@@ -1,5 +1,20 @@
 # Changelog
 
+## v0.2.0 — 2026-07-18
+
+- Added a dedicated **Tests** stage (new stage 6, model Opus) between Dev and
+  Lint/deploy: writes tests for new functionality, updates/repairs existing tests
+  touched by the change, and adds edge-case + failure-path coverage.
+- Hard **full-suite-green gate before deploy** — the deploy stage now requires both
+  lint clean and the whole suite green; never advances on a red or partial run.
+- Pipeline grew 8 → 9 stages; deploy/post-deploy/docs renumbered 7/8/9. Model
+  tiering: Fable 1–4, Opus 5–6, inherit 7–9. Docs/tables/references synced.
+- Added a real `/task-pipeline` slash command (`commands/task-pipeline.md`);
+  `install.sh` now installs it to `~/.claude/commands/` alongside the skill so the
+  command works for the plain-skill path too.
+- Validator hardened: enforces marketplace↔plugin.json **version sync** and the
+  presence of the command file.
+
 ## v0.1.0 — 2026-07-18
 
 Initial release.

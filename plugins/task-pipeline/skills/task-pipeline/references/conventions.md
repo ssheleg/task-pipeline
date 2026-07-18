@@ -1,6 +1,6 @@
-# Host conventions (stages 6–8)
+# Host conventions (stages 6–9)
 
-The orchestrator is project-agnostic. For lint / deploy / docs / wiki it reads the
+The orchestrator is project-agnostic. For tests / lint / deploy / docs / wiki it reads the
 **host project's `CLAUDE.md` / `AGENTS.md` first**, then falls back to detection.
 Prefer explicit host instructions over detection; if a step's convention can't be
 found, surface it and **ask** rather than guessing.

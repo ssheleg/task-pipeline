@@ -38,19 +38,30 @@ must pass before advancing.
 - **GATE:** all plan tasks DONE (two-stage review: spec compliance, then code
   quality); full test suite green.
 
-## 6 — Lint + deploy (host model)
-- Read host conventions (`conventions.md`): run linter + tests; fix failures; then
-  deploy per the project's convention.
-- **GATE:** lint + tests green **before** deploy. Deploy is outward → explicit
-  operator go. Respect deploy-from-main rules if the project mandates them.
+## 6 — Tests (Opus)
+- **What:** consolidate test coverage for the change: confirm new functionality
+  has tests (written test-first in stage 5), update/repair existing tests the
+  change touched, and add edge-case + failure-path tests per DoD.
+- **Invoke:** the host test runner (see `conventions.md` → *Lint + test*);
+  `superpowers:test-driven-development` for any uncovered gap.
+- **GATE:** the **full** suite is green (not just the new tests); new/changed code
+  is covered; no `skip`/`xfail` smuggling a red suite past the gate. Never advance
+  to deploy on a red or partial run.
 
-## 7 — Post-deploy (host model)
+## 7 — Lint + deploy (host model)
+- Read host conventions (`conventions.md`): run the linter; fix failures. The suite
+  is already green from stage 6 — re-run it if code changed since. Then deploy per
+  the project's convention.
+- **GATE:** lint clean **and** suite green **before** deploy. Deploy is outward →
+  explicit operator go. Respect deploy-from-main rules if the project mandates them.
+
+## 8 — Post-deploy (host model)
 - Tail deploy logs / health-check per conventions. Confirm clean boot, no error
   spike, live subsystems healthy.
 - **GATE:** clean boot confirmed, or an **honest degradation report** with next
   steps — never silent success.
 
-## 8 — Docs + wiki (host model)
+## 9 — Docs + wiki (host model)
 - Update host module docs / runbooks per the project's self-update rules, in the
   **same change**. Then sync knowledge to the wiki (`wiki-update` skill).
 - **GATE:** docs in sync with code; wiki synced; dangling links fixed.

@@ -65,6 +65,23 @@ for label, val in {"marketplace": mkt_name, "plugin.json": plg_name, "frontmatte
     if val != NAME:
         fail(f"name mismatch: {label}={val!r} expected {NAME!r}")
 
+# version must be in sync across marketplace entry and plugin.json
+mkt_ver = None
+if mkt and (mkt.get("plugins") or []):
+    mkt_ver = mkt["plugins"][0].get("version")
+plg_ver = plg.get("version") if plg else None
+if not plg_ver:
+    fail("plugin.json: missing version")
+if not mkt_ver:
+    fail("marketplace.json: plugin entry missing version")
+if mkt_ver and plg_ver and mkt_ver != plg_ver:
+    fail(f"version mismatch: marketplace={mkt_ver!r} plugin.json={plg_ver!r}")
+
+# slash command must exist so /task-pipeline resolves
+cmd_path = os.path.join(ROOT, "plugins/task-pipeline/commands/task-pipeline.md")
+if not os.path.isfile(cmd_path):
+    fail("missing command: plugins/task-pipeline/commands/task-pipeline.md")
+
 refdir = os.path.join(ROOT, "plugins/task-pipeline/skills/task-pipeline/references")
 for r in ("stages.md", "model-tiering.md", "conventions.md"):
     if not os.path.isfile(os.path.join(refdir, r)):
