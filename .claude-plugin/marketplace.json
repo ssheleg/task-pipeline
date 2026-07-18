@@ -1,0 +1,18 @@
+{
+  "name": "task-pipeline",
+  "owner": { "name": "ssheleg", "url": "https://github.com/ssheleg" },
+  "description": "Full-cycle task delivery pipeline orchestrator for Claude Code.",
+  "homepage": "https://github.com/ssheleg/task-pipeline",
+  "repository": "https://github.com/ssheleg/task-pipeline",
+  "plugins": [
+    {
+      "name": "task-pipeline",
+      "source": "./plugins/task-pipeline",
+      "description": "Thin orchestrator that runs a task through 8 gated stages (docs study, brainstorm, spec, plan, subagent build, lint/deploy, post-deploy check, docs/wiki) with per-stage model reminders. Built on the superpowers skills.",
+      "version": "0.1.0",
+      "author": { "name": "ssheleg" },
+      "keywords": ["pipeline", "workflow", "superpowers", "orchestrator", "tdd", "deploy", "spec-driven"],
+      "category": "development"
+    }
+  ]
+}
