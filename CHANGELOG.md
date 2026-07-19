@@ -1,5 +1,24 @@
 # Changelog
 
+## v0.3.0 — 2026-07-19
+
+Packaging/tooling alignment with the ssheleg skill-repo canon (make-skill).
+
+- **CI:** `.github/workflows/validate.yml` runs the structural validator on every
+  push/PR, plus a **negative self-test** — corrupts a copy of the repo and expects
+  the validator to FAIL (a validator that can't fail is decoration) — and a
+  `bash -n` syntax check of `install.sh`.
+- **Validator hardened:** now also enforces command frontmatter
+  (`description` + `argument-hint`), **CHANGELOG top-entry version sync** with the
+  manifests, and resolution of every relative markdown link in the repo.
+- **`install.sh` is idempotent:** reruns skip already-installed skill/command;
+  destructive overwrite only behind `--force` (never silently `rm -rf`s an
+  existing install).
+- **`/task-pipeline` is an idempotent entry point:** detects an existing pipeline
+  TaskList and resumes from the first incomplete stage instead of restarting.
+- **README:** added the `npx skills add ssheleg/task-pipeline` install path
+  (vercel-labs skills CLI, 70+ agents) and a closing Russian section.
+
 ## v0.2.0 — 2026-07-18
 
 - Added a dedicated **Tests** stage (new stage 6, model Opus) between Dev and

@@ -10,5 +10,8 @@ differs from the current one.
 
 Task: $ARGUMENTS
 
-If no task is given above, ask the operator for the task in one line before
-starting stage 1.
+Idempotent entry — inspect state first, never restart blindly:
+- If a pipeline TaskList from a previous run already exists for this task,
+  **resume** from the first incomplete stage instead of starting over.
+- Otherwise, if no task is given above, ask the operator for the task in one
+  line before starting stage 1.

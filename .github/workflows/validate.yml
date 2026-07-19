@@ -1,0 +1,31 @@
+name: validate
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Structural validator
+        run: python3 test/validate.py
+
+      - name: Negative self-test (validator must be able to fail)
+        run: |
+          set -eu
+          cp -R . /tmp/corrupt-copy
+          # corrupt the version so marketplace/plugin/CHANGELOG drift
+          sed -i 's/"version": "[0-9.]*"/"version": "0.0.0-corrupt"/' \
+            /tmp/corrupt-copy/plugins/task-pipeline/.claude-plugin/plugin.json
+          if python3 /tmp/corrupt-copy/test/validate.py; then
+            echo "ERROR: validator passed on a corrupted copy — it cannot fail"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs on corrupted copy"
+          fi
+
+      - name: install.sh syntax check
+        run: bash -n install.sh

@@ -40,13 +40,19 @@ Each stage gates the next; each names the model to use.
 /plugin install task-pipeline@task-pipeline
 ```
 
+**Any agent via the skills CLI (Claude Code, Cursor, Codex, 70+ agents):**
+```
+npx skills add ssheleg/task-pipeline
+```
+
 **Plain skill:**
 ```
 git clone https://github.com/ssheleg/task-pipeline
 cd task-pipeline && ./install.sh
 ```
 (copies the skill into `~/.claude/skills/task-pipeline` and the `/task-pipeline`
-command into `~/.claude/commands/`)
+command into `~/.claude/commands/`; idempotent — rerun skips existing installs,
+`./install.sh --force` overwrites)
 
 ## Use
 
@@ -63,6 +69,26 @@ pinned to Opus automatically.
 
 Stages 6–9 read the host project's `CLAUDE.md` conventions (tests / lint / deploy /
 docs / wiki) with detection fallbacks, so the skill works in any repo.
+
+## По-русски
+
+**task-pipeline** — оркестратор полного цикла доставки задачи для Claude Code:
+один скилл проводит любую существенную задачу через **9 гейтованных стадий**
+(изучение доков → брейншторм → спека → план → сборка сабагентами → тесты →
+линт/деплой → пост-деплой проверка логов → синк доков/вики), построенных на
+скиллах [superpowers](https://github.com/obra/superpowers).
+
+- Ни одна стадия не стартует, пока не пройден гейт предыдущей; деплой требует
+  зелёного полного прогона тестов и явного «go» оператора.
+- Каждая стадия напоминает, какую модель включить (`/model`): 1–4 — Fable,
+  5–6 — Opus, 7–9 — наследуется. Это только напоминание — модель переключает
+  оператор.
+- Стадии 6–9 читают конвенции хост-проекта из `CLAUDE.md` (тесты / линт /
+  деплой / доки / вики), поэтому скилл работает в любом репозитории.
+
+Запуск: скажите *«полный цикл»* / *«прогони по конвейеру»* или `/task-pipeline
+<задача>`. Установка — см. раздел Install выше (плагин, `npx skills add
+ssheleg/task-pipeline` или `./install.sh`).
 
 ## License
 

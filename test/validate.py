@@ -77,10 +77,49 @@ if not mkt_ver:
 if mkt_ver and plg_ver and mkt_ver != plg_ver:
     fail(f"version mismatch: marketplace={mkt_ver!r} plugin.json={plg_ver!r}")
 
-# slash command must exist so /task-pipeline resolves
+# slash command must exist so /task-pipeline resolves, with proper frontmatter
 cmd_path = os.path.join(ROOT, "plugins/task-pipeline/commands/task-pipeline.md")
 if not os.path.isfile(cmd_path):
     fail("missing command: plugins/task-pipeline/commands/task-pipeline.md")
+else:
+    ctxt = open(cmd_path, encoding="utf-8").read()
+    cm = re.match(r"^---\n(.*?)\n---\n", ctxt, re.S)
+    if not cm:
+        fail("command: no frontmatter")
+    else:
+        cfm = cm.group(1)
+        if not re.search(r"^description:\s*\S", cfm, re.M):
+            fail("command: empty/missing description in frontmatter")
+        if not re.search(r"^argument-hint:\s*\S", cfm, re.M):
+            fail("command: empty/missing argument-hint in frontmatter")
+
+# top CHANGELOG entry must carry the same version as the manifests
+chg_path = os.path.join(ROOT, "CHANGELOG.md")
+if not os.path.isfile(chg_path):
+    fail("missing root file: CHANGELOG.md")
+else:
+    chg = open(chg_path, encoding="utf-8").read()
+    vm = re.search(r"^##\s*v(\d+\.\d+\.\d+)", chg, re.M)
+    if not vm:
+        fail("CHANGELOG.md: no '## vX.Y.Z' entry found")
+    elif plg_ver and vm.group(1) != plg_ver:
+        fail(f"version mismatch: CHANGELOG top entry=v{vm.group(1)} plugin.json={plg_ver!r}")
+
+# every relative markdown link in repo docs must resolve
+LINK_RE = re.compile(r"\[[^\]]*\]\(([^)\s]+)\)")
+for dirpath, dirnames, filenames in os.walk(ROOT):
+    dirnames[:] = [d for d in dirnames if d not in (".git", "node_modules")]
+    for fn in filenames:
+        if not fn.endswith(".md"):
+            continue
+        fp = os.path.join(dirpath, fn)
+        for target in LINK_RE.findall(open(fp, encoding="utf-8").read()):
+            if target.startswith(("http://", "https://", "mailto:", "#")):
+                continue
+            tpath = os.path.normpath(os.path.join(dirpath, target.split("#")[0]))
+            if not os.path.exists(tpath):
+                rel = os.path.relpath(fp, ROOT)
+                fail(f"broken relative link in {rel}: {target}")
 
 refdir = os.path.join(ROOT, "plugins/task-pipeline/skills/task-pipeline/references")
 for r in ("stages.md", "model-tiering.md", "conventions.md"):
