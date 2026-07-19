@@ -1,0 +1,33 @@
+{
+  "name": "task-pipeline-skill",
+  "version": "0.4.0",
+  "description": "Full-cycle task delivery pipeline orchestrator skill for Claude Code — 9 gated stages (docs, brainstorm, spec, plan, build, tests, deploy, post-deploy, docs/wiki) built on the superpowers skills. This package is the installer CLI.",
+  "bin": {
+    "task-pipeline": "bin/task-pipeline.js"
+  },
+  "files": [
+    "bin",
+    "plugins",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
+  "repository": "github:ssheleg/task-pipeline",
+  "homepage": "https://github.com/ssheleg/task-pipeline",
+  "license": "MIT",
+  "author": "ssheleg",
+  "engines": {
+    "node": ">=16"
+  },
+  "keywords": [
+    "pipeline",
+    "workflow",
+    "superpowers",
+    "orchestrator",
+    "tdd",
+    "deploy",
+    "spec-driven",
+    "claude-code",
+    "skill"
+  ]
+}

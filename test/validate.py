@@ -77,6 +77,24 @@ if not mkt_ver:
 if mkt_ver and plg_ver and mkt_ver != plg_ver:
     fail(f"version mismatch: marketplace={mkt_ver!r} plugin.json={plg_ver!r}")
 
+# npm package: version in sync, bin entry exists and points at a real file
+pkg = load_json("package.json")
+if pkg:
+    pkg_ver = pkg.get("version")
+    if not pkg_ver:
+        fail("package.json: missing version")
+    elif plg_ver and pkg_ver != plg_ver:
+        fail(f"version mismatch: package.json={pkg_ver!r} plugin.json={plg_ver!r}")
+    bin_map = pkg.get("bin") or {}
+    if not bin_map:
+        fail("package.json: missing bin entry")
+    for bin_name, bin_rel in bin_map.items():
+        if not os.path.isfile(os.path.join(ROOT, bin_rel)):
+            fail(f"package.json bin {bin_name!r} -> missing file {bin_rel!r}")
+    files = pkg.get("files") or []
+    if "plugins" not in files or "bin" not in files:
+        fail("package.json: files[] must whitelist 'bin' and 'plugins' (skill sources ship in the package)")
+
 # slash command must exist so /task-pipeline resolves, with proper frontmatter
 cmd_path = os.path.join(ROOT, "plugins/task-pipeline/commands/task-pipeline.md")
 if not os.path.isfile(cmd_path):

@@ -29,3 +29,21 @@ jobs:
 
       - name: install.sh syntax check
         run: bash -n install.sh
+
+      - name: npm installer CLI check
+        run: node --check bin/task-pipeline.js
+
+      - name: npm installer functional test (fresh / rerun-skip / --force)
+        run: |
+          set -eu
+          export HOME=/tmp/fakehome
+          mkdir -p "$HOME"
+          node bin/task-pipeline.js
+          test -f "$HOME/.claude/skills/task-pipeline/SKILL.md"
+          test -f "$HOME/.claude/commands/task-pipeline.md"
+          node bin/task-pipeline.js | grep -q '^skip:'
+          node bin/task-pipeline.js --force | grep -q '^Installed'
+          if node bin/task-pipeline.js --wat; then
+            echo "ERROR: unknown arg accepted"; exit 1
+          fi
+          echo "OK: npm installer behaves"

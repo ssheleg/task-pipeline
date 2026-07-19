@@ -1,5 +1,22 @@
 # Changelog
 
+## v0.4.0 — 2026-07-19
+
+npm installer.
+
+- **`bin/task-pipeline.js`** — zero-dependency Node installer CLI (mirrors
+  `install.sh`: skill → `~/.claude/skills/task-pipeline`, command →
+  `~/.claude/commands/`; idempotent, overwrite only behind `--force`).
+- **`package.json`** — package name **`task-pipeline-skill`** (unscoped
+  `task-pipeline` is taken on npm); bin command stays `task-pipeline`;
+  `files` whitelist ships `bin` + `plugins`. Works without npm publish via
+  `npx github:ssheleg/task-pipeline`; after publish also `npx task-pipeline-skill`.
+- **Version sync is now four-way** (marketplace.json, plugin.json,
+  package.json, CHANGELOG top entry) — validator enforces, plus checks the
+  bin entry resolves and the files whitelist ships the skill sources.
+- **CI:** `node --check` + a functional install run (fresh → rerun-skip →
+  `--force`) against a fake `$HOME`.
+
 ## v0.3.0 — 2026-07-19
 
 Packaging/tooling alignment with the ssheleg skill-repo canon (make-skill).

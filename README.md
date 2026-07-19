@@ -45,6 +45,15 @@ Each stage gates the next; each names the model to use.
 npx skills add ssheleg/task-pipeline
 ```
 
+**npm installer (no clone needed):**
+```
+npx github:ssheleg/task-pipeline          # straight from GitHub
+npx task-pipeline-skill                   # from the npm registry
+```
+(package is `task-pipeline-skill` — the unscoped `task-pipeline` name is taken
+on npm; installs the same skill + `/task-pipeline` command into `~/.claude`,
+idempotent, `--force` to overwrite)
+
 **Plain skill:**
 ```
 git clone https://github.com/ssheleg/task-pipeline
@@ -88,7 +97,8 @@ docs / wiki) with detection fallbacks, so the skill works in any repo.
 
 Запуск: скажите *«полный цикл»* / *«прогони по конвейеру»* или `/task-pipeline
 <задача>`. Установка — см. раздел Install выше (плагин, `npx skills add
-ssheleg/task-pipeline` или `./install.sh`).
+ssheleg/task-pipeline`, `npx task-pipeline-skill` / `npx
+github:ssheleg/task-pipeline` или `./install.sh`).
 
 ## License
 
