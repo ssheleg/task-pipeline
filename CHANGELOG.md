@@ -1,5 +1,22 @@
 # Changelog
 
+## v0.3.0 — 2026-07-18
+
+- **Machine-readable pipeline config** — new universal contract `pipeline.schema.json` (JSON Schema):
+  a pipeline is an ordered list of stages, each with `skills[]` (the skills/agents that run it) and a
+  `gate {type, check}`. The framework ships the schema plus a copy-and-rewrite `pipeline.example.json`
+  (encoding the plugin's own default superpowers flow); it imposes no specific stages, skills, or gate
+  assignments.
+- **Bring your own skills / stages** — copy `pipeline.example.json` → `pipeline.json` in your project
+  and rewrite it: its own stages (any count), each run by your own skills/agents via `skills[]`, with
+  its own gate types. Nothing about the stage set, the skills, or which gates are manual is fixed.
+- **Typed gates** — every gate declares a `type`: `auto` (orchestrator verifies the check, pass/fail)
+  or `manual` (wait for explicit operator go). Surfaced in SKILL.md's run loop, the example stage
+  table (new **Type** column), and each `**GATE (auto|manual):**` line in stages.md.
+- Validator extended: `test/validate.py` checks the schema is well-formed and the example conforms —
+  a dependency-free shape check (≥1 stage, unique `state`, non-empty `skills[]`, `gate.type ∈
+  {auto,manual}` + non-empty `check`), plus a full `jsonschema` pass when the library is installed.
+
 ## v0.2.0 — 2026-07-18
 
 - Added a dedicated **Tests** stage (new stage 6, model Opus) between Dev and

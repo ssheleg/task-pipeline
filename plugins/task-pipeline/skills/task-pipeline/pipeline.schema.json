@@ -1,0 +1,50 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/ssheleg/task-pipeline/pipeline.schema.json",
+  "title": "task-pipeline config",
+  "description": "Generic contract for a pipeline config. An ordered list of stages; each stage is run by the host project's own skills/agents and guarded by a typed gate. The framework imposes no specific stages, skills, or gate assignments — those are entirely the host project's config. Copy pipeline.example.json and rewrite it to match your project.",
+  "type": "object",
+  "required": ["stages"],
+  "additionalProperties": true,
+  "properties": {
+    "version": { "type": "integer", "minimum": 1 },
+    "stages": {
+      "type": "array",
+      "minItems": 1,
+      "description": "The pipeline stages, in order. Any number, any names — your project's real stages.",
+      "items": { "$ref": "#/definitions/stage" }
+    }
+  },
+  "definitions": {
+    "stage": {
+      "type": "object",
+      "required": ["state", "skills", "gate"],
+      "additionalProperties": true,
+      "properties": {
+        "id": { "type": "integer", "description": "Optional ordinal." },
+        "state": { "type": "string", "minLength": 1, "description": "Unique stable key for the stage." },
+        "name": { "type": "string", "description": "Optional human label." },
+        "model": { "type": "string", "description": "Optional recommended model id for the stage." },
+        "skills": {
+          "type": "array",
+          "minItems": 1,
+          "description": "The skill(s)/agent(s) that execute this stage. Any names your environment resolves — this is where you plug in your OWN skills.",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "gate": {
+          "type": "object",
+          "required": ["type", "check"],
+          "additionalProperties": true,
+          "description": "Condition that must pass before advancing to the next stage.",
+          "properties": {
+            "type": {
+              "enum": ["auto", "manual"],
+              "description": "auto = the orchestrator verifies `check` itself (pass/fail); manual = wait for the operator's explicit go."
+            },
+            "check": { "type": "string", "minLength": 1, "description": "The gate condition, in prose." }
+          }
+        }
+      }
+    }
+  }
+}
