@@ -18,11 +18,16 @@ If missing → tell the operator to install from **https://github.com/obra/super
 (`/plugin marketplace add obra/superpowers` → `/plugin install superpowers@superpowers`)
 and stop.
 
+For **user-facing tasks** (web/mobile/CLI/TUI) the spec stage additionally requires
+the **super-ux** skills (`ux-foundation`, `ux-scenarios`, `/ux`) —
+**https://github.com/ssheleg/super-ux**. Check only when stage 2 flags UI; if
+missing then → tell the operator to install and stop.
+
 ## How to run
 
 1. Restate the task in one line. Create a **TaskList: one task per stage** (survives
    context loss; lets you resume).
-2. Walk stages 1→8. Before each: **model check** (see `references/model-tiering.md`) —
+2. Walk stages 1→9. Before each: **model check** (see `references/model-tiering.md`) —
    if recommended ≠ current, emit the reminder block and wait for the operator to `/model`.
 3. Do **not** advance until the stage **gate** passes (`references/stages.md`).
 4. Cross-cutting, every stage: task tracker + conventional commits per host
@@ -35,8 +40,8 @@ and stop.
 | # | Stage | Model | Invoke | Gate |
 |---|---|---|---|---|
 | 1 | Docs study | Fable | `context7` (resolve-library-id → get-library-docs) / `context7-docs` | contracts grounded on fetched docs |
-| 2 | Brainstorm | Fable | `superpowers:brainstorming` | design approved by user |
-| 3 | Spec | Fable | brainstorming writes `docs/superpowers/specs/…-design.md` | committed + user-reviewed |
+| 2 | Brainstorm | Fable | `superpowers:brainstorming` + **UI detection** | design approved; UI verdict recorded |
+| 3 | Spec | Fable | **UI → super-ux first** (`/ux` → `ux-foundation` CJM → `ux-scenarios`), then spec `docs/superpowers/specs/…-design.md` | committed + reviewed; UI: scenarios validated + CJM traced |
 | 4 | Plan | Fable | `superpowers:writing-plans` → `docs/superpowers/plans/…md` | parallel-ready, DoD per task |
 | 5 | Dev | **Opus** | `superpowers:using-git-worktrees` + `superpowers:subagent-driven-development` (TDD) | tasks DONE, TDD green per task |
 | 6 | Tests | **Opus** | host test runner + `superpowers:test-driven-development` | full suite green; new/changed code covered |

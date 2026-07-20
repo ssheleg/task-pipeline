@@ -1,5 +1,24 @@
 # Changelog
 
+## v0.5.0 — 2026-07-20
+
+UX track: scenario-first design for user-facing tasks, built on
+[super-ux](https://github.com/ssheleg/super-ux).
+
+- **Stage 2 (Brainstorm)** now includes a mandatory **UI detection** check —
+  records whether the task touches a user-facing surface (web/mobile/CLI/TUI);
+  the verdict arms the UX track and is part of the stage gate.
+- **Stage 3 (Spec)** gains a conditional **UX track that runs before the spec**
+  (and therefore before any plan): `/ux` setup check → `ux-foundation`
+  (personas, JTBD, **customer journey maps**, user stories) → `ux-scenarios`
+  (usage scenarios drafted + validated per ux-contract v2, traced to
+  foundation). Spec must embed the UX layer: scenario IDs, CJM stages served,
+  applicable UX patterns/quality bars. Gate extended accordingly; super-ux
+  missing on a UI task → install instructions + stop.
+- **Stage 4 (Plan)** gate extended: UI tasks name the scenario ID(s) they
+  implement; DoD includes satisfying them.
+- README (EN + RU): UX track section; super-ux added to prerequisites.
+
 ## v0.4.0 — 2026-07-19
 
 npm installer.

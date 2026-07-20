@@ -15,13 +15,36 @@ must pass before advancing.
 ## 2 — Brainstorm (Fable)
 - **Invoke:** `superpowers:brainstorming`. One question at a time; 2–3 approaches +
   a recommendation; design presented in sections.
-- **GATE:** the user approves the design.
+- **UI detection (mandatory check):** decide whether the task touches any
+  user-facing surface (web, mobile, CLI, TUI — new feature, new screen/command,
+  or a change to user-visible behavior). Record the verdict; it arms the UX
+  track in stage 3.
+- **GATE:** the user approves the design **and** the UI verdict is recorded.
 
-## 3 — Spec (Fable)
-- brainstorming writes the design to
+## 3 — Spec (Fable) — with UX track for user-facing tasks
+- **UX track (runs FIRST when stage 2 flagged UI; skip entirely otherwise).**
+  Requires the **super-ux** skills (`/plugin marketplace add ssheleg/super-ux` →
+  `/plugin install super-ux@super-ux`, or `npx skills add ssheleg/super-ux`);
+  if missing on a UI task → tell the operator to install and stop.
+  1. `/ux` (super-ux entry) — inspects/repairs `docs/ux/` setup in the host project.
+  2. `ux-foundation` — the WHY layer: personas, Jobs to Be Done, **customer
+     journey maps (CJM)**, user stories with Given/When/Then acceptance
+     criteria. Create if missing; update if the feature shifts who/why.
+  3. `ux-scenarios` — draft the feature's usage scenarios and validate them
+     against the existing base per the super-ux format contract
+     (`scenario-format.md`, ux-contract v2): IDs, statuses, `Traces:` to
+     foundation stories/journey stages, edge/error states enumerated.
+- **Spec:** brainstorming writes the design to
   `docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md` and commits it. Lock all
-  shared contracts (types, schemas, signatures, file layout).
-- **GATE:** spec committed **and** user-reviewed.
+  shared contracts (types, schemas, signatures, file layout). For UI tasks the
+  spec **embeds the UX layer**: links the validated scenario IDs and the CJM
+  stages the feature serves, and states which UX patterns/guides from super-ux
+  apply (per-scenario quality bars, error/empty/loading states, traceability).
+- **GATE:** spec committed **and** user-reviewed; for UI tasks additionally:
+  scenarios validated in `docs/ux/scenarios.md`, CJM/foundation coverage in
+  `docs/ux/foundation.md` (or explicit v1-mode/tiny-project waiver by the
+  operator), and every user-facing spec requirement traces to a scenario ID.
+  No plan (stage 4) starts before this — scenarios come BEFORE interface.
 
 ## 4 — Plan (Fable)
 - **Invoke:** `superpowers:writing-plans` →
@@ -29,7 +52,8 @@ must pass before advancing.
   paths, TDD steps, DoD each, dependency graph + parallel groups, non-overlapping
   file ownership.
 - **GATE:** every spec requirement maps to a task; no placeholders; parallel-group
-  tasks share no files.
+  tasks share no files. For UI tasks: every task building user-facing behavior
+  names the scenario ID(s) it implements, and its DoD includes satisfying them.
 
 ## 5 — Dev (Opus)
 - **Invoke:** `superpowers:using-git-worktrees` (isolate) →

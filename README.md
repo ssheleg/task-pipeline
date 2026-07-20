@@ -14,8 +14,8 @@ Each stage gates the next; each names the model to use.
 | # | Stage | Model | Gate |
 |---|---|---|---|
 | 1 | Docs study | Fable | contracts grounded on current docs |
-| 2 | Brainstorm | Fable | design approved |
-| 3 | Spec | Fable | committed + reviewed |
+| 2 | Brainstorm | Fable | design approved; UI verdict recorded |
+| 3 | Spec | Fable | committed + reviewed; UI: scenarios + CJM traced |
 | 4 | Plan | Fable | parallel-ready, DoD per task |
 | 5 | Dev | Opus | tasks DONE, TDD green per task |
 | 6 | Tests | Opus | full suite green, new code covered |
@@ -23,13 +23,30 @@ Each stage gates the next; each names the model to use.
 | 8 | Post-deploy | host | clean boot / honest degradation |
 | 9 | Docs + wiki | host | docs + wiki synced |
 
-## Prerequisite
+## UX track (user-facing tasks)
+
+When a task touches any user-facing surface (web / mobile / CLI / TUI), the spec
+stage runs the [super-ux](https://github.com/ssheleg/super-ux) skills **before any
+plan is written**: `/ux` (setup check) → `ux-foundation` (personas, JTBD,
+**customer journey maps**, user stories) → `ux-scenarios` (usage scenarios
+validated against the base, ux-contract v2). The spec then embeds the UX layer —
+scenario IDs, CJM stages served, applicable UX patterns — and the plan's
+UI tasks carry scenario IDs in their DoD. Scenarios come before interface.
+
+## Prerequisites
 
 **superpowers** — https://github.com/obra/superpowers
 
 ```
 /plugin marketplace add obra/superpowers
 /plugin install superpowers@superpowers
+```
+
+**super-ux** (only for user-facing tasks) — https://github.com/ssheleg/super-ux
+
+```
+/plugin marketplace add ssheleg/super-ux
+/plugin install super-ux@super-ux
 ```
 
 ## Install
@@ -89,6 +106,11 @@ docs / wiki) with detection fallbacks, so the skill works in any repo.
 
 - Ни одна стадия не стартует, пока не пройден гейт предыдущей; деплой требует
   зелёного полного прогона тестов и явного «go» оператора.
+- **UX-трек:** для user-facing задач стадия спеки сначала гоняет скиллы
+  [super-ux](https://github.com/ssheleg/super-ux) (`/ux` → `ux-foundation`:
+  персоны, JTBD, CJM → `ux-scenarios`: сценарии использования по контракту
+  ux-contract v2) — до написания плана; спека включает ID сценариев, стадии
+  CJM и применённые UX-паттерны. Сценарии — до интерфейса.
 - Каждая стадия напоминает, какую модель включить (`/model`): 1–4 — Fable,
   5–6 — Opus, 7–9 — наследуется. Это только напоминание — модель переключает
   оператор.
