@@ -10,6 +10,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install jsonschema (enables full pipeline.example.json conformance pass)
+        run: python3 -m pip install --quiet jsonschema
+
       - name: Structural validator
         run: python3 test/validate.py
 
@@ -25,6 +28,19 @@ jobs:
             exit 1
           else
             echo "OK: validator correctly FAILs on corrupted copy"
+          fi
+
+      - name: Negative self-test (bad gate type in pipeline.example.json must fail)
+        run: |
+          set -eu
+          cp -R . /tmp/gate-copy
+          sed -i 's/"type": "auto"/"type": "sometimes"/' \
+            /tmp/gate-copy/plugins/task-pipeline/skills/task-pipeline/pipeline.example.json
+          if python3 /tmp/gate-copy/test/validate.py; then
+            echo "ERROR: validator passed an invalid gate.type"
+            exit 1
+          else
+            echo "OK: validator rejects an invalid gate.type"
           fi
 
       - name: install.sh syntax check

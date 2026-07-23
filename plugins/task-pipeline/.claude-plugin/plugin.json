@@ -1,7 +1,7 @@
 {
   "name": "task-pipeline",
   "description": "Thin orchestrator that runs a task through the full delivery pipeline: docs study, brainstorm, spec, plan, subagent build, test suite, lint/deploy, post-deploy log check, docs/wiki sync. Built on the superpowers skills; per-stage model reminders; generic-portable.",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "author": { "name": "ssheleg" },
   "homepage": "https://github.com/ssheleg/task-pipeline",
   "repository": "https://github.com/ssheleg/task-pipeline",

@@ -1,7 +1,12 @@
 # Stages — detail & gates
 
 For each stage: what it does, what to invoke, artifacts, and the **GATE** that
-must pass before advancing.
+must pass before advancing. Each gate is tagged with its **type** — `auto` (the
+orchestrator verifies the check itself, pass/fail) or `manual` (wait for the
+operator's explicit go). These 9 stages are the plugin's **example** flow,
+encoded in `pipeline.example.json` against the universal contract
+`pipeline.schema.json`; a host project replaces it with its own
+stages/agents/types (see SKILL.md → *Bring your own skills*).
 
 ## 1 — Docs study (Fable)
 - **What:** ground every external library / API / SDK the task touches on the
@@ -9,8 +14,8 @@ must pass before advancing.
 - **Invoke:** `context7` MCP (`resolve-library-id` → `get-library-docs`, scope by
   `topic`) or the `context7-docs` skill. Web-search fallback for libs context7
   can't resolve.
-- **GATE:** every contract the design will lock is grounded in fetched docs, not
-  recall. Unresolvable libraries are flagged in the spec.
+- **GATE (auto):** every contract the design will lock is grounded in fetched docs,
+  not recall. Unresolvable libraries are flagged in the spec.
 
 ## 2 — Brainstorm (Fable)
 - **Invoke:** `superpowers:brainstorming`. One question at a time; 2–3 approaches +
@@ -19,7 +24,7 @@ must pass before advancing.
   user-facing surface (web, mobile, CLI, TUI — new feature, new screen/command,
   or a change to user-visible behavior). Record the verdict; it arms the UX
   track in stage 3.
-- **GATE:** the user approves the design **and** the UI verdict is recorded.
+- **GATE (manual):** the user approves the design **and** the UI verdict is recorded.
 
 ## 3 — Spec (Fable) — with UX track for user-facing tasks
 - **UX track (runs FIRST when stage 2 flagged UI; skip entirely otherwise).**
@@ -40,7 +45,7 @@ must pass before advancing.
   spec **embeds the UX layer**: links the validated scenario IDs and the CJM
   stages the feature serves, and states which UX patterns/guides from super-ux
   apply (per-scenario quality bars, error/empty/loading states, traceability).
-- **GATE:** spec committed **and** user-reviewed; for UI tasks additionally:
+- **GATE (manual):** spec committed **and** user-reviewed; for UI tasks additionally:
   scenarios validated in `docs/ux/scenarios.md`, CJM/foundation coverage in
   `docs/ux/foundation.md` (or explicit v1-mode/tiny-project waiver by the
   operator), and every user-facing spec requirement traces to a scenario ID.
@@ -51,7 +56,7 @@ must pass before advancing.
   `docs/superpowers/plans/YYYY-MM-DD-<feature>.md`. Zero-context tasks, exact
   paths, TDD steps, DoD each, dependency graph + parallel groups, non-overlapping
   file ownership.
-- **GATE:** every spec requirement maps to a task; no placeholders; parallel-group
+- **GATE (auto):** every spec requirement maps to a task; no placeholders; parallel-group
   tasks share no files. For UI tasks: every task building user-facing behavior
   names the scenario ID(s) it implements, and its DoD includes satisfying them.
 
@@ -59,7 +64,7 @@ must pass before advancing.
 - **Invoke:** `superpowers:using-git-worktrees` (isolate) →
   `superpowers:subagent-driven-development` (or `superpowers:executing-plans`).
   TDD per task (failing test → minimal impl → green → commit). Pin subagents to Opus.
-- **GATE:** all plan tasks DONE (two-stage review: spec compliance, then code
+- **GATE (auto):** all plan tasks DONE (two-stage review: spec compliance, then code
   quality); full test suite green.
 
 ## 6 — Tests (Opus)
@@ -68,7 +73,7 @@ must pass before advancing.
   change touched, and add edge-case + failure-path tests per DoD.
 - **Invoke:** the host test runner (see `conventions.md` → *Lint + test*);
   `superpowers:test-driven-development` for any uncovered gap.
-- **GATE:** the **full** suite is green (not just the new tests); new/changed code
+- **GATE (auto):** the **full** suite is green (not just the new tests); new/changed code
   is covered; no `skip`/`xfail` smuggling a red suite past the gate. Never advance
   to deploy on a red or partial run.
 
@@ -76,16 +81,16 @@ must pass before advancing.
 - Read host conventions (`conventions.md`): run the linter; fix failures. The suite
   is already green from stage 6 — re-run it if code changed since. Then deploy per
   the project's convention.
-- **GATE:** lint clean **and** suite green **before** deploy. Deploy is outward →
+- **GATE (manual):** lint clean **and** suite green **before** deploy. Deploy is outward →
   explicit operator go. Respect deploy-from-main rules if the project mandates them.
 
 ## 8 — Post-deploy (host model)
 - Tail deploy logs / health-check per conventions. Confirm clean boot, no error
   spike, live subsystems healthy.
-- **GATE:** clean boot confirmed, or an **honest degradation report** with next
+- **GATE (auto):** clean boot confirmed, or an **honest degradation report** with next
   steps — never silent success.
 
 ## 9 — Docs + wiki (host model)
 - Update host module docs / runbooks per the project's self-update rules, in the
   **same change**. Then sync knowledge to the wiki (`wiki-update` skill).
-- **GATE:** docs in sync with code; wiki synced; dangling links fixed.
+- **GATE (auto):** docs in sync with code; wiki synced; dangling links fixed.

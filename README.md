@@ -9,19 +9,28 @@ runs any substantial task through **9 gated stages** — built on the
 `docs study → brainstorm → spec → plan → subagent build → tests → lint/deploy →
 post-deploy log check → docs/wiki sync`
 
-Each stage gates the next; each names the model to use.
+Each stage gates the next; each names the model to use. Every gate is typed —
+**auto** (the orchestrator verifies it, pass/fail) or **manual** (waits for your go).
 
-| # | Stage | Model | Gate |
-|---|---|---|---|
-| 1 | Docs study | Fable | contracts grounded on current docs |
-| 2 | Brainstorm | Fable | design approved; UI verdict recorded |
-| 3 | Spec | Fable | committed + reviewed; UI: scenarios + CJM traced |
-| 4 | Plan | Fable | parallel-ready, DoD per task |
-| 5 | Dev | Opus | tasks DONE, TDD green per task |
-| 6 | Tests | Opus | full suite green, new code covered |
-| 7 | Lint + deploy | host | lint clean + suite green before deploy |
-| 8 | Post-deploy | host | clean boot / honest degradation |
-| 9 | Docs + wiki | host | docs + wiki synced |
+| # | Stage | Model | Gate | Type |
+|---|---|---|---|---|
+| 1 | Docs study | Fable | contracts grounded on current docs | auto |
+| 2 | Brainstorm | Fable | design approved; UI verdict recorded | manual |
+| 3 | Spec | Fable | committed + reviewed; UI: scenarios + CJM traced | manual |
+| 4 | Plan | Fable | parallel-ready, DoD per task | auto |
+| 5 | Dev | Opus | tasks DONE, TDD green per task | auto |
+| 6 | Tests | Opus | full suite green, new code covered | auto |
+| 7 | Lint + deploy | host | lint clean + suite green before deploy | manual |
+| 8 | Post-deploy | host | clean boot / honest degradation | auto |
+| 9 | Docs + wiki | host | docs + wiki synced | auto |
+
+These 9 stages are the plugin's **example** flow. It's a machine-readable config
+([`pipeline.example.json`](plugins/task-pipeline/skills/task-pipeline/pipeline.example.json))
+against a universal contract
+([`pipeline.schema.json`](plugins/task-pipeline/skills/task-pipeline/pipeline.schema.json)):
+a host project copies the example to `pipeline.json` and rewrites it with its own
+stages (any count), its own `skills[]`, and its own `auto`/`manual` gate types —
+"bring your own skills". The framework bakes in no fixed stages.
 
 ## UX track (user-facing tasks)
 

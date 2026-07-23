@@ -1,5 +1,31 @@
 # Changelog
 
+## v0.6.0 — 2026-07-23
+
+Typed gates + generic pipeline contract (merged the good ideas from the `os`
+branch onto main, **keeping** the v0.5.0 UX track, the npm installer, and CI).
+
+- **Typed gates:** every gate is now tagged `auto` (the orchestrator verifies the
+  check itself, pass/fail) or `manual` (wait for the operator's explicit go).
+  SKILL.md gained a **Type** column; `stages.md` tags each gate; SKILL.md's
+  *How to run* spells out honoring the type (an auto gate never substitutes for a
+  required manual approval). Default assignment: 2/3/7 manual, the rest auto.
+- **Generic config contract:** new **`pipeline.schema.json`** (universal contract —
+  ordered `stages[]`, each with `skills[]` + `gate{type,check}`; no fixed stage
+  count, no baked-in skills) and **`pipeline.example.json`** (this plugin's own
+  9-stage flow as config, UX track included). New *Bring your own skills* section:
+  a host project copies the example to `pipeline.json` and rewrites it with its
+  own stages/agents/gate-types.
+- **Validator:** checks the schema is well-formed and the example conforms — a
+  dependency-free shape check (states unique, `skills[]` non-empty, `gate.type` in
+  {auto,manual}, `gate.check` present) plus a full `jsonschema` pass when the
+  library is available. All prior checks (four-way version sync, command
+  frontmatter, relative links, npm bin) retained.
+- **Retained from main (not regressed by the merge):** the super-ux UX track
+  (stage-2 UI detection, stage-3 `/ux`→`ux-foundation` CJM→`ux-scenarios`,
+  scenario IDs in stage-4 DoD), `bin/task-pipeline.js` + `package.json`, and the
+  CI workflow with its negative self-test.
+
 ## v0.5.0 — 2026-07-20
 
 UX track: scenario-first design for user-facing tasks, built on

@@ -1,0 +1,106 @@
+{
+  "$schema": "./pipeline.schema.json",
+  "version": 1,
+  "_note": "EXAMPLE ONLY — copy this file, rename to pipeline.json in your project, and rewrite it. This particular example encodes the plugin's own default flow (superpowers + a super-ux UX track for user-facing tasks); it is NOT a fixed contract. Your project defines its own stages (any count), each executed by your own skills/agents, with your own gate types. The universal contract is pipeline.schema.json; test/validate.py checks this example against it. gate.type: auto = orchestrator verifies the check itself (pass/fail); manual = wait for an explicit operator go. Which stages are manual vs auto is the operator's decision, not the plugin's.",
+  "stages": [
+    {
+      "id": 1,
+      "state": "docs-study",
+      "name": "Docs study",
+      "model": "claude-fable-5",
+      "skills": ["context7", "context7-docs"],
+      "gate": {
+        "type": "auto",
+        "check": "every contract the design will lock is grounded in fetched docs, not recall; unresolvable libraries are flagged in the spec"
+      }
+    },
+    {
+      "id": 2,
+      "state": "brainstorm",
+      "name": "Brainstorm",
+      "model": "claude-fable-5",
+      "skills": ["superpowers:brainstorming"],
+      "gate": {
+        "type": "manual",
+        "check": "the user approves the design AND the UI verdict is recorded (does the task touch a user-facing surface — web/mobile/CLI/TUI? this arms the stage-3 UX track)"
+      }
+    },
+    {
+      "id": 3,
+      "state": "spec",
+      "name": "Spec",
+      "model": "claude-fable-5",
+      "skills": ["super-ux:ux-foundation", "super-ux:ux-scenarios", "superpowers:brainstorming"],
+      "gate": {
+        "type": "manual",
+        "check": "spec committed and user-reviewed with all shared contracts locked; for UI tasks additionally: UX track ran FIRST (/ux -> ux-foundation CJM -> ux-scenarios), scenarios validated in docs/ux/scenarios.md, CJM/foundation coverage present, and every user-facing spec requirement traces to a scenario ID — scenarios come BEFORE interface"
+      }
+    },
+    {
+      "id": 4,
+      "state": "plan",
+      "name": "Plan",
+      "model": "claude-fable-5",
+      "skills": ["superpowers:writing-plans"],
+      "gate": {
+        "type": "auto",
+        "check": "every spec requirement maps to a task; no placeholders; parallel-group tasks share no files; for UI tasks each user-facing task names the scenario ID(s) it implements and its DoD includes satisfying them"
+      }
+    },
+    {
+      "id": 5,
+      "state": "dev",
+      "name": "Dev",
+      "model": "claude-opus-4-8",
+      "skills": ["superpowers:using-git-worktrees", "superpowers:subagent-driven-development"],
+      "gate": {
+        "type": "auto",
+        "check": "all plan tasks DONE (two-stage review: spec compliance, then code quality); full test suite green"
+      }
+    },
+    {
+      "id": 6,
+      "state": "tests",
+      "name": "Tests",
+      "model": "claude-opus-4-8",
+      "skills": ["superpowers:test-driven-development"],
+      "gate": {
+        "type": "auto",
+        "check": "full suite green (not just new tests); new/changed code covered; no skip/xfail smuggling a red suite past the gate"
+      }
+    },
+    {
+      "id": 7,
+      "state": "lint-deploy",
+      "name": "Lint + deploy",
+      "model": "inherit",
+      "skills": ["host:lint", "host:deploy"],
+      "gate": {
+        "type": "manual",
+        "check": "lint clean and full suite green before deploy; deploy is outward and needs explicit operator go"
+      }
+    },
+    {
+      "id": 8,
+      "state": "post-deploy",
+      "name": "Post-deploy",
+      "model": "inherit",
+      "skills": ["host:health-check"],
+      "gate": {
+        "type": "auto",
+        "check": "clean boot confirmed (no error spike, live subsystems healthy), or an honest degradation report with next steps"
+      }
+    },
+    {
+      "id": 9,
+      "state": "docs-wiki",
+      "name": "Docs + wiki",
+      "model": "inherit",
+      "skills": ["host:module-docs", "wiki-update"],
+      "gate": {
+        "type": "auto",
+        "check": "docs in sync with code in the same change; wiki synced; dangling links fixed"
+      }
+    }
+  ]
+}

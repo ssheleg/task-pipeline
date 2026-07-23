@@ -1,6 +1,6 @@
 {
   "name": "task-pipeline-skill",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "Full-cycle task delivery pipeline orchestrator skill for Claude Code — 9 gated stages (docs, brainstorm, spec, plan, build, tests, deploy, post-deploy, docs/wiki) built on the superpowers skills. This package is the installer CLI.",
   "bin": {
     "task-pipeline": "bin/task-pipeline.js"
