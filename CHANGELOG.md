@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.8.1 — 2026-07-23
+
+- Docs consistency: the SKILL.md super-ux intro now lists the full current chain
+  (`/ux`, `ux-foundation`, `ux-flows`, `ux-scenarios`, `/ux-lint`) instead of the
+  pre-flows subset, matching the stage-3 table and `companion-skills.md`. Wiki
+  synced to the current architecture.
+
 ## v0.8.0 — 2026-07-23
 
 Project-configurable release automation, super-ux embedding refreshed to its

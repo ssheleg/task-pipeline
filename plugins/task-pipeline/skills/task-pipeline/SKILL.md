@@ -40,7 +40,8 @@ and stop.
 **super-ux — recommended for ANY user-facing task.** The moment a task implies a
 user interface (web / mobile / CLI / TUI — a screen, a command, a visible
 behavior; the stage-0 grill detects this early), super-ux is the recommended
-workflow for the WHY/scenario layer (`ux-foundation`, `ux-scenarios`, `/ux`).
+workflow for the WHY→UI→scenario chain (`/ux`, `ux-foundation`, `ux-flows`,
+`ux-scenarios`, `/ux-lint`).
 - **Already installed?** (does `/ux` or `super-ux:ux-foundation` resolve) → **use
   it**: `/ux` at intake, then the stage-3 UX track walks its traced chain —
   `ux-foundation` (personas, JTBD, CJM, stories) → `ux-flows` (user flows +
