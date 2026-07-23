@@ -33,7 +33,7 @@ design → plan is traceable at a glance.
 
 | Stage | Writes | Consumed by |
 |---|---|---|
-| 0 Intake | `specs/<topic>-brief.md` | stages 2–4 |
+| 0 Intake | `specs/<topic>-brief.md` (seed from `templates/brief.md`) | stages 2–4 |
 | 3 Spec | `specs/<topic>-design.md` (+ links `docs/ux/*` for UI) | stage 4 |
 | 4 Plan | `plans/<topic>.md` | stage 5 |
 | 3 UX track | `docs/ux/{foundation,flows,screens,scenarios}.md` | stages 4–9 + `/ux-lint` |
@@ -52,6 +52,8 @@ plugins/task-pipeline/
     pipeline.schema.json                      # generic pipeline contract
     pipeline.example.json                     # this plugin's own flow, as config
     references/{stages,model-tiering,conventions,artifacts,companion-skills}.md
+cursor/rules/task-pipeline.mdc                # Cursor channel (self-contained rule)
+templates/brief.md                            # skeleton seeded at stage 0
 bin/task-pipeline.js                          # npx installer (package task-pipeline-skill)
 package.json
 install.sh                                    # POSIX installer

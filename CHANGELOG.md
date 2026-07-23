@@ -1,5 +1,29 @@
 # Changelog
 
+## v0.9.0 — 2026-07-23
+
+Full structural parity with the sibling `super-ux` per the ssheleg skill canon
+(make-skill): the Cursor channel and a templates dir were the last gaps.
+
+- **Cursor channel.** New `cursor/rules/task-pipeline.mdc` — a self-contained,
+  agent-requested rule (`alwaysApply: false` + a trigger `description`, no external
+  links so it survives being copied into any project) that carries the full
+  intake-grill + 9-stage discipline and the super-ux recommendation. Install
+  globally via `npx skills add ssheleg/task-pipeline --agent cursor --global`, or
+  copy per project into `.cursor/rules/`.
+- **Templates dir.** New `templates/brief.md` — the stage-0 intake-brief skeleton
+  this plugin seeds into `docs/superpowers/specs/…-brief.md` (create-if-absent,
+  never overwrite), plus `templates/README.md` mapping template → destination →
+  stage. Spec/plan and `docs/ux/*` skeletons remain owned by superpowers / super-ux.
+- **Validator + packaging.** The validator now checks every `cursor/rules/*.mdc`
+  has `description` + `alwaysApply` frontmatter and that `templates/brief.md`
+  exists; `package.json` `files` ships `cursor` and `templates`. All prior gates
+  (four-way version sync, config conformance, gate types, release shape, links)
+  retained.
+- **Docs.** README gains a Cursor install block and an "Updating everywhere" table
+  (one channel per agent — the plugin+plain duplicate caveat spelled out);
+  `references/artifacts.md` and stage 0 reference the brief template.
+
 ## v0.8.1 — 2026-07-23
 
 - Docs consistency: the SKILL.md super-ux intro now lists the full current chain

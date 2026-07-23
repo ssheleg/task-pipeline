@@ -9,7 +9,7 @@
       "name": "task-pipeline",
       "source": "./plugins/task-pipeline",
       "description": "Thin orchestrator that runs a task through an intake grill + 9 gated stages (docs, brainstorm, spec, plan, subagent build, tests, lint/deploy, post-deploy, docs/wiki) with typed auto/manual gates, per-stage model reminders, a super-ux UX track for user-facing tasks, and toggleable project-configurable release automation. Built on the superpowers skills.",
-      "version": "0.8.1",
+      "version": "0.9.0",
       "author": { "name": "ssheleg" },
       "keywords": ["pipeline", "workflow", "superpowers", "orchestrator", "tdd", "deploy", "spec-driven"],
       "category": "development"

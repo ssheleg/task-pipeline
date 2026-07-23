@@ -97,6 +97,15 @@ npx task-pipeline-skill                   # from the npm registry
 on npm; installs the same skill + `/task-pipeline` command into `~/.claude`,
 idempotent, `--force` to overwrite)
 
+**Cursor:**
+```
+npx skills add ssheleg/task-pipeline --agent cursor --global   # global, or…
+```
+…or per project, copy `cursor/rules/task-pipeline.mdc` into the repo's
+`.cursor/rules/`. Cursor has no global rules directory — use the skills CLI for a
+global install, the `.mdc` for per-project, or paste it into Cursor Settings →
+Rules. The rule is self-contained (no external links), so it works copied anywhere.
+
 **Plain skill:**
 ```
 git clone https://github.com/ssheleg/task-pipeline
@@ -105,6 +114,19 @@ cd task-pipeline && ./install.sh
 (copies the skill into `~/.claude/skills/task-pipeline` and the `/task-pipeline`
 command into `~/.claude/commands/`; idempotent — rerun skips existing installs,
 `./install.sh --force` overwrites)
+
+## Updating everywhere
+
+Pick **one** channel per agent (running the plugin and the plain/skills-CLI copy
+on the same Claude Code install yields a duplicate skill).
+
+| Agent / channel | Update |
+|---|---|
+| Claude Code (plugin) | `claude plugin marketplace update task-pipeline` → `claude plugin update task-pipeline@task-pipeline` → restart |
+| Any agent (skills CLI) | `npx skills add ssheleg/task-pipeline --agent <name> --global` (re-run overwrites); `--agent '*'` for all |
+| Cursor | skills CLI (above) with `--agent cursor`, or re-copy the `.mdc` per project |
+| npm | `npx task-pipeline-skill@latest` / `npx github:ssheleg/task-pipeline` (ephemeral — always latest) |
+| Plain skill | `git pull && ./install.sh --force` |
 
 ## Use
 

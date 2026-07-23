@@ -45,8 +45,9 @@ stages/agents/types (see SKILL.md → *Bring your own skills*).
   *Prerequisites*); this arms the stage-3 UX track.
 - **Artifact:** lock the resolved decisions into a **task brief** committed at
   `docs/superpowers/specs/YYYY-MM-DD-<topic>-brief.md` (scope, users/UI verdict,
-  constraints, assumptions, explicitly-deferred items, done-criteria). Stages
-  2–4 build on this brief.
+  constraints, assumptions, explicitly-deferred items, done-criteria). Seed it from
+  the plugin's `templates/brief.md` skeleton — but only when absent, never
+  overwrite an existing brief. Stages 2–4 build on this brief.
 - **GATE (manual):** shared understanding reached — every detected branch has a
   recorded answer or an explicit deferral, no open contradictions, and the
   operator confirms the brief. Stop when a re-scan surfaces no new branches

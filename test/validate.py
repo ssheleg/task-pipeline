@@ -148,6 +148,32 @@ for r in ("README.md", "LICENSE"):
     if not os.path.isfile(os.path.join(ROOT, r)):
         fail(f"missing root file: {r}")
 
+# Cursor channel: every cursor/rules/*.mdc must carry `description` + `alwaysApply`
+# frontmatter (Cursor copies these into foreign projects, so no relative links —
+# not machine-checked here, but keep content self-contained).
+cursor_dir = os.path.join(ROOT, "cursor", "rules")
+mdcs = [f for f in os.listdir(cursor_dir) if f.endswith(".mdc")] if os.path.isdir(cursor_dir) else []
+if not mdcs:
+    fail("cursor/rules: no .mdc rules found")
+for f in mdcs:
+    mtxt = open(os.path.join(cursor_dir, f), encoding="utf-8").read()
+    mm = re.match(r"^---\n(.*?)\n---\n", mtxt, re.S)
+    if not mm:
+        fail(f"cursor/rules/{f}: no frontmatter")
+        continue
+    mfm = mm.group(1)
+    if not re.search(r"^description:\s*\S", mfm, re.M):
+        fail(f"cursor/rules/{f}: empty/missing description")
+    if not re.search(r"^alwaysApply:\s*(true|false)\s*$", mfm, re.M):
+        fail(f"cursor/rules/{f}: alwaysApply must be true or false")
+
+# templates/: skeletons this plugin seeds into a host project (the stage-0 brief).
+tpl_dir = os.path.join(ROOT, "templates")
+if not os.path.isdir(tpl_dir):
+    fail("missing templates/ directory")
+elif not os.path.isfile(os.path.join(tpl_dir, "brief.md")):
+    fail("missing template: templates/brief.md")
+
 # Pipeline config is generic: pipeline.schema.json is the universal contract,
 # pipeline.example.json is a copy-and-rewrite example. The framework ships NO
 # project-specific config, no fixed stage count, no opinion on which stages are

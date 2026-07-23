@@ -1,0 +1,56 @@
+---
+description: "task-pipeline: run a substantial task through a disciplined, gated delivery cycle — an intake grill that expands the request, then docs→brainstorm→spec→plan→build→tests→lint/deploy→post-deploy→docs. Apply when the user asks to run a task through the pipeline, the full cycle / полный цикл / прогони по конвейеру, or starts any substantial feature/fix/build."
+alwaysApply: false
+---
+
+# task-pipeline — gated delivery cycle (Cursor)
+
+Self-contained rule (Cursor copies this file into projects — no external links).
+Run a substantial task through an up-front **intake grill + 9 gated stages**. No
+stage advances until its **gate** passes. Each gate is `auto` (verify it yourself,
+pass/fail) or `manual` (wait for the user's explicit go).
+
+## Stage 0 — intake grill (do this FIRST)
+
+A one-line task ("build feature X") is not enough to finish autonomously. Grill the
+user up front, then run the rest without mid-flight questions:
+1. One question per turn — never bundle.
+2. Give a recommended answer with every question (+ one-line rationale).
+3. Explore the codebase before asking — if a search/read answers it, do that.
+4. Walk the decision tree depth-first; ask prerequisite decisions first.
+5. Reconcile contradictions; chase dodges ("decide later" → "latest you can decide
+   and still ship?").
+Stop when shared understanding is reached (every branch answered or explicitly
+deferred) and lock the answers into a short brief the user confirms. Only then start.
+
+## Stages 1→9
+
+1. **Docs study** (auto) — ground every external lib/API on current docs, not recall.
+2. **Brainstorm** (manual) — 2–3 approaches + a recommendation; design approved.
+   Record whether the task touches a user-facing surface (UI verdict).
+3. **Spec** (manual) — write and commit the design; lock shared contracts. For UI
+   tasks, run the UX chain FIRST (see super-ux below) and embed it.
+4. **Plan** (auto) — zero-context tasks, exact paths, TDD steps, DoD each,
+   dependency graph + parallel groups, non-overlapping file ownership.
+5. **Dev** (auto) — isolate (worktree), TDD per task (failing test → minimal impl →
+   green → commit); two-stage review (spec compliance, then code quality).
+6. **Tests** (auto) — full suite green (not just new tests); new/changed code
+   covered; no skip/xfail hiding red.
+7. **Lint + deploy** (manual) — lint clean AND suite green before deploy; deploy is
+   outward → explicit user go.
+8. **Post-deploy** (auto) — tail logs / health-check; clean boot or an honest
+   degradation report (never silent success).
+9. **Docs** (auto) — update module docs/runbooks in the SAME change.
+
+Cross-cutting: track tasks, conventional commits, honest degradation (never claim a
+failed/skipped step succeeded), and get explicit go before any outward/irreversible
+action (deploy, publish, repo create).
+
+## super-ux for user-facing tasks (recommended)
+
+If the task touches any UI (web/mobile/CLI/TUI), the WHY→UI→scenario chain comes
+BEFORE interface code. If super-ux is available, use it: foundation (personas,
+JTBD, customer journey maps, user stories) → flows + screens → scenarios (the
+source of truth) → run its linter. Otherwise still design that chain, get it
+approved, and trace every user-facing requirement to a scenario before building.
+Install (Cursor/Claude/others): `npx skills add ssheleg/super-ux`.
