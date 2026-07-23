@@ -9,8 +9,21 @@ operator's explicit go). These stages (0 intake + 1→9) are the plugin's
 stages/agents/types (see SKILL.md → *Bring your own skills*).
 
 ## 0 — Intake grill (Fable)
-- **What:** the operator's one-line task is almost never enough to run
-  autonomously. Before anything else, **grill the operator** to expand that
+- **Entry-from-super-ux short-circuit (check FIRST).** task-pipeline is often
+  launched *from* super-ux — its `/ux` action menu offers "execute autonomously
+  via the task-pipeline plugin" once the UX chain (and often a
+  `docs/ux/plans/…` fix plan) is already built. Before grilling, detect that:
+  if `docs/ux/` already holds a validated chain (foundation → flows → screens →
+  scenarios) and/or a fresh fix plan, **do not re-run the grill or the stage-3
+  UX track from scratch.** Instead: (1) run a quick check — `/ux-lint`
+  (`docs/ux/lint.py`) green, chain present, plan (if any) readable; (2) confirm
+  the scope with the operator in ONE line; (3) skip to the first stage that
+  still has real work (usually stage 4 Plan if a UX fix plan already exists, or
+  stage 3 Spec to formalize it). Record what was adopted vs skipped. If the
+  check finds drift/gaps, fall back to the normal flow for the missing parts
+  only.
+- **What (normal entry):** the operator's one-line task is almost never enough to
+  run autonomously. Before anything else, **grill the operator** to expand that
   one line into a complete, unambiguous brief — resolve every decision branch
   up front so stages 1→9 need no further human input beyond the manual gates.
   This is input expansion, not design: turn "make me feature X" into locked
@@ -60,28 +73,42 @@ stages/agents/types (see SKILL.md → *Bring your own skills*).
 
 ## 3 — Spec (Fable) — with UX track for user-facing tasks
 - **UX track (runs FIRST when stage 2 flagged UI; skip entirely otherwise).**
-  Requires the **super-ux** skills (`/plugin marketplace add ssheleg/super-ux` →
-  `/plugin install super-ux@super-ux`, or `npx skills add ssheleg/super-ux`);
-  if missing on a UI task → tell the operator to install and stop.
-  1. `/ux` (super-ux entry) — inspects/repairs `docs/ux/` setup in the host project.
-  2. `ux-foundation` — the WHY layer: personas, Jobs to Be Done, **customer
-     journey maps (CJM)**, user stories with Given/When/Then acceptance
-     criteria. Create if missing; update if the feature shifts who/why.
-  3. `ux-scenarios` — draft the feature's usage scenarios and validate them
-     against the existing base per the super-ux format contract
-     (`scenario-format.md`, ux-contract v2): IDs, statuses, `Traces:` to
-     foundation stories/journey stages, edge/error states enumerated.
+  Requires the **super-ux** skills. If missing on a UI task → give the install
+  line and stop (see SKILL.md *Prerequisites*: `/plugin marketplace add
+  ssheleg/super-ux` → `/plugin install super-ux@super-ux`, or `npx skills add
+  ssheleg/super-ux`). super-ux builds a traced chain — walk it top-down (see its
+  `system-map.md`):
+  1. `/ux` (the only super-ux entry) — reports which `docs/ux/` layers exist,
+     repairs the skeleton, records the Figma on/off choice, recommends the next
+     action. Never make the operator pick skills.
+  2. `ux-foundation` → `docs/ux/foundation.md` — the **WHY**: personas, Jobs to
+     Be Done, **customer journey maps (CJM)**, user stories (Given/When/Then).
+  3. `ux-flows` → `docs/ux/flows.md` + `docs/ux/screens.md` — the **HOW + UI
+     map**: task analysis, user-flow diagrams (branches, error paths), every
+     screen + state with wireframe and (Figma on) a Figma frame link.
+  4. `ux-scenarios` → `docs/ux/scenarios.md` — the **WHAT** (source of truth for
+     behavior): scenarios validated per the format contract (`scenario-format.md`,
+     ux-contract v2) — IDs, statuses, `Traces:` to stories/journey stages/flows,
+     edge/error states enumerated.
+  5. **Run the super-ux linter** (`/ux-lint` or `python3 docs/ux/lint.py`) — it
+     must pass: no drift, no orphans, no broken traces or stale Figma links.
+  These skills are **idempotent** — reuse and extend existing `docs/ux/` layers,
+  never rebuild from scratch. If the chain already exists and is validated (e.g.
+  the task entered from super-ux), just verify (linter green) and embed it into
+  the spec; only build the parts that are missing.
 - **Spec:** brainstorming writes the design to
   `docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md` and commits it. Lock all
   shared contracts (types, schemas, signatures, file layout). For UI tasks the
-  spec **embeds the UX layer**: links the validated scenario IDs and the CJM
-  stages the feature serves, and states which UX patterns/guides from super-ux
-  apply (per-scenario quality bars, error/empty/loading states, traceability).
-- **GATE (manual):** spec committed **and** user-reviewed; for UI tasks additionally:
-  scenarios validated in `docs/ux/scenarios.md`, CJM/foundation coverage in
-  `docs/ux/foundation.md` (or explicit v1-mode/tiny-project waiver by the
-  operator), and every user-facing spec requirement traces to a scenario ID.
-  No plan (stage 4) starts before this — scenarios come BEFORE interface.
+  spec **embeds the UX layer**: links the validated scenario IDs, the flows and
+  `SCR-` screens, the CJM stages the feature serves, and the UX
+  patterns/principles from super-ux that apply (`best-practices.md`,
+  `ux-design-principles.md`, `component-guidelines.md`).
+- **GATE (manual):** spec committed **and** user-reviewed; for UI tasks
+  additionally: the super-ux chain (foundation → flows → screens → scenarios) is
+  designed, validated and approved; scenarios validated in `docs/ux/scenarios.md`;
+  the linter passes; every user-facing spec requirement traces to a scenario ID
+  (or an explicit v1-mode/tiny-project waiver by the operator). No plan (stage 4)
+  starts before this — the chain comes BEFORE interface.
 
 ## 4 — Plan (Fable)
 - **Invoke:** `superpowers:writing-plans` →
@@ -90,7 +117,9 @@ stages/agents/types (see SKILL.md → *Bring your own skills*).
   file ownership.
 - **GATE (auto):** every spec requirement maps to a task; no placeholders; parallel-group
   tasks share no files. For UI tasks: every task building user-facing behavior
-  names the scenario ID(s) it implements, and its DoD includes satisfying them.
+  names the scenario ID(s) and `SCR-` screen(s) it implements, and its DoD
+  includes satisfying them **and** updating the affected super-ux layers in the
+  same change (super-ux *same-change* rule).
 
 ## 5 — Dev (Opus)
 - **Invoke:** `superpowers:using-git-worktrees` (isolate) →
@@ -111,10 +140,14 @@ stages/agents/types (see SKILL.md → *Bring your own skills*).
 
 ## 7 — Lint + deploy (host model)
 - Read host conventions (`conventions.md`): run the linter; fix failures. The suite
-  is already green from stage 6 — re-run it if code changed since. Then deploy per
-  the project's convention.
-- **GATE (manual):** lint clean **and** suite green **before** deploy. Deploy is outward →
-  explicit operator go. Respect deploy-from-main rules if the project mandates them.
+  is already green from stage 6 — re-run it if code changed since. For UI projects,
+  the **super-ux linter** (`python3 docs/ux/lint.py` / `/ux-lint`) is part of lint —
+  it must pass too (no UX drift merges). Then deploy per the project's convention;
+  if the project defines release automation (`pipeline.json` → `release`, toggle
+  on), that is what "deploy" runs here.
+- **GATE (manual):** lint clean (host linter **and**, for UI projects, the super-ux
+  linter) **and** suite green **before** deploy. Deploy is outward → explicit
+  operator go. Respect deploy-from-main rules if the project mandates them.
 
 ## 8 — Post-deploy (host model)
 - Tail deploy logs / health-check per conventions. Confirm clean boot, no error
@@ -124,5 +157,8 @@ stages/agents/types (see SKILL.md → *Bring your own skills*).
 
 ## 9 — Docs + wiki (host model)
 - Update host module docs / runbooks per the project's self-update rules, in the
-  **same change**. Then sync knowledge to the wiki (`wiki-update` skill).
-- **GATE (auto):** docs in sync with code; wiki synced; dangling links fixed.
+  **same change**. For UI tasks, confirm the super-ux layers were updated in this
+  change and the linter is green (super-ux *same-change* + *no-drift* rules). Then
+  sync knowledge to the wiki (`wiki-update` skill).
+- **GATE (auto):** docs in sync with code; UI: super-ux layers current + linter
+  green; wiki synced; dangling links fixed.

@@ -21,11 +21,12 @@ a machine-readable config — an ordered list of stages, each with `skills[]` (t
 skills/agents that run it) and a `gate {type, check}`. The schema is the universal
 contract; it imposes **no** specific stages, skills, or gate assignments.
 [`pipeline.example.json`](pipeline.example.json) is a **copy-and-rewrite example**
-that encodes this plugin's own default flow (the 9 stages tabled below). Any
-project replaces it wholesale — any number of stages, run by its own skills/agents,
-with its own gate types (see *Bring your own skills*). Each gate has a **type**:
-`auto` (the orchestrator verifies the `check` itself, pass/fail) or `manual` (wait
-for an explicit operator go); which stages are manual is the operator's call.
+that encodes this plugin's own default flow (stage 0 intake + the 1→9 stages
+tabled below) and an optional, toggleable `release` block. Any project replaces it
+wholesale — any number of stages, run by its own skills/agents, with its own gate
+types (see *Bring your own skills*). Each gate has a **type**: `auto` (the
+orchestrator verifies the `check` itself, pass/fail) or `manual` (wait for an
+explicit operator go); which stages are manual is the operator's call.
 
 ## Prerequisite
 
@@ -41,8 +42,11 @@ user interface (web / mobile / CLI / TUI — a screen, a command, a visible
 behavior; the stage-0 grill detects this early), super-ux is the recommended
 workflow for the WHY/scenario layer (`ux-foundation`, `ux-scenarios`, `/ux`).
 - **Already installed?** (does `/ux` or `super-ux:ux-foundation` resolve) → **use
-  it**: `/ux` at intake, then `ux-foundation` (personas, JTBD, CJM, stories) →
-  `ux-scenarios` (traced scenarios) as the stage-3 UX track.
+  it**: `/ux` at intake, then the stage-3 UX track walks its traced chain —
+  `ux-foundation` (personas, JTBD, CJM, stories) → `ux-flows` (user flows +
+  `screens.md`, Figma frames when on) → `ux-scenarios` (traced scenarios) → the
+  `/ux-lint` linter (`docs/ux/lint.py`) must pass. Wire that linter into the host
+  CI/pre-commit so UX drift can't merge.
 - **Not installed?** → recommend it and give the install line right away:
   ```
   /plugin marketplace add ssheleg/super-ux
@@ -59,10 +63,18 @@ engineering-advanced-skills marketplace.
 ## How to run
 
 1. Restate the task in one line. Create a **TaskList: one task per stage, starting
-   with stage 0** (survives context loss; lets you resume).
+   with stage 0** (survives context loss; lets you resume). Then run the
+   **companion preflight** (`references/companion-skills.md`): detect which
+   companion skills resolve and emit the recommendation block — install the
+   required/recommended ones (superpowers always; super-ux for UI tasks) before
+   proceeding.
 2. **Run stage 0 (Intake grill) first** — grill the operator until shared
    understanding is reached and the brief is locked (`references/stages.md` → 0).
-   Do not touch stage 1 before the brief is confirmed.
+   Do not touch stage 1 before the brief is confirmed. **Entered from super-ux?**
+   (a validated `docs/ux/` chain and/or a `docs/ux/plans/…` fix plan already
+   exists — super-ux's `/ux` hands off here) → don't re-grill or rebuild the UX
+   chain: just check it's OK (`/ux-lint` green), confirm scope in one line, and
+   skip ahead to the first stage with real work (see `references/stages.md` → 0).
 3. Walk stages 1→9. Before each: **model check** (see `references/model-tiering.md`) —
    if recommended ≠ current, emit the reminder block and wait for the operator to `/model`.
 4. Do **not** advance until the stage **gate** passes (`references/stages.md`).
@@ -82,7 +94,7 @@ engineering-advanced-skills marketplace.
 | 0 | Intake grill | Fable | `grill-me` / `grilling` if present, else built-in grill loop | shared understanding reached; brief locked + confirmed | manual |
 | 1 | Docs study | Fable | `context7` (resolve-library-id → get-library-docs) / `context7-docs` | contracts grounded on fetched docs | auto |
 | 2 | Brainstorm | Fable | `superpowers:brainstorming` + **UI detection** | design approved; UI verdict recorded | manual |
-| 3 | Spec | Fable | **UI → super-ux first** (`/ux` → `ux-foundation` CJM → `ux-scenarios`), then spec `docs/superpowers/specs/…-design.md` | committed + reviewed; UI: scenarios validated + CJM traced | manual |
+| 3 | Spec | Fable | **UI → super-ux chain first** (`/ux` → `ux-foundation` CJM → `ux-flows` screens → `ux-scenarios` → `/ux-lint`), then spec `docs/superpowers/specs/…-design.md` | committed + reviewed; UI: chain validated, linter green, scenarios/`SCR-` traced | manual |
 | 4 | Plan | Fable | `superpowers:writing-plans` → `docs/superpowers/plans/…md` | parallel-ready, DoD per task | auto |
 | 5 | Dev | **Opus** | `superpowers:using-git-worktrees` + `superpowers:subagent-driven-development` (TDD) | tasks DONE, TDD green per task | auto |
 | 6 | Tests | **Opus** | host test runner + `superpowers:test-driven-development` | full suite green; new/changed code covered | auto |
@@ -98,18 +110,21 @@ engineering-advanced-skills marketplace.
 
 ## Bring your own skills
 
-The 9 stages above are the **example** flow (superpowers + a super-ux UX track for
-user-facing tasks + host conventions). A host project owns its pipeline: copy
-`pipeline.example.json` → `pipeline.json`, then define its **own** stages (any
-count), point each stage's `skills[]` at the skills/agents its environment
-resolves, and set each `gate.type` (`auto`/`manual`) to fit its process. The
-framework ships no fixed stage count and no opinion on which gates are manual —
-`pipeline.schema.json` is the only contract.
+The stages above (stage 0 intake + 1→9) are the **example** flow (grill +
+superpowers + a super-ux UX track for user-facing tasks + host conventions). A
+host project owns its pipeline: copy `pipeline.example.json` → `pipeline.json`,
+then define its **own** stages (any count), point each stage's `skills[]` at the
+skills/agents its environment resolves, set each `gate.type` (`auto`/`manual`) to
+fit its process, and configure/toggle its own `release` block. The framework ships
+no fixed stage count and no opinion on which gates are manual or whether release
+automation is on — `pipeline.schema.json` is the only contract.
 
 ## References
 
-- `pipeline.schema.json` — the universal pipeline config contract
-- `pipeline.example.json` — this plugin's default 9-stage flow, as config
+- `pipeline.schema.json` — the universal pipeline config contract (stages + release)
+- `pipeline.example.json` — this plugin's default flow (stage 0 + 1→9) + release, as config
 - `references/stages.md` — per-stage detail + exact gate criteria + gate types
 - `references/model-tiering.md` — model map, ids, the `/model` reminder mechanic, override
 - `references/conventions.md` — how stages 6–9 read the host project's CLAUDE.md
+- `references/companion-skills.md` — companion skills, install lines, preflight recommendation
+- `references/artifacts.md` — the canonical document/artifact layout per stage

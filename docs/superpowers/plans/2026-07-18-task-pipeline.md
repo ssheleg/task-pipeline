@@ -1,5 +1,10 @@
 # task-pipeline — Implementation Plan
 
+> **Historical snapshot (v0.1.0).** The build has moved on substantially since
+> this plan (stage-0 grill, typed gates, super-ux track, npm installer,
+> toggleable release). Current state: `CHANGELOG.md` + `SKILL.md`. Kept as a dated
+> record.
+
 - **Date:** 2026-07-18
 - **Spec:** docs/superpowers/specs/2026-07-18-task-pipeline-design.md
 

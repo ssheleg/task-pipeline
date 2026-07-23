@@ -140,7 +140,7 @@ for dirpath, dirnames, filenames in os.walk(ROOT):
                 fail(f"broken relative link in {rel}: {target}")
 
 refdir = os.path.join(ROOT, "plugins/task-pipeline/skills/task-pipeline/references")
-for r in ("stages.md", "model-tiering.md", "conventions.md"):
+for r in ("stages.md", "model-tiering.md", "conventions.md", "companion-skills.md", "artifacts.md"):
     if not os.path.isfile(os.path.join(refdir, r)):
         fail(f"missing reference: references/{r}")
 
@@ -193,6 +193,25 @@ if pipe is not None:
                     fail(f"{where}: gate.type must be one of {sorted(GATE_TYPES)}, got {gate.get('type')!r}")
                 if not (isinstance(gate.get("check"), str) and gate.get("check").strip()):
                     fail(f"{where}: empty/missing gate.check")
+
+    # Release config is optional and individually toggleable. If present, shape-check it.
+    rel = pipe.get("release")
+    if rel is not None:
+        if not isinstance(rel, dict):
+            fail(f"{EXAMPLE_REL}: release must be an object")
+        else:
+            if not isinstance(rel.get("enabled"), bool):
+                fail(f"{EXAMPLE_REL}: release.enabled must be a boolean (the on/off toggle)")
+            if "trigger" in rel and rel["trigger"] not in {"tag", "manual", "push", "none"}:
+                fail(f"{EXAMPLE_REL}: release.trigger must be one of ['manual','none','push','tag'], got {rel['trigger']!r}")
+            for key in ("steps", "verify"):
+                if key in rel:
+                    v = rel[key]
+                    if not (isinstance(v, list) and v and all(isinstance(s, str) and s.strip() for s in v)):
+                        fail(f"{EXAMPLE_REL}: release.{key} must be a non-empty list of non-empty strings")
+            # If this repo declares release automation ON, it must ship the workflow that implements it.
+            if rel.get("enabled") is True and not os.path.isfile(os.path.join(ROOT, ".github/workflows/release.yml")):
+                fail("release.enabled is true but .github/workflows/release.yml is missing")
 
     # Full schema validation when jsonschema is installed (optional — the shape
     # check above is the dependency-free guarantee, so CI stays green without it).

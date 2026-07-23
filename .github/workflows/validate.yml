@@ -43,8 +43,25 @@ jobs:
             echo "OK: validator rejects an invalid gate.type"
           fi
 
+      - name: Negative self-test (release.enabled true but workflow missing must fail)
+        run: |
+          set -eu
+          cp -R . /tmp/rel-copy
+          rm -f /tmp/rel-copy/.github/workflows/release.yml
+          if python3 /tmp/rel-copy/test/validate.py; then
+            echo "ERROR: validator passed with release.enabled true but no release.yml"
+            exit 1
+          else
+            echo "OK: validator requires the release workflow when release is enabled"
+          fi
+
       - name: install.sh syntax check
         run: bash -n install.sh
+
+      - name: Workflow YAML parses (validate + release)
+        run: |
+          python3 -m pip install --quiet pyyaml
+          python3 -c "import yaml; yaml.safe_load(open('.github/workflows/release.yml')); yaml.safe_load(open('.github/workflows/validate.yml')); print('workflows parse OK')"
 
       - name: npm installer CLI check
         run: node --check bin/task-pipeline.js

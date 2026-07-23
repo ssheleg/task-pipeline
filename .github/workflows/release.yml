@@ -1,0 +1,73 @@
+name: release
+
+# Project-configurable, individually toggleable release automation.
+#
+# OFF by default: the job runs ONLY when the repo variable RELEASE_ENABLED is
+# "true" (Settings → Secrets and variables → Actions → Variables). A fork or a
+# project that copies this workflow decides for itself whether to arm it — no
+# code change needed to enable/disable, just the variable.
+#
+# This is the concrete instance of the generic `release` config declared in
+# plugins/task-pipeline/skills/task-pipeline/pipeline.example.json (trigger:
+# tag; steps: GitHub release + npm publish; verify: CI + npx smoke + npm view).
+# npm publish stays a human 2FA step and is intentionally NOT run here.
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+jobs:
+  release:
+    if: vars.RELEASE_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install jsonschema
+        run: python3 -m pip install --quiet jsonschema
+
+      - name: Structural validator (gate the release on a valid repo)
+        run: python3 test/validate.py
+
+      - name: Derive version from tag
+        id: v
+        run: echo "ver=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Tag must match the manifests (four-way version sync)
+        run: |
+          set -eu
+          PV=$(python3 -c "import json;print(json.load(open('plugins/task-pipeline/.claude-plugin/plugin.json'))['version'])")
+          if [ "$PV" != "${{ steps.v.outputs.ver }}" ]; then
+            echo "tag ${GITHUB_REF_NAME} does not match plugin.json version $PV"; exit 1
+          fi
+
+      - name: Extract this version's CHANGELOG section
+        run: |
+          set -eu
+          awk -v v="${{ steps.v.outputs.ver }}" '
+            $0 ~ "^## v" v "([^0-9]|$)" {f=1; next}
+            /^## v/ {f=0}
+            f {print}
+          ' CHANGELOG.md > /tmp/notes.md
+          test -s /tmp/notes.md || { echo "no CHANGELOG section for v${{ steps.v.outputs.ver }}"; exit 1; }
+
+      - name: Create the GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${GITHUB_REF_NAME}" \
+            --title "${GITHUB_REF_NAME} — task-pipeline" \
+            --notes-file /tmp/notes.md --latest
+
+      - name: Post-release smoke test (npx from a clean cwd — the verify gate)
+        run: |
+          set -eu
+          export HOME="$(mktemp -d)"
+          cd "$(mktemp -d)"
+          npx --yes "github:ssheleg/task-pipeline#${GITHUB_REF_NAME}"
+          test -f "$HOME/.claude/skills/task-pipeline/SKILL.md"
+          test -f "$HOME/.claude/commands/task-pipeline.md"
+          echo "OK: released $GITHUB_REF_NAME installs cleanly via npx"

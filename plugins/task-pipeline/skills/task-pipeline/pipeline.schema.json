@@ -13,9 +13,30 @@
       "minItems": 1,
       "description": "The pipeline stages, in order. Any number, any names — your project's real stages.",
       "items": { "$ref": "#/definitions/stage" }
-    }
+    },
+    "release": { "$ref": "#/definitions/release" }
   },
   "definitions": {
+    "release": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Optional release automation, entirely project-defined and INDIVIDUALLY TOGGLEABLE. Omit the whole object, or set enabled:false, to turn release automation off for this project. The framework ships an example workflow (.github/workflows/release.yml) whose job is gated on a repo variable so each project arms it on its own; this block is the declarative counterpart the orchestrator reads.",
+      "required": ["enabled"],
+      "properties": {
+        "enabled": { "type": "boolean", "description": "Master on/off toggle. false (or the object omitted) = no release automation for this project." },
+        "trigger": { "enum": ["tag", "manual", "push", "none"], "description": "What kicks off a release (e.g. a pushed vX.Y.Z tag, manual dispatch)." },
+        "steps": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "description": "Ordered release actions, in prose — project-specific (e.g. create a GitHub release, npm publish). Human-only steps (2FA publish) are named as such."
+        },
+        "verify": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "description": "Post-release smoke checks that must pass after a release — this is the release's own post-deploy gate (stage 8 applied to shipping the package itself)."
+        }
+      }
+    },
     "stage": {
       "type": "object",
       "required": ["state", "skills", "gate"],

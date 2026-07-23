@@ -113,5 +113,18 @@
         "check": "docs in sync with code in the same change; wiki synced; dangling links fixed"
       }
     }
-  ]
+  ],
+  "release": {
+    "enabled": true,
+    "trigger": "tag",
+    "steps": [
+      "create a GitHub release from the matching CHANGELOG section",
+      "npm publish (task-pipeline-skill) — human 2FA step, not automated"
+    ],
+    "verify": [
+      "CI green on the tagged commit",
+      "npx github:ssheleg/task-pipeline#<tag> from a clean cwd installs the skill + command",
+      "after npm publish: npm view task-pipeline-skill version == <tag>"
+    ]
+  }
 }

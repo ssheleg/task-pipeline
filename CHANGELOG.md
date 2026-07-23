@@ -1,5 +1,44 @@
 # Changelog
 
+## v0.8.0 — 2026-07-23
+
+Project-configurable release automation, super-ux embedding refreshed to its
+current chain, a locked artifact structure, a companion-skills preflight, and a
+full contradiction sweep.
+
+- **Release automation — project-configurable & individually toggleable.** New
+  optional `release` block in `pipeline.schema.json` (master `enabled` toggle,
+  `trigger`, project-defined `steps`, `verify` smoke-checks) with the repo's own
+  config in `pipeline.example.json`. Reference implementation
+  `.github/workflows/release.yml` is **off unless armed** per repo via the
+  `RELEASE_ENABLED` variable; when on it validates the tag ↔ manifest version,
+  cuts a GitHub release from the CHANGELOG, and smoke-tests `npx` from a clean
+  checkout — closing the previously-manual post-deploy gap. Validator shape-checks
+  the block and enforces that `enabled:true` ships the workflow.
+- **super-ux embedding updated to super-ux's current chain.** The stage-3 UX
+  track now walks `/ux` → `ux-foundation` (WHY) → `ux-flows` (flows + `screens.md`,
+  Figma frames) → `ux-scenarios` (WHAT) → **`/ux-lint`** (`docs/ux/lint.py`, must
+  pass), reflecting super-ux ≥0.17 (flows/screens layers, linter, Figma). The
+  linter is wired into stage 7 (lint) and stage 9 (same-change), and stage-4 DoD
+  now carries `SCR-` screens alongside scenario IDs.
+- **Entry-from-super-ux short-circuit.** When launched *from* super-ux (its `/ux`
+  hand-off, UX chain already built), stage 0 detects the existing validated
+  chain/plan and **skips the grill + UX rebuild** — it verifies (`/ux-lint`
+  green), confirms scope in one line, and resumes at the first stage with real
+  work. super-ux skills are treated as idempotent (reuse, never rebuild).
+- **Companion-skills preflight.** New `references/companion-skills.md`: a matrix
+  of what powers each stage (superpowers, super-ux, grill-me, context7,
+  wiki-update) with install lines and a preflight recommendation block emitted
+  before stage 0, so the operator can arm the full flow up front. super-ux install
+  lines are surfaced the moment a UI task is detected.
+- **Locked artifact structure.** New `references/artifacts.md` fixes the canonical
+  `docs/superpowers/{specs,plans}` + `docs/ux/*` layout, the stage→artifact map,
+  and this repo's own structure — so every stage writes to the same place.
+- **Contradiction sweep.** Manifest descriptions (marketplace/plugin/package) and
+  the "9 stages" wording in README + SKILL.md now account for stage 0; the v0.1.0
+  spec/plan carry *historical snapshot* banners; model tiering marks 0–4 Fable;
+  `conventions.md` covers the super-ux linter and the release block.
+
 ## v0.7.0 — 2026-07-23
 
 Front-loaded **intake grill** (stage 0) + super-ux promoted to a recommended,

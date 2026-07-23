@@ -28,7 +28,7 @@ use. Every gate is typed — **auto** (the orchestrator verifies it, pass/fail) 
 | 8 | Post-deploy | host | clean boot / honest degradation | auto |
 | 9 | Docs + wiki | host | docs + wiki synced | auto |
 
-These 9 stages are the plugin's **example** flow. It's a machine-readable config
+These stages (0 intake + 1→9) are the plugin's **example** flow. It's a machine-readable config
 ([`pipeline.example.json`](plugins/task-pipeline/skills/task-pipeline/pipeline.example.json))
 against a universal contract
 ([`pipeline.schema.json`](plugins/task-pipeline/skills/task-pipeline/pipeline.schema.json)):
@@ -113,14 +113,36 @@ or `/task-pipeline`. The skill creates a per-stage TaskList and walks the gates.
 
 ## Model tiering
 
-Stages 1–4 → Fable, stages 5–6 → Opus, 7–9 → inherit. **Reminders only** — a skill
+Stages 0–4 → Fable, stages 5–6 → Opus, 7–9 → inherit. **Reminders only** — a skill
 can't switch the main-loop model; `/model` is the operator's. Stage-5 subagents are
 pinned to Opus automatically.
+
+## Release automation (project-configurable, toggleable)
+
+A pipeline config may declare an optional `release` block (see
+[`pipeline.schema.json`](plugins/task-pipeline/skills/task-pipeline/pipeline.schema.json)):
+a master `enabled` toggle, a `trigger`, project-defined `steps`, and `verify`
+smoke-checks. It's **off unless a project turns it on**, and every project
+configures its own. This repo's own instance is
+[`.github/workflows/release.yml`](.github/workflows/release.yml) — armed per repo
+by the `RELEASE_ENABLED` variable (unset = off), it validates the tag against the
+manifests, cuts a GitHub release from the CHANGELOG, and smoke-tests `npx` from a
+clean checkout. Copy and adapt it per project; nothing is hardcoded.
+
+## Companion skills
+
+`references/companion-skills.md` lists what powers each stage and how to install
+it: **superpowers** (required), **super-ux** (required for user-facing tasks —
+install line surfaced on the spot), **grill-me** (optional, enhances the stage-0
+grill), **context7** (docs stage), **wiki-update** (stage 9). A preflight prints
+which are ready and which to install so you can arm the full flow before work.
 
 ## Portability
 
 Stages 6–9 read the host project's `CLAUDE.md` conventions (tests / lint / deploy /
-docs / wiki) with detection fallbacks, so the skill works in any repo.
+docs / wiki) with detection fallbacks, so the skill works in any repo. The
+canonical artifact layout each stage writes to is fixed in
+[`references/artifacts.md`](plugins/task-pipeline/skills/task-pipeline/references/artifacts.md).
 
 ## По-русски
 
