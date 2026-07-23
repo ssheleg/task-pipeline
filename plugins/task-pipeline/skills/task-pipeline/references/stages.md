@@ -3,10 +3,42 @@
 For each stage: what it does, what to invoke, artifacts, and the **GATE** that
 must pass before advancing. Each gate is tagged with its **type** — `auto` (the
 orchestrator verifies the check itself, pass/fail) or `manual` (wait for the
-operator's explicit go). These 9 stages are the plugin's **example** flow,
-encoded in `pipeline.example.json` against the universal contract
+operator's explicit go). These stages (0 intake + 1→9) are the plugin's
+**example** flow, encoded in `pipeline.example.json` against the universal contract
 `pipeline.schema.json`; a host project replaces it with its own
 stages/agents/types (see SKILL.md → *Bring your own skills*).
+
+## 0 — Intake grill (Fable)
+- **What:** the operator's one-line task is almost never enough to run
+  autonomously. Before anything else, **grill the operator** to expand that
+  one line into a complete, unambiguous brief — resolve every decision branch
+  up front so stages 1→9 need no further human input beyond the manual gates.
+  This is input expansion, not design: turn "make me feature X" into locked
+  answers for scope, users, constraints, data, edge cases, done-criteria.
+- **Invoke:** prefer the `grill-me` / `grilling` skill if it resolves; otherwise
+  run the built-in grill loop:
+  1. **One question per turn** — never bundle.
+  2. **Give a recommended answer with every question** (+ 1-line rationale);
+     "what do you think?" is lazy.
+  3. **Explore the codebase/docs before asking** — if `grep`/`Read`/context7
+     answers it, do that instead of spending a turn.
+  4. **Walk the decision tree depth-first**; finish a branch before opening
+     another; ask prerequisite decisions first.
+  5. **Reconcile contradictions** immediately; chase dodges ("we'll decide
+     later" → "what's the latest you can decide and still ship?").
+- **UI early-detect:** one branch of the grill is always "does this touch a
+  user-facing surface (web/mobile/CLI/TUI)?". If yes → surface **super-ux**
+  now (use it if installed; otherwise give the install line — see SKILL.md
+  *Prerequisites*); this arms the stage-3 UX track.
+- **Artifact:** lock the resolved decisions into a **task brief** committed at
+  `docs/superpowers/specs/YYYY-MM-DD-<topic>-brief.md` (scope, users/UI verdict,
+  constraints, assumptions, explicitly-deferred items, done-criteria). Stages
+  2–4 build on this brief.
+- **GATE (manual):** shared understanding reached — every detected branch has a
+  recorded answer or an explicit deferral, no open contradictions, and the
+  operator confirms the brief. Stop when a re-scan surfaces no new branches
+  (don't grill past diminishing returns; reversible calls can be deferred with a
+  note). Only then start stage 1.
 
 ## 1 — Docs study (Fable)
 - **What:** ground every external library / API / SDK the task touches on the

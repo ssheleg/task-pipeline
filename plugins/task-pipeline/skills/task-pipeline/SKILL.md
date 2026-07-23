@@ -1,6 +1,6 @@
 ---
 name: task-pipeline
-description: "Orchestrates a task through the full end-to-end delivery pipeline — docs study, brainstorm, spec, plan, subagent-driven build, test suite, lint/deploy, post-deploy log check, and docs/wiki sync — as nine gated stages built on the superpowers skills. Use when the user wants to run a task through the pipeline, asks for the full cycle / полный цикл / прогони по конвейеру, invokes /task-pipeline, or starts any substantial feature, fix, or build that should follow the disciplined cycle rather than ad-hoc coding. Reminds which model to switch to per stage; reads host-project conventions for deploy/docs/wiki so it stays project-agnostic."
+description: "Orchestrates a task through the full end-to-end delivery pipeline — an up-front intake grill that expands the request into a complete brief, then docs study, brainstorm, spec, plan, subagent-driven build, test suite, lint/deploy, post-deploy log check, and docs/wiki sync — as gated stages built on the superpowers skills. Use when the user wants to run a task through the pipeline, asks for the full cycle / полный цикл / прогони по конвейеру, invokes /task-pipeline, or starts any substantial feature, fix, or build that should follow the disciplined cycle rather than ad-hoc coding. Grills the operator first so the rest runs autonomously; recommends super-ux for any user-facing task; reminds which model to switch to per stage; reads host-project conventions for deploy/docs/wiki so it stays project-agnostic."
 ---
 
 # task-pipeline
@@ -8,6 +8,13 @@ description: "Orchestrates a task through the full end-to-end delivery pipeline 
 Thin orchestrator. Runs a task through **gated stages**, each built on an
 existing skill. Keeps the main thread disciplined: no stage advances until its
 gate passes; each stage names the model to use.
+
+**Grill first, then run autonomously.** A one-line task ("make me feature X") is
+never enough to finish without a human in the loop. Stage 0 **grills the operator
+up front** — a relentless, one-question-at-a-time interview that resolves every
+decision branch — and locks the answers into a brief. That front-loads all the
+human input so stages 1→9 can run to the end with only the built-in gate
+approvals, not mid-flight discovery.
 
 **Config contract: [`pipeline.schema.json`](pipeline.schema.json).** A pipeline is
 a machine-readable config — an ordered list of stages, each with `skills[]` (the
@@ -29,23 +36,41 @@ If missing → tell the operator to install from **https://github.com/obra/super
 (`/plugin marketplace add obra/superpowers` → `/plugin install superpowers@superpowers`)
 and stop.
 
-For **user-facing tasks** (web/mobile/CLI/TUI) the spec stage additionally requires
-the **super-ux** skills (`ux-foundation`, `ux-scenarios`, `/ux`) —
-**https://github.com/ssheleg/super-ux**. Check only when stage 2 flags UI; if
-missing then → tell the operator to install and stop.
+**super-ux — recommended for ANY user-facing task.** The moment a task implies a
+user interface (web / mobile / CLI / TUI — a screen, a command, a visible
+behavior; the stage-0 grill detects this early), super-ux is the recommended
+workflow for the WHY/scenario layer (`ux-foundation`, `ux-scenarios`, `/ux`).
+- **Already installed?** (does `/ux` or `super-ux:ux-foundation` resolve) → **use
+  it**: `/ux` at intake, then `ux-foundation` (personas, JTBD, CJM, stories) →
+  `ux-scenarios` (traced scenarios) as the stage-3 UX track.
+- **Not installed?** → recommend it and give the install line right away:
+  ```
+  /plugin marketplace add ssheleg/super-ux
+  /plugin install super-ux@super-ux
+  ```
+  (or `npx skills add ssheleg/super-ux`). For UI tasks the spec gate **requires**
+  it — install before stage 3, otherwise stop and ask the operator to install.
+
+**grill-me (optional, enhances stage 0).** If the `grill-me` / `grilling` skill
+resolves, stage 0 uses it; otherwise stage 0 runs its own built-in grill loop —
+no hard dependency. Install (optional): `npx skills add mattpocock/skills` or the
+engineering-advanced-skills marketplace.
 
 ## How to run
 
-1. Restate the task in one line. Create a **TaskList: one task per stage** (survives
-   context loss; lets you resume).
-2. Walk stages 1→9. Before each: **model check** (see `references/model-tiering.md`) —
+1. Restate the task in one line. Create a **TaskList: one task per stage, starting
+   with stage 0** (survives context loss; lets you resume).
+2. **Run stage 0 (Intake grill) first** — grill the operator until shared
+   understanding is reached and the brief is locked (`references/stages.md` → 0).
+   Do not touch stage 1 before the brief is confirmed.
+3. Walk stages 1→9. Before each: **model check** (see `references/model-tiering.md`) —
    if recommended ≠ current, emit the reminder block and wait for the operator to `/model`.
-3. Do **not** advance until the stage **gate** passes (`references/stages.md`).
+4. Do **not** advance until the stage **gate** passes (`references/stages.md`).
    Honor the gate **type**: for `auto`, verify the gate's `check` yourself and
    stop/return on fail; for `manual`, present the result and **wait for the
    operator's explicit "continue"/go** — an auto gate never substitutes for a
    required manual approval.
-4. Cross-cutting, every stage: task tracker + conventional commits per host
+5. Cross-cutting, every stage: task tracker + conventional commits per host
    conventions; worktree isolation for the build; honest degradation (never claim a
    failed/skipped step succeeded); outward/irreversible actions (deploy, publish,
    repo create) need explicit operator go.
@@ -54,6 +79,7 @@ missing then → tell the operator to install and stop.
 
 | # | Stage | Model | Invoke | Gate | Type |
 |---|---|---|---|---|---|
+| 0 | Intake grill | Fable | `grill-me` / `grilling` if present, else built-in grill loop | shared understanding reached; brief locked + confirmed | manual |
 | 1 | Docs study | Fable | `context7` (resolve-library-id → get-library-docs) / `context7-docs` | contracts grounded on fetched docs | auto |
 | 2 | Brainstorm | Fable | `superpowers:brainstorming` + **UI detection** | design approved; UI verdict recorded | manual |
 | 3 | Spec | Fable | **UI → super-ux first** (`/ux` → `ux-foundation` CJM → `ux-scenarios`), then spec `docs/superpowers/specs/…-design.md` | committed + reviewed; UI: scenarios validated + CJM traced | manual |

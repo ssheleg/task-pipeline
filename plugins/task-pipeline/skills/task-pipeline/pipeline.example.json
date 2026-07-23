@@ -1,8 +1,19 @@
 {
   "$schema": "./pipeline.schema.json",
   "version": 1,
-  "_note": "EXAMPLE ONLY — copy this file, rename to pipeline.json in your project, and rewrite it. This particular example encodes the plugin's own default flow (superpowers + a super-ux UX track for user-facing tasks); it is NOT a fixed contract. Your project defines its own stages (any count), each executed by your own skills/agents, with your own gate types. The universal contract is pipeline.schema.json; test/validate.py checks this example against it. gate.type: auto = orchestrator verifies the check itself (pass/fail); manual = wait for an explicit operator go. Which stages are manual vs auto is the operator's decision, not the plugin's.",
+  "_note": "EXAMPLE ONLY — copy this file, rename to pipeline.json in your project, and rewrite it. This particular example encodes the plugin's own default flow (an up-front intake grill + superpowers + a super-ux UX track for user-facing tasks); it is NOT a fixed contract. Your project defines its own stages (any count), each executed by your own skills/agents, with your own gate types. The universal contract is pipeline.schema.json; test/validate.py checks this example against it. gate.type: auto = orchestrator verifies the check itself (pass/fail); manual = wait for an explicit operator go. Which stages are manual vs auto is the operator's decision, not the plugin's.",
   "stages": [
+    {
+      "id": 0,
+      "state": "intake",
+      "name": "Intake grill",
+      "model": "claude-fable-5",
+      "skills": ["grill-me", "grilling"],
+      "gate": {
+        "type": "manual",
+        "check": "grill the operator one question at a time (recommended answer per question; explore codebase/docs before asking) until shared understanding is reached — every decision branch has a recorded answer or explicit deferral, no open contradictions; UI verdict recorded (arms super-ux); decisions locked into a committed task brief the operator confirms before stage 1"
+      }
+    },
     {
       "id": 1,
       "state": "docs-study",

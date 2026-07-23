@@ -1,5 +1,33 @@
 # Changelog
 
+## v0.7.0 — 2026-07-23
+
+Front-loaded **intake grill** (stage 0) + super-ux promoted to a recommended,
+auto-detected workflow for any user-facing task.
+
+- **New stage 0 — Intake grill (Fable, manual gate).** Before any technical work,
+  the pipeline interviews the operator relentlessly — one question per turn, a
+  recommended answer with each, exploring the codebase/docs before asking — until
+  every decision branch is resolved and locked into a committed **task brief**
+  (`docs/superpowers/specs/…-brief.md`). This expands a one-line request into a
+  complete input so stages 1→9 run autonomously (only the built-in gates pause).
+  Inspired by [Matt Pocock's grill-me](https://github.com/mattpocock/skills);
+  uses the `grill-me` / `grilling` skill if it resolves, else a built-in grill
+  loop (no hard dependency). The 5 grill rules + stopping condition are embedded
+  in `references/stages.md`.
+- **super-ux recommended for ANY user-facing task.** The stage-0 grill detects a
+  UI surface (web/mobile/CLI/TUI) early and surfaces super-ux immediately: **use
+  it if installed**, otherwise print the install line on the spot
+  (`/plugin marketplace add ssheleg/super-ux` → `/plugin install super-ux@super-ux`,
+  or `npx skills add ssheleg/super-ux`). The stage-3 UX track (`/ux` →
+  `ux-foundation` CJM → `ux-scenarios`) is unchanged; the spec gate still requires
+  it for UI tasks.
+- **Docs synced:** SKILL.md gains the intake overview, a strengthened super-ux
+  block (recommended / use-if-installed / install-now) and an optional grill-me
+  note; stages table + `pipeline.example.json` gain stage 0; model tiering marks
+  0–4 as Fable; the `/task-pipeline` command and README (EN + RU) describe the
+  grill-first flow.
+
 ## v0.6.0 — 2026-07-23
 
 Typed gates + generic pipeline contract (merged the good ideas from the `os`

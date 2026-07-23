@@ -1,19 +1,23 @@
 # task-pipeline
 
 Full-cycle task delivery pipeline orchestrator for **Claude Code**. One skill that
-runs any substantial task through **9 gated stages** — built on the
-[superpowers](https://github.com/obra/superpowers) skills.
+runs any substantial task through an up-front **intake grill** + **9 gated stages** —
+built on the [superpowers](https://github.com/obra/superpowers) skills.
 
 ## What it does
 
-`docs study → brainstorm → spec → plan → subagent build → tests → lint/deploy →
-post-deploy log check → docs/wiki sync`
+`intake grill → docs study → brainstorm → spec → plan → subagent build → tests →
+lint/deploy → post-deploy log check → docs/wiki sync`
 
-Each stage gates the next; each names the model to use. Every gate is typed —
-**auto** (the orchestrator verifies it, pass/fail) or **manual** (waits for your go).
+It **grills you first**: a one-line task ("make me feature X") is expanded, one
+question at a time, into a locked brief — so the remaining stages run to the end
+without mid-flight questions. Each stage gates the next; each names the model to
+use. Every gate is typed — **auto** (the orchestrator verifies it, pass/fail) or
+**manual** (waits for your go).
 
 | # | Stage | Model | Gate | Type |
 |---|---|---|---|---|
+| 0 | Intake grill | Fable | shared understanding reached; brief locked | manual |
 | 1 | Docs study | Fable | contracts grounded on current docs | auto |
 | 2 | Brainstorm | Fable | design approved; UI verdict recorded | manual |
 | 3 | Spec | Fable | committed + reviewed; UI: scenarios + CJM traced | manual |
@@ -32,15 +36,28 @@ a host project copies the example to `pipeline.json` and rewrites it with its ow
 stages (any count), its own `skills[]`, and its own `auto`/`manual` gate types —
 "bring your own skills". The framework bakes in no fixed stages.
 
-## UX track (user-facing tasks)
+## Intake grill (stage 0)
 
-When a task touches any user-facing surface (web / mobile / CLI / TUI), the spec
-stage runs the [super-ux](https://github.com/ssheleg/super-ux) skills **before any
-plan is written**: `/ux` (setup check) → `ux-foundation` (personas, JTBD,
-**customer journey maps**, user stories) → `ux-scenarios` (usage scenarios
-validated against the base, ux-contract v2). The spec then embeds the UX layer —
-scenario IDs, CJM stages served, applicable UX patterns — and the plan's
-UI tasks carry scenario IDs in their DoD. Scenarios come before interface.
+Inspired by [Matt Pocock's grill-me](https://github.com/mattpocock/skills). Before
+any technical work, task-pipeline interviews you relentlessly — one question per
+turn, each with a recommended answer, exploring the codebase before asking — until
+every decision branch is resolved and locked into a **task brief**. That front-loads
+all the human input so stages 1→9 run autonomously (only the built-in gates pause).
+Uses the `grill-me` / `grilling` skill if installed; otherwise runs a built-in grill
+loop (no hard dependency).
+
+## UX track (user-facing tasks) — super-ux recommended
+
+The moment a task touches any user-facing surface (web / mobile / CLI / TUI — a
+screen, command, or visible behavior), [super-ux](https://github.com/ssheleg/super-ux)
+is the **recommended** workflow, detected early in the stage-0 grill. If it's
+installed, task-pipeline uses it; if not, it gives you the install line on the spot.
+The spec stage runs it **before any plan is written**: `/ux` (setup check) →
+`ux-foundation` (personas, JTBD, **customer journey maps**, user stories) →
+`ux-scenarios` (usage scenarios validated against the base, ux-contract v2). The
+spec then embeds the UX layer — scenario IDs, CJM stages served, applicable UX
+patterns — and the plan's UI tasks carry scenario IDs in their DoD. Scenarios come
+before interface.
 
 ## Prerequisites
 
@@ -108,19 +125,28 @@ docs / wiki) with detection fallbacks, so the skill works in any repo.
 ## По-русски
 
 **task-pipeline** — оркестратор полного цикла доставки задачи для Claude Code:
-один скилл проводит любую существенную задачу через **9 гейтованных стадий**
-(изучение доков → брейншторм → спека → план → сборка сабагентами → тесты →
-линт/деплой → пост-деплой проверка логов → синк доков/вики), построенных на
-скиллах [superpowers](https://github.com/obra/superpowers).
+один скилл проводит любую существенную задачу через **интейк-грил + 9 гейтованных
+стадий** (изучение доков → брейншторм → спека → план → сборка сабагентами →
+тесты → линт/деплой → пост-деплой проверка логов → синк доков/вики), построенных
+на скиллах [superpowers](https://github.com/obra/superpowers).
 
+- **Грил на входе (стадия 0):** одна строка задачи («сделай фичу X») недостаточна
+  для автономной работы. Пайплайн сначала «допрашивает» оператора — по одному
+  вопросу за ход, с рекомендованным ответом, изучив код до вопроса — пока все
+  ветки решений не закрыты и не зафиксированы в брифе. Это выносит весь ввод
+  человека вперёд, дальше стадии 1→9 идут автономно. Идея взята из
+  [grill-me Мэтта Покока](https://github.com/mattpocock/skills); использует скилл
+  `grill-me`/`grilling` если установлен, иначе — встроенный грил-цикл.
 - Ни одна стадия не стартует, пока не пройден гейт предыдущей; деплой требует
   зелёного полного прогона тестов и явного «go» оператора.
-- **UX-трек:** для user-facing задач стадия спеки сначала гоняет скиллы
-  [super-ux](https://github.com/ssheleg/super-ux) (`/ux` → `ux-foundation`:
-  персоны, JTBD, CJM → `ux-scenarios`: сценарии использования по контракту
-  ux-contract v2) — до написания плана; спека включает ID сценариев, стадии
-  CJM и применённые UX-паттерны. Сценарии — до интерфейса.
-- Каждая стадия напоминает, какую модель включить (`/model`): 1–4 — Fable,
+- **UX-трек (super-ux рекомендуется):** как только задача трогает интерфейс
+  (web/mobile/CLI/TUI), [super-ux](https://github.com/ssheleg/super-ux) —
+  рекомендуемый воркфлоу, детектится ещё на гриле; если установлен — используется,
+  если нет — сразу даётся строка установки. Стадия спеки гоняет `/ux` →
+  `ux-foundation` (персоны, JTBD, CJM) → `ux-scenarios` (сценарии по ux-contract
+  v2) до написания плана; спека включает ID сценариев, стадии CJM и UX-паттерны.
+  Сценарии — до интерфейса.
+- Каждая стадия напоминает, какую модель включить (`/model`): 0–4 — Fable,
   5–6 — Opus, 7–9 — наследуется. Это только напоминание — модель переключает
   оператор.
 - Стадии 6–9 читают конвенции хост-проекта из `CLAUDE.md` (тесты / линт /
