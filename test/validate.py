@@ -168,11 +168,11 @@ for f in mdcs:
         fail(f"cursor/rules/{f}: alwaysApply must be true or false")
 
 # templates/: skeletons this plugin seeds into a host project (the stage-0 brief).
-tpl_dir = os.path.join(ROOT, "templates")
+tpl_dir = os.path.join(ROOT, "plugins/task-pipeline/skills/task-pipeline/templates")
 if not os.path.isdir(tpl_dir):
-    fail("missing templates/ directory")
+    fail("missing skill templates/ directory")
 elif not os.path.isfile(os.path.join(tpl_dir, "brief.md")):
-    fail("missing template: templates/brief.md")
+    fail("missing template: plugins/task-pipeline/skills/task-pipeline/templates/brief.md")
 
 # Pipeline config is generic: pipeline.schema.json is the universal contract,
 # pipeline.example.json is a copy-and-rewrite example. The framework ships NO

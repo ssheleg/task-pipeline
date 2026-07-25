@@ -6,7 +6,7 @@ lack one, keep your current model; the pipeline still runs.
 | Stages | Recommended | id |
 |---|---|---|
 | 0–4 (intake grill, docs, brainstorm, spec, plan) | Fable 5 | `claude-fable-5` |
-| 5–6 (subagent dev, tests) | Opus 4.8 | `claude-opus-4-8` |
+| 5–6 (subagent dev, tests) | Opus 5 | `claude-opus-5` |
 | 7–9 (lint/deploy, logs, docs) | inherit current | — |
 
 ## Mechanic

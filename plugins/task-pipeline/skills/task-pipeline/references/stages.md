@@ -46,7 +46,7 @@ stages/agents/types (see SKILL.md → *Bring your own skills*).
 - **Artifact:** lock the resolved decisions into a **task brief** committed at
   `docs/superpowers/specs/YYYY-MM-DD-<topic>-brief.md` (scope, users/UI verdict,
   constraints, assumptions, explicitly-deferred items, done-criteria). Seed it from
-  the plugin's `templates/brief.md` skeleton — but only when absent, never
+  the skill's `templates/brief.md` skeleton — but only when absent, never
   overwrite an existing brief. Stages 2–4 build on this brief.
 - **GATE (manual):** shared understanding reached — every detected branch has a
   recorded answer or an explicit deferral, no open contradictions, and the
@@ -89,7 +89,7 @@ stages/agents/types (see SKILL.md → *Bring your own skills*).
      screen + state with wireframe and (Figma on) a Figma frame link.
   4. `ux-scenarios` → `docs/ux/scenarios.md` — the **WHAT** (source of truth for
      behavior): scenarios validated per the format contract (`scenario-format.md`,
-     ux-contract v2) — IDs, statuses, `Traces:` to stories/journey stages/flows,
+     ux-contract v4) — IDs, statuses, `Traces:` to stories/journey stages/flows,
      edge/error states enumerated.
   5. **Run the super-ux linter** (`/ux-lint` or `python3 docs/ux/lint.py`) — it
      must pass: no drift, no orphans, no broken traces or stale Figma links.

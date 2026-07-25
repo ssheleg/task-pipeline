@@ -8,7 +8,10 @@
       "state": "intake",
       "name": "Intake grill",
       "model": "claude-fable-5",
-      "skills": ["grill-me", "grilling"],
+      "skills": [
+        "grill-me",
+        "grilling"
+      ],
       "gate": {
         "type": "manual",
         "check": "grill the operator one question at a time (recommended answer per question; explore codebase/docs before asking) until shared understanding is reached — every decision branch has a recorded answer or explicit deferral, no open contradictions; UI verdict recorded (arms super-ux); decisions locked into a committed task brief the operator confirms before stage 1"
@@ -19,7 +22,10 @@
       "state": "docs-study",
       "name": "Docs study",
       "model": "claude-fable-5",
-      "skills": ["context7", "context7-docs"],
+      "skills": [
+        "context7",
+        "context7-docs"
+      ],
       "gate": {
         "type": "auto",
         "check": "every contract the design will lock is grounded in fetched docs, not recall; unresolvable libraries are flagged in the spec"
@@ -30,7 +36,9 @@
       "state": "brainstorm",
       "name": "Brainstorm",
       "model": "claude-fable-5",
-      "skills": ["superpowers:brainstorming"],
+      "skills": [
+        "superpowers:brainstorming"
+      ],
       "gate": {
         "type": "manual",
         "check": "the user approves the design AND the UI verdict is recorded (does the task touch a user-facing surface — web/mobile/CLI/TUI? this arms the stage-3 UX track)"
@@ -41,10 +49,15 @@
       "state": "spec",
       "name": "Spec",
       "model": "claude-fable-5",
-      "skills": ["super-ux:ux-foundation", "super-ux:ux-scenarios", "superpowers:brainstorming"],
+      "skills": [
+        "super-ux:ux-foundation",
+        "super-ux:ux-flows",
+        "super-ux:ux-scenarios",
+        "superpowers:brainstorming"
+      ],
       "gate": {
         "type": "manual",
-        "check": "spec committed and user-reviewed with all shared contracts locked; for UI tasks additionally: UX track ran FIRST (/ux -> ux-foundation CJM -> ux-scenarios), scenarios validated in docs/ux/scenarios.md, CJM/foundation coverage present, and every user-facing spec requirement traces to a scenario ID — scenarios come BEFORE interface"
+        "check": "UX track ran FIRST for user-facing tasks (/ux -> ux-foundation CJM -> ux-flows screens -> ux-scenarios -> /ux-lint green); spec committed and user-reviewed; every user-facing requirement traces to a scenario ID"
       }
     },
     {
@@ -52,18 +65,23 @@
       "state": "plan",
       "name": "Plan",
       "model": "claude-fable-5",
-      "skills": ["superpowers:writing-plans"],
+      "skills": [
+        "superpowers:writing-plans"
+      ],
       "gate": {
         "type": "auto",
-        "check": "every spec requirement maps to a task; no placeholders; parallel-group tasks share no files; for UI tasks each user-facing task names the scenario ID(s) it implements and its DoD includes satisfying them"
+        "check": "every spec requirement maps to a task; no placeholders; parallel-group tasks share no files; UI tasks name the scenario ID(s) and SCR- screen(s) they implement in their DoD"
       }
     },
     {
       "id": 5,
       "state": "dev",
       "name": "Dev",
-      "model": "claude-opus-4-8",
-      "skills": ["superpowers:using-git-worktrees", "superpowers:subagent-driven-development"],
+      "model": "claude-opus-5",
+      "skills": [
+        "superpowers:using-git-worktrees",
+        "superpowers:subagent-driven-development"
+      ],
       "gate": {
         "type": "auto",
         "check": "all plan tasks DONE (two-stage review: spec compliance, then code quality); full test suite green"
@@ -73,8 +91,10 @@
       "id": 6,
       "state": "tests",
       "name": "Tests",
-      "model": "claude-opus-4-8",
-      "skills": ["superpowers:test-driven-development"],
+      "model": "claude-opus-5",
+      "skills": [
+        "superpowers:test-driven-development"
+      ],
       "gate": {
         "type": "auto",
         "check": "full suite green (not just new tests); new/changed code covered; no skip/xfail smuggling a red suite past the gate"
@@ -85,7 +105,10 @@
       "state": "lint-deploy",
       "name": "Lint + deploy",
       "model": "inherit",
-      "skills": ["host:lint", "host:deploy"],
+      "skills": [
+        "host:lint",
+        "host:deploy"
+      ],
       "gate": {
         "type": "manual",
         "check": "lint clean and full suite green before deploy; deploy is outward and needs explicit operator go"
@@ -96,7 +119,9 @@
       "state": "post-deploy",
       "name": "Post-deploy",
       "model": "inherit",
-      "skills": ["host:health-check"],
+      "skills": [
+        "host:health-check"
+      ],
       "gate": {
         "type": "auto",
         "check": "clean boot confirmed (no error spike, live subsystems healthy), or an honest degradation report with next steps"
@@ -107,7 +132,10 @@
       "state": "docs-wiki",
       "name": "Docs + wiki",
       "model": "inherit",
-      "skills": ["host:module-docs", "wiki-update"],
+      "skills": [
+        "host:module-docs",
+        "wiki-update"
+      ],
       "gate": {
         "type": "auto",
         "check": "docs in sync with code in the same change; wiki synced; dangling links fixed"

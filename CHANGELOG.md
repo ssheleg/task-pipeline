@@ -1,5 +1,26 @@
 # Changelog
 
+## v0.10.0 — 2026-07-25
+
+Review pass — doc drift and a distribution defect found by an adversarial audit.
+
+- **FIX: the stage-0 brief template never reached 3 of 4 install channels.**
+  `templates/brief.md` sat at the repo root, outside the plugin source, so the
+  skills CLI / npx / install.sh installs had no such file while `stages.md` told
+  the agent to seed from it. Moved to
+  `plugins/task-pipeline/skills/task-pipeline/templates/brief.md` — inside the
+  skill dir, so every channel ships it.
+- **FIX: stale super-ux chain in `pipeline.example.json`.** Stage 3 still listed
+  only `ux-foundation` + `ux-scenarios`; it now runs the current chain
+  (`/ux` → `ux-foundation` → **`ux-flows`** → `ux-scenarios` → **`/ux-lint`**),
+  matching SKILL.md and `stages.md`. Stage-4 gate now also names `SCR-` screens.
+- **FIX: README documented the old chain** in both languages, and recommended the
+  skills CLI for Claude Code (which shadows the plugin). Both corrected; multiple
+  agents now shown as repeated `--agent` flags.
+- Description now opens with "Use when …" per canon. `ux-contract` stamp updated
+  v2 → v4. Model tiering moved to the current Opus generation (`claude-opus-5`).
+- README gains npm / CI / license badges.
+
 ## v0.9.0 — 2026-07-23
 
 Full structural parity with the sibling `super-ux` per the ssheleg skill canon

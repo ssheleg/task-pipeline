@@ -1,5 +1,9 @@
 # task-pipeline
 
+[![npm](https://img.shields.io/npm/v/task-pipeline-skill)](https://www.npmjs.com/package/task-pipeline-skill)
+[![validate](https://github.com/ssheleg/task-pipeline/actions/workflows/validate.yml/badge.svg)](https://github.com/ssheleg/task-pipeline/actions/workflows/validate.yml)
+[![license](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+
 Full-cycle task delivery pipeline orchestrator for **Claude Code**. One skill that
 runs any substantial task through an up-front **intake grill** + **9 gated stages** —
 built on the [superpowers](https://github.com/obra/superpowers) skills.
@@ -20,7 +24,7 @@ use. Every gate is typed — **auto** (the orchestrator verifies it, pass/fail) 
 | 0 | Intake grill | Fable | shared understanding reached; brief locked | manual |
 | 1 | Docs study | Fable | contracts grounded on current docs | auto |
 | 2 | Brainstorm | Fable | design approved; UI verdict recorded | manual |
-| 3 | Spec | Fable | committed + reviewed; UI: scenarios + CJM traced | manual |
+| 3 | Spec | Fable | committed + reviewed; UI: super-ux chain validated, linter green | manual |
 | 4 | Plan | Fable | parallel-ready, DoD per task | auto |
 | 5 | Dev | Opus | tasks DONE, TDD green per task | auto |
 | 6 | Tests | Opus | full suite green, new code covered | auto |
@@ -54,7 +58,8 @@ is the **recommended** workflow, detected early in the stage-0 grill. If it's
 installed, task-pipeline uses it; if not, it gives you the install line on the spot.
 The spec stage runs it **before any plan is written**: `/ux` (setup check) →
 `ux-foundation` (personas, JTBD, **customer journey maps**, user stories) →
-`ux-scenarios` (usage scenarios validated against the base, ux-contract v2). The
+`ux-flows` (user flows + `screens.md` UI map, Figma frames) → `ux-scenarios`
+(usage scenarios validated against the base, ux-contract v4) → `/ux-lint` (must pass). The
 spec then embeds the UX layer — scenario IDs, CJM stages served, applicable UX
 patterns — and the plan's UI tasks carry scenario IDs in their DoD. Scenarios come
 before interface.
@@ -83,10 +88,13 @@ before interface.
 /plugin install task-pipeline@task-pipeline
 ```
 
-**Any agent via the skills CLI (Claude Code, Cursor, Codex, 70+ agents):**
+**Any agent via the skills CLI (Cursor, Codex, OpenCode, 70+ — not Claude Code,
+use the plugin above):**
 ```
-npx skills add ssheleg/task-pipeline
+npx skills add ssheleg/task-pipeline --agent cursor --agent codex --global
 ```
+(one repeated `--agent` per agent; never include `claude-code` while the plugin is
+installed — the plain copy shadows it)
 
 **npm installer (no clone needed):**
 ```
@@ -123,7 +131,7 @@ on the same Claude Code install yields a duplicate skill).
 | Agent / channel | Update |
 |---|---|
 | Claude Code (plugin) | `claude plugin marketplace update task-pipeline` → `claude plugin update task-pipeline@task-pipeline` → restart |
-| Any agent (skills CLI) | `npx skills add ssheleg/task-pipeline --agent <name> --global` (re-run overwrites); `--agent '*'` for all |
+| Any agent (skills CLI) | `npx skills update task-pipeline --global --yes`; to add: repeated `--agent <name>` (never `claude-code` when the plugin is installed) |
 | Cursor | skills CLI (above) with `--agent cursor`, or re-copy the `.mdc` per project |
 | npm | `npx task-pipeline-skill@latest` / `npx github:ssheleg/task-pipeline` (ephemeral — always latest) |
 | Plain skill | `git pull && ./install.sh --force` |
@@ -187,8 +195,10 @@ canonical artifact layout each stage writes to is fixed in
   (web/mobile/CLI/TUI), [super-ux](https://github.com/ssheleg/super-ux) —
   рекомендуемый воркфлоу, детектится ещё на гриле; если установлен — используется,
   если нет — сразу даётся строка установки. Стадия спеки гоняет `/ux` →
-  `ux-foundation` (персоны, JTBD, CJM) → `ux-scenarios` (сценарии по ux-contract
-  v2) до написания плана; спека включает ID сценариев, стадии CJM и UX-паттерны.
+  `ux-foundation` (персоны, JTBD, CJM) → `ux-flows` (флоу + `screens.md` — карта
+  экранов) → `ux-scenarios` (сценарии, ux-contract v4) → `/ux-lint` (линтер должен
+  быть зелёным) до написания плана; спека включает ID сценариев, `SCR-` экраны,
+  стадии CJM и UX-паттерны.
   Сценарии — до интерфейса.
 - Каждая стадия напоминает, какую модель включить (`/model`): 0–4 — Fable,
   5–6 — Opus, 7–9 — наследуется. Это только напоминание — модель переключает
