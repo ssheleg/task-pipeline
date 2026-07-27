@@ -1,5 +1,40 @@
 # Changelog
 
+## v0.12.0 — 2026-07-27
+
+The grill stops being someone else's skill. It is ported in, in full, and gains
+the domain-awareness half it was missing.
+
+- **The intake grill is now BUILT IN — zero external dependency.** New
+  `references/grill.md` carries the whole doctrine: the interview loop, domain
+  awareness, the autonomy sweep and the output contract. No companion skill to
+  install, no provider to resolve, no fallback path, no version skew with someone
+  else's repo. `grill-me` / `grilling` are gone from the companion matrix,
+  the preflight block and every channel's docs.
+- **Ported from [mattpocock/skills](https://github.com/mattpocock/skills)** — the
+  `grilling` / `grill-with-docs` interview loop and its domain discipline, MIT,
+  adapted to this pipeline's flow. `LICENSE` gains a *Third-party* section with
+  Matt Pocock's copyright notice covering the three affected files.
+- **New: domain awareness during the grill.** The grill now reads the project's
+  own `CONTEXT.md` / `CONTEXT-MAP.md` / `docs/adr/` and holds the operator to
+  them — challenging terms that conflict with the glossary, sharpening vague or
+  overloaded words into canonical ones, stress-testing relationships with concrete
+  edge-case scenarios, and surfacing contradictions between the code and what was
+  just said. Resolved terms are written to `CONTEXT.md` inline as they land, never
+  batched.
+- **New: ADR discipline.** An ADR is offered only when a decision is hard to
+  reverse **and** surprising without context **and** the result of a real
+  trade-off; any one missing, skip it. Files are created lazily, numbered
+  sequentially in `docs/adr/`.
+- **New templates** `templates/context.md` and `templates/adr.md` — the formats
+  those two artifacts follow, shipped on every install channel alongside
+  `brief.md`. `references/artifacts.md` now maps `CONTEXT.md` and `docs/adr/` into
+  the canonical layout.
+- **Validator:** requires `references/grill.md` and all three templates; the
+  broken-relative-link check now strips fenced code blocks first, so illustrative
+  paths inside examples stop being false failures (verified it still catches real
+  broken links outside fences).
+
 ## v0.11.0 — 2026-07-27
 
 The intake grill becomes mandatory, autonomy becomes something the grill actively

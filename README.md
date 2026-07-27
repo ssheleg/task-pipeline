@@ -49,9 +49,19 @@ every decision branch is resolved and locked into a **task brief**. There is no
 "clear enough task" exemption: no stage-1 work starts without a committed,
 confirmed brief.
 
-**The stage is required; the provider is not.** It runs through the `grill-me` /
-`grilling` skill when that chain resolves, otherwise through the orchestrator's own
-grill loop — both implement the same **grill contract**, neither is a downgrade.
+**Built in — nothing to install.** The full doctrine ships inside the skill
+([`references/grill.md`](plugins/task-pipeline/skills/task-pipeline/references/grill.md)):
+no companion skill, no resolution step, no fallback path, no version skew. Adapted
+from [Matt Pocock's grill-with-docs](https://github.com/mattpocock/skills) (MIT —
+see [LICENSE](LICENSE) → *Third-party*).
+
+**Domain awareness.** While exploring, the grill reads the project's own
+`CONTEXT.md` / `docs/adr/` and holds you to them — calling out terms that conflict
+with the glossary, replacing overloaded words with a canonical one, stress-testing
+relationships against concrete edge cases, and surfacing where the code contradicts
+what you just said. Resolved terms are written into `CONTEXT.md` as they land;
+decisions that are hard to reverse, surprising without context **and** the result of
+a real trade-off get an ADR. Both files are created lazily.
 
 **Autonomy comes from the sweep.** Beyond the task itself, the grill pre-resolves
 everything that would otherwise interrupt stages 1→9: which external libs need docs,
@@ -184,9 +194,9 @@ clean checkout. Copy and adapt it per project; nothing is hardcoded.
 
 `references/companion-skills.md` lists what powers each stage and how to install
 it: **superpowers** (required), **super-ux** (required for user-facing tasks —
-install line surfaced on the spot), **grill-me** (a swappable provider for the
-mandatory stage-0 grill — its absence never blocks, the built-in loop runs the same
-contract), **context7** (docs stage), **wiki-update** (stage 9). A single preflight
+install line surfaced on the spot), **context7** (docs stage), **wiki-update**
+(stage 9). The stage-0 grill is **not** on that list — it's built into the skill. A
+single preflight
 block prints which are ready, which to install, and the model recommendation, so you
 arm the whole run in one exchange.
 
@@ -210,10 +220,17 @@ canonical artifact layout each stage writes to is fixed in
   «допрашивает» оператора — по одному вопросу за ход, с рекомендованным ответом,
   изучив код до вопроса — пока все ветки решений не закрыты и не зафиксированы в
   брифе. Ни одна стадия 1+ не стартует без закоммиченного подтверждённого брифа.
-  Идея взята из [grill-me Мэтта Покока](https://github.com/mattpocock/skills).
-  **Обязательна стадия, а не скилл:** грил идёт через `grill-me`/`grilling`, если
-  цепочка резолвится, иначе — через собственный грил-цикл оркестратора; оба
-  реализуют один и тот же контракт грилла, второй — не деградация.
+  **Грил встроен в скилл** — ставить нечего: вся доктрина лежит в
+  `references/grill.md`, без компаньонов, резолва и фолбэков. Портировано из
+  [grill-with-docs Мэтта Покока](https://github.com/mattpocock/skills) (MIT, см.
+  `LICENSE` → *Third-party*).
+- **Доменная осознанность на гриле.** Пайплайн читает `CONTEXT.md` / `docs/adr/`
+  проекта и держит оператора в рамках его же языка: ловит термины, конфликтующие с
+  глоссарием, заменяет размытые слова каноничными, проверяет отношения конкретными
+  краевыми сценариями, вскрывает расхождения между кодом и только что сказанным.
+  Разрешённый термин сразу пишется в `CONTEXT.md`; решение, которое трудно
+  откатить, неочевидно без контекста и стало результатом реального компромисса,
+  получает ADR. Файлы создаются лениво.
 - **Автономию даёт свип по стадиям.** Помимо самой задачи грил заранее закрывает
   всё, что иначе остановит стадии 1→9: внешние библиотеки и где их доки, политику
   веток и трекер задач, команду тестов и что значит «зелено», команду линта, цель

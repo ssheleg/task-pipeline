@@ -56,24 +56,24 @@ workflow for the WHY→UI→scenario chain (`/ux`, `ux-foundation`, `ux-flows`,
   (or `npx skills add ssheleg/super-ux`). For UI tasks the spec gate **requires**
   it — install before stage 3, otherwise stop and ask the operator to install.
 
-**Stage 0 is MANDATORY — the stage, not any particular skill.** Every run grills
-before it builds; there is no "clear enough task" exemption and no starting stage 1
-without a committed, operator-confirmed brief (the one sanctioned bypass is the
-entry-from-super-ux short-circuit). What *is* swappable is the **provider**:
-- **`grill-me` / `grilling`** when the chain resolves — install:
-  `/plugin marketplace add alirezarezvani/claude-skills` →
-  `/plugin install engineering-advanced-skills@claude-code-skills` (upstream origin:
-  `npx skills add mattpocock/skills`). It usually ships `disable-model-invocation:
-  true`, so ask the operator to run `/grill-me`; and it typically delegates to
-  `/grilling` — if that doesn't resolve, the chain is dangling, use the loop.
-- **the orchestrator's own grill loop** otherwise — a compliant implementation of
-  the same **grill contract**, not a degradation.
+**The grill is built in — no companion skill, nothing to install.** Stage 0 ships
+with this skill: the full doctrine lives in [`references/grill.md`](references/grill.md)
+(interview loop, domain awareness, autonomy sweep, output). It is **mandatory** —
+no "clear enough task" exemption, no starting stage 1 without a committed,
+operator-confirmed brief. The one sanctioned bypass is the entry-from-super-ux
+short-circuit, and even that demands a scope confirmation.
 
-Either way the grill must satisfy the contract in `references/stages.md` → 0,
-including the **autonomy sweep**: it pre-resolves what would otherwise stop stages
-1→9 mid-flight (test/lint/deploy commands, branch policy, log locations, docs
-targets, the model decision, deploy authorization). Autonomy is bought here or not
-at all — an unasked question is a scheduled interruption.
+Two things the grill does beyond clarifying the request:
+- **Domain awareness.** It reads the project's own `CONTEXT.md` / `docs/adr/` and
+  holds the operator to them — challenging terms that conflict with the glossary,
+  sharpening overloaded words, stress-testing with concrete scenarios, and
+  flagging where the code contradicts what was just said. Resolved terms are
+  written to `CONTEXT.md` as they land; genuinely hard-to-reverse decisions get an
+  ADR.
+- **The autonomy sweep.** It pre-resolves what would otherwise stop stages 1→9
+  mid-flight (test/lint/deploy commands, branch policy, log locations, docs
+  targets, the model decision, deploy authorization). Autonomy is bought here or
+  not at all — an unasked question is a scheduled interruption.
 
 ## How to run
 
@@ -116,7 +116,7 @@ capable available — see `references/model-tiering.md`).
 
 | # | Stage | Invoke | Gate | Type |
 |---|---|---|---|---|
-| 0 | Intake grill — **mandatory** | `grill-me` / `grilling` if the chain resolves, else the built-in grill loop (same contract) | shared understanding reached; autonomy sweep covered; brief locked + confirmed | manual |
+| 0 | Intake grill — **mandatory** | built in: [`references/grill.md`](references/grill.md) | shared understanding reached; autonomy sweep covered; brief locked + confirmed | manual |
 | 1 | Docs study | `context7` (resolve-library-id → get-library-docs) / `context7-docs` | contracts grounded on fetched docs | auto |
 | 2 | Brainstorm | `superpowers:brainstorming` + **UI detection** | design approved; UI verdict recorded | manual |
 | 3 | Spec | **UI → super-ux chain first** (`/ux` → `ux-foundation` CJM → `ux-flows` screens → `ux-scenarios` → `/ux-lint`), then spec `docs/superpowers/specs/…-design.md` | committed + reviewed; UI: chain validated, linter green, scenarios/`SCR-` traced | manual |
@@ -158,6 +158,7 @@ automation is on — `pipeline.schema.json` is the only contract.
 
 - `pipeline.schema.json` — the universal pipeline config contract (stages + release)
 - `pipeline.example.json` — this plugin's default flow (stage 0 + 1→9) + release, as config
+- `references/grill.md` — the built-in stage-0 grill: loop, domain awareness, autonomy sweep
 - `references/stages.md` — per-stage detail + exact gate criteria + gate types
 - `references/model-tiering.md` — model map, ids, the `/model` reminder mechanic, override
 - `references/conventions.md` — how stages 6–9 read the host project's CLAUDE.md

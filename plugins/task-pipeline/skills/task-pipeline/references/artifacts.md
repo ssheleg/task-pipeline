@@ -8,7 +8,10 @@ shape.
 ## In the host project
 
 ```
+CONTEXT.md                            # stage 0 — domain glossary, written inline as terms resolve
 docs/
+  adr/
+    NNNN-<slug>.md                    # stage 0 — ADRs for hard-to-reverse decisions
   superpowers/
     specs/
       YYYY-MM-DD-<topic>-brief.md     # stage 0 — locked intake brief (grill output)
@@ -34,6 +37,7 @@ design → plan is traceable at a glance.
 | Stage | Writes | Consumed by |
 |---|---|---|
 | 0 Intake | `specs/<topic>-brief.md` (seed from the skill's `templates/brief.md`) | stages 2–4 |
+| 0 Grill (domain) | `CONTEXT.md`, `docs/adr/NNNN-<slug>.md` — created **lazily**, only when a term resolves or a decision qualifies | stages 2–4 + the repo |
 | 3 Spec | `specs/<topic>-design.md` (+ links `docs/ux/*` for UI) | stage 4 |
 | 4 Plan | `plans/<topic>.md` | stage 5 |
 | 3 UX track | `docs/ux/{foundation,flows,screens,scenarios}.md` | stages 4–9 + `/ux-lint` |
@@ -51,9 +55,9 @@ plugins/task-pipeline/
     SKILL.md
     pipeline.schema.json                      # generic pipeline contract
     pipeline.example.json                     # this plugin's own flow, as config
-    references/{stages,model-tiering,conventions,artifacts,companion-skills}.md
+    references/{grill,stages,model-tiering,conventions,artifacts,companion-skills}.md
 cursor/rules/task-pipeline.mdc                # Cursor channel (self-contained rule)
-plugins/task-pipeline/skills/task-pipeline/templates/brief.md   # stage-0 skeleton (ships on every channel)
+plugins/task-pipeline/skills/task-pipeline/templates/{brief,context,adr}.md      # stage-0 skeletons (ship on every channel)
 bin/task-pipeline.js                          # npx installer (package task-pipeline-skill)
 package.json
 install.sh                                    # POSIX installer

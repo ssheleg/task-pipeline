@@ -22,10 +22,10 @@ recommended tier isn't available, say which one you're using and continue.
 
 ## Stage 0 — intake grill (MANDATORY, do this FIRST)
 
-Never skipped. No "the task was already clear" exemption, no starting stage 1 while
-the user thinks. A one-line task ("build feature X") is not enough to finish
-autonomously. Grill the user up front, then run the rest without mid-flight
-questions:
+Never skipped, and nothing to install — the grill is part of this rule. No "the
+task was already clear" exemption, no starting stage 1 while the user thinks. A
+one-line task ("build feature X") is not enough to finish autonomously. Grill the
+user up front, then run the rest without mid-flight questions:
 1. One question per turn — never bundle.
 2. Give a recommended answer with every question (+ one-line rationale).
 3. Explore the codebase before asking — if a search/read answers it, do that.
@@ -39,6 +39,21 @@ questions:
    where logs/health live; which docs and runbooks this change updates. Each item
    gets an answer or an explicit "stop and ask me here" — an unasked question is a
    scheduled interruption.
+
+**Domain awareness while you grill.** Look for the project's own docs as you
+explore — a root `CONTEXT.md` (or a `CONTEXT-MAP.md` pointing at per-context ones)
+and `docs/adr/`. Then hold the user to them: call out terms that conflict with the
+glossary ("your glossary defines 'cancellation' as X, you seem to mean Y"), replace
+vague or overloaded words with a canonical one ("'account' — Customer or User?"),
+stress-test relationships with concrete edge-case scenarios, and surface
+contradictions between what the code does and what the user just said. Write
+resolved terms into `CONTEXT.md` right then, not in a batch — one tight sentence
+per term, aliases listed as "avoid", no implementation detail. Create these files
+lazily, only once there's something real to write.
+
+Offer an ADR (`docs/adr/NNNN-slug.md`, 1–3 sentences is a complete ADR) only when
+all three hold: hard to reverse, surprising without context, and the result of a
+real trade-off. Any one missing → skip it.
 
 Stop when shared understanding is reached (every branch answered or explicitly
 deferred) and lock the answers into a short brief the user confirms. Only then

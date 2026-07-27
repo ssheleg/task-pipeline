@@ -9,13 +9,11 @@
       "name": "Intake grill",
       "model": "default",
       "skills": [
-        "grill-me",
-        "grilling",
-        "builtin:grill-loop"
+        "task-pipeline:grill"
       ],
       "gate": {
         "type": "manual",
-        "check": "MANDATORY stage — never skipped (only sanctioned bypass: the entry-from-super-ux short-circuit). Grill per the contract: one question at a time, a recommended answer with each, explore the codebase/docs before asking, depth-first, contradictions reconciled. The autonomy sweep is covered — every stage 1-9 has its blockers pre-resolved (docs sources, branch/tracker policy, test + lint commands, deploy target and authorization, log/health locations, docs+wiki targets) or is explicitly marked 'stop and ask here'. UI verdict recorded (arms super-ux); model decision recorded. All of it locked into a committed task brief the operator confirms before stage 1."
+        "check": "MANDATORY stage — never skipped (only sanctioned bypass: the entry-from-super-ux short-circuit). The grill is built into the skill (references/grill.md) — no companion to install. Per its contract: one question at a time, a recommended answer with each, explore the codebase/docs before asking, depth-first, contradictions reconciled; domain awareness applied (terms challenged against CONTEXT.md, ADRs recorded for hard-to-reverse calls). The autonomy sweep is covered — every stage 1-9 has its blockers pre-resolved (docs sources, branch/tracker policy, test + lint commands, deploy target and authorization, log/health locations, docs+wiki targets) or is explicitly marked 'stop and ask here'. UI verdict recorded (arms super-ux); model decision recorded. All of it locked into a committed task brief the operator confirms before stage 1."
       }
     },
     {

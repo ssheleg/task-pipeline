@@ -112,6 +112,30 @@ jobs:
             echo "OK: validator requires the autonomy sweep in the brief template"
           fi
 
+      - name: Negative self-test (the grill doctrine must ship with the skill)
+        run: |
+          set -eu
+          cp -R . /tmp/doctrine-copy
+          rm -f /tmp/doctrine-copy/plugins/task-pipeline/skills/task-pipeline/references/grill.md
+          if python3 /tmp/doctrine-copy/test/validate.py; then
+            echo "ERROR: validator passed without the built-in grill doctrine"
+            exit 1
+          else
+            echo "OK: validator requires references/grill.md — the grill is built in, not a dependency"
+          fi
+
+      - name: Negative self-test (a real broken link still fails past the fence stripper)
+        run: |
+          set -eu
+          cp -R . /tmp/link-copy
+          printf '\n[gone](./does-not-exist.md)\n' >> /tmp/link-copy/README.md
+          if python3 /tmp/link-copy/test/validate.py; then
+            echo "ERROR: validator missed a broken relative link outside a code fence"
+            exit 1
+          else
+            echo "OK: validator still catches broken links outside fences"
+          fi
+
       - name: install.sh syntax check
         run: bash -n install.sh
 

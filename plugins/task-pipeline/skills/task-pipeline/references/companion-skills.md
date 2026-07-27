@@ -5,13 +5,17 @@ skills. Preflight-detect each one; if a needed skill doesn't resolve, **give the
 operator the install line immediately** and (for required ones) stop until it's
 installed. Never silently degrade a required capability.
 
+**Stage 0 is the exception: the grill is part of this skill**
+(`references/grill.md`), so it has no companion, no install line and no failure
+mode where it can't run.
+
 ## The matrix
 
 | Skill / tool | Needed for | Required? | Install |
 |---|---|---|---|
 | **superpowers** (`brainstorming`, `writing-plans`, `subagent-driven-development`, `using-git-worktrees`, `test-driven-development`) | stages 2, 4, 5, 6 | **Required** (always) | `/plugin marketplace add obra/superpowers` → `/plugin install superpowers@superpowers` |
 | **super-ux** (`ux-foundation`, `ux-flows`, `ux-scenarios`, `ux-audit`, `/ux`, `/ux-lint`) | stage 3 UX track | **Required for any user-facing task** | `/plugin marketplace add ssheleg/super-ux` → `/plugin install super-ux@super-ux` (or `npx skills add ssheleg/super-ux`) |
-| **grill-me** / **grilling** | stage 0 intake grill | **The stage is required; this provider is not.** Stage 0 can never be skipped — but it runs either through this skill or through the orchestrator's own grill loop, both compliant with the grill contract | `/plugin marketplace add alirezarezvani/claude-skills` → `/plugin install engineering-advanced-skills@claude-code-skills`; upstream origin `npx skills add mattpocock/skills` |
+| ~~grill-me / grilling~~ | — | **Not a dependency.** The stage-0 grill is **built into this skill** (`references/grill.md`) — nothing to install, nothing to resolve, no fallback path | — |
 | **context7** (MCP) | stage 1 docs study | Recommended (web-search fallback) | connect the context7 MCP server |
 | **wiki-update** | stage 9 wiki sync | Optional (skip wiki if absent) | user's wiki skill set |
 
@@ -28,11 +32,8 @@ Pipeline companions:
                            /plugin marketplace add ssheleg/super-ux
                            /plugin install super-ux@super-ux
   ✓ context7           — ready
-  ✗ grill-me           — provider absent; stage 0 still runs (built-in grill loop,
-                         same contract). To use it instead:
-                           /plugin marketplace add alirezarezvani/claude-skills
-                           /plugin install engineering-advanced-skills@claude-code-skills
   ✓ wiki-update        — ready
+  • intake grill       — built in, no install needed
 
 🧠 Model for this run: recommended <top tier available>. You're on <current>.
    /model <id> to switch, or "keep current", or name per-stage overrides.
@@ -44,13 +45,19 @@ Rules:
 - Only flag **super-ux** as recommended when the task implies a UI (the stage-0
   grill decides this; when unsure, flag it — a false positive costs one install).
 - **superpowers** missing → stop; it's required for the core stages.
-- **grill-me missing never blocks** — stage 0 is mandatory, its *provider* is not.
-  Say which provider will run and move on; don't present the built-in loop as a
-  downgrade.
+- **Never gate stage 0 on an install.** The grill ships with this skill; there is
+  no external grill dependency to detect, recommend, or fall back from.
 - Optional tools missing → state the fallback, don't block.
 - Re-detect after the operator installs; don't assume.
 - The model answer goes into the brief. Don't ask again per stage
   (`model-tiering.md` → *Mechanic*).
+
+## Credit
+
+The built-in grill is adapted from Matt Pocock's `grilling` / `grill-with-docs`
+skills (MIT, https://github.com/mattpocock/skills) — see the repo `LICENSE` →
+*Third-party*. It is **ported, not depended on**: no install, no resolution, no
+version skew.
 
 ## Hand-off the other direction
 

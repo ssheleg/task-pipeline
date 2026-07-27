@@ -123,15 +123,19 @@ else:
     elif plg_ver and vm.group(1) != plg_ver:
         fail(f"version mismatch: CHANGELOG top entry=v{vm.group(1)} plugin.json={plg_ver!r}")
 
-# every relative markdown link in repo docs must resolve
+# every relative markdown link in repo docs must resolve. Links inside fenced code
+# blocks are sample content (illustrative trees, template snippets), not links —
+# strip the fences before scanning, or every example path becomes a false failure.
 LINK_RE = re.compile(r"\[[^\]]*\]\(([^)\s]+)\)")
+FENCE_RE = re.compile(r"^([ \t]*)(```+|~~~+).*?^\1\2[^\n]*$", re.M | re.S)
 for dirpath, dirnames, filenames in os.walk(ROOT):
     dirnames[:] = [d for d in dirnames if d not in (".git", "node_modules")]
     for fn in filenames:
         if not fn.endswith(".md"):
             continue
         fp = os.path.join(dirpath, fn)
-        for target in LINK_RE.findall(open(fp, encoding="utf-8").read()):
+        body = FENCE_RE.sub("", open(fp, encoding="utf-8").read())
+        for target in LINK_RE.findall(body):
             if target.startswith(("http://", "https://", "mailto:", "#")):
                 continue
             tpath = os.path.normpath(os.path.join(dirpath, target.split("#")[0]))
@@ -140,7 +144,7 @@ for dirpath, dirnames, filenames in os.walk(ROOT):
                 fail(f"broken relative link in {rel}: {target}")
 
 refdir = os.path.join(ROOT, "plugins/task-pipeline/skills/task-pipeline/references")
-for r in ("stages.md", "model-tiering.md", "conventions.md", "companion-skills.md", "artifacts.md"):
+for r in ("grill.md", "stages.md", "model-tiering.md", "conventions.md", "companion-skills.md", "artifacts.md"):
     if not os.path.isfile(os.path.join(refdir, r)):
         fail(f"missing reference: references/{r}")
 
@@ -171,8 +175,10 @@ for f in mdcs:
 tpl_dir = os.path.join(ROOT, "plugins/task-pipeline/skills/task-pipeline/templates")
 if not os.path.isdir(tpl_dir):
     fail("missing skill templates/ directory")
-elif not os.path.isfile(os.path.join(tpl_dir, "brief.md")):
-    fail("missing template: plugins/task-pipeline/skills/task-pipeline/templates/brief.md")
+elif [t for t in ("brief.md", "context.md", "adr.md") if not os.path.isfile(os.path.join(tpl_dir, t))]:
+    for t in ("brief.md", "context.md", "adr.md"):
+        if not os.path.isfile(os.path.join(tpl_dir, t)):
+            fail(f"missing template: plugins/task-pipeline/skills/task-pipeline/templates/{t}")
 else:
     # The brief carries the stage-0 autonomy sweep — stages 1-9 read it instead of
     # asking. Without that section the grill has no place to record the answers and

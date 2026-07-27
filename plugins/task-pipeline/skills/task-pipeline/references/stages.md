@@ -35,56 +35,15 @@ stages/agents/types (see SKILL.md → *Bring your own skills*).
   up front so stages 1→9 need no further human input beyond the manual gates.
   This is input expansion, not design: turn "make me feature X" into locked
   answers for scope, users, constraints, data, edge cases, done-criteria.
-- **The grill contract (normative).** These rules are the *definition* of a
-  compliant grill, not a style suggestion. Whichever provider runs the grill must
-  satisfy every one of them; a grill that violates them fails the gate:
-  1. **One question per turn** — never bundle.
-  2. **Give a recommended answer with every question** (+ 1-line rationale);
-     "what do you think?" is lazy.
-  3. **Explore the codebase/docs before asking** — if `grep`/`Read`/context7
-     answers it, do that instead of spending a turn.
-  4. **Walk the decision tree depth-first**; finish a branch before opening
-     another; ask prerequisite decisions first.
-  5. **Reconcile contradictions** immediately; chase dodges ("we'll decide
-     later" → "what's the latest you can decide and still ship?").
-  6. **Cover the autonomy sweep below** — an unasked question becomes a
-     mid-flight stop.
-- **Providers (the stage is required; the provider is swappable).** Resolve in
-  this order — both are first-class, neither is a degradation:
-  1. **`grill-me` / `grilling`**, when the chain resolves. Note it usually ships
-     with `disable-model-invocation: true`, so the orchestrator **cannot** call it
-     — ask the operator to run `/grill-me`, then verify the result against the
-     contract and lock the brief yourself. `grill-me` is typically a thin wrapper
-     that delegates to `/grilling`: check that the skill it delegates to resolves
-     too, otherwise the chain is dangling and provider 2 runs instead.
-  2. **The orchestrator's own grill loop** — run rules 1–6 directly. This is a
-     compliant implementation of the contract, not a fallback.
-- **Autonomy sweep (mandatory pass — this is what buys autonomy).** Resolving the
-  *task* is not enough; the grill must also pre-resolve everything that would
-  otherwise stop stages 1→9 mid-flight. Walk the stages and get an answer or an
-  explicit "stop and ask me here" for each:
-
-  | Stage | What the grill must settle up front |
-  |---|---|
-  | 1 Docs | which external libs/APIs/SDKs are in play; any private/internal ones context7 can't resolve → where their docs live |
-  | 2–3 Spec | UI verdict (arms super-ux); any operator waiver (v1-mode / tiny project) for scenario tracing |
-  | 4–5 Dev | base branch; worktree/branch policy; is `main` off-limits; commit convention; task tracker (Linear / GitHub / local) |
-  | 6 Tests | the test command; what "green" means here; any known-red baseline; coverage expectation |
-  | 7 Lint+deploy | the lint command; the deploy target and path; release automation on/off; deploy-from-main rule; **deploy authorization** (see below) |
-  | 8 Post-deploy | where logs / health live (app name, endpoint, workflow) so the check needs no question |
-  | 9 Docs+wiki | which module docs / runbooks this change must update; wiki sync yes/no |
-  | run-wide | the **model decision** (`model-tiering.md`); what the operator wants decided autonomously vs escalated |
-
-  **Deploy authorization is the one item with a hard floor.** Deploy/publish is
-  outward and irreversible, so a vague "just do everything" does **not** authorize
-  it. The brief may carry a **standing authorization only if it is specific** —
-  named target, named preconditions (e.g. "deploy to staging once lint and the
-  full suite are green; production always asks"). Specific and recorded → the
-  stage-7 manual gate is satisfied by that record. Anything broader, absent, or
-  ambiguous → stage 7 stops and asks, as always.
-- **Whatever the sweep leaves open is a future interruption.** That is the
-  failure mode this stage exists to prevent — an unresolved item is not neutral,
-  it is a scheduled stop.
+- **How it runs: [`grill.md`](grill.md)** — the full doctrine, built into this
+  skill (nothing to install). In short: one question per turn, a recommended
+  answer with each, explore the codebase before asking, depth-first through the
+  decision tree, contradictions reconciled on the spot; plus **domain awareness**
+  (challenge terms against `CONTEXT.md`, sharpen fuzzy language, stress-test with
+  concrete scenarios, cross-reference the code, record ADRs for hard-to-reverse
+  calls) and the **autonomy sweep** that pre-resolves every stage-1→9 blocker.
+  Deploy authorization has a hard floor there: a standing go counts only when it
+  names the target and the preconditions.
 - **UI early-detect:** one branch of the grill is always "does this touch a
   user-facing surface (web/mobile/CLI/TUI)?". If yes → surface **super-ux**
   now (use it if installed; otherwise give the install line — see SKILL.md
@@ -95,7 +54,9 @@ stages/agents/types (see SKILL.md → *Bring your own skills*).
   autonomy sweep's per-stage answers and the model decision**. Seed it from
   the skill's `templates/brief.md` skeleton — but only when absent, never
   overwrite an existing brief. Stages 2–4 build on this brief; stages 5–9 read
-  its autonomy section instead of asking.
+  its autonomy section instead of asking. Where the session produced them, also:
+  an updated `CONTEXT.md` (terms written as they resolved) and any ADRs under
+  `docs/adr/` — see `grill.md` → *Domain awareness*.
 - **GATE (manual):** shared understanding reached — every detected branch has a
   recorded answer or an explicit deferral, no open contradictions, **every
   autonomy-sweep row is answered or explicitly marked "stop and ask here"**, the
