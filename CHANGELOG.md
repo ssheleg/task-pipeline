@@ -1,5 +1,55 @@
 # Changelog
 
+## v0.11.0 — 2026-07-27
+
+The intake grill becomes mandatory, autonomy becomes something the grill actively
+buys, and the model stops being a hardcoded per-stage tier list.
+
+- **Stage 0 is now MANDATORY — the stage, not a particular skill.** No "clear
+  enough task" exemption, no starting stage 1 without a committed,
+  operator-confirmed brief (the entry-from-super-ux short-circuit remains the one
+  sanctioned bypass, and still demands a scope confirmation). The **provider** is
+  what's swappable: `grill-me`/`grilling` when that chain resolves, otherwise the
+  orchestrator's own grill loop — both implement the same **grill contract**, and
+  the loop is explicitly no longer described as a "fallback".
+- **Grill-provider reality documented.** `grill-me` typically ships
+  `disable-model-invocation: true` (so the orchestrator can't call it — the
+  operator runs `/grill-me`) and is usually a thin wrapper delegating to
+  `/grilling`; if that delegate doesn't resolve the chain is dangling and the
+  built-in loop runs. The install line was also wrong — corrected to
+  `/plugin marketplace add alirezarezvani/claude-skills` →
+  `/plugin install engineering-advanced-skills@claude-code-skills`, with
+  `npx skills add mattpocock/skills` noted as the upstream origin.
+- **New: the autonomy sweep.** The grill no longer only resolves the *task*; a
+  mandatory pass walks stages 1→9 and pre-resolves everything that would otherwise
+  interrupt the run — docs sources, branch/tracker policy, the test command and
+  what "green" means, the lint command, deploy target + release toggle + deploy
+  authorization, log/health locations, docs and wiki targets, the model. Each row
+  gets an answer or an explicit "stop and ask here"; an unasked question is a
+  scheduled interruption. Stages 5–9 read the brief instead of asking.
+  `templates/brief.md` gains the matching `## Autonomy` table.
+- **Deploy authorization has a hard floor.** The brief can carry a standing
+  authorization for the manual stage-7 gate **only if it is specific** (named
+  target + named preconditions). A vague "just do everything" does not authorize an
+  outward, irreversible action.
+- **Model policy replaces model tiering.** One model for the whole run, confirmed
+  **once at preflight** instead of a reminder at every stage boundary. Default
+  recommendation: *the most capable reasoning model the environment offers* — a
+  **tier, not a string**. Vendor ids are gone from everything shipped: they go
+  stale as generations ship and the operator may be on another provider entirely.
+  Stage configs use provider-agnostic tokens (`default` / `inherit`), resolved at
+  runtime; stage-5 subagents are pinned to the confirmed model; an unavailable tier
+  degrades honestly instead of blocking.
+- **Validator gains four enforced invariants** (each with a CI negative self-test
+  proving it can fail): no hardcoded vendor model id anywhere shipped (skill,
+  references, cursor rule, command, README); stage `model` must be a
+  provider-agnostic token; the intake-grill gate must stay `manual` and declare
+  itself mandatory; `templates/brief.md` must keep its autonomy sweep.
+- Docs realigned across every channel — SKILL.md, `references/stages.md`,
+  `references/model-tiering.md`, `references/companion-skills.md`,
+  `pipeline.schema.json`, `pipeline.example.json`, the `/task-pipeline` command,
+  the Cursor rule, and the README in both languages.
+
 ## v0.10.0 — 2026-07-25
 
 Review pass — doc drift and a distribution defect found by an adversarial audit.

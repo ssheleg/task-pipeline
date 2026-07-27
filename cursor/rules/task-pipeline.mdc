@@ -10,18 +10,43 @@ Run a substantial task through an up-front **intake grill + 9 gated stages**. No
 stage advances until its **gate** passes. Each gate is `auto` (verify it yourself,
 pass/fail) or `manual` (wait for the user's explicit go).
 
-## Stage 0 — intake grill (do this FIRST)
+## Model — decide once, before you start
 
-A one-line task ("build feature X") is not enough to finish autonomously. Grill the
-user up front, then run the rest without mid-flight questions:
+Recommended: **the most capable reasoning model the environment offers** (at time
+of writing, the latest Opus generation — read that as a tier, not a string). Never
+hardcode a model id: generations ship, tiers get renamed, and the user may be on a
+different provider. Resolve the top tier available at runtime, tell the user what
+you recommend and what they're on, let them confirm or override (per-stage
+overrides welcome), record the answer — then **stop asking at every stage**. If the
+recommended tier isn't available, say which one you're using and continue.
+
+## Stage 0 — intake grill (MANDATORY, do this FIRST)
+
+Never skipped. No "the task was already clear" exemption, no starting stage 1 while
+the user thinks. A one-line task ("build feature X") is not enough to finish
+autonomously. Grill the user up front, then run the rest without mid-flight
+questions:
 1. One question per turn — never bundle.
 2. Give a recommended answer with every question (+ one-line rationale).
 3. Explore the codebase before asking — if a search/read answers it, do that.
 4. Walk the decision tree depth-first; ask prerequisite decisions first.
 5. Reconcile contradictions; chase dodges ("decide later" → "latest you can decide
    and still ship?").
+6. Run the **autonomy sweep** — resolve now whatever would stop stages 1→9 later:
+   external libs and where their docs live; UI verdict; base branch, branch policy,
+   commit convention, task tracker; the test command and what "green" means; the
+   lint command; the deploy target, release toggle and **deploy authorization**;
+   where logs/health live; which docs and runbooks this change updates. Each item
+   gets an answer or an explicit "stop and ask me here" — an unasked question is a
+   scheduled interruption.
+
 Stop when shared understanding is reached (every branch answered or explicitly
-deferred) and lock the answers into a short brief the user confirms. Only then start.
+deferred) and lock the answers into a short brief the user confirms. Only then
+start. Later stages read that brief instead of asking again.
+
+**Deploy authorization has a hard floor:** a standing go counts only if it is
+specific (named target + named preconditions). A vague "just do everything" does
+not authorize an outward, irreversible action — stage 7 stops and asks.
 
 ## Stages 1→9
 
@@ -37,14 +62,16 @@ deferred) and lock the answers into a short brief the user confirms. Only then s
 6. **Tests** (auto) — full suite green (not just new tests); new/changed code
    covered; no skip/xfail hiding red.
 7. **Lint + deploy** (manual) — lint clean AND suite green before deploy; deploy is
-   outward → explicit user go.
+   outward → explicit user go, or the specific standing authorization recorded in
+   the stage-0 brief.
 8. **Post-deploy** (auto) — tail logs / health-check; clean boot or an honest
    degradation report (never silent success).
 9. **Docs** (auto) — update module docs/runbooks in the SAME change.
 
-Cross-cutting: track tasks, conventional commits, honest degradation (never claim a
-failed/skipped step succeeded), and get explicit go before any outward/irreversible
-action (deploy, publish, repo create).
+Cross-cutting: answer from the brief's autonomy section rather than re-asking, track
+tasks, conventional commits, honest degradation (never claim a failed/skipped step
+succeeded), and get explicit go before any outward/irreversible action (deploy,
+publish, repo create).
 
 ## super-ux for user-facing tasks (recommended)
 

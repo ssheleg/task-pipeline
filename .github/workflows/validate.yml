@@ -55,6 +55,63 @@ jobs:
             echo "OK: validator requires the release workflow when release is enabled"
           fi
 
+      - name: Negative self-test (hardcoded vendor model id must fail)
+        run: |
+          set -eu
+          cp -R . /tmp/model-copy
+          printf '\nSwitch with `/model claude-opus-5` first.\n' \
+            >> /tmp/model-copy/plugins/task-pipeline/skills/task-pipeline/SKILL.md
+          if python3 /tmp/model-copy/test/validate.py; then
+            echo "ERROR: validator passed a hardcoded model id — ids go stale, the tier is the contract"
+            exit 1
+          else
+            echo "OK: validator rejects a hardcoded model id"
+          fi
+
+      - name: Negative self-test (non-token stage model must fail)
+        run: |
+          set -eu
+          cp -R . /tmp/token-copy
+          sed -i '0,/"model": "default"/s//"model": "some-vendor-model"/' \
+            /tmp/token-copy/plugins/task-pipeline/skills/task-pipeline/pipeline.example.json
+          if python3 /tmp/token-copy/test/validate.py; then
+            echo "ERROR: validator passed a stage model that is not a provider-agnostic token"
+            exit 1
+          else
+            echo "OK: validator requires provider-agnostic stage model tokens"
+          fi
+
+      - name: Negative self-test (intake grill must stay mandatory + manual)
+        run: |
+          set -eu
+          cp -R . /tmp/grill-copy
+          python3 - <<'EOF'
+          import json, collections
+          p = "/tmp/grill-copy/plugins/task-pipeline/skills/task-pipeline/pipeline.example.json"
+          d = json.load(open(p), object_pairs_hook=collections.OrderedDict)
+          d["stages"][0]["gate"]["type"] = "auto"
+          json.dump(d, open(p, "w"), indent=2, ensure_ascii=False)
+          EOF
+          if python3 /tmp/grill-copy/test/validate.py; then
+            echo "ERROR: validator passed a non-manual intake-grill gate"
+            exit 1
+          else
+            echo "OK: validator keeps the intake grill mandatory and operator-confirmed"
+          fi
+
+      - name: Negative self-test (brief template must keep the autonomy sweep)
+        run: |
+          set -eu
+          cp -R . /tmp/brief-copy
+          sed -i 's/^## Autonomy.*/## Notes/' \
+            /tmp/brief-copy/plugins/task-pipeline/skills/task-pipeline/templates/brief.md
+          if python3 /tmp/brief-copy/test/validate.py; then
+            echo "ERROR: validator passed a brief template with no autonomy sweep"
+            exit 1
+          else
+            echo "OK: validator requires the autonomy sweep in the brief template"
+          fi
+
       - name: install.sh syntax check
         run: bash -n install.sh
 

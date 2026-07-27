@@ -173,6 +173,45 @@ if not os.path.isdir(tpl_dir):
     fail("missing skill templates/ directory")
 elif not os.path.isfile(os.path.join(tpl_dir, "brief.md")):
     fail("missing template: plugins/task-pipeline/skills/task-pipeline/templates/brief.md")
+else:
+    # The brief carries the stage-0 autonomy sweep — stages 1-9 read it instead of
+    # asking. Without that section the grill has no place to record the answers and
+    # the autonomy promise silently degrades into mid-flight questions.
+    brief = open(os.path.join(tpl_dir, "brief.md"), encoding="utf-8").read()
+    if not re.search(r"^##\s+Autonomy\b", brief, re.M):
+        fail("templates/brief.md: missing the '## Autonomy' section (the stage-0 autonomy sweep)")
+
+# No hardcoded vendor model ids in anything we ship: model generations ship and get
+# renamed, and the operator may be on another provider entirely. Stage configs use
+# provider-agnostic tokens; prose names a TIER ("the most capable model available"),
+# never a string. See references/model-tiering.md.
+VENDOR_MODEL_RE = re.compile(r"\b(?:claude-[a-z]+-\d|gpt-\d|gemini-\d|grok-\d|llama-?\d)", re.I)
+model_scan = [
+    os.path.join(ROOT, "README.md"),
+    os.path.join(ROOT, "plugins/task-pipeline/commands/task-pipeline.md"),
+]
+for base in (
+    os.path.join(ROOT, "plugins/task-pipeline/skills/task-pipeline"),
+    os.path.join(ROOT, "cursor", "rules"),
+):
+    for dirpath, dirnames, filenames in os.walk(base):
+        dirnames[:] = [d for d in dirnames if d not in (".git", "node_modules")]
+        model_scan += [
+            os.path.join(dirpath, fn)
+            for fn in filenames
+            if fn.endswith((".md", ".mdc", ".json"))
+        ]
+for fp in model_scan:
+    if not os.path.isfile(fp):
+        continue
+    for lineno, line in enumerate(open(fp, encoding="utf-8"), start=1):
+        hit = VENDOR_MODEL_RE.search(line)
+        if hit:
+            rel = os.path.relpath(fp, ROOT)
+            fail(
+                f"hardcoded model id {hit.group(0)!r} in {rel}:{lineno} — "
+                "name the tier, not the id (see references/model-tiering.md)"
+            )
 
 # Pipeline config is generic: pipeline.schema.json is the universal contract,
 # pipeline.example.json is a copy-and-rewrite example. The framework ships NO
@@ -184,6 +223,8 @@ SKILL_DIR = "plugins/task-pipeline/skills/task-pipeline"
 SCHEMA_REL = f"{SKILL_DIR}/pipeline.schema.json"
 EXAMPLE_REL = f"{SKILL_DIR}/pipeline.example.json"
 GATE_TYPES = {"auto", "manual"}
+# 'default' = the model confirmed for the run; 'inherit' = whatever the operator is on.
+MODEL_TOKENS = {"default", "inherit"}
 
 schema = load_json(SCHEMA_REL)
 if schema is not None and schema.get("type") != "object":
@@ -211,6 +252,11 @@ if pipe is not None:
             skills = st.get("skills")
             if not (isinstance(skills, list) and skills and all(isinstance(s, str) and s.strip() for s in skills)):
                 fail(f"{where}: skills[] must be a non-empty list of non-empty strings")
+            # Models are provider-agnostic: a vendor id goes stale as generations
+            # ship and may not exist on the operator's provider at all.
+            model = st.get("model")
+            if model is not None and model not in MODEL_TOKENS:
+                fail(f"{where}: model must be a provider-agnostic token {sorted(MODEL_TOKENS)}, got {model!r}")
             gate = st.get("gate")
             if not isinstance(gate, dict):
                 fail(f"{where}: gate missing or not an object")
@@ -219,6 +265,17 @@ if pipe is not None:
                     fail(f"{where}: gate.type must be one of {sorted(GATE_TYPES)}, got {gate.get('type')!r}")
                 if not (isinstance(gate.get("check"), str) and gate.get("check").strip()):
                     fail(f"{where}: empty/missing gate.check")
+
+    # Stage 0 is the mandatory intake grill: its gate must be manual (the operator
+    # confirms the brief) and must state that the stage is mandatory, so the
+    # config can't drift from the doctrine in references/stages.md.
+    if isinstance(stages, list) and stages:
+        s0 = stages[0] if isinstance(stages[0], dict) else {}
+        s0_gate = s0.get("gate") if isinstance(s0.get("gate"), dict) else {}
+        if s0_gate.get("type") != "manual":
+            fail(f"{EXAMPLE_REL} stage[1]: the intake grill gate must be 'manual' (the operator confirms the brief)")
+        if "mandatory" not in str(s0_gate.get("check", "")).lower():
+            fail(f"{EXAMPLE_REL} stage[1]: gate.check must state that the intake grill is MANDATORY (never skipped)")
 
     # Release config is optional and individually toggleable. If present, shape-check it.
     rel = pipe.get("release")

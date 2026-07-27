@@ -11,14 +11,15 @@ installed. Never silently degrade a required capability.
 |---|---|---|---|
 | **superpowers** (`brainstorming`, `writing-plans`, `subagent-driven-development`, `using-git-worktrees`, `test-driven-development`) | stages 2, 4, 5, 6 | **Required** (always) | `/plugin marketplace add obra/superpowers` → `/plugin install superpowers@superpowers` |
 | **super-ux** (`ux-foundation`, `ux-flows`, `ux-scenarios`, `ux-audit`, `/ux`, `/ux-lint`) | stage 3 UX track | **Required for any user-facing task** | `/plugin marketplace add ssheleg/super-ux` → `/plugin install super-ux@super-ux` (or `npx skills add ssheleg/super-ux`) |
-| **grill-me** / **grilling** | stage 0 intake grill | Optional (built-in grill loop is the fallback) | `npx skills add mattpocock/skills`, or the engineering-advanced-skills marketplace |
+| **grill-me** / **grilling** | stage 0 intake grill | **The stage is required; this provider is not.** Stage 0 can never be skipped — but it runs either through this skill or through the orchestrator's own grill loop, both compliant with the grill contract | `/plugin marketplace add alirezarezvani/claude-skills` → `/plugin install engineering-advanced-skills@claude-code-skills`; upstream origin `npx skills add mattpocock/skills` |
 | **context7** (MCP) | stage 1 docs study | Recommended (web-search fallback) | connect the context7 MCP server |
 | **wiki-update** | stage 9 wiki sync | Optional (skip wiki if absent) | user's wiki skill set |
 
-## Preflight recommendation (emit before stage 0)
+## Preflight (emit before stage 0)
 
-At the very start, detect which of the above resolve and print ONE recommendation
-block so the operator can arm the full flow before work begins. Example:
+At the very start, detect which of the above resolve and print ONE block —
+companions **plus the model decision** (`model-tiering.md`), so the operator arms
+the whole run in a single exchange. Example:
 
 ```
 Pipeline companions:
@@ -27,17 +28,29 @@ Pipeline companions:
                            /plugin marketplace add ssheleg/super-ux
                            /plugin install super-ux@super-ux
   ✓ context7           — ready
-  ✗ grill-me           — optional; falling back to the built-in grill loop
+  ✗ grill-me           — provider absent; stage 0 still runs (built-in grill loop,
+                         same contract). To use it instead:
+                           /plugin marketplace add alirezarezvani/claude-skills
+                           /plugin install engineering-advanced-skills@claude-code-skills
   ✓ wiki-update        — ready
-Recommend installing the ✗ items marked recommended, then say "continue".
+
+🧠 Model for this run: recommended <top tier available>. You're on <current>.
+   /model <id> to switch, or "keep current", or name per-stage overrides.
+
+Install the ✗ items you want, answer the model line, then say "continue".
 ```
 
 Rules:
 - Only flag **super-ux** as recommended when the task implies a UI (the stage-0
   grill decides this; when unsure, flag it — a false positive costs one install).
 - **superpowers** missing → stop; it's required for the core stages.
+- **grill-me missing never blocks** — stage 0 is mandatory, its *provider* is not.
+  Say which provider will run and move on; don't present the built-in loop as a
+  downgrade.
 - Optional tools missing → state the fallback, don't block.
 - Re-detect after the operator installs; don't assume.
+- The model answer goes into the brief. Don't ask again per stage
+  (`model-tiering.md` → *Mechanic*).
 
 ## Hand-off the other direction
 

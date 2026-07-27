@@ -1,27 +1,28 @@
 {
   "$schema": "./pipeline.schema.json",
   "version": 1,
-  "_note": "EXAMPLE ONLY — copy this file, rename to pipeline.json in your project, and rewrite it. This particular example encodes the plugin's own default flow (an up-front intake grill + superpowers + a super-ux UX track for user-facing tasks); it is NOT a fixed contract. Your project defines its own stages (any count), each executed by your own skills/agents, with your own gate types. The universal contract is pipeline.schema.json; test/validate.py checks this example against it. gate.type: auto = orchestrator verifies the check itself (pass/fail); manual = wait for an explicit operator go. Which stages are manual vs auto is the operator's decision, not the plugin's.",
+  "_note": "EXAMPLE ONLY — copy this file, rename to pipeline.json in your project, and rewrite it. This particular example encodes the plugin's own default flow (an up-front intake grill + superpowers + a super-ux UX track for user-facing tasks); it is NOT a fixed contract. Your project defines its own stages (any count), each executed by your own skills/agents, with your own gate types. Stage models use provider-agnostic tokens ('default' = the model confirmed for the run, 'inherit' = whatever the operator is on) — never hardcode a vendor model id, it goes stale. The universal contract is pipeline.schema.json; test/validate.py checks this example against it. gate.type: auto = orchestrator verifies the check itself (pass/fail); manual = wait for an explicit operator go. Which stages are manual vs auto is the operator's decision, not the plugin's.",
   "stages": [
     {
       "id": 0,
       "state": "intake",
       "name": "Intake grill",
-      "model": "claude-fable-5",
+      "model": "default",
       "skills": [
         "grill-me",
-        "grilling"
+        "grilling",
+        "builtin:grill-loop"
       ],
       "gate": {
         "type": "manual",
-        "check": "grill the operator one question at a time (recommended answer per question; explore codebase/docs before asking) until shared understanding is reached — every decision branch has a recorded answer or explicit deferral, no open contradictions; UI verdict recorded (arms super-ux); decisions locked into a committed task brief the operator confirms before stage 1"
+        "check": "MANDATORY stage — never skipped (only sanctioned bypass: the entry-from-super-ux short-circuit). Grill per the contract: one question at a time, a recommended answer with each, explore the codebase/docs before asking, depth-first, contradictions reconciled. The autonomy sweep is covered — every stage 1-9 has its blockers pre-resolved (docs sources, branch/tracker policy, test + lint commands, deploy target and authorization, log/health locations, docs+wiki targets) or is explicitly marked 'stop and ask here'. UI verdict recorded (arms super-ux); model decision recorded. All of it locked into a committed task brief the operator confirms before stage 1."
       }
     },
     {
       "id": 1,
       "state": "docs-study",
       "name": "Docs study",
-      "model": "claude-fable-5",
+      "model": "default",
       "skills": [
         "context7",
         "context7-docs"
@@ -35,7 +36,7 @@
       "id": 2,
       "state": "brainstorm",
       "name": "Brainstorm",
-      "model": "claude-fable-5",
+      "model": "default",
       "skills": [
         "superpowers:brainstorming"
       ],
@@ -48,7 +49,7 @@
       "id": 3,
       "state": "spec",
       "name": "Spec",
-      "model": "claude-fable-5",
+      "model": "default",
       "skills": [
         "super-ux:ux-foundation",
         "super-ux:ux-flows",
@@ -64,7 +65,7 @@
       "id": 4,
       "state": "plan",
       "name": "Plan",
-      "model": "claude-fable-5",
+      "model": "default",
       "skills": [
         "superpowers:writing-plans"
       ],
@@ -77,7 +78,7 @@
       "id": 5,
       "state": "dev",
       "name": "Dev",
-      "model": "claude-opus-5",
+      "model": "default",
       "skills": [
         "superpowers:using-git-worktrees",
         "superpowers:subagent-driven-development"
@@ -91,7 +92,7 @@
       "id": 6,
       "state": "tests",
       "name": "Tests",
-      "model": "claude-opus-5",
+      "model": "default",
       "skills": [
         "superpowers:test-driven-development"
       ],
@@ -104,21 +105,21 @@
       "id": 7,
       "state": "lint-deploy",
       "name": "Lint + deploy",
-      "model": "inherit",
+      "model": "default",
       "skills": [
         "host:lint",
         "host:deploy"
       ],
       "gate": {
         "type": "manual",
-        "check": "lint clean and full suite green before deploy; deploy is outward and needs explicit operator go"
+        "check": "lint clean and full suite green before deploy; deploy is outward and needs explicit operator go — or the specific standing authorization recorded in the stage-0 brief (named target + named preconditions; a vague 'do everything' is not one)"
       }
     },
     {
       "id": 8,
       "state": "post-deploy",
       "name": "Post-deploy",
-      "model": "inherit",
+      "model": "default",
       "skills": [
         "host:health-check"
       ],
@@ -131,7 +132,7 @@
       "id": 9,
       "state": "docs-wiki",
       "name": "Docs + wiki",
-      "model": "inherit",
+      "model": "default",
       "skills": [
         "host:module-docs",
         "wiki-update"

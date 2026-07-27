@@ -4,13 +4,17 @@ argument-hint: <one-line task description>
 ---
 Use the `task-pipeline` skill to run the task below through all gated stages —
 **stage 0 intake grill** → docs study → brainstorm → spec → plan → subagent
-build → tests → lint/deploy → post-deploy → docs/wiki. Start with the **intake
-grill**: interview the operator one question at a time (with a recommended answer
-each, exploring the codebase before asking) until every decision branch is
-resolved and the brief is locked — so the rest runs autonomously. For any
-user-facing task, recommend/use **super-ux**. Honor every stage gate by its type
-(`auto` = verify yourself; `manual` = wait for explicit go) and emit the
-per-stage model reminder when the recommended model differs from the current one.
+build → tests → lint/deploy → post-deploy → docs/wiki. The **intake grill is
+mandatory** — never skip it: interview the operator one question at a time (with a
+recommended answer each, exploring the codebase before asking) until every decision
+branch is resolved, the **autonomy sweep** is covered (what would otherwise stop
+stages 1→9: docs sources, branch/tracker policy, test and lint commands, deploy
+target and authorization, log locations, docs/wiki targets) and the brief is locked
+— so the rest runs autonomously. For any user-facing task, recommend/use
+**super-ux**. Honor every stage gate by its type (`auto` = verify yourself;
+`manual` = wait for explicit go). Confirm the **model once at preflight** —
+recommend the most capable one the environment offers, never a hardcoded id — then
+run the whole pipeline on it without re-asking.
 
 Task: $ARGUMENTS
 
