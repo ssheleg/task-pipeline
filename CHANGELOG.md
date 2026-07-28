@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.16.1 — 2026-07-28
+
+### Fixed
+- **v0.16.0 added a tenth stage and left "1→9" in fifteen places** — the skill
+  description, the command, the Cursor rule, `stages.md`, `grill.md`, the brief
+  template, the example config and the README all still promised nine. The
+  package, marketplace and plugin descriptions said "9 gated stages" too, which
+  is what npm and the marketplace show. All re-synced to ten, and the plan
+  filename now uses the same slug as the brief and the spec.
+
 ## v0.16.0 — 2026-07-28
 
 Scope stops leaking. The request becomes an addressable list of requirements, the
@@ -54,6 +64,14 @@ briefs is four rewrites by a model and nothing compared the lists.
   **stage 7 refuses to deploy while any REQ is still `open`** (a `partial` ships only
   with explicit acceptance — a gap is cheapest to close before it ships).
 
+### Fixed
+- **`decomposition.md` and `loop-guard.md` shipped unreachable.** Both linked only
+  to each other; nothing in `SKILL.md` pointed at either, so under progressive
+  disclosure an agent would never load them — two contracts that existed, passed
+  every check, and were dead context. Wired into the doctrine table (stage 2 for
+  decomposition, cross-cutting for the loop guard), and the validator now walks the
+  link graph from `SKILL.md` and fails on any reference nothing reaches.
+
 ### Tests
 - `references/acceptance.md` joins the built-in doctrine set (stub-rejected);
   `templates/carryover.md` required; the brief template must carry
@@ -70,14 +88,6 @@ closed, and the config's gate text re-synced with the doctrine.
 
 ### Fixed
 - **Model policy contradicted itself.** `build.md` and `review.md` told the final
-- **`decomposition.md` and `loop-guard.md` shipped unreachable.** Both linked
-  only to each other; nothing in `SKILL.md` pointed at either, so under
-  progressive disclosure an agent would never load them — two contracts that
-  existed, passed every check, and were dead context. Wired into the doctrine
-  table (stage 2 for decomposition, cross-cutting for the loop guard), and the
-  validator now walks the link graph from `SKILL.md` and fails on any reference
-  nothing reaches.
-
   whole-branch review to run "on the most capable model available" while
   `model-tiering.md` promises **one** model per run. Both now default to the run's
   confirmed model; when the run sits below the top tier, escalation for that single

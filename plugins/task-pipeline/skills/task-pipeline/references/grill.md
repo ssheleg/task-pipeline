@@ -4,7 +4,7 @@ The intake grill is **part of this skill**. No companion skill to install, no
 provider to resolve, nothing to fall back to: this file *is* the implementation.
 
 Its job is not to design. It is to take a one-line request ("make me feature X")
-and interview it into a brief complete enough that stages 1→9 finish without
+and interview it into a brief complete enough that stages 1→10 finish without
 coming back to the operator.
 
 > Adapted, with thanks, from Matt Pocock's `grilling` / `grill-with-docs` skills
@@ -95,7 +95,7 @@ numbering (scan for the highest number, increment).
 ## The autonomy sweep
 
 Resolving the *task* is not enough. The grill must also pre-resolve everything that
-would otherwise stop stages 1→9 mid-flight. Every row gets an answer **or** an
+would otherwise stop stages 1→10 mid-flight. Every row gets an answer **or** an
 explicit "stop and ask me here":
 
 | Stage | What to settle up front |

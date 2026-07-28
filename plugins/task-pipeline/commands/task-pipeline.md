@@ -12,7 +12,7 @@ operator one question at a time (with a recommended answer each, exploring the
 codebase before asking) until every decision branch is resolved, applying the
 grill's **domain awareness** (challenge terms against `CONTEXT.md`, sharpen fuzzy
 language, ADRs for hard-to-reverse calls) and covering the **autonomy sweep** (what
-would otherwise stop stages 1→9: docs sources, branch/tracker policy, test and lint
+would otherwise stop stages 1→10: docs sources, branch/tracker policy, test and lint
 commands, deploy target and authorization, log locations, docs/wiki targets) —
 until the brief is locked — including the **REQ table**, the request as an addressable list where every row names how it is verified — so the rest runs autonomously and the final stage can account for all of it. The list is frozen: adding is free, removing needs the operator's agreement. Anything deferred goes into the carry-over ledger the moment it's said. For any user-facing task, recommend/use
 **super-ux**. Honor every stage gate by its type (`auto` = verify yourself;

@@ -15,7 +15,7 @@ lint/deploy → post-deploy log check → docs/wiki sync → acceptance`
 
 It **grills you first, always**: stage 0 is mandatory — a one-line task ("make me
 feature X") is expanded, one question at a time, into a locked brief, and the grill
-also sweeps stages 1→9 for anything that would stop the run later. Each stage gates
+also sweeps stages 1→10 for anything that would stop the run later. Each stage gates
 the next. Every gate is typed — **auto** (the orchestrator verifies it, pass/fail)
 or **manual** (waits for your go). One model, confirmed before the run starts.
 
@@ -33,7 +33,7 @@ or **manual** (waits for your go). One model, confirmed before the run starts.
 | 9 | Docs + wiki | docs + wiki synced | auto |
 | 10 | **Acceptance** | every REQ accounted for with evidence; operator signs off | manual |
 
-These stages (0 intake + 1→9) are the plugin's **example** flow. It's a machine-readable config
+These stages (0 intake + 1→10) are the plugin's **example** flow. It's a machine-readable config
 ([`pipeline.example.json`](plugins/task-pipeline/skills/task-pipeline/pipeline.example.json))
 against a universal contract
 ([`pipeline.schema.json`](plugins/task-pipeline/skills/task-pipeline/pipeline.schema.json)):
@@ -91,7 +91,7 @@ decisions that are hard to reverse, surprising without context **and** the resul
 a real trade-off get an ADR. Both files are created lazily.
 
 **Autonomy comes from the sweep.** Beyond the task itself, the grill pre-resolves
-everything that would otherwise interrupt stages 1→9: which external libs need docs,
+everything that would otherwise interrupt stages 1→10: which external libs need docs,
 branch and task-tracker policy, the test command and what "green" means, the lint
 command, the deploy target and its **authorization**, where logs and health live,
 which docs and runbooks to update, and the model. Each gets an answer or an explicit
@@ -268,7 +268,7 @@ canonical artifact layout each stage writes to is fixed in
 Agents write code well and judge *when to stop asking you things* badly. A
 substantial task turns into twenty interruptions, or into a confident build that
 skipped the tests. `task-pipeline` front-loads every decision into one intake
-conversation, then runs nine gated stages without stopping to check in.
+conversation, then runs ten gated stages without stopping to check in.
 
 - **The intake grill asks what a senior engineer would ask** before anything is
   touched — scope, edge cases, failure modes, rollback, who the user is — so the

@@ -3,7 +3,7 @@
 For each stage: what it does, what to invoke, artifacts, and the **GATE** that
 must pass before advancing. Each gate is tagged with its **type** — `auto` (the
 orchestrator verifies the check itself, pass/fail) or `manual` (wait for the
-operator's explicit go). These stages (0 intake + 1→9) are the plugin's
+operator's explicit go). These stages (0 intake + 1→10) are the plugin's
 **example** flow, encoded in `pipeline.example.json` against the universal contract
 `pipeline.schema.json`; a host project replaces it with its own
 stages/agents/types (see SKILL.md → *Bring your own skills*).
@@ -32,7 +32,7 @@ stages/agents/types (see SKILL.md → *Bring your own skills*).
 - **What (normal entry):** the operator's one-line task is almost never enough to
   run autonomously. Before anything else, **grill the operator** to expand that
   one line into a complete, unambiguous brief — resolve every decision branch
-  up front so stages 1→9 need no further human input beyond the manual gates.
+  up front so stages 1→10 need no further human input beyond the manual gates.
   This is input expansion, not design: turn "make me feature X" into locked
   answers for scope, users, constraints, data, edge cases, done-criteria.
 - **How it runs: [`grill.md`](grill.md)** — the full doctrine, built into this
@@ -41,7 +41,7 @@ stages/agents/types (see SKILL.md → *Bring your own skills*).
   decision tree, contradictions reconciled on the spot; plus **domain awareness**
   (challenge terms against `CONTEXT.md`, sharpen fuzzy language, stress-test with
   concrete scenarios, cross-reference the code, record ADRs for hard-to-reverse
-  calls) and the **autonomy sweep** that pre-resolves every stage-1→9 blocker.
+  calls) and the **autonomy sweep** that pre-resolves every stage-1→10 blocker.
   Deploy authorization has a hard floor there: a standing go counts only when it
   names the target and the preconditions.
 - **UI early-detect:** one branch of the grill is always "does this touch a
@@ -86,10 +86,22 @@ stages/agents/types (see SKILL.md → *Bring your own skills*).
   user-facing surface (web, mobile, CLI, TUI — new feature, new screen/command,
   or a change to user-visible behavior). Record the verdict; it arms the UX
   track in stage 3.
+- **Decomposition (platforms only): [`decomposition.md`](decomposition.md).** If
+  the brief describes a platform rather than a change — several independent
+  capabilities, several surfaces that could ship separately, REQs no single
+  deliverable satisfies — cut it into **modules** before any spec is written, and
+  commit the module map (`specs/<topic>-modules.md`): what each module delivers,
+  the entities it owns, what it depends on, the contracts it exposes, its REQs and
+  its status, in build order with the walking skeleton first. Single-module work
+  records `single module: <name>` in the design and moves on — a skipped
+  decomposition is a decision, never an omission.
 - **GATE (manual):** the user approves the design, the UI verdict is recorded,
-  **and every REQ is answered by the design** — a requirement the design doesn't
+  **every REQ is answered by the design** — a requirement the design doesn't
   address is either covered now or explicitly dropped by the operator, with the
-  drop recorded in the carry-over ledger.
+  drop recorded in the carry-over ledger — **and, for a platform, the module map is
+  approved**: brick criteria met or excepted in writing, dependency graph acyclic,
+  build order topological, every REQ mapped to exactly one module, cross-module
+  contracts named with their owner.
 
 ## 3 — Spec — with UX track for user-facing tasks
 - **How it runs: [`spec.md`](spec.md)** — built into this skill: the UX-track order,
@@ -137,7 +149,8 @@ stages/agents/types (see SKILL.md → *Bring your own skills*).
 
 ## 4 — Plan
 - **How it runs: [`planning.md`](planning.md)** — built into this skill →
-  `docs/superpowers/plans/YYYY-MM-DD-<feature>.md`. Zero-context tasks, exact
+  `docs/superpowers/plans/YYYY-MM-DD-<topic>.md` (same slug as the brief and the
+  spec). Zero-context tasks, exact
   paths, complete code in every step, TDD steps with expected output, DoD each,
   dependency graph + parallel groups, non-overlapping file ownership, and the
   Global Constraints block copied verbatim from the spec.
@@ -238,3 +251,51 @@ stages/agents/types (see SKILL.md → *Bring your own skills*).
   closing question and signs off. Manual by design — an automated check can prove
   the table is well-formed, only the person who asked can confirm it is what they
   asked for.
+
+## The program loop — a platform, one brick at a time
+
+When stage 2 produced a **module map** ([`decomposition.md`](decomposition.md)),
+stages 0–2 have run once for the whole platform and the rest of the pipeline runs
+**per module**, in build order:
+
+```
+module N → 3 spec (dossier) → 4 plan → 5 build → 6 tests → 7 lint+deploy
+         → 8 post-deploy → 9 docs+wiki → 10 acceptance → map status: done
+         → module N+1 (back to 3)
+```
+
+- **No re-grilling, no re-decomposing per module.** New information that changes the
+  map goes back to stage 2 as an explicit, operator-approved map revision — never a
+  quiet edit mid-module.
+- **Each module's spec is a full dossier** (`spec.md`): architecture, entities,
+  contracts in and out, business rules, edge and failure cases, UI/Figma chain when
+  it has a surface.
+- **Deploy cadence is the brief's call** (autonomy sweep): per module, or once after
+  several. Decide it up front, not per module.
+- **Update the module map's status in the same commit as that module's acceptance.**
+  The map is the resume point after a lost context.
+- **Program done** when every row is `done` or `deferred` with an agreed home, the
+  cross-module contracts are covered by tests that cross the seam, and a final
+  acceptance covers the platform's whole REQ table — not module by module.
+
+## Cross-cutting — the loop guard
+
+Any stage can be re-entered and any loop can churn: a pass undoing what an earlier
+pass decided, two shapes alternating, the same file rewritten with no new
+information. [`loop-guard.md`](loop-guard.md) is the detector and the break
+protocol, and it binds every repeating loop here — the stage-5 fix loop, a stage
+re-entered after a failed gate, the program loop above, any audit → fix → audit
+cycle.
+
+- **Every repeating pass logs one line per touched file** (`touch: <file> — pass N —
+  reason: <finding id / gate item>`) to the run ledger. Detection is mechanical, not
+  a feeling, and the ledger is what survives compaction.
+- **Trips on:** revert-oscillation (A→B→A); the same file edited twice for the same
+  reason; a finding already ADDRESSED or parked coming back; a stage entered a third
+  time for one artifact; two loops editing one file. Hard caps: 5 fix rounds per
+  task, 2 re-entries per stage per artifact, 3 passes per module.
+- **On a trip: stop editing.** Name shapes A and B with their evidence, escalate to
+  the layer that owns the conflict (rubric → operator → plan → spec → module map),
+  re-plan the check as an ordered one-item-per-line checklist, then go through it in
+  order, one commit per item. Never settle a higher-layer conflict inside a lower
+  loop, and never adjudicate before the cap.

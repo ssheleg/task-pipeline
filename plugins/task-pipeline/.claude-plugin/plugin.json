@@ -1,7 +1,7 @@
 {
   "name": "task-pipeline",
-  "description": "Self-contained orchestrator: a mandatory built-in intake grill expands the task, sharpens its domain language and pre-resolves what would stop later stages, then docs study, brainstorm, spec, plan, subagent build, tests, lint/deploy, post-deploy log check, docs/wiki sync — every stage's doctrine ships inside the skill (no companion plugin required), with typed auto/manual gates, one provider-agnostic model confirmed up front, a super-ux UX track for user-facing tasks, and toggleable project-configurable release automation. Generic-portable.",
-  "version": "0.16.0",
+  "description": "Self-contained orchestrator that runs a task through a mandatory built-in intake grill + 10 gated stages (docs, brainstorm, decompose, spec, plan, subagent build, tests, lint/deploy, post-deploy, acceptance, docs/wiki). Every stage's doctrine is built into the skill — no companion plugin required — with typed auto/manual gates, a loop guard that breaks churn, one provider-agnostic model confirmed up front, a super-ux UX track for user-facing tasks, and toggleable project-configurable release automation.",
+  "version": "0.16.1",
   "author": {
     "name": "ssheleg"
   },

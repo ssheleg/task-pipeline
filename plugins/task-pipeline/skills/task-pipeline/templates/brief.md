@@ -48,7 +48,7 @@ not continuously): `open` → `planned` → `built` → `verified` \| `partial` 
 |---|---|---|---|
 | 1 | … | … | … |
 
-## Autonomy (the sweep — stages 1→9 read this instead of asking)
+## Autonomy (the sweep — stages 1→10 read this instead of asking)
 
 Every row is either a resolved answer or an explicit **STOP AND ASK**. A blank row
 is not neutral — it is a scheduled interruption.

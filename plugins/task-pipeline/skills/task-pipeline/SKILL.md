@@ -1,6 +1,6 @@
 ---
 name: task-pipeline
-description: "Use when running a substantial task through the full end-to-end delivery pipeline — an up-front intake grill that expands the request into a complete brief, then docs study, brainstorm, spec, plan, subagent-driven build, tests, lint/deploy, post-deploy log check, and docs/wiki sync — as gated stages whose doctrine is built entirely into this skill (no required companion skills). Triggers - 'run this through the pipeline' / 'прогони по конвейеру', 'the full cycle' / 'полный цикл', /task-pipeline, or any substantial feature, fix, or build that should follow the disciplined cycle rather than ad-hoc coding. The intake grill is mandatory - it front-loads every decision, including the per-stage autonomy sweep, so stages 1→9 run without mid-flight questions; recommends super-ux for user-facing work; confirms one model up front (most capable available, never a hardcoded id); reads host-project conventions for deploy/docs/wiki so it stays project-agnostic."
+description: "Use when running a substantial task through the full end-to-end delivery pipeline — an up-front intake grill that expands the request into a complete brief, then docs study, brainstorm, spec, plan, subagent-driven build, tests, lint/deploy, post-deploy log check, and docs/wiki sync — as gated stages whose doctrine is built entirely into this skill (no required companion skills). Triggers - 'run this through the pipeline' / 'прогони по конвейеру', 'the full cycle' / 'полный цикл', /task-pipeline, or any substantial feature, fix, or build that should follow the disciplined cycle rather than ad-hoc coding. The intake grill is mandatory - it front-loads every decision, including the per-stage autonomy sweep, so stages 1→10 run without mid-flight questions; recommends super-ux for user-facing work; confirms one model up front (most capable available, never a hardcoded id); reads host-project conventions for deploy/docs/wiki so it stays project-agnostic."
 ---
 
 # task-pipeline
@@ -13,7 +13,7 @@ confirmed before it starts.
 **Grill first, then run autonomously.** A one-line task ("make me feature X") is
 never enough to finish without a human in the loop. Stage 0 is **mandatory**: a
 relentless, one-question-at-a-time interview that resolves every decision branch
-*and* sweeps stages 1→9 for anything that would stop the run later — then locks
+*and* sweeps stages 1→10 for anything that would stop the run later — then locks
 the answers into a brief. Autonomy is bought there or not at all; every question
 skipped at stage 0 comes back as an interruption at stage 6.
 
@@ -22,7 +22,7 @@ a machine-readable config — an ordered list of stages, each with `skills[]` (t
 skills/agents that run it) and a `gate {type, check}`. The schema is the universal
 contract; it imposes **no** specific stages, skills, or gate assignments.
 [`pipeline.example.json`](pipeline.example.json) is a **copy-and-rewrite example**
-that encodes this plugin's own default flow (stage 0 intake + the 1→9 stages
+that encodes this plugin's own default flow (stage 0 intake + the 1→10 stages
 tabled below) and an optional, toggleable `release` block. Any project replaces it
 wholesale — any number of stages, run by its own skills/agents, with its own gate
 types (see *Bring your own skills*). Each gate has a **type**: `auto` (the
@@ -92,7 +92,7 @@ Two things the grill does beyond clarifying the request:
   flagging where the code contradicts what was just said. Resolved terms are
   written to `CONTEXT.md` as they land; genuinely hard-to-reverse decisions get an
   ADR.
-- **The autonomy sweep.** It pre-resolves what would otherwise stop stages 1→9
+- **The autonomy sweep.** It pre-resolves what would otherwise stop stages 1→10
   mid-flight (test/lint/deploy commands, branch policy, log locations, docs
   targets, the model decision, deploy authorization). Autonomy is bought here or
   not at all — an unasked question is a scheduled interruption.
@@ -175,7 +175,7 @@ pinned to the confirmed model automatically. Detail: `references/model-tiering.m
 
 ## Bring your own skills
 
-The stages above (stage 0 intake + 1→9) are the **example** flow (this skill's
+The stages above (stage 0 intake + 1→10) are the **example** flow (this skill's
 built-in doctrine + a super-ux UX track for user-facing tasks + host conventions). A
 host project owns its pipeline: copy `pipeline.example.json` → `pipeline.json`,
 then define its **own** stages (any count), point each stage's `skills[]` at the
@@ -187,7 +187,7 @@ automation is on — `pipeline.schema.json` is the only contract.
 ## References
 
 - `pipeline.schema.json` — the universal pipeline config contract (stages + release)
-- `pipeline.example.json` — this plugin's default flow (stage 0 + 1→9) + release, as config
+- `pipeline.example.json` — this plugin's default flow (stage 0 + 1→10) + release, as config
 - `references/grill.md` — the built-in stage-0 grill: loop, domain awareness, autonomy sweep
 - `references/acceptance.md` — the built-in stage-10 close-out: REQ coverage, evidence, sign-off
 - `references/brainstorm.md` — stage 2: design dialogue, approaches, UI detection, hard gate

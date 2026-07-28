@@ -1,7 +1,7 @@
 {
   "$schema": "./pipeline.schema.json",
   "version": 1,
-  "_note": "EXAMPLE ONLY — copy this file, rename to pipeline.json in your project, and rewrite it. This particular example encodes the plugin's own default flow (an up-front intake grill + this skill's own built-in stage doctrine + a super-ux UX track for user-facing tasks); it is NOT a fixed contract. Your project defines its own stages (any count), each executed by your own skills/agents, with your own gate types. Stage models use provider-agnostic tokens ('default' = the model confirmed for the run, 'inherit' = whatever the operator is on) — never hardcode a vendor model id, it goes stale. The universal contract is pipeline.schema.json; test/validate.py checks this example against it. gate.type: auto = orchestrator verifies the check itself (pass/fail); manual = wait for an explicit operator go. Which stages are manual vs auto is the operator's decision, not the plugin's.",
+  "_note": "EXAMPLE ONLY — copy this file, rename to pipeline.json in your project, and rewrite it. This particular example encodes the plugin's own default flow (an up-front intake grill + this skill's own built-in stage doctrine + a super-ux UX track for user-facing tasks); it is NOT a fixed contract. Your project defines its own stages (any count), each executed by your own skills/agents, with your own gate types. Stage models use provider-agnostic tokens ('default' = the model confirmed for the run, 'inherit' = whatever the operator is on) — never hardcode a vendor model id, it goes stale. The universal contract is pipeline.schema.json; test/validate.py checks this example against it. gate.type: auto = orchestrator verifies the check itself (pass/fail); manual = wait for an explicit operator go. Which stages are manual vs auto is the operator's decision, not the plugin's. Any repeating loop in a run (fix loop, a re-entered stage, the per-module program loop) is bound by the loop guard: log every repeat touch, stop on oscillation, escalate to the layer that owns the conflict, then re-check in a planned order.",
   "stages": [
     {
       "id": 0,
@@ -13,7 +13,7 @@
       ],
       "gate": {
         "type": "manual",
-        "check": "MANDATORY stage — never skipped (only sanctioned bypass: the entry-from-super-ux short-circuit). The grill is built into the skill (references/grill.md) — no companion to install. Per its contract: one question at a time, a recommended answer with each, explore the codebase/docs before asking, depth-first, contradictions reconciled; domain awareness applied (terms challenged against CONTEXT.md, ADRs recorded for hard-to-reverse calls). The autonomy sweep is covered — every stage 1-9 has its blockers pre-resolved (docs sources, branch/tracker policy, test + lint commands, deploy target and authorization, log/health locations, docs+wiki targets) or is explicitly marked 'stop and ask here'. UI verdict recorded (arms super-ux); model decision recorded. All of it locked into a committed task brief the operator confirms before stage 1. The REQ table is written — one row per independently verifiable deliverable, each naming how it is verified — and frozen: adding later is free, removing or narrowing needs the operator's explicit agreement. The carry-over ledger is seeded."
+        "check": "MANDATORY stage — never skipped (only sanctioned bypass: the entry-from-super-ux short-circuit). The grill is built into the skill (references/grill.md) — no companion to install. Per its contract: one question at a time, a recommended answer with each, explore the codebase/docs before asking, depth-first, contradictions reconciled; domain awareness applied (terms challenged against CONTEXT.md, ADRs recorded for hard-to-reverse calls). The autonomy sweep is covered — every stage 1-10 has its blockers pre-resolved (docs sources, branch/tracker policy, test + lint commands, deploy target and authorization, log/health locations, docs+wiki targets) or is explicitly marked 'stop and ask here'. UI verdict recorded (arms super-ux); model decision recorded. All of it locked into a committed task brief the operator confirms before stage 1. The REQ table is written — one row per independently verifiable deliverable, each naming how it is verified — and frozen: adding later is free, removing or narrowing needs the operator's explicit agreement. The carry-over ledger is seeded."
       }
     },
     {
@@ -33,14 +33,15 @@
     {
       "id": 2,
       "state": "brainstorm",
-      "name": "Brainstorm",
+      "name": "Brainstorm + decompose",
       "model": "default",
       "skills": [
-        "task-pipeline:brainstorm"
+        "task-pipeline:brainstorm",
+        "task-pipeline:decompose"
       ],
       "gate": {
         "type": "manual",
-        "check": "the user approves the design AND the UI verdict is recorded (does the task touch a user-facing surface — web/mobile/CLI/TUI? this arms the stage-3 UX track) Every REQ is answered by the design, or explicitly dropped by the operator into the carry-over ledger."
+        "check": "the user approves the design AND the UI verdict is recorded (does the task touch a user-facing surface — web/mobile/CLI/TUI? this arms the stage-3 UX track) Every REQ is answered by the design, or explicitly dropped by the operator into the carry-over ledger. For a platform (several independent capabilities or shippable surfaces): the module map specs/<topic>-modules.md is committed and approved — brick criteria met or excepted in writing, dependency graph acyclic, build order topological with the walking skeleton first, every REQ mapped to exactly one module, cross-module contracts named with their owner. Single-module work records 'single module: <name>' instead — a skipped decomposition is a recorded decision, never an omission"
       }
     },
     {

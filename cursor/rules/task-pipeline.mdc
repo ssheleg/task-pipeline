@@ -36,7 +36,7 @@ user up front, then run the rest without mid-flight questions:
 4. Walk the decision tree depth-first; ask prerequisite decisions first.
 5. Reconcile contradictions; chase dodges ("decide later" → "latest you can decide
    and still ship?").
-6. Run the **autonomy sweep** — resolve now whatever would stop stages 1→9 later:
+6. Run the **autonomy sweep** — resolve now whatever would stop stages 1→10 later:
    external libs and where their docs live; UI verdict; base branch, branch policy,
    commit convention, task tracker; the test command and what "green" means; the
    lint command; the deploy target, release toggle and **deploy authorization**;
@@ -80,7 +80,7 @@ start. Later stages read that brief instead of asking again.
 specific (named target + named preconditions). A vague "just do everything" does
 not authorize an outward, irreversible action — stage 7 stops and asks.
 
-## Stages 1→9
+## Stages 1→10
 
 1. **Docs study** (auto) — ground every external lib/API on current docs, not recall.
 2. **Brainstorm** (manual) — read the brief, explore the code, then 2–3 approaches
