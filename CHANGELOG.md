@@ -1,5 +1,56 @@
 # Changelog
 
+## v0.18.0 — 2026-07-28
+
+The grill stops opening cold. Stage 0 now reads what the project already knows
+about the task **before** the first question, checks every answer against it, and
+stage 9 updates the same list at the end — the loop the pipeline was missing.
+
+### Added
+- **Stage 0 phase 1: the knowledge harvest** (`references/knowledge-sources.md`).
+  Before question one, query what the project already knows about *this* task —
+  the code, `CLAUDE.md`/`AGENTS.md`, `CONTEXT.md` + `docs/adr/`, `docs/` and
+  `docs/ux/`, previous pipeline briefs and their carry-over ledgers, **the
+  knowledge wiki when one is installed**, and **any other repository or hosted doc
+  system the project names as its docs**. It is retrieval scoped by the task's own
+  nouns, not a read of everything: query, follow one hop, stop when the terms
+  return nothing new. Nothing is ever fetched on a guess — a doc repo is in scope
+  because the project names it.
+- **The source ledger** — a required `## Knowledge sources` section in the brief
+  (source, what it says about this task, freshness, authority, "stale after this
+  run?"). `none found` is a valid, useful row: it tells the next run the search
+  happened and came back empty. Silence doesn't.
+- **Answers are validated against the harvest** (`grill.md` → *Domain awareness*).
+  The cheap win is not re-asking what an ADR already answers. The one that matters:
+  **an answer nobody can check is a recollection** — people answer from memory
+  about systems they wrote a year ago, and a false premise adopted at stage 0 makes
+  every later gate pass honestly on it. So the grill quotes the source instead:
+  *"the March ADR says X, you just described Y — has it changed?"* The operator
+  **outranks every document, but only out loud** — an override quoted against its
+  source is a recorded decision, an unquoted one is an undetected divergence.
+  Precedence when sources disagree: **code > host docs/ADRs > wiki > memory.**
+- **obsidian-wiki is the recommended knowledge base**
+  (https://github.com/ar9av/obsidian-wiki — Karpathy's LLM-wiki pattern), detected
+  via `~/.obsidian-wiki/config` or a resolving `wiki-query`/`wiki-update`.
+  Installed → queried in the harvest, synced with `wiki-update` at stage 9. Absent
+  → the preflight prints `pip install obsidian-wiki` / `obsidian-wiki setup --vault
+  <path>` **once** and the run continues. A recommendation, never a gate; a project
+  whose `CLAUDE.md` names a different knowledge base wins.
+- **Stage 9 closes the loop:** the stage-0 ledger *is* its work list. Every source
+  the harvest read gets updated if this run changed or disproved it — including the
+  docs the grill already proved stale, which is why those conflicts are logged in
+  phase 2 instead of only being settled out loud. Docs living in **another
+  repository** are outward: propose the edit and get an explicit go, or carry it
+  over with the exact change written down. Never a direct push to a repo the task
+  didn't name.
+- **Autonomy-sweep row** for doc sources beyond this repo, and whether stage 9 may
+  write to them — decided at intake, like every other outward action.
+- **Three validator guards, each with a CI negative self-test:** the brief template
+  must keep its `## Knowledge sources` section; the stage-0 gate must require the
+  harvest *and* its ledger before the interview; the stage-9 gate must name that
+  ledger as its work list. A harvest with nowhere to land degrades silently back
+  into asking from memory, which is precisely the failure it exists to stop.
+
 ## v0.17.1 — 2026-07-28
 
 A full-repo consistency audit. v0.16.0 added a third review verdict and a tenth

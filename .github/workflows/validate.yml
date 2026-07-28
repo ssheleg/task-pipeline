@@ -200,6 +200,57 @@ jobs:
             echo "OK: validator requires set equality at the brief-to-plan seam"
           fi
 
+      - name: Negative self-test (the brief must keep the knowledge-source ledger)
+        run: |
+          set -eu
+          cp -R . /tmp/ledger-copy
+          sed -i 's/^## Knowledge sources.*/## Notes/' \
+            /tmp/ledger-copy/plugins/task-pipeline/skills/task-pipeline/templates/brief.md
+          if python3 /tmp/ledger-copy/test/validate.py; then
+            echo "ERROR: validator passed a brief template with nowhere to record the harvest"
+            exit 1
+          else
+            echo "OK: validator requires the stage-0 source ledger in the brief template"
+          fi
+
+      - name: Negative self-test (stage 0 must harvest before it interviews)
+        run: |
+          set -eu
+          cp -R . /tmp/harvest-copy
+          python3 - <<'EOF'
+          import json, collections
+          p = "/tmp/harvest-copy/plugins/task-pipeline/skills/task-pipeline/pipeline.example.json"
+          d = json.load(open(p), object_pairs_hook=collections.OrderedDict)
+          d["stages"][0]["gate"]["check"] = "MANDATORY stage — never skipped. One question at a time; the brief is confirmed."
+          json.dump(d, open(p, "w"), indent=2, ensure_ascii=False)
+          EOF
+          if python3 /tmp/harvest-copy/test/validate.py; then
+            echo "ERROR: validator passed a stage-0 gate with no knowledge harvest"
+            exit 1
+          else
+            echo "OK: validator requires the phase-1 harvest and its ledger before the interview"
+          fi
+
+      - name: Negative self-test (stage 9 must close the loop on the ledger)
+        run: |
+          set -eu
+          cp -R . /tmp/loopback-copy
+          python3 - <<'EOF'
+          import json, collections
+          p = "/tmp/loopback-copy/plugins/task-pipeline/skills/task-pipeline/pipeline.example.json"
+          d = json.load(open(p), object_pairs_hook=collections.OrderedDict)
+          for s in d["stages"]:
+              if s.get("state") == "docs-wiki":
+                  s["gate"]["check"] = "docs in sync with code; wiki synced; dangling links fixed"
+          json.dump(d, open(p, "w"), indent=2, ensure_ascii=False)
+          EOF
+          if python3 /tmp/loopback-copy/test/validate.py; then
+            echo "ERROR: validator passed a docs stage that never updates what stage 0 read"
+            exit 1
+          else
+            echo "OK: validator keeps the harvest→update loop closed"
+          fi
+
       - name: Negative self-test (a description that drops the final stage must fail)
         run: |
           set -eu

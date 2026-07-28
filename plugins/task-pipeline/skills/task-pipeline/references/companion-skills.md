@@ -12,6 +12,7 @@ better, plus one that is required only for user-facing work.
 
 | Stage | Doctrine |
 |---|---|
+| 0 Knowledge harvest (pre-grill) | `references/knowledge-sources.md` |
 | 0 Intake grill | `references/grill.md` |
 | 2 Brainstorm | `references/brainstorm.md` |
 | 2 Decompose (platforms only) | `references/decomposition.md` |
@@ -28,7 +29,7 @@ better, plus one that is required only for user-facing work.
 |---|---|---|---|
 | **super-ux** (`ux-foundation`, `ux-flows`, `ux-scenarios`, `ux-audit`, `/ux`, `/ux-lint`) | stage 3 UX track | **Required for any user-facing task** | `/plugin marketplace add ssheleg/super-ux` → `/plugin install super-ux@super-ux` (or `npx skills add ssheleg/super-ux`) |
 | **context7** (MCP) | stage 1 docs study | Recommended (web-search fallback) | connect the context7 MCP server |
-| **wiki-update** | stage 9 wiki sync | Optional (skip wiki if absent) | user's wiki skill set |
+| **[obsidian-wiki](https://github.com/ar9av/obsidian-wiki)** (`wiki-query`, `wiki-update`) | **stage 0 harvest** (query what's already known) **+ stage 9 sync** | **Recommended** — never a gate; absent → harvest runs on repo docs alone | `pip install obsidian-wiki` → `obsidian-wiki setup --vault /path/to/your/vault` |
 | ~~superpowers~~ | — | **Not a dependency.** Stages 2/4/5/6 run on the built-in doctrine above. See *Optional bridge* | — |
 | ~~grill-me / grilling~~ | — | **Not a dependency.** The stage-0 grill is built in (`references/grill.md`) | — |
 
@@ -60,7 +61,11 @@ Pipeline companions (stage doctrine is built in — nothing to install for it):
                            /plugin marketplace add ssheleg/super-ux
                            /plugin install super-ux@super-ux
   ✓ context7           — ready
-  ✓ wiki-update        — ready
+  ✗ obsidian-wiki      — recommended: stage 0 queries it before grilling you,
+                         stage 9 syncs back what this run learned:
+                           pip install obsidian-wiki
+                           obsidian-wiki setup --vault /path/to/your/vault
+                         (running without it — the harvest uses repo docs only)
 
 🧠 Model for this run: recommended <top tier available>. You're on <current>.
    /model <id> to switch, or "keep current", or name per-stage overrides.
@@ -72,6 +77,10 @@ Rules:
 
 - Only flag **super-ux** when the task implies a UI (the stage-0 grill decides;
   when unsure, flag it — a false positive costs one install).
+- **obsidian-wiki**: detect via `~/.obsidian-wiki/config` or a resolving
+  `wiki-query`/`wiki-update`. Present → say `✓ ready` and use it in the harvest.
+  Absent → print the two install lines **once** and continue; never ask twice in a
+  run and never block a stage on it ([`knowledge-sources.md`](knowledge-sources.md)).
 - **Never gate any stage on an install** except the stage-3 UX track on a UI task.
 - Optional tools missing → state the fallback, don't block.
 - Re-detect after the operator installs; don't assume.

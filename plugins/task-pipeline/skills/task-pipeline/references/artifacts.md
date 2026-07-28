@@ -53,6 +53,7 @@ record (see `build.md`).
 
 | Stage | Writes | Consumed by |
 |---|---|---|
+| 0 Harvest | the brief's **Knowledge sources** ledger — every source consulted, its freshness, whether this run makes it stale | the grill (validation), **stage 9** (the update work list) |
 | 0 Intake | `specs/<topic>-brief.md` — incl. the **REQ table** (seed from `templates/brief.md`) | stages 2–5, 7, 10 |
 | 0→10 all | `specs/<topic>-carryover.md` — append-only ledger (seed from `templates/carryover.md`) | stage 10, in full |
 | 10 Acceptance | `specs/<topic>-acceptance.md` — every REQ with a status and evidence | the operator |
@@ -75,7 +76,7 @@ plugins/task-pipeline/
     SKILL.md
     pipeline.schema.json                      # generic pipeline contract
     pipeline.example.json                     # this plugin's own flow, as config
-    references/{grill,brainstorm,decomposition,spec,planning,build,review,tdd,acceptance}.md  # built-in stage doctrine
+    references/{knowledge-sources,grill,brainstorm,decomposition,spec,planning,build,review,tdd,acceptance}.md  # built-in stage doctrine
     references/loop-guard.md                  # cross-cutting: churn detection + break protocol
     references/{stages,model-tiering,conventions,artifacts,companion-skills}.md
 cursor/rules/task-pipeline.mdc                # Cursor channel (self-contained rule)

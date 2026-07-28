@@ -28,16 +28,42 @@ recommended tier isn't available, say which one you're using and continue.
 
 Never skipped, and nothing to install — the grill is part of this rule. No "the
 task was already clear" exemption, no starting stage 1 while the user thinks. A
-one-line task ("build feature X") is not enough to finish autonomously. Grill the
-user up front, then run the rest without mid-flight questions:
+one-line task ("build feature X") is not enough to finish autonomously.
+
+**Phase 1 — harvest the sources BEFORE the first question.** Find what the project
+already knows about this task and read it: the code; `CLAUDE.md` / `AGENTS.md`;
+`CONTEXT.md` (or `CONTEXT-MAP.md`) and `docs/adr/`; `docs/` and `docs/ux/`; past
+briefs/plans and their carry-over ledgers; **the knowledge wiki if one is
+installed** — [obsidian-wiki](https://github.com/ar9av/obsidian-wiki), detect
+`~/.obsidian-wiki/config` or a resolving `wiki-query`; and **any other repository
+or hosted doc system the project names as its docs** (read-only, and never a source
+you invented — it counts because the project names it). Query each by *this task's*
+nouns; it is retrieval, not a full read; stop when the terms return nothing new.
+Write a short **source ledger** into the brief — source, what it says about this
+task, how fresh, and whether this run makes it stale. `none found` is a valid row.
+If no wiki is installed, recommend it once and continue:
+`pip install obsidian-wiki` → `obsidian-wiki setup --vault <path>`. It is never a
+gate.
+
+**Phase 2 — grill the user against that harvest**, then run the rest without
+mid-flight questions:
 1. One question per turn — never bundle.
 2. Give a recommended answer with every question (+ one-line rationale).
 3. Explore the codebase before asking — if a search/read answers it, do that.
+3a. **Validate every answer against the harvest.** When what the user says
+   contradicts a doc you read, quote the doc and ask which governs: *"the March ADR
+   says X, you just described Y — has it changed?"* The user **outranks every
+   document, but only out loud** — an override quoted against its source is a
+   recorded decision; an unquoted one is an undetected divergence that every later
+   gate will pass over. When two sources disagree: code > host docs/ADRs > wiki >
+   memory. Whichever side loses, if it's written down somewhere, log it for the
+   stage-9 doc update.
 4. Walk the decision tree depth-first; ask prerequisite decisions first.
 5. Reconcile contradictions; chase dodges ("decide later" → "latest you can decide
    and still ship?").
 6. Run the **autonomy sweep** — resolve now whatever would stop stages 1→10 later:
-   external libs and where their docs live; UI verdict; base branch, branch policy,
+   external libs and where their docs live; **which doc sources beyond this repo are
+   in play and whether stage 9 may write to them**; UI verdict; base branch, branch policy,
    commit convention, task tracker; the test command and what "green" means; the
    lint command; the deploy target, release toggle and **deploy authorization**;
    where logs/health live; which docs and runbooks this change updates. Each item
@@ -127,8 +153,14 @@ not authorize an outward, irreversible action — stage 7 stops and asks.
    the stage-0 brief.
 8. **Post-deploy** (auto) — tail logs / health-check; clean boot or an honest
    degradation report (never silent success).
-9. **Docs + wiki** (auto) — update module docs/runbooks in the SAME change, and
-    sync the project's knowledge base/wiki if it has one.
+9. **Docs + wiki** (auto) — **the phase-1 source ledger is the work list**: every
+    source the harvest read gets updated if this run changed or disproved it. Module
+    docs and runbooks in the SAME change; the knowledge wiki via `wiki-update` when
+    [obsidian-wiki](https://github.com/ar9av/obsidian-wiki) is installed (absent →
+    recommend once, never block). Docs in **another repository** are outward:
+    propose the edit and get an explicit go, or carry it over with the exact change
+    written down. A doc that was worth reading at stage 0 and is wrong now is the
+    next run's false premise.
 10. **Acceptance** (manual) — the closing stage: go back to the brief and account
     for **every** REQ. One row each, status `verified` / `partial` / `deferred` /
     `dropped`, and every `verified` carries **evidence** — a passing test name, a

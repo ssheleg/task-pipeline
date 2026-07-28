@@ -37,6 +37,7 @@ and no stage that can fail because a dependency is missing:
 
 | Stage | Built-in doctrine |
 |---|---|
+| 0 Knowledge harvest (pre-grill) | [`references/knowledge-sources.md`](references/knowledge-sources.md) |
 | 0 Intake grill | [`references/grill.md`](references/grill.md) |
 | 2 Brainstorm | [`references/brainstorm.md`](references/brainstorm.md) |
 | 2 Decompose (platforms only) | [`references/decomposition.md`](references/decomposition.md) |
@@ -86,7 +87,19 @@ requirements, each naming how it will be verified. Stages 3–5 trace to those i
 stage 4's gate is a mechanical set-comparison against them, and **stage 10 accounts
 for every one** — which is what turns the pipeline from a funnel into a circle.
 
-Two things the grill does beyond clarifying the request:
+**Harvest before you ask.** Stage 0 opens with a **knowledge harvest**
+([`references/knowledge-sources.md`](references/knowledge-sources.md)), not a
+question: pull what the project already knows about this task from the code,
+`CLAUDE.md`, `CONTEXT.md`/ADRs, `docs/` + `docs/ux/`, past pipeline briefs, the
+**knowledge wiki** if one is installed
+([obsidian-wiki](https://github.com/ar9av/obsidian-wiki) — recommended, never
+required) and any **other repo or hosted doc system the project names as its
+docs**. Write the source ledger into the brief, then interview *against* it: every
+answer that touches a source is checked against that source, and the operator
+outranks any document — but only out loud, so an override is a recorded decision
+instead of an undetected divergence. The same ledger is stage 9's work list.
+
+Three things the grill does beyond clarifying the request:
 - **Domain awareness.** It reads the project's own `CONTEXT.md` / `docs/adr/` and
   holds the operator to them — challenging terms that conflict with the glossary,
   sharpening overloaded words, stress-testing with concrete scenarios, and
@@ -108,8 +121,13 @@ Two things the grill does beyond clarifying the request:
    **and the model decision** (`references/model-tiering.md`): recommend
    the most capable model available, let the operator confirm or override, record
    it. Ask once, here.
-2. **Run stage 0 (Intake grill) — always, no exceptions.** Grill until shared
-   understanding is reached, the autonomy sweep is covered, **the REQ table is
+2. **Run stage 0 — always, no exceptions.** It opens with the **knowledge harvest**
+   (`references/knowledge-sources.md`): query the project's own sources — repo docs,
+   ADRs, `docs/ux/`, past briefs, the wiki if installed, any doc repo the project
+   names — for this task's terms, and write the **source ledger** into the brief
+   before question one. Then grill until shared
+   understanding is reached, **each answer checked against the harvest**, the
+   autonomy sweep is covered, **the REQ table is
    written (one row per independently verifiable deliverable, each naming its
    check)** and the brief is locked
    (`references/stages.md` → 0). Do not touch stage 1 before the brief is
@@ -155,7 +173,7 @@ capable available — see `references/model-tiering.md`).
 
 | # | Stage | Invoke | Gate | Type |
 |---|---|---|---|---|
-| 0 | Intake grill — **mandatory** | built in: [`references/grill.md`](references/grill.md) | shared understanding reached; autonomy sweep covered; brief locked + confirmed | manual |
+| 0 | Intake grill — **mandatory** | built in: [`references/knowledge-sources.md`](references/knowledge-sources.md) (harvest) → [`references/grill.md`](references/grill.md) (interview) | source ledger written; shared understanding reached; autonomy sweep covered; brief locked + confirmed | manual |
 | 1 | Docs study | `context7` (resolve-library-id → get-library-docs) / `context7-docs` | contracts grounded on fetched docs | auto |
 | 2 | Brainstorm + decompose | built in: [`references/brainstorm.md`](references/brainstorm.md) + **UI detection** + [`references/decomposition.md`](references/decomposition.md) for platforms | design approved; UI verdict recorded; every REQ answered; platform: module map approved | manual |
 | 3 | Spec | built in: [`references/spec.md`](references/spec.md) — **UI → super-ux chain first** (`/ux` → `ux-foundation` CJM → `ux-flows` screens → `ux-scenarios` → `/ux-lint`), then spec `docs/superpowers/specs/…-design.md` | committed + reviewed; UI: chain validated, linter green, scenarios/`SCR-` traced | manual |
@@ -164,7 +182,7 @@ capable available — see `references/model-tiering.md`).
 | 6 | Tests | host test runner + built-in [`references/tdd.md`](references/tdd.md) | full suite green; new/changed code covered | auto |
 | 7 | Lint + deploy | host lint → deploy per host convention | lint clean + suite green before deploy; deploy needs a go (or the brief's specific standing authorization) | manual |
 | 8 | Post-deploy | tail deploy logs / health-check | clean boot or honest degradation report | auto |
-| 9 | Docs + wiki | host module docs/runbook rules → `wiki-update` | docs synced, wiki synced | auto |
+| 9 | Docs + wiki | host module docs/runbook rules → `wiki-update` ([obsidian-wiki](https://github.com/ar9av/obsidian-wiki), recommended) | every stale row of the stage-0 source ledger updated; docs synced; wiki synced | auto |
 | 10 | **Acceptance** | built in: [`references/acceptance.md`](references/acceptance.md) | every REQ accounted for with evidence; ledger has no unresolved row; operator signs off | manual |
 
 ## Model — ask once, at preflight
@@ -198,6 +216,7 @@ automation is on — `pipeline.schema.json` is the only contract.
 
 - `pipeline.schema.json` — the universal pipeline config contract (stages + release)
 - `pipeline.example.json` — this plugin's default flow (stage 0 + 1→10) + release, as config
+- `references/knowledge-sources.md` — stage-0 phase 1: the source list, the wiki, the ledger, the stage-9 loop-back
 - `references/grill.md` — the built-in stage-0 grill: loop, domain awareness, autonomy sweep
 - `references/acceptance.md` — the built-in stage-10 close-out: REQ coverage, evidence, sign-off
 - `references/brainstorm.md` — stage 2: design dialogue, approaches, UI detection, hard gate

@@ -162,6 +162,7 @@ for r in ("grill.md", "stages.md", "model-tiering.md", "conventions.md", "compan
 for r in (
     "brainstorm.md", "decomposition.md", "spec.md", "planning.md",
     "build.md", "review.md", "tdd.md", "acceptance.md", "loop-guard.md",
+    "knowledge-sources.md",
 ):
     rp = os.path.join(refdir, r)
     if not os.path.isfile(rp):
@@ -281,6 +282,13 @@ else:
     if not re.search(r"How it's verified", brief):
         fail("templates/brief.md: the REQ table must carry a \"How it's verified\" column — "
              "a requirement with no named check is what makes acceptance green over a gap")
+    # Stage 0 phase 1 writes the source ledger here, BEFORE the first question, and
+    # stage 9 reads it back as its work list. Without the section the harvest has
+    # nowhere to land: the grill degrades to asking from memory, and "docs updated"
+    # silently narrows to whatever files the change happened to touch.
+    if not re.search(r"^##\s+Knowledge sources\b", brief, re.M):
+        fail("templates/brief.md: missing the '## Knowledge sources' section "
+             "(the stage-0 harvest ledger that stage 9 updates)")
 
 # No hardcoded vendor model ids in anything we ship: model generations ship and get
 # renamed, and the operator may be on another provider entirely. Stage configs use
@@ -373,10 +381,22 @@ if pipe is not None:
     if isinstance(stages, list) and stages:
         s0 = stages[0] if isinstance(stages[0], dict) else {}
         s0_gate = s0.get("gate") if isinstance(s0.get("gate"), dict) else {}
+        s0_check = str(s0_gate.get("check", "")).lower()
         if s0_gate.get("type") != "manual":
             fail(f"{EXAMPLE_REL} stage[1]: the intake grill gate must be 'manual' (the operator confirms the brief)")
-        if "mandatory" not in str(s0_gate.get("check", "")).lower():
+        if "mandatory" not in s0_check:
             fail(f"{EXAMPLE_REL} stage[1]: gate.check must state that the intake grill is MANDATORY (never skipped)")
+        # The interview is phase 2. Dropping phase 1 from the gate turns the grill
+        # back into asking from memory: answers stop being checkable against
+        # anything, and stage 9 loses the list of sources it is supposed to update.
+        if "ledger" not in s0_check or not re.search(r"harvest|knowledge source", s0_check):
+            fail(f"{EXAMPLE_REL} stage[1]: gate.check must require the phase-1 knowledge harvest and "
+                 "its source ledger before the interview (see references/knowledge-sources.md)")
+        # Stage 9 is the other half of that loop.
+        s9 = next((s for s in stages if isinstance(s, dict) and s.get("state") == "docs-wiki"), None)
+        if s9 is not None and "ledger" not in str((s9.get("gate") or {}).get("check", "")).lower():
+            fail(f"{EXAMPLE_REL} stage 'docs-wiki': gate.check must name the stage-0 source ledger as its "
+                 "work list — a source read at stage 0 and left wrong is the next run's false premise")
 
     # No required external skill provider may sit in the default flow: the example
     # config is what a host project copies, so a foreign `plugin:skill` entry there

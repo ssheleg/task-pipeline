@@ -35,10 +35,24 @@ stages/agents/types (see SKILL.md → *Bring your own skills*).
   up front so stages 1→10 need no further human input beyond the manual gates.
   This is input expansion, not design: turn "make me feature X" into locked
   answers for scope, users, constraints, data, edge cases, done-criteria.
+- **Phase 1 — harvest the knowledge sources FIRST**
+  ([`knowledge-sources.md`](knowledge-sources.md)). Before the first question:
+  query what the project already knows about this task — code, `CLAUDE.md`,
+  `CONTEXT.md`/ADRs, `docs/` + `docs/ux/`, past pipeline briefs and carry-over
+  ledgers, the **knowledge wiki** if one is installed
+  ([obsidian-wiki](https://github.com/ar9av/obsidian-wiki) — recommended,
+  never required), and any **other repo or hosted doc system the project names as
+  its docs**. Write the **source ledger** into the brief (a row per source, or an
+  explicit "none found"). It is retrieval scoped by the task's own nouns, not a
+  read of everything — and it is what makes phase 2's answers checkable instead of
+  merely confident.
 - **How it runs: [`grill.md`](grill.md)** — the full doctrine, built into this
   skill (nothing to install). In short: one question per turn, a recommended
   answer with each, explore the codebase before asking, depth-first through the
-  decision tree, contradictions reconciled on the spot; plus **domain awareness**
+  decision tree, contradictions reconciled on the spot; **every answer that touches
+  a harvested source is checked against it** — the operator outranks any document,
+  but only out loud, and the losing side is logged for the stage-9 doc update; plus
+  **domain awareness**
   (challenge terms against `CONTEXT.md`, sharpen fuzzy language, stress-test with
   concrete scenarios, cross-reference the code, record ADRs for hard-to-reverse
   calls) and the **autonomy sweep** that pre-resolves every stage-1→10 blocker.
@@ -57,8 +71,11 @@ stages/agents/types (see SKILL.md → *Bring your own skills*).
   its autonomy section instead of asking. Where the session produced them, also:
   an updated `CONTEXT.md` (terms written as they resolved) and any ADRs under
   `docs/adr/` — see `grill.md` → *Domain awareness*.
-- **GATE (manual):** shared understanding reached — every detected branch has a
-  recorded answer or an explicit deferral, no open contradictions, **every
+- **GATE (manual):** shared understanding reached — **the source ledger is written
+  (every source consulted, or an explicit "none found")**, every detected branch has
+  a recorded answer or an explicit deferral, **every answer that contradicted a
+  harvested source has a recorded resolution** (which governs, and whether the doc
+  is now stale), no open contradictions, **every
   autonomy-sweep row is answered or explicitly marked "stop and ask here"**, the
   **REQ table is written and every row names its check**, the carry-over ledger is
   seeded, the model decision is recorded, and the operator confirms the brief. Stop when a
@@ -217,12 +234,24 @@ stages/agents/types (see SKILL.md → *Bring your own skills*).
   steps — never silent success.
 
 ## 9 — Docs + wiki
+- **The stage-0 source ledger is the work list** ([`knowledge-sources.md`](knowledge-sources.md)
+  → *Close the loop*): every source the harvest read gets updated if this run
+  changed or disproved it. What was worth reading at stage 0 and is wrong now is
+  the next run's false premise.
 - Update host module docs / runbooks per the project's self-update rules, in the
   **same change**. For UI tasks, confirm the super-ux layers were updated in this
-  change and the linter is green (super-ux *same-change* + *no-drift* rules). Then
-  sync knowledge to the wiki (`wiki-update` skill).
-- **GATE (auto):** docs in sync with code; UI: super-ux layers current + linter
-  green; wiki synced; dangling links fixed.
+  change and the linter is green (super-ux *same-change* + *no-drift* rules).
+- **Sync the knowledge wiki** — `wiki-update` when
+  [obsidian-wiki](https://github.com/ar9av/obsidian-wiki) is installed (detect:
+  `~/.obsidian-wiki/config`, or the skill resolves). Not installed → recommend it
+  once with its install line and continue; a missing wiki never blocks the gate.
+  Distil the knowledge (decisions, seams, why), not a diff summary.
+- **Docs living in another repository** are outward: propose the edit, get an
+  explicit go, then open a PR there. No go → the exact edit goes in the carry-over
+  ledger.
+- **GATE (auto):** docs in sync with code; every stale row in the source ledger
+  either updated or carried over with its edit; UI: super-ux layers current +
+  linter green; wiki synced (or absent and recommended once); dangling links fixed.
 
 ## 10 — Acceptance
 - **What:** the closing stage — go back to the brief and account for **every**

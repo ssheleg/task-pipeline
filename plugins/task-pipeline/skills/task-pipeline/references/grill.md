@@ -12,7 +12,27 @@ coming back to the operator.
 > half — glossary challenges, `CONTEXT.md`, ADR discipline — comes from there; the
 > autonomy sweep and the brief are this pipeline's.
 
-## The loop
+## Phase 1 — harvest before you ask
+
+**Do not open the interview cold.** Stage 0 begins by finding what the project
+already knows about this task: the code, `CLAUDE.md`, `CONTEXT.md` and the ADRs,
+`docs/` and `docs/ux/`, past pipeline briefs, the **knowledge wiki** when one is
+installed, and any **other repository or hosted doc system the project names as
+its docs**. Full procedure, source order, the wiki's detection and install line,
+and the ledger to write: [`knowledge-sources.md`](knowledge-sources.md).
+
+Two things come out of it, both required before question one:
+
+- the **source ledger** in the brief — one row per source consulted, what it says
+  about this task, and how fresh it is (`no sources found` is a valid row);
+- the list of things you therefore **don't need to ask**, and the specific points
+  where a source looks stale or ambiguous — those become the sharpest questions.
+
+Everything below runs against that harvest. An answer you can't check against a
+source is a recollection, and the whole loop exists to stop the run from building
+on one.
+
+## Phase 2 — the loop
 
 Interview the operator relentlessly about every aspect of the task until you reach
 a **shared understanding**. Walk down each branch of the decision tree, resolving
@@ -73,6 +93,15 @@ Create these files **lazily** — only when you have something real to write.
   check whether the code agrees, and surface contradictions: *"Your code cancels
   entire Orders, but you just said partial cancellation is possible — which is
   right?"*
+- **Cross-reference with the harvest — every answer, not just the domain ones.**
+  Phase 1 put the ADRs, runbooks and wiki pages in your hands; use them the same
+  way: *"The March ADR says orders are written only through the command handler,
+  you just described a direct write — has that changed?"* The operator **outranks
+  every document**, but only out loud: an override quoted against its source is a
+  recorded decision, an unquoted one is an undetected divergence. When two sources
+  disagree, precedence is code > host docs/ADRs > wiki > memory, and the loser is
+  logged for the stage-9 update ([`knowledge-sources.md`](knowledge-sources.md) →
+  *Phase 2*).
 - **Update `CONTEXT.md` inline.** Resolve a term → write it down right then, not in
   a batch at the end. Format: [`templates/context.md`](../templates/context.md).
   Keep it free of implementation detail — only terms a domain expert would
@@ -101,6 +130,7 @@ explicit "stop and ask me here":
 | Stage | What to settle up front |
 |---|---|
 | run-wide | the model decision ([`model-tiering.md`](model-tiering.md)); what to decide autonomously vs escalate |
+| 0 Harvest | doc sources beyond this repo — other repos, hosted doc systems, the knowledge wiki — and whether stage 9 may write to them (another repo is outward: propose + PR, never a direct push) |
 | 1 Docs | external libs/APIs/SDKs in play; any private ones context7 can't resolve → where their docs live |
 | 2 Decompose | is this a platform (several capabilities/surfaces) or one module? if platform: deploy cadence — per module or once at the end |
 | 2–3 Spec | UI verdict (arms super-ux); any scenario-tracing waiver |
@@ -153,9 +183,12 @@ that shrank without anyone deciding it should.
 Everything resolved goes into the **task brief**, seeded from
 [`templates/brief.md`](../templates/brief.md) and committed to
 `docs/superpowers/specs/YYYY-MM-DD-<topic>-brief.md` — scope, **the REQ table**,
-users, UI verdict, constraints, locked decisions, the autonomy table,
-done-criteria, open assumptions. Seed the template only when the file is absent;
-never overwrite an existing brief.
+**the phase-1 source ledger**, users, UI verdict, constraints, locked decisions,
+the autonomy table, done-criteria, open assumptions. Seed the template only when
+the file is absent; never overwrite an existing brief.
+
+The ledger is not decoration: **stage 9 updates exactly what stage 0 read**, and
+every doc the grill proved stale is already listed there with what's wrong.
 
 Alongside it, seed the **carry-over ledger** from
 [`templates/carryover.md`](../templates/carryover.md) at

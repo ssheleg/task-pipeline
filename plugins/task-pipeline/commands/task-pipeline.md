@@ -5,15 +5,25 @@ argument-hint: <one-line task description>
 Use the `task-pipeline` skill to run the task below through all gated stages —
 **stage 0 intake grill** → docs study → brainstorm → spec → plan → subagent
 build → tests → lint/deploy → post-deploy → docs/wiki → **acceptance**. **Every stage's doctrine is
-built into the skill** (`references/{grill,brainstorm,decomposition,spec,planning,build,review,tdd,acceptance,loop-guard}.md`)
-— no companion plugin is required for any of them. The **intake grill is
+built into the skill** (`references/{knowledge-sources,grill,brainstorm,decomposition,spec,planning,build,review,tdd,acceptance,loop-guard}.md`)
+— no companion plugin is required for any of them. **Stage 0 opens with the
+knowledge harvest, before the first question** (`references/knowledge-sources.md`):
+pull what the project already knows about this task from the code, `CLAUDE.md`,
+`CONTEXT.md`/ADRs, `docs/` + `docs/ux/`, past pipeline briefs, the **knowledge wiki**
+if one is installed ([obsidian-wiki](https://github.com/ar9av/obsidian-wiki) —
+recommended, never required; detect `~/.obsidian-wiki/config`) and any **other repo
+or hosted doc system the project names as its docs**, then write the **source
+ledger** into the brief. The **intake grill is
 mandatory** (`references/grill.md`): interview the
 operator one question at a time (with a recommended answer each, exploring the
-codebase before asking) until every decision branch is resolved, applying the
+codebase before asking) until every decision branch is resolved, **validating every
+answer against the harvested sources** — the operator outranks any document, but
+only out loud, and a doc the run proves stale is logged for the stage-9 update —
+applying the
 grill's **domain awareness** (challenge terms against `CONTEXT.md`, sharpen fuzzy
 language, ADRs for hard-to-reverse calls) and covering the **autonomy sweep** (what
-would otherwise stop stages 1→10: docs sources, branch/tracker policy, test and lint
-commands, deploy target and authorization, log locations, docs/wiki targets) —
+would otherwise stop stages 1→10: docs sources incl. doc repos and the wiki, branch/tracker
+policy, test and lint commands, deploy target and authorization, log locations, docs/wiki targets) —
 until the brief is locked — including the **REQ table**, the request as an addressable list where every row names how it is verified — so the rest runs autonomously and the final stage can account for all of it. The list is frozen: adding is free, removing needs the operator's agreement. Anything deferred goes into the carry-over ledger the moment it's said. For any user-facing task, recommend/use
 **super-ux**. **If the brief describes a platform rather than a change**, stage 2 also cuts it into modules (`references/decomposition.md`) — module map committed, walking skeleton first, every REQ in exactly one module — and stages 3→10 then run per module, one brick at a time. **If any loop starts undoing an earlier pass** (same file edited twice for the same reason, a closed finding returning, a third entry into one stage), stop and run the loop guard (`references/loop-guard.md`): name both shapes, escalate to the layer that owns the conflict, re-plan the check as an ordered list, then go item by item. Honor every stage gate by its type (`auto` = verify yourself;
 `manual` = wait for explicit go). Confirm the **model once at preflight** —

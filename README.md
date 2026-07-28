@@ -21,7 +21,7 @@ or **manual** (waits for your go). One model, confirmed before the run starts.
 
 | # | Stage | Gate | Type |
 |---|---|---|---|
-| 0 | Intake grill — **mandatory** | shared understanding + autonomy sweep; brief locked | manual |
+| 0 | Harvest + intake grill — **mandatory** | source ledger written; shared understanding + autonomy sweep; brief locked | manual |
 | 1 | Docs study | contracts grounded on current docs | auto |
 | 2 | Brainstorm + decompose | design approved; UI verdict recorded; every REQ answered; platform: module map approved | manual |
 | 3 | Spec | committed + reviewed; UI: super-ux chain validated, linter green | manual |
@@ -30,7 +30,7 @@ or **manual** (waits for your go). One model, confirmed before the run starts.
 | 6 | Tests | full suite green, new code covered | auto |
 | 7 | Lint + deploy | lint clean + suite green before deploy | manual |
 | 8 | Post-deploy | clean boot / honest degradation | auto |
-| 9 | Docs + wiki | docs + wiki synced | auto |
+| 9 | Docs + wiki | every stale source-ledger row updated; docs + wiki synced | auto |
 | 10 | **Acceptance** | every REQ accounted for with evidence; operator signs off | manual |
 
 These stages (0 intake + 1→10) are the plugin's **example** flow. It's a machine-readable config
@@ -49,6 +49,7 @@ stage that can fail because a plugin is missing:
 
 | Stage | Built-in doctrine |
 |---|---|
+| 0 Knowledge harvest | [`references/knowledge-sources.md`](plugins/task-pipeline/skills/task-pipeline/references/knowledge-sources.md) — source list, the wiki, the ledger, the stage-9 loop-back |
 | 0 Intake grill | [`references/grill.md`](plugins/task-pipeline/skills/task-pipeline/references/grill.md) — interview loop, domain awareness, autonomy sweep |
 | 2 Brainstorm | [`references/brainstorm.md`](plugins/task-pipeline/skills/task-pipeline/references/brainstorm.md) — approaches, YAGNI, the no-code-before-approval gate |
 | 2 Decompose | [`references/decomposition.md`](plugins/task-pipeline/skills/task-pipeline/references/decomposition.md) — platforms only: brick criteria, module map, build order |
@@ -69,6 +70,48 @@ and stages 2–6 from the corresponding skills in
 2/4/5/6 in your `pipeline.json` → `skills[]`. That's a substitution, never a
 requirement — the gates still govern, and nothing detects, recommends or waits for
 an external provider.
+
+## Knowledge harvest — read the project before asking the person
+
+Stage 0 doesn't open with a question. It opens by finding what the project already
+knows about this task
+([`references/knowledge-sources.md`](plugins/task-pipeline/skills/task-pipeline/references/knowledge-sources.md)):
+the code, `CLAUDE.md`, `CONTEXT.md` and the ADRs, `docs/` and `docs/ux/`, previous
+pipeline briefs and their carry-over ledgers, **the knowledge wiki if you have one**,
+and **any other repository or hosted doc system your project names as its docs**. It's
+retrieval scoped by the task's own nouns, not a read of everything, and it ends with a
+**source ledger** written into the brief — one row per source, what it says, how
+fresh, and whether this run makes it stale.
+
+That buys two things. The cheap one: you don't get asked what an ADR already
+answers. The one that matters: **an answer nobody can check is a recollection.**
+People answer from memory about systems they wrote a year ago, and without the
+document in hand there is no way to tell a decision from a misremembering — so the
+run builds on it and every later gate passes honestly on a false premise. With the
+harvest in hand the grill quotes the source instead: *"the March ADR says orders go
+through the command handler, you just described a direct write — has that changed?"*
+You outrank every document, but **only out loud**: an override quoted against its
+source is a recorded decision, an unquoted one is an undetected divergence. When two
+sources disagree, precedence is code > host docs/ADRs > wiki > memory.
+
+Then the loop closes: **stage 9 updates exactly what stage 0 read.** Every doc the
+run proved stale is already in the ledger with what's wrong, so "docs updated" means
+the sources the next run will trust — not just the files this change happened to
+touch.
+
+**The wiki is [obsidian-wiki](https://github.com/ar9av/obsidian-wiki)** (Karpathy's
+LLM-wiki pattern), and it's the one source that carries *why* across projects and
+across months. Detected via `~/.obsidian-wiki/config` or a resolving `wiki-query`.
+Installed → queried at stage 0, synced with `wiki-update` at stage 9. Not installed →
+recommended once, with the line, and the run continues:
+
+```
+pip install obsidian-wiki
+obsidian-wiki setup --vault /path/to/your/vault
+```
+
+It is a **recommendation, never a gate** — no stage blocks on a missing wiki, and
+nothing asks twice in one run.
 
 ## Intake grill (stage 0) — mandatory
 
@@ -296,8 +339,10 @@ clean checkout. Copy and adapt it per project; nothing is hardcoded.
 `references/companion-skills.md` separates what's built in (stages 0, 2, 3, 4, 5, 6
 and 10 — nothing to install) from the short optional list: **super-ux** (required only for
 user-facing tasks — install line surfaced on the spot), **context7** (docs stage),
-**wiki-update** (stage 9). A single preflight block prints which are ready, which to
-install, and the model recommendation, so you arm the whole run in one exchange.
+**[obsidian-wiki](https://github.com/ar9av/obsidian-wiki)** (recommended — queried in
+the stage-0 harvest, synced at stage 9). A single preflight block prints which are
+ready, which to install, and the model recommendation, so you arm the whole run in
+one exchange.
 
 ## Portability
 

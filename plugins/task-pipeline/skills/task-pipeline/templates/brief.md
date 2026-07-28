@@ -9,6 +9,28 @@
 - **UI verdict:** yes / no — does this touch a user-facing surface (web/mobile/CLI/TUI)?
   If yes, the stage-3 super-ux UX track is armed.
 
+## Knowledge sources (the phase-1 harvest — written BEFORE the first question)
+
+What the project already knew about this task, and where it said so. One row per
+source actually consulted; `none found` is a valid, useful row. Stage 9 updates
+this same list — a source worth reading at the start is the next run's false
+premise if the run leaves it wrong.
+
+| Source | What it says about this task | Fresh? | Authority | Stale after this run? |
+|---|---|---|---|---|
+| `docs/adr/NNNN-….md` | … | YYYY-MM | decision | no |
+| wiki: `projects/…/concepts/…` | … | YYYY-MM | context | **yes — update at stage 9** |
+| `CLAUDE.md` | test/lint/deploy commands, house rules | current | convention | no |
+
+Precedence when two disagree: **code > host docs and ADRs > wiki > memory.** The
+operator outranks every document — but only **out loud**: an override quoted
+against its source is a recorded decision, an unquoted one is an undetected
+divergence.
+
+- **Doc repos / hosted doc systems this project names:** … (or `none`)
+- **Knowledge wiki:** installed / not installed
+  ([obsidian-wiki](https://github.com/ar9av/obsidian-wiki); recommended, never a gate)
+
 ## Scope
 
 - **In scope:** …
@@ -57,6 +79,7 @@ is not neutral — it is a scheduled interruption.
 |---|---|---|
 | run-wide | Model for this run | … (most capable available unless overridden; per-stage overrides here) |
 | run-wide | Decide autonomously vs escalate to me | … |
+| 0 Harvest | Doc sources beyond this repo — other repos, hosted docs, the knowledge wiki; and may stage 9 write to them? | … (another repo is outward: propose + PR, never a direct push) |
 | 1 Docs | External libs/APIs/SDKs in play; any context7 can't resolve → where their docs live | … |
 | 2 Decompose | Platform (several capabilities/surfaces) or one module? If platform — deploy cadence: per module, or once at the end | … |
 | 2–3 Spec | UI verdict (arms super-ux); scenario-tracing waiver, if any | … |
@@ -67,7 +90,7 @@ is not neutral — it is a scheduled interruption.
 | 7 Deploy | Target + path; release automation on/off; deploy-from-main rule | … |
 | 7 Deploy | **Authorization** — standing go, or ask every time? | … |
 | 8 Post-deploy | Where logs / health live (app name, endpoint, workflow) | … |
-| 9 Docs+wiki | Which module docs / runbooks this change updates; wiki sync yes/no | … |
+| 9 Docs+wiki | Which module docs / runbooks this change updates; wiki sync yes/no; which stale ledger rows get fixed | … |
 | 10 Acceptance | Who signs off; where deferred REQs get tracked (issue tracker / backlog) | … |
 
 > **Deploy authorization has a hard floor.** A standing go counts only if it is

@@ -1,7 +1,10 @@
-# Host conventions (stages 6–10)
+# Host conventions (stage 0 harvest, stages 6–10)
 
 The orchestrator is project-agnostic. For tests / lint / deploy / docs / wiki it reads the
 **host project's `CLAUDE.md` / `AGENTS.md` first**, then falls back to detection.
+The same files are the stage-0 harvest's first stop — they are where a project
+names its doc repos, its knowledge base and its house rules
+([`knowledge-sources.md`](knowledge-sources.md)).
 Prefer explicit host instructions over detection; if a step's convention can't be
 found, surface it and **ask** rather than guessing.
 
@@ -30,9 +33,20 @@ found, surface it and **ask** rather than guessing.
   CI: the workflow run. Hit the health endpoint if one is defined.
 
 ## Docs + wiki
+- **Start from the stage-0 source ledger** ([`knowledge-sources.md`](knowledge-sources.md)):
+  the sources the harvest read are the sources this stage updates. Anything the run
+  proved stale is already listed there with what's wrong.
 - Host self-update rules (module docs, runbooks, agent-self cards, etc.) — update
-  in the same change. Wiki: the `wiki-update` skill (resolves the vault via
-  `~/.obsidian-wiki/config`). Fix dangling links.
+  in the same change. Fix dangling links.
+- **Wiki:** [obsidian-wiki](https://github.com/ar9av/obsidian-wiki) — the
+  `wiki-update` skill (resolves the vault via `~/.obsidian-wiki/config`). Detect it
+  the same way the harvest does; if absent, recommend it once
+  (`pip install obsidian-wiki` → `obsidian-wiki setup --vault <path>`) and continue.
+  A project may of course use a different knowledge base — then its own
+  `CLAUDE.md` names the sync command, and that wins.
+- **Docs in another repository** (a docs repo, a submodule, a sibling checkout the
+  project names): updating it is **outward** — propose the change, get an explicit
+  operator go, open a PR there. Never push to a repo the task didn't name.
 
 ## Issue tracker (stage 10)
 

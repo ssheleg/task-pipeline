@@ -9,11 +9,13 @@
       "name": "Intake grill",
       "model": "default",
       "skills": [
+        "task-pipeline:knowledge-harvest",
+        "wiki-query",
         "task-pipeline:grill"
       ],
       "gate": {
         "type": "manual",
-        "check": "MANDATORY stage — never skipped (only sanctioned bypass: the entry-from-super-ux short-circuit). The grill is built into the skill (references/grill.md) — no companion to install. Per its contract: one question at a time, a recommended answer with each, explore the codebase/docs before asking, depth-first, contradictions reconciled; domain awareness applied (terms challenged against CONTEXT.md, ADRs recorded for hard-to-reverse calls). The autonomy sweep is covered — every stage 1-10 has its blockers pre-resolved (docs sources, branch/tracker policy, test + lint commands, deploy target and authorization, log/health locations, docs+wiki targets) or is explicitly marked 'stop and ask here'. UI verdict recorded (arms super-ux); model decision recorded. All of it locked into a committed task brief the operator confirms before stage 1. The REQ table is written — one row per independently verifiable deliverable, each naming how it is verified — and frozen: adding later is free, removing or narrowing needs the operator's explicit agreement. The carry-over ledger is seeded."
+        "check": "MANDATORY stage — never skipped (only sanctioned bypass: the entry-from-super-ux short-circuit). PHASE 1, before the first question: harvest the knowledge sources (references/knowledge-sources.md) — code, CLAUDE.md/AGENTS.md, CONTEXT.md + docs/adr, docs/ + docs/ux, past pipeline briefs and carry-over ledgers, the knowledge wiki when installed (obsidian-wiki — recommended, never required; detect ~/.obsidian-wiki/config), and any other repo or hosted doc system the project names as its docs — queried by this task's own terms, with the SOURCE LEDGER written into the brief (a row per source consulted, or an explicit 'none found'). PHASE 2, the grill, built into the skill (references/grill.md) — no companion to install. Per its contract: one question at a time, a recommended answer with each, explore the codebase/docs before asking, depth-first, contradictions reconciled; EVERY answer that touches a harvested source is validated against that source — the operator outranks any document, but only out loud, and the losing side is logged for the stage-9 doc update; domain awareness applied (terms challenged against CONTEXT.md, ADRs recorded for hard-to-reverse calls). The autonomy sweep is covered — every stage 1-10 has its blockers pre-resolved (docs sources, branch/tracker policy, test + lint commands, deploy target and authorization, log/health locations, docs+wiki targets) or is explicitly marked 'stop and ask here'. UI verdict recorded (arms super-ux); model decision recorded. All of it locked into a committed task brief the operator confirms before stage 1. The REQ table is written — one row per independently verifiable deliverable, each naming how it is verified — and frozen: adding later is free, removing or narrowing needs the operator's explicit agreement. The carry-over ledger is seeded."
       }
     },
     {
@@ -139,7 +141,7 @@
       ],
       "gate": {
         "type": "auto",
-        "check": "docs in sync with code in the same change; wiki synced; dangling links fixed"
+        "check": "the stage-0 source ledger is the work list — every source the harvest read is updated if this run changed or disproved it; docs in sync with code in the same change; wiki synced via wiki-update when obsidian-wiki is installed (absent → recommended once, never a blocker); docs living in another repository are outward — proposed with an explicit go, or carried over with the exact edit; dangling links fixed"
       }
     },
     {
