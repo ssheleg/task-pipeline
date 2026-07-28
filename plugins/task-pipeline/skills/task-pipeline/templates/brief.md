@@ -38,6 +38,7 @@ is not neutral — it is a scheduled interruption.
 | 1 Docs | External libs/APIs/SDKs in play; any context7 can't resolve → where their docs live | … |
 | 2–3 Spec | UI verdict (arms super-ux); scenario-tracing waiver, if any | … |
 | 4–5 Dev | Base branch; worktree/branch policy; is `main` off-limits; commit convention; task tracker | … |
+| 5 Integration | How the branch lands — direct merge, PR (who approves), or "leave it, I'll merge"; is parallel fan-out (one worktree per implementer) wanted? | … |
 | 6 Tests | Test command; what "green" means; known-red baseline; coverage expectation | … |
 | 7 Lint | Lint command (incl. `docs/ux/lint.py` for UI projects) | … |
 | 7 Deploy | Target + path; release automation on/off; deploy-from-main rule | … |

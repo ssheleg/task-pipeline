@@ -21,6 +21,14 @@ genuine ambiguity, or completion. "Should I continue?" between tasks is noise.
 **Narration:** at most one short line between tool calls. The ledger and the tool
 results are the record.
 
+**No subagents available?** (a harness without them, or a plan so small that
+dispatching costs more than it saves) — run the same loop inline: same isolation,
+same ledger, same TDD per task, and after each task review your own diff against
+the rubric in [`review.md`](review.md) before moving on. What changes is who does
+the work; the gates, the artifacts and the review discipline do not. Say plainly
+that the run is inline, since a self-review is weaker evidence than a fresh
+reviewer's.
+
 ## 1. Isolation
 
 Work never starts on `main`/`master` without the operator's explicit consent
@@ -47,7 +55,10 @@ native tool exists creates state the harness can't see or clean up.
 **Git fallback**, only when there is no native tool:
 
 ```bash
-git check-ignore -q .worktrees || echo ".worktrees/" >> .gitignore   # MUST be ignored
+# both scratch roots MUST be ignored before anything is created
+git check-ignore -q .worktrees || printf '.worktrees/\n' >> .gitignore
+git check-ignore -q .task-pipeline || printf '.task-pipeline/\n' >> .gitignore
+git diff --quiet .gitignore || git commit -m "chore: ignore build scratch dirs" .gitignore
 git worktree add ".worktrees/$BRANCH" -b "$BRANCH"
 ```
 
@@ -71,7 +82,9 @@ re-dispatches completed tasks — the most expensive failure this stage has.
 - Each plan owns a git-ignored workspace: `.task-pipeline/build/<plan-basename>/`
   at the repo root. Everything for THIS plan lives there — ledger, task briefs,
   implementer reports, review packages. Another plan's directory is never yours to
-  read or write. Add `.task-pipeline/` to `.gitignore` if it isn't there.
+  read or write. `.task-pipeline/` must be git-ignored — the isolation step above
+  adds and commits it; if you skipped that step, do it now, in its own commit, so
+  scratch files never land in a task's diff.
 - Ledger: `<workspace>/progress.md`, first line = its identity:
   `# build ledger — plan: <plan file path>`.
 - **Resuming:** a task with a `Task <N>: complete` line is DONE — never
@@ -92,19 +105,28 @@ that mandates it, asking which governs. Clean scan → proceed silently.
 
 ## 3. Models
 
-The run has one confirmed model ([`model-tiering.md`](model-tiering.md)); pin every
-subagent to it explicitly. An omitted model silently inherits the session's,
-defeating any override the operator recorded.
+**Default: the run's one confirmed model** ([`model-tiering.md`](model-tiering.md))
+for every subagent — implementers, reviewers, fixers. Pin it explicitly on each
+dispatch; an omitted model silently inherits the session's and defeats whatever the
+operator recorded.
 
-When — and only when — the operator recorded a per-stage or per-role override map,
-apply it: mechanical transcription tasks (the plan carries the complete code, 1–2
-files) can take a cheaper tier, integration and design tasks stay on the confirmed
-one, and the final whole-branch review always takes the most capable tier
-available. Turn count beats token price: the cheapest tier routinely takes 2–3× the
-turns on multi-step work and costs more overall.
+**Deviate only from the operator's recorded override map.** If the stage-0 brief
+carries per-stage or per-role overrides, apply them: mechanical transcription tasks
+(the plan carries the complete code, 1–2 files) can take a cheaper tier, while
+integration, design and review work stays on the confirmed model. No map recorded →
+no deviation, and never a silent downgrade. Turn count beats token price: the
+cheapest tier routinely takes 2–3× the turns on multi-step work and costs more
+overall.
 
-**Fix-loop escalation (rounds 4–5):** one tier above the implementer that got
-stuck, if the environment has one; otherwise say so and use fresh eyes alone.
+**Two moments deserve more capability than the run's default** — both are
+*recommendations you state out loud*, never silent switches:
+
+- **The final whole-branch review.** If the run is on a tier below the most capable
+  one available, say so and offer to run this one review there; if the operator
+  declines or the tier doesn't exist, run it on the confirmed model and note it.
+- **Fix-loop rounds 4–5.** One tier above the implementer that got stuck, when the
+  environment has one and the override map or the operator allows it; otherwise
+  say so and rely on fresh eyes alone.
 
 ## 4. The task loop
 
@@ -134,25 +156,41 @@ Never paste accumulated history ("state after tasks 1–3") into later dispatche
 Never make a subagent read the whole plan. If an earlier task parked a finding in
 the area this task touches, carry a pointer to that ledger line.
 
-**Never dispatch implementers in parallel** — even for tasks in the same parallel
-group, unless each runs in its own isolated worktree; two agents writing one working
-tree corrupt each other's state.
-
 Record the implementer's agent identity: fix rounds 1–3 resume it.
 
 **Implementer contract** (put this in the prompt):
 
-> Read `<brief path>` first — it is your requirements. Work TDD: failing test →
-> watch it fail → minimal implementation → watch it pass → commit (see the
-> pipeline's TDD rules). Commit as you go, conventional commits. When done,
-> self-review your diff, then write the full report to `<report path>`:
+> Read `<brief path>` first — it is your requirements. Work TDD, and no production
+> code exists before a test you **watched fail**: write the failing test → run it
+> and confirm it fails for the right reason → write the minimal code that passes →
+> run it and confirm it passes, with the rest of the suite still green → commit.
+> Assert on real behavior, never on mock behavior. Commit as you go, conventional
+> commits. When done, self-review your diff, then write the full report to
+> `<report path>`:
 > what you built, the files touched, the commits, the test command and its
 > output, decisions you made, anything you're unsure about. Return **only**:
 > status (`DONE` / `DONE_WITH_CONCERNS` / `NEEDS_CONTEXT` / `BLOCKED`), the
 > commit range, a one-line test summary, and your concerns. Ask before starting
 > if anything in the brief is ambiguous — questions are cheaper than rework.
 
-### 4.2 Handle the report
+### 4.2 Parallel groups — when fan-out is allowed
+
+The plan's parallel groups ([`planning.md`](planning.md)) describe what *may* run
+concurrently. Whether it actually does is this stage's call, and the constraint is
+physical: **two implementers writing one working tree corrupt each other's state.**
+
+- **Default: sequential.** One implementer at a time, review after each. Correct for
+  every group, and always correct when the tasks are small.
+- **Fan out only when all three hold:** the tasks are in the same group (no
+  `depends:` between them), their file ownership is exclusive per the plan, and
+  **each implementer gets its own isolated worktree**. Then dispatch them together,
+  review each one against its own diff, and integrate the worktrees back to the
+  build branch one at a time, running the suite after each merge.
+- **Any conflict on integration** means the plan's file ownership was wrong: stop
+  fanning out, finish the group sequentially, and record it in the ledger.
+- Never fan out the fix loop — a task under repair belongs to one implementer.
+
+### 4.3 Handle the report
 
 | Status | Action |
 |---|---|
@@ -166,7 +204,7 @@ prompt after a BLOCKED. If the implementer says it's stuck, something must chang
 If the implementer asks a question — before or mid-task — answer it completely; do
 not rush it into implementation.
 
-### 4.3 Review the task
+### 4.4 Review the task
 
 Every task gets a review with **both** verdicts — spec compliance and code quality.
 The implementer's self-review never substitutes for it. Rubric, inputs, prompt
@@ -177,7 +215,7 @@ unchanged code or span tasks. They don't block the review, but you resolve each 
 yourself before completing the task; you hold the cross-task context the reviewer
 lacks. A confirmed gap becomes a failed spec review and enters the fix loop.
 
-### 4.4 The fix loop
+### 4.5 The fix loop
 
 Triggered by: spec ❌, any Critical or Important finding, or a "cannot verify" item
 you confirmed as a real gap.
@@ -215,8 +253,10 @@ Everything else loops. One round = one fix dispatch + one scoped re-review.
 - **Ledger, every round:**
   `Task <N>: fix round <R>/5 (<X> addressed, <Y> open — <one-liners>; commits <a7>..<b7>)`
 
-**Never fix findings yourself in the controller session** — controller fixes skip
-review and pollute the context you need for coordination.
+**In a subagent run, never fix findings yourself in the controller session** —
+controller fixes skip review and pollute the context you need for coordination. In a
+declared inline run you do fix them, and you still review the fix diff against the
+rubric before closing the round.
 
 **The breaker.** If round 5's re-review still leaves findings open, stop
 dispatching and adjudicate each one yourself:
@@ -234,7 +274,7 @@ Adjudicate **only at the cap**. Adjudicating earlier to end a loop is pre-judgin
 with a nicer name. Every adjudication is a ledger line; silent discards are
 forbidden.
 
-### 4.5 Complete the task
+### 4.6 Complete the task
 
 When the review is clean — or every open finding is parked with a ruling at the cap
 — append:
@@ -248,8 +288,9 @@ findings are neither fixed nor parked-with-ruling at the cap.
 ## 5. Final whole-branch review
 
 After the last task: build a package over `MERGE_BASE`..`HEAD`
-(`git merge-base main HEAD`), dispatch the whole-branch review on the most capable
-model available ([`review.md`](review.md) → *Final review*), and point it at the
+(`git merge-base main HEAD`), dispatch the whole-branch review
+([`review.md`](review.md) → *Final review*; on the run's model, escalation offered
+out loud per *Models* above), and point it at the
 ledger's deferred-minor and parked lines so it can triage what must be fixed before
 merge.
 
@@ -259,28 +300,47 @@ Then exactly **one** scoped re-review of the fix wave. Adjudicate residuals as i
 the breaker: park with rulings, or stop on load-bearing ones. There is no second
 fix wave.
 
-## 6. Finish
+## 6. Integrate, then finish
 
-Final review clean and its fixes merged → delete this plan's workspace
-(`rm -rf .task-pipeline/build/<plan-basename>`); git history is the record now.
-Sibling directories belong to other plans — leave them.
+The work is in a worktree on its own branch; stages 7–9 lint, deploy and document
+the **integrated** result. Close that gap here, honoring the branch policy recorded
+in the stage-0 brief:
+
+1. **Sync with the base branch** (rebase or merge, whichever the project uses) and
+   re-run the full suite on the result. A branch that was green in isolation and red
+   after integration is red — fix it here, not at stage 7.
+2. **Land it the project's way:** merge into the base branch, or open a PR when the
+   project requires review. Opening a PR is outward-facing — do it only with the
+   operator's go or the brief's specific standing authorization.
+3. **Never force-push a shared branch**, and never land on `main` when the brief put
+   it off-limits.
+4. **Remove the worktree** once merged (`git worktree remove <path>`, or the native
+   tool that created it), and delete this plan's workspace
+   (`rm -rf .task-pipeline/build/<plan-basename>`) — git history is the record now.
+   Sibling directories belong to other plans; leave them.
+
+If the operator's policy is "leave the branch, I'll merge it myself", stop after
+step 1, say exactly where the branch is and what state it's in, and record that
+stages 7–9 run against an unintegrated branch.
 
 ## GATE (auto)
 
 All plan tasks DONE with both review verdicts (spec compliance, then code quality);
 the full test suite green; every open finding either fixed or parked with a ruling;
-no task left BLOCKED. Verify it yourself; a red suite or an unresolved BLOCKED
-does not advance to stage 6.
+no task left BLOCKED; the branch integrated per the brief's policy — or the
+operator explicitly told you to leave it, and that is recorded. Verify it yourself;
+a red suite or an unresolved BLOCKED does not advance to stage 6.
 
 ## Rationalizations
 
 | Excuse | Reality |
 |---|---|
 | "Close enough on spec compliance" | The reviewer found spec gaps ⇒ not done. Fix, or hit the cap and adjudicate. Those are the only exits. |
-| "I'll fix it myself, dispatching is overhead" | Controller fixes skip review and pollute your context. Resume the implementer. |
+| "I'll fix it myself, dispatching is overhead" | In a subagent run, controller fixes skip review and pollute your context — resume the implementer. (Inline runs are the declared exception, and still review the fix diff.) |
 | "One more round will converge" | Past the cap, rounds don't converge — the failure is structural. Adjudicate and route. |
 | "The fix was small, skip the re-review" | Unreviewed fixes are how regressions land. Every round ends with a scoped re-review. |
 | "This finding is obviously wrong, drop it" | You adjudicate at the cap, in writing. Silent discards are forbidden. |
 | "Ledger bookkeeping is overhead" | The ledger is what survives compaction. Without one, controllers re-run entire completed task sequences. |
 | "Two implementers in parallel will be faster" | One working tree, two writers = corrupted state. Parallel needs one worktree each. |
 | "I'll paste the earlier tasks so it has context" | A fresh subagent needs its task, its interfaces and the constraints. Pasted history is pure cost. |
+| "Stage 7 can merge the branch" | Stage 7 lints and deploys what is integrated. An unmerged branch means lint, deploy and docs all ran against something that is not what ships. |

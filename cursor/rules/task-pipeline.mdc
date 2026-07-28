@@ -90,7 +90,11 @@ not authorize an outward, irreversible action — stage 7 stops and asks.
    commit), then a review with **both** verdicts — spec compliance and code
    quality. Findings loop back to the implementer (max 5 rounds, then adjudicate in
    writing); minor findings are recorded, never blocking. Keep a progress ledger in
-   a file so a lost context can resume instead of redoing finished work.
+   a file so a lost context can resume instead of redoing finished work. Tasks in
+   the same parallel group run concurrently **only** if each worker has its own
+   worktree — otherwise sequential. Close the stage by integrating: sync with the
+   base branch, re-run the full suite on the result, merge (or open a PR — that's
+   outward, so ask first), remove the worktree.
 6. **Tests** (auto) — full suite green (not just new tests); new/changed code
    covered including failure paths; no skip/xfail hiding red. Tests assert real
    behavior, never mock behavior.

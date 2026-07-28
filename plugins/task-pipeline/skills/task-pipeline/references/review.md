@@ -13,7 +13,9 @@ install.
 ## The diff package
 
 A reviewer never re-derives the diff with a dozen git calls, and the diff never
-enters **your** context. Write it to one file and pass the path:
+enters **your** context. Write it to one file and pass the path (`$WORKSPACE` is
+this plan's git-ignored directory, `.task-pipeline/build/<plan-basename>/` — see
+[`build.md`](build.md)):
 
 ```bash
 { git log --oneline "$BASE..$HEAD"
@@ -156,5 +158,8 @@ finding either.
 > which can stand and why. Findings only, with severity and a concrete failure
 > scenario each. Return the findings as your final message.
 
-Dispatch the final review on the most capable model available — it is the one
-review that sees the whole change.
+Run the final review on the **run's confirmed model** like everything else
+([`model-tiering.md`](model-tiering.md)). It is the one review that sees the whole
+change, so if the run is on a tier below the most capable one available, say so and
+offer to escalate just this dispatch — a recommendation stated out loud, never a
+silent switch (`build.md` → *Models*).

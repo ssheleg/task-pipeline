@@ -1,5 +1,55 @@
 # Changelog
 
+## v0.15.0 — 2026-07-28
+
+Coherence pass over the v0.13.0 port: three contradictions resolved, three gaps
+closed, and the config's gate text re-synced with the doctrine.
+
+### Fixed
+- **Model policy contradicted itself.** `build.md` and `review.md` told the final
+  whole-branch review to run "on the most capable model available" while
+  `model-tiering.md` promises **one** model per run. Both now default to the run's
+  confirmed model; when the run sits below the top tier, escalation for that single
+  review (and for fix-loop rounds 4–5) is **offered out loud**, never switched
+  silently, and only the operator's recorded override map authorizes a cheaper tier.
+- **Parallel groups were planned and then forbidden.** `planning.md` mandates
+  dependency-ordered parallel groups with exclusive file ownership; `build.md` said
+  "never dispatch implementers in parallel". New §4.2 states the real rule: default
+  sequential, fan out only when the tasks share a group, own disjoint files **and**
+  each implementer gets its own worktree; integrate the worktrees one at a time; any
+  merge conflict means the plan's ownership was wrong — fall back to sequential and
+  record it. The fix loop never fans out.
+- **Scratch dirs could land in a task's diff.** The isolation snippet now ignores
+  **and commits** both `.worktrees/` and `.task-pipeline/` before anything is
+  created.
+
+### Added
+- **Stage 5 now ends with integration.** Sync with the base branch, re-run the full
+  suite on the merged result (green-in-isolation is not green), land it the
+  project's way — merge, or a PR, which is outward and needs a go — never
+  force-push a shared branch, never land on `main` when the brief forbids it, then
+  remove the worktree. Stages 7–9 lint, deploy and document the integrated result,
+  so "leave it unmerged" is allowed but must be recorded. The stage-5 gate, the
+  stage table, the Cursor rule and the example config carry the new condition.
+- **Inline execution mode.** A harness without subagents (or a plan too small to be
+  worth dispatching) runs the same loop inline: same isolation, ledger, TDD and
+  review rubric applied to your own diff — declared out loud, since a self-review is
+  weaker evidence than a fresh reviewer's. Replaces the capability that
+  `superpowers:executing-plans` used to cover.
+- **Grill + brief sweep row for integration** — how the branch lands (merge / PR +
+  approver / "leave it") and whether parallel fan-out is wanted, so stage 5 never
+  stops to ask.
+
+### Changed
+- The implementer contract spells the TDD loop out inline instead of pointing a
+  zero-context subagent at a file it can't resolve, and the plan header no longer
+  cites a skill-internal path.
+- `pipeline.example.json` gate text for stages 4, 5 and 6 re-synced with
+  `references/stages.md`; stage 4's gate now also names type/name consistency and
+  the per-task DoD.
+- `review.md` defines `$WORKSPACE` where it first uses it; `build.md` §4 subsections
+  renumbered after the insert.
+
 ## v0.14.0 — 2026-07-28
 
 ### Fixed

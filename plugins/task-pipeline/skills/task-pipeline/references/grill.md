@@ -104,6 +104,7 @@ explicit "stop and ask me here":
 | 1 Docs | external libs/APIs/SDKs in play; any private ones context7 can't resolve → where their docs live |
 | 2–3 Spec | UI verdict (arms super-ux); any scenario-tracing waiver |
 | 4–5 Dev | base branch; worktree/branch policy; is `main` off-limits; commit convention; task tracker |
+| 5 Integration | how the branch lands (merge / PR + approver / "leave it unmerged"); parallel fan-out wanted (one worktree per implementer)? |
 | 6 Tests | the test command; what "green" means here; known-red baseline; coverage expectation |
 | 7 Lint+deploy | lint command; deploy target and path; release automation on/off; deploy-from-main rule; **deploy authorization** |
 | 8 Post-deploy | where logs / health live (app name, endpoint, workflow) |

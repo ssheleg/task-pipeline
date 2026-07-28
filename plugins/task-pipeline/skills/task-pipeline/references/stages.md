@@ -136,7 +136,8 @@ stages/agents/types (see SKILL.md → *Bring your own skills*).
   paths, complete code in every step, TDD steps with expected output, DoD each,
   dependency graph + parallel groups, non-overlapping file ownership, and the
   Global Constraints block copied verbatim from the spec.
-- **GATE (auto):** every spec requirement maps to a task; no placeholders; parallel-group
+- **GATE (auto):** every spec requirement maps to a task; no placeholders; names and
+  types consistent across tasks; every task carries a verifiable DoD; parallel-group
   tasks share no files. For UI tasks: every task building user-facing behavior
   names the scenario ID(s) and `SCR-` screen(s) it implements, and its DoD
   includes satisfying them **and** updating the affected super-ux layers in the
@@ -150,10 +151,16 @@ stages/agents/types (see SKILL.md → *Bring your own skills*).
   a review after every task ([`review.md`](review.md)), and a five-round fix loop
   with an explicit breaker. TDD per task ([`tdd.md`](tdd.md)): failing test →
   watch it fail → minimal impl → watch it pass → commit. Pin subagents to the
-  run's confirmed model (`model-tiering.md`).
+  run's confirmed model (`model-tiering.md`). The plan's parallel groups fan out
+  **only** when each implementer gets its own worktree; otherwise sequential.
+- **Integration closes the stage:** sync with the base branch, re-run the full suite
+  on the result, land it the project's way (merge, or a PR — outward, so it needs a
+  go), remove the worktree. Stages 7–9 act on the integrated result, so a branch the
+  operator chose to leave unmerged is recorded as such.
 - **GATE (auto):** all plan tasks DONE (two-stage review: spec compliance, then code
   quality); every finding fixed or parked with a ruling; no task left BLOCKED; full
-  test suite green.
+  test suite green; branch integrated per the brief's policy (or the operator's
+  "leave it" recorded).
 
 ## 6 — Tests
 - **What:** consolidate test coverage for the change: confirm new functionality

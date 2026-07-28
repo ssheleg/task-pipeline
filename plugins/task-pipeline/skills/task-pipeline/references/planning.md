@@ -59,8 +59,9 @@ commit.
 ```markdown
 # <Feature> — implementation plan
 
-> **For agentic workers:** execute this plan task-by-task per the task-pipeline
-> stage-5 build doctrine (`references/build.md`). Steps use `- [ ]` checkboxes.
+> **For agentic workers:** execute this plan task-by-task under the task-pipeline
+> stage-5 build doctrine — isolated workspace, one implementer per task, a review
+> with both verdicts after each. Steps use `- [ ]` checkboxes.
 
 **Goal:** <one sentence>
 

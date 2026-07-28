@@ -69,7 +69,7 @@
       ],
       "gate": {
         "type": "auto",
-        "check": "every spec requirement maps to a task; no placeholders; parallel-group tasks share no files; UI tasks name the scenario ID(s) and SCR- screen(s) they implement in their DoD"
+        "check": "every spec requirement maps to a task; no placeholders; names and types consistent across tasks; every task carries a verifiable DoD; parallel-group tasks share no files; UI tasks name the scenario ID(s) and SCR- screen(s) they implement in their DoD"
       }
     },
     {
@@ -83,7 +83,7 @@
       ],
       "gate": {
         "type": "auto",
-        "check": "all plan tasks DONE (two-stage review: spec compliance, then code quality); full test suite green"
+        "check": "all plan tasks DONE (two-stage review per task: spec compliance, then code quality); every finding fixed or parked with a written ruling; no task left BLOCKED; full test suite green; the branch integrated per the brief's branch policy (base synced, suite green on the result, worktree removed) — or the operator's explicit 'leave it unmerged' recorded"
       }
     },
     {
@@ -97,7 +97,7 @@
       ],
       "gate": {
         "type": "auto",
-        "check": "full suite green (not just new tests); new/changed code covered; no skip/xfail smuggling a red suite past the gate"
+        "check": "full suite green (not just new tests); new/changed code covered including failure paths; no skip/xfail smuggling a red suite past the gate; tests assert real behavior, not mock behavior"
       }
     },
     {

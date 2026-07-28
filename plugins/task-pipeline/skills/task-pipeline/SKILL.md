@@ -119,8 +119,9 @@ Two things the grill does beyond clarifying the request:
 5. Cross-cutting, every stage: **answer from the brief's autonomy section rather
    than asking again** — it was grilled precisely so you wouldn't have to; task
    tracker + conventional commits per host conventions; worktree isolation for the
-   build; honest degradation (never claim a failed/skipped step succeeded);
-   outward/irreversible actions (deploy, publish, repo create) need explicit
+   build, integrated back per the brief's branch policy before stage 7; honest
+   degradation (never claim a failed/skipped step succeeded);
+   outward/irreversible actions (deploy, publish, repo create, opening a PR) need explicit
    operator go — or a **specific** standing authorization recorded in the brief
    (named target + preconditions; a vague "do everything" is not one).
 
@@ -136,7 +137,7 @@ capable available — see `references/model-tiering.md`).
 | 2 | Brainstorm | built in: [`references/brainstorm.md`](references/brainstorm.md) + **UI detection** | design approved; UI verdict recorded | manual |
 | 3 | Spec | built in: [`references/spec.md`](references/spec.md) — **UI → super-ux chain first** (`/ux` → `ux-foundation` CJM → `ux-flows` screens → `ux-scenarios` → `/ux-lint`), then spec `docs/superpowers/specs/…-design.md` | committed + reviewed; UI: chain validated, linter green, scenarios/`SCR-` traced | manual |
 | 4 | Plan | built in: [`references/planning.md`](references/planning.md) → `docs/superpowers/plans/…md` | parallel-ready, DoD per task | auto |
-| 5 | Dev | built in: [`references/build.md`](references/build.md) (worktree → subagent per task → review loop) + [`references/tdd.md`](references/tdd.md) | tasks DONE, TDD green per task | auto |
+| 5 | Dev | built in: [`references/build.md`](references/build.md) (worktree → subagent per task → review loop → integrate) + [`references/tdd.md`](references/tdd.md) | tasks DONE, TDD green per task, branch integrated per the brief | auto |
 | 6 | Tests | host test runner + built-in [`references/tdd.md`](references/tdd.md) | full suite green; new/changed code covered | auto |
 | 7 | Lint + deploy | host lint → deploy per host convention | lint clean + suite green before deploy; deploy needs a go (or the brief's specific standing authorization) | manual |
 | 8 | Post-deploy | tail deploy logs / health-check | clean boot or honest degradation report | auto |
