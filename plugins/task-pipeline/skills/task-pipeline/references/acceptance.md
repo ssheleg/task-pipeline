@@ -18,10 +18,34 @@ run itself decided, deferred, or quietly dropped along the way.
 It runs **last** — after docs and wiki (stage 9), because those are deliverables
 too and a requirement may name them.
 
+## First, the ladder walk — what the list itself is missing
+
+The REQ table answers *"did everything on the list ship?"*. It cannot answer
+*"should something else have been on the list?"* — a comparison needs two sides,
+and an absence has one.
+
+So **before writing the coverage table**, walk the ladder in
+[`audit.md`](audit.md): each REQ bottom-up through its rungs (decision → spec
+section → contract **and its failure behavior** → task → change → executed test →
+surface and docs), checking the seam at each step. It is one pass, scoped to this
+run's deliverables, and it is the only part of the pipeline that can find a gap
+that was never a row.
+
+- **An absence found here becomes a new REQ row with its check**, then the table is
+  written. The list is frozen against *narrowing*, never against additions
+  ([`grill.md`](grill.md) → *The REQ spine*). Writing the table first and appending
+  afterwards is how acceptance goes green over a gap.
+- **A finding that belongs to a lower layer goes back to that layer** — spec gaps to
+  stage 3, plan gaps to stage 4 — rather than being patched in place at stage 10.
+- **Report the audit's two counts** (new findings; findings caused by this run's own
+  fixes) in the ledger. They are what tells the next pass whether the axis is
+  exhausted (`audit.md` → *Every pass changes the axis*).
+
 ## Inputs
 
 Read all of them before writing anything:
 
+- the ladder walk's findings (above) — they may have added REQ rows
 - the brief's **REQ table** (`docs/superpowers/specs/<topic>-brief.md`)
 - the **carry-over ledger** (`…-carryover.md`) — in full, every row
 - the plan and its task statuses
@@ -97,13 +121,20 @@ whether the run was finished.
 
 All of:
 
-1. **Every REQ has a status** — none `unknown`, none blank.
-2. **Every `verified` carries evidence** of the kind above.
-3. **Every `partial` names what's missing** and where it's tracked.
-4. **Every `deferred` / `dropped` has the operator's agreement** recorded (in the
+1. **The ladder walk ran** ([`audit.md`](audit.md)) — every REQ's rungs checked
+   bottom-up, findings ordered by seam, absences turned into REQ rows **before**
+   the table was written, and the two pass counts recorded.
+2. **Every check this gate leans on has been seen failing** at least once against a
+   planted defect (`audit.md` → *Exit criterion*). An unproven check's green is not
+   evidence.
+3. **Every REQ has a status** — none `unknown`, none blank.
+4. **Every `verified` carries evidence** of the kind above.
+5. **Every `partial` names what's missing** and where it's tracked.
+6. **Every `deferred` / `dropped` has the operator's agreement** recorded (in the
    ledger or here) and, for `deferred`, a tracker entry.
-5. **No carry-over row is left `unresolved`** — every one has a home.
-6. **The operator answers the closing question** and signs off.
+7. **No carry-over row is left `unresolved`** — every one has a home, and the
+   ledger's counts are printed with this verdict, not just filed.
+8. **The operator answers the closing question** and signs off.
 
 Manual by design. An automated check can prove the table is *well-formed*; only
 the person who asked can confirm it is *what they asked for*. Do not let a green

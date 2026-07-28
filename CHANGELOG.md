@@ -1,5 +1,88 @@
 # Changelog
 
+## v1.1.0 — 2026-07-29
+
+**The pipeline could find a requirement that was named and lost. It could not find
+one that was never named.** Every gate compares two things — and a contradiction has
+two sides while **an absence has one**. Nothing in a diff between spec and plan
+reveals the error path nobody specified, the entity nobody gave an owner, the
+failure mode nobody thought of. This release adds the pass that can.
+
+### Added
+- **`references/audit.md` — the audit ladder, cross-cutting.** Eight rungs of one
+  deliverable (requirement → decision → spec section → contract **and its failure
+  behavior** → plan task → change → **executed** test → surface/docs) and, more
+  importantly, the **seam between each pair**, each with its own question: did the
+  decision reach the spec; does the section say what happens when the contract
+  fails; does every contract have a task (stage 4's set-equality covers REQ→task and
+  nothing covers contract→task); did the DoD land in the diff; would this test still
+  pass with the production code deleted; can a user reach it and does a doc say so;
+  and finally — does what shipped satisfy the requirement's own *statement* rather
+  than the task's instructions.
+- **Stage 10 now opens with the ladder walk, before the coverage table.** An absence
+  found there becomes a **new REQ row with its check**, and *then* the table is
+  written. Appending after the table is exactly how acceptance goes green over a
+  gap. Findings that belong to a lower layer go back to that layer (spec → stage 3,
+  plan → stage 4) instead of being patched in place at the last stage.
+- **Findings are ordered by seam, never by file.** A file-ordered list reads as
+  noise; a seam-ordered one names *which layer of your own process is leaking*,
+  which is the part worth knowing.
+- **Bottom-up, and that is not taste.** A missing artefact low on the ladder makes
+  everything above it meaningless — top-down you spend the pass polishing a surface
+  for a contract that does not exist. Bottom-up, the absence is finding #1 and the
+  six findings above it collapse into it.
+
+### Added — three rules that stop the audit becoming another loop
+- **Every pass changes the axis, not the effort.** A searching loop does not
+  oscillate the way an editing loop does — it **converges**, because each pass edits
+  the corpus the next pass reads, so the newest edits are always the
+  least-reviewed text present and are what the next pass finds. Measured over seven
+  passes on a production repository: by pass six, ten of thirteen findings were
+  caused by pass five's own fixes, while the raw count still looked healthy. So the
+  doctrine requires **two counts per pass** — new findings, and self-inflicted ones —
+  and names the crossover as the signal to **rotate the axis**: seams down one
+  deliverable, then invariants across deliverables, then one class swept end to end.
+- **A class that repeats twice becomes a gate, not a note.** Once is an incident;
+  twice is a category, and a category belongs in the host's lint or CI where nobody
+  has to remember it. Writing the third instance into the ledger is how a
+  mechanical defect class becomes permanent. Wired into the stage-5 fix loop too.
+- **What can't be fixed now becomes a ratchet, never a TODO.** The carry-over ledger
+  is now defined as a *named, counted set that may only shrink, printed beside every
+  gate verdict* — `carry-over: 4 open (was 6) · unresolved: 0`. A TODO is invisible
+  until somebody opens the file; a ratchet sits next to the word `PASS` on every
+  run, so **"green" never reads as "verified"** — it reads as *"green, and here is
+  exactly what was not looked at"*. A ratchet that grew needs one sentence saying
+  why.
+
+### Added — the exit criterion that is usually skipped
+- **A green result from an unproven check is worth nothing.** A deliverable is not
+  audited when somebody has read it; it is audited when every rung has its artefact
+  **and every check being relied on has fired at least once against a planted
+  defect.** This is `tdd.md`'s iron law — *if you didn't watch it fail, you don't
+  know it tests the right thing* — raised from one test to every gate, linter and
+  script in the run, and it is now part of the stage-10 gate. Checks written under
+  pressure lie in ways that read as success: a predicate that inspects the wrong
+  shape, a probe that reads its own over-deletion as a pass, a regex that misses the
+  word it searches for. All three pass loudly.
+
+### Changed
+- `loop-guard.md` and `audit.md` now state their seam explicitly in both files: the
+  loop guard governs loops that **change** things and trips on oscillation; the
+  audit governs loops that **look** for things and trips on convergence. Different
+  failure, different exit, and an agent reading either one now learns when the other
+  applies.
+- `tdd.md` names the generalisation of its own iron law; `build.md`'s fix loop gains
+  the repeats-twice rule; `templates/carryover.md` documents the ratchet contract.
+
+### Validator
+- `references/audit.md` joins the built-in-doctrine set (must exist, must not be a
+  stub, must be reachable from `SKILL.md`).
+- The shipped acceptance gate must require the ladder walk **and** say that an
+  absence becomes a new REQ row — a config where stage 10 only compares the REQ list
+  now fails.
+- Both guards ship with CI negative self-tests, and both were proven the way this
+  release demands: defect planted, check watched failing, defect removed.
+
 ## v1.0.0 — 2026-07-28
 
 **1.0.** Eighteen releases in ten days added a stage, a requirement spine, a

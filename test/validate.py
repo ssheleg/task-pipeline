@@ -166,7 +166,7 @@ for r in ("grill.md", "stages.md", "model-tiering.md", "conventions.md", "compan
 for r in (
     "brainstorm.md", "decomposition.md", "spec.md", "planning.md",
     "build.md", "review.md", "tdd.md", "acceptance.md", "loop-guard.md",
-    "knowledge-sources.md",
+    "knowledge-sources.md", "audit.md",
 ):
     rp = os.path.join(refdir, r)
     if not os.path.isfile(rp):
@@ -441,6 +441,17 @@ if pipe is not None:
         elif "evidence" not in str(last_gate.get("check", "")).lower():
             fail(f"{EXAMPLE_REL}: the acceptance gate.check must require EVIDENCE per "
                  "requirement — 'done' without evidence is the gap this stage exists to catch")
+        # The REQ table compares two lists, so it can only find a requirement that was
+        # NAMED and lost. A requirement nobody ever wrote appears on neither side —
+        # an absence has one side, and no comparison finds it. The ladder walk
+        # (references/audit.md) is the only pass in the flow that can, and it has to
+        # run BEFORE the table or its findings arrive too late to become rows.
+        _acc_chk = str(last_gate.get("check", "")).lower()
+        if "ladder" not in _acc_chk or "absence" not in _acc_chk:
+            fail(f"{EXAMPLE_REL}: the acceptance gate.check must require the LADDER WALK "
+                 "(references/audit.md) before the coverage table, and must say that an "
+                 "absence becomes a new REQ row — the table alone cannot find what was "
+                 "never written")
         # The brief->plan seam is where scope leaks silently, so the plan gate must
         # state the mechanical set comparison, not a judgement call.
         plan = next((st for st in stages if isinstance(st, dict) and st.get("state") == "plan"), None)

@@ -262,6 +262,17 @@ stages/agents/types (see SKILL.md → *Bring your own skills*).
   surfaces.
 - **Runs last**, after docs and wiki — those are deliverables too, and a REQ may
   name them.
+- **The ladder walk runs FIRST** ([`audit.md`](audit.md)). The REQ table can only
+  find what was named and lost; it cannot find what was never named, because a
+  comparison needs two sides and an absence has one. So before the table: walk each
+  REQ bottom-up through its rungs (decision → spec section → contract **and its
+  failure behavior** → task → change → executed test → surface/docs), check the
+  seam at each step, and order the findings **by seam, not by file**. An absence
+  becomes a **new REQ row with its check** and *then* the table is written;
+  appending after the table is how acceptance goes green over a gap. Findings that
+  belong to a lower layer go back to that layer (spec → stage 3, plan → stage 4).
+  Record the pass's two counts — new findings, and findings caused by this run's
+  own fixes — so the next pass can tell whether the axis is exhausted.
 - **How it runs:** built in. Read the brief's REQ table, the carry-over ledger in
   full, the plan's task statuses, git log, the final suite output, stage-8 notes and
   stage-9 doc changes (plus `docs/ux/scenarios.md` + `/ux-lint` for UI tasks). Write
@@ -274,10 +285,14 @@ stages/agents/types (see SKILL.md → *Bring your own skills*).
   you asked for, here's what shipped, here's what's deferred and where it lives —
   what's missing?* Ask it even when the table is green; the operator holds context
   the brief never captured, and this is the cheapest moment in the run to hear it.
-- **GATE (manual):** every REQ has a status (none `unknown`); every `verified`
+- **GATE (manual):** the ladder walk ran and its absences became REQ rows before
+  the table was written; **every check this gate leans on has been seen failing
+  once against a planted defect** (an unproven check's green is not evidence);
+  every REQ has a status (none `unknown`); every `verified`
   carries evidence; every `partial` names what's missing and where it's tracked;
   every `deferred`/`dropped` has the operator's agreement and, for `deferred`, a
-  tracker entry; no carry-over row left `unresolved`; the operator answers the
+  tracker entry; no carry-over row left `unresolved`, and the ledger's counts are
+  printed with the verdict; the operator answers the
   closing question and signs off. Manual by design — an automated check can prove
   the table is well-formed, only the person who asked can confirm it is what they
   asked for.
@@ -329,3 +344,20 @@ cycle.
   re-plan the check as an ordered one-item-per-line checklist, then go through it in
   order, one commit per item. Never settle a higher-layer conflict inside a lower
   loop, and never adjudicate before the cap.
+
+## Cross-cutting — the audit
+
+The loop guard governs loops that **change** things. A loop that **looks** for
+things fails the other way: it converges, spending pass after pass on its own last
+pass's edits while the finding count stays healthy. [`audit.md`](audit.md) is that
+method and that exit — the L0→L7 ladder, the seam questions, the axis-rotation
+crossover, and the rule that a green from a check nobody has watched fail is worth
+nothing.
+
+- It runs **at stage 10 before the coverage table** (the only place that can find a
+  requirement nobody ever wrote), **per module** in the program loop, and as the
+  whole task when the request is itself an audit.
+- **A finding class seen twice becomes a script**, not a third ledger row.
+- **Whatever can't be fixed now becomes a ratchet** — a named, counted set that may
+  only shrink, printed beside every gate verdict, so "green" never reads as
+  "verified".

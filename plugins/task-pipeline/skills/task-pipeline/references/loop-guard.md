@@ -10,6 +10,14 @@ the pipeline: the stage-5 fix loop, a stage re-entered after a failed gate, the
 per-module program loop ([`decomposition.md`](decomposition.md)), and any
 audit → fix → audit cycle.
 
+**This file governs loops that *change* things.** A loop that *looks* for things —
+pass after pass over one corpus — fails differently: it does not oscillate, it
+**converges**, quietly spending each pass on the previous pass's own edits while the
+finding count stays healthy. That has its own detector and its own exit (rotate the
+axis, don't push harder): [`audit.md`](audit.md) → *Every pass changes the axis*.
+Both can bind one run. Use this file's trips for edits, that file's crossover for
+searches.
+
 ## Bookkeeping — the thing that makes detection mechanical
 
 You cannot detect churn from memory, especially after compaction. Every repeating

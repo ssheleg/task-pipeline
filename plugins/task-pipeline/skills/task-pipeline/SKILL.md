@@ -50,6 +50,7 @@ and no stage that can fail because a dependency is missing:
 | 5 Build (worktree, subagents, fix loop) | [`references/build.md`](references/build.md) + [`references/review.md`](references/review.md) |
 | 5–6 TDD + suite gate | [`references/tdd.md`](references/tdd.md) |
 | 10 Acceptance (REQ close-out) | [`references/acceptance.md`](references/acceptance.md) |
+| 10 + any audit (what's *missing*) | [`references/audit.md`](references/audit.md) |
 | any repeating loop | [`references/loop-guard.md`](references/loop-guard.md) |
 
 **Optional bridge.** If the operator already runs an equivalent skill set (e.g.
@@ -162,7 +163,10 @@ Three things the grill does beyond clarifying the request:
    third entry into one stage — stop and run the loop guard**
    (`references/loop-guard.md`): name the two shapes, escalate to the layer that
    owns the conflict, re-plan the check as an ordered list, then go through it one
-   item at a time; task
+   item at a time; **when a pass is *searching* rather than editing and starts
+   finding mostly what the previous pass's own fixes broke, the axis is exhausted —
+   rotate it, don't look harder** (`references/audit.md`), and remember that a
+   green from a check nobody has watched fail is not evidence; task
    tracker + conventional commits per host conventions; worktree isolation for the
    build, integrated back per the brief's branch policy before stage 7; honest
    degradation (never claim a failed/skipped step succeeded);
@@ -187,7 +191,7 @@ capable available — see `references/model-tiering.md`).
 | 7 | Lint + deploy | host lint → deploy per host convention | lint clean + suite green before deploy; deploy needs a go (or the brief's specific standing authorization) | manual |
 | 8 | Post-deploy | tail deploy logs / health-check | clean boot or honest degradation report | auto |
 | 9 | Docs + wiki | host module docs/runbook rules → `wiki-update` ([obsidian-wiki](https://github.com/ar9av/obsidian-wiki), recommended) | every stale row of the stage-0 source ledger updated; docs synced; wiki synced | auto |
-| 10 | **Acceptance** | built in: [`references/acceptance.md`](references/acceptance.md) | every REQ accounted for with evidence; ledger has no unresolved row; operator signs off | manual |
+| 10 | **Acceptance** | built in: [`references/audit.md`](references/audit.md) (ladder walk) → [`references/acceptance.md`](references/acceptance.md) (coverage table) | ladder walk ran, its absences became REQ rows; every REQ accounted for with evidence from a check seen failing once; ledger has no unresolved row; operator signs off | manual |
 
 ## Model — ask once, at preflight
 
@@ -223,6 +227,7 @@ automation is on — `pipeline.schema.json` is the only contract.
 - `references/knowledge-sources.md` — stage-0 phase 1: the source list, the wiki, the ledger, the stage-9 loop-back
 - `references/grill.md` — the built-in stage-0 grill: loop, domain awareness, autonomy sweep
 - `references/acceptance.md` — the built-in stage-10 close-out: REQ coverage, evidence, sign-off
+- `references/audit.md` — cross-cutting: the L0→L7 ladder and its seams (what was never written), axis rotation, ratchets, proven checks
 - `references/brainstorm.md` — stage 2: design dialogue, approaches, UI detection, hard gate
 - `references/spec.md` — stage 3: UX track order, the spec contract, self-review, review gate
 - `references/planning.md` — stage 4: zero-context plan format, parallel groups, no placeholders

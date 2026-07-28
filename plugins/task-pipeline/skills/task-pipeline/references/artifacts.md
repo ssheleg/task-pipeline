@@ -82,6 +82,7 @@ plugins/task-pipeline/
       spec.md planning.md                     #   stages 3-4
       build.md review.md tdd.md               #   stages 5-6
       acceptance.md                           #   stage 10
+      audit.md                                #   cross-cutting: the ladder + seams
       loop-guard.md                           #   cross-cutting: churn detection
       stages.md model-tiering.md              #   gates, model policy
       conventions.md artifacts.md             #   host conventions, this layout

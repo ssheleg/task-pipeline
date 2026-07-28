@@ -234,6 +234,12 @@ Two routes leave before the loop starts:
 - **Minor findings** never enter it. Record each in the ledger
   (`Task <N>: minor (deferred): <one-liner>`) and point the final review at that
   list. A roll-up nobody reads is a silent discard.
+- **A finding class that shows up a second time stops being a finding and becomes a
+  check.** Two tasks flagged for the same mechanical defect — the same missing
+  failure path, the same magic value, the same naming slip — means every later task
+  will produce it too. Add it to the host's lint or check script now, in its own
+  commit, instead of writing the third instance into the ledger
+  ([`audit.md`](audit.md) → *A class that repeats twice becomes a gate*).
 - **A finding that conflicts with what the plan mandates** is the operator's
   call: present the finding beside the plan text and ask which governs. Don't
   dismiss the finding because the plan mandated it; don't fix against the plan

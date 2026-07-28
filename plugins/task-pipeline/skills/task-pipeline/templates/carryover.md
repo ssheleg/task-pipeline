@@ -28,6 +28,29 @@
   with no home is exactly the thing that gets forgotten, so acceptance refuses to
   close on it.
 
+## This ledger is a ratchet, not a TODO list
+
+A TODO is invisible until somebody opens the file. **A ratchet is a named, counted
+set that may only shrink, and it is printed beside every gate verdict:**
+
+```
+GATE 6 tests: PASS — full suite green (247 tests)
+  carry-over: 4 open (was 6) · unresolved: 0 · audit findings deferred: 2
+```
+
+That one line is the whole mechanism. Without it, `PASS` reads as *verified*; with
+it, `PASS` reads as *"green, and here is exactly what was not looked at"* — which
+is the true statement.
+
+- **Print the counts at every gate**, not only at stage 10. A number nobody sees
+  until the end is a number nobody acts on.
+- **The set may only shrink.** If it grew, the run log gets one sentence saying why.
+  A ratchet that grows silently is a TODO with a better name.
+- **A finding class that appears twice stops belonging here** and becomes a check in
+  the host's lint or CI ([`audit.md`](../references/audit.md) → *A class that
+  repeats twice becomes a gate*). This ledger is for what cannot be automated, not
+  for what nobody automated.
+
 ## Notes
 
 - Adding a row costs one line and never blocks a stage — that is the point. The

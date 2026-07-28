@@ -78,7 +78,8 @@ Every gate is **typed**: `auto` — the orchestrator verifies it itself, pass/fa
 - **Every stage has a gate.** No code before a spec. No deploy before tests. No
   "done" before the post-deploy logs have been read.
 - **Nothing falls out the back.** The request becomes a frozen, addressable list of
-  requirements, and the last stage accounts for every one of them with evidence.
+  requirements, and the last stage accounts for every one with evidence — then
+  walks the ladder for what should have been on the list and never was.
 - **Team discipline without a team.** ADRs, a written plan, a real test suite, a
   wiki entry — produced as part of the work, not promised for later.
 - **It adapts to your repo, not the reverse.** Deploy, docs and wiki conventions
@@ -117,6 +118,7 @@ stage that can fail because a plugin is missing:
 | 5 Build | [`build.md`](plugins/task-pipeline/skills/task-pipeline/references/build.md) + [`review.md`](plugins/task-pipeline/skills/task-pipeline/references/review.md) — isolation, ledger, subagent loop, review rubric, fix loop |
 | 5–6 TDD | [`tdd.md`](plugins/task-pipeline/skills/task-pipeline/references/tdd.md) — the iron law, red/green/refactor, the suite gate |
 | 10 Acceptance | [`acceptance.md`](plugins/task-pipeline/skills/task-pipeline/references/acceptance.md) — REQ coverage table, evidence rules, the closing question |
+| 10 + any audit | [`audit.md`](plugins/task-pipeline/skills/task-pipeline/references/audit.md) — the L0→L7 ladder and its seams, axis rotation, ratchets, proven checks |
 | any loop | [`loop-guard.md`](plugins/task-pipeline/skills/task-pipeline/references/loop-guard.md) — churn detection, caps, the break protocol |
 
 **Ported, not depended on.** Stage 0 is adapted from
@@ -270,6 +272,57 @@ escalates to the layer that owns the conflict (rubric → operator → plan → 
 module map), re-plans the check as an ordered checklist with one verification
 command per item, and goes through it one at a time. A higher-layer conflict is
 never settled inside a lower loop.
+
+### The audit ladder — finding what was never written
+
+The REQ spine catches a requirement that was **named and lost**. It cannot catch
+one that was never named — because **a comparison needs two sides, and an absence
+has one.** Nothing in a diff between spec and plan reveals the error path nobody
+specified, the entity nobody gave an owner, the failure mode nobody thought of.
+
+So stage 10 opens with a **ladder walk**
+([`audit.md`](plugins/task-pipeline/skills/task-pipeline/references/audit.md)), not
+with the coverage table. Each requirement is walked **bottom-up** through its rungs
+— recorded decision → spec section → contract *and its failure behavior* → plan
+task → the change in the tree → an **executed** named assertion → the surface a
+user reaches and its docs — and the work is the **seam between each pair**: did the
+decision reach the spec, does every contract have a task, did the DoD land in the
+diff, would that test still pass with the production code deleted, does what
+shipped satisfy the requirement's own *statement* rather than the task's
+instructions. Findings are ordered **by seam, never by file** — the seam names
+which layer of your process leaks. Every absence becomes a new REQ row with its
+check *before* the table is written.
+
+Bottom-up is not taste: a missing artefact low on the ladder makes everything above
+it meaningless, so top-down you spend the pass polishing a surface for a contract
+that does not exist.
+
+Three rules keep the audit from becoming another loop:
+
+- **Every pass changes the axis, not the effort.** A searching pass doesn't
+  oscillate, it *converges*: each pass edits the corpus the next one reads, so the
+  newest edits are always the least-reviewed text and are what the next pass finds.
+  Measured over seven passes on a production repository, by pass six the audit was
+  mostly repairing its own previous pass — while the finding count still looked
+  healthy. So count both numbers every pass (new findings vs. self-inflicted ones);
+  when the second overtakes the first, **rotate the axis** — seams down one
+  deliverable, then invariants across deliverables, then one class swept end to end.
+- **A class that repeats twice becomes a gate, not a note.** Once is an incident;
+  twice is a category, and a category belongs in lint or CI where nobody has to
+  remember it. The third instance in a ledger is how a mechanical defect becomes
+  permanent.
+- **What can't be fixed now becomes a ratchet, never a TODO** — a named, counted
+  set that may only shrink, printed *beside every gate verdict*
+  (`carry-over: 4 open (was 6) · unresolved: 0`). A TODO is invisible until someone
+  opens the file; a ratchet makes **"green" never read as "verified"** — it reads
+  as *"green, and here is exactly what was not looked at"*.
+
+And the exit criterion that is usually skipped: a deliverable is audited when every
+rung has its artefact **and every check you are relying on has been seen failing
+once against a planted defect.** That is the TDD iron law — *if you didn't watch it
+fail, you don't know it tests the right thing* — raised from one test to every
+gate, linter and script in the run. **A green result from an unproven check is
+worth nothing.**
 
 ### UX track (user-facing tasks) — super-ux recommended
 

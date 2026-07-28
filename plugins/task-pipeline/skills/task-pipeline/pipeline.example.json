@@ -152,11 +152,12 @@
       "name": "Acceptance",
       "model": "default",
       "skills": [
+        "task-pipeline:audit",
         "task-pipeline:acceptance"
       ],
       "gate": {
         "type": "manual",
-        "check": "Close the circle: every REQ in the brief has a status (verified / partial / deferred / dropped) — none unknown; every verified carries evidence (a passing test name, file:line, a command and its output, or a scenario ID) — 'done' without evidence is downgraded to partial, not upgraded; every partial names what is missing and where it is tracked; every deferred/dropped has the operator's agreement and, for deferred, a tracker entry; no carry-over row is left unresolved; and the operator answers the closing question — here is what you asked for, here is what shipped, here is what is deferred, what is missing? — and signs off"
+        "check": "Close the circle. FIRST the LADDER WALK (references/audit.md), because the REQ table can only find what was named and lost — a comparison needs two sides and an absence has one: walk each REQ bottom-up through its rungs (decision -> spec section -> contract AND its failure behavior -> plan task -> change -> executed test -> surface/docs), check the seam at each step, order findings BY SEAM not by file, and turn every absence into a new REQ row with its check BEFORE the table is written; findings belonging to a lower layer go back to that layer (spec -> stage 3, plan -> stage 4); record the pass's two counts (new findings vs findings caused by this run's own fixes) so the next pass can tell whether the axis is exhausted. THEN the coverage table: every REQ has a status (verified / partial / deferred / dropped) — none unknown; every verified carries evidence (a passing test name, file:line, a command and its output, or a scenario ID) — 'done' without evidence is downgraded to partial, not upgraded, and a green from a check nobody has watched fail against a planted defect is not evidence at all; every partial names what is missing and where it is tracked; every deferred/dropped has the operator's agreement and, for deferred, a tracker entry; no carry-over row is left unresolved and the ledger's counts are printed beside this verdict, so 'green' never reads as 'verified'; and the operator answers the closing question — here is what you asked for, here is what shipped, here is what is deferred, what is missing? — and signs off"
       }
     }
   ],

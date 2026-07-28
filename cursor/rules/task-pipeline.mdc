@@ -161,14 +161,31 @@ not authorize an outward, irreversible action — stage 7 stops and asks.
     propose the edit and get an explicit go, or carry it over with the exact change
     written down. A doc that was worth reading at stage 0 and is wrong now is the
     next run's false premise.
-10. **Acceptance** (manual) — the closing stage: go back to the brief and account
-    for **every** REQ. One row each, status `verified` / `partial` / `deferred` /
-    `dropped`, and every `verified` carries **evidence** — a passing test name, a
-    `file:line`, a command and its output. "Done" without evidence is downgraded to
-    `partial`, never upgraded. Then ask out loud, list in hand: *here's what you
-    asked for, here's what shipped, here's what's deferred and where it lives —
-    what's missing?* Ask it even when the table is green. Gate: no REQ `unknown`,
-    no ledger row without a home, user signs off.
+10. **Acceptance** (manual) — the closing stage, in two halves.
+    **First the ladder walk**, because the REQ table only finds what was named and
+    lost: a comparison needs two sides and **an absence has one**. Walk each REQ
+    bottom-up through its rungs — recorded decision → spec section → contract *and
+    its failure behavior* → plan task with a satisfiable DoD → the change in the
+    tree → an **executed** named assertion → the surface a user reaches, and its
+    docs — checking the seam between each pair: does the decision reach the spec;
+    does the section say what happens when the contract fails; does every contract
+    have a task; did the DoD land in the diff; would that test still pass with the
+    production code deleted; can a user reach this and does a doc say so; and
+    finally, does what shipped satisfy the requirement's own *statement* rather
+    than the task's instructions. Order findings **by seam, not by file** — the
+    seam tells you which layer of your process leaks. Every absence becomes a new
+    REQ row with its check **before** the table is written; appending afterwards is
+    how acceptance goes green over a gap. Findings owned by a lower layer go back
+    there (spec → stage 3, plan → stage 4).
+    **Then the table:** one row per REQ, status `verified` / `partial` /
+    `deferred` / `dropped`, and every `verified` carries **evidence** — a passing
+    test name, a `file:line`, a command and its output. "Done" without evidence is
+    downgraded to `partial`, never upgraded, and **a green from a check nobody has
+    watched fail against a planted defect is not evidence at all**. Then ask out
+    loud, list in hand: *here's what you asked for, here's what shipped, here's
+    what's deferred and where it lives — what's missing?* Ask it even when the
+    table is green. Gate: ladder walk ran, no REQ `unknown`, no ledger row without
+    a home, user signs off.
 
 Cross-cutting: answer from the brief's autonomy section rather than re-asking, log every deferral in the ledger, never narrow the task silently, track
 tasks, conventional commits, honest degradation (never claim a failed/skipped step
@@ -192,6 +209,32 @@ verification command per item, and go through it one at a time, one commit per i
 no opportunistic edits. Re-check the list once in the same order at the end. If it
 trips again after a re-planned pass, stop and hand back with both shapes, the
 evidence and your recommendation.
+
+**Audit rules — for loops that *look* rather than edit.** A searching pass doesn't
+oscillate, it **converges**: each pass edits the corpus the next pass reads, so the
+newest edits are the least-reviewed text and are what the next pass finds. Measured
+over seven passes on a real repository, by pass six the audit was mostly repairing
+its own previous pass while the finding count still looked healthy. So:
+- **Count two numbers every pass** — new findings, and findings caused by the last
+  pass's own fixes. When the second overtakes the first, the axis is exhausted:
+  **rotate the axis, don't look harder.** The axes are orthogonal by construction —
+  seams down one deliverable (the ladder above), then invariants *across*
+  deliverables (one name, one enum, one owner everywhere), then one class swept end
+  to end (every error path, every count, every status vocabulary).
+- **Audit bottom-up.** A missing artefact at a low rung makes everything above it
+  meaningless; top-down you polish a surface for a contract that doesn't exist.
+- **A class that repeats twice becomes a check, not a note.** Once is an incident;
+  twice is a category, and a category belongs in lint or CI where nobody has to
+  remember it. The third instance in a ledger is how a mechanical defect becomes
+  permanent.
+- **What can't be fixed now becomes a ratchet, never a TODO** — a named, counted
+  set that may only shrink, **printed beside every gate verdict**
+  (`carry-over: 4 open (was 6) · unresolved: 0`). A TODO is invisible until someone
+  opens the file; a ratchet makes "green" read as *"green, and here is exactly what
+  was not looked at"*. If it grew, one sentence says why.
+- **Never trust an unproven check.** Plant the defect, watch the check fail, remove
+  it, then trust the green — same law as the failing test, applied to every gate,
+  linter and script the run leans on.
 
 ## super-ux for user-facing tasks (recommended)
 

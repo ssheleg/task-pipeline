@@ -15,6 +15,11 @@ NO PRODUCTION CODE WITHOUT A FAILING TEST FIRST
 
 **If you didn't watch the test fail, you don't know it tests the right thing.**
 
+The same law governs every other check in the run — a gate's `check`, a lint rule,
+a host script, a detector written during an audit. A check nobody has seen fail is
+a decoration that reports success. [`audit.md`](audit.md) → *Exit criterion* is
+this rule raised from one test to the whole pipeline.
+
 Wrote code before the test? Delete it and start from the test. Not "keep it as
 reference", not "adapt it while writing tests", not "look at it once more". Delete
 means delete — code you kept is code the test was written to fit.
