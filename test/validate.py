@@ -60,6 +60,14 @@ else:
             fail("SKILL.md: empty/missing name")
         if not dm or not dm.group(1).strip():
             fail("SKILL.md: empty/missing description")
+        else:
+            desc = dm.group(1).strip().strip('"').strip("'")
+            if not desc.startswith("Use when"):
+                fail("SKILL.md: description must start with 'Use when …' (canon)")
+            if not re.search(r"[а-яё]", desc, re.I):
+                fail("SKILL.md: description must carry Russian trigger aliases beside the English ones (canon)")
+        if len(fm) > 1024:
+            fail(f"SKILL.md: frontmatter is {len(fm)} chars, must be under 1024")
 
 for label, val in {"marketplace": mkt_name, "plugin.json": plg_name, "frontmatter": fm_name}.items():
     if val != NAME:

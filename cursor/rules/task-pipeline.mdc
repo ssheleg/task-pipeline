@@ -1,5 +1,5 @@
 ---
-description: "task-pipeline: run a substantial task through a disciplined, gated delivery cycle — an intake grill that expands the request, then docs→brainstorm→spec→plan→build→tests→lint/deploy→post-deploy→docs. Apply when the user asks to run a task through the pipeline, the full cycle / полный цикл / прогони по конвейеру, or starts any substantial feature/fix/build."
+description: "task-pipeline: run a substantial task through a disciplined, gated delivery cycle — an intake grill that expands the request, then docs→brainstorm→spec→plan→build→tests→lint/deploy→post-deploy→docs. Apply when the user asks to 'run this through the pipeline' / 'прогони по конвейеру', asks for 'the full cycle' / 'полный цикл', or starts any substantial feature/fix/build."
 alwaysApply: false
 ---
 
