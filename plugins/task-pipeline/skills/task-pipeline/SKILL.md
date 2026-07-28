@@ -1,6 +1,6 @@
 ---
 name: task-pipeline
-description: "Use when running a substantial task through the full end-to-end delivery pipeline — an up-front intake grill that expands the request into a complete brief, then docs study, brainstorm, spec, plan, subagent-driven build, tests, lint/deploy, post-deploy log check, and docs/wiki sync — as gated stages whose doctrine is built entirely into this skill (no required companion skills). Triggers - 'run this through the pipeline' / 'прогони по конвейеру', 'the full cycle' / 'полный цикл', /task-pipeline, or any substantial feature, fix, or build that should follow the disciplined cycle rather than ad-hoc coding. The intake grill is mandatory - it front-loads every decision, including the per-stage autonomy sweep, so stages 1→10 run without mid-flight questions; recommends super-ux for user-facing work; confirms one model up front (most capable available, never a hardcoded id); reads host-project conventions for deploy/docs/wiki so it stays project-agnostic."
+description: "Use when running a substantial task through the full end-to-end delivery pipeline — an up-front intake grill that expands the request into a complete brief, then docs study, brainstorm, spec, plan, subagent-driven build, tests, lint/deploy, post-deploy log check, docs/wiki sync and acceptance — as gated stages whose doctrine is built entirely into this skill (no required companion skills). Triggers - 'run this through the pipeline' / 'прогони по конвейеру', 'the full cycle' / 'полный цикл', /task-pipeline, or any substantial feature, fix, or build that should follow the disciplined cycle rather than ad-hoc coding. The intake grill is mandatory - it front-loads every decision, including the per-stage autonomy sweep, so stages 1→10 run without mid-flight questions; recommends super-ux for user-facing work; confirms one model up front (most capable available, never a hardcoded id); reads host-project conventions for deploy/docs/wiki so it stays project-agnostic."
 ---
 
 # task-pipeline
@@ -44,6 +44,7 @@ and no stage that can fail because a dependency is missing:
 | 4 Plan | [`references/planning.md`](references/planning.md) |
 | 5 Build (worktree, subagents, fix loop) | [`references/build.md`](references/build.md) + [`references/review.md`](references/review.md) |
 | 5–6 TDD + suite gate | [`references/tdd.md`](references/tdd.md) |
+| 10 Acceptance (REQ close-out) | [`references/acceptance.md`](references/acceptance.md) |
 | any repeating loop | [`references/loop-guard.md`](references/loop-guard.md) |
 
 **Optional bridge.** If the operator already runs an equivalent skill set (e.g.

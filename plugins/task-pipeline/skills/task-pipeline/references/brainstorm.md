@@ -88,8 +88,12 @@ negative ships an unspecified interface.
 
 ## GATE (manual)
 
-The operator approves the design **and** the UI verdict is recorded. Then, and only
-then, stage 3 writes it up.
+The operator approves the design **and** the UI verdict is recorded **and every REQ
+in the brief is answered by the design** — a requirement the design doesn't address
+is either covered now or explicitly dropped by the operator, with the drop written
+into the carry-over ledger. For a platform, the module map
+([`decomposition.md`](decomposition.md)) is committed and approved as part of this
+same gate. Then, and only then, stage 3 writes it up.
 
 ## Rationalizations
 

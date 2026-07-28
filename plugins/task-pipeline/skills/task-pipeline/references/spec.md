@@ -116,12 +116,15 @@ a private API) is **flagged in the spec** as an assumption, not silently assumed
 
 Read what you wrote with fresh eyes and fix inline. No subagent, no second pass:
 
-1. **Placeholders:** any TBD / TODO / "handle edge cases" / unfinished section? Fix.
-2. **Internal consistency:** do sections contradict each other? Does the
+1. **REQ coverage:** does every REQ in the brief appear in at least one section's
+   `covers:` line, and does every section cover at least one REQ? A missing REQ is
+   scope lost here; a section covering none is scope creep or a missing REQ.
+2. **Placeholders:** any TBD / TODO / "handle edge cases" / unfinished section? Fix.
+3. **Internal consistency:** do sections contradict each other? Does the
    architecture match the feature descriptions and the locked signatures?
-3. **Scope:** is this one implementable plan, or does it need decomposition?
-4. **Ambiguity:** can any requirement be read two ways? Pick one and say it.
-5. **Traceability (UI):** does every user-facing requirement name its scenario ID?
+4. **Scope:** is this one implementable plan, or does it need decomposition?
+5. **Ambiguity:** can any requirement be read two ways? Pick one and say it.
+6. **Traceability (UI):** does every user-facing requirement name its scenario ID?
 
 ## GATE (manual)
 
@@ -129,9 +132,13 @@ Read what you wrote with fresh eyes and fix inline. No subagent, no second pass:
 > change before I write the implementation plan."
 
 Wait for the operator. Changes requested → apply, re-run the self-review, ask
-again. For UI tasks the gate additionally requires: the chain (foundation → flows →
-screens → scenarios) designed, validated and approved; `/ux-lint` green; every
-user-facing requirement traced to a scenario ID — or an explicit waiver from the
-operator recorded in the spec.
+again.
+
+The gate is not only the operator's word: **every section carries `covers: REQ-…`
+and every REQ in the brief appears in at least one section.** For UI tasks it
+additionally requires: the chain (foundation → flows → screens → scenarios)
+designed, validated and approved; `/ux-lint` green; every user-facing requirement
+traced to a scenario ID — or an explicit waiver from the operator recorded in the
+spec.
 
 No plan starts before this gate passes.

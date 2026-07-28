@@ -2,9 +2,10 @@
 
 > **Historical snapshot (v0.1.0, 8 stages).** Superseded by later releases: the
 > live design is a **mandatory, built-in** stage-0 intake grill (domain-aware,
-> with an autonomy sweep and ADR discipline — no external grill dependency) + 9
-> gated stages with typed auto/manual gates, a super-ux UX track, one
-> provider-agnostic model confirmed up front, and toggleable release automation.
+> with an autonomy sweep and ADR discipline — no external grill dependency) + 10
+> gated stages with typed auto/manual gates, a REQ spine closed by a stage-10
+> acceptance, a super-ux UX track, one provider-agnostic model confirmed up front,
+> and toggleable release automation.
 > Source of truth now: `plugins/task-pipeline/skills/task-pipeline/SKILL.md`,
 > `references/grill.md`, `pipeline.example.json`, and `CHANGELOG.md`. Kept as a
 > dated design record — do not use for current shape.

@@ -16,9 +16,9 @@ docs/
     specs/
       YYYY-MM-DD-<topic>-brief.md     # stage 0 — locked intake brief (grill output)
       YYYY-MM-DD-<topic>-carryover.md # stage 0 seeds it; EVERY stage appends; stage 10 reads it
-      YYYY-MM-DD-<topic>-acceptance.md # stage 10 — REQ coverage table + evidence
-      YYYY-MM-DD-<topic>-modules.md  # stage 2 — module map + build order (platforms only)
+      YYYY-MM-DD-<topic>-modules.md   # stage 2 — module map + build order (platforms only)
       YYYY-MM-DD-<topic>-design.md    # stage 3 — the spec / module dossier (locks shared contracts)
+      YYYY-MM-DD-<topic>-acceptance.md # stage 10 — REQ coverage table + evidence
     plans/
       YYYY-MM-DD-<topic>.md           # stage 4 — the implementation plan
   ux/                                 # super-ux, UI tasks only (see companion-skills.md)
@@ -54,7 +54,7 @@ record (see `build.md`).
 | Stage | Writes | Consumed by |
 |---|---|---|
 | 0 Intake | `specs/<topic>-brief.md` — incl. the **REQ table** (seed from `templates/brief.md`) | stages 2–5, 7, 10 |
-| 0→9 all | `specs/<topic>-carryover.md` — append-only ledger (seed from `templates/carryover.md`) | stage 10 |
+| 0→10 all | `specs/<topic>-carryover.md` — append-only ledger (seed from `templates/carryover.md`) | stage 10, in full |
 | 10 Acceptance | `specs/<topic>-acceptance.md` — every REQ with a status and evidence | the operator |
 | 0 Grill (domain) | `CONTEXT.md`, `docs/adr/NNNN-<slug>.md` — created **lazily**, only when a term resolves or a decision qualifies | stages 2–4 + the repo |
 | 2 Decompose | `specs/<topic>-modules.md` — module map, build order, contracts, per-module status (platforms only) | stages 3–10, every module's run |

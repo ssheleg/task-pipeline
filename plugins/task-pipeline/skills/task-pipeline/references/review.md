@@ -112,10 +112,14 @@ finding either.
 > <verbatim block>
 > ```
 >
-> Produce two verdicts, both required:
+> Produce three verdicts, all required:
 > 1. **Spec compliance:** ✅ or ❌. List every requirement as met / partial /
 >    missing, and list anything implemented that was not asked for.
-> 2. **Code quality:** approved or not. Findings only, each as
+> 2. **REQ satisfied:** ✅ or ❌ per `Implements:` id. The brief quotes each
+>    requirement's statement — judge the diff against **that statement**, not
+>    against the task's instructions. A task can follow every instruction and still
+>    miss the requirement it exists to deliver; say so when it does.
+> 3. **Code quality:** approved or not. Findings only, each as
 >    `severity — file:line — the defect — the failure scenario (concrete input or
 >    state → wrong result)`. Severities: Critical, Important, Minor. Use
 >    `⚠️ cannot verify from diff` for anything you can't judge from the diff alone.

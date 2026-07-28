@@ -10,8 +10,8 @@ with every stage's doctrine **built in**: no companion plugin required.
 
 ## What it does
 
-`intake grill → docs study → brainstorm → spec → plan → subagent build → tests →
-lint/deploy → post-deploy log check → docs/wiki sync → acceptance`
+`intake grill → docs study → brainstorm + decompose → spec → plan → subagent build →
+tests → lint/deploy → post-deploy log check → docs/wiki sync → acceptance`
 
 It **grills you first, always**: stage 0 is mandatory — a one-line task ("make me
 feature X") is expanded, one question at a time, into a locked brief, and the grill
@@ -23,10 +23,10 @@ or **manual** (waits for your go). One model, confirmed before the run starts.
 |---|---|---|---|
 | 0 | Intake grill — **mandatory** | shared understanding + autonomy sweep; brief locked | manual |
 | 1 | Docs study | contracts grounded on current docs | auto |
-| 2 | Brainstorm | design approved; UI verdict recorded | manual |
+| 2 | Brainstorm + decompose | design approved; UI verdict recorded; every REQ answered; platform: module map approved | manual |
 | 3 | Spec | committed + reviewed; UI: super-ux chain validated, linter green | manual |
 | 4 | Plan | parallel-ready, DoD per task | auto |
-| 5 | Dev | tasks DONE, TDD green per task | auto |
+| 5 | Dev | tasks DONE (three review verdicts each), TDD green per task | auto |
 | 6 | Tests | full suite green, new code covered | auto |
 | 7 | Lint + deploy | lint clean + suite green before deploy | manual |
 | 8 | Post-deploy | clean boot / honest degradation | auto |
@@ -51,10 +51,13 @@ stage that can fail because a plugin is missing:
 |---|---|
 | 0 Intake grill | [`references/grill.md`](plugins/task-pipeline/skills/task-pipeline/references/grill.md) — interview loop, domain awareness, autonomy sweep |
 | 2 Brainstorm | [`references/brainstorm.md`](plugins/task-pipeline/skills/task-pipeline/references/brainstorm.md) — approaches, YAGNI, the no-code-before-approval gate |
+| 2 Decompose | [`references/decomposition.md`](plugins/task-pipeline/skills/task-pipeline/references/decomposition.md) — platforms only: brick criteria, module map, build order |
 | 3 Spec | [`references/spec.md`](plugins/task-pipeline/skills/task-pipeline/references/spec.md) — UX-track order, locked contracts, global constraints, self-review |
 | 4 Plan | [`references/planning.md`](plugins/task-pipeline/skills/task-pipeline/references/planning.md) — zero-context tasks, parallel groups, no placeholders |
 | 5 Build | [`references/build.md`](plugins/task-pipeline/skills/task-pipeline/references/build.md) + [`review.md`](plugins/task-pipeline/skills/task-pipeline/references/review.md) — isolation, ledger, subagent loop, review rubric, fix loop |
 | 5–6 TDD | [`references/tdd.md`](plugins/task-pipeline/skills/task-pipeline/references/tdd.md) — the iron law, red/green/refactor, the suite gate |
+| 10 Acceptance | [`references/acceptance.md`](plugins/task-pipeline/skills/task-pipeline/references/acceptance.md) — REQ coverage table, evidence rules, the closing question |
+| any loop | [`references/loop-guard.md`](plugins/task-pipeline/skills/task-pipeline/references/loop-guard.md) — churn detection, caps, the break protocol |
 
 **Ported, not depended on.** Stage 0 is adapted from
 [Matt Pocock's `grilling` / `grill-with-docs`](https://github.com/mattpocock/skills)
@@ -291,7 +294,7 @@ clean checkout. Copy and adapt it per project; nothing is hardcoded.
 ## Companion skills
 
 `references/companion-skills.md` separates what's built in (stages 0, 2, 3, 4, 5, 6
-— nothing to install) from the short optional list: **super-ux** (required only for
+and 10 — nothing to install) from the short optional list: **super-ux** (required only for
 user-facing tasks — install line surfaced on the spot), **context7** (docs stage),
 **wiki-update** (stage 9). A single preflight block prints which are ready, which to
 install, and the model recommendation, so you arm the whole run in one exchange.

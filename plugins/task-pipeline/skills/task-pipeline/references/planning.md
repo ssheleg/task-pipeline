@@ -61,7 +61,8 @@ commit.
 
 > **For agentic workers:** execute this plan task-by-task under the task-pipeline
 > stage-5 build doctrine — isolated workspace, one implementer per task, a review
-> with both verdicts after each. Steps use `- [ ]` checkboxes.
+> with all three verdicts after each (spec compliance, REQ satisfied, code
+> quality). Steps use `- [ ]` checkboxes.
 
 **Goal:** <one sentence>
 
@@ -181,7 +182,12 @@ A checklist you run yourself, inline. No subagent:
 
 ## GATE (auto)
 
-Every spec requirement maps to a task; no placeholders; names and types consistent
-across tasks; parallel-group tasks share no files; each task has a verifiable DoD.
-UI tasks carry their scenario IDs and `SCR-` screens. Verify this yourself and
-stop on failure — this gate has no operator in it.
+**Set equality first:** the REQ ids in the brief equal the union of `Implements:`
+across the plan's tasks. A non-empty difference fails the gate and is reported as
+the explicit list of dropped (or invented) requirements — this seam is where scope
+leaks, so the check is mechanical, never a judgement call.
+
+Then: every spec requirement maps to a task; no placeholders; names and types
+consistent across tasks; parallel-group tasks share no files; each task has a
+verifiable DoD. UI tasks carry their scenario IDs and `SCR-` screens. Verify all of
+it yourself and stop on failure — this gate has no operator in it.

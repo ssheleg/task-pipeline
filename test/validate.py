@@ -264,7 +264,7 @@ elif [t for t in ("brief.md", "carryover.md", "context.md", "adr.md") if not os.
         if not os.path.isfile(os.path.join(tpl_dir, t)):
             fail(f"missing template: plugins/task-pipeline/skills/task-pipeline/templates/{t}")
 else:
-    # The brief carries the stage-0 autonomy sweep — stages 1-9 read it instead of
+    # The brief carries the stage-0 autonomy sweep — stages 1-10 read it instead of
     # asking. Without that section the grill has no place to record the answers and
     # the autonomy promise silently degrades into mid-flight questions.
     brief = open(os.path.join(tpl_dir, "brief.md"), encoding="utf-8").read()
@@ -452,6 +452,108 @@ if pipe is not None:
                 fail(f"{EXAMPLE_REL}: does not conform to pipeline.schema.json: {e.message}")
         except ImportError:
             pass
+
+# A stage added at the END of the flow is the one every human-written blurb forgets:
+# the pipeline grows a tenth stage and six descriptions still enumerate nine, or list
+# the new one before the stage it runs after. Those blurbs are the only thing a user
+# reads on npm and in the marketplace, so drift there ships a wrong flow to every
+# install. Derive the last stage from the config and hold every surface to it.
+_pipe_stages = (pipe or {}).get("stages") if isinstance(pipe, dict) else None
+if isinstance(_pipe_stages, list) and _pipe_stages and isinstance(_pipe_stages[-1], dict):
+    _last = str(_pipe_stages[-1].get("state") or "")
+    _prev = str(_pipe_stages[-2].get("state") or "") if len(_pipe_stages) > 1 else ""
+    # (surface label, text) — every place the flow is enumerated for a human.
+    _blurbs = []
+
+    def _add_blurb(label, path, extract=None):
+        p = os.path.join(ROOT, path)
+        if not os.path.isfile(p):
+            return
+        raw = open(p, encoding="utf-8").read()
+        _blurbs.append((label, extract(raw) if extract else raw))
+
+    def _json_desc(key_path):
+        def _x(raw):
+            try:
+                d = json.loads(raw)
+            except Exception:
+                return ""
+            for k in key_path:
+                d = (d or {})[k] if not isinstance(k, int) else (d or [])[k]
+            return str(d or "")
+        return _x
+
+    def _frontmatter_desc(raw):
+        m = re.match(r"^---\n(.*?)\n---\n", raw, re.S)
+        if not m:
+            return ""
+        d = re.search(r"^description:\s*(.+)$", m.group(1), re.M)
+        return d.group(1) if d else ""
+
+    _add_blurb("package.json description", "package.json", _json_desc(["description"]))
+    _add_blurb("marketplace.json plugin description", ".claude-plugin/marketplace.json",
+               _json_desc(["plugins", 0, "description"]))
+    _add_blurb("plugin.json description", "plugins/task-pipeline/.claude-plugin/plugin.json",
+               _json_desc(["description"]))
+    _add_blurb("SKILL.md description", f"{SKILL_DIR}/SKILL.md", _frontmatter_desc)
+    _add_blurb("command description", "plugins/task-pipeline/commands/task-pipeline.md", _frontmatter_desc)
+    _add_blurb("cursor rule description", "cursor/rules/task-pipeline.mdc", _frontmatter_desc)
+    _add_blurb("README", "README.md")
+
+    def _spellings(state):
+        """A config state key ('docs-wiki') is written several ways in prose."""
+        s = state.lower()
+        return {s, s.replace("-", "/"), s.replace("-", " "), s.replace("-", " + "), s.replace("-", "")}
+
+    def _first_index(text, state):
+        """First mention — an enumeration names each stage once; a later incidental
+        mention ("reads deploy/docs/wiki conventions") is not part of the list."""
+        hits = [text.index(v) for v in _spellings(state) if v and v in text]
+        return min(hits) if hits else None
+
+    for _label, _text in _blurbs:
+        low = _text.lower()
+        _i_last = _first_index(low, _last) if _last else None
+        if _last and _i_last is None:
+            fail(f"{_label}: never names the flow's final stage {_last!r} — "
+                 "a description that stops one stage short is what ships to npm and the marketplace")
+        # …and it must come last: listing acceptance before docs/wiki inverts the flow.
+        _i_prev = _first_index(low, _prev) if _prev else None
+        if _i_last is not None and _i_prev is not None and _i_last < _i_prev:
+            fail(f"{_label}: stage {_last!r} is listed before {_prev!r} — the enumeration "
+                 "contradicts the order in pipeline.example.json")
+
+    # The per-task review's verdict count lives in five files. When it changed from two
+    # to three, three of them kept saying "both verdicts" — and the shipped reviewer
+    # prompt is what actually decides how many come back.
+    _dev = next((s for s in _pipe_stages if isinstance(s, dict) and s.get("state") == "dev"), None)
+    if _dev and "three verdicts" in str((_dev.get("gate") or {}).get("check", "")).lower():
+        for _rel in (f"{SKILL_DIR}/references/review.md", f"{SKILL_DIR}/references/build.md",
+                     f"{SKILL_DIR}/references/planning.md", f"{SKILL_DIR}/references/stages.md",
+                     "cursor/rules/task-pipeline.mdc"):
+            _p = os.path.join(ROOT, _rel)
+            if not os.path.isfile(_p):
+                continue
+            _body = open(_p, encoding="utf-8").read()
+            for _lineno, _line in enumerate(_body.splitlines(), start=1):
+                if re.search(r"(two|\*{0,2}both\*{0,2})\s+(review\s+)?verdicts", _line, re.I):
+                    fail(f"{_rel}:{_lineno}: says two/both verdicts, but the dev gate declares three "
+                         "(spec compliance, REQ satisfied, code quality)")
+
+    # Each stage's doctrine file states its own GATE type. If it disagrees with the
+    # config, an agent reading the doctrine gates differently than the flow says.
+    for _fn, _sid in (("brainstorm.md", 2), ("spec.md", 3), ("planning.md", 4),
+                      ("build.md", 5), ("tdd.md", 6), ("acceptance.md", 10)):
+        _p = os.path.join(refdir, _fn)
+        _cfg = next((s for s in _pipe_stages if isinstance(s, dict) and s.get("id") == _sid), None)
+        if not os.path.isfile(_p) or _cfg is None:
+            continue
+        _m = re.search(r"GATE\s*\([^)]*?(auto|manual)", open(_p, encoding="utf-8").read())
+        if not _m:
+            fail(f"references/{_fn}: no 'GATE (auto|manual)' line — every stage doctrine states its gate")
+        elif _m.group(1) != (_cfg.get("gate") or {}).get("type"):
+            fail(f"references/{_fn}: gate type {_m.group(1)!r} contradicts stage {_sid} in "
+                 f"{EXAMPLE_REL} ({(_cfg.get('gate') or {}).get('type')!r})")
 
 if errors:
     print("FAIL: task-pipeline structure invalid")

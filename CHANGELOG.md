@@ -1,5 +1,56 @@
 # Changelog
 
+## v0.17.1 — 2026-07-28
+
+A full-repo consistency audit. v0.16.0 added a third review verdict and a tenth
+stage; several surfaces never heard about either. An agent reads one surface, not
+all of them, so a stage that is `three verdicts` in the config and `both verdicts`
+in the prompt that actually runs simply produces two.
+
+### Fixed
+- **The third review verdict now exists where reviews are actually dispatched.**
+  `references/review.md`'s task-review prompt asked for *"two verdicts"* — so the
+  REQ-satisfaction verdict the stage-5 gate requires was never returned. It now asks
+  for three (spec compliance → **REQ satisfied** → code quality), with the REQ one
+  judged against the requirement's quoted statement rather than the task's
+  instructions. Same correction in `build.md` (§4.4 and its gate), `planning.md`'s
+  plan header, `stages.md` and the Cursor rule.
+- **Stage-5's gate now names the ledger harvest.** `build.md`'s gate omitted
+  "every parked finding and implementer concern harvested into the carry-over
+  ledger" — the one thing that must happen before the scratch workspace is deleted.
+- **Three gates in the doctrine files were weaker than the same gates in
+  `stages.md`:** `planning.md` didn't state the REQ **set-equality** check (the
+  brief→plan seam), `spec.md` didn't require `covers: REQ-…` per section, and
+  `brainstorm.md` didn't require every REQ answered by the design or the module map
+  approved for a platform. All three now match.
+- **Descriptions listed the flow wrong.** npm, the marketplace entry, the plugin
+  manifest: `…post-deploy, acceptance, docs/wiki` — eleven items for ten stages,
+  with the final stage listed second-to-last. The `/task-pipeline` command's
+  description and `SKILL.md`'s frontmatter stopped at docs/wiki and never named
+  acceptance at all.
+- **Built-in doctrine tables were missing rows** for stage 10 acceptance
+  (`SKILL.md`, `README.md`, `companion-skills.md`), stage-2 decomposition and the
+  loop guard (`README.md`, `companion-skills.md`) — files that ship, are reachable,
+  and were absent from the very tables that say what ships.
+- Smaller drift: the Cursor rule's stage 9 dropped the wiki sync; four gate checks
+  in `pipeline.example.json` had v0.16.0 sentences concatenated without punctuation;
+  `stages.md` wrote `implements:` where the plan format writes `Implements:`;
+  `artifacts.md` had the acceptance artifact listed before the spec and the ledger
+  attributed to stages `0→9`; the v0.1.0 design snapshot's disclaimer still
+  described the live shape as nine stages.
+
+### Added
+- **Three validator guards, each with a CI negative self-test**, so this class of
+  drift fails instead of shipping:
+  1. every human-facing description (npm, marketplace, plugin, `SKILL.md`, the
+     command, the Cursor rule, `README.md`) must name the flow's **final stage**,
+     and must not list it before the stage it runs after — derived from
+     `pipeline.example.json`, not hardcoded;
+  2. no shipped surface may say *two/both verdicts* while the dev gate declares
+     three;
+  3. each stage doctrine file's own `GATE (auto|manual)` must match that stage's
+     gate type in the config.
+
 ## v0.17.0 — 2026-07-28
 
 Two mechanisms stop being files nobody walks and become operational doctrine: a

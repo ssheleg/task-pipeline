@@ -210,9 +210,14 @@ not rush it into implementation.
 
 ### 4.4 Review the task
 
-Every task gets a review with **both** verdicts — spec compliance and code quality.
-The implementer's self-review never substitutes for it. Rubric, inputs, prompt
-templates and how to build the diff package: [`review.md`](review.md).
+Every task gets a review with **all three** verdicts — spec compliance, **REQ
+satisfied**, and code quality. The implementer's self-review never substitutes for
+it. Rubric, inputs, prompt templates and how to build the diff package:
+[`review.md`](review.md).
+
+The REQ verdict is the one the other two can't produce: a task can meet every line
+of its brief and still miss the requirement it was written to deliver. A ❌ there
+enters the fix loop like any Important finding.
 
 A review may report **"cannot verify from diff"** items — requirements that live in
 unchanged code or span tasks. They don't block the review, but you resolve each one
@@ -336,8 +341,10 @@ stages 7–9 run against an unintegrated branch.
 
 ## GATE (auto)
 
-All plan tasks DONE with both review verdicts (spec compliance, then code quality);
-the full test suite green; every open finding either fixed or parked with a ruling;
+All plan tasks DONE with all three review verdicts (spec compliance, REQ satisfied,
+code quality); the full test suite green; every open finding either fixed or parked
+with a ruling; **every parked finding and implementer concern harvested into the
+carry-over ledger** — the workspace is deleted, so nothing may stay only there;
 no task left BLOCKED; the branch integrated per the brief's policy — or the
 operator explicitly told you to leave it, and that is recorded. Verify it yourself;
 a red suite or an unresolved BLOCKED does not advance to stage 6.

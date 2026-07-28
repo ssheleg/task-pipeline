@@ -155,7 +155,7 @@ stages/agents/types (see SKILL.md → *Bring your own skills*).
   dependency graph + parallel groups, non-overlapping file ownership, and the
   Global Constraints block copied verbatim from the spec.
 - **GATE (auto):** **set equality — the REQ ids in the brief equal the union of
-  `implements:` across plan tasks.** A non-empty difference fails the gate and is
+  `Implements:` across plan tasks.** A non-empty difference fails the gate and is
   reported as the explicit list of dropped requirements; this is the seam where
   scope leaks silently, so the check is mechanical, not a judgement call. Plus:
   every spec requirement maps to a task; no placeholders; names and
@@ -179,8 +179,8 @@ stages/agents/types (see SKILL.md → *Bring your own skills*).
   on the result, land it the project's way (merge, or a PR — outward, so it needs a
   go), remove the worktree. Stages 7–9 act on the integrated result, so a branch the
   operator chose to leave unmerged is recorded as such.
-- **GATE (auto):** all plan tasks DONE (review verdicts: spec compliance, code
-  quality, **and the task's REQ satisfied**); every finding fixed or parked with a
+- **GATE (auto):** all plan tasks DONE (three review verdicts per task: spec
+  compliance, **REQ satisfied**, code quality); every finding fixed or parked with a
   ruling; **every parked finding and implementer concern harvested into the
   carry-over ledger** — nothing stays only in the scratch workspace, which is
   deleted; no task left BLOCKED; full test suite green; branch integrated per the brief's policy (or the operator's

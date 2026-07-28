@@ -1,7 +1,7 @@
 # Companions — what's built in, what's optional, what to install
 
-**The pipeline's doctrine is entirely built into this skill.** Stages 0, 2, 3, 4, 5
-and 6 run from `references/*.md` — no companion plugin, no resolution step, no
+**The pipeline's doctrine is entirely built into this skill.** Stages 0, 2, 3, 4, 5,
+6 and 10 run from `references/*.md` — no companion plugin, no resolution step, no
 fallback path, no version skew, and no failure mode where a stage can't run because
 something isn't installed.
 
@@ -14,10 +14,13 @@ better, plus one that is required only for user-facing work.
 |---|---|
 | 0 Intake grill | `references/grill.md` |
 | 2 Brainstorm | `references/brainstorm.md` |
+| 2 Decompose (platforms only) | `references/decomposition.md` |
 | 3 Spec | `references/spec.md` |
 | 4 Plan | `references/planning.md` |
 | 5 Build (isolation, subagents, fix loop) | `references/build.md` + `references/review.md` |
 | 5–6 TDD + suite gate | `references/tdd.md` |
+| 10 Acceptance (REQ close-out) | `references/acceptance.md` |
+| any repeating loop | `references/loop-guard.md` |
 
 ## The matrix
 

@@ -41,7 +41,7 @@
       ],
       "gate": {
         "type": "manual",
-        "check": "the user approves the design AND the UI verdict is recorded (does the task touch a user-facing surface — web/mobile/CLI/TUI? this arms the stage-3 UX track) Every REQ is answered by the design, or explicitly dropped by the operator into the carry-over ledger. For a platform (several independent capabilities or shippable surfaces): the module map specs/<topic>-modules.md is committed and approved — brick criteria met or excepted in writing, dependency graph acyclic, build order topological with the walking skeleton first, every REQ mapped to exactly one module, cross-module contracts named with their owner. Single-module work records 'single module: <name>' instead — a skipped decomposition is a recorded decision, never an omission"
+        "check": "the user approves the design AND the UI verdict is recorded (does the task touch a user-facing surface — web/mobile/CLI/TUI? this arms the stage-3 UX track). Every REQ is answered by the design, or explicitly dropped by the operator into the carry-over ledger. For a platform (several independent capabilities or shippable surfaces): the module map specs/<topic>-modules.md is committed and approved — brick criteria met or excepted in writing, dependency graph acyclic, build order topological with the walking skeleton first, every REQ mapped to exactly one module, cross-module contracts named with their owner. Single-module work records 'single module: <name>' instead — a skipped decomposition is a recorded decision, never an omission"
       }
     },
     {
@@ -57,7 +57,7 @@
       ],
       "gate": {
         "type": "manual",
-        "check": "UX track ran FIRST for user-facing tasks (/ux -> ux-foundation CJM -> ux-flows screens -> ux-scenarios -> /ux-lint green); spec committed and user-reviewed; every user-facing requirement traces to a scenario ID Every spec section carries covers: REQ-... and every REQ appears in at least one section."
+        "check": "UX track ran FIRST for user-facing tasks (/ux -> ux-foundation CJM -> ux-flows screens -> ux-scenarios -> /ux-lint green); spec committed and user-reviewed; every user-facing requirement traces to a scenario ID. Every spec section carries covers: REQ-... and every REQ appears in at least one section."
       }
     },
     {
@@ -84,7 +84,7 @@
       ],
       "gate": {
         "type": "auto",
-        "check": "all plan tasks DONE (two-stage review per task: spec compliance, then code quality); every finding fixed or parked with a written ruling; no task left BLOCKED; full test suite green; the branch integrated per the brief's branch policy (base synced, suite green on the result, worktree removed) — or the operator's explicit 'leave it unmerged' recorded Review returns three verdicts (spec compliance, code quality, REQ satisfied); every parked finding and implementer concern is harvested into the carry-over ledger before the scratch workspace is deleted."
+        "check": "all plan tasks DONE — the per-task review returns three verdicts (spec compliance, REQ satisfied, code quality); every finding fixed or parked with a written ruling; no task left BLOCKED; full test suite green; the branch integrated per the brief's branch policy (base synced, suite green on the result, worktree removed) — or the operator's explicit 'leave it unmerged' recorded. Every parked finding and implementer concern is harvested into the carry-over ledger before the scratch workspace is deleted."
       }
     },
     {
@@ -112,7 +112,7 @@
       ],
       "gate": {
         "type": "manual",
-        "check": "lint clean and full suite green before deploy; deploy is outward and needs explicit operator go — or the specific standing authorization recorded in the stage-0 brief (named target + named preconditions; a vague 'do everything' is not one) No REQ is still open; a partial ships only with the operator's explicit acceptance."
+        "check": "lint clean and full suite green before deploy; deploy is outward and needs explicit operator go — or the specific standing authorization recorded in the stage-0 brief (named target + named preconditions; a vague 'do everything' is not one). No REQ is still open; a partial ships only with the operator's explicit acceptance."
       }
     },
     {

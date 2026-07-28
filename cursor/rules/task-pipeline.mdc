@@ -1,5 +1,5 @@
 ---
-description: "task-pipeline: run a substantial task through a disciplined, gated delivery cycle — an intake grill that expands the request into a checkable requirement list, then docs→brainstorm→spec→plan→build→tests→lint/deploy→post-deploy→docs→acceptance. Apply when the user asks to 'run this through the pipeline' / 'прогони по конвейеру', asks for 'the full cycle' / 'полный цикл', or starts any substantial feature/fix/build."
+description: "task-pipeline: run a substantial task through a disciplined, gated delivery cycle — an intake grill that expands the request into a checkable requirement list, then docs→brainstorm→spec→plan→build→tests→lint/deploy→post-deploy→docs/wiki→acceptance. Apply when the user asks to 'run this through the pipeline' / 'прогони по конвейеру', asks for 'the full cycle' / 'полный цикл', or starts any substantial feature/fix/build."
 alwaysApply: false
 ---
 
@@ -110,9 +110,10 @@ not authorize an outward, irreversible action — stage 7 stops and asks.
 5. **Dev** (auto) — isolate first (existing worktree? native worktree tool? else
    `git worktree` into an ignored dir), baseline tests green, then one task at a
    time: TDD (failing test → watch it fail → minimal impl → watch it pass →
-   commit), then a review with **both** verdicts — spec compliance and code
-   quality. Findings loop back to the implementer (max 5 rounds, then adjudicate in
-   writing); minor findings are recorded, never blocking. Keep a progress ledger in
+   commit), then a review with **all three** verdicts — spec compliance, **REQ
+   satisfied** (judged against the requirement's own statement, not the task's
+   instructions), and code quality. Findings loop back to the implementer (max 5
+   rounds, then adjudicate in writing); minor findings are recorded, never blocking. Keep a progress ledger in
    a file so a lost context can resume instead of redoing finished work. Tasks in
    the same parallel group run concurrently **only** if each worker has its own
    worktree — otherwise sequential. Close the stage by integrating: sync with the
@@ -126,7 +127,8 @@ not authorize an outward, irreversible action — stage 7 stops and asks.
    the stage-0 brief.
 8. **Post-deploy** (auto) — tail logs / health-check; clean boot or an honest
    degradation report (never silent success).
-9. **Docs** (auto) — update module docs/runbooks in the SAME change.
+9. **Docs + wiki** (auto) — update module docs/runbooks in the SAME change, and
+    sync the project's knowledge base/wiki if it has one.
 10. **Acceptance** (manual) — the closing stage: go back to the brief and account
     for **every** REQ. One row each, status `verified` / `partial` / `deferred` /
     `dropped`, and every `verified` carries **evidence** — a passing test name, a

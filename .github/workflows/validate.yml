@@ -200,6 +200,50 @@ jobs:
             echo "OK: validator requires set equality at the brief-to-plan seam"
           fi
 
+      - name: Negative self-test (a description that drops the final stage must fail)
+        run: |
+          set -eu
+          cp -R . /tmp/blurb-copy
+          python3 - <<'EOF'
+          import json
+          p = "/tmp/blurb-copy/package.json"
+          d = json.load(open(p))
+          d["description"] = d["description"].replace(", acceptance)", ")")
+          json.dump(d, open(p, "w"), indent=2, ensure_ascii=False)
+          EOF
+          if python3 /tmp/blurb-copy/test/validate.py; then
+            echo "ERROR: validator passed a description that stops one stage short"
+            exit 1
+          else
+            echo "OK: validator requires every description to name the flow's final stage"
+          fi
+
+      - name: Negative self-test (verdict count must not drift from the dev gate)
+        run: |
+          set -eu
+          cp -R . /tmp/verdict-copy
+          sed -i 's/with \*\*all three\*\* verdicts/with **both** verdicts/' \
+            /tmp/verdict-copy/plugins/task-pipeline/skills/task-pipeline/references/build.md
+          if python3 /tmp/verdict-copy/test/validate.py; then
+            echo "ERROR: validator passed 'both verdicts' while the dev gate declares three"
+            exit 1
+          else
+            echo "OK: validator keeps the review verdict count consistent across surfaces"
+          fi
+
+      - name: Negative self-test (a doctrine file's gate type must match the config)
+        run: |
+          set -eu
+          cp -R . /tmp/doctrinegate-copy
+          sed -i 's/^## GATE (manual)/## GATE (auto)/' \
+            /tmp/doctrinegate-copy/plugins/task-pipeline/skills/task-pipeline/references/acceptance.md
+          if python3 /tmp/doctrinegate-copy/test/validate.py; then
+            echo "ERROR: validator passed a doctrine gate type contradicting pipeline.example.json"
+            exit 1
+          else
+            echo "OK: validator keeps each stage doctrine's gate type in sync with the config"
+          fi
+
       - name: install.sh syntax check
         run: bash -n install.sh
 

@@ -1,5 +1,5 @@
 ---
-description: Run a task through task-pipeline — an intake grill that expands the request, then docs → brainstorm → spec → plan → build → tests → deploy → post-deploy → docs/wiki.
+description: Run a task through task-pipeline — an intake grill that expands the request, then docs → brainstorm → spec → plan → build → tests → deploy → post-deploy → docs/wiki → acceptance.
 argument-hint: <one-line task description>
 ---
 Use the `task-pipeline` skill to run the task below through all gated stages —
