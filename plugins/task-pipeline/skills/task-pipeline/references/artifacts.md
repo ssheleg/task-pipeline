@@ -29,8 +29,18 @@ docs/
 ```
 
 Naming: date-prefixed `YYYY-MM-DD-<topic>` slugs, one topic per file, kebab-case.
-The three superpowers artifacts share the **same `<topic>` slug** so brief →
-design → plan is traceable at a glance.
+Brief, design and plan share the **same `<topic>` slug**, so the chain is traceable
+at a glance.
+
+> The `docs/superpowers/` directory name is this pipeline's historical convention
+> (kept so existing projects don't have to migrate) — **not a dependency on any
+> external skill**. A host project may relocate the root via its `CLAUDE.md`; keep
+> the shape, keep the slugs.
+
+Stage 5 also creates a **git-ignored** scratch workspace per plan at
+`.task-pipeline/build/<plan-basename>/` — ledger, task briefs, implementer reports,
+review packages. It is deleted when the final review is clean; git history is the
+record (see `build.md`).
 
 ## Stage → artifact map
 
@@ -55,7 +65,8 @@ plugins/task-pipeline/
     SKILL.md
     pipeline.schema.json                      # generic pipeline contract
     pipeline.example.json                     # this plugin's own flow, as config
-    references/{grill,stages,model-tiering,conventions,artifacts,companion-skills}.md
+    references/{grill,brainstorm,spec,planning,build,review,tdd}.md   # built-in stage doctrine
+    references/{stages,model-tiering,conventions,artifacts,companion-skills}.md
 cursor/rules/task-pipeline.mdc                # Cursor channel (self-contained rule)
 plugins/task-pipeline/skills/task-pipeline/templates/{brief,context,adr}.md      # stage-0 skeletons (ship on every channel)
 bin/task-pipeline.js                          # npx installer (package task-pipeline-skill)

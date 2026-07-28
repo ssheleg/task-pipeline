@@ -1,7 +1,7 @@
 {
   "name": "task-pipeline-skill",
-  "version": "0.12.0",
-  "description": "Full-cycle task delivery pipeline orchestrator skill for Claude Code \u2014 a mandatory built-in intake grill + 9 gated stages (docs, brainstorm, spec, plan, build, tests, deploy, post-deploy, docs/wiki) built on the superpowers skills, with a super-ux UX track for user-facing tasks and toggleable release automation. This package is the installer CLI.",
+  "version": "0.13.0",
+  "description": "Full-cycle task delivery pipeline orchestrator skill for Claude Code — a mandatory built-in intake grill + 9 gated stages (docs, brainstorm, spec, plan, build, tests, deploy, post-deploy, docs/wiki) whose doctrine ships inside the skill with no required companion plugin, plus a super-ux UX track for user-facing tasks and toggleable release automation. This package is the installer CLI.",
   "bin": {
     "task-pipeline": "bin/task-pipeline.js"
   },
@@ -23,11 +23,11 @@
   "keywords": [
     "pipeline",
     "workflow",
-    "superpowers",
     "orchestrator",
     "tdd",
     "deploy",
     "spec-driven",
+    "self-contained",
     "claude-code",
     "skill"
   ]

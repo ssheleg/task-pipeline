@@ -1,5 +1,67 @@
 # Changelog
 
+## v0.13.0 — 2026-07-28
+
+The last external dependency is gone. Every stage now runs on doctrine that ships
+inside the skill — the pipeline installs and runs with nothing else present.
+
+- **superpowers is no longer a prerequisite.** The preflight no longer resolves
+  `superpowers:*`, the "install this or stop" branch is deleted, and no stage can
+  fail because a companion plugin is missing. `Prerequisites` in SKILL.md and the
+  README now read "none required".
+- **Six new built-in references carry stages 2→6:**
+  - `references/brainstorm.md` — stage 2: read the brief first, explore, scope-check
+    for decomposition, one question at a time, 2–3 approaches with a recommendation,
+    YAGNI, design approved section by section. The **hard gate** (no code, no
+    scaffolding before approval, including on "obviously simple" tasks) is explicit.
+  - `references/spec.md` — stage 3: UX-track order, what the spec must lock (types,
+    schemas, signatures, file layout) plus the **Global Constraints** block stages
+    4–5 consume verbatim, the self-review pass, the operator-review gate.
+  - `references/planning.md` — stage 4: zero-context task format, dependency graph,
+    parallel groups with exclusive file ownership, required plan header and task
+    structure, the no-placeholders list, the self-review checklist.
+  - `references/build.md` — stage 5: worktree detection (submodule guard, native
+    tool first, ignored-directory check, baseline tests), a git-ignored ledger at
+    `.task-pipeline/build/<plan>/progress.md` that survives compaction, the
+    file-based dispatch contract, the four implementer statuses, the five-round fix
+    loop with its breaker and adjudication rules, and the single final fix wave.
+  - `references/review.md` — the review rubric (spec compliance, correctness,
+    constraints, test honesty, degradation, boundaries, security, docs-same-change),
+    severity ladder, controller rules ("never pre-judge a reviewer"), and the three
+    reviewer prompts. External helper scripts are replaced by plain git commands, so
+    the doctrine works on any agent.
+  - `references/tdd.md` — stages 5–6: the iron law, red/green/refactor with both
+    mandatory verifications, honest-test rules, the stage-6 full-suite gate, and the
+    rationalization table.
+- **Ported, not depended on.** Stages 2–6 are adapted from `brainstorming`,
+  `writing-plans`, `using-git-worktrees`, `subagent-driven-development`,
+  `test-driven-development` and `requesting-code-review` in
+  [obra/superpowers](https://github.com/obra/superpowers) (MIT) and rewritten for
+  this pipeline's stages, gates, artifacts and single-model policy. `LICENSE` gains
+  a second *Third-party* section with Jesse Vincent's copyright notice covering the
+  six files.
+- **Optional bridge, not a dependency.** An operator who already runs an equivalent
+  skill set can substitute it on stages 2/4/5/6 via `pipeline.json` → `skills[]`.
+  Nothing detects, recommends or waits for it; the gates still govern; providers are
+  never mixed inside one stage.
+- **Config:** `pipeline.example.json` stages now name `task-pipeline:brainstorm`,
+  `task-pipeline:spec`, `task-pipeline:plan`, `task-pipeline:build` +
+  `task-pipeline:review`, and `host:test-runner` + `task-pipeline:tdd`.
+- **Every channel updated** — SKILL.md (built-in doctrine table, stage table,
+  references list), `references/stages.md`, `references/companion-skills.md` (matrix
+  split into built-in vs optional, superpowers moved to a struck-through
+  "not a dependency" row), `references/artifacts.md` (new files in the repo map, the
+  `.task-pipeline/` scratch workspace, and a note that `docs/superpowers/` is a
+  retained directory *name*, not a dependency), the `/task-pipeline` command, the
+  Cursor rule (now carrying the design gate, plan format, build loop and TDD rules
+  inline) and the README in both languages.
+- **Validator:** requires all six doctrine files and rejects stubs (<1.5 KB), and
+  fails the build if the shipped default flow names an external provider
+  (`superpowers:*`, `grill-me`, `grilling`) in any stage's `skills[]`.
+- **Artifact paths unchanged** — briefs, specs and plans still live under
+  `docs/superpowers/{specs,plans}` so existing projects need no migration; the name
+  is now documented as historical convention only.
+
 ## v0.12.0 — 2026-07-27
 
 The grill stops being someone else's skill. It is ported in, in full, and gains

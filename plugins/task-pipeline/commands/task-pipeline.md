@@ -4,8 +4,10 @@ argument-hint: <one-line task description>
 ---
 Use the `task-pipeline` skill to run the task below through all gated stages —
 **stage 0 intake grill** → docs study → brainstorm → spec → plan → subagent
-build → tests → lint/deploy → post-deploy → docs/wiki. The **intake grill is
-mandatory and built in** (`references/grill.md` — nothing to install): interview the
+build → tests → lint/deploy → post-deploy → docs/wiki. **Every stage's doctrine is
+built into the skill** (`references/{grill,brainstorm,spec,planning,build,review,tdd}.md`)
+— no companion plugin is required for any of them. The **intake grill is
+mandatory** (`references/grill.md`): interview the
 operator one question at a time (with a recommended answer each, exploring the
 codebase before asking) until every decision branch is resolved, applying the
 grill's **domain awareness** (challenge terms against `CONTEXT.md`, sharpen fuzzy

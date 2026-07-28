@@ -74,8 +74,13 @@ stages/agents/types (see SKILL.md → *Bring your own skills*).
   not recall. Unresolvable libraries are flagged in the spec.
 
 ## 2 — Brainstorm
-- **Invoke:** `superpowers:brainstorming`. One question at a time; 2–3 approaches +
-  a recommendation; design presented in sections.
+- **How it runs: [`brainstorm.md`](brainstorm.md)** — built into this skill. Read
+  the brief first (stage 0 already answered scope/constraints/done-criteria), then
+  explore the codebase, scope-check for decomposition, one question at a time, 2–3
+  approaches with a recommendation, design presented in sections and approved
+  section by section. **Hard gate:** no code, no scaffolding, no implementation
+  skill before the operator approves the design — including on "obviously simple"
+  tasks.
 - **UI detection (mandatory check):** decide whether the task touches any
   user-facing surface (web, mobile, CLI, TUI — new feature, new screen/command,
   or a change to user-visible behavior). Record the verdict; it arms the UX
@@ -83,6 +88,10 @@ stages/agents/types (see SKILL.md → *Bring your own skills*).
 - **GATE (manual):** the user approves the design **and** the UI verdict is recorded.
 
 ## 3 — Spec — with UX track for user-facing tasks
+- **How it runs: [`spec.md`](spec.md)** — built into this skill: the UX-track order,
+  what the spec must lock (types, schemas, signatures, file layout, the **Global
+  Constraints** block stages 4–5 depend on), the self-review pass and the operator
+  review gate.
 - **UX track (runs FIRST when stage 2 flagged UI; skip entirely otherwise).**
   Requires the **super-ux** skills. If missing on a UI task → give the install
   line and stop (see SKILL.md *Prerequisites*: `/plugin marketplace add
@@ -107,8 +116,8 @@ stages/agents/types (see SKILL.md → *Bring your own skills*).
   never rebuild from scratch. If the chain already exists and is validated (e.g.
   the task entered from super-ux), just verify (linter green) and embed it into
   the spec; only build the parts that are missing.
-- **Spec:** brainstorming writes the design to
-  `docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md` and commits it. Lock all
+- **Spec:** write the approved design to
+  `docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md` and commit it. Lock all
   shared contracts (types, schemas, signatures, file layout). For UI tasks the
   spec **embeds the UX layer**: links the validated scenario IDs, the flows and
   `SCR-` screens, the CJM stages the feature serves, and the UX
@@ -122,10 +131,11 @@ stages/agents/types (see SKILL.md → *Bring your own skills*).
   starts before this — the chain comes BEFORE interface.
 
 ## 4 — Plan
-- **Invoke:** `superpowers:writing-plans` →
+- **How it runs: [`planning.md`](planning.md)** — built into this skill →
   `docs/superpowers/plans/YYYY-MM-DD-<feature>.md`. Zero-context tasks, exact
-  paths, TDD steps, DoD each, dependency graph + parallel groups, non-overlapping
-  file ownership.
+  paths, complete code in every step, TDD steps with expected output, DoD each,
+  dependency graph + parallel groups, non-overlapping file ownership, and the
+  Global Constraints block copied verbatim from the spec.
 - **GATE (auto):** every spec requirement maps to a task; no placeholders; parallel-group
   tasks share no files. For UI tasks: every task building user-facing behavior
   names the scenario ID(s) and `SCR-` screen(s) it implements, and its DoD
@@ -133,19 +143,25 @@ stages/agents/types (see SKILL.md → *Bring your own skills*).
   same change (super-ux *same-change* rule).
 
 ## 5 — Dev
-- **Invoke:** `superpowers:using-git-worktrees` (isolate) →
-  `superpowers:subagent-driven-development` (or `superpowers:executing-plans`).
-  TDD per task (failing test → minimal impl → green → commit). Pin subagents to the
+- **How it runs: [`build.md`](build.md)** — built into this skill: isolate the
+  workspace (native worktree tool first, git fallback, baseline tests), keep a
+  ledger under `.task-pipeline/build/<plan>/` so a compacted context can resume,
+  then one fresh implementer subagent per task with a file-based brief and report,
+  a review after every task ([`review.md`](review.md)), and a five-round fix loop
+  with an explicit breaker. TDD per task ([`tdd.md`](tdd.md)): failing test →
+  watch it fail → minimal impl → watch it pass → commit. Pin subagents to the
   run's confirmed model (`model-tiering.md`).
 - **GATE (auto):** all plan tasks DONE (two-stage review: spec compliance, then code
-  quality); full test suite green.
+  quality); every finding fixed or parked with a ruling; no task left BLOCKED; full
+  test suite green.
 
 ## 6 — Tests
 - **What:** consolidate test coverage for the change: confirm new functionality
   has tests (written test-first in stage 5), update/repair existing tests the
   change touched, and add edge-case + failure-path tests per DoD.
-- **Invoke:** the host test runner (see `conventions.md` → *Lint + test*);
-  `superpowers:test-driven-development` for any uncovered gap.
+- **Invoke:** the host test runner (see `conventions.md` → *Lint + test*); the
+  built-in [`tdd.md`](tdd.md) cycle for any uncovered gap — failing test first,
+  same as stage 5.
 - **GATE (auto):** the **full** suite is green (not just the new tests); new/changed code
   is covered; no `skip`/`xfail` smuggling a red suite past the gate. Never advance
   to deploy on a red or partial run.

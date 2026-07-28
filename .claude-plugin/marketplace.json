@@ -1,6 +1,9 @@
 {
   "name": "task-pipeline",
-  "owner": { "name": "ssheleg", "url": "https://github.com/ssheleg" },
+  "owner": {
+    "name": "ssheleg",
+    "url": "https://github.com/ssheleg"
+  },
   "description": "Full-cycle task delivery pipeline orchestrator for Claude Code.",
   "homepage": "https://github.com/ssheleg/task-pipeline",
   "repository": "https://github.com/ssheleg/task-pipeline",
@@ -8,10 +11,20 @@
     {
       "name": "task-pipeline",
       "source": "./plugins/task-pipeline",
-      "description": "Thin orchestrator that runs a task through a mandatory built-in intake grill + 9 gated stages (docs, brainstorm, spec, plan, subagent build, tests, lint/deploy, post-deploy, docs/wiki) with typed auto/manual gates, one provider-agnostic model confirmed up front, a super-ux UX track for user-facing tasks, and toggleable project-configurable release automation. Built on the superpowers skills.",
-      "version": "0.12.0",
-      "author": { "name": "ssheleg" },
-      "keywords": ["pipeline", "workflow", "superpowers", "orchestrator", "tdd", "deploy", "spec-driven"],
+      "description": "Self-contained orchestrator that runs a task through a mandatory built-in intake grill + 9 gated stages (docs, brainstorm, spec, plan, subagent build, tests, lint/deploy, post-deploy, docs/wiki). Every stage's doctrine is built into the skill — no companion plugin required — with typed auto/manual gates, one provider-agnostic model confirmed up front, a super-ux UX track for user-facing tasks, and toggleable project-configurable release automation.",
+      "version": "0.13.0",
+      "author": {
+        "name": "ssheleg"
+      },
+      "keywords": [
+        "pipeline",
+        "workflow",
+        "orchestrator",
+        "tdd",
+        "deploy",
+        "spec-driven",
+        "self-contained"
+      ],
       "category": "development"
     }
   ]

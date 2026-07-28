@@ -1,7 +1,7 @@
 {
   "$schema": "./pipeline.schema.json",
   "version": 1,
-  "_note": "EXAMPLE ONLY — copy this file, rename to pipeline.json in your project, and rewrite it. This particular example encodes the plugin's own default flow (an up-front intake grill + superpowers + a super-ux UX track for user-facing tasks); it is NOT a fixed contract. Your project defines its own stages (any count), each executed by your own skills/agents, with your own gate types. Stage models use provider-agnostic tokens ('default' = the model confirmed for the run, 'inherit' = whatever the operator is on) — never hardcode a vendor model id, it goes stale. The universal contract is pipeline.schema.json; test/validate.py checks this example against it. gate.type: auto = orchestrator verifies the check itself (pass/fail); manual = wait for an explicit operator go. Which stages are manual vs auto is the operator's decision, not the plugin's.",
+  "_note": "EXAMPLE ONLY — copy this file, rename to pipeline.json in your project, and rewrite it. This particular example encodes the plugin's own default flow (an up-front intake grill + this skill's own built-in stage doctrine + a super-ux UX track for user-facing tasks); it is NOT a fixed contract. Your project defines its own stages (any count), each executed by your own skills/agents, with your own gate types. Stage models use provider-agnostic tokens ('default' = the model confirmed for the run, 'inherit' = whatever the operator is on) — never hardcode a vendor model id, it goes stale. The universal contract is pipeline.schema.json; test/validate.py checks this example against it. gate.type: auto = orchestrator verifies the check itself (pass/fail); manual = wait for an explicit operator go. Which stages are manual vs auto is the operator's decision, not the plugin's.",
   "stages": [
     {
       "id": 0,
@@ -36,7 +36,7 @@
       "name": "Brainstorm",
       "model": "default",
       "skills": [
-        "superpowers:brainstorming"
+        "task-pipeline:brainstorm"
       ],
       "gate": {
         "type": "manual",
@@ -52,7 +52,7 @@
         "super-ux:ux-foundation",
         "super-ux:ux-flows",
         "super-ux:ux-scenarios",
-        "superpowers:brainstorming"
+        "task-pipeline:spec"
       ],
       "gate": {
         "type": "manual",
@@ -65,7 +65,7 @@
       "name": "Plan",
       "model": "default",
       "skills": [
-        "superpowers:writing-plans"
+        "task-pipeline:plan"
       ],
       "gate": {
         "type": "auto",
@@ -78,8 +78,8 @@
       "name": "Dev",
       "model": "default",
       "skills": [
-        "superpowers:using-git-worktrees",
-        "superpowers:subagent-driven-development"
+        "task-pipeline:build",
+        "task-pipeline:review"
       ],
       "gate": {
         "type": "auto",
@@ -92,7 +92,8 @@
       "name": "Tests",
       "model": "default",
       "skills": [
-        "superpowers:test-driven-development"
+        "host:test-runner",
+        "task-pipeline:tdd"
       ],
       "gate": {
         "type": "auto",

@@ -10,6 +10,10 @@ Run a substantial task through an up-front **intake grill + 9 gated stages**. No
 stage advances until its **gate** passes. Each gate is `auto` (verify it yourself,
 pass/fail) or `manual` (wait for the user's explicit go).
 
+**No companion skill is required.** Every rule below is the doctrine itself — the
+grill, the design gate, the plan format, the build loop and TDD. Nothing to
+install, nothing to resolve, nothing that breaks when a plugin is missing.
+
 ## Model — decide once, before you start
 
 Recommended: **the most capable reasoning model the environment offers** (at time
@@ -66,16 +70,30 @@ not authorize an outward, irreversible action — stage 7 stops and asks.
 ## Stages 1→9
 
 1. **Docs study** (auto) — ground every external lib/API on current docs, not recall.
-2. **Brainstorm** (manual) — 2–3 approaches + a recommendation; design approved.
-   Record whether the task touches a user-facing surface (UI verdict).
-3. **Spec** (manual) — write and commit the design; lock shared contracts. For UI
-   tasks, run the UX chain FIRST (see super-ux below) and embed it.
-4. **Plan** (auto) — zero-context tasks, exact paths, TDD steps, DoD each,
-   dependency graph + parallel groups, non-overlapping file ownership.
-5. **Dev** (auto) — isolate (worktree), TDD per task (failing test → minimal impl →
-   green → commit); two-stage review (spec compliance, then code quality).
+2. **Brainstorm** (manual) — read the brief, explore the code, then 2–3 approaches
+   with a recommendation, YAGNI applied, design presented in sections and approved.
+   **Hard gate: no code, no scaffolding before that approval** — including on
+   "obviously simple" tasks. Record whether the task touches a user-facing surface
+   (UI verdict).
+3. **Spec** (manual) — write and commit the design; lock every shared contract
+   (types, schemas, signatures, file layout) plus a **Global Constraints** block of
+   exact values every later task inherits. Self-review it for placeholders,
+   contradictions, ambiguity and scope before showing it. For UI tasks, run the UX
+   chain FIRST (see super-ux below) and embed it.
+4. **Plan** (auto) — zero-context tasks: exact paths, complete code in every step,
+   the exact command and its expected output, TDD steps, DoD each, dependency graph
+   + parallel groups, non-overlapping file ownership. **No placeholders** — no TBD,
+   no "add error handling", no "similar to Task N", no undefined types.
+5. **Dev** (auto) — isolate first (existing worktree? native worktree tool? else
+   `git worktree` into an ignored dir), baseline tests green, then one task at a
+   time: TDD (failing test → watch it fail → minimal impl → watch it pass →
+   commit), then a review with **both** verdicts — spec compliance and code
+   quality. Findings loop back to the implementer (max 5 rounds, then adjudicate in
+   writing); minor findings are recorded, never blocking. Keep a progress ledger in
+   a file so a lost context can resume instead of redoing finished work.
 6. **Tests** (auto) — full suite green (not just new tests); new/changed code
-   covered; no skip/xfail hiding red.
+   covered including failure paths; no skip/xfail hiding red. Tests assert real
+   behavior, never mock behavior.
 7. **Lint + deploy** (manual) — lint clean AND suite green before deploy; deploy is
    outward → explicit user go, or the specific standing authorization recorded in
    the stage-0 brief.

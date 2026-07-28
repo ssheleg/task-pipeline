@@ -1,8 +1,9 @@
 # templates
 
-Skeletons task-pipeline seeds into a host project. Only the **brief** is owned by
-this plugin (it is the stage-0 intake artifact); the spec and plan skeletons come
-from the `superpowers` skills, and the `docs/ux/*` skeletons from `super-ux`.
+Skeletons task-pipeline seeds into a host project. Only the **brief** is a seeded
+file (it is the stage-0 intake artifact). The spec and plan have no skeleton here —
+their required structure is prescribed inline by `references/spec.md` and
+`references/planning.md`; the `docs/ux/*` skeletons come from `super-ux`.
 
 | Template | Seeded to | Stage |
 |---|---|---|

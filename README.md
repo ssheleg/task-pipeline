@@ -6,7 +6,7 @@
 
 Full-cycle task delivery pipeline orchestrator for **Claude Code**. One skill that
 runs any substantial task through an up-front **intake grill** + **9 gated stages** —
-built on the [superpowers](https://github.com/obra/superpowers) skills.
+with every stage's doctrine **built in**: no companion plugin required.
 
 ## What it does
 
@@ -39,6 +39,32 @@ against a universal contract
 a host project copies the example to `pipeline.json` and rewrites it with its own
 stages (any count), its own `skills[]`, and its own `auto`/`manual` gate types —
 "bring your own skills". The framework bakes in no fixed stages.
+
+## Everything is built in — zero required dependencies
+
+The doctrine each stage runs on ships inside the skill. Nothing to install for it,
+nothing to resolve at preflight, no version skew with someone else's repo, and no
+stage that can fail because a plugin is missing:
+
+| Stage | Built-in doctrine |
+|---|---|
+| 0 Intake grill | [`references/grill.md`](plugins/task-pipeline/skills/task-pipeline/references/grill.md) — interview loop, domain awareness, autonomy sweep |
+| 2 Brainstorm | [`references/brainstorm.md`](plugins/task-pipeline/skills/task-pipeline/references/brainstorm.md) — approaches, YAGNI, the no-code-before-approval gate |
+| 3 Spec | [`references/spec.md`](plugins/task-pipeline/skills/task-pipeline/references/spec.md) — UX-track order, locked contracts, global constraints, self-review |
+| 4 Plan | [`references/planning.md`](plugins/task-pipeline/skills/task-pipeline/references/planning.md) — zero-context tasks, parallel groups, no placeholders |
+| 5 Build | [`references/build.md`](plugins/task-pipeline/skills/task-pipeline/references/build.md) + [`review.md`](plugins/task-pipeline/skills/task-pipeline/references/review.md) — isolation, ledger, subagent loop, review rubric, fix loop |
+| 5–6 TDD | [`references/tdd.md`](plugins/task-pipeline/skills/task-pipeline/references/tdd.md) — the iron law, red/green/refactor, the suite gate |
+
+**Ported, not depended on.** Stage 0 is adapted from
+[Matt Pocock's `grilling` / `grill-with-docs`](https://github.com/mattpocock/skills)
+and stages 2–6 from the corresponding skills in
+[obra/superpowers](https://github.com/obra/superpowers) — both MIT, both credited in
+[LICENSE](LICENSE) → *Third-party*. Nothing at runtime reaches for either.
+
+**Optional bridge:** if you already run an equivalent skill set, map it onto stages
+2/4/5/6 in your `pipeline.json` → `skills[]`. That's a substitution, never a
+requirement — the gates still govern, and nothing detects, recommends or waits for
+an external provider.
 
 ## Intake grill (stage 0) — mandatory
 
@@ -88,12 +114,8 @@ before interface.
 
 ## Prerequisites
 
-**superpowers** — https://github.com/obra/superpowers
-
-```
-/plugin marketplace add obra/superpowers
-/plugin install superpowers@superpowers
-```
+**None for the pipeline itself** — the doctrine for every stage ships inside the
+skill (see *Everything is built in* above).
 
 **super-ux** (only for user-facing tasks) — https://github.com/ssheleg/super-ux
 
@@ -192,13 +214,11 @@ clean checkout. Copy and adapt it per project; nothing is hardcoded.
 
 ## Companion skills
 
-`references/companion-skills.md` lists what powers each stage and how to install
-it: **superpowers** (required), **super-ux** (required for user-facing tasks —
-install line surfaced on the spot), **context7** (docs stage), **wiki-update**
-(stage 9). The stage-0 grill is **not** on that list — it's built into the skill. A
-single preflight
-block prints which are ready, which to install, and the model recommendation, so you
-arm the whole run in one exchange.
+`references/companion-skills.md` separates what's built in (stages 0, 2, 3, 4, 5, 6
+— nothing to install) from the short optional list: **super-ux** (required only for
+user-facing tasks — install line surfaced on the spot), **context7** (docs stage),
+**wiki-update** (stage 9). A single preflight block prints which are ready, which to
+install, and the model recommendation, so you arm the whole run in one exchange.
 
 ## Portability
 
@@ -212,9 +232,19 @@ canonical artifact layout each stage writes to is fixed in
 **task-pipeline** — оркестратор полного цикла доставки задачи для Claude Code:
 один скилл проводит любую существенную задачу через **интейк-грил + 9 гейтованных
 стадий** (изучение доков → брейншторм → спека → план → сборка сабагентами →
-тесты → линт/деплой → пост-деплой проверка логов → синк доков/вики), построенных
-на скиллах [superpowers](https://github.com/obra/superpowers).
+тесты → линт/деплой → пост-деплой проверка логов → синк доков/вики). **Доктрина
+каждой стадии встроена в скилл — обязательных зависимостей нет.**
 
+- **Всё внутри — ставить нечего.** Стадии 0, 2, 3, 4, 5 и 6 работают по
+  `references/{grill,brainstorm,spec,planning,build,review,tdd}.md`: нет
+  компаньон-плагина, нет резолва на префлайте, нет рассинхрона версий с чужим репо
+  и нет стадии, которая падает из-за отсутствующего плагина. Портировано (не
+  зависимость): стадия 0 — из [grill-with-docs Мэтта
+  Покока](https://github.com/mattpocock/skills), стадии 2–6 — из соответствующих
+  скиллов [obra/superpowers](https://github.com/obra/superpowers); оба MIT, оба
+  указаны в `LICENSE` → *Third-party*. Опциональный мост: если у вас уже стоит
+  эквивалентный набор скиллов, его можно подставить на стадии 2/4/5/6 через
+  `pipeline.json` → `skills[]` — это замена, а не требование.
 - **Грил на входе (стадия 0) — обязателен.** Одна строка задачи («сделай фичу X»)
   недостаточна для автономной работы, поэтому стадию нельзя пропустить: пайплайн
   «допрашивает» оператора — по одному вопросу за ход, с рекомендованным ответом,

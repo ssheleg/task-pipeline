@@ -1,13 +1,14 @@
 ---
 name: task-pipeline
-description: "Use when running a substantial task through the full end-to-end delivery pipeline — an up-front intake grill that expands the request into a complete brief, then docs study, brainstorm, spec, plan, subagent-driven build, test suite, lint/deploy, post-deploy log check, and docs/wiki sync — as gated stages built on the superpowers skills. Use when the user wants to run a task through the pipeline, asks for the full cycle / полный цикл / прогони по конвейеру, invokes /task-pipeline, or starts any substantial feature, fix, or build that should follow the disciplined cycle rather than ad-hoc coding. The intake grill is mandatory — it front-loads every decision, including the per-stage autonomy sweep, so stages 1→9 run without mid-flight questions; recommends super-ux for any user-facing task; confirms one model up front (most capable available, never a hardcoded id); reads host-project conventions for deploy/docs/wiki so it stays project-agnostic."
+description: "Use when running a substantial task through the full end-to-end delivery pipeline — an up-front intake grill that expands the request into a complete brief, then docs study, brainstorm, spec, plan, subagent-driven build, test suite, lint/deploy, post-deploy log check, and docs/wiki sync — as gated stages whose doctrine is entirely built into this skill (no required companion skills). Use when the user wants to run a task through the pipeline, asks for the full cycle / полный цикл / прогони по конвейеру, invokes /task-pipeline, or starts any substantial feature, fix, or build that should follow the disciplined cycle rather than ad-hoc coding. The intake grill is mandatory — it front-loads every decision, including the per-stage autonomy sweep, so stages 1→9 run without mid-flight questions; recommends super-ux for any user-facing task; confirms one model up front (most capable available, never a hardcoded id); reads host-project conventions for deploy/docs/wiki so it stays project-agnostic."
 ---
 
 # task-pipeline
 
-Thin orchestrator. Runs a task through **gated stages**, each built on an
-existing skill. Keeps the main thread disciplined: no stage advances until its
-gate passes; the whole run uses one model, confirmed before it starts.
+Self-contained orchestrator. Runs a task through **gated stages**, each carrying its
+own built-in doctrine — no companion plugin required. Keeps the main thread
+disciplined: no stage advances until its gate passes; the whole run uses one model,
+confirmed before it starts.
 
 **Grill first, then run autonomously.** A one-line task ("make me feature X") is
 never enough to finish without a human in the loop. Stage 0 is **mandatory**: a
@@ -28,14 +29,28 @@ types (see *Bring your own skills*). Each gate has a **type**: `auto` (the
 orchestrator verifies the `check` itself, pass/fail) or `manual` (wait for an
 explicit operator go); which stages are manual is the operator's call.
 
-## Prerequisite
+## Prerequisites — none required
 
-Requires the **superpowers** skills. Preflight: confirm `superpowers:brainstorming`,
-`superpowers:writing-plans`, `superpowers:subagent-driven-development`,
-`superpowers:using-git-worktrees`, `superpowers:test-driven-development` resolve.
-If missing → tell the operator to install from **https://github.com/obra/superpowers**
-(`/plugin marketplace add obra/superpowers` → `/plugin install superpowers@superpowers`)
-and stop.
+**Every stage's doctrine ships inside this skill.** There is no required companion
+plugin, nothing to resolve at preflight, no version skew with someone else's repo,
+and no stage that can fail because a dependency is missing:
+
+| Stage | Built-in doctrine |
+|---|---|
+| 0 Intake grill | [`references/grill.md`](references/grill.md) |
+| 2 Brainstorm | [`references/brainstorm.md`](references/brainstorm.md) |
+| 3 Spec | [`references/spec.md`](references/spec.md) |
+| 4 Plan | [`references/planning.md`](references/planning.md) |
+| 5 Build (worktree, subagents, fix loop) | [`references/build.md`](references/build.md) + [`references/review.md`](references/review.md) |
+| 5–6 TDD + suite gate | [`references/tdd.md`](references/tdd.md) |
+
+**Optional bridge.** If the operator already runs an equivalent skill set (e.g.
+`superpowers:brainstorming` / `writing-plans` / `subagent-driven-development` /
+`using-git-worktrees` / `test-driven-development`), it can be mapped onto stages
+2/4/5/6 in `pipeline.json` → `skills[]`. That is a **substitution, never a
+requirement**: the built-in doctrine is normative, the gates in
+`references/stages.md` still govern, and nothing detects, recommends or waits for
+an external provider.
 
 **super-ux — recommended for ANY user-facing task.** The moment a task implies a
 user interface (web / mobile / CLI / TUI — a screen, a command, a visible
@@ -79,10 +94,10 @@ Two things the grill does beyond clarifying the request:
 
 1. Restate the task in one line. Create a **TaskList: one task per stage, starting
    with stage 0** (survives context loss; lets you resume). Then run the
-   **companion preflight** (`references/companion-skills.md`): detect which
-   companion skills resolve and emit ONE block covering both the companions —
-   install the required/recommended ones (superpowers always; super-ux for UI
-   tasks) — **and the model decision** (`references/model-tiering.md`): recommend
+   **companion preflight** (`references/companion-skills.md`): the stage doctrine
+   is built in, so this only checks the *optional* companions (super-ux for UI
+   tasks, context7, wiki-update) and emits ONE block covering them
+   **and the model decision** (`references/model-tiering.md`): recommend
    the most capable model available, let the operator confirm or override, record
    it. Ask once, here.
 2. **Run stage 0 (Intake grill) — always, no exceptions.** Grill until shared
@@ -118,11 +133,11 @@ capable available — see `references/model-tiering.md`).
 |---|---|---|---|---|
 | 0 | Intake grill — **mandatory** | built in: [`references/grill.md`](references/grill.md) | shared understanding reached; autonomy sweep covered; brief locked + confirmed | manual |
 | 1 | Docs study | `context7` (resolve-library-id → get-library-docs) / `context7-docs` | contracts grounded on fetched docs | auto |
-| 2 | Brainstorm | `superpowers:brainstorming` + **UI detection** | design approved; UI verdict recorded | manual |
-| 3 | Spec | **UI → super-ux chain first** (`/ux` → `ux-foundation` CJM → `ux-flows` screens → `ux-scenarios` → `/ux-lint`), then spec `docs/superpowers/specs/…-design.md` | committed + reviewed; UI: chain validated, linter green, scenarios/`SCR-` traced | manual |
-| 4 | Plan | `superpowers:writing-plans` → `docs/superpowers/plans/…md` | parallel-ready, DoD per task | auto |
-| 5 | Dev | `superpowers:using-git-worktrees` + `superpowers:subagent-driven-development` (TDD) | tasks DONE, TDD green per task | auto |
-| 6 | Tests | host test runner + `superpowers:test-driven-development` | full suite green; new/changed code covered | auto |
+| 2 | Brainstorm | built in: [`references/brainstorm.md`](references/brainstorm.md) + **UI detection** | design approved; UI verdict recorded | manual |
+| 3 | Spec | built in: [`references/spec.md`](references/spec.md) — **UI → super-ux chain first** (`/ux` → `ux-foundation` CJM → `ux-flows` screens → `ux-scenarios` → `/ux-lint`), then spec `docs/superpowers/specs/…-design.md` | committed + reviewed; UI: chain validated, linter green, scenarios/`SCR-` traced | manual |
+| 4 | Plan | built in: [`references/planning.md`](references/planning.md) → `docs/superpowers/plans/…md` | parallel-ready, DoD per task | auto |
+| 5 | Dev | built in: [`references/build.md`](references/build.md) (worktree → subagent per task → review loop) + [`references/tdd.md`](references/tdd.md) | tasks DONE, TDD green per task | auto |
+| 6 | Tests | host test runner + built-in [`references/tdd.md`](references/tdd.md) | full suite green; new/changed code covered | auto |
 | 7 | Lint + deploy | host lint → deploy per host convention | lint clean + suite green before deploy; deploy needs a go (or the brief's specific standing authorization) | manual |
 | 8 | Post-deploy | tail deploy logs / health-check | clean boot or honest degradation report | auto |
 | 9 | Docs + wiki | host module docs/runbook rules → `wiki-update` | docs synced, wiki synced | auto |
@@ -145,8 +160,8 @@ pinned to the confirmed model automatically. Detail: `references/model-tiering.m
 
 ## Bring your own skills
 
-The stages above (stage 0 intake + 1→9) are the **example** flow (grill +
-superpowers + a super-ux UX track for user-facing tasks + host conventions). A
+The stages above (stage 0 intake + 1→9) are the **example** flow (this skill's
+built-in doctrine + a super-ux UX track for user-facing tasks + host conventions). A
 host project owns its pipeline: copy `pipeline.example.json` → `pipeline.json`,
 then define its **own** stages (any count), point each stage's `skills[]` at the
 skills/agents its environment resolves, set each `gate.type` (`auto`/`manual`) to
@@ -159,6 +174,12 @@ automation is on — `pipeline.schema.json` is the only contract.
 - `pipeline.schema.json` — the universal pipeline config contract (stages + release)
 - `pipeline.example.json` — this plugin's default flow (stage 0 + 1→9) + release, as config
 - `references/grill.md` — the built-in stage-0 grill: loop, domain awareness, autonomy sweep
+- `references/brainstorm.md` — stage 2: design dialogue, approaches, UI detection, hard gate
+- `references/spec.md` — stage 3: UX track order, the spec contract, self-review, review gate
+- `references/planning.md` — stage 4: zero-context plan format, parallel groups, no placeholders
+- `references/build.md` — stage 5: isolation, ledger, subagent task loop, fix loop, final review
+- `references/review.md` — the review rubric, diff packages and the three reviewer prompts
+- `references/tdd.md` — stages 5–6: the iron law, red/green/refactor, the suite gate
 - `references/stages.md` — per-stage detail + exact gate criteria + gate types
 - `references/model-tiering.md` — model map, ids, the `/model` reminder mechanic, override
 - `references/conventions.md` — how stages 6–9 read the host project's CLAUDE.md

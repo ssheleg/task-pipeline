@@ -148,6 +148,16 @@ for r in ("grill.md", "stages.md", "model-tiering.md", "conventions.md", "compan
     if not os.path.isfile(os.path.join(refdir, r)):
         fail(f"missing reference: references/{r}")
 
+# The pipeline is self-contained: every stage's doctrine ships inside the skill.
+# These files ARE stages 2-6 — a missing or stub one silently turns a stage back
+# into a dependency on someone else's plugin.
+for r in ("brainstorm.md", "spec.md", "planning.md", "build.md", "review.md", "tdd.md"):
+    rp = os.path.join(refdir, r)
+    if not os.path.isfile(rp):
+        fail(f"missing built-in stage doctrine: references/{r}")
+    elif os.path.getsize(rp) < 1500:
+        fail(f"references/{r}: too small to be the stage's doctrine (stub?)")
+
 for r in ("README.md", "LICENSE"):
     if not os.path.isfile(os.path.join(ROOT, r)):
         fail(f"missing root file: {r}")
@@ -282,6 +292,23 @@ if pipe is not None:
             fail(f"{EXAMPLE_REL} stage[1]: the intake grill gate must be 'manual' (the operator confirms the brief)")
         if "mandatory" not in str(s0_gate.get("check", "")).lower():
             fail(f"{EXAMPLE_REL} stage[1]: gate.check must state that the intake grill is MANDATORY (never skipped)")
+
+    # No required external skill provider may sit in the default flow: the example
+    # config is what a host project copies, so a foreign `plugin:skill` entry there
+    # reintroduces exactly the dependency this skill ported in-house. Substituting
+    # one is the operator's call in THEIR pipeline.json (see companion-skills.md ->
+    # Optional bridge), never the shipped default.
+    FORBIDDEN_SKILL_PREFIXES = ("superpowers:", "grill-me", "grilling")
+    if isinstance(stages, list):
+        for i, st in enumerate(stages, start=1):
+            if not isinstance(st, dict):
+                continue
+            for s in st.get("skills") or []:
+                if isinstance(s, str) and s.strip().lower().startswith(FORBIDDEN_SKILL_PREFIXES):
+                    fail(
+                        f"{EXAMPLE_REL} stage[{i}]: skills[] names {s!r} — the default flow must run on "
+                        "the built-in doctrine (references/*.md), not an external provider"
+                    )
 
     # Release config is optional and individually toggleable. If present, shape-check it.
     rel = pipe.get("release")
