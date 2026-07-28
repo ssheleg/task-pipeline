@@ -88,6 +88,28 @@ Breaking any of them means a 2.0.
 - npm metadata: a `test` script (`npm test`), a `bugs` URL, `homepage` at the README.
 - `.worktrees/` is git-ignored — stage 5 creates them.
 
+> The open-source surface above shipped in v0.18.1, hours earlier the same day;
+> it is restated here because it is part of what 1.0 means.
+
+## v0.18.1 — 2026-07-28
+
+Open-source hygiene pass — the repo is public, so the files a first-time
+contributor looks for now exist, and the validator keeps them there.
+
+### Added
+- `CONTRIBUTING.md`, `SECURITY.md`, `CODE_OF_CONDUCT.md`, issue forms and a
+  pull-request template.
+- `CLAUDE.md` — house rules for any agent working in this repo: the commands, the
+  branch and commit policy, and the invariants that drift most often.
+- The validator now requires the open-source root files, with a CI negative
+  self-test that deletes `CONTRIBUTING.md` and proves the check fails.
+
+### Changed
+- npm metadata: a `test` script, a `bugs` URL, and `homepage` pointing at the
+  README. Package, marketplace and plugin descriptions rewritten so all three say
+  the same thing about the ten stages.
+- `.worktrees/` is ignored — the pipeline creates them during stage 5.
+
 ## v0.18.0 — 2026-07-28
 
 The grill stops opening cold. Stage 0 now reads what the project already knows
