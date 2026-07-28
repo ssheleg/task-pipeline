@@ -48,6 +48,11 @@ Path: `docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md`, committed, **same
 anything; a host project may relocate the root via its `CLAUDE.md` — keep the
 shape. See [`artifacts.md`](artifacts.md).)
 
+**Every section carries `covers: REQ-…`** — the brief's requirement ids it serves.
+This is what makes the brief→spec seam checkable instead of a re-telling: at the
+gate, every REQ must appear in at least one section, and a section that covers no
+REQ is either scope creep or a missing REQ. Say which.
+
 The spec **locks every shared contract**, because from here on people and subagents
 work from it in parallel and can't renegotiate:
 

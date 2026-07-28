@@ -117,14 +117,49 @@ preconditions ("staging once lint and the full suite are green; production alway
 asks"). Specific and recorded → it satisfies the stage-7 manual gate. Broader,
 absent or ambiguous → stage 7 stops and asks.
 
+## The REQ spine — the grill's other hard output
+
+Prose scope is not checkable. Before the brief is confirmed, the grill must turn
+what was asked into an **addressable list of requirements**, because every later
+stage traces to these IDs and stage 10 accounts for every one of them.
+
+| ID | Requirement | How it's verified | Status |
+|---|---|---|---|
+| REQ-001 | … | test name / `file:line` / command + expected output / `SCN-…` | open |
+
+Three rules that decide whether the spine is worth anything:
+
+1. **One REQ = one independently verifiable deliverable.** Not one per sentence of
+   the request. A small task gets three rows, not thirty — an inflated table is
+   ignored, and an ignored table protects nothing.
+2. **Every row names its check.** *A requirement you can't say how to verify is a
+   badly-stated requirement* — split or sharpen it here, during the grill. This is
+   the single defence against the failure mode where three vague REQs cover a large
+   task and acceptance goes green over half of it.
+3. **Ask what "finished" means per row, not for the task overall.** "Export works"
+   hides five decisions; "exports the currently filtered rows as CSV, verified by
+   `test_export_respects_filters`" hides none.
+
+**Then freeze it.** Adding a requirement mid-run is fine — append with its source.
+**Removing or narrowing one requires the operator's explicit agreement**, recorded
+in the carry-over ledger. Quietly restating the task in smaller terms is the
+subtlest way to lose it: every gate downstream then passes honestly, on a task
+that shrank without anyone deciding it should.
+
 ## Output
 
 Everything resolved goes into the **task brief**, seeded from
 [`templates/brief.md`](../templates/brief.md) and committed to
-`docs/superpowers/specs/YYYY-MM-DD-<topic>-brief.md` — scope, users, UI verdict,
-constraints, locked decisions, the autonomy table, done-criteria, open
-assumptions. Seed the template only when the file is absent; never overwrite an
-existing brief.
+`docs/superpowers/specs/YYYY-MM-DD-<topic>-brief.md` — scope, **the REQ table**,
+users, UI verdict, constraints, locked decisions, the autonomy table,
+done-criteria, open assumptions. Seed the template only when the file is absent;
+never overwrite an existing brief.
+
+Alongside it, seed the **carry-over ledger** from
+[`templates/carryover.md`](../templates/carryover.md) at
+`…-carryover.md` — append-only, written by every later stage, read in full by
+stage 10. Anything deferred, dropped, or half-done from here on goes there the
+moment it's said: **deferred out loud is forgotten.**
 
 Plus, where the session produced them: an updated `CONTEXT.md` and any ADRs, each
 written as the decision landed.

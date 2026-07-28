@@ -15,6 +15,28 @@
 - **Out of scope / explicitly deferred:** … (with the reason and, for deferrals,
   the latest moment the decision can still be made)
 
+## Requirements (the REQ spine — every later stage traces to these IDs)
+
+Scope above is prose; this is the **addressable** form of it. One row per
+independently verifiable deliverable — not one per sentence. Every row needs a
+named check: **a requirement you can't say how to verify is a badly-stated
+requirement** — split it here, on the grill, not at acceptance.
+
+| ID | Requirement | How it's verified | Status |
+|---|---|---|---|
+| REQ-001 | … | test name / `file:line` / command + expected output / `SCN-…` | open |
+| REQ-002 | … | … | open |
+
+Status lifecycle, written at three checkpoints only (stage 4, stage 5, stage 10 —
+not continuously): `open` → `planned` → `built` → `verified` \| `partial` \|
+`deferred` \| `dropped`.
+
+> **The list is frozen once confirmed.** Adding a requirement mid-run is fine —
+> append it with its source. **Removing or narrowing one needs the operator's
+> explicit agreement**, recorded in the carry-over ledger. Silently restating the
+> task in smaller terms is the failure this table exists to prevent: every gate
+> after it goes green on the shrunken task and nothing reports the loss.
+
 ## Users & context
 
 - **Who / for what:** … (personas, the job being done)

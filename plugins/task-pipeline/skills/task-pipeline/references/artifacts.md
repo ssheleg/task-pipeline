@@ -15,6 +15,8 @@ docs/
   superpowers/
     specs/
       YYYY-MM-DD-<topic>-brief.md     # stage 0 — locked intake brief (grill output)
+      YYYY-MM-DD-<topic>-carryover.md # stage 0 seeds it; EVERY stage appends; stage 10 reads it
+      YYYY-MM-DD-<topic>-acceptance.md # stage 10 — REQ coverage table + evidence
       YYYY-MM-DD-<topic>-design.md    # stage 3 — the spec (locks shared contracts)
     plans/
       YYYY-MM-DD-<topic>.md           # stage 4 — the implementation plan
@@ -29,7 +31,7 @@ docs/
 ```
 
 Naming: date-prefixed `YYYY-MM-DD-<topic>` slugs, one topic per file, kebab-case.
-Brief, design and plan share the **same `<topic>` slug**, so the chain is traceable
+Brief, carry-over, design, plan and acceptance share the **same `<topic>` slug**, so the chain is traceable
 at a glance.
 
 > The `docs/superpowers/` directory name is this pipeline's historical convention
@@ -46,7 +48,9 @@ record (see `build.md`).
 
 | Stage | Writes | Consumed by |
 |---|---|---|
-| 0 Intake | `specs/<topic>-brief.md` (seed from the skill's `templates/brief.md`) | stages 2–4 |
+| 0 Intake | `specs/<topic>-brief.md` — incl. the **REQ table** (seed from `templates/brief.md`) | stages 2–5, 7, 10 |
+| 0→9 all | `specs/<topic>-carryover.md` — append-only ledger (seed from `templates/carryover.md`) | stage 10 |
+| 10 Acceptance | `specs/<topic>-acceptance.md` — every REQ with a status and evidence | the operator |
 | 0 Grill (domain) | `CONTEXT.md`, `docs/adr/NNNN-<slug>.md` — created **lazily**, only when a term resolves or a decision qualifies | stages 2–4 + the repo |
 | 3 Spec | `specs/<topic>-design.md` (+ links `docs/ux/*` for UI) | stage 4 |
 | 4 Plan | `plans/<topic>.md` | stage 5 |
@@ -65,10 +69,10 @@ plugins/task-pipeline/
     SKILL.md
     pipeline.schema.json                      # generic pipeline contract
     pipeline.example.json                     # this plugin's own flow, as config
-    references/{grill,brainstorm,spec,planning,build,review,tdd}.md   # built-in stage doctrine
+    references/{grill,brainstorm,spec,planning,build,review,tdd,acceptance}.md  # built-in stage doctrine
     references/{stages,model-tiering,conventions,artifacts,companion-skills}.md
 cursor/rules/task-pipeline.mdc                # Cursor channel (self-contained rule)
-plugins/task-pipeline/skills/task-pipeline/templates/{brief,context,adr}.md      # stage-0 skeletons (ship on every channel)
+plugins/task-pipeline/skills/task-pipeline/templates/{brief,carryover,context,adr}.md   # stage-0 skeletons (ship on every channel)
 bin/task-pipeline.js                          # npx installer (package task-pipeline-skill)
 package.json
 install.sh                                    # POSIX installer

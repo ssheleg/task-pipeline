@@ -63,24 +63,28 @@ Review in this order; stop reading the diff only when you've covered all of it.
 1. **Spec compliance.** Every requirement in the brief: met, partially met, or
    missing. Anything built that the brief did *not* ask for is scope creep — flag
    it, even when it's nice.
-2. **Correctness.** Logic errors, off-by-one, wrong operator, unhandled `None`/nil,
+2. **REQ satisfaction.** Read the task's `Implements:` requirement statements, not
+   just its instructions, and judge the diff against **those**. A task can satisfy
+   every line of its brief and still miss the requirement it exists to deliver —
+   that gap is invisible one level down, which is why it is asked for here.
+3. **Correctness.** Logic errors, off-by-one, wrong operator, unhandled `None`/nil,
    race conditions, resource leaks, wrong error propagation. State the concrete
    input or state that produces the wrong output — a finding without a failure
    scenario is an opinion.
-3. **Global constraints.** Exact values, formats and relationships from the
+4. **Global constraints.** Exact values, formats and relationships from the
    constraints block. Approximations are failures.
-4. **Test honesty.** Tests assert on real behavior, not on mocks. No test that
+5. **Test honesty.** Tests assert on real behavior, not on mocks. No test that
    passes regardless of the production code. No `skip`/`xfail`/commented assertion
    smuggling a red suite past a gate. New behavior has a covering test; the failure
    path has one too.
-5. **Error handling and degradation.** Every external call (network, DB, file, MCP,
+6. **Error handling and degradation.** Every external call (network, DB, file, MCP,
    API) handles failure, and the failure is reported honestly rather than swallowed.
-6. **Boundaries and clarity.** One responsibility per unit; names that say what the
+7. **Boundaries and clarity.** One responsibility per unit; names that say what the
    thing is; no duplication of a logic block that should be shared; nothing left
    dead.
-7. **Security.** No secrets in code, logs or fixtures; input validated at the
+8. **Security.** No secrets in code, logs or fixtures; input validated at the
    boundary; no new injection or path-traversal surface.
-8. **Docs in the same change.** Module docs, runbooks and (for UI work) the
+9. **Docs in the same change.** Module docs, runbooks and (for UI work) the
    super-ux layers updated alongside the code, not deferred.
 
 **Severities:**

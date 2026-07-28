@@ -78,6 +78,11 @@ no "clear enough task" exemption, no starting stage 1 without a committed,
 operator-confirmed brief. The one sanctioned bypass is the entry-from-super-ux
 short-circuit, and even that demands a scope confirmation.
 
+It also produces the **REQ spine**: the request as an addressable list of
+requirements, each naming how it will be verified. Stages 3–5 trace to those ids,
+stage 4's gate is a mechanical set-comparison against them, and **stage 10 accounts
+for every one** — which is what turns the pipeline from a funnel into a circle.
+
 Two things the grill does beyond clarifying the request:
 - **Domain awareness.** It reads the project's own `CONTEXT.md` / `docs/adr/` and
   holds the operator to them — challenging terms that conflict with the glossary,
@@ -101,14 +106,16 @@ Two things the grill does beyond clarifying the request:
    the most capable model available, let the operator confirm or override, record
    it. Ask once, here.
 2. **Run stage 0 (Intake grill) — always, no exceptions.** Grill until shared
-   understanding is reached, the autonomy sweep is covered and the brief is locked
+   understanding is reached, the autonomy sweep is covered, **the REQ table is
+   written (one row per independently verifiable deliverable, each naming its
+   check)** and the brief is locked
    (`references/stages.md` → 0). Do not touch stage 1 before the brief is
    committed and confirmed. **Entered from super-ux?**
    (a validated `docs/ux/` chain and/or a `docs/ux/plans/…` fix plan already
    exists — super-ux's `/ux` hands off here) → don't re-grill or rebuild the UX
    chain: just check it's OK (`/ux-lint` green), confirm scope in one line, and
    skip ahead to the first stage with real work (see `references/stages.md` → 0).
-3. Walk stages 1→9 on the model confirmed at preflight. **Don't re-ask about the
+3. Walk stages 1→10 on the model confirmed at preflight. **Don't re-ask about the
    model at every boundary** — only when the operator recorded a per-stage override
    map and the next stage's entry differs (`references/model-tiering.md`).
 4. Do **not** advance until the stage **gate** passes (`references/stages.md`).
@@ -117,7 +124,11 @@ Two things the grill does beyond clarifying the request:
    operator's explicit "continue"/go** — an auto gate never substitutes for a
    required manual approval.
 5. Cross-cutting, every stage: **answer from the brief's autonomy section rather
-   than asking again** — it was grilled precisely so you wouldn't have to; task
+   than asking again** — it was grilled precisely so you wouldn't have to;
+   **anything deferred, dropped or left half-done goes into the carry-over ledger
+   the moment it's said** — deferred out loud is forgotten; **never narrow the task
+   silently** — the REQ list is frozen, adding is free, removing needs the
+   operator's explicit agreement; task
    tracker + conventional commits per host conventions; worktree isolation for the
    build, integrated back per the brief's branch policy before stage 7; honest
    degradation (never claim a failed/skipped step succeeded);
@@ -142,6 +153,7 @@ capable available — see `references/model-tiering.md`).
 | 7 | Lint + deploy | host lint → deploy per host convention | lint clean + suite green before deploy; deploy needs a go (or the brief's specific standing authorization) | manual |
 | 8 | Post-deploy | tail deploy logs / health-check | clean boot or honest degradation report | auto |
 | 9 | Docs + wiki | host module docs/runbook rules → `wiki-update` | docs synced, wiki synced | auto |
+| 10 | **Acceptance** | built in: [`references/acceptance.md`](references/acceptance.md) | every REQ accounted for with evidence; ledger has no unresolved row; operator signs off | manual |
 
 ## Model — ask once, at preflight
 
@@ -175,6 +187,7 @@ automation is on — `pipeline.schema.json` is the only contract.
 - `pipeline.schema.json` — the universal pipeline config contract (stages + release)
 - `pipeline.example.json` — this plugin's default flow (stage 0 + 1→9) + release, as config
 - `references/grill.md` — the built-in stage-0 grill: loop, domain awareness, autonomy sweep
+- `references/acceptance.md` — the built-in stage-10 close-out: REQ coverage, evidence, sign-off
 - `references/brainstorm.md` — stage 2: design dialogue, approaches, UI detection, hard gate
 - `references/spec.md` — stage 3: UX track order, the spec contract, self-review, review gate
 - `references/planning.md` — stage 4: zero-context plan format, parallel groups, no placeholders

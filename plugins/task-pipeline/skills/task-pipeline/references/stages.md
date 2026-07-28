@@ -60,7 +60,8 @@ stages/agents/types (see SKILL.md → *Bring your own skills*).
 - **GATE (manual):** shared understanding reached — every detected branch has a
   recorded answer or an explicit deferral, no open contradictions, **every
   autonomy-sweep row is answered or explicitly marked "stop and ask here"**, the
-  model decision is recorded, and the operator confirms the brief. Stop when a
+  **REQ table is written and every row names its check**, the carry-over ledger is
+  seeded, the model decision is recorded, and the operator confirms the brief. Stop when a
   re-scan surfaces no new branches (don't grill past diminishing returns;
   reversible calls can be deferred with a note). Only then start stage 1.
 
@@ -85,7 +86,10 @@ stages/agents/types (see SKILL.md → *Bring your own skills*).
   user-facing surface (web, mobile, CLI, TUI — new feature, new screen/command,
   or a change to user-visible behavior). Record the verdict; it arms the UX
   track in stage 3.
-- **GATE (manual):** the user approves the design **and** the UI verdict is recorded.
+- **GATE (manual):** the user approves the design, the UI verdict is recorded,
+  **and every REQ is answered by the design** — a requirement the design doesn't
+  address is either covered now or explicitly dropped by the operator, with the
+  drop recorded in the carry-over ledger.
 
 ## 3 — Spec — with UX track for user-facing tasks
 - **How it runs: [`spec.md`](spec.md)** — built into this skill: the UX-track order,
@@ -123,7 +127,8 @@ stages/agents/types (see SKILL.md → *Bring your own skills*).
   `SCR-` screens, the CJM stages the feature serves, and the UX
   patterns/principles from super-ux that apply (`best-practices.md`,
   `ux-design-principles.md`, `component-guidelines.md`).
-- **GATE (manual):** spec committed **and** user-reviewed; for UI tasks
+- **GATE (manual):** spec committed **and** user-reviewed; **every section carries
+  `covers: REQ-…` and every REQ appears in at least one section**; for UI tasks
   additionally: the super-ux chain (foundation → flows → screens → scenarios) is
   designed, validated and approved; scenarios validated in `docs/ux/scenarios.md`;
   the linter passes; every user-facing spec requirement traces to a scenario ID
@@ -136,7 +141,11 @@ stages/agents/types (see SKILL.md → *Bring your own skills*).
   paths, complete code in every step, TDD steps with expected output, DoD each,
   dependency graph + parallel groups, non-overlapping file ownership, and the
   Global Constraints block copied verbatim from the spec.
-- **GATE (auto):** every spec requirement maps to a task; no placeholders; names and
+- **GATE (auto):** **set equality — the REQ ids in the brief equal the union of
+  `implements:` across plan tasks.** A non-empty difference fails the gate and is
+  reported as the explicit list of dropped requirements; this is the seam where
+  scope leaks silently, so the check is mechanical, not a judgement call. Plus:
+  every spec requirement maps to a task; no placeholders; names and
   types consistent across tasks; every task carries a verifiable DoD; parallel-group
   tasks share no files. For UI tasks: every task building user-facing behavior
   names the scenario ID(s) and `SCR-` screen(s) it implements, and its DoD
@@ -157,9 +166,11 @@ stages/agents/types (see SKILL.md → *Bring your own skills*).
   on the result, land it the project's way (merge, or a PR — outward, so it needs a
   go), remove the worktree. Stages 7–9 act on the integrated result, so a branch the
   operator chose to leave unmerged is recorded as such.
-- **GATE (auto):** all plan tasks DONE (two-stage review: spec compliance, then code
-  quality); every finding fixed or parked with a ruling; no task left BLOCKED; full
-  test suite green; branch integrated per the brief's policy (or the operator's
+- **GATE (auto):** all plan tasks DONE (review verdicts: spec compliance, code
+  quality, **and the task's REQ satisfied**); every finding fixed or parked with a
+  ruling; **every parked finding and implementer concern harvested into the
+  carry-over ledger** — nothing stays only in the scratch workspace, which is
+  deleted; no task left BLOCKED; full test suite green; branch integrated per the brief's policy (or the operator's
   "leave it" recorded).
 
 ## 6 — Tests
@@ -181,7 +192,9 @@ stages/agents/types (see SKILL.md → *Bring your own skills*).
   if the project defines release automation (`pipeline.json` → `release`, toggle
   on), that is what "deploy" runs here.
 - **GATE (manual):** lint clean (host linter **and**, for UI projects, the super-ux
-  linter) **and** suite green **before** deploy. Deploy is outward → explicit
+  linter) **and** suite green **before** deploy, **and no REQ is still `open`** — a
+  `partial` ships only with the operator's explicit acceptance. A gap is cheapest to
+  close before it ships, and the operator is already present at this gate. Deploy is outward → explicit
   operator go. Respect deploy-from-main rules if the project mandates them.
 
 ## 8 — Post-deploy
@@ -197,3 +210,31 @@ stages/agents/types (see SKILL.md → *Bring your own skills*).
   sync knowledge to the wiki (`wiki-update` skill).
 - **GATE (auto):** docs in sync with code; UI: super-ux layers current + linter
   green; wiki synced; dangling links fixed.
+
+## 10 — Acceptance
+- **What:** the closing stage — go back to the brief and account for **every**
+  requirement. Doctrine: [`acceptance.md`](acceptance.md). Every earlier gate asks
+  "is this artifact good?"; none asks "does this still contain everything that was
+  asked for?" The loss happens on the seams between stages, and this is where it
+  surfaces.
+- **Runs last**, after docs and wiki — those are deliverables too, and a REQ may
+  name them.
+- **How it runs:** built in. Read the brief's REQ table, the carry-over ledger in
+  full, the plan's task statuses, git log, the final suite output, stage-8 notes and
+  stage-9 doc changes (plus `docs/ux/scenarios.md` + `/ux-lint` for UI tasks). Write
+  `docs/superpowers/specs/YYYY-MM-DD-<topic>-acceptance.md` — one row per REQ,
+  status `verified` / `partial` / `deferred` / `dropped`, each with **evidence** (a
+  passing test name, `file:line`, a command and its output, or a scenario ID).
+  "Done" without evidence is not done: downgrade to `partial` and say so rather
+  than upgrading the claim.
+- Then ask the operator the closing question out loud, list in hand: *here's what
+  you asked for, here's what shipped, here's what's deferred and where it lives —
+  what's missing?* Ask it even when the table is green; the operator holds context
+  the brief never captured, and this is the cheapest moment in the run to hear it.
+- **GATE (manual):** every REQ has a status (none `unknown`); every `verified`
+  carries evidence; every `partial` names what's missing and where it's tracked;
+  every `deferred`/`dropped` has the operator's agreement and, for `deferred`, a
+  tracker entry; no carry-over row left `unresolved`; the operator answers the
+  closing question and signs off. Manual by design — an automated check can prove
+  the table is well-formed, only the person who asked can confirm it is what they
+  asked for.

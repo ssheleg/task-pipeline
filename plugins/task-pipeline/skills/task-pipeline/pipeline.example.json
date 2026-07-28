@@ -13,7 +13,7 @@
       ],
       "gate": {
         "type": "manual",
-        "check": "MANDATORY stage — never skipped (only sanctioned bypass: the entry-from-super-ux short-circuit). The grill is built into the skill (references/grill.md) — no companion to install. Per its contract: one question at a time, a recommended answer with each, explore the codebase/docs before asking, depth-first, contradictions reconciled; domain awareness applied (terms challenged against CONTEXT.md, ADRs recorded for hard-to-reverse calls). The autonomy sweep is covered — every stage 1-9 has its blockers pre-resolved (docs sources, branch/tracker policy, test + lint commands, deploy target and authorization, log/health locations, docs+wiki targets) or is explicitly marked 'stop and ask here'. UI verdict recorded (arms super-ux); model decision recorded. All of it locked into a committed task brief the operator confirms before stage 1."
+        "check": "MANDATORY stage — never skipped (only sanctioned bypass: the entry-from-super-ux short-circuit). The grill is built into the skill (references/grill.md) — no companion to install. Per its contract: one question at a time, a recommended answer with each, explore the codebase/docs before asking, depth-first, contradictions reconciled; domain awareness applied (terms challenged against CONTEXT.md, ADRs recorded for hard-to-reverse calls). The autonomy sweep is covered — every stage 1-9 has its blockers pre-resolved (docs sources, branch/tracker policy, test + lint commands, deploy target and authorization, log/health locations, docs+wiki targets) or is explicitly marked 'stop and ask here'. UI verdict recorded (arms super-ux); model decision recorded. All of it locked into a committed task brief the operator confirms before stage 1. The REQ table is written — one row per independently verifiable deliverable, each naming how it is verified — and frozen: adding later is free, removing or narrowing needs the operator's explicit agreement. The carry-over ledger is seeded."
       }
     },
     {
@@ -40,7 +40,7 @@
       ],
       "gate": {
         "type": "manual",
-        "check": "the user approves the design AND the UI verdict is recorded (does the task touch a user-facing surface — web/mobile/CLI/TUI? this arms the stage-3 UX track)"
+        "check": "the user approves the design AND the UI verdict is recorded (does the task touch a user-facing surface — web/mobile/CLI/TUI? this arms the stage-3 UX track) Every REQ is answered by the design, or explicitly dropped by the operator into the carry-over ledger."
       }
     },
     {
@@ -56,7 +56,7 @@
       ],
       "gate": {
         "type": "manual",
-        "check": "UX track ran FIRST for user-facing tasks (/ux -> ux-foundation CJM -> ux-flows screens -> ux-scenarios -> /ux-lint green); spec committed and user-reviewed; every user-facing requirement traces to a scenario ID"
+        "check": "UX track ran FIRST for user-facing tasks (/ux -> ux-foundation CJM -> ux-flows screens -> ux-scenarios -> /ux-lint green); spec committed and user-reviewed; every user-facing requirement traces to a scenario ID Every spec section carries covers: REQ-... and every REQ appears in at least one section."
       }
     },
     {
@@ -69,7 +69,7 @@
       ],
       "gate": {
         "type": "auto",
-        "check": "every spec requirement maps to a task; no placeholders; names and types consistent across tasks; every task carries a verifiable DoD; parallel-group tasks share no files; UI tasks name the scenario ID(s) and SCR- screen(s) they implement in their DoD"
+        "check": "SET EQUALITY: the REQ ids in the brief equal the union of Implements: across plan tasks — a non-empty difference fails the gate and is reported as the explicit list of dropped requirements. Plus: every spec requirement maps to a task; no placeholders; names and types consistent across tasks; every task carries a verifiable DoD; parallel-group tasks share no files; UI tasks name the scenario ID(s) and SCR- screen(s) they implement in their DoD"
       }
     },
     {
@@ -83,7 +83,7 @@
       ],
       "gate": {
         "type": "auto",
-        "check": "all plan tasks DONE (two-stage review per task: spec compliance, then code quality); every finding fixed or parked with a written ruling; no task left BLOCKED; full test suite green; the branch integrated per the brief's branch policy (base synced, suite green on the result, worktree removed) — or the operator's explicit 'leave it unmerged' recorded"
+        "check": "all plan tasks DONE (two-stage review per task: spec compliance, then code quality); every finding fixed or parked with a written ruling; no task left BLOCKED; full test suite green; the branch integrated per the brief's branch policy (base synced, suite green on the result, worktree removed) — or the operator's explicit 'leave it unmerged' recorded Review returns three verdicts (spec compliance, code quality, REQ satisfied); every parked finding and implementer concern is harvested into the carry-over ledger before the scratch workspace is deleted."
       }
     },
     {
@@ -111,7 +111,7 @@
       ],
       "gate": {
         "type": "manual",
-        "check": "lint clean and full suite green before deploy; deploy is outward and needs explicit operator go — or the specific standing authorization recorded in the stage-0 brief (named target + named preconditions; a vague 'do everything' is not one)"
+        "check": "lint clean and full suite green before deploy; deploy is outward and needs explicit operator go — or the specific standing authorization recorded in the stage-0 brief (named target + named preconditions; a vague 'do everything' is not one) No REQ is still open; a partial ships only with the operator's explicit acceptance."
       }
     },
     {
@@ -139,6 +139,19 @@
       "gate": {
         "type": "auto",
         "check": "docs in sync with code in the same change; wiki synced; dangling links fixed"
+      }
+    },
+    {
+      "id": 10,
+      "state": "acceptance",
+      "name": "Acceptance",
+      "model": "default",
+      "skills": [
+        "task-pipeline:acceptance"
+      ],
+      "gate": {
+        "type": "manual",
+        "check": "Close the circle: every REQ in the brief has a status (verified / partial / deferred / dropped) — none unknown; every verified carries evidence (a passing test name, file:line, a command and its output, or a scenario ID) — 'done' without evidence is downgraded to partial, not upgraded; every partial names what is missing and where it is tracked; every deferred/dropped has the operator's agreement and, for deferred, a tracker entry; no carry-over row is left unresolved; and the operator answers the closing question — here is what you asked for, here is what shipped, here is what is deferred, what is missing? — and signs off"
       }
     }
   ],

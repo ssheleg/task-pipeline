@@ -159,7 +159,7 @@ for r in ("grill.md", "stages.md", "model-tiering.md", "conventions.md", "compan
 # The pipeline is self-contained: every stage's doctrine ships inside the skill.
 # These files ARE stages 2-6 — a missing or stub one silently turns a stage back
 # into a dependency on someone else's plugin.
-for r in ("brainstorm.md", "spec.md", "planning.md", "build.md", "review.md", "tdd.md"):
+for r in ("brainstorm.md", "spec.md", "planning.md", "build.md", "review.md", "tdd.md", "acceptance.md"):
     rp = os.path.join(refdir, r)
     if not os.path.isfile(rp):
         fail(f"missing built-in stage doctrine: references/{r}")
@@ -193,8 +193,8 @@ for f in mdcs:
 tpl_dir = os.path.join(ROOT, "plugins/task-pipeline/skills/task-pipeline/templates")
 if not os.path.isdir(tpl_dir):
     fail("missing skill templates/ directory")
-elif [t for t in ("brief.md", "context.md", "adr.md") if not os.path.isfile(os.path.join(tpl_dir, t))]:
-    for t in ("brief.md", "context.md", "adr.md"):
+elif [t for t in ("brief.md", "carryover.md", "context.md", "adr.md") if not os.path.isfile(os.path.join(tpl_dir, t))]:
+    for t in ("brief.md", "carryover.md", "context.md", "adr.md"):
         if not os.path.isfile(os.path.join(tpl_dir, t)):
             fail(f"missing template: plugins/task-pipeline/skills/task-pipeline/templates/{t}")
 else:
@@ -204,6 +204,17 @@ else:
     brief = open(os.path.join(tpl_dir, "brief.md"), encoding="utf-8").read()
     if not re.search(r"^##\s+Autonomy\b", brief, re.M):
         fail("templates/brief.md: missing the '## Autonomy' section (the stage-0 autonomy sweep)")
+    # The REQ spine is what stages 3-5 trace to and what stage 10 accounts for.
+    # Without it in the template the grill has nowhere to write requirements, the
+    # stage-4 set-comparison has nothing to compare, and acceptance degrades into
+    # recalling the task from memory — the exact failure the spine exists to stop.
+    if not re.search(r"^##\s+Requirements\b", brief, re.M):
+        fail("templates/brief.md: missing the '## Requirements' section (the REQ spine)")
+    if "REQ-001" not in brief:
+        fail("templates/brief.md: Requirements section has no REQ-NNN example row")
+    if not re.search(r"How it's verified", brief):
+        fail("templates/brief.md: the REQ table must carry a \"How it's verified\" column — "
+             "a requirement with no named check is what makes acceptance green over a gap")
 
 # No hardcoded vendor model ids in anything we ship: model generations ship and get
 # renamed, and the operator may be on another provider entirely. Stage configs use
@@ -317,6 +328,33 @@ if pipe is not None:
                         f"{EXAMPLE_REL} stage[{i}]: skills[] names {s!r} — the default flow must run on "
                         "the built-in doctrine (references/*.md), not an external provider"
                     )
+
+    # The shipped default flow must close the circle: the last stage is acceptance,
+    # and it is manual. Every earlier gate asks "is this artifact good?"; only this
+    # one asks "does this still contain everything that was asked for?" — and only
+    # the person who asked can answer that, so an auto gate here would be a lie.
+    # (Host projects are unconstrained: pipeline.schema.json fixes no stage count.
+    # This checks the EXAMPLE we ship.)
+    if isinstance(stages, list) and stages:
+        last = stages[-1] if isinstance(stages[-1], dict) else {}
+        last_gate = last.get("gate") if isinstance(last.get("gate"), dict) else {}
+        if last.get("state") != "acceptance":
+            fail(f"{EXAMPLE_REL}: the default flow's last stage must be 'acceptance' "
+                 f"(the REQ close-out), got {last.get('state')!r}")
+        elif last_gate.get("type") != "manual":
+            fail(f"{EXAMPLE_REL}: the acceptance gate must be 'manual' — a green table "
+                 "is not the operator confirming it is what they asked for")
+        elif "evidence" not in str(last_gate.get("check", "")).lower():
+            fail(f"{EXAMPLE_REL}: the acceptance gate.check must require EVIDENCE per "
+                 "requirement — 'done' without evidence is the gap this stage exists to catch")
+        # The brief->plan seam is where scope leaks silently, so the plan gate must
+        # state the mechanical set comparison, not a judgement call.
+        plan = next((st for st in stages if isinstance(st, dict) and st.get("state") == "plan"), None)
+        if plan is not None:
+            pchk = str((plan.get("gate") or {}).get("check", "")).upper()
+            if "SET EQUALITY" not in pchk or "REQ" not in pchk:
+                fail(f"{EXAMPLE_REL} stage 'plan': gate.check must require SET EQUALITY between "
+                     "the brief's REQ ids and the union of Implements: across tasks")
 
     # Release config is optional and individually toggleable. If present, shape-check it.
     rel = pipe.get("release")

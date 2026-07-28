@@ -1,5 +1,68 @@
 # Changelog
 
+## v0.16.0 — 2026-07-28
+
+Scope stops leaking. The request becomes an addressable list of requirements, the
+ids are traced through every stage, and a new final stage accounts for all of them.
+
+The failure this fixes: every gate up to now asked *"is this artifact good?"* and
+none asked *"does this still contain everything that was asked for?"* Scope doesn't
+leak inside a stage — it leaks on the **seams**, because brief → spec → plan → task
+briefs is four rewrites by a model and nothing compared the lists.
+
+### Added
+- **The REQ spine.** The grill's second hard output is a requirement table in the
+  brief — one row per *independently verifiable* deliverable, each naming **how it
+  is verified** (test name, `file:line`, command + expected output, scenario id). A
+  requirement you can't say how to verify is a badly-stated requirement, and gets
+  split during the grill rather than discovered at the end. One REQ = one
+  deliverable, not one per sentence: an inflated table is ignored, and an ignored
+  table protects nothing.
+- **Traceability through the run.** Spec sections carry `covers: REQ-…`; plan tasks
+  carry `Implements: REQ-…`; the implementer's task brief quotes the requirement
+  statement **verbatim**, so it optimises the requirement and not just the
+  instruction; the review rubric gains a verdict beside spec-compliance and
+  code-quality — **does this satisfy its REQ?**
+- **Stage 10 — Acceptance** (`references/acceptance.md`, manual gate). Closes the
+  circle: every REQ gets `verified` / `partial` / `deferred` / `dropped`, written to
+  `specs/<topic>-acceptance.md`. `verified` **requires evidence** — a passing test
+  name, a `file:line`, a command and its output. "Done" without evidence is
+  downgraded to `partial`, never upgraded. Then the operator is asked the closing
+  question out loud, list in hand: *here's what you asked for, here's what shipped,
+  here's what's deferred and where it lives — what's missing?* Asked even when the
+  table is green. Manual by design: an automated check can prove the table is
+  well-formed; only the person who asked can confirm it is what they asked for.
+- **The carry-over ledger** (`templates/carryover.md`) — append-only, seeded at
+  stage 0, written by every stage, read in full at stage 10. Implementer concerns
+  and parked review findings are harvested into it before the scratch workspace is
+  deleted. The rule: **deferred out loud is forgotten** — a row with no home
+  (issue, backlog, or an agreed `dropped`) blocks the acceptance gate.
+
+### Changed
+- **The brief→plan seam is now mechanical.** Stage 4's gate is **set equality**
+  between the brief's REQ ids and the union of `Implements:` across plan tasks. A
+  non-empty difference fails the gate and is reported as the explicit list of
+  dropped requirements — a comparison, not a judgement call.
+- **No silent narrowing.** The REQ list is frozen once confirmed: adding mid-run is
+  free, **removing or narrowing needs the operator's explicit agreement**, recorded
+  in the ledger. Quietly restating the task smaller is the subtlest loss, because
+  every later gate then passes honestly on a task that shrank without anyone
+  deciding it should.
+- **Gates tightened** — stage 0 requires the REQ table and a seeded ledger; stage 2
+  requires the design to answer every REQ (or an operator-agreed drop); stage 3
+  requires `covers:` on every section; stage 5 harvests concerns into the ledger;
+  **stage 7 refuses to deploy while any REQ is still `open`** (a `partial` ships only
+  with explicit acceptance — a gap is cheapest to close before it ships).
+
+### Tests
+- `references/acceptance.md` joins the built-in doctrine set (stub-rejected);
+  `templates/carryover.md` required; the brief template must carry
+  `## Requirements`, a `REQ-NNN` row and the verification column; the shipped flow's
+  last stage must be `acceptance` with a **manual** gate whose check demands
+  evidence; the plan gate must state the set comparison.
+- Nine new invariants, each verified to fail on a broken copy; four added to CI as
+  negative self-tests.
+
 ## v0.15.0 — 2026-07-28
 
 Coherence pass over the v0.13.0 port: three contradictions resolved, three gaps

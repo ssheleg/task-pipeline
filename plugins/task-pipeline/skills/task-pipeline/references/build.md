@@ -142,6 +142,10 @@ fix-round diffs need it.
 **Write the task brief to a file** — extract the task's full text from the plan to
 `<workspace>/task-<N>-brief.md`. The brief is the single source of requirements;
 exact values (numbers, strings, signatures, test cases) live **only** there.
+Include the task's `Implements:` ids **with each REQ's one-line statement quoted
+verbatim** — an implementer who sees only an instruction optimises the
+instruction; one who sees the requirement behind it catches the case the
+instruction didn't cover.
 
 The dispatch prompt contains exactly five things:
 
@@ -195,7 +199,7 @@ physical: **two implementers writing one working tree corrupt each other's state
 | Status | Action |
 |---|---|
 | `DONE` | Build the review package, dispatch the task review ([`review.md`](review.md)). |
-| `DONE_WITH_CONCERNS` | Read the concerns first. Correctness or scope → resolve before review. Observations ("this file is getting large") → note and proceed. |
+| `DONE_WITH_CONCERNS` | Read the concerns first. Correctness or scope → resolve before review. Observations ("this file is getting large") → **append to the carry-over ledger**, then proceed. A concern that stays only in the report dies with the workspace. |
 | `NEEDS_CONTEXT` | Supply exactly what's missing, re-dispatch. |
 | `BLOCKED` | Diagnose: missing context → re-dispatch with it; needs more reasoning → a more capable model; too large → split the task; the plan itself is wrong → escalate to the operator. |
 

@@ -136,6 +136,70 @@ jobs:
             echo "OK: validator still catches broken links outside fences"
           fi
 
+      - name: Negative self-test (the REQ spine must stay in the brief template)
+        run: |
+          set -eu
+          cp -R . /tmp/req-copy
+          sed -i 's/^## Requirements.*/## Notes/' \
+            /tmp/req-copy/plugins/task-pipeline/skills/task-pipeline/templates/brief.md
+          if python3 /tmp/req-copy/test/validate.py; then
+            echo "ERROR: validator passed a brief template with no REQ spine"
+            exit 1
+          else
+            echo "OK: validator requires the REQ spine in the brief template"
+          fi
+
+      - name: Negative self-test (REQ rows must name how they are verified)
+        run: |
+          set -eu
+          cp -R . /tmp/verify-copy
+          sed -i "s/How it's verified/Notes/g" \
+            /tmp/verify-copy/plugins/task-pipeline/skills/task-pipeline/templates/brief.md
+          if python3 /tmp/verify-copy/test/validate.py; then
+            echo "ERROR: validator passed a REQ table with no verification column"
+            exit 1
+          else
+            echo "OK: validator requires a named check per requirement"
+          fi
+
+      - name: Negative self-test (acceptance must close the flow, manually, with evidence)
+        run: |
+          set -eu
+          cp -R . /tmp/acc-copy
+          python3 - <<'EOF'
+          import json, collections
+          p = "/tmp/acc-copy/plugins/task-pipeline/skills/task-pipeline/pipeline.example.json"
+          d = json.load(open(p), object_pairs_hook=collections.OrderedDict)
+          d["stages"][-1]["gate"]["type"] = "auto"
+          json.dump(d, open(p, "w"), indent=2, ensure_ascii=False)
+          EOF
+          if python3 /tmp/acc-copy/test/validate.py; then
+            echo "ERROR: validator passed a non-manual acceptance gate"
+            exit 1
+          else
+            echo "OK: validator keeps acceptance manual — only the asker can confirm"
+          fi
+
+      - name: Negative self-test (the plan gate must be a set comparison)
+        run: |
+          set -eu
+          cp -R . /tmp/seam-copy
+          python3 - <<'EOF'
+          import json, collections
+          p = "/tmp/seam-copy/plugins/task-pipeline/skills/task-pipeline/pipeline.example.json"
+          d = json.load(open(p), object_pairs_hook=collections.OrderedDict)
+          for st in d["stages"]:
+              if st.get("state") == "plan":
+                  st["gate"]["check"] = "every spec requirement maps to a task"
+          json.dump(d, open(p, "w"), indent=2, ensure_ascii=False)
+          EOF
+          if python3 /tmp/seam-copy/test/validate.py; then
+            echo "ERROR: validator passed a plan gate with no REQ set comparison"
+            exit 1
+          else
+            echo "OK: validator requires set equality at the brief-to-plan seam"
+          fi
+
       - name: install.sh syntax check
         run: bash -n install.sh
 

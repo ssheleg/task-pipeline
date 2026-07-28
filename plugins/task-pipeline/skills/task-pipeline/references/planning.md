@@ -94,6 +94,11 @@ verbatim from the spec. Every task's requirements implicitly include this sectio
 
 **Depends:** [task ids, or —]
 
+**Implements:** REQ-003, REQ-007 — *(the brief's requirement ids this task
+delivers, or `—` for pure glue/infrastructure tasks. Quote each REQ's one-line
+statement under the DoD so the zero-context implementer sees the intent, not just
+the instruction.)*
+
 **Files:**
 - Create: `exact/path/to/file.py`
 - Modify: `exact/path/to/existing.py:123-145`
@@ -159,15 +164,20 @@ These are plan failures. Never write them:
 
 A checklist you run yourself, inline. No subagent:
 
-1. **Spec coverage:** walk each spec requirement. Point at the task that implements
+1. **REQ coverage — set equality, not a feeling.** Collect every `Implements:` id
+   across all tasks and compare it to the brief's REQ table. The two sets must be
+   **equal**: a REQ with no task is scope silently lost; an `Implements:` id that
+   isn't in the brief is either a typo or work nobody asked for. Print the
+   difference and fix it before anything else — this seam is where scope leaks.
+2. **Spec coverage:** walk each spec requirement. Point at the task that implements
    it. A requirement with no task → add the task.
-2. **Placeholder scan:** search the plan for every pattern above. Fix.
-3. **Name and type consistency:** signatures, property names and types used in
+3. **Placeholder scan:** search the plan for every pattern above. Fix.
+4. **Name and type consistency:** signatures, property names and types used in
    later tasks match what earlier tasks defined. `clearLayers()` in Task 3 and
    `clearFullLayers()` in Task 7 is a bug, not a style difference.
-4. **Parallel safety:** no two tasks in the same group write the same file; every
+5. **Parallel safety:** no two tasks in the same group write the same file; every
    `depends:` points at a task that really produces what's consumed.
-5. **DoD present and verifiable** on every task.
+6. **DoD present and verifiable** on every task.
 
 ## GATE (auto)
 

@@ -1,12 +1,12 @@
 ---
-description: "task-pipeline: run a substantial task through a disciplined, gated delivery cycle — an intake grill that expands the request, then docs→brainstorm→spec→plan→build→tests→lint/deploy→post-deploy→docs. Apply when the user asks to 'run this through the pipeline' / 'прогони по конвейеру', asks for 'the full cycle' / 'полный цикл', or starts any substantial feature/fix/build."
+description: "task-pipeline: run a substantial task through a disciplined, gated delivery cycle — an intake grill that expands the request into a checkable requirement list, then docs→brainstorm→spec→plan→build→tests→lint/deploy→post-deploy→docs→acceptance. Apply when the user asks to 'run this through the pipeline' / 'прогони по конвейеру', asks for 'the full cycle' / 'полный цикл', or starts any substantial feature/fix/build."
 alwaysApply: false
 ---
 
 # task-pipeline — gated delivery cycle (Cursor)
 
 Self-contained rule (Cursor copies this file into projects — no external links).
-Run a substantial task through an up-front **intake grill + 9 gated stages**. No
+Run a substantial task through an up-front **intake grill + 10 gated stages**. No
 stage advances until its **gate** passes. Each gate is `auto` (verify it yourself,
 pass/fail) or `manual` (wait for the user's explicit go).
 
@@ -59,6 +59,19 @@ Offer an ADR (`docs/adr/NNNN-slug.md`, 1–3 sentences is a complete ADR) only w
 all three hold: hard to reverse, surprising without context, and the result of a
 real trade-off. Any one missing → skip it.
 
+**Write the REQ spine before the brief is confirmed.** Turn the request into an
+addressable list — one row per independently verifiable deliverable (not one per
+sentence), each naming **how it is verified**: a test name, a `file:line`, a command
+and its expected output, or a scenario id. *A requirement you can't say how to
+verify is a badly-stated requirement* — split it here. Then freeze the list:
+adding later is free, **removing or narrowing needs the user's explicit
+agreement**. Quietly restating the task in smaller terms is the subtlest way to
+lose it — every later gate then passes honestly on a task that shrank.
+
+Seed a **carry-over ledger** next to the brief, append-only. Anything deferred,
+dropped, or left half-done goes in the moment it's said — including implementer
+concerns and non-blocking review findings. **Deferred out loud is forgotten.**
+
 Stop when shared understanding is reached (every branch answered or explicitly
 deferred) and lock the answers into a short brief the user confirms. Only then
 start. Later stages read that brief instead of asking again.
@@ -80,7 +93,7 @@ not authorize an outward, irreversible action — stage 7 stops and asks.
    exact values every later task inherits. Self-review it for placeholders,
    contradictions, ambiguity and scope before showing it. For UI tasks, run the UX
    chain FIRST (see super-ux below) and embed it.
-4. **Plan** (auto) — zero-context tasks: exact paths, complete code in every step,
+4. **Plan** (auto) — every task names the REQ ids it `Implements:`, and the set of those ids must **equal** the brief's REQ set — a difference is scope lost, print it and fix it. Zero-context tasks: exact paths, complete code in every step,
    the exact command and its expected output, TDD steps, DoD each, dependency graph
    + parallel groups, non-overlapping file ownership. **No placeholders** — no TBD,
    no "add error handling", no "similar to Task N", no undefined types.
@@ -104,8 +117,16 @@ not authorize an outward, irreversible action — stage 7 stops and asks.
 8. **Post-deploy** (auto) — tail logs / health-check; clean boot or an honest
    degradation report (never silent success).
 9. **Docs** (auto) — update module docs/runbooks in the SAME change.
+10. **Acceptance** (manual) — the closing stage: go back to the brief and account
+    for **every** REQ. One row each, status `verified` / `partial` / `deferred` /
+    `dropped`, and every `verified` carries **evidence** — a passing test name, a
+    `file:line`, a command and its output. "Done" without evidence is downgraded to
+    `partial`, never upgraded. Then ask out loud, list in hand: *here's what you
+    asked for, here's what shipped, here's what's deferred and where it lives —
+    what's missing?* Ask it even when the table is green. Gate: no REQ `unknown`,
+    no ledger row without a home, user signs off.
 
-Cross-cutting: answer from the brief's autonomy section rather than re-asking, track
+Cross-cutting: answer from the brief's autonomy section rather than re-asking, log every deferral in the ledger, never narrow the task silently, track
 tasks, conventional commits, honest degradation (never claim a failed/skipped step
 succeeded), and get explicit go before any outward/irreversible action (deploy,
 publish, repo create).

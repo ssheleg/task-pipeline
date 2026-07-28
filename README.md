@@ -5,13 +5,13 @@
 [![license](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
 Full-cycle task delivery pipeline orchestrator for **Claude Code**. One skill that
-runs any substantial task through an up-front **intake grill** + **9 gated stages** —
+runs any substantial task through an up-front **intake grill** + **10 gated stages** —
 with every stage's doctrine **built in**: no companion plugin required.
 
 ## What it does
 
 `intake grill → docs study → brainstorm → spec → plan → subagent build → tests →
-lint/deploy → post-deploy log check → docs/wiki sync`
+lint/deploy → post-deploy log check → docs/wiki sync → acceptance`
 
 It **grills you first, always**: stage 0 is mandatory — a one-line task ("make me
 feature X") is expanded, one question at a time, into a locked brief, and the grill
@@ -31,6 +31,7 @@ or **manual** (waits for your go). One model, confirmed before the run starts.
 | 7 | Lint + deploy | lint clean + suite green before deploy | manual |
 | 8 | Post-deploy | clean boot / honest degradation | auto |
 | 9 | Docs + wiki | docs + wiki synced | auto |
+| 10 | **Acceptance** | every REQ accounted for with evidence; operator signs off | manual |
 
 These stages (0 intake + 1→9) are the plugin's **example** flow. It's a machine-readable config
 ([`pipeline.example.json`](plugins/task-pipeline/skills/task-pipeline/pipeline.example.json))
@@ -97,6 +98,40 @@ which docs and runbooks to update, and the model. Each gets an answer or an expl
 "stop and ask me here" — an unasked question is a scheduled interruption. Deploy
 authorization has a hard floor: a standing go counts only if it names the target and
 the preconditions.
+
+## The REQ spine — why nothing falls out the back
+
+Every gate before the last one asks *"is this artifact good?"* — none asks *"does
+this still contain everything that was asked for?"* Scope doesn't leak inside a
+stage; it leaks on the **seams**, because brief → spec → plan → task briefs is four
+rewrites and nothing compares the lists.
+
+So the grill's second hard output is an addressable **requirement table**: one row
+per independently verifiable deliverable, each naming how it will be verified. A
+requirement you can't say how to verify is a badly-stated requirement — it gets
+split during the grill, not discovered at the end.
+
+From there the ids thread through everything:
+
+| Where | What it does |
+|---|---|
+| Spec | every section carries `covers: REQ-…` |
+| Plan | every task carries `Implements: REQ-…`; **the gate is set equality** against the brief — a difference is printed as the explicit list of dropped requirements |
+| Build | the implementer's brief quotes the REQ statement verbatim, so it optimises the requirement and not just the instruction |
+| Review | a third verdict beside spec-compliance and code-quality: **does this satisfy its REQ?** |
+| Deploy | no REQ may still be `open`; a `partial` ships only with explicit acceptance |
+| **Acceptance** | every REQ gets `verified` / `partial` / `deferred` / `dropped` — and `verified` requires **evidence**: a passing test name, a `file:line`, a command and its output |
+
+Two rules keep it honest. **The list is frozen** — adding mid-run is free, removing
+or narrowing needs your explicit agreement, because silently restating the task
+smaller makes every later gate pass honestly on a shrunken task. And **deferred out
+loud is forgotten** — anything postponed, dropped or half-done goes into an
+append-only carry-over ledger the moment it's said, including implementer concerns
+and non-blocking review findings.
+
+Stage 10 closes the circle with the question the pipeline exists to be able to
+answer from a list rather than from memory: *here's what you asked for, here's what
+shipped, here's what's deferred and where it lives — what's missing?*
 
 ## UX track (user-facing tasks) — super-ux recommended
 
@@ -247,7 +282,7 @@ conversation, then runs nine gated stages without stopping to check in.
 
 ## Author
 
-Built by ssheleg — [svlab.online](https://svlab.online)
+Built by ssheleg — [sshlg.me](https://sshlg.me)
 
 - X / Twitter — [@fuck_this_year](https://x.com/fuck_this_year)
 - Telegram — [@sshlg](https://t.me/sshlg)
