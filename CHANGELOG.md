@@ -70,6 +70,14 @@ closed, and the config's gate text re-synced with the doctrine.
 
 ### Fixed
 - **Model policy contradicted itself.** `build.md` and `review.md` told the final
+- **`decomposition.md` and `loop-guard.md` shipped unreachable.** Both linked
+  only to each other; nothing in `SKILL.md` pointed at either, so under
+  progressive disclosure an agent would never load them — two contracts that
+  existed, passed every check, and were dead context. Wired into the doctrine
+  table (stage 2 for decomposition, cross-cutting for the loop guard), and the
+  validator now walks the link graph from `SKILL.md` and fails on any reference
+  nothing reaches.
+
   whole-branch review to run "on the most capable model available" while
   `model-tiering.md` promises **one** model per run. Both now default to the run's
   confirmed model; when the run sits below the top tier, escalation for that single

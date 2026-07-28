@@ -39,10 +39,12 @@ and no stage that can fail because a dependency is missing:
 |---|---|
 | 0 Intake grill | [`references/grill.md`](references/grill.md) |
 | 2 Brainstorm | [`references/brainstorm.md`](references/brainstorm.md) |
+| 2 Decompose (platforms only) | [`references/decomposition.md`](references/decomposition.md) |
 | 3 Spec | [`references/spec.md`](references/spec.md) |
 | 4 Plan | [`references/planning.md`](references/planning.md) |
 | 5 Build (worktree, subagents, fix loop) | [`references/build.md`](references/build.md) + [`references/review.md`](references/review.md) |
 | 5–6 TDD + suite gate | [`references/tdd.md`](references/tdd.md) |
+| any repeating loop | [`references/loop-guard.md`](references/loop-guard.md) |
 
 **Optional bridge.** If the operator already runs an equivalent skill set (e.g.
 `superpowers:brainstorming` / `writing-plans` / `subagent-driven-development` /

@@ -166,6 +166,23 @@ for r in ("brainstorm.md", "spec.md", "planning.md", "build.md", "review.md", "t
     elif os.path.getsize(rp) < 1500:
         fail(f"references/{r}: too small to be the stage's doctrine (stub?)")
 
+# Progressive disclosure means an agent loads only what SKILL.md points it to,
+# directly or transitively. A reference nothing links to is dead context: it
+# ships, it passes every other check, and it is never read.
+_skill_dir = os.path.join(ROOT, "plugins/task-pipeline/skills/task-pipeline")
+_seen, _frontier = set(), ["SKILL.md"]
+while _frontier:
+    _f = os.path.join(_skill_dir, _frontier.pop())
+    if not os.path.isfile(_f):
+        continue
+    with open(_f, encoding="utf-8") as fh:
+        for _m in re.finditer(r"references/([a-z0-9-]+\.md)", fh.read()):
+            if _m.group(1) not in _seen:
+                _seen.add(_m.group(1))
+                _frontier.append(f"references/{_m.group(1)}")
+for _orphan in sorted({f for f in os.listdir(refdir) if f.endswith(".md")} - _seen):
+    fail(f"references/{_orphan}: unreachable from SKILL.md — dead context, wire it in or delete it")
+
 for r in ("README.md", "LICENSE"):
     if not os.path.isfile(os.path.join(ROOT, r)):
         fail(f"missing root file: {r}")
