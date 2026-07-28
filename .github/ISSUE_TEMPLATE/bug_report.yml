@@ -1,0 +1,77 @@
+name: Bug report
+description: Something in the skill, the doctrine or an installer behaves wrongly
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the report. If this is a **security** issue, please do not file
+        it here — see [SECURITY.md](https://github.com/ssheleg/task-pipeline/blob/main/SECURITY.md).
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Where
+      options:
+        - Skill doctrine (SKILL.md / references/*)
+        - Slash command (/task-pipeline)
+        - Cursor rule (.mdc)
+        - Installer (npx / install.sh)
+        - Pipeline config (schema / example)
+        - CI / validator
+        - Docs (README, CHANGELOG, …)
+        - Not sure
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: "`npm view task-pipeline-skill version`, the plugin version, or the commit sha"
+      placeholder: "0.18.0"
+    validations:
+      required: true
+
+  - type: input
+    id: agent
+    attributes:
+      label: Agent / harness
+      placeholder: "Claude Code 2.x desktop · Cursor · Codex · …"
+    validations:
+      required: true
+
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What the pipeline did, and at which stage.
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What should have happened
+      description: If a doctrine file says otherwise, quote it with `file:line`.
+    validations:
+      required: true
+
+  - type: textarea
+    id: repro
+    attributes:
+      label: How to reproduce
+      description: The task you gave it, the stage it reached, anything relevant from the brief or the ledger. Redact secrets.
+      placeholder: |
+        1. /task-pipeline add CSV export
+        2. answered the grill …
+        3. at stage 4 it …
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checks
+      options:
+        - label: I'm on the latest release (or said which version above)
+          required: true
+        - label: I have only one install channel active for this agent (plugin **or** skills-CLI copy, not both)

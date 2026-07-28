@@ -295,6 +295,36 @@ jobs:
             echo "OK: validator keeps each stage doctrine's gate type in sync with the config"
           fi
 
+      - name: Negative self-test (the open-source surface must stay present)
+        run: |
+          set -eu
+          cp -R . /tmp/oss-copy
+          rm -f /tmp/oss-copy/CONTRIBUTING.md
+          if python3 /tmp/oss-copy/test/validate.py; then
+            echo "ERROR: validator passed a repo with no CONTRIBUTING.md"
+            exit 1
+          else
+            echo "OK: validator requires the open-source root files"
+          fi
+
+      - name: Negative self-test (npm test must run the validator)
+        run: |
+          set -eu
+          cp -R . /tmp/script-copy
+          python3 - <<'EOF'
+          import json
+          p = "/tmp/script-copy/package.json"
+          d = json.load(open(p))
+          d["scripts"] = {"test": "echo ok"}
+          json.dump(d, open(p, "w"), indent=2, ensure_ascii=False)
+          EOF
+          if python3 /tmp/script-copy/test/validate.py; then
+            echo "ERROR: validator passed a package.json whose test script skips the validator"
+            exit 1
+          else
+            echo "OK: validator requires npm test to run test/validate.py"
+          fi
+
       - name: install.sh syntax check
         run: bash -n install.sh
 

@@ -123,9 +123,9 @@ Three shapes and what to do with each:
 document; they may not do it by accident. The point of quoting the source is that
 the override becomes a recorded decision instead of an undetected divergence.
 
-**Precedence when two sources disagree with each other:** code > host docs and ADRs
-> the wiki > anyone's memory. The wiki is *distilled* knowledge and can lag the
-repo by months; the code is what runs. A disagreement between them is a grill
+**Precedence when two sources disagree with each other:** code > host docs and
+ADRs > the wiki > anyone's memory. The wiki is *distilled* knowledge and can lag
+the repo by months; the code is what runs. A disagreement between them is a grill
 question, never a silent pick — and it is usually a sign the doc is due an update.
 
 ## Close the loop — stage 9 updates what stage 0 read

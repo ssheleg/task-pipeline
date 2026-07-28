@@ -63,8 +63,9 @@ Run: <branch/commit range> · Date: YYYY-MM-DD
 | `deferred` | agreed not to do it now | the operator's agreement **and** a tracker entry |
 | `dropped` | agreed it isn't wanted | the operator's agreement + the reason |
 
-There is no fifth status. A requirement nobody can classify is `unknown`, and
-`unknown` fails the gate — that is the whole mechanism.
+Those four are the only ways a requirement may close. Anything that fits none of
+them is `unknown`, and **`unknown` fails the gate** — that is the whole mechanism:
+the run cannot end while a requirement is still unclassified.
 
 ## Evidence, not assertion
 

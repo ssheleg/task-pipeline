@@ -4,15 +4,15 @@
     "name": "ssheleg",
     "url": "https://github.com/ssheleg"
   },
-  "description": "Full-cycle task delivery pipeline orchestrator for Claude Code.",
+  "description": "Full-cycle delivery pipeline for coding agents — an intake grill plus ten gated stages, all doctrine built in.",
   "homepage": "https://github.com/ssheleg/task-pipeline",
   "repository": "https://github.com/ssheleg/task-pipeline",
   "plugins": [
     {
       "name": "task-pipeline",
       "source": "./plugins/task-pipeline",
-      "description": "Self-contained orchestrator that runs a task through a mandatory built-in intake grill + 10 gated stages (docs, brainstorm+decompose, spec, plan, subagent build, tests, lint/deploy, post-deploy, docs/wiki, acceptance). Every stage's doctrine is built into the skill — no companion plugin required — with typed auto/manual gates, a loop guard that breaks churn, one provider-agnostic model confirmed up front, a super-ux UX track for user-facing tasks, and toggleable project-configurable release automation.",
-      "version": "0.18.0",
+      "description": "Runs a substantial task through a mandatory built-in intake grill, then 10 gated stages (docs, brainstorm+decompose, spec, plan, subagent build, tests, lint/deploy, post-deploy, docs/wiki, acceptance). Every stage's doctrine is built into the skill — no companion plugin required — with typed auto/manual gates, a frozen requirement spine that must close with evidence, a loop guard that breaks churn, one provider-agnostic model confirmed up front, and an optional super-ux UX track for user-facing work.",
+      "version": "0.18.1",
       "author": {
         "name": "ssheleg"
       },

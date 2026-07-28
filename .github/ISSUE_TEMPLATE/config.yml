@@ -1,0 +1,11 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/ssheleg/task-pipeline/security/advisories/new
+    about: Report privately — please do not open a public issue.
+  - name: super-ux (the UX track companion)
+    url: https://github.com/ssheleg/super-ux/issues
+    about: Issues with the stage-3 UX chain belong there.
+  - name: obsidian-wiki (the knowledge wiki)
+    url: https://github.com/ar9av/obsidian-wiki
+    about: Issues with the wiki used at stages 0 and 9 belong there.

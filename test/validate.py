@@ -102,6 +102,10 @@ if pkg:
     files = pkg.get("files") or []
     if "plugins" not in files or "bin" not in files:
         fail("package.json: files[] must whitelist 'bin' and 'plugins' (skill sources ship in the package)")
+    # One documented way to run the checks. A contributor who has to reverse-engineer
+    # the test command from CI is a contributor who opens the PR without running it.
+    if "validate.py" not in str((pkg.get("scripts") or {}).get("test", "")):
+        fail("package.json: scripts.test must run test/validate.py (npm test is the documented check)")
 
 # slash command must exist so /task-pipeline resolves, with proper frontmatter
 cmd_path = os.path.join(ROOT, "plugins/task-pipeline/commands/task-pipeline.md")
@@ -187,7 +191,11 @@ while _frontier:
 for _orphan in sorted({f for f in os.listdir(refdir) if f.endswith(".md")} - _seen):
     fail(f"references/{_orphan}: unreachable from SKILL.md — dead context, wire it in or delete it")
 
-for r in ("README.md", "LICENSE"):
+# The open-source surface. These are the files a stranger looks for before they
+# trust, use or contribute to the repo; one of them silently disappearing in a
+# refactor is invisible in review and expensive at the moment someone needs it.
+for r in ("README.md", "LICENSE", "CONTRIBUTING.md", "SECURITY.md",
+          "CODE_OF_CONDUCT.md", "CLAUDE.md"):
     if not os.path.isfile(os.path.join(ROOT, r)):
         fail(f"missing root file: {r}")
 

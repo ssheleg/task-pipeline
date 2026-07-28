@@ -50,7 +50,7 @@ mid-flight questions:
 1. One question per turn — never bundle.
 2. Give a recommended answer with every question (+ one-line rationale).
 3. Explore the codebase before asking — if a search/read answers it, do that.
-3a. **Validate every answer against the harvest.** When what the user says
+4. **Validate every answer against the harvest.** When what the user says
    contradicts a doc you read, quote the doc and ask which governs: *"the March ADR
    says X, you just described Y — has it changed?"* The user **outranks every
    document, but only out loud** — an override quoted against its source is a
@@ -58,10 +58,10 @@ mid-flight questions:
    gate will pass over. When two sources disagree: code > host docs/ADRs > wiki >
    memory. Whichever side loses, if it's written down somewhere, log it for the
    stage-9 doc update.
-4. Walk the decision tree depth-first; ask prerequisite decisions first.
-5. Reconcile contradictions; chase dodges ("decide later" → "latest you can decide
+5. Walk the decision tree depth-first; ask prerequisite decisions first.
+6. Reconcile contradictions; chase dodges ("decide later" → "latest you can decide
    and still ship?").
-6. Run the **autonomy sweep** — resolve now whatever would stop stages 1→10 later:
+7. Run the **autonomy sweep** — resolve now whatever would stop stages 1→10 later:
    external libs and where their docs live; **which doc sources beyond this repo are
    in play and whether stage 9 may write to them**; UI verdict; base branch, branch policy,
    commit convention, task tracker; the test command and what "green" means; the

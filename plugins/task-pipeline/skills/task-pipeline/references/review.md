@@ -29,7 +29,8 @@ this plan's git-ignored directory, `.task-pipeline/build/<plan-basename>/` — s
 `BASE` is the commit you recorded **before** dispatching the implementer — never
 `HEAD~1`, which silently drops every commit but the last of a multi-commit task.
 For a scoped re-review, `BASE` is the head the previous review saw. For the final
-review, `BASE` is `git merge-base main HEAD`.
+review, `BASE` is `git merge-base "$BASE_BRANCH" HEAD` — the base branch recorded
+in the stage-0 brief, which is not always `main`.
 
 Never dispatch a reviewer without a diff file.
 

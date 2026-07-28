@@ -4,20 +4,57 @@
 [![validate](https://github.com/ssheleg/task-pipeline/actions/workflows/validate.yml/badge.svg)](https://github.com/ssheleg/task-pipeline/actions/workflows/validate.yml)
 [![license](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
-Full-cycle task delivery pipeline orchestrator for **Claude Code**. One skill that
-runs any substantial task through an up-front **intake grill** + **10 gated stages** —
-with every stage's doctrine **built in**: no companion plugin required.
+**A full-cycle delivery pipeline for coding agents.** One skill takes a substantial
+task, interrogates it into a complete brief, then walks it through ten gated stages
+— and refuses to advance until each gate passes.
 
-## What it does
+Agents write code well and judge *when to stop asking you things* badly. A
+substantial task becomes twenty interruptions, or a confident build that skipped
+the tests and quietly delivered two thirds of what you asked for. `task-pipeline`
+front-loads every decision into one intake conversation, then runs to the end
+without checking in — and closes by accounting for every requirement, from a list
+rather than from memory.
 
-`intake grill → docs study → brainstorm + decompose → spec → plan → subagent build →
-tests → lint/deploy → post-deploy log check → docs/wiki sync → acceptance`
+Built for **Claude Code**, and installable into any agent that reads skills
+(Cursor, Codex, OpenCode, …). Every stage's doctrine ships **inside the skill** —
+no companion plugin, nothing to resolve, nothing that breaks when a dependency is
+missing.
 
-It **grills you first, always**: stage 0 is mandatory — a one-line task ("make me
-feature X") is expanded, one question at a time, into a locked brief, and the grill
-also sweeps stages 1→10 for anything that would stop the run later. Each stage gates
-the next. Every gate is typed — **auto** (the orchestrator verifies it, pass/fail)
-or **manual** (waits for your go). One model, confirmed before the run starts.
+---
+
+## The flow
+
+```
+intake grill → docs study → brainstorm + decompose → spec → plan → subagent build
+→ tests → lint/deploy → post-deploy log check → docs/wiki sync → acceptance
+```
+
+```mermaid
+flowchart TD
+    S0["0 · Harvest + intake grill<br/>brief · REQ table · source ledger"]
+    S1["1 · Docs study"]
+    S2["2 · Brainstorm + decompose"]
+    S3["3 · Spec — UX track first, if UI"]
+    S4["4 · Plan"]
+    S5["5 · Dev — worktree, subagents, TDD"]
+    S6["6 · Tests"]
+    S7["7 · Lint + deploy"]
+    S8["8 · Post-deploy"]
+    S9["9 · Docs + wiki"]
+    S10["10 · Acceptance"]
+
+    S0 --> S1 --> S2 --> S3 --> S4 --> S5 --> S6 --> S7 --> S8 --> S9 --> S10
+    S2 -. "platform → repeat 3-10 per module" .-> S3
+    S10 -. "every REQ answered against the brief" .-> S0
+
+    classDef manual fill:#fde68a,stroke:#b45309,color:#111827
+    classDef auto fill:#dbeafe,stroke:#1d4ed8,color:#111827
+    class S0,S2,S3,S7,S10 manual
+    class S1,S4,S5,S6,S8,S9 auto
+```
+
+Every gate is **typed**: `auto` — the orchestrator verifies it itself, pass/fail
+(blue); `manual` — it waits for your explicit go (amber).
 
 | # | Stage | Gate | Type |
 |---|---|---|---|
@@ -33,15 +70,37 @@ or **manual** (waits for your go). One model, confirmed before the run starts.
 | 9 | Docs + wiki | every stale source-ledger row updated; docs + wiki synced | auto |
 | 10 | **Acceptance** | every REQ accounted for with evidence; operator signs off | manual |
 
-These stages (0 intake + 1→10) are the plugin's **example** flow. It's a machine-readable config
-([`pipeline.example.json`](plugins/task-pipeline/skills/task-pipeline/pipeline.example.json))
-against a universal contract
-([`pipeline.schema.json`](plugins/task-pipeline/skills/task-pipeline/pipeline.schema.json)):
-a host project copies the example to `pipeline.json` and rewrites it with its own
-stages (any count), its own `skills[]`, and its own `auto`/`manual` gate types —
-"bring your own skills". The framework bakes in no fixed stages.
+## What you get
 
-## Everything is built in — zero required dependencies
+- **The intake grill asks what a senior engineer would ask** before anything is
+  touched — scope, edge cases, failure modes, rollback, who the user is — so the
+  build does not stall halfway through.
+- **Every stage has a gate.** No code before a spec. No deploy before tests. No
+  "done" before the post-deploy logs have been read.
+- **Nothing falls out the back.** The request becomes a frozen, addressable list of
+  requirements, and the last stage accounts for every one of them with evidence.
+- **Team discipline without a team.** ADRs, a written plan, a real test suite, a
+  wiki entry — produced as part of the work, not promised for later.
+- **It adapts to your repo, not the reverse.** Deploy, docs and wiki conventions
+  are read from the host project, so nothing is imposed.
+
+## Quickstart
+
+```
+/plugin marketplace add ssheleg/task-pipeline
+/plugin install task-pipeline@task-pipeline
+```
+
+Then say *"run this through the pipeline"*, *"the full cycle"*, or invoke
+`/task-pipeline <one-line task>`. Russian phrasings (*"полный цикл"*, *"прогони по
+конвейеру"*) route the same way. The skill creates a TaskList with one entry per
+stage and walks the gates. See [Install](#install) for the other channels.
+
+---
+
+## What makes it different
+
+### Everything is built in — zero required dependencies
 
 The doctrine each stage runs on ships inside the skill. Nothing to install for it,
 nothing to resolve at preflight, no version skew with someone else's repo, and no
@@ -49,16 +108,16 @@ stage that can fail because a plugin is missing:
 
 | Stage | Built-in doctrine |
 |---|---|
-| 0 Knowledge harvest | [`references/knowledge-sources.md`](plugins/task-pipeline/skills/task-pipeline/references/knowledge-sources.md) — source list, the wiki, the ledger, the stage-9 loop-back |
-| 0 Intake grill | [`references/grill.md`](plugins/task-pipeline/skills/task-pipeline/references/grill.md) — interview loop, domain awareness, autonomy sweep |
-| 2 Brainstorm | [`references/brainstorm.md`](plugins/task-pipeline/skills/task-pipeline/references/brainstorm.md) — approaches, YAGNI, the no-code-before-approval gate |
-| 2 Decompose | [`references/decomposition.md`](plugins/task-pipeline/skills/task-pipeline/references/decomposition.md) — platforms only: brick criteria, module map, build order |
-| 3 Spec | [`references/spec.md`](plugins/task-pipeline/skills/task-pipeline/references/spec.md) — UX-track order, locked contracts, global constraints, self-review |
-| 4 Plan | [`references/planning.md`](plugins/task-pipeline/skills/task-pipeline/references/planning.md) — zero-context tasks, parallel groups, no placeholders |
-| 5 Build | [`references/build.md`](plugins/task-pipeline/skills/task-pipeline/references/build.md) + [`review.md`](plugins/task-pipeline/skills/task-pipeline/references/review.md) — isolation, ledger, subagent loop, review rubric, fix loop |
-| 5–6 TDD | [`references/tdd.md`](plugins/task-pipeline/skills/task-pipeline/references/tdd.md) — the iron law, red/green/refactor, the suite gate |
-| 10 Acceptance | [`references/acceptance.md`](plugins/task-pipeline/skills/task-pipeline/references/acceptance.md) — REQ coverage table, evidence rules, the closing question |
-| any loop | [`references/loop-guard.md`](plugins/task-pipeline/skills/task-pipeline/references/loop-guard.md) — churn detection, caps, the break protocol |
+| 0 Knowledge harvest | [`knowledge-sources.md`](plugins/task-pipeline/skills/task-pipeline/references/knowledge-sources.md) — source list, the wiki, the ledger, the stage-9 loop-back |
+| 0 Intake grill | [`grill.md`](plugins/task-pipeline/skills/task-pipeline/references/grill.md) — interview loop, domain awareness, autonomy sweep |
+| 2 Brainstorm | [`brainstorm.md`](plugins/task-pipeline/skills/task-pipeline/references/brainstorm.md) — approaches, YAGNI, the no-code-before-approval gate |
+| 2 Decompose | [`decomposition.md`](plugins/task-pipeline/skills/task-pipeline/references/decomposition.md) — platforms only: brick criteria, module map, build order |
+| 3 Spec | [`spec.md`](plugins/task-pipeline/skills/task-pipeline/references/spec.md) — UX-track order, locked contracts, global constraints, self-review |
+| 4 Plan | [`planning.md`](plugins/task-pipeline/skills/task-pipeline/references/planning.md) — zero-context tasks, parallel groups, no placeholders |
+| 5 Build | [`build.md`](plugins/task-pipeline/skills/task-pipeline/references/build.md) + [`review.md`](plugins/task-pipeline/skills/task-pipeline/references/review.md) — isolation, ledger, subagent loop, review rubric, fix loop |
+| 5–6 TDD | [`tdd.md`](plugins/task-pipeline/skills/task-pipeline/references/tdd.md) — the iron law, red/green/refactor, the suite gate |
+| 10 Acceptance | [`acceptance.md`](plugins/task-pipeline/skills/task-pipeline/references/acceptance.md) — REQ coverage table, evidence rules, the closing question |
+| any loop | [`loop-guard.md`](plugins/task-pipeline/skills/task-pipeline/references/loop-guard.md) — churn detection, caps, the break protocol |
 
 **Ported, not depended on.** Stage 0 is adapted from
 [Matt Pocock's `grilling` / `grill-with-docs`](https://github.com/mattpocock/skills)
@@ -71,11 +130,36 @@ and stages 2–6 from the corresponding skills in
 requirement — the gates still govern, and nothing detects, recommends or waits for
 an external provider.
 
-## Knowledge harvest — read the project before asking the person
+### The intake grill (stage 0) — mandatory
+
+Before any technical work, task-pipeline interviews you relentlessly — one question
+per turn, each with a recommended answer, exploring the codebase before asking —
+until every decision branch is resolved and locked into a **task brief**. There is
+no "clear enough task" exemption: no stage-1 work starts without a committed,
+confirmed brief.
+
+**Domain awareness.** While exploring, the grill reads the project's own
+`CONTEXT.md` / `docs/adr/` and holds you to them — calling out terms that conflict
+with the glossary, replacing overloaded words with a canonical one, stress-testing
+relationships against concrete edge cases, and surfacing where the code contradicts
+what you just said. Resolved terms are written into `CONTEXT.md` as they land;
+decisions that are hard to reverse, surprising without context **and** the result of
+a real trade-off get an ADR. Both files are created lazily.
+
+**Autonomy comes from the sweep.** Beyond the task itself, the grill pre-resolves
+everything that would otherwise interrupt stages 1→10: which external libs need
+docs, branch and task-tracker policy, the test command and what "green" means, the
+lint command, the deploy target and its **authorization**, where logs and health
+live, which docs and runbooks to update, and the model. Each gets an answer or an
+explicit "stop and ask me here" — an unasked question is a scheduled interruption.
+Deploy authorization has a hard floor: a standing go counts only if it names the
+target and the preconditions.
+
+### Knowledge harvest — read the project before asking the person
 
 Stage 0 doesn't open with a question. It opens by finding what the project already
 knows about this task
-([`references/knowledge-sources.md`](plugins/task-pipeline/skills/task-pipeline/references/knowledge-sources.md)):
+([`knowledge-sources.md`](plugins/task-pipeline/skills/task-pipeline/references/knowledge-sources.md)):
 the code, `CLAUDE.md`, `CONTEXT.md` and the ADRs, `docs/` and `docs/ux/`, previous
 pipeline briefs and their carry-over ledgers, **the knowledge wiki if you have one**,
 and **any other repository or hosted doc system your project names as its docs**. It's
@@ -105,7 +189,7 @@ across months. Detected via `~/.obsidian-wiki/config` or a resolving `wiki-query
 Installed → queried at stage 0, synced with `wiki-update` at stage 9. Not installed →
 recommended once, with the line, and the run continues:
 
-```
+```bash
 pip install obsidian-wiki
 obsidian-wiki setup --vault /path/to/your/vault
 ```
@@ -113,39 +197,7 @@ obsidian-wiki setup --vault /path/to/your/vault
 It is a **recommendation, never a gate** — no stage blocks on a missing wiki, and
 nothing asks twice in one run.
 
-## Intake grill (stage 0) — mandatory
-
-Inspired by [Matt Pocock's grill-me](https://github.com/mattpocock/skills). Before
-any technical work, task-pipeline interviews you relentlessly — one question per
-turn, each with a recommended answer, exploring the codebase before asking — until
-every decision branch is resolved and locked into a **task brief**. There is no
-"clear enough task" exemption: no stage-1 work starts without a committed,
-confirmed brief.
-
-**Built in — nothing to install.** The full doctrine ships inside the skill
-([`references/grill.md`](plugins/task-pipeline/skills/task-pipeline/references/grill.md)):
-no companion skill, no resolution step, no fallback path, no version skew. Adapted
-from [Matt Pocock's grill-with-docs](https://github.com/mattpocock/skills) (MIT —
-see [LICENSE](LICENSE) → *Third-party*).
-
-**Domain awareness.** While exploring, the grill reads the project's own
-`CONTEXT.md` / `docs/adr/` and holds you to them — calling out terms that conflict
-with the glossary, replacing overloaded words with a canonical one, stress-testing
-relationships against concrete edge cases, and surfacing where the code contradicts
-what you just said. Resolved terms are written into `CONTEXT.md` as they land;
-decisions that are hard to reverse, surprising without context **and** the result of
-a real trade-off get an ADR. Both files are created lazily.
-
-**Autonomy comes from the sweep.** Beyond the task itself, the grill pre-resolves
-everything that would otherwise interrupt stages 1→10: which external libs need docs,
-branch and task-tracker policy, the test command and what "green" means, the lint
-command, the deploy target and its **authorization**, where logs and health live,
-which docs and runbooks to update, and the model. Each gets an answer or an explicit
-"stop and ask me here" — an unasked question is a scheduled interruption. Deploy
-authorization has a hard floor: a standing go counts only if it names the target and
-the preconditions.
-
-## The REQ spine — why nothing falls out the back
+### The REQ spine — why nothing falls out the back
 
 Every gate before the last one asks *"is this artifact good?"* — none asks *"does
 this still contain everything that was asked for?"* Scope doesn't leak inside a
@@ -179,12 +231,12 @@ Stage 10 closes the circle with the question the pipeline exists to be able to
 answer from a list rather than from memory: *here's what you asked for, here's what
 shipped, here's what's deferred and where it lives — what's missing?*
 
-## Platforms — decomposed into bricks, built one at a time
+### Platforms — decomposed into bricks, built one at a time
 
 A one-feature task runs the pipeline once. A **platform** — several independent
 capabilities, several separately shippable surfaces, requirements no single
 deliverable satisfies — gets cut into modules at stage 2, before any spec is
-written ([`references/decomposition.md`](plugins/task-pipeline/skills/task-pipeline/references/decomposition.md)).
+written ([`decomposition.md`](plugins/task-pipeline/skills/task-pipeline/references/decomposition.md)).
 
 Modules are cut **by capability, never by layer** ("Ordering", "Billing" — not
 "Controllers", "Services"), and a candidate is only a brick when it is
@@ -201,7 +253,7 @@ stopped. Each module's spec is a full dossier: architecture, entities and
 ownership, contracts in and out with their failure behavior, business rules, edge
 and failure cases, UI/Figma chain, limits, open questions.
 
-## Loop guard — churn is detected, not endured
+### Loop guard — churn is detected, not endured
 
 Any repeating pass can start undoing the previous one: two shapes alternating, the
 same file rewritten round after round, a finding that was closed coming back. That
@@ -219,7 +271,7 @@ module map), re-plans the check as an ordered checklist with one verification
 command per item, and goes through it one at a time. A higher-layer conflict is
 never settled inside a lower loop.
 
-## UX track (user-facing tasks) — super-ux recommended
+### UX track (user-facing tasks) — super-ux recommended
 
 The moment a task touches any user-facing surface (web / mobile / CLI / TUI — a
 screen, command, or visible behavior), [super-ux](https://github.com/ssheleg/super-ux)
@@ -228,26 +280,82 @@ installed, task-pipeline uses it; if not, it gives you the install line on the s
 The spec stage runs it **before any plan is written**: `/ux` (setup check) →
 `ux-foundation` (personas, JTBD, **customer journey maps**, user stories) →
 `ux-flows` (user flows + `screens.md` UI map, Figma frames) → `ux-scenarios`
-(usage scenarios validated against the base, ux-contract v4) → `/ux-lint` (must pass). The
-spec then embeds the UX layer — scenario IDs, CJM stages served, applicable UX
-patterns — and the plan's UI tasks carry scenario IDs in their DoD. Scenarios come
-before interface.
-
-## Prerequisites
-
-**None for the pipeline itself** — the doctrine for every stage ships inside the
-skill (see *Everything is built in* above).
-
-**super-ux** (only for user-facing tasks) — https://github.com/ssheleg/super-ux
+(usage scenarios validated against super-ux's own scenario-format contract) →
+`/ux-lint` (must pass). The spec then embeds the UX layer — scenario IDs, CJM
+stages served, applicable UX patterns — and the plan's UI tasks carry scenario IDs
+in their DoD. Scenarios come before interface.
 
 ```
 /plugin marketplace add ssheleg/super-ux
 /plugin install super-ux@super-ux
 ```
 
+### Model policy — one model, confirmed once
+
+The default recommendation is *the most capable reasoning model the environment
+offers* — currently the latest Opus generation, but that's a **tier, not a string**.
+Model ids go stale as generations ship, and you may be on another provider entirely,
+so nothing is hardcoded: the pipeline resolves the top tier available at runtime and
+stage configs use provider-agnostic tokens (`default` / `inherit`).
+
+You confirm or override it (per-stage overrides welcome) before stage 0 — then it
+**stops asking**. A skill can't switch the main-loop model; `/model` is yours.
+Stage-5 subagents are pinned to the confirmed model automatically. If the
+recommended tier isn't available, the pipeline says which one it's using and
+continues — a reminder, never a block.
+
+---
+
+## Configure it for your project
+
+### Bring your own skills
+
+Stages 0→10 above are the plugin's **example** flow. It is a machine-readable config
+([`pipeline.example.json`](plugins/task-pipeline/skills/task-pipeline/pipeline.example.json))
+written against a universal contract
+([`pipeline.schema.json`](plugins/task-pipeline/skills/task-pipeline/pipeline.schema.json)):
+copy the example to `pipeline.json` in your repo and rewrite it with your own stages
+(any count), your own `skills[]`, and your own `auto`/`manual` gate types. The
+framework bakes in no fixed stage count and no opinion on which gates are manual.
+
+```jsonc
+{
+  "version": 1,
+  "stages": [
+    {
+      "id": 1,
+      "state": "spec",
+      "name": "Spec",
+      "model": "default",              // 'default' = the run's confirmed model
+      "skills": ["your-team:spec"],    // whatever your environment resolves
+      "gate": { "type": "manual", "check": "spec committed and reviewed" }
+    }
+  ]
+}
+```
+
+### Release automation (optional, toggleable)
+
+A pipeline config may declare an optional `release` block: a master `enabled`
+toggle, a `trigger`, project-defined `steps`, and `verify` smoke-checks. It's **off
+unless a project turns it on**, and every project configures its own. This repo's
+own instance is [`.github/workflows/release.yml`](.github/workflows/release.yml) —
+armed per repo by the `RELEASE_ENABLED` variable (unset = off), it validates the tag
+against the manifests, cuts a GitHub release from the CHANGELOG, and smoke-tests
+`npx` from a clean checkout. Copy and adapt it; nothing is hardcoded.
+
+### Portability
+
+Stages 6–10 read the host project's `CLAUDE.md` conventions (tests / lint / deploy /
+docs / wiki) with detection fallbacks, so the skill works in any repo. The canonical
+artifact layout each stage writes to is fixed in
+[`artifacts.md`](plugins/task-pipeline/skills/task-pipeline/references/artifacts.md).
+
+---
+
 ## Install
 
-**Plugin (recommended):**
+**Claude Code plugin (recommended):**
 ```
 /plugin marketplace add ssheleg/task-pipeline
 /plugin install task-pipeline@task-pipeline
@@ -255,14 +363,14 @@ skill (see *Everything is built in* above).
 
 **Any agent via the skills CLI (Cursor, Codex, OpenCode, 70+ — not Claude Code,
 use the plugin above):**
-```
+```bash
 npx skills add ssheleg/task-pipeline --agent cursor --agent codex --global
 ```
 (one repeated `--agent` per agent; never include `claude-code` while the plugin is
 installed — the plain copy shadows it)
 
 **npm installer (no clone needed):**
-```
+```bash
 npx github:ssheleg/task-pipeline          # straight from GitHub
 npx task-pipeline-skill                   # from the npm registry
 ```
@@ -270,17 +378,14 @@ npx task-pipeline-skill                   # from the npm registry
 on npm; installs the same skill + `/task-pipeline` command into `~/.claude`,
 idempotent, `--force` to overwrite)
 
-**Cursor:**
-```
-npx skills add ssheleg/task-pipeline --agent cursor --global   # global, or…
-```
-…or per project, copy `cursor/rules/task-pipeline.mdc` into the repo's
+**Cursor:** the skills CLI above with `--agent cursor`, or per project copy
+[`cursor/rules/task-pipeline.mdc`](cursor/rules/task-pipeline.mdc) into the repo's
 `.cursor/rules/`. Cursor has no global rules directory — use the skills CLI for a
 global install, the `.mdc` for per-project, or paste it into Cursor Settings →
 Rules. The rule is self-contained (no external links), so it works copied anywhere.
 
 **Plain skill:**
-```
+```bash
 git clone https://github.com/ssheleg/task-pipeline
 cd task-pipeline && ./install.sh
 ```
@@ -288,10 +393,10 @@ cd task-pipeline && ./install.sh
 command into `~/.claude/commands/`; idempotent — rerun skips existing installs,
 `./install.sh --force` overwrites)
 
-## Updating everywhere
+### Updating
 
-Pick **one** channel per agent (running the plugin and the plain/skills-CLI copy
-on the same Claude Code install yields a duplicate skill).
+Pick **one** channel per agent — running the plugin and the plain/skills-CLI copy on
+the same Claude Code install yields a duplicate, shadowing skill.
 
 | Agent / channel | Update |
 |---|---|
@@ -301,72 +406,47 @@ on the same Claude Code install yields a duplicate skill).
 | npm | `npx task-pipeline-skill@latest` / `npx github:ssheleg/task-pipeline` (ephemeral — always latest) |
 | Plain skill | `git pull && ./install.sh --force` |
 
-## Use
+### Prerequisites
 
-Say *"run this through the pipeline"* or *"the full cycle"*, or invoke
-`/task-pipeline`. The skill creates a per-stage TaskList and walks the gates.
-Russian phrasings (*"полный цикл"*, *"прогони по конвейеру"*) route the same way.
+**None for the pipeline itself** — the doctrine for every stage ships inside the
+skill. Three optional companions make individual stages better:
 
-## Model policy
+| Companion | For | Required? |
+|---|---|---|
+| [super-ux](https://github.com/ssheleg/super-ux) | the stage-3 UX track | only for user-facing tasks |
+| context7 (MCP) | stage-1 docs study | recommended — web-search fallback |
+| [obsidian-wiki](https://github.com/ar9av/obsidian-wiki) | stage-0 harvest + stage-9 sync | recommended — never a gate |
 
-**One model, confirmed once, at preflight.** The default recommendation is *the most
-capable reasoning model the environment offers* — currently the latest Opus
-generation, but that's a **tier, not a string**. Model ids go stale as generations
-ship, and you may be on another provider entirely, so nothing is hardcoded: the
-pipeline resolves the top tier available at runtime and stage configs use
-provider-agnostic tokens (`default` / `inherit`).
+A single preflight block prints which are ready, which to install, and the model
+recommendation, so you arm the whole run in one exchange. Detail:
+[`companion-skills.md`](plugins/task-pipeline/skills/task-pipeline/references/companion-skills.md).
 
-You confirm or override it (per-stage overrides welcome) before stage 0 — then it
-**stops asking**. A skill can't switch the main-loop model; `/model` is yours.
-Stage-5 subagents are pinned to the confirmed model automatically. If the
-recommended tier isn't available, the pipeline says which one it's using and
-continues — a reminder, never a block.
+---
 
-## Release automation (project-configurable, toggleable)
+## Documentation map
 
-A pipeline config may declare an optional `release` block (see
-[`pipeline.schema.json`](plugins/task-pipeline/skills/task-pipeline/pipeline.schema.json)):
-a master `enabled` toggle, a `trigger`, project-defined `steps`, and `verify`
-smoke-checks. It's **off unless a project turns it on**, and every project
-configures its own. This repo's own instance is
-[`.github/workflows/release.yml`](.github/workflows/release.yml) — armed per repo
-by the `RELEASE_ENABLED` variable (unset = off), it validates the tag against the
-manifests, cuts a GitHub release from the CHANGELOG, and smoke-tests `npx` from a
-clean checkout. Copy and adapt it per project; nothing is hardcoded.
+| File | What's in it |
+|---|---|
+| [`SKILL.md`](plugins/task-pipeline/skills/task-pipeline/SKILL.md) | the orchestrator: how to run, the stage table, the model decision |
+| [`references/stages.md`](plugins/task-pipeline/skills/task-pipeline/references/stages.md) | per-stage detail and the exact gate criteria |
+| [`references/artifacts.md`](plugins/task-pipeline/skills/task-pipeline/references/artifacts.md) | the canonical document layout each stage writes to |
+| [`references/conventions.md`](plugins/task-pipeline/skills/task-pipeline/references/conventions.md) | how stages 6–10 read the host project's `CLAUDE.md` |
+| [`references/model-tiering.md`](plugins/task-pipeline/skills/task-pipeline/references/model-tiering.md) | model policy, the `/model` reminder, overrides |
+| [`templates/`](plugins/task-pipeline/skills/task-pipeline/templates/README.md) | brief, carry-over ledger, `CONTEXT.md` and ADR skeletons |
+| [`CHANGELOG.md`](CHANGELOG.md) | every release, with the reasoning behind it |
+| [`CONTRIBUTING.md`](CONTRIBUTING.md) | dev setup, the validator, the version-sync rule, release flow |
 
-## Companion skills
+## Contributing
 
-`references/companion-skills.md` separates what's built in (stages 0, 2, 3, 4, 5, 6
-and 10 — nothing to install) from the short optional list: **super-ux** (required only for
-user-facing tasks — install line surfaced on the spot), **context7** (docs stage),
-**[obsidian-wiki](https://github.com/ar9av/obsidian-wiki)** (recommended — queried in
-the stage-0 harvest, synced at stage 9). A single preflight block prints which are
-ready, which to install, and the model recommendation, so you arm the whole run in
-one exchange.
+Issues and pull requests are welcome — see [CONTRIBUTING.md](CONTRIBUTING.md) for
+the repo's invariants (the structural validator, four-way version sync, and the
+surfaces that must never drift apart). Security reports:
+[SECURITY.md](SECURITY.md). Everyone participating is expected to follow the
+[Code of Conduct](CODE_OF_CONDUCT.md).
 
-## Portability
-
-Stages 6–10 read the host project's `CLAUDE.md` conventions (tests / lint / deploy /
-docs / wiki) with detection fallbacks, so the skill works in any repo. The
-canonical artifact layout each stage writes to is fixed in
-[`references/artifacts.md`](plugins/task-pipeline/skills/task-pipeline/references/artifacts.md).
-
-## What this gives you
-
-Agents write code well and judge *when to stop asking you things* badly. A
-substantial task turns into twenty interruptions, or into a confident build that
-skipped the tests. `task-pipeline` front-loads every decision into one intake
-conversation, then runs ten gated stages without stopping to check in.
-
-- **The intake grill asks what a senior engineer would ask** before anything is
-  touched — scope, edge cases, failure modes, rollback, who the user is — so the
-  build does not stall halfway through.
-- **Every stage has a gate.** No code before a spec. No deploy before tests. No
-  "done" before the post-deploy logs have been read.
-- **Team discipline without a team.** ADRs, a written plan, a real test suite, a
-  wiki entry — produced as part of the work, not promised for later.
-- **It adapts to your repo, not the reverse.** Deploy, docs and wiki conventions
-  are read from the host project, so nothing is imposed.
+```bash
+npm test        # python3 test/validate.py — the structural validator
+```
 
 ## Author
 
@@ -385,4 +465,5 @@ npx sshlg-skills install
 
 ## License
 
-MIT © 2026 ssheleg.
+MIT © 2026 ssheleg. Third-party portions (the ported stage doctrine) are credited
+and licensed in [LICENSE](LICENSE) → *Third-party*.

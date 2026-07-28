@@ -37,10 +37,12 @@ not a question to re-open from scratch.
 1. **Explore the current state.** Files, module docs, recent commits, the
    conventions the repo already follows. Do this before asking anything.
 2. **Scope check, early.** If the task actually describes several independent
-   subsystems, say so immediately and help decompose it into sub-projects: what the
-   independent pieces are, how they relate, what order they get built in. Then
-   brainstorm the first one. Each sub-project gets its own spec → plan → build
-   cycle. Don't refine details of something that needs splitting first.
+   capabilities or separately shippable surfaces, say so immediately: that is a
+   **platform**, and it gets cut into modules at the end of this stage by
+   [`decomposition.md`](decomposition.md), before any spec is written. Brainstorm
+   the platform's shape — the pieces, how they relate, what order they land in —
+   not the details of one corner; those belong to each module's own stage-3
+   dossier. Don't refine something that needs splitting first.
 3. **Questions one at a time.** Never bundle. Multiple choice where it fits, open
    where it doesn't. Purpose, constraints, success criteria — anything the brief
    left at design level.

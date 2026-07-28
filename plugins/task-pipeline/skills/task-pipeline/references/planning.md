@@ -21,9 +21,11 @@ brief and the spec.
 
 ## Before writing tasks
 
-**Scope check.** If the spec covers several independent subsystems, split it into
-one plan per subsystem; each plan must produce working, testable software on its
-own.
+**Scope check.** A plan covers exactly **one** spec — for a decomposed platform,
+one module's dossier ([`decomposition.md`](decomposition.md)). If the spec in front
+of you covers several independent subsystems, the decomposition was missed at stage
+2: say so and go back there for a module map, rather than inventing the split here.
+Whatever this plan covers must produce working, testable software on its own.
 
 **Map the file structure.** List every file that will be created or modified and
 what each one owns. This is where decomposition gets locked in:

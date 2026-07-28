@@ -68,24 +68,34 @@ record (see `build.md`).
 ## This repo (task-pipeline itself), for reference
 
 ```
-.claude-plugin/marketplace.json              # marketplace manifest
+.claude-plugin/marketplace.json               # marketplace manifest
 plugins/task-pipeline/
-  .claude-plugin/plugin.json
+  .claude-plugin/plugin.json                  # plugin manifest
   commands/task-pipeline.md                   # /task-pipeline
   skills/task-pipeline/
-    SKILL.md
+    SKILL.md                                  # the orchestrator itself
     pipeline.schema.json                      # generic pipeline contract
     pipeline.example.json                     # this plugin's own flow, as config
-    references/{knowledge-sources,grill,brainstorm,decomposition,spec,planning,build,review,tdd,acceptance}.md  # built-in stage doctrine
-    references/loop-guard.md                  # cross-cutting: churn detection + break protocol
-    references/{stages,model-tiering,conventions,artifacts,companion-skills}.md
+    references/                               # built-in stage doctrine:
+      knowledge-sources.md grill.md           #   stage 0 (harvest, then interview)
+      brainstorm.md decomposition.md          #   stage 2
+      spec.md planning.md                     #   stages 3-4
+      build.md review.md tdd.md               #   stages 5-6
+      acceptance.md                           #   stage 10
+      loop-guard.md                           #   cross-cutting: churn detection
+      stages.md model-tiering.md              #   gates, model policy
+      conventions.md artifacts.md             #   host conventions, this layout
+      companion-skills.md                     #   optional companions + preflight
+    templates/                                # skeletons seeded into a host project
+      README.md brief.md carryover.md context.md adr.md
 cursor/rules/task-pipeline.mdc                # Cursor channel (self-contained rule)
-plugins/task-pipeline/skills/task-pipeline/templates/{brief,carryover,context,adr}.md   # stage-0 skeletons (ship on every channel)
 bin/task-pipeline.js                          # npx installer (package task-pipeline-skill)
-package.json
 install.sh                                    # POSIX installer
-test/validate.py                              # structural validator
-.github/workflows/{validate,release}.yml      # CI + toggleable release
-README.md  CHANGELOG.md  LICENSE
+test/validate.py                              # structural validator (npm test)
+.github/workflows/{validate,release}.yml      # CI + toggleable release automation
+.github/ISSUE_TEMPLATE/  .github/PULL_REQUEST_TEMPLATE.md
+package.json  .gitignore
+README.md  CHANGELOG.md  LICENSE  CLAUDE.md
+CONTRIBUTING.md  SECURITY.md  CODE_OF_CONDUCT.md
 docs/superpowers/{specs,plans}/               # this repo's own design history
 ```

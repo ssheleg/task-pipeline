@@ -1,7 +1,7 @@
 {
   "$schema": "./pipeline.schema.json",
   "version": 1,
-  "_note": "EXAMPLE ONLY — copy this file, rename to pipeline.json in your project, and rewrite it. This particular example encodes the plugin's own default flow (an up-front intake grill + this skill's own built-in stage doctrine + a super-ux UX track for user-facing tasks); it is NOT a fixed contract. Your project defines its own stages (any count), each executed by your own skills/agents, with your own gate types. Stage models use provider-agnostic tokens ('default' = the model confirmed for the run, 'inherit' = whatever the operator is on) — never hardcode a vendor model id, it goes stale. The universal contract is pipeline.schema.json; test/validate.py checks this example against it. gate.type: auto = orchestrator verifies the check itself (pass/fail); manual = wait for an explicit operator go. Which stages are manual vs auto is the operator's decision, not the plugin's. Any repeating loop in a run (fix loop, a re-entered stage, the per-module program loop) is bound by the loop guard: log every repeat touch, stop on oscillation, escalate to the layer that owns the conflict, then re-check in a planned order.",
+  "_note": "EXAMPLE ONLY — copy this file, rename to pipeline.json in your project, and rewrite it. This particular example encodes the plugin's own default flow (an up-front intake grill + this skill's own built-in stage doctrine + a super-ux UX track for user-facing tasks); it is NOT a fixed contract. Reading skills[] in THIS example: a 'task-pipeline:<name>' entry is not an installable skill — it names this skill's own built-in doctrine file (references/<name>.md, e.g. task-pipeline:grill -> references/grill.md); a 'host:<name>' entry is the host project's own command for that job, resolved from its CLAUDE.md (see references/conventions.md); every other entry is a real skill/agent your environment resolves (super-ux:*, context7, wiki-query, wiki-update). In YOUR pipeline.json, put whatever names your environment actually resolves. Your project defines its own stages (any count), each executed by your own skills/agents, with your own gate types. Stage models use provider-agnostic tokens ('default' = the model confirmed for the run, 'inherit' = whatever the operator is on) — never hardcode a vendor model id, it goes stale. The universal contract is pipeline.schema.json; test/validate.py checks this example against it. gate.type: auto = orchestrator verifies the check itself (pass/fail); manual = wait for an explicit operator go. Which stages are manual vs auto is the operator's decision, not the plugin's. Any repeating loop in a run (fix loop, a re-entered stage, the per-module program loop) is bound by the loop guard: log every repeat touch, stop on oscillation, escalate to the layer that owns the conflict, then re-check in a planned order.",
   "stages": [
     {
       "id": 0,
@@ -52,9 +52,11 @@
       "name": "Spec",
       "model": "default",
       "skills": [
+        "super-ux:ux",
         "super-ux:ux-foundation",
         "super-ux:ux-flows",
         "super-ux:ux-scenarios",
+        "super-ux:ux-lint",
         "task-pipeline:spec"
       ],
       "gate": {

@@ -27,7 +27,11 @@ tabled below) and an optional, toggleable `release` block. Any project replaces 
 wholesale — any number of stages, run by its own skills/agents, with its own gate
 types (see *Bring your own skills*). Each gate has a **type**: `auto` (the
 orchestrator verifies the `check` itself, pass/fail) or `manual` (wait for an
-explicit operator go); which stages are manual is the operator's call.
+explicit operator go); which stages are manual is the operator's call. In the
+example's `skills[]`, `task-pipeline:<name>` denotes this skill's own built-in
+doctrine (`references/<name>.md`) and `host:<name>` denotes the host project's own
+command for that job (`references/conventions.md`); everything else is a real skill
+the environment resolves.
 
 ## Prerequisites — none required
 
@@ -230,3 +234,6 @@ automation is on — `pipeline.schema.json` is the only contract.
 - `references/conventions.md` — how stages 6–10 read the host project's CLAUDE.md
 - `references/companion-skills.md` — companion skills, install lines, preflight recommendation
 - `references/artifacts.md` — the canonical document/artifact layout per stage
+- `templates/` — skeletons seeded into the host project: `brief.md` (stage 0),
+  `carryover.md` (seeded at 0, appended by every stage, read in full at 10),
+  `context.md` and `adr.md` (format references the grill writes lazily)

@@ -1,0 +1,54 @@
+name: Feature or doctrine change
+description: Propose a new capability, a new gate, or a change to how a stage behaves
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Doctrine changes are welcome, but they are load-bearing: every stage rule
+        is read by an agent under load, and every human-facing description has to
+        stay in sync. Concrete failure cases beat preferences.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: The failure this prevents
+      description: What goes wrong today, concretely. "A run that … ends up …".
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed change
+      description: Which stage, which file, and what the rule would say.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Kind of change
+      options:
+        - New rule inside an existing stage
+        - New stage or gate
+        - Change to a gate's type (auto ⇄ manual)
+        - New optional companion / integration
+        - Installer, packaging or CI
+        - Docs only
+    validations:
+      required: true
+
+  - type: textarea
+    id: cost
+    attributes:
+      label: What it costs
+      description: Extra turns for the operator, extra tokens, surfaces that must be updated together, backwards compatibility.
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checks
+      options:
+        - label: This does not require installing a companion plugin for a stage to run at all
+        - label: I've read the relevant reference file under `plugins/task-pipeline/skills/task-pipeline/references/`

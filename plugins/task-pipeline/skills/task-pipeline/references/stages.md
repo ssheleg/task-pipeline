@@ -140,8 +140,9 @@ stages/agents/types (see SKILL.md → *Bring your own skills*).
      map**: task analysis, user-flow diagrams (branches, error paths), every
      screen + state with wireframe and (Figma on) a Figma frame link.
   4. `ux-scenarios` → `docs/ux/scenarios.md` — the **WHAT** (source of truth for
-     behavior): scenarios validated per the format contract (`scenario-format.md`,
-     ux-contract v4) — IDs, statuses, `Traces:` to stories/journey stages/flows,
+     behavior): scenarios validated against the scenario-format contract super-ux
+     itself ships (`scenario-format.md` — read its current version there, never
+     pin one here) — IDs, statuses, `Traces:` to stories/journey stages/flows,
      edge/error states enumerated.
   5. **Run the super-ux linter** (`/ux-lint` or `python3 docs/ux/lint.py`) — it
      must pass: no drift, no orphans, no broken traces or stale Figma links.
