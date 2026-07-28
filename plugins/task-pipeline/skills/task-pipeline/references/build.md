@@ -237,6 +237,13 @@ Two routes leave before the loop starts:
 Everything else loops. One round = one fix dispatch + one scoped re-review.
 **Five rounds maximum per task.**
 
+**The loop guard runs alongside the counter** ([`loop-guard.md`](loop-guard.md)):
+log every repeat touch (`touch: <file> — round N — reason: <finding id>`) and trip
+*before* the cap when a fix undoes an earlier fix, when the same file returns for
+the same reason, or when a finding already ADDRESSED reappears. A tripped guard is
+not another round: stop, name the two shapes, escalate to the layer that owns the
+conflict, then re-check in a planned order.
+
 - **Rounds 1–3:** resume the original implementer with the open findings verbatim —
   its context is intact. If the harness can't message a live subagent, dispatch a
   fresh one with the brief path, the report path and the findings; the report file

@@ -17,7 +17,8 @@ docs/
       YYYY-MM-DD-<topic>-brief.md     # stage 0 — locked intake brief (grill output)
       YYYY-MM-DD-<topic>-carryover.md # stage 0 seeds it; EVERY stage appends; stage 10 reads it
       YYYY-MM-DD-<topic>-acceptance.md # stage 10 — REQ coverage table + evidence
-      YYYY-MM-DD-<topic>-design.md    # stage 3 — the spec (locks shared contracts)
+      YYYY-MM-DD-<topic>-modules.md  # stage 2 — module map + build order (platforms only)
+      YYYY-MM-DD-<topic>-design.md    # stage 3 — the spec / module dossier (locks shared contracts)
     plans/
       YYYY-MM-DD-<topic>.md           # stage 4 — the implementation plan
   ux/                                 # super-ux, UI tasks only (see companion-skills.md)
@@ -39,6 +40,10 @@ at a glance.
 > external skill**. A host project may relocate the root via its `CLAUDE.md`; keep
 > the shape, keep the slugs.
 
+Loop-bearing runs also keep a **git-ignored** run ledger at `.task-pipeline/run.md` —
+stage-level and program-level repeat touches, one line each, so the loop guard can
+detect churn after a lost context (see [`loop-guard.md`](loop-guard.md)).
+
 Stage 5 also creates a **git-ignored** scratch workspace per plan at
 `.task-pipeline/build/<plan-basename>/` — ledger, task briefs, implementer reports,
 review packages. It is deleted when the final review is clean; git history is the
@@ -52,7 +57,8 @@ record (see `build.md`).
 | 0→9 all | `specs/<topic>-carryover.md` — append-only ledger (seed from `templates/carryover.md`) | stage 10 |
 | 10 Acceptance | `specs/<topic>-acceptance.md` — every REQ with a status and evidence | the operator |
 | 0 Grill (domain) | `CONTEXT.md`, `docs/adr/NNNN-<slug>.md` — created **lazily**, only when a term resolves or a decision qualifies | stages 2–4 + the repo |
-| 3 Spec | `specs/<topic>-design.md` (+ links `docs/ux/*` for UI) | stage 4 |
+| 2 Decompose | `specs/<topic>-modules.md` — module map, build order, contracts, per-module status (platforms only) | stages 3–10, every module's run |
+| 3 Spec | `specs/<topic>-design.md` — module dossier for a decomposed platform (+ links `docs/ux/*` for UI) | stage 4 |
 | 4 Plan | `plans/<topic>.md` | stage 5 |
 | 3 UX track | `docs/ux/{foundation,flows,screens,scenarios}.md` | stages 4–9 + `/ux-lint` |
 | 8 Post-deploy | log/health notes (in the run, not a committed file) | stage 9 |
@@ -69,7 +75,8 @@ plugins/task-pipeline/
     SKILL.md
     pipeline.schema.json                      # generic pipeline contract
     pipeline.example.json                     # this plugin's own flow, as config
-    references/{grill,brainstorm,spec,planning,build,review,tdd,acceptance}.md  # built-in stage doctrine
+    references/{grill,brainstorm,decomposition,spec,planning,build,review,tdd,acceptance}.md  # built-in stage doctrine
+    references/loop-guard.md                  # cross-cutting: churn detection + break protocol
     references/{stages,model-tiering,conventions,artifacts,companion-skills}.md
 cursor/rules/task-pipeline.mdc                # Cursor channel (self-contained rule)
 plugins/task-pipeline/skills/task-pipeline/templates/{brief,carryover,context,adr}.md   # stage-0 skeletons (ship on every channel)

@@ -71,6 +71,44 @@ flows and `SCR-` screens, the CJM stages the feature serves, and the applicable
 super-ux patterns and principles. Every user-facing requirement traces to a
 scenario ID.
 
+## Module dossier — when the run is one brick of a platform
+
+If stage 2 produced a module map ([`decomposition.md`](decomposition.md)), this
+spec is that module's **dossier**, and it is the only document the module's build
+gets. Cover all of it, in this order, each section carrying its `covers: REQ-…`:
+
+1. **Purpose and boundary** — what this module delivers, and what it explicitly
+   does not (naming the module that does).
+2. **Architecture** — the module's internal shape: units, responsibilities, the
+   flow of a request or event through it, and where it sits in the platform.
+3. **Entities and data** — the entities this module **owns** (it is their source of
+   truth), their fields and invariants, their lifecycle/state transitions, storage
+   and migrations. Entities owned elsewhere are referenced by id, never copied into
+   a second source of truth.
+4. **Contracts — in and out.** For every inbound API/event this module serves and
+   every outbound one it consumes: exact signature or schema, auth, idempotency,
+   versioning, and **the behavior when the other side is unavailable or wrong**.
+   These are the seams the map named; here they get their shapes.
+5. **Business logic and rules** — the rules in the domain's language, each with the
+   condition that triggers it and the outcome. Rules that only exist as code are
+   rules nobody can review.
+6. **Edge and failure cases** — the boundaries (empty, first, last, maximum,
+   concurrent), the failure modes (timeout, partial write, duplicate delivery,
+   downstream down) and the honest degradation for each. This is the section that
+   decides whether the module survives contact with production, so it is not a
+   bullet list of "handle errors".
+7. **UI / Figma** — for a module with a surface: the super-ux chain (foundation →
+   flows → screens → scenarios), the `SCR-` screens and their Figma frame links,
+   and the states each screen has (loading, empty, error, partial).
+8. **Non-functional** — limits, expected volumes, latency budget, security and
+   privacy constraints that bind this module specifically.
+9. **Open questions** — anything still undecided, with the latest moment it can be
+   decided and who decides. An open question that reaches the plan becomes an
+   implementer's guess.
+
+A dossier that skips a section says why in one line (`no UI surface`, `owns no
+entities`). Silence is not a skip.
+
 Anything the stage-1 docs study could not ground (a library context7 can't resolve,
 a private API) is **flagged in the spec** as an assumption, not silently assumed.
 

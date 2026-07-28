@@ -1,4 +1,4 @@
-# Host conventions (stages 6–9)
+# Host conventions (stages 6–10)
 
 The orchestrator is project-agnostic. For tests / lint / deploy / docs / wiki it reads the
 **host project's `CLAUDE.md` / `AGENTS.md` first**, then falls back to detection.
@@ -33,3 +33,13 @@ found, surface it and **ask** rather than guessing.
 - Host self-update rules (module docs, runbooks, agent-self cards, etc.) — update
   in the same change. Wiki: the `wiki-update` skill (resolves the vault via
   `~/.obsidian-wiki/config`). Fix dangling links.
+
+## Issue tracker (stage 10)
+
+Acceptance parks what wasn't delivered: every `deferred` REQ and every unresolved
+carry-over row needs a **home** — an issue, a backlog entry, a ticket id. Read the
+host's convention (`CLAUDE.md` usually names the tracker and the id format; else
+detect: a `.github/ISSUE_TEMPLATE/`, a Linear/Jira reference in recent commits, a
+`TODO.md`). Never invent a tracker, and never close a run on "we'll remember it" —
+if no tracker exists, write the row into the repo's backlog file and say where it
+went.

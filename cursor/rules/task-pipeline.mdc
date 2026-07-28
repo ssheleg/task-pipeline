@@ -83,11 +83,21 @@ not authorize an outward, irreversible action — stage 7 stops and asks.
 ## Stages 1→10
 
 1. **Docs study** (auto) — ground every external lib/API on current docs, not recall.
-2. **Brainstorm** (manual) — read the brief, explore the code, then 2–3 approaches
-   with a recommendation, YAGNI applied, design presented in sections and approved.
-   **Hard gate: no code, no scaffolding before that approval** — including on
-   "obviously simple" tasks. Record whether the task touches a user-facing surface
-   (UI verdict).
+2. **Brainstorm + decompose** (manual) — read the brief, explore the code, then 2–3
+   approaches with a recommendation, YAGNI applied, design presented in sections and
+   approved. **Hard gate: no code, no scaffolding before that approval** — including
+   on "obviously simple" tasks. Record whether the task touches a user-facing surface
+   (UI verdict). **If the brief is a platform, not a change** — several independent
+   capabilities or separately shippable surfaces — cut it into modules before any
+   spec: modules by capability, never by layer; a module qualifies as a brick only if
+   it is independently specifiable, buildable and testable, owns its own entities,
+   talks to others through declared contracts only, and can land while leaving the
+   system working. Commit a module map (module, delivers, entities owned, depends on,
+   contracts exposed, UI?, REQs, status) in build order — the **walking skeleton
+   first**, then topologically, no cycles (a cycle means the cut is wrong). Every REQ
+   maps to exactly one module. Then stages 3→10 run **per module**, one brick at a
+   time; stages 0–2 run once, and the map's status column is the resume point. Single
+   module → record "single module: <name>" and move on.
 3. **Spec** (manual) — write and commit the design; lock every shared contract
    (types, schemas, signatures, file layout) plus a **Global Constraints** block of
    exact values every later task inherits. Self-review it for placeholders,
@@ -130,6 +140,24 @@ Cross-cutting: answer from the brief's autonomy section rather than re-asking, l
 tasks, conventional commits, honest degradation (never claim a failed/skipped step
 succeeded), and get explicit go before any outward/irreversible action (deploy,
 publish, repo create).
+
+**Loop guard — break churn instead of iterating.** Every repeating pass (a fix
+round, a re-entered stage, the next module) logs one line per touched file: the
+file, the pass, and the reason that forced it — a finding id or a failed gate item.
+"Cleanup" is not a reason. **Stop immediately** when: an edit undoes what an earlier
+pass in this run deliberately did (A→B→A); the same file is edited twice for the
+same reason; a finding already fixed or parked comes back; a stage is entered a
+third time for one artifact; two loops edit one file. Hard caps: 5 fix rounds per
+task, 2 re-entries per stage, 3 passes per module. On a stop: name shape A and shape
+B with their evidence and who asks for each; escalate to the layer that owns the
+conflict (two findings → the review rubric; finding vs plan → the user; plan vs spec
+→ back to planning; ambiguous spec → back to spec; two modules claiming one file →
+back to the module map) — **never settle a higher-layer conflict inside a lower
+loop**; then re-plan the check as an ordered checklist, one owner and one
+verification command per item, and go through it one at a time, one commit per item,
+no opportunistic edits. Re-check the list once in the same order at the end. If it
+trips again after a re-planned pass, stop and hand back with both shapes, the
+evidence and your recommendation.
 
 ## super-ux for user-facing tasks (recommended)
 

@@ -58,6 +58,7 @@ is not neutral — it is a scheduled interruption.
 | run-wide | Model for this run | … (most capable available unless overridden; per-stage overrides here) |
 | run-wide | Decide autonomously vs escalate to me | … |
 | 1 Docs | External libs/APIs/SDKs in play; any context7 can't resolve → where their docs live | … |
+| 2 Decompose | Platform (several capabilities/surfaces) or one module? If platform — deploy cadence: per module, or once at the end | … |
 | 2–3 Spec | UI verdict (arms super-ux); scenario-tracing waiver, if any | … |
 | 4–5 Dev | Base branch; worktree/branch policy; is `main` off-limits; commit convention; task tracker | … |
 | 5 Integration | How the branch lands — direct merge, PR (who approves), or "leave it, I'll merge"; is parallel fan-out (one worktree per implementer) wanted? | … |
@@ -67,6 +68,7 @@ is not neutral — it is a scheduled interruption.
 | 7 Deploy | **Authorization** — standing go, or ask every time? | … |
 | 8 Post-deploy | Where logs / health live (app name, endpoint, workflow) | … |
 | 9 Docs+wiki | Which module docs / runbooks this change updates; wiki sync yes/no | … |
+| 10 Acceptance | Who signs off; where deferred REQs get tracked (issue tracker / backlog) | … |
 
 > **Deploy authorization has a hard floor.** A standing go counts only if it is
 > **specific** — named target and named preconditions ("staging, once lint and the

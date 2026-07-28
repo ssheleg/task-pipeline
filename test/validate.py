@@ -159,7 +159,10 @@ for r in ("grill.md", "stages.md", "model-tiering.md", "conventions.md", "compan
 # The pipeline is self-contained: every stage's doctrine ships inside the skill.
 # These files ARE stages 2-6 — a missing or stub one silently turns a stage back
 # into a dependency on someone else's plugin.
-for r in ("brainstorm.md", "spec.md", "planning.md", "build.md", "review.md", "tdd.md", "acceptance.md"):
+for r in (
+    "brainstorm.md", "decomposition.md", "spec.md", "planning.md",
+    "build.md", "review.md", "tdd.md", "acceptance.md", "loop-guard.md",
+):
     rp = os.path.join(refdir, r)
     if not os.path.isfile(rp):
         fail(f"missing built-in stage doctrine: references/{r}")
@@ -186,6 +189,52 @@ for _orphan in sorted({f for f in os.listdir(refdir) if f.endswith(".md")} - _se
 for r in ("README.md", "LICENSE"):
     if not os.path.isfile(os.path.join(ROOT, r)):
         fail(f"missing root file: {r}")
+
+# The stage list is published on three surfaces an agent may read independently:
+# SKILL.md's table (what it walks), references/stages.md (the per-stage detail and
+# gate criteria) and pipeline.example.json (the machine-readable flow). Drift
+# between them is invisible in review and lethal at runtime — a stage silently
+# manual on one surface and auto on another, or a stage that exists in the config
+# and has no doctrine. Compare ids, names and gate types across all three.
+_sk_txt = open(skill_path, encoding="utf-8").read() if os.path.isfile(skill_path) else ""
+_st_path = os.path.join(refdir, "stages.md")
+_st_txt = open(_st_path, encoding="utf-8").read() if os.path.isfile(_st_path) else ""
+_cfg_path = os.path.join(ROOT, "plugins/task-pipeline/skills/task-pipeline/pipeline.example.json")
+if os.path.isfile(_cfg_path) and _sk_txt and _st_txt:
+    try:
+        _stages_cfg = json.load(open(_cfg_path, encoding="utf-8")).get("stages") or []
+    except Exception:
+        _stages_cfg = []
+
+    def _norm(name):
+        return re.sub(r"[^a-z0-9+ ]", "", name.lower()).replace("  ", " ").strip()
+
+    _cfg_rows = [(s.get("id"), _norm(str(s.get("name", ""))), (s.get("gate") or {}).get("type")) for s in _stages_cfg]
+    _sk_rows = [
+        (int(a), _norm(b), c)
+        for a, b, c in re.findall(r"^\|\s*(\d+)\s*\|([^|]+)\|.*\|\s*(auto|manual)\s*\|\s*$", _sk_txt, re.M)
+    ]
+    _st_rows = []
+    for _n, _title, _body in re.findall(r"^## (\d+) — (.*?)\n(.*?)(?=^## |\Z)", _st_txt, re.M | re.S):
+        _g = re.findall(r"\*\*GATE \((auto|manual)\)", _body)
+        _st_rows.append((int(_n), _norm(_title.split("—")[0]), _g[0] if _g else None))
+
+    if [r[0] for r in _cfg_rows] != [r[0] for r in _sk_rows]:
+        fail(f"stage ids differ: pipeline.example.json {[r[0] for r in _cfg_rows]} vs SKILL.md table {[r[0] for r in _sk_rows]}")
+    if [r[0] for r in _cfg_rows] != [r[0] for r in _st_rows]:
+        fail(f"stage ids differ: pipeline.example.json {[r[0] for r in _cfg_rows]} vs references/stages.md {[r[0] for r in _st_rows]}")
+    for _c, _s in zip(_cfg_rows, _sk_rows):
+        if _c[2] != _s[2]:
+            fail(f"stage {_c[0]}: gate type differs — pipeline.example.json {_c[2]!r} vs SKILL.md {_s[2]!r}")
+        if _c[1] not in _s[1] and _s[1] not in _c[1]:
+            fail(f"stage {_c[0]}: name differs — pipeline.example.json {_c[1]!r} vs SKILL.md {_s[1]!r}")
+    for _c, _t in zip(_cfg_rows, _st_rows):
+        if _t[2] is None:
+            fail(f"references/stages.md stage {_t[0]}: no '**GATE (auto|manual)**' line — every stage states its gate")
+        elif _c[2] != _t[2]:
+            fail(f"stage {_c[0]}: gate type differs — pipeline.example.json {_c[2]!r} vs references/stages.md {_t[2]!r}")
+        if _c[1] not in _t[1] and _t[1] not in _c[1]:
+            fail(f"stage {_c[0]}: name differs — pipeline.example.json {_c[1]!r} vs references/stages.md {_t[1]!r}")
 
 # Cursor channel: every cursor/rules/*.mdc must carry `description` + `alwaysApply`
 # frontmatter (Cursor copies these into foreign projects, so no relative links —

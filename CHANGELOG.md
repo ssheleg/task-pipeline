@@ -1,5 +1,60 @@
 # Changelog
 
+## v0.17.0 — 2026-07-28
+
+Two mechanisms stop being files nobody walks and become operational doctrine: a
+platform is cut into bricks before it is specced, and a loop that starts undoing
+itself is broken instead of endured.
+
+### Added
+- **Decomposition is stage 2's second half**, wired end to end —
+  `references/decomposition.md` now reached from `SKILL.md`'s doctrine table, the
+  stage-2 gate in `stages.md`, the example config, the Cursor rule, the command and
+  the README. A brief that describes a *platform* — several independent
+  capabilities, several separately shippable surfaces, REQs no single deliverable
+  satisfies — is cut into **modules** before any spec exists: by capability, never
+  by layer, and a candidate is a brick only when it is independently specifiable,
+  buildable and testable, owns its entities, talks through declared contracts only,
+  and can land while leaving the system working. The module map carries build order
+  — **walking skeleton first**, then topological, no cycles — with every REQ mapped
+  to exactly one module. Single-module work records `single module: <name>`: a
+  skipped decomposition is a decision, never an omission.
+- **The module dossier** (`spec.md`): for a decomposed platform the spec has nine
+  required sections — purpose and boundary, architecture, entities and ownership,
+  contracts in and out **with their behavior when the other side is down**,
+  business rules in the domain's language, edge and failure cases, UI/Figma chain,
+  non-functional limits, and open questions with a decide-by moment. A skipped
+  section says why in one line; silence is not a skip.
+- **The loop guard binds every repeating loop** — `references/loop-guard.md` is now
+  referenced from `SKILL.md`'s cross-cutting rules, a `stages.md` section, the
+  stage-5 fix loop, the Cursor rule and the command. Every repeating pass logs one
+  line per touched file with the reason that forced it ("cleanup" is not a reason).
+  It trips on revert-oscillation, a file edited twice for the same reason, a
+  resurrected finding, a third entry into one stage, or two loops editing one file,
+  plus hard caps (5 fix rounds per task, 2 re-entries per stage, 3 passes per
+  module). On a trip: stop editing, name shape A and shape B with their evidence,
+  escalate to the layer that owns the conflict, re-plan the check as an ordered
+  checklist with one verification command per item, then go through it one at a
+  time. **A higher-layer conflict is never settled inside a lower loop.**
+- **Two autonomy-sweep rows** (grill + brief template): platform-or-single-module
+  with the deploy cadence it implies, and who signs off acceptance plus where
+  deferred REQs are tracked.
+- **`conventions.md` gains the issue tracker** stage 10 needs — read the host's
+  convention, never invent a tracker, never close a run on "we'll remember it".
+- `artifacts.md` gains the module map and the run-level ledger
+  (`.task-pipeline/run.md`) the loop guard writes to.
+
+### Tests
+- **The stage list is cross-checked across all three surfaces it is published on** —
+  `SKILL.md`'s table, `references/stages.md` and `pipeline.example.json`: identical
+  ids in identical order, matching names, matching gate types, and every stage in
+  `stages.md` carrying a `**GATE (auto|manual)**` line. Drift between surfaces is
+  invisible in review and lethal at runtime — a stage manual on one surface and auto
+  on another.
+- `decomposition.md` and `loop-guard.md` join the stub-rejected doctrine set.
+- Three negative self-tests against a mutated copy: a flipped gate type, a removed
+  GATE line and a deleted doctrine file each fail the validator.
+
 ## v0.16.1 — 2026-07-28
 
 ### Fixed

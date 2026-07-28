@@ -133,6 +133,46 @@ Stage 10 closes the circle with the question the pipeline exists to be able to
 answer from a list rather than from memory: *here's what you asked for, here's what
 shipped, here's what's deferred and where it lives — what's missing?*
 
+## Platforms — decomposed into bricks, built one at a time
+
+A one-feature task runs the pipeline once. A **platform** — several independent
+capabilities, several separately shippable surfaces, requirements no single
+deliverable satisfies — gets cut into modules at stage 2, before any spec is
+written ([`references/decomposition.md`](plugins/task-pipeline/skills/task-pipeline/references/decomposition.md)).
+
+Modules are cut **by capability, never by layer** ("Ordering", "Billing" — not
+"Controllers", "Services"), and a candidate is only a brick when it is
+independently specifiable, buildable and testable, owns its own entities, talks to
+its neighbours through declared contracts only, and can land while leaving the
+system working. The committed module map fixes the build order — **walking skeleton
+first**, then topological, no cycles — and every requirement maps to exactly one
+module.
+
+Then stages 3→10 run **per module**: dossier → plan → build → tests → deploy →
+post-deploy → docs → acceptance → next brick. Stages 0–2 run once for the platform,
+and the map's status column is what a resumed session reads to know where it
+stopped. Each module's spec is a full dossier: architecture, entities and
+ownership, contracts in and out with their failure behavior, business rules, edge
+and failure cases, UI/Figma chain, limits, open questions.
+
+## Loop guard — churn is detected, not endured
+
+Any repeating pass can start undoing the previous one: two shapes alternating, the
+same file rewritten round after round, a finding that was closed coming back. That
+looks like progress and consumes a run, so it is
+[detected mechanically](plugins/task-pipeline/skills/task-pipeline/references/loop-guard.md):
+every repeat pass logs one line per touched file with **the reason that forced it**
+— a finding id, a failed gate item. "Cleanup" is not a reason.
+
+It trips on revert-oscillation, a file edited twice for the same reason, a
+resurrected finding, a third entry into one stage, or two loops editing one file —
+plus hard caps (5 fix rounds per task, 2 re-entries per stage, 3 passes per module).
+On a trip the run **stops editing**, names shape A and shape B with their evidence,
+escalates to the layer that owns the conflict (rubric → operator → plan → spec →
+module map), re-plans the check as an ordered checklist with one verification
+command per item, and goes through it one at a time. A higher-layer conflict is
+never settled inside a lower loop.
+
 ## UX track (user-facing tasks) — super-ux recommended
 
 The moment a task touches any user-facing surface (web / mobile / CLI / TUI — a
@@ -258,7 +298,7 @@ install, and the model recommendation, so you arm the whole run in one exchange.
 
 ## Portability
 
-Stages 6–9 read the host project's `CLAUDE.md` conventions (tests / lint / deploy /
+Stages 6–10 read the host project's `CLAUDE.md` conventions (tests / lint / deploy /
 docs / wiki) with detection fallbacks, so the skill works in any repo. The
 canonical artifact layout each stage writes to is fixed in
 [`references/artifacts.md`](plugins/task-pipeline/skills/task-pipeline/references/artifacts.md).

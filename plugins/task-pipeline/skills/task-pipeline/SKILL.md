@@ -120,6 +120,10 @@ Two things the grill does beyond clarifying the request:
 3. Walk stages 1→10 on the model confirmed at preflight. **Don't re-ask about the
    model at every boundary** — only when the operator recorded a per-stage override
    map and the next stage's entry differs (`references/model-tiering.md`).
+   **Is the brief a platform rather than a change?** Then stage 2 also cuts it into
+   modules (`references/decomposition.md`) and stages 3→10 run **per module** in
+   build order, one brick at a time — stages 0–2 run once, and the module map's
+   status column is the resume point (`references/stages.md` → *The program loop*).
 4. Do **not** advance until the stage **gate** passes (`references/stages.md`).
    Honor the gate **type**: for `auto`, verify the gate's `check` yourself and
    stop/return on fail; for `manual`, present the result and **wait for the
@@ -130,7 +134,12 @@ Two things the grill does beyond clarifying the request:
    **anything deferred, dropped or left half-done goes into the carry-over ledger
    the moment it's said** — deferred out loud is forgotten; **never narrow the task
    silently** — the REQ list is frozen, adding is free, removing needs the
-   operator's explicit agreement; task
+   operator's explicit agreement; **when a loop starts undoing an earlier pass —
+   the same file edited twice for the same reason, a closed finding coming back, a
+   third entry into one stage — stop and run the loop guard**
+   (`references/loop-guard.md`): name the two shapes, escalate to the layer that
+   owns the conflict, re-plan the check as an ordered list, then go through it one
+   item at a time; task
    tracker + conventional commits per host conventions; worktree isolation for the
    build, integrated back per the brief's branch policy before stage 7; honest
    degradation (never claim a failed/skipped step succeeded);
@@ -147,7 +156,7 @@ capable available — see `references/model-tiering.md`).
 |---|---|---|---|---|
 | 0 | Intake grill — **mandatory** | built in: [`references/grill.md`](references/grill.md) | shared understanding reached; autonomy sweep covered; brief locked + confirmed | manual |
 | 1 | Docs study | `context7` (resolve-library-id → get-library-docs) / `context7-docs` | contracts grounded on fetched docs | auto |
-| 2 | Brainstorm | built in: [`references/brainstorm.md`](references/brainstorm.md) + **UI detection** | design approved; UI verdict recorded | manual |
+| 2 | Brainstorm + decompose | built in: [`references/brainstorm.md`](references/brainstorm.md) + **UI detection** + [`references/decomposition.md`](references/decomposition.md) for platforms | design approved; UI verdict recorded; every REQ answered; platform: module map approved | manual |
 | 3 | Spec | built in: [`references/spec.md`](references/spec.md) — **UI → super-ux chain first** (`/ux` → `ux-foundation` CJM → `ux-flows` screens → `ux-scenarios` → `/ux-lint`), then spec `docs/superpowers/specs/…-design.md` | committed + reviewed; UI: chain validated, linter green, scenarios/`SCR-` traced | manual |
 | 4 | Plan | built in: [`references/planning.md`](references/planning.md) → `docs/superpowers/plans/…md` | parallel-ready, DoD per task | auto |
 | 5 | Dev | built in: [`references/build.md`](references/build.md) (worktree → subagent per task → review loop → integrate) + [`references/tdd.md`](references/tdd.md) | tasks DONE, TDD green per task, branch integrated per the brief | auto |
@@ -198,6 +207,6 @@ automation is on — `pipeline.schema.json` is the only contract.
 - `references/tdd.md` — stages 5–6: the iron law, red/green/refactor, the suite gate
 - `references/stages.md` — per-stage detail + exact gate criteria + gate types
 - `references/model-tiering.md` — model map, ids, the `/model` reminder mechanic, override
-- `references/conventions.md` — how stages 6–9 read the host project's CLAUDE.md
+- `references/conventions.md` — how stages 6–10 read the host project's CLAUDE.md
 - `references/companion-skills.md` — companion skills, install lines, preflight recommendation
 - `references/artifacts.md` — the canonical document/artifact layout per stage

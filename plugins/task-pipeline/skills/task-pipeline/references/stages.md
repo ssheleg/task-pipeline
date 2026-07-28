@@ -53,7 +53,7 @@ stages/agents/types (see SKILL.md → *Bring your own skills*).
   constraints, assumptions, explicitly-deferred items, done-criteria) **plus the
   autonomy sweep's per-stage answers and the model decision**. Seed it from
   the skill's `templates/brief.md` skeleton — but only when absent, never
-  overwrite an existing brief. Stages 2–4 build on this brief; stages 5–9 read
+  overwrite an existing brief. Stages 2–4 build on this brief; stages 5–10 read
   its autonomy section instead of asking. Where the session produced them, also:
   an updated `CONTEXT.md` (terms written as they resolved) and any ADRs under
   `docs/adr/` — see `grill.md` → *Domain awareness*.
@@ -74,7 +74,7 @@ stages/agents/types (see SKILL.md → *Bring your own skills*).
 - **GATE (auto):** every contract the design will lock is grounded in fetched docs,
   not recall. Unresolvable libraries are flagged in the spec.
 
-## 2 — Brainstorm
+## 2 — Brainstorm + decompose
 - **How it runs: [`brainstorm.md`](brainstorm.md)** — built into this skill. Read
   the brief first (stage 0 already answered scope/constraints/done-criteria), then
   explore the codebase, scope-check for decomposition, one question at a time, 2–3
