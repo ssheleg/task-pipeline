@@ -1,5 +1,22 @@
 # Changelog
 
+## v0.14.0 — 2026-07-28
+
+### Fixed
+- Skill front-matter was **1039 characters**, over the 1024 canon limit, and the
+  validator did not check it. Description tightened to 996 and the limit is now
+  enforced.
+
+### Changed
+- Triggers restructured English-first — `'run this through the pipeline' /
+  'прогони по конвейеру'` — in both the skill and the Cursor rule.
+- README is English-only, with a plain statement of what the pipeline gives you
+  and an author/links block.
+
+### Added
+- Validator enforces the description canon: `Use when` opening, Russian trigger
+  aliases present, front-matter under 1024 characters.
+
 ## v0.13.0 — 2026-07-28
 
 The last external dependency is gone. Every stage now runs on doctrine that ships

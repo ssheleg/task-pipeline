@@ -182,8 +182,9 @@ on the same Claude Code install yields a duplicate skill).
 
 ## Use
 
-Say *"run this through the pipeline"* / *"полный цикл"* / *"прогони по конвейеру"*,
-or `/task-pipeline`. The skill creates a per-stage TaskList and walks the gates.
+Say *"run this through the pipeline"* or *"the full cycle"*, or invoke
+`/task-pipeline`. The skill creates a per-stage TaskList and walks the gates.
+Russian phrasings (*"полный цикл"*, *"прогони по конвейеру"*) route the same way.
 
 ## Model policy
 
@@ -227,74 +228,37 @@ docs / wiki) with detection fallbacks, so the skill works in any repo. The
 canonical artifact layout each stage writes to is fixed in
 [`references/artifacts.md`](plugins/task-pipeline/skills/task-pipeline/references/artifacts.md).
 
-## По-русски
+## What this gives you
 
-**task-pipeline** — оркестратор полного цикла доставки задачи для Claude Code:
-один скилл проводит любую существенную задачу через **интейк-грил + 9 гейтованных
-стадий** (изучение доков → брейншторм → спека → план → сборка сабагентами →
-тесты → линт/деплой → пост-деплой проверка логов → синк доков/вики). **Доктрина
-каждой стадии встроена в скилл — обязательных зависимостей нет.**
+Agents write code well and judge *when to stop asking you things* badly. A
+substantial task turns into twenty interruptions, or into a confident build that
+skipped the tests. `task-pipeline` front-loads every decision into one intake
+conversation, then runs nine gated stages without stopping to check in.
 
-- **Всё внутри — ставить нечего.** Стадии 0, 2, 3, 4, 5 и 6 работают по
-  `references/{grill,brainstorm,spec,planning,build,review,tdd}.md`: нет
-  компаньон-плагина, нет резолва на префлайте, нет рассинхрона версий с чужим репо
-  и нет стадии, которая падает из-за отсутствующего плагина. Портировано (не
-  зависимость): стадия 0 — из [grill-with-docs Мэтта
-  Покока](https://github.com/mattpocock/skills), стадии 2–6 — из соответствующих
-  скиллов [obra/superpowers](https://github.com/obra/superpowers); оба MIT, оба
-  указаны в `LICENSE` → *Third-party*. Опциональный мост: если у вас уже стоит
-  эквивалентный набор скиллов, его можно подставить на стадии 2/4/5/6 через
-  `pipeline.json` → `skills[]` — это замена, а не требование.
-- **Грил на входе (стадия 0) — обязателен.** Одна строка задачи («сделай фичу X»)
-  недостаточна для автономной работы, поэтому стадию нельзя пропустить: пайплайн
-  «допрашивает» оператора — по одному вопросу за ход, с рекомендованным ответом,
-  изучив код до вопроса — пока все ветки решений не закрыты и не зафиксированы в
-  брифе. Ни одна стадия 1+ не стартует без закоммиченного подтверждённого брифа.
-  **Грил встроен в скилл** — ставить нечего: вся доктрина лежит в
-  `references/grill.md`, без компаньонов, резолва и фолбэков. Портировано из
-  [grill-with-docs Мэтта Покока](https://github.com/mattpocock/skills) (MIT, см.
-  `LICENSE` → *Third-party*).
-- **Доменная осознанность на гриле.** Пайплайн читает `CONTEXT.md` / `docs/adr/`
-  проекта и держит оператора в рамках его же языка: ловит термины, конфликтующие с
-  глоссарием, заменяет размытые слова каноничными, проверяет отношения конкретными
-  краевыми сценариями, вскрывает расхождения между кодом и только что сказанным.
-  Разрешённый термин сразу пишется в `CONTEXT.md`; решение, которое трудно
-  откатить, неочевидно без контекста и стало результатом реального компромисса,
-  получает ADR. Файлы создаются лениво.
-- **Автономию даёт свип по стадиям.** Помимо самой задачи грил заранее закрывает
-  всё, что иначе остановит стадии 1→9: внешние библиотеки и где их доки, политику
-  веток и трекер задач, команду тестов и что значит «зелено», команду линта, цель
-  деплоя и **авторизацию на него**, где живут логи/health, какие доки и раннбуки
-  обновлять, и модель. По каждому пункту — либо ответ, либо явное «здесь
-  остановись и спроси»; незаданный вопрос = запланированное прерывание. У
-  авторизации деплоя жёсткий пол: постоянное «go» засчитывается, только если
-  названы цель и предусловия.
-- Ни одна стадия не стартует, пока не пройден гейт предыдущей; деплой требует
-  зелёного полного прогона тестов и явного «go» оператора.
-- **UX-трек (super-ux рекомендуется):** как только задача трогает интерфейс
-  (web/mobile/CLI/TUI), [super-ux](https://github.com/ssheleg/super-ux) —
-  рекомендуемый воркфлоу, детектится ещё на гриле; если установлен — используется,
-  если нет — сразу даётся строка установки. Стадия спеки гоняет `/ux` →
-  `ux-foundation` (персоны, JTBD, CJM) → `ux-flows` (флоу + `screens.md` — карта
-  экранов) → `ux-scenarios` (сценарии, ux-contract v4) → `/ux-lint` (линтер должен
-  быть зелёным) до написания плана; спека включает ID сценариев, `SCR-` экраны,
-  стадии CJM и UX-паттерны.
-  Сценарии — до интерфейса.
-- **Модель — одна на прогон, подтверждается один раз до старта.** Рекомендация по
-  умолчанию — *самая мощная reasoning-модель, доступная в окружении* (сейчас это
-  последнее поколение Opus, но это **тир, а не строка**). Идентификаторы моделей
-  устаревают, и провайдер может быть другой, поэтому ничего не захардкожено:
-  актуальный топ-тир определяется в рантайме, а в конфиге стадий стоят
-  провайдер-агностичные токены (`default` / `inherit`). Оператор подтверждает или
-  переопределяет (можно по стадиям) — дальше пайплайн больше не переспрашивает.
-  Сабагенты стадии 5 пинятся на подтверждённую модель автоматически.
-- Стадии 6–9 читают конвенции хост-проекта из `CLAUDE.md` (тесты / линт /
-  деплой / доки / вики), поэтому скилл работает в любом репозитории.
+- **The intake grill asks what a senior engineer would ask** before anything is
+  touched — scope, edge cases, failure modes, rollback, who the user is — so the
+  build does not stall halfway through.
+- **Every stage has a gate.** No code before a spec. No deploy before tests. No
+  "done" before the post-deploy logs have been read.
+- **Team discipline without a team.** ADRs, a written plan, a real test suite, a
+  wiki entry — produced as part of the work, not promised for later.
+- **It adapts to your repo, not the reverse.** Deploy, docs and wiki conventions
+  are read from the host project, so nothing is imposed.
 
-Запуск: скажите *«полный цикл»* / *«прогони по конвейеру»* или `/task-pipeline
-<задача>`. Установка — см. раздел Install выше (плагин, `npx skills add
-ssheleg/task-pipeline`, `npx task-pipeline-skill` / `npx
-github:ssheleg/task-pipeline` или `./install.sh`).
+## Author
+
+Built by ssheleg — [svlab.online](https://svlab.online)
+
+- X / Twitter — [@fuck_this_year](https://x.com/fuck_this_year)
+- Telegram — [@sshlg](https://t.me/sshlg)
+
+Part of the [ssheleg skill family](https://github.com/ssheleg/sshlg-skills):
+`super-ux`, `task-pipeline`, `make-skill`, `sheleg-design`, `seo-aeo-audit`.
+One command installs all five for every agent you use:
+
+```bash
+npx sshlg-skills install
+```
 
 ## License
 
