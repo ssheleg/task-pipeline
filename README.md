@@ -44,8 +44,8 @@ flowchart TD
     S10["10 · Acceptance"]
 
     S0 --> S1 --> S2 --> S3 --> S4 --> S5 --> S6 --> S7 --> S8 --> S9 --> S10
-    S2 -. "platform → repeat 3-10 per module" .-> S3
-    S10 -. "every REQ answered against the brief" .-> S0
+    S10 -. "platform: next module" .-> S3
+    S10 -. "accounts for every REQ in the brief" .-> S0
 
     classDef manual fill:#fde68a,stroke:#b45309,color:#111827
     classDef auto fill:#dbeafe,stroke:#1d4ed8,color:#111827

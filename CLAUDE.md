@@ -42,11 +42,12 @@ invariants*. The two that bite most often:
 1. **Four-way version sync** — `package.json`, `.claude-plugin/marketplace.json`
    (`plugins[0].version`), `plugins/task-pipeline/.claude-plugin/plugin.json`, and
    the top `## vX.Y.Z` heading in `CHANGELOG.md`.
-2. **The stage list lives on seven surfaces.** `SKILL.md`'s table,
-   `references/stages.md`, `pipeline.example.json`, the command, the Cursor rule,
-   the three JSON descriptions and the README. Change one → walk all of them. The
-   validator compares ids, names and gate types, and it holds every human-facing
-   description to naming the flow's **final** stage, last.
+2. **The stage list lives on nine surfaces.** Three are compared mechanically —
+   `SKILL.md`'s table, `references/stages.md` and `pipeline.example.json` (ids,
+   names **and gate types**, plus each stage's own doctrine file). Seven enumerate
+   the flow for a human and must name the final stage, last: `package.json`,
+   `marketplace.json`, `plugin.json`, `SKILL.md`'s frontmatter description, the
+   command, the Cursor rule and the README. Change one → walk all of them.
 
 Also: no hardcoded vendor model ids anywhere in the shipped skill (name the tier);
 every `references/*.md` must be reachable from `SKILL.md`; the Cursor rule stays

@@ -1,24 +1,92 @@
 # Changelog
 
-## v0.18.1 — 2026-07-28
+## v1.0.0 — 2026-07-28
 
-Open-source hygiene pass — the repo is public, so the files a first-time
-contributor looks for now exist, and the validator keeps them there.
+**1.0.** Eighteen releases in ten days added a stage, a requirement spine, a
+decomposition pass and a loop guard; this one adds nothing and instead makes the
+whole thing coherent enough to depend on. Every file was read against every other
+file, the contradictions between them are fixed, and the repo now carries the
+surface a stranger needs before they trust it.
 
-### Added
-- `CONTRIBUTING.md`, `SECURITY.md`, `CODE_OF_CONDUCT.md`, issue forms and a
-  pull-request template.
-- `CLAUDE.md` — house rules for any agent working in this repo: the commands, the
-  branch and commit policy, and the invariants that drift most often (four-way
-  version sync; the stage list living on seven surfaces).
-- The validator now requires the open-source root files, with a CI negative
-  self-test that deletes `CONTRIBUTING.md` and proves the check fails.
+What 1.0 promises: the stage flow (0 intake + 1→10), `pipeline.schema.json`, the
+artifact layout in `references/artifacts.md`, and the two install paths are stable.
+Breaking any of them means a 2.0.
+
+### Fixed — contradictions between doctrine files
+- **Two names for one idea.** `brainstorm.md` told the agent to split an oversized
+  task into "sub-projects", each with its own spec→plan→build cycle;
+  `decomposition.md` — the file that actually owns the procedure — calls them
+  **modules**, cuts them at the end of stage 2, and runs stages 3→10 per module
+  against a committed module map. An agent that read the first file ran a
+  decomposition the second file's gate could not check. Brainstorm now hands off to
+  `decomposition.md` by name.
+- **The same split, invented twice.** `planning.md` independently told stage 4 to
+  "split the spec into one plan per subsystem" — a second, unrecorded decomposition
+  two stages after the one with the gate and the map. A plan now covers exactly one
+  spec; a multi-subsystem spec arriving at stage 4 is a missed stage-2
+  decomposition and goes back there.
+- **A hardcoded `main`.** `build.md` and `review.md` both built the final
+  whole-branch review package with `git merge-base main HEAD`, in a pipeline whose
+  stage-0 brief records the base branch precisely because it is not always `main`.
+  On any repo with a `master`, a `develop` or a stacked base, the final review saw
+  the wrong diff. Both now read the brief's base.
+- **A five-status set that claimed to have four.** `acceptance.md` listed four
+  statuses, declared "there is no fifth status", then named `unknown` in the next
+  clause. Reworded so the mechanism is legible: four ways to close, and anything
+  that fits none of them is `unknown`, which fails the gate.
+- **A version pin on someone else's contract.** The README and `stages.md` both
+  pinned super-ux's scenario format at "ux-contract v4" — the exact cross-repo
+  version skew this project ported its own doctrine in-house to avoid. Both now
+  point at the contract super-ux itself ships, with no version named here.
+- **A blockquote where a sentence should be.** In `knowledge-sources.md` the
+  precedence chain `code > host docs and ADRs > the wiki > memory` wrapped so the
+  second line *began* with `>`, which Markdown renders as a block quote —
+  the rule about which source wins was visually broken in the file that defines it.
+- **`skills[]` entries that resolve to nothing.** `pipeline.example.json` names
+  `task-pipeline:grill` and `host:lint` beside real skills, with no key anywhere for
+  the two prefixes. A host copying the example had no way to tell a notional label
+  from an installable skill. The convention is now stated in the config and in
+  `SKILL.md`: `task-pipeline:<name>` is this skill's own `references/<name>.md`,
+  `host:<name>` is the host project's command per `conventions.md`, everything else
+  is a real skill. Stage 3 also gained the `/ux` entry point and `/ux-lint`, which
+  the doctrine mandates and the config had omitted.
+- **A repo tree that had drifted.** `references/artifacts.md`'s map of this
+  repository listed `templates/` outside the tree and missed several files.
+- A broken ordered list in the Cursor rule (`3a.` is not a list marker) and a
+  `references/` index in `SKILL.md` that never mentioned `templates/`.
+
+### Added — the open-source surface
+- `CONTRIBUTING.md` — dev setup, the repository layout, and **the nine invariants**
+  written out with the failure each one prevents: four-way version sync, the stage
+  list living on three machine-checked surfaces, every human-facing description
+  having to name the flow's final stage last, no hardcoded vendor model ids, no
+  unreachable reference file, no external provider in the default flow, stage 0 and
+  stage 10 staying manual, the frontmatter budget, and resolving links.
+- `SECURITY.md` — what the executable surface actually is (two installers, a
+  validator, two workflows), private reporting with a 72-hour acknowledgement, and
+  an explicit scope: doctrine that would lead an agent to exfiltrate secrets, push
+  to an unnamed repo or deploy without a go **is** a security bug here.
+- `CODE_OF_CONDUCT.md`, GitHub issue forms (bug / doctrine change, with routing to
+  super-ux and obsidian-wiki), and a pull-request template whose checklist is the
+  list of surfaces that drift.
+- `CLAUDE.md` — house rules for any agent working in this repo, which is also what
+  this pipeline's own stage-0 harvest reads first: the commands, the branch and
+  commit policy, the invariants, and the docs that must be updated in the same
+  change. The project now dogfoods the convention it asks of every host.
+- **Two validator guards, each with a CI negative self-test:** the open-source root
+  files must exist, and `npm test` must actually run the validator. A documented
+  check nobody can run is a check nobody runs.
 
 ### Changed
-- npm metadata: a `test` script, a `bugs` URL, and `homepage` pointing at the
-  README anchor. Package, marketplace and plugin descriptions rewritten so all
-  three say the same thing about the ten stages.
-- `.worktrees/` is ignored — the pipeline creates them during stage 5.
+- **README rewritten.** Same substance, ordered so it can be read: a one-paragraph
+  statement of the problem, a Mermaid diagram of the flow with gate types coloured,
+  the gate table, *what you get*, then a quickstart — before the deep sections.
+  Configuration, install/update and a documentation map now live in their own
+  places instead of interleaved with doctrine.
+- Package, marketplace and plugin descriptions rewritten — shorter, and all three
+  now say the same thing about the same ten stages.
+- npm metadata: a `test` script (`npm test`), a `bugs` URL, `homepage` at the README.
+- `.worktrees/` is git-ignored — stage 5 creates them.
 
 ## v0.18.0 — 2026-07-28
 
