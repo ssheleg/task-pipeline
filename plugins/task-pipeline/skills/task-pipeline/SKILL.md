@@ -194,7 +194,34 @@ capable available — see `references/model-tiering.md`).
 | 7 | Lint + deploy | host lint → deploy per host convention | lint clean + suite green before deploy; deploy needs a go (or the brief's specific standing authorization) | manual |
 | 8 | Post-deploy | tail deploy logs / health-check | clean boot or honest degradation report | auto |
 | 9 | Docs + wiki | host module docs/runbook rules → `wiki-update` ([obsidian-wiki](https://github.com/ar9av/obsidian-wiki), recommended) | every stale row of the stage-0 source ledger updated; docs synced; wiki synced | auto |
-| 10 | **Acceptance** | built in: [`references/audit.md`](references/audit.md) (ladder walk) → [`references/acceptance.md`](references/acceptance.md) (coverage table) | ladder walk ran, its absences became REQ rows; every REQ accounted for with evidence from a check seen failing once; ledger has no unresolved row; operator signs off | manual |
+| 10 | **Acceptance** | built in: [`references/audit.md`](references/audit.md) (ladder walk) → [`references/acceptance.md`](references/acceptance.md) (coverage table) | ladder walk ran, its absences became REQ rows; every REQ accounted for with evidence from a check seen failing once; ledger has no unresolved row; **in a multi-repository project, every repository is clean, pushed and pointed at** (below); operator signs off | manual |
+
+
+### Stage 10 in a project of several repositories
+
+**A submodule is finished when its parent says so.** A parent repository records each submodule as
+a pointer to one commit, and moving the submodule does not move the pointer. So the work is
+committed, pushed, its CI is green and its own roadmap says done — and anyone who clones the parent
+gets the commit **before** the change. Nothing looks wrong in either repository on its own; the
+disagreement exists only between them, which is why it survives every check that runs inside one.
+
+Stage 10 does not close until:
+
+```bash
+git submodule status          # no line begins with '+'  (a '+' is the missing bump)
+git -C <each repo> status --porcelain && git -C <each repo> log @{u}..HEAD --oneline
+```
+
+report nothing — for the parent as well as every submodule. Where
+[agent-sync](https://github.com/appvillis-com/agent-sync) is installed, `/agent-sync finish` runs
+exactly this plus *no lease left held*, and `--gates` adds the project's own gate commands.
+
+The fix, when it fails, is two commands and the second is the one that gets forgotten:
+
+```bash
+git -C <submodule> push
+git add <submodule> && git commit -m "chore: bump <name> submodule — <why>"
+```
 
 ## Model — ask once, at preflight
 

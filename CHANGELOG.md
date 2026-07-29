@@ -1,5 +1,18 @@
 # Changelog
 
+## v1.3.1 — 2026-07-29
+
+### Stage 10 closes on the parent repository, not only on the one you edited
+
+A submodule is finished when its parent says so. A parent records each submodule as a pointer to
+one commit, and moving the submodule does not move the pointer — so work can be committed, pushed,
+green in CI and marked done in its own roadmap while a clone of the parent still gets the commit
+before it. Neither repository looks wrong alone; the disagreement lives between them, which is why
+it survives every check that runs inside one.
+
+Stage 10's gate now requires every repository — parent included — to be clean, pushed and pointed
+at, with the plain-git commands given and `/agent-sync finish` named for projects that have it.
+
 ## v1.3.0 — 2026-07-29
 
 **One design file, in a named team, decided before anything is drawn.** Left to
