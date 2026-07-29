@@ -21,8 +21,13 @@ jobs:
           set -eu
           cp -R . /tmp/corrupt-copy
           # corrupt the version so marketplace/plugin/CHANGELOG drift
-          sed -i 's/"version": "[0-9.]*"/"version": "0.0.0-corrupt"/' \
-            /tmp/corrupt-copy/plugins/task-pipeline/.claude-plugin/plugin.json
+          python3 - <<'EOF'
+          import re
+          p = "/tmp/corrupt-copy/plugins/task-pipeline/.claude-plugin/plugin.json"
+          t = open(p, encoding="utf-8").read()
+          open(p, "w", encoding="utf-8").write(
+              re.sub(r'"version": "[0-9.]*"', '"version": "0.0.0-corrupt"', t))
+          EOF
           if python3 /tmp/corrupt-copy/test/validate.py; then
             echo "ERROR: validator passed on a corrupted copy — it cannot fail"
             exit 1
@@ -34,8 +39,11 @@ jobs:
         run: |
           set -eu
           cp -R . /tmp/gate-copy
-          sed -i 's/"type": "auto"/"type": "sometimes"/' \
-            /tmp/gate-copy/plugins/task-pipeline/skills/task-pipeline/pipeline.example.json
+          python3 - <<'EOF'
+          p = "/tmp/gate-copy/plugins/task-pipeline/skills/task-pipeline/pipeline.example.json"
+          t = open(p, encoding="utf-8").read()
+          open(p, "w", encoding="utf-8").write(t.replace('"type": "auto"', '"type": "sometimes"'))
+          EOF
           if python3 /tmp/gate-copy/test/validate.py; then
             echo "ERROR: validator passed an invalid gate.type"
             exit 1
@@ -72,8 +80,13 @@ jobs:
         run: |
           set -eu
           cp -R . /tmp/token-copy
-          sed -i '0,/"model": "default"/s//"model": "some-vendor-model"/' \
-            /tmp/token-copy/plugins/task-pipeline/skills/task-pipeline/pipeline.example.json
+          python3 - <<'EOF'
+          import json, collections
+          p = "/tmp/token-copy/plugins/task-pipeline/skills/task-pipeline/pipeline.example.json"
+          d = json.load(open(p), object_pairs_hook=collections.OrderedDict)
+          d["stages"][0]["model"] = "some-vendor-model"
+          json.dump(d, open(p, "w"), indent=2, ensure_ascii=False)
+          EOF
           if python3 /tmp/token-copy/test/validate.py; then
             echo "ERROR: validator passed a stage model that is not a provider-agnostic token"
             exit 1
@@ -103,8 +116,12 @@ jobs:
         run: |
           set -eu
           cp -R . /tmp/brief-copy
-          sed -i 's/^## Autonomy.*/## Notes/' \
-            /tmp/brief-copy/plugins/task-pipeline/skills/task-pipeline/templates/brief.md
+          python3 - <<'EOF'
+          import re
+          p = "/tmp/brief-copy/plugins/task-pipeline/skills/task-pipeline/templates/brief.md"
+          t = open(p, encoding="utf-8").read()
+          open(p, "w", encoding="utf-8").write(re.sub(r"^## Autonomy.*", "## Notes", t, flags=re.M))
+          EOF
           if python3 /tmp/brief-copy/test/validate.py; then
             echo "ERROR: validator passed a brief template with no autonomy sweep"
             exit 1
@@ -140,8 +157,12 @@ jobs:
         run: |
           set -eu
           cp -R . /tmp/req-copy
-          sed -i 's/^## Requirements.*/## Notes/' \
-            /tmp/req-copy/plugins/task-pipeline/skills/task-pipeline/templates/brief.md
+          python3 - <<'EOF'
+          import re
+          p = "/tmp/req-copy/plugins/task-pipeline/skills/task-pipeline/templates/brief.md"
+          t = open(p, encoding="utf-8").read()
+          open(p, "w", encoding="utf-8").write(re.sub(r"^## Requirements.*", "## Notes", t, flags=re.M))
+          EOF
           if python3 /tmp/req-copy/test/validate.py; then
             echo "ERROR: validator passed a brief template with no REQ spine"
             exit 1
@@ -153,8 +174,11 @@ jobs:
         run: |
           set -eu
           cp -R . /tmp/verify-copy
-          sed -i "s/How it's verified/Notes/g" \
-            /tmp/verify-copy/plugins/task-pipeline/skills/task-pipeline/templates/brief.md
+          python3 - <<'EOF'
+          p = "/tmp/verify-copy/plugins/task-pipeline/skills/task-pipeline/templates/brief.md"
+          t = open(p, encoding="utf-8").read()
+          open(p, "w", encoding="utf-8").write(t.replace("How it's verified", "Notes"))
+          EOF
           if python3 /tmp/verify-copy/test/validate.py; then
             echo "ERROR: validator passed a REQ table with no verification column"
             exit 1
@@ -204,8 +228,12 @@ jobs:
         run: |
           set -eu
           cp -R . /tmp/ledger-copy
-          sed -i 's/^## Knowledge sources.*/## Notes/' \
-            /tmp/ledger-copy/plugins/task-pipeline/skills/task-pipeline/templates/brief.md
+          python3 - <<'EOF'
+          import re
+          p = "/tmp/ledger-copy/plugins/task-pipeline/skills/task-pipeline/templates/brief.md"
+          t = open(p, encoding="utf-8").read()
+          open(p, "w", encoding="utf-8").write(re.sub(r"^## Knowledge sources.*", "## Notes", t, flags=re.M))
+          EOF
           if python3 /tmp/ledger-copy/test/validate.py; then
             echo "ERROR: validator passed a brief template with nowhere to record the harvest"
             exit 1
@@ -273,8 +301,11 @@ jobs:
         run: |
           set -eu
           cp -R . /tmp/verdict-copy
-          sed -i 's/with \*\*all three\*\* verdicts/with **both** verdicts/' \
-            /tmp/verdict-copy/plugins/task-pipeline/skills/task-pipeline/references/build.md
+          python3 - <<'EOF'
+          p = "/tmp/verdict-copy/plugins/task-pipeline/skills/task-pipeline/references/build.md"
+          t = open(p, encoding="utf-8").read()
+          open(p, "w", encoding="utf-8").write(t.replace("with **all three** verdicts", "with **both** verdicts"))
+          EOF
           if python3 /tmp/verdict-copy/test/validate.py; then
             echo "ERROR: validator passed 'both verdicts' while the dev gate declares three"
             exit 1
@@ -286,8 +317,12 @@ jobs:
         run: |
           set -eu
           cp -R . /tmp/doctrinegate-copy
-          sed -i 's/^## GATE (manual)/## GATE (auto)/' \
-            /tmp/doctrinegate-copy/plugins/task-pipeline/skills/task-pipeline/references/acceptance.md
+          python3 - <<'EOF'
+          import re
+          p = "/tmp/doctrinegate-copy/plugins/task-pipeline/skills/task-pipeline/references/acceptance.md"
+          t = open(p, encoding="utf-8").read()
+          open(p, "w", encoding="utf-8").write(re.sub(r"^## GATE \(manual\)", "## GATE (auto)", t, flags=re.M))
+          EOF
           if python3 /tmp/doctrinegate-copy/test/validate.py; then
             echo "ERROR: validator passed a doctrine gate type contradicting pipeline.example.json"
             exit 1
@@ -409,6 +444,26 @@ jobs:
             exit 1
           else
             echo "OK: validator requires npm test to run test/validate.py"
+          fi
+
+      - name: Negative self-test (the negative self-tests must stay runnable off CI)
+        run: |
+          set -eu
+          cp -R . /tmp/portable-copy
+          python3 - <<'EOF'
+          # build the forbidden token at runtime — spelling it literally here would
+          # make this very file trip the guard it is testing
+          bad = "s" + "ed -i"
+          p = "/tmp/portable-copy/.github/workflows/validate.yml"
+          t = open(p, encoding="utf-8").read()
+          open(p, "w", encoding="utf-8").write(
+              t + f"\n      - name: stray\n        run: |\n          {bad} 's/a/b/' x\n")
+          EOF
+          if python3 /tmp/portable-copy/test/validate.py; then
+            echo "ERROR: validator passed a workflow with non-portable in-place edits — that breaks the local runner on BSD"
+            exit 1
+          else
+            echo "OK: validator keeps the negative self-tests portable"
           fi
 
       - name: install.sh syntax check

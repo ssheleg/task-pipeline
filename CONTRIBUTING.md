@@ -17,9 +17,28 @@ npm test          # == python3 test/validate.py
 ```
 
 `npm test` must print `PASS: task-pipeline structure valid` before you open a PR.
-CI runs the same validator plus ~18 **negative self-tests** that corrupt a copy of
-the repo and assert the validator rejects it — see
-[`.github/workflows/validate.yml`](.github/workflows/validate.yml).
+
+That proves the repo is well-formed. It does **not** prove the validator is
+anything more than a decoration — for that, every guard has to be watched
+rejecting a planted defect:
+
+```bash
+npm run test:negatives    # python3 test/negatives.py
+npm run test:all          # both, in order
+```
+
+The corruptions live in [`.github/workflows/validate.yml`](.github/workflows/validate.yml)
+and `test/negatives.py` reads them from there — never duplicated, because a second
+copy of a corruption is a second thing to drift. The runner also tells a **broken
+test** from a **guard that didn't fire**: if a planted defect changed nothing, the
+validator passing means the test proved nothing, and it is reported as `BROKEN`
+rather than as a failure of the guard.
+
+**Corrupt files in python, never with `sed -i`.** BSD sed needs an argument GNU sed
+refuses, and `0,/re/` does not exist on BSD at all — there it edits nothing
+silently, and the test reads as a guard that failed. The validator rejects `sed -i`
+in the workflow for exactly this reason: a self-test that only runs on CI cannot be
+used while you are writing the guard, which is the moment it is worth most.
 
 To try your change in a real agent:
 
@@ -98,7 +117,10 @@ a fenced code block must point at a path that exists.
   commit. The validator catches much of this — do not rely on it to think for you.
 - **A new guard needs a negative self-test.** If you teach `test/validate.py` a new
   rule, add a step to `.github/workflows/validate.yml` that corrupts a copy and
-  asserts the validator fails. A guard nobody proved can fail is decoration.
+  asserts the validator fails, then watch it with `npm run test:negatives`. A guard
+  nobody proved can fail is decoration. **Check the base is green first** — if the
+  repo already fails your new rule, the self-test passes for the wrong reason and
+  proves nothing.
 - **Keep the Cursor rule self-contained.** It gets copied into foreign projects;
   relative links break there. Restate, don't link.
 - **Prose style:** state the rule, then the failure it prevents. Every doctrine

@@ -18,6 +18,7 @@ Human-facing entry points: [`README.md`](README.md) (what it is),
 | Job | Command |
 |---|---|
 | Test | `npm test` (= `python3 test/validate.py`) — must print `PASS: task-pipeline structure valid` |
+| Prove the guards | `npm run test:negatives` — feeds every guard a planted defect and requires it to reject one; `npm run test:all` runs both. Corrupt files in **python, never `sed -i`** (not portable; the validator rejects it) |
 | Lint | none separate; the validator is the lint |
 | Install locally | `./install.sh --force` or `node bin/task-pipeline.js --force` |
 | Deploy / release | push a `vX.Y.Z` tag → `.github/workflows/release.yml` (armed by the repo variable `RELEASE_ENABLED`) |

@@ -1,5 +1,48 @@
 # Changelog
 
+## v1.3.2 — 2026-07-29
+
+**The 26 negative self-tests could not be run anywhere except CI** — which meant
+that on the maintainer's own machine, a new guard could never be watched rejecting
+its planted defect. The project's own `references/audit.md` demands exactly that
+(*plant the defect, watch the check fail, then trust the green*), and the tooling
+made it impossible at the one moment it is worth most: while the guard is being
+written.
+
+Found by running the full CI suite locally during a validity re-check. Nine of the
+26 failed — every one on BSD sed, none on a repo defect.
+
+### Added
+- **`test/negatives.py`** — runs every negative self-test locally, zero
+  dependencies, same as the validator. `npm run test:negatives`, or
+  `npm run test:all` for validator-then-guards. The corruptions are **read from
+  `.github/workflows/validate.yml`, never duplicated** — a second copy of a
+  corruption is a second thing to drift.
+- **It tells a broken test from a guard that didn't fire.** If a planted defect
+  changed nothing, the validator passing means the *test* proved nothing, not that
+  the guard is dead. That case now reports `BROKEN`, with the fix pointed at the
+  workflow. This is the failure mode that hid the sed problem in the first place: a
+  no-op corruption reads exactly like a broken guard.
+- It also refuses to run if it finds fewer than 20 tests — a parser or format change
+  that silently matched nothing would otherwise report zero failures and look like
+  success.
+
+### Fixed
+- **Every `sed -i` corruption in the workflow is now python.** BSD sed needs an
+  argument GNU sed refuses, and `0,/re/` does not exist on BSD at all — there it
+  edits nothing *silently*, and the test reads as a guard that failed to fire.
+  Nine steps converted; CI and a laptop now run the identical script.
+
+### Validator
+- **`sed -i` in `.github/workflows/validate.yml` is now a failure**, and
+  `test/negatives.py` must exist. Without both, the guards drift back to
+  CI-only and stop being provable where they are written.
+- The new self-test builds the forbidden token at runtime, because spelling it
+  literally would make the workflow trip the guard it is testing. Verified the
+  honest way: a clean copy passes, and the injected copy is the *only* reason the
+  corrupted one fails — a self-test that passes because the base is already red
+  proves nothing.
+
 ## v1.3.1 — 2026-07-29
 
 ### Stage 10 closes on the parent repository, not only on the one you edited

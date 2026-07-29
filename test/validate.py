@@ -199,6 +199,24 @@ for r in ("README.md", "LICENSE", "CONTRIBUTING.md", "SECURITY.md",
     if not os.path.isfile(os.path.join(ROOT, r)):
         fail(f"missing root file: {r}")
 
+# The negative self-tests are the only proof the guards above are not decoration,
+# so they must be runnable on a maintainer's machine and not just on CI. `sed -i`
+# is the one thing that reliably breaks that: BSD sed needs an argument GNU sed
+# refuses, and `0,/re/` does not exist on BSD at all — where it silently edits
+# nothing and the test reads as a guard that failed to fire. Corrupt in python.
+_wf = os.path.join(ROOT, ".github/workflows/validate.yml")
+if not os.path.isfile(os.path.join(ROOT, "test/negatives.py")):
+    fail("missing test/negatives.py — the local runner for the CI negative self-tests; "
+         "without it a guard can only ever be proven on CI")
+elif os.path.isfile(_wf):
+    _wf_txt = open(_wf, encoding="utf-8").read()
+    for _lineno, _line in enumerate(_wf_txt.splitlines(), start=1):
+        if re.search(r"\bsed -i\b", _line):
+            fail(f".github/workflows/validate.yml:{_lineno}: uses `sed -i`, which is not "
+                 "portable (BSD sed needs an argument, and `0,/re/` does not exist there) — "
+                 "corrupt the file in python so test/negatives.py runs the same script "
+                 "locally and on CI")
+
 # The stage list is published on three surfaces an agent may read independently:
 # SKILL.md's table (what it walks), references/stages.md (the per-stage detail and
 # gate criteria) and pipeline.example.json (the machine-readable flow). Drift
