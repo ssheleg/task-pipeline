@@ -1,5 +1,13 @@
 # Changelog
 
+## v1.1.1 — 2026-07-29
+
+Version bump only — a fresh npm artifact for the v1.1.0 content. **No changes to
+the skill, the doctrine, the gates or the installers**; the tree is identical to
+v1.1.0. Nothing to re-read, nothing to re-learn.
+
+(npm versions are immutable, so re-publishing the same content needs a new number.)
+
 ## v1.1.0 — 2026-07-29
 
 **The pipeline could find a requirement that was named and lost. It could not find
