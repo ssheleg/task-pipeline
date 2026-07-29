@@ -131,6 +131,13 @@ stages/agents/types (see SKILL.md → *Bring your own skills*).
   ssheleg/super-ux` → `/plugin install super-ux@super-ux`, or `npx skills add
   ssheleg/super-ux`). super-ux builds a traced chain — walk it top-down (see its
   `system-map.md`):
+  0. **Destination first, when Figma is on.** The brief already names the team/org
+     and the file; `docs/ux/foundation.md` → *Design tooling* is the canonical
+     record. Confirm it **resolves** before drawing. **Never create a file while a
+     recorded one resolves; if it doesn't resolve, stop and ask — never create a
+     replacement** (that is the duplicate, and it hides a permissions problem).
+     A creation happens at most once, in the named team, and its URL is written to
+     the canonical record before the first frame.
   1. `/ux` (the only super-ux entry) — reports which `docs/ux/` layers exist,
      repairs the skeleton, records the Figma on/off choice, recommends the next
      action. Never make the operator pick skills.
@@ -162,7 +169,10 @@ stages/agents/types (see SKILL.md → *Bring your own skills*).
   additionally: the super-ux chain (foundation → flows → screens → scenarios) is
   designed, validated and approved; scenarios validated in `docs/ux/scenarios.md`;
   the linter passes; every user-facing spec requirement traces to a scenario ID
-  (or an explicit v1-mode/tiny-project waiver by the operator). No plan (stage 4)
+  (or an explicit v1-mode/tiny-project waiver by the operator). **With Figma on:
+  the canonical record names one file, and every `screens.md` frame link carries
+  that same `:fileKey`** — a string match, not a judgement; a differing key means
+  the run drew in a second file nobody will open. No plan (stage 4)
   starts before this — the chain comes BEFORE interface.
 
 ## 4 — Plan

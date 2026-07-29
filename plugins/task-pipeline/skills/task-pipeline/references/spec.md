@@ -21,6 +21,14 @@ Runs on **super-ux** — the one companion this pipeline recommends by name
 ([`companion-skills.md`](companion-skills.md)). If it isn't installed on a UI task,
 give the install line and stop; don't improvise a half-chain.
 
+0. **The design destination is already decided — read it, don't re-open it.** When
+   Figma is on, the stage-0 brief names the team/org and the file
+   ([`grill.md`](grill.md) → *The design destination*), and
+   `docs/ux/foundation.md` → *Design tooling* is the canonical record. Confirm the
+   recorded file **resolves** before any drawing. **Never create a file when a
+   recorded one resolves; if it doesn't resolve, stop and ask — never create a
+   replacement.** A creation happens at most once per project, in the team the
+   brief names, and its URL goes into the canonical record before the first frame.
 1. `/ux` — the single super-ux entry: reports which `docs/ux/` layers exist,
    repairs the skeleton, records the Figma on/off choice, recommends the next
    action. Never make the operator pick skills.
@@ -140,5 +148,12 @@ additionally requires: the chain (foundation → flows → screens → scenarios
 designed, validated and approved; `/ux-lint` green; every user-facing requirement
 traced to a scenario ID — or an explicit waiver from the operator recorded in the
 spec.
+
+With Figma on, one more, and it is mechanical: **the canonical record names a file,
+and every frame link in `screens.md` carries that same file key.** Deep links are
+`figma.com/design/:fileKey/…`, so this is a string comparison, not a judgement — a
+link whose key differs points at a *second* file, which means the run drew
+somewhere nobody will look. Same check at the audit's `F` rung
+([`audit.md`](audit.md)); if it ever fires twice, it belongs in the host's lint.
 
 No plan starts before this gate passes.

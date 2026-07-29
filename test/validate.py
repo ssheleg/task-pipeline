@@ -428,6 +428,16 @@ if pipe is not None:
         if "ledger" not in s0_check or not re.search(r"harvest|knowledge source", s0_check):
             fail(f"{EXAMPLE_REL} stage[1]: gate.check must require the phase-1 knowledge harvest and "
                  "its source ledger before the interview (see references/knowledge-sources.md)")
+        # Creating a design file is outward and duplicates are silent: a second file
+        # is internally consistent, its frames are named correctly and the UX linter
+        # is green, so nothing downstream notices that half the work now lives where
+        # nobody looks. The only place that can prevent it is intake, by naming the
+        # team and the file before anything is drawn.
+        if not re.search(r"design destination", s0_check):
+            fail(f"{EXAMPLE_REL} stage[1]: gate.check must settle the DESIGN DESTINATION for "
+                 "Figma work (which team/org, which file, and never create while a recorded "
+                 "one resolves) — a destination decided at drawing time is how a project ends "
+                 "up with several design files (see references/grill.md)")
         # Stage 9 is the other half of that loop.
         s9 = next((s for s in stages if isinstance(s, dict) and s.get("state") == "docs-wiki"), None)
         if s9 is not None and "ledger" not in str((s9.get("gate") or {}).get("check", "")).lower():

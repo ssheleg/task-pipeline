@@ -70,7 +70,18 @@ mid-flight questions:
    tasks also: **is the design done visually (Figma) or text-only, is the Figma MCP
    connected, and if it isn't — ship text-only or stop and connect it?** The UX
    chain degrades to text-only on its own and never blocks, so an unasked question
-   there silently ships a UI feature with no mockups. Each item
+   there silently ships a UI feature with no mockups. **And with Figma on, settle
+   the destination here, never at drawing time: which team/org by name, and which
+   file** — the one already recorded, a URL the user gives, or *creation in that
+   named team, explicitly authorized*. A file URL says which file, not whose
+   workspace, and a design that lands in someone's personal drafts is invisible to
+   the people who need it. **Never create a file while a recorded one resolves; if
+   it doesn't resolve, stop and ask — never create a replacement**, because "I
+   couldn't open it so I made a new one" is how a project ends up with three design
+   files and hides a permissions problem at the same time. Write the URL into the
+   project's own record (`docs/ux/foundation.md` → Design tooling if the UX chain
+   exists, otherwise the repo's `CLAUDE.md`/README) **before the first frame** — a
+   file created and then lost to a crashed context is worse than none. Each item
    gets an answer or an explicit "stop and ask me here" — an unasked question is a
    scheduled interruption.
 
@@ -184,8 +195,12 @@ not authorize an outward, irreversible action — stage 7 stops and asks.
     promising a retention window, a credit meter or a tier nobody built passes
     every lint there is, while being the version stakeholders believe. The spec is
     the contract: say which document you propose to move, don't quietly redraw, and
-    remember that editing a shared design file is outward. Order findings **by
-    seam, not by file** — the seam tells you which layer of your process leaks. Every absence becomes a new
+    remember that editing a shared design file is outward. **Also check the file,
+    not just the frames:** deep links are `figma.com/design/:fileKey/…`, so
+    comparing each screen link's key against the recorded destination is a string
+    match — a differing key is a second design file with real work in it, and
+    nothing else notices, because that file is internally consistent and its frames
+    are named correctly. Order findings **by seam, not by file** — the seam tells you which layer of your process leaks. Every absence becomes a new
     REQ row with its check **before** the table is written; appending afterwards is
     how acceptance goes green over a gap. Findings owned by a lower layer go back
     there (spec → stage 3, plan → stage 4).
@@ -203,7 +218,9 @@ Cross-cutting: answer from the brief's autonomy section rather than re-asking, l
 tasks, conventional commits, honest degradation (never claim a failed/skipped step
 succeeded), and get explicit go before any outward/irreversible action (deploy,
 publish, repo create, **editing a shared design file** — frames are read by
-designers and stakeholders, so drawing in one is publishing, not local work).
+designers and stakeholders, so drawing in one is publishing, not local work — and
+above all **creating** one, which needs a named team and never happens while a
+recorded file resolves).
 
 **Loop guard — break churn instead of iterating.** Every repeating pass (a fix
 round, a re-entered stage, the next module) logs one line per touched file: the

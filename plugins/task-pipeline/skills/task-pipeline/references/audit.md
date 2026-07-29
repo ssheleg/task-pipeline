@@ -74,7 +74,7 @@ absence findable.
 | **L5** | Change | the commits — the thing actually in the tree |
 | **L6** | Test | an **executed** assertion, by name — never "the tests pass" |
 | **L7** | Surface | what a user reaches: scenario, screen state, CLI output, runbook |
-| **F** | Frame — *conditional* | UI work with Figma on: one frame per `SCR-NN/<Screen>/<state>`. Not a step in the sequence — a **second, parallel statement of the same surface**, made in pictures |
+| **F** | Frame — *conditional* | UI work with Figma on: one frame per `SCR-NN/<Screen>/<state>`, **in the one file the project recorded**. Not a step in the sequence — a **second, parallel statement of the same surface**, made in pictures |
 
 **Audit the seams, not the artifacts.** Each rung is internally consistent most of
 the time — that is exactly what the horizontal pass is good at, and it has already
@@ -92,6 +92,7 @@ done it. What survives lives between rungs:
 | L7→L0 | does the shipped surface satisfy the requirement's **statement**? | it does what the task said and not what the requirement meant |
 | L2→F | *(UI)* does the frame render what the spec **says**? | a frame that promises a capability, limit or number the product does not have |
 | F→L7 | *(UI)* did what shipped match the frame, or did the frame become fiction? | the frame is still the design of record and no longer describes anything that exists |
+| →F | *(UI)* is every frame **in the recorded file**? | a second design file nobody opens, holding real work — the check is a `:fileKey` string match, so it is a gate, not an opinion |
 
 The L7→L0 seam is stage 10's question, expressed as a seam. When it fails, the run
 did every instruction correctly and delivered the wrong thing.
@@ -120,7 +121,17 @@ Say which one you are proposing to move, and why, rather than quietly redrawing.
 **Editing someone else's Figma file is outward.** Frames live in a shared file that
 designers and stakeholders read; changing one is publishing, not local work.
 Propose the change, get an explicit go, and only then draw — the same rule as a PR,
-a deploy, or docs in another repository.
+a deploy, or docs in another repository. **Creating** one is stronger still: it
+needs a named team and an explicit authorization recorded at intake
+([`grill.md`](grill.md) → *The design destination*).
+
+**And check the file, not just the frames.** Every deep link is
+`figma.com/design/:fileKey/…`, so comparing each `screens.md` link's key against
+the canonical record (`docs/ux/foundation.md` → *Design tooling*) is a string
+match. A key that differs is a **second file with real work in it** — the failure
+that starts with one agent unable to open the recorded file and quietly making a
+new one. Nothing else in the chain notices: the new file is internally consistent,
+its frames are named correctly, and the linter is green.
 
 ## How one audit pass runs
 
@@ -253,3 +264,4 @@ a script — and if it cannot be, **that is the finding: write the check.**
 | "This is out of scope for the audit" | Then it is a carry-over row with a home, right now. An audit that silently declines findings is worse than none. |
 | "The UX linter is green, the frames are fine" | It proved the links exist, are named right and aren't stale. It cannot read the picture. A frame that promises a feature nobody built passes every lint there is. |
 | "The frame is wrong, I'll just redraw it" | Editing a shared design file is outward, and the spec is the contract. Say which document you are moving and get the go. |
+| "I couldn't open the recorded file, so I made a new one" | That is the duplicate, and it hides a permissions problem a new file does not fix. Unreachable means stop and ask. |

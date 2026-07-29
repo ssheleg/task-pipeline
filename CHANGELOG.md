@@ -1,5 +1,62 @@
 # Changelog
 
+## v1.3.0 — 2026-07-29
+
+**One design file, in a named team, decided before anything is drawn.** Left to
+drawing time, "where do I put this?" is answered by whichever agent is holding the
+brush, and the answer is usually *create a new file* — which is how a project
+acquires three files called some variation of "Design", each with real work in it
+and no way to tell which one the team actually opens.
+
+The duplicate is **silent by construction**: the second file is internally
+consistent, its frames are named correctly, and the UX linter is green. Nothing
+downstream notices that half the design now lives where nobody looks.
+
+### Added — the design destination is a stage-0 decision
+- **New sweep row `3 Design file`** (in both homes — `grill.md`'s table, which the
+  grill reads, and `templates/brief.md`, which records the answer): **which
+  team/org, by name, and which file.** Three legal answers: the file already
+  recorded, a URL the operator supplies, or **creation in that named team,
+  explicitly authorized**.
+- **Creation follows the deploy-authorization floor.** *"Create the design file in
+  team `Acme Product`"* authorizes one creation in one place; a vague "set up Figma
+  for me" authorizes nothing, because deciding *where* on its own is the entire
+  failure. `grill.md` → **The design destination** is the new doctrine section.
+- **The team is recorded, not just the file.** A file URL identifies a file; it does
+  not say whose workspace it lives in. super-ux runs `whoami` and asks which team
+  when there are several — but nothing wrote the answer down, and a design that
+  lands in someone's personal drafts is invisible to everyone who needs it.
+- **Two rules that make it stick:** never create while a recorded file resolves;
+  and **if the recorded file does not resolve, stop and ask — never create a
+  replacement.** "I couldn't open it so I made a new one" is simultaneously the
+  duplicate and a hidden permissions problem that a new file does not fix.
+- **Written before the first frame, not after.** A file created and then lost to a
+  crashed context is worse than none: it exists, it is empty, nobody knows it is
+  there.
+
+### Added — the check that catches it mechanically
+- Deep links are `figma.com/design/:fileKey/…`, so **comparing every `screens.md`
+  frame link's key against the canonical record is a string match**, not a
+  judgement. A differing key *is* a second file. This is now the stage-3 gate and
+  the audit ladder's **`→F`** seam; if it ever fires twice, it belongs in the host's
+  lint, per the repeats-twice rule.
+
+### Changed
+- **Canonical record: `docs/ux/foundation.md` → *Design tooling*** — super-ux owns
+  that section, it is per-project and it survives every run, which is exactly what
+  "the agents always know which file" requires. The brief holds the **decision and
+  the authorization** and points at it; it is a record, **not a second registry**,
+  and if the two disagree `foundation.md` wins. On a project with no `docs/ux/` the
+  brief is canonical instead, and **stage 9 writes the destination into the host's
+  own docs** (`conventions.md`) so the next run finds it without asking.
+- **Creating** a shared design file joins the outward list beside *editing* one —
+  it is the stronger of the two, and it is the one that duplicates.
+
+### Validator
+- The shipped intake gate must settle the design destination; a config where stage 0
+  never names the team or the file now fails. Proven against a planted defect and
+  shipped with a CI negative self-test.
+
 ## v1.2.0 — 2026-07-29
 
 The pipeline already knew about Figma — but only second-hand, through super-ux, and

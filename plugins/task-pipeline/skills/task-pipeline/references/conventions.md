@@ -38,6 +38,12 @@ found, surface it and **ask** rather than guessing.
   proved stale is already listed there with what's wrong.
 - Host self-update rules (module docs, runbooks, agent-self cards, etc.) — update
   in the same change. Fix dangling links.
+- **The design destination, on a project with no `docs/ux/`.** When the work uses
+  Figma but super-ux isn't in play, there is no `foundation.md` to hold the file, so
+  the brief is canonical — and a brief is per-run. Write the team and the file URL
+  into the host's own docs (`CLAUDE.md`, or the README) in this change, so the next
+  run reads the destination instead of creating a second file
+  ([`grill.md`](grill.md) → *The design destination*).
 - **Wiki:** [obsidian-wiki](https://github.com/ar9av/obsidian-wiki) — the
   `wiki-update` skill (resolves the vault via `~/.obsidian-wiki/config`). Detect it
   the same way the harvest does; if absent, recommend it once

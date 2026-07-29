@@ -368,6 +368,23 @@ question quietly narrows the delivery from "designed" to "described". The stage-
 sweep decides it, and the preflight block flags the missing MCP in the same
 exchange as everything else.
 
+**One file, in a named team, decided before anything is drawn.** Left to drawing
+time, "where do I put this?" gets answered by whichever agent is holding the brush,
+and the answer is usually *create a new file* — which is how a project acquires
+three files called some variation of "Design", each with real work in it. So the
+sweep settles the **team or organization by name** (a file URL says which file, not
+whose workspace — a design that lands in someone's personal drafts is invisible to
+everyone who needs it) and **the file**: the one already recorded, a URL you supply,
+or creation in that named team, explicitly authorized the same way a deploy target
+is. Two rules make it stick: **never create while a recorded file resolves**, and
+**if the recorded file doesn't resolve, stop and ask — never create a replacement**,
+because "I couldn't open it so I made a new one" is both the duplicate and a hidden
+permissions problem. The URL is written to the project's canonical record —
+`docs/ux/foundation.md` → *Design tooling*, or the repo's own docs when there's no
+UX chain — **before the first frame**, and the audit's `F` rung then checks it
+mechanically: every `screens.md` deep link is `figma.com/design/:fileKey/…`, so a
+key that differs from the recorded one is a second file, caught by a string match.
+
 ### Model policy — one model, confirmed once
 
 The default recommendation is *the most capable reasoning model the environment

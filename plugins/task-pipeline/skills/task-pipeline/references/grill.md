@@ -135,6 +135,7 @@ explicit "stop and ask me here":
 | 2 Decompose | is this a platform (several capabilities/surfaces) or one module? if platform: deploy cadence — per module or once at the end |
 | 2–3 Spec | UI verdict (arms super-ux); any scenario-tracing waiver |
 | 3 Design surface | UI tasks only: **Figma on or text-only** (super-ux's project-level choice, default on — check `docs/ux/foundation.md` → *Design tooling* before asking); is the Figma MCP connected; **and if it isn't — ship text-only, or stop here and connect it?** super-ux degrades to text-only on its own and never blocks, which means an unasked question here silently ships a UI feature with no mockups |
+| 3 Design file | Figma on only: **exactly which file, in which team/org** — the recorded one, or a URL the operator gives, or *create one in a named team* with that creation explicitly authorized. A destination decided at drawing time is how a project ends up with three "design" files and no way to tell which is real. See *The design destination* below |
 | 4–5 Dev | base branch; worktree/branch policy; is `main` off-limits; commit convention; task tracker |
 | 5 Integration | how the branch lands (merge / PR + approver / "leave it unmerged"); parallel fan-out wanted (one worktree per implementer)? |
 | 6 Tests | the test command; what "green" means here; known-red baseline; coverage expectation |
@@ -149,6 +150,58 @@ authorization counts only when it is **specific** — named target, named
 preconditions ("staging once lint and the full suite are green; production always
 asks"). Specific and recorded → it satisfies the stage-7 manual gate. Broader,
 absent or ambiguous → stage 7 stops and asks.
+
+## The design destination — one file, decided here, never invented later
+
+When the project designs in Figma, **the destination is a stage-0 decision, not a
+stage-3 side effect.** Left to drawing time, the question "where do I put this?"
+gets answered by whichever agent happens to be holding the brush, and the answer is
+usually *create a new file* — which is how a project acquires three files called
+some variation of "Design", each with real work in it and no way to tell which one
+the team actually opens.
+
+**Settle three things, in this order:**
+
+1. **Is there already a file?** Read `docs/ux/foundation.md` → *Design tooling*
+   first. A recorded, resolving file ends the question — record "use the recorded
+   file" and move on. Do not ask the operator something the project already answered.
+2. **Which team / organization**, by name. A file URL identifies a file; it does not
+   say whose workspace it lives in, and a design that lands in someone's personal
+   drafts instead of the team space is invisible to everyone who needs it. When the
+   operator belongs to several teams, the choice is theirs and it gets written down —
+   `whoami` tells you which are available, it does not tell you which is right.
+3. **Which file** — an existing URL the operator supplies, or **creation in that
+   named team, explicitly authorized.**
+
+**Creating a file in a shared workspace is outward and irreversible enough to need a
+named target.** It follows the same floor as deploy authorization above: *"create
+the design file in team `Acme Product`"* authorizes one creation in one place. A
+vague "set up Figma for me" does not — the whole failure this row prevents is an
+agent deciding *where* on its own.
+
+**Two rules that make it stick:**
+
+- **Never create when a recorded file resolves.** Check before you create, every
+  time, in every run.
+- **If the recorded file does not resolve** — deleted, moved, no access — **stop and
+  ask. Never create a replacement.** A replacement is exactly the duplicate this
+  section exists to prevent, and "I couldn't open it so I made a new one" is how it
+  always happens. An unreachable file is usually a permissions problem, which a new
+  file does not solve and does hide.
+
+**Where it lives, and which copy wins.** `docs/ux/foundation.md` → *Design tooling*
+is **canonical** — super-ux owns that section, it is per-project, and it survives
+every run, which is exactly what "the agents always know which file" requires. The
+brief records the **decision and the authorization** and points at it; it is a
+record, not a second registry. If the two ever disagree, `foundation.md` wins and
+the brief is the thing that was stale. On a project with no `docs/ux/` at all, the
+brief is canonical instead, and **stage 9 writes the destination into the host's own
+docs** (`CLAUDE.md` or the README) so the next run finds it without asking.
+
+**Write it down before drawing, not after.** The URL goes into the canonical record
+the moment the file is chosen or created — before the first frame. A file created
+and then lost to a crashed context is worse than no file: it exists, it is empty,
+and nobody knows it is there.
 
 ## The REQ spine — the grill's other hard output
 
