@@ -13,6 +13,23 @@ it survives every check that runs inside one.
 Stage 10's gate now requires every repository — parent included — to be clean, pushed and pointed
 at, with the plain-git commands given and `/agent-sync finish` named for projects that have it.
 
+The rule reaches all seven surfaces that carry the stage-10 close-out: `SKILL.md`, the gate in
+`references/stages.md`, the doctrine in `references/acceptance.md`, the machine-readable check in
+`pipeline.example.json`, `build.md`, `conventions.md`, the slash command and the Cursor rule.
+
+### Validator — the class that caused this is now a check
+
+This close-out has failed to reach every surface **twice**: v0.17.1 fixed it for the third review
+verdict, and this release's own first pass declared the parent-repository rule in `SKILL.md`,
+`build.md` and `conventions.md` while `acceptance.md`, `stages.md` and the config — *the three
+places that actually define the gate* — never heard of it. A gate that says "now requires X" only
+where X is not enforced is inert, and no existing check saw it: the validator compared stage ids,
+names and gate types, never gate content.
+
+Twice is a category, so it is a check now. Whatever close-out concept `SKILL.md` names, the
+surfaces that enforce stage 10 must name it too. Proven against a planted defect, with a CI
+negative self-test.
+
 ## v1.3.0 — 2026-07-29
 
 **One design file, in a named team, decided before anything is drawn.** Left to

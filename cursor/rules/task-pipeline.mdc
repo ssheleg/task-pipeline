@@ -211,8 +211,20 @@ not authorize an outward, irreversible action — stage 7 stops and asks.
     watched fail against a planted defect is not evidence at all**. Then ask out
     loud, list in hand: *here's what you asked for, here's what shipped, here's
     what's deferred and where it lives — what's missing?* Ask it even when the
-    table is green. Gate: ladder walk ran, no REQ `unknown`, no ledger row without
-    a home, user signs off.
+    table is green.
+    **In a project of several repositories, close the parent too.** A parent records
+    each submodule as a **pointer to one commit**, and moving the submodule does not
+    move the pointer — so the work is committed, pushed, CI green and done in its own
+    roadmap, while anyone cloning the parent gets the commit *before* the change.
+    Neither repository looks wrong on its own; the disagreement exists only between
+    them, which is why it survives every check that runs inside one. Require this to
+    report nothing, for the parent as well as every submodule:
+    `git submodule status` (no line starting `+` — a `+` is the missing bump),
+    `git -C <repo> status --porcelain`, `git -C <repo> log @{u}..HEAD --oneline`.
+    The fix is two commands and the second is the one that gets forgotten:
+    `git -C <submodule> push`, then `git add <submodule> && git commit`.
+    Gate: ladder walk ran, no REQ `unknown`, no ledger row without
+    a home, every repository clean/pushed/pointed-at, user signs off.
 
 Cross-cutting: answer from the brief's autonomy section rather than re-asking, log every deferral in the ledger, never narrow the task silently, track
 tasks, conventional commits, honest degradation (never claim a failed/skipped step

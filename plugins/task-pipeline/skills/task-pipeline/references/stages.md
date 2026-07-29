@@ -300,8 +300,22 @@ stages/agents/types (see SKILL.md → *Bring your own skills*).
   you asked for, here's what shipped, here's what's deferred and where it lives —
   what's missing?* Ask it even when the table is green; the operator holds context
   the brief never captured, and this is the cheapest moment in the run to hear it.
+- **Several repositories: a submodule is finished when its parent says so.** A
+  parent records each submodule as a **pointer to one commit**, and moving the
+  submodule does not move the pointer — so the work is committed, pushed, CI green
+  and done in its own roadmap, while a clone of the parent still gets the commit
+  before it. Neither repo looks wrong alone; the disagreement lives between them,
+  which is why it survives every check that runs inside one. Before closing, this
+  reports nothing **for the parent as well as every submodule**:
+  `git submodule status` (no line starting `+`), plus `git -C <repo> status
+  --porcelain` and `git -C <repo> log @{u}..HEAD --oneline` per repo. With
+  [agent-sync](https://github.com/appvillis-com/agent-sync) installed,
+  `/agent-sync finish` runs exactly that. The fix is two commands and the second is
+  the forgotten one: `git -C <submodule> push`, then
+  `git add <submodule> && git commit`.
 - **GATE (manual):** the ladder walk ran and its absences became REQ rows before
-  the table was written; **every check this gate leans on has been seen failing
+  the table was written; **every repository is closed — the parent included:
+  `git submodule status` shows no `+`, each repo clean and pushed**; **every check this gate leans on has been seen failing
   once against a planted defect** (an unproven check's green is not evidence);
   every REQ has a status (none `unknown`); every `verified`
   carries evidence; every `partial` names what's missing and where it's tracked;

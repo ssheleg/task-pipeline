@@ -617,6 +617,33 @@ if isinstance(_pipe_stages, list) and _pipe_stages and isinstance(_pipe_stages[-
                     fail(f"{_rel}:{_lineno}: says two/both verdicts, but the dev gate declares three "
                          "(spec compliance, REQ satisfied, code quality)")
 
+    # The stage-10 close-out has now failed to reach every surface TWICE (v0.17.1
+    # fixed it for the third review verdict; v1.3.1 added the parent-repository rule
+    # to SKILL.md, build.md and conventions.md while acceptance.md, stages.md and the
+    # config — the three places that actually define the gate — never heard of it).
+    # A gate's own doctrine claiming "now requires X" while the gate says nothing
+    # about X is invisible in review and inert at runtime. Twice is a category, so
+    # it is a check: whatever close-out concept SKILL.md names, the surfaces that
+    # enforce stage 10 must name too.
+    _sk_low = _sk_txt.lower()
+    for _anchor, _what in (
+        ("submodule", "the parent-repository close-out"),
+        ("ladder", "the ladder walk"),
+    ):
+        if _anchor not in _sk_low:
+            continue
+        for _rel, _txt in (
+            (f"{SKILL_DIR}/references/acceptance.md",
+             open(os.path.join(refdir, "acceptance.md"), encoding="utf-8").read()
+             if os.path.isfile(os.path.join(refdir, "acceptance.md")) else ""),
+            (f"{SKILL_DIR}/references/stages.md", _st_txt),
+            (EXAMPLE_REL, json.dumps(_pipe_stages or [], ensure_ascii=False)),
+        ):
+            if _anchor not in _txt.lower():
+                fail(f"{_rel}: SKILL.md describes {_what} as part of the stage-10 close-out, "
+                     f"but this surface never mentions {_anchor!r} — a gate that is only "
+                     "declared where it is not enforced is inert")
+
     # Each stage's doctrine file states its own GATE type. If it disagrees with the
     # config, an agent reading the doctrine gates differently than the flow says.
     for _fn, _sid in (("brainstorm.md", 2), ("spec.md", 3), ("planning.md", 4),

@@ -104,6 +104,42 @@ and the test-honesty rules apply one level down, raised to the level of intent:
 If the evidence for a requirement is "I read the code and it looks right", the
 status is `partial`, not `verified` — say so plainly rather than upgrading it.
 
+## Several repositories — a submodule is finished when its parent says so
+
+A parent repository records each submodule as **a pointer to one commit**, and
+moving the submodule does not move the pointer. So the work is committed, pushed,
+its CI is green and its own roadmap says done — while anyone who clones the parent
+gets the commit **before** the change.
+
+Neither repository looks wrong on its own. The disagreement exists only *between*
+them, which is why it survives every check that runs inside one — including this
+stage, if this stage only ever looks at the repo it was working in.
+
+Before the table is called complete, this reports nothing, **for the parent as well
+as every submodule**:
+
+```bash
+git submodule status          # no line begins with '+'  (a '+' is the missing bump)
+git -C <each repo> status --porcelain
+git -C <each repo> log @{u}..HEAD --oneline
+```
+
+Where [agent-sync](https://github.com/appvillis-com/agent-sync) is installed,
+`/agent-sync finish` runs exactly this plus *no lease left held*, and `--gates`
+adds the project's own gate commands.
+
+When it fails, the fix is two commands and **the second is the one that gets
+forgotten**:
+
+```bash
+git -C <submodule> push
+git add <submodule> && git commit -m "chore: bump <name> submodule — <why>"
+```
+
+A REQ whose evidence lives in an unpushed commit, or in a submodule the parent
+doesn't point at yet, is `partial` — the evidence is not reachable by anyone but
+you.
+
 ## The closing question
 
 The table is preparation. The stage exists for the question that follows it, asked
@@ -134,7 +170,10 @@ All of:
    ledger or here) and, for `deferred`, a tracker entry.
 7. **No carry-over row is left `unresolved`** — every one has a home, and the
    ledger's counts are printed with this verdict, not just filed.
-8. **The operator answers the closing question** and signs off.
+8. **Every repository is closed, the parent included** — `git submodule status`
+   shows no `+`, and each repo is clean and pushed. A submodule is finished when
+   its parent points at it.
+9. **The operator answers the closing question** and signs off.
 
 Manual by design. An automated check can prove the table is *well-formed*; only
 the person who asked can confirm it is *what they asked for*. Do not let a green
