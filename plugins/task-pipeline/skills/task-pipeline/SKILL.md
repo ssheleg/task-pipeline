@@ -170,7 +170,9 @@ Three things the grill does beyond clarifying the request:
    tracker + conventional commits per host conventions; worktree isolation for the
    build, integrated back per the brief's branch policy before stage 7; honest
    degradation (never claim a failed/skipped step succeeded);
-   outward/irreversible actions (deploy, publish, repo create, opening a PR) need explicit
+   outward/irreversible actions (deploy, publish, repo create, opening a PR,
+   **editing a shared design file — frames are read by designers and stakeholders,
+   so drawing in one is publishing**) need explicit
    operator go — or a **specific** standing authorization recorded in the brief
    (named target + preconditions; a vague "do everything" is not one).
 

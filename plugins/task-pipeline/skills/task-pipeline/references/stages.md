@@ -267,7 +267,12 @@ stages/agents/types (see SKILL.md → *Bring your own skills*).
   comparison needs two sides and an absence has one. So before the table: walk each
   REQ bottom-up through its rungs (decision → spec section → contract **and its
   failure behavior** → task → change → executed test → surface/docs), check the
-  seam at each step, and order the findings **by seam, not by file**. An absence
+  seam at each step, and order the findings **by seam, not by file**. On UI work
+  designed visually, the frame is a **second, parallel statement of the same
+  surface**: read it against the spec section that covers its `SCR-` id and against
+  what shipped. The super-ux linter proves a frame link exists, is named right and
+  is not stale — it cannot read the picture, so a frame promising a limit, a meter
+  or a tier nobody built passes every lint there is. An absence
   becomes a **new REQ row with its check** and *then* the table is written;
   appending after the table is how acceptance goes green over a gap. Findings that
   belong to a lower layer go back to that layer (spec → stage 3, plan → stage 4).

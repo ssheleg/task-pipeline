@@ -74,6 +74,7 @@ absence findable.
 | **L5** | Change | the commits — the thing actually in the tree |
 | **L6** | Test | an **executed** assertion, by name — never "the tests pass" |
 | **L7** | Surface | what a user reaches: scenario, screen state, CLI output, runbook |
+| **F** | Frame — *conditional* | UI work with Figma on: one frame per `SCR-NN/<Screen>/<state>`. Not a step in the sequence — a **second, parallel statement of the same surface**, made in pictures |
 
 **Audit the seams, not the artifacts.** Each rung is internally consistent most of
 the time — that is exactly what the horizontal pass is good at, and it has already
@@ -89,9 +90,37 @@ done it. What survives lives between rungs:
 | L5→L6 | is there an executed observable? | "tests pass"; a test that still passes with the production code deleted |
 | L6→L7 | can a user reach it, and does a doc say so? | shipped behavior with no scenario, no `--help` line, no runbook entry |
 | L7→L0 | does the shipped surface satisfy the requirement's **statement**? | it does what the task said and not what the requirement meant |
+| L2→F | *(UI)* does the frame render what the spec **says**? | a frame that promises a capability, limit or number the product does not have |
+| F→L7 | *(UI)* did what shipped match the frame, or did the frame become fiction? | the frame is still the design of record and no longer describes anything that exists |
 
-The last seam is stage 10's question, expressed as a seam. When it fails, the run
+The L7→L0 seam is stage 10's question, expressed as a seam. When it fails, the run
 did every instruction correctly and delivered the wrong thing.
+
+### The frame is a second claim, and nothing compares it to the first
+
+Where the project designs in Figma, **super-ux owns the frame entirely** — the
+on/off choice, the MCP preflight, the `SCR-NN/<Screen>/<state>` naming, and a
+linter that catches a missing link, a broken trace or a stale one. That is a lot,
+and none of it is this file's business.
+
+What no linter can check is **what the frame says.** A frame link can be present,
+correctly named, non-stale — and the picture behind it can state a retention
+window, a credit meter, a pricing tier or a button whose promise the spec never
+made and the code never implements. It is a *claim about the product*, rendered,
+usually seen by more people than the spec, and frequently the thing a stakeholder
+believes. Compare frames to frames and they are consistent; compare specs to specs
+and they are consistent; the defect lives in the seam, and only a walk finds it.
+
+So on UI work with Figma on, the walk carries one extra step in each direction:
+read the frame against the spec section that covers its `SCR-` id (`L2→F`), then
+against what actually shipped (`F→L7`). A mismatch is a finding like any other —
+and it is usually the **frame** that must change, because the spec is the contract.
+Say which one you are proposing to move, and why, rather than quietly redrawing.
+
+**Editing someone else's Figma file is outward.** Frames live in a shared file that
+designers and stakeholders read; changing one is publishing, not local work.
+Propose the change, get an explicit go, and only then draw — the same rule as a PR,
+a deploy, or docs in another repository.
 
 ## How one audit pass runs
 
@@ -222,3 +251,5 @@ a script — and if it cannot be, **that is the finding: write the check.**
 | "Findings grouped by file are easier to fix" | And impossible to learn from. Group by seam; the seam names which layer of your process leaks. |
 | "The ledger has it, we won't forget" | Only if it is printed beside every verdict. Unprinted, it is a TODO, and TODOs are invisible by construction. |
 | "This is out of scope for the audit" | Then it is a carry-over row with a home, right now. An audit that silently declines findings is worse than none. |
+| "The UX linter is green, the frames are fine" | It proved the links exist, are named right and aren't stale. It cannot read the picture. A frame that promises a feature nobody built passes every lint there is. |
+| "The frame is wrong, I'll just redraw it" | Editing a shared design file is outward, and the spec is the contract. Say which document you are moving and get the go. |

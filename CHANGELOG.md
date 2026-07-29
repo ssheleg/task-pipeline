@@ -1,5 +1,62 @@
 # Changelog
 
+## v1.2.0 — 2026-07-29
+
+The pipeline already knew about Figma — but only second-hand, through super-ux, and
+**every one of its own promises had a Figma-shaped hole**. None of these required it
+to learn Figma; super-ux owns that completely and keeps owning it.
+
+### Fixed — four holes in the pipeline's own promises
+- **The sweep never asked about the design surface.** super-ux asks "Figma or
+  text-only" once per project and stores the answer — but that first ask lands
+  *mid-run*, in the very run the sweep exists to make uninterrupted. Worse: when the
+  Figma MCP is absent, super-ux correctly recommends it and then **continues
+  text-only on its own, never blocking**. That is a scope change nobody agreed to —
+  a UI feature ships "described" instead of "designed" and no gate says so. New sweep
+  row **`3 Design surface`**: Figma on or text-only, is the MCP connected, and *if it
+  isn't, ship text-only or stop and connect it?*
+- **The single-preflight promise was broken for UI tasks.** `companion-skills.md`
+  guarantees ONE block — companions plus the model — so the operator arms the whole
+  run in one exchange. The Figma MCP is a companion stage 3 needs, and its check
+  happened later, inside the stage. It is now in the matrix and in the preflight
+  block, flagged only when the task is user-facing *and* the project designs
+  visually (read `docs/ux/foundation.md` → Design tooling first; no record means the
+  choice itself is a stage-0 question).
+- **The audit ladder had no rung for the frame.** Added as **`F`** — deliberately
+  *conditional and parallel*, not a step in the sequence, so `L0→L7` keeps its
+  numbering. A frame is **a second statement of the same surface, made in pictures.**
+  super-ux's linter proves a frame link exists, is named `SCR-NN/<Screen>/<state>`
+  and isn't stale; **it cannot read the picture.** A frame can pass every lint there
+  is while promising a retention window, a credit meter or a pricing tier the spec
+  never described and the code never built — a rendered claim about the product,
+  seen by more people than the spec, and often the version stakeholders believe.
+  Compare frames to frames and they agree; compare specs to specs and they agree;
+  the defect lives in the seam. Two new seam questions: **`L2→F`** does the frame
+  render what the spec says, and **`F→L7`** did what shipped stay matched to it. The
+  spec is the contract — name the document you propose to move instead of quietly
+  redrawing.
+- **Editing a shared design file was missing from the outward list.** Frames are
+  read by designers and stakeholders; drawing in one is publishing, not local work.
+  It now sits beside deploy, publish, repo-create and opening a PR — the list an
+  agent actually reads.
+
+### Added — validator
+- **Autonomy-sweep drift guard.** The sweep lives twice: `grill.md`'s table is what
+  the agent *reads* while interviewing, `templates/brief.md`'s is what it *writes*.
+  A row added to one and not the other is a question never asked, or an answer with
+  nowhere to land. The validator now compares the stage numbers the two tables cover
+  and fails on a difference. Proven against two planted defects (a stage present
+  only in the grill; a stage dropped only from the brief) plus an unmodified control,
+  and shipped with a CI negative self-test. **Scope, stated honestly: it catches
+  stage-level drift, not row-level** — a row added under a stage number both tables
+  already mention passes.
+
+### Changed
+- The boundary is now written down in both directions: super-ux owns *how* to design
+  (the choice, the MCP preflight, frame naming, the drift linter); task-pipeline owns
+  *when to ask, what counts as degradation, and how to check afterwards that the
+  picture and the product still say the same thing*.
+
 ## v1.1.1 — 2026-07-29
 
 Version bump only — a fresh npm artifact for the v1.1.0 content. **No changes to

@@ -134,6 +134,7 @@ explicit "stop and ask me here":
 | 1 Docs | external libs/APIs/SDKs in play; any private ones context7 can't resolve → where their docs live |
 | 2 Decompose | is this a platform (several capabilities/surfaces) or one module? if platform: deploy cadence — per module or once at the end |
 | 2–3 Spec | UI verdict (arms super-ux); any scenario-tracing waiver |
+| 3 Design surface | UI tasks only: **Figma on or text-only** (super-ux's project-level choice, default on — check `docs/ux/foundation.md` → *Design tooling* before asking); is the Figma MCP connected; **and if it isn't — ship text-only, or stop here and connect it?** super-ux degrades to text-only on its own and never blocks, which means an unasked question here silently ships a UI feature with no mockups |
 | 4–5 Dev | base branch; worktree/branch policy; is `main` off-limits; commit convention; task tracker |
 | 5 Integration | how the branch lands (merge / PR + approver / "leave it unmerged"); parallel fan-out wanted (one worktree per implementer)? |
 | 6 Tests | the test command; what "green" means here; known-red baseline; coverage expectation |

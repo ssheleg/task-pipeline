@@ -66,7 +66,11 @@ mid-flight questions:
    in play and whether stage 9 may write to them**; UI verdict; base branch, branch policy,
    commit convention, task tracker; the test command and what "green" means; the
    lint command; the deploy target, release toggle and **deploy authorization**;
-   where logs/health live; which docs and runbooks this change updates. Each item
+   where logs/health live; which docs and runbooks this change updates. For UI
+   tasks also: **is the design done visually (Figma) or text-only, is the Figma MCP
+   connected, and if it isn't — ship text-only or stop and connect it?** The UX
+   chain degrades to text-only on its own and never blocks, so an unasked question
+   there silently ships a UI feature with no mockups. Each item
    gets an answer or an explicit "stop and ask me here" — an unasked question is a
    scheduled interruption.
 
@@ -167,13 +171,21 @@ not authorize an outward, irreversible action — stage 7 stops and asks.
     bottom-up through its rungs — recorded decision → spec section → contract *and
     its failure behavior* → plan task with a satisfiable DoD → the change in the
     tree → an **executed** named assertion → the surface a user reaches, and its
-    docs — checking the seam between each pair: does the decision reach the spec;
+    docs, **plus, on UI work designed visually, the frame as a second parallel
+    statement of the same surface** — checking the seam between each pair: does the
+    decision reach the spec;
     does the section say what happens when the contract fails; does every contract
     have a task; did the DoD land in the diff; would that test still pass with the
     production code deleted; can a user reach this and does a doc say so; and
     finally, does what shipped satisfy the requirement's own *statement* rather
-    than the task's instructions. Order findings **by seam, not by file** — the
-    seam tells you which layer of your process leaks. Every absence becomes a new
+    than the task's instructions. **And for a frame: does it render what the spec
+    says, and does what shipped still match it?** A UX linter proves a frame link
+    exists, is named right and isn't stale — it cannot read the picture, so a frame
+    promising a retention window, a credit meter or a tier nobody built passes
+    every lint there is, while being the version stakeholders believe. The spec is
+    the contract: say which document you propose to move, don't quietly redraw, and
+    remember that editing a shared design file is outward. Order findings **by
+    seam, not by file** — the seam tells you which layer of your process leaks. Every absence becomes a new
     REQ row with its check **before** the table is written; appending afterwards is
     how acceptance goes green over a gap. Findings owned by a lower layer go back
     there (spec → stage 3, plan → stage 4).
@@ -190,7 +202,8 @@ not authorize an outward, irreversible action — stage 7 stops and asks.
 Cross-cutting: answer from the brief's autonomy section rather than re-asking, log every deferral in the ledger, never narrow the task silently, track
 tasks, conventional commits, honest degradation (never claim a failed/skipped step
 succeeded), and get explicit go before any outward/irreversible action (deploy,
-publish, repo create).
+publish, repo create, **editing a shared design file** — frames are read by
+designers and stakeholders, so drawing in one is publishing, not local work).
 
 **Loop guard — break churn instead of iterating.** Every repeating pass (a fix
 round, a re-entered stage, the next module) logs one line per touched file: the

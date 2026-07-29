@@ -297,6 +297,20 @@ Bottom-up is not taste: a missing artefact low on the ladder makes everything ab
 it meaningless, so top-down you spend the pass polishing a surface for a contract
 that does not exist.
 
+**The frame is a rung too, where the project designs visually.** super-ux owns the
+frame completely — the Figma on/off choice, the MCP preflight, the
+`SCR-NN/<Screen>/<state>` naming, and a linter that catches a missing, misnamed or
+stale link. What no linter can check is **what the frame says.** A link can be
+present, correctly named and fresh while the picture behind it promises a retention
+window, a credit meter or a pricing tier the spec never described and the code
+never built — a rendered claim about the product, seen by more people than the
+spec, and often the version stakeholders believe. Compare frames to frames and they
+agree; compare specs to specs and they agree; the defect lives in the seam. So the
+walk adds two questions on UI work: *does the frame render what the spec says*, and
+*does what shipped still match the frame*. The spec is the contract — say which
+document you propose to move, and remember that **editing a shared design file is
+outward**, like a PR or a deploy.
+
 Three rules keep the audit from becoming another loop:
 
 - **Every pass changes the axis, not the effort.** A searching pass doesn't
@@ -342,6 +356,17 @@ in their DoD. Scenarios come before interface.
 /plugin marketplace add ssheleg/super-ux
 /plugin install super-ux@super-ux
 ```
+
+**Figma is super-ux's, and the decision about it is stage 0's.** super-ux mirrors
+every `SCR-` screen and state into a frame when the project designs visually, and
+it handles all of it: the on/off choice, the MCP preflight, the naming contract,
+the drift linter. task-pipeline only settles the part that would otherwise
+interrupt a run — *is Figma on, is the MCP connected, and if it isn't, do we ship
+text-only or stop and connect it?* That last clause matters: super-ux recommends
+the MCP and then **continues text-only on its own, never blocking**, so an unasked
+question quietly narrows the delivery from "designed" to "described". The stage-0
+sweep decides it, and the preflight block flags the missing MCP in the same
+exchange as everything else.
 
 ### Model policy — one model, confirmed once
 

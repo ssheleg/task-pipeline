@@ -297,6 +297,34 @@ else:
     if not re.search(r"^##\s+Knowledge sources\b", brief, re.M):
         fail("templates/brief.md: missing the '## Knowledge sources' section "
              "(the stage-0 harvest ledger that stage 9 updates)")
+    # The autonomy sweep lives twice: grill.md's table is what the agent READS while
+    # interviewing, brief.md's is what it WRITES. They drift silently — a row added
+    # to one is simply never asked, or never recorded, and the autonomy promise
+    # degrades into a mid-flight question with nothing to show it was ever dropped.
+    # Compare the stage numbers each table covers, not the wording.
+    def _sweep_stages(text):
+        m = re.search(r"^\|\s*(?:Stage|run-wide)\b.*?\n(?:\|[-: |]+\|\n)?((?:\|.*\n)+)",
+                      text, re.M)
+        if not m:
+            return None
+        covered = set()
+        for row in m.group(1).splitlines():
+            cell = row.split("|")[1] if row.count("|") > 1 else ""
+            covered.update(int(n) for n in re.findall(r"\d+", cell))
+        return covered
+
+    _grill_p = os.path.join(refdir, "grill.md")
+    if os.path.isfile(_grill_p):
+        _g = _sweep_stages(open(_grill_p, encoding="utf-8").read().split("## The autonomy sweep")[-1])
+        _b = _sweep_stages(brief.split("## Autonomy")[-1])
+        if _g is None or _b is None:
+            fail("autonomy sweep: could not find the table in references/grill.md "
+                 "and/or templates/brief.md — the sweep must be a table in both")
+        elif _g != _b:
+            fail(f"autonomy sweep drift: references/grill.md covers stages {sorted(_g)} "
+                 f"but templates/brief.md covers {sorted(_b)} — one is what the grill "
+                 "asks, the other is what the brief records; a row in only one is a "
+                 "question never asked or an answer never written down")
 
 # No hardcoded vendor model ids in anything we ship: model generations ship and get
 # renamed, and the operator may be on another provider entirely. Stage configs use
