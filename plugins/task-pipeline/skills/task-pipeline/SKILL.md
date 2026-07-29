@@ -189,11 +189,11 @@ capable available — see `references/model-tiering.md`).
 | 2 | Brainstorm + decompose | built in: [`references/brainstorm.md`](references/brainstorm.md) + **UI detection** + [`references/decomposition.md`](references/decomposition.md) for platforms | design approved; UI verdict recorded; every REQ answered; platform: module map approved | manual |
 | 3 | Spec | built in: [`references/spec.md`](references/spec.md) — **UI → super-ux chain first** (`/ux` → `ux-foundation` CJM → `ux-flows` screens → `ux-scenarios` → `/ux-lint`), then spec `docs/superpowers/specs/…-design.md` | committed + reviewed; UI: chain validated, linter green, scenarios/`SCR-` traced | manual |
 | 4 | Plan | built in: [`references/planning.md`](references/planning.md) → `docs/superpowers/plans/…md` | parallel-ready, DoD per task | auto |
-| 5 | Dev | built in: [`references/build.md`](references/build.md) (worktree → subagent per task → review loop → integrate) + [`references/tdd.md`](references/tdd.md) | tasks DONE, TDD green per task, branch integrated per the brief | auto |
-| 6 | Tests | host test runner + built-in [`references/tdd.md`](references/tdd.md) | full suite green; new/changed code covered | auto |
+| 5 | Dev | built in: [`references/build.md`](references/build.md) (worktree → subagent per task → review loop → integrate) + [`references/tdd.md`](references/tdd.md) | tasks DONE, TDD green per task, branch integrated per the brief; **anything generated passes its own checks, and local infrastructure does not publish the host's default ports** ([`references/learned.md`](references/learned.md)) | auto |
+| 6 | Tests | host test runner + built-in [`references/tdd.md`](references/tdd.md) + [`references/learned.md`](references/learned.md) | full suite green; new/changed code covered; **every new check probed both ways and asserted on its exit code**, and the suite run once against a cold environment | auto |
 | 7 | Lint + deploy | host lint → deploy per host convention | lint clean + suite green before deploy; deploy needs a go (or the brief's specific standing authorization) | manual |
 | 8 | Post-deploy | tail deploy logs / health-check | clean boot or honest degradation report | auto |
-| 9 | Docs + wiki | host module docs/runbook rules → `wiki-update` ([obsidian-wiki](https://github.com/ar9av/obsidian-wiki), recommended) | every stale row of the stage-0 source ledger updated; docs synced; wiki synced | auto |
+| 9 | Docs + wiki | host module docs/runbook rules → `wiki-update` ([obsidian-wiki](https://github.com/ar9av/obsidian-wiki), recommended) | every stale row of the stage-0 source ledger updated; docs synced; wiki synced; **every number computed rather than restated, every named command or file resolvable** ([`references/learned.md`](references/learned.md)) | auto |
 | 10 | **Acceptance** | built in: [`references/audit.md`](references/audit.md) (ladder walk) → [`references/acceptance.md`](references/acceptance.md) (coverage table) | ladder walk ran, its absences became REQ rows; every REQ accounted for with evidence from a check seen failing once; ledger has no unresolved row; **in a multi-repository project, every repository is clean, pushed and pointed at** (below); operator signs off | manual |
 
 
@@ -258,6 +258,7 @@ automation is on — `pipeline.schema.json` is the only contract.
 - `references/grill.md` — the built-in stage-0 grill: loop, domain awareness, autonomy sweep
 - `references/acceptance.md` — the built-in stage-10 close-out: REQ coverage, evidence, sign-off
 - `references/audit.md` — cross-cutting: the L0→L7 ladder and its seams (what was never written), axis rotation, ratchets, proven checks
+- `references/learned.md` — cross-cutting: fourteen rules earned by failure on a real multi-repository build, each with the incident behind it, its check and its exit criterion; plus the two that no check can decide
 - `references/brainstorm.md` — stage 2: design dialogue, approaches, UI detection, hard gate
 - `references/spec.md` — stage 3: UX track order, the spec contract, self-review, review gate
 - `references/planning.md` — stage 4: zero-context plan format, parallel groups, no placeholders
