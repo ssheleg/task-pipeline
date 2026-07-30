@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.4.4 — 2026-07-30
+
+### Added
+- **`displayName`** ("Task Pipeline") in both manifests — `name` stays kebab-case
+  because it namespaces components; the picker shows this instead.
+
 ## v1.4.3 — 2026-07-30
 
 ### Fixed
