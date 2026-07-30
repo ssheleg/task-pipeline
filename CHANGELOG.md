@@ -1,5 +1,19 @@
 # Changelog
 
+## v1.4.2 — 2026-07-30
+
+### Fixed
+- **`pipeline.schema.json` identified itself with a URL that 404s.** The `$id`
+  read `https://github.com/ssheleg/task-pipeline/pipeline.schema.json` — a path
+  that has never existed (no `blob/main`, wrong depth). This file is installed
+  into `~/.claude/skills/task-pipeline/`, so every install carried a schema
+  whose declared identity could not be fetched by anything resolving it. Now the
+  raw URL that actually serves the file, matching `agent-sync`'s convention.
+
+### Changed
+- `license: MIT` declared in the `marketplace.json` plugin entry and in the
+  skill's front matter — the `LICENSE` file was invisible to both surfaces.
+
 ## v1.4.1 — 2026-07-30
 
 ### Changed

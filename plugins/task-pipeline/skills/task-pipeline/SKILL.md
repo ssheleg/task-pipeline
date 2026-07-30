@@ -1,6 +1,7 @@
 ---
 name: task-pipeline
 description: "Use when running a substantial task through the full end-to-end delivery pipeline — an up-front intake grill that expands the request into a complete brief, then docs study, brainstorm, spec, plan, subagent-driven build, tests, lint/deploy, post-deploy log check, docs/wiki sync and acceptance — as gated stages whose doctrine is built entirely into this skill (no required companion skills). Triggers - 'run this through the pipeline' / 'прогони по конвейеру', 'the full cycle' / 'полный цикл', /task-pipeline, or any substantial feature, fix, or build that should follow the disciplined cycle rather than ad-hoc coding. The intake grill is mandatory - it front-loads every decision, including the per-stage autonomy sweep, so stages 1→10 run without mid-flight questions; recommends super-ux for user-facing work; confirms one model up front (most capable available, never a hardcoded id); reads host-project conventions for deploy/docs/wiki so it stays project-agnostic."
+license: MIT
 ---
 
 # task-pipeline

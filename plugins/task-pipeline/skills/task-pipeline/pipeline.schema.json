@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://github.com/ssheleg/task-pipeline/pipeline.schema.json",
+  "$id": "https://raw.githubusercontent.com/ssheleg/task-pipeline/main/plugins/task-pipeline/skills/task-pipeline/pipeline.schema.json",
   "title": "task-pipeline config",
   "description": "Generic contract for a pipeline config. An ordered list of stages; each stage is run by the host project's own skills/agents and guarded by a typed gate. The framework imposes no specific stages, skills, or gate assignments — those are entirely the host project's config. Copy pipeline.example.json and rewrite it to match your project.",
   "type": "object",
