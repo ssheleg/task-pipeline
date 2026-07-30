@@ -1,5 +1,16 @@
 # Changelog
 
+## v1.4.3 — 2026-07-30
+
+### Fixed
+- **`argument-hint` in the slash command was unquoted.** In YAML a bare
+  `[a | b]` is a flow sequence, not a string, so the hint parsed as a *list*.
+  Found by `claude plugin validate --strict`, the upstream schema checker, which
+  now runs in CI on both this plugin and its marketplace manifest.
+- **`homepage` and `repository` sat at the top level of `marketplace.json`,
+  where Claude Code does not recognize them.** They are plugin-entry fields;
+  moved there, so the values reach the plugin listing instead of being ignored.
+
 ## v1.4.2 — 2026-07-30
 
 ### Fixed

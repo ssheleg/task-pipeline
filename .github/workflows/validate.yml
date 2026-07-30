@@ -491,3 +491,12 @@ jobs:
             echo "ERROR: unknown arg accepted"; exit 1
           fi
           echo "OK: npm installer behaves"
+      - name: Official Claude Code conformance (plugin + marketplace, strict)
+        run: |
+          set -eu
+          # The repo's own validator enforces house rules; this one is the
+          # upstream spec. --strict fails on unrecognized manifest fields and on
+          # front matter that silently drops at runtime -- both were real here.
+          npm install -g @anthropic-ai/claude-code
+          claude plugin validate . --strict
+          claude plugin validate plugins/task-pipeline --strict
