@@ -1,5 +1,32 @@
 # Changelog
 
+## v1.4.0 — 2026-07-29
+
+### `references/learned.md` — fourteen rules earned by failure, each with its incident
+
+Taught to the pipeline by a real build: a 229-decision specification across four repositories with
+several agents working at once. Every rule names the failure that produced it, because a rule with
+no incident behind it is somebody's preference and gets argued with at the worst moment.
+
+The ones that cost the most, now gate criteria rather than advice:
+
+- **A gate's exit code is part of its output.** One printed `FAIL` and returned `0`; CI had been
+  green over it for an unknown period.
+- **Doubt the probe first.** Five probes failed before any check did — four times out of five the
+  planted defect was never planted, and the silence read as a passing check.
+- **Absence needs its own check.** Comparing documents finds contradictions, and a contradiction
+  needs two sides; a whole missing subsystem has one. Only the reverse direction of a computed
+  mapping found it.
+- **Tests create what they assert on.** A test read another test file's leftovers, so it passed on a
+  warm database and failed on the cold one every new developer has.
+- **A generator seeds green** · **local infrastructure does not publish the host's default ports** ·
+  **compute rather than restate** · **sweep the class, not the finding** · **ratchet, never TODO**.
+
+Wired into stages 5, 6, 9 and 10 as gate criteria, not as reading. Two lessons are deliberately kept
+OUT of the table, as review questions — *is this the right citation* and *did this number come from
+the contract or from prose about it* — because a rule that pretends to be enforced and is not is the
+same failure as the gate that printed `FAIL` and exited `0`.
+
 ## v1.3.2 — 2026-07-29
 
 **The 26 negative self-tests could not be run anywhere except CI** — which meant
