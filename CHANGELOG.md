@@ -1,5 +1,12 @@
 # Changelog
 
+## v1.4.1 — 2026-07-30
+
+### Changed
+- `agent-sync` moved to **`ssheleg/agent-sync`**. The three places this skill
+  links to it — `SKILL.md`, `references/stages.md`, `references/acceptance.md` —
+  now point at the new owner rather than relying on GitHub's redirect.
+
 ## v1.4.0 — 2026-07-29
 
 ### `references/learned.md` — fourteen rules earned by failure, each with its incident

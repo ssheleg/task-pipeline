@@ -309,7 +309,7 @@ stages/agents/types (see SKILL.md → *Bring your own skills*).
   reports nothing **for the parent as well as every submodule**:
   `git submodule status` (no line starting `+`), plus `git -C <repo> status
   --porcelain` and `git -C <repo> log @{u}..HEAD --oneline` per repo. With
-  [agent-sync](https://github.com/appvillis-com/agent-sync) installed,
+  [agent-sync](https://github.com/ssheleg/agent-sync) installed,
   `/agent-sync finish` runs exactly that. The fix is two commands and the second is
   the forgotten one: `git -C <submodule> push`, then
   `git add <submodule> && git commit`.

@@ -213,7 +213,7 @@ git -C <each repo> status --porcelain && git -C <each repo> log @{u}..HEAD --one
 ```
 
 report nothing — for the parent as well as every submodule. Where
-[agent-sync](https://github.com/appvillis-com/agent-sync) is installed, `/agent-sync finish` runs
+[agent-sync](https://github.com/ssheleg/agent-sync) is installed, `/agent-sync finish` runs
 exactly this plus *no lease left held*, and `--gates` adds the project's own gate commands.
 
 The fix, when it fails, is two commands and the second is the one that gets forgotten:

@@ -124,7 +124,7 @@ git -C <each repo> status --porcelain
 git -C <each repo> log @{u}..HEAD --oneline
 ```
 
-Where [agent-sync](https://github.com/appvillis-com/agent-sync) is installed,
+Where [agent-sync](https://github.com/ssheleg/agent-sync) is installed,
 `/agent-sync finish` runs exactly this plus *no lease left held*, and `--gates`
 adds the project's own gate commands.
 
