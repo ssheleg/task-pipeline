@@ -13,6 +13,7 @@ docs/
   adr/
     NNNN-<slug>.md                    # stage 0 — ADRs for hard-to-reverse decisions
   superpowers/
+    retro.md                          # stage 10's last act — ONE per project, not per run
     specs/
       YYYY-MM-DD-<topic>-brief.md     # stage 0 — locked intake brief (grill output)
       YYYY-MM-DD-<topic>-carryover.md # stage 0 seeds it; EVERY stage appends; stage 10 reads it
@@ -29,6 +30,10 @@ docs/
     audits/YYYY-MM-DD-<scope>.md       # ux-audit reports
     plans/YYYY-MM-DD-<scope>.md        # super-ux fix plans (may hand off to this pipeline)
     lint.py, README.md                 # seeded by super-ux
+graphify-out/                          # git-ignored: the code graph, if one is built
+  graph.json                           # stage 0 queries it; stage 9 refreshes it
+  GRAPH_REPORT.md  graph.html          # the plain-language report + interactive view
+  manifest.json  cache/                # extraction bookkeeping — never edited by hand
 ```
 
 Naming: date-prefixed `YYYY-MM-DD-<topic>` slugs, one topic per file, kebab-case.
@@ -57,13 +62,14 @@ record (see `build.md`).
 | 0 Intake | `specs/<topic>-brief.md` — incl. the **REQ table** (seed from `templates/brief.md`) | stages 2–5, 7, 10 |
 | 0→10 all | `specs/<topic>-carryover.md` — append-only ledger (seed from `templates/carryover.md`) | stage 10, in full |
 | 10 Acceptance | `specs/<topic>-acceptance.md` — every REQ with a status and evidence | the operator |
+| 10 Retro | `superpowers/retro.md` — standing instructions (max 10), the problem→cause→fix log, run stamps. Pruned **before** anything is added (`retrospective.md`) | **stage 0 of the next run**, in full |
 | 0 Grill (domain) | `CONTEXT.md`, `docs/adr/NNNN-<slug>.md` — created **lazily**, only when a term resolves or a decision qualifies | stages 2–4 + the repo |
 | 2 Decompose | `specs/<topic>-modules.md` — module map, build order, contracts, per-module status (platforms only) | stages 3–10, every module's run |
 | 3 Spec | `specs/<topic>-design.md` — module dossier for a decomposed platform (+ links `docs/ux/*` for UI) | stage 4 |
 | 4 Plan | `plans/<topic>.md` | stage 5 |
 | 3 UX track | `docs/ux/{foundation,flows,screens,scenarios}.md` | stages 4–9 + `/ux-lint` |
 | 8 Post-deploy | log/health notes (in the run, not a committed file) | stage 9 |
-| 9 Docs+wiki | host module docs + wiki pages | — |
+| 9 Docs+wiki | host module docs + wiki pages + the refreshed `graphify-out/graph.json` (`knowledge-graph.md`) | the **next** run's stage-0 harvest |
 
 ## This repo (task-pipeline itself), for reference
 
@@ -78,17 +84,18 @@ plugins/task-pipeline/
     pipeline.example.json                     # this plugin's own flow, as config
     references/                               # built-in stage doctrine:
       knowledge-sources.md grill.md           #   stage 0 (harvest, then interview)
+      knowledge-graph.md                      #   stages 0+9: the code graph, refresh, divergence
       brainstorm.md decomposition.md          #   stage 2
       spec.md planning.md                     #   stages 3-4
       build.md review.md tdd.md               #   stages 5-6
-      acceptance.md                           #   stage 10
+      acceptance.md retrospective.md          #   stage 10 (close-out, then the retro)
       audit.md                                #   cross-cutting: the ladder + seams
       loop-guard.md                           #   cross-cutting: churn detection
       stages.md model-tiering.md              #   gates, model policy
       conventions.md artifacts.md             #   host conventions, this layout
       companion-skills.md                     #   optional companions + preflight
     templates/                                # skeletons seeded into a host project
-      README.md brief.md carryover.md context.md adr.md
+      README.md brief.md carryover.md context.md adr.md retro.md
 cursor/rules/task-pipeline.mdc                # Cursor channel (self-contained rule)
 bin/task-pipeline.js                          # npx installer (package task-pipeline-skill)
 install.sh                                    # POSIX installer

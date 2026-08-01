@@ -44,6 +44,12 @@ found, surface it and **ask** rather than guessing.
   into the host's own docs (`CLAUDE.md`, or the README) in this change, so the next
   run reads the destination instead of creating a second file
   ([`grill.md`](grill.md) → *The design destination*).
+- **The code graph:** [graphify](https://github.com/Graphify-Labs/graphify) —
+  `/graphify . --update` when `graphify-out/` exists, in the same change as the docs
+  and the wiki ([`knowledge-graph.md`](knowledge-graph.md)). It is derived, so
+  `graphify-out/` is git-ignored unless the project's own `CLAUDE.md` says the team
+  commits it. A project that uses a different graph/index tool names its refresh
+  command there, and that wins.
 - **Wiki:** [obsidian-wiki](https://github.com/ar9av/obsidian-wiki) — the
   `wiki-update` skill (resolves the vault via `~/.obsidian-wiki/config`). Detect it
   the same way the harvest does; if absent, recommend it once

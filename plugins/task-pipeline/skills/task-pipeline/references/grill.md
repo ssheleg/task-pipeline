@@ -130,7 +130,7 @@ explicit "stop and ask me here":
 | Stage | What to settle up front |
 |---|---|
 | run-wide | the model decision ([`model-tiering.md`](model-tiering.md)); what to decide autonomously vs escalate |
-| 0 Harvest | doc sources beyond this repo — other repos, hosted doc systems, the knowledge wiki — and whether stage 9 may write to them (another repo is outward: propose + PR, never a direct push) |
+| 0 Harvest | doc sources beyond this repo — other repos, hosted doc systems, the knowledge wiki, **the code graph** ([`knowledge-graph.md`](knowledge-graph.md): built / installed-not-built / absent) — and whether stage 9 may write to them (another repo is outward: propose + PR, never a direct push) |
 | 1 Docs | external libs/APIs/SDKs in play; any private ones context7 can't resolve → where their docs live |
 | 2 Decompose | is this a platform (several capabilities/surfaces) or one module? if platform: deploy cadence — per module or once at the end |
 | 2–3 Spec | UI verdict (arms super-ux); any scenario-tracing waiver |
@@ -141,8 +141,8 @@ explicit "stop and ask me here":
 | 6 Tests | the test command; what "green" means here; known-red baseline; coverage expectation |
 | 7 Lint+deploy | lint command; deploy target and path; release automation on/off; deploy-from-main rule; **deploy authorization** |
 | 8 Post-deploy | where logs / health live (app name, endpoint, workflow) |
-| 9 Docs+wiki | which module docs / runbooks this change updates; wiki sync yes/no |
-| 10 Acceptance | who signs off; where deferred REQs are tracked (issue tracker, backlog) |
+| 9 Docs+wiki | which module docs / runbooks this change updates; wiki sync yes/no; **code-graph refresh yes/no** (`/graphify . --update` — the third close-out artifact) |
+| 10 Acceptance | who signs off; where deferred REQs are tracked (issue tracker, backlog); the **retro file** — does `docs/superpowers/retro.md` exist, and are its standing instructions in force for this run ([`retrospective.md`](retrospective.md)) |
 
 **Deploy authorization has a hard floor.** Deploy and publish are outward and
 irreversible, so a vague "just do everything" authorizes nothing. A standing

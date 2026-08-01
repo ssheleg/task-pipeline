@@ -26,23 +26,73 @@ makes the grill's answers *checkable* instead of merely confident.
 | # | Source | How to find it | What it's good for |
 |---|---|---|---|
 | 1 | **The code** | the repo you're in | what actually runs — the tiebreaker |
-| 2 | **Host agent docs** | `CLAUDE.md`, `AGENTS.md`, `.cursor/rules/` | conventions, commands, deploy path, house rules |
-| 3 | **Domain docs** | `CONTEXT.md` / `CONTEXT-MAP.md`, `docs/adr/` | the glossary and the decisions with their reasons |
-| 4 | **Product/UX docs** | `docs/ux/` (super-ux chain), `README`, runbooks | user-facing behavior that is already specified |
-| 5 | **Pipeline history** | `docs/superpowers/specs/`, `plans/`, past `-carryover.md` | what a previous run of this pipeline decided or deferred |
-| 6 | **The knowledge wiki** | see below | distilled cross-project knowledge, prior sessions, why decisions were made |
-| 7 | **Other doc repos the project names** | a docs repo URL or submodule in `CLAUDE.md`/`README`, a sibling checkout, a `docs/` monorepo package | specs, contracts and runbooks that live outside this repo |
-| 8 | **Hosted doc systems the project names** | Notion / Confluence / Google Docs referenced in the project | the same, when the team keeps them there |
+| 2 | **The code graph** | `graphify-out/graph.json` — see below | *reach*: what calls this, what breaks if it moves, what every change passes through |
+| 3 | **Host agent docs** | `CLAUDE.md`, `AGENTS.md`, `.cursor/rules/` | conventions, commands, deploy path, house rules |
+| 4 | **Domain docs** | `CONTEXT.md` / `CONTEXT-MAP.md`, `docs/adr/` | the glossary and the decisions with their reasons |
+| 5 | **Product/UX docs** | `docs/ux/` (super-ux chain), `README`, runbooks | user-facing behavior that is already specified |
+| 6 | **Pipeline history** | `docs/superpowers/specs/`, `plans/`, past `-carryover.md` | what a previous run of this pipeline decided or deferred |
+| 7 | **The retro's standing instructions** | `docs/superpowers/retro.md` ([`retrospective.md`](retrospective.md)) | what previous runs got wrong here — **read in full**, they are capped at ten |
+| 8 | **The knowledge wiki** | see below | distilled cross-project knowledge, prior sessions, why decisions were made |
+| 9 | **Other doc repos the project names** | a docs repo URL or submodule in `CLAUDE.md`/`README`, a sibling checkout, a `docs/` monorepo package | specs, contracts and runbooks that live outside this repo |
+| 10 | **Hosted doc systems the project names** | Notion / Confluence / Google Docs referenced in the project | the same, when the team keeps them there |
 
 Rules for the list:
 
 - **Never invent a source.** A doc repo is in scope because the project names it,
   not because it plausibly exists. Nothing is cloned or fetched on a guess.
-- **Sources 7–8 are read-only at this stage**, and reading a hosted system needs a
+- **Sources 9–10 are read-only at this stage**, and reading a hosted system needs a
   connected tool — if there's no tool, record the gap and ask the operator to paste
   what matters rather than pretending the source was covered.
-- **The wiki is optional; the harvest is not.** With no wiki and no doc repos, the
-  harvest is sources 1–5 and takes two minutes. Skipping it is never the answer.
+- **The wiki and the graph are optional; the harvest is not.** With no wiki, no
+  graph and no doc repos, the harvest is sources 1 and 3–7 and takes two minutes.
+  Skipping it is never the answer.
+- **Source 7 is read in full, not queried.** It is capped at ten instructions
+  precisely so that this is cheap, and it is the one source that *binds* the run
+  rather than informing it.
+
+## The retro's standing instructions — an instruction source, not background
+
+`docs/superpowers/retro.md` ([`retrospective.md`](retrospective.md)) is the one
+harvested source that is **read in full rather than queried**: the standing
+instructions are capped at ten precisely so that this is cheap. They are what
+previous runs of this pipeline got wrong *in this project* — the rules no check
+could decide — and they bind this run.
+
+Two obligations that come with reading them:
+
+- **Stamp an instruction the moment it fires.** That date is the only evidence
+  behind the cold-retirement rule at stage 10; without it "hasn't fired in five
+  runs" is a guess and the prune becomes a mood.
+- **Record the file as a ledger row**, like any other source. It is also the row
+  stage 10 writes back to, which is what closes this particular loop.
+
+## The code graph — recommended
+
+Full doctrine: [`knowledge-graph.md`](knowledge-graph.md). In one paragraph: a grep
+finds a **name**, a graph finds **reach** — what calls this, what breaks if it
+moves, which module every change passes through. That is the class of question the
+harvest most needs answered and the class documents answer least reliably, because a
+document records the reach its author remembered.
+
+**Detect it** — `graphify-out/graph.json` exists (built), or `graphify` resolves but
+the directory doesn't (installed, not built).
+
+- **Built → query it** during the harvest: `graphify query "<the task, as a
+  question>"`, `graphify affected "<the thing being changed>"`, `graphify god-nodes`.
+  Record the row **with the graph's build date**, because a graph is a source and
+  goes stale like one.
+- **Not installed → recommend it once**, in the preflight block, with the lines:
+
+  ```bash
+  uv tool install graphifyy      # the CLI
+  graphify install               # add the /graphify skill to this agent
+  ```
+
+  then `/graphify .` in the project root. Then continue — it is a
+  **recommendation, never a gate**, exactly like the wiki.
+
+The graph **points; the code decides.** Retrieval order puts it right after the
+code, never as the tiebreaker.
 
 ## The knowledge wiki — recommended
 
@@ -139,6 +189,13 @@ The ledger is the stage-9 work list. For each row:
   resolved verbally.
 - **The wiki** — `wiki-update` syncs what this run learned. Distil the *knowledge*
   (decisions, seams, gotchas, why), never a diff summary.
+- **The graph** — `/graphify . --update` re-extracts what this run changed
+  ([`knowledge-graph.md`](knowledge-graph.md)). It is a **peer of the docs, not an
+  afterthought**: the next run's harvest queries it first, and a stale graph is a
+  false premise delivered with the authority of a machine. A wrong doc gets argued
+  with; a wrong graph gets believed. Refreshing it also enables the cheap half of
+  the **divergence check** — a hub no doc names, an edge the docs deny, a doc naming
+  a module the graph no longer has.
 - **Another repository's docs** — writing to a repo the operator didn't ask you to
   touch is **outward**: propose the change, get an explicit go, then open a PR
   there. Absent a go, it goes in the carry-over ledger with the exact edit needed.

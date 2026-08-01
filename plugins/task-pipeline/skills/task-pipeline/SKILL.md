@@ -43,6 +43,7 @@ and no stage that can fail because a dependency is missing:
 | Stage | Built-in doctrine |
 |---|---|
 | 0 Knowledge harvest (pre-grill) | [`references/knowledge-sources.md`](references/knowledge-sources.md) |
+| 0 + 9 The code graph (graphify — recommended, never required) | [`references/knowledge-graph.md`](references/knowledge-graph.md) |
 | 0 Intake grill | [`references/grill.md`](references/grill.md) |
 | 2 Brainstorm | [`references/brainstorm.md`](references/brainstorm.md) |
 | 2 Decompose (platforms only) | [`references/decomposition.md`](references/decomposition.md) |
@@ -51,6 +52,7 @@ and no stage that can fail because a dependency is missing:
 | 5 Build (worktree, subagents, fix loop) | [`references/build.md`](references/build.md) + [`references/review.md`](references/review.md) |
 | 5–6 TDD + suite gate | [`references/tdd.md`](references/tdd.md) |
 | 10 Acceptance (REQ close-out) | [`references/acceptance.md`](references/acceptance.md) |
+| 10 Retrospective (the run's last act) | [`references/retrospective.md`](references/retrospective.md) |
 | 10 + any audit (what's *missing*) | [`references/audit.md`](references/audit.md) |
 | any repeating loop | [`references/loop-guard.md`](references/loop-guard.md) |
 
@@ -95,15 +97,43 @@ for every one** — which is what turns the pipeline from a funnel into a circle
 
 **Harvest before you ask.** Stage 0 opens with a **knowledge harvest**
 ([`references/knowledge-sources.md`](references/knowledge-sources.md)), not a
-question: pull what the project already knows about this task from the code,
-`CLAUDE.md`, `CONTEXT.md`/ADRs, `docs/` + `docs/ux/`, past pipeline briefs, the
-**knowledge wiki** if one is installed
+question: pull what the project already knows about this task from the code, the
+**code graph** if one is built
+([`references/knowledge-graph.md`](references/knowledge-graph.md) — graphify;
+recommended, never required),
+`CLAUDE.md`, `CONTEXT.md`/ADRs, `docs/` + `docs/ux/`, past pipeline briefs, **the
+retro's standing instructions** — `docs/superpowers/retro.md`, read in full because
+they *bind* this run ([`references/retrospective.md`](references/retrospective.md)) —
+the **knowledge wiki** if one is installed
 ([obsidian-wiki](https://github.com/ar9av/obsidian-wiki) — recommended, never
 required) and any **other repo or hosted doc system the project names as its
 docs**. Write the source ledger into the brief, then interview *against* it: every
 answer that touches a source is checked against that source, and the operator
 outranks any document — but only out loud, so an override is a recorded decision
 instead of an undetected divergence. The same ledger is stage 9's work list.
+
+**Three artifacts close a run, not two.** Stage 9 syncs the docs, the wiki **and the
+code graph** (`/graphify . --update`) — the graph is what the *next* run's harvest
+queries first, so a stale one is a false premise carrying the authority of a
+machine. Refreshing it also buys the **graph↔docs divergence check**: a hub no
+document names, an edge the docs deny, a doc naming a module the graph no longer
+has. Doc-side findings are fixed at stage 9; absences become REQ rows at stage 10
+([`references/knowledge-graph.md`](references/knowledge-graph.md),
+[`references/audit.md`](references/audit.md)).
+
+**The run teaches the next run — and the list stays short.** Every gate is good at
+*this* run and blind across runs, so the same class of failure can be caught, fixed
+and forgotten five times with nothing noticing it is the same one. The last act of
+stage 10 is therefore the **retrospective**
+([`references/retrospective.md`](references/retrospective.md), written to
+`docs/superpowers/retro.md`): **prune first** — every standing instruction checked
+against its retirement triggers (it became a check · its surface is gone · it hasn't
+fired in five runs), the list held to a hard cap of **ten**, every deletion logged —
+then stamp the run, then write an entry **only if the run diverged** (symptom, the
+stage that *owned* it, root cause, fix, and the check that catches it next time).
+Stage 0 reads those standing instructions in full, which is exactly why the prune is
+a gate criterion and not a good intention: a rule nobody reads to the end is worse
+than no rule, because everyone believes it is covered.
 
 Three things the grill does beyond clarifying the request:
 - **Domain awareness.** It reads the project's own `CONTEXT.md` / `docs/adr/` and
@@ -123,7 +153,7 @@ Three things the grill does beyond clarifying the request:
    with stage 0** (survives context loss; lets you resume). Then run the
    **companion preflight** (`references/companion-skills.md`): the stage doctrine
    is built in, so this only checks the *optional* companions (super-ux for UI
-   tasks, context7, wiki-update) and emits ONE block covering them
+   tasks, context7, wiki-update, graphify) and emits ONE block covering them
    **and the model decision** (`references/model-tiering.md`): recommend
    the most capable model available, let the operator confirm or override, record
    it. Ask once, here.
@@ -194,8 +224,8 @@ capable available — see `references/model-tiering.md`).
 | 6 | Tests | host test runner + built-in [`references/tdd.md`](references/tdd.md) + [`references/learned.md`](references/learned.md) | full suite green; new/changed code covered; **every new check probed both ways and asserted on its exit code**, and the suite run once against a cold environment | auto |
 | 7 | Lint + deploy | host lint → deploy per host convention | lint clean + suite green before deploy; deploy needs a go (or the brief's specific standing authorization) | manual |
 | 8 | Post-deploy | tail deploy logs / health-check | clean boot or honest degradation report | auto |
-| 9 | Docs + wiki | host module docs/runbook rules → `wiki-update` ([obsidian-wiki](https://github.com/ar9av/obsidian-wiki), recommended) | every stale row of the stage-0 source ledger updated; docs synced; wiki synced; **every number computed rather than restated, every named command or file resolvable** ([`references/learned.md`](references/learned.md)) | auto |
-| 10 | **Acceptance** | built in: [`references/audit.md`](references/audit.md) (ladder walk) → [`references/acceptance.md`](references/acceptance.md) (coverage table) | ladder walk ran, its absences became REQ rows; every REQ accounted for with evidence from a check seen failing once; ledger has no unresolved row; **axis rotation recorded** (new findings vs self-inflicted, rule 1 of [`references/learned.md`](references/learned.md)), **every closure verified against the artefact rather than the document describing it**, **each correction swept across its class**, **every deferral a printed ratchet rather than a TODO**; **in a multi-repository project, every repository is clean, pushed and pointed at** (below); operator signs off | manual |
+| 9 | Docs + wiki | host module docs/runbook rules → `wiki-update` ([obsidian-wiki](https://github.com/ar9av/obsidian-wiki), recommended) → `/graphify . --update` ([`references/knowledge-graph.md`](references/knowledge-graph.md), recommended) | every stale row of the stage-0 source ledger updated; docs synced; wiki synced; **the code graph refreshed where one exists** and checked against the docs (a hub no doc names, a doc naming a node the graph lost); **every number computed rather than restated, every named command or file resolvable** ([`references/learned.md`](references/learned.md)) | auto |
+| 10 | **Acceptance** | built in: [`references/audit.md`](references/audit.md) (ladder walk) → [`references/acceptance.md`](references/acceptance.md) (coverage table) → [`references/retrospective.md`](references/retrospective.md) (retro: prune, stamp, entry) | ladder walk ran, its absences became REQ rows; every REQ accounted for with evidence from a check seen failing once; ledger has no unresolved row; **axis rotation recorded** (new findings vs self-inflicted, rule 1 of [`references/learned.md`](references/learned.md)), **every closure verified against the artefact rather than the document describing it**, **each correction swept across its class**, **every deferral a printed ratchet rather than a TODO**; **in a multi-repository project, every repository is clean, pushed and pointed at** (below); operator signs off; **the retrospective written last — prune before entry, list at or under its cap, deletions logged, run stamped, counts printed** | manual |
 
 
 ### Stage 10 in a project of several repositories
@@ -256,8 +286,10 @@ automation is on — `pipeline.schema.json` is the only contract.
 - `pipeline.schema.json` — the universal pipeline config contract (stages + release)
 - `pipeline.example.json` — this plugin's default flow (stage 0 + 1→10) + release, as config
 - `references/knowledge-sources.md` — stage-0 phase 1: the source list, the wiki, the ledger, the stage-9 loop-back
+- `references/knowledge-graph.md` — the code graph (graphify): install line, stage-0 reach queries, the stage-9 refresh, the graph↔docs divergence check
 - `references/grill.md` — the built-in stage-0 grill: loop, domain awareness, autonomy sweep
 - `references/acceptance.md` — the built-in stage-10 close-out: REQ coverage, evidence, sign-off
+- `references/retrospective.md` — stage 10's last act: the project retro (`docs/superpowers/retro.md`), the three grades of fix, the mandatory prune and its cap of ten
 - `references/audit.md` — cross-cutting: the L0→L7 ladder and its seams (what was never written), axis rotation, ratchets, proven checks
 - `references/learned.md` — cross-cutting: fourteen rules earned by failure on a real multi-repository build, each with the incident behind it, its check and its exit criterion; plus the two that no check can decide
 - `references/brainstorm.md` — stage 2: design dialogue, approaches, UI detection, hard gate

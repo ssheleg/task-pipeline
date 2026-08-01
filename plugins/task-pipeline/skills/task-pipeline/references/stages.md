@@ -37,15 +37,20 @@ stages/agents/types (see SKILL.md → *Bring your own skills*).
   answers for scope, users, constraints, data, edge cases, done-criteria.
 - **Phase 1 — harvest the knowledge sources FIRST**
   ([`knowledge-sources.md`](knowledge-sources.md)). Before the first question:
-  query what the project already knows about this task — code, `CLAUDE.md`,
+  query what the project already knows about this task — code, **the code graph**
+  when one is built ([`knowledge-graph.md`](knowledge-graph.md): `graphify query` /
+  `affected` / `god-nodes` answer *reach*, which is what grep cannot), `CLAUDE.md`,
   `CONTEXT.md`/ADRs, `docs/` + `docs/ux/`, past pipeline briefs and carry-over
-  ledgers, the **knowledge wiki** if one is installed
+  ledgers, **the retro's standing instructions** (`docs/superpowers/retro.md`, read
+  **in full** — they are capped at ten and they bind this run; stamp each one as it
+  fires, [`retrospective.md`](retrospective.md)), the **knowledge wiki** if one is
+  installed
   ([obsidian-wiki](https://github.com/ar9av/obsidian-wiki) — recommended,
   never required), and any **other repo or hosted doc system the project names as
   its docs**. Write the **source ledger** into the brief (a row per source, or an
-  explicit "none found"). It is retrieval scoped by the task's own nouns, not a
-  read of everything — and it is what makes phase 2's answers checkable instead of
-  merely confident.
+  explicit "none found"; the graph's row carries its build date). It is retrieval
+  scoped by the task's own nouns, not a read of everything — and it is what makes
+  phase 2's answers checkable instead of merely confident.
 - **How it runs: [`grill.md`](grill.md)** — the full doctrine, built into this
   skill (nothing to install). In short: one question per turn, a recommended
   answer with each, explore the codebase before asking, depth-first through the
@@ -257,12 +262,27 @@ stages/agents/types (see SKILL.md → *Bring your own skills*).
   `~/.obsidian-wiki/config`, or the skill resolves). Not installed → recommend it
   once with its install line and continue; a missing wiki never blocks the gate.
   Distil the knowledge (decisions, seams, why), not a diff summary.
+- **Refresh the code graph** — `/graphify . --update` when one exists
+  ([`knowledge-graph.md`](knowledge-graph.md)). The close-out has **three**
+  artifacts, not two: docs, wiki, graph. The graph is the source the *next* run's
+  harvest queries first, so a stale one is a false premise carrying the authority of
+  a machine — a wrong doc gets argued with, a wrong graph gets believed. Incremental
+  and model-free for code; a run that deleted code legitimately rebuilds smaller
+  (`--force`).
+- **Then check the graph against the docs** — the cheap half of the divergence sweep
+  (`graphify god-nodes`; any doc naming a module the graph no longer has). A hub no
+  doc names, or an edge the docs deny, is either a leak in the code or a lie in the
+  docs; a doc naming a node that no longer exists is a stale ledger row found
+  mechanically. Doc-side findings are fixed here; **absences go to stage 10's ladder
+  walk as REQ rows** ([`audit.md`](audit.md)).
 - **Docs living in another repository** are outward: propose the edit, get an
   explicit go, then open a PR there. No go → the exact edit goes in the carry-over
   ledger.
 - **GATE (auto):** docs in sync with code; every stale row in the source ledger
   either updated or carried over with its edit; UI: super-ux layers current +
-  linter green; wiki synced (or absent and recommended once); dangling links fixed.
+  linter green; wiki synced (or absent and recommended once); **the code graph
+  refreshed where one exists, or the reason it wasn't written into the carry-over
+  ledger** (absent and recommended once is fine); dangling links fixed.
 
 ## 10 — Acceptance
 - **What:** the closing stage — go back to the brief and account for **every**
@@ -313,8 +333,23 @@ stages/agents/types (see SKILL.md → *Bring your own skills*).
   `/agent-sync finish` runs exactly that. The fix is two commands and the second is
   the forgotten one: `git -C <submodule> push`, then
   `git add <submodule> && git commit`.
+- **The retrospective is the run's last act** ([`retrospective.md`](retrospective.md)),
+  written to `docs/superpowers/retro.md` — one file per project, not per run. The
+  pipeline's gates are good at *this* run and blind across runs: the same class of
+  failure can be caught, fixed and forgotten five times and nothing in the flow
+  notices it is the same one. So, in this order: **prune first** (every standing
+  instruction against its three retirement triggers — it became a check, its
+  surface is gone, it hasn't fired in five run stamps — and the list held to its cap
+  of ten, every deletion logged), **stamp the run**, then **write an entry only if
+  the run diverged** (symptom · the stage it surfaced at · the stage that *owned* it
+  · root cause · fix, mechanical before instruction before expiring note · the check
+  that catches it next time). Every run prunes and stamps; a retro left empty after
+  a messy run is the failure the file exists to stop. Stage 0 reads the standing
+  instructions in full next time, which is why the cap is not negotiable.
 - **GATE (manual):** the ladder walk ran and its absences became REQ rows before
-  the table was written; **every repository is closed — the parent included:
+  the table was written; **the retrospective is written — prune before entry, the
+  list at or under its cap with every deletion logged, the run stamped, and the
+  counts printed beside this verdict**; **every repository is closed — the parent included:
   `git submodule status` shows no `+`, each repo clean and pushed**; **every check this gate leans on has been seen failing
   once against a planted defect** (an unproven check's green is not evidence);
   every REQ has a status (none `unknown`); every `verified`

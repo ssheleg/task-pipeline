@@ -205,6 +205,14 @@ construction**:
    everywhere. This is the horizontal pass, and it is where it belongs.
 3. **One class swept end to end** — every error path, every count, every status
    vocabulary, every timeout, across the whole change at once.
+4. **The graph against the docs** — where a code graph exists
+   ([`knowledge-graph.md`](knowledge-graph.md)), it is a *second, machine-built
+   statement of the same system*, and disagreement is mechanical rather than
+   remembered: a hub `god-nodes` reports that no document names is an undocumented
+   seam; an edge the docs deny is either a leak in the code or a lie in the docs; a
+   doc naming a module the graph has no node for describes something that no longer
+   exists. This axis is the only one that finds absences without reading for them,
+   which is why it is worth rotating onto when the reading axes go quiet.
 
 **The crossover is measurable, so measure it.** Every pass, count two numbers: new
 findings, and findings caused by the previous pass's own fixes. When the second

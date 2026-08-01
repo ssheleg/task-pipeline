@@ -67,8 +67,8 @@ Every gate is **typed**: `auto` — the orchestrator verifies it itself, pass/fa
 | 6 | Tests | full suite green, new code covered | auto |
 | 7 | Lint + deploy | lint clean + suite green before deploy | manual |
 | 8 | Post-deploy | clean boot / honest degradation | auto |
-| 9 | Docs + wiki | every stale source-ledger row updated; docs + wiki synced | auto |
-| 10 | **Acceptance** | every REQ accounted for with evidence; operator signs off | manual |
+| 9 | Docs + wiki | every stale source-ledger row updated; docs + wiki synced; the code graph refreshed and checked against the docs | auto |
+| 10 | **Acceptance** | every REQ accounted for with evidence; operator signs off; the retro written — pruned before anything was added | manual |
 
 ## What you get
 
@@ -84,6 +84,10 @@ Every gate is **typed**: `auto` — the orchestrator verifies it itself, pass/fa
   wiki entry — produced as part of the work, not promised for later.
 - **It adapts to your repo, not the reverse.** Deploy, docs and wiki conventions
   are read from the host project, so nothing is imposed.
+- **It gets better at your project, without getting longer.** Each run ends with a
+  retrospective, and the next run reads it — but the standing-instruction list is
+  capped at ten and pruned *before* anything is added, so what you inherit is the
+  rules that still fire, not an archive.
 
 ## Quickstart
 
@@ -163,7 +167,8 @@ Stage 0 doesn't open with a question. It opens by finding what the project alrea
 knows about this task
 ([`knowledge-sources.md`](plugins/task-pipeline/skills/task-pipeline/references/knowledge-sources.md)):
 the code, `CLAUDE.md`, `CONTEXT.md` and the ADRs, `docs/` and `docs/ux/`, previous
-pipeline briefs and their carry-over ledgers, **the knowledge wiki if you have one**,
+pipeline briefs and their carry-over ledgers, **the retro's standing instructions**
+(read in full — they bind the run; see below), **the knowledge wiki if you have one**,
 and **any other repository or hosted doc system your project names as its docs**. It's
 retrieval scoped by the task's own nouns, not a read of everything, and it ends with a
 **source ledger** written into the brief — one row per source, what it says, how
@@ -198,6 +203,70 @@ obsidian-wiki setup --vault /path/to/your/vault
 
 It is a **recommendation, never a gate** — no stage blocks on a missing wiki, and
 nothing asks twice in one run.
+
+### The code graph — reach, and a second opinion on your docs
+
+A grep finds a **name**. A graph finds **reach**: what actually calls this, what
+breaks if it moves, what every change passes through. That is the question stage 0
+needs answered before it asks you anything, and the one documents answer least
+reliably — a document records the reach its author remembered.
+
+So where a code graph exists, the pipeline uses it
+([`knowledge-graph.md`](plugins/task-pipeline/skills/task-pipeline/references/knowledge-graph.md)).
+The tool is **[graphify](https://github.com/Graphify-Labs/graphify)**; detected via
+`graphify-out/graph.json`. Not installed → recommended once, in the preflight block,
+with the lines — then the run continues:
+
+```bash
+uv tool install graphifyy      # the CLI
+graphify install               # add the /graphify skill to this agent
+```
+
+then, in the project root:
+
+```
+/graphify .
+```
+
+**Stage 0 asks it what grep can't** — `graphify query "how does session reach the
+API layer"`, `graphify affected "AuthModule"`, `graphify god-nodes` — and records it
+in the source ledger **with its build date**, because a graph goes stale exactly like
+a doc. It points; the code decides.
+
+**Stage 9 closes three artifacts, not two.** Docs, wiki, **and the graph** — in the
+agent, so the documents this stage just edited are re-extracted too:
+
+```
+/graphify . --update
+```
+
+There is a CLI shortcut, `graphify update .`, which is structural, model-free and
+**code-only** — the wrong default at the one stage whose job was changing the docs,
+because it produces the most expensive kind of stale graph: one that was refreshed.
+And the reason the graph is a peer of the docs rather than an afterthought: the
+*next* run's harvest queries it first, so a stale graph is a false premise delivered
+with the authority of a machine. A wrong doc gets argued with. A wrong graph gets
+believed.
+
+**Then the divergence check — two independent statements of the same system.** This
+is the part a doc linter cannot do, because it compares your docs against the code's
+actual shape rather than against itself:
+
+| Ask the graph | A disagreement means |
+|---|---|
+| `graphify god-nodes` | a hub **no document names** — an undocumented seam: the thing every change passes through and nothing explains |
+| `graphify path "A" "B"` | an edge the docs **deny** — either a leak in the code or a lie in the docs, and which one is a decision, not a guess |
+| `graphify affected "X"` | callers the docs never mention — the documented blast radius is smaller than the real one |
+| a doc naming a module the graph has **no node for** | the doc describes something that no longer exists |
+
+Doc-side findings are fixed at stage 9. Absences go to stage 10's ladder walk and
+become **REQ rows with their checks** — the graph is the fourth audit axis, and the
+only one that finds an absence without reading for it. The graph is *derived*, so it
+is never hand-edited and `graphify-out/` is git-ignored by default: you fix the code
+or the doc and re-extract.
+
+Cadence: refresh every close-out, sweep periodically (stage 10, or when another axis
+goes quiet). Like the wiki, it is a **recommendation, never a gate**.
 
 ### The REQ spine — why nothing falls out the back
 
@@ -337,6 +406,50 @@ once against a planted defect.** That is the TDD iron law — *if you didn't wat
 fail, you don't know it tests the right thing* — raised from one test to every
 gate, linter and script in the run. **A green result from an unproven check is
 worth nothing.**
+
+### The retrospective — the run teaches the next run, and the list stays short
+
+Every gate in this flow is good at *this* run and blind across runs. So the same
+class of failure gets caught, fixed and forgotten five times, and nothing in the
+pipeline notices it is the same one.
+
+The last act of stage 10 is therefore a **retrospective**, written to
+`docs/superpowers/retro.md` — **one file per project, not per run**
+([`retrospective.md`](plugins/task-pipeline/skills/task-pipeline/references/retrospective.md)).
+Every run **prunes and stamps**; only a run that *diverged* writes an entry:
+symptom with evidence, the stage it surfaced at, the stage that **owned** it, the
+root cause, the fix, and the check that catches it the first time from now on.
+
+**Fixes come in three grades, and you take the highest one that works:**
+
+| Grade | What it is | What it costs later |
+|---|---|---|
+| 1 — mechanical | a test, a lint rule, a gate criterion, a hook | nothing: the check *is* the memory |
+| 2 — standing instruction | a rule agents read, for what no check can decide | one of ten slots, and its retirement trigger must be written at birth |
+| 3 — a note | something still being understood | expires in two runs, then it is promoted or deleted |
+
+**The prune is mandatory and runs before anything is added.** Every standing
+instruction is checked against three retirement triggers — *it became a check* ·
+*every path or command it names is gone* · *it has not fired in the last five run
+stamps* — and the list is held to a **hard cap of ten**. At eleven, the oldest
+never-fired rule goes; "but they all matter" is exactly the state in which the list
+stopped being read, and the ninth stale rule is what discredits the two that are
+load-bearing.
+
+Nothing is deleted silently: **every retirement writes one line in the log**, so
+the incident survives and only the instruction leaves. And the counts print beside
+the gate verdict, like the carry-over ledger's, so a list that quietly grew back is
+visible where it happened:
+
+```
+GATE 10 acceptance: PASS — 14/14 REQ verified
+  carry-over: 0 unresolved · retro: 7 standing (was 9) · retired 3 · added 1
+```
+
+Stage 0 reads those standing instructions **in full** on the next run — which is
+the whole reason the cap exists and the prune is a gate criterion instead of a good
+intention. A rule nobody reads to the end is worse than no rule: everyone believes
+it is covered.
 
 ### UX track (user-facing tasks) — super-ux recommended
 
@@ -517,13 +630,14 @@ the same Claude Code install yields a duplicate, shadowing skill.
 ### Prerequisites
 
 **None for the pipeline itself** — the doctrine for every stage ships inside the
-skill. Three optional companions make individual stages better:
+skill. Four optional companions make individual stages better:
 
 | Companion | For | Required? |
 |---|---|---|
 | [super-ux](https://github.com/ssheleg/super-ux) | the stage-3 UX track | only for user-facing tasks |
 | context7 (MCP) | stage-1 docs study | recommended — web-search fallback |
 | [obsidian-wiki](https://github.com/ar9av/obsidian-wiki) | stage-0 harvest + stage-9 sync | recommended — never a gate |
+| [graphify](https://github.com/Graphify-Labs/graphify) | stage-0 reach queries + stage-9 refresh + the graph↔docs divergence check | recommended — never a gate |
 
 A single preflight block prints which are ready, which to install, and the model
 recommendation, so you arm the whole run in one exchange. Detail:
@@ -539,6 +653,8 @@ recommendation, so you arm the whole run in one exchange. Detail:
 | [`references/stages.md`](plugins/task-pipeline/skills/task-pipeline/references/stages.md) | per-stage detail and the exact gate criteria |
 | [`references/artifacts.md`](plugins/task-pipeline/skills/task-pipeline/references/artifacts.md) | the canonical document layout each stage writes to |
 | [`references/conventions.md`](plugins/task-pipeline/skills/task-pipeline/references/conventions.md) | how stages 6–10 read the host project's `CLAUDE.md` |
+| [`references/knowledge-graph.md`](plugins/task-pipeline/skills/task-pipeline/references/knowledge-graph.md) | the code graph: install line, stage-0 reach queries, the stage-9 refresh, the graph↔docs divergence check |
+| [`references/retrospective.md`](plugins/task-pipeline/skills/task-pipeline/references/retrospective.md) | the project retro: the three grades of fix, the mandatory prune, the cap of ten |
 | [`references/model-tiering.md`](plugins/task-pipeline/skills/task-pipeline/references/model-tiering.md) | model policy, the `/model` reminder, overrides |
 | [`templates/`](plugins/task-pipeline/skills/task-pipeline/templates/README.md) | brief, carry-over ledger, `CONTEXT.md` and ADR skeletons |
 | [`CHANGELOG.md`](CHANGELOG.md) | every release, with the reasoning behind it |

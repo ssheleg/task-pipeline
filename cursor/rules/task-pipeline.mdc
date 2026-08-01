@@ -31,7 +31,11 @@ task was already clear" exemption, no starting stage 1 while the user thinks. A
 one-line task ("build feature X") is not enough to finish autonomously.
 
 **Phase 1 — harvest the sources BEFORE the first question.** Find what the project
-already knows about this task and read it: the code; `CLAUDE.md` / `AGENTS.md`;
+already knows about this task and read it: the code; **the code graph if one is
+built** — [graphify](https://github.com/Graphify-Labs/graphify), detect
+`graphify-out/graph.json`, and ask it what grep cannot (`graphify query "<the task,
+as a question>"`, `graphify affected "<what is changing>"`, `graphify god-nodes`);
+`CLAUDE.md` / `AGENTS.md`;
 `CONTEXT.md` (or `CONTEXT-MAP.md`) and `docs/adr/`; `docs/` and `docs/ux/`; past
 briefs/plans and their carry-over ledgers; **the knowledge wiki if one is
 installed** — [obsidian-wiki](https://github.com/ar9av/obsidian-wiki), detect
@@ -40,10 +44,18 @@ or hosted doc system the project names as its docs** (read-only, and never a sou
 you invented — it counts because the project names it). Query each by *this task's*
 nouns; it is retrieval, not a full read; stop when the terms return nothing new.
 Write a short **source ledger** into the brief — source, what it says about this
-task, how fresh, and whether this run makes it stale. `none found` is a valid row.
+task, how fresh, and whether this run makes it stale. `none found` is a valid row;
+the graph's row carries its build date, because a graph goes stale like any other
+source, and it **points while the code decides** — never the tiebreaker.
+**Read `docs/superpowers/retro.md` in full if it exists** — its *standing
+instructions* are what previous runs of this pipeline got wrong in this project, and
+they bind this run (they are capped at ten, so reading them all is cheap). Stamp
+each one the moment it fires: that date is the only evidence behind the
+cold-retirement rule at stage 10.
 If no wiki is installed, recommend it once and continue:
-`pip install obsidian-wiki` → `obsidian-wiki setup --vault <path>`. It is never a
-gate.
+`pip install obsidian-wiki` → `obsidian-wiki setup --vault <path>`. If no graph is
+built, recommend it once and continue: `uv tool install graphifyy` →
+`graphify install` → `/graphify .`. Neither is ever a gate.
 
 **Phase 2 — grill the user against that harvest**, then run the rest without
 mid-flight questions:
@@ -172,7 +184,18 @@ not authorize an outward, irreversible action — stage 7 stops and asks.
     source the harvest read gets updated if this run changed or disproved it. Module
     docs and runbooks in the SAME change; the knowledge wiki via `wiki-update` when
     [obsidian-wiki](https://github.com/ar9av/obsidian-wiki) is installed (absent →
-    recommend once, never block). Docs in **another repository** are outward:
+    recommend once, never block); **and the code graph via `/graphify . --update`**
+    when `graphify-out/` exists (absent → recommend once, never block). The close-out
+    has **three** artifacts, not two — the graph is what the *next* run's harvest
+    queries first, so a stale one is a false premise carrying the authority of a
+    machine: a wrong doc gets argued with, a wrong graph gets believed.
+    **Then check the graph against the docs:** a hub `graphify god-nodes` reports
+    that no document names is an undocumented seam; an edge the docs deny is either a
+    leak in the code or a lie in the docs; a doc naming a module the graph has no
+    node for describes something that no longer exists. Fix the doc-side findings
+    here; hand absences to stage 10's ladder walk as REQ rows. Never "fix" the graph
+    by hand — it is derived: fix the code or the doc and re-extract.
+    Docs in **another repository** are outward:
     propose the edit and get an explicit go, or carry it over with the exact change
     written down. A doc that was worth reading at stage 0 and is wrong now is the
     next run's false premise.
@@ -223,8 +246,37 @@ not authorize an outward, irreversible action — stage 7 stops and asks.
     `git -C <repo> status --porcelain`, `git -C <repo> log @{u}..HEAD --oneline`.
     The fix is two commands and the second is the one that gets forgotten:
     `git -C <submodule> push`, then `git add <submodule> && git commit`.
+    **The last act is the retrospective** — `docs/superpowers/retro.md`, **one file
+    per project, not per run**. Every gate above is good at *this* run and blind
+    across runs: the same class of failure gets caught, fixed and forgotten five
+    times and nothing notices it is the same one. So, in this order —
+    **1. Prune before you add.** Check every standing instruction against three
+    retirement triggers: it became a check (a test, a lint rule, a gate, a hook →
+    delete it; the check is the memory, and keeping both means it is read twice and
+    obeyed once); every path, command or stage it names is gone (→ delete, it
+    describes a system nobody runs); it has not fired in the last **five run
+    stamps** (→ delete, that is the evidence it was situational). Then the cap:
+    **ten standing instructions, hard** — at eleven the oldest never-fired row goes,
+    because "they all matter" is exactly the state in which the list stopped being
+    read. **Every deletion writes one line in the log; silent deletion is
+    forbidden** — the record stays, the instruction leaves.
+    **2. Stamp the run** — date, topic, verdict, counts. That stamp is what makes
+    "five runs" countable.
+    **3. Write an entry, only if the run diverged** — symptom with evidence, the
+    stage it *surfaced at*, the stage that **owned** it (usually earlier — a finding
+    recorded against the stage that tripped over it comes back), the root cause
+    ("the agent was careless" is not a cause, it is the absence of one), the fix by
+    grade — **mechanical check > standing instruction (with its retire-when written
+    at birth) > a note that expires in two runs** — and the check that catches it
+    the first time from now on. A lesson true in any repository belongs upstream in
+    the skill's own doctrine, not in one project's file.
+    A retro left empty after a messy run is the failure it exists to stop. Phase 1
+    of the next run reads those standing instructions **in full**, which is why the
+    cap is not negotiable and the prune is a gate item, not a good intention.
     Gate: ladder walk ran, no REQ `unknown`, no ledger row without
-    a home, every repository clean/pushed/pointed-at, user signs off.
+    a home, every repository clean/pushed/pointed-at, user signs off, **and the
+    retro is written — pruned before anything was added, at or under its cap, every
+    deletion logged, the run stamped, and the counts printed beside this verdict**.
 
 Cross-cutting: answer from the brief's autonomy section rather than re-asking, log every deferral in the ledger, never narrow the task silently, track
 tasks, conventional commits, honest degradation (never claim a failed/skipped step
@@ -262,7 +314,10 @@ its own previous pass while the finding count still looked healthy. So:
   **rotate the axis, don't look harder.** The axes are orthogonal by construction —
   seams down one deliverable (the ladder above), then invariants *across*
   deliverables (one name, one enum, one owner everywhere), then one class swept end
-  to end (every error path, every count, every status vocabulary).
+  to end (every error path, every count, every status vocabulary), then — where a
+  code graph exists — **the graph against the docs**, the only axis that finds an
+  absence without reading for it (a hub no document names, an edge the docs deny, a
+  doc naming a module the graph no longer has).
 - **Audit bottom-up.** A missing artefact at a low rung makes everything above it
   meaningless; top-down you polish a surface for a contract that doesn't exist.
 - **A class that repeats twice becomes a check, not a note.** Once is an incident;
