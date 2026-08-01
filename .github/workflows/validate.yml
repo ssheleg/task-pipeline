@@ -9,6 +9,36 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # the tag-ancestry check below needs history, not a shallow clone
+
+      # A release that lives only on a tag is invisible from inside either record.
+      # v1.4.4 was tagged, released and published with a manifest field that `main`
+      # never received; every later branch was cut from a tree that had not seen it,
+      # and v1.6.0 silently shipped without it. main was consistent with itself, the
+      # tag was consistent with itself, CI was green on both — the disagreement only
+      # existed BETWEEN them, which is the same shape as the parent/submodule pointer
+      # this project's own stage-10 doctrine guards against. So: every released tag
+      # must be reachable from main.
+      - name: Every v* tag must be contained in main
+        run: |
+          set -eu
+          git fetch --tags --quiet
+          git fetch --quiet origin main:refs/remotes/origin/main || true
+          orphans=""
+          for t in $(git tag --list 'v*'); do
+            if ! git merge-base --is-ancestor "$t" origin/main 2>/dev/null; then
+              orphans="$orphans $t"
+            fi
+          done
+          if [ -n "$orphans" ]; then
+            echo "ERROR: released tag(s) not contained in main:$orphans"
+            echo "A tag outside main is a release nobody can branch from — its changes"
+            echo "vanish from the next version while the registry still serves them."
+            echo "Fix: merge or cherry-pick the tagged commit into main, then re-tag."
+            exit 1
+          fi
+          echo "OK: every v* tag is an ancestor of main"
 
       - name: Install jsonschema (enables full pipeline.example.json conformance pass)
         run: python3 -m pip install --quiet jsonschema
@@ -565,6 +595,26 @@ jobs:
             exit 1
           else
             echo "OK: validator requires every task-pipeline:<name> to resolve to references/<name>.md"
+          fi
+
+      - name: Negative self-test (an unresolved merge conflict must fail)
+        run: |
+          set -eu
+          cp -R . /tmp/conflict-copy
+          python3 - <<'EOF'
+          # build the markers at runtime — spelling them here would trip the guard
+          # on this very file
+          o, c, s = "<" * 7, ">" * 7, "=" * 7
+          p = "/tmp/conflict-copy/README.md"
+          t = open(p, encoding="utf-8").read()
+          open(p, "w", encoding="utf-8").write(
+              t + f"\n{o} HEAD\nours\n{s}\ntheirs\n{c} branch\n")
+          EOF
+          if python3 /tmp/conflict-copy/test/validate.py; then
+            echo "ERROR: validator passed a file with unresolved conflict markers — in a prose repo that ships as doctrine"
+            exit 1
+          else
+            echo "OK: validator rejects unresolved merge conflict markers"
           fi
 
       - name: install.sh syntax check

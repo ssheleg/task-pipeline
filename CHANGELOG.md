@@ -1,5 +1,35 @@
 # Changelog
 
+## v1.6.1 — 2026-08-01
+
+### Fixed — v1.6.0 shipped without `displayName`, because a release lived only on a tag
+
+**`v1.4.4` was tagged, released and published to npm, and its commit was never in
+`main`.** It added `displayName` ("Task Pipeline") to both manifests — the label the
+plugin picker shows. Every branch cut from `main` afterwards therefore started from a
+tree that had never seen it, and v1.6.0 published a manifest without the field,
+quietly returning the picker to the kebab-case `name`.
+
+Nothing inside either record looked wrong: `main` was consistent with itself, the tag
+was consistent with itself, CI was green on both, and the registry served a 1.4.4 no
+branch contained. That is the same shape as the parent/submodule pointer this
+project's own stage-10 doctrine already guards against — **a disagreement that lives
+between two records and survives every check that runs inside one.**
+
+- `displayName` restored, and the v1.4.4 section restored to this file. The fix is a
+  **merge of the tag**, not a re-typed field: copying the content back would have
+  left the tag still outside `main`, which is the condition that caused this.
+- **CI now refuses an orphaned release:** every `v*` tag must be an ancestor of
+  `main`, checked on every push. The next tag that lands outside the branch is a red
+  build, not a feature that disappears three releases later.
+- **The validator now rejects unresolved merge conflict markers.** Resolving the
+  merge above surfaced it: a `CHANGELOG.md` carrying three `<<<<<<<` markers passed
+  every existing check, because they all look at structure and none at the text. In a
+  repo that is almost entirely prose, a half-resolved merge ships as doctrine an
+  agent reads and obeys. (34 guards now, each with its negative self-test; the
+  tag-ancestry check is a CI step rather than a validator guard, since it needs git
+  history the offline validator does not have.)
+
 ## v1.6.0 — 2026-08-01
 
 ### `references/retrospective.md` — the run teaches the next run, and the list stays short

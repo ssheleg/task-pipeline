@@ -743,6 +743,27 @@ if os.path.isfile(os.path.join(refdir, "knowledge-graph.md")):
              "doctrine but the stage-9 section never mentions the graph — an agent reading the "
              "stage detail is never told to refresh it")
 
+# An unresolved merge leaves conflict markers in the file, and this repo is almost
+# entirely prose — so a botched resolution ships as doctrine an agent will read and
+# obey. Nothing here noticed: a CHANGELOG carrying three markers passed every other
+# check, because they all look at structure and none at the text. (Only the two
+# arrow markers are checked; a bare row of '=' is legal setext markdown.)
+_OPEN, _CLOSE = "<" * 7 + " ", ">" * 7 + " "
+for dirpath, dirnames, filenames in os.walk(ROOT):
+    dirnames[:] = [d for d in dirnames if d not in (".git", "node_modules", "graphify-out")]
+    for fn in filenames:
+        if not fn.endswith((".md", ".mdc", ".json", ".py", ".js", ".sh", ".yml", ".yaml")):
+            continue
+        fp = os.path.join(dirpath, fn)
+        try:
+            body = open(fp, encoding="utf-8").read()
+        except (UnicodeDecodeError, OSError):
+            continue
+        for lineno, line in enumerate(body.splitlines(), start=1):
+            if line.startswith(_OPEN) or line.startswith(_CLOSE):
+                fail(f"{os.path.relpath(fp, ROOT)}:{lineno}: unresolved merge conflict marker — "
+                     "a half-resolved merge ships as doctrine somebody reads and obeys")
+
 if errors:
     print("FAIL: task-pipeline structure invalid")
     for e in errors:
