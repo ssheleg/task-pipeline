@@ -8,6 +8,7 @@
   "plugins": [
     {
       "name": "task-pipeline",
+      "displayName": "Task Pipeline",
       "source": "./plugins/task-pipeline",
       "description": "Runs a substantial task through a mandatory built-in intake grill, then 10 gated stages (docs, brainstorm+decompose, spec, plan, subagent build, tests, lint/deploy, post-deploy, docs/wiki, acceptance). Every stage's doctrine is built into the skill — no companion plugin required — with typed auto/manual gates, a frozen requirement spine that must close with evidence, a loop guard that breaks churn, one provider-agnostic model confirmed up front, and an optional super-ux UX track for user-facing work.",
       "version": "1.6.0",

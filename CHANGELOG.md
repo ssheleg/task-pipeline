@@ -109,6 +109,12 @@ shipped graph doctrine must reach the **stage-9 gate** in `pipeline.example.json
 *and* the stage-9 section of `references/stages.md`. That is the third time this repo
 has shipped a rule to `SKILL.md` and not to the surface that enforces it — a gate
 declared where it is not enforced is inert.
+## v1.4.4 — 2026-07-30
+
+### Added
+- **`displayName`** ("Task Pipeline") in both manifests — `name` stays kebab-case
+  because it namespaces components; the picker shows this instead.
+
 ## v1.4.3 — 2026-07-30
 
 ### Fixed
