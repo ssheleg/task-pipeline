@@ -1,5 +1,114 @@
 # Changelog
 
+## v1.6.0 — 2026-08-01
+
+### `references/retrospective.md` — the run teaches the next run, and the list stays short
+
+Every gate in this flow is good at *this* run and blind across runs. So a class of
+failure gets caught, fixed and forgotten five times, and nothing in the pipeline
+notices it is the same one. The ladder walk finds what was never written **inside** a
+run; nothing was looking across them.
+
+Stage 10 now ends with a **retrospective** written to `docs/superpowers/retro.md` —
+**one file per project, not per run**, seeded from the new `templates/retro.md`.
+Every run prunes and stamps; only a run that *diverged* writes an entry, and the
+entry names the stage that **owned** the failure rather than the stage that tripped
+over it — recording it against the latter is how the same defect comes back.
+
+**Fixes have three grades, and the highest one that works is the one you take:** a
+mechanical check (a test, a lint rule, a gate criterion — the check *is* the memory,
+so nothing has to be remembered or pruned later), a **standing instruction** for
+what no check can decide, or a note that expires in two runs.
+
+**The part that makes it survive: the prune is mandatory and runs before anything is
+added.** Every standing instruction is checked against three retirement triggers —
+it became a check · every path or command it names is gone · it has not fired in the
+last five run stamps — and the list is held to a **hard cap of ten**. At eleven, the
+oldest never-fired rule goes. "But they all matter" is precisely the state in which
+the list stopped being read, and the ninth stale rule is what discredits the two that
+are load-bearing.
+
+Nothing leaves silently: **every retirement writes one line in the log**, so the
+incident survives and only the instruction goes. The counts print beside the gate
+verdict like the carry-over ledger's, so a list that quietly grew back is visible
+where it happened.
+
+Stage 0 reads the standing instructions **in full** (they are capped, so it is
+cheap) and stamps each one as it fires — which is the only evidence behind the
+cold-retirement rule. Without that stamp the prune is a mood.
+
+Three new guards, each with its negative self-test: the retro must reach the
+surfaces that *enforce* stage 10 — not just `SKILL.md`; the template must ship; and
+its standing-instruction table must carry a **Retire when** column and the run
+stamps. A retirement trigger written at birth is what makes the prune mechanical
+instead of an argument every time.
+
+### Also in this release — what an audit of the two features found
+
+Both features were then walked against the tools they name, which is the only way
+this class of defect surfaces:
+
+- **The refresh command was wrong, in thirteen files.** `graphify . --update` was
+  documented as a shell command. Run, it does not do what the text claims: the CLI's
+  incremental form is `graphify update <path>` and it re-extracts **code only**,
+  while `/graphify . --update` is the *agent* form that also re-reads the documents.
+  Stage 9 is the stage that just changed the documents, so the shortcut would have
+  produced the most expensive kind of stale graph — one that was refreshed. Both
+  forms are now documented with the distinction spelled out, and the doctrine says
+  which is the default and why.
+- **Three stages pointed at doctrine that does not exist.** In the example config a
+  `task-pipeline:<name>` entry *is* the built-in doctrine file `references/<name>.md`
+  — and `knowledge-harvest`, `decompose` and `plan` resolved to nothing. It read as
+  covered on every review. Fixed, and now a **guard** resolves every such entry
+  (33 guards total, all provable locally).
+- **The retro is a seeded file, and the templates README said only the brief was.**
+  The seeding rule matters most there: overwriting `retro.md` with the skeleton
+  destroys every lesson the project has bought. Stated explicitly.
+- **The harvest source list is renumbered** (the retro's standing instructions are
+  source 7, read *in full* rather than queried) and the graph doctrine now says
+  plainly that `affected`/`path` are sharp on a code repo and near-useless on a prose
+  one — an empty traversal there is not evidence of no coupling.
+
+## v1.5.0 — 2026-08-01
+
+### `references/knowledge-graph.md` — the code graph as a source, and as a second opinion
+
+A grep finds a **name**. The questions that actually stop a run are *what calls this*
+and *what breaks if it moves* — **reach** — and reach is exactly what a document
+records least reliably, because it records the reach its author remembered. The
+harvest had no way to ask that question, so it asked the operator, whose answer
+nobody could check.
+
+So the pipeline now uses a code graph where one exists
+([graphify](https://github.com/Graphify-Labs/graphify) — detected via
+`graphify-out/graph.json`; recommended, never a gate, exactly like the wiki, with its
+install line printed once in the preflight block).
+
+**Stage 0** queries it before the interview (`graphify query` / `affected` /
+`god-nodes`) and records it in the source ledger **with its build date** — a graph
+goes stale like any other source, and it points while the code decides.
+
+**Stage 9 now closes three artifacts, not two:** docs, wiki, **and the graph**
+(`/graphify . --update`). The reason it is a peer rather than an afterthought is
+asymmetric: the next run's harvest queries the graph *first*, so a stale graph is a
+false premise delivered with the authority of a machine. A wrong doc gets argued
+with; a wrong graph gets believed.
+
+**And then the part that finds things: the graph↔docs divergence check.** Two
+independent statements of the same system, so a disagreement is mechanical instead of
+remembered — a hub `god-nodes` reports that no document names is an undocumented
+seam; an edge the docs deny is either a leak in the code or a lie in the docs; a doc
+naming a module the graph has no node for describes something that no longer exists.
+Doc-side findings are fixed at stage 9; **absences become REQ rows at stage 10**,
+because this is a fourth audit axis (`references/audit.md`) and the only one that
+finds an absence without reading for it. The graph is derived, so it is never
+hand-edited: fix the code or the doc and re-extract.
+
+Two new guards, both with negative self-tests: a
+shipped graph doctrine must reach the **stage-9 gate** in `pipeline.example.json`
+*and* the stage-9 section of `references/stages.md`. That is the third time this repo
+has shipped a rule to `SKILL.md` and not to the surface that enforces it — a gate
+declared where it is not enforced is inert.
 ## v1.4.3 — 2026-07-30
 
 ### Fixed

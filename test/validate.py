@@ -286,8 +286,8 @@ for f in mdcs:
 tpl_dir = os.path.join(ROOT, "plugins/task-pipeline/skills/task-pipeline/templates")
 if not os.path.isdir(tpl_dir):
     fail("missing skill templates/ directory")
-elif [t for t in ("brief.md", "carryover.md", "context.md", "adr.md") if not os.path.isfile(os.path.join(tpl_dir, t))]:
-    for t in ("brief.md", "carryover.md", "context.md", "adr.md"):
+elif [t for t in ("brief.md", "carryover.md", "context.md", "adr.md", "retro.md") if not os.path.isfile(os.path.join(tpl_dir, t))]:
+    for t in ("brief.md", "carryover.md", "context.md", "adr.md", "retro.md"):
         if not os.path.isfile(os.path.join(tpl_dir, t)):
             fail(f"missing template: plugins/task-pipeline/skills/task-pipeline/templates/{t}")
 else:
@@ -315,6 +315,28 @@ else:
     if not re.search(r"^##\s+Knowledge sources\b", brief, re.M):
         fail("templates/brief.md: missing the '## Knowledge sources' section "
              "(the stage-0 harvest ledger that stage 9 updates)")
+    # The retro is the only artifact that outlives the run, so it is the only one
+    # that can rot. Its whole value depends on being READ IN FULL at stage 0, which
+    # a growing file quietly stops being — and a rule nobody reads to the end is
+    # worse than no rule, because everyone believes it is covered. The prune is what
+    # prevents that, and the prune is only mechanical if every instruction carries
+    # the trigger that retires it and the run stamps that make "hasn't fired in five
+    # runs" countable. A retro template without those two columns degrades into a
+    # notes file within a few runs.
+    retro = open(os.path.join(tpl_dir, "retro.md"), encoding="utf-8").read()
+    if not re.search(r"^##\s+Standing instructions\b", retro, re.M):
+        fail("templates/retro.md: missing the '## Standing instructions' section — "
+             "the in-force list stage 0 reads in full (see references/retrospective.md)")
+    if "Retire when" not in retro:
+        fail("templates/retro.md: the standing-instruction table must carry a "
+             "\"Retire when\" column — an instruction with no retirement trigger "
+             "written at birth is one the prune can only argue about, and the list "
+             "grows until nobody reads it")
+    if not re.search(r"^##\s+Run stamps\b", retro, re.M):
+        fail("templates/retro.md: missing the '## Run stamps' section — it is what "
+             "makes the cold-retirement rule ('has not fired in five run stamps') "
+             "countable instead of a guess")
+
     # The autonomy sweep lives twice: grill.md's table is what the agent READS while
     # interviewing, brief.md's is what it WRITES. They drift silently — a row added
     # to one is simply never asked, or never recorded, and the autonomy promise
@@ -461,6 +483,26 @@ if pipe is not None:
         if s9 is not None and "ledger" not in str((s9.get("gate") or {}).get("check", "")).lower():
             fail(f"{EXAMPLE_REL} stage 'docs-wiki': gate.check must name the stage-0 source ledger as its "
                  "work list — a source read at stage 0 and left wrong is the next run's false premise")
+
+    # A 'task-pipeline:<name>' entry in skills[] is not an installable skill — the
+    # config's own note defines it as this skill's doctrine file, references/<name>.md.
+    # So an entry that resolves to nothing is a stage pointed at doctrine that does
+    # not exist: it reads as covered, ships as covered, and the agent following it
+    # finds nothing. Three of them survived every review until a mechanical check
+    # asked. (Host projects are free to name anything in THEIR pipeline.json; this
+    # is the example we ship, and it is what people copy.)
+    if isinstance(stages, list):
+        for i, st in enumerate(stages, start=1):
+            if not isinstance(st, dict):
+                continue
+            for s in st.get("skills") or []:
+                if isinstance(s, str) and s.strip().startswith("task-pipeline:"):
+                    _doc = s.strip().split(":", 1)[1] + ".md"
+                    if not os.path.isfile(os.path.join(refdir, _doc)):
+                        fail(f"{EXAMPLE_REL} stage[{i}]: skills[] names {s!r}, but "
+                             f"references/{_doc} does not exist — a 'task-pipeline:<name>' "
+                             "entry IS the built-in doctrine file, so a dangling one is a "
+                             "stage pointing at doctrine nobody wrote")
 
     # No required external skill provider may sit in the default flow: the example
     # config is what a host project copies, so a foreign `plugin:skill` entry there
@@ -647,6 +689,7 @@ if isinstance(_pipe_stages, list) and _pipe_stages and isinstance(_pipe_stages[-
     for _anchor, _what in (
         ("submodule", "the parent-repository close-out"),
         ("ladder", "the ladder walk"),
+        ("retro", "the retrospective (prune, stamp, entry)"),
     ):
         if _anchor not in _sk_low:
             continue
@@ -676,6 +719,29 @@ if isinstance(_pipe_stages, list) and _pipe_stages and isinstance(_pipe_stages[-
         elif _m.group(1) != (_cfg.get("gate") or {}).get("type"):
             fail(f"references/{_fn}: gate type {_m.group(1)!r} contradicts stage {_sid} in "
                  f"{EXAMPLE_REL} ({(_cfg.get('gate') or {}).get('type')!r})")
+
+# The code graph is the third close-out artifact (references/knowledge-graph.md):
+# stage 0 queries it, stage 9 refreshes it and checks it against the docs. Shipping
+# that doctrine while the surfaces that ENFORCE stage 9 say nothing about it is the
+# same inert-gate failure the stage-10 close-out hit twice — the file reads as law
+# and the run never does it. So if the doctrine ships, stage 9 must name it in both
+# places: the config gate (what the orchestrator verifies) and stages.md's stage-9
+# section (what an agent reads).
+if os.path.isfile(os.path.join(refdir, "knowledge-graph.md")):
+    _s9_cfg = next(
+        (s for s in (_pipe_stages or []) if isinstance(s, dict) and s.get("state") == "docs-wiki"),
+        None,
+    )
+    if _s9_cfg is not None and "graph" not in str((_s9_cfg.get("gate") or {}).get("check", "")).lower():
+        fail(f"{EXAMPLE_REL} stage 'docs-wiki': references/knowledge-graph.md ships the code-graph "
+             "doctrine but the stage-9 gate.check never mentions the graph — the refresh is "
+             "declared where it is not enforced, so a run closes with a stale graph the NEXT "
+             "run's harvest will read as truth")
+    _s9_doc = re.search(r"^## 9 — .*?(?=^## |\Z)", _st_txt, re.M | re.S)
+    if _s9_doc and "graph" not in _s9_doc.group(0).lower():
+        fail("references/stages.md stage 9: references/knowledge-graph.md ships the code-graph "
+             "doctrine but the stage-9 section never mentions the graph — an agent reading the "
+             "stage detail is never told to refresh it")
 
 if errors:
     print("FAIL: task-pipeline structure invalid")

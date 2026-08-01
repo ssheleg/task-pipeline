@@ -466,6 +466,107 @@ jobs:
             echo "OK: validator keeps the negative self-tests portable"
           fi
 
+      - name: Negative self-test (a shipped code-graph doctrine must reach the stage-9 gate)
+        run: |
+          set -eu
+          cp -R . /tmp/graph-copy
+          python3 - <<'EOF'
+          import json, re
+          p = "/tmp/graph-copy/plugins/task-pipeline/skills/task-pipeline/pipeline.example.json"
+          d = json.load(open(p, encoding="utf-8"))
+          for s in d["stages"]:
+              if s.get("state") == "docs-wiki":
+                  s["gate"]["check"] = re.sub(r"graph", "doc", s["gate"]["check"], flags=re.I)
+          json.dump(d, open(p, "w", encoding="utf-8"), indent=2, ensure_ascii=False)
+          EOF
+          if python3 /tmp/graph-copy/test/validate.py; then
+            echo "ERROR: validator passed a stage-9 gate that never mentions the graph — the refresh would be declared where it is not enforced"
+            exit 1
+          else
+            echo "OK: validator requires the stage-9 gate to enforce the code-graph refresh"
+          fi
+
+      - name: Negative self-test (the stage-9 detail must name the code-graph refresh too)
+        run: |
+          set -eu
+          cp -R . /tmp/graph-doc-copy
+          python3 - <<'EOF'
+          import re
+          p = "/tmp/graph-doc-copy/plugins/task-pipeline/skills/task-pipeline/references/stages.md"
+          t = open(p, encoding="utf-8").read()
+          m = re.search(r"^## 9 — .*?(?=^## |\Z)", t, re.M | re.S)
+          open(p, "w", encoding="utf-8").write(
+              t[:m.start()] + re.sub(r"graph", "doc", m.group(0), flags=re.I) + t[m.end():])
+          EOF
+          if python3 /tmp/graph-doc-copy/test/validate.py; then
+            echo "ERROR: validator passed a stage-9 section that never mentions the graph — an agent reading the stage detail is never told to refresh it"
+            exit 1
+          else
+            echo "OK: validator requires stages.md stage 9 to name the code-graph refresh"
+          fi
+
+      - name: Negative self-test (the retrospective must reach the surfaces that enforce stage 10)
+        run: |
+          set -eu
+          cp -R . /tmp/retro-anchor-copy
+          python3 - <<'EOF'
+          import re
+          p = "/tmp/retro-anchor-copy/plugins/task-pipeline/skills/task-pipeline/references/acceptance.md"
+          t = open(p, encoding="utf-8").read()
+          open(p, "w", encoding="utf-8").write(re.sub(r"retro", "post", t, flags=re.I))
+          EOF
+          if python3 /tmp/retro-anchor-copy/test/validate.py; then
+            echo "ERROR: validator passed a close-out doctrine that never mentions the retro — the rule would be declared in SKILL.md and enforced nowhere"
+            exit 1
+          else
+            echo "OK: validator requires the retro to reach the stage-10 surfaces"
+          fi
+
+      - name: Negative self-test (the retro template must ship)
+        run: |
+          set -eu
+          cp -R . /tmp/retro-tpl-copy
+          rm -f /tmp/retro-tpl-copy/plugins/task-pipeline/skills/task-pipeline/templates/retro.md
+          if python3 /tmp/retro-tpl-copy/test/validate.py; then
+            echo "ERROR: validator passed with no retro template — the run has nowhere to write its lessons"
+            exit 1
+          else
+            echo "OK: validator requires the retro template"
+          fi
+
+      - name: Negative self-test (a standing instruction must carry its retirement trigger)
+        run: |
+          set -eu
+          cp -R . /tmp/retro-prune-copy
+          python3 - <<'EOF'
+          p = "/tmp/retro-prune-copy/plugins/task-pipeline/skills/task-pipeline/templates/retro.md"
+          t = open(p, encoding="utf-8").read()
+          open(p, "w", encoding="utf-8").write(t.replace("Retire when", "Notes"))
+          EOF
+          if python3 /tmp/retro-prune-copy/test/validate.py; then
+            echo "ERROR: validator passed a retro template with no retirement trigger — the prune becomes an argument and the list grows until nobody reads it"
+            exit 1
+          else
+            echo "OK: validator requires every standing instruction to carry its retire-when trigger"
+          fi
+
+      - name: Negative self-test (a task-pipeline:<name> skill must resolve to its doctrine file)
+        run: |
+          set -eu
+          cp -R . /tmp/doctrine-ptr-copy
+          python3 - <<'EOF'
+          p = "/tmp/doctrine-ptr-copy/plugins/task-pipeline/skills/task-pipeline/pipeline.example.json"
+          t = open(p, encoding="utf-8").read()
+          open(p, "w", encoding="utf-8").write(
+              t.replace('"task-pipeline:grill"', '"task-pipeline:interrogation"'))
+          EOF
+          if python3 /tmp/doctrine-ptr-copy/test/validate.py; then
+            echo "ERROR: validator passed a stage pointed at doctrine that does not exist"
+            exit 1
+          else
+            echo "OK: validator requires every task-pipeline:<name> to resolve to references/<name>.md"
+          fi
+
       - name: install.sh syntax check
         run: bash -n install.sh
 

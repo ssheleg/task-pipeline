@@ -61,9 +61,23 @@ negative self-test in `.github/workflows/validate.yml`.
   mattered*, never a diff summary.
 - `README.md` — when a user-visible capability, install path or stage changes.
 - `references/artifacts.md` — when the repo layout changes.
+- `docs/superpowers/retro.md` — when a run of the pipeline **on this repo**
+  diverged: prune the standing instructions first (retirement triggers, cap of ten,
+  every deletion logged), stamp the run, then write the entry
+  ([`references/retrospective.md`](plugins/task-pipeline/skills/task-pipeline/references/retrospective.md)).
 - `docs/superpowers/` holds this repo's **historical** design records (v0.1.0).
   They carry a "superseded" banner; do not update them to the current shape and do
   not treat them as the source of truth.
+
+## Knowledge graph
+
+Optional here, recommended by the skill itself
+([`references/knowledge-graph.md`](plugins/task-pipeline/skills/task-pipeline/references/knowledge-graph.md)).
+If `graphify-out/` exists in this checkout, refresh it in the same change as the
+docs (`/graphify . --update`) and check it against them — a hub no doc names, a doc
+naming a file the graph no longer has. It is git-ignored and derived: never edit it
+by hand. Not installed →
+`uv tool install graphifyy` → `graphify install` → `/graphify .`.
 
 ## Knowledge wiki
 

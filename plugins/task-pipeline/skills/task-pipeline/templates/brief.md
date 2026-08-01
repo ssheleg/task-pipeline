@@ -19,17 +19,25 @@ premise if the run leaves it wrong.
 | Source | What it says about this task | Fresh? | Authority | Stale after this run? |
 |---|---|---|---|---|
 | `docs/adr/NNNN-….md` | … | YYYY-MM | decision | no |
+| `graphify-out/graph.json` | reach: what calls it, what breaks if it moves | built YYYY-MM-DD | index | **yes — refresh at stage 9** |
 | wiki: `projects/…/concepts/…` | … | YYYY-MM | context | **yes — update at stage 9** |
 | `CLAUDE.md` | test/lint/deploy commands, house rules | current | convention | no |
 
-Precedence when two disagree: **code > host docs and ADRs > wiki > memory.** The
-operator outranks every document — but only **out loud**: an override quoted
-against its source is a recorded decision, an unquoted one is an undetected
+Precedence when two disagree, in one direction: **code first, then host docs and
+ADRs, then the code graph, then the wiki, then memory.** The graph points; the code
+decides. The operator outranks every document — but only **out loud**: an override
+quoted against its source is a recorded decision, an unquoted one is an undetected
 divergence.
 
 - **Doc repos / hosted doc systems this project names:** … (or `none`)
 - **Knowledge wiki:** installed / not installed
   ([obsidian-wiki](https://github.com/ar9av/obsidian-wiki); recommended, never a gate)
+- **Retro standing instructions:** `docs/superpowers/retro.md` — none / N in force
+  (read **in full**; list which ones bind this run, and stamp each as it fires —
+  that date is the only evidence behind stage 10's cold-retirement rule)
+- **Code graph:** built / installed-not-built / not installed
+  ([graphify](https://github.com/Graphify-Labs/graphify); recommended, never a gate —
+  built → its row above carries the build date and stage 9 refreshes it)
 
 ## Scope
 
@@ -79,7 +87,7 @@ is not neutral — it is a scheduled interruption.
 |---|---|---|
 | run-wide | Model for this run | … (most capable available unless overridden; per-stage overrides here) |
 | run-wide | Decide autonomously vs escalate to me | … |
-| 0 Harvest | Doc sources beyond this repo — other repos, hosted docs, the knowledge wiki; and may stage 9 write to them? | … (another repo is outward: propose + PR, never a direct push) |
+| 0 Harvest | Doc sources beyond this repo — other repos, hosted docs, the knowledge wiki, the code graph; and may stage 9 write to them? | … (another repo is outward: propose + PR, never a direct push; graph built / not built) |
 | 1 Docs | External libs/APIs/SDKs in play; any context7 can't resolve → where their docs live | … |
 | 2 Decompose | Platform (several capabilities/surfaces) or one module? If platform — deploy cadence: per module, or once at the end | … |
 | 2–3 Spec | UI verdict (arms super-ux); scenario-tracing waiver, if any | … |
@@ -92,8 +100,8 @@ is not neutral — it is a scheduled interruption.
 | 7 Deploy | Target + path; release automation on/off; deploy-from-main rule | … |
 | 7 Deploy | **Authorization** — standing go, or ask every time? | … |
 | 8 Post-deploy | Where logs / health live (app name, endpoint, workflow) | … |
-| 9 Docs+wiki | Which module docs / runbooks this change updates; wiki sync yes/no; which stale ledger rows get fixed | … |
-| 10 Acceptance | Who signs off; where deferred REQs get tracked (issue tracker / backlog) | … |
+| 9 Docs+wiki | Which module docs / runbooks this change updates; wiki sync yes/no; **code-graph refresh yes/no** (`/graphify . --update`); which stale ledger rows get fixed | … |
+| 10 Acceptance | Who signs off; where deferred REQs get tracked (issue tracker / backlog); **retro file** — `docs/superpowers/retro.md` present? which standing instructions bind this run? | … |
 
 > **Deploy authorization has a hard floor.** A standing go counts only if it is
 > **specific** — named target and named preconditions ("staging, once lint and the

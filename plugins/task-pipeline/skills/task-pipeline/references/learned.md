@@ -133,3 +133,11 @@ answer would have exposed it in a minute.
 | 6 Tests | 4, 5, 10, 11 — every new check probed both ways, measured, and asserted on its exit code |
 | 9 Docs | 8, 14 — every number computed, every target resolvable |
 | 10 Acceptance | 1, 3, 6, 7 — axis rotation recorded, closure verified against artefacts, classes swept, ratchets printed |
+
+**This file is the shipped list; a project keeps its own.** These fourteen were
+earned on someone else's build and travel with the skill. The lessons *your*
+project buys go in its retro ([`retrospective.md`](retrospective.md) →
+`docs/superpowers/retro.md`), where they are capped, pruned and retired — and a
+lesson there that would be true in any repository belongs here instead, as an issue
+upstream. A local file that accumulates universal rules is a fork of this one that
+nobody named.

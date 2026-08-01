@@ -13,6 +13,7 @@ better, plus one that is required only for user-facing work.
 | Stage | Doctrine |
 |---|---|
 | 0 Knowledge harvest (pre-grill) | `references/knowledge-sources.md` |
+| 0 + 9 The code graph (the tool is optional; the doctrine ships) | `references/knowledge-graph.md` |
 | 0 Intake grill | `references/grill.md` |
 | 2 Brainstorm | `references/brainstorm.md` |
 | 2 Decompose (platforms only) | `references/decomposition.md` |
@@ -21,6 +22,7 @@ better, plus one that is required only for user-facing work.
 | 5 Build (isolation, subagents, fix loop) | `references/build.md` + `references/review.md` |
 | 5–6 TDD + suite gate | `references/tdd.md` |
 | 10 Acceptance (REQ close-out) | `references/acceptance.md` |
+| 10 Retrospective (the run's last act: prune, stamp, entry) | `references/retrospective.md` |
 | 10 + any audit (finding what's missing) | `references/audit.md` |
 | any repeating loop | `references/loop-guard.md` |
 
@@ -32,6 +34,7 @@ better, plus one that is required only for user-facing work.
 | **context7** (MCP) | stage 1 docs study | Recommended (web-search fallback) | connect the context7 MCP server |
 | **Figma** (MCP) | stage 3 UX track, when the project designs visually — super-ux mirrors each `SCR-` screen/state into a frame | Optional, **UI + Figma-on only**. Absent → super-ux degrades to text-only *by itself and never blocks*, so shipping a UI feature with no mockups becomes a silent scope call — which is why the stage-0 sweep decides it | connect the Figma MCP server (`/mcp`, or your claude.ai connectors) |
 | **[obsidian-wiki](https://github.com/ar9av/obsidian-wiki)** (`wiki-query`, `wiki-update`) | **stage 0 harvest** (query what's already known) **+ stage 9 sync** | **Recommended** — never a gate; absent → harvest runs on repo docs alone | `pip install obsidian-wiki` → `obsidian-wiki setup --vault /path/to/your/vault` |
+| **[graphify](https://github.com/Graphify-Labs/graphify)** (`/graphify`, `graphify query\|affected\|god-nodes`) | **stage 0 harvest** (reach: what calls this, what breaks if it moves) **+ stage 9 refresh + the graph↔docs divergence check** ([`knowledge-graph.md`](knowledge-graph.md)) | **Recommended** — never a gate; absent → the harvest greps instead, and the divergence axis is unavailable | `uv tool install graphifyy` → `graphify install` → `/graphify .` |
 | ~~superpowers~~ | — | **Not a dependency.** Stages 2/4/5/6 run on the built-in doctrine above. See *Optional bridge* | — |
 | ~~grill-me / grilling~~ | — | **Not a dependency.** The stage-0 grill is built in (`references/grill.md`) | — |
 
@@ -73,6 +76,13 @@ Pipeline companions (stage doctrine is built in — nothing to install for it):
                            pip install obsidian-wiki
                            obsidian-wiki setup --vault /path/to/your/vault
                          (running without it — the harvest uses repo docs only)
+  ✗ graphify           — recommended: stage 0 asks it what reaches what,
+                         stage 9 refreshes it beside the docs and the wiki:
+                           uv tool install graphifyy
+                           graphify install
+                           /graphify .        (once, in this project)
+                         (running without it — no reach queries, no graph↔docs
+                          divergence check)
 
 🧠 Model for this run: recommended <top tier available>. You're on <current>.
    /model <id> to switch, or "keep current", or name per-stage overrides.
@@ -88,6 +98,11 @@ Rules:
   `wiki-query`/`wiki-update`. Present → say `✓ ready` and use it in the harvest.
   Absent → print the two install lines **once** and continue; never ask twice in a
   run and never block a stage on it ([`knowledge-sources.md`](knowledge-sources.md)).
+- **graphify**: detect via `graphify-out/graph.json` (built → `✓ ready`, query it in
+  the harvest) or a resolving `graphify` binary with no `graphify-out/` (installed,
+  not built → offer the one-line `/graphify .`). Absent → print the install lines
+  **once** and continue. Same law as the wiki: recommended, never a gate, never
+  asked twice ([`knowledge-graph.md`](knowledge-graph.md)).
 - **Figma MCP**: flag it only when the task is user-facing **and** the project
   designs visually — read `docs/ux/foundation.md` → *Design tooling* first; no
   record yet means the choice itself is a stage-0 question (super-ux's default is
