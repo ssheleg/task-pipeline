@@ -144,7 +144,13 @@ a fenced code block must point at a path that exists.
    [`.github/workflows/release.yml`](.github/workflows/release.yml) re-runs the
    validator, checks the tag against the manifests, cuts a GitHub release from that
    CHANGELOG section, and smoke-tests `npx` from a clean checkout.
-4. `npm publish` stays a **human step** (2FA) and is intentionally not automated.
+4. **`npm publish` runs in the same workflow**, in a second job armed by the repo
+   variable `PUBLISH_NPMJS=true` — it was the one human step in every release, and
+   the registry drifted behind the tags because of it. Auth is either the
+   `NPM_TOKEN` secret (a **granular automation** token; a classic one is still
+   refused by 2FA) or npm trusted publishing via OIDC, which needs no long-lived
+   credential. With `PUBLISH_NPMJS` unset or false it stays manual, and 2FA makes
+   that a human step.
 5. Refresh the local installs: `claude plugin marketplace update task-pipeline` →
    `claude plugin update task-pipeline@task-pipeline` →
    `npx skills update task-pipeline --global --yes`, then restart the agent.

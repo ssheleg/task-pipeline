@@ -172,7 +172,7 @@
     "trigger": "tag",
     "steps": [
       "create a GitHub release from the matching CHANGELOG section",
-      "npm publish (task-pipeline-skill) — human 2FA step, not automated"
+      "npm publish (task-pipeline-skill) — a second job in the same workflow, armed per repository by the PUBLISH_NPMJS variable (NPM_TOKEN granular automation token, or trusted publishing via OIDC); unarmed it falls back to a human 2FA step"
     ],
     "verify": [
       "CI green on the tagged commit",

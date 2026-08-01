@@ -24,7 +24,10 @@ Human-facing entry points: [`README.md`](README.md) (what it is),
 | Deploy / release | push a `vX.Y.Z` tag → `.github/workflows/release.yml` (armed by the repo variable `RELEASE_ENABLED`) |
 | Post-deploy check | the release workflow's own `npx` smoke test; then `npm view task-pipeline-skill version` |
 
-`npm publish` is a **human 2FA step** and is intentionally never automated.
+`npm publish` runs in the release workflow's second job, armed per repository by the
+variable `PUBLISH_NPMJS` (auth: the `NPM_TOKEN` secret — a **granular automation**
+token — or npm trusted publishing via OIDC). Unarmed, it falls back to a human 2FA
+step.
 
 ## Branch and commit policy
 
