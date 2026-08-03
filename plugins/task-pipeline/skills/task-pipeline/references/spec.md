@@ -9,6 +9,16 @@ Writing the approved design down so a zero-context implementer — human or suba
 > *Third-party*), extended here with the UX track and the Global Constraints block
 > that stages 4–5 depend on.
 
+## Contents
+
+- Order of operations
+- UX track (user-facing tasks only)
+- Write the spec
+- Module dossier — when the run is one brick of a platform
+- Self-review — before showing it
+- Locked contracts are decisions — the register, not only the spec
+- GATE (manual)
+
 ## Order of operations
 
 For a **user-facing task** (stage-2 UI verdict = yes) the UX chain runs **first** —

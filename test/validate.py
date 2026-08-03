@@ -62,8 +62,27 @@ else:
             fail("SKILL.md: empty/missing description")
         else:
             desc = dm.group(1).strip().strip('"').strip("'")
-            if not desc.startswith("Use when"):
-                fail("SKILL.md: description must start with 'Use when …' (canon)")
+            # Anthropic's authoring guidance: the description "must include both what
+            # the Skill does and when Claude should use it", written in third person,
+            # and their own examples lead with the capability — "Extracts text and
+            # tables from PDF files… Use when working with PDF files."
+            #
+            # This used to demand the string start with "Use when", which enforced the
+            # WHEN half and let the WHAT half be optional. The rule now checks what the
+            # guidance actually asks for: a capability statement, then the trigger.
+            _uw = desc.find("Use when")
+            if _uw < 0:
+                fail("SKILL.md: description has no 'Use when …' clause — the trigger half "
+                     "is what Claude matches a request against")
+            elif _uw < 40:
+                fail("SKILL.md: description opens with the trigger and never says what the "
+                     "skill DOES — lead with the capability in third person, then 'Use when …' "
+                     "(Anthropic skill-authoring guidance)")
+            if len(desc) > 1024:
+                fail(f"SKILL.md: description is {len(desc)} chars, the limit is 1024")
+            if re.search(r"\b(I can|I'll|you can use this)\b", desc, re.I):
+                fail("SKILL.md: description must be third person — it is injected into the "
+                     "system prompt, and a first/second-person voice breaks discovery")
             if not re.search(r"[а-яё]", desc, re.I):
                 fail("SKILL.md: description must carry Russian trigger aliases beside the English ones (canon)")
         if len(fm) > 1024:
@@ -179,6 +198,44 @@ for r in (
     elif os.path.getsize(rp) < 1500:
         fail(f"references/{r}: too small to be the stage's doctrine (stub?)")
 
+# Anthropic's Skill authoring guidance: "For reference files longer than 100 lines,
+# include a table of contents at the top. This ensures Claude can see the full scope
+# of available information even when previewing with partial reads." That preview is
+# real — a long file gets `head -100`'d, and references/stages.md is 500 lines: an
+# agent could read stages 0 and 1 and never learn stage 9 exists.
+#
+# The list is COMPARED against the headings, not merely required to be present. A
+# contents list restated by hand is a second source that goes stale on the next
+# heading — the failure references/documentation.md is written against.
+for _fn in sorted(os.listdir(refdir)):
+    if not _fn.endswith(".md"):
+        continue
+    _p = os.path.join(refdir, _fn)
+    _txt = open(_p, encoding="utf-8").read()
+    if _txt.count("\n") <= 100:
+        continue
+    _heads, _infence = [], False
+    for _ln in _txt.split("\n"):
+        if re.match(r"^\s*(```|~~~)", _ln):
+            _infence = not _infence
+            continue
+        if not _infence and _ln.startswith("## "):
+            _heads.append(_ln[3:].strip())
+    if "Contents" not in _heads:
+        fail(f"references/{_fn}: {_txt.count(chr(10))} lines and no '## Contents' — a "
+             "reference over 100 lines needs one, or a partial read shows an agent "
+             "only the sections that happen to come first")
+        continue
+    _m = re.search(r"^## Contents\s*\n\n((?:- .*\n)+)", _txt, re.M)
+    _listed = [l[2:].strip() for l in _m.group(1).splitlines()] if _m else []
+    _expected = [h for h in _heads if h != "Contents"]
+    if _listed != _expected:
+        _missing = [h for h in _expected if h not in _listed]
+        _stale = [h for h in _listed if h not in _expected]
+        fail(f"references/{_fn}: the Contents list disagrees with the headings — "
+             f"missing {_missing or '[]'}, stale {_stale or '[]'}"
+             + ("" if _missing or _stale else " (same items, wrong order)"))
+
 # Progressive disclosure means an agent loads only what SKILL.md points it to,
 # directly or transitively. A reference nothing links to is dead context: it
 # ships, it passes every other check, and it is never read.
@@ -196,13 +253,62 @@ while _frontier:
 for _orphan in sorted({f for f in os.listdir(refdir) if f.endswith(".md")} - _seen):
     fail(f"references/{_orphan}: unreachable from SKILL.md — dead context, wire it in or delete it")
 
+# Behavioural evaluations. Anthropic's guidance: "Create evaluations BEFORE writing
+# extensive documentation", "At least three evaluations created", and the enterprise
+# page requires 3-5 queries per Skill covering should-trigger, should-not-trigger and
+# ambiguous cases, tested across the models in use.
+#
+# This repo's 46 structural guards prove the skill is well-FORMED. Until this suite
+# runs, nothing proves it BEHAVES — that it fires on the right request, stays quiet
+# on a question, and actually performs the steps it documents. Shipping the suite is
+# the part a check can enforce; running it is a human/agent step, and evals/run.py
+# deliberately never reports a pass it did not observe.
+_evals_dir = os.path.join(ROOT, "evals")
+if not os.path.isdir(_evals_dir):
+    fail("missing evals/ — a skill with no behavioural evaluations is a skill whose "
+         "structure is proven and whose behaviour is assumed")
+else:
+    for _f in ("task-pipeline.evals.json", "run.py", "RESULTS.md"):
+        if not os.path.isfile(os.path.join(_evals_dir, _f)):
+            fail(f"missing evals/{_f}")
+    _runner = os.path.join(_evals_dir, "run.py")
+    if os.path.isfile(_runner):
+        _r = subprocess.run([sys.executable, _runner, "--list"],
+                            cwd=ROOT, capture_output=True, text=True)
+        if _r.returncode != 0:
+            fail("evals/run.py rejects the suite: "
+                 + (_r.stdout + _r.stderr).strip()[-400:])
+
 # The open-source surface. These are the files a stranger looks for before they
 # trust, use or contribute to the repo; one of them silently disappearing in a
 # refactor is invisible in review and expensive at the moment someone needs it.
 for r in ("README.md", "LICENSE", "CONTRIBUTING.md", "SECURITY.md",
-          "CODE_OF_CONDUCT.md", "CLAUDE.md"):
+          "CODE_OF_CONDUCT.md", "CLAUDE.md", "SKILL-CARD.md"):
     if not os.path.isfile(os.path.join(ROOT, r)):
         fail(f"missing root file: {r}")
+
+# The registry entry Anthropic's enterprise guidance asks every organisation to keep
+# (purpose, owner, version, dependencies, evaluation status), plus an honest pass
+# over its risk-tier table. This skill scores three "High" indicators — shipped
+# scripts, MCP references, tool invocations — and a reviewer who cannot see that
+# stated has to reverse-engineer it from 23 files.
+_card_p = os.path.join(ROOT, "SKILL-CARD.md")
+if os.path.isfile(_card_p):
+    _card = open(_card_p, encoding="utf-8").read()
+    for _field in ("Purpose", "Owner", "Version", "Dependencies", "Evaluation status"):
+        if f"**{_field}**" not in _card:
+            fail(f"SKILL-CARD.md: no '{_field}' row — that is a registry field the "
+                 "enterprise guidance requires")
+    for _ind in ("Code execution", "MCP server references", "Tool invocations",
+                 "Filesystem access scope", "Instruction manipulation",
+                 "Network access patterns", "Hardcoded credentials"):
+        if _ind not in _card:
+            fail(f"SKILL-CARD.md: risk indicator {_ind!r} is unanswered — an omitted "
+                 "row reads as 'does not apply', and here three of them do")
+    # A card that claims a version the manifests do not carry is worse than none.
+    if plg_ver and f"| **Version** | {plg_ver} |" not in _card:
+        fail(f"SKILL-CARD.md: Version row does not read {plg_ver!r} — the card is a "
+             "registry entry, and a stale one misroutes a rollback")
 
 # The negative self-tests are the only proof the guards above are not decoration,
 # so they must be runnable on a maintainer's machine and not just on CI. `sed -i`

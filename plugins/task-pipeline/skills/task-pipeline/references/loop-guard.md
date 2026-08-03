@@ -18,6 +18,14 @@ axis, don't push harder): [`audit.md`](audit.md) → *Every pass changes the axi
 Both can bind one run. Use this file's trips for edits, that file's crossover for
 searches.
 
+## Contents
+
+- Bookkeeping — the thing that makes detection mechanical
+- Detection — any one of these trips the guard
+- The break protocol
+- When to stop and hand back
+- Rationalizations
+
 ## Bookkeeping — the thing that makes detection mechanical
 
 You cannot detect churn from memory, especially after compaction. Every repeating

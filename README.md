@@ -464,6 +464,32 @@ Code, and **any exit code other than 2 is non-blocking, so a crashing guard fail
 open** and stops guarding without announcing it. Elsewhere the run is `ungated` and
 must say so.
 
+### Held to Anthropic's own Skill authoring guidance
+
+Audited against the four Agent Skills pages. Most of it already held — `name`
+13/64 chars, `description` inside 1024, `SKILL.md` 334/500 lines, all 23 references
+linked **directly** from `SKILL.md`, 436 KB against a 30 MB ceiling. What did not,
+now does:
+
+- **Every reference over 100 lines carries a `## Contents` list**, and the list is
+  *compared against the file's own headings* rather than trusted. The guidance is
+  explicit about why: a long file gets previewed with a partial read, and
+  `stages.md` is 500 lines.
+- **A behavioural evaluation suite** (`evals/`) — 13 evaluations across the five
+  dimensions the enterprise guidance names: should-trigger, should-not-trigger,
+  ambiguous, coexistence, instruction-following. `evals/run.py` validates the suite
+  and prints the protocol; it **never reports a pass**, because no runner exists
+  upstream and a script claiming to have run a model would be the exact failure this
+  skill is written against. `evals/RESULTS.md` carries the honest state.
+- **A copyable run checklist** and a **stated degree of freedom per stage** — high
+  in the open field (brainstorm), low on the narrow bridge (TDD order, deploy, the
+  matrix walk).
+- **[`SKILL-CARD.md`](SKILL-CARD.md)** — the registry entry an enterprise reviewer
+  needs, with an honest pass over the risk-tier table. This skill scores three
+  *High* indicators and says so, along with what a consumer should know rather than
+  discover: author and reviewer are the same person, commits are unsigned, and the
+  eval suite has not been executed.
+
 ### The retrospective — the run teaches the next run, and the list stays short
 
 Every gate in this flow is good at *this* run and blind across runs. So the same
@@ -717,6 +743,8 @@ recommendation, so you arm the whole run in one exchange. Detail:
 | [`references/retrospective.md`](plugins/task-pipeline/skills/task-pipeline/references/retrospective.md) | the project retro: the three grades of fix, the mandatory prune, the cap of ten |
 | [`references/model-tiering.md`](plugins/task-pipeline/skills/task-pipeline/references/model-tiering.md) | model policy, the `/model` reminder, overrides |
 | [`templates/`](plugins/task-pipeline/skills/task-pipeline/templates/README.md) | brief, carry-over ledger, `CONTEXT.md` and ADR skeletons, the doc map, both registers, the retro and its archive, the seeded `docgate.sh`, a worked hook |
+| [`SKILL-CARD.md`](SKILL-CARD.md) | the registry entry and risk-tier disclosure a reviewer needs before deploying it |
+| [`evals/`](evals/RESULTS.md) | the behavioural evaluation suite, its protocol, and what has actually been observed |
 | [`CHANGELOG.md`](CHANGELOG.md) | every release, with the reasoning behind it |
 | [`CONTRIBUTING.md`](CONTRIBUTING.md) | dev setup, the validator, the version-sync rule, release flow |
 

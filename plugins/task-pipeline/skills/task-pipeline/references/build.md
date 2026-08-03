@@ -29,6 +29,17 @@ the work; the gates, the artifacts and the review discipline do not. Say plainly
 that the run is inline, since a self-review is weaker evidence than a fresh
 reviewer's.
 
+## Contents
+
+- 1. Isolation
+- 2. Workspace and ledger
+- 3. Models
+- 4. The task loop
+- 5. Final whole-branch review
+- 6. Integrate, then finish
+- GATE (auto)
+- Rationalizations
+
 ## 1. Isolation
 
 Work never starts on `main`/`master` without the operator's explicit consent

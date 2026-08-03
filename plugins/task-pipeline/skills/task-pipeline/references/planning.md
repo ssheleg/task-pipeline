@@ -9,6 +9,18 @@ Built into this skill; nothing to install.
 > *Third-party*), extended with the dependency graph, parallel groups and
 > file-ownership rules this pipeline's stage-5 subagent build depends on.
 
+## Contents
+
+- Audience
+- Before writing tasks
+- Task right-sizing
+- Plan header — required
+- Task structure — required
+- No placeholders
+- Self-review — before handing off
+- This stage settles nothing — and that is a rule, not an omission
+- GATE (auto)
+
 ## Audience
 
 Assume a skilled developer who knows nothing about this codebase, this domain or

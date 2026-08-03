@@ -1,5 +1,65 @@
 # Changelog
 
+## v1.8.0 — 2026-08-03
+
+### Added — the skill now meets Anthropic's own authoring guidance, measurably
+
+Audited against the four Agent Skills pages (overview, best practices, enterprise,
+API guide). Most of the spec already held — `name` 13/64 chars, `description` inside
+1024, `SKILL.md` 334/500 lines, all 23 references linked **directly** from SKILL.md,
+forward slashes only, 436 KB against a 30 MB ceiling, and the plan-validate-execute
+pattern the guidance describes is exactly the stage 3→4 set-equality check. Five
+things did not.
+
+**Every reference over 100 lines now carries a `## Contents` list — 21 files, from
+zero.** The guidance is explicit about why: *"This ensures Claude can see the full
+scope of available information even when previewing with partial reads."* That
+preview is real, and `references/stages.md` is 500 lines — an agent that previewed
+it saw stages 0 and 1 and could not learn stage 9 existed. The list is **compared
+against the file's own headings**, not merely required to be present, because a
+hand-maintained contents list is a second source that goes stale on the next
+heading.
+
+**A behavioural evaluation suite, where there was none.** 46 structural guards prove
+the skill is well-*formed*; nothing proved it *behaves*. `evals/` now carries 13
+evaluations across the five dimensions the enterprise page names — should-trigger,
+should-not-trigger, ambiguous, coexistence with super-ux, and instruction-following
+(does phase 1 really run before the first question; does stage 9 walk the matrix and
+print ratchets; does a stage-5 subagent refuse to write the register; does stage 10
+run the ladder walk before the table).
+
+`evals/run.py` validates the suite and prints the protocol. **It never reports a
+pass**, because Anthropic ships no runner and a script claiming to have executed a
+model would be the exact failure this repository is written against.
+`evals/RESULTS.md` records the honest state — *authored, zero models exercised, zero
+runs* — as a ratchet, so "46 of 46 green" is never read as "the skill is known to
+work".
+
+**A copyable run checklist and a stated degree of freedom per stage.** The guidance
+recommends a checklist Claude copies into its response for complex workflows, and
+matching specificity to fragility — high freedom in the open field, low on the
+narrow bridge. Every stage now declares which it is and why: stage 2 is high (many
+designs are valid), stages 5, 7 and 9 are low (TDD order, an irreversible deploy, a
+mechanical matrix walk).
+
+**`SKILL-CARD.md`** — the registry entry the enterprise guidance asks for (purpose,
+owner, version, dependencies, evaluation status) plus an honest pass over its
+risk-tier table. This skill scores **three High indicators** — shipped scripts, MCP
+references, tool invocations — and says so, along with the three things a consumer
+should know rather than discover: author and reviewer are the same person, commits
+are unsigned, and behavioural evidence is missing rather than thin.
+
+### Changed
+
+- **The description leads with what the skill does, then the trigger** — the shape
+  Anthropic's own examples use. The validator used to *require* the string start with
+  "Use when", which enforced the WHEN half and left the WHAT half optional; it now
+  checks for both, plus the third-person voice the guidance requires.
+- MCP tools are named fully qualified (`context7:resolve-library-id`), because
+  without the server prefix Claude may fail to locate the tool.
+
+Four new guards, each with a negative self-test watched failing.
+
 ## v1.7.2 — 2026-08-03
 
 ### Fixed — nine findings from a post-release investigation of v1.7.1

@@ -5,6 +5,12 @@ a resumed or handed-off run always knows where to look. This is the recommended
 structure; a host project may relocate roots via its `CLAUDE.md`, but keep the
 shape.
 
+## Contents
+
+- In the host project
+- Stage → artifact map
+- This repo (task-pipeline itself), for reference
+
 ## In the host project
 
 ```

@@ -7,6 +7,19 @@ None of them asks *"does this still contain everything that was asked for?"*
 That is this stage's only job: **go back to the brief and account for every
 requirement.** It is what turns the pipeline from a funnel into a circle.
 
+## Contents
+
+- Why a stage and not a gate
+- First, the ladder walk — what the list itself is missing
+- Inputs
+- Output — the coverage table
+- Evidence, not assertion
+- Several repositories — a submodule is finished when its parent says so
+- The closing question
+- The retrospective — the run's last act
+- GATE (manual)
+- When the answer is "something's missing"
+
 ## Why a stage and not a gate
 
 The loss this catches doesn't happen inside a stage — it happens **on the seams**.

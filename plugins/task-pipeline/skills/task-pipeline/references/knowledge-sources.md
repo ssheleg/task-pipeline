@@ -8,6 +8,19 @@ The same source list closes the loop at **stage 9**: what was read at the start 
 what gets updated at the end. A source good enough to answer a question is a source
 that goes stale when the answer changes.
 
+## Contents
+
+- Why this is a phase and not "explore a bit first"
+- The sources, in the order to try them
+- The retro's standing instructions — an instruction source, not background
+- The code graph — recommended
+- The knowledge wiki — recommended
+- How to harvest — retrieval, not reading
+- Record it — the source ledger
+- Phase 2 — validate the answers against the harvest
+- Close the loop — stage 9 updates what stage 0 read
+- Rationalizations
+
 ## Why this is a phase and not "explore a bit first"
 
 An agent that starts asking without harvesting spends the operator's turns on

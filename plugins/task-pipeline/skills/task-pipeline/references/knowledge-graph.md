@@ -15,6 +15,14 @@ It is **recommended, never required**. No stage blocks on a missing graph; the
 harvest simply runs on the sources it has
 ([`knowledge-sources.md`](knowledge-sources.md)).
 
+## Contents
+
+- Detect it, and install it once
+- Stage 0 — query the graph before you ask the person
+- Stage 9 — the close-out has three artifacts, not two
+- The divergence check — the graph against the docs
+- Rationalizations
+
 ## Detect it, and install it once
 
 Detect, in this order:

@@ -12,6 +12,18 @@ approved design — not at code.
 > the UI verdict is a required output, and the spec write-up moved to stage 3
 > ([`spec.md`](spec.md)).
 
+## Contents
+
+- The hard gate
+- Input: the brief, not a blank page
+- The loop
+- Design for isolation and clarity
+- Working in an existing codebase
+- UI detection — a required output
+- The approved design is a set of decisions — record them
+- GATE (manual)
+- Rationalizations
+
 ## The hard gate
 
 **No implementation action before the operator approves a design.** No code, no

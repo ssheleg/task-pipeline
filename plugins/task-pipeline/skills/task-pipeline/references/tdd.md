@@ -7,6 +7,16 @@ into this skill; nothing to install.
 > [obra/superpowers](https://github.com/obra/superpowers) (MIT — see `LICENSE` →
 > *Third-party*), with the stage-6 suite gate added.
 
+## Contents
+
+- The iron law
+- Red → green → refactor
+- Tests that stay honest
+- Stage 6 — consolidation and the suite gate
+- When stuck
+- Rationalizations
+- Red flags — stop and start over
+
 ## The iron law
 
 ```

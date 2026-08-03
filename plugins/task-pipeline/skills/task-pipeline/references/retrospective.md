@@ -20,6 +20,17 @@ Every run writes a **stamp** and runs the **prune**. Only a run that *diverged*
 writes an entry. A retro that is empty after a messy run is the exact failure this
 file exists to stop.
 
+## Contents
+
+- Write the entry only for a divergence — and name the layer that owned it
+- Every lesson carries its commit
+- Rotation — the archive is how pruning stops losing things
+- Three grades of fix — take the highest one that can work
+- The prune — mandatory, and it runs BEFORE the new entry is written
+- The loop closes at stage 0
+- Where a lesson goes when it is not about this project
+- Rationalizations
+
 ## Write the entry only for a divergence — and name the layer that owned it
 
 An entry is owed when the run did not go as planned: a gate reopened, a stage was

@@ -13,6 +13,14 @@ to be enforced and is not is the same failure as a gate that prints `FAIL` and e
 
 ---
 
+## Contents
+
+- The table — trigger · check · exit criterion
+- The incidents, so the rules are not abstract
+- The two that are not in the table, and why
+- The one instruction that would have prevented the most
+- Where these bind in the pipeline
+
 ## The table — trigger · check · exit criterion
 
 | # | Rule | Trigger | The check | Exit criterion |

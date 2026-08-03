@@ -19,6 +19,20 @@ elsewhere and is not restated here:
 
 ---
 
+## Contents
+
+- Axis A — the stage gate type
+- Axis B — the enforcement mechanism
+- Before you run a check
+- Anatomy of a project gate
+- Writing the check itself
+- Probing — plant, run, restore
+- The false-positive budget
+- Ratchets
+- Where a gate runs
+- Adding a check to an existing gate
+- Rationalizations
+
 ## Axis A — the stage gate type
 
 From [`../pipeline.schema.json`](../pipeline.schema.json), one per stage:

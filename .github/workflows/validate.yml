@@ -832,6 +832,83 @@ jobs:
             echo "OK: validator compares the sweep per stage as a topic set"
           fi
 
+      - name: Negative self-test (a long reference's Contents must match its headings)
+        run: |
+          set -eu
+          rm -rf /tmp/toc-copy && cp -R . /tmp/toc-copy
+          python3 - <<'EOF'
+          p = "/tmp/toc-copy/plugins/task-pipeline/skills/task-pipeline/references/stages.md"
+          t = open(p, encoding="utf-8").read()
+          old = "## The program loop"
+          assert old in t, "PLANT MISSED"
+          open(p, "w", encoding="utf-8").write(
+              t.replace(old, "## A section nobody listed\n\nbody.\n\n" + old, 1))
+          EOF
+          if python3 /tmp/toc-copy/test/validate.py; then
+            echo "ERROR: validator passed a Contents list that no longer matches the headings — a hand-maintained list is a second source, and a partial read trusts it"
+            exit 1
+          else
+            echo "OK: validator compares each long reference's Contents against its own headings"
+          fi
+
+      - name: Negative self-test (the evaluation suite must cover every category)
+        run: |
+          set -eu
+          rm -rf /tmp/evals-copy && cp -R . /tmp/evals-copy
+          python3 - <<'EOF'
+          import json
+          p = "/tmp/evals-copy/evals/task-pipeline.evals.json"
+          d = json.load(open(p, encoding="utf-8"))
+          n = len(d["evals"])
+          d["evals"] = [e for e in d["evals"] if e["category"] != "coexistence"]
+          assert len(d["evals"]) < n, "PLANT MISSED"
+          json.dump(d, open(p, "w", encoding="utf-8"), indent=2)
+          EOF
+          if python3 /tmp/evals-copy/test/validate.py; then
+            echo "ERROR: validator passed an eval suite with a missing dimension — coexistence is where a broad description steals triggers from narrower skills"
+            exit 1
+          else
+            echo "OK: validator runs evals/run.py and requires all five dimensions"
+          fi
+
+      - name: Negative self-test (the description must say WHAT before WHEN)
+        run: |
+          set -eu
+          rm -rf /tmp/desc-copy && cp -R . /tmp/desc-copy
+          python3 - <<'EOF'
+          import re
+          p = "/tmp/desc-copy/plugins/task-pipeline/skills/task-pipeline/SKILL.md"
+          t = open(p, encoding="utf-8").read()
+          t2 = re.sub(r'^description: ".*?"$',
+                      'description: "Use when running a substantial task через полный цикл."',
+                      t, count=1, flags=re.M | re.S)
+          assert t2 != t, "PLANT MISSED"
+          open(p, "w", encoding="utf-8").write(t2)
+          EOF
+          if python3 /tmp/desc-copy/test/validate.py; then
+            echo "ERROR: validator passed a description that opens with the trigger and never says what the skill does"
+            exit 1
+          else
+            echo "OK: validator requires the capability first, then 'Use when …'"
+          fi
+
+      - name: Negative self-test (the skill card must answer every risk indicator)
+        run: |
+          set -eu
+          rm -rf /tmp/card-copy && cp -R . /tmp/card-copy
+          python3 - <<'EOF'
+          p = "/tmp/card-copy/SKILL-CARD.md"
+          t = open(p, encoding="utf-8").read()
+          assert "MCP server references" in t, "PLANT MISSED"
+          open(p, "w", encoding="utf-8").write(t.replace("MCP server references", "Other notes"))
+          EOF
+          if python3 /tmp/card-copy/test/validate.py; then
+            echo "ERROR: validator passed a skill card with a risk indicator omitted — an omitted row reads as 'does not apply', and here three of them do"
+            exit 1
+          else
+            echo "OK: validator requires every risk indicator answered on the card"
+          fi
+
       - name: install.sh syntax check
         run: bash -n install.sh
 

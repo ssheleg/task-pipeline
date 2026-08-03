@@ -8,6 +8,15 @@ a time, each brick carrying its own documentation, spec, plan, build and gates.
 This runs at the end of **stage 2**, on the approved design, before any spec is
 written. It is skipped — explicitly, in writing — when the work is a single module.
 
+## Contents
+
+- When it applies
+- How to cut
+- The module map — the artifact
+- GATE (part of stage 2, manual)
+- The program loop — one brick at a time
+- Program done
+
 ## When it applies
 
 Decompose when any of these is true:

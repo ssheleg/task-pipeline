@@ -4,6 +4,22 @@
 have.** A hook is rung 5 of [`gates.md`](gates.md)'s ladder — the only mechanism
 that acts *while the agent is working* rather than after the commit.
 
+## Contents
+
+- The limit, before the capability
+- The events
+- The `PreToolUse` contract
+- What the hook receives
+- Where it lives
+- Matchers
+- Performance
+- What belongs in a hook, and what does not
+- A worked example
+- Debugging
+- Removing them
+- Leases are not reimplemented here
+- Rationalizations
+
 ## The limit, before the capability
 
 **Hooks exist only in Claude Code.** On Cursor, Codex and the other agents a skill

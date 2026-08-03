@@ -16,6 +16,20 @@ being written twice; write it once, here.
 
 ---
 
+## Contents
+
+- The inventory — four questions, answered before the first line of work
+- Registers and ids
+- Single source of truth
+- The Doc Loop
+- Changing your mind
+- The propagation matrix
+- Navigation
+- Intent and as-built
+- Registers are shared state
+- Where this binds in the pipeline
+- Rationalizations
+
 ## The inventory — four questions, answered before the first line of work
 
 Stage 0 answers these before the interview, and writes the answers to

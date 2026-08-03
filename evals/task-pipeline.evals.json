@@ -1,0 +1,166 @@
+{
+  "_note": "Behavioural evaluations for the task-pipeline skill. Format follows Anthropic's Skill authoring guidance (skills, query, expected_behavior), extended with `id`, `category` and `why` so a failure says which dimension broke. There is no built-in runner for these upstream; `run.py` validates the suite and prints the protocol, and results are recorded in RESULTS.md. Dimensions come from the enterprise guidance: triggering accuracy, isolation, coexistence, instruction following, output quality.",
+  "skill": "task-pipeline",
+  "models": ["haiku", "sonnet", "opus"],
+  "evals": [
+    {
+      "id": "TRIG-01",
+      "category": "should_trigger",
+      "skills": ["task-pipeline"],
+      "query": "run this through the pipeline: add per-tenant rate limiting to the public API",
+      "expected_behavior": [
+        "Invokes the task-pipeline skill rather than starting to design or code inline",
+        "Runs the stage-0 knowledge harvest BEFORE the first interview question, and writes a source ledger",
+        "Asks interview questions one at a time, each with a recommended answer",
+        "Writes no implementation code before a brief is committed and confirmed"
+      ],
+      "why": "The explicit invocation phrase is the primary trigger; the failure it guards is jumping to code."
+    },
+    {
+      "id": "TRIG-02",
+      "category": "should_trigger",
+      "skills": ["task-pipeline"],
+      "query": "полный цикл: перенести биллинг на нового провайдера",
+      "expected_behavior": [
+        "Invokes the task-pipeline skill from the Russian trigger alias",
+        "Continues the conversation in Russian while keeping identifiers and commands untranslated",
+        "Reaches stage 0 and does not skip the grill because the request looks clear"
+      ],
+      "why": "The description carries Russian trigger aliases; if they do not fire, half the operator's phrasings miss the skill."
+    },
+    {
+      "id": "TRIG-03",
+      "category": "should_trigger",
+      "skills": ["task-pipeline"],
+      "query": "build a support-agent dashboard with saved views and CSV export",
+      "expected_behavior": [
+        "Invokes the skill without an explicit pipeline phrase, because the request is a substantial build",
+        "Detects the user-facing surface and surfaces super-ux at intake",
+        "Records the UI verdict in the brief"
+      ],
+      "why": "Substantial work must trigger without the magic words, or the skill only helps people who already know it exists."
+    },
+    {
+      "id": "NOTRIG-01",
+      "category": "should_not_trigger",
+      "skills": ["task-pipeline"],
+      "query": "what does this regex do: ^(?!.*--)[a-z0-9-]{1,63}$",
+      "expected_behavior": [
+        "Answers the question directly",
+        "Does NOT invoke the task-pipeline skill",
+        "Does NOT create a TaskList or propose an intake grill"
+      ],
+      "why": "A question is not a build. Triggering here is the 'description too broad' failure the enterprise guidance names."
+    },
+    {
+      "id": "NOTRIG-02",
+      "category": "should_not_trigger",
+      "skills": ["task-pipeline"],
+      "query": "fix the typo in the README heading: 'Instalation' -> 'Installation'",
+      "expected_behavior": [
+        "Makes the edit directly",
+        "Does NOT invoke the task-pipeline skill",
+        "Does NOT run a ten-stage flow for a one-character change"
+      ],
+      "why": "A trivial mechanical edit run through ten gates teaches the operator to route around the skill."
+    },
+    {
+      "id": "NOTRIG-03",
+      "category": "should_not_trigger",
+      "skills": ["task-pipeline"],
+      "query": "explain how our auth middleware decides which routes are public",
+      "expected_behavior": [
+        "Reads the code and explains it",
+        "Does NOT invoke the task-pipeline skill"
+      ],
+      "why": "Explanation is not delivery."
+    },
+    {
+      "id": "AMB-01",
+      "category": "ambiguous",
+      "skills": ["task-pipeline"],
+      "query": "clean up the error handling in the payments module",
+      "expected_behavior": [
+        "Establishes scope before choosing a route — asks whether this is a bounded fix or a refactor worth the full cycle",
+        "Does NOT silently start the ten-stage flow, and does NOT silently start editing",
+        "States which route it is taking and why"
+      ],
+      "why": "The honest failure here is a silent pick in either direction; the skill should make the choice visible."
+    },
+    {
+      "id": "AMB-02",
+      "category": "ambiguous",
+      "skills": ["task-pipeline"],
+      "query": "add an `is_archived` field to the user model",
+      "expected_behavior": [
+        "Recognises that a schema field touches contracts, migrations and documentation even though the change is small",
+        "Either runs the flow or states explicitly which parts it is skipping and why",
+        "Does not treat 'small diff' as 'no decision to record'"
+      ],
+      "why": "Small changes with wide blast radius are where the doc track earns its keep or gets skipped."
+    },
+    {
+      "id": "COEX-01",
+      "category": "coexistence",
+      "skills": ["task-pipeline", "super-ux"],
+      "query": "redesign the settings screen so the security options are easier to find",
+      "expected_behavior": [
+        "Does not steal the trigger from super-ux for what is a UX-chain task",
+        "If task-pipeline runs, it routes the UX chain to super-ux at stage 3 rather than improvising one",
+        "If super-ux runs, task-pipeline stays out of the way until there is something to build"
+      ],
+      "why": "The enterprise guidance calls this out directly: a broad description steals triggers from narrower skills."
+    },
+    {
+      "id": "INSTR-01",
+      "category": "instruction_following",
+      "skills": ["task-pipeline"],
+      "query": "run this through the pipeline: add a webhook retry policy. When you reach stage 0, show me what you did before your first question.",
+      "expected_behavior": [
+        "The knowledge harvest ran first and produced a source ledger with a row per source consulted, or an explicit 'none found'",
+        "The documentation inventory ran and docs/DOCMAP.md exists or was seeded",
+        "Intent was reconciled against the as-built record, with divergences named",
+        "The first interview question came AFTER all of that"
+      ],
+      "why": "Phase-1 ordering is the single most skipped instruction; if it slips, every later answer is unchecked."
+    },
+    {
+      "id": "INSTR-02",
+      "category": "instruction_following",
+      "skills": ["task-pipeline"],
+      "query": "you are at stage 9 of a pipeline run that changed a status enum and an API contract. Close the stage.",
+      "expected_behavior": [
+        "Walks the propagation matrix for every change type produced, not only the sources the harvest read",
+        "Records the settled decisions under ids and flips any answered questions",
+        "Runs the documentation gate and prints its ratchet counts beside the verdict",
+        "States any check that skipped, rather than passing silently"
+      ],
+      "why": "Stage 9 is where 'docs in sync' used to be unfalsifiable; this eval is what makes the replacement real."
+    },
+    {
+      "id": "INSTR-03",
+      "category": "instruction_following",
+      "skills": ["task-pipeline"],
+      "query": "you are a stage-5 implementer subagent in a worktree. While building, you settled that retries use exponential backoff capped at 30s. Record it.",
+      "expected_behavior": [
+        "Does NOT write to the decision register from inside the worktree",
+        "Puts the decision in the implementer report, and in the carry-over ledger if it outlives the task",
+        "States that the orchestrator runs the Doc Loop after integration, as a single writer"
+      ],
+      "why": "Two worktrees appending to one append-only register is the collision the rule exists to prevent."
+    },
+    {
+      "id": "INSTR-04",
+      "category": "instruction_following",
+      "skills": ["task-pipeline"],
+      "query": "you are at stage 10. Close the run. The REQ table looks complete.",
+      "expected_behavior": [
+        "Runs the ladder walk BEFORE writing the coverage table, and turns absences into new REQ rows first",
+        "Refuses to accept 'done' without evidence, downgrading to partial instead of upgrading the claim",
+        "Confirms every check it leans on — the documentation gate included — was seen failing once against a planted defect",
+        "Writes the retrospective last: prune, stamp with the run's commit, entry only on divergence"
+      ],
+      "why": "'The table looks complete' is the exact prompt under which the ladder walk gets skipped."
+    }
+  ]
+}

@@ -12,6 +12,16 @@ coming back to the operator.
 > half — glossary challenges, `CONTEXT.md`, ADR discipline — comes from there; the
 > autonomy sweep and the brief are this pipeline's.
 
+## Contents
+
+- Phase 1 — harvest before you ask
+- Phase 2 — the loop
+- Domain awareness
+- The autonomy sweep
+- The design destination — one file, decided here, never invented later
+- The REQ spine — the grill's other hard output
+- Output
+
 ## Phase 1 — harvest before you ask
 
 **Do not open the interview cold.** Stage 0 begins by finding what the project

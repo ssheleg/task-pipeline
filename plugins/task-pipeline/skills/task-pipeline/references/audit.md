@@ -14,6 +14,17 @@ This file is the method that finds those. It is **cross-cutting**: stage 10 runs
 before writing the coverage table, the program loop runs it per module, and a task
 whose whole job is "audit X" runs nothing else.
 
+## Contents
+
+- Three things that are easy to confuse
+- Why "look again, more carefully" stops working
+- The ladder
+- How one audit pass runs
+- Exit criterion — the part usually skipped
+- The three rules that stop this becoming another loop
+- When this runs
+- Rationalizations
+
 ## Three things that are easy to confuse
 
 | File | Runs when | Answers |

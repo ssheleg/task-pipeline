@@ -10,6 +10,16 @@ install.
 > external helper scripts replaced by plain git commands so the doctrine works on
 > any agent.
 
+## Contents
+
+- The diff package
+- Reviewer inputs
+- Controller rules
+- The rubric
+- Prompt — task review
+- Prompt — scoped re-review
+- Prompt — final whole-branch review
+
 ## The diff package
 
 A reviewer never re-derives the diff with a dozen git calls, and the diff never
