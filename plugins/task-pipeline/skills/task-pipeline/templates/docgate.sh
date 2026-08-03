@@ -37,8 +37,19 @@ MAP_FILE=${MAP_FILE:-$DOCS_DIR/DOCMAP.md}
 RETRO_GLOB=${RETRO_GLOB:-$DOCS_DIR/superpowers}
 
 # ---------- ratchets: a floor may only fall. Raising one is a decision. ----------
-PROP_FLOOR=${PROP_FLOOR:-0}        # allowed missing propagation citations
-RESIDUE_FLOOR=${RESIDUE_FLOOR:-0}  # allowed unmarked citations of retired ids
+# THE TWO FLOORS ARE DIFFERENT KINDS. Mixing them up is why this is spelled out.
+#
+# PROP_FLOOR is an ID THRESHOLD, not a count. An entry whose number is >= the floor
+#   must have propagated; everything older is a counted backlog that may only shrink.
+#   ADOPTING THIS GATE IN AN EXISTING REPOSITORY MEANS SETTING IT TO THE NEXT FREE
+#   ID: from today the rule binds, and the history becomes one printed number instead
+#   of a thousand failures nobody will fix. Lower it as tranches are cleared.
+PROP_FLOOR=${PROP_FLOOR:-0}        # id threshold — entries >= this must propagate
+#
+# RESIDUE_FLOOR is a COUNT: how many unmarked citations of retired decisions are
+#   tolerated. On adoption set it to what the repository measurably has today, then
+#   only ever lower it.
+RESIDUE_FLOOR=${RESIDUE_FLOOR:-0}  # count — tolerated unmarked citations, today's number
 
 TMP=$(mktemp -d 2>/dev/null || mktemp -d -t docgate)
 trap 'rm -rf "$TMP"' EXIT

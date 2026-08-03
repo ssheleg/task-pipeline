@@ -89,8 +89,16 @@ else:
                      "system prompt, and a first/second-person voice breaks discovery")
             if not re.search(r"[а-яё]", desc, re.I):
                 fail("SKILL.md: description must carry Russian trigger aliases beside the English ones (canon)")
-        if len(fm) > 1024:
-            fail(f"SKILL.md: frontmatter is {len(fm)} chars, must be under 1024")
+        # The PLATFORM limit is 1024 on `description` alone (checked above). This is
+        # OURS, and it is a budget rather than a contract: the whole frontmatter is
+        # preloaded into the system prompt for every session, so it stays bounded.
+        # It used to be 1024 — the same number as the platform's — which silently
+        # made the usable description ~975 and read as if it were the real rule.
+        # Two different limits must not wear one number.
+        if len(fm) > 1200:
+            fail(f"SKILL.md: frontmatter is {len(fm)} chars, over this repo's budget "
+                 "of 1200 (the platform's own limit is 1024 on `description` alone, "
+                 "checked separately)")
 
 for label, val in {"marketplace": mkt_name, "plugin.json": plg_name, "frontmatter": fm_name}.items():
     if val != NAME:

@@ -1,12 +1,18 @@
 {
   "_note": "Behavioural evaluations for the task-pipeline skill. Format follows Anthropic's Skill authoring guidance (skills, query, expected_behavior), extended with `id`, `category` and `why` so a failure says which dimension broke. There is no built-in runner for these upstream; `run.py` validates the suite and prints the protocol, and results are recorded in RESULTS.md. Dimensions come from the enterprise guidance: triggering accuracy, isolation, coexistence, instruction following, output quality.",
   "skill": "task-pipeline",
-  "models": ["haiku", "sonnet", "opus"],
+  "models": [
+    "haiku",
+    "sonnet",
+    "opus"
+  ],
   "evals": [
     {
       "id": "TRIG-01",
       "category": "should_trigger",
-      "skills": ["task-pipeline"],
+      "skills": [
+        "task-pipeline"
+      ],
       "query": "run this through the pipeline: add per-tenant rate limiting to the public API",
       "expected_behavior": [
         "Invokes the task-pipeline skill rather than starting to design or code inline",
@@ -19,7 +25,9 @@
     {
       "id": "TRIG-02",
       "category": "should_trigger",
-      "skills": ["task-pipeline"],
+      "skills": [
+        "task-pipeline"
+      ],
       "query": "полный цикл: перенести биллинг на нового провайдера",
       "expected_behavior": [
         "Invokes the task-pipeline skill from the Russian trigger alias",
@@ -31,7 +39,9 @@
     {
       "id": "TRIG-03",
       "category": "should_trigger",
-      "skills": ["task-pipeline"],
+      "skills": [
+        "task-pipeline"
+      ],
       "query": "build a support-agent dashboard with saved views and CSV export",
       "expected_behavior": [
         "Invokes the skill without an explicit pipeline phrase, because the request is a substantial build",
@@ -43,7 +53,9 @@
     {
       "id": "NOTRIG-01",
       "category": "should_not_trigger",
-      "skills": ["task-pipeline"],
+      "skills": [
+        "task-pipeline"
+      ],
       "query": "what does this regex do: ^(?!.*--)[a-z0-9-]{1,63}$",
       "expected_behavior": [
         "Answers the question directly",
@@ -55,7 +67,9 @@
     {
       "id": "NOTRIG-02",
       "category": "should_not_trigger",
-      "skills": ["task-pipeline"],
+      "skills": [
+        "task-pipeline"
+      ],
       "query": "fix the typo in the README heading: 'Instalation' -> 'Installation'",
       "expected_behavior": [
         "Makes the edit directly",
@@ -67,7 +81,9 @@
     {
       "id": "NOTRIG-03",
       "category": "should_not_trigger",
-      "skills": ["task-pipeline"],
+      "skills": [
+        "task-pipeline"
+      ],
       "query": "explain how our auth middleware decides which routes are public",
       "expected_behavior": [
         "Reads the code and explains it",
@@ -78,7 +94,9 @@
     {
       "id": "AMB-01",
       "category": "ambiguous",
-      "skills": ["task-pipeline"],
+      "skills": [
+        "task-pipeline"
+      ],
       "query": "clean up the error handling in the payments module",
       "expected_behavior": [
         "Establishes scope before choosing a route — asks whether this is a bounded fix or a refactor worth the full cycle",
@@ -90,7 +108,9 @@
     {
       "id": "AMB-02",
       "category": "ambiguous",
-      "skills": ["task-pipeline"],
+      "skills": [
+        "task-pipeline"
+      ],
       "query": "add an `is_archived` field to the user model",
       "expected_behavior": [
         "Recognises that a schema field touches contracts, migrations and documentation even though the change is small",
@@ -102,7 +122,10 @@
     {
       "id": "COEX-01",
       "category": "coexistence",
-      "skills": ["task-pipeline", "super-ux"],
+      "skills": [
+        "task-pipeline",
+        "super-ux"
+      ],
       "query": "redesign the settings screen so the security options are easier to find",
       "expected_behavior": [
         "Does not steal the trigger from super-ux for what is a UX-chain task",
@@ -114,7 +137,9 @@
     {
       "id": "INSTR-01",
       "category": "instruction_following",
-      "skills": ["task-pipeline"],
+      "skills": [
+        "task-pipeline"
+      ],
       "query": "run this through the pipeline: add a webhook retry policy. When you reach stage 0, show me what you did before your first question.",
       "expected_behavior": [
         "The knowledge harvest ran first and produced a source ledger with a row per source consulted, or an explicit 'none found'",
@@ -127,7 +152,9 @@
     {
       "id": "INSTR-02",
       "category": "instruction_following",
-      "skills": ["task-pipeline"],
+      "skills": [
+        "task-pipeline"
+      ],
       "query": "you are at stage 9 of a pipeline run that changed a status enum and an API contract. Close the stage.",
       "expected_behavior": [
         "Walks the propagation matrix for every change type produced, not only the sources the harvest read",
@@ -140,7 +167,9 @@
     {
       "id": "INSTR-03",
       "category": "instruction_following",
-      "skills": ["task-pipeline"],
+      "skills": [
+        "task-pipeline"
+      ],
       "query": "you are a stage-5 implementer subagent in a worktree. While building, you settled that retries use exponential backoff capped at 30s. Record it.",
       "expected_behavior": [
         "Does NOT write to the decision register from inside the worktree",
@@ -152,7 +181,9 @@
     {
       "id": "INSTR-04",
       "category": "instruction_following",
-      "skills": ["task-pipeline"],
+      "skills": [
+        "task-pipeline"
+      ],
       "query": "you are at stage 10. Close the run. The REQ table looks complete.",
       "expected_behavior": [
         "Runs the ladder walk BEFORE writing the coverage table, and turns absences into new REQ rows first",
@@ -161,6 +192,34 @@
         "Writes the retrospective last: prune, stamp with the run's commit, entry only on divergence"
       ],
       "why": "'The table looks complete' is the exact prompt under which the ladder walk gets skipped."
+    },
+    {
+      "id": "TRIG-04",
+      "category": "should_trigger",
+      "skills": [
+        "task-pipeline"
+      ],
+      "query": "перепиши модуль экспорта на потоковую выдачу, он не держит большие выгрузки",
+      "expected_behavior": [
+        "Invokes the skill from a plain Russian refactor request with no pipeline phrase — the work changes the repository, which is the boundary",
+        "Runs stage 0 before touching code",
+        "Does not treat 'it's just a refactor' as an exemption from the brief"
+      ],
+      "why": "Default-on is only real if it fires on ordinary work phrased ordinarily; a skill that needs magic words helps only people who already know it exists."
+    },
+    {
+      "id": "NOTRIG-04",
+      "category": "should_not_trigger",
+      "skills": [
+        "task-pipeline"
+      ],
+      "query": "перепиши модуль экспорта на потоковую выдачу, без пайплайна",
+      "expected_behavior": [
+        "Does NOT invoke the skill, despite the task being repo-changing and otherwise qualifying",
+        "Says out loud that the cycle was skipped because the operator opted out",
+        "Does the work directly"
+      ],
+      "why": "The opt-out phrase is the release valve that makes default-on acceptable. If it does not work, the boundary is a trap rather than a default."
     }
   ]
 }

@@ -1,6 +1,6 @@
 ---
 name: task-pipeline
-description: "Runs a substantial task through a full delivery pipeline: an intake grill that expands the request into a locked brief, then docs study, brainstorm, spec, plan, subagent build, tests, lint/deploy, post-deploy check, docs/wiki sync and acceptance — gated stages whose doctrine ships inside this skill (no required companions). Use when any substantial feature, fix or build should follow the disciplined cycle rather than ad-hoc coding, or on 'run this through the pipeline' / 'прогони по конвейеру', 'the full cycle' / 'полный цикл', /task-pipeline. The grill is mandatory and front-loads every decision, so stages 1→10 run without mid-flight questions; documentation is a deliverable with its own gate; recommends super-ux for user-facing work; confirms one model up front (most capable available, never a hardcoded id); reads host conventions so it stays project-agnostic."
+description: "Runs a substantial task through a full delivery pipeline: an intake grill that expands the request into a locked brief, then docs study, brainstorm, spec, plan, subagent build, tests, lint/deploy, post-deploy check, docs/wiki sync and acceptance — gated stages whose doctrine ships inside this skill (no required companions). Use when work changes the repository — a feature, fix, refactor, migration, integration, rewrite, adoption or hardening; фича, фикс, рефактор, миграция, интеграция, доработать, починить, внедрить — or on 'run this through the pipeline' / 'прогони по конвейеру', 'the full cycle' / 'полный цикл', /task-pipeline. Not for: answering a question, explaining or reading code, a typo or a one-line edit — say 'без пайплайна' / 'quick' to opt out. The grill is mandatory and front-loads every decision, so stages 1→10 run without mid-flight questions; documentation is a deliverable with its own gate; recommends super-ux for user-facing work; confirms one model up front, never a hardcoded id."
 license: MIT
 ---
 
@@ -61,6 +61,7 @@ gate stops until it is installed.
 | 10 Acceptance (REQ close-out) | [`references/acceptance.md`](references/acceptance.md) |
 | 10 Retrospective (the run's last act) | [`references/retrospective.md`](references/retrospective.md) |
 | 10 + any audit (what's *missing*) | [`references/audit.md`](references/audit.md) |
+| **first run in a project** (new or existing) | [`references/adoption.md`](references/adoption.md) |
 | any repeating loop | [`references/loop-guard.md`](references/loop-guard.md) |
 
 **Optional bridge.** If the operator already runs an equivalent skill set (e.g.
@@ -331,6 +332,8 @@ automation is on — `pipeline.schema.json` is the only contract.
 - `references/tdd.md` — stages 5–6: the iron law, red/green/refactor, the suite gate
 - `references/stages.md` — per-stage detail + exact gate criteria + gate types
 - `references/model-tiering.md` — model map, ids, the `/model` reminder mechanic, override
+- `references/adoption.md` — the first run in a project: greenfield seeding, and the
+  brownfield walkthrough whose third step baselines the ratchets at today
 - `references/conventions.md` — how stages 6–10 read the host project's CLAUDE.md
 - `references/companion-skills.md` — companion skills, install lines, preflight recommendation
 - `references/artifacts.md` — the canonical document/artifact layout per stage
