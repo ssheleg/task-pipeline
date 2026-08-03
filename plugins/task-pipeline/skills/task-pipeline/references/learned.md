@@ -4,7 +4,7 @@
 it.** Every rule here names the incident that produced it. A rule with no incident behind it is
 somebody's preference, and it will be argued with at the worst moment.
 
-They come from one 229-decision, 72-document specification built across four repositories with
+They come from one 260-decision, 72-document specification built across four repositories with
 several agents working at once. Nothing here is hypothetical.
 
 **A rule belongs in the table only when it has a check.** Two of the lessons below could not be
@@ -31,6 +31,7 @@ to be enforced and is not is the same failure as a gate that prints `FAIL` and e
 | 12 | **Tests create what they assert on** | any test touching shared state | run the suite against a cold, empty environment | the cold run and the warm run agree |
 | 13 | **Local infrastructure does not fight the host** | any dev compose or service definition | assume the host already runs the defaults | services reachable with the host's own still running |
 | 14 | **A document may not send a reader to something absent** | any instruction naming a command, file or install | resolve it | the gate fails when the target does not exist |
+| 15 | **Identity before coordination** | any lease, lock, claim or run id | ask what two instances with the same identity would do, and make the tool answer it | two instances demonstrably get two identities |
 
 ---
 
@@ -94,6 +95,18 @@ the migration failed with a permission error that named nothing about the collis
 was not installed, with no install line anywhere and no statement of what a session without it
 actually is.
 
+**15 · Identity.** The coordination plugin derived one run id **per checkout**. A hook has the
+session id in its environment and a plain shell command does not, so the second session in a
+checkout adopted the first one's identity: **an entire day of work was performed holding another
+session's leases**, and the end-of-work check that had just been written offered to release
+*theirs*. It was invisible from inside — `whoami` reported a lease and a run id, both plausible,
+both somebody else's — and it surfaced only because a new command printed a lease nobody could
+account for. This is the same failure as *the one instruction* below, and it is in the table rather
+than only in that list because it **has** a check. Follow-on, from the first two attempted fixes:
+**do not infer identity from strings the environment is also free to contain** — matching `"claude"`
+in a process command line matched the throwaway shell of every tool call, and matching the binary
+path hit the same wall. Prefer a fact something authoritative wrote down.
+
 ---
 
 ## The two that are not in the table, and why
@@ -128,13 +141,15 @@ answer would have exposed it in a minute.
 
 | Stage | Rules that apply |
 |---|---|
+| 0 Inventory · 9 Docs · any register write | 8 (compute), 14 (targets resolve — including every commit SHA in the retro), 15 (identity before a lease) — see [`documentation.md`](documentation.md) |
+| any check you write | 4, 5, 7, 10, 11 — the procedure is [`gates.md`](gates.md) |
 | 3 Spec · 4 Plan | 2 (both directions), 8 (compute, never restate) |
 | 5 Dev | 9 (generators seed green), 12 (tests create their own state), 13 (local infra) |
 | 6 Tests | 4, 5, 10, 11 — every new check probed both ways, measured, and asserted on its exit code |
 | 9 Docs | 8, 14 — every number computed, every target resolvable |
 | 10 Acceptance | 1, 3, 6, 7 — axis rotation recorded, closure verified against artefacts, classes swept, ratchets printed |
 
-**This file is the shipped list; a project keeps its own.** These fourteen were
+**This file is the shipped list; a project keeps its own.** These fifteen were
 earned on someone else's build and travel with the skill. The lessons *your*
 project buys go in its retro ([`retrospective.md`](retrospective.md) →
 `docs/superpowers/retro.md`), where they are capped, pruned and retired — and a

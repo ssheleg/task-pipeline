@@ -23,18 +23,35 @@ premise if the run leaves it wrong.
 | wiki: `projects/…/concepts/…` | … | YYYY-MM | context | **yes — update at stage 9** |
 | `CLAUDE.md` | test/lint/deploy commands, house rules | current | convention | no |
 
-Precedence when two disagree, in one direction: **code first, then host docs and
-ADRs, then the code graph, then the wiki, then memory.** The graph points; the code
-decides. The operator outranks every document — but only **out loud**: an override
-quoted against its source is a recorded decision, an unquoted one is an undetected
-divergence.
+Precedence splits by the question being asked. **For what *is*:** code first, then
+host docs and ADRs, then the code graph, then the wiki, then memory — the graph
+points, the code decides. **For what *should be*:** the decision register outranks
+the code, because a decision accepted and not yet built is still the decision, and
+code that contradicts it is a finding rather than a tie-break. The operator
+outranks every document — but only **out loud**: an override quoted against its
+source is a recorded decision, an unquoted one is an undetected divergence.
+
+## Documentation (the phase-1b inventory — the four questions)
+
+| Question | Answer |
+|---|---|
+| **Regime** | governed — seeded this run / already in place since … |
+| **Decision home** (exactly one) | `docs/DECISIONS.md` (`DEC-####`) / `docs/adr/` (`ADR-NNNN`) — never both |
+| **Open questions** | `docs/OPEN_QUESTIONS.md` (`OQ-####`) |
+| **Doc map** | `docs/DOCMAP.md` — single homes + the propagation matrix (non-empty; every row names its check or the word `review` with a reason) |
+| **Gate** | `bash scripts/check-docs.sh` — seeded / already present; ratchet floors: … |
+| **Shared state** | lease mechanism present / **`ungated`** (say so out loud in the run) |
+| **Intent vs as-built** | reconciled on … ; divergences found: … ; each resolved how |
 
 - **Doc repos / hosted doc systems this project names:** … (or `none`)
 - **Knowledge wiki:** installed / not installed
   ([obsidian-wiki](https://github.com/ar9av/obsidian-wiki); recommended, never a gate)
-- **Retro standing instructions:** `docs/superpowers/retro.md` — none / N in force
-  (read **in full**; list which ones bind this run, and stamp each as it fires —
-  that date is the only evidence behind stage 10's cold-retirement rule)
+- **Retro, in force:** `docs/superpowers/retro.md` — none / N standing instructions
+  (read **in full**, together with the run stamps and the recent-log window; list
+  which ones bind this run, and stamp each as it fires **with the commit** — that
+  stamp is the only evidence behind stage 10's cold-retirement rule)
+- **Retro archive:** `docs/superpowers/retro/` — **queried** by this task's nouns;
+  what it returned: … (or `nothing`)
 - **Code graph:** built / installed-not-built / not installed
   ([graphify](https://github.com/Graphify-Labs/graphify); recommended, never a gate —
   built → its row above carries the build date and stage 9 refreshes it)
@@ -88,6 +105,7 @@ is not neutral — it is a scheduled interruption.
 | run-wide | Model for this run | … (most capable available unless overridden; per-stage overrides here) |
 | run-wide | Decide autonomously vs escalate to me | … |
 | 0 Harvest | Doc sources beyond this repo — other repos, hosted docs, the knowledge wiki, the code graph; and may stage 9 write to them? | … (another repo is outward: propose + PR, never a direct push; graph built / not built) |
+| 0 Docs regime | Where settled things live (register or ADR set — one home, never both); who may write it; lease mechanism present, or is this run `ungated`? Gate command + ratchet floors; may this run raise a floor? | … |
 | 1 Docs | External libs/APIs/SDKs in play; any context7 can't resolve → where their docs live | … |
 | 2 Decompose | Platform (several capabilities/surfaces) or one module? If platform — deploy cadence: per module, or once at the end | … |
 | 2–3 Spec | UI verdict (arms super-ux); scenario-tracing waiver, if any | … |

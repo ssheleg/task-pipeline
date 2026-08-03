@@ -60,6 +60,25 @@ found, surface it and **ask** rather than guessing.
   project names): updating it is **outward** — propose the change, get an explicit
   operator go, open a PR there. Never push to a repo the task didn't name.
 
+## Documentation regime (stage 0, then 9 and 10)
+
+The host's `CLAUDE.md`/`AGENTS.md` wins over anything detected — read it first.
+Then detect, in this order ([`documentation.md`](documentation.md)):
+
+| Look for | Means |
+|---|---|
+| `docs/DOCMAP.md` | the inventory has been done; read it, extend it, do not re-seed |
+| `docs/adr/` with at least one `NNNN-*.md` | **that is the register.** Record it in the doc map; never seed a second decision home beside it |
+| `docs/DECISIONS.md` | the register shape; note its id scheme and its "Next free ID" line |
+| a decisions/ADR section inside `AGENTS.md` or `CONTRIBUTING.md` | the rules live there; the doc map holds a **pointer**, not a copy |
+| a `check-docs`, `lint:docs`, `docs` target in `package.json`/`Makefile`/CI | the documentation gate already exists — use it, and read its scope header |
+| none of the above | **seed the set**: `docmap.md`, `decisions.md`, `open-questions.md` and `docgate.sh` from [`../templates/`](../templates/README.md), and record the seeding as the register's first entry |
+
+Two rules that are not negotiable when seeding: the gate must exit `0` on the seeds
+themselves, and the registers must be useful at three entries. A project whose gate
+is red on day one has learned that the gate is noise, and nothing later un-teaches
+that.
+
 ## Issue tracker (stage 10)
 
 Acceptance parks what wasn't delivered: every `deferred` REQ and every unresolved

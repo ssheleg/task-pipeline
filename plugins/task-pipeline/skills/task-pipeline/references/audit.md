@@ -67,7 +67,7 @@ absence findable.
 | Rung | Layer | The artefact that must exist |
 |---|---|---|
 | **L0** | Requirement | a `REQ-###` row in the brief **with a named check** |
-| **L1** | Decision | the locked decision, ADR or `CONTEXT.md` term this REQ rests on |
+| **L1** | Decision | the locked decision this REQ rests on — **an entry in the register** (`DEC-####` or an ADR), or a `CONTEXT.md` term ([`documentation.md`](documentation.md)) |
 | **L2** | Design | a spec section carrying `covers: REQ-…` |
 | **L3** | Contract | an exact signature or schema · **and its failure behavior** |
 | **L4** | Task | a plan task with `Implements:` and a DoD satisfiable **as written** |
@@ -194,6 +194,10 @@ Writing the third instance into the carry-over ledger is how a known, mechanical
 defect class becomes permanent. If the class genuinely cannot be checked
 mechanically, say so in one line and *say why*; that sentence is itself a finding
 worth having.
+
+**How to write, place, arm, probe and own that script is
+[`gates.md`](gates.md).** "Put it in a script" with no place to put it is how the
+third instance ends up in the ledger too.
 
 ### 2. Every pass changes the axis, not the effort
 

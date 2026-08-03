@@ -322,7 +322,7 @@ automation is on — `pipeline.schema.json` is the only contract.
 - `references/gates.md` — cross-cutting: the two axes, the promotion ladder, gate anatomy, the probe recipe, ratchet floors, where a gate runs
 - `references/hooks.md` — agent-time enforcement: the PreToolUse contract, the fail-open hazard, placement, and the Claude-Code-only limit
 - `references/audit.md` — cross-cutting: the L0→L7 ladder and its seams (what was never written), axis rotation, ratchets, proven checks
-- `references/learned.md` — cross-cutting: fourteen rules earned by failure on a real multi-repository build, each with the incident behind it, its check and its exit criterion; plus the two that no check can decide
+- `references/learned.md` — cross-cutting: fifteen rules earned by failure on a real multi-repository build, each with the incident behind it, its check and its exit criterion; plus the two that no check can decide
 - `references/brainstorm.md` — stage 2: design dialogue, approaches, UI detection, hard gate
 - `references/spec.md` — stage 3: UX track order, the spec contract, self-review, review gate
 - `references/planning.md` — stage 4: zero-context plan format, parallel groups, no placeholders

@@ -9,11 +9,16 @@ shape.
 
 ```
 CONTEXT.md                            # stage 0 — domain glossary, written inline as terms resolve
+scripts/check-docs.sh                 # stage 0 seeds it, 9 runs it, 10 proves it — the docs gate
 docs/
+  DOCMAP.md                           # stage 0 — the inventory: registers, homes, matrix, gates
+  DECISIONS.md                        # the decision register (DEC-####), append-only …
+  OPEN_QUESTIONS.md                   #   … and its questions (OQ-####) — never delete a resolved row
   adr/
-    NNNN-<slug>.md                    # stage 0 — ADRs for hard-to-reverse decisions
+    NNNN-<slug>.md                    # the OTHER permitted decision home — one project uses ONE
   superpowers/
     retro.md                          # stage 10's last act — ONE per project, not per run
+    retro/YYYY-QN.md                  # the archive: rotated entries + retirements, queried not read
     specs/
       YYYY-MM-DD-<topic>-brief.md     # stage 0 — locked intake brief (grill output)
       YYYY-MM-DD-<topic>-carryover.md # stage 0 seeds it; EVERY stage appends; stage 10 reads it
@@ -63,7 +68,10 @@ record (see `build.md`).
 | 0→10 all | `specs/<topic>-carryover.md` — append-only ledger (seed from `templates/carryover.md`) | stage 10, in full |
 | 10 Acceptance | `specs/<topic>-acceptance.md` — every REQ with a status and evidence | the operator |
 | 10 Retro | `superpowers/retro.md` — standing instructions (max 10), the problem→cause→fix log, run stamps. Pruned **before** anything is added (`retrospective.md`) | **stage 0 of the next run**, in full |
-| 0 Grill (domain) | `CONTEXT.md`, `docs/adr/NNNN-<slug>.md` — created **lazily**, only when a term resolves or a decision qualifies | stages 2–4 + the repo |
+| 0 Inventory | `docs/DOCMAP.md` + the registers + `scripts/check-docs.sh` — seeded **only when absent**, and the seeding is the register's first entry ([`documentation.md`](documentation.md)) | every later stage; **stage 9** walks the matrix, **stage 10** proves the gate |
+| 0 Grill (domain) | `CONTEXT.md`, `docs/adr/NNNN-<slug>.md` — created **lazily**, only when a term resolves or a decision qualifies. Where `docs/adr/` **is** the register, entries carry the register's field set | stages 2–4 + the repo |
+| any stage | a register entry per settled thing, via the **Doc Loop** — recorded, resolved, propagated, committed with its id | the next run's harvest |
+| 10 Retro rotation | `docs/superpowers/retro/YYYY-QN.md` — entries older than five stamps, plus every retirement, each with its commit | queried by a later run's harvest |
 | 2 Decompose | `specs/<topic>-modules.md` — module map, build order, contracts, per-module status (platforms only) | stages 3–10, every module's run |
 | 3 Spec | `specs/<topic>-design.md` — module dossier for a decomposed platform (+ links `docs/ux/*` for UI) | stage 4 |
 | 4 Plan | `plans/<topic>.md` | stage 5 |
