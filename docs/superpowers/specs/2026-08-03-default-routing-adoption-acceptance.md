@@ -36,17 +36,17 @@ exhausted; a second pass would still be reading, not repairing itself.
 | REQ-005 routing rule | **verified** | `~/.claude/CLAUDE.md` — boundary, exclusions, both escape phrases, and why the rule lives there |
 | REQ-006 agent-sync patch | **verified** | `jsonschema.validate` PASS against `pipeline.schema.json`; guardedFiles +2; shipped as 1.4.3 |
 | REQ-007 version floor | **verified** | `companion-skills.md` states ≥ 1.3.0 and why |
-| REQ-008 dogfood | **verified, under a revised check** | `docs/DOCMAP.md` records the real gate and refuses a second; no `scripts/check-docs.sh` created. **The check itself changed at stage 5 (C-4) and needs the operator's agreement** |
+| REQ-008 dogfood | **verified** | `docs/DOCMAP.md` records the real gate and refuses a second; no `scripts/check-docs.sh` created. The check was revised at stage 5 (C-4) and **the operator agreed to the revision at this gate on 2026-08-03** |
 | REQ-009 run recorded | **verified** | `evals/RESULTS.md` — one dated run, scoped honestly as self-observed rather than blind |
 
-**Nine REQs · 8 verified · 1 verified-under-a-revised-check · 0 unknown.**
+**Nine REQs · 9 verified · 0 partial · 0 unknown.** One check was revised mid-run and the revision carries the operator's explicit agreement, recorded rather than assumed.
 
 ## Carry-over at close
 
-`open: 4 · accepted: 1 · needs-agreement: 1 · unresolved: 0`
+`open: 3 · accepted: 1 · resolved: 2 · unresolved: 0`
 
 C-1 evals never executed · C-2 the rule binds only where that config is read ·
-C-3 **closed** (agent-sync pulled before editing) · C-4 the revised REQ-008 check ·
+C-3 **closed** (agent-sync pulled before editing) · C-4 **closed** (operator agreed to the revised REQ-008 check) ·
 A-1 the routing rule is itself untested · A-2 wiki not synced.
 
 ## The closing question
