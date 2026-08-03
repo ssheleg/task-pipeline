@@ -50,7 +50,7 @@ repository — the smallest one still decides *somewhere* that a thing is true �
 the only choice is whether that answer is written down or re-derived by each new
 reader. What scales down is **volume**, never the rules: a register with three
 entries is a register, and the seeded gate is green on exactly those three
-([`gates.md`](gates.md) → *progressive arming*).
+([`gates.md`](gates.md) → *Progressive arming*).
 
 ---
 

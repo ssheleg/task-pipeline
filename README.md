@@ -630,7 +630,7 @@ framework bakes in no fixed stage count and no opinion on which gates are manual
 A pipeline config may declare an optional `release` block: a master `enabled`
 toggle, a `trigger`, project-defined `steps`, and `verify` smoke-checks. It's **off
 unless a project turns it on**, and every project configures its own. This repo's
-own instance is [`.github/workflows/release.yml`](.github/workflows/release.yml) —
+own instance is [`.github/workflows/release.yml`](https://github.com/ssheleg/task-pipeline/blob/main/.github/workflows/release.yml) —
 armed per repo by the `RELEASE_ENABLED` variable (unset = off), it validates the tag
 against the manifests, cuts a GitHub release from the CHANGELOG, and smoke-tests
 `npx` from a clean checkout. Copy and adapt it; nothing is hardcoded.

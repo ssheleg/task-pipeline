@@ -125,7 +125,7 @@ and the commit. Silent deletion is forbidden: the record is what survives, the
 instruction is what leaves.
 
 **Print the counts beside the gate verdict**, the same way the carry-over ledger
-does ([`audit.md`](audit.md) → *ratchet, never TODO*):
+does ([`audit.md`](audit.md) → *What can't be fixed now becomes a ratchet, never a TODO*):
 
 ```
 GATE 10 acceptance: PASS — 14/14 REQ verified

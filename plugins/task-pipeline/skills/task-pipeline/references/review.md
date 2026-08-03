@@ -182,7 +182,7 @@ exactly the sentence a future reader will hit in the code and re-litigate, so a
 ruling that outlives the run goes through the **Doc Loop**
 ([`documentation.md`](documentation.md)) — via the report and the ledger, written by
 the orchestrator after integration, never by a subagent
-([`build.md`](build.md) → *§4.1a*).
+([`build.md`](build.md) → *4.1a Decisions settled inside a task*).
 
 Run the final review on the **run's confirmed model** like everything else
 ([`model-tiering.md`](model-tiering.md)). It is the one review that sees the whole

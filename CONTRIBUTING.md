@@ -64,60 +64,83 @@ node bin/task-pipeline.js --force   # the same, through the npm installer
 ## The invariants
 
 These are what the validator enforces. Breaking one is not a style disagreement —
-it ships a wrong pipeline to every install.
+it ships a wrong pipeline to every install. Numbered in reading order; the numbers
+are labels, not priorities.
 
 **1. Four-way version sync.** `package.json`, `.claude-plugin/marketplace.json`
 (`plugins[0].version`), `plugins/task-pipeline/.claude-plugin/plugin.json` and the
 top `## vX.Y.Z` heading in `CHANGELOG.md` must all carry the same version.
+`SKILL-CARD.md`'s Version row is held to it too.
 
 **2. The stage list lives on three surfaces and may not drift.** `SKILL.md`'s
 table, `references/stages.md`'s per-stage sections, and `pipeline.example.json`.
 Stage ids, names and **gate types** are compared across all three. Each stage's own
-doctrine file states its gate type too (`## GATE (auto)` / `## GATE (manual)`) and
-must agree with the config.
+doctrine file states its gate type too and must agree with the config.
 
 **3. Every human-facing description must name the flow's final stage, last.** The
 package, marketplace, plugin, skill, command, Cursor-rule and README blurbs are the
-only thing most people ever read. When a stage is added at the end, all of them
-change. The validator derives the last stage from `pipeline.example.json` and holds
-every blurb to it.
+only thing most people ever read. The validator derives the last stage from
+`pipeline.example.json` and holds every blurb to it.
 
-**4. No hardcoded vendor model ids.** Anywhere in the shipped skill, the README,
-the command or the Cursor rule. Generations ship, tiers get renamed, and the
-operator may be on another provider — name the **tier** ("the most capable model
-available"), never a string. Stage configs use the provider-agnostic tokens
-`default` / `inherit`.
+**4. No hardcoded vendor model ids.** Anywhere in the shipped skill, the README, the
+command or the Cursor rule. Name the **tier**, never a string; stage configs use the
+provider-agnostic tokens `default` / `inherit`.
 
 **5. Every `references/*.md` must be reachable from `SKILL.md`**, directly or
-transitively. Progressive disclosure means an agent loads only what it is pointed
-at; an unreferenced file is dead context that ships and is never read.
+transitively. An unreferenced file is dead context that ships and is never read.
 
 **6. No external provider may substitute for built-in stage doctrine.**
-`pipeline.example.json`'s `skills[]` may not name a provider that would *replace*
-the doctrine stages 2, 3-spec, 4, 5, 6 and 10 run on (`superpowers:*`, `grill-me`,
-…). Substituting one is a host project's call in *their* `pipeline.json`, never the
-shipped default. The **enumerated exceptions** are named deliberately and are not
-substitutions: the optional tools (`context7`, `wiki-query`/`wiki-update`,
-`graphify`, `figma`) and the `super-ux:*` track, which is required for user-facing
-work. Earlier wording said the config named *no* external provider while it named
-eleven — the enforced rule was always the narrower one.
+`pipeline.example.json`'s `skills[]` may not name one for the stages whose doctrine
+ships here (2, 3-spec, 4, 5, 6, 10). The optional tools — `context7`, `figma`,
+`graphify`, `wiki-query` / `wiki-update` — and the UI-required `super-ux:*` track are
+the enumerated exceptions, named deliberately.
 
-**10. A seeded template must keep the seeded gate green.** `templates/docgate.sh`
-is run by `npm test` over a scratch project built from `templates/docmap.md`,
-`decisions.md`, `open-questions.md` and `retro.md`, and must exit `0`. A generator
-whose output fails the generator's own checks teaches every new project on day one
-that the gate is noise (`references/learned.md` rule 9). Change a template → run
-`npm test`, not just your eyes.
+**7. Stage 0 is mandatory and manual; stage 10 is manual and demands evidence; the
+stage-4 gate is a set comparison.** These three are the spine, asserted in the
+shipped config.
 
-**7. Stage 0 is mandatory and manual; stage 10 is manual and demands evidence;
-the stage-4 gate is a set comparison.** These three are the spine — the validator
-asserts each of them in the shipped config.
+**8. `SKILL.md` frontmatter stays under 1024 characters, and the description says
+WHAT before WHEN.** Anthropic's authoring guidance requires both halves — a
+capability statement in third person, then the `Use when …` trigger — and Russian
+trigger aliases ride beside the English ones. *(Before v1.8.0 this invariant demanded
+the description **open** with `Use when`, which enforced the trigger half and left
+the capability optional. The validator now rejects that shape.)*
 
-**8. `SKILL.md` frontmatter stays under 1024 characters**, the description opens
-with `Use when …`, and it carries Russian trigger aliases beside the English ones.
+**9. Relative links resolve.** Every relative markdown link in every file outside a
+fenced code block must point at a path that exists.
 
-**9. Relative links resolve.** Every relative markdown link in every file outside
-a fenced code block must point at a path that exists.
+**10. A seeded template must keep the seeded gate green — in both register shapes.**
+`templates/docgate.sh` is run by `npm test` over two scratch projects: one seeded
+from `docmap.md` / `decisions.md` / `open-questions.md` / `retro.md`, and one built
+from `adr.md`'s own fenced example. Each must exit `0`, **report the shape it
+found**, and run a minimum of live checks — because every section can go `dormant`,
+and a gate blind to a shape passes exactly like one that reads it. Change a template
+→ run `npm test`, not just your eyes.
+
+**11. Every reference over 100 lines carries a `## Contents` list**, and the list is
+compared against that file's own `##` headings. The guidance asks for it because a
+long file gets previewed with a partial read; the comparison is because a hand-kept
+list is a second source that goes stale on the next heading.
+
+**12. A section-qualified citation must name a section that exists.**
+A citation of the form `file.md → *Section*` is checked against the target's headings. The
+link checker proves the file resolves; only this proves the pointer is not false.
+
+**13. Numbers stated in living documents are computed, not restated.** The guard
+count in `README.md`, `SKILL-CARD.md` and `evals/RESULTS.md` is compared against the
+negative self-tests the workflow defines. CHANGELOG entries are exempt — they record
+what a past release shipped.
+
+**14. Every relative link in `README.md` resolves inside the published package.**
+`package.json` → `files[]` must ship whatever the README points at, or the link
+dangles for every npm consumer.
+
+**15. `SKILL-CARD.md` answers every risk indicator** and carries the current
+version. It is the registry entry a consumer reviews before deploying, and an
+omitted row reads as "does not apply".
+
+**16. The evaluation suite covers all five dimensions** and `evals/run.py` accepts
+it. Running it is a human step; the suite existing is not.
 
 ## Adding or changing doctrine
 

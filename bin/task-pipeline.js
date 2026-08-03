@@ -78,6 +78,29 @@ function main(argv) {
   }
 
   const home = os.homedir(); // respects $HOME on POSIX — tests override via env
+
+  // One channel per agent. This installer writes a PLAIN copy to
+  // ~/.claude/skills/<id>, and while the Claude Code PLUGIN channel is active that
+  // copy SHADOWS the plugin — silently serving whatever version was copied, forever.
+  // The family launcher (sshlg-skills) prunes exactly these copies for that reason,
+  // so creating one without saying so undoes the thing it is paired with.
+  const pluginDirs = [
+    path.join(home, '.claude', 'plugins', 'marketplaces', 'task-pipeline'),
+    path.join(home, '.claude', 'plugins', 'cache', 'task-pipeline'),
+  ];
+  if (!force && pluginDirs.some((d) => fs.existsSync(d))) {
+    console.error(`refusing: task-pipeline is already installed as a Claude Code PLUGIN.
+
+A plain copy in ~/.claude/skills/ shadows the plugin and keeps serving the version
+it was copied from — the failure this family prunes for. Prefer the plugin:
+
+  claude plugin marketplace update task-pipeline
+  claude plugin update task-pipeline@task-pipeline
+
+Rerun with --force if you deliberately want the plain copy instead.`);
+    return 3;
+  }
+
   installOne(
     'task-pipeline skill  ',
     skillSrc,

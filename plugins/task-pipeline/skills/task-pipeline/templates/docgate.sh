@@ -82,7 +82,9 @@ find . -maxdepth 1 -type f -name '*.md' 2>/dev/null | sort >> "$TMP/files" || tr
 FILE_COUNT=$(wc -l < "$TMP/files" | tr -d ' ')
 
 if [ "$FILE_COUNT" = "0" ]; then
-  echo "FAIL: documentation gate — no markdown found under $DOCS_DIR"
+  echo "FAIL: documentation gate — no markdown found in $DOCS_DIR/ or the repository root."
+  echo "      Seed the doc map and the registers first (task-pipeline stage 0, phase 1b),"
+  echo "      or point DOCS_DIR at wherever this project keeps its documentation."
   exit 1
 fi
 

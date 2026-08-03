@@ -7,6 +7,10 @@ NAME = "task-pipeline"
 errors = []
 
 
+LINK_RE = re.compile(r"\[[^\]]*\]\(([^)\s]+)\)")
+FENCE_RE = re.compile(r"^([ \t]*)(```+|~~~+).*?^\1\2[^\n]*$", re.M | re.S)
+
+
 def fail(m):
     errors.append(m)
 
@@ -121,6 +125,21 @@ if pkg:
     files = pkg.get("files") or []
     if "plugins" not in files or "bin" not in files:
         fail("package.json: files[] must whitelist 'bin' and 'plugins' (skill sources ship in the package)")
+    # README ships in the package, so every relative link in it must resolve INSIDE
+    # the package too. It did not: SKILL-CARD.md and the whole evals/ directory were
+    # excluded from files[] while the README pointed at both, and CONTRIBUTING /
+    # SECURITY / CODE_OF_CONDUCT had been dangling for npm consumers for far longer.
+    # references/learned.md rule 14 — a document may not send a reader to something
+    # absent — applied to the artefact that is actually published.
+    _rd_p = os.path.join(ROOT, "README.md")
+    if os.path.isfile(_rd_p):
+        _rd = FENCE_RE.sub("", open(_rd_p, encoding="utf-8").read())
+        for _t in sorted({t for t in LINK_RE.findall(_rd)
+                          if not t.startswith(("http://", "https://", "mailto:", "#"))}):
+            _top = _t.split("/")[0].split("#")[0]
+            if _top and _top not in files:
+                fail(f"README.md links to {_t!r}, which package.json files[] does not "
+                     f"ship ({_top!r} missing) — the link dangles for every npm install")
     # One documented way to run the checks. A contributor who has to reverse-engineer
     # the test command from CI is a contributor who opens the PR without running it.
     if "validate.py" not in str((pkg.get("scripts") or {}).get("test", "")):
@@ -157,8 +176,6 @@ else:
 # every relative markdown link in repo docs must resolve. Links inside fenced code
 # blocks are sample content (illustrative trees, template snippets), not links —
 # strip the fences before scanning, or every example path becomes a false failure.
-LINK_RE = re.compile(r"\[[^\]]*\]\(([^)\s]+)\)")
-FENCE_RE = re.compile(r"^([ \t]*)(```+|~~~+).*?^\1\2[^\n]*$", re.M | re.S)
 for dirpath, dirnames, filenames in os.walk(ROOT):
     dirnames[:] = [d for d in dirnames if d not in (".git", "node_modules")]
     for fn in filenames:
@@ -236,6 +253,49 @@ for _fn in sorted(os.listdir(refdir)):
              f"missing {_missing or '[]'}, stale {_stale or '[]'}"
              + ("" if _missing or _stale else " (same items, wrong order)"))
 
+# A section-qualified cross-reference — [`file.md`](file.md) → *Section* — must name
+# a section that EXISTS in that file. The link checker proves the file resolves and
+# stops there, which is exactly the hole references/learned.md keeps as a review
+# question: "a stale reference was replaced with a FALSE one — the new target existed
+# and said nothing about the subject."
+#
+# Found by sweeping: 15 broken pointers in one pass, including eleven that sent the
+# reader to a section about something else entirely. Measured before being trusted
+# (learned.md rule 10): whitespace is normalised first, because a citation wrapped
+# across two lines is not a defect and reported six of them as one.
+def _sections_of(path):
+    out, infence = [], False
+    for _ln in open(path, encoding="utf-8"):
+        if re.match(r"^\s*(```|~~~)", _ln):
+            infence = not infence
+            continue
+        if not infence and re.match(r"^#{2,4} ", _ln):
+            out.append(re.sub(r"\s+", " ", re.sub(r"^#+\s*", "", _ln)).strip().lower())
+    return out
+
+
+_sec_cache, _bad_cites = {}, []
+for _src in ["SKILL.md"] + [f"references/{f}" for f in sorted(os.listdir(refdir))
+                            if f.endswith(".md")]:
+    _sp = os.path.join(_skill_root := os.path.dirname(refdir), _src)
+    if not os.path.isfile(_sp):
+        continue
+    _flat = re.sub(r"\s+", " ", open(_sp, encoding="utf-8").read())
+    for _tgt, _sec in re.findall(
+            r"\[`([a-z0-9-]+\.md)`\]\([^)]*\)\s*(?:→|->)\s*\*([^*]+)\*", _flat):
+        _tp = os.path.join(refdir, _tgt)
+        if not os.path.isfile(_tp):
+            _bad_cites.append(f"{_src} cites {_tgt} → *{_sec.strip()}* — no such file")
+            continue
+        _sec_cache.setdefault(_tp, _sections_of(_tp))
+        _s = re.sub(r"\s+", " ", _sec).strip().lower().rstrip(".,;")
+        if not any(_s == _h or _s in _h or _h in _s for _h in _sec_cache[_tp]):
+            _bad_cites.append(
+                f"{_src} cites {_tgt} → *{_sec.strip()}*, which has no such section")
+for _b in sorted(set(_bad_cites)):
+    fail(_b + " — a citation whose file resolves and whose section does not is the "
+               "one a link checker cannot catch and a reader believes")
+
 # Progressive disclosure means an agent loads only what SKILL.md points it to,
 # directly or transitively. A reference nothing links to is dead context: it
 # ships, it passes every other check, and it is never read.
@@ -252,6 +312,25 @@ while _frontier:
                 _frontier.append(f"references/{_m.group(1)}")
 for _orphan in sorted({f for f in os.listdir(refdir) if f.endswith(".md")} - _seen):
     fail(f"references/{_orphan}: unreachable from SKILL.md — dead context, wire it in or delete it")
+
+# Compute, never restate (references/learned.md rule 8) — applied to this repo's own
+# prose. The guard count is stated in living documents, and two of them silently
+# claimed 46 after the suite reached 50: a number written by hand is a number that
+# goes stale on the next commit. CHANGELOG entries are exempt on purpose — they are
+# records of what a past release shipped, not claims about now.
+_neg_wf = os.path.join(ROOT, ".github/workflows/validate.yml")
+if os.path.isfile(_neg_wf):
+    _neg_n = len(re.findall(r"^\s*- name:\s*Negative self-test",
+                            open(_neg_wf, encoding="utf-8").read(), re.M))
+    for _living in ("README.md", "SKILL-CARD.md", "evals/RESULTS.md"):
+        _lp = os.path.join(ROOT, _living)
+        if not os.path.isfile(_lp):
+            continue
+        for _m in re.finditer(r"\b(\d+)\+?\s+(?:of\s+\d+\s+)?(?:structural\s+)?guards\b",
+                              open(_lp, encoding="utf-8").read()):
+            if int(_m.group(1)) != _neg_n:
+                fail(f"{_living}: states {_m.group(0)!r} but the workflow defines "
+                     f"{_neg_n} negative self-tests — derive the number or delete it")
 
 # Behavioural evaluations. Anthropic's guidance: "Create evaluations BEFORE writing
 # extensive documentation", "At least three evaluations created", and the enterprise

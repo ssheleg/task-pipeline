@@ -352,7 +352,7 @@ findings are neither fixed nor parked-with-ruling at the cap.
 After the last task: build a package over `MERGE_BASE`..`HEAD`
 (`git merge-base "$BASE_BRANCH" HEAD`, where `$BASE_BRANCH` is the base recorded in
 the stage-0 brief — never a hardcoded `main`), dispatch the whole-branch review
-([`review.md`](review.md) → *Final review*; on the run's model, escalation offered
+([`review.md`](review.md) → *Prompt — final whole-branch review*; on the run's model, escalation offered
 out loud per *Models* above), and point it at the
 ledger's deferred-minor and parked lines so it can triage what must be fixed before
 merge.

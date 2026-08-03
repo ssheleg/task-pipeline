@@ -1,5 +1,63 @@
 # Changelog
 
+## v1.8.1 — 2026-08-03
+
+### Fixed — eight findings from a code-and-contradiction audit of 1.8.0
+
+A third pass, on a third axis: the first read for contradictions, the second measured
+against Anthropic's guidance, this one went after the **code** and the **invariants
+between files**. Everything below was proven before the fix and again after.
+
+**Fifteen broken cross-references, eleven of them pointing at a section about
+something else.** Every per-stage freedom label cited `gates.md → Axis B` — which is
+the *enforcement ladder* and contains no mention of degrees of freedom. Two more
+cited sections that do not exist at all (`gates.md → progressive arming`,
+`review.md → Final review`). This is the failure `references/learned.md` keeps as a
+review question rather than a rule: *"a stale reference was replaced with a FALSE
+one — the new target existed and said nothing about the subject."* The link checker
+proved every file resolved and could not see it.
+
+It is a rule now. `gates.md` gained the two sections the citations were reaching for
+— **Axis C — degrees of freedom** and **Progressive arming** — and a guard checks
+every ``file.md → *Section*`` pointer against the target's actual headings. Measured
+before shipping: whitespace is normalised first, because a citation wrapped across
+two lines is not a defect and six were reported as such.
+
+**Both installers created the shadow copy this family exists to prune.**
+`install.sh` and `bin/task-pipeline.js` write a plain copy to
+`~/.claude/skills/task-pipeline`; the launcher (`sshlg-skills`) deletes exactly those
+because while the plugin channel is active a plain copy **shadows it and keeps
+serving the version it was copied from**. `CLAUDE.md` documented the shadow-creating
+form (`--force`) as the local install path. Both installers now **refuse when a
+plugin install is detected**, name the plugin commands instead, and take `--force`
+only as a deliberate override.
+
+**The npm package did not contain what the README points at.** `SKILL-CARD.md` and
+the whole `evals/` directory were outside `files[]` while the shipped README linked
+both — and `CONTRIBUTING.md`, `SECURITY.md` and `CODE_OF_CONDUCT.md` had been
+dangling for npm consumers far longer. Rule 14 — *a document may not send a reader
+to something absent* — applied to the artefact that is actually published. All are
+packaged now, and a guard holds every relative README link to `files[]`.
+
+**Living documents restated a guard count that had moved.** `SKILL-CARD.md` and
+`evals/RESULTS.md` claimed 46 after the suite reached 50. Rule 8 — *compute, never
+restate* — had never been applied to this repository's own prose. It is now: the
+count is compared against the negative self-tests the workflow defines, and the
+guard caught its own author within the minute, when adding three tests made the
+freshly-corrected numbers stale again. CHANGELOG entries are exempt; they record
+what a past release shipped.
+
+**The contributor invariants were numbered 1,2,3,4,5,6,10,7,8,9 — and number 8
+documented the opposite of what is enforced**, still requiring the description to
+*open* with `Use when` after v1.8.0 made that a failure. Rewritten: sixteen
+invariants, in order, each matching a guard that exists.
+
+**Smaller:** the seeded gate's empty-project failure named only `docs/` while it also
+scans the repository root, and offered no remedy — it now names both and says what to
+do; `CLAUDE.md` gained the `evals/run.py` row it never had.
+
+Three new guards, each with a negative self-test watched failing.
+
 ## v1.8.0 — 2026-08-03
 
 ### Added — the skill now meets Anthropic's own authoring guidance, measurably

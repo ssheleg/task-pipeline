@@ -909,6 +909,61 @@ jobs:
             echo "OK: validator requires every risk indicator answered on the card"
           fi
 
+      - name: Negative self-test (a citation must name a section that exists)
+        run: |
+          set -eu
+          rm -rf /tmp/cite-copy && cp -R . /tmp/cite-copy
+          python3 - <<'EOF'
+          p = "/tmp/cite-copy/plugins/task-pipeline/skills/task-pipeline/references/stages.md"
+          t = open(p, encoding="utf-8").read()
+          assert "→ *Axis C*" in t, "PLANT MISSED"
+          open(p, "w", encoding="utf-8").write(t.replace("→ *Axis C*", "→ *Axis Q*", 1))
+          EOF
+          if python3 /tmp/cite-copy/test/validate.py; then
+            echo "ERROR: validator passed a citation whose file resolves and whose section does not — the one a link checker cannot catch and a reader believes"
+            exit 1
+          else
+            echo "OK: validator checks section-qualified citations against the target's headings"
+          fi
+
+      - name: Negative self-test (a living document may not restate a stale count)
+        run: |
+          set -eu
+          rm -rf /tmp/count-copy && cp -R . /tmp/count-copy
+          python3 - <<'EOF'
+          p = "/tmp/count-copy/SKILL-CARD.md"
+          t = open(p, encoding="utf-8").read()
+          import re
+          m = re.search(r"(\d+) guards", t)
+          assert m, "PLANT MISSED"
+          open(p, "w", encoding="utf-8").write(t.replace(m.group(0), "3 guards", 1))
+          EOF
+          if python3 /tmp/count-copy/test/validate.py; then
+            echo "ERROR: validator passed a hand-written guard count that disagrees with the workflow"
+            exit 1
+          else
+            echo "OK: validator computes the guard count instead of trusting the prose"
+          fi
+
+      - name: Negative self-test (a README link must ship in the npm package)
+        run: |
+          set -eu
+          rm -rf /tmp/pkg-copy && cp -R . /tmp/pkg-copy
+          python3 - <<'EOF'
+          import json
+          p = "/tmp/pkg-copy/package.json"
+          d = json.load(open(p, encoding="utf-8"))
+          assert "evals" in d["files"], "PLANT MISSED"
+          d["files"] = [f for f in d["files"] if f != "evals"]
+          json.dump(d, open(p, "w", encoding="utf-8"), indent=2)
+          EOF
+          if python3 /tmp/pkg-copy/test/validate.py; then
+            echo "ERROR: validator passed a README that links to something files[] does not publish — the link dangles for every npm install"
+            exit 1
+          else
+            echo "OK: validator holds README links to the published package"
+          fi
+
       - name: install.sh syntax check
         run: bash -n install.sh
 

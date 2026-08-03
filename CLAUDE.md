@@ -20,7 +20,8 @@ Human-facing entry points: [`README.md`](README.md) (what it is),
 | Test | `npm test` (= `python3 test/validate.py`) — must print `PASS: task-pipeline structure valid` |
 | Prove the guards | `npm run test:negatives` — feeds every guard a planted defect and requires it to reject one; `npm run test:all` runs both. Corrupt files in **python, never `sed -i`** (not portable; the validator rejects it) |
 | Lint | none separate; the validator is the lint |
-| Install locally | `./install.sh --force` or `node bin/task-pipeline.js --force` |
+| Install locally | `./install.sh` or `node bin/task-pipeline.js` — **both refuse when the Claude Code plugin is installed**, because a plain `~/.claude/skills/` copy shadows it; `--force` overrides deliberately |
+| Behavioural evals | `python3 evals/run.py` — validates the suite and prints the protocol; it never reports a pass it did not observe |
 | Deploy / release | push a `vX.Y.Z` tag → `.github/workflows/release.yml` (armed by the repo variable `RELEASE_ENABLED`) |
 | Post-deploy check | the release workflow's own `npx` smoke test; then `npm view task-pipeline-skill version` |
 
@@ -41,7 +42,7 @@ step.
 ## Invariants that must not drift
 
 Full list with reasoning in [`CONTRIBUTING.md`](CONTRIBUTING.md) → *The
-invariants*. The two that bite most often:
+invariants* (sixteen of them). The two that bite most often:
 
 1. **Four-way version sync** — `package.json`, `.claude-plugin/marketplace.json`
    (`plugins[0].version`), `plugins/task-pipeline/.claude-plugin/plugin.json`, and

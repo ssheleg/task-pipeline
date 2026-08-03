@@ -53,7 +53,7 @@ never that the work was skipped quietly.
 - Cross-cutting — the audit
 
 ## 0 — Intake grill — MANDATORY
-- **Freedom: medium** — the interview adapts to the answers; its two phases and their order do not ([`gates.md`](gates.md) → *Axis B*).
+- **Freedom: medium** — the interview adapts to the answers; its two phases and their order do not ([`gates.md`](gates.md) → *Axis C*).
 - **Stage 0 is not optional and not skippable.** There is no "small enough task"
   exemption, no "the request was already clear" exemption, no starting stage 1
   "while the operator thinks". The only sanctioned bypass is the
@@ -154,7 +154,7 @@ never that the work was skipped quietly.
   reversible calls can be deferred with a note). Only then start stage 1.
 
 ## 1 — Docs study
-- **Freedom: medium** — which sources to fetch is judgement; grounding contracts on fetched docs is not ([`gates.md`](gates.md) → *Axis B*).
+- **Freedom: medium** — which sources to fetch is judgement; grounding contracts on fetched docs is not ([`gates.md`](gates.md) → *Axis C*).
 - **What:** ground every external library / API / SDK the task touches on the
   *current* docs, before locking any contract.
 - **Invoke:** the `context7` MCP — `context7:resolve-library-id` → `context7:query-docs`,
@@ -164,7 +164,7 @@ never that the work was skipped quietly.
   not recall. Unresolvable libraries are flagged in the spec.
 
 ## 2 — Brainstorm + decompose
-- **Freedom: high** — many designs are valid — this is the open field, and the only fixed thing is the gate ([`gates.md`](gates.md) → *Axis B*).
+- **Freedom: high** — many designs are valid — this is the open field, and the only fixed thing is the gate ([`gates.md`](gates.md) → *Axis C*).
 - **How it runs: [`brainstorm.md`](brainstorm.md)** — built into this skill. Read
   the brief first (stage 0 already answered scope/constraints/done-criteria), then
   explore the codebase, scope-check for decomposition, one question at a time, 2–3
@@ -194,7 +194,7 @@ never that the work was skipped quietly.
   contracts named with their owner.
 
 ## 3 — Spec — with UX track for user-facing tasks
-- **Freedom: medium** — what the contract says is judgement; which contracts must be locked is a list ([`gates.md`](gates.md) → *Axis B*).
+- **Freedom: medium** — what the contract says is judgement; which contracts must be locked is a list ([`gates.md`](gates.md) → *Axis C*).
 - **How it runs: [`spec.md`](spec.md)** — built into this skill: the UX-track order,
   what the spec must lock (types, schemas, signatures, file layout, the **Global
   Constraints** block stages 4–5 depend on), the self-review pass and the operator
@@ -250,7 +250,7 @@ never that the work was skipped quietly.
   starts before this — the chain comes BEFORE interface.
 
 ## 4 — Plan
-- **Freedom: low** — the task format is prescribed and the REQ set-comparison is mechanical ([`gates.md`](gates.md) → *Axis B*).
+- **Freedom: low** — the task format is prescribed and the REQ set-comparison is mechanical ([`gates.md`](gates.md) → *Axis C*).
 - **How it runs: [`planning.md`](planning.md)** — built into this skill →
   `docs/superpowers/plans/YYYY-MM-DD-<topic>.md` (same slug as the brief and the
   spec). Zero-context tasks, exact
@@ -269,7 +269,7 @@ never that the work was skipped quietly.
   same change (super-ux *same-change* rule).
 
 ## 5 — Dev
-- **Freedom: low** — TDD order, worktree isolation and 'a subagent never writes the register' are the narrow bridge ([`gates.md`](gates.md) → *Axis B*).
+- **Freedom: low** — TDD order, worktree isolation and 'a subagent never writes the register' are the narrow bridge ([`gates.md`](gates.md) → *Axis C*).
 - **How it runs: [`build.md`](build.md)** — built into this skill: isolate the
   workspace (native worktree tool first, git fallback, baseline tests), keep a
   ledger under `.task-pipeline/build/<plan>/` so a compacted context can resume,
@@ -291,7 +291,7 @@ never that the work was skipped quietly.
   "leave it" recorded).
 
 ## 6 — Tests
-- **Freedom: low** — green means the full suite, and no skip smuggles a red one past ([`gates.md`](gates.md) → *Axis B*).
+- **Freedom: low** — green means the full suite, and no skip smuggles a red one past ([`gates.md`](gates.md) → *Axis C*).
 - **What:** consolidate test coverage for the change: confirm new functionality
   has tests (written test-first in stage 5), update/repair existing tests the
   change touched, and add edge-case + failure-path tests per DoD.
@@ -305,7 +305,7 @@ never that the work was skipped quietly.
   ([`audit.md`](audit.md)).
 
 ## 7 — Lint + deploy
-- **Freedom: low** — outward and irreversible — the authorization floor is exact or the stage stops ([`gates.md`](gates.md) → *Axis B*).
+- **Freedom: low** — outward and irreversible — the authorization floor is exact or the stage stops ([`gates.md`](gates.md) → *Axis C*).
 - Read host conventions (`conventions.md`): run the linter; fix failures. The suite
   is already green from stage 6 — re-run it if code changed since. For UI projects,
   the **super-ux linter** (`python3 docs/ux/lint.py` / `/ux-lint`) is part of lint —
@@ -320,14 +320,14 @@ never that the work was skipped quietly.
   operator go. Respect deploy-from-main rules if the project mandates them.
 
 ## 8 — Post-deploy
-- **Freedom: medium** — where the logs live varies; 'clean boot or an honest degradation report' does not ([`gates.md`](gates.md) → *Axis B*).
+- **Freedom: medium** — where the logs live varies; 'clean boot or an honest degradation report' does not ([`gates.md`](gates.md) → *Axis C*).
 - Tail deploy logs / health-check per conventions. Confirm clean boot, no error
   spike, live subsystems healthy.
 - **GATE (auto):** clean boot confirmed, or an **honest degradation report** with next
   steps — never silent success.
 
 ## 9 — Docs + wiki
-- **Freedom: low** — the matrix walk and the gate are mechanical; what a doc says is not this stage's call ([`gates.md`](gates.md) → *Axis B*).
+- **Freedom: low** — the matrix walk and the gate are mechanical; what a doc says is not this stage's call ([`gates.md`](gates.md) → *Axis C*).
 - **The propagation sweep runs first** ([`documentation.md`](documentation.md)).
   The ledger below names the documents you **read**; the matrix in `docs/DOCMAP.md`
   names the documents you **owe**. They are not the same list, and the gap between
@@ -381,7 +381,7 @@ never that the work was skipped quietly.
   carry-over count printed beside this verdict**.
 
 ## 10 — Acceptance
-- **Freedom: medium** — the walk and the evidence rule are fixed; whether it is what was asked for is the operator's ([`gates.md`](gates.md) → *Axis B*).
+- **Freedom: medium** — the walk and the evidence rule are fixed; whether it is what was asked for is the operator's ([`gates.md`](gates.md) → *Axis C*).
 - **What:** the closing stage — go back to the brief and account for **every**
   requirement. Doctrine: [`acceptance.md`](acceptance.md). Every earlier gate asks
   "is this artifact good?"; none asks "does this still contain everything that was

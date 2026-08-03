@@ -23,6 +23,8 @@ elsewhere and is not restated here:
 
 - Axis A — the stage gate type
 - Axis B — the enforcement mechanism
+- Axis C — degrees of freedom
+- Progressive arming
 - Before you run a check
 - Anatomy of a project gate
 - Writing the check itself
@@ -69,6 +71,53 @@ common answer. Written down with its reason, it is a finding somebody can later
 disprove. Left unwritten, it is indistinguishable from an omission.
 
 ---
+
+## Axis C — degrees of freedom
+
+Axis B says how hard a rule bites. This one says how much latitude the *instruction*
+leaves, and it is a separate choice: a low-freedom instruction guarded by nothing is
+a wish, and a high-freedom instruction behind a blocking hook is a bottleneck.
+
+Match the level to how **fragile** the step is, not to how important it feels:
+
+| Level | Shape | Use when | Example here |
+|---|---|---|---|
+| **high** | prose direction, no prescribed sequence | many routes reach a good answer and context decides | stage 2 — the design conversation |
+| **medium** | a named order with room inside each step | the sequence is fixed, the content is judgement | stage 0 — two phases, adaptive questions |
+| **low** | run exactly this, in this order, no variation | the operation is fragile, irreversible, or must be identical every time | stage 5's TDD order · stage 7's deploy · stage 9's matrix walk |
+
+The picture worth keeping is an **open field versus a narrow bridge**. In the field,
+say where to go and let the agent find the route. On the bridge there is one safe way
+across, and the guardrails are the instruction.
+
+**Over-constraining costs as much as under-constraining and is harder to see.** A
+high-freedom step written as low freedom produces an agent that follows the letter
+past the point where the letter stopped fitting — and reports success, because it did
+what it was told. Where a step is genuinely open, say so out loud; that sentence is
+what stops the next reader from hardening it.
+
+Every stage in [`stages.md`](stages.md) declares its level and its reason, on the
+line under its heading.
+
+## Progressive arming
+
+A gate seeded into a young project has almost nothing to check yet, and a gate that
+starts red teaches everyone on day one that it is noise ([`learned.md`](learned.md)
+rule 9). So each section reports one of four states and only one of them fails:
+
+| State | Means | Fails? |
+|---|---|---|
+| `ok` | the check ran and passed | no |
+| `dormant: … — no <artefact> yet` | the input does not exist yet | no |
+| `skip: … — <why>` | the input exists, the check could not run here | no |
+| `ERR` | the check ran and found something | **yes** |
+
+`dormant` and `skip` are **printed, never silent** — that is the whole reason they do
+not quietly become permanent.
+
+They also force one more obligation on the verdict line: it must report **what the
+run actually looked at**. Every section dormant is indistinguishable from a gate
+blind to the shape in front of it, and exit 0 alone cannot tell those two apart.
 
 ## Before you run a check
 
