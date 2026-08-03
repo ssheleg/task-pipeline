@@ -20,7 +20,8 @@ over all of them.
 
 | id | Born | Commit | Instruction | Because | Retire when | Last fired | Fired at |
 |---|---|---|---|---|---|---|---|
-| R-001 | 2026-08-03 · `documentation-track` | `dbe4f43` | When a check stays silent against a planted defect, **prove the plant landed in the text the check actually parses before touching the check.** | Two silent probes in one run: one was a bad probe (§9 correctly skips outside a git tree), one was a real bug (`$((0009))` is octal). The split is 50/50 here and was 4-of-5 probe-fault on the source project — guessing wrong costs a real bug or a false fix. | a probe harness exists that asserts the plant changed the parsed text, making this mechanical | 2026-08-03 | `dbe4f43` |
+| R-001 | 2026-08-03 · `documentation-track` | `dbe4f43` | When a check stays silent against a planted defect, **prove the plant landed in the text the check actually parses before touching the check.** | Two silent probes in one run: one was a bad probe (§9 correctly skips outside a git tree), one was a real bug (`$((0009))` is octal). The split is 50/50 here and was 4-of-5 probe-fault on the source project — guessing wrong costs a real bug or a false fix. | a probe harness exists that asserts the plant changed the parsed text, making this mechanical | 2026-08-03 | `096f0f0` |
+| R-002 | 2026-08-03 · `doc-track-audit` | `096f0f0` | When a batch of edits returns **any** error, re-verify **every** edit in that batch before reporting the batch done — not only the one that errored. | Two edits were issued together; the second failed the read-before-write check and was retried, the first was silently never applied. It was reported as done, shipped in v1.7.0, and surfaced only in a post-release audit as a question the grill never asks with a field in the brief waiting for the answer. | the harness reports per-edit outcomes in a form a check can read, or the edits are issued one per message | 2026-08-03 | `096f0f0` |
 
 Retire on **any** of: it became a check · every path/command it names is gone · it
 has not fired in the last five run stamps. At eleven rows, the oldest never-fired
@@ -31,6 +32,45 @@ row goes — the cap is not negotiable, ranking is.
 Older entries and every retirement **move** to `docs/superpowers/retro/YYYY-QN.md`
 at the prune. Moving is not deleting: the archive is append-only and holds the
 incident forever, so pruning the in-force list costs no knowledge.
+
+### 2026-08-03 · `doc-track-audit` · a gate that read one of the two shapes it promised
+
+- **Symptom:** on a project using the ADR shape — which `documentation.md` permits
+  explicitly — `scripts/check-docs.sh` printed **eight `dormant` lines out of ten
+  sections** and exited 0, with a planted propagation violation uncaught. Evidence:
+  the ADR seed run, and `templates/docgate.sh` parsing only `$DEC_FILE`.
+- **Surfaced at:** a post-release audit · **Owned by:** the release that wrote both
+  the doctrine and the gate in one change and tested only the shape it had seeded.
+- **Root cause:** `dormant` was designed so a *fresh* project is green on day one,
+  and it was never bounded to that case — so it also covered a *populated* register
+  the gate could not read. Green from a check that did not look is the failure the
+  whole file is written against, reproduced by its own author.
+- **Fix:** grade 1 — a normalised entry index, so no section knows which shape it
+  reads; plus the validator asserting the seeded run **reports the shape it found**
+  and **ran at least N live checks**. Exit 0 alone can no longer stand in for
+  having looked.
+- **The check:** two seeded projects executed on every `npm test`, one per shape,
+  each asserting live-check counts; seven planted defects on the ADR shape.
+- **Commit:** `096f0f0`
+- **Upstream?** Already upstream. The generalised rule — *a skip is not a pass, and
+  a gate must report what it looked at* — went into `references/gates.md`.
+
+### 2026-08-03 · `doc-track-audit` · a cross-cutting protocol that no stage had heard of
+
+- **Symptom:** `grep -c "doc loop\|documentation.md"` over `brainstorm.md`,
+  `spec.md`, `planning.md`, `build.md`, `review.md`, `acceptance.md` → **0 each**,
+  while SKILL.md, stages.md and documentation.md all called the Doc Loop
+  cross-cutting.
+- **Surfaced at:** the same audit · **Owned by:** the release, which wired the track
+  into the orchestration layer and stopped there.
+- **Root cause:** the orchestrator's view was mistaken for the executor's. An agent
+  running stage 5 opens `build.md`; it never re-reads SKILL.md to discover that a
+  protocol applies. Declaring a thing cross-cutting does not distribute it.
+- **Fix:** grade 1 — five stage doctrines now name it, held by a guard; and stage 5
+  gets the rule its architecture demanded (a subagent never writes the register).
+- **The check:** the doc-loop reach guard, with its negative self-test.
+- **Commit:** `096f0f0`
+- **Upstream?** n/a — this repo is the skill.
 
 ### 2026-08-03 · `documentation-track` · a new gate passed for every id ending 8 or 9
 
@@ -76,6 +116,7 @@ One line per run, appended at stage 10. This is what makes "five runs" countable
 
 | Date | Topic | Commit | Verdict | Retro |
 |---|---|---|---|---|
+| 2026-08-03 | `doc-track-audit` | `096f0f0` | 9/9 findings fixed, each proven before and after | 2 entries · 2 standing (was 1) · retired 0 · added 1 · R-001 fired |
 | 2026-08-03 | `documentation-track` | `0ddd4e3` | 17/17 contracts · 12/12 findings verified | 2 entries · 1 standing (was 0) · retired 0 · added 1 |
 
 The `Commit` column is what turns a stamp from a date into a navigable point in

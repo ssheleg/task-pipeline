@@ -182,6 +182,19 @@ A checklist you run yourself, inline. No subagent:
    `depends:` points at a task that really produces what's consumed.
 6. **DoD present and verifiable** on every task.
 
+## This stage settles nothing — and that is a rule, not an omission
+
+Planning **translates** decisions; it does not make them. So unlike stages 2, 3, 5
+and 10 there is no Doc Loop trigger here ([`documentation.md`](documentation.md)),
+and the reason is worth stating, because an unstated exclusion is indistinguishable
+from a gap.
+
+The consequence is the working rule: **if writing the plan forces a choice, the
+choice belongs to a lower layer.** A contract that turns out underspecified goes
+back to stage 3 and is recorded there; a scope question goes back to the operator.
+A decision first made while sequencing tasks is a decision nothing downstream will
+ever find, because nobody reads a plan after the build.
+
 ## GATE (auto)
 
 **Set equality first:** the REQ ids in the brief equal the union of `Implements:`
