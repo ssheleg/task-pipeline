@@ -1,5 +1,75 @@
 # Changelog
 
+## v1.7.2 — 2026-08-03
+
+### Fixed — nine findings from a post-release investigation of v1.7.1
+
+The release was audited against the skill's own ladder, bottom-up, findings ordered
+by seam. Every one below was proven before it was fixed and again after.
+
+**The gate enforced one of the two register shapes it promises.** `documentation.md`
+permits two decision homes — `docs/DECISIONS.md` or `docs/adr/` — and says they owe
+the same six things; `docgate.sh` parsed only the first. Measured on a real ADR
+project: **eight of ten sections went `dormant`**, dormant is green by design, and a
+planted propagation violation was not caught. The gate now builds a **normalised
+entry index** from whichever home exists, so no section knows which shape it is
+reading, and holding both at once is itself an error. Seven planted defects on the
+ADR shape, all firing.
+
+Two of those probes exposed bugs in the checks rather than in the fixtures — the
+fixture is derived from `templates/adr.md`'s own fenced example, so it cannot drift
+from the documented format. HTML comments were not stripped, so a status line
+carrying `<!-- or: Superseded by ADR-0012 -->` made an entry read as retired *and*
+invented an undefined id; and the first fix dropped the line that **opened** the
+comment, throwing away the `Status:` before it. Duplicate ADR numbers were counted
+from the entry index, whose one-row-per-id dedupe swallowed exactly the second file
+this check exists to find — it counts filenames now, because the filename is the
+allocator.
+
+**Exit 0 was not proof that the gate had looked.** Every section can go `dormant`,
+so a gate blind to a shape passes identically to one that reads it. The validator
+now asserts the seeded run **reports which shape it found** and **ran at least N
+live checks** — the difference between "it did not fail" and "it looked".
+
+**The Doc Loop was declared cross-cutting and appeared in no stage doctrine.**
+`brainstorm.md`, `spec.md`, `build.md`, `review.md` and `acceptance.md` had zero
+mentions of it — so the flow as an agent *executes* it never ran the loop, because
+an agent opens the stage file, not the orchestrator's summary. All five now say
+where a settled decision goes, and it is a guard.
+
+Most of that gap was at stage 5, which settles more decisions than any other stage
+and runs in an isolated worktree with parallel implementers. The rule is now
+explicit and argued from the same physics as the existing parallel-fan-out rule:
+**a subagent never writes the register** — append-only shared state cannot be
+hand-merged across worktrees, and an id cannot be *reserved* from a branch that
+cannot see the other writers. Decisions ride the implementer report and the ledger;
+the orchestrator runs the loop after integration, as a single writer.
+
+**`hooks.md` stated an external contract from memory.** Re-fetched from the Claude
+Code hooks reference and corrected: `permissionDecision` has **four** values, not
+one; there are **35** events, not the four listed; `effort`, `agent_id` and
+`agent_type` were missing from the stdin fields; `if` is evaluated on five tool
+events and its Bash matching is best-effort. The reference also says outright that
+**exit 1 is non-blocking "even though 1 is the conventional Unix failure code"** —
+which is the sharpest possible argument for the `|| exit 2` this file already
+required. Provenance and fetch date are now in the file, because stage 1 of this
+pipeline exists for exactly this.
+
+**Smaller, and all real:** a "we don't document" escape hatch in `documentation.md`
+contradicted the seeding rule four lines above it and the stage-0 gate; the stage-9
+config gate carried both the retired criterion *"docs in sync with code"* and the
+sentence declaring it retired; a lost edit meant the grill never asked the
+documentation-regime question the brief had a field for — and the sweep-drift guard
+missed it because it compared **stage numbers**, which both files still matched, so
+it now compares topics per stage (measured: zero false positives, including the
+legitimate case where the brief splits one grill row into two); `acceptance.md`
+never mentioned the documentation gate it is supposed to prove; and nested bold in
+the stage-10 gate criterion inverted the emphasis of everything after "every
+deletion logged".
+
+Three new guards, each with a negative self-test watched failing.
+**46 of 46 guards provably reject their planted defect.**
+
 ## v1.7.1 — 2026-08-03
 
 ### Fixed — the tag-ancestry gate had been failing on every release since v1.6.1

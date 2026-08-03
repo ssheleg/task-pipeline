@@ -445,29 +445,99 @@ else:
     # A generator seeds green (references/learned.md rule 9). A scaffold whose own
     # gate rejects its own templates teaches every new project that the gate is
     # noise. This is the one guard in this repo that EXECUTES what it checks.
+    #
+    # BOTH register shapes are exercised. references/documentation.md permits two
+    # decision homes and says they owe the same six things; the gate read only one
+    # of them, so an ADR project got eight green "dormant" lines over a fully
+    # populated register and a planted propagation violation went uncaught. A
+    # promise kept for one shape is a promise, not a contract — so the contract is
+    # what runs here.
     if os.path.isfile(gate) and shutil.which("bash"):
-        _seed = tempfile.mkdtemp(prefix="tp-seed-")
-        try:
-            os.makedirs(os.path.join(_seed, "docs/superpowers"))
-            os.makedirs(os.path.join(_seed, "scripts"))
+
+        def _run_seed(label, shape, build, min_ok):
+            _seed = tempfile.mkdtemp(prefix="tp-seed-")
+            try:
+                os.makedirs(os.path.join(_seed, "scripts"))
+                with open(os.path.join(_seed, "scripts/check-docs.sh"), "w",
+                          encoding="utf-8") as _fh:
+                    _fh.write(open(gate, encoding="utf-8").read())
+                build(_seed)
+                _r = subprocess.run(["bash", "scripts/check-docs.sh"], cwd=_seed,
+                                    capture_output=True, text=True)
+                _out = _r.stdout + _r.stderr
+                if _r.returncode != 0:
+                    fail(f"templates/docgate.sh seeds RED on a {label} project "
+                         f"(exit {_r.returncode}) — a project that starts red learns "
+                         "on day one that the gate is noise. Output: "
+                         + _out.strip()[-500:])
+                    return
+                # Exit 0 alone proves nothing here: every section can go `dormant`,
+                # dormant is green by design, and a gate blind to this shape would
+                # pass exactly like a gate that read it. So make the run report
+                # something verifiable — which shape it found, and how much of it it
+                # actually looked at.
+                if f"shape {shape}" not in _out:
+                    fail(f"templates/docgate.sh did not report 'shape {shape}' on a "
+                         f"{label} project — it exited 0 without recognising the "
+                         "register, which is indistinguishable from reading it")
+                _n_ok = len([l for l in _out.splitlines() if l.startswith("ok:")])
+                if _n_ok < min_ok:
+                    fail(f"templates/docgate.sh ran only {_n_ok} live check(s) on a "
+                         f"{label} project (expected at least {min_ok}) — the rest "
+                         "went dormant, and dormant is green: that is how a fully "
+                         "populated register sits behind a passing gate")
+            finally:
+                shutil.rmtree(_seed, ignore_errors=True)
+
+        def _copy(seed, src, dst):
+            _p = os.path.join(tpl_dir, src)
+            if not os.path.isfile(_p):
+                return
+            _t = os.path.join(seed, dst)
+            os.makedirs(os.path.dirname(_t), exist_ok=True)
+            with open(_t, "w", encoding="utf-8") as _fh:
+                _fh.write(open(_p, encoding="utf-8").read())
+
+        def _build_register(seed):
             for _src, _dst in (("docmap.md", "docs/DOCMAP.md"),
                                ("decisions.md", "docs/DECISIONS.md"),
                                ("open-questions.md", "docs/OPEN_QUESTIONS.md"),
-                               ("retro.md", "docs/superpowers/retro.md"),
-                               ("docgate.sh", "scripts/check-docs.sh")):
-                _p = os.path.join(tpl_dir, _src)
-                if os.path.isfile(_p):
-                    with open(os.path.join(_seed, _dst), "w", encoding="utf-8") as _fh:
-                        _fh.write(open(_p, encoding="utf-8").read())
-            _r = subprocess.run(["bash", "scripts/check-docs.sh"], cwd=_seed,
-                                capture_output=True, text=True)
-            if _r.returncode != 0:
-                fail("templates/docgate.sh seeds RED on a freshly seeded project "
-                     f"(exit {_r.returncode}) — a project that starts red learns on "
-                     "day one that the gate is noise. Output: "
-                     + (_r.stdout + _r.stderr).strip()[-500:])
-        finally:
-            shutil.rmtree(_seed, ignore_errors=True)
+                               ("retro.md", "docs/superpowers/retro.md")):
+                _copy(seed, _src, _dst)
+
+        def _build_adr(seed):
+            # The fixture is DERIVED from templates/adr.md's own fenced example, so
+            # it cannot drift from the format the skill documents. A hand-written
+            # copy here would be a second statement of the ADR contract.
+            _adr_src = os.path.join(tpl_dir, "adr.md")
+            if not os.path.isfile(_adr_src):
+                return
+            _txt = open(_adr_src, encoding="utf-8").read()
+            if "## When this directory IS the register" not in _txt:
+                fail("templates/adr.md: no 'When this directory IS the register' "
+                     "section — the seeded gate's ADR fixture is derived from its "
+                     "fenced example, and without it the ADR shape ships untested")
+                return
+            _blk = _txt.split("## When this directory IS the register")[1]
+            _blk = _blk.split("```md")[1].split("```")[0]
+            _blk = _blk.replace("- **Supersedes:** ADR-0004", "")
+            os.makedirs(os.path.join(seed, "docs/adr"), exist_ok=True)
+            with open(os.path.join(seed, "docs/adr/0001-seed.md"), "w",
+                      encoding="utf-8") as _fh:
+                _fh.write(_blk)
+            for _doc in re.findall(r"`([^`]+\.md)`", _blk):
+                _t = os.path.join(seed, _doc)
+                os.makedirs(os.path.dirname(_t), exist_ok=True)
+                with open(_t, "w", encoding="utf-8") as _fh:
+                    _fh.write("# %s\n\nGoverned by ADR-0001.\n" % os.path.basename(_doc))
+            with open(os.path.join(seed, "docs/DOCMAP.md"), "w", encoding="utf-8") as _fh:
+                _fh.write("# Doc map\n\n## Registers\n\n| Register | File | ID |\n"
+                          "|---|---|---|\n| Decisions | `docs/adr/` | `ADR-NNNN` |\n"
+                          "\n## Propagation matrix\n\n| Change | Update | Checked by |\n"
+                          "|---|---|---|\n| a decision | its consequences | gate section 5 |\n")
+
+        _run_seed("register-shape", "register", _build_register, 8)
+        _run_seed("ADR-shape", "adr", _build_adr, 7)
 
     # A template that ships and is not listed is a template nobody knows to seed.
     _tpl_readme = os.path.join(tpl_dir, "README.md")
@@ -487,15 +557,26 @@ else:
     # to one is simply never asked, or never recorded, and the autonomy promise
     # degrades into a mid-flight question with nothing to show it was ever dropped.
     # Compare the stage numbers each table covers, not the wording.
+    # Compared per stage as a KEYWORD SET, not as a set of stage numbers. The
+    # number-only version passed while grill.md was missing the documentation-regime
+    # row that templates/brief.md had a field for — a question never asked with an
+    # answer nowhere to write, which is the exact defect this check exists to catch,
+    # walking through it because both files still "covered stage 0".
+    # Measured before being trusted (learned.md rule 10): zero false positives on
+    # the real content, including the legitimate case where the brief splits
+    # grill's "7 Lint+deploy" into separate "7 Lint" and "7 Deploy" rows — the union
+    # of words per stage is identical either way.
     def _sweep_stages(text):
         m = re.search(r"^\|\s*(?:Stage|run-wide)\b.*?\n(?:\|[-: |]+\|\n)?((?:\|.*\n)+)",
                       text, re.M)
         if not m:
             return None
-        covered = set()
+        covered = {}
         for row in m.group(1).splitlines():
             cell = row.split("|")[1] if row.count("|") > 1 else ""
-            covered.update(int(n) for n in re.findall(r"\d+", cell))
+            key = tuple(re.findall(r"\d+", cell))
+            covered.setdefault(key, set()).update(
+                w.lower() for w in re.findall(r"[A-Za-z]{3,}", cell))
         return covered
 
     _grill_p = os.path.join(refdir, "grill.md")
@@ -506,10 +587,13 @@ else:
             fail("autonomy sweep: could not find the table in references/grill.md "
                  "and/or templates/brief.md — the sweep must be a table in both")
         elif _g != _b:
-            fail(f"autonomy sweep drift: references/grill.md covers stages {sorted(_g)} "
-                 f"but templates/brief.md covers {sorted(_b)} — one is what the grill "
-                 "asks, the other is what the brief records; a row in only one is a "
-                 "question never asked or an answer never written down")
+            _only_g = {k: sorted(_g[k] - _b.get(k, set())) for k in _g if _g[k] - _b.get(k, set())}
+            _only_b = {k: sorted(_b[k] - _g.get(k, set())) for k in _b if _b[k] - _g.get(k, set())}
+            fail("autonomy sweep drift — one file is what the grill ASKS, the other "
+                 "is what the brief RECORDS, so a topic in only one is a question "
+                 "never asked or an answer with nowhere to go. "
+                 f"only in references/grill.md: {_only_g or '{}'} · "
+                 f"only in templates/brief.md: {_only_b or '{}'}")
 
 # No hardcoded vendor model ids in anything we ship: model generations ship and get
 # renamed, and the operator may be on another provider entirely. Stage configs use
@@ -835,6 +919,11 @@ if isinstance(_pipe_stages, list) and _pipe_stages and isinstance(_pipe_stages[-
         ("submodule", "the parent-repository close-out"),
         ("ladder", "the ladder walk"),
         ("retro", "the retrospective (prune, stamp, entry)"),
+        # Stage 10 must PROVE the documentation gate, not merely inherit its green.
+        # acceptance.md — the file an agent actually opens at stage 10 — shipped
+        # without a word about it while SKILL.md's row and the config both demanded
+        # it: the same inert-gate shape the three anchors above already guard.
+        ("documentation gate", "the documentation gate as a stage-10 proof obligation"),
     ):
         if _anchor not in _sk_low:
             continue
@@ -870,6 +959,21 @@ if isinstance(_pipe_stages, list) and _pipe_stages and isinstance(_pipe_stages[-
             if _anchor not in _txt.lower():
                 fail(f"{_rel}: SKILL.md describes {_what}, but this surface never "
                      f"mentions {_anchor!r} — declared where it is not enforced is inert")
+
+    # The Doc Loop is declared CROSS-CUTTING — "it fires at any stage" — in SKILL.md,
+    # stages.md and documentation.md. It shipped that way while not one stage
+    # doctrine file mentioned it, which means the flow as an agent EXECUTES it never
+    # ran the loop: an agent opens the stage file, not the orchestrator's summary.
+    # These five are the stages that settle decisions, so these five must say so.
+    for _fn in ("brainstorm.md", "spec.md", "build.md", "review.md", "acceptance.md"):
+        _p = os.path.join(refdir, _fn)
+        if not os.path.isfile(_p):
+            continue
+        if "documentation.md" not in open(_p, encoding="utf-8").read():
+            fail(f"references/{_fn}: the Doc Loop is declared cross-cutting but this "
+                 "stage doctrine never names references/documentation.md — a stage "
+                 "that settles decisions and does not know where they go is where "
+                 "they are lost")
 
     # Each stage's doctrine file states its own GATE type. If it disagrees with the
     # config, an agent reading the doctrine gates differently than the flow says.

@@ -31,8 +31,12 @@ A project with no answers gets them seeded. The seeding is itself recorded as th
 first entry in the register, which is the cheapest possible demonstration that the
 register works.
 
-**A project that answers "we don't document" has still answered.** Write that down,
-with the date, and the next agent stops re-deciding it every run.
+**There is no "we don't document" answer.** The four questions have answers in every
+repository — the smallest one still decides *somewhere* that a thing is true — and
+the only choice is whether that answer is written down or re-derived by each new
+reader. What scales down is **volume**, never the rules: a register with three
+entries is a register, and the seeded gate is green on exactly those three
+([`gates.md`](gates.md) → *progressive arming*).
 
 ---
 

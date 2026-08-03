@@ -88,6 +88,18 @@ it arms the stage-3 UX track ([`spec.md`](spec.md) → *UX track*). When it's
 genuinely borderline, record "yes": a false positive costs one extra chain, a false
 negative ships an unspecified interface.
 
+## The approved design is a set of decisions — record them
+
+An approved approach is a decision, and so is each alternative rejected for a reason
+worth remembering. Run the **Doc Loop** ([`documentation.md`](documentation.md)) on
+the ones that will outlive this run: the shape chosen, the boundary drawn, the option
+deliberately not taken. Not every preference — the ones a future reader would
+otherwise re-litigate from scratch, which is the same test an ADR applies.
+
+The cost of skipping it is specific: a design approved in conversation and recorded
+only in the spec dies with that spec, and the next run re-opens a question the
+operator already answered.
+
 ## GATE (manual)
 
 The operator approves the design **and** the UI verdict is recorded **and every REQ

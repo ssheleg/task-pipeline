@@ -131,6 +131,7 @@ explicit "stop and ask me here":
 |---|---|
 | run-wide | the model decision ([`model-tiering.md`](model-tiering.md)); what to decide autonomously vs escalate |
 | 0 Harvest | doc sources beyond this repo — other repos, hosted doc systems, the knowledge wiki, **the code graph** ([`knowledge-graph.md`](knowledge-graph.md): built / installed-not-built / absent) — and whether stage 9 may write to them (another repo is outward: propose + PR, never a direct push) |
+| 0 Docs regime | where settled things live (the decision home — **one** per project, and an existing `docs/adr/` **is** it), who may write it, whether a lease mechanism is present or the run is `ungated`, the gate command and its ratchet floors, and whether this run may raise a floor ([`documentation.md`](documentation.md)) |
 | 1 Docs | external libs/APIs/SDKs in play; any private ones context7 can't resolve → where their docs live |
 | 2 Decompose | is this a platform (several capabilities/surfaces) or one module? if platform: deploy cadence — per module or once at the end |
 | 2–3 Spec | UI verdict (arms super-ux); any scenario-tracing waiver |

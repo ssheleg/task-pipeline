@@ -778,6 +778,60 @@ jobs:
             echo "OK: validator holds decisions.md and adr.md to one field set"
           fi
 
+      - name: Negative self-test (the seeded gate must read BOTH register shapes)
+        run: |
+          set -eu
+          rm -rf /tmp/blindadr-copy && cp -R . /tmp/blindadr-copy
+          python3 - <<'EOF'
+          p = "/tmp/blindadr-copy/plugins/task-pipeline/skills/task-pipeline/templates/docgate.sh"
+          s = open(p, encoding="utf-8").read()
+          old = 'elif [ "$have_adr" = "1" ]; then'
+          assert old in s, "PLANT MISSED"
+          open(p, "w", encoding="utf-8").write(s.replace(old, "elif false; then", 1))
+          EOF
+          if python3 /tmp/blindadr-copy/test/validate.py; then
+            echo "ERROR: validator passed a gate blind to the ADR shape — every section goes dormant, dormant is green, and a populated register sits behind a passing gate"
+            exit 1
+          else
+            echo "OK: validator requires the seeded gate to report its shape and run live checks on both"
+          fi
+
+      - name: Negative self-test (the Doc Loop must reach the stages that settle decisions)
+        run: |
+          set -eu
+          rm -rf /tmp/docloop-copy && cp -R . /tmp/docloop-copy
+          python3 - <<'EOF'
+          p = "/tmp/docloop-copy/plugins/task-pipeline/skills/task-pipeline/references/build.md"
+          s = open(p, encoding="utf-8").read()
+          assert "documentation.md" in s, "PLANT MISSED"
+          open(p, "w", encoding="utf-8").write(s.replace("documentation.md", "somewhere-else.md"))
+          EOF
+          if python3 /tmp/docloop-copy/test/validate.py; then
+            echo "ERROR: validator passed a stage doctrine that settles decisions and never names the Doc Loop"
+            exit 1
+          else
+            echo "OK: validator holds the five decision-settling stages to the Doc Loop"
+          fi
+
+      - name: Negative self-test (the autonomy sweep is compared by topic, not by stage number)
+        run: |
+          set -eu
+          rm -rf /tmp/sweep-copy && cp -R . /tmp/sweep-copy
+          python3 - <<'EOF'
+          p = "/tmp/sweep-copy/plugins/task-pipeline/skills/task-pipeline/references/grill.md"
+          t = open(p, encoding="utf-8").read()
+          old = "| 0 Docs regime |"
+          assert old in t, "PLANT MISSED"
+          i = t.index(old); j = t.index("\n", i) + 1
+          open(p, "w", encoding="utf-8").write(t[:i] + t[j:])
+          EOF
+          if python3 /tmp/sweep-copy/test/validate.py; then
+            echo "ERROR: validator passed a sweep row the brief records and the grill never asks — both files still 'cover stage 0', which is why counting stage numbers was not enough"
+            exit 1
+          else
+            echo "OK: validator compares the sweep per stage as a topic set"
+          fi
+
       - name: install.sh syntax check
         run: bash -n install.sh
 

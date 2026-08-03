@@ -177,6 +177,35 @@ Record the implementer's agent identity: fix rounds 1–3 resume it.
 > commit range, a one-line test summary, and your concerns. Ask before starting
 > if anything in the brief is ambiguous — questions are cheaper than rework.
 
+### 4.1a Decisions settled inside a task — and who may write them down
+
+The report above already asks for *"decisions you made"*, and stage 5 settles more
+of them than any other stage: an interface picked between two tasks, a ruling on a
+review finding, a constraint discovered in the code. Every one is a Doc Loop trigger
+([`documentation.md`](documentation.md)) — and this is the one stage where running
+that loop naively breaks something.
+
+**A subagent never writes the register.** Not a style rule; the same physical
+argument as §4.2 below, one level up:
+
+- The register is **append-only shared state**. Two implementers appending in two
+  worktrees conflict on the one file a project cannot afford to hand-merge, and the
+  loser's entry is the one that quietly disappears.
+- An **id cannot be reserved from inside an isolated branch.** Reserving *is* an
+  arbitration between concurrent writers, and a worktree is by construction unable
+  to see the other writers ([`documentation.md`](documentation.md) → *Registers are
+  shared state*).
+
+So the route is fixed: a decision settled in a task goes into the **implementer
+report**, and into the **carry-over ledger** if it outlives the task — and the
+**orchestrator runs the Doc Loop after integration**, on the base branch, as a
+single writer. Nothing is lost and nothing collides.
+
+**What that costs, said out loud:** between the ruling and the entry there is a
+window in which the decision exists only in a report. That is exactly why the gate
+below harvests every report and parked finding into the ledger **before the scratch
+workspace is deleted** — the ledger is what survives the window.
+
 ### 4.2 Parallel groups — when fan-out is allowed
 
 The plan's parallel groups ([`planning.md`](planning.md)) describe what *may* run
@@ -353,7 +382,10 @@ code quality); the full test suite green; every open finding either fixed or par
 with a ruling; **every parked finding and implementer concern harvested into the
 carry-over ledger** — the workspace is deleted, so nothing may stay only there;
 no task left BLOCKED; the branch integrated per the brief's policy — or the
-operator explicitly told you to leave it, and that is recorded. Verify it yourself;
+operator explicitly told you to leave it, and that is recorded. **Every decision a
+task settled has run the Doc Loop after integration, written by the orchestrator on
+the base branch** (§4.1a — a subagent never writes the register), or is sitting in
+the ledger with its entry still owed. Verify it yourself;
 a red suite or an unresolved BLOCKED does not advance to stage 6.
 
 ## Rationalizations

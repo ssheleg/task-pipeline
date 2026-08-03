@@ -382,7 +382,8 @@ stages/agents/types (see SKILL.md → *Bring your own skills*).
   notices it is the same one. So, in this order: **prune first** (every standing
   instruction against its three retirement triggers — it became a check, its
   surface is gone, it hasn't fired in five run stamps — and the list held to its cap
-  of ten, every deletion logged), **stamp the run**, then **write an entry only if
+  of ten, every deletion logged **in the archive, with the commit that retired it**),
+  **stamp the run**, then **write an entry only if
   the run diverged** (symptom · the stage it surfaced at · the stage that *owned* it
   · root cause · fix, mechanical before instruction before expiring note · the check
   that catches it next time). Every run prunes and stamps; a retro left empty after
@@ -390,9 +391,9 @@ stages/agents/types (see SKILL.md → *Bring your own skills*).
   instructions in full next time, which is why the cap is not negotiable.
 - **GATE (manual):** the ladder walk ran and its absences became REQ rows before
   the table was written; **the retrospective is written — prune before entry, the
-  list at or under its cap, every deletion logged **in the archive with its commit**,
+  list at or under its cap, every deletion logged in the archive with its commit,
   entries older than five run stamps rotated into `docs/superpowers/retro/`, the run
-  stamped **with its commit**, every SHA in either file resolvable, and the
+  stamped with its commit, every SHA in either file resolvable, and the
   counts printed beside this verdict**; **the documentation gate has been seen
   failing once against a planted defect and its ratchet counts are printed**
   ([`gates.md`](gates.md)); **every repository is closed — the parent included:

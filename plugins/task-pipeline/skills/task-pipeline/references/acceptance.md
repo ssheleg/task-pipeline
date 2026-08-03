@@ -87,6 +87,12 @@ Run: <branch/commit range> · Date: YYYY-MM-DD
 | `deferred` | agreed not to do it now | the operator's agreement **and** a tracker entry |
 | `dropped` | agreed it isn't wanted | the operator's agreement + the reason |
 
+**A `dropped` is a scope decision, and it outlives this run.** The operator's
+agreement closes the row here; the **Doc Loop**
+([`documentation.md`](documentation.md)) is what stops the same requirement being
+re-proposed next quarter by someone who never saw this table. A `deferred` needs its
+tracker entry, not an entry in the register — it is a schedule, not a decision.
+
 Those four are the only ways a requirement may close. Anything that fits none of
 them is `unknown`, and **`unknown` fails the gate** — that is the whole mechanism:
 the run cannot end while a requirement is still unclassified.
@@ -187,8 +193,13 @@ All of:
    bottom-up, findings ordered by seam, absences turned into REQ rows **before**
    the table was written, and the two pass counts recorded.
 2. **Every check this gate leans on has been seen failing** at least once against a
-   planted defect (`audit.md` → *Exit criterion*). An unproven check's green is not
-   evidence.
+   planted defect (`audit.md` → *Exit criterion*; the procedure, with the commands,
+   is [`gates.md`](gates.md) → *Probing*). An unproven check's green is not
+   evidence. That includes **the documentation gate** the project's doc map names
+   ([`documentation.md`](documentation.md)) — stage 9 ran it, this stage is where it
+   is *proven*, and its **ratchet counts are printed beside this verdict**. A
+   documentation gate is the easiest one in a run to inherit unproven, because it
+   was green the first time anyone looked at it.
 3. **Every REQ has a status** — none `unknown`, none blank.
 4. **Every `verified` carries evidence** of the kind above.
 5. **Every `partial` names what's missing** and where it's tracked.

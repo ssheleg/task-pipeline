@@ -167,6 +167,13 @@ finding either.
 > which can stand and why. Findings only, with severity and a concrete failure
 > scenario each. Return the findings as your final message.
 
+**A ruling that parks a finding is a decision.** *"This stands, and here is why"* is
+exactly the sentence a future reader will hit in the code and re-litigate, so a
+ruling that outlives the run goes through the **Doc Loop**
+([`documentation.md`](documentation.md)) — via the report and the ledger, written by
+the orchestrator after integration, never by a subagent
+([`build.md`](build.md) → *§4.1a*).
+
 Run the final review on the **run's confirmed model** like everything else
 ([`model-tiering.md`](model-tiering.md)). It is the one review that sees the whole
 change, so if the run is on a tier below the most capable one available, say so and

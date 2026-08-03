@@ -16,13 +16,29 @@ The gap between "the rule exists" and "the rule is enforced" is invisible from
 inside a transcript, and a false guarantee is worse than a stated absence: everyone
 downstream stops checking.
 
+> **Provenance.** Every contract below is quoted from the Claude Code hooks
+> reference (`code.claude.com/docs/en/hooks`), fetched **2026-08-03**. Re-fetch
+> before relying on it: this is an external API, and stage 1 of this very pipeline
+> exists because a contract recalled from memory is a contract that has already
+> moved. Where the reference and this file disagree, the reference wins and this
+> file is the bug.
+
 ## The events
+
+There are **35** hook events. These are the ones this pipeline reaches for; the
+reference has the rest, grouped as session lifecycle, per-turn, tool execution,
+subagents and tasks, file and config changes, compaction, worktrees, display, and
+MCP elicitation.
 
 | Event | Fires | Used for |
 |---|---|---|
 | `SessionStart` | session opens (matcher `startup\|resume`) | register the run, print the board, name the one next action |
-| `PreToolUse` | before a tool call | **block** — the only event that can refuse |
-| `PostToolUse` | after every tool call | bookkeeping: renew a lease, stamp a marker |
+| `PreToolUse` | before a tool call | **block** — the event that can refuse |
+| `PostToolUse` | after a tool call | bookkeeping: renew a lease, stamp a marker |
+| `Stop` | the turn ends | a last-word check — the run's own gate, not the repo's |
+| `SubagentStart` · `SubagentStop` | a subagent starts or finishes | stage 5 runs implementers as subagents; this is where a per-agent identity or ledger line belongs |
+| `WorktreeCreate` · `WorktreeRemove` | a worktree appears or goes | stage 5 isolates in worktrees; a guard that must not fire inside one can key off these |
+| `PreCompact` · `PostCompact` | context is compacted | flush anything that only lives in context — the ledger exists because this happens |
 | `SessionEnd` | session closes | release leases, flush the journal |
 
 ## The `PreToolUse` contract
@@ -38,22 +54,44 @@ A hook blocks a call in **either** of two ways:
  "permissionDecisionReason":"docs gate failed: 2 undefined ids in docs/ARCHITECTURE.md"}}
 ```
 
+`permissionDecision` takes **four** values, not one: `allow` (permit it), `deny`
+(block it), `ask` (escalate to the user), `defer` (fall through to the normal
+permission flow). Exit 0 with empty stdout means `defer` by omission. A hook may
+also rewrite the call instead of judging it, by returning `updatedInput` in the
+same block — which is a different power from blocking and worth knowing before you
+reach for it.
+
 **Any other exit code is a non-blocking error**: execution continues and stderr is
-shown in the transcript. So **a crashing guard fails open** — it stops guarding and
-nothing announces that it has. Write the guard to `exit 2` on its own internal
-errors, or accept that a typo in it silently removes the protection everyone
-believes is there.
+shown in the transcript. The reference is explicit that **exit 1 is treated as
+non-blocking, "even though 1 is the conventional Unix failure code"** — so the
+single most likely way to write a guard, `command || exit 1`, is the one that does
+not guard. And on exit 2 Claude Code **ignores stdout and any JSON in it**; only
+stderr is read back.
+
+So **a crashing guard fails open** — it stops guarding and nothing announces that
+it has. Write the guard to `exit 2` on its own internal errors, or accept that a
+typo in it silently removes the protection everyone believes is there.
 
 That asymmetry is the whole reason this file leads with the limit: a hook is the
 strongest rung and the one whose failure is quietest.
 
 ## What the hook receives
 
-JSON on stdin: `session_id`, `prompt_id`, `transcript_path`, `cwd`,
-`permission_mode`, `hook_event_name`, `tool_name`, `tool_input`, `tool_use_id`.
+JSON on stdin. Common to every event: `session_id`, `transcript_path`, `cwd`,
+`permission_mode` (`default` · `plan` · `acceptEdits` · `auto` · `dontAsk` ·
+`bypassPermissions`), `effort` (an object with `level`), `hook_event_name`, and —
+inside a subagent — `agent_id` and `agent_type`. `prompt_id` is present from a
+recent version onward, so treat it as optional unless you pin one.
 
-`tool_input` is where the target lives — `file_path` for an edit, `command` for a
-Bash call. Parse it; do not infer the target from anything else in the environment.
+Tool events add `tool_name`, `tool_input` and `tool_use_id`. **`tool_input` is
+where the target lives** — `file_path` for an edit, `command` for a Bash call.
+Parse it; do not infer the target from anything else in the environment
+([`learned.md`](learned.md) rule 15: a heuristic over strings the environment also
+produces matched the throwaway shell of every tool call).
+
+`agent_id` matters more here than it looks: stage 5 runs implementers as subagents
+in worktrees, and a guard that must behave differently for the orchestrator and for
+an implementer has exactly one honest way to tell them apart.
 
 ## Where it lives
 
@@ -76,6 +114,17 @@ machine, and the first surprising denial is debugged in the wrong project.
 - a tool-name pattern (`Edit|Write|…`), or `"*"` for every call;
 - for a specific shell command, add `"if": "Bash(git commit *)"` beside
   `"matcher": "Bash"`.
+
+`if` uses **permission-rule syntax** (`Bash(git *)`, `Edit(*.ts)`) and is evaluated
+**only on tool events** — `PreToolUse`, `PostToolUse`, `PostToolUseFailure`,
+`PermissionRequest`, `PermissionDenied`. Anywhere else it is inert, which is a
+silent way to write a guard that never fires.
+
+**For Bash the match is best-effort — the reference's own word.** It inspects
+subcommands, `$()` expansions and backticks, and strips leading `FOO=bar`
+assignments before matching. So `if` is a good **filter** and a bad **boundary**:
+narrow with it to keep the hook cheap, then re-check the real target inside the
+script before refusing anything.
 
 Match as **narrowly** as the rule allows. A `"*"` matcher on a blocking event puts
 your script in the path of every tool call the agent makes.

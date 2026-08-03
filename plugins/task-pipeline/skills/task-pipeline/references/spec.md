@@ -134,6 +134,18 @@ Read what you wrote with fresh eyes and fix inline. No subagent, no second pass:
 5. **Ambiguity:** can any requirement be read two ways? Pick one and say it.
 6. **Traceability (UI):** does every user-facing requirement name its scenario ID?
 
+## Locked contracts are decisions — the register, not only the spec
+
+This stage settles more than any other: a schema, a signature, a status vocabulary,
+an error shape. Each has a life longer than the document it is written into, so run
+the **Doc Loop** ([`documentation.md`](documentation.md)) for the ones that bind
+future work — record the entry, propagate by the matrix, and cite the id from the
+spec section instead of restating the reasoning there.
+
+**A spec states a contract; the register makes it addressable.** A spec is per-run
+and the next one supersedes it; an id survives. If this stage settled something and
+no entry names it, the run has agreed to decide it again later.
+
 ## GATE (manual)
 
 > "Spec written and committed to `<path>`. Review it and tell me if anything should
