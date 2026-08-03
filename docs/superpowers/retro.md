@@ -33,6 +33,46 @@ Older entries and every retirement **move** to `docs/superpowers/retro/YYYY-QN.m
 at the prune. Moving is not deleting: the archive is append-only and holds the
 incident forever, so pruning the in-force list costs no knowledge.
 
+### 2026-08-03 · `code-audit` · a citation whose file resolves and whose section does not
+
+- **Symptom:** fifteen section-qualified cross-references pointed at nothing. Eleven
+  of them — every per-stage freedom label — cited `gates.md` → *Axis B*, which is the
+  enforcement ladder and contains zero mentions of degrees of freedom. Evidence: a
+  sweep of all 33 such citations; `grep -ci "degrees of freedom" references/gates.md`
+  → 0.
+- **Surfaced at:** a third-axis audit · **Owned by:** the release that wrote the
+  labels — the concept had no home, and rather than noticing that, the citation was
+  pointed at the nearest plausible section.
+- **Root cause:** the link checker proves a *file* resolves, and that green was read
+  as the pointer being right. `learned.md` names this exact failure and deliberately
+  keeps it as a review question because "only a reader can prove it is the right
+  one" — which was true until the sweep showed the section name is machine-checkable.
+- **Fix:** grade 1 — `gates.md` gained the two sections the citations were reaching
+  for, and a guard now compares every pointer against the target's real headings.
+- **The check:** the citation guard, measured for false positives (whitespace
+  normalised — a wrapped citation is not a defect and six were reported as such).
+- **Commit:** `270bc2c`
+- **Upstream?** Already upstream: `learned.md`'s review question can be promoted to a
+  rule with a check, and this release is the evidence.
+
+### 2026-08-03 · `code-audit` · the installer built the thing its own family prunes
+
+- **Symptom:** `install.sh` and `bin/task-pipeline.js` write a plain copy to
+  `~/.claude/skills/task-pipeline`; `sshlg-skills` deletes exactly those, and its
+  README says Claude Code gets the plugin "never as a plain copy". `CLAUDE.md`
+  documented `./install.sh --force` as the local install path.
+- **Surfaced at:** reading the installers as code — the first pass on them in three
+  audits · **Owned by:** whichever release added the launcher's prune rule without
+  walking back to the installers it contradicts.
+- **Root cause:** the rule lived in the family repo and the violation lived in a
+  member repo, so no single repository's checks could see both.
+- **Fix:** grade 1 — both installers refuse when a plugin install is detected.
+- **The check:** none mechanical; the honest state is that this is a cross-repository
+  invariant with no cross-repository gate. Recorded rather than pretended.
+- **Commit:** `270bc2c`
+- **Upstream?** Worth an issue on `sshlg-skills`: the family owns the rule, so it
+  should own the check.
+
 ### 2026-08-03 · `doc-track-audit` · a gate that read one of the two shapes it promised
 
 - **Symptom:** on a project using the ADR shape — which `documentation.md` permits
@@ -116,6 +156,7 @@ One line per run, appended at stage 10. This is what makes "five runs" countable
 
 | Date | Topic | Commit | Verdict | Retro |
 |---|---|---|---|---|
+| 2026-08-03 | `code-audit` | `270bc2c` | 8/8 findings fixed, each proven before and after | 2 entries · 2 standing · retired 0 · added 0 · R-001 and R-002 both fired |
 | 2026-08-03 | `doc-track-audit` | `096f0f0` | 9/9 findings fixed, each proven before and after | 2 entries · 2 standing (was 1) · retired 0 · added 1 · R-001 fired |
 | 2026-08-03 | `documentation-track` | `0ddd4e3` | 17/17 contracts · 12/12 findings verified | 2 entries · 1 standing (was 0) · retired 0 · added 1 |
 
