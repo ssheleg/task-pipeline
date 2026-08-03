@@ -1,5 +1,76 @@
 # Changelog
 
+## v1.9.0 — 2026-08-03
+
+### Added — the adoption track, and default-on inside a stated boundary
+
+Built by running this skill through itself: brief, spec, plan, gated stages,
+acceptance. The stage-0 harvest found two things that changed the shape of the work,
+and one of them is why this release exists at all.
+
+**`references/adoption.md` — the first run in a project.** The pipeline assumed a
+documentation system either exists or gets seeded, and said almost nothing about the
+repository you actually have. Greenfield is mechanical: stage 0 seeds the map, the
+registers and the gate, and the gate is green on day one because unarmed sections
+print `dormant`. Brownfield is a different problem and now has seven steps, of which
+**step 3 decides whether adoption survives**: baseline the ratchets at today —
+`PROP_FLOOR` to the next free id, `RESIDUE_FLOOR` to the measured count — so the gate
+is green on the history it inherited and red only on what happens next. On the
+project this practice comes from, the first run of that check reported **162 missing
+propagations across 73 decisions**; that is a printed number, not a to-do list, and a
+gate that is red on adoption day is switched off on day two.
+
+It also states the rule that keeps a register honest: **history is not back-filled.**
+An old decision enters the register the day somebody is about to contradict it —
+when the reason is being discussed anyway and the person holding the context is in
+the room. A reconstructed rationale is indistinguishable from a real one forever.
+
+**Default-on routing, inside a boundary.** The description now widens to work that
+**changes the repository** — feature, fix, refactor, migration, integration, rewrite,
+adoption, hardening, with Russian verbs beside the English — and carries an explicit
+`Not for:` clause for questions, explanations, typos and one-line edits, plus the
+opt-out phrases *"без пайплайна"* / *"quick"*. Two evals follow it: a plain Russian
+refactor that must trigger, and the same request with the opt-out that must not. A
+guard ties the two together, because an escape hatch nobody tests is a trap rather
+than a default.
+
+**The lever that actually binds is not in this repository**, and the brief says so:
+a `description` raises the odds a skill is selected and cannot make selection
+mandatory. Default-on is enforced by an instruction in the operator's `CLAUDE.md`;
+the description makes it reachable.
+
+### Fixed
+
+- **The ratchet floors were documented as the same kind and are not.** `PROP_FLOOR`
+  is an **id threshold**, `RESIDUE_FLOOR` is a **count**; the comment called both
+  counts. Adoption turns on that distinction, so it is now spelled out where the
+  floors are declared.
+- **The frontmatter guard wore the platform's number.** It capped the whole block at
+  1024 — the limit Anthropic puts on `description` alone — silently making the
+  usable description ~975 and reading as if it were the real rule. The platform's
+  limit stays on `description`; ours becomes a stated budget of 1200.
+- **agent-sync's binding to this skill** (patched in that repository): its
+  `pipeline.json` example claimed this schema permitted it while carrying a string
+  `id`, a `title` where the schema says `name`, and no `state` at all — required. Its
+  gate texts stated only agent-sync's half, so a host that copied them silently
+  dropped the stage's real gate. Stage 9 pointed at the artifact-layout reference
+  instead of that stage's doctrine. And `guardedFiles` did not cover `docs/DOCMAP.md`
+  or `docs/superpowers/retro.md`, both of which this pipeline now creates and both of
+  which lose data under a concurrent write. `companion-skills.md` states the
+  **≥ 1.3.0** floor `finish` needs.
+
+### Dogfooded
+
+This repository ran its own brownfield walkthrough and wrote `docs/DOCMAP.md`. Step 1
+— *inventory what is already there* — changed the plan: `npm test` already resolves
+links, checks citations and computes counts over the same markdown, so **no second
+gate was seeded**. The map records the gate that exists and why no other is created,
+which is the walkthrough's step 2 read correctly: seed what is *missing*, and here
+that was the map. The changed check went to the carry-over ledger for the operator's
+agreement rather than being swapped silently.
+
+Two new guards, each with a negative self-test watched failing.
+
 ## v1.8.1 — 2026-08-03
 
 ### Fixed — eight findings from a code-and-contradiction audit of 1.8.0

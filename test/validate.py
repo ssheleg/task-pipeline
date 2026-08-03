@@ -340,6 +340,45 @@ if os.path.isfile(_neg_wf):
                 fail(f"{_living}: states {_m.group(0)!r} but the workflow defines "
                      f"{_neg_n} negative self-tests — derive the number or delete it")
 
+# The adoption doctrine has to carry BOTH entry conditions. Greenfield is the easy
+# half and the one that gets written; brownfield is where a repository actually is,
+# and its third step — baselining the ratchets at today — is the whole reason the
+# gate survives adoption day. A file that documents only the easy half reads as
+# complete and helps nobody with a real repo.
+_adopt = os.path.join(refdir, "adoption.md")
+if os.path.isfile(_adopt):
+    _a = open(_adopt, encoding="utf-8").read().lower()
+    for _needle, _what in (("a new project", "the greenfield walkthrough"),
+                           ("an existing project", "the brownfield walkthrough"),
+                           ("baseline the ratchets", "the ratchet-baseline step"),
+                           ("not back-filled", "the do-not-back-fill rule")):
+        if _needle not in _a:
+            fail(f"references/adoption.md: no {_what} (looked for {_needle!r}) — "
+                 "adoption without it is a tutorial for the repository nobody has")
+
+# Default-on routing is only safe with a stated boundary AND a working opt-out.
+# Anthropic's enterprise guidance names the failure directly: a description that is
+# too broad steals triggers from narrower skills. So the exclusion clause is required
+# in the description, and the opt-out phrase must appear in the eval suite — an
+# escape hatch nobody tests is a trap rather than a default.
+if fm_name and 'desc' in dir():
+    _d = desc if 'desc' in dir() else ""
+    if "Not for:" not in _d:
+        fail("SKILL.md: the description widens to repo-changing work but states no "
+             "'Not for: …' exclusion clause — that is the 'too broad, steals "
+             "triggers' failure the enterprise guidance names")
+    for _phrase in ("без пайплайна", "quick"):
+        if _phrase not in _d:
+            fail(f"SKILL.md: the description does not name the opt-out phrase "
+                 f"{_phrase!r} — default-on without a release valve is a trap")
+    _sp = os.path.join(ROOT, "evals", "task-pipeline.evals.json")
+    if os.path.isfile(_sp):
+        _suite = json.load(open(_sp, encoding="utf-8"))
+        if not any("без пайплайна" in (e.get("query") or "")
+                   for e in _suite.get("evals", [])):
+            fail("evals: no eval exercises the opt-out phrase — the description "
+                 "promises an escape hatch that nothing checks")
+
 # Behavioural evaluations. Anthropic's guidance: "Create evaluations BEFORE writing
 # extensive documentation", "At least three evaluations created", and the enterprise
 # page requires 3-5 queries per Skill covering should-trigger, should-not-trigger and

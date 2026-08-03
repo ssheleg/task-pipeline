@@ -86,8 +86,21 @@ command the stage-10 close-out names — did not exist before it.
 
 `docs/DOCMAP.md` records D5 (decision home = `CHANGELOG.md` + `docs/superpowers/specs/`,
 no second register), the SSOT rows this repo actually has, its propagation matrix,
-its gate commands (`npm test`, `npm run test:all`) and its ratchets. A seeded
-`scripts/check-docs.sh` runs green with floors baselined at today.
+its gate commands and its ratchets.
+
+**Revised at stage 5, by doing the work.** The original wording required a seeded
+`scripts/check-docs.sh` here. Step 1 of the walkthrough — *inventory what is already
+there* — says otherwise: this repository's gate is **`npm test`**, 53 guards that
+already resolve links, verify citations and compute counts over the same markdown.
+Seeding a second gate over one corpus is the duplicate the doc map itself forbids,
+and it would make the map's first act a violation of its own SSOT rule.
+
+So the map records the gate that exists, and records **why no second one is
+seeded** — which is the tutorial's own step 2 read correctly: *seed what is missing*,
+and here the missing artefact is the map, not another script. REQ-008's check
+changes from "`bash scripts/check-docs.sh` exits 0" to "`docs/DOCMAP.md` names this
+repo's real gate and no second gate is created; `npm run test:all` green" — carried
+to stage 10 for the operator's agreement rather than swapped silently.
 
 ## 8. New guards · covers: REQ-001, REQ-003, REQ-004
 

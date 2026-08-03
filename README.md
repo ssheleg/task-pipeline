@@ -490,6 +490,24 @@ now does:
   discover: author and reviewer are the same person, commits are unsigned, and the
   eval suite has not been executed.
 
+### Adopting it — a new project, and the one you actually have
+
+Greenfield is mechanical: stage 0 seeds `docs/DOCMAP.md`, the registers and the gate
+before the first interview question, and the gate is green on day one because
+sections with nothing to check yet print `dormant`.
+
+Brownfield is a different problem, and [`references/adoption.md`](plugins/task-pipeline/skills/task-pipeline/references/adoption.md)
+gives it seven steps. The third one decides whether adoption survives: **baseline the
+ratchets at today** — the propagation floor to the next free id, the residue floor to
+the measured count — so the gate is green on the history it inherited and red only on
+what happens next. On the project this practice comes from, that check's first run
+reported 162 missing propagations across 73 decisions. That is a printed number, not
+a to-do list; a gate that is red on adoption day is switched off on day two.
+
+And history is **not** back-filled. An old decision enters the register the day
+somebody is about to contradict it — when the reason is being discussed anyway and
+the person who holds the context is in the room.
+
 ### The retrospective — the run teaches the next run, and the list stays short
 
 Every gate in this flow is good at *this* run and blind across runs. So the same
@@ -743,6 +761,7 @@ recommendation, so you arm the whole run in one exchange. Detail:
 | [`references/retrospective.md`](plugins/task-pipeline/skills/task-pipeline/references/retrospective.md) | the project retro: the three grades of fix, the mandatory prune, the cap of ten |
 | [`references/model-tiering.md`](plugins/task-pipeline/skills/task-pipeline/references/model-tiering.md) | model policy, the `/model` reminder, overrides |
 | [`templates/`](plugins/task-pipeline/skills/task-pipeline/templates/README.md) | brief, carry-over ledger, `CONTEXT.md` and ADR skeletons, the doc map, both registers, the retro and its archive, the seeded `docgate.sh`, a worked hook |
+| [`references/adoption.md`](plugins/task-pipeline/skills/task-pipeline/references/adoption.md) | the first run in a project: greenfield seeding, and the brownfield walkthrough |
 | [`SKILL-CARD.md`](SKILL-CARD.md) | the registry entry and risk-tier disclosure a reviewer needs before deploying it |
 | [`evals/`](evals/RESULTS.md) | the behavioural evaluation suite, its protocol, and what has actually been observed |
 | [`CHANGELOG.md`](CHANGELOG.md) | every release, with the reasoning behind it |
