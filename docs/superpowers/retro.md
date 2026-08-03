@@ -33,6 +33,29 @@ Older entries and every retirement **move** to `docs/superpowers/retro/YYYY-QN.m
 at the prune. Moving is not deleting: the archive is append-only and holds the
 incident forever, so pruning the in-force list costs no knowledge.
 
+### 2026-08-03 · `default-routing-adoption` · the work contradicted the spec, and the loop caught it
+
+- **Symptom:** stage 5 was about to seed `scripts/check-docs.sh` into this repository
+  because the spec said so. Step 1 of the adoption walkthrough being written in the
+  same run — *inventory what is already there* — showed `npm test` already resolves
+  links, checks citations and computes counts over the same markdown. Seeding a
+  second gate would have made the doc map's first act a breach of the SSOT rule it
+  publishes.
+- **Surfaced at:** stage 5 · **Owned by:** stage 3 — the spec assumed the template
+  applied without running the walkthrough's own first step against this repo.
+- **Root cause:** writing a tutorial and applying it in one run is exactly when the
+  author is least likely to *follow* it. The spec was written from the template's
+  shape rather than from the inventory the tutorial demands.
+- **Fix:** grade 3 — a note, not a rule. The pipeline already handles this: the
+  finding went back to stage 3, the spec was revised in place, and the changed check
+  was raised in the carry-over ledger for the operator instead of being swapped
+  silently. No new instruction is owed; the mechanism worked.
+- **The check:** none added. This is the loop behaving as designed, recorded so the
+  next run knows the seam exists.
+- **Commit:** `d76ff5e`
+- **Upstream?** No — it is an instance of doctrine already in `audit.md` ("a finding
+  that contradicts the spec goes back to stage 3").
+
 ### 2026-08-03 · `code-audit` · a citation whose file resolves and whose section does not
 
 - **Symptom:** fifteen section-qualified cross-references pointed at nothing. Eleven
@@ -156,6 +179,7 @@ One line per run, appended at stage 10. This is what makes "five runs" countable
 
 | Date | Topic | Commit | Verdict | Retro |
 |---|---|---|---|---|
+| 2026-08-03 | `default-routing-adoption` | `d76ff5e` | 9 REQ · 8 verified, 1 under a revised check | 1 entry · 2 standing · retired 0 · added 0 · R-001 and R-002 both fired |
 | 2026-08-03 | `code-audit` | `270bc2c` | 8/8 findings fixed, each proven before and after | 2 entries · 2 standing · retired 0 · added 0 · R-001 and R-002 both fired |
 | 2026-08-03 | `doc-track-audit` | `096f0f0` | 9/9 findings fixed, each proven before and after | 2 entries · 2 standing (was 1) · retired 0 · added 1 · R-001 fired |
 | 2026-08-03 | `documentation-track` | `0ddd4e3` | 17/17 contracts · 12/12 findings verified | 2 entries · 1 standing (was 0) · retired 0 · added 1 |
