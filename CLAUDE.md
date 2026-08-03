@@ -58,6 +58,12 @@ every `references/*.md` must be reachable from `SKILL.md`; the Cursor rule stays
 self-contained with no relative links; every new validator guard needs a matching
 negative self-test in `.github/workflows/validate.yml`.
 
+3. **`npm test` now runs bash.** One guard **executes** `templates/docgate.sh` over
+   a scratch project seeded from the templates and requires exit `0` — a scaffold
+   whose own gate rejects its own seeds teaches every new project that the gate is
+   noise. Touching any of `templates/{docmap,decisions,open-questions,retro}.md` or
+   `docgate.sh` means running `npm test`, because the four are one contract.
+
 ## Docs to update in the same change
 
 - `CHANGELOG.md` — a section per version, written as *what changed and why it

@@ -13,6 +13,9 @@ better, plus one that is required only for user-facing work.
 | Stage | Doctrine |
 |---|---|
 | 0 Knowledge harvest (pre-grill) | `references/knowledge-sources.md` |
+| 0 + 9 + any settled decision — the documentation system | `references/documentation.md` |
+| 6–10 + any check you write — gates | `references/gates.md` |
+| any agent-time enforcement — hooks | `references/hooks.md` |
 | 0 + 9 The code graph (the tool is optional; the doctrine ships) | `references/knowledge-graph.md` |
 | 0 Intake grill | `references/grill.md` |
 | 2 Brainstorm | `references/brainstorm.md` |
@@ -35,6 +38,7 @@ better, plus one that is required only for user-facing work.
 | **Figma** (MCP) | stage 3 UX track, when the project designs visually — super-ux mirrors each `SCR-` screen/state into a frame | Optional, **UI + Figma-on only**. Absent → super-ux degrades to text-only *by itself and never blocks*, so shipping a UI feature with no mockups becomes a silent scope call — which is why the stage-0 sweep decides it | connect the Figma MCP server (`/mcp`, or your claude.ai connectors) |
 | **[obsidian-wiki](https://github.com/ar9av/obsidian-wiki)** (`wiki-query`, `wiki-update`) | **stage 0 harvest** (query what's already known) **+ stage 9 sync** | **Recommended** — never a gate; absent → harvest runs on repo docs alone | `pip install obsidian-wiki` → `obsidian-wiki setup --vault /path/to/your/vault` |
 | **[graphify](https://github.com/Graphify-Labs/graphify)** (`/graphify`, `graphify query\|affected\|god-nodes`) | **stage 0 harvest** (reach: what calls this, what breaks if it moves) **+ stage 9 refresh + the graph↔docs divergence check** ([`knowledge-graph.md`](knowledge-graph.md)) | **Recommended** — never a gate; absent → the harvest greps instead, and the divergence axis is unavailable | `uv tool install graphifyy` → `graphify install` → `/graphify .` |
+| **[agent-sync](https://github.com/ssheleg/agent-sync)** (`/agent-sync`) | **guarded registers** — a lease before writing one, `reserve` before minting an id, `reconcile`/`record` for intent vs as-built, and `finish` for the stage-10 multi-repository close-out ([`documentation.md`](documentation.md)) | **Recommended** — never a gate. Absent → the run is **`ungated`** and must say so out loud; the discipline still applies, only the arbitration is missing | `npx sshlg-skills install` |
 | ~~superpowers~~ | — | **Not a dependency.** Stages 2/4/5/6 run on the built-in doctrine above. See *Optional bridge* | — |
 | ~~grill-me / grilling~~ | — | **Not a dependency.** The stage-0 grill is built in (`references/grill.md`) | — |
 
@@ -76,6 +80,12 @@ Pipeline companions (stage doctrine is built in — nothing to install for it):
                            pip install obsidian-wiki
                            obsidian-wiki setup --vault /path/to/your/vault
                          (running without it — the harvest uses repo docs only)
+  ✗ agent-sync         — recommended: guarded registers, id reservation before
+                         minting, intent-vs-as-built reconcile, and the stage-10
+                         multi-repository close-out:
+                           npx sshlg-skills install
+                         (running without it — the doc track still applies, the
+                          run is recorded `ungated`, and that is said out loud)
   ✗ graphify           — recommended: stage 0 asks it what reaches what,
                          stage 9 refreshes it beside the docs and the wiki:
                            uv tool install graphifyy
@@ -114,6 +124,11 @@ Rules:
   the MCP and then *continues text-only on its own*, so without a recorded answer
   the run silently narrows from "designed" to "described". The sweep row is
   `3 Design surface` ([`grill.md`](grill.md) → *The autonomy sweep*).
+- **agent-sync**: detect via a resolving `/agent-sync` or a `.claude/agent-sync.json`
+  in the project. Present → take a lease before writing a guarded register and
+  reserve ids before minting them. Absent → print the line **once**, continue, and
+  **record the run as `ungated`** — never describe the project as protected
+  ([`documentation.md`](documentation.md) → *Registers are shared state*).
 - **Never gate any stage on an install** except the stage-3 UX track on a UI task.
 - Optional tools missing → state the fallback, don't block.
 - Re-detect after the operator installs; don't assume.

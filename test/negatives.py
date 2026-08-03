@@ -26,7 +26,12 @@ WORKFLOW = os.path.join(ROOT, ".github/workflows/validate.yml")
 MARKER = "Negative self-test"
 # A format change that silently matched nothing would report "0 failures" and look
 # like success. Refuse to be that quiet.
-MIN_EXPECTED = 20
+#
+# Raise this when guards are added. It sat at 20 while the workflow carried 34,
+# which is the floor doing half its job: it would have caught a total collapse and
+# not the loss of a third of the suite. Set it to the real count, and treat a
+# mismatch as a finding rather than as noise to be lowered away.
+MIN_EXPECTED = 43
 
 
 def parse_steps(path):

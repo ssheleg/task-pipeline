@@ -13,7 +13,20 @@ from `super-ux`.
 | `carryover.md` | `docs/superpowers/specs/YYYY-MM-DD-<topic>-carryover.md` | 0 seeds, all stages append, 10 reads |
 | `context.md` | `CONTEXT.md` at the repo root (or per context) | 0 — grill, domain awareness |
 | `adr.md` | `docs/adr/NNNN-<slug>.md` | 0 — grill, hard-to-reverse decisions |
-| `retro.md` | `docs/superpowers/retro.md` — **one per project, not per run** | 10 writes (prune → stamp → entry), 0 reads the standing instructions in full |
+| `docmap.md` | `docs/DOCMAP.md` — **one per project** | 0 — the documentation inventory |
+| `decisions.md` | `docs/DECISIONS.md` — the decision register | 0 seeds it, the Doc Loop appends |
+| `open-questions.md` | `docs/OPEN_QUESTIONS.md` | 0 seeds it, the Doc Loop resolves rows |
+| `docgate.sh` | `scripts/check-docs.sh` | 0 seeds it · 9 runs it · 10 proves it |
+| `hooks.example.json` | the project's `.claude/settings.json` | 0 — offered, never installed silently |
+| `retro.md` | `docs/superpowers/retro.md` — **one per project, not per run** | 10 writes (prune → stamp → entry), 0 reads it in full |
+| `retro-archive.md` | `docs/superpowers/retro/YYYY-QN.md` | 10 rotates into it, 0 **queries** it |
+
+The documentation-track templates (`docmap.md`, `decisions.md`,
+`open-questions.md`, `docgate.sh`) are seeded **together**, and they are useful at
+three entries: the register opens with the decision that established it, and the
+gate exits `0` on exactly those seeds. A scaffold that seeds red teaches everyone on
+day one that the gate is noise, so this repo's own validator runs the seeded gate
+over a scratch project on every `npm test` and fails if it is not green.
 
 `context.md` and `adr.md` are **format references**, not files to copy wholesale:
 the grill writes `CONTEXT.md` entries and ADRs in their shape, lazily — only once

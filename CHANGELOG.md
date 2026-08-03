@@ -1,5 +1,106 @@
 # Changelog
 
+## v1.7.0 — 2026-08-03
+
+### Added — documentation is a deliverable, and it has a gate
+
+Stage 9's gate read *"docs in sync with code"*. That sentence names no artefact and
+no command, so nothing in the run could make it false — and the pipeline had no
+concept of a decision outliving the spec that recorded it. Three built-in doctrines
+close that, ported from a 260-decision, 72-document specification built across four
+repositories with several agents editing at once.
+
+**`references/documentation.md`** — the inventory (four questions, answered before
+the first interview question and written to `docs/DOCMAP.md`), registers and stable
+ids, single source of truth including its cross-repository form, **the Doc Loop as a
+cross-cutting protocol** that fires whenever anything is settled rather than only at
+stage 9, append-only history with three distinct edge markers, the propagation
+matrix and its ratchet, navigation, intent vs as-built, and registers as shared
+state.
+
+Two measurements decide two of those rules rather than taste. **204 of 275**
+refine/supersede edges pointed at an unannotated target — which was not 204
+violations, because most were additive; *that ambiguity was the defect*, and it is
+why `Refines:` / `Contradicts:` / `Supersedes:` are three markers with different
+obligations. And turning the propagation check on found **162** missing citations
+across **73** decisions, not the four an audit had reported — so it ships ratcheted,
+because failing on all of them makes a gate people switch off.
+
+**`references/gates.md`** — the two axes (a stage's `auto`/`manual` type versus the
+enforcement mechanism) and the promotion ladder: doctrine line → review question →
+script check → CI step → hook, with the trigger for each promotion. It owns
+*procedure* only; `audit.md` and `learned.md` already own probes, ratchets, exit
+codes and false positives as *law*, and a second statement of one law is the exact
+defect this release ports a rule against.
+
+**`references/hooks.md`** — the `PreToolUse` contract, led by the limit rather than
+the capability: hooks exist only in Claude Code, and **any exit code other than 2 is
+non-blocking, so a crashing guard fails open** and stops guarding without announcing
+it. Elsewhere the run is `ungated` and must say so.
+
+### Added — a documentation gate that travels, and seeds green
+
+**`templates/docgate.sh`** is a portable gate (bash 3.2; no `grep -P`, no in-place
+stream edits, no bash-4 builtins) with ten sections, ratchet floors as variables,
+printed register sizes, and **progressive arming**: a section whose input does not
+exist yet prints `dormant` and does not fail. That is what makes always-governed
+survivable on a three-file repository — the alternative was regime tiers, and a tier
+is a switch that gets set to "minimal" by whoever is in a hurry.
+
+Probe log — every section planted, run, restored, asserted on `$?`:
+
+```
+1 links · 2 ids · 3 next-free · 4 counts · 5 propagation · 6 supersede
+7 residue · 8 vocabulary · 9 commit SHAs (armed tree) · 10 doc map    10/10 fire
+```
+
+Two probes came back silent and they landed on opposite sides of the doctrine. One
+was a bad probe: section 9 correctly *skips* outside a git tree, so expecting a
+failure there was wrong. The other was a real bug in the gate — `$((0009))` is
+octal, `9` is not an octal digit, the expansion errored, the `if` took its else
+branch, and section 3 printed `ok` for **every id ending in 8 or 9**.
+
+Also seeded: `docmap.md`, `decisions.md`, `open-questions.md`, `retro-archive.md`
+and one worked `hooks.example.json`. Lease arbitration is **not** reimplemented —
+`agent-sync` owns it and is now in the companion matrix and the preflight, where it
+had been missing while four other files leaned on it.
+
+### Changed — the retrospective is traceable, and bounded
+
+Standing instructions carry `Born`/`Commit` and `Last fired`/`Fired at`; every log
+entry, retirement and run stamp carries a commit; and every SHA must resolve, which
+the seeded gate checks with `git rev-parse --verify` — rule 14 applied to history. A
+`file:line` rots at the next edit, while `git show <sha>` reconstructs the whole
+incident months later, which is exactly when a class returns.
+
+Entries older than the last five run stamps now **rotate** into
+`docs/superpowers/retro/YYYY-QN.md` — append-only, queried by the task's nouns,
+never read end to end. This also closes a contradiction the file had carried from
+the start: it was described as *read in full* while containing an unbounded log, so
+the cap that justified reading it protected one section while the rest grew.
+
+### Fixed — defects found while porting, in the files the port touched
+
+- **`SKILL.md` promised what it contradicted 42 lines later**: "no stage that can
+  fail because a dependency is missing", then "for UI tasks the spec gate
+  **requires** super-ux". `companion-skills.md` had the true rule all along.
+- **Source precedence was stated once for two different questions.** `code`, then
+  docs, then the wiki, then memory is right for what *is* and wrong for what
+  *should be*: a decision accepted and not yet built is still the decision.
+- **`learned.md` narrated its most expensive incident and never gave it a row** —
+  a full day of work performed under another session's identity. Now rule 15, with
+  its check, cross-referencing the narration rather than repeating it.
+- `conventions.md` never asked where decisions live; `audit.md`'s "put it in a
+  script" had nowhere to point; the carry-over ratchet was required by one gate and
+  specified for all of them; `templates/README.md` had no guard and would have gone
+  stale on the first new template.
+- `test/negatives.py`'s floor sat at **20** while the workflow carried **34** — it
+  would have caught a total collapse and not the loss of a third of the suite.
+
+Eleven new validator guards, each with a negative self-test watched failing. One of
+them **executes** the seeded gate over a scratch project and requires exit `0`.
+**43 of 43 guards provably reject their planted defect.**
+
 ## v1.6.1 — 2026-08-01
 
 ### Fixed — v1.6.0 shipped without `displayName`, because a release lived only on a tag

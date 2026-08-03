@@ -92,10 +92,22 @@ available"), never a string. Stage configs use the provider-agnostic tokens
 transitively. Progressive disclosure means an agent loads only what it is pointed
 at; an unreferenced file is dead context that ships and is never read.
 
-**6. The default flow runs on the built-in doctrine.** `pipeline.example.json`'s
-`skills[]` may not name an external provider (`superpowers:*`, `grill-me`, …).
-Substituting one is a host project's call in *their* `pipeline.json`, never the
-shipped default.
+**6. No external provider may substitute for built-in stage doctrine.**
+`pipeline.example.json`'s `skills[]` may not name a provider that would *replace*
+the doctrine stages 2, 3-spec, 4, 5, 6 and 10 run on (`superpowers:*`, `grill-me`,
+…). Substituting one is a host project's call in *their* `pipeline.json`, never the
+shipped default. The **enumerated exceptions** are named deliberately and are not
+substitutions: the optional tools (`context7`, `wiki-query`/`wiki-update`,
+`graphify`, `figma`) and the `super-ux:*` track, which is required for user-facing
+work. Earlier wording said the config named *no* external provider while it named
+eleven — the enforced rule was always the narrower one.
+
+**10. A seeded template must keep the seeded gate green.** `templates/docgate.sh`
+is run by `npm test` over a scratch project built from `templates/docmap.md`,
+`decisions.md`, `open-questions.md` and `retro.md`, and must exit `0`. A generator
+whose output fails the generator's own checks teaches every new project on day one
+that the gate is noise (`references/learned.md` rule 9). Change a template → run
+`npm test`, not just your eyes.
 
 **7. Stage 0 is mandatory and manual; stage 10 is manual and demands evidence;
 the stage-4 gate is a set comparison.** These three are the spine — the validator

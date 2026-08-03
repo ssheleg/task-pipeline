@@ -333,6 +333,88 @@ its own previous pass while the finding count still looked healthy. So:
   it, then trust the green — same law as the failing test, applied to every gate,
   linter and script the run leans on.
 
+## Documentation is a deliverable, and it has a gate
+
+**Before the first question (stage 0), answer four things and write them to
+`docs/DOCMAP.md`:** where settled things live, what each fact's single home is,
+what a change of type X obliges, and what proves it. A project with no answers gets
+them seeded — a decision register, an open-questions register and a documentation
+gate — and the seeding is recorded as the register's first entry. **One decision
+home per project:** an existing `docs/adr/` *is* the register; never create a second
+beside it. Then **reconcile intent against as-built** — git says how it should be,
+the run record says how it turned out — and resolve every divergence before you
+start: the document is stale, the record is wrong, or they genuinely disagree and
+that is a decision. There is no fourth option, and starting on an unresolved one
+means building against a system that does not exist.
+
+**The Doc Loop fires whenever anything is settled, at any stage — not at the end.**
+Seven steps: orient and reconcile → reserve the id, then record → resolve the
+question it answers → propagate → adjust scope → record as-built → commit with the
+ids in the subject. Reading a "Next free ID" line is **not** reserving it: a second
+agent reading it in the same minute gets the same number. Finishing the chat answer
+is not finishing the task.
+
+**Registers are append-only.** To reverse: add a new entry, edit **only the status
+line** of the old one, leave its body intact. Three distinct markers, because one
+word for "adds to" and "replaces a clause of" cannot be enforced: `Refines:` is
+additive and the target needs no annotation; `Contradicts:` names a clause that
+falls and the target **must** say so; `Supersedes:` retires the whole target and the
+target **must** say so.
+
+**The propagation matrix is not the harvest ledger.** The ledger names the documents
+you *read*; the matrix names the documents you *owe*. The document nobody read is
+exactly the document nobody updated. At stage 9, walk the matrix for every change
+type the run produced, then run the documentation gate and print its ratchet counts.
+
+## Gates: two axes, and how to build one that cannot lie
+
+**Axis A — the stage gate type.** `auto` = verify the check yourself and stop on
+fail; `manual` = wait for an explicit operator go. An auto gate never substitutes
+for a required manual approval.
+
+**Axis B — where the rule is actually enforced**, and a rule climbs this ladder
+rather than starting at the top: doctrine line → review question at a named gate →
+script check (promote here once the class has occurred **twice**) → CI step → hook.
+A rule may sit on several rungs; what it may never do is *pretend* to be on a higher
+one — that is the same failure as a gate that prints `FAIL` and exits `0`.
+
+**Before you run any check:** the base is green (or its known-red baseline is
+recorded); the check has been probed; you have read its scope header and know what
+it does **not** cover; you have read its ratchet floors.
+
+**Anatomy of a gate script:** non-zero exit on any failure; the verdict block last
+and **nothing after it**; a SCOPE header; portable (no `grep -P`, no in-place stream
+edits, no bash-4 builtins); ratchet floors as variables with the counts printed
+beside `OK`; skips printed, never silent; a section with no input yet prints
+`dormant` and stays green so a fresh project never starts red; every count computed,
+never restated; two-layer mappings checked in **both** directions.
+
+**Probing:** copy the tree, plant the defect **in python** (an in-place stream edit
+is not portable and silently edits nothing on BSD), run, assert `$?` is non-zero,
+restore, assert zero. **Doubt the probe before the check** — four of five silent
+probes on a real project were the probe's fault. Record the probe.
+
+## Hooks — the limit first
+
+Hooks exist **only in Claude Code**. Elsewhere the same rules run as a self-check
+and the run is recorded **`ungated`** — never describe a project as protected when
+its agents run somewhere else. A `PreToolUse` hook blocks by **exit 2** with the
+reason on stderr, or exit 0 with a `permissionDecision: deny` payload on stdout.
+**Any other exit code is non-blocking, so a crashing guard fails open** and stops
+guarding without announcing it — write the guard to exit 2 on its own errors. Keep
+hooks cheap and narrowly matched; the full suite belongs in CI, which is late, and
+late is the right trade for slow.
+
+## The retro carries commits
+
+Standing instructions (max ten) carry the commit that introduced them and the commit
+of the run in which they last fired; every log entry, every retirement and every run
+stamp carries one; and every SHA must resolve. A `file:line` rots at the next edit,
+while `git show <sha>` reconstructs the whole incident months later. Entries older
+than the last five run stamps **move** to an append-only archive that is *queried*
+by the task's nouns rather than read — which keeps the in-force file short enough to
+read in full, and makes pruning cost no knowledge.
+
 ## super-ux for user-facing tasks (recommended)
 
 If the task touches any UI (web/mobile/CLI/TUI), the WHY→UI→scenario chain comes

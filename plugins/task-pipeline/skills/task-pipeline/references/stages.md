@@ -51,6 +51,23 @@ stages/agents/types (see SKILL.md → *Bring your own skills*).
   explicit "none found"; the graph's row carries its build date). It is retrieval
   scoped by the task's own nouns, not a read of everything — and it is what makes
   phase 2's answers checkable instead of merely confident.
+- **Phase 1b — the documentation inventory**
+  ([`documentation.md`](documentation.md)). Four questions, answered before the
+  interview and written to `docs/DOCMAP.md` (seeded from
+  [`../templates/docmap.md`](../templates/docmap.md), **only when absent**): where
+  do settled things live, what is each fact's single home, what does a change of
+  type X oblige, and what proves it. A project with no answers gets them seeded —
+  registers, the matrix and `scripts/check-docs.sh` — and the seeding is itself
+  recorded as the register's first entry. **One decision home per project:** an
+  existing `docs/adr/` *is* the register and is recorded as such, never duplicated.
+  The gate is seeded so that it exits `0` on its own seeds; a project that starts
+  red learns on day one that the gate is noise.
+- **Phase 1c — reconcile intent against as-built.** Git says how it *should* be;
+  the run record says how it *turned out*. Read both for the area you are about to
+  touch and resolve every divergence — the document is stale, the record is wrong,
+  or they genuinely disagree and that is a decision. There is no fourth option, and
+  starting on an unresolved divergence means building against a system that does
+  not exist.
 - **How it runs: [`grill.md`](grill.md)** — the full doctrine, built into this
   skill (nothing to install). In short: one question per turn, a recommended
   answer with each, explore the codebase before asking, depth-first through the
@@ -77,7 +94,11 @@ stages/agents/types (see SKILL.md → *Bring your own skills*).
   an updated `CONTEXT.md` (terms written as they resolved) and any ADRs under
   `docs/adr/` — see `grill.md` → *Domain awareness*.
 - **GATE (manual):** shared understanding reached — **the source ledger is written
-  (every source consulted, or an explicit "none found")**, every detected branch has
+  (every source consulted, or an explicit "none found")**, **the documentation
+  inventory is answered into `docs/DOCMAP.md`** with its registers, single homes,
+  a non-empty propagation matrix and the gate command, **the regime is recorded**,
+  **intent and as-built are reconciled with every divergence resolved**, the retro's
+  in-force sections are read in full and its archive queried, every detected branch has
   a recorded answer or an explicit deferral, **every answer that contradicted a
   harvested source has a recorded resolution** (which governs, and whether the doc
   is now stale), no open contradictions, **every
@@ -228,7 +249,9 @@ stages/agents/types (see SKILL.md → *Bring your own skills*).
   same as stage 5.
 - **GATE (auto):** the **full** suite is green (not just the new tests); new/changed code
   is covered; no `skip`/`xfail` smuggling a red suite past the gate. Never advance
-  to deploy on a red or partial run.
+  to deploy on a red or partial run. **The carry-over count is printed beside this
+  verdict** — a ratchet nobody prints is a TODO with a better name
+  ([`audit.md`](audit.md)).
 
 ## 7 — Lint + deploy
 - Read host conventions (`conventions.md`): run the linter; fix failures. The suite
@@ -240,7 +263,8 @@ stages/agents/types (see SKILL.md → *Bring your own skills*).
 - **GATE (manual):** lint clean (host linter **and**, for UI projects, the super-ux
   linter) **and** suite green **before** deploy, **and no REQ is still `open`** — a
   `partial` ships only with the operator's explicit acceptance. A gap is cheapest to
-  close before it ships, and the operator is already present at this gate. Deploy is outward → explicit
+  close before it ships, and the operator is already present at this gate. **The
+  carry-over count is printed beside this verdict.** Deploy is outward → explicit
   operator go. Respect deploy-from-main rules if the project mandates them.
 
 ## 8 — Post-deploy
@@ -250,6 +274,18 @@ stages/agents/types (see SKILL.md → *Bring your own skills*).
   steps — never silent success.
 
 ## 9 — Docs + wiki
+- **The propagation sweep runs first** ([`documentation.md`](documentation.md)).
+  The ledger below names the documents you **read**; the matrix in `docs/DOCMAP.md`
+  names the documents you **owe**. They are not the same list, and the gap between
+  them is where documentation rots — the document nobody read is exactly the
+  document nobody updated. Walk the matrix row for **every** change type this run
+  produced. Every settled thing gets an id in the register, every answered question
+  is flipped to `Resolved→<id>`, and every document named in a
+  `Consequences / affects:` line cites its decision.
+- **Then run the documentation gate** (`bash scripts/check-docs.sh`, or whatever
+  `docs/DOCMAP.md` → *Gates* names) and print its **ratchet counts** beside the
+  verdict, so "green" reads as *"green, and here is exactly what was not looked
+  at"* ([`gates.md`](gates.md)). A check that skipped says so.
 - **The stage-0 source ledger is the work list** ([`knowledge-sources.md`](knowledge-sources.md)
   → *Close the loop*): every source the harvest read gets updated if this run
   changed or disproved it. What was worth reading at stage 0 and is wrong now is
@@ -278,11 +314,17 @@ stages/agents/types (see SKILL.md → *Bring your own skills*).
 - **Docs living in another repository** are outward: propose the edit, get an
   explicit go, then open a PR there. No go → the exact edit goes in the carry-over
   ledger.
-- **GATE (auto):** docs in sync with code; every stale row in the source ledger
-  either updated or carried over with its edit; UI: super-ux layers current +
-  linter green; wiki synced (or absent and recommended once); **the code graph
+- **GATE (auto):** **the propagation matrix walked for every change type this run
+  produced**, with every settled thing recorded under an id and every answered
+  question resolved; **the documentation gate green, its ratchet counts printed and
+  any skip stated** — this is what replaced the unfalsifiable *"docs in sync with
+  code"*, which named no artefact and no command; every stale row in the source
+  ledger either updated or carried over with its edit; the **as-built record
+  written and reconciled**; UI: super-ux layers current + linter green; wiki synced
+  (or absent and recommended once); **the code graph
   refreshed where one exists, or the reason it wasn't written into the carry-over
-  ledger** (absent and recommended once is fine); dangling links fixed.
+  ledger** (absent and recommended once is fine); dangling links fixed; **the
+  carry-over count printed beside this verdict**.
 
 ## 10 — Acceptance
 - **What:** the closing stage — go back to the brief and account for **every**
@@ -348,8 +390,12 @@ stages/agents/types (see SKILL.md → *Bring your own skills*).
   instructions in full next time, which is why the cap is not negotiable.
 - **GATE (manual):** the ladder walk ran and its absences became REQ rows before
   the table was written; **the retrospective is written — prune before entry, the
-  list at or under its cap with every deletion logged, the run stamped, and the
-  counts printed beside this verdict**; **every repository is closed — the parent included:
+  list at or under its cap, every deletion logged **in the archive with its commit**,
+  entries older than five run stamps rotated into `docs/superpowers/retro/`, the run
+  stamped **with its commit**, every SHA in either file resolvable, and the
+  counts printed beside this verdict**; **the documentation gate has been seen
+  failing once against a planted defect and its ratchet counts are printed**
+  ([`gates.md`](gates.md)); **every repository is closed — the parent included:
   `git submodule status` shows no `+`, each repo clean and pushed**; **every check this gate leans on has been seen failing
   once against a planted defect** (an unproven check's green is not evidence);
   every REQ has a status (none `unknown`); every `verified`
@@ -386,6 +432,22 @@ module N → 3 spec (dossier) → 4 plan → 5 build → 6 tests → 7 lint+depl
 - **Program done** when every row is `done` or `deferred` with an agreed home, the
   cross-module contracts are covered by tests that cross the seam, and a final
   acceptance covers the platform's whole REQ table — not module by module.
+
+## Cross-cutting — the Doc Loop
+
+A decision is not made at stage 9. It is made the moment something is settled —
+in the grill, in the brainstorm's approved design, in the spec's locked contract,
+in a ruling on a review finding at stage 5 — and every one of those is a stage that
+can lose it.
+
+- **It fires at any stage**, and the seven steps live in
+  [`documentation.md`](documentation.md): orient and reconcile → reserve the id and
+  record → resolve the question it answers → propagate by the matrix → adjust scope
+  → record as-built → commit with the ids.
+- **Step 7 is part of the loop, not after it.** A decision recorded and uncommitted
+  is a decision that survives exactly as long as the working tree.
+- **Reserve before you mint.** Reading *"Next free ID"* is not reserving it, and a
+  second agent reading it in the same minute gets the same number.
 
 ## Cross-cutting — the loop guard
 

@@ -617,6 +617,152 @@ jobs:
             echo "OK: validator rejects unresolved merge conflict markers"
           fi
 
+      - name: Negative self-test (the documentation-track doctrine must ship)
+        run: |
+          set -eu
+          for f in documentation gates hooks; do
+            rm -rf /tmp/doctrine-copy
+            cp -R . /tmp/doctrine-copy
+            rm /tmp/doctrine-copy/plugins/task-pipeline/skills/task-pipeline/references/$f.md
+            if python3 /tmp/doctrine-copy/test/validate.py; then
+              echo "ERROR: validator passed with references/$f.md missing"
+              exit 1
+            fi
+          done
+          echo "OK: validator requires documentation.md, gates.md and hooks.md"
+
+      - name: Negative self-test (the doc map must carry its propagation matrix)
+        run: |
+          set -eu
+          rm -rf /tmp/docmap-copy && cp -R . /tmp/docmap-copy
+          python3 - <<'EOF'
+          p = "/tmp/docmap-copy/plugins/task-pipeline/skills/task-pipeline/templates/docmap.md"
+          t = open(p, encoding="utf-8").read()
+          assert "## Propagation matrix" in t, "PLANT MISSED"
+          open(p, "w", encoding="utf-8").write(t.replace("## Propagation matrix", "## What changes what", 1))
+          EOF
+          if python3 /tmp/docmap-copy/test/validate.py; then
+            echo "ERROR: validator passed a doc map with no propagation matrix — that seeds a project with a register and no obligation"
+            exit 1
+          else
+            echo "OK: validator requires the doc map's propagation matrix"
+          fi
+
+      - name: Negative self-test (a retro lesson must carry its commit)
+        run: |
+          set -eu
+          rm -rf /tmp/retrocommit-copy && cp -R . /tmp/retrocommit-copy
+          python3 - <<'EOF'
+          p = "/tmp/retrocommit-copy/plugins/task-pipeline/skills/task-pipeline/templates/retro.md"
+          t = open(p, encoding="utf-8").read()
+          assert "Commit" in t, "PLANT MISSED"
+          open(p, "w", encoding="utf-8").write(t.replace("Commit", "Ref"))
+          EOF
+          if python3 /tmp/retrocommit-copy/test/validate.py; then
+            echo "ERROR: validator passed a retro with no Commit column — file:line evidence rots at the next edit"
+            exit 1
+          else
+            echo "OK: validator requires the retro's commit columns"
+          fi
+
+      - name: Negative self-test (the retro archive template must ship)
+        run: |
+          set -eu
+          rm -rf /tmp/retroarch-copy && cp -R . /tmp/retroarch-copy
+          rm /tmp/retroarch-copy/plugins/task-pipeline/skills/task-pipeline/templates/retro-archive.md
+          if python3 /tmp/retroarch-copy/test/validate.py; then
+            echo "ERROR: validator passed with no archive template — the in-force retro is capped and read in full, so its history needs a home"
+            exit 1
+          else
+            echo "OK: validator requires templates/retro-archive.md"
+          fi
+
+      - name: Negative self-test (the seeded gate must stay portable)
+        run: |
+          set -eu
+          rm -rf /tmp/portable-copy && cp -R . /tmp/portable-copy
+          python3 - <<'EOF'
+          p = "/tmp/portable-copy/plugins/task-pipeline/skills/task-pipeline/templates/docgate.sh"
+          t = open(p, encoding="utf-8").read()
+          # Build the construct at runtime — spelling it here would trip the
+          # workflow's own portability guard on this very file.
+          bad = "s" + "ed -" + "i 's/a/b/' /dev/null"
+          # plant in CODE, not in a comment: the guard reads code only
+          assert "set -u" in t, "PLANT MISSED"
+          open(p, "w", encoding="utf-8").write(t.replace("set -u", "set -u\n" + bad, 1))
+          EOF
+          if python3 /tmp/portable-copy/test/validate.py; then
+            echo "ERROR: validator passed a gate using an in-place stream edit — on BSD it silently edits nothing and reads as a guard that failed to fire"
+            exit 1
+          else
+            echo "OK: validator rejects non-portable constructs in the seeded gate"
+          fi
+
+      - name: Negative self-test (the seeded gate must seed GREEN)
+        run: |
+          set -eu
+          rm -rf /tmp/seedred-copy && cp -R . /tmp/seedred-copy
+          python3 - <<'EOF'
+          p = "/tmp/seedred-copy/plugins/task-pipeline/skills/task-pipeline/templates/decisions.md"
+          t = open(p, encoding="utf-8").read()
+          old = "**Next free ID:** `DEC-0002`"
+          assert old in t, "PLANT MISSED"
+          open(p, "w", encoding="utf-8").write(t.replace(old, "**Next free ID:** `DEC-0009`", 1))
+          EOF
+          if python3 /tmp/seedred-copy/test/validate.py; then
+            echo "ERROR: validator passed templates whose own gate rejects them — a project that starts red learns on day one that the gate is noise"
+            exit 1
+          else
+            echo "OK: validator runs the seeded gate over a seeded project and requires exit 0"
+          fi
+
+      - name: Negative self-test (every template must be listed in templates/README.md)
+        run: |
+          set -eu
+          rm -rf /tmp/tplreadme-copy && cp -R . /tmp/tplreadme-copy
+          echo "# stray" > /tmp/tplreadme-copy/plugins/task-pipeline/skills/task-pipeline/templates/unlisted.md
+          if python3 /tmp/tplreadme-copy/test/validate.py; then
+            echo "ERROR: validator passed an unlisted template — one nobody knows to seed"
+            exit 1
+          else
+            echo "OK: validator requires templates/README.md to list every template"
+          fi
+
+      - name: Negative self-test (the doc track must reach the surfaces that enforce it)
+        run: |
+          set -eu
+          rm -rf /tmp/anchor-copy && cp -R . /tmp/anchor-copy
+          python3 - <<'EOF'
+          import re
+          p = "/tmp/anchor-copy/plugins/task-pipeline/skills/task-pipeline/references/stages.md"
+          t = open(p, encoding="utf-8").read()
+          assert re.search("propagation", t, re.I), "PLANT MISSED"
+          open(p, "w", encoding="utf-8").write(re.sub("propagation", "spreading", t, flags=re.I))
+          EOF
+          if python3 /tmp/anchor-copy/test/validate.py; then
+            echo "ERROR: validator passed with the propagation sweep declared in SKILL.md and absent from stages.md — declared where it is not enforced is inert"
+            exit 1
+          else
+            echo "OK: validator holds every surface that enforces stage 9 to the propagation sweep"
+          fi
+
+      - name: Negative self-test (the two decision shapes must agree on fields)
+        run: |
+          set -eu
+          rm -rf /tmp/adrparity-copy && cp -R . /tmp/adrparity-copy
+          python3 - <<'EOF'
+          p = "/tmp/adrparity-copy/plugins/task-pipeline/skills/task-pipeline/templates/adr.md"
+          t = open(p, encoding="utf-8").read()
+          assert "Consequences / affects" in t, "PLANT MISSED"
+          open(p, "w", encoding="utf-8").write(t.replace("Consequences / affects", "Downstream effects"))
+          EOF
+          if python3 /tmp/adrparity-copy/test/validate.py; then
+            echo "ERROR: validator passed a register and an ADR set that disagree on fields — two shapes of one contract is a fork with extra steps"
+            exit 1
+          else
+            echo "OK: validator holds decisions.md and adr.md to one field set"
+          fi
+
       - name: install.sh syntax check
         run: bash -n install.sh
 

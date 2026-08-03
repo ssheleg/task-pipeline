@@ -29,9 +29,11 @@ makes the grill's answers *checkable* instead of merely confident.
 | 2 | **The code graph** | `graphify-out/graph.json` — see below | *reach*: what calls this, what breaks if it moves, what every change passes through |
 | 3 | **Host agent docs** | `CLAUDE.md`, `AGENTS.md`, `.cursor/rules/` | conventions, commands, deploy path, house rules |
 | 4 | **Domain docs** | `CONTEXT.md` / `CONTEXT-MAP.md`, `docs/adr/` | the glossary and the decisions with their reasons |
+| 4a | **The decision register and the doc map** | `docs/DECISIONS.md` **or** `docs/adr/` — `docs/DOCMAP.md` says which ([`documentation.md`](documentation.md)) | what is already settled, what it superseded, and which documents this run will owe |
 | 5 | **Product/UX docs** | `docs/ux/` (super-ux chain), `README`, runbooks | user-facing behavior that is already specified |
 | 6 | **Pipeline history** | `docs/superpowers/specs/`, `plans/`, past `-carryover.md` | what a previous run of this pipeline decided or deferred |
-| 7 | **The retro's standing instructions** | `docs/superpowers/retro.md` ([`retrospective.md`](retrospective.md)) | what previous runs got wrong here — **read in full**, they are capped at ten |
+| 7 | **The retro, in force** | `docs/superpowers/retro.md` ([`retrospective.md`](retrospective.md)) | what previous runs got wrong here — **read in full**: standing instructions (capped at ten), run stamps and the recent-log window, all bounded by construction |
+| 7a | **The retro archive** | `docs/superpowers/retro/YYYY-QN.md` | *have we been bitten by this class before?* — **queried** by the task's nouns, never read end to end |
 | 8 | **The knowledge wiki** | see below | distilled cross-project knowledge, prior sessions, why decisions were made |
 | 9 | **Other doc repos the project names** | a docs repo URL or submodule in `CLAUDE.md`/`README`, a sibling checkout, a `docs/` monorepo package | specs, contracts and runbooks that live outside this repo |
 | 10 | **Hosted doc systems the project names** | Notion / Confluence / Google Docs referenced in the project | the same, when the team keeps them there |
@@ -173,10 +175,22 @@ Three shapes and what to do with each:
 document; they may not do it by accident. The point of quoting the source is that
 the override becomes a recorded decision instead of an undetected divergence.
 
-**Precedence when two sources disagree with each other:** code > host docs and
-ADRs > the wiki > anyone's memory. The wiki is *distilled* knowledge and can lag
-the repo by months; the code is what runs. A disagreement between them is a grill
-question, never a silent pick — and it is usually a sign the doc is due an update.
+**Precedence — and it splits in two, because two different questions are being
+asked.**
+
+*For what **is**:* code, then host docs and ADRs, then the wiki, then anyone's
+memory. The wiki is *distilled* knowledge and can lag the repo by months; the code
+is what runs.
+
+*For what **should be**:* the **register outranks the code**
+([`documentation.md`](documentation.md)). A decision that is accepted and not yet
+built is still the decision, and code that contradicts it is a finding — a bug, or
+an unrecorded reversal — never a tie-break in the code's favour. Getting this
+backwards is how a run "discovers" that the system does not work the way the
+project decided, and quietly builds the version it found.
+
+Either way a disagreement is a grill question, never a silent pick, and it is
+usually a sign that something is due an update.
 
 ## Close the loop — stage 9 updates what stage 0 read
 
@@ -184,6 +198,13 @@ The ledger is the stage-9 work list. For each row:
 
 - **Host repo docs, ADRs, runbooks, `docs/ux/`** — updated in the **same change**,
   per the host's own rules ([`conventions.md`](conventions.md)).
+- **The register and the doc map** — every decision this run settled gets an entry
+  with an id; every question it answered is flipped; the doc map gains any new
+  document class or ratchet. Note that this list and the **propagation matrix** are
+  different lists on purpose: the ledger is what you *read*, the matrix is what you
+  *owe* ([`documentation.md`](documentation.md)), and stage 9 walks both.
+- **The retro** — prune, stamp, entry, and rotate what aged out into the archive
+  ([`retrospective.md`](retrospective.md)).
 - **Anything the run proved stale** — including a doc that was "wrong but nobody
   had time": that's why the conflict was logged in phase 2 instead of only being
   resolved verbally.

@@ -37,11 +37,18 @@ the environment resolves.
 ## Prerequisites — none required
 
 **Every stage's doctrine ships inside this skill.** There is no required companion
-plugin, nothing to resolve at preflight, no version skew with someone else's repo,
-and no stage that can fail because a dependency is missing:
+plugin, nothing to resolve at preflight and no version skew with someone else's
+repo. Stages 1 and 6–9 additionally run the *host's own* commands and optional
+tools, and **no stage blocks on an install** — stage 1 falls back to web search, the
+wiki and the code graph are recommendations. The **one** exception is deliberate and
+named: on a user-facing task the stage-3 UX track requires super-ux, and the spec
+gate stops until it is installed.
 
 | Stage | Built-in doctrine |
 |---|---|
+| 0 + 9 + any settled decision · The documentation system | [`references/documentation.md`](references/documentation.md) |
+| 6–10 + any check you write · Gates | [`references/gates.md`](references/gates.md) |
+| any agent-time enforcement · Hooks | [`references/hooks.md`](references/hooks.md) |
 | 0 Knowledge harvest (pre-grill) | [`references/knowledge-sources.md`](references/knowledge-sources.md) |
 | 0 + 9 The code graph (graphify — recommended, never required) | [`references/knowledge-graph.md`](references/knowledge-graph.md) |
 | 0 Intake grill | [`references/grill.md`](references/grill.md) |
@@ -101,9 +108,12 @@ question: pull what the project already knows about this task from the code, the
 **code graph** if one is built
 ([`references/knowledge-graph.md`](references/knowledge-graph.md) — graphify;
 recommended, never required),
-`CLAUDE.md`, `CONTEXT.md`/ADRs, `docs/` + `docs/ux/`, past pipeline briefs, **the
-retro's standing instructions** — `docs/superpowers/retro.md`, read in full because
-they *bind* this run ([`references/retrospective.md`](references/retrospective.md)) —
+`CLAUDE.md`, `CONTEXT.md`/ADRs, **the decision register**, `docs/` + `docs/ux/`,
+past pipeline briefs, **the retro's standing instructions, run stamps and recent
+log** — `docs/superpowers/retro.md`, read in full because they *bind* this run and
+are bounded by construction, while the archive under `docs/superpowers/retro/` is
+**queried** by the task's nouns
+([`references/retrospective.md`](references/retrospective.md)) —
 the **knowledge wiki** if one is installed
 ([obsidian-wiki](https://github.com/ar9av/obsidian-wiki) — recommended, never
 required) and any **other repo or hosted doc system the project names as its
@@ -120,6 +130,18 @@ document names, an edge the docs deny, a doc naming a module the graph no longer
 has. Doc-side findings are fixed at stage 9; absences become REQ rows at stage 10
 ([`references/knowledge-graph.md`](references/knowledge-graph.md),
 [`references/audit.md`](references/audit.md)).
+
+**Documentation is a deliverable, and it has a gate**
+([`references/documentation.md`](references/documentation.md)). Stage 0's harvest
+reads what the project knows; a second phase asks the four questions that make it a
+*system* — where settled things live, what each fact's single home is, what a change
+of type X obliges, and what proves it — and writes them to `docs/DOCMAP.md`. From
+then on the **Doc Loop** fires whenever anything is settled, at **any** stage, not
+only at stage 9; the stage-9 sweep walks the **propagation matrix** (the harvest
+ledger names what you *read*, the matrix names what you *owe*); and *"docs in sync"*
+stops being an assertion and becomes a command with an exit code. Governance is a
+by-product: the run already produces decisions, so recording one is transcription
+plus a stable id, never a second act of thinking.
 
 **The run teaches the next run — and the list stays short.** Every gate is good at
 *this* run and blind across runs, so the same class of failure can be caught, fixed
@@ -184,7 +206,13 @@ Three things the grill does beyond clarifying the request:
    stop/return on fail; for `manual`, present the result and **wait for the
    operator's explicit "continue"/go** — an auto gate never substitutes for a
    required manual approval.
-5. Cross-cutting, every stage: **answer from the brief's autonomy section rather
+5. Cross-cutting, every stage: **when anything is settled — scope, a contract, a
+   name, a policy, a vocabulary — run the Doc Loop
+   (`references/documentation.md`) before the run moves on**: reserve the id,
+   record it, resolve the question it answers, propagate by the matrix, commit
+   with the ids. A decision that lives only in the spec dies with the spec, and one
+   that lives only in the conversation was never made;
+   **answer from the brief's autonomy section rather
    than asking again** — it was grilled precisely so you wouldn't have to;
    **anything deferred, dropped or left half-done goes into the carry-over ledger
    the moment it's said** — deferred out loud is forgotten; **never narrow the task
@@ -215,7 +243,7 @@ capable available — see `references/model-tiering.md`).
 
 | # | Stage | Invoke | Gate | Type |
 |---|---|---|---|---|
-| 0 | Intake grill — **mandatory** | built in: [`references/knowledge-sources.md`](references/knowledge-sources.md) (harvest) → [`references/grill.md`](references/grill.md) (interview) | source ledger written; shared understanding reached; autonomy sweep covered; brief locked + confirmed | manual |
+| 0 | Intake grill — **mandatory** | built in: [`references/knowledge-sources.md`](references/knowledge-sources.md) (harvest) → [`references/grill.md`](references/grill.md) (interview) | source ledger written; **the documentation inventory answered into `docs/DOCMAP.md`** — registers, single homes, the propagation matrix, the gate command — and **intent reconciled against as-built**, every divergence resolved ([`references/documentation.md`](references/documentation.md)); the retro read in full and its archive queried; shared understanding reached; autonomy sweep covered; brief locked + confirmed | manual |
 | 1 | Docs study | `context7` (resolve-library-id → get-library-docs) / `context7-docs` | contracts grounded on fetched docs | auto |
 | 2 | Brainstorm + decompose | built in: [`references/brainstorm.md`](references/brainstorm.md) + **UI detection** + [`references/decomposition.md`](references/decomposition.md) for platforms | design approved; UI verdict recorded; every REQ answered; platform: module map approved | manual |
 | 3 | Spec | built in: [`references/spec.md`](references/spec.md) — **UI → super-ux chain first** (`/ux` → `ux-foundation` CJM → `ux-flows` screens → `ux-scenarios` → `/ux-lint`), then spec `docs/superpowers/specs/…-design.md` | committed + reviewed; UI: chain validated, linter green, scenarios/`SCR-` traced | manual |
@@ -224,8 +252,8 @@ capable available — see `references/model-tiering.md`).
 | 6 | Tests | host test runner + built-in [`references/tdd.md`](references/tdd.md) + [`references/learned.md`](references/learned.md) | full suite green; new/changed code covered; **every new check probed both ways and asserted on its exit code**, and the suite run once against a cold environment | auto |
 | 7 | Lint + deploy | host lint → deploy per host convention | lint clean + suite green before deploy; deploy needs a go (or the brief's specific standing authorization) | manual |
 | 8 | Post-deploy | tail deploy logs / health-check | clean boot or honest degradation report | auto |
-| 9 | Docs + wiki | host module docs/runbook rules → `wiki-update` ([obsidian-wiki](https://github.com/ar9av/obsidian-wiki), recommended) → `/graphify . --update` ([`references/knowledge-graph.md`](references/knowledge-graph.md), recommended) | every stale row of the stage-0 source ledger updated; docs synced; wiki synced; **the code graph refreshed where one exists** and checked against the docs (a hub no doc names, a doc naming a node the graph lost); **every number computed rather than restated, every named command or file resolvable** ([`references/learned.md`](references/learned.md)) | auto |
-| 10 | **Acceptance** | built in: [`references/audit.md`](references/audit.md) (ladder walk) → [`references/acceptance.md`](references/acceptance.md) (coverage table) → [`references/retrospective.md`](references/retrospective.md) (retro: prune, stamp, entry) | ladder walk ran, its absences became REQ rows; every REQ accounted for with evidence from a check seen failing once; ledger has no unresolved row; **axis rotation recorded** (new findings vs self-inflicted, rule 1 of [`references/learned.md`](references/learned.md)), **every closure verified against the artefact rather than the document describing it**, **each correction swept across its class**, **every deferral a printed ratchet rather than a TODO**; **in a multi-repository project, every repository is clean, pushed and pointed at** (below); operator signs off; **the retrospective written last — prune before entry, list at or under its cap, deletions logged, run stamped, counts printed** | manual |
+| 9 | Docs + wiki | host module docs/runbook rules → `wiki-update` ([obsidian-wiki](https://github.com/ar9av/obsidian-wiki), recommended) → `/graphify . --update` ([`references/knowledge-graph.md`](references/knowledge-graph.md), recommended) | every stale row of the stage-0 source ledger updated; **the propagation matrix walked for every change type this run produced** — the ledger names what you read, the matrix names what you owe — every settled thing recorded with an id, every answered question resolved, and **the documentation gate green with its ratchet counts printed**; docs synced; wiki synced; **the code graph refreshed where one exists** and checked against the docs (a hub no doc names, a doc naming a node the graph lost); **every number computed rather than restated, every named command or file resolvable** ([`references/learned.md`](references/learned.md)); the carry-over count printed beside the verdict | auto |
+| 10 | **Acceptance** | built in: [`references/audit.md`](references/audit.md) (ladder walk) → [`references/acceptance.md`](references/acceptance.md) (coverage table) → [`references/retrospective.md`](references/retrospective.md) (retro: prune, stamp, entry) | ladder walk ran, its absences became REQ rows; every REQ accounted for with evidence from a check seen failing once; ledger has no unresolved row; **axis rotation recorded** (new findings vs self-inflicted, rule 1 of [`references/learned.md`](references/learned.md)), **every closure verified against the artefact rather than the document describing it**, **each correction swept across its class**, **every deferral a printed ratchet rather than a TODO**; **in a multi-repository project, every repository is clean, pushed and pointed at** (below); operator signs off; **every check this close-out leans on — the documentation gate included — has been seen failing once against a planted defect, and its ratchet counts are printed beside the verdict**; **the retrospective written last — prune before entry, list at or under its cap, every deletion and every entry carrying its commit, entries older than five stamps rotated into the archive, run stamped with its commit, counts printed** | manual |
 
 
 ### Stage 10 in a project of several repositories
@@ -290,8 +318,11 @@ automation is on — `pipeline.schema.json` is the only contract.
 - `references/grill.md` — the built-in stage-0 grill: loop, domain awareness, autonomy sweep
 - `references/acceptance.md` — the built-in stage-10 close-out: REQ coverage, evidence, sign-off
 - `references/retrospective.md` — stage 10's last act: the project retro (`docs/superpowers/retro.md`), the three grades of fix, the mandatory prune and its cap of ten
+- `references/documentation.md` — cross-cutting: the doc inventory, registers and ids, SSOT, the Doc Loop, supersede semantics, the propagation matrix, intent vs as-built
+- `references/gates.md` — cross-cutting: the two axes, the promotion ladder, gate anatomy, the probe recipe, ratchet floors, where a gate runs
+- `references/hooks.md` — agent-time enforcement: the PreToolUse contract, the fail-open hazard, placement, and the Claude-Code-only limit
 - `references/audit.md` — cross-cutting: the L0→L7 ladder and its seams (what was never written), axis rotation, ratchets, proven checks
-- `references/learned.md` — cross-cutting: fourteen rules earned by failure on a real multi-repository build, each with the incident behind it, its check and its exit criterion; plus the two that no check can decide
+- `references/learned.md` — cross-cutting: fifteen rules earned by failure on a real multi-repository build, each with the incident behind it, its check and its exit criterion; plus the two that no check can decide
 - `references/brainstorm.md` — stage 2: design dialogue, approaches, UI detection, hard gate
 - `references/spec.md` — stage 3: UX track order, the spec contract, self-review, review gate
 - `references/planning.md` — stage 4: zero-context plan format, parallel groups, no placeholders
