@@ -407,6 +407,57 @@ fail, you don't know it tests the right thing* — raised from one test to every
 gate, linter and script in the run. **A green result from an unproven check is
 worth nothing.**
 
+### Documentation is a deliverable, and it has a gate
+
+Stage 9 used to say *"docs in sync with code"*. That sentence names no artefact and
+no command, so nothing could make it false. The pipeline now carries the system that
+can.
+
+**Stage 0 answers four questions** and writes them to `docs/DOCMAP.md`: where
+settled things live, what each fact's single home is, what a change of type X
+obliges, and what proves it. A project with no answers gets them seeded — a decision
+register, an open-questions register and a portable documentation gate — and the
+seeding is itself the register's first entry. One decision home per project: an
+existing `docs/adr/` **is** the register and is never duplicated.
+
+**The Doc Loop fires whenever anything is settled, at any stage.** Reserve the id,
+record it, resolve the question it answers, propagate, commit with the ids. A
+decision that lives only in the spec dies with the spec; one that lives only in the
+conversation was never made.
+
+**The propagation matrix is not the harvest ledger.** The ledger names the documents
+the run *read*; the matrix names the documents it *owes*. They are different lists,
+and the gap between them is where documentation rots — the document nobody read is
+exactly the document nobody updated.
+
+**Governance is a by-product, not a second job.** The run already produces decisions
+(the brief's *Decisions locked*, the spec's contracts, the ADRs), so recording one is
+transcription plus a stable id. And the seeded gate **arms progressively**: a section
+whose input does not exist yet prints `dormant` and stays green, so a three-file
+repository is governed from day one without starting red — a scaffold that seeds red
+teaches everyone on day one that the gate is noise.
+
+### Gates and hooks — how a rule becomes something that can say no
+
+Two axes, deliberately not conflated. **The stage gate type** (`auto` = verify it
+yourself; `manual` = wait for an explicit go) is about this pipeline. **The
+enforcement mechanism** is a ladder a rule climbs: a doctrine line → a review
+question → a script check (promote here once the class has occurred *twice*) → a CI
+step → a hook. A rule may sit on several rungs; what it may never do is *pretend* to
+be on a higher one.
+
+The skill ships the anatomy of a gate that cannot lie — non-zero exit on any
+failure, the verdict block last with nothing after it, a scope header saying what it
+does **not** cover, ratchet floors as variables with the counts printed beside `OK`,
+skips printed rather than silent, and every count computed rather than restated —
+plus the probe recipe, because a green from a check nobody has watched fail is worth
+nothing, and **the probe is the thing to doubt first**.
+
+Hooks get their own file, and it leads with the limit: they exist only in Claude
+Code, and **any exit code other than 2 is non-blocking, so a crashing guard fails
+open** and stops guarding without announcing it. Elsewhere the run is `ungated` and
+must say so.
+
 ### The retrospective — the run teaches the next run, and the list stays short
 
 Every gate in this flow is good at *this* run and blind across runs. So the same
@@ -652,11 +703,14 @@ recommendation, so you arm the whole run in one exchange. Detail:
 | [`SKILL.md`](plugins/task-pipeline/skills/task-pipeline/SKILL.md) | the orchestrator: how to run, the stage table, the model decision |
 | [`references/stages.md`](plugins/task-pipeline/skills/task-pipeline/references/stages.md) | per-stage detail and the exact gate criteria |
 | [`references/artifacts.md`](plugins/task-pipeline/skills/task-pipeline/references/artifacts.md) | the canonical document layout each stage writes to |
-| [`references/conventions.md`](plugins/task-pipeline/skills/task-pipeline/references/conventions.md) | how stages 6–10 read the host project's `CLAUDE.md` |
+| [`references/conventions.md`](plugins/task-pipeline/skills/task-pipeline/references/conventions.md) | how stages 6–10 read the host project's `CLAUDE.md`, and how the documentation regime is detected |
+| [`references/documentation.md`](plugins/task-pipeline/skills/task-pipeline/references/documentation.md) | the doc system: the inventory, registers and ids, SSOT, the Doc Loop, supersede semantics, the propagation matrix, intent vs as-built |
+| [`references/gates.md`](plugins/task-pipeline/skills/task-pipeline/references/gates.md) | the two axes, the promotion ladder, gate anatomy, the probe recipe, ratchet floors, where a gate runs |
+| [`references/hooks.md`](plugins/task-pipeline/skills/task-pipeline/references/hooks.md) | the `PreToolUse` contract, the fail-open hazard, placement, and the Claude-Code-only limit |
 | [`references/knowledge-graph.md`](plugins/task-pipeline/skills/task-pipeline/references/knowledge-graph.md) | the code graph: install line, stage-0 reach queries, the stage-9 refresh, the graph↔docs divergence check |
 | [`references/retrospective.md`](plugins/task-pipeline/skills/task-pipeline/references/retrospective.md) | the project retro: the three grades of fix, the mandatory prune, the cap of ten |
 | [`references/model-tiering.md`](plugins/task-pipeline/skills/task-pipeline/references/model-tiering.md) | model policy, the `/model` reminder, overrides |
-| [`templates/`](plugins/task-pipeline/skills/task-pipeline/templates/README.md) | brief, carry-over ledger, `CONTEXT.md` and ADR skeletons |
+| [`templates/`](plugins/task-pipeline/skills/task-pipeline/templates/README.md) | brief, carry-over ledger, `CONTEXT.md` and ADR skeletons, the doc map, both registers, the retro and its archive, the seeded `docgate.sh`, a worked hook |
 | [`CHANGELOG.md`](CHANGELOG.md) | every release, with the reasoning behind it |
 | [`CONTRIBUTING.md`](CONTRIBUTING.md) | dev setup, the validator, the version-sync rule, release flow |
 
