@@ -18,15 +18,40 @@ increment. Create the directory **lazily** — only when the first ADR is needed
 That's it. An ADR can be a single paragraph. The value is recording *that* a
 decision was made and *why* — not filling out sections.
 
+## When this directory IS the register
+
+An ADR set and `docs/DECISIONS.md` are **two shapes of one decision home**, and a
+project has exactly one ([`../references/documentation.md`](../references/documentation.md)).
+If `docs/adr/` already holds an `NNNN-*.md`, that is the register — record it in
+`docs/DOCMAP.md` and never seed a second home beside it.
+
+In that role an ADR owes the same six things the register does, so these stop being
+optional and become the format:
+
+```md
+# {Short title of the decision}
+
+- **Status:** Accepted            <!-- or: Superseded by ADR-0012 · Reversed ·
+                                       Accepted · **Partially superseded by ADR-0012** — <clause> -->
+- **Consequences / affects:** `docs/SECURITY.md`, `docs/DATA_MODEL.md`
+- **Source:** run `2026-08-03-<topic>` · commit `<sha>`
+- **Supersedes:** ADR-0004        <!-- or Refines: / Contradicts: -->
+
+{1–3 sentences: what the context was, what was decided, and why.}
+```
+
+`Refines:` is additive and needs no annotation on the target; `Contradicts:` and
+`Supersedes:` both **oblige the target's status line to say so**. Never renumber,
+never delete — add a new ADR and edit only the old one's status line.
+
 ## Optional sections
 
 Only when they add genuine value; most ADRs need none.
 
-- **Status** frontmatter (`proposed | accepted | deprecated | superseded by
-  ADR-NNNN`) — useful once decisions start getting revisited.
 - **Considered options** — only when the rejected alternatives are worth
   remembering.
-- **Consequences** — only when non-obvious downstream effects need calling out.
+- **Consequences** (prose) — only when non-obvious downstream effects need calling
+  out beyond the `Consequences / affects:` file list.
 
 ## When to write one
 

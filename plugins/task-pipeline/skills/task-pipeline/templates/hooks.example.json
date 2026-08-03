@@ -1,0 +1,21 @@
+{
+  "_note": "EXAMPLE — copy this block into the project's .claude/settings.json. Doctrine: references/hooks.md. Hooks exist ONLY in Claude Code; on any other agent the same rule runs as a self-check and the run is recorded 'ungated'. Never describe a project as protected when its agents run elsewhere.",
+  "_contract": "A PreToolUse hook blocks in one of two ways: exit 2 with the reason on stderr (stdout is ignored), or exit 0 with {\"hookSpecificOutput\":{\"hookEventName\":\"PreToolUse\",\"permissionDecision\":\"deny\",\"permissionDecisionReason\":\"...\"}} on stdout. ANY OTHER EXIT CODE IS NON-BLOCKING, so a crashing guard fails open and stops guarding without announcing it. That is why the command below ends in '|| exit 2' — the gate's own 'exit 1' would otherwise land in the non-blocking branch and the commit would proceed.",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "_note": "Refuse a commit while the documentation gate is red. Matched narrowly: the matcher is free, the script is not.",
+        "matcher": "Bash",
+        "if": "Bash(git commit *)",
+        "hooks": [
+          {
+            "type": "command",
+            "shell": "bash",
+            "timeout": 60,
+            "command": "bash scripts/check-docs.sh >&2 || exit 2"
+          }
+        ]
+      }
+    ]
+  }
+}

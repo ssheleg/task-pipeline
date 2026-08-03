@@ -5,14 +5,16 @@ done. It exists because the pipeline's gates are good at *this* run and blind
 across runs: the same class of failure can be caught, fixed and forgotten five
 times, and nothing in the flow notices it is the same one.
 
-**Artifact:** `docs/superpowers/retro.md` — **one per project, not per run**,
-committed. It has three parts and a hard size limit:
+**Two artifacts, and the split is the point.** A file that is read *in full* every
+run may not contain anything that grows without limit — otherwise the cap that
+justifies reading it protects one section while the file below it doubles.
 
-| Part | What's in it | Read by |
+| Artifact | Parts | How it is read |
 |---|---|---|
-| **Standing instructions** | the rules currently in force — max **10** | stage 0, in full, every run |
-| **Log** | problem → cause → fix → check, newest first, plus every retirement | a human, and stage 0 when the terms match |
-| **Run stamps** | one line per run: date, topic, verdict | the prune (this is what makes "five runs" countable) |
+| `docs/superpowers/retro.md` — **one per project** | **Standing instructions** (max **10**) · **Recent log** (entries from the last five run stamps) · **Run stamps** | stage 0, **in full** — all three are bounded by construction |
+| `docs/superpowers/retro/YYYY-QN.md` — the archive | every entry and every retirement ever written, append-only | **queried** by the task's nouns; never read end to end |
+
+Seed the archive from [`../templates/retro-archive.md`](../templates/retro-archive.md).
 
 Every run writes a **stamp** and runs the **prune**. Only a run that *diverged*
 writes an entry. A retro that is empty after a messy run is the exact failure this
@@ -34,6 +36,38 @@ Required fields, and none of them is optional:
 | **Root cause** | why the pipeline permitted it. "The agent was careless" is not a cause — it is the absence of one, and it produces no fix |
 | **Fix** | one of the three grades below |
 | **The check** | what would have caught this the first time. If the honest answer is "nothing yet", that is the fix, and it is grade 1 |
+| **Commit** | the short SHA of the change that fixed it |
+
+## Every lesson carries its commit
+
+A standing instruction carries **two** SHAs — `Commit` (the change that introduced
+it) and `Fired at` (the last run in which it fired) — and every log entry and every
+retirement carries one.
+
+**Why a SHA and not a `file:line`.** A line number rots at the next edit, and then
+the evidence points at something that has moved or gone; the reader is left with a
+claim and no way to check it. A commit is immutable and carries the diff, the
+message and the parent, so `git show <sha>` reconstructs the entire incident two
+months later — which is exactly when the same class comes back and somebody needs
+to know whether this was already understood.
+
+**Every SHA must resolve.** This is [`learned.md`](learned.md) rule 14 — *a
+document may not send a reader to something absent* — applied to history, and it is
+mechanical: the project's documentation gate runs `git rev-parse --verify --quiet
+<sha>^{commit}` over every backticked SHA in the retro and its archive
+([`gates.md`](gates.md)).
+
+## Rotation — the archive is how pruning stops losing things
+
+At the prune, entries older than the last five run stamps **move** to
+`docs/superpowers/retro/YYYY-QN.md`. Moving is not deleting.
+
+- The archive is **append-only**, and a retirement writes its line **there**, with
+  the trigger that retired it and the commit.
+- A retired rule that comes back as a real failure is a grade-1 fix — **with its
+  history attached**, which is the whole return on having archived it.
+- Nothing is ever removed from the archive to keep it tidy. It is not read in full,
+  so its size costs nothing; its completeness is what it is for.
 
 ## Three grades of fix — take the highest one that can work
 
@@ -60,7 +94,9 @@ rule that could have been a check gets read twice and obeyed once.
 Prune first, then write. A lesson that lands in a cluttered file is a lesson nobody
 will reach.
 
-Check **every** standing instruction against three retirement triggers:
+Every row carries its own trigger in a **`Retire when`** column, written at birth —
+a rule whose retirement condition is decided later is a rule the prune can only
+argue about. Check **every** standing instruction against three triggers:
 
 | Trigger | Test | Then |
 |---|---|---|
@@ -73,10 +109,9 @@ them all — the oldest never-fired one goes. "But all of them matter" is precis
 the state in which the list stopped being read, and the ninth stale rule is what
 discredits the two that are load-bearing.
 
-**Every deletion writes one line in the Log** — id, date, which trigger fired.
-Silent deletion is forbidden: the record is what survives, the instruction is what
-leaves. A retired rule that comes back as a real failure is a grade-1 fix, and now
-you have its history.
+**Every deletion writes one line in the archive** — id, date, which trigger fired,
+and the commit. Silent deletion is forbidden: the record is what survives, the
+instruction is what leaves.
 
 **Print the counts beside the gate verdict**, the same way the carry-over ledger
 does ([`audit.md`](audit.md) → *ratchet, never TODO*):
@@ -93,9 +128,15 @@ A pruned list that nobody prints is a list that quietly grows back.
 The standing instructions are an **instruction source**, not background reading:
 [`knowledge-sources.md`](knowledge-sources.md) reads them in full at the harvest —
 they are short by construction — and records the file as a ledger row. Every
-instruction that actually *fires* during the run gets its **last-fired date
-stamped** as it fires. That stamp is the only thing that makes the cold-rule honest;
-without it "five runs without firing" is a guess, and the prune becomes a mood.
+instruction that actually *fires* during the run gets its **last-fired date and
+commit stamped** as it fires. That stamp is the only thing that makes the cold-rule
+honest; without it "five runs without firing" is a guess, and the prune becomes a
+mood.
+
+**The archive is queried at the same moment**, by the task's own nouns. It is the
+one source that answers *"have we been bitten by this class before?"* — and that
+question is worth asking precisely when the in-force list says nothing, because a
+rule that was retired for going cold is exactly the rule about to be re-learned.
 
 ## Where a lesson goes when it is not about this project
 

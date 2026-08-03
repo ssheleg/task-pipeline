@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Structural validator for the task-pipeline skill repo. Exit 0 = pass."""
-import json, os, re, sys
+import json, os, re, shutil, subprocess, sys, tempfile
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 NAME = "task-pipeline"
@@ -167,6 +167,11 @@ for r in (
     "brainstorm.md", "decomposition.md", "spec.md", "planning.md",
     "build.md", "review.md", "tdd.md", "acceptance.md", "loop-guard.md",
     "knowledge-sources.md", "audit.md",
+    # The documentation track (v1.7.0): docs are a deliverable with a gate, the
+    # gate is an artefact somebody has to write, and a hook is the only mechanism
+    # that can stop a bad edit before it lands. A stub here turns each of those
+    # back into "the agent will remember", which is the state the track ends.
+    "documentation.md", "gates.md", "hooks.md",
 ):
     rp = os.path.join(refdir, r)
     if not os.path.isfile(rp):
@@ -336,6 +341,146 @@ else:
         fail("templates/retro.md: missing the '## Run stamps' section — it is what "
              "makes the cold-retirement rule ('has not fired in five run stamps') "
              "countable instead of a guess")
+    # A lesson with no commit is a lesson nobody can reopen. `file:line` evidence
+    # rots at the next edit and then points at something that has moved; a SHA
+    # carries the diff, the message and the parent forever, so `git show <sha>`
+    # reconstructs the incident two months later when the class comes back.
+    for _col in ("Commit", "Fired at"):
+        if _col not in retro:
+            fail(f"templates/retro.md: the standing-instruction table must carry a "
+                 f"'{_col}' column — evidence that survives a rename is a commit, "
+                 "not a line number")
+    if not os.path.isfile(os.path.join(tpl_dir, "retro-archive.md")):
+        fail("missing template: templates/retro-archive.md — retro.md is capped and "
+             "read IN FULL every run, so its history needs a home that is queried "
+             "instead of read; without one the prune loses the incident")
+    # Same drift class as the autonomy sweep: retrospective.md is what the agent
+    # READS about the retro's shape, templates/retro.md is what it WRITES. A column
+    # in one and not the other is a field never asked for or never recorded.
+    _retro_doc = os.path.join(refdir, "retrospective.md")
+    if os.path.isfile(_retro_doc):
+        _rd = open(_retro_doc, encoding="utf-8").read()
+        for _col in ("Commit", "Fired at", "Retire when"):
+            if (_col in _rd) != (_col in retro):
+                fail(f"retro field {_col!r} appears in only one of "
+                     "references/retrospective.md and templates/retro.md — one is "
+                     "the doctrine, the other is the artifact, and they drift silently")
+
+    # ---- the documentation track (v1.7.0) -------------------------------------
+    # The doc map is the host project's own copy of the documentation contract:
+    # where decisions live, each fact's single home, what a change obliges, and
+    # what proves it. A seeded map missing the matrix seeds a project with a
+    # register and no obligation — which is the state the register exists to end.
+    docmap = os.path.join(tpl_dir, "docmap.md")
+    if not os.path.isfile(docmap):
+        fail("missing template: templates/docmap.md (the host project's doc map)")
+    else:
+        _dm = open(docmap, encoding="utf-8").read()
+        for _h in ("Regime", "Registers", "Single source of truth",
+                   "Propagation matrix", "Gates", "Ratchets", "Navigation"):
+            if not re.search(r"^##\s+" + re.escape(_h) + r"\b", _dm, re.M):
+                fail(f"templates/docmap.md: missing the '## {_h}' section — the doc "
+                     "map answers four questions and this is one of them")
+        if "Checked by" not in _dm:
+            fail("templates/docmap.md: the propagation matrix must carry a "
+                 "'Checked by' column — a row nothing enforces is a wish, and the "
+                 "column is where the word 'review' has to be written out loud")
+
+    # Two permitted shapes of ONE decision home. If they disagree on fields, a
+    # project that picks the other shape silently loses a rule.
+    _dec = os.path.join(tpl_dir, "decisions.md")
+    _adr = os.path.join(tpl_dir, "adr.md")
+    if not os.path.isfile(_dec):
+        fail("missing template: templates/decisions.md (the decision register)")
+    elif os.path.isfile(_adr):
+        _d = open(_dec, encoding="utf-8").read()
+        _a = open(_adr, encoding="utf-8").read()
+        for _field in ("Status", "Consequences / affects", "Source",
+                       "Refines", "Contradicts", "Supersedes"):
+            if (_field in _d) != (_field in _a):
+                fail(f"templates: {_field!r} is in only one of decisions.md and "
+                     "adr.md — the register and the ADR set are two spellings of one "
+                     "contract, so a field in one and not the other is a fork")
+    if not os.path.isfile(os.path.join(tpl_dir, "open-questions.md")):
+        fail("missing template: templates/open-questions.md")
+    if not os.path.isfile(os.path.join(tpl_dir, "hooks.example.json")):
+        fail("missing template: templates/hooks.example.json (references/hooks.md "
+             "points at it as the one worked example)")
+    else:
+        try:
+            json.load(open(os.path.join(tpl_dir, "hooks.example.json"), encoding="utf-8"))
+        except Exception as e:
+            fail(f"templates/hooks.example.json: invalid JSON ({e}) — it is copied "
+                 "verbatim into a settings file, so a broken one breaks the project")
+
+    # The seeded gate travels to macOS (bash 3.2) and to whatever CI the host runs.
+    # These three constructs fail SILENTLY rather than loudly: BSD `sed -i` needs an
+    # argument GNU refuses and `0,/re/` does not exist there at all.
+    gate = os.path.join(tpl_dir, "docgate.sh")
+    if not os.path.isfile(gate):
+        fail("missing template: templates/docgate.sh (the seeded documentation gate)")
+    else:
+        _g = open(gate, encoding="utf-8").read()
+        # Scan CODE, not comments. The gate's own header names these three
+        # constructs in order to forbid them; a detector that reads its own
+        # prohibition as a violation is the false-positive class of learned rule 10,
+        # and a gate that cries wolf is switched off by the third person who hits it.
+        _g_code = "\n".join(l for l in _g.splitlines() if not l.lstrip().startswith("#"))
+        for _bad, _why in ((r"grep\s+-[a-zA-Z]*P\b", "grep -P is not on macOS"),
+                           (r"\bsed\s+-i\b", "sed -i is not portable"),
+                           (r"\breadarray\b|\bmapfile\b", "readarray/mapfile is bash 4+")):
+            if re.search(_bad, _g_code):
+                fail(f"templates/docgate.sh: non-portable construct ({_why}) — the "
+                     "gate ships to macOS bash 3.2 and must behave identically there")
+        if "SCOPE:" not in _g:
+            fail("templates/docgate.sh: no 'SCOPE:' header — a gate quoted as "
+                 "evidence must state what it does NOT cover, or its green is read "
+                 "as proof of a surface nobody walked")
+        _after_verdict = _g.split("VERDICT")[-1]
+        if "exit 0" not in _after_verdict or "exit 1" not in _after_verdict:
+            fail("templates/docgate.sh: the VERDICT block must be last and must "
+                 "exit — a gate has shipped that appended a check after its verdict, "
+                 "printed FAIL and returned 0, with CI green over it")
+
+    # A generator seeds green (references/learned.md rule 9). A scaffold whose own
+    # gate rejects its own templates teaches every new project that the gate is
+    # noise. This is the one guard in this repo that EXECUTES what it checks.
+    if os.path.isfile(gate) and shutil.which("bash"):
+        _seed = tempfile.mkdtemp(prefix="tp-seed-")
+        try:
+            os.makedirs(os.path.join(_seed, "docs/superpowers"))
+            os.makedirs(os.path.join(_seed, "scripts"))
+            for _src, _dst in (("docmap.md", "docs/DOCMAP.md"),
+                               ("decisions.md", "docs/DECISIONS.md"),
+                               ("open-questions.md", "docs/OPEN_QUESTIONS.md"),
+                               ("retro.md", "docs/superpowers/retro.md"),
+                               ("docgate.sh", "scripts/check-docs.sh")):
+                _p = os.path.join(tpl_dir, _src)
+                if os.path.isfile(_p):
+                    with open(os.path.join(_seed, _dst), "w", encoding="utf-8") as _fh:
+                        _fh.write(open(_p, encoding="utf-8").read())
+            _r = subprocess.run(["bash", "scripts/check-docs.sh"], cwd=_seed,
+                                capture_output=True, text=True)
+            if _r.returncode != 0:
+                fail("templates/docgate.sh seeds RED on a freshly seeded project "
+                     f"(exit {_r.returncode}) — a project that starts red learns on "
+                     "day one that the gate is noise. Output: "
+                     + (_r.stdout + _r.stderr).strip()[-500:])
+        finally:
+            shutil.rmtree(_seed, ignore_errors=True)
+
+    # A template that ships and is not listed is a template nobody knows to seed.
+    _tpl_readme = os.path.join(tpl_dir, "README.md")
+    if not os.path.isfile(_tpl_readme):
+        fail("missing templates/README.md")
+    else:
+        _tr = open(_tpl_readme, encoding="utf-8").read()
+        for _t in sorted(os.listdir(tpl_dir)):
+            if _t == "README.md" or _t.startswith("."):
+                continue
+            if _t not in _tr:
+                fail(f"templates/README.md does not list {_t!r} — an unlisted "
+                     "template is one nobody knows to seed")
 
     # The autonomy sweep lives twice: grill.md's table is what the agent READS while
     # interviewing, brief.md's is what it WRITES. They drift silently — a row added
@@ -704,6 +849,27 @@ if isinstance(_pipe_stages, list) and _pipe_stages and isinstance(_pipe_stages[-
                 fail(f"{_rel}: SKILL.md describes {_what} as part of the stage-10 close-out, "
                      f"but this surface never mentions {_anchor!r} — a gate that is only "
                      "declared where it is not enforced is inert")
+
+    # Same inert-gate class, for the documentation track: SKILL.md promises the
+    # stage-0 inventory and the stage-9 propagation sweep, so the surfaces that
+    # actually ENFORCE those stages must name them too. A track declared only where
+    # it is not enforced is a track no run performs.
+    _doc_ref = os.path.join(refdir, "documentation.md")
+    _doc_txt = open(_doc_ref, encoding="utf-8").read() if os.path.isfile(_doc_ref) else ""
+    for _anchor, _what in (
+        ("propagation", "the stage-9 propagation sweep"),
+        ("docmap", "the stage-0 documentation inventory"),
+    ):
+        if _anchor not in _sk_low:
+            continue
+        for _rel, _txt in (
+            (f"{SKILL_DIR}/references/documentation.md", _doc_txt),
+            (f"{SKILL_DIR}/references/stages.md", _st_txt),
+            (EXAMPLE_REL, json.dumps(_pipe_stages or [], ensure_ascii=False)),
+        ):
+            if _anchor not in _txt.lower():
+                fail(f"{_rel}: SKILL.md describes {_what}, but this surface never "
+                     f"mentions {_anchor!r} — declared where it is not enforced is inert")
 
     # Each stage's doctrine file states its own GATE type. If it disagrees with the
     # config, an agent reading the doctrine gates differently than the flow says.
