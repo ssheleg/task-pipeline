@@ -676,7 +676,7 @@ npm test        # python3 test/validate.py — the structural validator
 
 Built by ssheleg — [sshlg.me](https://sshlg.me)
 
-- X / Twitter — [@fuck_this_year](https://x.com/fuck_this_year)
+- X / Twitter — [@sshlg93](https://x.com/sshlg93)
 - Telegram — [@sshlg](https://t.me/sshlg)
 
 Part of the [ssheleg skill family](https://github.com/ssheleg/sshlg-skills):

@@ -22,7 +22,10 @@
   "homepage": "https://github.com/ssheleg/task-pipeline#readme",
   "bugs": "https://github.com/ssheleg/task-pipeline/issues",
   "license": "MIT",
-  "author": "ssheleg",
+  "author": {
+    "name": "ssheleg",
+    "url": "https://x.com/sshlg93"
+  },
   "engines": {
     "node": ">=16"
   },
