@@ -58,7 +58,7 @@ Every gate is **typed**: `auto` — the orchestrator verifies it itself, pass/fa
 
 | # | Stage | Gate | Type |
 |---|---|---|---|
-| 0 | Harvest + intake grill — **mandatory** | source ledger written; shared understanding + autonomy sweep; brief locked | manual |
+| 0 | Harvest + intake grill — **mandatory** | source ledger written; the documentation inventory answered into `docs/DOCMAP.md`; intent reconciled against as-built; shared understanding + autonomy sweep; brief locked | manual |
 | 1 | Docs study | contracts grounded on current docs | auto |
 | 2 | Brainstorm + decompose | design approved; UI verdict recorded; every REQ answered; platform: module map approved | manual |
 | 3 | Spec | committed + reviewed; UI: super-ux chain validated, linter green | manual |
@@ -67,8 +67,8 @@ Every gate is **typed**: `auto` — the orchestrator verifies it itself, pass/fa
 | 6 | Tests | full suite green, new code covered | auto |
 | 7 | Lint + deploy | lint clean + suite green before deploy | manual |
 | 8 | Post-deploy | clean boot / honest degradation | auto |
-| 9 | Docs + wiki | every stale source-ledger row updated; docs + wiki synced; the code graph refreshed and checked against the docs | auto |
-| 10 | **Acceptance** | every REQ accounted for with evidence; operator signs off; the retro written — pruned before anything was added | manual |
+| 9 | Docs + wiki | the propagation matrix walked and the documentation gate green with its ratchets printed; every stale source-ledger row updated; docs + wiki synced; the code graph refreshed and checked against the docs | auto |
+| 10 | **Acceptance** | every REQ accounted for with evidence; every check leaned on seen failing once; operator signs off; the retro written — pruned before anything was added, every lesson carrying its commit | manual |
 
 ## What you get
 
@@ -108,8 +108,11 @@ stage and walks the gates. See [Install](#install) for the other channels.
 ### Everything is built in — zero required dependencies
 
 The doctrine each stage runs on ships inside the skill. Nothing to install for it,
-nothing to resolve at preflight, no version skew with someone else's repo, and no
-stage that can fail because a plugin is missing:
+nothing to resolve at preflight, no version skew with someone else's repo, and
+**no stage blocks on an install** — stage 1 falls back to web search, the wiki and
+the code graph are recommendations. The one exception is deliberate and named: on a
+user-facing task the stage-3 UX track requires super-ux, and the spec gate stops
+until it is installed.
 
 | Stage | Built-in doctrine |
 |---|---|
@@ -124,6 +127,9 @@ stage that can fail because a plugin is missing:
 | 10 Acceptance | [`acceptance.md`](plugins/task-pipeline/skills/task-pipeline/references/acceptance.md) — REQ coverage table, evidence rules, the closing question |
 | 10 + any audit | [`audit.md`](plugins/task-pipeline/skills/task-pipeline/references/audit.md) — the L0→L7 ladder and its seams, axis rotation, ratchets, proven checks |
 | any loop | [`loop-guard.md`](plugins/task-pipeline/skills/task-pipeline/references/loop-guard.md) — churn detection, caps, the break protocol |
+| 0 + 9 + any settled decision | [`documentation.md`](plugins/task-pipeline/skills/task-pipeline/references/documentation.md) — the inventory, registers and ids, SSOT, the Doc Loop, supersede semantics, the propagation matrix, intent vs as-built |
+| 6–10 + any check you write | [`gates.md`](plugins/task-pipeline/skills/task-pipeline/references/gates.md) — the two axes, the promotion ladder, gate anatomy, the probe recipe, ratchet floors |
+| any agent-time enforcement | [`hooks.md`](plugins/task-pipeline/skills/task-pipeline/references/hooks.md) — the `PreToolUse` contract, the fail-open hazard, the Claude-Code-only limit |
 
 **Ported, not depended on.** Stage 0 is adapted from
 [Matt Pocock's `grilling` / `grill-with-docs`](https://github.com/mattpocock/skills)
