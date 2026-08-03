@@ -1,5 +1,33 @@
 # Changelog
 
+## v1.7.1 — 2026-08-03
+
+### Fixed — the tag-ancestry gate had been failing on every release since v1.6.1
+
+The step that exists so *"a release does not live only on a tag"* — added after the
+v1.4.4 incident — **failed on every tag from v1.6.1 onward**, and nobody saw it,
+because `release` ran green beside it and the failing log showed only the echoed
+script with no output of its own.
+
+`git fetch --tags` without `--force` aborts with *"would clobber existing tag"* when
+the checkout has already created `refs/tags/<tag>` locally and the tag is
+**annotated**. `set -eu` then killed the step before its first `echo` — which is why
+the log was blank and read as though the ancestry check itself had found something.
+v1.6.1 was the first tag cut with `git tag -a`; every one since inherited it.
+
+Two changes, and the second matters more than the first:
+
+- `--force` on the tag fetch, with a printed note if it still degrades.
+- **The step now says which failure it is.** If `refs/remotes/origin/main` cannot be
+  resolved, every tag looks like an orphan and the old wording reported a
+  catastrophe that was really a missing ref. It now fails with that sentence
+  instead, and on success prints the tag count and the `main` it checked against.
+
+This is the shape the repo's own doctrine names: a gate whose exit code nobody reads
+is a gate that has stopped guarding — `references/gates.md` → *A gate's exit code is
+part of its output*, and `references/learned.md` rule 11. It was found by watching
+the release this release shipped, which is the only reason it was found at all.
+
 ## v1.7.0 — 2026-08-03
 
 ### Added — documentation is a deliverable, and it has a gate

@@ -23,8 +23,23 @@ jobs:
       - name: Every v* tag must be contained in main
         run: |
           set -eu
-          git fetch --tags --quiet
+          # --force, and it is not defensive noise. On a TAG build, checkout has
+          # already created refs/tags/<tag> locally; re-fetching an ANNOTATED tag
+          # then aborts with "would clobber existing tag" and git exits 1 — before
+          # this step prints a single line, so `set -e` kills it with no output and
+          # the log shows only the echoed script. That is exactly how it read.
+          # It failed on every tag from v1.6.1 (the first one cut with `git tag -a`)
+          # while `release` went out green beside it, so nobody saw a thing.
+          git fetch --tags --force --quiet || echo "note: tag fetch degraded, continuing"
           git fetch --quiet origin main:refs/remotes/origin/main || true
+          # If origin/main cannot be resolved, EVERY tag looks like an orphan and the
+          # step reports a catastrophe that is really a missing ref. Say which it is.
+          if ! git rev-parse --verify --quiet refs/remotes/origin/main >/dev/null; then
+            echo "ERROR: refs/remotes/origin/main could not be fetched — the ancestry"
+            echo "check cannot run, and reporting every tag as an orphan would be a lie."
+            exit 1
+          fi
+          echo "checking $(git tag --list 'v*' | wc -l | tr -d ' ') tag(s) against $(git rev-parse --short refs/remotes/origin/main)"
           orphans=""
           for t in $(git tag --list 'v*'); do
             if ! git merge-base --is-ancestor "$t" origin/main 2>/dev/null; then
