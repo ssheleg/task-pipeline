@@ -1,5 +1,35 @@
 # Changelog
 
+## v1.10.1 — 2026-08-03
+
+### Fixed — four surfaces that never heard about the last two releases
+
+A fourth audit pass, on a fourth axis: **the claims of the last three releases,
+checked against the tree.** All four findings are the same shape — a file shipped and
+the surfaces that tell a reader it exists were never walked. Reachability from
+`SKILL.md` was green throughout, because that check proves an agent can *find* a file,
+not that anybody was *told* about it.
+
+- **The Cursor rule was two releases behind** — and it is the surface that travels,
+  copied into foreign projects and required to be self-contained. It knew the
+  documentation track and nothing about adoption, the entry audit, portability, the
+  routing boundary or the opt-out phrase: an agent reading it in another repository
+  had no idea when the pipeline applies. Measured `0` for each. Now current.
+- **The README's documentation map** listed `adoption.md` and named neither
+  `setup.md` nor `portability.md` — and had never named `learned.md` at all.
+- **The portability manifest covered 14 of 26 references.** It claims *every workflow
+  decision*, and the twelve stage doctrines — spec, build, planning, review,
+  acceptance, brainstorm, decomposition, tdd, conventions, companion-skills,
+  knowledge-graph, model-tiering — had no row. The guard could not see it: it checked
+  that every listed path resolves, which is the direction that cannot find an absence.
+- **Two seeded templates over 100 lines had no `## Contents`** — the doc map (eight
+  sections) and the brief (nine). The rule was scoped to `references/` while the files
+  a host project actually reads were outside it.
+
+**Two new guards, and they are the point.** Every reference must appear in the README
+map *and* in the manifest; every seeded template over 100 lines carries its own
+Contents. Both check the direction that finds absences, and both were watched failing.
+
 ## v1.10.0 — 2026-08-03
 
 ### Added — the entry audit, and a boundary that keeps the workflow portable

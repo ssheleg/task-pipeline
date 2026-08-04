@@ -56,6 +56,18 @@ a row pointing outside the bundle is the defect this file exists to catch.
 | **The routing default and its boundary** | `templates/routing-rule.md` |
 | The seeded doc map, registers and gate | `templates/docmap.md`, `templates/decisions.md`, `templates/open-questions.md`, `templates/docgate.sh` |
 | What a stage reads, and which host files bind it | `references/artifacts.md` |
+| The design conversation, its hard gate, UI detection, user paths | `references/brainstorm.md` |
+| Cutting a platform into modules, brick criteria, build order | `references/decomposition.md` |
+| What a spec must lock, the UX-track order, the module dossier | `references/spec.md` |
+| The zero-context plan format, parallel groups, set equality | `references/planning.md` |
+| Workspace isolation, the subagent loop, who may write the register | `references/build.md` |
+| The review rubric, diff packages, the three verdicts | `references/review.md` |
+| The TDD iron law and the suite gate | `references/tdd.md` |
+| The REQ coverage table, evidence rules, the closing question | `references/acceptance.md` |
+| How the host project's own conventions are read | `references/conventions.md` |
+| Which companions exist, what is required, self-currency | `references/companion-skills.md` |
+| The code graph: queries, refresh, the graph↔docs divergence | `references/knowledge-graph.md` |
+| Model policy — tier not id, ask once at preflight | `references/model-tiering.md` |
 | This boundary | `references/portability.md` |
 
 **The routing rule is the row worth watching.** A skill's `description` raises the

@@ -9,6 +9,18 @@
 - **UI verdict:** yes / no — does this touch a user-facing surface (web/mobile/CLI/TUI)?
   If yes, the stage-3 super-ux UX track is armed.
 
+## Contents
+
+- Knowledge sources (the phase-1 harvest — written BEFORE the first question)
+- Documentation (the phase-1b inventory — the four questions)
+- Scope
+- Requirements (the REQ spine — every later stage traces to these IDs)
+- Users & context
+- Decisions locked (the grill's output)
+- Autonomy (the sweep — stages 1→10 read this instead of asking)
+- Done-criteria
+- Open assumptions / risks
+
 ## Knowledge sources (the phase-1 harvest — written BEFORE the first question)
 
 What the project already knew about this task, and where it said so. One row per

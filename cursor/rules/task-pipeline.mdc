@@ -423,3 +423,45 @@ JTBD, customer journey maps, user stories) → flows + screens → scenarios (th
 source of truth) → run its linter. Otherwise still design that chain, get it
 approved, and trace every user-facing requirement to a scenario before building.
 Install (Cursor/Claude/others): `npx skills add ssheleg/super-ux`.
+
+## Routing — when this applies at all
+
+**Work that CHANGES THE REPOSITORY goes through the pipeline** — a feature, fix,
+refactor, migration, integration, rewrite, adoption or hardening pass, in any
+phrasing. **Not** for a question, an explanation, reading code, a typo or a one-line
+edit. The operator opts out of a qualifying task by saying "без пайплайна" or
+"quick"; when they do, say out loud that the cycle was skipped at their request.
+
+A borderline case is named, not silently chosen: state which route you are taking and
+why, in one line.
+
+**Escalation while running.** Decide alone while the cost of being wrong stays inside
+the repository and is reversible. Escalate a price, a legal posture, a promise to
+somebody outside the team, anything spending money or reputation, and any irreversible
+outward act. The tell is the cost of being wrong, not the size of the change.
+
+## The first run in a project
+
+Two entry conditions, and they are different problems.
+
+**A new project:** stage 0 seeds the doc map, the registers and the documentation
+gate before the first interview question. The gate is green on day one because
+sections with nothing to check yet print `dormant`.
+
+**An existing project:** offer the **entry audit** once — seven passes over the
+documentation that already exists, *before* building on it: one decision home,
+register integrity, propagation, the matrix's checked-by column, declared terms, the
+UX chain, and the gate itself proven against a planted defect. Findings carry
+`file:line`, the minimal fix and the **seam**, ordered by seam rather than by file.
+It ends in a fix plan and **fixes nothing while reading**.
+
+The step that decides whether adoption survives is **baselining the ratchets at
+today**: the propagation floor to the next free id, the residue floor to the measured
+count. A gate that is red on adoption day is switched off on day two. History is
+**not** back-filled — an old decision enters the register the day somebody is about to
+contradict it.
+
+**Portability.** A decision about how the pipeline behaves belongs in the skill; a
+decision about what this project decided belongs in the project. The test for a rule
+you are about to write down: does it name a path, a command or a person? If not, it is
+the pipeline's, and leaving it in one repository is a fork nobody named.

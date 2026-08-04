@@ -355,6 +355,25 @@ if os.path.isfile(_art):
             fail(f"references/artifacts.md: no {_what} — the stage/artifact relation "
                  "must be mapped in BOTH directions, or one of them is assumed")
 
+# A new reference has to REACH the surfaces a human and a foreign agent read. Three
+# instances in two releases: adoption.md, setup.md and portability.md landed and the
+# README's map and the portability manifest never heard of two of them. Reachability
+# from SKILL.md was green throughout — that check proves an agent can find the file,
+# not that anybody was told it exists. Absence has one side, so it needs its own check.
+_readme_p = os.path.join(ROOT, "README.md")
+_port_p = os.path.join(refdir, "portability.md")
+if os.path.isfile(_readme_p) and os.path.isfile(_port_p):
+    _rd_txt = open(_readme_p, encoding="utf-8").read()
+    _pt_txt = open(_port_p, encoding="utf-8").read()
+    for _ref in sorted(f for f in os.listdir(refdir) if f.endswith(".md")):
+        if _ref not in _pt_txt:
+            fail("references/%s is not in references/portability.md's manifest — a "
+                 "workflow decision with no manifest row is one nobody can check "
+                 "travels with the bundle" % _ref)
+        if _ref not in _rd_txt:
+            fail("references/%s is named nowhere in README.md — it ships and no "
+                 "reader is told it exists" % _ref)
+
 # The portability manifest is the outward half of the check in
 # references/portability.md: every WORKFLOW decision must have a home inside the
 # bundle. A row naming a path that does not resolve here is a decision that was made
@@ -588,6 +607,19 @@ elif [t for t in ("brief.md", "carryover.md", "context.md", "adr.md", "retro.md"
         if not os.path.isfile(os.path.join(tpl_dir, t)):
             fail(f"missing template: plugins/task-pipeline/skills/task-pipeline/templates/{t}")
 else:
+    # The Contents rule was scoped to references/ and the seeded doc map grew past 100
+    # lines with eight sections and no list at all — a host project reads that file, and a
+    # partial read of it shows whichever sections happen to come first.
+    for _tf in sorted(os.listdir(tpl_dir)):
+        if not _tf.endswith(".md"):
+            continue
+        _tp = os.path.join(tpl_dir, _tf)
+        _tt = open(_tp, encoding="utf-8").read()
+        if _tt.count("\n") > 100 and not re.search(r"^## Contents\b", _tt, re.M):
+            fail("templates/%s: %d lines and no '## Contents' — a seeded file a host "
+                 "project reads needs the same partial-read protection references get"
+                 % (_tf, _tt.count("\n")))
+
     # The brief carries the stage-0 autonomy sweep — stages 1-10 read it instead of
     # asking. Without that section the grill has no place to record the answers and
     # the autonomy promise silently degrades into mid-flight questions.

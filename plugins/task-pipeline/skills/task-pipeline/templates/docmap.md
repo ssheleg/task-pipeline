@@ -10,6 +10,17 @@ elsewhere — where another file already says it, this one holds a **pointer lin
 not a copy. A doc map that duplicates `AGENTS.md` is the first violation of the
 rule it publishes.
 
+## Contents
+
+- Regime
+- Registers
+- Single source of truth
+- Propagation matrix
+- Gates
+- Ratchets
+- Terms
+- Navigation
+
 ## Regime
 
 `governed` — established <YYYY-MM-DD> by run `<topic>`, recorded as `DEC-0001`.
