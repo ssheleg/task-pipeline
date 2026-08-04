@@ -131,6 +131,13 @@ never that the work was skipped quietly.
   calls) and the **autonomy sweep** that pre-resolves every stage-1→10 blocker.
   Deploy authorization has a hard floor there: a standing go counts only when it
   names the target and the preconditions.
+- **The run mode is settled here too** ([`continuity.md`](continuity.md)): does
+  the run advance item-by-item with no check-in between items, and on what
+  interval? Read `pipeline.json` → `run.loop` first — a recorded mode is the
+  answer and is not re-asked; **absent, it is off**. It buys pacing, never
+  authorization: no loop mode collapses a `manual` gate or an outward act. The
+  same file carries the other half of pacing — the context budget, which fires
+  only on a harness signal or the operator's word, never on an estimate.
 - **UI early-detect:** one branch of the grill is always "does this touch a
   user-facing surface (web/mobile/CLI/TUI)?". If yes → surface **super-ux**
   now (use it if installed; otherwise give the install line — see SKILL.md

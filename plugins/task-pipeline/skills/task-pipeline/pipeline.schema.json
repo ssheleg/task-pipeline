@@ -14,9 +14,38 @@
       "description": "The pipeline stages, in order. Any number, any names — your project's real stages.",
       "items": { "$ref": "#/definitions/stage" }
     },
-    "release": { "$ref": "#/definitions/release" }
+    "release": { "$ref": "#/definitions/release" },
+    "run": { "$ref": "#/definitions/run" }
   },
   "definitions": {
+    "run": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Optional run-wide pacing. Omit the object and every field defaults OFF: silence arms nothing and authorises nothing — the same floor deploy authorization uses. There is deliberately NO context-budget field: the remaining context is not measurable from inside a run, so a field accepting a percentage would validate a number that can never be honoured. That rule is unconditional doctrine in references/continuity.md instead.",
+      "properties": {
+        "loop": {
+          "type": "object",
+          "required": ["mode"],
+          "additionalProperties": true,
+          "description": "Whether the run advances item by item without a discretionary check-in. It NEVER collapses a manual gate or an outward action — a generic flag is not a specific authorization.",
+          "properties": {
+            "mode": {
+              "enum": ["off", "interval"],
+              "description": "off (the default when absent) = the run pauses between items as it always did. interval = the run is armed with the harness's own loop primitive and advances one item per fire, stopping only at a manual gate, an unresolvable block, a genuine ambiguity, or completion."
+            },
+            "interval": {
+              "type": "string",
+              "pattern": "^[0-9]+[smhd]$",
+              "description": "Required when mode is 'interval'. Must divide its unit cleanly (5m, 10m, 2h — not 7m or 90m); a value that does not is rounded to the nearest that does, and the rounding is stated out loud. Pick the shortest interval that is longer than a typical item."
+            },
+            "command": {
+              "type": "string",
+              "description": "How this harness arms it, e.g. '/loop'. Harness-specific and therefore project-recorded rather than assumed: on a harness with no loop primitive, omit it — the mode then degrades to prose discipline plus the build ledger, and the run says so instead of implying it is armed."
+            }
+          }
+        }
+      }
+    },
     "release": {
       "type": "object",
       "additionalProperties": true,

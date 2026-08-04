@@ -1137,6 +1137,96 @@ jobs:
             echo "OK: the seeded matrix must carry the meta-row"
           fi
 
+      - name: Negative self-test (the example must set run.loop.mode explicitly)
+        run: |
+          set -eu
+          rm -rf /tmp/runmode-copy && cp -R . /tmp/runmode-copy
+          python3 - <<'EOF'
+          p = "/tmp/runmode-copy/plugins/task-pipeline/skills/task-pipeline/pipeline.example.json"
+          t = open(p, encoding="utf-8").read()
+          block = '  "run": {\n    "loop": { "mode": "off", "interval": "5m", "command": "/loop" }\n  },\n'
+          assert block in t, "PLANT MISSED"
+          open(p, "w", encoding="utf-8").write(t.replace(block, "", 1))
+          EOF
+          if python3 /tmp/runmode-copy/test/validate.py; then
+            echo "ERROR: validator passed an example with no run.loop.mode — the example is what gets copied, so an absent field reads as an oversight rather than a decision"
+            exit 1
+          else
+            echo "OK: the example must demonstrate the default, not omit it"
+          fi
+
+      - name: Negative self-test (a run-wide rule every stage must name)
+        run: |
+          set -eu
+          rm -rf /tmp/reach-copy && cp -R . /tmp/reach-copy
+          python3 - <<'EOF'
+          p = "/tmp/reach-copy/plugins/task-pipeline/skills/task-pipeline/references/build.md"
+          t = open(p, encoding="utf-8").read()
+          assert "[`continuity.md`](continuity.md)" in t, "PLANT MISSED"
+          open(p, "w", encoding="utf-8").write(
+              t.replace("[`continuity.md`](continuity.md)", "`elsewhere`"))
+          EOF
+          if python3 /tmp/reach-copy/test/validate.py; then
+            echo "ERROR: validator passed a stage doctrine that never names continuity.md — the continuous-execution rule sat inside build.md for nine releases and did not work for exactly this reason"
+            exit 1
+          else
+            echo "OK: every stage that could be misled by the run mode names it"
+          fi
+
+      - name: Negative self-test (the context-evidence clause may not be softened)
+        run: |
+          set -eu
+          rm -rf /tmp/clause1-copy && cp -R . /tmp/clause1-copy
+          python3 - <<'EOF'
+          p = "/tmp/clause1-copy/plugins/task-pipeline/skills/task-pipeline/references/continuity.md"
+          t = open(p, encoding="utf-8").read()
+          c = "**never announce that\nthe context is nearly spent without one of those signals**"
+          assert c in t, "PLANT MISSED"
+          open(p, "w", encoding="utf-8").write(t.replace(c, "**stay quiet**"))
+          EOF
+          if python3 /tmp/clause1-copy/test/validate.py; then
+            echo "ERROR: validator passed continuity.md with the evidence clause removed — without it the rule degrades to a suggestion and the guess comes back"
+            exit 1
+          else
+            echo "OK: the evidence clause is contractual"
+          fi
+
+      - name: Negative self-test (the harness-limit clause may not be softened)
+        run: |
+          set -eu
+          rm -rf /tmp/clause2-copy && cp -R . /tmp/clause2-copy
+          python3 - <<'EOF'
+          p = "/tmp/clause2-copy/plugins/task-pipeline/skills/task-pipeline/references/continuity.md"
+          t = open(p, encoding="utf-8").read()
+          assert "Claude Code only" in t, "PLANT MISSED"
+          open(p, "w", encoding="utf-8").write(t.replace("Claude Code only", "available everywhere"))
+          EOF
+          if python3 /tmp/clause2-copy/test/validate.py; then
+            echo "ERROR: validator passed continuity.md claiming the loop primitive is universal — a run that reports itself as looping while nothing is scheduled claims a capability it does not have"
+            exit 1
+          else
+            echo "OK: the harness limit is stated, not implied"
+          fi
+
+      - name: Negative self-test (a seeded template may not carry a relative link)
+        run: |
+          set -eu
+          rm -rf /tmp/tpl-copy && cp -R . /tmp/tpl-copy
+          python3 - <<'EOF'
+          p = "/tmp/tpl-copy/plugins/task-pipeline/skills/task-pipeline/templates/brief.md"
+          t = open(p, encoding="utf-8").read()
+          assert "# Task brief" in t, "PLANT MISSED"
+          open(p, "w", encoding="utf-8").write(
+              t.replace("# Task brief",
+                        "See [`audit.md`](../references/audit.md).\n\n# Task brief", 1))
+          EOF
+          if python3 /tmp/tpl-copy/test/validate.py; then
+            echo "ERROR: validator passed a template carrying a relative link — it resolves from templates/ and from nowhere the file is ever actually read"
+            exit 1
+          else
+            echo "OK: a seeded template is self-contained"
+          fi
+
       - name: install.sh syntax check
         run: bash -n install.sh
 

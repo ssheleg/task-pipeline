@@ -20,8 +20,8 @@ over all of them.
 
 | id | Born | Commit | Instruction | Because | Retire when | Last fired | Fired at |
 |---|---|---|---|---|---|---|---|
-| R-001 | 2026-08-03 · `documentation-track` | `dbe4f43` | When a check stays silent against a planted defect, **prove the plant landed in the text the check actually parses before touching the check.** | Two silent probes in one run: one was a bad probe (§9 correctly skips outside a git tree), one was a real bug (`$((0009))` is octal). The split is 50/50 here and was 4-of-5 probe-fault on the source project — guessing wrong costs a real bug or a false fix. | a probe harness exists that asserts the plant changed the parsed text, making this mechanical | 2026-08-03 | `096f0f0` |
-| R-002 | 2026-08-03 · `doc-track-audit` | `096f0f0` | When a batch of edits returns **any** error, re-verify **every** edit in that batch before reporting the batch done — not only the one that errored. | Two edits were issued together; the second failed the read-before-write check and was retried, the first was silently never applied. It was reported as done, shipped in v1.7.0, and surfaced only in a post-release audit as a question the grill never asks with a field in the brief waiting for the answer. | the harness reports per-edit outcomes in a form a check can read, or the edits are issued one per message | 2026-08-03 | `096f0f0` |
+| R-001 | 2026-08-03 · `documentation-track` | `dbe4f43` | When a check stays silent against a planted defect, **prove the plant landed in the text the check actually parses before touching the check.** | Two silent probes in one run: one was a bad probe (§9 correctly skips outside a git tree), one was a real bug (`$((0009))` is octal). The split is 50/50 here and was 4-of-5 probe-fault on the source project — guessing wrong costs a real bug or a false fix. | a probe harness exists that asserts the plant changed the parsed text, making this mechanical | 2026-08-04 | `7155c98` |
+| R-002 | 2026-08-03 · `doc-track-audit` | `096f0f0` | When a batch of edits returns **any** error, re-verify **every** edit in that batch before reporting the batch done — not only the one that errored. | Two edits were issued together; the second failed the read-before-write check and was retried, the first was silently never applied. It was reported as done, shipped in v1.7.0, and surfaced only in a post-release audit as a question the grill never asks with a field in the brief waiting for the answer. | the harness reports per-edit outcomes in a form a check can read, or the edits are issued one per message | 2026-08-04 | `7155c98` |
 
 Retire on **any** of: it became a check · every path/command it names is gone · it
 has not fired in the last five run stamps. At eleven rows, the oldest never-fired
@@ -32,6 +32,73 @@ row goes — the cap is not negotiable, ranking is.
 Older entries and every retirement **move** to `docs/superpowers/retro/YYYY-QN.md`
 at the prune. Moving is not deleting: the archive is append-only and holds the
 incident forever, so pruning the in-force list costs no knowledge.
+
+### 2026-08-04 · `run-continuity` · a checker that resolves from the file's home
+
+- **Symptom:** seeding `templates/carryover.md` to the path its own doctrine names
+  (`docs/superpowers/specs/`) turned `npm test` red on the first try:
+  `broken relative link … ../references/audit.md`. Present since `2a6ff89` (v1.1.0),
+  nine minor releases. Two prior runs wrote a carry-over ledger and neither hit it,
+  because neither copied the template verbatim.
+- **Surfaced at:** stage 1, by following the instruction · **Owned by:** the release
+  that put a relative link in a file whose whole purpose is to be copied elsewhere.
+- **Root cause:** the link checker resolves every link **from the file's home**, and
+  a template's home is the one place it is never read. Green from a check looking in
+  the wrong direction — the `surface-audit` shape, one axis over.
+- **Fix:** grade 1 — a seeded template carries **no** relative links at all and
+  names files in code spans instead.
+- **The check:** the seeded-template guard, watched failing on a planted link.
+- **Commit:** `17b35de`
+- **Upstream?** n/a — this repo is the skill; the rule ships in the bundle, and it
+  is the same requirement the Cursor rule has always had.
+
+### 2026-08-04 · `run-continuity` · the spec locked a contract that cannot exist
+
+- **Symptom:** stage 5 started building the guard stage 3 had specified and the
+  first measurement showed it could never go green. The spec required a template's
+  relative links to resolve **from the destination**; the same file also sits in
+  `templates/`, where the existing checker resolves them **from there**. One link,
+  two required bases, no satisfying value.
+- **Surfaced at:** stage 5, before the guard shipped · **Owned by:** stage 3.
+- **Root cause:** the contract was written from the *defect's* shape rather than
+  from the constraint system the defect lives in. The finding said "this breaks at
+  the destination", so the spec said "make it work at the destination", and nobody
+  asked what else resolves that link today.
+- **Fix:** grade 3 — a note. `gates.md` already demands a detector be measured
+  before it ships, and that demand is exactly what caught this. The spec was amended
+  in place and the amendment says why, rather than being quietly rewritten.
+- **The check:** none added; the mechanism worked. Recorded so the seam is visible.
+- **Commit:** `17b35de`
+- **Upstream?** No — `learned.md` rule 6 (sweep the class, not the instance) covers
+  it. A second instance of that rule not being applied to itself: worth recording,
+  still not worth a new rule.
+
+### 2026-08-04 · `run-continuity` · the loop fired into the decision it was waiting on
+
+- **Symptom:** the run armed `/loop 5m` — the mechanism this change was adding — and
+  then parked on a task needing the operator's word. The timer fired into that wall,
+  twice: a generic scheduled prompt arriving where a specific answer was owed.
+- **Surfaced at:** stages 2 and 5, by using the feature · **Owned by:** the design,
+  which had not asked what a fire does when the run is parked.
+- **Root cause:** two failure modes, one cause. A loop firing into a `manual` gate
+  is a **nag**, and a nagged operator learns to ignore it — the same death as a rule
+  nobody reads to the end. And a tick is not consent: reading it as authorization
+  would have written to the operator's private config on the strength of a cron
+  schedule.
+- **Fix:** grade 1 — the run cancels its own loop job on parking and prints the
+  re-arm command; the mode never collapses a gate. Both applied in this run before
+  they were written down.
+- **Reopened after acceptance, pre-tag:** the first cancel was issued against an id
+  that had never been scheduled, and the teardown call **reported success anyway** —
+  so the real job kept firing for another forty minutes while the transcript said it
+  had stopped. The doctrine as first written said *cancel* and not *verify the
+  cancel*, which would have reproduced this in every project that followed it.
+  `continuity.md` now requires listing the jobs afterwards. Caught by the very tick
+  that should not have existed.
+- **The check:** the continuity clause guard covers the file. **No check can decide
+  whether a tick was read as consent** — that half is doctrine, and it ships.
+- **Commit:** `17b35de`
+- **Upstream?** Already upstream, in `references/continuity.md`.
 
 ### 2026-08-03 · `root-cause` · five audits, one missing row
 
@@ -126,122 +193,6 @@ incident forever, so pruning the in-force list costs no knowledge.
 - **Upstream?** No — it is an instance of doctrine already in `audit.md` ("a finding
   that contradicts the spec goes back to stage 3").
 
-### 2026-08-03 · `code-audit` · a citation whose file resolves and whose section does not
-
-- **Symptom:** fifteen section-qualified cross-references pointed at nothing. Eleven
-  of them — every per-stage freedom label — cited `gates.md` → *Axis B*, which is the
-  enforcement ladder and contains zero mentions of degrees of freedom. Evidence: a
-  sweep of all 33 such citations; `grep -ci "degrees of freedom" references/gates.md`
-  → 0.
-- **Surfaced at:** a third-axis audit · **Owned by:** the release that wrote the
-  labels — the concept had no home, and rather than noticing that, the citation was
-  pointed at the nearest plausible section.
-- **Root cause:** the link checker proves a *file* resolves, and that green was read
-  as the pointer being right. `learned.md` names this exact failure and deliberately
-  keeps it as a review question because "only a reader can prove it is the right
-  one" — which was true until the sweep showed the section name is machine-checkable.
-- **Fix:** grade 1 — `gates.md` gained the two sections the citations were reaching
-  for, and a guard now compares every pointer against the target's real headings.
-- **The check:** the citation guard, measured for false positives (whitespace
-  normalised — a wrapped citation is not a defect and six were reported as such).
-- **Commit:** `270bc2c`
-- **Upstream?** Already upstream: `learned.md`'s review question can be promoted to a
-  rule with a check, and this release is the evidence.
-
-### 2026-08-03 · `code-audit` · the installer built the thing its own family prunes
-
-- **Symptom:** `install.sh` and `bin/task-pipeline.js` write a plain copy to
-  `~/.claude/skills/task-pipeline`; `sshlg-skills` deletes exactly those, and its
-  README says Claude Code gets the plugin "never as a plain copy". `CLAUDE.md`
-  documented `./install.sh --force` as the local install path.
-- **Surfaced at:** reading the installers as code — the first pass on them in three
-  audits · **Owned by:** whichever release added the launcher's prune rule without
-  walking back to the installers it contradicts.
-- **Root cause:** the rule lived in the family repo and the violation lived in a
-  member repo, so no single repository's checks could see both.
-- **Fix:** grade 1 — both installers refuse when a plugin install is detected.
-- **The check:** none mechanical; the honest state is that this is a cross-repository
-  invariant with no cross-repository gate. Recorded rather than pretended.
-- **Commit:** `270bc2c`
-- **Upstream?** Worth an issue on `sshlg-skills`: the family owns the rule, so it
-  should own the check.
-
-### 2026-08-03 · `doc-track-audit` · a gate that read one of the two shapes it promised
-
-- **Symptom:** on a project using the ADR shape — which `documentation.md` permits
-  explicitly — `scripts/check-docs.sh` printed **eight `dormant` lines out of ten
-  sections** and exited 0, with a planted propagation violation uncaught. Evidence:
-  the ADR seed run, and `templates/docgate.sh` parsing only `$DEC_FILE`.
-- **Surfaced at:** a post-release audit · **Owned by:** the release that wrote both
-  the doctrine and the gate in one change and tested only the shape it had seeded.
-- **Root cause:** `dormant` was designed so a *fresh* project is green on day one,
-  and it was never bounded to that case — so it also covered a *populated* register
-  the gate could not read. Green from a check that did not look is the failure the
-  whole file is written against, reproduced by its own author.
-- **Fix:** grade 1 — a normalised entry index, so no section knows which shape it
-  reads; plus the validator asserting the seeded run **reports the shape it found**
-  and **ran at least N live checks**. Exit 0 alone can no longer stand in for
-  having looked.
-- **The check:** two seeded projects executed on every `npm test`, one per shape,
-  each asserting live-check counts; seven planted defects on the ADR shape.
-- **Commit:** `096f0f0`
-- **Upstream?** Already upstream. The generalised rule — *a skip is not a pass, and
-  a gate must report what it looked at* — went into `references/gates.md`.
-
-### 2026-08-03 · `doc-track-audit` · a cross-cutting protocol that no stage had heard of
-
-- **Symptom:** `grep -c "doc loop\|documentation.md"` over `brainstorm.md`,
-  `spec.md`, `planning.md`, `build.md`, `review.md`, `acceptance.md` → **0 each**,
-  while SKILL.md, stages.md and documentation.md all called the Doc Loop
-  cross-cutting.
-- **Surfaced at:** the same audit · **Owned by:** the release, which wired the track
-  into the orchestration layer and stopped there.
-- **Root cause:** the orchestrator's view was mistaken for the executor's. An agent
-  running stage 5 opens `build.md`; it never re-reads SKILL.md to discover that a
-  protocol applies. Declaring a thing cross-cutting does not distribute it.
-- **Fix:** grade 1 — five stage doctrines now name it, held by a guard; and stage 5
-  gets the rule its architecture demanded (a subagent never writes the register).
-- **The check:** the doc-loop reach guard, with its negative self-test.
-- **Commit:** `096f0f0`
-- **Upstream?** n/a — this repo is the skill.
-
-### 2026-08-03 · `documentation-track` · a new gate passed for every id ending 8 or 9
-
-- **Symptom:** `templates/docgate.sh` §3 (*next free id*) printed `ok` against a
-  planted `DEC-0009` while the highest defined id was `DEC-0001`. Probe output:
-  `SILENT §3 next-free — planted defect did NOT fail the gate`.
-- **Surfaced at:** the probe pass · **Owned by:** the same change that wrote §3 —
-  it was never exercised against a two-digit-ending id before the probe.
-- **Root cause:** `$((0009))` — bash reads a leading-zero literal as **octal**, `9`
-  is not an octal digit, the arithmetic expansion errors, the enclosing `if` takes
-  its **else** branch, and the section reports success. Zero-padded ids are the
-  normal case in this register, so the check was silent for two digits out of ten.
-- **Fix:** grade 1 (mechanical) — strip leading zeros before any arithmetic, with
-  the cause written into the code comment so the next reader does not re-derive it.
-- **The check:** the probe itself, now part of the release procedure: every gate
-  section planted, run, restored, asserted on `$?`. 10/10 fire.
-- **Commit:** `dbe4f43`
-- **Upstream?** Already upstream — this **is** the skill. The generalised rule is
-  `references/gates.md` → *Probing*, and the judgement half became `R-001`.
-
-### 2026-08-03 · `documentation-track` · two guards fired on the change that wrote them
-
-- **Symptom:** the new portability guard rejected `docgate.sh` for containing
-  `grep -P`, `sed -i` and `readarray` — all three inside the header comment that
-  **forbids** them. Separately, the workflow's pre-existing `sed -i` guard rejected
-  the negative test that plants `sed -i`.
-- **Surfaced at:** the first `npm test` after each was written ·
-  **Owned by:** the same change.
-- **Root cause:** a detector that reads prose about a construct as an instance of
-  it — `learned.md` rule 10's false-positive class, seen from the inside.
-- **Fix:** grade 1 — the guard scans code lines only; the negative test builds the
-  construct at runtime, the pattern the merge-conflict test already used.
-- **The check:** both are now covered by their own negative self-tests.
-- **Commit:** `dbe4f43` and `45e26f0`
-- **Upstream?** The rule already exists (`learned.md` 10); the *procedure* for
-  measuring a detector before shipping it is now `gates.md` → *The false-positive
-  budget*.
-
 ## Run stamps
 
 One line per run, appended at stage 10. This is what makes "five runs" countable
@@ -249,6 +200,7 @@ One line per run, appended at stage 10. This is what makes "five runs" countable
 
 | Date | Topic | Commit | Verdict | Retro |
 |---|---|---|---|---|
+| 2026-08-04 | `run-continuity` | `7155c98` | 13 REQ · 13 verified (12 by a proven check, 1 by eye — outside the repo) · carry-over 4 rows, 0 unresolved | 3 entries · 2 standing · retired 0 · added 0 · **archived 6** · R-001 and R-002 both fired |
 | 2026-08-03 | `default-routing-adoption` | `d76ff5e` | 9 REQ · 9 verified (one check revised mid-run, revision agreed) | 1 entry · 2 standing · retired 0 · added 0 · R-001 and R-002 both fired |
 | 2026-08-03 | `root-cause` | `17d53ba` | 1 cause behind 9 findings, fixed as doctrine | 1 entry · 2 standing · retired 0 · added 0 |
 | 2026-08-03 | `enforcement-audit` | `a34e5ff` | 1 finding, fixed as a class | 1 entry · 2 standing · retired 0 · added 0 |

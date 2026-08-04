@@ -65,6 +65,7 @@ gate stops until it is installed.
 | **first run · the entry audit** (offered once) | [`references/setup.md`](references/setup.md) |
 | **what travels with the bundle vs stays in a project** | [`references/portability.md`](references/portability.md) |
 | any repeating loop | [`references/loop-guard.md`](references/loop-guard.md) |
+| run-wide · how a run keeps going (the loop mode + the context budget) | [`references/continuity.md`](references/continuity.md) |
 
 **Optional bridge.** If the operator already runs an equivalent skill set (e.g.
 `superpowers:brainstorming` / `writing-plans` / `subagent-driven-development` /
@@ -181,7 +182,12 @@ Three things the grill does beyond clarifying the request:
    tasks, context7, wiki-update, graphify) and emits ONE block covering them
    **and the model decision** (`references/model-tiering.md`): recommend
    the most capable model available, let the operator confirm or override, record
-   it. Ask once, here.
+   it. Ask once, here. **The same block carries the run mode**
+   (`references/continuity.md`): read `pipeline.json` → `run.loop`; where it is
+   recorded, arm it and print the job id and the cancel command — the config is
+   the authorization, so re-asking rebuilds the habit it exists to retire. Where
+   it is **absent, the mode is off**; recommend it in one line and move on.
+   Silence arms nothing, and the mode never collapses a `manual` gate.
 2. **Run stage 0 — always, no exceptions.** It opens with the **knowledge harvest**
    (`references/knowledge-sources.md`): query the project's own sources — repo docs,
    ADRs, `docs/ux/`, past briefs, the wiki if installed, any doc repo the project
@@ -341,6 +347,10 @@ automation is on — `pipeline.schema.json` is the only contract.
   inside the bundle, and the boundary against a project's own answers
 - `references/adoption.md` — the first run in a project: greenfield seeding, and the
   brownfield walkthrough whose third step baselines the ratchets at today
+- `references/continuity.md` — run-wide pacing: the loop mode (`run.loop`, default
+  off, and it never collapses a manual gate), how it is armed on Claude Code and
+  what that costs, and the context budget — which fires on a harness signal, never
+  on an estimate
 - `references/conventions.md` — how stages 6–10 read the host project's CLAUDE.md
 - `references/companion-skills.md` — companion skills, install lines, preflight recommendation
 - `references/artifacts.md` — the canonical document/artifact layout per stage
