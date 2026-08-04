@@ -1,5 +1,65 @@
 # Changelog
 
+## v1.11.0 — 2026-08-04
+
+### Added — run continuity: the pacing rules the operator was repeating by hand
+
+Two rules that had to be said out loud at the start of every run. One of them was
+already written down, which is the interesting half.
+
+**The loop mode is now config, not a request.** `references/build.md` has carried
+*"Continuous execution: don't check in between tasks"* since early on, and it did
+not work — for two compounding reasons. It lived inside stage 5, so an agent
+running any other stage never saw it; and on a harness where a turn ends, prose
+cannot carry a run across the boundary at all. Only a scheduled re-invocation
+can. So the decision moved to `pipeline.json` → `run.loop`, read at preflight in
+the same block as the model: recorded means armed and never re-asked, absent means
+**off**. `build.md`'s rule keeps its full force and gains one sentence naming its
+scope, because the two govern different things and a reader was going to take one
+for the other.
+
+**The context rule fires on evidence or not at all.** The opposite failure was
+live: runs announcing that context was nearly exhausted against a mostly-empty
+window, because an estimate from transcript length was being presented as a
+measurement. Nothing returns the remaining percentage, so the rule now admits
+exactly two signals — the harness saying so, or the operator saying so — and
+forbids the announcement without one. When it does fire: finish the item in
+flight, start no new one, make the ledgers true, continue. Not stop.
+
+There is deliberately **no config field** for the context half. The one number
+anyone would put in it is the one that can never be honoured, and the schema's own
+`description` says so — a blank space in a contract gets filled back in by the
+next contributor as an oversight.
+
+Both halves live in one new file, `references/continuity.md`, because they are one
+mechanism: the loop is what makes the context rule necessary. Without a loop a run
+stops at the turn boundary anyway; with one, it will start an item it cannot
+finish.
+
+### Fixed — three templates whose links were broken everywhere they are read
+
+`templates/adr.md`, `carryover.md` and `routing-rule.md` carried relative links
+that resolved from `templates/` — where the files are stored — and from nowhere
+they are ever actually seeded. `carryover.md` had shipped one since v1.1.0 and the
+link checker was green the whole time, because it resolves from the file's home.
+No run had seeded the template verbatim, so nobody hit it until one did.
+
+The rule is now the one the Cursor rule already follows: a document that travels
+is self-contained, and names files in code spans rather than linking to them.
+
+### Guards — 63 → 68
+
+`run.loop.mode` must be set explicitly in the shipped example; five surfaces must
+name `continuity.md`; the two load-bearing clauses in `continuity.md` must survive
+an edit (matched after whitespace normalisation, since both wrap at 80 columns and
+a line-oriented search would reject correct prose); and no seeded template may
+carry a relative link. Four invariants added to `CONTRIBUTING.md`, each citing the
+guard that enforces it.
+
+`CLAUDE.md`'s claim of *sixteen* invariants — the list held twenty-four — was
+deleted rather than corrected. A hand-written count drifts; that is what the rule
+about computing numbers is for, and this file was breaking it.
+
 ## v1.10.3 — 2026-08-03
 
 ### Fixed — the cause behind five audits, rather than a sixth symptom
