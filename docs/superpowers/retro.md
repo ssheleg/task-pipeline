@@ -88,6 +88,13 @@ incident forever, so pruning the in-force list costs no knowledge.
 - **Fix:** grade 1 — the run cancels its own loop job on parking and prints the
   re-arm command; the mode never collapses a gate. Both applied in this run before
   they were written down.
+- **Reopened after acceptance, pre-tag:** the first cancel was issued against an id
+  that had never been scheduled, and the teardown call **reported success anyway** —
+  so the real job kept firing for another forty minutes while the transcript said it
+  had stopped. The doctrine as first written said *cancel* and not *verify the
+  cancel*, which would have reproduced this in every project that followed it.
+  `continuity.md` now requires listing the jobs afterwards. Caught by the very tick
+  that should not have existed.
 - **The check:** the continuity clause guard covers the file. **No check can decide
   whether a tick was read as consent** — that half is doctrine, and it ships.
 - **Commit:** `17b35de`

@@ -133,6 +133,14 @@ command beside the gate. The go and the re-arm are then one act. This is also th
 honest accounting: while the run waits for a person, nothing is looping, and the
 job list should agree with that.
 
+**Verify the cancel by listing the jobs, never by the cancel's own reply.** A
+teardown call will happily accept an id that was never scheduled and report
+success, which leaves the real job running while the transcript says it stopped.
+List afterwards and read the list. This is the same law the rest of this pipeline
+applies to every gate — a green nobody watched is not evidence — and a loop is
+exactly where breaking it goes unnoticed, because the symptom is a message
+arriving on time.
+
 ## Part 2 — the context budget
 
 Near the end of the context window, the run does **not** stop and it does not
