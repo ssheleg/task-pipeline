@@ -33,6 +33,29 @@ Older entries and every retirement **move** to `docs/superpowers/retro/YYYY-QN.m
 at the prune. Moving is not deleting: the archive is append-only and holds the
 incident forever, so pruning the in-force list costs no knowledge.
 
+### 2026-08-03 · `surface-audit` · nine of nine verified, and four surfaces did not know
+
+- **Symptom:** one release after an acceptance that read *11/11 verified*, a fourth
+  audit found four shipped files whose readers were never told they exist — the Cursor
+  rule two releases behind (0 hits for adoption, the entry audit, portability, the
+  routing boundary, the opt-out phrase), the README map missing three references, the
+  portability manifest covering 14 of 26, and two seeded templates over 100 lines with
+  no Contents.
+- **Surfaced at:** a standalone audit · **Owned by:** stage 10 of the two releases
+  before it. The acceptance verified every REQ, and *"the surfaces know"* was never a
+  REQ.
+- **Root cause:** reachability from `SKILL.md` is the check that exists, and it stayed
+  green the whole time — it proves an agent can **find** a file, not that a reader was
+  **told** about it. Two different questions wearing one green.
+- **Fix:** grade 1 — every reference must now appear in the README map and in the
+  portability manifest, and every seeded template over 100 lines carries its own
+  Contents. Both check the direction that finds absences.
+- **The check:** the reach guard and the template-Contents guard, both watched failing.
+- **Commit:** `86bcad1`
+- **Upstream?** No — but the lesson generalises and is already in `audit.md`: a
+  comparison needs two sides, so a check that only walks the list you have cannot see
+  the entry you never made.
+
 ### 2026-08-03 · `default-routing-adoption` · the work contradicted the spec, and the loop caught it
 
 - **Symptom:** stage 5 was about to seed `scripts/check-docs.sh` into this repository
@@ -180,6 +203,7 @@ One line per run, appended at stage 10. This is what makes "five runs" countable
 | Date | Topic | Commit | Verdict | Retro |
 |---|---|---|---|---|
 | 2026-08-03 | `default-routing-adoption` | `d76ff5e` | 9 REQ · 9 verified (one check revised mid-run, revision agreed) | 1 entry · 2 standing · retired 0 · added 0 · R-001 and R-002 both fired |
+| 2026-08-03 | `surface-audit` | `86bcad1` | 4 findings, all fixed | 1 entry · 2 standing · retired 0 · added 0 |
 | 2026-08-03 | `setup-and-autonomy` | `7569dd6` | 11 REQ · 11 verified | no divergence · 2 standing · retired 0 · added 0 |
 | 2026-08-03 | `code-audit` | `270bc2c` | 8/8 findings fixed, each proven before and after | 2 entries · 2 standing · retired 0 · added 0 · R-001 and R-002 both fired |
 | 2026-08-03 | `doc-track-audit` | `096f0f0` | 9/9 findings fixed, each proven before and after | 2 entries · 2 standing (was 1) · retired 0 · added 1 · R-001 fired |
