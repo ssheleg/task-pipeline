@@ -8,7 +8,7 @@ operator's configuration silently.
 raises the odds the model selects it and cannot make selection mandatory — the choice
 stays with the model, case by case. Only an instruction makes routing binding. That
 instruction therefore has to be *installed*, which is exactly how a workflow decision
-ends up living outside the bundle ([`../references/portability.md`](../references/portability.md)).
+ends up living outside the bundle (the skill's own `references/portability.md`).
 Shipping it as a template is what lets it travel.
 
 **Keep the exclusions identical** to the skill's `description` and to the

@@ -169,7 +169,34 @@ with the bundle instead of being hand-installed into an operator's config.
 reads those files, and a partial read shows whichever sections come first.
 *(guard: `needs the same partial-read protection references get`)*
 
-**24. Every invariant above names the guard that enforces it, and that guard exists.**
+**24. Run-wide pacing is config, and the example demonstrates its default.** The
+`run` block in `pipeline.schema.json` carries the loop mode; the shipped example
+sets `run.loop.mode` explicitly rather than omitting it, because the example is
+what gets copied and an absent field reads as an oversight instead of a decision.
+*(guard: `no explicit run.loop.mode`)*
+
+**25. The run-wide mode is named by every stage that could be misled by it.**
+`SKILL.md`, `references/grill.md`, `references/build.md`, `references/stages.md`
+and `templates/brief.md` each name `continuity.md`. The continuous-execution rule
+sat inside `build.md` for nine releases and did not work, because an agent running
+one stage never re-reads the orchestrator to discover a run-wide rule exists.
+*(guard: `a run-wide rule no stage has heard of`)*
+
+**26. `references/continuity.md` keeps its two load-bearing clauses.** One forbids
+announcing that context is nearly spent without a harness signal; the other names
+the harness limit on the loop primitive. Both are one edit away from softening into
+nothing. The guard normalises whitespace first — the clauses wrap at 80 columns,
+and a line-oriented search would reject correctly formatted prose.
+*(guard: `missing the contractual clause`)*
+
+**27. A seeded template carries no relative markdown links.** A template is copied
+somewhere else by definition, so a link that resolves from `templates/` is broken
+everywhere the file is actually read. `carryover.md` shipped one for nine minor
+releases and the link checker stayed green throughout, because it resolves from the
+file's home. Name the file in a code span instead — the same rule the Cursor rule
+follows, for the same reason. *(guard: `resolves only from`)*
+
+**28. Every invariant above names the guard that enforces it, and that guard exists.**
 This list claims to be *what the validator enforces*; it was eight guards behind when
 an audit measured it. A claim of enforcement is now checked like any other claim.
 *(guard: `whose message does not appear in`)* — and a cited literal must lie inside

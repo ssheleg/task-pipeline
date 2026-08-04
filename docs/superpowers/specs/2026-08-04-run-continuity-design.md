@@ -176,7 +176,27 @@ asserts the citation resolves.
 | G3 | The continuity clause guard — both contractual sentences present in `references/continuity.md` | `references/continuity.md: missing the contractual clause` | 005, 006, 013 |
 | G4 | The seeded-template link guard — copy each `templates/*.md` into a scratch tree at the destination its doctrine seeds it to, and resolve every relative link from there | `resolves only from templates/, not from the destination it is seeded to` | 012 |
 
-**G4's destination table** is the contract, not a guess:
+**G4 amended at stage 5 — the first shape was impossible.** The spec asked that a
+template's relative links resolve *from the destination*. They cannot: the same
+file also sits in `templates/`, where this repository's existing link checker
+resolves them from **there**. One link, two required bases, no value satisfying
+both. So the rule is the stronger and simpler one, and it already has a precedent
+here — the Cursor rule is required to be self-contained with no relative links,
+for exactly this reason:
+
+> **A template that will be copied somewhere else carries no relative markdown
+> links at all.** It names the file in a code span instead. A link that resolves
+> only where the template is stored is a link that is broken everywhere the
+> template is actually read.
+
+Three templates violate this today and are fixed by this run: `adr.md`
+(`../references/documentation.md`), `carryover.md` (`../references/audit.md`) and
+`routing-rule.md` (`../references/portability.md`). `templates/README.md` is
+excluded by name — it is the directory's own index and is never seeded.
+
+**The destination table** stays as documentation of where each template lands —
+it is what makes the rule's *reason* checkable by a reader, even though the guard
+no longer needs it to decide:
 
 | Template | Seeded to |
 |---|---|

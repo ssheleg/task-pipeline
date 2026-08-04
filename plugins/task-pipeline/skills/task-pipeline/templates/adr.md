@@ -21,7 +21,7 @@ decision was made and *why* — not filling out sections.
 ## When this directory IS the register
 
 An ADR set and `docs/DECISIONS.md` are **two shapes of one decision home**, and a
-project has exactly one ([`../references/documentation.md`](../references/documentation.md)).
+project has exactly one (the skill's own `references/documentation.md`).
 If `docs/adr/` already holds an `NNNN-*.md`, that is the register — record it in
 `docs/DOCMAP.md` and never seed a second home beside it.
 

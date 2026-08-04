@@ -47,7 +47,7 @@ is the true statement.
 - **The set may only shrink.** If it grew, the run log gets one sentence saying why.
   A ratchet that grows silently is a TODO with a better name.
 - **A finding class that appears twice stops belonging here** and becomes a check in
-  the host's lint or CI ([`audit.md`](../references/audit.md) → *A class that
+  the host's lint or CI (the skill's own `references/audit.md` → *A class that
   repeats twice becomes a gate*). This ledger is for what cannot be automated, not
   for what nobody automated.
 

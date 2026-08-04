@@ -42,7 +42,9 @@ step.
 ## Invariants that must not drift
 
 Full list with reasoning in [`CONTRIBUTING.md`](CONTRIBUTING.md) → *The
-invariants* (sixteen of them). The two that bite most often:
+invariants*. (No count here on purpose: a hand-written one drifts, and this one
+already had — it said sixteen while the list held twenty-four.) The two that bite
+most often:
 
 1. **Four-way version sync** — `package.json`, `.claude-plugin/marketplace.json`
    (`plugins[0].version`), `plugins/task-pipeline/.claude-plugin/plugin.json`, and

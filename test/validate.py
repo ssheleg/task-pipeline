@@ -1388,6 +1388,70 @@ for dirpath, dirnames, filenames in os.walk(ROOT):
                 fail(f"{os.path.relpath(fp, ROOT)}:{lineno}: unresolved merge conflict marker — "
                      "a half-resolved merge ships as doctrine somebody reads and obeys")
 
+# --- run continuity (v1.11.0) -------------------------------------------------
+# G1. The run-wide pacing block. A config field that a project may set but the
+# shipped example never shows is a field nobody discovers: the example is what
+# gets copied. So the example must set run.loop.mode EXPLICITLY — demonstrating
+# the default rather than relying on its absence, which reads as an oversight.
+_sch = load_json("plugins/task-pipeline/skills/task-pipeline/pipeline.schema.json")
+_exm = load_json("plugins/task-pipeline/skills/task-pipeline/pipeline.example.json")
+if _sch and "run" not in _sch.get("definitions", {}):
+    fail("pipeline.schema.json: no 'run' definition — run-wide pacing has no contract")
+if _exm is not None:
+    _mode = (_exm.get("run") or {}).get("loop", {}).get("mode")
+    if _mode not in ("off", "interval"):
+        fail("pipeline.example.json: no explicit run.loop.mode — the example must "
+             "DEMONSTRATE the default, not rely on its absence")
+
+# G2. The continuity reach guard. references/build.md carried the continuous-
+# execution rule for nine releases and it did not work, because it lived inside one
+# stage: an agent running stage 5 opens build.md and never re-reads SKILL.md to
+# learn that a run-wide mode exists. Same class as the doc-loop reach guard above —
+# declaring a thing run-wide does not distribute it.
+_SKILLDIR = "plugins/task-pipeline/skills/task-pipeline"
+for _rel in ("SKILL.md", "references/grill.md", "references/build.md",
+             "references/stages.md", "templates/brief.md"):
+    _p = os.path.join(ROOT, _SKILLDIR, _rel)
+    if os.path.isfile(_p) and "continuity.md" not in open(_p, encoding="utf-8").read():
+        fail(f"{_rel} does not name continuity.md — "
+             "a run-wide rule no stage has heard of is a rule that does not run")
+
+# G3. Two clauses in references/continuity.md are load-bearing and easy to soften
+# into nothing during an edit: the one forbidding a context warning without
+# evidence, and the one naming the harness limit. Whitespace is normalised first —
+# the first clause is 74 characters and wraps at this repo's 80-column style, so a
+# line-oriented search would reject correctly formatted prose. That false-positive
+# class already cost this repository six bogus findings once (learned.md rule 10).
+_cont = os.path.join(ROOT, _SKILLDIR, "references/continuity.md")
+if os.path.isfile(_cont):
+    _cn = re.sub(r"\s+", " ", open(_cont, encoding="utf-8").read())
+    for _clause in ("never announce that the context is nearly spent without one "
+                    "of those signals",
+                    "Claude Code only"):
+        if _clause not in _cn:
+            fail(f"references/continuity.md: missing the contractual clause "
+                 f"{_clause!r} — without it the rule degrades to a suggestion")
+
+# G4. A template is COPIED somewhere else — that is what a template is. A relative
+# link inside one resolves from templates/, where the file is stored, and from
+# nowhere it is ever actually read: carryover.md shipped '../references/audit.md'
+# for nine minor releases and broke the moment it was seeded to the path its own
+# doctrine names. The repo's link checker stayed green throughout, because it
+# resolves from the file's home. Same rule as the Cursor rule, same reason: a
+# document that travels must be self-contained. Name the file in a code span.
+_tpl = os.path.join(ROOT, _SKILLDIR, "templates")
+if os.path.isdir(_tpl):
+    for _fn in sorted(os.listdir(_tpl)):
+        if not _fn.endswith(".md") or _fn == "README.md":
+            continue  # README.md is the directory's own index and is never seeded
+        _body = FENCE_RE.sub("", open(os.path.join(_tpl, _fn), encoding="utf-8").read())
+        for _t in LINK_RE.findall(_body):
+            if _t.startswith(("http://", "https://", "mailto:", "#")):
+                continue
+            fail(f"templates/{_fn}: relative link {_t!r} resolves only from "
+                 "templates/, not from the destination it is seeded to — a seeded "
+                 "template must be self-contained; name the file in a code span")
+
 if errors:
     print("FAIL: task-pipeline structure invalid")
     for e in errors:
