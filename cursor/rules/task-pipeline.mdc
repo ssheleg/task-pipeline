@@ -465,3 +465,17 @@ contradict it.
 decision about what this project decided belongs in the project. The test for a rule
 you are about to write down: does it name a path, a command or a person? If not, it is
 the pipeline's, and leaving it in one repository is a fork nobody named.
+
+## Writing a propagation matrix — start with the row nobody writes
+
+The most frequent change in any documented project is **adding a document**, and that
+is the row people leave out — so the matrix ends up unable to catch the class it will
+meet most often. Write it first, before the change types you can think of:
+
+> **A new document or rule** → every surface that must *learn it exists*: the index a
+> reader opens, the map, any manifest, the agent-facing rules file. Checked by:
+> whatever check can resolve those, or `review` with the reason none can.
+
+Measured on the project this pipeline comes from: nine findings across five audits
+were that one missing row, with every check green throughout — a check only walks the
+list it was given.

@@ -62,12 +62,16 @@ column is a finding, not a blank.
 
 | Change type | Update these | Checked by |
 |---|---|---|
+| **A new document or rule** — start with this row | every surface that must *learn* it exists: the index a reader opens, the map, any manifest, the agent-facing rules file | `<the check, or `review` with its reason>` |
 | New/changed **decision** | `docs/DECISIONS.md` + every doc in its `Consequences / affects:` line | gate §5 propagation |
 | Question **resolved** | `docs/OPEN_QUESTIONS.md` → `Resolved→DEC-####`, the owning topic doc | gate §2 ids · gate §8 status vocabulary |
 | **Scope** change | `<roadmap>`, `<mvp>`, the register | review — scope is a judgement, not a shape |
 | `<new/changed entity or field>` | `<data model>` (canonical), `<glossary>` | `<fill me>` |
 | `<user-facing behaviour>` | `<scenarios>` + `<flows>` + `<screens>`, same change | `<ux linter>` |
 | `<fill me>` | … | … |
+
+
+**Start with the row above.** The most frequent change in any documented project is *adding a document*, and it is the row nobody writes — so the matrix ends up unable to catch the class it will meet most. On the project this practice comes from, nine findings across five audits were that one missing row.
 
 ## Gates
 

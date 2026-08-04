@@ -1,5 +1,44 @@
 # Changelog
 
+## v1.10.3 — 2026-08-03
+
+### Fixed — the cause behind five audits, rather than a sixth symptom
+
+Five audit passes produced roughly thirty findings. Grouped by shape, **nine of them
+were one missing row**: this repository ships a propagation matrix to every project it
+touches and its own had no row for *adding a document*.
+
+`adoption.md`, `setup.md`, `portability.md` and `learned.md` never reached the README
+map · the manifest covered 14 of 26 references · the Cursor rule ran two releases
+stale · `CONTRIBUTING.md` ran eight guards behind · `agent-sync` was doctrine in four
+files and absent from the companion matrix · `templates/README.md` went stale. One
+cause, nine symptoms, five audits — and **every check was green throughout**, because
+a check can only walk the list it was given.
+
+**The meta-row.** The most frequent change in any documented project is adding a
+document, and it is the row nobody writes — so the matrix ends up unable to catch the
+class it will meet most often. It is now:
+
+- **step 0** of the matrix-building procedure in `references/documentation.md`, with
+  the measurement attached;
+- a row in this repository's own `docs/DOCMAP.md`, first;
+- a row in the seeded `templates/docmap.md`, guarded — a seeded matrix without it
+  fails the build;
+- pass 4 of the entry audit in `references/setup.md`;
+- a named step before the tag in `CONTRIBUTING.md` → *Releasing*, where the one cell
+  that is `review` — the Cursor rule — is called out, because no check can decide
+  whether a change alters how an agent behaves in a **foreign** project. That cell was
+  skipped twice, and the rule shipped two versions stale.
+
+### The two causes no row can fix, stated rather than left implied
+
+**Guards are written after a finding.** The doctrine's own rule — a class seen twice
+becomes a script — is by construction one instance late, and twice a fix was scoped to
+its instance rather than its class.
+
+**Author and reviewer are the same person**, which `SKILL-CARD.md` already discloses.
+Five audits are what a review would have been.
+
 ## v1.10.2 — 2026-08-03
 
 ### Fixed — the list of invariants was eight guards behind, and now checks itself

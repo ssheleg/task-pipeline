@@ -195,6 +195,14 @@ nobody read is exactly the document nobody updated.
 
 **Build it in five steps** (stage 0; extend it whenever a new doc class appears):
 
+0. **Write the meta-row first: *a new document or rule*.** The most frequent change
+   in any documented project is adding a document, and it is the row nobody writes —
+   so the matrix ends up unable to catch the class it will meet most often. Its
+   *Update these* column is every surface that must **learn the thing exists**: the
+   index a reader opens, the map, any manifest, the agent-facing rules file.
+   Measured on the project this practice comes from: **nine findings across five
+   audits were that one missing row**, and the checks were green throughout, because
+   a check can only walk the list it was given.
 1. List the project's doc classes — one line each: what is this the home of?
 2. For each **change type** the project can undergo, name every document that must
    move.

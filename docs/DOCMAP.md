@@ -41,6 +41,7 @@ Three true rows beat twenty imported ones. Extended when a new class appears.
 
 | Change type | Update these | Checked by |
 |---|---|---|
+| **A new document, rule or guard** — the change type this repository makes most often | `SKILL.md` (doctrine table + references list) · `README.md`'s map · `references/portability.md`'s manifest · `cursor/rules/task-pipeline.mdc` when it changes how an agent behaves · `CONTRIBUTING.md` when it adds an enforced invariant · `templates/README.md` when it is a template | `test/validate.py` — the reach guard, the manifest guard and the invariant-citation guard; the Cursor rule is **`review`**, because no check can decide whether a change alters agent behaviour in a foreign project |
 | A stage's id, name or gate type | `pipeline.example.json`, `SKILL.md` table, `references/stages.md`, that stage's doctrine file | `test/validate.py` — cross-surface comparison |
 | A new or changed guard | `test/validate.py`, a negative self-test in `.github/workflows/validate.yml`, `CONTRIBUTING.md` → *The invariants*, `test/negatives.py` floor | `npm run test:all` + the invariant-count review |
 | A user-visible capability, install path or stage | `README.md`, `CHANGELOG.md`, `SKILL-CARD.md`, the four version manifests, `cursor/rules/task-pipeline.mdc` | `test/validate.py` — blurb/final-stage and four-way version checks |

@@ -43,7 +43,9 @@ Seven passes, cheapest first. Each either reports `ok`, a finding, or **`skipped
 3. **Propagation.** Every document named in an entry's `Consequences / affects:` line
    cites that entry — ratcheted, so history is a printed number and not a wall of
    failures ([`adoption.md`](adoption.md) → *Baseline the ratchets*).
-4. **The matrix.** Every row has a *Checked by* cell — a check, or `review` **with the
+4. **The matrix.** It contains the **meta-row** — *a new document or rule* — without
+   which it cannot catch the change type the project makes most often. Every row has
+   a *Checked by* cell — a check, or `review` **with the
    reason no check can decide it**. An empty cell is a finding, not a blank.
 5. **Terms.** Every term the doc map declares resolves to exactly one definition, and
    the definition's home actually contains it. **Only declared terms are checked** —

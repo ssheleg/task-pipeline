@@ -206,6 +206,14 @@ quote straddling a line-continuation is a citation nothing can find.
 
 ## Releasing (maintainers)
 
+**Before the tag, walk `docs/DOCMAP.md`'s propagation matrix — starting at its first
+row.** The guards cover most of it; the one cell that is `review` is
+`cursor/rules/task-pipeline.mdc`, because no check can decide whether a change alters
+how an agent behaves in a *foreign* project. That cell was skipped for two releases
+and the rule shipped two versions stale. If the change would make an agent act
+differently somewhere else, the Cursor rule is part of the change.
+
+
 1. Bump the version in **all four** places (see invariant 1) and write the
    `CHANGELOG.md` section — what changed and *why it mattered*, not a diff summary.
 2. `npm test` green, commit, push.

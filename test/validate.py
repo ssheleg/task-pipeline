@@ -726,6 +726,15 @@ else:
             if not re.search(r"^##\s+" + re.escape(_h) + r"\b", _dm, re.M):
                 fail(f"templates/docmap.md: missing the '## {_h}' section — the doc "
                      "map answers four questions and this is one of them")
+    # The most frequent change in a documented project is ADDING a document, and it
+    # is the row nobody writes — so the matrix cannot catch the class it meets most.
+    # Measured here: nine findings across five audits were that one missing row, with
+    # every check green throughout, because a check only walks the list it was given.
+    if "new document" not in _dm.lower():
+        fail("templates/docmap.md: the propagation matrix has no row for adding a new "
+             "document or rule — the change type a project makes most often, and the "
+             "one a matrix without it can never catch")
+
         if "Checked by" not in _dm:
             fail("templates/docmap.md: the propagation matrix must carry a "
                  "'Checked by' column — a row nothing enforces is a wish, and the "
