@@ -33,6 +33,32 @@ Older entries and every retirement **move** to `docs/superpowers/retro/YYYY-QN.m
 at the prune. Moving is not deleting: the archive is append-only and holds the
 incident forever, so pruning the in-force list costs no knowledge.
 
+### 2026-08-03 · `root-cause` · five audits, one missing row
+
+- **Symptom:** five audit passes produced roughly thirty findings. Grouped by shape,
+  **nine were the same missing propagation row** — this repository ships a matrix to
+  every project it touches and its own had no row for *adding a document*. Evidence:
+  `adoption.md`, `setup.md`, `portability.md`, `learned.md` absent from the README map;
+  the manifest at 14 of 26; the Cursor rule two releases stale; `CONTRIBUTING` eight
+  guards behind; `agent-sync` doctrine in four files and absent from the companion
+  matrix; `templates/README.md` stale.
+- **Surfaced at:** a question about why the audits keep finding things · **Owned by:**
+  the release that dogfooded the doc map and wrote six matrix rows, none of them the
+  one for its own most frequent change.
+- **Root cause:** a check can only walk the list it was given. Every guard was green
+  through all nine, because none of them was told the list should have that row on it.
+  The matrix is the list, and the row about adding to the list is the row nobody
+  writes.
+- **Fix:** grade 1 — the meta-row is step 0 of the matrix procedure, a guarded row in
+  the seeded template, a pass of the entry audit, a row here, and a named release step
+  whose one `review` cell (the Cursor rule) is called out by name. It earned its keep
+  on the first walk: it is what said this change alters agent behaviour elsewhere, so
+  the Cursor rule was part of it.
+- **The check:** the meta-row guard, probed by removing the row from a copy.
+- **Commit:** `17d53ba`
+- **Upstream?** Already upstream — the meta-row ships in the template and the doctrine,
+  so the next project starts with the row this one learned the hard way.
+
 ### 2026-08-03 · `enforcement-audit` · the previous fix was scoped to its instance
 
 - **Symptom:** `CONTRIBUTING.md` states its invariants are *"what the validator
@@ -224,6 +250,7 @@ One line per run, appended at stage 10. This is what makes "five runs" countable
 | Date | Topic | Commit | Verdict | Retro |
 |---|---|---|---|---|
 | 2026-08-03 | `default-routing-adoption` | `d76ff5e` | 9 REQ · 9 verified (one check revised mid-run, revision agreed) | 1 entry · 2 standing · retired 0 · added 0 · R-001 and R-002 both fired |
+| 2026-08-03 | `root-cause` | `17d53ba` | 1 cause behind 9 findings, fixed as doctrine | 1 entry · 2 standing · retired 0 · added 0 |
 | 2026-08-03 | `enforcement-audit` | `a34e5ff` | 1 finding, fixed as a class | 1 entry · 2 standing · retired 0 · added 0 |
 | 2026-08-03 | `surface-audit` | `86bcad1` | 4 findings, all fixed | 1 entry · 2 standing · retired 0 · added 0 |
 | 2026-08-03 | `setup-and-autonomy` | `7569dd6` | 11 REQ · 11 verified | no divergence · 2 standing · retired 0 · added 0 |
