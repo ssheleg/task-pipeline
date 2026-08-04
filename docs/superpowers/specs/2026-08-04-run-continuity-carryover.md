@@ -11,6 +11,7 @@
 
 | # | Stage | What | Why it isn't done | REQ | Where it lives now |
 |---|---|---|---|---|---|
+| 2 | 5 Dev | T8 — the context rule in `~/.claude/CLAUDE.md` — is written and shown but **not applied**: it needs the operator's explicit word, and a loop fire is not one | blocked on a human by design (REQ-009); a generic signal is not a specific authorization | REQ-009 | unresolved — blocks the stage-10 gate until the operator rules |
 | 1 | 1 Docs | `templates/carryover.md` ships `../references/audit.md`, which breaks the moment the template is seeded where its own doctrine says to seed it (`docs/superpowers/specs/`). Present since `2a6ff89` (v1.1.0); no prior run seeded the template verbatim, so nobody hit it | found mid-run, fix belongs to stage 5 | REQ-012 | REQ-012, this run |
 
 ## Columns
