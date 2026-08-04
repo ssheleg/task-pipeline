@@ -84,6 +84,7 @@ the `root-cause` retro entry from 2026-08-03. Logged as REQ-011.
 | REQ-010 | `pipeline.example.json` ships `run` **explicitly off**, so the example demonstrates the default instead of relying on its absence | `npm test` — example-vs-schema validation, plus a guard that the example carries the block | open |
 | REQ-011 | `docs/DOCMAP.md` gains a propagation row for **a change to the config contract** | review — no check can decide whether a matrix row is missing; the absence itself is the evidence | open |
 | REQ-012 | Every relative link in a seeded template resolves **from the destination the doctrine seeds it to**, not only from `templates/` | new guard: seed each template to its documented destination in a scratch tree and run the existing link resolver over it; negative self-test plants a `../`-relative link | open (added at stage 1) |
+| REQ-013 | The doctrine states what a loop fire does when the run is **parked at a `manual` gate**: the run quiesces its own loop and prints the re-arm command beside the gate | the continuity clause guard covers the sentence; the behaviour itself was exercised in this run | open (added at stage 2) |
 
 Frozen. Adding is free; removing needs the operator's explicit agreement.
 **REQ-012 was added at stage 1**, from a defect the run hit itself — the addition
@@ -104,6 +105,8 @@ is largely free.
 | D-2 | `manual` gates and outward acts are **never** collapsed by the mode | Repository floor: a generic flag is not a specific authorization |
 | D-3 | The threshold fires **only** on a harness signal (compaction warning, `PreCompact`) or the operator saying so | There is no tool that reports context percentage. A number the agent estimates is the guess that caused the complaint |
 | D-4 | Home: a `run` block in `pipeline.schema.json` **and** `references/continuity.md` | A project sets it once and is never asked again — which is what "stop repeating it" actually requires |
+| D-4a | **Amended at stage 2, with the operator's agreement:** the `run` block carries **`loop` only**. The context rule is unconditional doctrine with no toggle | The threshold is not measurable, so the one number a person would configure is the one that cannot be honoured — a field validating an unobservable value is a lie with a schema. And a safety rule with an off switch gets switched off |
+| D-8 | Parked at a `manual` gate, the run **cancels its own loop job** and prints the re-arm command beside the gate | Discovered by doing it: a fixed interval firing into a manual gate every five minutes trains the operator to ignore the loop — the same failure as a rule nobody reads to the end |
 | D-5 | Canonical Claude Code form: `/loop <interval> <invocation>`, a **fixed short interval** | The operator's answer, against my recommendation of the self-paced form. The mid-task-fire risk is closed by the build ledger: `Task <N>: complete` is the only DONE marker, so a fire inside a task resumes it |
 | D-6 | Default **off** when unrecorded | The operator's instruction, and it matches the deploy-authorization floor: silence authorizes nothing |
 | D-7 | The context rule also goes into the global `~/.claude/CLAUDE.md` | The complaint was about sessions in general, not only runs |
@@ -181,3 +184,25 @@ Two consequences for what gets written:
    The doctrine states the limit out loud and gives the degradation: on a harness
    with no loop primitive, the mode is prose discipline plus the ledger, and the
    run says so rather than pretending it is armed.
+
+## Stage 2 — design approved
+
+**UI verdict: not user-facing.** No screen, command or visible product behaviour.
+The super-ux track is not armed and no scenario tracing is owed.
+
+**One doctrine file, not two**, and the reason is causal rather than tidy: **the
+loop is what makes the context rule necessary.** Without a loop a run stops at the
+turn boundary anyway and never faces the question; with one, it faces it every
+iteration and answers "yes, start task 9" by default. Two files would hide the
+one interaction that justifies either of them. Shape follows
+[`hooks.md`](../../../plugins/task-pipeline/skills/task-pipeline/references/hooks.md),
+whose first section is *The limit, before the capability*.
+
+**Two decisions came out of the design rather than into it** — D-4a (the config
+carries `loop` only) and D-8 (a parked run quiesces its own loop). D-8 was found
+by doing: this run's own job would have fired into this very gate three times
+while the operator read the design.
+
+Approved by the operator on 2026-08-04, together with the D-4a amendment. The
+loop job was cancelled at the gate and re-armed with the go — the behaviour D-8
+now writes down.
