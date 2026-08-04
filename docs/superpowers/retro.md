@@ -33,6 +33,27 @@ Older entries and every retirement **move** to `docs/superpowers/retro/YYYY-QN.m
 at the prune. Moving is not deleting: the archive is append-only and holds the
 incident forever, so pruning the in-force list costs no knowledge.
 
+### 2026-08-03 · `enforcement-audit` · the previous fix was scoped to its instance
+
+- **Symptom:** `CONTRIBUTING.md` states its invariants are *"what the validator
+  enforces"* and listed sixteen while the validator enforced eight more concepts —
+  adoption, the exclusion clause, the opt-out, the input map, portability, the routing
+  template, the README-reach rule, the seeded-template Contents rule. Measured: each
+  `grep -ci` in CONTRIBUTING → 0, in validate.py → 1–11.
+- **Surfaced at:** a fifth audit, on the enforcement-claim axis · **Owned by:** the
+  release *before* it, which fixed exactly this class for references → README and
+  manifest and did not ask where else the class lived.
+- **Root cause:** the fix was written against the finding rather than the class.
+  `learned.md` rule 6 says sweep the class — and it was not applied to the sweep that
+  was applying it.
+- **Fix:** grade 1 — the invariant list is self-verifying: every invariant that cites
+  a guard cites a literal this validator actually prints, checked on every commit.
+- **The check:** the invariant-citation guard, probed both ways (a false citation, and
+  the list ceasing to cite at all).
+- **Commit:** `a34e5ff`
+- **Upstream?** No — `learned.md` rule 6 already covers it. This is an instance of the
+  rule failing to be applied to itself, which is worth recording and not worth a rule.
+
 ### 2026-08-03 · `surface-audit` · nine of nine verified, and four surfaces did not know
 
 - **Symptom:** one release after an acceptance that read *11/11 verified*, a fourth
@@ -203,6 +224,7 @@ One line per run, appended at stage 10. This is what makes "five runs" countable
 | Date | Topic | Commit | Verdict | Retro |
 |---|---|---|---|---|
 | 2026-08-03 | `default-routing-adoption` | `d76ff5e` | 9 REQ · 9 verified (one check revised mid-run, revision agreed) | 1 entry · 2 standing · retired 0 · added 0 · R-001 and R-002 both fired |
+| 2026-08-03 | `enforcement-audit` | `a34e5ff` | 1 finding, fixed as a class | 1 entry · 2 standing · retired 0 · added 0 |
 | 2026-08-03 | `surface-audit` | `86bcad1` | 4 findings, all fixed | 1 entry · 2 standing · retired 0 · added 0 |
 | 2026-08-03 | `setup-and-autonomy` | `7569dd6` | 11 REQ · 11 verified | no divergence · 2 standing · retired 0 · added 0 |
 | 2026-08-03 | `code-audit` | `270bc2c` | 8/8 findings fixed, each proven before and after | 2 entries · 2 standing · retired 0 · added 0 · R-001 and R-002 both fired |

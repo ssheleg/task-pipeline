@@ -355,6 +355,27 @@ if os.path.isfile(_art):
             fail(f"references/artifacts.md: no {_what} — the stage/artifact relation "
                  "must be mapped in BOTH directions, or one of them is assumed")
 
+# CONTRIBUTING.md claims to be "what the validator enforces". It was eight guards
+# behind when an audit measured it — the same class as the Cursor rule, on the
+# contributor-facing surface, and the previous fix (references -> README + manifest)
+# was scoped to its instance rather than the class. So the claim is now checked like
+# any other claim: an invariant that names a guard literal must name one this file
+# actually prints.
+_contrib = os.path.join(ROOT, "CONTRIBUTING.md")
+if os.path.isfile(_contrib):
+    _ct = open(_contrib, encoding="utf-8").read()
+    _self = open(os.path.abspath(__file__), encoding="utf-8").read()
+    _cited = re.findall(r"\*\(guard: `([^`]+)`\)\*", _ct)
+    if len(_cited) < 8:
+        fail("CONTRIBUTING.md: only %d invariant(s) name the guard that enforces them "
+             "— a list that claims to be 'what the validator enforces' and cites "
+             "nothing drifts silently" % len(_cited))
+    for _lit in _cited:
+        if _lit not in _self:
+            fail("CONTRIBUTING.md names a guard whose message does not appear in "
+                 "test/validate.py: %r — the invariant claims an enforcement that "
+                 "does not exist" % _lit)
+
 # A new reference has to REACH the surfaces a human and a foreign agent read. Three
 # instances in two releases: adoption.md, setup.md and portability.md landed and the
 # README's map and the portability manifest never heard of two of them. Reachability

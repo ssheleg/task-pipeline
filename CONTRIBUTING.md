@@ -142,6 +142,40 @@ omitted row reads as "does not apply".
 **16. The evaluation suite covers all five dimensions** and `evals/run.py` accepts
 it. Running it is a human step; the suite existing is not.
 
+**17. Both adoption walkthroughs ship, with the ratchet-baseline step.** Greenfield
+is the easy half and the one that gets written; brownfield is where a repository
+actually is. *(guard: `adoption without it is a tutorial for the repository nobody has`)*
+
+**18. The description states its exclusions, and the opt-out is exercised by an eval.**
+Default-on without a release valve is a trap, and an escape hatch nobody tests is not
+one. *(guard: `no eval exercises the opt-out phrase`)*
+
+**19. The stage/artifact relation is mapped in both directions.** What each stage
+writes, and what it reads and from where. *(guard: `must be mapped in BOTH directions`)*
+
+**20. Every workflow decision has a home inside the bundle.** The manifest in
+`references/portability.md` names it, and no row may point outside.
+*(guard: `manifest names`)*
+
+**21. The routing default ships as a file.** It is a workflow decision, so it travels
+with the bundle instead of being hand-installed into an operator's config.
+*(guard: `must ship as a file rather than be hand-installed`)*
+
+**22. Every reference reaches the README map and the manifest.** Reachability from
+`SKILL.md` proves an agent can *find* a file, not that a reader was *told* about it.
+*(guard: `is named nowhere in README.md`)*
+
+**23. A seeded template over 100 lines carries its own Contents.** A host project
+reads those files, and a partial read shows whichever sections come first.
+*(guard: `needs the same partial-read protection references get`)*
+
+**24. Every invariant above names the guard that enforces it, and that guard exists.**
+This list claims to be *what the validator enforces*; it was eight guards behind when
+an audit measured it. A claim of enforcement is now checked like any other claim.
+*(guard: `whose message does not appear in`)* — and a cited literal must lie inside
+a **single** string in `test/validate.py`: the check reads that file as text, so a
+quote straddling a line-continuation is a citation nothing can find.
+
 ## Adding or changing doctrine
 
 - **Change one idea per PR.** These files are read by agents under load; a PR that

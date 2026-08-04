@@ -1,5 +1,32 @@
 # Changelog
 
+## v1.10.2 — 2026-08-03
+
+### Fixed — the list of invariants was eight guards behind, and now checks itself
+
+A fifth audit pass, on two axes never used before: **the consumer's view** (unpack the
+published package and run its installer in an isolated HOME — clean install works, the
+refuse-on-plugin path fires, all 58 files present) and **one class swept end to end**:
+every claim of enforcement against the guard that supposedly makes it true.
+
+The doc map's six *Checked by* cells all resolved. `CONTRIBUTING.md` did not.
+It states plainly that its invariants are *"what the validator enforces"*, and it had
+sixteen while the validator enforced eight more concepts it had never heard of —
+adoption, the exclusion clause, the opt-out, the input map, portability, the routing
+template, the README-reach rule and the seeded-template Contents rule.
+
+**The previous round fixed this class in one instance and not as a class.** The reach
+guard shipped last release covers *references → README and manifest*; nothing covered
+*guard → CONTRIBUTING*. `references/learned.md` rule 6 — sweep the class, not the
+finding — applied to the sweep itself.
+
+So the list is now **self-verifying**: invariants 17–24 name the new guards, and every
+invariant that cites a guard cites a **literal this validator actually prints**. A
+claim of enforcement is checked like any other claim. One discovered constraint is
+stated with it: a cited literal must lie inside a *single* string in `test/validate.py`,
+because the check reads that file as text — a quote straddling a line-continuation is
+a citation nothing can find, which is how the first three citations failed.
+
 ## v1.10.1 — 2026-08-03
 
 ### Fixed — four surfaces that never heard about the last two releases

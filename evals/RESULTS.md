@@ -37,9 +37,9 @@ or it belongs in a check.
 | Dated runs recorded | **0** | 2026-08-03 |
 
 The bottom two numbers are the honest state of this skill's behavioural evidence.
-Everything else in this repository is proven by 61 structural guards that check the
+Everything else in this repository is proven by 62 structural guards that check the
 *form*; these are the only checks that would speak to the *behaviour*, and they have
-not been run yet. Printed here so "61 of 61 green" is never read as "the skill is
+not been run yet. Printed here so "62 of 62 green" is never read as "the skill is
 known to work".
 
 ## Runs
