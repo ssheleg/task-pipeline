@@ -83,8 +83,11 @@ the `root-cause` retro entry from 2026-08-03. Logged as REQ-011.
 | REQ-009 | The context rule also lands in `~/.claude/CLAUDE.md`, **with the diff shown before it is written** | the operator sees the diff; `grep` in the file afterwards. No repo check — stated honestly | open |
 | REQ-010 | `pipeline.example.json` ships `run` **explicitly off**, so the example demonstrates the default instead of relying on its absence | `npm test` — example-vs-schema validation, plus a guard that the example carries the block | open |
 | REQ-011 | `docs/DOCMAP.md` gains a propagation row for **a change to the config contract** | review — no check can decide whether a matrix row is missing; the absence itself is the evidence | open |
+| REQ-012 | Every relative link in a seeded template resolves **from the destination the doctrine seeds it to**, not only from `templates/` | new guard: seed each template to its documented destination in a scratch tree and run the existing link resolver over it; negative self-test plants a `../`-relative link | open (added at stage 1) |
 
 Frozen. Adding is free; removing needs the operator's explicit agreement.
+**REQ-012 was added at stage 1**, from a defect the run hit itself — the addition
+is recorded here rather than folded silently into REQ-002.
 
 ## Users & context
 
@@ -132,10 +135,49 @@ closed; the retro pruned, stamped and written.
 
 ## Open assumptions / risks
 
-- **`/loop`'s minimum interval is not documented to me.** The doctrine will name
-  the form and tell the operator to pick the shortest interval **longer than a
-  typical task**, rather than assert a number I cannot verify.
+- ~~**`/loop`'s minimum interval is not documented to me.**~~ **Resolved at stage
+  1** — see below. The mechanism was executed, not recalled.
 - **REQ-009 leaves the repository.** No guard here can prove a line exists in the
   operator's private global file; the brief says so rather than implying coverage.
 - **R-002 binds this run**: any batch of edits that returns an error gets every
   edit in the batch re-verified, not only the one that failed.
+
+## Stage 1 — grounded contracts
+
+No external library is in play. The **one** external contract this change
+documents is the harness's own loop mechanism, and this repository's most
+expensive past failure was a command described in thirteen files that did
+something else when run. So it was **armed and observed in this session**, and
+only the observed behaviour is written into doctrine.
+
+| Fact | Evidence |
+|---|---|
+| `/loop <N>m <prompt>` parses a leading `^\d+[smhd]$` token as the interval; the remainder is the prompt | the loop skill's own parsing rules, applied to this run's input |
+| `Nm` for N ≤ 59 becomes the cron expression `*/N * * * *`, scheduled with `recurring: true` | this run: `5m` → `*/5 * * * *`, job `1c656ab5` |
+| The job is **session-only** — never written to disk, gone when the session ends | the scheduler's own return value |
+| Recurring jobs **auto-expire after 7 days**, firing one final time | same |
+| **Jobs fire only while the REPL is idle — never mid-query** | the scheduler's documented runtime behaviour |
+| Recurring fires carry jitter: up to 10% of the period late, capped at 15 minutes | same |
+| An interval that does not divide its unit cleanly (`7m`, `90m`) must be rounded to one that does, and the rounding said out loud | the loop skill's interval table |
+| With **no** interval, the loop self-paces instead, and the delay is clamped to 60–3600 s | the wakeup tool's contract |
+| Loops of ≥60 minutes or daily cadence belong in the cloud scheduler, not here | the loop skill's cloud-offer rule |
+
+**This retires the risk recorded against D-5, and it retires it by construction
+rather than by care.** The objection to a fixed interval was that a fire could
+land inside an unfinished task and cause the completed work to be re-run. It
+cannot: the scheduler only enqueues while the REPL is idle. The build ledger
+remains the second line of defence for a fire that lands between two tasks after
+a context loss — but the first line is that the interrupt this risk assumed does
+not exist. **Doctrine must say both, and must not claim the ledger is what makes
+the interval safe.**
+
+Two consequences for what gets written:
+
+1. The doctrine names an interval **form**, never a magic number, and states the
+   rounding rule and the 7-day expiry, because a loop that silently dies on day
+   eight is worse than one that was never armed.
+2. `/loop` is **Claude-Code-only**, exactly like the hook contract in
+   [`hooks.md`](../../../plugins/task-pipeline/skills/task-pipeline/references/hooks.md).
+   The doctrine states the limit out loud and gives the degradation: on a harness
+   with no loop primitive, the mode is prose discipline plus the ledger, and the
+   run says so rather than pretending it is armed.

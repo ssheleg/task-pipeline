@@ -11,9 +11,7 @@
 
 | # | Stage | What | Why it isn't done | REQ | Where it lives now |
 |---|---|---|---|---|---|
-| 1 | 5 Dev | XLSX export path | scope call — CSV first | REQ-004 | LIN-483 |
-| 2 | 5 Review | `export.ts` lacks a size guard | minor, non-blocking | — | backlog |
-| 3 | 2 Brainstorm | REQ-007 dropped: bulk export | operator agreed 2026-07-28 | REQ-007 | dropped |
+| 1 | 1 Docs | `templates/carryover.md` ships `../references/audit.md`, which breaks the moment the template is seeded where its own doctrine says to seed it (`docs/superpowers/specs/`). Present since `2a6ff89` (v1.1.0); no prior run seeded the template verbatim, so nobody hit it | found mid-run, fix belongs to stage 5 | REQ-012 | REQ-012, this run |
 
 ## Columns
 
@@ -47,7 +45,7 @@ is the true statement.
 - **The set may only shrink.** If it grew, the run log gets one sentence saying why.
   A ratchet that grows silently is a TODO with a better name.
 - **A finding class that appears twice stops belonging here** and becomes a check in
-  the host's lint or CI ([`audit.md`](../references/audit.md) → *A class that
+  the host's lint or CI ([`audit.md`](../../../plugins/task-pipeline/skills/task-pipeline/references/audit.md) → *A class that
   repeats twice becomes a gate*). This ledger is for what cannot be automated, not
   for what nobody automated.
 
