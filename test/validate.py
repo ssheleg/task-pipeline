@@ -340,6 +340,21 @@ if os.path.isfile(_neg_wf):
                 fail(f"{_living}: states {_m.group(0)!r} but the workflow defines "
                      f"{_neg_n} negative self-tests — derive the number or delete it")
 
+# references/artifacts.md maps stage -> what it WRITES. The reverse direction — what
+# each stage READS and from where — is the one an agent actually needs at runtime,
+# and it was absent for nine releases: learned.md rule 2 (compute the mapping in both
+# directions) unapplied to this file itself. A stage whose inputs are unnamed reads
+# whatever the context happens to hold.
+_art = os.path.join(refdir, "artifacts.md")
+if os.path.isfile(_art):
+    _at = open(_art, encoding="utf-8").read()
+    for _needle, _what in (("Stage → input map", "the stage → input map"),
+                           ("Project-saved rules", "the project-saved-rules map"),
+                           ("Stage → artifact map", "the stage → artifact map")):
+        if _needle not in _at:
+            fail(f"references/artifacts.md: no {_what} — the stage/artifact relation "
+                 "must be mapped in BOTH directions, or one of them is assumed")
+
 # The adoption doctrine has to carry BOTH entry conditions. Greenfield is the easy
 # half and the one that gets written; brownfield is where a repository actually is,
 # and its third step — baselining the ratchets at today — is the whole reason the

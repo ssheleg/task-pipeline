@@ -1,5 +1,33 @@
 # Changelog
 
+## v1.9.1 — 2026-08-03
+
+### Added — the direction of the artifact map that was missing
+
+`references/artifacts.md` mapped **stage → what it writes → who consumes it** and
+nothing the other way. What an agent actually needs at runtime is **what each stage
+reads, and from where** — and that direction had been absent since the file was
+written. It is `references/learned.md` rule 2 (*compute the mapping in both
+directions*) left unapplied to this file itself: the direction that feels redundant
+is the one that finds things.
+
+Two tables now sit above the old one:
+
+- **Stage → input map** — per stage, the exact inputs and their origin. Stage 9's row
+  is the one worth reading twice: it takes **two different lists**, the stage-0 source
+  ledger (what the run *read*) and the doc map's propagation matrix (what the run
+  *owes*), and the gap between them is where documentation rots.
+- **Project-saved rules, and where each one binds** — the eight files a host project
+  owns that change how a run behaves, each with where it is read and where it is
+  enforced: `CLAUDE.md`/`AGENTS.md`, `docs/DOCMAP.md`, the retro's standing
+  instructions, the brief's autonomy section, the carry-over ledger,
+  `docs/ux/scenarios.md`, `.claude/agent-sync.json`, and the operator's global config
+  that decides whether a task routes here at all. Plus the precedence rule: for *what
+  is*, code wins; for *what should be*, the register wins, and the gap is a finding
+  rather than a tie-break.
+
+A guard holds all three maps present, with a negative self-test watched failing.
+
 ## v1.9.0 — 2026-08-03
 
 ### Added — the adoption track, and default-on inside a stated boundary
