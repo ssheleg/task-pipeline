@@ -43,3 +43,9 @@ Idempotent entry — inspect state first, never restart blindly:
   **resume** from the first incomplete stage instead of starting over.
 - Otherwise, begin at stage 0 (intake grill). If no task is given above, the
   grill's first question asks the operator for the task in one line.
+
+**`/task-pipeline setup`** — the entry audit instead of a feature. Runs seven passes
+over the documentation this project already has, reports findings as `file:line` + the
+minimal fix ordered by seam, and hands back a fix plan the pipeline can run. Offered
+once at stage 0 when the doc map is absent or stale; run it directly any time.
+Doctrine: `references/setup.md`.

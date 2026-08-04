@@ -62,6 +62,8 @@ gate stops until it is installed.
 | 10 Retrospective (the run's last act) | [`references/retrospective.md`](references/retrospective.md) |
 | 10 + any audit (what's *missing*) | [`references/audit.md`](references/audit.md) |
 | **first run in a project** (new or existing) | [`references/adoption.md`](references/adoption.md) |
+| **first run · the entry audit** (offered once) | [`references/setup.md`](references/setup.md) |
+| **what travels with the bundle vs stays in a project** | [`references/portability.md`](references/portability.md) |
 | any repeating loop | [`references/loop-guard.md`](references/loop-guard.md) |
 
 **Optional bridge.** If the operator already runs an equivalent skill set (e.g.
@@ -332,6 +334,11 @@ automation is on — `pipeline.schema.json` is the only contract.
 - `references/tdd.md` — stages 5–6: the iron law, red/green/refactor, the suite gate
 - `references/stages.md` — per-stage detail + exact gate criteria + gate types
 - `references/model-tiering.md` — model map, ids, the `/model` reminder mechanic, override
+- `references/setup.md` — the entry audit: seven passes over the docs you already
+  have, offered once, output as a fix plan; plus the inward check for rules that
+  belong upstream
+- `references/portability.md` — the manifest of workflow decisions and their homes
+  inside the bundle, and the boundary against a project's own answers
 - `references/adoption.md` — the first run in a project: greenfield seeding, and the
   brownfield walkthrough whose third step baselines the ratchets at today
 - `references/conventions.md` — how stages 6–10 read the host project's CLAUDE.md

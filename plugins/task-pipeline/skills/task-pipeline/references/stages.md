@@ -107,6 +107,12 @@ never that the work was skipped quietly.
   existing `docs/adr/` *is* the register and is recorded as such, never duplicated.
   The gate is seeded so that it exits `0` on its own seeds; a project that starts
   red learns on day one that the gate is noise.
+- **Phase 1b+ — offer the entry audit, once** ([`setup.md`](setup.md)). When
+  `docs/DOCMAP.md` is absent or its regime line predates the project's last release,
+  ask whether to audit the documentation that already exists **before** building on
+  it. Record the answer — including a refusal — in the brief's autonomy sweep and
+  never ask again. `audit.md`'s ladder runs at the *end* over the change; this runs
+  at the *start* over what is already there.
 - **Phase 1c — reconcile intent against as-built.** Git says how it *should* be;
   the run record says how it *turned out*. Read both for the area you are about to
   touch and resolve every divergence — the document is stale, the record is wrong,

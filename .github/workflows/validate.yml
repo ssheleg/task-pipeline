@@ -1019,6 +1019,53 @@ jobs:
             echo "OK: validator requires stage->inputs, stage->writes and the project-rules map"
           fi
 
+      - name: Negative self-test (a workflow decision must have a home inside the bundle)
+        run: |
+          set -eu
+          rm -rf /tmp/port-copy && cp -R . /tmp/port-copy
+          python3 - <<'EOF'
+          p = "/tmp/port-copy/plugins/task-pipeline/skills/task-pipeline/references/portability.md"
+          t = open(p, encoding="utf-8").read()
+          old = "`references/setup.md`"
+          assert old in t, "PLANT MISSED"
+          open(p, "w", encoding="utf-8").write(t.replace(old, "`../../elsewhere/setup.md`", 1))
+          EOF
+          if python3 /tmp/port-copy/test/validate.py; then
+            echo "ERROR: validator passed a manifest row pointing outside the bundle — a workflow decision that does not travel is a fork nobody named"
+            exit 1
+          else
+            echo "OK: every manifest path must resolve inside the bundle"
+          fi
+
+      - name: Negative self-test (the routing rule must ship as a file)
+        run: |
+          set -eu
+          rm -rf /tmp/rule-copy && cp -R . /tmp/rule-copy
+          rm /tmp/rule-copy/plugins/task-pipeline/skills/task-pipeline/templates/routing-rule.md
+          if python3 /tmp/rule-copy/test/validate.py; then
+            echo "ERROR: validator passed with the routing rule hand-installed only — it would not travel with the bundle"
+            exit 1
+          else
+            echo "OK: the routing default ships as a template"
+          fi
+
+      - name: Negative self-test (stage 2 must produce user paths and error paths)
+        run: |
+          set -eu
+          rm -rf /tmp/ux2-copy && cp -R . /tmp/ux2-copy
+          python3 - <<'EOF'
+          p = "/tmp/ux2-copy/plugins/task-pipeline/skills/task-pipeline/references/brainstorm.md"
+          t = open(p, encoding="utf-8").read()
+          assert "User paths are a design output" in t, "PLANT MISSED"
+          open(p, "w", encoding="utf-8").write(t.replace("User paths are a design output", "Some other heading"))
+          EOF
+          if python3 /tmp/ux2-copy/test/validate.py; then
+            echo "ERROR: validator passed a design stage that never names user paths or error paths — the hardest third gets invented at stage 5 by whoever implements it"
+            exit 1
+          else
+            echo "OK: the design stage owns paths, states and error paths"
+          fi
+
       - name: install.sh syntax check
         run: bash -n install.sh
 

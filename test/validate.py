@@ -355,6 +355,51 @@ if os.path.isfile(_art):
             fail(f"references/artifacts.md: no {_what} — the stage/artifact relation "
                  "must be mapped in BOTH directions, or one of them is assumed")
 
+# The portability manifest is the outward half of the check in
+# references/portability.md: every WORKFLOW decision must have a home inside the
+# bundle. A row naming a path that does not resolve here is a decision that was made
+# and then left somewhere that does not travel — the fork that file exists to catch.
+_port = os.path.join(refdir, "portability.md")
+if not os.path.isfile(_port):
+    fail("missing built-in doctrine: references/portability.md — without the manifest "
+         "nothing checks that workflow decisions live inside the bundle")
+else:
+    _pt = open(_port, encoding="utf-8").read()
+    _skill_root2 = os.path.dirname(refdir)
+    _man = re.search(r"^## The manifest.*?\n(.*?)(?=^## )", _pt, re.M | re.S)
+    if not _man:
+        fail("references/portability.md: no manifest section")
+    else:
+        _rows = [l for l in _man.group(1).splitlines() if l.startswith("|") and "`" in l]
+        if len(_rows) < 10:
+            fail("references/portability.md: manifest has %d row(s) — it enumerates "
+                 "every workflow decision, not a sample" % len(_rows))
+        for _row in _rows:
+            for _path in re.findall(r"`([a-zA-Z0-9_./-]+\.(?:md|json|sh))`", _row):
+                if not os.path.isfile(os.path.join(_skill_root2, _path)):
+                    fail("references/portability.md: manifest names %r, which does not "
+                         "resolve inside the bundle — a workflow decision whose home is "
+                         "outside the bundle does not travel with it" % _path)
+
+for _f, _needles in (
+    ("setup.md", ("What it inspects", "The finding shape", "inward check",
+                  "Offer, never write")),
+    ("companion-skills.md", ("Is this skill itself current", "sshlg-skills@latest update")),
+    ("brainstorm.md", ("User paths are a design output", "error paths")),
+):
+    _p2 = os.path.join(refdir, _f)
+    if not os.path.isfile(_p2):
+        fail("missing reference: references/" + _f)
+        continue
+    _b = open(_p2, encoding="utf-8").read()
+    for _n in _needles:
+        if _n not in _b:
+            fail("references/%s: missing %r — declared in the brief and absent from "
+                 "the file that has to carry it" % (_f, _n))
+if not os.path.isfile(os.path.join(os.path.dirname(refdir), "templates", "routing-rule.md")):
+    fail("missing template: templates/routing-rule.md — the routing default is a "
+         "workflow decision, so it must ship as a file rather than be hand-installed")
+
 # The adoption doctrine has to carry BOTH entry conditions. Greenfield is the easy
 # half and the one that gets written; brownfield is where a repository actually is,
 # and its third step — baselining the ratchets at today — is the whole reason the

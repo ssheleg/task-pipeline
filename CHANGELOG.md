@@ -1,5 +1,68 @@
 # Changelog
 
+## v1.10.0 — 2026-08-03
+
+### Added — the entry audit, and a boundary that keeps the workflow portable
+
+**`references/setup.md` — the audit that runs *before* the feature.** The ladder in
+`audit.md` runs at the end of a run, over the change; nothing ran at the start, over
+the documentation a project already has. Seven passes, cheapest first — one decision
+home, register integrity, propagation (ratcheted), the matrix's *Checked by* column,
+declared terms, the UX chain, and the gate itself proven against a planted defect.
+Findings carry `file:line`, the minimal fix and **the seam they belong to**, ordered
+by seam rather than by file, because a file-ordered list reads as noise and a
+seam-ordered one names the layer of the project's own process that is leaking. It
+ends in a fix plan, not a lecture, and it **fixes nothing while reading** — that is
+how a pass starts finding its own edits.
+
+**Offered once, never imposed.** Stage 0 asks when the doc map is absent or stale;
+the answer, including a refusal, is recorded in the brief and never asked again. A
+check that runs before every feature is a check people learn to dismiss.
+
+**`references/portability.md` — the boundary the whole bundle rests on.** A decision
+about *how the pipeline behaves* belongs in the bundle; a decision about *what this
+project decided* belongs in the project. Get it backwards and one of two quiet
+failures follows: an optimisation stranded in one repository, or a skill that has
+learned one project's answers and stopped being project-agnostic.
+
+It ships a **manifest** — every workflow decision with its home inside the bundle —
+and a guard that resolves every path. And it names both directions, because a
+comparison needs two sides: *outward*, does every workflow decision have a home here;
+*inward*, is this project holding a rule that would be true in a repository nobody
+has seen. The inward test is one line — **does the rule name a path, a command or a
+person?** If not, it is the bundle's, and keeping it local costs every future project.
+
+**The routing rule now travels.** It was hand-installed into an operator's config
+last release, which made it the one workflow decision living outside the bundle —
+neither installer touches any `CLAUDE.md`. It ships as `templates/routing-rule.md`,
+and `setup` **offers** to append it. Offers, never writes: it is the operator's
+configuration.
+
+### Added — three smaller things the same run asked for
+
+- **Self-currency.** Preflight compares the installed version with the released one
+  and recommends the **launcher** (`npx sshlg-skills update`), never the bare
+  per-skill form that re-creates the plain copy which shadows a plugin. Plus three
+  staleness signals that are not version numbers: a standing instruction that has not
+  fired in five stamps, a doc map older than the last release, a ratchet whose count
+  has not moved.
+- **The escalation boundary.** The autonomy sweep gains the rule that lets a run go
+  further without stopping: decide alone while the cost of being wrong stays inside
+  the repository and is reversible; escalate a price, a legal posture, a promise, money,
+  reputation, and any irreversible outward act. **The tell is the cost of being wrong,
+  not the size of the change.**
+- **User paths become a stage-2 output.** The contract layer was never the thin one —
+  the spec already locks error handling and a module dossier already has edge cases.
+  The thin layer was the *conversation*: `brainstorm.md` mentioned edge cases once and
+  scenarios not at all. Paths, states and error paths are now named where the design
+  is approved, and the gate says so. Scenario IDs stay the chain's job — two sources
+  for one scenario is worse than one.
+- **Declared terms.** The seeded doc map gains a *Terms* table, and only terms it
+  declares are checked. A heuristic over every capitalised word cries wolf, and a gate
+  that cries wolf is removed by the third person who hits it.
+
+Three new guards, each with a negative self-test watched failing.
+
 ## v1.9.1 — 2026-08-03
 
 ### Added — the direction of the artifact map that was missing

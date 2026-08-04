@@ -41,6 +41,14 @@
 | REQ-007 | Stage 2 produces user paths, states and error paths as **design outputs**, feeding the stage-3 chain | `brainstorm.md` gains the section and its gate clause; guard requires it |
 | REQ-008 | Every new invariant has a guard **and** a negative self-test watched failing | `npm run test:all` green with the floor raised |
 | REQ-009 | Released, catalogue pinned, local installs refreshed through the launcher, this run recorded | `npm view`, `list`, no shadow copies |
+| REQ-010 | `references/portability.md` — the manifest: every **workflow decision** with its home **inside the bundle**, plus the boundary rule (workflow decisions travel, project answers stay) | guard: every path the manifest names exists inside the skill, and no row points outside it |
+| REQ-011 | The routing rule travels with the bundle: `templates/routing-rule.md`, and `setup` **offers** to append it to the operator's config rather than writing silently | guard: the template exists and `setup.md` names the offer; C-2 of the previous run moves from accepted-risk to closed |
+
+**Added at gate 0, after the operator asked how workflow decisions stay portable.**
+Adding to a frozen list is free; nothing was removed. The finding that prompted them:
+**neither installer touches any `CLAUDE.md`** (`grep -c` = 0 in both), so the routing
+rule shipped last run was hand-installed and does not travel — the one *workflow*
+decision living outside the bundle.
 
 ## Users & UI verdict
 

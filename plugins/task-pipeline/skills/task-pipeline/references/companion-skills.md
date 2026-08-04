@@ -14,6 +14,7 @@ better, plus one that is required only for user-facing work.
 - The matrix
 - Optional bridge — substituting an external skill set
 - Preflight (emit before stage 0)
+- Is this skill itself current?
 - Credit
 - Hand-off the other direction
 
@@ -143,6 +144,39 @@ Rules:
 - Re-detect after the operator installs; don't assume.
 - The model answer goes into the brief. Don't ask again per stage
   (`model-tiering.md` → *Mechanic*).
+
+## Is this skill itself current?
+
+Preflight's other question, asked once beside the companion block. A pipeline running
+on a stale copy of its own doctrine repeats a class of failure that was already fixed
+upstream — and nothing in a run would ever reveal it.
+
+```bash
+npx --yes sshlg-skills@latest list      # what the current release of each member is
+```
+
+Compare it with what is installed. Behind → offer the **launcher**, never the bare
+per-skill form:
+
+```bash
+npx --yes sshlg-skills@latest update
+```
+
+The launcher moves the whole family, updates plugins and agent copies together, and
+prunes the plain `~/.claude/skills/<name>/` copies that otherwise shadow a plugin and
+serve the version they were copied from, forever. A bare `npx skills update <name>`
+re-creates exactly that shadow.
+
+**Three staleness signals worth naming**, because none of them is a version number:
+
+| Signal | What it means |
+|---|---|
+| A standing instruction that has not fired in five run stamps | the rule was situational; the prune retires it ([`retrospective.md`](retrospective.md)) |
+| A doc map older than the project's last release | the regime was decided for a project that has since changed shape — `setup` offers the entry audit ([`setup.md`](setup.md)) |
+| A ratchet whose count has not moved in months | either the backlog is genuinely frozen, or nobody is looking at the number printed beside every verdict |
+
+Recommend once, then continue. **Never a gate** — a run blocked on its own updater is
+a run that cannot ship a fix to the updater.
 
 ## Credit
 

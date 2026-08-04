@@ -490,6 +490,21 @@ now does:
   discover: author and reviewer are the same person, commits are unsigned, and the
   eval suite has not been executed.
 
+### The entry audit — before the feature, not after
+
+`/task-pipeline setup` runs seven passes over the documentation a project already
+has, and hands back a fix plan rather than a lecture: one decision home, register
+integrity, ratcheted propagation, the matrix's *Checked by* column, declared terms,
+the UX chain, and the gate itself proven against a planted defect. Findings carry
+`file:line`, the minimal fix and **the seam** — ordered by seam, because that names
+which layer of your process is leaking.
+
+Offered once when the doc map is absent or stale, and the refusal is recorded. It
+also runs the **inward check**: does this project hold a rule that would be true in a
+repository nobody has seen? If it names no path, no command and no person, it is the
+bundle's — and keeping it local costs every future project
+([`references/portability.md`](plugins/task-pipeline/skills/task-pipeline/references/portability.md)).
+
 ### Adopting it — a new project, and the one you actually have
 
 Greenfield is mechanical: stage 0 seeds `docs/DOCMAP.md`, the registers and the gate

@@ -21,6 +21,7 @@ approved design — not at code.
 - Working in an existing codebase
 - UI detection — a required output
 - The approved design is a set of decisions — record them
+- User paths are a design output, not a spec detail
 - GATE (manual)
 - Rationalizations
 
@@ -112,10 +113,32 @@ The cost of skipping it is specific: a design approved in conversation and recor
 only in the spec dies with that spec, and the next run re-opens a question the
 operator already answered.
 
+## User paths are a design output, not a spec detail
+
+For anything with a user-facing surface, the design is not done when the components
+are named. Three things come out of **this** stage and feed the stage-3 chain:
+
+1. **The paths** — how a user actually reaches this, start to finish, including the
+   route they take when they arrive from somewhere unexpected.
+2. **The states** — every screen or command has more than the happy one: loading,
+   empty, partial, denied, expired, offline. Name them here; naming them in the spec
+   means the design was approved without them.
+3. **The error paths** — what the user sees when it fails, what they can do next, and
+   what the system says out loud versus logs quietly.
+
+**Why here and not at stage 3.** The spec already locks *Error handling and
+degradation*, and a module dossier already has *Edge and failure cases* — the
+contract layer is not the thin one. What was thin is the conversation: a design
+approved without its error paths is a design whose hardest third is invented later by
+whoever implements it, alone, at stage 5.
+
+Feed them into [`spec.md`](spec.md)'s UX track — super-ux turns them into flows,
+screens and traced scenarios. **Do not draft scenario IDs here**; that is the
+chain's job, and two sources for one scenario is worse than one.
+
 ## GATE (manual)
 
-The operator approves the design **and** the UI verdict is recorded **and every REQ
-in the brief is answered by the design** — a requirement the design doesn't address
+The operator approves the design, **the UI verdict is recorded**, and — where that verdict is *yes* — **the paths, the states and the error paths are named** (above) rather than deferred to the spec. **Every REQ in the brief is answered by the design** — a requirement the design doesn't address
 is either covered now or explicitly dropped by the operator, with the drop written
 into the carry-over ledger. For a platform, the module map
 ([`decomposition.md`](decomposition.md)) is committed and approved as part of this

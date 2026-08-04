@@ -78,6 +78,21 @@ Raising a floor is a decision and belongs in the register.
 | Propagation backlog | `PROP_FLOOR` | 0 | <YYYY-MM-DD> |
 | `<fill me>` | … | … | … |
 
+## Terms
+
+Only terms **declared here** are checked. A heuristic over every capitalised word
+cries wolf, and a gate that cries wolf is removed by the third person who hits it —
+so this table is the project's own list, and it may start with three rows.
+
+| Term | Definition lives in | Anchor |
+|---|---|---|
+| `<Entity>` | `docs/DATA_MODEL.md` | `#entity` |
+| `<fill me>` | `<the one document that defines it>` | `#anchor` |
+
+Rules: **one definition per term**, the anchor resolves, and a document that uses the
+term links to that anchor rather than restating it. A term with two definitions is
+the same defect as a fact with two homes.
+
 ## Navigation
 
 - One definition per entity, with an explicit anchor.

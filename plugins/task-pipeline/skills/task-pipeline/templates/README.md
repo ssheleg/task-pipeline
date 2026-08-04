@@ -18,6 +18,7 @@ from `super-ux`.
 | `open-questions.md` | `docs/OPEN_QUESTIONS.md` | 0 seeds it, the Doc Loop resolves rows |
 | `docgate.sh` | `scripts/check-docs.sh` | 0 seeds it · 9 runs it · 10 proves it |
 | `hooks.example.json` | the project's `.claude/settings.json` | 0 — offered, never installed silently |
+| `routing-rule.md` | the operator's `CLAUDE.md` — **offered by `setup`, never written silently** | 0 / `setup` |
 | `retro.md` | `docs/superpowers/retro.md` — **one per project, not per run** | 10 writes (prune → stamp → entry), 0 reads it in full |
 | `retro-archive.md` | `docs/superpowers/retro/YYYY-QN.md` | 10 rotates into it, 0 **queries** it |
 
