@@ -18,6 +18,15 @@ session's history, so it stays focused; your context stays free for coordination
 plan to be executed — execute it. Stop only for BLOCKED you can't resolve, a
 genuine ambiguity, or completion. "Should I continue?" between tasks is noise.
 
+**Scope, so this is not mistaken for the run-wide mode:** the rule above governs
+the *inside* of this stage and is unconditional — it holds whether or not a loop
+is armed. What it cannot do is reach the other nine stages, or survive the
+boundary between one agent turn and the next; on a harness where prose does not
+carry across that boundary, only a scheduled re-invocation does.
+[`continuity.md`](continuity.md) owns that half, is recorded in `pipeline.json` →
+`run.loop`, and is **off unless recorded**. The two never disagree: one is a
+stage's internal discipline, the other is the run's pacing.
+
 **Narration:** at most one short line between tool calls. The ledger and the tool
 results are the record.
 

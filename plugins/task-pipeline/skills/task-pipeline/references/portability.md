@@ -51,6 +51,8 @@ a row pointing outside the bundle is the defect this file exists to catch.
 | The entry audit and what it inspects | `references/setup.md` |
 | The ladder, seams, axis rotation, ratchets | `references/audit.md` |
 | Loop detection and its caps | `references/loop-guard.md` |
+| **The run mode** — item-by-item pacing, default off, what it never collapses | `references/continuity.md` |
+| **The context budget** — the evidence rule and what a flush actually updates | `references/continuity.md` |
 | The retro: prune, cap, commits, archive | `references/retrospective.md` |
 | Rules earned by failure | `references/learned.md` |
 | **The routing default and its boundary** | `templates/routing-rule.md` |

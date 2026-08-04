@@ -170,6 +170,10 @@
       }
     }
   ],
+  "_run_note": "Run-wide pacing. Shipped explicitly OFF so this example DEMONSTRATES the default rather than relying on its absence — see references/continuity.md. Set mode to 'interval' and a project stops being asked whether to run item-by-item; it still stops at every manual gate. There is no context-budget field here on purpose: the threshold is not measurable, so it is unconditional doctrine, not config.",
+  "run": {
+    "loop": { "mode": "off", "interval": "5m", "command": "/loop" }
+  },
   "release": {
     "enabled": true,
     "trigger": "tag",

@@ -24,6 +24,47 @@ you recommend and what they're on, let them confirm or override (per-stage
 overrides welcome), record the answer — then **stop asking at every stage**. If the
 recommended tier isn't available, say which one you're using and continue.
 
+## Pacing — the run mode, and the context budget
+
+Two rules about how a run keeps going. Settle the first at stage 0, in the same
+block as the model; the second is unconditional and needs no setting.
+
+**The run mode.** On, the run advances one item per iteration and does not ask
+between items — the plan's tasks, the boundary between stages whose gate is
+automatic, the per-module loop, the acceptance tail. It stops for exactly four
+things: a manual gate, a block it can't resolve, a genuine ambiguity, completion.
+
+- **Off unless recorded.** Read the project's pipeline config → `run.loop`. A
+  recorded mode is the answer and is never re-asked; absent, the mode is **off**.
+  Silence arms nothing, the same floor deploy authorization uses.
+- **It buys pacing, never authorization.** It never collapses a manual gate, and
+  never a deploy, publish, PR or shared-design-file write. A generic flag is not a
+  specific authorization.
+- **Prose does not survive a turn boundary.** Where the harness offers a loop
+  primitive, arm it and say the interval, the job id and how to cancel; where it
+  does not, the mode degrades to discipline plus the build ledger — and you say
+  which of the two you are actually running rather than implying the stronger one.
+- **Pick an interval longer than a typical item**, and one that divides its unit
+  cleanly. If the job auto-expires, say when: a loop that quietly stops is worse
+  than one never armed.
+- **Parked at a manual gate, cancel the loop** and print the re-arm command beside
+  the gate. A loop firing into a gate every few minutes is a nag, and a nagged
+  operator stops reading.
+
+**The context budget.** Near the end of the window: finish the item in flight,
+**start no new one**, make the ledgers true, then continue. Compaction is a normal
+event, not the end of the run — what loses work is crossing it mid-item.
+
+- **It fires on evidence only:** a harness signal (a compaction warning, a
+  pre-compaction hook) or the user saying so. Nothing returns the remaining
+  percentage, so an estimate from transcript length is a guess — and announcing
+  that context is nearly spent without a signal is presenting a guess as a
+  measurement. A run that keeps volunteering it against a mostly-empty window
+  trains the user to disregard the one time it is true.
+- **Flushing updates what already exists** — the build ledger, the carry-over
+  ledger, requirement statuses, the task list. Not a summary written for the
+  compactor: that is a fourth copy of the truth that nobody maintains.
+
 ## Stage 0 — intake grill (MANDATORY, do this FIRST)
 
 Never skipped, and nothing to install — the grill is part of this rule. No "the

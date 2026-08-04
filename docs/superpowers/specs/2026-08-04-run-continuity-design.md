@@ -111,7 +111,16 @@ headings **exactly and in order** (the validator compares them literally).
 ```
 
 **Two sentences are contractual** — the clause guard (Contract 4, G3) checks for
-these literal substrings, so they must appear verbatim:
+these substrings **after normalising whitespace**, so they must appear verbatim
+apart from line breaks:
+
+**Amended at stage 5, from measuring the guard before shipping it.** The first
+sentence is 74 characters and wraps at the file's 80-column style, so a
+line-oriented search finds nothing and would reject correctly formatted prose.
+This repository has already paid for that lesson once — the citation guard
+normalises whitespace because six wrapped citations were reported as defects.
+G3 normalises the same way, and its negative self-test therefore plants a
+**deletion**, never a re-wrap.
 
 1. `never announce that the context is nearly spent without one of those signals`
 2. `Claude Code only`

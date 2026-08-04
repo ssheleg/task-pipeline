@@ -140,6 +140,7 @@ explicit "stop and ask me here":
 | Stage | What to settle up front |
 |---|---|
 | run-wide | the model decision ([`model-tiering.md`](model-tiering.md)); what to decide autonomously vs escalate |
+| run-wide Pacing | the **run mode** ([`continuity.md`](continuity.md)): does the run advance item-by-item with no check-in between items, and on what interval? Read `pipeline.json` → `run.loop` first — a recorded mode is the answer and is not re-asked. **Absent, it is off**: recommend it, take the answer, record it. It never collapses a `manual` gate or an outward act, so this row buys pacing, not authorization |
 | 0 Harvest | doc sources beyond this repo — other repos, hosted doc systems, the knowledge wiki, **the code graph** ([`knowledge-graph.md`](knowledge-graph.md): built / installed-not-built / absent) — and whether stage 9 may write to them (another repo is outward: propose + PR, never a direct push) |
 | 0 Setup audit | doc map absent or stale: run the entry audit over the existing documentation before building on it ([`setup.md`](setup.md))? Asked once; a refusal is recorded and never re-asked |
 | run-wide Escalation | cost of being wrong: decide alone while it stays inside the repository and reversible; escalate price, legal posture, promise, money, reputation, irreversible outward acts. Project exceptions? |
