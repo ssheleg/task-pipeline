@@ -1261,3 +1261,124 @@ jobs:
           npm install -g @anthropic-ai/claude-code
           claude plugin validate . --strict
           claude plugin validate plugins/task-pipeline --strict
+      - name: Negative self-test (the hygiene gate catches conflict markers)
+        run: |
+          set -eu
+          rm -rf /tmp/hyg1 && mkdir -p /tmp/hyg1
+          cp plugins/task-pipeline/skills/task-pipeline/templates/hygiene.sh /tmp/hyg1/gate.sh
+          echo "clean" > /tmp/hyg1/base.md
+          cd /tmp/hyg1
+          python3 - <<'EOF'
+          open('c1.md','w').write('a\n<<<<<<< HEAD\nx\n=======\ny\n>>>>>>> b\n')
+          EOF
+          test -s c1.md || { echo "ERROR: plant did not land — c1.md is empty"; exit 1; }
+          if bash gate.sh; then
+            echo "ERROR: hygiene gate passed with conflict markers present"
+            exit 1
+          else
+            echo "OK: hygiene gate rejects conflict markers"
+          fi
+      - name: Negative self-test (the hygiene gate catches a surviving placeholder)
+        run: |
+          set -eu
+          rm -rf /tmp/hyg2 && mkdir -p /tmp/hyg2
+          cp plugins/task-pipeline/skills/task-pipeline/templates/hygiene.sh /tmp/hyg2/gate.sh
+          echo "clean" > /tmp/hyg2/base.md
+          cd /tmp/hyg2
+          python3 - <<'EOF'
+          open('c2.py','w').write('# TODO: finish this\ndef f(): pass\n')
+          EOF
+          test -s c2.py || { echo "ERROR: plant did not land — c2.py is empty"; exit 1; }
+          if bash gate.sh; then
+            echo "ERROR: hygiene gate passed with a surviving placeholder present"
+            exit 1
+          else
+            echo "OK: hygiene gate rejects a surviving placeholder"
+          fi
+      - name: Negative self-test (the hygiene gate catches an unterminated fence)
+        run: |
+          set -eu
+          rm -rf /tmp/hyg3 && mkdir -p /tmp/hyg3
+          cp plugins/task-pipeline/skills/task-pipeline/templates/hygiene.sh /tmp/hyg3/gate.sh
+          echo "clean" > /tmp/hyg3/base.md
+          cd /tmp/hyg3
+          python3 - <<'EOF'
+          open('c3.md','w').write('# t\n\n```python\nx = 1\n')
+          EOF
+          test -s c3.md || { echo "ERROR: plant did not land — c3.md is empty"; exit 1; }
+          if bash gate.sh; then
+            echo "ERROR: hygiene gate passed with an unterminated fence present"
+            exit 1
+          else
+            echo "OK: hygiene gate rejects an unterminated fence"
+          fi
+      - name: Negative self-test (the hygiene gate catches a truncation stub)
+        run: |
+          set -eu
+          rm -rf /tmp/hyg4 && mkdir -p /tmp/hyg4
+          cp plugins/task-pipeline/skills/task-pipeline/templates/hygiene.sh /tmp/hyg4/gate.sh
+          echo "clean" > /tmp/hyg4/base.md
+          cd /tmp/hyg4
+          python3 - <<'EOF'
+          open('c4.js','w').write('function a() {}\n// ... existing code ...\n')
+          EOF
+          test -s c4.js || { echo "ERROR: plant did not land — c4.js is empty"; exit 1; }
+          if bash gate.sh; then
+            echo "ERROR: hygiene gate passed with a truncation stub present"
+            exit 1
+          else
+            echo "OK: hygiene gate rejects a truncation stub"
+          fi
+      - name: Negative self-test (the hygiene gate catches a duplicated adjacent block)
+        run: |
+          set -eu
+          rm -rf /tmp/hyg5 && mkdir -p /tmp/hyg5
+          cp plugins/task-pipeline/skills/task-pipeline/templates/hygiene.sh /tmp/hyg5/gate.sh
+          echo "clean" > /tmp/hyg5/base.md
+          cd /tmp/hyg5
+          python3 - <<'EOF'
+          open('c5.md','w').write('# t\n\nalpha\nbeta\ngamma\n\nalpha\nbeta\ngamma\n\ntail\n')
+          EOF
+          test -s c5.md || { echo "ERROR: plant did not land — c5.md is empty"; exit 1; }
+          if bash gate.sh; then
+            echo "ERROR: hygiene gate passed with a duplicated adjacent block present"
+            exit 1
+          else
+            echo "OK: hygiene gate rejects a duplicated adjacent block"
+          fi
+      - name: Negative self-test (the hygiene gate catches an empty section)
+        run: |
+          set -eu
+          rm -rf /tmp/hyg6 && mkdir -p /tmp/hyg6
+          cp plugins/task-pipeline/skills/task-pipeline/templates/hygiene.sh /tmp/hyg6/gate.sh
+          echo "clean" > /tmp/hyg6/base.md
+          cd /tmp/hyg6
+          python3 - <<'EOF'
+          open('c6.md','w').write('# t\n\n## One\n\n## Two\n\nbody\n')
+          EOF
+          test -s c6.md || { echo "ERROR: plant did not land — c6.md is empty"; exit 1; }
+          if bash gate.sh; then
+            echo "ERROR: hygiene gate passed with an empty section present"
+            exit 1
+          else
+            echo "OK: hygiene gate rejects an empty section"
+          fi
+      - name: Negative self-test (a gate script must keep its VERDICT block last)
+        run: |
+          set -eu
+          cp -R . /tmp/verdict-copy
+          python3 - <<'EOF'
+          p = "/tmp/verdict-copy/plugins/task-pipeline/skills/task-pipeline/templates/hygiene.sh"
+          t = open(p, encoding="utf-8").read()
+          marker = "# ---------- VERDICT"
+          assert marker in t, "plant would not land: no VERDICT section marker"
+          t2 = t.replace(marker, "# ---------- verdict-renamed")
+          assert marker not in t2, "plant did not land"
+          open(p, "w", encoding="utf-8").write(t2)
+          EOF
+          if python3 /tmp/verdict-copy/test/validate.py; then
+            echo "ERROR: validator passed with the VERDICT block renamed"
+            exit 1
+          else
+            echo "OK: validator requires the VERDICT block, on every gate script"
+          fi

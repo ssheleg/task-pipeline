@@ -799,11 +799,22 @@ else:
             fail(f"templates/{_gname}: no 'SCOPE:' header — a gate quoted as "
                  "evidence must state what it does NOT cover, or its green is read "
                  "as proof of a surface nobody walked")
-        _after_verdict = _g.split("VERDICT")[-1]
-        if "exit 0" not in _after_verdict or "exit 1" not in _after_verdict:
-            fail(f"templates/{_gname}: the VERDICT block must be last and must "
-                 "exit — a gate has shipped that appended a check after its verdict, "
-                 "printed FAIL and returned 0, with CI green over it")
+        # Split on the SECTION MARKER, not on the word. Splitting on "VERDICT"
+        # matched the header sentence that forbids appending after it, so the
+        # "tail" was most of the script and the guard passed on anything. Found by
+        # writing the first probe for it — the guard had been decorative since it
+        # shipped, on both gate scripts.
+        _vmark = [l for l in _g.splitlines() if l.startswith("# ---------- VERDICT")]
+        if not _vmark:
+            fail(f"templates/{_gname}: no '# ---------- VERDICT' section marker — "
+                 "the block that decides the exit code has to be findable, or "
+                 "'nothing runs after it' is unenforceable")
+        else:
+            _after_verdict = _g.split(_vmark[-1])[-1]
+            if "exit 0" not in _after_verdict or "exit 1" not in _after_verdict:
+                fail(f"templates/{_gname}: the VERDICT block must be last and must "
+                     "exit — a gate has shipped that appended a check after its "
+                     "verdict, printed FAIL and returned 0, with CI green over it")
 
     # A generator seeds green (references/learned.md rule 9). A scaffold whose own
     # gate rejects its own templates teaches every new project that the gate is
