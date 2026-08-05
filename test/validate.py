@@ -1541,6 +1541,48 @@ if os.path.isfile(_wf_p):
              "corrupt another's copy, and a test that passes against the wrong "
              "corruption proves nothing")
 
+# The read-back guards (v1.13.0). Four rules already lived in this bundle and were
+# stranded in stages that never handed them to the stage which had to obey them; the
+# fix is that stages 3 and 4 are told to go and read them. These three checks prove
+# the doctrine FILES CARRY the items — nothing here can prove a run in someone
+# else's repository performed a self-review, and saying so plainly is the point:
+# a guard that claimed otherwise would be the exact defect this release fixes.
+_rb = (
+    (os.path.join(refdir, "spec.md"), "references/spec.md", (
+        ("Every check this spec names resolves",
+         "stage 3 names checks, and nothing asked whether a named one is real"),
+        ("Read the decisions back",
+         "brainstorm.md records rejected options and no stage-3 item ever opens them"),
+        ("Print the cost",
+         "nothing anywhere asks whether a change still costs what it was worth"),
+    )),
+    (os.path.join(refdir, "planning.md"), "references/planning.md", (
+        ("Every command, path and file a DoD names resolves",
+         "learned.md rule 14 fired only at stage 9, four stages after the target is written"),
+    )),
+)
+for _p, _rel, _items in _rb:
+    if not os.path.isfile(_p):
+        continue
+    _txt = open(_p, encoding="utf-8").read()
+    for _needle, _why in _items:
+        if _needle not in _txt:
+            fail(f"{_rel}: the self-review no longer asks '{_needle}' — {_why}")
+    if "## Self-review" not in _txt or "computed number, not a tick" not in _txt:
+        fail(f"{_rel}: no committed '## Self-review' section shape — a checklist that "
+             "leaves no trace is an assertion, and this repository already demands "
+             "the set difference be PRINTED one stage over")
+
+# Rule 14 binds the stages that WRITE a target, not only the one that trips over it.
+_lp = os.path.join(refdir, "learned.md")
+if os.path.isfile(_lp):
+    _lt = open(_lp, encoding="utf-8").read()
+    for _stage in ("| 3 Spec | 14", "| 4 Plan | 14"):
+        if _stage not in _lt:
+            fail(f"references/learned.md: the stage map does not bind rule 14 at "
+                 f"'{_stage.strip('| ')}' — a rule mapped only to the stage that "
+                 "notices the breakage is a rule nobody reads while causing it")
+
 if errors:
     print("FAIL: task-pipeline structure invalid")
     for e in errors:
