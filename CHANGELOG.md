@@ -1,5 +1,44 @@
 # Changelog
 
+## v1.13.0 — 2026-08-05
+
+### Added — the read-back: four rules that existed and were never handed over
+
+Stages 3 and 4 produced documents stating things nobody verified: that a named
+check exists, that the spec agrees with decisions already made, that the
+self-review happened at all, and that the change still costs what it was worth.
+
+Five defects, and **four of them are one shape.** The rule already lived in this
+bundle, in a stage that never handed it to the stage which had to obey it. The
+evidence-for-checks rule sits at stages 6 and 10; the rejected-alternatives rule
+sits at stage 2; `learned.md` rule 14 has sat at stage 9 since v1.4.0. Stage 3
+names checks, contradicts decisions and writes DoDs — and read none of them back.
+
+So the fix is one mechanism applied four times. `spec.md`'s self-review now asks
+whether every check it names is real, reads back the brief's `Decisions locked`
+table **and** the alternatives stage 2 rejected, and prints the cost.
+`planning.md` asks whether every command, path and file a DoD names resolves.
+`learned.md`'s stage map binds rule 14 at 3 and 4, not only at 9.
+
+**The fifth is a genuine absence, and it prints rather than decides.** Nothing
+anywhere asked whether a change had outgrown its worth. The new checkpoint counts
+surfaces, guards and REQ rows now versus at stage 2 and prints all three — the
+stage-3 gate is the operator's, and an agent that narrows the task on its own
+judgement breaks *never narrow the task silently*.
+
+**Both self-reviews now leave a committed trace.** A `## Self-review` section,
+identical in shape across the two files, every line a **computed number rather
+than a tick** — because a number nobody computed is visible as such and a
+checkbox never is. `planning.md` already demanded the REQ set difference be
+*printed*; this extends that principle to the rest of the checklist.
+
+Three guards prove the files carry the items, with four probes. What they cannot
+prove is that a run in someone else's repository performed a self-review — and
+that boundary is stated in the spec, in the guard's own comment and here, because
+a guard claiming otherwise would be the exact defect this release fixes.
+
+Negative self-tests: 76 → 80.
+
 ## v1.12.0 — 2026-08-05
 
 ### Added — a gate for the defects an agent leaves behind

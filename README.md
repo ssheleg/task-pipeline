@@ -129,6 +129,7 @@ until it is installed.
 | any loop | [`loop-guard.md`](plugins/task-pipeline/skills/task-pipeline/references/loop-guard.md) — churn detection, caps, the break protocol |
 | run-wide pacing | [`continuity.md`](plugins/task-pipeline/skills/task-pipeline/references/continuity.md) — the loop mode (`run.loop`, default off, never collapses a manual gate) and the context budget (fires on a harness signal, never on an estimate) |
 | 0 + 9 + any settled decision | [`documentation.md`](plugins/task-pipeline/skills/task-pipeline/references/documentation.md) — the inventory, registers and ids, SSOT, the Doc Loop, supersede semantics, the propagation matrix, intent vs as-built |
+| 3 + 4 · every spec and plan | the self-review reads its rules back — is every named check real, does anything contradict a locked decision or a rejected option, and what does this cost now versus at design time. Answers land as a committed `## Self-review` of computed numbers |
 | 6–10 + any check you write | [`gates.md`](plugins/task-pipeline/skills/task-pipeline/references/gates.md) — the two axes, the promotion ladder, gate anatomy, the probe recipe, ratchet floors |
 | any agent-time enforcement | [`hooks.md`](plugins/task-pipeline/skills/task-pipeline/references/hooks.md) — the `PreToolUse` contract, the fail-open hazard, the Claude-Code-only limit |
 

@@ -124,6 +124,13 @@ scripts are validated by one iterated block, not two copies, and both must keep 
 `# ---------- VERDICT` marker with nothing after it.
 *(guard: `the VERDICT block must be last and must `)*
 
+**Stages 3 and 4 must keep reading their rules back.** `spec.md`'s self-review asks
+whether every check it names is real, reads back the brief's decisions and stage 2's
+rejected options, and prints the cost; `planning.md` asks whether every command a DoD
+names resolves; `learned.md` binds rule 14 at both stages. Both files carry a
+committed `## Self-review` section of computed numbers rather than ticks.
+*(guard: `the self-review no longer asks `)*
+
 **11. Every reference over 100 lines carries a `## Contents` list**, and the list is
 compared against that file's own `##` headings. The guidance asks for it because a
 long file gets previewed with a partial read; the comparison is because a hand-kept
