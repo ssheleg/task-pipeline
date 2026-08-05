@@ -251,7 +251,10 @@ never that the work was skipped quietly.
   `SCR-` screens, the CJM stages the feature serves, and the UX
   patterns/principles from super-ux that apply (`best-practices.md`,
   `ux-design-principles.md`, `component-guidelines.md`).
-- **GATE (manual):** spec committed **and** user-reviewed; **every section carries
+- **GATE (manual):** the **`## Self-review` section written and committed with
+  computed values** — every check the spec names resolving or marked `review`, the
+  brief's decisions and stage 2's rejected options read back with no unresolved
+  contradiction, and the cost delta printed; spec committed **and** user-reviewed; **every section carries
   `covers: REQ-…` and every REQ appears in at least one section**; for UI tasks
   additionally: the super-ux chain (foundation → flows → screens → scenarios) is
   designed, validated and approved; scenarios validated in `docs/ux/scenarios.md`;
@@ -270,7 +273,8 @@ never that the work was skipped quietly.
   paths, complete code in every step, TDD steps with expected output, DoD each,
   dependency graph + parallel groups, non-overlapping file ownership, and the
   Global Constraints block copied verbatim from the spec.
-- **GATE (auto):** **set equality — the REQ ids in the brief equal the union of
+- **GATE (auto):** the **`## Self-review` section written with computed values**,
+  every command, path and file a DoD names resolving; **set equality — the REQ ids in the brief equal the union of
   `Implements:` across plan tasks.** A non-empty difference fails the gate and is
   reported as the explicit list of dropped requirements; this is the seam where
   scope leaks silently, so the check is mechanical, not a judgement call. Plus:

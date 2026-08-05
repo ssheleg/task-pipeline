@@ -154,6 +154,8 @@ answer would have exposed it in a minute.
 | 3 Spec · 4 Plan | 2 (both directions), 8 (compute, never restate) |
 | 5 Dev | 9 (generators seed green), 12 (tests create their own state), 13 (local infra) |
 | 6 Tests | 4, 5, 10, 11 — every new check probed both ways, measured, and asserted on its exit code |
+| 3 Spec | 14 — every check the spec **names** must resolve at the moment it is named, or be marked `review` |
+| 4 Plan | 14 — every command, path and file a DoD names must resolve |
 | 9 Docs | 8, 14 — every number computed, every target resolvable |
 | 10 Acceptance | 1, 3, 6, 7 — axis rotation recorded, closure verified against artefacts, classes swept, ratchets printed |
 
