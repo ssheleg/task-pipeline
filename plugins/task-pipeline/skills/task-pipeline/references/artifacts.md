@@ -156,6 +156,7 @@ plugins/task-pipeline/
       conventions.md artifacts.md             #   host conventions, this layout
       companion-skills.md                     #   optional companions + preflight
     templates/                                # skeletons seeded into a host project
+      hygiene.sh                            # -> scripts/check-hygiene.sh (stages 5, 6, 9)
       README.md brief.md carryover.md context.md adr.md retro.md
 cursor/rules/task-pipeline.mdc                # Cursor channel (self-contained rule)
 bin/task-pipeline.js                          # npx installer (package task-pipeline-skill)

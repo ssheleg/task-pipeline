@@ -296,7 +296,9 @@ never that the work was skipped quietly.
   on the result, land it the project's way (merge, or a PR — outward, so it needs a
   go), remove the worktree. Stages 7–9 act on the integrated result, so a branch the
   operator chose to leave unmerged is recorded as such.
-- **GATE (auto):** all plan tasks DONE (three review verdicts per task: spec
+- **GATE (auto):** **the hygiene gate green in diff mode after every task**
+  (`references/build.md`) — six checks over what that task changed, no floor, and a
+  finding fixed in-task or carried over with a reason; all plan tasks DONE (three review verdicts per task: spec
   compliance, **REQ satisfied**, code quality); every finding fixed or parked with a
   ruling; **every parked finding and implementer concern harvested into the
   carry-over ledger** — nothing stays only in the scratch workspace, which is
@@ -311,7 +313,8 @@ never that the work was skipped quietly.
 - **Invoke:** the host test runner (see `conventions.md` → *Lint + test*); the
   built-in [`tdd.md`](tdd.md) cycle for any uncovered gap — failing test first,
   same as stage 5.
-- **GATE (auto):** the **full** suite is green (not just the new tests); new/changed code
+- **GATE (auto):** **the hygiene gate green over the whole tree**, its six counts
+  printed beside their floors; the **full** suite is green (not just the new tests); new/changed code
   is covered; no `skip`/`xfail` smuggling a red suite past the gate. Never advance
   to deploy on a red or partial run. **The carry-over count is printed beside this
   verdict** — a ratchet nobody prints is a TODO with a better name
@@ -381,7 +384,7 @@ never that the work was skipped quietly.
 - **Docs living in another repository** are outward: propose the edit, get an
   explicit go, then open a PR there. No go → the exact edit goes in the carry-over
   ledger.
-- **GATE (auto):** **the propagation matrix walked for every change type this run
+- **GATE (auto):** **the hygiene gate green**, counts printed; **the propagation matrix walked for every change type this run
   produced**, with every settled thing recorded under an id and every answered
   question resolved; **the documentation gate green, its ratchet counts printed and
   any skip stated** — this is what replaced the unfalsifiable *"docs in sync with

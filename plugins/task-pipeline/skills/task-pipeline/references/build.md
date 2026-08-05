@@ -247,10 +247,34 @@ physical: **two implementers writing one working tree corrupt each other's state
 
 | Status | Action |
 |---|---|
-| `DONE` | Build the review package, dispatch the task review ([`review.md`](review.md)). |
+| `DONE` | **Run the hygiene gate in diff mode first** (below), then build the review package and dispatch the task review ([`review.md`](review.md)). |
 | `DONE_WITH_CONCERNS` | Read the concerns first. Correctness or scope → resolve before review. Observations ("this file is getting large") → **append to the carry-over ledger**, then proceed. A concern that stays only in the report dies with the workspace. |
 | `NEEDS_CONTEXT` | Supply exactly what's missing, re-dispatch. |
 | `BLOCKED` | Diagnose: missing context → re-dispatch with it; needs more reasoning → a more capable model; too large → split the task; the plan itself is wrong → escalate to the operator. |
+
+### The hygiene gate — after every task, before the review
+
+A subagent's own report is not evidence about the text it left behind. Run the
+seeded gate over **what this task changed**, before the reviewer sees it:
+
+```bash
+HYGIENE_BASE=<the commit recorded before dispatching> bash scripts/check-hygiene.sh
+```
+
+Diff mode has **no floor**: this task wrote it, this task fixes it. Six checks — a
+half-resolved merge, a stub that outlived the task, a fence left open, a file
+"shortened" while being rewritten, a **block duplicated by a retried edit**, and a
+section opened and abandoned.
+
+The fifth is why the gate runs here rather than only at stage 6. A batch of edits
+where one applied twice, or never applied at all, is the incident behind standing
+instruction R-002 — and it is invisible in a status report. Found one task later it
+costs a re-dispatch; found eight tasks later it is fixed by an agent that no longer
+remembers the code.
+
+**The gate never edits. Fixing is yours.** A finding is repaired inside the same
+task, or it becomes a carry-over row with a reason — never a silent pass. A gate
+whose findings nobody acts on is a slower way of ignoring them.
 
 **Never** ignore an escalation, and never re-dispatch the same model with the same
 prompt after a BLOCKED. If the implementer says it's stuck, something must change.

@@ -57,6 +57,7 @@ a row pointing outside the bundle is the defect this file exists to catch.
 | Rules earned by failure | `references/learned.md` |
 | **The routing default and its boundary** | `templates/routing-rule.md` |
 | The seeded doc map, registers and gate | `templates/docmap.md`, `templates/decisions.md`, `templates/open-questions.md`, `templates/docgate.sh` |
+| Which agent-introduced defects are found, and that the agent fixes them rather than the script | `templates/hygiene.sh`, `references/build.md` |
 | What a stage reads, and which host files bind it | `references/artifacts.md` |
 | The design conversation, its hard gate, UI detection, user paths | `references/brainstorm.md` |
 | Cutting a platform into modules, brick criteria, build order | `references/decomposition.md` |
