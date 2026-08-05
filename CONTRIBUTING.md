@@ -117,6 +117,13 @@ found**, and run a minimum of live checks — because every section can go `dorm
 and a gate blind to a shape passes exactly like one that reads it. Change a template
 → run `npm test`, not just your eyes.
 
+**The same law now covers `templates/hygiene.sh`.** It is run over a clean scratch
+project, must exit `0`, and must report all six of its check counts — exit `0` alone
+proves nothing, because every check can go `dormant` and dormant is green. Both gate
+scripts are validated by one iterated block, not two copies, and both must keep a
+`# ---------- VERDICT` marker with nothing after it.
+*(guard: `the VERDICT block must be last and must `)*
+
 **11. Every reference over 100 lines carries a `## Contents` list**, and the list is
 compared against that file's own `##` headings. The guidance asks for it because a
 long file gets previewed with a partial read; the comparison is because a hand-kept

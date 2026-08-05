@@ -770,31 +770,51 @@ else:
     # The seeded gate travels to macOS (bash 3.2) and to whatever CI the host runs.
     # These three constructs fail SILENTLY rather than loudly: BSD `sed -i` needs an
     # argument GNU refuses and `0,/re/` does not exist there at all.
-    gate = os.path.join(tpl_dir, "docgate.sh")
-    if not os.path.isfile(gate):
-        fail("missing template: templates/docgate.sh (the seeded documentation gate)")
-    else:
-        _g = open(gate, encoding="utf-8").read()
+    # ITERATED, NOT COPIED. A second seeded gate arrived (hygiene.sh) and copying
+    # this block for it would have created two guards to keep in step — which is the
+    # drift this repository writes retro entries about. Adding a third gate means
+    # adding its name here and nothing else.
+    GATE_SCRIPTS = (
+        ("docgate.sh", "the seeded documentation gate"),
+        ("hygiene.sh", "the seeded artifact-hygiene gate"),
+    )
+    for _gname, _gwhat in GATE_SCRIPTS:
+      _gpath = os.path.join(tpl_dir, _gname)
+      if not os.path.isfile(_gpath):
+        fail(f"missing template: templates/{_gname} ({_gwhat})")
+      else:
+        _g = open(_gpath, encoding="utf-8").read()
         # Scan CODE, not comments. The gate's own header names these three
         # constructs in order to forbid them; a detector that reads its own
         # prohibition as a violation is the false-positive class of learned rule 10,
-        # and a gate that cries wolf is switched off by the third person who hits it.
+      # and a gate that cries wolf is switched off by the third person who hits it.
         _g_code = "\n".join(l for l in _g.splitlines() if not l.lstrip().startswith("#"))
         for _bad, _why in ((r"grep\s+-[a-zA-Z]*P\b", "grep -P is not on macOS"),
                            (r"\bsed\s+-i\b", "sed -i is not portable"),
                            (r"\breadarray\b|\bmapfile\b", "readarray/mapfile is bash 4+")):
             if re.search(_bad, _g_code):
-                fail(f"templates/docgate.sh: non-portable construct ({_why}) — the "
+                fail(f"templates/{_gname}: non-portable construct ({_why}) — the "
                      "gate ships to macOS bash 3.2 and must behave identically there")
         if "SCOPE:" not in _g:
-            fail("templates/docgate.sh: no 'SCOPE:' header — a gate quoted as "
+            fail(f"templates/{_gname}: no 'SCOPE:' header — a gate quoted as "
                  "evidence must state what it does NOT cover, or its green is read "
                  "as proof of a surface nobody walked")
-        _after_verdict = _g.split("VERDICT")[-1]
-        if "exit 0" not in _after_verdict or "exit 1" not in _after_verdict:
-            fail("templates/docgate.sh: the VERDICT block must be last and must "
-                 "exit — a gate has shipped that appended a check after its verdict, "
-                 "printed FAIL and returned 0, with CI green over it")
+        # Split on the SECTION MARKER, not on the word. Splitting on "VERDICT"
+        # matched the header sentence that forbids appending after it, so the
+        # "tail" was most of the script and the guard passed on anything. Found by
+        # writing the first probe for it — the guard had been decorative since it
+        # shipped, on both gate scripts.
+        _vmark = [l for l in _g.splitlines() if l.startswith("# ---------- VERDICT")]
+        if not _vmark:
+            fail(f"templates/{_gname}: no '# ---------- VERDICT' section marker — "
+                 "the block that decides the exit code has to be findable, or "
+                 "'nothing runs after it' is unenforceable")
+        else:
+            _after_verdict = _g.split(_vmark[-1])[-1]
+            if "exit 0" not in _after_verdict or "exit 1" not in _after_verdict:
+                fail(f"templates/{_gname}: the VERDICT block must be last and must "
+                     "exit — a gate has shipped that appended a check after its "
+                     "verdict, printed FAIL and returned 0, with CI green over it")
 
     # A generator seeds green (references/learned.md rule 9). A scaffold whose own
     # gate rejects its own templates teaches every new project that the gate is
@@ -806,6 +826,44 @@ else:
     # populated register and a planted propagation violation went uncaught. A
     # promise kept for one shape is a promise, not a contract — so the contract is
     # what runs here.
+    # The hygiene gate is EXECUTED, not merely read — same law as the doc gate below
+    # it, and for the same reason: a seeded gate that is red on the seeds teaches a
+    # new project on day one that the gate is noise. Run it over a scratch project
+    # holding one clean file and require exit 0 with all six checks reported live.
+    _hyg = os.path.join(tpl_dir, "hygiene.sh")
+    if os.path.isfile(_hyg) and shutil.which("bash"):
+        _hs = tempfile.mkdtemp(prefix="tp-hyg-")
+        try:
+            with open(os.path.join(_hs, "README.md"), "w", encoding="utf-8") as _fh:
+                _fh.write("# Scratch\n\nOne clean sentence, no defects of any kind.\n")
+            with open(os.path.join(_hs, "check-hygiene.sh"), "w", encoding="utf-8") as _fh:
+                _fh.write(open(_hyg, encoding="utf-8").read())
+            _r = subprocess.run(["bash", "check-hygiene.sh"], cwd=_hs,
+                                capture_output=True, text=True)
+            _out = _r.stdout + _r.stderr
+            if _r.returncode != 0:
+                fail(f"templates/hygiene.sh seeds RED on a clean scratch project "
+                     f"(exit {_r.returncode}) — a gate that rejects a file with "
+                     "nothing wrong in it gets switched off. Output: "
+                     + _out.strip()[-500:])
+            else:
+                # Exit 0 alone proves nothing: every check could have gone dormant,
+                # and dormant is green by design. Require the verdict to report all
+                # six counts, which is the smallest evidence that it looked.
+                _missing = [_k for _k in ("conflict", "placeholder", "fence",
+                                          "truncation", "duplicate", "empty-section")
+                            if _k not in _out]
+                if _missing:
+                    fail("templates/hygiene.sh exited 0 without reporting "
+                         f"{_missing} — a verdict that omits a check is "
+                         "indistinguishable from a check that never ran")
+        finally:
+            shutil.rmtree(_hs, ignore_errors=True)
+
+    # Bound explicitly: this block runs the DOCUMENTATION gate. It used to inherit
+    # `gate` from the check above, which silently became the last-iterated script the
+    # moment that check grew a second one.
+    gate = os.path.join(tpl_dir, "docgate.sh")
     if os.path.isfile(gate) and shutil.which("bash"):
 
         def _run_seed(label, shape, build, min_ok):
@@ -1451,6 +1509,37 @@ if os.path.isdir(_tpl):
             fail(f"templates/{_fn}: relative link {_t!r} resolves only from "
                  "templates/, not from the destination it is seeded to — a seeded "
                  "template must be self-contained; name the file in a code span")
+
+# Two negative self-tests that share a scratch directory can mask each other: the
+# second copy lands in a populated tree, git's read-only pack files refuse to be
+# overwritten, and on a good day it fails loudly. On a bad day it succeeds and the
+# test passes against the FIRST test's corruption instead of its own. Found by a
+# collision on /tmp/verdict-copy, in the release that ships a gate for exactly this
+# class of accident.
+_wf_p = os.path.join(ROOT, ".github/workflows/validate.yml")
+if os.path.isfile(_wf_p):
+    _wf_t = open(_wf_p, encoding="utf-8").read()
+    # Strip heredoc bodies first. A step that PLANTS a duplicate as test data
+    # contains the very string this scans for, and counting it made the guard fail
+    # on its own negative self-test — the same class as the markdown fence strip
+    # above, one file format over.
+    _wf_scan, _inheredoc = [], False
+    for _l in _wf_t.splitlines():
+        if "<<'EOF'" in _l:
+            _inheredoc = True
+            continue
+        if _inheredoc:
+            if _l.strip() == "EOF":
+                _inheredoc = False
+            continue
+        _wf_scan.append(_l)
+    _dirs = re.findall(r"cp -R \. (/tmp/[A-Za-z0-9._-]+)", "\n".join(_wf_scan))
+    _dupes = sorted({d for d in _dirs if _dirs.count(d) > 1})
+    if _dupes:
+        fail("`.github/workflows/validate.yml`: scratch directories reused across "
+             f"negative self-tests: {_dupes} — a shared scratch dir lets one test "
+             "corrupt another's copy, and a test that passes against the wrong "
+             "corruption proves nothing")
 
 if errors:
     print("FAIL: task-pipeline structure invalid")

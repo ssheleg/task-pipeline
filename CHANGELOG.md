@@ -1,5 +1,59 @@
 # Changelog
 
+## v1.12.0 — 2026-08-05
+
+### Added — a gate for the defects an agent leaves behind
+
+Every other check in this repository asks whether the work is *right*. None of
+them asked whether the text is *intact* — whether a merge was left half-resolved,
+a stub outlived its task, a generation stopped mid-fence, a file was "shortened"
+while being rewritten, a retried edit duplicated a block instead of replacing it,
+or a section was opened and abandoned. That class has an author, and the author is
+an agent.
+
+`templates/hygiene.sh` is the answer: a seeded, executable gate, sibling of
+`docgate.sh`, carrying the same contracts — a `SCOPE:` header that names its own
+false-positive surfaces, a VERDICT block that must be last, portability to macOS
+bash 3.2, progressive arming, and a final line of computed numbers. It runs in two
+modes: the run's diff at **zero tolerance**, and the whole tree behind per-check
+**ratchet floors**, so an existing repository can adopt it without starting red
+while nothing new is forgiven.
+
+**It never edits.** None of the six defects is safely machine-fixable — deleting a
+"duplicated block" sometimes deletes a legitimate repetition, and deleting a `TODO`
+erases a reminder instead of discharging it. `references/build.md` makes fixing the
+agent's obligation, at the point it is cheapest: after each task reports `DONE`,
+before the reviewer sees it. Found one task later, a defect costs a re-dispatch;
+found eight tasks later it is fixed by an agent that no longer remembers the code.
+
+**Two of the six definitions were wrong until they were measured**, which is the
+point of the rule that says measure a detector before shipping it. Matching the
+word `TODO` anywhere found 33 hits here, 28 of them ordinary English — this is a
+repository whose own doctrine is *"a ratchet, never a TODO"*. Anchored as a
+line-leading marker: 0. Flagging a heading followed by any heading found 62
+legitimate nestings; restricted to same-or-higher level it found 4, and the
+detector still had a bug — fenced lines were skipped entirely, so a section whose
+body is one code block looked empty. Counting fenced content as body: 2, both real.
+Check 4 then repeated check 2's mistake in its sibling and was caught the same way.
+
+Those last 2 were fixed rather than absorbed into a floor, so all six ship at 0.
+One of them was a shape mistake in the retro template every project copies: a
+one-line retirement record written as a heading, when a heading promises a section.
+
+### Fixed — a guard that had been decorative since it shipped
+
+Writing the first probe for the VERDICT-last contract revealed that the guard split
+each gate script on the *word* `VERDICT`, which also appears in the header sentence
+forbidding anything after it. Its "tail after the verdict" was therefore most of the
+script, exit lines included, and it passed on anything. It now splits on the
+`# ---------- VERDICT` marker and requires that marker to exist. A green from a
+check nobody has watched fail is not evidence; this one was green for nine releases.
+
+The template contract guards now iterate a `GATE_SCRIPTS` list instead of naming one
+file, so a third gate costs one line rather than a copied block that drifts.
+
+Negative self-tests: 68 → 75.
+
 ## v1.11.0 — 2026-08-04
 
 ### Added — run continuity: the pacing rules the operator was repeating by hand

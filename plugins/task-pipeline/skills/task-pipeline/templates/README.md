@@ -17,6 +17,7 @@ from `super-ux`.
 | `decisions.md` | `docs/DECISIONS.md` — the decision register | 0 seeds it, the Doc Loop appends |
 | `open-questions.md` | `docs/OPEN_QUESTIONS.md` | 0 seeds it, the Doc Loop resolves rows |
 | `docgate.sh` | `scripts/check-docs.sh` | 0 seeds it · 9 runs it · 10 proves it |
+| `hygiene.sh` | `scripts/check-hygiene.sh` | 0 seeds it · **5 runs it after every task** · 6 and 9 run it · 10 proves it |
 | `hooks.example.json` | the project's `.claude/settings.json` | 0 — offered, never installed silently |
 | `routing-rule.md` | the operator's `CLAUDE.md` — **offered by `setup`, never written silently** | 0 / `setup` |
 | `retro.md` | `docs/superpowers/retro.md` — **one per project, not per run** | 10 writes (prune → stamp → entry), 0 reads it in full |

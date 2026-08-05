@@ -37,12 +37,15 @@ or it belongs in a check.
 | Dated runs recorded | **0** | 2026-08-03 |
 
 The bottom two numbers are the honest state of this skill's behavioural evidence.
-Everything else in this repository is proven by 68 structural guards that check the
+Everything else in this repository is proven by 76 structural guards that check the
 *form*; these are the only checks that would speak to the *behaviour*, and they have
 not been run yet. Printed here so "63 of 63 green" is never read as "the skill is
 known to work".
 
 ## Runs
+
+Newest first. Each entry states the model, the task, and how the evidence was
+obtained — a self-observed run and a blind one are not the same claim.
 
 ## 2026-08-03 · opus · self-observed, not a blind run
 
