@@ -197,6 +197,13 @@ not authorize an outward, irreversible action — stage 7 stops and asks.
    exact values every later task inherits. Self-review it for placeholders,
    contradictions, ambiguity and scope before showing it. For UI tasks, run the UX
    chain FIRST (see super-ux below) and embed it.
+   **Before handing a spec or a plan over, read your rules back:** does every
+   check you named actually exist (or say `review`)? does anything here
+   contradict a decision already locked, including an option deliberately
+   rejected? how many surfaces, guards and requirements is this now versus
+   when the design was approved — print all three and let the operator
+   decide. Leave the answers as a committed `Self-review` section of
+   computed numbers, not ticks.
 4. **Plan** (auto) — every task names the REQ ids it `Implements:`, and the set of those ids must **equal** the brief's REQ set — a difference is scope lost, print it and fix it. Zero-context tasks: exact paths, complete code in every step,
    the exact command and its expected output, TDD steps, DoD each, dependency graph
    + parallel groups, non-overlapping file ownership. **No placeholders** — no TBD,

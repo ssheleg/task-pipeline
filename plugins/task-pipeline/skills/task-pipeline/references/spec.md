@@ -143,6 +143,42 @@ Read what you wrote with fresh eyes and fix inline. No subagent, no second pass:
 4. **Scope:** is this one implementable plan, or does it need decomposition?
 5. **Ambiguity:** can any requirement be read two ways? Pick one and say it.
 6. **Traceability (UI):** does every user-facing requirement name its scenario ID?
+7. **Every check this spec names resolves.** Walk the verification claims — the
+   table, and every sentence that says how something is proven. For each: does that
+   check exist today, or is this plan building it? A check that is neither is **not**
+   a verification: mark it `review` and say so, or build it. This repository's whole
+   doctrine is that a green from a check nobody watched fail is not evidence — and
+   this stage is where checks are first *named*, which is one step earlier than
+   anyone was looking.
+8. **Read the decisions back.** Open the brief's `## Decisions locked` table **and**
+   the register entries stage 2 recorded for the alternatives it *rejected*
+   (`references/brainstorm.md` → *The approved design is a set of decisions*). Does
+   any contract here contradict one? Resolve it **out loud** — amend the spec, or
+   reverse the decision and record the reversal. A spec that quietly contradicts a
+   settled decision re-opens a question the operator already answered.
+9. **Print the cost.** Count the surfaces this spec touches, the guards it adds and
+   the REQ rows, now versus at stage 2. **Print all three and decide nothing.**
+   Growth is information for the operator, whose gate this is; an agent that narrows
+   the task on its own judgement breaks *never narrow the task silently*.
+10. **Run the hygiene gate** over what this stage wrote and record its counts below.
+
+### The `## Self-review` section — committed, not asserted
+
+The checklist above leaves a **committed trace**, last section before the gate.
+Every line carries a **computed number, not a tick**: a number nobody computed is
+visible as such, and a checkbox never is. `planning.md` uses the identical shape, so
+one habit covers both stages.
+
+```markdown
+## Self-review
+
+- REQ coverage: <n> in brief, <n> covered, difference <set or ∅>
+- Named checks: <n> named, <n> resolve, <n> marked `review`
+- Decisions: checked against <the brief's D-table> and <stage 2's rejected options> — <verdict>
+- Cost: <surfaces>/<guards>/<REQ> now, <…> at stage 2 — <proportionate | grown, and why>
+- Hygiene: <n> checks, <n> findings, <n> open
+- Placeholders: <n> · Ambiguity: <n> found, <n> resolved inline
+```
 
 ## Locked contracts are decisions — the register, not only the spec
 

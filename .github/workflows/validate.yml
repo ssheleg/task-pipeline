@@ -1400,3 +1400,79 @@ jobs:
           else
             echo "OK: validator rejects a reused scratch directory"
           fi
+      - name: Negative self-test (the spec must keep asking whether a named check is real)
+        run: |
+          set -eu
+          rm -rf /tmp/readback-spec-copy && cp -R . /tmp/readback-spec-copy
+          python3 - <<'EOF'
+          p = "/tmp/readback-spec-copy/plugins/task-pipeline/skills/task-pipeline/references/spec.md"
+          t = open(p, encoding="utf-8").read()
+          n = "Every check this spec names resolves"
+          assert n in t, "plant would not land: needle absent"
+          t2 = t.replace(n, "removed-by-probe", 1)
+          assert n not in t2, "plant did not land"
+          open(p, "w", encoding="utf-8").write(t2)
+          EOF
+          if python3 /tmp/readback-spec-copy/test/validate.py; then
+            echo "ERROR: validator passed without 'Every check this spec names resolves'"
+            exit 1
+          else
+            echo "OK: validator requires it"
+          fi
+      - name: Negative self-test (a plan must keep asking whether a DoD's targets resolve)
+        run: |
+          set -eu
+          rm -rf /tmp/readback-plan-copy && cp -R . /tmp/readback-plan-copy
+          python3 - <<'EOF'
+          p = "/tmp/readback-plan-copy/plugins/task-pipeline/skills/task-pipeline/references/planning.md"
+          t = open(p, encoding="utf-8").read()
+          n = "Every command, path and file a DoD names resolves"
+          assert n in t, "plant would not land: needle absent"
+          t2 = t.replace(n, "removed-by-probe", 1)
+          assert n not in t2, "plant did not land"
+          open(p, "w", encoding="utf-8").write(t2)
+          EOF
+          if python3 /tmp/readback-plan-copy/test/validate.py; then
+            echo "ERROR: validator passed without 'Every command, path and file a DoD names resolves'"
+            exit 1
+          else
+            echo "OK: validator requires it"
+          fi
+      - name: Negative self-test (the self-review must leave a committed trace)
+        run: |
+          set -eu
+          rm -rf /tmp/readback-trace-copy && cp -R . /tmp/readback-trace-copy
+          python3 - <<'EOF'
+          p = "/tmp/readback-trace-copy/plugins/task-pipeline/skills/task-pipeline/references/spec.md"
+          t = open(p, encoding="utf-8").read()
+          n = "computed number, not a tick"
+          assert n in t, "plant would not land: needle absent"
+          t2 = t.replace(n, "removed-by-probe", 1)
+          assert n not in t2, "plant did not land"
+          open(p, "w", encoding="utf-8").write(t2)
+          EOF
+          if python3 /tmp/readback-trace-copy/test/validate.py; then
+            echo "ERROR: validator passed without 'computed number, not a tick'"
+            exit 1
+          else
+            echo "OK: validator requires it"
+          fi
+      - name: Negative self-test (rule 14 must bind the stages that write the targets)
+        run: |
+          set -eu
+          rm -rf /tmp/readback-map-copy && cp -R . /tmp/readback-map-copy
+          python3 - <<'EOF'
+          p = "/tmp/readback-map-copy/plugins/task-pipeline/skills/task-pipeline/references/learned.md"
+          t = open(p, encoding="utf-8").read()
+          n = "| 3 Spec | 14"
+          assert n in t, "plant would not land"
+          t2 = t.replace(n, "| 3 Spec | none", 1)
+          assert n not in t2, "plant did not land"
+          open(p, "w", encoding="utf-8").write(t2)
+          EOF
+          if python3 /tmp/readback-map-copy/test/validate.py; then
+            echo "ERROR: validator passed with rule 14 unmapped at stage 3"
+            exit 1
+          else
+            echo "OK: validator requires rule 14 at the stages that write targets"
+          fi

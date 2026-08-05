@@ -12,7 +12,7 @@ harmless.
 |---|---|
 | **Purpose** | Runs a substantial task through ten gated delivery stages — intake grill, docs study, brainstorm, spec, plan, subagent build, tests, lint/deploy, post-deploy, docs+registers, acceptance — refusing to advance until each gate passes |
 | **Owner** | ssheleg ([github.com/ssheleg/task-pipeline](https://github.com/ssheleg/task-pipeline)) |
-| **Version** | 1.12.0 |
+| **Version** | 1.13.0 |
 | **Surface** | Claude Code (filesystem skill + plugin) and the vercel `skills` CLI. **Not** uploaded to the Skills API; custom Skills do not sync across surfaces |
 | **Dependencies** | None required. Optional: `context7` (MCP), `figma` (MCP), super-ux, agent-sync, graphify, obsidian-wiki. Every stage's doctrine ships in-repo; the one conditional requirement is super-ux for the stage-3 UX track on a user-facing task |
 | **Evaluation status** | Suite authored (15 evals, 5 categories). **Never executed** — see [`evals/RESULTS.md`](evals/RESULTS.md) |
@@ -38,7 +38,7 @@ apply.
    instruction surface, and every one is linked directly from `SKILL.md`.
 2. Read `templates/docgate.sh` before seeding it; it is the only shipped script a
    host project will run on its own repository.
-3. Run `npm run test:all` — 76 guards, each with a negative self-test that plants a
+3. Run `npm run test:all` — 80 guards, each with a negative self-test that plants a
    defect and requires rejection.
 4. Run `python3 evals/run.py` for the behavioural protocol, and read
    `evals/RESULTS.md` for what has actually been observed.
@@ -54,7 +54,7 @@ apply.
 - **Versions are pinned by git tag** and mirrored into `sshlg-skills`'s catalogue.
   Rollback is `git checkout v<previous>` or pinning the previous plugin version;
   the previous version is never deleted.
-- **Behavioural evidence is missing, not merely thin.** 76 structural guards prove
+- **Behavioural evidence is missing, not merely thin.** 80 structural guards prove
   the skill is well-formed. Until `evals/RESULTS.md` carries a dated run, nothing in
   this repository proves it *behaves* — triggers correctly, stays quiet on a
   question, or performs the steps it documents.
