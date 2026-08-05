@@ -75,9 +75,15 @@ is the whole check, and this repository is its worst case. Measured: 0.
 `^[[:space:]]*```` ``` ```` is odd. False-positive surface: a fence deliberately
 shown unclosed as an example. Measured: 0.
 
-**4 — truncation stub.** A line matching
-`(\.\.\. existing code|\[TRUNC|rest of (the )?file unchanged|unchanged\.\.\.)`.
-Measured: 0.
+**4 — truncation stub.** A **line-leading** stub, optionally behind a comment
+introducer — the same anchoring as check 2, for the same reason.
+
+**Amended at stage 5, and the amendment says why rather than being rewritten
+quietly.** As first specified this matched the phrase *anywhere*, and the first run
+of the built gate fired three times — on this run's own brief and design, the two
+documents that *define* the patterns. Check 2's lesson had not been generalised to
+its sibling: `learned.md` rule 6, *sweep the class, not the instance*, not applied by
+the very spec that had just applied it once. Anchored, it measures 0.
 
 **5 — duplicated adjacent block (the R-002 mechanisation).** Two consecutive blocks
 of **3 or more** non-blank lines, separated by blank lines, that are byte-identical.

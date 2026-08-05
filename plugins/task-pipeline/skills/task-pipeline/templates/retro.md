@@ -48,7 +48,13 @@ stays short precisely so that reading it in full at stage 0 stays cheap.
 - **Upstream?** … (a lesson true in any repo belongs in the skill's own
   `references/learned.md` — open an issue and say so here)
 
-### 2026-05-04 · retired R-000 — became a check (`npm run lint:paths`) · `<sha>`
+### Retirements
+
+One line each, newest first. A retirement is a record, not a section — so it is a
+list item. A heading promises a body, and a heading with nothing under it is the
+shape the hygiene gate's check 6 exists to find.
+
+- 2026-05-04 · retired R-000 — became a check (`npm run lint:paths`) · `<sha>`
 
 ## Run stamps
 

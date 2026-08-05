@@ -44,6 +44,9 @@ known to work".
 
 ## Runs
 
+Newest first. Each entry states the model, the task, and how the evidence was
+obtained — a self-observed run and a blind one are not the same claim.
+
 ## 2026-08-03 · opus · self-observed, not a blind run
 
 **Scope of this evidence.** The author ran the skill on a real task
