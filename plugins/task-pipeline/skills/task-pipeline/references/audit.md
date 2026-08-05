@@ -228,6 +228,12 @@ construction**:
    doc naming a module the graph has no node for describes something that no longer
    exists. This axis is the only one that finds absences without reading for them,
    which is why it is worth rotating onto when the reading axes go quiet.
+5. **False success** — not *"is this check correct"* but *"what does this mechanism
+   print when it did not look?"* Wrongness is loud and the reading axes above find
+   it; a mechanism that reports a win it never checked is silent, so it survives
+   every pass that reads for wrongness. Sweep the change for actions trusted by
+   their own reply. Definition and the known shapes: [`gates.md`](gates.md) →
+   *False success*.
 
 **The crossover is measurable, so measure it.** Every pass, count two numbers: new
 findings, and findings caused by the previous pass's own fixes. When the second

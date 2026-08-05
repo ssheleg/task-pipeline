@@ -450,6 +450,33 @@ is not portable and silently edits nothing on BSD), run, assert `$?` is non-zero
 restore, assert zero. **Doubt the probe before the check** — four of five silent
 probes on a real project were the probe's fault. Record the probe.
 
+## False success — the failure that removes the reason to look
+
+An actor's own reply is not evidence about the world. A failure is loud and gets
+fixed; a mechanism that reports a win it never checked is silent, so it survives
+every pass that reads for wrongness. Known shapes: a hook that fails open (any exit
+code but 2 is non-blocking, so a crashed guard ALLOWS the action), a cancel that
+accepts an id that was never scheduled and returns success, a check asserting the
+new value is present instead of the old one being gone, a batch of edits reporting
+done while one edit never applied, and a section with no input whose silence is
+read as a pass.
+
+Two rules:
+
+1. **Verify by re-reading, not by the reply.** After a teardown, cancel, delete,
+   disable, publish or migrate — query the authoritative state and assert the new
+   condition.
+2. **Assert the absence of the old, not the presence of the new.** A check that only
+   proves the new value exists stays green while the old one is still shipping.
+
+The test for any mechanism you are about to trust: what does it print when it did
+not look? If that is indistinguishable from what it prints when it looked and found
+nothing wrong, it is not evidence.
+
+**In a build:** every step whose effect lives outside your own diff carries a
+`verified-by:` line — the command that CONFIRMED the state, not the one that caused
+it. A step without one is unverified, not done, and a review rates it Important.
+
 ## Hooks — the limit first
 
 Hooks exist **only in Claude Code**. Elsewhere the same rules run as a self-check

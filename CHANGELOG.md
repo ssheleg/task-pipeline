@@ -1,5 +1,55 @@
 # Changelog
 
+## v1.14.0 — 2026-08-05
+
+### Added — false success: the failure mode that removes the reason to look
+
+Every incident this repository has recorded of a mechanism reporting a win it never
+checked was fixed as its own instance, because the class had no name to be swept by:
+the hook that fails open (any exit code but `2` is non-blocking, so a **crashed**
+guard *allows* the action), the cancel that accepted an id that was never scheduled
+and returned success, the counter that asserted the new number was present instead of
+the old one being gone — green for three releases while four surfaces printed the old
+one — and R-002's batch of edits reporting done while one edit never applied.
+
+- **`references/gates.md` gains the class**: the law (*an actor's own reply is not
+  evidence about the world*), the five known shapes, the test that separates a checked
+  pass from a silent one — *what does it print when it did not look?* — and two rules:
+  verify by re-reading rather than by the reply, and assert the **absence of the old**
+  rather than the presence of the new.
+- **`references/audit.md` gains a fifth axis.** The four existing axes read for
+  wrongness, which is exactly what a false success is not. The new axis asks where a
+  mechanism can report a win it never checked.
+- **The other files cite the class, never restate it.** `continuity.md`'s cancel rule
+  became one named instance instead of a second definition.
+
+### Added — effect verification: the diff cannot show what the task did
+
+`v1.12.0` added a hygiene gate over what a task **wrote**. It is blind to what a task
+**did** — a file moved, a job cancelled, a service restarted, a record migrated — and
+the implementer's report is not evidence about any of it.
+
+- **`references/build.md`**: the implementer contract now requires a `verified-by:`
+  line for every step whose effect lives outside its own diff, carrying the command
+  that *confirmed* the state rather than the one that caused it. The hygiene-gate
+  section names its own blind side and tells the controller to read those lines back.
+- **`references/review.md`**: a new rubric item — **Effect verification** — rated
+  **Important**, not Minor. A finding that never blocks is a finding the fix loop
+  never sees.
+
+### Guards — 80 → 94
+
+Fourteen new checks, each with a negative self-test whose plant asserts it landed
+before the edit. Two invariants added to `CONTRIBUTING.md`, both citing a literal the
+validator actually prints. The negatives floor moved 80 → 94.
+
+**One defect found by this run's own discipline:** the first draft of these guards was
+appended *below* the validator's verdict block, so on a clean run they executed after
+`PASS` was printed and on a corrupted one they never executed at all — fourteen guards
+that could not fail. The negatives runner caught it because it requires positive
+evidence (`OK:` in stdout), not merely a non-zero exit. A runner that accepted silence
+would have shipped the exact defect this release is about.
+
 ## v1.13.0 — 2026-08-05
 
 ### Added — the read-back: four rules that existed and were never handed over

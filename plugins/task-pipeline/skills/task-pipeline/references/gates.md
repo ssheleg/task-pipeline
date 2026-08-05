@@ -26,6 +26,7 @@ elsewhere and is not restated here:
 - Axis C — degrees of freedom
 - Progressive arming
 - Before you run a check
+- False success — when a mechanism reports a win it never checked
 - Anatomy of a project gate
 - Writing the check itself
 - Probing — plant, run, restore
@@ -133,6 +134,40 @@ Four preconditions. Skipping any of them turns a run into a claim.
    "the gate is green" becomes a false statement made in good faith.
 4. **You have read the ratchet floors.** A pass with a floor that was quietly
    raised is a pass over the thing the floor was hiding.
+
+---
+
+## False success — when a mechanism reports a win it never checked
+
+The four preconditions above protect a *check*. The same law binds an **action**:
+
+> **An actor's own reply is not evidence about the world. Confirm an effect by
+> re-reading the state it changed.**
+
+A failure is loud and gets fixed on the pass that finds it. A false success is
+silent and **removes the reason to look**, which is why every shape below survived
+at least one release in this repository:
+
+| Shape | What reported success | What was actually true |
+|---|---|---|
+| Fail-open hook | any exit code but `2` is non-blocking, so a **crashed** guard *allows* the action | the guard never ran |
+| Teardown by reply | a cancel accepted an id that was never scheduled and returned success | the job was still armed |
+| Presence instead of absence | a counter asserted the new number was present, not that the old one was gone | four surfaces still printed the old number, green for three releases |
+| Half-applied batch | a batch of edits reported done while one edit never applied (R-002) | the file was unchanged |
+| Silence read as a pass | a section with no input printed nothing, and the caller counted it as checked | nothing was looked at |
+
+**The test.** For any mechanism you are about to trust, ask:
+*what does it print when it did not look?* If that is indistinguishable from what
+it prints when it looked and found nothing wrong, it is not evidence — give it a distinct `dormant`
+or `skip` state (→ *Progressive arming*), or verify the effect independently.
+
+Two rules follow. Elsewhere in this bundle they are **cited, never restated**:
+
+1. **Verify by re-reading, not by the reply.** After a teardown, cancel, delete,
+   disable, publish or migrate: query the authoritative state and assert the item's
+   new condition.
+2. **Assert the absence of the old, not the presence of the new.** A check that only
+   proves the new value exists stays green while the old one is still shipping.
 
 ---
 

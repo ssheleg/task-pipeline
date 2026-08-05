@@ -210,7 +210,22 @@ releases and the link checker stayed green throughout, because it resolves from 
 file's home. Name the file in a code span instead — the same rule the Cursor rule
 follows, for the same reason. *(guard: `resolves only from`)*
 
-**28. Every invariant above names the guard that enforces it, and that guard exists.**
+**28. The False success class has one home, and the files that use it cite it.**
+`references/gates.md` defines it — the law, the did-not-look test, and its two
+rules; `audit.md` (the fifth axis), `build.md`, `review.md` and `continuity.md`
+point at that section instead of restating it. Every incident this repository has
+recorded of a mechanism reporting a win it never checked was fixed as its own
+instance, because the class had no name to be swept by.
+*(guard: `the False success class is gone`)*
+
+**29. A side effect is confirmed by re-reading the state, never by the reply.**
+`references/build.md` binds the implementer to a `verified-by:` line for every
+step whose effect lives outside its own diff, and names the hygiene gate's blind
+side; `references/review.md` rates an effect asserted without one as **Important**,
+not Minor. A finding that never blocks is a finding the fix loop never sees.
+*(guard: `the report no longer requires verified-by lines`)*
+
+**30. Every invariant above names the guard that enforces it, and that guard exists.**
 This list claims to be *what the validator enforces*; it was eight guards behind when
 an audit measured it. A claim of enforcement is now checked like any other claim.
 *(guard: `whose message does not appear in`)* — and a cited literal must lie inside

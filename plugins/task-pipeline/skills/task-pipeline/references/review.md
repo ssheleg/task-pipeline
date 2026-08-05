@@ -88,14 +88,20 @@ Review in this order; stop reading the diff only when you've covered all of it.
    passes regardless of the production code. No `skip`/`xfail`/commented assertion
    smuggling a red suite past a gate. New behavior has a covering test; the failure
    path has one too.
-6. **Error handling and degradation.** Every external call (network, DB, file, MCP,
+6. **Effect verification.** Claims about the world outside the diff — a migration
+   run, a job cancelled, a file moved, a service restarted, an artifact published —
+   carry evidence that the **state was re-read**, not that the command returned
+   success. A report asserting an effect with no `verified-by:` line is an
+   unverified claim, and it is **Important**, not Minor
+   ([`gates.md`](gates.md) → *False success*).
+7. **Error handling and degradation.** Every external call (network, DB, file, MCP,
    API) handles failure, and the failure is reported honestly rather than swallowed.
-7. **Boundaries and clarity.** One responsibility per unit; names that say what the
+8. **Boundaries and clarity.** One responsibility per unit; names that say what the
    thing is; no duplication of a logic block that should be shared; nothing left
    dead.
-8. **Security.** No secrets in code, logs or fixtures; input validated at the
+9. **Security.** No secrets in code, logs or fixtures; input validated at the
    boundary; no new injection or path-traversal surface.
-9. **Docs in the same change.** Module docs, runbooks and (for UI work) the
+10. **Docs in the same change.** Module docs, runbooks and (for UI work) the
    super-ux layers updated alongside the code, not deferred.
 
 **Severities:**

@@ -136,8 +136,8 @@ job list should agree with that.
 **Verify the cancel by listing the jobs, never by the cancel's own reply.** A
 teardown call will happily accept an id that was never scheduled and report
 success, which leaves the real job running while the transcript says it stopped.
-List afterwards and read the list. This is the same law the rest of this pipeline
-applies to every gate — a green nobody watched is not evidence — and a loop is
+List afterwards and read the list. This is one instance of a named class —
+[`gates.md`](gates.md) → *False success*, rule 1 — and a loop is
 exactly where breaking it goes unnoticed, because the symptom is a message
 arriving on time.
 

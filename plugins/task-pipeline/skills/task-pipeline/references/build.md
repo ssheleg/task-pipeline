@@ -188,8 +188,12 @@ Record the implementer's agent identity: fix rounds 1–3 resume it.
 > code exists before a test you **watched fail**: write the failing test → run it
 > and confirm it fails for the right reason → write the minimal code that passes →
 > run it and confirm it passes, with the rest of the suite still green → commit.
-> Assert on real behavior, never on mock behavior. Commit as you go, conventional
-> commits. When done, self-review your diff, then write the full report to
+> Assert on real behavior, never on mock behavior. **Any step with a side effect
+> outside your own diff — a command that moves, deletes, publishes, migrates,
+> restarts or cancels something — is confirmed by re-reading the state it changed,
+> never by the command's own reply; record each one in the report as a
+> `verified-by:` line carrying the command you ran to confirm and its output.**
+> Commit as you go, conventional commits. When done, self-review your diff, then write the full report to
 > `<report path>`:
 > what you built, the files touched, the commits, the test command and its
 > output, decisions you made, anything you're unsure about. Return **only**:
@@ -271,6 +275,14 @@ where one applied twice, or never applied at all, is the incident behind standin
 instruction R-002 — and it is invisible in a status report. Found one task later it
 costs a re-dispatch; found eight tasks later it is fixed by an agent that no longer
 remembers the code.
+
+**The hygiene gate reads what the task wrote; it cannot see what the task did.**
+A file the task moved, a job it cancelled, a service it restarted, a record it
+migrated — none of that is in the diff, and the implementer's report is not evidence
+about it either. Before the review, read back the report's `verified-by:` lines:
+every side-effecting step must carry the command that **confirmed** the state, not
+the command that caused it. A step with no such line is unverified, not done
+([`gates.md`](gates.md) → *False success*).
 
 **The gate never edits. Fixing is yours.** A finding is repaired inside the same
 task, or it becomes a carry-over row with a reason — never a silent pass. A gate

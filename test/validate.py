@@ -1583,6 +1583,74 @@ if os.path.isfile(_lp):
                  f"'{_stage.strip('| ')}' — a rule mapped only to the stage that "
                  "notices the breakage is a rule nobody reads while causing it")
 
+# The false-success guards (v1.14.0). Every incident this repository has recorded in
+# which a mechanism reported a win it never checked -- the fail-open hook, the cancel
+# that accepted an unscheduled id, the counter that asserted presence of the new
+# instead of absence of the old, R-002's half-applied batch -- was one class with no
+# name, so each was fixed as its own instance. These four checks hold the class in one
+# home and hold the other files to citing it rather than restating it.
+_fs = os.path.join(refdir, "gates.md")
+if os.path.isfile(_fs):
+    _ft = open(_fs, encoding="utf-8").read()
+    if "## False success" not in _ft:
+        fail("references/gates.md: the False success class is gone -- the one home for "
+             "an actor's reply not being evidence about the world")
+    for _needle, _why in (
+        ("re-reading the state it changed",
+         "the law itself, without which the section is a list of anecdotes"),
+        ("what does it print when it did not look",
+         "the test that separates a checked pass from a silent one"),
+        ("Verify by re-reading, not by the reply",
+         "rule 1, the one the other files cite"),
+        ("Assert the absence of the old, not the presence of the new",
+         "rule 2, the shape that stayed green for three releases"),
+    ):
+        if _needle not in _ft:
+            fail(f"references/gates.md: the False success section no longer states "
+                 f"'{_needle}' -- {_why}")
+
+# The class is cited, never restated: four files must point at the one home.
+for _rel, _why in (
+    ("audit.md", "the fifth axis is what sweeps for the class; an axis that does not "
+                 "name its definition drifts into a second definition"),
+    ("build.md", "the implementer contract demands the read-back and must say under "
+                 "which rule"),
+    ("review.md", "the rubric raises an unverified effect to Important and must cite "
+                  "the class that defines it"),
+    ("continuity.md", "the cancel rule is one instance of the class and was the "
+                      "incident that named it"),
+):
+    _p = os.path.join(refdir, _rel)
+    if os.path.isfile(_p):
+        _txt = open(_p, encoding="utf-8").read()
+        if "*False success*" not in _txt:
+            fail(f"references/{_rel}: no citation of the False success class -- {_why}")
+
+# The implementer contract carries the read-back, and the hygiene gate names its blind side.
+_bp = os.path.join(refdir, "build.md")
+if os.path.isfile(_bp):
+    _bt = open(_bp, encoding="utf-8").read()
+    if "`verified-by:` line" not in _bt and "`verified-by:` lines" not in _bt:
+        fail("references/build.md: the report no longer requires verified-by lines -- a "
+             "side effect confirmed by the command that caused it is not confirmed")
+    if "confirmed by re-reading the state it changed" not in _bt:
+        fail("references/build.md: the implementer contract dropped the re-reading "
+             "clause -- an implementer told to report success is not told to check it")
+    if "cannot see what the task did" not in _bt:
+        fail("references/build.md: the hygiene gate no longer states its blind side -- "
+             "a gate over the diff reads what the task wrote, never what it did")
+
+# The rubric item exists and is Important rather than Minor.
+_rp = os.path.join(refdir, "review.md")
+if os.path.isfile(_rp):
+    _rt = open(_rp, encoding="utf-8").read()
+    if "**Effect verification.**" not in _rt:
+        fail("references/review.md: the rubric lost the Effect verification item -- the "
+             "reviewer reads the diff and would never ask what happened outside it")
+    if "unverified claim, and it is **Important**" not in _rt:
+        fail("references/review.md: an unverified effect is no longer Important -- a "
+             "finding that never blocks is a finding the fix loop never sees")
+
 if errors:
     print("FAIL: task-pipeline structure invalid")
     for e in errors:

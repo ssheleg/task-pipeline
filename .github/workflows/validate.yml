@@ -1476,3 +1476,242 @@ jobs:
           else
             echo "OK: validator requires rule 14 at the stages that write targets"
           fi
+      - name: Negative self-test (the False success section must exist)
+        run: |
+          set -eu
+          rm -rf /tmp/fs01-copy && cp -R . /tmp/fs01-copy
+          python3 - <<'EOF'
+          p = "/tmp/fs01-copy/plugins/task-pipeline/skills/task-pipeline/references/gates.md"
+          t = open(p, encoding="utf-8").read()
+          assert '## False success — when a mechanism reports a win it never checked' in t, "PLANT DID NOT LAND: needle absent before edit"
+          t = t.replace('## False success — when a mechanism reports a win it never checked', '## Something else entirely')
+          t = t.replace('- False success — when a mechanism reports a win it never checked', '- Something else entirely')
+          open(p, "w", encoding="utf-8").write(t)
+          EOF
+          if python3 /tmp/fs01-copy/test/validate.py; then
+            echo "ERROR: validator passed with the False success section must exist broken"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the False success section must exist"
+          fi
+      - name: Negative self-test (the False success law must be stated)
+        run: |
+          set -eu
+          rm -rf /tmp/fs02-copy && cp -R . /tmp/fs02-copy
+          python3 - <<'EOF'
+          p = "/tmp/fs02-copy/plugins/task-pipeline/skills/task-pipeline/references/gates.md"
+          t = open(p, encoding="utf-8").read()
+          assert 're-reading the state it changed' in t, "PLANT DID NOT LAND: needle absent before edit"
+          t = t.replace('re-reading the state it changed', 'asking again politely')
+          open(p, "w", encoding="utf-8").write(t)
+          EOF
+          if python3 /tmp/fs02-copy/test/validate.py; then
+            echo "ERROR: validator passed with the False success law must be stated broken"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the False success law must be stated"
+          fi
+      - name: Negative self-test (the did-not-look test must survive)
+        run: |
+          set -eu
+          rm -rf /tmp/fs03-copy && cp -R . /tmp/fs03-copy
+          python3 - <<'EOF'
+          p = "/tmp/fs03-copy/plugins/task-pipeline/skills/task-pipeline/references/gates.md"
+          t = open(p, encoding="utf-8").read()
+          assert 'what does it print when it did not look' in t, "PLANT DID NOT LAND: needle absent before edit"
+          t = t.replace('what does it print when it did not look', 'what does it print')
+          open(p, "w", encoding="utf-8").write(t)
+          EOF
+          if python3 /tmp/fs03-copy/test/validate.py; then
+            echo "ERROR: validator passed with the did-not-look test must survive broken"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the did-not-look test must survive"
+          fi
+      - name: Negative self-test (rule 1 must survive)
+        run: |
+          set -eu
+          rm -rf /tmp/fs04-copy && cp -R . /tmp/fs04-copy
+          python3 - <<'EOF'
+          p = "/tmp/fs04-copy/plugins/task-pipeline/skills/task-pipeline/references/gates.md"
+          t = open(p, encoding="utf-8").read()
+          assert 'Verify by re-reading, not by the reply' in t, "PLANT DID NOT LAND: needle absent before edit"
+          t = t.replace('Verify by re-reading, not by the reply', 'Verify carefully')
+          open(p, "w", encoding="utf-8").write(t)
+          EOF
+          if python3 /tmp/fs04-copy/test/validate.py; then
+            echo "ERROR: validator passed with rule 1 must survive broken"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — rule 1 must survive"
+          fi
+      - name: Negative self-test (rule 2 must survive)
+        run: |
+          set -eu
+          rm -rf /tmp/fs05-copy && cp -R . /tmp/fs05-copy
+          python3 - <<'EOF'
+          p = "/tmp/fs05-copy/plugins/task-pipeline/skills/task-pipeline/references/gates.md"
+          t = open(p, encoding="utf-8").read()
+          assert 'Assert the absence of the old, not the presence of the new' in t, "PLANT DID NOT LAND: needle absent before edit"
+          t = t.replace('Assert the absence of the old, not the presence of the new', 'Assert the new value')
+          open(p, "w", encoding="utf-8").write(t)
+          EOF
+          if python3 /tmp/fs05-copy/test/validate.py; then
+            echo "ERROR: validator passed with rule 2 must survive broken"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — rule 2 must survive"
+          fi
+      - name: Negative self-test (audit.md must cite the class)
+        run: |
+          set -eu
+          rm -rf /tmp/fs06-copy && cp -R . /tmp/fs06-copy
+          python3 - <<'EOF'
+          p = "/tmp/fs06-copy/plugins/task-pipeline/skills/task-pipeline/references/audit.md"
+          t = open(p, encoding="utf-8").read()
+          assert '*False success*' in t, "PLANT DID NOT LAND: needle absent before edit"
+          t = t.replace('*False success*', '*that other thing*')
+          open(p, "w", encoding="utf-8").write(t)
+          EOF
+          if python3 /tmp/fs06-copy/test/validate.py; then
+            echo "ERROR: validator passed with audit.md must cite the class broken"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — audit.md must cite the class"
+          fi
+      - name: Negative self-test (build.md must cite the class)
+        run: |
+          set -eu
+          rm -rf /tmp/fs07-copy && cp -R . /tmp/fs07-copy
+          python3 - <<'EOF'
+          p = "/tmp/fs07-copy/plugins/task-pipeline/skills/task-pipeline/references/build.md"
+          t = open(p, encoding="utf-8").read()
+          assert '*False success*' in t, "PLANT DID NOT LAND: needle absent before edit"
+          t = t.replace('*False success*', '*that other thing*')
+          open(p, "w", encoding="utf-8").write(t)
+          EOF
+          if python3 /tmp/fs07-copy/test/validate.py; then
+            echo "ERROR: validator passed with build.md must cite the class broken"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — build.md must cite the class"
+          fi
+      - name: Negative self-test (review.md must cite the class)
+        run: |
+          set -eu
+          rm -rf /tmp/fs08-copy && cp -R . /tmp/fs08-copy
+          python3 - <<'EOF'
+          p = "/tmp/fs08-copy/plugins/task-pipeline/skills/task-pipeline/references/review.md"
+          t = open(p, encoding="utf-8").read()
+          assert '*False success*' in t, "PLANT DID NOT LAND: needle absent before edit"
+          t = t.replace('*False success*', '*that other thing*')
+          open(p, "w", encoding="utf-8").write(t)
+          EOF
+          if python3 /tmp/fs08-copy/test/validate.py; then
+            echo "ERROR: validator passed with review.md must cite the class broken"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — review.md must cite the class"
+          fi
+      - name: Negative self-test (continuity.md must cite the class)
+        run: |
+          set -eu
+          rm -rf /tmp/fs09-copy && cp -R . /tmp/fs09-copy
+          python3 - <<'EOF'
+          p = "/tmp/fs09-copy/plugins/task-pipeline/skills/task-pipeline/references/continuity.md"
+          t = open(p, encoding="utf-8").read()
+          assert '*False success*' in t, "PLANT DID NOT LAND: needle absent before edit"
+          t = t.replace('*False success*', '*that other thing*')
+          open(p, "w", encoding="utf-8").write(t)
+          EOF
+          if python3 /tmp/fs09-copy/test/validate.py; then
+            echo "ERROR: validator passed with continuity.md must cite the class broken"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — continuity.md must cite the class"
+          fi
+      - name: Negative self-test (the report must require verified-by lines)
+        run: |
+          set -eu
+          rm -rf /tmp/fs10-copy && cp -R . /tmp/fs10-copy
+          python3 - <<'EOF'
+          p = "/tmp/fs10-copy/plugins/task-pipeline/skills/task-pipeline/references/build.md"
+          t = open(p, encoding="utf-8").read()
+          assert '`verified-by:` line' in t, "PLANT DID NOT LAND: needle absent before edit"
+          t = t.replace('`verified-by:` line', '`looks-fine:` line')
+          open(p, "w", encoding="utf-8").write(t)
+          EOF
+          if python3 /tmp/fs10-copy/test/validate.py; then
+            echo "ERROR: validator passed with the report must require verified-by lines broken"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the report must require verified-by lines"
+          fi
+      - name: Negative self-test (the implementer contract keeps the re-reading clause)
+        run: |
+          set -eu
+          rm -rf /tmp/fs11-copy && cp -R . /tmp/fs11-copy
+          python3 - <<'EOF'
+          p = "/tmp/fs11-copy/plugins/task-pipeline/skills/task-pipeline/references/build.md"
+          t = open(p, encoding="utf-8").read()
+          assert 'confirmed by re-reading the state it changed' in t, "PLANT DID NOT LAND: needle absent before edit"
+          t = t.replace('confirmed by re-reading the state it changed', "confirmed by the tool's reply")
+          open(p, "w", encoding="utf-8").write(t)
+          EOF
+          if python3 /tmp/fs11-copy/test/validate.py; then
+            echo "ERROR: validator passed with the implementer contract keeps the re-reading clause broken"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the implementer contract keeps the re-reading clause"
+          fi
+      - name: Negative self-test (the hygiene gate must name its blind side)
+        run: |
+          set -eu
+          rm -rf /tmp/fs12-copy && cp -R . /tmp/fs12-copy
+          python3 - <<'EOF'
+          p = "/tmp/fs12-copy/plugins/task-pipeline/skills/task-pipeline/references/build.md"
+          t = open(p, encoding="utf-8").read()
+          assert 'cannot see what the task did' in t, "PLANT DID NOT LAND: needle absent before edit"
+          t = t.replace('cannot see what the task did', 'sees everything')
+          open(p, "w", encoding="utf-8").write(t)
+          EOF
+          if python3 /tmp/fs12-copy/test/validate.py; then
+            echo "ERROR: validator passed with the hygiene gate must name its blind side broken"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the hygiene gate must name its blind side"
+          fi
+      - name: Negative self-test (the rubric keeps the Effect verification item)
+        run: |
+          set -eu
+          rm -rf /tmp/fs13-copy && cp -R . /tmp/fs13-copy
+          python3 - <<'EOF'
+          p = "/tmp/fs13-copy/plugins/task-pipeline/skills/task-pipeline/references/review.md"
+          t = open(p, encoding="utf-8").read()
+          assert '**Effect verification.**' in t, "PLANT DID NOT LAND: needle absent before edit"
+          t = t.replace('**Effect verification.**', '**Vibes check.**')
+          open(p, "w", encoding="utf-8").write(t)
+          EOF
+          if python3 /tmp/fs13-copy/test/validate.py; then
+            echo "ERROR: validator passed with the rubric keeps the Effect verification item broken"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the rubric keeps the Effect verification item"
+          fi
+      - name: Negative self-test (an unverified effect must stay Important)
+        run: |
+          set -eu
+          rm -rf /tmp/fs14-copy && cp -R . /tmp/fs14-copy
+          python3 - <<'EOF'
+          p = "/tmp/fs14-copy/plugins/task-pipeline/skills/task-pipeline/references/review.md"
+          t = open(p, encoding="utf-8").read()
+          assert 'unverified claim, and it is **Important**' in t, "PLANT DID NOT LAND: needle absent before edit"
+          t = t.replace('unverified claim, and it is **Important**', 'unverified claim, and it is **Minor**')
+          open(p, "w", encoding="utf-8").write(t)
+          EOF
+          if python3 /tmp/fs14-copy/test/validate.py; then
+            echo "ERROR: validator passed with an unverified effect must stay Important broken"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — an unverified effect must stay Important"
+          fi

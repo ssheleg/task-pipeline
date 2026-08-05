@@ -66,6 +66,8 @@ a row pointing outside the bundle is the defect this file exists to catch.
 | The zero-context plan format, parallel groups, set equality | `references/planning.md` |
 | Workspace isolation, the subagent loop, who may write the register | `references/build.md` |
 | The review rubric, diff packages, the three verdicts | `references/review.md` |
+| **False success** — the class, its known shapes and its two rules | `references/gates.md` |
+| **Effect verification** — the `verified-by:` contract and the rubric item that blocks | `references/build.md`, `references/review.md` |
 | The TDD iron law and the suite gate | `references/tdd.md` |
 | The REQ coverage table, evidence rules, the closing question | `references/acceptance.md` |
 | How the host project's own conventions are read | `references/conventions.md` |
