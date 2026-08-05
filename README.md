@@ -776,7 +776,7 @@ recommendation, so you arm the whole run in one exchange. Detail:
 | [`references/knowledge-graph.md`](plugins/task-pipeline/skills/task-pipeline/references/knowledge-graph.md) | the code graph: install line, stage-0 reach queries, the stage-9 refresh, the graph↔docs divergence check |
 | [`references/retrospective.md`](plugins/task-pipeline/skills/task-pipeline/references/retrospective.md) | the project retro: the three grades of fix, the mandatory prune, the cap of ten |
 | [`references/model-tiering.md`](plugins/task-pipeline/skills/task-pipeline/references/model-tiering.md) | model policy, the `/model` reminder, overrides |
-| [`templates/`](plugins/task-pipeline/skills/task-pipeline/templates/README.md) | brief, carry-over ledger, `CONTEXT.md` and ADR skeletons, the doc map, both registers, the retro and its archive, the seeded `docgate.sh`, a worked hook |
+| [`templates/`](plugins/task-pipeline/skills/task-pipeline/templates/README.md) | brief, carry-over ledger, `CONTEXT.md` and ADR skeletons, the doc map, both registers, the retro and its archive, the seeded `docgate.sh` and `hygiene.sh`, a worked hook |
 | [`references/adoption.md`](plugins/task-pipeline/skills/task-pipeline/references/adoption.md) | the first run in a project: greenfield seeding, and the brownfield walkthrough |
 | [`references/setup.md`](plugins/task-pipeline/skills/task-pipeline/references/setup.md) | the entry audit: seven passes over the docs a project already has, offered once, output as a fix plan |
 | [`references/portability.md`](plugins/task-pipeline/skills/task-pipeline/references/portability.md) | the manifest of workflow decisions and their homes in the bundle, and the boundary against a project's own answers |

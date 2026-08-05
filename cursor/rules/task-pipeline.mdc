@@ -207,7 +207,15 @@ not authorize an outward, irreversible action — stage 7 stops and asks.
    commit), then a review with **all three** verdicts — spec compliance, **REQ
    satisfied** (judged against the requirement's own statement, not the task's
    instructions), and code quality. Findings loop back to the implementer (max 5
-   rounds, then adjudicate in writing); minor findings are recorded, never blocking. Keep a progress ledger in
+   rounds, then adjudicate in writing); minor findings are recorded, never blocking.
+   **After each task reports done, before the review, scan what that task changed
+   for the defects an agent leaves behind** — a half-resolved merge, a stub that
+   outlived the task, a code fence left open, a file "shortened" while being
+   rewritten, a block duplicated by a retried edit, a section opened and abandoned.
+   Zero tolerance on a diff: that task wrote it, that task fixes it. A subagent's own
+   report is not evidence about the text it left behind, and a duplicated block eight
+   tasks later is repaired by an agent that no longer remembers the code.
+   Keep a progress ledger in
    a file so a lost context can resume instead of redoing finished work. Tasks in
    the same parallel group run concurrently **only** if each worker has its own
    worktree — otherwise sequential. Close the stage by integrating: sync with the
