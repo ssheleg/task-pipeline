@@ -193,6 +193,34 @@ A checklist you run yourself, inline. No subagent:
 5. **Parallel safety:** no two tasks in the same group write the same file; every
    `depends:` points at a task that really produces what's consumed.
 6. **DoD present and verifiable** on every task.
+7. **Every command, path and file a DoD names resolves.** Walk each task's
+   *Definition of done* and its steps and check the targets exist — a DoD that says
+   `npm run lint:paths` when no such script exists is an instruction the implementer
+   cannot follow and a check the acceptance cannot run.
+   [`learned.md`](learned.md) rule 14 has said *every target resolvable* since
+   v1.4.0 and fired only at stage 9 — four stages after the target is written here.
+8. **Run the hygiene gate** over what this stage wrote and record its counts below.
+
+**R-003 asked of this file, and answered:** `spec.md`'s items 8 and 9 — reading
+decisions back, and printing the cost — deliberately do **not** appear here. This
+stage settles nothing (see below), so it has no decisions to contradict and no scope
+of its own to grow. Its sibling's item 7 does belong, reworded for DoDs.
+
+### The `## Self-review` section — committed, not asserted
+
+Identical in shape to `spec.md`'s, so one habit covers both stages. Last section
+before the gate; every line a **computed number, not a tick**.
+
+```markdown
+## Self-review
+
+- REQ coverage: <n> in brief, <n> covered, difference <set or ∅>
+- Named checks: <n> named, <n> resolve, <n> marked `review`
+- Decisions: checked against <the brief's D-table> and <stage 2's rejected options> — <verdict>
+- Cost: <surfaces>/<guards>/<REQ> now, <…> at stage 2 — <proportionate | grown, and why>
+- Hygiene: <n> checks, <n> findings, <n> open
+- Placeholders: <n> · Ambiguity: <n> found, <n> resolved inline
+```
 
 ## This stage settles nothing — and that is a rule, not an omission
 
