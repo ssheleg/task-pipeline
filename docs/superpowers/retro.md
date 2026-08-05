@@ -20,15 +20,58 @@ over all of them.
 
 | id | Born | Commit | Instruction | Because | Retire when | Last fired | Fired at |
 |---|---|---|---|---|---|---|---|
-| R-001 | 2026-08-03 · `documentation-track` | `dbe4f43` | When a check stays silent against a planted defect, **prove the plant landed in the text the check actually parses before touching the check.** | Two silent probes in one run: one was a bad probe (§9 correctly skips outside a git tree), one was a real bug (`$((0009))` is octal). The split is 50/50 here and was 4-of-5 probe-fault on the source project — guessing wrong costs a real bug or a false fix. | a probe harness exists that asserts the plant changed the parsed text, making this mechanical | 2026-08-04 | `7155c98` |
-| R-002 | 2026-08-03 · `doc-track-audit` | `096f0f0` | When a batch of edits returns **any** error, re-verify **every** edit in that batch before reporting the batch done — not only the one that errored. | Two edits were issued together; the second failed the read-before-write check and was retried, the first was silently never applied. It was reported as done, shipped in v1.7.0, and surfaced only in a post-release audit as a question the grill never asks with a field in the brief waiting for the answer. | the harness reports per-edit outcomes in a form a check can read, or the edits are issued one per message | 2026-08-04 | `7155c98` |
-| R-003 | 2026-08-05 · `artifact-hygiene` | `13028e9` | When you fix a defect in one check, guard or detector, **immediately run that defect's definition against its siblings** before moving on — the same file's other checks, and the other files that do the same job. | `learned.md` rule 6 says *sweep the class, not the instance*, and this is its **third** recorded failure to be applied to itself. 2026-08-03 `enforcement-audit`: a fix scoped to references→README while the same class lived in six other places. 2026-08-03 `root-cause`: nine findings, one missing matrix row. 2026-08-05: check 2's false-positive class was solved, and check 4 — its immediate sibling, in the same file, written in the same hour — shipped with the identical bug and fired on this run's own documents. Two instances were worth notes; `audit.md` says a class seen twice becomes a mechanism rather than a third ledger row. | a check can compare sibling detectors for a shared false-positive class — which needs the classes to be named in a machine-readable form first | 2026-08-05 | `13028e9` |
+| R-001 | 2026-08-03 · `documentation-track` | `dbe4f43` | When a check stays silent against a planted defect, **prove the plant landed in the text the check actually parses before touching the check.** | Two silent probes in one run: one was a bad probe (§9 correctly skips outside a git tree), one was a real bug (`$((0009))` is octal). The split is 50/50 here and was 4-of-5 probe-fault on the source project — guessing wrong costs a real bug or a false fix. | a probe harness exists that asserts the plant changed the parsed text, making this mechanical | 2026-08-05 | `348357e` |
+| R-002 | 2026-08-03 · `doc-track-audit` | `096f0f0` | When a batch of edits returns **any** error, re-verify **every** edit in that batch before reporting the batch done — not only the one that errored. | Two edits were issued together; the second failed the read-before-write check and was retried, the first was silently never applied. It was reported as done, shipped in v1.7.0, and surfaced only in a post-release audit as a question the grill never asks with a field in the brief waiting for the answer. | the harness reports per-edit outcomes in a form a check can read, or the edits are issued one per message | 2026-08-05 | `348357e` |
+| R-003 | 2026-08-05 · `artifact-hygiene` | `13028e9` | When you fix a defect in one check, guard or detector, **immediately run that defect's definition against its siblings** before moving on — the same file's other checks, and the other files that do the same job. | `learned.md` rule 6 says *sweep the class, not the instance*, and this is its **third** recorded failure to be applied to itself. 2026-08-03 `enforcement-audit`: a fix scoped to references→README while the same class lived in six other places. 2026-08-03 `root-cause`: nine findings, one missing matrix row. 2026-08-05: check 2's false-positive class was solved, and check 4 — its immediate sibling, in the same file, written in the same hour — shipped with the identical bug and fired on this run's own documents. Two instances were worth notes; `audit.md` says a class seen twice becomes a mechanism rather than a third ledger row. | a check can compare sibling detectors for a shared false-positive class — which needs the classes to be named in a machine-readable form first | 2026-08-05 | `348357e` |
 
 Retire on **any** of: it became a check · every path/command it names is gone · it
 has not fired in the last five run stamps. At eleven rows, the oldest never-fired
 row goes — the cap is not negotiable, ranking is.
 
 ## Recent log — entries from the last five run stamps (newest first)
+
+### 2026-08-05 · `false-success` · fourteen guards that could not fail
+
+**Symptom.** The four new guard blocks were appended to the end of `test/validate.py`
+and the validator went green. `npm run test:all` then reported **13 guards did not
+fire, 1 test broken** — every new negative self-test planted its defect and the
+validator still passed.
+
+**Where it surfaced:** stage 6, the negatives runner. **Where it was owned:** stage 5 —
+"append to the file" is not the same instruction as "append to the checks".
+
+**Root cause.** `validate.py` ends with `if errors: … sys.exit(1)` and then
+`print("PASS")`. Code appended *below* that block executes after the verdict on a
+clean run, and on a corrupted run `sys.exit()` fires first so it never executes at
+all. A guard placed there is dead code shaped exactly like a guard — and it is green
+for the one reason that cannot be argued with: it never ran. This is the release's own
+subject, false success, committed by the release that names it.
+
+**Fix — grade 1, mechanical.** A guard that reads its own source and rejects any
+`fail(` after the verdict is printed. Doctrine would not have caught this; the check
+does, in every future release, without anyone remembering.
+
+**And the fix had the same defect.** The new guard located the verdict with
+`_src.find(...)` — and the first occurrence of that literal is inside the guard's own
+source, so it matched itself and fired on a clean repo. Its own negative self-test
+caught it within one run. `rfind` with the reason written beside it.
+
+### 2026-08-05 · `false-success` · two releases that never reached the catalogue
+
+**Symptom.** The launcher pinned `task-pipeline` at **1.11.0** while **1.12.0 and
+1.13.0** were tagged, released and published to npm. `npx sshlg-skills list` reported
+1.11.0 and `update` installed it, for two days.
+
+**Root cause.** The catalogue bump is step 6 of a release and nothing compares the pin
+against the member's own latest tag — the pin is only ever *written*, never *checked*.
+Both skipped releases were green in their own repository, which is what made it
+invisible: neither side is wrong alone.
+
+**Fix — grade 1 belongs in `sshlg-skills`, not here:** a check that fails when a pin
+is behind the member's newest tag. Carried as a ratchet with a named home rather than
+fixed in passing, because it is a different repository's gate. The pin itself moved
+straight to 1.14.0 and the gap is recorded in that project's changelog rather than
+quietly closed.
 
 Older entries and every retirement **move** to `docs/superpowers/retro/YYYY-QN.md`
 at the prune. Moving is not deleting: the archive is append-only and holds the
@@ -250,6 +293,7 @@ One line per run, appended at stage 10. This is what makes "five runs" countable
 
 | Date | Topic | Commit | Verdict | Retro |
 |---|---|---|---|---|
+| 2026-08-05 | `false-success` | `348357e` | 10 REQ · 9 verified by a proven check · 1 `review` (the Cursor rule, per the matrix) · carry-over 1 row, 0 unresolved | 2 entries · 3 standing · retired 0 · added 0 · **R-001, R-002 and R-003 all fired** · guards 80 → 95 |
 | 2026-08-05 | `spec-plan-quality` | `e9123c6` | 11 REQ · 8 verified by a proven check · 3 carrying an explicit `review` half · carry-over 5 rows, 0 unresolved, 1 printed exclusion | **no divergence** · 3 standing · retired 0 · added 0 · **R-003 fired on its first run** (asked of `planning.md`, answered "no", recorded) · guards 76 → 80 |
 | 2026-08-05 | `artifact-hygiene` | `13028e9` | 15 REQ · 13 verified by a proven check · 2 marked `review` out loud (the agent-fixes obligation, the Cursor rule) · 1 new REQ from the ladder walk carried as printed backlog · carry-over 7 rows, 0 unresolved | 2 entries · **3 standing (was 2)** · retired 0 · added 1 (R-003) · R-001 fired twice, R-002 did not fire · guards 68 → 76 |
 | 2026-08-04 | `run-continuity` | `7155c98` | 13 REQ · 13 verified (12 by a proven check, 1 by eye — outside the repo) · carry-over 4 rows, 0 unresolved | 3 entries · 2 standing · retired 0 · added 0 · **archived 6** · R-001 and R-002 both fired |

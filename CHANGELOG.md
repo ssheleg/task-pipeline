@@ -1,5 +1,22 @@
 # Changelog
 
+## v1.14.1 — 2026-08-05
+
+### Fixed — a guard below the verdict block is dead code shaped like a guard
+
+The fourteen guards v1.14.0 added were first appended to the *end* of
+`test/validate.py`, below `if errors: … sys.exit(1)`. On a clean run they executed
+after `PASS` was printed; on a corrupted one `sys.exit()` fired first and they never
+executed at all. Every one was green for the single reason that cannot be argued
+with: it never ran. The negatives runner caught it because it requires positive
+evidence (`OK:` in stdout) rather than a non-zero exit — this release's own subject,
+committed by the release that names it.
+
+A guard now reads the validator's own source and rejects any `fail(` after the
+verdict. It shipped with the same defect it checks for — `find()` matched the literal
+inside the guard's own body — and its negative self-test caught that within one run;
+`rfind`, with the reason written beside it. Guards 94 → 95.
+
 ## v1.14.0 — 2026-08-05
 
 ### Added — false success: the failure mode that removes the reason to look

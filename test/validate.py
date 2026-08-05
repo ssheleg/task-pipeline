@@ -1651,6 +1651,18 @@ if os.path.isfile(_rp):
         fail("references/review.md: an unverified effect is no longer Important -- a "
              "finding that never blocks is a finding the fix loop never sees")
 
+# A guard added below the verdict block is dead code that reads as a guard: on a clean
+# run it executes after PASS is printed, and on a corrupted one sys.exit() fires first
+# so it never executes at all. Fourteen checks shipped that way in this file's own
+# v1.14.0 draft and every one of them was green because it could not run.
+_src = open(__file__, encoding="utf-8").read()
+_verdict = _src.rfind('print("PASS: task-pipeline structure valid")')  # rfind: the
+# literal also appears in this guard's own source, and find() would match itself
+if _verdict != -1 and "fail(" in _src[_verdict:]:
+    fail("test/validate.py: a fail() call appears after the verdict is printed — a "
+         "check below the verdict block never runs on a corrupted repo and runs too "
+         "late on a clean one; move it above `if errors:`")
+
 if errors:
     print("FAIL: task-pipeline structure invalid")
     for e in errors:
