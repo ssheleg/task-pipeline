@@ -22,6 +22,7 @@ over all of them.
 |---|---|---|---|---|---|---|---|
 | R-001 | 2026-08-03 · `documentation-track` | `dbe4f43` | When a check stays silent against a planted defect, **prove the plant landed in the text the check actually parses before touching the check.** | Two silent probes in one run: one was a bad probe (§9 correctly skips outside a git tree), one was a real bug (`$((0009))` is octal). The split is 50/50 here and was 4-of-5 probe-fault on the source project — guessing wrong costs a real bug or a false fix. | a probe harness exists that asserts the plant changed the parsed text, making this mechanical | 2026-08-04 | `7155c98` |
 | R-002 | 2026-08-03 · `doc-track-audit` | `096f0f0` | When a batch of edits returns **any** error, re-verify **every** edit in that batch before reporting the batch done — not only the one that errored. | Two edits were issued together; the second failed the read-before-write check and was retried, the first was silently never applied. It was reported as done, shipped in v1.7.0, and surfaced only in a post-release audit as a question the grill never asks with a field in the brief waiting for the answer. | the harness reports per-edit outcomes in a form a check can read, or the edits are issued one per message | 2026-08-04 | `7155c98` |
+| R-003 | 2026-08-05 · `artifact-hygiene` | `13028e9` | When you fix a defect in one check, guard or detector, **immediately run that defect's definition against its siblings** before moving on — the same file's other checks, and the other files that do the same job. | `learned.md` rule 6 says *sweep the class, not the instance*, and this is its **third** recorded failure to be applied to itself. 2026-08-03 `enforcement-audit`: a fix scoped to references→README while the same class lived in six other places. 2026-08-03 `root-cause`: nine findings, one missing matrix row. 2026-08-05: check 2's false-positive class was solved, and check 4 — its immediate sibling, in the same file, written in the same hour — shipped with the identical bug and fired on this run's own documents. Two instances were worth notes; `audit.md` says a class seen twice becomes a mechanism rather than a third ledger row. | a check can compare sibling detectors for a shared false-positive class — which needs the classes to be named in a machine-readable form first | 2026-08-05 | `13028e9` |
 
 Retire on **any** of: it became a check · every path/command it names is gone · it
 has not fired in the last five run stamps. At eleven rows, the oldest never-fired
@@ -32,6 +33,55 @@ row goes — the cap is not negotiable, ranking is.
 Older entries and every retirement **move** to `docs/superpowers/retro/YYYY-QN.md`
 at the prune. Moving is not deleting: the archive is append-only and holds the
 incident forever, so pruning the in-force list costs no knowledge.
+
+### 2026-08-05 · `artifact-hygiene` · a guard that had been decorative for nine releases
+
+- **Symptom:** the VERDICT-last contract guard passed against a gate script whose
+  verdict marker had been renamed. It split the file on the **word** `VERDICT` —
+  which also appears in the header sentence forbidding anything after it — so its
+  "tail after the verdict" was most of the script, exit lines included, and it
+  matched `exit 0` / `exit 1` no matter what. Green since it shipped, on
+  `docgate.sh` as well as the new file.
+- **Surfaced at:** stage 6, on the first probe ever written for it ·
+  **Owned by:** the release that shipped the guard without one.
+- **Root cause:** the guard's own subject matter was its blind spot. A file that
+  *documents* a rule contains the rule's keyword, so anchoring on the keyword
+  anchors on the documentation. Same shape as check 2's placeholder problem, one
+  layer up — and nobody noticed because a guard nobody probes is indistinguishable
+  from a guard that works.
+- **Fix:** grade 1 — split on the `# ---------- VERDICT` section marker and require
+  the marker to exist.
+- **The check:** its own negative self-test, watched failing on a renamed marker
+  after the rename was asserted to have landed.
+- **Commit:** `13028e9`
+- **Upstream?** n/a — this repo is the skill; both gate scripts ship with the fix.
+
+### 2026-08-05 · `artifact-hygiene` · two self-tests sharing one scratch directory
+
+- **Symptom:** CI failed on `cp: cannot create regular file
+  '/tmp/verdict-copy/./.git/objects/pack/…': Permission denied`. A new negative
+  self-test reused a scratch directory an existing one already owned, so the second
+  copy landed in a populated tree and git's read-only pack files refused to be
+  overwritten. A guard written in reaction then found **four more collisions that
+  predated the branch**.
+- **Surfaced at:** stage 7, by CI · **Owned by:** every release that added a
+  self-test without checking the name was free.
+- **Root cause:** loud failure was the *lucky* outcome. Two tests sharing a scratch
+  directory can also succeed — against the first test's corruption instead of their
+  own — and a test that passes for the wrong reason is worse than one that fails.
+  Nothing in the suite could see the collision, because each test only ever looks at
+  itself.
+- **Fix:** grade 1 — a guard requiring every `cp -R . /tmp/…` destination in the
+  workflow to be unique, plus `rm -rf` before all 35 copies so a leftover directory
+  cannot fail a probe for an unrelated reason.
+- **The check:** its own negative self-test. Building it produced two more instances
+  of the same day's lessons: the guard was first placed **after** `validate.py`'s own
+  `if errors: … sys.exit(1)` — the nothing-runs-after-the-verdict defect, committed
+  while writing the guard against it — and it then fired on its own self-test,
+  because the step that *plants* a duplicate contains the string being scanned for.
+  Heredoc bodies are stripped now, the same treatment markdown fences already get.
+- **Commit:** `13028e9`
+- **Upstream?** No — the collision is this repository's CI shape, not the skill's.
 
 ### 2026-08-04 · `run-continuity` · a checker that resolves from the file's home
 
@@ -200,6 +250,7 @@ One line per run, appended at stage 10. This is what makes "five runs" countable
 
 | Date | Topic | Commit | Verdict | Retro |
 |---|---|---|---|---|
+| 2026-08-05 | `artifact-hygiene` | `13028e9` | 15 REQ · 13 verified by a proven check · 2 marked `review` out loud (the agent-fixes obligation, the Cursor rule) · 1 new REQ from the ladder walk carried as printed backlog · carry-over 7 rows, 0 unresolved | 2 entries · **3 standing (was 2)** · retired 0 · added 1 (R-003) · R-001 fired twice, R-002 did not fire · guards 68 → 76 |
 | 2026-08-04 | `run-continuity` | `7155c98` | 13 REQ · 13 verified (12 by a proven check, 1 by eye — outside the repo) · carry-over 4 rows, 0 unresolved | 3 entries · 2 standing · retired 0 · added 0 · **archived 6** · R-001 and R-002 both fired |
 | 2026-08-03 | `default-routing-adoption` | `d76ff5e` | 9 REQ · 9 verified (one check revised mid-run, revision agreed) | 1 entry · 2 standing · retired 0 · added 0 · R-001 and R-002 both fired |
 | 2026-08-03 | `root-cause` | `17d53ba` | 1 cause behind 9 findings, fixed as doctrine | 1 entry · 2 standing · retired 0 · added 0 |
