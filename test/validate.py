@@ -1510,6 +1510,37 @@ if os.path.isdir(_tpl):
                  "templates/, not from the destination it is seeded to — a seeded "
                  "template must be self-contained; name the file in a code span")
 
+# Two negative self-tests that share a scratch directory can mask each other: the
+# second copy lands in a populated tree, git's read-only pack files refuse to be
+# overwritten, and on a good day it fails loudly. On a bad day it succeeds and the
+# test passes against the FIRST test's corruption instead of its own. Found by a
+# collision on /tmp/verdict-copy, in the release that ships a gate for exactly this
+# class of accident.
+_wf_p = os.path.join(ROOT, ".github/workflows/validate.yml")
+if os.path.isfile(_wf_p):
+    _wf_t = open(_wf_p, encoding="utf-8").read()
+    # Strip heredoc bodies first. A step that PLANTS a duplicate as test data
+    # contains the very string this scans for, and counting it made the guard fail
+    # on its own negative self-test — the same class as the markdown fence strip
+    # above, one file format over.
+    _wf_scan, _inheredoc = [], False
+    for _l in _wf_t.splitlines():
+        if "<<'EOF'" in _l:
+            _inheredoc = True
+            continue
+        if _inheredoc:
+            if _l.strip() == "EOF":
+                _inheredoc = False
+            continue
+        _wf_scan.append(_l)
+    _dirs = re.findall(r"cp -R \. (/tmp/[A-Za-z0-9._-]+)", "\n".join(_wf_scan))
+    _dupes = sorted({d for d in _dirs if _dirs.count(d) > 1})
+    if _dupes:
+        fail("`.github/workflows/validate.yml`: scratch directories reused across "
+             f"negative self-tests: {_dupes} — a shared scratch dir lets one test "
+             "corrupt another's copy, and a test that passes against the wrong "
+             "corruption proves nothing")
+
 if errors:
     print("FAIL: task-pipeline structure invalid")
     for e in errors:

@@ -64,7 +64,7 @@ jobs:
       - name: Negative self-test (validator must be able to fail)
         run: |
           set -eu
-          cp -R . /tmp/corrupt-copy
+          rm -rf /tmp/corrupt-copy && cp -R . /tmp/corrupt-copy
           # corrupt the version so marketplace/plugin/CHANGELOG drift
           python3 - <<'EOF'
           import re
@@ -83,7 +83,7 @@ jobs:
       - name: Negative self-test (bad gate type in pipeline.example.json must fail)
         run: |
           set -eu
-          cp -R . /tmp/gate-copy
+          rm -rf /tmp/gate-copy && cp -R . /tmp/gate-copy
           python3 - <<'EOF'
           p = "/tmp/gate-copy/plugins/task-pipeline/skills/task-pipeline/pipeline.example.json"
           t = open(p, encoding="utf-8").read()
@@ -99,7 +99,7 @@ jobs:
       - name: Negative self-test (release.enabled true but workflow missing must fail)
         run: |
           set -eu
-          cp -R . /tmp/rel-copy
+          rm -rf /tmp/rel-copy && cp -R . /tmp/rel-copy
           rm -f /tmp/rel-copy/.github/workflows/release.yml
           if python3 /tmp/rel-copy/test/validate.py; then
             echo "ERROR: validator passed with release.enabled true but no release.yml"
@@ -111,7 +111,7 @@ jobs:
       - name: Negative self-test (hardcoded vendor model id must fail)
         run: |
           set -eu
-          cp -R . /tmp/model-copy
+          rm -rf /tmp/model-copy && cp -R . /tmp/model-copy
           printf '\nSwitch with `/model claude-opus-5` first.\n' \
             >> /tmp/model-copy/plugins/task-pipeline/skills/task-pipeline/SKILL.md
           if python3 /tmp/model-copy/test/validate.py; then
@@ -124,7 +124,7 @@ jobs:
       - name: Negative self-test (non-token stage model must fail)
         run: |
           set -eu
-          cp -R . /tmp/token-copy
+          rm -rf /tmp/token-copy && cp -R . /tmp/token-copy
           python3 - <<'EOF'
           import json, collections
           p = "/tmp/token-copy/plugins/task-pipeline/skills/task-pipeline/pipeline.example.json"
@@ -142,7 +142,7 @@ jobs:
       - name: Negative self-test (intake grill must stay mandatory + manual)
         run: |
           set -eu
-          cp -R . /tmp/grill-copy
+          rm -rf /tmp/grill-copy && cp -R . /tmp/grill-copy
           python3 - <<'EOF'
           import json, collections
           p = "/tmp/grill-copy/plugins/task-pipeline/skills/task-pipeline/pipeline.example.json"
@@ -160,7 +160,7 @@ jobs:
       - name: Negative self-test (brief template must keep the autonomy sweep)
         run: |
           set -eu
-          cp -R . /tmp/brief-copy
+          rm -rf /tmp/brief-copy && cp -R . /tmp/brief-copy
           python3 - <<'EOF'
           import re
           p = "/tmp/brief-copy/plugins/task-pipeline/skills/task-pipeline/templates/brief.md"
@@ -177,7 +177,7 @@ jobs:
       - name: Negative self-test (the grill doctrine must ship with the skill)
         run: |
           set -eu
-          cp -R . /tmp/doctrine-copy
+          rm -rf /tmp/doctrine-copy && cp -R . /tmp/doctrine-copy
           rm -f /tmp/doctrine-copy/plugins/task-pipeline/skills/task-pipeline/references/grill.md
           if python3 /tmp/doctrine-copy/test/validate.py; then
             echo "ERROR: validator passed without the built-in grill doctrine"
@@ -189,7 +189,7 @@ jobs:
       - name: Negative self-test (a real broken link still fails past the fence stripper)
         run: |
           set -eu
-          cp -R . /tmp/link-copy
+          rm -rf /tmp/link-copy && cp -R . /tmp/link-copy
           printf '\n[gone](./does-not-exist.md)\n' >> /tmp/link-copy/README.md
           if python3 /tmp/link-copy/test/validate.py; then
             echo "ERROR: validator missed a broken relative link outside a code fence"
@@ -201,7 +201,7 @@ jobs:
       - name: Negative self-test (the REQ spine must stay in the brief template)
         run: |
           set -eu
-          cp -R . /tmp/req-copy
+          rm -rf /tmp/req-copy && cp -R . /tmp/req-copy
           python3 - <<'EOF'
           import re
           p = "/tmp/req-copy/plugins/task-pipeline/skills/task-pipeline/templates/brief.md"
@@ -218,7 +218,7 @@ jobs:
       - name: Negative self-test (REQ rows must name how they are verified)
         run: |
           set -eu
-          cp -R . /tmp/verify-copy
+          rm -rf /tmp/verify-copy && cp -R . /tmp/verify-copy
           python3 - <<'EOF'
           p = "/tmp/verify-copy/plugins/task-pipeline/skills/task-pipeline/templates/brief.md"
           t = open(p, encoding="utf-8").read()
@@ -234,7 +234,7 @@ jobs:
       - name: Negative self-test (acceptance must close the flow, manually, with evidence)
         run: |
           set -eu
-          cp -R . /tmp/acc-copy
+          rm -rf /tmp/acc-copy && cp -R . /tmp/acc-copy
           python3 - <<'EOF'
           import json, collections
           p = "/tmp/acc-copy/plugins/task-pipeline/skills/task-pipeline/pipeline.example.json"
@@ -252,7 +252,7 @@ jobs:
       - name: Negative self-test (the plan gate must be a set comparison)
         run: |
           set -eu
-          cp -R . /tmp/seam-copy
+          rm -rf /tmp/seam-copy && cp -R . /tmp/seam-copy
           python3 - <<'EOF'
           import json, collections
           p = "/tmp/seam-copy/plugins/task-pipeline/skills/task-pipeline/pipeline.example.json"
@@ -272,7 +272,7 @@ jobs:
       - name: Negative self-test (the brief must keep the knowledge-source ledger)
         run: |
           set -eu
-          cp -R . /tmp/ledger-copy
+          rm -rf /tmp/ledger-copy && cp -R . /tmp/ledger-copy
           python3 - <<'EOF'
           import re
           p = "/tmp/ledger-copy/plugins/task-pipeline/skills/task-pipeline/templates/brief.md"
@@ -289,7 +289,7 @@ jobs:
       - name: Negative self-test (stage 0 must harvest before it interviews)
         run: |
           set -eu
-          cp -R . /tmp/harvest-copy
+          rm -rf /tmp/harvest-copy && cp -R . /tmp/harvest-copy
           python3 - <<'EOF'
           import json, collections
           p = "/tmp/harvest-copy/plugins/task-pipeline/skills/task-pipeline/pipeline.example.json"
@@ -307,7 +307,7 @@ jobs:
       - name: Negative self-test (stage 9 must close the loop on the ledger)
         run: |
           set -eu
-          cp -R . /tmp/loopback-copy
+          rm -rf /tmp/loopback-copy && cp -R . /tmp/loopback-copy
           python3 - <<'EOF'
           import json, collections
           p = "/tmp/loopback-copy/plugins/task-pipeline/skills/task-pipeline/pipeline.example.json"
@@ -327,7 +327,7 @@ jobs:
       - name: Negative self-test (a description that drops the final stage must fail)
         run: |
           set -eu
-          cp -R . /tmp/blurb-copy
+          rm -rf /tmp/blurb-copy && cp -R . /tmp/blurb-copy
           python3 - <<'EOF'
           import json
           p = "/tmp/blurb-copy/package.json"
@@ -345,7 +345,7 @@ jobs:
       - name: Negative self-test (verdict count must not drift from the dev gate)
         run: |
           set -eu
-          cp -R . /tmp/verdict-copy
+          rm -rf /tmp/verdict-copy && cp -R . /tmp/verdict-copy
           python3 - <<'EOF'
           p = "/tmp/verdict-copy/plugins/task-pipeline/skills/task-pipeline/references/build.md"
           t = open(p, encoding="utf-8").read()
@@ -361,7 +361,7 @@ jobs:
       - name: Negative self-test (a doctrine file's gate type must match the config)
         run: |
           set -eu
-          cp -R . /tmp/doctrinegate-copy
+          rm -rf /tmp/doctrinegate-copy && cp -R . /tmp/doctrinegate-copy
           python3 - <<'EOF'
           import re
           p = "/tmp/doctrinegate-copy/plugins/task-pipeline/skills/task-pipeline/references/acceptance.md"
@@ -378,7 +378,7 @@ jobs:
       - name: Negative self-test (a stage-10 close-out rule must reach the surfaces that enforce it)
         run: |
           set -eu
-          cp -R . /tmp/closeout-copy
+          rm -rf /tmp/closeout-copy && cp -R . /tmp/closeout-copy
           python3 - <<'EOF'
           import re
           p = "/tmp/closeout-copy/plugins/task-pipeline/skills/task-pipeline/references/acceptance.md"
@@ -395,7 +395,7 @@ jobs:
       - name: Negative self-test (intake must settle the Figma design destination)
         run: |
           set -eu
-          cp -R . /tmp/dest-copy
+          rm -rf /tmp/dest-copy && cp -R . /tmp/dest-copy
           python3 - <<'EOF'
           import json, collections, re
           p = "/tmp/dest-copy/plugins/task-pipeline/skills/task-pipeline/pipeline.example.json"
@@ -415,7 +415,7 @@ jobs:
       - name: Negative self-test (the autonomy sweep must not drift between its two homes)
         run: |
           set -eu
-          cp -R . /tmp/sweep-copy
+          rm -rf /tmp/sweep-copy && cp -R . /tmp/sweep-copy
           python3 - <<'EOF'
           p = "/tmp/sweep-copy/plugins/task-pipeline/skills/task-pipeline/templates/brief.md"
           t = open(p, encoding="utf-8").read()
@@ -432,7 +432,7 @@ jobs:
       - name: Negative self-test (acceptance must walk the ladder before the table)
         run: |
           set -eu
-          cp -R . /tmp/ladder-copy
+          rm -rf /tmp/ladder-copy && cp -R . /tmp/ladder-copy
           python3 - <<'EOF'
           import json, collections
           p = "/tmp/ladder-copy/plugins/task-pipeline/skills/task-pipeline/pipeline.example.json"
@@ -452,7 +452,7 @@ jobs:
       - name: Negative self-test (the audit doctrine must ship with the skill)
         run: |
           set -eu
-          cp -R . /tmp/audit-copy
+          rm -rf /tmp/audit-copy && cp -R . /tmp/audit-copy
           rm -f /tmp/audit-copy/plugins/task-pipeline/skills/task-pipeline/references/audit.md
           if python3 /tmp/audit-copy/test/validate.py; then
             echo "ERROR: validator passed without the built-in audit doctrine"
@@ -464,7 +464,7 @@ jobs:
       - name: Negative self-test (the open-source surface must stay present)
         run: |
           set -eu
-          cp -R . /tmp/oss-copy
+          rm -rf /tmp/oss-copy && cp -R . /tmp/oss-copy
           rm -f /tmp/oss-copy/CONTRIBUTING.md
           if python3 /tmp/oss-copy/test/validate.py; then
             echo "ERROR: validator passed a repo with no CONTRIBUTING.md"
@@ -476,7 +476,7 @@ jobs:
       - name: Negative self-test (npm test must run the validator)
         run: |
           set -eu
-          cp -R . /tmp/script-copy
+          rm -rf /tmp/script-copy && cp -R . /tmp/script-copy
           python3 - <<'EOF'
           import json
           p = "/tmp/script-copy/package.json"
@@ -494,7 +494,7 @@ jobs:
       - name: Negative self-test (the negative self-tests must stay runnable off CI)
         run: |
           set -eu
-          cp -R . /tmp/portable-copy
+          rm -rf /tmp/portable-copy && cp -R . /tmp/portable-copy
           python3 - <<'EOF'
           # build the forbidden token at runtime — spelling it literally here would
           # make this very file trip the guard it is testing
@@ -514,7 +514,7 @@ jobs:
       - name: Negative self-test (a shipped code-graph doctrine must reach the stage-9 gate)
         run: |
           set -eu
-          cp -R . /tmp/graph-copy
+          rm -rf /tmp/graph-copy && cp -R . /tmp/graph-copy
           python3 - <<'EOF'
           import json, re
           p = "/tmp/graph-copy/plugins/task-pipeline/skills/task-pipeline/pipeline.example.json"
@@ -534,7 +534,7 @@ jobs:
       - name: Negative self-test (the stage-9 detail must name the code-graph refresh too)
         run: |
           set -eu
-          cp -R . /tmp/graph-doc-copy
+          rm -rf /tmp/graph-doc-copy && cp -R . /tmp/graph-doc-copy
           python3 - <<'EOF'
           import re
           p = "/tmp/graph-doc-copy/plugins/task-pipeline/skills/task-pipeline/references/stages.md"
@@ -553,7 +553,7 @@ jobs:
       - name: Negative self-test (the retrospective must reach the surfaces that enforce stage 10)
         run: |
           set -eu
-          cp -R . /tmp/retro-anchor-copy
+          rm -rf /tmp/retro-anchor-copy && cp -R . /tmp/retro-anchor-copy
           python3 - <<'EOF'
           import re
           p = "/tmp/retro-anchor-copy/plugins/task-pipeline/skills/task-pipeline/references/acceptance.md"
@@ -570,7 +570,7 @@ jobs:
       - name: Negative self-test (the retro template must ship)
         run: |
           set -eu
-          cp -R . /tmp/retro-tpl-copy
+          rm -rf /tmp/retro-tpl-copy && cp -R . /tmp/retro-tpl-copy
           rm -f /tmp/retro-tpl-copy/plugins/task-pipeline/skills/task-pipeline/templates/retro.md
           if python3 /tmp/retro-tpl-copy/test/validate.py; then
             echo "ERROR: validator passed with no retro template — the run has nowhere to write its lessons"
@@ -582,7 +582,7 @@ jobs:
       - name: Negative self-test (a standing instruction must carry its retirement trigger)
         run: |
           set -eu
-          cp -R . /tmp/retro-prune-copy
+          rm -rf /tmp/retro-prune-copy && cp -R . /tmp/retro-prune-copy
           python3 - <<'EOF'
           p = "/tmp/retro-prune-copy/plugins/task-pipeline/skills/task-pipeline/templates/retro.md"
           t = open(p, encoding="utf-8").read()
@@ -598,7 +598,7 @@ jobs:
       - name: Negative self-test (a task-pipeline:<name> skill must resolve to its doctrine file)
         run: |
           set -eu
-          cp -R . /tmp/doctrine-ptr-copy
+          rm -rf /tmp/doctrine-ptr-copy && cp -R . /tmp/doctrine-ptr-copy
           python3 - <<'EOF'
           p = "/tmp/doctrine-ptr-copy/plugins/task-pipeline/skills/task-pipeline/pipeline.example.json"
           t = open(p, encoding="utf-8").read()
@@ -615,7 +615,7 @@ jobs:
       - name: Negative self-test (an unresolved merge conflict must fail)
         run: |
           set -eu
-          cp -R . /tmp/conflict-copy
+          rm -rf /tmp/conflict-copy && cp -R . /tmp/conflict-copy
           python3 - <<'EOF'
           # build the markers at runtime — spelling them here would trip the guard
           # on this very file
@@ -637,9 +637,9 @@ jobs:
           set -eu
           for f in documentation gates hooks; do
             rm -rf /tmp/doctrine-copy
-            cp -R . /tmp/doctrine-copy
-            rm /tmp/doctrine-copy/plugins/task-pipeline/skills/task-pipeline/references/$f.md
-            if python3 /tmp/doctrine-copy/test/validate.py; then
+            rm -rf /tmp/doctrine-copy-2 && cp -R . /tmp/doctrine-copy-2
+            rm /tmp/doctrine-copy-2/plugins/task-pipeline/skills/task-pipeline/references/$f.md
+            if python3 /tmp/doctrine-copy-2/test/validate.py; then
               echo "ERROR: validator passed with references/$f.md missing"
               exit 1
             fi
@@ -695,9 +695,9 @@ jobs:
       - name: Negative self-test (the seeded gate must stay portable)
         run: |
           set -eu
-          rm -rf /tmp/portable-copy && cp -R . /tmp/portable-copy
+          rm -rf /tmp/portable-copy && cp -R . /tmp/portable-copy-2
           python3 - <<'EOF'
-          p = "/tmp/portable-copy/plugins/task-pipeline/skills/task-pipeline/templates/docgate.sh"
+          p = "/tmp/portable-copy-2/plugins/task-pipeline/skills/task-pipeline/templates/docgate.sh"
           t = open(p, encoding="utf-8").read()
           # Build the construct at runtime — spelling it here would trip the
           # workflow's own portability guard on this very file.
@@ -706,7 +706,7 @@ jobs:
           assert "set -u" in t, "PLANT MISSED"
           open(p, "w", encoding="utf-8").write(t.replace("set -u", "set -u\n" + bad, 1))
           EOF
-          if python3 /tmp/portable-copy/test/validate.py; then
+          if python3 /tmp/portable-copy-2/test/validate.py; then
             echo "ERROR: validator passed a gate using an in-place stream edit — on BSD it silently edits nothing and reads as a guard that failed to fire"
             exit 1
           else
@@ -816,16 +816,16 @@ jobs:
       - name: Negative self-test (the autonomy sweep is compared by topic, not by stage number)
         run: |
           set -eu
-          rm -rf /tmp/sweep-copy && cp -R . /tmp/sweep-copy
+          rm -rf /tmp/sweep-copy && cp -R . /tmp/sweep-copy-2
           python3 - <<'EOF'
-          p = "/tmp/sweep-copy/plugins/task-pipeline/skills/task-pipeline/references/grill.md"
+          p = "/tmp/sweep-copy-2/plugins/task-pipeline/skills/task-pipeline/references/grill.md"
           t = open(p, encoding="utf-8").read()
           old = "| 0 Docs regime |"
           assert old in t, "PLANT MISSED"
           i = t.index(old); j = t.index("\n", i) + 1
           open(p, "w", encoding="utf-8").write(t[:i] + t[j:])
           EOF
-          if python3 /tmp/sweep-copy/test/validate.py; then
+          if python3 /tmp/sweep-copy-2/test/validate.py; then
             echo "ERROR: validator passed a sweep row the brief records and the grill never asks — both files still 'cover stage 0', which is why counting stage numbers was not enough"
             exit 1
           else
@@ -1158,15 +1158,15 @@ jobs:
       - name: Negative self-test (a run-wide rule every stage must name)
         run: |
           set -eu
-          rm -rf /tmp/reach-copy && cp -R . /tmp/reach-copy
+          rm -rf /tmp/reach-copy && cp -R . /tmp/reach-copy-2
           python3 - <<'EOF'
-          p = "/tmp/reach-copy/plugins/task-pipeline/skills/task-pipeline/references/build.md"
+          p = "/tmp/reach-copy-2/plugins/task-pipeline/skills/task-pipeline/references/build.md"
           t = open(p, encoding="utf-8").read()
           assert "[`continuity.md`](continuity.md)" in t, "PLANT MISSED"
           open(p, "w", encoding="utf-8").write(
               t.replace("[`continuity.md`](continuity.md)", "`elsewhere`"))
           EOF
-          if python3 /tmp/reach-copy/test/validate.py; then
+          if python3 /tmp/reach-copy-2/test/validate.py; then
             echo "ERROR: validator passed a stage doctrine that never names continuity.md — the continuous-execution rule sat inside build.md for nine releases and did not work for exactly this reason"
             exit 1
           else
@@ -1366,9 +1366,9 @@ jobs:
       - name: Negative self-test (a gate script must keep its VERDICT block last)
         run: |
           set -eu
-          cp -R . /tmp/verdict-copy
+          rm -rf /tmp/hyg-verdict-copy && cp -R . /tmp/hyg-verdict-copy
           python3 - <<'EOF'
-          p = "/tmp/verdict-copy/plugins/task-pipeline/skills/task-pipeline/templates/hygiene.sh"
+          p = "/tmp/hyg-verdict-copy/plugins/task-pipeline/skills/task-pipeline/templates/hygiene.sh"
           t = open(p, encoding="utf-8").read()
           marker = "# ---------- VERDICT"
           assert marker in t, "plant would not land: no VERDICT section marker"
@@ -1376,9 +1376,27 @@ jobs:
           assert marker not in t2, "plant did not land"
           open(p, "w", encoding="utf-8").write(t2)
           EOF
-          if python3 /tmp/verdict-copy/test/validate.py; then
+          if python3 /tmp/hyg-verdict-copy/test/validate.py; then
             echo "ERROR: validator passed with the VERDICT block renamed"
             exit 1
           else
             echo "OK: validator requires the VERDICT block, on every gate script"
+          fi
+      - name: Negative self-test (two self-tests may not share a scratch directory)
+        run: |
+          set -eu
+          rm -rf /tmp/scratchdupe-copy && cp -R . /tmp/scratchdupe-copy
+          python3 - <<'EOF'
+          p = "/tmp/scratchdupe-copy/.github/workflows/validate.yml"
+          t = open(p, encoding="utf-8").read()
+          t2 = t.replace("rm -rf /tmp/hyg-verdict-copy && cp -R . /tmp/hyg-verdict-copy",
+                         "cp -R . /tmp/rel-copy", 1)
+          assert t2.count("cp -R . /tmp/rel-copy") >= 2, "plant did not land"
+          open(p, "w", encoding="utf-8").write(t2)
+          EOF
+          if python3 /tmp/scratchdupe-copy/test/validate.py; then
+            echo "ERROR: validator passed with two self-tests sharing a scratch dir"
+            exit 1
+          else
+            echo "OK: validator rejects a reused scratch directory"
           fi
