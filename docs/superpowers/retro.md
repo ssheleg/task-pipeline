@@ -20,15 +20,63 @@ over all of them.
 
 | id | Born | Commit | Instruction | Because | Retire when | Last fired | Fired at |
 |---|---|---|---|---|---|---|---|
-| R-001 | 2026-08-03 · `documentation-track` | `dbe4f43` | When a check stays silent against a planted defect, **prove the plant landed in the text the check actually parses before touching the check.** | Two silent probes in one run: one was a bad probe (§9 correctly skips outside a git tree), one was a real bug (`$((0009))` is octal). The split is 50/50 here and was 4-of-5 probe-fault on the source project — guessing wrong costs a real bug or a false fix. | a probe harness exists that asserts the plant changed the parsed text, making this mechanical | 2026-08-05 | `348357e` |
-| R-002 | 2026-08-03 · `doc-track-audit` | `096f0f0` | When a batch of edits returns **any** error, re-verify **every** edit in that batch before reporting the batch done — not only the one that errored. | Two edits were issued together; the second failed the read-before-write check and was retried, the first was silently never applied. It was reported as done, shipped in v1.7.0, and surfaced only in a post-release audit as a question the grill never asks with a field in the brief waiting for the answer. | the harness reports per-edit outcomes in a form a check can read, or the edits are issued one per message | 2026-08-05 | `348357e` |
-| R-003 | 2026-08-05 · `artifact-hygiene` | `13028e9` | When you fix a defect in one check, guard or detector, **immediately run that defect's definition against its siblings** before moving on — the same file's other checks, and the other files that do the same job. | `learned.md` rule 6 says *sweep the class, not the instance*, and this is its **third** recorded failure to be applied to itself. 2026-08-03 `enforcement-audit`: a fix scoped to references→README while the same class lived in six other places. 2026-08-03 `root-cause`: nine findings, one missing matrix row. 2026-08-05: check 2's false-positive class was solved, and check 4 — its immediate sibling, in the same file, written in the same hour — shipped with the identical bug and fired on this run's own documents. Two instances were worth notes; `audit.md` says a class seen twice becomes a mechanism rather than a third ledger row. | a check can compare sibling detectors for a shared false-positive class — which needs the classes to be named in a machine-readable form first | 2026-08-05 | `348357e` |
+| R-001 | 2026-08-03 · `documentation-track` | `dbe4f43` | When a check stays silent against a planted defect, **prove the plant landed in the text the check actually parses before touching the check.** | Two silent probes in one run: one was a bad probe (§9 correctly skips outside a git tree), one was a real bug (`$((0009))` is octal). The split is 50/50 here and was 4-of-5 probe-fault on the source project — guessing wrong costs a real bug or a false fix. | a probe harness exists that asserts the plant changed the parsed text, making this mechanical | 2026-08-06 | `2ce6ecc` |
+| R-002 | 2026-08-03 · `doc-track-audit` | `096f0f0` | When a batch of edits returns **any** error, re-verify **every** edit in that batch before reporting the batch done — not only the one that errored. | Two edits were issued together; the second failed the read-before-write check and was retried, the first was silently never applied. It was reported as done, shipped in v1.7.0, and surfaced only in a post-release audit as a question the grill never asks with a field in the brief waiting for the answer. | the harness reports per-edit outcomes in a form a check can read, or the edits are issued one per message | 2026-08-06 | `2ce6ecc` |
+| R-003 | 2026-08-05 · `artifact-hygiene` | `13028e9` | When you fix a defect in one check, guard or detector, **immediately run that defect's definition against its siblings** before moving on — the same file's other checks, and the other files that do the same job. | `learned.md` rule 6 says *sweep the class, not the instance*, and this is its **third** recorded failure to be applied to itself. 2026-08-03 `enforcement-audit`: a fix scoped to references→README while the same class lived in six other places. 2026-08-03 `root-cause`: nine findings, one missing matrix row. 2026-08-05: check 2's false-positive class was solved, and check 4 — its immediate sibling, in the same file, written in the same hour — shipped with the identical bug and fired on this run's own documents. Two instances were worth notes; `audit.md` says a class seen twice becomes a mechanism rather than a third ledger row. | a check can compare sibling detectors for a shared false-positive class — which needs the classes to be named in a machine-readable form first | 2026-08-06 | `2ce6ecc` |
+| R-004 | 2026-08-06 · `graph-staleness` | `2ce6ecc` | When a gate runs, the **next command must be conditional on its exit code** — never a gate and a commit in one block separated by newlines. | The hygiene gate returned FAIL and the `git commit` and `git push` beneath it ran anyway, because they were separate lines rather than a chain. The gate was read and not obeyed, which is indistinguishable in the transcript from a gate that passed. `learned.md` rule 11 makes the gate *return* the right code; nothing made the caller *use* it. | a harness or wrapper refuses to run a mutating command after a non-zero gate in the same block | 2026-08-06 | `2ce6ecc` |
 
 Retire on **any** of: it became a check · every path/command it names is gone · it
 has not fired in the last five run stamps. At eleven rows, the oldest never-fired
 row goes — the cap is not negotiable, ranking is.
 
 ## Recent log — entries from the last five run stamps (newest first)
+
+### 2026-08-06 · `graph-staleness` · a guard green because it never looked, and a marker with four spellings
+
+**Symptom.** Two independent failures, both inside the release that names their class.
+(a) The new guard requiring the canonical distrust marker compared **per line**; this
+doctrine wraps at ~80 columns, so in `README.md` and `stages.md` — where the marker is
+split across two lines — it matched nothing and printed `PASS`. (b) The marker itself
+was written four ways in one PR: absent from the doctrine's own three worked examples,
+a second spelling (*"treat as stale until refreshed"*) in the `unresolvable` row, and
+the sigil dropped in the Cursor rule and the config.
+
+**Surfaced at:** stage 5 — (a) by probing the guard with a planted wrapped defect,
+(b) by the PR review, which found one instance.
+
+**Owned by:** stage 5 for both. (a) is the guard's own construction; (b) is the edit
+that introduced the marker and did not sweep its own siblings unprompted.
+
+**Root cause.** (a) A check whose predicate is *"the needle is on this line"* silently
+assumes the source is not wrapped — and the one thing certain about this repository's
+prose is that it wraps at ~80. The guard's own green was the only evidence anyone had
+that it worked, which is the definition in `gates.md` → *False success*. (b) A marker
+is a **string**, and its value is entirely that one grep finds every occurrence; four
+spellings is not four styles, it is zero markers.
+
+**Fix, by grade.**
+1. *(mechanical)* The marker guard now normalises whitespace before counting — probed
+   with a planted wrapped defect and watched rejecting it.
+2. *(mechanical)* Hygiene **check 7** — a blank line inside a GFM table. The class hit
+   **five** times in this run, and on the check's first armed pass it found three more
+   in the v1.12.0 and v1.13.0 carry-over ledgers, which had been rendering broken since
+   the day they were written. All eight fixed, none baselined behind a floor.
+3. *(mechanical)* An undeclared hygiene floor is a failure rather than a zero: check 7
+   shipped without `HYGIENE_FLOOR_7` and printed `ok … (floor )` over three real hits.
+4. *(mechanical)* The guard count stopped being restated in prose at all — third
+   hand-correction in one run, and the guard's message had always offered *derive or
+   delete*.
+5. *(standing instruction)* **R-004** — a gate's exit code must gate the next command.
+
+**The check that catches each from now on:** negatives *"the distrust marker keeps its
+sigil, even wrapped"*, *"the distrust marker gets no second spelling"*, *"the hygiene
+gate catches a blank line inside a table"*, *"the hygiene gate refuses an undeclared
+floor"*.
+
+**What R-003 was worth, measured:** review found **1** of the four marker spellings.
+Running its definition against the siblings found the other **3**. The instruction did
+three quarters of the work on this run.
+
 
 ### 2026-08-05 · `false-success` · fourteen guards that could not fail
 
@@ -293,6 +341,7 @@ One line per run, appended at stage 10. This is what makes "five runs" countable
 
 | Date | Topic | Commit | Verdict | Retro |
 |---|---|---|---|---|
+| 2026-08-06 | `graph-staleness` | `2ce6ecc` | 13 REQ · 12 verified · 1 deferred (tag, by operator decision) | 1 entry · 4 standing (was 3) · retired 0 · added 1 · R-001, R-002, R-003 all fired |
 | 2026-08-05 | `false-success` | `348357e` | 10 REQ · 9 verified by a proven check · 1 `review` (the Cursor rule, per the matrix) · carry-over 1 row, 0 unresolved | 2 entries · 3 standing · retired 0 · added 0 · **R-001, R-002 and R-003 all fired** · guards 80 → 95 |
 | 2026-08-05 | `spec-plan-quality` | `e9123c6` | 11 REQ · 8 verified by a proven check · 3 carrying an explicit `review` half · carry-over 5 rows, 0 unresolved, 1 printed exclusion | **no divergence** · 3 standing · retired 0 · added 0 · **R-003 fired on its first run** (asked of `planning.md`, answered "no", recorded) · guards 76 → 80 |
 | 2026-08-05 | `artifact-hygiene` | `13028e9` | 15 REQ · 13 verified by a proven check · 2 marked `review` out loud (the agent-fixes obligation, the Cursor rule) · 1 new REQ from the ladder walk carried as printed backlog · carry-over 7 rows, 0 unresolved | 2 entries · **3 standing (was 2)** · retired 0 · added 1 (R-003) · R-001 fired twice, R-002 did not fire · guards 68 → 76 |

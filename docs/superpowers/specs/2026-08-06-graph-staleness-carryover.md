@@ -12,6 +12,10 @@ something is deferred, never at the end from memory.
 | 5 | 5 | A blank line inside a GFM table, twice in this run (carry-over ledger, brief) | closed as a mechanism, not a row — `audit.md`: a class seen twice becomes a check. Hygiene **check 7**; its first armed pass found 3 more in the v1.12.0/v1.13.0 ledgers, all fixed rather than baselined | — | **closed** — check + negative |
 | 6 | 5 | Check 7 shipped with `HYGIENE_FLOOR_7` undeclared and printed `ok … (floor )` over 3 real hits | closed in this change — the gate reporting a pass it never computed, on the release about that. An undeclared floor is now a failure, not a zero | — | **closed** — refusal + negative |
 | 7 | 5 | The guard count restated in three living documents, hand-corrected three times | closed by taking the guard's other option — *derive or delete*. The prose now names the command instead of the number, and the guard's own negative was rewritten to introduce a count rather than edit one | — | **closed** |
+| 8 | 9 | The code graph not refreshed and the wiki not synced in this change | a concurrent session committed `1c508d4` (the ten canons) onto this branch three seconds after the merge landed, targeting **the same v1.15.0**. Building the graph now indexes a tree that is on no branch's tip for long, and the doc set changes again when canons reaches `main` — one refresh after both halves land is one refresh, two is one wasted and one stale in between | next run, before its stage 0 trusts the graph | open — **and the graph's own row will say so**: `built 3944593 — N commits behind HEAD, signal: built_at_commit (exact) — ⚠ not trusted for reach until refreshed`, which is this release working on its own author |
+| 9 | 7 | The tag `v1.15.0` and the npm release | operator decision, not an omission: `main` carries this half, the canons half is in flight under the same version, and one tag over both is what makes the version mean something | operator, once canons lands | open |
+| 10 | 7 | `gh` CLI unusable — the token went invalid mid-run (401 after a successful `gh pr create`) | credentials are a human step by design; merge and push still work over SSH, which is how `main` was reached | operator — `gh auth login -h github.com` | open |
 
-Counts printed beside every gate verdict: **7 rows · 6 closed · 1 open (deferred by
-decision, with its promotion trigger recorded)**.
+Counts printed beside every gate verdict: **10 rows · 6 closed · 4 open (1 deferred by
+decision with its promotion trigger recorded, 2 awaiting the concurrent half, 1 human
+credential step)**.
