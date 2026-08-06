@@ -49,6 +49,7 @@ gate stops until it is installed.
 | 0 + 9 + any settled decision · The documentation system | [`references/documentation.md`](references/documentation.md) |
 | any claim that will be read as true · The canons, and where each is enforced | [`evidence-docs`](../evidence-docs/SKILL.md) — the sibling skill in this plugin |
 | 6–10 + any check you write · Gates | [`references/gates.md`](references/gates.md) |
+| 7–8 · Deploy targets | [`references/deploy-targets.md`](references/deploy-targets.md) |
 | any agent-time enforcement · Hooks | [`references/hooks.md`](references/hooks.md) |
 | 0 Knowledge harvest (pre-grill) | [`references/knowledge-sources.md`](references/knowledge-sources.md) |
 | 0 + 9 The code graph (graphify — recommended, never required) | [`references/knowledge-graph.md`](references/knowledge-graph.md) |
@@ -330,6 +331,7 @@ automation is on — `pipeline.schema.json` is the only contract.
 - `references/retrospective.md` — stage 10's last act: the project retro (`docs/superpowers/retro.md`), the three grades of fix, the mandatory prune and its cap of ten
 - `references/documentation.md` — cross-cutting: the doc inventory, registers and ids, SSOT, the Doc Loop, supersede semantics, the propagation matrix, intent vs as-built
 - `references/gates.md` — cross-cutting: the two axes, the promotion ladder, gate anatomy, the probe recipe, ratchet floors, where a gate runs
+- `references/deploy-targets.md` — stages 7–8: writing the runbook when there is none, the template, per-platform deploy and log verbs, and the verification trio
 - `references/hooks.md` — agent-time enforcement: the PreToolUse contract, the fail-open hazard, placement, and the Claude-Code-only limit
 - `references/audit.md` — cross-cutting: the L0→L7 ladder and its seams (what was never written), axis rotation, ratchets, proven checks
 - `references/learned.md` — cross-cutting: fifteen rules earned by failure on a real multi-repository build, each with the incident behind it, its check and its exit criterion; plus the two that no check can decide

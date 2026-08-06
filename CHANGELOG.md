@@ -1,5 +1,29 @@
 # Changelog
 
+## v1.18.0 — 2026-08-06
+
+### Added
+- **`references/deploy-targets.md`** — stages 7 and 8 knew what a deploy must
+  satisfy and never said what to run. This carries the runbook template, the
+  per-platform verbs (Heroku, DO App Platform, droplet over SSH, CI-as-deploy,
+  and the quick table for Fly/Vercel/Cloudflare), and the verification trio.
+
+### Changed
+- **Stage 7: a missing runbook is now the stage's first deliverable**, not a
+  reason to improvise. A deploy performed from an agent's inference about the
+  project is one nobody can repeat or roll back, and the operator is already
+  standing at that manual gate — the questions cost two minutes there and cannot
+  be reconstructed during an incident.
+- **Stage 8 names all three verifications, and says to check the deploy job**,
+  not only the build. A green build beside a skipped or failed deploy is the
+  commonest way a run reports success while nothing shipped — previously the
+  stage said "confirm clean boot" and left the shape of the confirmation open.
+
+### Notes
+- Ported from a standalone `deploy` skill that lived only in a Cursor skills
+  directory. The pipeline already owned the gates; what it lacked was the
+  concrete verbs behind them, so the skill folded in rather than shipping beside.
+
 ## v1.17.0 — 2026-08-06
 
 **A carried-in claim is a recollection — `learned.md` rule 16, and the four places
@@ -97,6 +121,7 @@ the workflow's count, not merely sit below it. Its own comment records the first
 landed and the floor stayed at 104 while the file carried 108. A floor below the count
 cannot notice losing the difference, which is the entire job. Now guarded, and the
 guard was watched rejecting a lowered floor.
+
 
 ## v1.16.1 — 2026-08-06
 

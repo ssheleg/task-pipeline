@@ -799,6 +799,7 @@ recommendation, so you arm the whole run in one exchange. Detail:
 | [`references/conventions.md`](plugins/task-pipeline/skills/task-pipeline/references/conventions.md) | how stages 6–10 read the host project's `CLAUDE.md`, and how the documentation regime is detected |
 | [`references/documentation.md`](plugins/task-pipeline/skills/task-pipeline/references/documentation.md) | the doc system: the inventory, registers and ids, SSOT, the Doc Loop, supersede semantics, the propagation matrix, intent vs as-built |
 | [`references/gates.md`](plugins/task-pipeline/skills/task-pipeline/references/gates.md) | the two axes, the promotion ladder, gate anatomy, the probe recipe, ratchet floors, where a gate runs |
+| [`references/deploy-targets.md`](plugins/task-pipeline/skills/task-pipeline/references/deploy-targets.md) | stages 7–8: writing the runbook when there is none, the template, per-platform deploy and log verbs, the verification trio |
 | [`references/hooks.md`](plugins/task-pipeline/skills/task-pipeline/references/hooks.md) | the `PreToolUse` contract, the fail-open hazard, placement, and the Claude-Code-only limit |
 | [`references/knowledge-graph.md`](plugins/task-pipeline/skills/task-pipeline/references/knowledge-graph.md) | the code graph: install line, stage-0 reach queries, the stage-9 refresh, the graph↔docs divergence check |
 | [`references/retrospective.md`](plugins/task-pipeline/skills/task-pipeline/references/retrospective.md) | the project retro: the three grades of fix, the mandatory prune, the cap of ten |

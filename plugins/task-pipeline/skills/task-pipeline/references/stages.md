@@ -339,7 +339,11 @@ never that the work was skipped quietly.
   the **super-ux linter** (`python3 docs/ux/lint.py` / `/ux-lint`) is part of lint —
   it must pass too (no UX drift merges). Then deploy per the project's convention;
   if the project defines release automation (`pipeline.json` → `release`, toggle
-  on), that is what "deploy" runs here.
+  on), that is what "deploy" runs here. **No runbook, or one too thin to act on?
+  Write it first** ([`deploy-targets.md`](deploy-targets.md)) — a deploy performed
+  from inference about the project is one nobody can repeat or roll back, and the
+  operator is standing at this gate anyway. That reference also carries the CLI
+  verbs per target for when the runbook names a platform you have to recall.
 - **GATE (manual):** lint clean (host linter **and**, for UI projects, the super-ux
   linter) **and** suite green **before** deploy, **and no REQ is still `open`** — a
   `partial` ships only with the operator's explicit acceptance. A gap is cheapest to
@@ -353,7 +357,12 @@ never that the work was skipped quietly.
 ## 8 — Post-deploy
 - **Freedom: medium** — where the logs live varies; 'clean boot or an honest degradation report' does not ([`gates.md`](gates.md) → *Axis C*).
 - Tail deploy logs / health-check per conventions. Confirm clean boot, no error
-  spike, live subsystems healthy.
+  spike, live subsystems healthy. **All three of the verification trio, not one of
+  them** ([`deploy-targets.md`](deploy-targets.md) → *The verification trio*):
+  deployment/process state, runtime logs, and a health-check request from outside.
+  Where deploy happens in CI, verify the **deploy** job and not only the build —
+  a green build beside a skipped deploy is the commonest way a run reports success
+  while nothing shipped.
 - **Read the CI verdict for the deploy's own commit** ([`conventions.md`](conventions.md)
   → *The CI verdict*): the run's conclusion quoted, the **failing step's log quoted**
   on anything but `success`, and one of the three states stated — including **`no run
