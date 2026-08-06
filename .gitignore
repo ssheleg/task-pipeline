@@ -4,3 +4,5 @@ node_modules/
 .task-pipeline/
 .worktrees/
 graphify-out/
+__pycache__/
+*.pyc
