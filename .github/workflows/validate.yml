@@ -934,9 +934,17 @@ jobs:
           p = "/tmp/count-copy/SKILL-CARD.md"
           t = open(p, encoding="utf-8").read()
           import re
-          m = re.search(r"(\d+) guards", t)
-          assert m, "PLANT MISSED"
-          open(p, "w", encoding="utf-8").write(t.replace(m.group(0), "3 guards", 1))
+          # The guard rejects ANY hand-written guard count in a living document, so
+          # the plant INTRODUCES one rather than editing an existing number. The
+          # earlier plant edited the count in place and broke the day the prose
+          # stopped restating it — a test coupled to the defect it was written
+          # against instead of to the rule.
+          assert not re.search(r"\b\d+\+?\s+(?:structural\s+)?guards\b", t), \
+              "PLANT MISSED: SKILL-CARD.md already restates a count, so this plants nothing"
+          anchor = "## What to check before you trust it"
+          assert anchor in t, "PLANT MISSED: anchor heading absent"
+          open(p, "w", encoding="utf-8").write(
+              t.replace(anchor, anchor + "\n\nThis skill ships 3 guards.\n", 1))
           EOF
           if python3 /tmp/count-copy/test/validate.py; then
             echo "ERROR: validator passed a hand-written guard count that disagrees with the workflow"
@@ -1854,4 +1862,41 @@ jobs:
             exit 1
           else
             echo "OK: validator correctly FAILs — the distrust marker gets no second spelling"
+          fi
+      - name: Negative self-test (the hygiene gate catches a blank line inside a table)
+        run: |
+          set -eu
+          rm -rf /tmp/hyg7 && mkdir -p /tmp/hyg7
+          cp plugins/task-pipeline/skills/task-pipeline/templates/hygiene.sh /tmp/hyg7/gate.sh
+          cd /tmp/hyg7
+          python3 - <<'EOF'
+          open('t7.md','w').write(
+              '# Ledger\n\n| id | what |\n|---|---|\n| 1 | first |\n\n| 2 | second |\n')
+          EOF
+          test -s t7.md || { echo "ERROR: plant did not land — t7.md is empty"; exit 1; }
+          if bash gate.sh; then
+            echo "ERROR: hygiene gate passed with a blank line splitting a table"
+            exit 1
+          else
+            echo "OK: hygiene gate rejects a blank line inside a table"
+          fi
+      - name: Negative self-test (the hygiene gate refuses an undeclared floor)
+        run: |
+          set -eu
+          rm -rf /tmp/hyg8 && mkdir -p /tmp/hyg8
+          cp plugins/task-pipeline/skills/task-pipeline/templates/hygiene.sh /tmp/hyg8/gate.sh
+          cd /tmp/hyg8
+          python3 - <<'EOF'
+          p = 'gate.sh'
+          t = open(p, encoding='utf-8').read()
+          needle = 'HYGIENE_FLOOR_7=${HYGIENE_FLOOR_7:-0}\n'
+          assert needle in t, "PLANT DID NOT LAND: floor 7 is not declared in the gate"
+          open(p, 'w', encoding='utf-8').write(t.replace(needle, ''))
+          open('t8.md','w').write('# Ledger\n\n| id | what |\n|---|---|\n| 1 | first |\n\n| 2 | second |\n')
+          EOF
+          if bash gate.sh; then
+            echo "ERROR: hygiene gate passed while judging a check whose floor is undeclared"
+            exit 1
+          else
+            echo "OK: hygiene gate refuses an undeclared floor instead of printing ok"
           fi

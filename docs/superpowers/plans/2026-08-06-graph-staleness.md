@@ -32,9 +32,9 @@ prove the guards). No parallel group, so no shared-file conflict is possible.
 - **Computed, not asserted — and the estimate was wrong, which is why it is measured
   at the end rather than trusted from the start:** tasks **9** · REQ rows covered
   **13** · files touched **22** (planned 13; the gap is this run's own artifacts plus
-  three surfaces the repo's drift guard surfaced) · guards **95 → 100** (planned 97 —
+  three surfaces the repo's drift guard surfaced) · guards **95 → 102** (planned 97 —
   the four stage-0/doctrine checks and the template check were counted as two) ·
-  negatives floor **95 → 100**.
+  negatives floor **95 → 102**.
 - **Where the correction came from:** not from re-reading the plan. `npm run test:all`
   failed on `SKILL-CARD.md` and `evals/RESULTS.md` still saying *95 structural
   guards* — invariant 13 catching an estimate that had been written down as a fact.

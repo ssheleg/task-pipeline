@@ -108,7 +108,7 @@ section — rather than copied into a second guard that would drift from the fir
   --count`, `git log -1 --format=%ct` — all three run in this repo, and the worked
   example in the brief's ledger was produced by them.
 - **Read back against the brief's `Decisions locked`:** D-1 (cadence untouched) — no
-  section here changes stage 9. D-2/D-8 (compute) — the commands section. D-3 (no
+  section here changes stage 9. D-2 (compute) — the commands section. D-3 (no
   threshold) — stated with its precedent. D-4 (three states) — the table. D-5 (doctrine
   not script) — in *Rejected*. D-6 (extend the sibling guard) — in *Where it is
   enforced*. No decision is contradicted.
@@ -117,3 +117,7 @@ section — rather than copied into a second guard that would drift from the fir
 - **Cost checkpoint, printed and not decided:** surfaces touched **7** (was 7 at intake,
   none discovered) · guards **95 → 97 expected** · REQ rows **13** (13 at intake).
   No growth to report; the operator's gate, not the agent's.
+  *(Measured at stage 10: guards 95 → **102**, surfaces **9**. The estimate above is
+  left standing rather than rewritten — a design-time expectation is a record of what
+  was believed, and quietly editing it to match the outcome is how a project loses the
+  evidence that its estimates run low.)*

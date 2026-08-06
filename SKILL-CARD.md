@@ -38,7 +38,7 @@ apply.
    instruction surface, and every one is linked directly from `SKILL.md`.
 2. Read `templates/docgate.sh` before seeding it; it is the only shipped script a
    host project will run on its own repository.
-3. Run `npm run test:all` — 102 guards, each with a negative self-test that plants a
+3. Run `npm run test:all` — every guard has a negative self-test that plants a
    defect and requires rejection.
 4. Run `python3 evals/run.py` for the behavioural protocol, and read
    `evals/RESULTS.md` for what has actually been observed.
@@ -54,7 +54,7 @@ apply.
 - **Versions are pinned by git tag** and mirrored into `sshlg-skills`'s catalogue.
   Rollback is `git checkout v<previous>` or pinning the previous plugin version;
   the previous version is never deleted.
-- **Behavioural evidence is missing, not merely thin.** 102 structural guards prove
+- **Behavioural evidence is missing, not merely thin.** The structural guards prove
   the skill is well-formed. Until `evals/RESULTS.md` carries a dated run, nothing in
   this repository proves it *behaves* — triggers correctly, stays quiet on a
   question, or performs the steps it documents.

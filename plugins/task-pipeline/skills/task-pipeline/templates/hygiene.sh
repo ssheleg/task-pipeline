@@ -7,7 +7,8 @@
 # WHAT IT IS FOR: the defect class an AGENT produces and no other check looks for —
 #   a half-resolved merge, a stub that outlived its task, a generation cut off in the
 #   middle, a file "shortened" while being rewritten, a batch of edits where one
-#   applied twice, a section opened and abandoned.
+#   applied twice, a section opened and abandoned, a blank line left in a table so
+#   every row below it silently stops being one.
 #
 # SCOPE: walks tracked files. In diff mode it walks only what this run changed; in
 #   tree mode it walks everything, behind per-check floors.
@@ -26,9 +27,11 @@
 #     5 duplicated block   — a legitimately repeated stanza 3+ lines long
 #     6 empty section      — a heading used as a one-line record. If you have those,
 #                            they want to be list items: a heading promises a section.
+#     7 split table        — a document deliberately showing a broken table as an
+#                            example of the defect.
 #   Read this header before quoting a green from here as evidence.
 #
-# IT NEVER EDITS. It reports file:line and exits non-zero. None of the six is safely
+# IT NEVER EDITS. It reports file:line and exits non-zero. None of them is safely
 #   machine-fixable: deleting a "duplicated block" sometimes deletes a legitimate
 #   repetition, and deleting a TODO erases a reminder instead of discharging it.
 #   Fixing is the agent's job, and task-pipeline's references/build.md makes it one.
@@ -36,6 +39,8 @@
 # EXIT CODE IS THE OUTPUT: non-zero on any failure. Nothing may run after the
 #   VERDICT block at the bottom — a gate that appended a check after its verdict
 #   printed FAIL and returned 0, and CI was green over it for an unknown period.
+#   For the same reason, an UNDECLARED FLOOR is a failure, not a zero: check 7
+#   shipped without HYGIENE_FLOOR_7 and printed "ok … (floor )" over 3 real hits.
 #
 # PORTABLE to macOS bash 3.2: no grep -P, no sed -i, no readarray, no mapfile.
 #
@@ -62,6 +67,7 @@ HYGIENE_FLOOR_3=${HYGIENE_FLOOR_3:-0}
 HYGIENE_FLOOR_4=${HYGIENE_FLOOR_4:-0}
 HYGIENE_FLOOR_5=${HYGIENE_FLOOR_5:-0}
 HYGIENE_FLOOR_6=${HYGIENE_FLOOR_6:-0}
+HYGIENE_FLOOR_7=${HYGIENE_FLOOR_7:-0}
 
 TMP=${TMPDIR:-/tmp}/hygiene.$$
 mkdir -p "$TMP" || exit 2
@@ -117,6 +123,12 @@ floor_for() {
 
 judge() { # judge <n> <count> <label>
   _f=$(floor_for "$1")
+  # An undeclared floor made this print "ok … (floor )" while the count was 3 — the
+  # gate reporting a pass it never computed. Refuse rather than default to zero: a
+  # missing floor is a bug in the gate, and a bug in the gate is not a passing file.
+  case "$_f" in
+    ''|*[!0-9]*) err "check $1 — $3: no floor declared (HYGIENE_FLOOR_$1) — the gate cannot judge $2 finding(s)"; return ;;
+  esac
   if [ "$2" -gt "$_f" ]; then
     err "check $1 — $3: $2 finding(s), floor $_f"
     sed 's/^/         /' "$TMP/hits$1"
@@ -127,7 +139,7 @@ judge() { # judge <n> <count> <label>
 
 if [ "$NFILES" -eq 0 ]; then
   dormant "every check — no files in scope"
-  C1=0; C2=0; C3=0; C4=0; C5=0; C6=0
+  C1=0; C2=0; C3=0; C4=0; C5=0; C6=0; C7=0
 else
 
 # ---------- 1. conflict markers ----------
@@ -225,12 +237,41 @@ else
   judge 6 "$C6" "empty section"
 fi
 
+# ---------- 7. a blank line inside a table ----------
+# A GFM table ends at the first blank line. An agent appending rows to a ledger or a
+# decision register routinely leaves one behind, and the rows after it silently stop
+# being a table: they render as pipe-delimited prose with no header. Nothing else
+# here sees it — the file is well-formed markdown, every row is present, and the
+# defect is invisible in a diff that shows only the added lines.
+# Found twice in one run (a carry-over ledger and a brief's decision table), which is
+# what turns a finding into a check rather than a third ledger row.
+: > "$TMP/hits7"
+if [ "$NMD" -eq 0 ]; then
+  dormant "check 7 — blank line inside a table: no markdown in scope"
+  C7=0
+else
+  while read -r f; do
+    awk -v F="$f" '
+      /^[[:space:]]*(```|~~~)/ { fence = !fence; next }
+      fence { next }
+      { line[NR] = $0 }
+      END {
+        for (i = 2; i < NR; i++)
+          if (line[i] == "" && line[i-1] ~ /^\|/ && line[i+1] ~ /^\|/)
+            print F ":" i ": blank line inside a table — the rows below it stop being a table"
+      }
+    ' "$f" >> "$TMP/hits7" 2>/dev/null
+  done < "$TMP/md"
+  C7=$(wc -l < "$TMP/hits7" | tr -d ' ')
+  judge 7 "$C7" "blank line inside a table"
+fi
+
 fi
 
 # ---------- VERDICT — nothing may run after this block ----------
 if [ "$FAIL" -ne 0 ]; then
-  echo "FAIL: hygiene gate — mode $MODE · conflict ${C1} · placeholder ${C2} · fence ${C3} · truncation ${C4} · duplicate ${C5} · empty-section ${C6}"
+  echo "FAIL: hygiene gate — mode $MODE · conflict ${C1} · placeholder ${C2} · fence ${C3} · truncation ${C4} · duplicate ${C5} · empty-section ${C6} · split-table ${C7}"
   exit 1
 fi
-echo "OK: hygiene gate — mode $MODE · $NFILES file(s) · conflict ${C1} · placeholder ${C2} · fence ${C3} · truncation ${C4} · duplicate ${C5} · empty-section ${C6}"
+echo "OK: hygiene gate — mode $MODE · $NFILES file(s) · conflict ${C1} · placeholder ${C2} · fence ${C3} · truncation ${C4} · duplicate ${C5} · empty-section ${C6} · split-table ${C7}"
 exit 0

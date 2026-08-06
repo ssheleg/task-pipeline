@@ -37,7 +37,23 @@ behind a date that looked current.
   schedules exactly the state the doctrine warns about — a graph confidently wrong
   between releases, read first by the next run.
 
-### Guards — 95 → 102, by extending a sibling rather than copying it
+### Added — hygiene check 7: a blank line inside a table
+
+A GFM table ends at the first blank line, so a blank line left mid-table silently
+demotes every row below it to pipe-delimited prose. The file stays well-formed, every
+row is still present, and a diff showing only added lines shows nothing wrong. It
+happened **twice inside this run** — a carry-over ledger and the brief's decision
+table — which is `audit.md`'s threshold for a mechanism rather than a third ledger
+row. On its first armed pass the check found **three more** in the carry-over ledgers
+of v1.12.0 and v1.13.0, which had been rendering broken since the day they were
+written. All three are fixed rather than baselined behind a floor.
+
+The check shipped with `HYGIENE_FLOOR_7` undeclared, so `judge()` compared against an
+empty string and printed `ok: check 7 … 3 (floor )` over three real hits — the gate
+reporting a pass it never computed, on the release about exactly that. An undeclared
+floor is now a failure, not a zero, and the reason is written beside it.
+
+### Guards — 95 → 104, by extending a sibling rather than copying it
 
 `test/validate.py` already enforced that the code-graph doctrine be named in **both**
 halves of stage 9 — the config gate the orchestrator verifies and the section an agent
@@ -52,11 +68,16 @@ the **measured lag**, and three more checks keep the cited section honest: the c
 must survive, all three states must survive, and `templates/brief.md` may not ship the
 superseded bare-date row to every project scaffolded from it.
 
-The repository's own drift guard then caught the release mid-flight — twice.
-`SKILL-CARD.md` and `evals/RESULTS.md` still said *95 structural guards*, and after
-the next two guards landed they said *100*. Invariant 13 — numbers in living
-documents are computed, not restated — is what turned an estimate into the measured
-102.
+The repository's own drift guard caught the release mid-flight **three times**:
+`SKILL-CARD.md` and `evals/RESULTS.md` said *95*, then *100*, then *102*. Its message
+has always offered two fixes — *derive the number or delete it* — and three
+hand-corrections in one run is the answer to which one was right. **The prose no
+longer states a count at all**; it names the command that prints one. The guard's own
+negative self-test was rewritten in the same move: its plant used to edit the
+restated number in place, so it broke the moment the number went away — a test
+coupled to the defect it was written against rather than to the rule. It now
+*introduces* a count into a document that has none, which is what the guard actually
+forbids.
 
 ### Fixed — one marker, one spelling
 
