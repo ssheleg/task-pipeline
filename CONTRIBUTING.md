@@ -235,7 +235,21 @@ commands and all three signal states — with a state missing, a graph that coul
 be measured prints like a fresh one.
 *(guard: `never requires it — a run passes intake quoting a`)*
 
-**31. Every invariant above names the guard that enforces it, and that guard exists.**
+**31. A CI run's verdict is read, never assumed — and every stage that pushes says so.**
+`references/conventions.md` → *The CI verdict* keeps the commands, the unauthenticated
+fallback and all three states; stages 7, 8 and 9 cite it rather than carrying a second
+copy. A workflow run that nobody reads is the fail-open hook with extra steps: this
+repo's own `validate` was red on a push to `main` and on a release tag, the guard that
+failed was correct, and nothing obliged anyone to look.
+*(guard: `never names it — the run it triggers is closed on an unread verdict`)*
+
+**32. The negatives floor equals the workflow's count.**
+`MIN_EXPECTED` is a number in a living document (rule 8). Below the count it cannot
+notice losing the difference — it lagged at 20 against 34 once, and at 104 against 108
+in v1.15.0.
+*(guard: `a floor below the count is a floor that cannot`)*
+
+**33. Every invariant above names the guard that enforces it, and that guard exists.**
 This list claims to be *what the validator enforces*; it was eight guards behind when
 an audit measured it. A claim of enforcement is now checked like any other claim.
 *(guard: `whose message does not appear in`)* — and a cited literal must lie inside

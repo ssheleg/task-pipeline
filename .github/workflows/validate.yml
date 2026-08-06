@@ -1964,3 +1964,115 @@ jobs:
           else
             echo "OK: validator correctly FAILs — the canon/rule boundary must stay stated"
           fi
+      - name: Negative self-test (the CI verdict must keep its commands)
+        run: |
+          set -eu
+          rm -rf /tmp/ci01-copy && cp -R . /tmp/ci01-copy
+          python3 - <<'EOF'
+          p = "/tmp/ci01-copy/plugins/task-pipeline/skills/task-pipeline/references/conventions.md"
+          t = open(p, encoding="utf-8").read()
+          assert "gh run list --branch" in t, "PLANT DID NOT LAND: needle absent before edit"
+          open(p, "w", encoding="utf-8").write(t.replace("gh run list --branch", "gh run glance --branch"))
+          EOF
+          if python3 /tmp/ci01-copy/test/validate.py; then
+            echo "ERROR: validator passed with the CI-verdict commands gone"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the CI verdict must keep its commands"
+          fi
+      - name: Negative self-test (a run that cannot be established needs its own state)
+        run: |
+          set -eu
+          rm -rf /tmp/ci02-copy && cp -R . /tmp/ci02-copy
+          python3 - <<'EOF'
+          p = "/tmp/ci02-copy/plugins/task-pipeline/skills/task-pipeline/references/conventions.md"
+          t = open(p, encoding="utf-8").read()
+          assert "**no run found**" in t, "PLANT DID NOT LAND: needle absent before edit"
+          open(p, "w", encoding="utf-8").write(t.replace("**no run found**", "**probably fine**"))
+          EOF
+          if python3 /tmp/ci02-copy/test/validate.py; then
+            echo "ERROR: validator passed with the 'no run found' state removed"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — a run that cannot be established needs its own state"
+          fi
+      - name: Negative self-test (a pushing stage must name the CI verdict)
+        run: |
+          set -eu
+          rm -rf /tmp/ci03-copy && cp -R . /tmp/ci03-copy
+          python3 - <<'EOF'
+          p = "/tmp/ci03-copy/plugins/task-pipeline/skills/task-pipeline/references/stages.md"
+          t = open(p, encoding="utf-8").read()
+          i, j = t.index("## 7 — "), t.index("## 8 — ")
+          sec = t[i:j]
+          block = ("**Before\n  tagging, the CI verdict for what was just pushed is READ, not assumed**\n"
+                   "  ([`conventions.md`](conventions.md) → *The CI verdict*) — a tag on a commit whose\n"
+                   "  run nobody read is how a red `main` ships.")
+          assert block in sec, "PLANT DID NOT LAND: the stage-7 CI block is absent before edit"
+          open(p, "w", encoding="utf-8").write(t[:i] + sec.replace(block, "") + t[j:])
+          EOF
+          if python3 /tmp/ci03-copy/test/validate.py; then
+            echo "ERROR: validator passed with a pushing stage no longer naming the CI verdict"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — a pushing stage must name the CI verdict"
+          fi
+      - name: Negative self-test (a stage may not carry its own copy of the CI commands)
+        run: |
+          set -eu
+          rm -rf /tmp/ci04-copy && cp -R . /tmp/ci04-copy
+          python3 - <<'EOF'
+          p = "/tmp/ci04-copy/plugins/task-pipeline/skills/task-pipeline/references/stages.md"
+          t = open(p, encoding="utf-8").read()
+          anchor = "- **Read the CI verdict for the deploy's own commit**"
+          assert anchor in t, "PLANT DID NOT LAND: anchor absent before edit"
+          assert "gh run list --branch" not in t, "PLANT DID NOT LAND: a copy already exists"
+          open(p, "w", encoding="utf-8").write(
+              t.replace(anchor, "- run `gh run list --branch main --limit 1`\n" + anchor, 1))
+          EOF
+          if python3 /tmp/ci04-copy/test/validate.py; then
+            echo "ERROR: validator passed with a second copy of the CI-verdict commands"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — a stage may not carry its own copy of the CI commands"
+          fi
+      - name: Negative self-test (the stage-8 gate must require the CI verdict)
+        run: |
+          set -eu
+          rm -rf /tmp/ci05-copy && cp -R . /tmp/ci05-copy
+          python3 - <<'EOF'
+          import json, re
+          p = "/tmp/ci05-copy/plugins/task-pipeline/skills/task-pipeline/pipeline.example.json"
+          d = json.load(open(p, encoding="utf-8"))
+          s = [x for x in d["stages"] if x["state"] == "post-deploy"][0]
+          c = s["gate"]["check"]
+          assert "CI VERDICT" in c, "PLANT DID NOT LAND: the stage-8 gate does not require it before the edit"
+          s["gate"]["check"] = re.sub(r"(?i)ci verdict", "vibes check", c)
+          open(p, "w", encoding="utf-8").write(json.dumps(d, indent=2, ensure_ascii=False) + "\n")
+          EOF
+          if python3 /tmp/ci05-copy/test/validate.py; then
+            echo "ERROR: validator passed with the stage-8 gate no longer requiring the CI verdict"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the stage-8 gate must require the CI verdict"
+          fi
+      - name: Negative self-test (the negatives floor may not lag the workflow)
+        run: |
+          set -eu
+          rm -rf /tmp/ci06-copy && cp -R . /tmp/ci06-copy
+          python3 - <<'EOF'
+          import re
+          p = "/tmp/ci06-copy/test/negatives.py"
+          t = open(p, encoding="utf-8").read()
+          m = re.search(r"^MIN_EXPECTED\s*=\s*(\d+)", t, re.M)
+          assert m, "PLANT DID NOT LAND: MIN_EXPECTED not found"
+          lowered = int(m.group(1)) - 4
+          open(p, "w", encoding="utf-8").write(
+              t.replace(m.group(0), f"MIN_EXPECTED = {lowered}", 1))
+          EOF
+          if python3 /tmp/ci06-copy/test/validate.py; then
+            echo "ERROR: validator passed with the negatives floor lagging the workflow"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the negatives floor may not lag the workflow"
+          fi

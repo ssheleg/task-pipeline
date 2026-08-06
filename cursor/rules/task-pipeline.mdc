@@ -243,7 +243,17 @@ not authorize an outward, irreversible action — stage 7 stops and asks.
    outward → explicit user go, or the specific standing authorization recorded in
    the stage-0 brief.
 8. **Post-deploy** (auto) — tail logs / health-check; clean boot or an honest
-   degradation report (never silent success).
+   degradation report (never silent success). **Read the CI verdict, never assume
+   it** — `gh run list --branch <b> --limit 1 --json databaseId,name,status,conclusion,headSha`,
+   then `gh run view <id> --log-failed` on anything but success (unauthenticated
+   fallback: `curl -s https://api.github.com/repos/<owner>/<repo>/commits/<sha>/check-runs`).
+   Quote the conclusion with its run id, quote the failing step, and state one of
+   three states: concluded / in progress (wait and re-read — "it was still running"
+   is a report, not a verdict) / **no run found**, said out loud, because a project
+   without CI is a legitimate state and not a green one. Probe credentials with a
+   live call, never `gh auth status`, which answers from cache. This binds every
+   stage that pushes — 7, 8 and 9 — not just this one. It reports; it does not
+   block.
 9. **Docs + wiki** (auto) — **the phase-1 source ledger is the work list**: every
     source the harvest read gets updated if this run changed or disproved it. Module
     docs and runbooks in the SAME change; the knowledge wiki via `wiki-update` when

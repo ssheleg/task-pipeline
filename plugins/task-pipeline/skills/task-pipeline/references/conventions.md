@@ -8,6 +8,16 @@ names its doc repos, its knowledge base and its house rules
 Prefer explicit host instructions over detection; if a step's convention can't be
 found, surface it and **ask** rather than guessing.
 
+## Contents
+
+- Lint + test
+- Deploy / release
+- Post-deploy logs
+- The CI verdict — read the run, never assume it
+- Docs + wiki
+- Documentation regime (stage 0, then 9 and 10)
+- Issue tracker (stage 10)
+
 ## Lint + test
 - `CLAUDE.md` usually names the commands. Else detect: `package.json` scripts
   (`npm test` / `npm run lint`), `pyproject.toml` / `ruff` (`ruff check`), `pytest`,
@@ -30,7 +40,61 @@ found, surface it and **ask** rather than guessing.
 
 ## Post-deploy logs
 - Heroku: `heroku logs -a <app>`. Docker / k8s: `docker logs` / `kubectl logs`.
-  CI: the workflow run. Hit the health endpoint if one is defined.
+  Hit the health endpoint if one is defined. **CI: the workflow run — and a run is
+  checked by reading it, below.**
+
+## The CI verdict — read the run, never assume it
+
+A push either triggered a run or it did not, and either way **the run's own reply is
+the only evidence** ([`gates.md`](gates.md) → *False success*). "CI is green" written
+without a command behind it is a sentence that prints the same whether it looked or
+not.
+
+This is not hypothetical. On 2026-08-06 this repository's `validate` was
+`completed/failure` on a push to `main` and on a release tag. The failure was
+**correct** — the *Every v\* tag must be contained in main* guard firing on a tag that
+was not yet an ancestor — and nothing in this bundle obliged anyone to read it. A
+guard nobody reads is a fail-open hook with extra steps.
+
+```bash
+# authenticated
+gh run list --branch <branch> --limit 1 \
+  --json databaseId,name,status,conclusion,headSha
+gh run view <databaseId> --log-failed        # only when conclusion != success
+```
+
+```bash
+# unauthenticated fallback — public repo, no token needed
+curl -s "https://api.github.com/repos/<owner>/<repo>/commits/<sha>/check-runs"
+```
+
+**Two paths on purpose.** A credential problem must not end the check: this repo's
+`gh` token expired mid-run the same night, and `gh auth status` reported it invalid
+from a **cached** verdict while `gh api user` succeeded. Probe credentials with a
+live call, never with the status command.
+
+**Three states, and the third is why this is written down:**
+
+| State | Condition | Record |
+|---|---|---|
+| **concluded** | a run exists for this sha, `status == completed` | the conclusion and run id — and on any non-`success`, the **quoted failing step** |
+| **in progress** | a run exists, not finished | wait and re-read. *"It was still running when I looked"* is a report, not a verdict |
+| **no run found** | no run for this sha | say so out loud — a project without CI is a legitimate state and **not a green one** ([`gates.md`](gates.md) → *Progressive arming*) |
+
+**Read the log, not just the verdict.** A conclusion says *that* it failed; only the
+log says *what*. In the incident above the log named the guard, the orphan tag and the
+one-line fix — a bare "CI failed" would have handed the next reader a search the log
+had already finished. On any non-`success`: read the failing step and quote the line
+that names the failure.
+
+**It reports; it does not block.** Same shape stage 8 already uses for deploy logs — a
+red run the operator has seen and ruled on is a decision, a red run nobody printed is
+the failure. Blocking would also make a project *without* CI cheaper to ship from than
+one with it.
+
+**Promote it when it breaks** ([`gates.md`](gates.md) → *Axis B*): this sits at rung 2,
+a criterion in the stage gates. Promote it to a script the first time a run is observed
+closing a stage with an unread CI verdict.
 
 ## Docs + wiki
 - **Start from the stage-0 source ledger** ([`knowledge-sources.md`](knowledge-sources.md)):
