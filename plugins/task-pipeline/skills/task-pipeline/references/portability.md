@@ -46,6 +46,7 @@ a row pointing outside the bundle is the defect this file exists to catch.
 | The knowledge harvest and its source ledger | `references/knowledge-sources.md` |
 | The documentation system, the Doc Loop, supersede semantics | `references/documentation.md` |
 | Gate types, the enforcement ladder, degrees of freedom, probing | `references/gates.md` |
+| Deploy runbook template, per-platform verbs, the verification trio | `references/deploy-targets.md` |
 | The Claude Code hook contract | `references/hooks.md` |
 | First run in a project: greenfield and brownfield | `references/adoption.md` |
 | The entry audit and what it inspects | `references/setup.md` |
