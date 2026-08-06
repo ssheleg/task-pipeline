@@ -67,6 +67,7 @@ a row pointing outside the bundle is the defect this file exists to catch.
 | Workspace isolation, the subagent loop, who may write the register | `references/build.md` |
 | The review rubric, diff packages, the three verdicts | `references/review.md` |
 | **False success** — the class, its known shapes and its two rules | `references/gates.md` |
+| **The canons** — what makes a claim documentation, and the index that routes to each | `references/documentation.md`, `../evidence-docs/SKILL.md` |
 | **Effect verification** — the `verified-by:` contract and the rubric item that blocks | `references/build.md`, `references/review.md` |
 | The TDD iron law and the suite gate | `references/tdd.md` |
 | The REQ coverage table, evidence rules, the closing question | `references/acceptance.md` |

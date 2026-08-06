@@ -235,7 +235,15 @@ commands and all three signal states — with a state missing, a graph that coul
 be measured prints like a fresh one.
 *(guard: `never requires it — a run passes intake quoting a`)*
 
-**31. Every invariant above names the guard that enforces it, and that guard exists.**
+**31. The evidence-docs navigator indexes the canons and never copies them.**
+`skills/evidence-docs/SKILL.md` is a second skill in the same plugin: the ten canons as
+a one-line index, a pointer to their one home, and a table of where to go next. The
+guard holds the index to the doctrine's own list, requires the pointer, and resolves
+every relative link **from the navigator's directory** — it sits one level over from
+everything it names, which is canon 4 in the file that publishes canon 4.
+*(guard: `index that has drifted from its doctrine`)*
+
+**32. Every invariant above names the guard that enforces it, and that guard exists.**
 This list claims to be *what the validator enforces*; it was eight guards behind when
 an audit measured it. A claim of enforcement is now checked like any other claim.
 *(guard: `whose message does not appear in`)* — and a cited literal must lie inside

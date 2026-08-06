@@ -47,6 +47,7 @@ gate stops until it is installed.
 | Stage | Built-in doctrine |
 |---|---|
 | 0 + 9 + any settled decision · The documentation system | [`references/documentation.md`](references/documentation.md) |
+| any claim that will be read as true · The canons, and where each is enforced | [`evidence-docs`](../evidence-docs/SKILL.md) — the sibling skill in this plugin |
 | 6–10 + any check you write · Gates | [`references/gates.md`](references/gates.md) |
 | any agent-time enforcement · Hooks | [`references/hooks.md`](references/hooks.md) |
 | 0 Knowledge harvest (pre-grill) | [`references/knowledge-sources.md`](references/knowledge-sources.md) |

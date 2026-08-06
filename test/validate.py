@@ -1796,6 +1796,43 @@ if os.path.isfile(_dp):
              "learned.md's operational rules -- two undifferentiated rule lists is the "
              "duplication canon 3 forbids")
 
+# The evidence-docs navigator (v1.16.0). A second skill in the same plugin: the canons
+# as an index plus where to go next. It ships beside the doctrine rather than carrying a
+# copy of it, so the whole risk is drift -- an index that still lists ten laws after the
+# doctrine has nine reads as authoritative and is wrong.
+_ed = os.path.join(ROOT, "plugins/task-pipeline/skills/evidence-docs/SKILL.md")
+if not os.path.isfile(_ed):
+    fail("plugins/task-pipeline/skills/evidence-docs/SKILL.md is missing -- the router "
+         "names evidence-docs, and a routed name that resolves to nothing is the shape "
+         "learned.md rule 14 forbids")
+else:
+    _et = open(_ed, encoding="utf-8").read()
+    _fm = _et.split("---")[1] if _et.startswith("---") else ""
+    _nm = re.search(r"^name:\s*(.+)$", _fm, re.M)
+    _ds = re.search(r"^description:\s*(.+)$", _fm, re.M)
+    if not _nm or _nm.group(1).strip() != "evidence-docs":
+        fail("skills/evidence-docs/SKILL.md: frontmatter name must be 'evidence-docs' — "
+             "the directory, the name and the routed id are one identity")
+    if not _ds or len(_ds.group(1).strip()) > 1024:
+        fail("skills/evidence-docs/SKILL.md: description missing or over the 1024-char "
+             "limit the Agent Skills spec sets")
+    # The index must carry every canon and no invented one.
+    for _c in _canons:
+        if _c not in _et:
+            fail(f"skills/evidence-docs/SKILL.md: the index no longer lists '{_c}' — an "
+                 "index that has drifted from its doctrine reads as authoritative and is "
+                 "wrong")
+    if "documentation.md) → *The canons*" not in _et:
+        fail("skills/evidence-docs/SKILL.md: no pointer to the one home of the canons — "
+             "without it the index becomes the second copy canon 3 forbids")
+    # Canon 4 applied to the navigator itself: it lives one directory over from every
+    # file it names, so its links resolve from a different place than the doctrine's do.
+    _edir = os.path.dirname(_ed)
+    for _rel in re.findall(r"\]\((\.\./[^)]+)\)", _et):
+        if not os.path.exists(os.path.normpath(os.path.join(_edir, _rel))):
+            fail(f"skills/evidence-docs/SKILL.md: '{_rel}' does not resolve from the "
+                 "navigator's own directory — canon 4, in the file that publishes it")
+
 if errors:
     print("FAIL: task-pipeline structure invalid")
     for e in errors:

@@ -116,6 +116,7 @@ until it is installed.
 
 | Stage | Built-in doctrine |
 |---|---|
+| **any claim read as true** | [`evidence-docs`](plugins/task-pipeline/skills/evidence-docs/SKILL.md) — **a second skill in this plugin**: the ten canons as an index, and where each is defined, enforced and seeded |
 | 0 Knowledge harvest | [`knowledge-sources.md`](plugins/task-pipeline/skills/task-pipeline/references/knowledge-sources.md) — source list, the wiki, the ledger, the stage-9 loop-back |
 | 0 Intake grill | [`grill.md`](plugins/task-pipeline/skills/task-pipeline/references/grill.md) — interview loop, domain awareness, autonomy sweep |
 | 2 Brainstorm | [`brainstorm.md`](plugins/task-pipeline/skills/task-pipeline/references/brainstorm.md) — approaches, YAGNI, the no-code-before-approval gate |

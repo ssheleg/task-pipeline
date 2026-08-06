@@ -1,5 +1,33 @@
 # Changelog
 
+## v1.16.0 — 2026-08-06
+
+### Added — `evidence-docs`: a second skill in this plugin, and the router row it fills
+
+The canons landed in v1.15.0 with no way to reach them except through the pipeline. The
+global router already reserved a name for the question *"what is this proved by?"* —
+`evidence-docs` — and nothing resolved it. A routed name that resolves to nothing is the
+shape `learned.md` rule 14 forbids, in the routing table itself.
+
+`skills/evidence-docs/SKILL.md` is a **navigator, not a second copy**: the ten canons as
+a one-line index, a pointer to their one home in `documentation.md` → *The canons*, and a
+table of where to go next — set docs up from nothing, record a decision, avoid orphaning
+docs on a change, build a check that cannot lie, trust a mechanism that reports success,
+audit docs a project already has, seed a gate. It states its own boundary ("it will be
+read as true"), what is explicitly out (drafts, chat, commit messages, code comments) and
+its refusal phrase.
+
+Shipping it as a second skill **in the same plugin** rather than a separate repository is
+what keeps SSOT: one set of files, one release, and no copy to drift. `super-ux` already
+ships six skills from one plugin, so the shape is the family's own.
+
+### Guards — 108 → 112
+
+The index is held to the doctrine's own canon list, the pointer to the one home is
+required, the frontmatter is checked against the Agent Skills spec, and every relative
+link is resolved **from the navigator's own directory** — it sits one level over from
+everything it names, which is canon 4 enforced in the file that publishes canon 4.
+
 ## v1.15.0 — 2026-08-06
 
 ### Added — the ten canons: what makes a document evidence
