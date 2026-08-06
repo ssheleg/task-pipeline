@@ -2,6 +2,30 @@
 
 ## v1.15.0 — 2026-08-06
 
+### Added — the ten canons: what makes a document evidence
+
+The doctrine carried the mechanisms and never stated the standard they serve.
+`references/documentation.md` now opens with ten laws — a claim carries its address,
+numbers are computed rather than restated, one home per fact, a reference resolves from
+where the document is *read*, green nobody watched turn red is not evidence, a check
+proves its scope and nothing beyond it, silence is not a pass, an estimate is never
+announced as a measurement, what was not checked is printed beside what was, and the
+document ships in the change that made it true.
+
+Each canon **names where it is enforced** instead of restating the mechanism, and the
+boundary against `learned.md` is written down: the canons are epistemic (what makes a
+claim documentation), `learned.md` is operational (what to do at a trigger). Two
+undifferentiated rule lists would be the duplication canon 3 forbids.
+
+Guarded four ways: the list exists, all ten laws are present, every canon names an
+enforcement, and the boundary is stated. The enforcement check counts **per canon**
+rather than in total — a total threshold only fires once most of them are gone, which
+is a check proving less than it claims, canon 6 applied to itself.
+
+**Found while writing them, by this repository's own guard:** canon 9 cited
+`audit.md → Ratchets`, a section that lives in `gates.md`. The file resolved and the
+section did not — the shape a link checker cannot catch and a reader believes.
+
 ### Added — a build date is the graph's reply about itself, not a measurement of it
 
 Stage 0 reads the code graph before it reads anything else, and until now it recorded

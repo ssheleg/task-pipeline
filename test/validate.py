@@ -1747,6 +1747,55 @@ if _verdict != -1 and "fail(" in _src[_verdict:]:
          "check below the verdict block never runs on a corrupted repo and runs too "
          "late on a clean one; move it above `if errors:`")
 
+# The canons (v1.15.0). Ten laws saying what makes a claim documentation, as opposed to
+# learned.md's rules, which say what to do at a trigger. A canon list is worth having only
+# while it is complete and while each law still names where it is enforced instead of
+# restating the mechanism -- a canon that repeats its own gate is the second home the
+# first canon forbids.
+_dp = os.path.join(refdir, "documentation.md")
+if os.path.isfile(_dp):
+    _dt = open(_dp, encoding="utf-8").read()
+    if "## The canons" not in _dt:
+        fail("references/documentation.md: the canons are gone -- the laws the rest of "
+             "this file serves")
+    _canons = (
+        "A claim carries its address",
+        "Numbers are computed, never restated",
+        "Every fact has exactly one home",
+        "A reference resolves from where the document is read",
+        "Green nobody watched turn red is not evidence",
+        "A check proves its scope and nothing beyond it",
+        "Silence is not a pass",
+        "An estimate is never announced as a measurement",
+        "What was not checked is printed beside what was",
+        "The document ships in the change that made it true",
+    )
+    _missing = [c for c in _canons if c not in _dt]
+    if _missing:
+        fail(f"references/documentation.md: canon(s) dropped: {_missing} -- a list that "
+             "loses a law silently is worse than no list, because everyone believes it "
+             "is covered")
+    _seg = _dt.split("## The canons", 1)[1].split("### What these are not", 1)[0]
+    # Per canon, not a total: a count threshold only fires when most of them are gone,
+    # which is the check proving less than it claims (canon 6 applied to itself).
+    for _i, _c in enumerate(_canons):
+        _start = _seg.find(_c)
+        if _start == -1:
+            continue
+        _end = len(_seg)
+        for _n in _canons[_i + 1:]:
+            _nx = _seg.find(_n, _start)
+            if _nx != -1:
+                _end = _nx
+                break
+        if "\u2192" not in _seg[_start:_end]:
+            fail(f"references/documentation.md: canon '{_c}' names no enforcement -- a "
+                 "canon that does not point at its mechanism becomes a second copy of it")
+    if "epistemic" not in _dt:
+        fail("references/documentation.md: the canons no longer say how they differ from "
+             "learned.md's operational rules -- two undifferentiated rule lists is the "
+             "duplication canon 3 forbids")
+
 if errors:
     print("FAIL: task-pipeline structure invalid")
     for e in errors:
