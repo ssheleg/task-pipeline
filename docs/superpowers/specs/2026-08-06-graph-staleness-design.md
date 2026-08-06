@@ -37,9 +37,9 @@ states, not one, and each names its own signal:
 
 | State | Condition | The `Fresh?` cell reads |
 |---|---|---|
-| **exact** | `built_at_commit` present and resolves in this checkout | ``built `3944593` — 12 commits / 2d behind HEAD, signal: built_at_commit (exact)`` |
-| **approximate** | no `built_at_commit` in `graph.json` | ``built ≤ 2026-08-05T22:47Z — signal: file mtime (approximate; the graph carries no commit stamp, so this is a lower bound on the lag)`` |
-| **unresolvable** | stamp present, does not resolve here (rebase, squash, shallow clone) | ``built `3944593` — UNRESOLVABLE in this checkout, signal: none — treat as stale until refreshed`` |
+| **exact** | `built_at_commit` present and resolves in this checkout | ``built `3944593` — 12 commits / 2d behind HEAD, signal: built_at_commit (exact) — ⚠ not trusted for reach until refreshed`` |
+| **approximate** | no `built_at_commit` in `graph.json` | ``built ≤ 2026-08-05T22:47Z — signal: file mtime (approximate; the graph carries no commit stamp, so this is a lower bound on the lag) — ⚠ not trusted for reach until refreshed`` |
+| **unresolvable** | stamp present, does not resolve here (rebase, squash, shallow clone) | ``built `3944593` — UNRESOLVABLE in this checkout, signal: none — ⚠ not trusted for reach until refreshed`` |
 
 **Zero is stated, not omitted.** A current graph reads
 ``built `3944593` — current (0 commits behind), signal: built_at_commit (exact)``.

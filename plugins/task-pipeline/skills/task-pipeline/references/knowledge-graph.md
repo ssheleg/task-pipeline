@@ -113,9 +113,13 @@ silence. Three states, each naming its signal — the same reason
 
 | State | Condition | The `Fresh?` cell reads |
 |---|---|---|
-| **exact** | stamp present and resolves here | ``built `3944593` — 12 commits / 2d behind HEAD, signal: built_at_commit (exact)`` |
-| **approximate** | no stamp in `graph.json` | ``built ≤ 2026-08-05T22:47Z — signal: file mtime (approximate; no commit stamp, so this is a lower bound)`` |
-| **unresolvable** | stamp present, does not resolve here (rebase, squash, shallow clone) | ``built `3944593` — UNRESOLVABLE in this checkout, signal: none — treat as stale until refreshed`` |
+| **exact** | stamp present and resolves here | ``built `3944593` — 12 commits / 2d behind HEAD, signal: built_at_commit (exact) — ⚠ not trusted for reach until refreshed`` |
+| **approximate** | no stamp in `graph.json` | ``built ≤ 2026-08-05T22:47Z — signal: file mtime (approximate; no commit stamp, so this is a lower bound) — ⚠ not trusted for reach until refreshed`` |
+| **unresolvable** | stamp present, does not resolve here (rebase, squash, shallow clone) | ``built `3944593` — UNRESOLVABLE in this checkout, signal: none — ⚠ not trusted for reach until refreshed`` |
+
+Every row above is a **non-current** graph, so every row ends with the marker. The
+cell is quoted whole on purpose: a worked example is what gets copied, and an example
+that omits the thing it exists to demonstrate teaches the omission.
 
 **State zero out loud.** A current graph reads ``built `3944593` — current (0 commits
 behind), signal: built_at_commit (exact)``. Printing nothing when the graph is fresh

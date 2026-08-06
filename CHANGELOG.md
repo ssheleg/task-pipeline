@@ -37,7 +37,7 @@ behind a date that looked current.
   schedules exactly the state the doctrine warns about — a graph confidently wrong
   between releases, read first by the next run.
 
-### Guards — 95 → 100, by extending a sibling rather than copying it
+### Guards — 95 → 102, by extending a sibling rather than copying it
 
 `test/validate.py` already enforced that the code-graph doctrine be named in **both**
 halves of stage 9 — the config gate the orchestrator verifies and the section an agent
@@ -52,10 +52,30 @@ the **measured lag**, and three more checks keep the cited section honest: the c
 must survive, all three states must survive, and `templates/brief.md` may not ship the
 superseded bare-date row to every project scaffolded from it.
 
-The repository's own drift guard then caught the release mid-flight: `SKILL-CARD.md`
-and `evals/RESULTS.md` still said *95 structural guards*. Invariant 13 — numbers in
-living documents are computed, not restated — is what turned an estimate into the
-measured 100.
+The repository's own drift guard then caught the release mid-flight — twice.
+`SKILL-CARD.md` and `evals/RESULTS.md` still said *95 structural guards*, and after
+the next two guards landed they said *100*. Invariant 13 — numbers in living
+documents are computed, not restated — is what turned an estimate into the measured
+102.
+
+### Fixed — one marker, one spelling
+
+The distrust marker this release introduces was written **four different ways inside
+the release that introduced it**: the doctrine's own three-state table omitted it
+entirely, its `unresolvable` row invented *"treat as stale until refreshed"*, and the
+Cursor rule and the config both dropped the sigil. Review caught the first; standing
+instruction R-003 — run a fixed defect's definition against its siblings — found the
+other three. `audit.md` says a class seen twice becomes a mechanism rather than a
+third ledger row, so a guard now requires the canonical string and rejects the second
+spelling. Greppability is the marker's only property: a ledger row is prose, and the
+marker is the one string a later reader can search for.
+
+That guard shipped green for the wrong reason and was caught by probing it rather
+than by reading it. It compared **per line**, and this doctrine wraps at ~80 columns —
+so in `README.md` and `stages.md`, where the marker is split across two lines, it
+matched nothing and reported a pass. It now normalises whitespace before counting.
+Two releases running, the defect found inside the release was an instance of the
+class the release was about.
 
 ## v1.14.1 — 2026-08-05
 

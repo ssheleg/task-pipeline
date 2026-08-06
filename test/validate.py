@@ -1464,6 +1464,41 @@ if os.path.isfile(os.path.join(refdir, "knowledge-graph.md")):
             fail(f"references/knowledge-graph.md: the measured-lag rule no longer names the "
                  f"'{_state}' state — with a state missing, a graph that could not be measured "
                  "prints indistinguishably from a fresh one")
+    # One marker, one spelling. The distrust marker was written four different ways
+    # inside the release that introduced it — the doctrine table omitted it entirely,
+    # the unresolvable row invented "treat as stale until refreshed", and the Cursor
+    # rule and the config both dropped the sigil. A marker with four spellings is not
+    # greppable, which is the only property it has: a ledger row is prose, and the
+    # marker is the one string a reader (or a later check) can look for. audit.md:
+    # a class seen twice becomes a mechanism rather than a third ledger row.
+    _MARKER = "⚠ not trusted for reach until refreshed"
+    _marker_scope = [
+        os.path.join(ROOT, "README.md"),
+        os.path.join(ROOT, "cursor/rules/task-pipeline.mdc"),
+        os.path.join(_skill_dir, "pipeline.example.json"),
+        os.path.join(_skill_dir, "templates", "brief.md"),
+    ] + [os.path.join(refdir, _f) for _f in sorted(os.listdir(refdir)) if _f.endswith(".md")]
+    for _p in _marker_scope:
+        if not os.path.isfile(_p):
+            continue
+        _rel = os.path.relpath(_p, ROOT)
+        _t = open(_p, encoding="utf-8").read()
+        if "treat as stale until refreshed" in _t:
+            fail(f"{_rel}: 'treat as stale until refreshed' is a second spelling of the "
+                 f"distrust marker — use the canonical '{_MARKER}', because a marker with "
+                 "two spellings is greppable as neither")
+        # Whitespace-normalised, not per line: this doctrine wraps at ~80 columns, so
+        # the marker is routinely split across two lines. A per-line check would find
+        # nothing in README.md and stages.md and report that as a pass — a guard that
+        # is green because it never looked (references/gates.md -> False success).
+        _norm = re.sub(r"\s+", " ", _t)
+        _bare = _norm.count("not trusted for reach until refreshed")
+        _full = _norm.count(_MARKER)
+        if _bare != _full:
+            fail(f"{_rel}: the distrust marker appears {_bare - _full} time(s) without its "
+                 f"sigil — the canonical string is '{_MARKER}' and nothing else, so one grep "
+                 "finds every ledger row that admitted it could not be trusted")
+
     # The seeded brief is what every new project starts from. Leaving the superseded
     # bare-date form in the template ships the defect this release removes.
     _brief_p = os.path.join(_skill_dir, "templates", "brief.md")
