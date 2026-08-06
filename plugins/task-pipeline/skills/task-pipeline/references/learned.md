@@ -40,6 +40,7 @@ to be enforced and is not is the same failure as a gate that prints `FAIL` and e
 | 13 | **Local infrastructure does not fight the host** | any dev compose or service definition | assume the host already runs the defaults | services reachable with the host's own still running |
 | 14 | **A document may not send a reader to something absent** | any instruction naming a command, file or install | resolve it | the gate fails when the target does not exist |
 | 15 | **Identity before coordination** | any lease, lock, claim or run id | ask what two instances with the same identity would do, and make the tool answer it | two instances demonstrably get two identities |
+| 16 | **A carried-in claim is a recollection** | any run resuming from a summary, a handoff or a compacted context | re-derive the claim from its source before acting on it or reporting it | every state claim the run makes is marked `measured` with the command behind it, or it is not made |
 
 ---
 
@@ -115,6 +116,26 @@ than only in that list because it **has** a check. Follow-on, from the first two
 in a process command line matched the throwaway shell of every tool call, and matching the binary
 path hit the same wall. Prefer a fact something authoritative wrote down.
 
+**16 · A carried-in claim.** A long autonomous run advanced one roadmap row per iteration. Each
+iteration was correct: gates green, defects planted and watched to fail, docs closed. What was wrong
+was the sentence between them — *"the remaining rows are these"* — taken from a list that had
+arrived in the context through a compaction, had once been a filtered subset, and had lost its
+provenance on the way. Eleven iterations later a single command over the register printed **36 open
+rows out of 99**, not the handful being worked from. Nothing had failed, because nothing compares a
+run's belief about the work-list against the register; the claim only ever appeared in prose.
+
+The same class had already bitten that project twice from the other side, and its roadmap names the
+property exactly: seven rows read `blocked` on producers the dependency board recorded as delivered,
+and *"no gate can catch it because it breaks nothing — it only removes work from consideration"*;
+and a row filed as *"the object nothing produces"* whose producer had shipped in between. **Stale
+state does not throw.** It narrows what gets considered, silently, and every downstream gate passes
+honestly on the smaller world.
+
+Rule 8 is the neighbour, not the same rule: it governs a number *inside a document*, checked when
+that document is checked. This one governs a fact that crossed a **session boundary** and is being
+reported as current — the case where there is no document to check, only a memory that reads like
+one.
+
 ---
 
 ## The two that are not in the table, and why
@@ -150,6 +171,7 @@ answer would have exposed it in a minute.
 | Stage | Rules that apply |
 |---|---|
 | 0 Inventory · 9 Docs · any register write | 8 (compute), 14 (targets resolve — including every commit SHA in the retro), 15 (identity before a lease) — see [`documentation.md`](documentation.md) |
+| 0 Harvest · any run resuming from a summary | 16 — the work-list and every inherited state claim re-derived before use, [`knowledge-sources.md`](knowledge-sources.md) → *Carried-in claims* |
 | any check you write | 4, 5, 7, 10, 11 — the procedure is [`gates.md`](gates.md) |
 | 3 Spec · 4 Plan | 2 (both directions), 8 (compute, never restate) |
 | 5 Dev | 9 (generators seed green), 12 (tests create their own state), 13 (local infra) |
@@ -158,9 +180,10 @@ answer would have exposed it in a minute.
 | 4 Plan | 14 — every command, path and file a DoD names must resolve |
 | 9 Docs | 8, 14 — every number computed, every target resolvable |
 | 10 Acceptance | 1, 3, 6, 7 — axis rotation recorded, closure verified against artefacts, classes swept, ratchets printed |
+| 10 Acceptance · every loop iteration | 16 — the work-list re-measured at close and printed beside its opening count ([`audit.md`](audit.md), [`continuity.md`](continuity.md)) |
 
-**This file is the shipped list; a project keeps its own.** These fifteen were
-earned on someone else's build and travel with the skill. The lessons *your*
+**This file is the shipped list; a project keeps its own.** Every rule in the table
+above was earned on someone else's build and travels with the skill. The lessons *your*
 project buys go in its retro ([`retrospective.md`](retrospective.md) →
 `docs/superpowers/retro.md`), where they are capped, pruned and retired — and a
 lesson there that would be true in any repository belongs here instead, as an issue

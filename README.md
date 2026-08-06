@@ -58,7 +58,7 @@ Every gate is **typed**: `auto` — the orchestrator verifies it itself, pass/fa
 
 | # | Stage | Gate | Type |
 |---|---|---|---|
-| 0 | Harvest + intake grill — **mandatory** | source ledger written; the documentation inventory answered into `docs/DOCMAP.md`; intent reconciled against as-built; shared understanding + autonomy sweep; brief locked | manual |
+| 0 | Harvest + intake grill — **mandatory** | source ledger written **with the work-list measured, not recalled**; the documentation inventory answered into `docs/DOCMAP.md`; intent reconciled against as-built; shared understanding + autonomy sweep; brief locked | manual |
 | 1 | Docs study | contracts grounded on current docs | auto |
 | 2 | Brainstorm + decompose | design approved; UI verdict recorded; every REQ answered; platform: module map approved | manual |
 | 3 | Spec | committed + reviewed; UI: super-ux chain validated, linter green | manual |

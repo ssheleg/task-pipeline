@@ -120,6 +120,7 @@ is not neutral — it is a scheduled interruption.
 | run-wide | Decide autonomously vs escalate to me | … |
 | run-wide Pacing | Run mode: item-by-item with no check-in between items, and on what interval? (the skill's `references/continuity.md`; read `pipeline.json` → `run.loop` first) | … (**absent ⇒ off**; it never collapses a manual gate or an outward act) |
 | 0 Harvest | Doc sources beyond this repo — other repos, hosted docs, the knowledge wiki, the code graph; and may stage 9 write to them? | … (another repo is outward: propose + PR, never a direct push; graph built / not built) |
+| 0 Work-list | Which register holds task **state**, and the command that reads it — re-run at every harvest, at every loop iteration and at the close | … (e.g. `bash scripts/board.sh`; none → record empty) |
 | 0 Setup audit | … (yes / no — recorded either way) | doc map absent or stale: run the entry audit over the existing documentation before building on it (the skill's `references/setup.md`)? Asked once; a refusal is recorded and never re-asked |
 | 0 Docs regime | Where settled things live (register or ADR set — one home, never both); who may write it; lease mechanism present, or is this run `ungated`? Gate command + ratchet floors; may this run raise a floor? | … |
 | 1 Docs | External libs/APIs/SDKs in play; any context7 can't resolve → where their docs live | … |

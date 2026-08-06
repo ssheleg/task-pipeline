@@ -1,5 +1,58 @@
 # Changelog
 
+## v1.17.0 — 2026-08-06
+
+**A carried-in claim is a recollection — `learned.md` rule 16, and the four places
+it binds.**
+
+A long autonomous run advanced one roadmap row per iteration and was correct every
+time: gates green, defects planted and watched to fail, docs closed in the same
+change. What was wrong was the sentence between the iterations — *"the remaining
+rows are these"* — taken from a list that had reached the context through a
+compaction, had once been a filtered subset, and had lost its provenance on the
+way. Eleven iterations later one command over the register printed **36 open rows
+out of 99**. Nothing had failed, because nothing compares a run's belief about the
+work-list against the register: the claim only ever existed in prose.
+
+The same class had already bitten that project twice from the other side, and its
+own roadmap names the property — seven rows reading `blocked` on producers the
+dependency board recorded as delivered, *"no gate can catch it because it breaks
+nothing, it only removes work from consideration"*. **Stale state does not throw.**
+It narrows what gets considered, and every downstream gate then passes honestly on
+the smaller world.
+
+Rule 8 was the neighbour and not the same rule: it governs a number *inside a
+document*, checked when that document is. Rule 16 governs a fact that crossed a
+**session boundary** and is being reported as current — where there is no document
+to check, only a memory that reads like one.
+
+What changed:
+
+- **`references/learned.md`** — rule 16 with its incident, and two binding rows:
+  stage 0 harvest, and stage 10 plus every loop iteration.
+- **`references/knowledge-sources.md`** — a new source (the task register, read for
+  its *state*, with a command) and a new section, *Carried-in claims — measured or
+  recalled*. Every inherited claim starts `recalled`; before it is acted on **or
+  reported to the operator** it is re-derived and marked `measured`, or it is not
+  stated. Three claims go stale most reliably and all three are cheap: the
+  work-list, `green`, and a blocker or premise.
+- **`references/continuity.md`** — in loop mode the harvest's documents may be
+  carried between iterations; the work-list line may not, because the previous
+  iteration is what invalidated it. And *"next up is X"* in a closing report is a
+  claim about the board — the one sentence in the cycle no gate reads.
+- **`references/audit.md`** — a third exit criterion at stage 10: the work-list is
+  re-measured and **printed beside the count the run opened with**. A pair of
+  numbers that has to agree cannot be filled in without looking, which is what
+  keeps the measurement load-bearing instead of ceremonial.
+- **`references/grill.md`** + **`templates/brief.md`** — one autonomy-sweep row:
+  which register holds task state, and the command that reads it. Settled once; a
+  project without one records it empty and the rule costs nothing.
+- **Guard + negative self-test** — the rule's own failure mode applied to itself:
+  doctrine carried in one file reads like doctrine in force. The validator names
+  each consumer, so a file that drops its citation fails rather than silently
+  ending the coverage. Guard count 119 → 120.
+
+
 ## v1.16.2 — 2026-08-06
 
 ### Added — a CI run is checked by reading it, not by assuming it

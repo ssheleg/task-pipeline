@@ -180,7 +180,22 @@ A deliverable is **not** audited when somebody has read it. It is audited when:
 
 1. every rung has its artefact, **and**
 2. **every check you are relying on has fired at least once against a planted
-   defect.**
+   defect**, **and**
+3. **the work-list is re-measured and printed beside the count the run opened
+   with.**
+
+Point 3 costs one command and covers the one claim nothing else reads. A run's
+closing report says what shipped — and then, almost always, what is left and what
+is next. That second half is a statement about the register, and if it came from
+the same list the run started with, it has never been checked against anything. A
+run can be entirely correct and still hand the operator a false map of the work
+([`learned.md`](learned.md) rule 16, [`knowledge-sources.md`](knowledge-sources.md)
+→ *Carried-in claims*).
+
+Printing both numbers is what makes the measurement load-bearing rather than
+ceremonial: **opened 36 open · closed 34 open · 2 rows closed this run.** A row in
+a ledger that nobody reconciles stops being read by the third run. A pair of
+numbers that has to agree cannot be filled in without looking.
 
 **A green result from an unproven check is worth nothing.** This is the iron law of
 [`tdd.md`](tdd.md) — *if you didn't watch it fail, you don't know it tests the

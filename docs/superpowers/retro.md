@@ -31,6 +31,41 @@ row goes — the cap is not negotiable, ranking is.
 
 ## Recent log — entries from the last five run stamps (newest first)
 
+### 2026-08-06 · `carried-in-claims` · an exit code read through a pipe, and an edit that failed silently
+
+**Symptom.** Two slips inside the change that adds rule 16, both of them the shape
+rule 16 is about — believing a report instead of measuring.
+(a) A planted-defect run was piped to `tail -2` and `$?` was read afterwards, so the
+recorded status was `tail`'s. It printed `planted rc=0 (want non-zero)` while the
+validator had in fact returned `1`; the guard was working and the measurement of it
+was not.
+(b) A python heredoc that inserted the new workflow step raised `ValueError` and
+wrote nothing. The step count printed `119` — unchanged — and the failure was
+visible only because the next command grepped for the inserted text.
+
+**Surfaced at:** stage 6, both — (a) by re-running the same command without the pipe,
+(b) by `grep -c` on the string that was supposed to have landed.
+
+**Owned by:** stage 6. Both were verification steps that reported on themselves.
+
+**Root cause.** `$?` after a pipeline is the last element's status, and a heredoc
+that throws still exits the surrounding block cleanly enough to look like a write.
+Neither is obscure; both are invisible unless the *result* is checked rather than the
+*command*.
+
+**Fix.** (a) Re-measured with `cmd >/dev/null 2>&1; echo $?` — `1` planted, `0` clean.
+(b) Re-inserted with `cat >>` and confirmed by grep and by `yaml.safe_load`.
+
+**Standing instruction:** none added. `R-004` already carries this class — *a gate's
+exit code must govern what runs next* — and (a) is the same rule one step earlier:
+the code you read must be the one you meant. Adding a fifth row for a variant of an
+existing rule is how a capped list stops being read. Stamped `R-004` as fired.
+
+**The check that catches it next time:** for (b), the negative self-test added in
+this release fails when a consumer file loses its citation, which is what a silently
+skipped insertion produces. For (a), nothing mechanical — it is `R-004`'s territory
+and stays a review question.
+
 ### 2026-08-06 · `graph-staleness` · a guard green because it never looked, and a marker with four spellings
 
 **Symptom.** Two independent failures, both inside the release that names their class.

@@ -121,6 +121,18 @@ Do not write, and do not believe, that the ledger is what makes the interval saf
 Someone will eventually remove the ledger on the strength of that sentence, and
 the protection they think they are keeping is in the scheduler.
 
+**Each iteration re-measures the work-list.** The harvest's *documents* may be
+carried across iterations — an ADR did not change while you worked. The line that
+says **what is still open** may not: the previous iteration is precisely what
+invalidated it, and a loop that picks its next item from the list it started with
+works a stale board for as long as the loop runs. One command, at the top of the
+iteration, recorded ([`knowledge-sources.md`](knowledge-sources.md) → *Carried-in
+claims*; [`learned.md`](learned.md) rule 16).
+
+This is also where a loop's report goes wrong most quietly. *"Next up is X"* at the
+end of an iteration is a claim about the board, and it is the one sentence in the
+whole cycle that no gate reads. It cites the measurement or it is not written.
+
 ## Parked at a manual gate
 
 A fixed interval firing into a `manual` gate is a nag. Five minutes later it fires

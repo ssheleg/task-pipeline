@@ -340,6 +340,30 @@ if os.path.isfile(_neg_wf):
                 fail(f"{_living}: states {_m.group(0)!r} but the workflow defines "
                      f"{_neg_n} negative self-tests — derive the number or delete it")
 
+# learned.md rule 16 — a rule that lands in the table and nowhere else is a rule the
+# run never meets, because nothing at stage 0 or stage 10 sends anybody to it. The
+# rule's own failure mode applied to itself: doctrine carried in one file reads like
+# doctrine in force. Each consumer is named, so a file dropping its citation fails
+# here rather than silently ending the coverage.
+_learned = os.path.join(refdir, "learned.md")
+if os.path.isfile(_learned):
+    _lt = open(_learned, encoding="utf-8").read()
+    if re.search(r"^\|\s*16\s*\|", _lt, re.M):
+        if "Carried-in claims" not in _lt:
+            fail("references/learned.md: rule 16 is in the table and its binding row "
+                 "does not name knowledge-sources.md -> Carried-in claims")
+        for _f, _needle in (
+            ("knowledge-sources.md", "## Carried-in claims"),
+            ("continuity.md", "Each iteration re-measures the work-list"),
+            ("audit.md", "the work-list is re-measured"),
+            ("grill.md", "0 Work-list"),
+        ):
+            _fp = os.path.join(refdir, _f)
+            if not os.path.isfile(_fp) or _needle not in open(_fp, encoding="utf-8").read():
+                fail(f"references/{_f}: learned.md rule 16 is in force and this file "
+                     f"does not carry {_needle!r} — a state claim inherited across a "
+                     "session boundary goes unmeasured wherever the citation is missing")
+
 # references/artifacts.md maps stage -> what it WRITES. The reverse direction — what
 # each stage READS and from where — is the one an agent actually needs at runtime,
 # and it was absent for nine releases: learned.md rule 2 (compute the mapping in both

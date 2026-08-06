@@ -17,6 +17,7 @@ that goes stale when the answer changes.
 - The knowledge wiki — recommended
 - How to harvest — retrieval, not reading
 - Record it — the source ledger
+- Carried-in claims — measured or recalled
 - Phase 2 — validate the answers against the harvest
 - Close the loop — stage 9 updates what stage 0 read
 - Rationalizations
@@ -43,6 +44,7 @@ makes the grill's answers *checkable* instead of merely confident.
 | 3 | **Host agent docs** | `CLAUDE.md`, `AGENTS.md`, `.cursor/rules/` | conventions, commands, deploy path, house rules |
 | 4 | **Domain docs** | `CONTEXT.md` / `CONTEXT-MAP.md`, `docs/adr/` | the glossary and the decisions with their reasons |
 | 4a | **The decision register and the doc map** | `docs/DECISIONS.md` **or** `docs/adr/` — `docs/DOCMAP.md` says which ([`documentation.md`](documentation.md)) | what is already settled, what it superseded, and which documents this run will owe |
+| 4b | **The task register, for its *state*** | `docs/ROADMAP.md`, a board, a backlog, the tracker `CLAUDE.md` names | **what is open right now** — read with a command, never from memory; see *Carried-in claims* |
 | 5 | **Product/UX docs** | `docs/ux/` (super-ux chain), `README`, runbooks | user-facing behavior that is already specified |
 | 6 | **Pipeline history** | `docs/superpowers/specs/`, `plans/`, past `-carryover.md` | what a previous run of this pipeline decided or deferred |
 | 7 | **The retro, in force** | `docs/superpowers/retro.md` ([`retrospective.md`](retrospective.md)) | what previous runs got wrong here — **read in full**: standing instructions (capped at ten), run stamps and the recent-log window, all bounded by construction |
@@ -169,6 +171,49 @@ source nobody will update.
 **"No sources found" is a valid, recorded outcome.** Write the row. An empty ledger
 tells the next run that the search happened and came back empty — silence doesn't.
 
+## Carried-in claims — measured or recalled
+
+The harvest exists because *the operator misremembers*. This section exists because
+**the agent does too**, and it is the harder case: a run that resumes from a
+summary, a handoff note or a compacted context inherits a pile of statements that
+read exactly like findings and have no source attached.
+
+They are not lies and they were not wrong when they were written. They are **stale
+by construction** — a filtered subset that lost its filter, a status true two weeks
+ago, a blocker that cleared while nobody was looking. And unlike a wrong number,
+stale state **does not throw**. It narrows what the run considers, and every gate
+after it passes honestly on the smaller world ([`learned.md`](learned.md) rule 16).
+
+**Every inherited claim starts as `recalled`.** Before it is acted on *or reported
+to the operator*, it is either re-derived from its source and marked `measured`, or
+it is not stated. Add the column to the ledger and use it:
+
+| Claim | Whence | State | Re-derived by |
+|---|---|---|---|
+| 36 of 99 rows open; 4 blocked | `docs/ROADMAP.md` | measured | `bash scripts/board.sh` |
+| the suite is green | prior session | measured | `npm test` → 601 pass |
+| `NBA-046` has no producer | prior session | **recalled** | not checked — do not report |
+
+Three claims that go stale most reliably, and all three are cheap to re-derive:
+
+- **The work-list.** What is open, what is blocked, and *on what*. If the project
+  has a register, the harvest reads it with a command and records the counts. A run
+  that says *"what remains is X"* without this is guessing out loud.
+- **Green.** A suite, a gate, a deploy. Run it; the answer is a minute old, not a
+  session old.
+- **A blocker or a premise.** *"Blocked on Y"*, *"nothing produces this"*,
+  *"that endpoint doesn't exist"*. These clear silently — somebody else's work
+  lands and no signal reaches this run.
+
+**Where the command comes from.** The grill's autonomy sweep settles it once, at
+stage 0: which register holds task state and what reads it. A project without one
+records the row empty and the rule costs nothing.
+
+**And it is per iteration, not per session.** In loop mode ([`continuity.md`](continuity.md))
+the harvest's documents may be carried between iterations — they did not change.
+**The work-list line may not.** It is the one row the previous iteration's own work
+invalidates.
+
 ## Phase 2 — validate the answers against the harvest
 
 This is the payoff, and it belongs to the grill loop
@@ -251,3 +296,6 @@ written list instead of from whatever the search happened to surface.
 | "The operator knows their own system" | They do — a year ago, before three other people changed it. That's the exact case where quoting the doc pays. |
 | "Reading the whole wiki costs too much" | The harvest is a query per task noun, not a read. If it feels expensive, you're reading instead of retrieving. |
 | "I'll update the docs at the end from memory" | The ledger exists because the end is exactly when you no longer remember which sources you leaned on. |
+| "The summary said what's left, that's the same list" | It was a list *once*, under a filter nobody wrote down. Re-deriving it costs one command; being wrong about it costs every iteration after. |
+| "Nothing changed since last iteration" | The previous iteration changed it. That is what an iteration is. |
+| "Re-measuring every cycle is overhead" | It is one command against a file you already have open. The overhead is the eleven cycles spent working from a list that was wrong at cycle one. |
