@@ -2076,3 +2076,82 @@ jobs:
           else
             echo "OK: validator correctly FAILs — the negatives floor may not lag the workflow"
           fi
+      - name: Negative self-test (the navigator must exist)
+        run: |
+          set -eu
+          rm -rf /tmp/ed1-copy && cp -R . /tmp/ed1-copy
+          python3 - <<'EOF'
+          import os
+          os.remove("/tmp/ed1-copy/plugins/task-pipeline/skills/evidence-docs/SKILL.md")
+          EOF
+          if python3 /tmp/ed1-copy/test/validate.py; then
+            echo "ERROR: validator passed with the navigator must exist broken"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the navigator must exist"
+          fi
+      - name: Negative self-test (the index must not drift from the canons)
+        run: |
+          set -eu
+          rm -rf /tmp/ed2-copy && cp -R . /tmp/ed2-copy
+          python3 - <<'EOF'
+          p = "/tmp/ed2-copy/plugins/task-pipeline/skills/evidence-docs/SKILL.md"
+          t = open(p, encoding="utf-8").read()
+          assert '**Silence is not a pass**' in t, "PLANT DID NOT LAND: needle absent before edit"
+          open(p, "w", encoding="utf-8").write(t.replace('**Silence is not a pass**', '**Vibes are fine**'))
+          EOF
+          if python3 /tmp/ed2-copy/test/validate.py; then
+            echo "ERROR: validator passed with the index must not drift from the canons broken"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the index must not drift from the canons"
+          fi
+      - name: Negative self-test (the navigator must point at the one home)
+        run: |
+          set -eu
+          rm -rf /tmp/ed3-copy && cp -R . /tmp/ed3-copy
+          python3 - <<'EOF'
+          p = "/tmp/ed3-copy/plugins/task-pipeline/skills/evidence-docs/SKILL.md"
+          t = open(p, encoding="utf-8").read()
+          assert 'documentation.md) → *The canons*' in t, "PLANT DID NOT LAND: needle absent before edit"
+          open(p, "w", encoding="utf-8").write(t.replace('documentation.md) → *The canons*', 'documentation.md)'))
+          EOF
+          if python3 /tmp/ed3-copy/test/validate.py; then
+            echo "ERROR: validator passed with the navigator must point at the one home broken"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the navigator must point at the one home"
+          fi
+      - name: Negative self-test (a navigator link must resolve from its own directory)
+        run: |
+          set -eu
+          rm -rf /tmp/ed4-copy && cp -R . /tmp/ed4-copy
+          python3 - <<'EOF'
+          p = "/tmp/ed4-copy/plugins/task-pipeline/skills/evidence-docs/SKILL.md"
+          t = open(p, encoding="utf-8").read()
+          assert '../task-pipeline/references/gates.md' in t, "PLANT DID NOT LAND: needle absent before edit"
+          open(p, "w", encoding="utf-8").write(t.replace('../task-pipeline/references/gates.md', '../task-pipeline/references/gaits.md'))
+          EOF
+          if python3 /tmp/ed4-copy/test/validate.py; then
+            echo "ERROR: validator passed with a navigator link must resolve from its own directory broken"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — a navigator link must resolve from its own directory"
+          fi
+      - name: Negative self-test (a colon-space in frontmatter must be rejected)
+        run: |
+          set -eu
+          rm -rf /tmp/ed5-copy && cp -R . /tmp/ed5-copy
+          python3 - <<'EOF'
+          p = "/tmp/ed5-copy/plugins/task-pipeline/skills/evidence-docs/SKILL.md"
+          t = open(p, encoding="utf-8").read()
+          needle = "will be read as true — a decision record"
+          assert needle in t, "PLANT DID NOT LAND: needle absent before edit"
+          open(p, "w", encoding="utf-8").write(t.replace(needle, "will be read as true: a decision record"))
+          EOF
+          if python3 /tmp/ed5-copy/test/validate.py; then
+            echo "ERROR: validator passed frontmatter that YAML drops silently"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — a colon-space in frontmatter"
+          fi

@@ -249,8 +249,15 @@ notice losing the difference — it lagged at 20 against 34 once, and at 104 aga
 in v1.15.0.
 *(guard: `a floor below the count is a floor that cannot`)*
 
-**33. Every invariant above names the guard that enforces it, and that guard exists.**
-This list claims to be *what the validator enforces*; it was eight guards behind when
+**33. The evidence-docs navigator indexes the canons and never copies them.**
+`skills/evidence-docs/SKILL.md` is a second skill in the same plugin: the ten canons as
+a one-line index, a pointer to their one home, and a table of where to go next. The
+guard holds the index to the doctrine's own list, requires the pointer, and resolves
+every relative link **from the navigator's directory** — it sits one level over from
+everything it names, which is canon 4 in the file that publishes canon 4.
+*(guard: `index that has drifted from its doctrine`)*
+
+**34. Every invariant above names the guard that enforces it, and that guard exists.**This list claims to be *what the validator enforces*; it was eight guards behind when
 an audit measured it. A claim of enforcement is now checked like any other claim.
 *(guard: `whose message does not appear in`)* — and a cited literal must lie inside
 a **single** string in `test/validate.py`: the check reads that file as text, so a

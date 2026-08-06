@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Structural validator for the task-pipeline skill repo. Exit 0 = pass."""
-import json, os, re, shutil, subprocess, sys, tempfile
+import glob, json, os, re, shutil, subprocess, sys, tempfile
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 NAME = "task-pipeline"
@@ -1854,6 +1854,67 @@ if os.path.isfile(_dp):
         fail("references/documentation.md: the canons no longer say how they differ from "
              "learned.md's operational rules -- two undifferentiated rule lists is the "
              "duplication canon 3 forbids")
+
+# The evidence-docs navigator (v1.16.0). A second skill in the same plugin: the canons
+# as an index plus where to go next. It ships beside the doctrine rather than carrying a
+# copy of it, so the whole risk is drift -- an index that still lists ten laws after the
+# doctrine has nine reads as authoritative and is wrong.
+_ed = os.path.join(ROOT, "plugins/task-pipeline/skills/evidence-docs/SKILL.md")
+if not os.path.isfile(_ed):
+    fail("plugins/task-pipeline/skills/evidence-docs/SKILL.md is missing -- the router "
+         "names evidence-docs, and a routed name that resolves to nothing is the shape "
+         "learned.md rule 14 forbids")
+else:
+    _et = open(_ed, encoding="utf-8").read()
+    _fm = _et.split("---")[1] if _et.startswith("---") else ""
+    _nm = re.search(r"^name:\s*(.+)$", _fm, re.M)
+    _ds = re.search(r"^description:\s*(.+)$", _fm, re.M)
+    if not _nm or _nm.group(1).strip() != "evidence-docs":
+        fail("skills/evidence-docs/SKILL.md: frontmatter name must be 'evidence-docs' — "
+             "the directory, the name and the routed id are one identity")
+    if not _ds or len(_ds.group(1).strip()) > 1024:
+        fail("skills/evidence-docs/SKILL.md: description missing or over the 1024-char "
+             "limit the Agent Skills spec sets")
+    # The index must carry every canon and no invented one.
+    for _c in _canons:
+        if _c not in _et:
+            fail(f"skills/evidence-docs/SKILL.md: the index no longer lists '{_c}' — an "
+                 "index that has drifted from its doctrine reads as authoritative and is "
+                 "wrong")
+    if "documentation.md) → *The canons*" not in _et:
+        fail("skills/evidence-docs/SKILL.md: no pointer to the one home of the canons — "
+             "without it the index becomes the second copy canon 3 forbids")
+    # Canon 4 applied to the navigator itself: it lives one directory over from every
+    # file it names, so its links resolve from a different place than the doctrine's do.
+    _edir = os.path.dirname(_ed)
+    for _rel in re.findall(r"\]\((\.\./[^)]+)\)", _et):
+        if not os.path.exists(os.path.normpath(os.path.join(_edir, _rel))):
+            fail(f"skills/evidence-docs/SKILL.md: '{_rel}' does not resolve from the "
+                 "navigator's own directory — canon 4, in the file that publishes it")
+
+# Frontmatter must parse as YAML, not merely match a regex (v1.16.1). The evidence-docs
+# description carried "read as true: a decision record" -- a colon-space inside a plain
+# scalar, which YAML reads as a nested mapping. The regex check above called it valid; the
+# official plugin validator called it "loads with empty metadata, all fields silently
+# dropped". A check proving less than it claims is canon 6, and it shipped in the release
+# that publishes canon 6. Applied to every SKILL.md in the plugin, not just the new one.
+for _sk in sorted(glob.glob(os.path.join(ROOT, "plugins/*/skills/*/SKILL.md"))):
+    _st = open(_sk, encoding="utf-8").read()
+    _rel_sk = os.path.relpath(_sk, ROOT)
+    if not _st.startswith("---"):
+        fail(f"{_rel_sk}: no YAML frontmatter block")
+        continue
+    for _line in _st.split("---")[1].splitlines():
+        _m = re.match(r"^([A-Za-z_][\w-]*):\s*(\S.*)$", _line)
+        if not _m:
+            continue
+        _val = _m.group(2).strip()
+        if _val[:1] in ("'", '"', "|", ">", "[", "{"):
+            continue
+        if ": " in _val:
+            fail(f"{_rel_sk}: frontmatter '{_m.group(1)}' is a plain scalar containing "
+                 "a colon-space, so YAML parses it as a mapping and the field is "
+                 "silently dropped at load time -- quote the value or rephrase")
 
 if errors:
     print("FAIL: task-pipeline structure invalid")
