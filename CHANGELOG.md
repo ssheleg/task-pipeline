@@ -1,5 +1,103 @@
 # Changelog
 
+## v1.15.0 — 2026-08-06
+
+### Added — a build date is the graph's reply about itself, not a measurement of it
+
+Stage 0 reads the code graph before it reads anything else, and until now it recorded
+that graph's freshness as `built YYYY-MM-DD`. That is true, self-reported, and silent
+about the only thing the harvest needs to know: whether the graph describes the tree
+this run is about to change. Twelve commits later the row still reads `built
+2026-08-05` — and still reads *fresh*, because a date with nothing subtracted from it
+is a fact with no scale. It is the class `references/gates.md` named one release ago:
+an actor's own reply, standing in for evidence about the world.
+
+The occasion was this repository's own. `docs/superpowers/specs/` holds a brief, a
+carry-over ledger and an acceptance document for v1.11.0, v1.12.0 and v1.13.0 — and
+none for v1.14.0 or v1.14.1. Those two releases never opened stage 9, so nothing
+refreshed the graph, and the next harvest would have read a two-release-old index
+behind a date that looked current.
+
+- **`references/knowledge-graph.md` gains *Measure the lag***: three commands
+  (`git rev-parse --verify`, `git rev-list --count`, `git log -1 --format=%ct`) so
+  the number comes from git rather than from judgement, and **three states** —
+  `built_at_commit` exact, file `mtime` approximate, and `unresolvable` — because
+  `graph.json` carries the commit stamp **only when the caller passed it** and
+  `graphify update` from the CLI does not. With one state, "could not measure" would
+  print like "fresh", which is the failure the section cites `gates.md` for. Zero is
+  stated out loud for the same reason.
+- **No threshold, deliberately.** `continuity.md` refused a context-budget number on
+  the same grounds: an unmeasurable threshold becomes unconditional doctrine, not
+  config. One commit that moved the function this task is about outweighs fifty that
+  touched a README, so anything but `current` carries `⚠ not trusted for reach until
+  refreshed` — a marker, not a block. The graph is recommended everywhere else in this
+  bundle; a blocking staleness check would make *no graph* cheaper than a week-old one.
+- **The cadence is untouched.** Stage 9 already required the refresh unconditionally,
+  and an `always | major | manual` mode was rejected rather than deferred: `major`
+  schedules exactly the state the doctrine warns about — a graph confidently wrong
+  between releases, read first by the next run.
+
+### Added — hygiene check 7: a blank line inside a table
+
+A GFM table ends at the first blank line, so a blank line left mid-table silently
+demotes every row below it to pipe-delimited prose. The file stays well-formed, every
+row is still present, and a diff showing only added lines shows nothing wrong. It
+happened **twice inside this run** — a carry-over ledger and the brief's decision
+table — which is `audit.md`'s threshold for a mechanism rather than a third ledger
+row. On its first armed pass the check found **three more** in the carry-over ledgers
+of v1.12.0 and v1.13.0, which had been rendering broken since the day they were
+written. All three are fixed rather than baselined behind a floor.
+
+The check shipped with `HYGIENE_FLOOR_7` undeclared, so `judge()` compared against an
+empty string and printed `ok: check 7 … 3 (floor )` over three real hits — the gate
+reporting a pass it never computed, on the release about exactly that. An undeclared
+floor is now a failure, not a zero, and the reason is written beside it.
+
+### Guards — 95 → 104, by extending a sibling rather than copying it
+
+`test/validate.py` already enforced that the code-graph doctrine be named in **both**
+halves of stage 9 — the config gate the orchestrator verifies and the section an agent
+reads — because a file that "reads as law while the run never does it" is an inert
+gate. Standing instruction R-003 requires running a fixed defect's definition against
+its siblings, and stage 0 is the sibling: same doctrine file, one duty reading the
+graph where the other refreshes it. So the existing guard was **extended**, not
+duplicated.
+
+At stage 0 the word *graph* is not the test — it was already there. The guard requires
+the **measured lag**, and three more checks keep the cited section honest: the commands
+must survive, all three states must survive, and `templates/brief.md` may not ship the
+superseded bare-date row to every project scaffolded from it.
+
+The repository's own drift guard caught the release mid-flight **three times**:
+`SKILL-CARD.md` and `evals/RESULTS.md` said *95*, then *100*, then *102*. Its message
+has always offered two fixes — *derive the number or delete it* — and three
+hand-corrections in one run is the answer to which one was right. **The prose no
+longer states a count at all**; it names the command that prints one. The guard's own
+negative self-test was rewritten in the same move: its plant used to edit the
+restated number in place, so it broke the moment the number went away — a test
+coupled to the defect it was written against rather than to the rule. It now
+*introduces* a count into a document that has none, which is what the guard actually
+forbids.
+
+### Fixed — one marker, one spelling
+
+The distrust marker this release introduces was written **four different ways inside
+the release that introduced it**: the doctrine's own three-state table omitted it
+entirely, its `unresolvable` row invented *"treat as stale until refreshed"*, and the
+Cursor rule and the config both dropped the sigil. Review caught the first; standing
+instruction R-003 — run a fixed defect's definition against its siblings — found the
+other three. `audit.md` says a class seen twice becomes a mechanism rather than a
+third ledger row, so a guard now requires the canonical string and rejects the second
+spelling. Greppability is the marker's only property: a ledger row is prose, and the
+marker is the one string a later reader can search for.
+
+That guard shipped green for the wrong reason and was caught by probing it rather
+than by reading it. It compared **per line**, and this doctrine wraps at ~80 columns —
+so in `README.md` and `stages.md`, where the marker is split across two lines, it
+matched nothing and reported a pass. It now normalises whitespace before counting.
+Two releases running, the defect found inside the release was an instance of the
+class the release was about.
+
 ## v1.14.1 — 2026-08-05
 
 ### Fixed — a guard below the verdict block is dead code shaped like a guard

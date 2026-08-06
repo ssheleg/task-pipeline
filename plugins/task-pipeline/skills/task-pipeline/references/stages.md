@@ -93,7 +93,11 @@ never that the work was skipped quietly.
   ([obsidian-wiki](https://github.com/ar9av/obsidian-wiki) — recommended,
   never required), and any **other repo or hosted doc system the project names as
   its docs**. Write the **source ledger** into the brief (a row per source, or an
-  explicit "none found"; the graph's row carries its build date). It is retrieval
+  explicit "none found"; **the graph's row carries its measured lag — commits and
+  days behind `HEAD`, the signal that measured it, and `⚠ not trusted for reach
+  until refreshed` on anything but `current`**
+  ([`knowledge-graph.md`](knowledge-graph.md) → *Measure the lag*; a build date is
+  the graph's own reply about itself, not a measurement of it). It is retrieval
   scoped by the task's own nouns, not a read of everything — and it is what makes
   phase 2's answers checkable instead of merely confident.
 - **Phase 1b — the documentation inventory**
@@ -152,7 +156,11 @@ never that the work was skipped quietly.
   an updated `CONTEXT.md` (terms written as they resolved) and any ADRs under
   `docs/adr/` — see `grill.md` → *Domain awareness*.
 - **GATE (manual):** shared understanding reached — **the source ledger is written
-  (every source consulted, or an explicit "none found")**, **the documentation
+  (every source consulted, or an explicit "none found")**, **where a code graph
+  exists its row carries the measured lag and the signal it was measured with — a
+  bare build date does not satisfy this, because it is the graph's own reply rather
+  than a measurement of it** ([`knowledge-graph.md`](knowledge-graph.md) →
+  *Measure the lag*), **the documentation
   inventory is answered into `docs/DOCMAP.md`** with its registers, single homes,
   a non-empty propagation matrix and the gate command, **the regime is recorded**,
   **intent and as-built are reconciled with every divergence resolved**, the retro's

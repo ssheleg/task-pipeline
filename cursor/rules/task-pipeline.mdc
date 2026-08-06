@@ -86,8 +86,16 @@ you invented — it counts because the project names it). Query each by *this ta
 nouns; it is retrieval, not a full read; stop when the terms return nothing new.
 Write a short **source ledger** into the brief — source, what it says about this
 task, how fresh, and whether this run makes it stale. `none found` is a valid row;
-the graph's row carries its build date, because a graph goes stale like any other
-source, and it **points while the code decides** — never the tiebreaker.
+the graph's row carries its **measured lag**, not a build date — run
+`git rev-list --count <built_at_commit>..HEAD` and record `N commits / M days behind
+HEAD` plus the signal it came from (`built_at_commit` exact, file `mtime`
+approximate when the graph carries no stamp, or `unresolvable` when the stamp does
+not resolve here), ending in `⚠ not trusted for reach until refreshed` on anything
+but `current` — that exact string, so one marker is greppable across every
+ledger. A date is the graph's own reply about itself; the lag is the only part
+that says whether it describes the tree you are about to change. A graph goes stale
+like any other source, and it **points while the code decides** — never the
+tiebreaker.
 **Read `docs/superpowers/retro.md` in full if it exists** — its *standing
 instructions* are what previous runs of this pipeline got wrong in this project, and
 they bind this run (they are capped at ten, so reading them all is cheap). Stamp

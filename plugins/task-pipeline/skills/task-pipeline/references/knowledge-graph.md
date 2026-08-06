@@ -19,6 +19,7 @@ harvest simply runs on the sources it has
 
 - Detect it, and install it once
 - Stage 0 — query the graph before you ask the person
+- Measure the lag — a build date is a reply, not a measurement
 - Stage 9 — the close-out has three artifacts, not two
 - The divergence check — the graph against the docs
 - Rationalizations
@@ -78,10 +79,68 @@ Two rules keep it honest:
   belongs in the retrieval order right after the code, and never as the tiebreaker.
   Precedence, reflowed so it reads in one direction: code first, then host docs and
   ADRs, then the graph, then the wiki, then anyone's memory.
-- **Record it in the ledger with its build date** — source
-  `graphify-out/graph.json`, what it said about this task, how fresh, and therefore
-  whether stage 9 owes it a refresh. A source consulted but not recorded is a source
-  nobody will update.
+- **Record it in the ledger with its measured lag** — source
+  `graphify-out/graph.json`, what it said about this task, **how far behind `HEAD` it
+  actually is**, and therefore whether stage 9 owes it a refresh. A source consulted
+  but not recorded is a source nobody will update. How to measure it: next section.
+
+## Measure the lag — a build date is a reply, not a measurement
+
+[`gates.md`](gates.md) → *False success* gives the law — *an actor's own reply is not
+evidence about the world* — and the test: **what does it print when it did not look?**
+
+A build date is that kind of reply. `built 2026-08-05` is true, self-reported, and
+says nothing about whether the graph describes the tree this run is about to change.
+Twelve commits later it still reads `built 2026-08-05`, and it still reads *fresh* —
+a date with nothing subtracted from it is a fact with no scale. So the `Fresh?` cell
+of the graph's ledger row carries a **measured distance from `HEAD`**, the **signal it
+was measured with**, and — while that distance is not zero — a refusal to lean on it.
+
+**Compute it; never type it** ([`learned.md`](learned.md) rule 8). Three commands, and
+the first one's failure *is* a state rather than an error to handle:
+
+```bash
+git rev-parse --verify -q "<built_at_commit>^{commit}"   # which state applies
+git rev-list --count "<built_at_commit>..HEAD"           # commits behind
+git log -1 --format=%ct "<built_at_commit>"              # its timestamp → days behind
+```
+
+`<built_at_commit>` is read from the top level of `graph.json`. **It is written only
+when the caller passed it**, and `graphify update .` from the CLI does not — so the
+absence of a stamp is normal, not a defect, and it gets its own state instead of
+silence. Three states, each naming its signal — the same reason
+[`gates.md`](gates.md) → *Progressive arming* gives a dormant check a word of its own:
+
+| State | Condition | The `Fresh?` cell reads |
+|---|---|---|
+| **exact** | stamp present and resolves here | ``built `3944593` — 12 commits / 2d behind HEAD, signal: built_at_commit (exact) — ⚠ not trusted for reach until refreshed`` |
+| **approximate** | no stamp in `graph.json` | ``built ≤ 2026-08-05T22:47Z — signal: file mtime (approximate; no commit stamp, so this is a lower bound) — ⚠ not trusted for reach until refreshed`` |
+| **unresolvable** | stamp present, does not resolve here (rebase, squash, shallow clone) | ``built `3944593` — UNRESOLVABLE in this checkout, signal: none — ⚠ not trusted for reach until refreshed`` |
+
+Every row above is a **non-current** graph, so every row ends with the marker. The
+cell is quoted whole on purpose: a worked example is what gets copied, and an example
+that omits the thing it exists to demonstrate teaches the omission.
+
+**State zero out loud.** A current graph reads ``built `3944593` — current (0 commits
+behind), signal: built_at_commit (exact)``. Printing nothing when the graph is fresh
+is what makes freshness indistinguishable from a harvest that never looked, which is
+the failure this section cites `gates.md` for.
+
+**Anything but `current` ends the cell with `⚠ not trusted for reach until
+refreshed`.** The marker does not block — stage 0's gate is `manual` and this is a
+ledger row, not a gate. It tells the harvest what it may lean on; the run continues,
+it just stops quoting the graph as though it were current.
+
+**No threshold, deliberately.** [`continuity.md`](continuity.md) refused a
+context-budget number for the same reason: an unmeasurable threshold becomes
+unconditional doctrine, not config. "Ten commits is fine, eleven is not" is a number
+nobody can defend, and a number nobody can defend is one every run argues its way
+under — one commit that moved the function this task is about outweighs fifty that
+touched a README.
+
+**Promote it when it breaks, not before** ([`gates.md`](gates.md) → *Axis B*): this
+rule sits at rung 2, a criterion in stage 0's gate. Promote it to a script the first
+time a run is observed passing stage 0 with an unmeasured graph row.
 
 ## Stage 9 — the close-out has three artifacts, not two
 
@@ -160,7 +219,8 @@ sweep on every commit turns an audit axis into noise and it stops being read.
 | Excuse | Reality |
 |---|---|
 | "I'll just grep, it's faster" | Grep answers "where is this name". The questions that stop a run are "what reaches this" and "what breaks if it moves" — that is one query against a graph and an afternoon with grep. |
-| "The graph is probably stale" | Then it has a build date and you can say so. Stale-and-dated is a finding; stale-and-unknown is what you get by not building one. |
+| "The graph is probably stale" | Then measure it and say how stale — three commands, above. *Probably* is the word a run uses right before leaning on it anyway; `12 commits / 2d behind HEAD` is a finding, and `built 2026-08-05` on its own is only a date. |
+| "It says built today, that's fresh enough" | Today's date and today's `HEAD` are different claims. The date is the graph's own reply about itself; the lag is the one thing that says whether it describes the tree you are about to change. |
 | "Docs and wiki are updated, we're done" | The graph is the source the *next* harvest reads first. Leaving it behind is leaving a false premise where a machine will quote it back. |
 | "The divergence check found nothing, skip it next time" | It found nothing **on this axis, this pass**. Rotate the axis; that is the rule this check belongs to, not an exemption from it. |
 | "A hub with no doc is fine, everyone knows it" | Everyone currently on the team. The graph found it in one command; the person who joins next month will find it in a postmortem. |

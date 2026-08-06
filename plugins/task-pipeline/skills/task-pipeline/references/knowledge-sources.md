@@ -94,8 +94,11 @@ the directory doesn't (installed, not built).
 
 - **Built → query it** during the harvest: `graphify query "<the task, as a
   question>"`, `graphify affected "<the thing being changed>"`, `graphify god-nodes`.
-  Record the row **with the graph's build date**, because a graph is a source and
-  goes stale like one.
+  Record the row **with the graph's measured lag** — how far behind `HEAD` it is and
+  which signal said so — because a graph is a source and goes stale like one, and a
+  build date is the graph's own reply about itself rather than a measurement of it.
+  The three commands and the three states:
+  [`knowledge-graph.md`](knowledge-graph.md) → *Measure the lag*.
 - **Not installed → recommend it once**, in the preflight block, with the lines:
 
   ```bash

@@ -934,9 +934,17 @@ jobs:
           p = "/tmp/count-copy/SKILL-CARD.md"
           t = open(p, encoding="utf-8").read()
           import re
-          m = re.search(r"(\d+) guards", t)
-          assert m, "PLANT MISSED"
-          open(p, "w", encoding="utf-8").write(t.replace(m.group(0), "3 guards", 1))
+          # The guard rejects ANY hand-written guard count in a living document, so
+          # the plant INTRODUCES one rather than editing an existing number. The
+          # earlier plant edited the count in place and broke the day the prose
+          # stopped restating it — a test coupled to the defect it was written
+          # against instead of to the rule.
+          assert not re.search(r"\b\d+\+?\s+(?:structural\s+)?guards\b", t), \
+              "PLANT MISSED: SKILL-CARD.md already restates a count, so this plants nothing"
+          anchor = "## What to check before you trust it"
+          assert anchor in t, "PLANT MISSED: anchor heading absent"
+          open(p, "w", encoding="utf-8").write(
+              t.replace(anchor, anchor + "\n\nThis skill ships 3 guards.\n", 1))
           EOF
           if python3 /tmp/count-copy/test/validate.py; then
             echo "ERROR: validator passed a hand-written guard count that disagrees with the workflow"
@@ -1732,4 +1740,163 @@ jobs:
             exit 1
           else
             echo "OK: validator correctly FAILs — a guard below the verdict"
+          fi
+      - name: Negative self-test (stage 0's config gate must require the measured lag)
+        run: |
+          set -eu
+          rm -rf /tmp/gs01-copy && cp -R . /tmp/gs01-copy
+          python3 - <<'EOF'
+          p = "/tmp/gs01-copy/plugins/task-pipeline/skills/task-pipeline/pipeline.example.json"
+          t = open(p, encoding="utf-8").read()
+          assert "THE GRAPH'S ROW CARRIES ITS MEASURED LAG" in t, "PLANT DID NOT LAND: needle absent before edit"
+          t = t.replace("THE GRAPH'S ROW CARRIES ITS MEASURED LAG", "the graph's row carries its build date")
+          open(p, "w", encoding="utf-8").write(t)
+          EOF
+          if python3 /tmp/gs01-copy/test/validate.py; then
+            echo "ERROR: validator passed with stage 0's gate no longer requiring the measured lag"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — stage 0's config gate must require the measured lag"
+          fi
+      - name: Negative self-test (stage 0's own section must state the measured lag)
+        run: |
+          set -eu
+          rm -rf /tmp/gs02-copy && cp -R . /tmp/gs02-copy
+          python3 - <<'EOF'
+          p = "/tmp/gs02-copy/plugins/task-pipeline/skills/task-pipeline/references/stages.md"
+          t = open(p, encoding="utf-8").read()
+          assert t.count("measured lag") == 2, "PLANT DID NOT LAND: expected 2 needles before edit"
+          t = t.replace("measured lag", "build date")
+          open(p, "w", encoding="utf-8").write(t)
+          EOF
+          if python3 /tmp/gs02-copy/test/validate.py; then
+            echo "ERROR: validator passed with stage 0's section no longer stating the measured lag"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — stage 0's own section must state the measured lag"
+          fi
+      - name: Negative self-test (the measured-lag rule must keep its commands)
+        run: |
+          set -eu
+          rm -rf /tmp/gs03-copy && cp -R . /tmp/gs03-copy
+          python3 - <<'EOF'
+          p = "/tmp/gs03-copy/plugins/task-pipeline/skills/task-pipeline/references/knowledge-graph.md"
+          t = open(p, encoding="utf-8").read()
+          assert "git rev-list --count" in t, "PLANT DID NOT LAND: needle absent before edit"
+          t = t.replace("git rev-list --count", "look at how old it seems")
+          open(p, "w", encoding="utf-8").write(t)
+          EOF
+          if python3 /tmp/gs03-copy/test/validate.py; then
+            echo "ERROR: validator passed with the measured-lag rule missing its counting command"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the measured-lag rule must keep its commands"
+          fi
+      - name: Negative self-test (a graph that cannot be measured needs its own state)
+        run: |
+          set -eu
+          rm -rf /tmp/gs04-copy && cp -R . /tmp/gs04-copy
+          python3 - <<'EOF'
+          p = "/tmp/gs04-copy/plugins/task-pipeline/skills/task-pipeline/references/knowledge-graph.md"
+          t = open(p, encoding="utf-8").read()
+          assert "**unresolvable**" in t, "PLANT DID NOT LAND: needle absent before edit"
+          t = t.replace("**unresolvable**", "**probably fine**")
+          open(p, "w", encoding="utf-8").write(t)
+          EOF
+          if python3 /tmp/gs04-copy/test/validate.py; then
+            echo "ERROR: validator passed with the unresolvable state removed"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — a graph that cannot be measured needs its own state"
+          fi
+      - name: Negative self-test (the seeded brief must not ship a bare build date)
+        run: |
+          set -eu
+          rm -rf /tmp/gs05-copy && cp -R . /tmp/gs05-copy
+          python3 - <<'EOF'
+          p = "/tmp/gs05-copy/plugins/task-pipeline/skills/task-pipeline/templates/brief.md"
+          t = open(p, encoding="utf-8").read()
+          needle = "built `<sha>` — N commits / M days behind HEAD, signal: built_at_commit (exact) — ⚠ not trusted for reach until refreshed"
+          assert needle in t, "PLANT DID NOT LAND: needle absent before edit"
+          t = t.replace(needle, "built YYYY-MM-DD")
+          open(p, "w", encoding="utf-8").write(t)
+          EOF
+          if python3 /tmp/gs05-copy/test/validate.py; then
+            echo "ERROR: validator passed with the seeded brief shipping a bare build date"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the seeded brief must not ship a bare build date"
+          fi
+      - name: Negative self-test (the distrust marker keeps its sigil, even wrapped)
+        run: |
+          set -eu
+          rm -rf /tmp/gs06-copy && cp -R . /tmp/gs06-copy
+          python3 - <<'EOF'
+          p = "/tmp/gs06-copy/README.md"
+          t = open(p, encoding="utf-8").read()
+          needle = "`⚠ not trusted for reach until\nrefreshed`"
+          assert needle in t, "PLANT DID NOT LAND: the wrapped marker is absent before edit"
+          t = t.replace(needle, "`not trusted for reach until\nrefreshed`")
+          open(p, "w", encoding="utf-8").write(t)
+          EOF
+          if python3 /tmp/gs06-copy/test/validate.py; then
+            echo "ERROR: validator passed with the marker's sigil dropped across a line wrap"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the distrust marker keeps its sigil, even wrapped"
+          fi
+      - name: Negative self-test (the distrust marker gets no second spelling)
+        run: |
+          set -eu
+          rm -rf /tmp/gs07-copy && cp -R . /tmp/gs07-copy
+          python3 - <<'EOF'
+          p = "/tmp/gs07-copy/plugins/task-pipeline/skills/task-pipeline/references/knowledge-graph.md"
+          t = open(p, encoding="utf-8").read()
+          needle = "signal: none — ⚠ not trusted for reach until refreshed"
+          assert needle in t, "PLANT DID NOT LAND: the unresolvable row's marker is absent before edit"
+          t = t.replace(needle, "signal: none — treat as stale until refreshed")
+          open(p, "w", encoding="utf-8").write(t)
+          EOF
+          if python3 /tmp/gs07-copy/test/validate.py; then
+            echo "ERROR: validator passed with a second spelling of the distrust marker"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the distrust marker gets no second spelling"
+          fi
+      - name: Negative self-test (the hygiene gate catches a blank line inside a table)
+        run: |
+          set -eu
+          rm -rf /tmp/hyg7 && mkdir -p /tmp/hyg7
+          cp plugins/task-pipeline/skills/task-pipeline/templates/hygiene.sh /tmp/hyg7/gate.sh
+          cd /tmp/hyg7
+          python3 - <<'EOF'
+          open('t7.md','w').write(
+              '# Ledger\n\n| id | what |\n|---|---|\n| 1 | first |\n\n| 2 | second |\n')
+          EOF
+          test -s t7.md || { echo "ERROR: plant did not land — t7.md is empty"; exit 1; }
+          if bash gate.sh; then
+            echo "ERROR: hygiene gate passed with a blank line splitting a table"
+            exit 1
+          else
+            echo "OK: hygiene gate rejects a blank line inside a table"
+          fi
+      - name: Negative self-test (the hygiene gate refuses an undeclared floor)
+        run: |
+          set -eu
+          rm -rf /tmp/hyg8 && mkdir -p /tmp/hyg8
+          cp plugins/task-pipeline/skills/task-pipeline/templates/hygiene.sh /tmp/hyg8/gate.sh
+          cd /tmp/hyg8
+          python3 - <<'EOF'
+          p = 'gate.sh'
+          t = open(p, encoding='utf-8').read()
+          needle = 'HYGIENE_FLOOR_7=${HYGIENE_FLOOR_7:-0}\n'
+          assert needle in t, "PLANT DID NOT LAND: floor 7 is not declared in the gate"
+          open(p, 'w', encoding='utf-8').write(t.replace(needle, ''))
+          open('t8.md','w').write('# Ledger\n\n| id | what |\n|---|---|\n| 1 | first |\n\n| 2 | second |\n')
+          EOF
+          if bash gate.sh; then
+            echo "ERROR: hygiene gate passed while judging a check whose floor is undeclared"
+            exit 1
+          else
+            echo "OK: hygiene gate refuses an undeclared floor instead of printing ok"
           fi

@@ -225,7 +225,17 @@ side; `references/review.md` rates an effect asserted without one as **Important
 not Minor. A finding that never blocks is a finding the fix loop never sees.
 *(guard: `the report no longer requires verified-by lines`)*
 
-**30. Every invariant above names the guard that enforces it, and that guard exists.**
+**30. The code graph's ledger row states a measured lag, never a build date.**
+Stage 0 reads the graph first, so its freshness is the one claim a whole run rests
+on — and `built 2026-08-05` is the graph's own reply about itself, true and silent
+about whether it describes the tree the run is about to change. `stages.md`'s stage-0
+section and the config's stage-0 gate must both require the measurement, exactly as
+they do for the stage-9 refresh, and `references/knowledge-graph.md` must keep the
+commands and all three signal states — with a state missing, a graph that could not
+be measured prints like a fresh one.
+*(guard: `never requires it — a run passes intake quoting a`)*
+
+**31. Every invariant above names the guard that enforces it, and that guard exists.**
 This list claims to be *what the validator enforces*; it was eight guards behind when
 an audit measured it. A claim of enforcement is now checked like any other claim.
 *(guard: `whose message does not appear in`)* — and a cited literal must lie inside
