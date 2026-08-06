@@ -18,6 +18,7 @@ being written twice; write it once, here.
 
 ## Contents
 
+- The canons — what makes a document evidence
 - The inventory — four questions, answered before the first line of work
 - Registers and ids
 - Single source of truth
@@ -29,6 +30,71 @@ being written twice; write it once, here.
 - Registers are shared state
 - Where this binds in the pipeline
 - Rationalizations
+
+## The canons — what makes a document evidence
+
+Ten laws. Everything else in this file, and the mechanisms in [`gates.md`](gates.md),
+[`learned.md`](learned.md) and [`retrospective.md`](retrospective.md), exist to serve
+them. Where a canon is already enforced by something, the enforcement is **named, not
+restated** — a canon that repeats its own mechanism is the second home this system
+exists to prevent.
+
+**1. A claim carries its address.** Every fact that lands in a document names where it
+can be checked: `file:line`, a command with its output, a test name. A lesson names the
+commit that earned it. *"We verified it" is the sentence that passes every review and
+proves nothing.* → the retro's SHA-resolution guard; the finding shape in
+[`setup.md`](setup.md).
+
+**2. Numbers are computed, never restated.** A count in prose is a number that was true
+once. Derive it at check time and compare the stated one against the computed one as the
+same object. → [`learned.md`](learned.md) rule 8.
+
+**3. Every fact has exactly one home.** Other documents link to it; they never restate
+it. Two homes do not disagree on the day they are written — they disagree on the day one
+of them is updated. → *Single source of truth*, below.
+
+**4. A reference resolves from where the document is read.** Not from where it lives. A
+link correct in `templates/` and broken everywhere the template is seeded stays green
+under every link checker, because the checker resolves from the file's home. → invariant
+27; the seeded-template guard.
+
+**5. Green nobody watched turn red is not evidence.** A check must be seen rejecting a
+planted defect before its pass means anything — and the plant must be proven to have
+landed in the text the check actually parses. → [`gates.md`](gates.md) → *Probing*;
+[`learned.md`](learned.md) rules 4 and 5.
+
+**6. A check proves its scope and nothing beyond it.** Every gate carries what it does
+**not** cover, and quoting it wider is how "the gate is green" becomes a false statement
+made in good faith. "The docs are in sync" is a command with an exit code, never a
+sentence at the end of a report. → [`gates.md`](gates.md) → *Before you run a check*.
+
+**7. Silence is not a pass.** Ask of any mechanism: what does it print when it did not
+look? If that is indistinguishable from what it prints when it looked and found nothing
+wrong, it is not evidence. → [`gates.md`](gates.md) → *False success*.
+
+**8. An estimate is never announced as a measurement.** A rule that fires on a judgement
+states its **evidence condition** — the observable signal that licenses it. A false
+alarm does not cost one interruption; it costs the alarm. → [`continuity.md`](continuity.md)
+→ *The context budget*.
+
+**9. What was not checked is printed beside what was.** Absence is a finding with one
+side, so it never surfaces by comparison. Carry it as a named, counted set next to every
+verdict — a ratchet, never a TODO — so `PASS` reads as *"green, and here is what nobody
+looked at"*. → [`learned.md`](learned.md) rule 7; [`gates.md`](gates.md) → *Ratchets*.
+
+**10. The document ships in the change that made it true.** Not in the next ticket —
+documentation deferred is documentation that describes a system nobody is running. A
+correction is **appended**, never edited over: a register that is rewritten loses the
+fact that it was ever wrong, which is usually the useful part. → *The Doc Loop*, below.
+
+### What these are not
+
+They are **epistemic**, not operational: they say what makes a claim documentation, not
+what to do at a trigger. The operational layer is [`learned.md`](learned.md) — each rule
+there carries a trigger, a check and an exit criterion. When the two seem to say the same
+thing, the canon is the *why* and the rule is the *how*; edit the rule, cite the canon.
+
+---
 
 ## The inventory — four questions, answered before the first line of work
 
