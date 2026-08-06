@@ -1,5 +1,62 @@
 # Changelog
 
+## v1.15.0 — 2026-08-06
+
+### Added — a build date is the graph's reply about itself, not a measurement of it
+
+Stage 0 reads the code graph before it reads anything else, and until now it recorded
+that graph's freshness as `built YYYY-MM-DD`. That is true, self-reported, and silent
+about the only thing the harvest needs to know: whether the graph describes the tree
+this run is about to change. Twelve commits later the row still reads `built
+2026-08-05` — and still reads *fresh*, because a date with nothing subtracted from it
+is a fact with no scale. It is the class `references/gates.md` named one release ago:
+an actor's own reply, standing in for evidence about the world.
+
+The occasion was this repository's own. `docs/superpowers/specs/` holds a brief, a
+carry-over ledger and an acceptance document for v1.11.0, v1.12.0 and v1.13.0 — and
+none for v1.14.0 or v1.14.1. Those two releases never opened stage 9, so nothing
+refreshed the graph, and the next harvest would have read a two-release-old index
+behind a date that looked current.
+
+- **`references/knowledge-graph.md` gains *Measure the lag***: three commands
+  (`git rev-parse --verify`, `git rev-list --count`, `git log -1 --format=%ct`) so
+  the number comes from git rather than from judgement, and **three states** —
+  `built_at_commit` exact, file `mtime` approximate, and `unresolvable` — because
+  `graph.json` carries the commit stamp **only when the caller passed it** and
+  `graphify update` from the CLI does not. With one state, "could not measure" would
+  print like "fresh", which is the failure the section cites `gates.md` for. Zero is
+  stated out loud for the same reason.
+- **No threshold, deliberately.** `continuity.md` refused a context-budget number on
+  the same grounds: an unmeasurable threshold becomes unconditional doctrine, not
+  config. One commit that moved the function this task is about outweighs fifty that
+  touched a README, so anything but `current` carries `⚠ not trusted for reach until
+  refreshed` — a marker, not a block. The graph is recommended everywhere else in this
+  bundle; a blocking staleness check would make *no graph* cheaper than a week-old one.
+- **The cadence is untouched.** Stage 9 already required the refresh unconditionally,
+  and an `always | major | manual` mode was rejected rather than deferred: `major`
+  schedules exactly the state the doctrine warns about — a graph confidently wrong
+  between releases, read first by the next run.
+
+### Guards — 95 → 100, by extending a sibling rather than copying it
+
+`test/validate.py` already enforced that the code-graph doctrine be named in **both**
+halves of stage 9 — the config gate the orchestrator verifies and the section an agent
+reads — because a file that "reads as law while the run never does it" is an inert
+gate. Standing instruction R-003 requires running a fixed defect's definition against
+its siblings, and stage 0 is the sibling: same doctrine file, one duty reading the
+graph where the other refreshes it. So the existing guard was **extended**, not
+duplicated.
+
+At stage 0 the word *graph* is not the test — it was already there. The guard requires
+the **measured lag**, and three more checks keep the cited section honest: the commands
+must survive, all three states must survive, and `templates/brief.md` may not ship the
+superseded bare-date row to every project scaffolded from it.
+
+The repository's own drift guard then caught the release mid-flight: `SKILL-CARD.md`
+and `evals/RESULTS.md` still said *95 structural guards*. Invariant 13 — numbers in
+living documents are computed, not restated — is what turned an estimate into the
+measured 100.
+
 ## v1.14.1 — 2026-08-05
 
 ### Fixed — a guard below the verdict block is dead code shaped like a guard

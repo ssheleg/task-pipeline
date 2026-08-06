@@ -73,6 +73,7 @@ a row pointing outside the bundle is the defect this file exists to catch.
 | How the host project's own conventions are read | `references/conventions.md` |
 | Which companions exist, what is required, self-currency | `references/companion-skills.md` |
 | The code graph: queries, refresh, the graph↔docs divergence | `references/knowledge-graph.md` |
+| How the graph's staleness is measured and stated in the ledger | `references/knowledge-graph.md` |
 | Model policy — tier not id, ask once at preflight | `references/model-tiering.md` |
 | This boundary | `references/portability.md` |
 

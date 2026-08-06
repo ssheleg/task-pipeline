@@ -31,7 +31,7 @@ premise if the run leaves it wrong.
 | Source | What it says about this task | Fresh? | Authority | Stale after this run? |
 |---|---|---|---|---|
 | `docs/adr/NNNN-….md` | … | YYYY-MM | decision | no |
-| `graphify-out/graph.json` | reach: what calls it, what breaks if it moves | built YYYY-MM-DD | index | **yes — refresh at stage 9** |
+| `graphify-out/graph.json` | reach: what calls it, what breaks if it moves | built `<sha>` — N commits / M days behind HEAD, signal: built_at_commit (exact) — ⚠ not trusted for reach until refreshed | index | **yes — refresh at stage 9** |
 | wiki: `projects/…/concepts/…` | … | YYYY-MM | context | **yes — update at stage 9** |
 | `CLAUDE.md` | test/lint/deploy commands, house rules | current | convention | no |
 
@@ -66,7 +66,8 @@ source is a recorded decision, an unquoted one is an undetected divergence.
   what it returned: … (or `nothing`)
 - **Code graph:** built / installed-not-built / not installed
   ([graphify](https://github.com/Graphify-Labs/graphify); recommended, never a gate —
-  built → its row above carries the build date and stage 9 refreshes it)
+  built → its row above carries the **measured lag and the signal it was measured
+  with**, and stage 9 refreshes it)
 
 ## Scope
 

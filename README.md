@@ -238,8 +238,12 @@ then, in the project root:
 
 **Stage 0 asks it what grep can't** — `graphify query "how does session reach the
 API layer"`, `graphify affected "AuthModule"`, `graphify god-nodes` — and records it
-in the source ledger **with its build date**, because a graph goes stale exactly like
-a doc. It points; the code decides.
+in the source ledger **with its measured lag**, because a graph goes stale exactly
+like a doc. Not a build date: `built 2026-08-05` is the graph's own reply about
+itself, true and self-reported and silent about whether it describes the tree you
+are about to change. The row carries `N commits / M days behind HEAD`, the signal
+that measured it — and, on anything but `current`, `⚠ not trusted for reach until
+refreshed`. It points; the code decides.
 
 **Stage 9 closes three artifacts, not two.** Docs, wiki, **and the graph** — in the
 agent, so the documents this stage just edited are re-extracted too:

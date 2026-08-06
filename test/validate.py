@@ -1425,6 +1425,55 @@ if os.path.isfile(os.path.join(refdir, "knowledge-graph.md")):
              "doctrine but the stage-9 section never mentions the graph — an agent reading the "
              "stage detail is never told to refresh it")
 
+    # Stage 0 is stage 9's sibling here — the same doctrine file ships both duties,
+    # one READING the graph and one REFRESHING it — so standing instruction R-003
+    # puts the check above on both. The word "graph" is not the test at stage 0: it
+    # is already there ("query the graph"). What must be enforced is the MEASURED
+    # lag, because a build date is the graph's own reply about itself and passes any
+    # check that only looks for the word (references/gates.md -> False success).
+    _kg_txt = open(os.path.join(refdir, "knowledge-graph.md"), encoding="utf-8").read()
+    _s0_cfg = next(
+        (s for s in (_pipe_stages or []) if isinstance(s, dict) and s.get("state") == "intake"),
+        None,
+    )
+    if _s0_cfg is not None and "measured lag" not in str((_s0_cfg.get("gate") or {}).get("check", "")).lower():
+        fail(f"{EXAMPLE_REL} stage 'intake': references/knowledge-graph.md ships the measured-lag "
+             "rule but the stage-0 gate.check never requires it — a run passes intake quoting a "
+             "graph whose staleness nobody measured, which is the one source the harvest reads "
+             "first")
+    _s0_doc = re.search(r"^## 0 — .*?(?=^## |\Z)", _st_txt, re.M | re.S)
+    if _s0_doc and "measured lag" not in _s0_doc.group(0).lower():
+        fail("references/stages.md stage 0: references/knowledge-graph.md ships the measured-lag "
+             "rule but the stage-0 section never states it — an agent reading the stage detail "
+             "records a build date and believes it has recorded freshness")
+    # The surfaces above cite a section by name; if it stops delivering the commands
+    # or drops a state, they cite an empty promise. All three states are load-bearing:
+    # graph.json carries built_at_commit only when the caller passed it, so a doctrine
+    # with one state makes "no stamp" print like "fresh".
+    for _need, _what in (
+        ("git rev-list --count", "the command that counts commits behind HEAD"),
+        ("git log -1 --format=%ct", "the command that dates the build commit"),
+        ("git rev-parse --verify", "the probe that decides which state applies"),
+    ):
+        if _need not in _kg_txt:
+            fail(f"references/knowledge-graph.md: the measured-lag rule no longer names "
+                 f"`{_need}` — {_what}. Without the command the rule is an intention and the "
+                 "number goes back to being typed (references/learned.md rule 8)")
+    for _state in ("exact", "approximate", "unresolvable"):
+        if f"**{_state}**" not in _kg_txt:
+            fail(f"references/knowledge-graph.md: the measured-lag rule no longer names the "
+                 f"'{_state}' state — with a state missing, a graph that could not be measured "
+                 "prints indistinguishably from a fresh one")
+    # The seeded brief is what every new project starts from. Leaving the superseded
+    # bare-date form in the template ships the defect this release removes.
+    _brief_p = os.path.join(_skill_dir, "templates", "brief.md")
+    if os.path.isfile(_brief_p):
+        for _ln in open(_brief_p, encoding="utf-8").read().splitlines():
+            if "graphify-out/graph.json" in _ln and "built YYYY-MM-DD" in _ln:
+                fail("templates/brief.md: the seeded code-graph ledger row still reads "
+                     "`built YYYY-MM-DD` — every project scaffolded from this template starts "
+                     "by recording the graph's own reply instead of measuring it")
+
 # An unresolved merge leaves conflict markers in the file, and this repo is almost
 # entirely prose — so a botched resolution ships as doctrine an agent will read and
 # obey. Nothing here noticed: a CHANGELOG carrying three markers passed every other
