@@ -1,6 +1,6 @@
 ---
 name: evidence-docs
-description: Applies the ten canons of evidence-backed documentation — what makes a claim documentation rather than an assertion — and routes to the doctrine that enforces each one. Use when writing or reviewing anything that will be read as true: a decision record, a README, an acceptance report, a runbook, a changelog entry, an audit finding, or any claim that something was verified. Also use when a project needs a documentation gate, a decision register, a propagation matrix, or a retrospective that outlives its author. Not for drafts, chat answers, commit messages or code comments.
+description: Applies the ten canons of evidence-backed documentation — what makes a claim documentation rather than an assertion — and routes to the doctrine that enforces each one. Use when writing or reviewing anything that will be read as true — a decision record, a README, an acceptance report, a runbook, a changelog entry, an audit finding, or any claim that something was verified. Also use when a project needs a documentation gate, a decision register, a propagation matrix, or a retrospective that outlives its author. Not for drafts, chat answers, commit messages or code comments.
 ---
 
 # Evidence-backed documentation

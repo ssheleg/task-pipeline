@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Structural validator for the task-pipeline skill repo. Exit 0 = pass."""
-import json, os, re, shutil, subprocess, sys, tempfile
+import glob, json, os, re, shutil, subprocess, sys, tempfile
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 NAME = "task-pipeline"
@@ -1832,6 +1832,30 @@ else:
         if not os.path.exists(os.path.normpath(os.path.join(_edir, _rel))):
             fail(f"skills/evidence-docs/SKILL.md: '{_rel}' does not resolve from the "
                  "navigator's own directory — canon 4, in the file that publishes it")
+
+# Frontmatter must parse as YAML, not merely match a regex (v1.16.1). The evidence-docs
+# description carried "read as true: a decision record" -- a colon-space inside a plain
+# scalar, which YAML reads as a nested mapping. The regex check above called it valid; the
+# official plugin validator called it "loads with empty metadata, all fields silently
+# dropped". A check proving less than it claims is canon 6, and it shipped in the release
+# that publishes canon 6. Applied to every SKILL.md in the plugin, not just the new one.
+for _sk in sorted(glob.glob(os.path.join(ROOT, "plugins/*/skills/*/SKILL.md"))):
+    _st = open(_sk, encoding="utf-8").read()
+    _rel_sk = os.path.relpath(_sk, ROOT)
+    if not _st.startswith("---"):
+        fail(f"{_rel_sk}: no YAML frontmatter block")
+        continue
+    for _line in _st.split("---")[1].splitlines():
+        _m = re.match(r"^([A-Za-z_][\w-]*):\s*(\S.*)$", _line)
+        if not _m:
+            continue
+        _val = _m.group(2).strip()
+        if _val[:1] in ("'", '"', "|", ">", "[", "{"):
+            continue
+        if ": " in _val:
+            fail(f"{_rel_sk}: frontmatter '{_m.group(1)}' is a plain scalar containing "
+                 "a colon-space, so YAML parses it as a mapping and the field is "
+                 "silently dropped at load time -- quote the value or rephrase")
 
 if errors:
     print("FAIL: task-pipeline structure invalid")

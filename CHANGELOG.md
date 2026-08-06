@@ -1,5 +1,21 @@
 # Changelog
 
+## v1.16.1 — 2026-08-06
+
+### Fixed — frontmatter that a regex called valid and a YAML parser silently dropped
+
+`evidence-docs`'s description contained *"read as true: a decision record"*. A
+colon-space inside a plain YAML scalar makes the value a nested mapping, so the official
+plugin validator reported the skill **loads with empty metadata — every frontmatter field
+silently dropped**, which for a skill means it never triggers. v1.16.0 published in that
+state.
+
+The guard that was supposed to catch it checked the frontmatter with a regular
+expression and passed: a check proving less than it claims, shipped in the release that
+publishes canon 6. It now rejects a plain scalar carrying a colon-space, across **every**
+`SKILL.md` in the plugin rather than only the new one — the class, not the instance.
+Guards 112 → 113.
+
 ## v1.16.0 — 2026-08-06
 
 ### Added — `evidence-docs`: a second skill in this plugin, and the router row it fills
