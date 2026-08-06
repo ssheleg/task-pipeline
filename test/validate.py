@@ -1509,6 +1509,65 @@ if os.path.isfile(os.path.join(refdir, "knowledge-graph.md")):
                      "`built YYYY-MM-DD` — every project scaffolded from this template starts "
                      "by recording the graph's own reply instead of measuring it")
 
+# The negatives floor is a number in a living document, so rule 8 binds it like any
+# other: MIN_EXPECTED must EQUAL the workflow's count, not merely be below it. Its own
+# comment records the first time it lagged (20 while the workflow carried 34); the
+# second was v1.15.0, where four canon self-tests landed and the floor stayed at 104.
+# A floor below the count cannot notice losing the difference, which is the whole job.
+_neg_py = os.path.join(ROOT, "test/negatives.py")
+if os.path.isfile(_neg_py) and os.path.isfile(_neg_wf):
+    _m_floor = re.search(r"^MIN_EXPECTED\s*=\s*(\d+)", open(_neg_py, encoding="utf-8").read(), re.M)
+    if _m_floor and int(_m_floor.group(1)) != _neg_n:
+        fail(f"test/negatives.py: MIN_EXPECTED is {_m_floor.group(1)} but the workflow defines "
+             f"{_neg_n} negative self-tests — a floor below the count is a floor that cannot "
+             "notice losing the difference; raise it in the same change that adds the tests")
+
+# The CI verdict (references/conventions.md). A workflow run that nobody reads is the
+# fail-open hook with extra steps: on 2026-08-06 this repo's `validate` was
+# completed/failure on a push to main and on a release tag, the guard that failed was
+# CORRECT, and nothing obliged anyone to look. So the method must keep its commands,
+# must keep all three states -- the third, "no run found", is the one that stops
+# silence from reading as green -- and every stage that PUSHES must cite it.
+_conv_p = os.path.join(refdir, "conventions.md")
+if os.path.isfile(_conv_p):
+    _conv = open(_conv_p, encoding="utf-8").read()
+    for _need, _why in (
+        ("gh run list --branch", "the command that finds the run"),
+        ("--log-failed", "the command that reads WHY it failed; a conclusion says only THAT"),
+        ("check-runs", "the unauthenticated path — a dead token must not end the check"),
+    ):
+        if _need not in _conv:
+            fail(f"references/conventions.md: *The CI verdict* no longer names `{_need}` — "
+                 f"{_why}. Without the command the rule is an intention, and 'CI is green' "
+                 "goes back to being a sentence anyone can write without looking")
+    for _state in ("concluded", "in progress", "no run found"):
+        if f"**{_state}**" not in _conv:
+            fail(f"references/conventions.md: the CI verdict's '{_state}' state is gone — "
+                 "with a state missing, a push whose run could not be established prints "
+                 "indistinguishably from a green one")
+    # Declared in one file and enforced nowhere is the inert-gate failure this repo has
+    # now hit at stage 9, stage 10 and stage 0. Every stage of the flow that pushes must
+    # name the rule -- and cite it rather than carry a second copy of the commands.
+    _st_all = open(os.path.join(refdir, "stages.md"), encoding="utf-8").read()
+    for _num in ("7", "8", "9"):
+        _sec = re.search(r"^## %s — .*?(?=^## |\Z)" % _num, _st_all, re.M | re.S)
+        if _sec and "the ci verdict" not in _sec.group(0).lower():
+            fail(f"references/stages.md stage {_num}: this stage pushes, and "
+                 "references/conventions.md ships the CI-verdict rule, but the section "
+                 "never names it — the run it triggers is closed on an unread verdict")
+        if _sec and "gh run list --branch" in _sec.group(0):
+            fail(f"references/stages.md stage {_num}: carries its own copy of the CI-verdict "
+                 "commands — cite conventions.md instead; two homes do not disagree the day "
+                 "they are written, they disagree the day one is updated")
+    _s8_cfg = next(
+        (s for s in (_pipe_stages or []) if isinstance(s, dict) and s.get("state") == "post-deploy"),
+        None,
+    )
+    if _s8_cfg is not None and "ci verdict" not in str((_s8_cfg.get("gate") or {}).get("check", "")).lower():
+        fail(f"{EXAMPLE_REL} stage 'post-deploy': the CI-verdict rule ships in "
+             "references/conventions.md but the stage-8 gate.check never requires it — "
+             "declared where it is not enforced")
+
 # An unresolved merge leaves conflict markers in the file, and this repo is almost
 # entirely prose — so a botched resolution ships as doctrine an agent will read and
 # obey. Nothing here noticed: a CHANGELOG carrying three markers passed every other

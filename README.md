@@ -66,7 +66,7 @@ Every gate is **typed**: `auto` — the orchestrator verifies it itself, pass/fa
 | 5 | Dev | tasks DONE (three review verdicts each), TDD green per task | auto |
 | 6 | Tests | full suite green, new code covered | auto |
 | 7 | Lint + deploy | lint clean + suite green before deploy | manual |
-| 8 | Post-deploy | clean boot / honest degradation | auto |
+| 8 | Post-deploy | clean boot / honest degradation, **and the CI verdict read rather than assumed** | auto |
 | 9 | Docs + wiki | the propagation matrix walked and the documentation gate green with its ratchets printed; every stale source-ledger row updated; docs + wiki synced; the code graph refreshed and checked against the docs | auto |
 | 10 | **Acceptance** | every REQ accounted for with evidence; every check leaned on seen failing once; operator signs off; the retro written — pruned before anything was added, every lesson carrying its commit | manual |
 
@@ -212,6 +212,27 @@ obsidian-wiki setup --vault /path/to/your/vault
 
 It is a **recommendation, never a gate** — no stage blocks on a missing wiki, and
 nothing asks twice in one run.
+
+### The CI verdict — read the run, never assume it
+
+A push either triggered a workflow run or it did not, and either way the run's own
+reply is the only evidence. *"CI is green"* written without a command behind it prints
+the same whether it looked or not.
+
+This repository learned it the direct way: `validate` was `completed/failure` on a push
+to `main` and on a release tag, the guard that failed was **correct** — a tag that was
+not yet an ancestor of `main` — and nothing obliged anyone to read it. A guard nobody
+reads is a fail-open hook with extra steps.
+
+So stages 7, 8 and 9 — every stage of the flow that pushes — require the verdict to be
+**read and quoted**: the conclusion with its run id, the failing step's log on anything
+but success, and one of three states, including **`no run found`** said out loud,
+because a project without CI is a legitimate state and not a green one. Two command
+paths, authenticated and not, because a dead token must not end the check. It reports;
+it does not block.
+
+Method: [`conventions.md`](plugins/task-pipeline/skills/task-pipeline/references/conventions.md)
+→ *The CI verdict*.
 
 ### The code graph — reach, and a second opinion on your docs
 

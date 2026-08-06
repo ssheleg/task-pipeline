@@ -345,14 +345,24 @@ never that the work was skipped quietly.
   `partial` ships only with the operator's explicit acceptance. A gap is cheapest to
   close before it ships, and the operator is already present at this gate. **The
   carry-over count is printed beside this verdict.** Deploy is outward → explicit
-  operator go. Respect deploy-from-main rules if the project mandates them.
+  operator go. Respect deploy-from-main rules if the project mandates them. **Before
+  tagging, the CI verdict for what was just pushed is READ, not assumed**
+  ([`conventions.md`](conventions.md) → *The CI verdict*) — a tag on a commit whose
+  run nobody read is how a red `main` ships.
 
 ## 8 — Post-deploy
 - **Freedom: medium** — where the logs live varies; 'clean boot or an honest degradation report' does not ([`gates.md`](gates.md) → *Axis C*).
 - Tail deploy logs / health-check per conventions. Confirm clean boot, no error
   spike, live subsystems healthy.
+- **Read the CI verdict for the deploy's own commit** ([`conventions.md`](conventions.md)
+  → *The CI verdict*): the run's conclusion quoted, the **failing step's log quoted**
+  on anything but `success`, and one of the three states stated — including **`no run
+  found`**, out loud, because a project without CI is a legitimate state and not a
+  green one.
 - **GATE (auto):** clean boot confirmed, or an **honest degradation report** with next
-  steps — never silent success.
+  steps — never silent success. **The CI verdict is one of the reported facts, with
+  its run id** — "CI is green" written without a command behind it prints the same
+  whether it looked or not ([`gates.md`](gates.md) → *False success*).
 
 ## 9 — Docs + wiki
 - **Freedom: low** — the matrix walk and the gate are mechanical; what a doc says is not this stage's call ([`gates.md`](gates.md) → *Axis C*).
@@ -405,7 +415,10 @@ never that the work was skipped quietly.
   written and reconciled**; UI: super-ux layers current + linter green; wiki synced
   (or absent and recommended once); **the code graph
   refreshed where one exists, or the reason it wasn't written into the carry-over
-  ledger** (absent and recommended once is fine); dangling links fixed; **the
+  ledger** (absent and recommended once is fine); dangling links fixed; **the CI
+  verdict read for this stage's own push** ([`conventions.md`](conventions.md) →
+  *The CI verdict*) — this stage pushes like any other and is the one that habitually
+  ends a run, so an unread red here is a red `main` nobody is coming back to; **the
   carry-over count printed beside this verdict**.
 
 ## 10 — Acceptance

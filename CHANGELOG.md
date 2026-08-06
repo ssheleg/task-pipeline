@@ -1,5 +1,50 @@
 # Changelog
 
+## v1.16.2 — 2026-08-06
+
+### Added — a CI run is checked by reading it, not by assuming it
+
+The bundle offered a place (`conventions.md`: *"CI: the workflow run."*) and a claim
+(`release.verify`: *"CI green on the tagged commit"*) with no method between them.
+Both are satisfiable by believing them, which is the class `gates.md` named in
+v1.14.0: **an actor's own reply is not evidence about the world**, and the test —
+*what does it print when it did not look?*
+
+The occasion was v1.15.0's own release. `validate` was `completed/failure` on a push
+to `main` and on the release tag. The failure was **correct**: the repository's own
+*Every v\* tag must be contained in main* guard, firing on a tag that was not yet an
+ancestor — precisely the defect v1.6.1 built it for. The guard worked, and **nothing
+obliged anyone to read it**. A guard nobody reads is a fail-open hook with extra
+steps; it surfaced only because the run happened to poll the API.
+
+- **`conventions.md` gains *The CI verdict***: the commands (`gh run list … --json
+  databaseId,name,status,conclusion,headSha`, then `gh run view … --log-failed`), an
+  **unauthenticated fallback** on the `check-runs` API, and **three states** —
+  concluded, in progress (*"it was still running when I looked"* is a report, not a
+  verdict), and **no run found**, said out loud, because a project without CI is a
+  legitimate state and not a green one.
+- **Read the log, not just the verdict.** A conclusion says *that* it failed; only the
+  log said *what* — the guard's name, the orphan tag and the one-line fix. A bare "CI
+  failed" hands the next reader a search the log had already finished.
+- **Two paths because one credential died.** `gh`'s token expired mid-run that night,
+  and `gh auth status` reported it invalid from a **cached** verdict while `gh api
+  user` succeeded. The doctrine names the live call, never the status command.
+- **Bound at stages 7, 8 and 9** — every stage of this flow that pushes. The incident
+  hit at the merge and again at the docs push; binding stage 8 alone would have caught
+  neither. The gates cite `conventions.md`; a guard rejects a second copy of the
+  commands.
+- **It reports, it does not block** — the shape stage 8 already used for deploy logs.
+  Blocking would make a project *without* CI cheaper to ship from than one with it.
+
+### Fixed — the negatives floor may no longer lag its own workflow
+
+`MIN_EXPECTED` is a number in a living document, so rule 8 binds it: it must **equal**
+the workflow's count, not merely sit below it. Its own comment records the first lag
+(20 while the workflow carried 34); v1.15.0 was the second — four canon self-tests
+landed and the floor stayed at 104 while the file carried 108. A floor below the count
+cannot notice losing the difference, which is the entire job. Now guarded, and the
+guard was watched rejecting a lowered floor.
+
 ## v1.16.1 — 2026-08-06
 
 ### Fixed — frontmatter that a regex called valid and a YAML parser silently dropped

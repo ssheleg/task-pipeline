@@ -133,7 +133,7 @@
       ],
       "gate": {
         "type": "auto",
-        "check": "clean boot confirmed (no error spike, live subsystems healthy), or an honest degradation report with next steps"
+        "check": "clean boot confirmed (no error spike, live subsystems healthy), or an honest degradation report with next steps. THE CI VERDICT IS READ, NEVER ASSUMED (references/conventions.md -> The CI verdict): the run's conclusion for this commit is quoted with its run id, the FAILING STEP'S LOG is quoted on anything but success, and one of three states is stated — concluded / in progress (wait and re-read; 'it was still running' is a report, not a verdict) / NO RUN FOUND, said out loud, because a project without CI is a legitimate state and not a green one. 'CI is green' written without a command behind it prints the same whether it looked or not (references/gates.md -> False success). Two command paths, because a credential problem must not end the check: 'gh run list --branch <b> --limit 1 --json databaseId,name,status,conclusion,headSha' then 'gh run view <id> --log-failed', or unauthenticated 'curl -s https://api.github.com/repos/<owner>/<repo>/commits/<sha>/check-runs'. Probe credentials with a live call, never with 'gh auth status', which answers from cache. It reports, it does not block."
       }
     },
     {
@@ -182,7 +182,7 @@
       "npm publish (task-pipeline-skill) — a second job in the same workflow, armed per repository by the PUBLISH_NPMJS variable (NPM_TOKEN granular automation token, or trusted publishing via OIDC); unarmed it falls back to a human 2FA step"
     ],
     "verify": [
-      "CI green on the tagged commit",
+      "CI green on the tagged commit — READ, not assumed: the run's conclusion quoted with its run id, and the failing step's log quoted on anything but success (references/conventions.md -> The CI verdict)",
       "npx github:ssheleg/task-pipeline#<tag> from a clean cwd installs the skill + command",
       "after npm publish: npm view task-pipeline-skill version == <tag>"
     ]
