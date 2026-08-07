@@ -364,6 +364,23 @@ if os.path.isfile(_learned):
                      f"does not carry {_needle!r} — a state claim inherited across a "
                      "session boundary goes unmeasured wherever the citation is missing")
 
+# learned.md rule 17 — the same shape as rule 16's guard, and for the same reason: a rule that
+# lands in the table and nowhere else is a rule the run never meets. This one guards the check that
+# would have caught the incident that produced it, so it is the one most likely to be quietly
+# dropped when a consumer file is rewritten.
+if os.path.isfile(_learned):
+    _lt17 = open(_learned, encoding="utf-8").read()
+    if re.search(r"^\|\s*17\s*\|", _lt17, re.M):
+        for _f, _needle in (
+            ("knowledge-sources.md", "## The source is not the copy you have"),
+            ("grill.md", "0 Source"),
+        ):
+            _fp = os.path.join(refdir, _f)
+            if not os.path.isfile(_fp) or _needle not in open(_fp, encoding="utf-8").read():
+                fail(f"references/{_f}: learned.md rule 17 is in force and this file "
+                     f"does not carry {_needle!r} — a run editing a stale checkout deletes "
+                     "newer work by fast-forward wherever the citation is missing")
+
 # references/artifacts.md maps stage -> what it WRITES. The reverse direction — what
 # each stage READS and from where — is the one an agent actually needs at runtime,
 # and it was absent for nine releases: learned.md rule 2 (compute the mapping in both

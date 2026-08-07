@@ -17,6 +17,7 @@ that goes stale when the answer changes.
 - The knowledge wiki — recommended
 - How to harvest — retrieval, not reading
 - Record it — the source ledger
+- The source is not the copy you have
 - Carried-in claims — measured or recalled
 - Phase 2 — validate the answers against the harvest
 - Close the loop — stage 9 updates what stage 0 read
@@ -170,6 +171,27 @@ source nobody will update.
 
 **"No sources found" is a valid, recorded outcome.** Write the row. An empty ledger
 tells the next run that the search happened and came back empty — silence doesn't.
+
+## The source is not the copy you have
+
+`learned.md` rule 17. The harvest reads the project's own files, and one property of them is
+invisible to reading: **whether this checkout is the one that ships.** A working copy two commits
+behind its upstream looks exactly like a current one — clean tree, no conflict, `git status` says
+nothing is wrong — and an edit on top of it deletes the newer work by fast-forward rather than by
+collision.
+
+Before the first edit, in any repository that has an upstream:
+
+```bash
+git fetch -q && git rev-list --count HEAD..@{u}     # 0, or stop and pull
+```
+
+Print the number. `0` is the measurement; the absence of a complaint is not.
+
+This matters most where it is least suspected — a skill, a plugin, a fork, a vendored library —
+because those are the repositories a machine keeps **twice**, once to publish from and once to run,
+and the one a person opens is chosen by a path in some documentation rather than by which is
+current.
 
 ## Carried-in claims — measured or recalled
 

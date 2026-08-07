@@ -1,5 +1,31 @@
 # Changelog
 
+## v1.19.0
+
+### The copy you are about to edit may not be the copy that ships — `learned.md` rule 17
+
+A machine keeps a skill twice: the working copy it publishes from and the installed plugin it runs.
+On 2026-08-07 the working copy was **two commits behind its own origin** — `v1.16.2` against
+`v1.18.0` — and the newer commits carried rule 16 itself. The tree was clean and nothing had
+diverged; the copy had simply never been pulled. An edit there would have landed on 1.16.2 and the
+release would have **deleted rule 16 and two versions of work by fast-forward** — not as a conflict
+git would show, but silently. The project's own instruction names that directory as the source, so
+whoever did it would have been following the documentation.
+
+The check is one command and it runs **before the first edit**:
+
+```bash
+git fetch -q && git rev-list --count HEAD..@{u}     # 0, or stop and pull
+```
+
+- `references/learned.md` — rule 17 and incident 17.
+- `references/knowledge-sources.md` — a harvest section, because this is a property of the sources
+  that reading them cannot reveal.
+- `references/grill.md` + `templates/brief.md` — autonomy-sweep row `0 Source`, in both files: the
+  grill asks it, the brief records it, and a topic in only one is a question with nowhere to land.
+- `test/validate.py` — a guard in the shape of rule 16's, so dropping a citation fails the build
+  rather than quietly ending the coverage. Both halves were watched failing against planted defects.
+
 ## v1.18.0 — 2026-08-06
 
 ### Added

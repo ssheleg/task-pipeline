@@ -41,6 +41,7 @@ to be enforced and is not is the same failure as a gate that prints `FAIL` and e
 | 14 | **A document may not send a reader to something absent** | any instruction naming a command, file or install | resolve it | the gate fails when the target does not exist |
 | 15 | **Identity before coordination** | any lease, lock, claim or run id | ask what two instances with the same identity would do, and make the tool answer it | two instances demonstrably get two identities |
 | 16 | **A carried-in claim is a recollection** | any run resuming from a summary, a handoff or a compacted context | re-derive the claim from its source before acting on it or reporting it | every state claim the run makes is marked `measured` with the command behind it, or it is not made |
+| 17 | **The copy you are about to edit may not be the copy that ships** | any run editing a repository that has an upstream — a skill, a plugin, a vendored library, a fork | `git rev-list --count HEAD..@{u}` **before the first edit**; non-zero means stop and pull | the run states the count it measured, or it has not started |
 
 ---
 
@@ -123,6 +124,8 @@ arrived in the context through a compaction, had once been a filtered subset, an
 provenance on the way. Eleven iterations later a single command over the register printed **36 open
 rows out of 99**, not the handful being worked from. Nothing had failed, because nothing compares a
 run's belief about the work-list against the register; the claim only ever appeared in prose.
+
+**17 · The stale source.** A machine keeps its skills in two places: the working copy it publishes from and the installed plugin it runs. On 2026-08-07 the working copy was **two commits behind its own origin** — `v1.16.2` against `v1.18.0` — and the newer commits carried rule 16 itself. The repository was clean, nothing had diverged, and `git status` said so; the copy was simply never pulled. An edit made there would have landed on top of 1.16.2, and the release would have **silently deleted rule 16 and everything else in two versions** — not as a conflict, which git would have shown, but as a fast-forward over work that was already published. The project's own instruction names that directory as the source, so the person doing it would have been following the documentation. Nothing in the pipeline asked the one question that separates a source from a copy of one, and the check is a single command.
 
 The same class had already bitten that project twice from the other side, and its roadmap names the
 property exactly: seven rows read `blocked` on producers the dependency board recorded as delivered,
