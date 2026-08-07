@@ -1,5 +1,27 @@
 # Changelog
 
+## v1.20.0
+
+### State that accumulates locally is created from nothing everywhere else — `learned.md` rule 18
+
+The retro says this class has recurred longer than any other: three sightings across forty entries
+before 2026-08-07, and four more that day alone. Its worst instance: a CI job that started an empty
+database, created the runtime role, and ran the suite — with nothing between those steps applying
+the schema. **1039 failed, 1339 errors, 4704 × `UndefinedTable`**, every suite touching a table, for
+as long as the repository had real tests. Invisible locally by construction: the compose database is
+migrated once by hand and stays migrated, so every author has a schema and the runner has none.
+
+Local state is *cumulative*; CI state is *constructed*. A green obtained on the cumulative one
+carries an unstated premise, false in the only environment that matters.
+
+- `references/learned.md` — rule 18 and incident 18.
+- `references/tdd.md` — "The green from residue": run the suite once against a freshly created
+  instance, and name it in the report. "Green" and "green against a database created ten seconds
+  ago" are different claims; only the second predicts CI.
+- `references/grill.md` + `templates/brief.md` — sweep row `0 Fixtures`: what persists between runs
+  here, and the command that recreates it from nothing.
+- `test/validate.py` — a guard, watched failing against two planted defects.
+
 ## v1.19.0
 
 ### The copy you are about to edit may not be the copy that ships — `learned.md` rule 17

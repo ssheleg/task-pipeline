@@ -11,6 +11,7 @@ into this skill; nothing to install.
 
 - The iron law
 - Red → green → refactor
+- The green from residue
 - Tests that stay honest
 - Stage 6 — consolidation and the suite gate
 - When stuck
@@ -62,6 +63,26 @@ Test still fails → fix the code, never the test. Another test broke → fix it
 Tests stay green. No new behavior enters here.
 
 Then the next failing test.
+
+## The green from residue
+
+`learned.md` rule 18. A suite that passes here and fails on a runner is usually not flaky and not
+environment-specific — it is reading **state that accumulated on this machine** and is created from
+nothing everywhere else. A database migrated once by hand months ago, a cache warmed by an earlier
+run, rows a previous suite left behind, a checkout whose generated files were never regenerated.
+
+Local state is *cumulative*; CI state is *constructed*. Every green obtained on the cumulative one
+carries an unstated premise, and the premise is false in the only environment that matters.
+
+Once per feature, and always before calling a suite green:
+
+```bash
+# whatever "new" means here — a fresh database, a clean volume, a new container, a fresh clone
+docker compose down -v && docker compose up -d && <migrate> && <test>
+```
+
+Name the fresh instance in the report. "The suite is green" and "the suite is green against a
+database created ten seconds ago" are different claims, and only the second one predicts CI.
 
 ## Tests that stay honest
 

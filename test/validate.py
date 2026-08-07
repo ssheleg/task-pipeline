@@ -381,6 +381,22 @@ if os.path.isfile(_learned):
                      f"does not carry {_needle!r} — a run editing a stale checkout deletes "
                      "newer work by fast-forward wherever the citation is missing")
 
+# learned.md rule 18 — same shape, same reason. This one guards the check that separates a green
+# from a green obtained off residue, which is the class the retro has recorded more often than any
+# other over the life of this skill.
+if os.path.isfile(_learned):
+    _lt18 = open(_learned, encoding="utf-8").read()
+    if re.search(r"^\|\s*18\s*\|", _lt18, re.M):
+        for _f, _needle in (
+            ("tdd.md", "## The green from residue"),
+            ("grill.md", "0 Fixtures"),
+        ):
+            _fp = os.path.join(refdir, _f)
+            if not os.path.isfile(_fp) or _needle not in open(_fp, encoding="utf-8").read():
+                fail(f"references/{_f}: learned.md rule 18 is in force and this file "
+                     f"does not carry {_needle!r} — a suite green against accumulated local "
+                     "state is a green whose premise is false on every runner")
+
 # references/artifacts.md maps stage -> what it WRITES. The reverse direction — what
 # each stage READS and from where — is the one an agent actually needs at runtime,
 # and it was absent for nine releases: learned.md rule 2 (compute the mapping in both
