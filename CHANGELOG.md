@@ -1,5 +1,32 @@
 # Changelog
 
+## v1.22.0
+
+### When a thing exists twice, ask which one is used — `learned.md` rule 20
+
+A service had **two Dockerfiles**. One was added at the repository root by a run that checked for a
+Dockerfile by looking where it expected one; `docker/Dockerfile` had been there all along, and
+`.github/workflows/ci.yml` says `file: docker/Dockerfile`. They disagreed about the port — 8080 at
+the root, 8000 in `docker/` — and the disagreement surfaced two days later as a **deployed service
+that answered nothing**, while `docker ps` said `Up` and `systemctl` said `active`. The built one
+also ran as root and copied the whole context including `.git`; the hardened one was the one nobody
+built.
+
+Diffing the two files finds the difference and not the **direction**, and the direction is the whole
+finding. Only the consumer says which one ships, and it is one grep.
+
+Its second shape: **a rule written in two documents is two rules.** This skill's own autonomy sweep
+lives in `grill.md` (what the grill ASKS) and `templates/brief.md` (what the brief RECORDS), and in
+the two releases before this one a row was added to one and not the other — twice — each time caught
+by a validator that knew to look at both.
+
+- `references/learned.md` — rule 20 and incident 20.
+- `references/audit.md` — "Two copies, and which one wins", including why the copy that ships is
+  usually the one nobody hardened.
+- `references/grill.md` + `templates/brief.md` — sweep row `0 Duplicates`: the consumer line, quoted.
+- `test/validate.py` — a guard, watched failing against three planted defects, the third being the
+  sweep row present in one file and not the other.
+
 ## v1.21.0
 
 ### An empty measurement is a refused measurement — `learned.md` rule 19

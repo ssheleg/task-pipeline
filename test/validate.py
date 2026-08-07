@@ -412,6 +412,22 @@ if os.path.isfile(_learned):
                      f"does not carry {_needle!r} — an instrument that failed and a subject "
                      "that is clean both produce an empty string")
 
+# learned.md rule 20 — the rule about a thing existing twice, guarded in both files it exists in,
+# which is the joke and also the point: the sweep lives in grill.md and templates/brief.md, and this
+# skill has twice added a row to one of them and not the other.
+if os.path.isfile(_learned):
+    _lt20 = open(_learned, encoding="utf-8").read()
+    if re.search(r"^\|\s*20\s*\|", _lt20, re.M):
+        for _f, _needle in (
+            ("audit.md", "## Two copies, and which one wins"),
+            ("grill.md", "0 Duplicates"),
+        ):
+            _fp = os.path.join(refdir, _f)
+            if not os.path.isfile(_fp) or _needle not in open(_fp, encoding="utf-8").read():
+                fail(f"references/{_f}: learned.md rule 20 is in force and this file "
+                     f"does not carry {_needle!r} — the copy that ships is often not the copy "
+                     "anybody opens")
+
 # references/artifacts.md maps stage -> what it WRITES. The reverse direction — what
 # each stage READS and from where — is the one an agent actually needs at runtime,
 # and it was absent for nine releases: learned.md rule 2 (compute the mapping in both

@@ -20,6 +20,7 @@ whose whole job is "audit X" runs nothing else.
 - Why "look again, more carefully" stops working
 - The ladder
 - How one audit pass runs
+- Two copies, and which one wins
 - Silence is not a reading
 - Exit criterion — the part usually skipped
 - The three rules that stop this becoming another loop
@@ -174,6 +175,27 @@ against *narrowing*, never against additions ([`grill.md`](grill.md) → *The RE
 spine*). A finding that contradicts the spec goes back to stage 3; one that
 contradicts the plan goes back to stage 4. Auditing is not a licence to edit
 across layers in place.
+
+## Two copies, and which one wins
+
+`learned.md` rule 20. When something exists twice — two build files, a schema and its mirror, a
+vendored library, one rule written in two documents — the useful question is not *do they agree*.
+Diffing them finds the difference and not the **direction**, and the direction is the whole finding:
+one of them is what runs, and the other is what somebody reads and edits.
+
+The copies cannot answer it about themselves. The consumer can, and usually in one line:
+
+```bash
+grep -rn "Dockerfile\|schema.json\|VERSION" .github/workflows/ Makefile* package.json
+```
+
+Two consequences worth stating separately, because they fail differently:
+
+- **The copy that wins is often the one nobody hardened.** Attention goes to the copy people open,
+  and the build reads the other.
+- **A rule written in two documents is two rules.** One asks, one records; one describes, one
+  decides. Edit only the first and the second silently disagrees — which is why a check that knows
+  about both is worth more than a note asking people to remember.
 
 ## Silence is not a reading
 

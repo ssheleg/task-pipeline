@@ -120,6 +120,7 @@ is not neutral — it is a scheduled interruption.
 | run-wide | Decide autonomously vs escalate to me | … |
 | run-wide Pacing | Run mode: item-by-item with no check-in between items, and on what interval? (the skill's `references/continuity.md`; read `pipeline.json` → `run.loop` first) | … (**absent ⇒ off**; it never collapses a manual gate or an outward act) |
 | 0 Harvest | Doc sources beyond this repo — other repos, hosted docs, the knowledge wiki, the code graph; and may stage 9 write to them? | … (another repo is outward: propose + PR, never a direct push; graph built / not built) |
+| 0 Duplicates | the line in the workflow/Makefile naming which copy the build reads, quoted (`learned.md` rule 20) | |
 | 0 Fixtures | the command that recreates local persistent state from nothing, and the run's statement that the suite was seen green against it (`learned.md` rule 18) | |
 | 0 Source | `git rev-list --count HEAD..@{u}` before the first edit, printed. Behind means stop and pull — an edit on a stale checkout deletes newer work by fast-forward and nothing complains (`learned.md` rule 17) | |
 | 0 Work-list | Which register holds task **state**, and the command that reads it — re-run at every harvest, at every loop iteration and at the close | … (e.g. `bash scripts/board.sh`; none → record empty) |
