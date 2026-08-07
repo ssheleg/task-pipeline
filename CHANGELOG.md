@@ -1,5 +1,28 @@
 # Changelog
 
+## v1.21.0
+
+### An empty measurement is a refused measurement — `learned.md` rule 19
+
+Rule 11 says a gate's exit code is part of its output. This is the other half, and in practice the
+louder one: **a command that never ran exits `0` and prints nothing**, and satisfies a run that
+checks neither.
+
+Three sightings in one session, one shape. A `docker run` without `-i` does not attach stdin, so a
+heredoc carrying `ALTER ROLE` stopped at the docker CLI — `psql` read an empty script, did nothing,
+exited `0`, and the step printed "password set". A `grep` pattern written against the wrong output
+format matched nothing, so three consecutive planted-defect runs printed empty strings that read as
+passes. A migration step printed no lines, which looked like a step that had not run and was in fact
+a step that had. Every time, the instrument failed and the failure was indistinguishable from
+success, because both produce nothing.
+
+- `references/learned.md` — rule 19 and incident 19.
+- `references/audit.md` — "Silence is not a reading": non-empty, shaped as expected, and quote the
+  output rather than the conclusion drawn from it.
+- `references/review.md` — the same bar before a finding is closed.
+- `test/validate.py` — a guard, watched failing against two planted defects, asserted on both the
+  exit code and the presence of the expected line.
+
 ## v1.20.0
 
 ### State that accumulates locally is created from nothing everywhere else — `learned.md` rule 18

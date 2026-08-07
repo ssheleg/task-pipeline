@@ -195,3 +195,5 @@ Run the final review on the **run's confirmed model** like everything else
 change, so if the run is on a tier below the most capable one available, say so and
 offer to escalate just this dispatch — a recommendation stated out loud, never a
 silent switch (`build.md` → *Models*).
+
+**An empty result is not a clean result** (`learned.md` rule 19). A verification command that printed nothing did not verify anything — the instrument and the subject fail identically, because both produce an empty string. Assert the output is non-empty and shaped as expected before any finding is closed on it, and quote the output rather than the conclusion.

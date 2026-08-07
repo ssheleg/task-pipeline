@@ -397,6 +397,21 @@ if os.path.isfile(_learned):
                      f"does not carry {_needle!r} — a suite green against accumulated local "
                      "state is a green whose premise is false on every runner")
 
+# learned.md rule 19 — the other half of rule 11. A command that never ran exits 0 and prints
+# nothing, and satisfies a run that checks neither, so the guard names both consumers.
+if os.path.isfile(_learned):
+    _lt19 = open(_learned, encoding="utf-8").read()
+    if re.search(r"^\|\s*19\s*\|", _lt19, re.M):
+        for _f, _needle in (
+            ("audit.md", "## Silence is not a reading"),
+            ("review.md", "An empty result is not a clean result"),
+        ):
+            _fp = os.path.join(refdir, _f)
+            if not os.path.isfile(_fp) or _needle not in open(_fp, encoding="utf-8").read():
+                fail(f"references/{_f}: learned.md rule 19 is in force and this file "
+                     f"does not carry {_needle!r} — an instrument that failed and a subject "
+                     "that is clean both produce an empty string")
+
 # references/artifacts.md maps stage -> what it WRITES. The reverse direction — what
 # each stage READS and from where — is the one an agent actually needs at runtime,
 # and it was absent for nine releases: learned.md rule 2 (compute the mapping in both

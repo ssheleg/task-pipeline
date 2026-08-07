@@ -20,6 +20,7 @@ whose whole job is "audit X" runs nothing else.
 - Why "look again, more carefully" stops working
 - The ladder
 - How one audit pass runs
+- Silence is not a reading
 - Exit criterion — the part usually skipped
 - The three rules that stop this becoming another loop
 - When this runs
@@ -173,6 +174,25 @@ against *narrowing*, never against additions ([`grill.md`](grill.md) → *The RE
 spine*). A finding that contradicts the spec goes back to stage 3; one that
 contradicts the plan goes back to stage 4. Auditing is not a licence to edit
 across layers in place.
+
+## Silence is not a reading
+
+`learned.md` rule 19. The ladder's evidence is commands and their output, and a command that
+printed **nothing** has not answered — it has failed in a way that looks exactly like the answer
+"nothing is wrong". The instrument and the subject fail identically, because both produce an empty
+string.
+
+Before a count, a probe or a diff becomes evidence:
+
+- **The output is non-empty.** An empty result and a broken invocation are the same characters.
+- **It is shaped as expected.** A `grep` whose pattern does not match the real output format returns
+  success and nothing else, which reads as a clean pass through whatever it was pointed at.
+- **Quote what was read, not what was concluded.** "0 findings" is a conclusion; the command and its
+  actual output are the evidence, and only they survive review.
+
+This is rule 11's other half. That one insists the exit code is part of the output; this one insists
+the output is too. A command that never ran exits `0` and prints nothing, and satisfies a run that
+checks neither.
 
 ## Exit criterion — the part usually skipped
 
