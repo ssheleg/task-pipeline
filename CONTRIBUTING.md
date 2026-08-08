@@ -262,8 +262,11 @@ everything it names, which is canon 4 in the file that publishes canon 4.
 
 **34. No surface enumerates the retrospective's acts in an order that contradicts
 `references/retrospective.md`.** Rule 21 changed the order to *stamp first* in that one
-file and reached none of the nine other surfaces that state it — `SKILL.md` included,
-which is what an agent loads first. Every per-rule guard has the same blind spot: it
+file and reached **no other surface that states it** — `SKILL.md` included, which is what
+an agent loads first. (No count here on purpose: whether it is nine, twelve or fifteen
+depends on counting files or occurrences, and this repository produced three different
+answers while writing the fix. The guard is the count.) Every per-rule guard has the same
+blind spot: it
 proves a consumer still **cites** the doctrine, and a contradicting consumer keeps its
 citation. So this one compares the **order**, in four deterministic shapes (adjacent
 enumeration, *first…then*, a bare *…then…* sequence, and an ordered list), against the

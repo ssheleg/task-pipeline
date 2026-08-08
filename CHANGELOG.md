@@ -2,13 +2,13 @@
 
 ## v1.24.0
 
-### A rule that reached one file of ten, and the guard shape that let it
+### A rule that reached one file, and the guard shape that let it
 
 `v1.23.0` added rule 21 — *a step that consumes what a later step produces is a deadlock*
 — and reordered the retrospective's three acts to **stamp → prune → entry**. It changed
 `references/retrospective.md`. It changed nothing else.
 
-Ten other surfaces still taught the deadlocked *prune first*: `SKILL.md` twice (including
+Every other surface still taught the deadlocked *prune first* — the list is the count, and it was written down rather than tallied, because a tally of this fix would be the defect the fix is about: `SKILL.md` twice (including
 the stage-10 gate row), `references/acceptance.md` three times, `references/stages.md`
 three times, `references/companion-skills.md`, `references/knowledge-sources.md`,
 `templates/retro.md`, `templates/README.md`, `commands/task-pipeline.md`,

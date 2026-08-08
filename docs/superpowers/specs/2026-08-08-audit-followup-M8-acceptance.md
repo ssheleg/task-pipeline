@@ -28,8 +28,10 @@ wording). Below the crossover, so the axis was not rotated.
 `templates/retro.md` · `templates/README.md` · `commands/task-pipeline.md` ·
 `cursor/rules/task-pipeline.mdc` · `docs/DOCMAP.md` · `README.md` ×2 · `CLAUDE.md` —
 and, in M1's close-out, this project's own `docs/superpowers/retro.md` header and two
-pages in the operator's wiki. **Fifteen statements of one rule; one of them had been
-updated.**
+pages in the operator's wiki. **One rule, stated on every file above; exactly one of them —
+`references/retrospective.md` — had been updated.** The count is deliberately not written
+here: it depends on whether you count files or occurrences, and this run produced two
+different numbers from two definitions before settling on the list.
 
 ## What the operator should look at
 
@@ -44,6 +46,31 @@ an unnoticed one.
 **The guard was blind to the wording this very release introduced.** Its first ordered-list
 pattern required a list item to open with a bare act word; the fix wrote `2. **Then
 prune.**`, which opens with "Then". A probe caught it. A green would not have.
+
+## The review found what the gates did not
+
+`Claude Code Review` on PR #10 confirmed **three of five candidates**, and one of them was
+a real defect in the guard this module exists to ship:
+
+1. **The surface count disagreed with itself** across `CONTRIBUTING.md`, `CHANGELOG.md`,
+   the PR body and this document — nine, ten, twelve-by-enumeration, fourteen, fifteen.
+   The class this PR fixes, committed in the PR's own prose. Resolved by deleting the
+   number everywhere and keeping the list.
+2. **The guard's `SCOPE` comment said "three shapes"** while listing and implementing
+   four — the same drift, inside the guard written to catch drift.
+3. **The P3 ordered-list branch had a proven false-negative path.** It scanned the whole
+   file and compared only the first pair, so a violating list placed *after* a correct one
+   was never examined; it also skipped the history exemption the prose shapes get, so a
+   numbered list narrating the old order would have blocked a legitimate commit.
+
+Finding 3 was labelled a nit and is not one by this repository's own rubric: a guard with
+a known false-negative path is what [`gates.md`](../../../plugins/task-pipeline/skills/task-pipeline/references/gates.md)
+calls a decoration that reports success. It was fixed, and all four scenarios were probed:
+history lead-in → exempt · violation after a correct list → fires · two unrelated lists →
+silent · plain violation → fires.
+
+**The uncomfortable part:** none of this came from a stage. It came from a bot the
+repository happens to run on pull requests. Carry-over row 8.
 
 ## Gate verdict
 
