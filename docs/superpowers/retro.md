@@ -35,6 +35,58 @@ row goes — the cap is not negotiable, ranking is.
 
 ## Recent log — entries from the last five run stamps (newest first)
 
+### 2026-08-08 · `audit-followup`/M7 · a one-directional check, in the repository whose rule 2 is both directions
+
+**Symptom.** The module added a guard comparing the companion **matrix** against the
+**preflight block** — the two places `companion-skills.md` states the same list. It
+checked matrix → preflight and stopped.
+
+`learned.md` rule 2 is *absence needs its own check: compute the mapping in **both**
+directions*, and its incident is four fully-specified entities with no schema anywhere,
+found only by the direction that felt redundant. The reverse here is a real failure with
+its own shape: a preflight line whose companion the matrix never explains, so the operator
+is asked to install something nobody told them the purpose of. It would have passed in
+silence.
+
+Three smaller ones in the same review, all in this change: a suffix strip that could never
+match (the capture stopped at a space before the token it was meant to strip, so the code
+looked like it handled *"Figma MCP"* and did nothing); `SKILL-CARD.md`'s **risk disclosure**
+not naming the MCP this release adds — the page a reviewer reads *before* deciding to trust
+the skill; and a stray space before a comma from appending a clause to a line that already
+ended in a bold marker.
+
+**Surfaced at:** stage 7, all four, by the review.
+
+**Owned by:** stage 6 for the guard, stage 9 for the disclosure — that is a propagation
+row, and the matrix in `docs/DOCMAP.md` names `SKILL-CARD.md` for a user-visible change but
+not for a new **capability reference**, which is what an added MCP is.
+
+**Root cause.** Writing a check exercises the parts of the doctrine you are thinking about.
+This one was written while thinking about rule 20 — *a thing that exists twice* — which it
+gets right. Rule 2 was not in view, and nothing brings it into view: `learned.md`'s table
+is read at the stage that *binds* it, not at the moment a new check is being written.
+
+**Fix, by grade.**
+1. *(mechanical)* Both directions now computed and both probed — the reverse plant fails,
+   which it did not before. The suffix strip is live. `SKILL-CARD.md` names
+   `chrome-devtools` **with what makes it different**: it drives a real browser, opens
+   pages, runs scripts in them and reads console and network traffic. A reviewer deciding
+   whether to trust the skill needs that, not the bare name.
+2. *(note, expires in two runs)* `docs/DOCMAP.md`'s propagation matrix has no row for
+   *adding a capability reference* (an MCP, a tool the doctrine names) as distinct from a
+   user-visible capability. That is why `SKILL-CARD.md` was not walked.
+
+**Standing instruction: none added, deliberately.** R-005 already requires an independent
+reader on a change that adds or widens a check, it fired, and the reader is what found all
+four. The gap is not that the rule went unread — it is that `learned.md`'s own table is not
+consulted **while writing** a check, and that is one instance of rule 2 rather than a new
+class. A seventh row for a variant of an existing rule is how a capped list stops being
+read.
+
+**The check that catches it next time:** nothing mechanical for the general case. For this
+instance, the guard's own bidirectional probe, and the matrix note above.
+
+
 ### 2026-08-08 · `audit-followup`/M2 · a limit made visible, reported as a limit removed
 
 **Symptom.** Review round two found that the claim registry's number-word map stopped at
@@ -277,102 +329,6 @@ Running its definition against the siblings found the other **3**. The instructi
 three quarters of the work on this run.
 
 
-### 2026-08-05 · `false-success` · fourteen guards that could not fail
-
-**Symptom.** The four new guard blocks were appended to the end of `test/validate.py`
-and the validator went green. `npm run test:all` then reported **13 guards did not
-fire, 1 test broken** — every new negative self-test planted its defect and the
-validator still passed.
-
-**Where it surfaced:** stage 6, the negatives runner. **Where it was owned:** stage 5 —
-"append to the file" is not the same instruction as "append to the checks".
-
-**Root cause.** `validate.py` ends with `if errors: … sys.exit(1)` and then
-`print("PASS")`. Code appended *below* that block executes after the verdict on a
-clean run, and on a corrupted run `sys.exit()` fires first so it never executes at
-all. A guard placed there is dead code shaped exactly like a guard — and it is green
-for the one reason that cannot be argued with: it never ran. This is the release's own
-subject, false success, committed by the release that names it.
-
-**Fix — grade 1, mechanical.** A guard that reads its own source and rejects any
-`fail(` after the verdict is printed. Doctrine would not have caught this; the check
-does, in every future release, without anyone remembering.
-
-**And the fix had the same defect.** The new guard located the verdict with
-`_src.find(...)` — and the first occurrence of that literal is inside the guard's own
-source, so it matched itself and fired on a clean repo. Its own negative self-test
-caught it within one run. `rfind` with the reason written beside it.
-
-### 2026-08-05 · `false-success` · two releases that never reached the catalogue
-
-**Symptom.** The launcher pinned `task-pipeline` at **1.11.0** while **1.12.0 and
-1.13.0** were tagged, released and published to npm. `npx sshlg-skills list` reported
-1.11.0 and `update` installed it, for two days.
-
-**Root cause.** The catalogue bump is step 6 of a release and nothing compares the pin
-against the member's own latest tag — the pin is only ever *written*, never *checked*.
-Both skipped releases were green in their own repository, which is what made it
-invisible: neither side is wrong alone.
-
-**Fix — grade 1 belongs in `sshlg-skills`, not here:** a check that fails when a pin
-is behind the member's newest tag. Carried as a ratchet with a named home rather than
-fixed in passing, because it is a different repository's gate. The pin itself moved
-straight to 1.14.0 and the gap is recorded in that project's changelog rather than
-quietly closed.
-
-Older entries and every retirement **move** to `docs/superpowers/retro/YYYY-QN.md`
-at the prune. Moving is not deleting: the archive is append-only and holds the
-incident forever, so pruning the in-force list costs no knowledge.
-
-### 2026-08-05 · `artifact-hygiene` · a guard that had been decorative for nine releases
-
-- **Symptom:** the VERDICT-last contract guard passed against a gate script whose
-  verdict marker had been renamed. It split the file on the **word** `VERDICT` —
-  which also appears in the header sentence forbidding anything after it — so its
-  "tail after the verdict" was most of the script, exit lines included, and it
-  matched `exit 0` / `exit 1` no matter what. Green since it shipped, on
-  `docgate.sh` as well as the new file.
-- **Surfaced at:** stage 6, on the first probe ever written for it ·
-  **Owned by:** the release that shipped the guard without one.
-- **Root cause:** the guard's own subject matter was its blind spot. A file that
-  *documents* a rule contains the rule's keyword, so anchoring on the keyword
-  anchors on the documentation. Same shape as check 2's placeholder problem, one
-  layer up — and nobody noticed because a guard nobody probes is indistinguishable
-  from a guard that works.
-- **Fix:** grade 1 — split on the `# ---------- VERDICT` section marker and require
-  the marker to exist.
-- **The check:** its own negative self-test, watched failing on a renamed marker
-  after the rename was asserted to have landed.
-- **Commit:** `13028e9`
-- **Upstream?** n/a — this repo is the skill; both gate scripts ship with the fix.
-
-### 2026-08-05 · `artifact-hygiene` · two self-tests sharing one scratch directory
-
-- **Symptom:** CI failed on `cp: cannot create regular file
-  '/tmp/verdict-copy/./.git/objects/pack/…': Permission denied`. A new negative
-  self-test reused a scratch directory an existing one already owned, so the second
-  copy landed in a populated tree and git's read-only pack files refused to be
-  overwritten. A guard written in reaction then found **four more collisions that
-  predated the branch**.
-- **Surfaced at:** stage 7, by CI · **Owned by:** every release that added a
-  self-test without checking the name was free.
-- **Root cause:** loud failure was the *lucky* outcome. Two tests sharing a scratch
-  directory can also succeed — against the first test's corruption instead of their
-  own — and a test that passes for the wrong reason is worse than one that fails.
-  Nothing in the suite could see the collision, because each test only ever looks at
-  itself.
-- **Fix:** grade 1 — a guard requiring every `cp -R . /tmp/…` destination in the
-  workflow to be unique, plus `rm -rf` before all 35 copies so a leftover directory
-  cannot fail a probe for an unrelated reason.
-- **The check:** its own negative self-test. Building it produced two more instances
-  of the same day's lessons: the guard was first placed **after** `validate.py`'s own
-  `if errors: … sys.exit(1)` — the nothing-runs-after-the-verdict defect, committed
-  while writing the guard against it — and it then fired on its own self-test,
-  because the step that *plants* a duplicate contains the string being scanned for.
-  Heredoc bodies are stripped now, the same treatment markdown fences already get.
-- **Commit:** `13028e9`
-- **Upstream?** No — the collision is this repository's CI shape, not the skill's.
-
 ## Run stamps
 
 One line per run, appended at stage 10. This is what makes "five runs" countable
@@ -380,6 +336,7 @@ One line per run, appended at stage 10. This is what makes "five runs" countable
 
 | Date | Topic | Commit | Verdict | Retro |
 |---|---|---|---|---|
+| 2026-08-08 | `audit-followup` / M7 `rendered-surface-check` | `b524680` | 1 REQ · a companion wired into stages 5–6 and 8 · **one review round, 4 findings, all mine, none found by my own probes** · carry-over 9 rows, 6 open, 0 unresolved | 1 entry · 6 standing · retired 0 · added 0 · R-005 and R-006 both fired · guards 130 → 131 |
 | 2026-08-08 | `audit-followup` / M2 `claim-registry` | `44bdf53` | 1 REQ + carry-over row 7 · six claim classes, each armed · **three review rounds, 13 findings, none of them found by the module's own probes** · carry-over 9 rows, 6 open, 0 unresolved | 1 entry · **6 standing (was 5)** · retired 0 · added 1 (R-006) · R-001, R-002, R-003, R-004, R-005 all fired · guards 124 → 130 |
 | 2026-08-08 | `audit-followup` / M8 `prune-order-sweep` | `5726f7f` | 1 REQ · verified against a check seen failing **five** ways · PR #10, two review passes, 6 findings confirmed of which 3 new · carry-over 9 rows, 0 unresolved, row 4 closed | 1 entry · **5 standing (was 4)** · retired 0 · added 1 (R-005) · R-001 fired 5× · R-002, R-003, R-004 all fired · guards 120 → 124 |
 | 2026-08-08 | `audit-followup` / M1 `truth-restore` | `68b4428` | 7 REQ · 6 verified by a proven check · 1 deferred to M8 (REQ-013, added mid-run) · carry-over 6 rows, 0 unresolved, 1 resolved · graph 27 commits stale → 0 | 1 entry · 4 standing · retired 0 · added 0 · **all four fired** · guards 120 |
