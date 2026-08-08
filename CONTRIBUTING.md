@@ -306,7 +306,18 @@ copies are used, which is what makes this `learned.md` rule 20 rather than a sty
 Found while adding `chrome-devtools`, which would have been the first to drift.
 *(guard: `a companion is in the matrix and not in the `)*
 
-**37. Every invariant above names the guard that enforces it, and that guard exists.**This list claims to be *what the validator enforces*; it was eight guards behind when
+**37. The cold-retirement condition carries both its units on every surface that states
+it.** A standing instruction retires when it has not fired in five run stamps **or** in sixty
+days. The stamp counter is written only by a run of this pipeline, so where a project ships
+some of its work another way the counter stops while the work does not — measured here, ten
+consecutive releases (`v1.16.0`–`v1.23.0`) carry no stamp, and across that stretch the trigger
+was neither strict nor lenient but **unreadable**. A list capped at ten whose retirement
+condition cannot be read fills up and stops being pruned. The calendar is the unit nothing can
+stall, which is why it is not belt-and-braces. Entry **rotation** ("entries older than five
+stamps move to the archive") is a different mechanism and is deliberately out of scope.
+*(guard: `states the cold-retirement condition as five run stamp`)*
+
+**38. Every invariant above names the guard that enforces it, and that guard exists.**This list claims to be *what the validator enforces*; it was eight guards behind when
 an audit measured it. A claim of enforcement is now checked like any other claim.
 *(guard: `whose message does not appear in`)* — and a cited literal must lie inside
 a **single** string in `test/validate.py`: the check reads that file as text, so a

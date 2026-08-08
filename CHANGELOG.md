@@ -1,5 +1,48 @@
 # Changelog
 
+## v1.27.0
+
+### A retirement trigger whose counter only some work moves
+
+A standing instruction retires when it has not fired **in the last five run stamps**. A run
+stamp is written by a run *of this pipeline*. Those two facts are fine apart and defective
+together: where a project ships some of its work another way, the counter stops while the
+work does not, so "the last five stamps" spans an arbitrary amount of change.
+
+Measured on this repository: **ten consecutive releases, `v1.16.0` through `v1.23.0`, carry
+no stamp at all** — four of the last fourteen tags moved the counter. Across that stretch the
+trigger was not strict and not lenient. It was **unreadable**, and a list capped at ten whose
+retirement condition cannot be read fills up and stops being pruned. That is the whole failure
+mode: not a wrong answer, an absent one.
+
+**The condition now carries a second unit — sixty days — and it is not belt-and-braces.** The
+stamp count is the better signal while the pipeline is in use; the calendar is the one that
+still works when it is not, which is precisely the state in which a stale rule does the most
+damage. Both units are stated on every surface that states the condition, and a guard holds
+them together: correcting the rule where somebody was looking and leaving it everywhere else
+is the class `v1.24.0` shipped a guard for.
+
+Entry **rotation** — *entries older than five stamps move to the archive* — is a different
+mechanism and is deliberately out of scope, said in the guard's own comment so the exclusion
+is a decision rather than an oversight.
+
+### The ten releases are recorded, not stamped
+
+`docs/superpowers/retro.md` now carries the gap as a section, with the command that produces
+it. **No stamps were written for those ten releases.** A stamp asserts that a run happened and
+that its gates were walked; writing ten to make the table continuous would be the exact defect
+this file exists to catch, committed in the file that catches it.
+
+Two consequences are stated there rather than left to be rediscovered: the cold trigger was
+unreadable across that stretch, and the lessons of those releases live in `CHANGELOG.md` and
+nowhere the next run's stage 0 looks — which is why rules 17–21 of `learned.md` sat outside
+the *Where these bind* map until `v1.23.1` found them.
+
+**A correction to this program's own ledger, made at the moment of use.** Its first row said
+*"seven releases (v1.17.0–v1.23.0)"*. Re-measured before being acted on: **ten**, reaching
+back to `v1.16.0`. The original was a filtered subset that had lost its filter — `learned.md`
+rule 16, in the ledger of the run that ships rule 16's neighbours.
+
 ## v1.26.0
 
 ### A green suite is not a rendered page

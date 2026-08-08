@@ -504,7 +504,7 @@ never that the work was skipped quietly.
   notices it is the same one. So, in this order: **stamp the run first** (one line,
   with its commit — and the only thing that makes the next step computable), **then
   prune** (every standing instruction against its three retirement triggers — it
-  became a check, its surface is gone, it hasn't fired in five run stamps — and the
+  became a check, its surface is gone, it hasn't fired in five run stamps or in sixty days — and the
   list held to its cap of ten, every deletion logged **in the archive, with the
   commit that retired it**), then **write an entry only if
   the run diverged** (symptom · the stage it surfaced at · the stage that *owned* it

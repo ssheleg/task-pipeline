@@ -5,7 +5,7 @@ stage 10 of every module. The count is printed beside every gate verdict.
 
 | # | Row | Raised at | Home | Status |
 |---|---|---|---|---|
-| 1 | Seven releases (v1.17.0–v1.23.0) shipped without a pipeline run, a brief, a spec or a run stamp | stage 0 | REQ-007 / **M3** | open |
+| 1 | ~~Seven releases (v1.17.0–v1.23.0)~~ — **re-measured at the moment of use, not inherited**: **ten consecutive releases, `v1.16.0` through `v1.23.0`**, shipped without a pipeline run, a brief, a spec or a run stamp. The original row was a filtered subset that had lost its filter (rule 16), and it understated both the count and the boundary. Command: resolve `git tag -l 'v1.*'` to SHAs and compare against the `| date | topic | sha |` rows of `docs/superpowers/retro.md` | stage 0, corrected in **M3** | REQ-007 / **M3** | open |
 | 2 | The shipped doctrine is ~97.5k tokens over 30 reference files, and `SKILL.md`'s frontmatter description sits at 1015 of the 1024-character limit — so M7 must displace text to add a companion, not append it | stage 0 | **M7** carries the displacement decision; the growth rule is **M6** | open |
 | 3 | `docs/DOCMAP.md` records no register for open questions (`none`), so a question raised mid-run has nowhere to live but this ledger | stage 0 | — | open — accepted for this program |
 | 4 | Rule 21's stamp-first ordering reached `references/retrospective.md` only; every other surface that stated it still taught the deadlock | **M1**, by R-003's sweep | REQ-013 / **M8** | **closed in M8** — every surface corrected, and a guard now compares the order rather than the citation |

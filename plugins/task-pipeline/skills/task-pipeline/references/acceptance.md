@@ -185,7 +185,8 @@ counter step 1 writes ([`learned.md`](learned.md) rule 21):
    costs nothing and it is the only thing that makes the next step computable.
 2. **Then prune.** Every standing instruction is checked against its three
    retirement triggers — it became a check, its surface is gone, or it has not
-   fired in the last five run stamps — and the list is held to its cap of **ten**.
+   fired in the last five run stamps **or in the last sixty days** — and the list is held
+   to its cap of **ten**.
    Every deletion writes one line in the log; silent deletion is forbidden.
 3. **Write the entry, if the run diverged** — symptom, the stage it surfaced at,
    the stage that *owned* it, the root cause, the fix (mechanical > standing

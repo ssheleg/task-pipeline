@@ -781,6 +781,43 @@ if os.path.isfile(_cs):
                  f"absent from the matrix — {_o!r}. The operator is asked to install something "
                  "the table never explains, which is the same drift read from the other side")
 
+# The cold-retirement condition is stated on seven surfaces, and it gained a SECOND UNIT in
+# v1.27.0: "five run stamps OR sixty days". The stamp counter is written only by a run of this
+# pipeline, so where a project ships some of its work another way the counter stops while the
+# work does not — measured here, ten consecutive releases (v1.16.0..v1.23.0) carry no stamp,
+# and across that stretch the trigger was not strict or lenient but UNREADABLE. A list capped
+# at ten with an unreadable retirement condition fills up and stops being pruned.
+#
+# A second unit on one surface and not the others is the class M8 shipped a guard for: the
+# rule is corrected where somebody was looking and left everywhere else. So every surface that
+# states the condition must state BOTH units. Rotation ("entries older than five stamps move
+# to the archive") is a DIFFERENT mechanism and is deliberately out of scope — it is named in
+# the scope line so the exclusion is a decision rather than an oversight.
+_COLD_SURFACES = [
+    "plugins/task-pipeline/skills/task-pipeline/references/retrospective.md",
+    "plugins/task-pipeline/skills/task-pipeline/references/acceptance.md",
+    "plugins/task-pipeline/skills/task-pipeline/references/stages.md",
+    "plugins/task-pipeline/skills/task-pipeline/references/companion-skills.md",
+    "plugins/task-pipeline/skills/task-pipeline/SKILL.md",
+    "plugins/task-pipeline/skills/task-pipeline/templates/retro.md",
+]
+_COLD_RE = re.compile(r"(?:has\s+not\s+)?fired\s+in\s+(?:the\s+last\s+)?five\s+run\s+stamps", re.I | re.S)
+for _f in _COLD_SURFACES:
+    _fp = os.path.join(ROOT, _f)
+    if not os.path.isfile(_fp):
+        continue
+    _ft = open(_fp, encoding="utf-8").read()
+    for _para in re.split(r"\n\s*\n", _ft):
+        _flat = re.sub(r"\s+", " ", _para)
+        if not _COLD_RE.search(_flat):
+            continue
+        if not re.search(r"sixty\s+days|60\s+days", _flat, re.I):
+            _line = _ft[:_ft.find(_para)].count("\n") + 1
+            fail(f"{_f}:{_line}: states the cold-retirement condition as five run stamps and "
+                 "omits the second unit — the stamp counter is written only by a run of this "
+                 "pipeline and stops when the pipeline is not used, which is exactly when a "
+                 "stale rule matters most. Both units, on every surface that states it.")
+
 # references/artifacts.md maps stage -> what it WRITES. The reverse direction — what
 # each stage READS and from where — is the one an agent actually needs at runtime,
 # and it was absent for nine releases: learned.md rule 2 (compute the mapping in both

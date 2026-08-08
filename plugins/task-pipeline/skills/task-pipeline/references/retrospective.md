@@ -134,7 +134,7 @@ argue about. Check **every** standing instruction against three triggers:
 |---|---|---|
 | **It became a check** | the rule is now enforced by a test, lint, gate or hook | delete it — the check is the memory, and keeping both means it is read twice and obeyed once |
 | **Its surface is gone** | resolve every path, command, stage and tool it names; any that no longer exists | delete it — it now describes a system nobody is running |
-| **It went cold** | it has not fired in the last **five run stamps** | delete it — five runs without firing is the evidence that it was situational |
+| **It went cold** | it has not fired in the last **five run stamps** — **or** in the last **sixty days**, whichever comes first | delete it: five runs without firing is the evidence it was situational, and the calendar is the unit that still moves when the stamp counter has stopped |
 
 **Each trigger is a command, not a judgement.** A retirement condition nobody can run is a
 condition nobody applies, which is how a list reaches ten and stops being read:
@@ -149,11 +149,37 @@ grep -oE '`[^`]+`' <<<"$RULE_TEXT" | tr -d '`' | while read -r t; do
 
 # went cold — fired in none of the last five stamps
 tail -n 200 docs/superpowers/retro.md | grep -c "$RULE_ID"
+
+# ...OR in the last 60 days, whichever comes first — see below for why both
+git log -1 --format=%cd --date=short -S"$RULE_ID" -- docs/superpowers/retro.md
 ```
 
-Anything the first two print is a deletion; a zero from the third across five stamps is a deletion.
-What survives all three stays, and the run states the three counts rather than the conclusion
-(`learned.md` rule 19 — an empty result and an unrun command look identical).
+Anything the first two print is a deletion; a zero from the third **or** a last-fired date more
+than sixty days old is a deletion. What survives all three stays, and the run states the counts
+rather than the conclusion (`learned.md` rule 19 — an empty result and an unrun command look
+identical).
+
+**Why the cold trigger needs two units, and it is not belt-and-braces.** A run stamp is written by
+a run *of this pipeline*. Where a project ships some of its work another way, the stamp counter
+stops while the work does not — so "the last five stamps" can span an arbitrary amount of change,
+and a rule sits unexamined for exactly as long as the pipeline goes unused. Measured on this
+repository: **ten consecutive releases, `v1.16.0` through `v1.23.0`, carry no stamp at all.** Over
+that stretch the trigger was not strict or lenient; it was **unreadable**, and a list capped at ten
+with an unreadable retirement condition fills up and stops being pruned.
+
+The wall-clock alternative fires on elapsed time, which nothing can stall. Keep both: the stamp
+count is the better signal when the pipeline is in use, and the date is the one that still works
+when it is not.
+
+**The stamp gap is itself a number worth printing.** A retro whose newest stamp is far behind the
+repository's newest release is telling you the retro is describing a smaller world than the one
+that shipped — the same failure `learned.md` rule 16 records for a work-list. State it beside the
+retro counts:
+
+```bash
+git tag --sort=-v:refname | head -1                    # newest release
+grep -m1 -oE '`[0-9a-f]{7,}`' docs/superpowers/retro.md # newest stamped commit
+```
 
 Then the cap: **ten standing instructions, hard.** At eleven you do not get to keep
 them all — the oldest never-fired one goes. "But all of them matter" is precisely

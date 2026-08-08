@@ -30,7 +30,7 @@ over all of them.
 | R-006 | 2026-08-08 · `audit-followup`/M2 | `44bdf53` | A finding is closed when the **behaviour** changes. Reporting the gap — a `dormant` line, a printed `skip`, a note beside the verdict — is honest and is **not** a fix; say which one you did. | The claim registry's number-word map stopped at forty-nine while the guard count was 130, so a word form above the ceiling was skipped **in silence**. The fix shipped was: print the unread tokens. That is a real improvement and the gap was untouched — a word-form claim above fifty was still skipped, now with a note. It was recorded as addressed and the next review round reopened it, correctly. `gates.md` already says a `dormant` state must be printed; nothing said that printing it does not discharge the finding. | a close-out records, per finding, whether the behaviour or only the reporting changed — and a check can read that field | 2026-08-08 | `44bdf53` |
 
 Retire on **any** of: it became a check · every path/command it names is gone · it
-has not fired in the last five run stamps. At eleven rows, the oldest never-fired
+has not fired in the last five run stamps, or in the last sixty days. At eleven rows, the oldest never-fired
 row goes — the cap is not negotiable, ranking is.
 
 ## Recent log — entries from the last five run stamps (newest first)
@@ -328,6 +328,36 @@ floor"*.
 Running its definition against the siblings found the other **3**. The instruction did
 three quarters of the work on this run.
 
+
+## Releases that carry no stamp — stated, not stamped
+
+Ten consecutive releases, **`v1.16.0` through `v1.23.0`**, shipped without a run of this
+pipeline: no brief, no spec, no acceptance, no stamp. Measured, not recalled —
+
+```bash
+git tag -l 'v1.*' --sort=-v:refname | while read -r t; do
+  s=$(git rev-list -n1 "$t" | cut -c1-7)
+  grep -q "$s" docs/superpowers/retro.md || echo "$t $s no stamp"
+done
+```
+
+**No stamps were written for them, deliberately.** A stamp asserts that a run happened and
+that its gates were walked. Writing ten to make the table look continuous would be the exact
+defect this file exists to catch, on the file that catches it. The gap is recorded here
+instead, which is the honest form of the same information.
+
+Two consequences worth stating rather than leaving to be rediscovered:
+
+- **The cold-retirement trigger was unreadable across that stretch.** It counts firings
+  across the last five run stamps, and the counter moved four times in fourteen releases. It
+  was not strict or lenient — there was nothing to read. That is why the condition now carries
+  a second unit, sixty days, which nothing can stall
+  ([`references/retrospective.md`](../../plugins/task-pipeline/skills/task-pipeline/references/retrospective.md)).
+- **The lessons of those ten releases are in `CHANGELOG.md` and nowhere else.** They are not
+  lost, and they are not where the next run's stage 0 looks. Rules 17–21 of `learned.md` were
+  all earned in that stretch and reached the shipped doctrine directly, without passing
+  through a retro — which is why five of them sat outside the *Where these bind* map until
+  `v1.23.1` found it.
 
 ## Run stamps
 
