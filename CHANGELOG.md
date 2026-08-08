@@ -8,7 +8,9 @@
 — and reordered the retrospective's three acts to **stamp → prune → entry**. It changed
 `references/retrospective.md`. It changed nothing else.
 
-Every other surface still taught the deadlocked *prune first* — the list is the count, and it was written down rather than tallied, because a tally of this fix would be the defect the fix is about: `SKILL.md` twice (including
+Every other surface still taught the deadlocked *prune first* — the list is the count,
+and it was written down rather than tallied, because a tally of this fix would be the
+defect the fix is about: `SKILL.md` twice (including
 the stage-10 gate row), `references/acceptance.md` three times, `references/stages.md`
 three times, `references/companion-skills.md`, `references/knowledge-sources.md`,
 `templates/retro.md`, `templates/README.md`, `commands/task-pipeline.md`,

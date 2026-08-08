@@ -461,6 +461,10 @@ if os.path.isfile(_learned):
 #   P1 "prune, stamp" / "prune → stamp" (adjacent, connector punctuation only)
 #   P2 "prune first ... then stamp"     (the first...then construction, aside allowed between)
 #   P4 "prune … then stamp"          (sequence marker without "first" — "prune before you add … then stamp")
+#   P5 a bare "prune first" / "prune before" directive with NO second act nearby — the shape a
+#      TABLE CELL takes ("| carry a lesson | retrospective.md | prune first, cap of ten |"), which
+#      every pairwise shape misses by construction because there is no pair. It was live in the
+#      shipped evidence-docs navigator and only a review found it.
 #   P3 an ordered LIST whose items open with the acts ("1. Prune first." / "2. Stamp the run")
 #      — the shape acceptance.md and stages.md used, which P1 and P2 both missed because a
 #      numbered list needs no connector word at all. Found by probing the guard against the
@@ -475,10 +479,12 @@ if os.path.isfile(_learned):
 # sit AFTER the enumeration ("The stage's own instruction was **prune first, then stamp**. So the
 # trigger…"), so the paragraph is the unit and the exemption is computed once for every shape.
 # Cost, stated: a paragraph that narrates the old order AND states a wrong one is exempt.
-_ORDER_HISTORY = ("used to be", "instruction was", "order was", "it used to read")
+_ORDER_HISTORY = ("used to be", "instruction was", "order was", "it used to read",
+                  "still said", "still taught", "still teach")
 _P1 = re.compile(r"\b(prune|stamp)\b[\s,;:·]*(?:→|->|,|·)?\s*(?:then\s+)?(?:the\s+)?\b(stamp|prune)\b", re.I)
 _P2 = re.compile(r"\b(prune|stamp)\b[^.!?]{0,60}?\bfirst\b.{0,400}?(?:\bthen\b|,)\s*(?:the\s+)?\b(stamp|prune)\b", re.I | re.S)
 _P4 = re.compile(r"\b(prune|stamp)\b.{0,400}?\bthen\s+(?:the\s+)?\b(stamp|prune)\b", re.I | re.S)
+_P5 = re.compile(r"\bprune\s+(?:first|before)\b", re.I)
 _rp21 = os.path.join(refdir, "retrospective.md")
 if os.path.isfile(_learned) and os.path.isfile(_rp21):
     _lt = open(_learned, encoding="utf-8").read()
@@ -496,7 +502,7 @@ if os.path.isfile(_learned) and os.path.isfile(_rp21):
                 _scan += [os.path.join(_root, _f) for _f in _fs if _f.endswith(".md")]
             _scan += [os.path.join(ROOT, _f) for _f in
                       ("README.md", "CONTRIBUTING.md", "CLAUDE.md", "docs/DOCMAP.md",
-                       "cursor/rules/task-pipeline.mdc")]
+                       "cursor/rules/task-pipeline.mdc", "docs/superpowers/retro.md")]
             for _f in sorted(set(_scan)):
                 if not os.path.isfile(_f):
                     continue
@@ -539,6 +545,17 @@ if os.path.isfile(_learned) and os.path.isfile(_rp21):
                              f"{_a!r} then {_b!r} — references/retrospective.md orders them "
                              f"{_expect_first!r} first (learned.md rule 21)")
                         break
+                    # P5 — a lone directive, no pair to compare. Only fires when the expected
+                    # first act is NOT "prune"; derived, not hardcoded.
+                    if _expect_first != "prune":
+                        for _m5 in _P5.finditer(_flat):
+                            _rel = os.path.relpath(_f, ROOT)
+                            _line = _raw[:_raw.find(_para)].count("\n") + 1
+                            fail(f"{_rel}:{_line}: directs {_m5.group(0)!r} with no second act "
+                                 f"to compare — references/retrospective.md puts {_expect_first!r} "
+                                 f"first (learned.md rule 21). A table cell naming one act is the "
+                                 f"shape every pairwise check misses.")
+                            break
                     for _pat in (_P1, _P2, _P4):
                         for _m in _pat.finditer(_flat):
                             _a, _b = _m.group(1).lower(), _m.group(2).lower()

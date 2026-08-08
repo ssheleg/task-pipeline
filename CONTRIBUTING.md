@@ -268,9 +268,13 @@ depends on counting files or occurrences, and this repository produced three dif
 answers while writing the fix. The guard is the count.) Every per-rule guard has the same
 blind spot: it
 proves a consumer still **cites** the doctrine, and a contradicting consumer keeps its
-citation. So this one compares the **order**, in four deterministic shapes (adjacent
-enumeration, *first…then*, a bare *…then…* sequence, and an ordered list), against the
-order derived from `retrospective.md`'s own heading at check time rather than a literal.
+citation. So this one compares the **order** against the order derived from
+`retrospective.md`'s own heading at check time rather than a literal — in the shapes
+listed in the guard's own `SCOPE` comment, which is where they are enumerated so this
+list cannot go stale against them. **What the guard does not cover is written there
+too**: inflected forms, lists whose items are separated by blank lines, and any
+statement of the order that names neither act. Those are stated blind spots, not
+unnoticed ones.
 A paragraph that narrates the old order as the defect is exempt by an explicit marker
 list, not by a heuristic.
 *(guard: `enumerates the retro's acts as`)*

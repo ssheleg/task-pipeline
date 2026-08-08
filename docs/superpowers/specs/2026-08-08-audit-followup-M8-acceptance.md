@@ -69,14 +69,39 @@ calls a decoration that reports success. It was fixed, and all four scenarios we
 history lead-in → exempt · violation after a correct list → fires · two unrelated lists →
 silent · plain violation → fires.
 
+A second review pass on the fixes confirmed six more, of which **three were new**: a
+live defect in the shipped `evidence-docs` navigator (`prune first, cap of ten` in a table
+cell — a shape with **no pair to compare**, which every pairwise check misses by
+construction), this document's own gate verdict contradicting the ledger it summarises,
+and a 225-character line in `CHANGELOG.md` against this repo's ~80-character rule.
+
 **The uncomfortable part:** none of this came from a stage. It came from a bot the
 repository happens to run on pull requests. Carry-over row 8.
+
+## Axis arithmetic, and where this stopped
+
+`test/validate.py` was edited three times for the same reason, which is
+[`loop-guard.md`](../../../plugins/task-pipeline/skills/task-pipeline/references/loop-guard.md)'s
+trigger. Run, the two axes separate — and lumping them would have given the wrong answer:
+
+| Axis | New findings | Self-inflicted | Verdict |
+|---|---|---|---|
+| the guard's shapes | 5 | 0 | **still paying** — P5 caught a live defect in the shipped skill |
+| this run's own prose (counts, wrapping, the verdict) | 3 | 3 | **exhausted** — the fix is not another pass, it is deleting the numbers |
+
+**The stop rule, written down rather than felt.** The guard's `SCOPE` comment now states
+what it does **not** cover — inflected forms, lists whose items are separated by blank
+lines, and any statement of the order naming neither act. Invariant 34 points at that
+comment instead of restating the shape count, so the two cannot disagree. Any further
+widening is a ledger row, not a fourth pass on this module. A review finding that arrives
+after this merge is carried, not chased — that is what rotating the axis means here.
 
 ## Gate verdict
 
 ```
-GATE 10 acceptance (M8): PASS — 1/1 REQ verified against a check seen failing four ways
-  carry-over: 6 rows · 0 unresolved · row 4 closed by this module
+GATE 10 acceptance (M8): PASS — 1/1 REQ verified against a check seen failing five ways
+  carry-over: 8 rows · 6 open · 0 unresolved · row 4 closed by this module
+             (rows 7 and 8 were ADDED by this module — the ledger grew, and it says so)
   guards: 123 negative self-tests (floor raised 120 → 123)
   abstained: 0 · unmeasured: behavioural evidence, still 0 blind runs
 ```

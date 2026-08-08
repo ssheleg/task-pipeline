@@ -43,7 +43,7 @@ thing, the canon is the *why* and the rule is the *how*.
 | trust a mechanism that reports success | [`gates.md`](../task-pipeline/references/gates.md) → *False success* | the failure that removes the reason to look |
 | wire a check into the agent's own tooling | [`hooks.md`](../task-pipeline/references/hooks.md) | the hook contract, and why a crashed guard **allows** the action |
 | audit documentation a project already has | [`setup.md`](../task-pipeline/references/setup.md) | seven passes, cheapest first, output is a fix plan |
-| carry a lesson to the next run | [`retrospective.md`](../task-pipeline/references/retrospective.md) | prune first, cap of ten, every lesson names its commit |
+| carry a lesson to the next run | [`retrospective.md`](../task-pipeline/references/retrospective.md) | stamp first (the cold trigger reads it), then prune to a cap of ten; every lesson names its commit |
 | seed a gate into a host project | [`templates/docgate.sh`](../task-pipeline/templates/docgate.sh) | it seeds **green**: dormant where there is no input yet |
 | take a whole change through to acceptance | [`task-pipeline`](../task-pipeline/SKILL.md) | this skill is the standard; that one is how a change reaches the repository |
 
