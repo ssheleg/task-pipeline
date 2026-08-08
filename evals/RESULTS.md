@@ -1,8 +1,16 @@
 # Evaluation results — task-pipeline
 
-**Status: the suite is authored and has not been executed.** Recorded here rather
-than left blank, because an empty results file and an unrun suite look identical,
-and this repository's own doctrine calls that the failure — a skip is not a pass.
+**Status: the suite is authored. One run is recorded and it was self-observed by the
+author; no blind run has been made on any model.** Recorded this way rather than left
+blank, because an empty results file and an unrun suite look identical, and this
+repository's own doctrine calls that the failure — a skip is not a pass.
+
+**The numbers below are computed, not asserted.** `python3 evals/run.py` counts the
+suite and the dated run headings in this file. A value typed here that disagrees with
+what it prints is the defect, and it is the document that is wrong — this file said
+*"has not been executed"* and *"Dated runs recorded 0"* for five releases while the
+tool beneath it printed `recorded runs: 1`, which is the self-contradiction canon 2
+exists to prevent, in the one file whose whole job is honesty about evidence.
 
 Running these needs a fresh session per query, per model. That is a human or agent
 step; `evals/run.py` prints the protocol and deliberately never reports a pass it
@@ -29,19 +37,23 @@ or it belongs in a check.
 
 ## Ratchet
 
-| Metric | Value | As of |
-|---|---|---|
-| Evals authored | 15 | 2026-08-03 |
-| Categories covered | 5 of 5 | 2026-08-03 |
-| Models exercised | **0 of 3** | 2026-08-03 |
-| Dated runs recorded | **0** | 2026-08-03 |
+| Metric | Value | Computed by | As of |
+|---|---|---|---|
+| Evals authored | 15 | `python3 evals/run.py` → `suite: N evals` | 2026-08-08 |
+| Categories covered | 5 of 5 | the suite's own `category` fields | 2026-08-08 |
+| Dated runs recorded | **1** | `python3 evals/run.py` → `recorded runs: N` | 2026-08-08 |
+| …of those, **blind** | **0** | run headings not marked `self-observed` | 2026-08-08 |
+| Models exercised blind | **0 of 3** | distinct models across blind runs | 2026-08-08 |
 
-The bottom two numbers are the honest state of this skill's behavioural evidence.
+**The last three rows are the honest state of this skill's behavioural evidence**, and
+the split matters more than the total: a run the author watched, knowing the expected
+behaviour, is an observation of instruction-following and not an evaluation. Collapsing
+the two into one "runs recorded" number is how a self-check gets quoted as a result.
+
 Everything else in this repository is proven by structural guards — the count is
-whatever `npm run test:all` prints, deliberately not restated here — that check the
-*form*; these are the only checks that would speak to the *behaviour*, and they have
-not been run yet. Printed here so "63 of 63 green" is never read as "the skill is
-known to work".
+whatever `npm run test:all` prints, deliberately not restated here — and those check
+the *form*. These are the only checks that speak to the *behaviour*. Printed here so a
+green structural suite is never read as "the skill is known to work".
 
 ## Runs
 

@@ -46,9 +46,13 @@ invariants*. (No count here on purpose: a hand-written one drifts, and this one
 already had — it said sixteen while the list held twenty-four.) The two that bite
 most often:
 
-1. **Four-way version sync** — `package.json`, `.claude-plugin/marketplace.json`
-   (`plugins[0].version`), `plugins/task-pipeline/.claude-plugin/plugin.json`, and
-   the top `## vX.Y.Z` heading in `CHANGELOG.md`.
+1. **Version sync — every surface below, no number in the name.** `package.json`,
+   `.claude-plugin/marketplace.json` (`plugins[0].version`),
+   `plugins/task-pipeline/.claude-plugin/plugin.json`, the top `## vX.Y.Z` heading in
+   `CHANGELOG.md`, **and the `Version` row of `SKILL-CARD.md`**. This said *four-way*
+   and listed four until 2026-08-08 while `test/validate.py` enforced five; the miss
+   surfaced on a release bump, from the validator rather than from a reader. The list
+   is the count — same reason invariant counts are not written down here.
 2. **The stage list lives on nine surfaces.** Three are compared mechanically —
    `SKILL.md`'s table, `references/stages.md` and `pipeline.example.json` (ids,
    names **and gate types**, plus each stage's own doctrine file). Seven enumerate

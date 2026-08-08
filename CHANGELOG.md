@@ -1,5 +1,54 @@
 # Changelog
 
+## v1.23.1
+
+### Four documents that had gone false, and the config this repository never wrote
+
+A review of the hallucination-mitigation literature against this skill produced an
+uncomfortable result: the doctrine already covers almost every applicable mitigation the
+field names — grounding, constrained generation, post-processing that blocks unproven
+assertions, self-contradiction detection. What it does not cover is **this repository
+applying that doctrine to itself.** Everything below is a class the skill documents,
+found in the skill.
+
+**Four surfaces were stating numbers that had stopped being true.**
+
+- `README.md` and `SKILL.md` said `learned.md` carries *"fifteen rules"*. The table has
+  twenty-one. Both now describe the file without counting it — the table is the count,
+  the same fix `CLAUDE.md` already applies to the invariant list, and the reason is that
+  a hand-written count goes stale on the next rule rather than on the next audit.
+- `evals/RESULTS.md` opened with *"the suite is authored and has not been executed"* and
+  ratcheted *"Dated runs recorded 0"* — directly above a dated run, and directly on top
+  of `evals/run.py`, which computes `recorded runs: 1` and had been printing it for five
+  releases. The document and the tool beneath it disagreed, and nothing compared them.
+  The ratchet now carries what actually matters: one run, **self-observed**, and **zero
+  blind** — because collapsing those into a single total is how a self-check gets quoted
+  as a result.
+- `docs/DOCMAP.md` claimed two standing instructions against the retro's four, and
+  duplicated both eval numbers. Its ratchet table now names **homes and commands, never
+  values**. A ratchet copied into a second document is two ratchets, and the copy nobody
+  runs is the one people read.
+
+**`learned.md`'s own routing table stopped at rule 16.** Rules 17–21 were in the rule
+table, each guarded in its consumer files, and absent from *Where these bind in the
+pipeline* — the section an agent reads to learn *when* a rule applies. The rule's own
+failure mode, applied to the map of the rules. All twenty-one now name their stage, and
+the two mis-aimed citations that first attempt introduced were caught by the citation
+guard rather than by a reader, which is the guard doing exactly its job.
+
+**This repository had no `pipeline.json`.** The project that ships the config contract
+had never written its own, so `run.loop` was unrecorded, the mode defaulted to off, and
+every loop it ran was authorised in a chat message. There is now a real one: this repo's
+eleven stages with its real host commands, its release block, and the loop mode recorded
+as a file rather than remembered — including the note that the mode collapses
+discretionary check-ins only, and is never the authorization for the tag push.
+
+**Not fixed here, and named rather than quietly carried:** rule 21 changed the retro's
+order to *stamp first* in `references/retrospective.md` and in no other file. Eight
+sibling surfaces — `SKILL.md` included, which is what an agent loads first — still teach
+the deadlocked *prune first*. That is a gate contract, so it ships on its own branch with
+a guard that compares the class rather than one literal.
+
 ## v1.23.0
 
 ### A step that consumes what a later step produces is a deadlock — `learned.md` rule 21

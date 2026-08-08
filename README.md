@@ -808,7 +808,7 @@ recommendation, so you arm the whole run in one exchange. Detail:
 | [`references/adoption.md`](plugins/task-pipeline/skills/task-pipeline/references/adoption.md) | the first run in a project: greenfield seeding, and the brownfield walkthrough |
 | [`references/setup.md`](plugins/task-pipeline/skills/task-pipeline/references/setup.md) | the entry audit: seven passes over the docs a project already has, offered once, output as a fix plan |
 | [`references/portability.md`](plugins/task-pipeline/skills/task-pipeline/references/portability.md) | the manifest of workflow decisions and their homes in the bundle, and the boundary against a project's own answers |
-| [`references/learned.md`](plugins/task-pipeline/skills/task-pipeline/references/learned.md) | fifteen rules earned by failure on a real multi-repository build, each with its incident, its check and its exit criterion |
+| [`references/learned.md`](plugins/task-pipeline/skills/task-pipeline/references/learned.md) | rules earned by failure on a real multi-repository build, each with its incident, its check and its exit criterion — the table is the count, and it grows |
 | [`SKILL-CARD.md`](SKILL-CARD.md) | the registry entry and risk-tier disclosure a reviewer needs before deploying it |
 | [`evals/`](evals/RESULTS.md) | the behavioural evaluation suite, its protocol, and what has actually been observed |
 | [`CHANGELOG.md`](CHANGELOG.md) | every release, with the reasoning behind it |
@@ -817,8 +817,8 @@ recommendation, so you arm the whole run in one exchange. Detail:
 ## Contributing
 
 Issues and pull requests are welcome — see [CONTRIBUTING.md](CONTRIBUTING.md) for
-the repo's invariants (the structural validator, four-way version sync, and the
-surfaces that must never drift apart). Security reports:
+the repo's invariants (the structural validator, version sync across every manifest
+surface, and the surfaces that must never drift apart). Security reports:
 [SECURITY.md](SECURITY.md). Everyone participating is expected to follow the
 [Code of Conduct](CODE_OF_CONDUCT.md).
 

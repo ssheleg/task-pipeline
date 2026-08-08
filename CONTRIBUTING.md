@@ -67,10 +67,13 @@ These are what the validator enforces. Breaking one is not a style disagreement 
 it ships a wrong pipeline to every install. Numbered in reading order; the numbers
 are labels, not priorities.
 
-**1. Four-way version sync.** `package.json`, `.claude-plugin/marketplace.json`
-(`plugins[0].version`), `plugins/task-pipeline/.claude-plugin/plugin.json` and the
-top `## vX.Y.Z` heading in `CHANGELOG.md` must all carry the same version.
-`SKILL-CARD.md`'s Version row is held to it too.
+**1. Version sync across every manifest surface.** `package.json`,
+`.claude-plugin/marketplace.json` (`plugins[0].version`),
+`plugins/task-pipeline/.claude-plugin/plugin.json`, the top `## vX.Y.Z` heading in
+`CHANGELOG.md` **and `SKILL-CARD.md`'s Version row** must all carry the same version.
+The invariant was called *four-way* until 2026-08-08 while listing five surfaces and
+while the validator enforced five — a name that counts is a number, and it drifts like
+one. The list is the count.
 
 **2. The stage list lives on three surfaces and may not drift.** `SKILL.md`'s
 table, `references/stages.md`'s per-stage sections, and `pipeline.example.json`.

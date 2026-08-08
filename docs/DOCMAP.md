@@ -45,7 +45,7 @@ Three true rows beat twenty imported ones. Extended when a new class appears.
 | A stage's id, name or gate type | `pipeline.example.json`, `SKILL.md` table, `references/stages.md`, that stage's doctrine file | `test/validate.py` — cross-surface comparison |
 | **A change to the config contract** (`pipeline.schema.json`) — added 2026-08-04, run `run-continuity`, when the matrix was walked for a schema change and had no row for one | `pipeline.example.json` (the example must **demonstrate** the new field, not merely permit it), `SKILL.md`'s config paragraph, `README.md`, and the schema's own `description` — which is where the reason a field is **absent** has to live, or the next contributor adds it back as an oversight | `test/validate.py` — the example is validated against the schema, plus the guard that the example sets the field explicitly |
 | A new or changed guard | `test/validate.py`, a negative self-test in `.github/workflows/validate.yml`, `CONTRIBUTING.md` → *The invariants*, `test/negatives.py` floor | `npm run test:all` + the invariant-count review |
-| A user-visible capability, install path or stage | `README.md`, `CHANGELOG.md`, `SKILL-CARD.md`, the four version manifests, `cursor/rules/task-pipeline.mdc` | `test/validate.py` — blurb/final-stage and four-way version checks |
+| A user-visible capability, install path or stage | `README.md`, `CHANGELOG.md`, `cursor/rules/task-pipeline.mdc`, and **every** version surface — `package.json`, `.claude-plugin/marketplace.json`, `plugins/task-pipeline/.claude-plugin/plugin.json`, the top `CHANGELOG.md` heading, `SKILL-CARD.md`'s Version row | `test/validate.py` — blurb/final-stage plus the version-sync check, which enforces all five and caught this row calling them "the four version manifests" on 2026-08-08 |
 | A reference file's headings | that file's `## Contents` list | `test/validate.py` — Contents-vs-headings comparison |
 | A number stated in a living document | recompute it | `test/validate.py` — guard-count comparison |
 | Anything a run got wrong | `docs/superpowers/retro.md` (prune → stamp → entry, with commits) | `review` — no check can decide whether a run diverged |
@@ -67,13 +67,20 @@ a duplicate, and a duplicate that disagrees is worse than either half.
 
 ## Ratchets
 
-| Ratchet | Where | Current | Set on |
-|---|---|---|---|
-| Standing instructions | `docs/superpowers/retro.md` | 2 of a hard cap of 10 | 2026-08-03 |
-| Models exercised by the eval suite | `evals/RESULTS.md` | **0 of 3** | 2026-08-03 |
-| Dated eval runs recorded | `evals/RESULTS.md` | **0** | 2026-08-03 |
+| Ratchet | Home — the one place its value lives | Read it with |
+|---|---|---|
+| Standing instructions (hard cap 10) | `docs/superpowers/retro.md` → *Standing instructions* | `grep -cE '^\| R-[0-9]+' docs/superpowers/retro.md` |
+| Dated eval runs, and the blind/self-observed split | `evals/RESULTS.md` → *Ratchet* | `python3 evals/run.py` |
+| Structural guards proven against a planted defect | `.github/workflows/validate.yml` | `npm run test:all` |
+| Carry-over rows of a run | that run's `…-carryover.md` | the run's own gate verdicts |
 
-The bottom two are the honest state of this skill's behavioural evidence, printed
+**This table names homes and commands, never values.** It used to carry the numbers,
+and on 2026-08-08 all three had gone stale — it claimed two standing instructions
+against four in the retro, and zero dated eval runs against the one `evals/run.py`
+counts. A ratchet copied into a second document is two ratchets, and the copy nobody
+runs is the one people read. Canon 3, applied to this map itself.
+
+The behavioural rows are the honest state of this skill's evidence, pointed at from
 here so a green structural suite is never read as "the skill is known to work".
 
 ## Navigation

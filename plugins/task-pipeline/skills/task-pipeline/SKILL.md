@@ -334,7 +334,7 @@ automation is on — `pipeline.schema.json` is the only contract.
 - `references/deploy-targets.md` — stages 7–8: writing the runbook when there is none, the template, per-platform deploy and log verbs, and the verification trio
 - `references/hooks.md` — agent-time enforcement: the PreToolUse contract, the fail-open hazard, placement, and the Claude-Code-only limit
 - `references/audit.md` — cross-cutting: the L0→L7 ladder and its seams (what was never written), axis rotation, ratchets, proven checks
-- `references/learned.md` — cross-cutting: fifteen rules earned by failure on a real multi-repository build, each with the incident behind it, its check and its exit criterion; plus the two that no check can decide
+- `references/learned.md` — cross-cutting: rules earned by failure on a real multi-repository build, each with the incident behind it, its check and its exit criterion; plus the two that no check can decide. The table is the count — a number written here is a number that goes stale on the next rule
 - `references/brainstorm.md` — stage 2: design dialogue, approaches, UI detection, hard gate
 - `references/spec.md` — stage 3: UX track order, the spec contract, self-review, review gate
 - `references/planning.md` — stage 4: zero-context plan format, parallel groups, no placeholders

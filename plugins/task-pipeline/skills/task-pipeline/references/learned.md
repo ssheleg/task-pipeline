@@ -196,6 +196,11 @@ answer would have exposed it in a minute.
 | 9 Docs | 8, 14 — every number computed, every target resolvable |
 | 10 Acceptance | 1, 3, 6, 7 — axis rotation recorded, closure verified against artefacts, classes swept, ratchets printed |
 | 10 Acceptance · every loop iteration | 16 — the work-list re-measured at close and printed beside its opening count ([`audit.md`](audit.md), [`continuity.md`](continuity.md)) |
+| 0 Harvest · **before the first edit**, in any repository with an upstream | 17 — `git rev-list --count HEAD..@{u}` measured and its number printed, [`knowledge-sources.md`](knowledge-sources.md) → *The source is not the copy you have*; asked as row `0 Source` of [`grill.md`](grill.md) → *The autonomy sweep* |
+| 0 Harvest · 5 Dev · 6 Tests | 18 — the suite run once against a **freshly created** instance of whatever persists between runs, [`tdd.md`](tdd.md) → *The green from residue*; asked as row `0 Fixtures` of [`grill.md`](grill.md) → *The autonomy sweep* |
+| any command run to establish a fact — 6 Tests · 9 Docs · 10 Acceptance · 5 review | 19 — the output asserted non-empty and shaped as expected, and **quoted** rather than concluded from, [`audit.md`](audit.md) → *Silence is not a reading*; the reviewer's half is in [`review.md`](review.md) |
+| 0 Harvest · 10 Acceptance | 20 — the **consumer** read to learn which copy ships, never the copies compared against each other, [`audit.md`](audit.md) → *Two copies, and which one wins*; asked as row `0 Duplicates` of [`grill.md`](grill.md) → *The autonomy sweep* |
+| 10 Retro · **any gate or check you order** | 21 — each input traced to the step that writes it, and that step proven upstream, [`retrospective.md`](retrospective.md) → *Stamp first, then prune, then write* |
 
 **This file is the shipped list; a project keeps its own.** Every rule in the table
 above was earned on someone else's build and travels with the skill. The lessons *your*
