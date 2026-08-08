@@ -560,7 +560,9 @@ pipeline notices it is the same one.
 The last act of stage 10 is therefore a **retrospective**, written to
 `docs/superpowers/retro.md` — **one file per project, not per run**
 ([`retrospective.md`](plugins/task-pipeline/skills/task-pipeline/references/retrospective.md)).
-Every run **prunes and stamps**; only a run that *diverged* writes an entry:
+Every run **stamps and prunes** — in that order, because one retirement trigger
+counts firings across the last five run stamps and a prune ahead of the stamp reads a
+counter its own stage writes afterwards. Only a run that *diverged* writes an entry:
 symptom with evidence, the stage it surfaced at, the stage that **owned** it, the
 root cause, the fix, and the check that catches it the first time from now on.
 
@@ -572,7 +574,8 @@ root cause, the fix, and the check that catches it the first time from now on.
 | 2 — standing instruction | a rule agents read, for what no check can decide | one of ten slots, and its retirement trigger must be written at birth |
 | 3 — a note | something still being understood | expires in two runs, then it is promoted or deleted |
 
-**The prune is mandatory and runs before anything is added.** Every standing
+**The prune is mandatory, and it runs after the stamp and before anything is added.**
+Every standing
 instruction is checked against three retirement triggers — *it became a check* ·
 *every path or command it names is gone* · *it has not fired in the last five run
 stamps* — and the list is held to a **hard cap of ten**. At eleven, the oldest

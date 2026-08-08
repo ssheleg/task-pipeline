@@ -2172,3 +2172,84 @@ jobs:
           else
             echo "OK: validator correctly FAILs — a rule-16 consumer dropped its citation"
           fi
+
+      - name: Negative self-test (retro order — an adjacent enumeration puts prune before stamp)
+        run: |
+          set -eu
+          rm -rf /tmp/ord1-copy && cp -R . /tmp/ord1-copy
+          python3 - <<'EOF'
+          p = "/tmp/ord1-copy/plugins/task-pipeline/skills/task-pipeline/references/companion-skills.md"
+          t = open(p, encoding="utf-8").read()
+          needle = "last act: stamp, prune, entry"
+          assert needle in t, "PLANT DID NOT LAND: anchor absent before edit"
+          t = t.replace(needle, "last act: prune, stamp, entry", 1)
+          open(p, "w", encoding="utf-8").write(t)
+          assert "last act: prune, stamp, entry" in open(p, encoding="utf-8").read(), "PLANT DID NOT LAND"
+          EOF
+          if python3 /tmp/ord1-copy/test/validate.py; then
+            echo "ERROR: validator passed a surface enumerating prune before stamp"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — rule 21's order contradicted by a consumer"
+          fi
+
+      - name: Negative self-test (retro order — an ordered list runs prune before stamp)
+        run: |
+          set -eu
+          rm -rf /tmp/ord2-copy && cp -R . /tmp/ord2-copy
+          python3 - <<'EOF'
+          p = "/tmp/ord2-copy/plugins/task-pipeline/skills/task-pipeline/references/acceptance.md"
+          t = open(p, encoding="utf-8").read()
+          a, b = "1. **Stamp the run first**", "2. **Then prune.**"
+          assert a in t and b in t, "PLANT DID NOT LAND: list anchors absent before edit"
+          t = t.replace(a, "1. **Prune the list first**", 1).replace(b, "2. **Then stamp the run.**", 1)
+          open(p, "w", encoding="utf-8").write(t)
+          s = open(p, encoding="utf-8").read()
+          assert "1. **Prune the list first**" in s and "2. **Then stamp the run.**" in s, "PLANT DID NOT LAND"
+          EOF
+          if python3 /tmp/ord2-copy/test/validate.py; then
+            echo "ERROR: validator passed an ordered list running prune before stamp"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the ordered-list shape is covered"
+          fi
+
+      - name: Negative self-test (retro order — a then-sequence without the word first)
+        run: |
+          set -eu
+          rm -rf /tmp/ord3-copy && cp -R . /tmp/ord3-copy
+          python3 - <<'EOF'
+          p = "/tmp/ord3-copy/plugins/task-pipeline/commands/task-pipeline.md"
+          t = open(p, encoding="utf-8").read()
+          needle = "**stamp the run first** (its commit"
+          assert needle in t, "PLANT DID NOT LAND: anchor absent before edit"
+          t = t.replace(needle, "**prune the list** before you add — every trigger — then stamp the run (its commit", 1)
+          open(p, "w", encoding="utf-8").write(t)
+          assert "then stamp the run (its commit" in open(p, encoding="utf-8").read(), "PLANT DID NOT LAND"
+          EOF
+          if python3 /tmp/ord3-copy/test/validate.py; then
+            echo "ERROR: validator passed a prune-then-stamp sequence written without the word 'first'"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the bare then-sequence shape is covered"
+          fi
+
+      - name: Negative self-test (retro order — a lone prune-first directive with no second act)
+        run: |
+          set -eu
+          rm -rf /tmp/ord4-copy && cp -R . /tmp/ord4-copy
+          python3 - <<'EOF'
+          p = "/tmp/ord4-copy/plugins/task-pipeline/skills/evidence-docs/SKILL.md"
+          t = open(p, encoding="utf-8").read()
+          needle = "stamp first (the cold trigger reads it), then prune to a cap of ten"
+          assert needle in t, "PLANT DID NOT LAND: anchor absent before edit"
+          t = t.replace(needle, "prune first, cap of ten", 1)
+          open(p, "w", encoding="utf-8").write(t)
+          assert "prune first, cap of ten" in open(p, encoding="utf-8").read(), "PLANT DID NOT LAND"
+          EOF
+          if python3 /tmp/ord4-copy/test/validate.py; then
+            echo "ERROR: validator passed a lone prune-first directive — the table-cell shape"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — a one-act directive is covered"
+          fi

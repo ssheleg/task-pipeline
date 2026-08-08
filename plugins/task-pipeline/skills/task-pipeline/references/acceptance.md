@@ -176,16 +176,17 @@ whether the run was finished.
 
 After the closing question, before the run is called done:
 [`retrospective.md`](retrospective.md), written to `docs/superpowers/retro.md`.
-Every run **prunes and stamps**; only a run that *diverged* writes an entry.
+Every run **stamps and prunes**; only a run that *diverged* writes an entry.
 
-The order is fixed, because a lesson that lands in a cluttered file is a lesson
-nobody reaches:
+The order is fixed, and it is a **dependency, not a preference** — step 2 reads the
+counter step 1 writes ([`learned.md`](learned.md) rule 21):
 
-1. **Prune first.** Every standing instruction is checked against its three
+1. **Stamp the run first** — one line: date, topic, commit, verdict, retro counts. It
+   costs nothing and it is the only thing that makes the next step computable.
+2. **Then prune.** Every standing instruction is checked against its three
    retirement triggers — it became a check, its surface is gone, or it has not
    fired in the last five run stamps — and the list is held to its cap of **ten**.
    Every deletion writes one line in the log; silent deletion is forbidden.
-2. **Stamp the run** — one line: date, topic, verdict, retro counts.
 3. **Write the entry, if the run diverged** — symptom, the stage it surfaced at,
    the stage that *owned* it, the root cause, the fix (mechanical > standing
    instruction > note with an expiry), and the check that catches it next time.
@@ -224,11 +225,14 @@ All of:
    shows no `+`, and each repo is clean and pushed. A submodule is finished when
    its parent points at it.
 9. **The operator answers the closing question** and signs off.
-10. **The retrospective is written** ([`retrospective.md`](retrospective.md)) — the
-    prune ran **before** anything was added (standing instructions checked against
-    their retirement triggers, the list at or under its cap of ten, every deletion
-    logged), the run is stamped, and a run that diverged has its entry with a root
-    cause and a named check. The counts are printed beside this verdict, not filed.
+10. **The retrospective is written** ([`retrospective.md`](retrospective.md)) — **in
+    order**: the run is stamped with its commit first, **then** the prune runs before
+    anything is added (standing instructions checked against their retirement triggers,
+    the list at or under its cap of ten, every deletion logged), **then** a run that
+    diverged gets its entry with a root cause and a named check. The stamp precedes the
+    prune because a retirement trigger counts firings across the last five run stamps
+    ([`learned.md`](learned.md) rule 21). The counts are printed beside this verdict,
+    not filed.
 
 Manual by design. An automated check can prove the table is *well-formed*; only
 the person who asked can confirm it is *what they asked for*. Do not let a green

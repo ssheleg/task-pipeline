@@ -48,7 +48,7 @@ Three true rows beat twenty imported ones. Extended when a new class appears.
 | A user-visible capability, install path or stage | `README.md`, `CHANGELOG.md`, `cursor/rules/task-pipeline.mdc`, and **every** version surface — `package.json`, `.claude-plugin/marketplace.json`, `plugins/task-pipeline/.claude-plugin/plugin.json`, the top `CHANGELOG.md` heading, `SKILL-CARD.md`'s Version row | `test/validate.py` — blurb/final-stage plus the version-sync check, which enforces all five and caught this row calling them "the four version manifests" on 2026-08-08 |
 | A reference file's headings | that file's `## Contents` list | `test/validate.py` — Contents-vs-headings comparison |
 | A number stated in a living document | recompute it | `test/validate.py` — guard-count comparison |
-| Anything a run got wrong | `docs/superpowers/retro.md` (prune → stamp → entry, with commits) | `review` — no check can decide whether a run diverged |
+| Anything a run got wrong | `docs/superpowers/retro.md` (stamp → prune → entry, with commits) | `review` — no check can decide whether a run diverged |
 
 ## Gates
 

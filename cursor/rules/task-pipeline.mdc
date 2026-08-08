@@ -324,7 +324,12 @@ not authorize an outward, irreversible action — stage 7 stops and asks.
     per project, not per run**. Every gate above is good at *this* run and blind
     across runs: the same class of failure gets caught, fixed and forgotten five
     times and nothing notices it is the same one. So, in this order —
-    **1. Prune before you add.** Check every standing instruction against three
+    **1. Stamp the run first** — date, topic, commit, verdict, counts. It costs one
+    line and it is the only thing that makes the next step computable: one retirement
+    trigger counts firings across the last five run stamps, so a prune placed ahead of
+    the stamp reads a counter its own stage writes afterwards and can never run on real
+    data.
+    **2. Then prune.** Check every standing instruction against three
     retirement triggers: it became a check (a test, a lint rule, a gate, a hook →
     delete it; the check is the memory, and keeping both means it is read twice and
     obeyed once); every path, command or stage it names is gone (→ delete, it
@@ -334,8 +339,6 @@ not authorize an outward, irreversible action — stage 7 stops and asks.
     because "they all matter" is exactly the state in which the list stopped being
     read. **Every deletion writes one line in the log; silent deletion is
     forbidden** — the record stays, the instruction leaves.
-    **2. Stamp the run** — date, topic, verdict, counts. That stamp is what makes
-    "five runs" countable.
     **3. Write an entry, only if the run diverged** — symptom with evidence, the
     stage it *surfaced at*, the stage that **owned** it (usually earlier — a finding
     recorded against the stage that tripped over it comes back), the root cause
@@ -349,8 +352,8 @@ not authorize an outward, irreversible action — stage 7 stops and asks.
     cap is not negotiable and the prune is a gate item, not a good intention.
     Gate: ladder walk ran, no REQ `unknown`, no ledger row without
     a home, every repository clean/pushed/pointed-at, user signs off, **and the
-    retro is written — pruned before anything was added, at or under its cap, every
-    deletion logged, the run stamped, and the counts printed beside this verdict**.
+    retro is written — stamped first, then pruned before anything was added, at or
+    under its cap, every deletion logged, and the counts printed beside this verdict**.
 
 Cross-cutting: answer from the brief's autonomy section rather than re-asking, log every deferral in the ledger, never narrow the task silently, track
 tasks, conventional commits, honest degradation (never claim a failed/skipped step

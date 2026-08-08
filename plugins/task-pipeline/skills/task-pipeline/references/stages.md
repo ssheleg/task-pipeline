@@ -484,18 +484,19 @@ never that the work was skipped quietly.
   written to `docs/superpowers/retro.md` — one file per project, not per run. The
   pipeline's gates are good at *this* run and blind across runs: the same class of
   failure can be caught, fixed and forgotten five times and nothing in the flow
-  notices it is the same one. So, in this order: **prune first** (every standing
-  instruction against its three retirement triggers — it became a check, its
-  surface is gone, it hasn't fired in five run stamps — and the list held to its cap
-  of ten, every deletion logged **in the archive, with the commit that retired it**),
-  **stamp the run**, then **write an entry only if
+  notices it is the same one. So, in this order: **stamp the run first** (one line,
+  with its commit — and the only thing that makes the next step computable), **then
+  prune** (every standing instruction against its three retirement triggers — it
+  became a check, its surface is gone, it hasn't fired in five run stamps — and the
+  list held to its cap of ten, every deletion logged **in the archive, with the
+  commit that retired it**), then **write an entry only if
   the run diverged** (symptom · the stage it surfaced at · the stage that *owned* it
   · root cause · fix, mechanical before instruction before expiring note · the check
-  that catches it next time). Every run prunes and stamps; a retro left empty after
+  that catches it next time). Every run stamps and prunes; a retro left empty after
   a messy run is the failure the file exists to stop. Stage 0 reads the standing
   instructions in full next time, which is why the cap is not negotiable.
 - **GATE (manual):** the ladder walk ran and its absences became REQ rows before
-  the table was written; **the retrospective is written — prune before entry, the
+  the table was written; **the retrospective is written — stamped first, then pruned, then the entry; the
   list at or under its cap, every deletion logged in the archive with its commit,
   entries older than five run stamps rotated into `docs/superpowers/retro/`, the run
   stamped with its commit, every SHA in either file resolvable, and the

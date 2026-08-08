@@ -35,7 +35,7 @@ better, plus one that is required only for user-facing work.
 | 5 Build (isolation, subagents, fix loop) | `references/build.md` + `references/review.md` |
 | 5–6 TDD + suite gate | `references/tdd.md` |
 | 10 Acceptance (REQ close-out) | `references/acceptance.md` |
-| 10 Retrospective (the run's last act: prune, stamp, entry) | `references/retrospective.md` |
+| 10 Retrospective (the run's last act: stamp, prune, entry) | `references/retrospective.md` |
 | 10 + any audit (finding what's missing) | `references/audit.md` |
 | any repeating loop | `references/loop-guard.md` |
 

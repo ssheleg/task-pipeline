@@ -154,14 +154,18 @@ plus a stable id, never a second act of thinking.
 and forgotten five times with nothing noticing it is the same one. The last act of
 stage 10 is therefore the **retrospective**
 ([`references/retrospective.md`](references/retrospective.md), written to
-`docs/superpowers/retro.md`): **prune first** — every standing instruction checked
-against its retirement triggers (it became a check · its surface is gone · it hasn't
-fired in five runs), the list held to a hard cap of **ten**, every deletion logged —
-then stamp the run, then write an entry **only if the run diverged** (symptom, the
+`docs/superpowers/retro.md`): **stamp the run first** — one line, and the only thing
+that makes the next step computable — **then prune**, every standing instruction
+checked against its retirement triggers (it became a check · its surface is gone · it
+hasn't fired in five run stamps), the list held to a hard cap of **ten**, every
+deletion logged, then write an entry **only if the run diverged** (symptom, the
 stage that *owned* it, root cause, fix, and the check that catches it next time).
 Stage 0 reads those standing instructions in full, which is exactly why the prune is
 a gate criterion and not a good intention: a rule nobody reads to the end is worse
-than no rule, because everyone believes it is covered.
+than no rule, because everyone believes it is covered. **The order is load-bearing,
+not stylistic** — one retirement trigger counts firings across the last five run
+stamps, so a prune placed ahead of the stamp reads a counter its own stage writes
+afterwards and can never run on real data ([`references/learned.md`](references/learned.md) rule 21).
 
 Three things the grill does beyond clarifying the request:
 - **Domain awareness.** It reads the project's own `CONTEXT.md` / `docs/adr/` and
@@ -264,7 +268,7 @@ capable available — see `references/model-tiering.md`).
 | 7 | Lint + deploy | host lint → deploy per host convention | lint clean + suite green before deploy; deploy needs a go (or the brief's specific standing authorization) | manual |
 | 8 | Post-deploy | tail deploy logs / health-check | clean boot or honest degradation report | auto |
 | 9 | Docs + wiki | host module docs/runbook rules → `wiki-update` ([obsidian-wiki](https://github.com/ar9av/obsidian-wiki), recommended) → `/graphify . --update` ([`references/knowledge-graph.md`](references/knowledge-graph.md), recommended) | every stale row of the stage-0 source ledger updated; **the propagation matrix walked for every change type this run produced** — the ledger names what you read, the matrix names what you owe — every settled thing recorded with an id, every answered question resolved, and **the documentation gate green with its ratchet counts printed**; docs synced; wiki synced; **the code graph refreshed where one exists** and checked against the docs (a hub no doc names, a doc naming a node the graph lost); **every number computed rather than restated, every named command or file resolvable** ([`references/learned.md`](references/learned.md)); the carry-over count printed beside the verdict | auto |
-| 10 | **Acceptance** | built in: [`references/audit.md`](references/audit.md) (ladder walk) → [`references/acceptance.md`](references/acceptance.md) (coverage table) → [`references/retrospective.md`](references/retrospective.md) (retro: prune, stamp, entry) | ladder walk ran, its absences became REQ rows; every REQ accounted for with evidence from a check seen failing once; ledger has no unresolved row; **axis rotation recorded** (new findings vs self-inflicted, rule 1 of [`references/learned.md`](references/learned.md)), **every closure verified against the artefact rather than the document describing it**, **each correction swept across its class**, **every deferral a printed ratchet rather than a TODO**; **in a multi-repository project, every repository is clean, pushed and pointed at** (below); operator signs off; **every check this close-out leans on — the documentation gate included — has been seen failing once against a planted defect, and its ratchet counts are printed beside the verdict**; **the retrospective written last — prune before entry, list at or under its cap, every deletion and every entry carrying its commit, entries older than five stamps rotated into the archive, run stamped with its commit, counts printed** | manual |
+| 10 | **Acceptance** | built in: [`references/audit.md`](references/audit.md) (ladder walk) → [`references/acceptance.md`](references/acceptance.md) (coverage table) → [`references/retrospective.md`](references/retrospective.md) (retro: stamp, prune, entry) | ladder walk ran, its absences became REQ rows; every REQ accounted for with evidence from a check seen failing once; ledger has no unresolved row; **axis rotation recorded** (new findings vs self-inflicted, rule 1 of [`references/learned.md`](references/learned.md)), **every closure verified against the artefact rather than the document describing it**, **each correction swept across its class**, **every deferral a printed ratchet rather than a TODO**; **in a multi-repository project, every repository is clean, pushed and pointed at** (below); operator signs off; **every check this close-out leans on — the documentation gate included — has been seen failing once against a planted defect, and its ratchet counts are printed beside the verdict**; **the retrospective written last, and in order — the run stamped with its commit FIRST (the cold-retirement trigger reads that stamp), then the prune with the list at or under its cap and every deletion logged, then the entry; every deletion and every entry carrying its commit, entries older than five stamps rotated into the archive, counts printed** | manual |
 
 
 ### Stage 10 in a project of several repositories
