@@ -757,18 +757,29 @@ if os.path.isfile(_cs):
     _pre = _cst.split("Preflight (emit before stage 0)")[-1]
     _block = re.search(r"```(.*?)```", _pre, re.S)
     if _matrix and _block:
+        # The preflight names a companion then dashes into its explanation; take everything
+        # before the dash, so "Figma MCP" arrives whole rather than truncated at the space.
         _offered = set()
-        for _line in re.findall(r"^\s*[✓✗]\s+([A-Za-z0-9_.\-]+)", _block.group(1), re.M):
-            _offered.add(_line.strip().lower())
-        # Figma is offered as "Figma MCP" and tabled as "Figma"; normalise that one token
-        _offered = {re.sub(r"\s*mcp$", "", _o) for _o in _offered}
-        _missing = {_m for _m in _matrix if _m not in _offered
-                    and not any(_m.startswith(_o) or _o.startswith(_m) for _o in _offered)}
-        for _m in sorted(_missing):
+        for _line in re.findall(r"^\s*[✓✗]\s+(.+?)\s+[—-]", _block.group(1), re.M):
+            _offered.add(re.sub(r"\s*mcp$", "", _line.strip().lower()))
+
+        def _same(_a, _b):
+            return _a == _b or _a.startswith(_b) or _b.startswith(_a)
+
+        # BOTH directions (learned.md rule 2). The first version checked matrix -> preflight
+        # only, in a repository whose rule 2 is precisely "compute the mapping in both
+        # directions" — and the reverse is a real failure with a different shape: an install
+        # line for a companion the matrix never explains, which is what an operator would be
+        # asked to run without being told why.
+        for _m in sorted(_m for _m in _matrix if not any(_same(_m, _o) for _o in _offered)):
             fail("references/companion-skills.md: a companion is in the matrix and not in the "
                  f"preflight block — {_m!r}. A companion the operator is never offered is a "
                  "recommendation that exists only for the reader (learned.md rule 20: the list "
                  "exists twice and both copies are used)")
+        for _o in sorted(_o for _o in _offered if not any(_same(_o, _m) for _m in _matrix)):
+            fail("references/companion-skills.md: a companion is offered in the preflight and "
+                 f"absent from the matrix — {_o!r}. The operator is asked to install something "
+                 "the table never explains, which is the same drift read from the other side")
 
 # references/artifacts.md maps stage -> what it WRITES. The reverse direction — what
 # each stage READS and from where — is the one an agent actually needs at runtime,

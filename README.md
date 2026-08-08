@@ -66,7 +66,7 @@ Every gate is **typed**: `auto` — the orchestrator verifies it itself, pass/fa
 | 5 | Dev | tasks DONE (three review verdicts each), TDD green per task | auto |
 | 6 | Tests | full suite green, new code covered; **on a web front end the surface is checked in a browser, not in the diff** | auto |
 | 7 | Lint + deploy | lint clean + suite green before deploy | manual |
-| 8 | Post-deploy | clean boot / honest degradation, **and the CI verdict read rather than assumed** , and **a deployed web page is opened rather than curled** — a `200` is not a rendered page | auto |
+| 8 | Post-deploy | clean boot / honest degradation, **and the CI verdict read rather than assumed**, and **a deployed web page is opened rather than curled** — a `200` is not a rendered page | auto |
 | 9 | Docs + wiki | the propagation matrix walked and the documentation gate green with its ratchets printed; every stale source-ledger row updated; docs + wiki synced; the code graph refreshed and checked against the docs | auto |
 | 10 | **Acceptance** | every REQ accounted for with evidence; every check leaned on seen failing once; operator signs off; the retro written — pruned before anything was added, every lesson carrying its commit | manual |
 
