@@ -321,24 +321,170 @@ while _frontier:
 for _orphan in sorted({f for f in os.listdir(refdir) if f.endswith(".md")} - _seen):
     fail(f"references/{_orphan}: unreachable from SKILL.md — dead context, wire it in or delete it")
 
-# Compute, never restate (references/learned.md rule 8) — applied to this repo's own
-# prose. The guard count is stated in living documents, and two of them silently
-# claimed 46 after the suite reached 50: a number written by hand is a number that
-# goes stale on the next commit. CHANGELOG entries are exempt on purpose — they are
-# records of what a past release shipped, not claims about now.
-_neg_wf = os.path.join(ROOT, ".github/workflows/validate.yml")
-if os.path.isfile(_neg_wf):
-    _neg_n = len(re.findall(r"^\s*- name:\s*Negative self-test",
-                            open(_neg_wf, encoding="utf-8").read(), re.M))
-    for _living in ("README.md", "SKILL-CARD.md", "evals/RESULTS.md"):
+# ============================================================================
+# THE CLAIM REGISTRY — compute, never restate (references/learned.md rule 8)
+# ============================================================================
+# This began as ONE check, over ONE number: the guard count, because two living documents
+# silently claimed 46 after the suite reached 50. It stayed one check while the same class
+# went stale in five more places — `learned.md` described as "fifteen rules" against a table
+# of twenty-one, `evals/RESULTS.md` ratcheting "Dated runs recorded 0" directly above a
+# dated run and directly on top of a tool computing 1, `docs/DOCMAP.md` claiming two
+# standing instructions against the retro's four, and the version-sync invariant NAMED
+# "four-way" while the validator enforced five. Each was fixed as an instance. The class
+# was never gated, which is `audit.md`'s own rule — a class seen twice belongs in a script —
+# unapplied to the file that enforces it.
+#
+# So the check is now a REGISTRY: one row per claim class, each naming
+#   · the pattern that recognises the claim in prose,
+#   · the command that computes the truth,
+#   · the incident that earned the row.
+# Adding a class is a row, not a new block. That is the whole point: the next stale number
+# costs one line here instead of one more bespoke check nobody generalises.
+#
+# SCOPE, stated rather than implied:
+#   · It compares numbers that a command can produce. A count of an enumeration inside one
+#     sentence ("lives on nine surfaces: A, B, C…") is NOT computable from outside that
+#     sentence — those are DELETED rather than gated, and `CLAUDE.md` says so where it used
+#     to carry one.
+#   · CHANGELOG.md is exempt by design. It records what a past release shipped; a number
+#     true on the day of the release is not a claim about now.
+#   · A document that states no number is trivially green. The registry cannot make anyone
+#     write the number down, and does not try to.
+# Numbers appear in this corpus as DIGITS and as WORDS, and the incident that named this
+# registry's second row was a word: README.md and SKILL.md said "fifteen rules", not "15".
+# A registry that cannot see the form its own founding defect took is a check whose green is
+# narrower than the sentence people read it as. Measured after adding this: four live
+# word-form claims — "the ten canons", on four surfaces — that the digit-only patterns had
+# been skipping in silence. All four are correct; none of them was being checked, and the
+# release note for this very change claimed those classes were dormant because the numbers
+# had been deleted. For one of them that was simply untrue.
+_NUM_WORDS = {w: i for i, w in enumerate(
+    "zero one two three four five six seven eight nine ten eleven twelve thirteen fourteen "
+    "fifteen sixteen seventeen eighteen nineteen twenty".split())}
+for _tens, _tv in (("twenty", 20), ("thirty", 30), ("forty", 40)):
+    _NUM_WORDS[_tens] = _tv
+    for _u, _uv in [(w, i) for i, w in enumerate(
+            "zero one two three four five six seven eight nine".split()) if i]:
+        _NUM_WORDS[f"{_tens}-{_u}"] = _tv + _uv
+_NUM = r"(\d+|" + "|".join(sorted(_NUM_WORDS, key=len, reverse=True)) + r")"
+
+def _as_int(tok):
+    tok = tok.strip().lower()
+    return int(tok) if tok.isdigit() else _NUM_WORDS.get(tok)
+
+_neg_wf = os.path.join(ROOT, ".github/workflows/validate.yml")   # read again further down
+_neg_n = (len(re.findall(r"^\s*- name:\s*Negative self-test",
+                         open(_neg_wf, encoding="utf-8").read(), re.M))
+          if os.path.isfile(_neg_wf) else 0)   # the floor guard downstream reads this
+
+def _count_re(path, pattern, flags=re.M):
+    p = os.path.join(ROOT, path)
+    if not os.path.isfile(p):
+        return None
+    return len(re.findall(pattern, open(p, encoding="utf-8").read(), flags))
+
+def _count_run_headings(path):
+    """Dated run headings in evals/RESULTS.md, outside fenced blocks — the same unit
+    evals/run.py counts, deliberately duplicated in shape so the two can be compared."""
+    p = os.path.join(ROOT, path)
+    if not os.path.isfile(p):
+        return None
+    infence, n = False, 0
+    for ln in open(p, encoding="utf-8").read().split("\n"):
+        if re.match(r"^\s*(```|~~~)", ln):
+            infence = not infence
+            continue
+        if not infence and re.match(r"^## 20\d{2}-\d{2}-\d{2}\b", ln):
+            n += 1
+    return n
+
+# (label, claim pattern, computing callable, incident)
+_CLAIM_REGISTRY = [
+    ("negative self-tests",
+     r"\b" + _NUM + r"\+?\s+(?:of\s+\d+\s+)?(?:structural\s+)?guards\b(?!\s+behind)",
+     lambda: _count_re(".github/workflows/validate.yml", r"^\s*- name:\s*Negative self-test"),
+     "two living documents claimed 46 after the suite reached 50"),
+
+    ("rules in learned.md",
+     r"\b" + _NUM + r"\s+rules\s+earned\b",
+     lambda: _count_re("plugins/task-pipeline/skills/task-pipeline/references/learned.md",
+                       r"^\|\s*\d+\s*\|\s*\*\*"),
+     "README.md and SKILL.md said 'fifteen rules' against a table of twenty-one"),
+
+    ("dated eval runs",
+     r"[Dd]ated\s+(?:eval\s+)?runs\s+recorded\D{0,40}?\*{0,2}(\d+)\*{0,2}",
+     lambda: _count_run_headings("evals/RESULTS.md"),
+     "RESULTS.md ratcheted 0 directly above a dated run, while run.py computed 1"),
+
+    ("standing instructions",
+     r"\b" + _NUM + r"\s+of\s+a\s+hard\s+cap\s+of\s+10\b",
+     lambda: _count_re("docs/superpowers/retro.md", r"^\|\s*R-\d+\s*\|"),
+     "docs/DOCMAP.md claimed two while the retro held four"),
+
+    ("evidence canons",
+     r"\bthe\s+" + _NUM + r"\s+canons\b",
+     lambda: _count_re("plugins/task-pipeline/skills/task-pipeline/references/documentation.md",
+                       r"^\*\*\d+\.\s"),
+     "the canons are cited by count from three surfaces and the list can grow"),
+
+    ("reference files",
+     r"\b" + _NUM + r"\s+files\s+under\s+`?references/`?",
+     lambda: len([f for f in os.listdir(refdir) if f.endswith(".md")]) if os.path.isdir(refdir) else None,
+     "SKILL-CARD.md said 26 against a directory holding 28"),
+]
+
+# Living documents: what a reader takes as true NOW. CHANGELOG is excluded above; run
+# records under docs/superpowers/specs/ are frozen accounts of a past run, same reasoning.
+_LIVING = ["README.md", "SKILL-CARD.md", "CONTRIBUTING.md", "CLAUDE.md",
+           "docs/DOCMAP.md", "evals/RESULTS.md",
+           "plugins/task-pipeline/skills/task-pipeline/SKILL.md",
+           "plugins/task-pipeline/skills/evidence-docs/SKILL.md"]
+for _root, _dirs, _fs in os.walk(refdir):
+    _LIVING += [os.path.relpath(os.path.join(_root, _f), ROOT) for _f in _fs if _f.endswith(".md")]
+
+def _is_quoted(text, match):
+    """A number inside a double-quoted span is a CITATION of what a document said, not a
+    claim about now — `evals/RESULTS.md` quotes its own stale "Dated runs recorded 0" while
+    narrating the incident that put this registry here. Deterministic and vocabulary-free:
+    no marker list to grow per incident, which is the drift class this file is about.
+    Cost, stated: a live claim someone chose to wrap in quotes is exempt."""
+    ls = text.rfind("\n", 0, match.start()) + 1
+    le = text.find("\n", match.end())
+    le = le if le > 0 else len(text)
+    line = text[ls:le]
+    for _q in re.finditer(r'"[^"\n]*"', line):
+        if _q.start() + ls <= match.start() and match.end() <= _q.end() + ls:
+            return True
+    return False
+
+_CLAIM_STATES = []
+for _label, _pat, _compute, _incident in _CLAIM_REGISTRY:
+    _truth = _compute()
+    if _truth is None:                      # the source of truth is absent — say so, do not guess
+        _CLAIM_STATES.append(f"{_label}: skip — no source")
+        continue
+    _seen = 0
+    for _living in _LIVING:
         _lp = os.path.join(ROOT, _living)
         if not os.path.isfile(_lp):
             continue
-        for _m in re.finditer(r"\b(\d+)\+?\s+(?:of\s+\d+\s+)?(?:structural\s+)?guards\b",
-                              open(_lp, encoding="utf-8").read()):
-            if int(_m.group(1)) != _neg_n:
-                fail(f"{_living}: states {_m.group(0)!r} but the workflow defines "
-                     f"{_neg_n} negative self-tests — derive the number or delete it")
+        _txt = open(_lp, encoding="utf-8").read()
+        for _m in re.finditer(_pat, _txt, re.I):   # "## The ten canons" is a heading; case is not a claim
+            if _is_quoted(_txt, _m):
+                continue
+            _stated = _as_int(_m.group(1))
+            if _stated is None:            # a word outside the map — say nothing rather than guess
+                continue
+            _seen += 1
+            if _stated != _truth:
+                fail(f"{_living}: states {_m.group(0).strip()!r} but {_label} computes to "
+                     f"{_truth} — derive the number or delete it. This class is registered "
+                     f"because: {_incident}")
+    # Progressive arming (gates.md): a class nobody states is DORMANT, not passing. Printed,
+    # because a registry reporting green over six classes it never looked at is exactly the
+    # false success it exists to catch. Most classes are dormant on purpose — the numbers
+    # were deleted rather than corrected, and this is the ratchet against re-introducing them.
+    _CLAIM_STATES.append(f"{_label}: {'ok ' + str(_seen) if _seen else 'dormant'} (truth {_truth})")
 
 # learned.md rule 16 — a rule that lands in the table and nowhere else is a rule the
 # run never meets, because nothing at stage 0 or stage 10 sends anybody to it. The
@@ -2028,7 +2174,7 @@ if os.path.isfile(_rp):
 # so it never executes at all. Fourteen checks shipped that way in this file's own
 # v1.14.0 draft and every one of them was green because it could not run.
 _src = open(__file__, encoding="utf-8").read()
-_verdict = _src.rfind('print("PASS: task-pipeline structure valid")')  # rfind: the
+_verdict = _src.rfind('print("PASS: task-pipeline structure valid")')
 # literal also appears in this guard's own source, and find() would match itself
 if _verdict != -1 and "fail(" in _src[_verdict:]:
     fail("test/validate.py: a fail() call appears after the verdict is printed — a "
@@ -2151,3 +2297,4 @@ if errors:
         print(" - " + e)
     sys.exit(1)
 print("PASS: task-pipeline structure valid")
+print("  claim registry — " + " · ".join(_CLAIM_STATES))

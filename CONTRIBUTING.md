@@ -279,7 +279,24 @@ A paragraph that narrates the old order as the defect is exempt by an explicit m
 list, not by a heuristic.
 *(guard: `enumerates the retro's acts as`)*
 
-**35. Every invariant above names the guard that enforces it, and that guard exists.**This list claims to be *what the validator enforces*; it was eight guards behind when
+**35. A number a living document states is compared against the command that computes
+it — from a registry, not a bespoke check.** This began as one check over one number, and
+stayed one check while the same class went stale in five more places: `learned.md`
+described as *"fifteen rules"* against a table of twenty-one, `evals/RESULTS.md` ratcheting
+zero dated runs directly above a dated run and directly on top of a tool computing one,
+`docs/DOCMAP.md` claiming two standing instructions against four, and the version invariant
+**named** *four-way* while five surfaces were enforced. Each was fixed as an instance; the
+class was never gated — `audit.md`'s own rule, unapplied to the file that enforces it.
+Adding a class is now **a row**, naming the claim pattern, the computing command and the
+incident that earned it. Two things are stated rather than implied: a **quoted** number is a
+citation of what a document said and is exempt, so a register can narrate its own drift;
+and a count of an enumeration inside one sentence is not computable from outside it, so
+those are **deleted** instead — `CLAUDE.md`'s stage-list line says so where it used to carry
+one. Every class prints `ok`/`dormant` beside the verdict, because a registry reporting
+green over classes it never looked at is the false success it exists to catch.
+*(guard: `— derive the number or delete it. This class is registered `)*
+
+**36. Every invariant above names the guard that enforces it, and that guard exists.**This list claims to be *what the validator enforces*; it was eight guards behind when
 an audit measured it. A claim of enforcement is now checked like any other claim.
 *(guard: `whose message does not appear in`)* — and a cited literal must lie inside
 a **single** string in `test/validate.py`: the check reads that file as text, so a
