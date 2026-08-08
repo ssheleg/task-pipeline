@@ -333,9 +333,20 @@ Two disclosures, kept separate because they are different facts:
 | `abstained: N` | claims the run **declined to make** — `partial`, `unknown`, `cannot verify from diff` | a *choice*. Rising can mean the work got harder or the run got honest; falling can mean either the reverse |
 | `unlooked: N` | checks that **did not look** — `dormant`, `skip` | a *state of the corpus*, not a decision. It falls as the project grows the inputs those checks need |
 
-`recalled` and `ungated` are deliberately not counted: the first is a property of one
-claim and already lives in the ledger; the second is a property of the whole run and is
-said once, in words.
+Three are deliberately **not** counted, and saying which is part of the disclosure:
+
+- **`review`** — *no check can decide this* — is an abstention, and it is the one this
+  section first listed and then forgot, which is exactly the failure it exists to catch.
+  It stays out of `abstained` because it is not a claim the run declined: it is a rule
+  that **declined to be mechanical**, recorded once at rung 2 with its reason (→ *Axis B*).
+  Counted per run it would report the same standing number every time and say nothing
+  about the run.
+- **`recalled`** — a property of one claim, already carried in the ledger beside the
+  command that would re-derive it.
+- **`ungated`** — a property of the whole run, said once, in words.
+
+A vocabulary that is named and then left out of every bucket is the one that goes
+uncounted forever. So each gets its line, including the one that got missed here.
 
 **What makes a disclosure honest rather than decorative** is the same thing that makes a
 ratchet honest: it is *computed*, and it is printed whether or not anyone likes the

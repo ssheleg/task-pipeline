@@ -290,7 +290,7 @@ for _src in ["SKILL.md"] + [f"references/{f}" for f in sorted(os.listdir(refdir)
         continue
     _flat = re.sub(r"\s+", " ", open(_sp, encoding="utf-8").read())
     for _tgt, _sec in re.findall(
-            r"\[`([a-z0-9-]+\.md)`\]\([^)]*\)\s*(?:→|->)\s*\*([^*]+)\*", _flat):
+            r"\[`(?:[a-z0-9./-]*/)?([a-z0-9-]+\.md)`\]\([^)]*\)\s*(?:→|->)\s*\*([^*]+)\*", _flat):   # a path-prefixed label — [`references/gates.md`](...) — used to slip past this
         _tp = os.path.join(refdir, _tgt)
         if not os.path.isfile(_tp):
             _bad_cites.append(f"{_src} cites {_tgt} → *{_sec.strip()}* — no such file")
@@ -839,6 +839,7 @@ _DISCLOSURE_FILES = [
     "plugins/task-pipeline/skills/task-pipeline/references/audit.md",
     "plugins/task-pipeline/skills/task-pipeline/references/gates.md",
     "plugins/task-pipeline/skills/task-pipeline/references/retrospective.md",
+    "plugins/task-pipeline/skills/task-pipeline/templates/carryover.md",
 ]
 for _f in _DISCLOSURE_FILES:
     _fp = os.path.join(ROOT, _f)
