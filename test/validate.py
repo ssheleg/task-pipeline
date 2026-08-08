@@ -738,6 +738,38 @@ if os.path.isfile(_learned) and os.path.isfile(_rp21):
                                  f"reads the stamp, so a prune ahead of it never runs on real "
                                  f"data). Found: {_m.group(0).strip()!r}")
 
+# The companion list exists TWICE in companion-skills.md — as the matrix a reader consults
+# and as the preflight block the agent prints — and nothing compared them. That is
+# learned.md rule 20's shape exactly (a thing that exists twice; the useful question is which
+# one is used, and here BOTH are: the reader reads one, the operator is shown the other).
+# A companion added to the matrix and missing from the preflight is a recommendation nobody
+# is ever offered; the reverse is an install line for something the matrix does not explain.
+# Found while adding chrome-devtools, which would have been the first to drift.
+_cs = os.path.join(refdir, "companion-skills.md")
+if os.path.isfile(_cs):
+    _cst = open(_cs, encoding="utf-8").read()
+    # matrix rows: bolded name in the first cell, minus the struck-through "not a dependency" rows
+    _matrix = set()
+    for _row in re.findall(r"^\|\s*\*\*([^*|]+)\*\*", _cst, re.M):
+        _name = re.split(r"\s*\(", _row)[0].strip()
+        _name = re.sub(r"^\[|\]$", "", _name)      # the matrix wraps some names in a markdown link
+        _matrix.add(_name.lower())
+    _pre = _cst.split("Preflight (emit before stage 0)")[-1]
+    _block = re.search(r"```(.*?)```", _pre, re.S)
+    if _matrix and _block:
+        _offered = set()
+        for _line in re.findall(r"^\s*[✓✗]\s+([A-Za-z0-9_.\-]+)", _block.group(1), re.M):
+            _offered.add(_line.strip().lower())
+        # Figma is offered as "Figma MCP" and tabled as "Figma"; normalise that one token
+        _offered = {re.sub(r"\s*mcp$", "", _o) for _o in _offered}
+        _missing = {_m for _m in _matrix if _m not in _offered
+                    and not any(_m.startswith(_o) or _o.startswith(_m) for _o in _offered)}
+        for _m in sorted(_missing):
+            fail("references/companion-skills.md: a companion is in the matrix and not in the "
+                 f"preflight block — {_m!r}. A companion the operator is never offered is a "
+                 "recommendation that exists only for the reader (learned.md rule 20: the list "
+                 "exists twice and both copies are used)")
+
 # references/artifacts.md maps stage -> what it WRITES. The reverse direction — what
 # each stage READS and from where — is the one an agent actually needs at runtime,
 # and it was absent for nine releases: learned.md rule 2 (compute the mapping in both

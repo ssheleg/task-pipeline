@@ -96,6 +96,16 @@ database created ten seconds ago" are different claims, and only the second one 
   production classes.
 - **Edge cases and failure paths are part of the task**, not a follow-up ticket:
   empty input, boundary values, the network call that fails, the timeout.
+- **A green suite is not a rendered page.** On a web front end the suite proves the
+  code does what its assertions say; it cannot see a component that renders correctly
+  and lands under a fixed header, a request that 404s while every unit test mocks it,
+  or a console error that costs nothing at test time. Where `chrome-devtools` is
+  connected ([`companion-skills.md`](companion-skills.md)), open the surface and read
+  the console and the network log before calling it done — and **quote what you read**,
+  not that you looked. Absent, the honest sentence is *"verified by reading the diff"*,
+  which is a weaker claim and is recorded as one. Same family as a test that passes
+  regardless of the production code: the assertion is real and it is pointed at
+  something other than what a user reaches.
 
 ## Stage 6 — consolidation and the suite gate
 

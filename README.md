@@ -64,9 +64,9 @@ Every gate is **typed**: `auto` — the orchestrator verifies it itself, pass/fa
 | 3 | Spec | committed + reviewed; UI: super-ux chain validated, linter green | manual |
 | 4 | Plan | parallel-ready, DoD per task | auto |
 | 5 | Dev | tasks DONE (three review verdicts each), TDD green per task | auto |
-| 6 | Tests | full suite green, new code covered | auto |
+| 6 | Tests | full suite green, new code covered; **on a web front end the surface is checked in a browser, not in the diff** | auto |
 | 7 | Lint + deploy | lint clean + suite green before deploy | manual |
-| 8 | Post-deploy | clean boot / honest degradation, **and the CI verdict read rather than assumed** | auto |
+| 8 | Post-deploy | clean boot / honest degradation, **and the CI verdict read rather than assumed** , and **a deployed web page is opened rather than curled** — a `200` is not a rendered page | auto |
 | 9 | Docs + wiki | the propagation matrix walked and the documentation gate green with its ratchets printed; every stale source-ledger row updated; docs + wiki synced; the code graph refreshed and checked against the docs | auto |
 | 10 | **Acceptance** | every REQ accounted for with evidence; every check leaned on seen failing once; operator signs off; the retro written — pruned before anything was added, every lesson carrying its commit | manual |
 
@@ -198,6 +198,15 @@ Then the loop closes: **stage 9 updates exactly what stage 0 read.** Every doc t
 run proved stale is already in the ledger with what's wrong, so "docs updated" means
 the sources the next run will trust — not just the files this change happened to
 touch.
+
+**A web front end gets a browser, not a diff.** Where `chrome-devtools` is connected,
+stages 5–6 load the surface and read the console and the network log before calling it
+green, and stage 8 opens the deployed page instead of trusting a `200`. A green suite
+cannot see a component that renders correctly and lands under a fixed header, a request
+that 404s while every unit test mocks it, or an error that costs nothing at test time.
+Absent, the run says *"verified by reading the diff"* — a weaker claim, recorded as one.
+Install: `/plugin install chrome-devtools-mcp@claude-plugins-official`. It is never a
+gate, and a CLI, a library or a backend service is never offered it.
 
 **The wiki is [obsidian-wiki](https://github.com/ar9av/obsidian-wiki)** (Karpathy's
 LLM-wiki pattern), and it's the one source that carries *why* across projects and

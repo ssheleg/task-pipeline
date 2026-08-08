@@ -238,12 +238,22 @@ not authorize an outward, irreversible action — stage 7 stops and asks.
    outward, so ask first), remove the worktree.
 6. **Tests** (auto) — full suite green (not just new tests); new/changed code
    covered including failure paths; no skip/xfail hiding red. Tests assert real
-   behavior, never mock behavior.
+   behavior, never mock behavior. **Web front end? Check the surface in a browser,
+   not in the diff.** A green suite cannot see a component that renders correctly and
+   lands under a fixed header, a request that 404s while every unit test mocks it, or
+   a console error that costs nothing at test time. With the chrome-devtools MCP
+   connected: load the surface, snapshot it, read the console and the network log,
+   and quote what you read. Without it, say "verified by reading the diff" and treat
+   that as the weaker claim it is. Install once, never a gate:
+   `/plugin install chrome-devtools-mcp@claude-plugins-official`. A CLI, a library or
+   a backend service is never offered it.
 7. **Lint + deploy** (manual) — lint clean AND suite green before deploy; deploy is
    outward → explicit user go, or the specific standing authorization recorded in
    the stage-0 brief.
 8. **Post-deploy** (auto) — tail logs / health-check; clean boot or an honest
-   degradation report (never silent success). **Read the CI verdict, never assume
+   degradation report (never silent success). **A deployed web target is opened, not
+   curled** — a `200` proves the server answered and says nothing about a bundle that
+   404'd or a console full of errors on load; both ship green past a health check. **Read the CI verdict, never assume
    it** — `gh run list --branch <b> --limit 1 --json databaseId,name,status,conclusion,headSha`,
    then `gh run view <id> --log-failed` on anything but success (unauthenticated
    fallback: `curl -s https://api.github.com/repos/<owner>/<repo>/commits/<sha>/check-runs`).

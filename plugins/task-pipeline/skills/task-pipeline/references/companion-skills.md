@@ -48,6 +48,7 @@ better, plus one that is required only for user-facing work.
 | **Figma** (MCP) | stage 3 UX track, when the project designs visually — super-ux mirrors each `SCR-` screen/state into a frame | Optional, **UI + Figma-on only**. Absent → super-ux degrades to text-only *by itself and never blocks*, so shipping a UI feature with no mockups becomes a silent scope call — which is why the stage-0 sweep decides it | connect the Figma MCP server (`/mcp`, or your claude.ai connectors) |
 | **[obsidian-wiki](https://github.com/ar9av/obsidian-wiki)** (`wiki-query`, `wiki-update`) | **stage 0 harvest** (query what's already known) **+ stage 9 sync** | **Recommended** — never a gate; absent → harvest runs on repo docs alone | `pip install obsidian-wiki` → `obsidian-wiki setup --vault /path/to/your/vault` |
 | **[graphify](https://github.com/Graphify-Labs/graphify)** (`/graphify`, `graphify query\|affected\|god-nodes`) | **stage 0 harvest** (reach: what calls this, what breaks if it moves) **+ stage 9 refresh + the graph↔docs divergence check** ([`knowledge-graph.md`](knowledge-graph.md)) | **Recommended** — never a gate; absent → the harvest greps instead, and the divergence axis is unavailable | `uv tool install graphifyy` → `graphify install` → `/graphify .` |
+| **chrome-devtools** (MCP — `list_pages`, `navigate_page`, `take_snapshot`, `take_screenshot`, `evaluate_script`, `list_console_messages`, `list_network_requests`, `lighthouse_audit`) | **stages 5–6 on any project with a web front end** — verify the **rendered** surface rather than the diff: computed layout, console errors, failed requests. **Stage 8** on a deployed web target: load the page and read what the browser did, not what the deploy said | **Recommended** — never a gate; absent → say the surface was verified **by reading the diff** and treat that as the weaker claim it is | `/plugin install chrome-devtools-mcp@claude-plugins-official` (or connect the MCP server directly) |
 | **[agent-sync](https://github.com/ssheleg/agent-sync)** (`/agent-sync`, **≥ 1.3.0** — `finish` did not exist before it, so an older install turns the stage-10 close-out into a command that is not there) | **guarded registers** — a lease before writing one, `reserve` before minting an id, `reconcile`/`record` for intent vs as-built, and `finish` for the stage-10 multi-repository close-out ([`documentation.md`](documentation.md)) | **Recommended** — never a gate. Absent → the run is **`ungated`** and must say so out loud; the discipline still applies, only the arbitration is missing | `npx sshlg-skills install` |
 | ~~superpowers~~ | — | **Not a dependency.** Stages 2/4/5/6 run on the built-in doctrine above. See *Optional bridge* | — |
 | ~~grill-me / grilling~~ | — | **Not a dependency.** The stage-0 grill is built in (`references/grill.md`) | — |
@@ -103,6 +104,12 @@ Pipeline companions (stage doctrine is built in — nothing to install for it):
                            /graphify .        (once, in this project)
                          (running without it — no reach queries, no graph↔docs
                           divergence check)
+  ✗ chrome-devtools    — recommended when this project has a web front end:
+                         stages 5-6 check the RENDERED surface instead of the
+                         diff, stage 8 reads what the browser did after a deploy:
+                           /plugin install chrome-devtools-mcp@claude-plugins-official
+                         (running without it — the surface is verified by reading
+                          the diff, and the close-out says so in those words)
 
 🧠 Model for this run: recommended <top tier available>. You're on <current>.
    /model <id> to switch, or "keep current", or name per-stage overrides.
@@ -118,6 +125,13 @@ Rules:
   `wiki-query`/`wiki-update`. Present → say `✓ ready` and use it in the harvest.
   Absent → print the two install lines **once** and continue; never ask twice in a
   run and never block a stage on it ([`knowledge-sources.md`](knowledge-sources.md)).
+- **chrome-devtools**: flag it only when the project **has a web front end** — an
+  `index.html`, a `package.json` naming a browser framework, a `docs/ux/screens.md`, or
+  a deploy target that serves pages. Detect via a resolving
+  `mcp__chrome-devtools__list_pages` (or the plugin's tools under any prefix the host
+  uses). Present → `✓ ready`. Absent → print the install line **once** and continue; it
+  is never a gate. **A CLI, a library or a backend service does not flag it** — offering
+  a browser to a project with no browser is how a recommendation is taught to be noise.
 - **graphify**: detect via `graphify-out/graph.json` (built → `✓ ready`, query it in
   the harvest) or a resolving `graphify` binary with no `graphify-out/` (installed,
   not built → offer the one-line `/graphify .`). Absent → print the install lines
