@@ -53,12 +53,15 @@ most often:
    and listed four until 2026-08-08 while `test/validate.py` enforced five; the miss
    surfaced on a release bump, from the validator rather than from a reader. The list
    is the count — same reason invariant counts are not written down here.
-2. **The stage list lives on nine surfaces.** Three are compared mechanically —
-   `SKILL.md`'s table, `references/stages.md` and `pipeline.example.json` (ids,
-   names **and gate types**, plus each stage's own doctrine file). Seven enumerate
-   the flow for a human and must name the final stage, last: `package.json`,
-   `marketplace.json`, `plugin.json`, `SKILL.md`'s frontmatter description, the
-   command, the Cursor rule and the README. Change one → walk all of them.
+2. **The stage list lives on every surface below, and the list is the count.** Three
+   are compared mechanically — `SKILL.md`'s table, `references/stages.md` and
+   `pipeline.example.json` (ids, names **and gate types**, plus each stage's own
+   doctrine file). The rest enumerate the flow for a human and must name the final
+   stage, last: `package.json`, `marketplace.json`, `plugin.json`, `SKILL.md`'s
+   frontmatter description, the command, the Cursor rule and the README. Change one →
+   walk all of them. (It said *nine surfaces* above a list of ten until 2026-08-08. A
+   count of an enumeration inside one sentence cannot be computed from outside it, so
+   unlike the numbers in the claim registry this one is **deleted**, not gated.)
 
 Also: no hardcoded vendor model ids anywhere in the shipped skill (name the tier);
 every `references/*.md` must be reachable from `SKILL.md`; the Cursor rule stays

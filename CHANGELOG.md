@@ -1,5 +1,67 @@
 # Changelog
 
+## v1.25.0
+
+### One check over one number, made into a registry over the class
+
+The "compute, never restate" guard has existed since v1.5.0 and covered exactly one
+number: the count of negative self-tests, added because two living documents claimed 46
+after the suite reached 50. It stayed one check while the same class went stale in five
+more places, each fixed as an instance and none of them gating the shape:
+
+- `README.md` and `SKILL.md` described `learned.md` as *"fifteen rules"* against a table
+  of twenty-one;
+- `evals/RESULTS.md` ratcheted zero dated runs directly above a dated run, and directly
+  on top of `evals/run.py`, which computes one and had been printing it for five releases;
+- `docs/DOCMAP.md` claimed two standing instructions against the retro's four;
+- the version invariant was **named** *four-way* on four surfaces while `test/validate.py`
+  enforced five;
+- `SKILL-CARD.md` counted "the 26 files under `references/`" against a directory of 28.
+
+`audit.md` says a class seen twice belongs in a script. Six instances later, the file that
+enforces that rule had not applied it to itself.
+
+**The check is now a registry.** One row per claim class, each naming the pattern that
+recognises the claim in prose, the command that computes the truth, and the incident that
+earned the row. Adding a class costs one line instead of one more bespoke block nobody
+generalises.
+
+Two limits are stated rather than implied, because both were learned the hard way this
+release:
+
+- **A quoted number is a citation, not a claim.** `evals/RESULTS.md` narrates its own
+  stale `"Dated runs recorded 0"` while explaining the incident, and the first version of
+  the registry rejected it. The exemption is a quoted span — deterministic, with no marker
+  vocabulary to grow per incident, which is the same drift this release is about.
+- **A count of an enumeration inside one sentence is not computable from outside it.**
+  `CLAUDE.md` said *"the stage list lives on nine surfaces"* above a list of ten. There is
+  no command that can check that, so it is **deleted** rather than gated, and the line now
+  says why.
+
+**Numbers are read as digits and as words.** The incident that named the second row was a
+word — `README.md` said *"fifteen rules"*, not *"15 rules"* — so a digit-only registry could
+not have caught the defect it is named after. Adding word forms immediately found **four
+live claims** the patterns had been skipping in silence: *"the ten canons"*, on four
+surfaces. All four are correct, and none of them was being checked.
+
+That correction matters more than the fix, because the first draft of this entry claimed
+every dormant class was dormant *because the number had been deleted*. For the canons class
+that was simply untrue: it was dormant because the check could not see the form the claim
+was written in. **A dormant state is a claim about the corpus, and it needs the same
+evidence as any other** — this one was plausible, unverified, and wrong.
+
+**Every class reports `ok` or `dormant` beside the verdict.** Four of six are dormant now,
+and that is measured rather than assumed: v1.23.1 and v1.24.0 deleted those numbers rather
+than correcting them, which git history confirms. A registry reporting green over classes
+it never looked at would be precisely the false success it exists to catch. It is a ratchet
+against re-introduction more than a finder of present drift, and the verdict line says so
+every run.
+
+One false positive was measured and removed before shipping: `CONTRIBUTING.md` narrates
+that its invariant list *"was eight guards behind"*, which is a **lag**, not a count of the
+suite. The pattern excludes it explicitly rather than tolerating a noisy check — a gate that
+cries wolf is switched off by the third person who hits it.
+
 ## v1.24.0
 
 ### A rule that reached one file, and the guard shape that let it
