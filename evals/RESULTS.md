@@ -50,6 +50,13 @@ the split matters more than the total: a run the author watched, knowing the exp
 behaviour, is an observation of instruction-following and not an evaluation. Collapsing
 the two into one "runs recorded" number is how a self-check gets quoted as a result.
 
+That split is **canon 5 applied to evaluation** — *green nobody watched turn red is not
+evidence* ([`documentation.md`](../plugins/task-pipeline/skills/task-pipeline/references/documentation.md)
+→ *The canons*). A self-observed run is a green the author was steering; a blind run is
+the only one that could have come back red for a reason nobody arranged. The code graph
+surfaced this link before any document stated it, which is the divergence check earning
+its keep.
+
 Everything else in this repository is proven by structural guards — the count is
 whatever `npm run test:all` prints, deliberately not restated here — and those check
 the *form*. These are the only checks that speak to the *behaviour*. Printed here so a
