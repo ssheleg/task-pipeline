@@ -2253,3 +2253,162 @@ jobs:
           else
             echo "OK: validator correctly FAILs — a one-act directive is covered"
           fi
+
+      - name: Negative self-test (claim registry — a restated rule count that disagrees)
+        run: |
+          set -eu
+          rm -rf /tmp/cr1-copy && cp -R . /tmp/cr1-copy
+          python3 - <<'EOF'
+          p = "/tmp/cr1-copy/README.md"
+          t = open(p, encoding="utf-8").read()
+          anchor = "## Contributing"
+          assert anchor in t, "PLANT DID NOT LAND: anchor absent before edit"
+          t = t.replace(anchor, "The doctrine ships 15 rules earned by failure.\n\n" + anchor, 1)
+          open(p, "w", encoding="utf-8").write(t)
+          assert "15 rules earned by failure" in open(p, encoding="utf-8").read(), "PLANT DID NOT LAND"
+          EOF
+          if python3 /tmp/cr1-copy/test/validate.py; then
+            echo "ERROR: validator passed a restated rule count that disagrees with learned.md"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the claim registry caught a stale rule count"
+          fi
+
+      - name: Negative self-test (claim registry — a restated standing-instruction count)
+        run: |
+          set -eu
+          rm -rf /tmp/cr2-copy && cp -R . /tmp/cr2-copy
+          python3 - <<'EOF'
+          p = "/tmp/cr2-copy/docs/DOCMAP.md"
+          t = open(p, encoding="utf-8").read()
+          anchor = "## Ratchets"
+          assert anchor in t, "PLANT DID NOT LAND: anchor absent before edit"
+          t = t.replace(anchor, anchor + "\n\nThe retro currently holds 2 of a hard cap of 10.\n", 1)
+          open(p, "w", encoding="utf-8").write(t)
+          assert "2 of a hard cap of 10" in open(p, encoding="utf-8").read(), "PLANT DID NOT LAND"
+          EOF
+          if python3 /tmp/cr2-copy/test/validate.py; then
+            echo "ERROR: validator passed a standing-instruction count that disagrees with the retro"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the claim registry caught a stale ratchet"
+          fi
+
+      - name: Positive control (claim registry — a QUOTED stale number is a citation, not a claim)
+        run: |
+          set -eu
+          rm -rf /tmp/cr3-copy && cp -R . /tmp/cr3-copy
+          python3 - <<'EOF'
+          p = "/tmp/cr3-copy/README.md"
+          t = open(p, encoding="utf-8").read()
+          anchor = "## Contributing"
+          assert anchor in t, "PLANT DID NOT LAND: anchor absent before edit"
+          t = t.replace(anchor, 'It once said "15 rules earned by failure" and was wrong.\n\n' + anchor, 1)
+          open(p, "w", encoding="utf-8").write(t)
+          assert '"15 rules earned by failure"' in open(p, encoding="utf-8").read(), "PLANT DID NOT LAND"
+          EOF
+          if python3 /tmp/cr3-copy/test/validate.py; then
+            echo "OK: validator correctly PASSES — a quoted number is a citation of what a document said"
+          else
+            echo "ERROR: the registry rejected a quoted citation; documents cannot narrate their own drift"
+            exit 1
+          fi
+
+      - name: Negative self-test (claim registry — a stale canon count in word form)
+        run: |
+          set -eu
+          rm -rf /tmp/cr4-copy && cp -R . /tmp/cr4-copy
+          python3 - <<'EOF'
+          p = "/tmp/cr4-copy/plugins/task-pipeline/skills/evidence-docs/SKILL.md"
+          t = open(p, encoding="utf-8").read()
+          needle = "## The ten canons"
+          assert needle in t, "PLANT DID NOT LAND: anchor absent before edit"
+          open(p, "w", encoding="utf-8").write(t.replace(needle, "## The nine canons", 1))
+          assert "## The nine canons" in open(p, encoding="utf-8").read(), "PLANT DID NOT LAND"
+          EOF
+          if python3 /tmp/cr4-copy/test/validate.py; then
+            echo "ERROR: validator passed a canon count stated as a WORD that disagrees with the doctrine"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — word-form numbers are read, not skipped"
+          fi
+
+      - name: Negative self-test (claim registry — a stale reference-file count)
+        run: |
+          set -eu
+          rm -rf /tmp/cr5-copy && cp -R . /tmp/cr5-copy
+          python3 - <<'EOF'
+          p = "/tmp/cr5-copy/SKILL-CARD.md"
+          t = open(p, encoding="utf-8").read()
+          anchor = "## What to check before you trust it"
+          assert anchor in t, "PLANT DID NOT LAND: anchor absent before edit"
+          t = t.replace(anchor, anchor + "\n\nThere are 26 files under `references/`.\n", 1)
+          open(p, "w", encoding="utf-8").write(t)
+          assert "26 files under" in open(p, encoding="utf-8").read(), "PLANT DID NOT LAND"
+          EOF
+          if python3 /tmp/cr5-copy/test/validate.py; then
+            echo "ERROR: validator passed a reference-file count that disagrees with the directory"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the reference-file class is armed"
+          fi
+
+      - name: Negative self-test (claim registry — a stale guard count)
+        run: |
+          set -eu
+          rm -rf /tmp/cr6-copy && cp -R . /tmp/cr6-copy
+          python3 - <<'EOF'
+          p = "/tmp/cr6-copy/README.md"
+          t = open(p, encoding="utf-8").read()
+          anchor = "## Contributing"
+          assert anchor in t, "PLANT DID NOT LAND: anchor absent before edit"
+          t = t.replace(anchor, "The suite carries 46 guards.\n\n" + anchor, 1)
+          open(p, "w", encoding="utf-8").write(t)
+          assert "46 guards" in open(p, encoding="utf-8").read(), "PLANT DID NOT LAND"
+          EOF
+          if python3 /tmp/cr6-copy/test/validate.py; then
+            echo "ERROR: validator passed a guard count that disagrees with the workflow"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the founding class is still armed"
+          fi
+
+      - name: Negative self-test (claim registry — a stale dated-eval-run count)
+        run: |
+          set -eu
+          rm -rf /tmp/cr7-copy && cp -R . /tmp/cr7-copy
+          python3 - <<'EOF'
+          p = "/tmp/cr7-copy/docs/DOCMAP.md"
+          t = open(p, encoding="utf-8").read()
+          anchor = "## Ratchets"
+          assert anchor in t, "PLANT DID NOT LAND: anchor absent before edit"
+          t = t.replace(anchor, anchor + "\n\nDated eval runs recorded: 0.\n", 1)
+          open(p, "w", encoding="utf-8").write(t)
+          assert "Dated eval runs recorded: 0" in open(p, encoding="utf-8").read(), "PLANT DID NOT LAND"
+          EOF
+          if python3 /tmp/cr7-copy/test/validate.py; then
+            echo "ERROR: validator passed a dated-run count that disagrees with evals/run.py"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the eval-run class is armed"
+          fi
+
+      - name: Positive control (claim registry — a citation split by the repo's ~80-char wrap)
+        run: |
+          set -eu
+          rm -rf /tmp/cr8-copy && cp -R . /tmp/cr8-copy
+          python3 - <<'EOF'
+          p = "/tmp/cr8-copy/README.md"
+          t = open(p, encoding="utf-8").read()
+          anchor = "## Contributing"
+          assert anchor in t, "PLANT DID NOT LAND: anchor absent before edit"
+          cite = 'It used to say "fifteen rules earned by failure on a real multi-repository\nbuild" and that was wrong.\n\n'
+          open(p, "w", encoding="utf-8").write(t.replace(anchor, cite + anchor, 1))
+          assert "multi-repository\nbuild\"" in open(p, encoding="utf-8").read(), "PLANT DID NOT LAND"
+          EOF
+          if python3 /tmp/cr8-copy/test/validate.py; then
+            echo "OK: validator correctly PASSES — a quotation stays a quotation across a line break"
+          else
+            echo "ERROR: the quote exemption is per-line again; this corpus wraps at ~80 characters"
+            exit 1
+          fi
