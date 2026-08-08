@@ -26,12 +26,66 @@ over all of them.
 | R-002 | 2026-08-03 · `doc-track-audit` | `096f0f0` | When a batch of edits returns **any** error, re-verify **every** edit in that batch before reporting the batch done — not only the one that errored. | Two edits were issued together; the second failed the read-before-write check and was retried, the first was silently never applied. It was reported as done, shipped in v1.7.0, and surfaced only in a post-release audit as a question the grill never asks with a field in the brief waiting for the answer. | the harness reports per-edit outcomes in a form a check can read, or the edits are issued one per message | 2026-08-08 | `68b4428` |
 | R-003 | 2026-08-05 · `artifact-hygiene` | `13028e9` | When you fix a defect in one check, guard or detector, **immediately run that defect's definition against its siblings** before moving on — the same file's other checks, and the other files that do the same job. | `learned.md` rule 6 says *sweep the class, not the instance*, and this is its **third** recorded failure to be applied to itself. 2026-08-03 `enforcement-audit`: a fix scoped to references→README while the same class lived in six other places. 2026-08-03 `root-cause`: nine findings, one missing matrix row. 2026-08-05: check 2's false-positive class was solved, and check 4 — its immediate sibling, in the same file, written in the same hour — shipped with the identical bug and fired on this run's own documents. Two instances were worth notes; `audit.md` says a class seen twice becomes a mechanism rather than a third ledger row. | a check can compare sibling detectors for a shared false-positive class — which needs the classes to be named in a machine-readable form first | 2026-08-08 | `68b4428` |
 | R-004 | 2026-08-06 · `graph-staleness` | `2ce6ecc` | When a gate runs, the **next command must be conditional on its exit code** — never a gate and a commit in one block separated by newlines. | The hygiene gate returned FAIL and the `git commit` and `git push` beneath it ran anyway, because they were separate lines rather than a chain. The gate was read and not obeyed, which is indistinguishable in the transcript from a gate that passed. `learned.md` rule 11 makes the gate *return* the right code; nothing made the caller *use* it. | a harness or wrapper refuses to run a mutating command after a non-zero gate in the same block | 2026-08-08 | `68b4428` |
+| R-005 | 2026-08-08 · `audit-followup`/M8 | `5726f7f` | When a change adds or widens a **check**, get an independent reader on it before merge — your own probes only exercise the shapes you already thought of. | M8 probed its new guard in four shapes and shipped it with a proven false-negative path: the ordered-list branch scanned the whole file and compared only the first pair, so a violation after a correct list was never examined. Two PR review passes found that, plus a live defect in the shipped `evidence-docs` navigator that **no pairwise shape could see by construction** — a table cell naming one act. Five probes written by the author found neither. This is not R-001 (that one doubts a silent probe); this is the probe being confident and complete about the wrong set. | a second reader — human or agent — is dispatched by a stage rather than by the repository happening to run a bot on PRs | 2026-08-08 | `5726f7f` |
 
 Retire on **any** of: it became a check · every path/command it names is gone · it
 has not fired in the last five run stamps. At eleven rows, the oldest never-fired
 row goes — the cap is not negotiable, ranking is.
 
 ## Recent log — entries from the last five run stamps (newest first)
+
+### 2026-08-08 · `audit-followup`/M8 · five probes that all passed, and the two defects they could not see
+
+**Symptom.** The change that widens rule 21's guard from one file to the class shipped to
+review with two defects its own verification could not detect.
+
+(a) **A proven false-negative path.** The ordered-list branch scanned the whole file and
+compared only the *first* prune/stamp pair. A violating list placed after a correct one
+was never examined. Four planted-defect probes passed, because every one of them planted
+its defect as the first pair.
+
+(b) **A shape with no pair at all.** `evidence-docs/SKILL.md` still taught *"prune first,
+cap of ten"* in a table cell. Every shape written so far compares **two** act words; a cell that
+names one is invisible to all of them **by construction**, not by oversight. It was live
+in the shipped skill and no probe could have found it, because a probe tests the predicate
+you wrote.
+
+**Surfaced at:** stage 7, both — by the PR review bot, on two separate passes.
+
+**Owned by:** stage 6. That is where a new check is supposed to be proven, and where
+"proven" was defined as *the probes I wrote pass*.
+
+**Root cause.** A probe is written by whoever wrote the check, from the same model of the
+problem. It proves the check catches what its author imagined and is silent about the rest
+— which is exactly the failure mode `gates.md` names for a green nobody watched fail,
+one level up: here the check *was* watched failing, five times, on five shapes its author
+had thought of.
+
+The run also produced three defects in its own **prose** — a surface count stated five
+different ways, a 225-character line against this repo's own ~80 rule, and an acceptance
+verdict contradicting the ledger it summarised. Those are the same class this release
+fixes, committed while describing the fix.
+
+**Fix, by grade.**
+1. *(mechanical)* P3 moved inside the paragraph loop — scoped to one list block, **every**
+   adjacent pair compared, history exemption computed once per paragraph including the
+   preceding one. P5 added for the lone directive. Four negative self-tests; floor 120 → 124.
+2. *(mechanical)* Every count deleted rather than corrected. The guard's `SCOPE` comment
+   now states what it does **not** cover, and invariant 34 points at that comment instead
+   of restating the shape count, so the two cannot disagree.
+3. *(standing instruction)* **R-005** — an independent reader on any change that adds or
+   widens a check. This is the one thing above that no check can decide.
+
+**Axis, measured rather than felt.** `test/validate.py` was edited three times for the
+same reason, which is the loop guard's trigger. Split, the two axes disagree: the guard's
+shapes gave 5 new findings and 0 self-inflicted (still paying); the run's own prose gave 3
+findings and 3 self-inflicted (exhausted). Lumping them would have stopped the half that
+was working and continued the half that was not.
+
+**The check that catches it next time:** for (a) and (b), the four new negative self-tests
+plus the stated scope. For the class — a check written from its author's own model — there
+is none, and that is what R-005 is for.
+
 
 ### 2026-08-08 · `audit-followup` / M1 · a rule fixed in one file of nine, and the wrong copy edited while fixing it
 
@@ -281,6 +335,7 @@ One line per run, appended at stage 10. This is what makes "five runs" countable
 
 | Date | Topic | Commit | Verdict | Retro |
 |---|---|---|---|---|
+| 2026-08-08 | `audit-followup` / M8 `prune-order-sweep` | `5726f7f` | 1 REQ · verified against a check seen failing **five** ways · PR #10, two review passes, 6 findings confirmed of which 3 new · carry-over 9 rows, 0 unresolved, row 4 closed | 1 entry · **5 standing (was 4)** · retired 0 · added 1 (R-005) · R-001 fired 5× · R-002, R-003, R-004 all fired · guards 120 → 124 |
 | 2026-08-08 | `audit-followup` / M1 `truth-restore` | `68b4428` | 7 REQ · 6 verified by a proven check · 1 deferred to M8 (REQ-013, added mid-run) · carry-over 6 rows, 0 unresolved, 1 resolved · graph 27 commits stale → 0 | 1 entry · 4 standing · retired 0 · added 0 · **all four fired** · guards 120 |
 | 2026-08-06 | `graph-staleness` | `2ce6ecc` | 13 REQ · 12 verified · 1 deferred (tag, by operator decision) | 1 entry · 4 standing (was 3) · retired 0 · added 1 · R-001, R-002, R-003 all fired |
 | 2026-08-05 | `false-success` | `348357e` | 10 REQ · 9 verified by a proven check · 1 `review` (the Cursor rule, per the matrix) · carry-over 1 row, 0 unresolved | 2 entries · 3 standing · retired 0 · added 0 · **R-001, R-002 and R-003 all fired** · guards 80 → 95 |
