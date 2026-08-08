@@ -1,5 +1,56 @@
 # Changelog
 
+## v1.26.0
+
+### A green suite is not a rendered page
+
+Stages 5–6 verified a web front end by **reading the diff**. Nothing in the flow ever
+opened it. That is not a gap in the tests — a suite proves the code does what its
+assertions say, and it cannot see a component that renders correctly and lands under a
+fixed header, a request that 404s while every unit test mocks it, or a console error that
+costs nothing at test time. Stage 8 had the same shape one level out: a health check
+proves the server answered, and a `200` says nothing about a bundle that never loaded.
+
+`audit.md` already names this seam — `L6→L7`, *is there an executed observable a user
+reaches* — and no stage owned it. A grep over `stages.md` and `tdd.md` for *rendered*,
+*browser*, *screenshot* returned nothing at all before this change.
+
+**`chrome-devtools` is now a recommended companion**, wired where it pays:
+
+- **stages 5–6** — load the surface, snapshot it, and read the console and the network log
+  before calling it green;
+- **stage 8** — open the deployed page rather than curling it.
+
+**Absent, the run says so in those words.** *"Verified by reading the diff"* is a weaker
+claim than *"the page rendered"*, and the close-out records it as the weaker one instead of
+letting a passing suite stand in for a surface nobody looked at. It is never a gate.
+
+**The boundary is load-bearing and is written down.** A CLI, a library or a backend
+service is never offered a browser. Offering one to a project with no browser is the
+fastest way to teach an agent that the recommendation is noise — the same reasoning the
+false-positive budget applies to gates.
+
+### The list that existed twice and was never compared
+
+Adding the companion surfaced something older: `companion-skills.md` states the
+optional-companion list **twice** — as a table a reader consults, and as the block the
+agent prints before stage 0 — and nothing compared them. A companion in the table and
+missing from the block is a recommendation the operator is never offered; the reverse is
+an install line for something the table does not explain. **Both copies are used**, which
+is what makes it `learned.md` rule 20 rather than a style preference.
+
+`chrome-devtools` would have been the first to drift. There is now a guard, probed both
+ways, and invariant 36.
+
+**One thing this release did not need, against expectation.** The reconnaissance said the
+skill's `description` had nine free characters of 1024 and that adding a companion would
+force a displacement — a real cost, since the description is the only thing a router reads.
+Checking the analogy first showed the premise was wrong: `graphify`, `wiki-update`,
+`context7` and `agent-sync` are **not** in the description either. Only `super-ux` is, and
+only because it is a conditional *requirement* that blocks a gate. A companion is declared
+in `companion-skills.md` and the stage gates. No displacement, because the change never
+belonged to that surface.
+
 ## v1.25.0
 
 ### One check over one number, made into a registry over the class

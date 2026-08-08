@@ -331,6 +331,16 @@ never that the work was skipped quietly.
   to deploy on a red or partial run. **The carry-over count is printed beside this
   verdict** — a ratchet nobody prints is a TODO with a better name
   ([`audit.md`](audit.md)).
+- **Web front end? Then the surface is checked in a browser, not in the diff.**
+  A passing suite proves the code does what its assertions say. It does not prove the
+  page rendered — a component can be correct and land under a fixed header, a request
+  can 404 while every unit test mocks it, and a console error costs nothing at test
+  time. Where `chrome-devtools` is connected ([`companion-skills.md`](companion-skills.md)):
+  load the surface, take a snapshot, and read **the console and the network log**
+  before calling it green. Absent, say the surface was verified **by reading the
+  diff** — that is a weaker claim and the close-out records it as one, rather than
+  letting "tests pass" stand in for "it renders". This is the `L6→L7` seam of
+  [`audit.md`](audit.md)'s ladder: *is there an executed observable a user reaches?*
 
 ## 7 — Lint + deploy
 - **Freedom: low** — outward and irreversible — the authorization floor is exact or the stage stops ([`gates.md`](gates.md) → *Axis C*).
@@ -363,6 +373,13 @@ never that the work was skipped quietly.
   Where deploy happens in CI, verify the **deploy** job and not only the build —
   a green build beside a skipped deploy is the commonest way a run reports success
   while nothing shipped.
+- **A deployed web target is opened, not curled.** A `200` proves the server
+  answered; it says nothing about whether the page rendered, whether a bundle 404'd,
+  or whether the console filled with errors on load — all three ship green past a
+  health check. Where `chrome-devtools` is connected, load the deployed URL and read
+  the console and the network log; quote what you read, not that you looked
+  ([`companion-skills.md`](companion-skills.md)). Absent → say the check was an HTTP
+  response only, which is the honest name for it.
 - **Read the CI verdict for the deploy's own commit** ([`conventions.md`](conventions.md)
   → *The CI verdict*): the run's conclusion quoted, the **failing step's log quoted**
   on anything but `success`, and one of the three states stated — including **`no run

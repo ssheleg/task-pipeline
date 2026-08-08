@@ -738,6 +738,49 @@ if os.path.isfile(_learned) and os.path.isfile(_rp21):
                                  f"reads the stamp, so a prune ahead of it never runs on real "
                                  f"data). Found: {_m.group(0).strip()!r}")
 
+# The companion list exists TWICE in companion-skills.md — as the matrix a reader consults
+# and as the preflight block the agent prints — and nothing compared them. That is
+# learned.md rule 20's shape exactly (a thing that exists twice; the useful question is which
+# one is used, and here BOTH are: the reader reads one, the operator is shown the other).
+# A companion added to the matrix and missing from the preflight is a recommendation nobody
+# is ever offered; the reverse is an install line for something the matrix does not explain.
+# Found while adding chrome-devtools, which would have been the first to drift.
+_cs = os.path.join(refdir, "companion-skills.md")
+if os.path.isfile(_cs):
+    _cst = open(_cs, encoding="utf-8").read()
+    # matrix rows: bolded name in the first cell, minus the struck-through "not a dependency" rows
+    _matrix = set()
+    for _row in re.findall(r"^\|\s*\*\*([^*|]+)\*\*", _cst, re.M):
+        _name = re.split(r"\s*\(", _row)[0].strip()
+        _name = re.sub(r"^\[|\]$", "", _name)      # the matrix wraps some names in a markdown link
+        _matrix.add(_name.lower())
+    _pre = _cst.split("Preflight (emit before stage 0)")[-1]
+    _block = re.search(r"```(.*?)```", _pre, re.S)
+    if _matrix and _block:
+        # The preflight names a companion then dashes into its explanation; take everything
+        # before the dash, so "Figma MCP" arrives whole rather than truncated at the space.
+        _offered = set()
+        for _line in re.findall(r"^\s*[✓✗]\s+(.+?)\s+[—-]", _block.group(1), re.M):
+            _offered.add(re.sub(r"\s*mcp$", "", _line.strip().lower()))
+
+        def _same(_a, _b):
+            return _a == _b or _a.startswith(_b) or _b.startswith(_a)
+
+        # BOTH directions (learned.md rule 2). The first version checked matrix -> preflight
+        # only, in a repository whose rule 2 is precisely "compute the mapping in both
+        # directions" — and the reverse is a real failure with a different shape: an install
+        # line for a companion the matrix never explains, which is what an operator would be
+        # asked to run without being told why.
+        for _m in sorted(_m for _m in _matrix if not any(_same(_m, _o) for _o in _offered)):
+            fail("references/companion-skills.md: a companion is in the matrix and not in the "
+                 f"preflight block — {_m!r}. A companion the operator is never offered is a "
+                 "recommendation that exists only for the reader (learned.md rule 20: the list "
+                 "exists twice and both copies are used)")
+        for _o in sorted(_o for _o in _offered if not any(_same(_o, _m) for _m in _matrix)):
+            fail("references/companion-skills.md: a companion is offered in the preflight and "
+                 f"absent from the matrix — {_o!r}. The operator is asked to install something "
+                 "the table never explains, which is the same drift read from the other side")
+
 # references/artifacts.md maps stage -> what it WRITES. The reverse direction — what
 # each stage READS and from where — is the one an agent actually needs at runtime,
 # and it was absent for nine releases: learned.md rule 2 (compute the mapping in both

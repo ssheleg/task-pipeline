@@ -297,7 +297,16 @@ one. Every class prints `ok`/`dormant` beside the verdict, because a registry re
 green over classes it never looked at is the false success it exists to catch.
 *(guard: `— derive the number or delete it. This class is registered `)*
 
-**36. Every invariant above names the guard that enforces it, and that guard exists.**This list claims to be *what the validator enforces*; it was eight guards behind when
+**36. The companion matrix and the preflight block name the same companions.**
+`companion-skills.md` states the optional-companion list **twice** — as a table a reader
+consults, and as the block the agent prints before stage 0 — and nothing compared them. A
+companion in the table and missing from the block is a recommendation the operator is never
+offered; the reverse is an install line for something the table does not explain. Both
+copies are used, which is what makes this `learned.md` rule 20 rather than a style point.
+Found while adding `chrome-devtools`, which would have been the first to drift.
+*(guard: `a companion is in the matrix and not in the `)*
+
+**37. Every invariant above names the guard that enforces it, and that guard exists.**This list claims to be *what the validator enforces*; it was eight guards behind when
 an audit measured it. A claim of enforcement is now checked like any other claim.
 *(guard: `whose message does not appear in`)* — and a cited literal must lie inside
 a **single** string in `test/validate.py`: the check reads that file as text, so a
