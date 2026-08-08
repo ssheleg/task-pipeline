@@ -330,7 +330,10 @@ never that the work was skipped quietly.
   is covered; no `skip`/`xfail` smuggling a red suite past the gate. Never advance
   to deploy on a red or partial run. **The carry-over count is printed beside this
   verdict** — a ratchet nobody prints is a TODO with a better name
-  ([`audit.md`](audit.md)).
+  ([`audit.md`](audit.md)) — **and so are the two disclosures**, `abstained` and
+  `unlooked` ([`gates.md`](gates.md) → *Disclosures*): what the run declined to claim,
+  and what a check never looked at. Neither has a floor and neither may be targeted; a
+  target on an abstention count is an instruction to guess.
 - **Web front end? Then the surface is checked in a browser, not in the diff.**
   A passing suite proves the code does what its assertions say. It does not prove the
   page rendered — a component can be correct and land under a fixed header, a request

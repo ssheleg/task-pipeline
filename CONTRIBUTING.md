@@ -317,7 +317,19 @@ stall, which is why it is not belt-and-braces. Entry **rotation** ("entries olde
 stamps move to the archive") is a different mechanism and is deliberately out of scope.
 *(guard: `states the cold-retirement condition as five run stamp`)*
 
-**38. Every invariant above names the guard that enforces it, and that guard exists.**This list claims to be *what the validator enforces*; it was eight guards behind when
+**38. Every worked GATE verdict prints both disclosures.** `abstained` — what the run
+declined to claim — and `unlooked` — what a check never looked at. Without them a `PASS`
+reads as *verified* rather than as *"green, and here is what nobody claimed"*. They are
+**not** ratchets and the distinction is load-bearing: a ratchet may only shrink, and an
+abstention count under that rule pressures exactly one thing — claiming more. A run
+reporting `abstained: 0` is not more careful; it stopped saying *I don't know*. Refusals
+and wrong answers are communicating vessels, so a disclosure has no floor, no direction,
+and **may never be given a target** — a target on an abstention count is an instruction to
+guess. This repository had eight vocabularies for declining to claim and, until v1.28.0,
+zero counters.
+*(guard: `a worked GATE verdict omits `)*
+
+**39. Every invariant above names the guard that enforces it, and that guard exists.**This list claims to be *what the validator enforces*; it was eight guards behind when
 an audit measured it. A claim of enforcement is now checked like any other claim.
 *(guard: `whose message does not appear in`)* — and a cited literal must lie inside
 a **single** string in `test/validate.py`: the check reads that file as text, so a

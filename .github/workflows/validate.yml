@@ -2478,3 +2478,22 @@ jobs:
           else
             echo "OK: validator correctly FAILs — emphasis is normalised before matching"
           fi
+
+      - name: Negative self-test (a worked GATE verdict that prints no disclosures)
+        run: |
+          set -eu
+          rm -rf /tmp/disc-copy && cp -R . /tmp/disc-copy
+          python3 - <<'EOF'
+          p = "/tmp/disc-copy/plugins/task-pipeline/skills/task-pipeline/references/gates.md"
+          t = open(p, encoding="utf-8").read()
+          needle = "  abstained: 0 · unlooked: 4 (3 dormant · 1 skip — no submodules in this repo)\n"
+          assert needle in t, "PLANT DID NOT LAND: anchor absent before edit"
+          open(p, "w", encoding="utf-8").write(t.replace(needle, "", 1))
+          assert "abstained: 0 · unlooked: 4" not in open(p, encoding="utf-8").read(), "PLANT DID NOT LAND"
+          EOF
+          if python3 /tmp/disc-copy/test/validate.py; then
+            echo "ERROR: validator passed a GATE verdict that reads as 'verified' rather than as 'green, and here is what nobody claimed'"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — both disclosures print beside every worked verdict"
+          fi

@@ -826,6 +826,37 @@ for _f in _COLD_SURFACES:
                  "pipeline and stops when the pipeline is not used, which is exactly when a "
                  "stale rule matters most. Both units, on every surface that states it.")
 
+# Every worked GATE verdict in the doctrine must print BOTH disclosures. The formats live in
+# four files, and this bundle's recurring defect is one statement updated on one surface — so
+# the example verdicts are held together the way the stage list and the retro order are.
+#
+# Why disclosures and not a ratchet: a ratchet may only shrink, and an abstention count under
+# that rule pressures exactly one thing — claiming more. A run reaching `abstained: 0` is not
+# more careful, it stopped saying "I don't know". Refusals and wrong answers are communicating
+# vessels. gates.md -> Disclosures states the rule; this guard only holds the print.
+_DISCLOSURE_FILES = [
+    "plugins/task-pipeline/skills/task-pipeline/references/acceptance.md",
+    "plugins/task-pipeline/skills/task-pipeline/references/audit.md",
+    "plugins/task-pipeline/skills/task-pipeline/references/gates.md",
+    "plugins/task-pipeline/skills/task-pipeline/references/retrospective.md",
+]
+for _f in _DISCLOSURE_FILES:
+    _fp = os.path.join(ROOT, _f)
+    if not os.path.isfile(_fp):
+        continue
+    _ft = open(_fp, encoding="utf-8").read()
+    for _blk in re.findall(r"```[^\n]*\n(.*?)```", _ft, re.S):
+        if not re.search(r"^GATE\s+\d+", _blk, re.M):
+            continue
+        _flat = re.sub(r"\*+", "", re.sub(r"\s+", " ", _blk))
+        _missing = [_d for _d in ("abstained", "unlooked") if _d not in _flat]
+        if _missing:
+            _line = _ft[:_ft.find(_blk)].count("\n") + 1
+            fail(f"{_f}:{_line}: a worked GATE verdict omits {' and '.join(_missing)} — "
+                 "a verdict that prints neither reads as 'verified' rather than as 'green, "
+                 "and here is what nobody claimed and what nothing looked at' "
+                 "(gates.md -> Disclosures)")
+
 # references/artifacts.md maps stage -> what it WRITES. The reverse direction — what
 # each stage READS and from where — is the one an agent actually needs at runtime,
 # and it was absent for nine releases: learned.md rule 2 (compute the mapping in both
