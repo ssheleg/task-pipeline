@@ -368,9 +368,20 @@ for _tens, _tv in (("twenty", 20), ("thirty", 30), ("forty", 40)):
         _NUM_WORDS[f"{_tens}-{_u}"] = _tv + _uv
 _NUM = r"(\d+|" + "|".join(sorted(_NUM_WORDS, key=len, reverse=True)) + r")"
 
+_UNPARSED_WORDS = set()
+
 def _as_int(tok):
+    """None means 'this token is outside the map'. The map stops in the forties, and the
+    guard count is already past a hundred — so a word form above the ceiling would be
+    SKIPPED. Skipping is fine; skipping in silence is not (canon 9), so every unparseable
+    token is collected and printed beside the verdict."""
     tok = tok.strip().lower()
-    return int(tok) if tok.isdigit() else _NUM_WORDS.get(tok)
+    if tok.isdigit():
+        return int(tok)
+    val = _NUM_WORDS.get(tok)
+    if val is None:
+        _UNPARSED_WORDS.add(tok)
+    return val
 
 _neg_wf = os.path.join(ROOT, ".github/workflows/validate.yml")   # read again further down
 _neg_n = (len(re.findall(r"^\s*- name:\s*Negative self-test",
@@ -402,7 +413,7 @@ def _count_run_headings(path):
 _CLAIM_REGISTRY = [
     ("negative self-tests",
      r"\b" + _NUM + r"\+?\s+(?:of\s+\d+\s+)?(?:structural\s+)?guards\b(?!\s+behind)",
-     lambda: _count_re(".github/workflows/validate.yml", r"^\s*- name:\s*Negative self-test"),
+     lambda: _neg_n,          # one source: computed once above, not a second identical regex
      "two living documents claimed 46 after the suite reached 50"),
 
     ("rules in learned.md",
@@ -447,13 +458,20 @@ def _is_quoted(text, match):
     claim about now — `evals/RESULTS.md` quotes its own stale "Dated runs recorded 0" while
     narrating the incident that put this registry here. Deterministic and vocabulary-free:
     no marker list to grow per incident, which is the drift class this file is about.
+
+    Scoped to the PARAGRAPH, not the line. Its first version checked one line, and this
+    repository wraps prose at ~80 characters — so a quotation split across a line break
+    stopped being a quotation and the citation tripped the check. That is the third time a
+    per-line predicate has failed on this wrapping corpus (v1.24.0's marker guard was the
+    second), which is why the unit is written down here rather than discovered again.
     Cost, stated: a live claim someone chose to wrap in quotes is exempt."""
-    ls = text.rfind("\n", 0, match.start()) + 1
-    le = text.find("\n", match.end())
-    le = le if le > 0 else len(text)
-    line = text[ls:le]
-    for _q in re.finditer(r'"[^"\n]*"', line):
-        if _q.start() + ls <= match.start() and match.end() <= _q.end() + ls:
+    ps = text.rfind("\n\n", 0, match.start())
+    ps = 0 if ps < 0 else ps + 2
+    pe = text.find("\n\n", match.end())
+    pe = len(text) if pe < 0 else pe
+    para, off = text[ps:pe], ps
+    for _q in re.finditer(r'"[^"]*"', para, re.S):
+        if _q.start() + off <= match.start() and match.end() <= _q.end() + off:
             return True
     return False
 
@@ -2297,4 +2315,5 @@ if errors:
         print(" - " + e)
     sys.exit(1)
 print("PASS: task-pipeline structure valid")
-print("  claim registry — " + " · ".join(_CLAIM_STATES))
+print("  claim registry — " + " · ".join(_CLAIM_STATES)
+      + (" · UNREAD number-words: " + ", ".join(sorted(_UNPARSED_WORDS)) if _UNPARSED_WORDS else ""))

@@ -47,7 +47,7 @@ Three true rows beat twenty imported ones. Extended when a new class appears.
 | A new or changed guard | `test/validate.py`, a negative self-test in `.github/workflows/validate.yml`, `CONTRIBUTING.md` → *The invariants*, `test/negatives.py` floor | `npm run test:all` + the invariant-count review |
 | A user-visible capability, install path or stage | `README.md`, `CHANGELOG.md`, `cursor/rules/task-pipeline.mdc`, and **every** version surface — `package.json`, `.claude-plugin/marketplace.json`, `plugins/task-pipeline/.claude-plugin/plugin.json`, the top `CHANGELOG.md` heading, `SKILL-CARD.md`'s Version row | `test/validate.py` — blurb/final-stage plus the version-sync check, which enforces all five and caught this row calling them "the four version manifests" on 2026-08-08 |
 | A reference file's headings | that file's `## Contents` list | `test/validate.py` — Contents-vs-headings comparison |
-| A number stated in a living document | recompute it | `test/validate.py` — guard-count comparison |
+| A number stated in a living document | recompute it, or delete it | `test/validate.py` — **the claim registry**: one row per claim class, each naming the pattern that recognises the claim, the command that computes the truth, and the incident that earned the row. Reads digits **and** word forms; a quoted number is a citation and exempt; every class prints `ok`/`dormant` beside the verdict. A count of an enumeration inside one sentence is not computable from outside it — those are **deleted**, not gated |
 | Anything a run got wrong | `docs/superpowers/retro.md` (stamp → prune → entry, with commits) | `review` — no check can decide whether a run diverged |
 
 ## Gates
@@ -72,6 +72,7 @@ a duplicate, and a duplicate that disagrees is worse than either half.
 | Standing instructions (hard cap 10) | `docs/superpowers/retro.md` → *Standing instructions* | `grep -cE '^\| R-[0-9]+' docs/superpowers/retro.md` |
 | Dated eval runs, and the blind/self-observed split | `evals/RESULTS.md` → *Ratchet* | `python3 evals/run.py` |
 | Structural guards proven against a planted defect | `.github/workflows/validate.yml` | `npm run test:all` |
+| Which claim classes are armed vs dormant | `test/validate.py` → the claim registry | `npm test` — printed beside the verdict |
 | Carry-over rows of a run | that run's `…-carryover.md` | the run's own gate verdicts |
 
 **This table names homes and commands, never values.** It used to carry the numbers,
