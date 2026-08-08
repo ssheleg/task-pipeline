@@ -27,12 +27,57 @@ over all of them.
 | R-003 | 2026-08-05 · `artifact-hygiene` | `13028e9` | When you fix a defect in one check, guard or detector, **immediately run that defect's definition against its siblings** before moving on — the same file's other checks, and the other files that do the same job. | `learned.md` rule 6 says *sweep the class, not the instance*, and this is its **third** recorded failure to be applied to itself. 2026-08-03 `enforcement-audit`: a fix scoped to references→README while the same class lived in six other places. 2026-08-03 `root-cause`: nine findings, one missing matrix row. 2026-08-05: check 2's false-positive class was solved, and check 4 — its immediate sibling, in the same file, written in the same hour — shipped with the identical bug and fired on this run's own documents. Two instances were worth notes; `audit.md` says a class seen twice becomes a mechanism rather than a third ledger row. | a check can compare sibling detectors for a shared false-positive class — which needs the classes to be named in a machine-readable form first | 2026-08-08 | `68b4428` |
 | R-004 | 2026-08-06 · `graph-staleness` | `2ce6ecc` | When a gate runs, the **next command must be conditional on its exit code** — never a gate and a commit in one block separated by newlines. | The hygiene gate returned FAIL and the `git commit` and `git push` beneath it ran anyway, because they were separate lines rather than a chain. The gate was read and not obeyed, which is indistinguishable in the transcript from a gate that passed. `learned.md` rule 11 makes the gate *return* the right code; nothing made the caller *use* it. | a harness or wrapper refuses to run a mutating command after a non-zero gate in the same block | 2026-08-08 | `68b4428` |
 | R-005 | 2026-08-08 · `audit-followup`/M8 | `5726f7f` | When a change adds or widens a **check**, get an independent reader on it before merge — your own probes only exercise the shapes you already thought of. | M8 probed its new guard in four shapes and shipped it with a proven false-negative path: the ordered-list branch scanned the whole file and compared only the first pair, so a violation after a correct list was never examined. Two PR review passes found that, plus a live defect in the shipped `evidence-docs` navigator that **no pairwise shape could see by construction** — a table cell naming one act. Five probes written by the author found neither. This is not R-001 (that one doubts a silent probe); this is the probe being confident and complete about the wrong set. | a second reader — human or agent — is dispatched by a stage rather than by the repository happening to run a bot on PRs | 2026-08-08 | `5726f7f` |
+| R-006 | 2026-08-08 · `audit-followup`/M2 | `44bdf53` | A finding is closed when the **behaviour** changes. Reporting the gap — a `dormant` line, a printed `skip`, a note beside the verdict — is honest and is **not** a fix; say which one you did. | The claim registry's number-word map stopped at forty-nine while the guard count was 130, so a word form above the ceiling was skipped **in silence**. The fix shipped was: print the unread tokens. That is a real improvement and the gap was untouched — a word-form claim above fifty was still skipped, now with a note. It was recorded as addressed and the next review round reopened it, correctly. `gates.md` already says a `dormant` state must be printed; nothing said that printing it does not discharge the finding. | a close-out records, per finding, whether the behaviour or only the reporting changed — and a check can read that field | 2026-08-08 | `44bdf53` |
 
 Retire on **any** of: it became a check · every path/command it names is gone · it
 has not fired in the last five run stamps. At eleven rows, the oldest never-fired
 row goes — the cap is not negotiable, ranking is.
 
 ## Recent log — entries from the last five run stamps (newest first)
+
+### 2026-08-08 · `audit-followup`/M2 · a limit made visible, reported as a limit removed
+
+**Symptom.** Review round two found that the claim registry's number-word map stopped at
+forty-nine while the guard count it checks was already 130 — so any claim written as a word
+above the ceiling would be **skipped without a word**. The fix shipped was to collect
+unparseable tokens and print them beside the verdict, and the finding was recorded as
+addressed.
+
+It was not. A word-form claim of *"fifty-two files under `references/`"* was still skipped;
+it now merely said so. Review round three reopened it, and the probe settled it: that exact
+string is caught today and was not caught then.
+
+**Surfaced at:** stage 7, by the review, twice — once to open it and once to reject the fix.
+
+**Owned by:** stage 6. That is where a fix is supposed to be proven, and where "proven" was
+allowed to mean *the gap is now visible* rather than *the gap is gone*.
+
+**Root cause.** `gates.md` is emphatic that a `dormant` or `skip` state must be **printed** —
+a mechanism that reports nothing when it looked at nothing is the false success the whole
+file is about. That doctrine is correct and it was followed. What no line said is that
+printing the gap does not **discharge** the finding. Having done the honest thing, it was
+easy to record it as the whole thing.
+
+The three review rounds together found thirteen issues; the module's own five probes found
+none of them. That is the second consecutive module with that count, and it is exactly what
+`R-005` was added for one release ago — it fired, it was followed, and it does not make the
+probes better, because a probe is written from the same model of the problem as the check.
+
+**Fix, by grade.**
+1. *(mechanical)* The map now runs through ninety, and the lift was probed against the case
+   that exposed it. The eval-runs row was the only one of six bypassing the shared
+   digit-and-word matcher — a false negative on the very incident the registry is named
+   after — and now uses it.
+2. *(mechanical)* `CONTRIBUTING.md` invariant 13 still described the pre-registry single
+   check while invariant 35 described the registry: two invariants over one guard, one
+   stale. 13 now points at 35 and names no surfaces of its own.
+3. *(standing instruction)* **R-006** — a finding is closed when the behaviour changes;
+   reporting the gap is honest and is not a fix, and the close-out says which one happened.
+
+**The check that catches it next time:** none, yet — and that is the retirement condition
+written into R-006. When a close-out records per finding whether behaviour or only reporting
+changed, a check can read that field and the instruction leaves.
+
 
 ### 2026-08-08 · `audit-followup`/M8 · five probes that all passed, and the two defects they could not see
 
@@ -335,6 +380,7 @@ One line per run, appended at stage 10. This is what makes "five runs" countable
 
 | Date | Topic | Commit | Verdict | Retro |
 |---|---|---|---|---|
+| 2026-08-08 | `audit-followup` / M2 `claim-registry` | `44bdf53` | 1 REQ + carry-over row 7 · six claim classes, each armed · **three review rounds, 13 findings, none of them found by the module's own probes** · carry-over 9 rows, 6 open, 0 unresolved | 1 entry · **6 standing (was 5)** · retired 0 · added 1 (R-006) · R-001, R-002, R-003, R-004, R-005 all fired · guards 124 → 130 |
 | 2026-08-08 | `audit-followup` / M8 `prune-order-sweep` | `5726f7f` | 1 REQ · verified against a check seen failing **five** ways · PR #10, two review passes, 6 findings confirmed of which 3 new · carry-over 9 rows, 0 unresolved, row 4 closed | 1 entry · **5 standing (was 4)** · retired 0 · added 1 (R-005) · R-001 fired 5× · R-002, R-003, R-004 all fired · guards 120 → 124 |
 | 2026-08-08 | `audit-followup` / M1 `truth-restore` | `68b4428` | 7 REQ · 6 verified by a proven check · 1 deferred to M8 (REQ-013, added mid-run) · carry-over 6 rows, 0 unresolved, 1 resolved · graph 27 commits stale → 0 | 1 entry · 4 standing · retired 0 · added 0 · **all four fired** · guards 120 |
 | 2026-08-06 | `graph-staleness` | `2ce6ecc` | 13 REQ · 12 verified · 1 deferred (tag, by operator decision) | 1 entry · 4 standing (was 3) · retired 0 · added 1 · R-001, R-002, R-003 all fired |
