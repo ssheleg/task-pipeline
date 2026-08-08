@@ -36,6 +36,56 @@ row goes — the cap is not negotiable, ranking is.
 
 ## Recent log — entries from the last five run stamps (newest first)
 
+### 2026-08-09 · `audit-followup`/M3 · a guard that skipped the file defining the thing it guards
+
+**Symptom.** The module gave the cold-retirement trigger a second unit and shipped a guard
+holding both units together across every surface. Review returned **two Important** — the
+first of this programme — and both were in that guard.
+
+(a) The matcher never matched `references/retrospective.md`. Its canonical row reads *the
+last **five run stamps***, with the emphasis markers **inside** the phrase, and the guard
+normalised whitespace only. The one file that **defines** the trigger was silently skipped.
+
+(b) `commands/task-pipeline.md` restates the retirement triggers verbatim, still carried
+only the stamp unit, and was not in the guard's surface list. The guard's own comment said
+*seven surfaces* over a list of six.
+
+**Surfaced at:** stage 7, both, by review.
+
+**Owned by:** stage 6. The guard was probed — once, against `acceptance.md`, which has no
+bold interrupting the phrase. It fired, it was green, and it had never read the canonical
+file.
+
+**Root cause.** A probe demonstrates that a check can fire. It does not demonstrate *what
+the check reads*, and choosing the most convenient file to plant in selects for the surface
+with the least formatting. Both defects were **silent**: green over a file never opened,
+and green over a file never listed.
+
+Underneath is a class this bundle has now met three times, always by **formatting rather
+than content** — a citation wrapped across two lines, a marker split by the ~80-column wrap,
+and now emphasis inside a phrase. Each was recorded as a comment in the guard that hit it,
+and [`gates.md`](../../plugins/task-pipeline/skills/task-pipeline/references/gates.md) —
+the file that teaches how to write a check — said nothing.
+
+**Fix, by grade.**
+1. *(mechanical)* Emphasis is normalised alongside whitespace; the seventh surface is in the
+   list and corrected; the comment's count is replaced by *the list is the count*. A negative
+   self-test now plants **in `retrospective.md`**, the file the old guard skipped.
+2. *(doctrine — the class, not the instance)* `gates.md` → *Writing the check itself* gains
+   the rule with its three incidents in a table: normalise the corpus's own formatting, state
+   which unit you chose, and **plant the probe in the file that defines the thing** rather
+   than the most convenient one. `audit.md` says a class seen twice becomes a mechanism; this
+   was the third, so a fourth comment would have been the thing that rule forbids.
+
+**Standing instruction: none added.** R-005 requires an independent reader on a change that
+adds or widens a check; it fired and found both. The gap was never that a rule went unread —
+it is that the probe was written from the same model as the check, which is R-005's own
+stated limit, and `gates.md` now carries the mechanical part.
+
+**The check that catches it next time:** the new self-test for this instance; for the class,
+the `gates.md` rule and the next reviewer.
+
+
 ### 2026-08-08 · `audit-followup`/M7 · a one-directional check, in the repository whose rule 2 is both directions
 
 **Symptom.** The module added a guard comparing the companion **matrix** against the
@@ -368,6 +418,7 @@ One line per run, appended at stage 10. This is what makes "five runs" countable
 
 | Date | Topic | Commit | Verdict | Retro |
 |---|---|---|---|---|
+| 2026-08-09 | `audit-followup` / M3 `retro-continuity` | `a079192` | 1 REQ + ledger row 1 corrected · **one review round, 3 findings, TWO of them Important — the first of this programme, both in the guard this module ships** · carry-over 10 rows, 6 open, 0 unresolved | 1 entry · 6 standing · retired 0 · added 0 · R-001, R-003, R-005, R-006 all fired · guards 132 → 133 |
 | 2026-08-08 | `audit-followup` / M7 `rendered-surface-check` | `b524680` | 1 REQ · a companion wired into stages 5–6 and 8 · **one review round, 4 findings, all mine, none found by my own probes** · carry-over 9 rows, 6 open, 0 unresolved | 1 entry · 6 standing · retired 0 · added 0 · R-005 and R-006 both fired · guards 130 → 131 |
 | 2026-08-08 | `audit-followup` / M2 `claim-registry` | `44bdf53` | 1 REQ + carry-over row 7 · six claim classes, each armed · **three review rounds, 13 findings, none of them found by the module's own probes** · carry-over 9 rows, 6 open, 0 unresolved | 1 entry · **6 standing (was 5)** · retired 0 · added 1 (R-006) · R-001, R-002, R-003, R-004, R-005 all fired · guards 124 → 130 |
 | 2026-08-08 | `audit-followup` / M8 `prune-order-sweep` | `5726f7f` | 1 REQ · verified against a check seen failing **five** ways · PR #10, two review passes, 6 findings confirmed of which 3 new · carry-over 9 rows, 0 unresolved, row 4 closed | 1 entry · **5 standing (was 4)** · retired 0 · added 1 (R-005) · R-001 fired 5× · R-002, R-003, R-004 all fired · guards 120 → 124 |
