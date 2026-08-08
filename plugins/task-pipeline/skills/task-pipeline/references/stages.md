@@ -330,7 +330,10 @@ never that the work was skipped quietly.
   is covered; no `skip`/`xfail` smuggling a red suite past the gate. Never advance
   to deploy on a red or partial run. **The carry-over count is printed beside this
   verdict** — a ratchet nobody prints is a TODO with a better name
-  ([`audit.md`](audit.md)).
+  ([`audit.md`](audit.md)) — **and so are the two disclosures**, `abstained` and
+  `unlooked` ([`gates.md`](gates.md) → *Disclosures*): what the run declined to claim,
+  and what a check never looked at. Neither has a floor and neither may be targeted; a
+  target on an abstention count is an instruction to guess.
 - **Web front end? Then the surface is checked in a browser, not in the diff.**
   A passing suite proves the code does what its assertions say. It does not prove the
   page rendered — a component can be correct and land under a fixed header, a request
@@ -513,7 +516,10 @@ never that the work was skipped quietly.
   a messy run is the failure the file exists to stop. Stage 0 reads the standing
   instructions in full next time, which is why the cap is not negotiable.
 - **GATE (manual):** the ladder walk ran and its absences became REQ rows before
-  the table was written; **the retrospective is written — stamped first, then pruned, then the entry; the
+  the table was written; **both disclosures printed beside the verdict** — `abstained` (what the run declined
+  to claim) and `unlooked` (what a check never looked at), neither a ratchet, neither
+  with a floor, neither ever a target ([`gates.md`](gates.md) → *Disclosures*); **the
+  retrospective is written — stamped first, then pruned, then the entry; the
   list at or under its cap, every deletion logged in the archive with its commit,
   entries older than five run stamps rotated into `docs/superpowers/retro/`, the run
   stamped with its commit, every SHA in either file resolvable, and the

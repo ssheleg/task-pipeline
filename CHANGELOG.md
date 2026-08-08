@@ -1,5 +1,49 @@
 # Changelog
 
+## v1.28.0
+
+### Eight ways to say "I don't know", and no way to count them
+
+This bundle has eight vocabularies for declining to claim — `partial`, `unknown`,
+`cannot verify from diff`, `review`, `dormant`, `skip`, `recalled`, `ungated` — spread
+across sixteen reference files. Only one of them, `unknown`, blocks anything. **None of
+them appeared beside a verdict**, and `grep` for a counter returned zero.
+
+So `PASS` read as *verified*. It never read as *"green, and here is what nobody claimed
+and what nothing looked at"*, which is the only thing a gate can honestly mean.
+
+**The obvious fix is a ratchet, and it is wrong.** A ratchet may only shrink. A count of
+abstentions under that rule puts pressure on exactly one thing: **claiming more**. A run
+that reaches `abstained: 0` is not more careful — it has stopped saying *I don't know*,
+which is the cheapest way to make the number fall. Refusals and wrong answers are
+communicating vessels; squeeze one column and it reappears in the other, silently, because
+a wrong claim looks like a claim.
+
+`gates.md` therefore gains a second kind of counted set — a **disclosure**. Printed beside
+the verdict exactly like a ratchet, and carrying the opposite rule: **no floor, no
+direction, and never a target.** A target on an abstention count is an instruction to guess.
+
+Two of them, kept apart because they are different facts:
+
+| | Counts | How to read it |
+|---|---|---|
+| `abstained` | claims the run **declined to make** — `partial`, `unknown`, `cannot verify from diff` | a **choice**. Rising can mean the work got harder or the run got honest |
+| `unlooked` | checks that **did not look** — `dormant`, `skip` | a **state of the corpus**, not a decision; it falls as the project grows the inputs |
+
+`recalled` and `ungated` are deliberately not counted: the first is a property of one claim
+and already lives in the ledger, the second a property of the whole run and said once in
+words. Collapsing all eight into one number would be the false precision this change exists
+to avoid — a figure nobody can act on.
+
+Both print beside every worked verdict in the doctrine, both are required by the stage-6 and
+stage-10 gates, and a guard holds the four verdict formats together — one statement on four
+surfaces is this repository's most recurrent defect.
+
+**Where this came from.** The programme that produced it started from a review of the
+hallucination-mitigation literature, whose one directly importable idea was that
+*uncertain refusals* belong in the results table **next to** factual errors, because the two
+trade off. Everything else in that literature the doctrine already had. This is the import.
+
 ## v1.27.0
 
 ### A retirement trigger whose counter only some work moves

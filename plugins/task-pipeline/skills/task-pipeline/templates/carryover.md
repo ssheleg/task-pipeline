@@ -36,6 +36,7 @@ set that may only shrink, and it is printed beside every gate verdict:**
 ```
 GATE 6 tests: PASS — full suite green (247 tests)
   carry-over: 4 open (was 6) · unresolved: 0 · audit findings deferred: 2
+  abstained: 1 (1 cannot-verify) · unlooked: 2 dormant
 ```
 
 That one line is the whole mechanism. Without it, `PASS` reads as *verified*; with

@@ -198,6 +198,7 @@ ledger's, so a list that quietly grew back is visible at the moment it happened:
 ```
 GATE 10 acceptance: PASS — 14/14 REQ verified
   carry-over: 0 unresolved · retro: 7 standing (was 9) · retired 3 · added 1
+  abstained: 2 (1 partial · 1 cannot-verify) · unlooked: 3 dormant
 ```
 
 ## GATE (manual)
@@ -222,6 +223,13 @@ All of:
    ledger or here) and, for `deferred`, a tracker entry.
 7. **No carry-over row is left `unresolved`** — every one has a home, and the
    ledger's counts are printed with this verdict, not just filed.
+7a. **Both disclosures are printed** ([`gates.md`](gates.md) → *Disclosures*):
+   `abstained` — every REQ closing `partial`, every `unknown`, every ⚠️ *cannot verify
+   from diff* the controller could not resolve — and `unlooked`, every check that
+   reported `dormant` or `skip`. They are **not** ratchets: no floor, no direction, and
+   a movement either way wants one sentence. A run reporting `abstained: 0` is claiming
+   it knew everything, which is a stronger statement than any run this stage has ever
+   seen close honestly.
 8. **Every repository is closed, the parent included** — `git submodule status`
    shows no `+`, and each repo is clean and pushed. A submodule is finished when
    its parent points at it.

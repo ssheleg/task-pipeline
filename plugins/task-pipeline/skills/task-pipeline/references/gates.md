@@ -32,6 +32,7 @@ elsewhere and is not restated here:
 - Probing — plant, run, restore
 - The false-positive budget
 - Ratchets
+- Disclosures — counted like a ratchet, and deliberately not monotone
 - Where a gate runs
 - Adding a check to an existing gate
 - Rationalizations
@@ -300,9 +301,57 @@ A **ratchet** is a named, counted set that may only shrink, printed on every run
 
 ```
 GATE 9 docs: PASS — propagation backlog: 121 (was 162) · unmarked residue: 0
+  abstained: 0 · unlooked: 4 (3 dormant · 1 skip — no submodules in this repo)
 ```
 
 A ratchet nobody prints is a TODO with a better name.
+
+## Disclosures — counted like a ratchet, and deliberately not monotone
+
+A ratchet may only shrink. **Some numbers must not be**, and printing them under a
+ratchet's discipline inverts the thing they measure.
+
+**Abstention is the case that matters.** This bundle has eight vocabularies for declining
+to claim — `partial`, `unknown`, `cannot verify from diff`, `review`, `dormant`, `skip`,
+`recalled`, `ungated` — and until they were counted, none of them appeared beside a
+verdict. So `PASS` read as *verified* rather than as *"green, and here is what nobody
+claimed"*.
+
+The obvious fix is a ratchet, and it is wrong. A count of abstentions that may only shrink
+puts pressure on exactly one thing: **claiming more**. A run reaching `abstained: 0` is not
+more careful; it is a run that stopped saying *I don't know*, which is the cheapest way to
+make the number fall. Refusals and wrong answers are communicating vessels — squeeze one
+column and it reappears in the other, silently, because a wrong claim looks like a claim.
+
+So a **disclosure** is printed beside the verdict like a ratchet and carries the opposite
+rule: **no floor, no direction, and a movement in either direction wants one sentence.**
+
+Two disclosures, kept separate because they are different facts:
+
+| Disclosure | Counts | Reading it |
+|---|---|---|
+| `abstained: N` | claims the run **declined to make** — `partial`, `unknown`, `cannot verify from diff` | a *choice*. Rising can mean the work got harder or the run got honest; falling can mean either the reverse |
+| `unlooked: N` | checks that **did not look** — `dormant`, `skip` | a *state of the corpus*, not a decision. It falls as the project grows the inputs those checks need |
+
+Three are deliberately **not** counted, and saying which is part of the disclosure:
+
+- **`review`** — *no check can decide this* — is an abstention, and it is the one this
+  section first listed and then forgot, which is exactly the failure it exists to catch.
+  It stays out of `abstained` because it is not a claim the run declined: it is a rule
+  that **declined to be mechanical**, recorded once at rung 2 with its reason (→ *Axis B*).
+  Counted per run it would report the same standing number every time and say nothing
+  about the run.
+- **`recalled`** — a property of one claim, already carried in the ledger beside the
+  command that would re-derive it.
+- **`ungated`** — a property of the whole run, said once, in words.
+
+A vocabulary that is named and then left out of every bucket is the one that goes
+uncounted forever. So each gets its line, including the one that got missed here.
+
+**What makes a disclosure honest rather than decorative** is the same thing that makes a
+ratchet honest: it is *computed*, and it is printed whether or not anyone likes the
+number. What makes it different is that **nobody may set a target for it.** A target on an
+abstention count is an instruction to guess.
 
 ---
 

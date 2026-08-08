@@ -2478,3 +2478,64 @@ jobs:
           else
             echo "OK: validator correctly FAILs — emphasis is normalised before matching"
           fi
+
+      - name: Negative self-test (a worked GATE verdict that omits only `unlooked`)
+        run: |
+          set -eu
+          rm -rf /tmp/disc2-copy && cp -R . /tmp/disc2-copy
+          python3 - <<'EOF'
+          p = "/tmp/disc2-copy/plugins/task-pipeline/skills/task-pipeline/references/acceptance.md"
+          t = open(p, encoding="utf-8").read()
+          needle = "  abstained: 2 (1 partial · 1 cannot-verify) · unlooked: 3 dormant"
+          assert needle in t, "PLANT DID NOT LAND: anchor absent before edit"
+          t = t.replace(needle, "  abstained: 2 (1 partial · 1 cannot-verify)", 1)
+          open(p, "w", encoding="utf-8").write(t)
+          s = open(p, encoding="utf-8").read()
+          assert "unlooked: 3 dormant" not in s and "abstained: 2" in s, "PLANT DID NOT LAND"
+          EOF
+          if python3 /tmp/disc2-copy/test/validate.py; then
+            echo "ERROR: validator passed a verdict that discloses what was declined but not what was never looked at"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — each disclosure is required on its own"
+          fi
+
+      - name: Negative self-test (a worked GATE verdict that omits only `abstained`)
+        run: |
+          set -eu
+          rm -rf /tmp/disc3-copy && cp -R . /tmp/disc3-copy
+          python3 - <<'EOF'
+          p = "/tmp/disc3-copy/plugins/task-pipeline/skills/task-pipeline/references/audit.md"
+          t = open(p, encoding="utf-8").read()
+          needle = "  abstained: 1 (1 cannot-verify) · unlooked: 2 dormant"
+          assert needle in t, "PLANT DID NOT LAND: anchor absent before edit"
+          t = t.replace(needle, "  unlooked: 2 dormant", 1)
+          open(p, "w", encoding="utf-8").write(t)
+          s = open(p, encoding="utf-8").read()
+          assert "abstained: 1" not in s and "unlooked: 2 dormant" in s, "PLANT DID NOT LAND"
+          EOF
+          if python3 /tmp/disc3-copy/test/validate.py; then
+            echo "ERROR: validator passed a verdict that hides what the run declined to claim"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — each disclosure is required on its own"
+          fi
+
+      - name: Negative self-test (a worked GATE verdict that prints no disclosures)
+        run: |
+          set -eu
+          rm -rf /tmp/disc-copy && cp -R . /tmp/disc-copy
+          python3 - <<'EOF'
+          p = "/tmp/disc-copy/plugins/task-pipeline/skills/task-pipeline/references/gates.md"
+          t = open(p, encoding="utf-8").read()
+          needle = "  abstained: 0 · unlooked: 4 (3 dormant · 1 skip — no submodules in this repo)\n"
+          assert needle in t, "PLANT DID NOT LAND: anchor absent before edit"
+          open(p, "w", encoding="utf-8").write(t.replace(needle, "", 1))
+          assert "abstained: 0 · unlooked: 4" not in open(p, encoding="utf-8").read(), "PLANT DID NOT LAND"
+          EOF
+          if python3 /tmp/disc-copy/test/validate.py; then
+            echo "ERROR: validator passed a GATE verdict that reads as 'verified' rather than as 'green, and here is what nobody claimed'"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — both disclosures print beside every worked verdict"
+          fi
