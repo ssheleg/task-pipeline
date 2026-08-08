@@ -1,5 +1,32 @@
 # Changelog
 
+## v1.23.0
+
+### A step that consumes what a later step produces is a deadlock — `learned.md` rule 21
+
+The retrospective stage said **prune first, then stamp**. One of the prune's three retirement
+triggers is *it has not fired in the last five run stamps* — so the trigger read a counter the same
+stage wrote afterwards. On any list it had never run on real data, and it stays unreadable for
+exactly as long as nobody stamps.
+
+Measured on a real project: last entry five days old; stamps per day 33, 20, 26, **3, 0** — the zero
+on a day with 107 commits — and the list sitting at **10 of 10**. Every run arrived at a stage that
+opened with a full list, an unusable trigger and a mandatory deletion. It was not skipped out of
+laziness: its first step could not be performed, and the cheap step that would have made it
+performable was queued behind it.
+
+Two changes, and the second only works because of the first:
+
+- **Stamp first, then prune, then write.** The stamp is one line and costs nothing; it is also the
+  only thing that makes the cold trigger computable.
+- **Each trigger is a command, not a judgement.** All three are now runnable — grep for the rule's
+  words in anything that executes, resolve every path and tool it names, count its firings across
+  the last five stamps. A retirement condition nobody can run is one nobody applies, which is how a
+  list reaches ten and stops being read.
+
+`test/validate.py` guards all three: the new ordering, the absence of the old "runs BEFORE" wording,
+and the triggers being expressed as commands. Watched failing against two planted defects.
+
 ## v1.22.0
 
 ### When a thing exists twice, ask which one is used — `learned.md` rule 20

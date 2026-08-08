@@ -26,7 +26,8 @@ file exists to stop.
 - Every lesson carries its commit
 - Rotation — the archive is how pruning stops losing things
 - Three grades of fix — take the highest one that can work
-- The prune — mandatory, and it runs BEFORE the new entry is written
+- Stamp first, then prune, then write
+- The prune — mandatory, and it runs after the stamp
 - The loop closes at stage 0
 - Where a lesson goes when it is not about this project
 - Rationalizations
@@ -100,10 +101,30 @@ Prefer grade 1 whenever a check can decide it. This is the same law as
 [`audit.md`](audit.md) → *A class that repeats twice becomes a gate, not a note*: a
 rule that could have been a check gets read twice and obeyed once.
 
-## The prune — mandatory, and it runs BEFORE the new entry is written
+## Stamp first, then prune, then write
 
-Prune first, then write. A lesson that lands in a cluttered file is a lesson nobody
-will reach.
+`learned.md` rule 21. This order used to be *prune first*, and that was a **deadlock**, not a
+preference: the cold trigger below reads *the last five run stamps*, and the stamp was written after
+the prune. The trigger read a counter the same stage produced later, so on any list it had never run
+on real data — and it stays unreadable for exactly as long as nobody stamps.
+
+Measured on a real project: last entry five days old; stamps per day 33, 20, 26, **3, 0** — the zero
+on a day with 107 commits — and the list sitting at **10 of 10**. Every run arrived at a stage that
+opened with a full list, an unusable trigger and a mandatory deletion. It was not skipped out of
+laziness; its first step could not be performed, and the cheap step that would have made it
+performable was queued behind it.
+
+**The stamp is one line and costs nothing.** It is also the only thing that makes the prune
+computable, which is why it goes first:
+
+```bash
+printf '%s · %s\n' "$(date +%F)" "$(git rev-parse --short HEAD)" >> docs/superpowers/retro.md
+```
+
+## The prune — mandatory, and it runs after the stamp
+
+A lesson that lands in a cluttered file is a lesson nobody will reach — so the prune still runs
+before the entry is written. It runs *after* the stamp, because it reads it.
 
 Every row carries its own trigger in a **`Retire when`** column, written at birth —
 a rule whose retirement condition is decided later is a rule the prune can only
@@ -114,6 +135,25 @@ argue about. Check **every** standing instruction against three triggers:
 | **It became a check** | the rule is now enforced by a test, lint, gate or hook | delete it — the check is the memory, and keeping both means it is read twice and obeyed once |
 | **Its surface is gone** | resolve every path, command, stage and tool it names; any that no longer exists | delete it — it now describes a system nobody is running |
 | **It went cold** | it has not fired in the last **five run stamps** | delete it — five runs without firing is the evidence that it was situational |
+
+**Each trigger is a command, not a judgement.** A retirement condition nobody can run is a
+condition nobody applies, which is how a list reaches ten and stops being read:
+
+```bash
+# became a check — the rule's own words appear in something that runs
+grep -rl "$RULE_KEYWORD" scripts/ test/ .github/workflows/ Makefile* 2>/dev/null
+
+# surface is gone — every path, command and tool it names, resolved
+grep -oE '`[^`]+`' <<<"$RULE_TEXT" | tr -d '`' | while read -r t; do
+  [ -e "$t" ] || command -v "$t" >/dev/null || echo "MISSING: $t"; done
+
+# went cold — fired in none of the last five stamps
+tail -n 200 docs/superpowers/retro.md | grep -c "$RULE_ID"
+```
+
+Anything the first two print is a deletion; a zero from the third across five stamps is a deletion.
+What survives all three stays, and the run states the three counts rather than the conclusion
+(`learned.md` rule 19 — an empty result and an unrun command look identical).
 
 Then the cap: **ten standing instructions, hard.** At eleven you do not get to keep
 them all — the oldest never-fired one goes. "But all of them matter" is precisely

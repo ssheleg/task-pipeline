@@ -428,6 +428,25 @@ if os.path.isfile(_learned):
                      f"does not carry {_needle!r} — the copy that ships is often not the copy "
                      "anybody opens")
 
+# learned.md rule 21 — the deadlock rule, guarded where it was found. The retro stage must not
+# reintroduce "prune first": its cold trigger reads the stamp, so a prune ahead of the stamp is a
+# check that has never run on real data.
+if os.path.isfile(_learned):
+    _lt21 = open(_learned, encoding="utf-8").read()
+    if re.search(r"^\|\s*21\s*\|", _lt21, re.M):
+        _rp = os.path.join(refdir, "retrospective.md")
+        _rt = open(_rp, encoding="utf-8").read() if os.path.isfile(_rp) else ""
+        if "## Stamp first, then prune, then write" not in _rt:
+            fail("references/retrospective.md: learned.md rule 21 is in force and the stage does "
+                 "not open with 'Stamp first, then prune, then write' — the cold trigger reads the "
+                 "stamp, so a prune placed ahead of it can never run on real data")
+        if re.search(r"runs BEFORE the new entry", _rt):
+            fail("references/retrospective.md: the prune is still described as running BEFORE the "
+                 "stamp — that ordering is the deadlock rule 21 records")
+        if "Each trigger is a command, not a judgement" not in _rt:
+            fail("references/retrospective.md: the three retirement triggers are not expressed as "
+                 "commands — a retirement condition nobody can run is one nobody applies")
+
 # references/artifacts.md maps stage -> what it WRITES. The reverse direction — what
 # each stage READS and from where — is the one an agent actually needs at runtime,
 # and it was absent for nine releases: learned.md rule 2 (compute the mapping in both
