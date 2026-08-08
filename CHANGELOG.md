@@ -1,5 +1,54 @@
 # Changelog
 
+## v1.24.0
+
+### A rule that reached one file of ten, and the guard shape that let it
+
+`v1.23.0` added rule 21 — *a step that consumes what a later step produces is a deadlock*
+— and reordered the retrospective's three acts to **stamp → prune → entry**. It changed
+`references/retrospective.md`. It changed nothing else.
+
+Ten other surfaces still taught the deadlocked *prune first*: `SKILL.md` twice (including
+the stage-10 gate row), `references/acceptance.md` three times, `references/stages.md`
+three times, `references/companion-skills.md`, `references/knowledge-sources.md`,
+`templates/retro.md`, `templates/README.md`, `commands/task-pipeline.md`,
+`cursor/rules/task-pipeline.mdc`, `docs/DOCMAP.md`, `README.md` and this repository's own
+`CLAUDE.md`. **`SKILL.md` is what an agent loads first**, so the most-read surface of the
+shipped skill instructed the exact failure its newest rule defines.
+
+**Why every existing guard was green.** Rules 16–21 each have a bespoke check that names
+its consumer files and asserts a needle is present. That answers *"did a consumer drop its
+citation?"* — a real failure, and it catches it. It cannot answer *"does a consumer
+contradict what it cites?"*, because a contradicting consumer **keeps** its citation: the
+link resolves, the section exists, the needle is there. A pointer's validity says nothing
+about whether the two texts agree.
+
+**The new guard compares order, not presence** — and derives the expected order from
+`retrospective.md`'s own heading **at check time**, so it cannot drift from the doctrine it
+guards the way a hardcoded literal would.
+
+Four deterministic shapes, each arrived at by probing rather than by trusting a green:
+
+- an adjacent enumeration (`prune, stamp` / `prune → stamp`);
+- the `first … then` construction, with an aside allowed between;
+- a bare `… then …` sequence with no "first" at all (`prune before you add … then stamp`);
+- an **ordered list** whose items open with the acts — which needs no connector word, and
+  which the first two shapes both missed.
+
+Each of the four was found by running the check and reading the result, not by writing it
+and shipping. Two of them were blind spots in the guard's *own* first version, and one of
+those was blind to the exact wording this release introduced.
+
+**Measured before shipping** (rule 10). The obvious predicate — *both act words in one
+paragraph* — returns 32 hits on this corpus, of which 22 are false, including
+`retrospective.md`'s own correct prose. The shipped predicate returns 8, all true. A
+paragraph narrating the old order as a defect is exempt through an explicit marker list;
+`learned.md`'s rule-21 incident and `retrospective.md`'s own rationale both need it.
+
+Swept in the same change, because the class is *a claim that stopped being true*:
+`SKILL-CARD.md` still said the eval suite was **"Never executed"** and counted "the 26
+files under `references/`" against a directory holding 28.
+
 ## v1.23.1
 
 ### Four documents that had gone false, and the config this repository never wrote

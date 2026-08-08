@@ -447,6 +447,91 @@ if os.path.isfile(_learned):
             fail("references/retrospective.md: the three retirement triggers are not expressed as "
                  "commands — a retirement condition nobody can run is one nobody applies")
 
+# learned.md rule 21, widened from one file to THE CLASS. v1.23.0 changed the retro's act order to
+# stamp-first in references/retrospective.md and reached no other surface: SKILL.md — which an agent
+# loads first — still enumerated "prune, stamp, entry" through v1.23.1, along with six more surfaces.
+#
+# The guard above proves a consumer still CITES retrospective.md. It cannot prove the consumer AGREES
+# with it, because a contradicting consumer keeps its citation, its link resolves and its section
+# exists. Every guard for rules 16-21 has that shape, which is why this one compares ORDER instead,
+# and derives the expected order from retrospective.md at check time rather than hardcoding it — a
+# guard written against a literal drifts from the doctrine it guards the moment the doctrine moves.
+#
+# SCOPE: ordered ENUMERATIONS of the two acts, in three deterministic shapes —
+#   P1 "prune, stamp" / "prune → stamp" (adjacent, connector punctuation only)
+#   P2 "prune first ... then stamp"     (the first...then construction, aside allowed between)
+#   P4 "prune … then stamp"          (sequence marker without "first" — "prune before you add … then stamp")
+#   P3 an ordered LIST whose items open with the acts ("1. Prune first." / "2. Stamp the run")
+#      — the shape acceptance.md and stages.md used, which P1 and P2 both missed because a
+#      numbered list needs no connector word at all. Found by probing the guard against the
+#      corpus rather than by trusting its first green.
+# Prose that merely mentions both acts in one paragraph ("the prune runs after the stamp") is NOT an
+# enumeration and is deliberately OUT of scope. Measured before shipping (learned.md rule 10): the
+# loose "both words in a paragraph" predicate returned 32 hits of which 22 were false, including
+# retrospective.md's own correct sentences. This one returns 8, all true.
+# HISTORY EXEMPTION: an enumeration introduced by a past-tense marker is quoting the OLD order as the
+# defect — learned.md's rule-21 narrative and retrospective.md's own rationale both do this. The
+# markers are exact strings, not a heuristic; a new one has to be added deliberately.
+_ORDER_HISTORY = ("used to be", "instruction was", "order was", "it used to read")
+_P1 = re.compile(r"\b(prune|stamp)\b[\s,;:·]*(?:→|->|,|·)?\s*(?:then\s+)?(?:the\s+)?\b(stamp|prune)\b", re.I)
+_P2 = re.compile(r"\b(prune|stamp)\b[^.!?]{0,60}?\bfirst\b.{0,400}?(?:\bthen\b|,)\s*(?:the\s+)?\b(stamp|prune)\b", re.I | re.S)
+_P4 = re.compile(r"\b(prune|stamp)\b.{0,400}?\bthen\s+(?:the\s+)?\b(stamp|prune)\b", re.I | re.S)
+_rp21 = os.path.join(refdir, "retrospective.md")
+if os.path.isfile(_learned) and os.path.isfile(_rp21):
+    _lt = open(_learned, encoding="utf-8").read()
+    if re.search(r"^\|\s*21\s*\|", _lt, re.M):
+        # Derive the expected order from the doctrine's own heading, do not restate it.
+        _rt21 = open(_rp21, encoding="utf-8").read()
+        _hm = re.search(r"^##\s+(Stamp|Prune)\s+first,\s+then\s+(prune|stamp)", _rt21, re.M | re.I)
+        if not _hm:
+            fail("references/retrospective.md: no '## <act> first, then <act>' heading — the order "
+                 "guard derives the expected order from it and cannot run without it")
+        else:
+            _expect_first = _hm.group(1).lower()          # 'stamp'
+            _scan = []
+            for _root, _dirs, _fs in os.walk(os.path.join(ROOT, "plugins")):
+                _scan += [os.path.join(_root, _f) for _f in _fs if _f.endswith(".md")]
+            _scan += [os.path.join(ROOT, _f) for _f in
+                      ("README.md", "CONTRIBUTING.md", "CLAUDE.md", "docs/DOCMAP.md",
+                       "cursor/rules/task-pipeline.mdc")]
+            for _f in sorted(set(_scan)):
+                if not os.path.isfile(_f):
+                    continue
+                _raw = open(_f, encoding="utf-8").read()
+                # P3 — ordered list items opening with an act, compared in list order.
+                # The item may open with a connector ("2. **Then prune.**") — matching only
+                # a bare act word made the guard blind to the very wording this release
+                # introduced, which the probe caught and the first green did not.
+                _P3RE = r"^\s*\**\s*\d+\.\s+\**(?:then\s+|first,?\s+)?\**\s*(prune|stamp)\b"
+                _items = re.findall(_P3RE, _raw, re.M | re.I)
+                _seq = [x.lower() for x in _items]
+                if len(_seq) >= 2 and _seq[0] != _seq[1] and _seq[0] != _expect_first:
+                    _rel = os.path.relpath(_f, ROOT)
+                    _ln = _raw[:re.search(_P3RE, _raw, re.M | re.I).start()].count("\n") + 1
+                    fail(f"{_rel}:{_ln}: an ordered list runs the retro's acts "
+                         f"{_seq[0]!r} then {_seq[1]!r} — references/retrospective.md orders them "
+                         f"{_expect_first!r} first (learned.md rule 21)")
+                for _para in re.split(r"\n\s*\n", _raw):
+                    _flat = re.sub(r"\s+", " ", _para)
+                    for _pat in (_P1, _P2, _P4):
+                        for _m in _pat.finditer(_flat):
+                            _a, _b = _m.group(1).lower(), _m.group(2).lower()
+                            if _a == _b or _a == _expect_first:
+                                continue
+                            # The marker may sit AFTER the enumeration ("The stage's own
+                            # instruction was **prune first, then stamp**. So the trigger…"),
+                            # so the whole paragraph is the unit. Cost, stated: a paragraph
+                            # that narrates the old order AND states a wrong one is exempt.
+                            if any(_h in _flat.lower() for _h in _ORDER_HISTORY):
+                                continue                   # quoting the old order as the defect
+                            _rel = os.path.relpath(_f, ROOT)
+                            _line = _raw[:_raw.find(_para)].count("\n") + 1
+                            fail(f"{_rel}:{_line}: enumerates the retro's acts as "
+                                 f"{_a!r} before {_b!r} — references/retrospective.md orders them "
+                                 f"{_expect_first!r} first (learned.md rule 21: the cold trigger "
+                                 f"reads the stamp, so a prune ahead of it never runs on real "
+                                 f"data). Found: {_m.group(0).strip()!r}")
+
 # references/artifacts.md maps stage -> what it WRITES. The reverse direction — what
 # each stage READS and from where — is the one an agent actually needs at runtime,
 # and it was absent for nine releases: learned.md rule 2 (compute the mapping in both

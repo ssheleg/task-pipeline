@@ -286,7 +286,7 @@ The ledger is the stage-9 work list. For each row:
   document class or ratchet. Note that this list and the **propagation matrix** are
   different lists on purpose: the ledger is what you *read*, the matrix is what you
   *owe* ([`documentation.md`](documentation.md)), and stage 9 walks both.
-- **The retro** — prune, stamp, entry, and rotate what aged out into the archive
+- **The retro** — stamp, prune, entry, and rotate what aged out into the archive
   ([`retrospective.md`](retrospective.md)).
 - **Anything the run proved stale** — including a doc that was "wrong but nobody
   had time": that's why the conflict was logged in phase 2 instead of only being

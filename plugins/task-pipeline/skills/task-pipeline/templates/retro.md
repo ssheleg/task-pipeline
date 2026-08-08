@@ -1,7 +1,9 @@
 # Pipeline retrospective — <project>
 
 One file per project, not per run. Written as the **last act of stage 10**:
-prune first, then stamp, then write an entry **only if the run diverged**.
+**stamp first, then prune**, then write an entry **only if the run diverged**.
+The order is load-bearing: the cold-retirement trigger reads the stamp this stage
+writes, so a prune ahead of it can never run on real data (`learned.md` rule 21).
 Doctrine: `references/retrospective.md`.
 
 **What stage 0 reads in full:** *Standing instructions*, *Run stamps* and *Recent

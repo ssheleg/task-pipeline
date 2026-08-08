@@ -12,10 +12,10 @@ harmless.
 |---|---|
 | **Purpose** | Runs a substantial task through ten gated delivery stages — intake grill, docs study, brainstorm, spec, plan, subagent build, tests, lint/deploy, post-deploy, docs+registers, acceptance — refusing to advance until each gate passes |
 | **Owner** | ssheleg ([github.com/ssheleg/task-pipeline](https://github.com/ssheleg/task-pipeline)) |
-| **Version** | 1.23.1 |
+| **Version** | 1.24.0 |
 | **Surface** | Claude Code (filesystem skill + plugin) and the vercel `skills` CLI. **Not** uploaded to the Skills API; custom Skills do not sync across surfaces |
 | **Dependencies** | None required. Optional: `context7` (MCP), `figma` (MCP), super-ux, agent-sync, graphify, obsidian-wiki. Every stage's doctrine ships in-repo; the one conditional requirement is super-ux for the stage-3 UX track on a user-facing task |
-| **Evaluation status** | Suite authored (15 evals, 5 categories). **Never executed** — see [`evals/RESULTS.md`](evals/RESULTS.md) |
+| **Evaluation status** | Suite authored, 5 categories. One recorded run, **self-observed by the author**; **zero blind runs on zero of three models** — the split, and the numbers, live in [`evals/RESULTS.md`](evals/RESULTS.md) and are computed by `evals/run.py` |
 
 ## Risk-tier disclosure
 
@@ -34,8 +34,9 @@ apply.
 
 ## What to check before you trust it
 
-1. Read `SKILL.md` and the 26 files under `references/` — that is the whole
-   instruction surface, and every one is linked directly from `SKILL.md`.
+1. Read `SKILL.md` and every file under `references/` — that is the whole
+   instruction surface, and each one is linked directly from `SKILL.md`, so the
+   directory listing is the count.
 2. Read `templates/docgate.sh` before seeding it; it is the only shipped script a
    host project will run on its own repository.
 3. Run `npm run test:all` — every guard has a negative self-test that plants a
@@ -54,7 +55,9 @@ apply.
 - **Versions are pinned by git tag** and mirrored into `sshlg-skills`'s catalogue.
   Rollback is `git checkout v<previous>` or pinning the previous plugin version;
   the previous version is never deleted.
-- **Behavioural evidence is missing, not merely thin.** The structural guards prove
-  the skill is well-formed. Until `evals/RESULTS.md` carries a dated run, nothing in
-  this repository proves it *behaves* — triggers correctly, stays quiet on a
-  question, or performs the steps it documents.
+- **Behavioural evidence is thin to the point of absent.** The structural guards prove
+  the skill is well-formed. `evals/RESULTS.md` carries **one** dated run, and it was
+  self-observed by the author — an observation of instruction-following, not an
+  evaluation. **No blind run has been made on any model.** Nothing in this repository
+  yet proves the skill *behaves* — triggers correctly, stays quiet on a question, or
+  performs the steps it documents.
