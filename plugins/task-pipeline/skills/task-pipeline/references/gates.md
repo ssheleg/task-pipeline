@@ -223,6 +223,24 @@ exit 0
   in a process command line matched the throwaway shell of every tool call.
 - **Compute the count you print.** A number restated in prose is a number that will
   be wrong; derive it from the source at check time so the two cannot disagree.
+- **Normalise the corpus's own formatting before you match, and say which unit you
+  chose.** A predicate written against the sentence you have in mind meets the sentence
+  as the file actually stores it: wrapped at some column, with emphasis, inside a table
+  cell. Three separate guards in this bundle were defeated that way and none of them by
+  its content —
+
+  | What defeated it | The guard | The fix |
+  |---|---|---|
+  | a citation wrapped across two lines | the section-citation check | normalise whitespace, match over the paragraph |
+  | a marker split by the ~80-column wrap | the distrust-marker check | same |
+  | `**five run stamps**` — bold inside the phrase | the cold-retirement check | strip emphasis too |
+
+  Each was silent, which is the expensive part: the guard reported green over a file it
+  had never read. Pick the unit deliberately — **line, paragraph, or whole file** — write
+  down which, and probe the shape the corpus actually contains rather than the shape you
+  typed into the regex. And plant the defect **in the file that defines the thing**, not
+  in the most convenient one: a probe against a surface with none of the formatting is a
+  probe that cannot fail for this reason.
 
 ---
 

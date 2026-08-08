@@ -185,7 +185,7 @@ re-creates exactly that shadow.
 
 | Signal | What it means |
 |---|---|
-| A standing instruction that has not fired in five run stamps | the rule was situational; the prune retires it ([`retrospective.md`](retrospective.md)) |
+| A standing instruction that has not fired in five run stamps, or in sixty days | the rule was situational; the prune retires it ([`retrospective.md`](retrospective.md)) |
 | A doc map older than the project's last release | the regime was decided for a project that has since changed shape — `setup` offers the entry audit ([`setup.md`](setup.md)) |
 | A ratchet whose count has not moved in months | either the backlog is genuinely frozen, or nobody is looking at the number printed beside every verdict |
 

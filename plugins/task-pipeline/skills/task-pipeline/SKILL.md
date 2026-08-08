@@ -157,7 +157,8 @@ stage 10 is therefore the **retrospective**
 `docs/superpowers/retro.md`): **stamp the run first** — one line, and the only thing
 that makes the next step computable — **then prune**, every standing instruction
 checked against its retirement triggers (it became a check · its surface is gone · it
-hasn't fired in five run stamps), the list held to a hard cap of **ten**, every
+hasn't fired in five run stamps **or in sixty days** — the calendar is the unit that
+still moves when the stamp counter has stopped), the list held to a hard cap of **ten**, every
 deletion logged, then write an entry **only if the run diverged** (symptom, the
 stage that *owned* it, root cause, fix, and the check that catches it next time).
 Stage 0 reads those standing instructions in full, which is exactly why the prune is
