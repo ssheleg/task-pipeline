@@ -361,7 +361,8 @@ for _orphan in sorted({f for f in os.listdir(refdir) if f.endswith(".md")} - _se
 _NUM_WORDS = {w: i for i, w in enumerate(
     "zero one two three four five six seven eight nine ten eleven twelve thirteen fourteen "
     "fifteen sixteen seventeen eighteen nineteen twenty".split())}
-for _tens, _tv in (("twenty", 20), ("thirty", 30), ("forty", 40)):
+for _tens, _tv in (("twenty", 20), ("thirty", 30), ("forty", 40), ("fifty", 50),
+                   ("sixty", 60), ("seventy", 70), ("eighty", 80), ("ninety", 90)):
     _NUM_WORDS[_tens] = _tv
     for _u, _uv in [(w, i) for i, w in enumerate(
             "zero one two three four five six seven eight nine".split()) if i]:
@@ -423,7 +424,7 @@ _CLAIM_REGISTRY = [
      "README.md and SKILL.md said 'fifteen rules' against a table of twenty-one"),
 
     ("dated eval runs",
-     r"[Dd]ated\s+(?:eval\s+)?runs\s+recorded\D{0,40}?\*{0,2}(\d+)\*{0,2}",
+     r"[Dd]ated\s+(?:eval\s+)?runs\s+recorded[^.\n]{0,20}?\*{0,2}" + _NUM + r"\*{0,2}",
      lambda: _count_run_headings("evals/RESULTS.md"),
      "RESULTS.md ratcheted 0 directly above a dated run, while run.py computed 1"),
 
@@ -475,6 +476,14 @@ def _is_quoted(text, match):
             return True
     return False
 
+# Each living document is read ONCE, not once per class. Nested class-outer/doc-inner
+# opened ~36 files six times over; the states logic below is unchanged.
+_LIVING_TEXT = {}
+for _living in _LIVING:
+    _lp = os.path.join(ROOT, _living)
+    if os.path.isfile(_lp):
+        _LIVING_TEXT[_living] = open(_lp, encoding="utf-8").read()
+
 _CLAIM_STATES = []
 for _label, _pat, _compute, _incident in _CLAIM_REGISTRY:
     _truth = _compute()
@@ -482,11 +491,7 @@ for _label, _pat, _compute, _incident in _CLAIM_REGISTRY:
         _CLAIM_STATES.append(f"{_label}: skip — no source")
         continue
     _seen = 0
-    for _living in _LIVING:
-        _lp = os.path.join(ROOT, _living)
-        if not os.path.isfile(_lp):
-            continue
-        _txt = open(_lp, encoding="utf-8").read()
+    for _living, _txt in _LIVING_TEXT.items():
         for _m in re.finditer(_pat, _txt, re.I):   # "## The ten canons" is a heading; case is not a claim
             if _is_quoted(_txt, _m):
                 continue

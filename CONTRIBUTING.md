@@ -143,10 +143,11 @@ list is a second source that goes stale on the next heading.
 A citation of the form `file.md → *Section*` is checked against the target's headings. The
 link checker proves the file resolves; only this proves the pointer is not false.
 
-**13. Numbers stated in living documents are computed, not restated.** The guard
-count in `README.md`, `SKILL-CARD.md` and `evals/RESULTS.md` is compared against the
-negative self-tests the workflow defines. CHANGELOG entries are exempt — they record
-what a past release shipped.
+**13. Numbers stated in living documents are computed, not restated.** Superseded in
+substance by **invariant 35**, which turns this single guard-count comparison into a
+registry over the class. Kept as the entry point because it is the shorter statement of
+the law and the one people look for; the mechanism, the exemptions and the scope live in
+35, and this text names no surfaces of its own so the two cannot disagree.
 
 **14. Every relative link in `README.md` resolves inside the published package.**
 `package.json` → `files[]` must ship whatever the README points at, or the link
