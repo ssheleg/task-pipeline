@@ -781,7 +781,8 @@ if os.path.isfile(_cs):
                  f"absent from the matrix — {_o!r}. The operator is asked to install something "
                  "the table never explains, which is the same drift read from the other side")
 
-# The cold-retirement condition is stated on seven surfaces, and it gained a SECOND UNIT in
+# The cold-retirement condition is stated on every surface in _COLD_SURFACES below (the list is
+# the count — an earlier draft of this comment said 'seven' over a list of six). It gained a SECOND UNIT in
 # v1.27.0: "five run stamps OR sixty days". The stamp counter is written only by a run of this
 # pipeline, so where a project ships some of its work another way the counter stops while the
 # work does not — measured here, ten consecutive releases (v1.16.0..v1.23.0) carry no stamp,
@@ -800,6 +801,7 @@ _COLD_SURFACES = [
     "plugins/task-pipeline/skills/task-pipeline/references/companion-skills.md",
     "plugins/task-pipeline/skills/task-pipeline/SKILL.md",
     "plugins/task-pipeline/skills/task-pipeline/templates/retro.md",
+    "plugins/task-pipeline/commands/task-pipeline.md",
 ]
 _COLD_RE = re.compile(r"(?:has\s+not\s+)?fired\s+in\s+(?:the\s+last\s+)?five\s+run\s+stamps", re.I | re.S)
 for _f in _COLD_SURFACES:
@@ -808,7 +810,13 @@ for _f in _COLD_SURFACES:
         continue
     _ft = open(_fp, encoding="utf-8").read()
     for _para in re.split(r"\n\s*\n", _ft):
-        _flat = re.sub(r"\s+", " ", _para)
+        # Normalise whitespace AND markdown emphasis. The canonical row in
+        # retrospective.md reads "the last **five run stamps**", and a whitespace-only
+        # normalisation left the asterisks sitting inside the phrase — so the guard
+        # silently skipped the one file that DEFINES the trigger. Third time in this
+        # programme that a predicate was defeated by this corpus's formatting rather
+        # than by its content (twice by the ~80-column wrap, once by bold).
+        _flat = re.sub(r"\*+", "", re.sub(r"\s+", " ", _para))
         if not _COLD_RE.search(_flat):
             continue
         if not re.search(r"sixty\s+days|60\s+days", _flat, re.I):

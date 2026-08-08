@@ -27,7 +27,8 @@ them.
 | R-001 | 2026-05-04 · `<topic>` | `<sha>` | … | … (one line; links the archive entry) | … (e.g. "the export path is covered by a test") | 2026-06-18 | `<sha>` |
 
 Retire on **any** of: it became a check · every path/command it names is gone · it
-has not fired in the last five run stamps, or in the last sixty days. At eleven rows, the oldest never-fired
+has not fired in the last five run stamps, or in the last sixty days. At eleven
+rows, the oldest never-fired
 row goes — the cap is not negotiable, ranking is.
 
 ## Recent log — entries from the last five run stamps (newest first)

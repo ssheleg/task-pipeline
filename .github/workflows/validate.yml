@@ -2456,3 +2456,25 @@ jobs:
           else
             echo "OK: validator correctly FAILs — both units, on every surface that states it"
           fi
+
+      - name: Negative self-test (cold trigger — the canonical row, where bold interrupts the phrase)
+        run: |
+          set -eu
+          rm -rf /tmp/cold2-copy && cp -R . /tmp/cold2-copy
+          python3 - <<'EOF'
+          p = "/tmp/cold2-copy/plugins/task-pipeline/skills/task-pipeline/references/retrospective.md"
+          t = open(p, encoding="utf-8").read()
+          needle = "**five run stamps** — **or** in the last **sixty days**"
+          assert needle in t, "PLANT DID NOT LAND: canonical row absent before edit"
+          t = t.replace(needle, "**five run stamps**", 1)
+          open(p, "w", encoding="utf-8").write(t)
+          s = open(p, encoding="utf-8").read()
+          assert "**five run stamps** — **or**" not in s, "PLANT DID NOT LAND"
+          assert "**five run stamps**" in s, "PLANT WRONG: the bold phrase must survive"
+          EOF
+          if python3 /tmp/cold2-copy/test/validate.py; then
+            echo "ERROR: the guard skipped the file that DEFINES the trigger — markdown emphasis defeated it"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — emphasis is normalised before matching"
+          fi
