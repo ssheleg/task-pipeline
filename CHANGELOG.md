@@ -90,7 +90,13 @@ them. A description cannot masquerade as a status because it is never looked at.
 
 Every reversal was found by a reader. None by a probe.
 
-Guards: 156 → **169**, property checks 1 → 4.
+**Two surfaces did not know the board exists.** `cursor/rules/task-pipeline.mdc` and
+the command restate stage 0 and stage 10 in detail, and neither mentioned it — the same
+one-rule-in-one-file-of-nine class this repository has a guard for on the rotation axes
+and none for a new mechanism. Both carry it now, the Cursor rule by restatement because
+it is self-contained by contract.
+
+Guards: 156 → **170**, property checks 1 → 4.
 
 ## v1.30.0 — the cap that would have measured the wrong axis
 

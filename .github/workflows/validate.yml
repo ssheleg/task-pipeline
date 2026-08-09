@@ -3257,3 +3257,20 @@ jobs:
             echo "ERROR: a closed row was flagged because its description began 'Open-source'"
             exit 1
           fi
+
+      - name: Negative self-test (a mismatched-shape row losing its board id)
+        run: |
+          set -eu
+          rm -rf /tmp/bd13-copy && cp -R . /tmp/bd13-copy
+          python3 - <<'EOF'
+          p = "/tmp/bd13-copy/docs/superpowers/specs/2026-08-08-audit-followup-carryover.md"
+          t = open(p, encoding="utf-8").read()
+          assert "B-019" in t, "PLANT DID NOT LAND: anchor absent before the edit"
+          open(p, "w", encoding="utf-8").write(t.replace("B-019", "B-999", 1))
+          EOF
+          if python3 /tmp/bd13-copy/test/validate.py; then
+            echo "ERROR: a row whose cell count differs from its header was skipped before the id check ran"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the fallback matches on a word boundary, not exact equality"
+          fi

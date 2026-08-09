@@ -1268,10 +1268,17 @@ if os.path.isfile(_BOARD):
             if len(_c) == len(_hdr):
                 _cells = [_c[_i] for _i in _sidx]
             else:
-                # The row's shape does not match its header — three rows here carry an
-                # extra cell. Rather than skip (silence) or fail (history), fall back to
-                # every cell under the STRICT rule: the whole cell, nothing else.
-                _cells = [_x for _x in _c if _x in ("open", "unresolved", "backlog")]
+                # The row's shape does not match its header — an embedded `|` inside
+                # backticked text shifts the count on three rows here. Exact equality was
+                # tried and was wrong: a resolved cell reads `open → B-019` and equals
+                # nothing, so the row was skipped before the dangling-id check ran.
+                #
+                # So the fallback uses the same word-boundary match and looks at every
+                # cell. On a row that cannot be mapped to columns that risks flagging a
+                # description beginning "Open…", and that trade is deliberate: a false
+                # positive is loud and fixable, a false negative is a check that passes
+                # by looking at nothing.
+                _cells = _c
             if not any(_UNRES_RE.match(_x) or "needs a home" in _x for _x in _cells):
                 continue
             _ref = re.search(r"\bB-(\d+)\b", _l)

@@ -28,11 +28,14 @@ The ledger's last column is *Where it lives now*, and one of its legal values is
 `backlog` — a place the pipeline named and did not own. So the honest reading of a
 finished run was: *"deferred, and filed somewhere nobody here can point at."*
 
-**Stage 10 resolves it, and on two triggers rather than one.** A row is unresolved if
-its home is the literal `backlog` — the value that pointed nowhere — **or** if it is
-still `open`, which is what the rows in this repository actually said. The first version
-of the check enforced only `open` while the doctrine described only `backlog`; a reader
-seeded a ledger with the second shape and watched it pass. Both are checked now.
+**Stage 10 resolves it, on three triggers.** A row is unresolved if its home reads
+`backlog` — the value that pointed nowhere — or `open`, which is what the rows in this
+repository actually said, or `unresolved`, which
+[`templates/carryover.md`](../templates/carryover.md) calls the canonical not-done value
+and says outright blocks this gate. Each of the three was, at some point, described in
+the doctrine and absent from the check; a reader found each by seeding the shape and
+watching it pass. **The trigger list is the one part of this file that must be read
+against the code, not beside it.**
 
 - every unresolved ledger row has a board id, and that id exists on the board;
 - every board row sourced from a ledger names the ledger row it came from.
