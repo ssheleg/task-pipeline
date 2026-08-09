@@ -3,7 +3,7 @@
 > **The board.** Mutable: priority is re-derived, state changes, rows close. A row may
 > never vanish silently — it leaves into *Closed* with its commit.
 >
-> Seeded 2026-08-09 from **sixteen open rows across six carry-over ledgers**, which is
+> Seeded 2026-08-09 from **twenty-four open rows across eight carry-over ledgers** — sixteen across six by the first count, which read the status column by position and was wrong in half the corpus, which is
 > what the project had committed to remembering with nowhere to rank it. Three of them
 > were the same finding written three times; the board is where that collapses.
 >

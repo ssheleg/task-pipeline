@@ -376,7 +376,7 @@ old formats, `docs/superpowers/specs/` are point-in-time records.
 
 **44. A carry-over row still `open` names a board id, and the board row names it back.**
 `docs/superpowers/backlog.md` is the project's queue between runs; the ledger's `open`
-was a home that pointed nowhere, and sixteen rows across six ledgers sat in it. Both
+was a home that pointed nowhere, and rows across eight ledgers sat in it — sixteen by the first, positional count, twenty-four once the check stopped reading by column. Both
 directions are checked because they are different failures — an id nobody issued, and a
 row traceable to nothing. The test is **position-free**: a row is open if any of its cells
 says so, and homed if a board id appears anywhere in it. Neither question asks which

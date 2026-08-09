@@ -6,7 +6,7 @@ The carry-over ledger has always offered `backlog` as a home for a deferred row 
 place the pipeline **named and did not own**. The obvious fix was to build that
 backlog. Measuring first changed the target: across ten ledgers in this repository,
 **not one row has ever used that value.** The dangling pointer was never `backlog`. It
-was `open` — **sixteen rows across six ledgers**, deferred out loud and filed nowhere.
+was `open` — **sixteen rows across six ledgers** (later re-measured: **24 rows across eight**), deferred out loud and filed nowhere.
 
 `docs/superpowers/backlog.md` is the board: one per project, **mutable** where the
 ledger is append-only, because a queue is re-ranked and a history is not. Rows leave
@@ -72,7 +72,15 @@ table begins"* — it never checked whether the line after the blank opens its o
 which its own comment claimed it did. A **property check** now proves it stays quiet on
 the valid pattern, because a checker with false positives is worse than none.
 
-Guards: 156 → **165**, property checks 1 → 2.
+**A tightening that turned the guard off.** Fixing the false positive above, the
+separators were hand-listed — and the list omitted the arrow this repo's own annotations
+use (`open → B-001`), so **all twenty-four resolved rows became invisible** and the
+check passed by seeing nothing at all rather than by finding everything homed. The one
+negative test covering that path caught it, which is the entire argument for the suite
+in a sentence. The separator is now *"not a word character"* and the predicate is proven
+against eight concrete cases instead of one.
+
+Guards: 156 → **168**, property checks 1 → 3.
 
 ## v1.30.0 — the cap that would have measured the wrong axis
 

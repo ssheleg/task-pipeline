@@ -3143,3 +3143,79 @@ jobs:
             echo "ERROR: the split-table guard fires on a valid pattern; a checker with false positives is worse than none"
             exit 1
           fi
+
+      - name: Negative self-test (a row homed `unresolved` — the third promised trigger)
+        run: |
+          set -eu
+          rm -rf /tmp/bd9-copy && cp -R . /tmp/bd9-copy
+          python3 - <<'EOF'
+          p = "/tmp/bd9-copy/docs/superpowers/specs/2026-08-09-scratch2-carryover.md"
+          open(p, "w", encoding="utf-8").write(
+              "# Carry-over — scratch\n\n"
+              "| # | Stage | What | Why it isn't done | REQ | Where it lives now |\n"
+              "|---|---|---|---|---|---|\n"
+              "| 1 | 5 Dev | a thing | later | — | unresolved |\n")
+          assert "unresolved |" in open(p, encoding="utf-8").read(), "PLANT DID NOT LAND"
+          EOF
+          if python3 /tmp/bd9-copy/test/validate.py; then
+            echo "ERROR: templates/carryover.md says unresolved blocks the stage-10 gate and it did not"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — all three not-done values are checked, not only the one the rows used"
+          fi
+
+      - name: Negative self-test (a board row too short to compute a priority)
+        run: |
+          set -eu
+          rm -rf /tmp/bd10-copy && cp -R . /tmp/bd10-copy
+          python3 - <<'EOF'
+          p = "/tmp/bd10-copy/docs/superpowers/backlog.md"
+          t = open(p, encoding="utf-8").read()
+          row = [l for l in t.splitlines() if l.startswith("| B-008 |")]
+          assert row, "PLANT DID NOT LAND: B-008 absent before the edit"
+          open(p, "w", encoding="utf-8").write(t.replace(row[0], "| B-008 | short | src | S | 999 |", 1))
+          EOF
+          if python3 /tmp/bd10-copy/test/validate.py; then
+            echo "ERROR: a malformed row was skipped in silence, carrying any priority it liked"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — a row it cannot compute is reported, not skipped"
+          fi
+
+      - name: Negative self-test (a blanked Source in the seeded template)
+        run: |
+          set -eu
+          rm -rf /tmp/bd11-copy && cp -R . /tmp/bd11-copy
+          python3 - <<'EOF'
+          import re
+          p = "/tmp/bd11-copy/plugins/task-pipeline/skills/task-pipeline/templates/backlog.md"
+          t = open(p, encoding="utf-8").read()
+          m = re.search(r"^\| B-001 \|([^|]*)\|([^|]*)\|", t, re.M)
+          assert m and m.group(2).strip(), "PLANT DID NOT LAND: Source already empty"
+          open(p, "w", encoding="utf-8").write(t[:m.start(2)] + " " + t[m.end(2):])
+          EOF
+          if python3 /tmp/bd11-copy/test/validate.py; then
+            echo "ERROR: the reverse check covered this repo's board and not the file seeded into every host project"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — both boards, like the arithmetic check beside it"
+          fi
+
+      - name: Property check (a description beginning "Open" is not an open row)
+        run: |
+          set -eu
+          rm -rf /tmp/fp-copy && cp -R . /tmp/fp-copy
+          python3 - <<'EOF'
+          p = "/tmp/fp-copy/docs/superpowers/specs/2026-08-09-scratch3-carryover.md"
+          open(p, "w", encoding="utf-8").write(
+              "# Carry-over — scratch\n\n"
+              "| # | Stage | What | Why it isn't done | REQ | Where it lives now |\n"
+              "|---|---|---|---|---|---|\n"
+              "| 1 | 5 Dev | Open source license text is missing from the bundle | done | — | closed |\n")
+          EOF
+          if python3 /tmp/fp-copy/test/validate.py >/dev/null; then
+            echo "OK: a cell must BE a status, not merely begin with one — rule 10, a checker with false positives is worse than none"
+          else
+            echo "ERROR: a closed row was reported as open because its description started with the word Open"
+            exit 1
+          fi

@@ -1241,9 +1241,27 @@ if os.path.isfile(_BOARD):
             # `open` while three doctrine passages described `backlog`, one of them
             # claiming "the gate refuses it". A reader seeded a scratch ledger with that
             # exact row and watched PASS.
-            if not any(_x == "open" or _x.startswith("open ") or _x.startswith("open—")
-                       or _x.startswith("open -") or "needs a home" in _x
-                       or _x == "backlog" for _x in _c):
+            # A cell must BE a status, not merely begin with one. `startswith("open ")`
+            # flagged a description reading "Open source license text is missing…" on a
+            # row whose status said closed — and rule 10 is explicit that a checker with
+            # false positives is worse than none. So: the whole cell, or the word
+            # followed by punctuation ("open — needs a home"), never followed by more
+            # prose.
+            #
+            # `unresolved` is here because templates/carryover.md calls it the canonical
+            # not-done value and says outright that it "blocks the stage-10 gate". It was
+            # the THIRD trigger this guard promised somewhere and did not check.
+            def _is_unresolved(_x):
+                # The separator must be "anything that is not a word character",
+                # never a hand-listed set of punctuation. The listed version omitted the
+                # arrow this repo's own annotations use (`open → B-001`), which made
+                # every one of the 24 resolved rows INVISIBLE to the check — it then
+                # passed because it saw no unresolved rows at all, not because they were
+                # homed. Caught by the one negative test that covered this path.
+                return (_x in ("open", "backlog", "unresolved")
+                        or re.match(r"^(?:open|unresolved)(?:\s*$|\s*[^\w\s])", _x) is not None
+                        or "needs a home" in _x)
+            if not any(_is_unresolved(_x) for _x in _c):
                 continue
             if not re.search(r"\bB-\d+\b", _l):
                 _UNHOMED.append(f"{_rel} row {_c[0][:8]}")
@@ -1263,7 +1281,7 @@ if os.path.isfile(_BOARD):
     # formula printed two lines below them — in the file seeded verbatim into every
     # host project as its first board, whose stated point is that the arithmetic is
     # visible. Found by a reader.
-    for _bf in (_BOARD, os.path.join(refdir, "../templates/backlog.md")):
+    for _bf in (_BOARD, os.path.join(os.path.dirname(refdir), "templates", "backlog.md")):
         if not os.path.isfile(_bf):
             continue
         _bfr = os.path.relpath(os.path.realpath(_bf), ROOT)
@@ -1272,6 +1290,9 @@ if os.path.isfile(_BOARD):
                 continue
             _cl = [re.sub(r"[*_`]", "", _x).strip() for _x in _l.split("|")[1:-1]]
             if len(_cl) < 8:
+                fail(f"{_bfr}: row {_cl[0]} has {len(_cl)} cells where the board's shape "
+                     "needs at least 8 — skipping it silently is how a malformed row "
+                     "carries any priority it likes past a check built to compute one")
                 continue
             try:
                 _sev, _bl, _age, _pr = (int(_cl[4]), int(_cl[5]), int(_cl[6]), int(_cl[7]))
@@ -1288,10 +1309,14 @@ if os.path.isfile(_BOARD):
 
     # Both directions: a board row invented with no source is the other failure, and only
     # the reverse pass finds it (learned.md rule 2).
-    for _row in re.findall(r"^\|\s*B-\d+\s*\|(.+)$", _bt, re.M):
+    for _srcf in (_BOARD, os.path.join(os.path.dirname(refdir), "templates", "backlog.md")):
+      if not os.path.isfile(_srcf):
+        continue
+      for _row in re.findall(r"^\|\s*B-\d+\s*\|(.+)$",
+                             open(_srcf, encoding="utf-8").read(), re.M):
         _cells = [_x.strip() for _x in _row.split("|")]
         if len(_cells) < 2 or not _cells[1]:
-            fail("docs/superpowers/backlog.md: a row names no Source — a row nobody can "
+            fail(f"{os.path.relpath(_srcf, ROOT)}: a row names no Source — a row nobody can "
                  "trace back is a wish somebody typed, and six weeks later it is either "
                  "done twice or dropped by whoever trusts it least")
             break
@@ -1304,30 +1329,28 @@ if os.path.isfile(_BOARD):
 # text. audit.md says a class seen twice becomes a script rather than a third ledger
 # row, so here is the script. The shape is precise — a table row, one blank line, a
 # table row — so two genuinely separate tables are untouched.
-for _root, _dirs, _fs in os.walk(ROOT):
-    _dirs[:] = [_d for _d in _dirs if _d not in (".git", "node_modules", "graphify-out")]
-    for _f in _fs:
-        if not _f.endswith((".md", ".mdc")):
+# Routed through _discover_md rather than an eighth hand-rolled walk — its docstring
+# says the shape was promoted into a function so it would not be pasted again, and
+# board row B-010 already tracks what these repeated full-tree reads cost.
+_TBL_FILES, _TBL_TEXT = _discover_md((), lambda _c: "|" in _c)
+for _rel in _TBL_FILES:
+    _ls = _TBL_TEXT[_rel].splitlines()
+    _fence = False
+    for _i in range(len(_ls) - 2):
+        if _ls[_i].lstrip().startswith("```"):
+            _fence = not _fence
+        if _fence:
             continue
-        _rel = os.path.relpath(os.path.join(_root, _f), ROOT)
-        _ls = open(os.path.join(_root, _f), encoding="utf-8").read().splitlines()
-        _fence = False
-        for _i in range(len(_ls) - 2):
-            if _ls[_i].lstrip().startswith("```"):
-                _fence = not _fence
-            if _fence:
-                continue
-            # ...and "separate tables" is a real shape, so it is actually tested for:
-            # a new table opens with a header line whose NEXT line is a `|---|`
-            # delimiter. Without this the guard fires on two valid adjacent tables and
-            # its own comment claiming otherwise would be false.
-            _opens_new = (_i + 3 < len(_ls)
-                          and re.match(r"^\|[\s:|-]+\|\s*$", _ls[_i + 3] or ""))
-            if (_ls[_i].startswith("|") and not _ls[_i + 1].strip()
-                    and _ls[_i + 2].startswith("|") and not _opens_new):
-                fail(f"{_rel}:{_i + 2}: a blank line splits a table — every row below it "
-                     "loses the header and renders as pipe-delimited text, which looks "
-                     "like a table only in the editor")
+        # ...and "separate tables" is a real shape, so it is actually tested for: a new
+        # table opens with a header whose NEXT line is a `|---|` delimiter. Without this
+        # the guard fires on two valid adjacent tables and its own comment would be false.
+        _opens_new = (_i + 3 < len(_ls)
+                      and re.match(r"^\|[\s:|-]+\|\s*$", _ls[_i + 3] or ""))
+        if (_ls[_i].startswith("|") and not _ls[_i + 1].strip()
+                and _ls[_i + 2].startswith("|") and not _opens_new):
+            fail(f"{_rel}:{_i + 2}: a blank line splits a table — every row below it "
+                 "loses the header and renders as pipe-delimited text, which looks "
+                 "like a table only in the editor")
 
 # references/artifacts.md maps stage -> what it WRITES. The reverse direction — what
 # each stage READS and from where — is the one an agent actually needs at runtime,
