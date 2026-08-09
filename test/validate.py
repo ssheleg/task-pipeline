@@ -1507,6 +1507,29 @@ if _AT_TEXT is not None:
                  + " — named in this same file's tables. Two statements of one truth in one "
                    "file, and they drifted for two modules before a reader noticed")
 
+# The TOP CHANGELOG section describes the release being cut, so its guard and
+# property counts are claims about now — and they went stale twice in one programme,
+# because checks get added after the entry is written. Older sections are history and
+# correct as of their own day; only the newest is checked.
+_cl = os.path.join(ROOT, "CHANGELOG.md")
+_wf = os.path.join(ROOT, ".github/workflows/validate.yml")
+if os.path.isfile(_cl) and os.path.isfile(_wf):
+    _wft = open(_wf, encoding="utf-8").read()
+    _true_neg = _wft.count("name: Negative self-test")
+    _true_prop = _wft.count("name: Property check")
+    _clt = open(_cl, encoding="utf-8").read()
+    _top = _clt.split("\n## v", 2)
+    _top = _top[1] if len(_top) > 1 else ""
+    _g = re.search(r"Guards:\s*\d+\s*(?:→|->)\s*\*{0,2}(\d+)", _flatten(_top))
+    if _g and int(_g.group(1)) != _true_neg:
+        fail(f"CHANGELOG.md: the newest section claims {_g.group(1)} guards but the "
+             f"workflow defines {_true_neg} — the entry is written before the last "
+             "checks are added, and this count went stale twice in one programme")
+    _p = re.search(r"property checks\s*\d+\s*(?:→|->)\s*\*{0,2}(\d+)", _flatten(_top))
+    if _p and int(_p.group(1)) != _true_prop:
+        fail(f"CHANGELOG.md: the newest section claims {_p.group(1)} property checks but "
+             f"the workflow defines {_true_prop}")
+
 # references/artifacts.md maps stage -> what it WRITES. The reverse direction — what
 # each stage READS and from where — is the one an agent actually needs at runtime,
 # and it was absent for nine releases: learned.md rule 2 (compute the mapping in both
