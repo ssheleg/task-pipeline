@@ -91,7 +91,18 @@ The two discovered corpora also collapsed into one `_discover_md(skip, predicate
 second occurrence of the walk, and this file's own rule promotes a class at the second,
 not the third.
 
-Guards: 144 → **154**.
+**A check that only worked in the window its own test used.** The cross-commit
+comparison read the mark at `HEAD` — identical to the working tree on a *committed*
+checkout, which is what CI runs. It fired only in the local pre-commit window, and the
+self-test exercised exactly that window. A reader committed the coordinated edit and
+watched it pass. The mark is now compared against **every value this file's history has
+held**, and the test commits its plant.
+
+Two more from the same round: emptying the rules table wholesale made the list falsy and
+skipped the entire check (`rules 0`, PASS), and `docs/superpowers/plans/` was missing
+from the frozen-record exclusions its two siblings carry.
+
+Guards: 144 → **155**.
 
 ## v1.29.0 — a sixth axis, and three summaries that each read as complete
 

@@ -892,7 +892,11 @@ if os.path.isfile(_cs):
 # point-in-time design records, and the retro archive is not read in full.
 # Only load-bearing entries: the directory names below are pruned out of the walk
 # itself, so listing them here again would state the intent twice and enforce it once.
-_COLD_SKIP = ("CHANGELOG.md", "docs/superpowers/specs/", "docs/superpowers/retro/")
+# docs/superpowers/{specs,plans,retro}/ are frozen point-in-time records; retro.md
+# itself is live and stays in. plans/ was missing and a plan already carried the phrase
+# — it escaped only because its wording did not match the stricter regex.
+_COLD_SKIP = ("CHANGELOG.md", "docs/superpowers/specs/", "docs/superpowers/retro/",
+              "docs/superpowers/plans/")
 def _discover_md(skip, predicate):
     """Walk the repo for .md/.mdc surfaces a check applies to. Second caller, so it is
     a function: the shape (prune, filter, relpath, sort) was copy-pasted once and this
@@ -1093,7 +1097,10 @@ if os.path.isfile(_lp):
         fail("references/learned.md: no `### Retired` log — a rule can only leave on a "
              "logged line, and an absent log is indistinguishable from an empty one "
              "(the file's own *What leaves this file* section)")
-    elif _nums:
+    else:
+        # NOT `elif _nums`: deleting every row makes the list falsy and skipped the
+        # whole check — 21 rules removed at once printed PASS with `rules 0`.
+        # Wholesale deletion is the loudest case this guard exists for.
         # The high-water mark comes from the FILE, not from max(_nums): deleting the
         # highest rule shrinks the maximum with it and no gap opens. Proven by running
         # it — deleting rule 21 passed a guard whose whole job is to catch that.
@@ -1104,31 +1111,37 @@ if os.path.isfile(_lp):
                  "maximum with it and the guard sees no gap at all")
         else:
             _high = int(_hw.group(1))
-            # A high-water mark the same change can lower is not one. Deleting rule 21
-            # AND editing the mark to 20 makes both numbers agree and the gap never
-            # opens — found by a reader, who also named why a file-only validator
-            # cannot see it: the evidence is in the PREVIOUS commit. So take it from
-            # there when git is reachable, and PRINT the skip when it is not, because a
-            # check that goes quiet outside a checkout is a check nobody can audit.
+            # A high-water mark the same change can lower is not one, and the first
+            # version of this check compared the working tree against HEAD — which are
+            # the SAME THING on a committed checkout, i.e. in CI, where it therefore
+            # never fired. It only worked in the local pre-commit window, which is the
+            # only window its self-test exercised. Found by a reader who committed the
+            # coordinated edit and watched it pass.
+            #
+            # So: the mark may never fall below any value it has ever held. One
+            # `git log -p` over this file's history carries every version of the line,
+            # added or removed, and the maximum of those is the real high-water mark.
             try:
-                _prev = subprocess.run(
-                    ["git", "-C", ROOT, "show",
-                     "HEAD:plugins/task-pipeline/skills/task-pipeline/references/learned.md"],
-                    capture_output=True, text=True, timeout=10)
-                _pm = (re.search(r"Numbers\s+issued\s+so\s+far:\s*(\d+)",
-                                 _flatten(_prev.stdout), re.I)
-                       if _prev.returncode == 0 else None)
+                _hist = subprocess.run(
+                    ["git", "-C", ROOT, "log", "-n", "80", "-p", "--format=",
+                     "--", "plugins/task-pipeline/skills/task-pipeline/references/learned.md"],
+                    capture_output=True, text=True, timeout=30)
+                _seen = ([int(_x) for _x in re.findall(
+                    r"Numbers\s+issued\s+so\s+far:\s*(\d+)", _flatten(_hist.stdout), re.I)]
+                    if _hist.returncode == 0 else [])
             except Exception:
-                _pm = None
-            if _pm is None:
-                _UNLOOKED.append("learned.md high-water mark vs HEAD (no git or no prior "
-                                 "revision) — a same-change lowering would not be seen")
-            elif _high < int(_pm.group(1)):
-                fail(f"references/learned.md: `Numbers issued so far` fell from "
-                     f"{_pm.group(1)} to {_high} — the mark is a high-water mark and may "
-                     "not go down; lowering it in the same change that removes a rule is "
-                     "exactly how a deletion hides")
-            if _high < max(_nums):
+                _seen = []
+            if not _seen:
+                _UNLOOKED.append("learned.md high-water mark vs its own history (no git, no "
+                                 "prior revision, or the mark is new) — a lowering would not "
+                                 "be seen")
+            elif _high < max(_seen):
+                fail(f"references/learned.md: `Numbers issued so far` is {_high} but this "
+                     f"file's history has held {max(_seen)} — the mark is a high-water mark "
+                     "and may never fall; lowering it alongside a rule's removal is exactly "
+                     "how a deletion hides, and comparing only against HEAD cannot see it "
+                     "once the edit is committed")
+            if _nums and _high < max(_nums):
                 fail(f"references/learned.md: `Numbers issued so far: {_high}` is below the "
                      f"highest rule in the table ({max(_nums)}) — a new rule was added without "
                      "advancing the high-water mark, so its later deletion would be invisible")

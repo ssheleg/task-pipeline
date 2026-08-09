@@ -2835,7 +2835,7 @@ jobs:
             echo "OK: validator correctly FAILs — the disclosure corpus is discovered, not listed"
           fi
 
-      - name: Negative self-test (the high-water mark lowered in the same change that deletes a rule)
+      - name: Negative self-test (the high-water mark lowered in a COMMITTED change)
         run: |
           set -eu
           rm -rf /tmp/hw4-copy && cp -R . /tmp/hw4-copy
@@ -2850,21 +2850,39 @@ jobs:
           t = t[:m.start()] + t[m.end() + 1:]
           old = "**Numbers issued so far: %d.**" % hi
           assert old in t, "PLANT DID NOT LAND: mark absent"
-          t = t.replace(old, "**Numbers issued so far: %d.**" % (hi - 1), 1)
-          open(p, "w", encoding="utf-8").write(t)
+          open(p, "w", encoding="utf-8").write(t.replace(old, "**Numbers issued so far: %d.**" % (hi - 1), 1))
           EOF
+          # COMMIT it. The first version of this test left the edit uncommitted, and the
+          # check compared the working tree against HEAD — identical on a committed
+          # checkout, which is what CI runs. The test passed while the check was blind.
+          git -C /tmp/hw4-copy add -A
+          git -C /tmp/hw4-copy -c user.email=t@t -c user.name=t commit -q -m "coordinated edit"
           if python3 /tmp/hw4-copy/test/validate.py; then
-            echo "ERROR: a mark the same change can lower is not a high-water mark"
+            echo "ERROR: a committed coordinated edit passed — the check compares against the checkout it is in"
             exit 1
           else
-            echo "OK: validator correctly FAILs — the mark is compared against its value at HEAD"
+            echo "OK: validator correctly FAILs — the mark is compared against every value this file has held"
           fi
 
-      # NOT a negative self-test: it asserts a PROPERTY (the skip is printed), and the
-      # validator passes inside it. test/negatives.py reads steps by the marker in the
-      # name and requires each to see a rejection, so a positive assertion carrying that
-      # name reports as a broken test — which is the suite being right about its own
-      # contract.
+      - name: Negative self-test (every rule row deleted at once)
+        run: |
+          set -eu
+          rm -rf /tmp/hw7-copy && cp -R . /tmp/hw7-copy
+          python3 - <<'EOF'
+          import re
+          p = "/tmp/hw7-copy/plugins/task-pipeline/skills/task-pipeline/references/learned.md"
+          t = open(p, encoding="utf-8").read()
+          out = re.sub(r"^\|\s*\d+\s*\|\s*\*\*.*$\n", "", t, flags=re.M)
+          assert out != t, "PLANT DID NOT LAND: no rule rows removed"
+          open(p, "w", encoding="utf-8").write(out)
+          EOF
+          if python3 /tmp/hw7-copy/test/validate.py; then
+            echo "ERROR: emptying the table made the rule list falsy and skipped the whole check"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — wholesale deletion is the loudest case, not an exemption"
+          fi
+
       - name: Property check (the cross-commit skip is printed, never swallowed)
         run: |
           set -eu
