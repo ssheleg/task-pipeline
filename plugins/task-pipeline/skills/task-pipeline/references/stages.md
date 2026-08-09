@@ -173,6 +173,9 @@ never that the work was skipped quietly.
   seeded, the model decision is recorded, and the operator confirms the brief. Stop when a
   re-scan surfaces no new branches (don't grill past diminishing returns;
   reversible calls can be deferred with a note). Only then start stage 1.
+- **The verification ledger is read.** `docs/superpowers/verification.md` — the harvest
+  quotes **how many rows sit at `never`**, because that is the project's standing
+  exposure and stage 0 is where it is cheapest to look ([`verification.md`](verification.md)).
 - **The board is read, or seeded.** `docs/superpowers/backlog.md` ([`backlog.md`](backlog.md)) — its **open count is quoted in the brief**, measured by a command at the top of the run rather than inherited from the last run's report. Absent ⇒ seeded from the template and said so; an empty board and no board are the same thing to work on, and only one of them can be appended to.
 
 ## 1 — Docs study
@@ -393,6 +396,12 @@ never that the work was skipped quietly.
   steps — never silent success. **The CI verdict is one of the reported facts, with
   its run id** — "CI is green" written without a command behind it prints the same
   whether it looked or not ([`gates.md`](gates.md) → *False success*).
+- **Write the verification row.** One line per REQ this run shipped, into
+  `docs/superpowers/verification.md` ([`verification.md`](verification.md)) — the run,
+  the tag or commit it went out in, what the gate said, and `Human: never` unless the
+  operator confirmed during the run. The verification above already happened; this is
+  the only step that makes it answerable **later**, and `never` is a fact rather than a
+  failure — the count has no floor and may never be given a target.
 
 ## 9 — Docs + wiki
 - **Freedom: low** — the matrix walk and the gate are mechanical; what a doc says is not this stage's call ([`gates.md`](gates.md) → *Axis C*).
@@ -455,6 +464,9 @@ never that the work was skipped quietly.
 - **Freedom: medium** — the walk and the evidence rule are fixed; whether it is what was asked for is the operator's ([`gates.md`](gates.md) → *Axis C*).
 - **What:** the closing stage — go back to the brief and account for **every**
   requirement. Doctrine: [`acceptance.md`](acceptance.md).
+- **Every REQ this run shipped has a verification row, and every row names a REQ some
+  brief carries.** Both directions: a shipped feature that entered no ledger and a
+  ledger row about nothing are different failures ([`verification.md`](verification.md)).
 - **The ledger's open rows are resolved onto the board.** Every carry-over row still
   `open` leaves with a `B-NNN` id on `docs/superpowers/backlog.md`, and the ledger row
   is updated to name it ([`backlog.md`](backlog.md)). Both directions, because they are

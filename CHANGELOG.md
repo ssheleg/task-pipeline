@@ -1,5 +1,74 @@
 # Changelog
 
+## v1.32.0 — the column a machine may not fill
+
+Stage 8 already performs the verification trio, reads the CI verdict and opens the
+rendered page. All of it **per run**, none of it accumulating — so *"which features has
+nobody confirmed since they shipped?"* had no artifact to be asked of.
+
+`docs/superpowers/verification.md` is one row per shipped REQ, and its point is a single
+column: **`Human` — a date, or the literal `never`.** Nothing else. *"soon"*, *"mostly"*
+and *"looks fine"* are how a column stops being answerable, and this is the one thing in
+the pipeline a machine may not write on your behalf.
+
+**`never` is a fact, not a failure.** The count has no floor, no direction, and may
+never be given a target — the moment `never` becomes something to avoid writing, the
+column starts lying and the pipeline loses its only signal about the world outside its
+own checks. One of the new checks is a **property check** proving that filling the
+column does not fail the build: a gate that punishes an honest answer guarantees there
+will not be one.
+
+**It keys to the brief, not to the coverage table**, and that was a measurement rather
+than a preference. Ten acceptance files here carry their first REQ-bearing table in
+nearly as many shapes, because `acceptance.md` fixes it in prose — the same drift the
+carry-over ledger reached with six header shapes. Eight of nine briefs carry
+machine-readable `| REQ-NNN |` rows; the ninth was this programme's own brief, fixed the
+day it was measured. That the coverage table has no template is a real finding with a
+real cost, and it is on the board rather than fixed here.
+
+Both directions, because they are different failures: a shipped REQ that entered no
+ledger, and a ledger row about a requirement no brief carries.
+
+**Seeded truthfully: 103 rows, every one `never`.** Thirty-one versions shipped, and not
+one recorded instance of a person confirming a shipped requirement afterwards. That is
+not a new problem — it is the first time it can be stated.
+
+**Review round: N1's lesson carried forward by its wrong half.** The Human check
+scanned *every* cell for a date or `never`, so a bare date sitting in the Note column
+satisfied a row whose Human read *"soon"* — precisely the prose the guard exists to
+reject. N1 concluded *"the header names the candidate columns and the match happens
+inside them"*, not *"never look at columns"*; this file is templated and has exactly one
+shape, so the column is located by name and read alone.
+
+**A file that states one truth twice, and drifted for two modules.** `artifacts.md`
+carries an ASCII layout tree *and* the tables that name the same files — and the tree
+never gained `backlog.md` (shipped in v1.31.0) or `verification.md` (this release), both
+named in tables a hundred lines above it. A reader found it; nothing compared them. The
+tree is now computed against those tables.
+
+The seeded ledger also truncated its `What` column at 72 characters, leaving unterminated
+code spans, while the template it follows says *"copied from the brief, not re-worded"* —
+sixty-seven of a hundred and three rows landing at exactly 72 is a script's fingerprint,
+not an editor's. Reseeded in full: 26 to 246 characters, none at 72.
+
+**The ledger recorded unbuilt features as shipped and verified.** The seed took every
+REQ from every brief — including this programme's own, whose REQ-004/008/009/010 belong
+to modules that do not exist yet, and whose N2 rows were stamped with N1's version. In
+the file whose entire purpose is *what actually shipped*. Reseeded: **99 rows**, four
+omitted as not yet built, each module stamped with its own release.
+
+**And the count is printed.** It was computed and dropped on the floor for a release — a
+measurement nobody surfaces is the same silence as no measurement:
+
+```
+verification: 99 shipped REQ · 99 never confirmed by a person  (disclosure — no floor, no target)
+```
+
+Ninety-nine shipped requirements, not one confirmed by a person. That is the answer to a
+question this repository could not previously ask.
+
+Guards: 175 → **185**, property checks 4 → 8.
+
 ## v1.31.0 — the board, and the pointer that was never the one dangling
 
 The carry-over ledger has always offered `backlog` as a home for a deferred row — a

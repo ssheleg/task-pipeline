@@ -384,10 +384,12 @@ def _as_int(tok):
         _UNPARSED_WORDS.add(tok)
     return val
 
-_neg_wf = os.path.join(ROOT, ".github/workflows/validate.yml")   # read again further down
-_neg_n = (len(re.findall(r"^\s*- name:\s*Negative self-test",
-                         open(_neg_wf, encoding="utf-8").read(), re.M))
-          if os.path.isfile(_neg_wf) else 0)   # the floor guard downstream reads this
+_neg_wf = os.path.join(ROOT, ".github/workflows/validate.yml")
+_NEG_WF_TEXT = open(_neg_wf, encoding="utf-8").read() if os.path.isfile(_neg_wf) else ""
+# Both counts, from ONE read, used by every check below that needs either. The workflow
+# was being opened three times for two numbers.
+_neg_n = len(re.findall(r"^\s*- name:\s*Negative self-test", _NEG_WF_TEXT, re.M))
+_prop_n = len(re.findall(r"^\s*- name:\s*Property check", _NEG_WF_TEXT, re.M))
 
 def _count_re(path, pattern, flags=re.M):
     p = os.path.join(ROOT, path)
@@ -553,6 +555,13 @@ def _paragraphs(text):
     whole file, a guard measures a document's VOCABULARY; scoped to a paragraph, it
     measures what one passage claims. Third call site, so it is a function."""
     return re.split(r"\n\s*\n", text)
+
+
+def _row_cells(line, lower=True):
+    """Pipe-split a markdown row into flattened cells. Third copy of this comprehension
+    when it was extracted, and the drift it invites is not hypothetical: the Human-column
+    index bug in this same module came from two lists split slightly differently."""
+    return [_flatten(_x, lower=lower).strip() for _x in line.split("|")[1:-1]]
 
 
 def _flatten(text, lower=False):
@@ -1260,7 +1269,7 @@ if os.path.isfile(_BOARD):
         _hdr = None
         for _l in _lt.splitlines():
             if _l.startswith("|") and _l.split("|")[1].strip().lower() in _LEDGER_ID:
-                _hdr = [_flatten(_x, lower=True).strip() for _x in _l.split("|")[1:-1]]
+                _hdr = _row_cells(_l)
                 break
         if _hdr is None:
             continue                       # a ledger with no table yet
@@ -1272,7 +1281,7 @@ if os.path.isfile(_BOARD):
         for _l in _lt.splitlines():
             if not _l.startswith("|") or set(_l.strip()) <= set("|- "):
                 continue
-            _c = [_flatten(_x, lower=True).strip() for _x in _l.split("|")[1:-1]]
+            _c = _row_cells(_l)
             if not _c or _c[0] in _LEDGER_ID:
                 continue
             if len(_c) == len(_hdr):
@@ -1418,14 +1427,137 @@ else:
     fail("test/validate.py: cannot read the trigger literals out of _UNRES_RE — the "
          "doctrine-vs-code comparison has no source and is silently passing")
 
+# The verification ledger. Keyed to the BRIEF's REQ table, not to the stage-10 coverage
+# table: measured before building, ten acceptance files here carry the first REQ-bearing
+# table in nearly as many shapes, because acceptance.md fixes it in prose. Eight of nine
+# briefs carry machine-readable `| REQ-NNN |` rows, and the ninth was fixed the day this
+# was measured. Prose does not hold a shape across ten runs; a template does.
+_VERIF = os.path.join(ROOT, "docs/superpowers/verification.md")
+_VERIF_NEVER = 0
+_VERIF_TOTAL = 0
+if os.path.isfile(_VERIF):
+    _vt = open(_VERIF, encoding="utf-8").read()
+    _vrows = re.findall(r"^\|\s*(REQ-\d+)\s*\|(.+)$", _vt, re.M)
+    if not _vrows:
+        fail("docs/superpowers/verification.md: no `REQ-NNN` row — an empty ledger and a "
+             "missing one are the same thing to a reader, and only one of them means "
+             "nothing has shipped")
+    # The Human column is found BY NAME in this file's own header. Scanning every cell
+    # was the first version and it is N1's lesson carried forward by its wrong half:
+    # that module concluded "the header names the candidate columns and the match happens
+    # inside them", not "never look at columns". Scanning all cells let a bare date in
+    # the Note column satisfy a row whose Human said "soon" — the single thing this guard
+    # exists to reject.
+    _vhdr = None
+    for _l in _vt.splitlines():
+        if _l.startswith("|") and "human" in _flatten(_l, lower=True):
+            _vhdr = _row_cells(_l)
+            break
+    if _vhdr is None or "human" not in _vhdr:
+        fail("docs/superpowers/verification.md: no header row naming a `Human` column — "
+             "the one column this file exists for cannot be located, and a guard that "
+             "cannot find its subject passes everything")
+        _hidx = None
+    else:
+        _hidx = _vhdr.index("human")
+
+    _brief_reqs = set()
+    _brief_by_slug = {}
+    for _bf in glob.glob(os.path.join(ROOT, "docs/superpowers/specs/*brief.md")):
+        _slug = os.path.basename(_bf).replace("-brief.md", "")
+        _ids = set(re.findall(r"^\|\s*(REQ-\d+)\s*\|", open(_bf, encoding="utf-8").read(), re.M))
+        _brief_by_slug[_slug] = _ids
+        _brief_reqs |= _ids
+    for _rid, _rest in _vrows:
+        # Built over the WHOLE row, REQ included, so it is shaped like the header and
+        # `_hidx` indexes it directly. The first version dropped REQ from the cells but
+        # not from the header and bridged the gap with `_hidx - 1` — correct only while
+        # Human sits mid-table, and silently wrong the day somebody reorders columns.
+        _cells = [_flatten(_x).strip() for _x in (_rid + "|" + _rest).split("|")]
+        # Reverse direction: a row about nothing. Different failure from a shipped REQ
+        # that entered no ledger, and only this pass finds it (learned.md rule 2).
+        # Against the brief this row NAMES, not the union of all of them. Ids 001-014
+        # recur across every brief, so the union check passed a row paired with the wrong
+        # run almost always — it was asking "does this id exist anywhere", which is not
+        # the question.
+        _run = next((_x.strip("`") for _x in _cells if _x.strip("`") in _brief_by_slug), None)
+        if _run:
+            if _rid not in _brief_by_slug[_run]:
+                fail(f"docs/superpowers/verification.md: {_rid} is not in the REQ table of "
+                     f"`{_run}`, the run this row names — an id that exists in some other "
+                     "brief is not the same requirement")
+        elif _brief_reqs and _rid not in _brief_reqs:
+            fail(f"docs/superpowers/verification.md: {_rid} is in no brief's REQ table — a "
+                 "ledger row about a requirement nobody wrote down is a row about nothing")
+        # The Human column is the point of the file, so it is the one that is checked:
+        # a date or the literal `never`. "soon" and "mostly" are how it stops being
+        # answerable, and this is the only column a machine may not fill.
+        _human = ([_cells[_hidx]] if _hidx is not None and len(_cells) > _hidx else [])
+        _human = [_x for _x in _human if re.fullmatch(r"never|\d{4}-\d{2}-\d{2}", _x.lower())]
+        if _hidx is None:
+            pass                           # already failed above; do not report twice
+        elif not _human:
+            fail(f"docs/superpowers/verification.md: {_rid} has no `Human` value that is "
+                 "either a date or the literal `never` — prose in that column is how the "
+                 "one question this file exists to answer stops being answerable")
+        _VERIF_TOTAL += 1
+        if _human and _human[0].lower() == "never":
+            _VERIF_NEVER += 1
+
+# artifacts.md carries the same truth twice: an ASCII layout tree and a set of tables.
+# They drifted for two modules — the tree never gained `backlog.md` or
+# `verification.md` while both were named in the tables of the same file, and a reader
+# found it, not a check. Every `docs/superpowers/*.md` the tables name must appear in
+# the tree, computed from the tables so neither side can be the one that is right.
+# Reads artifacts.md ONCE and hands it to the stage-input check below, which used to
+# open the same file again on the next line. Board row B-010 tracks this class.
+_artf = os.path.join(refdir, "artifacts.md")
+_AT_TEXT = open(_artf, encoding="utf-8").read() if os.path.isfile(_artf) else None
+if _AT_TEXT is not None:
+    _at = _AT_TEXT
+    _named = set(re.findall(r"`docs/superpowers/([a-z-]+\.md)`", _at))
+    _tree = re.search(r"^  superpowers/\n((?:    .*\n)+)", _at, re.M)
+    if _named and not _tree:
+        fail("references/artifacts.md: the tables name files under `docs/superpowers/` and "
+             "the layout tree that should list them cannot be found — one of the two "
+             "statements of the same truth has moved")
+    elif _named:
+        _absent = sorted(_f for _f in _named if _f not in _tree.group(1))
+        if _absent:
+            fail("references/artifacts.md: the layout tree omits "
+                 + ", ".join(repr(_a) for _a in _absent)
+                 + " — named in this same file's tables. Two statements of one truth in one "
+                   "file, and they drifted for two modules before a reader noticed")
+
+# The TOP CHANGELOG section describes the release being cut, so its guard and
+# property counts are claims about now — and they went stale twice in one programme,
+# because checks get added after the entry is written. Older sections are history and
+# correct as of their own day; only the newest is checked.
+_cl = os.path.join(ROOT, "CHANGELOG.md")
+_wf = os.path.join(ROOT, ".github/workflows/validate.yml")
+if os.path.isfile(_cl) and os.path.isfile(_wf):
+    _true_neg, _true_prop = _neg_n, _prop_n
+    _clt = chg
+    _top = _clt.split("\n## v", 2)
+    _top = _top[1] if len(_top) > 1 else ""
+    _g = re.search(r"Guards:\s*\d+\s*(?:→|->)\s*(\d+)", _flatten(_top))
+    if _g and int(_g.group(1)) != _true_neg:
+        fail(f"CHANGELOG.md: the newest section claims {_g.group(1)} guards but the "
+             f"workflow defines {_true_neg} — the entry is written before the last "
+             "checks are added, and this count went stale twice in one programme")
+    _p = re.search(r"property checks\s*\d+\s*(?:→|->)\s*(\d+)", _flatten(_top))
+    if _p and int(_p.group(1)) != _true_prop:
+        fail(f"CHANGELOG.md: the newest section claims {_p.group(1)} property checks but "
+             f"the workflow defines {_true_prop}")
+
 # references/artifacts.md maps stage -> what it WRITES. The reverse direction — what
 # each stage READS and from where — is the one an agent actually needs at runtime,
 # and it was absent for nine releases: learned.md rule 2 (compute the mapping in both
 # directions) unapplied to this file itself. A stage whose inputs are unnamed reads
 # whatever the context happens to hold.
-_art = os.path.join(refdir, "artifacts.md")
-if os.path.isfile(_art):
-    _at = open(_art, encoding="utf-8").read()
+_art = _artf
+if _AT_TEXT is not None:
+    _at = _AT_TEXT
     for _needle, _what in (("Stage → input map", "the stage → input map"),
                            ("Project-saved rules", "the project-saved-rules map"),
                            ("Stage → artifact map", "the stage → artifact map")):
@@ -2595,11 +2727,20 @@ if os.path.isfile(os.path.join(refdir, "knowledge-graph.md")):
 # A floor below the count cannot notice losing the difference, which is the whole job.
 _neg_py = os.path.join(ROOT, "test/negatives.py")
 if os.path.isfile(_neg_py) and os.path.isfile(_neg_wf):
-    _m_floor = re.search(r"^MIN_EXPECTED\s*=\s*(\d+)", open(_neg_py, encoding="utf-8").read(), re.M)
+    _neg_py_txt = open(_neg_py, encoding="utf-8").read()
+    _m_floor = re.search(r"^MIN_EXPECTED\s*=\s*(\d+)", _neg_py_txt, re.M)
     if _m_floor and int(_m_floor.group(1)) != _neg_n:
         fail(f"test/negatives.py: MIN_EXPECTED is {_m_floor.group(1)} but the workflow defines "
              f"{_neg_n} negative self-tests — a floor below the count is a floor that cannot "
              "notice losing the difference; raise it in the same change that adds the tests")
+    # MIN_PROPS had NO such check at all — zero mentions in this file — while its sibling
+    # has been tied since v1.15.0 and still went stale twice. A floor nothing compares is
+    # not a floor, it is a number somebody typed once.
+    _p_floor = re.search(r"^MIN_PROPS\s*=\s*(\d+)", _neg_py_txt, re.M)
+    if _p_floor and int(_p_floor.group(1)) != _prop_n:
+        fail(f"test/negatives.py: MIN_PROPS is {_p_floor.group(1)} but the workflow defines "
+             f"{_prop_n} property checks — the same drift MIN_EXPECTED suffered twice, on the "
+             "floor nobody had wired up")
 
 # The CI verdict (references/conventions.md). A workflow run that nobody reads is the
 # fail-open hook with extra steps: on 2026-08-06 this repo's `validate` was
@@ -3008,5 +3149,12 @@ if _LSHAPE:
     print("  " + _LSHAPE + "  (disclosure — no floor, no target)")
 # The other disclosure: what this run did not look at. Printed even when empty, because
 # "unlooked: 0" and a missing line are the same silence to a reader.
+# The never-count, printed. It was computed and dropped on the floor for one release —
+# a measurement nobody surfaces is the same silence as no measurement, which is the
+# failure this file's own doctrine is loudest about. No floor, no direction, never a
+# target: N of M rows have not been looked at by a person, and that is the whole claim.
+if _VERIF_TOTAL:
+    print(f"  verification: {_VERIF_TOTAL} shipped REQ · {_VERIF_NEVER} never confirmed by "
+          "a person  (disclosure — no floor, no target)")
 print(f"  unlooked: {len(_UNLOOKED)}"
       + ("".join("\n    · " + _u for _u in _UNLOOKED) if _UNLOOKED else ""))

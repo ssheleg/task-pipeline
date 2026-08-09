@@ -3373,3 +3373,264 @@ jobs:
           else
             echo "OK: validator correctly FAILs — the gap is any length, because GFM ends the table at the first blank"
           fi
+
+      - name: Negative self-test (a verification row whose REQ is in no brief)
+        run: |
+          set -eu
+          rm -rf /tmp/vf1-copy && cp -R . /tmp/vf1-copy
+          python3 - <<'EOF'
+          p = "/tmp/vf1-copy/docs/superpowers/verification.md"
+          t = open(p, encoding="utf-8").read()
+          open(p, "w", encoding="utf-8").write(
+              t + "| REQ-999 | invented | `nowhere` | v1.0.0 | pass | never | — |\n")
+          EOF
+          if python3 /tmp/vf1-copy/test/validate.py; then
+            echo "ERROR: a ledger row about a requirement nobody wrote down passed"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the reverse direction, a row about nothing"
+          fi
+
+      - name: Negative self-test (prose in the Human column)
+        run: |
+          set -eu
+          rm -rf /tmp/vf2-copy && cp -R . /tmp/vf2-copy
+          python3 - <<'EOF'
+          p = "/tmp/vf2-copy/docs/superpowers/verification.md"
+          t = open(p, encoding="utf-8").read()
+          needle = "| pass | never | — |"
+          assert needle in t, "PLANT DID NOT LAND: anchor absent before the edit"
+          open(p, "w", encoding="utf-8").write(t.replace(needle, "| pass | soon | — |", 1))
+          EOF
+          if python3 /tmp/vf2-copy/test/validate.py; then
+            echo "ERROR: 'soon' in the one column a machine may not fill — the question stops being answerable"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — a date or the literal never, nothing else"
+          fi
+
+      - name: Negative self-test (the verification ledger emptied of rows)
+        run: |
+          set -eu
+          rm -rf /tmp/vf3-copy && cp -R . /tmp/vf3-copy
+          python3 - <<'EOF'
+          import re
+          p = "/tmp/vf3-copy/docs/superpowers/verification.md"
+          t = open(p, encoding="utf-8").read()
+          assert re.search(r"^\| REQ-\d+ ", t, re.M), "PLANT DID NOT LAND: no rows before the edit"
+          open(p, "w", encoding="utf-8").write(re.sub(r"^\| REQ-\d+ .*$", "", t, flags=re.M))
+          EOF
+          if python3 /tmp/vf3-copy/test/validate.py; then
+            echo "ERROR: an empty ledger reads exactly like a project that has shipped nothing"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the plant lands in the file that DEFINES the ledger"
+          fi
+
+      - name: Property check (a real date in the Human column is accepted)
+        run: |
+          set -eu
+          rm -rf /tmp/vf4-copy && cp -R . /tmp/vf4-copy
+          python3 - <<'EOF'
+          p = "/tmp/vf4-copy/docs/superpowers/verification.md"
+          t = open(p, encoding="utf-8").read()
+          needle = "| pass | never | — |"
+          assert needle in t, "PLANT DID NOT LAND: anchor absent"
+          open(p, "w", encoding="utf-8").write(
+              t.replace(needle, "| pass | 2026-08-09 | opened the rendered page |", 1))
+          EOF
+          if python3 /tmp/vf4-copy/test/validate.py >/dev/null; then
+            echo "OK: filling the column is the point of the file, so filling it must not fail the build"
+          else
+            echo "ERROR: recording that a human looked broke the gate — the column would never be filled again"
+            exit 1
+          fi
+
+      - name: Negative self-test (prose in Human, rescued by a date in Note)
+        run: |
+          set -eu
+          rm -rf /tmp/vf5-copy && cp -R . /tmp/vf5-copy
+          python3 - <<'EOF'
+          p = "/tmp/vf5-copy/docs/superpowers/verification.md"
+          t = open(p, encoding="utf-8").read()
+          needle = "| pass | never | — |"
+          assert needle in t, "PLANT DID NOT LAND: anchor absent before the edit"
+          open(p, "w", encoding="utf-8").write(t.replace(needle, "| pass | soon | 2026-08-09 |", 1))
+          EOF
+          if python3 /tmp/vf5-copy/test/validate.py; then
+            echo "ERROR: a bare date in Note satisfied a row whose Human said 'soon' — the one thing this guard rejects"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the Human column is located by name, not by scanning every cell"
+          fi
+
+      - name: Negative self-test (the Human column renamed away)
+        run: |
+          set -eu
+          rm -rf /tmp/vf6-copy && cp -R . /tmp/vf6-copy
+          python3 - <<'EOF'
+          p = "/tmp/vf6-copy/docs/superpowers/verification.md"
+          t = open(p, encoding="utf-8").read()
+          needle = "| Auto | Human | Note |"
+          assert needle in t, "PLANT DID NOT LAND: the header is not where the guard reads it"
+          open(p, "w", encoding="utf-8").write(t.replace(needle, "| Auto | Person | Note |", 1))
+          EOF
+          if python3 /tmp/vf6-copy/test/validate.py; then
+            echo "ERROR: the guard could not find its subject and passed everything"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — a guard that cannot locate its column says so"
+          fi
+
+      - name: Negative self-test (the layout tree drifting from the tables above it)
+        run: |
+          set -eu
+          rm -rf /tmp/tr1-copy && cp -R . /tmp/tr1-copy
+          python3 - <<'EOF'
+          p = "/tmp/tr1-copy/plugins/task-pipeline/skills/task-pipeline/references/artifacts.md"
+          t = open(p, encoding="utf-8").read()
+          needle = "    verification.md                   # one row per shipped REQ; `Human` is a date or `never`\n"
+          assert needle in t, "PLANT DID NOT LAND: the tree line is not where the guard reads it"
+          open(p, "w", encoding="utf-8").write(t.replace(needle, "", 1))
+          EOF
+          if python3 /tmp/tr1-copy/test/validate.py; then
+            echo "ERROR: one file states the same truth twice and the two drifted for two modules unnoticed"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the tree is computed against the tables beside it"
+          fi
+
+      - name: Property check (the never-count is printed beside the verdict)
+        run: |
+          set -eu
+          rm -rf /tmp/vf7-copy && cp -R . /tmp/vf7-copy
+          out=$(python3 /tmp/vf7-copy/test/validate.py) || { echo "ERROR: validator failed for an unrelated reason"; exit 1; }
+          if printf '%s' "$out" | grep -q "never confirmed by a person"; then
+            echo "OK: the count is surfaced — a measurement nobody prints is the same silence as no measurement"
+          else
+            echo "ERROR: the never-count is computed and dropped on the floor"
+            exit 1
+          fi
+
+      - name: Negative self-test (the layout tree block gone entirely)
+        run: |
+          set -eu
+          rm -rf /tmp/tr2-copy && cp -R . /tmp/tr2-copy
+          python3 - <<'EOF'
+          import re
+          p = "/tmp/tr2-copy/plugins/task-pipeline/skills/task-pipeline/references/artifacts.md"
+          t = open(p, encoding="utf-8").read()
+          m = re.search(r"^  superpowers/\n(?:    .*\n)+", t, re.M)
+          assert m, "PLANT DID NOT LAND: the tree block is not where the guard reads it"
+          open(p, "w", encoding="utf-8").write(t[:m.start()] + t[m.end():])
+          assert not re.search(r"^  superpowers/\n    ", open(p, encoding="utf-8").read(), re.M), "PLANT DID NOT LAND"
+          EOF
+          if python3 /tmp/tr2-copy/test/validate.py; then
+            echo "ERROR: the tree vanished and the guard comparing against it passed"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the missing-block branch is watched too, not only the missing-line one"
+          fi
+
+      - name: Property check (the Human column survives a header reorder)
+        run: |
+          set -eu
+          rm -rf /tmp/hr-copy && cp -R . /tmp/hr-copy
+          python3 - <<'EOF'
+          import re
+          p = "/tmp/hr-copy/docs/superpowers/verification.md"
+          t = open(p, encoding="utf-8").read()
+          old = "| REQ | What | Run | Shipped in | Auto | Human | Note |"
+          assert old in t, "PLANT DID NOT LAND: header absent"
+          t = t.replace(old, "| REQ | What | Run | Shipped in | Auto | Note | Human |")
+          # Any Auto value, not just `pass`: four rows read `none` after a review round,
+          # and a plant that skips them leaves half the table in the old column order.
+          t = re.sub(r"\| (pass|none|partial) \| (never|\d{4}-\d{2}-\d{2}) \| — \|",
+                     r"| \1 | — | \2 |", t)
+          open(p, "w", encoding="utf-8").write(t)
+          EOF
+          if python3 /tmp/hr-copy/test/validate.py >/dev/null; then
+            echo "OK: the column is found by name, so moving it does not silently misread a neighbour"
+          else
+            echo "ERROR: reordering the header broke the check — it was reading a position, not a column"
+            exit 1
+          fi
+
+      - name: Negative self-test (a stale guard count in the newest CHANGELOG section)
+        run: |
+          set -eu
+          rm -rf /tmp/cl1-copy && cp -R . /tmp/cl1-copy
+          python3 - <<'EOF'
+          import re
+          p = "/tmp/cl1-copy/CHANGELOG.md"
+          t = open(p, encoding="utf-8").read()
+          m = re.search(r"(Guards:\s*\d+\s*→\s*\*\*)(\d+)(\*\*)", t)
+          assert m, "PLANT DID NOT LAND: no guard count in the newest section"
+          open(p, "w", encoding="utf-8").write(
+              t[:m.start(2)] + str(int(m.group(2)) - 1) + t[m.end(2):])
+          EOF
+          if python3 /tmp/cl1-copy/test/validate.py; then
+            echo "ERROR: the release entry claimed a guard count the workflow does not define"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the newest entry's counts are claims about now"
+          fi
+
+      - name: Property check (older CHANGELOG sections are history, not claims about now)
+        run: |
+          set -eu
+          rm -rf /tmp/cl3-copy && cp -R . /tmp/cl3-copy
+          python3 - <<'EOF'
+          import re
+          p = "/tmp/cl3-copy/CHANGELOG.md"
+          t = open(p, encoding="utf-8").read()
+          i = t.index("\n## v", t.index("\n## v") + 4)          # the SECOND version heading
+          seg = t[i:]
+          m = re.search(r"(Guards:\s*\d+\s*→\s*\*\*)(\d+)(\*\*)", seg)
+          assert m, "PLANT DID NOT LAND: no guard count in an older section"
+          open(p, "w", encoding="utf-8").write(
+              t[:i] + seg[:m.start(2)] + "999" + seg[m.end(2):])
+          EOF
+          if python3 /tmp/cl3-copy/test/validate.py >/dev/null; then
+            echo "OK: an older section states what was true on its own day and is left alone"
+          else
+            echo "ERROR: the guard reached back into history, where every count would need rewriting"
+            exit 1
+          fi
+
+      - name: Negative self-test (MIN_PROPS drifting from the workflow's property count)
+        run: |
+          set -eu
+          rm -rf /tmp/mp-copy && cp -R . /tmp/mp-copy
+          python3 - <<'EOF'
+          import re
+          p = "/tmp/mp-copy/test/negatives.py"
+          t = open(p, encoding="utf-8").read()
+          m = re.search(r"^MIN_PROPS\s*=\s*(\d+)", t, re.M)
+          assert m, "PLANT DID NOT LAND: MIN_PROPS is not where the guard reads it"
+          open(p, "w", encoding="utf-8").write(
+              t[:m.start(1)] + str(int(m.group(1)) - 1) + t[m.end(1):])
+          EOF
+          if python3 /tmp/mp-copy/test/validate.py; then
+            echo "ERROR: the property floor drifted below the count, exactly as MIN_EXPECTED did twice"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — both floors are tied to the workflow now, not only one"
+          fi
+
+      - name: Negative self-test (a REQ paired with a run whose brief does not carry it)
+        run: |
+          set -eu
+          rm -rf /tmp/wr-copy && cp -R . /tmp/wr-copy
+          python3 - <<'EOF'
+          p = "/tmp/wr-copy/docs/superpowers/verification.md"
+          t = open(p, encoding="utf-8").read()
+          open(p, "w", encoding="utf-8").write(
+              t + "| REQ-014 | wrong pairing | `2026-08-04-run-continuity` | v1.10.0 | pass | never | — |\n")
+          EOF
+          if python3 /tmp/wr-copy/test/validate.py; then
+            echo "ERROR: ids 001-014 recur across every brief, so a union check passes almost any mispairing"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the REQ is checked against the brief the row NAMES"
+          fi

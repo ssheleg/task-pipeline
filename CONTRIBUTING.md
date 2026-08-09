@@ -386,7 +386,17 @@ different cell per file and pass open rows in silence. Reading by name was the f
 design and it was wrong for the same reason.
 *(guard: `with no board id` and `names no Source`)*
 
-**45. Every invariant above names the guard that enforces it, and that guard exists.**This list claims to be *what the validator enforces*; it was eight guards behind when
+**45. Every shipped REQ has a verification row, and `Human` is a date or `never`.**
+`docs/superpowers/verification.md` records the one thing no check can decide — whether a
+person looked after it shipped. Both directions: a shipped REQ with no row, and a row
+whose REQ is in no brief. It keys to the brief because eight of nine briefs carry
+machine-readable REQ rows while ten acceptance files carry their coverage table in nearly
+as many shapes. **The `never` count has no floor and may never be given a target**; a
+property check proves that filling the column does not fail the build, because a gate
+that punishes an honest answer will not receive one.
+*(guard: `either a date or the literal` and `is in no brief's REQ table`)*
+
+**46. Every invariant above names the guard that enforces it, and that guard exists.**This list claims to be *what the validator enforces*; it was eight guards behind when
 an audit measured it. A claim of enforcement is now checked like any other claim.
 *(guard: `whose message does not appear in`)* — and a cited literal must lie inside
 a **single** string in `test/validate.py`: the check reads that file as text, so a
