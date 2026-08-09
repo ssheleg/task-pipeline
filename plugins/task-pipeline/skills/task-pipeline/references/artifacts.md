@@ -25,6 +25,8 @@ docs/
     NNNN-<slug>.md                    # the OTHER permitted decision home — one project uses ONE
   superpowers/
     retro.md                          # stage 10's last act — ONE per project, not per run
+    backlog.md                        # the work-list BETWEEN runs — read at 0, resolved at 10
+    verification.md                   # one row per shipped REQ; `Human` is a date or `never`
     retro/YYYY-QN.md                  # the archive: rotated entries + retirements, queried not read
     specs/
       YYYY-MM-DD-<topic>-brief.md     # stage 0 — locked intake brief (grill output)

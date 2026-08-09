@@ -1476,6 +1476,28 @@ if os.path.isfile(_VERIF):
         elif _human[0].lower() == "never":
             _VERIF_NEVER += 1
 
+# artifacts.md carries the same truth twice: an ASCII layout tree and a set of tables.
+# They drifted for two modules — the tree never gained `backlog.md` or
+# `verification.md` while both were named in the tables of the same file, and a reader
+# found it, not a check. Every `docs/superpowers/*.md` the tables name must appear in
+# the tree, computed from the tables so neither side can be the one that is right.
+_artf = os.path.join(refdir, "artifacts.md")
+if os.path.isfile(_artf):
+    _at = open(_artf, encoding="utf-8").read()
+    _named = set(re.findall(r"`docs/superpowers/([a-z-]+\.md)`", _at))
+    _tree = re.search(r"^  superpowers/\n((?:    .*\n)+)", _at, re.M)
+    if _named and not _tree:
+        fail("references/artifacts.md: the tables name files under `docs/superpowers/` and "
+             "the layout tree that should list them cannot be found — one of the two "
+             "statements of the same truth has moved")
+    elif _named:
+        _absent = sorted(_f for _f in _named if _f not in _tree.group(1))
+        if _absent:
+            fail("references/artifacts.md: the layout tree omits "
+                 + ", ".join(repr(_a) for _a in _absent)
+                 + " — named in this same file's tables. Two statements of one truth in one "
+                   "file, and they drifted for two modules before a reader noticed")
+
 # references/artifacts.md maps stage -> what it WRITES. The reverse direction — what
 # each stage READS and from where — is the one an agent actually needs at runtime,
 # and it was absent for nine releases: learned.md rule 2 (compute the mapping in both

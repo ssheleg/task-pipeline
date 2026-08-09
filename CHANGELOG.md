@@ -40,7 +40,18 @@ reject. N1 concluded *"the header names the candidate columns and the match happ
 inside them"*, not *"never look at columns"*; this file is templated and has exactly one
 shape, so the column is located by name and read alone.
 
-Guards: 175 → **180**, property checks 4 → 5.
+**A file that states one truth twice, and drifted for two modules.** `artifacts.md`
+carries an ASCII layout tree *and* the tables that name the same files — and the tree
+never gained `backlog.md` (shipped in v1.31.0) or `verification.md` (this release), both
+named in tables a hundred lines above it. A reader found it; nothing compared them. The
+tree is now computed against those tables.
+
+The seeded ledger also truncated its `What` column at 72 characters, leaving unterminated
+code spans, while the template it follows says *"copied from the brief, not re-worded"* —
+sixty-seven of a hundred and three rows landing at exactly 72 is a script's fingerprint,
+not an editor's. Reseeded in full: 26 to 246 characters, none at 72.
+
+Guards: 175 → **181**, property checks 4 → 5.
 
 ## v1.31.0 — the board, and the pointer that was never the one dangling
 
