@@ -329,7 +329,27 @@ guess. This repository had eight vocabularies for declining to claim and, until 
 zero counters.
 *(guard: `a worked GATE verdict omits `)*
 
-**39. Every invariant above names the guard that enforces it, and that guard exists.**This list claims to be *what the validator enforces*; it was eight guards behind when
+**39. A surface that enumerates the rotation axes enumerates all of them.** The axes
+live once, in `references/audit.md`; the Cursor rule summarises them because it is
+self-contained by contract and can point nowhere. Measured on 2026-08-09: the
+definition held five, the Cursor rule four, README three — and each read as complete,
+because a list of three orthogonal things is a convincing list of three orthogonal
+things. The keys are derived from `audit.md` at check time, never hand-listed, and the
+unit is the **paragraph**: scoped to the file, the first version of this guard reported
+`stages.md` for three hits 595 lines apart that meant three different things. Either
+name every axis or stop enumerating and name the file.
+*(guard: `enumerates the rotation axes but names`)*
+
+**40. Counts of "axes" are computed, and the two kinds are kept apart.** `gates.md` is
+built on three of its own (context, enforcement, degrees of freedom) and `audit.md`
+rotates between six; the word is polysemous in this corpus. `gates.md` was titled *"the
+two axes"* over a file with Axis A, B and C, and four surfaces repeated it — including
+README's prose, which never mentioned degrees of freedom at all. Both counts are now
+claim-registry classes, separated by the qualifier, so a guard cannot report drift
+between two things that were never the same list.
+*(guard: `gates.md's own axes`)*
+
+**41. Every invariant above names the guard that enforces it, and that guard exists.**This list claims to be *what the validator enforces*; it was eight guards behind when
 an audit measured it. A claim of enforcement is now checked like any other claim.
 *(guard: `whose message does not appear in`)* — and a cited literal must lie inside
 a **single** string in `test/validate.py`: the check reads that file as text, so a

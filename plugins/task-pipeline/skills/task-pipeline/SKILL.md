@@ -335,7 +335,7 @@ automation is on — `pipeline.schema.json` is the only contract.
 - `references/acceptance.md` — the built-in stage-10 close-out: REQ coverage, evidence, sign-off
 - `references/retrospective.md` — stage 10's last act: the project retro (`docs/superpowers/retro.md`), the three grades of fix, the mandatory prune and its cap of ten
 - `references/documentation.md` — cross-cutting: the doc inventory, registers and ids, SSOT, the Doc Loop, supersede semantics, the propagation matrix, intent vs as-built
-- `references/gates.md` — cross-cutting: the two axes, the promotion ladder, gate anatomy, the probe recipe, ratchet floors, where a gate runs
+- `references/gates.md` — cross-cutting: the three axes, the promotion ladder, gate anatomy, the probe recipe, ratchet floors, where a gate runs
 - `references/deploy-targets.md` — stages 7–8: writing the runbook when there is none, the template, per-platform deploy and log verbs, and the verification trio
 - `references/hooks.md` — agent-time enforcement: the PreToolUse contract, the fail-open hazard, placement, and the Claude-Code-only limit
 - `references/audit.md` — cross-cutting: the L0→L7 ladder and its seams (what was never written), axis rotation, ratchets, proven checks

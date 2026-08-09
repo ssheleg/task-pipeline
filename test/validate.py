@@ -411,6 +411,48 @@ def _count_run_headings(path):
     return n
 
 # (label, claim pattern, computing callable, incident)
+_AX_STOP = {"the", "one", "a", "an"}
+
+
+_AXIS_MEMO = {}
+
+
+def _axis_keys():
+    """Bold leads of the numbered axis list in audit.md -> match keys.
+
+    Key = the first one or two non-stopword words of the lead, lowercased. Two words
+    where the first alone would collide with ordinary prose: 'class' appears in "a
+    class that repeats twice" on the same surfaces, and would report an axis named
+    that nobody named.
+    """
+    if "r" in _AXIS_MEMO:
+        return _AXIS_MEMO["r"]
+    _p = os.path.join(refdir, "audit.md")
+    if not os.path.isfile(_p):
+        return None, None
+    # Called once by the claim-registry lambda and once to build _AXIS_KEYS, both
+    # BEFORE _LIVING_TEXT exists — so the file is memoised here rather than fetched
+    # from a cache that is not built yet at the first call.
+    _t = open(_p, encoding="utf-8").read()
+    _AXIS_MEMO["t"] = _t
+    _h = re.search(r"^###\s+\d+\.\s+Every pass changes the axis.*$", _t, re.M)
+    if not _h:
+        return None, None
+    _seg = _t[_h.end():]
+    _nx = re.search(r"^###\s", _seg, re.M)
+    if _nx:
+        _seg = _seg[:_nx.start()]
+    _keys = []
+    for _lead in re.findall(r"^\d+\.\s+\*\*(.+?)\*\*", _seg, re.M):
+        _w = [_x for _x in re.findall(r"[A-Za-z][A-Za-z-]*", _lead.lower())
+              if _x not in _AX_STOP]
+        if not _w:
+            continue
+        _keys.append(" ".join(_w[:2]) if len(_w) > 1 else _w[0])
+    _AXIS_MEMO["r"] = (_keys, _p)
+    return _keys, _p
+
+
 _CLAIM_REGISTRY = [
     ("negative self-tests",
      r"\b" + _NUM + r"\+?\s+(?:of\s+\d+\s+)?(?:structural\s+)?guards\b(?!\s+behind)",
@@ -438,6 +480,21 @@ _CLAIM_REGISTRY = [
      lambda: _count_re("plugins/task-pipeline/skills/task-pipeline/references/documentation.md",
                        r"^\*\*\d+\.\s"),
      "the canons are cited by count from three surfaces and the list can grow"),
+
+    ("rotation axes",
+     r"\b" + _NUM + r"\s+(?:orthogonal|rotation)\s+axes\b",
+     lambda: (lambda k: len(k) if k else None)(_axis_keys()[0]),
+     "audit.md defined five while the Cursor rule summarised four and README three"),
+
+    # "axes" is polysemous in this corpus: audit.md rotates between them, gates.md is
+    # BUILT on three of its own. The qualifier is what separates the classes, and the
+    # bare form below cannot match "six rotation axes" because the qualifier sits
+    # between the number and the noun.
+    ("gates.md's own axes",
+     r"\b" + _NUM + r"\s+axes\b",
+     lambda: _count_re("plugins/task-pipeline/skills/task-pipeline/references/gates.md",
+                       r"^##\s+Axis\s"),
+     "gates.md's title said 'the two axes' over a file with Axis A, B and C"),
 
     ("reference files",
      r"\b" + _NUM + r"\s+files\s+under\s+`?references/`?",
@@ -478,11 +535,36 @@ def _is_quoted(text, match):
 
 # Each living document is read ONCE, not once per class. Nested class-outer/doc-inner
 # opened ~36 files six times over; the states logic below is unchanged.
+def _paragraphs(text):
+    """Split on blank lines. The unit matters and has bitten this file: scoped to the
+    whole file, a guard measures a document's VOCABULARY; scoped to a paragraph, it
+    measures what one passage claims. Third call site, so it is a function."""
+    return re.split(r"\n\s*\n", text)
+
+
+def _flatten(text, lower=False):
+    """Collapse the corpus's own formatting before matching: ~80-column wrapping and
+    emphasis INSIDE a phrase have now defeated three guards in this file, each of
+    which hand-rolled its own version of this. The class repeated three times, so it
+    became a mechanism — the same rule audit.md applies to findings."""
+    _f = re.sub(r"\s+", " ", re.sub(r"[*_`]+", "", text))
+    return _f.lower() if lower else _f
+
+
 _LIVING_TEXT = {}
 for _living in _LIVING:
     _lp = os.path.join(ROOT, _living)
     if os.path.isfile(_lp):
         _LIVING_TEXT[_living] = open(_lp, encoding="utf-8").read()
+# The Cursor rule and the command are shipped doctrine and restate counts like any
+# other surface, but neither was in this corpus — so the review that found the Cursor
+# rule still claiming "two axes" found it by reading, not by a check. Added here
+# rather than to _LIVING, which other guards use for a different question.
+for _extra in ["cursor/rules/task-pipeline.mdc",
+               "plugins/task-pipeline/commands/task-pipeline.md"]:
+    _xp = os.path.join(ROOT, _extra)
+    if os.path.isfile(_xp) and _extra not in _LIVING_TEXT:
+        _LIVING_TEXT[_extra] = open(_xp, encoding="utf-8").read()
 
 _CLAIM_STATES = []
 for _label, _pat, _compute, _incident in _CLAIM_REGISTRY:
@@ -681,7 +763,7 @@ if os.path.isfile(_learned) and os.path.isfile(_rp21):
                     continue
                 _raw = open(_f, encoding="utf-8").read()
                 _prev = ""
-                for _para in re.split(r"\n\s*\n", _raw):
+                for _para in _paragraphs(_raw):
                     _flat = re.sub(r"\s+", " ", _para)
                     # The history exemption is computed ONCE per paragraph and applies to every
                     # shape, P3 included. Its first version exempted only the prose shapes, so a
@@ -813,14 +895,14 @@ for _f in _COLD_SURFACES:
     if not os.path.isfile(_fp):
         continue
     _ft = open(_fp, encoding="utf-8").read()
-    for _para in re.split(r"\n\s*\n", _ft):
+    for _para in _paragraphs(_ft):
         # Normalise whitespace AND markdown emphasis. The canonical row in
         # retrospective.md reads "the last **five run stamps**", and a whitespace-only
         # normalisation left the asterisks sitting inside the phrase — so the guard
         # silently skipped the one file that DEFINES the trigger. Third time in this
         # programme that a predicate was defeated by this corpus's formatting rather
         # than by its content (twice by the ~80-column wrap, once by bold).
-        _flat = re.sub(r"\*+", "", re.sub(r"\s+", " ", _para))
+        _flat = _flatten(_para)
         if not _COLD_RE.search(_flat):
             continue
         if not re.search(r"sixty\s+days|60\s+days", _flat, re.I):
@@ -853,7 +935,7 @@ for _f in _DISCLOSURE_FILES:
     for _blk in re.findall(r"```[^\n]*\n(.*?)```", _ft, re.S):
         if not re.search(r"^GATE\s+\d+", _blk, re.M):
             continue
-        _flat = re.sub(r"\*+", "", re.sub(r"\s+", " ", _blk))
+        _flat = _flatten(_blk)
         _missing = [_d for _d in ("abstained", "unlooked") if _d not in _flat]
         if _missing:
             _line = _ft[:_ft.find(_blk)].count("\n") + 1
@@ -861,6 +943,83 @@ for _f in _DISCLOSURE_FILES:
                  "a verdict that prints neither reads as 'verified' rather than as 'green, "
                  "and here is what nobody claimed and what nothing looked at' "
                  "(gates.md -> Disclosures)")
+
+# The rotation axes are defined once, in audit.md, and summarised on surfaces that
+# cannot link to it (the Cursor rule is self-contained by contract). Measured on
+# 2026-08-09, before this guard existed: audit.md defined FIVE axes, the Cursor rule
+# named FOUR and README named THREE — and each summary read as complete, because a
+# list of three orthogonal things is a convincing list of three orthogonal things.
+# Nothing compared them, so the drift was invisible from inside every file.
+#
+# Keys are derived from audit.md at check time, never hand-listed here: a hand-listed
+# key set is the second source of truth this guard exists to forbid. A surface naming
+# three or more axes is enumerating them, and must name all of them.
+_AXIS_KEYS, _AXIS_SRC = _axis_keys()
+if _AXIS_KEYS is None:
+    fail("test/validate.py: cannot locate the rotation-axis list in references/audit.md "
+         "— the axis-enumeration guard has no source of truth and is silently passing")
+elif len(_AXIS_KEYS) < 2:
+    fail(f"references/audit.md: the rotation-axis list parsed to {len(_AXIS_KEYS)} axes "
+         "— either the list moved or the bold-lead shape changed; a guard reading one "
+         "axis would pass every surface trivially")
+else:
+    _AXIS_SURFACES = ["README.md", "CONTRIBUTING.md", "CLAUDE.md",
+                      "cursor/rules/task-pipeline.mdc",
+                      "plugins/task-pipeline/commands/task-pipeline.md"] + [
+        _l for _l in _LIVING if _l.startswith("plugins/")]
+    for _f in dict.fromkeys(_AXIS_SURFACES):
+        _fp = os.path.join(ROOT, _f)
+        if not os.path.isfile(_fp) or os.path.relpath(_fp, ROOT) == os.path.relpath(_AXIS_SRC, ROOT):
+            continue
+        # Unit: the PARAGRAPH, not the file. Scoped to the file, this guard's first run
+        # accused stages.md of enumerating three axes when its three hits were 595 lines
+        # apart and meant different things — "decisions, seams, why", a stage-9 duty, and
+        # a citation to gates.md. An enumeration is contiguous; a vocabulary is not.
+        # Emphasis lives INSIDE these phrases ("invariants *across* deliverables") and
+        # ~80-column wrapping splits them; both defeated earlier guards in this file.
+        _raw = _LIVING_TEXT.get(_f) or open(_fp, encoding="utf-8").read()
+        for _para in _paragraphs(_raw):
+            _flat = _flatten(_para, lower=True)
+            _named = [_k for _k in _AXIS_KEYS if _k in _flat]
+            if len(_named) < 3:
+                continue                 # not enumerating; a passing mention is not a list
+            _missing = [_k for _k in _AXIS_KEYS if _k not in _named]
+            if _missing:
+                _line = _raw[:_raw.find(_para)].count("\n") + 1
+                fail(f"{_f}:{_line}: enumerates the rotation axes but names "
+                     f"{len(_named)} of {len(_AXIS_KEYS)} — missing "
+                     f"{', '.join(repr(_m) for _m in _missing)}. Either name every axis "
+                     "audit.md defines, or stop enumerating and point at audit.md; a "
+                     "summary that lists most of a list reads as complete.")
+
+# The re-derivation axis demands a PAIR printed rather than agreement asserted. A
+# doctrine that only asserts that cannot teach it, so the axis carries a worked block
+# and this guard holds the block to the axis's own contract: both numbers and the
+# verdict, visible. The lead is located by name and its absence FAILS rather than
+# skips — a guard whose subject was renamed away must say so.
+_rd = os.path.join(refdir, "audit.md")
+if os.path.isfile(_rd):
+    _rdt = (_LIVING_TEXT.get("plugins/task-pipeline/skills/task-pipeline/references/audit.md")
+            or _AXIS_MEMO.get("t") or open(_rd, encoding="utf-8").read())
+    _m = re.search(r"^\d+\.\s+\*\*Re-derivation\*\*", _rdt, re.M)
+    if not _m:
+        fail("references/audit.md: the Re-derivation axis is gone or renamed — the guard "
+             "holding its worked example to its own 'print the pair' contract has no "
+             "subject, and a guard with no subject passes everything")
+    else:
+        _body = _rdt[_m.start():]
+        _nxt = re.search(r"^(?:\d+\.\s+\*\*|\*\*The crossover)", _body[3:], re.M)
+        if _nxt:
+            _body = _body[:_nxt.start() + 3]
+        _blocks = re.findall(r"```[^\n]*\n(.*?)```", _body, re.S)
+        _ok = [_b for _b in _blocks
+               if all(_lbl in _flatten(_b, lower=True)
+                      for _lbl in ("claimed:", "re-derived:", "verdict:"))]
+        if not _ok:
+            fail("references/audit.md: the Re-derivation axis has no worked block printing "
+                 "`claimed:`, `re-derived:` and `verdict:` — the one axis whose exit "
+                 "criterion is a printed pair must show the pair, or it is teaching "
+                 "'assert agreement', which is the failure it names")
 
 # references/artifacts.md maps stage -> what it WRITES. The reverse direction — what
 # each stage READS and from where — is the one an agent actually needs at runtime,

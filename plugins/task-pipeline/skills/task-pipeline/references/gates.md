@@ -1,4 +1,4 @@
-# Gates — the two axes, and how to build one that cannot lie
+# Gates — the three axes, and how to build one that cannot lie
 
 **One job: turn a rule into something that can say no.** [`audit.md`](audit.md)
 says a class seen twice *belongs in a script*; this file is where that script comes
