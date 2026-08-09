@@ -374,7 +374,16 @@ Exclusions are allowed and must each carry a reason in the code: a changelog nar
 old formats, `docs/superpowers/specs/` are point-in-time records.
 *(guard: `a worked GATE verdict omits ` and `states the cold-retirement condition as` — both now run over corpora walked from disk, so a new surface joins by existing)*
 
-**44. Every invariant above names the guard that enforces it, and that guard exists.**This list claims to be *what the validator enforces*; it was eight guards behind when
+**44. A carry-over row still `open` names a board id, and the board row names it back.**
+`docs/superpowers/backlog.md` is the project's queue between runs; the ledger's `open`
+was a home that pointed nowhere, and sixteen rows across six ledgers sat in it. Both
+directions are checked because they are different failures — an id nobody issued, and a
+row traceable to nothing. Ledger columns are found **by name**: ten ledgers in this repo
+carry six different header shapes, and a positional read would check the wrong cell in
+five of them.
+*(guard: `with no board id` and `names no Source`)*
+
+**45. Every invariant above names the guard that enforces it, and that guard exists.**This list claims to be *what the validator enforces*; it was eight guards behind when
 an audit measured it. A claim of enforcement is now checked like any other claim.
 *(guard: `whose message does not appear in`)* — and a cited literal must lie inside
 a **single** string in `test/validate.py`: the check reads that file as text, so a
