@@ -1457,7 +1457,11 @@ if os.path.isfile(_VERIF):
         _brief_reqs |= set(re.findall(r"^\|\s*(REQ-\d+)\s*\|",
                                       open(_bf, encoding="utf-8").read(), re.M))
     for _rid, _rest in _vrows:
-        _cells = [_flatten(_x).strip() for _x in _rest.split("|")]
+        # Built over the WHOLE row, REQ included, so it is shaped like the header and
+        # `_hidx` indexes it directly. The first version dropped REQ from the cells but
+        # not from the header and bridged the gap with `_hidx - 1` — correct only while
+        # Human sits mid-table, and silently wrong the day somebody reorders columns.
+        _cells = [_flatten(_x).strip() for _x in (_rid + "|" + _rest).split("|")]
         # Reverse direction: a row about nothing. Different failure from a shipped REQ
         # that entered no ledger, and only this pass finds it (learned.md rule 2).
         if _brief_reqs and _rid not in _brief_reqs:
@@ -1466,7 +1470,7 @@ if os.path.isfile(_VERIF):
         # The Human column is the point of the file, so it is the one that is checked:
         # a date or the literal `never`. "soon" and "mostly" are how it stops being
         # answerable, and this is the only column a machine may not fill.
-        _human = ([_cells[_hidx - 1]] if _hidx is not None and len(_cells) >= _hidx else [])
+        _human = ([_cells[_hidx]] if _hidx is not None and len(_cells) > _hidx else [])
         _human = [_x for _x in _human if re.fullmatch(r"never|\d{4}-\d{2}-\d{2}", _x.lower())]
         if _hidx is None:
             pass                           # already failed above; do not report twice

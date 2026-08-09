@@ -3511,3 +3511,44 @@ jobs:
             echo "ERROR: the never-count is computed and dropped on the floor"
             exit 1
           fi
+
+      - name: Negative self-test (the layout tree block gone entirely)
+        run: |
+          set -eu
+          rm -rf /tmp/tr2-copy && cp -R . /tmp/tr2-copy
+          python3 - <<'EOF'
+          import re
+          p = "/tmp/tr2-copy/plugins/task-pipeline/skills/task-pipeline/references/artifacts.md"
+          t = open(p, encoding="utf-8").read()
+          m = re.search(r"^  superpowers/\n(?:    .*\n)+", t, re.M)
+          assert m, "PLANT DID NOT LAND: the tree block is not where the guard reads it"
+          open(p, "w", encoding="utf-8").write(t[:m.start()] + t[m.end():])
+          assert not re.search(r"^  superpowers/\n    ", open(p, encoding="utf-8").read(), re.M), "PLANT DID NOT LAND"
+          EOF
+          if python3 /tmp/tr2-copy/test/validate.py; then
+            echo "ERROR: the tree vanished and the guard comparing against it passed"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the missing-block branch is watched too, not only the missing-line one"
+          fi
+
+      - name: Property check (the Human column survives a header reorder)
+        run: |
+          set -eu
+          rm -rf /tmp/hr-copy && cp -R . /tmp/hr-copy
+          python3 - <<'EOF'
+          import re
+          p = "/tmp/hr-copy/docs/superpowers/verification.md"
+          t = open(p, encoding="utf-8").read()
+          old = "| REQ | What | Run | Shipped in | Auto | Human | Note |"
+          assert old in t, "PLANT DID NOT LAND: header absent"
+          t = t.replace(old, "| REQ | What | Run | Shipped in | Auto | Note | Human |")
+          t = re.sub(r"\| pass \| (never|\d{4}-\d{2}-\d{2}) \| — \|", r"| pass | — | \1 |", t)
+          open(p, "w", encoding="utf-8").write(t)
+          EOF
+          if python3 /tmp/hr-copy/test/validate.py >/dev/null; then
+            echo "OK: the column is found by name, so moving it does not silently misread a neighbour"
+          else
+            echo "ERROR: reordering the header broke the check — it was reading a position, not a column"
+            exit 1
+          fi
