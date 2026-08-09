@@ -2958,3 +2958,418 @@ jobs:
           else
             echo "OK: validator correctly FAILs — a gap has one side and so does a resurrection"
           fi
+
+      - name: Negative self-test (an open ledger row with no board id)
+        run: |
+          set -eu
+          rm -rf /tmp/bd1-copy && cp -R . /tmp/bd1-copy
+          python3 - <<'EOF'
+          p = "/tmp/bd1-copy/docs/superpowers/specs/2026-08-08-audit-followup-carryover.md"
+          t = open(p, encoding="utf-8").read()
+          needle = " → `B-001`"
+          assert needle in t, "PLANT DID NOT LAND: the board id is absent before the edit"
+          open(p, "w", encoding="utf-8").write(t.replace(needle, "", 1))
+          assert "B-001" not in open(p, encoding="utf-8").read(), "PLANT DID NOT LAND"
+          EOF
+          if python3 /tmp/bd1-copy/test/validate.py; then
+            echo "ERROR: an open row with no board id passed — the dangling pointer the board exists to resolve"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — every open ledger row names a board id"
+          fi
+
+      - name: Negative self-test (a ledger pointing at a board id nobody issued)
+        run: |
+          set -eu
+          rm -rf /tmp/bd2-copy && cp -R . /tmp/bd2-copy
+          python3 - <<'EOF'
+          p = "/tmp/bd2-copy/docs/superpowers/specs/2026-08-08-audit-followup-carryover.md"
+          t = open(p, encoding="utf-8").read()
+          assert "B-001" in t, "PLANT DID NOT LAND: anchor absent before the edit"
+          open(p, "w", encoding="utf-8").write(t.replace("B-001", "B-999", 1))
+          assert "B-999" in open(p, encoding="utf-8").read(), "PLANT DID NOT LAND"
+          EOF
+          if python3 /tmp/bd2-copy/test/validate.py; then
+            echo "ERROR: a pointer to an id nobody issued reads as filed and is not"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the id has to exist on the board"
+          fi
+
+      - name: Negative self-test (a board row with no Source — the reverse direction)
+        run: |
+          set -eu
+          rm -rf /tmp/bd3-copy && cp -R . /tmp/bd3-copy
+          python3 - <<'EOF'
+          import re
+          p = "/tmp/bd3-copy/docs/superpowers/backlog.md"
+          t = open(p, encoding="utf-8").read()
+          m = re.search(r"^\| B-009 \|([^|]*)\|([^|]*)\|", t, re.M)
+          assert m and m.group(2).strip(), "PLANT DID NOT LAND: B-009's Source is already empty"
+          open(p, "w", encoding="utf-8").write(t[:m.start(2)] + " " + t[m.end(2):])
+          EOF
+          if python3 /tmp/bd3-copy/test/validate.py; then
+            echo "ERROR: a board row traceable to nothing passed — a gap has one side and so does an invention"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — both directions are checked"
+          fi
+
+      - name: Negative self-test (the board emptied of every row)
+        run: |
+          set -eu
+          rm -rf /tmp/bd4-copy && cp -R . /tmp/bd4-copy
+          python3 - <<'EOF'
+          import re
+          p = "/tmp/bd4-copy/docs/superpowers/backlog.md"
+          t = open(p, encoding="utf-8").read()
+          assert re.search(r"B-\d+", t), "PLANT DID NOT LAND: no ids before the edit"
+          open(p, "w", encoding="utf-8").write(re.sub(r"B-(\d+)", r"X-\1", t))
+          assert not re.search(r"B-\d+", open(p, encoding="utf-8").read()), "PLANT DID NOT LAND"
+          EOF
+          if python3 /tmp/bd4-copy/test/validate.py; then
+            echo "ERROR: an empty board passed — it reads exactly like a board with nothing queued"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the plant lands in the file that DEFINES the board"
+          fi
+
+      - name: Negative self-test (a board priority that does not follow from its inputs)
+        run: |
+          set -eu
+          rm -rf /tmp/bd5-copy && cp -R . /tmp/bd5-copy
+          python3 - <<'EOF'
+          p = "/tmp/bd5-copy/docs/superpowers/backlog.md"
+          t = open(p, encoding="utf-8").read()
+          needle = "| 1 | **6** | open"
+          assert needle in t, "PLANT DID NOT LAND: anchor absent before the edit"
+          open(p, "w", encoding="utf-8").write(t.replace(needle, "| 1 | **9** | open", 1))
+          EOF
+          if python3 /tmp/bd5-copy/test/validate.py; then
+            echo "ERROR: a priority contradicting its own sev/blast/age passed — the hand-assigned number this column replaced"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the one number a reader is invited to check is checked"
+          fi
+
+      - name: Negative self-test (the seeded template's own worked example broken)
+        run: |
+          set -eu
+          rm -rf /tmp/bd6-copy && cp -R . /tmp/bd6-copy
+          python3 - <<'EOF'
+          p = "/tmp/bd6-copy/plugins/task-pipeline/skills/task-pipeline/templates/backlog.md"
+          t = open(p, encoding="utf-8").read()
+          needle = "| 12 | **2** | open"
+          assert needle in t, "PLANT DID NOT LAND: anchor absent before the edit"
+          open(p, "w", encoding="utf-8").write(t.replace(needle, "| 12 | **7** | open", 1))
+          EOF
+          if python3 /tmp/bd6-copy/test/validate.py; then
+            echo "ERROR: the file seeded verbatim into every host project shipped an example that fails its own formula"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the plant lands in the template, not only in this repo's board"
+          fi
+
+      - name: Negative self-test (an open row whose ledger has two status columns)
+        run: |
+          set -eu
+          rm -rf /tmp/bd7-copy && cp -R . /tmp/bd7-copy
+          python3 - <<'EOF'
+          p = "/tmp/bd7-copy/docs/superpowers/specs/2026-08-03-setup-and-autonomy-carryover.md"
+          t = open(p, encoding="utf-8").read()
+          needle = " → `B-015`"
+          assert needle in t, "PLANT DID NOT LAND: the board id is absent before the edit"
+          open(p, "w", encoding="utf-8").write(t.replace(needle, "", 1))
+          assert "B-015" not in open(p, encoding="utf-8").read(), "PLANT DID NOT LAND"
+          EOF
+          if python3 /tmp/bd7-copy/test/validate.py; then
+            echo "ERROR: a ledger with both Status and Home hid an open row — five of ten ledgers here have that shape"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the test is position-free, so a shape nobody anticipated cannot defeat it"
+          fi
+
+      - name: Negative self-test (a blank line splitting a markdown table)
+        run: |
+          set -eu
+          rm -rf /tmp/tbl-copy && cp -R . /tmp/tbl-copy
+          python3 - <<'EOF'
+          p = "/tmp/tbl-copy/docs/superpowers/backlog.md"
+          t = open(p, encoding="utf-8").read()
+          needle = "| B-015 |"
+          assert needle in t, "PLANT DID NOT LAND: anchor absent before the edit"
+          open(p, "w", encoding="utf-8").write(t.replace(needle, "\n" + needle, 1))
+          EOF
+          if python3 /tmp/tbl-copy/test/validate.py; then
+            echo "ERROR: a split table passed — every row below the gap renders as prose, silently"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the class that hit this repo's own board is now a check"
+          fi
+
+      - name: Negative self-test (a row homed `backlog` — the trigger the templates promise)
+        run: |
+          set -eu
+          rm -rf /tmp/bd8-copy && cp -R . /tmp/bd8-copy
+          python3 - <<'EOF'
+          p = "/tmp/bd8-copy/docs/superpowers/specs/2026-08-09-scratch-carryover.md"
+          open(p, "w", encoding="utf-8").write(
+              "# Carry-over — scratch\n\n"
+              "| # | Stage | What | Why it isn't done | REQ | Where it lives now |\n"
+              "|---|---|---|---|---|---|\n"
+              "| 1 | 5 Dev | a thing | later | — | backlog |\n")
+          assert "backlog |" in open(p, encoding="utf-8").read(), "PLANT DID NOT LAND"
+          EOF
+          if python3 /tmp/bd8-copy/test/validate.py; then
+            echo "ERROR: the doctrine promised the gate refuses this shape and the gate did not"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — both triggers are enforced, not only the one the rows happened to use"
+          fi
+
+      - name: Property check (two adjacent tables are not a split table)
+        run: |
+          set -eu
+          rm -rf /tmp/adj-copy && cp -R . /tmp/adj-copy
+          python3 - <<'EOF'
+          p = "/tmp/adj-copy/README.md"
+          t = open(p, encoding="utf-8").read()
+          open(p, "w", encoding="utf-8").write(
+              t + "\n| a | b |\n|---|---|\n| 1 | 2 |\n\n| c | d |\n|---|---|\n| 3 | 4 |\n")
+          EOF
+          if python3 /tmp/adj-copy/test/validate.py >/dev/null; then
+            echo "OK: two independent tables one blank line apart are left alone — the shape the guard's comment claims"
+          else
+            echo "ERROR: the split-table guard fires on a valid pattern; a checker with false positives is worse than none"
+            exit 1
+          fi
+
+      - name: Negative self-test (a row homed `unresolved` — the third promised trigger)
+        run: |
+          set -eu
+          rm -rf /tmp/bd9-copy && cp -R . /tmp/bd9-copy
+          python3 - <<'EOF'
+          p = "/tmp/bd9-copy/docs/superpowers/specs/2026-08-09-scratch2-carryover.md"
+          open(p, "w", encoding="utf-8").write(
+              "# Carry-over — scratch\n\n"
+              "| # | Stage | What | Why it isn't done | REQ | Where it lives now |\n"
+              "|---|---|---|---|---|---|\n"
+              "| 1 | 5 Dev | a thing | later | — | unresolved |\n")
+          assert "unresolved |" in open(p, encoding="utf-8").read(), "PLANT DID NOT LAND"
+          EOF
+          if python3 /tmp/bd9-copy/test/validate.py; then
+            echo "ERROR: templates/carryover.md says unresolved blocks the stage-10 gate and it did not"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — all three not-done values are checked, not only the one the rows used"
+          fi
+
+      - name: Negative self-test (a board row too short to compute a priority)
+        run: |
+          set -eu
+          rm -rf /tmp/bd10-copy && cp -R . /tmp/bd10-copy
+          python3 - <<'EOF'
+          p = "/tmp/bd10-copy/docs/superpowers/backlog.md"
+          t = open(p, encoding="utf-8").read()
+          row = [l for l in t.splitlines() if l.startswith("| B-008 |")]
+          assert row, "PLANT DID NOT LAND: B-008 absent before the edit"
+          open(p, "w", encoding="utf-8").write(t.replace(row[0], "| B-008 | short | src | S | 999 |", 1))
+          EOF
+          if python3 /tmp/bd10-copy/test/validate.py; then
+            echo "ERROR: a malformed row was skipped in silence, carrying any priority it liked"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — a row it cannot compute is reported, not skipped"
+          fi
+
+      - name: Negative self-test (a blanked Source in the seeded template)
+        run: |
+          set -eu
+          rm -rf /tmp/bd11-copy && cp -R . /tmp/bd11-copy
+          python3 - <<'EOF'
+          import re
+          p = "/tmp/bd11-copy/plugins/task-pipeline/skills/task-pipeline/templates/backlog.md"
+          t = open(p, encoding="utf-8").read()
+          m = re.search(r"^\| B-001 \|([^|]*)\|([^|]*)\|", t, re.M)
+          assert m and m.group(2).strip(), "PLANT DID NOT LAND: Source already empty"
+          open(p, "w", encoding="utf-8").write(t[:m.start(2)] + " " + t[m.end(2):])
+          EOF
+          if python3 /tmp/bd11-copy/test/validate.py; then
+            echo "ERROR: the reverse check covered this repo's board and not the file seeded into every host project"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — both boards, like the arithmetic check beside it"
+          fi
+
+      - name: Property check (a description beginning "Open" is not an open row)
+        run: |
+          set -eu
+          rm -rf /tmp/fp-copy && cp -R . /tmp/fp-copy
+          python3 - <<'EOF'
+          p = "/tmp/fp-copy/docs/superpowers/specs/2026-08-09-scratch3-carryover.md"
+          open(p, "w", encoding="utf-8").write(
+              "# Carry-over — scratch\n\n"
+              "| # | Stage | What | Why it isn't done | REQ | Where it lives now |\n"
+              "|---|---|---|---|---|---|\n"
+              "| 1 | 5 Dev | Open source license text is missing from the bundle | done | — | closed |\n")
+          EOF
+          if python3 /tmp/fp-copy/test/validate.py >/dev/null; then
+            echo "OK: a cell must BE a status, not merely begin with one — rule 10, a checker with false positives is worse than none"
+          else
+            echo "ERROR: a closed row was reported as open because its description started with the word Open"
+            exit 1
+          fi
+
+      - name: Negative self-test (a status column worded in prose — "open as a printed exclusion")
+        run: |
+          set -eu
+          rm -rf /tmp/bd12-copy && cp -R . /tmp/bd12-copy
+          python3 - <<'EOF'
+          p = "/tmp/bd12-copy/docs/superpowers/specs/2026-08-09-prose-carryover.md"
+          open(p, "w", encoding="utf-8").write(
+              "# Carry-over — scratch\n\n"
+              "| # | Stage | What | Why it isn't done | REQ | Where it lives now |\n"
+              "|---|---|---|---|---|---|\n"
+              "| 1 | 5 Dev | a thing | later | — | open as a printed exclusion |\n")
+          EOF
+          if python3 /tmp/bd12-copy/test/validate.py; then
+            echo "ERROR: a status column saying 'open …' in prose was not read as open — this repo has live rows worded that way"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — inside a status column, a word boundary is enough"
+          fi
+
+      - name: Property check (a hyphenated "Open-source" in a description is not a status)
+        run: |
+          set -eu
+          rm -rf /tmp/hyp-copy && cp -R . /tmp/hyp-copy
+          python3 - <<'EOF'
+          p = "/tmp/hyp-copy/docs/superpowers/specs/2026-08-09-hyphen-carryover.md"
+          open(p, "w", encoding="utf-8").write(
+              "# Carry-over — scratch\n\n"
+              "| # | Stage | What | Why it isn't done | REQ | Where it lives now |\n"
+              "|---|---|---|---|---|---|\n"
+              "| 1 | 5 Dev | Open-source license text is missing | done | — | closed |\n")
+          EOF
+          if python3 /tmp/hyp-copy/test/validate.py >/dev/null; then
+            echo "OK: the What column is never read as a status, so punctuation in prose cannot fake one"
+          else
+            echo "ERROR: a closed row was flagged because its description began 'Open-source'"
+            exit 1
+          fi
+
+      - name: Negative self-test (a mismatched-shape row losing its board id)
+        run: |
+          set -eu
+          rm -rf /tmp/bd13-copy && cp -R . /tmp/bd13-copy
+          python3 - <<'EOF'
+          p = "/tmp/bd13-copy/docs/superpowers/specs/2026-08-08-audit-followup-carryover.md"
+          t = open(p, encoding="utf-8").read()
+          assert "B-019" in t, "PLANT DID NOT LAND: anchor absent before the edit"
+          open(p, "w", encoding="utf-8").write(t.replace("B-019", "B-999", 1))
+          EOF
+          if python3 /tmp/bd13-copy/test/validate.py; then
+            echo "ERROR: a row whose cell count differs from its header was skipped before the id check ran"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the fallback matches on a word boundary, not exact equality"
+          fi
+
+      - name: Negative self-test (a trigger the code accepts and the doctrine never names)
+        run: |
+          set -eu
+          rm -rf /tmp/tg1-copy && cp -R . /tmp/tg1-copy
+          python3 - <<'EOF'
+          p = "/tmp/tg1-copy/test/validate.py"
+          t = open(p, encoding="utf-8").read()
+          needle = 'r"^(?:open|unresolved|backlog)\\b"'
+          assert needle in t, "PLANT DID NOT LAND: the trigger regex is not where the guard reads it"
+          open(p, "w", encoding="utf-8").write(t.replace(needle, 'r"^(?:open|unresolved|backlog|parked)\\b"', 1))
+          EOF
+          if python3 /tmp/tg1-copy/test/validate.py; then
+            echo "ERROR: the code grew a trigger the doctrine never names — that shipped three times in one module"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the enumeration is computed from the regex, both directions"
+          fi
+
+      - name: Negative self-test (the trigger regex renamed out from under its own comparison)
+        run: |
+          set -eu
+          rm -rf /tmp/tg3-copy && cp -R . /tmp/tg3-copy
+          python3 - <<'EOF'
+          p = "/tmp/tg3-copy/test/validate.py"
+          t = open(p, encoding="utf-8").read()
+          assert "_UNRES_RE = re.compile" in t, "PLANT DID NOT LAND: anchor absent"
+          open(p, "w", encoding="utf-8").write(
+              t.replace("_UNRES_RE = re.compile", "_UNRESOLVED_RE = re.compile")
+               .replace("_UNRES_RE.match", "_UNRESOLVED_RE.match"))
+          EOF
+          if python3 /tmp/tg3-copy/test/validate.py; then
+            echo "ERROR: the comparison lost its source and passed everything in silence"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — a guard with no source says so"
+          fi
+
+      - name: Negative self-test (the seeded ledger template showing `backlog` as settled)
+        run: |
+          set -eu
+          rm -rf /tmp/cot-copy && cp -R . /tmp/cot-copy
+          python3 - <<'EOF'
+          p = "/tmp/cot-copy/plugins/task-pipeline/skills/task-pipeline/templates/carryover.md"
+          t = open(p, encoding="utf-8").read()
+          needle = "| 2 | 5 Review | `export.ts` lacks a size guard | minor, non-blocking | — | `B-014` |"
+          assert needle in t, "PLANT DID NOT LAND: anchor absent before the edit"
+          open(p, "w", encoding="utf-8").write(t.replace(
+              needle,
+              "| 2 | 5 Review | `export.ts` lacks a size guard | minor, non-blocking | — | backlog |", 1))
+          EOF
+          if python3 /tmp/cot-copy/test/validate.py; then
+            echo "ERROR: the file seeded into every host project taught that a bare `backlog` home is a settled outcome"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the worked example carries a real board id"
+          fi
+
+      - name: Negative self-test (a trigger named on the page but not in the enumerating paragraph)
+        run: |
+          set -eu
+          rm -rf /tmp/tg4-copy && cp -R . /tmp/tg4-copy
+          python3 - <<'EOF'
+          import re
+          p = "/tmp/tg4-copy/plugins/task-pipeline/skills/task-pipeline/references/backlog.md"
+          t = open(p, encoding="utf-8").read()
+          parts = re.split(r"(\n\s*\n)", t)
+          hit = [i for i, x in enumerate(parts) if "three triggers" in x]
+          assert hit, "PLANT DID NOT LAND: the enumerating paragraph is not where the plant looks"
+          parts[hit[0]] = parts[hit[0]].replace("unresolved", "not-done")
+          t = "".join(parts).rstrip() + "\n\nA later note mentioning unresolved in passing.\n"
+          open(p, "w", encoding="utf-8").write(t)
+          seg = [x for x in re.split(r"\n\s*\n", t) if "three triggers" in x][0]
+          assert "unresolved" not in seg, "PLANT DID NOT LAND: the literal is still in the paragraph"
+          EOF
+          if python3 /tmp/tg4-copy/test/validate.py; then
+            echo "ERROR: a trigger word floating elsewhere on the page satisfied the enumeration — the false-success class this guard closes"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the check is scoped to the paragraph that enumerates"
+          fi
+
+      - name: Negative self-test (a table split by TWO blank lines)
+        run: |
+          set -eu
+          rm -rf /tmp/tbl2-copy && cp -R . /tmp/tbl2-copy
+          python3 - <<'EOF'
+          p = "/tmp/tbl2-copy/docs/superpowers/backlog.md"
+          t = open(p, encoding="utf-8").read()
+          needle = "| B-015 |"
+          assert needle in t, "PLANT DID NOT LAND: anchor absent before the edit"
+          open(p, "w", encoding="utf-8").write(t.replace(needle, "\n\n" + needle, 1))
+          EOF
+          if python3 /tmp/tbl2-copy/test/validate.py; then
+            echo "ERROR: two blank lines end a table exactly like one, and the guard saw neither"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the gap is any length, because GFM ends the table at the first blank"
+          fi

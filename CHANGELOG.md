@@ -1,5 +1,126 @@
 # Changelog
 
+## v1.31.0 — the board, and the pointer that was never the one dangling
+
+The carry-over ledger has always offered `backlog` as a home for a deferred row — a
+place the pipeline **named and did not own**. The obvious fix was to build that
+backlog. Measuring first changed the target: across ten ledgers in this repository,
+**not one row has ever used that value.** The dangling pointer was never `backlog`. It
+was `open` — **sixteen rows across six ledgers** (later re-measured: **24 rows across eight**), deferred out loud and filed nowhere.
+
+`docs/superpowers/backlog.md` is the board: one per project, **mutable** where the
+ledger is append-only, because a queue is re-ranked and a history is not. Rows leave
+only into a *Closed* list, with the commit.
+
+**Priority is computed, never assigned:** `prio = sev × blast + age_bonus`, inputs in
+the row and the formula in the doctrine, so a ranking can be **checked** rather than
+trusted. Two consequences are the point rather than side effects: an old small thing
+eventually outranks a new medium one, and a row's priority moves without anyone
+touching it — which is what makes the re-derivation at the end of an iteration real
+work instead of ceremony.
+
+**Ten ledgers, six different column shapes.** `#` or `id`; the status column named
+*Home*, *Where it lives now*, *Resolution*, *Status* or *State*. So the guard finds
+columns **by name** — a positional read would have silently checked the wrong cell in
+five files out of six, and passed.
+
+Both directions, because they are different failures: a ledger row pointing at an id
+nobody issued, and a board row traceable to nothing. Neither is visible from the other
+side.
+
+The seam was closed rather than deferred: all sixteen rows carry a board id, so the
+floor is **zero** and the next unhomed row fails the build instead of joining a debt.
+This repo's own board opens seeded from those ledgers, with several rows that were the
+same finding written separately by different runs — collapsed into one each, which is the
+job the board exists for. The count is deliberately not restated here: it moved twice
+while this entry was being written, which is exactly why this repository deletes
+restated numbers rather than chasing them.
+
+**The review found the guard reading the wrong cell in half the corpus.** The status
+column was taken by position — and five of ten ledgers here carry *two* status-ish
+columns (`status`+`home`, `resolution`+`state`), so "take the last one" read a different
+cell per file and passed genuinely open rows in silence. Three more rows carry more
+cells than their header and were skipped outright.
+
+The test is now **position-free**: a row is open if any of its cells says so, and homed
+if a board id appears anywhere in it. Neither question asks which column it came from,
+so neither can be defeated by a shape nobody anticipated. It immediately found **eight
+more open rows** — the true count was 24, not 16, and my own measurement was a third
+low. Three of the eight were the same *"evals never run"* finding written by three
+different runs; the board collapses them into one, which is the job it exists for.
+
+Two more from the same round: the new stage-0 bullet was spliced into the middle of the
+word *"the"* and `npm test` did not see it, and `templates/backlog.md` — the file seeded
+verbatim into every host project — shipped a worked example that **contradicted the
+formula printed two lines below it**. The arithmetic is now a guard, over both boards.
+
+**The class the board logs hit the board itself.** A blank line inside its table split
+three rows off into prose — and row **B-004** on that same board reads *"a blank line
+silently splits a markdown table, and the documentation gate does not catch it."* Second
+instance of a class this repository already had written down, so it became a script
+rather than a third ledger row, swept across the whole corpus. B-004 is closed by the
+check it asked for.
+
+**A promise is not a check.** Three doctrine passages described stage-10 resolution as
+keyed on a ledger row homed `backlog`, and the seeded template said outright that *the
+gate refuses it* — while the shipped guard only ever looked for `open`. A reader seeded
+a scratch ledger with exactly that row and watched it pass. Both triggers are enforced
+now, and the doctrine describes what runs.
+
+The split-table guard, one round old, could not tell *"table split"* from *"table ends,
+table begins"* — it never checked whether the line after the blank opens its own table,
+which its own comment claimed it did. A **property check** now proves it stays quiet on
+the valid pattern, because a checker with false positives is worse than none.
+
+**A tightening that turned the guard off.** Fixing the false positive above, the
+separators were hand-listed — and the list omitted the arrow this repo's own annotations
+use (`open → B-001`), so **all twenty-four resolved rows became invisible** and the
+check passed by seeing nothing at all rather than by finding everything homed. The one
+negative test covering that path caught it, which is the entire argument for the suite
+in a sentence. The separator is now *"not a word character"* and the predicate is proven
+against eight concrete cases instead of one.
+
+**The detector reversed three times, and the third answer was in between.** Positional
+read the wrong cell wherever a ledger carried two status columns. Pure-text then broke in
+both directions with one regex — too strict for a live row worded *"open as a printed
+exclusion"*, too loose for a description reading *"Open-source …"*, because a hyphen is
+punctuation exactly like the arrow. What ships reads the header for **candidate columns**
+— all of them, never just the last — and matches a status on a word boundary **inside**
+them. A description cannot masquerade as a status because it is never looked at.
+
+Every reversal was found by a reader. None by a probe.
+
+**Two surfaces did not know the board exists.** `cursor/rules/task-pipeline.mdc` and
+the command restate stage 0 and stage 10 in detail, and neither mentioned it — the same
+one-rule-in-one-file-of-nine class this repository has a guard for on the rotation axes
+and none for a new mechanism. Both carry it now, the Cursor rule by restatement because
+it is self-contained by contract.
+
+**The class that ran through six rounds is closed by computation, not by a sixth fix.**
+Every one of those rounds found the same shape: the doctrine promised a resolution
+trigger the check did not enforce — `open` alone while the prose said `backlog`,
+`backlog` added while `unresolved` was still only promised, *"two triggers"* written in
+a file whose code checked three. `audit.md` says a class seen twice becomes a script, so
+the enumeration is now **extracted from the regex** and required to appear wherever the
+doctrine lists it, in both directions. A guard that loses its own source fails rather
+than passing.
+
+**And the seam's origin was the template nobody opened.**
+`templates/carryover.md` — the first ledger every host project ever sees — showed a bare
+`backlog` home as a *settled* outcome, with a worked example carrying no board id. Six
+rounds went into the doctrine, the guard, the board and three consuming surfaces before
+anyone read the file the value came from. It names three unsettled values now, its
+example carries a real id, and the guard checks the template beside the live ledgers.
+
+**The guard written to close a false-success class had the class.** It verified that a
+trigger word appeared *somewhere on the page* rather than that it was presented as an
+enabled trigger — so prose reading *"those are the only two triggers"* would pass on the
+strength of the third word appearing in a later paragraph. Scoped to the enumerating
+paragraph now, and what it still cannot decide is written into the code rather than
+implied by its silence.
+
+Guards: 156 → **175**, property checks 1 → 4.
+
 ## v1.30.0 — the cap that would have measured the wrong axis
 
 The audit's last finding was that `references/learned.md` has no retirement rule while

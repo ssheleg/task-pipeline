@@ -173,6 +173,7 @@ never that the work was skipped quietly.
   seeded, the model decision is recorded, and the operator confirms the brief. Stop when a
   re-scan surfaces no new branches (don't grill past diminishing returns;
   reversible calls can be deferred with a note). Only then start stage 1.
+- **The board is read, or seeded.** `docs/superpowers/backlog.md` ([`backlog.md`](backlog.md)) — its **open count is quoted in the brief**, measured by a command at the top of the run rather than inherited from the last run's report. Absent ⇒ seeded from the template and said so; an empty board and no board are the same thing to work on, and only one of them can be appended to.
 
 ## 1 — Docs study
 - **Freedom: medium** — which sources to fetch is judgement; grounding contracts on fetched docs is not ([`gates.md`](gates.md) → *Axis C*).
@@ -453,7 +454,16 @@ never that the work was skipped quietly.
 ## 10 — Acceptance
 - **Freedom: medium** — the walk and the evidence rule are fixed; whether it is what was asked for is the operator's ([`gates.md`](gates.md) → *Axis C*).
 - **What:** the closing stage — go back to the brief and account for **every**
-  requirement. Doctrine: [`acceptance.md`](acceptance.md). Every earlier gate asks
+  requirement. Doctrine: [`acceptance.md`](acceptance.md).
+- **The ledger's open rows are resolved onto the board.** Every carry-over row still
+  `open` leaves with a `B-NNN` id on `docs/superpowers/backlog.md`, and the ledger row
+  is updated to name it ([`backlog.md`](backlog.md)). Both directions, because they are
+  different failures: a ledger row pointing at an id nobody issued, and a board row
+  traceable to nothing. Measured before this was built: across the ledgers in
+  this repository, **twenty-four rows sat `open` with no home at all** — deferred out
+  loud and filed nowhere. The first count said sixteen across six ledgers; it read the
+  status column by position and was wrong wherever a ledger carried two of them. Then the board's priority is re-derived, because `age` moved while the
+  run was happening. Every earlier gate asks
   "is this artifact good?"; none asks "does this still contain everything that was
   asked for?" The loss happens on the seams between stages, and this is where it
   surfaces.

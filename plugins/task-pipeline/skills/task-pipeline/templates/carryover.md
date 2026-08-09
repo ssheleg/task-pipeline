@@ -12,7 +12,7 @@
 | # | Stage | What | Why it isn't done | REQ | Where it lives now |
 |---|---|---|---|---|---|
 | 1 | 5 Dev | XLSX export path | scope call — CSV first | REQ-004 | LIN-483 |
-| 2 | 5 Review | `export.ts` lacks a size guard | minor, non-blocking | — | backlog |
+| 2 | 5 Review | `export.ts` lacks a size guard | minor, non-blocking | — | `B-014` |
 | 3 | 2 Brainstorm | REQ-007 dropped: bulk export | operator agreed 2026-07-28 | REQ-007 | dropped |
 
 ## Columns
@@ -23,10 +23,15 @@
 - **Why it isn't done** — scope call, blocked, deliberate deferral, out of budget.
   "Forgot" is a legitimate and useful answer here.
 - **REQ** — the requirement it belongs to, or `—` if it's outside the REQ spine.
-- **Where it lives now** — issue id, backlog, `dropped` (with the operator's
-  agreement), or `unresolved`. **`unresolved` blocks the stage-10 gate**: an item
-  with no home is exactly the thing that gets forgotten, so acceptance refuses to
-  close on it.
+- **Where it lives now** — an issue id, a **board id** (`B-NNN` on
+  `docs/superpowers/backlog.md`), or `dropped` with the operator's agreement. Those are
+  the three ways a row is *settled*.
+  **Three values are not settled and all three block the stage-10 gate:** `unresolved`,
+  `open`, and a bare `backlog` — the last one because it names a place without naming a
+  row in it, which is how a deferral reads as filed while being findable by nobody.
+  Each leaves stage 10 with a real `B-NNN`, and the board row names this ledger back.
+  An item with no home is exactly the thing that gets forgotten, so acceptance refuses
+  to close on it.
 
 ## This ledger is a ratchet, not a TODO list
 

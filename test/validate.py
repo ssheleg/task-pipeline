@@ -564,6 +564,9 @@ def _flatten(text, lower=False):
     return _f.lower() if lower else _f
 
 
+# This file reads itself in three places; once is enough.
+_OWN_SRC = open(os.path.join(ROOT, "test", "validate.py"), encoding="utf-8").read()
+
 _LIVING_TEXT = {}
 for _living in _LIVING:
     _lp = os.path.join(ROOT, _living)
@@ -1194,6 +1197,226 @@ if os.path.isfile(_lp):
     # say which one it means is a number nobody can check.
     _LSHAPE = (f"learned.md — rules {len(_nums)} · rules with an incident {len(_incs)} · "
                f"incident words {_incw} · binding rows {_bindrows}")
+
+# The board (references/backlog.md). The carry-over ledger's last column has always
+# offered `backlog` as a home for a deferred row — a place the pipeline named and did
+# not own. Measured before building it: across ten ledgers in this repo, **not one row
+# ever used that value**, and sixteen rows sat `open` with no home at all. The dangling
+# pointer was not `backlog`; it was `open`.
+#
+# Ten ledgers, six header shapes, and FIVE with two status-ish columns. Neither a
+# positional read nor a by-name read survives that: both pick one cell per file and the
+# wrong one in half the corpus. The test below asks neither question — see POSITION-FREE
+# where the work actually happens.
+#
+# Floor 0, and it is a ratchet: every open row was given a board id at the seam's
+# closing, so a new one arriving unhomed fails rather than joining a backlog of debt.
+_BOARD = os.path.join(ROOT, "docs/superpowers/backlog.md")
+_UNHOMED = []
+_BOARD_IDS = set()
+if os.path.isfile(_BOARD):
+    _bt = open(_BOARD, encoding="utf-8").read()
+    _BOARD_IDS = set(re.findall(r"\bB-(\d+)\b", _bt))
+    # Each board file read ONCE and shared by both loops below. Re-opening them was
+    # compounding the very cost this PR put on the board as row B-010.
+    _BOARD_TEXT = {_BOARD: _bt}
+    _tmplb = os.path.join(os.path.dirname(refdir), "templates", "backlog.md")
+    if os.path.isfile(_tmplb):
+        _BOARD_TEXT[_tmplb] = open(_tmplb, encoding="utf-8").read()
+    if not _BOARD_IDS:
+        fail("docs/superpowers/backlog.md: no `B-NNN` row — an empty board and a missing "
+             "board are the same thing to work on, and only one can be appended to")
+    # POSITION-FREE, and the first version of this guard was not. Ten ledgers here carry
+    # six header shapes and FIVE of them have two status-ish columns ('status'+'home',
+    # 'resolution'+'state', …) — "take the last one" then read a different cell per file
+    # and missed genuinely open rows in silence. Three rows also carry more cells than
+    # their header, and skipping those was a second silent path.
+    #
+    # So: a row is OPEN if any of its cells *is* the word open (or says it needs a home),
+    # and HOMED if a board id appears anywhere in the row. Neither test asks which column
+    # it came from, so neither can be defeated by a shape nobody anticipated.
+    # Neither pure-positional nor pure-textual survives this corpus, and both were
+    # tried. Positional read the wrong cell in the five ledgers that carry TWO
+    # status-ish columns. Text-only broke in both directions at once: too strict on a
+    # real row worded "open as a printed exclusion", too loose on a description reading
+    # "Open-source …", because a hyphen is punctuation and so is an arrow.
+    #
+    # So: the header names the candidate columns — ALL of them, never just the last —
+    # and inside those columns a status is matched on a word boundary. A cell in the
+    # What column cannot masquerade as a status because it is never looked at.
+    _LEDGER_ID = {"#", "id", "row"}
+    _LEDGER_STATUS = {"home", "where it lives now", "resolution", "status", "state"}
+    _UNRES_RE = re.compile(r"^(?:open|unresolved|backlog)\b", re.I)
+    _LEDGERS = sorted(glob.glob(os.path.join(ROOT, "docs/superpowers/specs/*carryover.md")))
+    # ...and the SEEDED template, whose worked example is the first ledger every host
+    # project ever sees. It showed a bare `backlog` home as a settled outcome for as
+    # long as this seam existed, which is where the value nobody owned came from.
+    _ctmpl = os.path.join(os.path.dirname(refdir), "templates", "carryover.md")
+    if os.path.isfile(_ctmpl):
+        _LEDGERS.append(_ctmpl)
+    for _lf in _LEDGERS:
+        _lt = open(_lf, encoding="utf-8").read()
+        _rel = os.path.relpath(_lf, ROOT)
+        _hdr = None
+        for _l in _lt.splitlines():
+            if _l.startswith("|") and _l.split("|")[1].strip().lower() in _LEDGER_ID:
+                _hdr = [_flatten(_x, lower=True).strip() for _x in _l.split("|")[1:-1]]
+                break
+        if _hdr is None:
+            continue                       # a ledger with no table yet
+        _sidx = [_i for _i, _c in enumerate(_hdr) if _c in _LEDGER_STATUS]
+        if not _sidx:
+            fail(f"{_rel}: no status column among {sorted(_LEDGER_STATUS)} — a ledger "
+                 "whose rows have no home column cannot be checked for dangling ones")
+            continue
+        for _l in _lt.splitlines():
+            if not _l.startswith("|") or set(_l.strip()) <= set("|- "):
+                continue
+            _c = [_flatten(_x, lower=True).strip() for _x in _l.split("|")[1:-1]]
+            if not _c or _c[0] in _LEDGER_ID:
+                continue
+            if len(_c) == len(_hdr):
+                _cells = [_c[_i] for _i in _sidx]
+            else:
+                # The row's shape does not match its header — an embedded `|` inside
+                # backticked text shifts the count on three rows here. Exact equality was
+                # tried and was wrong: a resolved cell reads `open → B-019` and equals
+                # nothing, so the row was skipped before the dangling-id check ran.
+                #
+                # So the fallback uses the same word-boundary match and looks at every
+                # cell. On a row that cannot be mapped to columns that risks flagging a
+                # description beginning "Open…", and that trade is deliberate: a false
+                # positive is loud and fixable, a false negative is a check that passes
+                # by looking at nothing.
+                _cells = _c
+            if not any(_UNRES_RE.match(_x) or "needs a home" in _x for _x in _cells):
+                continue
+            _ref = re.search(r"\bB-(\d+)\b", _l)
+            if not _ref:
+                _UNHOMED.append(f"{_rel} row {_c[0][:8]}")
+            elif _ref.group(1) not in _BOARD_IDS:
+                fail(f"{_rel} row {_c[0][:8]}: names `B-{_ref.group(1)}`, which is on no "
+                     "board row — a pointer to an id nobody issued reads as filed and is not")
+    if _UNHOMED:
+        fail("carry-over rows still `open` with no board id: "
+             + " · ".join(_UNHOMED)
+             + " — the board exists so a deferred row has somewhere to be ranked; an open "
+               "row with no id is the dangling pointer it was built to resolve "
+               "(references/backlog.md)")
+    # The priority is the one number on the board that a reader is invited to CHECK,
+    # so it is checked. The template shipped with three rows that contradicted the
+    # formula printed two lines below them — in the file seeded verbatim into every
+    # host project as its first board, whose stated point is that the arithmetic is
+    # visible. Found by a reader.
+    for _bf, _btext in _BOARD_TEXT.items():
+        _bfr = os.path.relpath(os.path.realpath(_bf), ROOT)
+        for _l in _btext.splitlines():
+            if not re.match(r"^\|\s*B-\d+\s*\|", _l):
+                continue
+            _cl = [_flatten(_x).strip() for _x in _l.split("|")[1:-1]]
+            if len(_cl) < 8:
+                fail(f"{_bfr}: row {_cl[0]} has {len(_cl)} cells where the board's shape "
+                     "needs at least 8 — skipping it silently is how a malformed row "
+                     "carries any priority it likes past a check built to compute one")
+                continue
+            try:
+                _sev, _bl, _age, _pr = (int(_cl[4]), int(_cl[5]), int(_cl[6]), int(_cl[7]))
+            except ValueError:
+                fail(f"{_bfr}: row {_cl[0]} has a non-numeric sev/blast/age/prio — the four "
+                     "are what make the ranking checkable, and prose in any of them makes "
+                     "it an opinion again")
+                continue
+            _want = _sev * _bl + (2 if _age > 30 else 1 if _age > 14 else 0)
+            if _want != _pr:
+                fail(f"{_bfr}: row {_cl[0]} states prio {_pr} but sev {_sev} × blast {_bl} "
+                     f"+ age bonus computes to {_want} — a priority that does not follow "
+                     "from its own inputs is the hand-assigned number this column replaced")
+
+    # Both directions: a board row invented with no source is the other failure, and only
+    # the reverse pass finds it (learned.md rule 2).
+    for _srcf, _stext in _BOARD_TEXT.items():
+      for _row in re.findall(r"^\|\s*B-\d+\s*\|(.+)$", _stext, re.M):
+        _cells = [_x.strip() for _x in _row.split("|")]
+        if len(_cells) < 2 or not _cells[1]:
+            fail(f"{os.path.relpath(_srcf, ROOT)}: a row names no Source — a row nobody can "
+                 "trace back is a wish somebody typed, and six weeks later it is either "
+                 "done twice or dropped by whoever trusts it least")
+            break
+
+# A blank line inside a table ENDS it. Every row after the gap loses the header and
+# renders as pipe-delimited prose — on GitHub, in any CommonMark reader, and silently.
+# This repo's own board carries a row about exactly this class ("a blank line silently
+# splits a markdown table, and the documentation gate does not catch it"), and the class
+# then hit that very board: three rows appended after a stray blank line rendered as
+# text. audit.md says a class seen twice becomes a script rather than a third ledger
+# row, so here is the script. The shape is precise — a table row, one blank line, a
+# table row — so two genuinely separate tables are untouched.
+# Routed through _discover_md rather than an eighth hand-rolled walk — its docstring
+# says the shape was promoted into a function so it would not be pasted again, and
+# board row B-010 already tracks what these repeated full-tree reads cost.
+_TBL_FILES, _TBL_TEXT = _discover_md((), lambda _c: "|" in _c)
+for _rel in _TBL_FILES:
+    _ls = _TBL_TEXT[_rel].splitlines()
+    _fence = False
+    for _i in range(len(_ls) - 2):
+        if _ls[_i].lstrip().startswith("```"):
+            _fence = not _fence
+        if _fence:
+            continue
+        # ...and "separate tables" is a real shape, so it is actually tested for: a new
+        # table opens with a header whose NEXT line is a `|---|` delimiter. Without this
+        # the guard fires on two valid adjacent tables and its own comment would be false.
+        # Any number of blank lines, not exactly one: GFM ends a table at the FIRST
+        # blank line whatever follows, so two blanks produce the identical defect and
+        # the one-blank pattern could not see it.
+        _j = _i + 1
+        while _j < len(_ls) and not _ls[_j].strip():
+            _j += 1
+        _gap = _j - (_i + 1)
+        _opens_new = (_j + 1 < len(_ls)
+                      and re.match(r"^\|[\s:|-]+\|\s*$", _ls[_j + 1] or ""))
+        if (_ls[_i].startswith("|") and _gap >= 1
+                and _j < len(_ls) and _ls[_j].startswith("|") and not _opens_new):
+            fail(f"{_rel}:{_j}: a blank line splits a table — every row below it "
+                 "loses the header and renders as pipe-delimited text, which looks "
+                 "like a table only in the editor")
+
+# The trigger list is written in code and enumerated in prose, and in one module the
+# two disagreed FOUR times — `open` alone while the doctrine said `backlog`, then
+# `backlog` added while `unresolved` was still only promised, then "two triggers" in a
+# file whose code checked three. Every instance was found by a reader. A class seen
+# twice becomes a script (audit.md), so the enumeration is now computed FROM the regex
+# and required to appear wherever the doctrine enumerates it.
+_UNRES_SRC = re.search(r'_UNRES_RE = re\.compile\(r"\^\(\?:([a-z|]+)\)', _OWN_SRC)
+if _UNRES_SRC:
+    _TRIGGERS = set(_UNRES_SRC.group(1).split("|"))
+    for _tf in ("plugins/task-pipeline/skills/task-pipeline/references/backlog.md",
+                "plugins/task-pipeline/skills/task-pipeline/templates/backlog.md"):
+        _tp = os.path.join(ROOT, _tf)
+        if not os.path.isfile(_tp):
+            continue
+        # Scoped to the paragraph that enumerates them. Checking the whole page was the
+        # first version and it is the very class this guard exists to close: a passage
+        # saying "those are the only two triggers" would pass on the strength of the
+        # third word appearing somewhere else entirely.
+        #
+        # What it still does not cover, said out loud: prose that names all three inside
+        # one paragraph while denying one of them. No check decides that; a reader does.
+        _paras = [_flatten(_x, lower=True) for _x in _paragraphs(open(_tp, encoding="utf-8").read())]
+        _enum = [_x for _x in _paras if "trigger" in _x and any(_t in _x for _t in _TRIGGERS)]
+        if not _enum:
+            continue                       # this file does not enumerate the triggers
+        _tt = max(_enum, key=len)
+        _absent = sorted(_t for _t in _TRIGGERS if _t not in _tt)
+        if _absent:
+            fail(f"{_tf}: the paragraph enumerating resolution triggers omits "
+                 + ", ".join(repr(_a) for _a in _absent)
+                 + " — the check in test/validate.py accepts them, and a doctrine that "
+                   "names fewer than the code accepts is how three of them shipped "
+                   "described-but-unenforced in a single module")
+else:
+    fail("test/validate.py: cannot read the trigger literals out of _UNRES_RE — the "
+         "doctrine-vs-code comparison has no source and is silently passing")
 
 # references/artifacts.md maps stage -> what it WRITES. The reverse direction — what
 # each stage READS and from where — is the one an agent actually needs at runtime,
