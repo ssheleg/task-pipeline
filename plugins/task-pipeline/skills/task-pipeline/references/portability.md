@@ -56,6 +56,7 @@ a row pointing outside the bundle is the defect this file exists to catch.
 | **The context budget** — the evidence rule and what a flush actually updates | `references/continuity.md` |
 | **The board** — the work-list between runs, its computed priority, and the ledger seam it resolves | `references/backlog.md` |
 | **The verification ledger** — what shipped, and whether a human ever confirmed it | `references/verification.md` |
+| **Exposure** — the unconfirmed count as a named vector, never a probability, and the `checkup` mode | `references/exposure.md` |
 | The retro: prune, cap, commits, archive | `references/retrospective.md` |
 | Rules earned by failure | `references/learned.md` |
 | **The routing default and its boundary** | `templates/routing-rule.md` |

@@ -44,6 +44,17 @@ Idempotent entry — inspect state first, never restart blindly:
 - Otherwise, begin at stage 0 (intake grill). If no task is given above, the
   grill's first question asks the operator for the task in one line.
 
+**`/task-pipeline checkup`** — **runs with no task in flight, and that is the point.**
+Accumulated unconfirmed work is invisible precisely because nobody is running a pipeline,
+so a check living only inside a run can never say *"stop, fourteen things are
+unconfirmed."* It takes no brief, opens no grill, and writes nothing on its own. Four
+sections, each read from a file this pipeline already keeps: the **exposure** line with
+its check-list oldest-first, the **board**'s open rows by computed priority, the
+carry-over ledgers' unresolved count, and the code graph's staleness where one exists.
+Where you ask it to file what it found, it appends board rows whose `Source` names the
+checkup and its date — printing what it would add first, never silently. Doctrine:
+`references/exposure.md`.
+
 **`/task-pipeline setup`** — the entry audit instead of a feature. Runs seven passes
 over the documentation this project already has, reports findings as `file:line` + the
 minimal fix ordered by seam, and hands back a fix plan the pipeline can run. Offered

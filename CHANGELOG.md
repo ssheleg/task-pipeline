@@ -1,5 +1,51 @@
 # Changelog
 
+## v1.33.0 — the number, the list, and the command that shows them with no task running
+
+Three modules shipped as one, because they are one capability: the index, the list it
+produces, and the command that prints them when nothing else is running.
+
+**Exposure is a vector with its components named, never a probability.** The request that
+started this asked for *"the probability of an error"*. It is not computable from these
+inputs, and a number dressed as one is the class this repository has spent its history
+removing — so the guard rejects a `%` on that line outright:
+
+```
+exposure: 99 unverified · never checked · 10 releases carry one
+    REQ-001  references/setup.md — the entry audit: when it runs …   v1.10.0
+    …
+    and 91 more — the full list is `/task-pipeline checkup`
+```
+
+**`never checked`, not `0 days`.** When no row has ever been confirmed — this repo's
+exact state — a zero would read as *checked today*, the precise inversion this pipeline
+exists to prevent. The literal is required by its own guard.
+
+**A single score was refused on purpose.** One number invites a threshold, and a
+threshold here is a target on `never`, which `verification.md` says may never have one.
+The components are one line; a reader can hold three.
+
+**`/task-pipeline checkup` runs with no task in flight**, which is the whole point:
+accumulated unconfirmed work is invisible precisely because nobody is running a pipeline,
+so a check living only inside a run can never say *stop, fourteen things are
+unconfirmed*. It reads four files this pipeline already keeps and writes nothing unless
+asked — and then only board rows whose `Source` names the checkup, printed before they
+are added.
+
+**And `continuity.md` finally names the file it always demanded.** It has required each
+iteration to re-measure the work-list since the beginning, and said *"next up is X"* is
+a claim no gate reads. The board is that list; the claim now cites a `B-NNN`, which can
+be checked, rather than a description, which cannot.
+
+**Two defects in the new guard, both self-inflicted and both instructive.** Its needle
+looked for *"never a percentage"* while the doctrine it guards says *"no percentage,
+ever"* — guard and prose written an hour apart, already disagreeing. And the `%` check
+searched for a literal that its own line necessarily contains, so it matched **itself**
+and passed a planted percentage. A detector that matches itself first is checking the
+wrong thing.
+
+Guards: 185 → **187**, property checks 8.
+
 ## v1.32.0 — the column a machine may not fill
 
 Stage 8 already performs the verification trio, reads the CI verdict and opens the

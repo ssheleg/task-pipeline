@@ -3634,3 +3634,39 @@ jobs:
           else
             echo "OK: validator correctly FAILs — the REQ is checked against the brief the row NAMES"
           fi
+
+      - name: Negative self-test (a percentage reaching the exposure line)
+        run: |
+          set -eu
+          rm -rf /tmp/pct-copy && cp -R . /tmp/pct-copy
+          python3 - <<'EOF'
+          p = "/tmp/pct-copy/test/validate.py"
+          t = open(p, encoding="utf-8").read()
+          needle = 'f"  exposure: {_VERIF_NEVER} unverified'
+          assert needle in t, "PLANT DID NOT LAND: the exposure print is not where the guard reads it"
+          open(p, "w", encoding="utf-8").write(
+              t.replace(needle, 'f"  exposure: {_VERIF_NEVER}% unverified', 1))
+          EOF
+          if python3 /tmp/pct-copy/test/validate.py; then
+            echo "ERROR: the exposure line rendered as a percentage — P(defect) is not computable from these inputs"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the one rendering this line may never take"
+          fi
+
+      - name: Negative self-test (the exposure doctrine dropping its never-checked rule)
+        run: |
+          set -eu
+          rm -rf /tmp/nc-copy && cp -R . /tmp/nc-copy
+          python3 - <<'EOF'
+          p = "/tmp/nc-copy/plugins/task-pipeline/skills/task-pipeline/references/exposure.md"
+          t = open(p, encoding="utf-8").read()
+          assert "never checked" in t, "PLANT DID NOT LAND: the rule is not in the doctrine"
+          open(p, "w", encoding="utf-8").write(t.replace("never checked", "zero days"))
+          EOF
+          if python3 /tmp/nc-copy/test/validate.py; then
+            echo "ERROR: the doctrine lost the rule that zero days would read as 'checked today'"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the decision lives where the next reader looks"
+          fi

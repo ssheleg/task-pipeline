@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Structural validator for the task-pipeline skill repo. Exit 0 = pass."""
-import glob, json, os, re, shutil, subprocess, sys, tempfile
+import datetime, glob, json, os, re, shutil, subprocess, sys, tempfile
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 NAME = "task-pipeline"
@@ -1435,6 +1435,8 @@ else:
 _VERIF = os.path.join(ROOT, "docs/superpowers/verification.md")
 _VERIF_NEVER = 0
 _VERIF_TOTAL = 0
+_VERIF_ROWS = []     # (shipped-in, req, what) for every unconfirmed row
+_VERIF_DATES = []    # every date a person actually wrote
 if os.path.isfile(_VERIF):
     _vt = open(_VERIF, encoding="utf-8").read()
     _vrows = re.findall(r"^\|\s*(REQ-\d+)\s*\|(.+)$", _vt, re.M)
@@ -1501,8 +1503,12 @@ if os.path.isfile(_VERIF):
                  "either a date or the literal `never` — prose in that column is how the "
                  "one question this file exists to answer stops being answerable")
         _VERIF_TOTAL += 1
+        _ship = _cells[_vhdr.index("shipped in")] if "shipped in" in _vhdr and len(_cells) > _vhdr.index("shipped in") else ""
         if _human and _human[0].lower() == "never":
             _VERIF_NEVER += 1
+            _VERIF_ROWS.append((_ship.strip("`"), _rid, _cells[1] if len(_cells) > 1 else ""))
+        elif _human:
+            _VERIF_DATES.append(_human[0])
 
 # artifacts.md carries the same truth twice: an ASCII layout tree and a set of tables.
 # They drifted for two modules — the tree never gained `backlog.md` or
@@ -1549,6 +1555,41 @@ if os.path.isfile(_cl) and os.path.isfile(_wf):
     if _p and int(_p.group(1)) != _true_prop:
         fail(f"CHANGELOG.md: the newest section claims {_p.group(1)} property checks but "
              f"the workflow defines {_true_prop}")
+
+# The exposure line may never render as a probability. The request that produced it
+# asked for one; `P(defect)` is not computable from these inputs, and a number dressed
+# as one is the class this repository has spent its history removing. So: no `%` on that
+# line, and the doctrine that says why must say it where somebody proposing a percentage
+# will read it.
+_expo = os.path.join(refdir, "exposure.md")
+if os.path.isfile(_expo):
+    _et = open(_expo, encoding="utf-8").read()
+    # Needles matched against the doctrine's ACTUAL words. The first draft looked for
+    # "never a percentage" while the file says "no percentage, ever" — the guard and the
+    # prose it guards, written an hour apart by the same author, already disagreed.
+    for _needle, _why in (
+            ("no percentage", "the ban on rendering exposure as a probability"),
+            ("never checked", "the literal printed when NO row has ever been confirmed — "
+                              "`0 days` would read as *checked today*"),
+            ("checkup", "the command mode that prints the full check-list")):
+        if _needle not in _flatten(_et, lower=True):
+            fail(f"references/exposure.md: says nothing about {_why} — the doctrine has to "
+                 "carry it where the next reader looks, or the guard below is the only "
+                 "record of a decision nobody can find")
+    # And the code must agree with it: a `%` reaching the exposure print is the defect.
+    # Scoped to the print statement itself, not a window around the first mention of the
+    # word: the first draft took 1200 characters from wherever "exposure:" appeared and
+    # swept in unrelated code, failing on somebody else's `%`.
+    # Matched on the PRINT, not on the word: the first draft searched for the literal
+    # and found its own line, which necessarily contains it. A detector that matches
+    # itself first checks the wrong thing and passes.
+    _pr = [_l for _l in _OWN_SRC.splitlines() if _l.lstrip().startswith('print(f"  exposure:')]
+    if _pr and "%" in _pr[0]:
+        fail("test/validate.py: a `%` appears in the exposure print — the one rendering "
+             "this line may never take (references/exposure.md)")
+else:
+    fail("references/exposure.md: absent, and the exposure line is printed anyway — a "
+         "number with no doctrine is the estimate-as-measurement this file forbids")
 
 # references/artifacts.md maps stage -> what it WRITES. The reverse direction — what
 # each stage READS and from where — is the one an agent actually needs at runtime,
@@ -3156,5 +3197,26 @@ if _LSHAPE:
 if _VERIF_TOTAL:
     print(f"  verification: {_VERIF_TOTAL} shipped REQ · {_VERIF_NEVER} never confirmed by "
           "a person  (disclosure — no floor, no target)")
+    # The exposure vector. Components named, never summed into a score: a single number
+    # invites a threshold, and a threshold here is a target on `never`, which the ledger
+    # says may never have one. And NEVER a percentage — `P(defect)` is not computable
+    # from these inputs and a number dressed as one is the class this repo removes.
+    if _VERIF_NEVER:
+        if _VERIF_DATES:
+            _newest = max(_VERIF_DATES)
+            _d = (datetime.date.today() - datetime.date(*(int(_x) for _x in _newest.split("-")))).days
+            _since = f"{_d} days since the last human confirmation ({_newest})"
+        else:
+            # Zero would read as "checked today", which is the opposite of the truth.
+            _since = "never checked"
+        _rel = len([_x for _x in _VERIF_ROWS if _x[0]])
+        print(f"  exposure: {_VERIF_NEVER} unverified · {_since} · "
+              f"{len(set(_x[0] for _x in _VERIF_ROWS if _x[0]))} releases carry one")
+        # Oldest first: the longest-unconfirmed row is the one whose context is most gone.
+        for _s, _r, _w in sorted(_VERIF_ROWS, key=lambda _x: _x[0])[:8]:
+            print(f"      {_r}  {_w[:58]:60} {_s}")
+        if len(_VERIF_ROWS) > 8:
+            print(f"      … and {len(_VERIF_ROWS) - 8} more — the full list is "
+                  "`/task-pipeline checkup`, which prints all of them")
 print(f"  unlooked: {len(_UNLOOKED)}"
       + ("".join("\n    · " + _u for _u in _UNLOOKED) if _UNLOOKED else ""))

@@ -15,6 +15,8 @@ duplicated here: a second copy of a corruption is a second thing to drift.
 
 Zero dependencies, same as the validator.
 """
+import concurrent.futures
+import tempfile
 import os
 import re
 import shutil
@@ -33,7 +35,7 @@ MIN_PROPS = 8
 # which is the floor doing half its job: it would have caught a total collapse and
 # not the loss of a third of the suite. Set it to the real count, and treat a
 # mismatch as a finding rather than as noise to be lowered away.
-MIN_EXPECTED = 185
+MIN_EXPECTED = 187
 
 
 def parse_steps(path):
@@ -131,6 +133,22 @@ def main(argv):
     # A leftover copy from an interrupted run would make the next one lie.
     sweep([copy_dir_of(s) for _, s in tests])
 
+    # Every test does `cp -R .` — from the CURRENT WORKING DIRECTORY. Run with cwd=ROOT
+    # that is the live tree, so editing a file mid-run hands some tests a half-written
+    # copy and the suite reports on a state the repo was never in. It happened twice in
+    # one session, and board row B-023 predicted both.
+    #
+    # So the suite copies ROOT once into a snapshot and runs every test with cwd there.
+    # Editing while it runs is now harmless.
+    _snap = tempfile.mkdtemp(prefix="tp-negatives-snap-")
+    _base = os.path.join(_snap, "repo")
+    shutil.copytree(ROOT, _base, ignore=shutil.ignore_patterns(
+        "node_modules", "graphify-out", ".git"), symlinks=True)
+    # `.git` is skipped for speed and restored for the two tests that commit a plant.
+    _git_src = os.path.join(ROOT, ".git")
+    if os.path.isdir(_git_src):
+        shutil.copytree(_git_src, os.path.join(_base, ".git"), symlinks=True)
+
     # Property checks assert that something IS printed, so the validator passes inside
     # them and they cannot join the suite above. They still have to run somewhere the
     # author can see: a step that lives only in CI is a step the local gate is blind to,
@@ -148,14 +166,26 @@ def main(argv):
     if only:
         props = [(n, s) for n, s in props if only.lower() in n.lower()]
 
+    # 187 tests x (copy + validate) is thirteen minutes serially, long enough that the
+    # suite gets backgrounded and stops being run before a commit — board row B-021.
+    # They are independent and each owns a distinct scratch name, so they run in
+    # parallel. Collisions only happen between two SUITE runs, which is a different row.
+    _WORKERS = min(8, (os.cpu_count() or 4))
+
     failed, broken, prop_failed = [], [], []
     print(f"running {len(tests)} negative self-tests"
           + (f" + {len(props)} property checks\n" if props else "\n"))
-    for name, script in tests:
+    def _run_one(name_script):
+        name, script = name_script
         cdir = copy_dir_of(script)
         sweep([cdir])
-        r = subprocess.run(["bash", "-c", script], cwd=ROOT,
+        r = subprocess.run(["bash", "-c", script], cwd=_base,
                            capture_output=True, text=True)
+        return name, script, cdir, r
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=_WORKERS) as _ex:
+        _results = list(_ex.map(_run_one, tests))
+    for name, script, cdir, r in _results:
         passed = r.returncode == 0 and "OK:" in r.stdout
 
         # The trap this runner exists to avoid: a corruption that quietly changed
@@ -176,7 +206,7 @@ def main(argv):
     for name, script in props:
         cdir = copy_dir_of(script)
         sweep([cdir])
-        r = subprocess.run(["bash", "-c", script], cwd=ROOT, capture_output=True, text=True)
+        r = subprocess.run(["bash", "-c", script], cwd=_base, capture_output=True, text=True)
         ok = r.returncode == 0 and "OK:" in r.stdout
         print(f"  {'PASS' if ok else 'FAIL':<7}[property] " + _plabel(name))
         if not ok:
@@ -199,6 +229,8 @@ def main(argv):
                 for line in (out + err).strip().splitlines()[-6:]:
                     print("      " + line)
             print()
+
+    shutil.rmtree(_snap, ignore_errors=True)
 
     if failed or broken or prop_failed:
         print(f"FAIL: {len(failed)} guard(s) did not fire, {len(broken)} test(s) broken"
