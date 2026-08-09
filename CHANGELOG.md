@@ -44,7 +44,7 @@ searched for a literal that its own line necessarily contains, so it matched **i
 and passed a planted percentage. A detector that matches itself first is checking the
 wrong thing.
 
-Guards: 185 → **187**, property checks 8.
+Guards: 185 → **188**, property checks 8.
 
 ## v1.32.0 — the column a machine may not fill
 

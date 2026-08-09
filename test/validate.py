@@ -1583,7 +1583,19 @@ if os.path.isfile(_expo):
     # Matched on the PRINT, not on the word: the first draft searched for the literal
     # and found its own line, which necessarily contains it. A detector that matches
     # itself first checks the wrong thing and passes.
-    _pr = [_l for _l in _OWN_SRC.splitlines() if _l.lstrip().startswith('print(f"  exposure:')]
+    # The WHOLE statement, not its first physical line: a `%` on the continuation
+    # ("releases carry one") rendered `10% releases` and passed, which is the class this
+    # guard exists for. Scope was the first draft's second scoping bug in one module.
+    _src_lines = _OWN_SRC.splitlines()
+    _pr = []
+    for _i, _l in enumerate(_src_lines):
+        if _l.lstrip().startswith('print(f"  exposure:'):
+            _stmt = _l
+            _j = _i + 1
+            while _j < len(_src_lines) and not _stmt.rstrip().endswith(")"):
+                _stmt += _src_lines[_j]
+                _j += 1
+            _pr.append(_stmt)
     if _pr and "%" in _pr[0]:
         fail("test/validate.py: a `%` appears in the exposure print — the one rendering "
              "this line may never take (references/exposure.md)")
@@ -2937,6 +2949,17 @@ if os.path.isfile(_wf_p):
                 _inheredoc = False
             continue
         _wf_scan.append(_l)
+    # A step that deletes one directory and copies into another was harmless while the
+    # suite ran serially, and became a race the hour it went parallel: `rm -rf /tmp/X &&
+    # cp -R . /tmp/X-2` wipes the live scratch of whichever test owns X. Three shipped
+    # that way, and the reuse guard below never saw them because it only ever compared
+    # `cp` targets.
+    for _l in _wf_scan:
+        _m = re.search(r"rm -rf (/tmp/[A-Za-z0-9._-]+) && cp -R \. (/tmp/[A-Za-z0-9._-]+)", _l)
+        if _m and _m.group(1) != _m.group(2):
+            fail(f"`.github/workflows/validate.yml`: a step removes `{_m.group(1)}` and "
+                 f"copies into `{_m.group(2)}` — it wipes a directory it does not own, "
+                 "which is a race the moment two tests run at once")
     _dirs = re.findall(r"cp -R \. (/tmp/[A-Za-z0-9._-]+)", "\n".join(_wf_scan))
     _dupes = sorted({d for d in _dirs if _dirs.count(d) > 1})
     if _dupes:
@@ -3213,7 +3236,13 @@ if _VERIF_TOTAL:
         print(f"  exposure: {_VERIF_NEVER} unverified · {_since} · "
               f"{len(set(_x[0] for _x in _VERIF_ROWS if _x[0]))} releases carry one")
         # Oldest first: the longest-unconfirmed row is the one whose context is most gone.
-        for _s, _r, _w in sorted(_VERIF_ROWS, key=lambda _x: _x[0])[:8]:
+        # Version-aware, not lexicographic: "1" < "9" char-by-char puts v1.10.0 before
+        # v1.9.0, which inverts the one ordering rule exposure.md promises — and with the
+        # list truncated, the genuinely oldest rows never printed at all.
+        def _verkey(_x):
+            _m = re.findall(r"\d+", _x[0])
+            return ([int(_n) for _n in _m], _x[0]) if _m else ([9999], _x[0])
+        for _s, _r, _w in sorted(_VERIF_ROWS, key=_verkey)[:8]:
             print(f"      {_r}  {_w[:58]:60} {_s}")
         if len(_VERIF_ROWS) > 8:
             print(f"      … and {len(_VERIF_ROWS) - 8} more — the full list is "

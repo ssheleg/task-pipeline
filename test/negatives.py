@@ -35,7 +35,7 @@ MIN_PROPS = 8
 # which is the floor doing half its job: it would have caught a total collapse and
 # not the loss of a third of the suite. Set it to the real count, and treat a
 # mismatch as a finding rather than as noise to be lowered away.
-MIN_EXPECTED = 187
+MIN_EXPECTED = 188
 
 
 def parse_steps(path):
@@ -77,7 +77,7 @@ def copy_dir_of(script):
 
 def differs_from_repo(path):
     r = subprocess.run(
-        ["diff", "-rq", "--exclude=.git", "--exclude=node_modules", path, ROOT],
+        ["diff", "-rq", "--exclude=.git", "--exclude=node_modules", "--exclude=graphify-out", path, ROOT],
         capture_output=True, text=True,
     )
     return bool(r.stdout.strip()) or bool(r.stderr.strip())
