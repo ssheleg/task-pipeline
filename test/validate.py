@@ -880,15 +880,34 @@ if os.path.isfile(_cs):
 # states the condition must state BOTH units. Rotation ("entries older than five stamps move
 # to the archive") is a DIFFERENT mechanism and is deliberately out of scope — it is named in
 # the scope line so the exclusion is a decision rather than an oversight.
-_COLD_SURFACES = [
-    "plugins/task-pipeline/skills/task-pipeline/references/retrospective.md",
-    "plugins/task-pipeline/skills/task-pipeline/references/acceptance.md",
-    "plugins/task-pipeline/skills/task-pipeline/references/stages.md",
-    "plugins/task-pipeline/skills/task-pipeline/references/companion-skills.md",
-    "plugins/task-pipeline/skills/task-pipeline/SKILL.md",
-    "plugins/task-pipeline/skills/task-pipeline/templates/retro.md",
-    "plugins/task-pipeline/commands/task-pipeline.md",
-]
+# The corpus is DISCOVERED, not listed. A hand-listed one was seven files and missed
+# README.md, which states the condition and had never been checked — found by reading,
+# in the release after a review found the same shape in the claim registry's corpus.
+# Nobody notices a corpus that is too small, because everything inside it passes. So
+# any shipped surface that states the condition is a surface that must state both units.
+#
+# Excluded on purpose, and each for a reason that is not "it was inconvenient":
+# CHANGELOG.md narrates the day the second unit was added, docs/superpowers/specs/ are
+# point-in-time design records, and the retro archive is not read in full.
+_COLD_SKIP = ("CHANGELOG.md", "docs/superpowers/specs/", "docs/superpowers/retro/",
+              "node_modules/", "graphify-out/", ".git/")
+_COLD_SURFACES = []
+for _root, _dirs, _fs in os.walk(ROOT):
+    _dirs[:] = [_d for _d in _dirs if _d not in (".git", "node_modules", "graphify-out")]
+    for _f in _fs:
+        if not _f.endswith((".md", ".mdc")):
+            continue
+        _rel = os.path.relpath(os.path.join(_root, _f), ROOT)
+        if any(_rel.startswith(_s) or _rel == _s for _s in _COLD_SKIP):
+            continue
+        if "five run stamps" in _flatten(open(os.path.join(_root, _f), encoding="utf-8").read(), lower=True):
+            _COLD_SURFACES.append(_rel)
+_COLD_SURFACES.sort()
+# A NARRATION of what the rule said before the second unit existed is not a statement
+# of the rule — learned.md's own rule-21 incident quotes the old wording, and rewriting
+# it would falsify the incident. Same convention the claim registry uses: a
+# double-quoted span is a citation. Italics are not, deliberately — a marker vocabulary
+# that grows per incident is the drift this file exists to prevent.
 _COLD_RE = re.compile(r"(?:has\s+not\s+)?fired\s+in\s+(?:the\s+last\s+)?five\s+run\s+stamps", re.I | re.S)
 for _f in _COLD_SURFACES:
     _fp = os.path.join(ROOT, _f)
@@ -903,8 +922,11 @@ for _f in _COLD_SURFACES:
         # programme that a predicate was defeated by this corpus's formatting rather
         # than by its content (twice by the ~80-column wrap, once by bold).
         _flat = _flatten(_para)
-        if not _COLD_RE.search(_flat):
+        _m = _COLD_RE.search(_flat)
+        if not _m:
             continue
+        if _is_quoted(_flat, _m):
+            continue                    # a narration of the old wording, not a statement
         if not re.search(r"sixty\s+days|60\s+days", _flat, re.I):
             _line = _ft[:_ft.find(_para)].count("\n") + 1
             fail(f"{_f}:{_line}: states the cold-retirement condition as five run stamps and "
@@ -1043,7 +1065,11 @@ if os.path.isfile(_lp):
         or open(_lp, encoding="utf-8").read()
     _nums = [int(_n) for _n in re.findall(r"^\|\s*(\d+)\s*\|\s*\*\*", _lt, re.M)]
     _inc = re.search(r"^## The incidents.*?(?=^## )", _lt, re.M | re.S)
-    _incs = re.findall(r"^\*\*(\d+)\s*·", _inc.group(0), re.M) if _inc else []
+    # "**4 and 5 · Probes.**" is one write-up covering two rules. A digits-then-dot
+    # pattern drops it, and the disclosure then prints a number lower than the file —
+    # a disclosure that is wrong is worse than none, because nothing cross-checks it.
+    _incs = ([_d for _h in re.findall(r"^\*\*([\d,\s]+(?:and[\d,\s]+)*)·", _inc.group(0), re.M)
+              for _d in re.findall(r"\d+", _h)] if _inc else [])
     _incw = len(_inc.group(0).split()) if _inc else 0
     _bind = re.search(r"^## Where these bind.*?(?=^---|\Z)", _lt, re.M | re.S)
     _bindrows = len(re.findall(r"^\|", _bind.group(0), re.M)) - 2 if _bind else 0
@@ -1053,16 +1079,35 @@ if os.path.isfile(_lp):
              "logged line, and an absent log is indistinguishable from an empty one "
              "(the file's own *What leaves this file* section)")
     elif _nums:
-        _gaps = [_n for _n in range(1, max(_nums) + 1) if _n not in _nums]
-        _logged = set(re.findall(r"\b(\d+)\b", _ret.group(1)))
-        _silent = [_g for _g in _gaps if str(_g) not in _logged]
-        if _silent:
-            fail("references/learned.md: rule number(s) "
-                 + ", ".join(str(_s) for _s in _silent)
-                 + " are missing from the table and named in no line of `### Retired` — "
-                 "a rule that vanishes silently takes its incident with it, and the "
-                 "next run re-learns it at full price")
-    _LSHAPE = (f"learned.md — rules {len(_nums)} · incidents {len(_incs)} · "
+        # The high-water mark comes from the FILE, not from max(_nums): deleting the
+        # highest rule shrinks the maximum with it and no gap opens. Proven by running
+        # it — deleting rule 21 passed a guard whose whole job is to catch that.
+        _hw = re.search(r"Numbers\s+issued\s+so\s+far:\s*(\d+)", _flatten(_ret.group(1)), re.I)
+        if not _hw:
+            fail("references/learned.md: `### Retired` does not state `Numbers issued so far: N` "
+                 "— without a high-water mark, deleting the highest-numbered rule shrinks the "
+                 "maximum with it and the guard sees no gap at all")
+        else:
+            _high = int(_hw.group(1))
+            if _high < max(_nums):
+                fail(f"references/learned.md: `Numbers issued so far: {_high}` is below the "
+                     f"highest rule in the table ({max(_nums)}) — a new rule was added without "
+                     "advancing the high-water mark, so its later deletion would be invisible")
+            _gaps = [_n for _n in range(1, _high + 1) if _n not in _nums]
+            # Anchored to the line's LEADING number. A body-wide digit scan lets a
+            # subsumption note ("subsumed by rule 9") mask a real deletion of rule 9.
+            _logged = set(re.findall(r"^\s*-\s*\*\*(\d+)\s*·", _ret.group(1), re.M))
+            _silent = [_g for _g in _gaps if str(_g) not in _logged]
+            if _silent:
+                fail("references/learned.md: rule number(s) "
+                     + ", ".join(str(_s) for _s in _silent)
+                     + " are missing from the table and named in no line of `### Retired` — "
+                     "a rule that vanishes silently takes its incident with it, and the "
+                     "next run re-learns it at full price")
+    # "rules with an incident", not "incidents": one write-up can cover two rules
+    # ("**4 and 5 · Probes.**"), so the two numbers differ and a label that does not
+    # say which one it means is a number nobody can check.
+    _LSHAPE = (f"learned.md — rules {len(_nums)} · rules with an incident {len(_incs)} · "
                f"incident words {_incw} · binding rows {_bindrows}")
 
 # references/artifacts.md maps stage -> what it WRITES. The reverse direction — what

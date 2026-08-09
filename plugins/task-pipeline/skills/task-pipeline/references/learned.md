@@ -138,7 +138,7 @@ run's belief about the work-list against the register; the claim only ever appea
 
 **20 · The copy that wins.** A service had **two Dockerfiles**. One was added at the repository root by a run that checked whether a Dockerfile existed by looking where it expected one; `docker/Dockerfile` had been there all along, and `.github/workflows/ci.yml` says `file: docker/Dockerfile`. They disagreed about the port — 8080 at the root, 8000 in `docker/` — and the disagreement surfaced two days later as a **deployed service that answered nothing**, while `docker ps` said `Up` and `systemctl` said `active`. The built one also ran as root and copied the whole context, including `.git` and any `.env`; the hardened one was the one nobody built. Comparing the two files would have found the difference and not the direction. Only the workflow line says which one ships, and it is one grep. The same session hit this three more times: an autonomy sweep row added to the file that ASKS and not the file that RECORDS, twice, caught by a validator that knew to look at both.
 
-**21 · The prune that could not run.** A retrospective's standing-instruction list has a hard cap of ten and three retirement triggers, one of which is *it has not fired in the last five run stamps*. The stage's own instruction was **prune first, then stamp**. So the trigger read a counter the same stage wrote afterwards: on a fresh list it is unreadable, and it stays unreadable for as long as nobody stamps. Measured on a real project: the last retro entry was five days old, stamps per day ran 33, 20, 26, **3, 0** — the zero on a day with 107 commits — and the list sat at exactly **10 of 10**, so every run arrived at a stage that opened with a full list, an unusable trigger and a mandatory deletion. It was not skipped out of laziness. It was skipped because its first step could not be performed, and the cheap step that would have made it performable was queued behind it.
+**21 · The prune that could not run.** A retrospective's standing-instruction list has a hard cap of ten and three retirement triggers, one of which was, at the time of this incident, "it has not fired in the last five run stamps" — it has since gained a second unit, and the incident is left as it happened. The stage's own instruction was **prune first, then stamp**. So the trigger read a counter the same stage wrote afterwards: on a fresh list it is unreadable, and it stays unreadable for as long as nobody stamps. Measured on a real project: the last retro entry was five days old, stamps per day ran 33, 20, 26, **3, 0** — the zero on a day with 107 commits — and the list sat at exactly **10 of 10**, so every run arrived at a stage that opened with a full list, an unusable trigger and a mandatory deletion. It was not skipped out of laziness. It was skipped because its first step could not be performed, and the cheap step that would have made it performable was queued behind it.
 
 The same class had already bitten that project twice from the other side, and its roadmap names the
 property exactly: seven rows read `blocked` on producers the dependency board recorded as delivered,
@@ -264,7 +264,17 @@ evidence that something left, and the log below says what.
 
 ### Retired
 
-*None yet.* Stated rather than omitted: an empty log and a missing log look identical
-from outside, and only one of them means nothing has been retired.
+**Numbers issued so far: 21.** This is the high-water mark, and it is the only number
+this file states about itself — deliberately, because the gap that proves a rule left
+cannot be computed from the table alone: **deleting the highest-numbered rule shrinks
+the maximum with it, and no gap ever opens.** That false negative shipped in the first
+draft of this very section's guard and was found by a reader, not by its probe, which
+had planted in the middle of the list.
+
+*None retired yet.* Stated rather than omitted: an empty log and a missing log look
+identical from outside, and only one of them means nothing has been retired. Each
+retirement is one line, starting with the rule's number:
+
+<!-- - **N · Name** — trigger: subsumed by M | conditions gone; `<commit>` -->
 
 ---

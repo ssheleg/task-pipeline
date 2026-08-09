@@ -336,9 +336,11 @@ not authorize an outward, irreversible action — stage 7 stops and asks.
     times and nothing notices it is the same one. So, in this order —
     **1. Stamp the run first** — date, topic, commit, verdict, counts. It costs one
     line and it is the only thing that makes the next step computable: one retirement
-    trigger counts firings across the last five run stamps, so a prune placed ahead of
-    the stamp reads a counter its own stage writes afterwards and can never run on real
-    data.
+    trigger counts firings across the last five run stamps **or sixty days**, whichever
+    comes first, so a prune placed ahead of the stamp reads a counter its own stage
+    writes afterwards and can never run on real data. The calendar unit exists because
+    the stamp counter only moves when this pipeline runs — ten consecutive releases of
+    this repository carry no stamp at all.
     **2. Then prune.** Check every standing instruction against three
     retirement triggers: it became a check (a test, a lint rule, a gate, a hook →
     delete it; the check is the memory, and keeping both means it is read twice and

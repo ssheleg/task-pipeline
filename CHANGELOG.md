@@ -42,7 +42,27 @@ And the file's **shape** is now printed beside the validator's verdict — rules
 incidents, incident words, binding rows — as a disclosure: computed, no floor, no
 direction, **never a target**. Growth becomes visible without becoming a lever.
 
-Guards: 144 → **146**.
+**The review found a guard that could not catch the thing it was built for.** Deleting
+the **highest-numbered** rule shrinks `max()` with it, so no gap ever opens — reproduced
+by deleting rule 21 and getting a clean pass. My own probe had planted in the middle of
+the list, which is the shape the author imagines. The mark now comes from the file
+(`Numbers issued so far: N`, the one number this file states about itself), and the log
+match is anchored to each line's leading number, because a bare digit anywhere in the
+body — *"subsumed by 9"* — masked a genuine deletion of rule 9.
+
+The disclosure was also wrong before it was right: one write-up covers two rules
+(*"4 and 5 · Probes"*), so it printed 18 where the file has 19 write-ups covering 20
+rules. It now says **rules with an incident**, because a label that does not say what
+it counts is a number nobody can check.
+
+**Swept the same class one level out.** The cold-retirement guard's corpus was a
+hand-written list of seven files. Made **discovered** instead — any shipped surface that
+states the condition must state both units — and it immediately found **fourteen**,
+including `README.md`, the Cursor rule, `gates.md` and `learned.md` itself. A narration
+of the old wording is exempt by the repository's existing convention: a double-quoted
+span is a citation, and rule 21's incident is left as it happened.
+
+Guards: 144 → **150**.
 
 ## v1.29.0 — a sixth axis, and three summaries that each read as complete
 

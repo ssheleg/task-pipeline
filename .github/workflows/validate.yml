@@ -2732,3 +2732,86 @@ jobs:
           else
             echo "OK: validator correctly FAILs — the log exists, so 'nothing retired' is a statement"
           fi
+
+      - name: Negative self-test (a NEW surface states the cold trigger with one unit)
+        run: |
+          set -eu
+          rm -rf /tmp/coldnew-copy && cp -R . /tmp/coldnew-copy
+          python3 - <<'EOF'
+          p = "/tmp/coldnew-copy/docs/DOCMAP.md"
+          t = open(p, encoding="utf-8").read()
+          t += "\n\nA rule retires when it has not fired in the last five run stamps.\n"
+          open(p, "w", encoding="utf-8").write(t)
+          assert "five run stamps" in open(p, encoding="utf-8").read(), "PLANT DID NOT LAND"
+          EOF
+          if python3 /tmp/coldnew-copy/test/validate.py; then
+            echo "ERROR: validator passed a surface that was never on any hand-written list"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the corpus is discovered, so a new surface joins it by existing"
+          fi
+
+      - name: Negative self-test (the HIGHEST-numbered rule deleted — the gap that does not open)
+        run: |
+          set -eu
+          rm -rf /tmp/hw1-copy && cp -R . /tmp/hw1-copy
+          python3 - <<'EOF'
+          import re
+          p = "/tmp/hw1-copy/plugins/task-pipeline/skills/task-pipeline/references/learned.md"
+          t = open(p, encoding="utf-8").read()
+          nums = [int(n) for n in re.findall(r"^\|\s*(\d+)\s*\|\s*\*\*", t, re.M)]
+          assert nums, "PLANT DID NOT LAND: no rule rows found"
+          m = re.search(r"^\|\s*%d\s*\|\s*\*\*.*$" % max(nums), t, re.M)
+          assert m, "PLANT DID NOT LAND: highest row absent before edit"
+          open(p, "w", encoding="utf-8").write(t[:m.start()] + t[m.end() + 1:])
+          after = [int(n) for n in re.findall(r"^\|\s*(\d+)\s*\|\s*\*\*", open(p, encoding="utf-8").read(), re.M)]
+          assert max(after) < max(nums), "PLANT DID NOT LAND"
+          EOF
+          if python3 /tmp/hw1-copy/test/validate.py; then
+            echo "ERROR: deleting the highest rule shrinks max() with it and opens no gap — the false negative this guard shipped with"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the high-water mark comes from the file, not from max()"
+          fi
+
+      - name: Negative self-test (a digit in the log body masking a real deletion)
+        run: |
+          set -eu
+          rm -rf /tmp/hw2-copy && cp -R . /tmp/hw2-copy
+          python3 - <<'EOF'
+          import re
+          p = "/tmp/hw2-copy/plugins/task-pipeline/skills/task-pipeline/references/learned.md"
+          t = open(p, encoding="utf-8").read()
+          m = re.search(r"^\|\s*9\s*\|\s*\*\*.*$", t, re.M)
+          assert m, "PLANT DID NOT LAND: rule 9's row absent before edit"
+          t = t[:m.start()] + t[m.end() + 1:]
+          needle = "*None retired yet.*"
+          assert needle in t, "PLANT DID NOT LAND: log anchor absent"
+          t = t.replace(needle, "- **12 · Something** — trigger: subsumed by 9; `deadbeef`\n\n" + needle, 1)
+          open(p, "w", encoding="utf-8").write(t)
+          EOF
+          if python3 /tmp/hw2-copy/test/validate.py; then
+            echo "ERROR: a bare digit anywhere in the log masked a genuine silent deletion"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the log match is anchored to each line's leading number"
+          fi
+
+      - name: Negative self-test (the high-water mark removed from learned.md)
+        run: |
+          set -eu
+          rm -rf /tmp/hw3-copy && cp -R . /tmp/hw3-copy
+          python3 - <<'EOF'
+          p = "/tmp/hw3-copy/plugins/task-pipeline/skills/task-pipeline/references/learned.md"
+          t = open(p, encoding="utf-8").read()
+          needle = "**Numbers issued so far: 21.**"
+          assert needle in t, "PLANT DID NOT LAND: high-water mark absent before edit"
+          open(p, "w", encoding="utf-8").write(t.replace(needle, "**A note.**", 1))
+          assert "Numbers issued so far" not in open(p, encoding="utf-8").read(), "PLANT DID NOT LAND"
+          EOF
+          if python3 /tmp/hw3-copy/test/validate.py; then
+            echo "ERROR: validator passed with no high-water mark — the gap guard has nothing to measure against"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the mark is required, and it may not fall below the table"
+          fi
