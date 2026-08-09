@@ -33,7 +33,14 @@ ledger, and a ledger row about a requirement no brief carries.
 one recorded instance of a person confirming a shipped requirement afterwards. That is
 not a new problem — it is the first time it can be stated.
 
-Guards: 175 → **178**, property checks 4 → 5.
+**Review round: N1's lesson carried forward by its wrong half.** The Human check
+scanned *every* cell for a date or `never`, so a bare date sitting in the Note column
+satisfied a row whose Human read *"soon"* — precisely the prose the guard exists to
+reject. N1 concluded *"the header names the candidate columns and the match happens
+inside them"*, not *"never look at columns"*; this file is templated and has exactly one
+shape, so the column is located by name and read alone.
+
+Guards: 175 → **180**, property checks 4 → 5.
 
 ## v1.31.0 — the board, and the pointer that was never the one dangling
 

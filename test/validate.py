@@ -1432,6 +1432,25 @@ if os.path.isfile(_VERIF):
         fail("docs/superpowers/verification.md: no `REQ-NNN` row — an empty ledger and a "
              "missing one are the same thing to a reader, and only one of them means "
              "nothing has shipped")
+    # The Human column is found BY NAME in this file's own header. Scanning every cell
+    # was the first version and it is N1's lesson carried forward by its wrong half:
+    # that module concluded "the header names the candidate columns and the match happens
+    # inside them", not "never look at columns". Scanning all cells let a bare date in
+    # the Note column satisfy a row whose Human said "soon" — the single thing this guard
+    # exists to reject.
+    _vhdr = None
+    for _l in _vt.splitlines():
+        if _l.startswith("|") and "human" in _flatten(_l, lower=True):
+            _vhdr = [_flatten(_x, lower=True).strip() for _x in _l.split("|")[1:-1]]
+            break
+    if _vhdr is None or "human" not in _vhdr:
+        fail("docs/superpowers/verification.md: no header row naming a `Human` column — "
+             "the one column this file exists for cannot be located, and a guard that "
+             "cannot find its subject passes everything")
+        _hidx = None
+    else:
+        _hidx = _vhdr.index("human")
+
     _brief_reqs = set()
     for _bf in glob.glob(os.path.join(ROOT, "docs/superpowers/specs/*brief.md")):
         _brief_reqs |= set(re.findall(r"^\|\s*(REQ-\d+)\s*\|",
@@ -1446,8 +1465,11 @@ if os.path.isfile(_VERIF):
         # The Human column is the point of the file, so it is the one that is checked:
         # a date or the literal `never`. "soon" and "mostly" are how it stops being
         # answerable, and this is the only column a machine may not fill.
-        _human = [_x for _x in _cells if re.fullmatch(r"never|\d{4}-\d{2}-\d{2}", _x.lower())]
-        if not _human:
+        _human = ([_cells[_hidx - 1]] if _hidx is not None and len(_cells) >= _hidx else [])
+        _human = [_x for _x in _human if re.fullmatch(r"never|\d{4}-\d{2}-\d{2}", _x.lower())]
+        if _hidx is None:
+            pass                           # already failed above; do not report twice
+        elif not _human:
             fail(f"docs/superpowers/verification.md: {_rid} has no `Human` value that is "
                  "either a date or the literal `never` — prose in that column is how the "
                  "one question this file exists to answer stops being answerable")
