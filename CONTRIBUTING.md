@@ -364,7 +364,17 @@ every word of the growth in the binding map. Its shape prints beside the verdict
 **disclosure** — computed, no floor, no direction, never a target.
 *(guard: `learned.md — rules `)*
 
-**43. Every invariant above names the guard that enforces it, and that guard exists.**This list claims to be *what the validator enforces*; it was eight guards behind when
+**43. A guard's corpus is discovered, not hand-listed.** Three in `test/validate.py`
+held written lists, and all three had missed a shipped surface: the cold trigger named
+seven files where fourteen state the condition, the disclosure check named five where
+`README.md` also prints a worked verdict, and the claim registry excluded the Cursor
+rule and the command. Every miss was found by a reader or a sweep, never by the guard —
+**nobody notices a corpus that is too small, because everything inside it passes.**
+Exclusions are allowed and must each carry a reason in the code: a changelog narrates
+old formats, `docs/superpowers/specs/` are point-in-time records.
+*(guard: `the disclosure corpus is discovered`)*
+
+**44. Every invariant above names the guard that enforces it, and that guard exists.**This list claims to be *what the validator enforces*; it was eight guards behind when
 an audit measured it. A claim of enforcement is now checked like any other claim.
 *(guard: `whose message does not appear in`)* — and a cited literal must lie inside
 a **single** string in `test/validate.py`: the check reads that file as text, so a

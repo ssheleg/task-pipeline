@@ -608,6 +608,7 @@ visible where it happened:
 ```
 GATE 10 acceptance: PASS — 14/14 REQ verified
   carry-over: 0 unresolved · retro: 7 standing (was 9) · retired 3 · added 1
+  abstained: 1 (1 cannot-verify) · unlooked: 0
 ```
 
 Stage 0 reads those standing instructions **in full** on the next run — which is

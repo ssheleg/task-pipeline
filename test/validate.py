@@ -942,13 +942,24 @@ for _f in _COLD_SURFACES:
 # that rule pressures exactly one thing — claiming more. A run reaching `abstained: 0` is not
 # more careful, it stopped saying "I don't know". Refusals and wrong answers are communicating
 # vessels. gates.md -> Disclosures states the rule; this guard only holds the print.
-_DISCLOSURE_FILES = [
-    "plugins/task-pipeline/skills/task-pipeline/references/acceptance.md",
-    "plugins/task-pipeline/skills/task-pipeline/references/audit.md",
-    "plugins/task-pipeline/skills/task-pipeline/references/gates.md",
-    "plugins/task-pipeline/skills/task-pipeline/references/retrospective.md",
-    "plugins/task-pipeline/skills/task-pipeline/templates/carryover.md",
-]
+# Discovered, not listed — third corpus in this file to be widened by finding what a
+# hand-written list had missed, and the last one that was still hand-written. The
+# five-file version omitted README.md, which prints a worked GATE 10 verdict in its
+# own doctrine section. A surface that shows a verdict teaches its format.
+_DISCLOSURE_FILES = []
+for _root, _dirs, _fs in os.walk(ROOT):
+    _dirs[:] = [_d for _d in _dirs if _d not in (".git", "node_modules", "graphify-out")]
+    for _f in _fs:
+        if not _f.endswith((".md", ".mdc")):
+            continue
+        _rel = os.path.relpath(os.path.join(_root, _f), ROOT)
+        if _rel == "CHANGELOG.md" or _rel.startswith("docs/superpowers/"):
+            continue        # a changelog narrates old formats; superpowers/ is a record
+        _c = open(os.path.join(_root, _f), encoding="utf-8").read()
+        if any(re.search(r"^GATE\s+\d+", _b, re.M)
+               for _b in re.findall(r"```[^\n]*\n(.*?)```", _c, re.S)):
+            _DISCLOSURE_FILES.append(_rel)
+_DISCLOSURE_FILES.sort()
 for _f in _DISCLOSURE_FILES:
     _fp = os.path.join(ROOT, _f)
     if not os.path.isfile(_fp):

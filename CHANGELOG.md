@@ -62,7 +62,15 @@ including `README.md`, the Cursor rule, `gates.md` and `learned.md` itself. A na
 of the old wording is exempt by the repository's existing convention: a double-quoted
 span is a citation, and rule 21's incident is left as it happened.
 
-Guards: 144 → **150**.
+**The class turned out to be the module.** Three guards in this file held
+hand-written corpora; all three had missed a shipped surface, and each miss was found
+by a reader or by a sweep rather than by the guard. All three are now **discovered**:
+the cold trigger (7 listed → 14 found), the disclosure verdicts (5 listed → README's
+worked `GATE 10` block found), and the claim registry (widened in v1.29.0 after the
+same shape). *Nobody notices a corpus that is too small, because everything inside it
+passes.*
+
+Guards: 144 → **151**.
 
 ## v1.29.0 — a sixth axis, and three summaries that each read as complete
 
