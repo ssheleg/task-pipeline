@@ -102,7 +102,14 @@ Two more from the same round: emptying the rules table wholesale made the list f
 skipped the entire check (`rules 0`, PASS), and `docs/superpowers/plans/` was missing
 from the frozen-record exclusions its two siblings carry.
 
-Guards: 144 → **155**.
+**CI caught what the local gate could not see.** Renaming the skip's message left the
+property check grepping for the old string — and that step lives only in the workflow,
+because it asserts something *is printed* rather than watching a guard reject. The local
+runner had no way to run it, so `npm run test:all` was green while CI failed on a string
+this same change had renamed. `test/negatives.py` now runs property checks too: a step
+that exists only in CI is a step the author's gate is blind to.
+
+Guards: 144 → **155**, plus 1 property check now covered locally.
 
 ## v1.29.0 — a sixth axis, and three summaries that each read as complete
 

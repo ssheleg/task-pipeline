@@ -24,6 +24,7 @@ import sys
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 WORKFLOW = os.path.join(ROOT, ".github/workflows/validate.yml")
 MARKER = "Negative self-test"
+PROP_MARKER = "Property check"
 # A format change that silently matched nothing would report "0 failures" and look
 # like success. Refuse to be that quiet.
 #
@@ -119,8 +120,16 @@ def main(argv):
     # A leftover copy from an interrupted run would make the next one lie.
     sweep([copy_dir_of(s) for _, s in tests])
 
+    # Property checks assert that something IS printed, so the validator passes inside
+    # them and they cannot join the suite above. They still have to run somewhere the
+    # author can see: a step that lives only in CI is a step the local gate is blind to,
+    # and that is exactly how this runner shipped green while CI failed on a string this
+    # very file had renamed.
+    props = [(n, s) for n, s in parse_steps(WORKFLOW) if PROP_MARKER in n]
+
     failed, broken = [], []
-    print(f"running {len(tests)} negative self-tests\n")
+    print(f"running {len(tests)} negative self-tests"
+          + (f" + {len(props)} property checks\n" if props else "\n"))
     for name, script in tests:
         cdir = copy_dir_of(script)
         sweep([cdir])
@@ -141,6 +150,18 @@ def main(argv):
         print(f"  {status:<7}{label(name)}")
         if bucket is not None:
             bucket.append((label(name), r.stdout[-500:], r.stderr[-500:]))
+        sweep([cdir])
+
+    for name, script in props:
+        cdir = copy_dir_of(script)
+        sweep([cdir])
+        r = subprocess.run(["bash", "-c", script], cwd=ROOT, capture_output=True, text=True)
+        ok = r.returncode == 0 and "OK:" in r.stdout
+        print(f"  {'PASS' if ok else 'FAIL':<7}"
+              + name.replace(PROP_MARKER, "").strip().strip("()"))
+        if not ok:
+            failed.append((name.replace(PROP_MARKER, "").strip().strip("()"),
+                           r.stdout[-500:], r.stderr[-500:]))
         sweep([cdir])
 
     print()
