@@ -112,7 +112,14 @@ rounds went into the doctrine, the guard, the board and three consuming surfaces
 anyone read the file the value came from. It names three unsettled values now, its
 example carries a real id, and the guard checks the template beside the live ledgers.
 
-Guards: 156 → **173**, property checks 1 → 4.
+**The guard written to close a false-success class had the class.** It verified that a
+trigger word appeared *somewhere on the page* rather than that it was presented as an
+enabled trigger — so prose reading *"those are the only two triggers"* would pass on the
+strength of the third word appearing in a later paragraph. Scoped to the enumerating
+paragraph now, and what it still cannot decide is written into the code rather than
+implied by its silence.
+
+Guards: 156 → **175**, property checks 1 → 4.
 
 ## v1.30.0 — the cap that would have measured the wrong axis
 

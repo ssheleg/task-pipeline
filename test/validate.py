@@ -564,6 +564,9 @@ def _flatten(text, lower=False):
     return _f.lower() if lower else _f
 
 
+# This file reads itself in three places; once is enough.
+_OWN_SRC = open(os.path.join(ROOT, "test", "validate.py"), encoding="utf-8").read()
+
 _LIVING_TEXT = {}
 for _living in _LIVING:
     _lp = os.path.join(ROOT, _living)
@@ -1363,11 +1366,18 @@ for _rel in _TBL_FILES:
         # ...and "separate tables" is a real shape, so it is actually tested for: a new
         # table opens with a header whose NEXT line is a `|---|` delimiter. Without this
         # the guard fires on two valid adjacent tables and its own comment would be false.
-        _opens_new = (_i + 3 < len(_ls)
-                      and re.match(r"^\|[\s:|-]+\|\s*$", _ls[_i + 3] or ""))
-        if (_ls[_i].startswith("|") and not _ls[_i + 1].strip()
-                and _ls[_i + 2].startswith("|") and not _opens_new):
-            fail(f"{_rel}:{_i + 2}: a blank line splits a table — every row below it "
+        # Any number of blank lines, not exactly one: GFM ends a table at the FIRST
+        # blank line whatever follows, so two blanks produce the identical defect and
+        # the one-blank pattern could not see it.
+        _j = _i + 1
+        while _j < len(_ls) and not _ls[_j].strip():
+            _j += 1
+        _gap = _j - (_i + 1)
+        _opens_new = (_j + 1 < len(_ls)
+                      and re.match(r"^\|[\s:|-]+\|\s*$", _ls[_j + 1] or ""))
+        if (_ls[_i].startswith("|") and _gap >= 1
+                and _j < len(_ls) and _ls[_j].startswith("|") and not _opens_new):
+            fail(f"{_rel}:{_j}: a blank line splits a table — every row below it "
                  "loses the header and renders as pipe-delimited text, which looks "
                  "like a table only in the editor")
 
@@ -1377,8 +1387,7 @@ for _rel in _TBL_FILES:
 # file whose code checked three. Every instance was found by a reader. A class seen
 # twice becomes a script (audit.md), so the enumeration is now computed FROM the regex
 # and required to appear wherever the doctrine enumerates it.
-_UNRES_SRC = re.search(r'_UNRES_RE = re\.compile\(r"\^\(\?:([a-z|]+)\)', 
-                       open(os.path.join(ROOT, "test", "validate.py"), encoding="utf-8").read())
+_UNRES_SRC = re.search(r'_UNRES_RE = re\.compile\(r"\^\(\?:([a-z|]+)\)', _OWN_SRC)
 if _UNRES_SRC:
     _TRIGGERS = set(_UNRES_SRC.group(1).split("|"))
     for _tf in ("plugins/task-pipeline/skills/task-pipeline/references/backlog.md",
@@ -1386,12 +1395,21 @@ if _UNRES_SRC:
         _tp = os.path.join(ROOT, _tf)
         if not os.path.isfile(_tp):
             continue
-        _tt = _flatten(open(_tp, encoding="utf-8").read(), lower=True)
-        if "unresolved" not in _tt and "resolves it" not in _tt:
+        # Scoped to the paragraph that enumerates them. Checking the whole page was the
+        # first version and it is the very class this guard exists to close: a passage
+        # saying "those are the only two triggers" would pass on the strength of the
+        # third word appearing somewhere else entirely.
+        #
+        # What it still does not cover, said out loud: prose that names all three inside
+        # one paragraph while denying one of them. No check decides that; a reader does.
+        _paras = [_flatten(_x, lower=True) for _x in _paragraphs(open(_tp, encoding="utf-8").read())]
+        _enum = [_x for _x in _paras if "trigger" in _x and any(_t in _x for _t in _TRIGGERS)]
+        if not _enum:
             continue                       # this file does not enumerate the triggers
+        _tt = max(_enum, key=len)
         _absent = sorted(_t for _t in _TRIGGERS if _t not in _tt)
         if _absent:
-            fail(f"{_tf}: the resolution triggers this file enumerates omit "
+            fail(f"{_tf}: the paragraph enumerating resolution triggers omits "
                  + ", ".join(repr(_a) for _a in _absent)
                  + " — the check in test/validate.py accepts them, and a doctrine that "
                    "names fewer than the code accepts is how three of them shipped "
