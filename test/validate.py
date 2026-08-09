@@ -1244,7 +1244,14 @@ if os.path.isfile(_BOARD):
     _LEDGER_ID = {"#", "id", "row"}
     _LEDGER_STATUS = {"home", "where it lives now", "resolution", "status", "state"}
     _UNRES_RE = re.compile(r"^(?:open|unresolved|backlog)\b", re.I)
-    for _lf in sorted(glob.glob(os.path.join(ROOT, "docs/superpowers/specs/*carryover.md"))):
+    _LEDGERS = sorted(glob.glob(os.path.join(ROOT, "docs/superpowers/specs/*carryover.md")))
+    # ...and the SEEDED template, whose worked example is the first ledger every host
+    # project ever sees. It showed a bare `backlog` home as a settled outcome for as
+    # long as this seam existed, which is where the value nobody owned came from.
+    _ctmpl = os.path.join(os.path.dirname(refdir), "templates", "carryover.md")
+    if os.path.isfile(_ctmpl):
+        _LEDGERS.append(_ctmpl)
+    for _lf in _LEDGERS:
         _lt = open(_lf, encoding="utf-8").read()
         _rel = os.path.relpath(_lf, ROOT)
         _hdr = None
@@ -1303,7 +1310,7 @@ if os.path.isfile(_BOARD):
         for _l in _btext.splitlines():
             if not re.match(r"^\|\s*B-\d+\s*\|", _l):
                 continue
-            _cl = [re.sub(r"[*_`]", "", _x).strip() for _x in _l.split("|")[1:-1]]
+            _cl = [_flatten(_x).strip() for _x in _l.split("|")[1:-1]]
             if len(_cl) < 8:
                 fail(f"{_bfr}: row {_cl[0]} has {len(_cl)} cells where the board's shape "
                      "needs at least 8 — skipping it silently is how a malformed row "

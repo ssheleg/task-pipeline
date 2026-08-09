@@ -3311,3 +3311,23 @@ jobs:
           else
             echo "OK: validator correctly FAILs — a guard with no source says so"
           fi
+
+      - name: Negative self-test (the seeded ledger template showing `backlog` as settled)
+        run: |
+          set -eu
+          rm -rf /tmp/cot-copy && cp -R . /tmp/cot-copy
+          python3 - <<'EOF'
+          p = "/tmp/cot-copy/plugins/task-pipeline/skills/task-pipeline/templates/carryover.md"
+          t = open(p, encoding="utf-8").read()
+          needle = "| 2 | 5 Review | `export.ts` lacks a size guard | minor, non-blocking | — | `B-014` |"
+          assert needle in t, "PLANT DID NOT LAND: anchor absent before the edit"
+          open(p, "w", encoding="utf-8").write(t.replace(
+              needle,
+              "| 2 | 5 Review | `export.ts` lacks a size guard | minor, non-blocking | — | backlog |", 1))
+          EOF
+          if python3 /tmp/cot-copy/test/validate.py; then
+            echo "ERROR: the file seeded into every host project taught that a bare `backlog` home is a settled outcome"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the worked example carries a real board id"
+          fi

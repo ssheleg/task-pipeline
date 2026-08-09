@@ -105,7 +105,14 @@ the enumeration is now **extracted from the regex** and required to appear where
 doctrine lists it, in both directions. A guard that loses its own source fails rather
 than passing.
 
-Guards: 156 → **172**, property checks 1 → 4.
+**And the seam's origin was the template nobody opened.**
+`templates/carryover.md` — the first ledger every host project ever sees — showed a bare
+`backlog` home as a *settled* outcome, with a worked example carrying no board id. Six
+rounds went into the doctrine, the guard, the board and three consuming surfaces before
+anyone read the file the value came from. It names three unsettled values now, its
+example carries a real id, and the guard checks the template beside the live ledgers.
+
+Guards: 156 → **173**, property checks 1 → 4.
 
 ## v1.30.0 — the cap that would have measured the wrong axis
 
