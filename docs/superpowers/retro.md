@@ -36,6 +36,65 @@ row goes — the cap is not negotiable, ranking is.
 
 ## Recent log — entries from the last five run stamps (newest first)
 
+### 2026-08-09 · `audit-followup`/M5 · three summaries of one list, each complete on its own
+
+**Symptom.** The module was written as *"add a sixth rotation axis"*. Measuring before
+building — the discipline that has now changed four modules of six — found that the five
+that existed were already summarised **three different ways**: `audit.md` defined five,
+the Cursor rule named four, README named three. Nothing was wrong in any single file.
+A list of three orthogonal things is a convincing list of three orthogonal things, so
+each summary read as complete, and no reader had two of them open at once.
+
+Then the PR that fixed this **committed the same defect inside itself**: it retitled
+`gates.md` to *"the three axes"*, propagated that to README, `SKILL.md` and
+`CONTRIBUTING.md` — and left the Cursor rule's own Gates section saying *"two axes"*
+with no Axis C at all, fifty lines below an edit the same PR had made to that file.
+Found by the reader, not by me, and invisible to every check: the claim registry's
+corpus held neither the Cursor rule nor the command file.
+
+**Surfaced at:** stage 7, four rounds, eight findings, **none of them from my probes**.
+
+**Owned by:** stage 5 for the Cursor-rule miss (the file was open); stage 3 for the
+spec, which promised a guard that was never built and a threshold the code did not use.
+
+**Root cause.** A guard's corpus is a claim about where the rule applies, and mine was
+narrower than the shipped surfaces. The registry was written when `references/` was the
+whole world; the Cursor rule and the command are shipped doctrine that restate counts
+like anything else, and they were simply never added. Nobody notices a corpus that is
+too small, because everything inside it passes.
+
+The first version of the new guard also measured the wrong unit — scoped to the file,
+it accused `stages.md` of enumerating three axes whose three hits were 595 lines apart
+and meant three different things. Vocabulary is not enumeration. That is the third time
+in three releases that a guard in this file was defeated by **how the corpus stores a
+sentence** rather than by what it says.
+
+**Fix, by grade.**
+1. *(mechanical)* The registry corpus now includes the Cursor rule and the command —
+   proven live rather than assumed, because the `gates.md` axis count moved **6 → 7**
+   the moment they were added. The enumeration guard is paragraph-scoped and derives
+   its keys from `audit.md` at check time. `_flatten()` and `_paragraphs()` replace the
+   three and four hand-rolled copies of the two idioms that keep defeating these guards.
+   Eight new self-tests, including one that plants in `audit.md` itself and one that
+   removes the guard's own source of truth.
+2. *(mechanical, and the round-three finding worth keeping)* A **dormant** claim class
+   is not a proven one. `rotation axes` matched nothing in the corpus by design, so its
+   fail branch had never executed — dormant is green here, which is exactly why a
+   dormant class still needs its plant.
+3. *(none above that.)* R-005 fired and the reader found all eight.
+
+**The check that catches it next time:** for the corpus, the two files are in it. For
+the unit, the helper's docstring says what the choice costs. For a summary that lists
+most of a list — the paragraph guard, which is the first mechanical answer this
+repository has had to that shape.
+
+**Re-derivation, used on the review itself.** The reader estimated the redundant-read
+class at "3+"; an instrumented run counting `open()` rather than a grep of the source
+returned **25 reads of `audit.md` and 668 `.md` opens**. Eight times low — and the axis
+this module shipped is exactly the instruction to print that pair instead of asserting
+agreement. Carry-over row 12 carries the number.
+
+
 ### 2026-08-09 · `audit-followup`/M4 · a section that named eight and disposed of seven
 
 **Symptom.** The module counted abstentions for the first time. Its doctrine section opens
@@ -469,6 +528,7 @@ One line per run, appended at stage 10. This is what makes "five runs" countable
 
 | Date | Topic | Commit | Verdict | Retro |
 |---|---|---|---|---|
+| 2026-08-09 | `audit-followup` / M5 `re-derive-axis` | `a3dd771` | 1 REQ · a sixth rotation axis, and the enumeration of the five that had already drifted · **four review rounds, 8 findings, all mine, none from my probes** · carry-over 12 rows, 7 open, 0 unresolved | 1 entry · 6 standing · retired 0 · added 0 · R-001, R-005 fired · guards 136 → 144 |
 | 2026-08-09 | `audit-followup` / M4 `abstention-disclosure` | `1426bdf` | 1 REQ · a second kind of counted set, non-monotone by construction · **one review round, 5 findings, all mine** · carry-over 11 rows, 7 open, 0 unresolved | 1 entry · 6 standing · retired 0 · added 0 · R-001, R-003, R-005 all fired · guards 134 → 136 |
 | 2026-08-09 | `audit-followup` / M3 `retro-continuity` | `a079192` | 1 REQ + ledger row 1 corrected · **one review round, 3 findings, TWO of them Important — the first of this programme, both in the guard this module ships** · carry-over 10 rows, 6 open, 0 unresolved | 1 entry · 6 standing · retired 0 · added 0 · R-001, R-003, R-005, R-006 all fired · guards 132 → 133 |
 | 2026-08-08 | `audit-followup` / M7 `rendered-surface-check` | `b524680` | 1 REQ · a companion wired into stages 5–6 and 8 · **one review round, 4 findings, all mine, none found by my own probes** · carry-over 9 rows, 6 open, 0 unresolved | 1 entry · 6 standing · retired 0 · added 0 · R-005 and R-006 both fired · guards 130 → 131 |
