@@ -20,6 +20,7 @@ to be enforced and is not is the same failure as a gate that prints `FAIL` and e
 - The two that are not in the table, and why
 - The one instruction that would have prevented the most
 - Where these bind in the pipeline
+- What leaves this file, and why there is no cap
 
 ## The table — trigger · check · exit criterion
 
@@ -209,3 +210,61 @@ project buys go in its retro ([`retrospective.md`](retrospective.md) →
 lesson there that would be true in any repository belongs here instead, as an issue
 upstream. A local file that accumulates universal rules is a fork of this one that
 nobody named.
+
+---
+
+## What leaves this file, and why there is no cap
+
+`docs/superpowers/retro.md` caps its standing instructions at **ten** and retires them
+on three triggers. Somebody proposes the same cap here about once a programme. It is
+the wrong instrument, and the reason is worth more than the rule.
+
+**A cap belongs to a file you must finish reading.** The retro's standing instructions
+are read *in full* at stage 0 of every run — bounded by construction, or the last one
+is never reached. This file is never read in full: it is entered by citation from the
+stages, and *Where these bind in the pipeline* is that entrance. **A file you enter
+through an index needs its index to be right, not its length to be short.**
+
+And the cap would have measured the axis that is not moving. Re-derived across releases
+rather than recalled — **measured at each tag**, so these rows are history and cannot
+go stale; the live shape is printed by `npm test` beside its verdict, and this file
+states no number about itself:
+
+| | v1.14.1 | v1.20.0 | v1.23.0 | v1.29.0 |
+|---|---|---|---|---|
+| rules in the table | 15 | 18 | 21 | **21** |
+| words in the file | 2165 | 2987 | 3696 | **3919** |
+
+Rules have been flat for four releases while the file grew — and every word of that
+growth is in the binding map, the section that makes a rule *reachable*. Cutting there
+shortens the index. The largest section by far is the incidents, and those are the only
+record of those events anywhere in this repository — checked by taking each incident's
+distinctive tokens against the whole retro corpus, which returned nothing. They are not
+a compression target; they are the thing the rules are made of.
+
+**Two triggers retire a rule, and neither is a count:**
+
+1. **The conditions cannot occur.** The tool, the layer, or the failure mode it names
+   is gone from every project the skill runs on — not "we have not hit it lately".
+2. **It is subsumed.** Another rule covers it entirely. This is a **merge**, not a
+   delete: the absorbing rule names the absorbed one, and every binding-map row that
+   pointed at the old number is repointed in the same change, or the map now sends a
+   stage to a rule that is not there.
+
+Never *"it became a check"* — that trigger is right for a standing instruction, whose
+whole purpose is to be read until the machine takes over. Here the rule is the reason
+the check exists, and a check whose reason has been deleted is the next thing somebody
+removes as noise.
+
+**Every deletion is logged as one line**, in the same change, the same discipline as
+the retro's prune: the rule's number, its name, which trigger fired, and the commit.
+A rule that vanishes silently takes its incident with it, and the next run re-learns it
+at full price. Numbers are never reused and never closed up — a gap in the table is the
+evidence that something left, and the log below says what.
+
+### Retired
+
+*None yet.* Stated rather than omitted: an empty log and a missing log look identical
+from outside, and only one of them means nothing has been retired.
+
+---

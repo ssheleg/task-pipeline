@@ -1,5 +1,49 @@
 # Changelog
 
+## v1.30.0 — the cap that would have measured the wrong axis
+
+The audit's last finding was that `references/learned.md` has no retirement rule while
+`retro.md` caps its standing instructions at ten. Four measurements, each with a
+differently-shaped command — the rotation axis shipped one release ago, turned on the
+backlog that proposed it:
+
+| The belief | The command | Result |
+|---|---|---|
+| rules accumulate | table rows per tag: 15 → 18 → 21 → 21 | **flat for four releases** |
+| growth *is* rules | words per section, v1.23.0 → HEAD | **+223, every word in the binding map** |
+| the long incidents duplicate the retro | each incident's distinctive tokens against the whole retro corpus | **zero hits** — they are other projects' events, held nowhere else here |
+
+A cap of N would have squeezed the axis that had not moved in four releases. A word
+budget would have cut the incidents, which are the only record of those events anywhere
+in this repository. **The finding was right that something was missing and wrong about
+what.**
+
+**Why the retro is capped and this file is not**, now written down where the proposal
+keeps arriving: a cap belongs to a file you must *finish reading*. The retro's standing
+instructions are read in full at stage 0 — bounded by construction, or the last one is
+never reached. `learned.md` is entered by citation from twenty-three surfaces and its
+binding map is that entrance. **A file you enter through an index needs its index to be
+right, not its length to be short.**
+
+**Two triggers retire a rule, and neither is a count:** the conditions can no longer
+occur in any project the skill runs on, or the rule is **subsumed** — a merge, where the
+absorbing rule names the absorbed one and every binding-map row is repointed in the same
+change. Explicitly *not* "it became a check": that trigger is right for a standing
+instruction, whose job is to be read until the machine takes over, but here the rule is
+the **reason** the check exists, and a check whose reason was deleted is the next thing
+somebody removes as noise.
+
+Numbers are never reused and never closed up, so a departure shows as a **gap**, and a
+gap the `### Retired` log does not name now fails the build. The log exists while empty
+and says so — an absent log and an empty one are indistinguishable from outside, and
+only one of them means nothing has been retired.
+
+And the file's **shape** is now printed beside the validator's verdict — rules,
+incidents, incident words, binding rows — as a disclosure: computed, no floor, no
+direction, **never a target**. Growth becomes visible without becoming a lever.
+
+Guards: 144 → **146**.
+
 ## v1.29.0 — a sixth axis, and three summaries that each read as complete
 
 **Re-derivation** joins the rotation axes in `references/audit.md`: take a number the

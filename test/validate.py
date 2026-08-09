@@ -1021,6 +1021,50 @@ if os.path.isfile(_rd):
                  "criterion is a printed pair must show the pair, or it is teaching "
                  "'assert agreement', which is the failure it names")
 
+# learned.md's shape, printed rather than capped. The retro caps its standing
+# instructions because they are read IN FULL every run; this file is entered by
+# citation and its index is what must be right. Measured before writing that down:
+# rules 15 -> 18 -> 21 -> 21 across four releases while the file grew, and every word
+# of the growth was in the binding map — a cap would have squeezed the axis that had
+# not moved, and a word budget would have hit the incidents, which are the only record
+# of those events anywhere here.
+#
+# So it is a DISCLOSURE (gates.md -> Disclosures): no floor, no direction, never a
+# target. It exists so growth is visible rather than a surprise, and so no document
+# has to restate a number about this file.
+#
+# A rule leaves on two triggers only, and a departure shows as a GAP in the numbering:
+# numbers are never reused and never closed up. A gap the Retired log does not name is
+# a rule that vanished silently, taking its incident with it.
+_LSHAPE = ""
+_lp = os.path.join(refdir, "learned.md")
+if os.path.isfile(_lp):
+    _lt = _LIVING_TEXT.get("plugins/task-pipeline/skills/task-pipeline/references/learned.md") \
+        or open(_lp, encoding="utf-8").read()
+    _nums = [int(_n) for _n in re.findall(r"^\|\s*(\d+)\s*\|\s*\*\*", _lt, re.M)]
+    _inc = re.search(r"^## The incidents.*?(?=^## )", _lt, re.M | re.S)
+    _incs = re.findall(r"^\*\*(\d+)\s*·", _inc.group(0), re.M) if _inc else []
+    _incw = len(_inc.group(0).split()) if _inc else 0
+    _bind = re.search(r"^## Where these bind.*?(?=^---|\Z)", _lt, re.M | re.S)
+    _bindrows = len(re.findall(r"^\|", _bind.group(0), re.M)) - 2 if _bind else 0
+    _ret = re.search(r"^### Retired\s*(.*?)(?=^##|\Z)", _lt, re.M | re.S)
+    if _ret is None:
+        fail("references/learned.md: no `### Retired` log — a rule can only leave on a "
+             "logged line, and an absent log is indistinguishable from an empty one "
+             "(the file's own *What leaves this file* section)")
+    elif _nums:
+        _gaps = [_n for _n in range(1, max(_nums) + 1) if _n not in _nums]
+        _logged = set(re.findall(r"\b(\d+)\b", _ret.group(1)))
+        _silent = [_g for _g in _gaps if str(_g) not in _logged]
+        if _silent:
+            fail("references/learned.md: rule number(s) "
+                 + ", ".join(str(_s) for _s in _silent)
+                 + " are missing from the table and named in no line of `### Retired` — "
+                 "a rule that vanishes silently takes its incident with it, and the "
+                 "next run re-learns it at full price")
+    _LSHAPE = (f"learned.md — rules {len(_nums)} · incidents {len(_incs)} · "
+               f"incident words {_incw} · binding rows {_bindrows}")
+
 # references/artifacts.md maps stage -> what it WRITES. The reverse direction — what
 # each stage READS and from where — is the one an agent actually needs at runtime,
 # and it was absent for nine releases: learned.md rule 2 (compute the mapping in both
@@ -2605,3 +2649,6 @@ if errors:
 print("PASS: task-pipeline structure valid")
 print("  claim registry — " + " · ".join(_CLAIM_STATES)
       + (" · UNREAD number-words: " + ", ".join(sorted(_UNPARSED_WORDS)) if _UNPARSED_WORDS else ""))
+if _LSHAPE:
+    # A disclosure, not a ratchet: no floor, no direction, and never a target.
+    print("  " + _LSHAPE + "  (disclosure — no floor, no target)")
