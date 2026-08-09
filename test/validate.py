@@ -525,11 +525,29 @@ def _is_quoted(text, match):
 
 # Each living document is read ONCE, not once per class. Nested class-outer/doc-inner
 # opened ~36 files six times over; the states logic below is unchanged.
+def _flatten(text, lower=False):
+    """Collapse the corpus's own formatting before matching: ~80-column wrapping and
+    emphasis INSIDE a phrase have now defeated three guards in this file, each of
+    which hand-rolled its own version of this. The class repeated three times, so it
+    became a mechanism — the same rule audit.md applies to findings."""
+    _f = re.sub(r"\s+", " ", re.sub(r"[*_`]+", "", text))
+    return _f.lower() if lower else _f
+
+
 _LIVING_TEXT = {}
 for _living in _LIVING:
     _lp = os.path.join(ROOT, _living)
     if os.path.isfile(_lp):
         _LIVING_TEXT[_living] = open(_lp, encoding="utf-8").read()
+# The Cursor rule and the command are shipped doctrine and restate counts like any
+# other surface, but neither was in this corpus — so the review that found the Cursor
+# rule still claiming "two axes" found it by reading, not by a check. Added here
+# rather than to _LIVING, which other guards use for a different question.
+for _extra in ["cursor/rules/task-pipeline.mdc",
+               "plugins/task-pipeline/commands/task-pipeline.md"]:
+    _xp = os.path.join(ROOT, _extra)
+    if os.path.isfile(_xp) and _extra not in _LIVING_TEXT:
+        _LIVING_TEXT[_extra] = open(_xp, encoding="utf-8").read()
 
 _CLAIM_STATES = []
 for _label, _pat, _compute, _incident in _CLAIM_REGISTRY:
@@ -867,7 +885,7 @@ for _f in _COLD_SURFACES:
         # silently skipped the one file that DEFINES the trigger. Third time in this
         # programme that a predicate was defeated by this corpus's formatting rather
         # than by its content (twice by the ~80-column wrap, once by bold).
-        _flat = re.sub(r"\*+", "", re.sub(r"\s+", " ", _para))
+        _flat = _flatten(_para)
         if not _COLD_RE.search(_flat):
             continue
         if not re.search(r"sixty\s+days|60\s+days", _flat, re.I):
@@ -900,7 +918,7 @@ for _f in _DISCLOSURE_FILES:
     for _blk in re.findall(r"```[^\n]*\n(.*?)```", _ft, re.S):
         if not re.search(r"^GATE\s+\d+", _blk, re.M):
             continue
-        _flat = re.sub(r"\*+", "", re.sub(r"\s+", " ", _blk))
+        _flat = _flatten(_blk)
         _missing = [_d for _d in ("abstained", "unlooked") if _d not in _flat]
         if _missing:
             _line = _ft[:_ft.find(_blk)].count("\n") + 1
@@ -942,9 +960,9 @@ else:
         # a citation to gates.md. An enumeration is contiguous; a vocabulary is not.
         # Emphasis lives INSIDE these phrases ("invariants *across* deliverables") and
         # ~80-column wrapping splits them; both defeated earlier guards in this file.
-        _raw = open(_fp, encoding="utf-8").read()
+        _raw = _LIVING_TEXT.get(_f) or open(_fp, encoding="utf-8").read()
         for _para in re.split(r"\n\s*\n", _raw):
-            _flat = re.sub(r"\s+", " ", re.sub(r"[*_`]+", "", _para)).lower()
+            _flat = _flatten(_para, lower=True)
             _named = [_k for _k in _AXIS_KEYS if _k in _flat]
             if len(_named) < 3:
                 continue                 # not enumerating; a passing mention is not a list
@@ -956,6 +974,34 @@ else:
                      f"{', '.join(repr(_m) for _m in _missing)}. Either name every axis "
                      "audit.md defines, or stop enumerating and point at audit.md; a "
                      "summary that lists most of a list reads as complete.")
+
+# The re-derivation axis demands a PAIR printed rather than agreement asserted. A
+# doctrine that only asserts that cannot teach it, so the axis carries a worked block
+# and this guard holds the block to the axis's own contract: both numbers and the
+# verdict, visible. The lead is located by name and its absence FAILS rather than
+# skips — a guard whose subject was renamed away must say so.
+_rd = os.path.join(refdir, "audit.md")
+if os.path.isfile(_rd):
+    _rdt = open(_rd, encoding="utf-8").read()
+    _m = re.search(r"^\d+\.\s+\*\*Re-derivation\*\*", _rdt, re.M)
+    if not _m:
+        fail("references/audit.md: the Re-derivation axis is gone or renamed — the guard "
+             "holding its worked example to its own 'print the pair' contract has no "
+             "subject, and a guard with no subject passes everything")
+    else:
+        _body = _rdt[_m.start():]
+        _nxt = re.search(r"^(?:\d+\.\s+\*\*|\*\*The crossover)", _body[3:], re.M)
+        if _nxt:
+            _body = _body[:_nxt.start() + 3]
+        _blocks = re.findall(r"```[^\n]*\n(.*?)```", _body, re.S)
+        _ok = [_b for _b in _blocks
+               if all(_lbl in _flatten(_b, lower=True)
+                      for _lbl in ("claimed:", "re-derived:", "verdict:"))]
+        if not _ok:
+            fail("references/audit.md: the Re-derivation axis has no worked block printing "
+                 "`claimed:`, `re-derived:` and `verdict:` — the one axis whose exit "
+                 "criterion is a printed pair must show the pair, or it is teaching "
+                 "'assert agreement', which is the failure it names")
 
 # references/artifacts.md maps stage -> what it WRITES. The reverse direction — what
 # each stage READS and from where — is the one an agent actually needs at runtime,

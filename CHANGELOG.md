@@ -39,7 +39,15 @@ class for the rotation axes. The two are separated by the qualifier, because *ax
 polysemous in this corpus and a guard that conflates them reports drift that is not
 there.
 
-Guards: 136 → **140**.
+**Review round.** Four findings, none from the probes. The guard re-read thirty
+surfaces already cached; the flattening idiom had been hand-rolled three times, each
+commenting on the earlier ones, and is now `_flatten()`; the spec claimed a guard that
+did not exist. And the Cursor rule's **own** Gates section still said *"two axes"* with
+no Axis C — introduced by this PR, fifty lines below an edit it made. Nothing could see
+it: the claim registry's corpus held neither the Cursor rule nor the command file.
+Both are in it now, and the count moved 6 → 7 the moment they were.
+
+Guards: 136 → **143**.
 
 ## v1.28.0
 

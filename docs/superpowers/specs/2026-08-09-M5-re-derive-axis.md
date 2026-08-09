@@ -29,8 +29,8 @@ So M5 does two things, not one:
 | # | Requirement | Verified by |
 |---|---|---|
 | R1 | `audit.md` gains a sixth axis, **Re-derivation**: a number the audit already produced is re-produced by a command of a *different shape*, and the exit criterion is **the pair printed**, never agreement asserted | the axis exists in the numbered list; `npm test` green |
-| R2 | The axis carries a worked example that shows **two differently-shaped commands and both outputs** — a doctrine that only asserts re-derivation cannot teach it | guard: the axis body must contain a fenced block with two distinct commands |
-| R3 | Every surface that enumerates the axes enumerates **all** of them | guard, both directions: a surface naming ≥2 axis keywords must name all of them; keywords derived from `audit.md` at check time, never hand-listed |
+| R2 | The axis carries a worked example that shows **two differently-shaped commands and both outputs** — a doctrine that only asserts re-derivation cannot teach it | guard: the axis body must hold a fenced block printing `claimed:`, `re-derived:` and `verdict:`; a rename of the axis **fails** rather than skips |
+| R3 | Every surface that enumerates the axes enumerates **all** of them | guard: a **paragraph** naming ≥3 axis keywords must name all of them — three, not two, because a lower bar false-positived on `stages.md`; keywords derived from `audit.md` at check time, never hand-listed |
 | R4 | The axis count is registered as a claim class, so no document can restate a stale one | claim registry entry, computed from `audit.md` |
 | R5 | Each new guard is proven against a planted defect, and one of the plants lands in `audit.md` itself — the file that *defines* the axes | `npm run test:negatives` |
 
@@ -60,3 +60,23 @@ value is that it can come back disagreeing.
   deleting a restatement is how this repository has fixed every count it got wrong.
   The Cursor rule *does* get all six, because it is self-contained by contract and
   cannot point anywhere.
+
+## Review round (stage 7)
+
+Four findings, none of them from my own probes:
+
+1. The new guard re-read ~30 surfaces already cached in `_LIVING_TEXT` — the exact
+   redundant-I/O class that cache's own comment records fixing.
+2. **The Cursor rule's own Gates section still said "two axes" and had no Axis C** — in
+   a PR that retitled `gates.md` and edited that same file fifty lines above. It was
+   invisible to every check because the claim registry's corpus did not include the
+   Cursor rule or the command; both are now in it, and the count moved 6 → 7 the moment
+   they were, which is how the widening was proven live rather than assumed.
+3. The whitespace/emphasis flattening idiom had been hand-rolled three times, each
+   occurrence commenting on the earlier ones. A class that repeats is a mechanism:
+   `_flatten()`.
+4. This spec claimed a guard that did not exist (R2) and a threshold the code did not
+   use (R3). Both are now true: R2's guard is implemented and probed, R3 says three.
+
+Guards: 140 → **143**.
+

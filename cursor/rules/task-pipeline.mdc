@@ -457,7 +457,7 @@ you *read*; the matrix names the documents you *owe*. The document nobody read i
 exactly the document nobody updated. At stage 9, walk the matrix for every change
 type the run produced, then run the documentation gate and print its ratchet counts.
 
-## Gates: two axes, and how to build one that cannot lie
+## Gates: three axes, and how to build one that cannot lie
 
 **Axis A — the stage gate type.** `auto` = verify the check yourself and stop on
 fail; `manual` = wait for an explicit operator go. An auto gate never substitutes
@@ -468,6 +468,17 @@ rather than starting at the top: doctrine line → review question at a named ga
 script check (promote here once the class has occurred **twice**) → CI step → hook.
 A rule may sit on several rungs; what it may never do is *pretend* to be on a higher
 one — that is the same failure as a gate that prints `FAIL` and exits `0`.
+
+**Axis C — degrees of freedom**, and it is the one that gets skipped. Axis B says how
+hard a rule bites; this says how much latitude the *instruction* leaves. **high** —
+prose direction, no prescribed sequence, for steps where many routes reach a good
+answer. **medium** — a named order with room inside each step. **low** — run exactly
+this, in this order, for a step that is fragile, irreversible, or must be identical
+every time. Match the level to how fragile the step is, not to how important it feels:
+an open field versus a narrow bridge. **Over-constraining costs as much as
+under-constraining and is harder to see** — a high-freedom step written as low freedom
+produces an agent that follows the letter past the point where the letter stopped
+fitting, and reports success, because it did what it was told.
 
 **Before you run any check:** the base is green (or its known-red baseline is
 recorded); the check has been probed; you have read its scope header and know what
