@@ -1418,6 +1418,42 @@ else:
     fail("test/validate.py: cannot read the trigger literals out of _UNRES_RE — the "
          "doctrine-vs-code comparison has no source and is silently passing")
 
+# The verification ledger. Keyed to the BRIEF's REQ table, not to the stage-10 coverage
+# table: measured before building, ten acceptance files here carry the first REQ-bearing
+# table in nearly as many shapes, because acceptance.md fixes it in prose. Eight of nine
+# briefs carry machine-readable `| REQ-NNN |` rows, and the ninth was fixed the day this
+# was measured. Prose does not hold a shape across ten runs; a template does.
+_VERIF = os.path.join(ROOT, "docs/superpowers/verification.md")
+_VERIF_NEVER = 0
+if os.path.isfile(_VERIF):
+    _vt = open(_VERIF, encoding="utf-8").read()
+    _vrows = re.findall(r"^\|\s*(REQ-\d+)\s*\|(.+)$", _vt, re.M)
+    if not _vrows:
+        fail("docs/superpowers/verification.md: no `REQ-NNN` row — an empty ledger and a "
+             "missing one are the same thing to a reader, and only one of them means "
+             "nothing has shipped")
+    _brief_reqs = set()
+    for _bf in glob.glob(os.path.join(ROOT, "docs/superpowers/specs/*brief.md")):
+        _brief_reqs |= set(re.findall(r"^\|\s*(REQ-\d+)\s*\|",
+                                      open(_bf, encoding="utf-8").read(), re.M))
+    for _rid, _rest in _vrows:
+        _cells = [_flatten(_x).strip() for _x in _rest.split("|")]
+        # Reverse direction: a row about nothing. Different failure from a shipped REQ
+        # that entered no ledger, and only this pass finds it (learned.md rule 2).
+        if _brief_reqs and _rid not in _brief_reqs:
+            fail(f"docs/superpowers/verification.md: {_rid} is in no brief's REQ table — a "
+                 "ledger row about a requirement nobody wrote down is a row about nothing")
+        # The Human column is the point of the file, so it is the one that is checked:
+        # a date or the literal `never`. "soon" and "mostly" are how it stops being
+        # answerable, and this is the only column a machine may not fill.
+        _human = [_x for _x in _cells if re.fullmatch(r"never|\d{4}-\d{2}-\d{2}", _x.lower())]
+        if not _human:
+            fail(f"docs/superpowers/verification.md: {_rid} has no `Human` value that is "
+                 "either a date or the literal `never` — prose in that column is how the "
+                 "one question this file exists to answer stops being answerable")
+        elif _human[0].lower() == "never":
+            _VERIF_NEVER += 1
+
 # references/artifacts.md maps stage -> what it WRITES. The reverse direction — what
 # each stage READS and from where — is the one an agent actually needs at runtime,
 # and it was absent for nine releases: learned.md rule 2 (compute the mapping in both

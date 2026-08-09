@@ -76,7 +76,7 @@ whatever the context happens to hold.
 
 | Stage | Reads | From where |
 |---|---|---|
-| **0 Harvest** | the project's own knowledge about this task | code · the code graph (`graphify-out/`) · `CLAUDE.md`/`AGENTS.md` · `CONTEXT.md`/`docs/adr/` · `docs/` + `docs/ux/` · past briefs and carry-over ledgers · **the board** (`docs/superpowers/backlog.md`, open count quoted in the brief) · the retro's standing instructions **in full** · the wiki · any doc repo or hosted system the project names |
+| **0 Harvest** | the project's own knowledge about this task | code · the code graph (`graphify-out/`) · `CLAUDE.md`/`AGENTS.md` · `CONTEXT.md`/`docs/adr/` · `docs/` + `docs/ux/` · past briefs and carry-over ledgers · **the board** (`docs/superpowers/backlog.md`, open count quoted in the brief) · **the verification ledger** (`docs/superpowers/verification.md`, how many rows sit at `never`) · the retro's standing instructions **in full** · the wiki · any doc repo or hosted system the project names |
 | **0 Inventory (1b)** | the documentation regime | `docs/DOCMAP.md` — registers, single homes, propagation matrix, gate commands, ratchet floors. Absent ⇒ seeded ([`adoption.md`](adoption.md)) |
 | **0 Reconcile (1c)** | intent vs as-built | git (how it *should* be) against the run record (how it *turned out*) |
 | **0 Grill** | the operator | the interview — every answer checked against the harvest, which is what makes it checkable rather than confident |
@@ -100,6 +100,7 @@ that has not read them is running the pipeline's defaults, not this project's.
 |---|---|---|---|
 | `CLAUDE.md` / `AGENTS.md` | commands, deploy path, house rules, which docs exist and where | 0 | 6–10 |
 | `docs/DOCMAP.md` | the decision home, each fact's single home, the propagation matrix, the gate and its ratchet floors | 0 (1b) | 9 |
+| `docs/superpowers/verification.md` | one row per shipped REQ, and the one column a machine may not fill: the date a **human** confirmed it, or `never` ([`verification.md`](verification.md)) | 0 | written at 8, required at 10 |
 | `docs/superpowers/backlog.md` | the project's work-list **between** runs — ids, the three priority inputs, state. Mutable; rows leave only into its *Closed* list ([`backlog.md`](backlog.md)) | 0 | re-derived at every iteration's end; resolved at 10 |
 | `docs/superpowers/retro.md` | standing instructions — the rules no check can decide. Capped at ten, **read in full**, stamped the moment one fires | 0 | pruned at 10 |
 | `specs/<topic>-brief.md` → *Autonomy* | every pre-resolved decision; stages 1→10 **answer from it instead of asking** | 0 | 1–10 |
@@ -125,6 +126,7 @@ them is a finding, not a tie-break ([`knowledge-sources.md`](knowledge-sources.m
 | 0 Inventory | `docs/DOCMAP.md` + the registers + `scripts/check-docs.sh` — seeded **only when absent**, and the seeding is the register's first entry ([`documentation.md`](documentation.md)) | every later stage; **stage 9** walks the matrix, **stage 10** proves the gate |
 | 0 Grill (domain) | `CONTEXT.md`, `docs/adr/NNNN-<slug>.md` — created **lazily**, only when a term resolves or a decision qualifies. Where `docs/adr/` **is** the register, entries carry the register's field set | stages 2–4 + the repo |
 | any stage | a register entry per settled thing, via the **Doc Loop** — recorded, resolved, propagated, committed with its id | the next run's harvest |
+| 8 Verification row | `docs/superpowers/verification.md` — one row per REQ the run shipped, written right after the deploy verification; `Human` starts at `never` ([`verification.md`](verification.md)) | stage 10 requires it; stage 0 of every later run reads it |
 | 10 Board resolution | `docs/superpowers/backlog.md` — every unresolved ledger row — homed `backlog` or still `open` — arrives with a real id, and the ledger row is updated to name it; priority re-derived ([`backlog.md`](backlog.md)) | the next run's harvest, and every loop iteration |
 | 10 Retro rotation | `docs/superpowers/retro/YYYY-QN.md` — entries older than five stamps, plus every retirement, each with its commit | queried by a later run's harvest |
 | 2 Decompose | `specs/<topic>-modules.md` — module map, build order, contracts, per-module status (platforms only) | stages 3–10, every module's run |

@@ -3373,3 +3373,75 @@ jobs:
           else
             echo "OK: validator correctly FAILs — the gap is any length, because GFM ends the table at the first blank"
           fi
+
+      - name: Negative self-test (a verification row whose REQ is in no brief)
+        run: |
+          set -eu
+          rm -rf /tmp/vf1-copy && cp -R . /tmp/vf1-copy
+          python3 - <<'EOF'
+          p = "/tmp/vf1-copy/docs/superpowers/verification.md"
+          t = open(p, encoding="utf-8").read()
+          open(p, "w", encoding="utf-8").write(
+              t + "| REQ-999 | invented | `nowhere` | v1.0.0 | pass | never | — |\n")
+          EOF
+          if python3 /tmp/vf1-copy/test/validate.py; then
+            echo "ERROR: a ledger row about a requirement nobody wrote down passed"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the reverse direction, a row about nothing"
+          fi
+
+      - name: Negative self-test (prose in the Human column)
+        run: |
+          set -eu
+          rm -rf /tmp/vf2-copy && cp -R . /tmp/vf2-copy
+          python3 - <<'EOF'
+          p = "/tmp/vf2-copy/docs/superpowers/verification.md"
+          t = open(p, encoding="utf-8").read()
+          needle = "| pass | never | — |"
+          assert needle in t, "PLANT DID NOT LAND: anchor absent before the edit"
+          open(p, "w", encoding="utf-8").write(t.replace(needle, "| pass | soon | — |", 1))
+          EOF
+          if python3 /tmp/vf2-copy/test/validate.py; then
+            echo "ERROR: 'soon' in the one column a machine may not fill — the question stops being answerable"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — a date or the literal never, nothing else"
+          fi
+
+      - name: Negative self-test (the verification ledger emptied of rows)
+        run: |
+          set -eu
+          rm -rf /tmp/vf3-copy && cp -R . /tmp/vf3-copy
+          python3 - <<'EOF'
+          import re
+          p = "/tmp/vf3-copy/docs/superpowers/verification.md"
+          t = open(p, encoding="utf-8").read()
+          assert re.search(r"^\| REQ-\d+ ", t, re.M), "PLANT DID NOT LAND: no rows before the edit"
+          open(p, "w", encoding="utf-8").write(re.sub(r"^\| REQ-\d+ .*$", "", t, flags=re.M))
+          EOF
+          if python3 /tmp/vf3-copy/test/validate.py; then
+            echo "ERROR: an empty ledger reads exactly like a project that has shipped nothing"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the plant lands in the file that DEFINES the ledger"
+          fi
+
+      - name: Property check (a real date in the Human column is accepted)
+        run: |
+          set -eu
+          rm -rf /tmp/vf4-copy && cp -R . /tmp/vf4-copy
+          python3 - <<'EOF'
+          p = "/tmp/vf4-copy/docs/superpowers/verification.md"
+          t = open(p, encoding="utf-8").read()
+          needle = "| pass | never | — |"
+          assert needle in t, "PLANT DID NOT LAND: anchor absent"
+          open(p, "w", encoding="utf-8").write(
+              t.replace(needle, "| pass | 2026-08-09 | opened the rendered page |", 1))
+          EOF
+          if python3 /tmp/vf4-copy/test/validate.py >/dev/null; then
+            echo "OK: filling the column is the point of the file, so filling it must not fail the build"
+          else
+            echo "ERROR: recording that a human looked broke the gate — the column would never be filled again"
+            exit 1
+          fi
