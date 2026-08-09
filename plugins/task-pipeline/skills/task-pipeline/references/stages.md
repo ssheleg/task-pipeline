@@ -459,9 +459,10 @@ never that the work was skipped quietly.
   `open` leaves with a `B-NNN` id on `docs/superpowers/backlog.md`, and the ledger row
   is updated to name it ([`backlog.md`](backlog.md)). Both directions, because they are
   different failures: a ledger row pointing at an id nobody issued, and a board row
-  traceable to nothing. Measured before this was built: across ten ledgers in this
-  repository, **sixteen rows sat `open` with no home at all** — deferred out loud and
-  filed nowhere. Then the board's priority is re-derived, because `age` moved while the
+  traceable to nothing. Measured before this was built: across the ledgers in
+  this repository, **twenty-four rows sat `open` with no home at all** — deferred out
+  loud and filed nowhere. The first count said sixteen across six ledgers; it read the
+  status column by position and was wrong wherever a ledger carried two of them. Then the board's priority is re-derived, because `age` moved while the
   run was happening. Every earlier gate asks
   "is this artifact good?"; none asks "does this still contain everything that was
   asked for?" The loss happens on the seams between stages, and this is where it

@@ -80,7 +80,17 @@ negative test covering that path caught it, which is the entire argument for the
 in a sentence. The separator is now *"not a word character"* and the predicate is proven
 against eight concrete cases instead of one.
 
-Guards: 156 → **168**, property checks 1 → 3.
+**The detector reversed three times, and the third answer was in between.** Positional
+read the wrong cell wherever a ledger carried two status columns. Pure-text then broke in
+both directions with one regex — too strict for a live row worded *"open as a printed
+exclusion"*, too loose for a description reading *"Open-source …"*, because a hyphen is
+punctuation exactly like the arrow. What ships reads the header for **candidate columns**
+— all of them, never just the last — and matches a status on a word boundary **inside**
+them. A description cannot masquerade as a status because it is never looked at.
+
+Every reversal was found by a reader. None by a probe.
+
+Guards: 156 → **169**, property checks 1 → 4.
 
 ## v1.30.0 — the cap that would have measured the wrong axis
 

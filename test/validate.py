@@ -1214,6 +1214,12 @@ _BOARD_IDS = set()
 if os.path.isfile(_BOARD):
     _bt = open(_BOARD, encoding="utf-8").read()
     _BOARD_IDS = set(re.findall(r"\bB-(\d+)\b", _bt))
+    # Each board file read ONCE and shared by both loops below. Re-opening them was
+    # compounding the very cost this PR put on the board as row B-010.
+    _BOARD_TEXT = {_BOARD: _bt}
+    _tmplb = os.path.join(os.path.dirname(refdir), "templates", "backlog.md")
+    if os.path.isfile(_tmplb):
+        _BOARD_TEXT[_tmplb] = open(_tmplb, encoding="utf-8").read()
     if not _BOARD_IDS:
         fail("docs/superpowers/backlog.md: no `B-NNN` row — an empty board and a missing "
              "board are the same thing to work on, and only one can be appended to")
@@ -1226,50 +1232,54 @@ if os.path.isfile(_BOARD):
     # So: a row is OPEN if any of its cells *is* the word open (or says it needs a home),
     # and HOMED if a board id appears anywhere in the row. Neither test asks which column
     # it came from, so neither can be defeated by a shape nobody anticipated.
+    # Neither pure-positional nor pure-textual survives this corpus, and both were
+    # tried. Positional read the wrong cell in the five ledgers that carry TWO
+    # status-ish columns. Text-only broke in both directions at once: too strict on a
+    # real row worded "open as a printed exclusion", too loose on a description reading
+    # "Open-source …", because a hyphen is punctuation and so is an arrow.
+    #
+    # So: the header names the candidate columns — ALL of them, never just the last —
+    # and inside those columns a status is matched on a word boundary. A cell in the
+    # What column cannot masquerade as a status because it is never looked at.
+    _LEDGER_ID = {"#", "id", "row"}
+    _LEDGER_STATUS = {"home", "where it lives now", "resolution", "status", "state"}
+    _UNRES_RE = re.compile(r"^(?:open|unresolved|backlog)\b", re.I)
     for _lf in sorted(glob.glob(os.path.join(ROOT, "docs/superpowers/specs/*carryover.md"))):
         _lt = open(_lf, encoding="utf-8").read()
         _rel = os.path.relpath(_lf, ROOT)
+        _hdr = None
+        for _l in _lt.splitlines():
+            if _l.startswith("|") and _l.split("|")[1].strip().lower() in _LEDGER_ID:
+                _hdr = [_flatten(_x, lower=True).strip() for _x in _l.split("|")[1:-1]]
+                break
+        if _hdr is None:
+            continue                       # a ledger with no table yet
+        _sidx = [_i for _i, _c in enumerate(_hdr) if _c in _LEDGER_STATUS]
+        if not _sidx:
+            fail(f"{_rel}: no status column among {sorted(_LEDGER_STATUS)} — a ledger "
+                 "whose rows have no home column cannot be checked for dangling ones")
+            continue
         for _l in _lt.splitlines():
             if not _l.startswith("|") or set(_l.strip()) <= set("|- "):
                 continue
             _c = [_flatten(_x, lower=True).strip() for _x in _l.split("|")[1:-1]]
-            if not _c or _c[0] in ("#", "id", "row"):
+            if not _c or _c[0] in _LEDGER_ID:
                 continue
-            # Two triggers, because the templates promise both: a row still `open`, and a
-            # row homed at the literal `backlog` — the value the ledger template has
-            # always offered and nothing owned. The first shipped guard checked only
-            # `open` while three doctrine passages described `backlog`, one of them
-            # claiming "the gate refuses it". A reader seeded a scratch ledger with that
-            # exact row and watched PASS.
-            # A cell must BE a status, not merely begin with one. `startswith("open ")`
-            # flagged a description reading "Open source license text is missing…" on a
-            # row whose status said closed — and rule 10 is explicit that a checker with
-            # false positives is worse than none. So: the whole cell, or the word
-            # followed by punctuation ("open — needs a home"), never followed by more
-            # prose.
-            #
-            # `unresolved` is here because templates/carryover.md calls it the canonical
-            # not-done value and says outright that it "blocks the stage-10 gate". It was
-            # the THIRD trigger this guard promised somewhere and did not check.
-            def _is_unresolved(_x):
-                # The separator must be "anything that is not a word character",
-                # never a hand-listed set of punctuation. The listed version omitted the
-                # arrow this repo's own annotations use (`open → B-001`), which made
-                # every one of the 24 resolved rows INVISIBLE to the check — it then
-                # passed because it saw no unresolved rows at all, not because they were
-                # homed. Caught by the one negative test that covered this path.
-                return (_x in ("open", "backlog", "unresolved")
-                        or re.match(r"^(?:open|unresolved)(?:\s*$|\s*[^\w\s])", _x) is not None
-                        or "needs a home" in _x)
-            if not any(_is_unresolved(_x) for _x in _c):
-                continue
-            if not re.search(r"\bB-\d+\b", _l):
-                _UNHOMED.append(f"{_rel} row {_c[0][:8]}")
+            if len(_c) == len(_hdr):
+                _cells = [_c[_i] for _i in _sidx]
             else:
-                _ref = re.search(r"\bB-(\d+)\b", _l)
-                if _ref.group(1) not in _BOARD_IDS:
-                    fail(f"{_rel} row {_c[0][:8]}: names `B-{_ref.group(1)}`, which is on no "
-                         "board row — a pointer to an id nobody issued reads as filed and is not")
+                # The row's shape does not match its header — three rows here carry an
+                # extra cell. Rather than skip (silence) or fail (history), fall back to
+                # every cell under the STRICT rule: the whole cell, nothing else.
+                _cells = [_x for _x in _c if _x in ("open", "unresolved", "backlog")]
+            if not any(_UNRES_RE.match(_x) or "needs a home" in _x for _x in _cells):
+                continue
+            _ref = re.search(r"\bB-(\d+)\b", _l)
+            if not _ref:
+                _UNHOMED.append(f"{_rel} row {_c[0][:8]}")
+            elif _ref.group(1) not in _BOARD_IDS:
+                fail(f"{_rel} row {_c[0][:8]}: names `B-{_ref.group(1)}`, which is on no "
+                     "board row — a pointer to an id nobody issued reads as filed and is not")
     if _UNHOMED:
         fail("carry-over rows still `open` with no board id: "
              + " · ".join(_UNHOMED)
@@ -1281,11 +1291,9 @@ if os.path.isfile(_BOARD):
     # formula printed two lines below them — in the file seeded verbatim into every
     # host project as its first board, whose stated point is that the arithmetic is
     # visible. Found by a reader.
-    for _bf in (_BOARD, os.path.join(os.path.dirname(refdir), "templates", "backlog.md")):
-        if not os.path.isfile(_bf):
-            continue
+    for _bf, _btext in _BOARD_TEXT.items():
         _bfr = os.path.relpath(os.path.realpath(_bf), ROOT)
-        for _l in open(_bf, encoding="utf-8").read().splitlines():
+        for _l in _btext.splitlines():
             if not re.match(r"^\|\s*B-\d+\s*\|", _l):
                 continue
             _cl = [re.sub(r"[*_`]", "", _x).strip() for _x in _l.split("|")[1:-1]]
@@ -1309,11 +1317,8 @@ if os.path.isfile(_BOARD):
 
     # Both directions: a board row invented with no source is the other failure, and only
     # the reverse pass finds it (learned.md rule 2).
-    for _srcf in (_BOARD, os.path.join(os.path.dirname(refdir), "templates", "backlog.md")):
-      if not os.path.isfile(_srcf):
-        continue
-      for _row in re.findall(r"^\|\s*B-\d+\s*\|(.+)$",
-                             open(_srcf, encoding="utf-8").read(), re.M):
+    for _srcf, _stext in _BOARD_TEXT.items():
+      for _row in re.findall(r"^\|\s*B-\d+\s*\|(.+)$", _stext, re.M):
         _cells = [_x.strip() for _x in _row.split("|")]
         if len(_cells) < 2 or not _cells[1]:
             fail(f"{os.path.relpath(_srcf, ROOT)}: a row names no Source — a row nobody can "

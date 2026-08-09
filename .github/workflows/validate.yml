@@ -3219,3 +3219,41 @@ jobs:
             echo "ERROR: a closed row was reported as open because its description started with the word Open"
             exit 1
           fi
+
+      - name: Negative self-test (a status column worded in prose — "open as a printed exclusion")
+        run: |
+          set -eu
+          rm -rf /tmp/bd12-copy && cp -R . /tmp/bd12-copy
+          python3 - <<'EOF'
+          p = "/tmp/bd12-copy/docs/superpowers/specs/2026-08-09-prose-carryover.md"
+          open(p, "w", encoding="utf-8").write(
+              "# Carry-over — scratch\n\n"
+              "| # | Stage | What | Why it isn't done | REQ | Where it lives now |\n"
+              "|---|---|---|---|---|---|\n"
+              "| 1 | 5 Dev | a thing | later | — | open as a printed exclusion |\n")
+          EOF
+          if python3 /tmp/bd12-copy/test/validate.py; then
+            echo "ERROR: a status column saying 'open …' in prose was not read as open — this repo has live rows worded that way"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — inside a status column, a word boundary is enough"
+          fi
+
+      - name: Property check (a hyphenated "Open-source" in a description is not a status)
+        run: |
+          set -eu
+          rm -rf /tmp/hyp-copy && cp -R . /tmp/hyp-copy
+          python3 - <<'EOF'
+          p = "/tmp/hyp-copy/docs/superpowers/specs/2026-08-09-hyphen-carryover.md"
+          open(p, "w", encoding="utf-8").write(
+              "# Carry-over — scratch\n\n"
+              "| # | Stage | What | Why it isn't done | REQ | Where it lives now |\n"
+              "|---|---|---|---|---|---|\n"
+              "| 1 | 5 Dev | Open-source license text is missing | done | — | closed |\n")
+          EOF
+          if python3 /tmp/hyp-copy/test/validate.py >/dev/null; then
+            echo "OK: the What column is never read as a status, so punctuation in prose cannot fake one"
+          else
+            echo "ERROR: a closed row was flagged because its description began 'Open-source'"
+            exit 1
+          fi
