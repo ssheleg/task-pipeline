@@ -636,7 +636,6 @@ jobs:
         run: |
           set -eu
           for f in documentation gates hooks; do
-            rm -rf /tmp/doctrine-copy
             rm -rf /tmp/doctrine-copy-2 && cp -R . /tmp/doctrine-copy-2
             rm /tmp/doctrine-copy-2/plugins/task-pipeline/skills/task-pipeline/references/$f.md
             if python3 /tmp/doctrine-copy-2/test/validate.py; then
@@ -695,7 +694,7 @@ jobs:
       - name: Negative self-test (the seeded gate must stay portable)
         run: |
           set -eu
-          rm -rf /tmp/portable-copy && cp -R . /tmp/portable-copy-2
+          rm -rf /tmp/portable-copy-2 && cp -R . /tmp/portable-copy-2
           python3 - <<'EOF'
           p = "/tmp/portable-copy-2/plugins/task-pipeline/skills/task-pipeline/templates/docgate.sh"
           t = open(p, encoding="utf-8").read()
@@ -816,7 +815,7 @@ jobs:
       - name: Negative self-test (the autonomy sweep is compared by topic, not by stage number)
         run: |
           set -eu
-          rm -rf /tmp/sweep-copy && cp -R . /tmp/sweep-copy-2
+          rm -rf /tmp/sweep-copy-2 && cp -R . /tmp/sweep-copy-2
           python3 - <<'EOF'
           p = "/tmp/sweep-copy-2/plugins/task-pipeline/skills/task-pipeline/references/grill.md"
           t = open(p, encoding="utf-8").read()
@@ -1166,7 +1165,7 @@ jobs:
       - name: Negative self-test (a run-wide rule every stage must name)
         run: |
           set -eu
-          rm -rf /tmp/reach-copy && cp -R . /tmp/reach-copy-2
+          rm -rf /tmp/reach-copy-2 && cp -R . /tmp/reach-copy-2
           python3 - <<'EOF'
           p = "/tmp/reach-copy-2/plugins/task-pipeline/skills/task-pipeline/references/build.md"
           t = open(p, encoding="utf-8").read()
@@ -3633,4 +3632,59 @@ jobs:
             exit 1
           else
             echo "OK: validator correctly FAILs — the REQ is checked against the brief the row NAMES"
+          fi
+
+      - name: Negative self-test (a percentage reaching the exposure line)
+        run: |
+          set -eu
+          rm -rf /tmp/pct-copy && cp -R . /tmp/pct-copy
+          python3 - <<'EOF'
+          p = "/tmp/pct-copy/test/validate.py"
+          t = open(p, encoding="utf-8").read()
+          needle = 'f"  exposure: {_VERIF_NEVER} unverified'
+          assert needle in t, "PLANT DID NOT LAND: the exposure print is not where the guard reads it"
+          open(p, "w", encoding="utf-8").write(
+              t.replace(needle, 'f"  exposure: {_VERIF_NEVER}% unverified', 1))
+          EOF
+          if python3 /tmp/pct-copy/test/validate.py; then
+            echo "ERROR: the exposure line rendered as a percentage — P(defect) is not computable from these inputs"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the one rendering this line may never take"
+          fi
+
+      - name: Negative self-test (the exposure doctrine dropping its never-checked rule)
+        run: |
+          set -eu
+          rm -rf /tmp/nc-copy && cp -R . /tmp/nc-copy
+          python3 - <<'EOF'
+          p = "/tmp/nc-copy/plugins/task-pipeline/skills/task-pipeline/references/exposure.md"
+          t = open(p, encoding="utf-8").read()
+          assert "never checked" in t, "PLANT DID NOT LAND: the rule is not in the doctrine"
+          open(p, "w", encoding="utf-8").write(t.replace("never checked", "zero days"))
+          EOF
+          if python3 /tmp/nc-copy/test/validate.py; then
+            echo "ERROR: the doctrine lost the rule that zero days would read as 'checked today'"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the decision lives where the next reader looks"
+          fi
+
+      - name: Negative self-test (a step wiping a scratch dir it does not own)
+        run: |
+          set -eu
+          rm -rf /tmp/mm-copy && cp -R . /tmp/mm-copy
+          python3 - <<'EOF'
+          p = "/tmp/mm-copy/.github/workflows/validate.yml"
+          t = open(p, encoding="utf-8").read()
+          needle = "rm -rf /tmp/sweep-copy-2 && cp -R . /tmp/sweep-copy-2"
+          assert needle in t, "PLANT DID NOT LAND: the repaired pair is not where the guard reads it"
+          open(p, "w", encoding="utf-8").write(
+              t.replace(needle, "rm -rf /tmp/sweep-copy && cp -R . /tmp/sweep-copy-2", 1))
+          EOF
+          if python3 /tmp/mm-copy/test/validate.py; then
+            echo "ERROR: a step deleting a directory it does not own passed — harmless serially, a race in parallel"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — rm and cp in one step name the same directory"
           fi

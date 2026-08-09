@@ -396,7 +396,16 @@ property check proves that filling the column does not fail the build, because a
 that punishes an honest answer will not receive one.
 *(guard: `either a date or the literal` and `is in no brief's REQ table`)*
 
-**46. Every invariant above names the guard that enforces it, and that guard exists.**This list claims to be *what the validator enforces*; it was eight guards behind when
+**46. Exposure prints as a named vector and never as a probability.** The request that
+produced it asked for `P(defect)`; it is not computable from these inputs, and a single
+score invites a threshold, which is a target on `never` — the one thing the verification
+ledger says may never have one. A `%` on that line fails the build. Where no row has ever
+been confirmed the line prints the literal `never checked`, because `0 days` reads as
+*checked today*. The doctrine carries both rules where a reader proposing a percentage
+will find them.
+*(guard: `may never take` and `carry it where the next reader looks`)*
+
+**47. Every invariant above names the guard that enforces it, and that guard exists.**This list claims to be *what the validator enforces*; it was eight guards behind when
 an audit measured it. A claim of enforcement is now checked like any other claim.
 *(guard: `whose message does not appear in`)* — and a cited literal must lie inside
 a **single** string in `test/validate.py`: the check reads that file as text, so a

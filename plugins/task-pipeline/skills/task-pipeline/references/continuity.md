@@ -129,9 +129,16 @@ works a stale board for as long as the loop runs. One command, at the top of the
 iteration, recorded ([`knowledge-sources.md`](knowledge-sources.md) → *Carried-in
 claims*; [`learned.md`](learned.md) rule 16).
 
+**The work-list is `docs/superpowers/backlog.md`** ([`backlog.md`](backlog.md)), and the
+other half of the same measurement is the exposure line ([`exposure.md`](exposure.md)).
+Counted at the top of the iteration, re-derived at the bottom — `age` moves on its own,
+so the re-derivation is the only moment the board stops being stale.
+
 This is also where a loop's report goes wrong most quietly. *"Next up is X"* at the
 end of an iteration is a claim about the board, and it is the one sentence in the
-whole cycle that no gate reads. It cites the measurement or it is not written.
+whole cycle that no gate reads. It cites the measurement or it is not written — **a
+`B-NNN`, not a description**: *"next up: B-014"* can be checked against the file,
+*"next up: the export fix"* cannot.
 
 ## Parked at a manual gate
 

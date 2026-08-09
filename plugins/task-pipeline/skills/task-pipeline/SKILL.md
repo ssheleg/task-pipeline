@@ -70,6 +70,7 @@ gate stops until it is installed.
 | run-wide · how a run keeps going (the loop mode + the context budget) | [`references/continuity.md`](references/continuity.md) |
 | run-wide · the work-list **between** runs, and how its priority is computed | [`references/backlog.md`](references/backlog.md) |
 | run-wide · whether a **human** ever confirmed what shipped, and when | [`references/verification.md`](references/verification.md) |
+| run-wide · how much unconfirmed work has piled up, and what to look at first | [`references/exposure.md`](references/exposure.md) |
 
 **Optional bridge.** If the operator already runs an equivalent skill set (e.g.
 `superpowers:brainstorming` / `writing-plans` / `subagent-driven-development` /
