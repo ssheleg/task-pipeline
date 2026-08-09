@@ -1517,15 +1517,15 @@ _cl = os.path.join(ROOT, "CHANGELOG.md")
 _wf = os.path.join(ROOT, ".github/workflows/validate.yml")
 if os.path.isfile(_cl) and os.path.isfile(_wf):
     _true_neg, _true_prop = _neg_n, _prop_n
-    _clt = open(_cl, encoding="utf-8").read()
+    _clt = chg
     _top = _clt.split("\n## v", 2)
     _top = _top[1] if len(_top) > 1 else ""
-    _g = re.search(r"Guards:\s*\d+\s*(?:→|->)\s*\*{0,2}(\d+)", _flatten(_top))
+    _g = re.search(r"Guards:\s*\d+\s*(?:→|->)\s*(\d+)", _flatten(_top))
     if _g and int(_g.group(1)) != _true_neg:
         fail(f"CHANGELOG.md: the newest section claims {_g.group(1)} guards but the "
              f"workflow defines {_true_neg} — the entry is written before the last "
              "checks are added, and this count went stale twice in one programme")
-    _p = re.search(r"property checks\s*\d+\s*(?:→|->)\s*\*{0,2}(\d+)", _flatten(_top))
+    _p = re.search(r"property checks\s*\d+\s*(?:→|->)\s*(\d+)", _flatten(_top))
     if _p and int(_p.group(1)) != _true_prop:
         fail(f"CHANGELOG.md: the newest section claims {_p.group(1)} property checks but "
              f"the workflow defines {_true_prop}")
@@ -2707,7 +2707,8 @@ if os.path.isfile(os.path.join(refdir, "knowledge-graph.md")):
 # A floor below the count cannot notice losing the difference, which is the whole job.
 _neg_py = os.path.join(ROOT, "test/negatives.py")
 if os.path.isfile(_neg_py) and os.path.isfile(_neg_wf):
-    _m_floor = re.search(r"^MIN_EXPECTED\s*=\s*(\d+)", open(_neg_py, encoding="utf-8").read(), re.M)
+    _neg_py_txt = open(_neg_py, encoding="utf-8").read()
+    _m_floor = re.search(r"^MIN_EXPECTED\s*=\s*(\d+)", _neg_py_txt, re.M)
     if _m_floor and int(_m_floor.group(1)) != _neg_n:
         fail(f"test/negatives.py: MIN_EXPECTED is {_m_floor.group(1)} but the workflow defines "
              f"{_neg_n} negative self-tests — a floor below the count is a floor that cannot "
@@ -2715,7 +2716,7 @@ if os.path.isfile(_neg_py) and os.path.isfile(_neg_wf):
     # MIN_PROPS had NO such check at all — zero mentions in this file — while its sibling
     # has been tied since v1.15.0 and still went stale twice. A floor nothing compares is
     # not a floor, it is a number somebody typed once.
-    _p_floor = re.search(r"^MIN_PROPS\s*=\s*(\d+)", open(_neg_py, encoding="utf-8").read(), re.M)
+    _p_floor = re.search(r"^MIN_PROPS\s*=\s*(\d+)", _neg_py_txt, re.M)
     if _p_floor and int(_p_floor.group(1)) != _prop_n:
         fail(f"test/negatives.py: MIN_PROPS is {_p_floor.group(1)} but the workflow defines "
              f"{_prop_n} property checks — the same drift MIN_EXPECTED suffered twice, on the "
