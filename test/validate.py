@@ -1235,8 +1235,15 @@ if os.path.isfile(_BOARD):
             _c = [_flatten(_x, lower=True).strip() for _x in _l.split("|")[1:-1]]
             if not _c or _c[0] in ("#", "id", "row"):
                 continue
+            # Two triggers, because the templates promise both: a row still `open`, and a
+            # row homed at the literal `backlog` — the value the ledger template has
+            # always offered and nothing owned. The first shipped guard checked only
+            # `open` while three doctrine passages described `backlog`, one of them
+            # claiming "the gate refuses it". A reader seeded a scratch ledger with that
+            # exact row and watched PASS.
             if not any(_x == "open" or _x.startswith("open ") or _x.startswith("open—")
-                       or _x.startswith("open -") or "needs a home" in _x for _x in _c):
+                       or _x.startswith("open -") or "needs a home" in _x
+                       or _x == "backlog" for _x in _c):
                 continue
             if not re.search(r"\bB-\d+\b", _l):
                 _UNHOMED.append(f"{_rel} row {_c[0][:8]}")
@@ -1310,8 +1317,14 @@ for _root, _dirs, _fs in os.walk(ROOT):
                 _fence = not _fence
             if _fence:
                 continue
+            # ...and "separate tables" is a real shape, so it is actually tested for:
+            # a new table opens with a header line whose NEXT line is a `|---|`
+            # delimiter. Without this the guard fires on two valid adjacent tables and
+            # its own comment claiming otherwise would be false.
+            _opens_new = (_i + 3 < len(_ls)
+                          and re.match(r"^\|[\s:|-]+\|\s*$", _ls[_i + 3] or ""))
             if (_ls[_i].startswith("|") and not _ls[_i + 1].strip()
-                    and _ls[_i + 2].startswith("|")):
+                    and _ls[_i + 2].startswith("|") and not _opens_new):
                 fail(f"{_rel}:{_i + 2}: a blank line splits a table — every row below it "
                      "loses the header and renders as pipe-delimited text, which looks "
                      "like a table only in the editor")

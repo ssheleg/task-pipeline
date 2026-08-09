@@ -51,7 +51,8 @@ from outside, and only one of them means nothing has closed.
 1. **Stage 0** seeds this file when it is absent, and reads it when it is present.
 2. **Any stage, mid-run** — the moment something is said aloud and not done. Same rule
    as the carry-over ledger: *deferred out loud, or lost.*
-3. **Stage 10** — every carry-over row whose `Where it lives now` is `backlog` arrives
-   here with a real id, and the ledger row is updated to name that id. A ledger row
-   pointing at `backlog` with no id on this board is the dangling pointer this file
-   exists to resolve, and the gate refuses it.
+3. **Stage 10** — every carry-over row that is unresolved arrives here with a real id,
+   and the ledger row is updated to name it. Unresolved means either home `backlog` —
+   the value that used to point nowhere — or still `open`. A row in either shape with no
+   id on this board is the dangling pointer this file exists to resolve, and the gate
+   refuses it.

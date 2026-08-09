@@ -125,7 +125,7 @@ them is a finding, not a tie-break ([`knowledge-sources.md`](knowledge-sources.m
 | 0 Inventory | `docs/DOCMAP.md` + the registers + `scripts/check-docs.sh` — seeded **only when absent**, and the seeding is the register's first entry ([`documentation.md`](documentation.md)) | every later stage; **stage 9** walks the matrix, **stage 10** proves the gate |
 | 0 Grill (domain) | `CONTEXT.md`, `docs/adr/NNNN-<slug>.md` — created **lazily**, only when a term resolves or a decision qualifies. Where `docs/adr/` **is** the register, entries carry the register's field set | stages 2–4 + the repo |
 | any stage | a register entry per settled thing, via the **Doc Loop** — recorded, resolved, propagated, committed with its id | the next run's harvest |
-| 10 Board resolution | `docs/superpowers/backlog.md` — every ledger row homed `backlog` arrives with a real id, and the ledger row is updated to name it; priority re-derived ([`backlog.md`](backlog.md)) | the next run's harvest, and every loop iteration |
+| 10 Board resolution | `docs/superpowers/backlog.md` — every unresolved ledger row — homed `backlog` or still `open` — arrives with a real id, and the ledger row is updated to name it; priority re-derived ([`backlog.md`](backlog.md)) | the next run's harvest, and every loop iteration |
 | 10 Retro rotation | `docs/superpowers/retro/YYYY-QN.md` — entries older than five stamps, plus every retirement, each with its commit | queried by a later run's harvest |
 | 2 Decompose | `specs/<topic>-modules.md` — module map, build order, contracts, per-module status (platforms only) | stages 3–10, every module's run |
 | 3 Spec | `specs/<topic>-design.md` — module dossier for a decomposed platform (+ links `docs/ux/*` for UI) | stage 4 |

@@ -30,9 +30,11 @@ side.
 
 The seam was closed rather than deferred: all sixteen rows carry a board id, so the
 floor is **zero** and the next unhomed row fails the build instead of joining a debt.
-This repo's own board opens with eleven rows — three of them the same finding three
-ledgers had written separately, collapsed into one, which is the job the board exists
-for.
+This repo's own board opens seeded from those ledgers, with several rows that were the
+same finding written separately by different runs — collapsed into one each, which is the
+job the board exists for. The count is deliberately not restated here: it moved twice
+while this entry was being written, which is exactly why this repository deletes
+restated numbers rather than chasing them.
 
 **The review found the guard reading the wrong cell in half the corpus.** The status
 column was taken by position — and five of ten ledgers here carry *two* status-ish
@@ -59,7 +61,18 @@ instance of a class this repository already had written down, so it became a scr
 rather than a third ledger row, swept across the whole corpus. B-004 is closed by the
 check it asked for.
 
-Guards: 156 → **164**.
+**A promise is not a check.** Three doctrine passages described stage-10 resolution as
+keyed on a ledger row homed `backlog`, and the seeded template said outright that *the
+gate refuses it* — while the shipped guard only ever looked for `open`. A reader seeded
+a scratch ledger with exactly that row and watched it pass. Both triggers are enforced
+now, and the doctrine describes what runs.
+
+The split-table guard, one round old, could not tell *"table split"* from *"table ends,
+table begins"* — it never checked whether the line after the blank opens its own table,
+which its own comment claimed it did. A **property check** now proves it stays quiet on
+the valid pattern, because a checker with false positives is worse than none.
+
+Guards: 156 → **165**, property checks 1 → 2.
 
 ## v1.30.0 — the cap that would have measured the wrong axis
 
