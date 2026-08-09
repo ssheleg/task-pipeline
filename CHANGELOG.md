@@ -47,6 +47,13 @@ no Axis C — introduced by this PR, fifty lines below an edit it made. Nothing 
 it: the claim registry's corpus held neither the Cursor rule nor the command file.
 Both are in it now, and the count moved 6 → 7 the moment they were.
 
+A second round found the same I/O class at two more call sites. Re-deriving its size
+with a differently-shaped command — an instrumented run rather than a grep of the
+source — put it at **25 reads of `audit.md` and 668 `.md` opens per run**, against an
+estimate of "3+". The two named sites are fixed; the rest is carry-over row 12 with the
+number attached, because a class measured and then left unmentioned is the TODO this
+repository refuses to keep.
+
 Guards: 136 → **143**.
 
 ## v1.28.0

@@ -414,6 +414,9 @@ def _count_run_headings(path):
 _AX_STOP = {"the", "one", "a", "an"}
 
 
+_AXIS_MEMO = {}
+
+
 def _axis_keys():
     """Bold leads of the numbered axis list in audit.md -> match keys.
 
@@ -422,10 +425,16 @@ def _axis_keys():
     class that repeats twice" on the same surfaces, and would report an axis named
     that nobody named.
     """
+    if "r" in _AXIS_MEMO:
+        return _AXIS_MEMO["r"]
     _p = os.path.join(refdir, "audit.md")
     if not os.path.isfile(_p):
         return None, None
+    # Called once by the claim-registry lambda and once to build _AXIS_KEYS, both
+    # BEFORE _LIVING_TEXT exists — so the file is memoised here rather than fetched
+    # from a cache that is not built yet at the first call.
     _t = open(_p, encoding="utf-8").read()
+    _AXIS_MEMO["t"] = _t
     _h = re.search(r"^###\s+\d+\.\s+Every pass changes the axis.*$", _t, re.M)
     if not _h:
         return None, None
@@ -440,6 +449,7 @@ def _axis_keys():
         if not _w:
             continue
         _keys.append(" ".join(_w[:2]) if len(_w) > 1 else _w[0])
+    _AXIS_MEMO["r"] = (_keys, _p)
     return _keys, _p
 
 
@@ -982,7 +992,8 @@ else:
 # skips — a guard whose subject was renamed away must say so.
 _rd = os.path.join(refdir, "audit.md")
 if os.path.isfile(_rd):
-    _rdt = open(_rd, encoding="utf-8").read()
+    _rdt = (_LIVING_TEXT.get("plugins/task-pipeline/skills/task-pipeline/references/audit.md")
+            or _AXIS_MEMO.get("t") or open(_rd, encoding="utf-8").read())
     _m = re.search(r"^\d+\.\s+\*\*Re-derivation\*\*", _rdt, re.M)
     if not _m:
         fail("references/audit.md: the Re-derivation axis is gone or renamed — the guard "
