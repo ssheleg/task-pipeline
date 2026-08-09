@@ -372,7 +372,7 @@ rule and the command. Every miss was found by a reader or a sweep, never by the 
 **nobody notices a corpus that is too small, because everything inside it passes.**
 Exclusions are allowed and must each carry a reason in the code: a changelog narrates
 old formats, `docs/superpowers/specs/` are point-in-time records.
-*(guard: `the disclosure corpus is discovered`)*
+*(guard: `a worked GATE verdict omits ` and `states the cold-retirement condition as` — both now run over corpora walked from disk, so a new surface joins by existing)*
 
 **44. Every invariant above names the guard that enforces it, and that guard exists.**This list claims to be *what the validator enforces*; it was eight guards behind when
 an audit measured it. A claim of enforcement is now checked like any other claim.
