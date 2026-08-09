@@ -52,7 +52,14 @@ word *"the"* and `npm test` did not see it, and `templates/backlog.md` — the f
 verbatim into every host project — shipped a worked example that **contradicted the
 formula printed two lines below it**. The arithmetic is now a guard, over both boards.
 
-Guards: 156 → **163**.
+**The class the board logs hit the board itself.** A blank line inside its table split
+three rows off into prose — and row **B-004** on that same board reads *"a blank line
+silently splits a markdown table, and the documentation gate does not catch it."* Second
+instance of a class this repository already had written down, so it became a script
+rather than a third ledger row, swept across the whole corpus. B-004 is closed by the
+check it asked for.
+
+Guards: 156 → **164**.
 
 ## v1.30.0 — the cap that would have measured the wrong axis
 

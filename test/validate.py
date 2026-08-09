@@ -1201,10 +1201,10 @@ if os.path.isfile(_lp):
 # ever used that value**, and sixteen rows sat `open` with no home at all. The dangling
 # pointer was not `backlog`; it was `open`.
 #
-# Ten ledgers, and the header shape varies six ways (`#` vs `id`; the status column
-# named Home / Where it lives now / Resolution / Status / State). So columns are found
-# by NAME, never by position — a positional read is how a guard silently checks the
-# wrong cell on five of six files.
+# Ten ledgers, six header shapes, and FIVE with two status-ish columns. Neither a
+# positional read nor a by-name read survives that: both pick one cell per file and the
+# wrong one in half the corpus. The test below asks neither question — see POSITION-FREE
+# where the work actually happens.
 #
 # Floor 0, and it is a ratchet: every open row was given a board id at the seam's
 # closing, so a new one arriving unhomed fails rather than joining a backlog of debt.
@@ -1288,6 +1288,33 @@ if os.path.isfile(_BOARD):
                  "trace back is a wish somebody typed, and six weeks later it is either "
                  "done twice or dropped by whoever trusts it least")
             break
+
+# A blank line inside a table ENDS it. Every row after the gap loses the header and
+# renders as pipe-delimited prose — on GitHub, in any CommonMark reader, and silently.
+# This repo's own board carries a row about exactly this class ("a blank line silently
+# splits a markdown table, and the documentation gate does not catch it"), and the class
+# then hit that very board: three rows appended after a stray blank line rendered as
+# text. audit.md says a class seen twice becomes a script rather than a third ledger
+# row, so here is the script. The shape is precise — a table row, one blank line, a
+# table row — so two genuinely separate tables are untouched.
+for _root, _dirs, _fs in os.walk(ROOT):
+    _dirs[:] = [_d for _d in _dirs if _d not in (".git", "node_modules", "graphify-out")]
+    for _f in _fs:
+        if not _f.endswith((".md", ".mdc")):
+            continue
+        _rel = os.path.relpath(os.path.join(_root, _f), ROOT)
+        _ls = open(os.path.join(_root, _f), encoding="utf-8").read().splitlines()
+        _fence = False
+        for _i in range(len(_ls) - 2):
+            if _ls[_i].lstrip().startswith("```"):
+                _fence = not _fence
+            if _fence:
+                continue
+            if (_ls[_i].startswith("|") and not _ls[_i + 1].strip()
+                    and _ls[_i + 2].startswith("|")):
+                fail(f"{_rel}:{_i + 2}: a blank line splits a table — every row below it "
+                     "loses the header and renders as pipe-delimited text, which looks "
+                     "like a table only in the editor")
 
 # references/artifacts.md maps stage -> what it WRITES. The reverse direction — what
 # each stage READS and from where — is the one an agent actually needs at runtime,

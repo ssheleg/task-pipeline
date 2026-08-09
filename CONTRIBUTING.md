@@ -378,9 +378,12 @@ old formats, `docs/superpowers/specs/` are point-in-time records.
 `docs/superpowers/backlog.md` is the project's queue between runs; the ledger's `open`
 was a home that pointed nowhere, and sixteen rows across six ledgers sat in it. Both
 directions are checked because they are different failures — an id nobody issued, and a
-row traceable to nothing. Ledger columns are found **by name**: ten ledgers in this repo
-carry six different header shapes, and a positional read would check the wrong cell in
-five of them.
+row traceable to nothing. The test is **position-free**: a row is open if any of its cells
+says so, and homed if a board id appears anywhere in it. Neither question asks which
+column the value came from — ten ledgers here carry six header shapes and **five of them
+have two status-ish columns**, so both a positional read and a by-name read pick a
+different cell per file and pass open rows in silence. Reading by name was the first
+design and it was wrong for the same reason.
 *(guard: `with no board id` and `names no Source`)*
 
 **45. Every invariant above names the guard that enforces it, and that guard exists.**This list claims to be *what the validator enforces*; it was eight guards behind when

@@ -3088,3 +3088,21 @@ jobs:
           else
             echo "OK: validator correctly FAILs — the test is position-free, so a shape nobody anticipated cannot defeat it"
           fi
+
+      - name: Negative self-test (a blank line splitting a markdown table)
+        run: |
+          set -eu
+          rm -rf /tmp/tbl-copy && cp -R . /tmp/tbl-copy
+          python3 - <<'EOF'
+          p = "/tmp/tbl-copy/docs/superpowers/backlog.md"
+          t = open(p, encoding="utf-8").read()
+          needle = "| B-015 |"
+          assert needle in t, "PLANT DID NOT LAND: anchor absent before the edit"
+          open(p, "w", encoding="utf-8").write(t.replace(needle, "\n" + needle, 1))
+          EOF
+          if python3 /tmp/tbl-copy/test/validate.py; then
+            echo "ERROR: a split table passed — every row below the gap renders as prose, silently"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the class that hit this repo's own board is now a check"
+          fi
