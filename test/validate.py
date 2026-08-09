@@ -1425,6 +1425,7 @@ else:
 # was measured. Prose does not hold a shape across ten runs; a template does.
 _VERIF = os.path.join(ROOT, "docs/superpowers/verification.md")
 _VERIF_NEVER = 0
+_VERIF_TOTAL = 0
 if os.path.isfile(_VERIF):
     _vt = open(_VERIF, encoding="utf-8").read()
     _vrows = re.findall(r"^\|\s*(REQ-\d+)\s*\|(.+)$", _vt, re.M)
@@ -1473,7 +1474,8 @@ if os.path.isfile(_VERIF):
             fail(f"docs/superpowers/verification.md: {_rid} has no `Human` value that is "
                  "either a date or the literal `never` — prose in that column is how the "
                  "one question this file exists to answer stops being answerable")
-        elif _human[0].lower() == "never":
+        _VERIF_TOTAL += 1
+        if _human and _human[0].lower() == "never":
             _VERIF_NEVER += 1
 
 # artifacts.md carries the same truth twice: an ASCII layout tree and a set of tables.
@@ -3088,5 +3090,12 @@ if _LSHAPE:
     print("  " + _LSHAPE + "  (disclosure — no floor, no target)")
 # The other disclosure: what this run did not look at. Printed even when empty, because
 # "unlooked: 0" and a missing line are the same silence to a reader.
+# The never-count, printed. It was computed and dropped on the floor for one release —
+# a measurement nobody surfaces is the same silence as no measurement, which is the
+# failure this file's own doctrine is loudest about. No floor, no direction, never a
+# target: N of M rows have not been looked at by a person, and that is the whole claim.
+if _VERIF_TOTAL:
+    print(f"  verification: {_VERIF_TOTAL} shipped REQ · {_VERIF_NEVER} never confirmed by "
+          "a person  (disclosure — no floor, no target)")
 print(f"  unlooked: {len(_UNLOOKED)}"
       + ("".join("\n    · " + _u for _u in _UNLOOKED) if _UNLOOKED else ""))

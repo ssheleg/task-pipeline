@@ -394,7 +394,7 @@ machine-readable REQ rows while ten acceptance files carry their coverage table 
 as many shapes. **The `never` count has no floor and may never be given a target**; a
 property check proves that filling the column does not fail the build, because a gate
 that punishes an honest answer will not receive one.
-*(guard: `has no `Human` value that is` and `is in no brief's REQ table`)*
+*(guard: `either a date or the literal` and `is in no brief's REQ table`)*
 
 **46. Every invariant above names the guard that enforces it, and that guard exists.**This list claims to be *what the validator enforces*; it was eight guards behind when
 an audit measured it. A claim of enforcement is now checked like any other claim.

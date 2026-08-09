@@ -51,7 +51,23 @@ code spans, while the template it follows says *"copied from the brief, not re-w
 sixty-seven of a hundred and three rows landing at exactly 72 is a script's fingerprint,
 not an editor's. Reseeded in full: 26 to 246 characters, none at 72.
 
-Guards: 175 → **181**, property checks 4 → 5.
+**The ledger recorded unbuilt features as shipped and verified.** The seed took every
+REQ from every brief — including this programme's own, whose REQ-004/008/009/010 belong
+to modules that do not exist yet, and whose N2 rows were stamped with N1's version. In
+the file whose entire purpose is *what actually shipped*. Reseeded: **99 rows**, four
+omitted as not yet built, each module stamped with its own release.
+
+**And the count is printed.** It was computed and dropped on the floor for a release — a
+measurement nobody surfaces is the same silence as no measurement:
+
+```
+verification: 99 shipped REQ · 99 never confirmed by a person  (disclosure — no floor, no target)
+```
+
+Ninety-nine shipped requirements, not one confirmed by a person. That is the answer to a
+question this repository could not previously ask.
+
+Guards: 175 → **181**, property checks 4 → 6.
 
 ## v1.31.0 — the board, and the pointer that was never the one dangling
 

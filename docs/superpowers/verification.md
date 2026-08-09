@@ -110,10 +110,6 @@
 | REQ-001 | `artifacts.md` names both new files in **both** maps and in the single-home table | `2026-08-09-planning-system` | v1.31.0 | pass | never | — |
 | REQ-002 | `docs/superpowers/backlog.md` — seeded at stage 0 when absent, picked up when present | `2026-08-09-planning-system` | v1.31.0 | pass | never | — |
 | REQ-003 | Any stage may append a row mid-run, same rule as the ledger: *deferred out loud or lost* | `2026-08-09-planning-system` | v1.31.0 | pass | never | — |
-| REQ-004 | Each loop iteration reads the board at the top and re-prioritises at the bottom; *"next up"* cites the measurement | `2026-08-09-planning-system` | v1.31.0 | pass | never | — |
 | REQ-005 | Every carry-over row homed `backlog` resolves to a real board id — **both directions** | `2026-08-09-planning-system` | v1.31.0 | pass | never | — |
-| REQ-006 | `docs/superpowers/verification.md` — one row per REQ: shipped-in, auto verdict, human-confirmed date or `never` | `2026-08-09-planning-system` | v1.31.0 | pass | never | — |
-| REQ-007 | Stage 8 writes the row; stage 10 refuses a REQ with no row | `2026-08-09-planning-system` | v1.31.0 | pass | never | — |
-| REQ-008 | The exposure index is computed and printed beside the verdict as a **disclosure** — inputs visible, plus the list of what to check | `2026-08-09-planning-system` | v1.31.0 | pass | never | — |
-| REQ-009 | `/task-pipeline checkup` runs **standalone**, with no task in flight | `2026-08-09-planning-system` | v1.31.0 | pass | never | — |
-| REQ-010 | The index is never rendered as a probability or a percentage | `2026-08-09-planning-system` | v1.31.0 | pass | never | — |
+| REQ-006 | `docs/superpowers/verification.md` — one row per REQ: shipped-in, auto verdict, human-confirmed date or `never` | `2026-08-09-planning-system` | v1.32.0 | pass | never | — |
+| REQ-007 | Stage 8 writes the row; stage 10 refuses a REQ with no row | `2026-08-09-planning-system` | v1.32.0 | pass | never | — |
