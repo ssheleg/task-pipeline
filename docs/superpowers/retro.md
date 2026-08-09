@@ -36,6 +36,91 @@ row goes — the cap is not negotiable, ranking is.
 
 ## Recent log — entries from the last five run stamps (newest first)
 
+### 2026-08-10 · `planning-system`/N3+N4+N5 · three board rows described the failure I kept hitting
+
+**Symptom.** The negative suite failed and hung for most of a working day: concurrent
+runs clobbering each other's `/tmp` scratch, a thirteen-minute serial pass long enough to
+get backgrounded, and copies taken from a working tree I was editing at the time.
+
+**All three were already written down.** B-005, B-021, B-023 — on the board this very
+programme built, by me, before any of them fired. I read them as a queue of someday-work
+rather than as a description of what was blocking the step in front of me.
+
+**Surfaced at:** the operator, saying *"your runs fail and hang forever."* Not a stage,
+not a check, not the board — a person watching from outside.
+
+**Owned by:** stage 0 of every iteration since the board existed. The harvest reads the
+board. Nothing in it asks *"is one of these rows the reason the current step is failing?"*
+
+**Root cause, and it is the honest one.** A queue answers *what should we do next*. It
+does not answer *what is biting us right now*, and those are different questions asked of
+the same rows. The exposure line and `/task-pipeline checkup` shipped in this module exist
+precisely to surface a standing condition **before** work rather than when somebody thinks
+to look — and I built both without once running them on myself.
+
+**Fix, by grade.**
+1. *(mechanical)* One snapshot, eight workers: **13+ min → 5m34s**, measured. Every test
+   runs against a pristine copy, so editing the tree mid-run is harmless. All three rows
+   closed by behaviour rather than by a note.
+2. *(mechanical, and the parallel run earned it immediately)* Three shipped steps read
+   `rm -rf /tmp/X && cp -R . /tmp/X-2` — deleting a directory they did not own. Harmless
+   while the suite was serial; a race the first hour it was not. The existing reuse guard
+   never saw them because it compared only `cp` targets while the defect lived in the
+   `rm`. Both now checked.
+3. *(no new standing instruction.)* The candidate — *when a step fails twice for the same
+   reason, search the board before diagnosing* — is a judgement rule, and the list sits at
+   six of ten. It goes into the next prune's argument, not silently into the list.
+
+**Two self-inflicted guard defects, kept because they rhyme.** The exposure guard's needle
+looked for *"never a percentage"* while the doctrine it guards says *"no percentage,
+ever"* — guard and prose written an hour apart, already disagreeing. And its `%` check
+matched **its own line**, the one line in the file guaranteed to contain the literal, and
+passed a planted percentage. A detector that matches itself first is checking the wrong
+thing.
+
+**And the ordering promise was inverted.** *"Oldest first"* compared version strings, so
+`v1.10.0` sorted before `v1.9.0` — with the list truncated at eight, the genuinely oldest
+rows never printed at all. The doctrine said one thing and the code did another on this
+repository's own data, and a reader found it.
+
+### 2026-08-10 · `planning-system`/N2 · the file whose job is not to claim things claimed three
+
+**Symptom.** Ten review rounds, roughly twenty findings, **none from my probes**. The
+doctrine landed on the first pass and was never argued with. Three findings were one
+shape, and it is the shape worth the entry:
+
+- `Auto=pass` written on all ninety-nine rows while four coverage verdicts read
+  **`review`** — *no check can decide this*;
+- four REQs recorded as **shipped** while the modules that would ship them did not exist;
+- one REQ stamped with the release *before* the file its criterion requires existed,
+  contradicting the row directly beneath it.
+
+In the file built specifically so that a machine cannot claim a person looked. It claimed
+three other things instead, in its first seeding, from a script I wrote in five minutes
+after spending an hour on the doctrine forbidding exactly that.
+
+**Surfaced at:** stage 7, by a reader who compared two adjacent rows and saw them
+disagree about a date.
+
+**Owned by:** stage 5. The doctrine was the careful part; the seed was the afterthought,
+and the seed is what shipped a false record.
+
+**Root cause.** A generator writes what its author assumed, not what the sources say, and
+nothing compares the two. [`learned.md`](../../plugins/task-pipeline/skills/task-pipeline/references/learned.md)
+rule 9 — *a generator seeds green* — one level out: here it seeded **truth-shaped**.
+
+**Fix, by grade.**
+1. *(mechanical)* The REQ is checked against the brief the row **names**, not the union of
+   all briefs — ids 001–014 recur across all nine, so the union check passed almost any
+   mispairing. `review → none` is in the template and the doctrine. Rows for modules that
+   have not shipped are omitted rather than stamped.
+2. *(nothing above that.)* R-005 dispatched the reader and the reader found all of it.
+
+**The check that catches it next time:** for pairing, the guard. For *"the seed wrote what
+I assumed"* — nothing mechanical, and saying so is the honest end of this entry. No check
+compares two adjacent rows for a contradiction about a date. A person did.
+
+
 ### 2026-08-09 · `planning-system`/N1 · everyone who reads a value, and not the file that writes it
 
 **Symptom.** Ten review rounds, twenty-nine findings, none of them from my probes. The
@@ -633,6 +718,8 @@ One line per run, appended at stage 10. This is what makes "five runs" countable
 
 | Date | Topic | Commit | Verdict | Retro |
 |---|---|---|---|---|
+| 2026-08-10 | `planning-system` / N3+N4+N5 `exposure-checkup-loop` | `0137512` | 3 REQ · a vector never a probability, the command with no task in flight, the loop citing the board · **one review round by the lowered threshold, 5 findings** · the suite itself fixed: 13+ min → **5m34s** · carry-over 2 rows, 0 unresolved | 1 entry · 6 standing · retired 0 · added 0 · R-001, R-002, R-004 fired · guards 185 → 188 |
+| 2026-08-10 | `planning-system` / N2 `verification-ledger` | `85f8c8a` | 3 REQ · the column a machine may not fill · **ten review rounds, ~20 findings, none from my probes** · carry-over 2 rows, 0 unresolved | 1 entry · 6 standing · retired 0 · added 0 · R-001, R-002, R-005 fired · guards 175 → 185 |
 | 2026-08-09 | `planning-system` / N1 `the-board` | `4233c3d` | 4 REQ · a queue between runs, and the seam the ledger left dangling · **ten review rounds, 29 findings, none from my probes** · carry-over 2 rows, 2 open, 0 unresolved | 1 entry · 6 standing · retired 0 · added 0 · R-001, R-002, R-004, R-005 all fired · guards 156 → 175 + 4 property |
 | 2026-08-09 | `audit-followup` / M6 `learned-shape` | `241df1e` | 1 REQ · a cap refused by measurement, and the class it uncovered · **eight review rounds, 20 findings, two of them red, none from my probes** · carry-over 12 rows, 7 open, 0 unresolved | 1 entry · 6 standing · retired 0 · added 0 · R-001, R-005 fired · guards 144 → 156 + 1 property |
 | 2026-08-09 | `audit-followup` / M5 `re-derive-axis` | `a3dd771` | 1 REQ · a sixth rotation axis, and the enumeration of the five that had already drifted · **four review rounds, 8 findings, all mine, none from my probes** · carry-over 12 rows, 7 open, 0 unresolved | 1 entry · 6 standing · retired 0 · added 0 · R-001, R-005 fired · guards 136 → 144 |
