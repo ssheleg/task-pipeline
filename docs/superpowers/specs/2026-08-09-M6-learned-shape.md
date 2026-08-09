@@ -59,11 +59,17 @@ down — which is why the proposal came back, and why it is written down here.
 
 ## The numbers this module ships with
 
-Re-derived on the branch commit, not carried from the note that proposed the module:
+Re-derived at the **branch point**, not carried from the note that proposed the module.
+Left as measured there and labelled as such — the module then changed the file, so a
+number written here as "current" would have been stale by the time it was read:
 
 ```
-rules=21  incidents=18  incident_words=1940  binding_rows=16  total_words=3919
+at branch:  rules=21  incidents=18  incident_words=1940  binding_rows=16  total=3919
 ```
+
+The live shape is printed by `npm test` beside its verdict, and it already differs — the
+count now says **rules with an incident**, because one write-up covers two rules and the
+old label did not say which it meant.
 
 ## What the module actually found (stage 7, two review rounds)
 
