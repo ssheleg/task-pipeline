@@ -36,6 +36,57 @@ row goes — the cap is not negotiable, ranking is.
 
 ## Recent log — entries from the last five run stamps (newest first)
 
+### 2026-08-09 · `audit-followup`/M4 · a section that named eight and disposed of seven
+
+**Symptom.** The module counted abstentions for the first time. Its doctrine section opens
+by naming **eight** vocabularies for declining to claim, sorts three into `abstained`, two
+into `unlooked`, and excludes two by name. That is seven. **`review` was named and then
+appeared in no bucket and no exclusion** — it simply stopped being mentioned.
+
+In the section whose entire subject is *abstentions nobody counts*.
+
+Four more from the same review, all mine: the guard held four reference files and not
+`templates/carryover.md` — a template **seeded into host projects**, which teaches the
+verdict format to everyone who installs the skill; the section-citation checker could not
+see the citation this change added, because its matcher wants a bare filename in backticks
+and the label this change wrote carries a path — `references/gates.md`, not `gates.md`, in the
+backticks before the parenthesis; the shipped self-test removed both counts
+at once and so proved neither was required alone; and `stages.md`'s stage-10 gate was left
+behind while stage 6 in the same file was updated.
+
+**Surfaced at:** stage 7, all five, by review.
+
+**Owned by:** stage 3 for the omission — an enumeration is a design artefact, and this one
+was written and never read back against itself. Stage 9 for the template.
+
+**Root cause.** A list does not check itself. Naming eight and handling them one at a time
+is exactly the shape where the last item is lost, because attention runs out on the ones
+with interesting answers — and `review`'s answer *is* the interesting one: it is not a
+claim the run declined, it is a rule that **declined to be mechanical**, so counting it per
+run would report the same standing number forever. The item hardest to place is the item
+most likely to be dropped.
+
+This is `audit.md`'s own thesis at paragraph scale: *a contradiction has two sides and an
+absence has one*. Nothing in the paragraph contradicted anything. `review` was simply not
+there, and only counting the names against the buckets finds that.
+
+**Fix, by grade.**
+1. *(mechanical)* Each uncounted vocabulary now carries its own line **and its reason**, so
+   an omission shows as a missing bullet rather than as silence. `templates/carryover.md`
+   joins the guard's file list — second time this programme that an obligation reached the
+   doctrine and not `templates/`. The citation matcher accepts a path-prefixed label; the
+   corpus stayed green after widening, so nothing had gone through the hole, but the hole
+   was open. Two per-disclosure self-tests replace the one that removed both at once.
+2. *(none needed above that.)* R-005 fired and the reader found all five.
+
+**The check that catches it next time:** for the template and the citation form, the two
+widened guards. Writing this entry then hit the same class one level down — spelling the
+citation form out literally *is* a citation, and the link checker resolved the ellipsis inside
+it as a path and failed the suite. Correct behaviour, and the reason the form is now described
+rather than written. For an enumeration that loses its last item — nothing mechanical, and that
+is worth saying plainly rather than inventing a guard that would only fit this paragraph.
+
+
 ### 2026-08-09 · `audit-followup`/M3 · a guard that skipped the file defining the thing it guards
 
 **Symptom.** The module gave the cold-retirement trigger a second unit and shipped a guard
@@ -418,6 +469,7 @@ One line per run, appended at stage 10. This is what makes "five runs" countable
 
 | Date | Topic | Commit | Verdict | Retro |
 |---|---|---|---|---|
+| 2026-08-09 | `audit-followup` / M4 `abstention-disclosure` | `1426bdf` | 1 REQ · a second kind of counted set, non-monotone by construction · **one review round, 5 findings, all mine** · carry-over 11 rows, 7 open, 0 unresolved | 1 entry · 6 standing · retired 0 · added 0 · R-001, R-003, R-005 all fired · guards 134 → 136 |
 | 2026-08-09 | `audit-followup` / M3 `retro-continuity` | `a079192` | 1 REQ + ledger row 1 corrected · **one review round, 3 findings, TWO of them Important — the first of this programme, both in the guard this module ships** · carry-over 10 rows, 6 open, 0 unresolved | 1 entry · 6 standing · retired 0 · added 0 · R-001, R-003, R-005, R-006 all fired · guards 132 → 133 |
 | 2026-08-08 | `audit-followup` / M7 `rendered-surface-check` | `b524680` | 1 REQ · a companion wired into stages 5–6 and 8 · **one review round, 4 findings, all mine, none found by my own probes** · carry-over 9 rows, 6 open, 0 unresolved | 1 entry · 6 standing · retired 0 · added 0 · R-005 and R-006 both fired · guards 130 → 131 |
 | 2026-08-08 | `audit-followup` / M2 `claim-registry` | `44bdf53` | 1 REQ + carry-over row 7 · six claim classes, each armed · **three review rounds, 13 findings, none of them found by the module's own probes** · carry-over 9 rows, 6 open, 0 unresolved | 1 entry · **6 standing (was 5)** · retired 0 · added 1 (R-006) · R-001, R-002, R-003, R-004, R-005 all fired · guards 124 → 130 |

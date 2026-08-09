@@ -507,7 +507,11 @@ for _label, _pat, _compute, _incident in _CLAIM_REGISTRY:
     # because a registry reporting green over six classes it never looked at is exactly the
     # false success it exists to catch. Most classes are dormant on purpose — the numbers
     # were deleted rather than corrected, and this is the ratchet against re-introducing them.
-    _CLAIM_STATES.append(f"{_label}: {'ok ' + str(_seen) if _seen else 'dormant'} (truth {_truth})")
+    # "ok 4 (truth 10)" reads as "claims 4, truth is 10" — the author of this line misread
+    # his own output that way within a day of writing it. The count is of agreeing statements,
+    # so it is written as a multiplier: a state line nobody can parse is not a disclosure.
+    _CLAIM_STATES.append(
+        f"{_label}: {'agrees x' + str(_seen) if _seen else 'dormant'} (truth {_truth})")
 
 # learned.md rule 16 — a rule that lands in the table and nowhere else is a rule the
 # run never meets, because nothing at stage 0 or stage 10 sends anybody to it. The
