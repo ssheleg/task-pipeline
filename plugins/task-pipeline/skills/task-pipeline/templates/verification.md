@@ -26,7 +26,9 @@
   the commit, and the same value every row of that run carries.
 - **Auto** — what the run's own gate said: `pass` · `partial` · `none`. Copied from the
   coverage table rather than re-derived; where the two disagree the coverage table wins
-  and the disagreement is a finding.
+  and the disagreement is a finding. A coverage verdict of **`review`** — *no check can
+  decide this* — becomes `none`, because this column records what a machine established
+  and there the honest answer is *nothing*.
 - **Human** — a date, or the literal **`never`**. Nothing else. *"soon"*, *"mostly"* and
   *"looks fine"* are how a column stops being answerable, and this is the only column in
   the pipeline that a machine may not fill on your behalf.

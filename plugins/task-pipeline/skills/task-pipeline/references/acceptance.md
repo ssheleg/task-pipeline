@@ -205,10 +205,15 @@ GATE 10 acceptance: PASS — 14/14 REQ verified
 
 All of:
 
-1. **The ladder walk ran** ([`audit.md`](audit.md)) — every REQ's rungs checked
+1. **Every shipped REQ has a verification row, and every row names a REQ its own run
+   carries** ([`verification.md`](verification.md)) — both directions, because a shipped
+   feature that entered no ledger and a ledger row about nothing are different failures.
+   The row's `Human` is a date or the literal `never`; `never` is a **fact** and its
+   count has no floor, no direction and never a target.
+2. **The ladder walk ran** ([`audit.md`](audit.md)) — every REQ's rungs checked
    bottom-up, findings ordered by seam, absences turned into REQ rows **before**
    the table was written, and the two pass counts recorded.
-2. **Every check this gate leans on has been seen failing** at least once against a
+3. **Every check this gate leans on has been seen failing** at least once against a
    planted defect (`audit.md` → *Exit criterion*; the procedure, with the commands,
    is [`gates.md`](gates.md) → *Probing*). An unproven check's green is not
    evidence. That includes **the documentation gate** the project's doc map names
@@ -216,12 +221,12 @@ All of:
    is *proven*, and its **ratchet counts are printed beside this verdict**. A
    documentation gate is the easiest one in a run to inherit unproven, because it
    was green the first time anyone looked at it.
-3. **Every REQ has a status** — none `unknown`, none blank.
-4. **Every `verified` carries evidence** of the kind above.
-5. **Every `partial` names what's missing** and where it's tracked.
-6. **Every `deferred` / `dropped` has the operator's agreement** recorded (in the
+4. **Every REQ has a status** — none `unknown`, none blank.
+5. **Every `verified` carries evidence** of the kind above.
+6. **Every `partial` names what's missing** and where it's tracked.
+7. **Every `deferred` / `dropped` has the operator's agreement** recorded (in the
    ledger or here) and, for `deferred`, a tracker entry.
-7. **No carry-over row is left `unresolved`** — every one has a home, and the
+8. **No carry-over row is left `unresolved`** — every one has a home, and the
    ledger's counts are printed with this verdict, not just filed.
 7a. **Both disclosures are printed** ([`gates.md`](gates.md) → *Disclosures*):
    `abstained` — every REQ closing `partial`, every `unknown`, every ⚠️ *cannot verify
@@ -230,11 +235,11 @@ All of:
    a movement either way wants one sentence. A run reporting `abstained: 0` is claiming
    it knew everything, which is a stronger statement than any run this stage has ever
    seen close honestly.
-8. **Every repository is closed, the parent included** — `git submodule status`
+9. **Every repository is closed, the parent included** — `git submodule status`
    shows no `+`, and each repo is clean and pushed. A submodule is finished when
    its parent points at it.
-9. **The operator answers the closing question** and signs off.
-10. **The retrospective is written** ([`retrospective.md`](retrospective.md)) — **in
+10. **The operator answers the closing question** and signs off.
+11. **The retrospective is written** ([`retrospective.md`](retrospective.md)) — **in
     order**: the run is stamped with its commit first, **then** the prune runs before
     anything is added (standing instructions checked against their retirement triggers,
     the list at or under its cap of ten, every deletion logged), **then** a run that

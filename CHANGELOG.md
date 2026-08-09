@@ -67,7 +67,7 @@ verification: 99 shipped REQ · 99 never confirmed by a person  (disclosure — 
 Ninety-nine shipped requirements, not one confirmed by a person. That is the answer to a
 question this repository could not previously ask.
 
-Guards: 175 → **184**, property checks 4 → 8.
+Guards: 175 → **185**, property checks 4 → 8.
 
 ## v1.31.0 — the board, and the pointer that was never the one dangling
 

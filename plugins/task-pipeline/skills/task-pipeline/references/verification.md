@@ -55,6 +55,11 @@ failing; it is a project that now knows something it could not previously ask.
 
 ## What stage 8 writes and what stage 10 refuses
 
+**A coverage verdict of `review` becomes `none`.** *No check can decide this* is not
+a pass; `Auto` records what a machine established, and there the honest answer is
+nothing. The first seed wrote `pass` for four such rows — in the file whose whole
+purpose is not to do that.
+
 **Stage 8** writes one row per REQ the run shipped, right after the verification it
 already does. `Human` starts at `never` unless the operator confirmed during the run.
 

@@ -557,6 +557,13 @@ def _paragraphs(text):
     return re.split(r"\n\s*\n", text)
 
 
+def _row_cells(line, lower=True):
+    """Pipe-split a markdown row into flattened cells. Third copy of this comprehension
+    when it was extracted, and the drift it invites is not hypothetical: the Human-column
+    index bug in this same module came from two lists split slightly differently."""
+    return [_flatten(_x, lower=lower).strip() for _x in line.split("|")[1:-1]]
+
+
 def _flatten(text, lower=False):
     """Collapse the corpus's own formatting before matching: ~80-column wrapping and
     emphasis INSIDE a phrase have now defeated three guards in this file, each of
@@ -1262,7 +1269,7 @@ if os.path.isfile(_BOARD):
         _hdr = None
         for _l in _lt.splitlines():
             if _l.startswith("|") and _l.split("|")[1].strip().lower() in _LEDGER_ID:
-                _hdr = [_flatten(_x, lower=True).strip() for _x in _l.split("|")[1:-1]]
+                _hdr = _row_cells(_l)
                 break
         if _hdr is None:
             continue                       # a ledger with no table yet
@@ -1274,7 +1281,7 @@ if os.path.isfile(_BOARD):
         for _l in _lt.splitlines():
             if not _l.startswith("|") or set(_l.strip()) <= set("|- "):
                 continue
-            _c = [_flatten(_x, lower=True).strip() for _x in _l.split("|")[1:-1]]
+            _c = _row_cells(_l)
             if not _c or _c[0] in _LEDGER_ID:
                 continue
             if len(_c) == len(_hdr):
@@ -1444,7 +1451,7 @@ if os.path.isfile(_VERIF):
     _vhdr = None
     for _l in _vt.splitlines():
         if _l.startswith("|") and "human" in _flatten(_l, lower=True):
-            _vhdr = [_flatten(_x, lower=True).strip() for _x in _l.split("|")[1:-1]]
+            _vhdr = _row_cells(_l)
             break
     if _vhdr is None or "human" not in _vhdr:
         fail("docs/superpowers/verification.md: no header row naming a `Human` column — "
@@ -1455,9 +1462,12 @@ if os.path.isfile(_VERIF):
         _hidx = _vhdr.index("human")
 
     _brief_reqs = set()
+    _brief_by_slug = {}
     for _bf in glob.glob(os.path.join(ROOT, "docs/superpowers/specs/*brief.md")):
-        _brief_reqs |= set(re.findall(r"^\|\s*(REQ-\d+)\s*\|",
-                                      open(_bf, encoding="utf-8").read(), re.M))
+        _slug = os.path.basename(_bf).replace("-brief.md", "")
+        _ids = set(re.findall(r"^\|\s*(REQ-\d+)\s*\|", open(_bf, encoding="utf-8").read(), re.M))
+        _brief_by_slug[_slug] = _ids
+        _brief_reqs |= _ids
     for _rid, _rest in _vrows:
         # Built over the WHOLE row, REQ included, so it is shaped like the header and
         # `_hidx` indexes it directly. The first version dropped REQ from the cells but
@@ -1466,7 +1476,17 @@ if os.path.isfile(_VERIF):
         _cells = [_flatten(_x).strip() for _x in (_rid + "|" + _rest).split("|")]
         # Reverse direction: a row about nothing. Different failure from a shipped REQ
         # that entered no ledger, and only this pass finds it (learned.md rule 2).
-        if _brief_reqs and _rid not in _brief_reqs:
+        # Against the brief this row NAMES, not the union of all of them. Ids 001-014
+        # recur across every brief, so the union check passed a row paired with the wrong
+        # run almost always — it was asking "does this id exist anywhere", which is not
+        # the question.
+        _run = next((_x.strip("`") for _x in _cells if _x.strip("`") in _brief_by_slug), None)
+        if _run:
+            if _rid not in _brief_by_slug[_run]:
+                fail(f"docs/superpowers/verification.md: {_rid} is not in the REQ table of "
+                     f"`{_run}`, the run this row names — an id that exists in some other "
+                     "brief is not the same requirement")
+        elif _brief_reqs and _rid not in _brief_reqs:
             fail(f"docs/superpowers/verification.md: {_rid} is in no brief's REQ table — a "
                  "ledger row about a requirement nobody wrote down is a row about nothing")
         # The Human column is the point of the file, so it is the one that is checked:
