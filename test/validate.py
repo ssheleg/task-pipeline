@@ -1364,6 +1364,35 @@ for _rel in _TBL_FILES:
                  "loses the header and renders as pipe-delimited text, which looks "
                  "like a table only in the editor")
 
+# The trigger list is written in code and enumerated in prose, and in one module the
+# two disagreed FOUR times — `open` alone while the doctrine said `backlog`, then
+# `backlog` added while `unresolved` was still only promised, then "two triggers" in a
+# file whose code checked three. Every instance was found by a reader. A class seen
+# twice becomes a script (audit.md), so the enumeration is now computed FROM the regex
+# and required to appear wherever the doctrine enumerates it.
+_UNRES_SRC = re.search(r'_UNRES_RE = re\.compile\(r"\^\(\?:([a-z|]+)\)', 
+                       open(os.path.join(ROOT, "test", "validate.py"), encoding="utf-8").read())
+if _UNRES_SRC:
+    _TRIGGERS = set(_UNRES_SRC.group(1).split("|"))
+    for _tf in ("plugins/task-pipeline/skills/task-pipeline/references/backlog.md",
+                "plugins/task-pipeline/skills/task-pipeline/templates/backlog.md"):
+        _tp = os.path.join(ROOT, _tf)
+        if not os.path.isfile(_tp):
+            continue
+        _tt = _flatten(open(_tp, encoding="utf-8").read(), lower=True)
+        if "unresolved" not in _tt and "resolves it" not in _tt:
+            continue                       # this file does not enumerate the triggers
+        _absent = sorted(_t for _t in _TRIGGERS if _t not in _tt)
+        if _absent:
+            fail(f"{_tf}: the resolution triggers this file enumerates omit "
+                 + ", ".join(repr(_a) for _a in _absent)
+                 + " — the check in test/validate.py accepts them, and a doctrine that "
+                   "names fewer than the code accepts is how three of them shipped "
+                   "described-but-unenforced in a single module")
+else:
+    fail("test/validate.py: cannot read the trigger literals out of _UNRES_RE — the "
+         "doctrine-vs-code comparison has no source and is silently passing")
+
 # references/artifacts.md maps stage -> what it WRITES. The reverse direction — what
 # each stage READS and from where — is the one an agent actually needs at runtime,
 # and it was absent for nine releases: learned.md rule 2 (compute the mapping in both

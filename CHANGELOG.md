@@ -96,7 +96,16 @@ one-rule-in-one-file-of-nine class this repository has a guard for on the rotati
 and none for a new mechanism. Both carry it now, the Cursor rule by restatement because
 it is self-contained by contract.
 
-Guards: 156 → **170**, property checks 1 → 4.
+**The class that ran through six rounds is closed by computation, not by a sixth fix.**
+Every one of those rounds found the same shape: the doctrine promised a resolution
+trigger the check did not enforce — `open` alone while the prose said `backlog`,
+`backlog` added while `unresolved` was still only promised, *"two triggers"* written in
+a file whose code checked three. `audit.md` says a class seen twice becomes a script, so
+the enumeration is now **extracted from the regex** and required to appear wherever the
+doctrine lists it, in both directions. A guard that loses its own source fails rather
+than passing.
+
+Guards: 156 → **172**, property checks 1 → 4.
 
 ## v1.30.0 — the cap that would have measured the wrong axis
 
