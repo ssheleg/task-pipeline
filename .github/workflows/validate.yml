@@ -2539,3 +2539,81 @@ jobs:
           else
             echo "OK: validator correctly FAILs — both disclosures print beside every worked verdict"
           fi
+
+      - name: Negative self-test (a summary that names most of the rotation axes)
+        run: |
+          set -eu
+          rm -rf /tmp/axis1-copy && cp -R . /tmp/axis1-copy
+          python3 - <<'EOF'
+          p = "/tmp/axis1-copy/cursor/rules/task-pipeline.mdc"
+          t = open(p, encoding="utf-8").read()
+          needle = ", then **false success** (not \"is this\n  check correct\" but \"what does this mechanism print when it did not look?\"), then\n  **re-derivation**"
+          assert needle in t, "PLANT DID NOT LAND: anchor absent before edit"
+          t = t.replace(needle, ", then\n  **re-derivation**", 1)
+          open(p, "w", encoding="utf-8").write(t)
+          assert "false success" not in open(p, encoding="utf-8").read(), "PLANT DID NOT LAND"
+          EOF
+          if python3 /tmp/axis1-copy/test/validate.py; then
+            echo "ERROR: validator passed an enumeration missing an axis — the drift this guard exists for"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — a surface that enumerates the axes names all of them"
+          fi
+
+      - name: Negative self-test (an axis added to audit.md that no summary echoes)
+        run: |
+          set -eu
+          rm -rf /tmp/axis2-copy && cp -R . /tmp/axis2-copy
+          python3 - <<'EOF'
+          p = "/tmp/axis2-copy/plugins/task-pipeline/skills/task-pipeline/references/audit.md"
+          t = open(p, encoding="utf-8").read()
+          needle = "\n**The crossover is measurable, so measure it.**"
+          assert needle in t, "PLANT DID NOT LAND: anchor absent before edit"
+          t = t.replace(needle, "\n7. **Adversarial reading** — an axis defined and never summarised.\n" + needle, 1)
+          open(p, "w", encoding="utf-8").write(t)
+          assert "Adversarial reading" in open(p, encoding="utf-8").read(), "PLANT DID NOT LAND"
+          EOF
+          if python3 /tmp/axis2-copy/test/validate.py; then
+            echo "ERROR: validator passed a new axis that reached the definition and no consumer"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the plant lands in the file that DEFINES the axes"
+          fi
+
+      - name: Negative self-test (the axis list moved out from under its own guard)
+        run: |
+          set -eu
+          rm -rf /tmp/axis3-copy && cp -R . /tmp/axis3-copy
+          python3 - <<'EOF'
+          p = "/tmp/axis3-copy/plugins/task-pipeline/skills/task-pipeline/references/audit.md"
+          t = open(p, encoding="utf-8").read()
+          needle = "### 2. Every pass changes the axis, not the effort"
+          assert needle in t, "PLANT DID NOT LAND: anchor absent before edit"
+          open(p, "w", encoding="utf-8").write(t.replace(needle, "### 2. Rotating the search", 1))
+          assert "Every pass changes the axis" not in open(p, encoding="utf-8").read(), "PLANT DID NOT LAND"
+          EOF
+          if python3 /tmp/axis3-copy/test/validate.py; then
+            echo "ERROR: validator passed with its axis source of truth unfindable — a guard silently checking nothing"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — a guard that lost its source says so instead of passing"
+          fi
+
+      - name: Negative self-test (a restated count of gates.md's own axes)
+        run: |
+          set -eu
+          rm -rf /tmp/axis4-copy && cp -R . /tmp/axis4-copy
+          python3 - <<'EOF'
+          p = "/tmp/axis4-copy/plugins/task-pipeline/skills/task-pipeline/references/gates.md"
+          t = open(p, encoding="utf-8").read()
+          needle = "# Gates — the three axes,"
+          assert needle in t, "PLANT DID NOT LAND: anchor absent before edit"
+          open(p, "w", encoding="utf-8").write(t.replace(needle, "# Gates — the two axes,", 1))
+          assert "the two axes" in open(p, encoding="utf-8").read(), "PLANT DID NOT LAND"
+          EOF
+          if python3 /tmp/axis4-copy/test/validate.py; then
+            echo "ERROR: validator passed a title claiming two axes over a file with three"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the count is computed from the Axis headings"
+          fi

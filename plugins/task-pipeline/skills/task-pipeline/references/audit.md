@@ -291,6 +291,25 @@ construction**:
    every pass that reads for wrongness. Sweep the change for actions trusted by
    their own reply. Definition and the known shapes: [`gates.md`](gates.md) →
    *False success*.
+6. **Re-derivation** — take a number the audit has already produced and produce it
+   again with a command of a **different shape**, then print both. Not a second
+   opinion: a second *route*. Re-running the same command is a spell-check of the
+   first run; asking a different question that must land on the same number is the
+   only version that can come back disagreeing. The exit criterion is **the pair
+   printed** — never "verified", never "matches". A re-derivation reported as
+   agreement is a claim about a measurement nobody can see.
+
+   ```
+   claimed:    the version invariant is four-way          (CONTRIBUTING.md, prose)
+   re-derived: grep -rl '"version"\|^## v' --include='*.json' --include='*.md' . \
+                 | wc -l                                  -> 5 surfaces
+   verdict:    REFUTED — the sentence and the corpus disagree; the corpus wins
+   ```
+
+   Rotate onto this axis when the reading axes go quiet **and the change carries
+   numbers**: counts in prose, thresholds, "N of M" claims, anything a document
+   asserts about itself. Its yield is not proportional to effort — it is
+   proportional to how long the first number went unchallenged.
 
 **The crossover is measurable, so measure it.** Every pass, count two numbers: new
 findings, and findings caused by the previous pass's own fixes. When the second

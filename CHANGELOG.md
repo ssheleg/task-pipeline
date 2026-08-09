@@ -1,5 +1,46 @@
 # Changelog
 
+## v1.29.0 — a sixth axis, and three summaries that each read as complete
+
+**Re-derivation** joins the rotation axes in `references/audit.md`: take a number the
+audit already produced and produce it again with a command of a **different shape**,
+then print both. Not a second opinion — a second route. Re-running the same command is
+a spell-check of the first run; only a differently-shaped question can come back
+disagreeing. The exit criterion is **the pair printed**, never "verified", never
+"matches": a re-derivation reported as agreement is a claim about a measurement nobody
+can see.
+
+It earns its place from this repository's own record. Four applications, two of which
+refuted something already written down as fact: the version invariant called *four-way*
+over five surfaces (`CONTRIBUTING.md:74`), and a graph shrink read as legitimate
+tightening at 864→839 and as erosion at 839→798 — **same procedure, opposite answers**,
+which is the whole argument for the axis in one line.
+
+**The enumeration had already drifted, and nothing could see it.** Measured before
+writing a word of doctrine: `audit.md` defined five axes, the Cursor rule summarised
+four, `README.md` three. Each reads as complete on its own, because a list of three
+orthogonal things is a convincing list of three orthogonal things. The Cursor rule now
+carries all six (it is self-contained by contract and cannot point anywhere); README
+stops enumerating and names the file that defines them — deleting a restatement is how
+every count this repository got wrong has been fixed.
+
+A guard now derives the axis keys from `audit.md` **at check time** and requires any
+paragraph naming three or more of them to name all of them. Its first run accused
+`stages.md` of enumerating three axes whose three hits were 595 lines apart and meant
+different things; scoped to the file, the predicate was measuring vocabulary rather
+than enumeration. The unit is the paragraph, and the guard says so in its own comment.
+
+**Found by the false positive:** `gates.md` was titled *the two axes* over a file with
+Axis A, B and C, and four surfaces repeated the two. README's prose named two and never
+mentioned degrees of freedom at all — the axis about how much latitude an instruction
+leaves, which is the one that gets skipped. All five sites corrected, and the count is
+now computed from the `## Axis` headings by a claim-registry class, alongside a second
+class for the rotation axes. The two are separated by the qualifier, because *axes* is
+polysemous in this corpus and a guard that conflates them reports drift that is not
+there.
+
+Guards: 136 → **140**.
+
 ## v1.28.0
 
 ### Eight ways to say "I don't know", and no way to count them

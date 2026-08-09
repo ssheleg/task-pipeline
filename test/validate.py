@@ -411,6 +411,38 @@ def _count_run_headings(path):
     return n
 
 # (label, claim pattern, computing callable, incident)
+_AX_STOP = {"the", "one", "a", "an"}
+
+
+def _axis_keys():
+    """Bold leads of the numbered axis list in audit.md -> match keys.
+
+    Key = the first one or two non-stopword words of the lead, lowercased. Two words
+    where the first alone would collide with ordinary prose: 'class' appears in "a
+    class that repeats twice" on the same surfaces, and would report an axis named
+    that nobody named.
+    """
+    _p = os.path.join(refdir, "audit.md")
+    if not os.path.isfile(_p):
+        return None, None
+    _t = open(_p, encoding="utf-8").read()
+    _h = re.search(r"^###\s+\d+\.\s+Every pass changes the axis.*$", _t, re.M)
+    if not _h:
+        return None, None
+    _seg = _t[_h.end():]
+    _nx = re.search(r"^###\s", _seg, re.M)
+    if _nx:
+        _seg = _seg[:_nx.start()]
+    _keys = []
+    for _lead in re.findall(r"^\d+\.\s+\*\*(.+?)\*\*", _seg, re.M):
+        _w = [_x for _x in re.findall(r"[A-Za-z][A-Za-z-]*", _lead.lower())
+              if _x not in _AX_STOP]
+        if not _w:
+            continue
+        _keys.append(" ".join(_w[:2]) if len(_w) > 1 else _w[0])
+    return _keys, _p
+
+
 _CLAIM_REGISTRY = [
     ("negative self-tests",
      r"\b" + _NUM + r"\+?\s+(?:of\s+\d+\s+)?(?:structural\s+)?guards\b(?!\s+behind)",
@@ -438,6 +470,21 @@ _CLAIM_REGISTRY = [
      lambda: _count_re("plugins/task-pipeline/skills/task-pipeline/references/documentation.md",
                        r"^\*\*\d+\.\s"),
      "the canons are cited by count from three surfaces and the list can grow"),
+
+    ("rotation axes",
+     r"\b" + _NUM + r"\s+(?:orthogonal|rotation)\s+axes\b",
+     lambda: (lambda k: len(k) if k else None)(_axis_keys()[0]),
+     "audit.md defined five while the Cursor rule summarised four and README three"),
+
+    # "axes" is polysemous in this corpus: audit.md rotates between them, gates.md is
+    # BUILT on three of its own. The qualifier is what separates the classes, and the
+    # bare form below cannot match "six rotation axes" because the qualifier sits
+    # between the number and the noun.
+    ("gates.md's own axes",
+     r"\b" + _NUM + r"\s+axes\b",
+     lambda: _count_re("plugins/task-pipeline/skills/task-pipeline/references/gates.md",
+                       r"^##\s+Axis\s"),
+     "gates.md's title said 'the two axes' over a file with Axis A, B and C"),
 
     ("reference files",
      r"\b" + _NUM + r"\s+files\s+under\s+`?references/`?",
@@ -861,6 +908,54 @@ for _f in _DISCLOSURE_FILES:
                  "a verdict that prints neither reads as 'verified' rather than as 'green, "
                  "and here is what nobody claimed and what nothing looked at' "
                  "(gates.md -> Disclosures)")
+
+# The rotation axes are defined once, in audit.md, and summarised on surfaces that
+# cannot link to it (the Cursor rule is self-contained by contract). Measured on
+# 2026-08-09, before this guard existed: audit.md defined FIVE axes, the Cursor rule
+# named FOUR and README named THREE — and each summary read as complete, because a
+# list of three orthogonal things is a convincing list of three orthogonal things.
+# Nothing compared them, so the drift was invisible from inside every file.
+#
+# Keys are derived from audit.md at check time, never hand-listed here: a hand-listed
+# key set is the second source of truth this guard exists to forbid. A surface naming
+# three or more axes is enumerating them, and must name all of them.
+_AXIS_KEYS, _AXIS_SRC = _axis_keys()
+if _AXIS_KEYS is None:
+    fail("test/validate.py: cannot locate the rotation-axis list in references/audit.md "
+         "— the axis-enumeration guard has no source of truth and is silently passing")
+elif len(_AXIS_KEYS) < 2:
+    fail(f"references/audit.md: the rotation-axis list parsed to {len(_AXIS_KEYS)} axes "
+         "— either the list moved or the bold-lead shape changed; a guard reading one "
+         "axis would pass every surface trivially")
+else:
+    _AXIS_SURFACES = ["README.md", "CONTRIBUTING.md", "CLAUDE.md",
+                      "cursor/rules/task-pipeline.mdc",
+                      "plugins/task-pipeline/commands/task-pipeline.md"] + [
+        _l for _l in _LIVING if _l.startswith("plugins/")]
+    for _f in dict.fromkeys(_AXIS_SURFACES):
+        _fp = os.path.join(ROOT, _f)
+        if not os.path.isfile(_fp) or os.path.relpath(_fp, ROOT) == os.path.relpath(_AXIS_SRC, ROOT):
+            continue
+        # Unit: the PARAGRAPH, not the file. Scoped to the file, this guard's first run
+        # accused stages.md of enumerating three axes when its three hits were 595 lines
+        # apart and meant different things — "decisions, seams, why", a stage-9 duty, and
+        # a citation to gates.md. An enumeration is contiguous; a vocabulary is not.
+        # Emphasis lives INSIDE these phrases ("invariants *across* deliverables") and
+        # ~80-column wrapping splits them; both defeated earlier guards in this file.
+        _raw = open(_fp, encoding="utf-8").read()
+        for _para in re.split(r"\n\s*\n", _raw):
+            _flat = re.sub(r"\s+", " ", re.sub(r"[*_`]+", "", _para)).lower()
+            _named = [_k for _k in _AXIS_KEYS if _k in _flat]
+            if len(_named) < 3:
+                continue                 # not enumerating; a passing mention is not a list
+            _missing = [_k for _k in _AXIS_KEYS if _k not in _named]
+            if _missing:
+                _line = _raw[:_raw.find(_para)].count("\n") + 1
+                fail(f"{_f}:{_line}: enumerates the rotation axes but names "
+                     f"{len(_named)} of {len(_AXIS_KEYS)} — missing "
+                     f"{', '.join(repr(_m) for _m in _missing)}. Either name every axis "
+                     "audit.md defines, or stop enumerating and point at audit.md; a "
+                     "summary that lists most of a list reads as complete.")
 
 # references/artifacts.md maps stage -> what it WRITES. The reverse direction — what
 # each stage READS and from where — is the one an agent actually needs at runtime,

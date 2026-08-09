@@ -404,7 +404,11 @@ its own previous pass while the finding count still looked healthy. So:
   to end (every error path, every count, every status vocabulary), then — where a
   code graph exists — **the graph against the docs**, the only axis that finds an
   absence without reading for it (a hub no document names, an edge the docs deny, a
-  doc naming a module the graph no longer has).
+  doc naming a module the graph no longer has), then **false success** (not "is this
+  check correct" but "what does this mechanism print when it did not look?"), then
+  **re-derivation** — a number the audit already produced, produced again by a
+  command of a *different shape*, with **both printed**; agreement asserted instead
+  of a pair printed is not a re-derivation.
 - **Audit bottom-up.** A missing artefact at a low rung makes everything above it
   meaningless; top-down you polish a surface for a contract that doesn't exist.
 - **A class that repeats twice becomes a check, not a note.** Once is an incident;

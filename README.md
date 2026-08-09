@@ -131,7 +131,7 @@ until it is installed.
 | run-wide pacing | [`continuity.md`](plugins/task-pipeline/skills/task-pipeline/references/continuity.md) — the loop mode (`run.loop`, default off, never collapses a manual gate) and the context budget (fires on a harness signal, never on an estimate) |
 | 0 + 9 + any settled decision | [`documentation.md`](plugins/task-pipeline/skills/task-pipeline/references/documentation.md) — the inventory, registers and ids, SSOT, the Doc Loop, supersede semantics, the propagation matrix, intent vs as-built |
 | 3 + 4 · every spec and plan | the self-review reads its rules back — is every named check real, does anything contradict a locked decision or a rejected option, and what does this cost now versus at design time. Answers land as a committed `## Self-review` of computed numbers |
-| 6–10 + any check you write | [`gates.md`](plugins/task-pipeline/skills/task-pipeline/references/gates.md) — the two axes, the promotion ladder, gate anatomy, the probe recipe, ratchet floors |
+| 6–10 + any check you write | [`gates.md`](plugins/task-pipeline/skills/task-pipeline/references/gates.md) — the three axes, the promotion ladder, gate anatomy, the probe recipe, ratchet floors |
 | any agent-time enforcement | [`hooks.md`](plugins/task-pipeline/skills/task-pipeline/references/hooks.md) — the `PreToolUse` contract, the fail-open hazard, the Claude-Code-only limit |
 
 **Ported, not depended on.** Stage 0 is adapted from
@@ -431,8 +431,9 @@ Three rules keep the audit from becoming another loop:
   Measured over seven passes on a production repository, by pass six the audit was
   mostly repairing its own previous pass — while the finding count still looked
   healthy. So count both numbers every pass (new findings vs. self-inflicted ones);
-  when the second overtakes the first, **rotate the axis** — seams down one
-  deliverable, then invariants across deliverables, then one class swept end to end.
+  when the second overtakes the first, **rotate the axis**. The axes are orthogonal
+  by construction and there is one list of them, in `references/audit.md` — this line
+  used to restate three of the five that existed, and read as complete while doing it.
 - **A class that repeats twice becomes a gate, not a note.** Once is an incident;
   twice is a category, and a category belongs in lint or CI where nobody has to
   remember it. The third instance in a ledger is how a mechanical defect becomes
@@ -482,12 +483,17 @@ teaches everyone on day one that the gate is noise.
 
 ### Gates and hooks — how a rule becomes something that can say no
 
-Two axes, deliberately not conflated. **The stage gate type** (`auto` = verify it
+Three axes, deliberately not conflated. **The stage gate type** (`auto` = verify it
 yourself; `manual` = wait for an explicit go) is about this pipeline. **The
 enforcement mechanism** is a ladder a rule climbs: a doctrine line → a review
 question → a script check (promote here once the class has occurred *twice*) → a CI
 step → a hook. A rule may sit on several rungs; what it may never do is *pretend* to
-be on a higher one.
+be on a higher one. **Degrees of freedom** is the third and the one that gets
+skipped: how much latitude the *instruction* leaves — an open field where many
+routes reach a good answer, a narrow bridge where the guardrails are the wording.
+Over-constraining costs as much as under-constraining and is harder to see, because
+an agent following the letter past the point where the letter fits still reports
+success.
 
 The skill ships the anatomy of a gate that cannot lie — non-zero exit on any
 failure, the verdict block last with nothing after it, a scope header saying what it
@@ -810,7 +816,7 @@ recommendation, so you arm the whole run in one exchange. Detail:
 | [`references/artifacts.md`](plugins/task-pipeline/skills/task-pipeline/references/artifacts.md) | the canonical document layout each stage writes to |
 | [`references/conventions.md`](plugins/task-pipeline/skills/task-pipeline/references/conventions.md) | how stages 6–10 read the host project's `CLAUDE.md`, and how the documentation regime is detected |
 | [`references/documentation.md`](plugins/task-pipeline/skills/task-pipeline/references/documentation.md) | the doc system: the inventory, registers and ids, SSOT, the Doc Loop, supersede semantics, the propagation matrix, intent vs as-built |
-| [`references/gates.md`](plugins/task-pipeline/skills/task-pipeline/references/gates.md) | the two axes, the promotion ladder, gate anatomy, the probe recipe, ratchet floors, where a gate runs |
+| [`references/gates.md`](plugins/task-pipeline/skills/task-pipeline/references/gates.md) | the three axes, the promotion ladder, gate anatomy, the probe recipe, ratchet floors, where a gate runs |
 | [`references/deploy-targets.md`](plugins/task-pipeline/skills/task-pipeline/references/deploy-targets.md) | stages 7–8: writing the runbook when there is none, the template, per-platform deploy and log verbs, the verification trio |
 | [`references/hooks.md`](plugins/task-pipeline/skills/task-pipeline/references/hooks.md) | the `PreToolUse` contract, the fail-open hazard, placement, and the Claude-Code-only limit |
 | [`references/knowledge-graph.md`](plugins/task-pipeline/skills/task-pipeline/references/knowledge-graph.md) | the code graph: install line, stage-0 reach queries, the stage-9 refresh, the graph↔docs divergence check |
