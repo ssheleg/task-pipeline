@@ -2787,7 +2787,10 @@ jobs:
           t = t[:m.start()] + t[m.end() + 1:]
           needle = "*None retired yet.*"
           assert needle in t, "PLANT DID NOT LAND: log anchor absent"
-          t = t.replace(needle, "- **12 · Something** — trigger: subsumed by 9; `deadbeef`\n\n" + needle, 1)
+          # The leading number must NOT be a live table row, or the plant trips the
+          # resurrection check instead and the test can no longer tell a working anchor
+          # from a regressed one — verified by reverting the anchor and still failing.
+          t = t.replace(needle, "- **99 · Something** — trigger: subsumed by 9; `deadbeef`\n\n" + needle, 1)
           open(p, "w", encoding="utf-8").write(t)
           EOF
           if python3 /tmp/hw2-copy/test/validate.py; then

@@ -127,6 +127,21 @@ validator accepted a planted defect"*, which is false for a check that plants no
 Its verdict now names what ran: `PASS: all 0 guards` over an empty selection is the
 refused measurement this repository has a rule about.
 
+**A probe that could no longer fail for its own reason.** The anchor test planted a log
+line whose *body* held the digit it was about — and the high-water mark lives in that
+same section, so a bare-digit scan picked up `21`, tripped a different check, and the
+test failed either way. It could not tell a working anchor from a regressed one, which a
+reader demonstrated by reverting the anchor. The mark is now stripped before the log is
+parsed (it was never a log entry), the plant uses a number that is not a live row, and
+reverting the anchor makes the test pass again — which is what "this test measures that"
+means.
+
+Two more of the same family: the rule-row regex existed twice, byte-identical, one for
+the registry and one for the disclosure — rule 8's class inside the file that enforces
+it, now one pattern with two readers. And property checks got the floor the negative
+suite has had for releases: rename the only one and the category empties in silence,
+which is the failure property checks were added to close, one level up.
+
 Guards: 144 → **156**, plus 1 property check now covered locally.
 
 ## v1.29.0 — a sixth axis, and three summaries that each read as complete

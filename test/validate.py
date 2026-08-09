@@ -453,6 +453,12 @@ def _axis_keys():
     return _keys, _p
 
 
+# One pattern, two readers. The registry counted rule rows and the shape disclosure
+# counted them again with a byte-identical regex differing only in its capture group —
+# rule 8's own class ("compute, never restate") living inside the file that enforces it.
+_RULE_ROW = r"^\|\s*\d+\s*\|\s*\*\*"
+_RULE_ROW_ID = r"^\|\s*(\d+)\s*\|\s*\*\*"
+
 _CLAIM_REGISTRY = [
     ("negative self-tests",
      r"\b" + _NUM + r"\+?\s+(?:of\s+\d+\s+)?(?:structural\s+)?guards\b(?!\s+behind)",
@@ -462,7 +468,7 @@ _CLAIM_REGISTRY = [
     ("rules in learned.md",
      r"\b" + _NUM + r"\s+rules\s+earned\b",
      lambda: _count_re("plugins/task-pipeline/skills/task-pipeline/references/learned.md",
-                       r"^\|\s*\d+\s*\|\s*\*\*"),
+                       _RULE_ROW),
      "README.md and SKILL.md said 'fifteen rules' against a table of twenty-one"),
 
     ("dated eval runs",
@@ -1093,7 +1099,7 @@ _lp = os.path.join(refdir, "learned.md")
 if os.path.isfile(_lp):
     _lt = _LIVING_TEXT.get("plugins/task-pipeline/skills/task-pipeline/references/learned.md") \
         or open(_lp, encoding="utf-8").read()
-    _nums = [int(_n) for _n in re.findall(r"^\|\s*(\d+)\s*\|\s*\*\*", _lt, re.M)]
+    _nums = [int(_n) for _n in re.findall(_RULE_ROW_ID, _lt, re.M)]
     _inc = re.search(r"^## The incidents.*?(?=^## )", _lt, re.M | re.S)
     # "**4 and 5 · Probes.**" is one write-up covering two rules. A digits-then-dot
     # pattern drops it, and the disclosure then prints a number lower than the file —
@@ -1159,7 +1165,12 @@ if os.path.isfile(_lp):
             _gaps = [_n for _n in range(1, _high + 1) if _n not in _nums]
             # Anchored to the line's LEADING number. A body-wide digit scan lets a
             # subsumption note ("subsumed by rule 9") mask a real deletion of rule 9.
-            _logged = set(re.findall(r"^\s*-\s*\*\*(\d+)\s*·", _ret.group(1), re.M))
+            # The high-water mark lives in this same section, so its digits are not
+            # log entries. Strip it before parsing, or every reader of the log — this
+            # one and any future one — counts the mark as a retirement.
+            _log_body = re.sub(r"Numbers\s+issued\s+so\s+far:\s*\d+\.?", "",
+                               _ret.group(1), flags=re.I)
+            _logged = set(re.findall(r"^\s*-\s*\*\*(\d+)\s*·", _log_body, re.M))
             # Both directions — rule 2, applied to this guard. A number logged as
             # retired while its row is still in the table means the log is wrong or the
             # rule came back without anyone noticing, and only the reverse pass finds it:

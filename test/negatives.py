@@ -25,6 +25,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 WORKFLOW = os.path.join(ROOT, ".github/workflows/validate.yml")
 MARKER = "Negative self-test"
 PROP_MARKER = "Property check"
+MIN_PROPS = 1
 # A format change that silently matched nothing would report "0 failures" and look
 # like success. Refuse to be that quiet.
 #
@@ -136,6 +137,14 @@ def main(argv):
     # and that is exactly how this runner shipped green while CI failed on a string this
     # very file had renamed.
     props = [(n, s) for n, s in _STEPS if PROP_MARKER in n]
+    # Same floor, same reason as MIN_EXPECTED above, one level up: rename the sole
+    # property step and this list empties, the runner skips it in silence and still
+    # exits 0 — which is the failure property checks were added to close.
+    if len(props) < MIN_PROPS:
+        print(f"FAIL: found only {len(props)} property checks in the workflow "
+              f"(expected at least {MIN_PROPS}). A category that quietly empties is "
+              f"a category nobody notices is gone.")
+        return 2
     if only:
         props = [(n, s) for n, s in props if only.lower() in n.lower()]
 
