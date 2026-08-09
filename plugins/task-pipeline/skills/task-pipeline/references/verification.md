@@ -58,6 +58,13 @@ failing; it is a project that now knows something it could not previously ask.
 **Stage 8** writes one row per REQ the run shipped, right after the verification it
 already does. `Human` starts at `never` unless the operator confirmed during the run.
 
+**A REQ that spans two modules is stamped with the second, not the first.** Its criterion
+is satisfied when the last part of it exists, and stamping the earlier release claims a
+capability the project did not yet have. Caught by a reader on the first ledger this
+skill ever seeded: one row said a file was named in the maps a release before that file
+existed, and the row directly below it said when the file arrived. Two rows of one
+table, disagreeing about the same date.
+
 **Stage 10** refuses a REQ that shipped and has no row — and, in the other direction, a
 row whose REQ appears in no brief. They are different failures: a shipped feature that
 entered no ledger, and a ledger row about nothing. One direction alone finds one of them

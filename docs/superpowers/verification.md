@@ -107,7 +107,7 @@
 | REQ-009 | `references/audit.md` carries a sixth rotation axis — *re-derive, don't re-read* — with its exit criterion | `2026-08-08-audit-followup` | v1.23.1^0 | pass | never | — |
 | REQ-010 | `references/learned.md` has a retirement rule and a cap, analogous to the retro's | `2026-08-08-audit-followup` | v1.23.1^0 | pass | never | — |
 | REQ-013 | Every surface that states the retro's three acts states them **stamp → prune → entry**, and the rule-21 guard compares the class rather than one file | `2026-08-08-audit-followup` | v1.23.1^0 | pass | never | — |
-| REQ-001 | `artifacts.md` names both new files in **both** maps and in the single-home table | `2026-08-09-planning-system` | v1.31.0 | pass | never | — |
+| REQ-001 | `artifacts.md` names both new files in **both** maps and in the single-home table | `2026-08-09-planning-system` | v1.32.0 | pass | never | — |
 | REQ-002 | `docs/superpowers/backlog.md` — seeded at stage 0 when absent, picked up when present | `2026-08-09-planning-system` | v1.31.0 | pass | never | — |
 | REQ-003 | Any stage may append a row mid-run, same rule as the ledger: *deferred out loud or lost* | `2026-08-09-planning-system` | v1.31.0 | pass | never | — |
 | REQ-005 | Every carry-over row homed `backlog` resolves to a real board id — **both directions** | `2026-08-09-planning-system` | v1.31.0 | pass | never | — |
