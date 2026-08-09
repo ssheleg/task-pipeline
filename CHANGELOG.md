@@ -56,7 +56,9 @@ present in the legend; the computed-rail promise stated where a reader meets it;
 ledger's line shapes compared declared-vs-shown **and** against the files that read them.
 The first version of the fourth probe removed one of three `touch:` lines from the worked
 log, left the shape shown, and read the guard's correct silence as a broken guard — R-001
-again, and the reason it is a standing instruction. Guards 188 → **193**.
+again, and the reason it is a standing instruction.
+
+Guards: 188 → **193**, property checks 8.
 
 ## v1.33.0 — the number, the list, and the command that shows them with no task running
 

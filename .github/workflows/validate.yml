@@ -3563,10 +3563,18 @@ jobs:
           import re
           p = "/tmp/cl1-copy/CHANGELOG.md"
           t = open(p, encoding="utf-8").read()
-          m = re.search(r"(Guards:\s*\d+\s*→\s*\*\*)(\d+)(\*\*)", t)
-          assert m, "PLANT DID NOT LAND: no guard count in the newest section"
-          open(p, "w", encoding="utf-8").write(
-              t[:m.start(2)] + str(int(m.group(2)) - 1) + t[m.end(2):])
+          # Scope to the NEWEST section, which is the only one the guard reads. The
+          # first version searched the whole file, so an entry writing the count in a
+          # slightly different form sent the plant into a released section and the
+          # guard stayed correctly silent — a probe that lands somewhere real and
+          # proves nothing (R-001).
+          heads = [x.start() for x in re.finditer(r"^## v", t, re.M)]
+          assert len(heads) >= 2, "PLANT DID NOT LAND: fewer than two release sections"
+          top = t[heads[0]:heads[1]]
+          m = re.search(r"(Guards:\s*\d+\s*→\s*\*\*)(\d+)(\*\*)", top)
+          assert m, "PLANT DID NOT LAND: no guard count in the NEWEST section"
+          patched = top[:m.start(2)] + str(int(m.group(2)) - 1) + top[m.end(2):]
+          open(p, "w", encoding="utf-8").write(t[:heads[0]] + patched + t[heads[1]:])
           EOF
           if python3 /tmp/cl1-copy/test/validate.py; then
             echo "ERROR: the release entry claimed a guard count the workflow does not define"
