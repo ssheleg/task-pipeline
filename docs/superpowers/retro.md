@@ -36,6 +36,60 @@ row goes — the cap is not negotiable, ranking is.
 
 ## Recent log — entries from the last five run stamps (newest first)
 
+### 2026-08-09 · `planning-system`/N1 · everyone who reads a value, and not the file that writes it
+
+**Symptom.** Ten review rounds, twenty-nine findings, none of them from my probes. The
+doctrine landed on the first pass and was never argued with. Every finding was in the
+machinery, and they sort into two classes that are really one.
+
+**Class one — the detector reversed three times.** Positional read the wrong cell in the
+five ledgers that carry *two* status columns. Pure-text then broke in **both directions
+with one regex**: too strict for a live row worded *"open as a printed exclusion"*, too
+loose for a description reading *"Open-source …"*, because a hyphen is punctuation
+exactly like the arrow. The answer was in between — the header names the candidate
+columns, all of them, and a status matches on a word boundary *inside* them.
+
+Between those, the worst single defect: tightening against the false positive, I
+hand-listed the separators and **omitted the arrow my own annotations use**, so all
+twenty-four resolved rows went invisible and the guard passed by seeing nothing at all.
+One negative test covered that path and caught it. That is the suite's entire argument
+in a sentence.
+
+**Class two — the doctrine promised what the code did not do.** Five times. `open` alone
+while the prose said `backlog`; `backlog` added while `unresolved` was still only
+promised; *"two triggers"* in a file whose code checked three; a comment claiming
+coverage of adjacent tables it never tested for; a guard against false success that
+verified a word appeared *somewhere on the page*.
+
+**Surfaced at:** stage 7, ten rounds, by a reader.
+
+**Owned by:** stage 5 for the detector, stage 3 for the promises — an enumeration
+written in prose and enforced in code is two artifacts, and nothing compared them.
+
+**Root cause, and it is the last finding.** The value nobody owned — a ledger row homed
+`backlog`, pointing at a place the pipeline named and did not own — came from
+`templates/carryover.md`, whose worked example showed exactly that as a *settled*
+outcome. **Six rounds went into the doctrine, the guard, the board and three consuming
+surfaces before anyone opened the file the value came from.** Fixing every reader and
+not the writer is a shape worth its own name.
+
+**Fix, by grade.**
+1. *(mechanical)* The trigger enumeration is now **extracted from the regex** and
+   required to appear in the paragraph that enumerates it, both directions — the class
+   that ran through six rounds, closed by computation rather than a sixth correction.
+   The seeded ledger template names three unsettled values and its example carries a
+   real id. Nineteen new guards and three new property checks; a property check exists
+   because *"the guard stays quiet on the valid pattern"* is not a rejection and does
+   not belong in a suite of rejections.
+2. *(nothing above that.)* R-005 dispatched the reader and the reader found all
+   twenty-nine. R-001 fired twice on my own probes, R-002 on a mis-applied batch, R-004
+   on a commit chain that ran past a failing edit.
+
+**The check that catches it next time:** for the promises, the computed enumeration. For
+the origin — nothing mechanical, and that is the honest end of this entry. Nothing told
+me to read the file that writes the value rather than the files that read it.
+
+
 ### 2026-08-09 · `audit-followup`/M6 · the module was right, the guards were not
 
 **Symptom.** The doctrine this module set out to write landed intact and unchallenged:
@@ -579,6 +633,7 @@ One line per run, appended at stage 10. This is what makes "five runs" countable
 
 | Date | Topic | Commit | Verdict | Retro |
 |---|---|---|---|---|
+| 2026-08-09 | `planning-system` / N1 `the-board` | `4233c3d` | 4 REQ · a queue between runs, and the seam the ledger left dangling · **ten review rounds, 29 findings, none from my probes** · carry-over 2 rows, 2 open, 0 unresolved | 1 entry · 6 standing · retired 0 · added 0 · R-001, R-002, R-004, R-005 all fired · guards 156 → 175 + 4 property |
 | 2026-08-09 | `audit-followup` / M6 `learned-shape` | `241df1e` | 1 REQ · a cap refused by measurement, and the class it uncovered · **eight review rounds, 20 findings, two of them red, none from my probes** · carry-over 12 rows, 7 open, 0 unresolved | 1 entry · 6 standing · retired 0 · added 0 · R-001, R-005 fired · guards 144 → 156 + 1 property |
 | 2026-08-09 | `audit-followup` / M5 `re-derive-axis` | `a3dd771` | 1 REQ · a sixth rotation axis, and the enumeration of the five that had already drifted · **four review rounds, 8 findings, all mine, none from my probes** · carry-over 12 rows, 7 open, 0 unresolved | 1 entry · 6 standing · retired 0 · added 0 · R-001, R-005 fired · guards 136 → 144 |
 | 2026-08-09 | `audit-followup` / M4 `abstention-disclosure` | `1426bdf` | 1 REQ · a second kind of counted set, non-monotone by construction · **one review round, 5 findings, all mine** · carry-over 11 rows, 7 open, 0 unresolved | 1 entry · 6 standing · retired 0 · added 0 · R-001, R-003, R-005 all fired · guards 134 → 136 |
