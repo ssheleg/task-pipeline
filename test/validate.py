@@ -535,6 +535,13 @@ def _is_quoted(text, match):
 
 # Each living document is read ONCE, not once per class. Nested class-outer/doc-inner
 # opened ~36 files six times over; the states logic below is unchanged.
+def _paragraphs(text):
+    """Split on blank lines. The unit matters and has bitten this file: scoped to the
+    whole file, a guard measures a document's VOCABULARY; scoped to a paragraph, it
+    measures what one passage claims. Third call site, so it is a function."""
+    return re.split(r"\n\s*\n", text)
+
+
 def _flatten(text, lower=False):
     """Collapse the corpus's own formatting before matching: ~80-column wrapping and
     emphasis INSIDE a phrase have now defeated three guards in this file, each of
@@ -756,7 +763,7 @@ if os.path.isfile(_learned) and os.path.isfile(_rp21):
                     continue
                 _raw = open(_f, encoding="utf-8").read()
                 _prev = ""
-                for _para in re.split(r"\n\s*\n", _raw):
+                for _para in _paragraphs(_raw):
                     _flat = re.sub(r"\s+", " ", _para)
                     # The history exemption is computed ONCE per paragraph and applies to every
                     # shape, P3 included. Its first version exempted only the prose shapes, so a
@@ -888,7 +895,7 @@ for _f in _COLD_SURFACES:
     if not os.path.isfile(_fp):
         continue
     _ft = open(_fp, encoding="utf-8").read()
-    for _para in re.split(r"\n\s*\n", _ft):
+    for _para in _paragraphs(_ft):
         # Normalise whitespace AND markdown emphasis. The canonical row in
         # retrospective.md reads "the last **five run stamps**", and a whitespace-only
         # normalisation left the asterisks sitting inside the phrase — so the guard
@@ -971,7 +978,7 @@ else:
         # Emphasis lives INSIDE these phrases ("invariants *across* deliverables") and
         # ~80-column wrapping splits them; both defeated earlier guards in this file.
         _raw = _LIVING_TEXT.get(_f) or open(_fp, encoding="utf-8").read()
-        for _para in re.split(r"\n\s*\n", _raw):
+        for _para in _paragraphs(_raw):
             _flat = _flatten(_para, lower=True)
             _named = [_k for _k in _AXIS_KEYS if _k in _flat]
             if len(_named) < 3:

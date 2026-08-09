@@ -54,7 +54,13 @@ estimate of "3+". The two named sites are fixed; the rest is carry-over row 12 w
 number attached, because a class measured and then left unmentioned is the TODO this
 repository refuses to keep.
 
-Guards: 136 → **143**.
+A third round found the sibling of the idiom the second round found — the
+paragraph-split, hand-rolled at four sites — now `_paragraphs()`, whose docstring says
+what the unit costs. And it found that the new **rotation axes** claim class was
+permanently dormant and had **never been watched failing**: dormant is green by design
+here, which is exactly why a dormant class still needs its plant. It has one now.
+
+Guards: 136 → **144**.
 
 ## v1.28.0
 

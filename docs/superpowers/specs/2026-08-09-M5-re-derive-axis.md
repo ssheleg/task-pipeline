@@ -78,5 +78,12 @@ Four findings, none of them from my own probes:
 4. This spec claimed a guard that did not exist (R2) and a threshold the code did not
    use (R3). Both are now true: R2's guard is implemented and probed, R3 says three.
 
-Guards: 140 → **143**.
+A third round: the paragraph-split idiom, hand-rolled at four sites, is now
+`_paragraphs()` — the sibling of the flatten extraction the round before. And the
+`rotation axes` claim class had never been watched failing, because nothing in the
+corpus states that number. **Dormant is green by design, which is precisely why a
+dormant class still needs a plant** — otherwise the repository owns a class whose
+fail branch has never executed. It has a self-test now.
+
+Guards: 140 → **144**.
 
