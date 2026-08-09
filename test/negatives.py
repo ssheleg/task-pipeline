@@ -97,7 +97,8 @@ def main(argv):
         print(f"FAIL: no workflow at {WORKFLOW}")
         return 2
 
-    tests = [(n, s) for n, s in parse_steps(WORKFLOW) if MARKER in n]
+    _STEPS = parse_steps(WORKFLOW)          # parsed once; both filters read the same list
+    tests = [(n, s) for n, s in _STEPS if MARKER in n]
     if len(tests) < MIN_EXPECTED:
         print(f"FAIL: found only {len(tests)} negative self-tests in the workflow "
               f"(expected at least {MIN_EXPECTED}). The parser or the workflow "
@@ -106,14 +107,23 @@ def main(argv):
         return 2
     if only:
         tests = [(n, s) for n, s in tests if only in n.lower()]
-        if not tests:
-            print(f"FAIL: no negative self-test matches {only!r}")
+        # The bail moved below the property filter: `-k property` matched no negative
+        # self-test and errored out while the checks it named were sitting right there,
+        # unrun. A selector that refuses the thing it selected is worse than no selector.
+        if not tests and not [1 for _n, _ in _STEPS if PROP_MARKER in _n and only in _n.lower()]:
+            print(f"FAIL: no negative self-test or property check matches {only!r}")
             return 2
 
     label = lambda n: n.replace(MARKER, "").strip().strip("()")
+    _plabel = lambda n: n.replace(PROP_MARKER, "").strip().strip("()")
     if listing:
         for n, _ in tests:
             print(" ", label(n))
+        # A listing that omits a whole category of test teaches that the category does
+        # not exist. They run; they are listed.
+        for n, _ in [(n, s) for n, s in _STEPS if PROP_MARKER in n
+                     and (not only or only.lower() in n.lower())]:
+            print("  [property]", _plabel(n))
         print(f"\n{len(tests)} negative self-tests")
         return 0
 
@@ -125,9 +135,11 @@ def main(argv):
     # author can see: a step that lives only in CI is a step the local gate is blind to,
     # and that is exactly how this runner shipped green while CI failed on a string this
     # very file had renamed.
-    props = [(n, s) for n, s in parse_steps(WORKFLOW) if PROP_MARKER in n]
+    props = [(n, s) for n, s in _STEPS if PROP_MARKER in n]
+    if only:
+        props = [(n, s) for n, s in props if only.lower() in n.lower()]
 
-    failed, broken = [], []
+    failed, broken, prop_failed = [], [], []
     print(f"running {len(tests)} negative self-tests"
           + (f" + {len(props)} property checks\n" if props else "\n"))
     for name, script in tests:
@@ -157,11 +169,9 @@ def main(argv):
         sweep([cdir])
         r = subprocess.run(["bash", "-c", script], cwd=ROOT, capture_output=True, text=True)
         ok = r.returncode == 0 and "OK:" in r.stdout
-        print(f"  {'PASS' if ok else 'FAIL':<7}"
-              + name.replace(PROP_MARKER, "").strip().strip("()"))
+        print(f"  {'PASS' if ok else 'FAIL':<7}[property] " + _plabel(name))
         if not ok:
-            failed.append((name.replace(PROP_MARKER, "").strip().strip("()"),
-                           r.stdout[-500:], r.stderr[-500:]))
+            prop_failed.append((_plabel(name), r.stdout[-500:], r.stderr[-500:]))
         sweep([cdir])
 
     print()
@@ -170,6 +180,8 @@ def main(argv):
          "fix the corruption in .github/workflows/validate.yml"),
         ("FAIL — the validator accepted a planted defect", failed,
          "the guard does not actually fire"),
+        ("FAIL — a property the run must print was not printed", prop_failed,
+         "nothing was planted here: the check asserts an output, and the output is gone"),
     ):
         if rows:
             print(f"{title}:")
@@ -179,10 +191,16 @@ def main(argv):
                     print("      " + line)
             print()
 
-    if failed or broken:
-        print(f"FAIL: {len(failed)} guard(s) did not fire, {len(broken)} test(s) broken")
+    if failed or broken or prop_failed:
+        print(f"FAIL: {len(failed)} guard(s) did not fire, {len(broken)} test(s) broken"
+              + (f", {len(prop_failed)} property check(s) silent" if prop_failed else ""))
         return 1
-    print(f"PASS: all {len(tests)} guards provably reject their planted defect")
+    # "all 0 guards ... provably reject" is a pass over an empty set, which is the
+    # shape this repository calls a refused measurement. Say what actually ran.
+    _parts = ([f"all {len(tests)} guards provably reject their planted defect"] if tests else [])
+    _parts += ([f"{len(props)} property check(s) printed what they assert"] if props else [])
+    print("PASS: " + " · ".join(_parts) if _parts else
+          "PASS: nothing ran — no test matched, which is not a result")
     return 0
 
 

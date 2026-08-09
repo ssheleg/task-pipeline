@@ -366,7 +366,7 @@ every word of the growth in the binding map. Its shape prints beside the verdict
 
 **43. A guard's corpus is discovered, not hand-listed.** Three in `test/validate.py`
 held written lists, and all three had missed a shipped surface: the cold trigger named
-seven files where fourteen state the condition, the disclosure check named five where
+seven files where thirteen state the condition, the disclosure check named five where
 `README.md` also prints a worked verdict, and the claim registry excluded the Cursor
 rule and the command. Every miss was found by a reader or a sweep, never by the guard —
 **nobody notices a corpus that is too small, because everything inside it passes.**

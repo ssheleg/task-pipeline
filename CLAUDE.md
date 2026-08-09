@@ -72,8 +72,10 @@ negative self-test in `.github/workflows/validate.yml`.
    claim-registry states, `learned.md`'s shape (rules · rules with an incident ·
    incident words · binding rows), and `unlooked: N` — what this run could not look at,
    listed. None of the three is a ratchet: no floor, no direction, **never a target**.
-   One check compares `learned.md`'s high-water mark against its value at `HEAD`, so it
-   needs a git checkout; outside one it prints the skip rather than going quiet.
+   One check compares `learned.md`'s high-water mark against **every value that file's
+   history has held** (`git log -p`, last 80 commits) — comparing against `HEAD` was the
+   first draft and never fired on a committed checkout, which is what CI runs. Outside a
+   checkout it prints the skip rather than going quiet.
 
 4. **Guard corpora are discovered, not listed.** Three hand-written lists each missed a
    shipped surface and none of the misses was found by the guard holding the list. A new

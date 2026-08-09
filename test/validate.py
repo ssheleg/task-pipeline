@@ -496,6 +496,13 @@ _CLAIM_REGISTRY = [
                        r"^##\s+Axis\s"),
      "gates.md's title said 'the two axes' over a file with Axis A, B and C"),
 
+    # The number moved the moment an exclusion was added, and prose in two documents
+    # kept the old one. Registered so the corpus's own size cannot be restated stale.
+    ("cold-trigger surfaces",
+     r"\b" + _NUM + r"\s+(?:files|surfaces)\s+state\s+the\s+condition\b",
+     lambda: len(_COLD_SURFACES) if "_COLD_SURFACES" in globals() and _COLD_SURFACES else None,
+     "prose said fourteen after an exclusion took the corpus to thirteen"),
+
     ("reference files",
      r"\b" + _NUM + r"\s+files\s+under\s+`?references/`?",
      lambda: len([f for f in os.listdir(refdir) if f.endswith(".md")]) if os.path.isdir(refdir) else None,
@@ -567,34 +574,6 @@ for _extra in ["cursor/rules/task-pipeline.mdc",
         _LIVING_TEXT[_extra] = open(_xp, encoding="utf-8").read()
 
 _UNLOOKED = []
-_CLAIM_STATES = []
-for _label, _pat, _compute, _incident in _CLAIM_REGISTRY:
-    _truth = _compute()
-    if _truth is None:                      # the source of truth is absent — say so, do not guess
-        _CLAIM_STATES.append(f"{_label}: skip — no source")
-        continue
-    _seen = 0
-    for _living, _txt in _LIVING_TEXT.items():
-        for _m in re.finditer(_pat, _txt, re.I):   # "## The ten canons" is a heading; case is not a claim
-            if _is_quoted(_txt, _m):
-                continue
-            _stated = _as_int(_m.group(1))
-            if _stated is None:            # a word outside the map — say nothing rather than guess
-                continue
-            _seen += 1
-            if _stated != _truth:
-                fail(f"{_living}: states {_m.group(0).strip()!r} but {_label} computes to "
-                     f"{_truth} — derive the number or delete it. This class is registered "
-                     f"because: {_incident}")
-    # Progressive arming (gates.md): a class nobody states is DORMANT, not passing. Printed,
-    # because a registry reporting green over six classes it never looked at is exactly the
-    # false success it exists to catch. Most classes are dormant on purpose — the numbers
-    # were deleted rather than corrected, and this is the ratchet against re-introducing them.
-    # "ok 4 (truth 10)" reads as "claims 4, truth is 10" — the author of this line misread
-    # his own output that way within a day of writing it. The count is of agreeing statements,
-    # so it is written as a multiplier: a state line nobody can parse is not a disclosure.
-    _CLAIM_STATES.append(
-        f"{_label}: {'agrees x' + str(_seen) if _seen else 'dormant'} (truth {_truth})")
 
 # learned.md rule 16 — a rule that lands in the table and nowhere else is a rule the
 # run never meets, because nothing at stage 0 or stage 10 sends anybody to it. The
@@ -984,6 +963,38 @@ for _f in _DISCLOSURE_FILES:
                  "a verdict that prints neither reads as 'verified' rather than as 'green, "
                  "and here is what nobody claimed and what nothing looked at' "
                  "(gates.md -> Disclosures)")
+
+# Evaluated HERE, not where the registry is declared: one class counts a DISCOVERED
+# corpus, which does not exist until the walks above have run. Declared early,
+# computed late.
+_CLAIM_STATES = []
+for _label, _pat, _compute, _incident in _CLAIM_REGISTRY:
+    _truth = _compute()
+    if _truth is None:                      # the source of truth is absent — say so, do not guess
+        _CLAIM_STATES.append(f"{_label}: skip — no source")
+        continue
+    _seen = 0
+    for _living, _txt in _LIVING_TEXT.items():
+        for _m in re.finditer(_pat, _txt, re.I):   # "## The ten canons" is a heading; case is not a claim
+            if _is_quoted(_txt, _m):
+                continue
+            _stated = _as_int(_m.group(1))
+            if _stated is None:            # a word outside the map — say nothing rather than guess
+                continue
+            _seen += 1
+            if _stated != _truth:
+                fail(f"{_living}: states {_m.group(0).strip()!r} but {_label} computes to "
+                     f"{_truth} — derive the number or delete it. This class is registered "
+                     f"because: {_incident}")
+    # Progressive arming (gates.md): a class nobody states is DORMANT, not passing. Printed,
+    # because a registry reporting green over six classes it never looked at is exactly the
+    # false success it exists to catch. Most classes are dormant on purpose — the numbers
+    # were deleted rather than corrected, and this is the ratchet against re-introducing them.
+    # "ok 4 (truth 10)" reads as "claims 4, truth is 10" — the author of this line misread
+    # his own output that way within a day of writing it. The count is of agreeing statements,
+    # so it is written as a multiplier: a state line nobody can parse is not a disclosure.
+    _CLAIM_STATES.append(
+        f"{_label}: {'agrees x' + str(_seen) if _seen else 'dormant'} (truth {_truth})")
 
 # The rotation axes are defined once, in audit.md, and summarised on surfaces that
 # cannot link to it (the Cursor rule is self-contained by contract). Measured on

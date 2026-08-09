@@ -57,7 +57,7 @@ it counts is a number nobody can check.
 
 **Swept the same class one level out.** The cold-retirement guard's corpus was a
 hand-written list of seven files. Made **discovered** instead — any shipped surface that
-states the condition must state both units — and it immediately found **fourteen**,
+states the condition must state both units — and it immediately found **thirteen**,
 including `README.md`, the Cursor rule, `gates.md` and `learned.md` itself. A narration
 of the old wording is exempt by the repository's existing convention: a double-quoted
 span is a citation, and rule 21's incident is left as it happened.
@@ -65,7 +65,7 @@ span is a citation, and rule 21's incident is left as it happened.
 **The class turned out to be the module.** Three guards in this file held
 hand-written corpora; all three had missed a shipped surface, and each miss was found
 by a reader or by a sweep rather than by the guard. All three are now **discovered**:
-the cold trigger (7 listed → 14 found), the disclosure verdicts (5 listed → README's
+the cold trigger (7 listed → 13 found), the disclosure verdicts (5 listed → README's
 worked `GATE 10` block found), and the claim registry (widened in v1.29.0 after the
 same shape). *Nobody notices a corpus that is too small, because everything inside it
 passes.*
@@ -114,6 +114,18 @@ did not name, and never the reverse: a number *listed as retired* whose row is s
 the table — the log naming the wrong rule, or a retired rule quietly back. A gap has one
 side and so does a resurrection; only the second pass sees it. This is `learned.md`'s own
 rule 2 applied to the guard that guards `learned.md`.
+
+**And the number the exclusion moved.** Adding `docs/superpowers/plans/` to the frozen
+records took the discovered corpus from fourteen to thirteen, and two documents kept the
+old number — so the corpus's own size is now a claim-registry class, computed from the
+walk. The registry's evaluation moved below the walks that feed it: declared early,
+computed late.
+
+The local runner also learned to treat property checks as their own category — selected
+by `-k`, shown by `--list`, and reported under their own heading rather than as *"the
+validator accepted a planted defect"*, which is false for a check that plants nothing.
+Its verdict now names what ran: `PASS: all 0 guards` over an empty selection is the
+refused measurement this repository has a rule about.
 
 Guards: 144 → **156**, plus 1 property check now covered locally.
 
