@@ -68,7 +68,21 @@ every `references/*.md` must be reachable from `SKILL.md`; the Cursor rule stays
 self-contained with no relative links; every new validator guard needs a matching
 negative self-test in `.github/workflows/validate.yml`.
 
-3. **`npm test` now runs bash.** One guard **executes** `templates/docgate.sh` over
+3. **`npm test` reads git, and prints two disclosures.** Its verdict is followed by the
+   claim-registry states, `learned.md`'s shape (rules · rules with an incident ·
+   incident words · binding rows), and `unlooked: N` — what this run could not look at,
+   listed. None of the three is a ratchet: no floor, no direction, **never a target**.
+   One check compares `learned.md`'s high-water mark against **every value that file's
+   history has held** (`git log -p`, last 80 commits) — comparing against `HEAD` was the
+   first draft and never fired on a committed checkout, which is what CI runs. Outside a
+   checkout it prints the skip rather than going quiet.
+
+4. **Guard corpora are discovered, not listed.** Three hand-written lists each missed a
+   shipped surface and none of the misses was found by the guard holding the list. A new
+   surface joins a check by existing — see `_discover_md` in `test/validate.py`. If you
+   add a corpus, give it a predicate, and give every exclusion a reason in the code.
+
+5. **`npm test` now runs bash.** One guard **executes** `templates/docgate.sh` over
    a scratch project seeded from the templates and requires exit `0` — a scaffold
    whose own gate rejects its own seeds teaches every new project that the gate is
    noise. Touching any of `templates/{docmap,decisions,open-questions,retro}.md` or

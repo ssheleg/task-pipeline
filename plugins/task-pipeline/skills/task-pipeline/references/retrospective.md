@@ -5,6 +5,13 @@ done. It exists because the pipeline's gates are good at *this* run and blind
 across runs: the same class of failure can be caught, fixed and forgotten five
 times, and nothing in the flow notices it is the same one.
 
+**The cap here is not a general rule about doctrine files.** It applies because these
+instructions are read *in full* every run. [`learned.md`](learned.md) →
+*What leaves this file, and why there is no cap* is the other case: a file entered by
+citation, where the index must be right rather than the length short, and where a rule
+retires on two triggers that are not counts. Proposing this cap for that file is a
+recurring idea, and it is answered there with the measurement rather than an opinion.
+
 **Two artifacts, and the split is the point.** A file that is read *in full* every
 run may not contain anything that grows without limit — otherwise the cap that
 justifies reading it protects one section while the file below it doubles.

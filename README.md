@@ -576,8 +576,10 @@ The last act of stage 10 is therefore a **retrospective**, written to
 `docs/superpowers/retro.md` — **one file per project, not per run**
 ([`retrospective.md`](plugins/task-pipeline/skills/task-pipeline/references/retrospective.md)).
 Every run **stamps and prunes** — in that order, because one retirement trigger
-counts firings across the last five run stamps and a prune ahead of the stamp reads a
-counter its own stage writes afterwards. Only a run that *diverged* writes an entry:
+counts firings across the last five run stamps **or sixty days**, whichever comes
+first, and a prune ahead of the stamp reads a counter its own stage writes afterwards.
+The calendar is the unit that keeps moving when the stamp counter has stopped, which is
+exactly when a stale rule matters most. Only a run that *diverged* writes an entry:
 symptom with evidence, the stage it surfaced at, the stage that **owned** it, the
 root cause, the fix, and the check that catches it the first time from now on.
 
@@ -593,7 +595,7 @@ root cause, the fix, and the check that catches it the first time from now on.
 Every standing
 instruction is checked against three retirement triggers — *it became a check* ·
 *every path or command it names is gone* · *it has not fired in the last five run
-stamps* — and the list is held to a **hard cap of ten**. At eleven, the oldest
+stamps, or in sixty days* — and the list is held to a **hard cap of ten**. At eleven, the oldest
 never-fired rule goes; "but they all matter" is exactly the state in which the list
 stopped being read, and the ninth stale rule is what discredits the two that are
 load-bearing.
@@ -606,6 +608,7 @@ visible where it happened:
 ```
 GATE 10 acceptance: PASS — 14/14 REQ verified
   carry-over: 0 unresolved · retro: 7 standing (was 9) · retired 3 · added 1
+  abstained: 1 (1 cannot-verify) · unlooked: 0
 ```
 
 Stage 0 reads those standing instructions **in full** on the next run — which is

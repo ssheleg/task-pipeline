@@ -2693,3 +2693,268 @@ jobs:
           else
             echo "OK: validator correctly FAILs — the dormant class has now been watched firing"
           fi
+
+      - name: Negative self-test (a rule leaves learned.md with no logged line)
+        run: |
+          set -eu
+          rm -rf /tmp/lrn1-copy && cp -R . /tmp/lrn1-copy
+          python3 - <<'EOF'
+          import re
+          p = "/tmp/lrn1-copy/plugins/task-pipeline/skills/task-pipeline/references/learned.md"
+          t = open(p, encoding="utf-8").read()
+          m = re.search(r"^\|\s*12\s*\|\s*\*\*.*$", t, re.M)
+          assert m, "PLANT DID NOT LAND: rule 12's row absent before edit"
+          open(p, "w", encoding="utf-8").write(t[:m.start()] + t[m.end() + 1:])
+          assert re.search(r"^\|\s*12\s*\|", open(p, encoding="utf-8").read(), re.M) is None, "PLANT DID NOT LAND"
+          EOF
+          if python3 /tmp/lrn1-copy/test/validate.py; then
+            echo "ERROR: validator passed a rule that vanished, taking its incident with it"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — a gap the Retired log does not name is a silent deletion"
+          fi
+
+      - name: Negative self-test (the Retired log itself removed from learned.md)
+        run: |
+          set -eu
+          rm -rf /tmp/lrn2-copy && cp -R . /tmp/lrn2-copy
+          python3 - <<'EOF'
+          import re
+          p = "/tmp/lrn2-copy/plugins/task-pipeline/skills/task-pipeline/references/learned.md"
+          t = open(p, encoding="utf-8").read()
+          assert re.search(r"^### Retired\s*$", t, re.M), "PLANT DID NOT LAND: heading absent before edit"
+          open(p, "w", encoding="utf-8").write(re.sub(r"^### Retired\s*$", "### Departures", t, count=1, flags=re.M))
+          assert "### Retired" not in open(p, encoding="utf-8").read(), "PLANT DID NOT LAND"
+          EOF
+          if python3 /tmp/lrn2-copy/test/validate.py; then
+            echo "ERROR: validator passed with no departure log — an absent log reads exactly like an empty one"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the log exists, so 'nothing retired' is a statement"
+          fi
+
+      - name: Negative self-test (a NEW surface states the cold trigger with one unit)
+        run: |
+          set -eu
+          rm -rf /tmp/coldnew-copy && cp -R . /tmp/coldnew-copy
+          python3 - <<'EOF'
+          p = "/tmp/coldnew-copy/docs/DOCMAP.md"
+          t = open(p, encoding="utf-8").read()
+          t += "\n\nA rule retires when it has not fired in the last five run stamps.\n"
+          open(p, "w", encoding="utf-8").write(t)
+          assert "five run stamps" in open(p, encoding="utf-8").read(), "PLANT DID NOT LAND"
+          EOF
+          if python3 /tmp/coldnew-copy/test/validate.py; then
+            echo "ERROR: validator passed a surface that was never on any hand-written list"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the corpus is discovered, so a new surface joins it by existing"
+          fi
+
+      - name: Negative self-test (the HIGHEST-numbered rule deleted — the gap that does not open)
+        run: |
+          set -eu
+          rm -rf /tmp/hw1-copy && cp -R . /tmp/hw1-copy
+          python3 - <<'EOF'
+          import re
+          p = "/tmp/hw1-copy/plugins/task-pipeline/skills/task-pipeline/references/learned.md"
+          t = open(p, encoding="utf-8").read()
+          nums = [int(n) for n in re.findall(r"^\|\s*(\d+)\s*\|\s*\*\*", t, re.M)]
+          assert nums, "PLANT DID NOT LAND: no rule rows found"
+          m = re.search(r"^\|\s*%d\s*\|\s*\*\*.*$" % max(nums), t, re.M)
+          assert m, "PLANT DID NOT LAND: highest row absent before edit"
+          open(p, "w", encoding="utf-8").write(t[:m.start()] + t[m.end() + 1:])
+          after = [int(n) for n in re.findall(r"^\|\s*(\d+)\s*\|\s*\*\*", open(p, encoding="utf-8").read(), re.M)]
+          assert max(after) < max(nums), "PLANT DID NOT LAND"
+          EOF
+          if python3 /tmp/hw1-copy/test/validate.py; then
+            echo "ERROR: deleting the highest rule shrinks max() with it and opens no gap — the false negative this guard shipped with"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the high-water mark comes from the file, not from max()"
+          fi
+
+      - name: Negative self-test (a digit in the log body masking a real deletion)
+        run: |
+          set -eu
+          rm -rf /tmp/hw2-copy && cp -R . /tmp/hw2-copy
+          python3 - <<'EOF'
+          import re
+          p = "/tmp/hw2-copy/plugins/task-pipeline/skills/task-pipeline/references/learned.md"
+          t = open(p, encoding="utf-8").read()
+          m = re.search(r"^\|\s*9\s*\|\s*\*\*.*$", t, re.M)
+          assert m, "PLANT DID NOT LAND: rule 9's row absent before edit"
+          t = t[:m.start()] + t[m.end() + 1:]
+          needle = "*None retired yet.*"
+          assert needle in t, "PLANT DID NOT LAND: log anchor absent"
+          # The leading number must NOT be a live table row, or the plant trips the
+          # resurrection check instead and the test can no longer tell a working anchor
+          # from a regressed one — verified by reverting the anchor and still failing.
+          t = t.replace(needle, "- **99 · Something** — trigger: subsumed by 9; `deadbeef`\n\n" + needle, 1)
+          open(p, "w", encoding="utf-8").write(t)
+          EOF
+          if python3 /tmp/hw2-copy/test/validate.py; then
+            echo "ERROR: a bare digit anywhere in the log masked a genuine silent deletion"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the log match is anchored to each line's leading number"
+          fi
+
+      - name: Negative self-test (the high-water mark removed from learned.md)
+        run: |
+          set -eu
+          rm -rf /tmp/hw3-copy && cp -R . /tmp/hw3-copy
+          python3 - <<'EOF'
+          p = "/tmp/hw3-copy/plugins/task-pipeline/skills/task-pipeline/references/learned.md"
+          t = open(p, encoding="utf-8").read()
+          needle = "**Numbers issued so far: 21.**"
+          assert needle in t, "PLANT DID NOT LAND: high-water mark absent before edit"
+          open(p, "w", encoding="utf-8").write(t.replace(needle, "**A note.**", 1))
+          assert "Numbers issued so far" not in open(p, encoding="utf-8").read(), "PLANT DID NOT LAND"
+          EOF
+          if python3 /tmp/hw3-copy/test/validate.py; then
+            echo "ERROR: validator passed with no high-water mark — the gap guard has nothing to measure against"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the mark is required, and it may not fall below the table"
+          fi
+
+      - name: Negative self-test (a worked verdict on a surface no list named)
+        run: |
+          set -eu
+          rm -rf /tmp/discnew-copy && cp -R . /tmp/discnew-copy
+          python3 - <<'EOF'
+          p = "/tmp/discnew-copy/README.md"
+          t = open(p, encoding="utf-8").read()
+          needle = "  abstained: 1 (1 cannot-verify) · unlooked: 0\n"
+          assert needle in t, "PLANT DID NOT LAND: anchor absent before edit"
+          open(p, "w", encoding="utf-8").write(t.replace(needle, "", 1))
+          assert "abstained: 1 (1 cannot-verify)" not in open(p, encoding="utf-8").read(), "PLANT DID NOT LAND"
+          EOF
+          if python3 /tmp/discnew-copy/test/validate.py; then
+            echo "ERROR: validator passed a worked verdict on a surface the hand-written list had missed"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the disclosure corpus is discovered, not listed"
+          fi
+
+      - name: Negative self-test (the high-water mark lowered in a COMMITTED change)
+        run: |
+          set -eu
+          rm -rf /tmp/hw4-copy && cp -R . /tmp/hw4-copy
+          python3 - <<'EOF'
+          import re
+          p = "/tmp/hw4-copy/plugins/task-pipeline/skills/task-pipeline/references/learned.md"
+          t = open(p, encoding="utf-8").read()
+          nums = [int(n) for n in re.findall(r"^\|\s*(\d+)\s*\|\s*\*\*", t, re.M)]
+          hi = max(nums)
+          m = re.search(r"^\|\s*%d\s*\|\s*\*\*.*$" % hi, t, re.M)
+          assert m, "PLANT DID NOT LAND: highest row absent before edit"
+          t = t[:m.start()] + t[m.end() + 1:]
+          old = "**Numbers issued so far: %d.**" % hi
+          assert old in t, "PLANT DID NOT LAND: mark absent"
+          open(p, "w", encoding="utf-8").write(t.replace(old, "**Numbers issued so far: %d.**" % (hi - 1), 1))
+          EOF
+          # COMMIT it. The first version of this test left the edit uncommitted, and the
+          # check compared the working tree against HEAD — identical on a committed
+          # checkout, which is what CI runs. The test passed while the check was blind.
+          git -C /tmp/hw4-copy add -A
+          git -C /tmp/hw4-copy -c user.email=t@t -c user.name=t commit -q -m "coordinated edit"
+          if python3 /tmp/hw4-copy/test/validate.py; then
+            echo "ERROR: a committed coordinated edit passed — the check compares against the checkout it is in"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the mark is compared against every value this file has held"
+          fi
+
+      - name: Negative self-test (every rule row deleted at once)
+        run: |
+          set -eu
+          rm -rf /tmp/hw7-copy && cp -R . /tmp/hw7-copy
+          python3 - <<'EOF'
+          import re
+          p = "/tmp/hw7-copy/plugins/task-pipeline/skills/task-pipeline/references/learned.md"
+          t = open(p, encoding="utf-8").read()
+          out = re.sub(r"^\|\s*\d+\s*\|\s*\*\*.*$\n", "", t, flags=re.M)
+          assert out != t, "PLANT DID NOT LAND: no rule rows removed"
+          open(p, "w", encoding="utf-8").write(out)
+          EOF
+          if python3 /tmp/hw7-copy/test/validate.py; then
+            echo "ERROR: emptying the table made the rule list falsy and skipped the whole check"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — wholesale deletion is the loudest case, not an exemption"
+          fi
+
+      - name: Property check (the cross-commit skip is printed, never swallowed)
+        run: |
+          set -eu
+          rm -rf /tmp/hw5-copy && cp -R . /tmp/hw5-copy && rm -rf /tmp/hw5-copy/.git
+          out=$(python3 /tmp/hw5-copy/test/validate.py) || { echo "ERROR: validator failed for an unrelated reason"; exit 1; }
+          if printf '%s' "$out" | grep -q "high-water mark vs its own history"; then
+            echo "OK: outside a checkout the skip is printed as an unlooked disclosure, not swallowed"
+          else
+            echo "ERROR: the check could not run and said nothing — a silent skip reads as a pass"
+            exit 1
+          fi
+
+      - name: Negative self-test (a second guard named inside one citation, and it does not exist)
+        run: |
+          set -eu
+          rm -rf /tmp/cite2-copy && cp -R . /tmp/cite2-copy
+          python3 - <<'EOF'
+          p = "/tmp/cite2-copy/CONTRIBUTING.md"
+          t = open(p, encoding="utf-8").read()
+          needle = "`states the cold-retirement condition as`"
+          assert needle in t, "PLANT DID NOT LAND: second citation absent before edit"
+          open(p, "w", encoding="utf-8").write(t.replace(needle, "`this guard does not exist anywhere`", 1))
+          assert "this guard does not exist anywhere" in open(p, encoding="utf-8").read(), "PLANT DID NOT LAND"
+          EOF
+          if python3 /tmp/cite2-copy/test/validate.py; then
+            echo "ERROR: only the first literal in a citation was checked — the rest rode free"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — every literal inside a *(guard: ...)* parenthetical is checked"
+          fi
+
+      - name: Negative self-test (a rule numbered above the high-water mark)
+        run: |
+          set -eu
+          rm -rf /tmp/hw6-copy && cp -R . /tmp/hw6-copy
+          python3 - <<'EOF'
+          import re
+          p = "/tmp/hw6-copy/plugins/task-pipeline/skills/task-pipeline/references/learned.md"
+          t = open(p, encoding="utf-8").read()
+          rows = list(re.finditer(r"^\|\s*(\d+)\s*\|\s*\*\*.*$", t, re.M))
+          assert rows, "PLANT DID NOT LAND: no rule rows"
+          last = rows[-1]
+          new_no = int(last.group(1)) + 1
+          row = re.sub(r"^\|\s*\d+\s*\|", "| %d |" % new_no, last.group(0))
+          open(p, "w", encoding="utf-8").write(t[:last.end()] + "\n" + row + t[last.end():])
+          EOF
+          if python3 /tmp/hw6-copy/test/validate.py; then
+            echo "ERROR: a rule was added without advancing the mark, so its later deletion would be invisible"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the mark may not sit below the table"
+          fi
+
+      - name: Negative self-test (a rule listed as retired that is still in the table)
+        run: |
+          set -eu
+          rm -rf /tmp/hw8-copy && cp -R . /tmp/hw8-copy
+          python3 - <<'EOF'
+          p = "/tmp/hw8-copy/plugins/task-pipeline/skills/task-pipeline/references/learned.md"
+          t = open(p, encoding="utf-8").read()
+          needle = "*None retired yet.*"
+          assert needle in t, "PLANT DID NOT LAND: log anchor absent before edit"
+          t = t.replace(needle, "- **12 · Tests create what they assert on** — trigger: subsumed; `deadbeef`\n\n" + needle, 1)
+          open(p, "w", encoding="utf-8").write(t)
+          assert "**12 · Tests create" in open(p, encoding="utf-8").read(), "PLANT DID NOT LAND"
+          EOF
+          if python3 /tmp/hw8-copy/test/validate.py; then
+            echo "ERROR: a rule was logged as retired while its row still stands — the reverse direction nobody checked"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — a gap has one side and so does a resurrection"
+          fi

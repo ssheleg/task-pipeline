@@ -1,5 +1,149 @@
 # Changelog
 
+## v1.30.0 — the cap that would have measured the wrong axis
+
+The audit's last finding was that `references/learned.md` has no retirement rule while
+`retro.md` caps its standing instructions at ten. Four measurements, each with a
+differently-shaped command — the rotation axis shipped one release ago, turned on the
+backlog that proposed it:
+
+| The belief | The command | Result |
+|---|---|---|
+| rules accumulate | table rows per tag: 15 → 18 → 21 → 21 | **flat for four releases** |
+| growth *is* rules | words per section, v1.23.0 → HEAD | **+223, every word in the binding map** |
+| the long incidents duplicate the retro | each incident's distinctive tokens against the whole retro corpus | **zero hits** — they are other projects' events, held nowhere else here |
+
+A cap of N would have squeezed the axis that had not moved in four releases. A word
+budget would have cut the incidents, which are the only record of those events anywhere
+in this repository. **The finding was right that something was missing and wrong about
+what.**
+
+**Why the retro is capped and this file is not**, now written down where the proposal
+keeps arriving: a cap belongs to a file you must *finish reading*. The retro's standing
+instructions are read in full at stage 0 — bounded by construction, or the last one is
+never reached. `learned.md` is entered by citation from twenty-three surfaces and its
+binding map is that entrance. **A file you enter through an index needs its index to be
+right, not its length to be short.**
+
+**Two triggers retire a rule, and neither is a count:** the conditions can no longer
+occur in any project the skill runs on, or the rule is **subsumed** — a merge, where the
+absorbing rule names the absorbed one and every binding-map row is repointed in the same
+change. Explicitly *not* "it became a check": that trigger is right for a standing
+instruction, whose job is to be read until the machine takes over, but here the rule is
+the **reason** the check exists, and a check whose reason was deleted is the next thing
+somebody removes as noise.
+
+Numbers are never reused and never closed up, so a departure shows as a **gap**, and a
+gap the `### Retired` log does not name now fails the build. The log exists while empty
+and says so — an absent log and an empty one are indistinguishable from outside, and
+only one of them means nothing has been retired.
+
+And the file's **shape** is now printed beside the validator's verdict — rules,
+incidents, incident words, binding rows — as a disclosure: computed, no floor, no
+direction, **never a target**. Growth becomes visible without becoming a lever.
+
+**The review found a guard that could not catch the thing it was built for.** Deleting
+the **highest-numbered** rule shrinks `max()` with it, so no gap ever opens — reproduced
+by deleting rule 21 and getting a clean pass. My own probe had planted in the middle of
+the list, which is the shape the author imagines. The mark now comes from the file
+(`Numbers issued so far: N`, the one number this file states about itself), and the log
+match is anchored to each line's leading number, because a bare digit anywhere in the
+body — *"subsumed by 9"* — masked a genuine deletion of rule 9.
+
+The disclosure was also wrong before it was right: one write-up covers two rules
+(*"4 and 5 · Probes"*), so it printed 18 where the file has 19 write-ups covering 20
+rules. It now says **rules with an incident**, because a label that does not say what
+it counts is a number nobody can check.
+
+**Swept the same class one level out.** The cold-retirement guard's corpus was a
+hand-written list of seven files. Made **discovered** instead — any shipped surface that
+states the condition must state both units — and it immediately found **thirteen**,
+including `README.md`, the Cursor rule, `gates.md` and `learned.md` itself. A narration
+of the old wording is exempt by the repository's existing convention: a double-quoted
+span is a citation, and rule 21's incident is left as it happened.
+
+**The class turned out to be the module.** Three guards in this file held
+hand-written corpora; all three had missed a shipped surface, and each miss was found
+by a reader or by a sweep rather than by the guard. All three are now **discovered**:
+the cold trigger (7 listed → 13 found), the disclosure verdicts (5 listed → README's
+worked `GATE 10` block found), and the claim registry (widened in v1.29.0 after the
+same shape). *Nobody notices a corpus that is too small, because everything inside it
+passes.*
+
+**A high-water mark the same change can lower is not one.** A reader found the residual
+hole and named why a file-only validator cannot see it: the evidence is in the previous
+commit. Deleting rule 21 *and* editing the mark to 20 makes both numbers agree and no
+gap opens. The check now reads the mark at `HEAD` through git — and where git cannot
+answer, it **prints** the skip as an `unlooked` disclosure rather than going quiet,
+because a check that falls silent outside a checkout reads exactly like a check that
+passed. That assertion is a property, not a rejection, so it lives outside the negative
+suite: the suite requires each of its tests to watch a guard *reject* something, and it
+reported the mismatch itself.
+
+**A citation naming two guards was checked as zero.** The extractor matched a single
+backtick span followed by `)*`, so invariant 43 — the one this release added, naming
+two — contributed nothing to the checked set and sat silently exempt from the invariant
+that every citation must resolve. Found by a reader, on the invariant whose subject is
+exactly that. Every literal inside a `*(guard: …)*` parenthetical is now checked, and
+one branch that had shipped unprobed (a rule numbered above the mark) now has its plant.
+
+The two discovered corpora also collapsed into one `_discover_md(skip, predicate)` —
+second occurrence of the walk, and this file's own rule promotes a class at the second,
+not the third.
+
+**A check that only worked in the window its own test used.** The cross-commit
+comparison read the mark at `HEAD` — identical to the working tree on a *committed*
+checkout, which is what CI runs. It fired only in the local pre-commit window, and the
+self-test exercised exactly that window. A reader committed the coordinated edit and
+watched it pass. The mark is now compared against **every value this file's history has
+held**, and the test commits its plant.
+
+Two more from the same round: emptying the rules table wholesale made the list falsy and
+skipped the entire check (`rules 0`, PASS), and `docs/superpowers/plans/` was missing
+from the frozen-record exclusions its two siblings carry.
+
+**CI caught what the local gate could not see.** Renaming the skip's message left the
+property check grepping for the old string — and that step lives only in the workflow,
+because it asserts something *is printed* rather than watching a guard reject. The local
+runner had no way to run it, so `npm run test:all` was green while CI failed on a string
+this same change had renamed. `test/negatives.py` now runs property checks too: a step
+that exists only in CI is a step the author's gate is blind to.
+
+**Both directions, on the guard about both directions.** The check found gaps the log
+did not name, and never the reverse: a number *listed as retired* whose row is still in
+the table — the log naming the wrong rule, or a retired rule quietly back. A gap has one
+side and so does a resurrection; only the second pass sees it. This is `learned.md`'s own
+rule 2 applied to the guard that guards `learned.md`.
+
+**And the number the exclusion moved.** Adding `docs/superpowers/plans/` to the frozen
+records took the discovered corpus from fourteen to thirteen, and two documents kept the
+old number — so the corpus's own size is now a claim-registry class, computed from the
+walk. The registry's evaluation moved below the walks that feed it: declared early,
+computed late.
+
+The local runner also learned to treat property checks as their own category — selected
+by `-k`, shown by `--list`, and reported under their own heading rather than as *"the
+validator accepted a planted defect"*, which is false for a check that plants nothing.
+Its verdict now names what ran: `PASS: all 0 guards` over an empty selection is the
+refused measurement this repository has a rule about.
+
+**A probe that could no longer fail for its own reason.** The anchor test planted a log
+line whose *body* held the digit it was about — and the high-water mark lives in that
+same section, so a bare-digit scan picked up `21`, tripped a different check, and the
+test failed either way. It could not tell a working anchor from a regressed one, which a
+reader demonstrated by reverting the anchor. The mark is now stripped before the log is
+parsed (it was never a log entry), the plant uses a number that is not a live row, and
+reverting the anchor makes the test pass again — which is what "this test measures that"
+means.
+
+Two more of the same family: the rule-row regex existed twice, byte-identical, one for
+the registry and one for the disclosure — rule 8's class inside the file that enforces
+it, now one pattern with two readers. And property checks got the floor the negative
+suite has had for releases: rename the only one and the category empties in silence,
+which is the failure property checks were added to close, one level up.
+
+Guards: 144 → **156**, plus 1 property check now covered locally.
+
 ## v1.29.0 — a sixth axis, and three summaries that each read as complete
 
 **Re-derivation** joins the rotation axes in `references/audit.md`: take a number the

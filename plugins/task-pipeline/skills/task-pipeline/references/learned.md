@@ -20,6 +20,7 @@ to be enforced and is not is the same failure as a gate that prints `FAIL` and e
 - The two that are not in the table, and why
 - The one instruction that would have prevented the most
 - Where these bind in the pipeline
+- What leaves this file, and why there is no cap
 
 ## The table — trigger · check · exit criterion
 
@@ -137,7 +138,7 @@ run's belief about the work-list against the register; the claim only ever appea
 
 **20 · The copy that wins.** A service had **two Dockerfiles**. One was added at the repository root by a run that checked whether a Dockerfile existed by looking where it expected one; `docker/Dockerfile` had been there all along, and `.github/workflows/ci.yml` says `file: docker/Dockerfile`. They disagreed about the port — 8080 at the root, 8000 in `docker/` — and the disagreement surfaced two days later as a **deployed service that answered nothing**, while `docker ps` said `Up` and `systemctl` said `active`. The built one also ran as root and copied the whole context, including `.git` and any `.env`; the hardened one was the one nobody built. Comparing the two files would have found the difference and not the direction. Only the workflow line says which one ships, and it is one grep. The same session hit this three more times: an autonomy sweep row added to the file that ASKS and not the file that RECORDS, twice, caught by a validator that knew to look at both.
 
-**21 · The prune that could not run.** A retrospective's standing-instruction list has a hard cap of ten and three retirement triggers, one of which is *it has not fired in the last five run stamps*. The stage's own instruction was **prune first, then stamp**. So the trigger read a counter the same stage wrote afterwards: on a fresh list it is unreadable, and it stays unreadable for as long as nobody stamps. Measured on a real project: the last retro entry was five days old, stamps per day ran 33, 20, 26, **3, 0** — the zero on a day with 107 commits — and the list sat at exactly **10 of 10**, so every run arrived at a stage that opened with a full list, an unusable trigger and a mandatory deletion. It was not skipped out of laziness. It was skipped because its first step could not be performed, and the cheap step that would have made it performable was queued behind it.
+**21 · The prune that could not run.** A retrospective's standing-instruction list has a hard cap of ten and three retirement triggers, one of which was, at the time of this incident, "it has not fired in the last five run stamps" — it has since gained a second unit, and the incident is left as it happened. The stage's own instruction was **prune first, then stamp**. So the trigger read a counter the same stage wrote afterwards: on a fresh list it is unreadable, and it stays unreadable for as long as nobody stamps. Measured on a real project: the last retro entry was five days old, stamps per day ran 33, 20, 26, **3, 0** — the zero on a day with 107 commits — and the list sat at exactly **10 of 10**, so every run arrived at a stage that opened with a full list, an unusable trigger and a mandatory deletion. It was not skipped out of laziness. It was skipped because its first step could not be performed, and the cheap step that would have made it performable was queued behind it.
 
 The same class had already bitten that project twice from the other side, and its roadmap names the
 property exactly: seven rows read `blocked` on producers the dependency board recorded as delivered,
@@ -209,3 +210,71 @@ project buys go in its retro ([`retrospective.md`](retrospective.md) →
 lesson there that would be true in any repository belongs here instead, as an issue
 upstream. A local file that accumulates universal rules is a fork of this one that
 nobody named.
+
+---
+
+## What leaves this file, and why there is no cap
+
+`docs/superpowers/retro.md` caps its standing instructions at **ten** and retires them
+on three triggers. Somebody proposes the same cap here about once a programme. It is
+the wrong instrument, and the reason is worth more than the rule.
+
+**A cap belongs to a file you must finish reading.** The retro's standing instructions
+are read *in full* at stage 0 of every run — bounded by construction, or the last one
+is never reached. This file is never read in full: it is entered by citation from the
+stages, and *Where these bind in the pipeline* is that entrance. **A file you enter
+through an index needs its index to be right, not its length to be short.**
+
+And the cap would have measured the axis that is not moving. Re-derived across releases
+rather than recalled — **measured at each tag**, so these rows are history and cannot
+go stale; the live shape is printed by `npm test` beside its verdict, and this file
+states no number about itself:
+
+| | v1.14.1 | v1.20.0 | v1.23.0 | v1.29.0 |
+|---|---|---|---|---|
+| rules in the table | 15 | 18 | 21 | **21** |
+| words in the file | 2165 | 2987 | 3696 | **3919** |
+
+Rules have been flat for four releases while the file grew — and every word of that
+growth is in the binding map, the section that makes a rule *reachable*. Cutting there
+shortens the index. The largest section by far is the incidents, and those are the only
+record of those events anywhere in this repository — checked by taking each incident's
+distinctive tokens against the whole retro corpus, which returned nothing. They are not
+a compression target; they are the thing the rules are made of.
+
+**Two triggers retire a rule, and neither is a count:**
+
+1. **The conditions cannot occur.** The tool, the layer, or the failure mode it names
+   is gone from every project the skill runs on — not "we have not hit it lately".
+2. **It is subsumed.** Another rule covers it entirely. This is a **merge**, not a
+   delete: the absorbing rule names the absorbed one, and every binding-map row that
+   pointed at the old number is repointed in the same change, or the map now sends a
+   stage to a rule that is not there.
+
+Never *"it became a check"* — that trigger is right for a standing instruction, whose
+whole purpose is to be read until the machine takes over. Here the rule is the reason
+the check exists, and a check whose reason has been deleted is the next thing somebody
+removes as noise.
+
+**Every deletion is logged as one line**, in the same change, the same discipline as
+the retro's prune: the rule's number, its name, which trigger fired, and the commit.
+A rule that vanishes silently takes its incident with it, and the next run re-learns it
+at full price. Numbers are never reused and never closed up — a gap in the table is the
+evidence that something left, and the log below says what.
+
+### Retired
+
+**Numbers issued so far: 21.** This is the high-water mark, and it is the only number
+this file states about itself — deliberately, because the gap that proves a rule left
+cannot be computed from the table alone: **deleting the highest-numbered rule shrinks
+the maximum with it, and no gap ever opens.** That false negative shipped in the first
+draft of this very section's guard and was found by a reader, not by its probe, which
+had planted in the middle of the list.
+
+*None retired yet.* Stated rather than omitted: an empty log and a missing log look
+identical from outside, and only one of them means nothing has been retired. Each
+retirement is one line, starting with the rule's number:
+
+<!-- - **N · Name** — trigger: subsumed by M | conditions gone; `<commit>` -->
+
+---

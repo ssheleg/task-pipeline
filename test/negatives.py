@@ -24,6 +24,8 @@ import sys
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 WORKFLOW = os.path.join(ROOT, ".github/workflows/validate.yml")
 MARKER = "Negative self-test"
+PROP_MARKER = "Property check"
+MIN_PROPS = 1
 # A format change that silently matched nothing would report "0 failures" and look
 # like success. Refuse to be that quiet.
 #
@@ -31,7 +33,7 @@ MARKER = "Negative self-test"
 # which is the floor doing half its job: it would have caught a total collapse and
 # not the loss of a third of the suite. Set it to the real count, and treat a
 # mismatch as a finding rather than as noise to be lowered away.
-MIN_EXPECTED = 144
+MIN_EXPECTED = 156
 
 
 def parse_steps(path):
@@ -96,7 +98,8 @@ def main(argv):
         print(f"FAIL: no workflow at {WORKFLOW}")
         return 2
 
-    tests = [(n, s) for n, s in parse_steps(WORKFLOW) if MARKER in n]
+    _STEPS = parse_steps(WORKFLOW)          # parsed once; both filters read the same list
+    tests = [(n, s) for n, s in _STEPS if MARKER in n]
     if len(tests) < MIN_EXPECTED:
         print(f"FAIL: found only {len(tests)} negative self-tests in the workflow "
               f"(expected at least {MIN_EXPECTED}). The parser or the workflow "
@@ -105,22 +108,49 @@ def main(argv):
         return 2
     if only:
         tests = [(n, s) for n, s in tests if only in n.lower()]
-        if not tests:
-            print(f"FAIL: no negative self-test matches {only!r}")
+        # The bail moved below the property filter: `-k property` matched no negative
+        # self-test and errored out while the checks it named were sitting right there,
+        # unrun. A selector that refuses the thing it selected is worse than no selector.
+        if not tests and not [1 for _n, _ in _STEPS if PROP_MARKER in _n and only in _n.lower()]:
+            print(f"FAIL: no negative self-test or property check matches {only!r}")
             return 2
 
     label = lambda n: n.replace(MARKER, "").strip().strip("()")
+    _plabel = lambda n: n.replace(PROP_MARKER, "").strip().strip("()")
     if listing:
         for n, _ in tests:
             print(" ", label(n))
+        # A listing that omits a whole category of test teaches that the category does
+        # not exist. They run; they are listed.
+        for n, _ in [(n, s) for n, s in _STEPS if PROP_MARKER in n
+                     and (not only or only.lower() in n.lower())]:
+            print("  [property]", _plabel(n))
         print(f"\n{len(tests)} negative self-tests")
         return 0
 
     # A leftover copy from an interrupted run would make the next one lie.
     sweep([copy_dir_of(s) for _, s in tests])
 
-    failed, broken = [], []
-    print(f"running {len(tests)} negative self-tests\n")
+    # Property checks assert that something IS printed, so the validator passes inside
+    # them and they cannot join the suite above. They still have to run somewhere the
+    # author can see: a step that lives only in CI is a step the local gate is blind to,
+    # and that is exactly how this runner shipped green while CI failed on a string this
+    # very file had renamed.
+    props = [(n, s) for n, s in _STEPS if PROP_MARKER in n]
+    # Same floor, same reason as MIN_EXPECTED above, one level up: rename the sole
+    # property step and this list empties, the runner skips it in silence and still
+    # exits 0 — which is the failure property checks were added to close.
+    if len(props) < MIN_PROPS:
+        print(f"FAIL: found only {len(props)} property checks in the workflow "
+              f"(expected at least {MIN_PROPS}). A category that quietly empties is "
+              f"a category nobody notices is gone.")
+        return 2
+    if only:
+        props = [(n, s) for n, s in props if only.lower() in n.lower()]
+
+    failed, broken, prop_failed = [], [], []
+    print(f"running {len(tests)} negative self-tests"
+          + (f" + {len(props)} property checks\n" if props else "\n"))
     for name, script in tests:
         cdir = copy_dir_of(script)
         sweep([cdir])
@@ -143,12 +173,24 @@ def main(argv):
             bucket.append((label(name), r.stdout[-500:], r.stderr[-500:]))
         sweep([cdir])
 
+    for name, script in props:
+        cdir = copy_dir_of(script)
+        sweep([cdir])
+        r = subprocess.run(["bash", "-c", script], cwd=ROOT, capture_output=True, text=True)
+        ok = r.returncode == 0 and "OK:" in r.stdout
+        print(f"  {'PASS' if ok else 'FAIL':<7}[property] " + _plabel(name))
+        if not ok:
+            prop_failed.append((_plabel(name), r.stdout[-500:], r.stderr[-500:]))
+        sweep([cdir])
+
     print()
     for title, rows, why in (
         ("BROKEN — the planted defect changed nothing, so the test proves nothing", broken,
          "fix the corruption in .github/workflows/validate.yml"),
         ("FAIL — the validator accepted a planted defect", failed,
          "the guard does not actually fire"),
+        ("FAIL — a property the run must print was not printed", prop_failed,
+         "nothing was planted here: the check asserts an output, and the output is gone"),
     ):
         if rows:
             print(f"{title}:")
@@ -158,10 +200,16 @@ def main(argv):
                     print("      " + line)
             print()
 
-    if failed or broken:
-        print(f"FAIL: {len(failed)} guard(s) did not fire, {len(broken)} test(s) broken")
+    if failed or broken or prop_failed:
+        print(f"FAIL: {len(failed)} guard(s) did not fire, {len(broken)} test(s) broken"
+              + (f", {len(prop_failed)} property check(s) silent" if prop_failed else ""))
         return 1
-    print(f"PASS: all {len(tests)} guards provably reject their planted defect")
+    # "all 0 guards ... provably reject" is a pass over an empty set, which is the
+    # shape this repository calls a refused measurement. Say what actually ran.
+    _parts = ([f"all {len(tests)} guards provably reject their planted defect"] if tests else [])
+    _parts += ([f"{len(props)} property check(s) printed what they assert"] if props else [])
+    print("PASS: " + " · ".join(_parts) if _parts else
+          "PASS: nothing ran — no test matched, which is not a result")
     return 0
 
 

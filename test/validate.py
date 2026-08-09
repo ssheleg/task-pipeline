@@ -453,6 +453,12 @@ def _axis_keys():
     return _keys, _p
 
 
+# One pattern, two readers. The registry counted rule rows and the shape disclosure
+# counted them again with a byte-identical regex differing only in its capture group —
+# rule 8's own class ("compute, never restate") living inside the file that enforces it.
+_RULE_ROW = r"^\|\s*\d+\s*\|\s*\*\*"
+_RULE_ROW_ID = r"^\|\s*(\d+)\s*\|\s*\*\*"
+
 _CLAIM_REGISTRY = [
     ("negative self-tests",
      r"\b" + _NUM + r"\+?\s+(?:of\s+\d+\s+)?(?:structural\s+)?guards\b(?!\s+behind)",
@@ -462,7 +468,7 @@ _CLAIM_REGISTRY = [
     ("rules in learned.md",
      r"\b" + _NUM + r"\s+rules\s+earned\b",
      lambda: _count_re("plugins/task-pipeline/skills/task-pipeline/references/learned.md",
-                       r"^\|\s*\d+\s*\|\s*\*\*"),
+                       _RULE_ROW),
      "README.md and SKILL.md said 'fifteen rules' against a table of twenty-one"),
 
     ("dated eval runs",
@@ -495,6 +501,13 @@ _CLAIM_REGISTRY = [
      lambda: _count_re("plugins/task-pipeline/skills/task-pipeline/references/gates.md",
                        r"^##\s+Axis\s"),
      "gates.md's title said 'the two axes' over a file with Axis A, B and C"),
+
+    # The number moved the moment an exclusion was added, and prose in two documents
+    # kept the old one. Registered so the corpus's own size cannot be restated stale.
+    ("cold-trigger surfaces",
+     r"\b" + _NUM + r"\s+(?:files|surfaces)\s+state\s+the\s+condition\b",
+     lambda: len(_COLD_SURFACES) if "_COLD_SURFACES" in globals() and _COLD_SURFACES else None,
+     "prose said fourteen after an exclusion took the corpus to thirteen"),
 
     ("reference files",
      r"\b" + _NUM + r"\s+files\s+under\s+`?references/`?",
@@ -566,34 +579,7 @@ for _extra in ["cursor/rules/task-pipeline.mdc",
     if os.path.isfile(_xp) and _extra not in _LIVING_TEXT:
         _LIVING_TEXT[_extra] = open(_xp, encoding="utf-8").read()
 
-_CLAIM_STATES = []
-for _label, _pat, _compute, _incident in _CLAIM_REGISTRY:
-    _truth = _compute()
-    if _truth is None:                      # the source of truth is absent — say so, do not guess
-        _CLAIM_STATES.append(f"{_label}: skip — no source")
-        continue
-    _seen = 0
-    for _living, _txt in _LIVING_TEXT.items():
-        for _m in re.finditer(_pat, _txt, re.I):   # "## The ten canons" is a heading; case is not a claim
-            if _is_quoted(_txt, _m):
-                continue
-            _stated = _as_int(_m.group(1))
-            if _stated is None:            # a word outside the map — say nothing rather than guess
-                continue
-            _seen += 1
-            if _stated != _truth:
-                fail(f"{_living}: states {_m.group(0).strip()!r} but {_label} computes to "
-                     f"{_truth} — derive the number or delete it. This class is registered "
-                     f"because: {_incident}")
-    # Progressive arming (gates.md): a class nobody states is DORMANT, not passing. Printed,
-    # because a registry reporting green over six classes it never looked at is exactly the
-    # false success it exists to catch. Most classes are dormant on purpose — the numbers
-    # were deleted rather than corrected, and this is the ratchet against re-introducing them.
-    # "ok 4 (truth 10)" reads as "claims 4, truth is 10" — the author of this line misread
-    # his own output that way within a day of writing it. The count is of agreeing statements,
-    # so it is written as a multiplier: a state line nobody can parse is not a disclosure.
-    _CLAIM_STATES.append(
-        f"{_label}: {'agrees x' + str(_seen) if _seen else 'dormant'} (truth {_truth})")
+_UNLOOKED = []
 
 # learned.md rule 16 — a rule that lands in the table and nowhere else is a rule the
 # run never meets, because nothing at stage 0 or stage 10 sends anybody to it. The
@@ -880,21 +866,56 @@ if os.path.isfile(_cs):
 # states the condition must state BOTH units. Rotation ("entries older than five stamps move
 # to the archive") is a DIFFERENT mechanism and is deliberately out of scope — it is named in
 # the scope line so the exclusion is a decision rather than an oversight.
-_COLD_SURFACES = [
-    "plugins/task-pipeline/skills/task-pipeline/references/retrospective.md",
-    "plugins/task-pipeline/skills/task-pipeline/references/acceptance.md",
-    "plugins/task-pipeline/skills/task-pipeline/references/stages.md",
-    "plugins/task-pipeline/skills/task-pipeline/references/companion-skills.md",
-    "plugins/task-pipeline/skills/task-pipeline/SKILL.md",
-    "plugins/task-pipeline/skills/task-pipeline/templates/retro.md",
-    "plugins/task-pipeline/commands/task-pipeline.md",
-]
+# The corpus is DISCOVERED, not listed. A hand-listed one was seven files and missed
+# README.md, which states the condition and had never been checked — found by reading,
+# in the release after a review found the same shape in the claim registry's corpus.
+# Nobody notices a corpus that is too small, because everything inside it passes. So
+# any shipped surface that states the condition is a surface that must state both units.
+#
+# Excluded on purpose, and each for a reason that is not "it was inconvenient":
+# CHANGELOG.md narrates the day the second unit was added, docs/superpowers/specs/ are
+# point-in-time design records, and the retro archive is not read in full.
+# Only load-bearing entries: the directory names below are pruned out of the walk
+# itself, so listing them here again would state the intent twice and enforce it once.
+# docs/superpowers/{specs,plans,retro}/ are frozen point-in-time records; retro.md
+# itself is live and stays in. plans/ was missing and a plan already carried the phrase
+# — it escaped only because its wording did not match the stricter regex.
+_COLD_SKIP = ("CHANGELOG.md", "docs/superpowers/specs/", "docs/superpowers/retro/",
+              "docs/superpowers/plans/")
+def _discover_md(skip, predicate):
+    """Walk the repo for .md/.mdc surfaces a check applies to. Second caller, so it is
+    a function: the shape (prune, filter, relpath, sort) was copy-pasted once and this
+    file's own doctrine promotes a class at its second occurrence, not its third."""
+    _out, _texts = [], {}
+    for _r, _d, _f in os.walk(ROOT):
+        _d[:] = [_x for _x in _d if _x not in (".git", "node_modules", "graphify-out")]
+        for _n in _f:
+            if not _n.endswith((".md", ".mdc")):
+                continue
+            _rl = os.path.relpath(os.path.join(_r, _n), ROOT)
+            if any(_rl == _s or _rl.startswith(_s) for _s in skip):
+                continue
+            _c = _LIVING_TEXT.get(_rl) or open(os.path.join(_r, _n), encoding="utf-8").read()
+            if predicate(_c):
+                _out.append(_rl)
+                _texts[_rl] = _c
+    _out.sort()
+    return _out, _texts
+
+
+_COLD_SURFACES, _COLD_TEXT = _discover_md(
+    _COLD_SKIP, lambda _c: "five run stamps" in _flatten(_c, lower=True))
+# A NARRATION of what the rule said before the second unit existed is not a statement
+# of the rule — learned.md's own rule-21 incident quotes the old wording, and rewriting
+# it would falsify the incident. Same convention the claim registry uses: a
+# double-quoted span is a citation. Italics are not, deliberately — a marker vocabulary
+# that grows per incident is the drift this file exists to prevent.
 _COLD_RE = re.compile(r"(?:has\s+not\s+)?fired\s+in\s+(?:the\s+last\s+)?five\s+run\s+stamps", re.I | re.S)
 for _f in _COLD_SURFACES:
     _fp = os.path.join(ROOT, _f)
     if not os.path.isfile(_fp):
         continue
-    _ft = open(_fp, encoding="utf-8").read()
+    _ft = _COLD_TEXT.get(_f) or open(_fp, encoding="utf-8").read()
     for _para in _paragraphs(_ft):
         # Normalise whitespace AND markdown emphasis. The canonical row in
         # retrospective.md reads "the last **five run stamps**", and a whitespace-only
@@ -903,8 +924,11 @@ for _f in _COLD_SURFACES:
         # programme that a predicate was defeated by this corpus's formatting rather
         # than by its content (twice by the ~80-column wrap, once by bold).
         _flat = _flatten(_para)
-        if not _COLD_RE.search(_flat):
+        _m = _COLD_RE.search(_flat)
+        if not _m:
             continue
+        if _is_quoted(_flat, _m):
+            continue                    # a narration of the old wording, not a statement
         if not re.search(r"sixty\s+days|60\s+days", _flat, re.I):
             _line = _ft[:_ft.find(_para)].count("\n") + 1
             fail(f"{_f}:{_line}: states the cold-retirement condition as five run stamps and "
@@ -920,13 +944,15 @@ for _f in _COLD_SURFACES:
 # that rule pressures exactly one thing — claiming more. A run reaching `abstained: 0` is not
 # more careful, it stopped saying "I don't know". Refusals and wrong answers are communicating
 # vessels. gates.md -> Disclosures states the rule; this guard only holds the print.
-_DISCLOSURE_FILES = [
-    "plugins/task-pipeline/skills/task-pipeline/references/acceptance.md",
-    "plugins/task-pipeline/skills/task-pipeline/references/audit.md",
-    "plugins/task-pipeline/skills/task-pipeline/references/gates.md",
-    "plugins/task-pipeline/skills/task-pipeline/references/retrospective.md",
-    "plugins/task-pipeline/skills/task-pipeline/templates/carryover.md",
-]
+# Discovered, not listed — third corpus in this file to be widened by finding what a
+# hand-written list had missed, and the last one that was still hand-written. The
+# five-file version omitted README.md, which prints a worked GATE 10 verdict in its
+# own doctrine section. A surface that shows a verdict teaches its format.
+_DISCLOSURE_FILES, _ = _discover_md(
+    # a changelog narrates old verdict formats; superpowers/ is a record of runs
+    ("CHANGELOG.md", "docs/superpowers/"),
+    lambda _c: any(re.search(r"^GATE\s+\d+", _b, re.M)
+                   for _b in re.findall(r"```[^\n]*\n(.*?)```", _c, re.S)))
 for _f in _DISCLOSURE_FILES:
     _fp = os.path.join(ROOT, _f)
     if not os.path.isfile(_fp):
@@ -943,6 +969,38 @@ for _f in _DISCLOSURE_FILES:
                  "a verdict that prints neither reads as 'verified' rather than as 'green, "
                  "and here is what nobody claimed and what nothing looked at' "
                  "(gates.md -> Disclosures)")
+
+# Evaluated HERE, not where the registry is declared: one class counts a DISCOVERED
+# corpus, which does not exist until the walks above have run. Declared early,
+# computed late.
+_CLAIM_STATES = []
+for _label, _pat, _compute, _incident in _CLAIM_REGISTRY:
+    _truth = _compute()
+    if _truth is None:                      # the source of truth is absent — say so, do not guess
+        _CLAIM_STATES.append(f"{_label}: skip — no source")
+        continue
+    _seen = 0
+    for _living, _txt in _LIVING_TEXT.items():
+        for _m in re.finditer(_pat, _txt, re.I):   # "## The ten canons" is a heading; case is not a claim
+            if _is_quoted(_txt, _m):
+                continue
+            _stated = _as_int(_m.group(1))
+            if _stated is None:            # a word outside the map — say nothing rather than guess
+                continue
+            _seen += 1
+            if _stated != _truth:
+                fail(f"{_living}: states {_m.group(0).strip()!r} but {_label} computes to "
+                     f"{_truth} — derive the number or delete it. This class is registered "
+                     f"because: {_incident}")
+    # Progressive arming (gates.md): a class nobody states is DORMANT, not passing. Printed,
+    # because a registry reporting green over six classes it never looked at is exactly the
+    # false success it exists to catch. Most classes are dormant on purpose — the numbers
+    # were deleted rather than corrected, and this is the ratchet against re-introducing them.
+    # "ok 4 (truth 10)" reads as "claims 4, truth is 10" — the author of this line misread
+    # his own output that way within a day of writing it. The count is of agreeing statements,
+    # so it is written as a multiplier: a state line nobody can parse is not a disclosure.
+    _CLAIM_STATES.append(
+        f"{_label}: {'agrees x' + str(_seen) if _seen else 'dormant'} (truth {_truth})")
 
 # The rotation axes are defined once, in audit.md, and summarised on surfaces that
 # cannot link to it (the Cursor rule is self-contained by contract). Measured on
@@ -1021,6 +1079,122 @@ if os.path.isfile(_rd):
                  "criterion is a printed pair must show the pair, or it is teaching "
                  "'assert agreement', which is the failure it names")
 
+# learned.md's shape, printed rather than capped. The retro caps its standing
+# instructions because they are read IN FULL every run; this file is entered by
+# citation and its index is what must be right. Measured before writing that down:
+# rules 15 -> 18 -> 21 -> 21 across four releases while the file grew, and every word
+# of the growth was in the binding map — a cap would have squeezed the axis that had
+# not moved, and a word budget would have hit the incidents, which are the only record
+# of those events anywhere here.
+#
+# So it is a DISCLOSURE (gates.md -> Disclosures): no floor, no direction, never a
+# target. It exists so growth is visible rather than a surprise, and so no document
+# has to restate a number about this file.
+#
+# A rule leaves on two triggers only, and a departure shows as a GAP in the numbering:
+# numbers are never reused and never closed up. A gap the Retired log does not name is
+# a rule that vanished silently, taking its incident with it.
+_LSHAPE = ""
+_lp = os.path.join(refdir, "learned.md")
+if os.path.isfile(_lp):
+    _lt = _LIVING_TEXT.get("plugins/task-pipeline/skills/task-pipeline/references/learned.md") \
+        or open(_lp, encoding="utf-8").read()
+    _nums = [int(_n) for _n in re.findall(_RULE_ROW_ID, _lt, re.M)]
+    _inc = re.search(r"^## The incidents.*?(?=^## )", _lt, re.M | re.S)
+    # "**4 and 5 · Probes.**" is one write-up covering two rules. A digits-then-dot
+    # pattern drops it, and the disclosure then prints a number lower than the file —
+    # a disclosure that is wrong is worse than none, because nothing cross-checks it.
+    _incs = ([_d for _h in re.findall(r"^\*\*([\d,\s]+(?:and[\d,\s]+)*)·", _inc.group(0), re.M)
+              for _d in re.findall(r"\d+", _h)] if _inc else [])
+    _incw = len(_inc.group(0).split()) if _inc else 0
+    _bind = re.search(r"^## Where these bind.*?(?=^---|\Z)", _lt, re.M | re.S)
+    _bindrows = len(re.findall(r"^\|", _bind.group(0), re.M)) - 2 if _bind else 0
+    _ret = re.search(r"^### Retired\s*(.*?)(?=^##|\Z)", _lt, re.M | re.S)
+    if _ret is None:
+        fail("references/learned.md: no `### Retired` log — a rule can only leave on a "
+             "logged line, and an absent log is indistinguishable from an empty one "
+             "(the file's own *What leaves this file* section)")
+    else:
+        # NOT `elif _nums`: deleting every row makes the list falsy and skipped the
+        # whole check — 21 rules removed at once printed PASS with `rules 0`.
+        # Wholesale deletion is the loudest case this guard exists for.
+        # The high-water mark comes from the FILE, not from max(_nums): deleting the
+        # highest rule shrinks the maximum with it and no gap opens. Proven by running
+        # it — deleting rule 21 passed a guard whose whole job is to catch that.
+        _hw = re.search(r"Numbers\s+issued\s+so\s+far:\s*(\d+)", _flatten(_ret.group(1)), re.I)
+        if not _hw:
+            fail("references/learned.md: `### Retired` does not state `Numbers issued so far: N` "
+                 "— without a high-water mark, deleting the highest-numbered rule shrinks the "
+                 "maximum with it and the guard sees no gap at all")
+        else:
+            _high = int(_hw.group(1))
+            # A high-water mark the same change can lower is not one, and the first
+            # version of this check compared the working tree against HEAD — which are
+            # the SAME THING on a committed checkout, i.e. in CI, where it therefore
+            # never fired. It only worked in the local pre-commit window, which is the
+            # only window its self-test exercised. Found by a reader who committed the
+            # coordinated edit and watched it pass.
+            #
+            # So: the mark may never fall below any value it has ever held. One
+            # `git log -p` over this file's history carries every version of the line,
+            # added or removed, and the maximum of those is the real high-water mark.
+            try:
+                _hist = subprocess.run(
+                    ["git", "-C", ROOT, "log", "-n", "80", "-p", "--format=",
+                     "--", "plugins/task-pipeline/skills/task-pipeline/references/learned.md"],
+                    capture_output=True, text=True, timeout=30)
+                _seen = ([int(_x) for _x in re.findall(
+                    r"Numbers\s+issued\s+so\s+far:\s*(\d+)", _flatten(_hist.stdout), re.I)]
+                    if _hist.returncode == 0 else [])
+            except Exception:
+                _seen = []
+            if not _seen:
+                _UNLOOKED.append("learned.md high-water mark vs its own history (no git, no "
+                                 "prior revision, or the mark is new) — a lowering would not "
+                                 "be seen")
+            elif _high < max(_seen):
+                fail(f"references/learned.md: `Numbers issued so far` is {_high} but this "
+                     f"file's history has held {max(_seen)} — the mark is a high-water mark "
+                     "and may never fall; lowering it alongside a rule's removal is exactly "
+                     "how a deletion hides, and comparing only against HEAD cannot see it "
+                     "once the edit is committed")
+            if _nums and _high < max(_nums):
+                fail(f"references/learned.md: `Numbers issued so far: {_high}` is below the "
+                     f"highest rule in the table ({max(_nums)}) — a new rule was added without "
+                     "advancing the high-water mark, so its later deletion would be invisible")
+            _gaps = [_n for _n in range(1, _high + 1) if _n not in _nums]
+            # Anchored to the line's LEADING number. A body-wide digit scan lets a
+            # subsumption note ("subsumed by rule 9") mask a real deletion of rule 9.
+            # The high-water mark lives in this same section, so its digits are not
+            # log entries. Strip it before parsing, or every reader of the log — this
+            # one and any future one — counts the mark as a retirement.
+            _log_body = re.sub(r"Numbers\s+issued\s+so\s+far:\s*\d+\.?", "",
+                               _ret.group(1), flags=re.I)
+            _logged = set(re.findall(r"^\s*-\s*\*\*(\d+)\s*·", _log_body, re.M))
+            # Both directions — rule 2, applied to this guard. A number logged as
+            # retired while its row is still in the table means the log is wrong or the
+            # rule came back without anyone noticing, and only the reverse pass finds it:
+            # a gap has one side, and so does a resurrection.
+            _back = sorted(int(_l) for _l in _logged if int(_l) in _nums)
+            if _back:
+                fail("references/learned.md: rule number(s) "
+                     + ", ".join(str(_b) for _b in _back)
+                     + " are listed in `### Retired` and still present in the table — "
+                     "either the log names the wrong rule or a retired rule came back "
+                     "silently, and the binding map now points at both stories")
+            _silent = [_g for _g in _gaps if str(_g) not in _logged]
+            if _silent:
+                fail("references/learned.md: rule number(s) "
+                     + ", ".join(str(_s) for _s in _silent)
+                     + " are missing from the table and named in no line of `### Retired` — "
+                     "a rule that vanishes silently takes its incident with it, and the "
+                     "next run re-learns it at full price")
+    # "rules with an incident", not "incidents": one write-up can cover two rules
+    # ("**4 and 5 · Probes.**"), so the two numbers differ and a label that does not
+    # say which one it means is a number nobody can check.
+    _LSHAPE = (f"learned.md — rules {len(_nums)} · rules with an incident {len(_incs)} · "
+               f"incident words {_incw} · binding rows {_bindrows}")
+
 # references/artifacts.md maps stage -> what it WRITES. The reverse direction — what
 # each stage READS and from where — is the one an agent actually needs at runtime,
 # and it was absent for nine releases: learned.md rule 2 (compute the mapping in both
@@ -1046,7 +1220,8 @@ _contrib = os.path.join(ROOT, "CONTRIBUTING.md")
 if os.path.isfile(_contrib):
     _ct = open(_contrib, encoding="utf-8").read()
     _self = open(os.path.abspath(__file__), encoding="utf-8").read()
-    _cited = re.findall(r"\*\(guard: `([^`]+)`\)\*", _ct)
+    _cited = [_lit for _par in re.findall(r"\*\(guard: (.+?)\)\*", _ct, re.S)
+                     for _lit in re.findall(r"`([^`]+)`", _par)]
     if len(_cited) < 8:
         fail("CONTRIBUTING.md: only %d invariant(s) name the guard that enforces them "
              "— a list that claims to be 'what the validator enforces' and cites "
@@ -2605,3 +2780,10 @@ if errors:
 print("PASS: task-pipeline structure valid")
 print("  claim registry — " + " · ".join(_CLAIM_STATES)
       + (" · UNREAD number-words: " + ", ".join(sorted(_UNPARSED_WORDS)) if _UNPARSED_WORDS else ""))
+if _LSHAPE:
+    # A disclosure, not a ratchet: no floor, no direction, and never a target.
+    print("  " + _LSHAPE + "  (disclosure — no floor, no target)")
+# The other disclosure: what this run did not look at. Printed even when empty, because
+# "unlooked: 0" and a missing line are the same silence to a reader.
+print(f"  unlooked: {len(_UNLOOKED)}"
+      + ("".join("\n    · " + _u for _u in _UNLOOKED) if _UNLOOKED else ""))
