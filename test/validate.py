@@ -1195,6 +1195,77 @@ if os.path.isfile(_lp):
     _LSHAPE = (f"learned.md — rules {len(_nums)} · rules with an incident {len(_incs)} · "
                f"incident words {_incw} · binding rows {_bindrows}")
 
+# The board (references/backlog.md). The carry-over ledger's last column has always
+# offered `backlog` as a home for a deferred row — a place the pipeline named and did
+# not own. Measured before building it: across ten ledgers in this repo, **not one row
+# ever used that value**, and sixteen rows sat `open` with no home at all. The dangling
+# pointer was not `backlog`; it was `open`.
+#
+# Ten ledgers, and the header shape varies six ways (`#` vs `id`; the status column
+# named Home / Where it lives now / Resolution / Status / State). So columns are found
+# by NAME, never by position — a positional read is how a guard silently checks the
+# wrong cell on five of six files.
+#
+# Floor 0, and it is a ratchet: every open row was given a board id at the seam's
+# closing, so a new one arriving unhomed fails rather than joining a backlog of debt.
+_BOARD = os.path.join(ROOT, "docs/superpowers/backlog.md")
+_LEDGER_ID = {"#", "id"}
+_LEDGER_STATUS = {"home", "where it lives now", "resolution", "status", "state"}
+_UNHOMED = []
+_BOARD_IDS = set()
+if os.path.isfile(_BOARD):
+    _bt = open(_BOARD, encoding="utf-8").read()
+    _BOARD_IDS = set(re.findall(r"\bB-(\d+)\b", _bt))
+    if not _BOARD_IDS:
+        fail("docs/superpowers/backlog.md: no `B-NNN` row — an empty board and a missing "
+             "board are the same thing to work on, and only one can be appended to")
+    for _lf in sorted(glob.glob(os.path.join(ROOT, "docs/superpowers/specs/*carryover.md"))):
+        _lt = open(_lf, encoding="utf-8").read()
+        _hdr = None
+        for _l in _lt.splitlines():
+            if _l.startswith("|") and _l.split("|")[1].strip().lower() in _LEDGER_ID:
+                _hdr = [_c.strip().lower() for _c in _l.split("|")[1:-1]]
+                break
+        if not _hdr:
+            continue                      # a ledger with no table yet
+        _si = [_i for _i, _c in enumerate(_hdr) if _c in _LEDGER_STATUS]
+        if not _si:
+            fail(f"{os.path.relpath(_lf, ROOT)}: no status column among {sorted(_LEDGER_STATUS)} "
+                 "— a ledger whose rows have no home column cannot be checked for dangling ones")
+            continue
+        _si = _si[-1]
+        for _l in _lt.splitlines():
+            if not _l.startswith("|") or _l.startswith("|---"):
+                continue
+            _c = [_x.strip() for _x in _l.split("|")[1:-1]]
+            if len(_c) != len(_hdr) or _c[0].lower() in _LEDGER_ID:
+                continue
+            _st = re.sub(r"[*_`~]+", "", _c[_si]).lower()
+            if not (_st.startswith("open") or "needs a home" in _st):
+                continue
+            _ref = re.search(r"B-(\d+)", _c[_si])
+            if not _ref:
+                _UNHOMED.append(f"{os.path.relpath(_lf, ROOT)} row {_c[0]}")
+            elif _ref.group(1) not in _BOARD_IDS:
+                fail(f"{os.path.relpath(_lf, ROOT)} row {_c[0]}: names `B-{_ref.group(1)}`, "
+                     "which is on no board row — a pointer to an id nobody issued reads as "
+                     "filed and is not")
+    if _UNHOMED:
+        fail("carry-over rows still `open` with no board id: "
+             + " · ".join(_UNHOMED)
+             + " — the board exists so a deferred row has somewhere to be ranked; an open "
+               "row with no id is the dangling pointer it was built to resolve "
+               "(references/backlog.md)")
+    # Both directions: a board row invented with no source is the other failure, and only
+    # the reverse pass finds it (learned.md rule 2).
+    for _row in re.findall(r"^\|\s*B-\d+\s*\|(.+)$", _bt, re.M):
+        _cells = [_x.strip() for _x in _row.split("|")]
+        if len(_cells) < 2 or not _cells[1]:
+            fail("docs/superpowers/backlog.md: a row names no Source — a row nobody can "
+                 "trace back is a wish somebody typed, and six weeks later it is either "
+                 "done twice or dropped by whoever trusts it least")
+            break
+
 # references/artifacts.md maps stage -> what it WRITES. The reverse direction — what
 # each stage READS and from where — is the one an agent actually needs at runtime,
 # and it was absent for nine releases: learned.md rule 2 (compute the mapping in both

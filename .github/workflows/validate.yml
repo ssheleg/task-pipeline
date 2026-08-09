@@ -2958,3 +2958,78 @@ jobs:
           else
             echo "OK: validator correctly FAILs — a gap has one side and so does a resurrection"
           fi
+
+      - name: Negative self-test (an open ledger row with no board id)
+        run: |
+          set -eu
+          rm -rf /tmp/bd1-copy && cp -R . /tmp/bd1-copy
+          python3 - <<'EOF'
+          p = "/tmp/bd1-copy/docs/superpowers/specs/2026-08-08-audit-followup-carryover.md"
+          t = open(p, encoding="utf-8").read()
+          needle = " → `B-001`"
+          assert needle in t, "PLANT DID NOT LAND: the board id is absent before the edit"
+          open(p, "w", encoding="utf-8").write(t.replace(needle, "", 1))
+          assert "B-001" not in open(p, encoding="utf-8").read(), "PLANT DID NOT LAND"
+          EOF
+          if python3 /tmp/bd1-copy/test/validate.py; then
+            echo "ERROR: an open row with no board id passed — the dangling pointer the board exists to resolve"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — every open ledger row names a board id"
+          fi
+
+      - name: Negative self-test (a ledger pointing at a board id nobody issued)
+        run: |
+          set -eu
+          rm -rf /tmp/bd2-copy && cp -R . /tmp/bd2-copy
+          python3 - <<'EOF'
+          p = "/tmp/bd2-copy/docs/superpowers/specs/2026-08-08-audit-followup-carryover.md"
+          t = open(p, encoding="utf-8").read()
+          assert "B-001" in t, "PLANT DID NOT LAND: anchor absent before the edit"
+          open(p, "w", encoding="utf-8").write(t.replace("B-001", "B-999", 1))
+          assert "B-999" in open(p, encoding="utf-8").read(), "PLANT DID NOT LAND"
+          EOF
+          if python3 /tmp/bd2-copy/test/validate.py; then
+            echo "ERROR: a pointer to an id nobody issued reads as filed and is not"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the id has to exist on the board"
+          fi
+
+      - name: Negative self-test (a board row with no Source — the reverse direction)
+        run: |
+          set -eu
+          rm -rf /tmp/bd3-copy && cp -R . /tmp/bd3-copy
+          python3 - <<'EOF'
+          import re
+          p = "/tmp/bd3-copy/docs/superpowers/backlog.md"
+          t = open(p, encoding="utf-8").read()
+          m = re.search(r"^\| B-009 \|([^|]*)\|([^|]*)\|", t, re.M)
+          assert m and m.group(2).strip(), "PLANT DID NOT LAND: B-009's Source is already empty"
+          open(p, "w", encoding="utf-8").write(t[:m.start(2)] + " " + t[m.end(2):])
+          EOF
+          if python3 /tmp/bd3-copy/test/validate.py; then
+            echo "ERROR: a board row traceable to nothing passed — a gap has one side and so does an invention"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — both directions are checked"
+          fi
+
+      - name: Negative self-test (the board emptied of every row)
+        run: |
+          set -eu
+          rm -rf /tmp/bd4-copy && cp -R . /tmp/bd4-copy
+          python3 - <<'EOF'
+          import re
+          p = "/tmp/bd4-copy/docs/superpowers/backlog.md"
+          t = open(p, encoding="utf-8").read()
+          assert re.search(r"B-\d+", t), "PLANT DID NOT LAND: no ids before the edit"
+          open(p, "w", encoding="utf-8").write(re.sub(r"B-(\d+)", r"X-\1", t))
+          assert not re.search(r"B-\d+", open(p, encoding="utf-8").read()), "PLANT DID NOT LAND"
+          EOF
+          if python3 /tmp/bd4-copy/test/validate.py; then
+            echo "ERROR: an empty board passed — it reads exactly like a board with nothing queued"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the plant lands in the file that DEFINES the board"
+          fi

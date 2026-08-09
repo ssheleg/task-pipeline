@@ -68,6 +68,7 @@ gate stops until it is installed.
 | **what travels with the bundle vs stays in a project** | [`references/portability.md`](references/portability.md) |
 | any repeating loop | [`references/loop-guard.md`](references/loop-guard.md) |
 | run-wide · how a run keeps going (the loop mode + the context budget) | [`references/continuity.md`](references/continuity.md) |
+| run-wide · the work-list **between** runs, and how its priority is computed | [`references/backlog.md`](references/backlog.md) |
 
 **Optional bridge.** If the operator already runs an equivalent skill set (e.g.
 `superpowers:brainstorming` / `writing-plans` / `subagent-driven-development` /

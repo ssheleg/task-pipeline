@@ -1,5 +1,41 @@
 # Changelog
 
+## v1.31.0 — the board, and the pointer that was never the one dangling
+
+The carry-over ledger has always offered `backlog` as a home for a deferred row — a
+place the pipeline **named and did not own**. The obvious fix was to build that
+backlog. Measuring first changed the target: across ten ledgers in this repository,
+**not one row has ever used that value.** The dangling pointer was never `backlog`. It
+was `open` — **sixteen rows across six ledgers**, deferred out loud and filed nowhere.
+
+`docs/superpowers/backlog.md` is the board: one per project, **mutable** where the
+ledger is append-only, because a queue is re-ranked and a history is not. Rows leave
+only into a *Closed* list, with the commit.
+
+**Priority is computed, never assigned:** `prio = sev × blast + age_bonus`, inputs in
+the row and the formula in the doctrine, so a ranking can be **checked** rather than
+trusted. Two consequences are the point rather than side effects: an old small thing
+eventually outranks a new medium one, and a row's priority moves without anyone
+touching it — which is what makes the re-derivation at the end of an iteration real
+work instead of ceremony.
+
+**Ten ledgers, six different column shapes.** `#` or `id`; the status column named
+*Home*, *Where it lives now*, *Resolution*, *Status* or *State*. So the guard finds
+columns **by name** — a positional read would have silently checked the wrong cell in
+five files out of six, and passed.
+
+Both directions, because they are different failures: a ledger row pointing at an id
+nobody issued, and a board row traceable to nothing. Neither is visible from the other
+side.
+
+The seam was closed rather than deferred: all sixteen rows carry a board id, so the
+floor is **zero** and the next unhomed row fails the build instead of joining a debt.
+This repo's own board opens with eleven rows — three of them the same finding three
+ledgers had written separately, collapsed into one, which is the job the board exists
+for.
+
+Guards: 156 → **160**.
+
 ## v1.30.0 — the cap that would have measured the wrong axis
 
 The audit's last finding was that `references/learned.md` has no retirement rule while
