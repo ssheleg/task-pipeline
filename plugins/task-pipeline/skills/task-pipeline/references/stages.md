@@ -168,13 +168,12 @@ never that the work was skipped quietly.
   a recorded answer or an explicit deferral, **every answer that contradicted a
   harvested source has a recorded resolution** (which governs, and whether the doc
   is now stale), no open contradictions, **every
-  autonomy-sweep row is answered or explicitly marked "stop and ask here"**, th
-- **The board is read, or seeded.** `docs/superpowers/backlog.md` ([`backlog.md`](backlog.md)) — its **open count is quoted in the brief**, measured by a command at the top of the run rather than inherited from the last run's report. Absent ⇒ seeded from the template and said so; an empty board and no board are the same thing to work on, and only one of them can be appended to.
-e
+  autonomy-sweep row is answered or explicitly marked "stop and ask here"**, the
   **REQ table is written and every row names its check**, the carry-over ledger is
   seeded, the model decision is recorded, and the operator confirms the brief. Stop when a
   re-scan surfaces no new branches (don't grill past diminishing returns;
   reversible calls can be deferred with a note). Only then start stage 1.
+- **The board is read, or seeded.** `docs/superpowers/backlog.md` ([`backlog.md`](backlog.md)) — its **open count is quoted in the brief**, measured by a command at the top of the run rather than inherited from the last run's report. Absent ⇒ seeded from the template and said so; an empty board and no board are the same thing to work on, and only one of them can be appended to.
 
 ## 1 — Docs study
 - **Freedom: medium** — which sources to fetch is judgement; grounding contracts on fetched docs is not ([`gates.md`](gates.md) → *Axis C*).

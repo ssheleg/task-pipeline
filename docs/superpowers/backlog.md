@@ -13,7 +13,7 @@
 | id | What | Source | Size | Sev | Blast | Age | Prio | State | Home |
 |---|---|---|---|---|---|---|---|---|---|
 | B-001 | `SKILL.md`'s frontmatter description sits at **1015 of the 1024-character limit**, and the shipped doctrine is ~97.5k tokens over 30 reference files — the next companion must displace text, not append it | `08-08-audit-followup` #2 | M | 2 | 3 | 1 | **6** | open | — |
-| B-002 | **Zero blind eval runs on zero of three models.** The skill's behavioural evidence is one self-check by its author; `evals/RESULTS.md` states the split honestly, which is reporting the gap, not closing it | `08-08-audit-followup` #6 | L | 2 | 3 | 1 | **6** | open | — |
+| B-002 | **Zero blind eval runs on zero of three models.** The skill's behavioural evidence is one self-check by its author; `evals/RESULTS.md` states the split honestly, which is reporting the gap, not closing it | `08-08-audit-followup` #6 · `08-03-default-routing` #C-1 · `08-03-setup-and-autonomy` #C-1 | L | 2 | 3 | 1 | **6** | open | — |
 | B-003 | The independent reviewer is **not in the stage list** — it runs because this repository happens to have a bot on PRs. R-005 is a standing instruction precisely because no stage dispatches a reader | `08-08-audit-followup` #8 | M | 2 | 3 | 1 | **6** | open | — |
 | B-004 | A blank line silently splits a markdown table, and the documentation gate does not catch it | `08-05-artifact-hygiene` #C-007 | S | 2 | 2 | 4 | 4 | open | — |
 | B-005 | The negative self-tests use **fixed `/tmp/<name>-copy` paths**, so two concurrent runs of `npm run test:all` overwrite each other's scratch | `08-06-evidence-docs` #1 | S | 2 | 2 | 3 | 4 | open | — |
@@ -24,12 +24,20 @@
 | B-010 | The validator re-reads the same files from disk — **25 reads of `audit.md`, 668 `.md` opens per run**, measured by instrumentation against an estimate of "3+" | `08-08-audit-followup` #12 | S | 1 | 2 | 1 | 2 | open | — |
 | B-011 | `grill.md` has no *"is this worth doing at all"* question, and the run that noticed deliberately did not add one | `08-05-spec-plan-quality` #C-002 | S | 1 | 2 | 4 | 2 | open | — |
 
+| B-015 | Nothing tests the routing rule **as a rule** — that a task of the shape the rule describes actually reaches this pipeline | `08-03-setup-and-autonomy` #C-2 | M | 1 | 3 | 6 | 3 | open | — |
+| B-021 | The negative suite copies the whole repository **once per test** (`cp -R .` × 163) and now runs over ten minutes — long enough that it gets backgrounded, which is how a suite stops being run before every commit | `2026-08-09-planning-system` / N1 stage 6 | M | 1 | 2 | 0 | 2 | open | — |
+| B-016 | The term-index check has a false-positive budget that was never measured over a real corpus — `learned.md` rule 10 says measure a detector before trusting it | `08-03-setup-and-autonomy` #C-3 | S | 1 | 2 | 6 | 2 | open | — |
+
 ## Closed
 
 Rows leave the table above only into this list, one line each, with the commit.
 
 - **B-012 · The `v1.15.0` tag and its npm release** — `08-06-graph-staleness` #9; superseded: the project has shipped through `v1.30.0` since, and the release path is exercised every module. Closed by measurement on 2026-08-09.
 - **B-013 · `gh` CLI unusable, token went invalid mid-run** — `08-06-graph-staleness` #10; environmental and no longer reproducing: `gh` has served every PR and merge of the last two programmes. Closed by measurement on 2026-08-09.
+- **B-017 · The `~/DATA/agent-sync` checkout was behind origin during the 2026-08-03 run** — `08-03-default-routing` #C-3; a run-local observation about another repository's working copy, not project work. Closed as `dropped` on 2026-08-09.
+- **B-018 · The wiki was not synced** — `08-03-setup-and-autonomy` #C-4; synced repeatedly since, three times on 2026-08-09 alone. Closed by measurement.
+- **B-019 · Ten consecutive releases shipped without a run stamp** — `08-08-audit-followup` #1; addressed in M3, which gave the cold-retirement trigger a second unit precisely because the stamp counter stops when the pipeline is not used. Closed on 2026-08-09.
+- **B-020 · The M8 graph refresh dropped nine nodes to id collisions** — `08-08-audit-followup` #9; the row's own content already recorded **0 collisions** after M2's refresh while its status cell still read `open`. Closed by the row's own measurement.
 - **B-014 · A run parked at its stage-0 gate** — `08-05-spec-plan-quality` #C-004; not work, a state note about a run that has since finished. Closed as `dropped` on 2026-08-09.
 
 ## How rows arrive

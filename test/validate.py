@@ -1209,8 +1209,6 @@ if os.path.isfile(_lp):
 # Floor 0, and it is a ratchet: every open row was given a board id at the seam's
 # closing, so a new one arriving unhomed fails rather than joining a backlog of debt.
 _BOARD = os.path.join(ROOT, "docs/superpowers/backlog.md")
-_LEDGER_ID = {"#", "id"}
-_LEDGER_STATUS = {"home", "where it lives now", "resolution", "status", "state"}
 _UNHOMED = []
 _BOARD_IDS = set()
 if os.path.isfile(_BOARD):
@@ -1219,43 +1217,68 @@ if os.path.isfile(_BOARD):
     if not _BOARD_IDS:
         fail("docs/superpowers/backlog.md: no `B-NNN` row — an empty board and a missing "
              "board are the same thing to work on, and only one can be appended to")
+    # POSITION-FREE, and the first version of this guard was not. Ten ledgers here carry
+    # six header shapes and FIVE of them have two status-ish columns ('status'+'home',
+    # 'resolution'+'state', …) — "take the last one" then read a different cell per file
+    # and missed genuinely open rows in silence. Three rows also carry more cells than
+    # their header, and skipping those was a second silent path.
+    #
+    # So: a row is OPEN if any of its cells *is* the word open (or says it needs a home),
+    # and HOMED if a board id appears anywhere in the row. Neither test asks which column
+    # it came from, so neither can be defeated by a shape nobody anticipated.
     for _lf in sorted(glob.glob(os.path.join(ROOT, "docs/superpowers/specs/*carryover.md"))):
         _lt = open(_lf, encoding="utf-8").read()
-        _hdr = None
+        _rel = os.path.relpath(_lf, ROOT)
         for _l in _lt.splitlines():
-            if _l.startswith("|") and _l.split("|")[1].strip().lower() in _LEDGER_ID:
-                _hdr = [_c.strip().lower() for _c in _l.split("|")[1:-1]]
-                break
-        if not _hdr:
-            continue                      # a ledger with no table yet
-        _si = [_i for _i, _c in enumerate(_hdr) if _c in _LEDGER_STATUS]
-        if not _si:
-            fail(f"{os.path.relpath(_lf, ROOT)}: no status column among {sorted(_LEDGER_STATUS)} "
-                 "— a ledger whose rows have no home column cannot be checked for dangling ones")
-            continue
-        _si = _si[-1]
-        for _l in _lt.splitlines():
-            if not _l.startswith("|") or _l.startswith("|---"):
+            if not _l.startswith("|") or set(_l.strip()) <= set("|- "):
                 continue
-            _c = [_x.strip() for _x in _l.split("|")[1:-1]]
-            if len(_c) != len(_hdr) or _c[0].lower() in _LEDGER_ID:
+            _c = [_flatten(_x, lower=True).strip() for _x in _l.split("|")[1:-1]]
+            if not _c or _c[0] in ("#", "id", "row"):
                 continue
-            _st = re.sub(r"[*_`~]+", "", _c[_si]).lower()
-            if not (_st.startswith("open") or "needs a home" in _st):
+            if not any(_x == "open" or _x.startswith("open ") or _x.startswith("open—")
+                       or _x.startswith("open -") or "needs a home" in _x for _x in _c):
                 continue
-            _ref = re.search(r"B-(\d+)", _c[_si])
-            if not _ref:
-                _UNHOMED.append(f"{os.path.relpath(_lf, ROOT)} row {_c[0]}")
-            elif _ref.group(1) not in _BOARD_IDS:
-                fail(f"{os.path.relpath(_lf, ROOT)} row {_c[0]}: names `B-{_ref.group(1)}`, "
-                     "which is on no board row — a pointer to an id nobody issued reads as "
-                     "filed and is not")
+            if not re.search(r"\bB-\d+\b", _l):
+                _UNHOMED.append(f"{_rel} row {_c[0][:8]}")
+            else:
+                _ref = re.search(r"\bB-(\d+)\b", _l)
+                if _ref.group(1) not in _BOARD_IDS:
+                    fail(f"{_rel} row {_c[0][:8]}: names `B-{_ref.group(1)}`, which is on no "
+                         "board row — a pointer to an id nobody issued reads as filed and is not")
     if _UNHOMED:
         fail("carry-over rows still `open` with no board id: "
              + " · ".join(_UNHOMED)
              + " — the board exists so a deferred row has somewhere to be ranked; an open "
                "row with no id is the dangling pointer it was built to resolve "
                "(references/backlog.md)")
+    # The priority is the one number on the board that a reader is invited to CHECK,
+    # so it is checked. The template shipped with three rows that contradicted the
+    # formula printed two lines below them — in the file seeded verbatim into every
+    # host project as its first board, whose stated point is that the arithmetic is
+    # visible. Found by a reader.
+    for _bf in (_BOARD, os.path.join(refdir, "../templates/backlog.md")):
+        if not os.path.isfile(_bf):
+            continue
+        _bfr = os.path.relpath(os.path.realpath(_bf), ROOT)
+        for _l in open(_bf, encoding="utf-8").read().splitlines():
+            if not re.match(r"^\|\s*B-\d+\s*\|", _l):
+                continue
+            _cl = [re.sub(r"[*_`]", "", _x).strip() for _x in _l.split("|")[1:-1]]
+            if len(_cl) < 8:
+                continue
+            try:
+                _sev, _bl, _age, _pr = (int(_cl[4]), int(_cl[5]), int(_cl[6]), int(_cl[7]))
+            except ValueError:
+                fail(f"{_bfr}: row {_cl[0]} has a non-numeric sev/blast/age/prio — the four "
+                     "are what make the ranking checkable, and prose in any of them makes "
+                     "it an opinion again")
+                continue
+            _want = _sev * _bl + (2 if _age > 30 else 1 if _age > 14 else 0)
+            if _want != _pr:
+                fail(f"{_bfr}: row {_cl[0]} states prio {_pr} but sev {_sev} × blast {_bl} "
+                     f"+ age bonus computes to {_want} — a priority that does not follow "
+                     "from its own inputs is the hand-assigned number this column replaced")
+
     # Both directions: a board row invented with no source is the other failure, and only
     # the reverse pass finds it (learned.md rule 2).
     for _row in re.findall(r"^\|\s*B-\d+\s*\|(.+)$", _bt, re.M):

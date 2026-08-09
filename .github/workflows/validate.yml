@@ -3033,3 +3033,58 @@ jobs:
           else
             echo "OK: validator correctly FAILs — the plant lands in the file that DEFINES the board"
           fi
+
+      - name: Negative self-test (a board priority that does not follow from its inputs)
+        run: |
+          set -eu
+          rm -rf /tmp/bd5-copy && cp -R . /tmp/bd5-copy
+          python3 - <<'EOF'
+          p = "/tmp/bd5-copy/docs/superpowers/backlog.md"
+          t = open(p, encoding="utf-8").read()
+          needle = "| 1 | **6** | open"
+          assert needle in t, "PLANT DID NOT LAND: anchor absent before the edit"
+          open(p, "w", encoding="utf-8").write(t.replace(needle, "| 1 | **9** | open", 1))
+          EOF
+          if python3 /tmp/bd5-copy/test/validate.py; then
+            echo "ERROR: a priority contradicting its own sev/blast/age passed — the hand-assigned number this column replaced"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the one number a reader is invited to check is checked"
+          fi
+
+      - name: Negative self-test (the seeded template's own worked example broken)
+        run: |
+          set -eu
+          rm -rf /tmp/bd6-copy && cp -R . /tmp/bd6-copy
+          python3 - <<'EOF'
+          p = "/tmp/bd6-copy/plugins/task-pipeline/skills/task-pipeline/templates/backlog.md"
+          t = open(p, encoding="utf-8").read()
+          needle = "| 12 | **2** | open"
+          assert needle in t, "PLANT DID NOT LAND: anchor absent before the edit"
+          open(p, "w", encoding="utf-8").write(t.replace(needle, "| 12 | **7** | open", 1))
+          EOF
+          if python3 /tmp/bd6-copy/test/validate.py; then
+            echo "ERROR: the file seeded verbatim into every host project shipped an example that fails its own formula"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the plant lands in the template, not only in this repo's board"
+          fi
+
+      - name: Negative self-test (an open row whose ledger has two status columns)
+        run: |
+          set -eu
+          rm -rf /tmp/bd7-copy && cp -R . /tmp/bd7-copy
+          python3 - <<'EOF'
+          p = "/tmp/bd7-copy/docs/superpowers/specs/2026-08-03-setup-and-autonomy-carryover.md"
+          t = open(p, encoding="utf-8").read()
+          needle = " → `B-015`"
+          assert needle in t, "PLANT DID NOT LAND: the board id is absent before the edit"
+          open(p, "w", encoding="utf-8").write(t.replace(needle, "", 1))
+          assert "B-015" not in open(p, encoding="utf-8").read(), "PLANT DID NOT LAND"
+          EOF
+          if python3 /tmp/bd7-copy/test/validate.py; then
+            echo "ERROR: a ledger with both Status and Home hid an open row — five of ten ledgers here have that shape"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the test is position-free, so a shape nobody anticipated cannot defeat it"
+          fi

@@ -34,7 +34,25 @@ This repo's own board opens with eleven rows — three of them the same finding 
 ledgers had written separately, collapsed into one, which is the job the board exists
 for.
 
-Guards: 156 → **160**.
+**The review found the guard reading the wrong cell in half the corpus.** The status
+column was taken by position — and five of ten ledgers here carry *two* status-ish
+columns (`status`+`home`, `resolution`+`state`), so "take the last one" read a different
+cell per file and passed genuinely open rows in silence. Three more rows carry more
+cells than their header and were skipped outright.
+
+The test is now **position-free**: a row is open if any of its cells says so, and homed
+if a board id appears anywhere in it. Neither question asks which column it came from,
+so neither can be defeated by a shape nobody anticipated. It immediately found **eight
+more open rows** — the true count was 24, not 16, and my own measurement was a third
+low. Three of the eight were the same *"evals never run"* finding written by three
+different runs; the board collapses them into one, which is the job it exists for.
+
+Two more from the same round: the new stage-0 bullet was spliced into the middle of the
+word *"the"* and `npm test` did not see it, and `templates/backlog.md` — the file seeded
+verbatim into every host project — shipped a worked example that **contradicted the
+formula printed two lines below it**. The arithmetic is now a guard, over both boards.
+
+Guards: 156 → **163**.
 
 ## v1.30.0 — the cap that would have measured the wrong axis
 
