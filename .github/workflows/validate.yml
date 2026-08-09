@@ -2876,3 +2876,44 @@ jobs:
             echo "ERROR: the check could not run and said nothing — a silent skip reads as a pass"
             exit 1
           fi
+
+      - name: Negative self-test (a second guard named inside one citation, and it does not exist)
+        run: |
+          set -eu
+          rm -rf /tmp/cite2-copy && cp -R . /tmp/cite2-copy
+          python3 - <<'EOF'
+          p = "/tmp/cite2-copy/CONTRIBUTING.md"
+          t = open(p, encoding="utf-8").read()
+          needle = "`states the cold-retirement condition as`"
+          assert needle in t, "PLANT DID NOT LAND: second citation absent before edit"
+          open(p, "w", encoding="utf-8").write(t.replace(needle, "`this guard does not exist anywhere`", 1))
+          assert "this guard does not exist anywhere" in open(p, encoding="utf-8").read(), "PLANT DID NOT LAND"
+          EOF
+          if python3 /tmp/cite2-copy/test/validate.py; then
+            echo "ERROR: only the first literal in a citation was checked — the rest rode free"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — every literal inside a *(guard: ...)* parenthetical is checked"
+          fi
+
+      - name: Negative self-test (a rule numbered above the high-water mark)
+        run: |
+          set -eu
+          rm -rf /tmp/hw6-copy && cp -R . /tmp/hw6-copy
+          python3 - <<'EOF'
+          import re
+          p = "/tmp/hw6-copy/plugins/task-pipeline/skills/task-pipeline/references/learned.md"
+          t = open(p, encoding="utf-8").read()
+          rows = list(re.finditer(r"^\|\s*(\d+)\s*\|\s*\*\*.*$", t, re.M))
+          assert rows, "PLANT DID NOT LAND: no rule rows"
+          last = rows[-1]
+          new_no = int(last.group(1)) + 1
+          row = re.sub(r"^\|\s*\d+\s*\|", "| %d |" % new_no, last.group(0))
+          open(p, "w", encoding="utf-8").write(t[:last.end()] + "\n" + row + t[last.end():])
+          EOF
+          if python3 /tmp/hw6-copy/test/validate.py; then
+            echo "ERROR: a rule was added without advancing the mark, so its later deletion would be invisible"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the mark may not sit below the table"
+          fi

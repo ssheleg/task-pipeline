@@ -80,7 +80,18 @@ passed. That assertion is a property, not a rejection, so it lives outside the n
 suite: the suite requires each of its tests to watch a guard *reject* something, and it
 reported the mismatch itself.
 
-Guards: 144 → **152**.
+**A citation naming two guards was checked as zero.** The extractor matched a single
+backtick span followed by `)*`, so invariant 43 — the one this release added, naming
+two — contributed nothing to the checked set and sat silently exempt from the invariant
+that every citation must resolve. Found by a reader, on the invariant whose subject is
+exactly that. Every literal inside a `*(guard: …)*` parenthetical is now checked, and
+one branch that had shipped unprobed (a rule numbered above the mark) now has its plant.
+
+The two discovered corpora also collapsed into one `_discover_md(skip, predicate)` —
+second occurrence of the walk, and this file's own rule promotes a class at the second,
+not the third.
+
+Guards: 144 → **154**.
 
 ## v1.29.0 — a sixth axis, and three summaries that each read as complete
 

@@ -893,21 +893,29 @@ if os.path.isfile(_cs):
 # Only load-bearing entries: the directory names below are pruned out of the walk
 # itself, so listing them here again would state the intent twice and enforce it once.
 _COLD_SKIP = ("CHANGELOG.md", "docs/superpowers/specs/", "docs/superpowers/retro/")
-_COLD_SURFACES = []
-_COLD_TEXT = {}
-for _root, _dirs, _fs in os.walk(ROOT):
-    _dirs[:] = [_d for _d in _dirs if _d not in (".git", "node_modules", "graphify-out")]
-    for _f in _fs:
-        if not _f.endswith((".md", ".mdc")):
-            continue
-        _rel = os.path.relpath(os.path.join(_root, _f), ROOT)
-        if any(_rel.startswith(_s) or _rel == _s for _s in _COLD_SKIP):
-            continue
-        _c = _LIVING_TEXT.get(_rel) or open(os.path.join(_root, _f), encoding="utf-8").read()
-        if "five run stamps" in _flatten(_c, lower=True):
-            _COLD_SURFACES.append(_rel)
-            _COLD_TEXT[_rel] = _c
-_COLD_SURFACES.sort()
+def _discover_md(skip, predicate):
+    """Walk the repo for .md/.mdc surfaces a check applies to. Second caller, so it is
+    a function: the shape (prune, filter, relpath, sort) was copy-pasted once and this
+    file's own doctrine promotes a class at its second occurrence, not its third."""
+    _out, _texts = [], {}
+    for _r, _d, _f in os.walk(ROOT):
+        _d[:] = [_x for _x in _d if _x not in (".git", "node_modules", "graphify-out")]
+        for _n in _f:
+            if not _n.endswith((".md", ".mdc")):
+                continue
+            _rl = os.path.relpath(os.path.join(_r, _n), ROOT)
+            if any(_rl == _s or _rl.startswith(_s) for _s in skip):
+                continue
+            _c = _LIVING_TEXT.get(_rl) or open(os.path.join(_r, _n), encoding="utf-8").read()
+            if predicate(_c):
+                _out.append(_rl)
+                _texts[_rl] = _c
+    _out.sort()
+    return _out, _texts
+
+
+_COLD_SURFACES, _COLD_TEXT = _discover_md(
+    _COLD_SKIP, lambda _c: "five run stamps" in _flatten(_c, lower=True))
 # A NARRATION of what the rule said before the second unit existed is not a statement
 # of the rule — learned.md's own rule-21 incident quotes the old wording, and rewriting
 # it would falsify the incident. Same convention the claim registry uses: a
@@ -951,20 +959,11 @@ for _f in _COLD_SURFACES:
 # hand-written list had missed, and the last one that was still hand-written. The
 # five-file version omitted README.md, which prints a worked GATE 10 verdict in its
 # own doctrine section. A surface that shows a verdict teaches its format.
-_DISCLOSURE_FILES = []
-for _root, _dirs, _fs in os.walk(ROOT):
-    _dirs[:] = [_d for _d in _dirs if _d not in (".git", "node_modules", "graphify-out")]
-    for _f in _fs:
-        if not _f.endswith((".md", ".mdc")):
-            continue
-        _rel = os.path.relpath(os.path.join(_root, _f), ROOT)
-        if _rel == "CHANGELOG.md" or _rel.startswith("docs/superpowers/"):
-            continue        # a changelog narrates old formats; superpowers/ is a record
-        _c = open(os.path.join(_root, _f), encoding="utf-8").read()
-        if any(re.search(r"^GATE\s+\d+", _b, re.M)
-               for _b in re.findall(r"```[^\n]*\n(.*?)```", _c, re.S)):
-            _DISCLOSURE_FILES.append(_rel)
-_DISCLOSURE_FILES.sort()
+_DISCLOSURE_FILES, _ = _discover_md(
+    # a changelog narrates old verdict formats; superpowers/ is a record of runs
+    ("CHANGELOG.md", "docs/superpowers/"),
+    lambda _c: any(re.search(r"^GATE\s+\d+", _b, re.M)
+                   for _b in re.findall(r"```[^\n]*\n(.*?)```", _c, re.S)))
 for _f in _DISCLOSURE_FILES:
     _fp = os.path.join(ROOT, _f)
     if not os.path.isfile(_fp):
@@ -1175,7 +1174,8 @@ _contrib = os.path.join(ROOT, "CONTRIBUTING.md")
 if os.path.isfile(_contrib):
     _ct = open(_contrib, encoding="utf-8").read()
     _self = open(os.path.abspath(__file__), encoding="utf-8").read()
-    _cited = re.findall(r"\*\(guard: `([^`]+)`\)\*", _ct)
+    _cited = [_lit for _par in re.findall(r"\*\(guard: (.+?)\)\*", _ct, re.S)
+                     for _lit in re.findall(r"`([^`]+)`", _par)]
     if len(_cited) < 8:
         fail("CONTRIBUTING.md: only %d invariant(s) name the guard that enforces them "
              "— a list that claims to be 'what the validator enforces' and cites "
