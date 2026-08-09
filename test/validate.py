@@ -1483,9 +1483,12 @@ if os.path.isfile(_VERIF):
 # `verification.md` while both were named in the tables of the same file, and a reader
 # found it, not a check. Every `docs/superpowers/*.md` the tables name must appear in
 # the tree, computed from the tables so neither side can be the one that is right.
+# Reads artifacts.md ONCE and hands it to the stage-input check below, which used to
+# open the same file again on the next line. Board row B-010 tracks this class.
 _artf = os.path.join(refdir, "artifacts.md")
-if os.path.isfile(_artf):
-    _at = open(_artf, encoding="utf-8").read()
+_AT_TEXT = open(_artf, encoding="utf-8").read() if os.path.isfile(_artf) else None
+if _AT_TEXT is not None:
+    _at = _AT_TEXT
     _named = set(re.findall(r"`docs/superpowers/([a-z-]+\.md)`", _at))
     _tree = re.search(r"^  superpowers/\n((?:    .*\n)+)", _at, re.M)
     if _named and not _tree:
@@ -1505,9 +1508,9 @@ if os.path.isfile(_artf):
 # and it was absent for nine releases: learned.md rule 2 (compute the mapping in both
 # directions) unapplied to this file itself. A stage whose inputs are unnamed reads
 # whatever the context happens to hold.
-_art = os.path.join(refdir, "artifacts.md")
-if os.path.isfile(_art):
-    _at = open(_art, encoding="utf-8").read()
+_art = _artf
+if _AT_TEXT is not None:
+    _at = _AT_TEXT
     for _needle, _what in (("Stage → input map", "the stage → input map"),
                            ("Project-saved rules", "the project-saved-rules map"),
                            ("Stage → artifact map", "the stage → artifact map")):
