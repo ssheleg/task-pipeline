@@ -1,5 +1,63 @@
 # Changelog
 
+## v1.34.0 — a run that says which pipeline it is on, and where in it
+
+An audit of this pipeline asked four questions of it. The first was *does the agent
+understand the plan it is executing?* — and the honest answer was that nothing in eleven
+stages ever printed which pipeline, which module, or which iteration was running. The
+run checklist existed and was marked *"copy it, tick it"*: an instruction with no gate
+behind it, which is the same failure it was written to prevent, one level up.
+
+**The run prints where it is, at two boundaries and only two** — task start and
+iteration close ([`references/progress.md`](plugins/task-pipeline/skills/task-pipeline/references/progress.md)):
+
+```
+task-pipeline v1.34.0 · pipeline-audit · module P1 «the progress print» (1 of 4)
+  0 ✓  1 ✓  2 ✓  3 ▶  4 ·  5 ·  6 ·  7 ·  8 ·  9 · 10 ·
+  ███████░░░░░░░░░░░░░░░░░░░  gates 3/11 · now 3 Spec · manual
+  board B-028 · carry-over 0 rows · exposure 99 never · unlooked 0
+```
+
+An iteration is already defined as *one item taken to its gate*, not one agent turn.
+Printing per turn would put a bar above every tool call and teach the operator to skip
+the block that matters.
+
+**The rail is computed from the project's own `pipeline.json` and carries no stage count
+of its own.** The eleven above are this plugin's *example* flow; a host replaces them. A
+bar reading `gates 5/11` in a project with six stages is a summary confidently wrong
+about the thing it summarises, printed in the one place a run is trusted at a glance.
+
+**Every number on the block is borrowed, and the block computes nothing.** `board` comes
+from the backlog, `carry-over` from the ledger, `exposure` from the verification file,
+`unlooked` from the gate's own disclosure. If the block disagrees with a gate verdict,
+the block is wrong — that direction, always, because the gate looked and the block
+quoted. A progress line that computed its own counts would be the fourth copy of the
+truth, and this repository already knows what happens to those.
+
+**A glyph is read from the verdict its gate wrote, never from memory.** `✓` means the
+gate passed, not that the stage was walked — a rail is a summary, and a summary is the
+easiest artefact in a run to write from recollection. `⊘` may never be silent: a skipped
+stage with no recorded reason is indistinguishable from a stage never entered, and the
+two mean opposite things.
+
+**`.task-pipeline/run.md` is finally written.** `loop-guard.md` has named it since the
+day it shipped, calls its own churn detection *mechanical*, and reads `touch:` lines from
+it — and **no run had ever created it**. The detector had no input; the guard sat on
+rung 1 while every reader took it for rung 3. It is now seeded at stage 0 from
+[`templates/run.md`](plugins/task-pipeline/skills/task-pipeline/templates/run.md), named
+in that stage's gate, and serves two readers: the guard reads the touches, the progress
+block reads the stage verdicts and counts the `iter:` lines. The counter is a `grep -c`,
+not a number the agent is carrying — after a compaction the agent's count is gone and
+the file's is not.
+
+**Five new guards, each watched failing against a planted defect.** The header block's
+field set compared **both ways** between its two copies; every glyph a rail prints
+present in the legend; the computed-rail promise stated where a reader meets it; and the
+ledger's line shapes compared declared-vs-shown **and** against the files that read them.
+The first version of the fourth probe removed one of three `touch:` lines from the worked
+log, left the shape shown, and read the guard's correct silence as a broken guard — R-001
+again, and the reason it is a standing instruction. Guards 188 → **193**.
+
 ## v1.33.0 — the number, the list, and the command that shows them with no task running
 
 Three modules shipped as one, because they are one capability: the index, the list it

@@ -59,9 +59,15 @@ at a glance.
 > external skill**. A host project may relocate the root via its `CLAUDE.md`; keep
 > the shape, keep the slugs.
 
-Loop-bearing runs also keep a **git-ignored** run ledger at `.task-pipeline/run.md` —
-stage-level and program-level repeat touches, one line each, so the loop guard can
-detect churn after a lost context (see [`loop-guard.md`](loop-guard.md)).
+**Every** run keeps a **git-ignored** run ledger at `.task-pipeline/run.md`, seeded at
+stage 0 from [`../templates/run.md`](../templates/run.md). Three line shapes: a
+`stage:` verdict when a gate returns, an `iter:` line when an iteration closes, and a
+`touch:` line per file per repeating pass. Two readers depend on it —
+[`loop-guard.md`](loop-guard.md) detects churn from the `touch:` lines after a lost
+context, and [`progress.md`](progress.md) derives the stage rail and the iteration
+counter from the other two. It was described as loop-only until 2026-08-10 and, in
+practice, written by no run at all: the guard that calls its own detection *mechanical*
+had no input in any run to date.
 
 Stage 5 also creates a **git-ignored** scratch workspace per plan at
 `.task-pipeline/build/<plan-basename>/` — ledger, task briefs, implementer reports,
@@ -158,12 +164,13 @@ plugins/task-pipeline/
       acceptance.md retrospective.md          #   stage 10 (close-out, then the retro)
       audit.md                                #   cross-cutting: the ladder + seams
       loop-guard.md                           #   cross-cutting: churn detection
+      progress.md                             #   cross-cutting: what the run prints about itself
       stages.md model-tiering.md              #   gates, model policy
       conventions.md artifacts.md             #   host conventions, this layout
       companion-skills.md                     #   optional companions + preflight
     templates/                                # skeletons seeded into a host project
-      hygiene.sh                            # -> scripts/check-hygiene.sh (stages 5, 6, 9)
-      README.md brief.md carryover.md context.md adr.md retro.md
+      hygiene.sh docgate.sh                 # -> scripts/check-hygiene.sh, check-docs.sh
+      README.md                             # the index — and it is the list, not a copy of it
 cursor/rules/task-pipeline.mdc                # Cursor channel (self-contained rule)
 bin/task-pipeline.js                          # npx installer (package task-pipeline-skill)
 install.sh                                    # POSIX installer

@@ -30,7 +30,8 @@ searches.
 
 You cannot detect churn from memory, especially after compaction. Every repeating
 pass appends one line to the run's ledger (`.task-pipeline/build/<plan>/progress.md`
-for stage 5; `.task-pipeline/run.md` for stage-level and program-level loops):
+for stage 5; `.task-pipeline/run.md` for stage-level and program-level loops —
+**seeded at stage 0** from [`../templates/run.md`](../templates/run.md)):
 
 ```
 touch: <file> — pass <N> (<stage|round|module>) — reason: <finding id / gate item>
@@ -39,6 +40,12 @@ touch: <file> — pass <N> (<stage|round|module>) — reason: <finding id / gate
 One line per file per pass. The reason must name **what forced the edit** — a
 finding id, a failed gate item, an operator instruction. "Cleanup", "polish" and
 "while I was there" are not reasons; they are churn with better manners.
+
+**This ledger was required here from the day the file shipped and written by no run
+until 2026-08-10.** The detection below calls itself mechanical; with no ledger it had
+no input at all, so the guard sat on rung 1 while every reader took it for rung 3
+([`gates.md`](gates.md) → *Axis B*). It is now seeded at stage 0 and named in that
+stage's gate — which is the whole difference between a rule and a rule that runs.
 
 ## Detection — any one of these trips the guard
 

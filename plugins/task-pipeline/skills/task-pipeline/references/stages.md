@@ -8,12 +8,27 @@ operator's explicit go). These stages (0 intake + 1→10) are the plugin's
 `pipeline.schema.json`; a host project replaces it with its own
 stages/agents/types (see SKILL.md → *Bring your own skills*).
 
-## The run checklist — copy it, tick it
+## The run checklist — printed, not remembered
 
-Complex workflows lose steps silently. Copy this into your response at the start of
-a run and check items off as they close; it is the cheapest guard against the one
-failure this pipeline keeps paying for — a stage that *looks* done because nothing
-printed.
+Complex workflows lose steps silently. **The run says where it is**, at two boundaries
+and only two — task start and iteration close ([`progress.md`](progress.md)):
+
+```
+task-pipeline vX.Y.Z · <topic> · module <id> «<name>» (N of M)
+  0 ✓  1 ✓  2 ✓  3 ▶  4 ·  5 ·  6 ·  7 ·  8 ·  9 · 10 ·
+  ███████░░░░░░░░░░░░░░░░░░░  gates 3/11 · now 3 Spec · manual
+  board B-NNN · carry-over N rows · exposure N never · unlooked N
+```
+
+The rail's positions come from the project's own `pipeline.json`, never from the count
+below — those eleven are this plugin's example flow. Each glyph is read from the
+verdict its gate wrote to `.task-pipeline/run.md`, and from nothing else: a rail
+written from memory is a summary that is confidently wrong exactly where it is trusted
+at a glance.
+
+The checklist below is what that rail summarises. This section said *"copy it, tick
+it"* until 2026-08-10 — an instruction with no gate behind it, which is the same
+failure it was written to prevent, one level up.
 
 ```
 Pipeline progress
@@ -35,7 +50,7 @@ never that the work was skipped quietly.
 
 ## Contents
 
-- The run checklist — copy it, tick it
+- The run checklist — printed, not remembered
 - 0 — Intake grill — MANDATORY
 - 1 — Docs study
 - 2 — Brainstorm + decompose
@@ -170,12 +185,22 @@ never that the work was skipped quietly.
   is now stale), no open contradictions, **every
   autonomy-sweep row is answered or explicitly marked "stop and ask here"**, the
   **REQ table is written and every row names its check**, the carry-over ledger is
-  seeded, the model decision is recorded, and the operator confirms the brief. Stop when a
+  seeded, **`.task-pipeline/run.md` exists and the header block has been printed**
+  ([`progress.md`](progress.md)), the model decision is recorded, and the operator
+  confirms the brief. Stop when a
   re-scan surfaces no new branches (don't grill past diminishing returns;
   reversible calls can be deferred with a note). Only then start stage 1.
 - **The verification ledger is read.** `docs/superpowers/verification.md` — the harvest
   quotes **how many rows sit at `never`**, because that is the project's standing
   exposure and stage 0 is where it is cheapest to look ([`verification.md`](verification.md)).
+- **The run ledger is seeded and the header block is printed** — in that order, before
+  the first grill question. `.task-pipeline/run.md` from
+  [`../templates/run.md`](../templates/run.md) is the record **two** mechanisms already
+  depended on and no run had ever written: [`loop-guard.md`](loop-guard.md) calls its
+  own churn detection mechanical and reads the `touch:` lines, and
+  [`progress.md`](progress.md) derives the rail and the iteration counter from the
+  `stage:` and `iter:` lines. The header goes out before the interview because a run
+  that announces its position only at the end announced it to nobody.
 - **The board is read, or seeded.** `docs/superpowers/backlog.md` ([`backlog.md`](backlog.md)) — its **open count is quoted in the brief**, measured by a command at the top of the run rather than inherited from the last run's report. Absent ⇒ seeded from the template and said so; an empty board and no board are the same thing to work on, and only one of them can be appended to.
 
 ## 1 — Docs study

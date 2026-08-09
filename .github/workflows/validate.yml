@@ -3688,3 +3688,89 @@ jobs:
           else
             echo "OK: validator correctly FAILs — rm and cp in one step name the same directory"
           fi
+
+      - name: Negative self-test (the header block drifting between its two copies)
+        run: |
+          set -eu
+          rm -rf /tmp/hdr-copy && cp -R . /tmp/hdr-copy
+          python3 - <<'EOF'
+          p = "/tmp/hdr-copy/plugins/task-pipeline/skills/task-pipeline/references/stages.md"
+          t = open(p, encoding="utf-8").read()
+          assert " · unlooked N" in t, "PLANT DID NOT LAND: the field is not in the block"
+          open(p, "w", encoding="utf-8").write(t.replace(" · unlooked N", "", 1))
+          EOF
+          if python3 /tmp/hdr-copy/test/validate.py; then
+            echo "ERROR: one block, two copies, and a field silently in only one of them"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — both directions of the header field set"
+          fi
+
+      - name: Negative self-test (a rail glyph the legend does not define)
+        run: |
+          set -eu
+          rm -rf /tmp/glyph-copy && cp -R . /tmp/glyph-copy
+          python3 - <<'EOF'
+          p = "/tmp/glyph-copy/plugins/task-pipeline/skills/task-pipeline/references/progress.md"
+          t = open(p, encoding="utf-8").read()
+          assert "3 ▶" in t, "PLANT DID NOT LAND: the rail's in-flight glyph moved"
+          open(p, "w", encoding="utf-8").write(t.replace("3 ▶", "3 »", 1))
+          EOF
+          if python3 /tmp/glyph-copy/test/validate.py; then
+            echo "ERROR: the rail prints a symbol a reader has nothing to look up"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — every printed glyph is in the legend"
+          fi
+
+      - name: Negative self-test (the rail claiming a stage count of its own)
+        run: |
+          set -eu
+          rm -rf /tmp/rail-copy && cp -R . /tmp/rail-copy
+          python3 - <<'EOF'
+          p = "/tmp/rail-copy/plugins/task-pipeline/skills/task-pipeline/references/progress.md"
+          t = open(p, encoding="utf-8").read()
+          needle = "come from the project's `pipeline.json`"
+          assert needle in t, "PLANT DID NOT LAND: the computed-rail clause moved"
+          open(p, "w", encoding="utf-8").write(t.replace(needle, "come from the eleven stages", 1))
+          EOF
+          if python3 /tmp/rail-copy/test/validate.py; then
+            echo "ERROR: a rail hardcoding the example flow is wrong in every project that replaced it"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the rail is computed, never eleven"
+          fi
+
+      - name: Negative self-test (a ledger shape declared and never shown)
+        run: |
+          set -eu
+          rm -rf /tmp/led-copy && cp -R . /tmp/led-copy
+          python3 - <<'EOF'
+          p = "/tmp/led-copy/plugins/task-pipeline/skills/task-pipeline/templates/run.md"
+          t = open(p, encoding="utf-8").read()
+          assert t.count("touch: src/export.ts") >= 2, "PLANT DID NOT LAND: the Log fence lost its touch lines"
+          open(p, "w", encoding="utf-8").write(t.replace("touch: src/export.ts", "seen:  src/export.ts"))
+          EOF
+          if python3 /tmp/led-copy/test/validate.py; then
+            echo "ERROR: a declared line shape with no worked example, and an example with no declaration"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — declared and shown, compared both ways"
+          fi
+
+      - name: Negative self-test (a ledger shape no reader names)
+        run: |
+          set -eu
+          rm -rf /tmp/ledr-copy && cp -R . /tmp/ledr-copy
+          python3 - <<'EOF'
+          p = "/tmp/ledr-copy/plugins/task-pipeline/skills/task-pipeline/templates/run.md"
+          t = open(p, encoding="utf-8").read()
+          assert "iter: " in t, "PLANT DID NOT LAND: the iteration line moved"
+          open(p, "w", encoding="utf-8").write(t.replace("iter: ", "cycle:"))
+          EOF
+          if python3 /tmp/ledr-copy/test/validate.py; then
+            echo "ERROR: a ledger shape nothing reads is a shape nothing writes"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — every declared shape has a named reader"
+          fi

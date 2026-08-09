@@ -3200,6 +3200,138 @@ for _sk in sorted(glob.glob(os.path.join(ROOT, "plugins/*/skills/*/SKILL.md"))):
                  "a colon-space, so YAML parses it as a mapping and the field is "
                  "silently dropped at load time -- quote the value or rephrase")
 
+# --- P1: what the run prints about itself (v1.34.0) ---------------------------
+# SCOPE: these four check the DOCTRINE's internal consistency — the header block's
+# field set, the glyph legend, the computed-rail promise, and the run ledger's line
+# shapes. They do NOT check that any run ever printed a block; a static validator
+# cannot see a transcript, and naming that limit here is the whole point of a scope
+# header (gates.md -> Anatomy of a project gate).
+_PROG_REL = "references/progress.md"
+_PROG = os.path.join(ROOT, _SKILLDIR, _PROG_REL)
+_PTXT = open(_PROG, encoding="utf-8").read() if os.path.isfile(_PROG) else ""
+
+
+def _header_fields(_path):
+    """Field labels of the header block, read from the block itself, never listed.
+
+    Unit: the INDENTED, dot-separated lines of the first fence whose body opens
+    `task-pipeline v`. Two exclusions, each with its reason. The rail line is out
+    because it uses the middle dot as a GLYPH rather than a separator, so a segment
+    split would read its stage numbers as field names. The title line is out by
+    indentation, because its middle segment is the topic — which legitimately
+    differs between the doctrine's example and a restatement of it.
+    """
+    if not os.path.isfile(_path):
+        return None
+    for _blk in re.findall(r"```\n(.*?)```", open(_path, encoding="utf-8").read(), re.S):
+        if not _blk.startswith("task-pipeline v"):
+            continue
+        _out = set()
+        for _ln in _blk.split("\n")[1:]:
+            if not _ln[:1].isspace() or "·" not in _ln:
+                continue
+            if re.match(r"\s*\d+\s", _ln):
+                continue                      # the rail
+            for _seg in _ln.split("·"):
+                _m = re.match(r"([a-z][a-z-]*)\b", _seg.strip(" █░").strip())
+                if _m:
+                    _out.add(_m.group(1))
+        return _out
+    return None
+
+
+# P1-G1. The header block exists in TWO files, which is learned.md rule 20's shape:
+# a thing that exists twice drifts, and the drift is silent because each copy reads
+# complete on its own. Both directions, because they are different failures — a
+# field in the doctrine and absent from the stage list is a reader who never meets
+# it; a field on the stage list and absent from the doctrine is a number with no
+# home, which is the one thing progress.md forbids outright.
+_pf = _header_fields(_PROG)
+_sf = _header_fields(os.path.join(ROOT, _SKILLDIR, "references/stages.md"))
+if _pf is None or _sf is None or not _pf or not _sf:
+    _UNLOOKED.append("skip: header-block field set — no `task-pipeline v` fence in "
+                     "progress.md or stages.md")
+else:
+    for _miss, _where, _other in ((_pf - _sf, "references/stages.md", "progress.md"),
+                                  (_sf - _pf, _PROG_REL, "stages.md")):
+        if _miss:
+            fail(f"{_where}: the header block omits {sorted(_miss)}, which "
+                 f"{_other} prints — one block, two copies, already drifted")
+
+# P1-G2. Every glyph a rail prints is defined in the legend. SCOPE: one direction
+# only, and deliberately. A legend row for a glyph no example happens to use is a
+# vocabulary entry rather than a defect — `✗` is exactly that — so the reverse
+# check would fail on correct doctrine. The failure worth catching is the other
+# one: a symbol a reader meets with nothing to look it up in.
+if _PTXT:
+    _legend = set(re.findall(r"^\|\s*`(\S)`\s*\|", _PTXT, re.M))
+    _used = set()
+    for _blk in re.findall(r"```\n(.*?)```", _PTXT, re.S):
+        for _ln in _blk.split("\n"):
+            if re.match(r"\s*\d+\s", _ln):
+                _used |= set(re.findall(r"\d+\s(\S)", _ln))
+    if not _legend:
+        fail(f"{_PROG_REL}: no glyph legend — the rail's symbols are printed and "
+             "defined nowhere")
+    for _g in sorted(_used - _legend):
+        fail(f"{_PROG_REL}: the rail prints {_g!r} and "
+             "the legend does not define it"
+             " — a symbol a reader meets with nothing to look it up in")
+
+# P1-G3. REQ-013's promise, stated where a reader meets it. A rail that hardcodes
+# this plugin's eleven EXAMPLE stages is confidently wrong in every project that
+# replaced them, in the one place a run is trusted at a glance.
+if _PTXT:
+    _pn = _flatten(_PTXT, lower=True)
+    for _clause in ("come from the project's pipeline.json",
+                    "carries no stage count of its own"):
+        if _clause not in _pn:
+            fail(f"{_PROG_REL}: missing the clause {_clause!r} — without it the "
+                 "rail's stage set is whatever the agent assumed")
+
+
+def _md_section(_txt, _title):
+    _m = re.search(r"^##\s+" + re.escape(_title) + r"\s*$(.*?)(?=^##\s|\Z)",
+                   _txt, re.S | re.M)
+    return _m.group(1) if _m else ""
+
+
+def _line_prefixes(_txt):
+    return set(re.findall(r"^(\w+):\s", "\n".join(
+        re.findall(r"```\n(.*?)```", _txt, re.S)), re.M))
+
+
+# P1-G4. The ledger declares three line shapes and then shows them. Declared and
+# shown are two enumerations of one list, and N1's whole retro is about what
+# happens to those: five times the prose promised what nothing enforced. Both
+# directions — a shape declared and never shown is a rule with no worked example,
+# a shape shown and never declared is an example teaching an unowned format.
+_RUN_TPL = os.path.join(ROOT, _SKILLDIR, "templates/run.md")
+if os.path.isfile(_RUN_TPL):
+    _rt = open(_RUN_TPL, encoding="utf-8").read()
+    _declared = _line_prefixes(_md_section(_rt, "Lines"))
+    _shown = _line_prefixes(_md_section(_rt, "Log"))
+    if not _declared:
+        fail("templates/run.md: no line shapes declared under `## Lines` — the "
+             "ledger two mechanisms read has no stated format")
+    for _miss, _msg in ((_declared - _shown, "declared under `## Lines` and never "
+                                             "shown in `## Log`"),
+                        (_shown - _declared, "shown in `## Log` and never declared "
+                                             "under `## Lines`")):
+        if _miss:
+            fail(f"templates/run.md: line shape(s) {sorted(_miss)} {_msg}")
+    # And the cross-file direction: a shape nobody reads is a shape nobody writes.
+    _readers = _PTXT + (open(os.path.join(ROOT, _SKILLDIR, "references/loop-guard.md"),
+                             encoding="utf-8").read()
+                        if os.path.isfile(os.path.join(ROOT, _SKILLDIR,
+                                                       "references/loop-guard.md")) else "")
+    for _pfx in sorted(_declared):
+        if _pfx + ":" not in _readers:
+            fail(f"templates/run.md declares the {_pfx + ':'!r} line and neither "
+                 f"{_PROG_REL} nor references/loop-guard.md names it — "
+                 "a ledger shape with no reader"
+                 " is written by nobody")
+
 if errors:
     print("FAIL: task-pipeline structure invalid")
     for e in errors:

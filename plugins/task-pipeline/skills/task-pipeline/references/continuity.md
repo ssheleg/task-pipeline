@@ -140,6 +140,16 @@ whole cycle that no gate reads. It cites the measurement or it is not written �
 `B-NNN`, not a description**: *"next up: B-014"* can be checked against the file,
 *"next up: the export fix"* cannot.
 
+**And it is printed, in one fixed shape** ([`progress.md`](progress.md)):
+
+```
+▶ <topic> · <module> (N/M) · <id> <stage> <gate> · iter <N> · gates <N/M> · next B-NNN
+```
+
+The iteration number is a count of `iter:` lines in `.task-pipeline/run.md`, not a
+number the agent is carrying. After a compaction the agent's count is gone and the
+file's is not — which is the argument the build ledger already won one stage down.
+
 ## Parked at a manual gate
 
 A fixed interval firing into a `manual` gate is a nag. Five minutes later it fires

@@ -411,6 +411,30 @@ an audit measured it. A claim of enforcement is now checked like any other claim
 a **single** string in `test/validate.py`: the check reads that file as text, so a
 quote straddling a line-continuation is a citation nothing can find.
 
+**48. The progress header exists in two files and is compared both ways; the rail is
+computed, never eleven.** `references/progress.md` defines the block and
+`references/stages.md` restates it — learned.md rule 20's shape, and the drift is silent
+because each copy reads complete alone. Both directions, because they are different
+failures: a field in the doctrine and not the stage list is a reader who never meets it;
+a field on the stage list and not in the doctrine is a number with no home. The rail's
+stage set comes from the project's own `pipeline.json`, and the doctrine is required to
+say so — the eleven in `pipeline.example.json` are an example, and a bar reading
+`gates 5/11` in a six-stage project is wrong in the one place a run is read at a glance.
+Every glyph printed is in the legend, one direction and deliberately: a legend row for an
+unused glyph is vocabulary, not a defect.
+*(guard: `one block, two copies, already drifted` and `carries no stage count of its own`
+and `the legend does not define it`)*
+
+**49. The run ledger's line shapes are declared, shown, and read.** `templates/run.md`
+declares three under `## Lines` and works them under `## Log`; the two enumerations are
+compared **both ways**, because a shape declared and never shown is a rule with no
+example and a shape shown and never declared is an example teaching an unowned format.
+Third check: every declared shape is named by `references/progress.md` or
+`references/loop-guard.md` — a ledger shape nothing reads is a shape nothing writes,
+which is exactly what this file was for the whole time `loop-guard.md` called its own
+detection mechanical and no run had created the file.
+*(guard: `declared under` and `shown in` and `a ledger shape with no reader`)*
+
 ## Adding or changing doctrine
 
 - **Change one idea per PR.** These files are read by agents under load; a PR that
