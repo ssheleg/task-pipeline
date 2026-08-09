@@ -1149,6 +1149,17 @@ if os.path.isfile(_lp):
             # Anchored to the line's LEADING number. A body-wide digit scan lets a
             # subsumption note ("subsumed by rule 9") mask a real deletion of rule 9.
             _logged = set(re.findall(r"^\s*-\s*\*\*(\d+)\s*·", _ret.group(1), re.M))
+            # Both directions — rule 2, applied to this guard. A number logged as
+            # retired while its row is still in the table means the log is wrong or the
+            # rule came back without anyone noticing, and only the reverse pass finds it:
+            # a gap has one side, and so does a resurrection.
+            _back = sorted(int(_l) for _l in _logged if int(_l) in _nums)
+            if _back:
+                fail("references/learned.md: rule number(s) "
+                     + ", ".join(str(_b) for _b in _back)
+                     + " are listed in `### Retired` and still present in the table — "
+                     "either the log names the wrong rule or a retired rule came back "
+                     "silently, and the binding map now points at both stories")
             _silent = [_g for _g in _gaps if str(_g) not in _logged]
             if _silent:
                 fail("references/learned.md: rule number(s) "

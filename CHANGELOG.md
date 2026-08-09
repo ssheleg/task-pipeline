@@ -109,7 +109,13 @@ runner had no way to run it, so `npm run test:all` was green while CI failed on 
 this same change had renamed. `test/negatives.py` now runs property checks too: a step
 that exists only in CI is a step the author's gate is blind to.
 
-Guards: 144 → **155**, plus 1 property check now covered locally.
+**Both directions, on the guard about both directions.** The check found gaps the log
+did not name, and never the reverse: a number *listed as retired* whose row is still in
+the table — the log naming the wrong rule, or a retired rule quietly back. A gap has one
+side and so does a resurrection; only the second pass sees it. This is `learned.md`'s own
+rule 2 applied to the guard that guards `learned.md`.
+
+Guards: 144 → **156**, plus 1 property check now covered locally.
 
 ## v1.29.0 — a sixth axis, and three summaries that each read as complete
 
