@@ -384,10 +384,12 @@ def _as_int(tok):
         _UNPARSED_WORDS.add(tok)
     return val
 
-_neg_wf = os.path.join(ROOT, ".github/workflows/validate.yml")   # read again further down
-_neg_n = (len(re.findall(r"^\s*- name:\s*Negative self-test",
-                         open(_neg_wf, encoding="utf-8").read(), re.M))
-          if os.path.isfile(_neg_wf) else 0)   # the floor guard downstream reads this
+_neg_wf = os.path.join(ROOT, ".github/workflows/validate.yml")
+_NEG_WF_TEXT = open(_neg_wf, encoding="utf-8").read() if os.path.isfile(_neg_wf) else ""
+# Both counts, from ONE read, used by every check below that needs either. The workflow
+# was being opened three times for two numbers.
+_neg_n = len(re.findall(r"^\s*- name:\s*Negative self-test", _NEG_WF_TEXT, re.M))
+_prop_n = len(re.findall(r"^\s*- name:\s*Property check", _NEG_WF_TEXT, re.M))
 
 def _count_re(path, pattern, flags=re.M):
     p = os.path.join(ROOT, path)
@@ -1514,9 +1516,7 @@ if _AT_TEXT is not None:
 _cl = os.path.join(ROOT, "CHANGELOG.md")
 _wf = os.path.join(ROOT, ".github/workflows/validate.yml")
 if os.path.isfile(_cl) and os.path.isfile(_wf):
-    _wft = open(_wf, encoding="utf-8").read()
-    _true_neg = _wft.count("name: Negative self-test")
-    _true_prop = _wft.count("name: Property check")
+    _true_neg, _true_prop = _neg_n, _prop_n
     _clt = open(_cl, encoding="utf-8").read()
     _top = _clt.split("\n## v", 2)
     _top = _top[1] if len(_top) > 1 else ""
@@ -2712,6 +2712,14 @@ if os.path.isfile(_neg_py) and os.path.isfile(_neg_wf):
         fail(f"test/negatives.py: MIN_EXPECTED is {_m_floor.group(1)} but the workflow defines "
              f"{_neg_n} negative self-tests — a floor below the count is a floor that cannot "
              "notice losing the difference; raise it in the same change that adds the tests")
+    # MIN_PROPS had NO such check at all — zero mentions in this file — while its sibling
+    # has been tied since v1.15.0 and still went stale twice. A floor nothing compares is
+    # not a floor, it is a number somebody typed once.
+    _p_floor = re.search(r"^MIN_PROPS\s*=\s*(\d+)", open(_neg_py, encoding="utf-8").read(), re.M)
+    if _p_floor and int(_p_floor.group(1)) != _prop_n:
+        fail(f"test/negatives.py: MIN_PROPS is {_p_floor.group(1)} but the workflow defines "
+             f"{_prop_n} property checks — the same drift MIN_EXPECTED suffered twice, on the "
+             "floor nobody had wired up")
 
 # The CI verdict (references/conventions.md). A workflow run that nobody reads is the
 # fail-open hook with extra steps: on 2026-08-06 this repo's `validate` was
