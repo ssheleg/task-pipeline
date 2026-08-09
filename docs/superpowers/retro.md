@@ -36,6 +36,57 @@ row goes — the cap is not negotiable, ranking is.
 
 ## Recent log — entries from the last five run stamps (newest first)
 
+### 2026-08-09 · `audit-followup`/M6 · the module was right, the guards were not
+
+**Symptom.** The doctrine this module set out to write landed intact and unchallenged:
+`learned.md` gets no cap, because a cap belongs to a file read *in full* every run and
+this one is entered by citation. Four measurements refused the original premise before a
+line was written, and none of the eight review rounds argued with any of them.
+
+**Every one of the twenty findings was in the machinery.** Two were red, and both were
+the same shape:
+
+- Deleting the **highest-numbered** rule shrinks `max()` with it, so the silent-deletion
+  guard sees no gap at all. My probe planted mid-list — the shape the author imagines.
+  The reader deleted the last row.
+- The cross-commit comparison read the mark at `HEAD`, which **equals the working tree on
+  a committed checkout** — i.e. in CI. It fired only in the local pre-commit window, and
+  its self-test exercised exactly that window. Green everywhere, blind everywhere it ran.
+
+**Surfaced at:** stage 7, eight rounds, twenty findings, **none from my probes**.
+
+**Owned by:** stage 5 for the guards; stage 6 for the probes, which is the same sentence
+said twice — the probe and the guard were written by the same model of the problem, so
+the probe could only confirm it.
+
+**Root cause, and it is one thing.** *A check's scope is a claim about where it applies,
+and mine were always narrower than the shipped surface.* Three hand-written corpora had
+each missed a live file. One probe planted in the middle of a list. One check ran in a
+window nobody deploys from. One property test lived only in CI, so the local gate was
+blind to it — and CI failed on a string this same change had renamed. One citation
+naming two guards was parsed as naming none, exempting itself from the invariant it was
+written under. **Nobody notices a corpus that is too small, because everything inside it
+passes.**
+
+**Fix, by grade.**
+1. *(mechanical)* Corpora are **discovered**, not listed (`_discover_md`), each exclusion
+   carrying its reason. The high-water mark is compared against every value the file's
+   history has held. Both directions checked — a gap has one side, and so does a
+   resurrection. `test/negatives.py` runs property checks too, with their own floor,
+   their own `-k` selection, their own heading, and a verdict that says what ran rather
+   than *"all 0 guards pass"*.
+2. *(mechanical, and the one to remember)* A probe must be able to **fail for its own
+   reason**. The anchor test tripped a different check and so could not tell a working
+   anchor from a regressed one; it now flips when — and only when — the anchor is
+   reverted, which is what *"this test measures that"* means.
+3. *(no new standing instruction.)* R-005 already dispatches the reader, and the reader
+   found all twenty. Adding a seventh rule would say what the sixth already says.
+
+**The check that catches it next time:** for the corpora, discovery. For the mark, its
+own history. For probes — nothing mechanical, and saying so is the honest end of this
+entry: the only thing that found these was somebody who did not write them.
+
+
 ### 2026-08-09 · `audit-followup`/M5 · three summaries of one list, each complete on its own
 
 **Symptom.** The module was written as *"add a sixth rotation axis"*. Measuring before
@@ -528,6 +579,7 @@ One line per run, appended at stage 10. This is what makes "five runs" countable
 
 | Date | Topic | Commit | Verdict | Retro |
 |---|---|---|---|---|
+| 2026-08-09 | `audit-followup` / M6 `learned-shape` | `241df1e` | 1 REQ · a cap refused by measurement, and the class it uncovered · **eight review rounds, 20 findings, two of them red, none from my probes** · carry-over 12 rows, 7 open, 0 unresolved | 1 entry · 6 standing · retired 0 · added 0 · R-001, R-005 fired · guards 144 → 156 + 1 property |
 | 2026-08-09 | `audit-followup` / M5 `re-derive-axis` | `a3dd771` | 1 REQ · a sixth rotation axis, and the enumeration of the five that had already drifted · **four review rounds, 8 findings, all mine, none from my probes** · carry-over 12 rows, 7 open, 0 unresolved | 1 entry · 6 standing · retired 0 · added 0 · R-001, R-005 fired · guards 136 → 144 |
 | 2026-08-09 | `audit-followup` / M4 `abstention-disclosure` | `1426bdf` | 1 REQ · a second kind of counted set, non-monotone by construction · **one review round, 5 findings, all mine** · carry-over 11 rows, 7 open, 0 unresolved | 1 entry · 6 standing · retired 0 · added 0 · R-001, R-003, R-005 all fired · guards 134 → 136 |
 | 2026-08-09 | `audit-followup` / M3 `retro-continuity` | `a079192` | 1 REQ + ledger row 1 corrected · **one review round, 3 findings, TWO of them Important — the first of this programme, both in the guard this module ships** · carry-over 10 rows, 6 open, 0 unresolved | 1 entry · 6 standing · retired 0 · added 0 · R-001, R-003, R-005, R-006 all fired · guards 132 → 133 |
