@@ -2834,3 +2834,45 @@ jobs:
           else
             echo "OK: validator correctly FAILs — the disclosure corpus is discovered, not listed"
           fi
+
+      - name: Negative self-test (the high-water mark lowered in the same change that deletes a rule)
+        run: |
+          set -eu
+          rm -rf /tmp/hw4-copy && cp -R . /tmp/hw4-copy
+          python3 - <<'EOF'
+          import re
+          p = "/tmp/hw4-copy/plugins/task-pipeline/skills/task-pipeline/references/learned.md"
+          t = open(p, encoding="utf-8").read()
+          nums = [int(n) for n in re.findall(r"^\|\s*(\d+)\s*\|\s*\*\*", t, re.M)]
+          hi = max(nums)
+          m = re.search(r"^\|\s*%d\s*\|\s*\*\*.*$" % hi, t, re.M)
+          assert m, "PLANT DID NOT LAND: highest row absent before edit"
+          t = t[:m.start()] + t[m.end() + 1:]
+          old = "**Numbers issued so far: %d.**" % hi
+          assert old in t, "PLANT DID NOT LAND: mark absent"
+          t = t.replace(old, "**Numbers issued so far: %d.**" % (hi - 1), 1)
+          open(p, "w", encoding="utf-8").write(t)
+          EOF
+          if python3 /tmp/hw4-copy/test/validate.py; then
+            echo "ERROR: a mark the same change can lower is not a high-water mark"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the mark is compared against its value at HEAD"
+          fi
+
+      # NOT a negative self-test: it asserts a PROPERTY (the skip is printed), and the
+      # validator passes inside it. test/negatives.py reads steps by the marker in the
+      # name and requires each to see a rejection, so a positive assertion carrying that
+      # name reports as a broken test — which is the suite being right about its own
+      # contract.
+      - name: Property check (the cross-commit skip is printed, never swallowed)
+        run: |
+          set -eu
+          rm -rf /tmp/hw5-copy && cp -R . /tmp/hw5-copy && rm -rf /tmp/hw5-copy/.git
+          out=$(python3 /tmp/hw5-copy/test/validate.py) || { echo "ERROR: validator failed for an unrelated reason"; exit 1; }
+          if printf '%s' "$out" | grep -q "high-water mark vs HEAD"; then
+            echo "OK: outside a checkout the skip is printed as an unlooked disclosure, not swallowed"
+          else
+            echo "ERROR: the check could not run and said nothing — a silent skip reads as a pass"
+            exit 1
+          fi

@@ -566,6 +566,7 @@ for _extra in ["cursor/rules/task-pipeline.mdc",
     if os.path.isfile(_xp) and _extra not in _LIVING_TEXT:
         _LIVING_TEXT[_extra] = open(_xp, encoding="utf-8").read()
 
+_UNLOOKED = []
 _CLAIM_STATES = []
 for _label, _pat, _compute, _incident in _CLAIM_REGISTRY:
     _truth = _compute()
@@ -889,9 +890,11 @@ if os.path.isfile(_cs):
 # Excluded on purpose, and each for a reason that is not "it was inconvenient":
 # CHANGELOG.md narrates the day the second unit was added, docs/superpowers/specs/ are
 # point-in-time design records, and the retro archive is not read in full.
-_COLD_SKIP = ("CHANGELOG.md", "docs/superpowers/specs/", "docs/superpowers/retro/",
-              "node_modules/", "graphify-out/", ".git/")
+# Only load-bearing entries: the directory names below are pruned out of the walk
+# itself, so listing them here again would state the intent twice and enforce it once.
+_COLD_SKIP = ("CHANGELOG.md", "docs/superpowers/specs/", "docs/superpowers/retro/")
 _COLD_SURFACES = []
+_COLD_TEXT = {}
 for _root, _dirs, _fs in os.walk(ROOT):
     _dirs[:] = [_d for _d in _dirs if _d not in (".git", "node_modules", "graphify-out")]
     for _f in _fs:
@@ -900,8 +903,10 @@ for _root, _dirs, _fs in os.walk(ROOT):
         _rel = os.path.relpath(os.path.join(_root, _f), ROOT)
         if any(_rel.startswith(_s) or _rel == _s for _s in _COLD_SKIP):
             continue
-        if "five run stamps" in _flatten(open(os.path.join(_root, _f), encoding="utf-8").read(), lower=True):
+        _c = _LIVING_TEXT.get(_rel) or open(os.path.join(_root, _f), encoding="utf-8").read()
+        if "five run stamps" in _flatten(_c, lower=True):
             _COLD_SURFACES.append(_rel)
+            _COLD_TEXT[_rel] = _c
 _COLD_SURFACES.sort()
 # A NARRATION of what the rule said before the second unit existed is not a statement
 # of the rule — learned.md's own rule-21 incident quotes the old wording, and rewriting
@@ -913,7 +918,7 @@ for _f in _COLD_SURFACES:
     _fp = os.path.join(ROOT, _f)
     if not os.path.isfile(_fp):
         continue
-    _ft = open(_fp, encoding="utf-8").read()
+    _ft = _COLD_TEXT.get(_f) or open(_fp, encoding="utf-8").read()
     for _para in _paragraphs(_ft):
         # Normalise whitespace AND markdown emphasis. The canonical row in
         # retrospective.md reads "the last **five run stamps**", and a whitespace-only
@@ -1100,6 +1105,30 @@ if os.path.isfile(_lp):
                  "maximum with it and the guard sees no gap at all")
         else:
             _high = int(_hw.group(1))
+            # A high-water mark the same change can lower is not one. Deleting rule 21
+            # AND editing the mark to 20 makes both numbers agree and the gap never
+            # opens — found by a reader, who also named why a file-only validator
+            # cannot see it: the evidence is in the PREVIOUS commit. So take it from
+            # there when git is reachable, and PRINT the skip when it is not, because a
+            # check that goes quiet outside a checkout is a check nobody can audit.
+            try:
+                _prev = subprocess.run(
+                    ["git", "-C", ROOT, "show",
+                     "HEAD:plugins/task-pipeline/skills/task-pipeline/references/learned.md"],
+                    capture_output=True, text=True, timeout=10)
+                _pm = (re.search(r"Numbers\s+issued\s+so\s+far:\s*(\d+)",
+                                 _flatten(_prev.stdout), re.I)
+                       if _prev.returncode == 0 else None)
+            except Exception:
+                _pm = None
+            if _pm is None:
+                _UNLOOKED.append("learned.md high-water mark vs HEAD (no git or no prior "
+                                 "revision) — a same-change lowering would not be seen")
+            elif _high < int(_pm.group(1)):
+                fail(f"references/learned.md: `Numbers issued so far` fell from "
+                     f"{_pm.group(1)} to {_high} — the mark is a high-water mark and may "
+                     "not go down; lowering it in the same change that removes a rule is "
+                     "exactly how a deletion hides")
             if _high < max(_nums):
                 fail(f"references/learned.md: `Numbers issued so far: {_high}` is below the "
                      f"highest rule in the table ({max(_nums)}) — a new rule was added without "
@@ -2708,3 +2737,7 @@ print("  claim registry — " + " · ".join(_CLAIM_STATES)
 if _LSHAPE:
     # A disclosure, not a ratchet: no floor, no direction, and never a target.
     print("  " + _LSHAPE + "  (disclosure — no floor, no target)")
+# The other disclosure: what this run did not look at. Printed even when empty, because
+# "unlooked: 0" and a missing line are the same silence to a reader.
+print(f"  unlooked: {len(_UNLOOKED)}"
+      + ("".join("\n    · " + _u for _u in _UNLOOKED) if _UNLOOKED else ""))

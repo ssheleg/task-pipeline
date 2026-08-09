@@ -70,7 +70,17 @@ worked `GATE 10` block found), and the claim registry (widened in v1.29.0 after 
 same shape). *Nobody notices a corpus that is too small, because everything inside it
 passes.*
 
-Guards: 144 → **151**.
+**A high-water mark the same change can lower is not one.** A reader found the residual
+hole and named why a file-only validator cannot see it: the evidence is in the previous
+commit. Deleting rule 21 *and* editing the mark to 20 makes both numbers agree and no
+gap opens. The check now reads the mark at `HEAD` through git — and where git cannot
+answer, it **prints** the skip as an `unlooked` disclosure rather than going quiet,
+because a check that falls silent outside a checkout reads exactly like a check that
+passed. That assertion is a property, not a rejection, so it lives outside the negative
+suite: the suite requires each of its tests to watch a guard *reject* something, and it
+reported the mismatch itself.
+
+Guards: 144 → **152**.
 
 ## v1.29.0 — a sixth axis, and three summaries that each read as complete
 
