@@ -1,5 +1,99 @@
 # Changelog
 
+## v1.40.0 — the loop had a cadence and no queue
+
+`run.loop` said how **often** to continue. It never said **what the next item is**, so an
+armed mode still left the run choosing its next move by recollection — `learned.md` rule
+16, once per fire. And nothing scheduled the next turn at all: on 2026-08-10 a run of
+this pipeline wrote *«продолжаю без остановки»* and the turn ended, because a sentence
+about future behaviour is not a wakeup. That run is this release's occasion and its
+evidence.
+
+### The queue is stage 2's
+
+The **module map** when the brief was a platform, the plan's task list otherwise. Both
+already existed, both were already ordered, and neither had ever been named as the thing
+the loop walks. `run.loop.queue` names it; `run.loop.arm` says where the mode is armed,
+and the default for a queue-bearing run is **after decomposition** — arming at preflight
+arms a loop with nothing to walk.
+
+Arming is a consequence, not a request, for the same reason the mode is recorded rather
+than asked for: a capability the operator must remember to switch on is one they forget
+on exactly the run that needed it.
+
+**What arming does not change is stated where it could be missed.** The four stops are
+the four stops; a `manual` gate still waits; an outward act still needs its own specific
+authorization. *A generic flag is not a specific authorization*, and arming a queue is
+the most generic flag there is — guarded, because that sentence is what the deploy floor
+rests on.
+
+### `mode: dynamic`
+
+`interval` was the only mode while a fixed tick was the only primitive. A harness that
+can schedule its own next turn picks each delay from what it is waiting for, and **prints
+the delay it chose** — the disclosure that replaces an interval run's job id. A run
+silent about its pacing cannot be told apart from one that quietly stopped, which is the
+claim this file already forbade for harnesses with no primitive at all.
+
+### The goal is re-read between items, not only the board
+
+Each iteration already re-measured the work-list, which answers *what is open*. It did
+not answer *whether the open thing still serves what this run was for*. A queue built at
+stage 2 outlives the reason it was built, because the operator learns things between
+items and says so. So the bottom of an iteration now quotes the goal, states whether the
+next item still serves it, and re-orders or re-scopes when it does not — a row that stops
+serving the goal leaves for the board with its reason.
+
+A queue re-derived only by `age` and `sev` is honest about priority and silent about
+purpose. Both numbers can be right while the run finishes something the operator stopped
+wanting two items ago.
+
+### The reader found the contradiction, not the bug
+
+R-005's reader defeated all five guards and then read the doctrine as a reader rather
+than its author. Part 1a said *"arming is a consequence, not a request"* and stated its
+trigger as a fact about the **work** — a queue with more than one item — with no
+antecedent about configuration. Two sections above, the same file says **Default off.
+Silence arms nothing, exactly as silence authorizes no deploy**, and `grill.md`'s deploy
+floor is explicitly said to rest on that distinction. Read cold, Part 1a arms a loop in a
+project with no `pipeline.json` at all.
+
+The contradiction was in the phrasing, not the intent — `stages.md` had already restated
+the rule with the antecedent intact. **Part 1a gave way**, and a guard now requires it to
+state its precondition, because five guards checked for the presence of strings and not
+one would have noticed either reading.
+
+What the reader took apart in the guards, all verified by planting the defect and
+watching `PASS`:
+
+- **a deleted contract was a skip, not a failure.** Removing the whole `run.loop` block
+  left CI green with two tidy `unlooked` lines — and `run` allows additional properties,
+  so the example still conformed while meaning nothing;
+- **`_loop_block` searched instead of addressing.** A deprecated top-level `loop` earlier
+  in file order answered for the real contract;
+- **presence tests let the release's own thesis be reverted.** `arm` existed, so setting
+  the example back to `preflight` passed;
+- **`if _qv and …` short-circuited itself** — an open string in place of the queue enum
+  passed, which is precisely the failure the guard was written for;
+- **the floor guard had never tested its own rule.** Its phrase entered the file in
+  v1.11.0, twenty-nine releases earlier; both doctrinal statements could be deleted and a
+  Rationalizations row kept it green;
+- **the dynamic-disclosure regex was content-blind** — a sentence keeping the words and
+  inverting the obligation passed — and it triggered off the prose word, so renaming the
+  mode switched the guard off;
+- **`arm the mode` matched a bullet forbidding arming**, and `"loop"` matched any
+  sentence about any loop. Both now key on the schema's own tokens.
+
+Guards 233 → **248**: seven more probes than the first pass shipped with, six of them for
+fail sites that did not exist until the reader's findings were fixed.
+
+### Also
+
+- **A guard was listing the legal modes instead of reading them.** Adding `dynamic`
+  failed the guard on a correct example — a check enforcing its own staleness. It now
+  reads the enum out of the schema.
+- Guards: 233 → **248**, one per new fail site, each with its planted defect.
+
 ## v1.39.0 — the skill could not be reached by the word "audit"
 
 `references/audit.md` has said since v0.1.0 that an audit may be **the whole task** —

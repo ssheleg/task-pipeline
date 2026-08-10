@@ -1149,19 +1149,23 @@ jobs:
           set -eu
           rm -rf /tmp/runmode-copy && cp -R . /tmp/runmode-copy
           python3 - <<'EOF'
+          import json
           p = "/tmp/runmode-copy/plugins/task-pipeline/skills/task-pipeline/pipeline.example.json"
-          t = open(p, encoding="utf-8").read()
-          block = '  "run": {\n    "loop": { "mode": "off", "interval": "5m", "command": "/loop" }\n  },\n'
-          assert block in t, "PLANT MISSED"
-          open(p, "w", encoding="utf-8").write(t.replace(block, "", 1))
+          d = json.load(open(p, encoding="utf-8"))
+          # Planted through the parser, not a literal: the previous needle was the
+          # one-line `"loop": { "mode": "off", ... }` and it stopped matching the moment
+          # the block grew a queue and an arm point. A probe keyed to formatting tests
+          # the formatting.
+          assert d.get("run", {}).get("loop", {}).get("mode"), "PLANT DID NOT LAND: no run.loop.mode to remove"
+          del d["run"]["loop"]["mode"]
+          json.dump(d, open(p, "w", encoding="utf-8"), ensure_ascii=False, indent=2)
           EOF
-          if python3 /tmp/runmode-copy/test/validate.py; then
+          if python3 /tmp/runmode-copy/test/validate.py 2>&1 | grep -q "the schema's legal set is"; then
+            echo "OK: the example must DEMONSTRATE the default, not rely on its absence"
+          else
             echo "ERROR: validator passed an example with no run.loop.mode — the example is what gets copied, so an absent field reads as an oversight rather than a decision"
             exit 1
-          else
-            echo "OK: the example must demonstrate the default, not omit it"
           fi
-
       - name: Negative self-test (a run-wide rule every stage must name)
         run: |
           set -eu
@@ -4380,7 +4384,7 @@ jobs:
           python3 - <<'EOF'
           p = "/tmp/cl9-copy/CHANGELOG.md"
           t = open(p, encoding="utf-8").read()
-          n = "Guards: 218 -> **233**"
+          n = "Guards: 233 -> **248**"
           n = n.replace("->", "\u2192")
           assert n in t, "PLANT DID NOT LAND: the newest section states no guard count"
           # The exact shape this guard went dormant on: the same numbers, no colon.
@@ -4493,5 +4497,294 @@ jobs:
             echo "OK: validator FAILs — the defect may not return in the file that ships the rule elsewhere"
           else
             echo "ERROR: the portable rule re-excluded reading code and only SKILL.md was checked"
+            exit 1
+          fi
+      - name: Negative self-test (the loop loses its queue)
+        run: |
+          set -eu
+          rm -rf /tmp/lp01-copy && cp -R . /tmp/lp01-copy
+          python3 - <<'EOF'
+          p = "/tmp/lp01-copy/plugins/task-pipeline/skills/task-pipeline/pipeline.schema.json"
+          t = open(p, encoding="utf-8").read()
+          n = '"queue": {'
+          assert n in t, "PLANT DID NOT LAND: lp01"
+          open(p, "w", encoding="utf-8").write(t.replace(n, '"queue_": {', 1))
+          EOF
+          if python3 /tmp/lp01-copy/test/validate.py 2>&1 | grep -q 'run.loop has no .queue'; then
+            echo "OK: validator FAILs — a loop with no queue is a timer"
+          else
+            echo "ERROR: the queue field vanished and an armed loop still picks by recollection"
+            exit 1
+          fi
+      - name: Negative self-test (the loop loses its arming point)
+        run: |
+          set -eu
+          rm -rf /tmp/lp02-copy && cp -R . /tmp/lp02-copy
+          python3 - <<'EOF'
+          p = "/tmp/lp02-copy/plugins/task-pipeline/skills/task-pipeline/pipeline.schema.json"
+          t = open(p, encoding="utf-8").read()
+          n = '"arm": {'
+          assert n in t, "PLANT DID NOT LAND: lp02"
+          open(p, "w", encoding="utf-8").write(t.replace(n, '"arm_": {', 1))
+          EOF
+          if python3 /tmp/lp02-copy/test/validate.py 2>&1 | grep -q 'run.loop has no .arm'; then
+            echo "OK: validator FAILs — arming at preflight arms a loop with nothing to walk"
+          else
+            echo "ERROR: the arm field vanished and nothing objected"
+            exit 1
+          fi
+      - name: Negative self-test (the self-pacing mode is withdrawn)
+        run: |
+          set -eu
+          rm -rf /tmp/lp03-copy && cp -R . /tmp/lp03-copy
+          python3 - <<'EOF'
+          p = "/tmp/lp03-copy/plugins/task-pipeline/skills/task-pipeline/pipeline.schema.json"
+          t = open(p, encoding="utf-8").read()
+          n = '"dynamic"'
+          assert n in t, "PLANT DID NOT LAND: lp03"
+          open(p, "w", encoding="utf-8").write(t.replace(n, '"paced"', 1))
+          EOF
+          if python3 /tmp/lp03-copy/test/validate.py 2>&1 | grep -q 'has no .dynamic'; then
+            echo "OK: validator FAILs — a self-pacing run needs a way to record that it is one"
+          else
+            echo "ERROR: dynamic left the enum and nothing objected"
+            exit 1
+          fi
+      - name: Negative self-test (the queue names a source no stage produces)
+        run: |
+          set -eu
+          rm -rf /tmp/lp04-copy && cp -R . /tmp/lp04-copy
+          python3 - <<'EOF'
+          p = "/tmp/lp04-copy/plugins/task-pipeline/skills/task-pipeline/pipeline.schema.json"
+          t = open(p, encoding="utf-8").read()
+          n = '"module-map"'
+          assert n in t, "PLANT DID NOT LAND: lp04"
+          open(p, "w", encoding="utf-8").write(t.replace(n, '"whatever-is-next"', 1))
+          EOF
+          if python3 /tmp/lp04-copy/test/validate.py 2>&1 | grep -q 'does not offer .module-map'; then
+            echo "OK: validator FAILs — the queue must name a list this pipeline actually builds"
+          else
+            echo "ERROR: the queue named a source nothing produces and nothing objected"
+            exit 1
+          fi
+      - name: Negative self-test (the authorization floor leaves the file that defines the mode)
+        run: |
+          set -eu
+          rm -rf /tmp/lp05-copy && cp -R . /tmp/lp05-copy
+          python3 - <<'EOF'
+          p = "/tmp/lp05-copy/plugins/task-pipeline/skills/task-pipeline/references/continuity.md"
+          t = open(p, encoding="utf-8").read()
+          n = 'authorization'
+          assert t.count(n) >= 3, "PLANT DID NOT LAND: lp05 — fewer occurrences than expected"
+          # The guard reads _flatten()ed text, where a line-wrapped occurrence rejoins:
+          # replacing the single-line copies left the wrapped one matching and the guard
+          # silent. Plant on the word itself so no form of the phrase survives.
+          open(p, "w", encoding="utf-8").write(t.replace(n, 'permission', -1))
+          EOF
+          if python3 /tmp/lp05-copy/test/validate.py 2>&1 | grep -q 'keeps arming from reading as blanket permission'; then
+            echo "OK: validator FAILs — arming may never read as blanket permission"
+          else
+            echo "ERROR: the deploy floor's distinction vanished from continuity.md"
+            exit 1
+          fi
+      - name: Negative self-test (a dynamic run owes no disclosure)
+        run: |
+          set -eu
+          rm -rf /tmp/lp06-copy && cp -R . /tmp/lp06-copy
+          python3 - <<'EOF'
+          p = "/tmp/lp06-copy/plugins/task-pipeline/skills/task-pipeline/references/continuity.md"
+          t = open(p, encoding="utf-8").read()
+          n = 'prints **the delay it chose and why**'
+          assert n in t, "PLANT DID NOT LAND: lp06"
+          open(p, "w", encoding="utf-8").write(t.replace(n, 'runs quietly', 1))
+          EOF
+          if python3 /tmp/lp06-copy/test/validate.py 2>&1 | grep -q 'never says a self-pacing run prints the delay'; then
+            echo "OK: validator FAILs — a run silent about its pacing looks like one that stopped"
+          else
+            echo "ERROR: the dynamic disclosure vanished and nothing objected"
+            exit 1
+          fi
+      - name: Negative self-test (stage 2 stops owning the arming point)
+        run: |
+          set -eu
+          rm -rf /tmp/lp07-copy && cp -R . /tmp/lp07-copy
+          python3 - <<'EOF'
+          p = "/tmp/lp07-copy/plugins/task-pipeline/skills/task-pipeline/references/stages.md"
+          t = open(p, encoding="utf-8").read()
+          head = "- **The queue exists here, so the loop arms here**"
+          tail = "- **GATE (manual):**"
+          assert head in t and tail in t, "PLANT DID NOT LAND: lp07 bullet"
+          # Swapping one phrase left eight other 'arm' tokens in the section and the
+          # guard correctly found them. Remove the bullet AND the gate's own clause.
+          i = t.index(head); j = t.index(tail, i)
+          t = t[:i] + t[j:]
+          clause = " \u2014 **and the loop's arming state is printed**:\n  armed with its queue and pacing, or not armed with the reason"
+          assert clause in t, "PLANT DID NOT LAND: lp07 gate clause"
+          open(p, "w", encoding="utf-8").write(t.replace(clause, "", 1))
+          EOF
+          if python3 /tmp/lp07-copy/test/validate.py 2>&1 | grep -q 'nothing here says the LOOP arms on it'; then
+            echo "OK: validator FAILs — the queue exists at stage 2 and the arming belongs with it"
+          else
+            echo "ERROR: the prose stage list lost the arming and nothing objected"
+            exit 1
+          fi
+      - name: Negative self-test (the machine-readable stage 2 drops the arming)
+        run: |
+          set -eu
+          rm -rf /tmp/lp08-copy && cp -R . /tmp/lp08-copy
+          python3 - <<'EOF'
+          p = "/tmp/lp08-copy/plugins/task-pipeline/skills/task-pipeline/pipeline.example.json"
+          t = open(p, encoding="utf-8").read()
+          # Replacing only the headline left 'a loop armed earlier' in the same gate
+          # string, so the guard's substring test still matched. Drop the sentence whole.
+          n = " THE LOOP'S ARMING STATE IS PRINTED \u2014 armed with its queue and pacing, or not armed with the reason; the queue exists at this stage and a loop armed earlier has nothing to walk."
+          assert n in t, "PLANT DID NOT LAND: lp08"
+          open(p, "w", encoding="utf-8").write(t.replace(n, "", 1))
+          EOF
+          if python3 /tmp/lp08-copy/test/validate.py 2>&1 | grep -q "does not require the loop's arming state"; then
+            echo "OK: validator FAILs — the two statements of one rule may not drift"
+          else
+            echo "ERROR: the example's gate lost the arming while the prose kept it"
+            exit 1
+          fi
+      - name: Negative self-test (the whole loop contract is deleted from the schema)
+        run: |
+          set -eu
+          rm -rf /tmp/lp09-copy && cp -R . /tmp/lp09-copy
+          python3 - <<'EOF'
+          import json
+          p = "/tmp/lp09-copy/plugins/task-pipeline/skills/task-pipeline/pipeline.schema.json"
+          d = json.load(open(p, encoding="utf-8"))
+          assert "loop" in d["definitions"]["run"]["properties"], "PLANT DID NOT LAND: lp09"
+          del d["definitions"]["run"]["properties"]["loop"]
+          json.dump(d, open(p, "w", encoding="utf-8"), ensure_ascii=False, indent=2)
+          EOF
+          if python3 /tmp/lp09-copy/test/validate.py 2>&1 | grep -q 'no run.loop block at definitions.run.properties.loop'; then
+            echo "OK: validator FAILs — a deleted contract is a failure, not a tidy skip line"
+          else
+            echo "ERROR: the entire loop contract vanished and the suite stayed green"
+            exit 1
+          fi
+      - name: Negative self-test (the queue enum becomes an open string)
+        run: |
+          set -eu
+          rm -rf /tmp/lp10-copy && cp -R . /tmp/lp10-copy
+          python3 - <<'EOF'
+          import json
+          p = "/tmp/lp10-copy/plugins/task-pipeline/skills/task-pipeline/pipeline.schema.json"
+          d = json.load(open(p, encoding="utf-8"))
+          q = d["definitions"]["run"]["properties"]["loop"]["properties"]["queue"]
+          assert "enum" in q, "PLANT DID NOT LAND: lp10"
+          del q["enum"]; q["type"] = "string"
+          json.dump(d, open(p, "w", encoding="utf-8"), ensure_ascii=False, indent=2)
+          EOF
+          if python3 /tmp/lp10-copy/test/validate.py 2>&1 | grep -q 'an open string is not a queue'; then
+            echo "OK: validator FAILs — an open string accepts the name of a list nobody builds"
+          else
+            echo "ERROR: the queue accepted any string and nothing objected"
+            exit 1
+          fi
+      - name: Negative self-test (the arming point loses the one this release moved to)
+        run: |
+          set -eu
+          rm -rf /tmp/lp11-copy && cp -R . /tmp/lp11-copy
+          python3 - <<'EOF'
+          import json
+          p = "/tmp/lp11-copy/plugins/task-pipeline/skills/task-pipeline/pipeline.schema.json"
+          d = json.load(open(p, encoding="utf-8"))
+          a = d["definitions"]["run"]["properties"]["loop"]["properties"]["arm"]
+          assert "after-decomposition" in a["enum"], "PLANT DID NOT LAND: lp11"
+          a["enum"] = ["preflight"]
+          json.dump(d, open(p, "w", encoding="utf-8"), ensure_ascii=False, indent=2)
+          EOF
+          if python3 /tmp/lp11-copy/test/validate.py 2>&1 | grep -q 'does not offer .after-decomposition'; then
+            echo "OK: validator FAILs — the field cannot allow only the point the release moved away from"
+          else
+            echo "ERROR: arm kept only preflight and the field's existence was taken as proof"
+            exit 1
+          fi
+      - name: Negative self-test (Part 1a stops stating its precondition)
+        run: |
+          set -eu
+          rm -rf /tmp/lp12-copy && cp -R . /tmp/lp12-copy
+          python3 - <<'EOF'
+          p = "/tmp/lp12-copy/plugins/task-pipeline/skills/task-pipeline/references/continuity.md"
+          t = open(p, encoding="utf-8").read()
+          n = "**Where nothing is recorded, nothing arms.**"
+          assert n in t, "PLANT DID NOT LAND: lp12"
+          i = t.index(n); j = t.index("**What arming does NOT change", i)
+          t = t[:i] + t[j:]
+          t = t.replace("Where the mode\nis **recorded** and the queue", "Where the queue", 1)
+          open(p, "w", encoding="utf-8").write(t)
+          EOF
+          if python3 /tmp/lp12-copy/test/validate.py 2>&1 | grep -q 'arming is stated with no precondition'; then
+            echo "OK: validator FAILs — unconditional arming overrides the default-off floor"
+          else
+            echo "ERROR: Part 1a made arming unconditional and the floor three surfaces away did not object"
+            exit 1
+          fi
+      - name: Negative self-test (the floor leaves one section while a copy elsewhere keeps the guard green)
+        run: |
+          set -eu
+          rm -rf /tmp/lp13-copy && cp -R . /tmp/lp13-copy
+          python3 - <<'EOF'
+          p = "/tmp/lp13-copy/plugins/task-pipeline/skills/task-pipeline/references/continuity.md"
+          t = open(p, encoding="utf-8").read()
+          # No regex: an escaped pattern in a YAML heredoc searched for a literal
+          # backslash and the plant never landed. Plain indexing instead.
+          head = "## Part 1a"
+          i = t.index(head)
+          j = t.index("\n## ", i + len(head))
+          sec = t[i:j]
+          n = "*a generic flag is not a specific authorization*, and arming a"
+          assert n in sec, "PLANT DID NOT LAND: lp13 — Part 1a no longer states the floor"
+          # Only Part 1a's copy: the file-wide test this guard replaced stayed green here,
+          # answered by the bullet in "The limit" and a Rationalizations row.
+          sec2 = sec.replace(n, "arming a", 1)
+          open(p, "w", encoding="utf-8").write(t[:i] + sec2 + t[j:])
+          EOF
+          if python3 /tmp/lp13-copy/test/validate.py 2>&1 | grep -q "Part 1a.: the sentence that keeps arming"; then
+            echo "OK: validator FAILs — a copy elsewhere in the file is not the copy this section's reader meets"
+          else
+            echo "ERROR: the floor left Part 1a and a Rationalizations row kept the guard green"
+            exit 1
+          fi
+      - name: Negative self-test (the example reverts to its pre-v1.40 loop block)
+        run: |
+          set -eu
+          rm -rf /tmp/lp14-copy && cp -R . /tmp/lp14-copy
+          python3 - <<'EOF'
+          import json
+          p = "/tmp/lp14-copy/plugins/task-pipeline/skills/task-pipeline/pipeline.example.json"
+          d = json.load(open(p, encoding="utf-8"))
+          assert "queue" in d["run"]["loop"], "PLANT DID NOT LAND: lp14"
+          d["run"]["loop"] = {"mode": "off", "interval": "5m", "command": "/loop"}
+          json.dump(d, open(p, "w", encoding="utf-8"), ensure_ascii=False, indent=2)
+          EOF
+          if python3 /tmp/lp14-copy/test/validate.py 2>&1 | grep -q 'run.loop has no .queue. — the schema offers it'; then
+            echo "OK: validator FAILs — the example is what gets copied, so an absent field is a field nobody discovers"
+          else
+            echo "ERROR: the example lost both new fields and the contract passed"
+            exit 1
+          fi
+      - name: Negative self-test (the dynamic rule is inverted while its words are kept)
+        run: |
+          set -eu
+          rm -rf /tmp/lp15-copy && cp -R . /tmp/lp15-copy
+          python3 - <<'EOF'
+          p = "/tmp/lp15-copy/plugins/task-pipeline/skills/task-pipeline/references/continuity.md"
+          t = open(p, encoding="utf-8").read()
+          n = "prints **the delay it chose and why**"
+          assert n in t, "PLANT DID NOT LAND: lp15"
+          # The noun pair survives; the obligation is reversed. The first predicate
+          # searched for the words and passed this.
+          t = t.replace(n, "keeps the delay it chose internal, because a pacing line every turn is noise", 1)
+          t = t.replace("A dynamic run that says nothing about its pacing is indistinguishable from a\nrun that quietly stopped.", "", 1)
+          open(p, "w", encoding="utf-8").write(t)
+          EOF
+          if python3 /tmp/lp15-copy/test/validate.py 2>&1 | grep -q 'never says a self-pacing run prints the delay'; then
+            echo "OK: validator FAILs — the verb and the consequence are required, not the nouns"
+          else
+            echo "ERROR: the rule was inverted with its words intact and the guard passed"
             exit 1
           fi
