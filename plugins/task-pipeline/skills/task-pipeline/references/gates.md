@@ -30,6 +30,7 @@ elsewhere and is not restated here:
 - Anatomy of a project gate
 - Writing the check itself
 - Probing — plant, run, restore
+- The neighbour probe — plant the evidence outside the subject
 - The false-positive budget
 - Ratchets
 - Disclosures — counted like a ratchet, and deliberately not monotone
@@ -294,6 +295,45 @@ expect=<the guard's own words>)` rather than hand-rolling a fourth copy of the l
 Otherwise the next reader has to redo it to know whether it was ever done.
 
 ---
+
+## The neighbour probe — plant the evidence outside the subject
+
+A probe proves a guard rejects **the phrasing its author had in mind**. That is less than
+it looks, and the gap has one shape: **a check answered by text that is not its subject.**
+
+Measured on one project in one session, six times, each found by a reader planting a
+defect and watching `PASS`:
+
+| The check's subject | The text that answered it instead |
+|---|---|
+| stage 2 names the loop's arming | *"it **arms** the UX track"*, present since an earlier release |
+| the section states the authorization floor | the same phrase in a Rationalizations row, and in a section written twenty-nine releases before |
+| the run stamps have a cap | the **standing instructions'** `max 10`, in the same table cell — and, once the check was narrowed past it, the same cap moved to the other side of the `·` |
+| a section read in full stays capped | rows under **one** heading, while a second heading in the same file held forty more |
+
+Every one of those guards had a probe. Every probe fired. The probes and the guards were
+written in the same hour from the same reading, so they shared the same blind spot.
+
+**So a guard that reads a scoped span owes a second probe, and it plants in two places at
+once:**
+
+1. **break the subject** — remove the thing the guard is about;
+2. **plant the guard's own evidence next door** — in a sibling section, an adjacent table
+   cell, a rationalizations row, the other side of a separator;
+3. require the guard to **still fail**.
+
+A guard that passes step 3 is reading its subject. A guard that goes green is reading the
+neighbourhood, and the ordinary probe cannot tell the difference — which is why this one
+is separate rather than a stricter version of it.
+
+**Positional narrowing is not scoping.** Three of the six were "fixed" by cutting the
+search down to a row, then to everything after a phrase, and fell each time to text that
+was still inside the cut. Scope by *what the span is about*: split to the cell, then to
+the item, then match on flattened text so an emphasis marker cannot hide the boundary.
+
+**And state the span in the guard.** One line above the predicate — *what it reads, and
+where that ends*. It costs nothing and it is the only part of a check a later reader can
+disagree with before the defect arrives.
 
 ## The false-positive budget
 

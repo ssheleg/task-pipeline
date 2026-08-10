@@ -4850,3 +4850,70 @@ jobs:
             echo "ERROR: the file passed its cap inside a section read in full at stage 0"
             exit 1
           fi
+      - name: Negative self-test (neighbour probe — the stamps lose their cap while the cell keeps another)
+        run: |
+          set -eu
+          rm -rf /tmp/nb01-copy && cp -R . /tmp/nb01-copy
+          python3 - <<'EOF'
+          p = "/tmp/nb01-copy/plugins/task-pipeline/skills/task-pipeline/references/retrospective.md"
+          t = open(p, encoding="utf-8").read()
+          n = "**Standing instructions** (max **10**) · **Run stamps** (max **10**, oldest rotate out)"
+          assert n in t, "PLANT DID NOT LAND: nb01"
+          # Break the subject AND leave the neighbour's cap in the same cell — on the
+          # other side of the separator, which is where the narrowed version fell.
+          open(p, "w", encoding="utf-8").write(
+              t.replace(n, "**Run stamps** (one line each) \u00b7 **Standing instructions** (max **10**)", 1))
+          EOF
+          if python3 /tmp/nb01-copy/test/validate.py 2>&1 | grep -q 'run stamps are given no cap'; then
+            echo "OK: validator FAILs — the neighbour's cap does not answer for the stamps, on either side of the separator"
+          else
+            echo "ERROR: the stamps lost their cap and the standing instructions' own cap answered for them"
+            exit 1
+          fi
+      - name: Negative self-test (neighbour probe — Part 1a loses the floor while the file keeps it)
+        run: |
+          set -eu
+          rm -rf /tmp/nb02-copy && cp -R . /tmp/nb02-copy
+          python3 - <<'EOF'
+          p = "/tmp/nb02-copy/plugins/task-pipeline/skills/task-pipeline/references/continuity.md"
+          t = open(p, encoding="utf-8").read()
+          head = "## Part 1a"
+          i = t.index(head); j = t.index("\n## ", i + len(head))
+          sec = t[i:j]
+          n = "*a generic flag is not a specific authorization*, and arming a"
+          assert n in sec, "PLANT DID NOT LAND: nb02"
+          # Break the subject; the phrase survives twice elsewhere in the file — in the
+          # section written twenty-nine releases earlier and in a Rationalizations row,
+          # which is exactly what kept the first version of this guard green.
+          open(p, "w", encoding="utf-8").write(t[:i] + sec.replace(n, "arming a", 1) + t[j:])
+          EOF
+          if python3 /tmp/nb02-copy/test/validate.py 2>&1 | grep -q 'Part 1a.: the sentence that keeps arming'; then
+            echo "OK: validator FAILs — a copy elsewhere in the file is not the copy this section's reader meets"
+          else
+            echo "ERROR: Part 1a lost the floor and two copies elsewhere kept the guard green"
+            exit 1
+          fi
+      - name: Negative self-test (neighbour probe — stage 2 loses the arming while keeping the word)
+        run: |
+          set -eu
+          rm -rf /tmp/nb03-copy && cp -R . /tmp/nb03-copy
+          python3 - <<'EOF'
+          p = "/tmp/nb03-copy/plugins/task-pipeline/skills/task-pipeline/references/stages.md"
+          t = open(p, encoding="utf-8").read()
+          head = "- **The queue exists here, so the loop arms here**"
+          tail = "- **GATE (manual):**"
+          i = t.index(head); j = t.index(tail, i)
+          # Break the subject, then plant the guard's own word next door in a sentence
+          # that has nothing to do with the loop — the shape that satisfied the first
+          # predicate from a release written long before it.
+          t = t[:i] + "- **Nothing about the loop is decided here.** The UI verdict still arms the UX track in stage 3, and after-decomposition remains a word in the schema.\n" + t[j:]
+          clause = " \u2014 **and the loop's arming state is printed**:\n  armed with its queue and pacing, or not armed with the reason"
+          assert clause in t, "PLANT DID NOT LAND: nb03"
+          open(p, "w", encoding="utf-8").write(t.replace(clause, "", 1))
+          EOF
+          if python3 /tmp/nb03-copy/test/validate.py 2>&1 | grep -q 'nothing here says the LOOP arms on it'; then
+            echo "OK: validator FAILs — a neighbouring 'arms' and a stray schema token do not answer for the rule"
+          else
+            echo "ERROR: stage 2 lost the arming and neighbouring words answered for it"
+            exit 1
+          fi

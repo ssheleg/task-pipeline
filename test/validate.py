@@ -4056,7 +4056,15 @@ if os.path.isfile(_STG_P):
     _m2 = re.search(r"^##\s*2\s*—.*?$(.*?)(?=^##\s)", _stg, re.S | re.M)
     if _m2 is None:
         _UNLOOKED.append("skip: stage-2 arming — no `## 2 —` section in stages.md")
-    elif "after-decomposition" not in _flatten(_m2.group(1), lower=True):
+    # reads: the GATE bullet of stage 2, and nothing else in the section.
+    # Keyed on the OBLIGATION rather than the discussion around it. A predicate over
+    # the whole section was satisfied first by a bare "arm" (from `it arms the UX
+    # track`, present since v1.7.0), then by a bullet FORBIDDING arming, then — under
+    # a neighbour probe — by a sentence merely containing `after-decomposition`. What
+    # a stage must DO lives in its gate; prose above it can say anything.
+    elif "arming state" not in _flatten(
+            next((_b for _b in re.split(r"\n(?=- )", _m2.group(1))
+                  if _b.lstrip().startswith("- **GATE")), ""), lower=True):
         # A bare "arm" was the first predicate and it was satisfied from the day it was
         # written — this stage has said "it arms the UX track in stage 3" since v1.7.0,
         # so the guard passed for a reason that had nothing to do with the loop. Found
