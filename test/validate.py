@@ -3200,6 +3200,372 @@ for _sk in sorted(glob.glob(os.path.join(ROOT, "plugins/*/skills/*/SKILL.md"))):
                  "a colon-space, so YAML parses it as a mapping and the field is "
                  "silently dropped at load time -- quote the value or rephrase")
 
+# --- P1: what the run prints about itself (v1.34.0) ---------------------------
+# SCOPE: these four check the DOCTRINE's internal consistency — the header block's
+# field set, the glyph legend, the computed-rail promise, and the run ledger's line
+# shapes. They do NOT check that any run ever printed a block; a static validator
+# cannot see a transcript, and naming that limit here is the whole point of a scope
+# header (gates.md -> Anatomy of a project gate).
+_PROG_REL = "references/progress.md"
+_PROG = os.path.join(ROOT, _SKILLDIR, _PROG_REL)
+_PTXT = open(_PROG, encoding="utf-8").read() if os.path.isfile(_PROG) else ""
+
+
+def _header_fields(_path):
+    """Field labels of the header block, read from the block itself, never listed.
+
+    Unit: the INDENTED, dot-separated lines of the first fence whose body opens
+    `task-pipeline v`. Two exclusions, each with its reason. The rail line is out
+    because it uses the middle dot as a GLYPH rather than a separator, so a segment
+    split would read its stage numbers as field names. The title line is out by
+    indentation, because its middle segment is the topic — which legitimately
+    differs between the doctrine's example and a restatement of it.
+    """
+    if not os.path.isfile(_path):
+        return None
+    for _blk in re.findall(r"```[a-zA-Z]*\n(.*?)```", open(_path, encoding="utf-8").read(), re.S):
+        if not _blk.startswith("task-pipeline v"):
+            continue
+        _out = set()
+        for _ln in _blk.split("\n")[1:]:
+            if not _ln[:1].isspace() or "·" not in _ln:
+                continue
+            if re.match(r"\s*\d+\s", _ln):
+                continue                      # the rail
+            for _seg in _ln.split("·"):
+                _m = re.match(r"([a-z][a-z-]*)\b", _seg.strip(" █░").strip())
+                if _m:
+                    _out.add(_m.group(1))
+        return _out
+    return None
+
+
+# P1-G1. The header block exists in TWO files, which is learned.md rule 20's shape:
+# a thing that exists twice drifts, and the drift is silent because each copy reads
+# complete on its own. Both directions, because they are different failures — a
+# field in the doctrine and absent from the stage list is a reader who never meets
+# it; a field on the stage list and absent from the doctrine is a number with no
+# home, which is the one thing progress.md forbids outright.
+_pf = _header_fields(_PROG)
+_sf = _header_fields(os.path.join(ROOT, _SKILLDIR, "references/stages.md"))
+if _pf is None or _sf is None or not _pf or not _sf:
+    _UNLOOKED.append("skip: header-block field set — no `task-pipeline v` fence in "
+                     "progress.md or stages.md")
+else:
+    for _miss, _where, _other in ((_pf - _sf, "references/stages.md", "progress.md"),
+                                  (_sf - _pf, _PROG_REL, "stages.md")):
+        if _miss:
+            fail(f"{_where}: the header block omits {sorted(_miss)}, which "
+                 f"{_other} prints — one block, two copies, already drifted")
+
+# P1-G2. Every glyph a rail prints is defined in the legend. SCOPE: one direction
+# only, and deliberately. A legend row for a glyph no example happens to use is a
+# vocabulary entry rather than a defect — `✗` is exactly that — so the reverse
+# check would fail on correct doctrine. The failure worth catching is the other
+# one: a symbol a reader meets with nothing to look it up in.
+if _PTXT:
+    _legend = set(re.findall(r"^\|\s*`(\S)`\s*\|", _PTXT, re.M))
+    _used = set()
+    for _blk in re.findall(r"```[a-zA-Z]*\n(.*?)```", _PTXT, re.S):
+        for _ln in _blk.split("\n"):
+            if re.match(r"\s*\d+\s", _ln):
+                _used |= set(re.findall(r"\d+\s(\S)", _ln))
+    if not _legend:
+        fail(f"{_PROG_REL}: no glyph legend — the rail's symbols are printed and "
+             "defined nowhere")
+    for _g in sorted(_used - _legend):
+        fail(f"{_PROG_REL}: the rail prints {_g!r} and "
+             "the legend does not define it"
+             " — a symbol a reader meets with nothing to look it up in")
+
+# P1-G3. REQ-013's promise, stated where a reader meets it. A rail that hardcodes
+# this plugin's eleven EXAMPLE stages is confidently wrong in every project that
+# replaced them, in the one place a run is trusted at a glance.
+if _PTXT:
+    _pn = _flatten(_PTXT, lower=True)
+    for _clause in ("come from the project's pipeline.json",
+                    "carries no stage count of its own"):
+        if _clause not in _pn:
+            fail(f"{_PROG_REL}: missing the clause {_clause!r} — without it the "
+                 "rail's stage set is whatever the agent assumed")
+
+
+def _md_section(_txt, _title):
+    _m = re.search(r"^##\s+" + re.escape(_title) + r"\s*$(.*?)(?=^##\s|\Z)",
+                   _txt, re.S | re.M)
+    return _m.group(1) if _m else ""
+
+
+def _line_prefixes(_txt):
+    return set(re.findall(r"^(\w+):\s", "\n".join(
+        re.findall(r"```[a-zA-Z]*\n(.*?)```", _txt, re.S)), re.M))
+
+
+# P1-G4. The ledger declares three line shapes and then shows them. Declared and
+# shown are two enumerations of one list, and N1's whole retro is about what
+# happens to those: five times the prose promised what nothing enforced. Both
+# directions — a shape declared and never shown is a rule with no worked example,
+# a shape shown and never declared is an example teaching an unowned format.
+_RUN_TPL = os.path.join(ROOT, _SKILLDIR, "templates/run.md")
+if os.path.isfile(_RUN_TPL):
+    _rt = open(_RUN_TPL, encoding="utf-8").read()
+    _declared = _line_prefixes(_md_section(_rt, "Lines"))
+    _shown = _line_prefixes(_md_section(_rt, "Log"))
+    if not _declared:
+        fail("templates/run.md: no line shapes declared under `## Lines` — the "
+             "ledger two mechanisms read has no stated format")
+    for _miss, _msg in ((_declared - _shown, "declared under `## Lines` and never "
+                                             "shown in `## Log`"),
+                        (_shown - _declared, "shown in `## Log` and never declared "
+                                             "under `## Lines`")):
+        if _miss:
+            fail(f"templates/run.md: line shape(s) {sorted(_miss)} {_msg}")
+    # And the cross-file direction: a shape nobody reads is a shape nobody writes.
+    _readers = _PTXT + (open(os.path.join(ROOT, _SKILLDIR, "references/loop-guard.md"),
+                             encoding="utf-8").read()
+                        if os.path.isfile(os.path.join(ROOT, _SKILLDIR,
+                                                       "references/loop-guard.md")) else "")
+    for _pfx in sorted(_declared):
+        if _pfx + ":" not in _readers:
+            fail(f"templates/run.md declares the {_pfx + ':'!r} line and neither "
+                 f"{_PROG_REL} nor references/loop-guard.md names it — "
+                 "a ledger shape with no reader"
+                 " is written by nobody")
+
+# --- P2: the gate fixes (v1.35.0) ---------------------------------------------
+# SCOPE: the DOCTRINE's own agreement — the review cap stated in two files, the
+# short path's glyph defined where glyphs are defined, and the exposure example
+# matching the statement that prints it. None of these observes a run.
+_LG_P = os.path.join(ROOT, _SKILLDIR, "references/loop-guard.md")
+_ST_P = os.path.join(ROOT, _SKILLDIR, "references/stages.md")
+
+# P2-G1. The review cap is a number, and a number written twice drifts. It is
+# computed from loop-guard.md — the file that owns the caps — and required in the
+# stage that runs the loop. This loop was capped by nothing at all while a ceiling
+# of two re-entries per stage sat one paragraph above it, so the failure here is
+# not hypothetical: it is what the last ten-round run was.
+if os.path.isfile(_LG_P) and os.path.isfile(_ST_P):
+    _lg_t = open(_LG_P, encoding="utf-8").read()
+    _st_t = open(_ST_P, encoding="utf-8").read()
+    _cap = re.search(r"\*\*(\d+) review rounds\*\* per artifact", _lg_t)
+    if not _cap:
+        fail("references/loop-guard.md: no review-round cap — the loop this "
+             "repository ran ten rounds of is capped by nothing")
+    else:
+        _want = f"{_cap.group(1)} rounds per artifact"
+        if _want not in _flatten(_st_t, lower=True):
+            fail(f"references/stages.md: the stage running the review loop does not "
+                 f"state {_want!r}, which references/loop-guard.md sets — "
+                 "the cap exists in one file and the loop runs in the other")
+    for _f, _t in (("references/loop-guard.md", _lg_t), ("references/stages.md", _st_t)):
+        if "run.review.maxRounds" not in _t:
+            fail(f"{_f}: the review cap is stated with no config key — a default "
+                 "nobody can change is a default everybody overrides in their head")
+
+# P2-G2. The short path marks stages with a glyph, and a glyph is only safe if it
+# is defined where glyphs are defined. A skipped stage that reads as a stage never
+# entered is the exact inversion progress.md's legend exists to prevent.
+# Unit: the BULLET, not the paragraph. The bullet carries a fenced block with blank
+# lines around it, so a paragraph-scoped read stops three lines in and never reaches
+# the glyph — which is what the first version did, silently. gates.md says to write
+# down which unit was chosen and what it misses: this one ends at the next top-level
+# bullet, so a glyph introduced in a following bullet is out of scope.
+if _PTXT and os.path.isfile(_ST_P):
+    _legend2 = set(re.findall(r"^\|\s*`(\S)`\s*\|", _PTXT, re.M))
+    _stx = open(_ST_P, encoding="utf-8").read()
+    _at = _stx.find("short-path triage")
+    if _at == -1:
+        fail("references/stages.md: no short-path triage — a pipeline with eleven "
+             "stages and no measured exemption runs all of them over a typo")
+    else:
+        _end = _stx.find("\n- **", _at)
+        # Fences out first: ``` is three backticks, so the naive span matches its own
+        # middle one and reports the delimiter as an undefined glyph. The check found
+        # itself before it found anything else — the shape gates.md calls a detector
+        # that matches itself first.
+        _slice = FENCE_RE.sub("", _stx[_at:_end if _end > 0 else len(_stx)])
+        for _tok in set(re.findall(r"`(\S)`", _slice)):
+            if not _tok.isalnum() and _tok != "`" and _tok not in _legend2:
+                fail(f"references/stages.md: the short path marks a stage {_tok!r} "
+                     "and references/progress.md's legend does not define it — "
+                     "a skip a reader cannot tell from a stage never entered")
+
+# P2-G3. The exposure example and the statement that prints it are two statements
+# of one format. They disagreed for a whole release — the doctrine taught
+# `31 releases since the last human confirmation` while the code printed
+# `releases carry one`, and it hardcoded a live count that drifts. Computed from
+# the print, required in the doctrine, and the example is required to carry no
+# digits at all: a worked example with a number in it is a number nobody updates.
+_EXP_P = os.path.join(ROOT, _SKILLDIR, "references/exposure.md")
+if os.path.isfile(_EXP_P):
+    _exp_t = open(_EXP_P, encoding="utf-8").read()
+    _lines = _OWN_SRC.splitlines()
+    _stmt = ""
+    for _i, _l in enumerate(_lines):
+        if _l.lstrip().startswith('print(f"  exposure:'):
+            _stmt = _l
+            _j = _i + 1
+            while _j < len(_lines) and not _stmt.rstrip().endswith(")"):
+                _stmt += _lines[_j]
+                _j += 1
+            break
+    if not _stmt:
+        _UNLOOKED.append("skip: exposure example vs its print — no exposure print "
+                         "statement found in this file")
+    else:
+        # Placeholders out, then the alphabetic word-runs that remain are the
+        # format's own vocabulary. Anything the code prints, the doctrine shows.
+        _words = [w.strip() for w in
+                  re.findall(r"[A-Za-z][A-Za-z ]{2,}", re.sub(r"\{[^}]*\}", " ", _stmt))]
+        _expn = _flatten(_exp_t, lower=True)
+        for _w in {" ".join(w.split()).lower() for w in _words}:
+            if _w in ("print f exposure", "f") or len(_w.split()) < 2:
+                continue
+            if _w not in _expn:
+                fail(f"references/exposure.md: the print says {_w!r} and the doctrine "
+                     "does not — the worked example and its own output have drifted")
+    _ex_line = [_l for _b in re.findall(r"```[a-zA-Z]*\n(.*?)```", _exp_t, re.S)
+                for _l in _b.split("\n") if _l.startswith("exposure:")]
+    for _l in _ex_line:
+        if re.search(r"\d", _l):
+            fail(f"references/exposure.md: the worked example carries a digit "
+                 f"({_l.strip()!r}) — a live count in a doctrine is a count nobody "
+                 "updates, and this one was eight releases stale")
+
+# --- P3: the tracks a companion owns (v1.36.0) --------------------------------
+# The matrix's second cell says which stage needs a companion. Nothing checked that
+# the stage had ever heard of it — which is how `sheleg-design` reached one mention
+# in the whole bundle and super-ux's entire copy half reached none, while the
+# matrix read complete on its own. SCOPE: name presence in the stage's section. It
+# does not check that the stage USES the companion well, only that the stage the
+# matrix points at names it at all.
+_CS_P = os.path.join(ROOT, _SKILLDIR, "references/companion-skills.md")
+if os.path.isfile(_CS_P) and os.path.isfile(_ST_P):
+    _cs_t = open(_CS_P, encoding="utf-8").read()
+    _st_t2 = open(_ST_P, encoding="utf-8").read()
+    # Stage sections of stages.md, keyed by id.
+    _sections = {}
+    _heads = list(re.finditer(r"^##\s+(\d+)\s+—", _st_t2, re.M))
+    for _i, _h in enumerate(_heads):
+        _to = _heads[_i + 1].start() if _i + 1 < len(_heads) else len(_st_t2)
+        _sections[_h.group(1)] = _flatten(_st_t2[_h.start():_to], lower=True)
+    for _row in re.findall(r"^\|\s*\*\*([^*|]+)\*\*[^|]*\|([^|]*)\|", _cs_t, re.M):
+        _nm = re.sub(r"^\[|\]$", "", re.split(r"\s*\(", _row[0])[0].strip())
+        _need = _row[1]
+        _want = set()
+        for _m in re.finditer(r"[Ss]tages?\s+(\d+)\s*[–—-]\s*(\d+)|[Ss]tages?\s+(\d+)",
+                              _need):
+            if _m.group(1):
+                _want |= {str(_n) for _n in range(int(_m.group(1)), int(_m.group(2)) + 1)}
+            else:
+                _want.add(_m.group(3))
+        for _sid in sorted(_want):
+            if _sid not in _sections:
+                continue          # a stage this example flow does not have
+            if _nm.lower() not in _sections[_sid]:
+                fail(f"references/companion-skills.md points {_nm!r} at stage {_sid} "
+                     f"and references/stages.md's stage {_sid} never names it — "
+                     "a companion the operator is told to install for a stage that "
+                     "has not heard of it")
+
+    # P3-G2. The guard above reads matrix ROW NAMES, so a sub-skill named inside a
+    # row's own cell is out of its scope — and that is exactly where super-ux's copy
+    # half lived while being invisible to every stage. A probe found the hole, which
+    # is why this second, narrower check exists: the three stage-3 tracks by name,
+    # each naming the companion that owns it. Narrow on purpose. Generalising the
+    # sub-skill mapping would demand that stage 3 name `/brand-lint` and `ux-audit`
+    # too, which belong to other stages, and a check that over-reaches is switched
+    # off by the third person who hits it.
+    _s3 = _sections.get("3", "")
+    if not _s3:
+        _UNLOOKED.append("skip: the stage-3 tracks — this flow has no stage 3")
+    else:
+        for _track, _owner in (("ux track", "super-ux"),
+                               ("copy track", "copywriting"),
+                               ("visual track", "sheleg-design")):
+            if _track not in _s3:
+                fail(f"references/stages.md stage 3: no {_track!r} — the stage names "
+                     "what the interface must do, and not how it sounds or looks")
+            elif _owner not in _s3:
+                fail(f"references/stages.md stage 3: the {_track!r} names no owner — "
+                     f"{_owner!r} is absent, so the track is a heading with no skill "
+                     "behind it")
+
+# --- P4: publishing a retro insight (v1.37.0) ---------------------------------
+# SCOPE: the doctrine and the schema agreeing, the rule count being computed, and
+# the worked example obeying the rules it teaches. It cannot check that a run
+# redacted anything — no static check can read an issue that was opened.
+_RT_P = os.path.join(ROOT, _SKILLDIR, "references/retrospective.md")
+_SCHEMA_P = os.path.join(ROOT, _SKILLDIR, "pipeline.schema.json")
+if os.path.isfile(_RT_P):
+    _rt_t = open(_RT_P, encoding="utf-8").read()
+    _rt_f = _flatten(_rt_t, lower=True)
+
+    # P4-G1. The rule list is an enumeration stated twice — as a word in the
+    # sentence that introduces it, and as the numbered items. N1 spent six review
+    # rounds on exactly this shape, so the count is COMPUTED from the items and
+    # required in the sentence rather than compared by eye.
+    _sec = ""
+    _m_sec = re.search(r"^##\s+What may leave the project.*?$(.*?)(?=^##\s|\Z)",
+                       _rt_t, re.S | re.M)
+    if not _m_sec:
+        fail("references/retrospective.md: no redaction section — the doctrine "
+             "publishes to another repository and says nothing about what leaves")
+    else:
+        _sec = _m_sec.group(1)
+        _rules = re.findall(r"^\s*(\d+)\.\s+\*\*", _sec, re.M)
+        _n = len(_rules)
+        _words = {1: "one", 2: "two", 3: "three", 4: "four", 5: "five", 6: "six",
+                  7: "seven", 8: "eight", 9: "nine", 10: "ten"}
+        if _n == 0:
+            fail("references/retrospective.md: the redaction rules are prose, not an "
+                 "enumeration — a list nobody can point at an item of is advice")
+        elif f"{_words.get(_n, _n)} rules" not in _flatten(_sec, lower=True):
+            fail(f"references/retrospective.md: {_n} numbered redaction rules and the "
+                 f"sentence introducing them does not say {_words.get(_n, _n)!r} — "
+                 "an enumeration counted in prose is a count that drifts")
+
+    # P4-G2. The worked issue block must obey the rules it teaches. A doctrine whose
+    # own example breaks its own rule is the class that shipped in templates/backlog.md,
+    # seeded into every host project with arithmetic contradicting its own formula.
+    for _blk in re.findall(r"```[a-zA-Z]*\n(.*?)```", _rt_t, re.S):
+        if "would open issue" not in _blk:
+            continue
+        if re.search(r"(?m)^\s*/|\s/(Users|home|var|opt)/", _blk):
+            fail("references/retrospective.md: the worked issue body carries an "
+                 "absolute path — rule 1 of the list it is printed beside")
+        if re.search(r"\b[0-9a-f]{7,40}\b", _blk):
+            fail("references/retrospective.md: the worked issue body carries what "
+                 "reads as a commit — rule 2 of the list it is printed beside")
+        for _slug in set(re.findall(r"\b([\w.-]+/[\w.-]+)\b", _blk)):
+            if "task-pipeline" not in _slug and not _slug.startswith(
+                    ("references/", "templates/", "test/", "plugins/", "docs/")):
+                fail(f"references/retrospective.md: the worked issue body names "
+                     f"{_slug!r}, which is neither the skill's own repository nor a "
+                     "path inside it — rule 2 of the list it is printed beside")
+
+    # P4-G3. Doctrine and schema, both directions. An opt-in described in prose and
+    # absent from the schema validates nothing; a schema key no doctrine explains is
+    # a switch with no stated consequence.
+    if "retro.publish" not in _rt_t:
+        fail("references/retrospective.md: publishing is described with no config key "
+             "— an outward act armed by nothing nameable is armed by assumption")
+    if os.path.isfile(_SCHEMA_P):
+        _sch_t = open(_SCHEMA_P, encoding="utf-8").read()
+        _pub = json.loads(_sch_t).get("definitions", {}).get("retro", {}) \
+            .get("properties", {}).get("publish")
+        if _pub is None:
+            fail("pipeline.schema.json: references/retrospective.md documents "
+                 "`retro.publish` and the schema does not define it — the key the "
+                 "doctrine tells an operator to set validates nothing")
+        elif "off" not in _pub.get("description", "").lower():
+            fail("pipeline.schema.json: `retro.publish` does not state that it is OFF "
+                 "when absent — a default nobody reads as off is a default that "
+                 "publishes")
+    if "retro.publish" not in open(_ST_P, encoding="utf-8").read():
+        fail("references/stages.md: no stage names `retro.publish` — a step described "
+             "in the retro's doctrine and in no stage is a step that never runs")
+
 if errors:
     print("FAIL: task-pipeline structure invalid")
     for e in errors:

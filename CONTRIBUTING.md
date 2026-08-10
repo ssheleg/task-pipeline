@@ -411,6 +411,72 @@ an audit measured it. A claim of enforcement is now checked like any other claim
 a **single** string in `test/validate.py`: the check reads that file as text, so a
 quote straddling a line-continuation is a citation nothing can find.
 
+**48. The progress header exists in two files and is compared both ways; the rail is
+computed, never eleven.** `references/progress.md` defines the block and
+`references/stages.md` restates it — learned.md rule 20's shape, and the drift is silent
+because each copy reads complete alone. Both directions, because they are different
+failures: a field in the doctrine and not the stage list is a reader who never meets it;
+a field on the stage list and not in the doctrine is a number with no home. The rail's
+stage set comes from the project's own `pipeline.json`, and the doctrine is required to
+say so — the eleven in `pipeline.example.json` are an example, and a bar reading
+`gates 5/11` in a six-stage project is wrong in the one place a run is read at a glance.
+Every glyph printed is in the legend, one direction and deliberately: a legend row for an
+unused glyph is vocabulary, not a defect.
+*(guard: `one block, two copies, already drifted` and `carries no stage count of its own`
+and `the legend does not define it`)*
+
+**49. The run ledger's line shapes are declared, shown, and read.** `templates/run.md`
+declares three under `## Lines` and works them under `## Log`; the two enumerations are
+compared **both ways**, because a shape declared and never shown is a rule with no
+example and a shape shown and never declared is an example teaching an unowned format.
+Third check: every declared shape is named by `references/progress.md` or
+`references/loop-guard.md` — a ledger shape nothing reads is a shape nothing writes,
+which is exactly what this file was for the whole time `loop-guard.md` called its own
+detection mechanical and no run had created the file.
+*(guard: `declared under` and `shown in` and `a ledger shape with no reader`)*
+
+**50. The review loop has a stated cap, and the cap is one number in two files.** It is
+computed from `references/loop-guard.md`, which owns the caps, and required verbatim in
+the stage that runs the loop; both must name `run.review.maxRounds`, because a default
+nobody can change is a default everybody overrides in their head. The cap is a
+**decision point, not a stop** — at it the run prints new findings against
+self-inflicted ones, per round. A flat ceiling would be the wrong rule: the runs that
+went ten rounds were still finding real defects on round nine.
+*(guard: `no review-round cap` and `the review cap is stated with no config key`)*
+
+**51. The short path is proposed, printed and glyphed; the exposure example is computed
+from its own print.** A stage skipped by the triage is marked with a glyph
+`references/progress.md`'s legend defines — a skip nobody can see is indistinguishable
+from a stage never entered. And the worked exposure line carries **no digits**: its
+vocabulary is derived from the print statement at check time, because the previous
+example disagreed with the code in both directions at once and hardcoded a live count.
+*(guard: `and references/progress.md's legend does not define it`
+and `the worked example carries a digit`)*
+
+**52. A companion the matrix points at a stage is named by that stage, and stage 3's
+three tracks each name their owner.** The matrix's *"needed for"* cell says which stage
+needs a companion; nothing checked the stage had ever heard of it, which is how
+`sheleg-design` reached one mention in the whole bundle and super-ux's copy half reached
+none while the table read complete on its own. On the commit that added it, this guard
+found `chrome-devtools` pointed at stages 5–6 with stage 5 silent since the day it was
+added. A second, deliberately narrow check covers the three stage-3 tracks — UX, COPY,
+VISUAL — each with its owning skill, because the first reads matrix **row names** and
+the copy half lives inside super-ux's own cell, exactly where it was invisible.
+*(guard: `has not heard of it` and `names no owner`)*
+
+**53. Publishing a retro insight is opt-in, enumerated, and its own example obeys its
+own rules.** `retro.publish` is off when absent — opening an issue in another repository
+is an outward act, and a generic flag is not a specific authorization. The redaction
+rules are a **numbered enumeration whose count is computed from the items** and required
+in the sentence that introduces them, because an enumeration counted in prose is the
+class this repository spent six review rounds on. The doctrine's own worked issue body
+is checked against those rules: no absolute path, nothing that reads as a commit, no
+repository slug but the skill's. And the key must exist in `pipeline.schema.json` **and**
+be named by a stage — a step described in the retro's doctrine and in no stage never
+runs.
+*(guard: `does not say` and `rule 1 of the list it is printed beside`
+and `no stage names`)*
+
 ## Adding or changing doctrine
 
 - **Change one idea per PR.** These files are read by agents under load; a PR that

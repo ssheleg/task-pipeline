@@ -22,6 +22,7 @@ searches.
 
 - Bookkeeping — the thing that makes detection mechanical
 - Detection — any one of these trips the guard
+- The review loop — a cap that measures rather than stops
 - The break protocol
 - When to stop and hand back
 - Rationalizations
@@ -30,7 +31,8 @@ searches.
 
 You cannot detect churn from memory, especially after compaction. Every repeating
 pass appends one line to the run's ledger (`.task-pipeline/build/<plan>/progress.md`
-for stage 5; `.task-pipeline/run.md` for stage-level and program-level loops):
+for stage 5; `.task-pipeline/run.md` for stage-level and program-level loops —
+**seeded at stage 0** from [`../templates/run.md`](../templates/run.md)):
 
 ```
 touch: <file> — pass <N> (<stage|round|module>) — reason: <finding id / gate item>
@@ -39,6 +41,12 @@ touch: <file> — pass <N> (<stage|round|module>) — reason: <finding id / gate
 One line per file per pass. The reason must name **what forced the edit** — a
 finding id, a failed gate item, an operator instruction. "Cleanup", "polish" and
 "while I was there" are not reasons; they are churn with better manners.
+
+**This ledger was required here from the day the file shipped and written by no run
+until 2026-08-10.** The detection below calls itself mechanical; with no ledger it had
+no input at all, so the guard sat on rung 1 while every reader took it for rung 3
+([`gates.md`](gates.md) → *Axis B*). It is now seeded at stage 0 and named in that
+stage's gate — which is the whole difference between a rule and a rule that runs.
 
 ## Detection — any one of these trips the guard
 
@@ -59,7 +67,48 @@ finding id, a failed gate item, an operator instruction. "Cleanup", "polish" and
 
 Caps that trip the guard by themselves: **5 fix rounds** per task
 ([`build.md`](build.md)), **2 re-entries** per stage per artifact, **3 passes** per
-module in the program loop.
+module in the program loop, and **3 review rounds** per artifact — which is not a stop
+but a measurement, below.
+
+## The review loop — a cap that measures rather than stops
+
+The caps above govern loops that **edit**. A review loop does both: the reader finds,
+the run fixes, the reader reads again. It had no cap at all until 2026-08-10, and this
+repository's own run stamps say what that cost — **ten rounds, ten, eight, four,
+three** — against a stated ceiling of two re-entries per stage. Nothing tripped,
+because a review round was named in no cap.
+
+**A flat cap would have been the wrong fix.** Every one of those runs recorded *"none
+from my probes"* beside its count: the reader was still finding real defects on round
+nine. Stopping at two would have shipped them.
+
+So the cap is a **decision point**. Default **3 rounds** per artifact, recorded in
+`pipeline.json` → `run.review.maxRounds`. On reaching it, stop reviewing and print the
+pair [`audit.md`](audit.md) already defines — new findings, and findings caused by this
+run's own fixes — per round:
+
+```
+review cap reached — 3 rounds — artifact: test/validate.py
+  round 1: 12 new · 0 self-inflicted
+  round 2:  5 new · 1 self-inflicted
+  round 3:  1 new · 3 self-inflicted
+```
+
+- **Self-inflicted ≥ new** — the axis is exhausted ([`audit.md`](audit.md) → *Every
+  pass changes the axis*). Stop. Every remaining finding becomes a board row with its
+  evidence ([`backlog.md`](backlog.md)); none is dropped.
+- **New > self-inflicted** — the reader is still paying. Continuing is then the
+  operator's call, made with the numbers in hand rather than out of fatigue.
+
+**The pair is the whole point.** A round count alone says how tired everyone is; the
+pair says whether the loop still produces anything. Measured on one file once, the
+guard's shapes and the run's own prose disagreed — one still paying, one exhausted —
+so a single number would have stopped the half that was working and continued the half
+that was not.
+
+**Rounds are counted from the ledger, never from memory**: distinct `pass N` values on
+`touch:` lines at the review stage. A round that finds nothing ends the loop by
+definition and needs no counting.
 
 ## The break protocol
 
@@ -109,6 +158,7 @@ far cheaper than a third round of the same argument.
 | Excuse | Reality |
 |---|---|
 | "One more pass and it converges" | Two passes with the same reason already proved it doesn't. The disagreement is above the code. |
+| "The reviewer is still finding things, so keep going" | Then say so with the pair: new versus self-inflicted, per round. If new still leads, that is an argument. Ten rounds with nobody counting is not. |
 | "I'll just revert to what worked" | That is the oscillation, not the exit. Name A and B first. |
 | "The reviewer keeps changing its mind" | Different findings on the same lines mean the requirement is ambiguous. That's a spec question. |
 | "Tidying while I'm in the file" | Untracked edits are what make churn invisible. One reason per change, in the ledger. |

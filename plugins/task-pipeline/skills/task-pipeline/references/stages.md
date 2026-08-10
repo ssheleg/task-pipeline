@@ -8,12 +8,27 @@ operator's explicit go). These stages (0 intake + 1→10) are the plugin's
 `pipeline.schema.json`; a host project replaces it with its own
 stages/agents/types (see SKILL.md → *Bring your own skills*).
 
-## The run checklist — copy it, tick it
+## The run checklist — printed, not remembered
 
-Complex workflows lose steps silently. Copy this into your response at the start of
-a run and check items off as they close; it is the cheapest guard against the one
-failure this pipeline keeps paying for — a stage that *looks* done because nothing
-printed.
+Complex workflows lose steps silently. **The run says where it is**, at two boundaries
+and only two — task start and iteration close ([`progress.md`](progress.md)):
+
+```
+task-pipeline vX.Y.Z · <topic> · module <id> «<name>» (N of M)
+  0 ✓  1 ✓  2 ✓  3 ▶  4 ·  5 ·  6 ·  7 ·  8 ·  9 · 10 ·
+  ███████░░░░░░░░░░░░░░░░░░░  gates 3/11 · now 3 Spec · manual
+  board B-NNN · carry-over N rows · exposure N never · unlooked N
+```
+
+The rail's positions come from the project's own `pipeline.json`, never from the count
+below — those eleven are this plugin's example flow. Each glyph is read from the
+verdict its gate wrote to `.task-pipeline/run.md`, and from nothing else: a rail
+written from memory is a summary that is confidently wrong exactly where it is trusted
+at a glance.
+
+The checklist below is what that rail summarises. This section said *"copy it, tick
+it"* until 2026-08-10 — an instruction with no gate behind it, which is the same
+failure it was written to prevent, one level up.
 
 ```
 Pipeline progress
@@ -35,7 +50,7 @@ never that the work was skipped quietly.
 
 ## Contents
 
-- The run checklist — copy it, tick it
+- The run checklist — printed, not remembered
 - 0 — Intake grill — MANDATORY
 - 1 — Docs study
 - 2 — Brainstorm + decompose
@@ -123,6 +138,27 @@ never that the work was skipped quietly.
   or they genuinely disagree and that is a decision. There is no fourth option, and
   starting on an unresolved divergence means building against a system that does
   not exist.
+- **Phase 1d — the short-path triage: printed, proposed, never taken silently.** This
+  pipeline's own boundary exempts a typo, a one-line fix and a mechanical rename — and
+  nothing measured that until 2026-08-10, so the exemption depended on an agent
+  remembering it while eleven stages and four manual gates stood in front of a
+  one-paragraph edit. Three questions, each with something behind it:
+
+  ```
+  1. files the request names, resolved        git ls-files -- <paths>       -> N
+  2. any of them a public contract            the version-synced surfaces,
+                                              pipeline.schema.json, the
+                                              command, the README           -> yes/no
+  3. behaviour a user or a caller observes changes                          -> yes/no
+  ```
+
+  Few files, no contract, no observable change ⇒ **propose** the short path: stages 1,
+  2, 3 and 4 marked `⊘` with the triage answer as the reason, and 5→10 running
+  unchanged. **Propose, never take.** The answer goes in the brief's autonomy sweep and
+  silence takes the full flow — the same floor deploy authorization uses. The glyph is
+  what makes it safe: a skipped stage is printed on the rail **with its reason**
+  ([`progress.md`](progress.md)), and a skip nobody can see is indistinguishable from a
+  stage that was never entered.
 - **How it runs: [`grill.md`](grill.md)** — the full doctrine, built into this
   skill (nothing to install). In short: one question per turn, a recommended
   answer with each, explore the codebase before asking, depth-first through the
@@ -170,12 +206,22 @@ never that the work was skipped quietly.
   is now stale), no open contradictions, **every
   autonomy-sweep row is answered or explicitly marked "stop and ask here"**, the
   **REQ table is written and every row names its check**, the carry-over ledger is
-  seeded, the model decision is recorded, and the operator confirms the brief. Stop when a
+  seeded, **`.task-pipeline/run.md` exists and the header block has been printed**
+  ([`progress.md`](progress.md)), the model decision is recorded, and the operator
+  confirms the brief. Stop when a
   re-scan surfaces no new branches (don't grill past diminishing returns;
   reversible calls can be deferred with a note). Only then start stage 1.
 - **The verification ledger is read.** `docs/superpowers/verification.md` — the harvest
   quotes **how many rows sit at `never`**, because that is the project's standing
   exposure and stage 0 is where it is cheapest to look ([`verification.md`](verification.md)).
+- **The run ledger is seeded and the header block is printed** — in that order, before
+  the first grill question. `.task-pipeline/run.md` from
+  [`../templates/run.md`](../templates/run.md) is the record **two** mechanisms already
+  depended on and no run had ever written: [`loop-guard.md`](loop-guard.md) calls its
+  own churn detection mechanical and reads the `touch:` lines, and
+  [`progress.md`](progress.md) derives the rail and the iteration counter from the
+  `stage:` and `iter:` lines. The header goes out before the interview because a run
+  that announces its position only at the end announced it to nobody.
 - **The board is read, or seeded.** `docs/superpowers/backlog.md` ([`backlog.md`](backlog.md)) — its **open count is quoted in the brief**, measured by a command at the top of the run rather than inherited from the last run's report. Absent ⇒ seeded from the template and said so; an empty board and no board are the same thing to work on, and only one of them can be appended to.
 
 ## 1 — Docs study
@@ -256,6 +302,32 @@ never that the work was skipped quietly.
   never rebuild from scratch. If the chain already exists and is validated (e.g.
   the task entered from super-ux), just verify (linter green) and embed it into
   the spec; only build the parts that are missing.
+- **COPY track — how it sounds.** Every string a product's user will read is written
+  through super-ux's `copywriting`, against the brand pack (`docs/brand/voice.md`,
+  `terminology.md`, `facts.md`). No pack ⇒ `/brand-init` **before** the first string,
+  not after: a voice reverse-engineered from copy already written is a description of
+  what happened, not a decision. In scope: interface strings, errors, empty states,
+  the landing, pricing, the user-facing changelog. **Out of scope, and saying so is
+  what keeps the track honest:** commit messages, PR descriptions, code comments, a
+  developer README, internal docs. Running a brand pack over a line in a contributors'
+  changelog is the fastest way to teach an agent to route around the track.
+- **VISUAL track — how it looks.** Where the task has a visual surface, the visual
+  layer goes through `sheleg-design` ([`companion-skills.md`](companion-skills.md)):
+  tokens and themes, typography and rhythm, motion and how it degrades to rest, the
+  boundary with Figma (tokens as variables, never raw values carried across). Not
+  through it: a purely structural change — what sits where is the UX track's — text,
+  a backend, an internal script.
+- **Each track's refusal is a sentence, never a silence.** *"Без дизайна" / "as is"*
+  ends the visual track; *"без бренда" / "draft"* ends the copy track. Either one is
+  the operator's to make and costs nothing — but it is **recorded in the brief and
+  said out loud in the close-out**, because a track skipped silently and a track that
+  ran are the same thing in a transcript. This is the `⊘` rule one layer up: a skip
+  nobody can see is indistinguishable from work that happened.
+- **Three tracks, three questions, and they do not substitute for each other.** super-ux
+  decides what the interface must **do**; `copywriting` how it **sounds**;
+  `sheleg-design` how it **looks**. Until 2026-08-10 this stage named only the first,
+  so a run designed a flow, then wrote its strings by taste and picked its values at the
+  keyboard — and every gate in the pipeline reported green over both.
 - **Spec:** write the approved design to
   `docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md` and commit it. Lock all
   shared contracts (types, schemas, signatures, file layout). For UI tasks the
@@ -274,7 +346,11 @@ never that the work was skipped quietly.
   (or an explicit v1-mode/tiny-project waiver by the operator). **With Figma on:
   the canonical record names one file, and every `screens.md` frame link carries
   that same `:fileKey`** — a string match, not a judgement; a differing key means
-  the run drew in a second file nobody will open. No plan (stage 4)
+  the run drew in a second file nobody will open. **Every user-facing string went
+  through the COPY track or the refusal is recorded**, and **the visual layer went
+  through the VISUAL track or the refusal is recorded** — a recorded refusal passes
+  this gate and an unmentioned one does not, which is the only difference that matters.
+  No plan (stage 4)
   starts before this — the chain comes BEFORE interface.
 
 ## 4 — Plan
@@ -308,6 +384,16 @@ never that the work was skipped quietly.
   watch it fail → minimal impl → watch it pass → commit. Pin subagents to the
   run's confirmed model (`model-tiering.md`). The plan's parallel groups fan out
   **only** when each implementer gets its own worktree; otherwise sequential.
+- **Web front end? The task's own surface is checked in a browser, not in the diff.**
+  Where `chrome-devtools` is connected ([`companion-skills.md`](companion-skills.md)):
+  after a task that changes a rendered surface, load it, take a snapshot and read the
+  console and the network log **before the task is marked DONE** — a component can be
+  correct and land under a fixed header, and a review of the diff cannot see that.
+  Absent, say the surface was verified by reading the diff and treat it as the weaker
+  claim it is. Stage 6 repeats this over the whole tree; this one catches it while the
+  implementer that wrote it is still dispatched. The matrix pointed this companion at
+  stages 5–6 from the day it was added and **this stage had never named it** — found by
+  the guard comparing the two, not by a reader.
 - **Integration closes the stage:** sync with the base branch, re-run the full suite
   on the result, land it the project's way (merge, or a PR — outward, so it needs a
   go), remove the worktree. Stages 7–9 act on the integrated result, so a branch the
@@ -370,6 +456,14 @@ never that the work was skipped quietly.
   tagging, the CI verdict for what was just pushed is READ, not assumed**
   ([`conventions.md`](conventions.md) → *The CI verdict*) — a tag on a commit whose
   run nobody read is how a red `main` ships.
+- **The review loop that lives here has a cap, and the cap is a measurement**
+  ([`loop-guard.md`](loop-guard.md) → *The review loop*). **3 rounds** per artifact by
+  default (`pipeline.json` → `run.review.maxRounds`); at the cap the run stops reviewing
+  and prints new-versus-self-inflicted per round, and either the numbers end it or the
+  operator continues it out loud. This stage's loop was capped by nothing until
+  2026-08-10 and ran ten rounds twice in one programme, against a stated ceiling of two
+  re-entries per stage — the ceiling simply did not name a review round. Every finding
+  left open at the cap leaves as a board row with its evidence, never as a shrug.
 
 ## 8 — Post-deploy
 - **Freedom: medium** — where the logs live varies; 'clean boot or an honest degradation report' does not ([`gates.md`](gates.md) → *Axis C*).
@@ -545,7 +639,13 @@ never that the work was skipped quietly.
   list at or under its cap, every deletion logged in the archive with its commit,
   entries older than five run stamps rotated into `docs/superpowers/retro/`, the run
   stamped with its commit, every SHA in either file resolvable, and the
-  counts printed beside this verdict**; **the documentation gate has been seen
+  counts printed beside this verdict**; **where `pipeline.json` → `retro.publish` is
+  set, the skill-level insight is published as an issue on the skill's repository —
+  its body printed in full first, the printed string and the sent string being one
+  string, and the five redaction rules applied
+  ([`retrospective.md`](retrospective.md) → *What may leave the project*). Absent, the
+  step does not exist and is not asked about: publishing to another repository is an
+  outward act and silence authorizes none**; **the documentation gate has been seen
   failing once against a planted defect and its ratchet counts are printed**
   ([`gates.md`](gates.md)); **every repository is closed — the parent included:
   `git submodule status` shows no `+`, each repo clean and pushed**; **every check this gate leans on has been seen failing

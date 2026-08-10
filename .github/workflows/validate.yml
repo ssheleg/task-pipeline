@@ -3563,10 +3563,18 @@ jobs:
           import re
           p = "/tmp/cl1-copy/CHANGELOG.md"
           t = open(p, encoding="utf-8").read()
-          m = re.search(r"(Guards:\s*\d+\s*→\s*\*\*)(\d+)(\*\*)", t)
-          assert m, "PLANT DID NOT LAND: no guard count in the newest section"
-          open(p, "w", encoding="utf-8").write(
-              t[:m.start(2)] + str(int(m.group(2)) - 1) + t[m.end(2):])
+          # Scope to the NEWEST section, which is the only one the guard reads. The
+          # first version searched the whole file, so an entry writing the count in a
+          # slightly different form sent the plant into a released section and the
+          # guard stayed correctly silent — a probe that lands somewhere real and
+          # proves nothing (R-001).
+          heads = [x.start() for x in re.finditer(r"^## v", t, re.M)]
+          assert len(heads) >= 2, "PLANT DID NOT LAND: fewer than two release sections"
+          top = t[heads[0]:heads[1]]
+          m = re.search(r"(Guards:\s*\d+\s*→\s*\*\*)(\d+)(\*\*)", top)
+          assert m, "PLANT DID NOT LAND: no guard count in the NEWEST section"
+          patched = top[:m.start(2)] + str(int(m.group(2)) - 1) + top[m.end(2):]
+          open(p, "w", encoding="utf-8").write(t[:heads[0]] + patched + t[heads[1]:])
           EOF
           if python3 /tmp/cl1-copy/test/validate.py; then
             echo "ERROR: the release entry claimed a guard count the workflow does not define"
@@ -3687,4 +3695,402 @@ jobs:
             exit 1
           else
             echo "OK: validator correctly FAILs — rm and cp in one step name the same directory"
+          fi
+
+      - name: Negative self-test (the header block drifting between its two copies)
+        run: |
+          set -eu
+          rm -rf /tmp/hdr-copy && cp -R . /tmp/hdr-copy
+          python3 - <<'EOF'
+          p = "/tmp/hdr-copy/plugins/task-pipeline/skills/task-pipeline/references/stages.md"
+          t = open(p, encoding="utf-8").read()
+          assert " · unlooked N" in t, "PLANT DID NOT LAND: the field is not in the block"
+          open(p, "w", encoding="utf-8").write(t.replace(" · unlooked N", "", 1))
+          EOF
+          if python3 /tmp/hdr-copy/test/validate.py; then
+            echo "ERROR: one block, two copies, and a field silently in only one of them"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — both directions of the header field set"
+          fi
+
+      - name: Negative self-test (a rail glyph the legend does not define)
+        run: |
+          set -eu
+          rm -rf /tmp/glyph-copy && cp -R . /tmp/glyph-copy
+          python3 - <<'EOF'
+          p = "/tmp/glyph-copy/plugins/task-pipeline/skills/task-pipeline/references/progress.md"
+          t = open(p, encoding="utf-8").read()
+          assert "3 ▶" in t, "PLANT DID NOT LAND: the rail's in-flight glyph moved"
+          open(p, "w", encoding="utf-8").write(t.replace("3 ▶", "3 »", 1))
+          EOF
+          if python3 /tmp/glyph-copy/test/validate.py; then
+            echo "ERROR: the rail prints a symbol a reader has nothing to look up"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — every printed glyph is in the legend"
+          fi
+
+      - name: Negative self-test (the rail claiming a stage count of its own)
+        run: |
+          set -eu
+          rm -rf /tmp/rail-copy && cp -R . /tmp/rail-copy
+          python3 - <<'EOF'
+          p = "/tmp/rail-copy/plugins/task-pipeline/skills/task-pipeline/references/progress.md"
+          t = open(p, encoding="utf-8").read()
+          needle = "come from the project's `pipeline.json`"
+          assert needle in t, "PLANT DID NOT LAND: the computed-rail clause moved"
+          open(p, "w", encoding="utf-8").write(t.replace(needle, "come from the eleven stages", 1))
+          EOF
+          if python3 /tmp/rail-copy/test/validate.py; then
+            echo "ERROR: a rail hardcoding the example flow is wrong in every project that replaced it"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the rail is computed, never eleven"
+          fi
+
+      - name: Negative self-test (a ledger shape declared and never shown)
+        run: |
+          set -eu
+          rm -rf /tmp/led-copy && cp -R . /tmp/led-copy
+          python3 - <<'EOF'
+          p = "/tmp/led-copy/plugins/task-pipeline/skills/task-pipeline/templates/run.md"
+          t = open(p, encoding="utf-8").read()
+          assert t.count("touch: src/export.ts") >= 2, "PLANT DID NOT LAND: the Log fence lost its touch lines"
+          open(p, "w", encoding="utf-8").write(t.replace("touch: src/export.ts", "seen:  src/export.ts"))
+          EOF
+          if python3 /tmp/led-copy/test/validate.py; then
+            echo "ERROR: a declared line shape with no worked example, and an example with no declaration"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — declared and shown, compared both ways"
+          fi
+
+      - name: Negative self-test (a ledger shape no reader names)
+        run: |
+          set -eu
+          rm -rf /tmp/ledr-copy && cp -R . /tmp/ledr-copy
+          python3 - <<'EOF'
+          p = "/tmp/ledr-copy/plugins/task-pipeline/skills/task-pipeline/templates/run.md"
+          t = open(p, encoding="utf-8").read()
+          assert "iter: " in t, "PLANT DID NOT LAND: the iteration line moved"
+          open(p, "w", encoding="utf-8").write(t.replace("iter: ", "cycle:"))
+          EOF
+          if python3 /tmp/ledr-copy/test/validate.py; then
+            echo "ERROR: a ledger shape nothing reads is a shape nothing writes"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — every declared shape has a named reader"
+          fi
+
+      - name: Negative self-test (the review loop left with no cap)
+        run: |
+          set -eu
+          rm -rf /tmp/rc1-copy && cp -R . /tmp/rc1-copy
+          python3 - <<'EOF'
+          p = "/tmp/rc1-copy/plugins/task-pipeline/skills/task-pipeline/references/loop-guard.md"
+          t = open(p, encoding="utf-8").read()
+          needle = "**3 review rounds** per artifact"
+          assert needle in t, "PLANT DID NOT LAND: the cap is not where the guard reads it"
+          open(p, "w", encoding="utf-8").write(t.replace(needle, "review rounds per artifact", 1))
+          EOF
+          if python3 /tmp/rc1-copy/test/validate.py; then
+            echo "ERROR: the loop this repository ran ten rounds of is capped by nothing again"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the review loop carries a stated cap"
+          fi
+
+      - name: Negative self-test (the review cap moved in one file only)
+        run: |
+          set -eu
+          rm -rf /tmp/rc2-copy && cp -R . /tmp/rc2-copy
+          python3 - <<'EOF'
+          p = "/tmp/rc2-copy/plugins/task-pipeline/skills/task-pipeline/references/loop-guard.md"
+          t = open(p, encoding="utf-8").read()
+          needle = "**3 review rounds** per artifact"
+          assert needle in t, "PLANT DID NOT LAND: the cap moved"
+          open(p, "w", encoding="utf-8").write(
+              t.replace(needle, "**4 review rounds** per artifact", 1))
+          EOF
+          if python3 /tmp/rc2-copy/test/validate.py; then
+            echo "ERROR: the cap says one number in the file that owns it and another where the loop runs"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the cap is computed from one file and required in the other"
+          fi
+
+      - name: Negative self-test (the review cap with no config key)
+        run: |
+          set -eu
+          rm -rf /tmp/rc3-copy && cp -R . /tmp/rc3-copy
+          python3 - <<'EOF'
+          p = "/tmp/rc3-copy/plugins/task-pipeline/skills/task-pipeline/references/stages.md"
+          t = open(p, encoding="utf-8").read()
+          assert "`run.review.maxRounds`" in t, "PLANT DID NOT LAND: the config key moved"
+          open(p, "w", encoding="utf-8").write(t.replace("`run.review.maxRounds`", "the config", 1))
+          EOF
+          if python3 /tmp/rc3-copy/test/validate.py; then
+            echo "ERROR: a default nobody can change is a default everybody overrides in their head"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the cap names the key that changes it"
+          fi
+
+      - name: Negative self-test (the short path marking a stage with an undefined glyph)
+        run: |
+          set -eu
+          rm -rf /tmp/sp-copy && cp -R . /tmp/sp-copy
+          python3 - <<'EOF'
+          p = "/tmp/sp-copy/plugins/task-pipeline/skills/task-pipeline/references/stages.md"
+          t = open(p, encoding="utf-8").read()
+          needle = "marked `⊘` with the triage answer"
+          assert needle in t, "PLANT DID NOT LAND: the short path's glyph moved"
+          open(p, "w", encoding="utf-8").write(
+              t.replace(needle, "marked `※` with the triage answer", 1))
+          EOF
+          if python3 /tmp/sp-copy/test/validate.py; then
+            echo "ERROR: a skipped stage marked with a symbol no legend defines"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — every skip glyph is in the legend"
+          fi
+
+      - name: Negative self-test (the exposure example drifting from its own print)
+        run: |
+          set -eu
+          rm -rf /tmp/ex1-copy && cp -R . /tmp/ex1-copy
+          python3 - <<'EOF'
+          p = "/tmp/ex1-copy/plugins/task-pipeline/skills/task-pipeline/references/exposure.md"
+          t = open(p, encoding="utf-8").read()
+          assert "releases carry one" in t, "PLANT DID NOT LAND: the third component moved"
+          open(p, "w", encoding="utf-8").write(
+              t.replace("releases carry one", "releases since the last confirmation"))
+          EOF
+          if python3 /tmp/ex1-copy/test/validate.py; then
+            echo "ERROR: the doctrine teaches a format the code has never printed"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the example is computed from the print"
+          fi
+
+      - name: Negative self-test (a live count baked into the exposure example)
+        run: |
+          set -eu
+          rm -rf /tmp/ex2-copy && cp -R . /tmp/ex2-copy
+          python3 - <<'EOF'
+          p = "/tmp/ex2-copy/plugins/task-pipeline/skills/task-pipeline/references/exposure.md"
+          t = open(p, encoding="utf-8").read()
+          assert "exposure: N unverified" in t, "PLANT DID NOT LAND: the example line moved"
+          open(p, "w", encoding="utf-8").write(
+              t.replace("exposure: N unverified", "exposure: 99 unverified", 1))
+          EOF
+          if python3 /tmp/ex2-copy/test/validate.py; then
+            echo "ERROR: a live count in a doctrine is a count nobody updates"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the worked example carries no digits"
+          fi
+
+      - name: Negative self-test (a companion pointed at a stage that never names it)
+        run: |
+          set -eu
+          rm -rf /tmp/cw1-copy && cp -R . /tmp/cw1-copy
+          python3 - <<'EOF'
+          p = "/tmp/cw1-copy/plugins/task-pipeline/skills/task-pipeline/references/companion-skills.md"
+          t = open(p, encoding="utf-8").read()
+          needle = "| stage 3 — the **VISUAL track**"
+          assert needle in t, "PLANT DID NOT LAND: the visual row moved"
+          open(p, "w", encoding="utf-8").write(t.replace(needle, "| stage 4 — the **VISUAL track**", 1))
+          EOF
+          if python3 /tmp/cw1-copy/test/validate.py; then
+            echo "ERROR: the operator is told to install a companion for a stage that has not heard of it"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the matrix and the stage it points at agree"
+          fi
+
+      - name: Negative self-test (a stage dropping the companion the matrix aims at it)
+        run: |
+          set -eu
+          rm -rf /tmp/cw2-copy && cp -R . /tmp/cw2-copy
+          python3 - <<'EOF'
+          p = "/tmp/cw2-copy/plugins/task-pipeline/skills/task-pipeline/references/stages.md"
+          t = open(p, encoding="utf-8").read()
+          assert "`sheleg-design`" in t, "PLANT DID NOT LAND: the visual companion moved"
+          open(p, "w", encoding="utf-8").write(t.replace("`sheleg-design`", "the visual skill"))
+          EOF
+          if python3 /tmp/cw2-copy/test/validate.py; then
+            echo "ERROR: a recommended companion no stage names is a recommendation for the reader only"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the stage names its own companions"
+          fi
+
+      - name: Negative self-test (a stage-3 track with no owning skill)
+        run: |
+          set -eu
+          rm -rf /tmp/trk1-copy && cp -R . /tmp/trk1-copy
+          python3 - <<'EOF'
+          p = "/tmp/trk1-copy/plugins/task-pipeline/skills/task-pipeline/references/stages.md"
+          t = open(p, encoding="utf-8").read()
+          assert "`copywriting`" in t, "PLANT DID NOT LAND: the copy companion moved"
+          open(p, "w", encoding="utf-8").write(t.replace("`copywriting`", "the writing skill"))
+          EOF
+          if python3 /tmp/trk1-copy/test/validate.py; then
+            echo "ERROR: a track heading with no skill behind it — which is what the copy half was for a year"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — every stage-3 track names its owner"
+          fi
+
+      - name: Negative self-test (a stage-3 track deleted outright)
+        run: |
+          set -eu
+          rm -rf /tmp/trk2-copy && cp -R . /tmp/trk2-copy
+          python3 - <<'EOF'
+          import re
+          p = "/tmp/trk2-copy/plugins/task-pipeline/skills/task-pipeline/references/stages.md"
+          t = open(p, encoding="utf-8").read()
+          # Case-insensitive on purpose. The first version replaced only the heading's
+          # SHOUTED form and left "ends the visual track" in the refusal sentence, so
+          # the guard kept finding the track and stayed correctly quiet — a probe that
+          # deletes one spelling of a phrase and calls the class removed.
+          n, k = re.subn(r"visual track", "look-and-feel pass", t, flags=re.I)
+          assert k >= 2, "PLANT DID NOT LAND: the visual track is spelled fewer ways than expected"
+          open(p, "w", encoding="utf-8").write(n)
+          EOF
+          if python3 /tmp/trk2-copy/test/validate.py; then
+            echo "ERROR: the stage names what the interface must do and not how it looks"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — all three tracks are named at stage 3"
+          fi
+
+      - name: Negative self-test (a redaction rule added without the count moving)
+        run: |
+          set -eu
+          rm -rf /tmp/rp1-copy && cp -R . /tmp/rp1-copy
+          python3 - <<'EOF'
+          p = "/tmp/rp1-copy/plugins/task-pipeline/skills/task-pipeline/references/retrospective.md"
+          t = open(p, encoding="utf-8").read()
+          needle = "5. **The title states the class"
+          assert needle in t, "PLANT DID NOT LAND: the rule list moved"
+          open(p, "w", encoding="utf-8").write(t.replace(
+              needle,
+              "5. **No timestamps.** A wall-clock time narrows a repository to a person's day.\n"
+              "6. **The title states the class", 1))
+          EOF
+          if python3 /tmp/rp1-copy/test/validate.py; then
+            echo "ERROR: an enumeration counted in prose drifted from its own items"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the rule count is computed from the rules"
+          fi
+
+      - name: Negative self-test (the redaction rules flattened into prose)
+        run: |
+          set -eu
+          rm -rf /tmp/rp2-copy && cp -R . /tmp/rp2-copy
+          python3 - <<'EOF'
+          p = "/tmp/rp2-copy/plugins/task-pipeline/skills/task-pipeline/references/retrospective.md"
+          t = open(p, encoding="utf-8").read()
+          assert "1. **No host paths.**" in t, "PLANT DID NOT LAND: rule 1 moved"
+          open(p, "w", encoding="utf-8").write(t.replace("1. **No host paths.**", "- **No host paths.**", 1))
+          EOF
+          if python3 /tmp/rp2-copy/test/validate.py; then
+            echo "ERROR: a list nobody can point at an item of is advice, not a contract"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the redaction rules stay an enumeration"
+          fi
+
+      - name: Negative self-test (an absolute host path in the worked issue body)
+        run: |
+          set -eu
+          rm -rf /tmp/rp3-copy && cp -R . /tmp/rp3-copy
+          python3 - <<'EOF'
+          p = "/tmp/rp3-copy/plugins/task-pipeline/skills/task-pipeline/references/retrospective.md"
+          t = open(p, encoding="utf-8").read()
+          needle = "title: [retro] a queue is not a diagnosis"
+          assert needle in t, "PLANT DID NOT LAND: the worked issue moved"
+          open(p, "w", encoding="utf-8").write(
+              t.replace(needle, needle + "\nwhere: /Users/someone/work/api", 1))
+          EOF
+          if python3 /tmp/rp3-copy/test/validate.py; then
+            echo "ERROR: the doctrine's own example breaks rule 1 of the list beside it"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the example obeys the rules it teaches"
+          fi
+
+      - name: Negative self-test (a commit id in the worked issue body)
+        run: |
+          set -eu
+          rm -rf /tmp/rp4-copy && cp -R . /tmp/rp4-copy
+          python3 - <<'EOF'
+          p = "/tmp/rp4-copy/plugins/task-pipeline/skills/task-pipeline/references/retrospective.md"
+          t = open(p, encoding="utf-8").read()
+          needle = "title: [retro] a queue is not a diagnosis"
+          assert needle in t, "PLANT DID NOT LAND: the worked issue moved"
+          open(p, "w", encoding="utf-8").write(t.replace(needle, needle + "\nfound at: 4233c3d", 1))
+          EOF
+          if python3 /tmp/rp4-copy/test/validate.py; then
+            echo "ERROR: a host commit in a public issue body — rule 2, in the example itself"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — no host identifier in the worked body"
+          fi
+
+      - name: Negative self-test (a host repository slug in the worked issue body)
+        run: |
+          set -eu
+          rm -rf /tmp/rp5-copy && cp -R . /tmp/rp5-copy
+          python3 - <<'EOF'
+          p = "/tmp/rp5-copy/plugins/task-pipeline/skills/task-pipeline/references/retrospective.md"
+          t = open(p, encoding="utf-8").read()
+          needle = "repo:  ssheleg/task-pipeline"
+          assert needle in t, "PLANT DID NOT LAND: the repo line moved"
+          open(p, "w", encoding="utf-8").write(
+              t.replace(needle, needle + "\nseen in: acme-corp/billing-api", 1))
+          EOF
+          if python3 /tmp/rp5-copy/test/validate.py; then
+            echo "ERROR: the example names a repository that is not the skill's own"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — only the skill's own repo appears"
+          fi
+
+      - name: Negative self-test (the schema losing the key the doctrine names)
+        run: |
+          set -eu
+          rm -rf /tmp/rp6-copy && cp -R . /tmp/rp6-copy
+          python3 - <<'EOF'
+          p = "/tmp/rp6-copy/plugins/task-pipeline/skills/task-pipeline/pipeline.schema.json"
+          t = open(p, encoding="utf-8").read()
+          assert '"publish"' in t, "PLANT DID NOT LAND: the publish key moved"
+          open(p, "w", encoding="utf-8").write(t.replace('"publish"', '"publish_disabled"', 1))
+          EOF
+          if python3 /tmp/rp6-copy/test/validate.py; then
+            echo "ERROR: the key the doctrine tells an operator to set validates nothing"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — doctrine and schema name one key"
+          fi
+
+      - name: Negative self-test (no stage naming the publish step)
+        run: |
+          set -eu
+          rm -rf /tmp/rp7-copy && cp -R . /tmp/rp7-copy
+          python3 - <<'EOF'
+          p = "/tmp/rp7-copy/plugins/task-pipeline/skills/task-pipeline/references/stages.md"
+          t = open(p, encoding="utf-8").read()
+          assert "`retro.publish`" in t, "PLANT DID NOT LAND: the stage reference moved"
+          open(p, "w", encoding="utf-8").write(t.replace("`retro.publish`", "the publish setting"))
+          EOF
+          if python3 /tmp/rp7-copy/test/validate.py; then
+            echo "ERROR: a step in the retro's doctrine and in no stage is a step that never runs"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the outward step is named by a stage"
           fi

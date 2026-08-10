@@ -128,6 +128,7 @@ until it is installed.
 | 10 Acceptance | [`acceptance.md`](plugins/task-pipeline/skills/task-pipeline/references/acceptance.md) — REQ coverage table, evidence rules, the closing question |
 | 10 + any audit | [`audit.md`](plugins/task-pipeline/skills/task-pipeline/references/audit.md) — the L0→L7 ladder and its seams, axis rotation, ratchets, proven checks |
 | any loop | [`loop-guard.md`](plugins/task-pipeline/skills/task-pipeline/references/loop-guard.md) — churn detection, caps, the break protocol |
+| run-wide reporting | [`progress.md`](plugins/task-pipeline/skills/task-pipeline/references/progress.md) — the header block at task start and the one-line iteration close: the stage rail computed from the project's own `pipeline.json`, every number borrowed from the gate that measured it |
 | run-wide pacing | [`continuity.md`](plugins/task-pipeline/skills/task-pipeline/references/continuity.md) — the loop mode (`run.loop`, default off, never collapses a manual gate) and the context budget (fires on a harness signal, never on an estimate) |
 | the board between runs | [`backlog.md`](plugins/task-pipeline/skills/task-pipeline/references/backlog.md) — the work-list that outlives a run: seeded at stage 0 or picked up, priority **computed** from three stated inputs rather than assigned, and the seam where the carry-over ledger's `backlog` pointer finally resolves |
 | what a human confirmed | [`verification.md`](plugins/task-pipeline/skills/task-pipeline/references/verification.md) — one row per shipped REQ and the one column a machine may not fill: the date somebody **looked**, or `never`. No floor, no target — `never` is a fact, and a count driven down is a column that has started lying |
@@ -614,6 +615,17 @@ GATE 10 acceptance: PASS — 14/14 REQ verified
   abstained: 1 (1 cannot-verify) · unlooked: 0
 ```
 
+**And a lesson about the pipeline itself can leave the project.** A defect in the
+*skill* — a gate that loops, a doctrine promising what nothing enforces — was
+rediscovered independently in every repository that ran it and fixed in none. Set
+`retro.publish` in `pipeline.json` and stage 10 opens the insight as an issue on the
+skill's own repository, **printing the whole body first**; the printed string and the
+sent string are one string. Five numbered rules govern what leaves — no host paths, no
+host identifiers, no code or config or data, no names, and a title stating the class
+rather than the incident. **Absent the key, nothing is published and nothing is asked:**
+an issue in someone else's repository is an outward act, and a generic flag is not a
+specific authorization.
+
 Stage 0 reads those standing instructions **in full** on the next run — which is
 the whole reason the cap exists and the prune is a gate criterion instead of a good
 intention. A rule nobody reads to the end is worse than no rule: everyone believes
@@ -632,6 +644,17 @@ The spec stage runs it **before any plan is written**: `/ux` (setup check) →
 `/ux-lint` (must pass). The spec then embeds the UX layer — scenario IDs, CJM
 stages served, applicable UX patterns — and the plan's UI tasks carry scenario IDs
 in their DoD. Scenarios come before interface.
+
+**Two more tracks run beside it, and they answer different questions.** super-ux
+decides what the interface must *do*; its own `copywriting` decides how it *sounds*
+(every user-facing string, against the brand pack — `/brand-init` before the first
+string, never after); and [sheleg-design](https://github.com/ssheleg/sheleg-design)
+decides how it *looks* (tokens and themes, typography and rhythm, motion and its rest
+state). Until v1.36.0 this stage named only the first, so a run designed a flow and
+then wrote its strings by taste and picked its values at the keyboard, with every gate
+green over both. Either optional track can be declined — *"as is"*, *"draft"* — and
+the refusal is **recorded**, because a track skipped in silence and a track that ran
+are the same thing in a transcript.
 
 ```
 /plugin marketplace add ssheleg/super-ux

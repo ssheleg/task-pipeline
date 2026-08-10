@@ -1,5 +1,212 @@
 # Changelog
 
+## v1.37.0 — the audit, and the four things it found the pipeline could not say
+
+One release, four modules, and an audit that put four questions to this pipeline and
+answered them with measurements rather than opinion:
+
+- **99 shipped REQ, 99 of them at `Human: never`** — nothing has ever been confirmed by
+  a person, and the exposure line has been saying so on every run.
+- **`copywriting` appeared 0 times in the bundle and `sheleg-design` once**, as a name in
+  a README list.
+- **The review loop ran ten rounds, ten, eight, four, three** against a stated ceiling of
+  two stage re-entries — because a review round was named in no cap at all.
+- **Nothing ever printed which pipeline, which module, or which iteration was running.**
+  The run checklist existed and was marked *"copy it, tick it"*.
+
+Guards: 188 → **210**, property checks 8. Every one watched failing against a planted
+defect, and three of the probes were wrong before their guards were.
+
+### The lesson that stopped dying in the repository that learned it
+
+`retrospective.md` has said *"open an issue upstream"* since v1.9.0 and named no
+repository, no trigger and no authorization — an instruction on rung 1 that every reader
+took for done. So a defect in **the skill** — a gate that loops, a doctrine promising
+what nothing enforces, a rule firing on the wrong shape — was rediscovered independently
+in every project that ran the pipeline and fixed in none of them.
+
+**Opt-in, per project, off by default**, `pipeline.json` → `retro.publish`:
+
+```json
+"retro": { "publish": { "repo": "…", "label": "retro-insight", "redact": "strict" } }
+```
+
+Absent, nothing is published and nothing is asked. Opening an issue in another
+repository is an **outward act**, and an outward act taken from a generic flag is one
+nobody authorized — the same floor deploy authorization uses.
+
+**The body is printed in full before it is sent, and the printed string and the sent
+string are one string.** Redacting after the print, or printing a tidier version of what
+actually goes out, is the false-success shape this bundle names outright: a mechanism
+reporting on itself instead of on what it did.
+
+**Five numbered redaction rules**, because *insight only* is not a specification. No host
+paths — only paths inside task-pipeline itself. No host identifiers: repository,
+organisation, branch, commit, tag, issue. No code, no config values, no data, not even
+redacted. No names of any kind. And the title states the **class**, not the incident.
+When in doubt the rule is subtraction: an insight that survives losing a detail is still
+an insight, and a detail that leaks cannot be recalled from an index.
+
+**Seven guards, and one of them was broken by the fence above.** The check that makes the
+doctrine's own worked issue obey its own rules was silent against three separate plants —
+an absolute path, a commit id, a foreign repository slug — because the fence scan matched
+` ``` ` followed by a newline, and the ```json block one paragraph up made every
+subsequent fence pair with the wrong delimiter. Five fence scans across four modules had
+the same bug; all are language-tolerant now, and the earlier modules' probes were re-run
+to prove the change broke nothing (R-003: sweep the detector's siblings).
+
+### What it does, how it sounds, how it looks
+
+The audit measured this one rather than argued it: **`copywriting` appeared zero times
+in the whole bundle, and `sheleg-design` once — as a name in a list in the README.**
+Meanwhile the companion matrix named six super-ux surfaces while super-ux shipped eight
+skills and fifteen commands. So a run designed a flow, then wrote its interface strings
+by taste and picked its visual values at the keyboard, and every gate in the pipeline
+reported green over both.
+
+**Stage 3 now runs three tracks, and none substitutes for another:**
+
+| Track | Answers | Owner |
+|---|---|---|
+| UX | what the interface must **do** | super-ux — the WHY→UI→scenario chain |
+| COPY | how it **sounds** | `copywriting`, against the brand pack |
+| VISUAL | how it **looks** | `sheleg-design` — tokens, themes, rhythm, motion |
+
+Each carries its boundary in both directions, because a track that over-reaches is
+routed around. The copy track takes interface strings, errors, empty states, the
+landing, the user-facing changelog — and explicitly **not** commit messages, PR text,
+code comments or a developer README. The visual track takes the visual layer and
+explicitly **not** a purely structural change, which is the UX track's.
+
+**A refusal is a sentence, never a silence.** *"as is"* ends the visual track and
+*"draft"* ends the copy track; either is the operator's call and costs nothing. But it
+is recorded in the brief and said in the close-out, because a track skipped in silence
+and a track that ran are identical afterwards — the `⊘` rule one layer up.
+
+**`sheleg-design` joins the matrix and the preflight**, and super-ux's row finally names
+its copy half.
+
+**The new guard found a live defect on the clean tree before it found anything else.**
+It compares the matrix's *"needed for stage N"* cell against what that stage actually
+says, and reported that `chrome-devtools` had been pointed at **stages 5–6 since the day
+it was added, with stage 5 never naming it**. Fixed here: stage 5 now checks a rendered
+surface per task, while the implementer that wrote it is still dispatched.
+
+**And a probe found a hole in its own guard.** Removing `copywriting` from stage 3 left
+the check silent, because it reads matrix **row names** and the copy half lives inside
+super-ux's own cell — precisely where it had been invisible all along. A second, narrow
+check now covers the three tracks by name. It is narrow on purpose: generalising the
+sub-skill mapping would demand stage 3 name `/brand-lint` and `ux-audit` too, and a
+check that over-reaches is switched off by the third person who hits it.
+
+### The loop that had no ceiling, the exemption nobody measured
+
+Three findings from the same audit, all of them gates behaving as prose.
+
+**The review loop was capped by nothing.** `build.md` caps the stage-5 fix loop at five
+rounds per task and `loop-guard.md` caps stage re-entries at two — and a review round is
+neither, so nothing counted them. The run stamps say what that cost: **ten rounds, ten,
+eight, four, three**, in one programme.
+
+**A flat cap would have been the wrong fix**, and this is the part worth keeping. Every
+one of those runs recorded *"none from my probes"* beside its count — the reader was
+still finding real defects on round nine. Stopping at two would have shipped them. So
+the cap is a **decision point**: default 3 rounds per artifact (`pipeline.json` →
+`run.review.maxRounds`), and at the cap the run stops reviewing and prints the pair
+`audit.md` already defines, per round:
+
+```
+review cap reached — 3 rounds — artifact: test/validate.py
+  round 1: 12 new · 0 self-inflicted
+  round 2:  5 new · 1 self-inflicted
+  round 3:  1 new · 3 self-inflicted
+```
+
+Self-inflicted ≥ new and the axis is exhausted; new still ahead and continuing is the
+operator's call, made with numbers rather than fatigue. Rounds are counted from the run
+ledger's `touch:` pass numbers, never from memory. Every finding left open at the cap
+leaves as a board row with its evidence, never as a shrug.
+
+**The pipeline ran eleven stages over a typo because nothing measured the exemption.**
+The boundary — a one-line fix, a mechanical rename — existed in prose and depended on an
+agent remembering it. Stage 0 now runs a three-question triage with something behind each
+question, and **proposes** the short path: stages 1–4 marked `⊘` with the triage answer
+as the reason. Propose, never take: the answer goes in the brief and silence takes the
+full flow, the same floor deploy authorization uses. The glyph is what makes it safe —
+a skipped stage is printed on the rail *with its reason*, and a skip nobody can see is
+indistinguishable from a stage never entered.
+
+**`exposure.md`'s worked example disagreed with its own output, in both directions at
+once.** It taught `31 releases since the last human confirmation` while the code printed
+`releases carry one`, and it hardcoded `99` — a live count that drifts. The example now
+carries no digits at all, and a guard computes the format's vocabulary **from the print
+statement** and requires the doctrine to show it.
+
+**Six new guards, each watched failing.** Two of them found their own author first: the
+short-path check was scoped to a paragraph while the bullet it reads carries a fenced
+block, so it stopped three lines short of the glyph and passed in silence — and its
+replacement matched the fence's own backtick and accused the clean tree. A detector that
+finds itself before it finds anything else is checking the wrong thing, twice in one
+module.
+
+### A run that says which pipeline it is on, and where in it
+
+An audit of this pipeline asked four questions of it. The first was *does the agent
+understand the plan it is executing?* — and the honest answer was that nothing in eleven
+stages ever printed which pipeline, which module, or which iteration was running. The
+run checklist existed and was marked *"copy it, tick it"*: an instruction with no gate
+behind it, which is the same failure it was written to prevent, one level up.
+
+**The run prints where it is, at two boundaries and only two** — task start and
+iteration close ([`references/progress.md`](plugins/task-pipeline/skills/task-pipeline/references/progress.md)):
+
+```
+task-pipeline v1.34.0 · pipeline-audit · module P1 «the progress print» (1 of 4)
+  0 ✓  1 ✓  2 ✓  3 ▶  4 ·  5 ·  6 ·  7 ·  8 ·  9 · 10 ·
+  ███████░░░░░░░░░░░░░░░░░░░  gates 3/11 · now 3 Spec · manual
+  board B-028 · carry-over 0 rows · exposure 99 never · unlooked 0
+```
+
+An iteration is already defined as *one item taken to its gate*, not one agent turn.
+Printing per turn would put a bar above every tool call and teach the operator to skip
+the block that matters.
+
+**The rail is computed from the project's own `pipeline.json` and carries no stage count
+of its own.** The eleven above are this plugin's *example* flow; a host replaces them. A
+bar reading `gates 5/11` in a project with six stages is a summary confidently wrong
+about the thing it summarises, printed in the one place a run is trusted at a glance.
+
+**Every number on the block is borrowed, and the block computes nothing.** `board` comes
+from the backlog, `carry-over` from the ledger, `exposure` from the verification file,
+`unlooked` from the gate's own disclosure. If the block disagrees with a gate verdict,
+the block is wrong — that direction, always, because the gate looked and the block
+quoted. A progress line that computed its own counts would be the fourth copy of the
+truth, and this repository already knows what happens to those.
+
+**A glyph is read from the verdict its gate wrote, never from memory.** `✓` means the
+gate passed, not that the stage was walked — a rail is a summary, and a summary is the
+easiest artefact in a run to write from recollection. `⊘` may never be silent: a skipped
+stage with no recorded reason is indistinguishable from a stage never entered, and the
+two mean opposite things.
+
+**`.task-pipeline/run.md` is finally written.** `loop-guard.md` has named it since the
+day it shipped, calls its own churn detection *mechanical*, and reads `touch:` lines from
+it — and **no run had ever created it**. The detector had no input; the guard sat on
+rung 1 while every reader took it for rung 3. It is now seeded at stage 0 from
+[`templates/run.md`](plugins/task-pipeline/skills/task-pipeline/templates/run.md), named
+in that stage's gate, and serves two readers: the guard reads the touches, the progress
+block reads the stage verdicts and counts the `iter:` lines. The counter is a `grep -c`,
+not a number the agent is carrying — after a compaction the agent's count is gone and
+the file's is not.
+
+**Five new guards, each watched failing against a planted defect.** The header block's
+field set compared **both ways** between its two copies; every glyph a rail prints
+present in the legend; the computed-rail promise stated where a reader meets it; and the
+ledger's line shapes compared declared-vs-shown **and** against the files that read them.
+The first version of the fourth probe removed one of three `touch:` lines from the worked
+log, left the shape shown, and read the guard's correct silence as a broken guard — R-001
+again, and the reason it is a standing instruction.
+
 ## v1.33.0 — the number, the list, and the command that shows them with no task running
 
 Three modules shipped as one, because they are one capability: the index, the list it
