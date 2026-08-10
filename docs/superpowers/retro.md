@@ -41,6 +41,52 @@ row goes — the cap is not negotiable, ranking is.
 
 ## Recent log — entries from the last five run stamps (newest first)
 
+### 2026-08-10 · `findings-entry` · the guards were written by the person who wrote the defect
+
+**Symptom.** Nine validator guards, written in one hour to hold a boundary this release
+had just restated, were defeated **fifteen ways** by the independent reader R-005
+requires — each way verified by planting the text and watching `npm test` print `PASS`.
+Adding the six missing probes then found a sixteenth the reader had not.
+
+**Surfaced at:** stage 7, by the reader. Not by the suite: the suite was green, 227 of
+227, over guards that a presence test could satisfy without the rule saying anything.
+
+**The stage that owned it:** stage 5. The guards and their probes were written together,
+by the same reader of the same sentence, in the same hour — which is the exact condition
+R-005 names.
+
+**Root cause, and it is one sentence.** A check written to hold prose is tested against
+the prose in front of its author. Three shapes recurred: a presence test over a whole
+file proves a word exists, not that the rule says it; a corpus joined without its
+categories lets a negative control certify coverage; and a regex over prose is one
+innocent rewrite from dormancy — including the anti-dormancy sentinel added in this same
+release, which was itself one synonym from dormant.
+
+**The sharpest instance,** because it is about this repository's own honesty: the
+eval-coverage guard joined every query regardless of category. Deleting all four findings
+evals and mentioning the words in one `should_not_trigger` control certified *named and
+untested* — the state the guard cites `B-046` for — as covered. A guard can be wrong in
+the exact way it exists to prevent.
+
+**Fixes by grade.**
+
+1. *(mechanical)* All sixteen fixed: both cross-surface checks scoped to `## Routing`;
+   eval coverage reads `should_trigger` only; the reading heuristic is a family adjacent
+   to `code` and runs on all three surfaces; the locked-verb check reads the trigger
+   half; classes are extracted as pairs with their count compared to the `/` count; four
+   silent skips print in `unlooked`; three would-be-dormant regexes fail loudly.
+2. *(mechanical)* Guards 227 → **233**. The false-positive budget stayed at zero: the
+   reading heuristic was narrowed when it fired on `mapping code so a person can read
+   it`, a sentence that excludes mapping.
+3. *(standing instruction)* **None added.** R-005 already says this and already fired —
+   it worked exactly as written, on its second use. A rule that fires and is obeyed does
+   not need a sibling; it needs the run after it to keep dispatching the reader.
+
+**The check that catches it next time** is the one that caught it this time — a reader
+that is not the author, dispatched by a stage rather than by a repository happening to
+run a bot. What this run adds is evidence about its yield: **fifteen findings from nine
+guards, from a reader given one prompt and no other context.**
+
 ### 2026-08-10 · `skill-audit` · the doctrine was right and nobody could read it
 
 **Symptom.** An audit measured this skill rather than reading it, and the finding was
@@ -839,6 +885,7 @@ One line per run, appended at stage 10. This is what makes "five runs" countable
 
 | Date | Topic | Commit | Verdict | Retro |
 |---|---|---|---|---|
+| 2026-08-10 | `findings-entry` / B-047 `the-word-audit-could-not-reach-it` | `0df1e7a` | 8 REQ verified, 1 with its scope corrected (three surfaces, not four) · **routing measured on fresh agents, 7/10 → 9/10 → 8/10** — bug hunt and PR review moved in both after-runs, the production check in neither · **R-005's reader defeated the nine new guards fifteen ways**, all fixed, and the six added probes found a sixteenth · guards 218 → **233** · evals 21 → **28** | 1 entry · 5 standing · retired 0 · added 0 · R-003, R-005, R-006 fired; R-002 and R-004 did not |
 | 2026-08-10 | `skill-audit` / fixes `trigger-wall-probe-floor` | `b7778c9` | 9 of 12 plan items · the command wall 1281 → 295 words · the description 1015 → 956 with both no-task modes named · **`test/probe.py` built, and it caught two of this release's own guards on first use** · stage-0 floor ~47 750 → ~36 950 tok · evals 15 → 21 · guards 210 → **218** | 1 entry · **5 standing (was 6)** · retired 1 (R-001, its condition met) · added 0 · R-002, R-003, R-004, R-006 fired |
 | 2026-08-10 | `pipeline-audit` / P1+P2+P3+P4 `audit-and-four-modules` | `07e7824` | 12 REQ verified · 1 **partial and reported** (REQ-023: R-005's reader never ran — the review app reported `skipping` on all four PRs) · the audit's 8 findings closed as B-025..B-032 · guards 188 → **210** · **three probes wrong before their guards were** | 1 entry · 6 standing · retired 0 · added 0 · R-001, R-003, R-004, R-006 fired; R-002 and R-005 did not |
 | 2026-08-10 | `planning-system` / N3+N4+N5 `exposure-checkup-loop` | `0137512` | 3 REQ · a vector never a probability, the command with no task in flight, the loop citing the board · **one review round by the lowered threshold, 5 findings** · the suite itself fixed: 13+ min → **5m34s** · carry-over 2 rows, 0 unresolved | 1 entry · 6 standing · retired 0 · added 0 · R-001, R-002, R-004 fired · guards 185 → 188 |

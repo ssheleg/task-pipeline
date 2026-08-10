@@ -605,11 +605,17 @@ track that ran look identical afterwards.
 
 ## Routing — when this applies at all
 
-**Work that CHANGES THE REPOSITORY goes through the pipeline** — a feature, fix,
-refactor, migration, integration, rewrite, adoption or hardening pass, in any
-phrasing. **Not** for a question, an explanation, reading code, a typo or a one-line
-edit. The operator opts out of a qualifying task by saying "без пайплайна" or
-"quick"; when they do, say out loud that the cycle was skipped at their request.
+**Work that LANDS IN THE REPOSITORY goes through the pipeline**, in two shapes: a
+**change** — a feature, fix, refactor, migration, integration, rewrite, adoption or
+hardening pass — and a **finding that lands** — an audit, a bug hunt, a production
+check, a PR review, whose output is REQ rows, board rows and fixes rather than an
+answer in the chat. In any phrasing.
+
+**Not** for a question, an explanation, mapping code for a person to read, a typo or a
+one-line edit. **Reading is not the test**: an audit, a bug hunt and a PR review all
+begin by reading and all three end in the tree. The operator opts out of a qualifying
+task by saying "без пайплайна" or "quick"; when they do, say out loud that the cycle
+was skipped at their request.
 
 A borderline case is named, not silently chosen: state which route you are taking and
 why, in one line.

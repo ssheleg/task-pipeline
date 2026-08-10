@@ -17,20 +17,32 @@ than no boundary.
 
 ---
 
-## Routing — repo-changing work goes through the pipeline
+## Routing — work that lands in the repository goes through the pipeline
 
-**When `task-pipeline` is installed, any work that CHANGES THE REPOSITORY goes
-through it** — without being asked for. A feature, a fix, a refactor, a migration, an
-integration, a rewrite, an adoption, a hardening pass; in any language and any
-phrasing. Saying *"run this through the pipeline"* is an accelerator, not a
-precondition.
+**When `task-pipeline` is installed, any work that LANDS IN THE REPOSITORY goes
+through it** — without being asked for. Two shapes, not one:
 
-**The boundary is "changes the repository", and it cuts both ways.** Not through the
-pipeline:
+- **a change** — a feature, a fix, a refactor, a migration, an integration, a rewrite,
+  an adoption, a hardening pass;
+- **a finding that lands** — an audit, a bug hunt, a production check, a PR review. Its
+  output is not an answer in the chat: it is REQ rows, board rows, ledger rows and
+  fixes, and the pipeline is what carries them there.
 
-- a question and its answer, an explanation, reading or mapping code;
+In any language and any phrasing. Saying *"run this through the pipeline"* is an
+accelerator, not a precondition.
+
+**The boundary is what the request ENDS IN, and it cuts both ways.** An answer stops in
+the conversation; a change or a finding lands in the tree. Not through the pipeline:
+
+- a question and its answer, an explanation, mapping code so a person can read it;
 - a typo, a one-line edit, a mechanical rename;
-- reconnaissance or measurement that commits nothing.
+- reconnaissance or measurement that lands nothing.
+
+**Reading is not the test.** An audit, a bug hunt and a PR review all *begin* by reading,
+and all three end in the repository. Excluding them because they read is how a skill with
+a whole doctrine file for audits (`references/audit.md`) never gets reached by the word
+*audit* — measured, not supposed: three of ten routing queries were refused with this
+rule's own exclusion quoted back as the reason.
 
 Running ten gated stages for one character is the fastest way to teach an agent to
 route around the pipeline entirely.
