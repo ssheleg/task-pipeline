@@ -3930,6 +3930,113 @@ else:
                          "should_not_trigger control naming the word is not coverage")
 
 
+# --- the loop as a mechanism (v1.40.0) ----------------------------------------
+# B-054's occasion: a run wrote "продолжаю без остановки" and the turn ended,
+# because a sentence about future behaviour is not a wakeup. The mode existed and
+# said how OFTEN to continue, never WHAT the next item is. These guards hold the
+# three halves of the new contract to each other: the queue, the arming point, and
+# the disclosure a self-pacing run owes in place of a job id.
+_CONT_P = os.path.join(_skill_dir, "references", "continuity.md")
+_STG_P = os.path.join(_skill_dir, "references", "stages.md")
+_SCHEMA_P = os.path.join(_skill_dir, "pipeline.schema.json")
+_EX_P = os.path.join(_skill_dir, "pipeline.example.json")
+
+
+def _loop_block(node):
+    """run.loop's schema node, wherever the definitions put it."""
+    if isinstance(node, dict):
+        _pr = node.get("properties")
+        if isinstance(_pr, dict) and "loop" in _pr:
+            return _pr["loop"]
+        for _v in node.values():
+            _r = _loop_block(_v)
+            if _r is not None:
+                return _r
+    elif isinstance(node, list):
+        for _v in node:
+            _r = _loop_block(_v)
+            if _r is not None:
+                return _r
+    return None
+
+
+_schema_j = load_json(os.path.relpath(_SCHEMA_P, ROOT)) if os.path.isfile(_SCHEMA_P) else None
+_loop_s = _loop_block(_schema_j) if _schema_j else None
+if _loop_s is None:
+    _UNLOOKED.append("skip: the loop contract — pipeline.schema.json states no run.loop "
+                     "block, so its queue, arming and modes were not checked")
+else:
+    _lp = _loop_s.get("properties") or {}
+    # G1. A loop with no queue is a timer. The field is what stops an armed mode from
+    #     picking its next item by recollection, which is learned.md rule 16 once per fire.
+    if "queue" not in _lp:
+        fail("pipeline.schema.json: run.loop has no `queue` — a loop that says how often "
+             "to continue and never what the next item is leaves the run choosing by "
+             "recollection, which is the failure the mode was supposed to remove")
+    if "arm" not in _lp:
+        fail("pipeline.schema.json: run.loop has no `arm` — arming at preflight is arming "
+             "a loop with nothing to walk when the queue is stage 2's module map")
+    _modes = (_lp.get("mode") or {}).get("enum") or []
+    if "dynamic" not in _modes:
+        fail("pipeline.schema.json: run.loop.mode has no `dynamic` — a harness that can "
+             "schedule its own next turn has no way to record that it does, so a "
+             "self-pacing run is indistinguishable from an unarmed one")
+    # G2. The queue's legal values must be the artefacts that actually exist, or the
+    #     field names a source no stage produces.
+    _qv = set((_lp.get("queue") or {}).get("enum") or [])
+    for _need in ("module-map", "plan-tasks"):
+        if _qv and _need not in _qv:
+            fail(f"pipeline.schema.json: run.loop.queue does not offer `{_need}` — the "
+                 "two ordered lists this pipeline already builds are stage 2's module "
+                 "map and stage 4's task list; a queue that names neither has no source")
+
+if os.path.isfile(_CONT_P):
+    _cont = open(_CONT_P, encoding="utf-8").read()
+    _contf = _flatten(_cont, lower=True)
+    # G3. The floor the mode may never lower, in the file that defines the mode. It is
+    #     the sentence that keeps arming from reading as blanket permission.
+    if "generic flag is not a specific authorization" not in _contf:
+        fail("references/continuity.md: the sentence that keeps arming from reading as "
+             "blanket permission is gone — a recorded loop mode is a generic flag, and "
+             "the deploy floor in grill.md rests on that distinction")
+    # G4. A self-pacing run owes the same disclosure an interval run owes. An interval
+    #     run prints a job id; a dynamic run has none, so it prints the delay it chose.
+    #     Without this a run can report itself as looping while nothing is scheduled —
+    #     the exact claim this file already forbids for harnesses with no primitive.
+    if "dynamic" in _contf and not re.search(r"delay .{0,40}chose|chose .{0,40}delay",
+                                             _contf):
+        fail("references/continuity.md: `dynamic` is offered and the file never says a "
+             "self-pacing run prints the delay it chose. An interval run discloses a job "
+             "id; a dynamic run has none, and a run silent about its pacing cannot be "
+             "told apart from one that quietly stopped")
+
+# G5. Stage 2 owns the arming point, and both the prose and the machine-readable
+#     stage list must say so — the pair that has drifted before.
+if os.path.isfile(_STG_P):
+    _stg = open(_STG_P, encoding="utf-8").read()
+    _m2 = re.search(r"^##\s*2\s*—.*?$(.*?)(?=^##\s)", _stg, re.S | re.M)
+    if _m2 is None:
+        _UNLOOKED.append("skip: stage-2 arming — no `## 2 —` section in stages.md")
+    elif not re.search(r"loop arms|arm the mode|loop.s arming state",
+                       _flatten(_m2.group(1), lower=True)):
+        # A bare "arm" was the first predicate and it was satisfied from the day it was
+        # written — this stage has said "it arms the UX track in stage 3" since v1.7.0,
+        # so the guard passed for a reason that had nothing to do with the loop. Found
+        # by its own probe, which could not make it fail. The predicate now names the
+        # thing it is about.
+        fail("references/stages.md stage 2: the queue exists at this stage and nothing "
+             "here says the LOOP arms on it. Arming at preflight arms a loop with "
+             "nothing to walk")
+_ex_j = load_json(os.path.relpath(_EX_P, ROOT)) if os.path.isfile(_EX_P) else None
+if _ex_j:
+    _b2 = [_s for _s in (_ex_j.get("stages") or [])
+           if isinstance(_s, dict) and "rainstorm" in str(_s.get("name", ""))]
+    if _b2 and "loop" not in str((_b2[0].get("gate") or {}).get("check", "")).lower():
+        fail("pipeline.example.json stage 'Brainstorm + decompose': its gate does not "
+             "require the loop's arming state to be printed. stages.md says it does, and "
+             "the pair of surfaces that states one rule is the pair that drifts")
+
+
 if errors:
     print("FAIL: task-pipeline structure invalid")
     for e in errors:

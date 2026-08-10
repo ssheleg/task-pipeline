@@ -1,5 +1,60 @@
 # Changelog
 
+## v1.40.0 — the loop had a cadence and no queue
+
+`run.loop` said how **often** to continue. It never said **what the next item is**, so an
+armed mode still left the run choosing its next move by recollection — `learned.md` rule
+16, once per fire. And nothing scheduled the next turn at all: on 2026-08-10 a run of
+this pipeline wrote *«продолжаю без остановки»* and the turn ended, because a sentence
+about future behaviour is not a wakeup. That run is this release's occasion and its
+evidence.
+
+### The queue is stage 2's
+
+The **module map** when the brief was a platform, the plan's task list otherwise. Both
+already existed, both were already ordered, and neither had ever been named as the thing
+the loop walks. `run.loop.queue` names it; `run.loop.arm` says where the mode is armed,
+and the default for a queue-bearing run is **after decomposition** — arming at preflight
+arms a loop with nothing to walk.
+
+Arming is a consequence, not a request, for the same reason the mode is recorded rather
+than asked for: a capability the operator must remember to switch on is one they forget
+on exactly the run that needed it.
+
+**What arming does not change is stated where it could be missed.** The four stops are
+the four stops; a `manual` gate still waits; an outward act still needs its own specific
+authorization. *A generic flag is not a specific authorization*, and arming a queue is
+the most generic flag there is — guarded, because that sentence is what the deploy floor
+rests on.
+
+### `mode: dynamic`
+
+`interval` was the only mode while a fixed tick was the only primitive. A harness that
+can schedule its own next turn picks each delay from what it is waiting for, and **prints
+the delay it chose** — the disclosure that replaces an interval run's job id. A run
+silent about its pacing cannot be told apart from one that quietly stopped, which is the
+claim this file already forbade for harnesses with no primitive at all.
+
+### The goal is re-read between items, not only the board
+
+Each iteration already re-measured the work-list, which answers *what is open*. It did
+not answer *whether the open thing still serves what this run was for*. A queue built at
+stage 2 outlives the reason it was built, because the operator learns things between
+items and says so. So the bottom of an iteration now quotes the goal, states whether the
+next item still serves it, and re-orders or re-scopes when it does not — a row that stops
+serving the goal leaves for the board with its reason.
+
+A queue re-derived only by `age` and `sev` is honest about priority and silent about
+purpose. Both numbers can be right while the run finishes something the operator stopped
+wanting two items ago.
+
+### Also
+
+- **A guard was listing the legal modes instead of reading them.** Adding `dynamic`
+  failed the guard on a correct example — a check enforcing its own staleness. It now
+  reads the enum out of the schema.
+- Guards: 233 → **241**, one per new fail site, each with its planted defect.
+
 ## v1.39.0 — the skill could not be reached by the word "audit"
 
 `references/audit.md` has said since v0.1.0 that an audit may be **the whole task** —
