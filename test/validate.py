@@ -3223,7 +3223,7 @@ def _header_fields(_path):
     """
     if not os.path.isfile(_path):
         return None
-    for _blk in re.findall(r"```\n(.*?)```", open(_path, encoding="utf-8").read(), re.S):
+    for _blk in re.findall(r"```[a-zA-Z]*\n(.*?)```", open(_path, encoding="utf-8").read(), re.S):
         if not _blk.startswith("task-pipeline v"):
             continue
         _out = set()
@@ -3266,7 +3266,7 @@ else:
 if _PTXT:
     _legend = set(re.findall(r"^\|\s*`(\S)`\s*\|", _PTXT, re.M))
     _used = set()
-    for _blk in re.findall(r"```\n(.*?)```", _PTXT, re.S):
+    for _blk in re.findall(r"```[a-zA-Z]*\n(.*?)```", _PTXT, re.S):
         for _ln in _blk.split("\n"):
             if re.match(r"\s*\d+\s", _ln):
                 _used |= set(re.findall(r"\d+\s(\S)", _ln))
@@ -3298,7 +3298,7 @@ def _md_section(_txt, _title):
 
 def _line_prefixes(_txt):
     return set(re.findall(r"^(\w+):\s", "\n".join(
-        re.findall(r"```\n(.*?)```", _txt, re.S)), re.M))
+        re.findall(r"```[a-zA-Z]*\n(.*?)```", _txt, re.S)), re.M))
 
 
 # P1-G4. The ledger declares three line shapes and then shows them. Declared and
@@ -3424,7 +3424,7 @@ if os.path.isfile(_EXP_P):
             if _w not in _expn:
                 fail(f"references/exposure.md: the print says {_w!r} and the doctrine "
                      "does not — the worked example and its own output have drifted")
-    _ex_line = [_l for _b in re.findall(r"```\n(.*?)```", _exp_t, re.S)
+    _ex_line = [_l for _b in re.findall(r"```[a-zA-Z]*\n(.*?)```", _exp_t, re.S)
                 for _l in _b.split("\n") if _l.startswith("exposure:")]
     for _l in _ex_line:
         if re.search(r"\d", _l):
@@ -3490,6 +3490,81 @@ if os.path.isfile(_CS_P) and os.path.isfile(_ST_P):
                 fail(f"references/stages.md stage 3: the {_track!r} names no owner — "
                      f"{_owner!r} is absent, so the track is a heading with no skill "
                      "behind it")
+
+# --- P4: publishing a retro insight (v1.37.0) ---------------------------------
+# SCOPE: the doctrine and the schema agreeing, the rule count being computed, and
+# the worked example obeying the rules it teaches. It cannot check that a run
+# redacted anything — no static check can read an issue that was opened.
+_RT_P = os.path.join(ROOT, _SKILLDIR, "references/retrospective.md")
+_SCHEMA_P = os.path.join(ROOT, _SKILLDIR, "pipeline.schema.json")
+if os.path.isfile(_RT_P):
+    _rt_t = open(_RT_P, encoding="utf-8").read()
+    _rt_f = _flatten(_rt_t, lower=True)
+
+    # P4-G1. The rule list is an enumeration stated twice — as a word in the
+    # sentence that introduces it, and as the numbered items. N1 spent six review
+    # rounds on exactly this shape, so the count is COMPUTED from the items and
+    # required in the sentence rather than compared by eye.
+    _sec = ""
+    _m_sec = re.search(r"^##\s+What may leave the project.*?$(.*?)(?=^##\s|\Z)",
+                       _rt_t, re.S | re.M)
+    if not _m_sec:
+        fail("references/retrospective.md: no redaction section — the doctrine "
+             "publishes to another repository and says nothing about what leaves")
+    else:
+        _sec = _m_sec.group(1)
+        _rules = re.findall(r"^\s*(\d+)\.\s+\*\*", _sec, re.M)
+        _n = len(_rules)
+        _words = {1: "one", 2: "two", 3: "three", 4: "four", 5: "five", 6: "six",
+                  7: "seven", 8: "eight", 9: "nine", 10: "ten"}
+        if _n == 0:
+            fail("references/retrospective.md: the redaction rules are prose, not an "
+                 "enumeration — a list nobody can point at an item of is advice")
+        elif f"{_words.get(_n, _n)} rules" not in _flatten(_sec, lower=True):
+            fail(f"references/retrospective.md: {_n} numbered redaction rules and the "
+                 f"sentence introducing them does not say {_words.get(_n, _n)!r} — "
+                 "an enumeration counted in prose is a count that drifts")
+
+    # P4-G2. The worked issue block must obey the rules it teaches. A doctrine whose
+    # own example breaks its own rule is the class that shipped in templates/backlog.md,
+    # seeded into every host project with arithmetic contradicting its own formula.
+    for _blk in re.findall(r"```[a-zA-Z]*\n(.*?)```", _rt_t, re.S):
+        if "would open issue" not in _blk:
+            continue
+        if re.search(r"(?m)^\s*/|\s/(Users|home|var|opt)/", _blk):
+            fail("references/retrospective.md: the worked issue body carries an "
+                 "absolute path — rule 1 of the list it is printed beside")
+        if re.search(r"\b[0-9a-f]{7,40}\b", _blk):
+            fail("references/retrospective.md: the worked issue body carries what "
+                 "reads as a commit — rule 2 of the list it is printed beside")
+        for _slug in set(re.findall(r"\b([\w.-]+/[\w.-]+)\b", _blk)):
+            if "task-pipeline" not in _slug and not _slug.startswith(
+                    ("references/", "templates/", "test/", "plugins/", "docs/")):
+                fail(f"references/retrospective.md: the worked issue body names "
+                     f"{_slug!r}, which is neither the skill's own repository nor a "
+                     "path inside it — rule 2 of the list it is printed beside")
+
+    # P4-G3. Doctrine and schema, both directions. An opt-in described in prose and
+    # absent from the schema validates nothing; a schema key no doctrine explains is
+    # a switch with no stated consequence.
+    if "retro.publish" not in _rt_t:
+        fail("references/retrospective.md: publishing is described with no config key "
+             "— an outward act armed by nothing nameable is armed by assumption")
+    if os.path.isfile(_SCHEMA_P):
+        _sch_t = open(_SCHEMA_P, encoding="utf-8").read()
+        _pub = json.loads(_sch_t).get("definitions", {}).get("retro", {}) \
+            .get("properties", {}).get("publish")
+        if _pub is None:
+            fail("pipeline.schema.json: references/retrospective.md documents "
+                 "`retro.publish` and the schema does not define it — the key the "
+                 "doctrine tells an operator to set validates nothing")
+        elif "off" not in _pub.get("description", "").lower():
+            fail("pipeline.schema.json: `retro.publish` does not state that it is OFF "
+                 "when absent — a default nobody reads as off is a default that "
+                 "publishes")
+    if "retro.publish" not in open(_ST_P, encoding="utf-8").read():
+        fail("references/stages.md: no stage names `retro.publish` — a step described "
+             "in the retro's doctrine and in no stage is a step that never runs")
 
 if errors:
     print("FAIL: task-pipeline structure invalid")

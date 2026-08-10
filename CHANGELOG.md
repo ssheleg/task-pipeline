@@ -1,5 +1,45 @@
 # Changelog
 
+## v1.37.0 — a lesson that stops dying in the repository that learned it
+
+`retrospective.md` has said *"open an issue upstream"* since v1.9.0 and named no
+repository, no trigger and no authorization — an instruction on rung 1 that every reader
+took for done. So a defect in **the skill** — a gate that loops, a doctrine promising
+what nothing enforces, a rule firing on the wrong shape — was rediscovered independently
+in every project that ran the pipeline and fixed in none of them.
+
+**Opt-in, per project, off by default**, `pipeline.json` → `retro.publish`:
+
+```json
+"retro": { "publish": { "repo": "…", "label": "retro-insight", "redact": "strict" } }
+```
+
+Absent, nothing is published and nothing is asked. Opening an issue in another
+repository is an **outward act**, and an outward act taken from a generic flag is one
+nobody authorized — the same floor deploy authorization uses.
+
+**The body is printed in full before it is sent, and the printed string and the sent
+string are one string.** Redacting after the print, or printing a tidier version of what
+actually goes out, is the false-success shape this bundle names outright: a mechanism
+reporting on itself instead of on what it did.
+
+**Five numbered redaction rules**, because *insight only* is not a specification. No host
+paths — only paths inside task-pipeline itself. No host identifiers: repository,
+organisation, branch, commit, tag, issue. No code, no config values, no data, not even
+redacted. No names of any kind. And the title states the **class**, not the incident.
+When in doubt the rule is subtraction: an insight that survives losing a detail is still
+an insight, and a detail that leaks cannot be recalled from an index.
+
+**Seven guards, and one of them was broken by the fence above.** The check that makes the
+doctrine's own worked issue obey its own rules was silent against three separate plants —
+an absolute path, a commit id, a foreign repository slug — because the fence scan matched
+` ``` ` followed by a newline, and the ```json block one paragraph up made every
+subsequent fence pair with the wrong delimiter. Five fence scans across four modules had
+the same bug; all are language-tolerant now, and the earlier modules' probes were re-run
+to prove the change broke nothing (R-003: sweep the detector's siblings).
+
+Guards: 203 → **210**, property checks 8.
+
 ## v1.36.0 — what it does, how it sounds, how it looks
 
 The audit measured this one rather than argued it: **`copywriting` appeared zero times

@@ -381,7 +381,14 @@ not authorize an outward, irreversible action — stage 7 stops and asks.
     grade — **mechanical check > standing instruction (with its retire-when written
     at birth) > a note that expires in two runs** — and the check that catches it
     the first time from now on. A lesson true in any repository belongs upstream in
-    the skill's own doctrine, not in one project's file.
+    the skill's own doctrine, not in one project's file — and where the project has
+    opted in (`retro.publish` in its pipeline config, OFF when absent), that lesson
+    is opened as an issue on the skill's own repository. The body is printed in full
+    before it is sent and the printed string is the sent string; five rules govern
+    what may leave — no host paths, no host identifiers, no code or config or data,
+    no names, and a title stating the class rather than the incident. Nothing is
+    published without that opt-in: an issue in someone else's repository is an
+    outward act, and a generic flag is not a specific authorization.
     A retro left empty after a messy run is the failure it exists to stop. Phase 1
     of the next run reads those standing instructions **in full**, which is why the
     cap is not negotiable and the prune is a gate item, not a good intention.

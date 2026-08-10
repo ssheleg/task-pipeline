@@ -3966,3 +3966,131 @@ jobs:
           else
             echo "OK: validator correctly FAILs — all three tracks are named at stage 3"
           fi
+
+      - name: Negative self-test (a redaction rule added without the count moving)
+        run: |
+          set -eu
+          rm -rf /tmp/rp1-copy && cp -R . /tmp/rp1-copy
+          python3 - <<'EOF'
+          p = "/tmp/rp1-copy/plugins/task-pipeline/skills/task-pipeline/references/retrospective.md"
+          t = open(p, encoding="utf-8").read()
+          needle = "5. **The title states the class"
+          assert needle in t, "PLANT DID NOT LAND: the rule list moved"
+          open(p, "w", encoding="utf-8").write(t.replace(
+              needle,
+              "5. **No timestamps.** A wall-clock time narrows a repository to a person's day.\n"
+              "6. **The title states the class", 1))
+          EOF
+          if python3 /tmp/rp1-copy/test/validate.py; then
+            echo "ERROR: an enumeration counted in prose drifted from its own items"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the rule count is computed from the rules"
+          fi
+
+      - name: Negative self-test (the redaction rules flattened into prose)
+        run: |
+          set -eu
+          rm -rf /tmp/rp2-copy && cp -R . /tmp/rp2-copy
+          python3 - <<'EOF'
+          p = "/tmp/rp2-copy/plugins/task-pipeline/skills/task-pipeline/references/retrospective.md"
+          t = open(p, encoding="utf-8").read()
+          assert "1. **No host paths.**" in t, "PLANT DID NOT LAND: rule 1 moved"
+          open(p, "w", encoding="utf-8").write(t.replace("1. **No host paths.**", "- **No host paths.**", 1))
+          EOF
+          if python3 /tmp/rp2-copy/test/validate.py; then
+            echo "ERROR: a list nobody can point at an item of is advice, not a contract"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the redaction rules stay an enumeration"
+          fi
+
+      - name: Negative self-test (an absolute host path in the worked issue body)
+        run: |
+          set -eu
+          rm -rf /tmp/rp3-copy && cp -R . /tmp/rp3-copy
+          python3 - <<'EOF'
+          p = "/tmp/rp3-copy/plugins/task-pipeline/skills/task-pipeline/references/retrospective.md"
+          t = open(p, encoding="utf-8").read()
+          needle = "title: [retro] a queue is not a diagnosis"
+          assert needle in t, "PLANT DID NOT LAND: the worked issue moved"
+          open(p, "w", encoding="utf-8").write(
+              t.replace(needle, needle + "\nwhere: /Users/someone/work/api", 1))
+          EOF
+          if python3 /tmp/rp3-copy/test/validate.py; then
+            echo "ERROR: the doctrine's own example breaks rule 1 of the list beside it"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the example obeys the rules it teaches"
+          fi
+
+      - name: Negative self-test (a commit id in the worked issue body)
+        run: |
+          set -eu
+          rm -rf /tmp/rp4-copy && cp -R . /tmp/rp4-copy
+          python3 - <<'EOF'
+          p = "/tmp/rp4-copy/plugins/task-pipeline/skills/task-pipeline/references/retrospective.md"
+          t = open(p, encoding="utf-8").read()
+          needle = "title: [retro] a queue is not a diagnosis"
+          assert needle in t, "PLANT DID NOT LAND: the worked issue moved"
+          open(p, "w", encoding="utf-8").write(t.replace(needle, needle + "\nfound at: 4233c3d", 1))
+          EOF
+          if python3 /tmp/rp4-copy/test/validate.py; then
+            echo "ERROR: a host commit in a public issue body — rule 2, in the example itself"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — no host identifier in the worked body"
+          fi
+
+      - name: Negative self-test (a host repository slug in the worked issue body)
+        run: |
+          set -eu
+          rm -rf /tmp/rp5-copy && cp -R . /tmp/rp5-copy
+          python3 - <<'EOF'
+          p = "/tmp/rp5-copy/plugins/task-pipeline/skills/task-pipeline/references/retrospective.md"
+          t = open(p, encoding="utf-8").read()
+          needle = "repo:  ssheleg/task-pipeline"
+          assert needle in t, "PLANT DID NOT LAND: the repo line moved"
+          open(p, "w", encoding="utf-8").write(
+              t.replace(needle, needle + "\nseen in: acme-corp/billing-api", 1))
+          EOF
+          if python3 /tmp/rp5-copy/test/validate.py; then
+            echo "ERROR: the example names a repository that is not the skill's own"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — only the skill's own repo appears"
+          fi
+
+      - name: Negative self-test (the schema losing the key the doctrine names)
+        run: |
+          set -eu
+          rm -rf /tmp/rp6-copy && cp -R . /tmp/rp6-copy
+          python3 - <<'EOF'
+          p = "/tmp/rp6-copy/plugins/task-pipeline/skills/task-pipeline/pipeline.schema.json"
+          t = open(p, encoding="utf-8").read()
+          assert '"publish"' in t, "PLANT DID NOT LAND: the publish key moved"
+          open(p, "w", encoding="utf-8").write(t.replace('"publish"', '"publish_disabled"', 1))
+          EOF
+          if python3 /tmp/rp6-copy/test/validate.py; then
+            echo "ERROR: the key the doctrine tells an operator to set validates nothing"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — doctrine and schema name one key"
+          fi
+
+      - name: Negative self-test (no stage naming the publish step)
+        run: |
+          set -eu
+          rm -rf /tmp/rp7-copy && cp -R . /tmp/rp7-copy
+          python3 - <<'EOF'
+          p = "/tmp/rp7-copy/plugins/task-pipeline/skills/task-pipeline/references/stages.md"
+          t = open(p, encoding="utf-8").read()
+          assert "`retro.publish`" in t, "PLANT DID NOT LAND: the stage reference moved"
+          open(p, "w", encoding="utf-8").write(t.replace("`retro.publish`", "the publish setting"))
+          EOF
+          if python3 /tmp/rp7-copy/test/validate.py; then
+            echo "ERROR: a step in the retro's doctrine and in no stage is a step that never runs"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the outward step is named by a stage"
+          fi

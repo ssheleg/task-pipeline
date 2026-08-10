@@ -26,6 +26,9 @@
     },
     "run": {
       "$ref": "#/definitions/run"
+    },
+    "retro": {
+      "$ref": "#/definitions/retro"
     }
   },
   "definitions": {
@@ -168,6 +171,38 @@
               "type": "string",
               "minLength": 1,
               "description": "The gate condition, in prose."
+            }
+          }
+        }
+      }
+    },
+    "retro": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Optional. Governs what the retrospective does BEYOND writing to the project's own docs/superpowers/retro.md, which always happens. Omit it and nothing leaves the repository: silence arms nothing, exactly as it authorises no deploy.",
+      "properties": {
+        "publish": {
+          "type": "object",
+          "required": [
+            "repo"
+          ],
+          "additionalProperties": true,
+          "description": "Publish skill-level insights as issues on the skill's own repository, so a defect in the pipeline is fixed once instead of rediscovered in every project. OFF unless this object is present — opening an issue in another repository is an outward act, and an outward act taken from a generic flag is one nobody authorized. The body is printed in full before it is sent, and the printed string and the sent string are the same string. Doctrine, including the five redaction rules: references/retrospective.md.",
+          "properties": {
+            "repo": {
+              "type": "string",
+              "pattern": "^[^/\\s]+/[^/\\s]+$",
+              "description": "owner/name of the SKILL's repository, never the host project's."
+            },
+            "label": {
+              "type": "string",
+              "description": "Applied to every issue opened this way, so the operator can read them as a stream rather than find them by accident."
+            },
+            "redact": {
+              "enum": [
+                "strict"
+              ],
+              "description": "Only 'strict' exists, and it is not a level among others: the five rules are the contract. A field with one legal value is here so a reader asking 'what redaction applies?' finds the answer in the config rather than assuming none does."
             }
           }
         }

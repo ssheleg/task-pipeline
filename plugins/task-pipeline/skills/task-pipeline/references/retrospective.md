@@ -37,6 +37,8 @@ file exists to stop.
 - The prune — mandatory, and it runs after the stamp
 - The loop closes at stage 0
 - Where a lesson goes when it is not about this project
+- Publishing the insight — the skill learns from every project that runs it
+- What may leave the project — the redaction list
 - Rationalizations
 
 ## Write the entry only for a divergence — and name the layer that owned it
@@ -227,9 +229,92 @@ rule that was retired for going cold is exactly the rule about to be re-learned.
 
 A lesson that would be true in any repository does not belong in one project's
 retro — it belongs in the pipeline's own doctrine
-([`learned.md`](learned.md), which is exactly that list, earned the same way). Open
-an issue upstream and say so in the entry. A local file that accumulates universal
-rules is a fork of the skill that nobody named.
+([`learned.md`](learned.md), which is exactly that list, earned the same way). A local
+file that accumulates universal rules is a fork of the skill that nobody named.
+
+**This said *"open an issue upstream"* for eight releases and named no repository, no
+trigger and no authorization** — an instruction on rung 1 that everybody read as done.
+The rest of this section is the mechanism.
+
+## Publishing the insight — the skill learns from every project that runs it
+
+**One job: stop a lesson dying in the repository that learned it.**
+
+A retro entry is written per project and read by that project's next stage 0. The
+pipeline itself never sees it. So a defect in the **skill** — a gate that loops, a
+doctrine promising what nothing enforces, a rule firing on the wrong shape — is
+rediscovered independently in every project and fixed in none of them.
+
+**Opt-in, per project, off by default** — `pipeline.json` → `retro.publish`:
+
+```json
+"retro": {
+  "publish": {
+    "repo": "ssheleg/task-pipeline",
+    "label": "retro-insight",
+    "redact": "strict"
+  }
+}
+```
+
+Absent, nothing is published, and nothing is asked. **Silence arms nothing** — the same
+floor deploy authorization uses, and for the same reason: this is an **outward act**,
+and an outward act taken from a generic flag is an outward act nobody authorized
+([`continuity.md`](continuity.md) → *The limit, before the capability*).
+
+**The body is printed in full before the issue is opened, every time.** Not a summary
+of it, not its title — the string that will be sent. The operator standing at stage
+10's manual gate is already reading; showing them what leaves the machine costs one
+block and is the only moment anyone can stop it.
+
+```
+── would open issue ──────────────────────────────────────────
+repo:  ssheleg/task-pipeline
+label: retro-insight
+title: [retro] a queue is not a diagnosis
+<the whole body, verbatim>
+──────────────────────────────────────────────────────────────
+opening…  → #24
+```
+
+**No `gh`, no network, no permission?** Print the body, say the issue was **not**
+opened, and carry the exact text in the carry-over ledger. That is the honest
+degradation; a second transport is not.
+
+## What may leave the project — the redaction list
+
+An issue is a **public artefact in someone else's repository**. What travels is the
+*class*; what stays is everything that identifies where it happened.
+
+| Goes | Stays |
+|---|---|
+| the class of failure, stated in the abstract | the file, the function, the line it happened in |
+| which stage owned it and which stage surfaced it | the repository, organisation, branch or commit |
+| the doctrine or guard that missed it, by its name **in this skill** | any host path, absolute or relative |
+| the fix by grade, and the check that would catch it | the code, the config values, the data |
+| whether an existing standing instruction fired | any person, company, customer or product name |
+
+Five rules, numbered so a reader can point at one:
+
+1. **No host paths.** Only paths inside task-pipeline itself — `references/…`,
+   `templates/…`, `test/validate.py`. An absolute path names a machine.
+2. **No host identifiers**: repository, organisation, branch, commit, tag, issue or PR
+   number belonging to the project the run happened in.
+3. **No code, no configuration values, no data** — not a snippet, not a redacted
+   snippet. A shape can be described in a sentence.
+4. **No names**: person, company, customer, employer, product.
+5. **The title states the class, not the incident** — *"a queue is not a diagnosis"*,
+   never *"our export job looped"*.
+
+**The printed text and the sent text are one string.** Redacting after the print, or
+printing a cleaned-up version of what is actually sent, is the false-success shape this
+bundle names outright ([`gates.md`](gates.md) → *False success*): a mechanism reporting
+on itself rather than on what it did.
+
+**When in doubt the rule is subtraction, not judgement.** An insight that survives
+losing a detail is still an insight; a detail that leaks cannot be recalled from an
+index. If removing it makes the entry incomprehensible, the entry was about the project
+and not about the skill — keep it local.
 
 ## Rationalizations
 

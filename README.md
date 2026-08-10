@@ -615,6 +615,17 @@ GATE 10 acceptance: PASS — 14/14 REQ verified
   abstained: 1 (1 cannot-verify) · unlooked: 0
 ```
 
+**And a lesson about the pipeline itself can leave the project.** A defect in the
+*skill* — a gate that loops, a doctrine promising what nothing enforces — was
+rediscovered independently in every repository that ran it and fixed in none. Set
+`retro.publish` in `pipeline.json` and stage 10 opens the insight as an issue on the
+skill's own repository, **printing the whole body first**; the printed string and the
+sent string are one string. Five numbered rules govern what leaves — no host paths, no
+host identifiers, no code or config or data, no names, and a title stating the class
+rather than the incident. **Absent the key, nothing is published and nothing is asked:**
+an issue in someone else's repository is an outward act, and a generic flag is not a
+specific authorization.
+
 Stage 0 reads those standing instructions **in full** on the next run — which is
 the whole reason the cap exists and the prune is a gate criterion instead of a good
 intention. A rule nobody reads to the end is worse than no rule: everyone believes

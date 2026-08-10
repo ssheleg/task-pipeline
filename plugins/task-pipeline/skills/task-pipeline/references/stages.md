@@ -639,7 +639,13 @@ never that the work was skipped quietly.
   list at or under its cap, every deletion logged in the archive with its commit,
   entries older than five run stamps rotated into `docs/superpowers/retro/`, the run
   stamped with its commit, every SHA in either file resolvable, and the
-  counts printed beside this verdict**; **the documentation gate has been seen
+  counts printed beside this verdict**; **where `pipeline.json` → `retro.publish` is
+  set, the skill-level insight is published as an issue on the skill's repository —
+  its body printed in full first, the printed string and the sent string being one
+  string, and the five redaction rules applied
+  ([`retrospective.md`](retrospective.md) → *What may leave the project*). Absent, the
+  step does not exist and is not asked about: publishing to another repository is an
+  outward act and silence authorizes none**; **the documentation gate has been seen
   failing once against a planted defect and its ratchet counts are printed**
   ([`gates.md`](gates.md)); **every repository is closed — the parent included:
   `git submodule status` shows no `+`, each repo clean and pushed**; **every check this gate leans on has been seen failing

@@ -464,6 +464,19 @@ VISUAL — each with its owning skill, because the first reads matrix **row name
 the copy half lives inside super-ux's own cell, exactly where it was invisible.
 *(guard: `has not heard of it` and `names no owner`)*
 
+**53. Publishing a retro insight is opt-in, enumerated, and its own example obeys its
+own rules.** `retro.publish` is off when absent — opening an issue in another repository
+is an outward act, and a generic flag is not a specific authorization. The redaction
+rules are a **numbered enumeration whose count is computed from the items** and required
+in the sentence that introduces them, because an enumeration counted in prose is the
+class this repository spent six review rounds on. The doctrine's own worked issue body
+is checked against those rules: no absolute path, nothing that reads as a commit, no
+repository slug but the skill's. And the key must exist in `pipeline.schema.json` **and**
+be named by a stage — a step described in the retro's doctrine and in no stage never
+runs.
+*(guard: `does not say` and `rule 1 of the list it is printed beside`
+and `no stage names`)*
+
 ## Adding or changing doctrine
 
 - **Change one idea per PR.** These files are read by agents under load; a PR that
