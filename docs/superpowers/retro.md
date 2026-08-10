@@ -41,6 +41,51 @@ row goes — the cap is not negotiable, ranking is.
 
 ## Recent log — entries from the last five run stamps (newest first)
 
+### 2026-08-10 · `stamp-cap` · the guard read a section, and stage 0 reads the file
+
+**Symptom.** A cap guard written to stop a section growing inside the stage-0 floor was
+defeated six ways by R-005's reader, each planted and watched printing `PASS`. The one
+worth the entry: **the stamp shape this doctrine's own command writes.**
+`retrospective.md` tells the agent to append a stamp with
+`printf '%s · %s\n' "$(date +%F)" "$(git rev-parse --short HEAD)"`. That is prose, not a
+table row. An agent obeying the shipped instruction literally produced forty stamps the
+guard could not see, and the validator printed `PASS` with `unlooked: 0`.
+
+**Surfaced at:** stage 7, by the reader. Not by the suite: both probes fired, because
+both planted the shape their author had in mind.
+
+**The stage that owned it:** stage 5 — the guard and its probes were written together,
+from the same reading of the same file.
+
+**Root cause.** The check's subject was *a section read in full at stage 0*; its evidence
+was *rows under one heading*. Everything between those two — a second heading, a leading
+space, a list, the doctrine's own prose form, a second file shipping the same table —
+lives outside the evidence and inside the subject. This is the session's recurring class
+stated at its sharpest: **a check answered by text that is not its subject, and blind to
+subject that is not its text.**
+
+**The instance that names the class best** is the row check, because it had already been
+narrowed twice for exactly this and fell anyway: scoped past `run stamps`, it was defeated
+by moving the standing instructions' `max 10` to the *other side of the `·`*. Positional
+narrowing is not scoping.
+
+**Fixes by grade.**
+
+1. *(mechanical)* Both guards count by **predicate over a discovered corpus** — three
+   stamp shapes including the doctrine's own, every file carrying a `## Run stamps`
+   section, and the cap read from the segment that names the stamps.
+2. *(mechanical)* Four surfaces that had never learned the rule now state it: the live
+   section's intro, stage 10's prune, the scaffold, and the archive template — which had
+   no destination section for a rotation the doctrine names.
+3. *(standing instruction)* **None added.** `B-057` carries the mechanism, at priority 9
+   and the top of the board: derive a probe's needle where a parser exists, and record for
+   every guard the span it reads. Six instances in one session is a class for a script,
+   not a rule for a person to remember.
+
+**The check that catches it next time** does not exist yet, and that is the honest
+statement: this was caught by a reader, for the third release running. `B-057` is the
+attempt to stop needing one for this class.
+
 ### 2026-08-10 · `loop-mechanism` · a green validator is not a green suite, and it reached main
 
 **Symptom.** `5a77053` was pushed straight to `main` with CI red. `validate
@@ -933,6 +978,7 @@ without the cap the countable thing grows inside a section read in full.
 
 | Date | Topic | Commit | Verdict | Retro |
 |---|---|---|---|---|
+| 2026-08-10 | `stamp-cap` / B-055 `one-line-per-run-is-a-slope` | `141294a` | stamps capped at ten, 18 rotated whole into the archive · stamp section 2 099 → **1 088 tok**, read portion 3 333 → **2 335**, stage-0 floor → **~35 300** · **the reader found six ways past the first cap guard**, one of them the stamp shape this doctrine's own command writes · four surfaces had never learned the rule · a hand-written 21 was a computed 18 · guards 248 → **250** | 1 entry · 5 standing · retired 0 · added 0 · **stamps 11 → 10 (1 rotated at this prune)** · R-003, R-005, R-006 fired |
 | 2026-08-10 | `loop-mechanism` / B-054 `the-loop-had-no-queue` | `64fcc6b` | the queue, `mode: dynamic`, `run.loop.arm`, the goal re-read between items · **R-005's reader found a contradiction the guards could not**: Part 1a armed unconditionally and overrode the file's own `Default off` · six guard defects, all planted and watched passing · guards 233 → **248** · **a red CI reached `main` on `5a77053`** — pushed after `npm test` without `test:all` | 1 entry · 5 standing · retired 0 · added 0 · R-003, R-005, R-006 fired |
 | 2026-08-10 | `findings-entry` / B-047 `the-word-audit-could-not-reach-it` | `0df1e7a` | 8 REQ verified, 1 with its scope corrected (three surfaces, not four) · **routing measured on fresh agents, 7/10 → 9/10 → 8/10** — bug hunt and PR review moved in both after-runs, the production check in neither · **R-005's reader defeated the nine new guards fifteen ways**, all fixed, and the six added probes found a sixteenth · guards 218 → **233** · evals 21 → **28** | 1 entry · 5 standing · retired 0 · added 0 · R-003, R-005, R-006 fired; R-002 and R-004 did not |
 | 2026-08-10 | `skill-audit` / fixes `trigger-wall-probe-floor` | `b7778c9` | 9 of 12 plan items · the command wall 1281 → 295 words · the description 1015 → 956 with both no-task modes named · **`test/probe.py` built, and it caught two of this release's own guards on first use** · stage-0 floor ~47 750 → ~36 950 tok · evals 15 → 21 · guards 210 → **218** | 1 entry · **5 standing (was 6)** · retired 1 (R-001, its condition met) · added 0 · R-002, R-003, R-004, R-006 fired |
@@ -942,4 +988,3 @@ without the cap the countable thing grows inside a section read in full.
 | 2026-08-09 | `planning-system` / N1 `the-board` | `4233c3d` | 4 REQ · a queue between runs, and the seam the ledger left dangling · **ten review rounds, 29 findings, none from my probes** · carry-over 2 rows, 2 open, 0 unresolved | 1 entry · 6 standing · retired 0 · added 0 · R-001, R-002, R-004, R-005 all fired · guards 156 → 175 + 4 property |
 | 2026-08-09 | `audit-followup` / M6 `learned-shape` | `241df1e` | 1 REQ · a cap refused by measurement, and the class it uncovered · **eight review rounds, 20 findings, two of them red, none from my probes** · carry-over 12 rows, 7 open, 0 unresolved | 1 entry · 6 standing · retired 0 · added 0 · R-001, R-005 fired · guards 144 → 156 + 1 property |
 | 2026-08-09 | `audit-followup` / M5 `re-derive-axis` | `a3dd771` | 1 REQ · a sixth rotation axis, and the enumeration of the five that had already drifted · **four review rounds, 8 findings, all mine, none from my probes** · carry-over 12 rows, 7 open, 0 unresolved | 1 entry · 6 standing · retired 0 · added 0 · R-001, R-005 fired · guards 136 → 144 |
-| 2026-08-09 | `audit-followup` / M4 `abstention-disclosure` | `1426bdf` | 1 REQ · a second kind of counted set, non-monotone by construction · **one review round, 5 findings, all mine** · carry-over 11 rows, 7 open, 0 unresolved | 1 entry · 6 standing · retired 0 · added 0 · R-001, R-003, R-005 all fired · guards 134 → 136 |
