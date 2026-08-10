@@ -4801,14 +4801,27 @@ jobs:
           set -eu
           rm -rf /tmp/rs01-copy && cp -R . /tmp/rs01-copy
           python3 - <<'EOF'
+          import re
           p = "/tmp/rs01-copy/plugins/task-pipeline/skills/task-pipeline/references/retrospective.md"
           t = open(p, encoding="utf-8").read()
-          n = "**Run stamps** (max **10**, oldest rotate out)"
-          assert n in t, "PLANT DID NOT LAND: rs01"
-          # The exact wording the audit left in place: tidy growth described as a bound.
-          open(p, "w", encoding="utf-8").write(t.replace(n, "**Run stamps** (one line each)", 1))
+          # DERIVED: find the row the guard finds, then remove the cap from the segment
+          # that names the stamps. The first version held the cell verbatim and would
+          # have died red on a cosmetic reflow.
+          out, done = [], False
+          for l in t.splitlines(True):
+              if not done and l.startswith("|") and "retro.md" in l.lower() and "run stamps" in l.lower():
+                  i = l.lower().index("run stamps")
+                  j = l.find("|", i)
+                  seg = l[i:j if j > 0 else len(l)]
+                  seg2 = re.sub(r"\(max[^)]*\)", "(one line each)", seg, count=1)
+                  assert seg2 != seg, "PLANT DID NOT LAND: rs01 — the stamps segment states no cap"
+                  l = l[:i] + seg2 + (l[j:] if j > 0 else "")
+                  done = True
+              out.append(l)
+          assert done, "PLANT DID NOT LAND: rs01 — no row naming retro.md's run stamps"
+          open(p, "w", encoding="utf-8").write("".join(out))
           EOF
-          if python3 /tmp/rs01-copy/test/validate.py 2>&1 | grep -q "does not give the run stamps a cap"; then
+          if python3 /tmp/rs01-copy/test/validate.py 2>&1 | grep -q "run stamps are given no cap"; then
             echo "OK: validator FAILs — one line per run is a slope, not a bound"
           else
             echo "ERROR: the stamp table lost its cap and the section read in full kept growing"
@@ -4820,17 +4833,20 @@ jobs:
           rm -rf /tmp/rs02-copy && cp -R . /tmp/rs02-copy
           python3 - <<'EOF'
           import re
+          v = open("/tmp/rs02-copy/test/validate.py", encoding="utf-8").read()
+          cap = int(re.search(r"^STAMP_CAP = (\d+)", v, re.M).group(1))
           p = "/tmp/rs02-copy/docs/superpowers/retro.md"
           t = open(p, encoding="utf-8").read()
-          i = t.index("## Run stamps")
-          rows = [l for l in t[i:].splitlines() if l.startswith("| 2026-")]
-          assert len(rows) == 10, "PLANT DID NOT LAND: rs02 expected a full table, got %d" % len(rows)
-          j = t.index(rows[0], i)
-          open(p, "w", encoding="utf-8").write(t[:j] + rows[0] + "\n" + t[j:])
+          rows = re.findall(r"^[ \t]{0,3}\|\s*\d{4}-\d{2}-\d{2}\s*\|[^\n]*\n", t, re.M)
+          assert len(rows) == cap, "PLANT DID NOT LAND: rs02 — %d stamps, cap is %d" % (len(rows), cap)
+          # One more, in the shape the doctrine's own command appends — prose, not a row.
+          # A guard that counts table rows under one heading cannot see this at all.
+          i = t.index(rows[0])
+          open(p, "w", encoding="utf-8").write(t[:i] + "2026-08-11 · `deadbee`\n" + t[i:])
           EOF
-          if python3 /tmp/rs02-copy/test/validate.py 2>&1 | grep -q "run stamps in a table read"; then
-            echo "OK: validator FAILs — the eleventh stamp must rotate, not accumulate"
+          if python3 /tmp/rs02-copy/test/validate.py 2>&1 | grep -q "run stamps in a file read"; then
+            echo "OK: validator FAILs — the eleventh stamp must rotate, in every shape the doctrine writes them"
           else
-            echo "ERROR: the table passed its cap inside a section read in full at stage 0"
+            echo "ERROR: the file passed its cap inside a section read in full at stage 0"
             exit 1
           fi

@@ -926,8 +926,10 @@ Two consequences worth stating rather than leaving to be rediscovered:
 
 ## Run stamps
 
-One line per run, appended at stage 10. This is what makes "five runs" countable
-— without it the cold-rule is a guess and the prune becomes a mood.
+One line per run, appended at stage 10, **capped at ten** — at the eleventh the
+oldest rotates whole into `retro/YYYY-QN.md`. This is what makes "five runs"
+countable; without it the cold-rule is a guess and the prune becomes a mood, and
+without the cap the countable thing grows inside a section read in full.
 
 | Date | Topic | Commit | Verdict | Retro |
 |---|---|---|---|---|

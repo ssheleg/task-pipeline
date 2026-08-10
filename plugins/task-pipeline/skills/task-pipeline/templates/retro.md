@@ -61,8 +61,9 @@ shape the hygiene gate's check 6 exists to find.
 
 ## Run stamps
 
-One line per run, appended at stage 10. This is what makes "five runs" countable
-— without it the cold-rule is a guess and the prune becomes a mood.
+One line per run, appended at stage 10, **capped at ten** — at the eleventh the
+oldest rotates whole into the archive. One line per run is a slope, not a bound:
+this section is read in full at stage 0.
 
 | Date | Topic | Commit | Verdict | Retro |
 |---|---|---|---|---|
