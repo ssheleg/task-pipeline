@@ -86,7 +86,44 @@ import that never landed, a doctrine phrase worded differently, a `gh` call refu
 `>/dev/null`, and a test piped to `head` so `$?` belonged to `head`. **Assert the effect,
 not the call.**
 
-Guards: 210 → **215**, property checks 8.
+### The retro's uncapped narrative stopped being read in full
+
+The doctrine said stage 0 reads three sections of `docs/superpowers/retro.md` in full
+because *"all three are bounded by construction, which is why the cap is not
+negotiable."* Measured, that claim was false:
+
+```
+Standing instructions   ~ 1 394 tok   capped at ten rows
+Run stamps              ~ 1 842 tok   one line per run
+Recent log              ~10 937 tok   narrative — capped by nothing   ← 74% of the file
+```
+
+An uncapped section inside a source that **binds** the run is precisely what makes the
+capped part get skimmed. The log is now **queried by the task's nouns**, like the
+archive; the instructions and the stamps are still read in full, because they are the
+part that is actually bounded.
+
+**Stage-0 reading floor: ~47 750 → ~36 950 tokens** from that one change.
+
+**And the audit that found this over-claimed in the same paragraph.** Its own table said
+`stages.md` was *"read in full at stage 0"*; grepping the obligation returns only the
+retro. The report now says *the gates a run must satisfy*, which is weaker and true.
+
+### The preflight now says what has not been measured
+
+It reported companion availability in careful detail and this skill's own evidence not at
+all — while `evals/RESULTS.md` recorded **one self-observed run by the author and zero
+blind runs on zero models**. A skill silent about its own evidence is read as tested, by
+the bundle that demands evidence of everyone else. The line prints while no blind run is
+recorded and disappears when one is; it is a state of the evidence, not a warning.
+
+The suite itself was frozen at the v1.9 feature set — **zero cases** touching the board,
+the verification ledger, the exposure line, the progress rail, `checkup`, `setup`,
+`copywriting` or `sheleg-design`. Now **21 cases**, including the two no-task modes,
+the three stage-3 tracks, the progress rail and run ledger, the dispatched reader, and a
+question that must **not** trigger the pipeline at all.
+
+Guards: 210 → **218**, property checks 8.
 
 ## v1.37.0 — the audit, and the four things it found the pipeline could not say
 

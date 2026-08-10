@@ -4182,3 +4182,58 @@ jobs:
           else
             echo "OK: validator correctly FAILs — the probing doctrine points at the harness"
           fi
+
+      - name: Negative self-test (the retro's uncapped log slipping back into "read in full")
+        run: |
+          set -eu
+          rm -rf /tmp/rf1-copy && cp -R . /tmp/rf1-copy
+          python3 - <<'EOF'
+          p = "/tmp/rf1-copy/docs/superpowers/retro.md"
+          t = open(p, encoding="utf-8").read()
+          n = "The **Recent log** and the **archive**"
+          assert n in t, "PLANT DID NOT LAND: the read-in-full sentence moved"
+          open(p, "w", encoding="utf-8").write(
+              t.replace(n, "The **Recent log** is read in full. The **archive**", 1))
+          EOF
+          if python3 /tmp/rf1-copy/test/validate.py; then
+            echo "ERROR: an uncapped section is back inside the source whose cap justifies reading it"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the narrative log is queried, not read"
+          fi
+
+      - name: Negative self-test (a consumer re-binding the log to "in full")
+        run: |
+          set -eu
+          rm -rf /tmp/rf2-copy && cp -R . /tmp/rf2-copy
+          python3 - <<'EOF'
+          p = "/tmp/rf2-copy/plugins/task-pipeline/skills/task-pipeline/references/knowledge-sources.md"
+          t = open(p, encoding="utf-8").read()
+          n = "the *Recent log* is queried by the task's nouns like the archive"
+          assert n in t, "PLANT DID NOT LAND: the harvest clause moved"
+          open(p, "w", encoding="utf-8").write(t.replace(n, "the *Recent log* is read in full", 1))
+          EOF
+          if python3 /tmp/rf2-copy/test/validate.py; then
+            echo "ERROR: the harvest reads in full what nothing caps"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — every consumer agrees on what is read"
+          fi
+
+      - name: Negative self-test (a preflight silent about the skill's own evidence)
+        run: |
+          set -eu
+          rm -rf /tmp/pf1-copy && cp -R . /tmp/pf1-copy
+          python3 - <<'EOF'
+          p = "/tmp/pf1-copy/plugins/task-pipeline/skills/task-pipeline/references/companion-skills.md"
+          t = open(p, encoding="utf-8").read()
+          n = "This skill's own behaviour is unverified"
+          assert n in t, "PLANT DID NOT LAND: the behaviour line moved"
+          open(p, "w", encoding="utf-8").write(t.replace(n, "This skill is ready", 1))
+          EOF
+          if python3 /tmp/pf1-copy/test/validate.py; then
+            echo "ERROR: a skill silent about its own evidence is read as tested"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the preflight states what has not been measured"
+          fi

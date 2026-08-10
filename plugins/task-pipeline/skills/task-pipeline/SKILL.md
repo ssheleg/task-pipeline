@@ -119,10 +119,10 @@ question: pull what the project already knows about this task from the code, the
 ([`references/knowledge-graph.md`](references/knowledge-graph.md) — graphify;
 recommended, never required),
 `CLAUDE.md`, `CONTEXT.md`/ADRs, **the decision register**, `docs/` + `docs/ux/`,
-past pipeline briefs, **the retro's standing instructions, run stamps and recent
-log** — `docs/superpowers/retro.md`, read in full because they *bind* this run and
-are bounded by construction, while the archive under `docs/superpowers/retro/` is
-**queried** by the task's nouns
+past pipeline briefs, **the retro's standing instructions and run stamps** —
+`docs/superpowers/retro.md`, read in full because they *bind* this run and are
+bounded by construction (ten rows; one line per run), while its **recent log** and the
+archive under `docs/superpowers/retro/` are **queried** by the task's nouns
 ([`references/retrospective.md`](references/retrospective.md)) —
 the **knowledge wiki** if one is installed
 ([obsidian-wiki](https://github.com/ar9av/obsidian-wiki) — recommended, never

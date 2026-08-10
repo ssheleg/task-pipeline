@@ -101,9 +101,11 @@ never that the work was skipped quietly.
   when one is built ([`knowledge-graph.md`](knowledge-graph.md): `graphify query` /
   `affected` / `god-nodes` answer *reach*, which is what grep cannot), `CLAUDE.md`,
   `CONTEXT.md`/ADRs, `docs/` + `docs/ux/`, past pipeline briefs and carry-over
-  ledgers, **the retro's standing instructions** (`docs/superpowers/retro.md`, read
-  **in full** — they are capped at ten and they bind this run; stamp each one as it
-  fires, [`retrospective.md`](retrospective.md)), the **knowledge wiki** if one is
+  ledgers, **the retro's standing instructions and run stamps** (`docs/superpowers/retro.md`,
+  read **in full** — ten rows and one line per run, both bounded, and they bind this
+  run; stamp each instruction as it fires. Its *Recent log* is **queried** by the
+  task's nouns, not read: uncapped narrative inside a binding source is what makes the
+  capped part get skimmed, [`retrospective.md`](retrospective.md)), the **knowledge wiki** if one is
   installed
   ([obsidian-wiki](https://github.com/ar9av/obsidian-wiki) — recommended,
   never required), and any **other repo or hosted doc system the project names as

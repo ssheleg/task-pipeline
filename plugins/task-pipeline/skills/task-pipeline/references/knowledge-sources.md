@@ -64,15 +64,20 @@ Rules for the list:
 - **The wiki and the graph are optional; the harvest is not.** With no wiki, no
   graph and no doc repos, the harvest is sources 1 and 3–7 and takes two minutes.
   Skipping it is never the answer.
-- **Source 7 is read in full, not queried.** It is capped at ten instructions
-  precisely so that this is cheap, and it is the one source that *binds* the run
-  rather than informing it.
+- **Source 7 is read in full where it is bounded, and queried where it is not.** The
+  standing instructions (capped at ten) and the run stamps (one line each) are read;
+  the *Recent log* is queried by the task's nouns like the archive. Measured on the
+  file this doctrine was written for, the log was **74% of it** — and it is the one
+  section nothing caps. Source 7 is still the source that *binds* the run rather than
+  informing it; that is why the part which binds must stay cheap enough to read.
 
 ## The retro's standing instructions — an instruction source, not background
 
 `docs/superpowers/retro.md` ([`retrospective.md`](retrospective.md)) is the one
-harvested source that is **read in full rather than queried**: the standing
-instructions are capped at ten precisely so that this is cheap. They are what
+harvested source whose binding part is **read in full rather than queried**: the
+standing instructions are capped at ten precisely so that this is cheap, and the run
+stamps are one line each. Its narrative log is queried, not read — an uncapped section
+inside a source that binds is how the capped part stops being read. They are what
 previous runs of this pipeline got wrong *in this project* — the rules no check
 could decide — and they bind this run.
 

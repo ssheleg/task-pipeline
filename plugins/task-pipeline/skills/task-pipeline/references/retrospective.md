@@ -18,7 +18,8 @@ justifies reading it protects one section while the file below it doubles.
 
 | Artifact | Parts | How it is read |
 |---|---|---|
-| `docs/superpowers/retro.md` — **one per project** | **Standing instructions** (max **10**) · **Recent log** (entries from the last five run stamps) · **Run stamps** | stage 0, **in full** — all three are bounded by construction |
+| `docs/superpowers/retro.md` — **one per project** | **Standing instructions** (max **10**) · **Run stamps** (one line each) | stage 0, **in full** — both are bounded by construction |
+| the same file's **Recent log** | entries from the last five run stamps — narrative, and capped by nothing | stage 0, **queried** by the task's nouns. It said *in full* until 2026-08-10, when it measured **74%** of the file: an uncapped section inside a binding source is what makes the capped part get skimmed |
 | `docs/superpowers/retro/YYYY-QN.md` — the archive | every entry and every retirement ever written, append-only | **queried** by the task's nouns; never read end to end |
 
 Seed the archive from [`../templates/retro-archive.md`](../templates/retro-archive.md).

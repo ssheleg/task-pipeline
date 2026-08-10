@@ -16,7 +16,7 @@ output, not a recollection.
 
 ```
 SKILL.md                          ~ 7 953 tok    ← loaded on trigger
-references/stages.md              ~13 161 tok    ← read in full at stage 0
+references/stages.md              ~13 161 tok    ← the gates a run must satisfy
 references/grill.md               ~ 4 465 tok
 references/knowledge-sources.md   ~ 4 769 tok
 docs/superpowers/retro.md         ~14 896 tok    ← "read in full", a gate criterion
@@ -25,6 +25,13 @@ commands/task-pipeline.md         ~ 2 504 tok
 stage-0 floor                     ~47 751 tok    before the first grill question
 full bundle                      ~139 675 tok    (32 references + 15 templates + SKILL)
 ```
+
+**Correction, made when the fix pass measured it.** That line first read *"read in
+full at stage 0"*. Nothing in the doctrine says so — grepping the obligation returns
+only the retro. `stages.md` is the gate list a run must satisfy, which is a weaker and
+more accurate claim than the one this report shipped with. The stage-0 **floor** is
+correspondingly lower than stated, and the retro's share of it dropped from ~14 900 to
+~3 200 tokens when its uncapped narrative log stopped being read in full.
 
 **This is the root of most of what follows.** Not because the doctrine is wrong — it is
 unusually good — but because *volume is itself an instruction*, and the instruction it

@@ -3626,6 +3626,55 @@ else:
         fail("references/gates.md teaches probing and never names test/probe.py — "
              "the next probe will be hand-rolled for the fourth time")
 
+# T3-G1. What stage 0 reads IN FULL is an obligation stated in four files, and the
+# one section nothing caps must not be in it. Measured 2026-08-10: the narrative log
+# was 10 937 of retro.md's 14 756 tokens — 74% of a source whose cap is the entire
+# argument for reading it. An uncapped section inside a binding source is what makes
+# the capped part get skimmed, so the log is queried like the archive.
+# SCOPE: the SENTENCE, not the paragraph. Paragraph-scoped, the word "queried" —
+# which legitimately describes the archive one clause away — cancelled the check, so
+# both plants landed and the guard stayed quiet. The unit is stated here because
+# choosing it wrongly is how three earlier guards in this file went silent.
+# It cannot tell whether a run actually read anything.
+_FULL_READERS = [
+    ("docs/superpowers/retro.md", os.path.join(ROOT, "docs/superpowers/retro.md")),
+    ("references/retrospective.md", os.path.join(ROOT, _SKILLDIR, "references/retrospective.md")),
+    ("references/knowledge-sources.md", os.path.join(ROOT, _SKILLDIR, "references/knowledge-sources.md")),
+    ("references/stages.md", _ST_P),
+    ("SKILL.md", os.path.join(ROOT, _SKILLDIR, "SKILL.md")),
+]
+_seen_reader = 0
+for _label, _path in _FULL_READERS:
+    if not os.path.isfile(_path):
+        continue
+    _seen_reader += 1
+    _flat = _flatten(open(_path, encoding="utf-8").read(), lower=True)
+    for _sent in re.split(r"(?<=[.;:!?])\s+|\s\|\s", _flat):
+        if "recent log" not in _sent:
+            continue
+        if "in full" in _sent and "queried" not in _sent:
+            fail(f"{_label}: a sentence binds the retro's *Recent log* to "
+                 "'in full' — it is the one section nothing caps, and it measured "
+                 "74% of the file. Query it by the task's nouns like the archive")
+if _seen_reader < 3:
+    _UNLOOKED.append("skip: the read-in-full obligation — fewer than three of its "
+                     "stated consumers are present in this checkout")
+
+# T4-G1. The preflight reports companion availability in detail; until 2026-08-10 it
+# reported this skill's own evidence not at all, which reads as tested. While the eval
+# results record no blind run, the preflight says so. SCOPE: the line's presence and
+# the results file's honesty about the count — it cannot verify a run happened.
+_EV_P = os.path.join(ROOT, "evals", "RESULTS.md")
+if os.path.isfile(_CS_P) and os.path.isfile(_EV_P):
+    _cs2 = open(_CS_P, encoding="utf-8").read()
+    _ev = _flatten(open(_EV_P, encoding="utf-8").read(), lower=True)
+    _blind_claimed = "no blind run has been made" in _ev
+    if _blind_claimed and "behaviour is unverified" not in _flatten(_cs2, lower=True):
+        fail("references/companion-skills.md: evals/RESULTS.md records no blind run "
+             "and the preflight does not say so — a skill silent about its own "
+             "evidence is read as tested, by the bundle that demands evidence of "
+             "everyone else")
+
 if errors:
     print("FAIL: task-pipeline structure invalid")
     for e in errors:
