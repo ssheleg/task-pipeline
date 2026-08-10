@@ -47,6 +47,7 @@ to be enforced and is not is the same failure as a gate that prints `FAIL` and e
 | 19 | **An empty measurement is a refused measurement** | any command run to establish a fact — a count, a probe, a query, a suite | assert the output is **non-empty and shaped as expected** before reading meaning into it; a command that printed nothing did not answer | the run quotes the output it read, not the conclusion it drew from silence |
 | 20 | **When a thing exists twice, ask which one is used — not whether they agree** | any artifact with a second copy: two build files, a vendored library, a schema and its mirror, doctrine in two documents | find the **consumer** and read what it names; the copies cannot answer this about themselves | the run names the file the build/test/deploy actually reads, quoted from the consumer |
 | 21 | **A step that consumes what a later step produces is a deadlock, not an ordering** | any sequence where a check reads state another step writes — a prune reading stamps, a gate reading a ledger, a report reading counts | trace each input to the step that writes it; if that step is downstream, the check has never run on real data | every check names the step that produces its input, and that step is upstream of it |
+| 22 | **An operation that changes nothing reports the same as one that changed everything** | a substitution whose needle is absent · a command whose output is suppressed at a decision point · an edit issued against a shape the file does not have | assert the effect, not the call: a replacement must report how many times it matched, and a command whose exit code governs the next step is never piped or silenced | four incidents in two programmes, each invisible until something downstream failed — an import that never landed, a doctrine phrase worded differently, a `gh` call refused behind `>/dev/null`, and a test piped to `head` so that `$?` belonged to `head` |
 
 ---
 
@@ -189,6 +190,7 @@ answer would have exposed it in a minute.
 | 0 Inventory · 9 Docs · any register write | 8 (compute), 14 (targets resolve — including every commit SHA in the retro), 15 (identity before a lease) — see [`documentation.md`](documentation.md) |
 | 0 Harvest · any run resuming from a summary | 16 — the work-list and every inherited state claim re-derived before use, [`knowledge-sources.md`](knowledge-sources.md) → *Carried-in claims* |
 | any check you write | 4, 5, 7, 10, 11 — the procedure is [`gates.md`](gates.md) |
+| **every stage** · any edit, any command whose result is read | 22 — a no-op is indistinguishable from success unless the effect is asserted; never suppress the output of a command a decision depends on |
 | 3 Spec · 4 Plan | 2 (both directions), 8 (compute, never restate) |
 | 5 Dev | 9 (generators seed green), 12 (tests create their own state), 13 (local infra) |
 | 6 Tests | 4, 5, 10, 11 — every new check probed both ways, measured, and asserted on its exit code |
@@ -264,7 +266,7 @@ evidence that something left, and the log below says what.
 
 ### Retired
 
-**Numbers issued so far: 21.** This is the high-water mark, and it is the only number
+**Numbers issued so far: 22.** This is the high-water mark, and it is the only number
 this file states about itself — deliberately, because the gap that proves a rule left
 cannot be computed from the table alone: **deleting the highest-numbered rule shrinks
 the maximum with it, and no gap ever opens.** That false negative shipped in the first

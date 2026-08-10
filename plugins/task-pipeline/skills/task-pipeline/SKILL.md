@@ -1,6 +1,6 @@
 ---
 name: task-pipeline
-description: "Runs a substantial task through a full delivery pipeline: an intake grill that expands the request into a locked brief, then docs study, brainstorm, spec, plan, subagent build, tests, lint/deploy, post-deploy check, docs/wiki sync and acceptance — gated stages whose doctrine ships inside this skill (no required companions). Use when work changes the repository — a feature, fix, refactor, migration, integration, rewrite, adoption or hardening; фича, фикс, рефактор, миграция, интеграция, доработать, починить, внедрить — or on 'run this through the pipeline' / 'прогони по конвейеру', 'the full cycle' / 'полный цикл', /task-pipeline. Not for: answering a question, explaining or reading code, a typo or a one-line edit — say 'без пайплайна' / 'quick' to opt out. The grill is mandatory and front-loads every decision, so stages 1→10 run without mid-flight questions; documentation is a deliverable with its own gate; recommends super-ux for user-facing work; confirms one model up front, never a hardcoded id."
+description: "Runs a substantial task through a full delivery pipeline: an intake grill that expands the request into a locked brief, then docs study, brainstorm, spec, plan, subagent build, tests, lint/deploy, post-deploy check, docs/wiki sync and acceptance — gated stages whose doctrine ships inside this skill (no required companions). Use when work changes the repository — a feature, fix, refactor, migration, integration, rewrite, adoption or hardening; фича, фикс, рефактор, миграция, интеграция, доработать, починить, внедрить — or on 'run this through the pipeline' / 'прогони по конвейеру', 'the full cycle' / 'полный цикл', /task-pipeline. Two modes need no task at all: 'checkup' / 'чекап' reports what has shipped without a person confirming it and what to look at first; 'setup' audits the documentation a project already has. Not for: answering a question, explaining or reading code, a typo or a one-line edit — say 'без пайплайна' / 'quick' to opt out."
 license: MIT
 ---
 
@@ -119,10 +119,10 @@ question: pull what the project already knows about this task from the code, the
 ([`references/knowledge-graph.md`](references/knowledge-graph.md) — graphify;
 recommended, never required),
 `CLAUDE.md`, `CONTEXT.md`/ADRs, **the decision register**, `docs/` + `docs/ux/`,
-past pipeline briefs, **the retro's standing instructions, run stamps and recent
-log** — `docs/superpowers/retro.md`, read in full because they *bind* this run and
-are bounded by construction, while the archive under `docs/superpowers/retro/` is
-**queried** by the task's nouns
+past pipeline briefs, **the retro's standing instructions and run stamps** —
+`docs/superpowers/retro.md`, read in full because they *bind* this run and are
+bounded by construction (ten rows; one line per run), while its **recent log** and the
+archive under `docs/superpowers/retro/` are **queried** by the task's nouns
 ([`references/retrospective.md`](references/retrospective.md)) —
 the **knowledge wiki** if one is installed
 ([obsidian-wiki](https://github.com/ar9av/obsidian-wiki) — recommended, never

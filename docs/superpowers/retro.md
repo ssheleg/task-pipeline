@@ -6,10 +6,16 @@ The order is not style — the cold-retirement trigger reads the stamp this stag
 writes, so a prune placed ahead of it can never run on real data
 (`learned.md` rule 21). Doctrine: `references/retrospective.md`.
 
-**What stage 0 reads in full:** *Standing instructions*, *Run stamps* and *Recent
-log* — all three are bounded by construction, which is why the cap is not
-negotiable. The **archive** (`docs/superpowers/retro/YYYY-QN.md`) is *queried* by
-the task's nouns and never read end to end.
+**What stage 0 reads in full:** *Standing instructions* and *Run stamps*. Both are
+bounded by construction — ten rows and one line per run — which is why the cap is not
+negotiable. The **Recent log** and the **archive**
+(`docs/superpowers/retro/YYYY-QN.md`) are *queried* by the task's nouns and never read
+end to end.
+
+This said all three until 2026-08-10, and the claim that all three were bounded was
+false: measured, the log was **10 937 of this file's 14 756 tokens** and nothing caps
+its length. Reading nine narratives in full every run is not diligence — it is the
+volume that makes an agent skim the ten rules that actually bind it.
 
 ## Standing instructions (max 10 — in force right now)
 

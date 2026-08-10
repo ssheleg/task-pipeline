@@ -1,5 +1,130 @@
 # Changelog
 
+## v1.38.0 — the wall came down, and a green started meaning something
+
+An audit of this skill measured nineteen problems and asked one question of all of them:
+*why can an agent that follows every rule here still report work it did not do?* The
+answers were not in the doctrine. They were in how much of it there is, how it is
+delivered, and what nobody checks.
+
+### The wall
+
+`commands/task-pipeline.md` — the first text an agent reads when the skill fires — was
+**one paragraph of 1281 words carrying 25 obligations, with a 4115-character line**.
+Twenty-five duties in one breath: which of them an agent obeys is a function of position,
+not importance.
+
+Same doctrine, eight headed sections, nothing removed:
+
+```
+paragraphs        5  ->  34
+longest paragraph 1281 words  ->  295
+longest line      4115 chars  ->  261
+```
+
+### The trigger surface said nothing about two of the three modes
+
+`setup` and `checkup` appeared in **no browsable surface** — not the skill description,
+not the command description, neither manifest. `checkup` exists specifically to be run
+when nothing else is; the only way to learn it existed was to open the file you open by
+running the thing it replaces.
+
+The description was also at **1015 of its 1024-character ceiling**, with ~40% spent on
+mechanism prose that cannot affect routing. Cut, both modes named, and it now sits at
+956 with room to grow. Both manifests described the product as it stood at v1.30 — seven
+releases of capability absent from the only text a marketplace shows.
+
+**The plan proposed separate command files for the two modes and the doctrine refused
+it.** `exposure.md` says *a mode of the command, not a new command, because a second
+command costs every surface a command touches*. The doctrine is older than the plan and
+it won.
+
+### `test/probe.py` — R-001's retirement condition, three years of releases late
+
+The standing instruction R-001 has said since 2026-08-03: *prove the plant landed in the
+text the check actually parses.* Its retirement condition, written at birth, was **"a
+probe harness exists that asserts the plant changed the parsed text"**. It was never
+built, and three probes failed in a single day for want of it.
+
+Three assertions per plant, and the third is the one hand-rolled probes keep missing:
+
+1. the substitution **landed** — `replace` matching nothing raises nothing;
+2. the exit code is **non-zero** — never a `FAIL` line on stdout;
+3. **the guard that fired is the guard under test**, named up front rather than
+   recognised afterwards. A plant that trips some *other* check has proved that other
+   check works.
+
+The harness self-tests its own failure branches (`npm run test:probe`), because a
+harness whose failure path has never executed is exactly what it exists to stop. **On its
+first use it caught two of this release's own guards being too loose** — one accepted any
+three reader states rather than requiring the load-bearing one, and one matched
+`none found` against a coincidental sentence in another paragraph.
+
+### The independent reader is now dispatched by a stage, and read by its output
+
+R-005 requires an independent reader on any change that adds or widens a check. Four pull
+requests of almost nothing but check work were opened in one day; the review app reported
+**`skipping`** on every one, and twenty-two guards merged on author probes alone. Nothing
+was violated. Nothing read the reviewer's output either.
+
+Stage 7 now dispatches the reader — a subagent it can watch, a bot whose **verdict** it
+then reads, or a person — and records exactly one of three states beside the gate:
+
+```
+reader: 6 findings, 4 confirmed
+reader: none found
+reader: NO READER — <why>
+```
+
+The third is printed, never omitted. *A reader was requested* and *a reader reported* are
+different facts that look identical in a transcript.
+
+### `learned.md` rule 22 — an operation that changed nothing reports like one that changed everything
+
+Four incidents in two programmes, each invisible until something downstream failed: an
+import that never landed, a doctrine phrase worded differently, a `gh` call refused behind
+`>/dev/null`, and a test piped to `head` so `$?` belonged to `head`. **Assert the effect,
+not the call.**
+
+### The retro's uncapped narrative stopped being read in full
+
+The doctrine said stage 0 reads three sections of `docs/superpowers/retro.md` in full
+because *"all three are bounded by construction, which is why the cap is not
+negotiable."* Measured, that claim was false:
+
+```
+Standing instructions   ~ 1 394 tok   capped at ten rows
+Run stamps              ~ 1 842 tok   one line per run
+Recent log              ~10 937 tok   narrative — capped by nothing   ← 74% of the file
+```
+
+An uncapped section inside a source that **binds** the run is precisely what makes the
+capped part get skimmed. The log is now **queried by the task's nouns**, like the
+archive; the instructions and the stamps are still read in full, because they are the
+part that is actually bounded.
+
+**Stage-0 reading floor: ~47 750 → ~36 950 tokens** from that one change.
+
+**And the audit that found this over-claimed in the same paragraph.** Its own table said
+`stages.md` was *"read in full at stage 0"*; grepping the obligation returns only the
+retro. The report now says *the gates a run must satisfy*, which is weaker and true.
+
+### The preflight now says what has not been measured
+
+It reported companion availability in careful detail and this skill's own evidence not at
+all — while `evals/RESULTS.md` recorded **one self-observed run by the author and zero
+blind runs on zero models**. A skill silent about its own evidence is read as tested, by
+the bundle that demands evidence of everyone else. The line prints while no blind run is
+recorded and disappears when one is; it is a state of the evidence, not a warning.
+
+The suite itself was frozen at the v1.9 feature set — **zero cases** touching the board,
+the verification ledger, the exposure line, the progress rail, `checkup`, `setup`,
+`copywriting` or `sheleg-design`. Now **21 cases**, including the two no-task modes,
+the three stage-3 tracks, the progress rail and run ledger, the dispatched reader, and a
+question that must **not** trigger the pipeline at all.
+
+Guards: 210 → **218**, property checks 8.
+
 ## v1.37.0 — the audit, and the four things it found the pipeline could not say
 
 One release, four modules, and an audit that put four questions to this pipeline and

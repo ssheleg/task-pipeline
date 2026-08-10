@@ -101,9 +101,11 @@ never that the work was skipped quietly.
   when one is built ([`knowledge-graph.md`](knowledge-graph.md): `graphify query` /
   `affected` / `god-nodes` answer *reach*, which is what grep cannot), `CLAUDE.md`,
   `CONTEXT.md`/ADRs, `docs/` + `docs/ux/`, past pipeline briefs and carry-over
-  ledgers, **the retro's standing instructions** (`docs/superpowers/retro.md`, read
-  **in full** — they are capped at ten and they bind this run; stamp each one as it
-  fires, [`retrospective.md`](retrospective.md)), the **knowledge wiki** if one is
+  ledgers, **the retro's standing instructions and run stamps** (`docs/superpowers/retro.md`,
+  read **in full** — ten rows and one line per run, both bounded, and they bind this
+  run; stamp each instruction as it fires. Its *Recent log* is **queried** by the
+  task's nouns, not read: uncapped narrative inside a binding source is what makes the
+  capped part get skimmed, [`retrospective.md`](retrospective.md)), the **knowledge wiki** if one is
   installed
   ([obsidian-wiki](https://github.com/ar9av/obsidian-wiki) — recommended,
   never required), and any **other repo or hosted doc system the project names as
@@ -456,6 +458,15 @@ never that the work was skipped quietly.
   tagging, the CI verdict for what was just pushed is READ, not assumed**
   ([`conventions.md`](conventions.md) → *The CI verdict*) — a tag on a commit whose
   run nobody read is how a red `main` ships.
+- **The independent reader is dispatched by this stage, and read by its output**
+  ([`review.md`](review.md) → *The independent reader*). On any change that adds or
+  widens a check, the run dispatches a reader — a subagent it can watch, a bot whose
+  **verdict** it then reads, or a person — and records exactly one of three states
+  beside the verdict: `reader: N findings`, `reader: none found`, or `reader: NO READER
+  — <why>`. The third is printed, never omitted; a requested reader and a reading are
+  different facts that look identical afterwards. Four pull requests of check work once
+  merged on a bot's `skipping` with nobody noticing, which is why this is a stage rather
+  than a hope.
 - **The review loop that lives here has a cap, and the cap is a measurement**
   ([`loop-guard.md`](loop-guard.md) → *The review loop*). **3 rounds** per artifact by
   default (`pipeline.json` → `run.review.maxRounds`); at the cap the run stops reviewing

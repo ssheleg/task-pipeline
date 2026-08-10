@@ -122,6 +122,11 @@ Pipeline companions (stage doctrine is built in — nothing to install for it):
 🧠 Model for this run: recommended <top tier available>. You're on <current>.
    /model <id> to switch, or "keep current", or name per-stage overrides.
 
+⚠  This skill's own behaviour is unverified: evals/RESULTS.md records <N> blind
+   run(s) on <M> model(s). Its triggering and its stage compliance are authored,
+   not measured. Nothing here is blocked by that — you are told because a skill
+   that never says so is one you would assume had been tested.
+
 Install the ✗ items you want, answer the model line, then say "continue".
 ```
 
@@ -170,6 +175,13 @@ Rules:
   reserve ids before minting them. Absent → print the line **once**, continue, and
   **record the run as `ungated`** — never describe the project as protected
   ([`documentation.md`](documentation.md) → *Registers are shared state*).
+- **The behaviour line prints whenever `evals/RESULTS.md` records no blind run**, and
+  disappears the moment one is recorded — it is a state of the evidence, not a warning
+  and not a ratchet. This bundle asks every project it touches for evidence rather than
+  assertion, and until 2026-08-10 it made the opposite claim about itself by saying
+  nothing: **one self-observed run by the author, zero blind runs on zero models**, with
+  a preflight that reported companion availability in detail and its own confidence not
+  at all. A skill silent about its own evidence is read as tested.
 - **Never gate any stage on an install** except the stage-3 UX track on a UI task.
 - Optional tools missing → state the fallback, don't block.
 - Re-detect after the operator installs; don't assume.

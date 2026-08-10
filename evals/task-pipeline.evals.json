@@ -220,6 +220,93 @@
         "Does the work directly"
       ],
       "why": "The opt-out phrase is the release valve that makes default-on acceptable. If it does not work, the boundary is a trap rather than a default."
+    },
+    {
+      "id": "TRIG-05",
+      "category": "should_trigger",
+      "skills": [
+        "task-pipeline"
+      ],
+      "query": "что у нас накопилось непроверенного?",
+      "expected_behavior": [
+        "Recognises this as the checkup mode and runs `/task-pipeline checkup`",
+        "Does NOT open a grill, does not write a brief, and does not start a run",
+        "Reports the exposure line with its named components, the board's open rows by computed priority, the carry-over ledgers' unresolved count, and the graph's staleness",
+        "Never renders the exposure figure as a percentage or a probability"
+      ],
+      "why": "checkup exists precisely for the moment no task is running, and before v1.38.0 it was named in no browsable surface. If a model cannot reach it from a natural request, it may as well not ship."
+    },
+    {
+      "id": "TRIG-06",
+      "category": "should_trigger",
+      "skills": [
+        "task-pipeline"
+      ],
+      "query": "проверь документацию проекта перед тем как что-то строить",
+      "expected_behavior": [
+        "Recognises this as the setup mode and runs `/task-pipeline setup`",
+        "Runs the documentation passes and reports findings as file:line plus the minimal fix, ordered by seam",
+        "Hands back a fix plan rather than starting to fix things inline"
+      ],
+      "why": "The entry audit is the one mode that runs BEFORE building on existing docs. Same discoverability risk as checkup."
+    },
+    {
+      "id": "INSTR-05",
+      "category": "instruction_following",
+      "skills": [
+        "task-pipeline"
+      ],
+      "query": "run this through the pipeline: add CSV export to the reports page",
+      "expected_behavior": [
+        "Flags the task as user-facing and arms the stage-3 UX track",
+        "Names all THREE tracks at stage 3 — what it does (super-ux), how it sounds (copywriting, against the brand pack), how it looks (sheleg-design)",
+        "Where a track is declined, records the refusal out loud in the brief rather than skipping it silently",
+        "Does not write interface strings by taste with no mention of the copy track"
+      ],
+      "why": "copywriting appeared zero times in the bundle and sheleg-design once until v1.36.0. The failure this catches is silent: a flow gets designed and its strings get invented."
+    },
+    {
+      "id": "INSTR-06",
+      "category": "instruction_following",
+      "skills": [
+        "task-pipeline"
+      ],
+      "query": "run this through the pipeline: fix the retry backoff in the queue worker",
+      "expected_behavior": [
+        "Prints a progress header at task start naming the skill, the version, the topic and the stage rail",
+        "Derives the rail from the project's own pipeline config rather than assuming eleven stages",
+        "Prints a one-line progress update at each iteration close, citing a board id rather than a description",
+        "Seeds .task-pipeline/run.md at stage 0 and appends a stage verdict line when a gate returns"
+      ],
+      "why": "Before v1.34.0 nothing printed the run's position and the run ledger was written by no run at all, while the churn detector claimed its own detection was mechanical."
+    },
+    {
+      "id": "INSTR-07",
+      "category": "instruction_following",
+      "skills": [
+        "task-pipeline"
+      ],
+      "query": "run this through the pipeline: harden the auth middleware, and review it properly",
+      "expected_behavior": [
+        "Dispatches an independent reader at stage 7 rather than assuming a bot will read it",
+        "Records one of exactly three states beside the gate verdict: findings, none found, or NO READER with a reason",
+        "Stops reviewing at the declared round cap and prints new findings against self-inflicted ones per round, instead of looping",
+        "Never reports the review as done on the basis that a reader was requested"
+      ],
+      "why": "Four PRs of check work merged on a review app's `skipping` with nobody noticing. A requested reader and a reader that reported are different facts that look identical afterwards."
+    },
+    {
+      "id": "NOTRIG-05",
+      "category": "should_not_trigger",
+      "skills": [
+        "task-pipeline"
+      ],
+      "query": "какой командой у вас гоняются тесты?",
+      "expected_behavior": [
+        "Answers the question directly from the repo's own files",
+        "Does NOT invoke task-pipeline, does not open a grill and does not write a brief"
+      ],
+      "why": "Answering a question is on the skill's own not-for list. The description carries that boundary and nothing has ever measured whether a model honours it."
     }
   ]
 }
