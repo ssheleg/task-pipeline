@@ -41,6 +41,54 @@ row goes — the cap is not negotiable, ranking is.
 
 ## Recent log — entries from the last five run stamps (newest first)
 
+### 2026-08-11 · `neighbour-probe` · the doctrine failed its own first use
+
+**Symptom.** A section was written into `gates.md` telling a guard author to plant the
+guard's **own evidence** next door and require the guard to still fail. Three probes
+shipped implementing it. **One of them planted the needles of two retired predicates** —
+proving the guards that used to exist were neighbour-answerable, and saying nothing at all
+about the one that does.
+
+**Surfaced at:** stage 7, by R-005's fourth consecutive reader. Not by the suite: the
+probe fired, because a probe that plants *something* and watches the validator go red
+looks identical to one that plants the right thing.
+
+**The stage that owned it:** stage 3. The instruction was under-specified in the spec, not
+mis-implemented in the build — *"plant the guard's own evidence"* has an obvious wrong
+reading, and the run took it.
+
+**Root cause.** A doctrine written to catch *a check answered by text that is not its
+subject* was itself answered by a needle that was not its subject. The class is
+scale-free: it applies to guards, to the probes that test guards, and to the doctrine that
+specifies the probes. Each level was written by someone who had just understood the level
+below and assumed that understanding transferred.
+
+**What made it visible** was the same thing that made the six before it visible: a reader
+who had not written any of it. Four releases, four readers, four harvests of this class —
+fifteen, six, six, eight. The trend is not down.
+
+**Fixes by grade.**
+
+1. *(mechanical)* All eight closed, and each of the reader's plants replayed against the
+   fixed guard until it failed. Two were guards whose **declared span was false** — the
+   comment said one thing and the slice did another, which is worse than no comment.
+2. *(mechanical)* The doctrine now says **which literal** to plant: the one the predicate
+   matches today, read out of the guard rather than recalled. And a probe that only deletes
+   must assert the neighbours it leans on, or a later edit demotes it silently.
+3. *(standing instruction)* **None added.** R-005 already covers it and fired correctly.
+   What this run adds is evidence about its yield at a fourth use — undiminished, which is
+   itself the finding.
+
+**Also fired: R-002.** A fix batch raised on its third edit and never wrote the file, so
+three of four edits vanished. Caught only because the reader's defeats were replayed
+afterwards and one still passed. The instruction exists for exactly this and it earned its
+place again.
+
+**The check that catches this class does not exist**, and after four releases of saying so
+the honest addition is a number rather than a promise: **three guards of 253 have a
+neighbour probe**, and which of the remaining 250 read a scoped span cannot be computed
+from the code as written. That is `B-057`, and it is the work.
+
 ### 2026-08-10 · `stamp-cap` · the guard read a section, and stage 0 reads the file
 
 **Symptom.** A cap guard written to stop a section growing inside the stage-0 floor was
@@ -978,6 +1026,7 @@ without the cap the countable thing grows inside a section read in full.
 
 | Date | Topic | Commit | Verdict | Retro |
 |---|---|---|---|---|
+| 2026-08-11 | `neighbour-probe` / B-057 `plant-the-evidence-next-door` | `ac6e5db` | the neighbour probe as doctrine + three implementing it · **the doctrine failed its own first use** — one probe planted the needles of two RETIRED predicates · eight reader findings closed and each replayed failing, including a **declared span that was false** and a **silent loss of coverage** on a rekey · guards 250 → **253** · R-002 fired: a fix batch raised on its third edit and never wrote the file | 1 entry · 5 standing · retired 0 · added 0 · **stamps 11 → 10 (1 rotated)** · R-002, R-003, R-005, R-006 fired |
 | 2026-08-10 | `stamp-cap` / B-055 `one-line-per-run-is-a-slope` | `141294a` | stamps capped at ten, 18 rotated whole into the archive · stamp section 2 099 → **1 088 tok**, read portion 3 333 → **2 335**, stage-0 floor → **~35 300** · **the reader found six ways past the first cap guard**, one of them the stamp shape this doctrine's own command writes · four surfaces had never learned the rule · a hand-written 21 was a computed 18 · guards 248 → **250** | 1 entry · 5 standing · retired 0 · added 0 · **stamps 11 → 10 (1 rotated at this prune)** · R-003, R-005, R-006 fired |
 | 2026-08-10 | `loop-mechanism` / B-054 `the-loop-had-no-queue` | `64fcc6b` | the queue, `mode: dynamic`, `run.loop.arm`, the goal re-read between items · **R-005's reader found a contradiction the guards could not**: Part 1a armed unconditionally and overrode the file's own `Default off` · six guard defects, all planted and watched passing · guards 233 → **248** · **a red CI reached `main` on `5a77053`** — pushed after `npm test` without `test:all` | 1 entry · 5 standing · retired 0 · added 0 · R-003, R-005, R-006 fired |
 | 2026-08-10 | `findings-entry` / B-047 `the-word-audit-could-not-reach-it` | `0df1e7a` | 8 REQ verified, 1 with its scope corrected (three surfaces, not four) · **routing measured on fresh agents, 7/10 → 9/10 → 8/10** — bug hunt and PR review moved in both after-runs, the production check in neither · **R-005's reader defeated the nine new guards fifteen ways**, all fixed, and the six added probes found a sixteenth · guards 218 → **233** · evals 21 → **28** | 1 entry · 5 standing · retired 0 · added 0 · R-003, R-005, R-006 fired; R-002 and R-004 did not |
@@ -987,4 +1036,3 @@ without the cap the countable thing grows inside a section read in full.
 | 2026-08-10 | `planning-system` / N2 `verification-ledger` | `85f8c8a` | 3 REQ · the column a machine may not fill · **ten review rounds, ~20 findings, none from my probes** · carry-over 2 rows, 0 unresolved | 1 entry · 6 standing · retired 0 · added 0 · R-001, R-002, R-005 fired · guards 175 → 185 |
 | 2026-08-09 | `planning-system` / N1 `the-board` | `4233c3d` | 4 REQ · a queue between runs, and the seam the ledger left dangling · **ten review rounds, 29 findings, none from my probes** · carry-over 2 rows, 2 open, 0 unresolved | 1 entry · 6 standing · retired 0 · added 0 · R-001, R-002, R-004, R-005 all fired · guards 156 → 175 + 4 property |
 | 2026-08-09 | `audit-followup` / M6 `learned-shape` | `241df1e` | 1 REQ · a cap refused by measurement, and the class it uncovered · **eight review rounds, 20 findings, two of them red, none from my probes** · carry-over 12 rows, 7 open, 0 unresolved | 1 entry · 6 standing · retired 0 · added 0 · R-001, R-005 fired · guards 144 → 156 + 1 property |
-| 2026-08-09 | `audit-followup` / M5 `re-derive-axis` | `a3dd771` | 1 REQ · a sixth rotation axis, and the enumeration of the five that had already drifted · **four review rounds, 8 findings, all mine, none from my probes** · carry-over 12 rows, 7 open, 0 unresolved | 1 entry · 6 standing · retired 0 · added 0 · R-001, R-005 fired · guards 136 → 144 |
