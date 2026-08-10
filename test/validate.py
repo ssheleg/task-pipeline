@@ -2886,8 +2886,30 @@ if _sch and "run" not in _sch.get("definitions", {}):
     fail("pipeline.schema.json: no 'run' definition — run-wide pacing has no contract")
 if _exm is not None:
     _mode = (_exm.get("run") or {}).get("loop", {}).get("mode")
-    if _mode not in ("off", "interval"):
-        fail("pipeline.example.json: no explicit run.loop.mode — the example must "
+    # The legal set is READ from the schema, never listed here. It was listed once —
+    # ("off", "interval") — and adding `dynamic` in v1.40.0 failed this guard on a
+    # correct example, which is a check enforcing its own staleness (learned.md
+    # rule 8: compute, never restate).
+    def _loop_modes(node):
+        if isinstance(node, dict):
+            _pr = node.get("properties")
+            if isinstance(_pr, dict) and "loop" in _pr:
+                return ((_pr["loop"].get("properties") or {}).get("mode") or {}).get("enum")
+            for _v in node.values():
+                _r = _loop_modes(_v)
+                if _r: return _r
+        elif isinstance(node, list):
+            for _v in node:
+                _r = _loop_modes(_v)
+                if _r: return _r
+        return None
+    _legal = _loop_modes(_sch) if _sch else None
+    if not _legal:
+        _UNLOOKED.append("skip: run.loop.mode in the example — the schema states no "
+                         "enum for it, so there is nothing to check the example against")
+    elif _mode not in _legal:
+        fail("pipeline.example.json: run.loop.mode is "
+             f"{_mode!r}, and the schema's legal set is {_legal} — the example must "
              "DEMONSTRATE the default, not rely on its absence")
 
 # G2. The continuity reach guard. references/build.md carried the continuous-

@@ -258,13 +258,21 @@ never that the work was skipped quietly.
   its status, in build order with the walking skeleton first. Single-module work
   records `single module: <name>` in the design and moves on — a skipped
   decomposition is a decision, never an omission.
+- **The queue exists here, so the loop arms here** ([`continuity.md`](continuity.md) →
+  *Part 1a*). Where `run.loop.arm` is `after-decomposition` and the map holds more than
+  one module, arm the mode at the close of this stage and print one line: the mode, and
+  either the job id and its cancel command (`interval`) or the delay chosen and why
+  (`dynamic`). Arming collapses no gate and authorizes no outward act; it decides only
+  that the run does not stop to ask *"shall I take the next one?"*. Single-module work
+  arms nothing and says so — a loop with one item is a timer.
 - **GATE (manual):** the user approves the design, the UI verdict is recorded,
   **every REQ is answered by the design** — a requirement the design doesn't
   address is either covered now or explicitly dropped by the operator, with the
   drop recorded in the carry-over ledger — **and, for a platform, the module map is
   approved**: brick criteria met or excepted in writing, dependency graph acyclic,
   build order topological, every REQ mapped to exactly one module, cross-module
-  contracts named with their owner.
+  contracts named with their owner — **and the loop's arming state is printed**:
+  armed with its queue and pacing, or not armed with the reason.
 
 ## 3 — Spec — with UX track for user-facing tasks
 - **Freedom: medium** — what the contract says is judgement; which contracts must be locked is a list ([`gates.md`](gates.md) → *Axis C*).

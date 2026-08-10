@@ -11,6 +11,7 @@ almost no window left, loses the middle of it, and re-derives what it already di
 
 - The limit, before the capability
 - Part 1 — the loop
+- Part 1a — the queue is stage 2's, and the loop arms itself on it
 - Arming it on Claude Code
 - Other harnesses, and honest degradation
 - What one iteration means
@@ -62,6 +63,56 @@ the boundary between one agent turn and the next. This file is that reach.
 is never asked again — which is the entire point. A mode that has to be requested
 every run is not a mode, it is a habit the operator maintains by hand.
 
+## Part 1a — the queue is stage 2's, and the loop arms itself on it
+
+**A loop with no queue is a timer.** Until this section existed, `run.loop` said *how
+often* to continue and never said *what the next item is*, so the mode could be armed
+and still leave the run picking its next move by recollection — which is the failure
+[`learned.md`](learned.md) rule 16 is about, running once per fire.
+
+**The queue is the module map** ([`decomposition.md`](decomposition.md)) when the brief
+was a platform, and the plan's task list otherwise. Both already exist and both are
+already ordered; neither was ever named as the thing the loop walks.
+
+**Arming is a consequence, not a request.** Where the queue has more than one item, the
+loop arms **at the close of stage 2** and the run says so in one line. It is not asked
+for, for the same reason the mode is recorded rather than requested: a capability the
+operator must remember to switch on is one they will forget on exactly the run that
+needed it.
+
+**What arming does NOT change, and this is load-bearing:** the four stops are the four
+stops. A `manual` gate still waits. An outward or irreversible act still needs its own
+specific authorization — *a generic flag is not a specific authorization*, and arming a
+queue is the most generic flag there is. Arming decides only that the run does not stop
+to ask *"shall I take the next one?"*.
+
+**`mode: dynamic` — when the harness paces itself.** `interval` was the only mode while
+the only primitive was a fixed tick. A harness that can schedule its own next turn
+should: the run picks the delay from what it is waiting for, and a wait on nothing is a
+wait of minutes rather than a fixed tick nobody chose. On a harness with neither
+primitive the mode degrades to prose discipline plus the build ledger, and **the run
+says which one it is running** — the rule below about claiming a capability you do not
+have is unchanged and applies to `dynamic` first.
+
+### The goal is re-read between items, not only the board
+
+Each iteration already re-measures the work-list. That answers *what is open*. It does
+not answer *whether the open thing still serves what this run was for* — and a queue
+built at stage 2 outlives the reason it was built, because the operator learns things
+between items and says so.
+
+So at the bottom of an iteration, beside the re-derived `prio`:
+
+1. re-read the brief's goal — one line, quoted, not recalled;
+2. state whether the next item still serves it;
+3. if it does not, **re-order or re-scope the queue and say what moved and why.** A row
+   that stops serving the goal leaves for the board with its reason
+   ([`backlog.md`](backlog.md)), it does not get worked because it was next.
+
+A queue re-derived only by `age` and `sev` is a queue that is honest about priority and
+silent about purpose. Both numbers can be right while the run is finishing something the
+operator stopped wanting two items ago.
+
 ## Arming it on Claude Code
 
 ```
@@ -85,10 +136,22 @@ silent failures otherwise:
   stops on day eight is worse than one that was never armed, because the operator
   believes work is still moving.
 
-Where `run.loop.mode` is `interval`, the **preflight arms it** and prints the job
-id and the cancel command. Arming is not a new decision at that point — the config
-is the recorded authorization, and re-asking would rebuild the habit the config
-exists to retire.
+**Where it arms is `run.loop.arm`,** and there are two points because there are two
+kinds of run:
+
+- `preflight` — the top of the run. Right when the loop walks stage boundaries rather
+  than a list, and the only option before Part 1a existed.
+- `after-decomposition` — the close of stage 2, once the queue exists and holds more
+  than one item. Arming earlier would arm a loop with nothing to walk.
+
+Either way the run **prints the job id and the cancel command**, and arming is not a new
+decision at that point — the config is the recorded authorization, and re-asking would
+rebuild the habit the config exists to retire.
+
+Under `mode: dynamic` there is no job id: the run schedules its own next turn each time
+and prints **the delay it chose and why**, which is the same disclosure in the form that
+mode has. A dynamic run that says nothing about its pacing is indistinguishable from a
+run that quietly stopped.
 
 ## Other harnesses, and honest degradation
 

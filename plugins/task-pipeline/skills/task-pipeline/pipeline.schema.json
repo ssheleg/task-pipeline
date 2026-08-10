@@ -48,18 +48,34 @@
             "mode": {
               "enum": [
                 "off",
-                "interval"
+                "interval",
+                "dynamic"
               ],
-              "description": "off (the default when absent) = the run pauses between items as it always did. interval = the run is armed with the harness's own loop primitive and advances one item per fire, stopping only at a manual gate, an unresolvable block, a genuine ambiguity, or completion."
+              "description": "off (the default when absent) = the run pauses between items as it always did. interval = armed with the harness's fixed-tick primitive, one item per fire. dynamic = the harness schedules its own next turn and the run picks each delay from what it is waiting for; a wait on nothing is minutes, not a tick nobody chose. interval and dynamic stop at the same four things — a manual gate, an unresolvable block, a genuine ambiguity, completion — and neither collapses an outward act: a generic flag is not a specific authorization."
             },
             "interval": {
               "type": "string",
               "pattern": "^[0-9]+[smhd]$",
-              "description": "Required when mode is 'interval'. Must divide its unit cleanly (5m, 10m, 2h — not 7m or 90m); a value that does not is rounded to the nearest that does, and the rounding is stated out loud. Pick the shortest interval that is longer than a typical item."
+              "description": "Required when mode is 'interval', and meaningless when it is 'dynamic' — a self-pacing run chooses each delay. Must divide its unit cleanly (5m, 10m, 2h — not 7m or 90m); a value that does not is rounded to the nearest that does, and the rounding is stated out loud. Pick the shortest interval that is longer than a typical item."
             },
             "command": {
               "type": "string",
               "description": "How this harness arms it, e.g. '/loop'. Harness-specific and therefore project-recorded rather than assumed: on a harness with no loop primitive, omit it — the mode then degrades to prose discipline plus the build ledger, and the run says so instead of implying it is armed."
+            },
+            "queue": {
+              "enum": [
+                "module-map",
+                "plan-tasks",
+                "none"
+              ],
+              "description": "What the loop walks. A loop with no queue is a timer: it says how often to continue and never what the next item is, so the run picks its next move by recollection. module-map = stage 2's decomposition (a platform); plan-tasks = stage 4's task list; none = the mode is armed for the stage boundaries only. Doctrine: references/continuity.md -> Part 1a."
+            },
+            "arm": {
+              "enum": [
+                "preflight",
+                "after-decomposition"
+              ],
+              "description": "When the mode is armed. preflight = at the top of the run, the original behaviour. after-decomposition = at the close of stage 2, once the queue exists and has more than one item — the default for a queue-bearing run, because a capability the operator must remember to switch on is one they forget on the run that needed it. Arming never collapses a manual gate or an outward action."
             }
           }
         },

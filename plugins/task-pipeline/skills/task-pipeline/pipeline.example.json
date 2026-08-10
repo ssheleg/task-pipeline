@@ -46,7 +46,7 @@
       ],
       "gate": {
         "type": "manual",
-        "check": "the user approves the design AND the UI verdict is recorded (does the task touch a user-facing surface — web/mobile/CLI/TUI? this arms the stage-3 UX track). Every REQ is answered by the design, or explicitly dropped by the operator into the carry-over ledger. For a platform (several independent capabilities or shippable surfaces): the module map specs/<topic>-modules.md is committed and approved — brick criteria met or excepted in writing, dependency graph acyclic, build order topological with the walking skeleton first, every REQ mapped to exactly one module, cross-module contracts named with their owner. Single-module work records 'single module: <name>' instead — a skipped decomposition is a recorded decision, never an omission"
+        "check": "the user approves the design AND the UI verdict is recorded (does the task touch a user-facing surface — web/mobile/CLI/TUI? this arms the stage-3 UX track). Every REQ is answered by the design, or explicitly dropped by the operator into the carry-over ledger. For a platform (several independent capabilities or shippable surfaces): the module map specs/<topic>-modules.md is committed and approved — brick criteria met or excepted in writing, dependency graph acyclic, build order topological with the walking skeleton first, every REQ mapped to exactly one module, cross-module contracts named with their owner. Single-module work records 'single module: <name>' instead — a skipped decomposition is a recorded decision, never an omission. THE LOOP'S ARMING STATE IS PRINTED — armed with its queue and pacing, or not armed with the reason; the queue exists at this stage and a loop armed earlier has nothing to walk."
       }
     },
     {
@@ -172,7 +172,12 @@
   ],
   "_run_note": "Run-wide pacing. Shipped explicitly OFF so this example DEMONSTRATES the default rather than relying on its absence — see references/continuity.md. Set mode to 'interval' and a project stops being asked whether to run item-by-item; it still stops at every manual gate. There is no context-budget field here on purpose: the threshold is not measurable, so it is unconditional doctrine, not config.",
   "run": {
-    "loop": { "mode": "off", "interval": "5m", "command": "/loop" }
+    "loop": {
+      "mode": "dynamic",
+      "queue": "module-map",
+      "arm": "after-decomposition",
+      "command": "/loop"
+    }
   },
   "release": {
     "enabled": true,

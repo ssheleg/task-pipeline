@@ -191,7 +191,7 @@ reads those files, and a partial read shows whichever sections come first.
 `run` block in `pipeline.schema.json` carries the loop mode; the shipped example
 sets `run.loop.mode` explicitly rather than omitting it, because the example is
 what gets copied and an absent field reads as an oversight instead of a decision.
-*(guard: `no explicit run.loop.mode`)*
+*(guard: `run.loop.mode is` … `and the schema's legal set is`)*
 
 **25. The run-wide mode is named by every stage that could be misled by it.**
 `SKILL.md`, `references/grill.md`, `references/build.md`, `references/stages.md`
