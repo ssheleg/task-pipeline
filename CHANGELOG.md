@@ -1,5 +1,77 @@
 # Changelog
 
+## v1.42.0 — a probe proves the phrasing its author had in mind
+
+Six times in one session a guard was defeated by **text that was not its subject**, and
+every one of those guards had a probe, and every probe fired. The probes and the guards
+were written in the same hour from the same reading of the same file, so they shared the
+blind spot rather than covering it.
+
+| The check's subject | What answered it instead |
+|---|---|
+| stage 2 names the loop's arming | *"it **arms** the UX track"*, present since v1.7.0 |
+| the section states the authorization floor | the same phrase in a Rationalizations row, and in a section from v1.11.0 |
+| the run stamps have a cap | the **standing instructions'** `max 10` in the same cell — and, once narrowed past it, the same cap on the other side of the `·` |
+| a section read in full stays capped | rows under one heading, while a second heading held forty more |
+
+### The doctrine failed its own first use, and a reader caught that too
+
+R-005's fourth consecutive reader read the three new probes against the section that
+defines them. **`nb03` was not a neighbour probe.** It planted the needles of two
+*retired* predicates — proving the guards that used to exist were neighbour-answerable
+and saying nothing about the one that does. The instruction *"plant the guard's own
+evidence"* reads as *"plant something that used to satisfy it"* unless it says **which
+literal**, and now it does: the one the predicate matches today, read out of the guard.
+
+Seven more, each planted and watched passing, each now replayed and failing:
+
+- **Part 1a's precondition could be replaced by its opposite** and a housekeeping aside in
+  a `###` subsection answered for it — the reading `Default off` exists to forbid, shipping
+  behind a parenthesis;
+- **the stage-2 guard's declared span was false.** Its comment said *"the GATE bullet and
+  nothing else"*; the GATE is the last bullet, so the split handed it everything to the
+  section end and a trailing note satisfied it;
+- `- **GATEways to stage 3:**` was taken as the gate — no word boundary;
+- **a decoy row about the archive answered for the live file**, because the retrospective
+  check scanned every `|` line rather than the row it names;
+- **the scope depended on a `·`** no doctrine requires: replacing it with `, and` restored
+  the v1.41.0 defeat by punctuation;
+- **one disjunct was dead and the live one was a literal** — the source line-wraps, so the
+  check was a false positive on any reword and a false negative on inversion;
+- and **rekeying the stage-2 guard silently lost coverage**: deleting the whole queue
+  bullet began to pass, while its probe kept firing only because it *also* deleted the
+  gate clause. A probe whose stated claim has quietly become another probe's claim.
+
+**A probe that only deletes is not a neighbour probe** — it may be correct, but if it
+leans on copies already next door it must assert they are there, or a later edit demotes
+it to a delete-only test that still passes.
+
+### The neighbour probe
+
+`gates.md` now asks a guard that reads a scoped span for a **second** probe, planting in
+two places at once: break the subject, plant the guard's own evidence **next door**, and
+require it to still fail. A guard that goes green is reading the neighbourhood, and the
+ordinary probe cannot tell the difference — which is why it is a separate probe rather
+than a stricter one.
+
+Three shipped with it, one per guard that fell this way. **The third failed on its first
+run and was right to:** a planted sentence saying *"after-decomposition remains a word in
+the schema"* satisfied the stage-2 guard, proving it neighbour-answerable. The guard is
+now keyed on the stage's **gate** — what it must DO — rather than on prose around it,
+because prose above a gate can say anything.
+
+**Positional narrowing is not scoping**, and three of the six were "fixed" that way
+before falling again to text still inside the cut.
+
+### Half of B-057 was already mechanised, and the row overstated it
+
+`test/negatives.py` runs `differs_from_repo` on every planted copy, so a probe whose
+needle no longer matches fails **loudly** rather than silently — which is what every
+stale literal in this session actually did. The remaining half is the silent one, and it
+is what the neighbour probe is for.
+
+- Guards: 250 → **253**.
+
 ## v1.41.0 — one line per run is a slope, not a bound
 
 `retro.md` is read **in full** at stage 0, and its own doctrine called both read sections

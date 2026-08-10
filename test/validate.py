@@ -4012,7 +4012,9 @@ if os.path.isfile(_CONT_P):
     # and require the floor in each section that states it.
     for _sec_re, _label in (
             (r"^##\s*The limit, before the capability.*?$(.*?)(?=^##\s)", "The limit"),
-            (r"^##\s*Part 1a\b.*?$(.*?)(?=^##\s)", "Part 1a")):
+            # ...stopping at ANY heading depth: the span swallowed its own `###`
+            # subsections, so an aside there answered for the section body.
+            (r"^##\s*Part 1a\b.*?$(.*?)(?=^#{2,3}\s)", "Part 1a")):
         _sm = re.search(_sec_re, _cont, re.S | re.M)
         if _sm is None:
             fail(f"references/continuity.md: the `{_label}` section is gone — the "
@@ -4026,9 +4028,13 @@ if os.path.isfile(_CONT_P):
                  "the copy a reader of this section will meet")
     # ...and Part 1a must state its precondition, or it makes arming unconditional and
     # silently overrides the default-off floor stated three surfaces away.
-    _p1a = re.search(r"^##\s*Part 1a\b.*?$(.*?)(?=^##\s)", _cont, re.S | re.M)
-    if _p1a and not re.search(r"nothing is recorded|where the mode is \*\*recorded\*\*",
-                              _p1a.group(1), re.I):
+    # reads: `## Part 1a`, stopping at the next heading of ANY depth — the span
+    # swallowed its own `###` subsections, so an aside there answered for the body.
+    # Flattened: one disjunct was dead (the source wraps `Where the mode\nis
+    # **recorded**`) and the live one was a literal any reword broke.
+    _p1a = re.search(r"^##\s*Part 1a\b.*?$(.*?)(?=^#{2,3}\s)", _cont, re.S | re.M)
+    if _p1a and not re.search(r"nothing is recorded, nothing arms",
+                              _flatten(_p1a.group(1), lower=True)):
         fail("references/continuity.md Part 1a: arming is stated with no precondition "
              "about the recorded mode. Read cold, that arms a loop in a project with no "
              "pipeline.json at all — the reading an independent reader took before this "
@@ -4056,15 +4062,36 @@ if os.path.isfile(_STG_P):
     _m2 = re.search(r"^##\s*2\s*—.*?$(.*?)(?=^##\s)", _stg, re.S | re.M)
     if _m2 is None:
         _UNLOOKED.append("skip: stage-2 arming — no `## 2 —` section in stages.md")
-    elif "after-decomposition" not in _flatten(_m2.group(1), lower=True):
+    # reads: the GATE bullet of stage 2, and nothing else in the section.
+    # Keyed on the OBLIGATION rather than the discussion around it. A predicate over
+    # the whole section was satisfied first by a bare "arm" (from `it arms the UX
+    # track`, present since v1.7.0), then by a bullet FORBIDDING arming, then — under
+    # a neighbour probe — by a sentence merely containing `after-decomposition`. What
+    # a stage must DO lives in its gate; prose above it can say anything.
+    # reads: the FIRST PARAGRAPH of the GATE bullet. The bullet is last in the section,
+    # so the split hands it everything to the section end and a trailing note answered
+    # for it; and `startswith("- **GATE")` took `- **GATEways…` as the gate.
+    elif "arming state" not in _flatten(
+            next((_b for _b in re.split(r"\n(?=- )", _m2.group(1))
+                  if re.match(r"- \*\*GATE\b", _b.lstrip())), "").split("\n\n", 1)[0],
+            lower=True):
         # A bare "arm" was the first predicate and it was satisfied from the day it was
         # written — this stage has said "it arms the UX track in stage 3" since v1.7.0,
         # so the guard passed for a reason that had nothing to do with the loop. Found
         # by its own probe, which could not make it fail. The predicate now names the
         # thing it is about.
-        fail("references/stages.md stage 2: the queue exists at this stage and nothing "
-             "here says the LOOP arms on it. Arming at preflight arms a loop with "
-             "nothing to walk")
+        fail("references/stages.md stage 2: the GATE does not require the loop's arming "
+             "state to be printed. Arming at preflight arms a loop with nothing to walk, "
+             "and what a stage must DO lives in its gate — prose above it can say anything")
+    elif not re.search(r"loop arms here", _flatten(_m2.group(1), lower=True)):
+        # Rekeying to the gate silently dropped this: deleting the whole queue bullet
+        # passed, while lp07 kept firing only because it ALSO deletes the gate clause.
+        # A probe whose stated claim has quietly become another probe's claim is the
+        # coverage loss this release nearly shipped.
+        fail("references/stages.md stage 2: the gate requires the arming state and the "
+             "body no longer explains where the queue comes from. The obligation and its "
+             "reason are two statements of one rule, and this file has lost that pair "
+             "before")
 _ex_j = load_json(os.path.relpath(_EX_P, ROOT)) if os.path.isfile(_EX_P) else None
 if _ex_j:
     # By ID: a reader renamed the stage on all seven surfaces and this guard went
@@ -4152,10 +4179,14 @@ _RETRO_DOC = os.path.join(_skill_dir, "references", "retrospective.md")
 if os.path.isfile(_RETRO_DOC):
     _seg = None
     for _l in open(_RETRO_DOC, encoding="utf-8").read().splitlines():
-        if not _l.startswith("|") or "retro.md" not in _l.lower():
+        # reads: the ONE row whose first cell names docs/superpowers/retro.md. Scanning
+        # every `|` line let a decoy row for the ARCHIVE answer for the live file; and
+        # splitting on `·` made the scope depend on punctuation no doctrine requires,
+        # so `, and` in its place restored the v1.41.0 defeat.
+        if not _l.startswith("|") or "docs/superpowers/retro.md" not in _l.split("|")[1]:
             continue
         for _cell in _l.split("|"):
-            for _s in _cell.split("·"):
+            for _s in re.split(r"(?=\*\*[A-Z])", _cell):
                 if "run stamps" in _flatten(_s, lower=True):
                     _seg = _s
                     break
