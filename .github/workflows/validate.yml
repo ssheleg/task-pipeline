@@ -2806,7 +2806,7 @@ jobs:
           python3 - <<'EOF'
           p = "/tmp/hw3-copy/plugins/task-pipeline/skills/task-pipeline/references/learned.md"
           t = open(p, encoding="utf-8").read()
-          needle = "**Numbers issued so far: 21.**"
+          needle = "**Numbers issued so far: 22.**"
           assert needle in t, "PLANT DID NOT LAND: high-water mark absent before edit"
           open(p, "w", encoding="utf-8").write(t.replace(needle, "**A note.**", 1))
           assert "Numbers issued so far" not in open(p, encoding="utf-8").read(), "PLANT DID NOT LAND"

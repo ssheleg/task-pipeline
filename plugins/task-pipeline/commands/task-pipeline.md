@@ -37,8 +37,11 @@ Pull what the project already knows about *this task*:
   `graphify-out/graph.json`. It answers **reach** — what calls this, what breaks if it
   moves — which grep cannot.
 - `CLAUDE.md`, `CONTEXT.md`/ADRs, `docs/` + `docs/ux/`, past briefs and carry-over ledgers.
-- **the retro's standing instructions** — `docs/superpowers/retro.md`, read in full;
-  they bind this run (`references/retrospective.md`).
+- **the retro's standing instructions and run stamps** — `docs/superpowers/retro.md`,
+  read in full; both are bounded and they bind this run. Its **Recent log** is
+  *queried* by the task's nouns, not read: nothing caps it, and an uncapped section
+  inside a binding source is what makes the capped part get skimmed
+  (`references/retrospective.md`).
 - the **knowledge wiki** if installed ([obsidian-wiki](https://github.com/ar9av/obsidian-wiki);
   detect `~/.obsidian-wiki/config`), and any other doc system the project names as its docs.
 - **the board** (`docs/superpowers/backlog.md`) — open count quoted in the brief, or
@@ -136,7 +139,7 @@ gets argued with, a wrong graph gets believed.
    line starting `+`, and every repo clean and pushed. The fix is two commands and the
    second gets forgotten: push the submodule, **then** `git add <submodule> && git commit`.
 5. **The retrospective is the run's last act** (`references/retrospective.md`), in this
-   order: **stamp** the run (its commit makes the cold trigger computable) → **prune**
+   order: **stamp the run first** (its commit makes the cold trigger computable) → **prune**
    every standing instruction against its three retirement triggers, list held to ten,
    every deletion logged → **write an entry only if the run diverged**: symptom with
    evidence, the stage it surfaced at, the stage that *owned* it, the root cause, the
