@@ -1,5 +1,57 @@
 # Changelog
 
+## v1.35.0 — the loop that had no ceiling, the exemption nobody measured
+
+Three findings from the same audit, all of them gates behaving as prose.
+
+**The review loop was capped by nothing.** `build.md` caps the stage-5 fix loop at five
+rounds per task and `loop-guard.md` caps stage re-entries at two — and a review round is
+neither, so nothing counted them. The run stamps say what that cost: **ten rounds, ten,
+eight, four, three**, in one programme.
+
+**A flat cap would have been the wrong fix**, and this is the part worth keeping. Every
+one of those runs recorded *"none from my probes"* beside its count — the reader was
+still finding real defects on round nine. Stopping at two would have shipped them. So
+the cap is a **decision point**: default 3 rounds per artifact (`pipeline.json` →
+`run.review.maxRounds`), and at the cap the run stops reviewing and prints the pair
+`audit.md` already defines, per round:
+
+```
+review cap reached — 3 rounds — artifact: test/validate.py
+  round 1: 12 new · 0 self-inflicted
+  round 2:  5 new · 1 self-inflicted
+  round 3:  1 new · 3 self-inflicted
+```
+
+Self-inflicted ≥ new and the axis is exhausted; new still ahead and continuing is the
+operator's call, made with numbers rather than fatigue. Rounds are counted from the run
+ledger's `touch:` pass numbers, never from memory. Every finding left open at the cap
+leaves as a board row with its evidence, never as a shrug.
+
+**The pipeline ran eleven stages over a typo because nothing measured the exemption.**
+The boundary — a one-line fix, a mechanical rename — existed in prose and depended on an
+agent remembering it. Stage 0 now runs a three-question triage with something behind each
+question, and **proposes** the short path: stages 1–4 marked `⊘` with the triage answer
+as the reason. Propose, never take: the answer goes in the brief and silence takes the
+full flow, the same floor deploy authorization uses. The glyph is what makes it safe —
+a skipped stage is printed on the rail *with its reason*, and a skip nobody can see is
+indistinguishable from a stage never entered.
+
+**`exposure.md`'s worked example disagreed with its own output, in both directions at
+once.** It taught `31 releases since the last human confirmation` while the code printed
+`releases carry one`, and it hardcoded `99` — a live count that drifts. The example now
+carries no digits at all, and a guard computes the format's vocabulary **from the print
+statement** and requires the doctrine to show it.
+
+**Six new guards, each watched failing.** Two of them found their own author first: the
+short-path check was scoped to a paragraph while the bullet it reads carries a fenced
+block, so it stopped three lines short of the glyph and passed in silence — and its
+replacement matched the fence's own backtick and accused the clean tree. A detector that
+finds itself before it finds anything else is checking the wrong thing, twice in one
+module.
+
+Guards: 193 → **199**, property checks 8.
+
 ## v1.34.0 — a run that says which pipeline it is on, and where in it
 
 An audit of this pipeline asked four questions of it. The first was *does the agent

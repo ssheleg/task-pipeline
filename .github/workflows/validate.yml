@@ -3782,3 +3782,112 @@ jobs:
           else
             echo "OK: validator correctly FAILs — every declared shape has a named reader"
           fi
+
+      - name: Negative self-test (the review loop left with no cap)
+        run: |
+          set -eu
+          rm -rf /tmp/rc1-copy && cp -R . /tmp/rc1-copy
+          python3 - <<'EOF'
+          p = "/tmp/rc1-copy/plugins/task-pipeline/skills/task-pipeline/references/loop-guard.md"
+          t = open(p, encoding="utf-8").read()
+          needle = "**3 review rounds** per artifact"
+          assert needle in t, "PLANT DID NOT LAND: the cap is not where the guard reads it"
+          open(p, "w", encoding="utf-8").write(t.replace(needle, "review rounds per artifact", 1))
+          EOF
+          if python3 /tmp/rc1-copy/test/validate.py; then
+            echo "ERROR: the loop this repository ran ten rounds of is capped by nothing again"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the review loop carries a stated cap"
+          fi
+
+      - name: Negative self-test (the review cap moved in one file only)
+        run: |
+          set -eu
+          rm -rf /tmp/rc2-copy && cp -R . /tmp/rc2-copy
+          python3 - <<'EOF'
+          p = "/tmp/rc2-copy/plugins/task-pipeline/skills/task-pipeline/references/loop-guard.md"
+          t = open(p, encoding="utf-8").read()
+          needle = "**3 review rounds** per artifact"
+          assert needle in t, "PLANT DID NOT LAND: the cap moved"
+          open(p, "w", encoding="utf-8").write(
+              t.replace(needle, "**4 review rounds** per artifact", 1))
+          EOF
+          if python3 /tmp/rc2-copy/test/validate.py; then
+            echo "ERROR: the cap says one number in the file that owns it and another where the loop runs"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the cap is computed from one file and required in the other"
+          fi
+
+      - name: Negative self-test (the review cap with no config key)
+        run: |
+          set -eu
+          rm -rf /tmp/rc3-copy && cp -R . /tmp/rc3-copy
+          python3 - <<'EOF'
+          p = "/tmp/rc3-copy/plugins/task-pipeline/skills/task-pipeline/references/stages.md"
+          t = open(p, encoding="utf-8").read()
+          assert "`run.review.maxRounds`" in t, "PLANT DID NOT LAND: the config key moved"
+          open(p, "w", encoding="utf-8").write(t.replace("`run.review.maxRounds`", "the config", 1))
+          EOF
+          if python3 /tmp/rc3-copy/test/validate.py; then
+            echo "ERROR: a default nobody can change is a default everybody overrides in their head"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the cap names the key that changes it"
+          fi
+
+      - name: Negative self-test (the short path marking a stage with an undefined glyph)
+        run: |
+          set -eu
+          rm -rf /tmp/sp-copy && cp -R . /tmp/sp-copy
+          python3 - <<'EOF'
+          p = "/tmp/sp-copy/plugins/task-pipeline/skills/task-pipeline/references/stages.md"
+          t = open(p, encoding="utf-8").read()
+          needle = "marked `⊘` with the triage answer"
+          assert needle in t, "PLANT DID NOT LAND: the short path's glyph moved"
+          open(p, "w", encoding="utf-8").write(
+              t.replace(needle, "marked `※` with the triage answer", 1))
+          EOF
+          if python3 /tmp/sp-copy/test/validate.py; then
+            echo "ERROR: a skipped stage marked with a symbol no legend defines"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — every skip glyph is in the legend"
+          fi
+
+      - name: Negative self-test (the exposure example drifting from its own print)
+        run: |
+          set -eu
+          rm -rf /tmp/ex1-copy && cp -R . /tmp/ex1-copy
+          python3 - <<'EOF'
+          p = "/tmp/ex1-copy/plugins/task-pipeline/skills/task-pipeline/references/exposure.md"
+          t = open(p, encoding="utf-8").read()
+          assert "releases carry one" in t, "PLANT DID NOT LAND: the third component moved"
+          open(p, "w", encoding="utf-8").write(
+              t.replace("releases carry one", "releases since the last confirmation"))
+          EOF
+          if python3 /tmp/ex1-copy/test/validate.py; then
+            echo "ERROR: the doctrine teaches a format the code has never printed"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the example is computed from the print"
+          fi
+
+      - name: Negative self-test (a live count baked into the exposure example)
+        run: |
+          set -eu
+          rm -rf /tmp/ex2-copy && cp -R . /tmp/ex2-copy
+          python3 - <<'EOF'
+          p = "/tmp/ex2-copy/plugins/task-pipeline/skills/task-pipeline/references/exposure.md"
+          t = open(p, encoding="utf-8").read()
+          assert "exposure: N unverified" in t, "PLANT DID NOT LAND: the example line moved"
+          open(p, "w", encoding="utf-8").write(
+              t.replace("exposure: N unverified", "exposure: 99 unverified", 1))
+          EOF
+          if python3 /tmp/ex2-copy/test/validate.py; then
+            echo "ERROR: a live count in a doctrine is a count nobody updates"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the worked example carries no digits"
+          fi

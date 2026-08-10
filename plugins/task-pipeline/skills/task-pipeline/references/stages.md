@@ -138,6 +138,27 @@ never that the work was skipped quietly.
   or they genuinely disagree and that is a decision. There is no fourth option, and
   starting on an unresolved divergence means building against a system that does
   not exist.
+- **Phase 1d — the short-path triage: printed, proposed, never taken silently.** This
+  pipeline's own boundary exempts a typo, a one-line fix and a mechanical rename — and
+  nothing measured that until 2026-08-10, so the exemption depended on an agent
+  remembering it while eleven stages and four manual gates stood in front of a
+  one-paragraph edit. Three questions, each with something behind it:
+
+  ```
+  1. files the request names, resolved        git ls-files -- <paths>       -> N
+  2. any of them a public contract            the version-synced surfaces,
+                                              pipeline.schema.json, the
+                                              command, the README           -> yes/no
+  3. behaviour a user or a caller observes changes                          -> yes/no
+  ```
+
+  Few files, no contract, no observable change ⇒ **propose** the short path: stages 1,
+  2, 3 and 4 marked `⊘` with the triage answer as the reason, and 5→10 running
+  unchanged. **Propose, never take.** The answer goes in the brief's autonomy sweep and
+  silence takes the full flow — the same floor deploy authorization uses. The glyph is
+  what makes it safe: a skipped stage is printed on the rail **with its reason**
+  ([`progress.md`](progress.md)), and a skip nobody can see is indistinguishable from a
+  stage that was never entered.
 - **How it runs: [`grill.md`](grill.md)** — the full doctrine, built into this
   skill (nothing to install). In short: one question per turn, a recommended
   answer with each, explore the codebase before asking, depth-first through the
@@ -395,6 +416,14 @@ never that the work was skipped quietly.
   tagging, the CI verdict for what was just pushed is READ, not assumed**
   ([`conventions.md`](conventions.md) → *The CI verdict*) — a tag on a commit whose
   run nobody read is how a red `main` ships.
+- **The review loop that lives here has a cap, and the cap is a measurement**
+  ([`loop-guard.md`](loop-guard.md) → *The review loop*). **3 rounds** per artifact by
+  default (`pipeline.json` → `run.review.maxRounds`); at the cap the run stops reviewing
+  and prints new-versus-self-inflicted per round, and either the numbers end it or the
+  operator continues it out loud. This stage's loop was capped by nothing until
+  2026-08-10 and ran ten rounds twice in one programme, against a stated ceiling of two
+  re-entries per stage — the ceiling simply did not name a review round. Every finding
+  left open at the cap leaves as a board row with its evidence, never as a shrug.
 
 ## 8 — Post-deploy
 - **Freedom: medium** — where the logs live varies; 'clean boot or an honest degradation report' does not ([`gates.md`](gates.md) → *Axis C*).

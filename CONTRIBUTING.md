@@ -435,6 +435,24 @@ which is exactly what this file was for the whole time `loop-guard.md` called it
 detection mechanical and no run had created the file.
 *(guard: `declared under` and `shown in` and `a ledger shape with no reader`)*
 
+**50. The review loop has a stated cap, and the cap is one number in two files.** It is
+computed from `references/loop-guard.md`, which owns the caps, and required verbatim in
+the stage that runs the loop; both must name `run.review.maxRounds`, because a default
+nobody can change is a default everybody overrides in their head. The cap is a
+**decision point, not a stop** — at it the run prints new findings against
+self-inflicted ones, per round. A flat ceiling would be the wrong rule: the runs that
+went ten rounds were still finding real defects on round nine.
+*(guard: `no review-round cap` and `the review cap is stated with no config key`)*
+
+**51. The short path is proposed, printed and glyphed; the exposure example is computed
+from its own print.** A stage skipped by the triage is marked with a glyph
+`references/progress.md`'s legend defines — a skip nobody can see is indistinguishable
+from a stage never entered. And the worked exposure line carries **no digits**: its
+vocabulary is derived from the print statement at check time, because the previous
+example disagreed with the code in both directions at once and hardcoded a live count.
+*(guard: `and references/progress.md's legend does not define it`
+and `the worked example carries a digit`)*
+
 ## Adding or changing doctrine
 
 - **Change one idea per PR.** These files are read by agents under load; a PR that

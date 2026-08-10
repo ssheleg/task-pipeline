@@ -3332,6 +3332,106 @@ if os.path.isfile(_RUN_TPL):
                  "a ledger shape with no reader"
                  " is written by nobody")
 
+# --- P2: the gate fixes (v1.35.0) ---------------------------------------------
+# SCOPE: the DOCTRINE's own agreement — the review cap stated in two files, the
+# short path's glyph defined where glyphs are defined, and the exposure example
+# matching the statement that prints it. None of these observes a run.
+_LG_P = os.path.join(ROOT, _SKILLDIR, "references/loop-guard.md")
+_ST_P = os.path.join(ROOT, _SKILLDIR, "references/stages.md")
+
+# P2-G1. The review cap is a number, and a number written twice drifts. It is
+# computed from loop-guard.md — the file that owns the caps — and required in the
+# stage that runs the loop. This loop was capped by nothing at all while a ceiling
+# of two re-entries per stage sat one paragraph above it, so the failure here is
+# not hypothetical: it is what the last ten-round run was.
+if os.path.isfile(_LG_P) and os.path.isfile(_ST_P):
+    _lg_t = open(_LG_P, encoding="utf-8").read()
+    _st_t = open(_ST_P, encoding="utf-8").read()
+    _cap = re.search(r"\*\*(\d+) review rounds\*\* per artifact", _lg_t)
+    if not _cap:
+        fail("references/loop-guard.md: no review-round cap — the loop this "
+             "repository ran ten rounds of is capped by nothing")
+    else:
+        _want = f"{_cap.group(1)} rounds per artifact"
+        if _want not in _flatten(_st_t, lower=True):
+            fail(f"references/stages.md: the stage running the review loop does not "
+                 f"state {_want!r}, which references/loop-guard.md sets — "
+                 "the cap exists in one file and the loop runs in the other")
+    for _f, _t in (("references/loop-guard.md", _lg_t), ("references/stages.md", _st_t)):
+        if "run.review.maxRounds" not in _t:
+            fail(f"{_f}: the review cap is stated with no config key — a default "
+                 "nobody can change is a default everybody overrides in their head")
+
+# P2-G2. The short path marks stages with a glyph, and a glyph is only safe if it
+# is defined where glyphs are defined. A skipped stage that reads as a stage never
+# entered is the exact inversion progress.md's legend exists to prevent.
+# Unit: the BULLET, not the paragraph. The bullet carries a fenced block with blank
+# lines around it, so a paragraph-scoped read stops three lines in and never reaches
+# the glyph — which is what the first version did, silently. gates.md says to write
+# down which unit was chosen and what it misses: this one ends at the next top-level
+# bullet, so a glyph introduced in a following bullet is out of scope.
+if _PTXT and os.path.isfile(_ST_P):
+    _legend2 = set(re.findall(r"^\|\s*`(\S)`\s*\|", _PTXT, re.M))
+    _stx = open(_ST_P, encoding="utf-8").read()
+    _at = _stx.find("short-path triage")
+    if _at == -1:
+        fail("references/stages.md: no short-path triage — a pipeline with eleven "
+             "stages and no measured exemption runs all of them over a typo")
+    else:
+        _end = _stx.find("\n- **", _at)
+        # Fences out first: ``` is three backticks, so the naive span matches its own
+        # middle one and reports the delimiter as an undefined glyph. The check found
+        # itself before it found anything else — the shape gates.md calls a detector
+        # that matches itself first.
+        _slice = FENCE_RE.sub("", _stx[_at:_end if _end > 0 else len(_stx)])
+        for _tok in set(re.findall(r"`(\S)`", _slice)):
+            if not _tok.isalnum() and _tok != "`" and _tok not in _legend2:
+                fail(f"references/stages.md: the short path marks a stage {_tok!r} "
+                     "and references/progress.md's legend does not define it — "
+                     "a skip a reader cannot tell from a stage never entered")
+
+# P2-G3. The exposure example and the statement that prints it are two statements
+# of one format. They disagreed for a whole release — the doctrine taught
+# `31 releases since the last human confirmation` while the code printed
+# `releases carry one`, and it hardcoded a live count that drifts. Computed from
+# the print, required in the doctrine, and the example is required to carry no
+# digits at all: a worked example with a number in it is a number nobody updates.
+_EXP_P = os.path.join(ROOT, _SKILLDIR, "references/exposure.md")
+if os.path.isfile(_EXP_P):
+    _exp_t = open(_EXP_P, encoding="utf-8").read()
+    _lines = _OWN_SRC.splitlines()
+    _stmt = ""
+    for _i, _l in enumerate(_lines):
+        if _l.lstrip().startswith('print(f"  exposure:'):
+            _stmt = _l
+            _j = _i + 1
+            while _j < len(_lines) and not _stmt.rstrip().endswith(")"):
+                _stmt += _lines[_j]
+                _j += 1
+            break
+    if not _stmt:
+        _UNLOOKED.append("skip: exposure example vs its print — no exposure print "
+                         "statement found in this file")
+    else:
+        # Placeholders out, then the alphabetic word-runs that remain are the
+        # format's own vocabulary. Anything the code prints, the doctrine shows.
+        _words = [w.strip() for w in
+                  re.findall(r"[A-Za-z][A-Za-z ]{2,}", re.sub(r"\{[^}]*\}", " ", _stmt))]
+        _expn = _flatten(_exp_t, lower=True)
+        for _w in {" ".join(w.split()).lower() for w in _words}:
+            if _w in ("print f exposure", "f") or len(_w.split()) < 2:
+                continue
+            if _w not in _expn:
+                fail(f"references/exposure.md: the print says {_w!r} and the doctrine "
+                     "does not — the worked example and its own output have drifted")
+    _ex_line = [_l for _b in re.findall(r"```\n(.*?)```", _exp_t, re.S)
+                for _l in _b.split("\n") if _l.startswith("exposure:")]
+    for _l in _ex_line:
+        if re.search(r"\d", _l):
+            fail(f"references/exposure.md: the worked example carries a digit "
+                 f"({_l.strip()!r}) — a live count in a doctrine is a count nobody "
+                 "updates, and this one was eight releases stale")
+
 if errors:
     print("FAIL: task-pipeline structure invalid")
     for e in errors:

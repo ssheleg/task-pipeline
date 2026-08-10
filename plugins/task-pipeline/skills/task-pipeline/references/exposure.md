@@ -37,8 +37,15 @@ defect. Until then it is named honestly.
 ## The components, each named
 
 ```
-exposure: 99 unverified · never checked · 31 releases since the last human confirmation
+exposure: N unverified · never checked · N releases carry one
 ```
+
+**The example carries no numbers, deliberately.** It said `99 unverified` and
+`31 releases since the last human confirmation` until 2026-08-10 — one figure lifted
+from this repository's live count, which drifts, and one wording the code has never
+printed. A worked example that disagrees with its own output teaches the wrong format
+to every reader who trusts the doctrine over the terminal, and this one disagreed in
+both directions at once.
 
 - **unverified** — rows whose `Human` reads `never`.
 - **since** — days since the newest `Human` date. When **no** row has ever been

@@ -4,18 +4,29 @@
   "title": "task-pipeline config",
   "description": "Generic contract for a pipeline config. An ordered list of stages; each stage is run by the host project's own skills/agents and guarded by a typed gate. The framework imposes no specific stages, skills, or gate assignments — those are entirely the host project's config. Copy pipeline.example.json and rewrite it to match your project.",
   "type": "object",
-  "required": ["stages"],
+  "required": [
+    "stages"
+  ],
   "additionalProperties": true,
   "properties": {
-    "version": { "type": "integer", "minimum": 1 },
+    "version": {
+      "type": "integer",
+      "minimum": 1
+    },
     "stages": {
       "type": "array",
       "minItems": 1,
       "description": "The pipeline stages, in order. Any number, any names — your project's real stages.",
-      "items": { "$ref": "#/definitions/stage" }
+      "items": {
+        "$ref": "#/definitions/stage"
+      }
     },
-    "release": { "$ref": "#/definitions/release" },
-    "run": { "$ref": "#/definitions/run" }
+    "release": {
+      "$ref": "#/definitions/release"
+    },
+    "run": {
+      "$ref": "#/definitions/run"
+    }
   },
   "definitions": {
     "run": {
@@ -25,12 +36,17 @@
       "properties": {
         "loop": {
           "type": "object",
-          "required": ["mode"],
+          "required": [
+            "mode"
+          ],
           "additionalProperties": true,
           "description": "Whether the run advances item by item without a discretionary check-in. It NEVER collapses a manual gate or an outward action — a generic flag is not a specific authorization.",
           "properties": {
             "mode": {
-              "enum": ["off", "interval"],
+              "enum": [
+                "off",
+                "interval"
+              ],
               "description": "off (the default when absent) = the run pauses between items as it always did. interval = the run is armed with the harness's own loop primitive and advances one item per fire, stopping only at a manual gate, an unresolvable block, a genuine ambiguity, or completion."
             },
             "interval": {
@@ -43,6 +59,18 @@
               "description": "How this harness arms it, e.g. '/loop'. Harness-specific and therefore project-recorded rather than assumed: on a harness with no loop primitive, omit it — the mode then degrades to prose discipline plus the build ledger, and the run says so instead of implying it is armed."
             }
           }
+        },
+        "review": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "The review loop's ceiling. Absent, the default is 3 rounds per artifact. It is a DECISION POINT rather than a stop: at the cap the run prints new findings versus findings caused by its own fixes, per round, and either the pair ends the loop or the operator continues it out loud. A flat stop would be wrong — this repository's ten-round runs were still finding real defects on round nine. Doctrine: references/loop-guard.md.",
+          "properties": {
+            "maxRounds": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "Rounds per artifact before the run stops reviewing and measures. Counted from the run ledger's `touch:` pass numbers, never from memory; a round that finds nothing ends the loop by definition and is not counted."
+            }
+          }
         }
       }
     },
@@ -50,48 +78,97 @@
       "type": "object",
       "additionalProperties": true,
       "description": "Optional release automation, entirely project-defined and INDIVIDUALLY TOGGLEABLE. Omit the whole object, or set enabled:false, to turn release automation off for this project. The framework ships an example workflow (.github/workflows/release.yml) whose job is gated on a repo variable so each project arms it on its own; this block is the declarative counterpart the orchestrator reads.",
-      "required": ["enabled"],
+      "required": [
+        "enabled"
+      ],
       "properties": {
-        "enabled": { "type": "boolean", "description": "Master on/off toggle. false (or the object omitted) = no release automation for this project." },
-        "trigger": { "enum": ["tag", "manual", "push", "none"], "description": "What kicks off a release (e.g. a pushed vX.Y.Z tag, manual dispatch)." },
+        "enabled": {
+          "type": "boolean",
+          "description": "Master on/off toggle. false (or the object omitted) = no release automation for this project."
+        },
+        "trigger": {
+          "enum": [
+            "tag",
+            "manual",
+            "push",
+            "none"
+          ],
+          "description": "What kicks off a release (e.g. a pushed vX.Y.Z tag, manual dispatch)."
+        },
         "steps": {
           "type": "array",
-          "items": { "type": "string", "minLength": 1 },
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
           "description": "Ordered release actions, in prose — project-specific (e.g. create a GitHub release, npm publish). Human-only steps (2FA publish) are named as such."
         },
         "verify": {
           "type": "array",
-          "items": { "type": "string", "minLength": 1 },
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
           "description": "Post-release smoke checks that must pass after a release — this is the release's own post-deploy gate (stage 8 applied to shipping the package itself)."
         }
       }
     },
     "stage": {
       "type": "object",
-      "required": ["state", "skills", "gate"],
+      "required": [
+        "state",
+        "skills",
+        "gate"
+      ],
       "additionalProperties": true,
       "properties": {
-        "id": { "type": "integer", "description": "Optional ordinal." },
-        "state": { "type": "string", "minLength": 1, "description": "Unique stable key for the stage." },
-        "name": { "type": "string", "description": "Optional human label." },
-        "model": { "type": "string", "description": "Optional model for the stage. Prefer a provider-agnostic token over a vendor id, which goes stale as generations ship and may not exist on the operator's provider at all: 'default' = the model confirmed for this run (recommended: the most capable reasoning model the environment offers), 'inherit' = whatever the operator is currently on. A literal id is allowed but treated as an example, not a contract." },
+        "id": {
+          "type": "integer",
+          "description": "Optional ordinal."
+        },
+        "state": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Unique stable key for the stage."
+        },
+        "name": {
+          "type": "string",
+          "description": "Optional human label."
+        },
+        "model": {
+          "type": "string",
+          "description": "Optional model for the stage. Prefer a provider-agnostic token over a vendor id, which goes stale as generations ship and may not exist on the operator's provider at all: 'default' = the model confirmed for this run (recommended: the most capable reasoning model the environment offers), 'inherit' = whatever the operator is currently on. A literal id is allowed but treated as an example, not a contract."
+        },
         "skills": {
           "type": "array",
           "minItems": 1,
           "description": "The skill(s)/agent(s) that execute this stage. Any names your environment resolves — this is where you plug in your OWN skills.",
-          "items": { "type": "string", "minLength": 1 }
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
         },
         "gate": {
           "type": "object",
-          "required": ["type", "check"],
+          "required": [
+            "type",
+            "check"
+          ],
           "additionalProperties": true,
           "description": "Condition that must pass before advancing to the next stage.",
           "properties": {
             "type": {
-              "enum": ["auto", "manual"],
+              "enum": [
+                "auto",
+                "manual"
+              ],
               "description": "auto = the orchestrator verifies `check` itself (pass/fail); manual = wait for the operator's explicit go."
             },
-            "check": { "type": "string", "minLength": 1, "description": "The gate condition, in prose." }
+            "check": {
+              "type": "string",
+              "minLength": 1,
+              "description": "The gate condition, in prose."
+            }
           }
         }
       }
