@@ -1,5 +1,76 @@
 # Changelog
 
+## v1.41.0 — one line per run is a slope, not a bound
+
+`retro.md` is read **in full** at stage 0, and its own doctrine called both read sections
+*bounded by construction*. Measured 2026-08-10:
+
+```
+standing instructions   ~1 234 tok   capped at ten
+run stamps              ~2 099 tok   27 rows, capped by nothing
+recent log             ~12 441 tok   queried, not read
+```
+
+The v1.38.0 audit found exactly this shape in the narrative log and moved it out of the
+floor. It left the neighbour in the same file, with the same property, because the
+neighbour's growth is **tidy** — one line per run. A tidy slope is still a slope: at a
+hundred runs the stamp table alone is ~7 800 tokens of a floor the doctrine believes is
+bounded.
+
+**The cap is ten, and the cold trigger is why.** It reads *the last five run stamps*, so
+ten is that with a margin and a rotated row can never be one the trigger needed. Eighteen
+stamps rotated into `docs/superpowers/retro/2026-Q3.md`, whole, append-only. The stamp
+section went **2 099 → 1 088 tok**, the read portion **3 333 → 2 335**, and the stage-0
+floor to roughly **35 300**.
+
+### The reader found six ways past the cap, and one of them was the doctrine's own command
+
+R-005's reader defeated the first cap guard six ways, each planted and watched passing:
+
+- **a second `## Run stamps — …` heading in the same file** held forty more rows and
+  passed. The guard read a *section*; stage 0 reads the **file**;
+- **one leading space** on a row — still a valid table row — hid it from `startswith("|")`;
+- **the stamp command this doctrine ships** (`printf '%s · %s\n' …`) appends prose, not a
+  table row. An agent obeying the shipped instruction literally produced forty stamps the
+  guard could not see, with `unlooked: 0`;
+- **`templates/retro.md`** ships the same table to every host project and was outside the
+  corpus — the fourth hand-written list this repository has caught, against an invariant
+  that says corpora are discovered;
+- **rotation by deletion** passed: a stamp removed from `retro.md` and absent from the
+  archive is history destroyed, and the guard could not tell moving from deleting;
+- and the row check — already narrowed twice — was defeated by **swapping the two items
+  around the `·`**, which is the standing instructions' `max 10` answering for the stamps
+  again, on the other side of the separator.
+
+Both guards are rewritten to count by **predicate over a discovered corpus**: three stamp
+shapes (table row, list item, and the `<date> · <sha>` line the doctrine writes), every
+file carrying a `## Run stamps` section, and the doctrine's cap read from the segment that
+names the stamps rather than from anywhere in the row.
+
+**Four surfaces had never learned the rule** — the live section's own intro, stage 10's
+prune, `templates/retro.md`, and `templates/retro-archive.md`, which had no destination
+section for a rotation the doctrine names. And stage 0 still called *one line per run* a
+bound. All five now say the same thing.
+
+**A hand-written count in this release was wrong.** It said twenty-one stamps rotated;
+computed, it is **eighteen** (28 → 10). In a repository whose loudest canon is *compute,
+never restate*.
+
+### Two predicates that were answered by their neighbours
+
+Both found by their own probes, both the same shape as the defects the last release's
+reader named:
+
+- the first version asked whether the file contained *"one line each"* and *"bounded by
+  construction"*. After the fix both survived **only inside the sentences criticising
+  them**, and the guard fired on its own correction. A predicate that cannot tell a claim
+  from its refutation has a false-positive budget above zero, which `gates.md` sets at
+  zero;
+- scoped to the table row, it was then answered by the **standing instructions' own
+  `max 10`** in the same cell. It now reads only the part of the row after `Run stamps`.
+
+- Guards: 248 → **250**.
+
 ## v1.40.0 — the loop had a cadence and no queue
 
 `run.loop` said how **often** to continue. It never said **what the next item is**, so an

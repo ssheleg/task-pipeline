@@ -4096,6 +4096,84 @@ if _ex_j:
                  "example carrying a meaningless field teaches it")
 
 
+# The run-stamp table is read in full at stage 0 and had no cap until v1.41.0 —
+# ~2 099 tok over 27 rows against the standing instructions' ~1 234 behind a cap of ten,
+# while the doctrine called both "bounded by construction". One line per run is a slope.
+# The cold trigger reads the last FIVE stamps, so ten is that with a margin.
+#
+# Rewritten after a reader defeated the first version six ways. The lessons, all of them
+# this session's recurring class — a check answered by text that is not its subject:
+#   * it counted rows under ONE heading; a second `## Run stamps — …` heading in the same
+#     file held forty more and passed. Stage 0 reads the FILE;
+#   * it required a `|` at column zero; one leading space, still a valid table row, hid a
+#     row from it;
+#   * the doctrine's own stamp command appends `<date> · <sha>` as PROSE, so an agent
+#     obeying the shipped instruction literally produced stamps it could not see;
+#   * it named one file, while `templates/retro.md` ships the same table to every host
+#     project — the fourth hand-written corpus this repository has caught (invariant 4).
+_STAMP_ROW = re.compile(r"^[ \t]{0,3}\|\s*\d{4}-\d{2}-\d{2}\s*\|", re.M)
+_STAMP_LIST = re.compile(r"^[ \t]{0,3}[-*]\s+\d{4}-\d{2}-\d{2}\b[^\n]*`[0-9a-f]{7,40}`", re.M)
+_STAMP_LINE = re.compile(r"^[ \t]{0,3}\d{4}-\d{2}-\d{2}\s*·\s*`?[0-9a-f]{7,40}`?", re.M)
+STAMP_CAP = 10
+
+
+def _count_stamps(text):
+    return (len(_STAMP_ROW.findall(text)) + len(_STAMP_LIST.findall(text))
+            + len(_STAMP_LINE.findall(text)))
+
+
+# DISCOVERED: every `retro.md` this repository ships or keeps, excluding the archive,
+# which the doctrine says is append-only and never read in full.
+_RETRO_FILES, _ = _discover_md(
+    # the archive is append-only and never read in full, so its stamps are not a floor
+    ("docs/superpowers/retro/",),
+    lambda _c: bool(re.search(r"^##\s*Run stamps\b", _c, re.M)))
+if not _RETRO_FILES:
+    fail("no file with a `## Run stamps` section found — the stamp cap has no corpus, "
+         "and a check with an empty corpus passes by looking at nothing")
+for _rel in _RETRO_FILES:
+    _rp = os.path.join(ROOT, _rel)
+    if not os.path.isfile(_rp):
+        continue
+    _n = _count_stamps(open(_rp, encoding="utf-8").read())
+    if _n > STAMP_CAP:
+        fail(f"{_rel}: {_n} run stamps in a file read in full at stage 0, and the cap is "
+             f"{STAMP_CAP}. Rotate the oldest into docs/superpowers/retro/YYYY-QN.md — "
+             "the cold trigger reads the last five, so ten leaves it a margin it cannot "
+             "lose. Counted in every shape the doctrine writes them: table rows, list "
+             "items and the `<date> · <sha>` line its own command appends")
+
+# ...and the doctrine must give the stamps a cap of their own. Scoped to the SEGMENT of
+# the row that names them: the first version read the whole file and could not tell a
+# claim from the sentence refuting it; the second read the row and was answered by the
+# standing instructions' `max 10` in the same cell; the third read everything after
+# "run stamps" and was defeated by swapping the two items around the `·`.
+_RETRO_DOC = os.path.join(_skill_dir, "references", "retrospective.md")
+if os.path.isfile(_RETRO_DOC):
+    _seg = None
+    for _l in open(_RETRO_DOC, encoding="utf-8").read().splitlines():
+        if not _l.startswith("|") or "retro.md" not in _l.lower():
+            continue
+        for _cell in _l.split("|"):
+            for _s in _cell.split("·"):
+                if "run stamps" in _flatten(_s, lower=True):
+                    _seg = _s
+                    break
+            if _seg is not None:
+                break
+        if _seg is not None:
+            break
+    if _seg is None:
+        fail("references/retrospective.md: the source table has no segment naming "
+             "retro.md's run stamps — `**Run** **stamps**` renders identically and sent "
+             "an earlier version of this check into a silent skip, so the phrase is "
+             "matched on flattened text and its absence is a failure, not a disclosure")
+    elif not re.search(r"max\s*\*{0,2}\s*10\b|capped at ten", _flatten(_seg), re.I):
+        fail("references/retrospective.md: the run stamps are given no cap where they "
+             "are described. One line per run is a slope, not a bound — the shape the "
+             "2026-08-10 audit removed from the narrative log and left in its neighbour")
+
+
 if errors:
     print("FAIL: task-pipeline structure invalid")
     for e in errors:

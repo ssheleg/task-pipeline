@@ -102,7 +102,7 @@ never that the work was skipped quietly.
   `affected` / `god-nodes` answer *reach*, which is what grep cannot), `CLAUDE.md`,
   `CONTEXT.md`/ADRs, `docs/` + `docs/ux/`, past pipeline briefs and carry-over
   ledgers, **the retro's standing instructions and run stamps** (`docs/superpowers/retro.md`,
-  read **in full** — ten rows and one line per run, both bounded, and they bind this
+  read **in full** — ten standing rows and ten stamps, both bounded **by a cap**, and they bind this
   run; stamp each instruction as it fires. Its *Recent log* is **queried** by the
   task's nouns, not read: uncapped narrative inside a binding source is what makes the
   capped part get skimmed, [`retrospective.md`](retrospective.md)), the **knowledge wiki** if one is
@@ -656,7 +656,10 @@ never that the work was skipped quietly.
   with a floor, neither ever a target ([`gates.md`](gates.md) → *Disclosures*); **the
   retrospective is written — stamped first, then pruned, then the entry; the
   list at or under its cap, every deletion logged in the archive with its commit,
-  entries older than five run stamps rotated into `docs/superpowers/retro/`, the run
+  entries older than five run stamps rotated into `docs/superpowers/retro/` **and the
+  stamp table itself held to ten — at the eleventh the oldest stamp rotates whole into
+  the same archive, and both counts print beside the verdict** (the stamp table is read
+  in full at stage 0, so *one line per run* is a slope the prune has to stop), the run
   stamped with its commit, every SHA in either file resolvable, and the
   counts printed beside this verdict**; **where `pipeline.json` → `retro.publish` is
   set, the skill-level insight is published as an issue on the skill's repository —

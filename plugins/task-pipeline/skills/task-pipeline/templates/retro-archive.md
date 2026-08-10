@@ -39,3 +39,13 @@ history attached**, which is what this section is for.
 | Date | id | Instruction | Trigger that retired it | Commit |
 |---|---|---|---|---|
 | <YYYY-MM-DD> | R-000 | … | became a check (`npm run lint:paths`) | `<sha>` |
+
+## Run stamps
+
+Rotated out of `retro.md` when its live table passes ten. Append-only, whole rows —
+the cold trigger reads the last five in the live file, so a stamp here is one it no
+longer needs. Moving is not deleting: a stamp that leaves `retro.md` and appears
+nowhere is history destroyed, not archived.
+
+| Date | Topic | Commit | Verdict | Retro |
+|---|---|---|---|---|
