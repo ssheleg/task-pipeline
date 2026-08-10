@@ -4382,14 +4382,22 @@ jobs:
           set -eu
           rm -rf /tmp/cl9-copy && cp -R . /tmp/cl9-copy
           python3 - <<'EOF'
+          import re
           p = "/tmp/cl9-copy/CHANGELOG.md"
           t = open(p, encoding="utf-8").read()
-          n = "Guards: 233 -> **248**"
-          n = n.replace("->", "\u2192")
-          assert n in t, "PLANT DID NOT LAND: the newest section states no guard count"
-          # The exact shape this guard went dormant on: the same numbers, no colon.
-          open(p, "w", encoding="utf-8").write(
-              t.replace(n, "Guards **218 \u2192 226**", 1))
+          # DERIVED, not literal. This probe held `Guards: A -> **B**` as a hard-coded
+          # string and broke on three consecutive releases, once letting a red CI reach
+          # main. A needle that has to be maintained is a needle that goes stale between
+          # the change and the run.
+          heads = [m.start() for m in re.finditer(r"^## v", t, re.M)]
+          assert len(heads) >= 2, "PLANT DID NOT LAND: fewer than two release sections"
+          top = t[heads[0]:heads[1]]
+          m = re.search(r"Guards:\s*(\d+)\s*(?:\u2192|->)\s*(\*{0,2})(\d+)(\*{0,2})", top)
+          assert m, "PLANT DID NOT LAND: the newest section states no readable guard count"
+          # The exact shape the guard went dormant on: same numbers, no colon.
+          patched = top[:m.start()] + "Guards %s \u2192 %s%s%s" % (
+              m.group(1), m.group(2), m.group(3), m.group(4)) + top[m.end():]
+          open(p, "w", encoding="utf-8").write(t[:heads[0]] + patched + t[heads[1]:])
           EOF
           if python3 /tmp/cl9-copy/test/validate.py 2>&1 | grep -q "states no .Guards: N"; then
             echo "OK: validator FAILs — a count-shaped sentence with no readable count is not silence"
@@ -4786,5 +4794,43 @@ jobs:
             echo "OK: validator FAILs — the verb and the consequence are required, not the nouns"
           else
             echo "ERROR: the rule was inverted with its words intact and the guard passed"
+            exit 1
+          fi
+      - name: Negative self-test (the run-stamp table loses its cap)
+        run: |
+          set -eu
+          rm -rf /tmp/rs01-copy && cp -R . /tmp/rs01-copy
+          python3 - <<'EOF'
+          p = "/tmp/rs01-copy/plugins/task-pipeline/skills/task-pipeline/references/retrospective.md"
+          t = open(p, encoding="utf-8").read()
+          n = "**Run stamps** (max **10**, oldest rotate out)"
+          assert n in t, "PLANT DID NOT LAND: rs01"
+          # The exact wording the audit left in place: tidy growth described as a bound.
+          open(p, "w", encoding="utf-8").write(t.replace(n, "**Run stamps** (one line each)", 1))
+          EOF
+          if python3 /tmp/rs01-copy/test/validate.py 2>&1 | grep -q "does not give the run stamps a cap"; then
+            echo "OK: validator FAILs — one line per run is a slope, not a bound"
+          else
+            echo "ERROR: the stamp table lost its cap and the section read in full kept growing"
+            exit 1
+          fi
+      - name: Negative self-test (the run-stamp table grows past its cap)
+        run: |
+          set -eu
+          rm -rf /tmp/rs02-copy && cp -R . /tmp/rs02-copy
+          python3 - <<'EOF'
+          import re
+          p = "/tmp/rs02-copy/docs/superpowers/retro.md"
+          t = open(p, encoding="utf-8").read()
+          i = t.index("## Run stamps")
+          rows = [l for l in t[i:].splitlines() if l.startswith("| 2026-")]
+          assert len(rows) == 10, "PLANT DID NOT LAND: rs02 expected a full table, got %d" % len(rows)
+          j = t.index(rows[0], i)
+          open(p, "w", encoding="utf-8").write(t[:j] + rows[0] + "\n" + t[j:])
+          EOF
+          if python3 /tmp/rs02-copy/test/validate.py 2>&1 | grep -q "run stamps in a table read"; then
+            echo "OK: validator FAILs — the eleventh stamp must rotate, not accumulate"
+          else
+            echo "ERROR: the table passed its cap inside a section read in full at stage 0"
             exit 1
           fi

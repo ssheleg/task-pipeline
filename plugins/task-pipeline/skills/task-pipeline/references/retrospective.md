@@ -18,7 +18,7 @@ justifies reading it protects one section while the file below it doubles.
 
 | Artifact | Parts | How it is read |
 |---|---|---|
-| `docs/superpowers/retro.md` — **one per project** | **Standing instructions** (max **10**) · **Run stamps** (one line each) | stage 0, **in full** — both are bounded by construction |
+| `docs/superpowers/retro.md` — **one per project** | **Standing instructions** (max **10**) · **Run stamps** (max **10**, oldest rotate out) | stage 0, **in full** — both are bounded by a **cap**, which *one line each* never was |
 | the same file's **Recent log** | entries from the last five run stamps — narrative, and capped by nothing | stage 0, **queried** by the task's nouns. It said *in full* until 2026-08-10, when it measured **74%** of the file: an uncapped section inside a binding source is what makes the capped part get skimmed |
 | `docs/superpowers/retro/YYYY-QN.md` — the archive | every entry and every retirement ever written, append-only | **queried** by the task's nouns; never read end to end |
 
@@ -32,6 +32,7 @@ file exists to stop.
 
 - Write the entry only for a divergence — and name the layer that owned it
 - Every lesson carries its commit
+- The stamp table is capped at ten, and *one line per run* was never a cap
 - Rotation — the archive is how pruning stops losing things
 - Three grades of fix — take the highest one that can work
 - Stamp first, then prune, then write
@@ -78,6 +79,26 @@ document may not send a reader to something absent* — applied to history, and 
 mechanical: the project's documentation gate runs `git rev-parse --verify --quiet
 <sha>^{commit}` over every backticked SHA in the retro and its archive
 ([`gates.md`](gates.md)).
+
+## The stamp table is capped at ten, and *one line per run* was never a cap
+
+Measured 2026-08-10: standing instructions **~1 234 tok** behind a cap of ten, run stamps
+**~2 099 tok over 27 rows** behind nothing. Both are read in full at stage 0 and both
+were described as *bounded by construction*. One line per run is a **slope**: at a
+hundred runs the stamp table alone is ~7 800 tokens of a floor the doctrine believes is
+bounded.
+
+This is the same shape the 2026-08-10 audit found in the narrative log and moved out of
+the floor — and it left the neighbour in the same file, with the same property, because
+the neighbour's growth is *tidy*. A tidy slope is still a slope.
+
+**The cap is ten and the trigger is why.** The cold rule reads *the last five run
+stamps*; ten is that with a margin, so a stamp rotating out can never be one the trigger
+needed. At the eleventh, the oldest row moves — whole, with its verdict and its retro
+column — into `docs/superpowers/retro/YYYY-QN.md` under `## Run stamps`, append-only,
+like every other rotation. **The count is printed at the prune**, beside the standing
+instructions' own count, so a table that stops rotating is visible rather than merely
+large.
 
 ## Rotation — the archive is how pruning stops losing things
 
