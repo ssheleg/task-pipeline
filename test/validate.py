@@ -1547,6 +1547,18 @@ if os.path.isfile(_cl) and os.path.isfile(_wf):
     _top = _clt.split("\n## v", 2)
     _top = _top[1] if len(_top) > 1 else ""
     _g = re.search(r"Guards:\s*\d+\s*(?:→|->)\s*(\d+)", _flatten(_top))
+    # 2026-08-10: this guard went DORMANT on its own release. The v1.39.0 entry was
+    # written as `Guards **218 → 226**` — no colon — the pattern missed, the check
+    # stayed silent, and `npm test` was green over a count it had never read. The
+    # negatives suite caught it only because its probe could no longer plant. A
+    # mechanism with nothing to look at must say so rather than pass (gates.md →
+    # progressive arming); a count-shaped sentence with no count is the one case
+    # where silence and agreement are indistinguishable.
+    if _g is None and re.search(r"\bguards?\b", _flatten(_top), re.I):
+        fail("CHANGELOG.md: the newest section talks about guards but states no "
+             "`Guards: N → M` count this check can read — it went dormant here once "
+             "and the suite stayed green over an unread number; write the count in "
+             "that shape or say nothing about guards")
     if _g and int(_g.group(1)) != _true_neg:
         fail(f"CHANGELOG.md: the newest section claims {_g.group(1)} guards but the "
              f"workflow defines {_true_neg} — the entry is written before the last "
@@ -3520,10 +3532,21 @@ if os.path.isfile(_RT_P):
         if _n == 0:
             fail("references/retrospective.md: the redaction rules are prose, not an "
                  "enumeration — a list nobody can point at an item of is advice")
-        elif f"{_words.get(_n, _n)} rules" not in _flatten(_sec, lower=True):
-            fail(f"references/retrospective.md: {_n} numbered redaction rules and the "
-                 f"sentence introducing them does not say {_words.get(_n, _n)!r} — "
-                 "an enumeration counted in prose is a count that drifts")
+        else:
+            # R-003 sweep, 2026-08-10: the sibling shape `_words.get(n, n)` reaches a
+            # CEILING at ten and then compares against the digit alone — the same
+            # word-map ceiling that produced R-006. Accept either form, and say which
+            # ones were looked for, so a count past the map is a legible failure
+            # rather than a message quoting a number the prose never uses.
+            _forms = {str(_n)}
+            if _n in _words:
+                _forms.add(_words[_n])
+            _flat_sec = _flatten(_sec, lower=True)
+            if not any(f"{_f} rules" in _flat_sec for _f in _forms):
+                fail(f"references/retrospective.md: {_n} numbered redaction rules and "
+                     "the sentence introducing them says none of "
+                     f"{sorted(_forms)!r} — an enumeration counted in prose is a "
+                     "count that drifts")
 
     # P4-G2. The worked issue block must obey the rules it teaches. A doctrine whose
     # own example breaks its own rule is the class that shipped in templates/backlog.md,
@@ -3674,6 +3697,121 @@ if os.path.isfile(_CS_P) and os.path.isfile(_EV_P):
              "and the preflight does not say so — a skill silent about its own "
              "evidence is read as tested, by the bundle that demands evidence of "
              "everyone else")
+
+# ---------------------------------------------------------------------------
+# The routing boundary (v1.39.0). Measured 2026-08-10: three of ten routing
+# queries were refused with this skill's OWN exclusion clause quoted back as the
+# reason, while references/audit.md says an audit may be the whole task. The
+# boundary is what a request ENDS IN — an answer, or something that lands in the
+# tree — and these guards hold the surfaces that state it to one another.
+_SK_P = os.path.join(_skill_dir, "SKILL.md")
+_RR_P = os.path.join(_skill_dir, "templates", "routing-rule.md")
+_CR_P = os.path.join(ROOT, "cursor", "rules", "task-pipeline.mdc")
+_DESC_M = None
+if os.path.isfile(_SK_P):
+    _DESC_M = re.search(r'^description:\s*"(.*?)"\s*$',
+                        open(_SK_P, encoding="utf-8").read(), re.M | re.S)
+
+if _DESC_M:
+    _desc_txt = _DESC_M.group(1)
+
+    # 1. Both halves of the criterion, or the boundary reads as build-work-only —
+    #    which is the state that produced the three measured refusals.
+    if "changes the repository" not in _desc_txt:
+        fail("SKILL.md description: the change half of the boundary is gone — "
+             "'changes the repository' is what routes a feature, fix or refactor")
+    if "finding that lands in it" not in _desc_txt:
+        fail("SKILL.md description: the findings half of the boundary is gone. "
+             "audit.md says an audit may be the whole task; without this phrase "
+             "an agent reads the skill as build-work-only and refuses an audit, "
+             "which was measured on three of ten routing queries")
+
+    # 2. 'reading' may not return to the exclusion clause. An audit, a bug hunt and
+    #    a PR review all OPEN by reading; excluding them for it is the defect.
+    _not_for = _desc_txt.split("Not for:")[-1] if "Not for:" in _desc_txt else ""
+    if re.search(r"\breading\b", _not_for):
+        fail("SKILL.md description: 'reading' is back in the exclusion clause. "
+             "Reading is the opening move of every findings class this skill "
+             "routes, not the boundary — the boundary is what the request ends in")
+    # ...and the three exclusions v1.9.0 locked must survive the rewording, or the
+    #    clause and the NOTRIG evals drift, which that design forbade by name.
+    for _needed, _why in (("answering a question", "the question exclusion"),
+                          ("explaining", "the explanation exclusion"),
+                          ("one-line edit", "the one-line-edit exclusion")):
+        if _needed not in _not_for:
+            fail(f"SKILL.md description: {_why} left the 'Not for:' clause — the "
+                 "2026-08-03 design locked these three against the NOTRIG evals "
+                 "and said the two must not drift")
+
+    # 3. Every verb the v1.9.0 design locked must be ON the surface. DISCOVERED
+    #    from that design, never listed here: `перевести` was locked on 2026-08-03,
+    #    never shipped, and REQ-003 was accepted `verified` anyway because the
+    #    evidence recorded was the clause's shape and its character count — neither
+    #    of which can see a missing member of the list the REQ locked.
+    _LOCK_P = os.path.join(ROOT, "docs/superpowers/specs",
+                           "2026-08-03-default-routing-adoption-design.md")
+    if os.path.isfile(_LOCK_P):
+        _lock = open(_LOCK_P, encoding="utf-8").read()
+        _lm = re.search(r"\*\*work verbs, RU \+ EN:\*\*(.+?);", _lock, re.S)
+        if _lm:
+            _verbs = [v.strip(" \n*`") for v in _lm.group(1).split("·")]
+            _absent = [v for v in _verbs if v and v.lower() not in _desc_txt.lower()]
+            if _absent:
+                fail("SKILL.md description: verb(s) locked by the 2026-08-03 design "
+                     f"and absent from the shipped surface: {', '.join(_absent)}. "
+                     "A decision that never reached the text is the L1->L2 seam "
+                     "audit.md exists to walk")
+
+    # 4. The findings classes are named on every surface that carries the boundary.
+    #    The class list is DISCOVERED from the description, so a class added there
+    #    joins this check by existing (invariant 43).
+    _fm = re.search(r"finding that lands in it:(.+?)—", _desc_txt, re.S)
+    if _fm:
+        _classes = [c.strip().split("/")[0].strip()
+                    for c in _fm.group(1).split(",") if c.strip()]
+        for _surface, _label in ((_RR_P, "templates/routing-rule.md"),
+                                 (_CR_P, "cursor/rules/task-pipeline.mdc")):
+            if not os.path.isfile(_surface):
+                continue
+            _s = _flatten(open(_surface, encoding="utf-8").read(), lower=True)
+            _miss = [c for c in _classes if c.lower() not in _s]
+            if _miss:
+                fail(f"{_label}: the boundary is stated here too, and these findings "
+                     f"classes are missing from it: {', '.join(_miss)}. A rule that "
+                     "is portable is a rule that must agree with the description an "
+                     "agent routed on")
+        # ...and each class needs an eval, or the vocabulary is named and untested,
+        #    which is exactly what board row B-046 measured.
+        _EVJ = os.path.join(ROOT, "evals", "task-pipeline.evals.json")
+        if os.path.isfile(_EVJ):
+            try:
+                _q = " ".join((_c.get("query") or "").lower()
+                              for _c in json.load(open(_EVJ, encoding="utf-8"))["evals"])
+            except Exception:
+                _q = ""
+            if _q:
+                # A class name is English and the eval queries are the operator's own
+                # Russian, so the link between them cannot be discovered — it is
+                # declared. What CAN be mechanical is that a class with no declared
+                # link fails loudly instead of matching nothing and passing: an
+                # unmapped class would otherwise be a silent hole exactly where this
+                # guard claims coverage.
+                _KEY = {"audit": "аудит", "bug hunt": "ошибок",
+                        "production check": "проде", "pr review": "pr "}
+                _unmapped = [c for c in _classes if c.lower() not in _KEY]
+                if _unmapped:
+                    fail("test/validate.py: findings class(es) with no eval-query alias "
+                         f"declared in this guard: {', '.join(_unmapped)}. Add the alias "
+                         "in the same change that adds the class, or the guard reports "
+                         "coverage it never looked for")
+                _noev = [c for c in _classes
+                         if c.lower() in _KEY and _KEY[c.lower()] not in _q]
+                if _noev:
+                    fail("evals/task-pipeline.evals.json: findings class(es) named in "
+                         f"the description with no eval query: {', '.join(_noev)}. "
+                         "Named and untested is the state B-046 measured across six "
+                         "of the eight build verbs")
+
 
 if errors:
     print("FAIL: task-pipeline structure invalid")

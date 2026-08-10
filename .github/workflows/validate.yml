@@ -4237,3 +4237,159 @@ jobs:
           else
             echo "OK: validator correctly FAILs — the preflight states what has not been measured"
           fi
+      - name: Negative self-test (the change half of the boundary leaves the description)
+        run: |
+          set -eu
+          rm -rf /tmp/rt01-copy && cp -R . /tmp/rt01-copy
+          python3 - <<'EOF'
+          p = "/tmp/rt01-copy/plugins/task-pipeline/skills/task-pipeline/SKILL.md"
+          t = open(p, encoding="utf-8").read()
+          n = 'changes the repository'
+          assert n in t, "PLANT DID NOT LAND: rt01"
+          open(p, "w", encoding="utf-8").write(t.replace(n, 'changes the codebase', 1))
+          EOF
+          if python3 /tmp/rt01-copy/test/validate.py 2>&1 | grep -q 'the change half of the boundary is gone'; then
+            echo "OK: validator FAILs — a feature must still have a boundary that names it"
+          else
+            echo "ERROR: the description lost the change half and nothing objected"
+            exit 1
+          fi
+      - name: Negative self-test (the findings half of the boundary leaves the description)
+        run: |
+          set -eu
+          rm -rf /tmp/rt02-copy && cp -R . /tmp/rt02-copy
+          python3 - <<'EOF'
+          p = "/tmp/rt02-copy/plugins/task-pipeline/skills/task-pipeline/SKILL.md"
+          t = open(p, encoding="utf-8").read()
+          n = 'finding that lands in it'
+          assert n in t, "PLANT DID NOT LAND: rt02"
+          open(p, "w", encoding="utf-8").write(t.replace(n, 'thing produced by it', 1))
+          EOF
+          if python3 /tmp/rt02-copy/test/validate.py 2>&1 | grep -q 'the findings half of the boundary is gone'; then
+            echo "OK: validator FAILs — an audit is refused when nothing names it"
+          else
+            echo "ERROR: the description lost the findings half and nothing objected"
+            exit 1
+          fi
+      - name: Negative self-test (reading returns to the exclusion clause)
+        run: |
+          set -eu
+          rm -rf /tmp/rt03-copy && cp -R . /tmp/rt03-copy
+          python3 - <<'EOF'
+          p = "/tmp/rt03-copy/plugins/task-pipeline/skills/task-pipeline/SKILL.md"
+          t = open(p, encoding="utf-8").read()
+          n = 'explaining code, a typo'
+          assert n in t, "PLANT DID NOT LAND: rt03"
+          open(p, "w", encoding="utf-8").write(t.replace(n, 'explaining or reading code, a typo', 1))
+          EOF
+          if python3 /tmp/rt03-copy/test/validate.py 2>&1 | grep -q "'reading' is back in the exclusion clause"; then
+            echo "OK: validator FAILs — reading is the opening move of every findings class"
+          else
+            echo "ERROR: reading came back to the exclusions and nothing objected"
+            exit 1
+          fi
+      - name: Negative self-test (an exclusion locked in 2026-08-03 drops out)
+        run: |
+          set -eu
+          rm -rf /tmp/rt04-copy && cp -R . /tmp/rt04-copy
+          python3 - <<'EOF'
+          p = "/tmp/rt04-copy/plugins/task-pipeline/skills/task-pipeline/SKILL.md"
+          t = open(p, encoding="utf-8").read()
+          n = ', a typo or a one-line edit'
+          assert n in t, "PLANT DID NOT LAND: rt04"
+          open(p, "w", encoding="utf-8").write(t.replace(n, '', 1))
+          EOF
+          if python3 /tmp/rt04-copy/test/validate.py 2>&1 | grep -q "left the 'Not for:' clause"; then
+            echo "OK: validator FAILs — the clause and the NOTRIG evals may not drift"
+          else
+            echo "ERROR: a locked exclusion vanished and nothing objected"
+            exit 1
+          fi
+      - name: Negative self-test (a verb locked by the design never reaches the surface)
+        run: |
+          set -eu
+          rm -rf /tmp/rt05-copy && cp -R . /tmp/rt05-copy
+          python3 - <<'EOF'
+          p = "/tmp/rt05-copy/plugins/task-pipeline/skills/task-pipeline/SKILL.md"
+          t = open(p, encoding="utf-8").read()
+          n = 'внедрить, перевести'
+          assert n in t, "PLANT DID NOT LAND: rt05"
+          open(p, "w", encoding="utf-8").write(t.replace(n, 'внедрить', 1))
+          EOF
+          if python3 /tmp/rt05-copy/test/validate.py 2>&1 | grep -q 'locked by the 2026-08-03 design'; then
+            echo "OK: validator FAILs — this is exactly how перевести sat unshipped for a week"
+          else
+            echo "ERROR: a locked verb vanished and nothing objected"
+            exit 1
+          fi
+      - name: Negative self-test (a findings class is missing from the portable routing rule)
+        run: |
+          set -eu
+          rm -rf /tmp/rt06-copy && cp -R . /tmp/rt06-copy
+          python3 - <<'EOF'
+          p = "/tmp/rt06-copy/plugins/task-pipeline/skills/task-pipeline/templates/routing-rule.md"
+          t = open(p, encoding="utf-8").read()
+          n = 'a production check'
+          assert n in t, "PLANT DID NOT LAND: rt06"
+          open(p, "w", encoding="utf-8").write(t.replace(n, 'a deployment check', 1))
+          EOF
+          if python3 /tmp/rt06-copy/test/validate.py 2>&1 | grep -q 'classes are missing from it'; then
+            echo "OK: validator FAILs — a portable rule must agree with the description"
+          else
+            echo "ERROR: the portable rule lost a class and nothing objected"
+            exit 1
+          fi
+      - name: Negative self-test (a findings class is missing from the Cursor rule)
+        run: |
+          set -eu
+          rm -rf /tmp/rt07-copy && cp -R . /tmp/rt07-copy
+          python3 - <<'EOF'
+          p = "/tmp/rt07-copy/cursor/rules/task-pipeline.mdc"
+          t = open(p, encoding="utf-8").read()
+          n = 'PR review'
+          assert n in t, "PLANT DID NOT LAND: rt07"
+          open(p, "w", encoding="utf-8").write(t.replace(n, 'merge inspection', -1))
+          EOF
+          if python3 /tmp/rt07-copy/test/validate.py 2>&1 | grep -q 'classes are missing from it'; then
+            echo "OK: validator FAILs — the Cursor rule states the same boundary"
+          else
+            echo "ERROR: the Cursor rule lost a class and nothing objected"
+            exit 1
+          fi
+      - name: Negative self-test (a findings class has no eval query)
+        run: |
+          set -eu
+          rm -rf /tmp/rt08-copy && cp -R . /tmp/rt08-copy
+          python3 - <<'EOF'
+          p = "/tmp/rt08-copy/evals/task-pipeline.evals.json"
+          t = open(p, encoding="utf-8").read()
+          n = 'нет ли ошибок в обработчике вебхуков'
+          assert n in t, "PLANT DID NOT LAND: rt08"
+          open(p, "w", encoding="utf-8").write(t.replace(n, 'is the webhook handler sound', 1))
+          EOF
+          if python3 /tmp/rt08-copy/test/validate.py 2>&1 | grep -q 'with no eval query'; then
+            echo "OK: validator FAILs — named and untested is the state B-046 measured"
+          else
+            echo "ERROR: a class lost its only eval and nothing objected"
+            exit 1
+          fi
+      - name: Negative self-test (a release entry that talks about guards without a readable count)
+        run: |
+          set -eu
+          rm -rf /tmp/cl9-copy && cp -R . /tmp/cl9-copy
+          python3 - <<'EOF'
+          p = "/tmp/cl9-copy/CHANGELOG.md"
+          t = open(p, encoding="utf-8").read()
+          n = "Guards: 218 -> **227**"
+          n = n.replace("->", "\u2192")
+          assert n in t, "PLANT DID NOT LAND: the newest section states no guard count"
+          # The exact shape this guard went dormant on: the same numbers, no colon.
+          open(p, "w", encoding="utf-8").write(
+              t.replace(n, "Guards **218 \u2192 226**", 1))
+          EOF
+          if python3 /tmp/cl9-copy/test/validate.py 2>&1 | grep -q "states no .Guards: N"; then
+            echo "OK: validator FAILs — a count-shaped sentence with no readable count is not silence"
+          else
+            echo "ERROR: the guard went dormant on a reworded entry and the suite stayed green"
+            exit 1
+          fi

@@ -307,6 +307,92 @@
         "Does NOT invoke task-pipeline, does not open a grill and does not write a brief"
       ],
       "why": "Answering a question is on the skill's own not-for list. The description carries that boundary and nothing has ever measured whether a model honours it."
+    },
+    {
+      "id": "TRIG-07",
+      "category": "should_trigger",
+      "skills": [
+        "task-pipeline"
+      ],
+      "query": "сделай аудит модуля оплат",
+      "expected_behavior": [
+        "Invokes the skill: the output is a finding that lands in the repository, which the description names",
+        "Runs audit.md's L0->L7 ladder as the whole task — stages 3-5 produce findings and fixes rather than a feature",
+        "Does NOT justify the routing by stretching a build verb such as 'hardening'"
+      ],
+      "why": "Measured 2026-08-10: before the findings clause this routed, but its stated reason was the build-verb list. A right answer resting on a stretch is one rewording from a miss."
+    },
+    {
+      "id": "TRIG-08",
+      "category": "should_trigger",
+      "skills": [
+        "task-pipeline"
+      ],
+      "query": "проверь, нет ли ошибок в обработчике вебхуков",
+      "expected_behavior": [
+        "Invokes the skill rather than answering in the chat",
+        "Findings become REQ or board rows with file:line and a minimal fix, ordered by seam"
+      ],
+      "why": "Measured before the change: answered `none`, quoting the exclusion clause 'explaining or reading code'. Reading is the opening move, not the boundary."
+    },
+    {
+      "id": "TRIG-09",
+      "category": "should_trigger",
+      "skills": [
+        "task-pipeline"
+      ],
+      "query": "проверь, всё ли живо в проде после вчерашнего релиза",
+      "expected_behavior": [
+        "Invokes the skill; the verification trio, not one of three",
+        "Reads the CI run and the platform's own log command rather than assuming a verdict"
+      ],
+      "why": "Measured before the change: answered `none` on the same exclusion. A production check ends in a verification row, which lands."
+    },
+    {
+      "id": "TRIG-10",
+      "category": "should_trigger",
+      "skills": [
+        "task-pipeline"
+      ],
+      "query": "посмотри PR #24 и скажи, что там не так",
+      "expected_behavior": [
+        "Invokes the skill and applies review.md's reviewer contract, including the three reader states",
+        "Prints NO READER rather than staying silent when no independent reader is available"
+      ],
+      "why": "Measured before the change: answered `none` because no description offered a phrase for reviewing a PR, while review.md owns exactly that contract."
+    },
+    {
+      "id": "NOTRIG-06",
+      "category": "should_not_trigger",
+      "skills": [],
+      "query": "сделай аудит лендинга — почему упал трафик из поиска",
+      "expected_behavior": [
+        "Routes to seo-aeo-audit, whose description names 'почему упал трафик' verbatim",
+        "The widened findings vocabulary does not claim an audit that has an owner"
+      ],
+      "why": "False-positive control. Widening 'audit' must not steal work: gates.md sets the false-positive budget at zero."
+    },
+    {
+      "id": "NOTRIG-07",
+      "category": "should_not_trigger",
+      "skills": [],
+      "query": "проверь, что код соответствует UX-сценариям",
+      "expected_behavior": [
+        "Routes to ux-audit, which owns the scenario audit",
+        "The findings vocabulary in task-pipeline's description does not override an owner that names the surface exactly"
+      ],
+      "why": "False-positive control against the second competing claim on the word audit."
+    },
+    {
+      "id": "NOTRIG-08",
+      "category": "should_not_trigger",
+      "skills": [],
+      "query": "проверь, соответствует ли этот скил стандарту",
+      "expected_behavior": [
+        "Routes to make-skill, which owns skill-shaped audits",
+        "The findings vocabulary in task-pipeline's description does not override an owner that names the artefact exactly"
+      ],
+      "why": "False-positive control against the third competing claim on the word audit."
     }
   ]
 }

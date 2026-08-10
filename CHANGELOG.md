@@ -1,5 +1,57 @@
 # Changelog
 
+## v1.39.0 — the skill could not be reached by the word "audit"
+
+`references/audit.md` has said since v0.1.0 that an audit may be **the whole task** —
+stages 3–5 producing findings and fixes instead of a feature. No routing surface named
+it. Every trigger noun was build-shaped, and the exclusion clause read *"Not for:
+answering a question, explaining or reading code"* — which is the opening move of an
+audit, a bug hunt, a production check and a PR review alike.
+
+### Measured, not supposed
+
+Ten routing queries, one fresh agent each, holding nothing but the competing skill
+descriptions and one user sentence (`evals/routing/render.py`, results in
+`evals/routing/RESULTS.md`). **7 / 10 before.** The three misses were the three the board
+row predicted, and none of them was a failure to find a match — each agent **quoted this
+skill's own exclusion clause back as the reason it refused**:
+
+- «проверь, нет ли ошибок в обработчике вебхуков» → `none`
+- «проверь, всё ли живо в проде после вчерашнего релиза» → `none`
+- «посмотри PR #24 и скажи, что там не так» → `none`
+
+A fourth result only the reasoning shows: «сделай аудит модуля оплат» *did* route, and
+justified it by stretching the build verb `hardening`. A right answer resting on a
+stretch is one rewording from a miss.
+
+### The boundary is what a request ends in
+
+Not whether it reads. An answer stops in the conversation; a change **or a finding**
+lands in the tree, and the pipeline is what carries REQ rows, board rows and fixes
+there. The description, the portable routing rule and the Cursor rule now all say so,
+and `reading` is gone from the exclusions — guarded, so it cannot come back quietly.
+
+### Two things the harvest found before the first grill question
+
+- **`перевести` was locked into the verb list by the v1.9.0 design and never shipped.**
+  It existed in exactly one place in this repository: the design that locked it.
+- **`REQ-003` was accepted `verified` anyway.** The evidence recorded was the clause's
+  *shape* and its character count — neither of which can see a missing member of the
+  list the REQ locked. An L1→L2 absence that passed an L5 check. A guard now reads the
+  locked list out of that design and compares it to the shipped surface, so the next
+  dropped verb is a failure rather than a week.
+
+### Also
+
+- **False-positive controls, because widening a vocabulary can steal work.** Three
+  competitors already claim the word *audit* — `seo-aeo-audit`, `ux-audit`,
+  `make-skill`. All three are eval cases now, and all three still won their query.
+- **R-003 sweep** turned up the same word-map ceiling that produced R-006, in the
+  redaction-rule count: past ten it compared against the digit alone. It now accepts
+  either form and names both when it fails.
+- Guards: 218 → **227**; eval cases 21 → **28**; description 956 → 1004 of 1024, paid for
+  by cutting mechanism prose that could not affect routing.
+
 ## v1.38.0 — the wall came down, and a green started meaning something
 
 An audit of this skill measured nineteen problems and asked one question of all of them:
