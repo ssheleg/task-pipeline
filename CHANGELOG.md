@@ -1,6 +1,23 @@
 # Changelog
 
-## v1.37.0 — a lesson that stops dying in the repository that learned it
+## v1.37.0 — the audit, and the four things it found the pipeline could not say
+
+One release, four modules, and an audit that put four questions to this pipeline and
+answered them with measurements rather than opinion:
+
+- **99 shipped REQ, 99 of them at `Human: never`** — nothing has ever been confirmed by
+  a person, and the exposure line has been saying so on every run.
+- **`copywriting` appeared 0 times in the bundle and `sheleg-design` once**, as a name in
+  a README list.
+- **The review loop ran ten rounds, ten, eight, four, three** against a stated ceiling of
+  two stage re-entries — because a review round was named in no cap at all.
+- **Nothing ever printed which pipeline, which module, or which iteration was running.**
+  The run checklist existed and was marked *"copy it, tick it"*.
+
+Guards: 188 → **210**, property checks 8. Every one watched failing against a planted
+defect, and three of the probes were wrong before their guards were.
+
+### The lesson that stopped dying in the repository that learned it
 
 `retrospective.md` has said *"open an issue upstream"* since v1.9.0 and named no
 repository, no trigger and no authorization — an instruction on rung 1 that every reader
@@ -38,9 +55,7 @@ subsequent fence pair with the wrong delimiter. Five fence scans across four mod
 the same bug; all are language-tolerant now, and the earlier modules' probes were re-run
 to prove the change broke nothing (R-003: sweep the detector's siblings).
 
-Guards: 203 → **210**, property checks 8.
-
-## v1.36.0 — what it does, how it sounds, how it looks
+### What it does, how it sounds, how it looks
 
 The audit measured this one rather than argued it: **`copywriting` appeared zero times
 in the whole bundle, and `sheleg-design` once — as a name in a list in the README.**
@@ -84,9 +99,7 @@ check now covers the three tracks by name. It is narrow on purpose: generalising
 sub-skill mapping would demand stage 3 name `/brand-lint` and `ux-audit` too, and a
 check that over-reaches is switched off by the third person who hits it.
 
-Guards: 199 → **203**, property checks 8.
-
-## v1.35.0 — the loop that had no ceiling, the exemption nobody measured
+### The loop that had no ceiling, the exemption nobody measured
 
 Three findings from the same audit, all of them gates behaving as prose.
 
@@ -136,9 +149,7 @@ replacement matched the fence's own backtick and accused the clean tree. A detec
 finds itself before it finds anything else is checking the wrong thing, twice in one
 module.
 
-Guards: 193 → **199**, property checks 8.
-
-## v1.34.0 — a run that says which pipeline it is on, and where in it
+### A run that says which pipeline it is on, and where in it
 
 An audit of this pipeline asked four questions of it. The first was *does the agent
 understand the plan it is executing?* — and the honest answer was that nothing in eleven
@@ -195,8 +206,6 @@ ledger's line shapes compared declared-vs-shown **and** against the files that r
 The first version of the fourth probe removed one of three `touch:` lines from the worked
 log, left the shape shown, and read the guard's correct silence as a broken guard — R-001
 again, and the reason it is a standing instruction.
-
-Guards: 188 → **193**, property checks 8.
 
 ## v1.33.0 — the number, the list, and the command that shows them with no task running
 
