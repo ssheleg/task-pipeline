@@ -14,6 +14,38 @@ blind spot rather than covering it.
 | the run stamps have a cap | the **standing instructions'** `max 10` in the same cell — and, once narrowed past it, the same cap on the other side of the `·` |
 | a section read in full stays capped | rows under one heading, while a second heading held forty more |
 
+### The doctrine failed its own first use, and a reader caught that too
+
+R-005's fourth consecutive reader read the three new probes against the section that
+defines them. **`nb03` was not a neighbour probe.** It planted the needles of two
+*retired* predicates — proving the guards that used to exist were neighbour-answerable
+and saying nothing about the one that does. The instruction *"plant the guard's own
+evidence"* reads as *"plant something that used to satisfy it"* unless it says **which
+literal**, and now it does: the one the predicate matches today, read out of the guard.
+
+Seven more, each planted and watched passing, each now replayed and failing:
+
+- **Part 1a's precondition could be replaced by its opposite** and a housekeeping aside in
+  a `###` subsection answered for it — the reading `Default off` exists to forbid, shipping
+  behind a parenthesis;
+- **the stage-2 guard's declared span was false.** Its comment said *"the GATE bullet and
+  nothing else"*; the GATE is the last bullet, so the split handed it everything to the
+  section end and a trailing note satisfied it;
+- `- **GATEways to stage 3:**` was taken as the gate — no word boundary;
+- **a decoy row about the archive answered for the live file**, because the retrospective
+  check scanned every `|` line rather than the row it names;
+- **the scope depended on a `·`** no doctrine requires: replacing it with `, and` restored
+  the v1.41.0 defeat by punctuation;
+- **one disjunct was dead and the live one was a literal** — the source line-wraps, so the
+  check was a false positive on any reword and a false negative on inversion;
+- and **rekeying the stage-2 guard silently lost coverage**: deleting the whole queue
+  bullet began to pass, while its probe kept firing only because it *also* deleted the
+  gate clause. A probe whose stated claim has quietly become another probe's claim.
+
+**A probe that only deletes is not a neighbour probe** — it may be correct, but if it
+leans on copies already next door it must assert they are there, or a later edit demotes
+it to a delete-only test that still passes.
+
 ### The neighbour probe
 
 `gates.md` now asks a guard that reads a scoped span for a **second** probe, planting in

@@ -4612,7 +4612,7 @@ jobs:
             echo "ERROR: the dynamic disclosure vanished and nothing objected"
             exit 1
           fi
-      - name: Negative self-test (stage 2 stops owning the arming point)
+      - name: Negative self-test (stage 2 keeps its gate but loses where the queue comes from)
         run: |
           set -eu
           rm -rf /tmp/lp07-copy && cp -R . /tmp/lp07-copy
@@ -4621,19 +4621,19 @@ jobs:
           t = open(p, encoding="utf-8").read()
           head = "- **The queue exists here, so the loop arms here**"
           tail = "- **GATE (manual):**"
-          assert head in t and tail in t, "PLANT DID NOT LAND: lp07 bullet"
-          # Swapping one phrase left eight other 'arm' tokens in the section and the
-          # guard correctly found them. Remove the bullet AND the gate's own clause.
+          assert head in t and tail in t, "PLANT DID NOT LAND: lp07"
+          # The GATE clause is left INTACT. Rekeying the guard onto the gate silently
+          # dropped this case — deleting the whole bullet passed, and this probe kept
+          # firing only because it used to delete the gate clause too, which made it a
+          # duplicate of nb03. The obligation and its reason are two statements of one
+          # rule, and a probe that tests both tests neither.
           i = t.index(head); j = t.index(tail, i)
-          t = t[:i] + t[j:]
-          clause = " \u2014 **and the loop's arming state is printed**:\n  armed with its queue and pacing, or not armed with the reason"
-          assert clause in t, "PLANT DID NOT LAND: lp07 gate clause"
-          open(p, "w", encoding="utf-8").write(t.replace(clause, "", 1))
+          open(p, "w", encoding="utf-8").write(t[:i] + t[j:])
           EOF
-          if python3 /tmp/lp07-copy/test/validate.py 2>&1 | grep -q 'nothing here says the LOOP arms on it'; then
-            echo "OK: validator FAILs — the queue exists at stage 2 and the arming belongs with it"
+          if python3 /tmp/lp07-copy/test/validate.py 2>&1 | grep -q "no longer explains where the queue comes from"; then
+            echo "OK: validator FAILs — the gate's obligation without its reason is half a rule"
           else
-            echo "ERROR: the prose stage list lost the arming and nothing objected"
+            echo "ERROR: the queue bullet vanished while the gate kept its clause, and nothing objected"
             exit 1
           fi
       - name: Negative self-test (the machine-readable stage 2 drops the arming)
@@ -4877,6 +4877,10 @@ jobs:
           python3 - <<'EOF'
           p = "/tmp/nb02-copy/plugins/task-pipeline/skills/task-pipeline/references/continuity.md"
           t = open(p, encoding="utf-8").read()
+          # This probe DELETES from Part 1a and relies on the copies next door. Assert
+          # they exist, or a later edit silently demotes it to a delete-only probe.
+          assert " ".join(t.split()).count("generic flag is not a specific authorization") >= 3, \
+              "PLANT DID NOT LAND: nb02 — fewer neighbour copies than this probe assumes"
           head = "## Part 1a"
           i = t.index(head); j = t.index("\n## ", i + len(head))
           sec = t[i:j]
@@ -4900,20 +4904,21 @@ jobs:
           python3 - <<'EOF'
           p = "/tmp/nb03-copy/plugins/task-pipeline/skills/task-pipeline/references/stages.md"
           t = open(p, encoding="utf-8").read()
-          head = "- **The queue exists here, so the loop arms here**"
-          tail = "- **GATE (manual):**"
-          i = t.index(head); j = t.index(tail, i)
-          # Break the subject, then plant the guard's own word next door in a sentence
-          # that has nothing to do with the loop — the shape that satisfied the first
-          # predicate from a release written long before it.
-          t = t[:i] + "- **Nothing about the loop is decided here.** The UI verdict still arms the UX track in stage 3, and after-decomposition remains a word in the schema.\n" + t[j:]
           clause = " \u2014 **and the loop's arming state is printed**:\n  armed with its queue and pacing, or not armed with the reason"
-          assert clause in t, "PLANT DID NOT LAND: nb03"
-          open(p, "w", encoding="utf-8").write(t.replace(clause, "", 1))
+          assert clause in t, "PLANT DID NOT LAND: nb03 gate clause"
+          t = t.replace(clause, "", 1)
+          # Plant the needle the predicate matches TODAY, next door. The first version
+          # planted the needles of two RETIRED predicates, which proved the old guards
+          # were neighbour-answerable and said nothing about this one — the doctrine's
+          # own step 2 failing on its first use.
+          needle = "A note for readers: the loop's arming state is printed by the harness, not by this stage."
+          t = t.replace("\n## 3 \u2014 Spec", "\n" + needle + "\n\n## 3 \u2014 Spec", 1)
+          assert needle in t, "PLANT DID NOT LAND: nb03 neighbour"
+          open(p, "w", encoding="utf-8").write(t)
           EOF
-          if python3 /tmp/nb03-copy/test/validate.py 2>&1 | grep -q 'nothing here says the LOOP arms on it'; then
-            echo "OK: validator FAILs — a neighbouring 'arms' and a stray schema token do not answer for the rule"
+          if python3 /tmp/nb03-copy/test/validate.py 2>&1 | grep -q "the GATE does not require the loop's arming state"; then
+            echo "OK: validator FAILs — a trailing note is not the gate's obligation"
           else
-            echo "ERROR: stage 2 lost the arming and neighbouring words answered for it"
+            echo "ERROR: the gate lost its clause and a note after the section answered for it"
             exit 1
           fi

@@ -326,6 +326,18 @@ A guard that passes step 3 is reading its subject. A guard that goes green is re
 neighbourhood, and the ordinary probe cannot tell the difference — which is why this one
 is separate rather than a stricter version of it.
 
+**Step 2 means the literal the predicate matches *today*, read out of the guard.** The
+first three neighbour probes written against this section got that wrong on their first
+run: one planted the needles of two **retired** predicates, which proves the guards that
+used to exist were neighbour-answerable and says nothing about the one that does. A
+neighbour probe keyed to a needle the guard no longer reads is the same defect it was
+written to catch, one level up.
+
+**A probe that only deletes is not a neighbour probe.** It may still be a correct probe —
+but if it relies on copies that already sit next door, it must **assert they are there**.
+Otherwise a later edit removes them and the probe quietly becomes a delete-only test that
+still passes, having stopped testing the thing it is named for.
+
 **Positional narrowing is not scoping.** Three of the six were "fixed" by cutting the
 search down to a row, then to everything after a phrase, and fell each time to text that
 was still inside the cut. Scope by *what the span is about*: split to the cell, then to
