@@ -22,12 +22,12 @@ over all of them.
 
 | id | Born | Commit | Instruction | Because | Retire when | Last fired | Fired at |
 |---|---|---|---|---|---|---|---|
-| R-001 | 2026-08-03 · `documentation-track` | `dbe4f43` | When a check stays silent against a planted defect, **prove the plant landed in the text the check actually parses before touching the check.** | Two silent probes in one run: one was a bad probe (§9 correctly skips outside a git tree), one was a real bug (`$((0009))` is octal). The split is 50/50 here and was 4-of-5 probe-fault on the source project — guessing wrong costs a real bug or a false fix. | a probe harness exists that asserts the plant changed the parsed text, making this mechanical | 2026-08-08 | `68b4428` |
+| R-001 | 2026-08-03 · `documentation-track` | `dbe4f43` | When a check stays silent against a planted defect, **prove the plant landed in the text the check actually parses before touching the check.** | Two silent probes in one run: one was a bad probe (§9 correctly skips outside a git tree), one was a real bug (`$((0009))` is octal). The split is 50/50 here and was 4-of-5 probe-fault on the source project — guessing wrong costs a real bug or a false fix. | a probe harness exists that asserts the plant changed the parsed text, making this mechanical | 2026-08-10 | `07e7824` |
 | R-002 | 2026-08-03 · `doc-track-audit` | `096f0f0` | When a batch of edits returns **any** error, re-verify **every** edit in that batch before reporting the batch done — not only the one that errored. | Two edits were issued together; the second failed the read-before-write check and was retried, the first was silently never applied. It was reported as done, shipped in v1.7.0, and surfaced only in a post-release audit as a question the grill never asks with a field in the brief waiting for the answer. | the harness reports per-edit outcomes in a form a check can read, or the edits are issued one per message | 2026-08-08 | `68b4428` |
-| R-003 | 2026-08-05 · `artifact-hygiene` | `13028e9` | When you fix a defect in one check, guard or detector, **immediately run that defect's definition against its siblings** before moving on — the same file's other checks, and the other files that do the same job. | `learned.md` rule 6 says *sweep the class, not the instance*, and this is its **third** recorded failure to be applied to itself. 2026-08-03 `enforcement-audit`: a fix scoped to references→README while the same class lived in six other places. 2026-08-03 `root-cause`: nine findings, one missing matrix row. 2026-08-05: check 2's false-positive class was solved, and check 4 — its immediate sibling, in the same file, written in the same hour — shipped with the identical bug and fired on this run's own documents. Two instances were worth notes; `audit.md` says a class seen twice becomes a mechanism rather than a third ledger row. | a check can compare sibling detectors for a shared false-positive class — which needs the classes to be named in a machine-readable form first | 2026-08-08 | `68b4428` |
-| R-004 | 2026-08-06 · `graph-staleness` | `2ce6ecc` | When a gate runs, the **next command must be conditional on its exit code** — never a gate and a commit in one block separated by newlines. | The hygiene gate returned FAIL and the `git commit` and `git push` beneath it ran anyway, because they were separate lines rather than a chain. The gate was read and not obeyed, which is indistinguishable in the transcript from a gate that passed. `learned.md` rule 11 makes the gate *return* the right code; nothing made the caller *use* it. | a harness or wrapper refuses to run a mutating command after a non-zero gate in the same block | 2026-08-08 | `68b4428` |
+| R-003 | 2026-08-05 · `artifact-hygiene` | `13028e9` | When you fix a defect in one check, guard or detector, **immediately run that defect's definition against its siblings** before moving on — the same file's other checks, and the other files that do the same job. | `learned.md` rule 6 says *sweep the class, not the instance*, and this is its **third** recorded failure to be applied to itself. 2026-08-03 `enforcement-audit`: a fix scoped to references→README while the same class lived in six other places. 2026-08-03 `root-cause`: nine findings, one missing matrix row. 2026-08-05: check 2's false-positive class was solved, and check 4 — its immediate sibling, in the same file, written in the same hour — shipped with the identical bug and fired on this run's own documents. Two instances were worth notes; `audit.md` says a class seen twice becomes a mechanism rather than a third ledger row. | a check can compare sibling detectors for a shared false-positive class — which needs the classes to be named in a machine-readable form first | 2026-08-10 | `07e7824` |
+| R-004 | 2026-08-06 · `graph-staleness` | `2ce6ecc` | When a gate runs, the **next command must be conditional on its exit code** — never a gate and a commit in one block separated by newlines. | The hygiene gate returned FAIL and the `git commit` and `git push` beneath it ran anyway, because they were separate lines rather than a chain. The gate was read and not obeyed, which is indistinguishable in the transcript from a gate that passed. `learned.md` rule 11 makes the gate *return* the right code; nothing made the caller *use* it. | a harness or wrapper refuses to run a mutating command after a non-zero gate in the same block | 2026-08-10 | `07e7824` |
 | R-005 | 2026-08-08 · `audit-followup`/M8 | `5726f7f` | When a change adds or widens a **check**, get an independent reader on it before merge — your own probes only exercise the shapes you already thought of. | M8 probed its new guard in four shapes and shipped it with a proven false-negative path: the ordered-list branch scanned the whole file and compared only the first pair, so a violation after a correct list was never examined. Two PR review passes found that, plus a live defect in the shipped `evidence-docs` navigator that **no pairwise shape could see by construction** — a table cell naming one act. Five probes written by the author found neither. This is not R-001 (that one doubts a silent probe); this is the probe being confident and complete about the wrong set. | a second reader — human or agent — is dispatched by a stage rather than by the repository happening to run a bot on PRs | 2026-08-08 | `5726f7f` |
-| R-006 | 2026-08-08 · `audit-followup`/M2 | `44bdf53` | A finding is closed when the **behaviour** changes. Reporting the gap — a `dormant` line, a printed `skip`, a note beside the verdict — is honest and is **not** a fix; say which one you did. | The claim registry's number-word map stopped at forty-nine while the guard count was 130, so a word form above the ceiling was skipped **in silence**. The fix shipped was: print the unread tokens. That is a real improvement and the gap was untouched — a word-form claim above fifty was still skipped, now with a note. It was recorded as addressed and the next review round reopened it, correctly. `gates.md` already says a `dormant` state must be printed; nothing said that printing it does not discharge the finding. | a close-out records, per finding, whether the behaviour or only the reporting changed — and a check can read that field | 2026-08-08 | `44bdf53` |
+| R-006 | 2026-08-08 · `audit-followup`/M2 | `44bdf53` | A finding is closed when the **behaviour** changes. Reporting the gap — a `dormant` line, a printed `skip`, a note beside the verdict — is honest and is **not** a fix; say which one you did. | The claim registry's number-word map stopped at forty-nine while the guard count was 130, so a word form above the ceiling was skipped **in silence**. The fix shipped was: print the unread tokens. That is a real improvement and the gap was untouched — a word-form claim above fifty was still skipped, now with a note. It was recorded as addressed and the next review round reopened it, correctly. `gates.md` already says a `dormant` state must be printed; nothing said that printing it does not discharge the finding. | a close-out records, per finding, whether the behaviour or only the reporting changed — and a check can read that field | 2026-08-10 | `07e7824` |
 
 Retire on **any** of: it became a check · every path/command it names is gone · it
 has not fired in the last five run stamps, or in the last sixty days. At eleven
@@ -35,6 +35,69 @@ rows, the oldest never-fired
 row goes — the cap is not negotiable, ranking is.
 
 ## Recent log — entries from the last five run stamps (newest first)
+
+### 2026-08-10 · `pipeline-audit` · the reader that did not read, and three probes wrong before their guards
+
+**Symptom.** Four modules of guard work — 188 → 210 checks — reviewed by nobody. R-005
+requires an independent reader on any change that adds or widens a check; this programme
+was almost entirely that, four pull requests were opened for it, and the review app
+reported **`skipping`** on every one. The instruction was followed to the letter and the
+reading never happened.
+
+**Surfaced at:** stage 10's ladder walk, reading the PR check states rather than assuming
+them. Not by a gate — no gate asks whether the reader that was dispatched actually ran.
+
+**Owned by:** stage 7. That is where the reader is supposed to read, and where "an
+independent reader was requested" was allowed to stand in for "an independent reader
+reported".
+
+**Root cause, and R-005 wrote it down at birth.** Its own retirement condition says the
+reader should be *"dispatched by a stage rather than by the repository happening to run a
+bot on PRs"*. The bot is that dependency, and it declined. Board row B-003 has recorded
+the same thing since 2026-08-08. The gap is not that the rule went unread — it is that
+the rule's mechanism is a third party with no contract, and nothing checks its output.
+
+**Fix, by grade.**
+1. *(none mechanical, and saying so is the honest end.)* No check here can read a review
+   that was never written. What the run can do it did: **REQ-023 is `partial` in the
+   acceptance table, printed as `abstained: 1`, and named as a live instance of B-003.**
+   R-006 exists for exactly this sentence — reporting a gap is honest and is not a fix.
+2. *(no new standing instruction.)* A seventh row saying *"check that the reader
+   actually read"* would be a variant of R-005, and a capped list stops being read the
+   moment variants start joining it.
+
+**What the run's own probes were worth, measured.** Three of them were wrong before their
+guards were, and each failure was a different flavour of the same mistake — *the probe
+planted where it was convenient rather than where the check reads*:
+
+| The probe | Why it proved nothing |
+|---|---|
+| the ledger's line shapes | removed **one of three** `touch:` lines; the shape stayed shown and the guard was correctly silent |
+| the CHANGELOG guard count | the release entry wrote the count without the colon the plant matches, so the decrement landed in an **already-released** section |
+| the stage-3 track | deleted the SHOUTED spelling and left `visual track` in the refusal sentence — one spelling removed, the class intact |
+
+**And one guard could not see the thing it was written for.** P4's check that makes the
+doctrine's own worked issue obey its own redaction rules stayed silent against an
+absolute path, a commit id and a foreign repository slug. Its fence scan matched ```` ``` ````
+followed by a newline, and a ```` ```json ```` block one paragraph above made every later fence
+pair with the wrong delimiter — so it never read the block at all. **Five scans across
+four modules had the same defect.** R-003 fired: all five were swept in one change and
+the earlier modules' probe harnesses were re-run to prove nothing broke.
+
+**A live defect the new cross-file guard found before it found anything of mine.**
+`companion-skills.md` had pointed `chrome-devtools` at **stages 5–6** since the row was
+added, and stage 5 had never named it. Nothing compared the matrix's *"needed for stage
+N"* cell against what that stage says, so a recommendation existed for a stage that had
+not heard of it.
+
+**And R-004 fired on the first command of the run.** `npm test | head && git commit`
+reads `head`'s status, so a commit landed over a red validator. The rule is two years of
+this repository's history in one line and it still had to fire.
+
+**The check that catches it next time:** for the fence class, the five repaired scans and
+the probes that re-ran. For the matrix–stage seam, the new guard. For a reader that does
+not read — nothing, and that is B-003's job, not a seventh rule's.
+
 
 ### 2026-08-10 · `planning-system`/N3+N4+N5 · three board rows described the failure I kept hitting
 
@@ -718,6 +781,7 @@ One line per run, appended at stage 10. This is what makes "five runs" countable
 
 | Date | Topic | Commit | Verdict | Retro |
 |---|---|---|---|---|
+| 2026-08-10 | `pipeline-audit` / P1+P2+P3+P4 `audit-and-four-modules` | `07e7824` | 12 REQ verified · 1 **partial and reported** (REQ-023: R-005's reader never ran — the review app reported `skipping` on all four PRs) · the audit's 8 findings closed as B-025..B-032 · guards 188 → **210** · **three probes wrong before their guards were** | 1 entry · 6 standing · retired 0 · added 0 · R-001, R-003, R-004, R-006 fired; R-002 and R-005 did not |
 | 2026-08-10 | `planning-system` / N3+N4+N5 `exposure-checkup-loop` | `0137512` | 3 REQ · a vector never a probability, the command with no task in flight, the loop citing the board · **one review round by the lowered threshold, 5 findings** · the suite itself fixed: 13+ min → **5m34s** · carry-over 2 rows, 0 unresolved | 1 entry · 6 standing · retired 0 · added 0 · R-001, R-002, R-004 fired · guards 185 → 188 |
 | 2026-08-10 | `planning-system` / N2 `verification-ledger` | `85f8c8a` | 3 REQ · the column a machine may not fill · **ten review rounds, ~20 findings, none from my probes** · carry-over 2 rows, 0 unresolved | 1 entry · 6 standing · retired 0 · added 0 · R-001, R-002, R-005 fired · guards 175 → 185 |
 | 2026-08-09 | `planning-system` / N1 `the-board` | `4233c3d` | 4 REQ · a queue between runs, and the seam the ledger left dangling · **ten review rounds, 29 findings, none from my probes** · carry-over 2 rows, 2 open, 0 unresolved | 1 entry · 6 standing · retired 0 · added 0 · R-001, R-002, R-004, R-005 all fired · guards 156 → 175 + 4 property |
