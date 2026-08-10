@@ -4094,3 +4094,91 @@ jobs:
           else
             echo "OK: validator correctly FAILs — the outward step is named by a stage"
           fi
+
+      - name: Negative self-test (the reader losing its NO READER state)
+        run: |
+          set -eu
+          rm -rf /tmp/rd1-copy && cp -R . /tmp/rd1-copy
+          python3 - <<'EOF'
+          p = "/tmp/rd1-copy/plugins/task-pipeline/skills/task-pipeline/references/review.md"
+          t = open(p, encoding="utf-8").read()
+          n = "reader: NO READER — <why>"
+          assert n in t, "PLANT DID NOT LAND: the reader states moved"
+          open(p, "w", encoding="utf-8").write(t.replace(n, "reader: unknown", 1))
+          EOF
+          if python3 /tmp/rd1-copy/test/validate.py; then
+            echo "ERROR: a reader that never read is now indistinguishable from one that found nothing"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — NO READER is a printed state"
+          fi
+
+      - name: Negative self-test (a stage dropping a reader state)
+        run: |
+          set -eu
+          rm -rf /tmp/rd2-copy && cp -R . /tmp/rd2-copy
+          python3 - <<'EOF'
+          p = "/tmp/rd2-copy/plugins/task-pipeline/skills/task-pipeline/references/stages.md"
+          t = open(p, encoding="utf-8").read()
+          assert "`reader: none found`" in t, "PLANT DID NOT LAND: the stage's reader states moved"
+          open(p, "w", encoding="utf-8").write(t.replace("`reader: none found`", "a clean verdict", 1))
+          EOF
+          if python3 /tmp/rd2-copy/test/validate.py; then
+            echo "ERROR: a state the doctrine defines and no stage emits is a state nobody records"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — every reader state is named by the stage"
+          fi
+
+      - name: Negative self-test (the probe harness losing its target-guard assertion)
+        run: |
+          set -eu
+          rm -rf /tmp/ph1-copy && cp -R . /tmp/ph1-copy
+          python3 - <<'EOF'
+          p = "/tmp/ph1-copy/test/probe.py"
+          t = open(p, encoding="utf-8").read()
+          assert "expect" in t, "PLANT DID NOT LAND: the harness moved"
+          open(p, "w", encoding="utf-8").write(t.replace("expect", "wanted"))
+          EOF
+          if python3 /tmp/ph1-copy/test/validate.py; then
+            echo "ERROR: a probe that proves only that SOMETHING broke proves nothing about its guard"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — a plant names the guard it targets"
+          fi
+
+      - name: Negative self-test (the probe harness losing its entry point)
+        run: |
+          set -eu
+          rm -rf /tmp/ph2-copy && cp -R . /tmp/ph2-copy
+          python3 - <<'EOF'
+          p = "/tmp/ph2-copy/package.json"
+          t = open(p, encoding="utf-8").read()
+          n = "test/probe.py --self-test"
+          assert n in t, "PLANT DID NOT LAND: the script moved"
+          open(p, "w", encoding="utf-8").write(t.replace(n, "true", 1))
+          EOF
+          if python3 /tmp/ph2-copy/test/validate.py; then
+            echo "ERROR: a harness with no entry point is a file, not a gate"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the harness is runnable"
+          fi
+
+      - name: Negative self-test (gates.md teaching probing without naming the harness)
+        run: |
+          set -eu
+          rm -rf /tmp/ph3-copy && cp -R . /tmp/ph3-copy
+          python3 - <<'EOF'
+          p = "/tmp/ph3-copy/plugins/task-pipeline/skills/task-pipeline/references/gates.md"
+          t = open(p, encoding="utf-8").read()
+          n = "`test/probe.py` does all three"
+          assert n in t, "PLANT DID NOT LAND: the pointer moved"
+          open(p, "w", encoding="utf-8").write(t.replace(n, "a harness does all three", 1))
+          EOF
+          if python3 /tmp/ph3-copy/test/validate.py; then
+            echo "ERROR: the next probe gets hand-rolled for the fourth time"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the probing doctrine points at the harness"
+          fi

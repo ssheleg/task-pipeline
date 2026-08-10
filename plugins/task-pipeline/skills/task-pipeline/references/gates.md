@@ -272,6 +272,24 @@ one flipped a row whose cell was already empty, so nothing was planted. A silent
 check is a claim about two things, and the probe is the one to doubt first — prove
 your edit landed in the text the check actually parses.
 
+**Three assertions, and the third is the one hand-rolled probes keep missing.** A
+plant that trips some *other* check has proved that other check works. Three probes
+in one day passed that way: one removed 1 of 3 identical lines and left the shape
+intact; one decremented a number inside an **already-released** section; one deleted
+the shouted spelling of a phrase and left the lowercase one. Each landed somewhere
+real and demonstrated nothing about the guard it was written for. So:
+
+1. **the substitution landed** — `replace` matching nothing returns the string
+   unchanged and raises nothing;
+2. **the exit code is non-zero** — not a `FAIL` line on stdout;
+3. **the message that fired belongs to the guard under test** — named up front, not
+   recognised afterwards.
+
+`test/probe.py` does all three (`npm run test:probe` self-tests the harness, including
+its own failure branches, because a harness whose failure path has never executed is
+the thing it exists to stop). Declare the plant as `Plant(label, path, old, new,
+expect=<the guard's own words>)` rather than hand-rolling a fourth copy of the loop.
+
 **Record the probe.** One line per section, in the change that ships the check.
 Otherwise the next reader has to redo it to know whether it was ever done.
 

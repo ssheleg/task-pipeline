@@ -16,6 +16,7 @@ install.
 - Reviewer inputs
 - Controller rules
 - The rubric
+- The independent reader — dispatched by a stage, and read by its output
 - Prompt — task review
 - Prompt — scoped re-review
 - Prompt — final whole-branch review
@@ -117,6 +118,61 @@ Review in this order; stop reading the diff only when you've covered all of it.
 
 Formatting nits that don't change meaning are not findings. Praise is not a
 finding either.
+
+## The independent reader — dispatched by a stage, and read by its output
+
+**One job: stop *"a reader was requested"* from standing in for *"a reader
+reported"*.** Those are different facts and they look identical in a transcript.
+
+The rule this implements has been a standing instruction since 2026-08-08: **a change
+that adds or widens a check gets an independent reader before merge**, because your own
+probes exercise only the shapes you already thought of. Its retirement condition, written
+at birth, was that the reader be *dispatched by a stage rather than by the repository
+happening to run a bot on pull requests*. This section is that stage.
+
+**It happened.** Four pull requests of almost nothing but check work were opened on one
+day; the review application reported **`skipping`** on every one, and twenty-two new
+guards merged with the author's own probes as their only reading. Nothing was violated.
+Nothing read the reviewer's output either.
+
+### Who counts as the reader, in order
+
+1. **A subagent this run dispatches** — the only option whose execution the run can
+   observe end to end. Give it the diff package, the rubric, and the sentence *"the
+   author wrote both the check and its probes; find what neither could see."*
+2. **A review bot on the pull request** — acceptable, and it is a **third party with no
+   contract**: it may skip, rate-limit, or answer about a stale commit. Read its
+   verdict, not the fact that it was triggered.
+3. **A person.**
+
+### The three states, and one of them is not silence
+
+Record exactly one, beside the gate verdict:
+
+```
+reader: 6 findings, 4 confirmed        — read, and it had something
+reader: none found                     — read, and it did not
+reader: NO READER — <why>              — nobody read it
+```
+
+**`NO READER` is a printed state, never an omission.** It carries the same law as
+`dormant` and `skip` ([`gates.md`](gates.md) → *Progressive arming*): a mechanism that
+prints nothing when it looked at nothing is indistinguishable from one that looked and
+found nothing. Where the change added or widened a check, `NO READER` is also carried
+into the close-out as an open requirement rather than a footnote — reporting a gap is
+honest and is not a fix.
+
+### What the reader is asked
+
+Not *"review this."* The dispatch names the blind spot it exists to cover:
+
+- the probes and the checks were written from **one model of the problem** — where does
+  that model not reach?
+- which shapes does the check's **scope** exclude, and is any of them shipped?
+- is there a form of the defect that has **no pair to compare** — a single cell, a lone
+  directive, an absence?
+
+Those three questions come from findings no author-written probe has ever produced here.
 
 ## Prompt — task review
 

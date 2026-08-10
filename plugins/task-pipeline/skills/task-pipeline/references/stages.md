@@ -456,6 +456,15 @@ never that the work was skipped quietly.
   tagging, the CI verdict for what was just pushed is READ, not assumed**
   ([`conventions.md`](conventions.md) → *The CI verdict*) — a tag on a commit whose
   run nobody read is how a red `main` ships.
+- **The independent reader is dispatched by this stage, and read by its output**
+  ([`review.md`](review.md) → *The independent reader*). On any change that adds or
+  widens a check, the run dispatches a reader — a subagent it can watch, a bot whose
+  **verdict** it then reads, or a person — and records exactly one of three states
+  beside the verdict: `reader: N findings`, `reader: none found`, or `reader: NO READER
+  — <why>`. The third is printed, never omitted; a requested reader and a reading are
+  different facts that look identical afterwards. Four pull requests of check work once
+  merged on a bot's `skipping` with nobody noticing, which is why this is a stage rather
+  than a hope.
 - **The review loop that lives here has a cap, and the cap is a measurement**
   ([`loop-guard.md`](loop-guard.md) → *The review loop*). **3 rounds** per artifact by
   default (`pipeline.json` → `run.review.maxRounds`); at the cap the run stops reviewing

@@ -3566,6 +3566,66 @@ if os.path.isfile(_RT_P):
         fail("references/stages.md: no stage names `retro.publish` — a step described "
              "in the retro's doctrine and in no stage is a step that never runs")
 
+# --- Tier 2 of the skill audit: make a green mean something (v1.38.0) ---------
+# SCOPE: the doctrine's own agreement and the harness's existence. Neither can
+# observe a review that happened, which is the point of the NO READER state.
+_RV_P = os.path.join(ROOT, _SKILLDIR, "references/review.md")
+
+# T2-G1. The reader's three states are an enumeration stated in two files. The third
+# state is the whole mechanism: `NO READER` printed is what stops "a reader was
+# requested" from reading as "a reader reported". Both directions, because a state
+# in the doctrine and not in the stage never gets emitted, and a state emitted by a
+# stage and not in the doctrine is a vocabulary nobody defined.
+if os.path.isfile(_RV_P) and os.path.isfile(_ST_P):
+    _rv_t = open(_RV_P, encoding="utf-8").read()
+    _st_t3 = open(_ST_P, encoding="utf-8").read()
+    _states = set()
+    for _blk in re.findall(r"```[a-zA-Z]*\n(.*?)```", _rv_t, re.S):
+        for _ln in _blk.split("\n"):
+            _m = re.match(r"\s*reader:\s*(.+?)(?:\s{2,}|—|$)", _ln)
+            if _m:
+                _states.add(re.sub(r"\d+", "N", _m.group(1)).strip().lower())
+    if len(_states) < 3:
+        fail(f"references/review.md: the independent reader has {len(_states)} recorded "
+             "state(s), not three — without a printed NO READER, a reader that never "
+             "read is indistinguishable from one that found nothing")
+    if not any("no reader" in _s for _s in _states):
+        fail("references/review.md: no `NO READER` state — the other two say what a "
+             "reader found, and the whole mechanism is the one that says nobody read")
+    _stn = _flatten(_st_t3, lower=True)
+    for _s in sorted(_states):
+        # Matched WITH its `reader:` prefix. Keyed on the bare words, `none found`
+        # matched stage 0's source-ledger sentence — a coincidence in another
+        # paragraph, and the guard passed over a stage that had dropped the state.
+        _key = "reader: " + _s.split(",")[0].strip()
+        if _key not in _stn:
+            fail(f"references/stages.md: the stage running the review never names the "
+                 f"reader state {_key!r}, which references/review.md defines — "
+                 "a state no stage emits is a state nobody records")
+
+# T2-G2. R-001's retirement condition, written at birth in 2026-08-03: a probe
+# harness that asserts the plant changed the parsed text. It must exist, expose the
+# two names a caller uses, be runnable from package.json, and be named where probing
+# is taught — a harness nobody is pointed at is a fourth hand-rolled loop waiting.
+_PB_P = os.path.join(ROOT, "test", "probe.py")
+if not os.path.isfile(_PB_P):
+    fail("test/probe.py is absent — R-001 has asked for a probe harness since "
+         "2026-08-03 and three hand-rolled probes failed in one day for want of it")
+else:
+    _pb = open(_PB_P, encoding="utf-8").read()
+    for _sym in ("class Plant", "def run_probes", "expect"):
+        if _sym not in _pb:
+            fail(f"test/probe.py does not define {_sym!r} — the harness must name the "
+                 "guard a plant targets, or it proves only that something broke")
+    _pkg = json.loads(open(os.path.join(ROOT, "package.json"), encoding="utf-8").read())
+    if "probe.py" not in json.dumps(_pkg.get("scripts", {})):
+        fail("package.json: no script runs test/probe.py — a harness with no entry "
+             "point is a file, not a gate")
+    _gt = open(os.path.join(ROOT, _SKILLDIR, "references/gates.md"), encoding="utf-8").read()
+    if "test/probe.py" not in _gt:
+        fail("references/gates.md teaches probing and never names test/probe.py — "
+             "the next probe will be hand-rolled for the fourth time")
+
 if errors:
     print("FAIL: task-pipeline structure invalid")
     for e in errors:
