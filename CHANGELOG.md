@@ -48,12 +48,51 @@ A queue re-derived only by `age` and `sev` is honest about priority and silent a
 purpose. Both numbers can be right while the run finishes something the operator stopped
 wanting two items ago.
 
+### The reader found the contradiction, not the bug
+
+R-005's reader defeated all five guards and then read the doctrine as a reader rather
+than its author. Part 1a said *"arming is a consequence, not a request"* and stated its
+trigger as a fact about the **work** — a queue with more than one item — with no
+antecedent about configuration. Two sections above, the same file says **Default off.
+Silence arms nothing, exactly as silence authorizes no deploy**, and `grill.md`'s deploy
+floor is explicitly said to rest on that distinction. Read cold, Part 1a arms a loop in a
+project with no `pipeline.json` at all.
+
+The contradiction was in the phrasing, not the intent — `stages.md` had already restated
+the rule with the antecedent intact. **Part 1a gave way**, and a guard now requires it to
+state its precondition, because five guards checked for the presence of strings and not
+one would have noticed either reading.
+
+What the reader took apart in the guards, all verified by planting the defect and
+watching `PASS`:
+
+- **a deleted contract was a skip, not a failure.** Removing the whole `run.loop` block
+  left CI green with two tidy `unlooked` lines — and `run` allows additional properties,
+  so the example still conformed while meaning nothing;
+- **`_loop_block` searched instead of addressing.** A deprecated top-level `loop` earlier
+  in file order answered for the real contract;
+- **presence tests let the release's own thesis be reverted.** `arm` existed, so setting
+  the example back to `preflight` passed;
+- **`if _qv and …` short-circuited itself** — an open string in place of the queue enum
+  passed, which is precisely the failure the guard was written for;
+- **the floor guard had never tested its own rule.** Its phrase entered the file in
+  v1.11.0, twenty-nine releases earlier; both doctrinal statements could be deleted and a
+  Rationalizations row kept it green;
+- **the dynamic-disclosure regex was content-blind** — a sentence keeping the words and
+  inverting the obligation passed — and it triggered off the prose word, so renaming the
+  mode switched the guard off;
+- **`arm the mode` matched a bullet forbidding arming**, and `"loop"` matched any
+  sentence about any loop. Both now key on the schema's own tokens.
+
+Guards 233 → **248**: seven more probes than the first pass shipped with, six of them for
+fail sites that did not exist until the reader's findings were fixed.
+
 ### Also
 
 - **A guard was listing the legal modes instead of reading them.** Adding `dynamic`
   failed the guard on a correct example — a check enforcing its own staleness. It now
   reads the enum out of the schema.
-- Guards: 233 → **241**, one per new fail site, each with its planted defect.
+- Guards: 233 → **248**, one per new fail site, each with its planted defect.
 
 ## v1.39.0 — the skill could not be reached by the word "audit"
 

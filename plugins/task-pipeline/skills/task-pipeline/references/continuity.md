@@ -11,7 +11,7 @@ almost no window left, loses the middle of it, and re-derives what it already di
 
 - The limit, before the capability
 - Part 1 — the loop
-- Part 1a — the queue is stage 2's, and the loop arms itself on it
+- Part 1a — the queue is stage 2's, and the loop arms on it
 - Arming it on Claude Code
 - Other harnesses, and honest degradation
 - What one iteration means
@@ -63,7 +63,7 @@ the boundary between one agent turn and the next. This file is that reach.
 is never asked again — which is the entire point. A mode that has to be requested
 every run is not a mode, it is a habit the operator maintains by hand.
 
-## Part 1a — the queue is stage 2's, and the loop arms itself on it
+## Part 1a — the queue is stage 2's, and the loop arms on it
 
 **A loop with no queue is a timer.** Until this section existed, `run.loop` said *how
 often* to continue and never said *what the next item is*, so the mode could be armed
@@ -74,11 +74,17 @@ and still leave the run picking its next move by recollection — which is the f
 was a platform, and the plan's task list otherwise. Both already exist and both are
 already ordered; neither was ever named as the thing the loop walks.
 
-**Arming is a consequence, not a request.** Where the queue has more than one item, the
-loop arms **at the close of stage 2** and the run says so in one line. It is not asked
-for, for the same reason the mode is recorded rather than requested: a capability the
-operator must remember to switch on is one they will forget on exactly the run that
-needed it.
+**Arming is the execution of a recorded decision, not a fresh request.** Where the mode
+is **recorded** and the queue has more than one item, the loop arms **at the close of
+stage 2** and the run says so in one line. It is not asked for at that point, for the
+same reason the mode is recorded rather than requested: re-asking would rebuild the habit
+the config exists to retire.
+
+**Where nothing is recorded, nothing arms.** Silence arms nothing here too — this section
+moves *where* a recorded mode is armed, from preflight to the close of stage 2. It does
+not make arming unconditional, and a reader who takes it that way would arm a loop in a
+project with no `pipeline.json` at all. That reading was in this section's first draft;
+an independent reader found it before it shipped.
 
 **What arming does NOT change, and this is load-bearing:** the four stops are the four
 stops. A `manual` gate still waits. An outward or irreversible act still needs its own

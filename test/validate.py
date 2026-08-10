@@ -3943,28 +3943,27 @@ _EX_P = os.path.join(_skill_dir, "pipeline.example.json")
 
 
 def _loop_block(node):
-    """run.loop's schema node, wherever the definitions put it."""
-    if isinstance(node, dict):
-        _pr = node.get("properties")
-        if isinstance(_pr, dict) and "loop" in _pr:
-            return _pr["loop"]
-        for _v in node.values():
-            _r = _loop_block(_v)
-            if _r is not None:
-                return _r
-    elif isinstance(node, list):
-        for _v in node:
-            _r = _loop_block(_v)
-            if _r is not None:
-                return _r
-    return None
+    """run.loop's schema node, by ADDRESS.
+
+    The first version walked the document and returned the first `properties` dict
+    holding a "loop" key. A reader gutted the real block and added a deprecated
+    top-level `loop` carrying the expected fields: the decoy answered for the
+    contract and every check below passed. A path cannot be shadowed."""
+    try:
+        return node["definitions"]["run"]["properties"]["loop"]
+    except (KeyError, TypeError):
+        return None
 
 
 _schema_j = load_json(os.path.relpath(_SCHEMA_P, ROOT)) if os.path.isfile(_SCHEMA_P) else None
 _loop_s = _loop_block(_schema_j) if _schema_j else None
 if _loop_s is None:
-    _UNLOOKED.append("skip: the loop contract — pipeline.schema.json states no run.loop "
-                     "block, so its queue, arming and modes were not checked")
+    # This was an _UNLOOKED skip and a reader deleted the whole block: the release's
+    # entire contract vanished and CI stayed green with two tidy skip lines. A skip is
+    # for what may legitimately be absent; a file this repository ships is not that.
+    fail("pipeline.schema.json: no run.loop block at definitions.run.properties.loop — "
+         "the queue, the arming point and the modes have no contract, and `run` allows "
+         "additional properties, so the example still conforms while meaning nothing")
 else:
     _lp = _loop_s.get("properties") or {}
     # G1. A loop with no queue is a timer. The field is what stops an armed mode from
@@ -3984,6 +3983,17 @@ else:
     # G2. The queue's legal values must be the artefacts that actually exist, or the
     #     field names a source no stage produces.
     _qv = set((_lp.get("queue") or {}).get("enum") or [])
+    if "queue" in _lp and not _qv:
+        # `if _qv and ...` short-circuited itself: replacing the enum with an open
+        # string passed silently, and an open string is precisely "a field that names
+        # a source no stage produces".
+        fail("pipeline.schema.json: run.loop.queue has no enum — an open string is not "
+             "a queue, it is a field that accepts the name of a list nobody builds")
+    _av = set((_lp.get("arm") or {}).get("enum") or [])
+    if "arm" in _lp and "after-decomposition" not in _av:
+        fail("pipeline.schema.json: run.loop.arm does not offer `after-decomposition` — "
+             "the field exists and the only arming point it allows is the one this "
+             "release moved away from")
     for _need in ("module-map", "plan-tasks"):
         if _qv and _need not in _qv:
             fail(f"pipeline.schema.json: run.loop.queue does not offer `{_need}` — the "
@@ -3995,16 +4005,45 @@ if os.path.isfile(_CONT_P):
     _contf = _flatten(_cont, lower=True)
     # G3. The floor the mode may never lower, in the file that defines the mode. It is
     #     the sentence that keeps arming from reading as blanket permission.
-    if "generic flag is not a specific authorization" not in _contf:
-        fail("references/continuity.md: the sentence that keeps arming from reading as "
-             "blanket permission is gone — a recorded loop mode is a generic flag, and "
-             "the deploy floor in grill.md rests on that distinction")
+    _PHRASE = "generic flag is not a specific authorization"
+    # A file-wide `in` test was satisfied by prose from v1.11.0 — twenty-nine releases
+    # before the section this guard was written for — and stayed green after BOTH
+    # doctrinal statements were deleted, answered by a Rationalizations row. Scope it,
+    # and require the floor in each section that states it.
+    for _sec_re, _label in (
+            (r"^##\s*The limit, before the capability.*?$(.*?)(?=^##\s)", "The limit"),
+            (r"^##\s*Part 1a\b.*?$(.*?)(?=^##\s)", "Part 1a")):
+        _sm = re.search(_sec_re, _cont, re.S | re.M)
+        if _sm is None:
+            fail(f"references/continuity.md: the `{_label}` section is gone — the "
+                 "authorization floor is stated there and a guard cannot check a "
+                 "section that does not exist")
+        elif _PHRASE not in _flatten(_sm.group(1), lower=True):
+            fail(f"references/continuity.md `{_label}`: the sentence that keeps arming "
+                 "from reading as blanket permission is gone from this section. A "
+                 "recorded loop mode is a generic flag, the deploy floor in grill.md "
+                 "rests on that distinction, and a copy elsewhere in the file is not "
+                 "the copy a reader of this section will meet")
+    # ...and Part 1a must state its precondition, or it makes arming unconditional and
+    # silently overrides the default-off floor stated three surfaces away.
+    _p1a = re.search(r"^##\s*Part 1a\b.*?$(.*?)(?=^##\s)", _cont, re.S | re.M)
+    if _p1a and not re.search(r"nothing is recorded|where the mode is \*\*recorded\*\*",
+                              _p1a.group(1), re.I):
+        fail("references/continuity.md Part 1a: arming is stated with no precondition "
+             "about the recorded mode. Read cold, that arms a loop in a project with no "
+             "pipeline.json at all — the reading an independent reader took before this "
+             "shipped, and the one `Default off` exists to forbid")
     # G4. A self-pacing run owes the same disclosure an interval run owes. An interval
     #     run prints a job id; a dynamic run has none, so it prints the delay it chose.
     #     Without this a run can report itself as looping while nothing is scheduled —
     #     the exact claim this file already forbids for harnesses with no primitive.
-    if "dynamic" in _contf and not re.search(r"delay .{0,40}chose|chose .{0,40}delay",
-                                             _contf):
+    _dyn_offered = "dynamic" in ((_lp.get("mode") or {}).get("enum") or []) \
+        if _loop_s is not None else ("dynamic" in _contf)
+    # Triggering on the prose word was the first version: renaming the mode in the file
+    # switched the guard off. And the noun-pair regex passed a sentence that INVERTED
+    # the rule while keeping the words, so the verb and the consequence are both required.
+    if _dyn_offered and not (re.search(r"prints? \*{0,2}the delay it chose", _contf)
+                             and "indistinguishable from" in _contf):
         fail("references/continuity.md: `dynamic` is offered and the file never says a "
              "self-pacing run prints the delay it chose. An interval run discloses a job "
              "id; a dynamic run has none, and a run silent about its pacing cannot be "
@@ -4017,8 +4056,7 @@ if os.path.isfile(_STG_P):
     _m2 = re.search(r"^##\s*2\s*—.*?$(.*?)(?=^##\s)", _stg, re.S | re.M)
     if _m2 is None:
         _UNLOOKED.append("skip: stage-2 arming — no `## 2 —` section in stages.md")
-    elif not re.search(r"loop arms|arm the mode|loop.s arming state",
-                       _flatten(_m2.group(1), lower=True)):
+    elif "after-decomposition" not in _flatten(_m2.group(1), lower=True):
         # A bare "arm" was the first predicate and it was satisfied from the day it was
         # written — this stage has said "it arms the UX track in stage 3" since v1.7.0,
         # so the guard passed for a reason that had nothing to do with the loop. Found
@@ -4029,12 +4067,33 @@ if os.path.isfile(_STG_P):
              "nothing to walk")
 _ex_j = load_json(os.path.relpath(_EX_P, ROOT)) if os.path.isfile(_EX_P) else None
 if _ex_j:
+    # By ID: a reader renamed the stage on all seven surfaces and this guard went
+    # silent while the example's gate lost the arming.
     _b2 = [_s for _s in (_ex_j.get("stages") or [])
-           if isinstance(_s, dict) and "rainstorm" in str(_s.get("name", ""))]
-    if _b2 and "loop" not in str((_b2[0].get("gate") or {}).get("check", "")).lower():
+           if isinstance(_s, dict) and _s.get("id") == 2]
+    if _b2 and "arming state" not in str((_b2[0].get("gate") or {}).get("check", "")).lower():
         fail("pipeline.example.json stage 'Brainstorm + decompose': its gate does not "
              "require the loop's arming state to be printed. stages.md says it does, and "
              "the pair of surfaces that states one rule is the pair that drifts")
+
+    # The example is what gets copied — the premise this block inherits from v1.11.0 —
+    # and the two fields this release added could leave it silently. A reader reverted
+    # run.loop to its pre-v1.40 shape and the whole contract passed.
+    _exl = ((_ex_j.get("run") or {}).get("loop") or {})
+    if _exl:
+        for _f in ("queue", "arm"):
+            if _f not in _exl:
+                fail(f"pipeline.example.json: run.loop has no `{_f}` — the schema offers "
+                     "it and the example is what a project copies, so a field absent "
+                     "here is a field nobody discovers")
+        if _exl.get("mode") == "interval" and not _exl.get("interval"):
+            fail("pipeline.example.json: run.loop.mode is 'interval' with no interval — "
+                 "the schema says the field is required for that mode and states it in "
+                 "prose only")
+        if _exl.get("mode") == "dynamic" and _exl.get("interval"):
+            fail("pipeline.example.json: run.loop.mode is 'dynamic' and an interval is "
+                 "set — the schema calls it meaningless for a self-pacing run, and an "
+                 "example carrying a meaningless field teaches it")
 
 
 if errors:
