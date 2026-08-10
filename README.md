@@ -634,6 +634,17 @@ The spec stage runs it **before any plan is written**: `/ux` (setup check) →
 stages served, applicable UX patterns — and the plan's UI tasks carry scenario IDs
 in their DoD. Scenarios come before interface.
 
+**Two more tracks run beside it, and they answer different questions.** super-ux
+decides what the interface must *do*; its own `copywriting` decides how it *sounds*
+(every user-facing string, against the brand pack — `/brand-init` before the first
+string, never after); and [sheleg-design](https://github.com/ssheleg/sheleg-design)
+decides how it *looks* (tokens and themes, typography and rhythm, motion and its rest
+state). Until v1.36.0 this stage named only the first, so a run designed a flow and
+then wrote its strings by taste and picked its values at the keyboard, with every gate
+green over both. Either optional track can be declined — *"as is"*, *"draft"* — and
+the refusal is **recorded**, because a track skipped in silence and a track that ran
+are the same thing in a transcript.
+
 ```
 /plugin marketplace add ssheleg/super-ux
 /plugin install super-ux@super-ux

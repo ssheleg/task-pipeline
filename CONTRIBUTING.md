@@ -453,6 +453,17 @@ example disagreed with the code in both directions at once and hardcoded a live 
 *(guard: `and references/progress.md's legend does not define it`
 and `the worked example carries a digit`)*
 
+**52. A companion the matrix points at a stage is named by that stage, and stage 3's
+three tracks each name their owner.** The matrix's *"needed for"* cell says which stage
+needs a companion; nothing checked the stage had ever heard of it, which is how
+`sheleg-design` reached one mention in the whole bundle and super-ux's copy half reached
+none while the table read complete on its own. On the commit that added it, this guard
+found `chrome-devtools` pointed at stages 5–6 with stage 5 silent since the day it was
+added. A second, deliberately narrow check covers the three stage-3 tracks — UX, COPY,
+VISUAL — each with its owning skill, because the first reads matrix **row names** and
+the copy half lives inside super-ux's own cell, exactly where it was invisible.
+*(guard: `has not heard of it` and `names no owner`)*
+
 ## Adding or changing doctrine
 
 - **Change one idea per PR.** These files are read by agents under load; a PR that

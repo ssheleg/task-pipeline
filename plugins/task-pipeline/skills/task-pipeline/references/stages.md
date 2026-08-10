@@ -302,6 +302,32 @@ never that the work was skipped quietly.
   never rebuild from scratch. If the chain already exists and is validated (e.g.
   the task entered from super-ux), just verify (linter green) and embed it into
   the spec; only build the parts that are missing.
+- **COPY track — how it sounds.** Every string a product's user will read is written
+  through super-ux's `copywriting`, against the brand pack (`docs/brand/voice.md`,
+  `terminology.md`, `facts.md`). No pack ⇒ `/brand-init` **before** the first string,
+  not after: a voice reverse-engineered from copy already written is a description of
+  what happened, not a decision. In scope: interface strings, errors, empty states,
+  the landing, pricing, the user-facing changelog. **Out of scope, and saying so is
+  what keeps the track honest:** commit messages, PR descriptions, code comments, a
+  developer README, internal docs. Running a brand pack over a line in a contributors'
+  changelog is the fastest way to teach an agent to route around the track.
+- **VISUAL track — how it looks.** Where the task has a visual surface, the visual
+  layer goes through `sheleg-design` ([`companion-skills.md`](companion-skills.md)):
+  tokens and themes, typography and rhythm, motion and how it degrades to rest, the
+  boundary with Figma (tokens as variables, never raw values carried across). Not
+  through it: a purely structural change — what sits where is the UX track's — text,
+  a backend, an internal script.
+- **Each track's refusal is a sentence, never a silence.** *"Без дизайна" / "as is"*
+  ends the visual track; *"без бренда" / "draft"* ends the copy track. Either one is
+  the operator's to make and costs nothing — but it is **recorded in the brief and
+  said out loud in the close-out**, because a track skipped silently and a track that
+  ran are the same thing in a transcript. This is the `⊘` rule one layer up: a skip
+  nobody can see is indistinguishable from work that happened.
+- **Three tracks, three questions, and they do not substitute for each other.** super-ux
+  decides what the interface must **do**; `copywriting` how it **sounds**;
+  `sheleg-design` how it **looks**. Until 2026-08-10 this stage named only the first,
+  so a run designed a flow, then wrote its strings by taste and picked its values at the
+  keyboard — and every gate in the pipeline reported green over both.
 - **Spec:** write the approved design to
   `docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md` and commit it. Lock all
   shared contracts (types, schemas, signatures, file layout). For UI tasks the
@@ -320,7 +346,11 @@ never that the work was skipped quietly.
   (or an explicit v1-mode/tiny-project waiver by the operator). **With Figma on:
   the canonical record names one file, and every `screens.md` frame link carries
   that same `:fileKey`** — a string match, not a judgement; a differing key means
-  the run drew in a second file nobody will open. No plan (stage 4)
+  the run drew in a second file nobody will open. **Every user-facing string went
+  through the COPY track or the refusal is recorded**, and **the visual layer went
+  through the VISUAL track or the refusal is recorded** — a recorded refusal passes
+  this gate and an unmentioned one does not, which is the only difference that matters.
+  No plan (stage 4)
   starts before this — the chain comes BEFORE interface.
 
 ## 4 — Plan
@@ -354,6 +384,16 @@ never that the work was skipped quietly.
   watch it fail → minimal impl → watch it pass → commit. Pin subagents to the
   run's confirmed model (`model-tiering.md`). The plan's parallel groups fan out
   **only** when each implementer gets its own worktree; otherwise sequential.
+- **Web front end? The task's own surface is checked in a browser, not in the diff.**
+  Where `chrome-devtools` is connected ([`companion-skills.md`](companion-skills.md)):
+  after a task that changes a rendered surface, load it, take a snapshot and read the
+  console and the network log **before the task is marked DONE** — a component can be
+  correct and land under a fixed header, and a review of the diff cannot see that.
+  Absent, say the surface was verified by reading the diff and treat it as the weaker
+  claim it is. Stage 6 repeats this over the whole tree; this one catches it while the
+  implementer that wrote it is still dispatched. The matrix pointed this companion at
+  stages 5–6 from the day it was added and **this stage had never named it** — found by
+  the guard comparing the two, not by a reader.
 - **Integration closes the stage:** sync with the base branch, re-run the full suite
   on the result, land it the project's way (merge, or a PR — outward, so it needs a
   go), remove the worktree. Stages 7–9 act on the integrated result, so a branch the

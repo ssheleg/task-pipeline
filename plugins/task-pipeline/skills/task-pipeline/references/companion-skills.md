@@ -43,7 +43,8 @@ better, plus one that is required only for user-facing work.
 
 | Skill / tool | Needed for | Required? | Install |
 |---|---|---|---|
-| **super-ux** (`ux-foundation`, `ux-flows`, `ux-scenarios`, `ux-audit`, `/ux`, `/ux-lint`) | stage 3 UX track | **Required for any user-facing task** | `/plugin marketplace add ssheleg/super-ux` → `/plugin install super-ux@super-ux` (or `npx skills add ssheleg/super-ux`) |
+| **super-ux** (`ux-foundation`, `ux-flows`, `ux-scenarios`, `ux-audit`, `/ux`, `/ux-lint` — **and the copy half**: `copywriting`, `brand-voice`, `/brand-init`, `/copy`, `/brand-lint`, plus `/vision`) | stage 3 — the **UX track** *and* the **COPY track**. This row named six surfaces until 2026-08-10 while super-ux shipped eight skills and fifteen commands: the whole brand-and-copy half was invisible to this pipeline, so a run built scenarios and screens and then wrote the interface strings by taste | **Required for any user-facing task** | `/plugin marketplace add ssheleg/super-ux` → `/plugin install super-ux@super-ux` (or `npx skills add ssheleg/super-ux`) |
+| **sheleg-design** (`/sheleg-design`) | stage 3 — the **VISUAL track**: tokens and themes, typography and rhythm, motion and how it degrades to rest, the visual language a brand is recognised by. It answers *how it looks*, which no other companion here answers — `super-ux` decides what the interface must do, `copywriting` how it sounds. Before 2026-08-10 this skill appeared once in the whole bundle, as a name in a list | **Recommended** on any task with a visual surface; never a gate. Absent → the run says the visual layer shipped **undesigned**, which is the honest name for picking values at the keyboard | `/plugin marketplace add ssheleg/sheleg-design` → `/plugin install sheleg-design@sheleg-design-skill` |
 | **context7** (MCP — call tools fully qualified: `context7:resolve-library-id`, `context7:query-docs`) | stage 1 docs study | Recommended (web-search fallback) | connect the context7 MCP server |
 | **Figma** (MCP) | stage 3 UX track, when the project designs visually — super-ux mirrors each `SCR-` screen/state into a frame | Optional, **UI + Figma-on only**. Absent → super-ux degrades to text-only *by itself and never blocks*, so shipping a UI feature with no mockups becomes a silent scope call — which is why the stage-0 sweep decides it | connect the Figma MCP server (`/mcp`, or your claude.ai connectors) |
 | **[obsidian-wiki](https://github.com/ar9av/obsidian-wiki)** (`wiki-query`, `wiki-update`) | **stage 0 harvest** (query what's already known) **+ stage 9 sync** | **Recommended** — never a gate; absent → harvest runs on repo docs alone | `pip install obsidian-wiki` → `obsidian-wiki setup --vault /path/to/your/vault` |
@@ -77,9 +78,16 @@ exchange:
 
 ```
 Pipeline companions (stage doctrine is built in — nothing to install for it):
-  ✗ super-ux           — this task looks user-facing; required for the UX track:
+  ✗ super-ux           — this task looks user-facing; required for the UX track,
+                         and it also owns the COPY track (copywriting, brand-voice):
                            /plugin marketplace add ssheleg/super-ux
                            /plugin install super-ux@super-ux
+  ✗ sheleg-design      — this task has a visual surface; it owns the VISUAL track:
+                         tokens, themes, typography, rhythm, motion and its rest state:
+                           /plugin marketplace add ssheleg/sheleg-design
+                           /plugin install sheleg-design@sheleg-design-skill
+                         (running without it — the visual layer ships undesigned,
+                          and the close-out says so in those words)
   ✓ context7           — ready
   ✗ Figma MCP          — this task is user-facing and the project designs in Figma
                          (docs/ux/foundation.md → Design tooling). Without it the
@@ -120,7 +128,16 @@ Install the ✗ items you want, answer the model line, then say "continue".
 Rules:
 
 - Only flag **super-ux** when the task implies a UI (the stage-0 grill decides;
-  when unsure, flag it — a false positive costs one install).
+  when unsure, flag it — a false positive costs one install). It arms **two** tracks,
+  not one: the UX chain and the copy layer.
+- **sheleg-design**: flag it when the task has a **visual** surface — a page, a screen,
+  a themed component, a landing, a dashboard. Detect via a resolving `/sheleg-design`.
+  **A CLI, a library, a backend service or an internal script does not flag it**, and
+  neither does a purely structural change to an existing screen: choosing a palette for
+  a log parser is how a recommendation is taught to be noise, and this bundle already
+  spent a rule learning that about the browser. Absent → the run continues and says the
+  visual layer shipped **undesigned**; that is a weaker claim and the close-out records
+  it as one, exactly as it does for a surface verified by reading the diff.
 - **obsidian-wiki**: detect via `~/.obsidian-wiki/config` or a resolving
   `wiki-query`/`wiki-update`. Present → say `✓ ready` and use it in the harvest.
   Absent → print the two install lines **once** and continue; never ask twice in a

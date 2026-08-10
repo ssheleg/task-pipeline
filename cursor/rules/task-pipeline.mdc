@@ -569,14 +569,32 @@ than the last five run stamps **move** to an append-only archive that is *querie
 by the task's nouns rather than read — which keeps the in-force file short enough to
 read in full, and makes pruning cost no knowledge.
 
-## super-ux for user-facing tasks (recommended)
+## Three tracks for user-facing tasks (stage 3)
 
-If the task touches any UI (web/mobile/CLI/TUI), the WHY→UI→scenario chain comes
-BEFORE interface code. If super-ux is available, use it: foundation (personas,
-JTBD, customer journey maps, user stories) → flows + screens → scenarios (the
-source of truth) → run its linter. Otherwise still design that chain, get it
-approved, and trace every user-facing requirement to a scenario before building.
-Install (Cursor/Claude/others): `npx skills add ssheleg/super-ux`.
+Three questions, three owners, and none substitutes for another: what the
+interface must **do**, how it **sounds**, how it **looks**.
+
+1. **UX track — super-ux (recommended).** If the task touches any UI
+   (web/mobile/CLI/TUI), the WHY→UI→scenario chain comes BEFORE interface code:
+   foundation (personas, JTBD, customer journey maps, user stories) → flows +
+   screens → scenarios (the source of truth) → run its linter. Without the skill,
+   still design that chain, get it approved, and trace every user-facing
+   requirement to a scenario before building.
+   Install: `npx skills add ssheleg/super-ux`.
+2. **COPY track — copywriting (super-ux ships it).** Every string a product's
+   user reads goes through it, against the brand pack; no pack means running
+   brand-init BEFORE the first string, not after. Not through it: commit
+   messages, PR text, code comments, developer READMEs, internal docs.
+3. **VISUAL track — sheleg-design (recommended).** Tokens and themes,
+   typography and rhythm, motion and how it degrades to rest, the Figma boundary
+   (tokens as variables, never raw values carried across). Not through it: a
+   purely structural change, text, a backend, an internal script.
+   Install: `npx skills add ssheleg/sheleg-design`.
+
+**A refusal is a sentence, never a silence.** "as is" ends the visual track and
+"draft" ends the copy track; either is the operator's call and costs nothing, but
+it is recorded and said out loud in the close-out. A track skipped silently and a
+track that ran look identical afterwards.
 
 ## Routing — when this applies at all
 

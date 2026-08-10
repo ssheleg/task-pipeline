@@ -1,5 +1,51 @@
 # Changelog
 
+## v1.36.0 — what it does, how it sounds, how it looks
+
+The audit measured this one rather than argued it: **`copywriting` appeared zero times
+in the whole bundle, and `sheleg-design` once — as a name in a list in the README.**
+Meanwhile the companion matrix named six super-ux surfaces while super-ux shipped eight
+skills and fifteen commands. So a run designed a flow, then wrote its interface strings
+by taste and picked its visual values at the keyboard, and every gate in the pipeline
+reported green over both.
+
+**Stage 3 now runs three tracks, and none substitutes for another:**
+
+| Track | Answers | Owner |
+|---|---|---|
+| UX | what the interface must **do** | super-ux — the WHY→UI→scenario chain |
+| COPY | how it **sounds** | `copywriting`, against the brand pack |
+| VISUAL | how it **looks** | `sheleg-design` — tokens, themes, rhythm, motion |
+
+Each carries its boundary in both directions, because a track that over-reaches is
+routed around. The copy track takes interface strings, errors, empty states, the
+landing, the user-facing changelog — and explicitly **not** commit messages, PR text,
+code comments or a developer README. The visual track takes the visual layer and
+explicitly **not** a purely structural change, which is the UX track's.
+
+**A refusal is a sentence, never a silence.** *"as is"* ends the visual track and
+*"draft"* ends the copy track; either is the operator's call and costs nothing. But it
+is recorded in the brief and said in the close-out, because a track skipped in silence
+and a track that ran are identical afterwards — the `⊘` rule one layer up.
+
+**`sheleg-design` joins the matrix and the preflight**, and super-ux's row finally names
+its copy half.
+
+**The new guard found a live defect on the clean tree before it found anything else.**
+It compares the matrix's *"needed for stage N"* cell against what that stage actually
+says, and reported that `chrome-devtools` had been pointed at **stages 5–6 since the day
+it was added, with stage 5 never naming it**. Fixed here: stage 5 now checks a rendered
+surface per task, while the implementer that wrote it is still dispatched.
+
+**And a probe found a hole in its own guard.** Removing `copywriting` from stage 3 left
+the check silent, because it reads matrix **row names** and the copy half lives inside
+super-ux's own cell — precisely where it had been invisible all along. A second, narrow
+check now covers the three tracks by name. It is narrow on purpose: generalising the
+sub-skill mapping would demand stage 3 name `/brand-lint` and `ux-audit` too, and a
+check that over-reaches is switched off by the third person who hits it.
+
+Guards: 199 → **203**, property checks 8.
+
 ## v1.35.0 — the loop that had no ceiling, the exemption nobody measured
 
 Three findings from the same audit, all of them gates behaving as prose.

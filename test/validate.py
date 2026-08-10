@@ -3432,6 +3432,65 @@ if os.path.isfile(_EXP_P):
                  f"({_l.strip()!r}) — a live count in a doctrine is a count nobody "
                  "updates, and this one was eight releases stale")
 
+# --- P3: the tracks a companion owns (v1.36.0) --------------------------------
+# The matrix's second cell says which stage needs a companion. Nothing checked that
+# the stage had ever heard of it — which is how `sheleg-design` reached one mention
+# in the whole bundle and super-ux's entire copy half reached none, while the
+# matrix read complete on its own. SCOPE: name presence in the stage's section. It
+# does not check that the stage USES the companion well, only that the stage the
+# matrix points at names it at all.
+_CS_P = os.path.join(ROOT, _SKILLDIR, "references/companion-skills.md")
+if os.path.isfile(_CS_P) and os.path.isfile(_ST_P):
+    _cs_t = open(_CS_P, encoding="utf-8").read()
+    _st_t2 = open(_ST_P, encoding="utf-8").read()
+    # Stage sections of stages.md, keyed by id.
+    _sections = {}
+    _heads = list(re.finditer(r"^##\s+(\d+)\s+—", _st_t2, re.M))
+    for _i, _h in enumerate(_heads):
+        _to = _heads[_i + 1].start() if _i + 1 < len(_heads) else len(_st_t2)
+        _sections[_h.group(1)] = _flatten(_st_t2[_h.start():_to], lower=True)
+    for _row in re.findall(r"^\|\s*\*\*([^*|]+)\*\*[^|]*\|([^|]*)\|", _cs_t, re.M):
+        _nm = re.sub(r"^\[|\]$", "", re.split(r"\s*\(", _row[0])[0].strip())
+        _need = _row[1]
+        _want = set()
+        for _m in re.finditer(r"[Ss]tages?\s+(\d+)\s*[–—-]\s*(\d+)|[Ss]tages?\s+(\d+)",
+                              _need):
+            if _m.group(1):
+                _want |= {str(_n) for _n in range(int(_m.group(1)), int(_m.group(2)) + 1)}
+            else:
+                _want.add(_m.group(3))
+        for _sid in sorted(_want):
+            if _sid not in _sections:
+                continue          # a stage this example flow does not have
+            if _nm.lower() not in _sections[_sid]:
+                fail(f"references/companion-skills.md points {_nm!r} at stage {_sid} "
+                     f"and references/stages.md's stage {_sid} never names it — "
+                     "a companion the operator is told to install for a stage that "
+                     "has not heard of it")
+
+    # P3-G2. The guard above reads matrix ROW NAMES, so a sub-skill named inside a
+    # row's own cell is out of its scope — and that is exactly where super-ux's copy
+    # half lived while being invisible to every stage. A probe found the hole, which
+    # is why this second, narrower check exists: the three stage-3 tracks by name,
+    # each naming the companion that owns it. Narrow on purpose. Generalising the
+    # sub-skill mapping would demand that stage 3 name `/brand-lint` and `ux-audit`
+    # too, which belong to other stages, and a check that over-reaches is switched
+    # off by the third person who hits it.
+    _s3 = _sections.get("3", "")
+    if not _s3:
+        _UNLOOKED.append("skip: the stage-3 tracks — this flow has no stage 3")
+    else:
+        for _track, _owner in (("ux track", "super-ux"),
+                               ("copy track", "copywriting"),
+                               ("visual track", "sheleg-design")):
+            if _track not in _s3:
+                fail(f"references/stages.md stage 3: no {_track!r} — the stage names "
+                     "what the interface must do, and not how it sounds or looks")
+            elif _owner not in _s3:
+                fail(f"references/stages.md stage 3: the {_track!r} names no owner — "
+                     f"{_owner!r} is absent, so the track is a heading with no skill "
+                     "behind it")
+
 if errors:
     print("FAIL: task-pipeline structure invalid")
     for e in errors:

@@ -3891,3 +3891,78 @@ jobs:
           else
             echo "OK: validator correctly FAILs — the worked example carries no digits"
           fi
+
+      - name: Negative self-test (a companion pointed at a stage that never names it)
+        run: |
+          set -eu
+          rm -rf /tmp/cw1-copy && cp -R . /tmp/cw1-copy
+          python3 - <<'EOF'
+          p = "/tmp/cw1-copy/plugins/task-pipeline/skills/task-pipeline/references/companion-skills.md"
+          t = open(p, encoding="utf-8").read()
+          needle = "| stage 3 — the **VISUAL track**"
+          assert needle in t, "PLANT DID NOT LAND: the visual row moved"
+          open(p, "w", encoding="utf-8").write(t.replace(needle, "| stage 4 — the **VISUAL track**", 1))
+          EOF
+          if python3 /tmp/cw1-copy/test/validate.py; then
+            echo "ERROR: the operator is told to install a companion for a stage that has not heard of it"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the matrix and the stage it points at agree"
+          fi
+
+      - name: Negative self-test (a stage dropping the companion the matrix aims at it)
+        run: |
+          set -eu
+          rm -rf /tmp/cw2-copy && cp -R . /tmp/cw2-copy
+          python3 - <<'EOF'
+          p = "/tmp/cw2-copy/plugins/task-pipeline/skills/task-pipeline/references/stages.md"
+          t = open(p, encoding="utf-8").read()
+          assert "`sheleg-design`" in t, "PLANT DID NOT LAND: the visual companion moved"
+          open(p, "w", encoding="utf-8").write(t.replace("`sheleg-design`", "the visual skill"))
+          EOF
+          if python3 /tmp/cw2-copy/test/validate.py; then
+            echo "ERROR: a recommended companion no stage names is a recommendation for the reader only"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the stage names its own companions"
+          fi
+
+      - name: Negative self-test (a stage-3 track with no owning skill)
+        run: |
+          set -eu
+          rm -rf /tmp/trk1-copy && cp -R . /tmp/trk1-copy
+          python3 - <<'EOF'
+          p = "/tmp/trk1-copy/plugins/task-pipeline/skills/task-pipeline/references/stages.md"
+          t = open(p, encoding="utf-8").read()
+          assert "`copywriting`" in t, "PLANT DID NOT LAND: the copy companion moved"
+          open(p, "w", encoding="utf-8").write(t.replace("`copywriting`", "the writing skill"))
+          EOF
+          if python3 /tmp/trk1-copy/test/validate.py; then
+            echo "ERROR: a track heading with no skill behind it — which is what the copy half was for a year"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — every stage-3 track names its owner"
+          fi
+
+      - name: Negative self-test (a stage-3 track deleted outright)
+        run: |
+          set -eu
+          rm -rf /tmp/trk2-copy && cp -R . /tmp/trk2-copy
+          python3 - <<'EOF'
+          import re
+          p = "/tmp/trk2-copy/plugins/task-pipeline/skills/task-pipeline/references/stages.md"
+          t = open(p, encoding="utf-8").read()
+          # Case-insensitive on purpose. The first version replaced only the heading's
+          # SHOUTED form and left "ends the visual track" in the refusal sentence, so
+          # the guard kept finding the track and stayed correctly quiet — a probe that
+          # deletes one spelling of a phrase and calls the class removed.
+          n, k = re.subn(r"visual track", "look-and-feel pass", t, flags=re.I)
+          assert k >= 2, "PLANT DID NOT LAND: the visual track is spelled fewer ways than expected"
+          open(p, "w", encoding="utf-8").write(n)
+          EOF
+          if python3 /tmp/trk2-copy/test/validate.py; then
+            echo "ERROR: the stage names what the interface must do and not how it looks"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — all three tracks are named at stage 3"
+          fi
