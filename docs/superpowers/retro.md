@@ -28,7 +28,6 @@ over all of them.
 
 | id | Born | Commit | Instruction | Because | Retire when | Last fired | Fired at |
 |---|---|---|---|---|---|---|---|
-| R-001 | 2026-08-03 · `documentation-track` | `dbe4f43` | When a check stays silent against a planted defect, **prove the plant landed in the text the check actually parses before touching the check.** | Two silent probes in one run: one was a bad probe (§9 correctly skips outside a git tree), one was a real bug (`$((0009))` is octal). The split is 50/50 here and was 4-of-5 probe-fault on the source project — guessing wrong costs a real bug or a false fix. | a probe harness exists that asserts the plant changed the parsed text, making this mechanical | 2026-08-10 | `07e7824` |
 | R-002 | 2026-08-03 · `doc-track-audit` | `096f0f0` | When a batch of edits returns **any** error, re-verify **every** edit in that batch before reporting the batch done — not only the one that errored. | Two edits were issued together; the second failed the read-before-write check and was retried, the first was silently never applied. It was reported as done, shipped in v1.7.0, and surfaced only in a post-release audit as a question the grill never asks with a field in the brief waiting for the answer. | the harness reports per-edit outcomes in a form a check can read, or the edits are issued one per message | 2026-08-08 | `68b4428` |
 | R-003 | 2026-08-05 · `artifact-hygiene` | `13028e9` | When you fix a defect in one check, guard or detector, **immediately run that defect's definition against its siblings** before moving on — the same file's other checks, and the other files that do the same job. | `learned.md` rule 6 says *sweep the class, not the instance*, and this is its **third** recorded failure to be applied to itself. 2026-08-03 `enforcement-audit`: a fix scoped to references→README while the same class lived in six other places. 2026-08-03 `root-cause`: nine findings, one missing matrix row. 2026-08-05: check 2's false-positive class was solved, and check 4 — its immediate sibling, in the same file, written in the same hour — shipped with the identical bug and fired on this run's own documents. Two instances were worth notes; `audit.md` says a class seen twice becomes a mechanism rather than a third ledger row. | a check can compare sibling detectors for a shared false-positive class — which needs the classes to be named in a machine-readable form first | 2026-08-10 | `07e7824` |
 | R-004 | 2026-08-06 · `graph-staleness` | `2ce6ecc` | When a gate runs, the **next command must be conditional on its exit code** — never a gate and a commit in one block separated by newlines. | The hygiene gate returned FAIL and the `git commit` and `git push` beneath it ran anyway, because they were separate lines rather than a chain. The gate was read and not obeyed, which is indistinguishable in the transcript from a gate that passed. `learned.md` rule 11 makes the gate *return* the right code; nothing made the caller *use* it. | a harness or wrapper refuses to run a mutating command after a non-zero gate in the same block | 2026-08-10 | `07e7824` |
@@ -41,6 +40,59 @@ rows, the oldest never-fired
 row goes — the cap is not negotiable, ranking is.
 
 ## Recent log — entries from the last five run stamps (newest first)
+
+### 2026-08-10 · `skill-audit` · the doctrine was right and nobody could read it
+
+**Symptom.** An audit measured this skill rather than reading it, and the finding was
+not that any rule is wrong. It is that the **stage-0 reading floor was ~47 750 tokens**,
+that the launch instruction was **one 1281-word paragraph carrying 25 obligations**, and
+that the bundle spends **one `never` per 227 words** across 77 230 words. Volume is
+itself an instruction, and the instruction it gives is *skim*.
+
+**Surfaced at:** an audit the operator asked for, with fresh eyes. Not by a gate — every
+gate here measures an artifact, and none measures whether the artifact was read.
+
+**Owned by:** no stage, which is the finding. Nothing in eleven stages asks *is this
+readable?* — the closest thing was a checklist marked *"copy it, tick it"*.
+
+**Root cause.** Every release added correct doctrine to a file that was already being
+skimmed, and each addition was individually justified. There is no mechanism anywhere
+that pays a cost for length, so length was free and reading was not.
+
+**Fix, by grade.**
+1. *(mechanical)* The command file is eight headed sections. The retro's **narrative
+   log** — 10 937 of its 14 756 tokens, and the one section nothing caps — is queried
+   rather than read in full; the floor fell to ~36 950. A guard holds it, scoped to the
+   **sentence**, because paragraph scope let the word *queried* one clause away cancel
+   the check and both plants passed.
+2. *(mechanical, and the one to keep)* **`test/probe.py`**. R-001 asked for it on
+   2026-08-03 and named it as its own retirement condition; it was never built, and
+   three probes failed in one day for want of it. Its third assertion — *the guard that
+   fired is the guard under test* — **caught two of this release's own guards being too
+   loose on its first use**, before either reached a reviewer.
+3. *(mechanical)* Stage 7 now dispatches the reader and reads its **output**, with
+   `NO READER` a printed state. `learned.md` rule 22 makes the silent no-op a named class.
+
+**Retired: R-001**, its trigger met by the harness. First retirement in this project's
+history, and it is the honest one — the rule said what would replace it, and that thing
+now exists.
+
+**Three findings reported and not fixed**, which R-006 exists to make me say plainly:
+`stages.md` is still 13 161 tokens (B-043); 340 prohibitions still carry equal weight
+(B-044); 92 hand-written counts still face 10 registered classes (B-045). Each is a
+sweep, not an edit, and pretending otherwise in a close-out is the failure this file is
+for.
+
+**And the audit over-claimed, in the paragraph that measured everything else.** Its table
+said `stages.md` was *"read in full at stage 0"*. Grepping the obligation returns only
+the retro. Corrected in place, weaker and true — a measurement report is not exempt from
+the rule it is measuring against.
+
+**The check that catches it next time:** for the reading floor, the sentence-scoped
+guard. For a probe that proves nothing, the harness. For *"the doctrine grew and nobody
+paid for it"* — nothing, and that is the honest end: no check can decide whether a file
+is worth its length.
+
 
 ### 2026-08-10 · `pipeline-audit` · the reader that did not read, and three probes wrong before their guards
 
@@ -787,6 +839,7 @@ One line per run, appended at stage 10. This is what makes "five runs" countable
 
 | Date | Topic | Commit | Verdict | Retro |
 |---|---|---|---|---|
+| 2026-08-10 | `skill-audit` / fixes `trigger-wall-probe-floor` | `b7778c9` | 9 of 12 plan items · the command wall 1281 → 295 words · the description 1015 → 956 with both no-task modes named · **`test/probe.py` built, and it caught two of this release's own guards on first use** · stage-0 floor ~47 750 → ~36 950 tok · evals 15 → 21 · guards 210 → **218** | 1 entry · **5 standing (was 6)** · retired 1 (R-001, its condition met) · added 0 · R-002, R-003, R-004, R-006 fired |
 | 2026-08-10 | `pipeline-audit` / P1+P2+P3+P4 `audit-and-four-modules` | `07e7824` | 12 REQ verified · 1 **partial and reported** (REQ-023: R-005's reader never ran — the review app reported `skipping` on all four PRs) · the audit's 8 findings closed as B-025..B-032 · guards 188 → **210** · **three probes wrong before their guards were** | 1 entry · 6 standing · retired 0 · added 0 · R-001, R-003, R-004, R-006 fired; R-002 and R-005 did not |
 | 2026-08-10 | `planning-system` / N3+N4+N5 `exposure-checkup-loop` | `0137512` | 3 REQ · a vector never a probability, the command with no task in flight, the loop citing the board · **one review round by the lowered threshold, 5 findings** · the suite itself fixed: 13+ min → **5m34s** · carry-over 2 rows, 0 unresolved | 1 entry · 6 standing · retired 0 · added 0 · R-001, R-002, R-004 fired · guards 185 → 188 |
 | 2026-08-10 | `planning-system` / N2 `verification-ledger` | `85f8c8a` | 3 REQ · the column a machine may not fill · **ten review rounds, ~20 findings, none from my probes** · carry-over 2 rows, 0 unresolved | 1 entry · 6 standing · retired 0 · added 0 · R-001, R-002, R-005 fired · guards 175 → 185 |
