@@ -41,6 +41,52 @@ row goes — the cap is not negotiable, ranking is.
 
 ## Recent log — entries from the last five run stamps (newest first)
 
+### 2026-08-10 · `loop-mechanism` · a green validator is not a green suite, and it reached main
+
+**Symptom.** `5a77053` was pushed straight to `main` with CI red. `validate
+#31418912240` failed on one step: *Negative self-test (the example must set
+run.loop.mode explicitly)* — a probe whose needle was the one-line
+`"loop": { "mode": "off", … }` literal, which stopped matching the moment that block
+grew a `queue` and an `arm`. Two commits later the probe was repaired and the merge
+closed the red, so nothing shipped broken. What shipped was a window in which `main`
+was red and the run did not know.
+
+**Surfaced at:** stage 7 of the *next* release, reading the CI list for a tag — not by
+the run that caused it.
+
+**The stage that owned it:** stage 7 of the run that pushed. It ran `npm test` and
+pushed on its verdict.
+
+**Root cause.** `npm test` and `npm run test:all` answer different questions. The first
+asks *does the validator pass over this tree*; the second asks *does every guard still
+reject its planted defect*. A change that edits the shape a probe plants into breaks
+only the second, and the doctrine's own words for it are already written: a guard nobody
+has watched fail is a decoration, and a probe whose needle matches nothing is that
+decoration's probe.
+
+**The class, and this is its third instance in one session.** A plant keyed to
+formatting tests the formatting. Three v1.39.0 plants swapped a phrase and left sibling
+occurrences alive; `cl9` held a stale count; this one held a stale JSON literal.
+`audit.md` says a class seen twice becomes a mechanism rather than a third ledger row —
+so it is `B-057`, with the mechanism named: plant through the parser where one exists,
+and check that a needle still occurs in the file it targets.
+
+**Fixes by grade.**
+
+1. *(mechanical)* The probe now plants through `json.load`/`json.dump` and asserts its
+   own message rather than any non-zero exit — it would previously have counted an
+   unrelated failure as success.
+2. *(mechanical)* `B-057` carries the sweep: a needle-occurrence check over every probe.
+3. *(standing instruction)* **None added.** R-004 already says the next command must be
+   conditional on a gate's exit code; nothing said *which* gate. The rule that would
+   have caught this is `npm run test:all` before a push that touches a guard or the text
+   a probe plants into — and that is a check, not a standing instruction, which is why
+   it goes to the board rather than to the cap of ten.
+
+**The check that catches it next time:** the needle-occurrence sweep in `B-057`. Until
+it exists, the honest statement is that this run found the incident by reading a CI list
+it had no reason to read, which is luck wearing the clothes of diligence.
+
 ### 2026-08-10 · `findings-entry` · the guards were written by the person who wrote the defect
 
 **Symptom.** Nine validator guards, written in one hour to hold a boundary this release
@@ -885,6 +931,7 @@ One line per run, appended at stage 10. This is what makes "five runs" countable
 
 | Date | Topic | Commit | Verdict | Retro |
 |---|---|---|---|---|
+| 2026-08-10 | `loop-mechanism` / B-054 `the-loop-had-no-queue` | `64fcc6b` | the queue, `mode: dynamic`, `run.loop.arm`, the goal re-read between items · **R-005's reader found a contradiction the guards could not**: Part 1a armed unconditionally and overrode the file's own `Default off` · six guard defects, all planted and watched passing · guards 233 → **248** · **a red CI reached `main` on `5a77053`** — pushed after `npm test` without `test:all` | 1 entry · 5 standing · retired 0 · added 0 · R-003, R-005, R-006 fired |
 | 2026-08-10 | `findings-entry` / B-047 `the-word-audit-could-not-reach-it` | `0df1e7a` | 8 REQ verified, 1 with its scope corrected (three surfaces, not four) · **routing measured on fresh agents, 7/10 → 9/10 → 8/10** — bug hunt and PR review moved in both after-runs, the production check in neither · **R-005's reader defeated the nine new guards fifteen ways**, all fixed, and the six added probes found a sixteenth · guards 218 → **233** · evals 21 → **28** | 1 entry · 5 standing · retired 0 · added 0 · R-003, R-005, R-006 fired; R-002 and R-004 did not |
 | 2026-08-10 | `skill-audit` / fixes `trigger-wall-probe-floor` | `b7778c9` | 9 of 12 plan items · the command wall 1281 → 295 words · the description 1015 → 956 with both no-task modes named · **`test/probe.py` built, and it caught two of this release's own guards on first use** · stage-0 floor ~47 750 → ~36 950 tok · evals 15 → 21 · guards 210 → **218** | 1 entry · **5 standing (was 6)** · retired 1 (R-001, its condition met) · added 0 · R-002, R-003, R-004, R-006 fired |
 | 2026-08-10 | `pipeline-audit` / P1+P2+P3+P4 `audit-and-four-modules` | `07e7824` | 12 REQ verified · 1 **partial and reported** (REQ-023: R-005's reader never ran — the review app reported `skipping` on all four PRs) · the audit's 8 findings closed as B-025..B-032 · guards 188 → **210** · **three probes wrong before their guards were** | 1 entry · 6 standing · retired 0 · added 0 · R-001, R-003, R-004, R-006 fired; R-002 and R-005 did not |
