@@ -41,6 +41,31 @@ and `reading` is gone from the exclusions — guarded, so it cannot come back qu
   locked list out of that design and compares it to the shipped surface, so the next
   dropped verb is a failure rather than a week.
 
+### The reader earned its standing instruction
+
+R-005 exists because an author's probes only exercise the shapes the author already
+thought of. Dispatched on the nine new guards, an independent reader defeated them
+**fifteen ways**, each verified by planting the text and watching the validator still
+print `PASS`. The three worth naming:
+
+- **A presence test over a whole file proves a word exists, not that the rule says it.**
+  The reader deleted the entire boundary clause from the Cursor rule, put the old
+  exclusion back, added one unrelated sentence elsewhere containing the same four class
+  names — and the guard passed. Both cross-surface checks are now scoped to the
+  `## Routing` section.
+- **A `should_not_trigger` control counted as coverage.** The eval-coverage guard joined
+  every query regardless of category, so deleting all four findings evals and mentioning
+  the words in one negative control certified *named and untested* — the exact state it
+  cites `B-046` for — as green. It now reads `should_trigger` queries only.
+- **The anti-dormancy sentinel was itself one synonym from dormant**, and the
+  locked-verb guard read a regex out of a document this repo forbids maintaining, so
+  relabelling one heading in a superseded design would have silenced the check that
+  exists because a verb was silently dropped. Both now fail loudly instead.
+
+Nine of the fifteen were in checks written that same hour. The tenth fail site had no
+probe at all — ten branches, nine tests — which is the invariant the repository states
+about itself and did not keep.
+
 ### Also
 
 - **False-positive controls, because widening a vocabulary can steal work.** Three
@@ -49,7 +74,7 @@ and `reading` is gone from the exclusions — guarded, so it cannot come back qu
 - **R-003 sweep** turned up the same word-map ceiling that produced R-006, in the
   redaction-rule count: past ten it compared against the digit alone. It now accepts
   either form and names both when it fails.
-- Guards: 218 → **227**; eval cases 21 → **28**; description 956 → 1004 of 1024, paid for
+- Guards: 218 → **233**; eval cases 21 → **28**; description 956 → 1004 of 1024, paid for
   by cutting mechanism prose that could not affect routing.
 
 ## v1.38.0 — the wall came down, and a green started meaning something

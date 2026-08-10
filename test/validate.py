@@ -1554,7 +1554,8 @@ if os.path.isfile(_cl) and os.path.isfile(_wf):
     # mechanism with nothing to look at must say so rather than pass (gates.md →
     # progressive arming); a count-shaped sentence with no count is the one case
     # where silence and agreement are indistinguishable.
-    if _g is None and re.search(r"\bguards?\b", _flatten(_top), re.I):
+    if _g is None and re.search(r"\b(guard|check|probe|negative self-test)s?\b",
+                                _flatten(_top), re.I):
         fail("CHANGELOG.md: the newest section talks about guards but states no "
              "`Guards: N → M` count this check can read — it went dormant here once "
              "and the suite stayed green over an unread number; write the count in "
@@ -3703,17 +3704,53 @@ if os.path.isfile(_CS_P) and os.path.isfile(_EV_P):
 # queries were refused with this skill's OWN exclusion clause quoted back as the
 # reason, while references/audit.md says an audit may be the whole task. The
 # boundary is what a request ENDS IN — an answer, or something that lands in the
-# tree — and these guards hold the surfaces that state it to one another.
+# tree — and these guards hold the three surfaces that state it to one another.
+#
+# Every check below was rewritten after an independent reader (R-005) defeated the
+# first version fifteen ways, each verified by planting the text and watching the
+# validator still PASS. What it found, in one sentence: a presence test over a whole
+# file proves a word exists, not that the rule says it, and a regex over prose is one
+# innocent rewrite from dormancy. Both lessons are why the skips below are LOUD.
 _SK_P = os.path.join(_skill_dir, "SKILL.md")
 _RR_P = os.path.join(_skill_dir, "templates", "routing-rule.md")
 _CR_P = os.path.join(ROOT, "cursor", "rules", "task-pipeline.mdc")
+# A reading exclusion may return in any of these forms, in either language. The first
+# version matched `\breading\b` alone; `a code read`, `read-through` and `чтение кода`
+# all sailed past it, and the incident sentence itself will not be reproduced verbatim
+# by whoever rewords it next.
+# Narrowed after it fired on `mapping code so a person can read it` — a sentence that
+# excludes MAPPING, not reading, and is exactly the wording a careful author uses.
+# gates.md puts the false-positive budget at zero, so the heuristic is the reading
+# word ADJACENT to code, which is the harmful construct; three intervening words
+# are enough to mean something else.
+_READ_RE = re.compile(
+    r"(?:read\w*|чтени\w*|читат\w*)\W+(?:\w+\W+){0,2}(?:code|код\w*)"
+    r"|(?:code|код\w*)\W+(?:\w+\W+){0,2}(?:read\w*|чтени\w*|читат\w*)", re.I)
+
+
+def _routing_section(path):
+    """The `## Routing` section, or None. Scoped, because a file-wide presence test
+    proves a word appears somewhere in seven hundred lines — the reader deleted the
+    whole boundary clause, added one unrelated sentence containing the same four
+    words elsewhere, and the first version passed."""
+    if not os.path.isfile(path):
+        return None
+    _t = open(path, encoding="utf-8").read()
+    _m = re.search(r"^##\s+Routing\b.*?$(.*?)(?=^##\s|\Z)", _t, re.S | re.M)
+    return _m.group(1) if _m else None
+
+
 _DESC_M = None
 if os.path.isfile(_SK_P):
     _DESC_M = re.search(r'^description:\s*"(.*?)"\s*$',
                         open(_SK_P, encoding="utf-8").read(), re.M | re.S)
-
-if _DESC_M:
+if _DESC_M is None:
+    _UNLOOKED.append("skip: the routing boundary — SKILL.md has no double-quoted "
+                     "description, so none of its seven checks ran")
+else:
     _desc_txt = _DESC_M.group(1)
+    _not_for = _desc_txt.split("Not for:")[-1] if "Not for:" in _desc_txt else ""
+    _use_when = _desc_txt.split("Not for:")[0]
 
     # 1. Both halves of the criterion, or the boundary reads as build-work-only —
     #    which is the state that produced the three measured refusals.
@@ -3726,13 +3763,35 @@ if _DESC_M:
              "an agent reads the skill as build-work-only and refuses an audit, "
              "which was measured on three of ten routing queries")
 
-    # 2. 'reading' may not return to the exclusion clause. An audit, a bug hunt and
-    #    a PR review all OPEN by reading; excluding them for it is the defect.
-    _not_for = _desc_txt.split("Not for:")[-1] if "Not for:" in _desc_txt else ""
-    if re.search(r"\breading\b", _not_for):
-        fail("SKILL.md description: 'reading' is back in the exclusion clause. "
-             "Reading is the opening move of every findings class this skill "
-             "routes, not the boundary — the boundary is what the request ends in")
+    # 2. Reading may not be an exclusion, on ANY of the three surfaces. It is the
+    #    opening move of every findings class this skill routes. The first version
+    #    checked the description only, so the exact defect that produced the measured
+    #    refusals could return verbatim in both files that ship the rule elsewhere.
+    for _p, _label, _txt in (
+            (_SK_P, "SKILL.md description", _not_for),
+            (_RR_P, "templates/routing-rule.md", None),
+            (_CR_P, "cursor/rules/task-pipeline.mdc", None)):
+        if _txt is None:
+            _sec = _routing_section(_p)
+            if _sec is None:
+                if os.path.isfile(_p):
+                    _UNLOOKED.append(f"skip: reading-exclusion check on {_label} — no "
+                                     "`## Routing` section to scope it to")
+                continue
+            # The WHOLE section. Filtering to lines containing "not" was the first
+            # try and it was wrong: an exclusion list's bullets do not repeat the
+            # word — it stands in the sentence above them — so the one harmful line
+            # never reached the check. Its own probe caught that. The section's
+            # correct prose ("reading is not the test", "all begin by reading") is
+            # safe because none of it puts a reading word within three of `code`.
+            _txt = _sec
+        if _READ_RE.search(_txt):
+            fail(f"{_label}: reading is named as an exclusion again. An audit, a bug "
+                 "hunt and a PR review all OPEN by reading and all three end in the "
+                 "tree — the boundary is what the request ends in, and this exact "
+                 "sentence is what three measured routing queries quoted when they "
+                 "refused")
+
     # ...and the three exclusions v1.9.0 locked must survive the rewording, or the
     #    clause and the NOTRIG evals drift, which that design forbade by name.
     for _needed, _why in (("answering a question", "the question exclusion"),
@@ -3743,61 +3802,96 @@ if _DESC_M:
                  "2026-08-03 design locked these three against the NOTRIG evals "
                  "and said the two must not drift")
 
-    # 3. Every verb the v1.9.0 design locked must be ON the surface. DISCOVERED
-    #    from that design, never listed here: `перевести` was locked on 2026-08-03,
-    #    never shipped, and REQ-003 was accepted `verified` anyway because the
-    #    evidence recorded was the clause's shape and its character count — neither
-    #    of which can see a missing member of the list the REQ locked.
+    # 3. Every verb the v1.9.0 design locked must be on the TRIGGER half of the
+    #    surface. DISCOVERED from that design: `перевести` was locked on 2026-08-03,
+    #    never shipped, and REQ-003 was accepted `verified` anyway because the evidence
+    #    recorded was the clause's shape and its character count — neither of which can
+    #    see a missing member of the list the REQ locked. Searching the WHOLE
+    #    description was the first version's bug: `Not for: перевести one file` satisfied
+    #    it, which is the locked verb's exact inversion.
     _LOCK_P = os.path.join(ROOT, "docs/superpowers/specs",
                            "2026-08-03-default-routing-adoption-design.md")
-    if os.path.isfile(_LOCK_P):
+    if not os.path.isfile(_LOCK_P):
+        _UNLOOKED.append("skip: locked-verb check — the 2026-08-03 design is gone")
+    else:
         _lock = open(_LOCK_P, encoding="utf-8").read()
-        _lm = re.search(r"\*\*work verbs, RU \+ EN:\*\*(.+?);", _lock, re.S)
-        if _lm:
+        _lm = re.search(r"\*\*work verbs, RU \+ EN:\*\*(.+?)[;.]", _lock, re.S)
+        if _lm is None:
+            # The anti-drift guard for a verb list, one innocent rewrite from silence,
+            # in a document this repo forbids maintaining. Loud, not dormant.
+            fail("docs/superpowers/specs/2026-08-03-default-routing-adoption-design.md: "
+                 "no `**work verbs, RU + EN:** … ;` list this check can read. It is a "
+                 "superseded record and must not be edited to suit a guard — if the "
+                 "shape genuinely changed, move the locked list somewhere maintained "
+                 "and point this check at it")
+        else:
             _verbs = [v.strip(" \n*`") for v in _lm.group(1).split("·")]
-            _absent = [v for v in _verbs if v and v.lower() not in _desc_txt.lower()]
+            _absent = [v for v in _verbs if v and v.lower() not in _use_when.lower()]
             if _absent:
                 fail("SKILL.md description: verb(s) locked by the 2026-08-03 design "
-                     f"and absent from the shipped surface: {', '.join(_absent)}. "
+                     f"and absent from the trigger half: {', '.join(_absent)}. "
                      "A decision that never reached the text is the L1->L2 seam "
                      "audit.md exists to walk")
 
-    # 4. The findings classes are named on every surface that carries the boundary.
-    #    The class list is DISCOVERED from the description, so a class added there
-    #    joins this check by existing (invariant 43).
+    # 4. The findings classes, DISCOVERED from the description so a class added there
+    #    joins this check by existing. Pairs are EXTRACTED rather than split on commas:
+    #    the reader added a fifth class with `and` instead of a comma and it vanished
+    #    from every downstream check at once.
     _fm = re.search(r"finding that lands in it:(.+?)—", _desc_txt, re.S)
-    if _fm:
-        _classes = [c.strip().split("/")[0].strip()
-                    for c in _fm.group(1).split(",") if c.strip()]
+    if _fm is None:
+        fail("SKILL.md description: the findings clause no longer has the shape "
+             "`finding that lands in it: <class>/<ru>, … —`. Four checks read that "
+             "span — the two portable surfaces and both eval-coverage checks — and a "
+             "colon changed to a dash takes all four offline in silence")
+    else:
+        _span = _fm.group(1)
+        _classes = [c.strip() for c in re.findall(r"([A-Za-z][A-Za-z ]*?)\s*/\s*[^,—]+",
+                                                  _span)]
+        # A delimiter this parser cannot see must be a failure, never a shorter list.
+        if len(_classes) != _span.count("/"):
+            fail("SKILL.md description: the findings clause lists "
+                 f"{_span.count('/')} class/alias pairs and this check could extract "
+                 f"{len(_classes)} — a separator it cannot see silently shrinks every "
+                 "downstream check; use `, ` between pairs")
         for _surface, _label in ((_RR_P, "templates/routing-rule.md"),
                                  (_CR_P, "cursor/rules/task-pipeline.mdc")):
-            if not os.path.isfile(_surface):
+            _sec = _routing_section(_surface)
+            if _sec is None:
+                if os.path.isfile(_surface):
+                    _UNLOOKED.append(f"skip: findings classes on {_label} — no "
+                                     "`## Routing` section")
                 continue
-            _s = _flatten(open(_surface, encoding="utf-8").read(), lower=True)
-            _miss = [c for c in _classes if c.lower() not in _s]
+            _sf = _flatten(_sec, lower=True)
+            _miss = [c for c in _classes if c.lower() not in _sf]
             if _miss:
-                fail(f"{_label}: the boundary is stated here too, and these findings "
-                     f"classes are missing from it: {', '.join(_miss)}. A rule that "
-                     "is portable is a rule that must agree with the description an "
-                     "agent routed on")
-        # ...and each class needs an eval, or the vocabulary is named and untested,
-        #    which is exactly what board row B-046 measured.
+                fail(f"{_label}: the boundary is stated here too, and its `## Routing` "
+                     f"section is missing these findings classes: {', '.join(_miss)}. "
+                     "A rule that is portable must agree with the description an agent "
+                     "routed on")
+        # ...and each class needs a TRIGGERING eval. Counting every query was the first
+        #    version's worst bug: a `should_not_trigger` control mentioning the word
+        #    satisfied it, so the guard could certify "named and untested" — the exact
+        #    state it cites B-046 for — as covered.
         _EVJ = os.path.join(ROOT, "evals", "task-pipeline.evals.json")
-        if os.path.isfile(_EVJ):
+        if not os.path.isfile(_EVJ):
+            _UNLOOKED.append("skip: findings-class eval coverage — no eval suite")
+        else:
             try:
-                _q = " ".join((_c.get("query") or "").lower()
-                              for _c in json.load(open(_EVJ, encoding="utf-8"))["evals"])
+                _cases = json.load(open(_EVJ, encoding="utf-8"))["evals"]
             except Exception:
-                _q = ""
-            if _q:
-                # A class name is English and the eval queries are the operator's own
-                # Russian, so the link between them cannot be discovered — it is
-                # declared. What CAN be mechanical is that a class with no declared
-                # link fails loudly instead of matching nothing and passing: an
-                # unmapped class would otherwise be a silent hole exactly where this
-                # guard claims coverage.
+                _cases = None
+            if _cases is None:
+                _UNLOOKED.append("skip: findings-class eval coverage — the suite did "
+                                 "not parse")
+            else:
+                _q = " ".join((_c.get("query") or "").lower() for _c in _cases
+                              if _c.get("category") == "should_trigger")
+                # The link between an English class name and the operator's Russian
+                # query cannot be discovered — it is declared. What IS mechanical:
+                # a class with no declared link fails loudly instead of matching
+                # nothing and passing.
                 _KEY = {"audit": "аудит", "bug hunt": "ошибок",
-                        "production check": "проде", "pr review": "pr "}
+                        "production check": "проде", "pr review": "pr #"}
                 _unmapped = [c for c in _classes if c.lower() not in _KEY]
                 if _unmapped:
                     fail("test/validate.py: findings class(es) with no eval-query alias "
@@ -3808,9 +3902,10 @@ if _DESC_M:
                          if c.lower() in _KEY and _KEY[c.lower()] not in _q]
                 if _noev:
                     fail("evals/task-pipeline.evals.json: findings class(es) named in "
-                         f"the description with no eval query: {', '.join(_noev)}. "
-                         "Named and untested is the state B-046 measured across six "
-                         "of the eight build verbs")
+                         f"the description with no should_trigger query: "
+                         f"{', '.join(_noev)}. Named and untested is the state B-046 "
+                         "measured across six of the eight build verbs — and a "
+                         "should_not_trigger control naming the word is not coverage")
 
 
 if errors:

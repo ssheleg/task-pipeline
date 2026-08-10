@@ -17,7 +17,7 @@ than no boundary.
 
 ---
 
-## Routing — repo-changing work goes through the pipeline
+## Routing — work that lands in the repository goes through the pipeline
 
 **When `task-pipeline` is installed, any work that LANDS IN THE REPOSITORY goes
 through it** — without being asked for. Two shapes, not one:
