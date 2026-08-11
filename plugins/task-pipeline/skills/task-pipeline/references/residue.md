@@ -101,9 +101,17 @@ Read the line the way the other disclosures on it are read:
 - **`holds: unlooked (…)`** — a class could not be enumerated, named. A run
   without container tooling says so rather than printing `0`.
 
-**Why the field is `holds:` and not `residue:`.** `gates.md` already prints `unmarked residue: 0` for a different thing — documentation items left unmarked — and `residue: 0` is a substring of it. A check written for this field would have been answered by that line. The word stays in the prose because it is the right word; the **field** is `holds:`, which is free and joins `stage:`, `iter:`, `hand:` and `touch:` in the run ledger.
+**Why the field is `holds:` and not `residue:`.** `gates.md` already prints
+`unmarked residue: 0` for a different thing — documentation items left unmarked
+— and `residue: 0` is a substring of it. A check written for this field would
+have been answered by that line. The word stays in the prose because it is the
+right word; the **field** is `holds:`, which is free and joins `stage:`,
+`iter:`, `hand:` and `touch:` in the run ledger.
 
-**Its sibling, one file over.** `tdd.md`'s *The green from residue* is the same class on the test axis — state left over from an earlier run making a case pass that would fail fresh. That rule is about residue **faking a result**; this one is about residue **outliving the run**. Neither overrides the other.
+**Its sibling, one file over.** `tdd.md`'s *The green from residue* is the same
+class on the test axis — state left over from an earlier run making a case pass
+that would fail fresh. That rule is about residue **faking a result**; this one
+is about residue **outliving the run**. Neither overrides the other.
 
 **`holds: 0` is never a target.** A run that tears down its database to make a
 number look tidy, and then brings it back up next stage, has spent time to make a

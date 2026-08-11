@@ -658,8 +658,9 @@ never that the work was skipped quietly.
   registers with its ids ([`progress.md`](progress.md) → *The hand-back*) — a run
   that cannot say what happened has not finished, it has stopped; **the environment is
   given back** — all eight classes enumerated, everything this run started ended and
-  verified by re-enumerating rather than by the teardown's reply, an item this project
-  does not own reported rather than ended, and the result written as a `holds:` line
+  verified by re-enumerating rather than by the teardown's reply, an earlier run of
+  this project ended only when **provably spent**, an item this project does not own
+  reported rather than ended, and the result written as a `holds:` line
   ([`residue.md`](residue.md)); **every disclosure printed beside the verdict** — `abstained` (what the run declined
   to claim) and `unlooked` (what a check never looked at), neither a ratchet, neither
   with a floor, neither ever a target ([`gates.md`](gates.md) → *Disclosures*); **the
