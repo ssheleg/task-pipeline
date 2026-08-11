@@ -67,6 +67,7 @@ gate stops until it is installed.
 | **first run · the entry audit** (offered once) | [`references/setup.md`](references/setup.md) |
 | **what travels with the bundle vs stays in a project** | [`references/portability.md`](references/portability.md) |
 | any repeating loop | [`references/loop-guard.md`](references/loop-guard.md) |
+| run-wide · what the run **leaves running and leaves behind** — every gate, and stage 10 | [`references/residue.md`](references/residue.md) |
 | run-wide · what the run **prints about itself** — the rail, the iteration line | [`references/progress.md`](references/progress.md) |
 | run-wide · how a run keeps going (the loop mode + the context budget) | [`references/continuity.md`](references/continuity.md) |
 | run-wide · the work-list **between** runs, and how its priority is computed | [`references/backlog.md`](references/backlog.md) |
@@ -245,7 +246,12 @@ Three things the grill does beyond clarifying the request:
    item at a time; **when a pass is *searching* rather than editing and starts
    finding mostly what the previous pass's own fixes broke, the axis is exhausted —
    rotate it, don't look harder** (`references/audit.md`), and remember that a
-   green from a check nobody has watched fail is not evidence; task
+   green from a check nobody has watched fail is not evidence; **every gate
+   prints `residue: N` — what this run left running** across the eight classes
+   (background shells, monitors, scheduled loops, coordination leases, worktrees,
+   containers, scratch files, remote state), enumerated **by class and never by a
+   single tool**, and stage 10 does not close while this run's residue is live and
+   unaccounted (`references/residue.md`); task
    tracker + conventional commits per host conventions; worktree isolation for the
    build, integrated back per the brief's branch policy before stage 7; honest
    degradation (never claim a failed/skipped step succeeded);

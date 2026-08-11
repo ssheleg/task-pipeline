@@ -4521,6 +4521,59 @@ if os.path.isfile(_STG_P2):
              "and this is that moment")
 
 
+# --- residue: what the run leaves running, and what it leaves behind ------------
+_RES_D = os.path.join(_skill_dir, "references", "residue.md")
+if not os.path.isfile(_RES_D):
+    fail("references/residue.md is gone. Every gate prints `holds:` and stage 10 will not "
+         "close without the teardown; the doctrine behind both has to exist")
+else:
+    # The ASYMMETRY is the rule, not the word "residue". A run that ends another
+    # session's monitor to tidy its own number breaks work that was going fine, and
+    # the cost of the two mistakes is not symmetric. Scoped to its own section so the
+    # inventory table's mention of leases cannot answer for it.
+    _res_own = _section(_RES_D, r"What must \*\*not\*\* be torn down")
+    if _res_own is None:
+        fail("references/residue.md: no section on what must not be torn down. Without it "
+             "the doctrine reads as 'reach zero', and reaching zero across a machine-wide "
+             "inventory means ending work this run does not own")
+    elif not ("tear down what this run started" in _flatten(_res_own, lower=True)
+              and "report what it did not" in _flatten(_res_own, lower=True)):
+        fail("references/residue.md → not torn down: the two halves are no longer stated "
+             "together. 'End what you started' without 'report what you did not' is the "
+             "half that kills another agent's lease")
+
+    # holds: is a disclosure. The moment it acquires a direction it stops describing
+    # the environment and starts instructing the run to lie about it.
+    _res_t = _LIVING_TEXT.get(os.path.relpath(_RES_D, ROOT)) or open(_RES_D, encoding="utf-8").read()
+    if "is never a target" not in _flatten(_res_t, lower=True):
+        fail("references/residue.md: `holds:` is no longer declared a non-target. Every other "
+             "disclosure in this bundle carries that sentence, and the one that loses it is "
+             "the one a run starts optimising")
+
+# Stage 10's gate list must carry the obligation, not a pointer to it. residue.md is
+# cited three lines above the criterion, so a check on the filename would be answered
+# by the citation — the class this repository has now met nine times.
+_ACC_D = os.path.join(_skill_dir, "references", "acceptance.md")
+if os.path.isfile(_ACC_D):
+    _acc_t = _LIVING_TEXT.get(os.path.relpath(_ACC_D, ROOT)) or open(_ACC_D, encoding="utf-8").read()
+    # Scope to the ITEM, not to the region before the next heading. The first draft
+    # ran to `^##`, so anything parked between the last criterion and that heading
+    # sat inside the span — and the neighbour probe went green on its first use by
+    # planting the needle in a comment there. Continuation lines are indented; the
+    # item ends at the next line starting in column 0.
+    _c13 = re.search(r"^13\.\s(.*?)(?=^\S)", _acc_t, re.S | re.M)
+    if _c13 is None:
+        fail("references/acceptance.md: stage 10 has no criterion 13. The teardown was added "
+             "as a gate criterion precisely because a cleanup written as good intention runs "
+             "on the runs that did not need it and is skipped by the ones that did")
+    elif not ("eight classes enumerated" in _flatten(_c13.group(1), lower=True)
+              and "reported, never ended" in _flatten(_c13.group(1), lower=True)):
+        fail("references/acceptance.md criterion 13: the give-back obligation lost one of its "
+             "halves — enumerate all eight classes, and report rather than end what this run "
+             "did not start. A criterion holding only the first teaches a run to tidy someone "
+             "else's environment")
+
+
 if errors:
     print("FAIL: task-pipeline structure invalid")
     for e in errors:

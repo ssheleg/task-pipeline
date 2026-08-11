@@ -5431,3 +5431,82 @@ jobs:
             echo "ERROR: the heading survived, the rule did not, and nothing objected"
             exit 1
           fi
+      - name: Negative self-test (the teardown keeps its first half and loses the one that protects other agents)
+        run: |
+          set -eu
+          rm -rf /tmp/res1-copy && cp -R . /tmp/res1-copy
+          python3 - <<'EOF'
+          p = "/tmp/res1-copy/plugins/task-pipeline/skills/task-pipeline/references/residue.md"
+          t = open(p, encoding="utf-8").read()
+          n = '**Tear down what this run started. Report what it did not.**'
+          assert n in t, "PLANT DID NOT LAND: res1"
+          _planted = t.replace(n, '**Tear down what this run started.**', 1)
+          assert _planted != t, "PLANT DID NOT LAND: res1"
+          open(p, "w", encoding="utf-8").write(_planted)
+          EOF
+          if python3 /tmp/res1-copy/test/validate.py 2>&1 | grep -q 'the half that kills another agent'; then
+            echo "OK: validator FAILs — 'end what you started' without 'report what you did not' is rejected"
+          else
+            echo "ERROR: the asymmetry vanished and nothing objected — a run may now end another session's work"
+            exit 1
+          fi
+      - name: Negative self-test (the holds disclosure is given a direction)
+        run: |
+          set -eu
+          rm -rf /tmp/res2-copy && cp -R . /tmp/res2-copy
+          python3 - <<'EOF'
+          p = "/tmp/res2-copy/plugins/task-pipeline/skills/task-pipeline/references/residue.md"
+          t = open(p, encoding="utf-8").read()
+          n = 'is never a target'
+          assert n in t, "PLANT DID NOT LAND: res2"
+          _planted = t.replace(n, 'is the goal', 1)
+          assert _planted != t, "PLANT DID NOT LAND: res2"
+          open(p, "w", encoding="utf-8").write(_planted)
+          EOF
+          if python3 /tmp/res2-copy/test/validate.py 2>&1 | grep -q 'no longer declared a non-target'; then
+            echo "OK: validator FAILs — a disclosure that acquires a direction is rejected"
+          else
+            echo "ERROR: holds: became a target and nothing objected"
+            exit 1
+          fi
+      - name: Negative self-test (stage 10's criterion 13 loses the report-do-not-end half)
+        run: |
+          set -eu
+          rm -rf /tmp/res3-copy && cp -R . /tmp/res3-copy
+          python3 - <<'EOF'
+          p = "/tmp/res3-copy/plugins/task-pipeline/skills/task-pipeline/references/acceptance.md"
+          t = open(p, encoding="utf-8").read()
+          n = '**reported, never ended**'
+          assert n in t, "PLANT DID NOT LAND: res3"
+          _planted = t.replace(n, 'cleaned up as well', 1)
+          assert _planted != t, "PLANT DID NOT LAND: res3"
+          open(p, "w", encoding="utf-8").write(_planted)
+          EOF
+          if python3 /tmp/res3-copy/test/validate.py 2>&1 | grep -q 'lost one of its halves'; then
+            echo "OK: validator FAILs — criterion 13 must carry both halves"
+          else
+            echo "ERROR: the give-back criterion kept one half and nothing objected"
+            exit 1
+          fi
+      - name: Negative self-test (NEIGHBOUR PROBE — criterion 13 is broken and its needle planted just outside the item)
+        run: |
+          set -eu
+          rm -rf /tmp/res4-copy && cp -R . /tmp/res4-copy
+          python3 - <<'EOF'
+          p = "/tmp/res4-copy/plugins/task-pipeline/skills/task-pipeline/references/acceptance.md"
+          t = open(p, encoding="utf-8").read()
+          n = '**reported, never ended**'
+          assert n in t, "PLANT DID NOT LAND: res4"
+          _planted = t.replace(n, 'cleaned up as well', 1)
+          _planted = _planted.replace('## When the answer is "something\'s missing"',
+              "<!-- eight classes enumerated \u00b7 reported, never ended -->\n\n"
+              '## When the answer is "something\'s missing"', 1)
+          assert _planted != t, "PLANT DID NOT LAND: res4"
+          open(p, "w", encoding="utf-8").write(_planted)
+          EOF
+          if python3 /tmp/res4-copy/test/validate.py 2>&1 | grep -q 'lost one of its halves'; then
+            echo "OK: validator FAILs — the guard reads the item, not the region before the next heading"
+          else
+            echo "ERROR: the guard was answered by text parked outside criterion 13 — positional narrowing is not scoping"
+            exit 1
+          fi

@@ -1,0 +1,78 @@
+# Decisions — task-pipeline
+
+**Append-only.** Every settled thing that shapes the product, the architecture, the
+scope, security, data, pricing or process. Doctrine:
+`plugins/task-pipeline/skills/task-pipeline/references/documentation.md`.
+
+Established 2026-08-11. The skill tells every host project to keep this register and
+this repository did not — the same gap `B-009` found for open questions, and it
+surfaced the same way: a status vocabulary (`Resolved→DEC-####`) pointing at a file
+that was not there.
+
+**Next free ID:** `DEC-0003`
+
+Reading *"Next free ID"* is **not** reserving it — a second agent reading it in the
+same minute gets the same answer. Reserve it, then write.
+
+**To change your mind:** add a new entry, edit **only the status line** of the old
+one, leave its body intact. Never renumber. Never delete.
+
+---
+
+### DEC-0001 — `SURFACED` is checked for contradiction, never for completeness
+
+- **Date:** 2026-08-11
+- **Status:** Accepted
+- **Context:** `OQ-0001` asked whether the hand-back's `SURFACED` section can be
+  checked at all. It is defined as what a run learned by accident — recoverable from
+  no artefact — so *"nothing surfaced"* is a quiet decision by construction, and the
+  `hand:` line records that a hand-back happened, never that it was complete.
+- **Decision:** `SURFACED` gets a **contradiction** check and no completeness check.
+  A run that filed a board row, a carry-over row, an open question or a retro entry
+  has provably surfaced something; if its hand-back reports zero, the two disagree
+  and the disagreement is computable. The doctrine states the residual **in the same
+  sentence**: a run can surface something, file it nowhere, report zero, and nothing
+  will notice.
+- **The measurement it rests on:** `docs/superpowers/backlog.md` carries a `Source`
+  column naming the run or document that filed each row — 27 rows, **0 with an empty
+  Source**. The join from *run* to *rows this run filed* exists today with no new
+  bookkeeping.
+- **What it deliberately does not buy:** coverage. The check must never require a
+  minimum, or a run will file a throwaway row to make the numbers agree.
+- **Consequences / affects:** `references/progress.md` (the hand-back section),
+  `references/acceptance.md` (criterion 12), `docs/OPEN_QUESTIONS.md` (`OQ-0001`).
+- **Source:** run `2026-08-11-residue-and-honesty` · commit `e063b29`
+
+---
+
+### DEC-0002 — the neighbour-probe work-list is computable, and it is a population rather than a debt
+
+- **Date:** 2026-08-11
+- **Status:** Accepted
+- **Context:** `OQ-0002` recorded that the list of guards reading a **scoped span**
+  "cannot be computed from the code as written", which left `B-057`'s remaining half
+  with no work-list. The claim was written from a reading, not a measurement.
+- **Decision:** the premise is **withdrawn**. A guard is exposed to this class
+  exactly when its needle is matched against a *derived* string rather than raw file
+  text, and that derivation is syntax. `B-057` takes the static pass as its
+  work-list.
+- **The measurement it rests on:** a static pass over `test/validate.py` —
+
+  | scoping shape | sites |
+  |---|---|
+  | named helper (`_section` / `_gate_bullet`) | 10 |
+  | inline slice `text[a:b]` | 4 |
+  | `re.split` into parts | 8 |
+  | `partition`/`split` then index | 27 |
+  | `search` then `.end()`/`.start()` offset | 6 |
+  | **total** | **55** |
+
+  against 350 `fail()` calls — a lower bound on the number of checks.
+- **The distinction that must travel with the number:** these are **candidates, not
+  findings**. Scoping is usually correct and necessary. Published as a defect count
+  the figure produces busywork and reads as debt; published as the population to
+  sample from, it is a work-list. The row must say which.
+- **Consequences / affects:** `docs/superpowers/backlog.md` (`B-057`),
+  `docs/OPEN_QUESTIONS.md` (`OQ-0002`), `references/gates.md` (the neighbour-probe
+  coverage figure, which stays an honest *4 of 279*).
+- **Source:** run `2026-08-11-residue-and-honesty` · commit `e063b29`

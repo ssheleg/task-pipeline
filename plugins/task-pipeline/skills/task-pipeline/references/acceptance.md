@@ -310,6 +310,14 @@ table substitute for that answer.
    its four registers with their ids. A run that cannot say what happened has not
    finished; it has stopped. This file is the one stage 10 opens, and it carried every
    other criterion while omitting this one for a release.
+13. **The run has given the environment back** ([`residue.md`](residue.md)) — all
+   eight classes enumerated **by class, never by one tool**, everything this run
+   started ended in dependency order, each teardown verified by **re-enumerating
+   rather than by the teardown's own reply**, and the result written as a `holds:`
+   line. `holds:` reaching zero is required here and **only** here. An item left
+   standing on purpose passes with its owner and reason named; an item this run did
+   not start is **reported, never ended** — the inventory is machine-wide and the
+   authority is not.
 
 
 ## When the answer is "something's missing"

@@ -26,8 +26,10 @@ maintains them and the next run reads them as current.
 - The rail is computed, never eleven
 - What each glyph means
 - The hand-back — what the operator reads when you stop
+- "Done" is a claim, and it names what makes it true
 - Every number is borrowed
 - Absent is a word, never a zero
+- The `holds:` line — what the run is still holding
 - The run ledger this reads from
 - Rationalizations
 
@@ -215,6 +217,38 @@ nothing was unclear. Where a project keeps no open-questions register, that row 
 `— no register` rather than `0`: an absent register and an empty one are different facts,
 and the second is the one worth acting on.
 
+## "Done" is a claim, and it names what makes it true
+
+Every disclosure in this bundle answers *what does it print when it did not look?*
+That question is asked of **checks**. It has to be asked of the run's own sentences
+too, because the sentence reaches the operator and the check does not.
+
+**A completion claim names what makes it true, or it is not a completion claim.**
+`done: the export writes UTF-8` is a claim. `done: the export writes UTF-8 —
+`test_export_encoding` green at 5f21ac3` is a report. The difference is not
+politeness; it is whether anyone can disagree with you.
+
+Three ways a run reports something it did not do, none of them requiring an
+intention to mislead:
+
+| The shape | What was actually true | What to write instead |
+|---|---|---|
+| **The plan reported as the outcome** — "added the retry" after writing the code and before running anything | the edit landed | `done` names the executed test, or the item is not `done` |
+| **The reply reported as the result** — a deploy, a teardown, a cancel, an API call that returned success | the call was accepted | re-read the state; the second look is the evidence, the reply is not |
+| **The part reported as the whole** — "tests pass" after running the file you touched | that file's tests pass | say which suite, or run the full one |
+
+**And the honest negative is a result.** *"Not done — the fixture needs a
+credential I do not have"* is a complete, useful report. *"Done (with a small
+caveat)"* for the same situation is not. A run that cannot finish something says
+so at the boundary it reached, names what would unblock it, and moves to the next
+item — `deferred` and `partial` exist as statuses precisely so that stopping does
+not have to be dressed up as finishing.
+
+**The status vocabulary is closed for the same reason.** Stage 10 takes
+`verified`, `partial`, `deferred`, `dropped` — and `unknown` fails the gate
+([`acceptance.md`](acceptance.md)). A fifth word invented at write-time is how a
+run reports a state nobody agreed to read.
+
 ## Every number is borrowed
 
 | Field | Its home |
@@ -249,6 +283,33 @@ is unconfirmed*, which is the opposite claim, and it is the same inversion
 
 `carry-over 0 rows` **is** a real zero and prints as one: the ledger exists and holds
 nothing.
+
+## The `holds:` line — what the run is still holding
+
+Beside every gate verdict the run prints `holds: N` — the environment it has not
+given back. It lands in the ledger as a `holds:` line
+([`../templates/run.md`](../templates/run.md)), one per gate that found anything,
+and one at stage 10 whatever the count.
+
+```
+holds: 5 — 2 (worktree: build-csv-export, this run; container: pg-test, this run) — enumerated 8/8 classes
+holds: 10 — none — enumerated 7/8 classes, unlooked: containers (no docker on this host)
+```
+
+Three things make the line worth writing rather than a habit:
+
+- **It names the class and the owner, not just a number.** *"2"* tells the next
+  run nothing; *"worktree, this run"* tells it what to end and what to leave.
+- **It records how many classes were enumerated.** `8/8` and `7/8, unlooked:
+  containers` are different facts, and a run without container tooling must print
+  the second rather than a clean zero it did not earn.
+- **It is a disclosure, never a ratchet.** No floor, no direction, no target. A
+  build stage legitimately holding a worktree and a database prints `2` and
+  passes; a run that tears its database down to make the number tidy and brings
+  it back up next stage has spent time making a measurement lie.
+
+Doctrine, including the eight classes and what must **not** be torn down:
+[`residue.md`](residue.md).
 
 ## The run ledger this reads from
 

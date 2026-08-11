@@ -35,6 +35,7 @@ elsewhere and is not restated here:
 - A green probe is evidence only if the mutation is known to have landed
 - The false-positive budget
 - Ratchets
+- The result is the goal; the check is how you know
 - Disclosures — counted like a ratchet, and deliberately not monotone
 - Where a gate runs
 - Adding a check to an existing gate
@@ -451,6 +452,49 @@ GATE 9 docs: PASS — propagation backlog: 121 (was 162) · unmarked residue: 0
 
 A ratchet nobody prints is a TODO with a better name.
 
+## The result is the goal; the check is how you know
+
+Everything else in this file pushes one way: prove more, assume less. Read alone it
+has an obvious failure mode — a run that spends its afternoon proving a
+one-character change and never ships the thing it was asked for. **The deliverable
+is the working result, as described in the brief. A check is how the run knows it
+has one. A check that is not buying that knowledge is not diligence; it is the run
+optimising the wrong thing.**
+
+**Scale the check to what breaking costs, and the project already computes that.**
+The board ranks by `sev × blast` ([`backlog.md`](backlog.md)). The same two inputs
+size the verification:
+
+| What breaking costs | What the check has to be |
+|---|---|
+| an outward, irreversible or shared-state effect — deploy, publish, a lease, another agent's file | proven: watched failing against a planted defect, and re-read rather than trusted from the reply |
+| a contract other code depends on | an executed test, named in the REQ row |
+| behaviour a person will see | observed on the surface — a browser, the actual output — not inferred from a diff |
+| a typo, a comment, a rename the compiler checks | the compiler, the suite already running, and nothing more |
+
+**Four things that mean you have crossed over**, and each has cost this project a
+run:
+
+- **A third pass over the same axis finds mostly what the last pass's fixes broke.**
+  The axis is exhausted — rotate it or stop ([`audit.md`](audit.md)).
+- **The check is being widened after it went green**, with no failure in hand. A
+  check widened by imagination is a check whose scope nobody has measured.
+- **The evidence is being gathered for a claim nobody made.** If no REQ row and no
+  gate criterion asks for it, it is not evidence — it is browsing.
+- **The run is on its second measurement of the same number.** One measurement plus
+  what it does not cover, stated, beats two measurements and no decision.
+
+**This never licenses skipping a gate.** The gates are the floor, and the floor is
+not proportionate to anything — a `manual` gate waits, `unknown` fails stage 10, and
+a green nobody watched fail is not evidence at any blast radius. What is
+proportionate is the work *above* the floor: how many axes, how many passes, how
+much of the corpus. Cutting the floor to go faster is not speed; it is the failure
+this whole file exists to prevent, arriving on schedule.
+
+**Where it is recorded.** Stages 3 and 4 carry a `Cost:` line —
+`<surfaces>/<guards>/<REQ> now, <…> at stage 2 — <proportionate | grown, and why>`.
+*Grown, and why* is the honest answer often enough that it is written into the form.
+
 ## Disclosures — counted like a ratchet, and deliberately not monotone
 
 A ratchet may only shrink. **Some numbers must not be**, and printing them under a
@@ -471,12 +515,13 @@ column and it reappears in the other, silently, because a wrong claim looks like
 So a **disclosure** is printed beside the verdict like a ratchet and carries the opposite
 rule: **no floor, no direction, and a movement in either direction wants one sentence.**
 
-Two disclosures, kept separate because they are different facts:
+The disclosures below are kept separate because they are different facts — the list is the count:
 
 | Disclosure | Counts | Reading it |
 |---|---|---|
 | `abstained: N` | claims the run **declined to make** — `partial`, `unknown`, `cannot verify from diff` | a *choice*. Rising can mean the work got harder or the run got honest; falling can mean either the reverse |
 | `unlooked: N` | checks that **did not look** — `dormant`, `skip` | a *state of the corpus*, not a decision. It falls as the project grows the inputs those checks need |
+| `holds: N` | what the run left **running or lying about** — the eight classes in `references/residue.md` | a *state of the environment*, not of the corpus or of the run's claims. A legitimate 2 during a build beats a manufactured 0; only stage 10 requires it to reach zero or name an owner per item |
 
 Three are deliberately **not** counted, and saying which is part of the disclosure:
 

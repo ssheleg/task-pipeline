@@ -11,7 +11,7 @@
       "displayName": "Task Pipeline",
       "source": "./plugins/task-pipeline",
       "description": "Runs a substantial task through a mandatory built-in intake grill, then 10 gated stages (docs, brainstorm+decompose, spec, plan, subagent build, tests, lint/deploy, post-deploy, docs/wiki, acceptance). Every stage's doctrine is built into the skill — no companion plugin required — with typed auto/manual gates, a frozen requirement spine that closes with evidence, a work board and a verification ledger that outlive a run, an exposure line naming what shipped unconfirmed, a progress rail computed from the project's own config, a loop guard whose review ceiling measures rather than stops, and stage-3 tracks for what a product does, how it sounds and how it looks. Two modes need no task: `checkup` (what is unverified) and `setup` (audit existing docs). Retro insights can publish upstream as issues, opt-in and redacted.",
-      "version": "1.44.0",
+      "version": "1.45.0",
       "author": {
         "name": "ssheleg",
         "url": "https://x.com/sshlg93"

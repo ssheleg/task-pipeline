@@ -1,5 +1,58 @@
 # Changelog
 
+## v1.45.0 — what a run leaves running, what "done" costs to say, and what a check is for
+
+Three rules this pipeline had been following by disposition rather than by doctrine,
+and one it had not been following at all.
+
+**A run is not only a diff — it is also everything it left running.** A background
+shell, a monitor polling an API, a scheduled loop, a coordination lease, a worktree,
+a container, scratch files, a draft PR. `references/residue.md` names eight classes
+and requires each to be enumerated **by class, never by one tool** — because the
+measured case that produced this file was a task inventory reporting *"No tasks
+found"* while `ps` showed the monitor alive and polling every thirty seconds. An
+inventory that does not contain the thing that leaks is a green light with no lamp
+behind it.
+
+Every gate now prints `holds: N` beside its verdict, the run ledger gains a fifth
+declared line shape, and stage 10 gains criterion 13: give the environment back.
+The asymmetry is the point — **end what this run started, report what it did not**.
+The inventory is machine-wide and the authority is not, so a stale-looking lease
+belonging to another agent is named, never released.
+
+The field is `holds:` rather than `residue:` because `gates.md` already prints
+`unmarked residue: 0` for documentation items, and `residue: 0` is a substring of
+it. A check written for the new field would have been answered by the old line — the
+class this repository has now met nine times, caught here before it shipped.
+
+**"Done" is a claim, and it names what makes it true.** Every disclosure in this
+bundle asks *what does it print when it did not look?* — of checks. `progress.md`
+now asks it of the run's own sentences, which reach the operator where the check
+does not. Three shapes, each requiring no intent to mislead: the plan reported as
+the outcome, the reply reported as the result, the part reported as the whole. And
+the honest negative is a result: *"not done, the fixture needs a credential I do not
+have"* is a complete report where *"done, with a small caveat"* is not.
+
+**The result is the goal; the check is how you know.** Every other line in
+`gates.md` pushes one way — prove more, assume less — and read alone it produces a
+run that spends an afternoon proving a one-character change. Verification now scales
+to what breaking costs, using the `sev × blast` the board already computes, with
+four named signals that you have crossed over. This never licenses skipping a gate:
+the floor is not proportionate to anything, and cutting it to go faster is the
+failure the file exists to prevent, arriving on schedule.
+
+**Publishing was half a loop.** `retrospective.md` closes it: an issue resolves when
+the **behaviour** changed and its closing comment names the file, the line and the
+guard; an issue nobody worked stays open rather than being triaged into silence;
+nothing is deleted, because the number is what the CHANGELOG points at. The queue a
+run pulls from when it finishes early is that pile, then the board, then the open
+questions.
+
+Guards: 275 → **279**, each still proven against a planted defect — including a
+neighbour probe that caught a defect in one of this release's own guards on its
+first use: the criterion-13 check scoped *to the next heading* rather than *to the
+item*, so a needle parked in between answered for the rule.
+
 ## v1.44.0 — six lessons other projects paid for, carried home by the mechanism that exists for it
 
 `retro.publish` sends a skill-level lesson upstream as an issue. Six arrived in one day

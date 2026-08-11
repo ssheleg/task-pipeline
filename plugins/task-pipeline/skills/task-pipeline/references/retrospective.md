@@ -41,6 +41,7 @@ file exists to stop.
 - The loop closes at stage 0
 - Where a lesson goes when it is not about this project
 - Publishing the insight — the skill learns from every project that runs it
+- The improvement iteration — what happens to a published insight next
 - What may leave the project — the redaction list
 - Rationalizations
 
@@ -339,6 +340,49 @@ opening…  → #24
 **No `gh`, no network, no permission?** Print the body, say the issue was **not**
 opened, and carry the exact text in the carry-over ledger. That is the honest
 degradation; a second transport is not.
+
+## The improvement iteration — what happens to a published insight next
+
+Publishing is half a loop. An issue that is opened and never triaged is a lesson
+that cost a run and bought nothing, and a tracker full of those teaches everyone
+that publishing is where findings go to be filed.
+
+**The loop, and every arrow in it is somebody's obligation:**
+
+```
+a run diverges → a retro entry → retro.publish → an issue on the skill
+                                                        ↓
+   a board row ← measured against the tree ← triaged in a later cycle
+        ↓
+   doctrine + the guard that proves it → a release → the next run reads it
+```
+
+**Resolve what you worked, let the rest accumulate — visibly.** At the close of a
+cycle that consumed published issues:
+
+- **An issue closes when the behaviour changed**, not when the lesson was
+  understood (that is R-006, and it applies to issues exactly as it applies to
+  findings). The closing comment names **where** it landed — a file and a line —
+  and the guard that now holds it. A close with no address is a close nobody can
+  audit.
+- **An issue nobody worked stays open.** It is not triaged into silence, not
+  relabelled, not closed as stale. The pile is the queue, and its depth is the
+  honest measure of how far behind the doctrine is.
+- **Nothing is deleted.** A closed issue keeps its number, and the number is what
+  the CHANGELOG and the retro entry point at. Deleting one severs both, and the
+  cost lands on whoever next asks *why is this rule here*.
+
+**Where the queue comes from at the start of a cycle**, in this order: open issues
+published by any project running this skill, then the board's open rows by computed
+priority, then the open-questions register. A run that finishes its brief early
+takes the top of that list rather than inventing work — and a run that *cannot*
+take it says so, which is a fuller queue rather than a quiet one.
+
+**The measurement that keeps this honest.** Print, at the close: issues consumed,
+issues resolved with an address, issues left open. Three numbers, no floor, no
+target, and the third one rising is information rather than a failure — it means
+the projects running this skill are finding more than one cycle can absorb, which
+is what you want them to do.
 
 ## What may leave the project — the redaction list
 

@@ -20,6 +20,7 @@ stage: <id> <name> — gate <auto|manual> — verdict <pass|fail|skip> — <ISO-
 iter:  <N> — item <B-NNN or task id> — closed at gate <stage id>
 touch: <file> — pass <N> (<stage|round|module>) — reason: <finding id / gate item>
 hand:  <N|10> — task "<quoted>" — done <n> — surfaced <n> — decisions <n> — amb <n> (<ids or "— no register">)
+holds: <stage id> — <n> (<class: what, owner>; … or "none") — enumerated <n>/8 classes, <unlooked: classes not enumerable>
 ```
 
 - **`stage:`** — written when a gate **returns**, not when the stage is entered. The
@@ -53,6 +54,8 @@ touch: src/export.ts — pass 1 (stage 5) — reason: TASK-3
 touch: src/export.ts — pass 2 (stage 5) — reason: F-014
 touch: src/export.ts — pass 3 (stage 5) — reason: F-014
 hand:  3 — task "add CSV export to the orders table" — done 2 — surfaced 1 — decisions 1 — amb 2 (OQ-0007, ledger row 4)
+holds: 5 — 2 (worktree: build-csv-export, this run; container: pg-test, this run) — enumerated 8/8 classes
+holds: 10 — none — enumerated 7/8 classes, unlooked: containers (no docker on this host)
 ```
 
 The last two lines are a **trip**: the same file, two consecutive passes, the same
