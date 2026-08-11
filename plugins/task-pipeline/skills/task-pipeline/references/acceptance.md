@@ -236,10 +236,17 @@ row per artefact and both rows were green.
 The blindness one layer down is already named — a handler test proves the handler, not the
 request path. This is that shape one layer up.
 
-**So when a run replaces a component that another component branches on, the decomposition
-produces an explicit REQ for the boundary** ([`decomposition.md`](decomposition.md)) —
+**So when a run replaces a component that another component branches on, stage 2 writes an
+explicit REQ for the boundary** —
 not *"A works"* and *"B works"* but **"a user in state X reaches Y"**. Phrased as a
 journey it is testable; phrased as two artefacts it is not.
+
+**This does not contradict [`decomposition.md`](decomposition.md), and the wording matters
+because a first draft did.** That file says a REQ appearing in two modules means the seam
+runs *through* a requirement, and tells you to re-cut. A boundary REQ is not that: it is a
+single requirement about the transition, owned by **one** module — the one that consumes
+the boundary — and it maps to exactly one module like every other. Cite it as a journey
+owned by the downstream module, and both rules hold.
 
 **And where no check can span the seam** — a server-rendered redirect on one side, a
 client write on the other — the table says so under `unlooked` rather than showing two

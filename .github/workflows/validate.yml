@@ -132,9 +132,11 @@ jobs:
           python3 - <<'EOF'
           import json, collections
           p = "/tmp/token-copy/plugins/task-pipeline/skills/task-pipeline/pipeline.example.json"
+          _orig_bytes = open(p, "rb").read()
           d = json.load(open(p), object_pairs_hook=collections.OrderedDict)
           d["stages"][0]["model"] = "some-vendor-model"
           json.dump(d, open(p, "w"), indent=2, ensure_ascii=False)
+          assert open(p, "rb").read() != _orig_bytes, "PLANT DID NOT LAND: non-token-stage-model-must-fail"
           EOF
           if python3 /tmp/token-copy/test/validate.py; then
             echo "ERROR: validator passed a stage model that is not a provider-agnostic token"
@@ -150,9 +152,11 @@ jobs:
           python3 - <<'EOF'
           import json, collections
           p = "/tmp/grill-copy/plugins/task-pipeline/skills/task-pipeline/pipeline.example.json"
+          _orig_bytes = open(p, "rb").read()
           d = json.load(open(p), object_pairs_hook=collections.OrderedDict)
           d["stages"][0]["gate"]["type"] = "auto"
           json.dump(d, open(p, "w"), indent=2, ensure_ascii=False)
+          assert open(p, "rb").read() != _orig_bytes, "PLANT DID NOT LAND: intake-grill-must-stay-mandatory-man"
           EOF
           if python3 /tmp/grill-copy/test/validate.py; then
             echo "ERROR: validator passed a non-manual intake-grill gate"
@@ -248,9 +252,11 @@ jobs:
           python3 - <<'EOF'
           import json, collections
           p = "/tmp/acc-copy/plugins/task-pipeline/skills/task-pipeline/pipeline.example.json"
+          _orig_bytes = open(p, "rb").read()
           d = json.load(open(p), object_pairs_hook=collections.OrderedDict)
           d["stages"][-1]["gate"]["type"] = "auto"
           json.dump(d, open(p, "w"), indent=2, ensure_ascii=False)
+          assert open(p, "rb").read() != _orig_bytes, "PLANT DID NOT LAND: acceptance-must-close-the-flow-manua"
           EOF
           if python3 /tmp/acc-copy/test/validate.py; then
             echo "ERROR: validator passed a non-manual acceptance gate"
@@ -266,11 +272,13 @@ jobs:
           python3 - <<'EOF'
           import json, collections
           p = "/tmp/seam-copy/plugins/task-pipeline/skills/task-pipeline/pipeline.example.json"
+          _orig_bytes = open(p, "rb").read()
           d = json.load(open(p), object_pairs_hook=collections.OrderedDict)
           for st in d["stages"]:
               if st.get("state") == "plan":
                   st["gate"]["check"] = "every spec requirement maps to a task"
           json.dump(d, open(p, "w"), indent=2, ensure_ascii=False)
+          assert open(p, "rb").read() != _orig_bytes, "PLANT DID NOT LAND: the-plan-gate-must-be-a-set-comparis"
           EOF
           if python3 /tmp/seam-copy/test/validate.py; then
             echo "ERROR: validator passed a plan gate with no REQ set comparison"
@@ -305,9 +313,11 @@ jobs:
           python3 - <<'EOF'
           import json, collections
           p = "/tmp/harvest-copy/plugins/task-pipeline/skills/task-pipeline/pipeline.example.json"
+          _orig_bytes = open(p, "rb").read()
           d = json.load(open(p), object_pairs_hook=collections.OrderedDict)
           d["stages"][0]["gate"]["check"] = "MANDATORY stage — never skipped. One question at a time; the brief is confirmed."
           json.dump(d, open(p, "w"), indent=2, ensure_ascii=False)
+          assert open(p, "rb").read() != _orig_bytes, "PLANT DID NOT LAND: stage-0-must-harvest-before-it-inter"
           EOF
           if python3 /tmp/harvest-copy/test/validate.py; then
             echo "ERROR: validator passed a stage-0 gate with no knowledge harvest"
@@ -323,11 +333,13 @@ jobs:
           python3 - <<'EOF'
           import json, collections
           p = "/tmp/loopback-copy/plugins/task-pipeline/skills/task-pipeline/pipeline.example.json"
+          _orig_bytes = open(p, "rb").read()
           d = json.load(open(p), object_pairs_hook=collections.OrderedDict)
           for s in d["stages"]:
               if s.get("state") == "docs-wiki":
                   s["gate"]["check"] = "docs in sync with code; wiki synced; dangling links fixed"
           json.dump(d, open(p, "w"), indent=2, ensure_ascii=False)
+          assert open(p, "rb").read() != _orig_bytes, "PLANT DID NOT LAND: stage-9-must-close-the-loop-on-the-l"
           EOF
           if python3 /tmp/loopback-copy/test/validate.py; then
             echo "ERROR: validator passed a docs stage that never updates what stage 0 read"
@@ -440,9 +452,11 @@ jobs:
           rm -rf /tmp/sweep-copy && cp -R . /tmp/sweep-copy
           python3 - <<'EOF'
           p = "/tmp/sweep-copy/plugins/task-pipeline/skills/task-pipeline/templates/brief.md"
+          _orig_bytes = open(p, "rb").read()
           t = open(p, encoding="utf-8").read()
           t = "\n".join(l for l in t.splitlines() if not l.startswith("| 8 Post-deploy"))
           open(p, "w", encoding="utf-8").write(t + "\n")
+          assert open(p, "rb").read() != _orig_bytes, "PLANT DID NOT LAND: the-autonomy-sweep-must-not-drift-be"
           EOF
           if python3 /tmp/sweep-copy/test/validate.py; then
             echo "ERROR: validator passed a brief template whose sweep drops a stage the grill asks about"
@@ -458,11 +472,13 @@ jobs:
           python3 - <<'EOF'
           import json, collections
           p = "/tmp/ladder-copy/plugins/task-pipeline/skills/task-pipeline/pipeline.example.json"
+          _orig_bytes = open(p, "rb").read()
           d = json.load(open(p), object_pairs_hook=collections.OrderedDict)
           d["stages"][-1]["gate"]["check"] = (
               "every REQ has a status; every verified carries evidence; the operator signs off"
           )
           json.dump(d, open(p, "w"), indent=2, ensure_ascii=False)
+          assert open(p, "rb").read() != _orig_bytes, "PLANT DID NOT LAND: acceptance-must-walk-the-ladder-befo"
           EOF
           if python3 /tmp/ladder-copy/test/validate.py; then
             echo "ERROR: validator passed an acceptance gate that only compares the REQ list — an absence has one side"
@@ -502,9 +518,11 @@ jobs:
           python3 - <<'EOF'
           import json
           p = "/tmp/script-copy/package.json"
+          _orig_bytes = open(p, "rb").read()
           d = json.load(open(p))
           d["scripts"] = {"test": "echo ok"}
           json.dump(d, open(p, "w"), indent=2, ensure_ascii=False)
+          assert open(p, "rb").read() != _orig_bytes, "PLANT DID NOT LAND: npm-test-must-run-the-validator"
           EOF
           if python3 /tmp/script-copy/test/validate.py; then
             echo "ERROR: validator passed a package.json whose test script skips the validator"
@@ -522,9 +540,11 @@ jobs:
           # make this very file trip the guard it is testing
           bad = "s" + "ed -i"
           p = "/tmp/portable-copy/.github/workflows/validate.yml"
+          _orig_bytes = open(p, "rb").read()
           t = open(p, encoding="utf-8").read()
           open(p, "w", encoding="utf-8").write(
               t + f"\n      - name: stray\n        run: |\n          {bad} 's/a/b/' x\n")
+          assert open(p, "rb").read() != _orig_bytes, "PLANT DID NOT LAND: the-negative-self-tests-must-stay-ru"
           EOF
           if python3 /tmp/portable-copy/test/validate.py; then
             echo "ERROR: validator passed a workflow with non-portable in-place edits — that breaks the local runner on BSD"
@@ -653,9 +673,11 @@ jobs:
           # on this very file
           o, c, s = "<" * 7, ">" * 7, "=" * 7
           p = "/tmp/conflict-copy/README.md"
+          _orig_bytes = open(p, "rb").read()
           t = open(p, encoding="utf-8").read()
           open(p, "w", encoding="utf-8").write(
               t + f"\n{o} HEAD\nours\n{s}\ntheirs\n{c} branch\n")
+          assert open(p, "rb").read() != _orig_bytes, "PLANT DID NOT LAND: an-unresolved-merge-conflict-must-fa"
           EOF
           if python3 /tmp/conflict-copy/test/validate.py; then
             echo "ERROR: validator passed a file with unresolved conflict markers — in a prose repo that ships as doctrine"
@@ -3419,9 +3441,11 @@ jobs:
           rm -rf /tmp/vf1-copy && cp -R . /tmp/vf1-copy
           python3 - <<'EOF'
           p = "/tmp/vf1-copy/docs/superpowers/verification.md"
+          _orig_bytes = open(p, "rb").read()
           t = open(p, encoding="utf-8").read()
           open(p, "w", encoding="utf-8").write(
               t + "| REQ-999 | invented | `nowhere` | v1.0.0 | pass | never | — |\n")
+          assert open(p, "rb").read() != _orig_bytes, "PLANT DID NOT LAND: a-verification-row-whose-req-is-in-n"
           EOF
           if python3 /tmp/vf1-copy/test/validate.py; then
             echo "ERROR: a ledger row about a requirement nobody wrote down passed"
@@ -3671,9 +3695,11 @@ jobs:
           rm -rf /tmp/wr-copy && cp -R . /tmp/wr-copy
           python3 - <<'EOF'
           p = "/tmp/wr-copy/docs/superpowers/verification.md"
+          _orig_bytes = open(p, "rb").read()
           t = open(p, encoding="utf-8").read()
           open(p, "w", encoding="utf-8").write(
               t + "| REQ-014 | wrong pairing | `2026-08-04-run-continuity` | v1.10.0 | pass | never | — |\n")
+          assert open(p, "rb").read() != _orig_bytes, "PLANT DID NOT LAND: a-req-paired-with-a-run-whose-brief"
           EOF
           if python3 /tmp/wr-copy/test/validate.py; then
             echo "ERROR: ids 001-014 recur across every brief, so a union check passes almost any mispairing"
@@ -5349,5 +5375,38 @@ jobs:
             echo "OK: validator FAILs — disclosed at the only moment anyone is reading"
           else
             echo "ERROR: the rule went missing and nothing objected — disclosed at the only moment anyone is reading"
+            exit 1
+          fi
+      - name: Negative self-test (a mutating probe ships with no plant-landed assertion)
+        run: |
+          set -eu
+          rm -rf /tmp/ri13-copy && cp -R . /tmp/ri13-copy
+          python3 - <<'EOF'
+          p = "/tmp/ri13-copy/.github/workflows/validate.yml"
+          t = open(p, encoding="utf-8").read()
+          # A probe that reads a file and writes it back, with the phrase only in a
+          # COMMENT — all three of these shapes were watched passing a first version of
+          # the guard: the phrase in a comment, in a bash echo, and asserted about a
+          # different needle.
+          step = (
+              "      - name: Negative self-test (planted, unasserted)\n"
+              "        run: |\n"
+              "          set -eu\n"
+              "          rm -rf /tmp/zz9-copy && cp -R . /tmp/zz9-copy\n"
+              "          python3 - <<'XEOF'\n"
+              "          p = \"/tmp/zz9-copy/README.md\"\n"
+              "          t = open(p, encoding=\"utf-8\").read()\n"
+              "          # the plant would not land if the needle moved; checked by eye\n"
+              "          open(p, \"w\", encoding=\"utf-8\").write(t.replace(\"NEEDLE\", \"x\"))\n"
+              "          XEOF\n"
+              "          echo ok\n")
+          _planted = t.rstrip("\n") + "\n" + step
+          assert _planted != t, "PLANT DID NOT LAND: ri13"
+          open(p, "w", encoding="utf-8").write(_planted)
+          EOF
+          if python3 /tmp/ri13-copy/test/validate.py 2>&1 | grep -q "never assert the plant landed"; then
+            echo "OK: validator FAILs — the phrase in a comment is not an assertion"
+          else
+            echo "ERROR: a mutating probe shipped unasserted and the guard that exists for it stayed quiet"
             exit 1
           fi

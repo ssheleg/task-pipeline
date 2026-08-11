@@ -161,6 +161,20 @@ rate-limited endpoints, external quota, seats, tokens — and confirm the suite'
 stays under the product's own bound. Where it cannot, the suite **shares** the resource
 across cases instead of acquiring it per case.
 
+**Where the bound comes from, and what to do when it does not exist.** In order: the
+product's own configuration or code; the provider's documented limit; the operator. Write
+the answer into the brief's source ledger like any other fetched fact — a limit an agent
+remembered is a limit nobody can check. **Where none of the three answers, the row reads
+`bound: unknown` and the count goes to `unlooked`** rather than to a guess: this file's
+whole argument is that an unmeasured resource reports as a timeout, and an unmeasured
+*bound* does the same one level up.
+
+**And it does not override *The green from residue*.** That rule is about state a case
+inherits — a database, a volume, a clone — and it still says acquire fresh. This rule is
+about a resource **the product itself meters**. Where the two meet, the product's bound
+wins and the suite shares that one resource while everything else stays fresh; say which
+resource is shared and why.
+
 **And a timeout in an end-to-end suite is an unclassified result, not a slow one.** Before
 it is read as a performance signal the resource question above must have an answer, or the
 run is interpreting its own harness. In the reporting project this was also the most

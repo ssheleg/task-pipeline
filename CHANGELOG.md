@@ -49,7 +49,7 @@ statements. Found by `compile()` and a restore from git.
 All **201** mutating probes carry the assertion now, and the guard reads the rule rather
 than the phrasing.
 
-- Guards: 261 → **273**.
+- Guards: 261 → **274**.
 
 ## v1.43.0 — the rail said where, and nothing said what happened
 
