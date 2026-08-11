@@ -41,6 +41,52 @@ row goes — the cap is not negotiable, ranking is.
 
 ## Recent log — entries from the last five run stamps (newest first)
 
+### 2026-08-11 · `hand-back` · the release built what it had just condemned
+
+**Symptom.** A gate criterion was added requiring the run to write a hand-back at stage
+10, argued for in a paragraph whose whole point was that an instruction with no gate
+behind it is *"copy it, tick it"* — a rung-1 rule read as rung 3, which the v1.37.0 audit
+had convicted. Seven guards shipped with it. **Every one read a doctrine file.** All they
+could establish was that the instruction was still written down.
+
+**Surfaced at:** stage 7, by R-005's fifth consecutive reader, which constructed a
+conforming hand-back concealing a weakened test and showed that nothing in the repository
+would notice — and that the same audit, run in a year, could reach no verdict either way,
+because there would be no run records to check.
+
+**The stage that owned it:** stage 3. The spec locked what the report must *contain* and
+never asked where it *lands*. Every other artefact in this pipeline has an address; this
+one had a format and a gate.
+
+**Root cause.** A gate criterion is a claim about a run. A check that reads the doctrine
+is a claim about the doctrine. The two look identical in a green suite, and the distance
+between them is exactly the distance the v1.37.0 audit measured — except that audit could
+work, because run records existed for it to read.
+
+**Fixes by grade.**
+
+1. *(mechanical)* The hand-back lands as a `hand:` line in the run ledger, its fourth
+   declared shape. `grep -c '^hand:'` against `grep -c '^iter:'` makes a missing one
+   readable, which is the least a later audit needs.
+2. *(mechanical)* Ten more defects the same reader found — six in guards, four in the
+   doctrine — including a bare `"hand-back"` substring that could not tell a gate
+   *requiring* it from one *excusing* it, and four ambiguity sources whose commands did
+   not exist, one of which would have grepped a string the source ledger never writes.
+3. *(standing instruction)* **None added.** R-005 covers it, fired, and this is its fifth
+   consecutive harvest.
+
+**What is stated rather than fixed, and it is the honest half.** `SURFACED` has no
+register behind it — the doctrine calls it the section that earns the hand-back precisely
+*because* what a run learned by accident is recoverable from no artefact. So *"nothing
+surfaced"* remains a quiet decision, and the ledger line records that a hand-back
+happened, never that it was complete. No check in this repository can close that, and
+saying so is the only thing that keeps the gate from being the decoration it was written
+to replace.
+
+**Six predicates were answered by their neighbours in this release, and all six were
+caught by their own probes rather than by a reader** — the first release where that ratio
+held. The neighbour-probe habit shipped in v1.42.0 is doing what it was written for.
+
 ### 2026-08-11 · `neighbour-probe` · the doctrine failed its own first use
 
 **Symptom.** A section was written into `gates.md` telling a guard author to plant the
@@ -1026,6 +1072,7 @@ without the cap the countable thing grows inside a section read in full.
 
 | Date | Topic | Commit | Verdict | Retro |
 |---|---|---|---|---|
+| 2026-08-11 | `hand-back` / the-rail-said-where | `5ec4cdd` | four sections and two lists at both boundaries, gated at stage 10 across **four** surfaces · **the reader found the release built what it had just condemned** — a gate criterion with no artefact — so the hand-back now lands as a `hand:` line in the run ledger · six guard defects and four doctrinal, all planted and watched passing · guards 253 → **261** · six neighbour-answered predicates, all caught by their own probes rather than by a reader | 1 entry · 5 standing · retired 0 · added 0 · **stamps 11 → 10 (1 rotated)** · R-002, R-003, R-005, R-006 fired |
 | 2026-08-11 | `neighbour-probe` / B-057 `plant-the-evidence-next-door` | `ac6e5db` | the neighbour probe as doctrine + three implementing it · **the doctrine failed its own first use** — one probe planted the needles of two RETIRED predicates · eight reader findings closed and each replayed failing, including a **declared span that was false** and a **silent loss of coverage** on a rekey · guards 250 → **253** · R-002 fired: a fix batch raised on its third edit and never wrote the file | 1 entry · 5 standing · retired 0 · added 0 · **stamps 11 → 10 (1 rotated)** · R-002, R-003, R-005, R-006 fired |
 | 2026-08-10 | `stamp-cap` / B-055 `one-line-per-run-is-a-slope` | `141294a` | stamps capped at ten, 18 rotated whole into the archive · stamp section 2 099 → **1 088 tok**, read portion 3 333 → **2 335**, stage-0 floor → **~35 300** · **the reader found six ways past the first cap guard**, one of them the stamp shape this doctrine's own command writes · four surfaces had never learned the rule · a hand-written 21 was a computed 18 · guards 248 → **250** | 1 entry · 5 standing · retired 0 · added 0 · **stamps 11 → 10 (1 rotated at this prune)** · R-003, R-005, R-006 fired |
 | 2026-08-10 | `loop-mechanism` / B-054 `the-loop-had-no-queue` | `64fcc6b` | the queue, `mode: dynamic`, `run.loop.arm`, the goal re-read between items · **R-005's reader found a contradiction the guards could not**: Part 1a armed unconditionally and overrode the file's own `Default off` · six guard defects, all planted and watched passing · guards 233 → **248** · **a red CI reached `main` on `5a77053`** — pushed after `npm test` without `test:all` | 1 entry · 5 standing · retired 0 · added 0 · R-003, R-005, R-006 fired |
@@ -1035,4 +1082,3 @@ without the cap the countable thing grows inside a section read in full.
 | 2026-08-10 | `planning-system` / N3+N4+N5 `exposure-checkup-loop` | `0137512` | 3 REQ · a vector never a probability, the command with no task in flight, the loop citing the board · **one review round by the lowered threshold, 5 findings** · the suite itself fixed: 13+ min → **5m34s** · carry-over 2 rows, 0 unresolved | 1 entry · 6 standing · retired 0 · added 0 · R-001, R-002, R-004 fired · guards 185 → 188 |
 | 2026-08-10 | `planning-system` / N2 `verification-ledger` | `85f8c8a` | 3 REQ · the column a machine may not fill · **ten review rounds, ~20 findings, none from my probes** · carry-over 2 rows, 0 unresolved | 1 entry · 6 standing · retired 0 · added 0 · R-001, R-002, R-005 fired · guards 175 → 185 |
 | 2026-08-09 | `planning-system` / N1 `the-board` | `4233c3d` | 4 REQ · a queue between runs, and the seam the ledger left dangling · **ten review rounds, 29 findings, none from my probes** · carry-over 2 rows, 2 open, 0 unresolved | 1 entry · 6 standing · retired 0 · added 0 · R-001, R-002, R-004, R-005 all fired · guards 156 → 175 + 4 property |
-| 2026-08-09 | `audit-followup` / M6 `learned-shape` | `241df1e` | 1 REQ · a cap refused by measurement, and the class it uncovered · **eight review rounds, 20 findings, two of them red, none from my probes** · carry-over 12 rows, 7 open, 0 unresolved | 1 entry · 6 standing · retired 0 · added 0 · R-001, R-005 fired · guards 144 → 156 + 1 property |
