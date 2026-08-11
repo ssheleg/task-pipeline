@@ -69,9 +69,11 @@ jobs:
           python3 - <<'EOF'
           import re
           p = "/tmp/corrupt-copy/plugins/task-pipeline/.claude-plugin/plugin.json"
+          _orig_bytes = open(p, "rb").read()
           t = open(p, encoding="utf-8").read()
           open(p, "w", encoding="utf-8").write(
               re.sub(r'"version": "[0-9.]*"', '"version": "0.0.0-corrupt"', t))
+          assert open(p, "rb").read() != _orig_bytes, "PLANT DID NOT LAND: validator-must-be-able-to-fail"
           EOF
           if python3 /tmp/corrupt-copy/test/validate.py; then
             echo "ERROR: validator passed on a corrupted copy — it cannot fail"
@@ -86,8 +88,10 @@ jobs:
           rm -rf /tmp/gate-copy && cp -R . /tmp/gate-copy
           python3 - <<'EOF'
           p = "/tmp/gate-copy/plugins/task-pipeline/skills/task-pipeline/pipeline.example.json"
+          _orig_bytes = open(p, "rb").read()
           t = open(p, encoding="utf-8").read()
           open(p, "w", encoding="utf-8").write(t.replace('"type": "auto"', '"type": "sometimes"'))
+          assert open(p, "rb").read() != _orig_bytes, "PLANT DID NOT LAND: bad-gate-type-in-pipeline-example-js"
           EOF
           if python3 /tmp/gate-copy/test/validate.py; then
             echo "ERROR: validator passed an invalid gate.type"
@@ -164,8 +168,10 @@ jobs:
           python3 - <<'EOF'
           import re
           p = "/tmp/brief-copy/plugins/task-pipeline/skills/task-pipeline/templates/brief.md"
+          _orig_bytes = open(p, "rb").read()
           t = open(p, encoding="utf-8").read()
           open(p, "w", encoding="utf-8").write(re.sub(r"^## Autonomy.*", "## Notes", t, flags=re.M))
+          assert open(p, "rb").read() != _orig_bytes, "PLANT DID NOT LAND: brief-template-must-keep-the-autonom"
           EOF
           if python3 /tmp/brief-copy/test/validate.py; then
             echo "ERROR: validator passed a brief template with no autonomy sweep"
@@ -205,8 +211,10 @@ jobs:
           python3 - <<'EOF'
           import re
           p = "/tmp/req-copy/plugins/task-pipeline/skills/task-pipeline/templates/brief.md"
+          _orig_bytes = open(p, "rb").read()
           t = open(p, encoding="utf-8").read()
           open(p, "w", encoding="utf-8").write(re.sub(r"^## Requirements.*", "## Notes", t, flags=re.M))
+          assert open(p, "rb").read() != _orig_bytes, "PLANT DID NOT LAND: the-req-spine-must-stay-in-the-brief"
           EOF
           if python3 /tmp/req-copy/test/validate.py; then
             echo "ERROR: validator passed a brief template with no REQ spine"
@@ -221,8 +229,10 @@ jobs:
           rm -rf /tmp/verify-copy && cp -R . /tmp/verify-copy
           python3 - <<'EOF'
           p = "/tmp/verify-copy/plugins/task-pipeline/skills/task-pipeline/templates/brief.md"
+          _orig_bytes = open(p, "rb").read()
           t = open(p, encoding="utf-8").read()
           open(p, "w", encoding="utf-8").write(t.replace("How it's verified", "Notes"))
+          assert open(p, "rb").read() != _orig_bytes, "PLANT DID NOT LAND: req-rows-must-name-how-they-are-veri"
           EOF
           if python3 /tmp/verify-copy/test/validate.py; then
             echo "ERROR: validator passed a REQ table with no verification column"
@@ -276,8 +286,10 @@ jobs:
           python3 - <<'EOF'
           import re
           p = "/tmp/ledger-copy/plugins/task-pipeline/skills/task-pipeline/templates/brief.md"
+          _orig_bytes = open(p, "rb").read()
           t = open(p, encoding="utf-8").read()
           open(p, "w", encoding="utf-8").write(re.sub(r"^## Knowledge sources.*", "## Notes", t, flags=re.M))
+          assert open(p, "rb").read() != _orig_bytes, "PLANT DID NOT LAND: the-brief-must-keep-the-knowledge-so"
           EOF
           if python3 /tmp/ledger-copy/test/validate.py; then
             echo "ERROR: validator passed a brief template with nowhere to record the harvest"
@@ -331,9 +343,11 @@ jobs:
           python3 - <<'EOF'
           import json
           p = "/tmp/blurb-copy/package.json"
+          _orig_bytes = open(p, "rb").read()
           d = json.load(open(p))
           d["description"] = d["description"].replace(", acceptance)", ")")
           json.dump(d, open(p, "w"), indent=2, ensure_ascii=False)
+          assert open(p, "rb").read() != _orig_bytes, "PLANT DID NOT LAND: a-description-that-drops-the-final-s"
           EOF
           if python3 /tmp/blurb-copy/test/validate.py; then
             echo "ERROR: validator passed a description that stops one stage short"
@@ -348,8 +362,10 @@ jobs:
           rm -rf /tmp/verdict-copy && cp -R . /tmp/verdict-copy
           python3 - <<'EOF'
           p = "/tmp/verdict-copy/plugins/task-pipeline/skills/task-pipeline/references/build.md"
+          _orig_bytes = open(p, "rb").read()
           t = open(p, encoding="utf-8").read()
           open(p, "w", encoding="utf-8").write(t.replace("with **all three** verdicts", "with **both** verdicts"))
+          assert open(p, "rb").read() != _orig_bytes, "PLANT DID NOT LAND: verdict-count-must-not-drift-from-th"
           EOF
           if python3 /tmp/verdict-copy/test/validate.py; then
             echo "ERROR: validator passed 'both verdicts' while the dev gate declares three"
@@ -365,8 +381,10 @@ jobs:
           python3 - <<'EOF'
           import re
           p = "/tmp/doctrinegate-copy/plugins/task-pipeline/skills/task-pipeline/references/acceptance.md"
+          _orig_bytes = open(p, "rb").read()
           t = open(p, encoding="utf-8").read()
           open(p, "w", encoding="utf-8").write(re.sub(r"^## GATE \(manual\)", "## GATE (auto)", t, flags=re.M))
+          assert open(p, "rb").read() != _orig_bytes, "PLANT DID NOT LAND: a-doctrine-file-s-gate-type-must-mat"
           EOF
           if python3 /tmp/doctrinegate-copy/test/validate.py; then
             echo "ERROR: validator passed a doctrine gate type contradicting pipeline.example.json"
@@ -382,8 +400,10 @@ jobs:
           python3 - <<'EOF'
           import re
           p = "/tmp/closeout-copy/plugins/task-pipeline/skills/task-pipeline/references/acceptance.md"
+          _orig_bytes = open(p, "rb").read()
           t = open(p, encoding="utf-8").read()
           open(p, "w", encoding="utf-8").write(re.sub(r"submodule", "sub-module", t, flags=re.I))
+          assert open(p, "rb").read() != _orig_bytes, "PLANT DID NOT LAND: a-stage-10-close-out-rule-must-reach"
           EOF
           if python3 /tmp/closeout-copy/test/validate.py; then
             echo "ERROR: validator passed a close-out rule declared in SKILL.md but absent from the gate that enforces it"
@@ -399,11 +419,13 @@ jobs:
           python3 - <<'EOF'
           import json, collections, re
           p = "/tmp/dest-copy/plugins/task-pipeline/skills/task-pipeline/pipeline.example.json"
+          _orig_bytes = open(p, "rb").read()
           d = json.load(open(p), object_pairs_hook=collections.OrderedDict)
           c = d["stages"][0]["gate"]["check"]
           d["stages"][0]["gate"]["check"] = re.sub(
               r"; plus, with Figma on, the DESIGN DESTINATION.*?replacement\)", ")", c, flags=re.S)
           json.dump(d, open(p, "w"), indent=2, ensure_ascii=False)
+          assert open(p, "rb").read() != _orig_bytes, "PLANT DID NOT LAND: intake-must-settle-the-figma-design"
           EOF
           if python3 /tmp/dest-copy/test/validate.py; then
             echo "ERROR: validator passed an intake gate that never settles which Figma file, in which team"
@@ -518,11 +540,13 @@ jobs:
           python3 - <<'EOF'
           import json, re
           p = "/tmp/graph-copy/plugins/task-pipeline/skills/task-pipeline/pipeline.example.json"
+          _orig_bytes = open(p, "rb").read()
           d = json.load(open(p, encoding="utf-8"))
           for s in d["stages"]:
               if s.get("state") == "docs-wiki":
                   s["gate"]["check"] = re.sub(r"graph", "doc", s["gate"]["check"], flags=re.I)
           json.dump(d, open(p, "w", encoding="utf-8"), indent=2, ensure_ascii=False)
+          assert open(p, "rb").read() != _orig_bytes, "PLANT DID NOT LAND: a-shipped-code-graph-doctrine-must-r"
           EOF
           if python3 /tmp/graph-copy/test/validate.py; then
             echo "ERROR: validator passed a stage-9 gate that never mentions the graph — the refresh would be declared where it is not enforced"
@@ -538,10 +562,12 @@ jobs:
           python3 - <<'EOF'
           import re
           p = "/tmp/graph-doc-copy/plugins/task-pipeline/skills/task-pipeline/references/stages.md"
+          _orig_bytes = open(p, "rb").read()
           t = open(p, encoding="utf-8").read()
           m = re.search(r"^## 9 — .*?(?=^## |\Z)", t, re.M | re.S)
           open(p, "w", encoding="utf-8").write(
               t[:m.start()] + re.sub(r"graph", "doc", m.group(0), flags=re.I) + t[m.end():])
+          assert open(p, "rb").read() != _orig_bytes, "PLANT DID NOT LAND: the-stage-9-detail-must-name-the-cod"
           EOF
           if python3 /tmp/graph-doc-copy/test/validate.py; then
             echo "ERROR: validator passed a stage-9 section that never mentions the graph — an agent reading the stage detail is never told to refresh it"
@@ -557,8 +583,10 @@ jobs:
           python3 - <<'EOF'
           import re
           p = "/tmp/retro-anchor-copy/plugins/task-pipeline/skills/task-pipeline/references/acceptance.md"
+          _orig_bytes = open(p, "rb").read()
           t = open(p, encoding="utf-8").read()
           open(p, "w", encoding="utf-8").write(re.sub(r"retro", "post", t, flags=re.I))
+          assert open(p, "rb").read() != _orig_bytes, "PLANT DID NOT LAND: the-retrospective-must-reach-the-sur"
           EOF
           if python3 /tmp/retro-anchor-copy/test/validate.py; then
             echo "ERROR: validator passed a close-out doctrine that never mentions the retro — the rule would be declared in SKILL.md and enforced nowhere"
@@ -585,8 +613,10 @@ jobs:
           rm -rf /tmp/retro-prune-copy && cp -R . /tmp/retro-prune-copy
           python3 - <<'EOF'
           p = "/tmp/retro-prune-copy/plugins/task-pipeline/skills/task-pipeline/templates/retro.md"
+          _orig_bytes = open(p, "rb").read()
           t = open(p, encoding="utf-8").read()
           open(p, "w", encoding="utf-8").write(t.replace("Retire when", "Notes"))
+          assert open(p, "rb").read() != _orig_bytes, "PLANT DID NOT LAND: a-standing-instruction-must-carry-it"
           EOF
           if python3 /tmp/retro-prune-copy/test/validate.py; then
             echo "ERROR: validator passed a retro template with no retirement trigger — the prune becomes an argument and the list grows until nobody reads it"
@@ -601,9 +631,11 @@ jobs:
           rm -rf /tmp/doctrine-ptr-copy && cp -R . /tmp/doctrine-ptr-copy
           python3 - <<'EOF'
           p = "/tmp/doctrine-ptr-copy/plugins/task-pipeline/skills/task-pipeline/pipeline.example.json"
+          _orig_bytes = open(p, "rb").read()
           t = open(p, encoding="utf-8").read()
           open(p, "w", encoding="utf-8").write(
               t.replace('"task-pipeline:grill"', '"task-pipeline:interrogation"'))
+          assert open(p, "rb").read() != _orig_bytes, "PLANT DID NOT LAND: a-task-pipeline-name-skill-must-reso"
           EOF
           if python3 /tmp/doctrine-ptr-copy/test/validate.py; then
             echo "ERROR: validator passed a stage pointed at doctrine that does not exist"
@@ -3007,9 +3039,13 @@ jobs:
           import re
           p = "/tmp/bd3-copy/docs/superpowers/backlog.md"
           t = open(p, encoding="utf-8").read()
-          m = re.search(r"^\| B-009 \|([^|]*)\|([^|]*)\|", t, re.M)
-          assert m and m.group(2).strip(), "PLANT DID NOT LAND: B-009's Source is already empty"
-          open(p, "w", encoding="utf-8").write(t[:m.start(2)] + " " + t[m.end(2):])
+          # DERIVED, not a literal id: this probe named B-009 and broke the day that row
+          # closed. A needle that has to be maintained goes stale between the change and
+          # the run — B-057's own class, caught loudly by negatives.py rather than silently.
+          m = next((x for x in re.finditer(r"^\| (B-\d+\w*) \|([^|]*)\|([^|]*)\|", t, re.M)
+                    if x.group(3).strip()), None)
+          assert m, "PLANT DID NOT LAND: no open board row carries a Source"
+          open(p, "w", encoding="utf-8").write(t[:m.start(3)] + " " + t[m.end(3):])
           EOF
           if python3 /tmp/bd3-copy/test/validate.py; then
             echo "ERROR: a board row traceable to nothing passed — a gap has one side and so does an invention"
@@ -5085,5 +5121,233 @@ jobs:
             echo "OK: validator FAILs — a narrative with no address is one no audit can find"
           else
             echo "ERROR: the doctrine lost the address and nothing objected"
+            exit 1
+          fi
+      - name: Negative self-test (the ratchet-matcher section is deleted)
+        run: |
+          set -eu
+          rm -rf /tmp/ri01-copy && cp -R . /tmp/ri01-copy
+          python3 - <<'EOF'
+          p = "/tmp/ri01-copy/plugins/task-pipeline/skills/task-pipeline/references/gates.md"
+          t = open(p, encoding="utf-8").read()
+          n = "## A ratchet's matcher is itself a check"
+          assert n in t, "PLANT DID NOT LAND: ri01"
+          _planted = t.replace(n, '## Matchers', 1)
+          assert _planted != t, "PLANT DID NOT LAND: ri01"
+          open(p, "w", encoding="utf-8").write(_planted)
+          EOF
+          if python3 /tmp/ri01-copy/test/validate.py 2>&1 | grep -q "no section on a ratchet's matcher"; then
+            echo "OK: validator FAILs — a matcher looser than its subject shrinks the ratchet"
+          else
+            echo "ERROR: the rule went missing and nothing objected — a matcher looser than its subject shrinks the ratchet"
+            exit 1
+          fi
+      - name: Negative self-test (the near-miss leaves the ratchet-matcher rule)
+        run: |
+          set -eu
+          rm -rf /tmp/ri02-copy && cp -R . /tmp/ri02-copy
+          python3 - <<'EOF'
+          p = "/tmp/ri02-copy/plugins/task-pipeline/skills/task-pipeline/references/gates.md"
+          t = open(p, encoding="utf-8").read()
+          n = 'feed its matcher a near-miss it must reject'
+          assert n in t, "PLANT DID NOT LAND: ri02"
+          _planted = t.replace(n, 'check that the matcher is sensible', 1)
+          assert _planted != t, "PLANT DID NOT LAND: ri02"
+          open(p, "w", encoding="utf-8").write(_planted)
+          EOF
+          if python3 /tmp/ri02-copy/test/validate.py 2>&1 | grep -q 'the near-miss is gone'; then
+            echo "OK: validator FAILs — reacting is not discriminating"
+          else
+            echo "ERROR: the rule went missing and nothing objected — reacting is not discriminating"
+            exit 1
+          fi
+      - name: Negative self-test (the unlanded-plant section is deleted)
+        run: |
+          set -eu
+          rm -rf /tmp/ri03-copy && cp -R . /tmp/ri03-copy
+          python3 - <<'EOF'
+          p = "/tmp/ri03-copy/plugins/task-pipeline/skills/task-pipeline/references/gates.md"
+          t = open(p, encoding="utf-8").read()
+          n = '## A green probe is evidence only if'
+          assert n in t, "PLANT DID NOT LAND: ri03"
+          _planted = t.replace(n, '## Probes and greens', 1)
+          assert _planted != t, "PLANT DID NOT LAND: ri03"
+          open(p, "w", encoding="utf-8").write(_planted)
+          EOF
+          if python3 /tmp/ri03-copy/test/validate.py 2>&1 | grep -q 'no section on a green probe'; then
+            echo "OK: validator FAILs — a plant that missed reports the same green as a sound check"
+          else
+            echo "ERROR: the rule went missing and nothing objected — a plant that missed reports the same green as a sound check"
+            exit 1
+          fi
+      - name: Negative self-test (the verified-by section is deleted)
+        run: |
+          set -eu
+          rm -rf /tmp/ri04-copy && cp -R . /tmp/ri04-copy
+          python3 - <<'EOF'
+          p = "/tmp/ri04-copy/plugins/task-pipeline/skills/task-pipeline/references/acceptance.md"
+          t = open(p, encoding="utf-8").read()
+          n = '## A `verified by` name is a claim until it resolves'
+          assert n in t, "PLANT DID NOT LAND: ri04"
+          _planted = t.replace(n, '## Naming checks', 1)
+          assert _planted != t, "PLANT DID NOT LAND: ri04"
+          open(p, "w", encoding="utf-8").write(_planted)
+          EOF
+          if python3 /tmp/ri04-copy/test/validate.py 2>&1 | grep -q 'no section requiring a `verified by` name'; then
+            echo "OK: validator FAILs — a cell can name a check that does not exist"
+          else
+            echo "ERROR: the rule went missing and nothing objected — a cell can name a check that does not exist"
+            exit 1
+          fi
+      - name: Negative self-test (an unresolvable verified-by name keeps reading verified)
+        run: |
+          set -eu
+          rm -rf /tmp/ri05-copy && cp -R . /tmp/ri05-copy
+          python3 - <<'EOF'
+          p = "/tmp/ri05-copy/plugins/task-pipeline/skills/task-pipeline/references/acceptance.md"
+          t = open(p, encoding="utf-8").read()
+          n = 'status **`unknown`**, never `verified`'
+          assert n in t, "PLANT DID NOT LAND: ri05"
+          _planted = t.replace(n, 'status noted in the row', 1)
+          assert _planted != t, "PLANT DID NOT LAND: ri05"
+          open(p, "w", encoding="utf-8").write(_planted)
+          EOF
+          if python3 /tmp/ri05-copy/test/validate.py 2>&1 | grep -q 'the status an unresolvable'; then
+            echo "OK: validator FAILs — without `unknown` the row keeps reading verified"
+          else
+            echo "ERROR: the rule went missing and nothing objected — without `unknown` the row keeps reading verified"
+            exit 1
+          fi
+      - name: Negative self-test (the seam section is deleted)
+        run: |
+          set -eu
+          rm -rf /tmp/ri06-copy && cp -R . /tmp/ri06-copy
+          python3 - <<'EOF'
+          p = "/tmp/ri06-copy/plugins/task-pipeline/skills/task-pipeline/references/acceptance.md"
+          t = open(p, encoding="utf-8").read()
+          n = '## A seam is not a deliverable'
+          assert n in t, "PLANT DID NOT LAND: ri06"
+          _planted = t.replace(n, '## Boundaries', 1)
+          assert _planted != t, "PLANT DID NOT LAND: ri06"
+          open(p, "w", encoding="utf-8").write(_planted)
+          EOF
+          if python3 /tmp/ri06-copy/test/validate.py 2>&1 | grep -q 'no section on the seam'; then
+            echo "OK: validator FAILs — two green halves reporting a working whole"
+          else
+            echo "ERROR: the rule went missing and nothing objected — two green halves reporting a working whole"
+            exit 1
+          fi
+      - name: Negative self-test (the seam loses its unlooked fallback)
+        run: |
+          set -eu
+          rm -rf /tmp/ri07-copy && cp -R . /tmp/ri07-copy
+          python3 - <<'EOF'
+          p = "/tmp/ri07-copy/plugins/task-pipeline/skills/task-pipeline/references/acceptance.md"
+          t = open(p, encoding="utf-8").read()
+          n = 'the table says so under `unlooked`'
+          assert n in t, "PLANT DID NOT LAND: ri07"
+          _planted = t.replace(n, 'the table notes it', 1)
+          assert _planted != t, "PLANT DID NOT LAND: ri07"
+          open(p, "w", encoding="utf-8").write(_planted)
+          EOF
+          if python3 /tmp/ri07-copy/test/validate.py 2>&1 | grep -q 'the `unlooked` fallback'; then
+            echo "OK: validator FAILs — where no check spans the seam, two green rows are a false whole"
+          else
+            echo "ERROR: the rule went missing and nothing objected — where no check spans the seam, two green rows are a false whole"
+            exit 1
+          fi
+      - name: Negative self-test (the consumption section is deleted)
+        run: |
+          set -eu
+          rm -rf /tmp/ri08-copy && cp -R . /tmp/ri08-copy
+          python3 - <<'EOF'
+          p = "/tmp/ri08-copy/plugins/task-pipeline/skills/task-pipeline/references/tdd.md"
+          t = open(p, encoding="utf-8").read()
+          n = '## What a case consumes'
+          assert n in t, "PLANT DID NOT LAND: ri08"
+          _planted = t.replace(n, '## Suite hygiene', 1)
+          assert _planted != t, "PLANT DID NOT LAND: ri08"
+          open(p, "w", encoding="utf-8").write(_planted)
+          EOF
+          if python3 /tmp/ri08-copy/test/validate.py 2>&1 | grep -q 'no section on what a case consumes'; then
+            echo "OK: validator FAILs — a suite that exhausts a production limit is measuring the limit"
+          else
+            echo "ERROR: the rule went missing and nothing objected — a suite that exhausts a production limit is measuring the limit"
+            exit 1
+          fi
+      - name: Negative self-test (a timeout becomes a slow result again)
+        run: |
+          set -eu
+          rm -rf /tmp/ri09-copy && cp -R . /tmp/ri09-copy
+          python3 - <<'EOF'
+          p = "/tmp/ri09-copy/plugins/task-pipeline/skills/task-pipeline/references/tdd.md"
+          t = open(p, encoding="utf-8").read()
+          n = 'is an unclassified result, not a slow one'
+          assert n in t, "PLANT DID NOT LAND: ri09"
+          _planted = t.replace(n, 'is a slow result', 1)
+          assert _planted != t, "PLANT DID NOT LAND: ri09"
+          open(p, "w", encoding="utf-8").write(_planted)
+          EOF
+          if python3 /tmp/ri09-copy/test/validate.py 2>&1 | grep -q 'UNCLASSIFIED result'; then
+            echo "OK: validator FAILs — read as slow, it sends a run to investigate the wrong thing"
+          else
+            echo "ERROR: the rule went missing and nothing objected — read as slow, it sends a run to investigate the wrong thing"
+            exit 1
+          fi
+      - name: Negative self-test (the publish disclosure section is deleted)
+        run: |
+          set -eu
+          rm -rf /tmp/ri10-copy && cp -R . /tmp/ri10-copy
+          python3 - <<'EOF'
+          p = "/tmp/ri10-copy/plugins/task-pipeline/skills/task-pipeline/references/retrospective.md"
+          t = open(p, encoding="utf-8").read()
+          n = '## `publish:` is a line in the verdict'
+          assert n in t, "PLANT DID NOT LAND: ri10"
+          _planted = t.replace(n, '## Publishing notes', 1)
+          assert _planted != t, "PLANT DID NOT LAND: ri10"
+          open(p, "w", encoding="utf-8").write(_planted)
+          EOF
+          if python3 /tmp/ri10-copy/test/validate.py 2>&1 | grep -q 'no section giving publication'; then
+            echo "OK: validator FAILs — an unarmed mechanism and one with nothing to say are indistinguishable"
+          else
+            echo "ERROR: the rule went missing and nothing objected — an unarmed mechanism and one with nothing to say are indistinguishable"
+            exit 1
+          fi
+      - name: Negative self-test (the publish line loses its not-configured form)
+        run: |
+          set -eu
+          rm -rf /tmp/ri11-copy && cp -R . /tmp/ri11-copy
+          python3 - <<'EOF'
+          p = "/tmp/ri11-copy/plugins/task-pipeline/skills/task-pipeline/references/retrospective.md"
+          t = open(p, encoding="utf-8").read()
+          n = 'not configured (N insight-grade entries stayed local)'
+          assert n in t, "PLANT DID NOT LAND: ri11"
+          _planted = t.replace(n, 'nothing to report', 1)
+          assert _planted != t, "PLANT DID NOT LAND: ri11"
+          open(p, "w", encoding="utf-8").write(_planted)
+          EOF
+          if python3 /tmp/ri11-copy/test/validate.py 2>&1 | grep -q 'the `not configured` form'; then
+            echo "OK: validator FAILs — a blank where configuration is absent is the silence this ends"
+          else
+            echo "ERROR: the rule went missing and nothing objected — a blank where configuration is absent is the silence this ends"
+            exit 1
+          fi
+      - name: Negative self-test (stage 10's verdict drops the publish line)
+        run: |
+          set -eu
+          rm -rf /tmp/ri12-copy && cp -R . /tmp/ri12-copy
+          python3 - <<'EOF'
+          p = "/tmp/ri12-copy/plugins/task-pipeline/skills/task-pipeline/references/stages.md"
+          t = open(p, encoding="utf-8").read()
+          n = 'Either way the verdict carries a `publish:`'
+          assert n in t, "PLANT DID NOT LAND: ri12"
+          _planted = t.replace(n, 'Publication is optional and', 1)
+          assert _planted != t, "PLANT DID NOT LAND: ri12"
+          open(p, "w", encoding="utf-8").write(_planted)
+          EOF
+          if python3 /tmp/ri12-copy/test/validate.py 2>&1 | grep -q 'carries no `publish:` line'; then
+            echo "OK: validator FAILs — disclosed at the only moment anyone is reading"
+          else
+            echo "ERROR: the rule went missing and nothing objected — disclosed at the only moment anyone is reading"
             exit 1
           fi

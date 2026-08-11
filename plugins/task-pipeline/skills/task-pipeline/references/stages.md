@@ -672,7 +672,12 @@ never that the work was skipped quietly.
   string, and the five redaction rules applied
   ([`retrospective.md`](retrospective.md) → *What may leave the project*). Absent, the
   step does not exist and is not asked about: publishing to another repository is an
-  outward act and silence authorizes none**; **the documentation gate has been seen
+  outward act and silence authorizes none. **Either way the verdict carries a `publish:`
+  line** — the issue url, `0 (configured, nothing insight-grade)`, or `not configured
+  (N insight-grade entries stayed local)`: an unarmed path and one with nothing to say
+  are otherwise indistinguishable, which is how this instruction went unread for eight
+  releases** ([`retrospective.md`](retrospective.md) → *`publish:` is a line in the
+  verdict*)**; **the documentation gate has been seen
   failing once against a planted defect and its ratchet counts are printed**
   ([`gates.md`](gates.md)); **every repository is closed — the parent included:
   `git submodule status` shows no `+`, each repo clean and pushed**; **every check this gate leans on has been seen failing

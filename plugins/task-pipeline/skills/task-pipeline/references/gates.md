@@ -31,6 +31,8 @@ elsewhere and is not restated here:
 - Writing the check itself
 - Probing — plant, run, restore
 - The neighbour probe — plant the evidence outside the subject
+- A ratchet's matcher is itself a check, and it needs a near-miss
+- A green probe is evidence only if the mutation is known to have landed
 - The false-positive budget
 - Ratchets
 - Disclosures — counted like a ratchet, and deliberately not monotone
@@ -346,6 +348,75 @@ the item, then match on flattened text so an emphasis marker cannot hide the bou
 **And state the span in the guard.** One line above the predicate — *what it reads, and
 where that ends*. It costs nothing and it is the only part of a check a later reader can
 disagree with before the defect arrives.
+
+## A ratchet's matcher is itself a check, and it needs a near-miss
+
+Reported from another project through `retro.publish`, and it is the neighbour probe's
+own class arrived at independently — which is the strongest evidence either has.
+
+A run built a ratchet to hold a coverage debt: a list of units with no test, a guard that
+fails when the list grows, a count printed at the gate. Exactly the shape
+[`audit.md`](audit.md) asks for instead of a deferred TODO. The guard decided whether a
+unit was covered by asking whether its identifier appeared **anywhere** in the test
+corpus. The identifiers were path-like and many were prefixes of longer ones, so every
+unit that happened to be the parent of another was credited with its child's coverage.
+
+**A ratchet whose matcher is looser than its subject shrinks itself.** It reports progress
+for work nobody did, and because a ratchet is trusted precisely so that nobody re-derives
+it, the error compounds for as long as the ratchet exists.
+
+Both existing rules were satisfied. The ratchet was printed. The guard had been seen going
+red when the list grew. Neither asks whether the matcher can tell its subject from a near
+neighbour, and that is the only question that would have caught it.
+
+**So before a ratchet is kept, feed its matcher a near-miss it must reject** — the prefix,
+the parent, the same name in a comment or an import, the longer extension. Seeing a guard
+go red on a real change proves it **reacts**; seeing it stay green on a look-alike proves
+it **discriminates**. Only the second makes its number worth trusting.
+
+**And when a matcher is corrected, re-derive the whole ratchet and print both numbers with
+the reason.** In the reporting project the corrected count was *identical* to the old one
+and the composition was not: rows credited falsely came back in as rows genuinely paid off
+went out. A single number with no delta reads as a run where nothing happened.
+
+## A green probe is evidence only if the mutation is known to have landed
+
+Also reported from another project, three times in one day, each caught only because the
+result was too good:
+
+1. a scripted substitution missed on indentation — the file was unchanged and the probe
+   measured nothing;
+2. an assertion written against a bare identifier kept matching the **import line** after
+   the field it guarded was deleted;
+3. a file-extension alternation matched the longer extension as though it were the
+   shorter, reporting nine live files as missing.
+
+In all three the observable was identical to success. *"See it fail once"* has an unstated
+precondition — **that the thing you changed is the thing the check reads** — and a planted
+defect that did not land produces the same green as a check that cannot fail.
+
+**So a probe that mutates an existing file asserts its plant landed, in the same breath as
+planting it.** A probe that writes a whole file has no such question: the file exists or
+the command failed. This repository measured itself while writing this section and got the
+number wrong three times. A hand-rolled classifier said *206 of 206 already carry it*.
+The guard written from the rule said **22 did not** — and was itself too narrow, matching
+one spelling of the assertion, so six probes that already had it in lower case were
+called defective. A sweep then "fixed" those six and **corrupted five**, splitting live
+statements. The true figure was **16**, and it took the guard, a compile check and a
+restore from git to find it.
+
+Two things are worth keeping from that. **The check corrected the measurement that
+motivated it** — which is the argument for writing checks rather than counting by hand.
+And **a check keyed to one spelling of a rule is the class two sections above**: it
+reported as defective the probes that obeyed the rule in different words. All **201**
+mutating probes carry the assertion now, and the guard reads the rule rather than the
+phrasing. Probes that write a whole file need none: the file exists or the command
+failed.
+
+**Prefer an assertion that names the construct over one that names a substring of it.** A
+guard written against a bare identifier survives the deletion of everything it guarded,
+because the identifier still appears in an import. That is case 2 above and it is the same
+class as the section before this one, one level down.
 
 ## The false-positive budget
 

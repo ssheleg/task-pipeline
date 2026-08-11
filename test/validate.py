@@ -4357,6 +4357,126 @@ if os.path.isfile(_RUN_T):
              "no audit can find")
 
 
+# --- six insights published by other projects through retro.publish (v1.44.0) -------
+# The mechanism this bundle shipped for skill-level lessons carried six of them home in
+# one day. These guards hold what each one bought. Two arrived at classes this repository
+# had reached independently — the ratchet matcher is the neighbour probe, and the unlanded
+# plant is R-001, retired here in v1.38.0 and still costing another project three
+# incidents in a day. Independent arrival is the strongest evidence either had.
+_GATES_P = os.path.join(_skill_dir, "references", "gates.md")
+_ACC_P = os.path.join(_skill_dir, "references", "acceptance.md")
+_TDD_P = os.path.join(_skill_dir, "references", "tdd.md")
+_RETRO_D = os.path.join(_skill_dir, "references", "retrospective.md")
+
+def _section(path, heading_re):
+    """A named section, stopping at the next heading of the SAME depth or shallower."""
+    if not os.path.isfile(path):
+        return None
+    _t = open(path, encoding="utf-8").read()
+    _m = re.search(rf"^(#{{2,3}})\s*{heading_re}.*?$(.*?)(?=^#{{1,3}}\s|\Z)", _t, re.S | re.M)
+    return _m.group(2) if _m else None
+
+# #35 — a ratchet's matcher is a check. The near-miss is the whole rule: a guard that
+#       reacts is not a guard that discriminates.
+_rm = _section(_GATES_P, r"A ratchet's matcher")
+if _rm is None:
+    fail("references/gates.md: no section on a ratchet's matcher. A matcher looser than "
+         "its subject shrinks the ratchet, credits work nobody did, and compounds for as "
+         "long as the ratchet exists — reported from another project through retro.publish")
+elif "near-miss" not in _flatten(_rm, lower=True):
+    fail("references/gates.md → A ratchet's matcher: the near-miss is gone. Seeing a guard "
+         "go red on a real change proves it reacts; only a look-alike it must reject "
+         "proves it discriminates, and only the second makes its number worth trusting")
+
+# #31 — R-001's class, returned by another project. Scoped to MUTATING probes, because
+#       this repository measured itself and found the file-writing ones structurally immune.
+_gp = _section(_GATES_P, r"A green probe is evidence")
+if _gp is None:
+    fail("references/gates.md: no section on a green probe whose mutation may not have "
+         "landed. `See it fail once` has an unstated precondition — that the thing you "
+         "changed is the thing the check reads — and a plant that missed produces the same "
+         "green as a check that cannot fail")
+
+# ...and the rule is enforced on the probes themselves: a probe that MUTATES a file must
+#    assert its plant landed. Measured 2026-08-11 before the guard existed: 206 of 206
+#    mutating probes already did, 55 file-writing ones needed nothing.
+_wf2 = os.path.join(ROOT, ".github/workflows/validate.yml")
+if os.path.isfile(_wf2):
+    _steps = re.findall(r"      - name: Negative self-test \(([^)]*)\)\n        run: \|\n"
+                        r"((?:          .*\n|\n)*)", open(_wf2, encoding="utf-8").read())
+    _mutating = [(_n, _b) for _n, _b in _steps
+                 if re.search(r"\.replace\(|re\.sub\(", _b)]
+    # Case- and wording-insensitive: six probes carried the assertion in lower case
+    # (`plant would not land`) and a first version of this check called them defective,
+    # which sent a sweep to "fix" six probes that were already sound and corrupt five of
+    # them. The rule is about the assertion existing, not about one spelling of it.
+    _unasserted = [_n for _n, _b in _mutating
+                   if not re.search(r"plant\s+(?:did not|would not|not)\s+land|plant missed",
+                                    _b, re.I)]
+    if _unasserted:
+        fail(f"{len(_unasserted)} negative self-test(s) mutate a file and never assert the "
+             f"plant landed: {', '.join(_unasserted[:3])}"
+             + (" …" if len(_unasserted) > 3 else "")
+             + ". A substitution that missed reports the same green as a sound check — "
+               "three incidents in one day in the project that reported this")
+
+# #30 — a name in `verified by` is a claim until it resolves.
+_vb = _section(_ACC_P, r"A `verified by` name")
+if _vb is None:
+    fail("references/acceptance.md: no section requiring a `verified by` name to resolve. "
+         "A cell can name a check that does not exist and the row reads as covered — the "
+         "table stops measuring the run and starts recording its author's intent")
+elif not re.search(r"\bunknown\b", _flatten(_vb, lower=True)):
+    fail("references/acceptance.md → A `verified by` name: the status an unresolvable "
+         "name earns is gone. `unknown` is the point — without it the row keeps reading "
+         "`verified`, which is the defect")
+
+# #32 — a seam has no file, and REQ rows are written against deliverables.
+_sm = _section(_ACC_P, r"A seam is not a deliverable")
+if _sm is None:
+    fail("references/acceptance.md: no section on the seam. Two halves each correct and "
+         "each green formed a closed loop that turned away the population the feature "
+         "existed to serve; the coverage table had a row per artefact and no row shape "
+         "for the boundary between them")
+elif "unlooked" not in _flatten(_sm, lower=True):
+    fail("references/acceptance.md → A seam is not a deliverable: the `unlooked` fallback "
+         "is gone. Where no check can span the seam, two green halves reporting a working "
+         "whole is the false-success shape this file spends its length refusing")
+
+# #33 — the harness is part of the system under test.
+_cc = _section(_TDD_P, r"What a case consumes")
+if _cc is None:
+    fail("references/tdd.md: no section on what a case consumes. A suite that exhausts a "
+         "production limit is measuring the limit, and a throttled case reports as a "
+         "timeout — noise that costs more than silence because it looks like data")
+elif "unclassified" not in _flatten(_cc, lower=True):
+    fail("references/tdd.md → What a case consumes: the rule that a timeout is an "
+         "UNCLASSIFIED result is gone. Read as a slow one, it sends a run to investigate "
+         "compilation and hydration while the harness is the cause")
+
+# #34 — an unarmed publish path and one with nothing to say.
+_pb = _section(_RETRO_D, r"`publish:` is a line in the verdict")
+if _pb is None:
+    fail("references/retrospective.md: no section giving publication a line in the "
+         "verdict. An unarmed mechanism and a mechanism with nothing to say are "
+         "indistinguishable, which is how this instruction went unread for eight releases")
+elif "not configured" not in _flatten(_pb, lower=True):
+    fail("references/retrospective.md → `publish:`: the `not configured` form is gone. A "
+         "count of zero beside `configured` is an answer; a blank where configuration is "
+         "absent is the silence the section exists to end")
+if os.path.isfile(_STG_P2):
+    _s10b = re.search(r"^##\s*10\s*—.*?$(.*?)(?=^##\s)",
+                      open(_STG_P2, encoding="utf-8").read(), re.S | re.M)
+    # On the OBLIGATION, not the token. `publish:` also occurs inside the citation to
+    # retrospective.md — flattened, "→ publish: is a line in the verdict" — so the
+    # reference to the rule answered for the rule. Seventh instance of that class this
+    # session, and again the probe found it rather than a reader.
+    if _s10b and "verdict carries a publish" not in _flatten(_s10b.group(1), lower=True):
+        fail("references/stages.md stage 10: the verdict carries no `publish:` line. The "
+             "doctrine says publication is disclosed at the only moment anyone is reading, "
+             "and this is that moment")
+
+
 if errors:
     print("FAIL: task-pipeline structure invalid")
     for e in errors:

@@ -1,5 +1,56 @@
 # Changelog
 
+## v1.44.0 — six lessons other projects paid for, carried home by the mechanism that exists for it
+
+`retro.publish` sends a skill-level lesson upstream as an issue. Six arrived in one day
+from projects that are not this one, and every one is a diagnosis: the class, why the
+existing doctrine did not catch it, and the fix by grade. This release is those six.
+
+| Issue | What it bought |
+|---|---|
+| #30 | a name in `verified by` **resolves**, or the row is `unknown` — never `verified` |
+| #31 | a probe that mutates a file asserts its plant landed **— now a guard** |
+| #32 | a seam is not a deliverable: an explicit REQ for the boundary, phrased as a journey |
+| #33 | the tests gate names **what each case consumes**; a timeout is unclassified, not slow |
+| #34 | stage 10 carries a `publish:` line — an unarmed path stops looking like silence |
+| #35 | a ratchet's matcher is itself a check: feed it a **near-miss it must reject** |
+
+### Two of them had already been found here, independently
+
+**#35 is the neighbour probe**, shipped in v1.42.0 after a reader defeated six guards whose
+evidence sat next to their subject. The reporting project reached it from a ratchet whose
+matcher credited every parent with its child's coverage. Same class, two routes, no
+contact — which is the strongest evidence either had.
+
+**#31 is R-001**, born here on 2026-08-03 and **retired in v1.38.0** on its own trigger:
+*"a probe harness exists that asserts the plant changed the parsed text"*. The harness does
+exist. The retirement was still premature, because the condition was *"a harness exists"*
+and the thing that mattered was *"the harness is used everywhere"*. It cost the reporting
+project three incidents in one day and this repository six in this session's own releases.
+**A retirement trigger phrased as the existence of a mechanism, rather than its reach, is
+a trigger that fires early.**
+
+### The number that took four attempts
+
+Enforcing #31 meant counting probes that mutate a file without asserting the plant landed:
+
+```
+hand-written classifier   206 of 206 already carry it   (wrong)
+the guard, first version   22 do not                    (wrong — one spelling)
+the sweep that followed    "fixed" 6 sound probes, corrupted 5
+the truth                  16
+```
+
+The guard corrected the hand count that motivated it. Then the guard was itself the class
+two sections above — keyed to one spelling, it reported as defective six probes that
+obeyed the rule in different words, and a sweep written from that verdict split five live
+statements. Found by `compile()` and a restore from git.
+
+All **201** mutating probes carry the assertion now, and the guard reads the rule rather
+than the phrasing.
+
+- Guards: 261 → **273**.
+
 ## v1.43.0 — the rail said where, and nothing said what happened
 
 A fourteen-iteration session on this repository ended each return with the same question
