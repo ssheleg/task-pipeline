@@ -5517,9 +5517,9 @@ jobs:
           python3 - <<'EOF'
           p = "/tmp/res5-copy/plugins/task-pipeline/skills/task-pipeline/references/acceptance.md"
           t = open(p, encoding="utf-8").read()
-          n = 'not start is **reported, never ended** — the inventory is machine-wide and the\n   authority is not.'
+          n = 'does not own** is **reported, never ended** — the inventory is machine-wide and\n   the authority is not.'
           assert n in t, "PLANT DID NOT LAND: res5"
-          _planted = t.replace(n, 'not start is **reported, never ended** — unless it looks stale, in which case end it\n   and note that you did.', 1)
+          _planted = t.replace(n, 'does not own** is **reported, never ended** — unless it looks stale, in which\n   case end it and note that you did.', 1)
           assert _planted != t, "PLANT DID NOT LAND: res5"
           open(p, "w", encoding="utf-8").write(_planted)
           EOF
