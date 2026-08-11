@@ -1,9 +1,59 @@
 # Changelog
 
+## v1.46.1 — the fixes a reader found in v1.46.0, which shipped without them
+
+v1.46.0 was tagged and published from a commit that carried this branch's doctrine and
+none of the three commits answering the reviewer. The defects below were already found
+and already fixed when the release went out; this is them arriving.
+
+**`docs/DOCMAP.md` forbade the register shipping beside it.** It said, in as many words,
+that no `docs/DECISIONS.md` is created here deliberately — and the release shipped that
+file. The old rule was right about the risk and wrong about the mechanism: `OQ-####`
+closes with `Resolved→DEC-####`, and a CHANGELOG version heading cannot be that target,
+because two decisions in one release collapse to a single pointer. SSOT is kept by
+direction now — the reason lives in `DECISIONS.md`, the CHANGELOG points at the id. The
+reversal is `DEC-0003`, because a register that appears without a decision is exactly
+the fork the old rule feared.
+
+**`HOW-IT-WORKS.md` called itself the version it was written under.** Its first line
+promises a rewrite every release and names the banner as the freshness signal; the
+banner read 1.45.0 while every other surface read 1.46.0. Corrected, and the two
+releases that landed from another session are named for what they were, so the gap in
+the version history is explained rather than silent.
+
+**An absolute rule keeps every keyword while an appended clause reverses it.** This
+release found that class, guarded it on stage 10's criterion 13, and left `residue.md`'s
+two absolute rules on plain substring presence — *"never released by this run, unless it
+has clearly expired"* passed. Sweeping the fix to its siblings then produced the reason
+to sweep it structurally: the second copy of the carve-out pattern had its escaping
+doubled, so it matched a literal backslash and walked past every inversion while looking
+correct. One home now, `_EXCEPTION_MARKER`, three call sites.
+
+**A probe demanded a dependency the harness disclaims.** `res8` required PyYAML to be
+installed; the guard it tests degrades honestly without it. `test:all` was red on any
+machine lacking it. Three branches now: the guard fired, the guard said it could not
+look, or neither — and only the third is an error.
+
+Also: the owner-row check went through `_row_cells` instead of a hand-rolled regex, as
+that helper's own docstring asks; and a reflow that fixed a 157-character line had
+orphaned two words onto a five-character one.
+
+Guards: 291 → **293**.
+
 ## v1.46.0 — what a run leaves running, what "done" costs to say, and what a check is for
 
 Three rules this pipeline had been following by disposition rather than by doctrine,
 and one it had not been following at all.
+
+**`evidence-docs` can now be reached in Russian.** It shipped without Russian triggers
+while `task-pipeline`, beside it in the same plugin, had carried them since v0.14.0 — a
+navigator nobody can summon is a navigator nobody reads. Its description now opens with
+`Use when …`, names twelve triggers on both sides, and keeps the `без доков` opt-out the
+body always documented. `task-pipeline`'s own description is deliberately unchanged: the
+house auditor requires every description to open with `Use when …`, this repository's
+validator requires the opposite — capability first, trigger second — and fails the build
+on anything else. Measured in both directions; which of the two rules is wrong is a
+decision, not a fix to slip into a release.
 
 **A run is not only a diff — it is also everything it left running.** A background
 shell, a monitor polling an API, a scheduled loop, a coordination lease, a worktree,

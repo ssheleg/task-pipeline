@@ -5,7 +5,7 @@ explains the machine — what routes a request into it, what each stage refuses 
 let past, and what makes any claim it prints believable. The README sells it and
 tells you how to install it; this file tells you how it thinks.
 
-> **Version 1.46.0.** The "What changed" section at the bottom carries the last
+> **Version 1.46.1.** The "What changed" section at the bottom carries the last
 > few releases. Everything above it describes the pipeline as it is *now*, not as
 > it was designed.
 
@@ -290,6 +290,14 @@ a run diverges  →  retro entry  →  retro.publish  →  upstream issue
 ---
 
 ## What changed, by version
+
+### v1.46.1 — the fixes a reader found in v1.46.0, which shipped without them
+v1.46.0 was tagged from a commit carrying this branch's doctrine and none of the
+three commits answering its reviewer. The doc map forbade the decisions register
+shipping beside it; this file called itself the version it was written under; two
+absolute rules were guarded by substring alone and inverted by an appended clause;
+and a probe demanded PyYAML the harness disclaims. All four were found and fixed
+before the release went out, and arrived after it.
 
 ### v1.46.0 — what a run leaves running, what "done" costs to say, what a check is for
 Four rules the pipeline had been following by disposition rather than by doctrine.
