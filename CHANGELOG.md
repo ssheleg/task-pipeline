@@ -46,10 +46,13 @@ two sections above — keyed to one spelling, it reported as defective six probe
 obeyed the rule in different words, and a sweep written from that verdict split five live
 statements. Found by `compile()` and a restore from git.
 
-All **201** mutating probes carry the assertion now, and the guard reads the rule rather
-than the phrasing.
+**Every** mutating probe carries the assertion. The figure is deliberately absent:
+a draft said *201*, true at the branch point and false in the same commit — the
+twelve probes added here are themselves mutating probes, and the shipped classifier
+counts 253. The guard computes it; a number in prose beside a check that can count
+is restating instead of computing, which is the rule this very release imports.
 
-- Guards: 261 → **274**.
+- Guards: 261 → **275**.
 
 ## v1.43.0 — the rail said where, and nothing said what happened
 

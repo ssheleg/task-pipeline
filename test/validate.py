@@ -4369,12 +4369,24 @@ _TDD_P = os.path.join(_skill_dir, "references", "tdd.md")
 _RETRO_D = os.path.join(_skill_dir, "references", "retrospective.md")
 
 def _section(path, heading_re):
-    """A named section, stopping at the next heading of the SAME depth or shallower."""
+    """A named section, stopping at the next heading of the SAME depth or shallower.
+
+    The first version said that and did something else: its lookahead was a flat
+    `^#{1,3}\s`, which stops at a DEEPER heading too. Every section wired to it happened
+    to have no `###` inside, so the span was right by luck — and the first subheading
+    anyone added would have truncated it before the phrase the guard requires, turning a
+    correct doctrine edit into a red build. Found by the PR review app, independently of
+    the dispatched reader that found the same shape. The depth is measured, then used."""
     if not os.path.isfile(path):
         return None
     _t = open(path, encoding="utf-8").read()
-    _m = re.search(rf"^(#{{2,3}})\s*{heading_re}.*?$(.*?)(?=^#{{1,3}}\s|\Z)", _t, re.S | re.M)
-    return _m.group(2) if _m else None
+    _h = re.search(rf"^(#{{2,3}})\s*{heading_re}.*?$", _t, re.M)
+    if _h is None:
+        return None
+    _depth = len(_h.group(1))
+    _rest = _t[_h.end():]
+    _stop = re.search(rf"^#{{1,{_depth}}}\s", _rest, re.M)
+    return _rest[:_stop.start()] if _stop else _rest
 
 # #35 — a ratchet's matcher is a check. The near-miss is the whole rule: a guard that
 #       reacts is not a guard that discriminates.
