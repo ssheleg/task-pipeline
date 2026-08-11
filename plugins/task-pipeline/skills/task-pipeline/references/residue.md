@@ -20,6 +20,7 @@ Both are checked the same way and this file covers both.
 - Where the check fires: every gate
 - The teardown, at the end of the run
 - What must **not** be torn down
+- Three owners, not two — and the third is where cleanup actually happens
 - Rationalizations
 
 ---
@@ -160,6 +161,41 @@ The asymmetry is deliberate: leaving something running costs a little, and killi
 something someone else owns costs a lot.
 
 ---
+
+## Three owners, not two — and the third is where cleanup actually happens
+
+The rule above splits the world in two: what this run started, and what it did not.
+**Dry-running this doctrine on its own project found the state it has no slot for.**
+
+Measured 2026-08-11, enumerating the eight classes on a live run:
+
+```
+worktrees/branches : 3 feature branches, all merged into main, from earlier runs
+containers         : 18 running, none started by this run, oldest 3 days,
+                     across four unrelated projects
+```
+
+The branches are not this run's, so *end what you started* does not reach them. They
+are not foreign either — the project owns them, and reporting them every run forever
+is how a report becomes wallpaper. So:
+
+| Owner | What to do | Why |
+|---|---|---|
+| **this run** | end it, in dependency order | it exists because of work that is now finished |
+| **an earlier run of this project** | end it **when it is provably spent**, and say you did — a branch merged into the default branch, a worktree with no diff, a scratch file from a completed run. Otherwise report it | this is the accumulation nobody is otherwise responsible for, and *provably spent* is a fact rather than a judgement |
+| **anything else** | **report, never end** | see the section above; the asymmetry is not negotiable |
+
+**"Provably spent" is the whole load-bearing phrase.** A branch merged into the
+default branch is spent — `git merge-base --is-ancestor` says so, and nothing is lost
+by removing it. A branch that merely *looks* abandoned is not spent, and the run that
+deletes it is guessing about someone's work in progress. **If the proof needs a
+judgement, the item is reported, not ended** — which puts it back under the rule
+above rather than creating an exception to it.
+
+**A foreign item never becomes spent.** The 18 containers above belong to other
+projects; that they have been up for three days is information for whoever owns them,
+not permission. The third owner state widens what a run may clean **inside its own
+project** and widens nothing at all outside it.
 
 ## Rationalizations
 

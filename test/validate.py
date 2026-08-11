@@ -4590,12 +4590,37 @@ if os.path.isfile(_ACC_D):
 # The two absolute sentences in residue.md, guarded as sentences rather than as topics.
 # Both survived an inversion planted next to their keywords on this release.
 if os.path.isfile(_RES_D):
-    _rt = _flatten(_LIVING_TEXT.get(os.path.relpath(_RES_D, ROOT))
-                   or open(_RES_D, encoding="utf-8").read(), lower=True)
+    _rt_raw = (_LIVING_TEXT.get(os.path.relpath(_RES_D, ROOT))
+               or open(_RES_D, encoding="utf-8").read())
+    _rt = _flatten(_rt_raw, lower=True)
     if "never released by this run" not in _rt:
         fail("references/residue.md: the lease rule lost its absolute form. 'May be "
              "released once it looks stale' is the same sentence with the protection "
              "removed, and it reads identically to a reader skimming for the topic")
+    # The third owner state widens what a run may clean INSIDE its own project. Both
+    # halves are load-bearing: "provably spent" is what keeps it from becoming a
+    # judgement, and "a foreign item never becomes spent" is what keeps it from
+    # widening outward. Either alone reads as a licence.
+    # Scope to the TABLE ROW. `provably spent` also appears in the paragraph that
+    # explains it, so a file-wide check was answered by the explanation while the rule
+    # it explains had been gutted — caught by attacking it, third time this session.
+    # One CELL, not the rest of the line. The row's third column explains the phrase
+    # — "*provably spent* is a fact rather than a judgement" — so a capture running to
+    # end-of-line was answered by the sibling cell while the rule cell was gutted.
+    # Fourth instance this session and the same sub-shape the concept page records.
+    _own_row = re.search(r"^\|\s*\*\*an earlier run of this project\*\*\s*\|([^|\n]*)\|",
+                         _rt_raw, re.M)
+    if _own_row is None:
+        fail("references/residue.md: the owner table lost its `an earlier run of this "
+             "project` row — the state that says which accumulated debris a run may clear")
+    elif "provably spent" not in _flatten(_own_row.group(1), lower=True):
+        fail("references/residue.md: the third owner state lost `provably spent` from its "
+             "own row. Without it, 'an earlier run of this project' becomes a judgement "
+             "about whether something looks abandoned, which is the guess this file stops")
+    if "a foreign item never becomes spent" not in _rt:
+        fail("references/residue.md: nothing stops the third owner state from reaching "
+             "outside the project. Three days of uptime is information for whoever owns "
+             "the container, not permission to stop it")
     if "only stage 10 requires the count to reach zero" not in _rt:
         fail("references/residue.md: `holds:` acquired a direction. 'Every stage should "
              "drive the count toward zero' leaves 'is never a target' standing three "
