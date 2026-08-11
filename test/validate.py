@@ -573,6 +573,18 @@ def _flatten(text, lower=False):
     return _f.lower() if lower else _f
 
 
+def _gate_bullet(section_body):
+    """The `- **GATE` bullet of a stage section, bounded below.
+
+    Two call sites extracted this byte for byte with different variable names. The
+    bound below matters and was learned once already: the GATE is the last bullet, so
+    a plain split hands it the rest of the section and a following paragraph answers
+    for it. A fix to how the bullet is bounded should land in one place."""
+    _b = next((_x for _x in re.split(r"\n(?=- )", section_body)
+               if re.match(r"- \*\*GATE\b", _x.lstrip())), "")
+    return re.split(r"\n(?=\S)", _b)[0]
+
+
 # This file reads itself in three places; once is enough.
 _OWN_SRC = open(os.path.join(ROOT, "test", "validate.py"), encoding="utf-8").read()
 
@@ -4303,11 +4315,7 @@ if os.path.isfile(_STG_P2):
     if _s10 is None:
         _UNLOOKED.append("skip: the hand-back gate — no `## 10 —` section in stages.md")
     else:
-        _g10 = next((_b for _b in re.split(r"\n(?=- )", _s10.group(1))
-                     if re.match(r"- \*\*GATE\b", _b.lstrip())), "")
-        # ...and bounded BELOW. The gate is the last bullet, so the split gave it the
-        # rest of the section: a paragraph after it answered for it, verified.
-        _g10 = re.split(r"\n(?=\S)", _g10)[0]
+        _g10 = _gate_bullet(_s10.group(1))
         # The NORMATIVE phrase, not the noun. A bare substring could not tell a gate
         # requiring the hand-back from one excusing it: `the hand-back is OPTIONAL and
         # may be skipped` passed, in the release whose entire argument is that this must
@@ -4355,6 +4363,162 @@ if os.path.isfile(_RUN_T):
         fail("references/progress.md → The hand-back: the doctrine never names the "
              "ledger line its trace lands on. A narrative with no address is a narrative "
              "no audit can find")
+
+
+# --- six insights published by other projects through retro.publish (v1.44.0) -------
+# The mechanism this bundle shipped for skill-level lessons carried six of them home in
+# one day. These guards hold what each one bought. Two arrived at classes this repository
+# had reached independently — the ratchet matcher is the neighbour probe, and the unlanded
+# plant is R-001, retired here in v1.38.0 and still costing another project three
+# incidents in a day. Independent arrival is the strongest evidence either had.
+_GATES_P = os.path.join(_skill_dir, "references", "gates.md")
+_ACC_P = os.path.join(_skill_dir, "references", "acceptance.md")
+_TDD_P = os.path.join(_skill_dir, "references", "tdd.md")
+_RETRO_D = os.path.join(_skill_dir, "references", "retrospective.md")
+
+def _section(path, heading_re):
+    """A named section, stopping at the next heading of the SAME depth or shallower.
+
+    The first version said that and did something else: its lookahead was a flat
+    `^#{1,3}\s`, which stops at a DEEPER heading too. Every section wired to it happened
+    to have no `###` inside, so the span was right by luck — and the first subheading
+    anyone added would have truncated it before the phrase the guard requires, turning a
+    correct doctrine edit into a red build. Found by the PR review app, independently of
+    the dispatched reader that found the same shape. The depth is measured, then used."""
+    if not os.path.isfile(path):
+        return None
+    # Read from the cache the module builds at load. The first version reopened
+    # gates.md and acceptance.md from disk twice each, beside a comment in this file
+    # saying "each living document is read ONCE, not once per class" — and board row
+    # B-010 tracks exactly this cost.
+    _rel = os.path.relpath(path, ROOT)
+    _t = _LIVING_TEXT.get(_rel) or open(path, encoding="utf-8").read()
+    _h = re.search(rf"^(#{{2,3}})\s*{heading_re}.*?$", _t, re.M)
+    if _h is None:
+        return None
+    _depth = len(_h.group(1))
+    _rest = _t[_h.end():]
+    _stop = re.search(rf"^#{{1,{_depth}}}\s", _rest, re.M)
+    return _rest[:_stop.start()] if _stop else _rest
+
+# #35 — a ratchet's matcher is a check. The near-miss is the whole rule: a guard that
+#       reacts is not a guard that discriminates.
+_rm = _section(_GATES_P, r"A ratchet's matcher")
+if _rm is None:
+    fail("references/gates.md: no section on a ratchet's matcher. A matcher looser than "
+         "its subject shrinks the ratchet, credits work nobody did, and compounds for as "
+         "long as the ratchet exists — reported from another project through retro.publish")
+elif not ("feed its matcher a near-miss it must reject" in _flatten(_rm, lower=True)
+              and "re-derive the whole ratchet and print both numbers" in _flatten(_rm, lower=True)):
+    fail("references/gates.md → A ratchet's matcher: the near-miss is gone. Seeing a guard "
+         "go red on a real change proves it reacts; only a look-alike it must reject "
+         "proves it discriminates, and only the second makes its number worth trusting")
+
+# #31 — R-001's class, returned by another project. Scoped to MUTATING probes, because
+#       this repository measured itself and found the file-writing ones structurally immune.
+_gp = _section(_GATES_P, r"A green probe is evidence")
+if _gp is not None and "asserts its plant landed" not in _flatten(_gp, lower=True):
+    fail("references/gates.md → A green probe: the obligation is gone. The section can be "
+         "emptied to a bare heading and its own rule — a probe that mutates an existing "
+         "file asserts its plant landed — leaves with it")
+if _gp is None:
+    fail("references/gates.md: no section on a green probe whose mutation may not have "
+         "landed. `See it fail once` has an unstated precondition — that the thing you "
+         "changed is the thing the check reads — and a plant that missed produces the same "
+         "green as a check that cannot fail")
+
+# ...and the rule is enforced on the probes themselves: a probe that MUTATES a file must
+#    assert its plant landed. Measured 2026-08-11 before the guard existed: 206 of 206
+#    mutating probes already did, 55 file-writing ones needed nothing.
+_wf2 = os.path.join(ROOT, ".github/workflows/validate.yml")
+if os.path.isfile(_wf2):
+    _steps = re.findall(r"      - name: Negative self-test \(([^)]*)\)\n        run: \|\n"
+                        r"((?:          .*\n|\n)*)", open(_wf2, encoding="utf-8").read())
+    # Read-then-write, not two spellings of substitution. Keyed to `.replace(`/`re.sub(`
+    # it missed every probe that slices, or that mutates a parsed structure and dumps it —
+    # 40 shipped probes, 14 of them with no assertion.
+    _mutating = [(_n, _b) for _n, _b in _steps
+                 if re.search(r"\.read\(\)|json\.load\(", _b)
+                 and re.search(r"""["']w["']|json\.dump\(""", _b)]
+    # Case- and wording-insensitive: six probes carried the assertion in lower case
+    # (`plant would not land`) and a first version of this check called them defective,
+    # which sent a sweep to "fix" six probes that were already sound and corrupt five of
+    # them. The rule is about the assertion existing, not about one spelling of it.
+    # ...and it must be an `assert` statement, not the phrase in a comment or an echo.
+    # All three shapes were watched passing a first version of this check.
+    _unasserted = [_n for _n, _b in _mutating
+                   if not re.search(r"^\s*assert\b[^\n]*"
+                                    r"(?:plant\s+(?:did not|would not|not)\s+land|plant missed)",
+                                    _b, re.I | re.M)]
+    if _unasserted:
+        fail(f"{len(_unasserted)} negative self-test(s) mutate a file and never assert the "
+             f"plant landed: {', '.join(_unasserted[:3])}"
+             + (" …" if len(_unasserted) > 3 else "")
+             + ". A substitution that missed reports the same green as a sound check — "
+               "three incidents in one day in the project that reported this")
+
+# #30 — a name in `verified by` is a claim until it resolves.
+_vb = _section(_ACC_P, r"A `verified by` name")
+if _vb is None:
+    fail("references/acceptance.md: no section requiring a `verified by` name to resolve. "
+         "A cell can name a check that does not exist and the row reads as covered — the "
+         "table stops measuring the run and starts recording its author's intent")
+elif "a req with status unknown, never verified" not in _flatten(_vb, lower=True):
+    fail("references/acceptance.md → A `verified by` name: the status an unresolvable "
+         "name earns is gone. `unknown` is the point — without it the row keeps reading "
+         "`verified`, which is the defect")
+
+# #32 — a seam has no file, and REQ rows are written against deliverables.
+_sm = _section(_ACC_P, r"A seam is not a deliverable")
+if _sm is None:
+    fail("references/acceptance.md: no section on the seam. Two halves each correct and "
+         "each green formed a closed loop that turned away the population the feature "
+         "existed to serve; the coverage table had a row per artefact and no row shape "
+         "for the boundary between them")
+elif not ("writes an explicit req for the boundary" in _flatten(_sm, lower=True)
+              and "the table says so under unlooked" in _flatten(_sm, lower=True)):
+    fail("references/acceptance.md → A seam is not a deliverable: the `unlooked` fallback "
+         "is gone. Where no check can span the seam, two green halves reporting a working "
+         "whole is the false-success shape this file spends its length refusing")
+
+# #33 — the harness is part of the system under test.
+_cc = _section(_TDD_P, r"What a case consumes")
+if _cc is None:
+    fail("references/tdd.md: no section on what a case consumes. A suite that exhausts a "
+         "production limit is measuring the limit, and a throttled case reports as a "
+         "timeout — noise that costs more than silence because it looks like data")
+elif not ("name what each case consumes from the product" in _flatten(_cc, lower=True)
+              and "is an unclassified result, not a slow one" in _flatten(_cc, lower=True)):
+    fail("references/tdd.md → What a case consumes: the rule that a timeout is an "
+         "UNCLASSIFIED result is gone. Read as a slow one, it sends a run to investigate "
+         "compilation and hydration while the harness is the cause")
+
+# #34 — an unarmed publish path and one with nothing to say.
+_pb = _section(_RETRO_D, r"`publish:` is a line in the verdict")
+if _pb is None:
+    fail("references/retrospective.md: no section giving publication a line in the "
+         "verdict. An unarmed mechanism and a mechanism with nothing to say are "
+         "indistinguishable, which is how this instruction went unread for eight releases")
+elif not ("stage 10's block carries one line for publication" in _flatten(_pb, lower=True)
+              and "not configured" in _flatten(_pb, lower=True)):
+    fail("references/retrospective.md → `publish:`: the `not configured` form is gone. A "
+         "count of zero beside `configured` is an answer; a blank where configuration is "
+         "absent is the silence the section exists to end")
+if os.path.isfile(_STG_P2):
+    _s10b = re.search(r"^##\s*10\s*—.*?$(.*?)(?=^##\s)",
+                      open(_STG_P2, encoding="utf-8").read(), re.S | re.M)
+    # On the OBLIGATION, not the token. `publish:` also occurs inside the citation to
+    # retrospective.md — flattened, "→ publish: is a line in the verdict" — so the
+    # reference to the rule answered for the rule. Seventh instance of that class this
+    # session, and again the probe found it rather than a reader.
+    if _s10b is None:
+        _UNLOOKED.append("skip: the publish: line — no `## 10 —` section in stages.md")
+    else:
+        _g10c = _gate_bullet(_s10b.group(1))
+    if _s10b is not None and "either way the verdict carries a publish" not in _flatten(_g10c, lower=True):
+        fail("references/stages.md stage 10: the verdict carries no `publish:` line. The "
+             "doctrine says publication is disclosed at the only moment anyone is reading, "
+             "and this is that moment")
 
 
 if errors:

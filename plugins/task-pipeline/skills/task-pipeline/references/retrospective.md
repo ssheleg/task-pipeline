@@ -33,6 +33,7 @@ file exists to stop.
 - Write the entry only for a divergence — and name the layer that owned it
 - Every lesson carries its commit
 - The stamp table is capped at ten, and *one line per run* was never a cap
+- `publish:` is a line in the verdict, not a silence
 - Rotation — the archive is how pruning stops losing things
 - Three grades of fix — take the highest one that can work
 - Stamp first, then prune, then write
@@ -99,6 +100,42 @@ column — into `docs/superpowers/retro/YYYY-QN.md` under `## Run stamps`, appen
 like every other rotation. **The count is printed at the prune**, beside the standing
 instructions' own count, so a table that stops rotating is visible rather than merely
 large.
+
+## `publish:` is a line in the verdict, not a silence
+
+Reported from another project, and the report is about this file: an operator asked, after
+many runs, why nothing had ever been published.
+
+The floor is right and does not move — publishing is opt-in per project, off by default,
+because an outward act taken from a generic flag is an outward act nobody authorized. The
+gap is what happens next. A project with no configuration produces, run after run,
+retrospective entries carrying lessons about **the skill**, and the mechanism reports
+nothing, because it was never armed. **An unarmed mechanism and a mechanism with nothing
+to say are indistinguishable from the outside** — [`gates.md`](gates.md)'s false success,
+applied to this bundle's own learning path. In the reporting project several runs had
+produced skill-level lessons over months; the count of published insights was zero and no
+gate had ever mentioned it.
+
+Stage 10 prints ratchets and two disclosures — what the run declined to claim, and what a
+check never looked at. Publishing is neither, so its absence is not observable at the only
+moment anyone is reading.
+
+**So stage 10's block carries one line for publication:**
+
+```
+publish: <issue url>                       — opened this run
+publish: 0 (configured, nothing insight-grade)
+publish: not configured (N insight-grade entries stayed local)
+```
+
+It arms nothing and authorizes nothing; it makes the silence legible. A count of zero
+beside *configured* is a fine answer. A **blank** where configuration is absent is how an
+instruction went unread for eight releases.
+
+**The failure mode survived its own fix, in a quieter form.** This section once said
+*"open an issue upstream"* while naming no repository, no trigger and no authorization,
+and every reader took it as done. The mechanism that replaced it is correct — and until
+this line existed it still had no way to say it never ran.
 
 ## Rotation — the archive is how pruning stops losing things
 

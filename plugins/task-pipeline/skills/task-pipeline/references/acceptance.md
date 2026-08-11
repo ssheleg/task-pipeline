@@ -17,6 +17,8 @@ requirement.** It is what turns the pipeline from a funnel into a circle.
 - Several repositories — a submodule is finished when its parent says so
 - The closing question
 - The retrospective — the run's last act
+- A `verified by` name is a claim until it resolves
+- A seam is not a deliverable, and REQ rows are written against deliverables
 - GATE (manual)
 - When the answer is "something's missing"
 
@@ -200,6 +202,56 @@ GATE 10 acceptance: PASS — 14/14 REQ verified
   carry-over: 0 unresolved · retro: 7 standing (was 9) · retired 3 · added 1
   abstained: 2 (1 partial · 1 cannot-verify) · unlooked: 3 dormant
 ```
+
+## A `verified by` name is a claim until it resolves
+
+Reported from another project. Two rows in one run named checks that did not exist — a
+locale-parity test for a project with ten locales and no such test, an index-resolution
+test that had never been written. Both rows carried a status, an owner and an evidence
+cell. **Nothing in the artefact distinguishes *"this check exists and passed"* from *"this
+is the name a check would have if someone wrote it"*.**
+
+This file already requires the evidence to come from a check seen failing once. That
+requirement is about the **check**; nothing walks back from the **name** to ask whether a
+check by that name is on disk. The ladder walk found both, because it re-derives coverage
+from the artefact instead of reading the table — which also means the table was wrong for
+the whole run until its last gate.
+
+**So every name in a `verified by` cell resolves before the table is accepted** — to a
+file, a test name a runner will select, or a command that exits. A cell naming nothing is
+a REQ with status **`unknown`**, never `verified`.
+
+The coverage table is this pipeline's own record of what was proven. When it can carry an
+unresolvable name it stops measuring the run and starts recording the author's intent,
+which is [`gates.md`](gates.md)'s false success living inside the pipeline's own artefact.
+
+## A seam is not a deliverable, and REQ rows are written against deliverables
+
+Also reported. Two halves of a feature shipped in one run, each correct alone, each with a
+passing unit test. Together they formed a closed loop: a guard turned away users who had
+not reached a state, and the new flow that would put them into that state sat behind the
+guard. **The defect was in the seam, and a seam has no file.** The coverage table had a
+row per artefact and both rows were green.
+
+The blindness one layer down is already named — a handler test proves the handler, not the
+request path. This is that shape one layer up.
+
+**So when a run replaces a component that another component branches on, stage 2 writes an
+explicit REQ for the boundary** —
+not *"A works"* and *"B works"* but **"a user in state X reaches Y"**. Phrased as a
+journey it is testable; phrased as two artefacts it is not.
+
+**This does not contradict [`decomposition.md`](decomposition.md), and the wording matters
+because a first draft did.** That file says a REQ appearing in two modules means the seam
+runs *through* a requirement, and tells you to re-cut. A boundary REQ is not that: it is a
+single requirement about the transition, owned by **one** module — the one that consumes
+the boundary — and it maps to exactly one module like every other. Cite it as a journey
+owned by the downstream module, and both rules hold.
+
+**And where no check can span the seam** — a server-rendered redirect on one side, a
+client write on the other — the table says so under `unlooked` rather than showing two
+green rows. Two green halves reporting a working whole is exactly the shape this file
+spends its length refusing.
 
 ## GATE (manual)
 

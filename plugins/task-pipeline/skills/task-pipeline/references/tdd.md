@@ -15,6 +15,7 @@ into this skill; nothing to install.
 - Tests that stay honest
 - Stage 6 — consolidation and the suite gate
 - When stuck
+- What a case consumes, and why a timeout is unclassified
 - Rationalizations
 - Red flags — stop and start over
 
@@ -133,6 +134,52 @@ honestly instead.
 | Everything has to be mocked | The code is too coupled. Inject dependencies. |
 | Setup is enormous | Extract helpers; if it's still huge, the design is the problem. |
 | Fixing a bug | Write the failing test that reproduces it first. The test proves the fix and prevents the regression. |
+
+## What a case consumes, and why a timeout is unclassified
+
+Reported from another project after hours spent reading environmental noise as product
+defects. An end-to-end suite registered a fresh account in every case. The product
+rate-limits registration to a handful per minute per address. **A suite of twenty-odd
+cases cannot avoid tripping its own product's limiter.**
+
+A throttled registration does not fail loudly. The form never advances, the case sits
+until its own timeout, and it reports **as a timeout** — which reads exactly like
+slowness. Cold compilation, hydration and a stale cache were each investigated and each
+was independently true; none was the cause.
+
+**A check that cannot run to completion in its own environment reports noise, and noise
+costs more than silence, because it looks like data.** Silence gets investigated. Noise
+gets interpreted.
+
+The neighbouring rule this bundle already has — *a check counts only where it runs* — is
+about **availability**: does the guard execute on the gate. This is about **capacity**:
+the harness is part of the system under test, and a suite that exhausts a production limit
+is measuring the limit.
+
+**So at the tests gate, name what each case consumes from the product** — accounts,
+rate-limited endpoints, external quota, seats, tokens — and confirm the suite's total
+stays under the product's own bound. Where it cannot, the suite **shares** the resource
+across cases instead of acquiring it per case.
+
+**Where the bound comes from, and what to do when it does not exist.** In order: the
+product's own configuration or code; the provider's documented limit; the operator. Write
+the answer into the brief's source ledger like any other fetched fact — a limit an agent
+remembered is a limit nobody can check. **Where none of the three answers, the row reads
+`bound: unknown` and the count goes to `unlooked`** rather than to a guess: this file's
+whole argument is that an unmeasured resource reports as a timeout, and an unmeasured
+*bound* does the same one level up.
+
+**And it does not override *The green from residue*.** That rule is about state a case
+inherits — a database, a volume, a clone — and it still says acquire fresh. This rule is
+about a resource **the product itself meters**. Where the two meet, the product's bound
+wins and the suite shares that one resource while everything else stays fresh; say which
+resource is shared and why.
+
+**And a timeout in an end-to-end suite is an unclassified result, not a slow one.** Before
+it is read as a performance signal the resource question above must have an answer, or the
+run is interpreting its own harness. In the reporting project this was also the most
+likely reason that suite had never once finished inside its CI time cap — so the cost was
+not only the hours, it was every defect the suite never got far enough to find.
 
 ## Rationalizations
 
