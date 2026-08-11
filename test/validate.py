@@ -557,6 +557,13 @@ def _paragraphs(text):
     return re.split(r"\n\s*\n", text)
 
 
+# One home for the carve-out vocabulary. It was written twice — once correctly and
+# once with the escaping doubled, so the second site matched a literal backslash and
+# every inversion walked past it. The copy that worked and the copy that did not were
+# forty lines apart and looked identical in review.
+_EXCEPTION_MARKER = r"\b(unless|except|other than|save where)\b"
+
+
 def _row_cells(line, lower=True):
     """Pipe-split a markdown row into flattened cells. Third copy of this comprehension
     when it was extracted, and the drift it invites is not hypothetical: the Human-column
@@ -4579,7 +4586,7 @@ if os.path.isfile(_ACC_D):
         # no exception by design, so an exception marker inside its span is itself the
         # defect, and that IS decidable. Narrow on purpose: it fires on a legitimate
         # rewrite too, and a guard that makes you argue beats one that sleeps.
-        _ex = re.search(r"\b(unless|except|other than|save where)\b",
+        _ex = re.search(_EXCEPTION_MARKER,
                         _flatten(_c13.group(1), lower=True))
         if _ex:
             fail("references/acceptance.md criterion 13: an exception marker "
@@ -4593,10 +4600,31 @@ if os.path.isfile(_RES_D):
     _rt_raw = (_LIVING_TEXT.get(os.path.relpath(_RES_D, ROOT))
                or open(_RES_D, encoding="utf-8").read())
     _rt = _flatten(_rt_raw, lower=True)
-    if "never released by this run" not in _rt:
-        fail("references/residue.md: the lease rule lost its absolute form. 'May be "
+    # Both of this file's absolute rules get the same treatment criterion 13 gets:
+    # presence of the sentence, AND no exception marker in the sentence that carries
+    # it. Guarding only presence was this release's own class — "never released by
+    # this run, unless it has clearly expired" keeps every substring and inverts the
+    # rule. Fixed on criterion 13 and not swept to the siblings until a reader said so,
+    # which is R-003's third failure to be applied to itself today.
+    _abs = [("never released by this run",
+             "references/residue.md: the lease rule lost its absolute form. 'May be "
              "released once it looks stale' is the same sentence with the protection "
-             "removed, and it reads identically to a reader skimming for the topic")
+             "removed, and it reads identically to a reader skimming for the topic"),
+            ("a foreign item never becomes spent",
+             "references/residue.md: nothing stops the third owner state from reaching "
+             "outside the project. Three days of uptime is information for whoever owns "
+             "the container, not permission to stop it")]
+    for _needle, _msg in _abs:
+        if _needle not in _rt:
+            fail(_msg)
+            continue
+        _sent = next((_x for _x in re.split(r"(?<=[.!?]) ", _rt) if _needle in _x), "")
+        _hit = re.search(_EXCEPTION_MARKER, _sent)
+        if _hit:
+            fail(f"references/residue.md: `{_needle}` still reads, and an exception "
+                 f"marker (`{_hit.group(1)}`) sits in the same sentence. An absolute "
+                 "rule with a carve-out is the inversion this release added a guard "
+                 "for on criterion 13 — the siblings need it too")
     # The third owner state widens what a run may clean INSIDE its own project. Both
     # halves are load-bearing: "provably spent" is what keeps it from becoming a
     # judgement, and "a foreign item never becomes spent" is what keeps it from
@@ -4608,12 +4636,14 @@ if os.path.isfile(_RES_D):
     # — "*provably spent* is a fact rather than a judgement" — so a capture running to
     # end-of-line was answered by the sibling cell while the rule cell was gutted.
     # Fourth instance this session and the same sub-shape the concept page records.
-    _own_row = re.search(r"^\|\s*\*\*an earlier run of this project\*\*\s*\|([^|\n]*)\|",
-                         _rt_raw, re.M)
+    _own_line = next((_l for _l in _rt_raw.splitlines()
+                      if "an earlier run of this project" in _flatten(_l, lower=True)
+                      and _l.lstrip().startswith("|")), None)
+    _own_row = _row_cells(_own_line)[1] if _own_line and len(_row_cells(_own_line)) > 1 else None
     if _own_row is None:
         fail("references/residue.md: the owner table lost its `an earlier run of this "
              "project` row — the state that says which accumulated debris a run may clear")
-    elif "provably spent" not in _flatten(_own_row.group(1), lower=True):
+    elif "provably spent" not in _own_row:
         fail("references/residue.md: the third owner state lost `provably spent` from its "
              "own row. Without it, 'an earlier run of this project' becomes a judgement "
              "about whether something looks abandoned, which is the guess this file stops")
@@ -4633,10 +4663,7 @@ if os.path.isfile(_RES_D):
         fail(f"SKILL.md names the gate field `{_cross.group(1)}` while references/residue.md "
              "defines `holds:`. The routing surface and the doctrine must agree on a "
              "ledger field's name, or a run writes a line no reader parses")
-    if "a foreign item never becomes spent" not in _rt:
-        fail("references/residue.md: nothing stops the third owner state from reaching "
-             "outside the project. Three days of uptime is information for whoever owns "
-             "the container, not permission to stop it")
+
     if "only stage 10 requires the count to reach zero" not in _rt:
         fail("references/residue.md: `holds:` acquired a direction. 'Every stage should "
              "drive the count toward zero' leaves 'is never a target' standing three "

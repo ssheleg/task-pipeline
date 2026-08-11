@@ -33,11 +33,10 @@ one, leave its body intact. Never renumber. Never delete.
   and the disagreement is computable. The doctrine states the residual **in the same
   sentence**: a run can surface something, file it nowhere, report zero, and nothing
   will notice.
-- **The measurement it rests on:** `docs/superpowers/backlog.md` carries a `Source`
-  column naming the run or document that filed each row — **0 with an empty
-  Source**. The join from *run* to *rows this run filed* exists today with no
-  new
-  bookkeeping.
+- **The measurement it rests on:** `docs/superpowers/backlog.md` carries a
+  `Source` column naming the run or document that filed each row — **0 with an
+  empty Source**. The join from *run* to *rows this run filed* exists today with
+  no new bookkeeping.
 - **What it deliberately does not buy:** coverage. The check must never require a
   minimum, or a run will file a throwaway row to make the numbers agree.
 - **Consequences / affects:** `references/progress.md` (the hand-back section),
