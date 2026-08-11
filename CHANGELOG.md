@@ -5,6 +5,16 @@
 Three rules this pipeline had been following by disposition rather than by doctrine,
 and one it had not been following at all.
 
+**`evidence-docs` can now be reached in Russian.** It shipped without Russian triggers
+while `task-pipeline`, beside it in the same plugin, had carried them since v0.14.0 — a
+navigator nobody can summon is a navigator nobody reads. Its description now opens with
+`Use when …`, names twelve triggers on both sides, and keeps the `без доков` opt-out the
+body always documented. `task-pipeline`'s own description is deliberately unchanged: the
+house auditor requires every description to open with `Use when …`, this repository's
+validator requires the opposite — capability first, trigger second — and fails the build
+on anything else. Measured in both directions; which of the two rules is wrong is a
+decision, not a fix to slip into a release.
+
 **A run is not only a diff — it is also everything it left running.** A background
 shell, a monitor polling an API, a scheduled loop, a coordination lease, a worktree,
 a container, scratch files, a draft PR. `references/residue.md` names eight classes
