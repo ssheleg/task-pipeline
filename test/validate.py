@@ -4572,6 +4572,51 @@ if os.path.isfile(_ACC_D):
              "halves — enumerate all eight classes, and report rather than end what this run "
              "did not start. A criterion holding only the first teaches a run to tidy someone "
              "else's environment")
+    else:
+        # A keyword guard cannot see a clause added BESIDE its needle that inverts the
+        # rule — measured on this release: "reported, never ended — unless it looks
+        # stale, in which case end it" kept every needle and passed. This rule admits
+        # no exception by design, so an exception marker inside its span is itself the
+        # defect, and that IS decidable. Narrow on purpose: it fires on a legitimate
+        # rewrite too, and a guard that makes you argue beats one that sleeps.
+        _ex = re.search(r"\b(unless|except|other than|save where)\b",
+                        _flatten(_c13.group(1), lower=True))
+        if _ex:
+            fail("references/acceptance.md criterion 13: an exception marker "
+                 f"(`{_ex.group(1)}`) appears inside a rule that admits none. Ending work "
+                 "this run did not start is not conditional on how stale it looks — stale "
+                 "is a judgement about someone else's work and the holder is a fact")
+
+# The two absolute sentences in residue.md, guarded as sentences rather than as topics.
+# Both survived an inversion planted next to their keywords on this release.
+if os.path.isfile(_RES_D):
+    _rt = _flatten(_LIVING_TEXT.get(os.path.relpath(_RES_D, ROOT))
+                   or open(_RES_D, encoding="utf-8").read(), lower=True)
+    if "never released by this run" not in _rt:
+        fail("references/residue.md: the lease rule lost its absolute form. 'May be "
+             "released once it looks stale' is the same sentence with the protection "
+             "removed, and it reads identically to a reader skimming for the topic")
+    if "only stage 10 requires the count to reach zero" not in _rt:
+        fail("references/residue.md: `holds:` acquired a direction. 'Every stage should "
+             "drive the count toward zero' leaves 'is never a target' standing three "
+             "paragraphs above it and means the opposite")
+
+
+# The workflow is counted by regex everywhere above, and a regex is happy with YAML
+# that GitHub will reject. Twice on one branch a step title containing `holds: ` broke
+# the file: `npm test` stayed green and only CI would have noticed. Parse it.
+try:
+    import yaml as _yaml
+    _wf_p = os.path.join(ROOT, ".github", "workflows", "validate.yml")
+    if os.path.isfile(_wf_p):
+        try:
+            _yaml.safe_load(open(_wf_p, encoding="utf-8").read())
+        except Exception as _e:
+            fail(f"`.github/workflows/validate.yml` is not valid YAML ({type(_e).__name__}). "
+                 "Every count in this validator reads it with a regex, which cannot tell — "
+                 "a colon-space inside an unquoted step name is the way this happens")
+except ImportError:
+    _UNLOOKED.append("skip: workflow YAML parse — PyYAML not installed")
 
 
 if errors:

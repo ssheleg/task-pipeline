@@ -301,7 +301,7 @@ makes it true, and the honest negative is a result. **Proportionate verification
 the deliverable is the working result and the check is how you know — scaled to
 `sev × blast`, never by cutting the floor. **The improvement iteration**: a published
 issue resolves when behaviour changed and its close names the address; unworked ones
-accumulate visibly rather than being triaged into silence. Guards: 275 → 279.
+accumulate visibly rather than being triaged into silence. Guards: 275 → 283.
 
 ### v1.44.0 — six lessons from other projects, and the guards that hold them
 Six issues published by runs in other repositories were worked into doctrine:

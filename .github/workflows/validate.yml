@@ -5510,3 +5510,81 @@ jobs:
             echo "ERROR: the guard was answered by text parked outside criterion 13 — positional narrowing is not scoping"
             exit 1
           fi
+      - name: Negative self-test (INVERSION — criterion 13 keeps both needles and gains an exception clause)
+        run: |
+          set -eu
+          rm -rf /tmp/res5-copy && cp -R . /tmp/res5-copy
+          python3 - <<'EOF'
+          p = "/tmp/res5-copy/plugins/task-pipeline/skills/task-pipeline/references/acceptance.md"
+          t = open(p, encoding="utf-8").read()
+          n = 'not start is **reported, never ended** — the inventory is machine-wide and the\n   authority is not.'
+          assert n in t, "PLANT DID NOT LAND: res5"
+          _planted = t.replace(n, 'not start is **reported, never ended** — unless it looks stale, in which case end it\n   and note that you did.', 1)
+          assert _planted != t, "PLANT DID NOT LAND: res5"
+          open(p, "w", encoding="utf-8").write(_planted)
+          EOF
+          if python3 /tmp/res5-copy/test/validate.py 2>&1 | grep -q 'admits none'; then
+            echo "OK: validator FAILs — an exception marker inside a rule that admits none is the defect"
+          else
+            echo "ERROR: the rule was inverted beside its own needle and every keyword check stayed green"
+            exit 1
+          fi
+      - name: Negative self-test (INVERSION — the foreign lease loses its absolute form)
+        run: |
+          set -eu
+          rm -rf /tmp/res6-copy && cp -R . /tmp/res6-copy
+          python3 - <<'EOF'
+          p = "/tmp/res6-copy/plugins/task-pipeline/skills/task-pipeline/references/residue.md"
+          t = open(p, encoding="utf-8").read()
+          n = '- **A lease held by another agent is never released by this run**'
+          assert n in t, "PLANT DID NOT LAND: res6"
+          _planted = t.replace(n, '- **A lease held by another agent may be released once it looks stale**', 1)
+          assert _planted != t, "PLANT DID NOT LAND: res6"
+          open(p, "w", encoding="utf-8").write(_planted)
+          EOF
+          if python3 /tmp/res6-copy/test/validate.py 2>&1 | grep -q 'lost its absolute form'; then
+            echo "OK: validator FAILs — 'never released' is guarded as a sentence, not as a topic"
+          else
+            echo "ERROR: another agent's lease became releasable and the topic-level check saw no change"
+            exit 1
+          fi
+      - name: Negative self-test (INVERSION — the holds count acquires a direction while 'never a target' still stands)
+        run: |
+          set -eu
+          rm -rf /tmp/res7-copy && cp -R . /tmp/res7-copy
+          python3 - <<'EOF'
+          p = "/tmp/res7-copy/plugins/task-pipeline/skills/task-pipeline/references/residue.md"
+          t = open(p, encoding="utf-8").read()
+          n = '**Only stage 10 requires the count to reach zero**'
+          assert n in t, "PLANT DID NOT LAND: res7"
+          _planted = t.replace(n, '**Every stage should drive the count toward zero**, and stage 10 requires it', 1)
+          assert _planted != t, "PLANT DID NOT LAND: res7"
+          open(p, "w", encoding="utf-8").write(_planted)
+          EOF
+          if python3 /tmp/res7-copy/test/validate.py 2>&1 | grep -q 'acquired a direction'; then
+            echo "OK: validator FAILs — a disclosure given a direction is rejected even with its non-target line intact"
+          else
+            echo "ERROR: holds: got a direction three paragraphs below the sentence forbidding one"
+            exit 1
+          fi
+      - name: Negative self-test (the workflow itself stops being valid YAML)
+        run: |
+          set -eu
+          rm -rf /tmp/res8-copy && cp -R . /tmp/res8-copy
+          python3 - <<'EOF'
+          p = "/tmp/res8-copy/.github/workflows/validate.yml"
+          t = open(p, encoding="utf-8").read()
+          n = "- name: Negative self-test (the holds disclosure is given a direction)"
+          assert n in t, "PLANT DID NOT LAND: res8"
+          # A colon-space inside an unquoted step name. Every count in the validator
+          # reads this file with a regex and cannot tell; only a parse can.
+          _planted = t.replace(n, "- name: Negative self-test (the holds: disclosure is given a direction)", 1)
+          assert _planted != t, "PLANT DID NOT LAND: res8"
+          open(p, "w", encoding="utf-8").write(_planted)
+          EOF
+          if python3 /tmp/res8-copy/test/validate.py 2>&1 | grep -q "not valid YAML"; then
+            echo "OK: validator FAILs — the workflow is parsed, not only pattern-matched"
+          else
+            echo "ERROR: the workflow stopped being loadable and every regex count stayed happy"
+            exit 1
+          fi
