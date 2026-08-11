@@ -16,7 +16,6 @@
 | B-002 | **Zero blind eval runs on zero of three models.** The skill's behavioural evidence is one self-check by its author; `evals/RESULTS.md` states the split honestly, which is reporting the gap, not closing it | `08-08-audit-followup` #6 · `08-03-default-routing` #C-1 · `08-03-setup-and-autonomy` #C-1 | L | 2 | 3 | 2 | **6** | open | — |
 | B-006 | `npm run test:negatives` was **flaky**: failed 20, then 4, then passed 114 twice — never diagnosed | `08-06-ci-run-verified` #3 | M | 2 | 2 | 4 | 4 | open | — |
 | B-008 | Promote the graph-staleness measurement from doctrine (rung 2) to a script (rung 3) | `08-06-graph-staleness` #2 | S | 1 | 2 | 4 | 2 | open | — |
-| B-009 | `docs/DOCMAP.md` records **no register for open questions**, so a question raised mid-run has nowhere to live but the run's own ledger | `08-08-audit-followup` #3 | S | 1 | 2 | 2 | 2 | open | — |
 | B-010 | The validator re-reads the same files from disk — **25 reads of `audit.md`, 668 `.md` opens per run**, measured by instrumentation against an estimate of "3+" | `08-08-audit-followup` #12 | S | 1 | 2 | 2 | 2 | open | — |
 | B-011 | `grill.md` has no *"is this worth doing at all"* question, and the run that noticed deliberately did not add one | `08-05-spec-plan-quality` #C-002 | S | 1 | 2 | 5 | 2 | open | — |
 | B-015 | Nothing tests the routing rule **as a rule** — that a task of the shape the rule describes actually reaches this pipeline | `08-03-setup-and-autonomy` #C-2 | M | 1 | 3 | 7 | 3 | open | — |
@@ -44,6 +43,8 @@
 ## Closed
 
 Rows leave the table above only into this list, one line each, with the commit.
+
+- **B-009 · `docs/DOCMAP.md` records no register for open questions** — it recorded `none` while the skill it ships tells every host project to keep one, and `templates/open-questions.md` had shipped all along. Seeded with three real questions this session raised, and the DOCMAP row now names it — which also gives the hand-back's first ambiguity source a number instead of `— no register`. **Behaviour**, not reporting. Closed 2026-08-11 in v1.43.0.
 
 - **B-055 · `retro.md`'s run-stamp table is read in full and has no cap** — capped at ten with rotation into the quarterly archive, taught on all four surfaces (doctrine, the live file, the scaffold, the archive template) and owned by stage 10's prune. Stamp section 2 099 → 1 088 tok, read portion 3 333 → 2 335, stage-0 floor ~36 300 → ~35 300. **Behaviour**, not reporting. Closed 2026-08-10 in v1.41.0.
 

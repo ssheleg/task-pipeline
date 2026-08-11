@@ -16,7 +16,7 @@ long-lived, so its register is a changelog rather than a table of ids.
 | Register | File | ID scheme | Append-only? | Guarded? |
 |---|---|---|---|---|
 | Decisions | `CHANGELOG.md` (what changed **and why it mattered**) + `docs/superpowers/specs/` (the design record per run) | version headings `vX.Y.Z` + dated run slugs | yes — a released section is never rewritten | no (single maintainer) |
-| Open questions | none | — | — | — |
+| Open questions | `docs/OPEN_QUESTIONS.md` | `OQ-####` | yes (never delete a resolved row) | same |
 | Lessons | `docs/superpowers/retro.md` — standing instructions capped at ten | `R-NNN` | pruned, never silently | no |
 
 **No `docs/DECISIONS.md` is created here, deliberately.** One decision home per
