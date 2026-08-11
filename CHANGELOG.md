@@ -48,7 +48,7 @@ nothing is deleted, because the number is what the CHANGELOG points at. The queu
 run pulls from when it finishes early is that pile, then the board, then the open
 questions.
 
-Guards: 275 → **287**, each still proven against a planted defect — including a
+Guards: 275 → **291**, each still proven against a planted defect — including a
 neighbour probe that caught a defect in one of this release's own guards on its
 first use: the criterion-13 check scoped *to the next heading* rather than *to the
 item*, so a needle parked in between answered for the rule.

@@ -34,8 +34,7 @@ one, leave its body intact. Never renumber. Never delete.
   sentence**: a run can surface something, file it nowhere, report zero, and nothing
   will notice.
 - **The measurement it rests on:** `docs/superpowers/backlog.md` carries a `Source`
-  column naming the run or document that filed each row — 27 rows, **0 with an empty
-  Source**. The join from *run* to *rows this run filed* exists today with no new
+  column naming the run or document that filed each row — **0 with an empty Source**. The join from *run* to *rows this run filed* exists today with no new
   bookkeeping.
 - **What it deliberately does not buy:** coverage. The check must never require a
   minimum, or a run will file a throwaway row to make the numbers agree.
@@ -72,7 +71,10 @@ one, leave its body intact. Never renumber. Never delete.
   findings**. Scoping is usually correct and necessary. Published as a defect count
   the figure produces busywork and reads as debt; published as the population to
   sample from, it is a work-list. The row must say which.
-- **Consequences / affects:** `docs/superpowers/backlog.md` (`B-057`),
-  `docs/OPEN_QUESTIONS.md` (`OQ-0002`), `references/gates.md` (the neighbour-probe
-  coverage figure, which stays an honest *4 of 279*).
+- **Consequences / affects:** `docs/superpowers/backlog.md` (`B-057`, which carries the
+  neighbour-probe coverage figure and must keep it honest — it read *three guards of
+  253* when this decision was written, and the corpus has grown since),
+  `docs/OPEN_QUESTIONS.md` (`OQ-0002`). An earlier draft of this line cited a figure in
+  `references/gates.md` that has never existed there; the reviewer caught it, in the
+  register whose subject is hand-written counts.
 - **Source:** run `2026-08-11-residue-and-honesty` · commit `e063b29`

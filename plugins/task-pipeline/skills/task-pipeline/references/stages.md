@@ -430,7 +430,7 @@ never that the work was skipped quietly.
   is covered; no `skip`/`xfail` smuggling a red suite past the gate. Never advance
   to deploy on a red or partial run. **The carry-over count is printed beside this
   verdict** — a ratchet nobody prints is a TODO with a better name
-  ([`audit.md`](audit.md)) — **and so are the two disclosures**, `abstained` and
+  ([`audit.md`](audit.md)) — **and so are the disclosures**, `abstained` and
   `unlooked` ([`gates.md`](gates.md) → *Disclosures*): what the run declined to claim,
   and what a check never looked at. Neither has a floor and neither may be targeted; a
   target on an abstention count is an instruction to guess.
@@ -656,7 +656,11 @@ never that the work was skipped quietly.
   surfaced that nobody asked for, every decision still waiting **asked here with
   options rather than listed**, and the ambiguity count computed from the four
   registers with its ids ([`progress.md`](progress.md) → *The hand-back*) — a run
-  that cannot say what happened has not finished, it has stopped; **both disclosures printed beside the verdict** — `abstained` (what the run declined
+  that cannot say what happened has not finished, it has stopped; **the environment is
+  given back** — all eight classes enumerated, everything this run started ended and
+  verified by re-enumerating rather than by the teardown's reply, an item this project
+  does not own reported rather than ended, and the result written as a `holds:` line
+  ([`residue.md`](residue.md)); **every disclosure printed beside the verdict** — `abstained` (what the run declined
   to claim) and `unlooked` (what a check never looked at), neither a ratchet, neither
   with a floor, neither ever a target ([`gates.md`](gates.md) → *Disclosures*); **the
   retrospective is written — stamped first, then pruned, then the entry; the

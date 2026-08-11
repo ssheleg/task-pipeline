@@ -5664,3 +5664,80 @@ jobs:
             echo "ERROR: the obligation to print holds: vanished and only the doctrine file remembered it"
             exit 1
           fi
+      - name: Negative self-test (the residue doctrine file is deleted outright)
+        run: |
+          set -eu
+          rm -rf /tmp/res13-copy && cp -R . /tmp/res13-copy
+          python3 - <<'EOF'
+          import os, re
+          p = "/tmp/res13-copy/plugins/task-pipeline/skills/task-pipeline/references/residue.md"
+          assert os.path.isfile(p), "PLANT DID NOT LAND: res13"
+          os.remove(p)
+          assert not os.path.exists(p), "PLANT DID NOT LAND: res13"
+          EOF
+          if python3 /tmp/res13-copy/test/validate.py 2>&1 | grep -q 'references/residue.md is gone'; then
+            echo "OK: validator FAILs — every gate prints holds: and the doctrine behind it must exist"
+          else
+            echo "ERROR: the file defining eight classes and the teardown vanished and the suite stayed green"
+            exit 1
+          fi
+      - name: Negative self-test (the not-torn-down section is deleted, not merely reworded)
+        run: |
+          set -eu
+          rm -rf /tmp/res14-copy && cp -R . /tmp/res14-copy
+          python3 - <<'EOF'
+          import os, re
+          p = "/tmp/res14-copy/plugins/task-pipeline/skills/task-pipeline/references/residue.md"
+          t = open(p, encoding="utf-8").read()
+          m = re.search(r"^## What must \*\*not\*\* be torn down.*?(?=^## )", t, re.S | re.M)
+          assert m, "PLANT DID NOT LAND: res14"
+          _planted = t[:m.start()] + t[m.end():]
+          assert _planted != t, "PLANT DID NOT LAND: res14"
+          open(p, "w", encoding="utf-8").write(_planted)
+          EOF
+          if python3 /tmp/res14-copy/test/validate.py 2>&1 | grep -q 'no section on what must not be torn down'; then
+            echo "OK: validator FAILs — the section is required to exist, not merely to be quoted elsewhere"
+          else
+            echo "ERROR: the asymmetry section was removed wholesale and only its citations remained"
+            exit 1
+          fi
+      - name: Negative self-test (stage 10 loses criterion 13 entirely)
+        run: |
+          set -eu
+          rm -rf /tmp/res15-copy && cp -R . /tmp/res15-copy
+          python3 - <<'EOF'
+          import os, re
+          p = "/tmp/res15-copy/plugins/task-pipeline/skills/task-pipeline/references/acceptance.md"
+          t = open(p, encoding="utf-8").read()
+          m = re.search(r"^13\. .*?(?=^\S)", t, re.S | re.M)
+          assert m, "PLANT DID NOT LAND: res15"
+          _planted = t[:m.start()] + t[m.end():]
+          assert _planted != t, "PLANT DID NOT LAND: res15"
+          open(p, "w", encoding="utf-8").write(_planted)
+          EOF
+          if python3 /tmp/res15-copy/test/validate.py 2>&1 | grep -q 'has no criterion 13'; then
+            echo "OK: validator FAILs — a give-back written as good intention runs only on the runs that did not need it"
+          else
+            echo "ERROR: the gate criterion was deleted and every text-level check still passed"
+            exit 1
+          fi
+      - name: Negative self-test (the owner table loses its earlier-run row)
+        run: |
+          set -eu
+          rm -rf /tmp/res16-copy && cp -R . /tmp/res16-copy
+          python3 - <<'EOF'
+          import os, re
+          p = "/tmp/res16-copy/plugins/task-pipeline/skills/task-pipeline/references/residue.md"
+          t = open(p, encoding="utf-8").read()
+          m = re.search(r"^\|\s*\*\*an earlier run of this project\*\*.*$", t, re.M)
+          assert m, "PLANT DID NOT LAND: res16"
+          _planted = t[:m.start()] + t[m.end():]
+          assert _planted != t, "PLANT DID NOT LAND: res16"
+          open(p, "w", encoding="utf-8").write(_planted)
+          EOF
+          if python3 /tmp/res16-copy/test/validate.py 2>&1 | grep -q 'lost its `an earlier run'; then
+            echo "OK: validator FAILs — the state that says which debris a run may clear must exist"
+          else
+            echo "ERROR: the middle owner state disappeared and the two remaining ones read as complete"
+            exit 1
+          fi

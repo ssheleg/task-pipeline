@@ -280,7 +280,7 @@ All of:
    ledger or here) and, for `deferred`, a tracker entry.
 8. **No carry-over row is left `unresolved`** — every one has a home, and the
    ledger's counts are printed with this verdict, not just filed.
-7a. **Both disclosures are printed** ([`gates.md`](gates.md) → *Disclosures*):
+7a. **Every disclosure is printed** ([`gates.md`](gates.md) → *Disclosures*):
    `abstained` — every REQ closing `partial`, every `unknown`, every ⚠️ *cannot verify
    from diff* the controller could not resolve — and `unlooked`, every check that
    reported `dormant` or `skip`. They are **not** ratchets: no floor, no direction, and
@@ -315,9 +315,10 @@ table substitute for that answer.
    started ended in dependency order, each teardown verified by **re-enumerating
    rather than by the teardown's own reply**, and the result written as a `holds:`
    line. `holds:` reaching zero is required here and **only** here. An item left
-   standing on purpose passes with its owner and reason named; an item this run did
-   not start is **reported, never ended** — the inventory is machine-wide and the
-   authority is not.
+   standing on purpose passes with its owner and reason named; an item **this project
+   does not own** is **reported, never ended** — the inventory is machine-wide and
+   the authority is not. An earlier run of *this* project is a third case, ended only
+   when provably spent ([`residue.md`](residue.md) → *Three owners*).
 
 
 ## When the answer is "something's missing"

@@ -88,8 +88,8 @@ Every gate verdict carries the count, in the same line as the rest:
 ```
 GATE 5 build: PASS — reviews 3 · findings 0 open · holds: 2 (worktree, container)
   abstained: 0 · unlooked: 0
-GATE 6 tests: PASS — suite green · holds: 0
-  abstained: 0 · unlooked: 1 (1 skip — no container tooling on this host)
+GATE 6 tests: PASS — suite green · holds: 1 (container: pg-test, this run)
+  abstained: 0 · unlooked: 0
 ```
 
 Read the line the way the other disclosures on it are read:
@@ -131,8 +131,8 @@ more, and for each item either end it or account for it:
 4. **Write what remains into the run ledger**, with its owner:
 
 ```
-holds: 0 — all eight classes enumerated, nothing this run started is live
-holds: 1 — container `pg-test` left up, owner: operator asked for it to stay
+holds: 10 — none — enumerated 8/8 classes
+holds: 10 — 1 (container: pg-test, operator asked for it to stay) — enumerated 8/8 classes
 ```
 
 An item left standing on purpose is fine. An item left standing silently is how

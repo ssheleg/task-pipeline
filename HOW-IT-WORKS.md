@@ -238,14 +238,15 @@ This is the part most pipelines skip, and it is the reason this one is trustwort
 rather than merely tidy.
 
 **Every guard is proven against a planted defect.** `npm run test:all` breaks the
-thing each of the **275** checks is about, and requires that check to reject it. A
+thing each of the **291** checks is about, and requires that check to reject it. A
 guard that has never been watched failing is not a guard; it is a comment.
 
 **The neighbour probe.** A check has a *subject* — the rule it is about — and
 *evidence* — the text it actually reads. When those differ, it goes green for
 reasons unrelated to the rule and no ordinary probe can tell. So: break the
 subject, plant the guard's **current** needle next door, and require it to still
-fail. Fifteen guards in one day were defeated this way by independent readers.
+fail. Six guards in one session were defeated this way — none of them by their own
+probes, all of them by a reader.
 
 **Disclosures are not ratchets.** Alongside every verdict the suite prints what it
 *could not* look at — `unlooked: N`, listed by name; `abstained` where a check's
@@ -301,7 +302,7 @@ makes it true, and the honest negative is a result. **Proportionate verification
 the deliverable is the working result and the check is how you know — scaled to
 `sev × blast`, never by cutting the floor. **The improvement iteration**: a published
 issue resolves when behaviour changed and its close names the address; unworked ones
-accumulate visibly rather than being triaged into silence. Guards: 275 → 287.
+accumulate visibly rather than being triaged into silence. Guards: 275 → 291.
 
 ### v1.44.0 — six lessons from other projects, and the guards that hold them
 Six issues published by runs in other repositories were worked into doctrine:
