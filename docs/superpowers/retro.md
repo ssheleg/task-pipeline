@@ -28,11 +28,11 @@ over all of them.
 
 | id | Born | Commit | Instruction | Because | Retire when | Last fired | Fired at |
 |---|---|---|---|---|---|---|---|
-| R-002 | 2026-08-03 · `doc-track-audit` | `096f0f0` | When a batch of edits returns **any** error, re-verify **every** edit in that batch before reporting the batch done — not only the one that errored. | Two edits were issued together; the second failed the read-before-write check and was retried, the first was silently never applied. It was reported as done, shipped in v1.7.0, and surfaced only in a post-release audit as a question the grill never asks with a field in the brief waiting for the answer. | the harness reports per-edit outcomes in a form a check can read, or the edits are issued one per message | 2026-08-08 | `68b4428` |
-| R-003 | 2026-08-05 · `artifact-hygiene` | `13028e9` | When you fix a defect in one check, guard or detector, **immediately run that defect's definition against its siblings** before moving on — the same file's other checks, and the other files that do the same job. | `learned.md` rule 6 says *sweep the class, not the instance*, and this is its **third** recorded failure to be applied to itself. 2026-08-03 `enforcement-audit`: a fix scoped to references→README while the same class lived in six other places. 2026-08-03 `root-cause`: nine findings, one missing matrix row. 2026-08-05: check 2's false-positive class was solved, and check 4 — its immediate sibling, in the same file, written in the same hour — shipped with the identical bug and fired on this run's own documents. Two instances were worth notes; `audit.md` says a class seen twice becomes a mechanism rather than a third ledger row. | a check can compare sibling detectors for a shared false-positive class — which needs the classes to be named in a machine-readable form first | 2026-08-10 | `07e7824` |
+| R-002 | 2026-08-03 · `doc-track-audit` | `096f0f0` | When a batch of edits returns **any** error, re-verify **every** edit in that batch before reporting the batch done — not only the one that errored. | Two edits were issued together; the second failed the read-before-write check and was retried, the first was silently never applied. It was reported as done, shipped in v1.7.0, and surfaced only in a post-release audit as a question the grill never asks with a field in the brief waiting for the answer. | the harness reports per-edit outcomes in a form a check can read, or the edits are issued one per message | 2026-08-11 | `6c8e484` |
+| R-003 | 2026-08-05 · `artifact-hygiene` | `13028e9` | When you fix a defect in one check, guard or detector, **immediately run that defect's definition against its siblings** before moving on — the same file's other checks, and the other files that do the same job. | `learned.md` rule 6 says *sweep the class, not the instance*, and this is its **third** recorded failure to be applied to itself. 2026-08-03 `enforcement-audit`: a fix scoped to references→README while the same class lived in six other places. 2026-08-03 `root-cause`: nine findings, one missing matrix row. 2026-08-05: check 2's false-positive class was solved, and check 4 — its immediate sibling, in the same file, written in the same hour — shipped with the identical bug and fired on this run's own documents. Two instances were worth notes; `audit.md` says a class seen twice becomes a mechanism rather than a third ledger row. | a check can compare sibling detectors for a shared false-positive class — which needs the classes to be named in a machine-readable form first | 2026-08-11 | `6c8e484` |
 | R-004 | 2026-08-06 · `graph-staleness` | `2ce6ecc` | When a gate runs, the **next command must be conditional on its exit code** — never a gate and a commit in one block separated by newlines. | The hygiene gate returned FAIL and the `git commit` and `git push` beneath it ran anyway, because they were separate lines rather than a chain. The gate was read and not obeyed, which is indistinguishable in the transcript from a gate that passed. `learned.md` rule 11 makes the gate *return* the right code; nothing made the caller *use* it. | a harness or wrapper refuses to run a mutating command after a non-zero gate in the same block | 2026-08-10 | `07e7824` |
-| R-005 | 2026-08-08 · `audit-followup`/M8 | `5726f7f` | When a change adds or widens a **check**, get an independent reader on it before merge — your own probes only exercise the shapes you already thought of. | M8 probed its new guard in four shapes and shipped it with a proven false-negative path: the ordered-list branch scanned the whole file and compared only the first pair, so a violation after a correct list was never examined. Two PR review passes found that, plus a live defect in the shipped `evidence-docs` navigator that **no pairwise shape could see by construction** — a table cell naming one act. Five probes written by the author found neither. This is not R-001 (that one doubts a silent probe); this is the probe being confident and complete about the wrong set. | a second reader — human or agent — is dispatched by a stage rather than by the repository happening to run a bot on PRs | 2026-08-08 | `5726f7f` |
-| R-006 | 2026-08-08 · `audit-followup`/M2 | `44bdf53` | A finding is closed when the **behaviour** changes. Reporting the gap — a `dormant` line, a printed `skip`, a note beside the verdict — is honest and is **not** a fix; say which one you did. | The claim registry's number-word map stopped at forty-nine while the guard count was 130, so a word form above the ceiling was skipped **in silence**. The fix shipped was: print the unread tokens. That is a real improvement and the gap was untouched — a word-form claim above fifty was still skipped, now with a note. It was recorded as addressed and the next review round reopened it, correctly. `gates.md` already says a `dormant` state must be printed; nothing said that printing it does not discharge the finding. | a close-out records, per finding, whether the behaviour or only the reporting changed — and a check can read that field | 2026-08-10 | `07e7824` |
+| R-005 | 2026-08-08 · `audit-followup`/M8 | `5726f7f` | When a change adds or widens a **check**, get an independent reader on it before merge — your own probes only exercise the shapes you already thought of. | M8 probed its new guard in four shapes and shipped it with a proven false-negative path: the ordered-list branch scanned the whole file and compared only the first pair, so a violation after a correct list was never examined. Two PR review passes found that, plus a live defect in the shipped `evidence-docs` navigator that **no pairwise shape could see by construction** — a table cell naming one act. Five probes written by the author found neither. This is not R-001 (that one doubts a silent probe); this is the probe being confident and complete about the wrong set. | a second reader — human or agent — is dispatched by a stage rather than by the repository happening to run a bot on PRs | 2026-08-11 | `6c8e484` |
+| R-006 | 2026-08-08 · `audit-followup`/M2 | `44bdf53` | A finding is closed when the **behaviour** changes. Reporting the gap — a `dormant` line, a printed `skip`, a note beside the verdict — is honest and is **not** a fix; say which one you did. | The claim registry's number-word map stopped at forty-nine while the guard count was 130, so a word form above the ceiling was skipped **in silence**. The fix shipped was: print the unread tokens. That is a real improvement and the gap was untouched — a word-form claim above fifty was still skipped, now with a note. It was recorded as addressed and the next review round reopened it, correctly. `gates.md` already says a `dormant` state must be printed; nothing said that printing it does not discharge the finding. | a close-out records, per finding, whether the behaviour or only the reporting changed — and a check can read that field | 2026-08-11 | `6c8e484` |
 
 Retire on **any** of: it became a check · every path/command it names is gone · it
 has not fired in the last five run stamps, or in the last sixty days. At eleven
@@ -40,6 +40,61 @@ rows, the oldest never-fired
 row goes — the cap is not negotiable, ranking is.
 
 ## Recent log — entries from the last five run stamps (newest first)
+
+### 2026-08-11 · `six-lessons` · the guard's reach ends at the repository, and the claim did not
+
+**Symptom.** The CHANGELOG carried a count of mutating probes. It was written as 206,
+corrected to 22, corrected to 253, and the true figure at that moment was 254 — three
+hand-written values for one corpus in a single day, each produced by a classifier written
+fresh for the occasion. The release's own conclusion was that the number should be
+**deleted rather than corrected**: a figure maintained by hand inside a file no check
+validates is a claim with no check behind it. That shipped.
+
+Twenty minutes after the tag, the GitHub comment closing **the very issue that taught this**
+quoted a probe count from memory. It was wrong again. A fourth classifier, written to
+verify it, produced a fourth answer.
+
+**Surfaced at:** stage 10, by me, immediately after posting — and only because the number
+looked wrong, not because anything checked it.
+
+**The stage that owned it:** stage 7. The release's outward surface — issue comments,
+release notes, the npm description — is written at deploy time and is the one place a
+claim leaves the repository. Every guard in this project reads files in the working tree.
+None of them can see a sentence posted to a forge.
+
+**Root cause.** The lesson was learned about a *file* and generalised no further. `CHANGELOG.md`
+is inside the repository, so the fix that worked there — delete the figure, let the
+validator be the guarantee — was available. Outside the repository the same claim has no
+validator to defer to, and the habit of quoting a measured number did not come with the
+habit of asking *what measures it here*. The distance between "I measured this" and "I
+measured this and something will notice if it drifts" is exactly the distance this project
+has spent a week closing, and it stops at the repository boundary.
+
+**Fixes by grade.**
+
+1. *(mechanical)* The comment was corrected in place, and states plainly that it had
+   quoted a count from memory, that three classifiers gave three totals, and that the
+   guarantee is the validator's rather than a number's.
+2. *(doctrine, filed)* A claim that leaves the repository names what measures it, or names
+   no number. Board row: outward-facing text is the one surface with no guard behind it.
+3. *(standing instruction)* **None added.** R-006 already says a finding closes when the
+   behaviour changes; the gap is *reach*, not *rule*, and a sixth row would not have
+   caught this.
+
+**A second finding, from the ladder rather than the diff.** Four of five standing
+instructions carried a stale `Last fired`: the stamps record R-002, R-003, R-005 and R-006
+firing on 2026-08-11 while their rows said 08-08 and 08-10. Nothing was wrongly retired —
+the retirement trigger reads the **stamps**, not the column — but the column is a second
+source of truth for one fact, a reader trusts it before the stamps, and at the cap of ten
+the row that looks coldest is the row that goes. The four values were refreshed, which
+fixes the **instance**; the class is that the column is derived and nothing derives it, and
+that is filed rather than fixed. Saying which of the two was done is R-006's whole point.
+
+**What is stated rather than fixed.** The *Recent log*'s heading says *entries from the
+last five run stamps*; it holds considerably more, reaching back to 2026-08-08. The
+doctrine above it says the log is queried rather than read and is deliberately uncapped —
+so the heading, not the length, is what is wrong. Filed, not fixed here: renaming a section
+that four guards may key on is its own change.
 
 ### 2026-08-11 · `hand-back` · the release built what it had just condemned
 
@@ -1072,6 +1127,7 @@ without the cap the countable thing grows inside a section read in full.
 
 | Date | Topic | Commit | Verdict | Retro |
 |---|---|---|---|---|
+| 2026-08-11 | `published-insights` / #30–#35 `six-lessons-carried-home` | `6c8e484` | six upstream issues became doctrine across four reference files, each with a guard and a planted-defect probe · **the review app returned after skipping five releases and found eight defects** — one a `_section()` whose docstring promised *same depth or shallower* while the code stopped at any heading, found **independently** by the dispatched reader too · a hand-written probe count was wrong three times in one day and was **deleted rather than corrected**, then quoted from memory a fourth time in a GitHub comment — outside every guard's reach · **four of five standing rows carry a stale `Last fired`** | 1 entry · 5 standing · retired 0 · added 0 · **stamps 11 → 10 (1 rotated)** · R-002, R-003, R-005, R-006 fired |
 | 2026-08-11 | `hand-back` / the-rail-said-where | `5ec4cdd` | four sections and two lists at both boundaries, gated at stage 10 across **four** surfaces · **the reader found the release built what it had just condemned** — a gate criterion with no artefact — so the hand-back now lands as a `hand:` line in the run ledger · six guard defects and four doctrinal, all planted and watched passing · guards 253 → **261** · six neighbour-answered predicates, all caught by their own probes rather than by a reader | 1 entry · 5 standing · retired 0 · added 0 · **stamps 11 → 10 (1 rotated)** · R-002, R-003, R-005, R-006 fired |
 | 2026-08-11 | `neighbour-probe` / B-057 `plant-the-evidence-next-door` | `ac6e5db` | the neighbour probe as doctrine + three implementing it · **the doctrine failed its own first use** — one probe planted the needles of two RETIRED predicates · eight reader findings closed and each replayed failing, including a **declared span that was false** and a **silent loss of coverage** on a rekey · guards 250 → **253** · R-002 fired: a fix batch raised on its third edit and never wrote the file | 1 entry · 5 standing · retired 0 · added 0 · **stamps 11 → 10 (1 rotated)** · R-002, R-003, R-005, R-006 fired |
 | 2026-08-10 | `stamp-cap` / B-055 `one-line-per-run-is-a-slope` | `141294a` | stamps capped at ten, 18 rotated whole into the archive · stamp section 2 099 → **1 088 tok**, read portion 3 333 → **2 335**, stage-0 floor → **~35 300** · **the reader found six ways past the first cap guard**, one of them the stamp shape this doctrine's own command writes · four surfaces had never learned the rule · a hand-written 21 was a computed 18 · guards 248 → **250** | 1 entry · 5 standing · retired 0 · added 0 · **stamps 11 → 10 (1 rotated at this prune)** · R-003, R-005, R-006 fired |
@@ -1081,4 +1137,3 @@ without the cap the countable thing grows inside a section read in full.
 | 2026-08-10 | `pipeline-audit` / P1+P2+P3+P4 `audit-and-four-modules` | `07e7824` | 12 REQ verified · 1 **partial and reported** (REQ-023: R-005's reader never ran — the review app reported `skipping` on all four PRs) · the audit's 8 findings closed as B-025..B-032 · guards 188 → **210** · **three probes wrong before their guards were** | 1 entry · 6 standing · retired 0 · added 0 · R-001, R-003, R-004, R-006 fired; R-002 and R-005 did not |
 | 2026-08-10 | `planning-system` / N3+N4+N5 `exposure-checkup-loop` | `0137512` | 3 REQ · a vector never a probability, the command with no task in flight, the loop citing the board · **one review round by the lowered threshold, 5 findings** · the suite itself fixed: 13+ min → **5m34s** · carry-over 2 rows, 0 unresolved | 1 entry · 6 standing · retired 0 · added 0 · R-001, R-002, R-004 fired · guards 185 → 188 |
 | 2026-08-10 | `planning-system` / N2 `verification-ledger` | `85f8c8a` | 3 REQ · the column a machine may not fill · **ten review rounds, ~20 findings, none from my probes** · carry-over 2 rows, 0 unresolved | 1 entry · 6 standing · retired 0 · added 0 · R-001, R-002, R-005 fired · guards 175 → 185 |
-| 2026-08-09 | `planning-system` / N1 `the-board` | `4233c3d` | 4 REQ · a queue between runs, and the seam the ledger left dangling · **ten review rounds, 29 findings, none from my probes** · carry-over 2 rows, 2 open, 0 unresolved | 1 entry · 6 standing · retired 0 · added 0 · R-001, R-002, R-004, R-005 all fired · guards 156 → 175 + 4 property |
