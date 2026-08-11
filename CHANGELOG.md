@@ -1,5 +1,56 @@
 # Changelog
 
+## v1.43.0 — the rail said where, and nothing said what happened
+
+A fourteen-iteration session on this repository ended each return with the same question
+from the operator: *what did you actually do?* The rail answered **where** the run was —
+one line, computed, correct — and nothing answered the rest. Everything else was
+recoverable from artefacts; what a run learned by accident was recoverable from nothing.
+
+### The hand-back
+
+At both boundaries — an iteration's close and stage 10's — the run now writes four
+sections and two lists:
+
+```
+TASK        the request as it was GIVEN, quoted from the brief
+PROGRESS    where the run stands against that request
+DONE        what was solved, each with its evidence
+SURFACED    what came up that nobody asked for
+
+DECISIONS WAITING  <n>   each as a question with options, asked HERE
+AMBIGUITIES        <n>   computed from four registers, with ids
+```
+
+**TASK is quoted, never paraphrased** — a run that restates the request in its own words
+after eight iterations has rewritten it, and the operator cannot see that happen.
+**DECISIONS WAITING are asked, not parked**: a question in a report is answered days
+later, if at all. And **AMBIGUITIES are computed**, from four registers an earlier stage
+already wrote — open `OQ-####` rows, carry-over rows with no home, REQ rows whose check is
+`review` rather than a command, and source-ledger rows reading *none found*. An unbounded
+*"is anything unclear?"* becomes a ritual sentence within three runs.
+
+**It is a gate criterion, not a good intention.** `progress.md` already carried one
+instruction with no gate behind it — *"copy it, tick it"* — and the v1.37.0 audit found
+that no run had ever obeyed it.
+
+### Three predicates answered by their neighbours, all caught by their own probes
+
+- the four section names were read from the whole section, and `SURFACED` appears in the
+  sentence explaining why SURFACED matters — so renaming the template row left the guard
+  green. It now reads the **fenced template**;
+- `asked` appears in `SURFACED`'s own description (*"nobody **asked** for"*), so the
+  decisions check was answered by a neighbour;
+- and the section span was narrowed to `#{2,3}` by reflex, which cut the guard off from
+  the `###` subsection holding four of the things it checks. **The span follows the
+  subject, not a house style** — v1.42.0 narrowed a different span for the opposite
+  reason.
+
+Not one of these needed a reader. The neighbour-probe habit shipped one release earlier
+caught all three, which is the first evidence it does what it was written for.
+
+- Guards: 253 → **259**.
+
 ## v1.42.0 — a probe proves the phrasing its author had in mind
 
 Six times in one session a guard was defeated by **text that was not its subject**, and

@@ -4205,6 +4205,103 @@ if os.path.isfile(_RETRO_DOC):
              "2026-08-10 audit removed from the narrative log and left in its neighbour")
 
 
+# --- the hand-back (v1.43.0) --------------------------------------------------
+# The rail says WHERE a run is; it never said what happened, and an operator who
+# stepped away rebuilt that by asking. Measured on this project: a fourteen-iteration
+# session in which every return began with the same question. The hand-back is a gate
+# criterion because this same file already carried one instruction with no gate behind
+# it — "copy it, tick it" — and no run had ever obeyed it.
+_PROG_P = os.path.join(_skill_dir, "references", "progress.md")
+_STG_P2 = os.path.join(_skill_dir, "references", "stages.md")
+_EX_P2 = os.path.join(_skill_dir, "pipeline.example.json")
+
+if not os.path.isfile(_PROG_P):
+    fail("references/progress.md is gone — the boundaries and the hand-back have no home")
+else:
+    _pg = open(_PROG_P, encoding="utf-8").read()
+    # reads: the `## The hand-back` section INCLUDING its `###` subsections, which is
+    # where the computed ambiguity sources live. v1.42.0 narrowed a different span to
+    # `#{2,3}` because THAT subject excluded its subsections; this one contains them.
+    # The span follows the subject, not a house style — narrowing by reflex would have
+    # cut this guard off from four of the things it checks.
+    _hb = re.search(r"^##\s*The hand-back\b.*?$(.*?)(?=^##\s)", _pg, re.S | re.M)
+    if _hb is None:
+        fail("references/progress.md: no `## The hand-back` section — the rail states "
+             "position and nothing states what happened, which is the gap it was added "
+             "for")
+    else:
+        _hbf = _flatten(_hb.group(1), lower=True)
+        # ...and the SECTION NAMES are read from the fenced template, not the prose
+        # around it. Caught by its own probe: `SURFACED` also appears in the sentence
+        # explaining why SURFACED matters, so renaming the template row left the guard
+        # green — this session's recurring class, in the guard written to end it.
+        _hb_tpl = "\n".join(re.findall(r"```[^\n]*\n(.*?)```", _hb.group(1), re.S))
+        if not _hb_tpl.strip():
+            fail("references/progress.md → The hand-back: no fenced template — the four "
+                 "sections are stated in prose only, and prose about a section is not "
+                 "the section")
+        # The four sections, by name. A hand-back missing one is a report with a hole
+        # exactly where a returning reader looks.
+        for _need, _why in (
+                ("task", "the request as it was GIVEN — a run that restates it in its own "
+                         "words after eight iterations has rewritten it unobserved"),
+                ("progress", "where the run stands against that request"),
+                ("done", "what was solved, each with its evidence"),
+                ("surfaced", "what came up that nobody asked for — the only part "
+                             "recoverable from no artefact")):
+            if not re.search(rf"^\s*{_need}\s{{2,}}", _hb_tpl, re.M | re.I):
+                fail(f"references/progress.md → The hand-back: the `{_need.upper()}` "
+                     f"section is gone. It carries {_why}")
+        # Questions are ASKED, not parked. A question in a report is answered days later.
+        # reads: the DECISIONS line of the template plus the paragraph that owns it —
+        # not the section. `asked` appears in SURFACED's own description ("nobody asked
+        # for"), so a section-wide test was answered by a neighbour. Third time in this
+        # release, each caught by the probe rather than by a reader, which is the
+        # neighbour-probe habit paying for itself.
+        _dec = re.search(r"^\s*DECISIONS WAITING[^\n]*", _hb_tpl, re.M)
+        _dec_para = re.search(r"\*\*DECISIONS WAITING[^*]*\*\*[^\n]*(?:\n(?!\n)[^\n]*)*",
+                              _hb.group(1))
+        _dec_txt = (_dec.group(0) if _dec else "") + " " + (_dec_para.group(0) if _dec_para else "")
+        if not re.search(r"\bask(ed|s|ing)?\b", _dec_txt, re.I):
+            fail("references/progress.md → The hand-back: the DECISIONS WAITING line does "
+                 "not say the question is ASKED at the boundary. A question parked in a "
+                 "report is a question the operator answers days later, if at all")
+        # ...and the ambiguity list is computed, or it becomes a ritual sentence.
+        _srcs = [_s for _s in ("oq", "carry-over", "review", "none found")
+                 if _s not in _hbf]
+        if _srcs:
+            fail("references/progress.md → The hand-back: the ambiguity list no longer "
+                 f"names these computed sources: {', '.join(_srcs)}. An unbounded 'is "
+                 "anything unclear?' becomes a ritual sentence within three runs; these "
+                 "four are registers an earlier stage already wrote")
+        if "zero prints as zero" not in _hbf and "prints as zero" not in _hbf:
+            fail("references/progress.md → The hand-back: nothing states that zero "
+                 "prints. Silence and 'I looked and found none' are the two states this "
+                 "file exists to keep apart")
+
+# The gate must require it, on both surfaces that state stage 10.
+if os.path.isfile(_STG_P2):
+    _s10 = re.search(r"^##\s*10\s*—.*?$(.*?)(?=^##\s)",
+                     open(_STG_P2, encoding="utf-8").read(), re.S | re.M)
+    if _s10 is None:
+        _UNLOOKED.append("skip: the hand-back gate — no `## 10 —` section in stages.md")
+    else:
+        _g10 = next((_b for _b in re.split(r"\n(?=- )", _s10.group(1))
+                     if re.match(r"- \*\*GATE\b", _b.lstrip())), "")
+        if "hand-back" not in _flatten(_g10, lower=True):
+            fail("references/stages.md stage 10: the GATE does not require the hand-back. "
+                 "An instruction to report with no gate behind it is what 'copy it, tick "
+                 "it' was, and no run ever obeyed that one")
+_ex2 = load_json(os.path.relpath(_EX_P2, ROOT)) if os.path.isfile(_EX_P2) else None
+if _ex2:
+    _a10 = [_s for _s in (_ex2.get("stages") or [])
+            if isinstance(_s, dict) and _s.get("state") == "acceptance"]
+    if _a10 and "hand-back" not in str((_a10[0].get("gate") or {}).get("check", "")).lower():
+        fail("pipeline.example.json stage 'acceptance': its gate does not require the "
+             "hand-back while stages.md does — the pair of surfaces that states one rule "
+             "is the pair that drifts")
+
+
 if errors:
     print("FAIL: task-pipeline structure invalid")
     for e in errors:
