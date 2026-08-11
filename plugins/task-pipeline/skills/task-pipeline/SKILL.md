@@ -247,7 +247,7 @@ Three things the grill does beyond clarifying the request:
    finding mostly what the previous pass's own fixes broke, the axis is exhausted —
    rotate it, don't look harder** (`references/audit.md`), and remember that a
    green from a check nobody has watched fail is not evidence; **every gate
-   prints `residue: N` — what this run left running** across the eight classes
+   prints `holds: N` — what this run left running** across the eight classes
    (background shells, monitors, scheduled loops, coordination leases, worktrees,
    containers, scratch files, remote state), enumerated **by class and never by a
    single tool**, and stage 10 does not close while this run's residue is live and

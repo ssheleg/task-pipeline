@@ -4617,6 +4617,22 @@ if os.path.isfile(_RES_D):
         fail("references/residue.md: the third owner state lost `provably spent` from its "
              "own row. Without it, 'an earlier run of this project' becomes a judgement "
              "about whether something looks abandoned, which is the guess this file stops")
+    # SKILL.md is the routing surface and residue.md is the doctrine; they name the
+    # same ledger field. They shipped disagreeing once — SKILL.md said `residue: N`
+    # after the field was renamed to avoid colliding with gates.md's `unmarked
+    # residue:`, and the coverage table caught it rather than any guard.
+    # `_sk` is a loop variable earlier in this file; a distinct name keeps this guard
+    # from depending on where that loop happened to stop.
+    _sk_txt = _LIVING_TEXT.get(os.path.relpath(_SK_P, ROOT)) or open(_SK_P, encoding="utf-8").read()
+    _cross = re.search(r"every gate\s+prints `([^`]+)`", _sk_txt)
+    if _cross is None:
+        fail("plugins/task-pipeline/skills/task-pipeline/SKILL.md: the cross-cutting rules "
+             "no longer name the field every gate prints. A gate disclosure nobody is told "
+             "to print is a disclosure that does not exist")
+    elif not _cross.group(1).startswith("holds:"):
+        fail(f"SKILL.md names the gate field `{_cross.group(1)}` while references/residue.md "
+             "defines `holds:`. The routing surface and the doctrine must agree on a "
+             "ledger field's name, or a run writes a line no reader parses")
     if "a foreign item never becomes spent" not in _rt:
         fail("references/residue.md: nothing stops the third owner state from reaching "
              "outside the project. Three days of uptime is information for whoever owns "
