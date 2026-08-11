@@ -573,6 +573,18 @@ def _flatten(text, lower=False):
     return _f.lower() if lower else _f
 
 
+def _gate_bullet(section_body):
+    """The `- **GATE` bullet of a stage section, bounded below.
+
+    Two call sites extracted this byte for byte with different variable names. The
+    bound below matters and was learned once already: the GATE is the last bullet, so
+    a plain split hands it the rest of the section and a following paragraph answers
+    for it. A fix to how the bullet is bounded should land in one place."""
+    _b = next((_x for _x in re.split(r"\n(?=- )", section_body)
+               if re.match(r"- \*\*GATE\b", _x.lstrip())), "")
+    return re.split(r"\n(?=\S)", _b)[0]
+
+
 # This file reads itself in three places; once is enough.
 _OWN_SRC = open(os.path.join(ROOT, "test", "validate.py"), encoding="utf-8").read()
 
@@ -4303,11 +4315,7 @@ if os.path.isfile(_STG_P2):
     if _s10 is None:
         _UNLOOKED.append("skip: the hand-back gate — no `## 10 —` section in stages.md")
     else:
-        _g10 = next((_b for _b in re.split(r"\n(?=- )", _s10.group(1))
-                     if re.match(r"- \*\*GATE\b", _b.lstrip())), "")
-        # ...and bounded BELOW. The gate is the last bullet, so the split gave it the
-        # rest of the section: a paragraph after it answered for it, verified.
-        _g10 = re.split(r"\n(?=\S)", _g10)[0]
+        _g10 = _gate_bullet(_s10.group(1))
         # The NORMATIVE phrase, not the noun. A bare substring could not tell a gate
         # requiring the hand-back from one excusing it: `the hand-back is OPTIONAL and
         # may be skipped` passed, in the release whose entire argument is that this must
@@ -4379,7 +4387,12 @@ def _section(path, heading_re):
     the dispatched reader that found the same shape. The depth is measured, then used."""
     if not os.path.isfile(path):
         return None
-    _t = open(path, encoding="utf-8").read()
+    # Read from the cache the module builds at load. The first version reopened
+    # gates.md and acceptance.md from disk twice each, beside a comment in this file
+    # saying "each living document is read ONCE, not once per class" — and board row
+    # B-010 tracks exactly this cost.
+    _rel = os.path.relpath(path, ROOT)
+    _t = _LIVING_TEXT.get(_rel) or open(path, encoding="utf-8").read()
     _h = re.search(rf"^(#{{2,3}})\s*{heading_re}.*?$", _t, re.M)
     if _h is None:
         return None
@@ -4426,7 +4439,7 @@ if os.path.isfile(_wf2):
     # 40 shipped probes, 14 of them with no assertion.
     _mutating = [(_n, _b) for _n, _b in _steps
                  if re.search(r"\.read\(\)|json\.load\(", _b)
-                 and re.search(r'"w"|json\.dump\(', _b)]
+                 and re.search(r"""["']w["']|json\.dump\(""", _b)]
     # Case- and wording-insensitive: six probes carried the assertion in lower case
     # (`plant would not land`) and a first version of this check called them defective,
     # which sent a sweep to "fix" six probes that were already sound and corrupt five of
@@ -4501,9 +4514,7 @@ if os.path.isfile(_STG_P2):
     if _s10b is None:
         _UNLOOKED.append("skip: the publish: line — no `## 10 —` section in stages.md")
     else:
-        _g10c = next((_b for _b in re.split(r"\n(?=- )", _s10b.group(1))
-                      if re.match(r"- \*\*GATE\b", _b.lstrip())), "")
-        _g10c = re.split(r"\n(?=\S)", _g10c)[0]
+        _g10c = _gate_bullet(_s10b.group(1))
     if _s10b is not None and "either way the verdict carries a publish" not in _flatten(_g10c, lower=True):
         fail("references/stages.md stage 10: the verdict carries no `publish:` line. The "
              "doctrine says publication is disclosed at the only moment anyone is reading, "

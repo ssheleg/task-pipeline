@@ -408,11 +408,13 @@ restore from git to find it.
 Two things are worth keeping from that. **The check corrected the measurement that
 motivated it** — which is the argument for writing checks rather than counting by hand.
 And **a check keyed to one spelling of a rule is the class two sections above**: it
-reported as defective the probes that obeyed the rule in different words. **Every** mutating probe carries the assertion now — the figure is deliberately not
+reported as defective the probes that obeyed the rule in different words. **Every**
+mutating probe carries the assertion now — the figure is deliberately not
 written here. A first draft said *201*, which was true of the branch point and false in
 the same commit, because the twelve probes added for this release are themselves mutating
 probes. The guard computes it; a number in prose beside a check that can count is the
-class this bundle calls restating instead of computing. Probes that write a whole file need none: the file exists or the command
+class this bundle calls restating instead of computing. Probes that write a whole file
+need none: the file exists or the command
 failed.
 
 **Prefer an assertion that names the construct over one that names a substring of it.** A
