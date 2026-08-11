@@ -9,7 +9,7 @@ this repository did not — the same gap `B-009` found for open questions, and i
 surfaced the same way: a status vocabulary (`Resolved→DEC-####`) pointing at a file
 that was not there.
 
-**Next free ID:** `DEC-0003`
+**Next free ID:** `DEC-0004`
 
 Reading *"Next free ID"* is **not** reserving it — a second agent reading it in the
 same minute gets the same answer. Reserve it, then write.
@@ -78,3 +78,28 @@ one, leave its body intact. Never renumber. Never delete.
   `references/gates.md` that has never existed there; the reviewer caught it, in the
   register whose subject is hand-written counts.
 - **Source:** run `2026-08-11-residue-and-honesty` · commit `e063b29`
+
+---
+
+### DEC-0003 — this project keeps an addressable decisions register, reversing DOCMAP's rule against one
+
+- **Date:** 2026-08-12
+- **Status:** Accepted
+- **Context:** `docs/DOCMAP.md` stated that no `docs/DECISIONS.md` is created here,
+  deliberately — one decision home per project, the CHANGELOG already carries every
+  decision with its reason and its commit, and a second register would be the fork the
+  SSOT rule exists to prevent. That reasoning was sound when written. It predates
+  `docs/OPEN_QUESTIONS.md`, whose closed status vocabulary is `Resolved→DEC-####`.
+- **Decision:** the register exists. A CHANGELOG version heading **cannot serve as the
+  target of `Resolved→DEC-####`**: two decisions shipped in one release collapse to a
+  single pointer, and the path from a question back to its answer is lost. The SSOT rule
+  is kept by **direction** instead of by absence — the reason lives in `DECISIONS.md`,
+  and the CHANGELOG points at the id rather than restating it.
+- **What made this visible:** the reviewer on PR #37, which created the register and left
+  DOCMAP's prohibition untouched. A register that appears without a decision is the fork
+  the old rule feared, so the reversal is written down rather than performed.
+- **Consequences / affects:** `docs/DOCMAP.md` (the Registers row and the paragraph that
+  forbade this file), `docs/OPEN_QUESTIONS.md` (its status vocabulary now resolves),
+  `docs/DECISIONS.md` (this entry).
+- **Source:** run `2026-08-11-residue-and-honesty` · commit `0756b0f`
+- **Supersedes:** the unnumbered rule in `docs/DOCMAP.md`, which predates this register

@@ -5582,10 +5582,15 @@ jobs:
           assert _planted != t, "PLANT DID NOT LAND: res8"
           open(p, "w", encoding="utf-8").write(_planted)
           EOF
-          if python3 /tmp/res8-copy/test/validate.py 2>&1 | grep -q "not valid YAML"; then
+          _out=$(python3 /tmp/res8-copy/test/validate.py 2>&1 || true)
+          if printf '%s' "$_out" | grep -q "not valid YAML"; then
             echo "OK: validator FAILs — the workflow is parsed, not only pattern-matched"
+          elif printf '%s' "$_out" | grep -q "PyYAML not installed"; then
+            echo "SKIP: PyYAML is absent, so the parse guard could not run — it said so"
+            echo "      rather than passing quietly, which is the behaviour under test here"
           else
-            echo "ERROR: the workflow stopped being loadable and every regex count stayed happy"
+            echo "ERROR: the workflow stopped being loadable, the parse guard neither fired"
+            echo "       nor declared itself unable to look, and every regex count stayed happy"
             exit 1
           fi
       - name: Negative self-test (the third owner state loses its proof requirement)

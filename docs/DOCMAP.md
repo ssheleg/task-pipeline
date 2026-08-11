@@ -15,14 +15,20 @@ long-lived, so its register is a changelog rather than a table of ids.
 
 | Register | File | ID scheme | Append-only? | Guarded? |
 |---|---|---|---|---|
-| Decisions | `CHANGELOG.md` (what changed **and why it mattered**) + `docs/superpowers/specs/` (the design record per run) | version headings `vX.Y.Z` + dated run slugs | yes — a released section is never rewritten | no (single maintainer) |
+| Decisions | `docs/DECISIONS.md` (the addressable record) + `CHANGELOG.md` (what changed **and why it mattered**) + `docs/superpowers/specs/` (the design record per run) | `DEC-####` + version headings `vX.Y.Z` + dated run slugs | yes — a released section is never rewritten, and a decision is superseded, never edited | no (single maintainer) |
 | Open questions | `docs/OPEN_QUESTIONS.md` | `OQ-####` | yes (never delete a resolved row) | same |
 | Lessons | `docs/superpowers/retro.md` — standing instructions capped at ten | `R-NNN` | pruned, never silently | no |
 
-**No `docs/DECISIONS.md` is created here, deliberately.** One decision home per
-project: the CHANGELOG already carries every decision with its reason and its
-commit, and a second register would be the fork the SSOT rule exists to prevent.
-Seeding one would make this map's first act a violation of the rule it publishes.
+**`docs/DECISIONS.md` exists, and until 2026-08-12 this map said it deliberately
+should not.** That rule was right about the risk and wrong about the mechanism, and
+the thing that broke it was the open-questions register: `OQ-####` closes with the
+value `Resolved→DEC-####`, and a CHANGELOG version heading **cannot be that target** —
+two decisions shipped in one release collapse to one pointer, so the path from a
+question back to its answer disappears. An id-addressable home is what the closed
+vocabulary requires. The SSOT rule is kept by direction rather than by absence: a
+decision's **reason** lives in `DECISIONS.md` and the CHANGELOG entry points at its
+id, never restating it. The reversal is itself recorded, as `DEC-0003` — a register
+that appeared without a decision would be exactly the fork the old rule feared.
 
 ## Single source of truth
 
