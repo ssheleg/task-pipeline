@@ -5,7 +5,7 @@ explains the machine — what routes a request into it, what each stage refuses 
 let past, and what makes any claim it prints believable. The README sells it and
 tells you how to install it; this file tells you how it thinks.
 
-> **Version 1.45.0.** The "What changed" section at the bottom carries the last
+> **Version 1.46.0.** The "What changed" section at the bottom carries the last
 > few releases. Everything above it describes the pipeline as it is *now*, not as
 > it was designed.
 
@@ -291,7 +291,7 @@ a run diverges  →  retro entry  →  retro.publish  →  upstream issue
 
 ## What changed, by version
 
-### v1.45.0 — what a run leaves running, what "done" costs to say, what a check is for
+### v1.46.0 — what a run leaves running, what "done" costs to say, what a check is for
 Four rules the pipeline had been following by disposition rather than by doctrine.
 **Residue**: eight classes of thing a run leaves running or leaves behind, enumerated
 by class and never by one tool — the case that produced it was a task inventory
@@ -303,6 +303,12 @@ the deliverable is the working result and the check is how you know — scaled t
 `sev × blast`, never by cutting the floor. **The improvement iteration**: a published
 issue resolves when behaviour changed and its close names the address; unworked ones
 accumulate visibly rather than being triaged into silence. Guards: 275 → 291.
+
+### v1.45.1 / v1.45.0 — shipped from another session while this branch was paused
+The reference routing existed three times over and was cut to one home; the guard
+count the self-test plants into was restored. Neither is this branch's work — they
+are here because they hold the version numbers this branch was originally built
+under, which is why it ships as 1.46.0.
 
 ### v1.44.0 — six lessons from other projects, and the guards that hold them
 Six issues published by runs in other repositories were worked into doctrine:
