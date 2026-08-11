@@ -251,6 +251,14 @@ All of:
 Manual by design. An automated check can prove the table is *well-formed*; only
 the person who asked can confirm it is *what they asked for*. Do not let a green
 table substitute for that answer.
+12. **The hand-back is written** ([`progress.md`](progress.md) → *The hand-back*) —
+   the request quoted as it was GIVEN, where the run stands against it, what was solved
+   with its evidence, what surfaced that nobody asked for, every decision still waiting
+   **asked here with options rather than listed**, and the ambiguity count computed from
+   its four registers with their ids. A run that cannot say what happened has not
+   finished; it has stopped. This file is the one stage 10 opens, and it carried every
+   other criterion while omitting this one for a release.
+
 
 ## When the answer is "something's missing"
 

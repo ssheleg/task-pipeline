@@ -5050,3 +5050,40 @@ jobs:
             echo "ERROR: the machine-readable gate lost the hand-back while the prose kept it"
             exit 1
           fi
+      - name: Negative self-test (the hand-back loses its trace in the ledger)
+        run: |
+          set -eu
+          rm -rf /tmp/hb07-copy && cp -R . /tmp/hb07-copy
+          python3 - <<'EOF'
+          p = "/tmp/hb07-copy/plugins/task-pipeline/skills/task-pipeline/templates/run.md"
+          t = open(p, encoding="utf-8").read()
+          n = "hand:  <N|10>"
+          assert n in t, "PLANT DID NOT LAND: hb07"
+          i = t.index(n); j = t.index("\n", i)
+          open(p, "w", encoding="utf-8").write(t[:i] + t[j+1:])
+          EOF
+          if python3 /tmp/hb07-copy/test/validate.py 2>&1 | grep -q 'no .hand:. line shape'; then
+            echo "OK: validator FAILs — a gate criterion with no trace is 'copy it, tick it' one level up"
+          else
+            echo "ERROR: the ledger lost the hand: shape and the gate kept requiring the report"
+            exit 1
+          fi
+      - name: Negative self-test (the doctrine stops naming where its trace lands)
+        run: |
+          set -eu
+          rm -rf /tmp/hb08-copy && cp -R . /tmp/hb08-copy
+          python3 - <<'EOF'
+          p = "/tmp/hb08-copy/plugins/task-pipeline/skills/task-pipeline/references/progress.md"
+          t = open(p, encoding="utf-8").read()
+          n = "as a `hand:` line"
+          assert n in t, "PLANT DID NOT LAND: hb08"
+          # Every mention, not the first: the section names the shape twice, and removing
+          # one left the guard reading the other.
+          open(p, "w", encoding="utf-8").write(t.replace(n, "somewhere durable", -1).replace("`hand:`", "the trace", -1))
+          EOF
+          if python3 /tmp/hb08-copy/test/validate.py 2>&1 | grep -q 'never names the ledger line its trace lands on'; then
+            echo "OK: validator FAILs — a narrative with no address is one no audit can find"
+          else
+            echo "ERROR: the doctrine lost the address and nothing objected"
+            exit 1
+          fi

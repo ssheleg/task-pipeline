@@ -13,12 +13,13 @@ Run: `<topic>` · started `<YYYY-MM-DD>` · module map: `<path or "none">`
 
 ## Lines
 
-Append-only. Three shapes, and nothing else belongs here:
+Append-only. Four shapes, and nothing else belongs here:
 
 ```
 stage: <id> <name> — gate <auto|manual> — verdict <pass|fail|skip> — <ISO-8601>
 iter:  <N> — item <B-NNN or task id> — closed at gate <stage id>
 touch: <file> — pass <N> (<stage|round|module>) — reason: <finding id / gate item>
+hand:  <N|10> — task "<quoted>" — done <n> — surfaced <n> — decisions <n> — amb <n> (<ids or "— no register">)
 ```
 
 - **`stage:`** — written when a gate **returns**, not when the stage is entered. The
@@ -26,6 +27,14 @@ touch: <file> — pass <N> (<stage|round|module>) — reason: <finding id / gate
   is a summary that is confidently wrong exactly when it matters.
 - **`iter:`** — one line per iteration closed. The progress line's counter is
   `grep -c '^iter:'`, never a number anyone remembers.
+- **`hand:`** — one per hand-back, at an iteration's close and at stage 10
+  (`references/progress.md` → *The hand-back*, inside the skill). The
+  narrative goes to the operator; **this line is the trace it leaves**, and it exists
+  because v1.43.0 shipped a gate criterion with no artefact behind it: every guard could
+  check that the instruction was still written, and none could check that a run obeyed
+  it. A later audit reads `grep -c '^hand:'` against `grep -c '^iter:'` and the two
+  should agree, plus one for stage 10.
+  **`amb` prints its ids or `— no register`, never a bare `0` with nothing beside it.**
 - **`touch:`** — one line per file per pass, and the reason names **what forced the
   edit**: a finding id, a failed gate item, an operator instruction. *"Cleanup"*,
   *"polish"* and *"while I was there"* are not reasons; they are churn with better
@@ -43,6 +52,7 @@ stage: 1 Docs study — gate auto — verdict pass — 2026-08-10T11:31Z
 touch: src/export.ts — pass 1 (stage 5) — reason: TASK-3
 touch: src/export.ts — pass 2 (stage 5) — reason: F-014
 touch: src/export.ts — pass 3 (stage 5) — reason: F-014
+hand:  3 — task "add CSV export to the orders table" — done 2 — surfaced 1 — decisions 1 — amb 2 (OQ-0007, ledger row 4)
 ```
 
 The last two lines are a **trip**: the same file, two consecutive passes, the same

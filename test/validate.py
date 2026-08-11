@@ -4224,7 +4224,7 @@ else:
     # `#{2,3}` because THAT subject excluded its subsections; this one contains them.
     # The span follows the subject, not a house style — narrowing by reflex would have
     # cut this guard off from four of the things it checks.
-    _hb = re.search(r"^##\s*The hand-back\b.*?$(.*?)(?=^##\s)", _pg, re.S | re.M)
+    _hb = re.search(r"^##\s*The hand-back\b.*?$(.*?)(?=^##\s|\Z)", _pg, re.S | re.M)
     if _hb is None:
         fail("references/progress.md: no `## The hand-back` section — the rail states "
              "position and nothing states what happened, which is the gap it was added "
@@ -4235,7 +4235,8 @@ else:
         # around it. Caught by its own probe: `SURFACED` also appears in the sentence
         # explaining why SURFACED matters, so renaming the template row left the guard
         # green — this session's recurring class, in the guard written to end it.
-        _hb_tpl = "\n".join(re.findall(r"```[^\n]*\n(.*?)```", _hb.group(1), re.S))
+        _hb_fences = re.findall(r"```[^\n]*\n(.*?)```", _hb.group(1), re.S)
+        _hb_tpl = _hb_fences[0] if _hb_fences else ""
         if not _hb_tpl.strip():
             fail("references/progress.md → The hand-back: no fenced template — the four "
                  "sections are stated in prose only, and prose about a section is not "
@@ -4248,7 +4249,10 @@ else:
                 ("progress", "where the run stands against that request"),
                 ("done", "what was solved, each with its evidence"),
                 ("surfaced", "what came up that nobody asked for — the only part "
-                             "recoverable from no artefact")):
+                             "recoverable from no artefact"),
+                ("decisions waiting", "the questions the boundary must ASK"),
+                ("ambiguities", "the computed count, which is the half a run cannot "
+                                "quietly decide")):
             if not re.search(rf"^\s*{_need}\s{{2,}}", _hb_tpl, re.M | re.I):
                 fail(f"references/progress.md → The hand-back: the `{_need.upper()}` "
                      f"section is gone. It carries {_why}")
@@ -4267,8 +4271,21 @@ else:
                  "not say the question is ASKED at the boundary. A question parked in a "
                  "report is a question the operator answers days later, if at all")
         # ...and the ambiguity list is computed, or it becomes a ritual sentence.
-        _srcs = [_s for _s in ("oq", "carry-over", "review", "none found")
-                 if _s not in _hbf]
+        # reads: the `### AMBIGUITIES` subsection's TABLE, not the section. Keeping the
+        # four words as *examples* in a paragraph satisfied a section-wide test while the
+        # table and the word `computed` were both gone — the subsection then said the
+        # opposite of its own title.
+        _amb = re.search(r"^###\s*AMBIGUITIES\b.*?$(.*?)(?=^#{2,3}\s|\Z)", _pg, re.S | re.M)
+        _amb_rows = "\n".join(re.findall(r"^\|.*\|\s*$", _amb.group(1), re.M)) if _amb else ""
+        if _amb is None or not _amb_rows:
+            fail("references/progress.md → AMBIGUITIES: no table of sources. The list is "
+                 "stated in prose, and prose naming the four as examples is judgement "
+                 "wearing a computation's title")
+        if _amb and not re.search(r"read by a command|computed", _flatten(_amb.group(1), lower=True)):
+            fail("references/progress.md → AMBIGUITIES: the subsection no longer says the "
+                 "sources are computed. Its title says they are")
+        _srcs = [_s for _s in ("oq-", "carry-over", "review", "none")
+                 if _s not in _flatten(_amb_rows, lower=True)]
         if _srcs:
             fail("references/progress.md → The hand-back: the ambiguity list no longer "
                  f"names these computed sources: {', '.join(_srcs)}. An unbounded 'is "
@@ -4288,7 +4305,14 @@ if os.path.isfile(_STG_P2):
     else:
         _g10 = next((_b for _b in re.split(r"\n(?=- )", _s10.group(1))
                      if re.match(r"- \*\*GATE\b", _b.lstrip())), "")
-        if "hand-back" not in _flatten(_g10, lower=True):
+        # ...and bounded BELOW. The gate is the last bullet, so the split gave it the
+        # rest of the section: a paragraph after it answered for it, verified.
+        _g10 = re.split(r"\n(?=\S)", _g10)[0]
+        # The NORMATIVE phrase, not the noun. A bare substring could not tell a gate
+        # requiring the hand-back from one excusing it: `the hand-back is OPTIONAL and
+        # may be skipped` passed, in the release whose entire argument is that this must
+        # be a criterion rather than a good intention.
+        if "the hand-back is written" not in _flatten(_g10, lower=True):
             fail("references/stages.md stage 10: the GATE does not require the hand-back. "
                  "An instruction to report with no gate behind it is what 'copy it, tick "
                  "it' was, and no run ever obeyed that one")
@@ -4296,10 +4320,41 @@ _ex2 = load_json(os.path.relpath(_EX_P2, ROOT)) if os.path.isfile(_EX_P2) else N
 if _ex2:
     _a10 = [_s for _s in (_ex2.get("stages") or [])
             if isinstance(_s, dict) and _s.get("state") == "acceptance"]
-    if _a10 and "hand-back" not in str((_a10[0].get("gate") or {}).get("check", "")).lower():
+    if _a10 and "the hand-back is written" not in str((_a10[0].get("gate") or {}).get("check", "")).lower():
         fail("pipeline.example.json stage 'acceptance': its gate does not require the "
              "hand-back while stages.md does — the pair of surfaces that states one rule "
              "is the pair that drifts")
+
+
+# The hand-back's ARTEFACT. v1.43.0's first draft shipped a gate criterion with no trace:
+# every guard read the doctrine files, so all any of them could establish was that the
+# instruction was still written down. A reader constructed a conforming hand-back that
+# concealed a weakened test and showed that nothing in the repository would notice — and
+# that an audit a year later could reach no verdict either way, because there were no run
+# records to check. The `hand:` line is what a later audit reads.
+_RUN_T = os.path.join(_skill_dir, "templates", "run.md")
+if os.path.isfile(_RUN_T):
+    _rt2 = open(_RUN_T, encoding="utf-8").read()
+    # reads: the `## Lines` DECLARATION block. A file-wide search was answered by the
+    # worked example under `## Log`, which is the same file's illustration of the shape
+    # rather than its contract — this session's recurring class, sixth instance, and
+    # again caught by the probe rather than by a reader.
+    _lines_sec = re.search(r"^##\s*Lines\b.*?$(.*?)(?=^##\s|\Z)", _rt2, re.S | re.M)
+    _decl = "\n".join(re.findall(r"```[^\n]*\n(.*?)```", _lines_sec.group(1), re.S)) \
+        if _lines_sec else ""
+    if not re.search(r"^hand:\s", _decl, re.M):
+        fail("templates/run.md: no `hand:` line shape. The hand-back is a gate criterion "
+             "at stage 10 and, without a shape in the ledger, it leaves no trace — which "
+             "is the shape this repository convicted as 'copy it, tick it', one level up")
+    _pgt = open(_PROG_P, encoding="utf-8").read() if os.path.isfile(_PROG_P) else ""
+    _hb2 = re.search(r"^##\s*The hand-back\b.*?$(.*?)(?=^##\s|\Z)", _pgt, re.S | re.M)
+    # ...on the BACKTICKED shape, which is how this bundle names a ledger line
+    # everywhere. A bare `hand:` was answered by the sentence `grep -c '^hand:'`, where
+    # the same substring lives legitimately — a neighbour inside the same paragraph.
+    if _hb2 and "`hand:`" not in _hb2.group(1):
+        fail("references/progress.md → The hand-back: the doctrine never names the "
+             "ledger line its trace lands on. A narrative with no address is a narrative "
+             "no audit can find")
 
 
 if errors:

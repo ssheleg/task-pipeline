@@ -34,7 +34,57 @@ already wrote — open `OQ-####` rows, carry-over rows with no home, REQ rows wh
 instruction with no gate behind it — *"copy it, tick it"* — and the v1.37.0 audit found
 that no run had ever obeyed it.
 
-### Three predicates answered by their neighbours, all caught by their own probes
+### The reader found that this release built what it had just condemned
+
+A gate criterion with **no artefact**. Every guard read the doctrine files, so all any of
+them could establish was that the instruction was still written down — none could
+establish that a run obeyed it. The reader then constructed a conforming hand-back
+concealing a weakened test and showed that **nothing in the repository would notice**,
+and that an audit a year later could reach no verdict either way, because there would be
+no run records to check. This file's own diagnosis of *"copy it, tick it"* — a rung-1
+rule read as rung 3 — reproduced one level up.
+
+**The hand-back now has an address:** a `hand:` line in the run ledger, declared as its
+fourth shape. `grep -c '^hand:'` against `grep -c '^iter:'` is what makes a missing one
+readable.
+
+Six more, all verified by planting and watching `PASS`:
+
+- **`"hand-back"` as a bare substring could not tell a requirement from a mention** — a
+  gate reading *"the hand-back is OPTIONAL and may be skipped"* passed, in the release
+  whose entire argument is that it must be a criterion. Both gate guards now require the
+  normative phrase;
+- **the gate span was unbounded below** — the GATE is the last bullet, so a paragraph
+  after it answered for it;
+- **the template was every fence joined**, so a worked example — the likeliest next edit
+  to that section — would have answered for the template;
+- **the two lists were left to prose** while the four sections were read from the fence,
+  which is the split this release wrote a guard to forbid;
+- **the AMBIGUITIES subsection could be replaced by explicit judgement** and pass, keeping
+  the four words as *examples*;
+- and a relocated section was reported as a deletion.
+
+**Four doctrinal defects, not guard defects:**
+
+- *"at both boundaries"* named a pair this file defines as something else three sections
+  above — a reader resolving it there writes a hand-back at task start, where TASK is the
+  only field with content;
+- **the four ambiguity sources had no commands**, though the section claimed *"each read
+  by a command"* — and one of them would have grepped for a string the source ledger's own
+  doctrine never writes, returning a false zero;
+- **one register is structurally zero at the gated boundary**: stage 10's own gate already
+  forbids an unresolved carry-over row, so that count is zero because a sibling clause
+  compelled it. The section now says to print *why*;
+- and **`acceptance.md` — the file stage 10 actually opens — never mentioned the
+  hand-back**, while carrying every other criterion. Two surfaces were updated where four
+  state this gate.
+
+**Still true and stated rather than fixed:** `SURFACED` has no register behind it, and the
+doctrine calls it the section that earns the hand-back. *"Nothing surfaced"* remains a
+quiet decision. The `hand:` line records that a hand-back happened, never that it was
+complete.
+
+### Six predicates answered by their neighbours, all caught by their own probes
 
 - the four section names were read from the whole section, and `SURFACED` appears in the
   sentence explaining why SURFACED matters — so renaming the template row left the guard
@@ -49,7 +99,7 @@ that no run had ever obeyed it.
 Not one of these needed a reader. The neighbour-probe habit shipped one release earlier
 caught all three, which is the first evidence it does what it was written for.
 
-- Guards: 253 → **259**.
+- Guards: 253 → **261**.
 
 ## v1.42.0 — a probe proves the phrasing its author had in mind
 
