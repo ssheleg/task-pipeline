@@ -14,7 +14,7 @@ tells you how to install it; this file tells you how it thinks.
 ## The one-sentence version
 
 A coding agent takes a substantial task, interrogates it into a complete brief,
-then walks it through **eleven gated stages** and refuses to advance until each
+then walks it through **ten gated stages** and refuses to advance until each
 gate passes — closing by accounting for every requirement from a list rather than
 from memory.
 

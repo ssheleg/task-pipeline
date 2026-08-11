@@ -266,6 +266,7 @@ does ([`audit.md`](audit.md) → *What can't be fixed now becomes a ratchet, nev
 GATE 10 acceptance: PASS — 14/14 REQ verified
   carry-over: 0 unresolved · retro: 7 standing (was 9) · retired 3 · added 1
   abstained: 2 · unlooked: 3
+  holds: 10 — none — enumerated 8/8 classes
 ```
 
 A pruned list that nobody prints is a list that quietly grows back.
