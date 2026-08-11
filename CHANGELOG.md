@@ -1,5 +1,19 @@
 # Changelog
 
+## v1.45.1
+
+### Fixed
+
+- **The v1.45.0 entry had no `Guards: N → **M**` line**, so the negative
+  self-test that plants a stale count had nothing to plant into and failed with
+  `PLANT DID NOT LAND`. The count is a claim about *now* and every release
+  section is required to restate it — a release that omits it silently disarms
+  the check that keeps the number honest.
+
+### Counts
+
+- Guards: 275 → **275**.
+
 ## v1.45.0
 
 ### Changed
@@ -16,6 +30,11 @@
   `Not for:` exclusions and the verbs `adopt`/`harden` against the NOTRIG evals
   from the 2026-08-03 design, and refused two rewordings before accepting one
   in text nothing had locked.
+
+### Counts
+
+- Guards: 275 → **275** — this release adds none; it removes duplication from
+  the body and touches no check.
 
 ### Known gap
 

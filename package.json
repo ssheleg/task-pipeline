@@ -1,6 +1,6 @@
 {
   "name": "task-pipeline-skill",
-  "version": "1.45.0",
+  "version": "1.45.1",
   "description": "Full-cycle delivery pipeline for coding agents: a mandatory built-in intake grill, then 10 gated stages (docs, brainstorm+decompose, spec, plan, build, tests, lint/deploy, post-deploy, docs/wiki, acceptance). Every stage's doctrine ships inside the skill — no companion plugin required. This package is the installer CLI.",
   "bin": {
     "task-pipeline": "bin/task-pipeline.js"
