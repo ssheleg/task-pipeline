@@ -651,7 +651,12 @@ never that the work was skipped quietly.
   a messy run is the failure the file exists to stop. Stage 0 reads the standing
   instructions in full next time, which is why the cap is not negotiable.
 - **GATE (manual):** the ladder walk ran and its absences became REQ rows before
-  the table was written; **both disclosures printed beside the verdict** — `abstained` (what the run declined
+  the table was written; **the hand-back is written** — the request quoted as it was
+  GIVEN, where the run stands against it, what was solved with its evidence, what
+  surfaced that nobody asked for, every decision still waiting **asked here with
+  options rather than listed**, and the ambiguity count computed from the four
+  registers with its ids ([`progress.md`](progress.md) → *The hand-back*) — a run
+  that cannot say what happened has not finished, it has stopped; **both disclosures printed beside the verdict** — `abstained` (what the run declined
   to claim) and `unlooked` (what a check never looked at), neither a ratchet, neither
   with a floor, neither ever a target ([`gates.md`](gates.md) → *Disclosures*); **the
   retrospective is written — stamped first, then pruned, then the entry; the

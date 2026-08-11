@@ -4922,3 +4922,168 @@ jobs:
             echo "ERROR: the gate lost its clause and a note after the section answered for it"
             exit 1
           fi
+      - name: Negative self-test (the hand-back loses the section a returning reader needs most)
+        run: |
+          set -eu
+          rm -rf /tmp/hb01-copy && cp -R . /tmp/hb01-copy
+          python3 - <<'EOF'
+          p = "/tmp/hb01-copy/plugins/task-pipeline/skills/task-pipeline/references/progress.md"
+          t = open(p, encoding="utf-8").read()
+          n = "SURFACED    what came up that nobody asked for"
+          assert n in t, "PLANT DID NOT LAND: hb01"
+          open(p, "w", encoding="utf-8").write(t.replace(n, "EXTRAS      anything else worth a line", 1))
+          EOF
+          if python3 /tmp/hb01-copy/test/validate.py 2>&1 | grep -q 'the .SURFACED. section is gone'; then
+            echo "OK: validator FAILs — what a run learned by accident is recoverable from no artefact"
+          else
+            echo "ERROR: the hand-back lost SURFACED and nothing objected"
+            exit 1
+          fi
+      - name: Negative self-test (waiting decisions become a list instead of a question)
+        run: |
+          set -eu
+          rm -rf /tmp/hb02-copy && cp -R . /tmp/hb02-copy
+          python3 - <<'EOF'
+          p = "/tmp/hb02-copy/plugins/task-pipeline/skills/task-pipeline/references/progress.md"
+          t = open(p, encoding="utf-8").read()
+          n = "**DECISIONS WAITING are asked, not listed.**"
+          assert n in t, "PLANT DID NOT LAND: hb02 paragraph"
+          tpl = "DECISIONS WAITING  <n>   each as a question with options, asked HERE"
+          assert tpl in t, "PLANT DID NOT LAND: hb02 template line"
+          # The rule is stated twice — in the template and in the paragraph that owns it.
+          # Removing one leaves it stated, and the guard was right not to fire; this
+          # probe's first version tested the paragraph alone and called that a defect.
+          t = t.replace(n, "**DECISIONS WAITING are recorded for later.**", 1)
+          t = t.replace(tpl, "DECISIONS WAITING  <n>   each with options, for the record", 1)
+          t = t.replace("Ask it at the boundary, with options and a\nrecommendation, in the same breath as the report.",
+                        "Record it with options and a recommendation.", 1)
+          open(p, "w", encoding="utf-8").write(t)
+          EOF
+          if python3 /tmp/hb02-copy/test/validate.py 2>&1 | grep -q 'DECISIONS WAITING line does not say the question is ASKED'; then
+            echo "OK: validator FAILs — a question parked in a report is answered days later, if at all"
+          else
+            echo "ERROR: decisions became a list and the boundary stopped asking"
+            exit 1
+          fi
+      - name: Negative self-test (the ambiguity list stops being computed)
+        run: |
+          set -eu
+          rm -rf /tmp/hb03-copy && cp -R . /tmp/hb03-copy
+          python3 - <<'EOF'
+          p = "/tmp/hb03-copy/plugins/task-pipeline/skills/task-pipeline/references/progress.md"
+          t = open(p, encoding="utf-8").read()
+          i = t.index("### AMBIGUITIES are computed")
+          j = t.index("\n## ", i)
+          assert "none found" in t[i:j], "PLANT DID NOT LAND: hb03"
+          # The shape it degrades into on its own: judgement with no register behind it.
+          open(p, "w", encoding="utf-8").write(
+              t[:i] + "### AMBIGUITIES\n\nList anything that still looks unclear to you.\n" + t[j:])
+          EOF
+          if python3 /tmp/hb03-copy/test/validate.py 2>&1 | grep -q 'no longer names these computed sources'; then
+            echo "OK: validator FAILs — an unbounded 'is anything unclear?' is a ritual sentence within three runs"
+          else
+            echo "ERROR: the ambiguity list became judgement and nothing objected"
+            exit 1
+          fi
+      - name: Negative self-test (stage 10's gate stops requiring the hand-back)
+        run: |
+          set -eu
+          rm -rf /tmp/hb04-copy && cp -R . /tmp/hb04-copy
+          python3 - <<'EOF'
+          p = "/tmp/hb04-copy/plugins/task-pipeline/skills/task-pipeline/references/stages.md"
+          t = open(p, encoding="utf-8").read()
+          n = "**the hand-back is written**"
+          assert n in t, "PLANT DID NOT LAND: hb04"
+          i = t.index(n)
+          j = t.index("a run\n  that cannot say what happened has not finished, it has stopped;", i)
+          k = j + len("a run\n  that cannot say what happened has not finished, it has stopped;")
+          open(p, "w", encoding="utf-8").write(t[:i] + t[k:])
+          EOF
+          if python3 /tmp/hb04-copy/test/validate.py 2>&1 | grep -q 'the GATE does not require the hand-back'; then
+            echo "OK: validator FAILs — an instruction to report with no gate behind it is 'copy it, tick it'"
+          else
+            echo "ERROR: the gate dropped the hand-back and the doctrine kept it"
+            exit 1
+          fi
+      - name: Negative self-test (neighbour probe — the gate loses the hand-back while the section keeps the word)
+        run: |
+          set -eu
+          rm -rf /tmp/hb05-copy && cp -R . /tmp/hb05-copy
+          python3 - <<'EOF'
+          p = "/tmp/hb05-copy/plugins/task-pipeline/skills/task-pipeline/references/stages.md"
+          t = open(p, encoding="utf-8").read()
+          n = "**the hand-back is written**"
+          i = t.index(n)
+          j = t.index("a run\n  that cannot say what happened has not finished, it has stopped;", i)
+          k = j + len("a run\n  that cannot say what happened has not finished, it has stopped;")
+          t = t[:i] + t[k:]
+          # Plant the CURRENT needle next door: same stage, not the gate bullet.
+          needle = "- **The hand-back** is described in progress.md and printed by the harness."
+          t = t.replace("- **GATE (manual):** the ladder walk ran", needle + "\n- **GATE (manual):** the ladder walk ran", 1)
+          assert needle in t, "PLANT DID NOT LAND: hb05 neighbour"
+          open(p, "w", encoding="utf-8").write(t)
+          EOF
+          if python3 /tmp/hb05-copy/test/validate.py 2>&1 | grep -q 'the GATE does not require the hand-back'; then
+            echo "OK: validator FAILs — a sibling bullet naming the hand-back is not the gate requiring it"
+          else
+            echo "ERROR: a neighbouring bullet answered for the gate"
+            exit 1
+          fi
+      - name: Negative self-test (the example's acceptance gate drops the hand-back)
+        run: |
+          set -eu
+          rm -rf /tmp/hb06-copy && cp -R . /tmp/hb06-copy
+          python3 - <<'EOF'
+          import json
+          p = "/tmp/hb06-copy/plugins/task-pipeline/skills/task-pipeline/pipeline.example.json"
+          d = json.load(open(p, encoding="utf-8"))
+          s = [x for x in d["stages"] if x.get("state") == "acceptance"][0]
+          c = s["gate"]["check"]
+          i = c.upper().index("THE HAND-BACK IS WRITTEN")
+          assert i > 0, "PLANT DID NOT LAND: hb06"
+          s["gate"]["check"] = c[:i].rstrip(". ") + "."
+          json.dump(d, open(p, "w", encoding="utf-8"), ensure_ascii=False, indent=2)
+          EOF
+          if python3 /tmp/hb06-copy/test/validate.py 2>&1 | grep -q 'its gate does not require the hand-back'; then
+            echo "OK: validator FAILs — the two surfaces that state one rule may not drift"
+          else
+            echo "ERROR: the machine-readable gate lost the hand-back while the prose kept it"
+            exit 1
+          fi
+      - name: Negative self-test (the hand-back loses its trace in the ledger)
+        run: |
+          set -eu
+          rm -rf /tmp/hb07-copy && cp -R . /tmp/hb07-copy
+          python3 - <<'EOF'
+          p = "/tmp/hb07-copy/plugins/task-pipeline/skills/task-pipeline/templates/run.md"
+          t = open(p, encoding="utf-8").read()
+          n = "hand:  <N|10>"
+          assert n in t, "PLANT DID NOT LAND: hb07"
+          i = t.index(n); j = t.index("\n", i)
+          open(p, "w", encoding="utf-8").write(t[:i] + t[j+1:])
+          EOF
+          if python3 /tmp/hb07-copy/test/validate.py 2>&1 | grep -q 'no .hand:. line shape'; then
+            echo "OK: validator FAILs — a gate criterion with no trace is 'copy it, tick it' one level up"
+          else
+            echo "ERROR: the ledger lost the hand: shape and the gate kept requiring the report"
+            exit 1
+          fi
+      - name: Negative self-test (the doctrine stops naming where its trace lands)
+        run: |
+          set -eu
+          rm -rf /tmp/hb08-copy && cp -R . /tmp/hb08-copy
+          python3 - <<'EOF'
+          p = "/tmp/hb08-copy/plugins/task-pipeline/skills/task-pipeline/references/progress.md"
+          t = open(p, encoding="utf-8").read()
+          n = "as a `hand:` line"
+          assert n in t, "PLANT DID NOT LAND: hb08"
+          # Every mention, not the first: the section names the shape twice, and removing
+          # one left the guard reading the other.
+          open(p, "w", encoding="utf-8").write(t.replace(n, "somewhere durable", -1).replace("`hand:`", "the trace", -1))
+          EOF
+          if python3 /tmp/hb08-copy/test/validate.py 2>&1 | grep -q 'never names the ledger line its trace lands on'; then
+            echo "OK: validator FAILs — a narrative with no address is one no audit can find"
+          else
+            echo "ERROR: the doctrine lost the address and nothing objected"
+            exit 1
+          fi

@@ -25,6 +25,7 @@ maintains them and the next run reads them as current.
 - The iteration line
 - The rail is computed, never eleven
 - What each glyph means
+- The hand-back — what the operator reads when you stop
 - Every number is borrowed
 - Absent is a word, never a zero
 - The run ledger this reads from
@@ -118,6 +119,101 @@ the verdict the gate wrote, in the run ledger, and from nothing else.
 
 **`⊘` may never be silent.** A skipped stage with no recorded reason is exactly what a
 `·` looks like from outside, and the two mean opposite things.
+
+## The hand-back — what the operator reads when you stop
+
+The rail says **where** the run is. It does not say what happened, and a reader who was
+away cannot reconstruct that from a glyph. Measured on this project: a fourteen-iteration
+session where the operator returned to a one-line rail each time and had to ask.
+
+**At the close of an iteration, and again at stage 10.** This is *not* the pair named
+three sections above: *The two boundaries, and only those two* governs the **rail**, and
+its pair is task start and iteration close. The hand-back shares one and adds the run's
+end — a rail at task start has nothing to report, and a run that ends without a hand-back
+is the case this section exists for. A reader resolving *"both boundaries"* against the
+other section wrote one at task start, where TASK is the only field with content. The run
+writes a hand-back with **four sections and two lists**. It is a gate criterion **at stage
+10**, not a good intention: this file already carried one instruction with no gate behind
+it (*"copy it, tick it"*), and the v1.37.0 audit found no run had ever obeyed it.
+
+**The iteration-close instance has no gate, and that is a weakness rather than an
+oversight** — an iteration boundary has no verdict to hang a criterion on. It is
+therefore the very shape the sentence above indicts, written inside it. What keeps it
+from being *"copy it, tick it"* is the run ledger: the iteration line already lands there,
+and the hand-back lands beside it, so a later audit has something to read. Where a project
+keeps no ledger, the iteration hand-back is prose discipline, and the run says which of
+the two it is running.
+
+```
+── hand-back · <topic> · iteration <n> ───────────────────────────
+TASK        the request as it was GIVEN, quoted from the brief — not
+            as it looks now that you understand it
+PROGRESS    where the run stands against that request: gates passed,
+            what remains, and the board id it is heading for
+DONE        what was solved this iteration, each with its evidence
+SURFACED    what came up that nobody asked for — findings, corrections,
+            things that turned out to be other than assumed
+
+DECISIONS WAITING  <n>   each as a question with options, asked HERE
+AMBIGUITIES        <n>   computed, below
+```
+
+**Where there is no brief** — `checkup`, `setup`, a short path — TASK quotes the
+operator's own sentence instead, marked as such. An unquotable TASK is a run that cannot
+say what it was asked, which is worth its own line.
+
+**Where it lands.** The narrative goes to the operator; the trace goes to the run
+ledger as a `hand:` line ([`../templates/run.md`](../templates/run.md)). Without it the
+hand-back is a gate criterion with no artefact — a reader proved that of v1.43.0's
+first draft: every guard could check the instruction was still written, none could
+check a run obeyed it, and an audit a year later could reach no verdict either way.
+`grep -c '^hand:'` against `grep -c '^iter:'` is what makes the difference readable.
+
+**TASK is quoted, never paraphrased.** A run that restates the request in its own words
+after eight iterations has rewritten it, and the operator cannot see that happen. The
+quote is the one line the drift shows against.
+
+**SURFACED is the section that earns the hand-back.** Everything else is recoverable from
+the artefacts; what a run *learned by accident* is recoverable from nothing. A run that
+found a stale claim, corrected a number, or discovered a rule was never enforced puts it
+here even when it was fixed in passing — especially then.
+
+**DECISIONS WAITING are asked, not listed.** A question parked in a report is a question
+the operator answers days later, if at all. Ask it at the boundary, with options and a
+recommendation, in the same breath as the report. If there are none, the field prints
+`0` — [`gates.md`](gates.md)'s rule about absence applies here too.
+
+### AMBIGUITIES are computed from four registers the run already keeps
+
+Not judgement, and not a prompt to think harder — an unbounded *"is anything unclear?"*
+becomes a ritual sentence within three runs. Four sources, each read by a command:
+
+| Source | What it means | Read by |
+|---|---|---|
+| open `OQ-####` rows ([`documentation.md`](documentation.md)) | a question raised and never answered | `grep -cE '^\| OQ-[0-9]+' docs/OPEN_QUESTIONS.md` — **no file prints `— no register`, never `0`** |
+| carry-over rows whose home is unsettled | deferred into nothing ([`../templates/carryover.md`](../templates/carryover.md): `open`, `unresolved`, or a bare `backlog`) | `grep -cEi '\\|[[:space:]]*(open\\|unresolved\\|backlog)[[:space:]]*\\|' <ledger>` |
+| REQ rows whose check is `review` rather than a command | shipped on judgement, unverifiable by a machine | the brief's REQ table, *Verified by* column. The count `spec.md` prints is **checks**, not REQ rows — different units, and quoting one for the other is a borrowed number that does not fit |
+| source-ledger rows with **no source** | the run built on the absence of a document | the brief's ledger, rows whose *Source* cell is empty or parenthesised. `knowledge-sources.md` writes them `(none for X)` while `templates/brief.md` writes `none found`, so **a grep for either string alone returns a false zero** |
+
+The `Read by` column is the point of the table. Without it, *"each read by a command"* is a
+claim the section makes about itself and cannot keep — and one of the four greps would
+have returned zero for searching a string the source ledger's own doctrine never writes.
+
+Each prints its count **and its ids**. A count with no ids is a number nobody can act on,
+and **zero prints as zero** — silence and "I looked and found none" are the two states
+this file exists to keep apart.
+
+**One of the four is structurally zero at the gated boundary.** Stage 10's own gate
+already requires that no carry-over row is left unresolved, so there that count is zero
+**because a sibling clause compelled it**, not because the run looked. At an iteration
+close it is a real measurement. Print it either way, and at stage 10 print *why* it is
+zero — a number that had no choice is not evidence.
+
+**Why these four and not a fifth.** Every one is already written down by an earlier stage,
+so the hand-back reports rather than re-derives, and a run cannot quietly decide that
+nothing was unclear. Where a project keeps no open-questions register, that row prints
+`— no register` rather than `0`: an absent register and an empty one are different facts,
+and the second is the one worth acting on.
 
 ## Every number is borrowed
 

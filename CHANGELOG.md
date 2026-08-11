@@ -1,5 +1,106 @@
 # Changelog
 
+## v1.43.0 — the rail said where, and nothing said what happened
+
+A fourteen-iteration session on this repository ended each return with the same question
+from the operator: *what did you actually do?* The rail answered **where** the run was —
+one line, computed, correct — and nothing answered the rest. Everything else was
+recoverable from artefacts; what a run learned by accident was recoverable from nothing.
+
+### The hand-back
+
+At both boundaries — an iteration's close and stage 10's — the run now writes four
+sections and two lists:
+
+```
+TASK        the request as it was GIVEN, quoted from the brief
+PROGRESS    where the run stands against that request
+DONE        what was solved, each with its evidence
+SURFACED    what came up that nobody asked for
+
+DECISIONS WAITING  <n>   each as a question with options, asked HERE
+AMBIGUITIES        <n>   computed from four registers, with ids
+```
+
+**TASK is quoted, never paraphrased** — a run that restates the request in its own words
+after eight iterations has rewritten it, and the operator cannot see that happen.
+**DECISIONS WAITING are asked, not parked**: a question in a report is answered days
+later, if at all. And **AMBIGUITIES are computed**, from four registers an earlier stage
+already wrote — open `OQ-####` rows, carry-over rows with no home, REQ rows whose check is
+`review` rather than a command, and source-ledger rows reading *none found*. An unbounded
+*"is anything unclear?"* becomes a ritual sentence within three runs.
+
+**It is a gate criterion, not a good intention.** `progress.md` already carried one
+instruction with no gate behind it — *"copy it, tick it"* — and the v1.37.0 audit found
+that no run had ever obeyed it.
+
+### The reader found that this release built what it had just condemned
+
+A gate criterion with **no artefact**. Every guard read the doctrine files, so all any of
+them could establish was that the instruction was still written down — none could
+establish that a run obeyed it. The reader then constructed a conforming hand-back
+concealing a weakened test and showed that **nothing in the repository would notice**,
+and that an audit a year later could reach no verdict either way, because there would be
+no run records to check. This file's own diagnosis of *"copy it, tick it"* — a rung-1
+rule read as rung 3 — reproduced one level up.
+
+**The hand-back now has an address:** a `hand:` line in the run ledger, declared as its
+fourth shape. `grep -c '^hand:'` against `grep -c '^iter:'` is what makes a missing one
+readable.
+
+Six more, all verified by planting and watching `PASS`:
+
+- **`"hand-back"` as a bare substring could not tell a requirement from a mention** — a
+  gate reading *"the hand-back is OPTIONAL and may be skipped"* passed, in the release
+  whose entire argument is that it must be a criterion. Both gate guards now require the
+  normative phrase;
+- **the gate span was unbounded below** — the GATE is the last bullet, so a paragraph
+  after it answered for it;
+- **the template was every fence joined**, so a worked example — the likeliest next edit
+  to that section — would have answered for the template;
+- **the two lists were left to prose** while the four sections were read from the fence,
+  which is the split this release wrote a guard to forbid;
+- **the AMBIGUITIES subsection could be replaced by explicit judgement** and pass, keeping
+  the four words as *examples*;
+- and a relocated section was reported as a deletion.
+
+**Four doctrinal defects, not guard defects:**
+
+- *"at both boundaries"* named a pair this file defines as something else three sections
+  above — a reader resolving it there writes a hand-back at task start, where TASK is the
+  only field with content;
+- **the four ambiguity sources had no commands**, though the section claimed *"each read
+  by a command"* — and one of them would have grepped for a string the source ledger's own
+  doctrine never writes, returning a false zero;
+- **one register is structurally zero at the gated boundary**: stage 10's own gate already
+  forbids an unresolved carry-over row, so that count is zero because a sibling clause
+  compelled it. The section now says to print *why*;
+- and **`acceptance.md` — the file stage 10 actually opens — never mentioned the
+  hand-back**, while carrying every other criterion. Two surfaces were updated where four
+  state this gate.
+
+**Still true and stated rather than fixed:** `SURFACED` has no register behind it, and the
+doctrine calls it the section that earns the hand-back. *"Nothing surfaced"* remains a
+quiet decision. The `hand:` line records that a hand-back happened, never that it was
+complete.
+
+### Six predicates answered by their neighbours, all caught by their own probes
+
+- the four section names were read from the whole section, and `SURFACED` appears in the
+  sentence explaining why SURFACED matters — so renaming the template row left the guard
+  green. It now reads the **fenced template**;
+- `asked` appears in `SURFACED`'s own description (*"nobody **asked** for"*), so the
+  decisions check was answered by a neighbour;
+- and the section span was narrowed to `#{2,3}` by reflex, which cut the guard off from
+  the `###` subsection holding four of the things it checks. **The span follows the
+  subject, not a house style** — v1.42.0 narrowed a different span for the opposite
+  reason.
+
+Not one of these needed a reader. The neighbour-probe habit shipped one release earlier
+caught all three, which is the first evidence it does what it was written for.
+
+- Guards: 253 → **261**.
+
 ## v1.42.0 — a probe proves the phrasing its author had in mind
 
 Six times in one session a guard was defeated by **text that was not its subject**, and
