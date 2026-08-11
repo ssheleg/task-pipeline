@@ -1,5 +1,31 @@
 # Changelog
 
+## v1.45.0
+
+### Changed
+
+- **The body went 367 lines / 7514 tokens to 338 / 6088** — measured with
+  `cl100k`. The reference routing existed **three times**: a 36-row "Built-in
+  doctrine" table, a flat `## References` catalogue below it, and again in the
+  stage table's `Invoke` column. One home now — the routing table, keyed by the
+  stage that sends you there — and the four files that lived only in the flat
+  list gained rows so nothing lost its trigger.
+
+- **The description is 970 chars**, exactly the 5% headroom the canon asks for,
+  down from 1010. Getting there took three attempts: the validator locks the
+  `Not for:` exclusions and the verbs `adopt`/`harden` against the NOTRIG evals
+  from the 2026-08-03 design, and refused two rewordings before accepting one
+  in text nothing had locked.
+
+### Known gap
+
+- **The body is still 6088 tokens against a 5000 cap.** What remains is a
+  36-entry routing table and a five-step operating procedure, and both are what
+  the skill *is* — a body that indexes 32 references cannot be smaller than its
+  index. Cutting further would mean removing the routing this skill exists to
+  do. Recorded rather than papered over: the number is real and the canon's cap
+  does not have a clause for a skill whose body is a router.
+
 ## v1.44.0 — six lessons other projects paid for, carried home by the mechanism that exists for it
 
 `retro.publish` sends a skill-level lesson upstream as an issue. Six arrived in one day
