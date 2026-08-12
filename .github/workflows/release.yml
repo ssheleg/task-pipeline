@@ -41,6 +41,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ steps.t.outputs.tag }}
+          fetch-depth: 0   # the suite's tag-ancestry check cannot answer on a shallow clone
       # AFTER the tag is checked out, never before: run on `workflow_dispatch` and the
       # ref the workflow started from is not necessarily the commit being released.
       # Placed earlier, this step tested one commit and published another.
@@ -128,6 +129,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ steps.t.outputs.tag }}
+          fetch-depth: 0   # the suite's tag-ancestry check cannot answer on a shallow clone
 
       - uses: actions/setup-node@v4
         with:

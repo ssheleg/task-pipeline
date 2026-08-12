@@ -5974,8 +5974,11 @@ jobs:
               open(f, "w", encoding="utf-8").write(_p)
           EOF
           cd - >/dev/null
-          if python3 /tmp/vt1-copy/test/validate.py 2>&1 | grep -q "is spoken"; then
+          _out=$(python3 /tmp/vt1-copy/test/validate.py 2>&1 || true)
+          if printf '%s' "$_out" | grep -q "is spoken"; then
             echo "OK: validator FAILs — the number is taken by another lineage, and the merge is not the place to find out"
+          elif printf '%s' "$_out" | grep -q "shallow clone, ancestry unknowable"; then
+            echo "SKIP: shallow checkout — ancestry cannot be answered, so the collision cannot be staged"
           else
             echo "ERROR: a branch may claim a version another lineage already ships under"
             exit 1
