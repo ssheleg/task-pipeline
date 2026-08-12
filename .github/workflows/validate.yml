@@ -5952,7 +5952,9 @@ jobs:
           # and carrying a released version forward is legitimate — so a real collision
           # has to be built: a commit with no parent, tagged, and then claimed.
           SIDE=$(git commit-tree "$(git hash-object -t tree /dev/null)" -m "another lineage")
-          git tag v99.99.99 "$SIDE"
+          # -f, because a copy of a git WORKTREE carries .git as a pointer and this
+          # tag lands in the real repository. Verified once, the hard way.
+          git tag -f v99.99.99 "$SIDE" >/dev/null
           python3 - <<'EOF'
           import json, re
           for f, fn in (("package.json", lambda d: d.__setitem__("version", "99.99.99")),
