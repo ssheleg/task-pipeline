@@ -41,9 +41,11 @@ reviewer's.
 ## Contents
 
 - 1. Isolation
+- 1a. Another agent may be in this repository right now
 - 2. Workspace and ledger
 - 3. Models
 - 4. The task loop
+- 4a. A screen is the frame, implemented
 - 5. Final whole-branch review
 - 6. Integrate, then finish
 - GATE (auto)
@@ -92,6 +94,36 @@ on a sandbox permission error, say so plainly and work in place.
 download`), then run the test command from the brief's autonomy sweep. A dirty
 baseline makes every later failure ambiguous: report failures and let the operator
 decide whether to proceed.
+
+## 1a. Another agent may be in this repository right now
+
+Isolation above is about *your* passes not colliding with each other. This is about
+someone else's.
+
+**Check before you start, and check by looking rather than by assuming.** A second
+agent leaves traces: uncommitted changes you did not make, a branch that moved under
+you, a version number that was free an hour ago and is taken now. The cost is not
+hypothetical — one session measured four version collisions, a `files[]` entry dropped
+silently by a merge, and a test run that failed because a probe copied the tree while
+someone else was writing to it.
+
+**Two mechanisms, and they answer different questions.**
+
+1. **A worktree per agent, always.** Sharing a checkout is what turns two independent
+   changes into one corrupted state: a copy taken mid-write, an edit staged into
+   somebody else's commit, a branch switched under a running test. `git worktree add`
+   costs nothing and removes the class outright. Never work in a tree another agent is
+   editing, even briefly, even to "just check something".
+2. **A lease before any shared register.** Where the project has
+   `.claude/agent-sync.json`, the board, the decisions register, the open questions and
+   the roadmap are claimed before they are edited — that is what the file is for. Where
+   it does not exist, say so in the brief rather than discovering it at merge time.
+
+**What to do when you find the other agent mid-run:** stop, name what you found, and
+leave their work alone. Their uncommitted edits are not yours to stage, revert or
+stash. Your own committed work is safe; put a ref on it so a branch reset cannot lose
+it, and continue in a worktree of your own. Ending someone else's work to unblock
+yourself is the same asymmetry `residue.md` refuses, one layer up.
 
 ## 2. Workspace and ledger
 
@@ -391,6 +423,60 @@ When the review is clean — or every open finding is parked with a ruling at th
 
 Mark the todo complete, move on. Never start the next task while Critical/Important
 findings are neither fixed nor parked-with-ruling at the cap.
+
+## 4a. A screen is the frame, implemented
+
+When Figma is connected, a screen is not *informed by* the design file — it **is** the
+frame, in code. Values, structure and composition all come from the file, and the order
+of authority is fixed:
+
+| Question | Answer comes from |
+|---|---|
+| what the screen **does** — states, errors, empties | `super-ux`'s scenarios |
+| what it is **made of** — elements, hierarchy, layout, tokens | **the frame** |
+| how it **looks and moves** where the frame is silent | `sheleg-design` |
+
+`sheleg-design` runs **after** the file, never instead of it. It owns rhythm, motion and
+motion's degradation to stillness — the things a frame does not carry. Put it first and
+it invents what was already decided.
+
+**Five things this makes concrete.**
+
+1. **The composition is compared, not recalled.** A frame has a node tree
+   (`get_metadata`). Every node has a counterpart in the screen, and nothing is present
+   that the frame does not have. A missing element is incomplete; an invented one is a
+   divergence, not an improvement.
+2. **Layout is read, not eyeballed.** Auto-layout direction, gaps, padding and
+   constraints come from `get_design_context`. From a screenshot they are recovered
+   approximately, and approximate is indistinguishable from exact in a report.
+3. **A component with a Code Connect mapping is not rewritten.** If
+   `get_code_connect_map` names a code component for that node, the screen uses it.
+   Reimplementing it is a silent fork of the design system.
+4. **A token names its variable.** A raw hex or px where the file has a variable is a
+   token that has quietly split in two. `get_variable_defs` is the canon; a screenshot
+   is a way to *look*, never a way to *know*.
+5. **The frame is a contract at its own width.** It is one width and said nothing about
+   the others, so behaviour at other breakpoints — and states the frame does not draw,
+   like error, empty and loading — is a **decision that gets recorded**, not guessed.
+   Without this the rule is either unfollowable or vacuous.
+
+**When there is no frame for a screen — build it, name it, offer to draw it.**
+
+Figma is a recommendation like the graph and the wiki: its absence is named and never
+blocks. So the screen is built from `sheleg-design`'s style pack, the spec records
+*"no frame — source: sheleg-design"*, and the run **offers to draw the missing screens**
+into the file the brief already named. Concretely: which screens, where they land, what
+they are drawn from — so the operator sees the size before saying go.
+
+Drawing happens **only on an explicit go**, into the recorded destination, never into a
+new file. And whatever is drawn is **marked as coming from implementation** — its own
+page or a naming convention that says so. A designer opening the file must be able to
+tell what a person decided from what a run generated; an unmarked generated frame is the
+same false confidence as an unproven green.
+
+**Deviation is a line, not a silence.** Where the implementation must differ — a
+platform constraint, an accessibility floor, a breakpoint — write what and why.
+Otherwise *"built from the frame"* and *"built to look like it"* read identically.
 
 ## 5. Final whole-branch review
 

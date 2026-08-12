@@ -311,6 +311,11 @@ table substitute for that answer.
    its four registers with their ids. A run that cannot say what happened has not
    finished; it has stopped. This file is the one stage 10 opens, and it carried every
    other criterion while omitting this one for a release.
+12a. **Every finding closed in this run records which changed — the behaviour or
+   only the reporting.** One of two words per finding, `behaviour` or `reporting`,
+   beside its id. Reporting a gap honestly is not fixing it, and the two have
+   looked identical in every close-out that did not say which. A finding whose row
+   says `reporting` stays open on the board with its id; only `behaviour` closes it.
 13. **The run has given the environment back** ([`residue.md`](residue.md)) — all
    eight classes enumerated **by class, never by one tool**, everything this run
    started ended in dependency order, each teardown verified by **re-enumerating

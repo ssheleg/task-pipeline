@@ -303,6 +303,12 @@ Three things make the line worth writing rather than a habit:
 - **It records how many classes were enumerated.** `8/8` and `7/8, unlooked:
   containers` are different facts, and a run without container tooling must print
   the second rather than a clean zero it did not earn.
+- **`SURFACED: 0` is checked against what the run filed.** A run that opened a board
+  row, a carry-over row, an open question or a retro entry has provably surfaced
+  something; reporting zero contradicts its own artefacts, and that disagreement is
+  computable from the `Source` column every board row carries. The residual belongs
+  in the same sentence: a run can surface something, file it nowhere, report zero,
+  and **nothing will notice** — this check kills the silent zero, not the blind spot.
 - **It is a disclosure, never a ratchet.** No floor, no direction, no target. A
   build stage legitimately holding a worktree and a database prints `2` and
   passes; a run that tears its database down to make the number tidy and brings

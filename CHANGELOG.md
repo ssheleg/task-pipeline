@@ -1,5 +1,75 @@
 # Changelog
 
+## v1.48.0 — a screen is the frame implemented, and four mechanisms this project owed itself
+
+**A screen is the frame, implemented.** Until now Figma was an address and a link: the
+brief recorded which file, `screens.md` carried frame URLs, the linter checked they were
+not stale. Nothing said the screen is **built from** it. Now the order of authority is
+fixed — `super-ux` says what the screen does, the **frame** says what it is made of, and
+`sheleg-design` says how it looks and moves **where the frame is silent**, after the file
+and never instead of it.
+
+Made concrete rather than aspirational: the composition is compared against the node
+tree, not recalled; layout is read from `get_design_context`, because from a screenshot
+it is recovered approximately and approximate is indistinguishable from exact in a
+report; a node with a Code Connect mapping is used, not reimplemented, since a rewrite
+is a silent fork of the design system; and a raw hex where a variable exists is a token
+that has quietly split in two.
+
+With the honest boundary that keeps it followable: **a frame is one width.** Behaviour
+at other breakpoints, and states the frame never draws — error, empty, loading — are
+decisions that get **recorded**, not guessed. Without that line the rule is broken on
+day one and then ignored entirely.
+
+**No frame for a screen: build it, name it, offer to draw it, mark what gets drawn.**
+Figma stays a recommendation whose absence is named and never blocks. The screen comes
+from the style pack, the spec says so screen by screen, and the run offers to draw the
+missing frames into the file the brief already named — which screens, where, from what,
+so the size is visible before anyone says go. Drawing happens only on an explicit go,
+and whatever is drawn is marked as coming from implementation. **A designer must be able
+to tell a decision from a generation**; an unmarked generated frame is the same false
+confidence as an unproven green.
+
+**Another agent may be in this repository right now.** Isolation used to mean *your*
+passes not colliding with each other. It now also means someone else's: a worktree per
+agent, always, because sharing a checkout is what turns two independent changes into one
+corrupted state — a copy taken mid-write, an edit staged into another commit, a branch
+switched under a running test. And a lease before any shared register where the project
+carries `.claude/agent-sync.json`, because a worktree separates files and answers nothing
+about who may edit the board.
+
+With the asymmetry that keeps the rule from becoming a licence: **on finding the other
+agent mid-run, leave their work alone.** Their uncommitted edits are not yours to stage,
+revert or stash. Put a ref on your own committed work so a branch reset cannot lose it,
+and continue in a worktree of your own — ending someone else's work to unblock yours is
+what `residue.md` refuses, one layer up.
+
+This is measured, not feared. One session produced four version collisions, a `files[]`
+entry dropped silently by a merge and caught only by the validator, and a test run that
+failed because a probe copied the tree while another agent was writing to it. This
+repository now carries the coordination config it was telling every other project to keep.
+
+**Four mechanisms this project had decided on and never built.**
+
+`DEC-0001` ruled that `SURFACED: 0` is checked against what the run filed — a run that
+opened a board row and reports nothing surfaced contradicts its own artefacts, and the
+`Source` column makes that computable. The decision was recorded and nothing implemented
+it, which is R-006's own subject applied to a decision instead of a finding. It is a
+check now, and it carries its residual in the same breath: it kills the silent zero, not
+the blind spot.
+
+`R-006` has been in force for four releases because nothing could read the distinction
+it draws. Stage 10 now records, per finding, **one of two words** — `behaviour` or
+`reporting`. A row saying `reporting` stays open on the board; only `behaviour` closes it.
+
+**The release path now runs the suite it advertises.** Two releases shipped over a red
+suite because the negatives ran on the PR and never on the tag. A tag is not evidence.
+
+**And a version number already spoken for now fails at the commit rather than at the
+merge.** Four collisions in one session, each costing a renumber of a whole branch.
+
+Guards: 294 → **309**.
+
 ## v1.47.2 — the body stopped retelling its own references
 
 `Prerequisites` was 2585 of the body's 6585 tokens, and most of it was a second

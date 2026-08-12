@@ -35,7 +35,7 @@ MIN_PROPS = 9
 # which is the floor doing half its job: it would have caught a total collapse and
 # not the loss of a third of the suite. Set it to the real count, and treat a
 # mismatch as a finding rather than as noise to be lowered away.
-MIN_EXPECTED = 294
+MIN_EXPECTED = 309
 
 
 def parse_steps(path):
@@ -194,9 +194,15 @@ def main(argv):
         # The trap this runner exists to avoid: a corruption that quietly changed
         # nothing still makes the validator pass, which reads as "the guard is
         # broken" when in fact the *test* is. Tell them apart.
+        # A probe that DECLARED a skip changed nothing on purpose. Reading that as a
+        # corruption is the same conflation one layer up: "could not look" reported as
+        # "the guard is broken". Skips get their own status so they stay visible.
+        skipped = r.returncode == 0 and "SKIP:" in r.stdout
         noop = cdir and os.path.isdir(cdir) and not differs_from_repo(cdir)
-        if noop:
+        if noop and not skipped:
             status, bucket = "BROKEN", broken
+        elif skipped:
+            status, bucket = "SKIP", None
         elif passed:
             status, bucket = "PASS", None
         else:

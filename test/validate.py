@@ -4714,6 +4714,135 @@ except ImportError:
     _UNLOOKED.append("skip: workflow YAML parse — PyYAML not installed")
 
 
+# --- what this session paid for, made mechanical -----------------------------
+# 1. DEC-0001. SURFACED is the one hand-back field with no lower bound; the decision
+#    was recorded and nothing implemented it for a release, which is R-006's subject
+#    applied to a decision instead of a finding.
+_PROG_D = os.path.join(_skill_dir, "references", "progress.md")
+if os.path.isfile(_PROG_D):
+    _pg = _flatten(_LIVING_TEXT.get(os.path.relpath(_PROG_D, ROOT))
+                   or open(_PROG_D, encoding="utf-8").read(), lower=True)
+    if "is checked against what the run filed" not in _pg:
+        fail("references/progress.md: `SURFACED: 0` is no longer checked against the "
+             "artefacts the run created. A field with no lower bound decays to a zero "
+             "nobody reads, which is worse than no field")
+    if "nothing will notice" not in _pg:
+        fail("references/progress.md: the SURFACED check lost its residual. It kills the "
+             "silent zero and not the blind spot, and a check sold as more than it is "
+             "buys exactly the false confidence this file exists to refuse")
+
+# 2. R-006 made readable. "Reported the gap" and "closed the gap" have looked identical
+#    in every close-out that did not say which.
+if os.path.isfile(_ACC_D):
+    _a12a = re.search(r"^12a\.\s(.*?)(?=^\S)", _acc_t, re.S | re.M)
+    if _a12a is None:
+        fail("references/acceptance.md: stage 10 no longer records, per finding, whether "
+             "the behaviour or only the reporting changed. R-006 has been in force for "
+             "four releases because nothing could read that distinction")
+    # The PAIR, not two loose words. `reporting` occurs again lower in the same item —
+    # "a finding whose row says `reporting` stays open" — so a check for both words
+    # present was answered by that second mention while the field itself was gutted.
+    elif "behaviour or reporting" not in _flatten(_a12a.group(1), lower=True):
+        fail("references/acceptance.md criterion 12a: the field no longer offers both "
+             "values as a pair. One value alone cannot distinguish anything, and the word "
+             "appearing elsewhere in the item is not the field offering it")
+
+# 3. A tag is not evidence. Two releases shipped over a red suite because the release
+#    path never ran the negatives — the PR ran them and the tag did not.
+_REL_Y = os.path.join(ROOT, ".github", "workflows", "release.yml")
+if os.path.isfile(_REL_Y):
+    _ry = open(_REL_Y, encoding="utf-8").read()
+    # In a LIVE step, not anywhere in the text: `# run: npm run test:all` keeps the
+    # phrase and runs nothing, which is this file's own recurring class one level out.
+    try:
+        import yaml as _y
+        _live = any("npm run test:all" in (_st.get("run") or "")
+                    for _j in (_y.safe_load(_ry) or {}).get("jobs", {}).values()
+                    for _st in (_j.get("steps") or []))
+    except Exception:
+        _live = None
+    if _live is False or (_live is None and "npm run test:all" not in _ry):
+        fail("`.github/workflows/release.yml` publishes without running `npm run test:all`. "
+             "A release that does not run the suite it advertises can ship a red one, and "
+             "has")
+
+# 4. A version number already spoken for. Four collisions in one session, each found at
+#    merge time, each costing a renumber of an entire branch.
+try:
+    _pkgv = json.load(open(os.path.join(ROOT, "package.json"), encoding="utf-8"))["version"]
+    _tagged = subprocess.run(["git", "-C", ROOT, "rev-list", "-n", "1", f"v{_pkgv}"],
+                             capture_output=True, text=True)
+    _head = subprocess.run(["git", "-C", ROOT, "rev-parse", "HEAD"],
+                           capture_output=True, text=True)
+    # A tag that does not exist yet is the normal state of every commit before a
+    # release — a pass, not a refusal to look. Reporting it as unlooked inflates the
+    # one disclosure whose whole job is to be believed.
+    if _head.returncode != 0:
+        _UNLOOKED.append(f"skip: version v{_pkgv} vs its tag — no git history here")
+    elif _tagged.returncode != 0:
+        pass
+    # A collision is DIVERGENCE, not difference. A commit before the tag carries the
+    # version it will ship under; a commit after it carries the version it shipped,
+    # until the next bump — flagging either would make `main` red after every release.
+    # What is wrong is another lineage claiming the same number.
+    elif _tagged.stdout.strip() and _tagged.stdout.strip() != _head.stdout.strip() and all(
+            subprocess.run(["git", "-C", ROOT, "merge-base", "--is-ancestor", _a, _b],
+                           capture_output=True).returncode != 0
+            for _a, _b in ((_head.stdout.strip(), _tagged.stdout.strip()),
+                           (_tagged.stdout.strip(), _head.stdout.strip()))):
+        fail(f"package.json claims {_pkgv} and tag v{_pkgv} already points at "
+             f"{_tagged.stdout.strip()[:7]}, which is not this commit. The number is spoken "
+             "for; pick the next one before the merge finds out for you")
+except Exception as _e:
+    _UNLOOKED.append(f"skip: version-vs-tag ({type(_e).__name__})")
+
+
+# 5. A screen is the frame, implemented. Three halves, and each alone is a different
+#    rule: the order of authority, the honest width, and what happens with no frame.
+_BLD_D = os.path.join(_skill_dir, "references", "build.md")
+if os.path.isfile(_BLD_D):
+    _scr = _section(_BLD_D, r"4a\. A screen is the frame, implemented")
+    if _scr is None:
+        fail("references/build.md: no section making a screen the implemented frame. "
+             "Without it Figma is an address and a link, which is what it was")
+    else:
+        _sf = _flatten(_scr, lower=True)
+        if "runs after the file, never instead of it" not in _sf:
+            fail("references/build.md 4a: the order of authority is gone. sheleg-design "
+                 "before the frame invents what the frame already decided")
+        if "contract at its own width" not in _sf:
+            fail("references/build.md 4a: the frame is stated as a contract without its "
+                 "width. A frame is one width and said nothing about the others; a rule "
+                 "that ignores that is either unfollowable or vacuous")
+        if not ("offers to draw" in _sf and "marked as coming from implementation" in _sf):
+            fail("references/build.md 4a: the no-frame branch lost a half. Building and "
+                 "naming without offering leaves the file drifting; offering without "
+                 "marking puts generated frames where a designer reads decisions")
+
+
+# 6. Another agent in the same repository. Two mechanisms answering different
+#    questions, and the asymmetry that keeps the second one from becoming a licence.
+if os.path.isfile(_BLD_D):
+    _oth = _section(_BLD_D, r"1a\. Another agent may be in this repository right now")
+    if _oth is None:
+        fail("references/build.md: nothing tells a run that another agent may hold this "
+             "repository. Measured cost of not saying it: four version collisions, a "
+             "manifest entry lost to a merge, and a test run corrupted by a copy taken "
+             "mid-write")
+    else:
+        _of = _flatten(_oth, lower=True)
+        if "a worktree per agent" not in _of:
+            fail("references/build.md 1a: the worktree rule is gone. Sharing a checkout is "
+                 "what turns two independent changes into one corrupted state")
+        if "a lease before any shared register" not in _of:
+            fail("references/build.md 1a: the lease rule is gone. A worktree separates "
+                 "files and answers nothing about who may edit the board")
+        if "leave their work alone" not in _of:
+            fail("references/build.md 1a: what to do on finding the other agent mid-run is "
+                 "gone. Ending someone else's work to unblock your own is the asymmetry "
+                 "residue.md refuses, one layer up")
+
+
 if errors:
     print("FAIL: task-pipeline structure invalid")
     for e in errors:
