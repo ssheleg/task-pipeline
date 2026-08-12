@@ -66,9 +66,17 @@ jobs:
       - name: Extract this version's CHANGELOG section
         run: |
           set -eu
+          # Accept every heading shape this family has used: `## v1.2.3`,
+          # `## 1.2.3`, `## [1.2.3] - date`, `## [v1.2.3]`. One pattern, copied to all
+          # eight members, because a mismatch fails the job AFTER the tag is public --
+          # the tag then looks delivered while nothing shipped. `super-ux` lost v0.34.1
+          # to `## [0.34.1]`; `agent-sync` lost three releases to the same class.
+          # The terminator requires a full semver, so a `## Fixed` subsection cannot end
+          # the extraction early. Keep it as permissive as the house validator, or the
+          # two gates disagree about what a heading is.
           awk -v v="${{ steps.t.outputs.ver }}" '
-            $0 ~ "^## v" v "([^0-9]|$)" {f=1; next}
-            /^## v/ {f=0}
+            $0 ~ "^## \\[?v?" v "\\]?([^0-9]|$)" {f=1; next}
+            /^## \[?v?[0-9]+\.[0-9]+\.[0-9]+/ {f=0}
             f {print}
           ' CHANGELOG.md > /tmp/notes.md
           test -s /tmp/notes.md || { echo "no CHANGELOG section for ${{ steps.t.outputs.ver }}"; exit 1; }
