@@ -5,7 +5,7 @@ explains the machine — what routes a request into it, what each stage refuses 
 let past, and what makes any claim it prints believable. The README sells it and
 tells you how to install it; this file tells you how it thinks.
 
-> **Version 1.47.1.** The "What changed" section at the bottom carries the last
+> **Version 1.48.0.** The "What changed" section at the bottom carries the last
 > few releases. Everything above it describes the pipeline as it is *now*, not as
 > it was designed.
 
@@ -238,7 +238,7 @@ This is the part most pipelines skip, and it is the reason this one is trustwort
 rather than merely tidy.
 
 **Every guard is proven against a planted defect.** `npm run test:all` breaks the
-thing each of the **294** checks is about, and requires that check to reject it. A
+thing each of the **304** checks is about, and requires that check to reject it. A
 guard that has never been watched failing is not a guard; it is a comment.
 
 **The neighbour probe.** A check has a *subject* — the rule it is about — and
@@ -290,6 +290,15 @@ a run diverges  →  retro entry  →  retro.publish  →  upstream issue
 ---
 
 ## What changed, by version
+
+### v1.48.0 — a screen is the frame implemented, and four mechanisms this project owed itself
+Figma stops being an address and becomes the source: composition compared against the
+node tree, layout read rather than eyeballed, Code Connect used rather than rewritten,
+tokens naming their variables — with the honest boundary that a frame is one width, and
+a no-frame branch that builds, names, offers to draw, and marks what it drew. Plus the
+SURFACED contradiction check DEC-0001 decided and nobody built, R-006 made readable, a
+release path that runs its own suite, and a version guard that fails at the commit
+rather than at the merge. Guards: 294 → 304.
 
 ### v1.47.1 — the fixes a reader found, which three releases shipped without
 Three releases went out from another session while this branch was reviewed, and

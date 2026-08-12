@@ -54,6 +54,13 @@ give the install line and stop; don't improvise a half-chain.
 5. **Run the linter** (`/ux-lint`, i.e. `python3 docs/ux/lint.py`). It must pass:
    no drift, no orphans, no broken traces, no stale Figma links.
 
+**The screen's source of truth is recorded here, not assumed.** Figma on → the frame
+supplies composition, layout and tokens, and `sheleg-design` supplies only what the
+frame is silent about. Figma off, or no frame for this screen → the style pack is the
+source and the spec says so, screen by screen. A screen whose values were taken from a
+screenshot is named as such: *sighted* and *read from the file* are different claims
+([`build.md`](build.md) → *A screen is the frame, implemented*).
+
 These skills are **idempotent** — extend the existing `docs/ux/` layers, never
 rebuild them. If the chain already exists and is validated (typically when the run
 entered from super-ux), verify it and embed it; build only what's missing.

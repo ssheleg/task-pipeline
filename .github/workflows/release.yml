@@ -28,6 +28,13 @@ jobs:
     permissions:
       contents: write
     steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '20'}
+      # A tag is not evidence. Two releases went out over a red suite because
+      # nothing on this path ran the negatives — the PR ran them, the tag did not.
+      - name: The suite this release claims
+        run: npm run test:all
       - name: Resolve the tag to release
         id: t
         run: |

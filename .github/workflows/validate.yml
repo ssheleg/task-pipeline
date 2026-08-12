@@ -5848,3 +5848,197 @@ jobs:
             echo "ERROR: a legitimate exception in an unrelated rule failed the suite — false positive"
             exit 1
           fi
+      - name: Negative self-test (the SURFACED zero stops being checked against what the run filed)
+        run: |
+          set -eu
+          rm -rf /tmp/sf1-copy && cp -R . /tmp/sf1-copy
+          python3 - <<'EOF'
+          p = "/tmp/sf1-copy/plugins/task-pipeline/skills/task-pipeline/references/progress.md"
+          t = open(p, encoding="utf-8").read()
+          n = 'is checked against what the run filed'
+          assert n in t, "PLANT DID NOT LAND: sf1"
+          _planted = t.replace(n, 'is worth writing carefully', 1)
+          assert _planted != t, "PLANT DID NOT LAND: sf1"
+          open(p, "w", encoding="utf-8").write(_planted)
+          EOF
+          if python3 /tmp/sf1-copy/test/validate.py 2>&1 | grep -q 'no longer checked against the artefacts'; then
+            echo "OK: validator FAILs — the one hand-back field with no lower bound needs the check DEC-0001 decided"
+          else
+            echo "ERROR: SURFACED went back to a zero nobody can disagree with"
+            exit 1
+          fi
+      - name: Negative self-test (the SURFACED check loses the residual that keeps it honest)
+        run: |
+          set -eu
+          rm -rf /tmp/sf2-copy && cp -R . /tmp/sf2-copy
+          python3 - <<'EOF'
+          p = "/tmp/sf2-copy/plugins/task-pipeline/skills/task-pipeline/references/progress.md"
+          t = open(p, encoding="utf-8").read()
+          n = 'nothing will notice'
+          assert n in t, "PLANT DID NOT LAND: sf2"
+          _planted = t.replace(n, 'the run is done', 1)
+          assert _planted != t, "PLANT DID NOT LAND: sf2"
+          open(p, "w", encoding="utf-8").write(_planted)
+          EOF
+          if python3 /tmp/sf2-copy/test/validate.py 2>&1 | grep -q 'lost its residual'; then
+            echo "OK: validator FAILs — a check sold as more than it is buys false confidence"
+          else
+            echo "ERROR: the check now reads as coverage it does not have"
+            exit 1
+          fi
+      - name: Negative self-test (the behaviour-or-reporting field loses one of its two values)
+        run: |
+          set -eu
+          rm -rf /tmp/r6a-copy && cp -R . /tmp/r6a-copy
+          python3 - <<'EOF'
+          p = "/tmp/r6a-copy/plugins/task-pipeline/skills/task-pipeline/references/acceptance.md"
+          t = open(p, encoding="utf-8").read()
+          n = 'One of two words per finding, `behaviour` or `reporting`,'
+          assert n in t, "PLANT DID NOT LAND: r6a"
+          _planted = t.replace(n, 'One word per finding, `behaviour`,', 1)
+          assert _planted != t, "PLANT DID NOT LAND: r6a"
+          open(p, "w", encoding="utf-8").write(_planted)
+          EOF
+          if python3 /tmp/r6a-copy/test/validate.py 2>&1 | grep -q 'both values as a pair'; then
+            echo "OK: validator FAILs — one value cannot distinguish a fix from a note"
+          else
+            echo "ERROR: R-006 got a field that cannot answer the question it exists for"
+            exit 1
+          fi
+      - name: Negative self-test (criterion 12a is deleted outright)
+        run: |
+          set -eu
+          rm -rf /tmp/r6b-copy && cp -R . /tmp/r6b-copy
+          python3 - <<'EOF'
+          p = "/tmp/r6b-copy/plugins/task-pipeline/skills/task-pipeline/references/acceptance.md"
+          t = open(p, encoding="utf-8").read()
+          n = '12a. **Every finding closed in this run records which changed'
+          assert n in t, "PLANT DID NOT LAND: r6b"
+          _planted = t.replace(n, '12z. **Something else entirely', 1)
+          assert _planted != t, "PLANT DID NOT LAND: r6b"
+          open(p, "w", encoding="utf-8").write(_planted)
+          EOF
+          if python3 /tmp/r6b-copy/test/validate.py 2>&1 | grep -q 'no longer records, per finding'; then
+            echo "OK: validator FAILs — R-006 has been in force for four releases with nothing able to read it"
+          else
+            echo "ERROR: the distinction between fixing and reporting vanished and every close-out still passed"
+            exit 1
+          fi
+      - name: Negative self-test (the release path stops running the suite it advertises)
+        run: |
+          set -eu
+          rm -rf /tmp/rel1-copy && cp -R . /tmp/rel1-copy
+          python3 - <<'EOF'
+          p = "/tmp/rel1-copy/.github/workflows/release.yml"
+          t = open(p, encoding="utf-8").read()
+          n = 'npm run test:all'
+          assert n in t, "PLANT DID NOT LAND: rel1"
+          _planted = t.replace(n, 'npm test', 1)
+          assert _planted != t, "PLANT DID NOT LAND: rel1"
+          open(p, "w", encoding="utf-8").write(_planted)
+          EOF
+          if python3 /tmp/rel1-copy/test/validate.py 2>&1 | grep -q 'publishes without running'; then
+            echo "OK: validator FAILs — a tag is not evidence"
+          else
+            echo "ERROR: the release path can ship a red suite again, which it has done twice"
+            exit 1
+          fi
+      - name: Negative self-test (a version number already spoken for by a tag)
+        run: |
+          set -eu
+          rm -rf /tmp/vt1-copy && cp -R . /tmp/vt1-copy
+          python3 - <<'EOF'
+          import json, subprocess
+          p = "/tmp/vt1-copy/package.json"
+          d = json.load(open(p, encoding="utf-8"))
+          tags = subprocess.run(["git", "-C", "/tmp/vt1-copy", "tag", "-l", "v*"],
+                                capture_output=True, text=True).stdout.split()
+          assert tags, "PLANT DID NOT LAND: vt1 — no tags in this checkout"
+          old = d["version"]
+          d["version"] = sorted(tags)[-1].lstrip("v")
+          assert d["version"] != old, "PLANT DID NOT LAND: vt1 — already claims that tag"
+          json.dump(d, open(p, "w", encoding="utf-8"), indent=2, ensure_ascii=False)
+          open(p, "a", encoding="utf-8").write("\n")
+          EOF
+          if python3 /tmp/vt1-copy/test/validate.py 2>&1 | grep -q "is spoken"; then
+            echo "OK: validator FAILs — the number is taken, and the merge is not the place to find out"
+          else
+            echo "ERROR: a branch may claim a version another commit already ships under"
+            exit 1
+          fi
+      - name: Negative self-test (the design skill is allowed to run before the file it should follow)
+        run: |
+          set -eu
+          rm -rf /tmp/fig1-copy && cp -R . /tmp/fig1-copy
+          python3 - <<'EOF'
+          p = "/tmp/fig1-copy/plugins/task-pipeline/skills/task-pipeline/references/build.md"
+          t = open(p, encoding="utf-8").read()
+          n = 'runs **after** the file, never instead of it'
+          assert n in t, "PLANT DID NOT LAND: fig1"
+          _planted = t.replace(n, 'is also worth consulting', 1)
+          assert _planted != t, "PLANT DID NOT LAND: fig1"
+          open(p, "w", encoding="utf-8").write(_planted)
+          EOF
+          if python3 /tmp/fig1-copy/test/validate.py 2>&1 | grep -q 'order of authority is gone'; then
+            echo "OK: validator FAILs — sheleg-design after the frame, never instead of it"
+          else
+            echo "ERROR: the visual skill may now invent what the frame already decided"
+            exit 1
+          fi
+      - name: Negative self-test (the frame becomes a contract without a width)
+        run: |
+          set -eu
+          rm -rf /tmp/fig2-copy && cp -R . /tmp/fig2-copy
+          python3 - <<'EOF'
+          p = "/tmp/fig2-copy/plugins/task-pipeline/skills/task-pipeline/references/build.md"
+          t = open(p, encoding="utf-8").read()
+          n = 'contract at its own width'
+          assert n in t, "PLANT DID NOT LAND: fig2"
+          _planted = t.replace(n, 'contract', 1)
+          assert _planted != t, "PLANT DID NOT LAND: fig2"
+          open(p, "w", encoding="utf-8").write(_planted)
+          EOF
+          if python3 /tmp/fig2-copy/test/validate.py 2>&1 | grep -q 'without its'; then
+            echo "OK: validator FAILs — a frame is one width and said nothing about the others"
+          else
+            echo "ERROR: a rule that cannot be followed at any other breakpoint shipped as if it could"
+            exit 1
+          fi
+      - name: Negative self-test (the missing-frame branch loses the offer to draw)
+        run: |
+          set -eu
+          rm -rf /tmp/fig3-copy && cp -R . /tmp/fig3-copy
+          python3 - <<'EOF'
+          p = "/tmp/fig3-copy/plugins/task-pipeline/skills/task-pipeline/references/build.md"
+          t = open(p, encoding="utf-8").read()
+          n = 'offers to draw'
+          assert n in t, "PLANT DID NOT LAND: fig3"
+          _planted = t.replace(n, 'mentions', 1)
+          assert _planted != t, "PLANT DID NOT LAND: fig3"
+          open(p, "w", encoding="utf-8").write(_planted)
+          EOF
+          if python3 /tmp/fig3-copy/test/validate.py 2>&1 | grep -q 'lost a half'; then
+            echo "OK: validator FAILs — building and naming without offering leaves the file drifting"
+          else
+            echo "ERROR: the design file drifts from the product with nobody proposing to close it"
+            exit 1
+          fi
+      - name: Negative self-test (generated frames stop being marked as generated)
+        run: |
+          set -eu
+          rm -rf /tmp/fig4-copy && cp -R . /tmp/fig4-copy
+          python3 - <<'EOF'
+          p = "/tmp/fig4-copy/plugins/task-pipeline/skills/task-pipeline/references/build.md"
+          t = open(p, encoding="utf-8").read()
+          n = 'marked as coming from implementation'
+          assert n in t, "PLANT DID NOT LAND: fig4"
+          _planted = t.replace(n, 'added', 1)
+          assert _planted != t, "PLANT DID NOT LAND: fig4"
+          open(p, "w", encoding="utf-8").write(_planted)
+          EOF
+          if python3 /tmp/fig4-copy/test/validate.py 2>&1 | grep -q 'lost a half'; then
+            echo "OK: validator FAILs — a designer must tell a decision from a generation"
+          else
+            echo "ERROR: an unmarked generated frame reads as a design decision, which is the same false confidence as an unproven green"
+            exit 1
+          fi
