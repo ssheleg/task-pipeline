@@ -5951,7 +5951,10 @@ jobs:
           # A collision is DIVERGENCE. Every tag in this repo is an ancestor of main,
           # and carrying a released version forward is legitimate — so a real collision
           # has to be built: a commit with no parent, tagged, and then claimed.
-          SIDE=$(git commit-tree "$(git hash-object -t tree /dev/null)" -m "another lineage")
+          # Identity inline: a CI runner has none configured and commit-tree exits 128.
+          # Green locally, red in CI — the environment dependence B-066 is about, mine.
+          SIDE=$(git -c user.email=t@t -c user.name=t commit-tree \
+                   "$(git hash-object -t tree /dev/null)" -m "another lineage")
           # -f, because a copy of a git WORKTREE carries .git as a pointer and this
           # tag lands in the real repository. Verified once, the hard way.
           git tag -f v99.99.99 "$SIDE" >/dev/null
