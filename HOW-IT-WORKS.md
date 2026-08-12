@@ -238,7 +238,7 @@ This is the part most pipelines skip, and it is the reason this one is trustwort
 rather than merely tidy.
 
 **Every guard is proven against a planted defect.** `npm run test:all` breaks the
-thing each of the **293** checks is about, and requires that check to reject it. A
+thing each of the **294** checks is about, and requires that check to reject it. A
 guard that has never been watched failing is not a guard; it is a comment.
 
 **The neighbour probe.** A check has a *subject* — the rule it is about — and
@@ -310,7 +310,7 @@ makes it true, and the honest negative is a result. **Proportionate verification
 the deliverable is the working result and the check is how you know — scaled to
 `sev × blast`, never by cutting the floor. **The improvement iteration**: a published
 issue resolves when behaviour changed and its close names the address; unworked ones
-accumulate visibly rather than being triaged into silence. Guards: 275 → 293.
+accumulate visibly rather than being triaged into silence. Guards: 275 → 291.
 
 ### v1.45.1 / v1.45.0 — shipped from another session while this branch was paused
 The reference routing existed three times over and was cut to one home; the guard

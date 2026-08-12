@@ -4618,8 +4618,14 @@ if os.path.isfile(_RES_D):
         if _needle not in _rt:
             fail(_msg)
             continue
-        _sent = next((_x for _x in re.split(r"(?<=[.!?]) ", _rt) if _needle in _x), "")
-        _hit = re.search(_EXCEPTION_MARKER, _sent)
+        # The SPAN, not the sentence. Criterion 13's guard reads its whole multi-line
+        # item; this one split the file into sentences and read only the one holding
+        # the needle, so a carve-out phrased as the NEXT sentence — "…never becomes
+        # spent. Except when a container has been idle for a week." — was invisible.
+        # A weaker copy of the guard it was written to mirror.
+        _span = next((_p for _p in _paragraphs(_rt_raw)
+                      if _needle in _flatten(_p, lower=True)), "")
+        _hit = re.search(_EXCEPTION_MARKER, _flatten(_span, lower=True))
         if _hit:
             fail(f"references/residue.md: `{_needle}` still reads, and an exception "
                  f"marker (`{_hit.group(1)}`) sits in the same sentence. An absolute "

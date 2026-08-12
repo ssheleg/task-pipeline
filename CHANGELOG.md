@@ -38,7 +38,7 @@ Also: the owner-row check went through `_row_cells` instead of a hand-rolled reg
 that helper's own docstring asks; and a reflow that fixed a 157-character line had
 orphaned two words onto a five-character one.
 
-Guards: 291 → **293**.
+Guards: 291 → **294**.
 
 ## v1.46.0 — what a run leaves running, what "done" costs to say, and what a check is for
 
@@ -98,7 +98,7 @@ nothing is deleted, because the number is what the CHANGELOG points at. The queu
 run pulls from when it finishes early is that pile, then the board, then the open
 questions.
 
-Guards: 275 → **293**, each still proven against a planted defect — including a
+Guards: 275 → **291**, each still proven against a planted defect — including a
 neighbour probe that caught a defect in one of this release's own guards on its
 first use: the criterion-13 check scoped *to the next heading* rather than *to the
 item*, so a needle parked in between answered for the rule.
