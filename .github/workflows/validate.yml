@@ -5947,30 +5947,32 @@ jobs:
         run: |
           set -eu
           rm -rf /tmp/vt1-copy && cp -R . /tmp/vt1-copy
+          cd /tmp/vt1-copy
+          # A collision is DIVERGENCE. Every tag in this repo is an ancestor of main,
+          # and carrying a released version forward is legitimate — so a real collision
+          # has to be built: a commit with no parent, tagged, and then claimed.
+          SIDE=$(git commit-tree "$(git hash-object -t tree /dev/null)" -m "another lineage")
+          git tag v99.99.99 "$SIDE"
           python3 - <<'EOF'
-          import json, subprocess
-          p = "/tmp/vt1-copy/package.json"
-          d = json.load(open(p, encoding="utf-8"))
-          tags = subprocess.run(["git", "-C", "/tmp/vt1-copy", "tag", "-l", "v*"],
-                                capture_output=True, text=True).stdout.split()
-          # A checkout with no tags is a precondition absent, not a plant that failed —
-          # a shallow CI fetch has none. Say which, and let the step pass as a skip.
-          if not tags:
-              open("/tmp/vt1-skip", "w").write("no tags")
-          else:
-              old = d["version"]
-              d["version"] = sorted(tags)[-1].lstrip("v")
-              assert d["version"] != old, "PLANT DID NOT LAND: vt1 — already claims that tag"
-              json.dump(d, open(p, "w", encoding="utf-8"), indent=2, ensure_ascii=False)
-              open(p, "a", encoding="utf-8").write("\n")
+          import json, re
+          for f, fn in (("package.json", lambda d: d.__setitem__("version", "99.99.99")),
+                        (".claude-plugin/marketplace.json", lambda d: d["plugins"][0].__setitem__("version", "99.99.99")),
+                        ("plugins/task-pipeline/.claude-plugin/plugin.json", lambda d: d.__setitem__("version", "99.99.99"))):
+              d = json.load(open(f, encoding="utf-8")); fn(d)
+              json.dump(d, open(f, "w", encoding="utf-8"), indent=2, ensure_ascii=False)
+              open(f, "a", encoding="utf-8").write("\n")
+          for f, pat, rep in (("SKILL-CARD.md", r"(\| \*\*Version\*\* \| )[\d.]+", r"\g<1>99.99.99"),
+                              ("CHANGELOG.md", r"^## v[\d.]+", "## v99.99.99")):
+              t = open(f, encoding="utf-8").read()
+              _p = re.sub(pat, rep, t, count=1, flags=re.M)
+              assert _p != t, "PLANT DID NOT LAND: vt1 " + f
+              open(f, "w", encoding="utf-8").write(_p)
           EOF
-          if [ -f /tmp/vt1-skip ]; then
-            rm -f /tmp/vt1-skip
-            echo "SKIP: this checkout carries no v* tags, so the collision cannot be staged here"
-          elif python3 /tmp/vt1-copy/test/validate.py 2>&1 | grep -q "is spoken"; then
-            echo "OK: validator FAILs — the number is taken, and the merge is not the place to find out"
+          cd - >/dev/null
+          if python3 /tmp/vt1-copy/test/validate.py 2>&1 | grep -q "is spoken"; then
+            echo "OK: validator FAILs — the number is taken by another lineage, and the merge is not the place to find out"
           else
-            echo "ERROR: a branch may claim a version another commit already ships under"
+            echo "ERROR: a branch may claim a version another lineage already ships under"
             exit 1
           fi
       - name: Negative self-test (the design skill is allowed to run before the file it should follow)
