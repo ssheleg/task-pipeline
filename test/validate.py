@@ -4777,8 +4777,16 @@ try:
     # A tag that does not exist yet is the normal state of every commit before a
     # release — a pass, not a refusal to look. Reporting it as unlooked inflates the
     # one disclosure whose whole job is to be believed.
+    _shallow = subprocess.run(["git", "-C", ROOT, "rev-parse", "--is-shallow-repository"],
+                              capture_output=True, text=True).stdout.strip() == "true"
     if _head.returncode != 0:
         _UNLOOKED.append(f"skip: version v{_pkgv} vs its tag — no git history here")
+    elif _shallow:
+        # A shallow clone cannot answer ancestry, so every pair reads as divergent and
+        # the guard would call a legitimate release a collision — which it did, blocking
+        # its own. Cannot look is not the same as found, and saying so is the whole
+        # point of this disclosure.
+        _UNLOOKED.append(f"skip: version v{_pkgv} vs its tag — shallow clone, ancestry unknowable")
     elif _tagged.returncode != 0:
         pass
     # A collision is DIVERGENCE, not difference. A commit before the tag carries the
