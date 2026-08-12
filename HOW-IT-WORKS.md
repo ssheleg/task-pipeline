@@ -295,7 +295,8 @@ a run diverges  →  retro entry  →  retro.publish  →  upstream issue
 Figma stops being an address and becomes the source: composition compared against the
 node tree, layout read rather than eyeballed, Code Connect used rather than rewritten,
 tokens naming their variables — with the honest boundary that a frame is one width, and
-a no-frame branch that builds, names, offers to draw, and marks what it drew. Plus a worktree per agent and a lease before any shared
+a no-frame branch that builds, names, offers to draw, and marks what it drew.
+Plus a worktree per agent and a lease before any shared
 register — measured at four version collisions in one session — the
 SURFACED contradiction check DEC-0001 decided and nobody built, R-006 made readable, a
 release path that runs its own suite, and a version guard that fails at the commit

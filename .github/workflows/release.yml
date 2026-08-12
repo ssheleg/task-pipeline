@@ -46,16 +46,13 @@ jobs:
       # Placed earlier, this step tested one commit and published another.
       - uses: actions/setup-node@v4
         with: {node-version: '20'}
+      - name: Dependencies the validator needs
+        run: python3 -m pip install --quiet jsonschema
+      # Before the suite, not after: the schema check lives inside validate.py
+      # and switches on when jsonschema is importable.
       - name: The suite this release claims
         run: npm run test:all
 
-      - name: Dependencies the validator needs
-        run: python3 -m pip install --quiet jsonschema
-
-      - name: Structural validator (gate the release on a valid repo)
-        run: |
-          set -eu
-          python3 test/validate.py
 
       - name: Tag must match the manifests (version sync)
         run: |
