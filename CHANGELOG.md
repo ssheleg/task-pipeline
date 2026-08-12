@@ -27,7 +27,8 @@ two absolute rules on plain substring presence — *"never released by this run,
 has clearly expired"* passed. Sweeping the fix to its siblings then produced the reason
 to sweep it structurally: the second copy of the carve-out pattern had its escaping
 doubled, so it matched a literal backslash and walked past every inversion while looking
-correct. One home now, `_EXCEPTION_MARKER`, three call sites.
+correct. One home now — `_EXCEPTION_MARKER` and the `_carve_out` helper that reads it —
+with two call sites.
 
 **A probe demanded a dependency the harness disclaims.** `res8` required PyYAML to be
 installed; the guard it tests degrades honestly without it. `test:all` was red on any

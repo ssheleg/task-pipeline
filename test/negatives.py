@@ -27,7 +27,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 WORKFLOW = os.path.join(ROOT, ".github/workflows/validate.yml")
 MARKER = "Negative self-test"
 PROP_MARKER = "Property check"
-MIN_PROPS = 8
+MIN_PROPS = 9
 # A format change that silently matched nothing would report "0 failures" and look
 # like success. Refuse to be that quiet.
 #

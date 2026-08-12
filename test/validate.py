@@ -564,6 +564,30 @@ def _paragraphs(text):
 _EXCEPTION_MARKER = r"\b(unless|except|other than|save where)\b"
 
 
+def _carve_out(text, needle):
+    """The exception marker inside the ITEM that carries `needle`, or None.
+
+    Scope has been wrong in both directions here. Sentence-scoped, a carve-out one
+    period away was invisible; paragraph-scoped, three independent bullets share one
+    blank-line-delimited block in residue.md, so a legitimate exception on the third
+    tripped the second's rule. An item is what a rule actually occupies: a bullet or
+    a numbered entry plus its indented continuation."""
+    _n = _flatten(needle, lower=True)
+    for _para in re.split(r"\n\s*\n", text):
+        if _n not in _flatten(_para, lower=True):
+            continue
+        # Narrowest chunk that still holds the whole rule: the paragraph, then the
+        # bullet inside it. Splitting on items ALONE glued a rule that lives in a
+        # paragraph to the bullet above it, and a legitimate `unless` two rules away
+        # tripped it — the third scoping mistake this guard has made, in the third
+        # direction.
+        for _item in re.split(r"\n(?=\s*(?:[-*]|\d+\.)\s)", _para):
+            if _n in _flatten(_item, lower=True):
+                return re.search(_EXCEPTION_MARKER, _flatten(_item, lower=True))
+        return re.search(_EXCEPTION_MARKER, _flatten(_para, lower=True))
+    return None
+
+
 def _row_cells(line, lower=True):
     """Pipe-split a markdown row into flattened cells. Third copy of this comprehension
     when it was extracted, and the drift it invites is not hypothetical: the Human-column
@@ -4586,8 +4610,7 @@ if os.path.isfile(_ACC_D):
         # no exception by design, so an exception marker inside its span is itself the
         # defect, and that IS decidable. Narrow on purpose: it fires on a legitimate
         # rewrite too, and a guard that makes you argue beats one that sleeps.
-        _ex = re.search(_EXCEPTION_MARKER,
-                        _flatten(_c13.group(1), lower=True))
+        _ex = re.search(_EXCEPTION_MARKER, _flatten(_c13.group(1), lower=True))
         if _ex:
             fail("references/acceptance.md criterion 13: an exception marker "
                  f"(`{_ex.group(1)}`) appears inside a rule that admits none. Ending work "
@@ -4623,9 +4646,7 @@ if os.path.isfile(_RES_D):
         # the needle, so a carve-out phrased as the NEXT sentence — "…never becomes
         # spent. Except when a container has been idle for a week." — was invisible.
         # A weaker copy of the guard it was written to mirror.
-        _span = next((_p for _p in _paragraphs(_rt_raw)
-                      if _needle in _flatten(_p, lower=True)), "")
-        _hit = re.search(_EXCEPTION_MARKER, _flatten(_span, lower=True))
+        _hit = _carve_out(_rt_raw, _needle)
         if _hit:
             fail(f"references/residue.md: `{_needle}` still reads, and an exception "
                  f"marker (`{_hit.group(1)}`) sits in the same sentence. An absolute "
