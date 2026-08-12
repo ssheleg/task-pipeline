@@ -4649,7 +4649,7 @@ if os.path.isfile(_RES_D):
         _hit = _carve_out(_rt_raw, _needle)
         if _hit:
             fail(f"references/residue.md: `{_needle}` still reads, and an exception "
-                 f"marker (`{_hit.group(1)}`) sits in the same sentence. An absolute "
+                 f"marker (`{_hit.group(1)}`) sits beside it, in the same item. An absolute "
                  "rule with a carve-out is the inversion this release added a guard "
                  "for on criterion 13 — the siblings need it too")
     # The third owner state widens what a run may clean INSIDE its own project. Both
