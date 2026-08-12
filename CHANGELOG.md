@@ -1,5 +1,45 @@
 # Changelog
 
+## v1.49.2 — four stray table rows, and a list that promised three and delivered two
+
+### Fixed
+
+- **The body shipped a rendering defect.** Four rows of the built-in-doctrine
+  index — `artifacts.md`, `companion-skills.md`, `conventions.md`,
+  `model-tiering.md` — sat between the grill's bullet list and `## How to run`
+  with no header row above them. GFM needs a delimiter row to open a table, so an
+  agent reading `SKILL.md` saw four lines of literal pipes. Moved back into the
+  index where their shape says they belong.
+
+- **"Three things the grill does beyond clarifying the request" listed two.** The
+  displaced rows had taken the third with them. Restored from
+  `references/grill.md`, which still carries it in full: **the design
+  destination** — which Figma file, in which team, decided at stage 0 rather than
+  at drawing time. Restored rather than renumbered, because the reference proves
+  what was lost; renumbering to "two" would have made the body agree with itself
+  and disagree with the doctrine.
+
+Guards: 309 → **309**. Property checks: 9 → 9. This release restores content and
+adds no enforcement — the defect was structural markdown, which no guard here
+reads, and the count is stated because two probes read the newest section.
+
+### Note on the token budget
+
+The body is **5969 tokens against a 5000 cap**, up 108: the restored bullet costs
+more than the four moved rows save. Correctness first — a body promising three
+items and delivering two, with four lines rendering as garbage, is worse than
+being over a soft cap it was already over.
+
+The gap is now measured rather than estimated, so it stops being re-litigated by
+prose trims. Three attempts at trimming prose produced 35 tokens between them. The
+whole doctrine index is 555 tokens — 320 in the descriptive column, 235 in the
+reference names — so compressing every description to nothing closes at most **26%
+of the 1219-token gap**, and less than that if the stage numbers stay, which are
+the navigational value. The remainder lives in the Stages table's `Gate` column
+(`grep -c '^\*\*Gate' references/stages.md` → **0**: the body is its only home)
+and in the five-step operating procedure. Closing the gap therefore means moving
+content into references — a restructuring of the skill, not a trim.
+
 ## v1.49.1 — the entry states the count its own guard reads
 
 ### Fixed

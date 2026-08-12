@@ -73,6 +73,10 @@ gate stops until it is installed.
 | run-wide · the work-list **between** runs, and how its priority is computed | `references/backlog.md` |
 | run-wide · whether a **human** ever confirmed what shipped, and when | `references/verification.md` |
 | run-wide · how much unconfirmed work has piled up, and what to look at first | `references/exposure.md` |
+| any stage · Where each artifact belongs | `references/artifacts.md` |
+| preflight · Companion skills and their fallbacks | `references/companion-skills.md` |
+| 6–10 · How the host project's CLAUDE.md is read | `references/conventions.md` |
+| preflight · Model map, ids and the override | `references/model-tiering.md` |
 
 **Optional bridge.** An equivalent skill set the operator already runs (e.g.
 `superpowers:brainstorming` / `writing-plans` / `subagent-driven-development` /
@@ -152,10 +156,12 @@ Three things the grill does beyond clarifying the request:
   mid-flight (test/lint/deploy commands, branch policy, log locations, docs
   targets, the model decision, deploy authorization). Autonomy is bought here or
   not at all — an unasked question is a scheduled interruption.
-| any stage · Where each artifact belongs | `references/artifacts.md` |
-| preflight · Companion skills and their fallbacks | `references/companion-skills.md` |
-| 6–10 · How the host project's CLAUDE.md is read | `references/conventions.md` |
-| preflight · Model map, ids and the override | `references/model-tiering.md` |
+- **The design destination**, when the project designs in Figma: *which* file, in
+  which team — a stage-0 decision, never a stage-3 side effect. Left to drawing
+  time the question is answered by whoever is holding the brush, and the answer is
+  usually *create a new file* — which is how a project ends up with three files
+  called some variation of "Design", each with real work in it and no way to tell
+  which one the team opens.
 
 ## How to run
 
