@@ -49,7 +49,7 @@ suite because the negatives ran on the PR and never on the tag. A tag is not evi
 **And a version number already spoken for now fails at the commit rather than at the
 merge.** Four collisions in one session, each costing a renumber of a whole branch.
 
-Guards: 294 → **304**.
+Guards: 294 → **305**.
 
 ## v1.47.2 — the body stopped retelling its own references
 

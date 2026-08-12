@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Structural validator for the task-pipeline skill repo. Exit 0 = pass."""
-import datetime, subprocess, glob, json, os, re, shutil, subprocess, sys, tempfile
+import datetime, glob, json, os, re, shutil, subprocess, sys, tempfile
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 NAME = "task-pipeline"
@@ -4765,8 +4765,13 @@ try:
                              capture_output=True, text=True)
     _head = subprocess.run(["git", "-C", ROOT, "rev-parse", "HEAD"],
                            capture_output=True, text=True)
-    if _tagged.returncode != 0 or _head.returncode != 0:
+    # A tag that does not exist yet is the normal state of every commit before a
+    # release — a pass, not a refusal to look. Reporting it as unlooked inflates the
+    # one disclosure whose whole job is to be believed.
+    if _head.returncode != 0:
         _UNLOOKED.append(f"skip: version v{_pkgv} vs its tag — no git history here")
+    elif _tagged.returncode != 0:
+        pass
     elif _tagged.stdout.strip() and _tagged.stdout.strip() != _head.stdout.strip():
         fail(f"package.json claims {_pkgv} and tag v{_pkgv} already points at "
              f"{_tagged.stdout.strip()[:7]}, which is not this commit. The number is spoken "
@@ -4779,7 +4784,6 @@ except Exception as _e:
 #    rule: the order of authority, the honest width, and what happens with no frame.
 _BLD_D = os.path.join(_skill_dir, "references", "build.md")
 if os.path.isfile(_BLD_D):
-    _bt = _LIVING_TEXT.get(os.path.relpath(_BLD_D, ROOT)) or open(_BLD_D, encoding="utf-8").read()
     _scr = _section(_BLD_D, r"4a\. A screen is the frame, implemented")
     if _scr is None:
         fail("references/build.md: no section making a screen the implemented frame. "
