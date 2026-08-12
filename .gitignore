@@ -6,3 +6,8 @@ node_modules/
 graphify-out/
 __pycache__/
 *.pyc
+
+# agent-sync
+.env.agent-sync
+
+.agent-sync/

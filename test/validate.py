@@ -4803,6 +4803,29 @@ if os.path.isfile(_BLD_D):
                  "marking puts generated frames where a designer reads decisions")
 
 
+# 6. Another agent in the same repository. Two mechanisms answering different
+#    questions, and the asymmetry that keeps the second one from becoming a licence.
+if os.path.isfile(_BLD_D):
+    _oth = _section(_BLD_D, r"1a\. Another agent may be in this repository right now")
+    if _oth is None:
+        fail("references/build.md: nothing tells a run that another agent may hold this "
+             "repository. Measured cost of not saying it: four version collisions, a "
+             "manifest entry lost to a merge, and a test run corrupted by a copy taken "
+             "mid-write")
+    else:
+        _of = _flatten(_oth, lower=True)
+        if "a worktree per agent" not in _of:
+            fail("references/build.md 1a: the worktree rule is gone. Sharing a checkout is "
+                 "what turns two independent changes into one corrupted state")
+        if "a lease before any shared register" not in _of:
+            fail("references/build.md 1a: the lease rule is gone. A worktree separates "
+                 "files and answers nothing about who may edit the board")
+        if "leave their work alone" not in _of:
+            fail("references/build.md 1a: what to do on finding the other agent mid-run is "
+                 "gone. Ending someone else's work to unblock your own is the asymmetry "
+                 "residue.md refuses, one layer up")
+
+
 if errors:
     print("FAIL: task-pipeline structure invalid")
     for e in errors:

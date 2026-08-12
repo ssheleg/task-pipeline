@@ -6065,3 +6065,60 @@ jobs:
             echo "ERROR: the whole rule was removed and only its citations objected"
             exit 1
           fi
+      - name: Negative self-test (the worktree-per-agent rule is removed)
+        run: |
+          set -eu
+          rm -rf /tmp/ag1-copy && cp -R . /tmp/ag1-copy
+          python3 - <<'EOF'
+          p = "/tmp/ag1-copy/plugins/task-pipeline/skills/task-pipeline/references/build.md"
+          t = open(p, encoding="utf-8").read()
+          n = '**A worktree per agent, always.**'
+          assert n in t, "PLANT DID NOT LAND: ag1"
+          _planted = t.replace(n, '**Try to avoid overlapping.**', 1)
+          assert _planted != t, "PLANT DID NOT LAND: ag1"
+          open(p, "w", encoding="utf-8").write(_planted)
+          EOF
+          if python3 /tmp/ag1-copy/test/validate.py 2>&1 | grep -q 'worktree rule is gone'; then
+            echo "OK: validator FAILs — sharing a checkout is what corrupts two independent changes into one state"
+          else
+            echo "ERROR: two agents may share a working tree again, which cost four version collisions in one session"
+            exit 1
+          fi
+      - name: Negative self-test (the lease rule is removed)
+        run: |
+          set -eu
+          rm -rf /tmp/ag2-copy && cp -R . /tmp/ag2-copy
+          python3 - <<'EOF'
+          p = "/tmp/ag2-copy/plugins/task-pipeline/skills/task-pipeline/references/build.md"
+          t = open(p, encoding="utf-8").read()
+          n = '**A lease before any shared register.**'
+          assert n in t, "PLANT DID NOT LAND: ag2"
+          _planted = t.replace(n, '**Be careful with shared files.**', 1)
+          assert _planted != t, "PLANT DID NOT LAND: ag2"
+          open(p, "w", encoding="utf-8").write(_planted)
+          EOF
+          if python3 /tmp/ag2-copy/test/validate.py 2>&1 | grep -q 'lease rule is gone'; then
+            echo "OK: validator FAILs — a worktree separates files and says nothing about who may edit the board"
+          else
+            echo "ERROR: the shared registers lost the only rule that stops two agents overwriting each other"
+            exit 1
+          fi
+      - name: Negative self-test (what to do on finding the other agent mid-run is removed)
+        run: |
+          set -eu
+          rm -rf /tmp/ag3-copy && cp -R . /tmp/ag3-copy
+          python3 - <<'EOF'
+          p = "/tmp/ag3-copy/plugins/task-pipeline/skills/task-pipeline/references/build.md"
+          t = open(p, encoding="utf-8").read()
+          n = 'leave their work alone'
+          assert n in t, "PLANT DID NOT LAND: ag3"
+          _planted = t.replace(n, 'proceed as you see fit', 1)
+          assert _planted != t, "PLANT DID NOT LAND: ag3"
+          open(p, "w", encoding="utf-8").write(_planted)
+          EOF
+          if python3 /tmp/ag3-copy/test/validate.py 2>&1 | grep -q 'mid-run is'; then
+            echo "OK: validator FAILs — ending someone else's work to unblock your own is the asymmetry residue.md refuses"
+          else
+            echo "ERROR: a run may now stage, revert or stash another agent's uncommitted work"
+            exit 1
+          fi

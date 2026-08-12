@@ -30,6 +30,25 @@ and whatever is drawn is marked as coming from implementation. **A designer must
 to tell a decision from a generation**; an unmarked generated frame is the same false
 confidence as an unproven green.
 
+**Another agent may be in this repository right now.** Isolation used to mean *your*
+passes not colliding with each other. It now also means someone else's: a worktree per
+agent, always, because sharing a checkout is what turns two independent changes into one
+corrupted state — a copy taken mid-write, an edit staged into another commit, a branch
+switched under a running test. And a lease before any shared register where the project
+carries `.claude/agent-sync.json`, because a worktree separates files and answers nothing
+about who may edit the board.
+
+With the asymmetry that keeps the rule from becoming a licence: **on finding the other
+agent mid-run, leave their work alone.** Their uncommitted edits are not yours to stage,
+revert or stash. Put a ref on your own committed work so a branch reset cannot lose it,
+and continue in a worktree of your own — ending someone else's work to unblock yours is
+what `residue.md` refuses, one layer up.
+
+This is measured, not feared. One session produced four version collisions, a `files[]`
+entry dropped silently by a merge and caught only by the validator, and a test run that
+failed because a probe copied the tree while another agent was writing to it. This
+repository now carries the coordination config it was telling every other project to keep.
+
 **Four mechanisms this project had decided on and never built.**
 
 `DEC-0001` ruled that `SURFACED: 0` is checked against what the run filed — a run that
@@ -49,7 +68,7 @@ suite because the negatives ran on the PR and never on the tag. A tag is not evi
 **And a version number already spoken for now fails at the commit rather than at the
 merge.** Four collisions in one session, each costing a renumber of a whole branch.
 
-Guards: 294 → **305**.
+Guards: 294 → **308**.
 
 ## v1.47.2 — the body stopped retelling its own references
 

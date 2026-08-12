@@ -1,0 +1,18 @@
+{
+  "backend": "fs",
+  "leaseTtlSeconds": 2700,
+  "renewIntervalSeconds": 300,
+  "gated": true,
+  "idRegisters": {},
+  "guardedFiles": [],
+  "claimTags": {},
+  "gates": [],
+  "mirror": {
+    "enabled": false,
+    "sources": []
+  },
+  "mergeLog": {
+    "file": "docs/MERGES.md",
+    "retentionDays": 7
+  }
+}

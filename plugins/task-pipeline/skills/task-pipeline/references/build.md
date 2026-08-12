@@ -41,6 +41,7 @@ reviewer's.
 ## Contents
 
 - 1. Isolation
+- 1a. Another agent may be in this repository right now
 - 2. Workspace and ledger
 - 3. Models
 - 4. The task loop
@@ -93,6 +94,36 @@ on a sandbox permission error, say so plainly and work in place.
 download`), then run the test command from the brief's autonomy sweep. A dirty
 baseline makes every later failure ambiguous: report failures and let the operator
 decide whether to proceed.
+
+## 1a. Another agent may be in this repository right now
+
+Isolation above is about *your* passes not colliding with each other. This is about
+someone else's.
+
+**Check before you start, and check by looking rather than by assuming.** A second
+agent leaves traces: uncommitted changes you did not make, a branch that moved under
+you, a version number that was free an hour ago and is taken now. The cost is not
+hypothetical — one session measured four version collisions, a `files[]` entry dropped
+silently by a merge, and a test run that failed because a probe copied the tree while
+someone else was writing to it.
+
+**Two mechanisms, and they answer different questions.**
+
+1. **A worktree per agent, always.** Sharing a checkout is what turns two independent
+   changes into one corrupted state: a copy taken mid-write, an edit staged into
+   somebody else's commit, a branch switched under a running test. `git worktree add`
+   costs nothing and removes the class outright. Never work in a tree another agent is
+   editing, even briefly, even to "just check something".
+2. **A lease before any shared register.** Where the project has
+   `.claude/agent-sync.json`, the board, the decisions register, the open questions and
+   the roadmap are claimed before they are edited — that is what the file is for. Where
+   it does not exist, say so in the brief rather than discovering it at merge time.
+
+**What to do when you find the other agent mid-run:** stop, name what you found, and
+leave their work alone. Their uncommitted edits are not yours to stage, revert or
+stash. Your own committed work is safe; put a ref on it so a branch reset cannot lose
+it, and continue in a worktree of your own. Ending someone else's work to unblock
+yourself is the same asymmetry `residue.md` refuses, one layer up.
 
 ## 2. Workspace and ledger
 
