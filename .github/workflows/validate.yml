@@ -1994,10 +1994,18 @@ jobs:
           set -eu
           rm -rf /tmp/cn3-copy && cp -R . /tmp/cn3-copy
           python3 - <<'EOF'
+          import re
           p = "/tmp/cn3-copy/plugins/task-pipeline/skills/task-pipeline/references/documentation.md"
           t = open(p, encoding="utf-8").read()
-          assert '→ [`gates.md`](gates.md) → *Probing*' in t, "PLANT DID NOT LAND: needle absent before edit"
-          open(p, "w", encoding="utf-8").write(t.replace('→ [`gates.md`](gates.md) → *Probing*', '(see elsewhere)'))
+          # The guard wants an arrow inside EACH canon's span. This probe matched one
+          # exact citation and broke the day that line rewrapped — the needle was still
+          # there, one newline further on. Operate on the span the guard reads instead.
+          m = re.search(r"\*\*5\..*?(?=\*\*6\.)", t, re.S)
+          assert m, "PLANT DID NOT LAND: canon 5 span not found"
+          assert "\u2192" in m.group(0), "PLANT DID NOT LAND: canon 5 names no enforcement already"
+          _planted = t[:m.start()] + m.group(0).replace("\u2192", "to") + t[m.end():]
+          assert _planted != t, "PLANT DID NOT LAND"
+          open(p, "w", encoding="utf-8").write(_planted)
           EOF
           if python3 /tmp/cn3-copy/test/validate.py; then
             echo "ERROR: validator passed with canons must keep naming their enforcement broken"
@@ -2200,11 +2208,23 @@ jobs:
           set -eu
           rm -rf /tmp/ed5-copy && cp -R . /tmp/ed5-copy
           python3 - <<'EOF'
+          import re
           p = "/tmp/ed5-copy/plugins/task-pipeline/skills/evidence-docs/SKILL.md"
           t = open(p, encoding="utf-8").read()
+          # The hazard is a colon-space in an UNQUOTED scalar — that is what YAML
+          # truncates. This probe used to plant one inside the description and stopped
+          # reproducing anything the day that description was quoted: `: ` between
+          # quotes is legal and loses nothing, so the guard fell silent for the right
+          # reason and the probe called it a failure. Strip the quotes first, then
+          # plant, so the plant recreates the hazard rather than a legal string.
+          m = re.search(r'^description: "(.*)"\s*$', t, re.M)
+          assert m, "PLANT DID NOT LAND: description is not a quoted scalar"
+          _unquoted = "description: " + m.group(1)
           needle = "will be read as true — a decision record"
-          assert needle in t, "PLANT DID NOT LAND: needle absent before edit"
-          open(p, "w", encoding="utf-8").write(t.replace(needle, "will be read as true: a decision record"))
+          assert needle in _unquoted, "PLANT DID NOT LAND: needle absent before edit"
+          _planted = t[:m.start()] + _unquoted.replace(needle, "will be read as true: a decision record", 1) + t[m.end():]
+          assert _planted != t, "PLANT DID NOT LAND"
+          open(p, "w", encoding="utf-8").write(_planted)
           EOF
           if python3 /tmp/ed5-copy/test/validate.py; then
             echo "ERROR: validator passed frontmatter that YAML drops silently"
@@ -5582,10 +5602,15 @@ jobs:
           assert _planted != t, "PLANT DID NOT LAND: res8"
           open(p, "w", encoding="utf-8").write(_planted)
           EOF
-          if python3 /tmp/res8-copy/test/validate.py 2>&1 | grep -q "not valid YAML"; then
+          _out=$(python3 /tmp/res8-copy/test/validate.py 2>&1 || true)
+          if printf '%s' "$_out" | grep -q "not valid YAML"; then
             echo "OK: validator FAILs — the workflow is parsed, not only pattern-matched"
+          elif printf '%s' "$_out" | grep -q "PyYAML not installed"; then
+            echo "SKIP: PyYAML is absent, so the parse guard could not run — it said so"
+            echo "      rather than passing quietly, which is the behaviour under test here"
           else
-            echo "ERROR: the workflow stopped being loadable and every regex count stayed happy"
+            echo "ERROR: the workflow stopped being loadable, the parse guard neither fired"
+            echo "       nor declared itself unable to look, and every regex count stayed happy"
             exit 1
           fi
       - name: Negative self-test (the third owner state loses its proof requirement)
@@ -5739,5 +5764,87 @@ jobs:
             echo "OK: validator FAILs — the state that says which debris a run may clear must exist"
           else
             echo "ERROR: the middle owner state disappeared and the two remaining ones read as complete"
+            exit 1
+          fi
+      - name: Negative self-test (INVERSION — the foreign lease keeps its sentence and gains a carve-out)
+        run: |
+          set -eu
+          rm -rf /tmp/res17-copy && cp -R . /tmp/res17-copy
+          python3 - <<'EOF'
+          p = "/tmp/res17-copy/plugins/task-pipeline/skills/task-pipeline/references/residue.md"
+          t = open(p, encoding="utf-8").read()
+          n = '**A lease held by another agent is never released by this run**'
+          assert n in t, "PLANT DID NOT LAND: res17"
+          _planted = t.replace(n, '**A lease held by another agent is never released by this run**, unless it has clearly expired', 1)
+          assert _planted != t, "PLANT DID NOT LAND: res17"
+          open(p, "w", encoding="utf-8").write(_planted)
+          EOF
+          if python3 /tmp/res17-copy/test/validate.py 2>&1 | grep -q "exception marker"; then
+            echo "OK: validator FAILs — an absolute rule with a carve-out is the inversion, substring intact"
+          else
+            echo "ERROR: another agent's lease became releasable by appending four words, and every substring check agreed"
+            exit 1
+          fi
+      - name: Negative self-test (INVERSION — the foreign-item boundary keeps its sentence and gains a carve-out)
+        run: |
+          set -eu
+          rm -rf /tmp/res18-copy && cp -R . /tmp/res18-copy
+          python3 - <<'EOF'
+          p = "/tmp/res18-copy/plugins/task-pipeline/skills/task-pipeline/references/residue.md"
+          t = open(p, encoding="utf-8").read()
+          n = '**A foreign item never becomes spent.**'
+          assert n in t, "PLANT DID NOT LAND: res18"
+          _planted = t.replace(n, '**A foreign item never becomes spent**, except where nobody claims it.', 1)
+          assert _planted != t, "PLANT DID NOT LAND: res18"
+          open(p, "w", encoding="utf-8").write(_planted)
+          EOF
+          if python3 /tmp/res18-copy/test/validate.py 2>&1 | grep -q "exception marker"; then
+            echo "OK: validator FAILs — the boundary of the third owner state admits no exception"
+          else
+            echo "ERROR: the third owner state reached outside the project through an appended clause"
+            exit 1
+          fi
+      - name: Negative self-test (INVERSION — the carve-out is a separate sentence, not a clause)
+        run: |
+          set -eu
+          rm -rf /tmp/res19-copy && cp -R . /tmp/res19-copy
+          python3 - <<'EOF'
+          p = "/tmp/res19-copy/plugins/task-pipeline/skills/task-pipeline/references/residue.md"
+          t = open(p, encoding="utf-8").read()
+          n = "**A foreign item never becomes spent.**"
+          assert n in t, "PLANT DID NOT LAND: res19"
+          # After the period, so a sentence-scoped guard cannot see it. The first
+          # version of that guard was sentence-scoped and this walked straight past.
+          _planted = t.replace(n, n + " Except when a container has been idle for more than a week.", 1)
+          assert _planted != t, "PLANT DID NOT LAND: res19"
+          open(p, "w", encoding="utf-8").write(_planted)
+          EOF
+          if python3 /tmp/res19-copy/test/validate.py 2>&1 | grep -q "exception marker"; then
+            echo "OK: validator FAILs — the guard reads the whole span, not one sentence"
+          else
+            echo "ERROR: a carve-out one period away from the rule was invisible"
+            exit 1
+          fi
+      - name: Property check (a legitimate exception two rules away does not trip the carve-out guard)
+        run: |
+          set -eu
+          rm -rf /tmp/carve-ctl-copy && cp -R . /tmp/carve-ctl-copy
+          python3 - <<'EOF'
+          p = "/tmp/carve-ctl-copy/plugins/task-pipeline/skills/task-pipeline/references/residue.md"
+          t = open(p, encoding="utf-8").read()
+          # An `unless` that belongs to the ambiguous-ownership bullet, two rules away
+          # from the lease rule and in a different bullet from the foreign-item rule.
+          # Paragraph-wide scoping tripped on exactly this; a guard that fires on
+          # honest text is worse than one that sleeps, because it teaches evasion.
+          n = "than deleted, which is irreversible."
+          assert n in t, "PLANT DID NOT LAND: carve-ctl"
+          _planted = t.replace(n, "than deleted, which is irreversible unless the operator says otherwise.", 1)
+          assert _planted != t, "PLANT DID NOT LAND: carve-ctl"
+          open(p, "w", encoding="utf-8").write(_planted)
+          EOF
+          if python3 /tmp/carve-ctl-copy/test/validate.py >/dev/null 2>&1; then
+            echo "OK: the guard reads the rule's own item, so a neighbour's exception is not its business"
+          else
+            echo "ERROR: a legitimate exception in an unrelated rule failed the suite — false positive"
             exit 1
           fi

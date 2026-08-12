@@ -27,7 +27,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 WORKFLOW = os.path.join(ROOT, ".github/workflows/validate.yml")
 MARKER = "Negative self-test"
 PROP_MARKER = "Property check"
-MIN_PROPS = 8
+MIN_PROPS = 9
 # A format change that silently matched nothing would report "0 failures" and look
 # like success. Refuse to be that quiet.
 #
@@ -35,7 +35,7 @@ MIN_PROPS = 8
 # which is the floor doing half its job: it would have caught a total collapse and
 # not the loss of a third of the suite. Set it to the real count, and treat a
 # mismatch as a finding rather than as noise to be lowered away.
-MIN_EXPECTED = 291
+MIN_EXPECTED = 294
 
 
 def parse_steps(path):
@@ -186,7 +186,10 @@ def main(argv):
     with concurrent.futures.ThreadPoolExecutor(max_workers=_WORKERS) as _ex:
         _results = list(_ex.map(_run_one, tests))
     for name, script, cdir, r in _results:
-        passed = r.returncode == 0 and "OK:" in r.stdout
+        # A probe that cannot run says SKIP and exits 0. Counting only "OK:" turned
+        # res8's honest degradation into a failure on any machine without PyYAML —
+        # the regression this release claimed to have closed, still open one layer up.
+        passed = r.returncode == 0 and any(_k in r.stdout for _k in ("OK:", "SKIP:"))
 
         # The trap this runner exists to avoid: a corruption that quietly changed
         # nothing still makes the validator pass, which reads as "the guard is
@@ -207,7 +210,7 @@ def main(argv):
         cdir = copy_dir_of(script)
         sweep([cdir])
         r = subprocess.run(["bash", "-c", script], cwd=_base, capture_output=True, text=True)
-        ok = r.returncode == 0 and "OK:" in r.stdout
+        ok = r.returncode == 0 and any(_k in r.stdout for _k in ("OK:", "SKIP:"))
         print(f"  {'PASS' if ok else 'FAIL':<7}[property] " + _plabel(name))
         if not ok:
             prop_failed.append((_plabel(name), r.stdout[-500:], r.stderr[-500:]))

@@ -1,5 +1,46 @@
 # Changelog
 
+## v1.47.1 — the fixes a reader found, which three releases shipped without
+
+v1.46.0 was tagged and published from a commit that carried this branch's doctrine and
+none of the three commits answering the reviewer. The defects below were already found
+and already fixed when the release went out; this is them arriving.
+
+**`docs/DOCMAP.md` forbade the register shipping beside it.** It said, in as many words,
+that no `docs/DECISIONS.md` is created here deliberately — and the release shipped that
+file. The old rule was right about the risk and wrong about the mechanism: `OQ-####`
+closes with `Resolved→DEC-####`, and a CHANGELOG version heading cannot be that target,
+because two decisions in one release collapse to a single pointer. SSOT is kept by
+direction now — the reason lives in `DECISIONS.md`, the CHANGELOG points at the id. The
+reversal is `DEC-0003`, because a register that appears without a decision is exactly
+the fork the old rule feared.
+
+**`HOW-IT-WORKS.md` called itself the version it was written under.** Its first line
+promises a rewrite every release and names the banner as the freshness signal; the
+banner read 1.45.0 while every other surface read 1.46.0. Corrected, and the two
+releases that landed from another session are named for what they were, so the gap in
+the version history is explained rather than silent.
+
+**An absolute rule keeps every keyword while an appended clause reverses it.** This
+release found that class, guarded it on stage 10's criterion 13, and left `residue.md`'s
+two absolute rules on plain substring presence — *"never released by this run, unless it
+has clearly expired"* passed. Sweeping the fix to its siblings then produced the reason
+to sweep it structurally: the second copy of the carve-out pattern had its escaping
+doubled, so it matched a literal backslash and walked past every inversion while looking
+correct. One home now — `_EXCEPTION_MARKER` and the `_carve_out` helper that reads it —
+with two call sites.
+
+**A probe demanded a dependency the harness disclaims.** `res8` required PyYAML to be
+installed; the guard it tests degrades honestly without it. `test:all` was red on any
+machine lacking it. Three branches now: the guard fired, the guard said it could not
+look, or neither — and only the third is an error.
+
+Also: the owner-row check went through `_row_cells` instead of a hand-rolled regex, as
+that helper's own docstring asks; and a reflow that fixed a 157-character line had
+orphaned two words onto a five-character one.
+
+Guards: 291 → **294**.
+
 ## v1.47.0 — a green suite that cannot speak for an agent
 
 The suite gate at stage 6 assumes the thing under test is deterministic: run it twice,
