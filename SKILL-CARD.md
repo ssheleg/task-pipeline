@@ -12,7 +12,7 @@ harmless.
 |---|---|
 | **Purpose** | Runs a substantial task through ten gated delivery stages — intake grill, docs study, brainstorm, spec, plan, subagent build, tests, lint/deploy, post-deploy, docs+registers, acceptance — refusing to advance until each gate passes |
 | **Owner** | ssheleg ([github.com/ssheleg/task-pipeline](https://github.com/ssheleg/task-pipeline)) |
-| **Version** | 1.48.0 |
+| **Version** | 1.49.0 |
 | **Surface** | Claude Code (filesystem skill + plugin) and the vercel `skills` CLI. **Not** uploaded to the Skills API; custom Skills do not sync across surfaces |
 | **Dependencies** | None required. Optional: `context7` (MCP), `figma` (MCP), super-ux, agent-sync, graphify, obsidian-wiki. Every stage's doctrine ships in-repo; the one conditional requirement is super-ux for the stage-3 UX track on a user-facing task |
 | **Evaluation status** | Suite authored, 5 categories. One recorded run, **self-observed by the author**; **zero blind runs on zero of three models** — the split, and the numbers, live in [`evals/RESULTS.md`](evals/RESULTS.md) and are computed by `evals/run.py` |

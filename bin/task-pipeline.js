@@ -54,6 +54,39 @@ function installOne(label, src, dest, isDir, force) {
   console.log(`Installed ${label} -> ${dest}`);
 }
 
+/**
+ * Ask the family launcher to write the routing block, for this member only.
+ *
+ * Delegated rather than reimplemented, for three reasons. The block describes
+ * what the machine actually has, so a lone member rendering the whole thing
+ * would produce a table for routers nobody installed. `--member` limits this to
+ * the `task-pipeline` section and leaves everyone else's alone, which is what
+ * lets the bundle and a single installer both write. And the launcher is the
+ * only writer that copies the operator's global instruction file before touching
+ * it — that file has no version control behind it, and two defects in this
+ * family's history destroyed it.
+ *
+ * `--no-install` keeps this from silently downloading a package the user did not
+ * ask for. When the launcher is absent, print the one command instead of
+ * failing: an installer that ends in an error because an OPTIONAL follow-up is
+ * missing reads as a failed install.
+ */
+function offerRouters() {
+  const { spawnSync } = require('child_process');
+  const r = spawnSync(
+    'npx',
+    ['--no-install', 'sshlg-skills', 'routers', '--member', 'task-pipeline'],
+    { stdio: 'inherit', shell: process.platform === 'win32' }
+  );
+  if (r.status !== 0) {
+    console.log(
+      '\nTo have this skill apply by default in every project, add the\n' +
+      "family's routing block to your agent's global instructions:\n\n" +
+      '  npx --yes sshlg-skills routers --member task-pipeline\n'
+    );
+  }
+}
+
 function main(argv) {
   const args = argv.slice(2);
   if (args.includes('--help') || args.includes('-h')) {
@@ -115,6 +148,7 @@ Rerun with --force if you deliberately want the plain copy instead.`);
     false,
     force
   );
+  offerRouters();
   return 0;
 }
 
