@@ -238,7 +238,7 @@ This is the part most pipelines skip, and it is the reason this one is trustwort
 rather than merely tidy.
 
 **Every guard is proven against a planted defect.** `npm run test:all` breaks the
-thing each of the **308** checks is about, and requires that check to reject it. A
+thing each of the **309** checks is about, and requires that check to reject it. A
 guard that has never been watched failing is not a guard; it is a comment.
 
 **The neighbour probe.** A check has a *subject* — the rule it is about — and
@@ -299,7 +299,7 @@ a no-frame branch that builds, names, offers to draw, and marks what it drew. Pl
 register — measured at four version collisions in one session — the
 SURFACED contradiction check DEC-0001 decided and nobody built, R-006 made readable, a
 release path that runs its own suite, and a version guard that fails at the commit
-rather than at the merge. Guards: 294 → 308.
+rather than at the merge. Guards: 294 → 309.
 
 ### v1.47.1 — the fixes a reader found, which three releases shipped without
 Three releases went out from another session while this branch was reviewed, and

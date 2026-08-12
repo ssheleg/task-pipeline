@@ -3,8 +3,28 @@
   "leaseTtlSeconds": 2700,
   "renewIntervalSeconds": 300,
   "gated": true,
-  "idRegisters": {},
-  "guardedFiles": [],
+  "idRegisters": {
+    "DEC": {
+      "file": "docs/DECISIONS.md",
+      "pattern": "DEC-(\\\\d{4})"
+    },
+    "OQ": {
+      "file": "docs/OPEN_QUESTIONS.md",
+      "pattern": "OQ-(\\\\d{4})"
+    },
+    "B": {
+      "file": "docs/superpowers/backlog.md",
+      "pattern": "B-(\\\\d{3})"
+    }
+  },
+  "guardedFiles": [
+    "docs/superpowers/backlog.md",
+    "docs/DECISIONS.md",
+    "docs/OPEN_QUESTIONS.md",
+    "docs/superpowers/retro.md",
+    "docs/superpowers/verification.md",
+    "docs/DOCMAP.md"
+  ],
   "claimTags": {},
   "gates": [],
   "mirror": {

@@ -5953,14 +5953,21 @@ jobs:
           d = json.load(open(p, encoding="utf-8"))
           tags = subprocess.run(["git", "-C", "/tmp/vt1-copy", "tag", "-l", "v*"],
                                 capture_output=True, text=True).stdout.split()
-          assert tags, "PLANT DID NOT LAND: vt1 — no tags in this checkout"
-          old = d["version"]
-          d["version"] = sorted(tags)[-1].lstrip("v")
-          assert d["version"] != old, "PLANT DID NOT LAND: vt1 — already claims that tag"
-          json.dump(d, open(p, "w", encoding="utf-8"), indent=2, ensure_ascii=False)
-          open(p, "a", encoding="utf-8").write("\n")
+          # A checkout with no tags is a precondition absent, not a plant that failed —
+          # a shallow CI fetch has none. Say which, and let the step pass as a skip.
+          if not tags:
+              open("/tmp/vt1-skip", "w").write("no tags")
+          else:
+              old = d["version"]
+              d["version"] = sorted(tags)[-1].lstrip("v")
+              assert d["version"] != old, "PLANT DID NOT LAND: vt1 — already claims that tag"
+              json.dump(d, open(p, "w", encoding="utf-8"), indent=2, ensure_ascii=False)
+              open(p, "a", encoding="utf-8").write("\n")
           EOF
-          if python3 /tmp/vt1-copy/test/validate.py 2>&1 | grep -q "is spoken"; then
+          if [ -f /tmp/vt1-skip ]; then
+            rm -f /tmp/vt1-skip
+            echo "SKIP: this checkout carries no v* tags, so the collision cannot be staged here"
+          elif python3 /tmp/vt1-copy/test/validate.py 2>&1 | grep -q "is spoken"; then
             echo "OK: validator FAILs — the number is taken, and the merge is not the place to find out"
           else
             echo "ERROR: a branch may claim a version another commit already ships under"
@@ -6120,5 +6127,25 @@ jobs:
             echo "OK: validator FAILs — ending someone else's work to unblock your own is the asymmetry residue.md refuses"
           else
             echo "ERROR: a run may now stage, revert or stash another agent's uncommitted work"
+            exit 1
+          fi
+      - name: Negative self-test (the another-agent section is deleted outright)
+        run: |
+          set -eu
+          rm -rf /tmp/ag4-copy && cp -R . /tmp/ag4-copy
+          python3 - <<'EOF'
+          import re
+          p = "/tmp/ag4-copy/plugins/task-pipeline/skills/task-pipeline/references/build.md"
+          t = open(p, encoding="utf-8").read()
+          m = re.search(r"^## 1a\. Another agent may be in this repository right now.*?(?=^## )", t, re.S | re.M)
+          assert m, "PLANT DID NOT LAND: ag4"
+          _planted = t[:m.start()] + t[m.end():]
+          assert _planted != t, "PLANT DID NOT LAND: ag4"
+          open(p, "w", encoding="utf-8").write(_planted)
+          EOF
+          if python3 /tmp/ag4-copy/test/validate.py 2>&1 | grep -q "nothing tells a run that another agent"; then
+            echo "OK: validator FAILs — ag1-ag3 mutate inside the section and never reach this branch"
+          else
+            echo "ERROR: the whole rule was removed and only its phrases were guarded"
             exit 1
           fi

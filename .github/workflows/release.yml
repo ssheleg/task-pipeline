@@ -28,9 +28,8 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with: {node-version: '20'}
+      # No checkout before this: the step below reads GitHub context only,
+      # and the ref-pinned checkout under it replaces anything fetched here.
       - name: Resolve the tag to release
         id: t
         run: |
