@@ -4752,7 +4752,16 @@ if os.path.isfile(_ACC_D):
 _REL_Y = os.path.join(ROOT, ".github", "workflows", "release.yml")
 if os.path.isfile(_REL_Y):
     _ry = open(_REL_Y, encoding="utf-8").read()
-    if "npm run test:all" not in _ry:
+    # In a LIVE step, not anywhere in the text: `# run: npm run test:all` keeps the
+    # phrase and runs nothing, which is this file's own recurring class one level out.
+    try:
+        import yaml as _y
+        _live = any("npm run test:all" in (_st.get("run") or "")
+                    for _j in (_y.safe_load(_ry) or {}).get("jobs", {}).values()
+                    for _st in (_j.get("steps") or []))
+    except Exception:
+        _live = None
+    if _live is False or (_live is None and "npm run test:all" not in _ry):
         fail("`.github/workflows/release.yml` publishes without running `npm run test:all`. "
              "A release that does not run the suite it advertises can ship a red one, and "
              "has")
@@ -4772,7 +4781,10 @@ try:
         _UNLOOKED.append(f"skip: version v{_pkgv} vs its tag — no git history here")
     elif _tagged.returncode != 0:
         pass
-    elif _tagged.stdout.strip() and _tagged.stdout.strip() != _head.stdout.strip():
+    elif (_tagged.stdout.strip() and _tagged.stdout.strip() != _head.stdout.strip()
+          and subprocess.run(["git", "-C", ROOT, "merge-base", "--is-ancestor",
+                              _head.stdout.strip(), _tagged.stdout.strip()],
+                             capture_output=True).returncode != 0):
         fail(f"package.json claims {_pkgv} and tag v{_pkgv} already points at "
              f"{_tagged.stdout.strip()[:7]}, which is not this commit. The number is spoken "
              "for; pick the next one before the merge finds out for you")
