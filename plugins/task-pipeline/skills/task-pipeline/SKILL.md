@@ -74,98 +74,66 @@ gate stops until it is installed.
 | run-wide · whether a **human** ever confirmed what shipped, and when | `references/verification.md` |
 | run-wide · how much unconfirmed work has piled up, and what to look at first | `references/exposure.md` |
 
-**Optional bridge.** If the operator already runs an equivalent skill set (e.g.
+**Optional bridge.** An equivalent skill set the operator already runs (e.g.
 `superpowers:brainstorming` / `writing-plans` / `subagent-driven-development` /
-`using-git-worktrees` / `test-driven-development`), it can be mapped onto stages
-2/4/5/6 in `pipeline.json` → `skills[]`. That is a **substitution, never a
-requirement**: the built-in doctrine is normative, the gates in
-`references/stages.md` still govern, and nothing detects, recommends or waits for
-an external provider.
+`using-git-worktrees` / `test-driven-development`) can be mapped onto stages 2/4/5/6
+in `pipeline.json` → `skills[]`. That is a **substitution, never a requirement**: the
+built-in doctrine is normative, the gates in `references/stages.md` still govern, and
+nothing detects, recommends or waits for an external provider.
 
-**super-ux — recommended for ANY user-facing task.** The moment a task implies a
-user interface (web / mobile / CLI / TUI — a screen, a command, a visible
-behavior; the stage-0 grill detects this early), super-ux is the recommended
-workflow for the WHY→UI→scenario chain (`/ux`, `ux-foundation`, `ux-flows`,
-`ux-scenarios`, `/ux-lint`).
-- **Already installed?** (does `/ux` or `super-ux:ux-foundation` resolve) → **use
-  it**: `/ux` at intake, then the stage-3 UX track walks its traced chain —
-  `ux-foundation` (personas, JTBD, CJM, stories) → `ux-flows` (user flows +
-  `screens.md`, Figma frames when on) → `ux-scenarios` (traced scenarios) → the
-  `/ux-lint` linter (`docs/ux/lint.py`) must pass. Wire that linter into the host
-  CI/pre-commit so UX drift can't merge.
-- **Not installed?** → recommend it and give the install line right away:
-  ```
-  /plugin marketplace add ssheleg/super-ux
-  /plugin install super-ux@super-ux
-  ```
-  (or `npx skills add ssheleg/super-ux`). For UI tasks the spec gate **requires**
-  it — install before stage 3, otherwise stop and ask the operator to install.
+**super-ux — recommended for ANY user-facing task**, and the one thing that can stop a
+gate. The moment a task implies an interface (web / mobile / CLI / TUI — the stage-0
+grill detects it early), the WHY→UI→scenario chain runs through `/ux`,
+`ux-foundation`, `ux-flows`, `ux-scenarios` and the `/ux-lint` linter, which belongs in
+the host's CI so UX drift cannot merge. **Not installed on a UI task? The stage-3 spec
+gate stops** — offer `/plugin marketplace add ssheleg/super-ux` and
+`/plugin install super-ux@super-ux` (or `npx skills add ssheleg/super-ux`) and wait.
+Details: `references/companion-skills.md`.
 
-**The grill is built in — no companion skill, nothing to install.** Stage 0 ships
-with this skill: the full doctrine lives in `references/grill.md`
-(interview loop, domain awareness, autonomy sweep, output). It is **mandatory** —
-no "clear enough task" exemption, no starting stage 1 without a committed,
-operator-confirmed brief. The one sanctioned bypass is the entry-from-super-ux
-short-circuit, and even that demands a scope confirmation.
+**The grill is built in and mandatory** (`references/grill.md`). No "clear enough task"
+exemption, no stage 1 without a committed, operator-confirmed brief; the one sanctioned
+bypass is the entry-from-super-ux short-circuit, and even that demands a scope
+confirmation. It produces the **REQ spine** — the request as an addressable list, each
+row naming how it is verified. Stages 3–5 trace to those ids, stage 4's gate is a
+mechanical set-comparison against them, and **stage 10 accounts for every one**, which
+is what turns the pipeline from a funnel into a circle.
 
-It also produces the **REQ spine**: the request as an addressable list of
-requirements, each naming how it will be verified. Stages 3–5 trace to those ids,
-stage 4's gate is a mechanical set-comparison against them, and **stage 10 accounts
-for every one** — which is what turns the pipeline from a funnel into a circle.
-
-**Harvest before you ask.** Stage 0 opens with a **knowledge harvest**
-(`references/knowledge-sources.md`), not a
-question: pull what the project already knows about this task from the code, the
-**code graph** if one is built
-(`references/knowledge-graph.md` — graphify;
-recommended, never required),
-`CLAUDE.md`, `CONTEXT.md`/ADRs, **the decision register**, `docs/` + `docs/ux/`,
-past pipeline briefs, **the retro's standing instructions and run stamps** —
-`docs/superpowers/retro.md`, read in full because they *bind* this run and are
-bounded by construction (ten rows; one line per run), while its **recent log** and the
-archive under `docs/superpowers/retro/` are **queried** by the task's nouns
-(`references/retrospective.md`) —
-the **knowledge wiki** if one is installed
-([obsidian-wiki](https://github.com/ar9av/obsidian-wiki) — recommended, never
-required) and any **other repo or hosted doc system the project names as its
-docs**. Write the source ledger into the brief, then interview *against* it: every
-answer that touches a source is checked against that source, and the operator
-outranks any document — but only out loud, so an override is a recorded decision
-instead of an undetected divergence. The same ledger is stage 9's work list.
+**Harvest before you ask** (`references/knowledge-sources.md`). Stage 0 opens by
+pulling what the project already knows about *this* task — the code and its graph,
+`CLAUDE.md`, `CONTEXT.md`/ADRs, the decision register, `docs/` and `docs/ux/`, past
+briefs, the wiki, and whatever else the project names as its docs. **The retro is read
+two ways and the difference matters:** its standing instructions and run stamps are
+read **in full** because they bind this run and are bounded by construction; its recent
+log and archive are **queried** by the task's nouns, because nothing caps them
+(`references/retrospective.md`). Write the source ledger into the brief and interview
+*against* it: every answer touching a source is checked against it, and the operator
+outranks any document — **but only out loud**, so an override is a recorded decision
+rather than an undetected divergence. That ledger is also stage 9's work list.
 
 **Three artifacts close a run, not two.** Stage 9 syncs the docs, the wiki **and the
-code graph** (`/graphify . --update`) — the graph is what the *next* run's harvest
-queries first, so a stale one is a false premise carrying the authority of a
-machine. Refreshing it also buys the **graph↔docs divergence check**: a hub no
-document names, an edge the docs deny, a doc naming a module the graph no longer
-has. Doc-side findings are fixed at stage 9; absences become REQ rows at stage 10
-(`references/knowledge-graph.md`,
-`references/audit.md`).
+code graph** (`/graphify . --update`). The graph is what the next run's harvest queries
+first, so a stale one is a false premise **carrying the authority of a machine** —
+a wrong doc gets argued with, a wrong graph gets believed. Refreshing it buys the
+graph↔docs divergence check; doc-side findings are fixed at stage 9, absences become
+REQ rows at stage 10 (`references/knowledge-graph.md`, `references/audit.md`).
 
-**Documentation is a deliverable, and it has a gate**
-(`references/documentation.md`). Stage 0's harvest
-reads what the project knows; a second phase asks the four questions that make it a
-*system* — where settled things live, what each fact's single home is, what a change
-of type X obliges, and what proves it — and writes them to `docs/DOCMAP.md`. From
-then on the **Doc Loop** fires whenever anything is settled, at **any** stage, not
-only at stage 9; the stage-9 sweep walks the **propagation matrix** (the harvest
-ledger names what you *read*, the matrix names what you *owe*); and *"docs in sync"*
-stops being an assertion and becomes a command with an exit code. Governance is a
-by-product: the run already produces decisions, so recording one is transcription
-plus a stable id, never a second act of thinking.
+**Documentation is a deliverable, and it has a gate** (`references/documentation.md`).
+A second stage-0 phase asks the four questions that make docs a *system* — where
+settled things live, each fact's single home, what a change of type X obliges, what
+proves it — and writes them to `docs/DOCMAP.md`. From then the **Doc Loop** fires
+whenever anything is settled, at **any** stage rather than only at stage 9; the stage-9
+sweep walks the **propagation matrix** (the harvest ledger names what you *read*, the
+matrix names what you *owe*); and *"docs in sync"* becomes a command with an exit code.
 
-**The run teaches the next run — and the list stays short.** Every gate is good at
-*this* run and blind across runs, so the same class of failure can be caught, fixed
-and forgotten five times with nothing noticing it is the same one. The last act of
-stage 10 is therefore the **retrospective**
-(`references/retrospective.md`, written to
-`docs/superpowers/retro.md`): **stamp the run first** — one line, and the only thing
-that makes the next step computable — **then prune**, every standing instruction
-checked against its retirement triggers (it became a check · its surface is gone · it
-hasn't fired in five run stamps **or in sixty days** — the calendar is the unit that
-still moves when the stamp counter has stopped), the list held to a hard cap of **ten**, every
-deletion logged, then write an entry **only if the run diverged** (symptom, the
-stage that *owned* it, root cause, fix, and the check that catches it next time).
+**The run teaches the next run, and the list stays short**
+(`references/retrospective.md`). Every gate is good at *this* run and blind across
+runs, so one class of failure can be caught, fixed and forgotten five times with
+nothing noticing it is the same one. Stage 10's last act: **stamp the run first** — the
+only thing that makes the next step computable — **then prune** every standing
+instruction against its retirement triggers, hold the list to a hard cap of **ten**,
+log every deletion, and write an entry **only if the run diverged** (symptom, the stage
+that *owned* it, root cause, fix, and the check that catches it next time).
+
 Stage 0 reads those standing instructions in full, which is exactly why the prune is
 a gate criterion and not a good intention: a rule nobody reads to the end is worse
 than no rule, because everyone believes it is covered. **The order is load-bearing,
