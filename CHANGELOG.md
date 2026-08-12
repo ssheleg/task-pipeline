@@ -1,5 +1,25 @@
 # Changelog
 
+## v1.47.2 — the body stopped retelling its own references
+
+`Prerequisites` was 2585 of the body's 6585 tokens, and most of it was a second
+telling: super-ux, the bridge, the grill, the harvest, the documentation gate and the
+retrospective each have a reference that carries them in full. The body now keeps what
+a reference cannot — the traps, and the one hard requirement — and points at the rest.
+
+What stayed inline, deliberately: **the stage-3 spec gate stops** on a UI task with no
+super-ux; the grill's single sanctioned bypass; **the retro is read two ways** and the
+difference matters (standing instructions in full because they bind and are bounded,
+the recent log queried because nothing caps it); a stale code graph is a false premise
+**carrying the authority of a machine**, since a wrong doc gets argued with and a wrong
+graph gets believed; and the operator outranks any document **only out loud**.
+
+~6585 → ~6180 tokens against a 5000 budget. **Still over, and the rest is not a trim.**
+What remains is `How to run` and `Stages` — the operating instructions themselves —
+and moving those out is a decision about what a reader must have in hand before the
+first stage, not a compression exercise. It is coupled to the description question the
+v1.47.0 entry recorded: both are about what this one file is obliged to carry.
+
 ## v1.47.1 — the fixes a reader found, which three releases shipped without
 
 v1.46.0 was tagged and published from a commit that carried this branch's doctrine and
