@@ -1,5 +1,57 @@
 # Changelog
 
+## v1.50.0 — the stage-7 gate stops being a sentence somebody reads
+
+### Added
+
+- **`plugins/task-pipeline/hooks/release-gate.sh` — the stage-7 rule, enforced at
+  agent time.** `stages.md` has always said a release does not leave stage 7 until
+  the full suite is green at stage 6. That was a sentence an agent reads and a
+  person hopes was obeyed, checked — when it was checked — after the tag was
+  already public. A `PreToolUse` hook now refuses `git tag`, a tag push,
+  `gh release create` and `npm publish` while the run ledger records no
+  `stage: 6 … verdict pass`.
+
+  Three narrownesses are the whole design, and each is the difference between a
+  gate people keep and a gate people rip out:
+
+  1. **Only outward acts.** Ordinary commits are how stage 5 works; gating them
+     would fight the pipeline's own build loop and be gone within a day.
+  2. **Only where a pipeline runs.** No `.task-pipeline/run.md` means exit 0
+     before anything else is read, so enabling the plugin changes nothing in any
+     other repository on the machine.
+  3. **Only what the ledger says.** Nothing reruns a suite or believes a claim —
+     `progress.md` already makes the ledger append-only, and this reads it.
+
+  The refusal names the act, the ledger to record the stage in, and the opt-out.
+  A refusal with no next step is how an operator learns to remove a gate.
+
+  Fail-closed by construction: an internal failure exits 2 as well, because every
+  non-zero code other than 2 is non-blocking in Claude Code, and a crashing gate
+  that fails open is worse than no gate — it reads as one.
+
+- **`test/release_gate_test.py`** — 16 fixtures, run as a process with real JSON on
+  stdin, wired into `npm run test:all` and CI. Eight of them were watched failing:
+  the first implementation fed its own python source to `python3 -` through a
+  heredoc **and** tried to read the payload from stdin, so `sys.stdin.read()` came
+  back empty, every release was classified as "not a release", and the gate
+  allowed everything while looking installed. The payload now travels in the
+  environment.
+
+### Notes
+
+- The hook lives in the plugin's `hooks/hooks.json` rather than in `SKILL.md`
+  front matter. Front-matter hooks are scoped to a skill's activation; a release
+  gate has to hold for the whole run, across turns where the skill is not the
+  thing being invoked. `agent-sync` already enforces its leases from the same
+  channel, so this is the family's proven path rather than a new one.
+
+Guards: 309 → **310**. Property checks: 9 → 9. The new guard is the negative
+self-test that disarms the release gate — it blanks the payload handoff, which is
+how the gate was really broken for its first eight fixtures — and requires the
+suite to notice. `test/negatives.py`'s floor moved with it in the same change,
+because a floor below the count cannot notice losing the difference.
+
 ## v1.49.2 — four stray table rows, and a list that promised three and delivered two
 
 ### Fixed

@@ -17,6 +17,7 @@ that acts *while the agent is working* rather than after the commit.
 - A worked example
 - Debugging
 - Removing them
+- The one this skill ships
 - Leases are not reimplemented here
 - Rationalizations
 
@@ -206,6 +207,33 @@ Delete the `hooks` block from the project's `.claude/settings.json`. Everything 
 hooks enforced is still available as a command and still stated in the doctrine —
 and the run is **`ungated`** from then on, which is a thing to say out loud rather
 than a detail to omit.
+
+## The one this skill ships
+
+Since v1.50.0 the plugin carries a hook of its own —
+`hooks/release-gate.sh`, wired at `PreToolUse` on `Bash`. It refuses an
+**outward, irreversible act** (`git tag`, a tag push, `gh release create`,
+`npm publish`) while the run ledger records no `stage: 6 … verdict pass`.
+
+It is the worked example above, made real, and its three narrownesses are the
+reusable part:
+
+| Narrowness | Why it is not a smaller feature |
+|---|---|
+| Only outward acts, never ordinary commits | stage 5 commits per task by design; a gate that fights the build loop is removed within a day |
+| Silent where no `.task-pipeline/run.md` exists | enabling the plugin must change nothing in a repository that runs no pipeline |
+| Reads the ledger, never reruns a suite | `progress.md` already makes the ledger append-only; a second source of truth about "did stage 6 pass" is the failure this file warns about below |
+
+**Fail-closed, deliberately.** Every non-zero exit code other than `2` is
+non-blocking, so an internal failure exits `2` as well. A crashing gate that fails
+open is worse than no gate: it reads as one.
+
+**The defect worth remembering** — the first implementation fed its own python
+source to `python3 -` through a heredoc *and* read the payload from stdin. The
+heredoc **is** stdin, so the payload came back empty, every act classified as "not
+a release", and the gate allowed everything while looking installed. Eight fixtures
+caught it. A hook that cannot see its own input is indistinguishable, from the
+outside, from a hook that approves.
 
 ## Leases are not reimplemented here
 
