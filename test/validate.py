@@ -4781,10 +4781,15 @@ try:
         _UNLOOKED.append(f"skip: version v{_pkgv} vs its tag — no git history here")
     elif _tagged.returncode != 0:
         pass
-    elif (_tagged.stdout.strip() and _tagged.stdout.strip() != _head.stdout.strip()
-          and subprocess.run(["git", "-C", ROOT, "merge-base", "--is-ancestor",
-                              _head.stdout.strip(), _tagged.stdout.strip()],
-                             capture_output=True).returncode != 0):
+    # A collision is DIVERGENCE, not difference. A commit before the tag carries the
+    # version it will ship under; a commit after it carries the version it shipped,
+    # until the next bump — flagging either would make `main` red after every release.
+    # What is wrong is another lineage claiming the same number.
+    elif _tagged.stdout.strip() and _tagged.stdout.strip() != _head.stdout.strip() and all(
+            subprocess.run(["git", "-C", ROOT, "merge-base", "--is-ancestor", _a, _b],
+                           capture_output=True).returncode != 0
+            for _a, _b in ((_head.stdout.strip(), _tagged.stdout.strip()),
+                           (_tagged.stdout.strip(), _head.stdout.strip()))):
         fail(f"package.json claims {_pkgv} and tag v{_pkgv} already points at "
              f"{_tagged.stdout.strip()[:7]}, which is not this commit. The number is spoken "
              "for; pick the next one before the merge finds out for you")
