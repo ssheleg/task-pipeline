@@ -5,7 +5,7 @@ explains the machine — what routes a request into it, what each stage refuses 
 let past, and what makes any claim it prints believable. The README sells it and
 tells you how to install it; this file tells you how it thinks.
 
-> **Version 1.46.1.** The "What changed" section at the bottom carries the last
+> **Version 1.47.1.** The "What changed" section at the bottom carries the last
 > few releases. Everything above it describes the pipeline as it is *now*, not as
 > it was designed.
 
@@ -291,7 +291,20 @@ a run diverges  →  retro entry  →  retro.publish  →  upstream issue
 
 ## What changed, by version
 
-### v1.46.1 — the fixes a reader found in v1.46.0, which shipped without them
+### v1.47.1 — the fixes a reader found, which three releases shipped without
+Three releases went out from another session while this branch was reviewed, and
+each carried the same defects forward: the doc map forbidding the decisions register
+shipping beside it, this file naming a version two releases stale, two absolute rules
+invertible by an appended clause, a probe demanding PyYAML the harness disclaims, and
+a probe that stopped reproducing its own hazard when its target string was quoted —
+which leaves `main`'s own suite red. Every one was found and fixed before the first
+of those releases; this is them arriving.
+
+### v1.47.0 / v1.46.0 — shipped from another session
+A green suite that cannot speak for an agent; and this branch's residue, completion
+honesty, proportionate verification and improvement-iteration doctrine, which reached
+main through the merge commit rather than through this branch's own release.
+
 v1.46.0 was tagged from a commit carrying this branch's doctrine and none of the
 three commits answering its reviewer. The doc map forbade the decisions register
 shipping beside it; this file called itself the version it was written under; two

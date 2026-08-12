@@ -42,8 +42,11 @@ exists to prevent.
 **1. A claim carries its address.** Every fact that lands in a document names where it
 can be checked: `file:line`, a command with its output, a test name. A lesson names the
 commit that earned it. *"We verified it" is the sentence that passes every review and
-proves nothing.* → the retro's SHA-resolution guard; the finding shape in
-[`setup.md`](setup.md).
+proves nothing.* Where the subject is non-deterministic — an agent, a model call — the
+address is **a trace id and the assertion that ran against it**, because a rerun is not
+the same run and a description of the behaviour is not the behaviour. → the retro's
+SHA-resolution guard; the finding shape in [`setup.md`](setup.md); [`tdd.md`](tdd.md) →
+*When the thing under test is an agent*.
 
 **2. Numbers are computed, never restated.** A count in prose is a number that was true
 once. Derive it at check time and compare the stated one against the computed one as the
@@ -60,8 +63,11 @@ under every link checker, because the checker resolves from the file's home. →
 
 **5. Green nobody watched turn red is not evidence.** A check must be seen rejecting a
 planted defect before its pass means anything — and the plant must be proven to have
-landed in the text the check actually parses. → [`gates.md`](gates.md) → *Probing*;
-[`learned.md`](learned.md) rules 4 and 5.
+landed in the text the check actually parses. **A model used as a judge is the same
+object**: until it has been seen disagreeing with a human label on a case known to be
+bad, its pass is an opinion with a number attached. → [`gates.md`](gates.md) →
+*Probing*; [`learned.md`](learned.md) rules 4 and 5; [`tdd.md`](tdd.md) → *When the
+thing under test is an agent*.
 
 **6. A check proves its scope and nothing beyond it.** Every gate carries what it does
 **not** cover, and quoting it wider is how "the gate is green" becomes a false statement
@@ -74,8 +80,9 @@ wrong, it is not evidence. → [`gates.md`](gates.md) → *False success*.
 
 **8. An estimate is never announced as a measurement.** A rule that fires on a judgement
 states its **evidence condition** — the observable signal that licenses it. A false
-alarm does not cost one interruption; it costs the alarm. → [`continuity.md`](continuity.md)
-→ *The context budget*.
+alarm does not cost one interruption; it costs the alarm. A score produced by a model
+is an estimate and stays one in every report that quotes it, however many decimal places
+it carries. → [`continuity.md`](continuity.md) → *The context budget*.
 
 **9. What was not checked is printed beside what was.** Absence is a finding with one
 side, so it never surfaces by comparison. Carry it as a named, counted set next to every
