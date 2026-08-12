@@ -1,5 +1,28 @@
 # Changelog
 
+## v1.49.1 — the entry states the count its own guard reads
+
+### Fixed
+
+- **v1.49.0 tagged but never released.** Its CHANGELOG entry stated no
+  `Guards: N → **M**` count, so two of this repo's negative self-tests had
+  nothing to patch and reported `PLANT DID NOT LAND` — the release job failed
+  after the tag was already public. Same class as v1.45.0, and the guard worked
+  exactly as designed: a probe that cannot plant says so instead of passing.
+
+  The count is unchanged because v1.49.0 added a feature, not enforcement.
+
+Guards: 309 → **309**. Property checks: 9 → 9. The installer change is
+behavioural and carries no new guard; the count is stated because two probes read
+the newest section and a count-shaped sentence with no count is the one case
+where silence and agreement look the same.
+
+### Changed
+
+- Everything in v1.49.0, which never shipped: the installer now offers the
+  family's routing block via `npx sshlg-skills routers --member task-pipeline`,
+  scoped so it repairs only this skill's own section. See that entry below.
+
 ## v1.49.0 — the installer stops leaving the skill unrouted
 
 ### Changed
