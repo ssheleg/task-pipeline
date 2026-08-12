@@ -1,5 +1,49 @@
 # Changelog
 
+## v1.47.0 — a green suite that cannot speak for an agent
+
+The suite gate at stage 6 assumes the thing under test is deterministic: run it twice,
+get the same answer, and a pass means something. An agent breaks that assumption, and
+until now this pipeline had nothing to say about it — a grep across the plugin for
+`llm-as-judge`, `eval suite`, `regression fixture` and `trace id` returned nothing.
+
+**`tdd.md` gains *When the thing under test is an agent*.** The artifact under test is
+the execution record, not the source: the code says what the agent is allowed to do,
+only a run says what it did. Three tiers with unequal authority at the gate — step and
+turn **block**, thread **reports** — plus the two rules an ordinary suite never needs.
+**Assert the side effect, not the sentence**, because an agent that says it saved the
+preference and did not passes trajectory and response and is broken. And **a model
+judging a model is not a check until it has been calibrated** against human labels on
+cases known to be bad. The suite is grown from production failures, minimised, and kept
+permanently — a fixed defect that silently returns is the whole reason.
+
+The gate states what it does **not** cover, as canon 6 requires: an offline suite speaks
+for the cases already known and for nothing else, which is why production observation
+stays a stage-8 concern.
+
+**Three canons extended rather than an eleventh added.** Canon 3 says every fact has one
+home, so the agent case belongs inside the canons it is an instance of, not beside them:
+
+- **Canon 1** — where the subject is non-deterministic, the address is a **trace id and
+  the assertion that ran against it**; a rerun is not the same run.
+- **Canon 5** — a model used as a judge is the same object as a check: until it has been
+  seen disagreeing with a human on a known-bad case, its pass is an opinion with a
+  number attached.
+- **Canon 8** — a score produced by a model is an estimate in every report that quotes
+  it, however many decimal places it carries.
+
+**`evidence-docs` gains one routing row** and no doctrine — it is a navigator. The row
+names its target instead of linking it: this navigator already carries eleven
+out-of-directory links that break wherever a packager ships the skill alone, and a
+twelfth would widen a known defect. Stated rather than fixed, and the count is unchanged
+at eleven — measured before and after, not assumed.
+
+`Guards: 291 → 291`. This release adds doctrine, not enforcement: nothing here is
+machine-checkable yet, and the count says so rather than leaving a reader to infer it.
+The gate written into `tdd.md` is a specification a host project runs against its own
+agent — this repository has no agent to run it against, so arming it here would be a
+check with nothing to look at, which `gates.md` calls dormant and forbids passing.
+
 ## v1.46.0 — what a run leaves running, what "done" costs to say, and what a check is for
 
 Three rules this pipeline had been following by disposition rather than by doctrine,

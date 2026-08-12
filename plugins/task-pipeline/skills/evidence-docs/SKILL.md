@@ -45,6 +45,7 @@ thing, the canon is the *why* and the rule is the *how*.
 | audit documentation a project already has | [`setup.md`](../task-pipeline/references/setup.md) | seven passes, cheapest first, output is a fix plan |
 | carry a lesson to the next run | [`retrospective.md`](../task-pipeline/references/retrospective.md) | stamp first (the cold trigger reads it), then prune to a cap of ten; every lesson names its commit |
 | seed a gate into a host project | [`templates/docgate.sh`](../task-pipeline/templates/docgate.sh) | it seeds **green**: dormant where there is no input yet |
+| claim that an **agent** behaves | `tdd.md` → *When the thing under test is an agent* — named rather than linked, because this navigator's out-of-directory links break wherever a packager ships this skill alone | the address is a trace id and the assertion that ran (canon 1); a judge nobody watched disagree is a green nobody watched turn red (canon 5) |
 | take a whole change through to acceptance | [`task-pipeline`](../task-pipeline/SKILL.md) | this skill is the standard; that one is how a change reaches the repository |
 
 ## When this applies

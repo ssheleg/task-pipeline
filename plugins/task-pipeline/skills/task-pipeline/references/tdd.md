@@ -14,6 +14,7 @@ into this skill; nothing to install.
 - The green from residue
 - Tests that stay honest
 - Stage 6 — consolidation and the suite gate
+- When the thing under test is an agent
 - When stuck
 - What a case consumes, and why a timeout is unclassified
 - Rationalizations
@@ -124,6 +125,51 @@ Stage 5 wrote the tests task by task. Stage 6 makes the whole thing true:
 changed code is covered. No `skip` / `xfail` / commented-out assertion smuggles a
 red suite past the gate. A partial or red run never advances to deploy; report it
 honestly instead.
+
+## When the thing under test is an agent
+
+An agent's behaviour is not in its source. The code says what it is *allowed* to do;
+only a run says what it did. So the artifact under test is the **execution record**, and
+the suite above needs one more tier before *green* means anything.
+
+Three tiers, and they do not carry equal authority at the gate:
+
+| Tier | Fixture | Asserts | At the gate |
+|---|---|---|---|
+| **Step** | one serialized model call with its prompt, tools and context | the decision — tool chosen, argument shape | **blocks** |
+| **Turn** | one whole execution | the trajectory, the final response, **and the state change** | **blocks** |
+| **Thread** | a scripted multi-turn session | what carried across turns, checked after **every** turn, failing fast | **reports** |
+
+Two rules the ordinary suite does not need:
+
+- **Assert the side effect, not the sentence.** An agent that says it saved the
+  preference and did not passes trajectory and response and is broken. The memory row,
+  the written file, the created record — inspect the thing, not the prose about it.
+- **A model judging a model is not a check until it has been calibrated.** Label the
+  same traces by hand, measure the agreement, and only then let it score unattended.
+  This is canon 5 with a different subject: a judge nobody has watched disagree is a
+  green nobody has watched turn red. Cheap deterministic checks — schema, exact match,
+  business rule, tool-call correctness — run first and take everything they can decide,
+  because they cost nothing and cannot drift.
+
+**The suite is grown, never authored.** Every production failure and every thumbs-down
+is minimised to the smallest input that still reproduces it, filed into the tier that
+isolates it, and **kept there permanently** — a fixed defect that silently returns is
+the whole reason this rule exists.
+
+**GATE (auto):** step and turn tiers green, and every fixture added by this change
+present in the suite. Thread results and any online, reference-free checks are
+**reported beside the verdict, not folded into it** — canon 9, which is why a
+non-blocking tier still has to print.
+
+**What this gate does not cover:** anything the fixtures do not contain. An offline
+suite proves you did not regress the cases already known; it cannot speak for inputs
+nobody has seen, which is canon 6 and the reason production observation is a stage-8
+concern rather than a stage-6 one.
+
+For building the suite this gate reads — the primitives, the tiers, judge design,
+annotation queues and simulated users — see the `agent-evals` skill in the
+`agent-stack` plugin.
 
 ## When stuck
 
