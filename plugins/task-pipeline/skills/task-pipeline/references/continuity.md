@@ -198,7 +198,7 @@ works a stale board for as long as the loop runs. One command, at the top of the
 iteration, recorded ([`knowledge-sources.md`](knowledge-sources.md) → *Carried-in
 claims*; [`learned.md`](learned.md) rule 16).
 
-**The work-list is `docs/superpowers/backlog.md`** ([`backlog.md`](backlog.md)), and the
+**The work-list is `<artifacts>/backlog.md`** ([`backlog.md`](backlog.md)), and the
 other half of the same measurement is the exposure line ([`exposure.md`](exposure.md)).
 Counted at the top of the iteration, re-derived at the bottom — `age` moves on its own,
 so the re-derivation is the only moment the board stops being stale.

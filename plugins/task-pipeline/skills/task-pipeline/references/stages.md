@@ -101,7 +101,7 @@ never that the work was skipped quietly.
   when one is built ([`knowledge-graph.md`](knowledge-graph.md): `graphify query` /
   `affected` / `god-nodes` answer *reach*, which is what grep cannot), `CLAUDE.md`,
   `CONTEXT.md`/ADRs, `docs/` + `docs/ux/`, past pipeline briefs and carry-over
-  ledgers, **the retro's standing instructions and run stamps** (`docs/superpowers/retro.md`,
+  ledgers, **the retro's standing instructions and run stamps** (`<artifacts>/retro.md`,
   read **in full** — ten standing rows and ten stamps, both bounded **by a cap**, and they bind this
   run; stamp each instruction as it fires. Its *Recent log* is **queried** by the
   task's nouns, not read: uncapped narrative inside a binding source is what makes the
@@ -185,7 +185,7 @@ never that the work was skipped quietly.
   now (use it if installed; otherwise give the install line — see SKILL.md
   *Prerequisites*); this arms the stage-3 UX track.
 - **Artifact:** lock the resolved decisions into a **task brief** committed at
-  `docs/superpowers/specs/YYYY-MM-DD-<topic>-brief.md` (scope, users/UI verdict,
+  `<artifacts>/specs/YYYY-MM-DD-<topic>-brief.md` (scope, users/UI verdict,
   constraints, assumptions, explicitly-deferred items, done-criteria) **plus the
   autonomy sweep's per-stage answers and the model decision**. Seed it from
   the skill's `templates/brief.md` skeleton — but only when absent, never
@@ -213,7 +213,7 @@ never that the work was skipped quietly.
   confirms the brief. Stop when a
   re-scan surfaces no new branches (don't grill past diminishing returns;
   reversible calls can be deferred with a note). Only then start stage 1.
-- **The verification ledger is read.** `docs/superpowers/verification.md` — the harvest
+- **The verification ledger is read.** `<artifacts>/verification.md` — the harvest
   quotes **how many rows sit at `never`**, because that is the project's standing
   exposure and stage 0 is where it is cheapest to look ([`verification.md`](verification.md)).
 - **The run ledger is seeded and the header block is printed** — in that order, before
@@ -224,7 +224,7 @@ never that the work was skipped quietly.
   [`progress.md`](progress.md) derives the rail and the iteration counter from the
   `stage:` and `iter:` lines. The header goes out before the interview because a run
   that announces its position only at the end announced it to nobody.
-- **The board is read, or seeded.** `docs/superpowers/backlog.md` ([`backlog.md`](backlog.md)) — its **open count is quoted in the brief**, measured by a command at the top of the run rather than inherited from the last run's report. Absent ⇒ seeded from the template and said so; an empty board and no board are the same thing to work on, and only one of them can be appended to.
+- **The board is read, or seeded.** `<artifacts>/backlog.md` ([`backlog.md`](backlog.md)) — its **open count is quoted in the brief**, measured by a command at the top of the run rather than inherited from the last run's report. Absent ⇒ seeded from the template and said so; an empty board and no board are the same thing to work on, and only one of them can be appended to.
 
 ## 1 — Docs study
 - **Freedom: medium** — which sources to fetch is judgement; grounding contracts on fetched docs is not ([`gates.md`](gates.md) → *Axis C*).
@@ -339,7 +339,7 @@ never that the work was skipped quietly.
   so a run designed a flow, then wrote its strings by taste and picked its values at the
   keyboard — and every gate in the pipeline reported green over both.
 - **Spec:** write the approved design to
-  `docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md` and commit it. Lock all
+  `<artifacts>/specs/YYYY-MM-DD-<topic>-design.md` and commit it. Lock all
   shared contracts (types, schemas, signatures, file layout). For UI tasks the
   spec **embeds the UX layer**: links the validated scenario IDs, the flows and
   `SCR-` screens, the CJM stages the feature serves, and the UX
@@ -366,7 +366,7 @@ never that the work was skipped quietly.
 ## 4 — Plan
 - **Freedom: low** — the task format is prescribed and the REQ set-comparison is mechanical ([`gates.md`](gates.md) → *Axis C*).
 - **How it runs: [`planning.md`](planning.md)** — built into this skill →
-  `docs/superpowers/plans/YYYY-MM-DD-<topic>.md` (same slug as the brief and the
+  `<artifacts>/plans/YYYY-MM-DD-<topic>.md` (same slug as the brief and the
   spec). Zero-context tasks, exact
   paths, complete code in every step, TDD steps with expected output, DoD each,
   dependency graph + parallel groups, non-overlapping file ownership, and the
@@ -510,7 +510,7 @@ never that the work was skipped quietly.
   its run id** — "CI is green" written without a command behind it prints the same
   whether it looked or not ([`gates.md`](gates.md) → *False success*).
 - **Write the verification row.** One line per REQ this run shipped, into
-  `docs/superpowers/verification.md` ([`verification.md`](verification.md)) — the run,
+  `<artifacts>/verification.md` ([`verification.md`](verification.md)) — the run,
   the tag or commit it went out in, what the gate said, and `Human: never` unless the
   operator confirmed during the run. The verification above already happened; this is
   the only step that makes it answerable **later**, and `never` is a fact rather than a
@@ -581,7 +581,7 @@ never that the work was skipped quietly.
   brief carries.** Both directions: a shipped feature that entered no ledger and a
   ledger row about nothing are different failures ([`verification.md`](verification.md)).
 - **The ledger's open rows are resolved onto the board.** Every carry-over row still
-  `open` leaves with a `B-NNN` id on `docs/superpowers/backlog.md`, and the ledger row
+  `open` leaves with a `B-NNN` id on `<artifacts>/backlog.md`, and the ledger row
   is updated to name it ([`backlog.md`](backlog.md)). Both directions, because they are
   different failures: a ledger row pointing at an id nobody issued, and a board row
   traceable to nothing. Measured before this was built: across the ledgers in
@@ -613,7 +613,7 @@ never that the work was skipped quietly.
 - **How it runs:** built in. Read the brief's REQ table, the carry-over ledger in
   full, the plan's task statuses, git log, the final suite output, stage-8 notes and
   stage-9 doc changes (plus `docs/ux/scenarios.md` + `/ux-lint` for UI tasks). Write
-  `docs/superpowers/specs/YYYY-MM-DD-<topic>-acceptance.md` — one row per REQ,
+  `<artifacts>/specs/YYYY-MM-DD-<topic>-acceptance.md` — one row per REQ,
   status `verified` / `partial` / `deferred` / `dropped`, each with **evidence** (a
   passing test name, `file:line`, a command and its output, or a scenario ID).
   "Done" without evidence is not done: downgrade to `partial` and say so rather
@@ -636,7 +636,7 @@ never that the work was skipped quietly.
   the forgotten one: `git -C <submodule> push`, then
   `git add <submodule> && git commit`.
 - **The retrospective is the run's last act** ([`retrospective.md`](retrospective.md)),
-  written to `docs/superpowers/retro.md` — one file per project, not per run. The
+  written to `<artifacts>/retro.md` — one file per project, not per run. The
   pipeline's gates are good at *this* run and blind across runs: the same class of
   failure can be caught, fixed and forgotten five times and nothing in the flow
   notices it is the same one. So, in this order: **stamp the run first** (one line,
@@ -666,7 +666,7 @@ never that the work was skipped quietly.
   with a floor, neither ever a target ([`gates.md`](gates.md) → *Disclosures*); **the
   retrospective is written — stamped first, then pruned, then the entry; the
   list at or under its cap, every deletion logged in the archive with its commit,
-  entries older than five run stamps rotated into `docs/superpowers/retro/` **and the
+  entries older than five run stamps rotated into `<artifacts>/retro/` **and the
   stamp table itself held to ten — at the eleventh the oldest stamp rotates whole into
   the same archive, and both counts print beside the verdict** (the stamp table is read
   in full at stage 0, so *one line per run* is a slope the prune has to stop), the run

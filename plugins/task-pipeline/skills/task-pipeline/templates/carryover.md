@@ -1,7 +1,7 @@
 # Carry-over ledger — <topic>
 
 > **Append-only.** Any stage may add a row; nobody edits or deletes one. Committed
-> to `docs/superpowers/specs/YYYY-MM-DD-<topic>-carryover.md` beside the brief, and
+> to `docs/evidence/specs/YYYY-MM-DD-<topic>-carryover.md` beside the brief, and
 > read in full by stage 10 (acceptance).
 >
 > **The rule: deferred out loud is forgotten.** If it isn't written here, it wasn't
@@ -24,7 +24,7 @@
   "Forgot" is a legitimate and useful answer here.
 - **REQ** — the requirement it belongs to, or `—` if it's outside the REQ spine.
 - **Where it lives now** — an issue id, a **board id** (`B-NNN` on
-  `docs/superpowers/backlog.md`), or `dropped` with the operator's agreement. Those are
+  `docs/evidence/backlog.md`), or `dropped` with the operator's agreement. Those are
   the three ways a row is *settled*.
   **Three values are not settled and all three block the stage-10 gate:** `unresolved`,
   `open`, and a bare `backlog` — the last one because it names a place without naming a

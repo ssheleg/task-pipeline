@@ -584,7 +584,7 @@ class of failure gets caught, fixed and forgotten five times, and nothing in the
 pipeline notices it is the same one.
 
 The last act of stage 10 is therefore a **retrospective**, written to
-`docs/superpowers/retro.md` — **one file per project, not per run**
+`docs/evidence/retro.md` — **one file per project, not per run**
 ([`retrospective.md`](plugins/task-pipeline/skills/task-pipeline/references/retrospective.md)).
 Every run **stamps and prunes** — in that order, because one retirement trigger
 counts firings across the last five run stamps **or sixty days**, whichever comes
@@ -783,6 +783,20 @@ npx task-pipeline-skill                   # from the npm registry
 (package is `task-pipeline-skill` — the unscoped `task-pipeline` name is taken
 on npm; installs the same skill + `/task-pipeline` command into `~/.claude`,
 idempotent, `--force` to overwrite)
+
+**Moving the paperwork off the legacy directory name — optional, always:**
+```bash
+npx task-pipeline-skill migrate-artifacts --dry-run   # the plan, nothing written
+npx task-pipeline-skill migrate-artifacts             # do it
+```
+The artifact root was `docs/superpowers/` until v1.53.0 and the default is now
+`docs/evidence/`. **A project on the old name keeps it and no run warns about it** —
+the root is resolved (`paths.artifacts` in `pipeline.json`, else an existing
+`docs/evidence/`, else an existing `docs/superpowers/`, else the new default), so an
+upgrade changes nothing for a project already running. The command moves the directory,
+never overwrites a collision, refuses when `paths.artifacts` is set rather than
+overriding you, and **lists every other file that names the old path without editing
+one of them** — only you can tell a path in use from a sentence about the old name.
 
 **Cursor:** the skills CLI above with `--agent cursor`, or per project copy
 [`cursor/rules/task-pipeline.mdc`](cursor/rules/task-pipeline.mdc) into the repo's

@@ -160,7 +160,7 @@ explicit "stop and ask me here":
 | 7 Lint+deploy | lint command; deploy target and path; release automation on/off; deploy-from-main rule; **deploy authorization** |
 | 8 Post-deploy | where logs / health live (app name, endpoint, workflow) |
 | 9 Docs+wiki | which module docs / runbooks this change updates; wiki sync yes/no; **code-graph refresh yes/no** (`/graphify . --update` — the third close-out artifact) |
-| 10 Acceptance | who signs off; where deferred REQs are tracked (issue tracker, backlog); the **retro file** — does `docs/superpowers/retro.md` exist, and are its standing instructions in force for this run ([`retrospective.md`](retrospective.md)) |
+| 10 Acceptance | who signs off; where deferred REQs are tracked (issue tracker, backlog); the **retro file** — does `<artifacts>/retro.md` exist, and are its standing instructions in force for this run ([`retrospective.md`](retrospective.md)) |
 
 **Deploy authorization has a hard floor.** Deploy and publish are outward and
 irreversible, so a vague "just do everything" authorizes nothing. A standing
@@ -254,7 +254,7 @@ that shrank without anyone deciding it should.
 
 Everything resolved goes into the **task brief**, seeded from
 [`templates/brief.md`](../templates/brief.md) and committed to
-`docs/superpowers/specs/YYYY-MM-DD-<topic>-brief.md` — scope, **the REQ table**,
+`<artifacts>/specs/YYYY-MM-DD-<topic>-brief.md` — scope, **the REQ table**,
 **the phase-1 source ledger**, users, UI verdict, constraints, locked decisions,
 the autonomy table, done-criteria, open assumptions. Seed the template only when
 the file is absent; never overwrite an existing brief.

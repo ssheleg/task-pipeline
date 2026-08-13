@@ -18,9 +18,9 @@ justifies reading it protects one section while the file below it doubles.
 
 | Artifact | Parts | How it is read |
 |---|---|---|
-| `docs/superpowers/retro.md` — **one per project** | **Standing instructions** (max **10**) · **Run stamps** (max **10**, oldest rotate out) | stage 0, **in full** — both are bounded by a **cap**, which *one line each* never was |
+| `docs/evidence/retro.md` — **one per project** | **Standing instructions** (max **10**) · **Run stamps** (max **10**, oldest rotate out) | stage 0, **in full** — both are bounded by a **cap**, which *one line each* never was |
 | the same file's **Recent log** | entries from the last five run stamps — narrative, and capped by nothing | stage 0, **queried** by the task's nouns. It said *in full* until 2026-08-10, when it measured **74%** of the file: an uncapped section inside a binding source is what makes the capped part get skimmed |
-| `docs/superpowers/retro/YYYY-QN.md` — the archive | every entry and every retirement ever written, append-only | **queried** by the task's nouns; never read end to end |
+| `docs/evidence/retro/YYYY-QN.md` — the archive | every entry and every retirement ever written, append-only | **queried** by the task's nouns; never read end to end |
 
 Seed the archive from [`../templates/retro-archive.md`](../templates/retro-archive.md).
 
@@ -97,7 +97,7 @@ the neighbour's growth is *tidy*. A tidy slope is still a slope.
 **The cap is ten and the trigger is why.** The cold rule reads *the last five run
 stamps*; ten is that with a margin, so a stamp rotating out can never be one the trigger
 needed. At the eleventh, the oldest row moves — whole, with its verdict and its retro
-column — into `docs/superpowers/retro/YYYY-QN.md` under `## Run stamps`, append-only,
+column — into `docs/evidence/retro/YYYY-QN.md` under `## Run stamps`, append-only,
 like every other rotation. **The count is printed at the prune**, beside the standing
 instructions' own count, so a table that stops rotating is visible rather than merely
 large.
@@ -141,7 +141,7 @@ this line existed it still had no way to say it never ran.
 ## Rotation — the archive is how pruning stops losing things
 
 At the prune, entries older than the last five run stamps **move** to
-`docs/superpowers/retro/YYYY-QN.md`. Moving is not deleting.
+`docs/evidence/retro/YYYY-QN.md`. Moving is not deleting.
 
 - The archive is **append-only**, and a retirement writes its line **there**, with
   the trigger that retired it and the commit.
@@ -187,7 +187,7 @@ performable was queued behind it.
 computable, which is why it goes first:
 
 ```bash
-printf '%s · %s\n' "$(date +%F)" "$(git rev-parse --short HEAD)" >> docs/superpowers/retro.md
+printf '%s · %s\n' "$(date +%F)" "$(git rev-parse --short HEAD)" >> docs/evidence/retro.md
 ```
 
 ## The prune — mandatory, and it runs after the stamp
@@ -217,10 +217,10 @@ grep -oE '`[^`]+`' <<<"$RULE_TEXT" | tr -d '`' | while read -r t; do
   [ -e "$t" ] || command -v "$t" >/dev/null || echo "MISSING: $t"; done
 
 # went cold — fired in none of the last five stamps
-tail -n 200 docs/superpowers/retro.md | grep -c "$RULE_ID"
+tail -n 200 docs/evidence/retro.md | grep -c "$RULE_ID"
 
 # ...OR in the last 60 days, whichever comes first — see below for why both
-git log -1 --format=%cd --date=short -S"$RULE_ID" -- docs/superpowers/retro.md
+git log -1 --format=%cd --date=short -S"$RULE_ID" -- docs/evidence/retro.md
 ```
 
 Anything the first two print is a deletion; a zero from the third **or** a last-fired date more
@@ -247,7 +247,7 @@ retro counts:
 
 ```bash
 git tag --sort=-v:refname | head -1                    # newest release
-grep -m1 -oE '`[0-9a-f]{7,}`' docs/superpowers/retro.md # newest stamped commit
+grep -m1 -oE '`[0-9a-f]{7,}`' docs/evidence/retro.md # newest stamped commit
 ```
 
 Then the cap: **ten standing instructions, hard.** At eleven you do not get to keep

@@ -26,6 +26,14 @@ Usage:
                                       into ~/.claude (skip existing unless --force)
   npx task-pipeline-skill --help
 
+  npx task-pipeline-skill migrate-artifacts [--dry-run]
+                                      move this project's paperwork from the legacy
+                                      docs/superpowers/ to docs/evidence/. Optional:
+                                      the legacy name is supported forever and no run
+                                      warns about it. Moves the directory, LISTS every
+                                      other file that names the old path, and edits
+                                      none of them.
+
 Other install paths:
   Claude Code plugin:  /plugin marketplace add ${REPO}
                        /plugin install task-pipeline@task-pipeline
@@ -87,12 +95,62 @@ function offerRouters() {
   }
 }
 
+/**
+ * `migrate-artifacts` — the one verb this installer grew.
+ *
+ * Kept here rather than in a second binary because the package ships one `bin`, and a
+ * project that wants the move should not have to learn a second command name. The work
+ * itself is in `lib/migrate-artifacts.js`, which is pure up to the moment it copies.
+ */
+function migrateArtifacts(args) {
+  const mig = require('./lib/migrate-artifacts.js');
+  const project = process.cwd();
+  const dry = args.includes('--dry-run');
+  const unknown = args.filter((a) => a !== '--dry-run');
+  if (unknown.length) {
+    console.error(`unknown argument(s) for migrate-artifacts: ${unknown.join(' ')}`);
+    return 2;
+  }
+
+  const p = mig.plan(project);
+  console.log(mig.render(p));
+  if (p.action === 'refused') return 3;
+  if (p.action === 'nothing') return 0;
+  if (dry) {
+    console.log('\n--dry-run: nothing was written.');
+    return 0;
+  }
+
+  let r;
+  try {
+    r = mig.apply(project, { stamp: new Date().toISOString().replace(/[:.]/g, '-') });
+  } catch (e) {
+    // A copy that cannot be taken cancels the move, and says so instead of
+    // degrading to "moved anyway".
+    console.error(`\nmove cancelled: ${e.message}`);
+    return 1;
+  }
+  console.log(`\nbackup: ${r.backupDir}`);
+  console.log(`moved:  ${r.moved} file(s)`);
+  if (r.plan.collisions.length) {
+    console.log(`kept:   ${r.plan.collisions.length} file(s) left in `
+                + `${mig.LEGACY}/ — their targets already existed`);
+  }
+  if (r.plan.mentions.length) {
+    console.log(`review: ${r.plan.mentions.length} file(s) still name ${mig.LEGACY}/ `
+                + '— listed above, none edited');
+  }
+  return 0;
+}
+
 function main(argv) {
   const args = argv.slice(2);
   if (args.includes('--help') || args.includes('-h')) {
     usage();
     return 0;
   }
+  if (args[0] === 'migrate-artifacts') return migrateArtifacts(args.slice(1));
+
   const force = args.includes('--force');
   const unknown = args.filter((a) => a !== '--force');
   if (unknown.length) {

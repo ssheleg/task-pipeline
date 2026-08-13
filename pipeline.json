@@ -12,7 +12,7 @@
       "skills": ["task-pipeline:knowledge-sources", "task-pipeline:knowledge-graph", "task-pipeline:documentation", "graphify", "wiki-query", "task-pipeline:grill"],
       "gate": {
         "type": "manual",
-        "check": "Harvest first: the code, graphify-out/graph.json WITH ITS MEASURED LAG (git rev-list --count <built_at_commit>..HEAD — a bare build date does not satisfy this), CLAUDE.md, docs/DOCMAP.md, docs/superpowers/specs/ + past carry-over ledgers, docs/superpowers/retro.md READ IN FULL (standing instructions bind the run), the retro archive queried by the task's nouns, and the obsidian wiki under projects/task-pipeline/. Source ledger written into the brief before question one. This repository has NO docs/DECISIONS.md by design — the decision home is CHANGELOG.md plus docs/superpowers/specs/ (docs/DOCMAP.md → Registers); do not seed a second register. Then the grill: one question at a time, every answer checked against the ledger, autonomy sweep covered, REQ table written with a check per row, brief locked and confirmed."
+        "check": "Harvest first: the code, graphify-out/graph.json WITH ITS MEASURED LAG (git rev-list --count <built_at_commit>..HEAD — a bare build date does not satisfy this), CLAUDE.md, docs/DOCMAP.md, docs/evidence/specs/ + past carry-over ledgers, docs/evidence/retro.md READ IN FULL (standing instructions bind the run), the retro archive queried by the task's nouns, and the obsidian wiki under projects/task-pipeline/. Source ledger written into the brief before question one. This repository has NO docs/DECISIONS.md by design — the decision home is CHANGELOG.md plus docs/evidence/specs/ (docs/DOCMAP.md → Registers); do not seed a second register. Then the grill: one question at a time, every answer checked against the ledger, autonomy sweep covered, REQ table written with a check per row, brief locked and confirmed."
       }
     },
     {
@@ -45,7 +45,7 @@
       "skills": ["task-pipeline:spec"],
       "gate": {
         "type": "manual",
-        "check": "docs/superpowers/specs/<date>-<slug>-design.md committed and self-reviewed, every section carrying covers: REQ-…. Every check the spec NAMES must resolve at the moment it is named, or be marked review (learned.md rule 14)."
+        "check": "docs/evidence/specs/<date>-<slug>-design.md committed and self-reviewed, every section carrying covers: REQ-…. Every check the spec NAMES must resolve at the moment it is named, or be marked review (learned.md rule 14)."
       }
     },
     {
@@ -56,7 +56,7 @@
       "skills": ["task-pipeline:planning"],
       "gate": {
         "type": "auto",
-        "check": "docs/superpowers/plans/<date>-<slug>.md written; set-equality between REQ ids and task Implements: ids computed in BOTH directions (learned.md rule 2); every command, path and file a DoD names resolves."
+        "check": "docs/evidence/plans/<date>-<slug>.md written; set-equality between REQ ids and task Implements: ids computed in BOTH directions (learned.md rule 2); every command, path and file a DoD names resolves."
       }
     },
     {

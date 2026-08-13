@@ -8,7 +8,7 @@ Doctrine: `references/retrospective.md`.
 
 **What stage 0 reads in full:** *Standing instructions*, *Run stamps* and *Recent
 log* — all three are bounded by construction, which is why the cap is not
-negotiable. The **archive** (`docs/superpowers/retro/YYYY-QN.md`) is *queried* by
+negotiable. The **archive** (`docs/evidence/retro/YYYY-QN.md`) is *queried* by
 the task's nouns and never read end to end.
 
 ## Standing instructions (max 10 — in force right now)
@@ -33,7 +33,7 @@ row goes — the cap is not negotiable, ranking is.
 
 ## Recent log — entries from the last five run stamps (newest first)
 
-Older entries and every retirement **move** to `docs/superpowers/retro/YYYY-QN.md`
+Older entries and every retirement **move** to `docs/evidence/retro/YYYY-QN.md`
 at the prune. Moving is not deleting: the archive is append-only and holds the
 incident forever, so pruning the in-force list costs no knowledge. This section
 stays short precisely so that reading it in full at stage 0 stays cheap.

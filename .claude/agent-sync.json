@@ -13,16 +13,16 @@
       "pattern": "OQ-(\\d{4})"
     },
     "B": {
-      "file": "docs/superpowers/backlog.md",
+      "file": "docs/evidence/backlog.md",
       "pattern": "B-(\\d{3})"
     }
   },
   "guardedFiles": [
-    "docs/superpowers/backlog.md",
+    "docs/evidence/backlog.md",
     "docs/DECISIONS.md",
     "docs/OPEN_QUESTIONS.md",
-    "docs/superpowers/retro.md",
-    "docs/superpowers/verification.md",
+    "docs/evidence/retro.md",
+    "docs/evidence/verification.md",
     "docs/DOCMAP.md"
   ],
   "claimTags": {},

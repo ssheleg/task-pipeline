@@ -65,7 +65,7 @@ into its neighbor or move the disputed data to the module that truly owns it.
 
 ## The module map — the artifact
 
-Write `docs/superpowers/specs/YYYY-MM-DD-<topic>-modules.md` and commit it. It is
+Write `<artifacts>/specs/YYYY-MM-DD-<topic>-modules.md` and commit it. It is
 the program's spine: every later run reads it, and its status column is how a
 resumed session knows where the program stopped.
 

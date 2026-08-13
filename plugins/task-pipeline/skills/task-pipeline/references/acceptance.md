@@ -61,7 +61,7 @@ that was never a row.
 Read all of them before writing anything:
 
 - the ladder walk's findings (above) — they may have added REQ rows
-- the brief's **REQ table** (`docs/superpowers/specs/<topic>-brief.md`)
+- the brief's **REQ table** (`<artifacts>/specs/<topic>-brief.md`)
 - the **carry-over ledger** (`…-carryover.md`) — in full, every row
 - the plan and its task statuses
 - git log for the run's branch; the test suite's final output
@@ -70,7 +70,7 @@ Read all of them before writing anything:
 
 ## Output — the coverage table
 
-Write `docs/superpowers/specs/YYYY-MM-DD-<topic>-acceptance.md`:
+Write `<artifacts>/specs/YYYY-MM-DD-<topic>-acceptance.md`:
 
 ```markdown
 # Acceptance — <topic>
@@ -177,7 +177,7 @@ whether the run was finished.
 ## The retrospective — the run's last act
 
 After the closing question, before the run is called done:
-[`retrospective.md`](retrospective.md), written to `docs/superpowers/retro.md`.
+[`retrospective.md`](retrospective.md), written to `<artifacts>/retro.md`.
 Every run **stamps and prunes**; only a run that *diverged* writes an entry.
 
 The order is fixed, and it is a **dependency, not a preference** — step 2 reads the

@@ -208,7 +208,7 @@ answer would have exposed it in a minute.
 **This file is the shipped list; a project keeps its own.** Every rule in the table
 above was earned on someone else's build and travels with the skill. The lessons *your*
 project buys go in its retro ([`retrospective.md`](retrospective.md) →
-`docs/superpowers/retro.md`), where they are capped, pruned and retired — and a
+`<artifacts>/retro.md`), where they are capped, pruned and retired — and a
 lesson there that would be true in any repository belongs here instead, as an issue
 upstream. A local file that accumulates universal rules is a fork of this one that
 nobody named.
@@ -217,7 +217,7 @@ nobody named.
 
 ## What leaves this file, and why there is no cap
 
-`docs/superpowers/retro.md` caps its standing instructions at **ten** and retires them
+`<artifacts>/retro.md` caps its standing instructions at **ten** and retires them
 on three triggers. Somebody proposes the same cap here about once a programme. It is
 the wrong instrument, and the reason is worth more than the rule.
 

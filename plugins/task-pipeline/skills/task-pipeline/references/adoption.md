@@ -163,7 +163,7 @@ it lands — `templates/hooks.example.json`, and read
 Only when more than one agent works the repository. Then the registers become shared
 state ([`documentation.md`](documentation.md) → *Registers are shared state*) and a
 coordination tool arbitrates: `guardedFiles` must list every register **plus
-`docs/DOCMAP.md` and `docs/superpowers/retro.md`**, which are equally shared and
+`docs/DOCMAP.md` and `<artifacts>/retro.md`**, which are equally shared and
 equally lossy under a concurrent write.
 
 Without such a tool the run is **`ungated`** and must say so. The discipline still

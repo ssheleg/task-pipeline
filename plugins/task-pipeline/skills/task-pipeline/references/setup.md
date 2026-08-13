@@ -12,6 +12,7 @@ is recorded in the brief's autonomy sweep and never asked again.
 ## Contents
 
 - When it runs
+- First it says where the paperwork lives
 - What it inspects
 - The finding shape
 - The output is a fix plan, not a lecture
@@ -30,6 +31,28 @@ is recorded in the brief's autonomy sweep and never asked again.
 
 **Never as a recurring tax.** A check that runs before every feature is a check people
 learn to dismiss. Once per project state, then it is the gate's job.
+
+## First it says where the paperwork lives
+
+Before any pass, one line naming **the resolved artifact root and why it resolved that
+way** ([`artifacts.md`](artifacts.md) → *the root is resolved, not spelled*). Not a
+finding — orientation, and the answer to the only question a rename can leave behind:
+
+```
+artifacts: docs/superpowers/   (legacy name, resolved because the directory exists and
+                                carries a register — the default is now docs/evidence/,
+                                and moving is optional: npx task-pipeline
+                                migrate-artifacts --dry-run)
+artifacts: docs/evidence/      (default)
+artifacts: docs/runs/          (configured — pipeline.json → paths.artifacts)
+artifacts: docs/evidence/      (default, and the directory already exists without a
+                                register — STOP AND ASK before writing into it)
+```
+
+A project on the legacy name is **not behind and is never warned about it on a run**;
+this line exists so nobody has to guess which of the two directories a gate will read.
+Where records sit in both, the leftover is named here too — a partial migration is a
+state somebody chose, not a fault.
 
 ## What it inspects
 
@@ -75,7 +98,7 @@ of the project's own process is leaking.
 
 ## The output is a fix plan, not a lecture
 
-The audit ends with `docs/superpowers/plans/YYYY-MM-DD-doc-audit.md` — the findings
+The audit ends with `<artifacts>/plans/YYYY-MM-DD-doc-audit.md` — the findings
 turned into tasks the pipeline can run, in the order that makes them terminate:
 
 1. everything the gate can enforce **after** the fix, so the class stops recurring;

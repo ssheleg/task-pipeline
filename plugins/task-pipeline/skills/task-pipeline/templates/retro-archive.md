@@ -1,7 +1,7 @@
 # Retro archive — <project> · <YYYY>-Q<N>
 
 **Append-only. Queried, never read in full.** The in-force list
-(`docs/superpowers/retro.md`) is capped at ten and read whole at stage 0; this file
+(`docs/evidence/retro.md`) is capped at ten and read whole at stage 0; this file
 is where entries and retirements go when they age out, so pruning stops losing
 things. Doctrine: `references/retrospective.md`.
 

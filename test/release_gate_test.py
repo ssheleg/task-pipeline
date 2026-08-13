@@ -444,7 +444,7 @@ def editing_source_before_build_asks():
 
 
 def the_pipelines_own_artefacts_are_never_gated():
-    for p in ("docs/ux/scenarios.md", "docs/superpowers/brief.md",
+    for p in ("docs/ux/scenarios.md", "docs/evidence/specs/2026-01-01-x-brief.md",
               ".task-pipeline/run.md", "README.md", "CHANGELOG.md"):
         assert build_gate(p, OPEN_RUN, BUILD_FLOW) is None, \
             "%s is what stages 0-4 are FOR, and the gate asked about it" % p

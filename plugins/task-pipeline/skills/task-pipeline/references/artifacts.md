@@ -23,7 +23,7 @@ docs/
   OPEN_QUESTIONS.md                   #   … and its questions (OQ-####) — never delete a resolved row
   adr/
     NNNN-<slug>.md                    # the OTHER permitted decision home — one project uses ONE
-  superpowers/
+  evidence/                             # the artifact root — RESOLVED, see the note below
     retro.md                          # stage 10's last act — ONE per project, not per run
     backlog.md                        # the work-list BETWEEN runs — read at 0, resolved at 10
     verification.md                   # one row per shipped REQ; `Human` is a date or `never`
@@ -54,10 +54,39 @@ Naming: date-prefixed `YYYY-MM-DD-<topic>` slugs, one topic per file, kebab-case
 Brief, carry-over, design, plan and acceptance share the **same `<topic>` slug**, so the chain is traceable
 at a glance.
 
-> The `docs/superpowers/` directory name is this pipeline's historical convention
-> (kept so existing projects don't have to migrate) — **not a dependency on any
-> external skill**. A host project may relocate the root via its `CLAUDE.md`; keep
-> the shape, keep the slugs.
+### `<artifacts>/` — the root is resolved, not spelled
+
+Every path above is written `<artifacts>/…`. That is not a placeholder you fill in by
+hand: it is **resolved**, in this order, and the answer is the same for the validator,
+the migration command and you.
+
+1. **`paths.artifacts` in `pipeline.json`** wins outright. Any relative path —
+   `docs/runs/`, `notes/pipeline/`, whatever this project already uses. Until v1.53.0
+   this file promised that a host project *may relocate the root* and nothing kept the
+   promise; the config key is what turned the sentence into a mechanism.
+2. **otherwise the first of `docs/evidence/`, then `docs/superpowers/`** that exists
+   **and carries a register** — a `retro.md`, `backlog.md`, `verification.md`, or a
+   `specs/`, `plans/`, `briefs/`, `retro/` directory. The new name is checked first, so
+   a project that moves one file at a time is never left split.
+3. **otherwise `docs/evidence/`** — the default for a project that has neither.
+
+**Carrying a register is the whole difference between a root and a directory.** A
+project may keep an unrelated `docs/evidence/` full of compliance material; adopting it
+because the name matched would write a run's paperwork into somebody else's folder. When
+the default lands on a directory like that, the resolver says so and the caller asks
+rather than writing.
+
+**`docs/superpowers/` is the name this pipeline used until 2026-08-13, and it is
+supported, not deprecated.** A project already on it keeps it — forever, with no
+warning on any run. The name was inherited from an unrelated pack whose own tests walk
+the same path; it was never a dependency on that pack, and renaming the default is what
+finally says so. Nothing migrates on its own: `npx task-pipeline migrate-artifacts`
+moves a project that wants to move, `--dry-run` first, and a project that never runs it
+is not behind.
+
+Implementations: `bin/lib/artifact-root.js` (shipped) and `test/artifact_root.py` (the
+validator). `test/artifact_root_test.py` runs both against one case table and fails when
+they disagree — which is why one rule is allowed two implementations here.
 
 **Every** run keeps a **git-ignored** run ledger at `.task-pipeline/run.md`, seeded at
 stage 0 from [`../templates/run.md`](../templates/run.md). Three line shapes: a
@@ -84,7 +113,7 @@ whatever the context happens to hold.
 
 | Stage | Reads | From where |
 |---|---|---|
-| **0 Harvest** | the project's own knowledge about this task | code · the code graph (`graphify-out/`) · `CLAUDE.md`/`AGENTS.md` · `CONTEXT.md`/`docs/adr/` · `docs/` + `docs/ux/` · past briefs and carry-over ledgers · **the board** (`docs/superpowers/backlog.md`, open count quoted in the brief) · **the verification ledger** (`docs/superpowers/verification.md`, how many rows sit at `never`) · the retro's standing instructions **in full** · the wiki · any doc repo or hosted system the project names |
+| **0 Harvest** | the project's own knowledge about this task | code · the code graph (`graphify-out/`) · `CLAUDE.md`/`AGENTS.md` · `CONTEXT.md`/`docs/adr/` · `docs/` + `docs/ux/` · past briefs and carry-over ledgers · **the board** (`<artifacts>/backlog.md`, open count quoted in the brief) · **the verification ledger** (`<artifacts>/verification.md`, how many rows sit at `never`) · the retro's standing instructions **in full** · the wiki · any doc repo or hosted system the project names |
 | **0 Inventory (1b)** | the documentation regime | `docs/DOCMAP.md` — registers, single homes, propagation matrix, gate commands, ratchet floors. Absent ⇒ seeded ([`adoption.md`](adoption.md)) |
 | **0 Reconcile (1c)** | intent vs as-built | git (how it *should* be) against the run record (how it *turned out*) |
 | **0 Grill** | the operator | the interview — every answer checked against the harvest, which is what makes it checkable rather than confident |
@@ -108,9 +137,9 @@ that has not read them is running the pipeline's defaults, not this project's.
 |---|---|---|---|
 | `CLAUDE.md` / `AGENTS.md` | commands, deploy path, house rules, which docs exist and where | 0 | 6–10 |
 | `docs/DOCMAP.md` | the decision home, each fact's single home, the propagation matrix, the gate and its ratchet floors | 0 (1b) | 9 |
-| `docs/superpowers/verification.md` | one row per shipped REQ, and the one column a machine may not fill: the date a **human** confirmed it, or `never` ([`verification.md`](verification.md)) | 0 | written at 8, required at 10 |
-| `docs/superpowers/backlog.md` | the project's work-list **between** runs — ids, the three priority inputs, state. Mutable; rows leave only into its *Closed* list ([`backlog.md`](backlog.md)) | 0 | re-derived at every iteration's end; resolved at 10 |
-| `docs/superpowers/retro.md` | standing instructions — the rules no check can decide. Capped at ten, **read in full**, stamped the moment one fires | 0 | pruned at 10 |
+| `<artifacts>/verification.md` | one row per shipped REQ, and the one column a machine may not fill: the date a **human** confirmed it, or `never` ([`verification.md`](verification.md)) | 0 | written at 8, required at 10 |
+| `<artifacts>/backlog.md` | the project's work-list **between** runs — ids, the three priority inputs, state. Mutable; rows leave only into its *Closed* list ([`backlog.md`](backlog.md)) | 0 | re-derived at every iteration's end; resolved at 10 |
+| `<artifacts>/retro.md` | standing instructions — the rules no check can decide. Capped at ten, **read in full**, stamped the moment one fires | 0 | pruned at 10 |
 | `specs/<topic>-brief.md` → *Autonomy* | every pre-resolved decision; stages 1→10 **answer from it instead of asking** | 0 | 1–10 |
 | `specs/<topic>-carryover.md` | everything deferred, parked or half-done; appended the moment it is said | all | read in full at 10 |
 | `docs/ux/scenarios.md` | the source of truth for user-facing behaviour (super-ux) | 3 | 3, 7, 9, 10 |
@@ -130,13 +159,13 @@ them is a finding, not a tie-break ([`knowledge-sources.md`](knowledge-sources.m
 | 0 Intake | `specs/<topic>-brief.md` — incl. the **REQ table** (seed from `templates/brief.md`) | stages 2–5, 7, 10 |
 | 0→10 all | `specs/<topic>-carryover.md` — append-only ledger (seed from `templates/carryover.md`) | stage 10, in full |
 | 10 Acceptance | `specs/<topic>-acceptance.md` — every REQ with a status and evidence | the operator |
-| 10 Retro | `superpowers/retro.md` — standing instructions (max 10), the problem→cause→fix log, run stamps. Pruned **before** anything is added (`retrospective.md`) | **stage 0 of the next run**, in full |
+| 10 Retro | `<artifacts>/retro.md` — standing instructions (max 10), the problem→cause→fix log, run stamps. Pruned **before** anything is added (`retrospective.md`) | **stage 0 of the next run**, in full |
 | 0 Inventory | `docs/DOCMAP.md` + the registers + `scripts/check-docs.sh` — seeded **only when absent**, and the seeding is the register's first entry ([`documentation.md`](documentation.md)) | every later stage; **stage 9** walks the matrix, **stage 10** proves the gate |
 | 0 Grill (domain) | `CONTEXT.md`, `docs/adr/NNNN-<slug>.md` — created **lazily**, only when a term resolves or a decision qualifies. Where `docs/adr/` **is** the register, entries carry the register's field set | stages 2–4 + the repo |
 | any stage | a register entry per settled thing, via the **Doc Loop** — recorded, resolved, propagated, committed with its id | the next run's harvest |
-| 8 Verification row | `docs/superpowers/verification.md` — one row per REQ the run shipped, written right after the deploy verification; `Human` starts at `never` ([`verification.md`](verification.md)) | stage 10 requires it; stage 0 of every later run reads it |
-| 10 Board resolution | `docs/superpowers/backlog.md` — every unresolved ledger row — homed `backlog` or still `open` — arrives with a real id, and the ledger row is updated to name it; priority re-derived ([`backlog.md`](backlog.md)) | the next run's harvest, and every loop iteration |
-| 10 Retro rotation | `docs/superpowers/retro/YYYY-QN.md` — entries older than five stamps, plus every retirement, each with its commit | queried by a later run's harvest |
+| 8 Verification row | `<artifacts>/verification.md` — one row per REQ the run shipped, written right after the deploy verification; `Human` starts at `never` ([`verification.md`](verification.md)) | stage 10 requires it; stage 0 of every later run reads it |
+| 10 Board resolution | `<artifacts>/backlog.md` — every unresolved ledger row — homed `backlog` or still `open` — arrives with a real id, and the ledger row is updated to name it; priority re-derived ([`backlog.md`](backlog.md)) | the next run's harvest, and every loop iteration |
+| 10 Retro rotation | `<artifacts>/retro/YYYY-QN.md` — entries older than five stamps, plus every retirement, each with its commit | queried by a later run's harvest |
 | 2 Decompose | `specs/<topic>-modules.md` — module map, build order, contracts, per-module status (platforms only) | stages 3–10, every module's run |
 | 3 Spec | `specs/<topic>-design.md` — module dossier for a decomposed platform (+ links `docs/ux/*` for UI) | stage 4 |
 | 4 Plan | `plans/<topic>.md` | stage 5 |
@@ -180,5 +209,5 @@ test/validate.py                              # structural validator (npm test)
 package.json  .gitignore
 README.md  CHANGELOG.md  LICENSE  CLAUDE.md
 CONTRIBUTING.md  SECURITY.md  CODE_OF_CONDUCT.md
-docs/superpowers/{specs,plans}/               # this repo's own design history
+<artifacts>/{specs,plans}/               # this repo's own design history
 ```

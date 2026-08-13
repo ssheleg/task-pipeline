@@ -371,11 +371,11 @@ seven files where thirteen state the condition, the disclosure check named five 
 rule and the command. Every miss was found by a reader or a sweep, never by the guard —
 **nobody notices a corpus that is too small, because everything inside it passes.**
 Exclusions are allowed and must each carry a reason in the code: a changelog narrates
-old formats, `docs/superpowers/specs/` are point-in-time records.
+old formats, `docs/evidence/specs/` are point-in-time records.
 *(guard: `a worked GATE verdict omits ` and `states the cold-retirement condition as` — both now run over corpora walked from disk, so a new surface joins by existing)*
 
 **44. A carry-over row still `open` names a board id, and the board row names it back.**
-`docs/superpowers/backlog.md` is the project's queue between runs; the ledger's `open`
+`docs/evidence/backlog.md` is the project's queue between runs; the ledger's `open`
 was a home that pointed nowhere, and rows across eight ledgers sat in it — sixteen by the first, positional count, twenty-four once the check stopped reading by column. Both
 directions are checked because they are different failures — an id nobody issued, and a
 row traceable to nothing. The test is **position-free**: a row is open if any of its cells
@@ -387,7 +387,7 @@ design and it was wrong for the same reason.
 *(guard: `with no board id` and `names no Source`)*
 
 **45. Every shipped REQ has a verification row, and `Human` is a date or `never`.**
-`docs/superpowers/verification.md` records the one thing no check can decide — whether a
+`docs/evidence/verification.md` records the one thing no check can decide — whether a
 person looked after it shipped. Both directions: a shipped REQ with no row, and a row
 whose REQ is in no brief. It keys to the brief because eight of nine briefs carry
 machine-readable REQ rows while ten acceptance files carry their coverage table in nearly

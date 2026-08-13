@@ -1,5 +1,84 @@
 # Changelog
 
+## v1.53.0 — the artifact root stops carrying another pack's name
+
+The paperwork directory was called `docs/superpowers/`. The name came from an unrelated
+pack — one whose own tests walk the same path — and `references/artifacts.md` had called
+it "historical convention" since v0.1.0, promising that a host project *may relocate the
+root*. Nothing kept that promise: the path was hardcoded in 24 places in the validator,
+in the gate prose of `pipeline.json`, and in 26 CI plants.
+
+### Added
+
+- **`paths.artifacts` in `pipeline.schema.json`.** Any relative path, and it outranks
+  both discovered names. This is what turns the v0.1.0 sentence into a mechanism.
+- **The artifact-root rule, resolved rather than spelled.** `paths.artifacts` →
+  an existing `docs/evidence/` → an existing `docs/superpowers/` → `docs/evidence/` for
+  a project that has neither. A directory is adopted only when it **carries a register**
+  (`retro.md`, `backlog.md`, `verification.md`, or a `specs/plans/briefs/retro`
+  directory): a project may keep an unrelated `docs/evidence/`, and adopting it on a
+  name match would write a run's paperwork into somebody else's folder. The answer is a
+  record — `{root, reason, legacy, leftover, collision}` — because a bare string cannot
+  say *this is the legacy name*, *records also sit over there*, or *the default landed on
+  an occupied directory*.
+- **Two implementations, one table, compared to each other.**
+  `bin/lib/artifact-root.js` ships; `test/artifact_root.py` serves the validator;
+  `test/artifact_root_test.py` builds all seven cases as real trees and fails when the
+  two disagree. Checking each against the table alone would let them drift into two
+  readings that are both "right".
+- **`npx task-pipeline migrate-artifacts [--dry-run]`.** Optional, always: the legacy
+  name is supported and **no run warns about it**. It moves the directory, refuses when
+  `paths.artifacts` is set rather than overriding the operator, never overwrites a
+  collision, backs up before writing — and **lists every file elsewhere that names the
+  old path without editing one of them.** Rewriting arbitrary documents in somebody's
+  repository would mean deciding for them which mentions are a path in use and which are
+  a sentence about the old name; this release got that distinction wrong in its own
+  sweep before the command was written, which is the argument for not automating it.
+- **`/task-pipeline setup` now opens with the resolved root and why**, with all four
+  outcomes spelled out — including the one where the default lands on a directory that
+  exists and carries no register, which is a stop-and-ask rather than a write.
+
+### Changed
+
+- **The default is `docs/evidence/`**, matching the `evidence-docs` skill this plugin
+  already ships. **Nothing migrates on its own.** A project on `docs/superpowers/` keeps
+  it, forever, with no warning on any run — an upgrade is a no-op for everyone already
+  running.
+- 24 sites in `test/validate.py` and 105 occurrences across 34 files now go through the
+  rule: doctrine writes `<artifacts>/`, templates and this repository's own statements
+  write the resolved name. **Frozen records were not touched** — a brief from March
+  describes where things were in March, and rewriting it would falsify the record.
+
+### Fixed
+
+- **A guard that had lost its subject.** The prose sweep rewrote
+  `` `docs/superpowers/…` `` to `` `<artifacts>/…` `` — and the guard comparing
+  `artifacts.md`'s tables against its layout tree searched for the resolved literal, so
+  it found nothing and passed by having nothing to check. Reported by the negative
+  self-test as *does not actually fire*, not by the validator, which was green. That is
+  standing instruction #6's corollary landing in this repository's own validator one
+  release after the instruction was written; the guard is now anchored on the symbol the
+  doctrine writes, and it has been watched failing against a planted defect.
+- **A plant that no longer landed.** The CI plant removing the layout tree anchored on a
+  bare `superpowers/` — a spelling the path sweep never matched — and said so, loudly,
+  because it asserts its own effect. Repointing the other 26 plants recovered 24 broken
+  negative self-tests.
+- **A backup taken when nothing moved.** `migrate-artifacts` copied the legacy tree
+  before every run, so a second run against a still-colliding tree changed the tree it
+  claimed to leave alone. Found by the three-run fixture rather than by reading: the pure
+  planner was right and the command that repeats was not, which is standing instruction
+  #2 arriving in the release that cites it.
+
+Guards: 312 → **313**. Property checks: 9 → 9. The new one reverses the precedence in
+one of the two resolver implementations: the table still describes the correct order, so
+a suite that merely ran both would stay green while they drifted apart on a case the
+table never named. Two new suites join CI — the artifact-root rule (7 cases, both
+implementations compared) and `migrate-artifacts` (7 cases, three real runs with hashes
+compared). 26 CI plants were repointed at the new root and 24 broken negative self-tests
+recovered; two remain unable to fire in a submodule checkout for a reason that predates
+this release (the harness copies to `/tmp` without a resolving `.git`, and both guards
+read git history — CI clones normally and is green).
+
 ## v1.52.0 — the three moments the run's own record could not show
 
 ### Added

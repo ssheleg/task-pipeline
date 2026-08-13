@@ -21,6 +21,9 @@
         "$ref": "#/definitions/stage"
       }
     },
+    "paths": {
+      "$ref": "#/definitions/paths"
+    },
     "release": {
       "$ref": "#/definitions/release"
     },
@@ -32,6 +35,19 @@
     }
   },
   "definitions": {
+    "paths": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Where this project keeps the pipeline's own paperwork. Optional: omit it and the root is DISCOVERED — docs/evidence/ when it exists and carries a register (retro.md, backlog.md, verification.md, or a specs/plans/briefs/retro directory), else the legacy docs/superpowers/ on the same test, else docs/evidence/ for a project that has neither. The legacy name is the one this pipeline used until 2026-08-13; a project on it keeps it, with no warning on any run. Setting this key outranks both discovered names, which is what finally makes references/artifacts.md's long-standing promise — a host project may relocate the root — something a machine keeps rather than a sentence.",
+      "properties": {
+        "artifacts": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^[^/].*[^/]$|^[^/]$",
+          "description": "Relative path from the project root to the artifact home: briefs, specs, plans, the backlog, the verification ledger and the retrospective. Relative, no leading or trailing slash — an absolute path would make the config unusable in any other checkout of the same project."
+        }
+      }
+    },
     "run": {
       "type": "object",
       "additionalProperties": true,
@@ -195,7 +211,7 @@
     "retro": {
       "type": "object",
       "additionalProperties": true,
-      "description": "Optional. Governs what the retrospective does BEYOND writing to the project's own docs/superpowers/retro.md, which always happens. Omit it and nothing leaves the repository: silence arms nothing, exactly as it authorises no deploy.",
+      "description": "Optional. Governs what the retrospective does BEYOND writing to the project's own docs/evidence/retro.md, which always happens. Omit it and nothing leaves the repository: silence arms nothing, exactly as it authorises no deploy.",
       "properties": {
         "publish": {
           "type": "object",

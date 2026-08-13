@@ -47,9 +47,9 @@ makes the grill's answers *checkable* instead of merely confident.
 | 4a | **The decision register and the doc map** | `docs/DECISIONS.md` **or** `docs/adr/` — `docs/DOCMAP.md` says which ([`documentation.md`](documentation.md)) | what is already settled, what it superseded, and which documents this run will owe |
 | 4b | **The task register, for its *state*** | `docs/ROADMAP.md`, a board, a backlog, the tracker `CLAUDE.md` names | **what is open right now** — read with a command, never from memory; see *Carried-in claims* |
 | 5 | **Product/UX docs** | `docs/ux/` (super-ux chain), `README`, runbooks | user-facing behavior that is already specified |
-| 6 | **Pipeline history** | `docs/superpowers/specs/`, `plans/`, past `-carryover.md` | what a previous run of this pipeline decided or deferred |
-| 7 | **The retro, in force** | `docs/superpowers/retro.md` ([`retrospective.md`](retrospective.md)) | what previous runs got wrong here — **read in full**: standing instructions (capped at ten), run stamps and the recent-log window, all bounded by construction |
-| 7a | **The retro archive** | `docs/superpowers/retro/YYYY-QN.md` | *have we been bitten by this class before?* — **queried** by the task's nouns, never read end to end |
+| 6 | **Pipeline history** | `<artifacts>/specs/`, `plans/`, past `-carryover.md` | what a previous run of this pipeline decided or deferred |
+| 7 | **The retro, in force** | `<artifacts>/retro.md` ([`retrospective.md`](retrospective.md)) | what previous runs got wrong here — **read in full**: standing instructions (capped at ten), run stamps and the recent-log window, all bounded by construction |
+| 7a | **The retro archive** | `<artifacts>/retro/YYYY-QN.md` | *have we been bitten by this class before?* — **queried** by the task's nouns, never read end to end |
 | 8 | **The knowledge wiki** | see below | distilled cross-project knowledge, prior sessions, why decisions were made |
 | 9 | **Other doc repos the project names** | a docs repo URL or submodule in `CLAUDE.md`/`README`, a sibling checkout, a `docs/` monorepo package | specs, contracts and runbooks that live outside this repo |
 | 10 | **Hosted doc systems the project names** | Notion / Confluence / Google Docs referenced in the project | the same, when the team keeps them there |
@@ -73,7 +73,7 @@ Rules for the list:
 
 ## The retro's standing instructions — an instruction source, not background
 
-`docs/superpowers/retro.md` ([`retrospective.md`](retrospective.md)) is the one
+`<artifacts>/retro.md` ([`retrospective.md`](retrospective.md)) is the one
 harvested source whose binding part is **read in full rather than queried**: the
 standing instructions are capped at ten precisely so that this is cheap, and the run
 stamps are one line each. Its narrative log is queried, not read — an uncapped section

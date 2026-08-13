@@ -85,7 +85,7 @@ Emitted at the **close** of every iteration, one line:
 **`next` cites a `B-NNN`, never a description.** That rule is
 [`continuity.md`](continuity.md)'s and it is the reason this line exists at all:
 *"next up is X"* was already the one sentence in a loop that no gate reads. A board id
-can be checked against `docs/superpowers/backlog.md`; *"next up: the export fix"*
+can be checked against `<artifacts>/backlog.md`; *"next up: the export fix"*
 cannot.
 
 **Nothing queued is `next —`, printed.** A loop that reaches an empty board says so;
@@ -255,9 +255,9 @@ run reports a state nobody agreed to read.
 
 | Field | Its home |
 |---|---|
-| `board B-NNN` | `docs/superpowers/backlog.md` ([`backlog.md`](backlog.md)) |
+| `board B-NNN` | `<artifacts>/backlog.md` ([`backlog.md`](backlog.md)) |
 | `carry-over N rows` | the run's carry-over ledger, as printed beside every gate verdict |
-| `exposure N never` | `docs/superpowers/verification.md` ([`exposure.md`](exposure.md)) |
+| `exposure N never` | `<artifacts>/verification.md` ([`exposure.md`](exposure.md)) |
 | `unlooked N` | the gate's own disclosure ([`gates.md`](gates.md) → *Disclosures*) |
 | `gates N/M` | the run ledger's verdict rows, and `pipeline.json` → `stages[]` |
 

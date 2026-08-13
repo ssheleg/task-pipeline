@@ -28,7 +28,7 @@ this toolset, has questionable taste, and will read **only their own task**.
 Everything they need is in that task: exact paths, complete code, exact commands,
 expected output. DRY. YAGNI. TDD. Frequent commits.
 
-Path: `docs/superpowers/plans/YYYY-MM-DD-<topic>.md` — same `<topic>` slug as the
+Path: `<artifacts>/plans/YYYY-MM-DD-<topic>.md` — same `<topic>` slug as the
 brief and the spec.
 
 ## Before writing tasks
@@ -84,7 +84,7 @@ commit.
 
 **Tech stack:** <key technologies>
 
-**Spec:** docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md
+**Spec:** <artifacts>/specs/YYYY-MM-DD-<topic>-design.md
 
 ## Global constraints
 

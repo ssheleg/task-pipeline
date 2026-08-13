@@ -47,7 +47,7 @@ pass in each direction finds both.
 
 ## Seeded or picked up
 
-Stage 0's harvest reads `docs/superpowers/backlog.md` when it exists — it is a source
+Stage 0's harvest reads `<artifacts>/backlog.md` when it exists — it is a source
 in the ledger like any other, and its **open count is quoted in the brief**, because a
 run that begins without knowing what is already queued will cheerfully re-discover it.
 

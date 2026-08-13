@@ -1,6 +1,6 @@
 # Backlog — <project>
 
-> **The board.** One per project, at `docs/superpowers/backlog.md`. Unlike the
+> **The board.** One per project, at `docs/evidence/backlog.md`. Unlike the
 > carry-over ledger, this file is **mutable**: priority is re-derived, state changes,
 > rows close. What may never happen silently is a row *disappearing* — a closed row is
 > marked closed, with the commit that closed it.
