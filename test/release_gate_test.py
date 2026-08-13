@@ -341,6 +341,142 @@ def a_later_green_clears_an_earlier_red():
 it("a later red beats an earlier green", a_later_red_beats_an_earlier_green)
 it("a later green clears an earlier red", a_later_green_clears_an_earlier_red)
 
+# --- the run's own lifecycle, written down as it happens --------------------
+
+LIFECYCLE = os.path.join(ROOT, "plugins", "task-pipeline", "hooks", "run-lifecycle.sh")
+BUILDGATE = os.path.join(ROOT, "plugins", "task-pipeline", "hooks", "build-gate.sh")
+
+
+def lifecycle(payload, ledger, pipeline=None):
+    with tempfile.TemporaryDirectory() as project:
+        os.makedirs(os.path.join(project, ".task-pipeline"))
+        path = os.path.join(project, ".task-pipeline", "run.md")
+        open(path, "w").write(ledger)
+        if pipeline is not None:
+            json.dump(pipeline, open(os.path.join(project, "pipeline.json"), "w"))
+        subprocess.run(["bash", LIFECYCLE], input=json.dumps(payload),
+                       env=dict(os.environ, CLAUDE_PROJECT_DIR=project),
+                       capture_output=True, text=True)
+        return open(path, encoding="utf-8").read()
+
+
+OPEN_RUN = "stage: 3 spec — gate auto — verdict pass — 2026-08-13T01:00:00Z\n"
+CLOSED_RUN = OPEN_RUN + "stage: 10 acceptance — gate manual — verdict pass — 2026-08-13T02:00:00Z\n"
+
+
+def compaction_is_recorded():
+    """The ledger exists because compaction happens, and could not show it."""
+    out = lifecycle({"hook_event_name": "PreCompact", "trigger": "auto"}, OPEN_RUN)
+    assert "event: compact — auto" in out, out
+
+
+def an_abandoned_run_is_recorded():
+    out = lifecycle({"hook_event_name": "SessionEnd", "reason": "logout"}, OPEN_RUN)
+    assert "event: session-end" in out, out
+    assert "not closed" in out, out
+
+
+def a_finished_run_is_not_called_abandoned():
+    """Recording an end for a run that reached acceptance fills checkup with noise."""
+    out = lifecycle({"hook_event_name": "SessionEnd", "reason": "logout"}, CLOSED_RUN)
+    assert "session-end" not in out, "a run that closed as intended was filed as abandoned"
+
+
+def a_subagent_stop_is_observed():
+    out = lifecycle({"hook_event_name": "SubagentStop", "agent_type": "general-purpose"}, OPEN_RUN)
+    assert "event: subagent — general-purpose" in out, out
+
+
+def it_never_writes_a_hand_line():
+    """`hand:` carries judgements only the agent holds; a hook filling them in
+    would fabricate the very evidence the line exists to provide."""
+    out = lifecycle({"hook_event_name": "SubagentStop", "agent_type": "x"}, OPEN_RUN)
+    assert "hand:" not in out, "a hook fabricated a hand-back accounting"
+
+
+def separators_in_input_cannot_break_the_grammar():
+    out = lifecycle({"hook_event_name": "SubagentStop", "agent_type": "a — b\nc"}, OPEN_RUN)
+    lines = [l for l in out.splitlines() if l.startswith("event:")]
+    assert len(lines) == 1, "one event became %d lines" % len(lines)
+    assert lines[0].count("—") == 2, "an em dash from the payload broke the shape: %s" % lines[0]
+
+
+def no_ledger_no_lifecycle():
+    with tempfile.TemporaryDirectory() as project:
+        r = subprocess.run(["bash", LIFECYCLE],
+                           input=json.dumps({"hook_event_name": "PreCompact", "trigger": "auto"}),
+                           env=dict(os.environ, CLAUDE_PROJECT_DIR=project),
+                           capture_output=True, text=True)
+        assert r.returncode == 0
+        assert not os.path.exists(os.path.join(project, ".task-pipeline"))
+
+
+it("a compaction is recorded at the boundary", compaction_is_recorded)
+it("a run whose session ended unclosed is recorded", an_abandoned_run_is_recorded)
+it("a run that reached acceptance is not called abandoned", a_finished_run_is_not_called_abandoned)
+it("a subagent stopping is observed", a_subagent_stop_is_observed)
+it("it never writes a hand: line — those are judgements it does not have", it_never_writes_a_hand_line)
+it("payload text cannot break the ledger's grammar", separators_in_input_cannot_break_the_grammar)
+it("no ledger, no lifecycle", no_ledger_no_lifecycle)
+
+
+# --- editing the product before the plan is agreed --------------------------
+
+def build_gate(path, ledger, pipeline=None):
+    with tempfile.TemporaryDirectory() as project:
+        os.makedirs(os.path.join(project, ".task-pipeline"))
+        open(os.path.join(project, ".task-pipeline", "run.md"), "w").write(ledger)
+        if pipeline is not None:
+            json.dump(pipeline, open(os.path.join(project, "pipeline.json"), "w"))
+        r = subprocess.run(["bash", BUILDGATE], input=json.dumps({
+            "hook_event_name": "PreToolUse", "tool_name": "Edit",
+            "tool_input": {"file_path": os.path.join(project, path)}}),
+            env=dict(os.environ, CLAUDE_PROJECT_DIR=project), capture_output=True, text=True)
+        out = (r.stdout or "").strip()
+        return json.loads(out)["hookSpecificOutput"]["permissionDecision"] if out else None
+
+
+BUILD_FLOW = {"stages": [{"id": 5, "state": "build"}]}
+
+
+def editing_source_before_build_asks():
+    assert build_gate("src/app.js", OPEN_RUN, BUILD_FLOW) == "ask"
+
+
+def the_pipelines_own_artefacts_are_never_gated():
+    for p in ("docs/ux/scenarios.md", "docs/superpowers/brief.md",
+              ".task-pipeline/run.md", "README.md", "CHANGELOG.md"):
+        assert build_gate(p, OPEN_RUN, BUILD_FLOW) is None, \
+            "%s is what stages 0-4 are FOR, and the gate asked about it" % p
+
+
+def once_the_build_stage_is_entered_it_is_silent():
+    led = OPEN_RUN + "stage: 5 build — gate auto — 2026-08-13T01:30:00Z\n"
+    assert build_gate("src/app.js", led, BUILD_FLOW) is None, \
+        "the gate fought stage 5, which is where code is written"
+
+
+def an_unresolvable_flow_is_silent():
+    """A question nobody can act on is worse than none — and keying it to a stage
+    NUMBER is the defect v1.50.0 shipped in the release gate."""
+    assert build_gate("src/app.js", "stage: 1 docs — gate auto — verdict pass — x\n") is None
+
+
+def no_run_no_gate():
+    with tempfile.TemporaryDirectory() as project:
+        r = subprocess.run(["bash", BUILDGATE], input=json.dumps({
+            "hook_event_name": "PreToolUse", "tool_name": "Edit",
+            "tool_input": {"file_path": os.path.join(project, "src/app.js")}}),
+            env=dict(os.environ, CLAUDE_PROJECT_DIR=project), capture_output=True, text=True)
+        assert (r.stdout or "").strip() == "", "gated a repository running no pipeline"
+
+
+it("editing source before the build stage asks", editing_source_before_build_asks)
+it("the pipeline's own artefacts are never gated", the_pipelines_own_artefacts_are_never_gated)
+it("once the build stage is entered the gate is silent", once_the_build_stage_is_entered_it_is_silent)
+it("an unresolvable flow is silent", an_unresolvable_flow_is_silent)
+it("no run, no gate", no_run_no_gate)
+
 if failures:
     for f in failures:
         print("FAIL: " + f)

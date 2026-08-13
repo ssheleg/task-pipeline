@@ -1,5 +1,52 @@
 # Changelog
 
+## v1.52.0 — the three moments the run's own record could not show
+
+### Added
+
+- **`hooks/run-lifecycle.sh`** — one line shape for three events the ledger was
+  blind to:
+
+  ```
+  event: <compact|session-end|subagent> — <detail> — <ISO-8601>
+  ```
+
+  - `compact` marks the boundary **the ledger exists because of** —
+    `templates/run.md` says so in its own header, and until now that boundary was
+    the one thing the file could not show. A resumed run could not tell "the
+    context was compacted here" from "nothing happened".
+  - `session-end` marks a run whose session ended without reaching acceptance.
+    That is precisely what `/task-pipeline checkup` looks for, and it was
+    invisible: the ledger simply stopped, which is indistinguishable from a run
+    still in progress. A run that *did* reach acceptance is not filed as
+    abandoned, or the report fills with runs that closed exactly as intended.
+  - `subagent` records one finishing, so the `hand:` count has something to be
+    checked against other than itself.
+
+  **It never writes a `hand:` line, and that is not a shortcut.** That shape
+  carries `done`, `surfaced`, `decisions` and `amb` — judgements only the agent
+  holds. A hook filling them in would fabricate the evidence the line exists to
+  provide. It records what it can see and leaves the accounting to whoever can
+  account.
+
+  One shape rather than three: a ledger grammar is read by four documents and
+  several hooks, and every shape added is a shape each of them must learn.
+
+- **`hooks/build-gate.sh`** — editing the product before the plan is agreed now
+  asks. Stage 5 is where code is written; editing during intake, docs, brainstorm,
+  spec or plan is the pipeline's discipline being skipped, and it is the skip
+  nobody notices because the work looks like progress.
+
+  `ask`, never `deny`: the routing boundary says a typo, a one-line fix or a
+  mechanical rename never went through the pipeline anyway, and no hook can tell a
+  typo from a feature. **The build stage is resolved by role, never by number** —
+  the same lesson v1.51.0 learned from the release gate, applied before it could
+  be repeated. **The pipeline's own artefacts are never gated**: `docs/`,
+  `.task-pipeline/`, README and CHANGELOG are what stages 0-4 are *for*.
+
+Guards: 311 → **312**. Property checks: 9 → 9. The release-gate suite is 29 → 43
+fixtures, all run as processes.
+
 ## v1.51.0 — the gate stopped being keyed to a number, and stopped believing the agent
 
 ### Fixed

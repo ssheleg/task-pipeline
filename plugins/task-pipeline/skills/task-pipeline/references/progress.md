@@ -31,6 +31,7 @@ maintains them and the next run reads them as current.
 - Absent is a word, never a zero
 - The `holds:` line — what the run is still holding
 - The observation beside the claim
+- The run's own lifecycle
 - The run ledger this reads from
 - Rationalizations
 
@@ -335,6 +336,20 @@ The reason is the one this whole file is about, arriving one level down. A rail
 written from memory is a summary that is confidently wrong exactly when it matters;
 a gate that reads a verdict typed by the agent it constrains is the same shape
 again, and it looks like enforcement while being a mirror.
+
+## The run's own lifecycle
+
+Three moments the rail cannot show, recorded by `hooks/run-lifecycle.sh` as
+
+```
+event: <compact|session-end|subagent> — <detail> — <ISO-8601>
+```
+
+The rail reads none of them; `checkup` reads `session-end`, which is how an
+abandoned run stops being invisible. Before this the ledger simply stopped at
+whatever stage the session died on — and a stopped ledger is indistinguishable
+from a run still in progress, which is the exact shape *absent is a word, never a
+zero* exists to refuse.
 
 ## The run ledger this reads from
 
