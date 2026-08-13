@@ -11,9 +11,16 @@
 
 Run: `<topic>` · started `<YYYY-MM-DD>` · module map: `<path or "none">`
 
+## Contents
+
+- Lines
+- Log
+- Why it is not the build ledger
+- What closes it, and what survives it
+
 ## Lines
 
-Append-only. Four shapes, and nothing else belongs here:
+Append-only. These shapes, and nothing else belongs here (the list is the count — a written one drifts, and this one already had):
 
 ```
 stage: <id> <name> — gate <auto|manual> — verdict <pass|fail|skip> — <ISO-8601>
@@ -21,11 +28,20 @@ iter:  <N> — item <B-NNN or task id> — closed at gate <stage id>
 touch: <file> — pass <N> (<stage|round|module>) — reason: <finding id / gate item>
 hand:  <N|10> — task "<quoted>" — done <n> — surfaced <n> — decisions <n> — amb <n> (<ids or "— no register">)
 holds: <stage id> — <n> (<class: what, owner>; … or "none") — enumerated <n>/8 classes, <unlooked: classes not enumerable>
+gate:  <stage id> — command "<cmd>" — exit <N> — <ISO-8601>
 ```
 
 - **`stage:`** — written when a gate **returns**, not when the stage is entered. The
   rail's `✓` is derived from this line and from nothing else; a glyph set from memory
   is a summary that is confidently wrong exactly when it matters.
+- **`gate:`** — written by `hooks/gate-observer.sh`, never by an agent. It is the
+  only line here that records what a command **did** rather than what somebody
+  concluded: the exit code of the stage's declared `gate.command`, observed. The
+  `stage:` line above it is the agent's claim, and the release gate requires the
+  two to agree — without this, a gate reads a claim written by the party it
+  constrains and confirms an assertion with itself. Absent where the project
+  declares no command, and the release gate then degrades to the claim alone.
+
 - **`iter:`** — one line per iteration closed. The progress line's counter is
   `grep -c '^iter:'`, never a number anyone remembers.
 - **`hand:`** — one per hand-back, at an iteration's close and at stage 10
@@ -53,6 +69,8 @@ stage: 1 Docs study — gate auto — verdict pass — 2026-08-10T11:31Z
 touch: src/export.ts — pass 1 (stage 5) — reason: TASK-3
 touch: src/export.ts — pass 2 (stage 5) — reason: F-014
 touch: src/export.ts — pass 3 (stage 5) — reason: F-014
+gate:  6 — command "npm test" — exit 0 — 2026-08-10T12:02Z
+stage: 6 Tests — gate manual — verdict pass — 2026-08-10T12:03Z
 hand:  3 — task "add CSV export to the orders table" — done 2 — surfaced 1 — decisions 1 — amb 2 (OQ-0007, ledger row 4)
 holds: 5 — 2 (worktree: build-csv-export, this run; container: pg-test, this run) — enumerated 8/8 classes
 holds: 10 — none — enumerated 7/8 classes, unlooked: containers (no docker on this host)

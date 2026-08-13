@@ -30,6 +30,7 @@ maintains them and the next run reads them as current.
 - Every number is borrowed
 - Absent is a word, never a zero
 - The `holds:` line — what the run is still holding
+- The observation beside the claim
 - The run ledger this reads from
 - Rationalizations
 
@@ -316,6 +317,24 @@ Three things make the line worth writing rather than a habit:
 
 Doctrine, including the eight classes and what must **not** be torn down:
 [`residue.md`](residue.md).
+
+## The observation beside the claim
+
+A `stage:` verdict is written by the agent. Since v1.51.0 the ledger also carries
+
+```
+gate:  <stage id> — command "<cmd>" — exit <N> — <ISO-8601>
+```
+
+written by `hooks/gate-observer.sh` and by nothing else: the **observed** exit code
+of the command the project declared in `pipeline.json` → the tests stage's
+`gate.command`. The rail does not read it — a glyph still comes from the verdict —
+but the stage-7 release gate requires the claim and the observation to agree.
+
+The reason is the one this whole file is about, arriving one level down. A rail
+written from memory is a summary that is confidently wrong exactly when it matters;
+a gate that reads a verdict typed by the agent it constrains is the same shape
+again, and it looks like enforcement while being a mirror.
 
 ## The run ledger this reads from
 

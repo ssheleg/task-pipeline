@@ -1,5 +1,5 @@
 {
-  "description": "task-pipeline — the stage-7 gate, enforced at agent time. Every hook exits 0 immediately when the project has no .task-pipeline/run.md, so installing the plugin globally changes nothing in a repository that is not running a pipeline.",
+  "description": "task-pipeline — the stage-7 gate and the observation it rests on. Every hook exits 0 immediately when the project has no .task-pipeline/run.md, so installing the plugin globally changes nothing in a repository that is not running a pipeline.",
   "hooks": {
     "PreToolUse": [
       {
@@ -9,7 +9,33 @@
             "type": "command",
             "shell": "bash",
             "command": "\"${CLAUDE_PLUGIN_ROOT}/hooks/release-gate.sh\"",
-            "statusMessage": "stage 7: has stage 6 passed?",
+            "statusMessage": "has the tests gate passed?",
+            "timeout": 20
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "shell": "bash",
+            "command": "\"${CLAUDE_PLUGIN_ROOT}/hooks/gate-observer.sh\"",
+            "timeout": 20
+          }
+        ]
+      }
+    ],
+    "PostToolUseFailure": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "shell": "bash",
+            "command": "\"${CLAUDE_PLUGIN_ROOT}/hooks/gate-observer.sh\"",
             "timeout": 20
           }
         ]

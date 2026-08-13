@@ -106,7 +106,8 @@
       ],
       "gate": {
         "type": "auto",
-        "check": "full suite green (not just new tests); new/changed code covered including failure paths; no skip/xfail smuggling a red suite past the gate; tests assert real behavior, not mock behavior"
+        "check": "full suite green (not just new tests); new/changed code covered including failure paths; no skip/xfail smuggling a red suite past the gate; tests assert real behavior, not mock behavior",
+        "command": "npm test"
       }
     },
     {

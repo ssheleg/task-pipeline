@@ -210,10 +210,27 @@ than a detail to omit.
 
 ## The one this skill ships
 
-Since v1.50.0 the plugin carries a hook of its own —
-`hooks/release-gate.sh`, wired at `PreToolUse` on `Bash`. It refuses an
-**outward, irreversible act** (`git tag`, a tag push, `gh release create`,
-`npm publish`) while the run ledger records no `stage: 6 … verdict pass`.
+Since v1.50.0 the plugin carries hooks of its own. `hooks/release-gate.sh`
+(`PreToolUse` on `Bash`) refuses an **outward, irreversible act** — `git tag`, a
+tag push, `gh release create`, `npm publish` — while the run says the suite has not
+passed. `hooks/gate-observer.sh` (`PostToolUse` and `PostToolUseFailure`) records
+what the declared gate command actually did.
+
+**Two lessons from v1.50.0, both shipped as defects and both fixed in v1.51.0.**
+
+*A gate keyed to a stage NUMBER is the rail's mistake with worse consequences.*
+The first version matched `stage: 6` literally. `progress.md` says the rail "is
+computed, never eleven" because a host project replaces the flow — and a project
+whose flow has six stages, tests green at stage 4, could never tag anything again.
+A wrong rail misinforms; a wrong gate stops the work. The stage is resolved from
+`pipeline.json` (`state: "tests"`, or a stage declaring `gate.command`), and
+failing that from the ledger by name.
+
+*A gate that reads a claim written by the party it constrains confirms an
+assertion with itself.* `stage: … verdict pass` is typed by the agent. Where the
+stage declares `gate.command`, the observer writes the **observed** exit code as a
+`gate:` line and the release gate requires both. Declare no command and it
+degrades to the claim alone — which is stated here rather than discovered.
 
 It is the worked example above, made real, and its three narrownesses are the
 reusable part:

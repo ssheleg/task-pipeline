@@ -2,9 +2,9 @@
 # PreToolUse — the stage-7 gate, made mechanical.
 #
 # `stages.md` already says a release does not leave stage 7 until the full suite
-# is green at stage 6. Until now that was a sentence an agent reads and a person
-# hopes was obeyed; the tag is public before anybody can check. This refuses the
-# irreversible act while the run's own ledger records no passing stage 6.
+# is green at the tests stage. Until now that was a sentence an agent reads and a
+# person hopes was obeyed; the tag is public before anybody can check. This
+# refuses the irreversible act while the run's own ledger says otherwise.
 #
 # THREE DELIBERATE NARROWNESSES, each one the difference between a gate people
 # keep and a gate people rip out:
@@ -15,8 +15,28 @@
 #   2. Only in a project that is running a pipeline. No `.task-pipeline/run.md`
 #      means exit 0 before anything else is read, so installing this plugin
 #      changes nothing anywhere else.
-#   3. Only what the ledger SAYS. Nothing here reruns a suite or believes a
-#      claim; `progress.md` makes the ledger append-only, and this reads it.
+#   3. Only what the ledger SAYS, plus what a hook OBSERVED. Nothing here reruns a
+#      suite.
+#
+# WHICH STAGE IS THE TESTS STAGE IS NOT A CONSTANT, and v1.50.0 shipped it as one.
+# It matched `stage: 6` literally, so a project whose flow has six stages — tests
+# at stage 4, everything green — could never tag anything again. The pipeline's own
+# `progress.md` says the rail "is computed, never eleven" because a host project
+# replaces the flow; a gate keyed to a stage number is the same error with worse
+# consequences, because a wrong rail misinforms and a wrong gate stops the work.
+# The stage is now resolved from `pipeline.json` (a stage whose `state` is `tests`,
+# or one declaring `gate.command`), and failing that from the ledger by name. When
+# it cannot be resolved at all the gate still REFUSES — a run is in flight and
+# nothing in it reports a suite passing, and "we could not tell, so we let it go"
+# is exactly what a release gate exists to refuse — but the reason says how to make
+# the flow readable, because a refusal with no next step is one that gets removed.
+#
+# AND THE CLAIM IS CORROBORATED. `stage: … verdict pass` is typed by the agent this
+# gate constrains, so on its own the gate confirms an assertion with itself. Where
+# the stage declares `gate.command`, `hooks/gate-observer.sh` records the OBSERVED
+# exit code of that command as a `gate:` line, and both must agree. Declare no
+# command and the gate degrades to the claim alone — stated here rather than
+# discovered.
 #
 # Exit 2 blocks the call and shows stderr as the reason. Any other non-zero code
 # is NON-blocking in Claude Code, so an internal failure exits 2 as well: a
@@ -33,10 +53,10 @@ decide() {
   # stdin for `python3 -`, so a script fed that way can never also read the hook's
   # JSON from there. Watched failing — the gate allowed every release, silently,
   # because `sys.stdin.read()` came back empty and an empty payload is a skip.
-  HOOK_INPUT="$input" python3 - "$ledger" <<'PY'
+  HOOK_INPUT="$input" python3 - "$ledger" "$project" <<'PY'
 import json, shlex, sys, os, re
 
-ledger = sys.argv[1]
+ledger, project = sys.argv[1], sys.argv[2]
 raw = os.environ.get("HOOK_INPUT", "")
 try:
     data = json.loads(raw)
@@ -48,6 +68,7 @@ try:
     tokens = shlex.split(cmd)
 except ValueError:
     tokens = cmd.split()
+
 
 def outward(tokens):
     """Is this an act that other people can see the moment it succeeds?"""
@@ -69,7 +90,6 @@ def outward(tokens):
                 sub = rest[j]
                 args = rest[j + 1:]
                 if sub == "tag" and not any(a in ("-d", "--delete", "-l", "--list") for a in args):
-                    # A bare `git tag` lists; a tag with a name creates one.
                     if any(not a.startswith("-") for a in args):
                         return "git tag"
                 if sub == "push":
@@ -82,6 +102,7 @@ def outward(tokens):
         if t.endswith("npm") and "publish" in rest:
             return "npm publish"
     return None
+
 
 act = outward(tokens)
 if not act:
@@ -97,17 +118,72 @@ except Exception:
     # gate cannot tell. Fail closed, and say which file to look at.
     print("block\t%s\tthe run ledger could not be read" % act); raise SystemExit(0)
 
-passed = False
-for line in text.splitlines():
-    line = line.strip()
-    if not line.startswith("stage:"):
-        continue
-    m = re.match(r"stage:\s*6\b", line)
-    if m and re.search(r"verdict\s+pass", line):
-        passed = True
+stage_lines = [l.strip() for l in text.splitlines() if l.strip().startswith("stage:")]
+
+
+def declared_test_stage():
+    """The tests stage, from the project's own flow. `(id, command)` or None."""
+    try:
+        cfg = json.load(open(os.path.join(project, "pipeline.json"), encoding="utf-8"))
+    except Exception:
+        return None
+    for s in cfg.get("stages") or []:
+        if not isinstance(s, dict):
+            continue
+        gate = s.get("gate") or {}
+        if s.get("state") == "tests" or gate.get("command"):
+            return (str(s.get("id")), gate.get("command"))
+    return None
+
+
+def ledger_test_stage():
+    """Failing a declaration, the stage the ledger itself calls the tests one."""
+    for l in stage_lines:
+        m = re.match(r"stage:\s*(\S+)\s+([^—]*)", l)
+        if m and re.search(r"test", m.group(2), re.I):
+            return (m.group(1), None)
+    return None
+
+
+found = declared_test_stage() or ledger_test_stage()
+if not found:
+    # A run is in flight and NOTHING in it reports a suite passing. Blocking is
+    # right — the alternative reads as "we could not tell, so we let it go", which
+    # is what a release gate exists to refuse. The reason says how to be readable.
+    print("block\t%s\tno stage in this run reports the suite passing; declare "
+          "the tests stage as `\"state\": \"tests\"` in pipeline.json, or record "
+          "it in the ledger with `test` in its name" % act)
+    raise SystemExit(0)
+
+stage_id, command = found
+
+claimed_at = None
+for i, l in enumerate(stage_lines):
+    if re.match(r"stage:\s*%s\b" % re.escape(stage_id), l) and re.search(r"verdict\s+pass", l):
+        claimed_at = i
         break
 
-print("ok\t%s" % act if passed else "block\t%s\tno `stage: 6 … verdict pass` line in the ledger" % act)
+if claimed_at is None:
+    print("block\t%s\tno `stage: %s … verdict pass` line in the ledger" % (act, stage_id))
+    raise SystemExit(0)
+
+# The claim is the agent's. Where the project declared the command, an observation
+# by a hook must agree with it — otherwise the gate corroborates an assertion with
+# the same assertion.
+if command:
+    observed = [l.strip() for l in text.splitlines()
+                if re.match(r"gate:\s*%s\b" % re.escape(stage_id), l.strip())]
+    green = [l for l in observed if re.search(r"—\s*exit\s+0\b", l)]
+    if not observed:
+        print("block\t%s\tthe ledger claims stage %s passed, and no hook observed "
+              "`%s` running — the claim is the agent's own" % (act, stage_id, command))
+        raise SystemExit(0)
+    if not green:
+        print("block\t%s\tthe last observed run of `%s` did not exit 0"
+              % (act, command))
+        raise SystemExit(0)
+
+print("ok\t%s" % act)
 PY
 }
 
@@ -129,11 +205,11 @@ case "$state" in
   skip|ok) exit 0 ;;
   block)
     cat >&2 <<EOF
-task-pipeline: \`$act\` is an outward, irreversible act and stage 6 has not passed
-in this run — $why.
+task-pipeline: \`$act\` is an outward, irreversible act and the tests gate has not
+passed in this run — $why.
 
 The tag is public the moment it lands; reading the verdict afterwards is not a
-gate. Run the full suite, record stage 6 in $ledger, then release.
+gate. Run the full suite, record the tests stage in $ledger, then release.
 
 To release deliberately without the pipeline, remove the ledger or say
 «без пайплайна» and take the route by hand.
