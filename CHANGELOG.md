@@ -1,5 +1,49 @@
 # Changelog
 
+## v1.51.0 — the gate stopped being keyed to a number, and stopped believing the agent
+
+### Fixed
+
+- **v1.50.0's release gate blocked every release forever in any project whose flow
+  has no stage 6.** It matched `stage: 6` literally. A six-stage project with tests
+  green at stage 4 could never tag anything again — and this file's own
+  `progress.md` says the rail "is computed, never eleven" for exactly this reason:
+  a host project replaces the flow. A wrong rail misinforms; a wrong gate stops the
+  work. Reproduced against a six-stage project before it was fixed.
+
+  The tests stage is now resolved from `pipeline.json` — a stage whose `state` is
+  `tests`, or one declaring `gate.command` — and failing that from the ledger by
+  name. When it cannot be resolved the gate still refuses, because a run is in
+  flight and nothing in it reports a suite passing, but the reason now says how to
+  make the flow readable.
+
+### Added
+
+- **`hooks/gate-observer.sh` — the observation the gate rests on.**
+  `stage: … verdict pass` is typed by the agent the release gate constrains, so on
+  its own the gate confirmed an assertion with the same assertion. The observer
+  records the **observed** exit code of the command the project declared, as a new
+  ledger line:
+
+  ```
+  gate:  <stage id> — command "<cmd>" — exit <N> — <ISO-8601>
+  ```
+
+  and the release gate requires the claim and the observation to agree. It records
+  a red run as a red run — a hook that hid one would read as "the suite was never
+  run", which is the opposite of what happened. Only the declared command is
+  observed, compared on the normalised command line: `echo "npm test"` and
+  `npm test --watch` are not the project's gate, and treating them as one puts a
+  fabricated observation in the file the gate trusts.
+
+  **No `gate.command` declared → the gate degrades to the claim alone.** Stated
+  here rather than discovered.
+
+Guards: 310 → **311**. Property checks: 9 → 9. The new guard disarms the
+corroboration — it makes the gate accept the claim alone — and requires the suite
+to notice; `test/negatives.py`'s floor moved with it in the same change. The
+release-gate suite is 16 → 29 fixtures, all run as processes.
+
 ## v1.50.0 — the stage-7 gate stops being a sentence somebody reads
 
 ### Added

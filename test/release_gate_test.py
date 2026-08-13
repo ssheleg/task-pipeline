@@ -112,7 +112,8 @@ it("git -C elsewhere tag is still a tag",
 def refusal_is_a_redirection():
     """A refusal with no next step is how an operator learns to remove a gate."""
     _, err = run("git tag v1", NO_STAGE6_LEDGER)
-    assert "stage 6" in err, "the reason does not say what is missing"
+    assert "suite passing" in err, "the reason does not say what is missing"
+    assert "pipeline.json" in err, "the reason does not say how to make the flow readable"
     assert "run.md" in err, "the reason does not name the ledger"
     assert "без пайплайна" in err, "the reason does not name the opt-out"
 
@@ -154,6 +155,170 @@ it("with stage 6 passed the release proceeds",
 it("a passing stage 6 recorded later in the file still counts",
    lambda: expect("npm publish", PASSED_LEDGER + "stage: 7 deploy — gate manual — verdict pass — x\n",
                   ALLOW, "the gate stopped reading at the first stage line"))
+
+# --- the stage is not a constant (the v1.50.0 defect) -----------------------
+
+SIX_STAGE_LEDGER = (
+    "stage: 3 build — gate auto — verdict pass — 2026-08-13T01:00:00Z\n"
+    "stage: 4 tests — gate manual — verdict pass — 2026-08-13T01:10:00Z\n"
+)
+
+
+def run_with(command, ledger, pipeline=None):
+    """Like `run`, but the project may declare its own flow."""
+    with tempfile.TemporaryDirectory() as project:
+        if ledger is not None:
+            os.makedirs(os.path.join(project, ".task-pipeline"))
+            with open(os.path.join(project, ".task-pipeline", "run.md"), "w") as fh:
+                fh.write(ledger)
+        if pipeline is not None:
+            with open(os.path.join(project, "pipeline.json"), "w") as fh:
+                json.dump(pipeline, fh)
+        env = dict(os.environ, CLAUDE_PROJECT_DIR=project)
+        payload = json.dumps({
+            "hook_event_name": "PreToolUse",
+            "tool_name": "Bash",
+            "tool_input": {"command": command},
+        })
+        proc = subprocess.run(["bash", GATE], input=payload, env=env,
+                              capture_output=True, text=True)
+        return proc.returncode, (proc.stderr or "")
+
+
+def six_stage_project_can_release():
+    """v1.50.0 matched `stage: 6` literally, so a six-stage flow could never tag."""
+    code, err = run_with("git tag v1.0.0", SIX_STAGE_LEDGER,
+                         {"stages": [{"id": i} for i in range(6)]})
+    assert code == ALLOW, (
+        "a six-stage project with a green tests stage at 4 was blocked — "
+        "the gate is keyed to a stage NUMBER again. stderr: %s" % err.strip()[:200])
+
+
+def declared_tests_stage_is_used():
+    code, err = run_with("git tag v1.0.0",
+                         "stage: 2 checks — gate auto — verdict pass — 2026-08-13T01:00:00Z\n",
+                         {"stages": [{"id": 2, "state": "tests"}]})
+    assert code == ALLOW, "the declared tests stage was ignored: %s" % err.strip()[:200]
+
+
+def declared_tests_stage_not_passed_blocks():
+    code, _ = run_with("git tag v1.0.0",
+                       "stage: 2 checks — gate auto — verdict fail — 2026-08-13T01:00:00Z\n",
+                       {"stages": [{"id": 2, "state": "tests"}]})
+    assert code == BLOCK, "a failing declared tests stage let a tag through"
+
+
+def unreadable_flow_still_refuses():
+    """A run in flight with nothing reporting a suite is still a refusal."""
+    code, err = run_with("git tag v1.0.0",
+                         "stage: 5 build — gate auto — verdict pass — 2026-08-13T01:00:00Z\n")
+    assert code == BLOCK, "the gate let a tag through because it could not read the flow"
+    assert "pipeline.json" in err, "the refusal does not say how to become readable"
+
+
+it("a six-stage project with green tests can release", six_stage_project_can_release)
+it("the declared tests stage is the one that counts", declared_tests_stage_is_used)
+it("a declared tests stage that failed still blocks", declared_tests_stage_not_passed_blocks)
+it("an unreadable flow refuses, and says how to be readable", unreadable_flow_still_refuses)
+
+
+# --- the claim must be corroborated ----------------------------------------
+
+OBSERVED = {"stages": [{"id": 6, "state": "tests", "gate": {"command": "npm test"}}]}
+CLAIM = "stage: 6 tests — gate manual — verdict pass — 2026-08-13T01:00:00Z\n"
+
+
+def claim_alone_is_not_enough():
+    code, err = run_with("git tag v1.0.0", CLAIM, OBSERVED)
+    assert code == BLOCK, "the agent's own claim released the tag with nothing observing it"
+    assert "the claim is the agent's own" in err, err.strip()[:200]
+
+
+def observation_that_failed_blocks():
+    led = CLAIM + 'gate:  6 — command "npm test" — exit 1 — 2026-08-13T01:05:00Z\n'
+    code, err = run_with("git tag v1.0.0", led, OBSERVED)
+    assert code == BLOCK, "a red observed run released the tag"
+    assert "did not exit 0" in err, err.strip()[:200]
+
+
+def claim_and_observation_agreeing_releases():
+    led = CLAIM + 'gate:  6 — command "npm test" — exit 0 — 2026-08-13T01:05:00Z\n'
+    code, err = run_with("git tag v1.0.0", led, OBSERVED)
+    assert code == ALLOW, "a corroborated claim was blocked: %s" % err.strip()[:200]
+
+
+def no_declared_command_degrades_to_the_claim():
+    """Stated behaviour, not discovered: no command declared, no corroboration."""
+    code, _ = run_with("git tag v1.0.0", CLAIM, {"stages": [{"id": 6, "state": "tests"}]})
+    assert code == ALLOW, "a project declaring no gate command was blocked for not observing one"
+
+
+it("the agent's claim alone does not release", claim_alone_is_not_enough)
+it("an observed failure blocks even when the claim says pass", observation_that_failed_blocks)
+it("claim and observation agreeing releases", claim_and_observation_agreeing_releases)
+it("no declared command degrades to the claim, deliberately", no_declared_command_degrades_to_the_claim)
+
+# --- the observer: what actually ran, written down --------------------------
+
+OBSERVER = os.path.join(ROOT, "plugins", "task-pipeline", "hooks", "gate-observer.sh")
+
+
+def observe(command, pipeline, ledger="", event="PostToolUse", error=None):
+    """Run the observer the way Claude Code does, and return the ledger after."""
+    with tempfile.TemporaryDirectory() as project:
+        os.makedirs(os.path.join(project, ".task-pipeline"))
+        path = os.path.join(project, ".task-pipeline", "run.md")
+        with open(path, "w") as fh:
+            fh.write(ledger)
+        if pipeline is not None:
+            with open(os.path.join(project, "pipeline.json"), "w") as fh:
+                json.dump(pipeline, fh)
+        payload = {"hook_event_name": event, "tool_name": "Bash",
+                   "tool_input": {"command": command}}
+        if error is not None:
+            payload["error"] = error
+        subprocess.run(["bash", OBSERVER], input=json.dumps(payload),
+                       env=dict(os.environ, CLAUDE_PROJECT_DIR=project),
+                       capture_output=True, text=True)
+        return open(path, encoding="utf-8").read()
+
+
+def observer_records_a_green_run():
+    out = observe("npm test", OBSERVED)
+    assert 'gate:  6 — command "npm test" — exit 0' in out, "nothing was recorded: %r" % out
+
+
+def observer_records_a_red_run():
+    """It records, it never judges. A hook that hid a red result would read as
+    'the suite was never run', which is the opposite of what happened."""
+    out = observe("npm test", OBSERVED, event="PostToolUseFailure", error="exit 1")
+    assert "exit 1" in out, "a failing run was not recorded: %r" % out
+
+
+def observer_ignores_anything_not_declared():
+    for cmd in ("npm test --watch", 'echo "npm test"', "npm run build", "git status"):
+        out = observe(cmd, OBSERVED)
+        assert "gate:" not in out, "a fabricated observation from %r: %r" % (cmd, out)
+
+
+def observer_is_silent_without_a_declaration():
+    out = observe("npm test", {"stages": [{"id": 6, "state": "tests"}]})
+    assert "gate:" not in out, "recorded an observation nobody asked for: %r" % out
+    out = observe("npm test", None)
+    assert "gate:" not in out, "recorded without a pipeline.json: %r" % out
+
+
+def observer_appends_and_never_rewrites():
+    led = "stage: 0 intake — gate manual — verdict pass — 2026-08-13T01:00:00Z\n"
+    out = observe("npm test", OBSERVED, ledger=led)
+    assert out.startswith(led), "the ledger was rewritten rather than appended to"
+
+
+it("the observer records a green run", observer_records_a_green_run)
+it("the observer records a red run too — it never judges", observer_records_a_red_run)
+it("only the declared command is observed, exactly", observer_ignores_anything_not_declared)
+it("no declaration, no observation", observer_is_silent_without_a_declaration)
+it("the ledger is appended to, never rewritten", observer_appends_and_never_rewrites)
 
 if failures:
     for f in failures:
