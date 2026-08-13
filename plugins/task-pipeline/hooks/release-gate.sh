@@ -173,13 +173,17 @@ if claimed_at is None:
 if command:
     observed = [l.strip() for l in text.splitlines()
                 if re.match(r"gate:\s*%s\b" % re.escape(stage_id), l.strip())]
-    green = [l for l in observed if re.search(r"—\s*exit\s+0\b", l)]
     if not observed:
         print("block\t%s\tthe ledger claims stage %s passed, and no hook observed "
               "`%s` running — the claim is the agent's own" % (act, stage_id, command))
         raise SystemExit(0)
-    if not green:
-        print("block\t%s\tthe last observed run of `%s` did not exit 0"
+    # THE LAST observation, not any of them. "Some run of the suite was green" is
+    # true of almost every repository that has ever been red, and a gate satisfied
+    # by history rather than by the current state is satisfied permanently. Found
+    # by running the observer against this pipeline's own ledger, where an earlier
+    # green sat above a later red and the gate waved it through.
+    if not re.search(r"—\s*exit\s+0\b", observed[-1]):
+        print("block\t%s\tthe most recent observed run of `%s` did not exit 0"
               % (act, command))
         raise SystemExit(0)
 

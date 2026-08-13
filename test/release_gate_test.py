@@ -320,6 +320,27 @@ it("only the declared command is observed, exactly", observer_ignores_anything_n
 it("no declaration, no observation", observer_is_silent_without_a_declaration)
 it("the ledger is appended to, never rewritten", observer_appends_and_never_rewrites)
 
+def a_later_red_beats_an_earlier_green():
+    """"Some run was green" is true of every repository that has ever been red."""
+    led = (CLAIM
+           + 'gate:  6 — command "npm test" — exit 0 — 2026-08-13T01:05:00Z\n'
+           + 'gate:  6 — command "npm test" — exit 1 — 2026-08-13T01:20:00Z\n')
+    code, err = run_with("git tag v1.0.0", led, OBSERVED)
+    assert code == BLOCK, "an earlier green satisfied the gate over a later red"
+    assert "most recent" in err, err.strip()[:200]
+
+
+def a_later_green_clears_an_earlier_red():
+    led = (CLAIM
+           + 'gate:  6 — command "npm test" — exit 1 — 2026-08-13T01:05:00Z\n'
+           + 'gate:  6 — command "npm test" — exit 0 — 2026-08-13T01:20:00Z\n')
+    code, err = run_with("git tag v1.0.0", led, OBSERVED)
+    assert code == ALLOW, "a fixed suite could not release: %s" % err.strip()[:200]
+
+
+it("a later red beats an earlier green", a_later_red_beats_an_earlier_green)
+it("a later green clears an earlier red", a_later_green_clears_an_earlier_red)
+
 if failures:
     for f in failures:
         print("FAIL: " + f)

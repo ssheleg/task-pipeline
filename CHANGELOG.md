@@ -39,6 +39,12 @@
   **No `gate.command` declared → the gate degrades to the claim alone.** Stated
   here rather than discovered.
 
+  **The LAST observation, not any of them.** "Some run of the suite was green" is
+  true of almost every repository that has ever been red, and a gate satisfied by
+  history rather than by current state is satisfied permanently. Found by running
+  the observer against this pipeline's own ledger, where an earlier green sat
+  above a later red and the gate waved it through.
+
 Guards: 310 → **311**. Property checks: 9 → 9. The new guard disarms the
 corroboration — it makes the gate accept the claim alone — and requires the suite
 to notice; `test/negatives.py`'s floor moved with it in the same change. The
