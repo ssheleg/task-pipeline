@@ -64,6 +64,38 @@ jobs:
       - name: Stage-7 release gate (the hook this skill ships)
         run: python3 test/release_gate_test.py
 
+      - name: The artifact-root rule (two implementations, one table, compared)
+        run: python3 test/artifact_root_test.py
+
+      - name: Negative self-test (the two artifact-root implementations must be compared, not merely run)
+        run: |
+          set -eu
+          rm -rf /tmp/ar-copy && cp -R . /tmp/ar-copy
+          python3 - <<'EOF'
+          # Reverse the precedence in ONE implementation. The table still describes the
+          # correct order, so a suite that only checked each side against the table
+          # would fail — but a suite that never compared them to each other would let
+          # the two drift apart on a case the table did not name. Anchored on the
+          # structural line, and it asserts it changed something: a plant that stops
+          # landing reports the guard it can no longer disarm as broken.
+          p = "/tmp/ar-copy/bin/lib/artifact-root.js"
+          t = open(p, encoding="utf-8").read()
+          old = "const KNOWN = ['docs/evidence', 'docs/superpowers'];"
+          assert old in t, "PLANT DID NOT LAND: the KNOWN order is not where it was"
+          t = t.replace(old, "const KNOWN = ['docs/superpowers', 'docs/evidence'];", 1)
+          open(p, "w", encoding="utf-8").write(t)
+          assert "const KNOWN = ['docs/superpowers'" in open(p, encoding="utf-8").read(), "PLANT DID NOT LAND"
+          EOF
+          if python3 /tmp/ar-copy/test/artifact_root_test.py; then
+            echo "ERROR: one implementation resolves a partial migration BACKWARDS and the suite passed"
+            exit 1
+          else
+            echo "OK: the suite refuses a disagreement between the two implementations"
+          fi
+
+      - name: migrate-artifacts, proven at the layer that repeats (three real runs)
+        run: python3 test/migrate_artifacts_test.py
+
       - name: Negative self-test (an abandoned run must be told from a finished one)
         run: |
           set -eu
@@ -3103,7 +3135,7 @@ jobs:
           set -eu
           rm -rf /tmp/bd1-copy && cp -R . /tmp/bd1-copy
           python3 - <<'EOF'
-          p = "/tmp/bd1-copy/docs/superpowers/specs/2026-08-08-audit-followup-carryover.md"
+          p = "/tmp/bd1-copy/docs/evidence/specs/2026-08-08-audit-followup-carryover.md"
           t = open(p, encoding="utf-8").read()
           needle = " → `B-001`"
           assert needle in t, "PLANT DID NOT LAND: the board id is absent before the edit"
@@ -3122,7 +3154,7 @@ jobs:
           set -eu
           rm -rf /tmp/bd2-copy && cp -R . /tmp/bd2-copy
           python3 - <<'EOF'
-          p = "/tmp/bd2-copy/docs/superpowers/specs/2026-08-08-audit-followup-carryover.md"
+          p = "/tmp/bd2-copy/docs/evidence/specs/2026-08-08-audit-followup-carryover.md"
           t = open(p, encoding="utf-8").read()
           assert "B-001" in t, "PLANT DID NOT LAND: anchor absent before the edit"
           open(p, "w", encoding="utf-8").write(t.replace("B-001", "B-999", 1))
@@ -3141,7 +3173,7 @@ jobs:
           rm -rf /tmp/bd3-copy && cp -R . /tmp/bd3-copy
           python3 - <<'EOF'
           import re
-          p = "/tmp/bd3-copy/docs/superpowers/backlog.md"
+          p = "/tmp/bd3-copy/docs/evidence/backlog.md"
           t = open(p, encoding="utf-8").read()
           # DERIVED, not a literal id: this probe named B-009 and broke the day that row
           # closed. A needle that has to be maintained goes stale between the change and
@@ -3164,7 +3196,7 @@ jobs:
           rm -rf /tmp/bd4-copy && cp -R . /tmp/bd4-copy
           python3 - <<'EOF'
           import re
-          p = "/tmp/bd4-copy/docs/superpowers/backlog.md"
+          p = "/tmp/bd4-copy/docs/evidence/backlog.md"
           t = open(p, encoding="utf-8").read()
           assert re.search(r"B-\d+", t), "PLANT DID NOT LAND: no ids before the edit"
           open(p, "w", encoding="utf-8").write(re.sub(r"B-(\d+)", r"X-\1", t))
@@ -3182,7 +3214,7 @@ jobs:
           set -eu
           rm -rf /tmp/bd5-copy && cp -R . /tmp/bd5-copy
           python3 - <<'EOF'
-          p = "/tmp/bd5-copy/docs/superpowers/backlog.md"
+          p = "/tmp/bd5-copy/docs/evidence/backlog.md"
           t = open(p, encoding="utf-8").read()
           needle = "| 1 | **6** | open"
           assert needle in t, "PLANT DID NOT LAND: anchor absent before the edit"
@@ -3218,7 +3250,7 @@ jobs:
           set -eu
           rm -rf /tmp/bd7-copy && cp -R . /tmp/bd7-copy
           python3 - <<'EOF'
-          p = "/tmp/bd7-copy/docs/superpowers/specs/2026-08-03-setup-and-autonomy-carryover.md"
+          p = "/tmp/bd7-copy/docs/evidence/specs/2026-08-03-setup-and-autonomy-carryover.md"
           t = open(p, encoding="utf-8").read()
           needle = " → `B-015`"
           assert needle in t, "PLANT DID NOT LAND: the board id is absent before the edit"
@@ -3237,7 +3269,7 @@ jobs:
           set -eu
           rm -rf /tmp/tbl-copy && cp -R . /tmp/tbl-copy
           python3 - <<'EOF'
-          p = "/tmp/tbl-copy/docs/superpowers/backlog.md"
+          p = "/tmp/tbl-copy/docs/evidence/backlog.md"
           t = open(p, encoding="utf-8").read()
           needle = "| B-015 |"
           assert needle in t, "PLANT DID NOT LAND: anchor absent before the edit"
@@ -3255,7 +3287,7 @@ jobs:
           set -eu
           rm -rf /tmp/bd8-copy && cp -R . /tmp/bd8-copy
           python3 - <<'EOF'
-          p = "/tmp/bd8-copy/docs/superpowers/specs/2026-08-09-scratch-carryover.md"
+          p = "/tmp/bd8-copy/docs/evidence/specs/2026-08-09-scratch-carryover.md"
           open(p, "w", encoding="utf-8").write(
               "# Carry-over — scratch\n\n"
               "| # | Stage | What | Why it isn't done | REQ | Where it lives now |\n"
@@ -3292,7 +3324,7 @@ jobs:
           set -eu
           rm -rf /tmp/bd9-copy && cp -R . /tmp/bd9-copy
           python3 - <<'EOF'
-          p = "/tmp/bd9-copy/docs/superpowers/specs/2026-08-09-scratch2-carryover.md"
+          p = "/tmp/bd9-copy/docs/evidence/specs/2026-08-09-scratch2-carryover.md"
           open(p, "w", encoding="utf-8").write(
               "# Carry-over — scratch\n\n"
               "| # | Stage | What | Why it isn't done | REQ | Where it lives now |\n"
@@ -3312,7 +3344,7 @@ jobs:
           set -eu
           rm -rf /tmp/bd10-copy && cp -R . /tmp/bd10-copy
           python3 - <<'EOF'
-          p = "/tmp/bd10-copy/docs/superpowers/backlog.md"
+          p = "/tmp/bd10-copy/docs/evidence/backlog.md"
           t = open(p, encoding="utf-8").read()
           row = [l for l in t.splitlines() if l.startswith("| B-008 |")]
           assert row, "PLANT DID NOT LAND: B-008 absent before the edit"
@@ -3349,7 +3381,7 @@ jobs:
           set -eu
           rm -rf /tmp/fp-copy && cp -R . /tmp/fp-copy
           python3 - <<'EOF'
-          p = "/tmp/fp-copy/docs/superpowers/specs/2026-08-09-scratch3-carryover.md"
+          p = "/tmp/fp-copy/docs/evidence/specs/2026-08-09-scratch3-carryover.md"
           open(p, "w", encoding="utf-8").write(
               "# Carry-over — scratch\n\n"
               "| # | Stage | What | Why it isn't done | REQ | Where it lives now |\n"
@@ -3368,7 +3400,7 @@ jobs:
           set -eu
           rm -rf /tmp/bd12-copy && cp -R . /tmp/bd12-copy
           python3 - <<'EOF'
-          p = "/tmp/bd12-copy/docs/superpowers/specs/2026-08-09-prose-carryover.md"
+          p = "/tmp/bd12-copy/docs/evidence/specs/2026-08-09-prose-carryover.md"
           open(p, "w", encoding="utf-8").write(
               "# Carry-over — scratch\n\n"
               "| # | Stage | What | Why it isn't done | REQ | Where it lives now |\n"
@@ -3387,7 +3419,7 @@ jobs:
           set -eu
           rm -rf /tmp/hyp-copy && cp -R . /tmp/hyp-copy
           python3 - <<'EOF'
-          p = "/tmp/hyp-copy/docs/superpowers/specs/2026-08-09-hyphen-carryover.md"
+          p = "/tmp/hyp-copy/docs/evidence/specs/2026-08-09-hyphen-carryover.md"
           open(p, "w", encoding="utf-8").write(
               "# Carry-over — scratch\n\n"
               "| # | Stage | What | Why it isn't done | REQ | Where it lives now |\n"
@@ -3406,7 +3438,7 @@ jobs:
           set -eu
           rm -rf /tmp/bd13-copy && cp -R . /tmp/bd13-copy
           python3 - <<'EOF'
-          p = "/tmp/bd13-copy/docs/superpowers/specs/2026-08-08-audit-followup-carryover.md"
+          p = "/tmp/bd13-copy/docs/evidence/specs/2026-08-08-audit-followup-carryover.md"
           t = open(p, encoding="utf-8").read()
           assert "B-019" in t, "PLANT DID NOT LAND: anchor absent before the edit"
           open(p, "w", encoding="utf-8").write(t.replace("B-019", "B-999", 1))
@@ -3504,7 +3536,7 @@ jobs:
           set -eu
           rm -rf /tmp/tbl2-copy && cp -R . /tmp/tbl2-copy
           python3 - <<'EOF'
-          p = "/tmp/tbl2-copy/docs/superpowers/backlog.md"
+          p = "/tmp/tbl2-copy/docs/evidence/backlog.md"
           t = open(p, encoding="utf-8").read()
           needle = "| B-015 |"
           assert needle in t, "PLANT DID NOT LAND: anchor absent before the edit"
@@ -3522,7 +3554,7 @@ jobs:
           set -eu
           rm -rf /tmp/vf1-copy && cp -R . /tmp/vf1-copy
           python3 - <<'EOF'
-          p = "/tmp/vf1-copy/docs/superpowers/verification.md"
+          p = "/tmp/vf1-copy/docs/evidence/verification.md"
           _orig_bytes = open(p, "rb").read()
           t = open(p, encoding="utf-8").read()
           open(p, "w", encoding="utf-8").write(
@@ -3541,7 +3573,7 @@ jobs:
           set -eu
           rm -rf /tmp/vf2-copy && cp -R . /tmp/vf2-copy
           python3 - <<'EOF'
-          p = "/tmp/vf2-copy/docs/superpowers/verification.md"
+          p = "/tmp/vf2-copy/docs/evidence/verification.md"
           t = open(p, encoding="utf-8").read()
           needle = "| pass | never | — |"
           assert needle in t, "PLANT DID NOT LAND: anchor absent before the edit"
@@ -3560,7 +3592,7 @@ jobs:
           rm -rf /tmp/vf3-copy && cp -R . /tmp/vf3-copy
           python3 - <<'EOF'
           import re
-          p = "/tmp/vf3-copy/docs/superpowers/verification.md"
+          p = "/tmp/vf3-copy/docs/evidence/verification.md"
           t = open(p, encoding="utf-8").read()
           assert re.search(r"^\| REQ-\d+ ", t, re.M), "PLANT DID NOT LAND: no rows before the edit"
           open(p, "w", encoding="utf-8").write(re.sub(r"^\| REQ-\d+ .*$", "", t, flags=re.M))
@@ -3577,7 +3609,7 @@ jobs:
           set -eu
           rm -rf /tmp/vf4-copy && cp -R . /tmp/vf4-copy
           python3 - <<'EOF'
-          p = "/tmp/vf4-copy/docs/superpowers/verification.md"
+          p = "/tmp/vf4-copy/docs/evidence/verification.md"
           t = open(p, encoding="utf-8").read()
           needle = "| pass | never | — |"
           assert needle in t, "PLANT DID NOT LAND: anchor absent"
@@ -3596,7 +3628,7 @@ jobs:
           set -eu
           rm -rf /tmp/vf5-copy && cp -R . /tmp/vf5-copy
           python3 - <<'EOF'
-          p = "/tmp/vf5-copy/docs/superpowers/verification.md"
+          p = "/tmp/vf5-copy/docs/evidence/verification.md"
           t = open(p, encoding="utf-8").read()
           needle = "| pass | never | — |"
           assert needle in t, "PLANT DID NOT LAND: anchor absent before the edit"
@@ -3614,7 +3646,7 @@ jobs:
           set -eu
           rm -rf /tmp/vf6-copy && cp -R . /tmp/vf6-copy
           python3 - <<'EOF'
-          p = "/tmp/vf6-copy/docs/superpowers/verification.md"
+          p = "/tmp/vf6-copy/docs/evidence/verification.md"
           t = open(p, encoding="utf-8").read()
           needle = "| Auto | Human | Note |"
           assert needle in t, "PLANT DID NOT LAND: the header is not where the guard reads it"
@@ -3665,10 +3697,10 @@ jobs:
           import re
           p = "/tmp/tr2-copy/plugins/task-pipeline/skills/task-pipeline/references/artifacts.md"
           t = open(p, encoding="utf-8").read()
-          m = re.search(r"^  superpowers/\n(?:    .*\n)+", t, re.M)
+          m = re.search(r"^  evidence/[^\n]*\n(?:    .*\n)+", t, re.M)
           assert m, "PLANT DID NOT LAND: the tree block is not where the guard reads it"
           open(p, "w", encoding="utf-8").write(t[:m.start()] + t[m.end():])
-          assert not re.search(r"^  superpowers/\n    ", open(p, encoding="utf-8").read(), re.M), "PLANT DID NOT LAND"
+          assert not re.search(r"^  evidence/[^\n]*\n    ", open(p, encoding="utf-8").read(), re.M), "PLANT DID NOT LAND"
           EOF
           if python3 /tmp/tr2-copy/test/validate.py; then
             echo "ERROR: the tree vanished and the guard comparing against it passed"
@@ -3683,7 +3715,7 @@ jobs:
           rm -rf /tmp/hr-copy && cp -R . /tmp/hr-copy
           python3 - <<'EOF'
           import re
-          p = "/tmp/hr-copy/docs/superpowers/verification.md"
+          p = "/tmp/hr-copy/docs/evidence/verification.md"
           t = open(p, encoding="utf-8").read()
           old = "| REQ | What | Run | Shipped in | Auto | Human | Note |"
           assert old in t, "PLANT DID NOT LAND: header absent"
@@ -3776,7 +3808,7 @@ jobs:
           set -eu
           rm -rf /tmp/wr-copy && cp -R . /tmp/wr-copy
           python3 - <<'EOF'
-          p = "/tmp/wr-copy/docs/superpowers/verification.md"
+          p = "/tmp/wr-copy/docs/evidence/verification.md"
           _orig_bytes = open(p, "rb").read()
           t = open(p, encoding="utf-8").read()
           open(p, "w", encoding="utf-8").write(
@@ -4336,7 +4368,7 @@ jobs:
           set -eu
           rm -rf /tmp/rf1-copy && cp -R . /tmp/rf1-copy
           python3 - <<'EOF'
-          p = "/tmp/rf1-copy/docs/superpowers/retro.md"
+          p = "/tmp/rf1-copy/docs/evidence/retro.md"
           t = open(p, encoding="utf-8").read()
           n = "The **Recent log** and the **archive**"
           assert n in t, "PLANT DID NOT LAND: the read-in-full sentence moved"
@@ -4605,7 +4637,7 @@ jobs:
           set -eu
           rm -rf /tmp/rt12-copy && cp -R . /tmp/rt12-copy
           python3 - <<'EOF'
-          p = "/tmp/rt12-copy/docs/superpowers/specs/2026-08-03-default-routing-adoption-design.md"
+          p = "/tmp/rt12-copy/docs/evidence/specs/2026-08-03-default-routing-adoption-design.md"
           t = open(p, encoding="utf-8").read()
           n = '**work verbs, RU + EN:**'
           assert n in t, "PLANT DID NOT LAND: rt12"
@@ -4979,7 +5011,7 @@ jobs:
           import re
           v = open("/tmp/rs02-copy/test/validate.py", encoding="utf-8").read()
           cap = int(re.search(r"^STAMP_CAP = (\d+)", v, re.M).group(1))
-          p = "/tmp/rs02-copy/docs/superpowers/retro.md"
+          p = "/tmp/rs02-copy/docs/evidence/retro.md"
           t = open(p, encoding="utf-8").read()
           rows = re.findall(r"^[ \t]{0,3}\|\s*\d{4}-\d{2}-\d{2}\s*\|[^\n]*\n", t, re.M)
           assert len(rows) == cap, "PLANT DID NOT LAND: rs02 — %d stamps, cap is %d" % (len(rows), cap)

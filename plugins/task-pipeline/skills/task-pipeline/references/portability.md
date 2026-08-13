@@ -18,7 +18,7 @@ one repository, or a skill that has quietly learned one project's answers.
 | Kind of decision | Example | Lives in | Travels? |
 |---|---|---|---|
 | **Workflow** — how the pipeline behaves anywhere | the gate types, the loop-guard caps, the Doc Loop's seven steps, the escalation rule, the routing boundary | `references/*.md`, `templates/*`, `pipeline.example.json` | **yes — this is the bundle** |
-| **Project answer** — what *this* repository decided | which register it uses, its propagation matrix, its ratchet floors, its standing instructions | `docs/DOCMAP.md`, the register, `docs/superpowers/retro.md`, the brief | **no — and correctly so** |
+| **Project answer** — what *this* repository decided | which register it uses, its propagation matrix, its ratchet floors, its standing instructions | `docs/DOCMAP.md`, the register, `<artifacts>/retro.md`, the brief | **no — and correctly so** |
 
 Two failures follow from confusing them, and they look nothing alike:
 

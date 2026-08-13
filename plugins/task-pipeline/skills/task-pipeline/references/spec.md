@@ -67,7 +67,7 @@ entered from super-ux), verify it and embed it; build only what's missing.
 
 ## Write the spec
 
-Path: `docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md`, committed, **same
+Path: `<artifacts>/specs/YYYY-MM-DD-<topic>-design.md`, committed, **same
 `<topic>` slug as the brief** so brief → design → plan is traceable at a glance.
 (The directory name is this pipeline's historical convention, not a dependency on
 anything; a host project may relocate the root via its `CLAUDE.md` — keep the

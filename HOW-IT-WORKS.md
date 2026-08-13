@@ -380,5 +380,5 @@ exclusion clause as their reason to refuse.
 | change it | [`CONTRIBUTING.md`](CONTRIBUTING.md) — the invariants live there |
 | why a release happened | [`CHANGELOG.md`](CHANGELOG.md) |
 | the stage doctrine itself | `plugins/task-pipeline/skills/task-pipeline/references/` |
-| what is open | [`docs/superpowers/backlog.md`](docs/superpowers/backlog.md) |
+| what is open | [`docs/evidence/backlog.md`](docs/evidence/backlog.md) |
 | what is genuinely unresolved | [`docs/OPEN_QUESTIONS.md`](docs/OPEN_QUESTIONS.md) |

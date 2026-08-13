@@ -6,6 +6,24 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 NAME = "task-pipeline"
 errors = []
 
+# Where THIS repository keeps its run paperwork, resolved rather than spelled.
+#
+# Every check below used to name `docs/superpowers/` literally, which made the
+# validator agree with exactly one layout — its own. A host project that relocated
+# the root (the thing references/artifacts.md has promised since v0.1.0) got a
+# validator that failed on every artifact it could not find at the one address it
+# knew. `artifact_root.resolve` answers for whatever layout is actually there:
+# `paths.artifacts` if set, else docs/evidence/, else the legacy docs/superpowers/.
+#
+# `bin/lib/artifact-root.js` implements the same rule for the shipped side, and
+# `test/artifact_root_test.py` fails when the two disagree — that comparison is why
+# two implementations of one rule are affordable here.
+import artifact_root                                        # noqa: E402
+
+_ART_INFO = artifact_root.resolve(ROOT)
+ART = _ART_INFO["root"]          # e.g. "docs/evidence", or "docs/superpowers" (legacy)
+ARTP = os.path.join(ROOT, ART)   # the same, absolute
+
 
 LINK_RE = re.compile(r"\[[^\]]*\]\(([^)\s]+)\)")
 FENCE_RE = re.compile(r"^([ \t]*)(```+|~~~+).*?^\1\2[^\n]*$", re.M | re.S)
@@ -480,7 +498,7 @@ _CLAIM_REGISTRY = [
 
     ("standing instructions",
      r"\b" + _NUM + r"\s+of\s+a\s+hard\s+cap\s+of\s+10\b",
-     lambda: _count_re("docs/superpowers/retro.md", r"^\|\s*R-\d+\s*\|"),
+     lambda: _count_re(f"{ART}/retro.md", r"^\|\s*R-\d+\s*\|"),
      "docs/DOCMAP.md claimed two while the retro held four"),
 
     ("evidence canons",
@@ -518,7 +536,7 @@ _CLAIM_REGISTRY = [
 ]
 
 # Living documents: what a reader takes as true NOW. CHANGELOG is excluded above; run
-# records under docs/superpowers/specs/ are frozen accounts of a past run, same reasoning.
+# records under the artifact root's specs/ are frozen accounts of a past run, same reasoning.
 _LIVING = ["README.md", "SKILL-CARD.md", "CONTRIBUTING.md", "CLAUDE.md",
            "docs/DOCMAP.md", "evals/RESULTS.md",
            "plugins/task-pipeline/skills/task-pipeline/SKILL.md",
@@ -798,7 +816,7 @@ if os.path.isfile(_learned) and os.path.isfile(_rp21):
                 _scan += [os.path.join(_root, _f) for _f in _fs if _f.endswith(".md")]
             _scan += [os.path.join(ROOT, _f) for _f in
                       ("README.md", "CONTRIBUTING.md", "CLAUDE.md", "docs/DOCMAP.md",
-                       "cursor/rules/task-pipeline.mdc", "docs/superpowers/retro.md")]
+                       "cursor/rules/task-pipeline.mdc", f"{ART}/retro.md")]
             for _f in sorted(set(_scan)):
                 if not os.path.isfile(_f):
                     continue
@@ -928,15 +946,14 @@ if os.path.isfile(_cs):
 # any shipped surface that states the condition is a surface that must state both units.
 #
 # Excluded on purpose, and each for a reason that is not "it was inconvenient":
-# CHANGELOG.md narrates the day the second unit was added, docs/superpowers/specs/ are
+# CHANGELOG.md narrates the day the second unit was added, the artifact root's specs/ are
 # point-in-time design records, and the retro archive is not read in full.
 # Only load-bearing entries: the directory names below are pruned out of the walk
 # itself, so listing them here again would state the intent twice and enforce it once.
-# docs/superpowers/{specs,plans,retro}/ are frozen point-in-time records; retro.md
+# <artifacts>/{specs,plans,retro}/ are frozen point-in-time records; retro.md
 # itself is live and stays in. plans/ was missing and a plan already carried the phrase
 # — it escaped only because its wording did not match the stricter regex.
-_COLD_SKIP = ("CHANGELOG.md", "docs/superpowers/specs/", "docs/superpowers/retro/",
-              "docs/superpowers/plans/")
+_COLD_SKIP = ("CHANGELOG.md", f"{ART}/specs/", f"{ART}/retro/", f"{ART}/plans/")
 def _discover_md(skip, predicate):
     """Walk the repo for .md/.mdc surfaces a check applies to. Second caller, so it is
     a function: the shape (prune, filter, relpath, sort) was copy-pasted once and this
@@ -1005,7 +1022,7 @@ for _f in _COLD_SURFACES:
 # own doctrine section. A surface that shows a verdict teaches its format.
 _DISCLOSURE_FILES, _ = _discover_md(
     # a changelog narrates old verdict formats; superpowers/ is a record of runs
-    ("CHANGELOG.md", "docs/superpowers/"),
+    ("CHANGELOG.md", f"{ART}/"),
     lambda _c: any(re.search(r"^GATE\s+\d+", _b, re.M)
                    for _b in re.findall(r"```[^\n]*\n(.*?)```", _c, re.S)))
 for _f in _DISCLOSURE_FILES:
@@ -1263,7 +1280,7 @@ if os.path.isfile(_lp):
 #
 # Floor 0, and it is a ratchet: every open row was given a board id at the seam's
 # closing, so a new one arriving unhomed fails rather than joining a backlog of debt.
-_BOARD = os.path.join(ROOT, "docs/superpowers/backlog.md")
+_BOARD = os.path.join(ARTP, "backlog.md")
 _UNHOMED = []
 _BOARD_IDS = set()
 if os.path.isfile(_BOARD):
@@ -1276,7 +1293,7 @@ if os.path.isfile(_BOARD):
     if os.path.isfile(_tmplb):
         _BOARD_TEXT[_tmplb] = open(_tmplb, encoding="utf-8").read()
     if not _BOARD_IDS:
-        fail("docs/superpowers/backlog.md: no `B-NNN` row — an empty board and a missing "
+        fail(f"{ART}/backlog.md: no `B-NNN` row — an empty board and a missing "
              "board are the same thing to work on, and only one can be appended to")
     # POSITION-FREE, and the first version of this guard was not. Ten ledgers here carry
     # six header shapes and FIVE of them have two status-ish columns ('status'+'home',
@@ -1299,7 +1316,7 @@ if os.path.isfile(_BOARD):
     _LEDGER_ID = {"#", "id", "row"}
     _LEDGER_STATUS = {"home", "where it lives now", "resolution", "status", "state"}
     _UNRES_RE = re.compile(r"^(?:open|unresolved|backlog)\b", re.I)
-    _LEDGERS = sorted(glob.glob(os.path.join(ROOT, "docs/superpowers/specs/*carryover.md")))
+    _LEDGERS = sorted(glob.glob(os.path.join(ARTP, "specs/*carryover.md")))
     # ...and the SEEDED template, whose worked example is the first ledger every host
     # project ever sees. It showed a bare `backlog` home as a settled outcome for as
     # long as this seam existed, which is where the value nobody owned came from.
@@ -1475,7 +1492,7 @@ else:
 # table in nearly as many shapes, because acceptance.md fixes it in prose. Eight of nine
 # briefs carry machine-readable `| REQ-NNN |` rows, and the ninth was fixed the day this
 # was measured. Prose does not hold a shape across ten runs; a template does.
-_VERIF = os.path.join(ROOT, "docs/superpowers/verification.md")
+_VERIF = os.path.join(ARTP, "verification.md")
 _VERIF_NEVER = 0
 _VERIF_TOTAL = 0
 _VERIF_ROWS = []     # (shipped-in, req, what) for every unconfirmed row
@@ -1484,7 +1501,7 @@ if os.path.isfile(_VERIF):
     _vt = open(_VERIF, encoding="utf-8").read()
     _vrows = re.findall(r"^\|\s*(REQ-\d+)\s*\|(.+)$", _vt, re.M)
     if not _vrows:
-        fail("docs/superpowers/verification.md: no `REQ-NNN` row — an empty ledger and a "
+        fail(f"{ART}/verification.md: no `REQ-NNN` row — an empty ledger and a "
              "missing one are the same thing to a reader, and only one of them means "
              "nothing has shipped")
     # The Human column is found BY NAME in this file's own header. Scanning every cell
@@ -1499,7 +1516,7 @@ if os.path.isfile(_VERIF):
             _vhdr = _row_cells(_l)
             break
     if _vhdr is None or "human" not in _vhdr:
-        fail("docs/superpowers/verification.md: no header row naming a `Human` column — "
+        fail(f"{ART}/verification.md: no header row naming a `Human` column — "
              "the one column this file exists for cannot be located, and a guard that "
              "cannot find its subject passes everything")
         _hidx = None
@@ -1508,7 +1525,7 @@ if os.path.isfile(_VERIF):
 
     _brief_reqs = set()
     _brief_by_slug = {}
-    for _bf in glob.glob(os.path.join(ROOT, "docs/superpowers/specs/*brief.md")):
+    for _bf in glob.glob(os.path.join(ARTP, "specs/*brief.md")):
         _slug = os.path.basename(_bf).replace("-brief.md", "")
         _ids = set(re.findall(r"^\|\s*(REQ-\d+)\s*\|", open(_bf, encoding="utf-8").read(), re.M))
         _brief_by_slug[_slug] = _ids
@@ -1528,11 +1545,11 @@ if os.path.isfile(_VERIF):
         _run = next((_x.strip("`") for _x in _cells if _x.strip("`") in _brief_by_slug), None)
         if _run:
             if _rid not in _brief_by_slug[_run]:
-                fail(f"docs/superpowers/verification.md: {_rid} is not in the REQ table of "
+                fail(f"{ART}/verification.md: {_rid} is not in the REQ table of "
                      f"`{_run}`, the run this row names — an id that exists in some other "
                      "brief is not the same requirement")
         elif _brief_reqs and _rid not in _brief_reqs:
-            fail(f"docs/superpowers/verification.md: {_rid} is in no brief's REQ table — a "
+            fail(f"{ART}/verification.md: {_rid} is in no brief's REQ table — a "
                  "ledger row about a requirement nobody wrote down is a row about nothing")
         # The Human column is the point of the file, so it is the one that is checked:
         # a date or the literal `never`. "soon" and "mostly" are how it stops being
@@ -1542,7 +1559,7 @@ if os.path.isfile(_VERIF):
         if _hidx is None:
             pass                           # already failed above; do not report twice
         elif not _human:
-            fail(f"docs/superpowers/verification.md: {_rid} has no `Human` value that is "
+            fail(f"{ART}/verification.md: {_rid} has no `Human` value that is "
                  "either a date or the literal `never` — prose in that column is how the "
                  "one question this file exists to answer stops being answerable")
         _VERIF_TOTAL += 1
@@ -1556,7 +1573,7 @@ if os.path.isfile(_VERIF):
 # artifacts.md carries the same truth twice: an ASCII layout tree and a set of tables.
 # They drifted for two modules — the tree never gained `backlog.md` or
 # `verification.md` while both were named in the tables of the same file, and a reader
-# found it, not a check. Every `docs/superpowers/*.md` the tables name must appear in
+# found it, not a check. Every `<artifacts>/*.md` the tables name must appear in
 # the tree, computed from the tables so neither side can be the one that is right.
 # Reads artifacts.md ONCE and hands it to the stage-input check below, which used to
 # open the same file again on the next line. Board row B-010 tracks this class.
@@ -1564,12 +1581,22 @@ _artf = os.path.join(refdir, "artifacts.md")
 _AT_TEXT = open(_artf, encoding="utf-8").read() if os.path.isfile(_artf) else None
 if _AT_TEXT is not None:
     _at = _AT_TEXT
-    _named = set(re.findall(r"`docs/superpowers/([a-z-]+\.md)`", _at))
-    _tree = re.search(r"^  superpowers/\n((?:    .*\n)+)", _at, re.M)
+    # Anchored on the SYMBOL the doctrine writes, not on the resolved literal.
+    # v1.53.0 rewrote these paths from `docs/superpowers/…` to `<artifacts>/…`, and a
+    # first draft of this guard searched for the resolved name instead: it found
+    # nothing, `_named` went empty, and the guard passed by having no subject —
+    # reported by the negative self-test as "does not actually fire". That is standing
+    # instruction #6's corollary in this repository's own validator, one release after
+    # the instruction was written. The symbol is the stable anchor; the literal moves.
+    _named = set(re.findall(r"`<artifacts>/([a-z-]+\.md)`", _at))
+    # The tree's own line for the root may carry a trailing comment, so the match
+    # stops at the newline rather than requiring the line to end at the slash.
+    _tree = re.search(rf"^  {re.escape(os.path.basename(ART))}/[^\n]*\n((?:    .*\n)+)",
+                      _at, re.M)
     if _named and not _tree:
-        fail("references/artifacts.md: the tables name files under `docs/superpowers/` and "
-             "the layout tree that should list them cannot be found — one of the two "
-             "statements of the same truth has moved")
+        fail(f"references/artifacts.md: the tables name files under `<artifacts>/` and "
+             f"the layout tree that should list them under `{os.path.basename(ART)}/` "
+             "cannot be found — one of the two statements of the same truth has moved")
     elif _named:
         _absent = sorted(_f for _f in _named if _f not in _tree.group(1))
         if _absent:
@@ -2234,7 +2261,7 @@ else:
             for _src, _dst in (("docmap.md", "docs/DOCMAP.md"),
                                ("decisions.md", "docs/DECISIONS.md"),
                                ("open-questions.md", "docs/OPEN_QUESTIONS.md"),
-                               ("retro.md", "docs/superpowers/retro.md")):
+                               ("retro.md", f"{ART}/retro.md")):
                 _copy(seed, _src, _dst)
 
         def _build_adr(seed):
@@ -3726,7 +3753,7 @@ else:
 # choosing it wrongly is how three earlier guards in this file went silent.
 # It cannot tell whether a run actually read anything.
 _FULL_READERS = [
-    ("docs/superpowers/retro.md", os.path.join(ROOT, "docs/superpowers/retro.md")),
+    (f"{ART}/retro.md", os.path.join(ARTP, "retro.md")),
     ("references/retrospective.md", os.path.join(ROOT, _SKILLDIR, "references/retrospective.md")),
     ("references/knowledge-sources.md", os.path.join(ROOT, _SKILLDIR, "references/knowledge-sources.md")),
     ("references/stages.md", _ST_P),
@@ -3874,7 +3901,7 @@ else:
     #    see a missing member of the list the REQ locked. Searching the WHOLE
     #    description was the first version's bug: `Not for: перевести one file` satisfied
     #    it, which is the locked verb's exact inversion.
-    _LOCK_P = os.path.join(ROOT, "docs/superpowers/specs",
+    _LOCK_P = os.path.join(ARTP, "specs",
                            "2026-08-03-default-routing-adoption-design.md")
     if not os.path.isfile(_LOCK_P):
         _UNLOOKED.append("skip: locked-verb check — the 2026-08-03 design is gone")
@@ -3884,7 +3911,7 @@ else:
         if _lm is None:
             # The anti-drift guard for a verb list, one innocent rewrite from silence,
             # in a document this repo forbids maintaining. Loud, not dormant.
-            fail("docs/superpowers/specs/2026-08-03-default-routing-adoption-design.md: "
+            fail(f"{ART}/specs/2026-08-03-default-routing-adoption-design.md: "
                  "no `**work verbs, RU + EN:** … ;` list this check can read. It is a "
                  "superseded record and must not be edited to suit a guard — if the "
                  "shape genuinely changed, move the locked list somewhere maintained "
@@ -4196,7 +4223,7 @@ def _count_stamps(text):
 # which the doctrine says is append-only and never read in full.
 _RETRO_FILES, _ = _discover_md(
     # the archive is append-only and never read in full, so its stamps are not a floor
-    ("docs/superpowers/retro/",),
+    (f"{ART}/retro/",),
     lambda _c: bool(re.search(r"^##\s*Run stamps\b", _c, re.M)))
 if not _RETRO_FILES:
     fail("no file with a `## Run stamps` section found — the stamp cap has no corpus, "
@@ -4208,7 +4235,7 @@ for _rel in _RETRO_FILES:
     _n = _count_stamps(open(_rp, encoding="utf-8").read())
     if _n > STAMP_CAP:
         fail(f"{_rel}: {_n} run stamps in a file read in full at stage 0, and the cap is "
-             f"{STAMP_CAP}. Rotate the oldest into docs/superpowers/retro/YYYY-QN.md — "
+             f"{STAMP_CAP}. Rotate the oldest into {ART}/retro/YYYY-QN.md — "
              "the cold trigger reads the last five, so ten leaves it a margin it cannot "
              "lose. Counted in every shape the doctrine writes them: table rows, list "
              "items and the `<date> · <sha>` line its own command appends")
@@ -4222,11 +4249,11 @@ _RETRO_DOC = os.path.join(_skill_dir, "references", "retrospective.md")
 if os.path.isfile(_RETRO_DOC):
     _seg = None
     for _l in open(_RETRO_DOC, encoding="utf-8").read().splitlines():
-        # reads: the ONE row whose first cell names docs/superpowers/retro.md. Scanning
+        # reads: the ONE row whose first cell names the artifact root's retro.md. Scanning
         # every `|` line let a decoy row for the ARCHIVE answer for the live file; and
         # splitting on `·` made the scope depend on punctuation no doctrine requires,
         # so `, and` in its place restored the v1.41.0 defeat.
-        if not _l.startswith("|") or "docs/superpowers/retro.md" not in _l.split("|")[1]:
+        if not _l.startswith("|") or f"{ART}/retro.md" not in _l.split("|")[1]:
             continue
         for _cell in _l.split("|"):
             for _s in re.split(r"(?=\*\*[A-Z])", _cell):

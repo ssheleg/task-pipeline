@@ -94,12 +94,12 @@ negative self-test in `.github/workflows/validate.yml`.
   mattered*, never a diff summary.
 - `README.md` — when a user-visible capability, install path or stage changes.
 - `references/artifacts.md` — when the repo layout changes.
-- `docs/superpowers/retro.md` — when a run of the pipeline **on this repo**
+- `docs/evidence/retro.md` — when a run of the pipeline **on this repo**
   diverged: stamp the run first (its commit makes the cold-retirement trigger
   computable), then prune the standing instructions (retirement triggers, cap of ten,
   every deletion logged), then write the entry
   ([`references/retrospective.md`](plugins/task-pipeline/skills/task-pipeline/references/retrospective.md)).
-- `docs/superpowers/` holds this repo's **historical** design records (v0.1.0).
+- `docs/evidence/` holds this repo's **historical** design records (v0.1.0).
   They carry a "superseded" banner; do not update them to the current shape and do
   not treat them as the source of truth.
 

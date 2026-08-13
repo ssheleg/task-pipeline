@@ -9,10 +9,10 @@ from `super-ux`.
 
 | Template | Seeded to | Stage |
 |---|---|---|
-| `brief.md` | `docs/superpowers/specs/YYYY-MM-DD-<topic>-brief.md` | 0 — intake grill |
-| `carryover.md` | `docs/superpowers/specs/YYYY-MM-DD-<topic>-carryover.md` | 0 seeds, all stages append, 10 reads |
-| `verification.md` | `docs/superpowers/verification.md` | 8 writes a row per shipped REQ, 10 requires it, a human fills `Human` |
-| `backlog.md` | `docs/superpowers/backlog.md` | 0 seeds when absent, any stage appends, 10 resolves and re-derives |
+| `brief.md` | `docs/evidence/specs/YYYY-MM-DD-<topic>-brief.md` | 0 — intake grill |
+| `carryover.md` | `docs/evidence/specs/YYYY-MM-DD-<topic>-carryover.md` | 0 seeds, all stages append, 10 reads |
+| `verification.md` | `docs/evidence/verification.md` | 8 writes a row per shipped REQ, 10 requires it, a human fills `Human` |
+| `backlog.md` | `docs/evidence/backlog.md` | 0 seeds when absent, any stage appends, 10 resolves and re-derives |
 | `run.md` | `.task-pipeline/run.md` — **git-ignored**, one per run | 0 seeds it, every gate appends a verdict, every repeating pass a `touch:` line |
 | `context.md` | `CONTEXT.md` at the repo root (or per context) | 0 — grill, domain awareness |
 | `adr.md` | `docs/adr/NNNN-<slug>.md` | 0 — grill, hard-to-reverse decisions |
@@ -23,8 +23,8 @@ from `super-ux`.
 | `hygiene.sh` | `scripts/check-hygiene.sh` | 0 seeds it · **5 runs it after every task** · 6 and 9 run it · 10 proves it |
 | `hooks.example.json` | the project's `.claude/settings.json` | 0 — offered, never installed silently |
 | `routing-rule.md` | the operator's `CLAUDE.md` — **offered by `setup`, never written silently** | 0 / `setup` |
-| `retro.md` | `docs/superpowers/retro.md` — **one per project, not per run** | 10 writes (stamp → prune → entry), 0 reads it in full |
-| `retro-archive.md` | `docs/superpowers/retro/YYYY-QN.md` | 10 rotates into it, 0 **queries** it |
+| `retro.md` | `docs/evidence/retro.md` — **one per project, not per run** | 10 writes (stamp → prune → entry), 0 reads it in full |
+| `retro-archive.md` | `docs/evidence/retro/YYYY-QN.md` | 10 rotates into it, 0 **queries** it |
 
 The documentation-track templates (`docmap.md`, `decisions.md`,
 `open-questions.md`, `docgate.sh`) are seeded **together**, and they are useful at

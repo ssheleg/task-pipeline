@@ -37,15 +37,15 @@ Pull what the project already knows about *this task*:
   `graphify-out/graph.json`. It answers **reach** — what calls this, what breaks if it
   moves — which grep cannot.
 - `CLAUDE.md`, `CONTEXT.md`/ADRs, `docs/` + `docs/ux/`, past briefs and carry-over ledgers.
-- **the retro's standing instructions and run stamps** — `docs/superpowers/retro.md`,
+- **the retro's standing instructions and run stamps** — `docs/evidence/retro.md`,
   read in full; both are bounded and they bind this run. Its **Recent log** is
   *queried* by the task's nouns, not read: nothing caps it, and an uncapped section
   inside a binding source is what makes the capped part get skimmed
   (`references/retrospective.md`).
 - the **knowledge wiki** if installed ([obsidian-wiki](https://github.com/ar9av/obsidian-wiki);
   detect `~/.obsidian-wiki/config`), and any other doc system the project names as its docs.
-- **the board** (`docs/superpowers/backlog.md`) — open count quoted in the brief, or
-  seeded when absent. **the verification ledger** (`docs/superpowers/verification.md`) —
+- **the board** (`docs/evidence/backlog.md`) — open count quoted in the brief, or
+  seeded when absent. **the verification ledger** (`docs/evidence/verification.md`) —
   how many rows sit at `never`.
 
 Write the **source ledger** into the brief: a row per source, or an explicit *none found*.

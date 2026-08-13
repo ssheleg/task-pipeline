@@ -1,7 +1,7 @@
 # Task brief — <topic>
 
 > Stage-0 intake artifact. The grill fills this in and the operator confirms it
-> before stage 1. Copy to `docs/superpowers/specs/YYYY-MM-DD-<topic>-brief.md`.
+> before stage 1. Copy to `docs/evidence/specs/YYYY-MM-DD-<topic>-brief.md`.
 > Every field is a resolved decision or an explicit deferral — no open unknowns.
 
 - **Date:** YYYY-MM-DD
@@ -58,11 +58,11 @@ source is a recorded decision, an unquoted one is an undetected divergence.
 - **Doc repos / hosted doc systems this project names:** … (or `none`)
 - **Knowledge wiki:** installed / not installed
   ([obsidian-wiki](https://github.com/ar9av/obsidian-wiki); recommended, never a gate)
-- **Retro, in force:** `docs/superpowers/retro.md` — none / N standing instructions
+- **Retro, in force:** `docs/evidence/retro.md` — none / N standing instructions
   (read **in full**, together with the run stamps and the recent-log window; list
   which ones bind this run, and stamp each as it fires **with the commit** — that
   stamp is the only evidence behind stage 10's cold-retirement rule)
-- **Retro archive:** `docs/superpowers/retro/` — **queried** by this task's nouns;
+- **Retro archive:** `docs/evidence/retro/` — **queried** by this task's nouns;
   what it returned: … (or `nothing`)
 - **Code graph:** built / installed-not-built / not installed
   ([graphify](https://github.com/Graphify-Labs/graphify); recommended, never a gate —
@@ -139,7 +139,7 @@ is not neutral — it is a scheduled interruption.
 | 7 Deploy | **Authorization** — standing go, or ask every time? | … |
 | 8 Post-deploy | Where logs / health live (app name, endpoint, workflow) | … |
 | 9 Docs+wiki | Which module docs / runbooks this change updates; wiki sync yes/no; **code-graph refresh yes/no** (`/graphify . --update`); which stale ledger rows get fixed | … |
-| 10 Acceptance | Who signs off; where deferred REQs get tracked (issue tracker / backlog); **retro file** — `docs/superpowers/retro.md` present? which standing instructions bind this run? | … |
+| 10 Acceptance | Who signs off; where deferred REQs get tracked (issue tracker / backlog); **retro file** — `docs/evidence/retro.md` present? which standing instructions bind this run? | … |
 
 > **Deploy authorization has a hard floor.** A standing go counts only if it is
 > **specific** — named target and named preconditions ("staging, once lint and the

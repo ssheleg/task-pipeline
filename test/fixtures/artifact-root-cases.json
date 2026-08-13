@@ -1,0 +1,51 @@
+{
+  "_note": "The ONE table behind every implementation of the artifact-root rule. Two exist — bin/lib/artifact-root.js (ships, used by migrate-artifacts) and test/artifact_root.py (used by the validator) — and test/artifact_root_test.py runs BOTH against this table and requires identical answers. A third implementation joins by passing the same table. This is the mechanism that keeps one rule from having two behaviours; a table per implementation would be two homes for one fact.",
+
+  "_markers": "A directory is adopted as an artifact root only when it CARRIES a register. Bare existence is not enough: a project may keep an unrelated docs/evidence/, and adopting it would write a run's paperwork into somebody else's folder. Standing instruction #1 — assert the input is what you think before deciding on it.",
+
+  "cases": [
+    {
+      "name": "legacy-only",
+      "why": "the upgrade must be a no-op for every project already running: the old root exists, so it stays the root and nothing moves",
+      "tree": ["docs/superpowers/retro.md"],
+      "expect": { "root": "docs/superpowers", "reason": "legacy", "legacy": true, "leftover": null, "collision": false }
+    },
+    {
+      "name": "new-only",
+      "why": "a project that has migrated, or was seeded after the rename",
+      "tree": ["docs/evidence/retro.md"],
+      "expect": { "root": "docs/evidence", "reason": "found", "legacy": false, "leftover": null, "collision": false }
+    },
+    {
+      "name": "both-roots",
+      "why": "a partial migration is a legitimate state — the operator moves what they need and leaves the rest. The new root wins and the remainder is REPORTED rather than silently ignored",
+      "tree": ["docs/evidence/retro.md", "docs/superpowers/specs/2026-01-01-old-brief.md"],
+      "expect": { "root": "docs/evidence", "reason": "found", "legacy": false, "leftover": "docs/superpowers", "collision": false }
+    },
+    {
+      "name": "fresh-project",
+      "why": "nothing exists yet: the default is the new name, which is how the rename reaches new projects without touching old ones",
+      "tree": [],
+      "expect": { "root": "docs/evidence", "reason": "default", "legacy": false, "leftover": null, "collision": false }
+    },
+    {
+      "name": "configured-wins-over-legacy",
+      "why": "references/artifacts.md promised since v0.1.0 that a host project may relocate the root. Until now nothing kept that promise; paths.artifacts does, and it outranks both discovered names. The legacy directory is still reported as a leftover: `leftover` answers 'what else carries records here', which is a different question from 'which root won' and has the same answer however the root was chosen",
+      "tree": ["docs/superpowers/retro.md"],
+      "config": { "version": 1, "stages": [{ "id": 0, "state": "intake", "name": "Intake", "gate": { "type": "manual", "check": "x" } }], "paths": { "artifacts": "docs/runs" } },
+      "expect": { "root": "docs/runs", "reason": "configured", "legacy": false, "leftover": "docs/superpowers", "collision": false }
+    },
+    {
+      "name": "unrelated-new-dir-is-not-adopted",
+      "why": "a docs/evidence/ holding somebody else's material carries no register, so it is not a pipeline root and the legacy one still is. Adopting on bare existence is how a run's paperwork lands in an unrelated folder",
+      "tree": ["docs/evidence/compliance-audit.pdf.md", "docs/superpowers/backlog.md"],
+      "expect": { "root": "docs/superpowers", "reason": "legacy", "legacy": true, "leftover": null, "collision": false }
+    },
+    {
+      "name": "default-path-occupied-reports-collision",
+      "why": "the sharp edge of the previous case: no legacy root exists, so the default applies — straight into a directory somebody else owns. The resolver still answers, and flags it, so the CALLER asks instead of writing blind. A resolver that returned a bare string could not express this at all",
+      "tree": ["docs/evidence/compliance-audit.pdf.md"],
+      "expect": { "root": "docs/evidence", "reason": "default", "legacy": false, "leftover": null, "collision": true }
+    }
+  ]
+}

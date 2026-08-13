@@ -96,7 +96,7 @@ ledger. A date is the graph's own reply about itself; the lag is the only part
 that says whether it describes the tree you are about to change. A graph goes stale
 like any other source, and it **points while the code decides** — never the
 tiebreaker.
-**Read `docs/superpowers/retro.md` in full if it exists** — its *standing
+**Read `docs/evidence/retro.md` in full if it exists** — its *standing
 instructions* are what previous runs of this pipeline got wrong in this project, and
 they bind this run (they are capped at ten, so reading them all is cheap). Stamp
 each one the moment it fires: that date is the only evidence behind the
@@ -174,12 +174,12 @@ Seed a **carry-over ledger** next to the brief, append-only. Anything deferred,
 dropped, or left half-done goes in the moment it's said — including implementer
 concerns and non-blocking review findings. **Deferred out loud is forgotten.**
 
-Read **the verification ledger** — `docs/superpowers/verification.md` — and quote how
+Read **the verification ledger** — `docs/evidence/verification.md` — and quote how
 many rows sit at `never`: that is the project's standing exposure, and stage 0 is where
 it is cheapest to look. `never` is a fact, not a failure; the count has no floor and may
 never be given a target.
 
-Read **the board** — `docs/superpowers/backlog.md`, the project's work-list *between*
+Read **the board** — `docs/evidence/backlog.md`, the project's work-list *between*
 runs — and quote its open count in the brief; seed it from the template when absent. Its
 priority is **computed, never assigned**: `prio = sev × blast + age_bonus`, with the
 three inputs in the row so a ranking can be checked rather than trusted, and `age` moving
@@ -342,7 +342,7 @@ not authorize an outward, irreversible action — stage 7 stops and asks.
     `git -C <repo> status --porcelain`, `git -C <repo> log @{u}..HEAD --oneline`.
     The fix is two commands and the second is the one that gets forgotten:
     `git -C <submodule> push`, then `git add <submodule> && git commit`.
-    **The last act is the retrospective** — `docs/superpowers/retro.md`, **one file
+    **The last act is the retrospective** — `docs/evidence/retro.md`, **one file
     per project, not per run**. Every gate above is good at *this* run and blind
     across runs: the same class of failure gets caught, fixed and forgotten five
     times and nothing notices it is the same one. So, in this order —
@@ -352,7 +352,7 @@ not authorize an outward, irreversible action — stage 7 stops and asks.
 
     **0. Resolve the ledger onto the board first.** Every carry-over row still
     `open`, `unresolved`, or homed `backlog` leaves with a `B-NNN` id on
-    `docs/superpowers/backlog.md`, and the ledger row is updated to name it — both
+    `docs/evidence/backlog.md`, and the ledger row is updated to name it — both
     directions, because a pointer to an id nobody issued and a board row traceable to
     nothing are different failures. Then re-derive the board's priorities: `age` moved
     while the run was happening.

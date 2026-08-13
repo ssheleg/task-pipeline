@@ -33,7 +33,7 @@ one, leave its body intact. Never renumber. Never delete.
   and the disagreement is computable. The doctrine states the residual **in the same
   sentence**: a run can surface something, file it nowhere, report zero, and nothing
   will notice.
-- **The measurement it rests on:** `docs/superpowers/backlog.md` carries a
+- **The measurement it rests on:** `docs/evidence/backlog.md` carries a
   `Source` column naming the run or document that filed each row — **0 with an
   empty Source**. The join from *run* to *rows this run filed* exists today with
   no new bookkeeping.
@@ -72,7 +72,7 @@ one, leave its body intact. Never renumber. Never delete.
   findings**. Scoping is usually correct and necessary. Published as a defect count
   the figure produces busywork and reads as debt; published as the population to
   sample from, it is a work-list. The row must say which.
-- **Consequences / affects:** `docs/superpowers/backlog.md` (`B-057`, which carries the
+- **Consequences / affects:** `docs/evidence/backlog.md` (`B-057`, which carries the
   neighbour-probe coverage figure and must keep it honest — it read *three guards of
   253* when this decision was written, and the corpus has grown since),
   `docs/OPEN_QUESTIONS.md` (`OQ-0002`). An earlier draft of this line cited a figure in
