@@ -1,5 +1,5 @@
 {
-  "description": "task-pipeline — the stage-7 gate and the observation it rests on. Every hook exits 0 immediately when the project has no .task-pipeline/run.md, so installing the plugin globally changes nothing in a repository that is not running a pipeline.",
+  "description": "task-pipeline — the gates and the observations they rest on. Every hook exits 0 immediately when the project has no .task-pipeline/run.md, so installing the plugin globally changes nothing in a repository that is not running a pipeline.",
   "hooks": {
     "PreToolUse": [
       {
@@ -10,6 +10,17 @@
             "shell": "bash",
             "command": "\"${CLAUDE_PLUGIN_ROOT}/hooks/release-gate.sh\"",
             "statusMessage": "has the tests gate passed?",
+            "timeout": 20
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write|MultiEdit|NotebookEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "shell": "bash",
+            "command": "\"${CLAUDE_PLUGIN_ROOT}/hooks/build-gate.sh\"",
             "timeout": 20
           }
         ]
@@ -37,6 +48,42 @@
             "shell": "bash",
             "command": "\"${CLAUDE_PLUGIN_ROOT}/hooks/gate-observer.sh\"",
             "timeout": 20
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "shell": "bash",
+            "command": "\"${CLAUDE_PLUGIN_ROOT}/hooks/run-lifecycle.sh\"",
+            "timeout": 15
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "shell": "bash",
+            "command": "\"${CLAUDE_PLUGIN_ROOT}/hooks/run-lifecycle.sh\"",
+            "timeout": 15
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "shell": "bash",
+            "command": "\"${CLAUDE_PLUGIN_ROOT}/hooks/run-lifecycle.sh\"",
+            "timeout": 10
           }
         ]
       }

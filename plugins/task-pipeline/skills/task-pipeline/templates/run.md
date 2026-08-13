@@ -29,6 +29,7 @@ touch: <file> — pass <N> (<stage|round|module>) — reason: <finding id / gate
 hand:  <N|10> — task "<quoted>" — done <n> — surfaced <n> — decisions <n> — amb <n> (<ids or "— no register">)
 holds: <stage id> — <n> (<class: what, owner>; … or "none") — enumerated <n>/8 classes, <unlooked: classes not enumerable>
 gate:  <stage id> — command "<cmd>" — exit <N> — <ISO-8601>
+event: <compact|session-end|subagent> — <detail> — <ISO-8601>
 ```
 
 - **`stage:`** — written when a gate **returns**, not when the stage is entered. The
@@ -41,6 +42,19 @@ gate:  <stage id> — command "<cmd>" — exit <N> — <ISO-8601>
   two to agree — without this, a gate reads a claim written by the party it
   constrains and confirms an assertion with itself. Absent where the project
   declares no command, and the release gate then degrades to the claim alone.
+
+- **`event:`** — written by `hooks/run-lifecycle.sh`, the three moments this file
+  otherwise cannot show. `compact` marks the boundary the ledger exists *because
+  of* — without it a resumed run cannot tell a compaction from nothing happening.
+  `session-end` marks a run whose session ended without reaching acceptance, which
+  is what `/task-pipeline checkup` looks for and what was previously invisible: the
+  ledger simply stopped, and a stopped ledger looks exactly like a run still in
+  progress. `subagent` records one finishing, so the `hand:` count below has
+  something to be checked against other than itself.
+
+  **It never writes a `hand:` line.** That shape carries `done`, `surfaced`,
+  `decisions` and `amb` — judgements only the agent holds, and a hook filling them
+  in would fabricate the evidence the line exists to provide.
 
 - **`iter:`** — one line per iteration closed. The progress line's counter is
   `grep -c '^iter:'`, never a number anyone remembers.
@@ -69,6 +83,8 @@ stage: 1 Docs study — gate auto — verdict pass — 2026-08-10T11:31Z
 touch: src/export.ts — pass 1 (stage 5) — reason: TASK-3
 touch: src/export.ts — pass 2 (stage 5) — reason: F-014
 touch: src/export.ts — pass 3 (stage 5) — reason: F-014
+event: compact — auto — 2026-08-10T11:58Z
+event: subagent — general-purpose — 2026-08-10T12:00Z
 gate:  6 — command "npm test" — exit 0 — 2026-08-10T12:02Z
 stage: 6 Tests — gate manual — verdict pass — 2026-08-10T12:03Z
 hand:  3 — task "add CSV export to the orders table" — done 2 — surfaced 1 — decisions 1 — amb 2 (OQ-0007, ledger row 4)
