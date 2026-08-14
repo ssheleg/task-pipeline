@@ -48,8 +48,9 @@ better, plus one that is required only for user-facing work.
 | **context7** (MCP — call tools fully qualified: `context7:resolve-library-id`, `context7:query-docs`) | stage 1 docs study | Recommended (web-search fallback) | connect the context7 MCP server |
 | **Figma** (MCP) | stage 3 UX track, when the project designs visually — super-ux mirrors each `SCR-` screen/state into a frame | Optional, **UI + Figma-on only**. Absent → super-ux degrades to text-only *by itself and never blocks*, so shipping a UI feature with no mockups becomes a silent scope call — which is why the stage-0 sweep decides it | connect the Figma MCP server (`/mcp`, or your claude.ai connectors) |
 | **[obsidian-wiki](https://github.com/ar9av/obsidian-wiki)** (`wiki-query`, `wiki-update`) | **stage 0 harvest** (query what's already known) **+ stage 9 sync** | **Recommended** — never a gate; absent → harvest runs on repo docs alone | `pip install obsidian-wiki` → `obsidian-wiki setup --vault /path/to/your/vault` |
-| **[graphify](https://github.com/Graphify-Labs/graphify)** (`/graphify`, `graphify query\|affected\|god-nodes`) | **stage 0 harvest** (reach: what calls this, what breaks if it moves) **+ stage 9 refresh + the graph↔docs divergence check** ([`knowledge-graph.md`](knowledge-graph.md)) | **Recommended** — never a gate; absent → the harvest greps instead, and the divergence axis is unavailable | `uv tool install graphifyy` → `graphify install` → `/graphify .` |
-| **chrome-devtools** (MCP — `list_pages`, `navigate_page`, `take_snapshot`, `take_screenshot`, `evaluate_script`, `list_console_messages`, `list_network_requests`, `lighthouse_audit`) | **stages 5–6 on any project with a web front end** — verify the **rendered** surface rather than the diff: computed layout, console errors, failed requests. **Stage 8** on a deployed web target: load the page and read what the browser did, not what the deploy said | **Recommended** — never a gate; absent → say the surface was verified **by reading the diff** and treat that as the weaker claim it is | `/plugin install chrome-devtools-mcp@claude-plugins-official` (or connect the MCP server directly) |
+| **[graphify](https://github.com/Graphify-Labs/graphify)** (`/graphify`, `graphify query`, `graphify affected`, `graphify god-nodes`) | **stage 0 harvest** (reach: what calls this, what breaks if it moves) **+ stage 9 refresh + the graph↔docs divergence check** ([`knowledge-graph.md`](knowledge-graph.md)) | **Recommended** — never a gate; absent → the harvest greps instead, and the divergence axis is unavailable | `uv tool install graphifyy` → `graphify install` → `/graphify .` |
+| **playwright** (CLI — `playwright-cli open`, `snapshot`, `click`, `type`, and the two this pipeline actually asks for: `console` and `requests`; or MCP — `browser_navigate`, `browser_snapshot`, `browser_click`, `browser_console_messages`, `browser_network_requests`) | **stages 5–6 on any project with a web front end**, and **stage 8** on a deployed target — the same job as the row below: open the surface, snapshot it, read the console and the network log. Its own difference is **cost per look**: the CLI is a shell command whose upstream states it *"avoid[s] loading large tool schemas and verbose accessibility trees into the model context"*, and both channels snapshot the **accessibility tree rather than pixels**, so a look costs a page of text and no vision model | **Recommended** — never a gate; absent → say the surface was verified **by reading the diff** and treat that as the weaker claim it is | CLI: `npm install -D @playwright/cli@latest` → `npx playwright-cli --help` (or `-g` for the global binary; `playwright-cli install --skills` adds its agent skills). MCP: `claude mcp add playwright npx @playwright/mcp@latest` |
+| **chrome-devtools** (MCP — `list_pages`, `navigate_page`, `take_snapshot`, `take_screenshot`, `evaluate_script`, `list_console_messages`, `list_network_requests`, `lighthouse_audit`, `performance_start_trace`, `take_heapsnapshot`) | **stages 5–6 on any project with a web front end** — verify the **rendered** surface rather than the diff: computed layout, console errors, failed requests. **Stage 8** on a deployed web target: load the page and read what the browser did, not what the deploy said. Its own difference is **reach past the page**: `lighthouse_audit`, performance traces and heap snapshots have no equivalent in the row above, and `seo-aeo-audit` builds on the first of them | **Recommended** — never a gate; absent → say the surface was verified **by reading the diff** and treat that as the weaker claim it is | `/plugin install chrome-devtools-mcp@claude-plugins-official` (or connect the MCP server directly) |
 | **[agent-sync](https://github.com/ssheleg/agent-sync)** (`/agent-sync`, **≥ 1.3.0** — `finish` did not exist before it, so an older install turns the stage-10 close-out into a command that is not there) | **guarded registers** — a lease before writing one, `reserve` before minting an id, `reconcile`/`record` for intent vs as-built, and `finish` for the stage-10 multi-repository close-out ([`documentation.md`](documentation.md)) | **Recommended** — never a gate. Absent → the run is **`ungated`** and must say so out loud; the discipline still applies, only the arbitration is missing | `npx sshlg-skills install` |
 | ~~superpowers~~ | — | **Not a dependency.** Stages 2/4/5/6 run on the built-in doctrine above. See *Optional bridge* | — |
 | ~~grill-me / grilling~~ | — | **Not a dependency.** The stage-0 grill is built in (`references/grill.md`) | — |
@@ -112,9 +113,19 @@ Pipeline companions (stage doctrine is built in — nothing to install for it):
                            /graphify .        (once, in this project)
                          (running without it — no reach queries, no graph↔docs
                           divergence check)
+  ✗ playwright         — recommended when this project has a web front end.
+                         One of TWO channels that do the same look; either is
+                         enough, and a project that already runs Playwright has
+                         this one for free:
+                           npm install -D @playwright/cli@latest   (then npx playwright-cli)
+                           claude mcp add playwright npx @playwright/mcp@latest
+                         (running without it — see the line below; without BOTH,
+                          the surface is verified by reading the diff)
   ✗ chrome-devtools    — recommended when this project has a web front end:
                          stages 5-6 check the RENDERED surface instead of the
-                         diff, stage 8 reads what the browser did after a deploy:
+                         diff, stage 8 reads what the browser did after a deploy.
+                         The other channel; it alone reaches lighthouse_audit,
+                         performance traces and heap snapshots:
                            /plugin install chrome-devtools-mcp@claude-plugins-official
                          (running without it — the surface is verified by reading
                           the diff, and the close-out says so in those words)
@@ -147,13 +158,28 @@ Rules:
   `wiki-query`/`wiki-update`. Present → say `✓ ready` and use it in the harvest.
   Absent → print the two install lines **once** and continue; never ask twice in a
   run and never block a stage on it ([`knowledge-sources.md`](knowledge-sources.md)).
-- **chrome-devtools**: flag it only when the project **has a web front end** — an
-  `index.html`, a `package.json` naming a browser framework, a `docs/ux/screens.md`, or
-  a deploy target that serves pages. Detect via a resolving
-  `mcp__chrome-devtools__list_pages` (or the plugin's tools under any prefix the host
-  uses). Present → `✓ ready`. Absent → print the install line **once** and continue; it
-  is never a gate. **A CLI, a library or a backend service does not flag it** — offering
-  a browser to a project with no browser is how a recommendation is taught to be noise.
+- **The browser channels — `playwright` and `chrome-devtools`, one rule for both.**
+  Flag them only when the project **has a web front end** — an `index.html`, a
+  `package.json` naming a browser framework, a `docs/ux/screens.md`, or a deploy target
+  that serves pages. **A CLI, a library or a backend service does not flag either** —
+  offering a browser to a project with no browser is how a recommendation is taught to
+  be noise. Detect `playwright` via a resolving `playwright-cli` binary, a
+  `@playwright/cli` or `@playwright/mcp` dependency, a `playwright.config.*`, or
+  `mcp__playwright__browser_navigate`; detect `chrome-devtools` via a resolving
+  `mcp__chrome-devtools__list_pages` (either one under whatever prefix the host uses).
+  Present → `✓ ready`. Absent → print its install lines **once** and continue; neither
+  is a gate.
+- **They are two channels for one look, and the run needs one of them, not both.**
+  Both open the page, snapshot it and read the console and the network log, so **stop
+  at the first one that answers** — running the same look twice is a cost with no
+  second fact. Where neither is present, say the surface was verified **by reading the
+  diff**; where both are, the tie-breakers are stated rather than left to taste:
+  **`playwright` when the project already runs it**, or when context budget is tight —
+  its own upstream sells the CLI on not loading large tool schemas and verbose
+  accessibility trees into the model context. **`chrome-devtools` when the question is
+  past the page** — a Lighthouse category, a performance trace, a heap snapshot; the
+  Playwright channel has no equivalent for any of the three. Neither is *the better
+  browser*, and a run that ranks them has invented a fact this matrix does not carry.
 - **graphify**: detect via `graphify-out/graph.json` (built → `✓ ready`, query it in
   the harvest) or a resolving `graphify` binary with no `graphify-out/` (installed,
   not built → offer the one-line `/graphify .`). Absent → print the install lines

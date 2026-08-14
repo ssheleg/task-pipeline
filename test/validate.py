@@ -3573,6 +3573,26 @@ if os.path.isfile(_CS_P) and os.path.isfile(_ST_P):
                      "a companion the operator is told to install for a stage that "
                      "has not heard of it")
 
+    # P3-G0. Both readers of this table parse a cell as `[^|]*`, so a pipe ANYWHERE
+    # inside a row — escaped `\|` included, since markdown renders it but the regex
+    # does not decode it — ends that cell early and silently hands the guard a
+    # different column. Found on this repo while adding the `playwright` row: the row
+    # listed `open\|click\|type` in its first cell, the matrix->stages check read the
+    # second cell as "click", parsed no stage numbers out of it, and passed without
+    # ever comparing anything. A guard that is quiet because its input was truncated
+    # is indistinguishable from a guard that looked and agreed. The umbrella hit the
+    # same class from the other side (an UNescaped pipe adding a column), which is the
+    # second sighting that makes this a check instead of a third ledger row.
+    for _ln, _line in enumerate(_cs_t.splitlines(), 1):
+        if not re.match(r"^\|\s*\*\*[^*|]+\*\*", _line):
+            continue
+        if "\\|" in _line:
+            fail(f"references/companion-skills.md:{_ln}: a matrix row carries an escaped "
+                 "pipe. Every guard over this table splits cells on `|` and does not "
+                 "decode `\\|`, so the row's later cells are read shifted — the "
+                 "matrix->stages check then compares nothing and passes. Use commas, "
+                 "or a code span per item, never a pipe inside a cell")
+
     # P3-G2. The guard above reads matrix ROW NAMES, so a sub-skill named inside a
     # row's own cell is out of its scope — and that is exactly where super-ux's copy
     # half lived while being invisible to every stage. A probe found the hole, which

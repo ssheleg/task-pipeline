@@ -113,3 +113,8 @@
 | REQ-005 | Every carry-over row homed `backlog` resolves to a real board id — **both directions** | `2026-08-09-planning-system` | v1.31.0 | pass | never | — |
 | REQ-006 | `docs/superpowers/verification.md` — one row per REQ: shipped-in, auto verdict, human-confirmed date or `never` | `2026-08-09-planning-system` | v1.32.0 | pass | never | — |
 | REQ-007 | Stage 8 writes the row; stage 10 refuses a REQ with no row | `2026-08-09-planning-system` | v1.32.0 | pass | never | — |
+| REQ-015 | `playwright` is a companion with two no-plugin install paths, and neither channel is ranked above the other | `2026-08-14-playwright-browser-channel` | v1.55.0 | pass | never | — |
+| REQ-016 | One detection rule covers both browser channels, with the tie-breaker written down and 'stop at the first that answers' | `2026-08-14-playwright-browser-channel` | v1.55.0 | pass | never | — |
+| REQ-017 | A browser test suite is the coverage half of stage 6 and never the look — stated in stages.md, tdd.md and SKILL.md | `2026-08-14-playwright-browser-channel` | v1.55.0 | pass | never | — |
+| REQ-018 | A browser finding is fixed in the stage that found it, not filed — stages 5 and 6 | `2026-08-14-playwright-browser-channel` | v1.55.0 | pass | never | — |
+| REQ-019 | A pipe inside a companion-skills.md matrix row is refused; the graphify row that carried one since it was added is fixed | `2026-08-14-playwright-browser-channel` | v1.55.0 | pass | never | — |

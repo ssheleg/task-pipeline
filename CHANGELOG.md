@@ -1,5 +1,64 @@
 # Changelog
 
+## v1.55.0 — the browser step gets a second channel, and the table that names it stops truncating itself
+
+The bundle has told every web project to check the rendered surface since v1.36.0, and
+it named exactly one way to do it: the `chrome-devtools` MCP, behind a plugin install.
+One channel is a single point of failure for a step the pipeline asks for at three
+stages, and the operator's report was the ordinary one — it lags.
+
+Playwright now sits beside it, and **neither is ranked**. They do the same look; the
+difference is stated as capability rather than quality, so a run picks by need instead of
+by taste. `playwright` costs the least per look — its own upstream sells the CLI on not
+loading large tool schemas and verbose accessibility trees into the model context, and
+both of its channels snapshot the accessibility tree rather than pixels.
+`chrome-devtools` is the one that reaches past the page: `lighthouse_audit`, performance
+traces and heap snapshots have no Playwright equivalent, and `seo-aeo-audit` builds on
+the first of them.
+
+### Added
+
+- **`playwright` as a companion**, with two install paths that need no plugin:
+  `npm install -D @playwright/cli@latest` (then `npx playwright-cli`) and
+  `claude mcp add playwright npx @playwright/mcp@latest`. Verified against the registry
+  at release time: `@playwright/cli` 0.1.18, `@playwright/mcp` 0.0.79.
+- **One detection rule for both channels instead of two that drift**, with the
+  tie-breaker written down: `playwright` where the project already runs it or context
+  budget is tight, `chrome-devtools` where the question is Lighthouse, a trace or a
+  heap snapshot. A run that ranks them has invented a fact the matrix does not carry.
+- **Stop at the first channel that answers.** Both open the page and read the console
+  and the network log; running the look twice is a cost with no second fact.
+- **A browser test suite is the other half of the gate, never a substitute for the
+  look** (stages 6, `tdd.md`, `SKILL.md`). `playwright test` in CI is a suite whose
+  runner happens to be a browser: it proves what someone thought to assert, and cannot
+  report the console error nobody asserted on or the element that moved under a header.
+  The suite is counted as coverage; the look is still a page opened and read. This
+  closes `OQ-0003` as `DEC-0004`.
+- **What the look finds is fixed in the stage that found it** (stages 5 and 6). A
+  browser finding parked for later is the diff-review verdict wearing a screenshot.
+
+### Fixed
+
+- **A pipe inside a matrix cell silently disabled the guard that reads it.** Both
+  readers of `companion-skills.md`'s table split cells on `|` and do not decode `\|`,
+  so an escaped pipe ends its cell early and hands the next check a different column.
+  The `graphify` row had carried `graphify query\|affected\|god-nodes` since it was
+  added: the matrix→stages check has been reading that row's second cell as `affected`,
+  parsing no stage numbers out of it, and passing **without comparing anything** — a
+  guard quiet because its input was truncated, which reads exactly like a guard that
+  looked and agreed. Found while planting a defect into the new `playwright` row and
+  watching the check stay silent. There is now a guard for the class, probed both ways,
+  and the `graphify` row is comma-separated. The umbrella hit the same class from the
+  other side in `B-40` (an *un*escaped pipe adding a column), which is the second
+  sighting that makes it a check rather than a third ledger row.
+
+### Guards
+
+Guards: 315 → **316**. Property checks: 9 → 9. The new one refuses a pipe inside a
+`companion-skills.md` matrix row, and it was watched failing twice: once against a
+planted `\|` in the `playwright` row, and once against the `graphify` row that had been
+carrying one in shipped content all along.
+
 ## v1.54.0 — a run cannot reach acceptance with a stage it never stamped
 
 The 2026-08-13 artifact-root run closed at stage 10 with `0,1,2,5,6,7,8,9,10` recorded
