@@ -260,9 +260,11 @@ not authorize an outward, irreversible action — stage 7 stops and asks.
    before calling the stage green. Without one, say "verified by reading the diff" and
    treat that as the weaker claim it is. Two channels, either is enough, ranked by
    nothing: `npm install -D @playwright/cli@latest` (or
-   `claude mcp add playwright npx @playwright/mcp@latest`) costs the least per look;
+   `claude mcp add playwright npx @playwright/mcp@latest`) needs no plugin, and its CLI
+   half puts no tool schema in the context window;
    `/plugin install chrome-devtools-mcp@claude-plugins-official` is the one that
-   reaches Lighthouse, performance traces and heap snapshots. Never a gate. A CLI, a
+   reaches Lighthouse and heap snapshots, and analyses a trace rather than only
+   recording one. Never a gate. A CLI, a
    library or a backend service is never offered either.
 7. **Lint + deploy** (manual) — lint clean AND suite green before deploy; deploy is
    outward → explicit user go, or the specific standing authorization recorded in

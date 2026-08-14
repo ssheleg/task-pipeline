@@ -121,11 +121,13 @@ one, leave its body intact. Never renumber. Never delete.
 - **Decision, in three parts.**
   1. **Playwright joins as a second channel and neither is ranked.** The operator asked
      for Playwright *in priority* and then, asked directly, chose equal footing. The
-     rows describe capability instead of quality: `playwright` costs the least per look
-     (its upstream sells the CLI on not loading large tool schemas and verbose
-     accessibility trees into the model context) and needs no plugin;
-     `chrome-devtools` alone reaches `lighthouse_audit`, performance traces and heap
-     snapshots. **A run that ranks them has invented a fact the matrix does not carry.**
+     rows describe capability instead of quality: `playwright` needs no plugin, and its
+     CLI half puts no tool schema in the context window — upstream's own comparison,
+     and it compares that CLI to an MCP rather than to `chrome-devtools`;
+     `chrome-devtools` alone reaches `lighthouse_audit` and a heap snapshot, and alone
+     analyses a performance trace, which `playwright-cli tracing-start` can record.
+     The first draft of this entry stated the trace leg as an absolute and was wrong;
+     the reader R-005 dispatched measured it against the CLI's own `--help`. **A run that ranks them has invented a fact the matrix does not carry.**
   2. **A green browser test suite is the other half of the gate, never a substitute for
      the look.** `playwright test` in CI proves what someone thought to assert, on the
      paths someone thought to write; it cannot report the console error nobody asserted

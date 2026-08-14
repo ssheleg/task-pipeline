@@ -464,6 +464,21 @@ VISUAL — each with its owning skill, because the first reads matrix **row name
 the copy half lives inside super-ux's own cell, exactly where it was invisible.
 *(guard: `has not heard of it` and `names no owner`)*
 
+**54. The companion matrix's own cells must be readable, and every row must derive a
+stage.** Every check that reads that table splits a cell on `|`, and none of them decodes
+the escaped form. So one extra pipe anywhere in a row — `\|` or bare — ends its cell early
+and hands the next check a different column, which is how the `graphify` row spent every
+release since it was added with its stage pointers **never compared**: the check derived
+an empty set and reported agreement. The cell count is now compared against the header,
+because that is blind to how the pipe was written, and the first draft of this guard was
+not — it tested `\|` only and an independent reader broke it with a bare one in a single
+move. Separately, the outcome is asserted directly: a row whose *"needed for"* cell
+derives **no** stage fails, because a pipe is only one road to an empty set and
+`agent-sync` took another, writing `stage-10` where the stage pattern wanted `stage 10`.
+The two checks share one compiled pattern for that reason — two copies would drift, and
+the drift is silent in precisely the direction that hurts.
+*(guard: `pipes where the header has` and `names no stage its second cell`)*
+
 **53. Publishing a retro insight is opt-in, enumerated, and its own example obeys its
 own rules.** `retro.publish` is off when absent — opening an issue in another repository
 is an outward act, and a generic flag is not a specific authorization. The redaction

@@ -221,10 +221,12 @@ the diff"* — a weaker claim, recorded as one.
 
 There are **two channels and either is enough**, ranked by nothing: `playwright`
 (`npm install -D @playwright/cli@latest`, or
-`claude mcp add playwright npx @playwright/mcp@latest`) costs the least per look and is
-already there on a project that runs Playwright; `chrome-devtools`
+`claude mcp add playwright npx @playwright/mcp@latest`) needs no plugin and is already
+there on a project that runs Playwright, and its CLI half puts no tool schema in the
+context window; `chrome-devtools`
 (`/plugin install chrome-devtools-mcp@claude-plugins-official`) is the one that reaches
-past the page to Lighthouse, performance traces and heap snapshots. Neither is a gate,
+past the page to Lighthouse and heap snapshots, and analyses a performance trace rather
+than only recording one. Neither is a gate,
 and a CLI, a library or a backend service is never offered either.
 
 **The wiki is [obsidian-wiki](https://github.com/ar9av/obsidian-wiki)** (Karpathy's

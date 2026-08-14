@@ -39,6 +39,22 @@ the first of them.
 
 ### Fixed
 
+- **Three claims this release shipped as facts, corrected against the tool's own
+  `--help`.** The independent reader measured them. *"Costs the least per look"* was
+  upstream's CLI-against-MCP comparison restated as this repo's CLI-against-`chrome-devtools`
+  fact — now attributed and scoped. *"Both channels snapshot the accessibility tree rather
+  than pixels"* was true of the default and denied a `screenshot` both channels ship —
+  now says which is the default and what the other costs. *"`chrome-devtools` alone
+  reaches performance traces"* was simply false: `playwright-cli tracing-start` records
+  one. Only the Lighthouse and heap-snapshot legs are exclusive, and the honest
+  difference on traces is that one channel **analyses** what the other only records.
+- **The look was called a half of the gate in the same file that calls it never a gate.**
+  Stage 6's new paragraph made the browser look sound like gate membership while the
+  GATE bullet above it, both matrix rows and `SKILL.md` all keep it recommended and
+  degradable. Stage 5 had the mirror defect: *fixed in this task, not filed* against a
+  GATE bullet that explicitly permits parking with a ruling. Both now say the thing the
+  gate actually enforces.
+
 - **A pipe inside a matrix cell silently disabled the guard that reads it.** Both
   readers of `companion-skills.md`'s table split cells on `|` and do not decode `\|`,
   so an escaped pipe ends its cell early and hands the next check a different column.
@@ -54,10 +70,14 @@ the first of them.
 
 ### Guards
 
-Guards: 315 → **316**. Property checks: 9 → 9. The new one refuses a pipe inside a
-`companion-skills.md` matrix row, and it was watched failing twice: once against a
-planted `\|` in the `playwright` row, and once against the `graphify` row that had been
-carrying one in shipped content all along.
+Guards: 315 → **318**. Property checks: 9 → 9. Two new checks over the companion matrix,
+each watched failing against a plant: the row's cell count against the header (which
+catches a bare pipe and an escaped one alike), and a row that derives no stage at all.
+The first draft of the first check tested `\|` only, and the independent reader `R-005`
+requires broke it with a bare pipe in one move — with a control proving the hole masked
+real matrix→stages drift. The second check exists because the same reader measured every
+row and found `agent-sync` deriving nothing from `stage-10`, one row below the `graphify`
+row this release set out to fix.
 
 ## v1.54.0 — a run cannot reach acceptance with a stage it never stamped
 
