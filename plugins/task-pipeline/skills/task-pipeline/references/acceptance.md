@@ -12,6 +12,7 @@ requirement.** It is what turns the pipeline from a funnel into a circle.
 - Why a stage and not a gate
 - First, the ladder walk — what the list itself is missing
 - Inputs
+- Every declared stage is accounted for
 - Output — the coverage table
 - Evidence, not assertion
 - Several repositories — a submodule is finished when its parent says so
@@ -67,6 +68,31 @@ Read all of them before writing anything:
 - git log for the run's branch; the test suite's final output
 - stage 8's post-deploy notes; stage 9's doc/wiki changes
 - for UI tasks: `docs/ux/scenarios.md` statuses and the `/ux-lint` result
+
+## Every declared stage is accounted for
+
+Before the coverage table, one cheaper question: **does the ledger account for every
+stage the flow declares?**
+
+A run can reach acceptance with stages that never happened and never said so. On
+2026-08-13 one closed with `0,1,2,5,6,7,8,9,10` recorded and **3 (spec) and 4 (plan)
+never stamped** — the artifacts existed, folded into the brief, but their verdicts did
+not. The status line printed `3· 4·` and 73% and was right; nothing read it. Stage 7's
+release gate could not have caught it: that gate fires before 8, 9 and 10 exist, and it
+asks only about the tests stage.
+
+```bash
+bash scripts/stage-coverage.sh
+```
+
+Exit 1 names each declared stage with no verdict. **Both remedies are legitimate** —
+stamp what actually happened, because a merged stage still has an outcome; or stop
+declaring a stage this project folds into another, in `pipeline.json`, where the flow
+describes itself. What is not legitimate is a flow that declares eleven stages and a
+ledger that accounts for nine.
+
+Exit 2 means it could not look — no config, or no ledger. That is **not** a pass: a
+check that cannot run says so rather than agreeing.
 
 ## Output — the coverage table
 

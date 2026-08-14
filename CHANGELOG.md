@@ -1,5 +1,35 @@
 # Changelog
 
+## v1.54.0 — a run cannot reach acceptance with a stage it never stamped
+
+The 2026-08-13 artifact-root run closed at stage 10 with `0,1,2,5,6,7,8,9,10` recorded
+and **3 (spec) and 4 (plan) never stamped**. The status line printed `3· 4·` and 73% and
+was exactly right; nothing read it. Detection existed — `lib/runledger.js` renders that
+rail — and no gate refused on it, which is the difference between a display and a check.
+
+Stage 7's release gate could not have caught it either: it fires before 8, 9 and 10
+exist, and it asks only about the tests stage.
+
+### Added
+
+- **`templates/stage-coverage.sh`**, seeded at stage 0 and run at stage 10 before the
+  coverage table. It reads the stage ids `pipeline.json` declares and the `stage: <id>
+  … verdict` lines the ledger holds, and names every declared stage with no verdict.
+  Last verdict per id wins — a stage re-entered after a fix has the outcome of the
+  re-entry, not of the failure that caused it.
+- **Both remedies are legitimate, and the refusal says so.** Stamp what happened,
+  because a merged stage still has an outcome; or stop declaring in `pipeline.json` a
+  stage this project folds into another. What is not legitimate is a flow that declares
+  eleven stages against a ledger that accounts for nine.
+- **Exit 2 when it cannot look** — no config, no ledger — and that is not a pass.
+  Standing instruction #1: a component that never received its input refuses rather than
+  approves. It has its own negative self-test, because "no input" is the state in which
+  a checker most easily agrees with everything.
+
+Guards: 313 → **315**. Property checks: 9 → 9. The first new one plants the incident
+itself — a five-stage flow whose ledger stamps four — and requires the refusal to name
+stage 3.
+
 ## v1.53.0 — the artifact root stops carrying another pack's name
 
 The paperwork directory was called `docs/superpowers/`. The name came from an unrelated
