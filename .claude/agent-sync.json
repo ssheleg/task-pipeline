@@ -23,7 +23,14 @@
     "docs/OPEN_QUESTIONS.md",
     "docs/evidence/retro.md",
     "docs/evidence/verification.md",
-    "docs/DOCMAP.md"
+    "docs/DOCMAP.md",
+    "CHANGELOG.md",
+    "package.json",
+    ".claude-plugin/marketplace.json",
+    "plugins/*/.claude-plugin/plugin.json",
+    ".github/workflows/*.yml",
+    "test/validate.py",
+    "test/negatives.py"
   ],
   "claimTags": {},
   "gates": [],
