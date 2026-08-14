@@ -395,12 +395,16 @@ never that the work was skipped quietly.
   run's confirmed model (`model-tiering.md`). The plan's parallel groups fan out
   **only** when each implementer gets its own worktree; otherwise sequential.
 - **Web front end? The task's own surface is checked in a browser, not in the diff.**
-  Where `chrome-devtools` is connected ([`companion-skills.md`](companion-skills.md)):
-  after a task that changes a rendered surface, load it, take a snapshot and read the
+  Where a browser channel is connected — `playwright` **or** `chrome-devtools`, either
+  one, whichever answers first ([`companion-skills.md`](companion-skills.md)): after a
+  task that changes a rendered surface, load it, take a snapshot and read the
   console and the network log **before the task is marked DONE** — a component can be
   correct and land under a fixed header, and a review of the diff cannot see that.
-  Absent, say the surface was verified by reading the diff and treat it as the weaker
-  claim it is. Stage 6 repeats this over the whole tree; this one catches it while the
+  **What the look finds is fixed in this task, or parked with the ruling the GATE below
+  requires — never parked silently** — a browser finding filed without a ruling is the
+  diff-review verdict wearing a screenshot; the look was worth taking only if it can
+  still change the code or is on record as deliberately not doing so. Absent, say the surface was verified by reading
+  the diff and treat it as the weaker claim it is. Stage 6 repeats this over the whole tree; this one catches it while the
   implementer that wrote it is still dispatched. The matrix pointed this companion at
   stages 5–6 from the day it was added and **this stage had never named it** — found by
   the guard comparing the two, not by a reader.
@@ -438,12 +442,29 @@ never that the work was skipped quietly.
   A passing suite proves the code does what its assertions say. It does not prove the
   page rendered — a component can be correct and land under a fixed header, a request
   can 404 while every unit test mocks it, and a console error costs nothing at test
-  time. Where `chrome-devtools` is connected ([`companion-skills.md`](companion-skills.md)):
+  time. Where a browser channel is connected — `playwright` **or** `chrome-devtools`,
+  either one ([`companion-skills.md`](companion-skills.md)):
   load the surface, take a snapshot, and read **the console and the network log**
   before calling it green. Absent, say the surface was verified **by reading the
   diff** — that is a weaker claim and the close-out records it as one, rather than
   letting "tests pass" stand in for "it renders". This is the `L6→L7` seam of
   [`audit.md`](audit.md)'s ladder: *is there an executed observable a user reaches?*
+- **A browser test suite does not discharge the look, and does not become it.** A
+  project whose CI runs `playwright test` has an *asserted* browser — it proves what
+  someone thought to assert, on the paths someone thought to write. It cannot report
+  the console error nobody asserted on, the bundle that 404s past a route nobody
+  visits, or the element that moved four pixels under a header. So a green spec suite
+  counts where every other test counts, inside **the suite half of the GATE above**;
+  the look stays what it already is here — **recommended, never a gate**, and reported
+  in the words the gate gives it. What the pair buys is that they fail differently: a
+  run that answers *the surface was checked* by pointing at its spec suite has answered
+  a different question. Where the suite is the thing that changed, the look is what
+  proves it runs against a page that renders.
+- **What the look finds is fixed here.** A rendering defect found at stage 6 is a
+  stage-6 finding: fix it, look again, then call the stage green. Filing it to the
+  board and advancing is how a run reports *checked in a browser* for a page it has
+  seen to be broken — so if it does leave unfixed, the reason is on record and the
+  close-out carries it, exactly as a parked finding does.
 
 ## 7 — Lint + deploy
 - **Freedom: low** — outward and irreversible — the authorization floor is exact or the stage stops ([`gates.md`](gates.md) → *Axis C*).
@@ -496,7 +517,8 @@ never that the work was skipped quietly.
 - **A deployed web target is opened, not curled.** A `200` proves the server
   answered; it says nothing about whether the page rendered, whether a bundle 404'd,
   or whether the console filled with errors on load — all three ship green past a
-  health check. Where `chrome-devtools` is connected, load the deployed URL and read
+  health check. Where a browser channel is connected — `playwright` **or**
+  `chrome-devtools`, either one — load the deployed URL and read
   the console and the network log; quote what you read, not that you looked
   ([`companion-skills.md`](companion-skills.md)). Absent → say the check was an HTTP
   response only, which is the honest name for it.

@@ -9,7 +9,7 @@ this repository did not — the same gap `B-009` found for open questions, and i
 surfaced the same way: a status vocabulary (`Resolved→DEC-####`) pointing at a file
 that was not there.
 
-**Next free ID:** `DEC-0004`
+**Next free ID:** `DEC-0005`
 
 Reading *"Next free ID"* is **not** reserving it — a second agent reading it in the
 same minute gets the same answer. Reserve it, then write.
@@ -104,3 +104,49 @@ one, leave its body intact. Never renumber. Never delete.
   `docs/DECISIONS.md` (this entry).
 - **Source:** run `2026-08-11-residue-and-honesty` · commit `0756b0f`
 - **Supersedes:** the unnumbered rule in `docs/DOCMAP.md`, which predates this register
+
+---
+
+### DEC-0004 — two browser channels, ranked by nothing, and a browser test suite is not the look
+
+- **Date:** 2026-08-14
+- **Status:** Accepted
+- **Context:** `OQ-0003` / `B-056` asked three things at once: is Playwright a *second*
+  browser companion or *the* one where a project already runs it in CI; what stage 6's
+  *checked in a browser, not in the diff* means when the check is a Playwright spec CI
+  runs rather than an agent driving a page; and whether structured accessibility
+  snapshots change what the rendered-surface claim is worth. Since v1.36.0 the bundle
+  had named exactly one channel — the `chrome-devtools` MCP, behind a plugin install —
+  for a step it asks for at three stages.
+- **Decision, in three parts.**
+  1. **Playwright joins as a second channel and neither is ranked.** The operator asked
+     for Playwright *in priority* and then, asked directly, chose equal footing. The
+     rows describe capability instead of quality: `playwright` needs no plugin, and its
+     CLI half puts no tool schema in the context window — upstream's own comparison,
+     and it compares that CLI to an MCP rather than to `chrome-devtools`;
+     `chrome-devtools` alone reaches `lighthouse_audit` and a heap snapshot, and alone
+     analyses a performance trace, which `playwright-cli tracing-start` can record.
+     The first draft of this entry stated the trace leg as an absolute and was wrong;
+     the reader R-005 dispatched measured it against the CLI's own `--help`. **A run that ranks them has invented a fact the matrix does not carry.**
+  2. **A green browser test suite is the other half of the gate, never a substitute for
+     the look.** `playwright test` in CI proves what someone thought to assert, on the
+     paths someone thought to write; it cannot report the console error nobody asserted
+     on, the bundle that 404s past an unvisited route, or the element that moved under a
+     fixed header. The suite is counted as coverage; the look is still a page opened and
+     read. The two fail differently, which is the whole reason to keep both.
+  3. **The browser step stays `recommended`, never a gate.** Hardening it was offered
+     and declined: a gate an environment cannot satisfy is a gate an agent learns to
+     report around, and the honest-degradation sentence — *verified by reading the
+     diff* — already prices the absence correctly.
+- **What made this visible:** the operator's report that `chrome-devtools` lags, against
+  a matrix that offered no alternative.
+- **Consequences / affects:** `references/companion-skills.md` (two rows, one shared
+  detection rule, the tie-breaker, the preflight block), `references/stages.md`
+  (stages 5, 6, 8), `references/tdd.md`, `SKILL.md` (stage 6 and 8 gate rows),
+  `README.md`, `cursor/rules/task-pipeline.mdc`, `SKILL-CARD.md` (the MCP-reference
+  risk row), `docs/OPEN_QUESTIONS.md` (`OQ-0003` resolves here),
+  `docs/evidence/backlog.md` (`B-056` closes).
+- **Source:** run `2026-08-14-playwright-browser-channel` · v1.55.0
+- **Id allocation:** by hand under lease `B-056`. `agent-sync reserve DEC` refused —
+  the `fs` backend cannot append atomically and said so rather than handing out an id
+  it could not guarantee.

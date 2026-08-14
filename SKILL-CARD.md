@@ -12,9 +12,9 @@ harmless.
 |---|---|
 | **Purpose** | Runs a substantial task through ten gated delivery stages — intake grill, docs study, brainstorm, spec, plan, subagent build, tests, lint/deploy, post-deploy, docs+registers, acceptance — refusing to advance until each gate passes |
 | **Owner** | ssheleg ([github.com/ssheleg/task-pipeline](https://github.com/ssheleg/task-pipeline)) |
-| **Version** | 1.54.0 |
+| **Version** | 1.55.0 |
 | **Surface** | Claude Code (filesystem skill + plugin) and the vercel `skills` CLI. **Not** uploaded to the Skills API; custom Skills do not sync across surfaces |
-| **Dependencies** | None required. Optional: `context7` (MCP), `figma` (MCP), super-ux, agent-sync, graphify, obsidian-wiki. Every stage's doctrine ships in-repo; the one conditional requirement is super-ux for the stage-3 UX track on a user-facing task |
+| **Dependencies** | None required. Optional: `context7` (MCP), `figma` (MCP), super-ux, agent-sync, graphify, obsidian-wiki, and **one of two browser channels** — `playwright` (CLI or MCP) or `chrome-devtools` (MCP); either satisfies the browser step and neither is required. Every stage's doctrine ships in-repo; the one conditional requirement is super-ux for the stage-3 UX track on a user-facing task |
 | **Evaluation status** | Suite authored, 5 categories. One recorded run, **self-observed by the author**; **zero blind runs on zero of three models** — the split, and the numbers, live in [`evals/RESULTS.md`](evals/RESULTS.md) and are computed by `evals/run.py` |
 
 ## Risk-tier disclosure
@@ -25,7 +25,7 @@ apply.
 | Indicator | Applies? | What exactly |
 |---|---|---|
 | **Code execution** | **Yes — High** | Ships `templates/docgate.sh` (seeded into the host project as its documentation gate), `bin/task-pipeline.js` and `install.sh` (installers), `test/*.py` and `evals/run.py` (repo checks). None run automatically; the gate is seeded and run by the host project |
-| **MCP server references** | **Yes — High** | Instructions name `context7`, `figma`, `graphify`, `wiki-query`, `wiki-update` and **`chrome-devtools`** — the last one **drives a real browser**: it opens pages, runs scripts in them and reads their console and network traffic, which is a wider capability than the others and is recommended only for projects that have a web front end. All optional; absence degrades a stage, never blocks one, except super-ux on a UI task |
+| **MCP server references** | **Yes — High** | Instructions name `context7`, `figma`, `graphify`, `wiki-query`, `wiki-update` and **two browser channels — `playwright` (CLI `@playwright/cli` or MCP `@playwright/mcp`) and `chrome-devtools`** — the last two **drive a real browser**: they open pages, run scripts in them and read their console and network traffic, which is a wider capability than the others and is recommended only for projects that have a web front end. Either one satisfies the browser step; neither is required. All optional; absence degrades a stage, never blocks one, except super-ux on a UI task |
 | **Tool invocations** | **Yes — Medium** | Instructs bash (git, test runners, the host's lint/deploy commands), file reads and writes, and a `PreToolUse` hook example that runs the docs gate before a commit |
 | **Filesystem access scope** | **Yes — Medium** | Reads and writes inside the host project: `docs/`, `scripts/check-docs.sh`, `.task-pipeline/` scratch, `CONTEXT.md`. Stage 5 creates and removes git worktrees. Writing to **another repository** is treated as outward and requires an explicit go |
 | **Instruction manipulation** | No | Nothing instructs Claude to bypass safety rules, hide actions, or behave conditionally on hidden inputs. Outward and irreversible actions (deploy, publish, PR, editing a shared design file) explicitly require operator authorization |

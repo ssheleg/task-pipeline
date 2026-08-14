@@ -253,12 +253,19 @@ not authorize an outward, irreversible action — stage 7 stops and asks.
    behavior, never mock behavior. **Web front end? Check the surface in a browser,
    not in the diff.** A green suite cannot see a component that renders correctly and
    lands under a fixed header, a request that 404s while every unit test mocks it, or
-   a console error that costs nothing at test time. With the chrome-devtools MCP
-   connected: load the surface, snapshot it, read the console and the network log,
-   and quote what you read. Without it, say "verified by reading the diff" and treat
-   that as the weaker claim it is. Install once, never a gate:
-   `/plugin install chrome-devtools-mcp@claude-plugins-official`. A CLI, a library or
-   a backend service is never offered it.
+   a console error that costs nothing at test time — and neither can a browser test
+   suite, which asserts what someone wrote down and counts as coverage, not as the
+   look. With a browser channel connected: load the surface, snapshot it, read the
+   console and the network log, and quote what you read. Fix what the look finds
+   before calling the stage green. Without one, say "verified by reading the diff" and
+   treat that as the weaker claim it is. Two channels, either is enough, ranked by
+   nothing: `npm install -D @playwright/cli@latest` (or
+   `claude mcp add playwright npx @playwright/mcp@latest`) needs no plugin, and its CLI
+   half puts no tool schema in the context window;
+   `/plugin install chrome-devtools-mcp@claude-plugins-official` is the one that
+   reaches Lighthouse and heap snapshots, and analyses a trace rather than only
+   recording one. Never a gate. A CLI, a
+   library or a backend service is never offered either.
 7. **Lint + deploy** (manual) — lint clean AND suite green before deploy; deploy is
    outward → explicit user go, or the specific standing authorization recorded in
    the stage-0 brief.

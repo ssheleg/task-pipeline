@@ -210,14 +210,24 @@ run proved stale is already in the ledger with what's wrong, so "docs updated" m
 the sources the next run will trust — not just the files this change happened to
 touch.
 
-**A web front end gets a browser, not a diff.** Where `chrome-devtools` is connected,
+**A web front end gets a browser, not a diff.** Where a browser channel is connected,
 stages 5–6 load the surface and read the console and the network log before calling it
 green, and stage 8 opens the deployed page instead of trusting a `200`. A green suite
 cannot see a component that renders correctly and lands under a fixed header, a request
-that 404s while every unit test mocks it, or an error that costs nothing at test time.
-Absent, the run says *"verified by reading the diff"* — a weaker claim, recorded as one.
-Install: `/plugin install chrome-devtools-mcp@claude-plugins-official`. It is never a
-gate, and a CLI, a library or a backend service is never offered it.
+that 404s while every unit test mocks it, or an error that costs nothing at test time —
+and neither can a **browser test suite**, which asserts what someone wrote down and is
+counted as coverage rather than as the look. Absent, the run says *"verified by reading
+the diff"* — a weaker claim, recorded as one.
+
+There are **two channels and either is enough**, ranked by nothing: `playwright`
+(`npm install -D @playwright/cli@latest`, or
+`claude mcp add playwright npx @playwright/mcp@latest`) needs no plugin and is already
+there on a project that runs Playwright, and its CLI half puts no tool schema in the
+context window; `chrome-devtools`
+(`/plugin install chrome-devtools-mcp@claude-plugins-official`) is the one that reaches
+past the page to Lighthouse and heap snapshots, and analyses a performance trace rather
+than only recording one. Neither is a gate,
+and a CLI, a library or a backend service is never offered either.
 
 **The wiki is [obsidian-wiki](https://github.com/ar9av/obsidian-wiki)** (Karpathy's
 LLM-wiki pattern), and it's the one source that carries *why* across projects and

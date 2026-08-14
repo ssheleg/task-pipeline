@@ -101,13 +101,19 @@ database created ten seconds ago" are different claims, and only the second one 
 - **A green suite is not a rendered page.** On a web front end the suite proves the
   code does what its assertions say; it cannot see a component that renders correctly
   and lands under a fixed header, a request that 404s while every unit test mocks it,
-  or a console error that costs nothing at test time. Where `chrome-devtools` is
-  connected ([`companion-skills.md`](companion-skills.md)), open the surface and read
+  or a console error that costs nothing at test time. Where a browser channel is
+  connected — `playwright` **or** `chrome-devtools`, either one
+  ([`companion-skills.md`](companion-skills.md)) — open the surface and read
   the console and the network log before calling it done — and **quote what you read**,
   not that you looked. Absent, the honest sentence is *"verified by reading the diff"*,
   which is a weaker claim and is recorded as one. Same family as a test that passes
   regardless of the production code: the assertion is real and it is pointed at
   something other than what a user reaches.
+- **A browser test suite does not close this, either.** `playwright test` in CI is a
+  suite whose runner happens to be a browser: it still asserts only what someone wrote
+  down. It belongs to the coverage half of the gate, and the sentence above still needs
+  a page that was opened and read. The two fail differently, which is the entire reason
+  to keep both.
 
 ## Stage 6 — consolidation and the suite gate
 

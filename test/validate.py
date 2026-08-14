@@ -3544,6 +3544,16 @@ if os.path.isfile(_EXP_P):
 # matrix read complete on its own. SCOPE: name presence in the stage's section. It
 # does not check that the stage USES the companion well, only that the stage the
 # matrix points at names it at all.
+# ONE pattern, used by the check that derives a row's stages and by the check that
+# refuses a row deriving none. Two copies would drift, and the drift would be silent in
+# exactly the direction that hurts: a spelling the deriver misses and the emptiness check
+# accepts is a row nobody compares. `stage-10` is in here because a shipped row wrote it
+# that way and cost this table a companion's coverage.
+_STAGE_REF = re.compile(
+    r"[Ss]tages?[\s-]+(\d+)\s*[–—-]\s*(\d+)"      # a range: stages 5–6
+    r"|[Ss]tages?[\s-]+(\d+)"                      # a single: stage 8, stage-10
+)
+
 _CS_P = os.path.join(ROOT, _SKILLDIR, "references/companion-skills.md")
 if os.path.isfile(_CS_P) and os.path.isfile(_ST_P):
     _cs_t = open(_CS_P, encoding="utf-8").read()
@@ -3558,8 +3568,7 @@ if os.path.isfile(_CS_P) and os.path.isfile(_ST_P):
         _nm = re.sub(r"^\[|\]$", "", re.split(r"\s*\(", _row[0])[0].strip())
         _need = _row[1]
         _want = set()
-        for _m in re.finditer(r"[Ss]tages?\s+(\d+)\s*[–—-]\s*(\d+)|[Ss]tages?\s+(\d+)",
-                              _need):
+        for _m in _STAGE_REF.finditer(_need):
             if _m.group(1):
                 _want |= {str(_n) for _n in range(int(_m.group(1)), int(_m.group(2)) + 1)}
             else:
@@ -3572,6 +3581,57 @@ if os.path.isfile(_CS_P) and os.path.isfile(_ST_P):
                      f"and references/stages.md's stage {_sid} never names it — "
                      "a companion the operator is told to install for a stage that "
                      "has not heard of it")
+
+    # P3-G0. Both readers of this table parse a cell as `[^|]*`, so ANY extra pipe in a
+    # row ends that cell early and silently hands the next guard a different column.
+    # Found on this repo while adding the `playwright` row: the row listed
+    # `open\|click\|type` in its first cell, the matrix->stages check read the second
+    # cell as "click", parsed no stage numbers out of it, and passed without ever
+    # comparing anything. A guard that is quiet because its input was truncated is
+    # indistinguishable from a guard that looked and agreed.
+    #
+    # THE FIRST DRAFT OF THIS GUARD CHECKED `\\|` ONLY, and the reader R-005 dispatched
+    # broke it in one move: a BARE `|` truncates the identical way and passed, with a
+    # control proving it masked real matrix->stages drift. The umbrella's B-40 was that
+    # same unescaped form. So the check is now the cell COUNT against the header, which
+    # is blind to how the pipe was written — the property that matters is *the readers
+    # disagree with the table about where cell two ends*, not the author's escaping.
+    _hdr = next((l for l in _cs_t.splitlines()
+                 if l.startswith("| Skill / tool")), None)
+    if _hdr:
+        _want_cells = _hdr.count("|")
+        for _ln, _line in enumerate(_cs_t.splitlines(), 1):
+            if not re.match(r"^\|\s*\*\*[^*|]+\*\*", _line):
+                continue
+            if _line.count("|") != _want_cells:
+                _how = ("an escaped `\\|`" if "\\|" in _line else "a bare `|`")
+                fail(f"references/companion-skills.md:{_ln}: a matrix row has "
+                     f"{_line.count('|')} pipes where the header has {_want_cells} — it "
+                     f"carries {_how} inside a cell. Every reader of this table splits "
+                     "on `|` and neither decodes the escaped form, so cell two is not "
+                     "the cell the table shows and the matrix->stages check compares "
+                     "something else, or nothing. Use commas, or a code span per item")
+
+    # P3-G0b. The failure mode P3-G0 exists to prevent is *a row whose stage set comes
+    # out empty*, and a pipe is only one way to get there. The `agent-sync` row got there
+    # by writing `stage-10` with a hyphen, which the stage regex below does not match —
+    # one row under the `graphify` row this release fixed, in the same table, found by
+    # the same reader. So assert the outcome directly: every matrix row must yield at
+    # least one stage. A row that names no stage is a companion the operator is told to
+    # install for nothing, and a row that means to name one and fails to is a check
+    # standing over an empty set, reporting agreement.
+    if _hdr:
+        for _ln, _line in enumerate(_cs_t.splitlines(), 1):
+            _m = re.match(r"^\|\s*\*\*([^*|]+)\*\*[^|]*\|([^|]*)\|", _line)
+            if not _m:
+                continue
+            if not _STAGE_REF.search(_m.group(2)):
+                _nm = re.sub(r"^\[|\]$", "", re.split(r"\s*\(", _m.group(1))[0].strip())
+                fail(f"references/companion-skills.md:{_ln}: the matrix row for {_nm!r} "
+                     "names no stage its second cell can be read from, so the "
+                     "matrix->stages check has nothing to compare and passes in silence. "
+                     "Write `stage N` or `stages N–M` — `stage-N` with a hyphen is the "
+                     "spelling that produced this defect")
 
     # P3-G2. The guard above reads matrix ROW NAMES, so a sub-skill named inside a
     # row's own cell is out of its scope — and that is exactly where super-ux's copy
