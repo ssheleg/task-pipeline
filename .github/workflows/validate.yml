@@ -3770,8 +3770,14 @@ jobs:
           t = t.replace(old, "| REQ | What | Run | Shipped in | Auto | Note | Human |")
           # Any Auto value, not just `pass`: four rows read `none` after a review round,
           # and a plant that skips them leaves half the table in the old column order.
-          t = re.sub(r"\| (pass|none|partial) \| (never|\d{4}-\d{2}-\d{2}) \| — \|",
-                     r"| \1 | — | \2 |", t)
+          #
+          # And any NOTE value, not just `—` — the identical failure one column over, found
+          # on 2026-08-15 when seven rows carrying an audit's finding ids (`F-1`, `F-5 · F-6`)
+          # went unmatched, stayed in the old order under a reordered header, and made this
+          # check report the doctrine broken when the plant was what had gone narrow. A plant
+          # anchored on the CONTENT of a cell describes the table it was written against.
+          t = re.sub(r"\| (pass|none|partial) \| (never|\d{4}-\d{2}-\d{2}) \| ([^|\n]*) \|",
+                     r"| \1 | \3 | \2 |", t)
           open(p, "w", encoding="utf-8").write(t)
           EOF
           if python3 /tmp/hr-copy/test/validate.py >/dev/null; then

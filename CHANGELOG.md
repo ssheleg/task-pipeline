@@ -73,6 +73,16 @@ data**, which is the audit's first result and the reason nothing was reordered.
   share a file, in separate worktrees, and meet the conflict at integration. Both surfaces
   now state all three.
 
+- **A property check's plant had gone narrow one column over, and CI is what found it.**
+  *The Human column survives a header reorder* rewrites the ledger's header and then swaps
+  each row's two last cells — matching on `| <auto> | <human> | — |`, with the `—` a
+  literal. Seven rows added by this run carry a finding id in `Note` instead, went
+  unmatched, stayed in the old order under a reordered header, and the check reported the
+  **doctrine** broken when the **plant** was what had aged. It had already been widened once
+  for exactly this reason one column to the left, which is what makes it a class rather than
+  an incident: a plant anchored on the CONTENT of a cell describes the table it was written
+  against. It now matches any note.
+
 Guards: 318 → **324**. Property checks: 9 → 9. Six new plants, because a rule a check can
 decide is written as the check and not as prose somebody remembers: the fake-edge test
 renamed away, the `Carries` column dropped, the stage-4 gate no longer reading it, §4.2a
