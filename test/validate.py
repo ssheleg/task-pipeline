@@ -5124,6 +5124,68 @@ if os.path.isfile(_STG):
                  "and it is the one condition that was never missing")
 
 
+# 9. The convergence checker, in the three places this pipeline fans out. One rule, and a
+#    rule with no gate behind it is advice: the harvest converges on a brief, stage 3's two
+#    tracks converge on a screen, and stage 9's three artifacts converge on a release.
+_KS = os.path.join(_skill_dir, "references", "knowledge-sources.md")
+if os.path.isfile(_KS):
+    _ks = _flatten(_LIVING_TEXT.get(os.path.relpath(_KS, ROOT))
+                   or open(_KS, encoding="utf-8").read(), lower=True)
+    if "contradictions:" not in _ks:
+        fail("references/knowledge-sources.md: the source ledger has no `Contradictions:` "
+             "line. The harvest is a fan-out that converges on one brief, phase 2 checks "
+             "each ANSWER against it, and nothing compares the sources with each other — "
+             "so a doc that contradicts the code produces two rows that each look fine")
+if os.path.isfile(_STG):
+    _s0 = _section(_STG, r"0 — Intake grill")
+    if _s0 is None:
+        fail("references/stages.md: no `0 — Intake grill` section")
+    elif "contradictions:" not in _flatten(_gate_bullet(_s0), lower=True):
+        fail("references/stages.md 0: the GATE does not read the ledger's "
+             "`Contradictions:` line. A check the gate does not require is one a run skips "
+             "on the day it is busy")
+    _s3 = _section(_STG, r"3 — Spec")
+    if _s3 is None:
+        fail("references/stages.md: no `3 — Spec` section")
+    else:
+        _s3f = _flatten(_s3, lower=True)
+        if "converge" not in _s3f:
+            fail("references/stages.md 3: COPY and VISUAL are stated without their "
+                 "convergence. Both land on the same screen, so the failure is not that "
+                 "one is wrong — it is that each is right alone and they disagree together")
+        if "parallel" not in _s3f:
+            fail("references/stages.md 3: the two tracks are still written as a sequence. "
+                 "Neither consumes the other; copy is written against the scenarios and "
+                 "the brand pack, the visual against the frame and the style pack")
+        if "converge" not in _flatten(_gate_bullet(_s3), lower=True):
+            fail("references/stages.md 3: the GATE does not require the tracks' "
+                 "convergence check, so it lives only in prose")
+
+# 10. A declared id register over a backend that cannot reserve. The tool refuses
+#     correctly; what fails is the project, because the declaration reads as a capability
+#     and nobody writes the manual procedure it hides. Two sessions filed one `B-073`.
+_ASJ = os.path.join(ROOT, ".claude", "agent-sync.json")
+if os.path.isfile(_ASJ):
+    try:
+        _cfg = json.load(open(_ASJ, encoding="utf-8"))
+    except Exception:
+        _cfg = None
+        fail(".claude/agent-sync.json: unreadable — a coordination config that cannot be "
+             "parsed protects nothing and says it protects everything")
+    if _cfg and _cfg.get("idRegisters") and _cfg.get("backend") == "fs":
+        _house = os.path.join(ROOT, "CLAUDE.md")
+        _h = open(_house, encoding="utf-8").read().lower() if os.path.isfile(_house) else ""
+        if "git show head:" not in _h:
+            fail("CLAUDE.md: this project declares id registers over the `fs` backend, whose "
+                 "`reserve` refuses by design — so allocation is manual and the procedure "
+                 "must be written where an agent reads it. It must compute the next id from "
+                 "the COMMITTED file (`git show HEAD:<file>`): a working copy holds your own "
+                 "unpushed row and hides somebody else's, which is how one id was filed twice")
+        if "ls-remote --tags" not in _h:
+            fail("CLAUDE.md: the same class with no register at all — a version number — is "
+                 "unaddressed. Two branches claimed one version by each incrementing from "
+                 "its own checkout; `git ls-remote --tags` is where the answer lives")
+
 if errors:
     print("FAIL: task-pipeline structure invalid")
     for e in errors:

@@ -353,6 +353,23 @@ A register is the one file two agents will write in the same minute.
   a real state, not a formality. Describing a project as protected while nothing
   enforces it is worse than having no protection, because everyone downstream
   believes the guarantee.
+- **A register declared against a backend that cannot reserve is a register in name
+  only, and its presence is what stops the manual procedure being written.** Measured
+  2026-08-15: a project declared three id registers over a local-filesystem backend
+  whose `reserve` correctly refuses — *pretending would hand two agents the same id* —
+  and two sessions filed a different `B-073` on the same afternoon. The tool was honest;
+  the *declaration* was the problem, because a capability that appears to exist is one
+  nobody replaces. Where reservation is not available, write the three-step manual
+  allocation down where an agent reads it, and make it follow the lease:
+  1. take the lease on the register's file **first**;
+  2. compute the next id from the **committed** file — `git show HEAD:<file>` — never
+     from a working copy, which holds your own unpushed row and hides somebody else's;
+  3. write and **commit** before releasing the lease. An id held only in an uncommitted
+     file is an id nobody else can see you took.
+- **A version number is the same class with no register at all.** Two branches both
+  claimed one version on that same afternoon because each incremented from what its own
+  checkout knew. Read the remote — `git ls-remote --tags` — because that list is the only
+  place the answer lives.
 
 ---
 

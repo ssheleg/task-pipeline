@@ -17,6 +17,7 @@ that goes stale when the answer changes.
 - The knowledge wiki — recommended
 - How to harvest — retrieval, not reading
 - Record it — the source ledger
+- The harvest is a convergence, so it needs a check across its sources
 - The source is not the copy you have
 - Carried-in claims — measured or recalled
 - Phase 2 — validate the answers against the harvest
@@ -176,6 +177,38 @@ source nobody will update.
 
 **"No sources found" is a valid, recorded outcome.** Write the row. An empty ledger
 tells the next run that the search happened and came back empty — silence doesn't.
+
+## The harvest is a convergence, so it needs a check across its sources
+
+Every row above was produced independently — the code does not know what the ADR says,
+the wiki does not know what the graph found. Then all of them arrive at one place, the
+brief, and the interview treats that place as a single answer. **That is a fan-out with
+a convergence, and a convergence trusts its inputs because they arrived**
+(`agent-stack` → `agent-orchestrator/references/graph-engineering.md`, the checker node).
+
+Phase 2 below checks each *answer* against the harvest. Nothing checks the **sources
+against each other**, and that is the gap: a doc that contradicts the code produces two
+rows that each look fine, and the run picks whichever it read last.
+
+So before the first question, walk the ledger once more and write a **`Contradictions:`**
+line under it. Four things to look for, and they are the checker's five catches with the
+one that cannot apply here dropped:
+
+1. **Empty** — a source that was consulted and said nothing about this task. Already a
+   valid row; the point is that it must be *written*, not omitted.
+2. **Mutually contradictory** — two sources that cannot both be true. Name both rows and
+   which one this run will follow, **out loud**, because the operator outranks a document
+   only when the override is recorded.
+3. **Off-topic** — a row that answers a neighbouring question. It inflates the ledger and
+   makes the next reader trust a source that was never about this.
+4. **Stale against a fresher neighbour** — the graph built a week before the code it
+   describes, an ADR superseded by a decision nobody linked. This is the one the `Fresh?`
+   column exists for and nobody compares.
+
+`Contradictions: none` is the answer most runs will write, and writing it is the point:
+a check whose silence is indistinguishable from not having run is not evidence. Anything
+found here is a stage-9 obligation — the ledger's row is what stage 9 goes back and
+fixes.
 
 ## The source is not the copy you have
 

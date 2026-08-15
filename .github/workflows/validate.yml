@@ -6800,3 +6800,114 @@ jobs:
             echo "ERROR: only one half of the stage-4 gate text is guarded"
             exit 1
           fi
+
+      - name: Negative self-test (the source ledger loses its contradictions line)
+        run: |
+          set -eu
+          rm -rf /tmp/cx1-copy && cp -R . /tmp/cx1-copy
+          python3 - <<'EOF'
+          import re
+          p = "/tmp/cx1-copy/plugins/task-pipeline/skills/task-pipeline/references/knowledge-sources.md"
+          t = open(p, encoding="utf-8").read()
+          planted = re.sub(r"(?i)contradictions:", "notes:", t)
+          assert planted != t, "PLANT DID NOT LAND: cx1"
+          open(p, "w", encoding="utf-8").write(planted)
+          EOF
+          if python3 /tmp/cx1-copy/test/validate.py 2>&1 | grep -q "no .Contradictions.. line"; then
+            echo "OK: validator FAILs — nothing else compares the harvest's sources with each other"
+          else
+            echo "ERROR: the harvest can converge unchecked"
+            exit 1
+          fi
+
+      - name: Negative self-test (the stage-0 gate stops reading the contradictions line)
+        run: |
+          set -eu
+          rm -rf /tmp/cx2-copy && cp -R . /tmp/cx2-copy
+          python3 - <<'EOF'
+          import re
+          p = "/tmp/cx2-copy/plugins/task-pipeline/skills/task-pipeline/references/stages.md"
+          t = open(p, encoding="utf-8").read()
+          m = re.search(r"^## 0 — Intake grill.*?(?=^## )", t, re.S | re.M)
+          assert m, "PLANT DID NOT LAND: cx2 — no stage 0 section"
+          g = re.search(r"\n- \*\*GATE \(manual\).*?(?=\n\S|\Z)", m.group(0), re.S)
+          assert g, "PLANT DID NOT LAND: cx2 — no GATE bullet"
+          _g = re.sub(r"(?i)contradictions:", "notes:", g.group(0))
+          assert _g != g.group(0), "PLANT DID NOT LAND: cx2 — the gate never named it"
+          sec = m.group(0)[:g.start()] + _g + m.group(0)[g.end():]
+          open(p, "w", encoding="utf-8").write(t[:m.start()] + sec + t[m.end():])
+          EOF
+          if python3 /tmp/cx2-copy/test/validate.py 2>&1 | grep -q "does not read the ledger"; then
+            echo "OK: validator FAILs — a check the gate does not require is one a run skips"
+          else
+            echo "ERROR: the gate can drop the criterion while the prose keeps it"
+            exit 1
+          fi
+
+      - name: Negative self-test (stage 3 loses the tracks convergence)
+        run: |
+          set -eu
+          rm -rf /tmp/cx3-copy && cp -R . /tmp/cx3-copy
+          python3 - <<'EOF'
+          import re
+          p = "/tmp/cx3-copy/plugins/task-pipeline/skills/task-pipeline/references/stages.md"
+          t = open(p, encoding="utf-8").read()
+          m = re.search(r"^## 3 — Spec.*?(?=^## )", t, re.S | re.M)
+          assert m, "PLANT DID NOT LAND: cx3 — no stage 3 section"
+          sec = re.sub(r"(?i)converge\w*", "combine", m.group(0))
+          assert sec != m.group(0), "PLANT DID NOT LAND: cx3 — stage 3 never named it"
+          open(p, "w", encoding="utf-8").write(t[:m.start()] + sec + t[m.end():])
+          EOF
+          if python3 /tmp/cx3-copy/test/validate.py 2>&1 | grep -q "without their convergence"; then
+            echo "OK: validator FAILs — each track is right alone and they disagree together"
+          else
+            echo "ERROR: the two tracks can converge on one screen unchecked"
+            exit 1
+          fi
+
+      - name: Negative self-test (stage 3's two tracks go back to a sequence)
+        run: |
+          set -eu
+          rm -rf /tmp/cx4-copy && cp -R . /tmp/cx4-copy
+          python3 - <<'EOF'
+          import re
+          p = "/tmp/cx4-copy/plugins/task-pipeline/skills/task-pipeline/references/stages.md"
+          t = open(p, encoding="utf-8").read()
+          m = re.search(r"^## 3 — Spec.*?(?=^## )", t, re.S | re.M)
+          assert m, "PLANT DID NOT LAND: cx4 — no stage 3 section"
+          sec = re.sub(r"(?i)parallel", "ordered", m.group(0))
+          assert sec != m.group(0), "PLANT DID NOT LAND: cx4 — stage 3 never named it"
+          assert "converge" in sec, "PLANT OVERREACHED: cx3's subject must survive"
+          open(p, "w", encoding="utf-8").write(t[:m.start()] + sec + t[m.end():])
+          EOF
+          if python3 /tmp/cx4-copy/test/validate.py 2>&1 | grep -q "still written as a sequence"; then
+            echo "OK: validator FAILs — a false order teaches a run to wait for a result that never arrives"
+          else
+            echo "ERROR: the fake edge can come back"
+            exit 1
+          fi
+
+      - name: Negative self-test (the stage-3 gate stops requiring the convergence)
+        run: |
+          set -eu
+          rm -rf /tmp/cx5-copy && cp -R . /tmp/cx5-copy
+          python3 - <<'EOF'
+          import re
+          p = "/tmp/cx5-copy/plugins/task-pipeline/skills/task-pipeline/references/stages.md"
+          t = open(p, encoding="utf-8").read()
+          m = re.search(r"^## 3 — Spec.*?(?=^## )", t, re.S | re.M)
+          assert m, "PLANT DID NOT LAND: cx5 — no stage 3 section"
+          g = re.search(r"\n- \*\*GATE \(manual\).*?(?=\n\S|\Z)", m.group(0), re.S)
+          assert g, "PLANT DID NOT LAND: cx5 — no GATE bullet"
+          _g = re.sub(r"(?i)converge\w*", "combine", g.group(0))
+          assert _g != g.group(0), "PLANT DID NOT LAND: cx5 — the gate never named it"
+          sec = m.group(0)[:g.start()] + _g + m.group(0)[g.end():]
+          assert "converge" in sec, "PLANT OVERREACHED: the prose must survive"
+          open(p, "w", encoding="utf-8").write(t[:m.start()] + sec + t[m.end():])
+          EOF
+          if python3 /tmp/cx5-copy/test/validate.py 2>&1 | grep -q "GATE does not require the tracks"; then
+            echo "OK: validator FAILs — the criterion would live only in prose"
+          else
+            echo "ERROR: the gate can drop it while the prose keeps it"
+            exit 1
+          fi

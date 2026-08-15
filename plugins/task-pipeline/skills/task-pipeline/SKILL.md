@@ -115,8 +115,12 @@ log and archive are **queried** by the task's nouns, because nothing caps them
 outranks any document — **but only out loud**, so an override is a recorded decision
 rather than an undetected divergence. That ledger is also stage 9's work list.
 
-**Three artifacts close a run, not two.** Stage 9 syncs the docs, the wiki **and the
-code graph** (`/graphify . --update`). The graph is what the next run's harvest queries
+**Three artifacts close a run, not two — and they are a convergence, not a sequence.**
+Stage 9 syncs the docs, the wiki **and the code graph** (`/graphify . --update`). None of
+the three consumes another; all three consume the same change, and the **graph↔docs
+divergence check is the gate over their convergence** rather than an extra nicety. That is
+why it is not optional where a graph exists: it is the only thing that compares two of the
+three outputs against each other. The graph is what the next run's harvest queries
 first, so a stale one is a false premise **carrying the authority of a machine** —
 a wrong doc gets argued with, a wrong graph gets believed. Refreshing it buys the
 graph↔docs divergence check; doc-side findings are fixed at stage 9, absences become
@@ -248,10 +252,10 @@ capable available — see `references/model-tiering.md`).
 
 | # | Stage | Gate | Type |
 |---|---|---|---|
-| 0 | Intake grill — **mandatory** | source ledger written; **the documentation inventory answered into `docs/DOCMAP.md`** — registers, single homes, the propagation matrix, the gate command — and **intent reconciled against as-built**, every divergence resolved ([`references/documentation.md`](references/documentation.md)); the retro read in full and its archive queried; shared understanding reached; autonomy sweep covered; brief locked + confirmed | manual |
+| 0 | Intake grill — **mandatory** | source ledger written **with its `Contradictions:` line** — the harvest converges on one brief and nothing else compares the sources with each other; **the documentation inventory answered into `docs/DOCMAP.md`** — registers, single homes, the propagation matrix, the gate command — and **intent reconciled against as-built**, every divergence resolved ([`references/documentation.md`](references/documentation.md)); the retro read in full and its archive queried; shared understanding reached; autonomy sweep covered; brief locked + confirmed | manual |
 | 1 | Docs study | contracts grounded on fetched docs | auto |
 | 2 | Brainstorm + decompose | design approved; UI verdict recorded; every REQ answered; platform: module map approved | manual |
-| 3 | Spec | committed + reviewed; UI: chain validated, linter green, scenarios/`SCR-` traced | manual |
+| 3 | Spec | committed + reviewed; UI: chain validated, linter green, scenarios/`SCR-` traced; **COPY and VISUAL are a parallel layer after UX, and where both ran their convergence check is recorded** — a label the layout has no room for is right in each track and wrong on the screen ([`references/stages.md`](references/stages.md)) | manual |
 | 4 | Plan | parallel-ready, DoD per task; **every edge names what it carries** — the fake-edge test run, its `Edges:` count computed, and no arrow left whose payload nobody can name ([`references/planning.md`](references/planning.md)) | auto |
 | 5 | Dev | tasks DONE, TDD green per task, branch integrated per the brief; **a fanned-out group gets one convergence check over all its diffs together before the first worktree lands** — a per-task review cannot see a contradiction that exists only between two of them ([`references/build.md`](references/build.md) §4.2a); **anything generated passes its own checks, and local infrastructure does not publish the host's default ports** ([`references/learned.md`](references/learned.md)) | auto |
 | 6 | Tests | full suite green; new/changed code covered; **every new check probed both ways and asserted on its exit code**, and the suite run once against a cold environment ; **on a web front end the surface is checked in a browser, not in the diff** — a green suite cannot see a component that renders under a fixed header, a request that 404s past its mock, or a console error — and a browser **test suite** is the other half of the pair, never a substitute for the look (`playwright` or `chrome-devtools`, either one — **how**: [`references/browser.md`](references/browser.md), which channel: [`references/companion-skills.md`](references/companion-skills.md); absent → say *verified by reading the diff* and record it as the weaker claim it is) | auto |

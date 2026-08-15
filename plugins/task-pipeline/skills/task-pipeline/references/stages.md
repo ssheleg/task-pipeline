@@ -194,7 +194,11 @@ never that the work was skipped quietly.
   an updated `CONTEXT.md` (terms written as they resolved) and any ADRs under
   `docs/adr/` — see `grill.md` → *Domain awareness*.
 - **GATE (manual):** shared understanding reached — **the source ledger is written
-  (every source consulted, or an explicit "none found")**, **where a code graph
+  (every source consulted, or an explicit "none found")** and **its `Contradictions:`
+  line is written under it** — the harvest is a fan-out that converges on one brief, and
+  nothing else compares the sources *with each other*; `Contradictions: none` is the
+  answer most runs give and writing it is the point
+  ([`knowledge-sources.md`](knowledge-sources.md)), **where a code graph
   exists its row carries the measured lag and the signal it was measured with — a
   bare build date does not satisfy this, because it is the graph's own reply rather
   than a measurement of it** ([`knowledge-graph.md`](knowledge-graph.md) →
@@ -338,6 +342,29 @@ never that the work was skipped quietly.
   `sheleg-design` how it **looks**. Until 2026-08-10 this stage named only the first,
   so a run designed a flow, then wrote its strings by taste and picked its values at the
   keyboard — and every gate in the pipeline reported green over both.
+- **Two of the three are a parallel layer, and the third is their only real dependency.**
+  COPY and VISUAL both consume the UX track's scenarios; **neither consumes the other**.
+  Copy is written against the brand pack and the scenarios, not against tokens; the visual
+  is built from the frame and the style pack, not from strings. Writing them in a line —
+  which this file did until 2026-08-15 — teaches a run to wait for a result that never
+  arrives. The order is `UX → { COPY ∥ VISUAL }`, and the only thing crossing each of
+  those two arrows is **the scenario set**.
+- **Their convergence needs a check, and it has a real contradiction to catch.** Both land
+  on the same screen, so the failure is not that one is wrong: it is that each is right
+  alone and they disagree together. Before the spec is committed, compare the two outputs
+  and record the answer:
+  1. **A string the layout has no room for** — a label, an error or an empty state longer
+     than the frame's element, at the frame's own width.
+  2. **A state one track has and the other does not** — copy for an empty state the design
+     never drew, or a loading state drawn with no string.
+  3. **Two names for one thing** — the design system's component name against the
+     terminology file's noun, where a user reads both.
+  4. **A tone the visual contradicts** — a calm, plain register on a screen whose motion
+     and colour say urgency.
+  `Tracks converge: clean` is the answer most runs write, and writing it is the point —
+  a check whose silence is indistinguishable from not having run is not evidence. This is
+  the same rule the harvest applies at stage 0 and the build applies to a fanned-out group
+  at stage 5 ([`build.md`](build.md) §4.2a); one shape, three places.
 - **Spec:** write the approved design to
   `<artifacts>/specs/YYYY-MM-DD-<topic>-design.md` and commit it. Lock all
   shared contracts (types, schemas, signatures, file layout). For UI tasks the
@@ -360,6 +387,9 @@ never that the work was skipped quietly.
   through the COPY track or the refusal is recorded**, and **the visual layer went
   through the VISUAL track or the refusal is recorded** — a recorded refusal passes
   this gate and an unmentioned one does not, which is the only difference that matters.
+  **Where both tracks ran, their convergence check is recorded** — findings with the
+  ruling, or `Tracks converge: clean`; a screen where each track is right alone and they
+  disagree together is the defect neither track's own review can see.
   No plan (stage 4)
   starts before this — the chain comes BEFORE interface.
 

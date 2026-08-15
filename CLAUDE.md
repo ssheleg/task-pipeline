@@ -30,6 +30,40 @@ variable `PUBLISH_NPMJS` (auth: the `NPM_TOKEN` secret — a **granular automati
 token — or npm trusted publishing via OIDC). Unarmed, it falls back to a human 2FA
 step.
 
+## Allocating an id, and a version, without a reservation
+
+`.claude/agent-sync.json` declares three id registers — `DEC`, `OQ`, `B` — and the `fs`
+backend behind them **cannot serve them**. `agent_sync.py reserve B` refuses, correctly and
+by design: *"backend 'fs' cannot reserve ids safely (atomicAppend is false) … Pretending
+would hand two agents the same id."* Only the `outline` backend can, and standing one up is
+an infrastructure decision nobody has taken.
+
+So allocation here is manual, and it is race-free on **this machine** if it follows the
+lease. On 2026-08-15 it did not, and two sessions filed a different `B-073` on the same
+afternoon; one had to be renumbered afterwards, which also rewrote the other session's
+reference to their own row.
+
+**The procedure, in order:**
+
+1. **Take the lease on the register's file first.** All three are in `guardedFiles`, so the
+   guard already refuses the edit without one. The lease is exclusive on this machine and
+   advisory across machines — that is the whole guarantee, and it is enough here.
+2. **Compute the next id from the committed file, never from your working copy.**
+   `git show HEAD:docs/evidence/backlog.md | grep -o 'B-[0-9]\{3\}' | sort -u | tail -1`.
+   A working copy holds your own unpushed row and hides somebody else's.
+3. **Write the row and commit before releasing the lease.** An id held only in an
+   uncommitted file is an id nobody else can see you took.
+
+**A version number is the same problem and has no register at all.** Before choosing one,
+read the remote rather than incrementing the local:
+
+```bash
+git ls-remote --tags origin | grep -o 'v[0-9.]*$' | sort -V | tail -3
+```
+
+Two branches both claimed `v1.56.0` on 2026-08-15 because both incremented from what their
+own checkout knew. The tag list is the only place the answer actually lives.
+
 ## Branch and commit policy
 
 - Small doc/doctrine fixes land on `main`; anything that changes the stage list,

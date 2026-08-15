@@ -1,5 +1,77 @@
 # Changelog
 
+## v1.58.0 — a fan-out is not finished when its branches are
+
+The graph model this pipeline was audited against in v1.57.0 named one defect and fixed
+it in one place. Applying the same model to the rest of the skill found the same defect
+in **three more**, and they are the same sentence each time: work fans out, the branches
+each go green, and the node that consumes them trusts them because they arrived.
+
+### Added
+
+- **The harvest is a convergence, and now it has a check.** Stage 0 queries the code, the
+  graph, `CLAUDE.md`, the ADRs, the docs, past briefs, the wiki, the board — all
+  independently — and lands them in one brief the interview then treats as a single
+  answer. Phase 2 checks each *answer* against the harvest; **nothing compared the sources
+  with each other**, so a doc contradicting the code produced two rows that each looked
+  fine and the run followed whichever it read last. The ledger now carries a
+  `Contradictions:` line with four things to look for, and the stage-0 gate reads it.
+  `Contradictions: none` is the answer most runs write, and writing it is the point.
+
+- **Stage 3's COPY and VISUAL tracks are a parallel layer, and their convergence has a
+  check.** Neither consumes the other — copy is written from the scenarios and the brand
+  pack, the visual from the frame and the style pack — so the order they were written in
+  was a fake edge teaching a run to wait for a result that never arrives. What they do
+  share is the screen, which is where the real failure lives: **each track is right alone
+  and they disagree together.** A label the layout has no room for, a state one drew and
+  the other never wrote, two names for one component, a tone the motion contradicts.
+
+- **Stage 9's three artifacts are named as a convergence**, and the graph↔docs divergence
+  check as its gate rather than a nicety — it is the only thing that compares two of the
+  three outputs against each other.
+
+Guards: 339 → **344**. Property checks: 9 → 9. Five new plants, one per branch of the
+three new checks, each anchored on a heading and each asserting it changed something.
+Two of the five were broken on their first run and both failures were mine: a grep
+pattern one character short of the message it looked for — **the same class fixed hours
+earlier in this programme and not swept into the new plants**, which is R-003 — and an
+assertion looking for the doctrine in the file that does not hold it.
+
+### Changed
+
+- **The stage-4 gate reads both halves of what it requires**, and the id/version
+  allocation this repository actually uses is written down. `.claude/agent-sync.json`
+  declares three id registers over an `fs` backend whose `reserve` refuses by design —
+  correctly, since *pretending would hand two agents the same id* — and the declaration
+  read as a capability, so nobody wrote the manual procedure it was hiding. On 2026-08-15
+  two sessions filed a different `B-073` and two branches claimed one version number.
+  `CLAUDE.md` now carries the three-step allocation (lease first, compute from the
+  **committed** file, commit before releasing) and the version rule (`git ls-remote --tags`,
+  because a local checkout is not where the answer lives), the shipped doctrine in
+  `documentation.md` carries the generalisable half, and a guard requires both.
+
+### Fixed
+
+- **Two concurrent runs of `test/negatives.py` no longer corrupt each other** (`B-075`).
+  Every step copies the repo to a **fixed** `/tmp` name, which is right in CI — one runner
+  per job — and wrong on a machine where a second suite is already running. The runner now
+  serialises the runs instead: an exclusive lock for the duration of the suite, so a second
+  run **waits** rather than corrupting the first and says so instead of producing a number
+  nobody can trust. The 344 workflow steps are untouched — they are the CI contract, one
+  runner per job, and they were never the ones colliding.
+
+  **The first fix was wrong and is worth recording.** It rewrote every `/tmp/...` path in a
+  step's script to a per-run name, and it broke two plants whose payload **is the workflow
+  text** — they search the copied workflow for a literal path in order to duplicate it. A
+  mechanical rewrite cannot tell a path being *used* from a path being *discussed*, which is
+  the umbrella's standing instruction #7 met for the second time in two days, both times by
+  the same author. The suite caught it; reading did not.
+
+  **Watched both ways, under real overlap.** Before, two concurrent runs of one selector
+  returned `1 guard did not fire, 7 broken` and `8 guards did not fire` — two different
+  wrong answers about a tree that was not changing. After, both return `all 8 guards
+  provably reject their planted defect`, exit 0, with the second printing that it waited.
+
 ## v1.57.0 — an arrow that carries nothing is not an arrow, and two green diffs can still contradict each other
 
 The pipeline has drawn a dependency graph at stage 4 since it had a stage 4, and grouped

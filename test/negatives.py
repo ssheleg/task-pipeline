@@ -35,7 +35,7 @@ MIN_PROPS = 9
 # which is the floor doing half its job: it would have caught a total collapse and
 # not the loss of a third of the suite. Set it to the real count, and treat a
 # mismatch as a finding rather than as noise to be lowered away.
-MIN_EXPECTED = 339
+MIN_EXPECTED = 344
 
 
 def parse_steps(path):
@@ -101,6 +101,37 @@ def main(argv):
         return 2
 
     _STEPS = parse_steps(WORKFLOW)          # parsed once; both filters read the same list
+
+    # Every step copies the repo to a FIXED `/tmp` name. In CI that is correct — one
+    # runner per job, no neighbours. On a developer machine two suite runs share those
+    # paths and overwrite each other mid-copy: four runs over an unchanged tree once
+    # returned four different answers (1, 2, 3 and 4 guards "not firing"), and the cause
+    # was never the tree. Board row B-075.
+    #
+    # The first fix rewrote every `/tmp/...` in the script text to a per-run name, and it
+    # broke two plants whose PAYLOAD IS THE WORKFLOW TEXT — they search the copied
+    # workflow for a literal path in order to duplicate it. A mechanical rewrite cannot
+    # tell a path being used from a path being discussed, which is the umbrella's standing
+    # instruction #7, met for the second time in two days.
+    #
+    # So the paths stay exactly as CI has them, and the runs are serialised instead. An
+    # exclusive lock for the duration of the suite: the second run waits rather than
+    # corrupting the first, and says so instead of producing a number nobody can trust.
+    _LOCK_PATH = os.path.join(tempfile.gettempdir(), "tp-negatives.lock")
+    _lock = open(_LOCK_PATH, "w")
+    try:
+        import fcntl
+        try:
+            fcntl.flock(_lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except OSError:
+            print("another run of this suite holds the scratch paths — waiting for it.\n"
+                  "  (every step copies the repo to a fixed /tmp name, so two runs at once\n"
+                  "   overwrite each other and both report about a tree neither one saw)")
+            fcntl.flock(_lock, fcntl.LOCK_EX)
+    except ImportError:
+        # No flock (Windows): say what is not guaranteed rather than implying it is.
+        print("note: no file locking available here — do not run two suites at once")
+
     tests = [(n, s) for n, s in _STEPS if MARKER in n]
     if len(tests) < MIN_EXPECTED:
         print(f"FAIL: found only {len(tests)} negative self-tests in the workflow "
