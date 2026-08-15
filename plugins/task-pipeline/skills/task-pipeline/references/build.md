@@ -275,9 +275,51 @@ physical: **two implementers writing one working tree corrupt each other's state
   **each implementer gets its own isolated worktree**. Then dispatch them together,
   review each one against its own diff, and integrate the worktrees back to the
   build branch one at a time, running the suite after each merge.
+- **Prefer a native fan-out primitive where the harness has one**, for the same
+  reason `git worktree` defers to a native worktree tool in §1: the harness owns the
+  concurrency cap, the per-agent isolation and the resume, and hand-rolling those
+  creates state it cannot see or clean up. Where there is none, dispatch by hand
+  under the three conditions above. **Never name a specific product here** — the
+  keyword for one host's fan-out was renamed six weeks after the article that
+  documented it, and doctrine pinned to a vendor's noun rots on that schedule.
 - **Any conflict on integration** means the plan's file ownership was wrong: stop
   fanning out, finish the group sequentially, and record it in the ledger.
 - Never fan out the fix loop — a task under repair belongs to one implementer.
+
+### 4.2a The group convergence check — after the group, before integration
+
+A per-task review reads **one diff**. A fanned-out group produces several, and the
+defect this stage cannot otherwise see is the one that exists only *between* them:
+each task passes its own review and the group is still incoherent.
+
+So after the last task in a fanned-out group reports, and **before** the first
+worktree is integrated, run one check over the group's reports and diffs together.
+It is the only moment all of them exist and none of them has landed.
+
+Five things it looks for. Each has been a real defect, and none is visible in a
+single diff:
+
+1. **An empty deliverable** — a task that reported DONE and changed nothing that
+   satisfies its REQ.
+2. **Two outputs that cannot both be true** — the same helper renamed by one task
+   and called by its old name in another; two tasks adding the same config key with
+   different defaults; two migrations claiming the same version.
+3. **Off-brief work** — a task that solved a neighbouring problem instead of the one
+   its brief named. Its own review passes, because its own diff is coherent.
+4. **A REQ satisfied twice, differently** — two tasks each implementing the same
+   requirement in incompatible ways, which the per-task REQ verdict cannot see
+   because each is looking at one task.
+5. **A shared assumption that only one task acted on** — a Global Constraint one
+   implementer applied and another did not.
+
+**A finding here is not a per-task fix loop.** It is a group-level decision: pick
+which task is right, send the other back with the ruling, or park both and escalate.
+Log it once, on the group:
+`Group <G>: convergence check — <n> findings (<one-liners>); ruling: <what governs>`.
+
+**A clean group logs a line too** — `Group <G>: convergence check clean (<n> tasks)`.
+A check whose silence is indistinguishable from not having run is not evidence, and
+this is the check most likely to be skipped because every task already went green.
 
 ### 4.3 Handle the report
 
@@ -541,5 +583,7 @@ a red suite or an unresolved BLOCKED does not advance to stage 6.
 | "This finding is obviously wrong, drop it" | You adjudicate at the cap, in writing. Silent discards are forbidden. |
 | "Ledger bookkeeping is overhead" | The ledger is what survives compaction. Without one, controllers re-run entire completed task sequences. |
 | "Two implementers in parallel will be faster" | One working tree, two writers = corrupted state. Parallel needs one worktree each. |
+| "Every task in the group passed its review, so the group is fine" | A per-task review reads one diff. The defect between two diffs — a rename one task made and another calls by its old name — passes both and lands at integration. §4.2a. |
+| "The convergence check found nothing, no need to log it" | A check whose silence looks identical to not having run is not evidence. The clean line is the record that it ran. |
 | "I'll paste the earlier tasks so it has context" | A fresh subagent needs its task, its interfaces and the constraints. Pasted history is pure cost. |
 | "Stage 7 can merge the branch" | Stage 7 lints and deploys what is integrated. An unmerged branch means lint, deploy and docs all ran against something that is not what ships. |

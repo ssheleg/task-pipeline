@@ -35,7 +35,7 @@ MIN_PROPS = 9
 # which is the floor doing half its job: it would have caught a total collapse and
 # not the loss of a third of the suite. Set it to the real count, and treat a
 # mismatch as a finding rather than as noise to be lowered away.
-MIN_EXPECTED = 318
+MIN_EXPECTED = 324
 
 
 def parse_steps(path):
@@ -145,9 +145,39 @@ def main(argv):
     shutil.copytree(ROOT, _base, ignore=shutil.ignore_patterns(
         "node_modules", "graphify-out", ".git"), symlinks=True)
     # `.git` is skipped for speed and restored for the two tests that commit a plant.
+    #
+    # It is restored from TWO shapes, because this repository is consumed in both. A normal
+    # clone keeps `.git` as a directory. A **submodule** checkout — which is how the
+    # `sshlg-skills` umbrella ships this pack, and therefore how most work on it happens —
+    # keeps `.git` as a FILE holding `gitdir: ../../.git/modules/skills/task-pipeline`.
+    # Handling only the directory meant both git-dependent guards ran against a tree with no
+    # repository, reported `fatal: not a git repository`, and were counted as *did not fire*:
+    # `python3 test/negatives.py` exited 1 with two guards silently disarmed, while CI — which
+    # clones normally — stayed green and said nothing. Measured 2026-08-15.
+    #
+    # The resolved gitdir is COPIED rather than pointed at, for two reasons that both bite:
+    # a plant that commits would otherwise move the real branch, and the module's config
+    # carries `core.worktree` pointing back at the live checkout, which would make every git
+    # command inside the snapshot operate on the tree the snapshot exists to protect. So the
+    # copy is made and that one key is stripped.
     _git_src = os.path.join(ROOT, ".git")
+    _git_dst = os.path.join(_base, ".git")
     if os.path.isdir(_git_src):
-        shutil.copytree(_git_src, os.path.join(_base, ".git"), symlinks=True)
+        shutil.copytree(_git_src, _git_dst, symlinks=True)
+    elif os.path.isfile(_git_src):
+        _ref = open(_git_src, encoding="utf-8").read().strip()
+        if _ref.startswith("gitdir:"):
+            _real = os.path.normpath(
+                os.path.join(ROOT, _ref.split(":", 1)[1].strip()))
+            if os.path.isdir(_real):
+                shutil.copytree(_real, _git_dst, symlinks=True)
+                _cfg = os.path.join(_git_dst, "config")
+                if os.path.isfile(_cfg):
+                    with open(_cfg, encoding="utf-8") as _fh:
+                        _kept = [ln for ln in _fh
+                                 if not re.match(r"\s*worktree\s*=", ln)]
+                    with open(_cfg, "w", encoding="utf-8") as _fh:
+                        _fh.writelines(_kept)
 
     # Property checks assert that something IS printed, so the validator passes inside
     # them and they cannot join the suite above. They still have to run somewhere the

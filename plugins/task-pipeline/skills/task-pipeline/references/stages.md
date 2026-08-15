@@ -378,7 +378,11 @@ never that the work was skipped quietly.
   scope leaks silently, so the check is mechanical, not a judgement call. Plus:
   every spec requirement maps to a task; no placeholders; names and
   types consistent across tasks; every task carries a verifiable DoD; parallel-group
-  tasks share no files. For UI tasks: every task building user-facing behavior
+  tasks share no files **or other mutable target**; **every edge in the *Execution
+  order* table carries a non-empty `Carries` cell and the self-review's `Edges:`
+  line is computed** — an arrow whose payload nobody can name is a fake edge and
+  the wait behind it is free to give away ([`planning.md`](planning.md)).
+  For UI tasks: every task building user-facing behavior
   names the scenario ID(s) and `SCR-` screen(s) it implements, and its DoD
   includes satisfying them **and** updating the affected super-ux layers in the
   same change (super-ux *same-change* rule).
@@ -393,7 +397,12 @@ never that the work was skipped quietly.
   with an explicit breaker. TDD per task ([`tdd.md`](tdd.md)): failing test →
   watch it fail → minimal impl → watch it pass → commit. Pin subagents to the
   run's confirmed model (`model-tiering.md`). The plan's parallel groups fan out
-  **only** when each implementer gets its own worktree; otherwise sequential.
+  **only when all three hold** — the tasks share no `depends:`, their file ownership
+  is exclusive per the plan, and each implementer gets its own worktree; otherwise
+  sequential. A group that did fan out gets **one convergence check over all its
+  reports and diffs together, before the first worktree is integrated**
+  ([`build.md`](build.md) §4.2a) — a per-task review reads one diff and cannot see a
+  contradiction that exists only between two of them.
 - **Web front end? The task's own surface is checked in a browser, not in the diff.**
   Where a browser channel is connected — `playwright` **or** `chrome-devtools`, either
   one, whichever answers first ([`companion-skills.md`](companion-skills.md)): after a

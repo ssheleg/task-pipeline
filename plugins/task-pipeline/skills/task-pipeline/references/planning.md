@@ -52,9 +52,52 @@ what each one owns. This is where decomposition gets locked in:
 into **parallel groups** in topological order, and tag each task
 `depends: [task ids]`.
 
+**Then run the fake-edge test over what you just drew.** An edge is a dependency
+that carries data — not two tasks that happen to be written one after the other.
+Six steps, five minutes, and it is the difference between a graph and a list:
+
+1. Write every task as a box.
+2. Draw an arrow between each pair you were about to order.
+3. For each arrow ask: **does output from A actually enter B?** Not *"does B come
+   after A"* — does B consume a file, a signature, a decision or a value that A
+   produced?
+4. Yes → keep it, and **write the payload in the `Carries` cell**.
+5. No → delete it. That wait was free to give away, and you were paying for it.
+6. Everything left with no incoming arrow is group A and starts at once.
+
+**The payload is the test, not the answer to it.** An arrow whose `Carries` cell
+you cannot fill is a fake edge, and the empty cell is what makes that visible to
+a reviewer instead of leaving an arrow in place because it looked orderly. Expect
+two or three per plan; the classic is *"review file A, then review file B"*,
+which reads as a sequence and never once passes anything between them.
+
 **File ownership is exclusive within a group.** No two tasks in the same parallel
 group write the same file — that is the rule that makes stage-5 fan-out safe.
 Sequential integration/glue tasks sit *between* groups.
+
+**Distinct is not the same as independent.** Two tasks with different names, in
+different directories, that both write one shared registry — or both take the
+same fixed scratch path — are one task with a race in it. The check is what they
+*touch*, never what they are called.
+
+### This pipeline is a static graph, and that is a decision
+
+The stage list is fixed before the run starts, and stays fixed. It could have
+been otherwise: a run that reads its own findings and invents its next stage is
+a real design, and it is the one this pipeline refuses.
+
+**The reason is auditability.** A graph that decides its own shape while running
+produces a shape nobody drew, so *"here is the pipeline"* and *"here is what this
+run did"* stop being the same document — and every claim stage 10 makes becomes
+unfalsifiable from the outside. That is the same failure the evidence canons name
+when a number is restated rather than computed.
+
+Two places the run *does* discover structure, both bounded and both recorded:
+the **module map** cut at stage 2 ([`decomposition.md`](decomposition.md)), which
+is committed as a file before any module is built, and the **carry-over ledger**,
+which grows but never reorders a stage. Discovery that lands in a committed
+artifact is not a dynamic graph; discovery that changes what runs next, silently,
+is.
 
 ## Task right-sizing
 
@@ -94,13 +137,18 @@ verbatim from the spec. Every task's requirements implicitly include this sectio
 
 ## Execution order
 
-| Group | Tasks | Runs after |
-|---|---|---|
-| A | 1, 2 | — |
-| B | 3 | A |
+| Group | Tasks | Runs after | Carries |
+|---|---|---|---|
+| A | 1, 2 | — | — |
+| B | 3 | A | <what crosses this edge: the file, signature, decision or value B consumes> |
 
 ---
 ```
+
+**The `Carries` cell is required on every edge and empty only on group A.** A cell
+you cannot fill means the arrow carries nothing, which means it is a fake edge:
+delete it and let the task start in the earlier group. This is the fake-edge test
+made a column, so its result is committed rather than remembered.
 
 ## Task structure — required
 
@@ -190,8 +238,11 @@ A checklist you run yourself, inline. No subagent:
 4. **Name and type consistency:** signatures, property names and types used in
    later tasks match what earlier tasks defined. `clearLayers()` in Task 3 and
    `clearFullLayers()` in Task 7 is a bug, not a style difference.
-5. **Parallel safety:** no two tasks in the same group write the same file; every
-   `depends:` points at a task that really produces what's consumed.
+5. **Parallel safety and the fake-edge test:** no two tasks in the same group write
+   the same file **or share any other mutable target**; every `depends:` points at a
+   task that really produces what's consumed, and every edge's `Carries` cell is
+   filled. Count the edges you deleted — that number is the line below, and a plan
+   that deletes none on its first pass has almost certainly not run the test.
 6. **DoD present and verifiable** on every task.
 7. **Every command, path and file a DoD names resolves.** Walk each task's
    *Definition of done* and its steps and check the targets exist — a DoD that says
@@ -219,6 +270,7 @@ before the gate; every line a **computed number, not a tick**.
 - Decisions: checked against <the brief's D-table> and <stage 2's rejected options> — <verdict>
 - Cost: <surfaces>/<guards>/<REQ> now, <…> at stage 2 — <proportionate | grown, and why>
 - Hygiene: <n> checks, <n> findings, <n> open
+- Edges: <n> declared, <n> carry data, <n> removed
 - Placeholders: <n> · Ambiguity: <n> found, <n> resolved inline
 ```
 
@@ -243,6 +295,9 @@ the explicit list of dropped (or invented) requirements — this seam is where s
 leaks, so the check is mechanical, never a judgement call.
 
 Then: every spec requirement maps to a task; no placeholders; names and types
-consistent across tasks; parallel-group tasks share no files; each task has a
-verifiable DoD. UI tasks carry their scenario IDs and `SCR-` screens. Verify all of
-it yourself and stop on failure — this gate has no operator in it.
+consistent across tasks; parallel-group tasks share no files **or other mutable
+target**; each task has a verifiable DoD. **Every edge in the *Execution order*
+table has a non-empty `Carries` cell, and the `Edges:` line of the self-review is
+computed** — an unfillable cell is a fake edge and the gate does not pass with one
+left in the table. UI tasks carry their scenario IDs and `SCR-` screens. Verify all
+of it yourself and stop on failure — this gate has no operator in it.

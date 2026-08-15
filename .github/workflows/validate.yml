@@ -6356,3 +6356,128 @@ jobs:
             echo "ERROR: the whole rule was removed and only its phrases were guarded"
             exit 1
           fi
+
+      - name: Negative self-test (the fake-edge test is removed from planning.md)
+        run: |
+          set -eu
+          rm -rf /tmp/fe1-copy && cp -R . /tmp/fe1-copy
+          python3 - <<'EOF'
+          import re
+          p = "/tmp/fe1-copy/plugins/task-pipeline/skills/task-pipeline/references/planning.md"
+          t = open(p, encoding="utf-8").read()
+          _planted = re.sub(r"fake-edge test", "ordering review", t, flags=re.I)
+          assert _planted != t, "PLANT DID NOT LAND: fe1"
+          open(p, "w", encoding="utf-8").write(_planted)
+          EOF
+          if python3 /tmp/fe1-copy/test/validate.py 2>&1 | grep -q "no fake-edge test"; then
+            echo "OK: validator FAILs — a dependency graph with no way to find its fake edges is a list with arrows"
+          else
+            echo "ERROR: the fake-edge test can be renamed away and the gate says nothing"
+            exit 1
+          fi
+
+      - name: Negative self-test (the Carries column is dropped from the plan template)
+        run: |
+          set -eu
+          rm -rf /tmp/fe2-copy && cp -R . /tmp/fe2-copy
+          python3 - <<'EOF'
+          import re
+          p = "/tmp/fe2-copy/plugins/task-pipeline/skills/task-pipeline/references/planning.md"
+          t = open(p, encoding="utf-8").read()
+          _planted = re.sub(r"[Cc]arries", "notes", t)
+          assert _planted != t, "PLANT DID NOT LAND: fe2"
+          open(p, "w", encoding="utf-8").write(_planted)
+          EOF
+          if python3 /tmp/fe2-copy/test/validate.py 2>&1 | grep -q "no .Carries. column"; then
+            echo "OK: validator FAILs — without the column, an unfillable payload is invisible to a reviewer"
+          else
+            echo "ERROR: the column that mechanises the fake-edge test can vanish silently"
+            exit 1
+          fi
+
+      - name: Negative self-test (the stage-4 gate stops reading the Carries cells)
+        run: |
+          set -eu
+          rm -rf /tmp/fe3-copy && cp -R . /tmp/fe3-copy
+          python3 - <<'EOF'
+          import re
+          p = "/tmp/fe3-copy/plugins/task-pipeline/skills/task-pipeline/references/planning.md"
+          t = open(p, encoding="utf-8").read()
+          m = re.search(r"^## GATE \(auto\).*", t, re.S | re.M)
+          assert m, "PLANT DID NOT LAND: fe3 — no GATE section"
+          _gate = re.sub(r"[Cc]arries", "listed", m.group(0))
+          _planted = t[:m.start()] + _gate
+          assert _planted != t, "PLANT DID NOT LAND: fe3"
+          open(p, "w", encoding="utf-8").write(_planted)
+          EOF
+          if python3 /tmp/fe3-copy/test/validate.py 2>&1 | grep -q "the gate does not read the .Carries. cells"; then
+            echo "OK: validator FAILs — a column no gate reads is decoration"
+          else
+            echo "ERROR: the gate can stop reading the column and the suite stays green"
+            exit 1
+          fi
+
+      - name: Negative self-test (the group convergence check is deleted outright)
+        run: |
+          set -eu
+          rm -rf /tmp/cv1-copy && cp -R . /tmp/cv1-copy
+          python3 - <<'EOF'
+          import re
+          p = "/tmp/cv1-copy/plugins/task-pipeline/skills/task-pipeline/references/build.md"
+          t = open(p, encoding="utf-8").read()
+          m = re.search(r"^### 4\.2a The group convergence check.*?(?=^#{2,3} )", t, re.S | re.M)
+          assert m, "PLANT DID NOT LAND: cv1 — no 4.2a section"
+          _planted = t[:m.start()] + t[m.end():]
+          assert _planted != t, "PLANT DID NOT LAND: cv1"
+          open(p, "w", encoding="utf-8").write(_planted)
+          EOF
+          if python3 /tmp/cv1-copy/test/validate.py 2>&1 | grep -q "no group convergence check"; then
+            echo "OK: validator FAILs — a fanned-out group would integrate with no cross-diff check"
+          else
+            echo "ERROR: the whole convergence rule can be removed and only its phrases were guarded"
+            exit 1
+          fi
+
+      - name: Negative self-test (the convergence check stops saying it runs before integration)
+        run: |
+          set -eu
+          rm -rf /tmp/cv2-copy && cp -R . /tmp/cv2-copy
+          python3 - <<'EOF'
+          import re
+          p = "/tmp/cv2-copy/plugins/task-pipeline/skills/task-pipeline/references/build.md"
+          t = open(p, encoding="utf-8").read()
+          m = re.search(r"^### 4\.2a The group convergence check.*?(?=^#{2,3} )", t, re.S | re.M)
+          assert m, "PLANT DID NOT LAND: cv2 — no 4.2a section"
+          _sec = re.sub(r"integrat\w*", "proceed", m.group(0), flags=re.I)
+          _planted = t[:m.start()] + _sec + t[m.end():]
+          assert _planted != t, "PLANT DID NOT LAND: cv2"
+          open(p, "w", encoding="utf-8").write(_planted)
+          EOF
+          if python3 /tmp/cv2-copy/test/validate.py 2>&1 | grep -q "does not say it runs BEFORE"; then
+            echo "OK: validator FAILs — after the first worktree lands, the group has stopped being a group"
+          else
+            echo "ERROR: the check can lose its position in the order and still pass"
+            exit 1
+          fi
+
+      - name: Negative self-test (stages.md drops the convergence check from its stage-5 summary)
+        run: |
+          set -eu
+          rm -rf /tmp/cv3-copy && cp -R . /tmp/cv3-copy
+          python3 - <<'EOF'
+          import re
+          p = "/tmp/cv3-copy/plugins/task-pipeline/skills/task-pipeline/references/stages.md"
+          t = open(p, encoding="utf-8").read()
+          m = re.search(r"^## 5 — Dev.*?(?=^## )", t, re.S | re.M)
+          assert m, "PLANT DID NOT LAND: cv3 — no stage 5 section"
+          _sec = m.group(0).replace("convergence check", "review")
+          assert _sec != m.group(0), "PLANT DID NOT LAND: cv3 — stage 5 never named it"
+          _planted = t[:m.start()] + _sec + t[m.end():]
+          open(p, "w", encoding="utf-8").write(_planted)
+          EOF
+          if python3 /tmp/cv3-copy/test/validate.py 2>&1 | grep -q "never mentions the group"; then
+            echo "OK: validator FAILs — a summary that drops the rule is how two surfaces disagreed about fan-out"
+          else
+            echo "ERROR: the summary can drift from build.md again, unwatched"
+            exit 1
+          fi

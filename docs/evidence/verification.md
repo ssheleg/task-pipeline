@@ -118,3 +118,10 @@
 | REQ-017 | A browser test suite is the coverage half of stage 6 and never the look — stated in stages.md, tdd.md and SKILL.md | `2026-08-14-playwright-browser-channel` | v1.55.0 | pass | never | — |
 | REQ-018 | A browser finding is fixed in the stage that found it, not filed — stages 5 and 6 | `2026-08-14-playwright-browser-channel` | v1.55.0 | pass | never | — |
 | REQ-019 | A pipe inside a companion-skills.md matrix row is refused; the graphify row that carried one since it was added is fixed | `2026-08-14-playwright-browser-channel` | v1.55.0 | pass | never | — |
+| REQ-001 | The fake-edge test is a numbered procedure in `planning.md`, not a checklist line — guarded by a plant that renames it away | `2026-08-15-graph-audit` | v1.56.0 | pass | never | F-1 |
+| REQ-002 | The plan's *Execution order* table has a `Carries` column and an empty cell is stated to be the finding — guarded both ways: the column dropped, and the gate no longer reading it | `2026-08-15-graph-audit` | v1.56.0 | pass | never | F-7 |
+| REQ-003 | The stage-4 self-review states `Edges: <n> declared, <n> carry data, <n> removed`, and the gate reads it | `2026-08-15-graph-audit` | v1.56.0 | pass | never | F-1 |
+| REQ-004 | `build.md` §4.2a — one convergence check over a fanned-out group's diffs together, **before** the first worktree is integrated, five catches, and a clean group logs a line too | `2026-08-15-graph-audit` | v1.56.0 | pass | never | F-2 |
+| REQ-005 | This pipeline is stated to be a static graph by choice, with auditability as the reason and both bounded dynamic elements named | `2026-08-15-graph-audit` | v1.56.0 | pass | never | F-3 |
+| REQ-006 | `stages.md` stage 5 states all three fan-out preconditions and names the convergence check — the drift that had it at one condition is guarded in the direction it drifted | `2026-08-15-graph-audit` | v1.56.0 | pass | never | F-5 · F-6 |
+| REQ-007 | `test/negatives.py` restores `.git` from a submodule checkout's `gitdir:` pointer, stripping `core.worktree` from the copy; measured exit 1 with 2 guards down before, exit 0 with all 318 twice after | `2026-08-15-graph-audit` | v1.56.0 | pass | never | F-8 |
