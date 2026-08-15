@@ -32,6 +32,7 @@ file exists to stop.
 
 - Write the entry only for a divergence — and name the layer that owned it
 - Every lesson carries its commit
+- Never amend a commit a record already names
 - The stamp table is capped at ten, and *one line per run* was never a cap
 - `publish:` is a line in the verdict, not a silence
 - Rotation — the archive is how pruning stops losing things
@@ -76,11 +77,39 @@ message and the parent, so `git show <sha>` reconstructs the entire incident two
 months later — which is exactly when the same class comes back and somebody needs
 to know whether this was already understood.
 
-**Every SHA must resolve.** This is [`learned.md`](learned.md) rule 14 — *a
-document may not send a reader to something absent* — applied to history, and it is
-mechanical: the project's documentation gate runs `git rev-parse --verify --quiet
-<sha>^{commit}` over every backticked SHA in the retro and its archive
-([`gates.md`](gates.md)).
+**Every SHA must resolve — and resolving is not enough.** This is
+[`learned.md`](learned.md) rule 14 — *a document may not send a reader to something
+absent* — applied to history, and it is mechanical: the documentation gate runs
+`git rev-parse --verify --quiet <sha>^{commit}` over every backticked SHA in the retro
+and its archive ([`gates.md`](gates.md)).
+
+**But a commit that was amended away still resolves on the machine that amended it**,
+and exists in no clone. The gate therefore also requires each SHA to be **reachable
+from `HEAD`** — `git merge-base --is-ancestor <sha> HEAD` — because that is the
+question a reader two months from now is actually asking, and the weaker one passes
+for as long as the object survives locally.
+
+## Never amend a commit a record already names
+
+Measured 2026-08-16, twice in one close-out and twenty minutes apart. The sequence is
+seductive because each step is right on its own: stamp the run with its commit → the
+stamp is part of the run, so fold it in with `--amend` → the amend mints a new SHA →
+the stamp now names a commit that will never reach the remote.
+
+The rule is one line and it is absolute: **once a file names a SHA, that commit is
+frozen.** A correction goes in a *follow-up commit*, never a second amend — amending to
+repair a stamp is the loop that produced the problem, and the second attempt lands in the
+same place as the first.
+
+Practically, that makes the order:
+
+1. commit the work;
+2. **then** stamp, in a commit of its own, naming the commit from step 1;
+3. prune and write the entry in that same second commit, or a third.
+
+The stamp costs one line and one commit. A run that folds it back into the work to keep
+the history tidy is trading a reader's ability to find the incident for the appearance of
+tidiness — and the reader is the entire reason the stamp exists.
 
 ## The stamp table is capped at ten, and *one line per run* was never a cap
 

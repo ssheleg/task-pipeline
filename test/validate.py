@@ -5172,7 +5172,11 @@ if os.path.isfile(_ASJ):
         _cfg = None
         fail(".claude/agent-sync.json: unreadable — a coordination config that cannot be "
              "parsed protects nothing and says it protects everything")
-    if _cfg and _cfg.get("idRegisters") and _cfg.get("backend") == "fs":
+    # Fires on the BACKEND, not on the declaration. The registers were removed on
+    # 2026-08-16 precisely because they could not be served — and a guard conditioned on
+    # their presence would have retired itself at the moment the procedure it protects
+    # became the only mechanism left.
+    if _cfg and _cfg.get("backend") == "fs":
         _house = os.path.join(ROOT, "CLAUDE.md")
         _h = open(_house, encoding="utf-8").read().lower() if os.path.isfile(_house) else ""
         if "git show head:" not in _h:

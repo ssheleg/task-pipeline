@@ -30,13 +30,26 @@ variable `PUBLISH_NPMJS` (auth: the `NPM_TOKEN` secret — a **granular automati
 token — or npm trusted publishing via OIDC). Unarmed, it falls back to a human 2FA
 step.
 
+## Coordination — how this project is wired
+
+The generated snapshot is [`docs/AGENT_SYNC.md`](docs/AGENT_SYNC.md): the record plane, the
+lease semantics, the guarded files and what the coordination layer does **not** guarantee.
+It is written by `agent_sync.py setup` from the live configuration — if the two disagree,
+the tool is right and the file is stale, so regenerate rather than edit.
+
 ## Allocating an id, and a version, without a reservation
 
-`.claude/agent-sync.json` declares three id registers — `DEC`, `OQ`, `B` — and the `fs`
-backend behind them **cannot serve them**. `agent_sync.py reserve B` refuses, correctly and
-by design: *"backend 'fs' cannot reserve ids safely (atomicAppend is false) … Pretending
-would hand two agents the same id."* Only the `outline` backend can, and standing one up is
-an infrastructure decision nobody has taken.
+`.claude/agent-sync.json` **declares no id registers, and that is the decision.** It
+declared three — `DEC`, `OQ`, `B` — over the `fs` backend, whose `reserve` refuses by
+design: *"backend 'fs' cannot reserve ids safely (atomicAppend is false) … Pretending would
+hand two agents the same id."* Only the `outline` backend can allocate, and standing one up
+is an infrastructure decision nobody has taken.
+
+A declaration that cannot be served is worse than none: it reads as a capability, so nobody
+writes the procedure it hides, and `agent_sync.py check` correctly called it a problem for
+as long as it stood. It was removed on 2026-08-16 — **restore the registers only together
+with a backend that can allocate.** Until then allocation is manual, and manual is fine if
+it follows the lease.
 
 So allocation here is manual, and it is race-free on **this machine** if it follows the
 lease. On 2026-08-15 it did not, and two sessions filed a different `B-073` on the same

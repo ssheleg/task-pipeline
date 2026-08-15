@@ -441,14 +441,22 @@ else
     while IFS=: read -r ln tok; do
       s=$(echo "$tok" | tr -d '`')
       case ${#s} in 7|8|9|10|11|12|40) ;; *) continue ;; esac
-      git rev-parse --verify --quiet "$s^{commit}" >/dev/null 2>&1 ||
+      if ! git rev-parse --verify --quiet "$s^{commit}" >/dev/null 2>&1; then
         echo "$f:$ln: commit \`$s\` does not resolve" >> "$TMP/sha"
+      # Resolving is the weaker half. A commit that was AMENDED AWAY still resolves on
+      # the machine that amended it and reaches no clone — measured 2026-08-16, twice in
+      # one close-out: the stamp named the run's commit, the commit was amended to carry
+      # the stamp, and the SHA the stamp recorded stopped being reachable. Ask the
+      # question a reader actually has: is it in this history at all.
+      elif ! git merge-base --is-ancestor "$s^{commit}" HEAD >/dev/null 2>&1; then
+        echo "$f:$ln: commit \`$s\` resolves but is NOT reachable from HEAD — amended away, or on a branch this checkout does not have" >> "$TMP/sha"
+      fi
     done
   done
   if [ -s "$TMP/sha" ] 2>/dev/null; then
-    err "unresolvable commit reference(s):"; sed 's/^/         /' "$TMP/sha"
+    err "commit reference(s) a clone could not follow:"; sed 's/^/         /' "$TMP/sha"
   else
-    ok "every commit reference in $RETRO_GLOB resolves"
+    ok "every commit reference in $RETRO_GLOB resolves AND is reachable from HEAD"
   fi
 fi
 

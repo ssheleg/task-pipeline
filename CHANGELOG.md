@@ -1,5 +1,48 @@
 # Changelog
 
+## v1.59.0 — never amend a commit a record already names
+
+### Fixed
+
+- **The stamping procedure invited the defect it then had to repair, twice in one
+  close-out.** `retrospective.md` says stamp the run with its own commit; the only way to
+  know that commit is to make it; so the stamp gets folded in with `--amend` — and the
+  amend mints a new SHA, leaving the stamp naming a commit that resolves on the machine
+  that wrote it and reaches no clone. It happened here on 2026-08-16 and then again in the
+  umbrella twenty minutes later, which is a procedure fault rather than two lapses.
+
+  The doctrine now says it in one line — **once a file names a SHA, that commit is
+  frozen** — states the order that removes the temptation (commit the work, *then* stamp in
+  a commit of its own), and names the only repair that does not re-enter the loop: a
+  follow-up commit, never a second amend.
+
+- **The documentation gate asked the weaker of the two questions.** It required every
+  backticked SHA in the retro to *resolve*, and an amended-away commit resolves for as long
+  as the object survives locally. It now also requires **reachability from `HEAD`**
+  (`git merge-base --is-ancestor`), which is the question a reader two months later is
+  actually asking. Watched failing on a purpose-built repository whose stamped commit had
+  been amended away: `commit ... resolves but is NOT reachable from HEAD`.
+
+- **Three id registers that could never allocate are removed** (`B-45`). They were declared
+  over the `fs` backend, whose `reserve` refuses by design, and `agent_sync.py check` had
+  been calling it a problem for as long as they stood. A declaration that cannot be served
+  is worse than none: it reads as a capability, so nobody writes the procedure it hides —
+  and on 2026-08-15 two sessions filed a different `B-073`. Allocation is manual, documented
+  in `CLAUDE.md`, and the guard that requires that documentation now fires on the **backend**
+  rather than on the declaration, so removing the registers could not retire it.
+
+Guards: 344 → **344**. Property checks: 9 → 9. No new plant, and that is the honest
+number: what changed is a gate script (`templates/docgate.sh`) rather than a validator
+guard, and it was watched failing against a purpose-built repository whose stamped commit
+had been amended away — the plant lives in that measurement rather than in the workflow,
+because a gate that runs over a project's own git history cannot be planted from inside a
+copy of this one.
+
+- **The coordination snapshot exists and is linked.** `docs/AGENT_SYNC.md` was missing
+  entirely, which `check` had also been reporting. Generated from the live configuration and
+  linked from `CLAUDE.md`; `agent_sync.py check` → **exit 0, `setup healthy`**, for the first
+  time in this repository.
+
 ## v1.58.0 — a fan-out is not finished when its branches are
 
 The graph model this pipeline was audited against in v1.57.0 named one defect and fixed

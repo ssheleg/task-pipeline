@@ -132,3 +132,7 @@
 | REQ-003 | Stage 9's three artifacts are named as a convergence and the graph↔docs check as its gate | `2026-08-16-graph-backlog` | v1.58.0 | pass | never | G-3 |
 | REQ-004 | Two concurrent runs of `negatives.py` serialise instead of corrupting each other; the second waits and says so | `2026-08-16-graph-backlog` | v1.58.0 | pass | never | B-075 |
 | REQ-005 | Manual id and version allocation is written where an agent reads it, and a guard requires it wherever a register is declared over a backend that cannot reserve | `2026-08-16-graph-backlog` | v1.58.0 | pass | never | B-45 |
+| REQ-001 | Never amend a commit a record already names — stated in `retrospective.md` with the order that removes the temptation | `2026-08-16-stamp-order` | v1.59.0 | pass | never | B-52 |
+| REQ-002 | The documentation gate requires reachability from HEAD, not only resolution | `2026-08-16-stamp-order` | v1.59.0 | pass | never | B-52 · watched failing on an amended-away commit |
+| REQ-003 | The three unservable id registers are removed and the guard that requires the manual procedure fires on the backend instead | `2026-08-16-stamp-order` | v1.59.0 | pass | never | B-45's remaining half |
+| REQ-004 | `agent_sync.py check` exits 0 here for the first time — snapshot generated and linked | `2026-08-16-stamp-order` | v1.59.0 | pass | never | B-46 |
