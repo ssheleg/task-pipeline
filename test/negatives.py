@@ -35,7 +35,7 @@ MIN_PROPS = 9
 # which is the floor doing half its job: it would have caught a total collapse and
 # not the loss of a third of the suite. Set it to the real count, and treat a
 # mismatch as a finding rather than as noise to be lowered away.
-MIN_EXPECTED = 324
+MIN_EXPECTED = 330
 
 
 def parse_steps(path):
@@ -146,38 +146,43 @@ def main(argv):
         "node_modules", "graphify-out", ".git"), symlinks=True)
     # `.git` is skipped for speed and restored for the two tests that commit a plant.
     #
-    # It is restored from TWO shapes, because this repository is consumed in both. A normal
-    # clone keeps `.git` as a directory. A **submodule** checkout — which is how the
-    # `sshlg-skills` umbrella ships this pack, and therefore how most work on it happens —
-    # keeps `.git` as a FILE holding `gitdir: ../../.git/modules/skills/task-pipeline`.
+    # **Ask git where the repository is; do not parse the pointer.** `.git` has three shapes
+    # and this repository is consumed in all of them: a directory in a normal clone, a FILE
+    # holding `gitdir: …/.git/modules/skills/task-pipeline` in the **submodule** checkout the
+    # `sshlg-skills` umbrella ships (which is how most work on this pack happens), and a FILE
+    # pointing at a per-worktree directory in a **linked worktree** — which `build.md` itself
+    # tells every run to work in.
+    #
     # Handling only the directory meant both git-dependent guards ran against a tree with no
     # repository, reported `fatal: not a git repository`, and were counted as *did not fire*:
-    # `python3 test/negatives.py` exited 1 with two guards silently disarmed, while CI — which
-    # clones normally — stayed green and said nothing. Measured 2026-08-15.
+    # exit 1 with two guards silently disarmed, while CI — which clones normally — stayed
+    # green and said nothing. Measured 2026-08-15. Handling the pointer by hand fixed the
+    # submodule and left the worktree broken in the identical way, because a per-worktree
+    # directory holds HEAD and index while `objects`, `refs` and `config` live wherever its
+    # `commondir` points. `--git-common-dir` answers correctly for all three.
     #
-    # The resolved gitdir is COPIED rather than pointed at, for two reasons that both bite:
-    # a plant that commits would otherwise move the real branch, and the module's config
-    # carries `core.worktree` pointing back at the live checkout, which would make every git
-    # command inside the snapshot operate on the tree the snapshot exists to protect. So the
-    # copy is made and that one key is stripped.
-    _git_src = os.path.join(ROOT, ".git")
+    # The result is COPIED rather than pointed at, for two reasons that both bite: a plant
+    # that commits would otherwise move the real branch, and a submodule's config carries
+    # `core.worktree` aimed back at the live checkout, which would make every git command
+    # inside the snapshot operate on the tree the snapshot exists to protect. So the copy is
+    # made and that one key is stripped.
     _git_dst = os.path.join(_base, ".git")
-    if os.path.isdir(_git_src):
-        shutil.copytree(_git_src, _git_dst, symlinks=True)
-    elif os.path.isfile(_git_src):
-        _ref = open(_git_src, encoding="utf-8").read().strip()
-        if _ref.startswith("gitdir:"):
-            _real = os.path.normpath(
-                os.path.join(ROOT, _ref.split(":", 1)[1].strip()))
-            if os.path.isdir(_real):
-                shutil.copytree(_real, _git_dst, symlinks=True)
-                _cfg = os.path.join(_git_dst, "config")
-                if os.path.isfile(_cfg):
-                    with open(_cfg, encoding="utf-8") as _fh:
-                        _kept = [ln for ln in _fh
-                                 if not re.match(r"\s*worktree\s*=", ln)]
-                    with open(_cfg, "w", encoding="utf-8") as _fh:
-                        _fh.writelines(_kept)
+    _common = None
+    try:
+        _r = subprocess.run(["git", "rev-parse", "--git-common-dir"],
+                            cwd=ROOT, capture_output=True, text=True)
+        if _r.returncode == 0 and _r.stdout.strip():
+            _common = os.path.normpath(os.path.join(ROOT, _r.stdout.strip()))
+    except OSError:
+        _common = None          # no git on PATH: the two git guards will say so themselves
+    if _common and os.path.isdir(_common):
+        shutil.copytree(_common, _git_dst, symlinks=True)
+        _cfg = os.path.join(_git_dst, "config")
+        if os.path.isfile(_cfg):
+            with open(_cfg, encoding="utf-8") as _fh:
+                _kept = [ln for ln in _fh if not re.match(r"\s*worktree\s*=", ln)]
+            with open(_cfg, "w", encoding="utf-8") as _fh:
+                _fh.writelines(_kept)
 
     # Property checks assert that something IS printed, so the validator passes inside
     # them and they cannot join the suite above. They still have to run somewhere the

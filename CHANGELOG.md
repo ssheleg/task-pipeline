@@ -83,13 +83,30 @@ data**, which is the audit's first result and the reason nothing was reordered.
   an incident: a plant anchored on the CONTENT of a cell describes the table it was written
   against. It now matches any note.
 
-Guards: 318 → **324**. Property checks: 9 → 9. Six new plants, because a rule a check can
-decide is written as the check and not as prose somebody remembers: the fake-edge test
+Guards: 318 → **330**. Property checks: 9 → 9. Twelve new plants, because a rule a check
+can decide is written as the check and not as prose somebody remembers: the fake-edge test
 renamed away, the `Carries` column dropped, the stage-4 gate no longer reading it, §4.2a
 deleted outright, §4.2a losing its *before integration*, and `stages.md` dropping the
 convergence check from its stage-5 summary — which is the exact drift F-5 found, now
-guarded in the direction it drifted. Every plant is anchored on a heading or a token, and
-every one asserts it changed something before the validator is asked.
+guarded in the direction it drifted. The other six came from **an independent reviewer on
+the PR**, which is the mechanism standing instruction R-005 exists to buy: it found four
+branches of the new guards with no plant behind them, a `_section()` site with no
+`is None` arm (the shape every other site in the file has), a stage-5 guard checking one
+of the three preconditions its own message claims, and an uncached read of a memoised
+document. It also found the two gaps that were not nits — see below. Every plant is
+anchored on a heading or a token, and every one asserts it changed something before the
+validator is asked.
+
+**Two of the reviewer's findings were defects, not nits, and both were fixed before
+merge.** First: the convergence check was written into narrative prose and into
+`SKILL.md`'s stage table, and **into neither GATE bullet** — so a fanned-out group could
+reach stage 6 having never run it. `build.md`'s and `stages.md`'s gates now require it,
+and a guard requires the gate to require it. Second: the `.git` restore resolved a
+`gitdir:` pointer by hand, which is right for a submodule and **wrong for a linked
+worktree** — the shape `build.md` itself tells every run to work in, where `objects`,
+`refs` and `config` live wherever `commondir` points. It now asks
+`git rev-parse --git-common-dir`, which answers correctly for all three shapes. A fix that
+covers one of two shapes of the same defect is half a fix.
 
 ### Not changed, deliberately
 

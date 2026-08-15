@@ -424,7 +424,9 @@ never that the work was skipped quietly.
 - **GATE (auto):** **the hygiene gate green in diff mode after every task**
   (`references/build.md`) — six checks over what that task changed, no floor, and a
   finding fixed in-task or carried over with a reason; all plan tasks DONE (three review verdicts per task: spec
-  compliance, **REQ satisfied**, code quality); every finding fixed or parked with a
+  compliance, **REQ satisfied**, code quality); **every group that fanned out ran its
+  convergence check before its first worktree was integrated, and logged a line either
+  way** ([`build.md`](build.md) §4.2a); every finding fixed or parked with a
   ruling; **every parked finding and implementer concern harvested into the
   carry-over ledger** — nothing stays only in the scratch workspace, which is
   deleted; no task left BLOCKED; full test suite green; branch integrated per the brief's policy (or the operator's

@@ -6487,3 +6487,124 @@ jobs:
             echo "ERROR: the summary can drift from build.md again, unwatched"
             exit 1
           fi
+
+      - name: Negative self-test (the computed Edges count is removed from the self-review)
+        run: |
+          set -eu
+          rm -rf /tmp/fe4-copy && cp -R . /tmp/fe4-copy
+          python3 - <<'EOF'
+          import re
+          p = "/tmp/fe4-copy/plugins/task-pipeline/skills/task-pipeline/references/planning.md"
+          t = open(p, encoding="utf-8").read()
+          _planted = re.sub(r"(?i)edges:", "arrows-noted:", t)
+          assert _planted != t, "PLANT DID NOT LAND: fe4"
+          open(p, "w", encoding="utf-8").write(_planted)
+          EOF
+          if python3 /tmp/fe4-copy/test/validate.py 2>&1 | grep -q "states no .Edges.. count"; then
+            echo "OK: validator FAILs — every other line in that block is a computed number"
+          else
+            echo "ERROR: the one line that counts deleted edges can vanish unnoticed"
+            exit 1
+          fi
+
+      - name: Negative self-test (planning.md's GATE section is renamed away)
+        run: |
+          set -eu
+          rm -rf /tmp/fe5-copy && cp -R . /tmp/fe5-copy
+          python3 - <<'EOF'
+          p = "/tmp/fe5-copy/plugins/task-pipeline/skills/task-pipeline/references/planning.md"
+          t = open(p, encoding="utf-8").read()
+          old = "## GATE (auto)"
+          assert old in t, "PLANT DID NOT LAND: fe5 — no GATE heading"
+          open(p, "w", encoding="utf-8").write(t.replace(old, "## Exit criteria", 1))
+          EOF
+          if python3 /tmp/fe5-copy/test/validate.py 2>&1 | grep -q "no .GATE (auto). section"; then
+            echo "OK: validator FAILs — renaming the section would otherwise disable every criterion read out of it"
+          else
+            echo "ERROR: a section-scoped check goes silent when its section is renamed"
+            exit 1
+          fi
+
+      - name: Negative self-test (the convergence check stops logging a clean group)
+        run: |
+          set -eu
+          rm -rf /tmp/cv4-copy && cp -R . /tmp/cv4-copy
+          python3 - <<'EOF'
+          import re
+          p = "/tmp/cv4-copy/plugins/task-pipeline/skills/task-pipeline/references/build.md"
+          t = open(p, encoding="utf-8").read()
+          m = re.search(r"^### 4\.2a The group convergence check.*?(?=^#{2,3} )", t, re.S | re.M)
+          assert m, "PLANT DID NOT LAND: cv4 — no 4.2a section"
+          _sec = re.sub(r"(?i)clean", "silent", m.group(0))
+          assert _sec != m.group(0), "PLANT DID NOT LAND: cv4 — section never said clean"
+          open(p, "w", encoding="utf-8").write(t[:m.start()] + _sec + t[m.end():])
+          EOF
+          if python3 /tmp/cv4-copy/test/validate.py 2>&1 | grep -q "a clean group logs nothing"; then
+            echo "OK: validator FAILs — a check whose silence looks like not running is not evidence"
+          else
+            echo "ERROR: the clean-group line can go and the check becomes unobservable"
+            exit 1
+          fi
+
+      - name: Negative self-test (stages.md drops the same-group fan-out precondition)
+        run: |
+          set -eu
+          rm -rf /tmp/cv5-copy && cp -R . /tmp/cv5-copy
+          python3 - <<'EOF'
+          import re
+          p = "/tmp/cv5-copy/plugins/task-pipeline/skills/task-pipeline/references/stages.md"
+          t = open(p, encoding="utf-8").read()
+          m = re.search(r"^## 5 — Dev.*?(?=^## )", t, re.S | re.M)
+          assert m, "PLANT DID NOT LAND: cv5 — no stage 5 section"
+          _sec = re.sub(r"(?i)depends|same group", "run together", m.group(0))
+          assert _sec != m.group(0), "PLANT DID NOT LAND: cv5 — stage 5 never named it"
+          open(p, "w", encoding="utf-8").write(t[:m.start()] + _sec + t[m.end():])
+          EOF
+          if python3 /tmp/cv5-copy/test/validate.py 2>&1 | grep -q "drops the same-group"; then
+            echo "OK: validator FAILs — two tasks with a dependency are not a parallel group however exclusive their files"
+          else
+            echo "ERROR: one of the three preconditions can drop again, in the other direction"
+            exit 1
+          fi
+
+      - name: Negative self-test (stages.md drops the worktree fan-out precondition)
+        run: |
+          set -eu
+          rm -rf /tmp/cv6-copy && cp -R . /tmp/cv6-copy
+          python3 - <<'EOF'
+          import re
+          p = "/tmp/cv6-copy/plugins/task-pipeline/skills/task-pipeline/references/stages.md"
+          t = open(p, encoding="utf-8").read()
+          m = re.search(r"^## 5 — Dev.*?(?=^## )", t, re.S | re.M)
+          assert m, "PLANT DID NOT LAND: cv6 — no stage 5 section"
+          _sec = re.sub(r"(?i)worktree", "workspace", m.group(0))
+          assert _sec != m.group(0), "PLANT DID NOT LAND: cv6 — stage 5 never named it"
+          open(p, "w", encoding="utf-8").write(t[:m.start()] + _sec + t[m.end():])
+          EOF
+          if python3 /tmp/cv6-copy/test/validate.py 2>&1 | grep -q "drops the worktree"; then
+            echo "OK: validator FAILs — one working tree with two writers is corrupted state"
+          else
+            echo "ERROR: the condition that was never missing is the one nothing guards"
+            exit 1
+          fi
+
+      - name: Negative self-test (build.md's GATE stops requiring the convergence check)
+        run: |
+          set -eu
+          rm -rf /tmp/cv7-copy && cp -R . /tmp/cv7-copy
+          python3 - <<'EOF'
+          import re
+          p = "/tmp/cv7-copy/plugins/task-pipeline/skills/task-pipeline/references/build.md"
+          t = open(p, encoding="utf-8").read()
+          m = re.search(r"^## GATE \(auto\).*?(?=^## )", t, re.S | re.M)
+          assert m, "PLANT DID NOT LAND: cv7 — no GATE section"
+          _sec = re.sub(r"(?i)convergence", "review", m.group(0))
+          assert _sec != m.group(0), "PLANT DID NOT LAND: cv7 — the GATE never required it"
+          open(p, "w", encoding="utf-8").write(t[:m.start()] + _sec + t[m.end():])
+          EOF
+          if python3 /tmp/cv7-copy/test/validate.py 2>&1 | grep -q "described in .4.2a and not required by the gate"; then
+            echo "OK: validator FAILs — a criterion that lives only in prose is one a run can skip"
+          else
+            echo "ERROR: the gate can drop the criterion while the prose still describes it"
+            exit 1
+          fi

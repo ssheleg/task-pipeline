@@ -562,8 +562,10 @@ stages 7–9 run against an unintegrated branch.
 ## GATE (auto)
 
 All plan tasks DONE with all three review verdicts (spec compliance, REQ satisfied,
-code quality); the full test suite green; every open finding either fixed or parked
-with a ruling; **every parked finding and implementer concern harvested into the
+code quality); **every group that actually fanned out has run its convergence check
+(§4.2a) before its first worktree was integrated, and logged a line either way** —
+findings with their ruling, or `convergence check clean`; the full test suite green;
+every open finding either fixed or parked with a ruling; **every parked finding and implementer concern harvested into the
 carry-over ledger** — the workspace is deleted, so nothing may stay only there;
 no task left BLOCKED; the branch integrated per the brief's policy — or the
 operator explicitly told you to leave it, and that is recorded. **Every decision a
