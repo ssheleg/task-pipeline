@@ -113,7 +113,13 @@ database created ten seconds ago" are different claims, and only the second one 
   suite whose runner happens to be a browser: it still asserts only what someone wrote
   down. It belongs to the coverage half of the gate, and the sentence above still needs
   a page that was opened and read. The two fail differently, which is the entire reason
-  to keep both.
+  to keep both — and [`browser.md`](browser.md) separates them from a third thing they
+  are both confused with, the Playwright **library**, which is an automation API and not
+  a test framework at all.
+- **The look that found it writes the assertion that keeps it found.** `generate-locator`
+  on the element the look caught, then a spec around it, then `pause-at` to watch the
+  new spec see what you saw ([`browser.md`](browser.md)). A browser finding fixed with
+  no test behind it is a finding scheduled to return.
 
 ## Stage 6 — consolidation and the suite gate
 

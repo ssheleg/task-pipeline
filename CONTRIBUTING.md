@@ -479,6 +479,32 @@ The two checks share one compiled pattern for that reason — two copies would d
 the drift is silent in precisely the direction that hurts.
 *(guard: `pipes where the header has` and `names no stage its second cell`)*
 
+**55. A stage that demands a look at the rendered surface LINKS the mechanism, and the
+mechanism keeps the whole look in one runnable block.** From v1.36.0 to v1.55.0 stages 5,
+6 and 8 required the browser and pointed only at which companion to install, so the
+requirement had no *how* anywhere in the bundle — the shape that lets a run report
+*checked in a browser* while meaning *ran the unit tests*. Every stage naming a browser
+channel, and `tdd.md` too, must **link** `references/browser.md`, and that file must keep
+one fenced block showing `open`, `snapshot`, `console` and `requests` together.
+
+Both halves are stated that precisely because the first draft of each was weaker and an
+independent reader broke both. The stage check tested the substring `browser.md`, and
+`<!-- browser.md -->` — invisible once rendered — satisfied it. The mechanism check
+searched the whole file, so the four commands could be parked in a fence captioned *"the
+ones this file tells you never to run"* with every needle intact and the recipe deleted;
+it also accepted `open` off an incidental mention in the session table. Requiring *one
+fence with all four* was the second draft and fell to the same reader: a fence captioned
+*"never run these"* holds all four. No text check separates a recipe from an anti-recipe,
+so the check is **scoped to the section** — the recipe must live under *The look, as
+commands you can run*, and renaming that heading fails the build, which is correct: the
+section is the contract. **What it does not claim:** an anti-recipe written inside that
+same section still passes. Three drafts were spent trying to close that with a pattern;
+the fourth wrote the limit down instead (`B-073`), because the difference between *run
+these* and *never run these* is prose, and prose is R-005's job. The move needle allows the `--json`, `--raw` and `-s=` prefixes,
+because this same file recommends them and a check that fails its own advice gets edited
+out rather than satisfied.
+*(guard: `does not LINK references/browser.md` and `has no single fenced block showing the whole`)*
+
 **53. Publishing a retro insight is opt-in, enumerated, and its own example obeys its
 own rules.** `retro.publish` is off when absent — opening an issue in another repository
 is an outward act, and a generic flag is not a specific authorization. The redaction

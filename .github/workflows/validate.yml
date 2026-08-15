@@ -4210,6 +4210,85 @@ jobs:
             echo "OK: validator correctly FAILs — every matrix row derives at least one stage"
           fi
 
+      - name: Negative self-test (a stage demanding the look with no mechanism to point at)
+        run: |
+          set -eu
+          rm -rf /tmp/br1-copy && cp -R . /tmp/br1-copy
+          python3 - <<'EOF'
+          p = "/tmp/br1-copy/plugins/task-pipeline/skills/task-pipeline/references/stages.md"
+          t = open(p, encoding="utf-8").read()
+          needle = "either one ([`browser.md`](browser.md)) — load the deployed URL"
+          assert needle in t, "PLANT DID NOT LAND: stage 8's browser pointer moved"
+          open(p, "w", encoding="utf-8").write(
+              t.replace(needle, "either one — load the deployed URL", 1))
+          EOF
+          if python3 /tmp/br1-copy/test/validate.py; then
+            echo "ERROR: a stage can demand a look at the rendered surface and name no mechanism"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — every stage asking for a browser points at browser.md"
+          fi
+
+      - name: Negative self-test (the mechanism file dropping one of the four moves)
+        run: |
+          set -eu
+          rm -rf /tmp/br2-copy && cp -R . /tmp/br2-copy
+          python3 - <<'EOF'
+          import re
+          p = "/tmp/br2-copy/plugins/task-pipeline/skills/task-pipeline/references/browser.md"
+          t = open(p, encoding="utf-8").read()
+          pat = re.compile(r"(playwright-cli (?:-s=\S+ )?)console(?=\s|$)", re.M)
+          assert pat.search(t), "PLANT DID NOT LAND: the console read moved"
+          open(p, "w", encoding="utf-8").write(pat.sub(r"\g<1>console-messages", t))
+          EOF
+          if python3 /tmp/br2-copy/test/validate.py; then
+            echo "ERROR: the look is open + snapshot + console + requests and one went missing unnoticed"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — all four moves stay shown"
+          fi
+
+      - name: Negative self-test (a browser pointer that renders as nothing)
+        run: |
+          set -eu
+          rm -rf /tmp/br3-copy && cp -R . /tmp/br3-copy
+          python3 - <<'EOF'
+          p = "/tmp/br3-copy/plugins/task-pipeline/skills/task-pipeline/references/stages.md"
+          t = open(p, encoding="utf-8").read()
+          needle = "either one ([`browser.md`](browser.md)) — load the deployed URL"
+          assert needle in t, "PLANT DID NOT LAND: stage 8's browser pointer moved"
+          open(p, "w", encoding="utf-8").write(
+              t.replace(needle, "either one <!-- browser.md --> — load the deployed URL", 1))
+          EOF
+          if python3 /tmp/br3-copy/test/validate.py; then
+            echo "ERROR: an HTML comment is invisible once rendered and satisfied the pointer check"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the pointer must be a link, not a substring"
+          fi
+
+      - name: Negative self-test (the look's recipe moved out of the section that is the mechanism)
+        run: |
+          set -eu
+          rm -rf /tmp/br4-copy && cp -R . /tmp/br4-copy
+          python3 - <<'EOF'
+          p = "/tmp/br4-copy/plugins/task-pipeline/skills/task-pipeline/references/browser.md"
+          t = open(p, encoding="utf-8").read()
+          needle = "playwright-cli open http://localhost:3000/checkout"
+          assert needle in t, "PLANT DID NOT LAND: the look's recipe moved"
+          i = t.index("```bash\n" + needle)
+          j = t.index("```", i + 3) + 3
+          block = t[i:j]
+          open(p, "w", encoding="utf-8").write(
+              t[:i] + "See the appendix.\n" + t[j:] + "\n\n## Appendix\n\n" + block + "\n")
+          EOF
+          if python3 /tmp/br4-copy/test/validate.py; then
+            echo "ERROR: the four commands can leave the section the stages point at and nothing notices"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the recipe lives in the section that is the mechanism"
+          fi
+
       - name: Negative self-test (a stage-3 track with no owning skill)
         run: |
           set -eu

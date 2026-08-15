@@ -76,6 +76,7 @@ a row pointing outside the bundle is the defect this file exists to catch.
 | **The canons** — what makes a claim documentation, and the index that routes to each | `references/documentation.md`, `../evidence-docs/SKILL.md` |
 | **Effect verification** — the `verified-by:` contract and the rubric item that blocks | `references/build.md`, `references/review.md` |
 | The TDD iron law and the suite gate | `references/tdd.md` |
+| How the browser look is taken, and how a spec suite sits beside it | `references/browser.md` |
 | The REQ coverage table, evidence rules, the closing question | `references/acceptance.md` |
 | How the host project's own conventions are read | `references/conventions.md` |
 | Which companions exist, what is required, self-currency | `references/companion-skills.md` |
