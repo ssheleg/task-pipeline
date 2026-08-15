@@ -405,7 +405,8 @@ never that the work was skipped quietly.
   contradiction that exists only between two of them.
 - **Web front end? The task's own surface is checked in a browser, not in the diff.**
   Where a browser channel is connected — `playwright` **or** `chrome-devtools`, either
-  one, whichever answers first ([`companion-skills.md`](companion-skills.md)): after a
+  one, whichever answers first (**how**: [`browser.md`](browser.md); which:
+  [`companion-skills.md`](companion-skills.md)): after a
   task that changes a rendered surface, load it, take a snapshot and read the
   console and the network log **before the task is marked DONE** — a component can be
   correct and land under a fixed header, and a review of the diff cannot see that.
@@ -454,7 +455,8 @@ never that the work was skipped quietly.
   page rendered — a component can be correct and land under a fixed header, a request
   can 404 while every unit test mocks it, and a console error costs nothing at test
   time. Where a browser channel is connected — `playwright` **or** `chrome-devtools`,
-  either one ([`companion-skills.md`](companion-skills.md)):
+  either one ([`browser.md`](browser.md) is the four commands this sentence means;
+  [`companion-skills.md`](companion-skills.md) is which channel):
   load the surface, take a snapshot, and read **the console and the network log**
   before calling it green. Absent, say the surface was verified **by reading the
   diff** — that is a weaker claim and the close-out records it as one, rather than
@@ -529,7 +531,7 @@ never that the work was skipped quietly.
   answered; it says nothing about whether the page rendered, whether a bundle 404'd,
   or whether the console filled with errors on load — all three ship green past a
   health check. Where a browser channel is connected — `playwright` **or**
-  `chrome-devtools`, either one — load the deployed URL and read
+  `chrome-devtools`, either one ([`browser.md`](browser.md)) — load the deployed URL and read
   the console and the network log; quote what you read, not that you looked
   ([`companion-skills.md`](companion-skills.md)). Absent → say the check was an HTTP
   response only, which is the honest name for it.

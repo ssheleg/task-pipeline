@@ -1,6 +1,6 @@
 # Changelog
 
-## v1.56.0 — an arrow that carries nothing is not an arrow, and two green diffs can still contradict each other
+## v1.57.0 — an arrow that carries nothing is not an arrow, and two green diffs can still contradict each other
 
 The pipeline has drawn a dependency graph at stage 4 since it had a stage 4, and grouped
 tasks topologically off it. What it never said was how to tell a **real** edge from one
@@ -83,7 +83,7 @@ data**, which is the audit's first result and the reason nothing was reordered.
   an incident: a plant anchored on the CONTENT of a cell describes the table it was written
   against. It now matches any note.
 
-Guards: 318 → **335**. Property checks: 9 → 9. Seventeen new plants, because a rule a check
+Guards: 322 → **339**. Property checks: 9 → 9. Seventeen new plants, because a rule a check
 can decide is written as the check and not as prose somebody remembers: the fake-edge test
 renamed away, the `Carries` column dropped, the stage-4 gate no longer reading it, §4.2a
 deleted outright, §4.2a losing its *before integration*, and `stages.md` dropping the
@@ -116,6 +116,104 @@ covers one of two shapes of the same defect is half a fix.
   post-deploy check can change what stage 9 must write. Weak is not the same as fake.
 - **The stage list, the stage count and every gate type.** Gate *criteria* moved at stage 4
   and stage 5; nothing was renumbered, reordered or retyped.
+
+**Released as 1.57.0, not 1.56.0.** This work was branched, reviewed over five rounds and tagged in its own tree while a concurrent session merged a different 1.56.0 — the
+browser-channel release below. Both branches claimed the number; the id register that would have prevented it is declared in `.claude/agent-sync.json` and cannot allocate
+against an `fs` backend, which is the umbrella's open row **B-45**. The same collision took a board id: `B-073` here was renumbered to **B-075**.
+
+## v1.56.0 — the stages demanded a look and named no way to take one
+
+Since v1.36.0 three stages have required the rendered surface to be checked in a
+browser, and v1.55.0 gave that requirement a second channel. Neither release said
+**how a look is taken**. An agent reading this bundle learned which plugin to install
+and nothing about what to do with it — which is precisely how a run reports *checked in
+a browser* and means *ran the unit tests*.
+
+`references/browser.md` is that mechanism, and stages 5, 6 and 8, `tdd.md` and both
+gate rows in `SKILL.md` now point at it.
+
+### Added
+
+- **The one model both channels share.** A snapshot returns the accessibility tree with
+  a **ref** per element, and you act on the ref — not on pixels, not on coordinates. Three
+  consequences the doctrine already rested on and had never stated: a look costs a page of
+  text and no vision model, a ref is deterministic where a coordinate is not, and **a ref
+  that stops resolving is a finding rather than an error to retry past**.
+- **The look as four runnable commands** — `open`, `snapshot`, `console`, `requests` —
+  with the MCP and `chrome-devtools` names beside them, because the look is the same look
+  and that is why the matrix ranks neither.
+- **Sessions and the daemon.** The browser lives between commands, which is the whole
+  reason the four compose; `-s=<session>` isolates, `list` is the evidence the environment
+  is clean, `kill-all` is for the zombie left by a crash.
+- **`--json` / `--raw`.** The difference between output a reader reads and output a check
+  can gate on. A gate that regexes prose breaks on the release that rewords it.
+- **"Tested in a browser" separated into the three claims it conflates** — the look, the
+  spec suite (`playwright test`, the runner) and the **library** (`class Playwright`),
+  which is an automation API and not a test framework at all. Choosing the library where a
+  runner was wanted is how a project grows a half-runner nobody trusts.
+- **Auth and mocking as solved steps rather than exemptions.** `state-save` / `state-load`
+  (`--storage-state` on the MCP) for a surface behind a login — the state file is a
+  credential and goes where credentials go; `route` / `route-list` / `unroute` for the
+  failure paths a mocked unit test can never show rendering.
+- **The loop that turns a look into a test that keeps it found:** `generate-locator` on
+  the element the look caught, then `pause-at` / `step-over` / `resume` to watch the new
+  spec see what you saw. A browser finding fixed with no test behind it is a finding
+  scheduled to return.
+- **What the channel can reach**, because recommending a real browser is the widest
+  capability in the matrix: the MCP confines file access to the workspace roots until
+  `--allow-unrestricted-file-access` says otherwise, `--isolated` keeps nothing,
+  `--secrets` exists so a password reaches the browser and not the transcript — and
+  `--allowed-origins` is **not** a security boundary, which is upstream's own wording.
+
+### Measured rather than restated
+
+- **The MCP's tool list is capability-gated: 24 tools by default, 42 with
+  `--caps vision,pdf,devtools`** — counted by starting the server and calling `tools/list`,
+  not read off a page. `browser_start_tracing`, `browser_start_video` and
+  `browser_pdf_save` are **absent** from a default server. A doctrine naming them without
+  `--caps` sends an agent to a tool that is not there, and the agent concludes the doctrine
+  is stale rather than the server narrow. The page current at the time also listed route,
+  cookie and localStorage tools this version does not ship at all — which is why the CLI is
+  what this file names for state and mocking.
+- Every CLI command and flag in the new file was checked against `playwright-cli --help`
+  before it shipped, `--persistent` included, which lives on `open` rather than at the top
+  level.
+
+### Corrected before merge, by the reader
+
+- **`npx playwright-cli --help` — this file's own re-derivation command — did not run.**
+  Outside a project that has already installed it, npm resolves the bare `playwright-cli`
+  to **somebody else's package**: Microsoft's, deprecated in favour of this one, latest
+  `0.262.0` against `@playwright/cli`'s `0.1.18`. The line sat inside the sentence that is
+  the whole file's evidentiary warrant. It now says `npx @playwright/cli@latest --help`
+  and explains the trap.
+- **`state-save .auth/state.json` fails on a directory that does not exist** — real exit 1,
+  `ENOENT`. The recipe gained the `mkdir -p` it always needed.
+- **The prescribed verdict quoted a filtered number as the page's request count.**
+  `requests` hides successful static resources by default and says so in its own footer.
+  Failures are listed either way, so *no status ≥ 400* survives and *"14 requests"* is
+  gone.
+
+### Guards
+
+Guards: 318 → **322**. Property checks: 9 → 9. Two checks: a stage that asks for a browser
+channel must **link** the mechanism, and the mechanism must keep the whole look in one
+runnable fence inside the section the stages point at.
+
+**Both shipped weaker first, and the independent reader `R-005` requires broke both.**
+The pointer check tested the substring `browser.md`, so `<!-- browser.md -->` — invisible
+once rendered — satisfied it while the stage named no reachable mechanism. The recipe
+check searched the whole file, so the four commands could be parked in a fence captioned
+*"the ones this file tells you never to run"*, every needle intact and the recipe deleted;
+it also accepted `open` off an incidental mention in the session table. An earlier draft
+had already been caught by a `\b` that let `console-messages` satisfy `console`, and
+`tdd.md` could drop both its pointers because only `stages.md` was read.
+
+**The scope is now written down rather than implied.** An anti-recipe *inside* the right
+section still passes: no text check separates *run these four* from *never run these four*,
+because the difference is the prose. Three drafts were spent proving that; the fourth
+stopped and filed `B-073`. `B-074` carries the other hole the reader found — a stage can
+demand the look while naming no channel, and nothing looks at it.
 
 ## v1.55.0 — the browser step gets a second channel, and the table that names it stops truncating itself
 
