@@ -35,7 +35,7 @@ MIN_PROPS = 9
 # which is the floor doing half its job: it would have caught a total collapse and
 # not the loss of a third of the suite. Set it to the real count, and treat a
 # mismatch as a finding rather than as noise to be lowered away.
-MIN_EXPECTED = 334
+MIN_EXPECTED = 335
 
 
 def parse_steps(path):
@@ -192,12 +192,7 @@ def main(argv):
         if _priv and os.path.isdir(_priv) and os.path.realpath(_priv) != os.path.realpath(_common):
             # A linked worktree: HEAD, index, logs and the rest of the per-worktree state
             # win over the main checkout's copies of the same names.
-            for _entry in os.listdir(_priv):
-                _src, _dst = os.path.join(_priv, _entry), os.path.join(_git_dst, _entry)
-                if os.path.isdir(_src) and not os.path.islink(_src):
-                    shutil.copytree(_src, _dst, symlinks=True, dirs_exist_ok=True)
-                else:
-                    shutil.copy2(_src, _dst, follow_symlinks=False)
+            shutil.copytree(_priv, _git_dst, symlinks=True, dirs_exist_ok=True)
             for _stale in ("commondir", "gitdir"):
                 _p = os.path.join(_git_dst, _stale)
                 if os.path.exists(_p):

@@ -4965,10 +4965,19 @@ if os.path.isfile(_PLN):
         fail("references/planning.md: no `GATE (auto)` section. Renaming it disables every "
              "criterion read out of it while the whole-file checks above stay green — the "
              "shape every other `_section()` site in this file guards against")
-    elif "carries" not in _flatten(_gate, lower=True):
-        fail("references/planning.md GATE: the gate does not read the `Carries` cells. A "
-             "column no gate reads is decoration, which is what the checklist line it "
-             "replaced already was")
+    else:
+        _gf = _flatten(_gate, lower=True)
+        if "carries" not in _gf:
+            fail("references/planning.md GATE: the gate does not read the `Carries` cells. "
+                 "A column no gate reads is decoration, which is what the checklist line "
+                 "it replaced already was")
+        # Both halves, because the GATE text requires both and a check on one of them lets
+        # the other be deleted while the whole-file `edges:` check still passes on the
+        # self-review template alone.
+        if "edges" not in _gf:
+            fail("references/planning.md GATE: the gate does not read the `Edges:` count. "
+                 "The template can keep the line while the gate stops requiring it, which "
+                 "is a computed number nobody has to compute")
 
 # 8. The group convergence check, on both surfaces. A per-task review reads one diff; the
 #    defect between two diffs passes both. The rule lives in build.md and is summarised in

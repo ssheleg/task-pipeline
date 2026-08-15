@@ -83,13 +83,13 @@ data**, which is the audit's first result and the reason nothing was reordered.
   an incident: a plant anchored on the CONTENT of a cell describes the table it was written
   against. It now matches any note.
 
-Guards: 318 → **334**. Property checks: 9 → 9. Sixteen new plants, because a rule a check
+Guards: 318 → **335**. Property checks: 9 → 9. Seventeen new plants, because a rule a check
 can decide is written as the check and not as prose somebody remembers: the fake-edge test
 renamed away, the `Carries` column dropped, the stage-4 gate no longer reading it, §4.2a
 deleted outright, §4.2a losing its *before integration*, and `stages.md` dropping the
 convergence check from its stage-5 summary — which is the exact drift F-5 found, now
-guarded in the direction it drifted. The other six came from **an independent reviewer on
-the PR**, which is the mechanism standing instruction R-005 exists to buy: it found four
+guarded in the direction it drifted. The other eleven came from **an independent reviewer
+across five rounds on the PR**, which is the mechanism standing instruction R-005 exists to buy: it found four
 branches of the new guards with no plant behind them, a `_section()` site with no
 `is None` arm (the shape every other site in the file has), a stage-5 guard checking one
 of the three preconditions its own message claims, and an uncached read of a memoised

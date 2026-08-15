@@ -69,8 +69,8 @@ shape is declared but not enforced.
 | full suite, with the fix, run A | fixed | exit **0** — `all 318 guards provably reject their planted defect · 9 property check(s)` |
 | full suite, with the fix, run B | fixed | exit **0** — identical |
 
-**Three intermediate runs disagreed with each other (1, 2 and 3 guards down, plus
-property checks silent) and that was not the subject.** They overlapped: a suite run
+**Four runs of the suite disagreed with each other — 1+1, 2, 3+2 and 4+4 (guards not
+firing, plus property checks silent) — and that was not the subject.** They overlapped: a suite run
 was started while another was still going, and every step copies the repo into a
 **fixed** `/tmp` path, so two concurrent suites overwrite each other's scratch. The
 runner's own comment says so — *"collisions only happen between two SUITE runs"* — and

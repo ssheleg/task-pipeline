@@ -68,8 +68,8 @@ Every gate is **typed**: `auto` — the orchestrator verifies it itself, pass/fa
 | 1 | Docs study | contracts grounded on current docs | auto |
 | 2 | Brainstorm + decompose | design approved; UI verdict recorded; every REQ answered; platform: module map approved | manual |
 | 3 | Spec | committed + reviewed; UI: super-ux chain validated, linter green | manual |
-| 4 | Plan | parallel-ready, DoD per task | auto |
-| 5 | Dev | tasks DONE (three review verdicts each), TDD green per task | auto |
+| 4 | Plan | parallel-ready, DoD per task; **every edge names what it carries** — an arrow whose payload nobody can fill is a fake edge | auto |
+| 5 | Dev | tasks DONE (three review verdicts each), TDD green per task; **a fanned-out group gets one convergence check over all its diffs together before the first worktree lands** | auto |
 | 6 | Tests | full suite green, new code covered; **on a web front end the surface is checked in a browser, not in the diff** | auto |
 | 7 | Lint + deploy | lint clean + suite green before deploy | manual |
 | 8 | Post-deploy | clean boot / honest degradation, **and the CI verdict read rather than assumed**, and **a deployed web page is opened rather than curled** — a `200` is not a rendered page | auto |
