@@ -3641,22 +3641,76 @@ if os.path.isfile(_CS_P) and os.path.isfile(_ST_P):
     # this check is that no stage can go back to demanding the look without pointing at it.
     _BR = os.path.join(ROOT, _SKILLDIR, "references/browser.md")
     if os.path.isfile(_BR):
+        # A LINK, not the substring. The first draft tested `"browser.md" in section`, and
+        # the reader R-005 requires satisfied it with `<!-- browser.md -->` — invisible in
+        # rendered markdown, so the stage still demanded the look and left no route to the
+        # mechanism. CONTRIBUTING #55 says *link*; now the code says it too.
         for _sid, _sec in sorted(_sections.items()):
             if "playwright" not in _sec and "chrome-devtools" not in _sec:
                 continue
-            if "browser.md" not in _sec:
+            if "](browser.md)" not in _sec:
                 fail(f"references/stages.md: stage {_sid} asks for a browser channel and "
-                     "never points at references/browser.md — a stage that demands a look "
-                     "at the rendered surface and names no mechanism is how 'checked in a "
-                     "browser' comes to mean 'ran the unit tests'")
-        # The four moves the look IS. A file that stops naming one of them stops being the
-        # mechanism the stages were pointed at, and nothing else would notice.
+                     "does not LINK references/browser.md — a stage that demands a look at "
+                     "the rendered surface and names no reachable mechanism is how "
+                     "'checked in a browser' comes to mean 'ran the unit tests'. A mention "
+                     "that does not render as a link is not a pointer")
+        # `tdd.md` demands the same look, and browser.md names it as a demander. The first
+        # draft read stages.md only, so both of tdd.md's pointers could be dropped in
+        # silence — found by the same reader.
+        _TD = os.path.join(ROOT, _SKILLDIR, "references/tdd.md")
+        if os.path.isfile(_TD):
+            _tdt = open(_TD, encoding="utf-8").read()
+            if ("playwright" in _tdt.lower() or "chrome-devtools" in _tdt.lower()) \
+                    and "](browser.md)" not in _tdt:
+                fail("references/tdd.md asks for a browser channel and does not LINK "
+                     "references/browser.md — the suite gate's own doctrine has to reach "
+                     "the mechanism it leans on")
+
+        # The four moves the look IS, and they have to be IN ONE RUNNABLE BLOCK. The first
+        # draft searched the whole file, and the reader parked the four literals in a fence
+        # captioned "the commands this file tells you never to run" — every needle present,
+        # the mechanism gone. It also passed `open` off an incidental mention in the session
+        # table while the recipe itself had been deleted. A fence that holds all four is the
+        # thing a reader can actually run.
         _brt = open(_BR, encoding="utf-8").read()
-        for _move in ("open", "snapshot", "console", "requests"):
-            if not re.search(rf"playwright-cli (?:-s=\S+ )?{_move}(?=\s|$)", _brt, re.M):
-                fail(f"references/browser.md no longer shows `playwright-cli {_move}` — "
-                     "the look is open + snapshot + console + requests, and a mechanism "
-                     "file missing one of the four leaves that step to taste")
+        _MOVES = ("open", "snapshot", "console", "requests")
+        # `playwright-cli [global flags] <move>` — the flags are the ones this same file
+        # recommends, so a recipe rewritten to use them must not fail its own check.
+        def _shows(_block, _move):
+            return re.search(rf"^\s*playwright-cli (?:(?:--json|--raw|-s=\S+)\s+)*{_move}(?=\s|$)",
+                             _block, re.M) is not None
+        # SCOPED TO THE SECTION THAT IS THE MECHANISM. Requiring "one fence somewhere with
+        # all four" was the second draft, and the reader defeated it: a fence captioned "the
+        # ones this file tells you never to run" holds all four and satisfies it. Scoping to
+        # the section kills that fence ANYWHERE ELSE in the file, and kills the appendix and
+        # the renamed heading with it.
+        #
+        # SCOPE, STATED RATHER THAN IMPLIED: it does NOT kill an anti-recipe written *inside
+        # this section*. No text check separates "run these four" from "never run these
+        # four" — the difference is the prose, and prose is what a reader reads. Three drafts
+        # were spent proving that; the fourth stopped. This guard's claim is exactly: the
+        # recipe exists, in the section the stages point at, complete and runnable. Whether
+        # the paragraph above it disowns it is `B-073` and belongs to R-005, not to a regex.
+        _HEAD = "## The look, as commands you can run"
+        _sec_i = _brt.find(_HEAD)
+        if _sec_i < 0:
+            fail("references/browser.md no longer has its "
+                 f"{_HEAD!r} section — that section IS the mechanism stages 5, 6 and 8 are "
+                 "pointed at, and a file that renames it away has moved the recipe "
+                 "somewhere no check can find it")
+        else:
+            _nxt = _brt.find("\n## ", _sec_i + len(_HEAD))
+            _sec = _brt[_sec_i:_nxt if _nxt > 0 else len(_brt)]
+            _blocks = re.findall(r"```[a-z]*\n(.*?)```", _sec, re.S)
+            if not any(all(_shows(_b, _m) for _m in _MOVES) for _b in _blocks):
+                _seen = {_m for _b in _blocks for _m in _MOVES if _shows(_b, _m)}
+                _lost = [_m for _m in _MOVES if _m not in _seen]
+                fail("references/browser.md has no single fenced block showing the whole "
+                     f"look — `playwright-cli` {' + '.join(_MOVES)} together, inside "
+                     f"{_HEAD!r}. "
+                     + (f"Missing there: {', '.join(_lost)}. " if _lost else
+                        "Each move appears, none in one runnable recipe. ")
+                     + "Four commands a reader has to assemble is not a mechanism")
 
     # P3-G2. The guard above reads matrix ROW NAMES, so a sub-skill named inside a
     # row's own cell is out of its scope — and that is exactly where super-ux's copy

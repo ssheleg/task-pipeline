@@ -11,8 +11,15 @@ which is how a run says *I checked the browser* and means *I ran the unit tests*
 
 > **Every command and flag below was read from the tool's own `--help`**, not from a
 > vendor page. Where the two disagreed, `--help` won and the page was wrong — see
-> *Rationalizations*. Re-derive before quoting: `npx playwright-cli --help`,
-> `npx @playwright/mcp@latest --help`.
+> *Rationalizations*. Re-derive before quoting:
+> `npx @playwright/cli@latest --help` and `npx @playwright/mcp@latest --help`.
+>
+> **Use the scoped name with `npx`.** `npx playwright-cli --help` fails outside a project
+> that has already installed it (`could not determine executable to run`), and the bare
+> `playwright-cli` on npm is **somebody else's package** — Microsoft's, deprecated in
+> favour of this one. The binary is called `playwright-cli`; the package is
+> `@playwright/cli`. Every `playwright-cli …` line below assumes it is installed and on
+> PATH, which is what the matrix's install line does.
 
 ## Contents
 
@@ -67,9 +74,14 @@ playwright-cli requests            # then: request <n> for headers, body, respon
 The MCP is the same four moves under different names: `browser_navigate`,
 `browser_snapshot`, `browser_console_messages`, `browser_network_requests`.
 
-**Quote what you read, not that you looked.** *"Console clean; 14 requests, all 200"* is
-a claim. *"`console warning` → empty; `requests` → 14, no status ≥ 400"* is the same
-claim with its command attached, and it is the one that belongs in a gate verdict.
+**Quote what you read, not that you looked.** *"Console clean, all requests fine"* is a
+claim. *"`console warning` → empty; `requests` → no status ≥ 400"* is the same claim with
+its command attached, and it is the one that belongs in a gate verdict.
+
+**Do not quote the request count as the page's count.** `requests` hides successful static
+resources by default and says so in its own footer (*"N static request(s) not shown"*);
+`requests --static` includes them. Failures are listed either way — a 404'd stylesheet
+appears without the flag — so *no status ≥ 400* is a safe claim and *14 requests* is not.
 
 `chrome-devtools` takes the identical four moves — `navigate_page`, `take_snapshot`,
 `list_console_messages`, `list_network_requests` — which is why the matrix ranks neither:
@@ -143,6 +155,7 @@ and neither needs a password in a transcript.
 **Storage state — log in once, replay it.**
 
 ```bash
+mkdir -p .auth                                  # state-save does not create it
 playwright-cli open https://app.example.com/login
 #  … sign in by hand, or drive the form …
 playwright-cli state-save .auth/state.json      # cookies + localStorage

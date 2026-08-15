@@ -58,13 +58,41 @@ gate rows in `SKILL.md` now point at it.
   before it shipped, `--persistent` included, which lives on `open` rather than at the top
   level.
 
+### Corrected before merge, by the reader
+
+- **`npx playwright-cli --help` — this file's own re-derivation command — did not run.**
+  Outside a project that has already installed it, npm resolves the bare `playwright-cli`
+  to **somebody else's package**: Microsoft's, deprecated in favour of this one, latest
+  `0.262.0` against `@playwright/cli`'s `0.1.18`. The line sat inside the sentence that is
+  the whole file's evidentiary warrant. It now says `npx @playwright/cli@latest --help`
+  and explains the trap.
+- **`state-save .auth/state.json` fails on a directory that does not exist** — real exit 1,
+  `ENOENT`. The recipe gained the `mkdir -p` it always needed.
+- **The prescribed verdict quoted a filtered number as the page's request count.**
+  `requests` hides successful static resources by default and says so in its own footer.
+  Failures are listed either way, so *no status ≥ 400* survives and *"14 requests"* is
+  gone.
+
 ### Guards
 
-Guards: 318 → **320**. Property checks: 9 → 9. One refuses a stage that asks for a browser
-channel and points at no mechanism; one refuses a mechanism file that has stopped showing
-any of the four moves the look is made of. The second was **watched being too weak first**:
-its needle used a word boundary, so `console-messages` satisfied `console` and the probe
-passed against a file that no longer said what the check claimed to require.
+Guards: 318 → **322**. Property checks: 9 → 9. Two checks: a stage that asks for a browser
+channel must **link** the mechanism, and the mechanism must keep the whole look in one
+runnable fence inside the section the stages point at.
+
+**Both shipped weaker first, and the independent reader `R-005` requires broke both.**
+The pointer check tested the substring `browser.md`, so `<!-- browser.md -->` — invisible
+once rendered — satisfied it while the stage named no reachable mechanism. The recipe
+check searched the whole file, so the four commands could be parked in a fence captioned
+*"the ones this file tells you never to run"*, every needle intact and the recipe deleted;
+it also accepted `open` off an incidental mention in the session table. An earlier draft
+had already been caught by a `\b` that let `console-messages` satisfy `console`, and
+`tdd.md` could drop both its pointers because only `stages.md` was read.
+
+**The scope is now written down rather than implied.** An anti-recipe *inside* the right
+section still passes: no text check separates *run these four* from *never run these four*,
+because the difference is the prose. Three drafts were spent proving that; the fourth
+stopped and filed `B-073`. `B-074` carries the other hole the reader found — a stage can
+demand the look while naming no channel, and nothing looks at it.
 
 ## v1.55.0 — the browser step gets a second channel, and the table that names it stops truncating itself
 

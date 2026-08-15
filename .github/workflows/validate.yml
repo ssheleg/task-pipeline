@@ -4248,6 +4248,47 @@ jobs:
             echo "OK: validator correctly FAILs — all four moves stay shown"
           fi
 
+      - name: Negative self-test (a browser pointer that renders as nothing)
+        run: |
+          set -eu
+          rm -rf /tmp/br3-copy && cp -R . /tmp/br3-copy
+          python3 - <<'EOF'
+          p = "/tmp/br3-copy/plugins/task-pipeline/skills/task-pipeline/references/stages.md"
+          t = open(p, encoding="utf-8").read()
+          needle = "either one ([`browser.md`](browser.md)) — load the deployed URL"
+          assert needle in t, "PLANT DID NOT LAND: stage 8's browser pointer moved"
+          open(p, "w", encoding="utf-8").write(
+              t.replace(needle, "either one <!-- browser.md --> — load the deployed URL", 1))
+          EOF
+          if python3 /tmp/br3-copy/test/validate.py; then
+            echo "ERROR: an HTML comment is invisible once rendered and satisfied the pointer check"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the pointer must be a link, not a substring"
+          fi
+
+      - name: Negative self-test (the look's recipe moved out of the section that is the mechanism)
+        run: |
+          set -eu
+          rm -rf /tmp/br4-copy && cp -R . /tmp/br4-copy
+          python3 - <<'EOF'
+          p = "/tmp/br4-copy/plugins/task-pipeline/skills/task-pipeline/references/browser.md"
+          t = open(p, encoding="utf-8").read()
+          needle = "playwright-cli open http://localhost:3000/checkout"
+          assert needle in t, "PLANT DID NOT LAND: the look's recipe moved"
+          i = t.index("```bash\n" + needle)
+          j = t.index("```", i + 3) + 3
+          block = t[i:j]
+          open(p, "w", encoding="utf-8").write(
+              t[:i] + "See the appendix.\n" + t[j:] + "\n\n## Appendix\n\n" + block + "\n")
+          EOF
+          if python3 /tmp/br4-copy/test/validate.py; then
+            echo "ERROR: the four commands can leave the section the stages point at and nothing notices"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the recipe lives in the section that is the mechanism"
+          fi
+
       - name: Negative self-test (a stage-3 track with no owning skill)
         run: |
           set -eu
