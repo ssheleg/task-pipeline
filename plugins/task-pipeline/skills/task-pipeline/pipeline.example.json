@@ -78,7 +78,7 @@
       ],
       "gate": {
         "type": "auto",
-        "check": "SET EQUALITY: the REQ ids in the brief equal the union of Implements: across plan tasks — a non-empty difference fails the gate and is reported as the explicit list of dropped requirements. Plus: every spec requirement maps to a task; no placeholders; names and types consistent across tasks; every task carries a verifiable DoD; parallel-group tasks share no files; UI tasks name the scenario ID(s) and SCR- screen(s) they implement in their DoD Every edge in the plan's Execution order table carries a non-empty Carries cell and the self-review's Edges: line is computed — an arrow whose payload nobody can name is a fake edge and the wait behind it is free to give away."
+        "check": "SET EQUALITY: the REQ ids in the brief equal the union of Implements: across plan tasks — a non-empty difference fails the gate and is reported as the explicit list of dropped requirements. Plus: every spec requirement maps to a task; no placeholders; names and types consistent across tasks; every task carries a verifiable DoD; parallel-group tasks share no files; UI tasks name the scenario ID(s) and SCR- screen(s) they implement in their DoD. Every edge in the plan's Execution order table carries a non-empty Carries cell and the self-review's Edges: line is computed — an arrow whose payload nobody can name is a fake edge and the wait behind it is free to give away."
       }
     },
     {

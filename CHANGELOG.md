@@ -83,7 +83,7 @@ data**, which is the audit's first result and the reason nothing was reordered.
   an incident: a plant anchored on the CONTENT of a cell describes the table it was written
   against. It now matches any note.
 
-Guards: 318 → **330**. Property checks: 9 → 9. Twelve new plants, because a rule a check
+Guards: 318 → **333**. Property checks: 9 → 9. Fifteen new plants, because a rule a check
 can decide is written as the check and not as prose somebody remembers: the fake-edge test
 renamed away, the `Carries` column dropped, the stage-4 gate no longer reading it, §4.2a
 deleted outright, §4.2a losing its *before integration*, and `stages.md` dropping the

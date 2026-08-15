@@ -35,7 +35,7 @@ MIN_PROPS = 9
 # which is the floor doing half its job: it would have caught a total collapse and
 # not the loss of a third of the suite. Set it to the real count, and treat a
 # mismatch as a finding rather than as noise to be lowered away.
-MIN_EXPECTED = 330
+MIN_EXPECTED = 333
 
 
 def parse_steps(path):
@@ -159,24 +159,49 @@ def main(argv):
     # green and said nothing. Measured 2026-08-15. Handling the pointer by hand fixed the
     # submodule and left the worktree broken in the identical way, because a per-worktree
     # directory holds HEAD and index while `objects`, `refs` and `config` live wherever its
-    # `commondir` points. `--git-common-dir` answers correctly for all three.
+    # `commondir` points.
+    #
+    # So BOTH are needed, and asking for only the common one is the trap the first fix fell
+    # into: from a worktree on `feature`, a copy of the common dir alone reports
+    # `git branch --show-current` = the main checkout's branch and a `git log` missing every
+    # commit the worktree made. The common dir is copied first and the per-worktree dir
+    # overlaid on top, which is exactly what git resolves at runtime.
     #
     # The result is COPIED rather than pointed at, for two reasons that both bite: a plant
     # that commits would otherwise move the real branch, and a submodule's config carries
     # `core.worktree` aimed back at the live checkout, which would make every git command
     # inside the snapshot operate on the tree the snapshot exists to protect. So the copy is
-    # made and that one key is stripped.
+    # made, that one key is stripped, and `commondir` is dropped because the copy is now
+    # self-contained and a dangling pointer is worse than none.
     _git_dst = os.path.join(_base, ".git")
-    _common = None
-    try:
-        _r = subprocess.run(["git", "rev-parse", "--git-common-dir"],
-                            cwd=ROOT, capture_output=True, text=True)
-        if _r.returncode == 0 and _r.stdout.strip():
-            _common = os.path.normpath(os.path.join(ROOT, _r.stdout.strip()))
-    except OSError:
-        _common = None          # no git on PATH: the two git guards will say so themselves
+
+    def _git_path(_flag):
+        try:
+            _r = subprocess.run(["git", "rev-parse", _flag],
+                                cwd=ROOT, capture_output=True, text=True)
+        except OSError:
+            return None         # no git on PATH: the two git guards will say so themselves
+        if _r.returncode != 0 or not _r.stdout.strip():
+            return None
+        return os.path.normpath(os.path.join(ROOT, _r.stdout.strip()))
+
+    _common = _git_path("--git-common-dir")
+    _priv = _git_path("--git-dir")
     if _common and os.path.isdir(_common):
         shutil.copytree(_common, _git_dst, symlinks=True)
+        if _priv and os.path.isdir(_priv) and os.path.realpath(_priv) != os.path.realpath(_common):
+            # A linked worktree: HEAD, index, logs and the rest of the per-worktree state
+            # win over the main checkout's copies of the same names.
+            for _entry in os.listdir(_priv):
+                _src, _dst = os.path.join(_priv, _entry), os.path.join(_git_dst, _entry)
+                if os.path.isdir(_src) and not os.path.islink(_src):
+                    shutil.copytree(_src, _dst, symlinks=True, dirs_exist_ok=True)
+                else:
+                    shutil.copy2(_src, _dst, follow_symlinks=False)
+            for _stale in ("commondir", "gitdir"):
+                _p = os.path.join(_git_dst, _stale)
+                if os.path.exists(_p):
+                    os.remove(_p)
         _cfg = os.path.join(_git_dst, "config")
         if os.path.isfile(_cfg):
             with open(_cfg, encoding="utf-8") as _fh:

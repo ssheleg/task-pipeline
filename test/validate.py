@@ -5002,12 +5002,18 @@ if os.path.isfile(_BLD_D):
              "and not required by the gate. A criterion that lives only in prose is a "
              "criterion a run can skip while every check stays green")
 _STG = os.path.join(_skill_dir, "references", "stages.md")
-if os.path.isfile(_STG) and os.path.isfile(_BLD_D):
+if os.path.isfile(_STG):
     _s5 = _section(_STG, r"5 — Dev")
     if _s5 is None:
         fail("references/stages.md: no `5 — Dev` section")
     else:
         _s5f = _flatten(_s5, lower=True)
+        # The GATE bullet specifically, not the section: prose that describes a criterion
+        # and a gate that requires it are different things, and only the second stops a run.
+        if "convergence" not in _flatten(_gate_bullet(_s5), lower=True):
+            fail("references/stages.md 5: the GATE bullet does not require the group "
+                 "convergence check. Describing it in the stage's prose leaves a fanned-out "
+                 "group free to reach stage 6 having never run it")
         if "convergence check" not in _s5f:
             fail("references/stages.md 5: the stage summary never mentions the group "
                  "convergence check that build.md 4.2a requires. A reader who takes the "
