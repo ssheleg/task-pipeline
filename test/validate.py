@@ -3633,6 +3633,31 @@ if os.path.isfile(_CS_P) and os.path.isfile(_ST_P):
                      "Write `stage N` or `stages N–M` — `stage-N` with a hyphen is the "
                      "spelling that produced this defect")
 
+    # P3-G0c. A stage that demands a look at the rendered surface must say HOW one is
+    # taken. From v1.36.0 to v1.55.0 stages 5, 6 and 8 demanded it and named only which
+    # companion to install — so *check it in a browser* had no mechanism behind it
+    # anywhere in the bundle, which is exactly how a run reports "I checked the browser"
+    # and means "I ran the unit tests". `references/browser.md` is that mechanism, and
+    # this check is that no stage can go back to demanding the look without pointing at it.
+    _BR = os.path.join(ROOT, _SKILLDIR, "references/browser.md")
+    if os.path.isfile(_BR):
+        for _sid, _sec in sorted(_sections.items()):
+            if "playwright" not in _sec and "chrome-devtools" not in _sec:
+                continue
+            if "browser.md" not in _sec:
+                fail(f"references/stages.md: stage {_sid} asks for a browser channel and "
+                     "never points at references/browser.md — a stage that demands a look "
+                     "at the rendered surface and names no mechanism is how 'checked in a "
+                     "browser' comes to mean 'ran the unit tests'")
+        # The four moves the look IS. A file that stops naming one of them stops being the
+        # mechanism the stages were pointed at, and nothing else would notice.
+        _brt = open(_BR, encoding="utf-8").read()
+        for _move in ("open", "snapshot", "console", "requests"):
+            if not re.search(rf"playwright-cli (?:-s=\S+ )?{_move}(?=\s|$)", _brt, re.M):
+                fail(f"references/browser.md no longer shows `playwright-cli {_move}` — "
+                     "the look is open + snapshot + console + requests, and a mechanism "
+                     "file missing one of the four leaves that step to taste")
+
     # P3-G2. The guard above reads matrix ROW NAMES, so a sub-skill named inside a
     # row's own cell is out of its scope — and that is exactly where super-ux's copy
     # half lived while being invisible to every stage. A probe found the hole, which

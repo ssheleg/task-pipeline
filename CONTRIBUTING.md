@@ -479,6 +479,18 @@ The two checks share one compiled pattern for that reason — two copies would d
 the drift is silent in precisely the direction that hurts.
 *(guard: `pipes where the header has` and `names no stage its second cell`)*
 
+**55. A stage that demands a look at the rendered surface names the mechanism, and the
+mechanism keeps showing all four moves.** From v1.36.0 to v1.55.0 stages 5, 6 and 8
+required the browser and pointed only at which companion to install, so the requirement
+had no *how* anywhere in the bundle — the shape that lets a run report *checked in a
+browser* while meaning *ran the unit tests*. Every stage naming a browser channel must
+link `references/browser.md`, and that file must keep showing `open`, `snapshot`,
+`console` and `requests`, because a mechanism missing one of the four leaves that step to
+taste. The needle is anchored on whitespace rather than a word boundary: the first draft
+used `\b`, and `console-messages` satisfied `console` while the file no longer said what
+the check claimed to require.
+*(guard: `never points at references/browser.md` and `no longer shows`)*
+
 **53. Publishing a retro insight is opt-in, enumerated, and its own example obeys its
 own rules.** `retro.publish` is off when absent — opening an issue in another repository
 is an outward act, and a generic flag is not a specific authorization. The redaction

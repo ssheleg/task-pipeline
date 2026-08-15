@@ -1,5 +1,71 @@
 # Changelog
 
+## v1.56.0 — the stages demanded a look and named no way to take one
+
+Since v1.36.0 three stages have required the rendered surface to be checked in a
+browser, and v1.55.0 gave that requirement a second channel. Neither release said
+**how a look is taken**. An agent reading this bundle learned which plugin to install
+and nothing about what to do with it — which is precisely how a run reports *checked in
+a browser* and means *ran the unit tests*.
+
+`references/browser.md` is that mechanism, and stages 5, 6 and 8, `tdd.md` and both
+gate rows in `SKILL.md` now point at it.
+
+### Added
+
+- **The one model both channels share.** A snapshot returns the accessibility tree with
+  a **ref** per element, and you act on the ref — not on pixels, not on coordinates. Three
+  consequences the doctrine already rested on and had never stated: a look costs a page of
+  text and no vision model, a ref is deterministic where a coordinate is not, and **a ref
+  that stops resolving is a finding rather than an error to retry past**.
+- **The look as four runnable commands** — `open`, `snapshot`, `console`, `requests` —
+  with the MCP and `chrome-devtools` names beside them, because the look is the same look
+  and that is why the matrix ranks neither.
+- **Sessions and the daemon.** The browser lives between commands, which is the whole
+  reason the four compose; `-s=<session>` isolates, `list` is the evidence the environment
+  is clean, `kill-all` is for the zombie left by a crash.
+- **`--json` / `--raw`.** The difference between output a reader reads and output a check
+  can gate on. A gate that regexes prose breaks on the release that rewords it.
+- **"Tested in a browser" separated into the three claims it conflates** — the look, the
+  spec suite (`playwright test`, the runner) and the **library** (`class Playwright`),
+  which is an automation API and not a test framework at all. Choosing the library where a
+  runner was wanted is how a project grows a half-runner nobody trusts.
+- **Auth and mocking as solved steps rather than exemptions.** `state-save` / `state-load`
+  (`--storage-state` on the MCP) for a surface behind a login — the state file is a
+  credential and goes where credentials go; `route` / `route-list` / `unroute` for the
+  failure paths a mocked unit test can never show rendering.
+- **The loop that turns a look into a test that keeps it found:** `generate-locator` on
+  the element the look caught, then `pause-at` / `step-over` / `resume` to watch the new
+  spec see what you saw. A browser finding fixed with no test behind it is a finding
+  scheduled to return.
+- **What the channel can reach**, because recommending a real browser is the widest
+  capability in the matrix: the MCP confines file access to the workspace roots until
+  `--allow-unrestricted-file-access` says otherwise, `--isolated` keeps nothing,
+  `--secrets` exists so a password reaches the browser and not the transcript — and
+  `--allowed-origins` is **not** a security boundary, which is upstream's own wording.
+
+### Measured rather than restated
+
+- **The MCP's tool list is capability-gated: 24 tools by default, 42 with
+  `--caps vision,pdf,devtools`** — counted by starting the server and calling `tools/list`,
+  not read off a page. `browser_start_tracing`, `browser_start_video` and
+  `browser_pdf_save` are **absent** from a default server. A doctrine naming them without
+  `--caps` sends an agent to a tool that is not there, and the agent concludes the doctrine
+  is stale rather than the server narrow. The page current at the time also listed route,
+  cookie and localStorage tools this version does not ship at all — which is why the CLI is
+  what this file names for state and mocking.
+- Every CLI command and flag in the new file was checked against `playwright-cli --help`
+  before it shipped, `--persistent` included, which lives on `open` rather than at the top
+  level.
+
+### Guards
+
+Guards: 318 → **320**. Property checks: 9 → 9. One refuses a stage that asks for a browser
+channel and points at no mechanism; one refuses a mechanism file that has stopped showing
+any of the four moves the look is made of. The second was **watched being too weak first**:
+its needle used a word boundary, so `console-messages` satisfied `console` and the probe
+passed against a file that no longer said what the check claimed to require.
+
 ## v1.55.0 — the browser step gets a second channel, and the table that names it stops truncating itself
 
 The bundle has told every web project to check the rendered surface since v1.36.0, and
