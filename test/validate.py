@@ -5017,6 +5017,113 @@ if os.path.isfile(_BLD_D):
                  "residue.md refuses, one layer up")
 
 
+# 7. The fake-edge test, and the column that makes it visible. The procedure alone is a
+#    thing an agent remembers to do; the `Carries` column is a cell a reviewer can see is
+#    empty, and the gate is what makes the empty cell cost something. All three or none —
+#    a procedure with no column is advice, and a column no gate reads is decoration.
+_PLN = os.path.join(_skill_dir, "references", "planning.md")
+if os.path.isfile(_PLN):
+    # Through the cache, like every other call site: each living document is read once,
+    # not once per class (board row B-010). `_section()` two statements down already does.
+    _pt = _flatten(_LIVING_TEXT.get(os.path.relpath(_PLN, ROOT))
+                   or open(_PLN, encoding="utf-8").read(), lower=True)
+    if "fake-edge test" not in _pt:
+        fail("references/planning.md: no fake-edge test. Drawing a dependency graph "
+             "without a way to find the edges that carry nothing produces a list with "
+             "arrows on it, and every wait in it reads as required")
+    if "carries" not in _pt:
+        fail("references/planning.md: the Execution order table has no `Carries` column. "
+             "The payload is the test — an arrow whose cell nobody can fill is a fake "
+             "edge, and without the column its absence is invisible to a reviewer")
+    if "edges:" not in _pt:
+        fail("references/planning.md: the self-review states no `Edges:` count. Every "
+             "other line in that block is a computed number and this one would be the "
+             "only tick")
+    _gate = _section(_PLN, r"GATE \(auto\)")
+    if _gate is None:
+        fail("references/planning.md: no `GATE (auto)` section. Renaming it disables every "
+             "criterion read out of it while the whole-file checks above stay green — the "
+             "shape every other `_section()` site in this file guards against")
+    else:
+        _gf = _flatten(_gate, lower=True)
+        if "carries" not in _gf:
+            fail("references/planning.md GATE: the gate does not read the `Carries` cells. "
+                 "A column no gate reads is decoration, which is what the checklist line "
+                 "it replaced already was")
+        # Both halves, because the GATE text requires both and a check on one of them lets
+        # the other be deleted while the whole-file `edges:` check still passes on the
+        # self-review template alone.
+        if "edges" not in _gf:
+            fail("references/planning.md GATE: the gate does not read the `Edges:` count. "
+                 "The template can keep the line while the gate stops requiring it, which "
+                 "is a computed number nobody has to compute")
+
+# 8. The group convergence check, on both surfaces. A per-task review reads one diff; the
+#    defect between two diffs passes both. The rule lives in build.md and is summarised in
+#    stages.md, and a summary that drops it is how the two surfaces disagreed about
+#    fan-out's preconditions until 2026-08-15.
+if os.path.isfile(_BLD_D):
+    _cvg = _section(_BLD_D, r"4\.2a The group convergence check")
+    if _cvg is None:
+        fail("references/build.md: no group convergence check. A fanned-out group is "
+             "reviewed one diff at a time, so a contradiction that exists only between "
+             "two of them — a rename one task made and another calls by its old name — "
+             "passes every review and lands at integration")
+    else:
+        _cf = _flatten(_cvg, lower=True)
+        if "before" not in _cf or "integrat" not in _cf:
+            fail("references/build.md 4.2a: the check does not say it runs BEFORE "
+                 "integration. After the first worktree lands is too late — that is the "
+                 "moment the group stops existing as a group")
+        if "clean" not in _cf:
+            fail("references/build.md 4.2a: a clean group logs nothing. A check whose "
+                 "silence is indistinguishable from not having run is not evidence, and "
+                 "this is the check most likely to be skipped after every task went green")
+    # Narrative prose is not a gate. The criterion has to be IN the bullet that decides
+    # whether stage 5 may end, or a fanned-out group advances to stage 6 having never run
+    # the check the prose above requires.
+    _bgate = _section(_BLD_D, r"GATE \(auto\)")
+    if _bgate is None:
+        fail("references/build.md: no `GATE (auto)` section")
+    elif "convergence" not in _flatten(_bgate, lower=True):
+        fail("references/build.md GATE: the group convergence check is described in §4.2a "
+             "and not required by the gate. A criterion that lives only in prose is a "
+             "criterion a run can skip while every check stays green")
+_STG = os.path.join(_skill_dir, "references", "stages.md")
+if os.path.isfile(_STG):
+    _s5 = _section(_STG, r"5 — Dev")
+    if _s5 is None:
+        fail("references/stages.md: no `5 — Dev` section")
+    else:
+        _s5f = _flatten(_s5, lower=True)
+        # The GATE bullet specifically, not the section: prose that describes a criterion
+        # and a gate that requires it are different things, and only the second stops a run.
+        if "convergence" not in _flatten(_gate_bullet(_s5), lower=True):
+            fail("references/stages.md 5: the GATE bullet does not require the group "
+                 "convergence check. Describing it in the stage's prose leaves a fanned-out "
+                 "group free to reach stage 6 having never run it")
+        if "convergence check" not in _s5f:
+            fail("references/stages.md 5: the stage summary never mentions the group "
+                 "convergence check that build.md 4.2a requires. A reader who takes the "
+                 "summary as the rule integrates a fanned-out group unchecked")
+        # All THREE preconditions, because the message claims all three and a guard that
+        # checks one of them lets the drift it was written for happen in the other two.
+        if not ("exclusive" in _s5f or "file ownership" in _s5f):
+            fail("references/stages.md 5: the fan-out summary drops exclusive file "
+                 "ownership. build.md requires three — same group, exclusive file "
+                 "ownership, own worktree — and this surface named only the worktree "
+                 "until 2026-08-15, which fans out two tasks that share a file and meets "
+                 "it at integration")
+        if not ("depends" in _s5f or "same group" in _s5f):
+            fail("references/stages.md 5: the fan-out summary drops the same-group "
+                 "precondition. Two tasks with a dependency between them are not a "
+                 "parallel group however exclusive their files are")
+        if "worktree" not in _s5f:
+            fail("references/stages.md 5: the fan-out summary drops the worktree "
+                 "precondition — one working tree with two writers is corrupted state, "
+                 "and it is the one condition that was never missing")
+
+
 if errors:
     print("FAIL: task-pipeline structure invalid")
     for e in errors:

@@ -78,7 +78,7 @@
       ],
       "gate": {
         "type": "auto",
-        "check": "SET EQUALITY: the REQ ids in the brief equal the union of Implements: across plan tasks — a non-empty difference fails the gate and is reported as the explicit list of dropped requirements. Plus: every spec requirement maps to a task; no placeholders; names and types consistent across tasks; every task carries a verifiable DoD; parallel-group tasks share no files; UI tasks name the scenario ID(s) and SCR- screen(s) they implement in their DoD"
+        "check": "SET EQUALITY: the REQ ids in the brief equal the union of Implements: across plan tasks — a non-empty difference fails the gate and is reported as the explicit list of dropped requirements. Plus: every spec requirement maps to a task; no placeholders; names and types consistent across tasks; every task carries a verifiable DoD; parallel-group tasks share no files; UI tasks name the scenario ID(s) and SCR- screen(s) they implement in their DoD. Every edge in the plan's Execution order table carries a non-empty Carries cell and the self-review's Edges: line is computed — an arrow whose payload nobody can name is a fake edge and the wait behind it is free to give away."
       }
     },
     {
@@ -92,7 +92,7 @@
       ],
       "gate": {
         "type": "auto",
-        "check": "all plan tasks DONE — the per-task review returns three verdicts (spec compliance, REQ satisfied, code quality); every finding fixed or parked with a written ruling; no task left BLOCKED; full test suite green; the branch integrated per the brief's branch policy (base synced, suite green on the result, worktree removed) — or the operator's explicit 'leave it unmerged' recorded. Every parked finding and implementer concern is harvested into the carry-over ledger before the scratch workspace is deleted."
+        "check": "all plan tasks DONE — the per-task review returns three verdicts (spec compliance, REQ satisfied, code quality); every finding fixed or parked with a written ruling; no task left BLOCKED; full test suite green; the branch integrated per the brief's branch policy (base synced, suite green on the result, worktree removed) — or the operator's explicit 'leave it unmerged' recorded. Every parked finding and implementer concern is harvested into the carry-over ledger before the scratch workspace is deleted. Every group that actually fanned out ran its convergence check over all its diffs together BEFORE its first worktree was integrated, and logged a line either way (findings with their ruling, or 'convergence check clean')."
       }
     },
     {

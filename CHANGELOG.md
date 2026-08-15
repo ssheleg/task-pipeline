@@ -1,5 +1,126 @@
 # Changelog
 
+## v1.57.0 — an arrow that carries nothing is not an arrow, and two green diffs can still contradict each other
+
+The pipeline has drawn a dependency graph at stage 4 since it had a stage 4, and grouped
+tasks topologically off it. What it never said was how to tell a **real** edge from one
+that only records the order somebody typed the tasks in. The self-review asked the right
+question in a checklist line — *does this `depends:` point at a task that really produces
+what's consumed* — and no gate read the answer, so a plan could serialise itself entirely
+and pass every check.
+
+Audited against *Graph Engineering with Claude*
+(`https://x.com/Mahaximus_/status/2082442856417956173`), findings and both rejections in
+`docs/evidence/specs/2026-08-15-graph-audit.md`. **Nine of the ten macro stage edges carry
+data**, which is the audit's first result and the reason nothing was reordered.
+
+### Added
+
+- **The fake-edge test, as a numbered procedure** (`references/planning.md`). Six steps
+  over the graph you just drew: for each arrow, does output from A actually enter B, and if
+  you cannot name what crosses it, delete it. Expect two or three per plan.
+
+- **A `Carries` column in the *Execution order* table**, and it is the whole mechanisation:
+  a cell you cannot fill **is** the finding. The fake-edge test stops being a thing an agent
+  remembers to do and becomes a column a reviewer can see is empty.
+
+- **`Edges: <n> declared, <n> carry data, <n> removed`** in the stage-4 self-review, and
+  the gate reads it. Computed, like every other line in that block.
+
+- **The group convergence check** (`references/build.md` §4.2a). A per-task review reads
+  **one diff**; a fanned-out group produces several, and the defect that exists only
+  *between* two of them passes both. One check over the group's reports and diffs together,
+  after the last task and **before the first worktree is integrated** — the only moment all
+  of them exist and none has landed. Five things it looks for, each a real defect invisible
+  in a single diff: an empty deliverable, two outputs that cannot both be true, off-brief
+  work, one REQ satisfied twice differently, a Global Constraint only one task applied.
+  **A clean group logs a line too**, because a check whose silence is indistinguishable from
+  not having run is not evidence.
+
+- **A statement that this pipeline is a static graph, and why** (`references/planning.md`).
+  Auditability: a graph that decides its own shape produces a shape nobody drew, and then
+  *"here is the pipeline"* and *"here is what this run did"* stop being the same document.
+  The two places the run **does** discover structure — the module map and the carry-over
+  ledger — are named, and both land in a committed artifact, which is what separates
+  discovery from a dynamic graph.
+
+- **A preference for a harness-native fan-out primitive**, on the same reasoning §1 already
+  applies to worktrees: the harness owns the concurrency cap, the isolation and the resume.
+  Stated **without naming a product** — the keyword for one host's fan-out was renamed six
+  weeks after the article documenting it, and doctrine pinned to a vendor's noun rots on
+  that schedule.
+
+### Fixed
+
+- **`test/negatives.py` could not restore `.git` in a submodule checkout, so two guards
+  silently never fired.** The restore was gated on `os.path.isdir(.git)`. In every checkout
+  of this repository **as a submodule** — which is how the `sshlg-skills` umbrella ships it,
+  and therefore how most work on it happens — `.git` is a 48-byte file holding a `gitdir:`
+  pointer, so the branch was skipped and both git-dependent guards reported `fatal: not a
+  git repository` and were counted as *did not fire*. CI clones normally and was green,
+  which is why it survived. Measured before: exit `1`, `2 guard(s) did not fire`. After:
+  exit `0`, **all 318 guards**, twice consecutively.
+
+  The copy resolves the `gitdir:` pointer and **copies** the directory rather than pointing
+  at it, for two reasons that both bite: a plant that commits would otherwise move the real
+  branch, and the module's config carries `core.worktree` aimed back at the live checkout,
+  which would make every git command inside the snapshot operate on the tree the snapshot
+  exists to protect. That one key is stripped from the copy.
+
+- **The fan-out rule was stated with three conditions in `build.md` and one in
+  `stages.md`.** The summary kept *own worktree* and dropped *same group* and *exclusive
+  file ownership*, so a reader who took the summary as the rule would fan out two tasks that
+  share a file, in separate worktrees, and meet the conflict at integration. Both surfaces
+  now state all three.
+
+- **A property check's plant had gone narrow one column over, and CI is what found it.**
+  *The Human column survives a header reorder* rewrites the ledger's header and then swaps
+  each row's two last cells — matching on `| <auto> | <human> | — |`, with the `—` a
+  literal. Seven rows added by this run carry a finding id in `Note` instead, went
+  unmatched, stayed in the old order under a reordered header, and the check reported the
+  **doctrine** broken when the **plant** was what had aged. It had already been widened once
+  for exactly this reason one column to the left, which is what makes it a class rather than
+  an incident: a plant anchored on the CONTENT of a cell describes the table it was written
+  against. It now matches any note.
+
+Guards: 322 → **339**. Property checks: 9 → 9. Seventeen new plants, because a rule a check
+can decide is written as the check and not as prose somebody remembers: the fake-edge test
+renamed away, the `Carries` column dropped, the stage-4 gate no longer reading it, §4.2a
+deleted outright, §4.2a losing its *before integration*, and `stages.md` dropping the
+convergence check from its stage-5 summary — which is the exact drift F-5 found, now
+guarded in the direction it drifted. The other eleven came from **an independent reviewer
+across five rounds on the PR**, which is the mechanism standing instruction R-005 exists to buy: it found four
+branches of the new guards with no plant behind them, a `_section()` site with no
+`is None` arm (the shape every other site in the file has), a stage-5 guard checking one
+of the three preconditions its own message claims, and an uncached read of a memoised
+document. It also found the two gaps that were not nits — see below. Every plant is
+anchored on a heading or a token, and every one asserts it changed something before the
+validator is asked.
+
+**Two of the reviewer's findings were defects, not nits, and both were fixed before
+merge.** First: the convergence check was written into narrative prose and into
+`SKILL.md`'s stage table, and **into neither GATE bullet** — so a fanned-out group could
+reach stage 6 having never run it. `build.md`'s and `stages.md`'s gates now require it,
+and a guard requires the gate to require it. Second: the `.git` restore resolved a
+`gitdir:` pointer by hand, which is right for a submodule and **wrong for a linked
+worktree** — the shape `build.md` itself tells every run to work in, where `objects`,
+`refs` and `config` live wherever `commondir` points. It now asks
+`git rev-parse --git-common-dir`, which answers correctly for all three shapes. A fix that
+covers one of two shapes of the same defect is half a fix.
+
+### Not changed, deliberately
+
+- **Stage 8 → 9.** The audit's F-4 asked whether docs depend on the post-deploy check or
+  only on the version stage 7 produced. Rejected with reasoning rather than left open: a
+  single agent session runs serially so removing the edge buys no wall-clock, and a
+  post-deploy check can change what stage 9 must write. Weak is not the same as fake.
+- **The stage list, the stage count and every gate type.** Gate *criteria* moved at stage 4
+  and stage 5; nothing was renumbered, reordered or retyped.
+
+**Released as 1.57.0, not 1.56.0.** This work was branched, reviewed over five rounds and tagged in its own tree while a concurrent session merged a different 1.56.0 — the
+browser-channel release below. Both branches claimed the number; the id register that would have prevented it is declared in `.claude/agent-sync.json` and cannot allocate
+against an `fs` backend, which is the umbrella's open row **B-45**. The same collision took a board id: `B-073` here was renumbered to **B-075**.
+
 ## v1.56.0 — the stages demanded a look and named no way to take one
 
 Since v1.36.0 three stages have required the rendered surface to be checked in a

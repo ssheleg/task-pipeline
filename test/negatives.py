@@ -35,7 +35,7 @@ MIN_PROPS = 9
 # which is the floor doing half its job: it would have caught a total collapse and
 # not the loss of a third of the suite. Set it to the real count, and treat a
 # mismatch as a finding rather than as noise to be lowered away.
-MIN_EXPECTED = 322
+MIN_EXPECTED = 339
 
 
 def parse_steps(path):
@@ -145,9 +145,64 @@ def main(argv):
     shutil.copytree(ROOT, _base, ignore=shutil.ignore_patterns(
         "node_modules", "graphify-out", ".git"), symlinks=True)
     # `.git` is skipped for speed and restored for the two tests that commit a plant.
-    _git_src = os.path.join(ROOT, ".git")
-    if os.path.isdir(_git_src):
-        shutil.copytree(_git_src, os.path.join(_base, ".git"), symlinks=True)
+    #
+    # **Ask git where the repository is; do not parse the pointer.** `.git` has three shapes
+    # and this repository is consumed in all of them: a directory in a normal clone, a FILE
+    # holding `gitdir: …/.git/modules/skills/task-pipeline` in the **submodule** checkout the
+    # `sshlg-skills` umbrella ships (which is how most work on this pack happens), and a FILE
+    # pointing at a per-worktree directory in a **linked worktree** — which `build.md` itself
+    # tells every run to work in.
+    #
+    # Handling only the directory meant both git-dependent guards ran against a tree with no
+    # repository, reported `fatal: not a git repository`, and were counted as *did not fire*:
+    # exit 1 with two guards silently disarmed, while CI — which clones normally — stayed
+    # green and said nothing. Measured 2026-08-15. Handling the pointer by hand fixed the
+    # submodule and left the worktree broken in the identical way, because a per-worktree
+    # directory holds HEAD and index while `objects`, `refs` and `config` live wherever its
+    # `commondir` points.
+    #
+    # So BOTH are needed, and asking for only the common one is the trap the first fix fell
+    # into: from a worktree on `feature`, a copy of the common dir alone reports
+    # `git branch --show-current` = the main checkout's branch and a `git log` missing every
+    # commit the worktree made. The common dir is copied first and the per-worktree dir
+    # overlaid on top, which is exactly what git resolves at runtime.
+    #
+    # The result is COPIED rather than pointed at, for two reasons that both bite: a plant
+    # that commits would otherwise move the real branch, and a submodule's config carries
+    # `core.worktree` aimed back at the live checkout, which would make every git command
+    # inside the snapshot operate on the tree the snapshot exists to protect. So the copy is
+    # made, that one key is stripped, and `commondir` is dropped because the copy is now
+    # self-contained and a dangling pointer is worse than none.
+    _git_dst = os.path.join(_base, ".git")
+
+    def _git_path(_flag):
+        try:
+            _r = subprocess.run(["git", "rev-parse", _flag],
+                                cwd=ROOT, capture_output=True, text=True)
+        except OSError:
+            return None         # no git on PATH: the two git guards will say so themselves
+        if _r.returncode != 0 or not _r.stdout.strip():
+            return None
+        return os.path.normpath(os.path.join(ROOT, _r.stdout.strip()))
+
+    _common = _git_path("--git-common-dir")
+    _priv = _git_path("--git-dir")
+    if _common and os.path.isdir(_common):
+        shutil.copytree(_common, _git_dst, symlinks=True)
+        if _priv and os.path.isdir(_priv) and os.path.realpath(_priv) != os.path.realpath(_common):
+            # A linked worktree: HEAD, index, logs and the rest of the per-worktree state
+            # win over the main checkout's copies of the same names.
+            shutil.copytree(_priv, _git_dst, symlinks=True, dirs_exist_ok=True)
+            for _stale in ("commondir", "gitdir"):
+                _p = os.path.join(_git_dst, _stale)
+                if os.path.exists(_p):
+                    os.remove(_p)
+        _cfg = os.path.join(_git_dst, "config")
+        if os.path.isfile(_cfg):
+            with open(_cfg, encoding="utf-8") as _fh:
+                _kept = [ln for ln in _fh if not re.match(r"\s*worktree\s*=", ln)]
+            with open(_cfg, "w", encoding="utf-8") as _fh:
+                _fh.writelines(_kept)
 
     # Property checks assert that something IS printed, so the validator passes inside
     # them and they cannot join the suite above. They still have to run somewhere the
