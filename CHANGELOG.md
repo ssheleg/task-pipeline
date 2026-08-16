@@ -1,5 +1,42 @@
 # Changelog
 
+## v1.61.0 — the command that was built, parked, and lost
+
+**The exposure command lands, two days after it was declared built.** B-43 recorded
+`templates/exposure.sh` and its fixtures as finished and parked in a session scratchpad,
+blocked only on a concurrent release. The scratchpad was cleaned; nothing on disk, in git
+history, in a stash or in a dangling object held any of it. **The row described work that
+no longer existed**, and nothing would have said so until someone went to merge it.
+
+So it is rebuilt, and this time the validator asserts it: a seeded shell script must
+exist, must carry a shebang, and must still be named by the doctrine that tells a project
+to copy it. All three watched failing.
+
+`exposure.sh` turns [`verification.md`](plugins/task-pipeline/skills/task-pipeline/references/verification.md)
+into the line and the check-list `references/exposure.md` specifies, so a host project
+gets the number without an agent in the room. **It exits 0 whatever the number is** — a
+threshold here would be a target on `never`, and the cheapest way to satisfy such a
+target is a date nobody earned.
+
+Three of its fourteen fixtures caught real defects in the first draft, all of them lying
+in the reassuring direction:
+
+- `$(grep -c "" f || echo 0)` prints **two** zeroes when nothing matches — grep prints its
+  own 0 and exits 1, so the fallback runs as well. The variable became `"0\n0"`, every
+  numeric test after it died with *integer expression expected*, and the script fell over
+  precisely in the case that means "everything is confirmed".
+- BSD `sort` exits with *Illegal byte sequence* on the non-ASCII `What` column under a
+  UTF-8 locale. The error went to stderr, the check-list came out **empty**, and the
+  count above it still said 126 unverified. A list that silently empties is worse than no
+  list.
+- Byte-wise `substr` cut a Cyrillic letter in half. Truncation is by whole words now, which
+  cannot land inside a character.
+
+Guards: 344 → **347**. Property checks: 9 → 9. Three new plants: the seeded script
+disappearing, the doctrine that stops naming it, and a percentage reaching the exposure
+line — the last because the doctrine says *no percentage, ever*, and a later hand adding
+`(N%)` would be adding it to look helpful.
+
 ## v1.60.1 — the gate can see an invariant it breaks elsewhere
 
 **This gate can now see an invariant it breaks one repository away.** The family umbrella

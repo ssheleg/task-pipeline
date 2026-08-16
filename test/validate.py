@@ -1988,6 +1988,26 @@ else:
                  "project reads needs the same partial-read protection references get"
                  % (_tf, _tt.count("\n")))
 
+    # The two seeded SHELL scripts, and the doctrine that has to keep naming them.
+    # B-43: `exposure.sh` was written, tested green, parked in a session scratchpad and
+    # lost when the scratchpad was cleaned — the board row described it as "built and
+    # parked" for two days while nothing on disk held it. A template nothing asserts is a
+    # template that can vanish between one run and the next.
+    for _sh, _doc, _why in (
+        ("docgate.sh", "adoption.md", "the documentation gate a host project seeds"),
+        ("exposure.sh", "exposure.md", "the exposure line a host project computes without an agent"),
+    ):
+        _p = os.path.join(tpl_dir, _sh)
+        if not os.path.isfile(_p):
+            fail(f"missing template: templates/{_sh} — {_why}")
+            continue
+        if not open(_p, encoding="utf-8").read().startswith("#!"):
+            fail(f"templates/{_sh}: no shebang — it is copied and executed, not sourced")
+        _ref = os.path.join(ROOT, "plugins/task-pipeline/skills/task-pipeline/references", _doc)
+        if os.path.isfile(_ref) and _sh not in open(_ref, encoding="utf-8").read():
+            fail(f"references/{_doc} no longer names templates/{_sh} — a seeded script "
+                 f"nothing points at is never copied, and the doctrine is where a run looks")
+
     # The brief carries the stage-0 autonomy sweep — stages 1-10 read it instead of
     # asking. Without that section the grill has no place to record the answers and
     # the autonomy promise silently degrades into mid-flight questions.

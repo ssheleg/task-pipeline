@@ -6887,6 +6887,59 @@ jobs:
             exit 1
           fi
 
+      - name: Exposure suite (14 cases — the measurement that must not become a score)
+        run: python3 test/exposure_test.py
+
+      - name: Negative self-test (the seeded exposure script disappearing must fail)
+        run: |
+          set -eu
+          # B-43: this script was written, tested green, parked in a session scratchpad
+          # and lost when the scratchpad was cleaned. The board called it "built and
+          # parked" for two days while nothing on disk held it.
+          rm -rf /tmp/exp1-copy && cp -R . /tmp/exp1-copy
+          rm /tmp/exp1-copy/plugins/task-pipeline/skills/task-pipeline/templates/exposure.sh
+          if python3 /tmp/exp1-copy/test/validate.py 2>&1 | grep -q "missing template: templates/exposure.sh"; then
+            echo "OK: validator FAILs — a template can no longer vanish silently"
+          else
+            echo "ERROR: the seeded script can disappear and the gate stays green"
+            exit 1
+          fi
+
+      - name: Negative self-test (doctrine that stops naming the script must fail)
+        run: |
+          set -eu
+          rm -rf /tmp/exp2-copy && cp -R . /tmp/exp2-copy
+          python3 - <<'EOF'
+          p = "/tmp/exp2-copy/plugins/task-pipeline/skills/task-pipeline/references/exposure.md"
+          t = open(p, encoding="utf-8").read()
+          assert "exposure.sh" in t, "PLANT DID NOT LAND: exposure.md never named the script"
+          open(p, "w", encoding="utf-8").write(t.replace("exposure.sh", "the-script"))
+          EOF
+          if python3 /tmp/exp2-copy/test/validate.py 2>&1 | grep -q "no longer names templates/exposure.sh"; then
+            echo "OK: validator FAILs — a seeded script nothing points at is never copied"
+          else
+            echo "ERROR: the doctrine can stop naming it and nothing notices"
+            exit 1
+          fi
+
+      - name: Negative self-test (an exposure line carrying a percentage must fail)
+        run: |
+          set -eu
+          # The doctrine's own refusal: "no percentage, ever". A single score invites a
+          # threshold, and a threshold here is a target on `never`.
+          rm -rf /tmp/exp3-copy && cp -R . /tmp/exp3-copy
+          s=/tmp/exp3-copy/plugins/task-pipeline/skills/task-pipeline/templates/exposure.sh
+          grep -q '^LINE=' "$s" || { echo "PLANT DID NOT LAND: no LINE= assignment"; exit 1; }
+          sed 's|^LINE=.*|LINE="exposure: 12% likely broken"|' "$s" > /tmp/exp3-copy/g.sh
+          mkdir -p /tmp/exp3-copy/probe/docs/evidence
+          printf '| REQ | What | Run | Shipped in | Auto | Human | Note |\n|---|---|---|---|---|---|---|\n| R-1 | x | r | v1.0.0 | pass | never | - |\n' \
+            > /tmp/exp3-copy/probe/docs/evidence/verification.md
+          if (cd /tmp/exp3-copy/probe && bash ../g.sh); then
+            echo "ERROR: a percentage went out on the exposure line"
+            exit 1
+          fi
+          echo "OK: refused, as the doctrine requires"
+
       - name: Negative self-test (the stage-3 gate stops requiring the convergence)
         run: |
           set -eu

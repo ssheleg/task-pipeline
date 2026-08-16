@@ -15,6 +15,7 @@ list `/task-pipeline checkup` hands an operator.
 - The components, each named
 - The check-list, and how it is ordered
 - `/task-pipeline checkup`
+- The seeded script
 - What the loop does with it
 - Rationalizations
 
@@ -88,6 +89,29 @@ ledgers' unresolved count, and the code graph's staleness where one exists.
 **Where the operator asks it to file findings**, it appends board rows whose `Source`
 names the checkup and its date — so a row a machine created is distinguishable from one a
 run surfaced. It prints what it would add first. Never silently.
+
+## The seeded script
+
+[`../templates/exposure.sh`](../templates/exposure.sh) computes the line and the
+check-list from the two files above, so a project gets the number without an agent in the
+room. Seed it the way the gate is seeded:
+
+```bash
+cp <skill>/templates/exposure.sh  scripts/exposure.sh    # only if absent
+chmod +x scripts/exposure.sh
+```
+
+**It exits 0 whatever the number is, and that is load-bearing.** A threshold here would
+be a target on `never`, and this file has already said that column may never have one —
+the moment *"unverified must be under ten"* exists, the cheapest way to satisfy it is a
+date nobody earned. Exit 1 means the ledger is present and unreadable, which is a
+different fact and deserves a different code.
+
+Two of its behaviours exist because the alternative lies in the reassuring direction. A
+project with no ledger prints `dormant:` rather than a clean zero, and a check-list that
+cannot be built is a failure rather than an empty section under a non-zero count — the
+first draft's `sort` died on a non-ASCII `What` column, printed its error to stderr, and
+left a confident number above nothing at all.
 
 ## What the loop does with it
 

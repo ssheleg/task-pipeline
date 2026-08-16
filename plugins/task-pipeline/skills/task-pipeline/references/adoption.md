@@ -82,7 +82,8 @@ Usually the map and the gate; often the register already exists in some shape.
 ```bash
 cp <skill>/templates/docmap.md   docs/DOCMAP.md          # only if absent
 cp <skill>/templates/docgate.sh  scripts/check-docs.sh   # only if absent
-chmod +x scripts/check-docs.sh
+cp <skill>/templates/exposure.sh scripts/exposure.sh     # only if absent
+chmod +x scripts/check-docs.sh scripts/exposure.sh
 ```
 
 **Seeding never overwrites.** An existing brief, register or map is the project's
