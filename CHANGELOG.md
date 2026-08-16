@@ -1,5 +1,31 @@
 # Changelog
 
+## v1.63.0 — the row you are about to work is a claim, and it has a date
+
+**A board row states the world at its `Source` date and says nothing about now.** Three
+rows expired inside one day on 2026-08-16 — one recorded a script and thirteen green
+fixtures as *built and parked* when every artifact had been deleted, one named six files
+belonging to another repository where a sweep found eleven, one said the graphs were
+frozen at a date nine days old when every one had been rebuilt. None was wrong when
+written. Each was caught only because the cycle that picked it up happened to measure
+first; nothing required it.
+
+`references/knowledge-sources.md` gains the rule beside *Carried-in claims*, which covers
+the sibling case of what a run inherits about itself: **re-derive the row's checkable
+claims before acting on them, and correct the row in the same run.** Most name something a
+command settles — a file, a count, a commit, a version, a green suite. What no command can
+settle is acted on as an assumption, out loud.
+
+It also names the sharper half, which is arithmetic rather than prose: **a row's derived
+columns decay and nothing notices, because the number still looks like a number.** A rank
+computed from an age term is wrong the moment the age moves. If a board computes a
+priority, something must recompute it — a promise in the header that it happens at stage 10
+is not a mechanism.
+
+Guards: 349 → **349**. No new plant, and the reason is measured rather than asserted:
+across the seven open rows the family carries, the checkable claims total **two file paths
+and one count**. A gate over that corpus would pass everything and read like coverage.
+
 ## v1.62.0 — a board row that says work exists names where it lives
 
 **`open` claims nothing exists. `parked` claims something does — and now has to say
