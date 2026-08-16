@@ -1,5 +1,49 @@
 # Changelog
 
+## v1.64.0 — the exposure line reported a clean bill on ledgers it could not read
+
+**The exposure command reported a clean bill on ledgers it could not read.** Shipped two
+releases ago keyed on POSITION — `NF >= 7`, status in field 7. Run against the family
+umbrella's four-column ledger it found **four rows out of 298**, because those four happen
+to contain a `|` inside inline code and so crossed the field count by accident, and from
+them printed:
+
+```
+exposure: 0 unverified · never checked · 125 releases carry one
+         every shipped row carries a human confirmation
+```
+
+The most reassuring sentence available, derived from punctuation, in the one tool whose
+stated purpose is to stop silent greens. Its own two halves contradict each other and the
+fixtures did not notice.
+
+**The status column is now found by name, per section, and the order matters.**
+`sheleg-design` carries both `Last verified` (a date and the thing watched) and `Status`
+(which holds `**green**`); preferring `status` read the gate instead of the person and
+reported 174 confirmations. Preference is `Human`, then `Last verified`, then
+`Status`/`State`. **`Verified by`, `Confirmed` and `How it is checked` are deliberately not
+status names** — five members hold shell commands under those headers, and a column of
+commands read as a column of statuses is how `python3 test/validate.py` became a status
+nobody could parse.
+
+Three further corrections, each of which was hiding a real row:
+
+- **Bold is stripped before matching.** These ledgers write `**never**`, not `never`.
+- **A shrug is not a clean bill.** A status that is neither a date nor a known word gets
+  its own count and its own list, and no clean bill prints over it.
+- **Only a `Human` column licenses the word "human".** The umbrella's ledger defines
+  `verified` as *a person **or** a command*, so a confirmation drawn from `Status` now says
+  which column it came from.
+
+Measured across the family afterwards: `task-pipeline` **126 unverified**, `sheleg-design`
+1, and `seo-aeo-audit`, `super-ux` and `agent-sync` **dormant — no status column at all**,
+which is the truth their shapes support and not a zero.
+
+Fixtures 14 → **18**, the four new ones named for the exact silent green.
+
+Guards: 349 → **349**. No new plant: every one of these is a behaviour of the seeded
+script, which the fixtures exercise directly by running it.
+
 ## v1.63.0 — the row you are about to work is a claim, and it has a date
 
 **A board row states the world at its `Source` date and says nothing about now.** Three

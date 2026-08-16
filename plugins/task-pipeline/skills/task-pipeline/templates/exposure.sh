@@ -47,43 +47,122 @@ fi
 TMP=$(mktemp -d 2>/dev/null || mktemp -d -t exposure)
 trap 'rm -rf "$TMP"' EXIT
 
-# ---------- the ledger's rows ----------
-# A row is a table line whose first cell is a REQ id. The header and the |---| separator
-# are excluded by that shape rather than by counting lines, because a ledger grows
-# sections and a line offset stops being true on the first one added.
+# ---------- the ledger's rows, resolved BY HEADER ----------
+# The first draft keyed on position — `NF >= 7`, status in field 7 — and on a ledger with
+# four columns it did not report a shape mismatch. It found FOUR rows out of 298, because
+# those four happened to contain a `|` inside inline code and so crossed the field count by
+# accident, then printed **"0 unverified · every shipped row carries a human confirmation"**.
+# The most reassuring sentence available, derived from punctuation. In a tool whose whole
+# purpose is to stop silent greens.
+#
+# So the status column is found by NAME, per section, and a ledger with no such column is
+# DORMANT rather than clean. Three shapes exist in this family already — `Human`, `Status`,
+# `Watched` — and a fourth will arrive without asking.
 awk -F'|' '
-  NF >= 7 && $2 ~ /^[[:space:]]*[A-Za-z][A-Za-z0-9-]*-?[0-9]*[[:space:]]*$/ &&
-  $2 !~ /^[[:space:]]*REQ[[:space:]]*$/ { print }
-' "$LEDGER" > "$TMP/rows" 2>/dev/null
+  function trim(s) { gsub(/^[ \t]+|[ \t]+$/, "", s); return s }
+  function lower(s) { return tolower(s) }
+  # A header is a row whose first cell names the id column. Everything after it, until the
+  # next header, is read with THAT header shape.
+  {
+    if (NF < 3) next
+    c1 = lower(trim($2))
+    if (c1 == "req" || c1 == "id" || c1 == "#") {
+      nf = NF; scol = 0; sname = ""
+      for (i = 2; i < NF; i++) {
+        n = lower(trim($i))
+        # `human` is the specific one and wins outright; the others are accepted so a
+        # differently-shaped ledger is read rather than declared unreadable.
+        # ORDER MATTERS, and getting it wrong reads the gate instead of the person.
+        # `sheleg-design`'"'"'s ledger carries BOTH `Last verified` (a date and what was
+        # watched) and `Status` (which holds `**green**`); preferring `status` reported
+        # 174 confirmed rows from the column that says the suite passed.
+        if (n == "human") { scol = i; sname = n; break }
+        if (n == "last verified" && sname != "human") { scol = i; sname = n }
+        if (scol == 0 && (n == "status" || n == "state")) { scol = i; sname = n }
+        # `Verified by`, `Confirmed` and `How it is checked` name the EVIDENCE, not the
+        # state — five members hold shell commands there. A column of commands read as a
+        # column of statuses is how `python3 test/validate.py` became an unreadable status.
+      }
+      next
+    }
+    if (nf == 0) next                      # rows before any header
+    if (trim($2) ~ /^[-: ]+$/) next        # the |---| separator
+    if (NF != nf) next                     # a row of another shape
+    if (scol == 0) { headerless++; next }  # counted, so the caller can say so
+    print trim($2) "\t" trim($(scol)) "\t" trim($3) "\t" (nf > 5 ? trim($5) : "")
+  }
+  END { print "##HEADERLESS " headerless+0 > "/dev/stderr"
+        print "##COLUMN " (sname == "" ? "-" : sname) > "/dev/stderr" }
+' "$LEDGER" > "$TMP/rows" 2>"$TMP/meta"
 
-# `$(grep -c … || echo 0)` prints TWO zeroes when there are no matches: grep prints its
-# 0 and exits 1, so the fallback runs too and the variable becomes "0\n0" — which then
-# fails `[ "$ROWS" -eq 0 ]` with *integer expression expected* and takes the rest of the
-# script with it. The fallback belongs OUTSIDE the substitution.
 ROWS=$(grep -c '' "$TMP/rows" 2>/dev/null) || ROWS=0
+HEADERLESS=$(sed -n 's/^##HEADERLESS //p' "$TMP/meta" 2>/dev/null)
+HEADERLESS=${HEADERLESS:-0}
+SCOL=$(sed -n 's/^##COLUMN //p' "$TMP/meta" 2>/dev/null)
+SCOL=${SCOL:--}
+
 if [ "$ROWS" -eq 0 ]; then
+  if [ "$HEADERLESS" -gt 0 ]; then
+    # THE CASE THAT WAS SILENTLY GREEN. Rows exist and none can be read, which is the one
+    # answer that must never be spelled "0 unverified".
+      echo "dormant: exposure — $LEDGER has $HEADERLESS row(s) but no column named Human,"
+    echo "         Last verified, Status or State. Columns like Verified by or How it is"
+    echo "         checked name the EVIDENCE, not the state, and are deliberately not read."
+    echo "         Nothing here can say whether anybody looked, so this reports no number."
+    exit 0
+  fi
   echo "dormant: exposure — $LEDGER has no REQ rows yet"
   exit 0
 fi
+if [ "$HEADERLESS" -gt 0 ]; then
+  echo "note:    $HEADERLESS row(s) sit under a header with no status column and are not counted"
+fi
 
-# Column order is the template's: REQ | What | Run | Shipped in | Auto | Human | Note.
-# With awk -F'|' on a leading-pipe line those are $2..$8.
-
-awk -F'|' '{ h=$7; gsub(/^[ \t]+|[ \t]+$/, "", h); if (h == "never") print }' \
+# Unconfirmed is a small closed vocabulary, and the empty cell is in it: a blank status is
+# the commonest way a row means "nobody has said", and reading it as confirmed inverts the
+# file's purpose.
+# NORMALISED first: these ledgers write `**never**`, not `never`. Bold hid three real
+# unverified rows in one member and seven in another, and both reported zero.
+awk -F'\t' '{ s=tolower($2); gsub(/[*`]/, "", s); gsub(/^[ \t]+|[ \t]+$/, "", s);
+              if (s=="never" || s=="" || s=="-" || s=="no" || s=="unverified" ||
+                  s=="pending" || s=="none") print }' \
   "$TMP/rows" > "$TMP/unverified"
 UNVERIFIED=$(grep -c '' "$TMP/unverified" 2>/dev/null) || UNVERIFIED=0
+
+# A THIRD BUCKET, because two are not enough. A status that is neither a known
+# unconfirmed word nor a date is UNREADABLE — `last tuesday`, `soon`, `ask Ben`. Counting
+# it as confirmed is how a shrug becomes a clean bill, which the fixture for this line
+# caught the moment it was written.
+awk -F'\t' '{ s=tolower($2); gsub(/[*`]/, "", s); gsub(/^[ \t]+|[ \t]+$/, "", s);
+               if (s=="never" || s=="" || s=="-" || s=="no" || s=="unverified" ||
+                   s=="pending" || s=="none") next;
+               if ($2 ~ /[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]/) next;
+               if (s=="pass" || s=="yes" || s=="verified" || s=="ok" || s=="observed" ||
+                   s=="confirmed" || s=="green") next;
+               print }' "$TMP/rows" > "$TMP/unreadable"
+UNREADABLE=$(grep -c '' "$TMP/unreadable" 2>/dev/null) || UNREADABLE=0
 
 # ---------- since: a date, or the literal `never checked` ----------
 # ZERO WOULD BE A LIE IN THE DANGEROUS DIRECTION. "0 days" reads as *checked today*,
 # which is the exact opposite of "nobody has ever looked", so the two cases print
 # different words rather than different numbers.
-awk -F'|' '{ h=$7; gsub(/^[ \t]+|[ \t]+$/, "", h);
-             if (h ~ /^[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]$/) print h }' \
+awk -F'\t' '{ if ($2 ~ /[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]/) {
+                   match($2, /[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]/);
+                   print substr($2, RSTART, RLENGTH) } }' \
   "$TMP/rows" | sort > "$TMP/dates"
 NEWEST=$(tail -1 "$TMP/dates" 2>/dev/null)
 
 if [ -z "$NEWEST" ]; then
-  SINCE="never checked"
+  # THREE FACTS, NOT TWO. "nobody has ever looked", "this shape records no dates" and
+  # "somebody wrote something nobody can read" are different, and the first draft printed
+  # the middle one for the last — a clean bill two lines under a shrug.
+  if [ "$UNREADABLE" -gt 0 ]; then
+    SINCE="never checked ($UNREADABLE status(es) this script cannot read)"
+  elif [ "$UNVERIFIED" -eq 0 ]; then
+    SINCE="no confirmation dates recorded"
+  else
+    SINCE="never checked"
+  fi
 else
   # Portable day arithmetic: BSD date and GNU date disagree on every flag that matters,
   # so ask python, which both platforms have and which will not silently return today.
@@ -97,10 +176,16 @@ print((datetime.date.today() - d).days)
 PY
 )
   if [ -z "${DAYS:-}" ]; then
-    echo "FAIL: exposure — $LEDGER has a Human date this script cannot parse: $NEWEST"
+    echo "FAIL: exposure — $LEDGER has a confirmation date this script cannot parse: $NEWEST"
     exit 1
   fi
-  SINCE="$DAYS days since the last human confirmation"
+  # The same discipline as the clean bill below: only a `Human` column licenses the word
+  # "human". Any other column records that something looked, not that somebody did.
+  if [ "$SCOL" = "human" ]; then
+    SINCE="$DAYS days since the last human confirmation"
+  else
+    SINCE="$DAYS days since the last \`$SCOL\` entry"
+  fi
 fi
 
 # ---------- releases: what has gone out on top of it ----------
@@ -134,18 +219,35 @@ esac
 echo "$LINE"
 
 # ---------- the check-list: a number without it says there is a problem, not where ----------
+# A SHRUG IS NOT A CLEAN BILL. A status that is neither a date nor a known word means
+# somebody wrote something and nobody can act on it; printing "every shipped row is
+# confirmed" over that is the failure this whole file exists to prevent.
+if [ "$UNREADABLE" -gt 0 ]; then
+  echo "         $UNREADABLE row(s) carry a status that is neither a date nor a known word,"
+  echo "         so no clean bill is printed over them:"
+  cut -f1,2 "$TMP/unreadable" | head -"$LIST_MAX" | sed 's/^/           /'
+  if [ "$UNVERIFIED" -eq 0 ]; then exit 0; fi
+fi
+
 if [ "$UNVERIFIED" -eq 0 ]; then
-  echo "         every shipped row carries a human confirmation"
+  # NAME THE COLUMN. `Human` means a person; `Status`, `State` and `Watched` do not
+  # distinguish a person from a command — the umbrella's own ledger says `verified` means
+  # "a person **or a command** looked", so claiming a human confirmation from that column
+  # is a stronger sentence than the data supports.
+  if [ "$SCOL" = "human" ]; then
+    echo "         every shipped row carries a human confirmation"
+  else
+    echo "         every shipped row is confirmed in its \`$SCOL\` column — which does not"
+    echo "         separate a person from a command; only a \`Human\` column does that"
+  fi
   exit 0
 fi
 
 # Oldest first by `Shipped in`, which is the only ordering this repository can defend.
 # Version sort, so v1.9.0 precedes v1.10.0 — a lexical sort puts the newer one first and
 # hands the operator the wrong end of the list.
-awk -F'|' '{ req=$2; ship=$5; what=$3;
-             gsub(/^[ \t]+|[ \t]+$/, "", req);
-             gsub(/^[ \t]+|[ \t]+$/, "", ship);
-             gsub(/^[ \t]+|[ \t]+$/, "", what);
+awk -F'\t' '{ req=$1; what=$3; ship=$4;
+             if (ship == "") ship = "—";
              # Truncated on a WORD boundary, never mid-character: awk counts bytes
              # here, so `substr(what, 1, 56)` cut a Cyrillic letter in half and printed
              # a replacement glyph. Appending whole words cannot land inside one.

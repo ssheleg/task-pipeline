@@ -162,6 +162,66 @@ def a_non_empty_count_never_prints_an_empty_list():
     assert "Illegal byte sequence" not in p.stderr, p.stderr
 
 
+def a_ledger_with_no_status_column_is_dormant_never_clean():
+    """THE SILENT GREEN. A four-column ledger has no Human column at all; the first draft
+    keyed on position, found four rows out of 298 whose inline code happened to contain a
+    `|`, and printed *0 unverified · every shipped row carries a human confirmation*."""
+    d = tempfile.mkdtemp()
+    os.makedirs(os.path.join(d, "docs", "evidence"))
+    with open(os.path.join(d, "docs/evidence/verification.md"), "w", encoding="utf-8") as fh:
+        fh.write("# L\n\n| REQ | What | Evidence | Note |\n|---|---|---|---|\n"
+                 "| R-1 | a thing | `npm test` | — |\n"
+                 "| R-2 | with a `|` inside code | see `| open |` | — |\n")
+    p = exposure(d)
+    assert p.returncode == 0, p.stderr
+    assert p.stdout.startswith("dormant:"), \
+        "a shape with no status column must be dormant, not clean: " + p.stdout
+    assert "0 unverified" not in p.stdout, "it reported a number it could not compute"
+    assert "no column named" in p.stdout, p.stdout
+
+
+def the_status_column_is_found_by_name_not_position():
+    """`Last verified` sits where `Run` sits in the canonical shape. Position would read
+    the wrong cell; the name cannot. `Watched` and `Verified by` are deliberately NOT
+    status names — five members hold shell commands under those headers."""
+    d = tempfile.mkdtemp()
+    os.makedirs(os.path.join(d, "docs", "evidence"))
+    with open(os.path.join(d, "docs/evidence/verification.md"), "w", encoding="utf-8") as fh:
+        fh.write("# L\n\n| REQ | What ships | Last verified |\n|---|---|---|\n"
+                 "| R-1 | a thing | **never** |\n| R-2 | another | 2026-08-01 |\n")
+    p = exposure(d)
+    assert "1 unverified" in p.stdout, p.stdout
+
+
+def only_a_human_column_licenses_the_word_human():
+    """The umbrella's own ledger defines `verified` as *a person **or a command***, so a
+    clean bill drawn from a `Status` column may not claim a person looked."""
+    d = tempfile.mkdtemp()
+    os.makedirs(os.path.join(d, "docs", "evidence"))
+    with open(os.path.join(d, "docs/evidence/verification.md"), "w", encoding="utf-8") as fh:
+        fh.write("# L\n\n| REQ | What shipped | Status |\n|---|---|---|\n"
+                 "| R-1 | a thing | verified |\n")
+    p = exposure(d)
+    assert "0 unverified" in p.stdout, p.stdout
+    assert "human confirmation" not in p.stdout, \
+        "a Status column cannot licence the word human: " + p.stdout
+    assert "`status` column" in p.stdout, p.stdout
+
+
+def a_shrug_never_gets_a_clean_bill():
+    """A status that is neither a date nor a known word is unreadable, and unreadable is
+    not confirmed."""
+    d = tempfile.mkdtemp()
+    os.makedirs(os.path.join(d, "docs", "evidence"))
+    with open(os.path.join(d, "docs/evidence/verification.md"), "w", encoding="utf-8") as fh:
+        fh.write("# L\n\n| REQ | What | Run | Shipped in | Auto | Human | Note |\n"
+                 "|---|---|---|---|---|---|---|\n"
+                 "| R-1 | a thing | run | v1.0.0 | pass | ask Ben | - |\n")
+    p = exposure(d)
+    assert "cannot read" in p.stdout, p.stdout
+    assert "every shipped row" not in p.stdout, "a shrug got a clean bill: " + p.stdout
+
+
 def everything_confirmed_says_so_plainly():
     p = exposure(project([row("REQ-001", human="2026-08-01")]))
     assert "0 unverified" in p.stdout, p.stdout
@@ -207,6 +267,10 @@ for n, f in [
     ("the list is version-ordered, oldest first", the_list_is_ordered_oldest_first_by_version_not_lexically),
     ("a non-empty count never prints an empty list", a_non_empty_count_never_prints_an_empty_list),
     ("everything confirmed says so plainly", everything_confirmed_says_so_plainly),
+    ("a ledger with no status column is dormant, never clean", a_ledger_with_no_status_column_is_dormant_never_clean),
+    ("the status column is found by name, not position", the_status_column_is_found_by_name_not_position),
+    ("only a Human column licenses the word human", only_a_human_column_licenses_the_word_human),
+    ("a shrug never gets a clean bill", a_shrug_never_gets_a_clean_bill),
     ("the cap says what it dropped", the_list_is_capped_and_says_what_it_dropped),
     ("blast comes from the board; absence is absent", blast_radius_comes_from_the_board_and_absence_is_not_a_default),
     ("no ledger is dormant and green", no_ledger_is_dormant_and_green),
@@ -215,6 +279,6 @@ for n, f in [
     case(n, f)
 
 if failures:
-    print(f"\nFAIL: {len(failures)} of 14")
+    print(f"\nFAIL: {len(failures)} of 18")
     sys.exit(1)
-print("\nPASS: exposure.sh — 14 cases")
+print("\nPASS: exposure.sh — 18 cases")
