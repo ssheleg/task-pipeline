@@ -20,6 +20,7 @@ exactly one seam, and that seam already existed as a dangling pointer.
 - Seeded or picked up
 - A row that says work exists names where it lives
 - Priority is computed, not assigned
+- A decision is not debt — `waived`
 - What a loop iteration does with it
 - Rationalizations
 
@@ -119,6 +120,39 @@ Two consequences worth stating, because both are the point:
 
 `sev` and `blast` are judgement, and they are written down *as* judgement: two small
 integers a reader can disagree with, rather than a ranking they can only accept.
+
+## A decision is not debt — `waived`
+
+`open` is work not done. `dropped` is an idea abandoned. Neither fits a deliberate **no**
+that could be revisited, and putting one in `open` has a cost that only shows up later:
+**a decision accrues age exactly like debt, and eventually outranks real work.**
+
+Measured in this family on 2026-08-16. Two rows recorded deliberate decisions on
+2026-08-06 — one waiving a UX chain in favour of fixtures, one keeping a skill an audit
+because another router carries the design-time rule. They sat `open`. The moment the age
+term started being computed they reached the **top** of the board at 2.67 each, and the
+next run spent itself re-deriving two decisions that were correct when made and are still
+correct.
+
+So:
+
+```
+| B-NNN | … | … | 1 | 7 | 3 | — | waived — revisit: <the condition, and how to measure it> |
+```
+
+- **Not counted open.** It is not queued work and must not appear as any.
+- **No priority.** The cell reads `—`; ranking a decision puts it above things to do.
+- **`revisit:` is mandatory.** A waiver with no trigger is a row nobody will reconsider,
+  and the trigger must be something a later run can **measure** — *"the command surface
+  grows past what the fixtures describe"* is checkable; *"if it becomes a problem"* is not.
+- **Still disclosed every run.** A waiver that becomes invisible is how a decision outlives
+  the reason for it. It is printed beside the verdict, never counted in it.
+
+**And the revisit condition is re-derived when the row is touched**, like any other claim
+([`knowledge-sources.md`](knowledge-sources.md)). Both of the rows above were re-measured
+before being waived — 8 commands with 0 uncovered by fixtures, and a router that still
+states the rule — because a waiver resting on a condition nobody has checked since 2026 is
+the same expired claim in a quieter voice.
 
 ## What a loop iteration does with it
 

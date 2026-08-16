@@ -1,5 +1,31 @@
 # Changelog
 
+## v1.65.0 — a decision is not debt
+
+**`open` is work not done, `dropped` is an idea abandoned, and neither fits a deliberate
+*no*.** Putting a decision in `open` has a cost that only appears later: **it accrues age
+exactly like debt and eventually outranks real work.**
+
+Measured on 2026-08-16. Two rows in the family umbrella recorded decisions on 2026-08-06 —
+one waiving a UX chain in favour of fixtures, one keeping a skill an audit because another
+router carries the design-time rule. Both sat `open`. The moment the age term started being
+computed they reached the **top** of that board at 2.67 each, and the next run spent itself
+re-deriving two decisions that were correct when made and are still correct.
+
+So `waived` is a state: not counted open, no priority (`—`), and it must name what would
+bring it back. **The `revisit:` clause is mandatory and gated** — a waiver with no trigger
+is a row nobody will reconsider, and the trigger has to be something a later run can
+measure. *"The command surface grows past what the fixtures describe"* is checkable; *"if
+it becomes a problem"* is not.
+
+The doctrine also requires the condition to be **re-derived when the row is touched**, like
+any other claim. Both umbrella rows were re-measured before being waived — 8 CLI commands
+with 0 uncovered by fixtures, and a router that still states the rule — because a waiver
+resting on a condition nobody has checked is the same expired claim in a quieter voice.
+
+Guards: 349 → **351**. Both new plants watched rejecting their defect: a waived row that
+keeps its priority, and a waiver that names no trigger.
+
 ## v1.64.0 — the exposure line reported a clean bill on ledgers it could not read
 
 **The exposure command reported a clean bill on ledgers it could not read.** Shipped two

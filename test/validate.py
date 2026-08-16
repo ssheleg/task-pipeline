@@ -1433,6 +1433,20 @@ if os.path.isfile(_BOARD):
                      "needs at least 8 — skipping it silently is how a malformed row "
                      "carries any priority it likes past a check built to compute one")
                 continue
+            # A WAIVED row is a decision, not debt: it carries no priority and must name
+            # what would bring it back. Ranking a decision is how two of them reached the
+            # top of a board on 2026-08-16 and cost a run that re-derived both.
+            _state = " ".join(_cl[8:]).lower() if len(_cl) > 8 else ""
+            if re.match(r"^\**waived\b", _state):
+                if _cl[7].strip("* ") not in ("—", "-", ""):
+                    fail(f"{_bfr}: row {_cl[0]} is waived but still carries priority "
+                         f"{_cl[7]!r} — a decision is not debt, and ranking it puts it "
+                         "above real work")
+                if "revisit:" not in _state:
+                    fail(f"{_bfr}: row {_cl[0]} is waived and names no `revisit:` condition "
+                         "— a waiver with no trigger is a row nobody will reconsider, and "
+                         "the trigger has to be something a later run can measure")
+                continue
             try:
                 _sev, _bl, _age, _pr = (int(_cl[4]), int(_cl[5]), int(_cl[6]), int(_cl[7]))
             except ValueError:

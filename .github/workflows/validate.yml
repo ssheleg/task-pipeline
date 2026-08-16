@@ -6887,6 +6887,62 @@ jobs:
             exit 1
           fi
 
+      - name: Negative self-test (a waived row that keeps its priority must fail)
+        run: |
+          set -eu
+          # A decision is not debt. Two of them reached the top of a board on 2026-08-16
+          # purely by ageing, and the run that picked them up re-derived both.
+          rm -rf /tmp/wv1-copy && cp -R . /tmp/wv1-copy
+          python3 - <<'EOF'
+          import re
+          p = "/tmp/wv1-copy/plugins/task-pipeline/skills/task-pipeline/templates/backlog.md"
+          lines = open(p, encoding="utf-8").read().split("\n")
+          for n, ln in enumerate(lines):
+              if not re.match(r"^\|\s*B-005\s*\|", ln):
+                  continue
+              c = ln.split("|")
+              assert c[8].strip() == "\u2014", "PLANT DID NOT LAND: B-005 priority is not cleared"
+              c[8] = " 3 "
+              lines[n] = "|".join(c)
+              break
+          else:
+              raise AssertionError("PLANT DID NOT LAND: no waived B-005 row")
+          open(p, "w", encoding="utf-8").write("\n".join(lines))
+          EOF
+          if python3 /tmp/wv1-copy/test/validate.py 2>&1 | grep -q "waived but still carries priority"; then
+            echo "OK: validator FAILs — a decision cannot be ranked above real work"
+          else
+            echo "ERROR: a waived row can carry a priority and outrank things to do"
+            exit 1
+          fi
+
+      - name: Negative self-test (a waiver naming no revisit condition must fail)
+        run: |
+          set -eu
+          rm -rf /tmp/wv2-copy && cp -R . /tmp/wv2-copy
+          python3 - <<'EOF'
+          import re
+          p = "/tmp/wv2-copy/plugins/task-pipeline/skills/task-pipeline/templates/backlog.md"
+          lines = open(p, encoding="utf-8").read().split("\n")
+          for n, ln in enumerate(lines):
+              if not re.match(r"^\|\s*B-005\s*\|", ln):
+                  continue
+              c = ln.split("|")
+              assert "revisit:" in c[9], "PLANT DID NOT LAND: B-005 has no revisit clause"
+              c[9] = " waived "
+              lines[n] = "|".join(c)
+              break
+          else:
+              raise AssertionError("PLANT DID NOT LAND: no waived B-005 row")
+          open(p, "w", encoding="utf-8").write("\n".join(lines))
+          EOF
+          if python3 /tmp/wv2-copy/test/validate.py 2>&1 | grep -q "names no .revisit:. condition"; then
+            echo "OK: validator FAILs — a waiver with no trigger is never reconsidered"
+          else
+            echo "ERROR: a decision can be recorded with nothing that would bring it back"
+            exit 1
+          fi
+
       - name: Negative self-test (a `parked` row naming no branch or commit must fail)
         run: |
           set -eu
