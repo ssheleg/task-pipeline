@@ -1313,6 +1313,51 @@ if os.path.isfile(_BOARD):
     # So: the header names the candidate columns — ALL of them, never just the last —
     # and inside those columns a status is matched on a word boundary. A cell in the
     # What column cannot masquerade as a status because it is never looked at.
+        # B-58: a row that CLAIMS work exists must say where it lives, and the two rules
+    # below are what survived measurement over 187 real rows.
+    #
+    # A prose detector was written first — "parked", "is built", "ready to merge" in the
+    # description cell — and it fired on THREE rows, all three false: two closed rows
+    # narrating the incident, and the row that asked for the rule. A check whose every
+    # current hit is wrong is discarded here rather than tuned, so what is gated is the
+    # STATUS CELL, which is never prose. Both rules below measured at zero hits on the
+    # same corpus, which is what makes a first firing meaningful.
+    _TEMP_HOME = re.compile(r"(scratchpad|/tmp/|/private/tmp/|/var/folders/|\$TMPDIR)", re.I)
+    _PARKED = re.compile(r"^\**parked\b", re.I)
+    _OPENISH = re.compile(r"^\**(open|partly)\b", re.I)
+    # A commit, or something shaped like `owner/branch`. Deliberately loose: the point is
+    # that SOMETHING addressable is named, and `git rev-parse` is the thing that can say
+    # whether it still resolves.
+    _GITREF = re.compile(r"\b([0-9a-f]{7,40}|[\w.-]+/[\w.-]+)\b")
+
+    def _board_home_rules(path, text):
+        for line in text.splitlines():
+            if not line.startswith("| B-"):
+                continue
+            cells = [c.strip() for c in line.split("|")]
+            if len(cells) < 5:
+                continue
+            # POSITION-FREE, like every other board check in this file, and the first
+            # draft of THIS one was not: it read `cells[-2]`, which is the status in the
+            # umbrella's eight-column board and the *Home* column in the ten-column
+            # template. The parked rule silently examined the wrong cell and reported
+            # nothing — under the comment fifty lines above explaining why positional
+            # reads fail on this corpus.
+            rid = cells[1]
+            for cell in cells[2:-1]:
+                if _OPENISH.match(cell) and _TEMP_HOME.search(cell):
+                    fail(f"{os.path.relpath(path, ROOT)}: row {rid} is open and homes its work in "
+                         "a per-session directory. A scratchpad is not a home — work that lives "
+                         "only there is unwritten, not parked (B-58)")
+                if _PARKED.match(cell) and not _GITREF.search(cell):
+                    fail(f"{os.path.relpath(path, ROOT)}: row {rid} says `parked` and names no "
+                         "branch or commit. `open` claims nothing exists; `parked` claims "
+                         "something does, and then has to say where somebody else can pick it "
+                         "up (B-58)")
+
+    for _bp, _bt in _BOARD_TEXT.items():
+        _board_home_rules(_bp, _bt)
+
     _LEDGER_ID = {"#", "id", "row"}
     _LEDGER_STATUS = {"home", "where it lives now", "resolution", "status", "state"}
     _UNRES_RE = re.compile(r"^(?:open|unresolved|backlog)\b", re.I)

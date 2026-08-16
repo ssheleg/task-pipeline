@@ -14,6 +14,7 @@
 | B-001 | `export.ts` has no size guard on the write path | `2026-07-28-export` / 5 Review | S | 2 | 1 | 12 | **2** | open | — |
 | B-002 | XLSX export path | `2026-07-28-export` / 5 Dev | M | 1 | 2 | 12 | 2 | open | LIN-483 |
 | B-003 | REQ-007 bulk export | `2026-07-28-export` / 2 Brainstorm | L | 1 | 1 | 12 | 1 | dropped | operator 2026-07-28 |
+| B-004 | Retry/backoff on the upload path | `2026-07-28-export` / 5 Dev | M | 2 | 2 | 4 | **4** | parked — feat/upload-retry | — |
 
 ## Columns
 

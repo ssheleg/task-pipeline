@@ -6887,6 +6887,48 @@ jobs:
             exit 1
           fi
 
+      - name: Negative self-test (a `parked` row naming no branch or commit must fail)
+        run: |
+          set -eu
+          # B-58: `open` claims nothing exists; `parked` claims something does, and a row
+          # that claims it without a ref is how work sat "built and parked" in a session
+          # scratchpad for two days after being deleted.
+          rm -rf /tmp/prk1-copy && cp -R . /tmp/prk1-copy
+          python3 - <<'EOF'
+          p = "/tmp/prk1-copy/plugins/task-pipeline/skills/task-pipeline/templates/backlog.md"
+          t = open(p, encoding="utf-8").read()
+          n = "parked — feat/upload-retry"
+          assert n in t, "PLANT DID NOT LAND: no parked worked example"
+          open(p, "w", encoding="utf-8").write(t.replace(n, "parked", 1))
+          EOF
+          if python3 /tmp/prk1-copy/test/validate.py 2>&1 | grep -q "names no branch or commit"; then
+            echo "OK: validator FAILs — a claim that work exists must say where"
+          else
+            echo "ERROR: a row can claim parked work and name nowhere to find it"
+            exit 1
+          fi
+
+      - name: Negative self-test (an open row homed in a scratchpad must fail)
+        run: |
+          set -eu
+          rm -rf /tmp/prk2-copy && cp -R . /tmp/prk2-copy
+          python3 - <<'EOF'
+          p = "/tmp/prk2-copy/plugins/task-pipeline/skills/task-pipeline/templates/backlog.md"
+          t = open(p, encoding="utf-8").read()
+          line = [l for l in t.splitlines() if l.startswith("| B-002 |")]
+          assert line, "PLANT DID NOT LAND: no B-002 row"
+          cells = line[0].split("|")
+          assert "open" in cells[-3], "PLANT DID NOT LAND: B-002 is not open"
+          cells[-3] = " open — held at scratchpad/b29/ "
+          open(p, "w", encoding="utf-8").write(t.replace(line[0], "|".join(cells), 1))
+          EOF
+          if python3 /tmp/prk2-copy/test/validate.py 2>&1 | grep -q "per-session directory"; then
+            echo "OK: validator FAILs — a scratchpad is not a home"
+          else
+            echo "ERROR: work can be homed somewhere nothing keeps it"
+            exit 1
+          fi
+
       - name: Exposure suite (14 cases — the measurement that must not become a score)
         run: python3 test/exposure_test.py
 

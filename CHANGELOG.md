@@ -1,5 +1,34 @@
 # Changelog
 
+## v1.62.0 — a board row that says work exists names where it lives
+
+**`open` claims nothing exists. `parked` claims something does — and now has to say
+where.** B-58: a row read as ready-to-merge for two days while its artifacts had already
+been deleted. It said *"built and parked … held at `scratchpad/b29-exposure/`"*, a
+session-scoped temp directory, and when a run finally went to land it nothing on disk, in
+git history, in a stash or in a dangling object held any of it. **A board cannot tell a
+claim about a filesystem from a claim about a repository**, and that row was the first
+kind while reading like the second.
+
+The status cell of a parked row now carries a branch or a commit, and two rules gate it:
+an open row may not home its work in a per-session directory, and a `parked` status
+without a ref is refused.
+
+**A prose detector was written first and thrown away.** Matching *"parked"*, *"is built"*,
+*"ready to merge"* in the description cell fired on **three rows out of 187 and every one
+was false** — two closed rows narrating this incident and the row that asked for the rule.
+A check whose every current hit is wrong teaches evasion; what ships reads the status
+cell, which is never prose, and both rules measured **zero** across 191 rows including the
+templates.
+
+The first draft of the guard read `cells[-2]`, which is the status in an eight-column
+board and the *Home* column in the ten-column template — so the parked rule examined the
+wrong cell and reported nothing, fifty lines below the comment explaining why positional
+reads fail on this corpus. It is position-free now, and the plant that was silently
+passing is the one that proved it.
+
+Guards: 347 → **349**. Property checks: 9 → 9.
+
 ## v1.61.0 — the command that was built, parked, and lost
 
 **The exposure command lands, two days after it was declared built.** B-43 recorded

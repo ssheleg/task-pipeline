@@ -18,6 +18,7 @@ exactly one seam, and that seam already existed as a dangling pointer.
 
 - The seam the ledger left open
 - Seeded or picked up
+- A row that says work exists names where it lives
 - Priority is computed, not assigned
 - What a loop iteration does with it
 - Rationalizations
@@ -59,6 +60,42 @@ work on, and only one of them can be appended to.
 **A picked-up board is re-measured, not recalled.** Its open count comes from a command
 at the top of the run, not from what the last run's report said — the previous run is
 precisely what invalidated that number ([`learned.md`](learned.md) rule 16).
+
+## A row that says work exists names where it lives
+
+**`open` claims nothing exists yet. `parked` claims something does — and then has to say
+where.** The status cell of a parked row carries a branch or a commit:
+
+```
+| B-043 | The exposure command … | 2026-08-14 run | 1 | 0 | 1 | 1.0 | parked — feat/exposure |
+| B-044 | The migration script … | 2026-08-15 run | 2 | 0 | 2 | 1.5 | parked — a1b2c3d |
+```
+
+The rule exists because a row read as ready-to-merge for two days while its artifacts had
+already been deleted. It said *"built and parked … held at `scratchpad/b29-exposure/`"* —
+a session-scoped temp directory. When a run finally went to land it, nothing on disk, in
+git history, in a stash or in a dangling object held any of it. **A board cannot tell a
+claim about a filesystem from a claim about a repository**, and that row was the first
+kind while reading like the second.
+
+So:
+
+- **A scratchpad, `/tmp`, or any per-session directory is not a home.** Work that lives
+  only there is not parked, it is unwritten — say `open` and describe what is wanted, not
+  what supposedly exists.
+- **Uncommitted work in a working tree is not parked either.** Another agent's checkout,
+  a stash, an unpushed branch on one machine: none of them survives the question *"can
+  somebody else pick this up?"*, which is the only question the board is answering.
+- **The ref is checkable and that is the point.** `git rev-parse` either resolves it or it
+  does not, so a row that has quietly expired can be found before somebody plans around
+  it.
+
+**A prose detector was tried first and discarded.** Matching *"parked"*, *"is built"*,
+*"ready to merge"* in the description cell fired on **three rows out of 187 and all three
+were false** — two closed rows narrating this very incident and the row that asked for
+this rule. A check whose every current hit is wrong teaches evasion, and this repository
+throws that shape away rather than tuning it. What is gated is the **status cell**, which
+is never prose.
 
 ## Priority is computed, not assigned
 
