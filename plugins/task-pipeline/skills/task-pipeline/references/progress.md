@@ -18,6 +18,12 @@ maintains them and the next run reads them as current.
 
 ---
 
+
+> **Decision `DEC-0001`** — the hand-back names what this run filed, and the join from a
+> run to its rows already exists: the board's `Source` column. It deliberately buys no
+> coverage number, because a required minimum is a run filing a throwaway row to make
+> the count agree (`docs/DECISIONS.md`).
+
 ## Contents
 
 - The two boundaries, and only those two

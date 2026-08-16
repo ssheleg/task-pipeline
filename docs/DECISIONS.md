@@ -39,7 +39,7 @@ one, leave its body intact. Never renumber. Never delete.
   no new bookkeeping.
 - **What it deliberately does not buy:** coverage. The check must never require a
   minimum, or a run will file a throwaway row to make the numbers agree.
-- **Consequences / affects:** `references/progress.md` (the hand-back section),
+- **Consequences / affects:** `plugins/task-pipeline/skills/task-pipeline/references/progress.md` (the hand-back section),
   `references/acceptance.md` (criterion 12), `docs/OPEN_QUESTIONS.md` (`OQ-0001`).
 - **Source:** run `2026-08-11-residue-and-honesty` · commit `e063b29`
 
@@ -140,7 +140,7 @@ one, leave its body intact. Never renumber. Never delete.
      diff* — already prices the absence correctly.
 - **What made this visible:** the operator's report that `chrome-devtools` lags, against
   a matrix that offered no alternative.
-- **Consequences / affects:** `references/companion-skills.md` (two rows, one shared
+- **Consequences / affects:** `plugins/task-pipeline/skills/task-pipeline/references/companion-skills.md` (two rows, one shared
   detection rule, the tie-breaker, the preflight block), `references/stages.md`
   (stages 5, 6, 8), `references/tdd.md`, `SKILL.md` (stage 6 and 8 gate rows),
   `README.md`, `cursor/rules/task-pipeline.mdc`, `SKILL-CARD.md` (the MCP-reference

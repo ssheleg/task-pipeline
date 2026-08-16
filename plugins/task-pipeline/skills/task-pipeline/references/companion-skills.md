@@ -8,6 +8,12 @@ something isn't installed.
 What remains is a short list of **optional** companions that make individual stages
 better, plus one that is required only for user-facing work.
 
+
+> **Decision `DEC-0004`** — two browser channels ranked by nothing, one detection rule,
+> stop at the first that answers. The step stays **recommended and never a gate**: a gate
+> an environment cannot satisfy is one an agent learns to report around, and *verified by
+> reading the diff* already prices the absence honestly (`docs/DECISIONS.md`).
+
 ## Contents
 
 - Built in — nothing to install

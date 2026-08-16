@@ -2,6 +2,38 @@
 
 ## v1.59.0 — never amend a commit a record already names
 
+### The gate this skill ships to every project had never run on this project
+
+Wiring it in was one line. Running it once found five things, and each was silent in a
+different way:
+
+- **It was skipping itself in every submodule checkout.** The section asked `[ -d .git ]`,
+  and a submodule's `.git` is a *file* holding a `gitdir:` pointer — the same shape that
+  disarmed two negative self-tests in v1.58.0, now found a third time in two days, in the
+  shipped gate. It asks `git rev-parse --is-inside-work-tree` now, which knows all three
+  shapes.
+- **Its corpus default still named the artifact root as it was before the 2026-08-13
+  rename**, so in every migrated project the SHA and propagation sections found nothing and
+  reported **dormant** — which reads exactly like having nothing to check. The root is
+  resolved now, new name first.
+- **Eleven commit references could not be followed.** Nine are pre-gate history rewritten
+  early in this project's life, one is a documentation placeholder that never named a
+  commit, and two were branch commits a **squash merge** had replaced — which is the same
+  class as the amend above, arriving from a different direction. The two were repointed to
+  the commits that carry their work on `main`; the other nine are **enumerated by name**
+  in the archive with their date and reason, so the gate passes over exactly those and
+  fails on the twelfth. An exception with names, never a floor.
+- **Two decisions named documents that never cited them.** `DEC-0001` and `DEC-0004` are
+  now cited in `progress.md` and `companion-skills.md` — which is the propagation contract
+  working the moment anything checked it.
+- **One id was reported undefined because the checker could not tell a plant from a
+  claim.** A retro entry recording *planted `DEC-0009` while the highest defined id was
+  `DEC-0001`* was read as a citation. A line describing a planted defect is sample content
+  by the same argument as a fenced block, and `strip_asides` now treats it as one.
+
+`npm run test:docs` is a script, and `test:all` calls it, and a guard requires both — a
+gate nobody's aggregate command runs is a gate that goes quiet the first busy week.
+
 ### Fixed
 
 - **The stamping procedure invited the defect it then had to repair, twice in one

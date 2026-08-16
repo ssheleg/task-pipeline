@@ -5190,6 +5190,23 @@ if os.path.isfile(_ASJ):
                  "unaddressed. Two branches claimed one version by each incrementing from "
                  "its own checkout; `git ls-remote --tags` is where the answer lives")
 
+# 11. The gate this skill ships to every project must run on this project. It shipped for
+#     months without ever executing here — and when it finally did, it found eleven
+#     unfollowable commit references and two decisions that had propagated nowhere. Both
+#     of its silences were structural: `[ -d .git ]` is false in a submodule checkout, and
+#     the corpus default still named the artifact root as it was before the rename.
+_PKG = os.path.join(ROOT, "package.json")
+if os.path.isfile(_PKG):
+    _sc = (json.load(open(_PKG, encoding="utf-8")).get("scripts") or {})
+    if "docgate.sh" not in (_sc.get("test:docs") or ""):
+        fail("package.json: no `test:docs` running templates/docgate.sh. This repository "
+             "ships that gate to every project it runs in and did not run it on itself; "
+             "the first execution found eleven dead commit references and two decisions "
+             "that had propagated nowhere")
+    if "test:docs" not in (_sc.get("test:all") or ""):
+        fail("package.json: `test:all` does not include `test:docs`. A gate nobody's "
+             "aggregate command calls is a gate that goes quiet the first busy week")
+
 if errors:
     print("FAIL: task-pipeline structure invalid")
     for e in errors:

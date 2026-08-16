@@ -9,9 +9,10 @@
     "test": "python3 test/validate.py",
     "test:negatives": "python3 test/negatives.py",
     "test:probe": "python3 test/probe.py --self-test",
-    "test:all": "python3 test/validate.py && python3 test/negatives.py && npm run test:probe && npm run test:hooks && npm run test:artifacts",
+    "test:all": "python3 test/validate.py && python3 test/negatives.py && npm run test:probe && npm run test:hooks && npm run test:artifacts && npm run test:docs",
     "test:hooks": "python3 test/release_gate_test.py",
-    "test:artifacts": "python3 test/artifact_root_test.py && python3 test/migrate_artifacts_test.py"
+    "test:artifacts": "python3 test/artifact_root_test.py && python3 test/migrate_artifacts_test.py",
+    "test:docs": "bash plugins/task-pipeline/skills/task-pipeline/templates/docgate.sh"
   },
   "files": [
     "bin",

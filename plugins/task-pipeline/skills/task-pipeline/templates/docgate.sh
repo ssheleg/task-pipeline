@@ -34,7 +34,18 @@ DEC_FILE=${DEC_FILE:-$DOCS_DIR/DECISIONS.md}
 ADR_DIR=${ADR_DIR:-$DOCS_DIR/adr}
 OQ_FILE=${OQ_FILE:-$DOCS_DIR/OPEN_QUESTIONS.md}
 MAP_FILE=${MAP_FILE:-$DOCS_DIR/DOCMAP.md}
-RETRO_GLOB=${RETRO_GLOB:-$DOCS_DIR/superpowers}
+# The artifact root is RESOLVED, not assumed. It was renamed `superpowers` → `evidence`
+# on 2026-08-13 (v1.53.0 made it resolvable, v0.46.0 moved the family), and this default
+# still named the old one — so in every migrated project the SHA and propagation sections
+# below found no corpus and went **dormant**, which reads exactly like having nothing to
+# check. Measured 2026-08-16 on this skill's own repository. Prefer the new name, fall
+# back to the old, and a project that has neither gets the dormant message it deserves.
+if [ -z "${RETRO_GLOB:-}" ]; then
+  if [ -d "$DOCS_DIR/evidence" ]; then RETRO_GLOB="$DOCS_DIR/evidence"
+  elif [ -d "$DOCS_DIR/superpowers" ]; then RETRO_GLOB="$DOCS_DIR/superpowers"
+  else RETRO_GLOB="$DOCS_DIR/evidence"
+  fi
+fi
 
 # ---------- ratchets: a floor may only fall. Raising one is a decision. ----------
 # THE TWO FLOORS ARE DIFFERENT KINDS. Mixing them up is why this is spelled out.
@@ -68,6 +79,13 @@ strip_asides() {
   awk '
     /^[ \t]*(```|~~~)/ { infence = !infence; print ""; next }
     infence { print ""; next }
+    # A line describing a PLANTED defect quotes ids that were never meant to exist —
+    # that is the payload of a negative self-test, written down so the incident can be
+    # read later. It is sample content by the same argument as a fenced block, and the
+    # checker cannot otherwise tell an id being USED from an id being DISCUSSED. Found
+    # 2026-08-16: a retro entry recording `planted DEC-0009 while the highest defined id
+    # was DEC-0001` was reported as citing an undefined decision.
+    /planted/ { print ""; next }
     {
       line = $0
       # A comment carried over from an earlier line.
@@ -430,17 +448,29 @@ fi
 # ---------- 9. every commit SHA named in the retro resolves ----------
 # A file:line rots at the next edit; a SHA carries the diff, the message and the
 # parent forever. A document may not send a reader to something absent.
-if [ ! -d .git ]; then
+# `[ -d .git ]` is the wrong question and it silently disabled this whole section for
+# every submodule and every linked worktree — where `.git` is a FILE holding a `gitdir:`
+# pointer. Measured 2026-08-16 on this skill's own repository, checked out as a submodule:
+# the section printed `skip` while five SHAs in the archive did not resolve at all. Ask git
+# whether it is inside a work tree; it knows about all three shapes and this does not.
+if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
   skipmsg "commit-SHA resolution — not a git working tree"
 elif [ ! -d "$RETRO_GLOB" ]; then
   dormant "commit-SHA resolution — no $RETRO_GLOB yet"
 else
   : > "$TMP/sha"
+  # An enumerated exception, never a floor. A commit whose history was rewritten before any
+  # of this was gated cannot be repaired without inventing a mapping, and a frozen record of
+  # a past run is not rewritten. Such SHAs are listed by name in a `docgate:known-dead`
+  # marker inside the retro corpus itself — one home, with the reason in prose beside it —
+  # so this passes over exactly those and still fails on the next one.
+  DEAD=$(grep -rho 'docgate:known-dead[^>]*' "$RETRO_GLOB" 2>/dev/null | sed 's/docgate:known-dead//' | tr -s ' \n' ' ')
   find "$RETRO_GLOB" -type f -name '*.md' 2>/dev/null | sort | while IFS= read -r f; do
     grep -n -o '`[0-9a-f][0-9a-f]*`' "$(flat_of "$f")" 2>/dev/null |
     while IFS=: read -r ln tok; do
       s=$(echo "$tok" | tr -d '`')
       case ${#s} in 7|8|9|10|11|12|40) ;; *) continue ;; esac
+      case " $DEAD " in *" $s "*) continue ;; esac
       if ! git rev-parse --verify --quiet "$s^{commit}" >/dev/null 2>&1; then
         echo "$f:$ln: commit \`$s\` does not resolve" >> "$TMP/sha"
       # Resolving is the weaker half. A commit that was AMENDED AWAY still resolves on
