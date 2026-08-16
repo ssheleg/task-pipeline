@@ -162,6 +162,33 @@ def a_non_empty_count_never_prints_an_empty_list():
     assert "Illegal byte sequence" not in p.stderr, p.stderr
 
 
+def blast_is_read_by_header_across_both_board_shapes():
+    """`$5` is `Blast` in an eight-column board and `Size` in the ten-column one this
+    repository SEEDS. Reading by index printed `[blast L]` — the size of the work labelled
+    as who it hurts — in every host project, for a full release, two lines from where the
+    same lesson had just been applied to the status column."""
+    ten = ("| id | What | Source | Size | Sev | Blast | Age | Prio | State | Home |\n"
+           "|---|---|---|---|---|---|---|---|---|---|\n"
+           "| REQ-001 | a thing | run | L | 1 | 3 | 0 | 3 | open | — |\n")
+    p = exposure(project([row("REQ-001")], board=ten))
+    assert "[blast 3]" in p.stdout, "the ten-column shape read the wrong cell: " + p.stdout
+    assert "[blast L]" not in p.stdout, p.stdout
+
+    eight = ("| id | What | Source | Blast | Age | Effort | P | Status |\n"
+             "|---|---|---|---|---|---|---|---|\n"
+             "| REQ-001 | a thing | run | 2 | 0 | 1 | 2.0 | open |\n")
+    p = exposure(project([row("REQ-001")], board=eight))
+    assert "[blast 2]" in p.stdout, "the eight-column shape regressed: " + p.stdout
+
+
+def a_board_with_no_blast_column_prints_no_blast():
+    """Absent is absent — a missing column must not become a default weight."""
+    none = ("| id | What | Status |\n|---|---|---|\n| REQ-001 | a thing | open |\n")
+    p = exposure(project([row("REQ-001")], board=none))
+    assert "REQ-001" in p.stdout, p.stdout
+    assert "[blast" not in p.stdout, "it invented a weight from a column that is not there: " + p.stdout
+
+
 def a_ledger_with_no_status_column_is_dormant_never_clean():
     """THE SILENT GREEN. A four-column ledger has no Human column at all; the first draft
     keyed on position, found four rows out of 298 whose inline code happened to contain a
@@ -267,6 +294,8 @@ for n, f in [
     ("the list is version-ordered, oldest first", the_list_is_ordered_oldest_first_by_version_not_lexically),
     ("a non-empty count never prints an empty list", a_non_empty_count_never_prints_an_empty_list),
     ("everything confirmed says so plainly", everything_confirmed_says_so_plainly),
+    ("blast is read by header across both board shapes", blast_is_read_by_header_across_both_board_shapes),
+    ("a board with no blast column prints no blast", a_board_with_no_blast_column_prints_no_blast),
     ("a ledger with no status column is dormant, never clean", a_ledger_with_no_status_column_is_dormant_never_clean),
     ("the status column is found by name, not position", the_status_column_is_found_by_name_not_position),
     ("only a Human column licenses the word human", only_a_human_column_licenses_the_word_human),
@@ -279,6 +308,6 @@ for n, f in [
     case(n, f)
 
 if failures:
-    print(f"\nFAIL: {len(failures)} of 18")
+    print(f"\nFAIL: {len(failures)} of 20")
     sys.exit(1)
-print("\nPASS: exposure.sh — 18 cases")
+print("\nPASS: exposure.sh — 20 cases")

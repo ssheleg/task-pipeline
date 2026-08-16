@@ -20,6 +20,7 @@ exactly one seam, and that seam already existed as a dangling pointer.
 - Seeded or picked up
 - A row that says work exists names where it lives
 - Priority is computed, not assigned
+- The shape is not fixed, so nothing may assume it
 - A decision is not debt — `waived`
 - What a loop iteration does with it
 - Rationalizations
@@ -120,6 +121,32 @@ Two consequences worth stating, because both are the point:
 
 `sev` and `blast` are judgement, and they are written down *as* judgement: two small
 integers a reader can disagree with, rather than a ranking they can only accept.
+
+## The shape is not fixed, so nothing may assume it
+
+This template ships one shape. Projects change it, and they are right to — the family
+umbrella dropped `Size`, `Sev` and `Home`, added `Effort`, and divides by it, which ranks
+cheap-and-old above expensive-and-old in a way `sev × blast` cannot. Two shapes, both
+documented in their own headers, neither wrong.
+
+**What is wrong is reading either one by position.** `$5` is `Blast` in an eight-column
+board and `Size` in this ten-column one, so a check-list that read index 5 printed
+`[blast L]` in every seeded project — the *size* of the work, labelled as who it hurts.
+It shipped for a full release, two lines from where the same lesson had just been applied
+to a different column.
+
+So the rule, for anything that reads a board or a ledger:
+
+- **Resolve every column by its header name**, once per section, and remember that a file
+  may hold more than one shape.
+- **A column that is absent is absent.** Print nothing rather than a default — an invented
+  weight is worse than a missing one, because it looks like data.
+- **Name the column in the output** where the reading depends on it. `[blast 3]` says which
+  number that is; a bare `3` does not.
+
+The same rule governs the verification ledger, where five shapes exist across this family
+and only one carries a column that can say a *person* looked
+([`exposure.md`](exposure.md)).
 
 ## A decision is not debt — `waived`
 

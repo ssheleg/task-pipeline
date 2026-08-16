@@ -273,7 +273,15 @@ head -"$LIST_MAX" "$TMP/sorted" | while IFS="$(printf '\t')" read -r ship req wh
   # than inventing a weight here. Absent is printed as absent, never as a default.
   blast=""
   if [ -f "$BOARD" ]; then
-    blast=$(grep -m1 "| $req |" "$BOARD" 2>/dev/null | awk -F'|' '{ b=$5; gsub(/^[ \t]+|[ \t]+$/, "", b); print b }')
+    blast=$(awk -F'|' -v req="$req" '
+      function trim(s) { gsub(/^[ \t]+|[ \t]+$/, "", s); return s }
+      # BY HEADER, not by index — the same lesson as the status column, and it was left
+      # two lines away for a whole release. `$5` is `Blast` in an eight-column board and
+      # `Size` in the ten-column one this repository SEEDS, so a host project`s check-list
+      # printed `[blast L]`: the size of the work, labelled as who it hurts.
+      tolower(trim($2)) == "id" { for (i = 2; i < NF; i++) if (tolower(trim($i)) == "blast") bcol = i; next }
+      bcol && trim($2) == req { print trim($(bcol)); exit }
+    ' "$BOARD" 2>/dev/null)
   fi
   if [ -n "$blast" ]; then
     printf '           %-10s %-12s %s  [blast %s]\n' "$ship" "$req" "$what" "$blast"

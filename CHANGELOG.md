@@ -1,5 +1,31 @@
 # Changelog
 
+## v1.66.0 — the shape is not fixed, so nothing may assume it
+
+**The check-list printed the size of the work labelled as who it hurts, in every seeded
+project.** `exposure.sh` read the board's blast radius from column 5. That is `Blast` in the
+family umbrella's eight-column board and **`Size`** in the ten-column board this repository
+seeds, so a host project got `[blast L]` — a work-size letter presented as a severity.
+
+It shipped for a full release **two lines away from where the same lesson had just been
+applied to the ledger's status column**. Fixing one instance of a class and leaving the
+other in the same file is the recurrence this repository's retro already names.
+
+Blast is resolved by header now, and two fixtures hold both shapes: the ten-column board
+must yield `[blast 3]` and not `[blast L]`, and the eight-column one must not regress. A
+third case asserts that a board with **no** blast column prints no blast at all — an
+invented weight is worse than a missing one, because it looks like data.
+
+**The rule is written down rather than left as two fixes.** `references/backlog.md` gains
+*The shape is not fixed, so nothing may assume it*: resolve every column by header name,
+once per section and knowing a file may hold more than one shape; treat an absent column as
+absent; and name the column in the output where the reading depends on it. Two board shapes
+exist in this family and five ledger shapes, all documented in their own headers, and none
+of them is wrong — reading any of them by position is.
+
+Fixtures 18 → **20**. Guards: 351 → **351**; these are behaviours of the seeded script,
+which the fixtures exercise by running it.
+
 ## v1.65.0 — a decision is not debt
 
 **`open` is work not done, `dropped` is an idea abandoned, and neither fits a deliberate
