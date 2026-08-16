@@ -22,6 +22,7 @@ the run*. Three things it does not say, and each is why this file exists:
 
 - Why it keys to the brief, not to the coverage table
 - `never` is a fact
+- A ledger records two different things, and most record only one
 - What stage 8 writes and what stage 10 refuses
 - Rationalizations
 
@@ -52,6 +53,39 @@ reality — and this is the pipeline's only signal about the world outside its o
 So the count has **no floor, no direction, and may never be given a target**, exactly
 like the disclosures in [`gates.md`](gates.md). A project with forty `never` rows is not
 failing; it is a project that now knows something it could not previously ask.
+
+## A ledger records two different things, and most record only one
+
+**What confirmed it** and **whether a person looked** are separate facts. The first is
+evidence: a command, a CI run id, a fixture name. The second is the `Human` axis, and it is
+the one the exposure line is defined over.
+
+A ledger may carry either or both, and most carry only the first. Measured across this
+family on 2026-08-16 — nine repositories, **ten** header shapes, **815** rows:
+
+| what the state column can say | rows | repositories |
+|---|---|---|
+| whether a **person** looked (`Human`) | **126** | 1 |
+| a date and what was watched (`Last verified`) | 180 | 1 |
+| `verified` — by a person **or** a command, indistinguishable | 391 | 4 |
+| nothing: the ledger records evidence and carries no state column | 118 | 3 |
+
+So **`never` is measurable in one repository of nine, over 15% of the rows**, and the exposure line — which this
+doctrine defines over it — is undefined in the rest. That is not a defect in those
+ledgers. Recording *what confirmed it* is the Auto job done properly, and a project that
+never asks the human question is making a choice.
+
+What is a defect is **doctrine that speaks as though the column were there**. So:
+
+- **Where there is no state column, the exposure line says so** and prints no number.
+  `templates/exposure.sh` reports `dormant` and names the column headings it looked for.
+  A zero would be the reassuring answer to a question nobody asked.
+- **A `verified` that cannot separate a person from a command may not be reported as
+  human confirmation.** The script names the column it read, for exactly this reason.
+- **Adding the column later never reaches backwards.** New rows start at `never`;
+  retrospective statuses for work nobody actually checked are the failure the
+  `evidence-docs` router exists to name, and a back-filled ledger is worse than an absent
+  one because it answers the question wrongly instead of not at all.
 
 ## What stage 8 writes and what stage 10 refuses
 

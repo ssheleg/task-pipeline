@@ -1,5 +1,39 @@
 # Changelog
 
+## v1.67.0 — a ledger records two different things, and most record only one
+
+**A ledger records two different things, and most record only one.** *What confirmed it*
+is evidence — a command, a CI run id, a fixture name. *Whether a person looked* is the
+`Human` axis, and it is the only one the exposure line is defined over.
+
+Measured across this family: nine repositories, **ten** header shapes, **815** rows.
+
+| what the state column can say | rows | repositories |
+|---|---|---|
+| whether a **person** looked (`Human`) | **126** | 1 |
+| a date and what was watched (`Last verified`) | 180 | 1 |
+| `verified` — by a person **or** a command, indistinguishable | 391 | 4 |
+| nothing: evidence recorded, no state column at all | 118 | 3 |
+
+So `never` is measurable in **one repository of nine, over 15% of the rows**, and the
+number this doctrine is written around is undefined in the rest. That is not a defect in
+those ledgers — recording what confirmed something is the Auto job done properly. **The
+defect is doctrine that speaks as though the column were there**, so `references/verification.md`
+now states the split, and three rules follow from it: where there is no state column the
+line says so and prints no number; a `verified` that cannot separate a person from a
+command may not be reported as human confirmation; and adding the column later never
+reaches backwards, because a back-filled ledger answers the question wrongly instead of not
+at all.
+
+`exposure.sh` also stops calling a self-explaining status unreadable. `**observed** — the
+row exists because the miss happened in this run` is an ordinary way to write a state, and
+four rows in this family were reported unparseable for explaining themselves. The
+vocabulary now matches the **leading word**, with the empty cell tested before the word is
+taken so a blank still counts as unconfirmed.
+
+Guards: 351 → **351**. Fixtures 20 → **20**; these are behaviours the existing cases
+exercise by running the script, and all nine family ledgers were run through it by hand.
+
 ## v1.66.0 — the shape is not fixed, so nothing may assume it
 
 **The check-list printed the size of the work labelled as who it hurts, in every seeded

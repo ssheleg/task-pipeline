@@ -123,9 +123,15 @@ fi
 # file's purpose.
 # NORMALISED first: these ledgers write `**never**`, not `never`. Bold hid three real
 # unverified rows in one member and seven in another, and both reported zero.
+# THE LEADING WORD, not the whole cell. `**observed** — the row exists because …` is a
+# normal way to write a status, and four rows in this family were reported unreadable for
+# explaining themselves. An empty cell still counts, which is why the emptiness test comes
+# before the word is taken.
 awk -F'\t' '{ s=tolower($2); gsub(/[*`]/, "", s); gsub(/^[ \t]+|[ \t]+$/, "", s);
-              if (s=="never" || s=="" || s=="-" || s=="no" || s=="unverified" ||
-                  s=="pending" || s=="none") print }' \
+              if (s=="") { print; next }
+              w=s; sub(/[ \t].*$/, "", w); sub(/[.,;:—-]+$/, "", w);
+              if (w=="never" || w=="-" || w=="no" || w=="unverified" ||
+                  w=="pending" || w=="none") print }' \
   "$TMP/rows" > "$TMP/unverified"
 UNVERIFIED=$(grep -c '' "$TMP/unverified" 2>/dev/null) || UNVERIFIED=0
 
@@ -134,11 +140,13 @@ UNVERIFIED=$(grep -c '' "$TMP/unverified" 2>/dev/null) || UNVERIFIED=0
 # it as confirmed is how a shrug becomes a clean bill, which the fixture for this line
 # caught the moment it was written.
 awk -F'\t' '{ s=tolower($2); gsub(/[*`]/, "", s); gsub(/^[ \t]+|[ \t]+$/, "", s);
-               if (s=="never" || s=="" || s=="-" || s=="no" || s=="unverified" ||
-                   s=="pending" || s=="none") next;
+               if (s=="") next;
+               w=s; sub(/[ \t].*$/, "", w); sub(/[.,;:—-]+$/, "", w);
+               if (w=="never" || w=="-" || w=="no" || w=="unverified" ||
+                   w=="pending" || w=="none") next;
                if ($2 ~ /[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]/) next;
-               if (s=="pass" || s=="yes" || s=="verified" || s=="ok" || s=="observed" ||
-                   s=="confirmed" || s=="green") next;
+               if (w=="pass" || w=="yes" || w=="verified" || w=="ok" || w=="observed" ||
+                   w=="confirmed" || w=="green" || w=="planted") next;
                print }' "$TMP/rows" > "$TMP/unreadable"
 UNREADABLE=$(grep -c '' "$TMP/unreadable" 2>/dev/null) || UNREADABLE=0
 
