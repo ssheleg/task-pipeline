@@ -11,3 +11,10 @@ __pycache__/
 .env.agent-sync
 
 .agent-sync/
+
+# Secrets — never committed. On 2026-08-16 a live API key sat in an
+# untracked-but-unignored .env at a sibling's repo root, one `git add -A`
+# away from a public repository. The hole was open in all nine.
+.env
+.env.*
+!.env.example
