@@ -1,5 +1,30 @@
 # Changelog
 
+## v1.60.1 — the gate can see an invariant it breaks elsewhere
+
+**This gate can now see an invariant it breaks one repository away.** The family umbrella
+routes work by matching a prompt against a table in `lib/triggers.js`, and every trigger
+there must be a word this skill's own `description` advertises. Nothing here knew that
+table existed. On 2026-08-16 `sheleg-design` 1.37.0 shipped green having dropped a phrase
+that was still a live trigger, the umbrella found out minutes after the tag, and it cost a
+patch release — because the member releases FIRST and the umbrella re-pins after.
+
+`test/validate.py` now asks the umbrella's own checker (`test/advertised_check.js`), which
+reads the module the hook itself calls. **No copy of the table lives here**, so there is
+nothing to drift. With no umbrella above this checkout — a standalone clone, and CI — it
+discloses rather than passing, because a check that cannot look must never read as one
+that looked.
+
+Guards: 344 → **344**, and the reason no plant joins this repository's own suite is the
+check's shape. It only sees anything when an umbrella checkout sits above this one, which
+is never true in this repository's CI — a negative self-test here would have to assert a
+refusal that cannot happen. The plant lives where the submodules exist: `sshlg-skills`
+runs one against every member's own gate.
+
+Watched refusing a real drop before shipping: every one of the seven members carrying
+routed triggers had one of its own advertised phrases removed and every one of them failed
+its own gate.
+
 ## v1.60.0 — the gate this skill ships had never run on this skill
 
 Wiring it in was one line. Running it once found five things, and each was silent in a
