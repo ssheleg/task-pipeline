@@ -1,5 +1,11 @@
 # Verification — task-pipeline
 
+## Shipped state — v1.68.0
+
+This file recorded no version at all until 2026-08-17, so nothing said which artifact its rows were confirmed against — a ledger whose
+own rule is that a row sits at `never` until somebody watched its check pass on **what shipped**.
+The umbrella's disclosure now reports that gap for every member on each `npm test`.
+
 > **Append-only.** One row per shipped REQ, written by stage 8. Nobody edits a row
 > except to fill `Human`, and filling it is the one thing here a machine may not do.
 >
