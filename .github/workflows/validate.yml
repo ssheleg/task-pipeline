@@ -5959,10 +5959,13 @@ jobs:
           python3 - <<'EOF'
           p = "/tmp/res12-copy/plugins/task-pipeline/skills/task-pipeline/SKILL.md"
           t = open(p, encoding="utf-8").read()
-          n = 'every gate\n   prints `holds: N`'
-          assert n in t, "PLANT DID NOT LAND: res12"
-          _planted = t.replace(n, 'every gate\n   says nothing about what', 1)
-          assert _planted != t, "PLANT DID NOT LAND: res12"
+          # Matched by regex, not by a literal with a line break in it: the phrase
+          # reflows whenever the paragraph is edited, and a plant that stops landing
+          # leaves its guard unproven while reading green (2026-08-16).
+          import re
+          _planted, _n = re.subn(r"every gate\s+prints `[^`]+`",
+                                 "every gate says nothing about what", t, count=1)
+          assert _n == 1, "PLANT DID NOT LAND: res12"
           open(p, "w", encoding="utf-8").write(_planted)
           EOF
           if python3 /tmp/res12-copy/test/validate.py 2>&1 | grep -q 'no longer name the field'; then

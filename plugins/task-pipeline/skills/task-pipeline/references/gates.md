@@ -40,6 +40,7 @@ elsewhere and is not restated here:
 - Where a gate runs
 - Adding a check to an existing gate
 - Rationalizations
+- Cross-cutting, at every stage
 
 ## Axis A — the stage gate type
 
@@ -589,3 +590,47 @@ of is deleted in the next refactor by someone who assumed it was dead.
 | "The gate would be red on day one, so I'll add it later" | Make the section dormant instead. Dormant is visible and green; "later" is neither. |
 | "I raised the floor to get the build green" | Then say so in the log, in the same commit. A floor raised silently is a ratchet running backwards. |
 | "A hook is overkill, CI catches it" | CI catches it after the edit, the commit and the push. If the point is to stop the edit, CI is the wrong rung — and if it is not, do not pay the latency. |
+
+---
+
+## Cross-cutting, at every stage
+
+5. Cross-cutting, every stage: **when anything is settled — scope, a contract, a
+   name, a policy, a vocabulary — run the Doc Loop
+   (`references/documentation.md`) before the run moves on**: reserve the id,
+   record it, resolve the question it answers, propagate by the matrix, commit
+   with the ids. A decision that lives only in the spec dies with the spec, and one
+   that lives only in the conversation was never made;
+   **answer from the brief's autonomy section rather
+   than asking again** — it was grilled precisely so you wouldn't have to;
+   **anything deferred, dropped or left half-done goes into the carry-over ledger
+   the moment it's said** — deferred out loud is forgotten; **never narrow the task
+   silently** — the REQ list is frozen, adding is free, removing needs the
+   operator's explicit agreement; **when a loop starts undoing an earlier pass —
+   the same file edited twice for the same reason, a closed finding coming back, a
+   third entry into one stage — stop and run the loop guard**
+   (`references/loop-guard.md`): name the two shapes, escalate to the layer that
+   owns the conflict, re-plan the check as an ordered list, then go through it one
+   item at a time; **when a pass is *searching* rather than editing and starts
+   finding mostly what the previous pass's own fixes broke, the axis is exhausted —
+   rotate it, don't look harder** (`references/audit.md`); **every gate
+   prints `holds: N` — what this run left running** across the eight classes
+   (background shells, monitors, scheduled loops, coordination leases, worktrees,
+   containers, scratch files, remote state), enumerated **by class and never by a
+   single tool**, and stage 10 does not close while this run's residue is live and
+   unaccounted (`references/residue.md`); and remember that a
+   green from a check nobody has watched fail is not evidence; task
+   tracker + conventional commits per host conventions; worktree isolation for the
+   build, integrated back per the brief's branch policy before stage 7; honest
+   degradation (never claim a failed/skipped step succeeded);
+   outward/irreversible actions (deploy, publish, repo create, opening a PR,
+   **editing a shared design file — frames are read by designers and stakeholders,
+   so drawing in one is publishing — and above all *creating* one, which needs a
+   named team and never happens while a recorded file resolves**) need explicit
+   operator go — or a **specific** standing authorization recorded in the brief
+   (named target + preconditions; a vague "do everything" is not one).
+
+Moved out of `SKILL.md` on 2026-08-16 for the same budget reason as the
+multi-repository block: these fire at any stage, so they belong with the gate
+doctrine rather than inside step 5 of the run order.
+

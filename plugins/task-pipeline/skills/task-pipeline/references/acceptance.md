@@ -22,6 +22,7 @@ requirement.** It is what turns the pipeline from a funnel into a circle.
 - A seam is not a deliverable, and REQ rows are written against deliverables
 - GATE (manual)
 - When the answer is "something's missing"
+- A project of several repositories
 
 ## Why a stage and not a gate
 
@@ -361,3 +362,35 @@ or a tracked follow-up. Both are legitimate outcomes of this stage. Closing the
 run with a known gap is fine **if the gap is written down** — closing it with the
 gap only in someone's memory is the failure mode this whole spine exists to
 prevent.
+
+---
+
+## A project of several repositories
+
+**A submodule is finished when its parent says so.** A parent repository records each submodule as
+a pointer to one commit, and moving the submodule does not move the pointer. So the work is
+committed, pushed, its CI is green and its own roadmap says done — and anyone who clones the parent
+gets the commit **before** the change. Nothing looks wrong in either repository on its own; the
+disagreement exists only between them, which is why it survives every check that runs inside one.
+
+Stage 10 does not close until:
+
+```bash
+git submodule status          # no line begins with '+'  (a '+' is the missing bump)
+git -C <each repo> status --porcelain && git -C <each repo> log @{u}..HEAD --oneline
+```
+
+report nothing — for the parent as well as every submodule. Where
+[agent-sync](https://github.com/ssheleg/agent-sync) is installed, `/agent-sync finish` runs
+exactly this plus *no lease left held*, and `--gates` adds the project's own gate commands.
+
+The fix, when it fails, is two commands and the second is the one that gets forgotten:
+
+```bash
+git -C <submodule> push
+git add <submodule> && git commit -m "chore: bump <name> submodule — <why>"
+```
+
+Moved out of `SKILL.md` on 2026-08-16: the body was 6685 tokens against a
+< 5000 budget, and stage-10 close-out is what this file is for.
+

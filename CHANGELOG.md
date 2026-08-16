@@ -1,5 +1,62 @@
 # Changelog
 
+## v1.68.0 — the worst body in the family, and the rule that was wrong about it
+
+**6685 tokens against a 5000 budget → 4735**, under the 4750 working limit, by
+splitting rather than trimming. This was the largest `SKILL.md` body in the
+ssheleg family and the furthest over — 34% — and the body loads on every turn of
+every session that resolves the skill.
+
+Most of the overrun sat in the **stage table's Gate column**, which restated
+`references/stages.md` under a heading that literally says *(detail in
+`references/stages.md`)*. The table is the index and the run order now; the
+reference is what you read while standing in the stage. Nothing was deleted:
+
+| Moved | To | Why there |
+|---|---|---|
+| Stage 10 in a project of several repositories | `references/acceptance.md` | it owns stage-10 close-out |
+| Step 5's cross-cutting rules | `references/gates.md` | they fire at any stage, not inside step 5 |
+
+and five *Prerequisites* paragraphs that restated a reference in full were cut to
+the rule plus the failure it prevents — which is what a body is for — with the
+procedure left in the file that owns it.
+
+**All 38 routed trigger phrases across both skills survive verbatim**
+(`node test/advertised_check.js`), and the stage list still matches across the
+three surfaces the validator compares mechanically.
+
+### The description rule was wrong, and this repository was already right
+
+The family's shared auditor demands a description **start** with `Use when …`.
+This repository's own validator refuses exactly that, and its comment says why:
+Anthropic's guidance asks for **both** halves — what the skill does and when to
+use it — and their own example leads with the capability (*"Extracts text and
+tables from PDF files… Use when working with PDF files."*). Demanding `Use when`
+at position 0 enforces the WHEN half and leaves the WHAT half optional.
+
+So the 2026-08-16 audit's finding that this description *"does not open with Use
+when, against the house rule its sibling obeys"* is **withdrawn — the house rule
+is the one that is wrong**, and this repository had corrected its own copy of it
+already. Applying the corrected rule to the family measures **22 of 24 skills**
+opening with the trigger, so flipping it rewrites 22 descriptions that carry live
+routing phrases. That is a family decision rather than a member's, and it is
+filed as umbrella `B-76` rather than taken here.
+
+### Fixed
+
+- A negative self-test was pinned to a literal containing a **line break**, so it
+  stopped landing the moment the paragraph reflowed — the guard then read green
+  while proving nothing. Matched by regex now. Same class as the two that refused
+  `seo-aeo-audit`'s release earlier the same day, and the reason the local gate
+  there learned to catch it before the tag.
+
+Guards: 351 → **351**. No guard was added or removed — one plant was repaired, and
+the suite that reports `all 351 guards provably reject their planted defect` was
+red until it was, which is the whole point of counting them.
+
+Found by the nine-repository audit of 2026-08-16 (umbrella `B-66`;
+`F-task-pipeline-01`, and `F-task-pipeline-02` withdrawn).
+
 ## v1.67.0 — a ledger records two different things, and most record only one
 
 **A ledger records two different things, and most record only one.** *What confirmed it*
