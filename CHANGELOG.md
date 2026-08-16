@@ -4232,6 +4232,11 @@ this class of defect surfaces:
 
 ## v1.5.0 — 2026-08-01
 
+> **Never released on its own.** There is no `v1.5.0` tag and no `1.5.0` on npm,
+> so `npm install task-pipeline-skill@1.5.0` and `git checkout v1.5.0` both fail. This section
+> describes work that shipped inside a later version. The note is here because
+> the section reads as a release (2026-08-17, umbrella `B-71`).
+
 ### `references/knowledge-graph.md` — the code graph as a source, and as a second opinion
 
 A grep finds a **name**. The questions that actually stop a run are *what calls this*
