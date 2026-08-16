@@ -136,3 +136,7 @@
 | REQ-002 | The documentation gate requires reachability from HEAD, not only resolution | `2026-08-16-stamp-order` | v1.59.0 | pass | never | B-52 · watched failing on an amended-away commit |
 | REQ-003 | The three unservable id registers are removed and the guard that requires the manual procedure fires on the backend instead | `2026-08-16-stamp-order` | v1.59.0 | pass | never | B-45's remaining half |
 | REQ-004 | `agent_sync.py check` exits 0 here for the first time — snapshot generated and linked | `2026-08-16-stamp-order` | v1.59.0 | pass | never | B-46 |
+| REQ-005 | The shipped documentation gate runs on this repository, wired into `test:all`, and a guard requires the wiring | `2026-08-16-docgate-self` | v1.60.0 | pass | never | first execution here, ever |
+| REQ-006 | Its two structural silences are gone — `[ -d .git ]` → `git rev-parse --is-inside-work-tree`, and the corpus root is resolved rather than assumed | `2026-08-16-docgate-self` | v1.60.0 | pass | never | both watched: the section printed `skip`, then ran |
+| REQ-007 | Eleven unfollowable commit references resolved: two repointed to the squash commits carrying their work, nine enumerated by name with date and reason | `2026-08-16-docgate-self` | v1.60.0 | pass | never | gate now prints `every commit reference … resolves AND is reachable from HEAD` |
+| REQ-008 | Two decisions that had propagated nowhere now cited by the documents they affect | `2026-08-16-docgate-self` | v1.60.0 | pass | never | DEC-0001, DEC-0004 |

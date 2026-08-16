@@ -1,8 +1,6 @@
 # Changelog
 
-## v1.59.0 — never amend a commit a record already names
-
-### The gate this skill ships to every project had never run on this project
+## v1.60.0 — the gate this skill ships had never run on this skill
 
 Wiring it in was one line. Running it once found five things, and each was silent in a
 different way:
@@ -33,6 +31,12 @@ different way:
 
 `npm run test:docs` is a script, and `test:all` calls it, and a guard requires both — a
 gate nobody's aggregate command runs is a gate that goes quiet the first busy week.
+
+Guards: 344 → **344**. The change is a gate script and its wiring; every finding above
+was watched being produced by the gate itself, which is the only plant a script that
+reads a project's own git history can have.
+
+## v1.59.0 — never amend a commit a record already names
 
 ### Fixed
 
