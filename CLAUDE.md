@@ -6,8 +6,15 @@ pipeline's own stage-0 harvest reads first, so keep it true.
 ## What this repo is
 
 A **skill**, not an application. Almost every file is prose an agent will read and
-act on. There is no build step and no runtime service; the only executable code is
-two installers and the structural validator.
+act on. There is no build step and no runtime service. The executable code is two
+installers, the structural validator, and — since v1.69.0 — **`scripts/graph.py`**,
+which is the first thing here that ships *inside* the skill bundle and therefore
+travels to every channel rather than only to Claude Code.
+
+It exists for one reason worth stating here: the work graph is walked by a script so
+the **model never reads it**. Measured on this build — a 400-node graph (51 KB) and a
+4-node graph produce the same 27-byte frontier. Context cost is flat in graph size,
+and that is the property the whole role-agent design rests on.
 
 Human-facing entry points: [`README.md`](README.md) (what it is),
 [`CONTRIBUTING.md`](CONTRIBUTING.md) (how to change it),

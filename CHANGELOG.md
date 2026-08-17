@@ -40,6 +40,34 @@ below it never ran; CI could not see it, because CI installs `jsonschema` first.
 accumulator here is `_UNLOOKED`, and the one-line fix that defines `_skips` would have
 been worse — a silent skip, which `test/validate.py:395` forbids by name.
 
+### T-2 — the walk, and the promise it exists to keep
+
+`scripts/graph.py` ships: `validate`, `next`, `goal`. Stdlib only, verified by
+parsing its own imports — `references/portability.md` makes `scripts/` the one
+Claude-Code capability that travels, and a dependency here would have made the
+graph Claude-Code-shaped.
+
+**The design's central claim is now a measurement.** A 400-node graph is 51 KB on
+disk and produces a **27-byte** frontier; a 4-node graph produces the same 27
+bytes. Context cost is **flat in graph size**, which is the property every other
+part of this programme rests on — and it is why `next` prints the frontier and
+nothing else. That line enters a context on every iteration of every loop.
+
+It checks the three things a schema cannot reach, and only those: whether `owner`
+names a role that **exists** (with the misspelt near-miss caught separately from
+the absent one, per `R-008`'s enumerate-the-shapes rule), whether `blocked_by` and
+the edges name nodes that exist, and whether the edges **cycle** — the one failure
+of this design that looks exactly like slow progress.
+
+Exit codes are the contract per `R-004`: `3` is *nothing left to do* and `4` is
+*nothing runnable*, because a finished graph and a stalled one are different facts
+and a caller that cannot tell them apart will wait on the wrong one.
+
+`test/graph_test.py`, **14 cases**, joins `npm test`. This is also the first
+`scripts/` in this repository, so `CLAUDE.md`'s sentence about the only executable
+code being two installers and the validator was false the moment it landed, and is
+corrected in the same change.
+
 Guards: 351 → **354**. Three plants, structurally distinct rather than variations,
 each asserting it landed before the validator runs.
 
