@@ -74,6 +74,7 @@ ROLES = {
 }
 
 TERMINAL = {"done", "parked"}
+NO_GRAPH = {"producer"}
 # Parking a node PROMOTES its dependents: `parked` is terminal, so anything
 # blocked on it becomes runnable even though the payload it waited on never
 # arrived. That is deliberate — `can_continue_around` in the verdict is the
@@ -743,10 +744,84 @@ def cmd_coverage(graph, args):
     return 1 if bad else 0
 
 
+def cmd_producer(graph, args):
+    """What produced this proof — B-086.
+
+    Every artifact this pipeline writes records what was done, what proved it, and whether
+    a person looked. None recorded what PRODUCED it, so two runs six months apart under
+    different generations of this doctrine leave indistinguishable coverage tables, and a
+    defect traced to a doctrine change cannot be scoped to the runs that carried it.
+
+    **Every field prints, and one that cannot be resolved says why.** An omitted field is
+    indistinguishable from a field that was checked and found empty — the same rule the
+    gate disclosures live by. The reason is what tells an operator whether the value is
+    wirable or genuinely absent here.
+
+    Four values the harness owns are read from the environment, because a script cannot
+    know its own model or trace id. The names are a contract a project wires once; unset,
+    each says so rather than guessing. `model` is deliberately not inferred: naming a
+    vendor id anywhere in a shipped skill is forbidden, and inferring the wrong one is
+    worse than saying nothing.
+    """
+    import hashlib
+
+    def env(var):
+        v = os.environ.get(var, "").strip()
+        return v or f"unavailable: {var} is not set by this harness"
+
+    def skill_version():
+        # `plugin.json` sits two levels above the bundle in a plugin install and does not
+        # exist at all in a plain-skill install — so this resolves on one channel and
+        # honestly does not on the others.
+        here = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        man = os.path.join(os.path.dirname(os.path.dirname(here)),
+                           ".claude-plugin", "plugin.json")
+        if not os.path.isfile(man):
+            return ("unavailable: no plugin manifest above this bundle — the skill is "
+                    "installed as a plain directory, which carries no version of its own")
+        try:
+            with open(man, encoding="utf-8") as fh:
+                v = json.load(fh).get("version")
+            return f"task-pipeline@{v}" if v else "unavailable: the manifest states no version"
+        except (OSError, ValueError) as e:
+            return f"unavailable: the plugin manifest is unreadable — {e}"
+
+    def config_digest():
+        for name in ("pipeline.json", os.path.join(".task-pipeline", "pipeline.json")):
+            if os.path.isfile(name):
+                with open(name, "rb") as fh:
+                    return "sha256:" + hashlib.sha256(fh.read()).hexdigest()[:16]
+        return ("unavailable: no pipeline.json in this directory — the run's stage and gate "
+                "configuration cannot be fingerprinted")
+
+    def commit():
+        import subprocess
+        try:
+            r = subprocess.run(["git", "rev-parse", "HEAD"], capture_output=True, text=True)
+        except OSError as e:
+            return f"unavailable: git is not runnable here — {e}"
+        out = r.stdout.strip()
+        if r.returncode or not out:
+            return "unavailable: not inside a git checkout, so no commit identifies the tree"
+        return out
+
+    for key, val in (("actor", env("TASK_PIPELINE_ACTOR")),
+                     ("model", env("TASK_PIPELINE_MODEL")),
+                     ("runtime", env("TASK_PIPELINE_RUNTIME")),
+                     ("skill", skill_version()),
+                     ("config", config_digest()),
+                     ("commit", commit()),
+                     ("trace", env("TASK_PIPELINE_TRACE"))):
+        print(f"{key}: {val}")
+    return 0
+
+
 VERBS = {
     "validate": (cmd_validate, "every invariant a schema cannot state"),
     "next": (cmd_next, "the frontier, ordered by what it unblocks"),
     "goal": (cmd_goal, "the release goal this graph serves"),
+    "producer": (cmd_producer, "what produced this proof: actor, model, runtime, skill, "
+                               "config digest, commit, trace"),
     "coverage": (cmd_coverage, "every requirement and the nodes serving it; exits 1 on a gap"),
     "add": (cmd_add, "add a node mid-run"),
     "park": (cmd_park, "park a node, carrying the reason"),
@@ -787,6 +862,8 @@ def main(argv=None):
 
     args = ap.parse_args(argv)
     verbs = {k: v[0] for k, v in VERBS.items()}
+    if args.verb in NO_GRAPH:
+        return verbs[args.verb](None, args)
     if args.verb in ("add", "park"):
         # The READ happens inside the lock too. Loading first and locking second is the
         # same lost update with an extra step: the stale copy is already in memory.

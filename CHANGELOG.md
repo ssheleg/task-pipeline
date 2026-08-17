@@ -68,8 +68,41 @@ and a caller that cannot tell them apart will wait on the wrong one.
 code being two installers and the validator was false the moment it landed, and is
 corrected in the same change.
 
-Guards: 351 → **364**. Eleven plants across the module, structurally distinct rather than variations,
+Guards: 351 → **365**. Twelve plants across the module, structurally distinct rather than variations,
 each asserting it landed before the validator runs.
+
+### B-086 — what produced the proof
+
+Every artifact here recorded what was done, what proved it, and whether a person looked.
+None recorded what **produced** it. Two runs six months apart, one under v1.40 doctrine
+and one under v1.69, leave indistinguishable coverage tables — so a defect traced to a
+doctrine change cannot be scoped to the runs that carried it.
+
+`graph.py producer` prints seven fields, and **needs no graph**, because it is wanted
+beside an acceptance artifact rather than inside a run. Three resolve from the tree —
+the skill version from the plugin manifest, a digest of the project's `pipeline.json`,
+and `git rev-parse HEAD`. Four belong to the harness (`actor`, `model`, `runtime`,
+`trace`) and are read from named environment variables a project wires once.
+
+**A field that cannot be resolved prints anyway and says why.** An omitted field is
+indistinguishable from one that was checked and found empty — the rule every disclosure
+in this pipeline already follows, applied to the one artifact that had no disclosures at
+all. And `model` is deliberately **not inferred**: naming a vendor id in a shipped skill
+is forbidden here, and inferring the wrong one is worse than saying nothing.
+
+`templates/verification.md` carries the block above its rows, with the command that
+computes it, so it is pasted rather than typed.
+
+**Two harness defects surfaced while building this, and both were worth more than the
+feature.** A fixture raising anything but `AssertionError` used to abort the whole suite —
+one `KeyError` hid every case after it, and a harness that stops at the first crash
+reports fewer failures than exist. It reports a `CRASH` line now and keeps going: the
+count went from 1 visible failure to 4. And the guard could not observe the
+no-manifest branch, because this repository always has a manifest — so a version *guessed*
+as `task-pipeline@unknown` passed. That branch has its own fixture now, copying the bundle
+alone, which is exactly what a plain-skill install is; watched failing against the guess.
+
+`test/graph_test.py` → **93 cases**.
 
 ### B-085 and B-077 — the one edge between intent and execution, and the relation over it
 

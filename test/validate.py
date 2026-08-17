@@ -2781,6 +2781,39 @@ if gschema is not None:
                          "requirement that is only served by a parked node — a refusal that "
                          "does not say which one sends the fix nowhere")
 
+    # B-086 — the producer block. RUN it: a template quoting a command nobody executes
+    # is the shape three checks in this file have already been defeated by.
+    if os.path.isfile(_gs):
+        try:
+            _pr = _sp2.run([sys.executable, _gs, "producer"], capture_output=True,
+                           text=True, timeout=60, cwd=ROOT)
+            _pf = dict(l.split(": ", 1) for l in _pr.stdout.splitlines() if ": " in l)
+        except Exception as _e3:
+            _pr, _pf = None, {}
+            _UNLOOKED.append(f"skip: could not run graph.py producer ({type(_e3).__name__})")
+        if _pr is not None:
+            if _pr.returncode != 0:
+                fail(f"`graph.py producer` exits {_pr.returncode} — B-086")
+            _missing = [k for k in ("actor", "model", "runtime", "skill", "config",
+                                    "commit", "trace") if k not in _pf]
+            if _missing:
+                fail(f"`graph.py producer` omits {', '.join(_missing)} — B-086: an omitted "
+                     "field is indistinguishable from one that was checked and found "
+                     "empty, which is the rule every disclosure in this pipeline follows")
+            _blank = [k for k, x in _pf.items() if not x.strip()]
+            if _blank:
+                fail(f"`graph.py producer` printed {', '.join(_blank)} with an empty value")
+            _mute = [k for k, x in _pf.items()
+                     if x.startswith("unavailable") and ":" not in x[len("unavailable"):]]
+            if _mute:
+                fail(f"`graph.py producer` says {', '.join(_mute)} is unavailable and not "
+                     "why — the reason is what tells an operator whether it is wirable")
+    _vt = os.path.join(ROOT, "plugins/task-pipeline/skills/task-pipeline/templates/verification.md")
+    if os.path.isfile(_vt) and "graph.py producer" not in open(_vt, encoding="utf-8").read():
+        fail("templates/verification.md does not name `graph.py producer` — B-086: the "
+             "ledger is where the producer block lands, and a block nobody is told to "
+             "compute is a block nobody computes")
+
     # The revision log — B-084. `park` demanded a reason from the start and `add`
     # demanded nothing, so half the graph's revision surface was silent, and a graph
     # that changed for unrecorded reasons can explain its own completion by a plan that

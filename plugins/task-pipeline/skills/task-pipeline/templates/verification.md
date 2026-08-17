@@ -9,6 +9,35 @@
 > after it shipped, nor whether it still works N releases later, and it dies with its
 > run. This file is the column that outlives it.
 
+## Producer — what wrote the rows below
+
+Computed, never typed, and every field prints even when it cannot be resolved:
+
+```bash
+python3 scripts/graph.py producer      # from the project root
+```
+
+```text
+actor: unavailable: TASK_PIPELINE_ACTOR is not set by this harness
+model: unavailable: TASK_PIPELINE_MODEL is not set by this harness
+runtime: unavailable: TASK_PIPELINE_RUNTIME is not set by this harness
+skill: task-pipeline@1.69.0
+config: sha256:3bb638e189c9ef46
+commit: fbd8a67e6988a0893f273eb37bd9a075a036c223
+trace: unavailable: TASK_PIPELINE_TRACE is not set by this harness
+```
+
+**Paste one such block per run, above the rows that run wrote.** Without it, two runs six
+months apart under different generations of this doctrine leave rows nobody can tell
+apart — so a defect traced to a doctrine change cannot be scoped to the runs that carried
+it. `skill`, `config` and `commit` resolve from the tree; `actor`, `model`, `runtime` and
+`trace` are the harness's to export, and each says so by name when unset, because a field
+that vanishes when unavailable is indistinguishable from one nobody checked.
+
+**A field is never deleted and never guessed.** `model` in particular is not inferred:
+naming a vendor id in a shipped skill is forbidden here, and inferring the wrong one is
+worse than saying nothing.
+
 | REQ | What | Run | Shipped in | Auto | Human | Note |
 |---|---|---|---|---|---|---|
 | REQ-001 | CSV export from a report | `2026-07-28-export` | v1.4.0 | pass | 2026-07-30 | opened the deployed page, exported, opened the file |

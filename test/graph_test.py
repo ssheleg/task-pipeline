@@ -18,6 +18,8 @@ fixture builds a graph in a temp directory: one that could reach a real
 import json
 import os
 import pathlib
+import re
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -43,6 +45,12 @@ def case(name):
         except AssertionError as e:
             failures.append("%s: %s" % (name, e))
             print("  FAIL  %s: %s" % (name, e))
+        except Exception as e:                      # noqa: BLE001 — deliberate
+            # A fixture that raises anything else used to abort the whole suite, so one
+            # `KeyError` hid every case after it. A harness that stops on the first crash
+            # reports fewer failures than exist and reads like fewer problems.
+            failures.append("%s: CRASH %s: %s" % (name, type(e).__name__, e))
+            print("  CRASH  %s: %s: %s" % (name, type(e).__name__, e))
     return deco
 
 
@@ -980,6 +988,107 @@ def _():
     assert "REQ-042" in out and "brief" in out.lower(), (
         "the refusal does not say the brief owns the REQ table: %s" % out)
     assert len(json.loads(p.read_text())["nodes"]) == 1, "it was written anyway"
+
+
+# --- B-086: what produced the proof --------------------------------------------------
+#
+# Every artifact recorded what was done, what proved it and whether a person looked.
+# None recorded what PRODUCED it. Two runs six months apart, one under v1.40 doctrine and
+# one under v1.69, produced indistinguishable coverage tables — so a defect traced to a
+# doctrine change could not be scoped to the runs that carried it.
+
+def producer(env=None, cwd=None):
+    e = dict(os.environ)
+    for k in list(e):
+        if k.startswith("TASK_PIPELINE_"):
+            del e[k]
+    e.update(env or {})
+    r = subprocess.run([sys.executable, str(GRAPH), "producer"],
+                       capture_output=True, text=True, env=e, cwd=cwd)
+    fields = dict(l.split(": ", 1) for l in r.stdout.splitlines() if ": " in l)
+    return r.returncode, fields, r.stdout + r.stderr
+
+
+@case("producer prints every field, and needs no graph to do it")
+def _():
+    code, f, out = producer()
+    assert code == 0, "producer exited %d: %s" % (code, out)
+    for k in ("actor", "model", "runtime", "skill", "config", "commit", "trace"):
+        assert k in f, "producer omits `%s` — an omitted field is indistinguishable from " \
+                       "one that was checked and found empty: %s" % (k, out)
+
+
+@case("an unresolved field says WHY it is unavailable, never blank and never absent")
+def _():
+    code, f, out = producer()
+    for k, v in f.items():
+        assert v.strip(), "producer printed `%s` with an empty value" % k
+        if v.startswith("unavailable"):
+            assert ":" in v[len("unavailable"):], (
+                "`%s: %s` says unavailable and not why — the reason is what tells an "
+                "operator whether it is wirable" % (k, v))
+
+
+@case("the harness's values are passed through when it sets them")
+def _():
+    code, f, out = producer(env={"TASK_PIPELINE_ACTOR": "coding-agent",
+                                 "TASK_PIPELINE_TRACE": "trace://run/1842"})
+    assert f["actor"] == "coding-agent", f
+    assert f["trace"] == "trace://run/1842", f
+
+
+@case("commit resolves inside a checkout and says so outside one")
+def _():
+    code, f, out = producer(cwd=str(ROOT))
+    assert re.match(r"^[0-9a-f]{40}$", f["commit"]), "commit inside a checkout: %r" % f["commit"]
+    code, f2, out2 = producer(cwd=tempfile.mkdtemp())
+    assert f2["commit"].startswith("unavailable"), (
+        "outside a checkout `commit` must say unavailable, not invent one: %r" % f2["commit"])
+
+
+@case("config is a digest of the project's pipeline.json, and it moves when the file does")
+def _():
+    d = tempfile.mkdtemp()
+    cfg = pathlib.Path(d) / "pipeline.json"
+    cfg.write_text('{"stages": []}')
+    _, a, _ = producer(cwd=d)
+    cfg.write_text('{"stages": [], "run": {}}')
+    _, b, _ = producer(cwd=d)
+    assert a["config"] != b["config"], "the digest did not move when pipeline.json did"
+    assert re.match(r"^sha256:[0-9a-f]{12,}$", a["config"]), a["config"]
+
+
+@case("producer names no vendor model id of its own")
+def _():
+    src = GRAPH.read_text()
+    for bad in ("claude-3", "claude-opus", "claude-sonnet", "gpt-4", "gemini-"):
+        assert bad not in src, "graph.py hardcodes a vendor model id: %s" % bad
+
+
+@case("the output is deterministic — the same environment gives the same block")
+def _():
+    _, a, _ = producer(cwd=str(ROOT))
+    _, b, _ = producer(cwd=str(ROOT))
+    assert a == b, "the producer block flickers: %s vs %s" % (a, b)
+
+
+@case("without a plugin manifest the skill version says unavailable rather than guessing")
+def _():
+    # The branch `validate.py` cannot observe, because this repository always has the
+    # manifest. Copy the bundle alone — which is exactly what a plain-skill install is —
+    # and the version must say why it is absent instead of inventing one.
+    d = tempfile.mkdtemp()
+    bundle = pathlib.Path(d) / "task-pipeline"
+    shutil.copytree(ROOT / "plugins/task-pipeline/skills/task-pipeline", bundle)
+    lone = bundle / "scripts" / "graph.py"
+    r = subprocess.run([sys.executable, str(lone), "producer"],
+                       capture_output=True, text=True, cwd=d)
+    f = dict(l.split(": ", 1) for l in r.stdout.splitlines() if ": " in l)
+    assert r.returncode == 0, r.stdout + r.stderr
+    assert f["skill"].startswith("unavailable"), (
+        "a plain-skill install invented a version instead of saying it has none: %r"
+        % f["skill"])
+    assert "plugin manifest" in f["skill"], f["skill"]
 
 if failures:
     print("\n%d failure(s) out of %d cases" % (len(failures), cases))
