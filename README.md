@@ -113,8 +113,8 @@ stage and walks the gates. See [Install](#install) for the other channels.
 
 `task-pipeline` is the reference implementation of **Proof of Done: The Agentic
 Software Development Manifesto** by Sergey Sheleg — *a foundation for building
-software when agents write the code*. The full text ships in the family umbrella
-([`sshlg-skills/MANIFESTO.md`](https://github.com/ssheleg/sshlg-skills/blob/main/MANIFESTO.md)).
+software when agents write the code*. The manifesto has its own home:
+<https://github.com/ssheleg/pod-manifesto>.
 
 Its central claim is that the unit of progress is not generated code but an
 **evidence-carrying change**: one carrying the intent it implements, the evidence that
