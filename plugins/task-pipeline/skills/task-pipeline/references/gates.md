@@ -493,7 +493,7 @@ A **ratchet** is a named, counted set that may only shrink, printed on every run
 
 ```
 GATE 9 docs: PASS — propagation backlog: 121 (was 162) · unmarked residue: 0
-  abstained: 0 · unlooked: 4 (3 dormant · 1 skip — no submodules in this repo)
+  abstained: 0 · unlooked: 4 (3 dormant · 1 skip — no submodules in this repo) · holds: 0
 ```
 
 A ratchet nobody prints is a TODO with a better name.

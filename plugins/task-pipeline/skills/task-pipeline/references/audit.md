@@ -329,7 +329,7 @@ beside the verdict**:
 ```
 GATE 6 tests: PASS — full suite green (247 tests)
   carry-over: 4 open (was 6) · unresolved: 0 · audit findings deferred: 2
-  abstained: 1 (1 cannot-verify) · unlooked: 2 dormant
+  abstained: 1 (1 cannot-verify) · unlooked: 2 dormant · holds: 1 (container: pg-test, this run)
 ```
 
 The difference from a TODO is not bookkeeping. A TODO is invisible until somebody

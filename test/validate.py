@@ -2845,6 +2845,81 @@ if gschema is not None:
             fail(f"{GRAPH_SCHEMA_REL}: edge.payload has no `minLength` — REQ-003: an empty "
                  "payload is `references/planning.md`'s fake edge with a field around it")
 
+# --- B-064: a worked example is the executable half of doctrine -------------------------
+#
+# Three times in one release a rule moved and its own example did not — a GATE 5 example
+# holding a container beside a GATE 6 one claiming no container tooling, two stage-10
+# verdicts predating the `holds:` line they now mandate, teardown examples ignoring the
+# ledger grammar declared one file over. An agent copies the example literally and
+# paraphrases the prose, so **the example is what ships**.
+#
+# Measured when this check was written: seven gate-verdict examples across the bundle, and
+# **two** carried the `holds:` line `gates.md` says every gate prints. The other five were
+# fixed in the same change.
+#
+# The unit is the BLOCK, not the line: a verdict is its `GATE …` line plus the indented
+# continuation beneath it, and reading only the first line would have found `holds:` in
+# none of the seven.
+_ex_files = []
+for _sub in ("references", "templates"):
+    _dd = os.path.join(ROOT, "plugins/task-pipeline/skills/task-pipeline", _sub)
+    if os.path.isdir(_dd):
+        _ex_files += [os.path.join(_dd, _f) for _f in sorted(os.listdir(_dd))
+                      if _f.endswith(".md")]
+
+_GATE_LINE = re.compile(r"^\s*GATE\s+\d+\s+[a-z+-]+:\s*(PASS|FAIL)\b")
+_blocks = []
+for _f in _ex_files:
+    _lines = open(_f, encoding="utf-8").read().splitlines()
+    _i = 0
+    while _i < len(_lines):
+        if _GATE_LINE.match(_lines[_i]):
+            _blk = [_lines[_i]]
+            _j = _i + 1
+            # The continuation is the indented run beneath it, stopping at a blank line, a
+            # fence, or another verdict.
+            while _j < len(_lines) and _lines[_j].startswith("  ") \
+                    and _lines[_j].strip() and not _GATE_LINE.match(_lines[_j]) \
+                    and not _lines[_j].strip().startswith("```"):
+                _blk.append(_lines[_j]); _j += 1
+            _blocks.append((os.path.relpath(_f, ROOT), _i + 1, "\n".join(_blk)))
+            _i = _j
+        else:
+            _i += 1
+
+if not _blocks:
+    fail("no `GATE <n> <name>: PASS|FAIL` example found in the shipped doctrine — B-064: "
+         "either the verdict shape changed and this check is reading for one nobody writes, "
+         "or the examples are gone. Both are worth stopping for")
+else:
+    # The file that STATES the mandate must carry an example of it. A rule whose own page
+    # shows no conforming verdict is a rule whose reader has nothing to copy — and copying
+    # is what an agent does with an example while it paraphrases the prose.
+    _stating = [b for b in _blocks if b[0].endswith("references/gates.md")]
+    if not _stating:
+        fail("references/gates.md states `every gate prints holds: N` and carries no "
+             "gate-verdict example of its own — B-064: the prose is paraphrased and the "
+             "example is copied, so the page stating a rule is the page that most needs one")
+
+    # What the doctrine mandates of every gate verdict, each with the sentence that says so.
+    _MANDATED = (("holds:", "gates.md → *every gate prints `holds: N`*"),)
+    for _rel, _ln, _blk in _blocks:
+        for _needle, _why in _MANDATED:
+            _n = _blk.count(_needle)
+            if _n == 0:
+                fail(f"{_rel}:{_ln}: a gate-verdict example carries no `{_needle}` — {_why}. "
+                     "An agent copies the example literally and paraphrases the prose, so an "
+                     "example that omits what the rule mandates teaches the omission")
+            elif _n > 1:
+                # Found on this check's own first run, against an edit made ten minutes
+                # earlier: measuring by LINE said two blocks lacked `holds:`, so a duplicate
+                # was added to blocks that already carried it on a continuation line — and
+                # `holds: 0` beside `holds: 10` is worse than neither, because a reader picks
+                # one. The unit is the block for exactly this reason.
+                fail(f"{_rel}:{_ln}: a gate-verdict example states `{_needle}` {_n} times in "
+                     "one verdict — two values for one disclosure is worse than none, because "
+                     "the reader picks one and the example teaches whichever they picked")
+
 # --- B-076: the judgment gate — a ruling is not a measurement ---------------------------
 #
 # Two types were not enough. A reviewer's ruling, a coherence check on scenarios and a

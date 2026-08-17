@@ -68,8 +68,36 @@ and a caller that cannot tell them apart will wait on the wrong one.
 code being two installers and the validator was false the moment it landed, and is
 corrected in the same change.
 
-Guards: 351 → **368**. Fifteen plants across the module, structurally distinct rather than variations,
+Guards: 351 → **369**. Sixteen plants across the module, structurally distinct rather than variations,
 each asserting it landed before the validator runs.
+
+### B-064 — a worked example is the executable half of doctrine, and now something checks one
+
+Three times in one release a rule moved and its own example did not. An agent copies the
+example literally and paraphrases the prose, so **the example is what ships** — and nothing
+compared one against the rule it illustrates.
+
+Now something does. Every `GATE <n> <name>: PASS|FAIL` block across `references/` and
+`templates/` is read and required to carry the `holds:` line `gates.md` says every gate
+prints. Three of the seven did not; they do now. And the page that **states** a mandate must
+carry a conforming example of its own — the prose gets paraphrased and the example gets
+copied, so the page stating a rule is the page that most needs one.
+
+**The unit is the block, and that is not a detail — it is the whole finding.** A verdict is
+its `GATE …` line plus the indented continuation beneath it. Measuring by *line* said five
+examples lacked `holds:`. Measuring by *block* says three did: two carried it on a
+continuation line all along.
+
+**So the first version of this fix was wrong, and this check caught it ten minutes later.**
+Reading line-wise, `holds: 0` was appended to two blocks that already said
+`holds: 10 — none — enumerated 8/8 classes`. Two values for one disclosure in one verdict is
+**worse than none**, because a reader picks one and copies whichever they picked. Both
+duplicates are reverted, and the guard now refuses a repeated disclosure as well as a
+missing one — a rule it learned from being broken by the change that introduced it.
+
+Six planted defects watched refused: a continuation-line disclosure removed, an inline one
+removed, the disclosure renamed inside an example, a **new** example added without it, a
+second contradicting value, and the stating page losing its own example.
 
 ### B-076 — a ruling is not a measurement
 
