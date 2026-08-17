@@ -21,7 +21,7 @@
     },
     {
       "id": "N-003",
-      "title": "The verifier agent and its five-key verdict",
+      "title": "The verifier agent and its six-key verdict",
       "owner": "verifier",
       "status": "pending",
       "blocked_by": ["N-001"],

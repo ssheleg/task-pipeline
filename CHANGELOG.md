@@ -68,9 +68,54 @@ and a caller that cannot tell them apart will wait on the wrong one.
 code being two installers and the validator was false the moment it landed, and is
 corrected in the same change.
 
-Guards: 351 → **354**. Three plants, structurally distinct rather than variations,
+Guards: 351 → **356**. Three plants, structurally distinct rather than variations,
 each asserting it landed before the validator runs.
 
+### Wave 2 — T-4 and T-6, and the check `build.md` puts over a fan-out
+
+`agents/verifier.md` ships — the first agent this plugin has. It closes one node and
+returns a six-key verdict, and `graph.py`'s `verdict_violations()` refuses one that
+omits a key or claims `done` with no evidence. The agent file says what it cannot do
+and why that matters: **it cannot ask the operator anything**, so a verdict meaning
+*«I need a decision»* has to say so in `replan.why` rather than end in a question
+nobody will see.
+
+`pipeline.json` moves to `mode: dynamic` — `interval` dropped, because the schema
+calls it meaningless there — and records `release.goal`.
+
+**Then the convergence check `references/build.md` §4.2a requires over a fanned-out
+group, and it earned its place.** Nine contradictions, every one of them invisible to
+the three per-task reviews that had already passed:
+
+| Found | Between |
+|---|---|
+| the verdict gate accepted `evidence: ["", "  "]` that the **schema refuses** — `close` would write a node its own shipped schema rejects | `graph.py` ↔ `graph.schema.json` |
+| `release.goal` was undeclared in the schema, so the guard T-6 shipped **could not see the field T-6 shipped** — `additionalProperties` is true, and renaming it away kept every gate green | `pipeline.json` ↔ `pipeline.schema.json` |
+| `ROLES` held ten of the brief's thirteen — and its own refusal message **named the manager while the set rejected it** | `graph.py` ↔ the brief |
+| `verifier.md` told an agent to run `graph.py close`, which is T-5 and does not exist | the agent ↔ the script |
+| `_goal_note` claimed the goal is *"printed above the frontier every iteration"*; nothing prints them together | the config ↔ the script |
+| the schema's `queue` cited `continuity.md`, which still describes a two-item queue set that does not include `work-graph` | the schema ↔ the doctrine |
+| the brief's REQ-005 required `plugin.json` to **declare** `agents`, and declaring it fails `--strict` | the brief ↔ the platform |
+| *«five keys»* over a six-key object, in five places | everywhere at once |
+| T-6's new guard shipped with **no negative self-test**, against this repo's own stage-6 gate | the change ↔ the gate |
+
+Every one is fixed. Two are worth naming for the shape rather than the fix:
+
+**`ROLES` conflated two different axes.** Whether a role ships as a subagent and
+whether it may **own a node** are separate questions, and the first draft answered
+the second with the first. `manager` and `business-analyst` are main-thread doctrine
+*because* their job is asking the operator — that is precisely why they cannot be
+agents, and it says nothing about whether work can belong to them. Both own nodes
+now; `project` still cannot, because the brief defers it for having no stated job,
+and a role that cannot say what it does cannot own work either.
+
+**And the fix for the evidence bug was itself incomplete.** A cross-check fixture —
+asking the gate and the schema the same question and requiring the same answer —
+caught `["  "]` surviving one and not the other: the gate strips, and `minLength: 1`
+counts a space. The schema now requires a non-whitespace character, and the fixture
+that found it is in the suite.
+
+`test/graph_test.py` → **29 cases**. Guards 354 → **356**.
 ## v1.68.0 — the worst body in the family, and the rule that was wrong about it
 
 **6685 tokens against a 5000 budget → 4735**, under the 4750 working limit, by

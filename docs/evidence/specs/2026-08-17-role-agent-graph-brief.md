@@ -151,7 +151,7 @@ not yet its gate.
 | REQ-002 | **Every node names its owning role.** A node with no owner fails the gate | planted node without `owner` → gate red | 1 |
 | REQ-003 | `planning.md`'s **fake-edge test** applies to graph edges — an arrow whose payload nobody can name is removed | planted payload-free edge → gate red | 1 |
 | REQ-004 | The graph is **written at stage 2** and is the queue the loop advances | `references/work-graph.md` states it; stage-2 gate criterion names it | 1 |
-| REQ-005 | A **verifier** role exists as `agents/verifier.md`, declared in `plugin.json` | `claude plugin validate --strict` green; the agent resolves by name | 1 |
+| REQ-005 | A **verifier** role exists as `agents/verifier.md`, discovered by convention | `claude plugin validate --strict` green; the agent resolves by name. **Amended 2026-08-17:** this said *declared in `plugin.json`*, and declaring it fails `--strict` with `agents: Invalid input`. The family's own working example — `make-skill`, which ships `agents/skill-auditor.md` and resolves — declares no `agents` key at all. The reversal was recorded only in a test comment until the wave-2 convergence check said so | 1 |
 | REQ-006 | At a task's close the verifier emits a verdict naming: what is done, **what is not**, the blockers, and a re-plan proposal | a fixture asserts all four fields present | 1 |
 | REQ-007 | Where the verifier can continue, it **triggers the backlog re-plan** and the graph advances; where it cannot, it stops and names why | fixture on both branches | 1 |
 | REQ-008 | `run.loop.command` recorded → **stage 2's close arms the loop**, printing the job id and the cancel command | fixture over a config with and without it | 1 |
@@ -486,7 +486,7 @@ JSON, so `close` consumes it without the model transcribing it:
   "evidence": ["the command and its output that proves each `done` row"] }
 ```
 
-**All five keys required.** `done` without `evidence` is refused by `close` — REQ-006,
+**All six keys required.** `done` without `evidence` is refused by `close` — REQ-006,
 and the reason the field exists at all.
 
 ### Contract 4 — the loop, dynamic
@@ -553,10 +553,10 @@ fixture reads the reason back.
 
 ### T-4 — the verifier agent
 **Implements:** REQ-005, REQ-006
-**Does:** `agents/verifier.md` to the fetched frontmatter contract, declared in
-`plugin.json`; the five-key verdict shape.
+**Does:** `agents/verifier.md` to the fetched frontmatter contract, **discovered by
+convention rather than declared**; the six-key verdict shape.
 **DoD:** `claude plugin validate --strict` green; the agent resolves as
-`task-pipeline:verifier`; a verdict missing any of the five keys is refused.
+`task-pipeline:verifier`; a verdict missing any of the six keys is refused.
 
 ### T-5 — `close` consumes a verdict and re-plans
 **Implements:** REQ-007
@@ -589,7 +589,7 @@ described.
 | T-1 | T-4 | the node shape the verdict's `node` field references |
 | T-2 | T-3 | the invariants the mutation verbs must not break |
 | T-3 | T-5 | the `close` verb `--verdict` extends |
-| T-4 | T-5 | the five-key verdict JSON `close` consumes |
+| T-4 | T-5 | the six-key verdict JSON `close` consumes |
 | T-3 | T-6 | the frontier print the iteration prints beneath the goal |
 | T-3, T-5, T-6 | T-7 | the behaviour the doctrine documents |
 

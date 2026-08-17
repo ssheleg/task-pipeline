@@ -2,14 +2,20 @@
   "$schema": "./plugins/task-pipeline/skills/task-pipeline/pipeline.schema.json",
   "version": 1,
   "_note": "THIS repository's own pipeline — not the shipped example. task-pipeline is a skill, so the 'build' is prose, JSON manifests and Python; the host commands below are the real ones from CLAUDE.md. Written 2026-08-08 by run `audit-followup`, whose stage 0 found that the project shipping the config contract had never written its own config: run.loop was therefore unrecorded, the mode defaulted to off, and every loop this repository ran was authorised in a chat message rather than in a file.",
-
   "stages": [
     {
       "id": 0,
       "state": "intake",
       "name": "Intake grill",
       "model": "default",
-      "skills": ["task-pipeline:knowledge-sources", "task-pipeline:knowledge-graph", "task-pipeline:documentation", "graphify", "wiki-query", "task-pipeline:grill"],
+      "skills": [
+        "task-pipeline:knowledge-sources",
+        "task-pipeline:knowledge-graph",
+        "task-pipeline:documentation",
+        "graphify",
+        "wiki-query",
+        "task-pipeline:grill"
+      ],
       "gate": {
         "type": "manual",
         "check": "Harvest first: the code, graphify-out/graph.json WITH ITS MEASURED LAG (git rev-list --count <built_at_commit>..HEAD — a bare build date does not satisfy this), CLAUDE.md, docs/DOCMAP.md, docs/evidence/specs/ + past carry-over ledgers, docs/evidence/retro.md READ IN FULL (standing instructions bind the run), the retro archive queried by the task's nouns, and the obsidian wiki under projects/task-pipeline/. Source ledger written into the brief before question one. This repository has NO docs/DECISIONS.md by design — the decision home is CHANGELOG.md plus docs/evidence/specs/ (docs/DOCMAP.md → Registers); do not seed a second register. Then the grill: one question at a time, every answer checked against the ledger, autonomy sweep covered, REQ table written with a check per row, brief locked and confirmed."
@@ -20,7 +26,10 @@
       "state": "docs",
       "name": "Docs study",
       "model": "default",
-      "skills": ["context7", "context7-docs"],
+      "skills": [
+        "context7",
+        "context7-docs"
+      ],
       "gate": {
         "type": "auto",
         "check": "Contracts grounded on read sources. For this repository the contracts are local, not third-party: plugins/task-pipeline/skills/task-pipeline/pipeline.schema.json, the Agent Skills frontmatter limits (description ≤ 1024 chars — SKILL.md sits at 1015, so any addition must displace something), the Claude Code plugin manifest schemas, and test/validate.py's own guard API. context7 is only reached for an actual third-party dependency, which this repository has none of at runtime."
@@ -31,7 +40,10 @@
       "state": "brainstorm",
       "name": "Brainstorm + decompose",
       "model": "default",
-      "skills": ["task-pipeline:brainstorm", "task-pipeline:decomposition"],
+      "skills": [
+        "task-pipeline:brainstorm",
+        "task-pipeline:decomposition"
+      ],
       "gate": {
         "type": "manual",
         "check": "Design approved; every REQ answered; UI verdict recorded — this repository ships prose and Python and has no interface, so the verdict is normally 'no UI' and super-ux is not armed. A brief describing several independent doctrine changes IS a platform: cut it into modules, one per REQ cluster, and run stages 3→10 per module."
@@ -42,7 +54,9 @@
       "state": "spec",
       "name": "Spec",
       "model": "default",
-      "skills": ["task-pipeline:spec"],
+      "skills": [
+        "task-pipeline:spec"
+      ],
       "gate": {
         "type": "manual",
         "check": "docs/evidence/specs/<date>-<slug>-design.md committed and self-reviewed, every section carrying covers: REQ-…. Every check the spec NAMES must resolve at the moment it is named, or be marked review (learned.md rule 14)."
@@ -53,7 +67,9 @@
       "state": "plan",
       "name": "Plan",
       "model": "default",
-      "skills": ["task-pipeline:planning"],
+      "skills": [
+        "task-pipeline:planning"
+      ],
       "gate": {
         "type": "auto",
         "check": "docs/evidence/plans/<date>-<slug>.md written; set-equality between REQ ids and task Implements: ids computed in BOTH directions (learned.md rule 2); every command, path and file a DoD names resolves."
@@ -64,7 +80,11 @@
       "state": "dev",
       "name": "Build",
       "model": "default",
-      "skills": ["task-pipeline:build", "task-pipeline:tdd", "task-pipeline:review"],
+      "skills": [
+        "task-pipeline:build",
+        "task-pipeline:tdd",
+        "task-pipeline:review"
+      ],
       "gate": {
         "type": "auto",
         "check": "Tasks DONE with the build ledger carrying a 'complete' line each. Corrupt files IN PYTHON, never sed -i — BSD and GNU disagree and the validator rejects it. Anything generated passes its own checks: templates/docgate.sh must exit 0 over a scratch project seeded from templates/ (learned.md rule 9)."
@@ -75,7 +95,11 @@
       "state": "tests",
       "name": "Tests",
       "model": "default",
-      "skills": ["host:npm test", "task-pipeline:tdd", "task-pipeline:learned"],
+      "skills": [
+        "host:npm test",
+        "task-pipeline:tdd",
+        "task-pipeline:learned"
+      ],
       "gate": {
         "type": "auto",
         "check": "npm test prints 'PASS: task-pipeline structure valid'. Every NEW guard also has a negative self-test in .github/workflows/validate.yml and has been watched rejecting a planted defect — assert on $? without a pipe, because $? after a pipeline is the last element's status (retro 2026-08-06). npm run test:all must print that all guards provably reject their planted defect."
@@ -86,7 +110,10 @@
       "state": "release",
       "name": "Lint + deploy",
       "model": "default",
-      "skills": ["host:npm run test:all", "host:git tag"],
+      "skills": [
+        "host:npm run test:all",
+        "host:git tag"
+      ],
       "gate": {
         "type": "manual",
         "check": "The validator IS the lint; there is no separate linter. Four-way version sync across package.json, .claude-plugin/marketplace.json, plugins/task-pipeline/.claude-plugin/plugin.json and the top CHANGELOG heading. Never tag before npm run test:all is green ON THE COMMIT THE TAG POINTS AT, and chain it — `npm run test:all && git tag -a vX.Y.Z && git push origin vX.Y.Z` — never a gate and a mutating command as two lines (retro R-004). Pushing the tag IS the deploy: it publishes to npm."
@@ -97,7 +124,9 @@
       "state": "postdeploy",
       "name": "Post-deploy",
       "model": "default",
-      "skills": ["host:gh run watch"],
+      "skills": [
+        "host:gh run watch"
+      ],
       "gate": {
         "type": "auto",
         "check": "The release workflow's conclusion READ, not assumed — quote the run id and the conclusion; on anything but success quote the failing step's log. Then npm view task-pipeline-skill version == the tag. Then the global obligation: npx --yes sshlg-skills@latest update, and the installed plugin version confirmed by reading it back."
@@ -108,7 +137,11 @@
       "state": "docs-sync",
       "name": "Docs + wiki + graph",
       "model": "default",
-      "skills": ["task-pipeline:documentation", "wiki-update", "graphify"],
+      "skills": [
+        "task-pipeline:documentation",
+        "wiki-update",
+        "graphify"
+      ],
       "gate": {
         "type": "auto",
         "check": "The docs/DOCMAP.md propagation matrix walked for EVERY change type this run produced — the source ledger names what you read, the matrix names what you owe. CHANGELOG.md gets a section written as what changed and why it mattered. Then the wiki (projects/task-pipeline/) and then /graphify . --update, followed by the graph↔docs divergence check. Every number computed rather than restated; every named command or file resolvable. Carry-over count printed beside the verdict."
@@ -119,24 +152,29 @@
       "state": "acceptance",
       "name": "Acceptance",
       "model": "default",
-      "skills": ["task-pipeline:audit", "task-pipeline:acceptance", "task-pipeline:retrospective"],
+      "skills": [
+        "task-pipeline:audit",
+        "task-pipeline:acceptance",
+        "task-pipeline:retrospective"
+      ],
       "gate": {
         "type": "manual",
         "check": "Ladder walk first, its absences turned into REQ rows BEFORE the coverage table. Every REQ has a status, none unknown; every verified carries evidence from a check seen failing once. Carry-over has no unresolved row. Repository clean and pushed. Then the retrospective, LAST and in this order: STAMP FIRST, then prune, then the entry — the cold-retirement trigger reads the stamp, so a prune ahead of it can never run on real data (learned.md rule 21)."
       }
     }
   ],
-
   "run": {
     "loop": {
-      "mode": "interval",
-      "interval": "15m",
+      "mode": "dynamic",
       "command": "/loop",
-      "_note": "Armed 2026-08-08 by operator instruction, recorded here rather than remembered. 15m is the shortest cleanly-dividing interval longer than a typical item here — one module through stages 3→10. The interval is the FALLBACK that keeps the program moving if the session goes idle; while a session is live the run advances the moment an iteration closes green, because the scheduler cannot deliver faster than the item finishes. The mode collapses discretionary check-ins ONLY: it never collapses a manual gate and it is not an authorization for the tag push in stage 7, which has its own specific standing authorization in the run brief."
+      "queue": "work-graph",
+      "arm": "after-decomposition",
+      "_note": "Changed from interval/15m to dynamic on 2026-08-17 (module 1, REQ-008). The interval form was armed 2026-08-08 and its own note explains itself honestly; what it cannot do is what the operator actually asked for — no pause between items. `interval` is dropped rather than kept at a value: the schema calls it meaningless under `dynamic`, because a self-pacing run chooses each delay. `command` stays, because how THIS harness arms a loop is a project answer and not an assumption the skill may make. `queue` is the work graph now rather than the module map: `scripts/graph.py next` is what the loop advances, and it is the reason a queue of four hundred nodes costs the same context as one of four."
     }
   },
-
   "release": {
+    "goal": "task-pipeline advances a work graph without a human between iterations, and every node it closes carries the evidence that closed it.",
+    "_goal_note": "REQ-010. **Not yet printed beside the frontier — that lands with T-6's iteration wiring; `next` prints the frontier and `goal` is a separate verb today.** Recorded here now because the field is what the printing will read, and because a note claiming a behaviour that does not exist is the defect the wave-2 convergence check caught in this very line. Once wired: a node serving neither this goal nor a REQ is parked WITH THAT AS THE REASON rather than done quietly.",
     "enabled": true,
     "trigger": "tag",
     "steps": [

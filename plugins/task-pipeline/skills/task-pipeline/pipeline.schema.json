@@ -82,9 +82,10 @@
               "enum": [
                 "module-map",
                 "plan-tasks",
+                "work-graph",
                 "none"
               ],
-              "description": "What the loop walks. A loop with no queue is a timer: it says how often to continue and never what the next item is, so the run picks its next move by recollection. module-map = stage 2's decomposition (a platform); plan-tasks = stage 4's task list; none = the mode is armed for the stage boundaries only. Doctrine: references/continuity.md -> Part 1a."
+              "description": "What the loop walks. A loop with no queue is a timer: it says how often to continue and never what the next item is, so the run picks its next move by recollection. module-map = stage 2's decomposition (a platform); plan-tasks = stage 4's task list; none = the mode is armed for the stage boundaries only. Doctrine: references/continuity.md -> Part 1a. `work-graph` is `.task-pipeline/graph.json`, walked by `scripts/graph.py next` — added 2026-08-17 with module 1. It is the queue whose context cost does not grow with its length, which is why it is the one to prefer where a graph exists. **`references/continuity.md` still describes a two-item queue set and does not yet name this one** — that doctrine lands with T-7, and the gap is stated here rather than left for a reader to hit."
             },
             "arm": {
               "enum": [
@@ -145,6 +146,15 @@
             "minLength": 1
           },
           "description": "Post-release smoke checks that must pass after a release — this is the release's own post-deploy gate (stage 8 applied to shipping the package itself)."
+        },
+        "goal": {
+          "type": "string",
+          "minLength": 1,
+          "description": "What this release is for, in one sentence. Printed beside the queue on every loop iteration so drift from it is visible rather than remembered, and a node serving neither it nor a REQ is parked WITH THAT AS THE REASON. Declared here because the guard that validates this config could not otherwise see the field: `additionalProperties` is true, so an undeclared `goal` could be renamed away and every gate would stay green (found by the wave-2 convergence check)."
+        },
+        "_goal_note": {
+          "type": "string",
+          "description": "Free prose beside `goal`."
         }
       }
     },

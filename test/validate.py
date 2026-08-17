@@ -2648,6 +2648,26 @@ schema = load_json(SCHEMA_REL)
 if schema is not None and schema.get("type") != "object":
     fail(f"{SCHEMA_REL}: not a JSON Schema (missing top-level type: object)")
 
+# The project's OWN config, against the schema it declares. `pipeline.example.json`
+# was validated and `pipeline.json` was not — so on 2026-08-17 this repository's config
+# carried `queue: "work-graph"` before the schema's enum knew the word, and every gate
+# stayed green. An example that conforms proves the example conforms.
+_own = os.path.join(ROOT, "pipeline.json")
+if schema is not None and os.path.isfile(_own):
+    _cfg = load_json("pipeline.json")
+    if _cfg is not None:
+        try:
+            import jsonschema as _js
+        except ImportError:
+            _UNLOOKED.append("skip: pipeline.json against its own schema — jsonschema "
+                             "is not installed")
+        else:
+            try:
+                _js.validate(_cfg, schema)
+            except _js.ValidationError as _e:
+                fail(f"pipeline.json: this project's own config does not satisfy "
+                     f"{SCHEMA_REL} — {_e.message}")
+
 pipe = load_json(EXAMPLE_REL)
 if pipe is not None:
     stages = pipe.get("stages")

@@ -171,6 +171,167 @@ def _():
     assert "N-001" not in out, "a parked node reached the frontier: %r" % out
 
 
+
+# --- the verdict: the shape `close` consumes, and what it refuses --------------
+
+def verdict(**kw):
+    v = {"node": "N-001", "done": ["a thing"], "not_done": [], "blockers": [],
+         "replan": {"possible": True, "add": [], "park": [], "why": "nothing blocks"},
+         "evidence": ["npm test → PASS"]}
+    v.update(kw)
+    return v
+
+
+def check_verdict(v):
+    """Ask graph.py, not a reimplementation of it. A fixture that validates the
+    verdict itself would pass while the script disagreed."""
+    sys.path.insert(0, str(GRAPH.parent))
+    import importlib
+    mod = importlib.import_module("graph")
+    importlib.reload(mod)
+    return mod.verdict_violations(v)
+
+
+@case("a complete verdict is accepted")
+def _():
+    assert check_verdict(verdict()) == [], check_verdict(verdict())
+
+
+@case("every one of the six keys is required, and the message names the missing one")
+def _():
+    for key in ("node", "done", "not_done", "blockers", "replan", "evidence"):
+        v = verdict()
+        del v[key]
+        bad = check_verdict(v)
+        assert bad, "a verdict with no %r was accepted" % key
+        assert any(key in b for b in bad), "the refusal does not name %r: %s" % (key, bad)
+
+
+@case("done without evidence is refused — the whole reason the field exists")
+def _():
+    bad = check_verdict(verdict(done=["a thing"], evidence=[]))
+    assert bad, "a done claim with empty evidence was accepted"
+    assert any("evidence" in b for b in bad), bad
+
+
+@case("done EMPTY with evidence empty is fine — nothing was claimed")
+def _():
+    assert check_verdict(verdict(done=[], evidence=[])) == []
+
+
+@case("a blocker must say what it blocks and whether the run can continue around it")
+def _():
+    bad = check_verdict(verdict(blockers=[{"what": "the API is down"}]))
+    assert bad, "a blocker with no `blocks` and no `can_continue_around` was accepted"
+
+
+@case("replan.possible false must carry a why — a stop with no reason is a stall")
+def _():
+    bad = check_verdict(verdict(replan={"possible": False, "add": [], "park": [], "why": ""}))
+    assert bad, "a stop with no reason was accepted"
+    assert any("why" in b for b in bad), bad
+
+
+@case("replan.park naming a node id shape that cannot exist is refused")
+def _():
+    bad = check_verdict(verdict(replan={"possible": True, "add": [], "park": ["nope"], "why": "x"}))
+    assert bad, "a park id that is not an N-nnn was accepted"
+
+
+@case("evidence entries must be non-empty strings, matching what the SCHEMA requires")
+def _():
+    # The convergence check's finding: `['', '   ']` passed this function and was
+    # refused by graph.schema.json, so `close` would have written a node its own
+    # shipped schema rejects. A list of blanks is what a script emitting an empty
+    # command output produces, which makes it the likely shape rather than a hostile one.
+    for bad in ([""], ["   "], [123], [None], ["ok", ""]):
+        got = check_verdict(verdict(done=["a thing"], evidence=bad))
+        assert got, "evidence %r was accepted by the verdict gate" % (bad,)
+
+
+@case("the verdict gate and the graph schema agree on evidence — checked against both")
+def _():
+    import json as _j
+    schema = _j.loads((ROOT / "plugins/task-pipeline/skills/task-pipeline"
+                       "/graph.schema.json").read_text())
+    try:
+        import jsonschema
+    except ImportError:
+        return
+    for ev in ([""], ["  "], []):
+        gate = bool(check_verdict(verdict(done=["x"], evidence=ev)))
+        g = {"goal": "g", "edges": [],
+             "nodes": [node("N-001", status="done", evidence=ev)]}
+        try:
+            jsonschema.validate(g, schema); sch = False
+        except jsonschema.ValidationError:
+            sch = True
+        assert gate == sch, ("evidence %r: the verdict gate says %s and the schema says "
+                             "%s — one of them writes what the other refuses" % (ev, gate, sch))
+
+
+@case("manager and business-analyst may own a node — doctrine is not the same as absent")
+def _():
+    for role in ("manager", "business-analyst"):
+        code, out = run(g([node("N-001", owner=role)]), "validate")
+        assert code == 0, "%r cannot own a node: %s" % (role, out)
+
+
+@case("project may NOT own a node — the brief defers it for having no stated job")
+def _():
+    code, _ = run(g([node("N-001", owner="project")]), "validate")
+    assert code == 1, "a deferred role was accepted as an owner"
+
+
+@case("the refusal never names a role the set rejects")
+def _():
+    import re as _re, sys as _s
+    _s.path.insert(0, str(GRAPH.parent))
+    import importlib, graph as _g
+    importlib.reload(_g)
+    src = GRAPH.read_text()
+    named = set(_re.findall(r"`(manager|business-analyst|verifier|decomposer|ux|ui)`", src))
+    missing = named - _g.ROLES
+    assert not missing, "graph.py names %s in its prose and rejects it as an owner" % missing
+
+
+# --- the agent ships, and to the contract the fetched reference gives ----------
+
+@case("agents/verifier.md ships, and the manifest does NOT declare the directory")
+def _():
+    agent = ROOT / "plugins/task-pipeline/agents/verifier.md"
+    assert agent.is_file(), "no agents/verifier.md"
+    manifest = json.loads((ROOT / "plugins/task-pipeline/.claude-plugin/plugin.json").read_text())
+    # The directory is discovered by convention. Declaring it as a string fails
+    # `claude plugin validate --strict` with `agents: Invalid input`, and the
+    # family's own working example (make-skill, which ships agents/skill-auditor.md
+    # and resolves) declares no `agents` key at all. Asserted so the next author
+    # does not add it back from the same wrong intuition this one had.
+    assert "agents" not in manifest, ("plugin.json declares `agents` — the directory is "
+                                      "discovered, and declaring it fails --strict")
+
+
+@case("the agent declares only frontmatter keys plugin agents accept")
+def _():
+    txt = (ROOT / "plugins/task-pipeline/agents/verifier.md").read_text()
+    fm = txt.split("---")[1]
+    keys = {l.split(":")[0].strip() for l in fm.splitlines() if l.strip() and not l[0].isspace()}
+    # Fetched 2026-08-17 from code.claude.com/docs/en/plugins-reference.
+    allowed = {"name", "description", "model", "effort", "maxTurns", "tools",
+               "disallowedTools", "skills", "memory", "background", "isolation"}
+    rejected = {"hooks", "mcpServers", "permissionMode"}
+    assert not (keys & rejected), "declares a key rejected for plugin agents: %s" % (keys & rejected)
+    assert not (keys - allowed), "declares a key the reference does not list: %s" % (keys - allowed)
+    assert "name" in keys and "description" in keys, keys
+
+
+@case("the agent names no vendor model id — the tier, never the id")
+def _():
+    txt = (ROOT / "plugins/task-pipeline/agents/verifier.md").read_text()
+    for bad in ("claude-3", "claude-opus-4", "gpt-4", "claude-sonnet-4"):
+        assert bad not in txt, "hardcodes a vendor model id: %s" % bad
+
+
 if failures:
     print("\n%d failure(s) out of %d cases" % (len(failures), cases))
     sys.exit(1)

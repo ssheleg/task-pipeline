@@ -7041,6 +7041,48 @@ jobs:
           fi
           echo "OK: refused, as the doctrine requires"
 
+      - name: Negative self-test (this project's own pipeline.json is validated, not only the example)
+        run: |
+          set -eu
+          rm -rf /tmp/gx4-copy && cp -R . /tmp/gx4-copy
+          python3 - <<'EOF'
+          import json
+          p = "/tmp/gx4-copy/pipeline.json"
+          d = json.load(open(p, encoding="utf-8"))
+          # `queue` is an enum in the schema, so a value outside it is refused — but
+          # only because something validates THIS file. The example conforming proves
+          # the example conforms, which is what this plant exists to keep true.
+          assert d["run"]["loop"]["queue"] != "not-a-queue", "PLANT DID NOT LAND: gx4"
+          d["run"]["loop"]["queue"] = "not-a-queue"
+          json.dump(d, open(p, "w", encoding="utf-8"), indent=2)
+          EOF
+          if python3 /tmp/gx4-copy/test/validate.py; then
+            echo "ERROR: the project's own config was never validated against its schema"; exit 1
+          else
+            echo "OK: pipeline.json is validated against pipeline.schema.json"
+          fi
+
+      - name: Negative self-test (the verdict gate and the graph schema must not diverge)
+        run: |
+          set -eu
+          rm -rf /tmp/gx5-copy && cp -R . /tmp/gx5-copy
+          python3 - <<'EOF'
+          import re
+          p = ("/tmp/gx5-copy/plugins/task-pipeline/skills/task-pipeline/scripts/graph.py")
+          t = open(p, encoding="utf-8").read()
+          # Weaken the gate to the container-only check the first draft had: a list of
+          # blank strings then passes the gate and is refused by the schema, so `close`
+          # would write a node the shipped schema rejects.
+          m = re.search(r"\n        for i, e in enumerate\(v\[\"evidence\"\]\):.*?\n\n", t, re.S)
+          assert m, "PLANT DID NOT LAND: gx5 — no per-entry evidence check to remove"
+          open(p, "w", encoding="utf-8").write(t.replace(m.group(0), "\n\n"))
+          EOF
+          if python3 /tmp/gx5-copy/test/graph_test.py; then
+            echo "ERROR: the verdict gate may accept evidence the schema refuses"; exit 1
+          else
+            echo "OK: the gate and the schema are held to the same rule"
+          fi
+
       - name: Negative self-test (a graph schema whose node shape does not bind)
         run: |
           set -eu

@@ -38,14 +38,26 @@ import json
 import os
 import sys
 
-# The roles the pipeline ships. A node owned by anything else is a node nobody
-# dispatches, and the failure is silent — it simply never leaves the frontier — so
-# this list is checked rather than trusted. It is the ONE place the set lives; a
-# second copy is what `references/documentation.md` calls a fact with two homes.
+# Who may OWN a node — which is a different axis from who ships as a subagent.
+#
+# The brief closed the role set at thirteen and the first draft of this set held ten,
+# because it silently conflated "is an agent" with "can own work". `manager` and
+# `business-analyst` are main-thread doctrine precisely BECAUSE their job is talking
+# to the operator, and that is still work a node can be owned by — the refusal message
+# below even named the manager while this set rejected it.
+#
+# `project` is the one deliberate absence: the brief defers it for having no bounded
+# job stated, and a role that cannot say what it does cannot own a node either.
+#
+# It is the ONE place the set lives; a second copy is what
+# `references/documentation.md` calls a fact with two homes.
 ROLES = {
     # execution — references/build.md
     "implementer", "reviewer", "fixer",
-    # product — the role graph
+    # main-thread doctrine: these own nodes, they just are not dispatched as agents,
+    # because a subagent cannot reach the operator and their job is to ask
+    "manager", "business-analyst",
+    # dispatched as agents — voluminous reading, small answer
     "verifier", "decomposer", "ux", "ui", "researcher", "market-analyst", "bug-analyst",
 }
 
@@ -154,6 +166,88 @@ def frontier(graph):
         if all(by_id.get(b, {}).get("status") in TERMINAL for b in blockers):
             ready.append(n)
     return ready
+
+
+# --- the verdict ---------------------------------------------------------------
+
+VERDICT_KEYS = ("node", "done", "not_done", "blockers", "replan", "evidence")
+NODE_ID = "N-"
+
+
+def verdict_violations(v):
+    """Everything wrong with a verdict, in a stable order.
+
+    The verifier's output is the one artifact in this design a human does not read
+    before it acts: `close` consumes it and the graph moves. So the shape is checked
+    rather than trusted, and every refusal names the key, because a verdict rejected
+    without naming its fault is a verdict the next attempt reproduces.
+
+    The rule that matters most is the smallest: **a `done` claim with no evidence is
+    refused.** Everything else here is structure; that one is the difference between
+    a node that was verified and a node that was asserted.
+    """
+    out = []
+    if not isinstance(v, dict):
+        return ["verdict is not an object"]
+
+    for k in VERDICT_KEYS:
+        if k not in v:
+            out.append(f"verdict has no `{k}` — all six are required, because a "
+                       "verdict that omits one is silent about it rather than clear")
+    if out:
+        return out
+
+    if not isinstance(v["node"], str) or not v["node"].startswith(NODE_ID):
+        out.append(f"verdict `node` is {v['node']!r}, which is not a node id")
+
+    for k in ("done", "not_done", "evidence"):
+        if not isinstance(v[k], list):
+            out.append(f"verdict `{k}` must be a list")
+
+    if isinstance(v.get("done"), list) and isinstance(v.get("evidence"), list):
+        if v["done"] and not v["evidence"]:
+            out.append("verdict claims `done` with empty `evidence` — the field exists "
+                       "for exactly this, and a node closed on an unevidenced claim is "
+                       "the thing the whole ledger is built to prevent")
+        # And each entry must be a non-empty string, because `graph.schema.json`
+        # requires exactly that of the node this verdict closes. The first draft
+        # checked only that the list was non-empty — so `['', '   ']` passed here and
+        # was refused by the schema, and `close` would have written a node its own
+        # shipped schema rejects. That is the same class the schema's own prose
+        # records fixing one level up: a rule stated about the container while the
+        # contents go unchecked. Found by the wave-2 convergence check, not by the
+        # per-task review that had already read this function.
+        for i, e in enumerate(v["evidence"]):
+            if not isinstance(e, str) or not e.strip():
+                out.append(f"verdict `evidence[{i}]` is {e!r} — every entry must be a "
+                           "non-empty string, and a list of blanks is the shape a script "
+                           "emitting an empty command output produces")
+
+    for b in v.get("blockers") or []:
+        if not isinstance(b, dict) or "what" not in b:
+            out.append("a blocker must say `what` it is")
+            continue
+        if "blocks" not in b or "can_continue_around" not in b:
+            out.append(f"blocker {b.get('what')!r} does not say what it `blocks` and "
+                       "whether the run `can_continue_around` it — without both, the "
+                       "manager cannot tell a pause from a stop")
+
+    rp = v.get("replan")
+    if not isinstance(rp, dict):
+        out.append("verdict `replan` must be an object")
+    else:
+        if "possible" not in rp:
+            out.append("verdict `replan` does not say whether a re-plan is `possible`")
+        elif rp.get("possible") is False and not (rp.get("why") or "").strip():
+            out.append("verdict says a re-plan is not possible and gives no `why` — a "
+                       "stop with no reason is indistinguishable from a stall")
+        for nid in rp.get("park") or []:
+            if not isinstance(nid, str) or not nid.startswith(NODE_ID):
+                out.append(f"replan.park names {nid!r}, which is not a node id")
+        for nid in rp.get("add") or []:
+            if not isinstance(nid, dict) or "title" not in nid:
+                out.append("replan.add entries must be nodes with at least a `title`")
+    return out
 
 
 # --- verbs --------------------------------------------------------------------
