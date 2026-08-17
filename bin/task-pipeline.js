@@ -79,6 +79,35 @@ function installOne(label, src, dest, isDir, force) {
  * failing: an installer that ends in an error because an OPTIONAL follow-up is
  * missing reads as a failed install.
  */
+/**
+ * Say what this path does NOT install, and what runs instead.
+ *
+ * `agents/` is a Claude Code plugin capability; `install()` copies the skill directory
+ * and the command and nothing else. That is the design — the brief chose plugin agents
+ * with honest degradation — and it was silent, which is the part that is not. An
+ * operator reading doctrine that names `task-pipeline:verifier` finds a name that
+ * resolves to nothing and no explanation anywhere in what they ran.
+ */
+function discloseAgents() {
+  const dir = path.join(ROOT, 'plugins', 'task-pipeline', 'agents');
+  let files = [];
+  try {
+    files = fs.readdirSync(dir).filter((f) => f.endsWith('.md'));
+  } catch (e) {
+    return;               // no agents shipped: nothing to disclose
+  }
+  if (!files.length) return;
+  console.log(
+    `\nNot installed: plugins/task-pipeline/agents/ (${files.length} file(s)).\n` +
+    '  Role agents are a Claude Code plugin capability; this path installs the skill\n' +
+    '  and the command only. Every role still runs — on the main thread instead of in\n' +
+    '  its own context, which costs context and speed, not doctrine.\n' +
+    '  For the agent-backed version, install the plugin:\n' +
+    `    claude plugin marketplace add ${REPO}\n` +
+    '    claude plugin install task-pipeline@task-pipeline'
+  );
+}
+
 function offerRouters() {
   const { spawnSync } = require('child_process');
   const r = spawnSync(
@@ -206,6 +235,7 @@ Rerun with --force if you deliberately want the plain copy instead.`);
     false,
     force
   );
+  discloseAgents();
   offerRouters();
   return 0;
 }

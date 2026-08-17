@@ -2722,6 +2722,60 @@ if gschema is not None:
             fail(f"{GRAPH_SCHEMA_REL}: edge.payload has no `minLength` — REQ-003: an empty "
                  "payload is `references/planning.md`'s fake edge with a field around it")
 
+# --- the agents directory travels with the PLUGIN, and only the plugin ------------
+#
+# `agents/` is a Claude Code plugin capability. `install.sh` and `bin/task-pipeline.js`
+# copy the skill directory and the command and nothing else, so on the npx and shell
+# install paths the role agents are simply absent — which is the DESIGN (brief G-1:
+# plugin agents plus honest degradation), and was silent, which is not.
+#
+# A capability that disappears without a word is worse than one that was never offered:
+# the doctrine names `task-pipeline:verifier`, an operator on the npx path reads that,
+# and nothing tells them why the name does not resolve. So: if agents ship, both
+# installers must SAY they are not installing them — in output, not in a comment.
+_AG_DIR = os.path.join(ROOT, "plugins/task-pipeline/agents")
+_agents = sorted(f for f in os.listdir(_AG_DIR)) if os.path.isdir(_AG_DIR) else []
+_agents = [f for f in _agents if f.endswith(".md")]
+if _agents:
+    # RUN them, do not read them. The first version of this guard scanned the source
+    # for the printed string — and a `discloseAgents()` defined and never called
+    # satisfies that exactly, which is how the first draft of this very fix shipped.
+    # Presence is not behaviour; today that lesson cost two criticals elsewhere.
+    import subprocess as _sp, tempfile as _tf
+    _probe = _tf.mkdtemp()
+    _env = dict(os.environ, HOME=_probe)
+    _runs = {
+        "install.sh": ["bash", os.path.join(ROOT, "install.sh")],
+        # No verb: the installer installs by default, and `install` is not one of its
+        # words — passing it prints usage and exits 0, which a check reading only the
+        # exit code would have called a pass.
+        "bin/task-pipeline.js": ["node", os.path.join(ROOT, "bin/task-pipeline.js")],
+    }
+    for _rel, _cmd in _runs.items():
+        if not os.path.isfile(os.path.join(ROOT, _rel)):
+            fail(f"{_rel} is missing — both install paths are part of this contract")
+            continue
+        try:
+            _r = _sp.run(_cmd, capture_output=True, text=True, env=_env, timeout=60,
+                         cwd=ROOT)
+            _out = (_r.stdout + _r.stderr).lower()
+        except Exception as _e:            # no bash, no node, a sandbox that refuses
+            _UNLOOKED.append(f"skip: could not run {_rel} to check the agents "
+                             f"disclosure ({type(_e).__name__})")
+            continue
+        if "agents/" not in _out:
+            # `agents/` with the slash, not the word "agent". `bin/task-pipeline.js`
+            # already prints "Any agent (70+): npx skills add …", which is about the 70
+            # agent PRODUCTS this skill installs into and has nothing to do with the
+            # `agents/` directory — and a substring check on the bare word passed it.
+            # Watched: the first version of this guard fired on one installer of two.
+            fail(f"{_rel} installs neither of the {len(_agents)} file(s) in "
+                 f"plugins/task-pipeline/agents/ and never says so. That absence is the "
+                 "design — agents are a plugin capability — but a capability that "
+                 "disappears without a word leaves an operator reading doctrine that "
+                 "names an agent which cannot resolve on their install. Print the "
+                 "degradation and what runs instead")
+
 gex = load_json(GRAPH_EXAMPLE_REL)
 if gschema is not None and gex is not None:
     # The example must EXERCISE the shape. "Validated against its schema" is true of

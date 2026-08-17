@@ -57,3 +57,19 @@ else
   cp "$CMD_SRC" "$CMD_DEST"
   echo "Installed /task-pipeline command -> $CMD_DEST"
 fi
+
+# The role agents are a Claude Code PLUGIN capability and this path does not install
+# them. Said out loud rather than left to be discovered: the doctrine names
+# `task-pipeline:verifier`, and an operator who reads that on this install path would
+# otherwise find a name that resolves to nothing and no explanation anywhere.
+AGENTS="$HERE/plugins/task-pipeline/agents"
+if [ -d "$AGENTS" ] && [ -n "$(ls -A "$AGENTS" 2>/dev/null)" ]; then
+  echo ""
+  echo "Not installed: plugins/task-pipeline/agents/ ($(ls -1 "$AGENTS" | wc -l | tr -d ' ') file(s))."
+  echo "  Role agents are a Claude Code plugin capability; this path installs the skill"
+  echo "  and the command only. Every role still runs — on the main thread instead of in"
+  echo "  its own context, which costs context and speed, not doctrine."
+  echo "  For the agent-backed version, install the plugin:"
+  echo "    claude plugin marketplace add ssheleg/task-pipeline"
+  echo "    claude plugin install task-pipeline@task-pipeline"
+fi

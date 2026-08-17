@@ -68,8 +68,32 @@ and a caller that cannot tell them apart will wait on the wrong one.
 code being two installers and the validator was false the moment it landed, and is
 corrected in the same change.
 
-Guards: 351 → **360**. Seven plants across the module, structurally distinct rather than variations,
+Guards: 351 → **361**. Eight plants across the module, structurally distinct rather than variations,
 each asserting it landed before the validator runs.
+
+### The npx install path lost the verifier without saying so
+
+`agents/` is a Claude Code plugin capability, and `install.sh` and
+`bin/task-pipeline.js` copy the skill directory and the command and nothing else. That
+absence is the **design** — the brief chose plugin agents with honest degradation. It
+was silent, which is the part that was not: an operator on the npx path reads doctrine
+naming `task-pipeline:verifier`, finds a name that resolves to nothing, and nothing they
+ran ever mentioned it.
+
+Both paths now print what they are not installing, how many files it is, that **every
+role still runs** — on the main thread rather than in its own context, which costs
+context and speed and not doctrine — and the two commands that get the agent-backed
+version.
+
+**The guard RUNS the installers against a throwaway `HOME` rather than reading them**,
+and that decision was forced twice. The first version scanned the source for the printed
+string — and the first draft of this very fix defined `discloseAgents()` and never
+called it, which satisfies a source scan exactly. The second was defeated by a
+substring: `bin/task-pipeline.js` already prints *"Any agent (70+): npx skills add…"*,
+about the seventy agent products this skill installs into, and a check for the word
+`agent` passed it while the real gap stood untouched. It matches `agents/` with the
+slash, in output, from a real run. Three planted defects watched being refused, the
+dead-code one included.
 
 ### The R-005 read of T-3 — fourteen findings, and two of them were critical
 
