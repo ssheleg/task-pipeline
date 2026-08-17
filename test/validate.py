@@ -2845,6 +2845,110 @@ if gschema is not None:
             fail(f"{GRAPH_SCHEMA_REL}: edge.payload has no `minLength` — REQ-003: an empty "
                  "payload is `references/planning.md`'s fake edge with a field around it")
 
+# --- templates/exposure.sh's staleness section — B-081, EXECUTED over four states -------
+#
+# The ledger tracked rows nobody had confirmed and had no notion of a row whose
+# confirmation the tree had overtaken: a row verified at commit A read `verified` after
+# commit B forever. The section is a port of the freshness contract
+# `references/knowledge-graph.md` already gives the code graph — a stamp, a distance, three
+# states, and every non-current state ending in a marker.
+_ex = os.path.join(ROOT, "plugins/task-pipeline/skills/task-pipeline/templates/exposure.sh")
+if not os.path.isfile(_ex):
+    fail("templates/exposure.sh is missing")
+elif not shutil.which("bash") or not shutil.which("git"):
+    _UNLOOKED.append("skip: exposure.sh staleness not executed — bash or git unavailable")
+else:
+    _sE = dict(os.environ, GIT_AUTHOR_NAME="t", GIT_AUTHOR_EMAIL="t@t",
+               GIT_COMMITTER_NAME="t", GIT_COMMITTER_EMAIL="t@t")
+    _sd = tempfile.mkdtemp(prefix="tp-stale-")
+    try:
+        def _sgit(*a):
+            return subprocess.run(["git", *a], cwd=_sd, capture_output=True, text=True,
+                                  env=_sE)
+        _sgit("init", "-q", "-b", "main")
+        os.makedirs(os.path.join(_sd, "docs", "evidence"))
+        os.makedirs(os.path.join(_sd, "scripts"))
+        shutil.copyfile(_ex, os.path.join(_sd, "scripts", "exposure.sh"))
+        open(os.path.join(_sd, "a.txt"), "w").write("one\n")
+        _sgit("add", "-A"); _sgit("commit", "-qm", "one")
+        _first = _sgit("rev-parse", "--short=7", "HEAD").stdout.strip()
+        open(os.path.join(_sd, "b.txt"), "w").write("two\n")
+        _sgit("add", "-A"); _sgit("commit", "-qm", "two")
+        _head = _sgit("rev-parse", "--short=7", "HEAD").stdout.strip()
+        _led = os.path.join(_sd, "docs", "evidence", "verification.md")
+        with open(_led, "w", encoding="utf-8") as _fh:
+            _fh.write("# Verification\n\n"
+                      "| REQ | What | Run | Shipped in | Observed at | Auto | Human | Note |\n"
+                      "|---|---|---|---|---|---|---|---|\n"
+                      f"| REQ-001 | current | `r1` | v1.0.0 | `{_head}` | pass | 2026-08-01 | — |\n"
+                      f"| REQ-002 | behind | `r1` | v1.0.0 | `{_first}` | pass | 2026-08-01 | — |\n"
+                      "| REQ-003 | unresolvable | `r1` | v1.0.0 | `deadbee` | pass | 2026-08-01 | — |\n"
+                      "| REQ-004 | unanchored | `r1` | v1.0.0 | — | pass | **never** | — |\n")
+        _sr = subprocess.run(["bash", "scripts/exposure.sh"], cwd=_sd, capture_output=True,
+                             text=True, env=_sE)
+        _so = _sr.stdout + _sr.stderr
+        # A LINE that starts with it, not a substring anywhere in the output. `"staleness"
+        # not in _so` was the first version and `was-staleness` satisfied it — the fourth
+        # time in this session a check read a name where it needed an anchor.
+        _sline = [l for l in _so.splitlines() if l.strip().startswith("staleness —")]
+        if not _sline:
+            fail("templates/exposure.sh prints no line beginning `staleness —` — B-081: the "
+                 "ledger has no notion of a row the tree has overtaken. Output: "
+                 + _so.strip()[-300:])
+        else:
+            for _want in ("current 1", "behind 1", "unresolvable 1", "unanchored 1"):
+                if _want not in _so:
+                    fail(f"templates/exposure.sh's staleness line does not report `{_want}` "
+                         "over a ledger built with exactly one row in each state — a state it "
+                         "cannot count is a state it reports as absent. Line: "
+                         + " ".join(l for l in _so.splitlines() if "staleness" in l)[:200])
+            # Per STATE, not once in the whole output. Checking the output as a whole
+            # passed a plant that stripped the marker from the `behind` row only, because
+            # the unresolvable row still carried one.
+            for _rid, _label in (("REQ-002", "behind"), ("REQ-003", "unresolvable"),
+                                 ("REQ-004", "unanchored")):
+                _rl = [l for l in _so.splitlines() if _rid in l]
+                if not _rl:
+                    fail(f"templates/exposure.sh's staleness list never names {_rid} "
+                         f"({_label}) — a state it does not list is a state nobody can act on")
+                elif _label != "unanchored" and "not trusted" not in _rl[0]:
+                    fail(f"templates/exposure.sh reports {_rid} as {_label} without the "
+                         "`not trusted … until re-observed` marker — the contract "
+                         "`references/knowledge-graph.md` sets for the code graph is that "
+                         f"every non-current state ends with it. Line: {_rl[0].strip()[:160]}")
+            if "never a target" not in _so:
+                fail("templates/exposure.sh's staleness counts print without saying they are "
+                     "a disclosure — a count with no such note grows a threshold, and a "
+                     "threshold here is a target on staleness")
+            # State zero out loud: a ledger whose every row is current must still print.
+            with open(_led, "w", encoding="utf-8") as _fh:
+                _fh.write("# Verification\n\n"
+                          "| REQ | What | Run | Shipped in | Observed at | Auto | Human | Note |\n"
+                          "|---|---|---|---|---|---|---|---|\n"
+                          f"| REQ-001 | current | `r1` | v1.0.0 | `{_head}` | pass | 2026-08-01 | — |\n")
+            _sr2 = subprocess.run(["bash", "scripts/exposure.sh"], cwd=_sd,
+                                  capture_output=True, text=True, env=_sE)
+            _so2 = _sr2.stdout + _sr2.stderr
+            if "current 1" not in _so2 or "behind 0" not in _so2:
+                fail("templates/exposure.sh prints no staleness counts when every row is "
+                     "current — state zero out loud, or freshness is indistinguishable from "
+                     "a check that never looked")
+    finally:
+        shutil.rmtree(_sd, ignore_errors=True)
+
+    # And the SHIPPED template must carry the column, or the section is dormant in every
+    # project that seeds it — the guard above only ever saw a ledger this file wrote.
+    _vt2 = os.path.join(ROOT,
+                        "plugins/task-pipeline/skills/task-pipeline/templates/verification.md")
+    if os.path.isfile(_vt2):
+        _vh = [l for l in open(_vt2, encoding="utf-8") if l.strip().startswith("| REQ |")]
+        if not _vh:
+            fail("templates/verification.md has no `| REQ |` header row")
+        elif "observed at" not in _vh[0].lower():
+            fail("templates/verification.md's header has no `Observed at` column — B-081: "
+                 "every project seeding this ledger gets a staleness section that is "
+                 "dormant forever, and dormant is green")
+
 # --- templates/convergence.sh — B-087, and it is EXECUTED against real repositories ----
 #
 # Stage 10 already required `git submodule status` with no `+`. That is a statement about

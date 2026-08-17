@@ -3,7 +3,10 @@
 #
 # Seeded by task-pipeline (references/exposure.md). IT IS YOURS NOW.
 #
-# SCOPE: reads the verification ledger and the git tag list. It does NOT know whether a
+# SCOPE: reads the verification ledger and the git tag list. The staleness section reports
+#   how far behind HEAD each row's observation is; it does NOT know whether the commits in
+#   between touched anything the row covers, so `behind` means *unproven for this tree*,
+#   never *wrong*. It does NOT know whether a
 #   confirmation was any good, whether a `pass` in the Auto column was watched failing,
 #   or anything about code. Read this header before quoting a number from here.
 #
@@ -225,6 +228,106 @@ case "$LINE" in
 esac
 
 echo "$LINE"
+
+# ---------- staleness: a row is true about the tree it OBSERVED, not about this one ------
+# B-081. The ledger tracked rows nobody had ever confirmed and had no notion of a row whose
+# confirmation the tree has since overtaken. Those are the same failure from two ends and
+# only one end was instrumented: a row verified at commit A stayed `verified` after commit B
+# forever.
+#
+# This is a PORT, not a design: `references/knowledge-graph.md` already gives the code graph
+# a freshness contract — a stamp, a distance, three states, and every non-current state
+# ending in a marker. The same shape, applied to the ledger.
+#
+# NO THRESHOLD AND NO TARGET, for the same reason the `never` column has none: the honest
+# number is whatever it is, and a floor here would teach a run to re-observe rows for the
+# counter rather than for the question.
+STALE_CURRENT=0; STALE_BEHIND=0; STALE_UNRESOLVABLE=0; STALE_UNANCHORED=0
+STALE_LIST=""
+if [ -f "$LEDGER" ] && git rev-parse --git-dir >/dev/null 2>&1; then
+  OBSERVED=$(awk -F'|' '
+    function trim(s) { gsub(/^[ \t]+|[ \t]+$/, "", s); return s }
+    function lower(s) { return tolower(s) }
+    {
+      if (NF < 3) next
+      c1 = lower(trim($2))
+      if (c1 == "req" || c1 == "id" || c1 == "#") {
+        ocol = 0
+        for (i = 2; i < NF; i++) {
+          n = lower(trim($i))
+          if (n == "observed at" || n == "observed") { ocol = i }
+        }
+        next
+      }
+      if (!ocol) next
+      if (trim($2) ~ /^-+$/) next
+      id = trim($2); v = trim($(ocol))
+      gsub(/[`*]/, "", v)
+      if (id == "" || id ~ /^-+$/) next
+      print id "\t" v
+    }
+  ' "$LEDGER" 2>/dev/null)
+
+  if [ -z "$OBSERVED" ]; then
+    STALE_STATE="dormant: the ledger has no \`Observed at\` column — no row can say which tree it saw"
+  else
+    STALE_STATE=""
+    OLDIFS=$IFS; IFS='
+'
+    for line in $OBSERVED; do
+      IFS=$OLDIFS
+      rid=$(printf '%s' "$line" | cut -f1)
+      sha=$(printf '%s' "$line" | cut -f2)
+      case "$sha" in
+        ""|"-"|"—"|"never"|"n/a")
+          STALE_UNANCHORED=$((STALE_UNANCHORED+1))
+          STALE_LIST="$STALE_LIST$rid unanchored — no commit recorded, so nothing can say what it saw
+" ;;
+        *)
+          if git rev-parse --verify -q "${sha}^{commit}" >/dev/null 2>&1; then
+            behind=$(git rev-list --count "${sha}..HEAD" 2>/dev/null || echo 0)
+            if [ "${behind:-0}" -eq 0 ]; then
+              STALE_CURRENT=$((STALE_CURRENT+1))
+            else
+              ts=$(git log -1 --format=%ct "$sha" 2>/dev/null || echo "")
+              now=$(git log -1 --format=%ct HEAD 2>/dev/null || echo "")
+              days=""
+              if [ -n "$ts" ] && [ -n "$now" ]; then days=" / $(( (now - ts) / 86400 ))d"; fi
+              STALE_BEHIND=$((STALE_BEHIND+1))
+              plural="commits"; [ "$behind" -eq 1 ] && plural="commit"
+              STALE_LIST="$STALE_LIST$rid observed \`$sha\` — $behind $plural$days behind HEAD — not trusted for the current tree until re-observed
+"
+            fi
+          else
+            STALE_UNRESOLVABLE=$((STALE_UNRESOLVABLE+1))
+            STALE_LIST="$STALE_LIST$rid observed \`$sha\`, which does not resolve in this checkout (rebase, squash or shallow clone) — not trusted until re-observed
+"
+          fi ;;
+      esac
+      IFS='
+'
+    done
+    IFS=$OLDIFS
+  fi
+else
+  STALE_STATE="dormant: no ledger or not a git checkout"
+fi
+
+echo ""
+if [ -n "${STALE_STATE:-}" ]; then
+  echo "staleness — $STALE_STATE"
+else
+  # State zero out loud: printing nothing when every row is current is what makes
+  # freshness indistinguishable from a check that never looked.
+  echo "staleness — current $STALE_CURRENT · behind $STALE_BEHIND · unresolvable $STALE_UNRESOLVABLE · unanchored $STALE_UNANCHORED"
+  echo "             (a disclosure: no floor, no direction, never a target. Invalidation is"
+  echo "              not deletion — an overtaken row stays true about the tree it observed.)"
+  if [ -n "$STALE_LIST" ]; then
+    printf '%s' "$STALE_LIST" | head -8 | while IFS= read -r l; do
+      [ -n "$l" ] && echo "           $l"
+    done
+  fi
+fi
 
 # ---------- the check-list: a number without it says there is a problem, not where ----------
 # A SHRUG IS NOT A CLEAN BILL. A status that is neither a date nor a known word means

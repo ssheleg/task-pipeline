@@ -38,11 +38,44 @@ that vanishes when unavailable is indistinguishable from one nobody checked.
 naming a vendor id in a shipped skill is forbidden here, and inferring the wrong one is
 worse than saying nothing.
 
-| REQ | What | Run | Shipped in | Auto | Human | Note |
-|---|---|---|---|---|---|---|
-| REQ-001 | CSV export from a report | `2026-07-28-export` | v1.4.0 | pass | 2026-07-30 | opened the deployed page, exported, opened the file |
-| REQ-004 | XLSX export | `2026-07-28-export` | v1.4.0 | pass | **never** | — |
-| REQ-007 | Export respects active filters | `2026-07-28-export` | v1.4.0 | partial | **never** | CSV path only |
+## Contents
+
+- [Staleness — a row is true about the tree it OBSERVED](#staleness--a-row-is-true-about-the-tree-it-observed)
+- the ledger itself — one row per REQ, appended by stage 8
+- [What `Human` means, and what it does not](#what-human-means-and-what-it-does-not)
+
+## Staleness — a row is true about the tree it OBSERVED
+
+`Observed at` is the commit the check ran against. Without it a row verified at commit A
+reads `verified` after commit B forever, and the ledger tracks rows nobody ever confirmed
+while having no notion of a row the tree has since **overtaken**. Those are the same
+failure from two ends, and only one end was instrumented.
+
+`scripts/exposure.sh` reports four states, and it is a **disclosure**: no floor, no
+direction, never a target — for the same reason the `Human` column has none.
+
+| State | Condition | What it means |
+|---|---|---|
+| **current** | 0 commits behind `HEAD` | the row still speaks about this tree |
+| **behind** | N commits / M days behind | *not trusted for the current tree until re-observed* |
+| **unresolvable** | the commit does not resolve here | rebase, squash or shallow clone — same marker |
+| **unanchored** | no commit recorded | nothing can say what it saw |
+
+**State zero prints out loud.** `current 12 · behind 0 · unresolvable 0 · unanchored 0` is
+a measurement; printing nothing when everything is fresh is what makes freshness
+indistinguishable from a check that never looked.
+
+**Invalidation is not deletion.** An overtaken row is not wrong — it is true about the tree
+it observed, and it stays. Re-observing appends a **new** row; it does not edit the old
+one. Four things overtake a row, and naming which one applies is the note's job: a **code**
+change in what it covers, a **dependency** change, an **environment** change, and a
+**policy** change — the last being the rule under which the evidence was accepted.
+
+| REQ | What | Run | Shipped in | Observed at | Auto | Human | Note |
+|---|---|---|---|---|---|---|---|
+| REQ-001 | CSV export from a report | `2026-07-28-export` | v1.4.0 | `5f21ac3` | pass | 2026-07-30 | opened the deployed page, exported, opened the file |
+| REQ-004 | XLSX export | `2026-07-28-export` | v1.4.0 | `5f21ac3` | pass | **never** | — |
+| REQ-007 | Export respects active filters | `2026-07-28-export` | v1.4.0 | `5f21ac3` | partial | **never** | CSV path only |
 
 ## Columns
 

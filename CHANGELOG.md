@@ -68,8 +68,42 @@ and a caller that cannot tell them apart will wait on the wrong one.
 code being two installers and the validator was false the moment it landed, and is
 corrected in the same change.
 
-Guards: 351 → **366**. Thirteen plants across the module, structurally distinct rather than variations,
+Guards: 351 → **367**. Fourteen plants across the module, structurally distinct rather than variations,
 each asserting it landed before the validator runs.
+
+### B-081 — proof expires, and the ledger had only one end of it
+
+The verification ledger tracked rows nobody had **ever** confirmed and had no notion of a
+row whose confirmation the tree has since **overtaken**. A row verified at commit A read
+`verified` after commit B, forever. Those are the same failure from two ends, and only one
+end was instrumented — so a ledger could read fully green over a tree where every check ran
+against code that has since moved.
+
+**This is a port, not a design.** `references/knowledge-graph.md` already gives the code
+graph a stamp, a distance, three states, and a marker on every non-current one. The same
+contract, applied to the ledger: `Observed at` is the commit the check ran against, and
+`exposure.sh` reports **current · behind · unresolvable · unanchored** — a disclosure with
+no floor, no direction and never a target, exactly like the `never` column beside it.
+
+`behind` means **unproven for this tree, never wrong.** The section knows the distance and
+does not know whether the commits between touched anything the row covers; claiming more
+would be the estimate-printed-as-measurement this pipeline refuses elsewhere. And
+**invalidation is not deletion** — an overtaken row is true about the tree it observed and
+stays; re-observing appends.
+
+**Where it prints turned out to matter as much as what it prints.** The first placement put
+the section after the check-list, and `exposure.sh` exits early when nothing is unverified
+— so the counts were invisible in exactly the state where they matter most. `0 unverified`
+is the sentence most likely to be read as *nothing to look at*.
+
+**Three of the eight plants defeated the guard on the first attempt, and one of them for the
+fourth time this session.** Checking `"staleness" not in output` passed a section renamed to
+`was-staleness`, because the old string is a substring of the new one; the guard anchors on a
+line *beginning* `staleness —` now. Checking `"not trusted" not in output` passed a plant
+that stripped the marker from the `behind` row only, because the unresolvable row still
+carried one — it is checked **per state** now. And nothing asserted the **shipped** template
+carried the column at all, so every project seeding it would have got a section dormant
+forever, and dormant is green. All eight refused now.
 
 ### B-087 — the pointer is not the path
 

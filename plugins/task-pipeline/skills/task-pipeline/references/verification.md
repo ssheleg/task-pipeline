@@ -22,6 +22,7 @@ the run*. Three things it does not say, and each is why this file exists:
 
 - Why it keys to the brief, not to the coverage table
 - `never` is a fact
+- Staleness — the other end of `never`
 - A ledger records two different things, and most record only one
 - What stage 8 writes and what stage 10 refuses
 - Rationalizations
@@ -53,6 +54,57 @@ reality — and this is the pipeline's only signal about the world outside its o
 So the count has **no floor, no direction, and may never be given a target**, exactly
 like the disclosures in [`gates.md`](gates.md). A project with forty `never` rows is not
 failing; it is a project that now knows something it could not previously ask.
+
+## Staleness — the other end of `never`
+
+This file tracked rows nobody had ever confirmed and had **no notion of a row whose
+confirmation the tree has overtaken.** A row verified at commit A read `verified` after
+commit B, forever. Those are the same failure from two ends, and only one end was
+instrumented — which is why a ledger could read fully green over a tree where every check
+ran against code that has since moved.
+
+`Observed at` is the commit the check ran against. `scripts/exposure.sh` reports four
+states from it, and the whole thing is a **port**: `references/knowledge-graph.md` already
+gives the code graph a stamp, a distance and three states, and every non-current one ends
+in a marker. The same contract, applied to the ledger.
+
+| State | Condition | Reads |
+|---|---|---|
+| **current** | 0 commits behind `HEAD` | still speaks about this tree |
+| **behind** | N commits / M days behind | *not trusted for the current tree until re-observed* |
+| **unresolvable** | the commit does not resolve here | rebase, squash, shallow clone — same marker |
+| **unanchored** | no commit recorded | nothing can say what it saw |
+
+**It is a disclosure: no floor, no direction, never a target** — the same contract the
+`Human` column has, and for the same reason. A threshold on staleness teaches a run to
+re-observe rows for the counter rather than for the question.
+
+**`behind` means unproven for this tree, never wrong.** The section knows the distance and
+does not know whether the commits in between touched anything the row covers. Claiming
+more than that would be the estimate-printed-as-measurement this pipeline refuses
+elsewhere.
+
+**State zero prints out loud.** `current 12 · behind 0 · unresolvable 0 · unanchored 0` is
+a measurement; printing nothing when everything is fresh makes freshness indistinguishable
+from a check that never looked.
+
+**Invalidation is not deletion.** An overtaken row is not wrong — it is true about the tree
+it observed, and it stays. Re-observing **appends** a row; it never edits the old one. Four
+things overtake a row, and the note says which applies: a **code** change in what it
+covers, a **dependency** change, an **environment** change, and a **policy** change — the
+rule under which the evidence was accepted.
+
+**Where the section prints matters as much as what it prints.** It runs *before* the
+check-list, because `exposure.sh` exits early when nothing is unverified — and that is
+exactly the state where these counts matter most. `0 unverified` is the sentence most
+likely to be read as *nothing to look at*, and a staleness section invisible behind it
+would have been dormant precisely when it was needed.
+
+| Rationalization | Why it is wrong |
+|---|---|
+| *"The row says `pass`, so it passes."* | It passed against a tree. Name which one, or the claim has no subject |
+| *"Everything is behind, so the number is noise."* | Then it is a large honest number. A threshold would make it a small dishonest one |
+| *"I re-ran the check, so I will update the row."* | Append. The old row is true about what it saw, and overwriting it destroys the only record of when the claim was earned |
 
 ## A ledger records two different things, and most record only one
 
