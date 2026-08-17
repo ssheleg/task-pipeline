@@ -211,7 +211,12 @@ def violations(graph):
 
         for field in ("title", "serves"):
             val = n.get(field)
-            if isinstance(val, str) and any(c in val for c in "\n\r"):
+            if not isinstance(val, str) or not val.strip():
+                out.append(f"{nid}: `{field}` is {val!r}. The schema requires a non-empty "
+                           "string and never ran against a live graph, so this passed — a "
+                           "node with no title is a frontier row nobody can act on, and a "
+                           "node serving nothing is REQ-012's park case")
+            elif any(c in val for c in "\n\r"):
                 out.append(f"{nid}: `{field}` contains a line break. `next` prints one row "
                            "per node and the loop reads those rows, so a break here forges "
                            "a row for a node that does not exist")
@@ -232,11 +237,44 @@ def violations(graph):
                            "REQ-012: a park without a reason is indistinguishable from "
                            "work that was quietly dropped")
 
+    # An edge with no payload, and a dependency with no edge. The graph stored the same
+    # fact in two unlinked places — `blocked_by`, which `frontier()` obeys, and `edges`,
+    # which carries the payload and which nothing read past a from/to existence check.
+    # So `references/planning.md`'s fake-edge test was stated for the markdown plan and
+    # unenforceable on the artifact that replaced it. Found by a four-way audit,
+    # 2026-08-17, which measured this pipeline's own `add` producing one every run.
+    carried = {}
     for e in graph.get("edges") or []:
         for end in ("from", "to"):
             if e.get(end) not in known:
                 out.append(f"edge {e.get('from')}→{e.get('to')}: {end} names "
                            f"{e.get(end)}, which is not in this graph")
+        pay = e.get("payload")
+        if not isinstance(pay, str) or not pay.strip():
+            out.append(f"edge {e.get('from')}→{e.get('to')}: `payload` is {pay!r}. An edge "
+                       "carrying no named artifact is chronology drawn as architecture — "
+                       "`references/planning.md`'s fake-edge test, on the graph rather than "
+                       "on the plan")
+        else:
+            carried[(e.get("from"), e.get("to"))] = pay
+
+    for n in nodes:
+        for b in n.get("blocked_by") or []:
+            if b in known and (b, n.get("id")) not in carried:
+                out.append(f"{n.get('id')}: blocked_by names {b} and no edge {b}→"
+                           f"{n.get('id')} carries a payload. The dependency the frontier "
+                           "obeys and the payload that justifies it are separate fields, "
+                           "and a dependency handing over nothing is the one this check "
+                           "exists to refuse")
+
+    for i, r in enumerate(graph.get("revisions") or []):
+        if not isinstance(r, dict):
+            out.append(f"revisions[{i}] is not an object")
+            continue
+        if not isinstance(r.get("why"), str) or not r["why"].strip():
+            out.append(f"revisions[{i}] records {r.get('verb')} on {r.get('node')} with "
+                       f"`why` = {r.get('why')!r} — a revision log whose reasons are blank "
+                       "is the log's own failure mode, not a record")
 
     out.extend(cycles(nodes))
     return out
@@ -477,6 +515,18 @@ class held:
         return False
 
 
+def revise(graph, verb, node, why):
+    """Append the revision. Both verbs call it; neither may skip it.
+
+    `park` demanded a reason from the start and `add` demanded nothing, so half the
+    graph's revision surface was silent — and a graph that changed for reasons nobody
+    recorded can always explain its own completion by appealing to a plan that existed
+    only at the end.
+    """
+    graph.setdefault("revisions", []).append(
+        {"verb": verb, "node": node, "why": why})
+
+
 def guard(graph, path):
     """Refuse a mutation on a graph that was already invalid, and SAY it was already.
 
@@ -519,6 +569,7 @@ def cmd_park(graph, args):
 
     node["status"] = "parked"
     node["parked_reason"] = reason
+    revise(graph, "park", args.node, reason)
     bad = violations(graph)
     if bad:
         die("parking %s would break the graph — nothing was written:\n  %s"
@@ -570,7 +621,33 @@ def cmd_add(graph, args):
     # Dedupe rather than refuse: `argparse action="append"` makes a repeat trivially easy
     # to type, the intent is unambiguous, and the schema calls the list unique — so the
     # repair is exact. A hand-written graph with the same repeat is caught by `violations`.
-    blocked = list(dict.fromkeys(args.blocked_by or []))
+    why = (args.why or "").strip()
+    if not why:
+        die("`add` needs a --why with something in it: a node appearing mid-run is a "
+            "revision of the plan, and a revision nobody recorded a reason for is how a "
+            "run explains its own completion by a plan that existed only at the end")
+    if any(c in why for c in "\n\r"):
+        die("--why contains a line break — nothing was written")
+
+    # `dict.fromkeys` for the dependency, and the payloads must survive the same
+    # deduplication or they stop pairing by index.
+    raw_blocked = args.blocked_by or []
+    raw_carries = args.carries or []
+    if len(raw_blocked) != len(raw_carries):
+        die("--blocked-by was given %d time(s) and --carries %d. Each dependency names "
+            "what it hands over, and they pair in the order written — an edge carrying no "
+            "named artifact is chronology drawn as architecture. Nothing was written"
+            % (len(raw_blocked), len(raw_carries)))
+    pairs, seen_b = [], set()
+    for b, c in zip(raw_blocked, raw_carries):
+        if b in seen_b:
+            continue
+        seen_b.add(b)
+        if not c.strip():
+            die("--carries for %s is blank. A payload nobody named is the fake edge with a "
+                "field around it — nothing was written" % b)
+        pairs.append((b, c.strip()))
+    blocked = [b for b, _ in pairs]
     for b in blocked:
         if b not in known:
             die("--blocked-by names %s, which is not in this graph — nothing was written" % b)
@@ -585,6 +662,12 @@ def cmd_add(graph, args):
     nodes.append({"id": nid, "title": title, "owner": args.owner, "status": "pending",
                   "blocked_by": blocked, "serves": serves,
                   "evidence": None})
+    # The edge lands WITH the node. Writing `blocked_by` and leaving `edges` for later is
+    # what made every mid-run node a fake edge by construction.
+    edges = graph.setdefault("edges", [])
+    for b, payload in pairs:
+        edges.append({"from": b, "to": nid, "payload": payload})
+    revise(graph, "add", nid, why)
     bad = violations(graph)
     if bad:
         # Belt over the braces: every shape enumerated above is checked before this
@@ -614,6 +697,10 @@ def main(argv=None):
     p_add.add_argument("--owner", required=True)
     p_add.add_argument("--serves", required=True)
     p_add.add_argument("--blocked-by", dest="blocked_by", action="append", default=[])
+    p_add.add_argument("--carries", action="append", default=[],
+                       help="what each --blocked-by hands over; pairs in the order written")
+    p_add.add_argument("--why", required=True,
+                       help="why this node appeared mid-run — it enters the revision log")
     p_add.add_argument("--id", default=None, help="omit to allocate the next one")
 
     p_park = sub.add_parser("park", parents=[common], help="park a node, carrying the reason")

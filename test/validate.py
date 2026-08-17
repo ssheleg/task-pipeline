@@ -2708,6 +2708,23 @@ if gschema is not None:
                 fail(f"{GRAPH_SCHEMA_REL}: {_why}. The same class was found and fixed on "
                      "`owner` three screens above and not carried to the new field")
 
+    # The revision log — B-084. `park` demanded a reason from the start and `add`
+    # demanded nothing, so half the graph's revision surface was silent, and a graph
+    # that changed for unrecorded reasons can explain its own completion by a plan that
+    # existed only at the end.
+    _grev, _rwhy = _garray_items(_gprops.get("revisions", {}), "revisions")
+    if _grev is None:
+        fail(f"{GRAPH_SCHEMA_REL}: {_rwhy} — B-084: the revision log has to bind, or a "
+             "mutation can record that it happened and not why")
+    else:
+        for _f in ("verb", "node", "why"):
+            if _f not in set(_grev.get("required") or []):
+                fail(f"{GRAPH_SCHEMA_REL}: a revision does not require `{_f}` — a log "
+                     "entry that omits any of the three records nothing usable")
+        _rw = _binds_blank(_gfield(_grev, "why"), "revision.why")
+        if _rw:
+            fail(f"{GRAPH_SCHEMA_REL}: {_rw} — B-084")
+
     _gedge, _why = _garray_items(_gprops.get("edges", {}), "edges")
     if _gedge is None:
         fail(f"{GRAPH_SCHEMA_REL}: {_why} — REQ-003: the edge shape has to bind")

@@ -56,5 +56,12 @@
       "to": "N-003",
       "payload": "the node shape the verdict's `node` field references"
     }
+  ],
+  "revisions": [
+    {
+      "verb": "park",
+      "node": "N-004",
+      "why": "The verifier's re-plan: this serves module 2, and module 1's goal clause does not reach it. Parked rather than dropped so the decision survives."
+    }
   ]
 }

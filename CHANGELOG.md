@@ -68,8 +68,46 @@ and a caller that cannot tell them apart will wait on the wrong one.
 code being two installers and the validator was false the moment it landed, and is
 corrected in the same change.
 
-Guards: 351 → **361**. Eight plants across the module, structurally distinct rather than variations,
+Guards: 351 → **362**. Nine plants across the module, structurally distinct rather than variations,
 each asserting it landed before the validator runs.
+
+### B-084 — the mutation verb was drawing chronology
+
+The graph stored one fact in two unlinked places. `blocked_by` is what `frontier()`
+obeys; `edges` carries the `payload` the schema requires — and nothing read it past a
+from/to existence check. So `references/planning.md`'s fake-edge test, stated for the
+markdown plan, was **unenforceable on the artifact that replaced the plan**, and
+`graph.py add` wrote the first field and never the second. Every node added mid-run
+therefore created a dependency whose payload was unnamed *by construction*. Measured by
+the four-way manifesto audit: adding a node to the shipped example gave 5 nodes, 2
+edges, `validate` exit 0.
+
+Four things move together, because separately each leaves a hole the others cover:
+
+- **`violations()` refuses an edge whose `payload` is missing or blank**, and refuses a
+  `blocked_by` with no payload-bearing edge **in the blocker→blocked direction** — a
+  backwards edge no longer satisfies a dependency.
+- **`title` and `serves` must be non-empty at runtime.** Both were schema-only, and the
+  schema has never run against a live graph, so `serves: ""` passed the gate while the
+  format forbade it.
+- **`add` takes `--carries`**, one per `--blocked-by`, pairing in the order written, and
+  writes the edge **with** the node. A count mismatch is refused and names both counts.
+- **`add` takes `--why`, and there is now a revision log.** `park` demanded a reason
+  from the start and `add` demanded nothing, which left half the graph's revision
+  surface silent — and a graph that changed for reasons nobody recorded can always
+  explain its own completion by appealing to a plan that existed only at the end. Both
+  verbs append `{verb, node, why}`; the schema requires all three and requires `why` to
+  hold a non-whitespace character; `next` never prints the log, because the frontier's
+  width is what a loop pays for on every iteration and this grows.
+
+**Tightening the rule invalidated the fixtures that had relied on it being loose**,
+which is the clearest evidence it bites: the test helper now *derives* an edge for every
+`blocked_by` it builds, and the one fixture that needs a dependency with no edge asks
+for it explicitly. Four planted defects were watched being refused, including a
+`why` pattern of `^.*$` and a nullable `why` — the two shapes that defeated this file
+twice already today.
+
+`test/graph_test.py` → **75 cases**.
 
 ### The npx install path lost the verifier without saying so
 

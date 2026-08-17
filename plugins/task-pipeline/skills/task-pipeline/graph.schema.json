@@ -29,6 +29,13 @@
         "$ref": "#/definitions/edge"
       },
       "description": "Dependencies, each carrying what it hands over."
+    },
+    "revisions": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/revision"
+      },
+      "description": "Why the graph is not the graph stage 2 wrote. Every mutation appends one entry, and both verbs refuse without a reason — `park` always did, `add` did not, which left half the revision surface silent. A graph that changed for reasons nobody recorded can always explain its own completion by appealing to a plan that existed only at the end; this log is what makes that checkable. `next` never prints it — the frontier's width is what a loop pays for on every iteration, and this grows."
     }
   },
   "definitions": {
@@ -177,6 +184,36 @@
           "type": "string",
           "minLength": 1,
           "description": "What this edge carries. Required, and it is `references/planning.md`'s fake-edge test stated in the schema rather than remembered: an arrow whose payload nobody can name is not a dependency, it is a drawing. Naming it is also how the receiving node's brief gets written."
+        }
+      }
+    },
+    "revision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "verb",
+        "node",
+        "why"
+      ],
+      "properties": {
+        "verb": {
+          "type": "string",
+          "enum": [
+            "add",
+            "park"
+          ],
+          "description": "Which mutation made this entry."
+        },
+        "node": {
+          "type": "string",
+          "pattern": "^N-[0-9]{3,}$",
+          "description": "The node the mutation touched."
+        },
+        "why": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "\\S",
+          "description": "The reason, written for a person reading it later. The non-whitespace pattern is required for the same reason `parked_reason` needs one: `minLength: 1` counts a space."
         }
       }
     }
