@@ -1,6 +1,6 @@
 ---
 name: verifier
-description: Closes one node of the work graph. Reads the diff, the node's REQ and the gate output, and returns a six-key verdict — what is done with the evidence for each claim, what is not, the blockers and whether the run can continue around them, and a re-plan. Use when a task in a task-pipeline run has finished and the graph needs to advance. Not for reviewing code quality — that is the reviewer.
+description: Closes one node of the work graph. Reads the diff, the node's REQ and the gate output, and returns a seven-key verdict — what is done with the evidence for each claim, what is not, the blockers and whether the run can continue around them, and a re-plan. Use when a task in a task-pipeline run has finished and the graph needs to advance. Not for reviewing code quality — that is the reviewer.
 model: inherit
 tools: Read, Grep, Glob, Bash
 ---
@@ -25,24 +25,31 @@ the human. So a verdict that means *«I need a decision»* must say so **in the
 verdict** — `replan.possible: false` with the `why` written for a person — rather
 than ending in a question nobody will see.
 
-## The verdict, and every key is required
+## The verdict, and all seven keys are required
 
 ```json
 {
   "node": "N-007",
-  "done":     ["what was asked and is now true"],
-  "not_done": ["what was asked and is not"],
-  "blockers": [{ "what": "…", "blocks": ["N-009"], "can_continue_around": true }],
-  "replan":   { "possible": true, "add": [], "park": ["N-009"], "why": "…" },
-  "evidence": ["the command and the output that proves each `done` row"]
+  "done":         ["what was asked and is now true"],
+  "not_done":     ["what was asked and is not"],
+  "not_verified": ["what was BUILT and no check touched"],
+  "blockers":     [{ "what": "…", "blocks": ["N-009"], "can_continue_around": true }],
+  "replan":       { "possible": true, "add": [], "park": ["N-009"], "why": "…" },
+  "evidence":     ["the command and the output that proves each `done` row"]
 }
 ```
 
-`scripts/graph.py close` refuses it otherwise, and the refusal names the key —
-**`close` lands with task T-5 and is not built yet (v1.69.0)**; until it is, the
-dispatcher checks your verdict with `graph.py`'s `verdict_violations()` and the
-rules below are the same either way. The
-rule with teeth is the smallest one: **a `done` claim with an empty `evidence` is
+**`not_verified` is the one people collapse into `not_done`, and they are different
+facts.** `not_done` is *asked for and absent*; `not_verified` is *present and unchecked* —
+the second ships and the first does not. An empty list is a valid answer and silence is
+not.
+
+**You do not supply the commit.** `close` reads `git rev-parse HEAD` itself and appends it
+to the evidence, because a verdict written after the tree moved is evidence about a
+different tree, and an agent cannot name the wrong one if it never names one.
+
+`scripts/graph.py close --verdict <path>` refuses it otherwise, and the refusal names the
+key. The rule with teeth is the smallest one: **a `done` claim with an empty `evidence` is
 rejected.** Not as bookkeeping — it is the difference between a node that was
 verified and a node that was asserted, and the assertion is the failure this whole
 ledger exists to catch.

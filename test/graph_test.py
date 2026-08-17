@@ -246,7 +246,8 @@ def _():
 # --- the verdict: the shape `close` consumes, and what it refuses --------------
 
 def verdict(**kw):
-    v = {"node": "N-001", "done": ["a thing"], "not_done": [], "blockers": [],
+    v = {"node": "N-001", "done": ["a thing"], "not_done": [], "not_verified": [],
+         "blockers": [],
          "replan": {"possible": True, "add": [], "park": [], "why": "nothing blocks"},
          "evidence": ["npm test → PASS"]}
     v.update(kw)
@@ -268,9 +269,13 @@ def _():
     assert check_verdict(verdict()) == [], check_verdict(verdict())
 
 
-@case("every one of the six keys is required, and the message names the missing one")
+@case("every one of the seven keys is required, and the message names the missing one")
 def _():
-    for key in ("node", "done", "not_done", "blockers", "replan", "evidence"):
+    # `not_verified` is the seventh, added by T-5: the six said what is built and what is
+    # not, and none said what was BUILT AND NOT CHECKED. `npm test` prints `unlooked: N` one
+    # level up, so the pipeline named the concept everywhere except in the verdict that
+    # closes work with it.
+    for key in ("node", "done", "not_done", "not_verified", "blockers", "replan", "evidence"):
         v = verdict()
         del v[key]
         bad = check_verdict(v)
@@ -1216,6 +1221,179 @@ def _():
     assert code == 0, out
     assert json.loads(p.read_text())["nodes"][1]["touches"] == ["src/a.ts", "src/b.ts"], \
         json.loads(p.read_text())["nodes"][1]
+
+
+# --- T-5: `close` consumes a verdict and re-plans -----------------------------------------
+#
+# `verdict_violations()` had no CLI verb, so the gate the module docstring calls *the thing
+# `close` consumes* was reachable only from this file. And `agents/verifier.md` told an agent
+# to run `graph.py close` — shipped doctrine pointing at an absence, the same class as B-080.
+
+def full_verdict(node="N-001", **over):
+    v = {"node": node,
+         "done": ["the thing was built"],
+         "not_done": [],
+         "not_verified": [],
+         "blockers": [],
+         "replan": {"possible": True, "add": [], "park": [], "why": ""},
+         "evidence": ["npm test → PASS: 3 cases"]}
+    v.update(over)
+    return v
+
+
+def close_at(path, v, *extra):
+    d = pathlib.Path(path).parent
+    vp = d / "verdict.json"
+    vp.write_text(json.dumps(v))
+    return run_at(path, "close", "--verdict", str(vp), *extra)
+
+
+@case("close marks the node done and records the evidence")
+def _():
+    p = written(g([node("N-001", serves="REQ-001"), node("N-002", serves="REQ-001")]))
+    code, out = close_at(p, full_verdict())
+    assert code == 0, "a well-formed verdict was refused: %s" % out
+    n = json.loads(p.read_text())["nodes"][0]
+    assert n["status"] == "done", n
+    assert any("npm test" in e for e in n["evidence"]), n
+
+
+@case("close STAMPS the commit — the verifier never supplies it")
+def _():
+    # An agent cannot claim the wrong tree if it is never the one naming it.
+    p = written(g([node("N-001", serves="REQ-001")]))
+    code, out = close_at(p, full_verdict())
+    assert code == 0, out
+    n = json.loads(p.read_text())["nodes"][0]
+    stamped = [e for e in n["evidence"] if re.search(r"\bobserved at\b", e)]
+    assert stamped, "close recorded no commit stamp: %s" % n["evidence"]
+    assert re.search(r"[0-9a-f]{7,40}|unavailable", stamped[0]), stamped[0]
+
+
+@case("a verdict omitting `not_verified` is refused — all seven keys")
+def _():
+    p = written(g([node("N-001", serves="REQ-001")]))
+    v = full_verdict()
+    del v["not_verified"]
+    code, out = close_at(p, v)
+    assert code == 1, "a six-key verdict was accepted: %s" % out
+    assert "not_verified" in out, out
+    assert json.loads(p.read_text())["nodes"][0]["status"] == "pending", "it closed anyway"
+
+
+@case("done with empty evidence is refused, and nothing is written")
+def _():
+    p = written(g([node("N-001", serves="REQ-001")]))
+    before = p.read_bytes()
+    code, out = close_at(p, full_verdict(evidence=[]))
+    assert code == 1, out
+    assert p.read_bytes() == before, "a refused close wrote to the file"
+
+
+@case("replan.add appends the nodes the verifier asked for")
+def _():
+    p = written(g([node("N-001", serves="REQ-001")]))
+    v = full_verdict(replan={"possible": True, "why": "the reader found a gap",
+                        "add": [{"title": "close the gap", "owner": "implementer",
+                                 "serves": "REQ-001"}],
+                        "park": []})
+    code, out = close_at(p, v)
+    assert code == 0, out
+    nodes = json.loads(p.read_text())["nodes"]
+    assert len(nodes) == 2, nodes
+    assert nodes[1]["title"] == "close the gap", nodes[1]
+    assert nodes[1]["status"] == "pending", nodes[1]
+
+
+@case("replan.park parks the nodes it names, carrying the verdict's why")
+def _():
+    p = written(g([node("N-001", serves="REQ-001"), node("N-002", serves="REQ-001")]))
+    v = full_verdict(replan={"possible": True, "why": "N-002 serves module 2", "add": [],
+                        "park": ["N-002"]})
+    code, out = close_at(p, v)
+    assert code == 0, out
+    n2 = json.loads(p.read_text())["nodes"][1]
+    assert n2["status"] == "parked", n2
+    assert "module 2" in n2.get("parked_reason", ""), n2
+
+
+@case("replan.possible false stops, and prints the verdict's own why")
+def _():
+    p = written(g([node("N-001", serves="REQ-001"), node("N-002", serves="REQ-001")]))
+    v = full_verdict(replan={"possible": False, "why": "the operator must choose a price", "add": [], "park": []})
+    code, out = close_at(p, v)
+    assert code == 1, "a stop must not exit 0 — the loop would carry on: %s" % out
+    assert "choose a price" in out, "the printed reason is not the verdict's own: %s" % out
+    assert json.loads(p.read_text())["nodes"][0]["status"] == "done", (
+        "the node it closed must still close — the stop is about what comes NEXT")
+
+
+@case("close prints the goal and the new frontier count")
+def _():
+    p = written(g([node("N-001", serves="REQ-001"), node("N-002", serves="REQ-001")],
+                  goal="the loop advances without a human"))
+    code, out = close_at(p, full_verdict())
+    assert code == 0, out
+    assert "without a human" in out, "the goal is not printed: %s" % out
+    assert re.search(r"frontier[^\n]*\b1\b", out), "the new frontier count is not printed: %s" % out
+
+
+@case("close records a revision carrying the verdict's why")
+def _():
+    p = written(g([node("N-001", serves="REQ-001")]))
+    close_at(p, full_verdict(replan={"possible": True, "why": "nothing further needed", "add": [], "park": []}))
+    rev = json.loads(p.read_text()).get("revisions") or []
+    assert any(r["verb"] == "close" and r["node"] == "N-001" for r in rev), rev
+
+
+@case("close refuses a node that is not runnable, and says why")
+def _():
+    p = written(g([node("N-001", serves="REQ-001"),
+                   node("N-002", serves="REQ-001", blocked=["N-001"])]))
+    code, out = close_at(p, full_verdict(node="N-002"))
+    assert code == 1, "a blocked node was closed: %s" % out
+    assert "N-001" in out, "the refusal does not name what it waits on: %s" % out
+
+
+@case("the graph after a close still validates")
+def _():
+    p = written(g([node("N-001", serves="REQ-001"), node("N-002", serves="REQ-001")]))
+    close_at(p, full_verdict(replan={"possible": True, "why": "w", "add": [], "park": ["N-002"]}))
+    code, out = run_at(p, "validate")
+    assert code == 0, "close wrote a graph that does not validate: %s" % out
+
+
+@case("the revision verb set agrees between the script and the schema")
+def _():
+    # `close` wrote `verb: "close"` while the schema enumerated only add and park, and the
+    # fixture asserting *the graph after a close still validates* passed anyway, because
+    # `violations()` never reached an enum. Same class as B-084, one field over — so the two
+    # homes are compared directly.
+    schema = json.loads((ROOT / "plugins/task-pipeline/skills/task-pipeline"
+                              / "graph.schema.json").read_text())
+    declared = set(schema["definitions"]["revision"]["properties"]["verb"]["enum"])
+    sys.path.insert(0, str(GRAPH.parent))
+    import importlib
+    mod = importlib.reload(importlib.import_module("graph"))
+    assert declared == mod.REVISION_VERBS, (
+        "the schema enumerates %s and the script knows %s" % (sorted(declared),
+                                                              sorted(mod.REVISION_VERBS)))
+
+
+@case("a close writes a graph its own schema accepts — checked with jsonschema")
+def _():
+    try:
+        import jsonschema
+    except ImportError:
+        skipped.append("the post-close schema cross-check")
+        return
+    schema = json.loads((ROOT / "plugins/task-pipeline/skills/task-pipeline"
+                              / "graph.schema.json").read_text())
+    p = written(g([node("N-001", serves="REQ-001"), node("N-002", serves="REQ-001")]))
+    code, out = close_at(p, full_verdict(replan={"possible": True, "why": "w", "add": [
+        {"title": "found", "owner": "implementer", "serves": "REQ-001"}], "park": ["N-002"]}))
+    assert code == 0, out
+    jsonschema.validate(json.loads(p.read_text()), schema)
 
 if failures:
     print("\n%d failure(s) out of %d cases" % (len(failures), cases))

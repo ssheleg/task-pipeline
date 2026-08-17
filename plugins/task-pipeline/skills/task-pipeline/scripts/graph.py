@@ -75,6 +75,9 @@ ROLES = {
 
 TERMINAL = {"done", "parked"}
 NO_GRAPH = {"producer", "doctrine"}
+# One place, and the schema enumerates the same three. Two homes for this set is
+# what let `close` write a verb the format forbade.
+REVISION_VERBS = {"add", "park", "close"}
 # Parking a node PROMOTES its dependents: `parked` is terminal, so anything
 # blocked on it becomes runnable even though the payload it waited on never
 # arrived. That is deliberate — `can_continue_around` in the verdict is the
@@ -285,6 +288,12 @@ def violations(graph):
         if not isinstance(r, dict):
             out.append(f"revisions[{i}] is not an object")
             continue
+        if r.get("verb") not in REVISION_VERBS:
+            out.append(f"revisions[{i}] records verb {r.get('verb')!r}, which is not one of "
+                       f"{sorted(REVISION_VERBS)} — the schema enumerates them and "
+                       "`violations()` never reached the enum, so `close` wrote a revision "
+                       "its own shipped schema rejected (found by a probe, not by the "
+                       "fixture that asserts the graph still validates)")
         if not isinstance(r.get("why"), str) or not r["why"].strip():
             out.append(f"revisions[{i}] records {r.get('verb')} on {r.get('node')} with "
                        f"`why` = {r.get('why')!r} — a revision log whose reasons are blank "
@@ -393,7 +402,7 @@ def frontier(graph):
 
 # --- the verdict ---------------------------------------------------------------
 
-VERDICT_KEYS = ("node", "done", "not_done", "blockers", "replan", "evidence")
+VERDICT_KEYS = ("node", "done", "not_done", "not_verified", "blockers", "replan", "evidence")
 NODE_ID = "N-"
 ID_SHAPE = re.compile(r"^N-[0-9]{3,}$")
 
@@ -416,7 +425,7 @@ def verdict_violations(v):
 
     for k in VERDICT_KEYS:
         if k not in v:
-            out.append(f"verdict has no `{k}` — all six are required, because a "
+            out.append(f"verdict has no `{k}` — all seven are required, because a "
                        "verdict that omits one is silent about it rather than clear")
     if out:
         return out
@@ -424,7 +433,7 @@ def verdict_violations(v):
     if not isinstance(v["node"], str) or not v["node"].startswith(NODE_ID):
         out.append(f"verdict `node` is {v['node']!r}, which is not a node id")
 
-    for k in ("done", "not_done", "evidence"):
+    for k in ("done", "not_done", "not_verified", "evidence"):
         if not isinstance(v[k], list):
             out.append(f"verdict `{k}` must be a list")
 
@@ -918,6 +927,121 @@ def cmd_doctrine(graph, args):
     return 0
 
 
+def cmd_close(graph, args):
+    """Consume a verdict, close one node, and re-plan — T-5, REQ-007.
+
+    The verdict is the one artifact in this design a human does not read before it acts, so
+    its shape is checked rather than trusted. `verdict_violations()` had no CLI verb until
+    now: the gate this module's docstring calls *the thing `close` consumes* was reachable
+    only from the test suite, while `agents/verifier.md` told an agent to run this command.
+
+    **`close` stamps the commit; the verifier never supplies it.** Evidence is prose, and a
+    verdict written after the tree moved is evidence about a different tree. An agent cannot
+    claim the wrong commit if it is never the one naming it. Outside a checkout the stamp
+    says `unavailable` and why — canon 9a.
+
+    **A stop closes the node and refuses the NEXT step.** `replan.possible: false` means the
+    run cannot continue around what it found, not that the work just verified did not
+    happen. Exiting 0 there would let the loop carry on past a stop; discarding the close
+    would throw away a verdict somebody earned.
+    """
+    guard(graph, args.graph)
+    try:
+        with open(args.verdict, encoding="utf-8") as fh:
+            v = json.load(fh)
+    except OSError as e:
+        die("cannot read the verdict at %s — %s" % (args.verdict, e), 2)
+    except ValueError as e:
+        die("%s: not readable as JSON — %s" % (args.verdict, e))
+
+    bad = verdict_violations(v)
+    if bad:
+        die("the verdict is malformed — nothing was written:\n  " + "\n  ".join(bad))
+
+    nid = v["node"]
+    by_id = {n.get("id"): n for n in graph.get("nodes") or []}
+    node = by_id.get(nid)
+    if node is None:
+        die("no node %s in this graph — nothing was written" % nid)
+    if node.get("status") in TERMINAL:
+        die("%s is already %s — a second close would overwrite the record of the first"
+            % (nid, node.get("status")))
+    open_blockers = [b for b in node.get("blocked_by") or []
+                     if by_id.get(b, {}).get("status") not in TERMINAL]
+    if open_blockers:
+        die("%s waits on %s, which %s not closed — a verdict about work that could not have "
+            "run is a verdict about nothing" % (nid, ", ".join(open_blockers),
+                                                "is" if len(open_blockers) == 1 else "are"))
+
+    # The stamp. Read here, never accepted from the verdict.
+    import subprocess
+    try:
+        r = subprocess.run(["git", "rev-parse", "HEAD"], capture_output=True, text=True)
+        head = r.stdout.strip() if r.returncode == 0 else ""
+    except OSError:
+        head = ""
+    stamp = ("observed at " + head) if head else \
+        "observed at unavailable — not inside a git checkout, so no commit identifies the tree"
+
+    node["status"] = "done"
+    node["evidence"] = list(v["evidence"]) + [stamp]
+
+    rp = v["replan"]
+    why = (rp.get("why") or "").strip()
+    added, parked = [], []
+    for spec in rp.get("add") or []:
+        title = str(spec.get("title", "")).strip()
+        owner = str(spec.get("owner", "implementer")).strip()
+        serves = str(spec.get("serves", node.get("serves"))).strip()
+        if not title:
+            die("replan.add carries an entry with no title — nothing was written")
+        if owner not in ROLES:
+            die("replan.add names owner %r, which is not a role this pipeline ships" % owner)
+        new_id = next_id({n.get("id") for n in graph["nodes"]})
+        graph["nodes"].append({"id": new_id, "title": title, "owner": owner,
+                               "status": "pending", "blocked_by": [], "serves": serves,
+                               "evidence": None})
+        revise(graph, "add", new_id, why or ("re-planned by the verdict on " + nid))
+        added.append(new_id)
+    for pid in rp.get("park") or []:
+        target = by_id.get(pid)
+        if target is None:
+            die("replan.park names %s, which is not in this graph — nothing was written" % pid)
+        if target.get("status") in TERMINAL:
+            continue
+        if not why:
+            die("replan.park names %s and the verdict gives no `why` — a park without a "
+                "reason is indistinguishable from work quietly dropped" % pid)
+        target["status"] = "parked"
+        target["parked_reason"] = why
+        revise(graph, "park", pid, why)
+        parked.append(pid)
+
+    revise(graph, "close", nid, why or "closed with no re-plan")
+
+    bad = violations(graph)
+    if bad:
+        die("closing %s would break the graph — nothing was written:\n  %s"
+            % (nid, "\n  ".join(bad)))
+    save(args.graph, graph)
+
+    goal = (graph.get("goal") or "").strip()
+    print("goal: %s" % (goal or "unstated"))
+    print("%s closed · added %d · parked %d · frontier %d"
+          % (nid, len(added), len(parked), len(frontier(graph))))
+    if v.get("not_verified"):
+        print("not verified: " + "; ".join(str(x) for x in v["not_verified"]))
+    else:
+        # Canon 9a, one artifact over: an empty list is a claim with a subject, and it says
+        # so rather than printing nothing.
+        print("not verified: none within the scope this verdict names")
+    if rp.get("possible") is False:
+        print("STOP — the run cannot continue around what this verdict found: %s"
+              % (why or "no reason given"), file=sys.stderr)
+        return 1
+    return 0
+
+
 VERBS = {
     "validate": (cmd_validate, "every invariant a schema cannot state"),
     "next": (cmd_next, "the frontier, ordered by what it unblocks"),
@@ -928,6 +1052,7 @@ VERBS = {
     "coverage": (cmd_coverage, "every requirement and the nodes serving it; exits 1 on a gap"),
     "add": (cmd_add, "add a node mid-run"),
     "park": (cmd_park, "park a node, carrying the reason"),
+    "close": (cmd_close, "consume a verdict, close one node and re-plan"),
 }
 
 
@@ -962,6 +1087,9 @@ def main(argv=None):
         "--ledger", default=os.path.join(".task-pipeline", "run.md"),
         help="the run ledger whose `read:` lines record what was opened")
 
+    made["close"].add_argument("--verdict", required=True,
+                               help="path to the verifier's seven-key verdict JSON")
+
     p_park = made["park"]
     p_park.add_argument("node")
     # `required=True` makes the MISSING flag a usage error (exit 2). The empty and
@@ -973,7 +1101,7 @@ def main(argv=None):
     verbs = {k: v[0] for k, v in VERBS.items()}
     if args.verb in NO_GRAPH:
         return verbs[args.verb](None, args)
-    if args.verb in ("add", "park"):
+    if args.verb in ("add", "park", "close"):
         # The READ happens inside the lock too. Loading first and locking second is the
         # same lost update with an extra step: the stale copy is already in memory.
         with held(args.graph):

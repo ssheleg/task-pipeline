@@ -68,8 +68,44 @@ and a caller that cannot tell them apart will wait on the wrong one.
 code being two installers and the validator was false the moment it landed, and is
 corrected in the same change.
 
-Guards: 351 → **374**. Twenty-one plants across the module, structurally distinct rather than variations,
+Guards: 351 → **375**. Twenty-two plants across the module, structurally distinct rather than variations,
 each asserting it landed before the validator runs.
+
+### T-5 — `close` consumes a verdict, and the verdict grew its seventh key
+
+`verdict_violations()` had **no CLI verb**: the gate this module's own docstring calls *the
+thing `close` consumes* was reachable only from the test suite, while `agents/verifier.md`
+told an agent to run `graph.py close`. Shipped doctrine pointing at an absence — the class
+B-080 is about, in the file that names it.
+
+`close <id> --verdict <path>` checks the verdict, closes the node, applies `replan.add` and
+`replan.park`, records a revision, and prints the goal with the new frontier count.
+
+**A stop closes the node and refuses the next step.** `replan.possible: false` means the run
+cannot continue around what it found — not that the work just verified did not happen.
+Exiting 0 there would let the loop carry on past a stop; discarding the close would throw
+away a verdict somebody earned. Both directions are fixtured, and the CI plant is the first
+of them.
+
+**`close` stamps the commit; the verifier never supplies it.** Evidence is prose, and a
+verdict written after the tree moved is evidence about a different tree. An agent cannot name
+the wrong commit if it is never the one naming one. Outside a checkout the stamp says
+`unavailable` and why — canon 9a.
+
+**The seventh key is `not_verified`, and it is the one people collapse into `not_done`.**
+`not_done` is *asked for and absent*; `not_verified` is *present and unchecked* — the second
+ships and the first does not. `npm test` has printed `unlooked: N` for releases, so the
+pipeline named the concept everywhere except in the verdict that closes work with it. An
+empty list is a valid answer; silence is not.
+
+**And it walked straight into B-084's class again.** `close` wrote `verb: "close"` into the
+revision log while the schema enumerated only `add` and `park` — so the first `close` wrote a
+graph its own shipped schema rejects. The fixture asserting *the graph after a close still
+validates* **passed**, because `violations()` never reaches an enum; a `jsonschema` probe
+caught it. Both ends now agree from one place, the runtime enforces the set, and a fixture
+compares the two homes directly rather than trusting either.
+
+`test/graph_test.py` → **114 cases**.
 
 ### B-092 — the report an operator actually reads
 
