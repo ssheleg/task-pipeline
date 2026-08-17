@@ -76,6 +76,32 @@ corrected in the same change.
 Guards: 351 → **376**. Twenty-three plants across the module, structurally distinct rather than variations,
 each asserting it landed before the validator runs.
 
+### Stage 9 — the third artifact, and one false alarm I raised myself
+
+The code graph was **33 commits behind** and its report described a *different* graph: 1787
+nodes and 1847 edges in `GRAPH_REPORT.md` against 1535 nodes in the `graph.json` beside it,
+with the report the older of the two. `graphify update .` re-extracts without an LLM call, so
+the refresh cost nothing but time: **1866 nodes · 1983 edges · 231 communities**, stamped at
+`26ac6dd`, and the report now agrees with the graph exactly.
+
+**The hubs are seven doctrine sections and three test helpers, and no undocumented code
+seam.** `project()`, `exposure()` and `row()` are hubs because twenty-four fixtures call them
+— scaffolding, not architecture. That `graph.py`'s own functions are *not* hubs is the
+informative part: nine verbs with little internal coupling is what the design intended.
+
+**And I raised a false alarm on the way, which is worth recording because of how it read.**
+The first measurement said *1535 nodes and zero edges* — a graph that answers no reach
+question at all, which is exactly the failure `references/knowledge-graph.md` warns of, since
+a wrong graph carries the authority of a machine. It was wrong: edges live under `links` in
+this format, and there were 1585 of them. A check that reads the wrong field reports the most
+alarming possible state with total confidence — the same shape as a check that reads the
+wrong subject, one axis over, and the reason the second measurement was taken before anything
+was filed.
+
+**Disclosed rather than skipped in silence:** 231 communities now carry 156 saved labels, 154
+of them renamed by their hub. Refreshing the names needs an LLM call and was not made, so the
+community names in the report are hub-derived and not semantic.
+
 ### Stage 6 — the full suite, and the thing it found was the suite itself
 
 `npm run test:all` ran six suites and **`graph_test.py` was not one of them.** 114 fixtures —
