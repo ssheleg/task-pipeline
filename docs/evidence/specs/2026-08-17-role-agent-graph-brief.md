@@ -255,3 +255,131 @@ implied. Recorded because the design was one step from being argued from it.
 **Gate verdict: PASS.** Every contract the design will lock is fetched or measured,
 the family's own prior reading was re-checked rather than trusted, and the two
 mis-measurements are recorded rather than quietly corrected.
+
+---
+
+## Stage 2 — brainstorm + decompose. Gate: `manual`, OPEN
+
+### The design, in one idea
+
+**The graph lives on disk. A script computes the frontier. The main thread reads the
+frontier, never the graph.**
+
+Everything else follows from that sentence, and it is the answer to *«правильно с
+точки зрения контекста»*. A work graph for a real release is hundreds of nodes; a
+model that reads it each iteration spends its context re-reading what it already
+walked. A script that answers *«which nodes are runnable right now»* costs nothing
+until it runs and returns three lines. `host-capabilities.md` says `scripts/` is the
+one Claude-Code capability that **travels** — it lives inside the skill directory, so
+every channel ships it.
+
+So the loop's iteration is:
+
+```
+frontier = scripts/graph.py next        # small, deterministic, portable
+dispatch each frontier node to its owner role
+verifier closes the node                # reads the diff; returns a verdict
+scripts/graph.py close <id> --verdict   # re-plans, re-prioritises, prints the goal
+```
+
+The model never holds the graph. It holds the frontier, the release goal, and the
+last verdict — bounded, per iteration, regardless of programme size.
+
+### Two rules decide agent vs doctrine, and the first is hard
+
+**Rule 1 — a role that must talk to the operator cannot be an agent.** Not a
+preference: the `Agent` tool's own contract states *"the agent's final report is not
+shown to the user — relay what matters."* A subagent's output reaches the dispatcher,
+never the human. Any role whose job includes asking a question **is main-thread work**
+or it silently stops being able to do its job.
+
+**Rule 2 — an agent earns its ~110 always-on tokens when the reading is voluminous and
+the answer is small** (`host-capabilities.md`, and it says the inverse too: not when
+the main thread needs the intermediate detail anyway).
+
+| Role | Talks to operator? | Reads | Returns | Verdict |
+|---|---|---|---|---|
+| **manager** | yes — it asks for the go at a manual gate | the frontier (small) | which node next (small) | **doctrine** — small in, small out, and it *is* the orchestration |
+| **business analyst** | **yes — a grill is a conversation** | the brief and its sources | questions, and the answers | **doctrine**, by rule 1. An agent cannot grill |
+| **project** | yes | undefined | undefined | **deferred** — see below |
+| **UX** | no — it reports | super-ux's whole chain: scenarios, flows, `/ux-lint` output | a verdict and its findings | **agent** |
+| **UI** | no | the pack layer, the existing design, Figma state | mockup proposals, a verdict | **agent** |
+| **decomposer** | no | one top-level plan item and its context | a task cut | **agent**, and **N in parallel** — the reason it is a role at all |
+| **verifier** | no | the closed task's diff, its REQ rows, the gate output | done · not-done · blockers · re-plan | **agent** — the main thread needs the *verdict*, not the diff |
+| **researcher** | no | prowl's tool output | findings | **agent** |
+| **market analyst** | no | the same | findings | **agent** |
+| **bug-analyst** | no | Sentry, production logs, database logs | findings, as backlog rows | **agent** |
+
+**Seven agents (~770 tok, +9% on the family's ~8,445), three doctrine.**
+
+### The `project` role is deferred, and that is a finding
+
+It was named as *«does other things too»* and those things were never stated. A role
+with no bounded job is a name, not a role — it would ship ~110 tokens a session to
+hold a description nobody can act on. **Filed to the board rather than built**, and it
+costs nothing to add once its job is written down.
+
+### The graph's own shape
+
+| Field | On a node | Why it exists |
+|---|---|---|
+| `id`, `title` | both | addressable, citable |
+| `owner` | a role name | REQ-002 — a node with no owner fails the gate, because an unowned node is one nobody dispatches |
+| `status` | `pending` · `running` · `done` · `blocked` · `parked` | `parked` is the verifier's *«blocker, continue around it»* |
+| `blocked_by` | node ids | what makes the frontier computable at all |
+| `serves` | a REQ id, or a clause of the release goal | REQ-012 — a node that serves neither is parked **with that as the reason** |
+| `evidence` | filled at close | the ledger row's other half; empty means the node is not done |
+
+Edges carry a payload and `planning.md`'s **fake-edge test** applies unchanged: an
+arrow whose payload nobody can name is removed rather than drawn.
+
+---
+
+## The module map — every REQ in exactly one module
+
+| M | Module | REQ | Ships |
+|---|---|---|---|
+| **1** | **Walking skeleton** — the graph artifact, its schema, `scripts/graph.py`, the verifier agent, and the dynamic loop mode | 001–012, 031 | the pipeline turns without a human between iterations |
+| 2 | The role layer — six more agents, three doctrine roles, the degradation | 013–018 | breadth on a graph that already turns |
+| 3 | The gates — understood-or-backlog, the funnel axis, super-ux as a dependency | 019–023 | quality on every run, agents or not |
+| 4 | External intake — prowl research, the bug-analyst's collection system | 024–027 | evidence from outside the repository |
+| 5 | The visualiser — separate repo, separate plugin, reads the ledger | 028 | a picture of a graph that by then exists |
+| — | Cross-cutting: `R-005` independent reader, `R-008` enumerate the shapes | 029–030 | binds every module |
+
+**Walking skeleton first, and it is module 1 by construction:** the verifier is what
+closes an iteration, the graph is what it re-plans, and the loop is what carries it to
+the next one. Modules 2–5 each plug into a graph that already turns; none of them can
+be demonstrated before it does.
+
+### Cross-module contracts
+
+| Contract | Owner | Consumers |
+|---|---|---|
+| the graph schema and `scripts/graph.py`'s output shape | M1 | M2 dispatches by `owner`; M5 renders it |
+| the verifier's four-field verdict | M1 | M3's gates read it; M5 shows it |
+| the role-agent frontmatter convention | M2 | M4's three roles are built to it |
+| the backlog row shape a finding becomes | M4 | the board, and M1's re-plan |
+
+### Deferred to later modules, in the carry-over ledger
+
+| Item | Why | Home |
+|---|---|---|
+| the `project` role | no bounded job stated | board row, not a module |
+| per-role model tiers beyond the default | `model-tiering.md` already carries the mechanism | M2 |
+| connecting a Sentry MCP | nothing here reports to Sentry; the role degrades | board row |
+
+---
+
+## Stage 2 gate — MANUAL, and it is open
+
+What the operator is being asked to approve:
+
+1. **The design**: graph on disk, frontier by script, main thread reads neither the
+   graph nor the diffs. This is what makes it correct on context rather than merely
+   parallel.
+2. **Seven agents, not ten** — two by a hard constraint (a subagent cannot ask you
+   anything), one deferred for having no stated job.
+3. **The module map**, with module 1 as the walking skeleton.
+4. **Arming the loop at this gate's close**, per `continuity.md` Part 1a — which
+   needs `run.loop.command` recorded in `pipeline.json` first, and that is the change
+   that answers the original complaint.
