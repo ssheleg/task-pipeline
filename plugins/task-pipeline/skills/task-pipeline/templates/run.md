@@ -54,6 +54,7 @@ stage: <id> <name> — gate <auto|manual> — verdict <pass|fail|skip> — <ISO-
 iter:  <N> — item <B-NNN or task id> — closed at gate <stage id>
 touch: <file> — pass <N> (<stage|round|module>) — reason: <finding id / gate item>
 hand:  <N|10> — task "<quoted>" — done <n> — surfaced <n> — decisions <n> — amb <n> (<ids or "— no register">)
+       scope <commit>/<env>/<REQ ids> — unverified <n|none-in-scope> (<what, or the literal>)
 holds: <stage id> — <n> (<class: what, owner>; … or "none") — enumerated <n>/8 classes, <unlooked: classes not enumerable>
 gate:  <stage id> — command "<cmd>" — exit <N> — <ISO-8601>
 event: <compact|session-end|subagent> — <detail> — <ISO-8601>
@@ -118,6 +119,7 @@ event: subagent — general-purpose — 2026-08-10T12:00Z
 gate:  6 — command "npm test" — exit 0 — 2026-08-10T12:02Z
 stage: 6 Tests — gate manual — verdict pass — 2026-08-10T12:03Z
 hand:  3 — task "add CSV export to the orders table" — done 2 — surfaced 1 — decisions 1 — amb 2 (OQ-0007, ledger row 4)
+       scope 5f21ac3/node-24-linux/REQ-001,REQ-004 — unverified 1 (XLSX path: no fixture)
 holds: 5 — 2 (worktree: build-csv-export, this run; container: pg-test, this run) — enumerated 8/8 classes
 holds: 10 — none — enumerated 7/8 classes, unlooked: containers (no docker on this host)
 ```

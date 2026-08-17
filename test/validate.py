@@ -2845,6 +2845,65 @@ if gschema is not None:
             fail(f"{GRAPH_SCHEMA_REL}: edge.payload has no `minLength` — REQ-003: an empty "
                  "payload is `references/planning.md`'s fake edge with a field around it")
 
+# --- B-092: the report an operator reads --------------------------------------------------
+#
+# The pipeline computes, at every gate, exactly what a not-verified field needs — `abstained`
+# for claims the run declined to make, `unlooked` for checks that did not look — and none of
+# it reached the hand-back, which is the artifact an operator actually reads. So a run could
+# hand back a report honest sentence by sentence and still be indistinguishable from a run
+# whose checks never looked.
+_pg = os.path.join(ROOT, "plugins/task-pipeline/skills/task-pipeline/references/progress.md")
+_rn = os.path.join(ROOT, "plugins/task-pipeline/skills/task-pipeline/templates/run.md")
+if os.path.isfile(_pg):
+    _pl = open(_pg, encoding="utf-8").read().splitlines()
+    # Inside the hand-back BLOCK, not anywhere in the file: the words appear in prose all
+    # over this doctrine, and a file-level search would pass a block that carries neither.
+    _hb, _in = [], False
+    for _l in _pl:
+        if _l.strip().startswith("── hand-back"):
+            _in = True
+            continue
+        if _in:
+            if _l.strip().startswith("```"):
+                break
+            _hb.append(_l)
+    if not _hb:
+        fail("references/progress.md: no hand-back block found — B-092's check cannot read "
+             "the artifact it is about, which means the block moved or is gone")
+    else:
+        _hbt = "\n".join(_hb)
+        for _fld in ("SCOPE", "NOT VERIFIED"):
+            if not [l for l in _hb if l.strip().startswith(_fld)]:
+                fail(f"references/progress.md: the hand-back block has no `{_fld}` row — "
+                     "B-092: the gates already compute what it needs, and none of it reaches "
+                     "the one artifact an operator reads, so an honest report and a run whose "
+                     "checks never looked are the same block")
+        if "none within the stated scope" not in _hbt:
+            fail("references/progress.md: the hand-back block does not give `NOT VERIFIED` a "
+                 "literal for the empty case — B-092 and canon 9a: an empty field and "
+                 "*nothing inside the stated scope is unverified* read the same and are not "
+                 "the same")
+
+if os.path.isfile(_rn):
+    _rl2 = open(_rn, encoding="utf-8").read().splitlines()
+    # The line AFTER each `hand:` line, whether that line is the shape or the example. A
+    # search for "scope" anywhere among them passed a run.md whose SHAPE had lost the field
+    # while the example still carried it, and vice versa — the same either-satisfies-both
+    # hole that a per-site check closes.
+    _hand_ix = [i for i, l in enumerate(_rl2) if l.startswith("hand:")]
+    if not _hand_ix:
+        fail("templates/run.md declares no `hand:` line — B-092's check cannot find the "
+             "ledger shape it is about")
+    for _i in _hand_ix:
+        _next = _rl2[_i + 1] if _i + 1 < len(_rl2) else ""
+        _what = "shape" if "<" in _rl2[_i] else "worked example"
+        if "scope " not in _next or "unverified " not in _next:
+            fail(f"templates/run.md:{_i + 1}: the `hand:` {_what} does not carry `scope` and "
+                 "`unverified` on its continuation — B-092: the block an operator reads is "
+                 "transient and the ledger is what survives a compaction, so a field in one "
+                 "and not the other is lost exactly when it is needed. An example that omits "
+                 "what the shape mandates teaches the omission")
+
 # --- canon 9a: a measured zero and an unmeasured quantity may not print the same ---------
 #
 # This arrived three times under three names before anyone named it — `State zero out loud`

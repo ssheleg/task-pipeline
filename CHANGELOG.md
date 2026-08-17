@@ -68,8 +68,40 @@ and a caller that cannot tell them apart will wait on the wrong one.
 code being two installers and the validator was false the moment it landed, and is
 corrected in the same change.
 
-Guards: 351 → **373**. Twenty plants across the module, structurally distinct rather than variations,
+Guards: 351 → **374**. Twenty-one plants across the module, structurally distinct rather than variations,
 each asserting it landed before the validator runs.
+
+### B-092 — the report an operator actually reads
+
+Every gate computes exactly what a not-verified field needs: `abstained` for claims the run
+declined to make, `unlooked` for checks that did not look. **None of it reached the
+hand-back** — four sections and two counters, none of which said what the claim covers or
+what was never checked. So a run could hand back a report honest sentence by sentence and
+still be **indistinguishable from a run whose checks never looked**, which is the failure
+`references/progress.md` names three separate times about other things.
+
+`SCOPE` and `NOT VERIFIED` are in the block now, and in the `hand:` ledger shape beside it —
+the block is transient and the ledger is what survives a compaction, so a field in one and
+not the other is lost exactly when it is needed.
+
+`NOT VERIFIED` is **populated from the disclosures rather than composed**: the `abstained`
+and `unlooked` sets in words, plus anything built this iteration that no check touched.
+Composed by hand it becomes a summary of the parts somebody remembered. And the literal
+`none within the stated scope` is required for the empty case, because an empty field and
+*nothing inside what SCOPE names is unverified* read the same and are not the same — canon
+9a, one artifact over.
+
+**Three of the five plants defeated the guard first, all by the same hole: either side
+satisfying a check meant for both.** A search for the words anywhere in `progress.md` passed
+a block that carried neither, since the doctrine discusses them in prose throughout — it
+reads **inside the block** now. And a search for `scope` among `run.md`'s `hand:` lines was
+satisfied by the *example* while the *shape* had lost it, and vice versa — each `hand:` line
+is now checked against its own continuation, shape and worked example alike, because an
+example that omits what the shape mandates teaches the omission.
+
+One miss was mine rather than the guard's: the plant harness filtered failures for `B-092`
+while that check cited only canon 9a, so a working guard read as a hole. The attribution now
+names both.
 
 ### Canon 9a — a measured zero and an unmeasured quantity may not print the same
 

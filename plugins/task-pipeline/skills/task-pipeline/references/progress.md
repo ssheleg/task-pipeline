@@ -163,10 +163,30 @@ PROGRESS    where the run stands against that request: gates passed,
 DONE        what was solved this iteration, each with its evidence
 SURFACED    what came up that nobody asked for — findings, corrections,
             things that turned out to be other than assumed
+SCOPE       what this claim covers: the commit, the environment, the REQ
+            ids, the surfaces — the validity domain, not the ambition
+NOT VERIFIED what was built and NOT checked, or could not be. The literal
+            `none within the stated scope` is a valid answer; an empty
+            field is not
 
 DECISIONS WAITING  <n>   each as a question with options, asked HERE
 AMBIGUITIES        <n>   computed, below
 ```
+
+**`SCOPE` and `NOT VERIFIED` are the two the block lacked, and their absence had a
+shape.** Every gate already computes exactly what `NOT VERIFIED` needs — `abstained` for
+claims the run declined to make, `unlooked` for checks that did not look — and none of it
+reached the artifact an operator actually reads. So a run could hand back a report honest
+sentence by sentence and still be **indistinguishable from a run whose checks never
+looked**, which is the failure this file names three separate times.
+
+`NOT VERIFIED` is **populated from those disclosures rather than composed**: it is the
+`abstained` and `unlooked` sets in words, plus anything built this iteration that no check
+touched. Composing it by hand is how it becomes a summary of the parts somebody remembered.
+
+And `none within the stated scope` is a claim with a subject — it says *nothing inside
+what SCOPE names is unverified*. Leaving the field empty says nothing at all, which reads
+as the same thing and is not: canon 9a, one artifact over.
 
 **Where there is no brief** — `checkup`, `setup`, a short path — TASK quotes the
 operator's own sentence instead, marked as such. An unquotable TASK is a run that cannot
