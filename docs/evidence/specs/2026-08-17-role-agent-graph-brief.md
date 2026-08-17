@@ -383,3 +383,137 @@ What the operator is being asked to approve:
 4. **Arming the loop at this gate's close**, per `continuity.md` Part 1a — which
    needs `run.loop.command` recorded in `pipeline.json` first, and that is the change
    that answers the original complaint.
+
+---
+
+## Stage 2's close — the loop is NOT armed, and that is the decision
+
+`continuity.md` Part 1a arms the recorded mode at this point. What is recorded in
+this repository's own `pipeline.json` is:
+
+```json
+"loop": { "mode": "interval", "interval": "15m", "command": "/loop" }
+```
+
+Armed 2026-08-08 by operator instruction. **Arming it would pace the very build that
+replaces it** — fifteen-minute gaps inserted into the module whose REQ-031 exists to
+document the self-paced mode instead. So nothing is armed here, and the reason is
+recorded rather than the step being skipped quietly. Module 1 changes the record
+first (REQ-008), and the loop arms on the new mode at the close of the module that
+earns it.
+
+Second finding from the same file: `release` **already exists** here — `enabled`,
+`trigger`, `steps`, `verify`. So REQ-010's `release.goal` is a **field on a block that
+is already there**, not a new structure. Cheaper than the brief assumed.
+
+---
+
+## Stage 3 — spec, module 1. Gate: `manual`
+
+### The three tracks, declined and recorded rather than silent
+
+`super-ux` · `copywriting` · `sheleg-design` run on user-facing work. Module 1 has no
+product interface: it is a schema, a script, an agent definition and doctrine, read by
+an agent and by the operator in a terminal.
+
+| Track | Verdict | Why |
+|---|---|---|
+| UX (`super-ux`) | **declined** | no product surface, no funnel, no user path. `ux-flows` owns how users move through a product; a frontier printer has no users |
+| COPY (`copywriting`) | **declined** | the family's own routing block excludes developer READMEs, internal docs and CLI output for developers. This is all three |
+| VISUAL (`sheleg-design`) | **declined** | module 1 has no visual layer. Module 5 does, and it runs the track then |
+
+Recorded, per the stage-3 rule that a declined track is never silent.
+
+### Contract 1 — the graph artifact
+
+**Location:** `.task-pipeline/graph.json`. That directory is already this pipeline's
+run-state home (`build.md` writes `.task-pipeline/run.md` there), so the graph joins
+an existing convention rather than inventing one.
+
+**Schema:** `graph.schema.json`, beside `pipeline.schema.json`, same style.
+
+```json
+{
+  "goal": "<echoed from pipeline.json release.goal at creation>",
+  "nodes": [
+    { "id": "N-001", "title": "…", "owner": "decomposer",
+      "status": "pending", "blocked_by": [], "serves": "REQ-004",
+      "evidence": null }
+  ],
+  "edges": [ { "from": "N-001", "to": "N-002", "payload": "the task cut" } ]
+}
+```
+
+**Invariants the schema and the script both enforce** — each one is a REQ:
+
+| Invariant | REQ | Failure |
+|---|---|---|
+| every node has an `owner` that is a known role | 002 | a node nobody dispatches |
+| every edge has a non-empty `payload` | 003 | `planning.md`'s fake edge, drawn anyway |
+| every node `serves` a REQ id or a goal clause | 012 | work that serves neither, done silently |
+| no cycles | — | a frontier that never empties |
+| `status: done` requires non-null `evidence` | 006 | a node called done by assertion |
+
+### Contract 2 — `scripts/graph.py`
+
+Stdlib-only python, like every other script in this bundle, so it travels to every
+channel. **Exit codes are the contract**, per standing instruction `R-004` — the next
+command is conditional on them, never sequenced after them.
+
+| Command | Prints | Exit |
+|---|---|---|
+| `next` | the frontier: `id · owner · title`, one per line, **and nothing else** | `0` runnable nodes exist · `3` graph complete · `4` every remaining node blocked |
+| `close <id> --verdict <path>` | the re-planned frontier count and the goal line | `0` closed · `1` verdict malformed or evidence missing |
+| `add --title --owner --serves [--blocked-by …]` | the new id | `0` · `1` invalid owner or unknown `serves` |
+| `park <id> --reason <text>` | confirmation | `0` · `1` no reason given |
+| `validate` | every violated invariant, one per line | `0` clean · `1` any violation |
+| `goal` | the release goal, one line | `0` · `3` none recorded |
+
+**`next` prints the frontier and nothing else** because that output is what enters the
+model's context every iteration. Anything else printed there is paid for on every
+turn of every loop.
+
+### Contract 3 — the verifier's verdict
+
+JSON, so `close` consumes it without the model transcribing it:
+
+```json
+{ "node": "N-007",
+  "done":     ["what was asked and is now true"],
+  "not_done": ["what was asked and is not"],
+  "blockers": [{ "what": "…", "blocks": ["N-009"], "can_continue_around": true }],
+  "replan":   { "possible": true, "add": [], "park": ["N-009"], "why": "…" },
+  "evidence": ["the command and its output that proves each `done` row"] }
+```
+
+**All five keys required.** `done` without `evidence` is refused by `close` — REQ-006,
+and the reason the field exists at all.
+
+### Contract 4 — the loop, dynamic
+
+`run.loop.mode: "dynamic"`, `interval` dropped (the schema already calls it meaningless
+there). `command` stays: it is how *this* harness arms it, and it is project-recorded
+rather than assumed.
+
+- **arms** at the close of stage 2 when the queue holds more than one item (unchanged)
+- **prints on arming**: the job id and the cancel command (unchanged)
+- **each iteration prints**: the release goal, then the frontier — REQ-010
+- **where nothing is recorded, nothing arms** — REQ-009, unchanged and re-asserted
+
+### Contract 5 — `release.goal`
+
+A string on the existing `release` block. `graph.py goal` reads it; every iteration
+prints it; a node that `serves` neither it nor a REQ is parked with that as the
+reason — REQ-012.
+
+### What module 1 does NOT lock
+
+The verifier ships as `agents/verifier.md` (REQ-005), and the **role-agent frontmatter
+convention** is module 2's contract. Module 1 writes one agent to the shape the fetched
+reference gives; module 2 generalises it across six more. Naming that boundary here is
+what stops module 1 inventing a convention module 2 then has to change.
+
+### Stage 3 gate — MANUAL
+
+Five contracts locked, three tracks declined with reasons, and the boundary to module 2
+named. What is being approved is the shape of the artifacts, not yet a line of code.
