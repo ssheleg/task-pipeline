@@ -75,6 +75,77 @@ def row(req, what="something", shipped="v1.0.0", human="never"):
     return f"| {req} | {what} | run | {shipped} | pass | {human} | — |\n"
 
 
+# --- the staleness section (B-081) — the other end of `never` ------------------------------
+# It needs an `Observed at` column and real commits, so it builds its own project: the
+# HEADER above predates the column, and reusing it would test the dormant path only.
+
+STALE_HEADER = ("| REQ | What | Run | Shipped in | Observed at | Auto | Human | Note |\n"
+                "|---|---|---|---|---|---|---|---|\n")
+
+
+def stale_project(rows_fn):
+    """Two commits, so `behind` is reachable. `rows_fn(first, head)` builds the rows."""
+    d = tempfile.mkdtemp()
+    run = lambda *a: subprocess.run(["git", "-C", d, *a], capture_output=True, text=True)
+    run("init", "-q")
+    run("config", "user.email", "t@t")
+    run("config", "user.name", "t")
+    os.makedirs(os.path.join(d, "docs", "evidence"), exist_ok=True)
+    with open(os.path.join(d, "a"), "w") as fh:
+        fh.write("one")
+    run("add", "-A"); run("commit", "-qm", "one")
+    first = run("rev-parse", "--short=7", "HEAD").stdout.strip()
+    with open(os.path.join(d, "b"), "w") as fh:
+        fh.write("two")
+    run("add", "-A"); run("commit", "-qm", "two")
+    head = run("rev-parse", "--short=7", "HEAD").stdout.strip()
+    with open(os.path.join(d, "docs/evidence/verification.md"), "w", encoding="utf-8") as fh:
+        fh.write("# Verification ledger\n\n" + STALE_HEADER + rows_fn(first, head))
+    return d
+
+
+def stale_line(out):
+    return next((l for l in out.splitlines() if l.strip().startswith("staleness")), "")
+
+
+def a_ledger_without_the_column_is_dormant():
+    p = exposure(project([row("REQ-001")]))
+    line = stale_line(p.stdout + p.stderr)
+    assert line, "no staleness line at all"
+    assert "dormant" in line, ("a ledger that cannot say which tree it saw must be dormant "
+                               "rather than counted: %r" % line)
+
+
+def every_staleness_state_is_counted_and_zero_prints():
+    d = stale_project(lambda first, head:
+                      "| REQ-001 | a | run | v1.0.0 | `%s` | pass | 2026-08-01 | — |\n" % head)
+    p = exposure(d)
+    line = stale_line(p.stdout + p.stderr)
+    for w in ("current", "behind", "unresolvable", "unanchored"):
+        assert w in line, "the %s state is not counted: %r" % (w, line)
+    assert "current 1" in line and "behind 0" in line, (
+        "state zero must print out loud, or freshness is indistinguishable from a check that "
+        "never looked: %r" % line)
+
+
+def an_overtaken_row_carries_the_marker():
+    d = stale_project(lambda first, head:
+                      "| REQ-001 | a | run | v1.0.0 | `%s` | pass | 2026-08-01 | — |\n" % first)
+    p = exposure(d)
+    out = p.stdout + p.stderr
+    assert "behind 1" in stale_line(out), stale_line(out)
+    assert "not trusted" in out, ("a non-current state must end with the marker — the contract "
+                                  "knowledge-graph.md sets for the code graph: %s" % out[-300:])
+
+
+def a_commit_that_does_not_resolve_is_its_own_state():
+    d = stale_project(lambda first, head:
+                      "| REQ-001 | a | run | v1.0.0 | `deadbee` | pass | 2026-08-01 | — |\n")
+    p = exposure(d)
+    line = stale_line(p.stdout + p.stderr)
+    assert "unresolvable 1" in line, ("a rebase, squash or shallow clone is not the same fact "
+                                      "as never having been observed: %r" % line)
+
 # --- the components -----------------------------------------------------------------
 
 def counts_only_rows_whose_human_is_never():
@@ -283,7 +354,7 @@ def a_ledger_with_only_a_header_is_dormant():
     assert "no REQ rows yet" in p.stdout, p.stdout
 
 
-for n, f in [
+CASES = [
     ("counts only rows whose Human is never", counts_only_rows_whose_human_is_never),
     ("no confirmation ever prints words, not a zero", no_confirmation_ever_prints_the_words_not_a_zero),
     ("a confirmation prints days since the NEWEST", a_confirmation_prints_days_since_the_newest),
@@ -304,10 +375,15 @@ for n, f in [
     ("blast comes from the board; absence is absent", blast_radius_comes_from_the_board_and_absence_is_not_a_default),
     ("no ledger is dormant and green", no_ledger_is_dormant_and_green),
     ("a header-only ledger is dormant", a_ledger_with_only_a_header_is_dormant),
-]:
+    ("a ledger without Observed at is dormant", a_ledger_without_the_column_is_dormant),
+    ("every staleness state is counted, zero out loud", every_staleness_state_is_counted_and_zero_prints),
+    ("an overtaken row carries the not-trusted marker", an_overtaken_row_carries_the_marker),
+    ("a commit that does not resolve is its own state", a_commit_that_does_not_resolve_is_its_own_state),
+]
+for n, f in CASES:
     case(n, f)
 
 if failures:
-    print(f"\nFAIL: {len(failures)} of 20")
+    print(f"\nFAIL: {len(failures)} of {len(CASES)}")
     sys.exit(1)
-print("\nPASS: exposure.sh — 20 cases")
+print(f"\nPASS: exposure.sh — {len(CASES)} cases")

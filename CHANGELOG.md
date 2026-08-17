@@ -71,6 +71,37 @@ corrected in the same change.
 Guards: 351 → **376**. Twenty-three plants across the module, structurally distinct rather than variations,
 each asserting it landed before the validator runs.
 
+### Stage 6 — the full suite, and the thing it found was the suite itself
+
+`npm run test:all` ran six suites and **`graph_test.py` was not one of them.** 114 fixtures —
+the whole of module 1 — lived in `npm test` and outside the command named *all*. Every command
+in `test:all` passed, so *the full suite is green* had been a true sentence about a smaller set
+than it names. `exposure_test.py` was worse off: **24 fixtures in no script at all**, testing
+the very file this release extended with the staleness section.
+
+Both are in now, and a guard **discovers** the suites rather than listing them — every
+`test/*_test.py` and `negatives.py` must be reachable from `test:all`, resolving one level of
+`npm run`. A list there would drift exactly the way the thing it checks drifted.
+
+**Its own first run was wrong, and said so.** Substituting script names in declaration order
+made `npm run test` a prefix of `npm run test:probe`, so four suites were reported absent that
+the chain reaches. Longest name first.
+
+**Then the full suite found two rotted CI plants — both rotted by edits made in this release.**
+
+- *coverage stops refusing a requirement nothing serves* replaced the first
+  `return 1 if bad else 0`, and that line **stopped being unique** the day `cmd_close` landed:
+  the plant disarmed `cmd_validate` instead and the guard, correctly, stayed green. This is a
+  new shape of an old class — a plant pinned to a literal usually rots because the literal
+  disappears; this one rotted because the literal **multiplied**. It anchors inside
+  `cmd_coverage` now.
+- *a worked GATE verdict that prints no disclosures* matched a sentence that B-064 appended
+  `· holds: 0` to, hours earlier. It matches the line's **shape** now.
+
+Both were watched landing and firing before the suite was re-run. `test:all` → **exit 0**
+across eight suites: 376 guards, 114 graph fixtures, 24 exposure fixtures, 9 property checks,
+7 + 7 artifact fixtures, the release-gate harness and the documentation gate.
+
 ### T-7 — the doctrine that names the graph, and module 1 closes
 
 `scripts/graph.py`, `graph.schema.json` and `.task-pipeline/graph.json` had shipped and **no

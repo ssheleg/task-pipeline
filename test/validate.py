@@ -2845,6 +2845,38 @@ if gschema is not None:
             fail(f"{GRAPH_SCHEMA_REL}: edge.payload has no `minLength` — REQ-003: an empty "
                  "payload is `references/planning.md`'s fake edge with a field around it")
 
+# --- every suite this repository ships must be in `test:all` -----------------------------
+#
+# Found at stage 6 of the role-agent programme, by stage 6: `test:all` ran six suites and
+# `graph_test.py` — 114 fixtures, the whole of module 1 — was in `npm test` and not in the
+# thing named *all*. A suite outside the full run is a suite CI does not have, and the claim
+# *the full suite is green* was false while every command in it passed.
+#
+# DISCOVERED, not listed: every `test/*_test.py` and `test/graph_test.py`-shaped file must
+# appear in some script, and `test:all` must reach it. A list here would drift the way the
+# thing it checks drifted.
+_pkg = load_json("package.json") or {}
+_scripts = _pkg.get("scripts") or {}
+_all = _scripts.get("test:all", "")
+if not _all:
+    fail("package.json declares no `test:all` — the full-suite claim has no command behind it")
+else:
+    # Resolve one level of `npm run <name>` so a suite reached indirectly counts.
+    # LONGEST NAME FIRST. `npm run test` is a prefix of `npm run test:probe`, so replacing
+    # in declaration order turned the latter into `…/graph_test.py:probe` and reported four
+    # suites absent that the chain actually reaches. The check's own first run said so.
+    _reach = _all
+    for _n in sorted(_scripts, key=len, reverse=True):
+        _reach = _reach.replace(f"npm run {_n}", _scripts[_n])
+    _suites = sorted(f for f in os.listdir(os.path.join(ROOT, "test"))
+                     if f.endswith("_test.py") or f == "negatives.py")
+    _absent = [f for f in _suites if f not in _reach]
+    if _absent:
+        fail("package.json: `test:all` does not run " + ", ".join(_absent)
+             + f" ({len(_absent)} of {len(_suites)} suites) — a suite outside the full run is "
+               "a suite CI does not have, and *the full suite is green* is then a true "
+               "sentence about a smaller set than it names")
+
 # --- T-7: the doctrine that names the graph ----------------------------------------------
 #
 # `scripts/graph.py`, `graph.schema.json` and `.task-pipeline/graph.json` shipped and **no

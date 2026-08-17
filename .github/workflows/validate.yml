@@ -2747,9 +2747,13 @@ jobs:
           python3 - <<'EOF'
           p = "/tmp/disc-copy/plugins/task-pipeline/skills/task-pipeline/references/gates.md"
           t = open(p, encoding="utf-8").read()
-          needle = "  abstained: 0 · unlooked: 4 (3 dormant · 1 skip — no submodules in this repo)\n"
-          assert needle in t, "PLANT DID NOT LAND: anchor absent before edit"
-          open(p, "w", encoding="utf-8").write(t.replace(needle, "", 1))
+          # Matched by SHAPE, not by the sentence: B-064 appended `· holds: 0` to this very
+          # line, and a literal needle went stale the same day. The plant removes whichever
+          # disclosure line sits under the GATE 9 example.
+          import re as _re
+          m = _re.search(r"^  abstained:[^\n]*\n", t, _re.M)
+          assert m, "PLANT DID NOT LAND: no disclosure line under a worked verdict"
+          open(p, "w", encoding="utf-8").write(t[:m.start()] + t[m.end():])
           assert "abstained: 0 · unlooked: 4" not in open(p, encoding="utf-8").read(), "PLANT DID NOT LAND"
           EOF
           if python3 /tmp/disc-copy/test/validate.py; then
@@ -7108,9 +7112,16 @@ jobs:
           python3 - <<'EOF'
           p = "/tmp/cov1-copy/plugins/task-pipeline/skills/task-pipeline/scripts/graph.py"
           t = open(p, encoding="utf-8").read()
+          # Anchor INSIDE cmd_coverage: `return 1 if bad else 0` stopped being unique the
+          # day cmd_close landed, and a first-occurrence replace then disarmed cmd_validate
+          # instead — a plant pinned to a literal rots when the literal stays and multiplies.
+          start = t.index("def cmd_coverage(")
+          end = t.index("\ndef ", start)
+          body = t[start:end]
           needle = "    return 1 if bad else 0"
-          assert needle in t, "PLANT DID NOT LAND: cov1 — coverage's verdict line moved"
-          open(p, "w", encoding="utf-8").write(t.replace(needle, "    return 0", 1))
+          assert needle in body, "PLANT DID NOT LAND: cov1 — coverage's verdict line moved"
+          open(p, "w", encoding="utf-8").write(
+              t[:start] + body.replace(needle, "    return 0", 1) + t[end:])
           EOF
           if python3 /tmp/cov1-copy/test/validate.py; then
             echo "ERROR: a coverage report that cannot fail was accepted — B-085, and a
