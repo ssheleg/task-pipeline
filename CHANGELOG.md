@@ -1,4 +1,14 @@
-## v1.71.0 — four shapes of a green that measured nothing
+# Changelog
+
+
+## v1.71.1 — four shapes of a green that measured nothing
+
+> **v1.71.0 is a burned tag.** Its entry was prepended **above** `# Changelog`, so
+> `test/validate.py`'s newest-section parser read the *previous* release while the
+> negative self-test planted its defect in *this* one. The two looked at different
+> sections, the plant proved nothing, and CI failed with *"the release entry claimed a
+> guard count the workflow does not define"* — which is the R-001 failure the plant's
+> own comment describes, reproduced by the release that shipped the doctrine about it.
 
 Four issues, one class: a signal that reports success while checking nothing. All four
 survived at least one release in a real project, and none is visible to inspection — the
@@ -49,8 +59,6 @@ Guards: 376 → **376**. No guard was added or removed — this release is doctr
 four rules is cited from the reference that owns it rather than restated.
 
 Closes #39, #40, #48, #49.
-
-# Changelog
 
 ## v1.70.0 — the stemmer cannot conjugate, so the description says the other form
 
