@@ -1,4 +1,4 @@
-<!-- agent-sync:generated source=task-pipeline@a51de29 cfg=19d7ec4ef51c at=2026-08-15T23:43:19Z — regenerate with `agent_sync.py setup`, do not hand-edit -->
+<!-- agent-sync:generated source=task-pipeline@92fc3ea cfg=440ec0fb5026 at=2026-08-17T13:19:44Z — regenerate with `agent_sync.py setup`, do not hand-edit -->
 
 # How documentation and coordination work in task-pipeline
 
@@ -34,12 +34,14 @@ None declared here. Ids live in the parent repository; reserve them there.
 - `docs/evidence/verification.md`
 - `docs/DOCMAP.md`
 - `CHANGELOG.md`
+- `SKILL-CARD.md`
 - `package.json`
 - `.claude-plugin/marketplace.json`
 - `plugins/*/.claude-plugin/plugin.json`
 - `.github/workflows/*.yml`
 - `test/validate.py`
 - `test/negatives.py`
+- `docs/evidence/specs/*carryover*.md`
 
 ### Gates run before a change is considered done
 
