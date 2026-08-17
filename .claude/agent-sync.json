@@ -12,12 +12,14 @@
     "docs/evidence/verification.md",
     "docs/DOCMAP.md",
     "CHANGELOG.md",
+    "SKILL-CARD.md",
     "package.json",
     ".claude-plugin/marketplace.json",
     "plugins/*/.claude-plugin/plugin.json",
     ".github/workflows/*.yml",
     "test/validate.py",
-    "test/negatives.py"
+    "test/negatives.py",
+    "docs/evidence/specs/*carryover*.md"
   ],
   "claimTags": {},
   "gates": [],

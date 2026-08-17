@@ -2845,6 +2845,54 @@ if gschema is not None:
             fail(f"{GRAPH_SCHEMA_REL}: edge.payload has no `minLength` — REQ-003: an empty "
                  "payload is `references/planning.md`'s fake edge with a field around it")
 
+# --- B-065: what the invariants bind together, coordination must guard together ----------
+#
+# Two agents, one checkout, no lease cost this project four version collisions and a
+# `files[]` entry silently dropped by a merge. `.claude/agent-sync.json` guards thirteen
+# files — and the version-sync invariant names FIVE surfaces that must move together, of
+# which four were guarded. The fifth is `SKILL-CARD.md`, whose omission had already
+# surfaced once on a release bump, from the validator rather than from a reader.
+#
+# The surfaces are DISCOVERED, not listed: a file DECLARING the current version — as JSON
+# `"version": "x"` or as the card's `| **Version** | x |` row — is a surface a version bump
+# touches, and a list here would drift from the invariant the way the last one did.
+_as = os.path.join(ROOT, ".claude", "agent-sync.json")
+if not os.path.isfile(_as):
+    _UNLOOKED.append("skip: no .claude/agent-sync.json — coordination is off in this checkout")
+elif not plg_ver:
+    _UNLOOKED.append("skip: no plugin version resolved, so version surfaces cannot be found")
+else:
+    import fnmatch as _fn
+    _guarded = (load_json(".claude/agent-sync.json") or {}).get("guardedFiles") or []
+    _decl = (re.compile(r'"version"\s*:\s*"' + re.escape(plg_ver) + r'"'),
+             re.compile(r"\|\s*\*\*Version\*\*\s*\|\s*" + re.escape(plg_ver) + r"\s*\|"))
+    _surfaces = []
+    for _dp, _dn, _fnames in os.walk(ROOT):
+        _dn[:] = [d for d in _dn if d not in
+                  (".git", "node_modules", "graphify-out", ".task-pipeline", "skills")]
+        for _f in _fnames:
+            if not (_f.endswith(".json") or _f.endswith(".md")):
+                continue
+            _fp = os.path.join(_dp, _f)
+            try:
+                _txt = open(_fp, encoding="utf-8").read()
+            except (OSError, UnicodeDecodeError):
+                continue
+            if any(_rx.search(_txt) for _rx in _decl):
+                _surfaces.append(os.path.relpath(_fp, ROOT))
+    if not _surfaces:
+        fail(f"no file DECLARES version {plg_ver} — B-065's check cannot find the surfaces "
+             "it is meant to compare, which means either the declaration shape changed or "
+             "the version is nowhere. Both are worth stopping for")
+    else:
+        for _rel in sorted(_surfaces):
+            if not any(_fn.fnmatch(_rel, _g) for _g in _guarded):
+                fail(f"{_rel} declares version {plg_ver} and is not in "
+                     "`.claude/agent-sync.json` → `guardedFiles` — B-065: the version-sync "
+                     "invariant makes these surfaces move together, so two agents bumping a "
+                     "version collide here with no lease. That is not hypothetical: this "
+                     "project lost four version numbers and a `files[]` entry to exactly it")
+
 # --- B-061: which doctrine a run actually read ------------------------------------------
 #
 # The bundle is 34 reference files and nothing recorded which a run opened, so a skipped

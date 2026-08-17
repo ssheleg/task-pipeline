@@ -68,8 +68,41 @@ and a caller that cannot tell them apart will wait on the wrong one.
 code being two installers and the validator was false the moment it landed, and is
 corrected in the same change.
 
-Guards: 351 → **370**. Seventeen plants across the module, structurally distinct rather than variations,
+Guards: 351 → **371**. Eighteen plants across the module, structurally distinct rather than variations,
 each asserting it landed before the validator runs.
+
+### B-065 — what the invariants bind together, coordination must guard together
+
+Two halves of this row had gone stale and the third could not be mechanised, so it was
+closed by measuring all three rather than by taking the easy one.
+
+**Stale, and the measurement says so.** *«six registers under lease»* — `idRegisters` is
+deliberately **empty**: the `fs` backend cannot reserve an id safely, and a declaration that
+cannot be served reads as a capability nobody then writes the procedure for. *«the same
+config in the other projects»* — measured: **all eight** family repositories carry one.
+
+**Genuinely open, and now closed.** The version-sync invariant names **five** surfaces that
+must move together; four were lease-guarded. The fifth is `SKILL-CARD.md` — whose omission
+had already surfaced once on a release bump, from the validator rather than from a reader.
+Two agents bumping a version collided there with no lease, which is not hypothetical: this
+project lost four version numbers and a `files[]` entry to exactly that. `SKILL-CARD.md` and
+the carry-over ledgers are guarded now.
+
+**The surfaces are discovered, not listed.** A file *declaring* the current version — JSON
+`"version": "x"` or the card's `| **Version** | x |` row — is a surface a bump touches, and
+each must match a `guardedFiles` glob. A list here would drift from the invariant exactly
+the way the last one did; watched catching a `registry.json` created for the test and never
+mentioned to the check.
+
+**And the habit was promoted rather than left as a row nobody can close.** *Take the lease
+before the edit, not after the collision* is `R-009` now, with the retirement condition the
+doctrine requires. It is a standing instruction and not a mechanism because whether a write
+is *about to* happen is not a state a script can read — the guard refuses an unleased edit
+*at* the edit, which is already too late to have avoided the race. B-75 is the evidence: a
+second session committed to the umbrella with no leases and **invisible to `agent_sync
+status`**, so the config being present is not the habit being held.
+
+Five planted defects watched refused.
 
 ### B-061 — which doctrine a run actually read, and the one number it must refuse to print
 
