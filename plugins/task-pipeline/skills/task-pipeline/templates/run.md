@@ -18,6 +18,33 @@ Run: `<topic>` · started `<YYYY-MM-DD>` · module map: `<path or "none">`
 - Why it is not the build ledger
 - What closes it, and what survives it
 
+## `read:` — which doctrine this run actually opened
+
+The bundle is 34 reference files and nothing recorded which of them a run read, so **a
+skipped file and a read one were indistinguishable** — the class every guard in this
+pipeline exists to catch, left standing over the doctrine itself.
+
+`read:` is **hook-written, never agent-written**, for the same reason `gate:` is: a claim
+about what somebody read, written by the party the claim is about, is not evidence. The
+hook is in `hooks.example.json`, matches `Read`, records the path only
+when it is inside the bundle's `references/`, deduplicates, and **always exits 0** — a hook
+that can fail a `Read` would break every turn in every session.
+
+`scripts/graph.py doctrine` reads these lines and prints one of three things:
+
+| It prints | When | Why not just a number |
+|---|---|---|
+| `unmeasured — no run ledger` | there is no ledger | nothing to read from |
+| `unmeasured — the ledger carries no read: lines` | the hook is absent, **or** the run opened no doctrine | two opposite facts, and the ledger cannot separate them, so neither is claimed |
+| `N of 34 reference files read`, then each unread one | the hook is installed and fired | the count alone says there is a gap, not where |
+
+**It is a disclosure: no floor, no direction, never a target.** A run that needs four files
+and reads four is not worse than one that reads thirty — and the moment the number becomes
+something to raise, agents will open files to raise it. There is **no per-file reading
+floor** in this pipeline; stage 0's mandatory items are the floor that exists, and they are
+not per-file. Inventing one inside a measurement would be a doctrine decision smuggled in
+as a count.
+
 ## Lines
 
 Append-only. These shapes, and nothing else belongs here (the list is the count — a written one drifts, and this one already had):
@@ -30,6 +57,7 @@ hand:  <N|10> — task "<quoted>" — done <n> — surfaced <n> — decisions <n
 holds: <stage id> — <n> (<class: what, owner>; … or "none") — enumerated <n>/8 classes, <unlooked: classes not enumerable>
 gate:  <stage id> — command "<cmd>" — exit <N> — <ISO-8601>
 event: <compact|session-end|subagent> — <detail> — <ISO-8601>
+read:  references/<file>.md            # hook-written, deduplicated, one per file opened
 ```
 
 - **`stage:`** — written when a gate **returns**, not when the stage is entered. The
@@ -77,6 +105,8 @@ never entered look identical from outside, and they mean opposite things.
 ## Log
 
 ```
+read:  references/grill.md
+read:  references/knowledge-sources.md
 stage: 0 Intake — gate manual — verdict pass — 2026-08-10T11:14Z
 iter:  1 — item B-025 — closed at gate 0
 stage: 1 Docs study — gate auto — verdict pass — 2026-08-10T11:31Z

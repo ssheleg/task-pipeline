@@ -2845,6 +2845,72 @@ if gschema is not None:
             fail(f"{GRAPH_SCHEMA_REL}: edge.payload has no `minLength` — REQ-003: an empty "
                  "payload is `references/planning.md`'s fake edge with a field around it")
 
+# --- B-061: which doctrine a run actually read ------------------------------------------
+#
+# The bundle is 34 reference files and nothing recorded which a run opened, so a skipped
+# file and a read one were indistinguishable — the class every guard here exists to catch,
+# left standing over the doctrine itself. The verb is RUN over all three of its states,
+# because the state that matters is the one that must NOT print a number.
+if os.path.isfile(_gs):
+    def _doc(*extra):
+        _r = subprocess.run([sys.executable, _gs, "doctrine", *extra],
+                            capture_output=True, text=True, timeout=60, cwd=ROOT)
+        return _r.returncode, _r.stdout + _r.stderr
+
+    _dtmp = tempfile.mkdtemp(prefix="tp-doc-")
+    try:
+        _c, _o = _doc("--ledger", os.path.join(_dtmp, "absent.md"))
+        if _c != 0 or "unmeasured" not in _o:
+            fail("`graph.py doctrine` over a missing ledger must exit 0 and say "
+                 f"`unmeasured` — got exit {_c}: {_o.strip()[:200]}")
+        _empty = os.path.join(_dtmp, "empty.md")
+        open(_empty, "w").write("stage: 0 Intake — gate manual — verdict pass\n")
+        _c, _o = _doc("--ledger", _empty)
+        if "unmeasured" not in _o:
+            fail("`graph.py doctrine` over a ledger with no `read:` lines does not say "
+                 "`unmeasured` — B-061: the hook being absent and the run reading nothing "
+                 "are opposite facts the ledger cannot separate, and a number there is the "
+                 f"reassuring answer to a question nobody asked. Output: {_o.strip()[:200]}")
+        elif re.search(r"\b0 of \d+", _o):
+            fail("`graph.py doctrine` prints `0 of N` where it must print `unmeasured` — "
+                 "B-061 and the whole point of the verb")
+        _full = os.path.join(_dtmp, "full.md")
+        open(_full, "w").write("read: references/gates.md\nread: references/build.md\n")
+        _c, _o = _doc("--ledger", _full)
+        if _c != 0 or not re.search(r"\b2 of \d+ reference files read", _o):
+            fail("`graph.py doctrine` does not count the `read:` lines it was given — "
+                 f"exit {_c}: {_o.strip()[:200]}")
+        if "unread:" not in _o:
+            fail("`graph.py doctrine` reports a count and never names an unread file — a "
+                 "number says there is a gap, not where")
+        if "never a target" not in _o:
+            fail("`graph.py doctrine` prints a count without saying it is a disclosure — "
+                 "the moment the number becomes something to raise, a run opens files to "
+                 "raise it")
+    finally:
+        shutil.rmtree(_dtmp, ignore_errors=True)
+
+    # The hook that writes the lines must ship, and it must be unable to fail a Read.
+    _hx = os.path.join(ROOT,
+                       "plugins/task-pipeline/skills/task-pipeline/templates/hooks.example.json")
+    if os.path.isfile(_hx):
+        _hj = load_json("plugins/task-pipeline/skills/task-pipeline/templates/hooks.example.json")
+        _hh = (_hj or {}).get("hooks") or _hj or {}
+        _post = _hh.get("PostToolUse") or []
+        _reads = [e for e in _post if isinstance(e, dict) and e.get("matcher") == "Read"]
+        if not _reads:
+            fail("templates/hooks.example.json has no PostToolUse hook matching `Read` — "
+                 "B-061: without it `graph.py doctrine` reports `unmeasured` forever, and "
+                 "the measurement this row exists for never happens")
+        else:
+            _cmds = [h.get("command", "") for e in _reads for h in (e.get("hooks") or [])]
+            if not any("read:" in c for c in _cmds):
+                fail("the Read hook in templates/hooks.example.json writes no `read:` line")
+            if not any("exit 0" in c for c in _cmds):
+                fail("the Read hook in templates/hooks.example.json does not end in "
+                     "`exit 0` — a hook that can fail a `Read` breaks every turn in every "
+                     "session, including sessions of packs that never asked for this one")
+
 # --- B-064: a worked example is the executable half of doctrine -------------------------
 #
 # Three times in one release a rule moved and its own example did not — a GATE 5 example

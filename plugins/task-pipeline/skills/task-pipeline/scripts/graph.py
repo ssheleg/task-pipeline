@@ -74,7 +74,7 @@ ROLES = {
 }
 
 TERMINAL = {"done", "parked"}
-NO_GRAPH = {"producer"}
+NO_GRAPH = {"producer", "doctrine"}
 # Parking a node PROMOTES its dependents: `parked` is terminal, so anything
 # blocked on it becomes runnable even though the payload it waited on never
 # arrived. That is deliberate — `can_continue_around` in the verdict is the
@@ -816,10 +816,71 @@ def cmd_producer(graph, args):
     return 0
 
 
+def cmd_doctrine(graph, args):
+    """Which doctrine this run actually read — B-061.
+
+    The bundle is 34 reference files. A run reads some subset and nothing recorded which,
+    so **a skipped file and a read one were indistinguishable** — the class every guard in
+    this repository exists to catch, left standing over the doctrine itself.
+
+    `read:` lines in the run ledger are written by a hook, never by the agent, for the same
+    reason `gate:` is: a claim about what somebody read, written by the party the claim is
+    about, is not evidence.
+
+    **The one rule that matters here: no `read:` lines means UNMEASURED, never «read
+    nothing».** Zero would be the reassuring answer to a question nobody asked, and this
+    verb exists because that shape had gone unnoticed for a whole bundle.
+
+    It reports and never scores. There is no per-file floor in this pipeline, and inventing
+    one here would be a doctrine decision smuggled in as a measurement — stage 0's
+    mandatory items are the floor that exists, and they are not per-file.
+    """
+    here = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    refs_dir = os.path.join(here, "references")
+    if not os.path.isdir(refs_dir):
+        die("no references/ beside this script — cannot say what the bundle holds", 2)
+    refs = sorted(f for f in os.listdir(refs_dir) if f.endswith(".md"))
+
+    ledger = args.ledger
+    if not os.path.isfile(ledger):
+        print(f"doctrine: unmeasured — no run ledger at {ledger}")
+        print(f"          the bundle holds {len(refs)} reference files; nothing records "
+              "which of them this run opened")
+        return 0
+
+    read = set()
+    with open(ledger, encoding="utf-8") as fh:
+        for line in fh:
+            if not line.startswith("read:"):
+                continue
+            val = line.split(":", 1)[1].strip().split(" ")[0]
+            read.add(os.path.basename(val))
+    read &= set(refs)
+
+    if not read:
+        # The whole point. An empty set here has two causes with opposite meanings and the
+        # ledger cannot tell them apart, so this says so instead of printing 0.
+        print("doctrine: unmeasured — the ledger carries no `read:` lines")
+        print("          Either the hook that writes them is not installed (see "
+              "templates/hooks.example.json) or this run opened no doctrine at all. Those "
+              "are opposite facts and nothing here can separate them, so neither is claimed.")
+        print(f"          the bundle holds {len(refs)} reference files")
+        return 0
+
+    unread = [r for r in refs if r not in read]
+    print(f"doctrine: {len(read)} of {len(refs)} reference files read")
+    print("          a disclosure: no floor, no direction, never a target. A run that needs "
+          "four files and reads four is not worse than one that reads thirty.")
+    for r in unread:
+        print(f"          unread: {r}")
+    return 0
+
+
 VERBS = {
     "validate": (cmd_validate, "every invariant a schema cannot state"),
     "next": (cmd_next, "the frontier, ordered by what it unblocks"),
     "goal": (cmd_goal, "the release goal this graph serves"),
+    "doctrine": (cmd_doctrine, "which of the bundle's reference files this run opened"),
     "producer": (cmd_producer, "what produced this proof: actor, model, runtime, skill, "
                                "config digest, commit, trace"),
     "coverage": (cmd_coverage, "every requirement and the nodes serving it; exits 1 on a gap"),
@@ -852,6 +913,10 @@ def main(argv=None):
     p_add.add_argument("--why", required=True,
                        help="why this node appeared mid-run — it enters the revision log")
     p_add.add_argument("--id", default=None, help="omit to allocate the next one")
+
+    made["doctrine"].add_argument(
+        "--ledger", default=os.path.join(".task-pipeline", "run.md"),
+        help="the run ledger whose `read:` lines record what was opened")
 
     p_park = made["park"]
     p_park.add_argument("node")

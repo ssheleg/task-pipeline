@@ -338,6 +338,27 @@ of the command the project declared in `pipeline.json` → the tests stage's
 `gate.command`. The rail does not read it — a glyph still comes from the verdict —
 but the stage-7 release gate requires the claim and the observation to agree.
 
+**The same shape, one axis over — `read:`.** Since v1.69.0 a `PostToolUse` hook on `Read`
+appends
+
+```
+read:  references/<file>.md
+```
+
+deduplicated, and always exiting 0 — a hook that can fail a `Read` breaks every turn in
+every session. `scripts/graph.py doctrine` reports how many of the bundle's reference files
+a run opened and lists the rest.
+
+Why it is hook-written is the same reason as above: a claim about what somebody read,
+written by the party the claim is about, is not evidence. And why the verb prints
+`unmeasured` rather than `0` when there are no such lines is the same reason again — the
+hook being absent and the run reading nothing are **opposite facts** the ledger cannot
+separate, so it claims neither. A `0` there would be the reassuring answer to a question
+nobody asked, over 34 files nobody checked.
+
+It is a disclosure: no floor, no direction, never a target. The moment the number becomes
+something to raise, a run will open files to raise it.
+
 The reason is the one this whole file is about, arriving one level down. A rail
 written from memory is a summary that is confidently wrong exactly when it matters;
 a gate that reads a verdict typed by the agent it constrains is the same shape

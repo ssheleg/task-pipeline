@@ -16,6 +16,18 @@
           }
         ]
       }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Read",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "f=$(python3 -c 'import json,sys;print(json.load(sys.stdin).get(\"tool_input\",{}).get(\"file_path\",\"\"))'); case \"$f\" in *task-pipeline/references/*.md) r=\"references/${f##*/}\"; l=.task-pipeline/run.md; mkdir -p .task-pipeline; touch \"$l\"; grep -q \"^read: $r$\" \"$l\" || echo \"read: $r\" >> \"$l\";; esac; exit 0"
+          }
+        ]
+      }
     ]
-  }
+  },
+  "_read_note": "The PostToolUse/Read hook writes `read: references/<file>.md` into the run ledger, deduplicated, and ALWAYS exits 0 — a hook that can fail a Read would break every turn in every session. It is what makes `scripts/graph.py doctrine` able to say which doctrine a run opened. Without it that verb reports `unmeasured` rather than 0: a skipped file and a read one are otherwise indistinguishable, and 0 would be the reassuring answer to a question nobody asked. Hooks exist only in Claude Code; on any other agent the count stays `unmeasured` and says so."
 }

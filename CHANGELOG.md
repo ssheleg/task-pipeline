@@ -68,8 +68,41 @@ and a caller that cannot tell them apart will wait on the wrong one.
 code being two installers and the validator was false the moment it landed, and is
 corrected in the same change.
 
-Guards: 351 → **369**. Sixteen plants across the module, structurally distinct rather than variations,
+Guards: 351 → **370**. Seventeen plants across the module, structurally distinct rather than variations,
 each asserting it landed before the validator runs.
+
+### B-061 — which doctrine a run actually read, and the one number it must refuse to print
+
+The bundle is **34 reference files**. A run reads some subset and nothing recorded which,
+so **a skipped file and a read one were indistinguishable** — the class every guard in this
+repository exists to catch, left standing over the doctrine itself.
+
+A `PostToolUse` hook on `Read` now appends `read: references/<file>.md` to the run ledger,
+deduplicated, and **always exits 0**: a hook that can fail a `Read` breaks every turn in
+every session, including sessions of packs that never asked for this one. It is
+hook-written for the same reason `gate:` is — a claim about what somebody read, written by
+the party the claim is about, is not evidence.
+
+`scripts/graph.py doctrine` reports it, and **the state that matters is the one where it
+must not print a number.** No ledger, or a ledger with no `read:` lines, prints
+`unmeasured` and says why: the hook being absent and the run having opened no doctrine are
+**opposite facts**, the ledger cannot separate them, so neither is claimed. `0 of 34` there
+would be the reassuring answer to a question nobody asked, over 34 files nobody checked —
+and that is precisely the shape that went unnoticed for a whole bundle.
+
+Where the hook did fire, it prints the count **and every unread file**, because a number
+says there is a gap and not where. It is a disclosure — no floor, no direction, never a
+target: a run that needs four files and reads four is not worse than one that reads thirty,
+and the moment the number becomes something to raise, a run will open files to raise it.
+
+**No per-file reading floor was invented.** Stage 0's mandatory items are the floor that
+exists and they are not per-file; declaring one inside a measurement would be a doctrine
+decision smuggled in as a count.
+
+Two existing guards caught this change as it landed, both correctly: a relative link in a
+seeded template (which resolves from `templates/` and nowhere it is seeded to), and **a
+ledger shape with no reader** — `read:` had to be named in the doctrine that consumes it
+before the template could declare it. Seven planted defects watched refused.
 
 ### B-064 — a worked example is the executable half of doctrine, and now something checks one
 
