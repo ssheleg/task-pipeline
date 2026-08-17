@@ -7041,6 +7041,67 @@ jobs:
           fi
           echo "OK: refused, as the doctrine requires"
 
+      - name: Negative self-test (a graph schema whose node shape does not bind)
+        run: |
+          set -eu
+          rm -rf /tmp/gx1-copy && cp -R . /tmp/gx1-copy
+          python3 - <<'EOF'
+          import json
+          p = "/tmp/gx1-copy/plugins/task-pipeline/skills/task-pipeline/graph.schema.json"
+          d = json.load(open(p, encoding="utf-8"))
+          assert d["properties"]["nodes"]["type"] == "array", "PLANT DID NOT LAND: gx1"
+          # An object map with `items` kept as decoration: `items` constrains arrays
+          # only, so every node check below it becomes vacuous.
+          d["properties"]["nodes"] = {"type": "object",
+                                      "additionalProperties": {"type": "object"},
+                                      "items": {"$ref": "#/definitions/node"}}
+          json.dump(d, open(p, "w", encoding="utf-8"), indent=2)
+          EOF
+          if python3 /tmp/gx1-copy/test/validate.py; then
+            echo "ERROR: a node shape that binds nothing was accepted"; exit 1
+          else
+            echo "OK: a non-binding node shape is refused"
+          fi
+
+      - name: Negative self-test (a required field whose subschema constrains nothing)
+        run: |
+          set -eu
+          rm -rf /tmp/gx2-copy && cp -R . /tmp/gx2-copy
+          python3 - <<'EOF'
+          import json
+          p = "/tmp/gx2-copy/plugins/task-pipeline/skills/task-pipeline/graph.schema.json"
+          d = json.load(open(p, encoding="utf-8"))
+          o = d["definitions"]["node"]["properties"]["owner"]
+          assert o.get("minLength"), "PLANT DID NOT LAND: gx2 — owner already unconstrained"
+          del o["minLength"]
+          json.dump(d, open(p, "w", encoding="utf-8"), indent=2)
+          EOF
+          if python3 /tmp/gx2-copy/test/validate.py; then
+            echo "ERROR: owner in required with no minLength was accepted — an empty owner
+                   satisfies required and dispatches to nobody"; exit 1
+          else
+            echo "OK: a name in required with no constraint is refused"
+          fi
+
+      - name: Negative self-test (done without evidence, expressible and unexpressed)
+        run: |
+          set -eu
+          rm -rf /tmp/gx3-copy && cp -R . /tmp/gx3-copy
+          python3 - <<'EOF'
+          import json
+          p = "/tmp/gx3-copy/plugins/task-pipeline/skills/task-pipeline/graph.schema.json"
+          d = json.load(open(p, encoding="utf-8"))
+          n = d["definitions"]["node"]
+          assert "if" in n and "then" in n, "PLANT DID NOT LAND: gx3 — no if/then to remove"
+          del n["if"]; del n["then"]
+          json.dump(d, open(p, "w", encoding="utf-8"), indent=2)
+          EOF
+          if python3 /tmp/gx3-copy/test/validate.py; then
+            echo "ERROR: a schema that lets a done node carry no evidence was accepted"; exit 1
+          else
+            echo "OK: done-without-evidence is refused by the schema, not only by a script"
+          fi
+
       - name: Negative self-test (the stage-3 gate stops requiring the convergence)
         run: |
           set -eu

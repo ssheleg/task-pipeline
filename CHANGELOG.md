@@ -1,5 +1,48 @@
 # Changelog
 
+## v1.69.0 — the work graph, and a check that mentions is not a check that binds
+
+*In progress — module 1 of the role-agent programme
+(`docs/evidence/specs/2026-08-17-role-agent-graph-brief.md`).*
+
+**`graph.schema.json` and `graph.example.json` ship**, and `test/validate.py` reads
+them. `.task-pipeline/graph.json` is the queue the loop walks — a run artifact, never
+committed by the skill, so what ships is the schema and one example that exercises it.
+
+**The first draft of the check asserted membership in `required` and nothing else,
+and an independent reader defeated every requirement it claimed to enforce.** Standing
+instruction `R-005` exists for exactly that — *your own reading of your own check is
+the reading that missed it* — and this is the first time it has been run on a check
+this repository added. Eight bypasses, all now refused and each watched refusing:
+
+| Bypass | Why it worked |
+|---|---|
+| `nodes` declared an object map, `items` left as decoration | `items` constrains arrays only, so every element check was vacuous — REQ-001, 002 and 003 defeated at once |
+| `owner` in `required`, `minLength` dropped | a node whose owner is `""` satisfies `required` and dispatches to nobody |
+| `owner` typed `["string", "null"]` | the same, with `null` |
+| `edges` requiring `payload` and neither endpoint | an edge is from, to, and what it carries |
+| `items` given as a tuple | binds element 0, frees the rest — and crashed the check rather than failing it |
+| a name in `required` that `properties` never declares | constrains nothing at all |
+| a two-hop `$ref` | reported five fields missing that were not missing |
+| an example of `{"nodes": [], "edges": []}` | validates against any schema and demonstrates none of it |
+
+**And one claim in the schema's own prose was false.** It said `done` implying
+evidence was beyond JSON Schema. Draft-07 `if`/`then` states it exactly, and now does
+— so a node called done by assertion is refused **by the format**, before any script
+runs. The line between "the schema's job" and "the script's job" moved to where the
+format actually puts it: what remains for `graph.py` is cross-document — whether an
+owner names a role that exists, whether `serves` resolves, whether the edges cycle.
+
+**A NameError, found by the reader and not by the author.** The skip path appended to
+`_skips`, which exists in a **sibling repository's** validator and not in this one. On
+any machine without `jsonschema` the run died on a bare traceback and the ~250 checks
+below it never ran; CI could not see it, because CI installs `jsonschema` first. The
+accumulator here is `_UNLOOKED`, and the one-line fix that defines `_skips` would have
+been worse — a silent skip, which `test/validate.py:395` forbids by name.
+
+Guards: 351 → **354**. Three plants, structurally distinct rather than variations,
+each asserting it landed before the validator runs.
+
 ## v1.68.0 — the worst body in the family, and the rule that was wrong about it
 
 **6685 tokens against a 5000 budget → 4735**, under the 4750 working limit, by

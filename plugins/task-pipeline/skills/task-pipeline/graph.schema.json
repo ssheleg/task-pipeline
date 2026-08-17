@@ -1,0 +1,151 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://raw.githubusercontent.com/ssheleg/task-pipeline/main/plugins/task-pipeline/skills/task-pipeline/graph.schema.json",
+  "title": "task-pipeline work graph",
+  "description": "The queue the loop walks, written at stage 2 and re-planned by the verifier at every close. It lives at `.task-pipeline/graph.json` — a RUN artifact, never shipped, never committed by the skill. What ships is this schema and one example.\n\nThe design rule this file exists to serve: the model never reads the graph. `scripts/graph.py next` computes the frontier and prints it, so what enters a context each iteration is bounded by the frontier's width rather than by the programme's size. A graph of four hundred nodes and a graph of four cost the same to walk.\n\nOnly the invariants a schema CAN state live here — and the first draft of this file drew that line in the wrong place. It claimed `done` implying evidence was beyond JSON Schema; draft-07 `if`/`then` states it exactly, and it is stated below. What genuinely cannot be expressed is cross-DOCUMENT: whether an `owner` names a role that exists, whether `serves` resolves to a real REQ, and whether the edges form a cycle. Those are `graph.py validate`'s, and the split is now where the format actually puts it.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "goal",
+    "nodes",
+    "edges"
+  ],
+  "properties": {
+    "goal": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Echoed from the project's `pipeline.json` → `release.goal` when the graph is created, so the graph carries the thing it serves rather than pointing at a file that may have moved on. Every loop iteration prints it above the frontier: drift from the goal becomes visible rather than remembered."
+    },
+    "nodes": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/node"
+      },
+      "description": "Units of work. A node is what one role does in one dispatch and what one verdict closes."
+    },
+    "edges": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/edge"
+      },
+      "description": "Dependencies, each carrying what it hands over."
+    }
+  },
+  "definitions": {
+    "node": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "title",
+        "owner",
+        "status",
+        "serves"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^N-[0-9]{3,}$",
+          "description": "Addressable, so a verdict, a board row and a commit can all cite the same node."
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "owner": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The role that runs it. Required by schema because a node with no owner is a node nobody dispatches — it sits in the frontier forever and the loop looks stalled for a reason no output explains. Whether the name is a role that EXISTS is `graph.py validate`'s question, not this file's."
+        },
+        "status": {
+          "enum": [
+            "pending",
+            "running",
+            "done",
+            "blocked",
+            "parked"
+          ],
+          "description": "`blocked` is waiting on an edge; `parked` is the verifier's deliberate *«this is a blocker, continue around it»*. The two are different facts and collapsing them loses the one a person needs."
+        },
+        "blocked_by": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^N-[0-9]{3,}$"
+          },
+          "default": [],
+          "description": "Node ids. This is what makes the frontier computable at all: a node is runnable when every id here is `done`.",
+          "uniqueItems": true
+        },
+        "serves": {
+          "type": "string",
+          "minLength": 1,
+          "description": "A REQ id, or a clause of the goal. Required, because a node that serves neither is work nobody asked for — and the pipeline's answer to that is to park it WITH THAT AS THE REASON rather than to do it quietly."
+        },
+        "evidence": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "string"
+          },
+          "default": null,
+          "description": "The command and its output that proves this node is done. Null until closed. **A `done` node must carry at least one non-empty entry** — stated as `if`/`then` above, so the format refuses it before any script runs. The first draft only promised that `graph.py close` refuses a null, which by its own wording accepted `evidence: []` — the exact shape a script writing an empty list produces."
+        },
+        "note": {
+          "type": "string"
+        }
+      },
+      "if": {
+        "properties": {
+          "status": {
+            "const": "done"
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "then": {
+        "required": [
+          "evidence"
+        ],
+        "properties": {
+          "evidence": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      }
+    },
+    "edge": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "from",
+        "to",
+        "payload"
+      ],
+      "properties": {
+        "from": {
+          "type": "string",
+          "pattern": "^N-[0-9]{3,}$"
+        },
+        "to": {
+          "type": "string",
+          "pattern": "^N-[0-9]{3,}$"
+        },
+        "payload": {
+          "type": "string",
+          "minLength": 1,
+          "description": "What this edge carries. Required, and it is `references/planning.md`'s fake-edge test stated in the schema rather than remembered: an arrow whose payload nobody can name is not a dependency, it is a drawing. Naming it is also how the receiving node's brief gets written."
+        }
+      }
+    }
+  }
+}

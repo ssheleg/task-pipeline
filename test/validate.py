@@ -2478,6 +2478,172 @@ GATE_TYPES = {"auto", "manual"}
 # 'default' = the model confirmed for the run; 'inherit' = whatever the operator is on.
 MODEL_TOKENS = {"default", "inherit"}
 
+# --- The work graph -----------------------------------------------------------
+# `.task-pipeline/graph.json` is the queue the loop walks: nodes owned by a role,
+# edges carrying a payload. It is a RUN artifact, never shipped, so what ships is
+# the schema plus an example — validated the way the pipeline config above is.
+#
+# **This block checks that the schema CONSTRAINS, not that it mentions.** The first
+# draft asserted membership in `required` and nothing else, and an independent read
+# (standing instruction R-005) defeated all of REQ-001/002/003 against it: `nodes`
+# declared an object map with `items` left as decoration; `owner` in `required` with
+# its `minLength` dropped, so `""` and `null` both pass; `edges` requiring `payload`
+# and neither endpoint. A name in `required` is not a constraint — the constraint is
+# the subschema, and this block reads the subschema.
+GRAPH_SCHEMA_REL = f"{SKILL_DIR}/graph.schema.json"
+GRAPH_EXAMPLE_REL = f"{SKILL_DIR}/graph.example.json"
+GRAPH_STATUSES = {"pending", "running", "done", "blocked", "parked"}
+
+gschema = load_json(GRAPH_SCHEMA_REL)
+
+
+def _gderef(obj, _depth=0):
+    """Follow local `$ref`s, to a bounded depth.
+
+    One hop was the first draft, and a two-hop `$ref` then reported five fields
+    missing that were not missing — safe direction, misleading message.
+    """
+    while isinstance(obj, dict) and "$ref" in obj and _depth < 8:
+        ref = obj["$ref"]
+        if not isinstance(ref, str) or not ref.startswith("#/"):
+            return None                      # non-local: this check cannot follow it
+        cur = gschema
+        for part in ref[2:].split("/"):
+            if not isinstance(cur, dict):
+                return None
+            cur = cur.get(part.replace("~1", "/").replace("~0", "~"))
+            if cur is None:
+                return None
+        obj, _depth = cur, _depth + 1
+    return obj if isinstance(obj, dict) else None
+
+
+def _garray_items(container, name):
+    """The subschema every element of an array property must satisfy.
+
+    Returns None — and says why — for each shape that makes the element checks
+    vacuous: a container that is not an array, `items` absent, or `items` given as
+    a tuple, which binds element 0 and leaves the rest free.
+    """
+    c = _gderef(container)
+    if c is None:
+        return None, f"`{name}` could not be resolved to a subschema"
+    if c.get("type") != "array":
+        return None, f"`{name}` is not declared an array, so its `items` constrains nothing"
+    it = c.get("items")
+    if it is None:
+        return None, f"`{name}` declares no `items`, so its elements are unconstrained"
+    if isinstance(it, list):
+        return None, f"`{name}.items` is a tuple, which binds the first element and frees the rest"
+    d = _gderef(it)
+    if d is None:
+        return None, f"`{name}.items` could not be resolved to a subschema"
+    return d, None
+
+
+def _gfield(sub, field):
+    """A field's own subschema, or None when `properties` never declares it — which
+    is how a name sits in `required` while constraining nothing at all."""
+    if not isinstance(sub, dict):
+        return None
+    return _gderef((sub.get("properties") or {}).get(field, {}))
+
+
+if gschema is not None:
+    if gschema.get("type") != "object":
+        fail(f"{GRAPH_SCHEMA_REL}: not a JSON Schema (missing top-level type: object)")
+    _gprops = gschema.get("properties") or {}
+    for _req in ("goal", "nodes", "edges"):
+        if _req not in _gprops:
+            fail(f"{GRAPH_SCHEMA_REL}: no `{_req}` property — the graph's three parts are "
+                 "the goal it serves, the nodes, and the edges")
+
+    _gnode, _why = _garray_items(_gprops.get("nodes", {}), "nodes")
+    if _gnode is None:
+        fail(f"{GRAPH_SCHEMA_REL}: {_why} — REQ-001: the node shape has to bind")
+    else:
+        _nreq = set(_gnode.get("required") or [])
+        for _f in ("id", "title", "owner", "status", "serves"):
+            if _f not in _nreq:
+                fail(f"{GRAPH_SCHEMA_REL}: node does not require `{_f}` — REQ-001/002: a node "
+                     "missing any of these is one nobody can dispatch or attribute")
+            elif _gfield(_gnode, _f) is None:
+                fail(f"{GRAPH_SCHEMA_REL}: node requires `{_f}` but never declares it — a name "
+                     "in `required` with no subschema constrains nothing")
+        for _f in ("blocked_by", "evidence"):
+            if _gfield(_gnode, _f) is None:
+                fail(f"{GRAPH_SCHEMA_REL}: node declares no `{_f}` — REQ-001 names it")
+
+        # REQ-002 in full: `owner` PRESENT is not `owner` MEANINGFUL. An empty string
+        # and a null are each a node with no owner, and each satisfies `required`.
+        _owner = _gfield(_gnode, "owner")
+        if _owner is not None:
+            if _owner.get("type") != "string":
+                fail(f"{GRAPH_SCHEMA_REL}: node.owner is not typed `string` — REQ-002: a null "
+                     "owner is a node nobody dispatches")
+            if not _owner.get("minLength"):
+                fail(f"{GRAPH_SCHEMA_REL}: node.owner has no `minLength` — REQ-002: an empty "
+                     "owner satisfies `required` and still dispatches to nobody")
+        _serves = _gfield(_gnode, "serves")
+        if _serves is not None and not _serves.get("minLength"):
+            fail(f"{GRAPH_SCHEMA_REL}: node.serves has no `minLength` — REQ-012: work that "
+                 "serves an empty string is work nobody asked for")
+        _status = _gfield(_gnode, "status")
+        if _status is not None and set(_status.get("enum") or []) != GRAPH_STATUSES:
+            fail(f"{GRAPH_SCHEMA_REL}: node.status must enumerate exactly "
+                 f"{sorted(GRAPH_STATUSES)} — `blocked` (waiting on an edge) and `parked` "
+                 "(a blocker somebody ruled on) are different facts, and collapsing them "
+                 "loses the one a person needs")
+        # REQ-006's half that a schema CAN express, and the first draft claimed it could
+        # not: draft-07 if/then states `done` implies non-empty evidence exactly.
+        _ifthen = _gnode.get("if") or {}
+        _then = _gnode.get("then") or {}
+        _ifok = ((_ifthen.get("properties") or {}).get("status") or {}).get("const") == "done"
+        _thenev = ((_then.get("properties") or {}).get("evidence") or {})
+        if not (_ifok and "evidence" in (_then.get("required") or [])
+                and _thenev.get("type") == "array" and _thenev.get("minItems")):
+            fail(f"{GRAPH_SCHEMA_REL}: node has no `if status==done then evidence` rule — "
+                 "REQ-006: a node called done by assertion is the thing `evidence` exists "
+                 "to prevent, and draft-07 states it without a script")
+
+    _gedge, _why = _garray_items(_gprops.get("edges", {}), "edges")
+    if _gedge is None:
+        fail(f"{GRAPH_SCHEMA_REL}: {_why} — REQ-003: the edge shape has to bind")
+    else:
+        _ereq = set(_gedge.get("required") or [])
+        for _f in ("from", "to", "payload"):
+            if _f not in _ereq:
+                fail(f"{GRAPH_SCHEMA_REL}: edge does not require `{_f}` — an edge is where "
+                     "it comes from, where it goes, and what it carries")
+        _pay = _gfield(_gedge, "payload")
+        if _pay is not None and not _pay.get("minLength"):
+            fail(f"{GRAPH_SCHEMA_REL}: edge.payload has no `minLength` — REQ-003: an empty "
+                 "payload is `references/planning.md`'s fake edge with a field around it")
+
+gex = load_json(GRAPH_EXAMPLE_REL)
+if gschema is not None and gex is not None:
+    # The example must EXERCISE the shape. "Validated against its schema" is true of
+    # `{"nodes": [], "edges": []}` and demonstrates none of it.
+    if not (gex.get("nodes") and gex.get("edges")):
+        fail(f"{GRAPH_EXAMPLE_REL}: must carry at least one node and one edge — an empty "
+             "example validates against any schema and shows nothing")
+    try:
+        import jsonschema
+    except ImportError:
+        # Skipping is fine; skipping in silence is not (canon 9). This file's
+        # accumulator is `_UNLOOKED`. The first draft appended to `_skips`, which
+        # exists in a SIBLING repository's validator and not in this one — so on a
+        # machine without jsonschema the run died with a NameError and the ~250
+        # checks below it never ran. Found by the R-005 reader, not by the author.
+        _UNLOOKED.append("skip: graph.example.json against its schema — jsonschema is "
+                         "not installed, so only the dependency-free shape was read")
+    else:
+        try:
+            jsonschema.validate(gex, gschema)
+        except jsonschema.ValidationError as _e:
+            fail(f"{GRAPH_EXAMPLE_REL}: does not satisfy its own schema — {_e.message}")
+
+
 schema = load_json(SCHEMA_REL)
 if schema is not None and schema.get("type") != "object":
     fail(f"{SCHEMA_REL}: not a JSON Schema (missing top-level type: object)")
