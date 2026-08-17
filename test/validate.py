@@ -2845,6 +2845,63 @@ if gschema is not None:
             fail(f"{GRAPH_SCHEMA_REL}: edge.payload has no `minLength` — REQ-003: an empty "
                  "payload is `references/planning.md`'s fake edge with a field around it")
 
+# --- B-093: two runnable nodes, one mutable target ---------------------------------------
+#
+# `references/planning.md` states the rule — *distinct is not the same as independent, and
+# the check is what they touch, never what they are called* — and it lived only in the
+# markdown plan, which the graph replaced as the thing deciding what runs next.
+if os.path.isfile(_gs):
+    _ctmp = tempfile.mkdtemp(prefix="tp-coll-")
+    try:
+        def _mkg(nodes):
+            _pp = os.path.join(_ctmp, "g.json")
+            _doc = {"goal": "g", "requirements": ["REQ-001"], "nodes": nodes,
+                    "edges": [{"from": b, "to": n["id"], "payload": "p"}
+                              for n in nodes for b in (n.get("blocked_by") or [])]}
+            with open(_pp, "w", encoding="utf-8") as _fh:
+                json.dump(_doc, _fh)
+            return _pp
+
+        def _nd(nid, touches=None, blocked=None):
+            _n = {"id": nid, "title": "t", "owner": "implementer", "status": "pending",
+                  "blocked_by": blocked or [], "serves": "REQ-001"}
+            if touches is not None:
+                _n["touches"] = touches
+            return _n
+
+        def _nx(path):
+            _r = subprocess.run([sys.executable, _gs, "next", "--graph", path],
+                                capture_output=True, text=True, timeout=60)
+            return _r.returncode, _r.stdout, _r.stderr
+
+        # A shared target between two simultaneously-runnable nodes is reported, and named.
+        _c, _o, _e = _nx(_mkg([_nd("N-001", ["src/a.ts"]), _nd("N-002", ["src/a.ts"])]))
+        if "src/a.ts" not in _e:
+            fail("`graph.py next` does not report two runnable nodes mutating the same "
+                 f"target — B-093, the false parallelism planning.md refuses. stderr: {_e!r}")
+        # And it stays OUT of the rows, which are paid for on every iteration of every loop.
+        _rows = [l for l in _o.splitlines() if l.strip()]
+        if len(_rows) != 2 or not all(l.split()[0].startswith("N-") for l in _rows):
+            fail("`graph.py next` put its collision warning in the frontier rows — B-093: "
+                 "those rows are parsed, and a warning among them reads as a node. "
+                 f"stdout: {_o!r}")
+        # A pair that cannot run together is not a collision — a warning nobody can act on
+        # is how a warning becomes noise.
+        _c, _o, _e = _nx(_mkg([_nd("N-001", ["src/a.ts"]),
+                               _nd("N-002", ["src/a.ts"], blocked=["N-001"])]))
+        if "collision" in _e.lower():
+            fail("`graph.py next` reports a sequential pair as a collision — they never hold "
+                 f"the target at once. stderr: {_e!r}")
+        # And the state that matters: nobody declared anything.
+        _c, _o, _e = _nx(_mkg([_nd("N-001"), _nd("N-002")]))
+        if "undeclared" not in _e.lower():
+            fail("`graph.py next` says nothing when no runnable node declares `touches` — "
+                 "B-093 and the same shape `doctrine` refuses to print 0 for: a frontier "
+                 "nobody described cannot be checked, and silence there reads as checked. "
+                 f"stderr: {_e!r}")
+    finally:
+        shutil.rmtree(_ctmp, ignore_errors=True)
+
 # --- B-065: what the invariants bind together, coordination must guard together ----------
 #
 # Two agents, one checkout, no lease cost this project four version collisions and a

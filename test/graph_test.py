@@ -97,6 +97,25 @@ def node(nid, owner="implementer", status="pending", blocked=None, serves="REQ-0
     return n
 
 
+def run_out(graph, *args):
+    """stdout ONLY. The frontier's width contract is about stdout — `next` writes its
+    collision and undeclared disclosures to stderr precisely so the rows stay parseable,
+    and a helper that merges the two cannot tell the contract from its violation."""
+    d = tempfile.mkdtemp()
+    p = pathlib.Path(d) / "graph.json"
+    p.write_text(json.dumps(graph))
+    r = subprocess.run([sys.executable, str(GRAPH), *args, "--graph", str(p)],
+                       capture_output=True, text=True)
+    return r.returncode, r.stdout
+
+
+def run_at_out(path, *args):
+    """stdout only, against a persistent graph — the width contract's unit."""
+    r = subprocess.run([sys.executable, str(GRAPH), *args, "--graph", str(path)],
+                       capture_output=True, text=True)
+    return r.returncode, r.stdout
+
+
 def run_at(path, *args):
     """Run against a graph that PERSISTS, so a mutation can be read back.
 
@@ -198,7 +217,7 @@ def _():
 
 @case("next prints the frontier and NOTHING else — this output is paid every iteration")
 def _():
-    _, out = run(g([node("N-001", owner="ux", title="check the funnel")]), "next")
+    _, out = run_out(g([node("N-001", owner="ux", title="check the funnel")]), "next")
     lines = [l for l in out.splitlines() if l.strip()]
     assert len(lines) == 1, "next printed %d lines, not one per runnable node: %r" % (len(lines), out)
     assert "N-001" in lines[0] and "ux" in lines[0], lines[0]
@@ -568,14 +587,14 @@ def _():
 @case("a node added mid-walk re-prioritises the NEXT frontier — REQ-011")
 def _():
     p = written(g([node("N-001"), node("N-002")]))
-    first = [l.split()[0] for l in run_at(p, "next")[1].strip().splitlines()]
+    first = [l.split()[0] for l in run_at_out(p, "next")[1].strip().splitlines()]
     assert first == ["N-001", "N-002"], first
     # The dynamic backlog: a task run finds work that depends on N-002.
     for _i in range(2):
         code, out = run_at(p, "add", "--title", "found mid-run", "--owner", "implementer",
                            "--serves", "REQ-001", "--blocked-by", "N-002", "--carries", "what it hands over", "--why", "a fixture")
         assert code == 0, out
-    second = [l.split()[0] for l in run_at(p, "next")[1].strip().splitlines()]
+    second = [l.split()[0] for l in run_at_out(p, "next")[1].strip().splitlines()]
     assert second[0] == "N-002", ("the frontier did not re-prioritise after the backlog "
                                   "grew: %s → %s" % (first, second))
 
@@ -583,15 +602,15 @@ def _():
 @case("the order is deterministic — the same graph gives the same frontier twice")
 def _():
     p = written(g([node("N-00%d" % i) for i in range(1, 6)]))
-    a = run_at(p, "next")[1]
-    b = run_at(p, "next")[1]
+    a = run_at_out(p, "next")[1]
+    b = run_at_out(p, "next")[1]
     assert a == b, "the frontier flickers between runs:\n%s\n---\n%s" % (a, b)
 
 
 @case("next prints the frontier and nothing else, priority or not")
 def _():
     p = written(g([node("N-001"), node("N-002", blocked=["N-001"])]))
-    code, out = run_at(p, "next")
+    code, out = run_at_out(p, "next")
     assert code == 0, out
     lines = [l for l in out.strip().splitlines() if l.strip()]
     assert len(lines) == 1, "next printed more than the frontier: %r" % out
@@ -1089,6 +1108,114 @@ def _():
         "a plain-skill install invented a version instead of saying it has none: %r"
         % f["skill"])
     assert "plugin manifest" in f["skill"], f["skill"]
+
+
+# --- B-093: two runnable nodes, one mutable target ---------------------------------------
+#
+# `references/planning.md` states the rule with the right teeth — *«distinct is not the same
+# as independent; the check is what they touch, never what they are called»* — and it lived
+# entirely in the markdown plan. The role-agent design replaces the plan with `graph.json`
+# as the thing that decides what runs next, and the node had no field for what it touches.
+# So `frontier()` ranked by `blocked_by` alone and could hand two agents two runnable nodes
+# that write the same file, and nothing could even report it.
+
+def _touch_node(nid, touches, **kw):
+    n = node(nid, **kw)
+    n["touches"] = touches
+    return n
+
+
+@case("two runnable nodes sharing a touched target are named on stderr")
+def _():
+    g2 = g([_touch_node("N-001", ["src/export.ts"]), _touch_node("N-002", ["src/export.ts"])])
+    code, out = run(g2, "next")
+    assert code == 0, out
+    assert "N-001" in out and "N-002" in out, out
+    assert "src/export.ts" in out, "the shared target is not named: %s" % out
+
+
+@case("the collision goes to stderr and never into the frontier rows")
+def _():
+    d = tempfile.mkdtemp()
+    p = pathlib.Path(d) / "graph.json"
+    p.write_text(json.dumps(g([_touch_node("N-001", ["a.ts"]), _touch_node("N-002", ["a.ts"])])))
+    r = subprocess.run([sys.executable, str(GRAPH), "next", "--graph", str(p)],
+                       capture_output=True, text=True)
+    rows = [l for l in r.stdout.splitlines() if l.strip()]
+    assert len(rows) == 2, ("the frontier print is the one line paid for on every iteration "
+                            "of every loop, so a warning may not enter it: %r" % r.stdout)
+    for l in rows:
+        assert l.split()[0].startswith("N-"), l
+    assert "a.ts" in r.stderr, "the collision is not on stderr: %r" % r.stderr
+
+
+@case("disjoint targets raise nothing")
+def _():
+    g2 = g([_touch_node("N-001", ["a.ts"]), _touch_node("N-002", ["b.ts"])])
+    code, out = run(g2, "next")
+    assert code == 0 and "collision" not in out.lower(), out
+
+
+@case("nodes that cannot run at once do not collide")
+def _():
+    # N-002 waits on N-001, so they never hold the file at the same time. Reporting them
+    # would be a warning nobody can act on, which is how a warning becomes noise.
+    g2 = g([_touch_node("N-001", ["a.ts"]),
+            _touch_node("N-002", ["a.ts"], blocked=["N-001"])])
+    code, out = run(g2, "next")
+    assert code == 0, out
+    assert "collision" not in out.lower(), "a sequential pair was reported: %s" % out
+
+
+@case("a frontier whose nodes declare no targets says so — silence is not 'no collision'")
+def _():
+    g2 = g([node("N-001"), node("N-002")])
+    code, out = run(g2, "next")
+    assert code == 0, out
+    low = out.lower()
+    assert "undeclared" in low or "declare no" in low, (
+        "two runnable nodes with no `touches` produce no warning and no disclosure, so a "
+        "quiet run reads as a checked one — the same shape `doctrine` refuses to print 0 "
+        "for: %s" % out)
+
+
+@case("a partially-declared frontier discloses how many said nothing")
+def _():
+    g2 = g([_touch_node("N-001", ["a.ts"]), node("N-002"), node("N-003")])
+    code, out = run(g2, "next")
+    assert code == 0, out
+    assert "2" in out, "the count of undeclared nodes is not reported: %s" % out
+
+
+@case("the schema binds `touches` — non-empty unique strings")
+def _():
+    try:
+        import jsonschema
+    except ImportError:
+        skipped.append("the `touches` schema rule")
+        return
+    schema = json.loads((ROOT / "plugins/task-pipeline/skills/task-pipeline"
+                              / "graph.schema.json").read_text())
+    ok = g([_touch_node("N-001", ["src/a.ts", "docs/DECISIONS.md"])])
+    jsonschema.validate(ok, schema)
+    for bad in ([""], ["   "], ["a", "a"], "a-string-not-a-list"):
+        doc = g([_touch_node("N-001", bad)])
+        try:
+            jsonschema.validate(doc, schema)
+        except jsonschema.ValidationError:
+            continue
+        raise AssertionError("the schema accepts touches=%r" % (bad,))
+
+
+@case("add --touches writes what the node will mutate")
+def _():
+    p = written(g([node("N-001", serves="REQ-001")]))
+    code, out = run_at(p, "add", "--title", "t", "--owner", "implementer", "--serves",
+                       "REQ-001", "--why", "found mid-run", "--touches", "src/a.ts",
+                       "--touches", "src/b.ts")
+    assert code == 0, out
+    assert json.loads(p.read_text())["nodes"][1]["touches"] == ["src/a.ts", "src/b.ts"], \
+        json.loads(p.read_text())["nodes"][1]
 
 if failures:
     print("\n%d failure(s) out of %d cases" % (len(failures), cases))

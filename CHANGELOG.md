@@ -68,8 +68,40 @@ and a caller that cannot tell them apart will wait on the wrong one.
 code being two installers and the validator was false the moment it landed, and is
 corrected in the same change.
 
-Guards: 351 → **371**. Eighteen plants across the module, structurally distinct rather than variations,
+Guards: 351 → **372**. Nineteen plants across the module, structurally distinct rather than variations,
 each asserting it landed before the validator runs.
+
+### B-093 — two runnable nodes, one mutable target
+
+`references/planning.md` states the rule with the right teeth — *distinct is not the same as
+independent, and the check is what they touch, never what they are called* — and it lived
+**entirely in the markdown plan**. The role-agent design replaced that plan with
+`graph.json` as the thing deciding what runs next, and the node had no field for what it
+mutates. So `frontier()` ranked by `blocked_by` alone and could hand two agents two runnable
+nodes that write the same file, with nothing able to report it.
+
+`touches` ships on the node — paths, register names, remote resource ids — and `next` reports
+a pair of **simultaneously-runnable** nodes sharing one. Only simultaneously: a pair where
+one waits on the other never holds the target at once, and reporting it would be a warning
+nobody can act on, which is how a warning becomes noise.
+
+**Both reports go to stderr, and that is a contract rather than a preference.** The frontier
+rows are parsed one per node and are the one line paid for on every iteration of every loop
+— a warning among them reads as a node.
+
+**And the third state is the one that matters: nobody declared anything.** A frontier whose
+nodes carry no `touches` produces no pairs, which looks exactly like a frontier that was
+checked and found clean. So `next` prints how many runnable nodes said nothing — the same
+shape `doctrine` refuses to print `0` for, one axis over.
+
+**Three existing fixtures went red, and they were right to.** They asserted *the frontier
+and nothing else* by reading stdout and stderr merged, so a disclosure written to stderr
+looked like a violation of the width contract. The contract is about stdout; the helpers
+`run_out` and `run_at_out` read that stream alone, and a helper that merges the two cannot
+tell the contract from its breach. Six planted defects watched refused, including both
+disclosures relocated to stdout.
+
+`test/graph_test.py` → **101 cases**.
 
 ### B-065 — what the invariants bind together, coordination must guard together
 

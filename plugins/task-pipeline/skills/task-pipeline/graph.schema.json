@@ -126,6 +126,16 @@
           "minLength": 1,
           "pattern": "\\S",
           "description": "Why this node is parked, written for the person who will read it weeks later. Required when `status` is `parked` — REQ-012, and the same rule shape as `done` implying `evidence`. A park with no reason is indistinguishable from a node that was quietly dropped, and the whole point of parking rather than deleting is that the reason survives. `scripts/graph.py park` refuses without one and refuses to overwrite one already recorded."
+        },
+        "touches": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "\\S"
+          },
+          "description": "What this node MUTATES — paths, register names, remote resource ids. `references/planning.md` states the rule the frontier needs: *distinct is not the same as independent, and the check is what they touch, never what they are called.* That rule lived in the markdown plan, and the graph replaced the plan as the thing deciding what runs next — so `next` could hand two agents two runnable nodes that write the same file, with nothing able to report it.\\n\\nOptional, and its absence is DISCLOSED rather than treated as «touches nothing»: `next` prints how many frontier nodes declared no targets, because a quiet run and a checked one must not look alike."
         }
       },
       "allOf": [

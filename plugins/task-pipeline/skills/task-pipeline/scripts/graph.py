@@ -348,6 +348,30 @@ def unblocks(nodes):
     return {n.get("id"): len(reach(n.get("id"))) for n in nodes}
 
 
+def collisions(ready):
+    """Pairs of simultaneously-runnable nodes that mutate the same thing — B-093.
+
+    Only among nodes that are ready TOGETHER: a pair where one waits on the other never
+    holds the target at once, and reporting it would be a warning nobody can act on, which
+    is how a warning becomes noise.
+
+    Returns (pairs, undeclared) — and the second is why this function returns two things.
+    A frontier whose nodes declare no `touches` produces no pairs, which looks exactly like
+    a frontier that was checked and found clean. So the count of nodes that said nothing is
+    reported beside the pairs, for the same reason `doctrine` refuses to print `0`.
+    """
+    out, undeclared = [], []
+    for n in ready:
+        if not (n.get("touches") or []):
+            undeclared.append(n.get("id"))
+    for i, a in enumerate(ready):
+        for b in ready[i + 1:]:
+            shared = sorted(set(a.get("touches") or []) & set(b.get("touches") or []))
+            if shared:
+                out.append((a.get("id"), b.get("id"), shared))
+    return out, undeclared
+
+
 def frontier(graph):
     nodes = graph.get("nodes") or []
     by_id = {n.get("id"): n for n in nodes}
@@ -472,6 +496,21 @@ def cmd_next(graph, args):
     # every iteration of every loop, so every word here is paid for repeatedly.
     for n in ready:
         print(f"{n['id']}  {n['owner']}  {n['title']}")
+
+    # On stderr, always. The frontier rows are the one line paid for on every iteration of
+    # every loop, and a warning inside them would be paid for the same way — and read as a
+    # node by anything parsing rows.
+    pairs, undeclared = collisions(ready)
+    for a, b, shared in pairs:
+        print(f"collision: {a} and {b} are both runnable and both mutate "
+              f"{', '.join(shared)} — dispatching them together is the false parallelism "
+              "`references/planning.md` refuses: distinct is not independent, and the check "
+              "is what they touch", file=sys.stderr)
+    if undeclared:
+        print(f"undeclared: {len(undeclared)} of {len(ready)} runnable node(s) declare no "
+              f"`touches` ({', '.join(undeclared[:6])}) — a frontier nobody described cannot "
+              "be checked for collisions, and no warning here is not the same as no "
+              "collision", file=sys.stderr)
     return 0
 
 
@@ -680,9 +719,12 @@ def cmd_add(graph, args):
         die("node id %s already exists — nothing was written. Omit --id and one is "
             "allocated from the highest in use" % nid)
 
-    nodes.append({"id": nid, "title": title, "owner": args.owner, "status": "pending",
-                  "blocked_by": blocked, "serves": serves,
-                  "evidence": None})
+    new = {"id": nid, "title": title, "owner": args.owner, "status": "pending",
+           "blocked_by": blocked, "serves": serves, "evidence": None}
+    touches = list(dict.fromkeys(t.strip() for t in (args.touches or []) if t.strip()))
+    if touches:
+        new["touches"] = touches
+    nodes.append(new)
     # The edge lands WITH the node. Writing `blocked_by` and leaving `edges` for later is
     # what made every mid-run node a fake edge by construction.
     edges = graph.setdefault("edges", [])
@@ -913,6 +955,8 @@ def main(argv=None):
     p_add.add_argument("--why", required=True,
                        help="why this node appeared mid-run — it enters the revision log")
     p_add.add_argument("--id", default=None, help="omit to allocate the next one")
+    p_add.add_argument("--touches", action="append", default=[],
+                       help="a path, register or resource this node mutates; repeat per target")
 
     made["doctrine"].add_argument(
         "--ledger", default=os.path.join(".task-pipeline", "run.md"),
