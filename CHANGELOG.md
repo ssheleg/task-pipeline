@@ -68,8 +68,43 @@ and a caller that cannot tell them apart will wait on the wrong one.
 code being two installers and the validator was false the moment it landed, and is
 corrected in the same change.
 
-Guards: 351 → **375**. Twenty-two plants across the module, structurally distinct rather than variations,
+Guards: 351 → **376**. Twenty-three plants across the module, structurally distinct rather than variations,
 each asserting it landed before the validator runs.
+
+### T-7 — the doctrine that names the graph, and module 1 closes
+
+`scripts/graph.py`, `graph.schema.json` and `.task-pipeline/graph.json` had shipped and **no
+doctrine file named any of them.** The schema disclosed it about itself: its `queue`
+description said `continuity.md` did not yet know about `work-graph`. A capability with no
+doctrine is one an agent meets by accident, and the run that meets it by accident is the run
+that reads the graph itself — which is the one thing the design exists to prevent.
+
+`references/work-graph.md` ships: what each field is for and the failure it prevents, the
+nine verbs with their exit codes, the three invariants a schema cannot state and the fourth
+reason `violations()` restates the ones it can (**the schema is never applied to a live
+graph** — `graph.py` is stdlib by design, so a rule checked only against the shipped example
+is a rule the run does not have), and what the graph deliberately does not do.
+
+**Stage 2 now writes it and its gate reads it.** The queue was already declared there — *the
+queue exists here, so the loop arms here* — and the graph is where that declaration becomes
+walkable: the frozen REQ ids so `serves` resolves, one node per unit of work with its owner
+and what it touches, an edge per dependency **naming what it hands over**, then
+`graph.py validate`. A graph that does not validate is not a queue, and `next` refuses to
+walk one. `continuity.md` prefers it over the module map and the task list for a measured
+reason rather than a taste: 400 nodes and 4 produce the same 27-byte frontier.
+
+**The verb list is discovered from the script, not typed into the doctrine.** Two homes for
+one list is the class B-084 recorded twice in a day, and the plant is a tenth verb shipped
+without a doctrine row — refused.
+
+**And the position hole appeared a third time.** `graph.py validate` is named in stage 2's
+body and in stage 2's gate, so a file-wide search was satisfied by either: removing it from
+the body left the gate to cover for it. Body and gate are checked separately now, as are
+`SKILL.md`'s stage-table row and `stages.md`'s prose — the stage list is compared across
+three surfaces, so a criterion on one is a criterion the others quietly drop.
+
+Six planted defects watched refused. **Module 1 of the role-agent programme is complete:
+T-1 through T-7.**
 
 ### T-5 — `close` consumes a verdict, and the verdict grew its seventh key
 

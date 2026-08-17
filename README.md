@@ -153,6 +153,7 @@ until it is installed.
 | 2 Decompose | [`decomposition.md`](plugins/task-pipeline/skills/task-pipeline/references/decomposition.md) — platforms only: brick criteria, module map, build order |
 | 3 Spec | [`spec.md`](plugins/task-pipeline/skills/task-pipeline/references/spec.md) — UX-track order, locked contracts, global constraints, self-review |
 | 4 Plan | [`planning.md`](plugins/task-pipeline/skills/task-pipeline/references/planning.md) — zero-context tasks, parallel groups, no placeholders |
+| the queue | [`work-graph.md`](plugins/task-pipeline/skills/task-pipeline/references/work-graph.md) — a script walks the graph so the model never reads it: 400 nodes and 4 print the same 27-byte frontier |
 | 5 Build | [`build.md`](plugins/task-pipeline/skills/task-pipeline/references/build.md) + [`review.md`](plugins/task-pipeline/skills/task-pipeline/references/review.md) — isolation, ledger, subagent loop, review rubric, fix loop |
 | 5–6 TDD | [`tdd.md`](plugins/task-pipeline/skills/task-pipeline/references/tdd.md) — the iron law, red/green/refactor, the suite gate |
 | 5, 6, 8 The browser | [`browser.md`](plugins/task-pipeline/skills/task-pipeline/references/browser.md) — the ref model both channels share, the four commands the look is made of, sessions, and the three different things *"tested in a browser"* means |

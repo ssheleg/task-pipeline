@@ -58,6 +58,7 @@ gate stops until it is installed.
 | 2 Decompose (platforms only) | `references/decomposition.md` |
 | 3 Spec | `references/spec.md` |
 | 4 Plan | `references/planning.md` |
+| the queue the loop walks | `references/work-graph.md` |
 | 5 Build (worktree, subagents, fix loop) | `references/build.md` + `references/review.md` |
 | 5–6 TDD + suite gate | `references/tdd.md` |
 | 5, 6, 8 The browser — the look, the spec suite, and the difference | `references/browser.md` |
@@ -211,7 +212,7 @@ capable available — see `references/model-tiering.md`).
 |---|---|---|---|
 | 0 | Intake grill — **mandatory** | source ledger written with its `Contradictions:` line; `docs/DOCMAP.md` answered and intent reconciled against as-built; the retro read in full; autonomy sweep covered; brief locked and confirmed | manual |
 | 1 | Docs study | contracts grounded on fetched docs | auto |
-| 2 | Brainstorm + decompose | design approved; UI verdict recorded; every REQ answered; platform: module map approved | manual |
+| 2 | Brainstorm + decompose | design approved; UI verdict recorded; every REQ answered; **the queue is an artifact** — a work graph validates and its coverage names no unserved REQ; platform: module map approved | manual |
 | 3 | Spec | committed + reviewed; UI: chain validated, linter green, scenarios and `SCR-` traced; COPY and VISUAL are a parallel layer after UX, and where both ran their convergence check is recorded | manual |
 | 4 | Plan | parallel-ready, DoD per task; **every edge names what it carries** — the fake-edge test run and its `Edges:` count computed | auto |
 | 5 | Dev | tasks DONE, TDD green per task, branch integrated per the brief; a fanned-out group gets **one convergence check over all its diffs together** before the first worktree lands | auto |

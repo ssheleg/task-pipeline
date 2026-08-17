@@ -85,7 +85,7 @@
                 "work-graph",
                 "none"
               ],
-              "description": "What the loop walks. A loop with no queue is a timer: it says how often to continue and never what the next item is, so the run picks its next move by recollection. module-map = stage 2's decomposition (a platform); plan-tasks = stage 4's task list; none = the mode is armed for the stage boundaries only. Doctrine: references/continuity.md -> Part 1a. `work-graph` is `.task-pipeline/graph.json`, walked by `scripts/graph.py next` — added 2026-08-17 with module 1. It is the queue whose context cost does not grow with its length, which is why it is the one to prefer where a graph exists. **`references/continuity.md` still describes a two-item queue set and does not yet name this one** — that doctrine lands with T-7, and the gap is stated here rather than left for a reader to hit."
+              "description": "What the loop walks. A loop with no queue is a timer: it says how often to continue and never what the next item is, so the run picks its next move by recollection. module-map = stage 2's decomposition (a platform); plan-tasks = stage 4's task list; none = the mode is armed for the stage boundaries only. Doctrine: references/continuity.md -> Part 1a. `work-graph` is `.task-pipeline/graph.json`, walked by `scripts/graph.py next`; doctrine: references/work-graph.md."
             },
             "arm": {
               "enum": [

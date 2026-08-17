@@ -2845,6 +2845,78 @@ if gschema is not None:
             fail(f"{GRAPH_SCHEMA_REL}: edge.payload has no `minLength` — REQ-003: an empty "
                  "payload is `references/planning.md`'s fake edge with a field around it")
 
+# --- T-7: the doctrine that names the graph ----------------------------------------------
+#
+# `scripts/graph.py`, `graph.schema.json` and `.task-pipeline/graph.json` shipped and **no
+# doctrine file named any of them**: the schema even disclosed that `continuity.md` did not
+# know about `work-graph`. A capability with no doctrine is a capability an agent meets by
+# accident, and the run that meets it by accident is the one that reads the graph itself.
+_wg = os.path.join(ROOT, "plugins/task-pipeline/skills/task-pipeline/references/work-graph.md")
+if not os.path.isfile(_wg):
+    fail("references/work-graph.md is missing — T-7: the scripts ship and nothing tells an "
+         "agent the graph exists, what its fields are for, or what the verbs' exit codes mean")
+else:
+    _wgt = open(_wg, encoding="utf-8").read()
+    # The verbs must be listed, and the list is DISCOVERED from the script so the two cannot
+    # drift — the class B-084 records, twice in one day, is a fact with two homes.
+    if os.path.isfile(_gs):
+        _gtxt = open(_gs, encoding="utf-8").read()
+        _shipped = set(re.findall(r'^\s+"([a-z]+)": \(cmd_', _gtxt, re.M))
+        _missing = sorted(v for v in _shipped if f"`{v}`" not in _wgt)
+        if _missing:
+            fail(f"references/work-graph.md documents no verb `{_missing[0]}` "
+                 f"({len(_missing)} missing of {len(_shipped)}) — the doctrine and the script "
+                 "are two homes for one list, and a verb nobody documents is a verb an agent "
+                 "finds by reading the source, which is what this file exists to prevent")
+    # The measured property is the reason the design exists; a doctrine that omits it teaches
+    # the file as a convention rather than as a decision with evidence.
+    if "27-byte" not in _wgt and "27 byte" not in _wgt:
+        fail("references/work-graph.md never states the measurement the design rests on — a "
+             "400-node graph and a 4-node graph produce the same frontier. Without it the "
+             "file reads as a convention rather than a decision somebody measured")
+
+# Stage 2 writes the graph, and its gate reads it. Both surfaces, because the stage list is
+# compared across them and a criterion on one is a criterion the other silently drops.
+_st = os.path.join(ROOT, "plugins/task-pipeline/skills/task-pipeline/references/stages.md")
+if os.path.isfile(_st):
+    # PER LOCATION. `graph.py validate` appears in the stage body and in the stage gate, so a
+    # search of the file was satisfied by either — the third time in this release that a check
+    # meant for two places passed on one of them.
+    _stl = open(_st, encoding="utf-8").read().splitlines()
+    _body = [l for l in _stl if l.strip().startswith("- **Where the queue is a work graph")]
+    if not _body:
+        fail("references/stages.md: stage 2 does not say the work graph is WRITTEN there — "
+             "T-7: the queue has to be an artifact before a loop can walk it")
+    else:
+        _bi = _stl.index(_body[0])
+        _blk = "\n".join(_stl[_bi:_bi + 10])
+        if "graph.py validate" not in _blk:
+            fail("references/stages.md: stage 2 writes the graph and never says how it is "
+                 "checked — a graph that does not validate is not a queue, and `next` refuses "
+                 "to walk one")
+    _gate = [l for l in _stl if "GATE (manual):" in l and "queue is an artifact" in
+             "\n".join(_stl[_stl.index(l):_stl.index(l) + 6])]
+    if not _gate:
+        fail("references/stages.md: stage 2's GATE does not require the queue to be an "
+             "artifact — T-7, and a queue held in recollection is the timer "
+             "`continuity.md` refuses")
+
+_sk2 = os.path.join(ROOT, "plugins/task-pipeline/skills/task-pipeline/SKILL.md")
+if os.path.isfile(_sk2):
+    _s2 = [l for l in open(_sk2, encoding="utf-8").read().splitlines()
+           if l.startswith("| 2 |")]
+    if not _s2 or "the queue is an artifact" not in _s2[0]:
+        fail("SKILL.md: stage 2's row in the stage table does not carry the queue criterion — "
+             "T-7: the table's gate column is what a run reads first, and the stage list is "
+             "compared across three surfaces, so a criterion on one is one the others drop")
+
+# And continuity.md must know the queue type the schema offers.
+_ct = os.path.join(ROOT, "plugins/task-pipeline/skills/task-pipeline/references/continuity.md")
+if os.path.isfile(_ct) and "work-graph" not in open(_ct, encoding="utf-8").read():
+    fail("references/continuity.md does not name `work-graph` — the schema offers the queue "
+         "type and the doctrine that defines queues has never heard of it, which is the "
+         "disagreement the schema itself used to disclose")
+
 # --- B-092: the report an operator reads --------------------------------------------------
 #
 # The pipeline computes, at every gate, exactly what a not-verified field needs — `abstained`

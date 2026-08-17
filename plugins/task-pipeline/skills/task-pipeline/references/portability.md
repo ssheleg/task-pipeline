@@ -70,6 +70,7 @@ a row pointing outside the bundle is the defect this file exists to catch.
 | Cutting a platform into modules, brick criteria, build order | `references/decomposition.md` |
 | What a spec must lock, the UX-track order, the module dossier | `references/spec.md` |
 | The zero-context plan format, parallel groups, set equality | `references/planning.md` |
+| The work graph: its fields, the verbs and their exit codes, and the three invariants a schema cannot state | `references/work-graph.md`, `scripts/graph.py`, `graph.schema.json` |
 | Workspace isolation, the subagent loop, who may write the register | `references/build.md` |
 | The review rubric, diff packages, the three verdicts | `references/review.md` |
 | **False success** — the class, its known shapes and its two rules | `references/gates.md` |

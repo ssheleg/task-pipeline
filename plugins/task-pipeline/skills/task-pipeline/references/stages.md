@@ -262,6 +262,14 @@ never that the work was skipped quietly.
   its status, in build order with the walking skeleton first. Single-module work
   records `single module: <name>` in the design and moves on — a skipped
   decomposition is a decision, never an omission.
+- **Where the queue is a work graph, it is WRITTEN here**
+  ([`work-graph.md`](work-graph.md)): `.task-pipeline/graph.json`, carrying the frozen REQ
+  ids so `serves` resolves, one node per unit of work with its owner and what it touches,
+  and an edge per dependency **naming what it hands over**. Then
+  `python3 scripts/graph.py validate` — a graph that does not validate is not a queue, and
+  `next` refuses to walk one. The reason to prefer it over a prose plan is measured, not
+  aesthetic: a 400-node graph and a 4-node graph produce the same 27-byte frontier, so the
+  cost of knowing what is next does not grow with the programme.
 - **The queue exists here, so the loop arms here** ([`continuity.md`](continuity.md) →
   *Part 1a*). Where `run.loop.arm` is `after-decomposition` and the map holds more than
   one module, arm the mode at the close of this stage and print one line: the mode, and
@@ -269,7 +277,9 @@ never that the work was skipped quietly.
   (`dynamic`). Arming collapses no gate and authorizes no outward act; it decides only
   that the run does not stop to ask *"shall I take the next one?"*. Single-module work
   arms nothing and says so — a loop with one item is a timer.
-- **GATE (manual):** the user approves the design, the UI verdict is recorded,
+- **GATE (manual):** the user approves the design, the UI verdict is recorded, **the
+  queue is an artifact rather than a recollection** — where it is a work graph,
+  `graph.py validate` exits 0 and `graph.py coverage` names any requirement no node serves,
   **every REQ is answered by the design** — a requirement the design doesn't
   address is either covered now or explicitly dropped by the operator, with the
   drop recorded in the carry-over ledger — **and, for a platform, the module map is
