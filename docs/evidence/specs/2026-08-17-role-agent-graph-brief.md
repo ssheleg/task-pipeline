@@ -517,3 +517,105 @@ what stops module 1 inventing a convention module 2 then has to change.
 
 Five contracts locked, three tracks declined with reasons, and the boundary to module 2
 named. What is being approved is the shape of the artifacts, not yet a line of code.
+
+---
+
+## Stage 4 — plan, module 1. Gate: `auto`
+
+Seven tasks. Every module-1 REQ appears in **exactly one** `Implements:` line, and
+their union is module 1's REQ set — the comparison this gate performs.
+
+### T-1 — the graph schema
+**Implements:** REQ-001
+**Does:** `graph.schema.json` beside `pipeline.schema.json` — node shape (`id`,
+`title`, `owner`, `status`, `blocked_by`, `serves`, `evidence`), edge shape
+(`from`, `to`, `payload`), the `goal` echo.
+**DoD:** an example graph validates; a node missing `owner` and an edge missing
+`payload` are both rejected **by the schema alone**, before any script runs.
+
+### T-2 — `graph.py validate`, and the invariants a schema cannot express
+**Implements:** REQ-002, REQ-003
+**Does:** the checks JSON Schema cannot state — `owner` is a **known role**, no
+cycles, `status: done` implies non-null `evidence`, every `serves` resolves.
+**DoD:** each invariant watched refusing its own planted violation; `validate` exits
+`1` on any, `0` clean. Per `R-008`, the plan names the shapes each defect can take
+before the fix is written: an unknown owner, a *misspelt* known owner, an owner that
+was valid before a role was removed.
+
+### T-3 — the walk and the mutation verbs
+**Implements:** REQ-011, REQ-012
+**Does:** `next`, `add`, `park`, `goal`. `next` prints the frontier **and nothing
+else**. `add` is how a task run adds work mid-flight — the dynamic backlog. `park`
+requires `--reason` and refuses without one.
+**DoD:** a graph mutated mid-walk re-prioritises on the next `next`; a node serving
+neither a REQ nor a goal clause is parked **carrying that as its reason**, and a
+fixture reads the reason back.
+
+### T-4 — the verifier agent
+**Implements:** REQ-005, REQ-006
+**Does:** `agents/verifier.md` to the fetched frontmatter contract, declared in
+`plugin.json`; the five-key verdict shape.
+**DoD:** `claude plugin validate --strict` green; the agent resolves as
+`task-pipeline:verifier`; a verdict missing any of the five keys is refused.
+
+### T-5 — `close` consumes a verdict and re-plans
+**Implements:** REQ-007
+**Does:** `close <id> --verdict <path>`: refuse `done` without `evidence`, apply
+`replan.add` / `replan.park`, print the new frontier count and the goal.
+**DoD:** both branches fixtured — `replan.possible: true` advances the graph;
+`false` stops and the printed reason is the verdict's own `why`.
+
+### T-6 — the loop, dynamic, and the goal it prints
+**Implements:** REQ-008, REQ-009, REQ-010
+**Does:** `pipeline.json` → `run.loop.mode: dynamic`, `interval` dropped, `command`
+kept; `release.goal` added to the block that already exists.
+**DoD:** a config with `command` arms and prints the job id and the cancel command;
+a config without arms nothing; every iteration prints the goal above the frontier.
+
+### T-7 — the doctrine
+**Implements:** REQ-004, REQ-031
+**Does:** `references/work-graph.md` (new, reachable from `SKILL.md`); the stage-2
+gate criterion naming the graph as the queue; `continuity.md`'s dynamic-mode section
+beside the interval one.
+**DoD:** `npm test` green — the reference is reachable, the stage table still matches
+across its three compared surfaces, and a fixture asserts all three `mode` values are
+described.
+
+### The graph of the plan itself — every edge names its payload
+
+| From | To | Payload |
+|---|---|---|
+| T-1 | T-2 | the schema `validate` validates against |
+| T-1 | T-4 | the node shape the verdict's `node` field references |
+| T-2 | T-3 | the invariants the mutation verbs must not break |
+| T-3 | T-5 | the `close` verb `--verdict` extends |
+| T-4 | T-5 | the five-key verdict JSON `close` consumes |
+| T-3 | T-6 | the frontier print the iteration prints beneath the goal |
+| T-3, T-5, T-6 | T-7 | the behaviour the doctrine documents |
+
+`planning.md`'s fake-edge test applied: seven edges, seven payloads, none removed.
+
+### Waves — what runs in parallel
+
+| Wave | Tasks | Why together |
+|---|---|---|
+| 1 | **T-1** | everything reads the schema |
+| 2 | **T-2 · T-4 · T-6** | three independent readers of the schema; T-6 touches only config |
+| 3 | **T-3** | needs T-2's invariants |
+| 4 | **T-5** | needs T-3's verb and T-4's verdict |
+| 5 | **T-7** | documents what waves 1–4 built |
+
+Five waves, seven tasks, maximum width three. `build.md`'s rule applies to wave 2:
+a fanned-out group gets **one convergence check over all its diffs together** before
+the first worktree lands, because a per-task review cannot see a contradiction that
+exists only between two of them.
+
+### Gate: the set comparison
+
+| | |
+|---|---|
+| module 1's REQ in the brief | 001 002 003 004 005 006 007 008 009 010 011 012 031 — **13** |
+| union of the seven `Implements:` | 001 · 002 003 · 011 012 · 005 006 · 007 · 008 009 010 · 004 031 — **13** |
+| difference | **none, in either direction** |
+
+**Gate verdict: PASS.**
