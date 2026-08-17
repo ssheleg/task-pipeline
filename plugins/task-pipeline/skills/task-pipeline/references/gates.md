@@ -186,6 +186,22 @@ Four preconditions. Skipping any of them turns a run into a claim.
 4. **You have read the ratchet floors.** A pass with a floor that was quietly
    raised is a pass over the thing the floor was hiding.
 
+**And one rule for the moment after.** A new check that goes red on the day it is
+written invites one reflex — *the check must be wrong, relax it*. Sometimes the
+check **is** wrong, **and the red is still the finding.** A guard asserted two
+constants describing "the price of one unit per year" were equal; they belong to
+two different products, so the premise was wrong and the obvious move was to
+delete the assertion. Reading further showed the disagreement was **visible to
+customers**: both products still sell from one page, and the note under the volume
+table promised a discount computed from the header's price while the table's own
+numbers gave roughly half of it. Nothing miscalculated — only the claim on the page
+was false.
+
+So: **separate the premise from the observation before touching either.** Ask what
+the check *saw*, not whether it was entitled to look. Relax or delete the assertion
+only after the thing it surfaced has its own record — otherwise the finding leaves
+with the check that found it, and nothing remembers it was ever seen.
+
 ---
 
 ## False success — when a mechanism reports a win it never checked
@@ -206,19 +222,34 @@ at least one release in this repository:
 | Presence instead of absence | a counter asserted the new number was present, not that the old one was gone | four surfaces still printed the old number, green for three releases |
 | Half-applied batch | a batch of edits reported done while one edit never applied (R-002) | the file was unchanged |
 | Silence read as a pass | a section with no input printed nothing, and the caller counted it as checked | nothing was looked at |
+| **Read through a pipe** | the caller read the **formatter's** exit code, not the gate's | `npm test 2>&1 \| tee ../test.log` under `bash -e` without `pipefail` concluded `success` over its own `# fail 55`; `check-docs.sh \| grep FAIL \| tail && git commit` committed over a `FAIL` printed to the author's screen |
+| **An absence with no subject** | an assertion that a thing is gone, about a thing that exists nowhere | a viewport test asserting a column leaves the tree at 1279px passed at **every** width — the column had been deleted from the product months earlier |
 
 **The test.** For any mechanism you are about to trust, ask:
 *what does it print when it did not look?* If that is indistinguishable from what
 it prints when it looked and found nothing wrong, it is not evidence — give it a distinct `dormant`
 or `skip` state (→ *Progressive arming*), or verify the effect independently.
 
-Two rules follow. Elsewhere in this bundle they are **cited, never restated**:
+Four rules follow. Elsewhere in this bundle they are **cited, never restated**:
 
 1. **Verify by re-reading, not by the reply.** After a teardown, cancel, delete,
    disable, publish or migrate: query the authoritative state and assert the item's
    new condition.
 2. **Assert the absence of the old, not the presence of the new.** A check that only
    proves the new value exists stays green while the old one is still shipping.
+3. **Read a gate's own exit code, never a pipeline's.** `set -o pipefail`, or
+   `${PIPESTATUS[0]}`, or do not pipe. GitHub Actions runs `run:` under `bash -e`
+   **without** `pipefail`, so `gate | tee` reports `tee`. This is the least visible
+   entry in the table because the command reads as diligence: `check.sh | grep FAIL`
+   looks like someone being careful, and it is the shape that reports success while
+   printing failure to the screen of the person who wrote it.
+4. **An absence assertion needs a subject that exists somewhere.** Before pinning
+   "X must not appear here", prove X appears *somewhere* — otherwise the assertion is
+   true for a reason unrelated to what it claims, and the complement of *watch the
+   green fail against a planted defect* is what catches it: that rule finds a check
+   that **cannot fail**, this one finds a check that **cannot succeed meaningfully**.
+   Both are invisible to every mechanical signal — the test is green, its name is
+   accurate, its code reads correctly.
 
 ---
 

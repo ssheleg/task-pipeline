@@ -1,3 +1,55 @@
+## v1.71.0 — four shapes of a green that measured nothing
+
+Four issues, one class: a signal that reports success while checking nothing. All four
+survived at least one release in a real project, and none is visible to inspection — the
+command reads correctly, the test name is accurate, the document's rows look settled.
+
+### The false-success table gains two shapes, and its rules go from two to four (#48, #49)
+
+**Read through a pipe.** GitHub Actions runs `run:` under `bash -e` **without** `pipefail`, so
+`npm test 2>&1 | tee ../test.log` concluded `success` over its own `# fail 55`. Then the same
+author did it by hand hours after fixing it: `check-docs.sh | grep -E '^(OK|FAIL)' | tail && git
+commit` committed over a `FAIL` printed to their own screen. **This is the least visible entry
+in the table because the command reads as diligence** — `check.sh | grep FAIL` looks like
+somebody being careful.
+
+**An absence with no subject.** A viewport suite pinned a responsive rule as a pair: the column
+visible at 1280, absent at 1279. The column had been removed from the product months earlier, so
+the desktop half failed and the compact half **passed at every width**. The test named after the
+compact band proved nothing about it. This is the complement of *watch the green fail against a
+planted defect*: that rule finds a check which **cannot fail**; this one finds a check which
+**cannot succeed meaningfully**.
+
+### A check with a wrong premise can still be the thing that finds the defect (#40)
+
+A new check going red on day one invites one reflex — *the check must be wrong, relax it*.
+A guard asserted two constants for "the price of one unit per year" were equal; the premise was
+wrong, they belong to two different products. Reading further, the disagreement was **visible to
+customers**: both still sell from one page, and the note under the volume table promised a
+discount computed from the header's price while the table's numbers gave roughly half of it.
+
+`gates.md` now says to **separate the premise from the observation before touching either**, and
+to relax the assertion only after what it surfaced has its own record — otherwise the finding
+leaves with the check that found it.
+
+### A hand-corrected document drifts back within one run (#39)
+
+Four boards consolidated into one, every row re-checked; within 24 hours a row settled in code
+that morning read `open` again — in **two** places, because a row in a section table and again
+in a summary has to be closed twice. **A document's claims are never executed**, so nothing
+distinguishes a row that *is* true from one that *was* true, and the audit correcting it is the
+only reader that checks.
+
+`documentation.md` gains the rule: a correction is done not when the rows are right but when
+**something other than the next audit** will notice them going wrong — with the four claim types
+and what makes each self-checking. Where a claim genuinely cannot be derived, **say so in the
+row**; correcting it silently a second time teaches readers that somebody else is checking.
+
+Guards: 376 → **376**. No guard was added or removed — this release is doctrine, and each of the
+four rules is cited from the reference that owns it rather than restated.
+
+Closes #39, #40, #48, #49.
+
 # Changelog
 
 ## v1.70.0 — the stemmer cannot conjugate, so the description says the other form

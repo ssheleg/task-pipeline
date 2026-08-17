@@ -22,6 +22,7 @@ being written twice; write it once, here.
 - The inventory — four questions, answered before the first line of work
 - Registers and ids
 - Single source of truth
+- A hand-corrected document drifts back within one run
 - The Doc Loop
 - Changing your mind
 - The propagation matrix
@@ -211,6 +212,42 @@ consumer document is wrong, fix it in place; if the **owner** is wrong or stale,
 is corrected there, by a decision entry, through a pull request — and the consumer
 document stays divergent and marked until that lands. Quietly aligning a consumer
 doc to its own view is the failure this paragraph exists to prevent.
+
+---
+
+## A hand-corrected document drifts back within one run
+
+A board, backlog or status document gets corrected during an audit; the same
+contradictions are back inside a day. **Correcting it again is the same
+intervention at the same cost, not a fix.**
+
+Measured: four contradictory boards were consolidated into one, every row
+re-checked against its source. Within 24 hours a row settled in code that morning
+read `open` again — in **two** places, because a row listed in a section table and
+again in a summary has to be closed twice. Another called two files missing while
+one had been written five hours earlier. A count quoted from a generated ledger had
+moved and the row had not.
+
+**Why the manual pass cannot hold.** A document's claims are never executed. Nothing
+distinguishes a row that **is** true from one that **was** true, so the audit that
+corrects it is the only reader that checks — and it runs once. Between audits the
+document is a set of assertions with no mechanism behind any of them, ageing at the
+speed of the work it describes.
+
+So a correction is not done when the rows are right. It is done when **something
+other than the next audit** will notice them going wrong:
+
+| The claim | What makes it self-checking |
+|---|---|
+| a row's status | derived from the artefact that settles it, or a gate that fails when the two disagree |
+| a count | computed at check time and printed beside its command — never transcribed |
+| "these files are missing" | resolved against the filesystem by the check that prints it |
+| a row in two tables | one table, or a guard asserting the pair agrees |
+
+Where a claim genuinely cannot be derived, **say that in the row** — an assertion
+marked as unverifiable is honest, and the next reader stops treating it as measured.
+Silently correcting it a second time is how a document teaches its readers that
+somebody else is checking.
 
 ---
 
