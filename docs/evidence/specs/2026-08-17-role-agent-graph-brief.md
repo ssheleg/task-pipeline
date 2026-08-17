@@ -203,3 +203,55 @@ Two things the operator should weigh before confirming:
    Today `super-ux` blocks only the stage-3 spec on a UI task. Making it block *any*
    user-facing feature is a real narrowing, and `portability.md` treats it as a cost
    rather than a free win. It is what was asked for and it is recorded as deliberate.
+
+---
+
+## Stage 1 — docs study. Gate: `auto`, verified
+
+*Every contract the design locks, grounded on a fetched doc or a measurement — never
+on recall. Run 2026-08-17.*
+
+| Contract | How it was grounded | What it says |
+|---|---|---|
+| **Plugin agent frontmatter** | fetched `code.claude.com/docs/en/plugins-reference` | `name`, `description`, `model`, `effort`, `maxTurns`, `tools`, `disallowedTools`, `skills`, `memory`, `background`, `isolation` — and **`hooks`, `mcpServers`, `permissionMode` are rejected for plugin-shipped agents, for security**. `isolation`'s only legal value is `"worktree"` |
+| **How a role is invoked** | same fetch | `<plugin>:<agent>` in the @-mention typeahead, once enabled. So the roles resolve as `task-pipeline:verifier` and so on |
+| **The family's own reading was current** | compared the fetch against `make-skill/references/host-capabilities.md`, *read 2026-08-03, Claude Code 2.1.212* | **identical on fields and rejections.** Two weeks old and still true — checked rather than assumed |
+| **What an agent costs** | `claude plugin details make-skill@make-skill` | **~110 always-on tokens** for `skill-auditor`, ~600 on-invoke. The family's `~100` estimate holds against a measurement |
+| **What it lands on** | `claude plugin details` across all eight members | the family costs **~8,445 always-on tokens in every session**. Ten roles = **+13%**; seven = **+9%** |
+| **The loop's config vocabulary** | read `pipeline.schema.json` → `definitions.run` | `mode` is `off` \| `interval` \| `dynamic`, `mode` is **required**, and the object's absence defaults everything OFF — *"silence arms nothing and authorises nothing"* |
+| **`prowl-cli`** | read the installed `prowl-cli` v0.2.0 skill | `@prowl-ai/cli`, Node 18+, `PROWL_API_KEY`, 448 tools, documented exit codes, and a section named *"Tiers, and the downgrade that is not a refusal"* — which is exactly REQ-024's shape |
+
+### Three findings that change the design
+
+**1. Not every role earns an agent, and the rule is already written.**
+`host-capabilities.md`: *"A subagent earns its always-on cost when the work is
+**voluminous and separable** — because its output is a summary while its reading stays
+in its own context. It does not earn it when the main thread needs the intermediate
+detail anyway."* By that rule the **manager** and the **verifier** are the two that do
+**not** qualify: deciding who runs next and acting on a verdict are the main thread's
+own work, and shipping them as agents pays 220 tokens a session to move a decision
+out of the context that has to make it. Stage 2 decides this per role; the budget is
+not the argument, the rule is.
+
+**2. `continuity.md` documents the older half of the loop.** Its *«Arming it on
+Claude Code»* section describes only `/loop <interval> <invocation>` and its
+constraints — intervals must divide cleanly, session-only, seven-day expiry. The
+schema already defines `dynamic` as *"the harness schedules its own next"*, and the
+umbrella's config already records `mode: dynamic`. So the vocabulary is complete and
+one section is behind it. **New REQ, and adding is free.**
+
+**3. Two of this stage's own measurements were wrong before they were right.** The
+first family total read **~2,634** because the parser stopped at a thousands
+separator, and a second attempt reproduced it. The real figure is **~8,445**, and the
+consequence flipped with it — the roles cost **+13%**, not the +42% the wrong number
+implied. Recorded because the design was one step from being argued from it.
+
+### REQ added at this stage
+
+| REQ | What must be true | Verified by | Module |
+|---|---|---|---|
+| REQ-031 | `continuity.md` documents the **dynamic** loop mode beside the interval one: self-paced wake-ups, no fixed tick, and what one iteration means in it | the section exists and names both modes; a fixture asserts the schema's three `mode` values are each described | 1 |
+
+**Gate verdict: PASS.** Every contract the design will lock is fetched or measured,
+the family's own prior reading was re-checked rather than trusted, and the two
+mis-measurements are recorded rather than quietly corrected.
