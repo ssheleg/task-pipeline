@@ -188,6 +188,42 @@ A REQ whose evidence lives in an unpushed commit, or in a submodule the parent
 doesn't point at yet, is `partial` — the evidence is not reachable by anyone but
 you.
 
+### The pointer is not the path — and the pointer check alone was the whole gate
+
+Everything above proves **commits**: the parent points at the child's newest one, every
+repository is clean, nothing is unpushed. None of it proves anything *works* at those two
+versions together. A parent can point at a green submodule whose contract the parent's own
+code calls with the previous signature, and every check in this pipeline passes — the
+child's suite ran against the child, the parent's against the parent, and **no check ran
+across the pointer**. Neither repository looks wrong alone, which is why this survived
+being written down twice.
+
+So the criterion has a second half, and it fires **only where a component pointer moved in
+the range being accepted**. A range that crossed no component boundary has no seam to
+prove, and demanding a record for it is how a gate becomes noise.
+
+Where one moved, the acceptance owes three things:
+
+1. **One named cross-component path** — a command, a test, a request, a scenario that
+   traverses both sides. Not each side's suite.
+2. **The exact versions it observed**, one per component: the commit the *parent pins*,
+   not whatever happens to be checked out. Those are the same fact only while they agree,
+   and they disagree in precisely the case this exists for.
+3. **The observation, to the same standard a single REQ meets** — the command and what it
+   printed, in `docs/evidence/convergence.md`.
+
+`templates/convergence.sh` mechanises the pointer half and requires the record for the
+seam half. It also checks the one thing `git submodule status` cannot see: **whether the
+pinned commit is published at all.** Measured here on 2026-08-16 — a release tag failed CI
+at checkout because the parent pinned a commit that existed only on one machine, and
+`git submodule status` showed no `+` because the pointer matched the *local* head.
+
+| Rationalization | Why it is wrong |
+|---|---|
+| *"Both suites are green, so the release is green."* | Each suite ran against one side. The defect lives in the seam, and no suite has an opinion about it |
+| *"The pointer is at the newest commit, so it is current."* | Current and *published* are different facts. A clone gets what the remote has |
+| *"I ran the cross-component check, it passed."* | Then say which versions it observed. A record citing no version cannot say which composition it proved |
+
 ## The closing question
 
 The table is preparation. The stage exists for the question that follows it, asked

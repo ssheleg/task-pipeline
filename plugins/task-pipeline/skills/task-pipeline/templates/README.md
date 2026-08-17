@@ -21,6 +21,7 @@ from `super-ux`.
 | `open-questions.md` | `docs/OPEN_QUESTIONS.md` | 0 seeds it, the Doc Loop resolves rows |
 | `docgate.sh` | `scripts/check-docs.sh` | 0 seeds it · 9 runs it · 10 proves it |
 | `exposure.sh` | `scripts/exposure.sh` | 0 reads it · 10 recomputes it · `checkup` prints it |
+| `convergence.sh` | `scripts/check-convergence.sh` | 0 seeds it · **10 runs it before the release closes** — only where the project pins components |
 | `hygiene.sh` | `scripts/check-hygiene.sh` | 0 seeds it · **5 runs it after every task** · 6 and 9 run it · 10 proves it |
 | `stage-coverage.sh` | `scripts/stage-coverage.sh` | 0 seeds it · **10 runs it before the coverage table** — every stage the flow declares must carry a verdict, or the flow stops declaring one it merges |
 | `hooks.example.json` | the project's `.claude/settings.json` | 0 — offered, never installed silently |

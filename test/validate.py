@@ -2845,6 +2845,110 @@ if gschema is not None:
             fail(f"{GRAPH_SCHEMA_REL}: edge.payload has no `minLength` — REQ-003: an empty "
                  "payload is `references/planning.md`'s fake edge with a field around it")
 
+# --- templates/convergence.sh — B-087, and it is EXECUTED against real repositories ----
+#
+# Stage 10 already required `git submodule status` with no `+`. That is a statement about
+# commits: the parent points at the child's newest one. It does not prove anything works
+# at those two versions together. This gate checks the pointers mechanically and the seam
+# by record, and the check below runs it over four shapes built from real git repositories
+# — because a seeded script nobody executes is the class this file has been defeated by
+# three times today.
+_cv = os.path.join(ROOT, "plugins/task-pipeline/skills/task-pipeline/templates/convergence.sh")
+if not os.path.isfile(_cv):
+    fail("templates/convergence.sh is missing — B-087: release acceptance proves the "
+         "pointer and never the path across it")
+elif not shutil.which("bash") or not shutil.which("git"):
+    _UNLOOKED.append("skip: convergence.sh not executed — bash or git unavailable")
+else:
+    _E = dict(os.environ, GIT_AUTHOR_NAME="t", GIT_AUTHOR_EMAIL="t@t",
+              GIT_COMMITTER_NAME="t", GIT_COMMITTER_EMAIL="t@t")
+
+    def _git(cwd, *a):
+        return subprocess.run(["git", "-c", "protocol.file.allow=always", *a], cwd=str(cwd),
+                              capture_output=True, text=True, env=_E)
+
+    def _cvrun(cwd, *args):
+        r = subprocess.run(["bash", _cv, *args], cwd=str(cwd), capture_output=True,
+                           text=True, env=_E)
+        return r.returncode, r.stdout + r.stderr
+
+    _cvroot = tempfile.mkdtemp(prefix="tp-conv-")
+    try:
+        # Shape 1 — a repository pinning nothing must be dormant and green. A gate that
+        # starts red teaches its project on day one that the gate is noise.
+        _bare = os.path.join(_cvroot, "plain")
+        os.makedirs(_bare)
+        _git(_bare, "init", "-q")
+        _c, _o = _cvrun(_bare)
+        if _c != 0 or "dormant: no .gitmodules" not in _o:
+            fail(f"templates/convergence.sh on a repository with no components: exit {_c}, "
+                 f"expected 0 and dormant. Output: {_o.strip()[-300:]}")
+        else:
+            # Shapes 2-4 need a real component with a real remote.
+            _comp = os.path.join(_cvroot, "comp"); os.makedirs(_comp)
+            _git(_comp, "init", "-q", "-b", "main")
+            open(os.path.join(_comp, "a.txt"), "w").write("one\n")
+            _git(_comp, "add", "-A"); _git(_comp, "commit", "-qm", "one")
+            _par = os.path.join(_cvroot, "parent"); os.makedirs(_par)
+            _git(_par, "init", "-q", "-b", "main")
+            open(os.path.join(_par, "r.md"), "w").write("x\n")
+            _git(_par, "add", "-A"); _git(_par, "commit", "-qm", "init")
+            _git(_par, "submodule", "add", "-q", _comp, "vendor/comp")
+            _git(_par, "commit", "-qm", "add component")
+            _barec = os.path.join(_cvroot, "comp.git")
+            _git(_comp, "clone", "-q", "--bare", _comp, _barec)
+            _sub = os.path.join(_par, "vendor", "comp")
+            _git(_sub, "remote", "add", "origin", _barec)
+            _git(_sub, "fetch", "-q", "origin")
+
+            # Shape 2 — a range that touches no component: PASS, seam section dormant.
+            _base = _git(_par, "rev-parse", "HEAD").stdout.strip()
+            open(os.path.join(_par, "unrelated.md"), "w").write("y\n")
+            _git(_par, "add", "-A"); _git(_par, "commit", "-qm", "unrelated")
+            _c, _o = _cvrun(_par, _base)
+            if _c != 0 or "no component pointer moved" not in _o:
+                fail(f"templates/convergence.sh over a range touching no component: exit "
+                     f"{_c}, expected 0 with the seam section dormant. "
+                     f"Output: {_o.strip()[-300:]}")
+            if "and that commit is published" not in _o:
+                fail("templates/convergence.sh never reports whether the parent's pin is "
+                     "published — B-087: a tag pinning a commit no remote has fails every "
+                     "clone at checkout while the machine that cut it stays green")
+
+            # Shape 3 — the pointer moved and nothing records the composition: FAIL.
+            open(os.path.join(_comp, "a.txt"), "w").write("two\n")
+            _git(_comp, "add", "-A"); _git(_comp, "commit", "-qm", "two")
+            _git(_comp, "push", "-q", _barec, "main")
+            _git(_sub, "fetch", "-q", "origin")
+            _git(_sub, "checkout", "-q", "origin/main")
+            _git(_par, "add", "vendor/comp"); _git(_par, "commit", "-qm", "bump")
+            _c, _o = _cvrun(_par)
+            if _c == 0 or "no convergence record exists" not in _o:
+                fail(f"templates/convergence.sh accepted a moved component pointer with no "
+                     f"convergence record: exit {_c} — B-087, and the negative control this "
+                     f"whole gate rests on. Output: {_o.strip()[-300:]}")
+
+            # Shape 4 — the record must name the version the parent SHIPS, not any version.
+            _pin = _git(_par, "rev-parse", "HEAD:vendor/comp").stdout.strip()[:7]
+            os.makedirs(os.path.join(_par, "docs", "evidence"), exist_ok=True)
+            _rec = os.path.join(_par, "docs", "evidence", "convergence.md")
+            open(_rec, "w").write(f"# Convergence\n\nObserved vendor/comp at {_pin}: "
+                                  "ran the cross-component smoke, exit 0.\n")
+            _git(_par, "add", "-A"); _git(_par, "commit", "-qm", "record")
+            _c, _o = _cvrun(_par)
+            if _c != 0:
+                fail(f"templates/convergence.sh refuses a moved pointer whose record names "
+                     f"the exact version: exit {_c}. Output: {_o.strip()[-300:]}")
+            open(_rec, "w").write("# Convergence\n\nObserved something, sometime.\n")
+            _git(_par, "add", "-A"); _git(_par, "commit", "-qm", "vague")
+            _c, _o = _cvrun(_par)
+            if _c == 0 or "does not name that version" not in _o:
+                fail(f"templates/convergence.sh accepted a record naming no version: exit "
+                     f"{_c} — a record that cites no version cannot say which composition "
+                     f"it observed. Output: {_o.strip()[-300:]}")
+    finally:
+        shutil.rmtree(_cvroot, ignore_errors=True)
+
 # --- the agents directory travels with the PLUGIN, and only the plugin ------------
 #
 # `agents/` is a Claude Code plugin capability. `install.sh` and `bin/task-pipeline.js`

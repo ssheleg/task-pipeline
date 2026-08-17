@@ -68,8 +68,43 @@ and a caller that cannot tell them apart will wait on the wrong one.
 code being two installers and the validator was false the moment it landed, and is
 corrected in the same change.
 
-Guards: 351 → **365**. Twelve plants across the module, structurally distinct rather than variations,
+Guards: 351 → **366**. Thirteen plants across the module, structurally distinct rather than variations,
 each asserting it landed before the validator runs.
+
+### B-087 — the pointer is not the path
+
+Stage 10 already required `git submodule status` with no `+` and every repository clean
+and pushed. That is a statement about **commits**: the parent points at the child's newest
+one. It proves nothing about whether the two versions work *together*. A parent can point
+at a green submodule whose contract the parent's own code calls with the previous
+signature, and every check passes — the child's suite ran against the child, the parent's
+against the parent, and no check ran across the pointer. Neither repository looks wrong
+alone, which is how this survived being written down twice.
+
+`templates/convergence.sh` ships, and the criterion fires **only where a component
+pointer moved in the range being accepted** — a range that crossed no boundary has no seam
+to prove, and demanding a record for it is how a gate becomes noise. Where one moved, the
+acceptance owes a named cross-component path, the exact versions it observed, and the
+observation to the same standard a single REQ meets.
+
+It also checks the thing `git submodule status` **cannot see: whether the pinned commit is
+published at all.** Measured here on 2026-08-16 — a release tag failed CI at checkout
+because the parent pinned a commit that existed only on one machine, and `submodule
+status` showed no `+` because the pointer matched the *local* head.
+
+**Two things happened on its first live run, and both are the point.** It found a real,
+current defect in the umbrella: the parent's pointer and the child's HEAD disagree, so a
+clone would get a different tree than the one tested. And it found a defect **in itself** —
+the published-pin section read `git -C <c> rev-parse HEAD`, the *child's* HEAD, where it
+needed `git rev-parse HEAD:<path>`, the parent's pointer. Those are the same fact only
+while they agree, and they disagree in precisely the case the section exists for. So its
+first live run reported about a commit the parent does not pin.
+
+**The gate does not read the script; it runs it over four shapes built from real git
+repositories** — a repository pinning nothing (dormant and green, because a gate that
+starts red teaches its project the gate is noise), a range touching no component, a moved
+pointer with no record, and a record that names no version. Five planted defects watched
+refused, including a verdict block that prints FAIL and returns 0.
 
 ### B-086 — what produced the proof
 
