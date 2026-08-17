@@ -7083,6 +7083,94 @@ jobs:
             echo "OK: the gate and the schema are held to the same rule"
           fi
 
+      - name: Negative self-test (a parked-reason pattern that accepts the empty string)
+        run: |
+          set -eu
+          rm -rf /tmp/gx8-copy && cp -R . /tmp/gx8-copy
+          python3 - <<'EOF'
+          import json
+          p = "/tmp/gx8-copy/plugins/task-pipeline/skills/task-pipeline/graph.schema.json"
+          d = json.load(open(p, encoding="utf-8"))
+          n = d["definitions"]["node"]
+          hit = [c for c in n["allOf"] if c["if"]["properties"]["status"]["const"] == "parked"]
+          assert hit, "PLANT DID NOT LAND: gx8 — no parked rule to weaken"
+          # A pattern is PRESENT and constrains nothing. Checking for the key's existence
+          # passes this; only running the regex catches it.
+          hit[0]["then"]["properties"]["parked_reason"]["pattern"] = "^.*$"
+          json.dump(d, open(p, "w", encoding="utf-8"), indent=2)
+          EOF
+          if python3 /tmp/gx8-copy/test/validate.py; then
+            echo "ERROR: a pattern that accepts the empty string was accepted — presence is
+                   not behaviour, and this is the shape an R-005 read used to defeat it"; exit 1
+          else
+            echo "OK: the pattern is run, not read"
+          fi
+
+      - name: Negative self-test (a conditional whose `if` can never be satisfied)
+        run: |
+          set -eu
+          rm -rf /tmp/gx9-copy && cp -R . /tmp/gx9-copy
+          python3 - <<'EOF'
+          import json
+          p = "/tmp/gx9-copy/plugins/task-pipeline/skills/task-pipeline/graph.schema.json"
+          d = json.load(open(p, encoding="utf-8"))
+          conds = d["definitions"]["node"]["allOf"]
+          assert conds, "PLANT DID NOT LAND: gx9 — no conditionals to disarm"
+          # additionalProperties is false, so a node can never carry `_never`: both rules
+          # go inert while every key the check reads is still in place.
+          for c in conds:
+              c["if"]["required"] = ["status", "_never"]
+          json.dump(d, open(p, "w", encoding="utf-8"), indent=2)
+          EOF
+          if python3 /tmp/gx9-copy/test/validate.py; then
+            echo "ERROR: two rules that can never fire were accepted — REQ-006 and REQ-012
+                   both defeated at once"; exit 1
+          else
+            echo "OK: an unsatisfiable `if` is refused"
+          fi
+
+      - name: Negative self-test (the parked-reason rule removed from the schema)
+        run: |
+          set -eu
+          rm -rf /tmp/gx6-copy && cp -R . /tmp/gx6-copy
+          python3 - <<'EOF'
+          import json
+          p = "/tmp/gx6-copy/plugins/task-pipeline/skills/task-pipeline/graph.schema.json"
+          d = json.load(open(p, encoding="utf-8"))
+          n = d["definitions"]["node"]
+          before = len(n["allOf"])
+          n["allOf"] = [c for c in n["allOf"]
+                        if c["if"]["properties"]["status"]["const"] != "parked"]
+          assert len(n["allOf"]) == before - 1, "PLANT DID NOT LAND: gx6 — no parked rule to remove"
+          json.dump(d, open(p, "w", encoding="utf-8"), indent=2)
+          EOF
+          if python3 /tmp/gx6-copy/test/validate.py; then
+            echo "ERROR: a schema letting a parked node carry no reason was accepted — REQ-012"; exit 1
+          else
+            echo "OK: parked-without-a-reason is refused by the schema, not only by park"
+          fi
+
+      - name: Negative self-test (the parked reason accepts a single space)
+        run: |
+          set -eu
+          rm -rf /tmp/gx7-copy && cp -R . /tmp/gx7-copy
+          python3 - <<'EOF'
+          import json
+          p = "/tmp/gx7-copy/plugins/task-pipeline/skills/task-pipeline/graph.schema.json"
+          d = json.load(open(p, encoding="utf-8"))
+          hit = [c for c in d["definitions"]["node"]["allOf"]
+                 if c["if"]["properties"]["status"]["const"] == "parked"]
+          dropped = [c["then"]["properties"]["parked_reason"].pop("pattern", None) for c in hit]
+          assert any(dropped), "PLANT DID NOT LAND: gx7 — no non-whitespace pattern to drop"
+          json.dump(d, open(p, "w", encoding="utf-8"), indent=2)
+          EOF
+          if python3 /tmp/gx7-copy/test/validate.py; then
+            echo "ERROR: minLength alone accepted — a single space satisfies it, which is the
+                   exact gap the wave-2 convergence check found between the schema and the gate"; exit 1
+          else
+            echo "OK: a whitespace-only reason is refused by the schema"
+          fi
+
       - name: Negative self-test (a graph schema whose node shape does not bind)
         run: |
           set -eu
@@ -7134,8 +7222,19 @@ jobs:
           p = "/tmp/gx3-copy/plugins/task-pipeline/skills/task-pipeline/graph.schema.json"
           d = json.load(open(p, encoding="utf-8"))
           n = d["definitions"]["node"]
-          assert "if" in n and "then" in n, "PLANT DID NOT LAND: gx3 — no if/then to remove"
-          del n["if"]; del n["then"]
+          # Find the done rule WHEREVER it sits. This plant used to do `del n["if"]`,
+          # and it stopped landing the moment a second conditional arrived and the pair
+          # moved into `allOf` — a green step that proved nothing, which is the exact
+          # class that refused three releases on 2026-08-16.
+          conds = ([(n, None)] if n.get("if") else []) + [(c, n["allOf"]) for c in n.get("allOf") or []]
+          hit = [(c, owner) for c, owner in conds
+                 if ((c.get("if") or {}).get("properties") or {}).get("status", {}).get("const") == "done"]
+          assert hit, "PLANT DID NOT LAND: gx3 — no done rule to remove, inline or in allOf"
+          c, owner = hit[0]
+          if owner is None:
+              del c["if"]; del c["then"]
+          else:
+              owner.remove(c)
           json.dump(d, open(p, "w", encoding="utf-8"), indent=2)
           EOF
           if python3 /tmp/gx3-copy/test/validate.py; then

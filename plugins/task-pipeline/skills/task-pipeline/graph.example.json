@@ -8,14 +8,18 @@
       "status": "done",
       "blocked_by": [],
       "serves": "REQ-001",
-      "evidence": ["npm test → PASS: task-pipeline structure valid, with graph.example.json validated against graph.schema.json"]
+      "evidence": [
+        "npm test → PASS: task-pipeline structure valid, with graph.example.json validated against graph.schema.json"
+      ]
     },
     {
       "id": "N-002",
       "title": "graph.py validate — the invariants a schema cannot state",
       "owner": "implementer",
       "status": "running",
-      "blocked_by": ["N-001"],
+      "blocked_by": [
+        "N-001"
+      ],
       "serves": "REQ-002",
       "evidence": null
     },
@@ -24,7 +28,9 @@
       "title": "The verifier agent and its six-key verdict",
       "owner": "verifier",
       "status": "pending",
-      "blocked_by": ["N-001"],
+      "blocked_by": [
+        "N-001"
+      ],
       "serves": "REQ-005",
       "evidence": null
     },
@@ -36,11 +42,19 @@
       "blocked_by": [],
       "serves": "REQ-016",
       "evidence": null,
-      "note": "Parked by the verifier: serves module 2, not this release's goal. Parked rather than done quietly — the reason is the point."
+      "parked_reason": "Serves module 2, not this release's goal. Parked rather than dropped quietly — the reason is the point."
     }
   ],
   "edges": [
-    { "from": "N-001", "to": "N-002", "payload": "the schema validate validates against" },
-    { "from": "N-001", "to": "N-003", "payload": "the node shape the verdict's `node` field references" }
+    {
+      "from": "N-001",
+      "to": "N-002",
+      "payload": "the schema validate validates against"
+    },
+    {
+      "from": "N-001",
+      "to": "N-003",
+      "payload": "the node shape the verdict's `node` field references"
+    }
   ]
 }

@@ -109,6 +109,30 @@ stage and walks the gates. See [Install](#install) for the other channels.
 
 ---
 
+## What this implements
+
+`task-pipeline` is the reference implementation of **Proof of Done: The Agentic
+Software Development Manifesto** by Sergey Sheleg — *a foundation for building
+software when agents write the code*. The full text ships in the family umbrella
+([`sshlg-skills/MANIFESTO.md`](https://github.com/ssheleg/sshlg-skills/blob/main/MANIFESTO.md)).
+
+Its central claim is that the unit of progress is not generated code but an
+**evidence-carrying change**: one carrying the intent it implements, the evidence that
+verifies it, the **limits** of that evidence, and the decision that accepts it. This
+repository is where that stops being an argument — the ladder walk in
+[`references/acceptance.md`](plugins/task-pipeline/skills/task-pipeline/references/acceptance.md),
+the eight residue classes in
+[`references/residue.md`](plugins/task-pipeline/skills/task-pipeline/references/residue.md),
+the axis rotation in
+[`references/audit.md`](plugins/task-pipeline/skills/task-pipeline/references/audit.md),
+and a guard suite in which **every** check has been watched rejecting a planted defect
+(`npm run test:negatives`).
+
+What the manifesto names and this repository has **not** built yet is filed open in this repository's evidence backlog
+(<https://github.com/ssheleg/task-pipeline/blob/main/docs/evidence/backlog.md>)
+rather than described as shipped — `package.json` ships the skill, not the
+ledgers, so the link is the repository's rather than the package's.
+
 ## What makes it different
 
 ### Everything is built in — zero required dependencies

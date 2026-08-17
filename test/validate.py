@@ -2596,15 +2596,117 @@ if gschema is not None:
                  "loses the one a person needs")
         # REQ-006's half that a schema CAN express, and the first draft claimed it could
         # not: draft-07 if/then states `done` implies non-empty evidence exactly.
-        _ifthen = _gnode.get("if") or {}
-        _then = _gnode.get("then") or {}
-        _ifok = ((_ifthen.get("properties") or {}).get("status") or {}).get("const") == "done"
-        _thenev = ((_then.get("properties") or {}).get("evidence") or {})
-        if not (_ifok and "evidence" in (_then.get("required") or [])
+        #
+        # There are now TWO such rules — `done` implies evidence, and `parked` implies a
+        # reason (REQ-012) — and draft-07 allows one `if`/`then` per schema object, so
+        # the second lives in an `allOf` beside the first. This check read `node["if"]`
+        # literally and went red the moment the pair moved there, which is the guard
+        # working: it saw the shape change rather than the meaning survive. It now
+        # collects every conditional wherever it sits, so a schema that states both in
+        # `allOf`, both inline, or one of each all read the same.
+        def _conditionals(sch):
+            out = []
+            if sch.get("if") is not None:
+                out.append((sch.get("if") or {}, sch.get("then")))
+            for _sub in sch.get("allOf") or []:
+                if isinstance(_sub, dict):
+                    out.extend(_conditionals(_sub))
+            return out
+
+        _conds = _conditionals(_gnode)
+
+        def _rule_for(status):
+            """The rule for one status — and only if it can actually FIRE.
+
+            The R-005 reader defeated the first version with an `if` that can never be
+            satisfied: add one impossible name to `if.required` and, under
+            `additionalProperties: false`, no node can ever match it. Both rules then
+            became inert while every gate stayed green. So an `if` is accepted only when
+            it constrains the status and NOTHING else — anything more is either a
+            narrower rule than the one claimed, or a rule that never fires, and the check
+            cannot tell those apart from the outside.
+            """
+            for _if, _then in _conds:
+                if ((_if.get("properties") or {}).get("status") or {}).get("const") != status:
+                    continue
+                if set(_if.get("required") or []) - {"status"}:
+                    continue
+                if set(_if.get("properties") or {}) - {"status"}:
+                    continue
+                if any(_k in _if for _k in ("not", "allOf", "anyOf", "oneOf", "$ref")):
+                    continue
+                # `then: true` is legal draft-07 for "impose nothing" — and it crashed
+                # this check before it reported the rule inert.
+                return _then if isinstance(_then, dict) else {}
+            return None
+
+        def _binds_blank(_sub, _what):
+            """A string subschema must REFUSE whitespace — tested, not inspected.
+
+            `pattern` being present was the first check, and presence is not behaviour:
+            `"^.*$"` is a pattern and it accepts the empty string. The rule is what the
+            regex DOES, so the check runs it.
+            """
+            if not isinstance(_sub, dict):
+                return f"{_what} has no subschema at all"
+            if _sub.get("type") != "string":
+                return (f"{_what} is not typed `string` (it is {_sub.get('type')!r}) — a "
+                        "nullable or untyped field satisfies every string-only assertion "
+                        "vacuously, which is how `null` gets through both of them")
+            _pat = _sub.get("pattern")
+            if not _pat:
+                return f"{_what} has no `pattern`"
+            try:
+                _rx = re.compile(_pat)
+            except re.error as _e:
+                return f"{_what} has a `pattern` that does not compile: {_e}"
+            if _rx.search("   ") or _rx.search(""):
+                return (f"{_what}'s pattern {_pat!r} ACCEPTS whitespace — measured here, "
+                        "not read. `minLength: 1` counts a space and so does `^.*$`")
+            if not _rx.search("a real reason"):
+                return f"{_what}'s pattern {_pat!r} rejects ordinary text"
+            return None
+
+        _then = _rule_for("done")
+        _thenev = (((_then or {}).get("properties") or {}).get("evidence") or {})
+        if not (_then is not None and "evidence" in (_then.get("required") or [])
                 and _thenev.get("type") == "array" and _thenev.get("minItems")):
-            fail(f"{GRAPH_SCHEMA_REL}: node has no `if status==done then evidence` rule — "
-                 "REQ-006: a node called done by assertion is the thing `evidence` exists "
-                 "to prevent, and draft-07 states it without a script")
+            fail(f"{GRAPH_SCHEMA_REL}: node has no `if status==done then evidence` rule "
+                 "that can fire — REQ-006: a node called done by assertion is the thing "
+                 "`evidence` exists to prevent, and draft-07 states it without a script")
+        else:
+            # And the ITEMS, not only the list. Replacing `items` with `{"type":"string"}`
+            # reopened the wave-2 gap — `evidence: ['']` accepted — with nothing noticing.
+            _why = _binds_blank(_thenev.get("items"), "the `done` rule's evidence items")
+            if _why:
+                fail(f"{GRAPH_SCHEMA_REL}: {_why}. A list of blanks is the shape a script "
+                     "emitting empty command output produces, and it closed a node once")
+
+        # REQ-012 — and it is the same rule one status over. A park is a decision, and
+        # the decision IS the reason; a parked node with no reason is indistinguishable
+        # from work that was quietly dropped, which is what parking exists instead of.
+        # `minLength: 1` alone would not do it: it accepts a single space, the gap the
+        # wave-2 convergence check found between this schema and `graph.py`'s own gate.
+        _pthen = _rule_for("parked")
+        if _pthen is None or "parked_reason" not in (_pthen.get("required") or []):
+            fail(f"{GRAPH_SCHEMA_REL}: node has no `if status==parked then parked_reason` "
+                 "rule that can fire — REQ-012: the reason is the artifact, and a park "
+                 "with none is indistinguishable from work quietly dropped")
+        else:
+            _why = _binds_blank((_pthen.get("properties") or {}).get("parked_reason"),
+                                "the `parked` rule's parked_reason")
+            if _why:
+                fail(f"{GRAPH_SCHEMA_REL}: {_why} — REQ-012")
+        _pdecl = (_gnode.get("properties") or {}).get("parked_reason")
+        if _pdecl is None:
+            fail(f"{GRAPH_SCHEMA_REL}: node declares no `parked_reason` — with "
+                 "`additionalProperties: false` the field REQ-012 requires cannot be "
+                 "written at all, so the rule above would refuse every parked node")
+        else:
+            _why = _binds_blank(_pdecl, "node.properties.parked_reason")
+            if _why:
+                fail(f"{GRAPH_SCHEMA_REL}: {_why}. The same class was found and fixed on "
+                     "`owner` three screens above and not carried to the new field")
 
     _gedge, _why = _garray_items(_gprops.get("edges", {}), "edges")
     if _gedge is None:

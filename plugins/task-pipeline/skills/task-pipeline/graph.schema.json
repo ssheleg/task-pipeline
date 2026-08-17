@@ -93,37 +93,68 @@
           "default": null,
           "description": "The command and its output that proves this node is done. Null until closed. **A `done` node must carry at least one non-empty entry** — stated as `if`/`then` above, so the format refuses it before any script runs. The first draft only promised that `graph.py close` refuses a null, which by its own wording accepted `evidence: []` — the exact shape a script writing an empty list produces."
         },
-        "note": {
-          "type": "string"
+        "parked_reason": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "\\S",
+          "description": "Why this node is parked, written for the person who will read it weeks later. Required when `status` is `parked` — REQ-012, and the same rule shape as `done` implying `evidence`. A park with no reason is indistinguishable from a node that was quietly dropped, and the whole point of parking rather than deleting is that the reason survives. `scripts/graph.py park` refuses without one and refuses to overwrite one already recorded."
         }
       },
-      "if": {
-        "properties": {
-          "status": {
-            "const": "done"
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "done"
+              }
+            },
+            "required": [
+              "status"
+            ]
+          },
+          "then": {
+            "required": [
+              "evidence"
+            ],
+            "properties": {
+              "evidence": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "pattern": "\\S",
+                  "description": "At least one non-whitespace character. `minLength: 1` alone accepts a single space, which is the one shape where this schema and `graph.py`'s verdict gate disagreed — the gate strips, the schema counted. A cross-check fixture comparing the two found it."
+                }
+              }
+            }
           }
         },
-        "required": [
-          "status"
-        ]
-      },
-      "then": {
-        "required": [
-          "evidence"
-        ],
-        "properties": {
-          "evidence": {
-            "type": "array",
-            "minItems": 1,
-            "items": {
-              "type": "string",
-              "minLength": 1,
-              "pattern": "\\S",
-              "description": "At least one non-whitespace character. `minLength: 1` alone accepts a single space, which is the one shape where this schema and `graph.py`'s verdict gate disagreed — the gate strips, the schema counted. A cross-check fixture comparing the two found it."
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "parked"
+              }
+            },
+            "required": [
+              "status"
+            ]
+          },
+          "then": {
+            "required": [
+              "parked_reason"
+            ],
+            "properties": {
+              "parked_reason": {
+                "type": "string",
+                "minLength": 1,
+                "pattern": "\\S"
+              }
             }
           }
         }
-      }
+      ]
     },
     "edge": {
       "type": "object",

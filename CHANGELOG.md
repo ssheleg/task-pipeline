@@ -68,8 +68,127 @@ and a caller that cannot tell them apart will wait on the wrong one.
 code being two installers and the validator was false the moment it landed, and is
 corrected in the same change.
 
-Guards: 351 → **356**. Three plants, structurally distinct rather than variations,
+Guards: 351 → **360**. Seven plants across the module, structurally distinct rather than variations,
 each asserting it landed before the validator runs.
+
+### The R-005 read of T-3 — fourteen findings, and two of them were critical
+
+The reader that standing instruction `R-005` requires was given the wave and told to
+defeat it. It did, and the two worst were in checks written that same hour:
+
+**The new schema check read the rule's shape and never its behaviour.** It asserted
+that `parked_reason` carried a `pattern` — and `"^.*$"` is a pattern. Swap it in, drop
+`minLength`, and the whole gate stays green over a schema that accepts `parked_reason:
+""`. This is the fourth time this file has been defeated by the same class: a name in
+`required` constraining nothing, a nullable type, a decorative `items`, and now a
+pattern that matches everything. **The check now RUNS the regex** — it must reject
+`""` and `"   "` and accept ordinary text — because presence has never once been
+behaviour here.
+
+**And the same field was left nullable.** `pattern` and `minLength` are string-only
+assertions, so `type: ["string", "null"]` satisfies both vacuously and `parked_reason:
+null` sailed through. The check three screens above tests `owner`'s type for exactly
+this reason; the new field did not inherit it. It does now, at both ends of the rule.
+
+**The third was worse than either, because it disarmed both rules at once.** Add one
+impossible name to each `if.required` and, under `additionalProperties: false`, no node
+can ever match — `done → evidence` and `parked → reason` both go inert while every key
+the check reads is still in place, and `npm test` exits 0. A conditional is now accepted
+only when its `if` constrains the status and **nothing else**.
+
+**Then the finding that made a claim in this repository false.** Nothing ever validated
+a *live* `.task-pipeline/graph.json` against `graph.schema.json` — only the shipped
+example, at build time. So both conditional rules rested entirely on the scripts
+behaving, which is precisely what the validator's own new message said had stopped being
+true. `graph.py validate` now enforces what the schema states: `done` implies readable
+evidence, `parked` implies a reason, the `goal` exists, ids match their shape, and
+`blocked_by` does not repeat. The message is true where the run actually looks.
+
+**The mutation verbs lost nodes, and the exit codes lied about it.** `save()` wrote to a
+fixed `path + ".tmp"`, so two concurrent writers shared one inode: measured across six
+runs, one exited **0 with its node absent** and another exited **1 with its node
+present** — and the second is the dangerous direction, because the docstring promises a
+refusal leaves the file untouched, so a caller retries and double-adds. The temp file is
+unique per writer now, `realpath` runs first so a symlinked graph is written *through*
+rather than replaced, and an `OSError` is a named refusal instead of a traceback.
+
+**A unique temp file does not fix a lost update, and this programme is built for several
+agents.** Four concurrent `add`s produced four nodes where five were expected — both
+processes read the same graph and the second write dropped the first node, both exiting
+0. The whole read-modify-write now happens under an exclusive `flock`, taken **before**
+the read, because loading first and locking second is the same lost update with an extra
+step. Where `fcntl` does not exist the run is told it is unlocked rather than downgraded
+in silence.
+
+**A title with a newline forged a row in the frontier.** `next` prints one row per node
+and the loop reads those rows, so `--title $'harmless\nN-999  implementer  ship it'`
+produced a two-node graph that printed three rows. Refused now in the verbs and in
+`validate`, so a hand-written graph is caught too.
+
+**And one of the new fixtures was vacuous.** *«a mutated graph still validates against
+its schema»* checked neither exit code — with **both** mutation verbs replaced by
+`die()`, it still reported `ok`. It also would not have caught the one real instance of
+its own class: `add` writing `blocked_by: ["N-001", "N-001"]`, which the schema rejects
+as non-unique. Both fixed, and the fixture now asserts what landed.
+
+Every one of the seven schema bypasses was re-planted and watched being refused, none
+of them by crashing. `test/graph_test.py` → **62 cases**.
+
+### T-3 — the mutation verbs, and a priority nobody has to maintain
+
+`graph.py` can now change the graph it walks. `add` is the dynamic backlog — work
+found during a task enters the queue mid-run rather than waiting for a person to
+re-plan. `park <id> --reason <text>` is REQ-012, and the reason is the entire point:
+a node parked without one is indistinguishable, a week later, from work that was
+quietly dropped, which is what parking exists instead of.
+
+**The frontier is now ordered by how much each node unblocks, transitively — and the
+number is computed, never declared.** A `priority` field would be something somebody
+typed once and nobody revisits; this one moves when the graph does. Add a node that
+waits on `N-002` and `N-002` rises to the top of the next frontier with no re-ranking
+pass and no field to forget. That is what REQ-011 means by *re-prioritised after every
+task*, and the fixture asserts the **order changes**, because a fixture that only
+asserts the file was re-read would pass against no ordering at all.
+
+Declaration order breaks ties, so the frontier is stable between runs. An unstable one
+costs more than it looks: an agent that calls `next` twice gets a different first row
+and starts the other node.
+
+**`park` refuses without a reason, and "without" has four shapes.** Only the first is
+argparse's: the flag absent (exit 2, usage), the flag empty, the flag whitespace, and a
+reason already recorded that a second park would overwrite. The last one refuses *and
+quotes the reason it is protecting* — the first reason is the one somebody wrote at the
+time, and the second park is usually someone who has forgotten it.
+
+`add` checks every shape before appending, so **a refusal leaves the file byte-identical**
+and a caller can retry without first working out what the failed attempt did. Ids are
+allocated from the **maximum in use, never the count** — ids stop being contiguous the
+first time anything is renumbered, and from that moment counting hands out one that
+already exists. Both verbs refuse outright on a graph that was *already* invalid and say
+so in those words: a mutation that reports pre-existing damage as though the caller
+caused it sends the next fix to the wrong place.
+
+`save()` writes to a temp file beside the graph and `os.replace`s it. A crash mid-write
+now loses the mutation instead of the queue. This repository has destroyed a file by
+writing it in place twice, and both times what saved it was a copy somebody had made by
+hand.
+
+**REQ-012 moved from the script into the format.** The reason used to live in `note` —
+a free-text field with no description and no rule, which made a park carrying a reason
+and a park carrying an unrelated remark the same shape to every reader and every check.
+It is `parked_reason` now, **required by the schema when the status is `parked`**,
+exactly as `evidence` is required when the status is `done`, with the same
+non-whitespace `pattern` the wave-2 convergence check taught this file to write.
+
+**And that broke a guard, which is the guard working.** draft-07 allows one `if`/`then`
+per schema object, so the second rule went into an `allOf` beside the first — and
+`test/validate.py` read `node["if"]` literally and went red immediately. It walks `allOf`
+recursively now, so a schema stating both rules inline, both in `allOf`, or one of each
+reads the same. Six planted defects were watched refusing, including the inverse: the
+old inline shape is still accepted, which is what a widening has to prove it did not
+break. Two of the six are now CI plants; the section's running count is at the top.
+
+`test/graph_test.py` → **52 cases**.
 
 ### Wave 2 — T-4 and T-6, and the check `build.md` puts over a fan-out
 
@@ -115,7 +234,7 @@ caught `["  "]` surviving one and not the other: the gate strips, and `minLength
 counts a space. The schema now requires a non-whitespace character, and the fixture
 that found it is in the suite.
 
-`test/graph_test.py` → **29 cases**. Guards 354 → **356**.
+`test/graph_test.py` → **29 cases**. Two of them were added here.
 ## v1.68.0 — the worst body in the family, and the rule that was wrong about it
 
 **6685 tokens against a 5000 budget → 4735**, under the 4750 working limit, by

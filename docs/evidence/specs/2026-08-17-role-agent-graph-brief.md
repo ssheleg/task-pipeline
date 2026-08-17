@@ -565,6 +565,35 @@ convention rather than declared**; the six-key verdict shape.
 **DoD:** both branches fixtured — `replan.possible: true` advances the graph;
 `false` stops and the printed reason is the verdict's own `why`.
 
+**Amended 2026-08-17 by the manifesto review**, which found two holes in the verdict
+this task consumes. Both land here rather than as backlog rows, because T-5 is the
+task that reads the verdict and changing its shape afterwards costs a second pass:
+
+- **A seventh key, `not_verified`.** The six keys say what is built and what is not;
+  none says what was **built and not checked**. Those are different facts, and the
+  gap is not a preference — `npm test` already prints `unlooked: N` one level up, so
+  the pipeline names the concept everywhere except in the verdict that closes work
+  with it. The key is REQUIRED and an empty list is a valid answer; silence is not.
+- **`close` stamps the commit, the verifier does not.** Evidence is a free string
+  today and says nothing about which tree it observed. A verdict written after the
+  tree moved is evidence about a different tree. `close` reads `git rev-parse HEAD`
+  itself and writes it beside the evidence — an agent cannot claim the wrong commit
+  if it is never the one supplying it. Outside a checkout the stamp is `null` and
+  says so, per the rule that a skip is disclosed rather than silent.
+
+**Two more from the `R-005` read of T-3, both landing on later tasks rather than here:**
+
+- **T-5 owns the verdict's reachability.** `verdict_violations()` has no CLI verb —
+  the verbs are `validate, next, goal, add, park` — so the gate the module docstring
+  describes as *the thing `close` consumes* is today reachable only from
+  `test/graph_test.py`. `close` is what makes it reachable, and until then the
+  docstring should not describe it as a runtime check.
+- **T-7 owns one consequence of parking.** `parked` is terminal, so parking a
+  **blocker** promotes its dependents into the frontier even though the payload they
+  waited on never arrived. That is consistent with `can_continue_around`, and it is a
+  real surprise for anyone parking a node that is not a leaf. It is written in
+  `graph.py` beside `TERMINAL`; the doctrine has to say it where a person reads.
+
 ### T-6 — the loop, dynamic, and the goal it prints
 **Implements:** REQ-008, REQ-009, REQ-010
 **Does:** `pipeline.json` → `run.loop.mode: dynamic`, `interval` dropped, `command`

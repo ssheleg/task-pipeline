@@ -27,6 +27,10 @@ GRAPH = ROOT / "plugins/task-pipeline/skills/task-pipeline/scripts/graph.py"
 
 cases = 0
 failures = []
+# What this run could NOT look at. A skip that prints nothing reads exactly
+# like a check that looked and found nothing — canon 9, and `validate.py`
+# already discloses its own the same way.
+skipped = []
 
 
 def case(name):
@@ -63,6 +67,26 @@ def node(nid, owner="implementer", status="pending", blocked=None, serves="REQ-0
     if evidence is not None:
         n["evidence"] = evidence
     return n
+
+
+def run_at(path, *args):
+    """Run against a graph that PERSISTS, so a mutation can be read back.
+
+    `run()` writes to a temp file and drops it — right for `validate` and `next`,
+    useless for `add` and `park`, whose whole contract is what the file says
+    afterwards. The mutation verbs are tested through this one.
+    """
+    r = subprocess.run([sys.executable, str(GRAPH), *args, "--graph", str(path)],
+                       capture_output=True, text=True)
+    return r.returncode, (r.stdout + r.stderr)
+
+
+def written(graph):
+    """A graph on disk, plus its path. The caller mutates it and reads it back."""
+    d = tempfile.mkdtemp()
+    p = pathlib.Path(d) / "graph.json"
+    p.write_text(json.dumps(graph))
+    return p
 
 
 # --- validate: the three a schema cannot reach --------------------------------
@@ -332,7 +356,381 @@ def _():
         assert bad not in txt, "hardcodes a vendor model id: %s" % bad
 
 
+
+# --- T-3: park, and the reason that is the whole point -------------------------
+#
+# R-008 — the shapes the defect can take, enumerated before the fix was written.
+# `park` refuses without a reason, and "without" has four shapes, not one:
+# the flag absent, the flag empty, the flag whitespace, and a reason already
+# recorded that a second park would overwrite. Only the first is argparse's.
+
+@case("park with no --reason at all is a usage error, not a silent park")
+def _():
+    p = written(g([node("N-001")]))
+    code, out = run_at(p, "park", "N-001")
+    assert code == 2, "park without --reason did not exit 2 (usage): %s" % out
+    assert json.loads(p.read_text())["nodes"][0]["status"] == "pending", "it parked anyway"
+
+
+@case("park with an EMPTY --reason is refused — the flag present is not a reason given")
+def _():
+    p = written(g([node("N-001")]))
+    code, out = run_at(p, "park", "N-001", "--reason", "")
+    assert code == 1, "an empty reason was accepted: %s" % out
+    assert json.loads(p.read_text())["nodes"][0]["status"] == "pending", "it parked anyway"
+
+
+@case("park with a WHITESPACE --reason is refused — the shape that satisfies argparse")
+def _():
+    p = written(g([node("N-001")]))
+    code, out = run_at(p, "park", "N-001", "--reason", "   ")
+    assert code == 1, "a whitespace reason was accepted: %s" % out
+
+
+@case("park records the reason, and it reads back off the file — REQ-012")
+def _():
+    p = written(g([node("N-001"), node("N-002")]))
+    reason = "serves module 2, not this release's goal"
+    code, out = run_at(p, "park", "N-001", "--reason", reason)
+    assert code == 0, "a well-formed park was refused: %s" % out
+    n = json.loads(p.read_text())["nodes"][0]
+    assert n["status"] == "parked", n
+    assert n.get("parked_reason") == reason, ("the reason is not on the node — REQ-012 is "
+                                              "the reason being recorded, not the status: %s" % n)
+
+
+@case("a parked node leaves the frontier")
+def _():
+    p = written(g([node("N-001"), node("N-002")]))
+    run_at(p, "park", "N-001", "--reason", "not this release")
+    code, out = run_at(p, "next")
+    assert code == 0, out
+    assert "N-001" not in out, "a parked node is still offered as runnable: %s" % out
+    assert "N-002" in out, out
+
+
+@case("park names a node that does not exist — refused, and the message names the id")
+def _():
+    p = written(g([node("N-001")]))
+    code, out = run_at(p, "park", "N-404", "--reason", "x")
+    assert code == 1, "parking a node that does not exist was accepted: %s" % out
+    assert "N-404" in out, "the refusal does not name the id: %s" % out
+
+
+@case("parking a DONE node is refused — a closed result is not re-openable this way")
+def _():
+    p = written(g([node("N-001", status="done", evidence=["npm test → PASS"])]))
+    code, out = run_at(p, "park", "N-001", "--reason", "changed my mind")
+    assert code == 1, "a done node was parked, destroying its close: %s" % out
+    assert json.loads(p.read_text())["nodes"][0]["status"] == "done"
+
+
+@case("re-parking is refused, and the refusal quotes the reason already recorded")
+def _():
+    p = written(g([node("N-001")]))
+    run_at(p, "park", "N-001", "--reason", "waiting on the operator's pricing call")
+    code, out = run_at(p, "park", "N-001", "--reason", "something else")
+    assert code == 1, "a second park overwrote the first reason: %s" % out
+    assert "pricing call" in out, ("the refusal does not quote the reason it protected: %s" % out)
+    assert json.loads(p.read_text())["nodes"][0]["parked_reason"].endswith("pricing call")
+
+
+# --- T-3: add, the dynamic backlog ---------------------------------------------
+
+@case("add appends a node and allocates the next id")
+def _():
+    p = written(g([node("N-001")]))
+    code, out = run_at(p, "add", "--title", "a thing found mid-run",
+                       "--owner", "implementer", "--serves", "REQ-011")
+    assert code == 0, "a well-formed add was refused: %s" % out
+    nodes = json.loads(p.read_text())["nodes"]
+    assert len(nodes) == 2, nodes
+    assert nodes[1]["id"] == "N-002", nodes[1]
+    assert nodes[1]["status"] == "pending", nodes[1]
+    assert "N-002" in out, "add does not print the id it allocated: %s" % out
+
+
+@case("the id is allocated from the MAXIMUM, not from the count")
+def _():
+    # Ids are not contiguous once anything has been renumbered or imported. Counting
+    # nodes hands out an id that already exists, and two nodes with one id is a graph
+    # nobody can cite — the exact defect `validate` reports as a duplicate.
+    p = written(g([node("N-001"), node("N-050")]))
+    code, out = run_at(p, "add", "--title", "t", "--owner", "implementer", "--serves", "REQ-011")
+    assert code == 0, out
+    assert json.loads(p.read_text())["nodes"][-1]["id"] == "N-051", out
+
+
+@case("an explicit --id that already exists is refused")
+def _():
+    p = written(g([node("N-001")]))
+    code, out = run_at(p, "add", "--id", "N-001", "--title", "t",
+                       "--owner", "implementer", "--serves", "REQ-011")
+    assert code == 1, "a duplicate id was accepted: %s" % out
+    assert len(json.loads(p.read_text())["nodes"]) == 1, "it was written anyway"
+
+
+@case("add with an unknown owner is refused and NOTHING is written")
+def _():
+    p = written(g([node("N-001")]))
+    before = p.read_text()
+    code, out = run_at(p, "add", "--title", "t", "--owner", "architect", "--serves", "REQ-011")
+    assert code == 1, "an unknown owner was added: %s" % out
+    assert p.read_text() == before, "the file changed on a refusal"
+
+
+@case("add --blocked-by naming a node that does not exist is refused")
+def _():
+    p = written(g([node("N-001")]))
+    code, out = run_at(p, "add", "--title", "t", "--owner", "implementer",
+                       "--serves", "REQ-011", "--blocked-by", "N-404")
+    assert code == 1, "a dangling blocked_by was added: %s" % out
+    assert len(json.loads(p.read_text())["nodes"]) == 1
+
+
+@case("add with an empty title is refused")
+def _():
+    p = written(g([node("N-001")]))
+    code, out = run_at(p, "add", "--title", "  ", "--owner", "implementer", "--serves", "REQ-011")
+    assert code == 1, "an empty title was accepted: %s" % out
+
+
+@case("add with an empty --serves is refused — a node serving nothing is REQ-012's case")
+def _():
+    p = written(g([node("N-001")]))
+    code, out = run_at(p, "add", "--title", "t", "--owner", "implementer", "--serves", " ")
+    assert code == 1, "a node serving nothing was added rather than refused: %s" % out
+
+
+@case("a mutation on an ALREADY-invalid graph says so, rather than blaming the new node")
+def _():
+    p = written(g([node("N-001", owner="architect")]))
+    code, out = run_at(p, "add", "--title", "t", "--owner", "implementer", "--serves", "REQ-011")
+    assert code == 1, out
+    assert "already" in out.lower(), ("the refusal reads as though the caller's node were "
+                                      "the problem: %s" % out)
+    assert len(json.loads(p.read_text())["nodes"]) == 1
+
+
+@case("a refused mutation leaves the file byte-identical")
+def _():
+    p = written(g([node("N-001")]))
+    before = p.read_bytes()
+    for args in (("park", "N-404", "--reason", "x"),
+                 ("add", "--id", "N-001", "--title", "t", "--owner", "implementer",
+                  "--serves", "REQ-011")):
+        run_at(p, *args)
+        assert p.read_bytes() == before, "a refusal wrote to the file: %s" % (args,)
+
+
+# --- T-3: the frontier re-prioritises, and the fixture proves the ORDER moves ---
+
+@case("the frontier is ordered by how much each node unblocks")
+def _():
+    # N-002 blocks two nodes, N-001 blocks none. Declaration order puts N-001 first;
+    # priority must put N-002 first, or the ordering claim is decoration.
+    p = written(g([node("N-001"), node("N-002"),
+                   node("N-003", blocked=["N-002"]), node("N-004", blocked=["N-002"])]))
+    code, out = run_at(p, "next")
+    assert code == 0, out
+    ids = [l.split()[0] for l in out.strip().splitlines()]
+    assert ids[0] == "N-002", "the frontier is not ordered by what it unblocks: %s" % ids
+
+
+@case("a node added mid-walk re-prioritises the NEXT frontier — REQ-011")
+def _():
+    p = written(g([node("N-001"), node("N-002")]))
+    first = [l.split()[0] for l in run_at(p, "next")[1].strip().splitlines()]
+    assert first == ["N-001", "N-002"], first
+    # The dynamic backlog: a task run finds work that depends on N-002.
+    for _i in range(2):
+        code, out = run_at(p, "add", "--title", "found mid-run", "--owner", "implementer",
+                           "--serves", "REQ-011", "--blocked-by", "N-002")
+        assert code == 0, out
+    second = [l.split()[0] for l in run_at(p, "next")[1].strip().splitlines()]
+    assert second[0] == "N-002", ("the frontier did not re-prioritise after the backlog "
+                                  "grew: %s → %s" % (first, second))
+
+
+@case("the order is deterministic — the same graph gives the same frontier twice")
+def _():
+    p = written(g([node("N-00%d" % i) for i in range(1, 6)]))
+    a = run_at(p, "next")[1]
+    b = run_at(p, "next")[1]
+    assert a == b, "the frontier flickers between runs:\n%s\n---\n%s" % (a, b)
+
+
+@case("next prints the frontier and nothing else, priority or not")
+def _():
+    p = written(g([node("N-001"), node("N-002", blocked=["N-001"])]))
+    code, out = run_at(p, "next")
+    assert code == 0, out
+    lines = [l for l in out.strip().splitlines() if l.strip()]
+    assert len(lines) == 1, "next printed more than the frontier: %r" % out
+    assert lines[0].split()[0] == "N-001", out
+
+
+@case("a mutated graph still validates against graph.schema.json itself")
+def _():
+    try:
+        import jsonschema
+    except ImportError:
+        skipped.append("the mutated-graph schema cross-check")
+        return
+    schema = json.loads((ROOT / "plugins/task-pipeline/skills/task-pipeline"
+                              / "graph.schema.json").read_text())
+    p = written(g([node("N-001"), node("N-002")]))
+    # The exit codes are the point. Without them this fixture passed with BOTH verbs
+    # replaced by `die()` — an unmutated graph validates, so it reported `ok` while
+    # proving nothing about mutations. Demonstrated by the R-005 reader, not by me.
+    code, out = run_at(p, "add", "--title", "t", "--owner", "ui", "--serves", "REQ-016",
+                       "--blocked-by", "N-001", "--blocked-by", "N-001")
+    assert code == 0, "the add was refused, so this fixture would validate an unmutated graph: %s" % out
+    code, out = run_at(p, "park", "N-002", "--reason", "serves module 2, not this release")
+    assert code == 0, "the park was refused: %s" % out
+    after = json.loads(p.read_text())
+    assert len(after["nodes"]) == 3, after
+    assert after["nodes"][1]["status"] == "parked", after["nodes"][1]
+    jsonschema.validate(after, schema)
+
+
+@case("the schema REQUIRES the reason on a parked node — not merely permits it")
+def _():
+    try:
+        import jsonschema
+    except ImportError:
+        skipped.append("the parked_reason schema rule")
+        return
+    schema = json.loads((ROOT / "plugins/task-pipeline/skills/task-pipeline"
+                              / "graph.schema.json").read_text())
+    bad = g([{"id": "N-001", "title": "t", "owner": "ui", "status": "parked",
+              "blocked_by": [], "serves": "REQ-016"}])
+    try:
+        jsonschema.validate(bad, schema)
+    except jsonschema.ValidationError:
+        return
+    raise AssertionError("a parked node with no reason satisfies the schema — REQ-012 rests "
+                         "on the script behaving, which is what `done → evidence` stopped doing")
+
+
+# --- what the R-005 read found, each now with the fixture that would have caught it ---
+
+@case("a duplicate blocked_by is refused — the schema calls the list unique")
+def _():
+    p = written(g([node("N-001"),
+                   {"id": "N-002", "title": "t", "owner": "implementer", "status": "pending",
+                    "blocked_by": ["N-001", "N-001"], "serves": "REQ-001"}]))
+    code, out = run_at(p, "validate")
+    assert code == 1, "a repeated dependency passed validate: %s" % out
+    assert "N-001" in out, out
+
+
+@case("add dedupes a repeated --blocked-by rather than writing what the schema rejects")
+def _():
+    p = written(g([node("N-001")]))
+    code, out = run_at(p, "add", "--title", "t", "--owner", "implementer", "--serves",
+                       "REQ-011", "--blocked-by", "N-001", "--blocked-by", "N-001")
+    assert code == 0, out
+    assert json.loads(p.read_text())["nodes"][1]["blocked_by"] == ["N-001"], "add wrote a duplicate"
+
+
+@case("a line break in a title is refused — `next` prints one row per node")
+def _():
+    p = written(g([node("N-001")]))
+    forged = "harmless\nN-999  implementer  ship it without review"
+    code, out = run_at(p, "add", "--title", forged, "--owner", "implementer", "--serves", "REQ-011")
+    assert code == 1, "a title forging a frontier row was accepted: %s" % out
+    p2 = written(g([node("N-001", title=forged)]))
+    code, out = run_at(p2, "validate")
+    assert code == 1, "a hand-written graph with a forged row passed validate: %s" % out
+
+
+@case("done with no evidence is refused AT RUNTIME, not only by the shipped schema")
+def _():
+    # The schema was never applied to a live graph — only to the example, at build time.
+    # So both conditional rules rested on the scripts behaving, which is what the
+    # validator's own message claimed had stopped being true.
+    p = written(g([node("N-001", status="done")]))
+    code, out = run_at(p, "validate")
+    assert code == 1, "a done node with no evidence passed validate: %s" % out
+    for ev in ([], [""], ["   "], None):
+        p2 = written(g([node("N-001", status="done", evidence=ev)]))
+        assert run_at(p2, "validate")[0] == 1, "done with evidence %r passed" % (ev,)
+
+
+@case("parked with no reason is refused at runtime, and `null` is one of the shapes")
+def _():
+    for reason in (None, "", "   ", 7):
+        n = node("N-001", status="parked")
+        if reason is not None:
+            n["parked_reason"] = reason
+        p = written(g([n]))
+        code, out = run_at(p, "validate")
+        assert code == 1, "parked with parked_reason=%r passed validate: %s" % (reason, out)
+
+
+@case("a graph with no goal is refused — the loop prints it every iteration")
+def _():
+    code, out = run_at(written(g([node("N-001")], goal="")), "validate")
+    assert code == 1, "a goalless graph passed: %s" % out
+
+
+@case("an id that does not match the schema's shape is refused")
+def _():
+    for bad in ("N-1", "N-abc", "001", ""):
+        p = written(g([node(bad)]))
+        assert run_at(p, "validate")[0] == 1, "id %r passed validate" % bad
+
+
+@case("a malformed graph is a named refusal, not a traceback")
+def _():
+    for bad in ({"goal": "g", "nodes": {"N-001": {}}, "edges": []},
+                {"goal": "g", "nodes": ["N-001"], "edges": []},
+                [], None):
+        code, out = run_at(written(bad), "validate")
+        assert code in (1, 2), "exit %d for %r: %s" % (code, bad, out)
+        assert "Traceback" not in out, "a traceback rather than a refusal for %r:\n%s" % (bad, out)
+
+
+@case("a symlinked graph is written THROUGH, not replaced")
+def _():
+    d = tempfile.mkdtemp()
+    real = pathlib.Path(d) / "real.json"
+    real.write_text(json.dumps(g([node("N-001")])))
+    link = pathlib.Path(d) / "graph.json"
+    os.symlink(real, link)
+    code, out = run_at(link, "add", "--title", "t", "--owner", "implementer", "--serves", "REQ-011")
+    assert code == 0, out
+    assert link.is_symlink(), "os.replace replaced the link — the queue forks in two"
+    assert len(json.loads(real.read_text())["nodes"]) == 2, "the target did not receive the node"
+
+
+@case("two concurrent adds do not share one temp file")
+def _():
+    # A fixed `path + '.tmp'` made two writers share an inode: exit 0 with the node
+    # absent, and exit 1 with it present — the second is what makes a retry double-add.
+    p = written(g([node("N-001")]))
+    procs = [subprocess.Popen([sys.executable, str(GRAPH), "add", "--title", "t%d" % i,
+                               "--owner", "implementer", "--serves", "REQ-011",
+                               "--graph", str(p)],
+                              stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+             for i in range(4)]
+    codes = [pr.wait() for pr in procs]
+    after = json.loads(p.read_text())          # must still parse
+    titles = {n["title"] for n in after["nodes"]}
+    assert codes == [0, 0, 0, 0], "a concurrent add failed: %s" % codes
+    assert len(after["nodes"]) == 5, ("%d nodes where 5 were expected — a lost update: two "
+                                      "processes read the same graph and the second write "
+                                      "dropped the first node, both exiting 0"
+                                      % len(after["nodes"]))
+    for i in range(4):
+        assert "t%d" % i in titles, "run %d exited 0 and its node is absent" % i
+    assert len({n["id"] for n in after["nodes"]}) == 5, "two nodes got the same id"
+
 if failures:
     print("\n%d failure(s) out of %d cases" % (len(failures), cases))
     sys.exit(1)
-print("\nPASS: graph.py — %d cases" % cases)
+if skipped:
+    print("\nunlooked: %d — %s" % (len(skipped), "; ".join(skipped)))
+print("\nPASS: graph.py — %d cases%s"
+      % (cases, (" (%d unlooked)" % len(skipped)) if skipped else ""))
