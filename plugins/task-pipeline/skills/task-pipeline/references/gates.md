@@ -22,6 +22,7 @@ elsewhere and is not restated here:
 ## Contents
 
 - Axis A — the stage gate type
+- The judgment gate — a ruling is not a measurement
 - Axis B — the enforcement mechanism
 - Axis C — degrees of freedom
 - Progressive arming
@@ -49,12 +50,56 @@ From [`../pipeline.schema.json`](../pipeline.schema.json), one per stage:
 | Type | Meaning | Failure to respect it |
 |---|---|---|
 | `auto` | the orchestrator verifies the `check` itself, pass/fail, and stops on fail | advancing on an unverified check |
+| `judgment` | somebody **rules** on it, because no complete deterministic check exists; the gate names its `judge` | recording the ruling in the slot reserved for what a machine established |
 | `manual` | wait for the operator's **explicit** go | treating an auto verification as the approval |
 
 **An auto gate never substitutes for a required manual approval.** A green table is
 not the operator confirming it is what they asked for, and no amount of checking
 makes it one. Which stages are manual is the **operator's** decision, recorded in
 their `pipeline.json`; the framework fixes no stage count and no gate assignment.
+
+## The judgment gate — a ruling is not a measurement
+
+Two types were not enough, and the gap was not cosmetic. A reviewer's ruling, a check that
+the scenarios are coherent, a verdict that a mockup is good — none has a complete
+deterministic check, and all three rode in `auto`, **indistinguishable from an exit code**.
+A coverage table then cannot tell a measured row from an opinion, and the role-agent
+programme multiplies the problem: `reviewer`, `ux`, `ui` and `market-analyst` produce
+judgement by design.
+
+`auto` now means only what a machine established.
+
+**The precedent already existed in miniature, and this generalises it rather than
+inventing it.** [`templates/verification.md`](../templates/verification.md) already turns a
+coverage verdict of `review` into `none` in the `Auto` column — because that column records
+what a machine established, and a review is not that. That rule, applied to one column, is
+the `judgment` type in one instance.
+
+Three obligations, and the third is the one that bites:
+
+1. **It names its `judge`** — a role, an agent, a person. The schema refuses the gate
+   without one. A ruling with no author cannot be weighed for independence, and
+   independence is not a property of *having* a reviewer: this pipeline's own `R-005` reader
+   shares a model, instructions and repository with the author it reviews, differing only in
+   context. That is a real second reading and it is **not** a deterministic runner, a
+   contract at another boundary, or an external system. Naming the judge is what makes the
+   difference visible instead of assumed.
+2. **The verdict is recorded as judgement**, in the artifact that quotes it — never
+   promoted to a pass in a column that means *a machine established this*.
+3. **It may not stand in for a `manual` gate.** A judgement can be rendered by an agent; an
+   *authorisation* cannot. Anything outward, irreversible, or costing money stays `manual`
+   however confident the judge.
+
+**Which of this pipeline's own gates are judgement is deliberately not decided here.**
+Gate assignment is the operator's call and the framework fixes none — so shipping a
+reclassified stage list would contradict the sentence above it. The type exists; the
+project chooses where it applies.
+
+| Rationalization | Why it is wrong |
+|---|---|
+| *"The reviewer approved it, so the gate passed."* | It did — as a judgement. Type it as one, or the table claims a machine agreed |
+| *"A second agent checked it, so it is independent."* | Independence is a different **evidence path**, not a second reader. Name the judge and the difference is visible |
+| *"There is no check for this, so it has to be `manual`."* | `manual` waits for a person's authority. `judgment` records a ruling. Collapsing them puts a human in the loop for everything that is merely hard to measure, which is how an operator learns to route around the pipeline |
 
 ## Axis B — the enforcement mechanism
 

@@ -2845,6 +2845,117 @@ if gschema is not None:
             fail(f"{GRAPH_SCHEMA_REL}: edge.payload has no `minLength` — REQ-003: an empty "
                  "payload is `references/planning.md`'s fake edge with a field around it")
 
+# --- B-076: the judgment gate — a ruling is not a measurement ---------------------------
+#
+# Two types were not enough. A reviewer's ruling, a coherence check on scenarios and a
+# verdict that a mockup is good all rode in `auto`, indistinguishable from an exit code, so
+# a coverage table could not tell a measured row from an opinion.
+_ps = load_json("plugins/task-pipeline/skills/task-pipeline/pipeline.schema.json")
+if _ps is not None:
+    def _find_gate(o):
+        if isinstance(o, dict):
+            if "type" in (o.get("properties") or {}) and "check" in (o.get("required") or []):
+                return o
+            for _v in o.values():
+                _r = _find_gate(_v)
+                if _r is not None:
+                    return _r
+        elif isinstance(o, list):
+            for _v in o:
+                _r = _find_gate(_v)
+                if _r is not None:
+                    return _r
+        return None
+
+    _gt = _find_gate(_ps)
+    if _gt is None:
+        fail("pipeline.schema.json: no gate object with `type` and `check` — B-076")
+    else:
+        # A SET, not a substring. `"judgment" in json.dumps(schema)` would be satisfied by
+        # the word appearing in any description, which is how four checks in this file were
+        # defeated in one session.
+        _types = set(((_gt.get("properties") or {}).get("type") or {}).get("enum") or [])
+        if _types != {"auto", "judgment", "manual"}:
+            fail(f"pipeline.schema.json: the gate type enum is {sorted(_types)} — B-076 "
+                 "expects exactly auto, judgment and manual. `auto` must mean only what a "
+                 "MACHINE established, and a judgement typed as `auto` is a ruling recorded "
+                 "in the slot reserved for facts")
+        else:
+            # The conditional must be able to FIRE — an `if` carrying one impossible
+            # requirement disarms the rule while every key a structural check reads stays
+            # in place, which is exactly how the graph schema was defeated earlier today.
+            _conds = []
+            if _gt.get("if") is not None:
+                _conds.append((_gt["if"], _gt.get("then")))
+            for _sub in _gt.get("allOf") or []:
+                if isinstance(_sub, dict) and _sub.get("if") is not None:
+                    _conds.append((_sub["if"], _sub.get("then")))
+            _jt = None
+            for _if, _then in _conds:
+                if ((_if.get("properties") or {}).get("type") or {}).get("const") != "judgment":
+                    continue
+                if set(_if.get("required") or []) - {"type"}:
+                    continue
+                if set(_if.get("properties") or {}) - {"type"}:
+                    continue
+                _jt = _then if isinstance(_then, dict) else {}
+                break
+            if _jt is None or "judge" not in (_jt.get("required") or []):
+                fail("pipeline.schema.json: no `if type==judgment then judge` rule that can "
+                     "fire — B-076: a ruling with no author cannot be weighed for "
+                     "independence, and independence is not a property of having a reviewer")
+            else:
+                _jsub = (_jt.get("properties") or {}).get("judge") or {}
+                _jpat = _jsub.get("pattern")
+                _jok = False
+                if _jsub.get("type") == "string" and _jpat:
+                    try:
+                        _jrx = re.compile(_jpat)
+                        _jok = not _jrx.search("   ") and bool(_jrx.search("reviewer"))
+                    except re.error:
+                        _jok = False
+                if not _jok:
+                    fail("pipeline.schema.json: the `judge` a judgment gate requires is not "
+                         "bound to a non-whitespace string — measured by running the pattern, "
+                         "because `minLength: 1` counts a space and `^.*$` is a pattern")
+
+            # The negative control, run rather than reasoned about.
+            try:
+                import jsonschema as _js2
+            except ImportError:
+                _UNLOOKED.append("skip: the judgment-gate probes need jsonschema")
+            else:
+                def _probe(_gate):
+                    _doc = {"stages": [{"state": "x", "skills": ["s"], "gate": _gate}]}
+                    try:
+                        _js2.validate(_doc, _ps)
+                        return True
+                    except _js2.ValidationError:
+                        return False
+                if _probe({"type": "judgment", "check": "c"}):
+                    fail("pipeline.schema.json accepts a judgment gate with no `judge` — "
+                         "B-076, and the rule this whole type rests on")
+                if _probe({"type": "judgment", "check": "c", "judge": "   "}):
+                    fail("pipeline.schema.json accepts a judgment gate whose `judge` is "
+                         "whitespace — presence is not an author")
+                if not _probe({"type": "judgment", "check": "c", "judge": "reviewer"}):
+                    fail("pipeline.schema.json refuses a well-formed judgment gate — the "
+                         "type is unusable")
+                if not _probe({"type": "auto", "check": "c"}):
+                    fail("pipeline.schema.json refuses an `auto` gate — the change broke the "
+                         "type it was not about")
+
+# The doctrine must carry the row, anchored on the row's own opening cell.
+_gd = os.path.join(ROOT, "plugins/task-pipeline/skills/task-pipeline/references/gates.md")
+if os.path.isfile(_gd):
+    _gl = open(_gd, encoding="utf-8").read().splitlines()
+    if not [l for l in _gl if l.strip().startswith("| `judgment` |")]:
+        fail("references/gates.md's Axis A table has no `judgment` row — B-076: a type the "
+             "schema accepts and the doctrine never explains is a type nobody uses")
+    if not [l for l in _gl if l.strip().startswith("## The judgment gate")]:
+        fail("references/gates.md has no `## The judgment gate` section — the type needs the "
+             "three obligations written where an agent reads them")
+
 # --- templates/exposure.sh's staleness section — B-081, EXECUTED over four states -------
 #
 # The ledger tracked rows nobody had confirmed and had no notion of a row whose

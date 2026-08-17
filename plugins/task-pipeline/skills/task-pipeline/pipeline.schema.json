@@ -205,16 +205,49 @@
             "type": {
               "enum": [
                 "auto",
+                "judgment",
                 "manual"
               ],
-              "description": "auto = the orchestrator verifies `check` itself (pass/fail); manual = wait for the operator's explicit go."
+              "description": "auto = the orchestrator verifies `check` itself, pass/fail — a fact a MACHINE established. judgment = there is no complete deterministic check and someone rules on it; the ruling is recorded AS judgement and never as a measurement, and the gate must name its `judge`. manual = wait for the operator's explicit go. Two types were not enough: a reviewer's ruling, a check that scenarios are coherent and a verdict that a mockup is good all rode in `auto`, indistinguishable from an exit code — so a coverage table could not tell a measured row from an opinion."
             },
             "check": {
               "type": "string",
               "minLength": 1,
               "description": "The gate condition, in prose."
+            },
+            "judge": {
+              "type": "string",
+              "minLength": 1,
+              "pattern": "\\S",
+              "description": "Who or what renders the judgement — a role, an agent, a person. Required when `type` is `judgment`. Without it the ruling has no author, and a judgement whose author is unknown cannot be weighed against its independence: this pipeline's own `R-005` reader shares a model and a repository with the author it reviews, which is a different kind of evidence from a deterministic runner. Naming the judge is what makes that difference visible."
             }
-          }
+          },
+          "allOf": [
+            {
+              "if": {
+                "properties": {
+                  "type": {
+                    "const": "judgment"
+                  }
+                },
+                "required": [
+                  "type"
+                ]
+              },
+              "then": {
+                "required": [
+                  "judge"
+                ],
+                "properties": {
+                  "judge": {
+                    "type": "string",
+                    "minLength": 1,
+                    "pattern": "\\S"
+                  }
+                }
+              }
+            }
+          ]
         }
       }
     },

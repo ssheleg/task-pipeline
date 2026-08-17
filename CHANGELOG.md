@@ -68,8 +68,42 @@ and a caller that cannot tell them apart will wait on the wrong one.
 code being two installers and the validator was false the moment it landed, and is
 corrected in the same change.
 
-Guards: 351 → **367**. Fourteen plants across the module, structurally distinct rather than variations,
+Guards: 351 → **368**. Fifteen plants across the module, structurally distinct rather than variations,
 each asserting it landed before the validator runs.
+
+### B-076 — a ruling is not a measurement
+
+Gate types were `auto` and `manual`, and that was one short. A reviewer's ruling, a check
+that the scenarios are coherent, a verdict that a mockup is good — none has a complete
+deterministic check, and all three rode in `auto`, **indistinguishable from an exit code**.
+A coverage table then cannot tell a measured row from an opinion, and the role-agent
+programme multiplies it: `reviewer`, `ux`, `ui` and `market-analyst` produce judgement by
+design.
+
+`judgment` ships. `auto` now means only what a machine established, and a judgment gate
+**must name its `judge`** — the schema refuses it otherwise. That obligation is not
+bookkeeping: a ruling with no author cannot be weighed for independence, and independence
+is not a property of *having* a reviewer. This pipeline's own `R-005` reader shares a
+model, instructions and repository with the author it reviews, differing only in context.
+It is a real second reading and it is **not** a deterministic runner, a contract at another
+boundary, or an external system. Naming the judge is what makes that difference visible
+instead of assumed.
+
+**It generalises a rule this repository already had in one place.**
+`templates/verification.md` turns a coverage verdict of `review` into `none` in the `Auto`
+column, because that column records what a machine established. That is the `judgment` type
+applied to one column, and it has been sitting there being right.
+
+**Which of this pipeline's own gates are judgement is deliberately not decided.**
+`references/gates.md` says gate assignment is the operator's call and the framework fixes
+none — so shipping a reclassified stage list would contradict the sentence above it.
+
+**Eight planted defects, all refused on the first attempt — including the two shapes that
+defeated every guard before this one.** Renaming the doctrine row to `judgement` and the
+section to *About judgment gates* both fail now, because the checks anchor on a line's
+opening cell rather than searching for a word. That was the session's repeated lesson —
+four guards had been beaten by a substring — and this is the first one written with it in
+hand.
 
 ### B-081 — proof expires, and the ledger had only one end of it
 
