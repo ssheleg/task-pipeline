@@ -2,8 +2,13 @@
 
 ## v1.69.0 — the work graph, and a check that mentions is not a check that binds
 
-*In progress — module 1 of the role-agent programme
-(`docs/evidence/specs/2026-08-17-role-agent-graph-brief.md`).*
+**Module 1 of the role-agent programme, complete** — T-1 through T-7, briefed in
+`docs/evidence/specs/2026-08-17-role-agent-graph-brief.md`. The graph is on disk, a script
+walks it, a verifier closes one node at a time against a seven-key verdict, and the loop
+reads a queue rather than its own recollection.
+
+**Counted at the close, not carried from a section above:** 376 guards · 114 graph fixtures · 24 exposure fixtures · 9 verbs on `graph.py` · 35 reference files · `npm run test:all` exits 0 over eight suites. The figures in the sub-sections below are each true at the moment that sub-section landed, which is why this line exists.
+
 
 **`graph.schema.json` and `graph.example.json` ship**, and `test/validate.py` reads
 them. `.task-pipeline/graph.json` is the queue the loop walks — a run artifact, never
