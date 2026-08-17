@@ -1,5 +1,30 @@
 # Changelog
 
+## v1.70.0 — the stemmer cannot conjugate, so the description says the other form
+
+`запиши решение` — the imperative a person actually types — reached no route at all, while
+`evidence-docs` advertised the infinitive `записать решение`. The umbrella's matcher stems
+`записать` to `записа-` and cannot reach `запиш-`: the с/ш alternation is a conjugation class,
+not an ending, and `lib/triggers.js` says in its own header that it is *deliberately NOT a
+morphological analyser*.
+
+**So the fix is here rather than there.** Teaching a load-bearing stemmer one conjugation
+class for one trigger was measured and refused (`B-84` on the umbrella's board); advertising
+the second form costs **19 characters in a description with 124 free**. The description now
+carries both, and the umbrella routes `запиши решение`, `запишите решение` and
+`запиши решение по архитектуре` to `evidence-docs`.
+
+**One false positive, measured rather than overlooked.** It also fires on «запиши решение
+суда». A court decision does not occur on this machine and the cost of the hit is one injected
+line — where `аудит` was refused against `аудитория` precisely because that word is common.
+The trade is named here so a later reader does not have to re-derive it.
+
+Coverage on the umbrella's own corpus: **64/15 → 65/14** of 79 prompts.
+
+Guards: 376 → **376**. No guard was added or removed — this release changes one description
+and nothing it asserts is new; the umbrella's fixture that every trigger is advertised is what
+holds the pair together, and it lives there rather than here.
+
 ## v1.69.0 — the work graph, and a check that mentions is not a check that binds
 
 **Module 1 of the role-agent programme, complete** — T-1 through T-7, briefed in
