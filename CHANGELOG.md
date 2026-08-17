@@ -68,8 +68,38 @@ and a caller that cannot tell them apart will wait on the wrong one.
 code being two installers and the validator was false the moment it landed, and is
 corrected in the same change.
 
-Guards: 351 → **372**. Nineteen plants across the module, structurally distinct rather than variations,
+Guards: 351 → **373**. Twenty plants across the module, structurally distinct rather than variations,
 each asserting it landed before the validator runs.
+
+### Canon 9a — a measured zero and an unmeasured quantity may not print the same
+
+This arrived **three times under three names** in one programme before anyone named it:
+*State zero out loud* for the code graph, `unanchored`/`unresolvable` for the verification
+ledger, and `unmeasured` for `graph.py doctrine` — joined this release by `next` reporting
+how many runnable nodes declared no `touches`. Four sites, one rule, and
+`references/audit.md` is explicit that a class seen twice becomes a mechanism rather than
+another paragraph.
+
+Canon 9 already said *carry the absence*. 9a says **refuse the number**: `0 of 34 files
+read` and *the recorder was never installed* are opposite facts, and a `0` claims the first
+while meaning the second — the most reassuring answer available, derived from an instrument
+nobody switched on.
+
+**The check is over the shape, not the four sites.** Any verb of `graph.py` that prints a
+count must carry, in the same function, a word for the case where nothing measured it. A
+list of the four would not catch the fifth, which is the whole reason the rule is written
+down — and the plant is exactly that fifth: a new counting verb, added and refused.
+
+**It also caught the difference between a word being present and a word being said.** The
+first version searched the whole function body, so a site that kept its `undeclared`
+variable and printed `note:` instead passed. It reads **printed text only** now — the same
+lesson as four substring failures earlier in this release, arriving once more in a new
+costume.
+
+Measured before writing, and it changed the work: `templates/stage-coverage.sh` prints three
+counts and no absence word, which looked like a fourth instance — and is not. It
+**enumerates** every unaccounted stage by name, so its `accounted for 0` is a measurement
+rather than a claim. The check was scoped to what actually has the defect.
 
 ### B-093 — two runnable nodes, one mutable target
 

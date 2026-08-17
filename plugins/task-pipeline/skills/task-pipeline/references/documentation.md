@@ -89,6 +89,23 @@ side, so it never surfaces by comparison. Carry it as a named, counted set next 
 verdict — a ratchet, never a TODO — so `PASS` reads as *"green, and here is what nobody
 looked at"*. → [`learned.md`](learned.md) rule 7; [`gates.md`](gates.md) → *Ratchets*.
 
+**9a. A measured zero and an unmeasured quantity may not print the same.** Canon 9 says
+carry the absence; this says **refuse the number** when nothing measured it. `0 of 34
+files read` and *the recorder was never installed* are opposite facts, and a `0` claims
+the first while meaning the second — the most reassuring answer available, derived from
+an instrument nobody switched on. So the unmeasured case prints a word, and the word says
+why it cannot be a number.
+
+The rule is written down because it arrived three times under three names before anyone
+named it: `references/knowledge-graph.md` → *State zero out loud* (a fresh graph must
+still print `current, 0 commits behind`, or freshness is indistinguishable from a harvest
+that never looked); `references/verification.md` → *Staleness* (`unanchored` and
+`unresolvable` are states, not zeroes); and `scripts/graph.py` → `doctrine`, which prints
+`unmeasured` and its reason rather than `0 of 34`, and `next`, which reports how many
+runnable nodes declared no `touches` so that no collision is not read as no collision
+found. Three sites, one rule, and the fourth will be written from this line rather than
+from the same mistake.
+
 **10. The document ships in the change that made it true.** Not in the next ticket —
 documentation deferred is documentation that describes a system nobody is running. A
 correction is **appended**, never edited over: a register that is rewritten loses the

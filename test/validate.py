@@ -2845,6 +2845,90 @@ if gschema is not None:
             fail(f"{GRAPH_SCHEMA_REL}: edge.payload has no `minLength` — REQ-003: an empty "
                  "payload is `references/planning.md`'s fake edge with a field around it")
 
+# --- canon 9a: a measured zero and an unmeasured quantity may not print the same ---------
+#
+# This arrived three times under three names before anyone named it — `State zero out loud`
+# for the code graph, `unanchored`/`unresolvable` for the ledger, and `unmeasured` for
+# `doctrine`. Canon 9 says carry the absence; 9a says REFUSE THE NUMBER when nothing
+# measured it, because `0 of 34` and *the recorder was never installed* are opposite facts
+# and the zero claims the first while meaning the second.
+#
+# So the check is over the SHAPE rather than the three known sites: any verb of `graph.py`
+# that prints a count must carry, in the same function, a word for the case where the
+# quantity was never measured. A list of the three would not catch the fourth, which is the
+# entire reason the rule is written down.
+#
+# SCOPE, because a check that overstates itself is the failure it exists to catch. This
+# reads source, so it cannot see UNREACHABLE code: wrapping a disclosure in `if False:`
+# leaves the words in place and passes here. That case is covered by the behavioural guards
+# that RUN the verbs — B-093's executes `next` over a frontier declaring nothing, B-061's
+# executes `doctrine` over a ledger with no `read:` lines — and it was watched being caught
+# by the first of those. What this check owns is the shape of a NEW site; what runs the code
+# owns whether the site fires.
+if os.path.isfile(_gs):
+    _gsrc = open(_gs, encoding="utf-8").read()
+    _COUNTS = re.compile(r"print\([^)]*(\{len\(|\bof \{|\{[a-z_]+\} of |current \{)", re.S)
+    _ABSENT = re.compile(r"unmeasured|undeclared|unresolvable|unanchored|dormant|"
+                         r"nothing records", re.I)
+    _verbs = re.split(r"\ndef ", _gsrc)
+    _checked = 0
+    for _fn in _verbs[1:]:
+        _fname = _fn.split("(")[0]
+        if not _fname.startswith("cmd_"):
+            continue
+        if not _COUNTS.search(_fn):
+            continue
+        _checked += 1
+        # Inside PRINTED text only. Matching the whole function body passed a site that
+        # kept its `undeclared` variable and printed `note:` instead — the same class as
+        # the substring failures earlier today: a word present is not a word said.
+        # Paren-BALANCE, not a pattern. A regex over nested parens flagged `cmd_next`,
+        # whose disclosure contains `{', '.join(undeclared[:6])}` — three levels deep. The
+        # tightening that fixed a false negative bought a false positive, and the gate
+        # refused the commit before it landed.
+        def _print_text(_body):
+            _out, _k = [], 0
+            while True:
+                _k = _body.find("print(", _k)
+                if _k < 0:
+                    return " ".join(_out)
+                _d, _j = 0, _k + len("print(") - 1
+                while _j < len(_body):
+                    if _body[_j] == "(":
+                        _d += 1
+                    elif _body[_j] == ")":
+                        _d -= 1
+                        if _d == 0:
+                            break
+                    _j += 1
+                _out.append(_body[_k:_j + 1])
+                _k = _j + 1
+
+        # LITERAL text only. An f-string's `{len(undeclared)}` puts the word inside the
+        # printed source while saying nothing, so a site could rename `undeclared:` to
+        # `note:` and still pass. Third narrowing of "said" in one sitting, each one closing
+        # a way the word appears without being spoken.
+        _printed = re.sub(r"\{[^{}]*\}", " ", _print_text(_fn))
+        if not _ABSENT.search(_printed):
+            fail(f"scripts/graph.py: `{_fname}` prints a count and carries no word for the "
+                 "case where nothing measured it — canon 9a: a measured zero and an "
+                 "unmeasured quantity may not print the same, because `0` is the most "
+                 "reassuring answer available and it is derived from an instrument nobody "
+                 "switched on")
+    if _checked == 0:
+        fail("scripts/graph.py: no verb appears to print a count, so canon 9a's check has "
+             "nothing to read — either the print shape changed and this check is blind, or "
+             "the counts are gone. Both are worth stopping for")
+
+    # And the canon must be stated where an author will meet it.
+    _dc = os.path.join(ROOT, "plugins/task-pipeline/skills/task-pipeline/references/documentation.md")
+    if os.path.isfile(_dc):
+        _dl = open(_dc, encoding="utf-8").read().splitlines()
+        if not [l for l in _dl if l.strip().startswith("**9a.")]:
+            fail("references/documentation.md has no canon `9a` — the rule arrived three "
+                 "times under three names, and the fourth site will be written from the "
+                 "line or from the same mistake")
+
 # --- B-093: two runnable nodes, one mutable target ---------------------------------------
 #
 # `references/planning.md` states the rule — *distinct is not the same as independent, and
