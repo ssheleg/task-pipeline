@@ -7101,6 +7101,44 @@ jobs:
             echo "OK: the installers are RUN, not read"
           fi
 
+      - name: Negative self-test (coverage stops refusing a requirement nothing serves)
+        run: |
+          set -eu
+          rm -rf /tmp/cov1-copy && cp -R . /tmp/cov1-copy
+          python3 - <<'EOF'
+          p = "/tmp/cov1-copy/plugins/task-pipeline/skills/task-pipeline/scripts/graph.py"
+          t = open(p, encoding="utf-8").read()
+          needle = "    return 1 if bad else 0"
+          assert needle in t, "PLANT DID NOT LAND: cov1 — coverage's verdict line moved"
+          open(p, "w", encoding="utf-8").write(t.replace(needle, "    return 0", 1))
+          EOF
+          if python3 /tmp/cov1-copy/test/validate.py; then
+            echo "ERROR: a coverage report that cannot fail was accepted — B-085, and a
+                   report that never refuses counted every gap as covered"; exit 1
+          else
+            echo "OK: coverage is run against both a covered and an uncovered graph"
+          fi
+
+      - name: Negative self-test (serves resolving against nothing)
+        run: |
+          set -eu
+          rm -rf /tmp/cov2-copy && cp -R . /tmp/cov2-copy
+          python3 - <<'EOF'
+          import json
+          p = "/tmp/cov2-copy/plugins/task-pipeline/skills/task-pipeline/graph.schema.json"
+          d = json.load(open(p, encoding="utf-8"))
+          assert "requirements" in d["required"], "PLANT DID NOT LAND: cov2"
+          d["required"] = [r for r in d["required"] if r != "requirements"]
+          json.dump(d, open(p, "w", encoding="utf-8"), indent=2)
+          EOF
+          if python3 /tmp/cov2-copy/test/validate.py; then
+            echo "ERROR: a graph with no frozen REQ set was accepted — B-077: serves then
+                   resolves against nothing, and that is the one edge between the intent
+                   graph and the execution graph"; exit 1
+          else
+            echo "OK: the intent side of the relation must exist"
+          fi
+
       - name: Negative self-test (a revision log that records the change and not the reason)
         run: |
           set -eu

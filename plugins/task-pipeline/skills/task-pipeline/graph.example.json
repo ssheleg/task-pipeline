@@ -1,5 +1,11 @@
 {
   "goal": "The pipeline advances a queue without a human between iterations, and says what it did.",
+  "requirements": [
+    "REQ-001",
+    "REQ-002",
+    "REQ-005",
+    "REQ-016"
+  ],
   "nodes": [
     {
       "id": "N-001",

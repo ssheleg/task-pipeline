@@ -59,7 +59,7 @@ def run(graph, *args):
 _AUTO = object()
 
 
-def g(nodes=None, edges=_AUTO, goal="a goal"):
+def g(nodes=None, edges=_AUTO, goal="a goal", reqs=_AUTO, clauses=None):
     """A graph. Edges are DERIVED from `blocked_by` unless given explicitly.
 
     Every dependency needs an edge carrying what it hands over (B-084), so a helper that
@@ -71,7 +71,13 @@ def g(nodes=None, edges=_AUTO, goal="a goal"):
     if edges is _AUTO:
         edges = [{"from": b, "to": n.get("id"), "payload": "what %s hands over" % b}
                  for n in nodes for b in (n.get("blocked_by") or [])]
-    return {"goal": goal, "nodes": nodes, "edges": edges}
+    out = {"goal": goal, "nodes": nodes, "edges": edges}
+    out["requirements"] = (sorted({n.get("serves") for n in nodes
+                                   if str(n.get("serves", "")).startswith("REQ-")})
+                           if reqs is _AUTO else reqs)
+    if clauses:
+        out["goal_clauses"] = clauses
+    return out
 
 
 def node(nid, owner="implementer", status="pending", blocked=None, serves="REQ-001",
@@ -455,7 +461,7 @@ def _():
 def _():
     p = written(g([node("N-001")]))
     code, out = run_at(p, "add", "--title", "a thing found mid-run",
-                       "--owner", "implementer", "--serves", "REQ-011", "--why", "a fixture")
+                       "--owner", "implementer", "--serves", "REQ-001", "--why", "a fixture")
     assert code == 0, "a well-formed add was refused: %s" % out
     nodes = json.loads(p.read_text())["nodes"]
     assert len(nodes) == 2, nodes
@@ -470,7 +476,7 @@ def _():
     # nodes hands out an id that already exists, and two nodes with one id is a graph
     # nobody can cite — the exact defect `validate` reports as a duplicate.
     p = written(g([node("N-001"), node("N-050")]))
-    code, out = run_at(p, "add", "--title", "t", "--owner", "implementer", "--serves", "REQ-011", "--why", "a fixture")
+    code, out = run_at(p, "add", "--title", "t", "--owner", "implementer", "--serves", "REQ-001", "--why", "a fixture")
     assert code == 0, out
     assert json.loads(p.read_text())["nodes"][-1]["id"] == "N-051", out
 
@@ -479,7 +485,7 @@ def _():
 def _():
     p = written(g([node("N-001")]))
     code, out = run_at(p, "add", "--id", "N-001", "--title", "t",
-                       "--owner", "implementer", "--serves", "REQ-011", "--why", "a fixture")
+                       "--owner", "implementer", "--serves", "REQ-001", "--why", "a fixture")
     assert code == 1, "a duplicate id was accepted: %s" % out
     assert len(json.loads(p.read_text())["nodes"]) == 1, "it was written anyway"
 
@@ -488,7 +494,7 @@ def _():
 def _():
     p = written(g([node("N-001")]))
     before = p.read_text()
-    code, out = run_at(p, "add", "--title", "t", "--owner", "architect", "--serves", "REQ-011", "--why", "a fixture")
+    code, out = run_at(p, "add", "--title", "t", "--owner", "architect", "--serves", "REQ-001", "--why", "a fixture")
     assert code == 1, "an unknown owner was added: %s" % out
     assert p.read_text() == before, "the file changed on a refusal"
 
@@ -497,7 +503,7 @@ def _():
 def _():
     p = written(g([node("N-001")]))
     code, out = run_at(p, "add", "--title", "t", "--owner", "implementer",
-                       "--serves", "REQ-011", "--blocked-by", "N-404", "--carries", "what it hands over", "--why", "a fixture")
+                       "--serves", "REQ-001", "--blocked-by", "N-404", "--carries", "what it hands over", "--why", "a fixture")
     assert code == 1, "a dangling blocked_by was added: %s" % out
     assert len(json.loads(p.read_text())["nodes"]) == 1
 
@@ -505,7 +511,7 @@ def _():
 @case("add with an empty title is refused")
 def _():
     p = written(g([node("N-001")]))
-    code, out = run_at(p, "add", "--title", "  ", "--owner", "implementer", "--serves", "REQ-011", "--why", "a fixture")
+    code, out = run_at(p, "add", "--title", "  ", "--owner", "implementer", "--serves", "REQ-001", "--why", "a fixture")
     assert code == 1, "an empty title was accepted: %s" % out
 
 
@@ -519,7 +525,7 @@ def _():
 @case("a mutation on an ALREADY-invalid graph says so, rather than blaming the new node")
 def _():
     p = written(g([node("N-001", owner="architect")]))
-    code, out = run_at(p, "add", "--title", "t", "--owner", "implementer", "--serves", "REQ-011", "--why", "a fixture")
+    code, out = run_at(p, "add", "--title", "t", "--owner", "implementer", "--serves", "REQ-001", "--why", "a fixture")
     assert code == 1, out
     assert "already" in out.lower(), ("the refusal reads as though the caller's node were "
                                       "the problem: %s" % out)
@@ -532,7 +538,7 @@ def _():
     before = p.read_bytes()
     for args in (("park", "N-404", "--reason", "x"),
                  ("add", "--id", "N-001", "--title", "t", "--owner", "implementer",
-                  "--serves", "REQ-011")):
+                  "--serves", "REQ-001")):
         run_at(p, *args)
         assert p.read_bytes() == before, "a refusal wrote to the file: %s" % (args,)
 
@@ -559,7 +565,7 @@ def _():
     # The dynamic backlog: a task run finds work that depends on N-002.
     for _i in range(2):
         code, out = run_at(p, "add", "--title", "found mid-run", "--owner", "implementer",
-                           "--serves", "REQ-011", "--blocked-by", "N-002", "--carries", "what it hands over", "--why", "a fixture")
+                           "--serves", "REQ-001", "--blocked-by", "N-002", "--carries", "what it hands over", "--why", "a fixture")
         assert code == 0, out
     second = [l.split()[0] for l in run_at(p, "next")[1].strip().splitlines()]
     assert second[0] == "N-002", ("the frontier did not re-prioritise after the backlog "
@@ -597,7 +603,7 @@ def _():
     # The exit codes are the point. Without them this fixture passed with BOTH verbs
     # replaced by `die()` — an unmutated graph validates, so it reported `ok` while
     # proving nothing about mutations. Demonstrated by the R-005 reader, not by me.
-    code, out = run_at(p, "add", "--title", "t", "--owner", "ui", "--serves", "REQ-016",
+    code, out = run_at(p, "add", "--title", "t", "--owner", "ui", "--serves", "REQ-001",
                        "--blocked-by", "N-001", "--blocked-by", "N-001", "--carries", "what it hands over", "--carries", "what it hands over", "--why", "a fixture")
     assert code == 0, "the add was refused, so this fixture would validate an unmutated graph: %s" % out
     code, out = run_at(p, "park", "N-002", "--reason", "serves module 2, not this release")
@@ -643,7 +649,7 @@ def _():
 def _():
     p = written(g([node("N-001")]))
     code, out = run_at(p, "add", "--title", "t", "--owner", "implementer", "--serves",
-                       "REQ-011", "--blocked-by", "N-001", "--blocked-by", "N-001", "--carries", "what it hands over", "--carries", "what it hands over", "--why", "a fixture")
+                       "REQ-001", "--blocked-by", "N-001", "--blocked-by", "N-001", "--carries", "what it hands over", "--carries", "what it hands over", "--why", "a fixture")
     assert code == 0, out
     assert json.loads(p.read_text())["nodes"][1]["blocked_by"] == ["N-001"], "add wrote a duplicate"
 
@@ -652,7 +658,7 @@ def _():
 def _():
     p = written(g([node("N-001")]))
     forged = "harmless\nN-999  implementer  ship it without review"
-    code, out = run_at(p, "add", "--title", forged, "--owner", "implementer", "--serves", "REQ-011", "--why", "a fixture")
+    code, out = run_at(p, "add", "--title", forged, "--owner", "implementer", "--serves", "REQ-001", "--why", "a fixture")
     assert code == 1, "a title forging a frontier row was accepted: %s" % out
     p2 = written(g([node("N-001", title=forged)]))
     code, out = run_at(p2, "validate")
@@ -713,7 +719,7 @@ def _():
     real.write_text(json.dumps(g([node("N-001")])))
     link = pathlib.Path(d) / "graph.json"
     os.symlink(real, link)
-    code, out = run_at(link, "add", "--title", "t", "--owner", "implementer", "--serves", "REQ-011", "--why", "a fixture")
+    code, out = run_at(link, "add", "--title", "t", "--owner", "implementer", "--serves", "REQ-001", "--why", "a fixture")
     assert code == 0, out
     assert link.is_symlink(), "os.replace replaced the link — the queue forks in two"
     assert len(json.loads(real.read_text())["nodes"]) == 2, "the target did not receive the node"
@@ -725,7 +731,7 @@ def _():
     # absent, and exit 1 with it present — the second is what makes a retry double-add.
     p = written(g([node("N-001")]))
     procs = [subprocess.Popen([sys.executable, str(GRAPH), "add", "--title", "t%d" % i,
-                               "--owner", "implementer", "--serves", "REQ-011",
+                               "--owner", "implementer", "--serves", "REQ-001",
                                "--why", "a concurrent fixture", "--graph", str(p)],
                               stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
              for i in range(4)]
@@ -803,7 +809,7 @@ def _():
 def _():
     p = written(g([node("N-001")]))
     code, out = run_at(p, "add", "--title", "t", "--owner", "implementer", "--serves",
-                       "REQ-011", "--blocked-by", "N-001", "--why", "found mid-run")
+                       "REQ-001", "--blocked-by", "N-001", "--why", "found mid-run")
     assert code == 1, "a dependency was added with no payload: %s" % out
     assert "carries" in out.lower(), "the refusal does not name the missing flag: %s" % out
     assert len(json.loads(p.read_text())["nodes"]) == 1, "it was written anyway"
@@ -813,7 +819,7 @@ def _():
 def _():
     p = written(g([node("N-001")]))
     code, out = run_at(p, "add", "--title", "t", "--owner", "implementer", "--serves",
-                       "REQ-011", "--blocked-by", "N-001", "--carries", "the parsed frontier",
+                       "REQ-001", "--blocked-by", "N-001", "--carries", "the parsed frontier",
                        "--why", "the audit found it")
     assert code == 0, out
     after = json.loads(p.read_text())
@@ -827,7 +833,7 @@ def _():
 @case("--carries and --blocked-by must pair up, and a mismatch names both counts")
 def _():
     p = written(g([node("N-001"), node("N-002")]))
-    code, out = run_at(p, "add", "--title", "t", "--owner", "implementer", "--serves", "REQ-011",
+    code, out = run_at(p, "add", "--title", "t", "--owner", "implementer", "--serves", "REQ-001",
                        "--blocked-by", "N-001", "--blocked-by", "N-002",
                        "--carries", "only one", "--why", "w")
     assert code == 1, "a count mismatch was accepted: %s" % out
@@ -837,17 +843,17 @@ def _():
 @case("add requires --why, and refuses a blank one")
 def _():
     p = written(g([node("N-001")]))
-    code, out = run_at(p, "add", "--title", "t", "--owner", "implementer", "--serves", "REQ-011")
+    code, out = run_at(p, "add", "--title", "t", "--owner", "implementer", "--serves", "REQ-001")
     assert code == 2, "add without --why is a usage error: got %d — %s" % (code, out)
     code, out = run_at(p, "add", "--title", "t", "--owner", "implementer", "--serves",
-                       "REQ-011", "--why", "   ")
+                       "REQ-001", "--why", "   ")
     assert code == 1, "a blank --why was accepted: %s" % out
 
 
 @case("every mutation appends a revision carrying its reason — B-084, and the graph says why it changed")
 def _():
     p = written(g([node("N-001")]))
-    run_at(p, "add", "--title", "t", "--owner", "implementer", "--serves", "REQ-011",
+    run_at(p, "add", "--title", "t", "--owner", "implementer", "--serves", "REQ-001",
            "--why", "the reader found a gap the plan had no node for")
     run_at(p, "park", "N-001", "--reason", "serves module 2, not this release")
     rev = json.loads(p.read_text()).get("revisions")
@@ -871,6 +877,109 @@ def _():
                           / "graph.example.json").read_text())
     code, out = run(ex, "validate")
     assert code == 0, "graph.example.json no longer validates: %s" % out
+
+
+# --- B-085 / B-077: the edge between intent and execution, and the relation over it --
+#
+# `serves` was a non-empty string and nothing more, so `serves: "REQ-999"` and
+# `serves: "asdf"` passed every gate identically — the one edge joining the intent graph
+# to the execution graph, unchecked. And the coverage relation the pipeline defines
+# precisely (`references/acceptance.md`: decision → spec → contract → task → change →
+# executed test → surface) was walked by an agent with a checklist and computed by
+# nothing.
+
+@case("a serves that names no declared requirement is refused, and the message names it")
+def _():
+    g2 = g([node("N-001", serves="REQ-999")], reqs=["REQ-001"])
+    code, out = run(g2, "validate")
+    assert code == 1, "an unresolvable serves passed: %s" % out
+    assert "REQ-999" in out, out
+
+
+@case("a serves naming a declared goal clause resolves")
+def _():
+    g2 = g([node("N-001", serves="the loop advances without a human")],
+           reqs=["REQ-001"], clauses=["the loop advances without a human"])
+    assert run(g2, "validate")[0] == 0, run(g2, "validate")[1]
+
+
+@case("a graph declaring no requirements is refused — the intent side cannot be empty")
+def _():
+    g2 = g([node("N-001")], reqs=[])
+    code, out = run(g2, "validate")
+    assert code == 1, "a graph with no declared requirements passed: %s" % out
+    assert "requirement" in out.lower(), out
+
+
+@case("coverage prints each requirement and the nodes serving it")
+def _():
+    g2 = g([node("N-001", serves="REQ-001", status="done", evidence=["npm test → PASS"]),
+            node("N-002", serves="REQ-002")], reqs=["REQ-001", "REQ-002"])
+    code, out = run(g2, "coverage")
+    assert code == 0, "a fully covered graph was refused: %s" % out
+    assert "REQ-001" in out and "N-001" in out, out
+    assert "REQ-002" in out and "N-002" in out, out
+
+
+@case("coverage refuses a requirement no node serves, and names it")
+def _():
+    g2 = g([node("N-001", serves="REQ-001")], reqs=["REQ-001", "REQ-002"])
+    code, out = run(g2, "coverage")
+    assert code == 1, "an uncovered requirement passed coverage: %s" % out
+    assert "REQ-002" in out, "the uncovered requirement is not named: %s" % out
+
+
+@case("coverage reports a requirement whose every node is parked — covered on paper only")
+def _():
+    g2 = g([{"id": "N-001", "title": "t", "owner": "ui", "status": "parked",
+             "blocked_by": [], "serves": "REQ-002",
+             "parked_reason": "serves module 2, not this release"},
+            node("N-002", serves="REQ-001")],
+           reqs=["REQ-001", "REQ-002"])
+    code, out = run(g2, "coverage")
+    assert code == 1, "a requirement served only by a parked node passed: %s" % out
+    assert "REQ-002" in out and "parked" in out.lower(), out
+
+
+@case("coverage names a done node whose evidence is empty rather than counting it")
+def _():
+    # `validate` already refuses this, so coverage must not be the only place it is
+    # caught — but a coverage report that counted it as covered would be the lie.
+    g2 = g([node("N-001", serves="REQ-001", status="done", evidence=[])], reqs=["REQ-001"])
+    assert run(g2, "validate")[0] == 1, "done with no evidence passed validate"
+
+
+@case("coverage says plainly what it cannot see")
+def _():
+    g2 = g([node("N-001", serves="REQ-001", status="done", evidence=["npm test → PASS"])],
+           reqs=["REQ-001"])
+    code, out = run(g2, "coverage")
+    assert code == 0, out
+    low = out.lower()
+    assert "ledger" in low or "not read" in low or "cannot" in low, (
+        "coverage claims a completeness it does not have — the fourth direction (an "
+        "evidence row closing no requirement) lives in the ledger, which this script "
+        "does not read, and a report silent about that reads as the whole relation: %s" % out)
+
+
+@case("the shipped example declares its requirements and covers them")
+def _():
+    ex = json.loads((ROOT / "plugins/task-pipeline/skills/task-pipeline"
+                          / "graph.example.json").read_text())
+    assert ex.get("requirements"), "the example declares no requirements"
+    code, out = run(ex, "validate")
+    assert code == 0, "the example no longer validates: %s" % out
+
+
+@case("add refuses a serves the brief never froze, and says who may add one")
+def _():
+    p = written(g([node("N-001", serves="REQ-001")]))
+    code, out = run_at(p, "add", "--title", "t", "--owner", "implementer",
+                       "--serves", "REQ-042", "--why", "found mid-run")
+    assert code == 1, "a node invented its own requirement: %s" % out
+    assert "REQ-042" in out and "brief" in out.lower(), (
+        "the refusal does not say the brief owns the REQ table: %s" % out)
+    assert len(json.loads(p.read_text())["nodes"]) == 1, "it was written anyway"
 
 if failures:
     print("\n%d failure(s) out of %d cases" % (len(failures), cases))

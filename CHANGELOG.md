@@ -68,8 +68,48 @@ and a caller that cannot tell them apart will wait on the wrong one.
 code being two installers and the validator was false the moment it landed, and is
 corrected in the same change.
 
-Guards: 351 → **362**. Nine plants across the module, structurally distinct rather than variations,
+Guards: 351 → **364**. Eleven plants across the module, structurally distinct rather than variations,
 each asserting it landed before the validator runs.
+
+### B-085 and B-077 — the one edge between intent and execution, and the relation over it
+
+`serves` was a non-empty string and nothing more, so `serves: "REQ-999"` and
+`serves: "asdf"` passed every gate identically — and that field is the **only** edge
+joining the intent graph to the execution graph. T-2's own DoD claimed *«every `serves`
+resolves»* and nothing did.
+
+The graph now carries `requirements`: the REQ ids the brief froze, **required and
+non-empty**, plus optional `goal_clauses` for release work no requirement names.
+Enumerated rather than substring-matched against the goal's prose, because matching a
+sentence is the kind of check that produces confidence without correctness. A `serves`
+resolving to neither is refused, with a near-miss hint.
+
+**And `add` refuses to invent a requirement.** The REQ table is frozen at stage 0 —
+adding to it is free and the *brief* does it, not a node. The refusal says so and lists
+what is available, because an agent told only «no» will try a synonym.
+
+**`graph.py coverage` computes the relation, and says which quarter of it it cannot
+see.** `references/acceptance.md` defines the path a requirement takes and an agent
+walked it from a checklist, one REQ at a time — the pipeline's own definition of a rule
+that should have been a mechanism. Three directions are now computed: a requirement no
+node serves, a requirement whose every node is **parked** (covered on paper and by
+nothing that will run), and each requirement with the nodes and statuses serving it. The
+fourth — an evidence row closing no requirement — lives in `docs/evidence/verification.md`,
+which this script does not read, and **the report says that out loud**, because a report
+silent about its own blind spot reads as the whole relation.
+
+**Two of the guards for this were defeated on their first attempt, and both by shapes
+this file has now met three times.** A source scan for `cmd_coverage` passed a
+renamed-and-unwired `_cmd_coverage_disabled`, because the old name is a substring of the
+new one. And the guard ran `coverage` only against the shipped example, which is fully
+covered on paper — so a `return 0` that had stopped refusing anything passed. Both are
+behavioural now: the example supplies the **failing** control (it has a parked-only
+requirement, and refusing it is correct), a copy with the parked node removed supplies
+the passing one, and the subparsers are **built from the dispatch table**, so a verb
+argparse accepts and the dispatch lacks cannot exist — it used to raise `KeyError`, which
+is a traceback where a named refusal belongs. Seven planted defects watched refused.
+
+`test/graph_test.py` → **85 cases**.
 
 ### B-084 — the mutation verb was drawing chronology
 

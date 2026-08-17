@@ -176,6 +176,12 @@ def violations(graph):
                        "nobody can cite, and a verdict naming it would close the wrong one")
         seen.add(i)
 
+    declared = set(graph.get("requirements") or []) | set(graph.get("goal_clauses") or [])
+    if not (graph.get("requirements") or []):
+        out.append("the graph declares no `requirements` — `serves` then resolves against "
+                   "nothing, and that field is the one edge joining the intent graph to "
+                   "this one. Copy the REQ ids the brief froze")
+
     if not (graph.get("goal") or "").strip():
         out.append("the graph has no `goal` — every iteration is supposed to print it "
                    "above the frontier, and a queue that cannot say what it serves is a "
@@ -220,6 +226,13 @@ def violations(graph):
                 out.append(f"{nid}: `{field}` contains a line break. `next` prints one row "
                            "per node and the loop reads those rows, so a break here forges "
                            "a row for a node that does not exist")
+            elif field == "serves" and declared and val not in declared:
+                near = [d for d in sorted(declared) if d[:5] == val[:5]]
+                hint = f" — did you mean {near[0]}?" if near else ""
+                out.append(f"{nid}: serves {val!r}, which is neither a declared requirement "
+                           f"nor a declared goal clause{hint}. A node serving something "
+                           "nobody asked for is work the brief cannot account for, and the "
+                           "coverage relation cannot reach it")
 
         if n.get("status") == "done":
             ev = n.get("evidence")
@@ -605,6 +618,13 @@ def cmd_add(graph, args):
         die("`add` needs --serves: the REQ or goal clause this node exists for. A node "
             "that serves nothing is not a node to add — it is REQ-012's park case, and "
             "adding it hides the decision that ought to be recorded")
+    declared = set(graph.get("requirements") or []) | set(graph.get("goal_clauses") or [])
+    if declared and serves not in declared:
+        die("--serves %r is neither a declared requirement nor a declared goal clause. The "
+            "REQ table is frozen at stage 0 — adding to it is free and the BRIEF does it, "
+            "not a node. Amend the brief and the graph's `requirements`, or serve one of: "
+            "%s. Nothing was written" % (serves, ", ".join(sorted(declared)[:6])))
+
     if args.owner not in ROLES:
         near = [r for r in sorted(ROLES) if r[:4] == (args.owner or "")[:4]]
         die("owner %r is not a role this pipeline ships%s — nothing was written"
@@ -680,6 +700,59 @@ def cmd_add(graph, args):
     return 0
 
 
+def cmd_coverage(graph, args):
+    """The coverage relation, computed rather than walked by hand.
+
+    `references/acceptance.md` defines the path a requirement takes — decision, spec
+    section, contract and its failure behaviour, task, change, executed test, surface —
+    and until this verb existed an agent walked it one REQ at a time from a checklist,
+    which is the pipeline's own definition of a rule that should have been a mechanism.
+
+    **Three of the four directions are here. The fourth is not, and this says so.**
+    An evidence row that closes no requirement lives in `docs/evidence/verification.md`,
+    which this script does not read; a report silent about that reads as the whole
+    relation and is the more dangerous half.
+    """
+    if violations(graph):
+        die("graph does not validate — run `validate` first", 1)
+    nodes = graph.get("nodes") or []
+    reqs = list(graph.get("requirements") or []) + list(graph.get("goal_clauses") or [])
+    by_req = {r: [] for r in reqs}
+    for n in nodes:
+        by_req.setdefault(n.get("serves"), []).append(n)
+
+    bad = []
+    for r in reqs:
+        served = by_req.get(r) or []
+        if not served:
+            bad.append(f"{r}: no node serves it")
+            continue
+        live = [n for n in served if n.get("status") != "parked"]
+        marks = " ".join(f"{n['id']}({n.get('status')})" for n in served)
+        if not live:
+            bad.append(f"{r}: every node serving it is parked — {marks}. Covered on paper "
+                       "and by nothing that will run")
+        else:
+            print(f"{r}  {marks}")
+
+    for line in bad:
+        print(line, file=sys.stderr)
+    print("not read here: whether an evidence row in docs/evidence/verification.md closes "
+          "no requirement — that is the fourth direction of this relation and it lives in "
+          "the ledger, not the graph", file=sys.stderr)
+    return 1 if bad else 0
+
+
+VERBS = {
+    "validate": (cmd_validate, "every invariant a schema cannot state"),
+    "next": (cmd_next, "the frontier, ordered by what it unblocks"),
+    "goal": (cmd_goal, "the release goal this graph serves"),
+    "coverage": (cmd_coverage, "every requirement and the nodes serving it; exits 1 on a gap"),
+    "add": (cmd_add, "add a node mid-run"),
+    "park": (cmd_park, "park a node, carrying the reason"),
+}
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(prog="graph.py", description=__doc__.split("\n")[0])
     # `--graph` hangs off every verb rather than off the top level, so it can be passed
@@ -688,11 +761,13 @@ def main(argv=None):
     common.add_argument("--graph", default=os.path.join(".task-pipeline", "graph.json"))
     sub = ap.add_subparsers(dest="verb", required=True)
 
-    sub.add_parser("validate", parents=[common], help="every invariant a schema cannot state")
-    sub.add_parser("next", parents=[common], help="the frontier, ordered by what it unblocks")
-    sub.add_parser("goal", parents=[common], help="the release goal this graph serves")
+    # The subparsers are built FROM the dispatch table, so a verb argparse accepts and the
+    # dispatch lacks cannot exist. It could before: renaming one key raised KeyError, which
+    # is a traceback where a named refusal belongs.
+    made = {n: sub.add_parser(n, parents=[common], help=h)
+            for n, (_, h) in VERBS.items()}
 
-    p_add = sub.add_parser("add", parents=[common], help="add a node mid-run")
+    p_add = made["add"]
     p_add.add_argument("--title", required=True)
     p_add.add_argument("--owner", required=True)
     p_add.add_argument("--serves", required=True)
@@ -703,7 +778,7 @@ def main(argv=None):
                        help="why this node appeared mid-run — it enters the revision log")
     p_add.add_argument("--id", default=None, help="omit to allocate the next one")
 
-    p_park = sub.add_parser("park", parents=[common], help="park a node, carrying the reason")
+    p_park = made["park"]
     p_park.add_argument("node")
     # `required=True` makes the MISSING flag a usage error (exit 2). The empty and
     # whitespace ones reach `cmd_park`, which refuses them — argparse cannot tell a flag
@@ -711,8 +786,7 @@ def main(argv=None):
     p_park.add_argument("--reason", required=True)
 
     args = ap.parse_args(argv)
-    verbs = {"validate": cmd_validate, "next": cmd_next, "goal": cmd_goal,
-             "add": cmd_add, "park": cmd_park}
+    verbs = {k: v[0] for k, v in VERBS.items()}
     if args.verb in ("add", "park"):
         # The READ happens inside the lock too. Loading first and locking second is the
         # same lost update with an extra step: the stale copy is already in memory.

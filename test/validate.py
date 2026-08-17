@@ -2708,6 +2708,79 @@ if gschema is not None:
                 fail(f"{GRAPH_SCHEMA_REL}: {_why}. The same class was found and fixed on "
                      "`owner` three screens above and not carried to the new field")
 
+    # B-085 / B-077 — the edge between the intent graph and this one. `serves` was a
+    # non-empty string and nothing more, so `serves: "REQ-999"` passed every gate.
+    if "requirements" not in set(gschema.get("required") or []):
+        fail(f"{GRAPH_SCHEMA_REL}: `requirements` is not required at the top level — "
+             "B-077: without a frozen REQ set on the graph, `serves` resolves against "
+             "nothing and the coverage relation has one side")
+    _greq, _qwhy = _garray_items(_gprops.get("requirements", {}), "requirements")
+    if _greq is None:
+        fail(f"{GRAPH_SCHEMA_REL}: {_qwhy} — B-077: the REQ set has to bind")
+    elif not (_gprops.get("requirements", {}).get("minItems")):
+        fail(f"{GRAPH_SCHEMA_REL}: `requirements` has no `minItems` — an empty array "
+             "satisfies `required` and leaves `serves` resolving against nothing, which "
+             "is the shape a name in `required` with no constraint always takes here")
+
+    # And the verb that computes the relation must exist, with the fourth direction
+    # disclosed rather than implied.
+    # RUN it against the shipped example. A source scan for `cmd_coverage` passed a
+    # renamed-and-unwired `_cmd_coverage_disabled`, because the old name is a substring of
+    # the new one — the third time today a check read a name instead of an observation.
+    _gs = os.path.join(ROOT, "plugins/task-pipeline/skills/task-pipeline/scripts/graph.py")
+    _gex = os.path.join(ROOT, GRAPH_EXAMPLE_REL)
+    if os.path.isfile(_gs) and os.path.isfile(_gex):
+        import subprocess as _sp2
+        try:
+            _cr = _sp2.run([sys.executable, _gs, "coverage", "--graph", _gex],
+                           capture_output=True, text=True, timeout=60)
+            _cout = _cr.stdout + _cr.stderr
+        except Exception as _e2:
+            _cr, _cout = None, ""
+            _UNLOOKED.append(f"skip: could not run graph.py coverage ({type(_e2).__name__})")
+        if _cr is not None:
+            # The shipped example exits 1 ON PURPOSE: one of its requirements is served
+            # only by a parked node, which is a real gap the release took deliberately and
+            # `coverage` is right to refuse. So the example gives the failing control and a
+            # derived copy gives the passing one — both from one artifact, which is what
+            # keeps them in step.
+            if "Traceback" in _cout:
+                fail("`graph.py coverage` crashes against the shipped example: "
+                     + _cout.strip().splitlines()[-1][:200])
+            elif _cr.returncode != 1:
+                fail(f"`graph.py coverage` exits {_cr.returncode} over graph.example.json, "
+                     "which has a requirement served only by a parked node — B-085: a "
+                     "coverage report that does not refuse a paper-only requirement counted "
+                     "the gap as covered")
+            elif "verification.md" not in _cout:
+                fail("`graph.py coverage` never names what it does not read — the fourth "
+                     "direction (an evidence row closing no requirement) lives in the "
+                     "ledger, and a report silent about that reads as the whole relation")
+            else:
+                import json as _j, tempfile as _tf2, os as _os2
+                _ex = _j.load(open(_gex, encoding="utf-8"))
+                _parked = {n["serves"] for n in _ex["nodes"] if n.get("status") == "parked"}
+                _clean = dict(_ex,
+                              nodes=[n for n in _ex["nodes"] if n.get("status") != "parked"],
+                              requirements=[r for r in _ex["requirements"] if r not in _parked])
+                _clean["edges"] = [e for e in _ex["edges"]
+                                   if e["from"] in {n["id"] for n in _clean["nodes"]}
+                                   and e["to"] in {n["id"] for n in _clean["nodes"]}]
+                _clean.pop("revisions", None)
+                _cp = _os2.path.join(_tf2.mkdtemp(), "graph.json")
+                with open(_cp, "w", encoding="utf-8") as _fh2:
+                    _j.dump(_clean, _fh2)
+                _cr2 = _sp2.run([sys.executable, _gs, "coverage", "--graph", _cp],
+                                capture_output=True, text=True, timeout=60)
+                if _cr2.returncode != 0:
+                    fail("`graph.py coverage` refuses a graph whose every requirement has a "
+                         "live node — B-085: the verb cannot tell covered from uncovered. "
+                         f"Output: {(_cr2.stdout + _cr2.stderr).strip()[:250]}")
+                elif not [r for r in _parked if r in _cout]:
+                    fail("`graph.py coverage` refuses the example without naming the "
+                         "requirement that is only served by a parked node — a refusal that "
+                         "does not say which one sends the fix nowhere")
+
     # The revision log — B-084. `park` demanded a reason from the start and `add`
     # demanded nothing, so half the graph's revision surface was silent, and a graph
     # that changed for unrecorded reasons can explain its own completion by a plan that

@@ -7,6 +7,7 @@
   "additionalProperties": false,
   "required": [
     "goal",
+    "requirements",
     "nodes",
     "edges"
   ],
@@ -36,6 +37,26 @@
         "$ref": "#/definitions/revision"
       },
       "description": "Why the graph is not the graph stage 2 wrote. Every mutation appends one entry, and both verbs refuse without a reason — `park` always did, `add` did not, which left half the revision surface silent. A graph that changed for reasons nobody recorded can always explain its own completion by appealing to a plan that existed only at the end; this log is what makes that checkable. `next` never prints it — the frontier's width is what a loop pays for on every iteration, and this grows."
+    },
+    "requirements": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^REQ-[0-9]{3,}$"
+      },
+      "description": "The REQ ids the brief froze at stage 0, copied here so `serves` has something to resolve against. Until this existed, `serves` was a non-empty string and nothing more — `serves: \"REQ-999\"` and `serves: \"asdf\"` passed every gate identically, and that field is the ONE edge joining the intent graph to the execution graph. Required and non-empty: a graph whose intent side is empty cannot be checked against anything, and a queue that serves nothing is not a plan."
+    },
+    "goal_clauses": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "pattern": "\\S"
+      },
+      "description": "Clauses of the release goal a node may serve instead of a REQ — release work that no requirement names. Enumerated rather than matched against the goal's prose, because substring-matching a sentence is the kind of check that produces confidence without correctness."
     }
   },
   "definitions": {
