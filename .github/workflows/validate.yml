@@ -7542,7 +7542,13 @@ jobs:
           p = "/tmp/gx8-copy/plugins/task-pipeline/skills/task-pipeline/graph.schema.json"
           d = json.load(open(p, encoding="utf-8"))
           n = d["definitions"]["node"]
-          hit = [c for c in n["allOf"] if c["if"]["properties"]["status"]["const"] == "parked"]
+          # Tolerant traversal. B-080 added an `allOf` branch keyed on
+          # `status: {not: {const: parked}}`, which carries no `const` under `status`, so the
+          # direct index raised KeyError and this plant died before reaching its own assert.
+          # A plant that crashes proves nothing — skip a branch shaped differently and let the
+          # assert below speak when none matches.
+          hit = [c for c in n["allOf"]
+                 if c.get("if", {}).get("properties", {}).get("status", {}).get("const") == "parked"]
           assert hit, "PLANT DID NOT LAND: gx8 — no parked rule to weaken"
           # A pattern is PRESENT and constrains nothing. Checking for the key's existence
           # passes this; only running the regex catches it.
@@ -7589,8 +7595,11 @@ jobs:
           d = json.load(open(p, encoding="utf-8"))
           n = d["definitions"]["node"]
           before = len(n["allOf"])
+          # Tolerant traversal (B-080 added a branch keyed on `not: {const: parked}`, which
+          # carries no `const` under `status`; a direct index raises KeyError and the plant
+          # dies before its own assert can speak).
           n["allOf"] = [c for c in n["allOf"]
-                        if c["if"]["properties"]["status"]["const"] != "parked"]
+                        if c.get("if", {}).get("properties", {}).get("status", {}).get("const") != "parked"]
           assert len(n["allOf"]) == before - 1, "PLANT DID NOT LAND: gx6 — no parked rule to remove"
           json.dump(d, open(p, "w", encoding="utf-8"), indent=2)
           EOF
@@ -7608,8 +7617,11 @@ jobs:
           import json
           p = "/tmp/gx7-copy/plugins/task-pipeline/skills/task-pipeline/graph.schema.json"
           d = json.load(open(p, encoding="utf-8"))
+          # Tolerant traversal (B-080 added a branch keyed on `not: {const: parked}`, which
+          # carries no `const` under `status`; a direct index raises KeyError and the plant
+          # dies before its own assert can speak).
           hit = [c for c in d["definitions"]["node"]["allOf"]
-                 if c["if"]["properties"]["status"]["const"] == "parked"]
+                 if c.get("if", {}).get("properties", {}).get("status", {}).get("const") == "parked"]
           dropped = [c["then"]["properties"]["parked_reason"].pop("pattern", None) for c in hit]
           assert any(dropped), "PLANT DID NOT LAND: gx7 — no non-whitespace pattern to drop"
           json.dump(d, open(p, "w", encoding="utf-8"), indent=2)
