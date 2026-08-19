@@ -3610,7 +3610,7 @@ jobs:
           _orig_bytes = open(p, "rb").read()
           t = open(p, encoding="utf-8").read()
           open(p, "w", encoding="utf-8").write(
-              t + "| REQ-999 | invented | `nowhere` | v1.0.0 | pass | never | — |\n")
+              t + "| REQ-999 | invented | `nowhere` | v1.0.0 | — | pass | never | — |\n")
           assert open(p, "rb").read() != _orig_bytes, "PLANT DID NOT LAND: a-verification-row-whose-req-is-in-n"
           EOF
           if python3 /tmp/vf1-copy/test/validate.py; then
@@ -3700,7 +3700,7 @@ jobs:
           python3 - <<'EOF'
           p = "/tmp/vf6-copy/docs/evidence/verification.md"
           t = open(p, encoding="utf-8").read()
-          needle = "| Auto | Human | Note |"
+          needle = "| Observed at | Auto | Human | Note |"
           assert needle in t, "PLANT DID NOT LAND: the header is not where the guard reads it"
           open(p, "w", encoding="utf-8").write(t.replace(needle, "| Auto | Person | Note |", 1))
           EOF
@@ -3769,9 +3769,9 @@ jobs:
           import re
           p = "/tmp/hr-copy/docs/evidence/verification.md"
           t = open(p, encoding="utf-8").read()
-          old = "| REQ | What | Run | Shipped in | Auto | Human | Note |"
+          old = "| REQ | What | Run | Shipped in | Observed at | Auto | Human | Note |"
           assert old in t, "PLANT DID NOT LAND: header absent"
-          t = t.replace(old, "| REQ | What | Run | Shipped in | Auto | Note | Human |")
+          t = t.replace(old, "| REQ | What | Run | Shipped in | Observed at | Auto | Note | Human |")
           # Any Auto value, not just `pass`: four rows read `none` after a review round,
           # and a plant that skips them leaves half the table in the old column order.
           #
@@ -3870,7 +3870,7 @@ jobs:
           _orig_bytes = open(p, "rb").read()
           t = open(p, encoding="utf-8").read()
           open(p, "w", encoding="utf-8").write(
-              t + "| REQ-014 | wrong pairing | `2026-08-04-run-continuity` | v1.10.0 | pass | never | — |\n")
+              t + "| REQ-014 | wrong pairing | `2026-08-04-run-continuity` | v1.10.0 | — | pass | never | — |\n")
           assert open(p, "rb").read() != _orig_bytes, "PLANT DID NOT LAND: a-req-paired-with-a-run-whose-brief"
           EOF
           if python3 /tmp/wr-copy/test/validate.py; then
@@ -7614,4 +7614,174 @@ jobs:
           else
             echo "ERROR: the gate can drop it while the prose keeps it"
             exit 1
+          fi
+
+      - name: Negative self-test (a node that cannot say how it will be closed)
+        run: |
+          set -eu
+          rm -rf /tmp/b80a-copy && cp -R . /tmp/b80a-copy
+          python3 - <<'EOF'
+          import json
+          p = "/tmp/b80a-copy/plugins/task-pipeline/skills/task-pipeline/graph.schema.json"
+          d = json.load(open(p, encoding="utf-8"))
+          n = d["definitions"]["node"]
+          assert "check" in n["properties"], "PLANT DID NOT LAND: b80a — no `check` to remove"
+          del n["properties"]["check"]
+          json.dump(d, open(p, "w", encoding="utf-8"), indent=2)
+          EOF
+          if python3 /tmp/b80a-copy/test/validate.py; then
+            echo "ERROR: a node with nowhere to name its completion test was accepted — B-080,
+                   and agents/verifier.md tells the verifier to read exactly that field"; exit 1
+          else
+            echo "OK: the field the doctrine reads must exist on the node"
+          fi
+
+      - name: Negative self-test (the check rule declared and never required)
+        run: |
+          set -eu
+          rm -rf /tmp/b80b-copy && cp -R . /tmp/b80b-copy
+          python3 - <<'EOF'
+          import json
+          p = "/tmp/b80b-copy/plugins/task-pipeline/skills/task-pipeline/graph.schema.json"
+          d = json.load(open(p, encoding="utf-8"))
+          n = d["definitions"]["node"]
+          before = len(n["allOf"])
+          n["allOf"] = [c for c in n["allOf"]
+                        if "check" not in (c.get("then", {}).get("required") or [])]
+          assert len(n["allOf"]) == before - 1, "PLANT DID NOT LAND: b80b — no check rule to remove"
+          json.dump(d, open(p, "w", encoding="utf-8"), indent=2)
+          EOF
+          if python3 /tmp/b80b-copy/test/validate.py; then
+            echo "ERROR: a declared-and-optional `check` was accepted — B-080 back one level:
+                   the doctrine reads a field the graph need not carry"; exit 1
+          else
+            echo "OK: required on every node the verifier will close, parked excepted"
+          fi
+
+      - name: Negative self-test (a check rule whose `if` can never be satisfied)
+        run: |
+          set -eu
+          rm -rf /tmp/b80c-copy && cp -R . /tmp/b80c-copy
+          python3 - <<'EOF'
+          import json
+          p = "/tmp/b80c-copy/plugins/task-pipeline/skills/task-pipeline/graph.schema.json"
+          d = json.load(open(p, encoding="utf-8"))
+          n = d["definitions"]["node"]
+          c = next((c for c in n["allOf"] if "check" in (c.get("then", {}).get("required") or [])), None)
+          assert c and c["if"].get("required") == ["status"], "PLANT DID NOT LAND: b80c"
+          # `additionalProperties: false` means no node can ever carry `impossible`, so the
+          # rule is stated and inert. The same trick defeated the first parked_reason guard.
+          c["if"]["required"] = ["status", "impossible"]
+          json.dump(d, open(p, "w", encoding="utf-8"), indent=2)
+          EOF
+          if python3 /tmp/b80c-copy/test/validate.py; then
+            echo "ERROR: a rule that can never fire was read as a rule — B-080, and the
+                   schema stays green while every node escapes it"; exit 1
+          else
+            echo "OK: an `if` is accepted only when it constrains the status and nothing else"
+          fi
+
+      - name: Negative self-test (a check pattern that accepts whitespace)
+        run: |
+          set -eu
+          rm -rf /tmp/b80d-copy && cp -R . /tmp/b80d-copy
+          python3 - <<'EOF'
+          import json
+          p = "/tmp/b80d-copy/plugins/task-pipeline/skills/task-pipeline/graph.schema.json"
+          d = json.load(open(p, encoding="utf-8"))
+          n = d["definitions"]["node"]
+          assert n["properties"]["check"].get("pattern"), "PLANT DID NOT LAND: b80d"
+          n["properties"]["check"]["pattern"] = "^.*$"
+          json.dump(d, open(p, "w", encoding="utf-8"), indent=2)
+          EOF
+          if python3 /tmp/b80d-copy/test/validate.py; then
+            echo "ERROR: a pattern that accepts the empty string was read as a constraint —
+                   presence is not behaviour, and `minLength: 1` counts a space"; exit 1
+          else
+            echo "OK: the regex is RUN against whitespace, not inspected"
+          fi
+
+      - name: Negative self-test (a nullable check, which satisfies every string rule vacuously)
+        run: |
+          set -eu
+          rm -rf /tmp/b80e-copy && cp -R . /tmp/b80e-copy
+          python3 - <<'EOF'
+          import json
+          p = "/tmp/b80e-copy/plugins/task-pipeline/skills/task-pipeline/graph.schema.json"
+          d = json.load(open(p, encoding="utf-8"))
+          n = d["definitions"]["node"]
+          assert n["properties"]["check"]["type"] == "string", "PLANT DID NOT LAND: b80e"
+          n["properties"]["check"]["type"] = ["string", "null"]
+          json.dump(d, open(p, "w", encoding="utf-8"), indent=2)
+          EOF
+          if python3 /tmp/b80e-copy/test/validate.py; then
+            echo "ERROR: a nullable completion test was accepted — `null` passes every
+                   string-only assertion without being a check"; exit 1
+          else
+            echo "OK: the field is typed string, so null cannot satisfy it vacuously"
+          fi
+
+      - name: Negative self-test (the runtime check rule disarmed, and the schema left intact)
+        run: |
+          set -eu
+          rm -rf /tmp/b80f-copy && cp -R . /tmp/b80f-copy
+          python3 - <<'EOF'
+          p = "/tmp/b80f-copy/plugins/task-pipeline/skills/task-pipeline/scripts/graph.py"
+          t = open(p, encoding="utf-8").read()
+          # Anchored INSIDE violations(): the schema is never applied to a LIVE graph, so a
+          # rule stated only in the format is a rule the run does not have.
+          start = t.index("def violations(")
+          end = t.index("\ndef ", start)
+          body = t[start:end]
+          needle = 'if n.get("status") != "parked":'
+          assert needle in body, "PLANT DID NOT LAND: b80f — the runtime rule moved"
+          open(p, "w", encoding="utf-8").write(
+              t[:start] + body.replace(needle, "if False:", 1) + t[end:])
+          EOF
+          if python3 /tmp/b80f-copy/test/validate.py; then
+            echo "ERROR: the run stopped refusing a node with no completion test while the
+                   schema still stated the rule — the split that has disagreed three times"; exit 1
+          else
+            echo "OK: validate.py RUNS the script over a planted graph, not only the format"
+          fi
+
+      - name: Negative self-test (the same disarm, against the graph fixtures)
+        run: |
+          set -eu
+          rm -rf /tmp/b80g-copy && cp -R . /tmp/b80g-copy
+          python3 - <<'EOF'
+          p = "/tmp/b80g-copy/plugins/task-pipeline/skills/task-pipeline/scripts/graph.py"
+          t = open(p, encoding="utf-8").read()
+          start = t.index("def violations(")
+          end = t.index("\ndef ", start)
+          body = t[start:end]
+          needle = 'if n.get("status") != "parked":'
+          assert needle in body, "PLANT DID NOT LAND: b80g — the runtime rule moved"
+          open(p, "w", encoding="utf-8").write(
+              t[:start] + body.replace(needle, "if False:", 1) + t[end:])
+          EOF
+          if python3 /tmp/b80g-copy/test/graph_test.py; then
+            echo "ERROR: the B-080 fixtures passed against a graph.py that refuses nothing —
+                   fixtures nobody watched fail are decoration"; exit 1
+          else
+            echo "OK: graph_test.py's own check fixtures bind"
+          fi
+
+      - name: Negative self-test (the verifier told to read a field again by name only)
+        run: |
+          set -eu
+          rm -rf /tmp/b80h-copy && cp -R . /tmp/b80h-copy
+          python3 - <<'EOF'
+          p = "/tmp/b80h-copy/plugins/task-pipeline/agents/verifier.md"
+          t = open(p, encoding="utf-8").read()
+          needle = "**Run the node's `check`.**"
+          assert needle in t, "PLANT DID NOT LAND: b80h — the doctrine no longer names the field"
+          open(p, "w", encoding="utf-8").write(
+              t.replace(needle, "**Run the checks the task named.**", 1))
+          EOF
+          if python3 /tmp/b80h-copy/test/validate.py; then
+            echo "ERROR: doctrine naming no field was accepted — B-080 is exactly that
+                   sentence, and nothing compared it against the schema for a day"; exit 1
+          else
+            echo "OK: what the verifier is told to read is compared against what the node has"
           fi

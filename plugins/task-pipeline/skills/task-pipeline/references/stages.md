@@ -264,8 +264,11 @@ never that the work was skipped quietly.
   decomposition is a decision, never an omission.
 - **Where the queue is a work graph, it is WRITTEN here**
   ([`work-graph.md`](work-graph.md)): `.task-pipeline/graph.json`, carrying the frozen REQ
-  ids so `serves` resolves, one node per unit of work with its owner and what it touches,
-  and an edge per dependency **naming what it hands over**. Then
+  ids so `serves` resolves, one node per unit of work with its owner, what it touches and
+  **the check that will close it**, and an edge per dependency **naming what it hands
+  over**. The check is the planner's job and not the verifier's: a node whose completion
+  test is decided by whoever happens to close it is a node two closes will disagree about,
+  and `validate` refuses one that names none. Then
   `python3 scripts/graph.py validate` — a graph that does not validate is not a queue, and
   `next` refuses to walk one. The reason to prefer it over a prose plan is measured, not
   aesthetic: a 400-node graph and a 4-node graph produce the same 27-byte frontier, so the

@@ -518,6 +518,19 @@ runs.
 *(guard: `does not say` and `rule 1 of the list it is printed beside`
 and `no stage names`)*
 
+**56. A node says how it will be closed, and the doctrine that reads that field names
+one the node has.** `agents/verifier.md` ordered the verifier to run *the checks the task
+named* while `graph.schema.json`'s node carried no field in which a task could name one —
+two files shipped on one day, and the instruction pointed at an absence that left the
+verifier the two options the same paragraph forbids: invent a check, or run everything.
+`check` is now a node property, **required on every node except a `parked` one** — the one
+node nobody will close, where a placeholder would be worse than the gap. The rule is
+stated twice on purpose, in the schema and in `violations()`, because the schema is never
+applied to a live graph; both are RUN against a planted graph rather than inspected. And
+the two homes are compared directly: whatever the verifier is told to read off the node
+must be a property the schema declares.
+*(guard: `node declares no` and `rule that can fire` and `off the node, and`)*
+
 ## Adding or changing doctrine
 
 - **Change one idea per PR.** These files are read by agents under load; a PR that

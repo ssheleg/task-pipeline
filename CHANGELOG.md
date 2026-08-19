@@ -55,8 +55,16 @@ only reader that checks.
 and what makes each self-checking. Where a claim genuinely cannot be derived, **say so in the
 row**; correcting it silently a second time teaches readers that somebody else is checking.
 
-Guards: 376 → **376**. No guard was added or removed — this release is doctrine, and each of the
-four rules is cited from the reference that owns it rather than restated.
+> **After the tag, on the same tree.** `v1.71.1` is cut, and the guard-count claim
+> `test/validate.py` reads is the newest `## vX.Y.Z` section's — which post-tag is this one,
+> with no version heading yet open for the work that follows. So the live figure is stated
+> here rather than inside a released sentence, and the released sentence below is not edited:
+> B-080 closed on 2026-08-19 with eight plants, so **Guards: 376 → 384**. The guard has no
+> home for a count between a tag and the next bump; filed as `B-104`, and the note is what
+> keeps the number true meanwhile.
+
+Guards at the tag: 376 → 376. No guard was added or removed — that release is doctrine, and
+each of the four rules is cited from the reference that owns it rather than restated.
 
 Closes #39, #40, #48, #49.
 

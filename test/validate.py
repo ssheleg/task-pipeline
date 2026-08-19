@@ -2697,6 +2697,56 @@ if gschema is not None:
                                 "the `parked` rule's parked_reason")
             if _why:
                 fail(f"{GRAPH_SCHEMA_REL}: {_why} — REQ-012")
+        # B-080 — the node says HOW it will be closed, and shipped doctrine reads that
+        # field. `agents/verifier.md` ordered the verifier to run *the check the task
+        # named* while no field existed in which a task could name one, so the
+        # instruction pointed at an absence and left the verifier the two options that
+        # same paragraph forbids: invent a check, or run everything. The contradiction
+        # shipped in two files on one day and nothing compared them.
+        def _rule_unless(status):
+            """The rule binding every node EXCEPT one status — and only if it can FIRE.
+
+            Same trap `_rule_for` names: an `if` constraining more than the status is
+            either narrower than the rule claimed or a rule that never fires, and from
+            outside the schema those are indistinguishable.
+            """
+            for _if, _then in _conds:
+                _st = (_if.get("properties") or {}).get("status") or {}
+                if not isinstance(_st.get("not"), dict) or _st["not"].get("const") != status:
+                    continue
+                if set(_if.get("required") or []) - {"status"}:
+                    continue
+                if set(_if.get("properties") or {}) - {"status"}:
+                    continue
+                if any(_k in _if for _k in ("not", "allOf", "anyOf", "oneOf", "$ref")):
+                    continue
+                return _then if isinstance(_then, dict) else {}
+            return None
+
+        _cdecl = (_gnode.get("properties") or {}).get("check")
+        if _cdecl is None:
+            fail(f"{GRAPH_SCHEMA_REL}: node declares no `check` — B-080: with "
+                 "`additionalProperties: false` a node CANNOT say how it will be closed, "
+                 "while `agents/verifier.md` tells the verifier to read exactly that. "
+                 "Doctrine reading a field the format does not have is the defect")
+        else:
+            _why = _binds_blank(_cdecl, "node.properties.check")
+            if _why:
+                fail(f"{GRAPH_SCHEMA_REL}: {_why} — B-080. The same class was found on "
+                     "`owner`, then on `parked_reason`; a completion test nobody can read "
+                     "is the absence with a field around it")
+        _cthen = _rule_unless("parked")
+        if _cthen is None or "check" not in (_cthen.get("required") or []):
+            fail(f"{GRAPH_SCHEMA_REL}: node has no `if status is not parked then check` "
+                 "rule that can fire — B-080: a `check` declared and never required is a "
+                 "field the doctrine reads and the graph need not carry, which is the "
+                 "absence back one level. A `parked` node is the one exemption, because "
+                 "it is the one node nobody will close")
+        else:
+            _why = _binds_blank((_cthen.get("properties") or {}).get("check"),
+                                "the not-parked rule's check")
+            if _why:
+                fail(f"{GRAPH_SCHEMA_REL}: {_why} — B-080")
         _pdecl = (_gnode.get("properties") or {}).get("parked_reason")
         if _pdecl is None:
             fail(f"{GRAPH_SCHEMA_REL}: node declares no `parked_reason` — with "
@@ -2907,6 +2957,94 @@ else:
              "400-node graph and a 4-node graph produce the same frontier. Without it the "
              "file reads as a convention rather than a decision somebody measured")
 
+# --- B-080: a node that cannot say how it will be closed is REFUSED, measured ------------
+#
+# The schema block above reads the format. This RUNS the script, because the schema is never
+# applied to a live graph and every rule it states has therefore been stated twice — the
+# split that has disagreed in this repository three times. The example supplies the passing
+# control and a derived copy the failing one, so neither can be the one that is right.
+if os.path.isfile(_gs) and os.path.isfile(_gex):
+    _b80 = json.load(open(_gex, encoding="utf-8"))
+    _live = next((n for n in _b80["nodes"] if n.get("status") != "parked"), None)
+    _prk = next((n for n in _b80["nodes"] if n.get("status") == "parked"), None)
+    if _live is None or "check" not in _live:
+        fail("graph.example.json has no live node carrying a `check` — B-080: the example is "
+             "what every project copies the node shape from, and the propagation rule for a "
+             "contract change is that the example DEMONSTRATES the field rather than "
+             "permitting it")
+    elif _prk is not None and "check" in _prk:
+        fail("graph.example.json's parked node names a `check` it will never run — the "
+             "example has to demonstrate the exemption too, or the next author reads the "
+             "field as unconditional and writes `n/a — parked` into it")
+    else:
+        def _b80run(doc):
+            _pp = os.path.join(tempfile.mkdtemp(prefix="tp-b80-"), "graph.json")
+            with open(_pp, "w", encoding="utf-8") as _fh:
+                json.dump(doc, _fh)
+            _r = subprocess.run([sys.executable, _gs, "validate", "--graph", _pp],
+                                capture_output=True, text=True, timeout=60)
+            return _r.returncode, _r.stdout + _r.stderr
+        _c0, _o0 = _b80run(_b80)
+        if _c0 != 0:
+            fail(f"`graph.py validate` refuses the shipped example ({_c0}) — the passing "
+                 f"control has to pass or the failing one proves nothing: {_o0.strip()[:250]}")
+        for _shape, _val in (("absent", None), ("blank", ""), ("whitespace", "   "),
+                             ("two commands", "npm test\nrm -rf /")):
+            _bad = json.loads(json.dumps(_b80))
+            _t = next(n for n in _bad["nodes"] if n["id"] == _live["id"])
+            if _val is None:
+                _t.pop("check", None)
+            else:
+                _t["check"] = _val
+            _c1, _o1 = _b80run(_bad)
+            if _c1 != 1:
+                fail(f"`graph.py validate` exits {_c1} for a node whose `check` is {_shape} "
+                     "— B-080: a node that cannot say how it will be closed leaves the "
+                     "verifier inventing a check or running everything, and "
+                     "`agents/verifier.md` forbids both")
+            elif _live["id"] not in _o1:
+                fail(f"`graph.py validate` refuses a {_shape} `check` without naming the "
+                     "node — a refusal that does not say which one sends the fix nowhere")
+        # And the exemption, behaviourally: a parked node with no check must PASS, or the
+        # rule is a placeholder generator rather than a contract.
+        if _prk is not None:
+            _ok = json.loads(json.dumps(_b80))
+            for _n in _ok["nodes"]:
+                if _n["id"] == _prk["id"]:
+                    _n.pop("check", None)
+            _c2, _o2 = _b80run(_ok)
+            if _c2 != 0:
+                fail("`graph.py validate` requires a `check` on a parked node — B-080: it is "
+                     "the one node nobody will close, and *n/a — parked* in that field is the "
+                     f"confidence-without-correctness the schema refuses elsewhere: {_o2.strip()[:200]}")
+
+# The doctrine and the schema are two homes for one field, and B-080 IS their disagreement.
+# So they are compared directly rather than each being read alone: whatever
+# `agents/verifier.md` tells the verifier to read off the node must be a property the schema
+# declares, and the fieldless phrasing that pointed at nothing must be gone.
+_vfr = os.path.join(ROOT, "plugins/task-pipeline/agents/verifier.md")
+if os.path.isfile(_vfr) and gschema is not None:
+    _vfx = open(_vfr, encoding="utf-8").read()
+    _nprops = set(((gschema.get("definitions") or {}).get("node") or {}).get("properties") or {})
+    _read = set(re.findall(r"the node's `([a-z_]+)`", _vfx))
+    if not _read:
+        fail("agents/verifier.md names no node field in the form ``the node's `x``` — B-080: "
+             "an instruction with no field in it resolves against nothing a guard can look "
+             "up, which is exactly how the contradiction shipped")
+    _unknown = sorted(_read - _nprops)
+    if _unknown:
+        fail("agents/verifier.md tells the verifier to read " + ", ".join(_unknown)
+             + " off the node, and `graph.schema.json` declares no such property — B-080: "
+               "shipped doctrine pointing at an absence, in the two files that shipped it")
+    if "check" not in _read:
+        fail("agents/verifier.md does not tell the verifier to read the node's `check` — "
+             "B-080: the field exists now, and doctrine that does not name it is back to "
+             "asking an agent to invent a check or run everything")
+    if "run the checks the task named" in _flatten(_vfx, lower=True):
+        fail("agents/verifier.md still carries the phrasing B-080 filed — *run the checks "
+             "the task named* names no field, and that is the whole defect rather than a "
+             "wording preference")
+
 # Stage 2 writes the graph, and its gate reads it. Both surfaces, because the stage list is
 # compared across them and a criterion on one is a criterion the other silently drops.
 _st = os.path.join(ROOT, "plugins/task-pipeline/skills/task-pipeline/references/stages.md")
@@ -3111,7 +3249,7 @@ if os.path.isfile(_gs):
 
         def _nd(nid, touches=None, blocked=None):
             _n = {"id": nid, "title": "t", "owner": "implementer", "status": "pending",
-                  "blocked_by": blocked or [], "serves": "REQ-001"}
+                  "blocked_by": blocked or [], "serves": "REQ-001", "check": "npm test"}
             if touches is not None:
                 _n["touches"] = touches
             return _n

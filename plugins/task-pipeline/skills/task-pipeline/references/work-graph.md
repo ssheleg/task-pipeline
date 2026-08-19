@@ -40,6 +40,7 @@ turn of every loop.
 | `nodes[].serves` | the REQ or goal clause it exists for. A node serving neither is **parked with that as the reason** |
 | `nodes[].blocked_by` | what must close first. This is what the frontier obeys |
 | `nodes[].touches` | what it **mutates**. Two runnable nodes writing one file is the false parallelism [`planning.md`](planning.md) refuses — *distinct is not the same as independent, and the check is what they touch, never what they are called* |
+| `nodes[].check` | **how this node will be closed** — one command, or the named judgement where no command can decide it. Required on every node except a `parked` one. `agents/verifier.md` runs it and reports its output as the evidence row; before this field existed that instruction pointed at an absence, leaving the verifier the two things it forbids — invent a check, or run everything (B-080) |
 | `nodes[].evidence` | required when `status` is `done`. A node called done by assertion is what evidence exists to prevent |
 | `nodes[].parked_reason` | required when `status` is `parked`. A park with no reason is indistinguishable, a week later, from work quietly dropped |
 | `edges[].payload` | what the dependency hands over. **An edge carrying no named artifact is chronology drawn as architecture** |
@@ -67,6 +68,14 @@ A `priority` field is something somebody typed once and nobody revisits; this on
 the graph does. Ties break on declaration order, so the frontier is stable between runs —
 an unstable one costs more than it looks, because an agent calling `next` twice starts the
 other node.
+
+**One node, one completion test.** `check` is a string rather than a list, because the
+requirement is singular throughout — one input, one job, one output, one owner, one
+completion test. A node needing two unrelated checks is a node doing two jobs, and the
+answer is to split it; one gate made of two commands is `a && b`, which is still one gate.
+A **`parked`** node is the single exemption: it is the one node nobody will close, and
+*n/a — parked* in that field is confidence without correctness. `park` never removes what
+the node said it would run.
 
 **`close` stamps the commit; the verifier never supplies it.** A verdict written after the
 tree moved is evidence about a different tree, and an agent cannot name the wrong commit if
@@ -114,6 +123,7 @@ does not have.
 
 | The excuse | Why it is wrong |
 |---|---|
+| *"The verifier will work out what to run."* | Then the node's completion test is decided by whoever happens to close it, and two closes of one node disagree. The field is where the planner says it, and `validate` refuses a node that does not |
 | *"I'll just read the graph, it's only forty nodes."* | Forty is the number today. The property being protected is that four hundred costs the same, and it stops being true the first time the model reads the file |
 | *"The frontier is short; one extra line won't matter."* | It is paid on every iteration of every loop. That is what *the frontier and nothing else* means |
 | *"`blocked_by` already says the dependency, the edge is bookkeeping."* | The edge carries the **payload**. A dependency handing over nothing named is the fake edge with a field around it |

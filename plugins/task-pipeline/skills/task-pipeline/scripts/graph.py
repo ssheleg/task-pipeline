@@ -19,7 +19,10 @@ channel ships it. A dependency here would make the graph Claude-Code-shaped.
 states everything JSON Schema can — the required fields, `owner` non-empty, an edge's
 payload, and `done` implying non-empty evidence. What a schema cannot reach is
 cross-document and cross-node: whether an `owner` names a role that EXISTS, whether
-`serves` resolves, and whether the edges cycle. Those three are here. The split is
+`serves` resolves, and whether the edges cycle. Those three are here. So is every rule
+the format states, because the schema is never applied to a LIVE graph — including
+B-080's `check`, without which `agents/verifier.md` instructs an agent to read a field
+that does not exist. The split is
 where the format actually puts it, which is not where the first draft drew it.
 
 Exit codes are the contract (standing instruction R-004 — the next command is
@@ -237,6 +240,25 @@ def violations(graph):
                            f"nor a declared goal clause{hint}. A node serving something "
                            "nobody asked for is work the brief cannot account for, and the "
                            "coverage relation cannot reach it")
+
+        # B-080 — the node says HOW it will be closed, and shipped doctrine reads it.
+        # `agents/verifier.md` told the verifier to run *the check the task named* while
+        # the schema had no field to name one, so the instruction pointed at an absence
+        # and the verifier's only options were the two that paragraph forbids: invent a
+        # check, or run everything. A `parked` node is the one exemption — it is the one
+        # node nobody will close, and a placeholder there would be worse than the gap.
+        if n.get("status") != "parked":
+            chk = n.get("check")
+            if not isinstance(chk, str) or not chk.strip():
+                out.append(f"{nid}: `check` is {chk!r} — B-080: a node that cannot say how "
+                           "it will be closed leaves the verifier inventing a check or "
+                           "running everything, and `agents/verifier.md` forbids both. Name "
+                           "the command, or the judge where no command can decide it. Only a "
+                           "`parked` node is exempt")
+            elif any(c in chk for c in "\n\r"):
+                out.append(f"{nid}: `check` contains a line break. A completion test that is "
+                           "two commands cannot say which one closed the node, and the "
+                           "verifier reports its output as one evidence row")
 
         if n.get("status") == "done":
             ev = n.get("evidence")
@@ -480,6 +502,16 @@ def verdict_violations(v):
         for nid in rp.get("add") or []:
             if not isinstance(nid, dict) or "title" not in nid:
                 out.append("replan.add entries must be nodes with at least a `title`")
+                continue
+            # B-080 again, at the one place a node is created by a verdict rather than by
+            # a person. Checked HERE so the refusal names the key before anything is
+            # written: leaving it to `violations()` after the close would abort the whole
+            # close over a field the verdict could have been asked for.
+            _c = nid.get("check")
+            if not isinstance(_c, str) or not _c.strip():
+                out.append(f"replan.add entry {nid.get('title')!r} names no `check` — the "
+                           "node it creates has to say how IT will be closed, or the next "
+                           "verifier faces the absence this one was told to read")
     return out
 
 
@@ -679,7 +711,14 @@ def cmd_add(graph, args):
         die("owner %r is not a role this pipeline ships%s — nothing was written"
             % (args.owner, (" — did you mean %s?" % near[0]) if near else ""))
 
-    for name, val in (("--title", title), ("--serves", serves)):
+    check = (args.check or "").strip()
+    if not check:
+        die("`add` needs a --check with something in it: the command that closes this node, "
+            "or the judge where no command can decide it. A node that cannot say how it "
+            "will be closed leaves the verifier inventing a check or running everything — "
+            "B-080, and `agents/verifier.md` forbids both. Nothing was written")
+
+    for name, val in (("--title", title), ("--serves", serves), ("--check", check)):
         if any(c in val for c in "\n\r"):
             die("%s contains a line break. `next` prints one row per node and the loop "
                 "reads those rows, so a break here forges a row for a node that does not "
@@ -729,7 +768,7 @@ def cmd_add(graph, args):
             "allocated from the highest in use" % nid)
 
     new = {"id": nid, "title": title, "owner": args.owner, "status": "pending",
-           "blocked_by": blocked, "serves": serves, "evidence": None}
+           "blocked_by": blocked, "serves": serves, "check": check, "evidence": None}
     touches = list(dict.fromkeys(t.strip() for t in (args.touches or []) if t.strip()))
     if touches:
         new["touches"] = touches
@@ -993,14 +1032,17 @@ def cmd_close(graph, args):
         title = str(spec.get("title", "")).strip()
         owner = str(spec.get("owner", "implementer")).strip()
         serves = str(spec.get("serves", node.get("serves"))).strip()
+        check = str(spec.get("check", "")).strip()
         if not title:
             die("replan.add carries an entry with no title — nothing was written")
+        if not check:
+            die("replan.add carries an entry with no check — nothing was written")
         if owner not in ROLES:
             die("replan.add names owner %r, which is not a role this pipeline ships" % owner)
         new_id = next_id({n.get("id") for n in graph["nodes"]})
         graph["nodes"].append({"id": new_id, "title": title, "owner": owner,
                                "status": "pending", "blocked_by": [], "serves": serves,
-                               "evidence": None})
+                               "check": check, "evidence": None})
         revise(graph, "add", new_id, why or ("re-planned by the verdict on " + nid))
         added.append(new_id)
     for pid in rp.get("park") or []:
@@ -1074,6 +1116,10 @@ def main(argv=None):
     p_add.add_argument("--title", required=True)
     p_add.add_argument("--owner", required=True)
     p_add.add_argument("--serves", required=True)
+    p_add.add_argument("--check", required=True,
+                       help="the command that closes this node, or the judge where no "
+                            "command can decide it — the verifier runs it and reports its "
+                            "output as the evidence row")
     p_add.add_argument("--blocked-by", dest="blocked_by", action="append", default=[])
     p_add.add_argument("--carries", action="append", default=[],
                        help="what each --blocked-by hands over; pairs in the order written")

@@ -34,7 +34,10 @@ than ending in a question nobody will see.
   "not_done":     ["what was asked and is not"],
   "not_verified": ["what was BUILT and no check touched"],
   "blockers":     [{ "what": "…", "blocks": ["N-009"], "can_continue_around": true }],
-  "replan":       { "possible": true, "add": [], "park": ["N-009"], "why": "…" },
+  "replan":       { "possible": true,
+                    "add": [{ "title": "…", "owner": "implementer",
+                              "serves": "REQ-004", "check": "…" }],
+                    "park": ["N-009"], "why": "…" },
   "evidence":     ["the command and the output that proves each `done` row"]
 }
 ```
@@ -58,12 +61,20 @@ ledger exists to catch.
 
 1. **Read the node's `serves`** — the REQ or the goal clause. That is the standard.
    Not what the diff does; what was asked.
-2. **Run the checks the task named.** Not a check you invented, and not `npm test`
-   alone if the task named something narrower — a green from a check nobody watched
-   fail against a planted defect is not evidence.
+2. **Run the node's `check`.** It is a field on the node — one command, or a named
+   judgement where no command can decide it — and it is what closes this node. Not a
+   check you invented, and not `npm test` alone when the node named something narrower:
+   a green from a check nobody watched fail against a planted defect is not evidence.
+   Where the `check` is a judgement, record the verdict **as** judgement
+   (`references/gates.md`), never as an exit code.
+   **A node with no `check` is a refusal, not a judgement call.** `graph.py validate`
+   exits 1 and names it, because inventing a check and running everything are the two
+   things this step forbids — and until B-080 closed, this paragraph asked for a field
+   the schema did not have.
 3. **`done` takes one row per claim, and each needs a line in `evidence`** — the
    command and what it printed. Paraphrase is not evidence. If you cannot produce
-   the output, the row belongs in `not_done`.
+   the output, the row belongs in `not_done`. The `check`'s own output is the first
+   row: the node said how it would be closed, so the proof it closed is that output.
 4. **`not_done` is not a failure report.** It is what the next iteration picks up,
    so write it as work rather than as blame.
 5. **Every blocker says what it `blocks` and whether the run `can_continue_around`
@@ -72,6 +83,9 @@ ledger exists to catch.
 6. **`replan.possible: false` needs a `why` a person can act on.** A stop with no
    reason is indistinguishable from a stall, and the operator is the one who has to
    tell them apart.
+7. **Every `replan.add` entry names its own `check`.** A node you create is a node the
+   next verifier has to close, and handing it the absence you were handed is how the
+   defect returns one iteration later. `close` refuses the verdict and names the key.
 
 ## Three ways this goes wrong
 
@@ -80,6 +94,7 @@ ledger exists to catch.
 | «The tests pass, so it is done» | The node serves a REQ, not a suite. A green suite that never exercised the requirement proves the suite ran |
 | «Close it and note the gap» | A `done` with a caveat is a `not_done` somebody will read as finished. Split the row |
 | «This blocker stops everything» | Say whether it does. `can_continue_around: true` is what keeps a run moving past one bad node, and guessing it wrong costs either the run or the correctness |
+| «The node names no check, so I'll run the suite» | That is the choice this agent may not make. `validate` refuses the node before you are dispatched; a node whose completion test nobody wrote is a planning defect, and reporting it is worth more than a green suite |
 
 ## Where the doctrine is
 

@@ -110,6 +110,15 @@
           "minLength": 1,
           "description": "A REQ id, or a clause of the goal. Required, because a node that serves neither is work nobody asked for — and the pipeline's answer to that is to park it WITH THAT AS THE REASON rather than to do it quietly."
         },
+        "check": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "\\S",
+          "not": {
+            "pattern": "[\\n\\r]"
+          },
+          "description": "**How this node will be closed** \u2014 the command a verifier runs, or the named judgement that stands in where no command can (`references/gates.md`'s third gate type: name the judge, record the verdict AS judgement). Its output becomes the node's `evidence` row.\n\nRequired on every node except a `parked` one, and that is the whole point of the field: `agents/verifier.md` tells the verifier to run *the check this node names*, so a node with none leaves it the two options that same paragraph forbids \u2014 invent a check, or run everything. Shipped doctrine read a field the schema did not have (B-080); the field the doctrine reads now exists.\n\nOne string, never a list, because the requirement it serves is singular throughout \u2014 one input, one job, one output, one owner, **one** completion test. A node needing two unrelated checks is a node doing two jobs, and the answer is to split it rather than to widen this field. One gate made of two commands is `a && b`, which is still one gate.\n\nA `parked` node is exempt because it is the one node nobody will close, and a placeholder there \u2014 *n/a, parked* \u2014 is the confidence-without-correctness this schema refuses everywhere else. The field survives a park: `park` sets the status and never removes what the node said it would run."
+        },
         "evidence": {
           "type": [
             "array",
@@ -139,6 +148,32 @@
         }
       },
       "allOf": [
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "not": {
+                  "const": "parked"
+                }
+              }
+            },
+            "required": [
+              "status"
+            ]
+          },
+          "then": {
+            "required": [
+              "check"
+            ],
+            "properties": {
+              "check": {
+                "type": "string",
+                "minLength": 1,
+                "pattern": "\\S"
+              }
+            }
+          }
+        },
         {
           "if": {
             "properties": {

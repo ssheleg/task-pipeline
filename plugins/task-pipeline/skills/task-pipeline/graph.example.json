@@ -14,6 +14,7 @@
       "status": "done",
       "blocked_by": [],
       "serves": "REQ-001",
+      "check": "npm test — graph.example.json validates against graph.schema.json",
       "evidence": [
         "npm test → PASS: task-pipeline structure valid, with graph.example.json validated against graph.schema.json"
       ]
@@ -27,6 +28,7 @@
         "N-001"
       ],
       "serves": "REQ-002",
+      "check": "python3 test/graph_test.py — the validate fixtures",
       "evidence": null
     },
     {
@@ -38,6 +40,7 @@
         "N-001"
       ],
       "serves": "REQ-005",
+      "check": "judgment: the reviewer rules the seven keys sufficient — recorded AS judgement, references/gates.md",
       "evidence": null
     },
     {
