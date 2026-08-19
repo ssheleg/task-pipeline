@@ -6114,6 +6114,108 @@ jobs:
             echo "ERROR: a carve-out one period away from the rule was invisible"
             exit 1
           fi
+      - name: Negative self-test (the prose drops the elapsed time its own `ps` receipt quotes)
+        run: |
+          set -eu
+          rm -rf /tmp/res20-copy && cp -R . /tmp/res20-copy
+          python3 - <<'EOF'
+          p = "/tmp/res20-copy/plugins/task-pipeline/skills/task-pipeline/references/residue.md"
+          t = open(p, encoding="utf-8").read()
+          # The shape this record actually shipped in for six days: the fenced receipt
+          # keeps `03:12` and the prose stops accounting for it, so the two lines read as
+          # one instant. The `ps` block is left intact deliberately — a check answered by
+          # the receipt it is checking is this section's own founding defect.
+          n = "three minutes and twelve seconds after the monitor was armed"
+          assert n in t, "PLANT DID NOT LAND: res20"
+          _planted = t.replace(n, "a few minutes after the monitor was armed", 1)
+          assert _planted != t, "PLANT DID NOT LAND: res20"
+          open(p, "w", encoding="utf-8").write(_planted)
+          EOF
+          if python3 /tmp/res20-copy/test/validate.py 2>&1 | grep -q "no sentence outside the block accounts for it"; then
+            echo "OK: validator FAILs — an elapsed time nothing outside the fence explains is a record asking to be interpreted"
+          else
+            echo "ERROR: the receipt answered for the prose that was supposed to explain it"
+            exit 1
+          fi
+      - name: Negative self-test (the opening record stops saying its two readings are two moments)
+        run: |
+          set -eu
+          rm -rf /tmp/res21-copy && cp -R . /tmp/res21-copy
+          python3 - <<'EOF'
+          p = "/tmp/res21-copy/plugins/task-pipeline/skills/task-pipeline/references/residue.md"
+          t = open(p, encoding="utf-8").read()
+          n = "taken at two different moments"
+          assert n in t, "PLANT DID NOT LAND: res21"
+          _planted = t.replace(n, "taken during the run", 1)
+          assert _planted != t, "PLANT DID NOT LAND: res21"
+          open(p, "w", encoding="utf-8").write(_planted)
+          EOF
+          if python3 /tmp/res21-copy/test/validate.py 2>&1 | grep -q "two readings are two moments"; then
+            echo "OK: validator FAILs — the finding is that both observations were accurate at different moments"
+          else
+            echo "ERROR: the externally cited record went back to reading as a single instant"
+            exit 1
+          fi
+      - name: Negative self-test (the record stops naming the times it never observed)
+        run: |
+          set -eu
+          rm -rf /tmp/res22-copy && cp -R . /tmp/res22-copy
+          python3 - <<'EOF'
+          p = "/tmp/res22-copy/plugins/task-pipeline/skills/task-pipeline/references/residue.md"
+          t = open(p, encoding="utf-8").read()
+          n = "the wall-clock times"
+          assert n in t, "PLANT DID NOT LAND: res22"
+          _planted = t.replace(n, "the exact hours", 1)
+          assert _planted != t, "PLANT DID NOT LAND: res22"
+          open(p, "w", encoding="utf-8").write(_planted)
+          EOF
+          if python3 /tmp/res22-copy/test/validate.py 2>&1 | grep -q "wall-clock times.* is gone"; then
+            echo "OK: validator FAILs — a record silent about its own limit invites a reader to supply an hour nobody measured"
+          else
+            echo "ERROR: the record lost the statement of what it did not observe"
+            exit 1
+          fi
+      - name: Negative self-test (the containers measurement and the prose citing it disagree)
+        run: |
+          set -eu
+          rm -rf /tmp/res23-copy && cp -R . /tmp/res23-copy
+          python3 - <<'EOF'
+          p = "/tmp/res23-copy/plugins/task-pipeline/skills/task-pipeline/references/residue.md"
+          t = open(p, encoding="utf-8").read()
+          # The number is frozen — no command recomputes a container count from one
+          # afternoon — so what is policed is the record's agreement with itself. An
+          # external document quotes this number out of the prose, not out of the block.
+          n = "The 18 containers above"
+          assert n in t, "PLANT DID NOT LAND: res23"
+          _planted = t.replace(n, "The 12 containers above", 1)
+          assert _planted != t, "PLANT DID NOT LAND: res23"
+          open(p, "w", encoding="utf-8").write(_planted)
+          EOF
+          if python3 /tmp/res23-copy/test/validate.py 2>&1 | grep -q "the two halves of one record cannot disagree"; then
+            echo "OK: validator FAILs — the block and the sentence that carries it outward are one number"
+          else
+            echo "ERROR: a cited measurement drifted from the prose citing it"
+            exit 1
+          fi
+      - name: Negative self-test (the frozen containers measurement loses its date)
+        run: |
+          set -eu
+          rm -rf /tmp/res24-copy && cp -R . /tmp/res24-copy
+          python3 - <<'EOF'
+          p = "/tmp/res24-copy/plugins/task-pipeline/skills/task-pipeline/references/residue.md"
+          t = open(p, encoding="utf-8").read()
+          n = "Measured 2026-08-11, enumerating"
+          assert n in t, "PLANT DID NOT LAND: res24"
+          _planted = t.replace(n, "Measured recently, enumerating", 1)
+          assert _planted != t, "PLANT DID NOT LAND: res24"
+          open(p, "w", encoding="utf-8").write(_planted)
+          EOF
+          if python3 /tmp/res24-copy/test/validate.py 2>&1 | grep -q "lost its date"; then
+            echo "OK: validator FAILs — an undated measurement reads as a claim about now"
+          else
+            echo "ERROR: a frozen measurement lost its date and nothing noticed"
+            exit 1
+          fi
       - name: Property check (a legitimate exception two rules away does not trip the carve-out guard)
         run: |
           set -eu

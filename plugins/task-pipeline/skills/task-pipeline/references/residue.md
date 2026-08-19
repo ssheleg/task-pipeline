@@ -27,15 +27,29 @@ Both are checked the same way and this file covers both.
 
 ## The measured reason this file exists
 
-On 2026-08-11, mid-run, a monitor was armed to watch CI. One minute later the
-harness task inventory was queried:
+On 2026-08-11, mid-run, a monitor was armed to watch CI. **What follows is two
+observations of two different things, taken at two different moments**, and each
+one is stamped so that a reader is not left reconciling them. One minute after
+the monitor was armed, the harness task inventory was queried; the process table
+was read after that:
 
 ```
 TaskList              →  "No tasks found"
 ps -eo pid,etime,cmd  →  52693  03:12  /bin/zsh -c … gh pr checks …
 ```
 
-The monitor was **alive and polling**, and the inventory tool reported nothing.
+`etime` is elapsed life, so the `03:12` in that line dates its own reading:
+three minutes and twelve seconds after the monitor was armed, a little over two
+minutes after the inventory had come back empty. The monitor was **alive and
+polling**, and the inventory tool reported nothing. Both readings were accurate.
+They were readings of different things, made about two minutes apart.
+
+**What this record does not carry, said plainly: the wall-clock times.** Neither
+observation was stamped with the hour at which it was taken, so what was
+observed is the two offsets above — one minute to the inventory, `03:12` of
+process life at the `ps` reading — and the interval between them is derived from
+those two. The absolute times are not recoverable from anything this record
+kept, and nothing here reconstructs them.
 
 This is the class this whole doctrine exists to catch: **a check answered by
 something that is not its subject.** An inventory that does not enumerate the
@@ -201,9 +215,9 @@ judgement, the item is reported, not ended** — which puts it back under the ru
 above rather than creating an exception to it.
 
 **A foreign item never becomes spent.** The 18 containers above belong to other
-projects; that they have been up for three days is information for whoever owns them,
-not permission. The third owner state widens what a run may clean **inside its own
-project** and widens nothing at all outside it.
+projects; that the oldest of them has been up for three days is information for
+whoever owns them, not permission. The third owner state widens what a run may
+clean **inside its own project** and widens nothing at all outside it.
 
 ## Rationalizations
 

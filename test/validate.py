@@ -6356,6 +6356,82 @@ if os.path.isfile(_RES_D):
              "drive the count toward zero' leaves 'is never a target' standing three "
              "paragraphs above it and means the opposite")
 
+    # --- the opening record must read as ONE event, and agree with its own receipt ----
+    # This file's first section is the source of an external document's opening story and
+    # is permalinked from it. It shipped framing two observations as one instant: "One
+    # minute later the harness task inventory was queried" sat directly above a `ps` line
+    # whose `etime` reads 03:12. Neither number was wrong — both anchor to the moment the
+    # monitor was armed, about two minutes apart — but nothing outside the fenced block
+    # said so, so a reader following the citation had to reconcile them, and the record
+    # that teaches "prove no more than you observed" was the one asking to be interpreted.
+    # Row TP-02.
+    #
+    # The computable half: `etime` is elapsed life, so the quoted line DATES its own
+    # reading, and the prose has to restate that value. Read from the prose with the fence
+    # REMOVED — a check answered by the receipt it is checking is this very section's
+    # founding defect, one layer up.
+    _e1 = _section(_RES_D, r"The measured reason this file exists")
+    if _e1 is None:
+        fail("references/residue.md: the measured reason section is gone. It is the record "
+             "an external document cites for the opening claim of this whole doctrine")
+    else:
+        _e1_prose = _flatten(re.sub(r"```.*?```", " ", _e1, flags=re.S), lower=True)
+        _et = re.search(r"^ps -eo\s+\S+\s+→\s+\d+\s+(\d+):(\d+)\s", _e1, re.M)
+        if _et is None:
+            fail("references/residue.md → measured reason: the `ps` receipt lost its `etime` "
+                 "field. That field is the only thing dating the second observation — without "
+                 "it the record carries one stated time for two readings taken minutes apart")
+        else:
+            _mm, _ss = int(_et.group(1)), int(_et.group(2))
+            _wf = ("zero one two three four five six seven eight nine ten eleven twelve "
+                   "thirteen fourteen fifteen sixteen seventeen eighteen nineteen "
+                   "twenty").split()
+            _forms = {f"{_mm} minutes and {_ss} seconds"}
+            if _mm < len(_wf) and _ss < len(_wf):
+                _forms.add(f"{_wf[_mm]} minutes and {_wf[_ss]} seconds")
+            if not any(_f in _e1_prose for _f in _forms):
+                fail(f"references/residue.md → measured reason: the receipt quotes an `etime` "
+                     f"of {_mm:02d}:{_ss:02d} and no sentence outside the block accounts for "
+                     f"it (expected one of {sorted(_forms)!r}). A reader is then left "
+                     "reconciling 'one minute later' against a three-minute process by hand, "
+                     "which is how the source of an external citation reads as a contradiction")
+        for _needle, _why in (
+                ("taken at two different moments",
+                 "the record stops saying that its two readings are two moments. The whole "
+                 "finding is that both were accurate and neither answered for the other"),
+                ("wall-clock times",
+                 "the record stops naming what it did not observe. The two offsets are all it "
+                 "kept, and a record silent about that limit invites the next reader to supply "
+                 "an hour nobody measured")):
+            if _needle not in _e1_prose:
+                fail(f"references/residue.md → measured reason: `{_needle}` is gone — {_why}")
+
+    # --- the containers measurement and the prose that cites it are ONE number --------
+    # Same file, same class, and also externally cited. The measurement is frozen — no
+    # command can recompute a container count from one afternoon — so what is policed is
+    # the record's internal agreement: the block's number against the sentence that carries
+    # it outward, and the date without which a frozen measurement reads as a claim about now.
+    _e4 = _section(_RES_D, r"Three owners, not two")
+    if _e4 is None:
+        fail("references/residue.md: the third owner state section is gone. It is the only "
+             "place that says which accumulated debris a run may clear and which it may not")
+    else:
+        if not re.search(r"measured\s+20\d\d-\d\d-\d\d", _flatten(_e4, lower=True)):
+            fail("references/residue.md → three owners: the enumeration behind the third owner "
+                 "state lost its date. An undated measurement reads as a claim about now, and "
+                 "this one is a claim about one machine on one afternoon")
+        _blk = re.search(r"containers\s*:\s*(\d+)\s+running", _e4)
+        _cite = re.search(r"the\s+(\d+)\s+containers\s+above", _flatten(_e4, lower=True))
+        if _blk is None or _cite is None:
+            fail("references/residue.md → three owners: the containers measurement and the "
+                 "sentence that cites it are no longer both present. The prose is what carries "
+                 "`report, never end` outward, and it has to cite the measurement it rests on")
+        elif _blk.group(1) != _cite.group(1):
+            fail(f"references/residue.md → three owners: the measurement says "
+                 f"{_blk.group(1)} containers and the prose that cites it says "
+                 f"{_cite.group(1)}. An external document quotes this number out of the "
+                 "prose; the two halves of one record cannot disagree about it")
+
 
 # The workflow is counted by regex everywhere above, and a regex is happy with YAML
 # that GitHub will reject. Twice on one branch a step title containing `holds: ` broke

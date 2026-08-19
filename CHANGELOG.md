@@ -59,9 +59,13 @@ row**; correcting it silently a second time teaches readers that somebody else i
 > `test/validate.py` reads is the newest `## vX.Y.Z` section's — which post-tag is this one,
 > with no version heading yet open for the work that follows. So the live figure is stated
 > here rather than inside a released sentence, and the released sentence below is not edited:
-> B-080 closed on 2026-08-19 with eight plants, so **Guards: 376 → 384**. The guard has no
-> home for a count between a tag and the next bump; filed as `B-104`, and the note is what
-> keeps the number true meanwhile.
+> B-080 closed on 2026-08-19 with eight plants and TP-02 with five on the same day, so
+> Guards: 376 → **389**. The guard has no home for a count between a tag and the next bump;
+> filed as `B-104`, and the note is what keeps the number true meanwhile. **The bold belongs
+> on the number alone**: the plant that corrupts this count reads `Guards: N → **M**` out of
+> the raw section, so bolding the whole phrase left the validator reading a count no plant
+> could still corrupt — which is the form this note was introduced with, and no second
+> count-shaped figure belongs in this section for the same reason.
 
 Guards at the tag: 376 → 376. No guard was added or removed — that release is doctrine, and
 each of the four rules is cited from the reference that owns it rather than restated.
