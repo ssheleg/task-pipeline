@@ -1582,6 +1582,30 @@ if os.path.isfile(_VERIF):
     else:
         _hidx = _vhdr.index("human")
 
+    # Every row must have the header's cell count, because an unescaped `|` inside a cell
+    # silently adds one and every column after it shifts. Found by CI on 2026-08-19: a
+    # ledger note wrote a pytest filter as `-k receipt|record|containers`, which split one
+    # cell into three. Nothing here noticed — with the shipped column order the extra
+    # cells landed to the RIGHT of `Human`, so the value still read `never` and the gate
+    # stayed green. It surfaced only through the header-reorder property check, whose own
+    # regex could not match a note containing a pipe and therefore left that row in the
+    # old order under the new header: a defect visible only because a second check was
+    # accidentally blind to it in the same way. That is too much luck to rely on twice,
+    # so the shape is now checked directly rather than inferred from a neighbour's failure.
+    if _vhdr is not None:
+        _want = len(_vhdr)
+        for _l in _vt.splitlines():
+            if not re.match(r"^\|\s*REQ-\d+\s*\|", _l):
+                continue
+            _got = len(_row_cells(_l))
+            if _got != _want:
+                _rid_bad = re.match(r"^\|\s*(REQ-\d+)", _l).group(1)
+                fail(f"{ART}/verification.md: {_rid_bad} has {_got} cells against a header "
+                     f"of {_want} — an unescaped `|` inside a cell splits it and shifts "
+                     "every column after it. Escape it as `\\|`, or write the text without "
+                     "a pipe; a row that does not line up with its header is read one "
+                     "column out by anything that trusts the header")
+
     _brief_reqs = set()
     _brief_by_slug = {}
     for _bf in glob.glob(os.path.join(ARTP, "specs/*brief.md")):
