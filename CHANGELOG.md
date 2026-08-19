@@ -1,5 +1,56 @@
 # Changelog
 
+## v1.72.0 — a node says how it will be closed
+
+**B-080 closed, and with it the last of four requirements this pack's own manifesto named
+as unbuilt.** The Proof of Done manifesto cites this repository as its reference
+implementation and filed four gaps against it by id; three closed on 2026-08-17, and this
+is the fourth. The public document now says all four are built and names the commit for
+each.
+
+### `check` — the per-node completion test
+
+A node could not say how it would be closed, while shipped doctrine told the verifier to
+"run the checks the task named". The doctrine read a field the schema did not have.
+
+`check` is a string, **required on every node whose status is not `parked`** — the parked
+node being the one nobody will close, where a placeholder would be confidence without
+correctness. Never a list: a node needing two unrelated checks is a node doing two jobs, and
+one gate made of two commands is `a && b`, which is still one gate. Stated twice on purpose,
+in the schema and in `violations()`, because the schema never runs against a live graph.
+`add --check` is required like `--why`, and a replan entry naming no check is refused before
+the close writes anything.
+
+### The record the manifesto opens with now reads as one event
+
+`residue.md`'s opening record is quoted by an external document and permalinked from a public
+site. It said the inventory was queried "one minute later" beside a `ps` line showing the
+process at 3:12 — two accurate observations of different things, framed so a reader had to
+reconcile them by hand. Both moments are now stated, the interval between them named, and
+**what the record never carried is named too**: the wall-clock times, which `git log --follow`
+proves were never in it. A disambiguation, not a correction — no number changed.
+
+The E4 sentence claimed more than its own block: "that **they** have been up for three days"
+from a measurement of the oldest one. Now "the oldest of them".
+
+### Three plants that could not run, and one row that could not be parsed
+
+CI failed twice on this release's work, and neither failure was noise.
+
+A ledger row wrote a pytest filter as a backticked `-k a|b|c`; markdown does not care about
+backticks, so two pipes split one cell into three and that row carried ten cells against a
+header of eight. Locally the damage sat in a column nothing read, so every gate run passed.
+Every `REQ` row must now match the header's cell count, with the remedy named in the refusal.
+
+Then three schema plants died on `KeyError` before reaching their own `PLANT DID NOT LAND`
+assert, because the new `check` rule added an `allOf` branch keyed on `not: {const: parked}`
+and each plant indexed the const directly. All three traverse tolerantly now. **The assert
+catches a plant that does not land; nothing catches a plant that cannot run** — the third
+instance of that class in three days, and it is filed family-wide rather than here.
+
+Guards: 389 → **390**. The new rule arrived without a plant, which this repository's own standard refuses; that is the plant. `graph.py` 114 → 129 cases.
+
+
 
 ## v1.71.1 — four shapes of a green that measured nothing
 
