@@ -41,6 +41,7 @@ worse than saying nothing.
 ## Contents
 
 - [Staleness — a row is true about the tree it OBSERVED](#staleness--a-row-is-true-about-the-tree-it-observed)
+- [Environment — a proof is only valid where it ran](#environment--a-proof-is-only-valid-where-it-ran)
 - the ledger itself — one row per REQ, appended by stage 8
 - [What `Human` means, and what it does not](#what-human-means-and-what-it-does-not)
 
@@ -71,11 +72,39 @@ one. Four things overtake a row, and naming which one applies is the note's job:
 change in what it covers, a **dependency** change, an **environment** change, and a
 **policy** change — the last being the rule under which the evidence was accepted.
 
-| REQ | What | Run | Shipped in | Observed at | Auto | Human | Note |
-|---|---|---|---|---|---|---|---|
-| REQ-001 | CSV export from a report | `2026-07-28-export` | v1.4.0 | `5f21ac3` | pass | 2026-07-30 | opened the deployed page, exported, opened the file |
-| REQ-004 | XLSX export | `2026-07-28-export` | v1.4.0 | `5f21ac3` | pass | **never** | — |
-| REQ-007 | Export respects active filters | `2026-07-28-export` | v1.4.0 | `5f21ac3` | partial | **never** | CSV path only |
+## Environment — a proof is only valid where it ran
+
+`Observed at` says which tree the check saw. It does not say **where**, and without that a
+smoke test against a preview URL enters the record in a shape indistinguishable from one
+against production, and a suite green on a laptop with accumulated state is
+indistinguishable from one green on a runner that started clean. Those are the two halves
+of the same question, and only one was instrumented.
+
+**`Environment` is a required cell on every row.** Its vocabulary is the project's own,
+declared in the runbook and not invented per row — this file ships with four, and a project
+that deploys differently declares different ones:
+
+| Value | What it means |
+|---|---|
+| `production` | the deployed target real users reach |
+| `preview` | a per-branch or per-PR deployment; proves the build, never the release |
+| `ci` | a clean runner, no accumulated state |
+| `local` | a developer machine, with whatever state it has |
+| `—` | **recorded absence** — a row written before this column existed, or one whose environment nobody recorded. Not a value, and never a default to reach for |
+
+A missing cell is not the same as `—`: the first is a row that forgot the question, and it is
+**refused**. The second is an answer.
+
+**A REQ claiming production behaviour may not be closed on a non-production
+observation.** Stage 8 writes the row and refuses that pairing rather than recording it —
+`pass` in `ci` against a requirement about the deployed product is the exact substitution
+this column exists to make visible.
+
+| REQ | What | Run | Shipped in | Observed at | Environment | Auto | Human | Note |
+|---|---|---|---|---|---|---|---|---|
+| REQ-001 | CSV export from a report | `2026-07-28-export` | v1.4.0 | `5f21ac3` | production | pass | 2026-07-30 | opened the deployed page, exported, opened the file |
+| REQ-004 | XLSX export | `2026-07-28-export` | v1.4.0 | `5f21ac3` | ci | pass | **never** | — |
+| REQ-007 | Export respects active filters | `2026-07-28-export` | v1.4.0 | `5f21ac3` | preview | partial | **never** | CSV path only |
 
 ## Columns
 
@@ -86,6 +115,10 @@ change in what it covers, a **dependency** change, an **environment** change, an
 - **Run** — the brief's topic slug, so the context is one file away.
 - **Shipped in** — the tag or commit that carried it. Where a project does not tag,
   the commit, and the same value every row of that run carries.
+- **Observed at** — the commit the check ran against. `—` where nobody recorded one.
+- **Environment** — where it ran, from the project's declared vocabulary. Required; `—` is
+  the recorded absence and an omitted cell is refused. See *Environment — a proof is only
+  valid where it ran*.
 - **Auto** — what the run's own gate said: `pass` · `partial` · `none`. Copied from the
   coverage table rather than re-derived; where the two disagree the coverage table wins
   and the disagreement is a finding. A coverage verdict of **`review`** — *no check can

@@ -58,6 +58,15 @@ not the operator confirming it is what they asked for, and no amount of checking
 makes it one. Which stages are manual is the **operator's** decision, recorded in
 their `pipeline.json`; the framework fixes no stage count and no gate assignment.
 
+**That sentence is about the pipeline's SHAPE, and nothing else.** It says a project
+chooses how many stages it runs and which of them wait for a person. It does not say the
+criteria inside a gate are per-run negotiable: where a project keeps stage 10 manual, what
+that gate asks is [`acceptance.md`](acceptance.md)'s policy **`AP-1`**, which is versioned
+and has an owner. The two rules stood side by side unscoped until 2026-08-20 (`B-091`), and
+a reader could take either as the whole rule — *the framework fixes nothing* and *the ladder
+is fixed* are both in the shipped doctrine, which is how an acceptance standard becomes
+something every run re-argues.
+
 ## The judgment gate — a ruling is not a measurement
 
 Two types were not enough, and the gap was not cosmetic. A reviewer's ruling, a check that

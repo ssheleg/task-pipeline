@@ -531,6 +531,67 @@ the two homes are compared directly: whatever the verifier is told to read off t
 must be a property the schema declares.
 *(guard: `node declares no` and `rule that can fire` and `off the node, and`)*
 
+**57. The claim registry reads every surface that states a number, including the ones this
+repository writes about itself.** Its corpus was eight named files plus `references/**`, so
+`templates/` and `scripts/` were invisible — three shipped surfaces said "34 reference files"
+over a directory of 35 while the class printed `dormant` — and so were the registers
+`docs/DOCMAP.md` names, where `docs/OPEN_QUESTIONS.md` said "the 250 guards" against a
+workflow defining 390. The corpus now covers both, and a class recognises every phrasing of
+its count rather than one word order. A number inside a **dated item** in a register is a
+record and exempt; on the board the discriminator is the **State** cell, because every row
+names the day it was filed and an open row is a claim about now.
+*(guard: `reference files` and `— derive the number or delete it`)*
+
+**58. Every documented `npm` command means what `package.json` runs.** `CLAUDE.md` glossed
+`npm test` as `python3 test/validate.py`, dropping `graph_test.py` and its 129 cases — the
+suite-outside-the-run class stated the other way round — and called `npm run test:all` "both"
+where it runs eight scripts. An equation is compared against the script body after one level
+of `npm run` resolution, and a bare `npm run X` in a document about this repository must be a
+script that exists. Portable doctrine under `plugins/` and `cursor/` is out of scope: it names
+a host project's commands.
+*(guard: `is glossed as` and `declares no such script`)*
+
+**59. A release either carries a run stamp or is recorded as a gap, and the guard-count claim
+has a home before the bump.** Fourteen consecutive releases had no stamp while the retro named
+only `v1.16.0`–`v1.23.0`, and the receipt that was supposed to prove it grepped a path removed
+at v1.53.0 for a tag's own commit — a stamp names the commit the *run* ended on. Scoped to the
+trailing stretch: 84 of 117 tags predate the register and backfilling is forbidden. Separately,
+the count guard reads the topmost `## ` section, so `## Unreleased` is where the number lives
+between a tag and the next bump, and it must sit above every version heading.
+*(guard: `release(s) after the newest run stamp` and `section sits below a released version`)*
+
+**60. A `file:line` range in an open board row quotes the phrase it points at.** Five
+citations resolved to real lines and pointed at other text; a line number is the most fragile
+address a document carries, because every edit above it moves it and nothing notices. Closed
+rows are records and are left alone; single-line citations cannot be quoted and are disclosed
+as unanchored rather than failed.
+*(guard: `quotes no phrase from it`)*
+
+**61. Every evidence row records the environment it ran in, and a claim of provenance the
+format cannot check is marked unattested instead.** `Observed at` said which tree a check saw
+and nothing said where it ran, so a preview smoke test and a production one entered the record
+in the same shape — in a pack whose own `learned.md` records a suite green on every author's
+machine and 1039 failures on a clean runner. And `read:`/`gate:` were declared *hook-written,
+never agent-written* while both land in the file the agent appends to at every stage: no writer
+field, no provenance check, so the count is reported `unattested` and the claim is not made.
+*(guard: `has no `Environment` cell` and `prints a count and never says`)*
+
+**62. The acceptance ladder is a versioned policy with an owner, and `gates.md`'s
+fixes-nothing sentence is scoped to the pipeline's shape.** Both rules stood unscoped side by
+side for seventy releases — *the framework fixes no stage count and no gate assignment* beside
+twelve fixed criteria — so a reader could take either as the whole rule, and a table accepted
+under v1.20 doctrine was indistinguishable from one accepted under v1.70. The block carries
+`AP-1`, an owner and an in-force date; an amendment moves the version and lands with a decision
+row.
+*(guard: `the acceptance policy carries no` and `stands unscoped beside`)*
+
+**63. A heading may not declare a bound nothing enforces.** The retro's *Recent log* read
+*entries from the last five run stamps* over 25 entries reaching back nine days, borrowing the
+stamp section's wording without its cap — filed twice as B-060 and B-069 and disclosed by the
+file about itself. Checked in the live retro and in `templates/retro.md`, which seeded the
+false bound into every host project.
+*(guard: `declares the bound` and `and nothing enforces it`)*
+
 ## Adding or changing doctrine
 
 - **Change one idea per PR.** These files are read by agents under load; a PR that

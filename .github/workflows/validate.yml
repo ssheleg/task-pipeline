@@ -1,7 +1,15 @@
 name: validate
 
 on:
+  # B-101: `push:` with no filter re-validated a SHA that had already passed. Observed
+  # 2026-08-17 releasing v1.69.0 — `validate` succeeded on `92fc3ea` at 14:15 and the tag
+  # push started a second run on the same `92fc3ea` eleven minutes later, at ~38 minutes a
+  # run. `tags-ignore` and not `paths-ignore`: the question is not which files changed, it
+  # is the same commit being asked the same question twice. The release workflow still runs
+  # the suite on its own tree, which is the run that proves what shipped.
   push:
+    tags-ignore:
+      - '**'
   pull_request:
 
 jobs:
@@ -2572,6 +2580,615 @@ jobs:
             echo "OK: validator correctly FAILs — the reference-file class is armed"
           fi
 
+      - name: Negative self-test (the doctrine claiming a provenance the ledger cannot prove)
+        run: |
+          set -eu
+          rm -rf /tmp/prov1-copy && cp -R . /tmp/prov1-copy
+          python3 - <<'EOF'
+          # B-014's class, committed by the mechanism built to close B-061: `read:` and
+          # `gate:` were declared «hook-written, never agent-written» while both land in
+          # `.task-pipeline/run.md` — the file the agent appends to at every stage — with no
+          # writer field and no provenance check in graph.py.
+          p = "/tmp/prov1-copy/plugins/task-pipeline/skills/task-pipeline/templates/run.md"
+          t = open(p, encoding="utf-8").read()
+          needle = "`read:` is **written by a hook rather than by the agent**"
+          assert needle in t, "PLANT DID NOT LAND: anchor absent before edit"
+          open(p, "w", encoding="utf-8").write(
+              t.replace(needle, "`read:` is hook-written, never agent-written", 1))
+          assert "never agent-written," in open(p, encoding="utf-8").read(), "PLANT DID NOT LAND"
+          EOF
+          if python3 /tmp/prov1-copy/test/validate.py; then
+            echo "ERROR: validator passed a provenance claim the ledger format cannot support"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — mark it unattested or do not claim it"
+          fi
+
+      - name: Negative self-test (`graph.py doctrine` dropping the `unattested` mark)
+        run: |
+          set -eu
+          rm -rf /tmp/prov2-copy && cp -R . /tmp/prov2-copy
+          python3 - <<'EOF'
+          # Dropping the false claim without stating the gap leaves a reader believing the
+          # provenance is established, which is the same defect one register quieter.
+          p = "/tmp/prov2-copy/plugins/task-pipeline/skills/task-pipeline/scripts/graph.py"
+          t = open(p, encoding="utf-8").read()
+          needle = 'reference files read — unattested"'
+          assert needle in t, "PLANT DID NOT LAND: anchor absent before edit"
+          open(p, "w", encoding="utf-8").write(t.replace(needle, 'reference files read"', 1))
+          out = open(p, encoding="utf-8").read()
+          assert 'reference files read — unattested"' not in out, "PLANT DID NOT LAND"
+          EOF
+          if python3 /tmp/prov2-copy/test/validate.py; then
+            echo "ERROR: validator passed a doctrine verb printing a count with no unattested mark"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the count says what the ledger says, not who wrote it"
+          fi
+
+      - name: Property check (a document may narrate the provenance claim it used to make)
+        run: |
+          set -eu
+          python3 - <<'EOF'
+          # Both surfaces cite «never agent-written» while marking it as what was wrong. A
+          # guard that cannot tell an assertion from its own obituary forces the history out
+          # of the document — and this one was watched doing exactly that, twice, first by
+          # flattening the emphasis away before looking for it and then by mispairing a
+          # single asterisk against an adjacent bold span.
+          import re
+          for p in ("plugins/task-pipeline/skills/task-pipeline/templates/run.md",
+                    "plugins/task-pipeline/skills/task-pipeline/references/progress.md"):
+              t = open(p, encoding="utf-8").read()
+              assert "agent-written" in t, f"{p}: the narration of the old claim is gone"
+              assert "unattested" in t, f"{p}: the unattested mark is gone"
+              print(f"OK: {p} narrates the claim and carries the mark")
+          EOF
+
+      - name: Negative self-test (the acceptance policy losing its version)
+        run: |
+          set -eu
+          rm -rf /tmp/ap1-copy && cp -R . /tmp/ap1-copy
+          python3 - <<'EOF'
+          # B-091: a table accepted under v1.20 doctrine was indistinguishable from one
+          # accepted under v1.70, forever, in a pack where every SHA in the retro resolves.
+          p = "/tmp/ap1-copy/plugins/task-pipeline/skills/task-pipeline/references/acceptance.md"
+          t = open(p, encoding="utf-8").read()
+          assert "**Acceptance policy `AP-1`" in t, "PLANT DID NOT LAND: anchor absent before edit"
+          open(p, "w", encoding="utf-8").write(t.replace("AP-1", "the ladder"))
+          assert "AP-1" not in open(p, encoding="utf-8").read(), "PLANT DID NOT LAND"
+          EOF
+          if python3 /tmp/ap1-copy/test/validate.py; then
+            echo "ERROR: validator passed an acceptance policy with no version to cite"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the acceptance standard is citable by version"
+          fi
+
+      - name: Negative self-test (the acceptance policy losing its owner)
+        run: |
+          set -eu
+          rm -rf /tmp/ap2-copy && cp -R . /tmp/ap2-copy
+          python3 - <<'EOF'
+          p = "/tmp/ap2-copy/plugins/task-pipeline/skills/task-pipeline/references/acceptance.md"
+          t = open(p, encoding="utf-8").read()
+          needle = "owner: the operator of the project running this pipeline"
+          assert needle in t, "PLANT DID NOT LAND: anchor absent before edit"
+          open(p, "w", encoding="utf-8").write(t.replace(needle, "the operator decides", 1))
+          assert needle not in open(p, encoding="utf-8").read(), "PLANT DID NOT LAND"
+          EOF
+          if python3 /tmp/ap2-copy/test/validate.py; then
+            echo "ERROR: validator passed an acceptance policy nobody owns"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — a decision with no owner is one each run makes for itself"
+          fi
+
+      - name: Negative self-test (gates.md's fixes-nothing sentence left unscoped)
+        run: |
+          set -eu
+          rm -rf /tmp/ap3-copy && cp -R . /tmp/ap3-copy
+          python3 - <<'EOF'
+          # Both rules were true and neither was scoped, so a reader could take either as
+          # the whole rule — *the framework fixes nothing* and *the ladder is fixed*.
+          p = "/tmp/ap3-copy/plugins/task-pipeline/skills/task-pipeline/references/gates.md"
+          t = open(p, encoding="utf-8").read()
+          assert "**That sentence is about the pipeline's SHAPE" in t, "PLANT DID NOT LAND: anchor absent"
+          i = t.index("**That sentence is about the pipeline's SHAPE")
+          j = t.index("## The judgment gate", i)
+          open(p, "w", encoding="utf-8").write(t[:i] + t[j:])
+          assert "AP-1" not in open(p, encoding="utf-8").read(), "PLANT DID NOT LAND"
+          EOF
+          if python3 /tmp/ap3-copy/test/validate.py; then
+            echo "ERROR: validator passed the two acceptance rules standing unscoped side by side"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the scoping sentence is what makes the two readable together"
+          fi
+
+      - name: Negative self-test (the Recent log's heading declaring a bound nothing enforces)
+        run: |
+          set -eu
+          rm -rf /tmp/rlog1-copy && cp -R . /tmp/rlog1-copy
+          python3 - <<'EOF'
+          # The heading read «entries from the last five run stamps» over 25 entries reaching
+          # back nine days, while the doctrine one file over said the section is capped by
+          # nothing. B-060 and B-069 were the same defect filed twice, and the file disclosed
+          # it about itself in its own honest-gaps section.
+          p = "/tmp/rlog1-copy/docs/evidence/retro.md"
+          t = open(p, encoding="utf-8").read()
+          needle = "## Recent log — narrative entries, uncapped and queried rather than read (newest first)"
+          assert needle in t, "PLANT DID NOT LAND: anchor absent before edit"
+          open(p, "w", encoding="utf-8").write(
+              t.replace(needle, "## Recent log — entries from the last five run stamps (newest first)", 1))
+          assert "last five run stamps (newest first)" in open(p, encoding="utf-8").read(), "PLANT DID NOT LAND"
+          EOF
+          if python3 /tmp/rlog1-copy/test/validate.py; then
+            echo "ERROR: validator passed a heading declaring a bound nothing enforces"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — a stated bound needs a mechanism, not a neighbour's wording"
+          fi
+
+      - name: Negative self-test (the SHIPPED retro template seeding the false bound)
+        run: |
+          set -eu
+          rm -rf /tmp/rlog2-copy && cp -R . /tmp/rlog2-copy
+          python3 - <<'EOF'
+          # The template seeds the heading into every host project, which is how one file's
+          # defect stops being one file's defect.
+          p = "/tmp/rlog2-copy/plugins/task-pipeline/skills/task-pipeline/templates/retro.md"
+          t = open(p, encoding="utf-8").read()
+          needle = "## Recent log — narrative entries, uncapped and queried rather than read (newest first)"
+          assert needle in t, "PLANT DID NOT LAND: anchor absent before edit"
+          open(p, "w", encoding="utf-8").write(
+              t.replace(needle, "## Recent log — the last 5 entries (newest first)", 1))
+          assert "the last 5 entries" in open(p, encoding="utf-8").read(), "PLANT DID NOT LAND"
+          EOF
+          if python3 /tmp/rlog2-copy/test/validate.py; then
+            echo "ERROR: validator passed a shipped template seeding a bound nothing enforces"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — in the template too, digits or words"
+          fi
+
+      - name: Negative self-test (an open board row whose cited span no longer holds its phrase)
+        run: |
+          set -eu
+          rm -rf /tmp/cite1-copy && cp -R . /tmp/cite1-copy
+          python3 - <<'EOF'
+          # Five `file:line-line` addresses in open rows resolved to real lines and pointed at
+          # the wrong text — B-094 cited gates.md:135-137 for «the check has been probed» when
+          # it sits at 180. A line number is the most fragile address a document carries:
+          # every edit above it moves it and nothing notices, because the file still exists
+          # and the line still exists.
+          import re
+          p = "/tmp/cite1-copy/docs/evidence/backlog.md"
+          t = open(p, encoding="utf-8").read()
+          m = re.search(r"`references/gates\.md:(\d+)-(\d+)` makes \*«the check has been probed»\*", t)
+          assert m, "PLANT DID NOT LAND: B-094's cited span is not where this plant reads it"
+          moved = m.group(0).replace(m.group(1) + "-" + m.group(2), "135-137")
+          open(p, "w", encoding="utf-8").write(t.replace(m.group(0), moved, 1))
+          assert "gates.md:135-137" in open(p, encoding="utf-8").read(), "PLANT DID NOT LAND"
+          EOF
+          if python3 /tmp/cite1-copy/test/validate.py; then
+            echo "ERROR: validator passed a citation that resolves and points at the wrong text"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — a citation that resolves is not a citation that is current"
+          fi
+
+      - name: Negative self-test (an open board row citing a span and quoting nothing from it)
+        run: |
+          set -eu
+          rm -rf /tmp/bcite2-copy && cp -R . /tmp/bcite2-copy
+          python3 - <<'EOF'
+          # Without a quoted needle the address can only be checked against the file's
+          # LENGTH, which is how five stale citations read as sound.
+          p = "/tmp/bcite2-copy/docs/evidence/backlog.md"
+          t = open(p, encoding="utf-8").read()
+          needle = "*«Scale the check to what breaking costs»* — "
+          assert needle in t, "PLANT DID NOT LAND: anchor absent before edit"
+          open(p, "w", encoding="utf-8").write(t.replace(needle, "", 1))
+          assert needle not in open(p, encoding="utf-8").read(), "PLANT DID NOT LAND"
+          EOF
+          if python3 /tmp/bcite2-copy/test/validate.py; then
+            echo "ERROR: validator passed an open row citing a span with no phrase to check it against"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — a range in an open row quotes what it points at"
+          fi
+
+      - name: Property check (a CLOSED board row's citation is a record and is left alone)
+        run: |
+          set -eu
+          rm -rf /tmp/cite3-copy && cp -R . /tmp/cite3-copy
+          python3 - <<'EOF'
+          # B-081 is closed and cites `references/knowledge-graph.md:100-129` with no needle.
+          # It was current at closing; demanding a rewrite would edit the record.
+          p = "/tmp/cite3-copy/docs/evidence/backlog.md"
+          t = open(p, encoding="utf-8").read()
+          assert "`references/knowledge-graph.md:100-129`" in t, "PLANT DID NOT LAND: the closed row's citation is gone"
+          EOF
+          if python3 /tmp/cite3-copy/test/validate.py >/dev/null; then
+            echo "OK: a closed row's citation is a record, not a live claim"
+          else
+            echo "ERROR: the currency check reached into closed rows, where every citation would need rewriting"
+            exit 1
+          fi
+
+      - name: Negative self-test (a ledger row with no `Environment` cell)
+        run: |
+          set -eu
+          rm -rf /tmp/env1-copy && cp -R . /tmp/env1-copy
+          python3 - <<'EOF'
+          # B-099: `Observed at` says which tree the check saw; nothing said where it RAN, so
+          # a smoke test against a preview URL entered the record indistinguishable from one
+          # against production. A row that omits the question is refused; `—` is an answer.
+          p = "/tmp/env1-copy/docs/evidence/verification.md"
+          t = open(p, encoding="utf-8").read().splitlines(True)
+          hit = next(i for i, l in enumerate(t) if l.startswith("| REQ-"))
+          cells = t[hit].split("|")
+          assert len(cells) == 11, "PLANT DID NOT LAND: the row is not the shape this plant expects"
+          del cells[6]
+          t[hit] = "|".join(cells)
+          open(p, "w", encoding="utf-8").write("".join(t))
+          assert len(open(p, encoding="utf-8").read().splitlines()[hit].split("|")) == 10, "PLANT DID NOT LAND"
+          EOF
+          if python3 /tmp/env1-copy/test/validate.py; then
+            echo "ERROR: validator passed a verification row with no Environment cell"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — every evidence row records where it ran"
+          fi
+
+      - name: Negative self-test (an `Environment` value outside the declared vocabulary)
+        run: |
+          set -eu
+          rm -rf /tmp/env2-copy && cp -R . /tmp/env2-copy
+          python3 - <<'EOF'
+          # An environment invented per row is a column nobody can compare two rows in. The
+          # vocabulary is read out of the shipped template, never listed in the checker.
+          p = "/tmp/env2-copy/docs/evidence/verification.md"
+          t = open(p, encoding="utf-8").read().splitlines(True)
+          hit = next(i for i, l in enumerate(t) if l.startswith("| REQ-"))
+          cells = t[hit].split("|")
+          assert cells[6].strip() == "—", "PLANT DID NOT LAND: cell 6 is not the Environment cell"
+          cells[6] = " staging-ish "
+          t[hit] = "|".join(cells)
+          open(p, "w", encoding="utf-8").write("".join(t))
+          assert "staging-ish" in open(p, encoding="utf-8").read(), "PLANT DID NOT LAND"
+          EOF
+          if python3 /tmp/env2-copy/test/validate.py; then
+            echo "ERROR: validator passed an Environment value the template never declares"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the vocabulary is the template's, not the row's"
+          fi
+
+      - name: Negative self-test (the shipped ledger template losing its `Environment` column)
+        run: |
+          set -eu
+          rm -rf /tmp/env3-copy && cp -R . /tmp/env3-copy
+          python3 - <<'EOF'
+          p = "/tmp/env3-copy/plugins/task-pipeline/skills/task-pipeline/templates/verification.md"
+          t = open(p, encoding="utf-8").read()
+          needle = "| REQ | What | Run | Shipped in | Observed at | Environment | Auto | Human | Note |"
+          assert needle in t, "PLANT DID NOT LAND: anchor absent before edit"
+          open(p, "w", encoding="utf-8").write(t.replace(needle, needle.replace(" Environment |", ""), 1))
+          assert "| Observed at | Auto |" in open(p, encoding="utf-8").read(), "PLANT DID NOT LAND"
+          EOF
+          if python3 /tmp/env3-copy/test/validate.py; then
+            echo "ERROR: validator passed a shipped template whose ledger cannot record an environment"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — every project seeding this ledger gets the column"
+          fi
+
+      - name: Negative self-test (a graph conditional dropped from behind its `$ref`)
+        run: |
+          set -eu
+          rm -rf /tmp/b79a-copy && cp -R . /tmp/b79a-copy
+          python3 - <<'EOF'
+          # B-079: `_conditionals()` recursed into `allOf` and never followed a `$ref`, so a
+          # schema that factors a rule into `definitions` — legal draft-07, and how a rule
+          # gets shared — read as a schema with NO conditionals, and both REQ-006 and REQ-012
+          # were reported missing from a schema that states them. The shipped schema now
+          # states all three rules behind `$ref`, so this plant only fails if the check
+          # follows the reference and then reads what is on the other side.
+          import collections, json
+          p = "/tmp/b79a-copy/plugins/task-pipeline/skills/task-pipeline/graph.schema.json"
+          s = json.load(open(p, encoding="utf-8"), object_pairs_hook=collections.OrderedDict)
+          allof = s["definitions"]["node"]["allOf"]
+          refs = [x.get("$ref", "") for x in allof]
+          assert any("rule_done_needs_evidence" in r for r in refs), "PLANT DID NOT LAND: the done-rule is not behind a $ref"
+          s["definitions"]["node"]["allOf"] = [x for x in allof if "rule_done_needs_evidence" not in x.get("$ref", "")]
+          open(p, "w", encoding="utf-8").write(json.dumps(s, indent=2, ensure_ascii=False) + "\n")
+          after = json.dumps(json.load(open(p, encoding="utf-8"))["definitions"]["node"])
+          assert "rule_done_needs_evidence" not in after, "PLANT DID NOT LAND"
+          EOF
+          if python3 /tmp/b79a-copy/test/validate.py; then
+            echo "ERROR: validator passed a node schema whose done-implies-evidence rule was removed"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the conditional check reads through a \$ref"
+          fi
+
+      - name: Property check (the shipped graph schema keeps its conditionals behind a `$ref`)
+        run: |
+          set -eu
+          python3 - <<'EOF'
+          # The deref branch is only exercised while the shipped schema actually uses it. If
+          # somebody inlines the three rules again the guard goes back to being untested by
+          # anything but a fixture, which is the state B-079 was found in.
+          import json
+          s = json.load(open("plugins/task-pipeline/skills/task-pipeline/graph.schema.json",
+                             encoding="utf-8"))
+          allof = s["definitions"]["node"]["allOf"]
+          refs = [x.get("$ref") for x in allof if isinstance(x, dict)]
+          assert len(refs) == 3 and all(r and r.startswith("#/definitions/") for r in refs), \
+              f"the node's conditionals are not behind $refs: {refs}"
+          print("OK: three conditionals, all behind #/definitions/ —", ", ".join(refs))
+          EOF
+
+      - name: Negative self-test (an `npm` gloss that disagrees with package.json)
+        run: |
+          set -eu
+          rm -rf /tmp/gloss1-copy && cp -R . /tmp/gloss1-copy
+          python3 - <<'EOF'
+          # CLAUDE.md said `npm test` (= `python3 test/validate.py`), dropping graph_test.py
+          # and its 129 cases — the same suite-outside-the-run class the test:all reach check
+          # exists for, stated the other way round. Nothing compared a documented equation
+          # against package.json.
+          p = "/tmp/gloss1-copy/CLAUDE.md"
+          t = open(p, encoding="utf-8").read()
+          needle = "(= `python3 test/validate.py && python3 test/graph_test.py`)"
+          assert needle in t, "PLANT DID NOT LAND: anchor absent before edit"
+          open(p, "w", encoding="utf-8").write(t.replace(needle, "(= `python3 test/validate.py`)", 1))
+          assert "(= `python3 test/validate.py`)" in open(p, encoding="utf-8").read(), "PLANT DID NOT LAND"
+          EOF
+          if python3 /tmp/gloss1-copy/test/validate.py; then
+            echo "ERROR: validator passed an npm gloss that names fewer suites than the script runs"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — a gloss is a claim about what the command does"
+          fi
+
+      - name: Negative self-test (a document naming an `npm run` script that does not exist)
+        run: |
+          set -eu
+          rm -rf /tmp/gloss2-copy && cp -R . /tmp/gloss2-copy
+          python3 - <<'EOF'
+          p = "/tmp/gloss2-copy/CLAUDE.md"
+          t = open(p, encoding="utf-8").read()
+          anchor = "## Commands"
+          assert anchor in t, "PLANT DID NOT LAND: anchor absent before edit"
+          t = t.replace(anchor, anchor + "\n\nRun `npm run test:negatives-fast` before pushing.\n", 1)
+          open(p, "w", encoding="utf-8").write(t)
+          assert "test:negatives-fast" in open(p, encoding="utf-8").read(), "PLANT DID NOT LAND"
+          EOF
+          if python3 /tmp/gloss2-copy/test/validate.py; then
+            echo "ERROR: validator passed a document quoting a dead npm script as runnable"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — a named npm script must exist in package.json"
+          fi
+
+      - name: Property check (a portable example command in shipped doctrine is not this repo's script)
+        run: |
+          set -eu
+          rm -rf /tmp/gloss3-copy && cp -R . /tmp/gloss3-copy
+          python3 - <<'EOF'
+          # `references/planning.md` names `npm run lint:paths` as an example of a HOST
+          # project's command. Refusing that would teach the doctrine to stop naming
+          # commands at all — measured on the check's first run, which reported four.
+          p = "/tmp/gloss3-copy/plugins/task-pipeline/skills/task-pipeline/references/planning.md"
+          t = open(p, encoding="utf-8").read()
+          assert "npm run lint:paths" in t, "PLANT DID NOT LAND: the portable example is gone"
+          EOF
+          if python3 /tmp/gloss3-copy/test/validate.py >/dev/null; then
+            echo "OK: shipped doctrine may name a host project's command"
+          else
+            echo "ERROR: the existence check reached into portable doctrine"
+            exit 1
+          fi
+
+      - name: Negative self-test (a release after the newest stamp that the gap section does not name)
+        run: |
+          set -eu
+          rm -rf /tmp/gap1-copy && cp -R . /tmp/gap1-copy
+          python3 - <<'EOF'
+          # Fourteen consecutive releases carried no run stamp while the honest-gap section
+          # still named only v1.16.0-v1.23.0, and the cold-retirement trigger — which reads
+          # the last five stamps — had nothing to read across the whole stretch. Nothing
+          # failed, because nothing compared the tag list against the stamps. Narrowing the
+          # declared range must reopen the finding.
+          p = "/tmp/gap1-copy/docs/evidence/retro.md"
+          t = open(p, encoding="utf-8").read()
+          needle = "`v1.60.1` through `v1.72.0`"
+          assert needle in t, "PLANT DID NOT LAND: the declared range is not where the plant expects it"
+          open(p, "w", encoding="utf-8").write(t.replace("v1.72.0", "v1.63.0"))
+          assert "v1.72.0" not in open(p, encoding="utf-8").read(), "PLANT DID NOT LAND"
+          EOF
+          if python3 /tmp/gap1-copy/test/validate.py; then
+            echo "ERROR: validator passed unstamped releases named nowhere in the gap section"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — a release either carries a stamp or is recorded as a gap"
+          fi
+
+      - name: Negative self-test (the retro's archive pointer naming a root this project does not use)
+        run: |
+          set -eu
+          rm -rf /tmp/gap2-copy && cp -R . /tmp/gap2-copy
+          python3 - <<'EOF'
+          # Live stage-0 doctrine named `docs/superpowers/retro/YYYY-QN.md` — the
+          # pre-v1.53.0 root — so the one line a run reads to find the archive pointed at a
+          # directory that has not existed since.
+          p = "/tmp/gap2-copy/docs/evidence/retro.md"
+          t = open(p, encoding="utf-8").read()
+          needle = "`docs/evidence/retro/YYYY-QN.md`"
+          assert needle in t, "PLANT DID NOT LAND: anchor absent before edit"
+          open(p, "w", encoding="utf-8").write(
+              t.replace(needle, "`docs/superpowers/retro/YYYY-QN.md`", 1))
+          assert "docs/superpowers/retro/YYYY-QN.md" in open(p, encoding="utf-8").read(), "PLANT DID NOT LAND"
+          EOF
+          if python3 /tmp/gap2-copy/test/validate.py; then
+            echo "ERROR: validator passed an archive pointer at a root this project does not use"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the archive pointer is compared against the resolved root"
+          fi
+
+      - name: Negative self-test (a stale guard count in the `## Unreleased` section)
+        run: |
+          set -eu
+          rm -rf /tmp/unr1-copy && cp -R . /tmp/unr1-copy
+          python3 - <<'EOF'
+          # B-104: the count guard read the newest `## vX.Y.Z` section, so between a tag and
+          # the next bump a commit adding guards had nowhere to state the count — and writing
+          # it into the shipped version's section would edit a released record. This proves
+          # `## Unreleased` is READ, not merely tolerated.
+          import re
+          p = "/tmp/unr1-copy/CHANGELOG.md"
+          t = open(p, encoding="utf-8").read()
+          m = re.search(r"(Guards:\s*\d+\s*→\s*\*\*)(\d+)(\*\*)", t)
+          assert m and t.index("## Unreleased") < m.start(), "PLANT DID NOT LAND: no count in Unreleased"
+          open(p, "w", encoding="utf-8").write(t[:m.start(2)] + "999" + t[m.end(2):])
+          assert "→ **999**" in open(p, encoding="utf-8").read(), "PLANT DID NOT LAND"
+          EOF
+          if python3 /tmp/unr1-copy/test/validate.py; then
+            echo "ERROR: validator passed a guard count in Unreleased that disagrees with the workflow"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the Unreleased section is where the count lives before a bump"
+          fi
+
+      - name: Negative self-test (an `## Unreleased` section parked below a released version)
+        run: |
+          set -eu
+          rm -rf /tmp/unr2-copy && cp -R . /tmp/unr2-copy
+          python3 - <<'EOF'
+          # Under a release heading the section reads as a claim about the past, and the count
+          # check would never reach it — the silent shape B-104 was made of.
+          p = "/tmp/unr2-copy/CHANGELOG.md"
+          t = open(p, encoding="utf-8").read()
+          i, j = t.index("## Unreleased"), t.index("## v1.")
+          assert i < j, "PLANT DID NOT LAND: Unreleased is not above the version heading"
+          open(p, "w", encoding="utf-8").write(t[:i] + t[j:j + 40] + "\n\n" + t[i:j] + t[j + 40:])
+          out = open(p, encoding="utf-8").read()
+          assert out.index("## Unreleased") > out.index("## v1."), "PLANT DID NOT LAND"
+          EOF
+          if python3 /tmp/unr2-copy/test/validate.py; then
+            echo "ERROR: validator passed an Unreleased section sitting under a release"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — Unreleased above every version heading, or it is unreadable"
+          fi
+
+      - name: Negative self-test (claim registry — a stale reference-file count in the SHIPPED template)
+        run: |
+          set -eu
+          rm -rf /tmp/cr5b-copy && cp -R . /tmp/cr5b-copy
+          python3 - <<'EOF'
+          # The incident this plant is for: three shipped surfaces said "34 reference files"
+          # over a directory of 35, and `npm test` printed `reference files: dormant`. Two
+          # holes at once — the pattern knew only the word order "N files under
+          # `references/`", and the corpus was eight named files plus references/**, so
+          # templates/ and scripts/ were never opened. Both are fixed; this proves it, in
+          # the template AND in the wording that was invisible.
+          p = "/tmp/cr5b-copy/plugins/task-pipeline/skills/task-pipeline/templates/run.md"
+          t = open(p, encoding="utf-8").read()
+          needle = "The bundle is 35 reference files"
+          assert needle in t, "PLANT DID NOT LAND: anchor absent before edit"
+          open(p, "w", encoding="utf-8").write(t.replace(needle, "The bundle is 34 reference files", 1))
+          assert "34 reference files" in open(p, encoding="utf-8").read(), "PLANT DID NOT LAND"
+          EOF
+          if python3 /tmp/cr5b-copy/test/validate.py; then
+            echo "ERROR: validator passed '34 reference files' in a shipped template over a directory of 35"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — templates/ and scripts/ are in the corpus and the class reads any phrasing"
+          fi
+
+      - name: Negative self-test (a stale count in an OPEN question, dated beside it)
+        run: |
+          set -eu
+          rm -rf /tmp/oqs-copy && cp -R . /tmp/oqs-copy
+          python3 - <<'EOF'
+          # The hole this closes was self-inflicted and watched. The honesty note explaining
+          # that OQ-0002 no longer restates a total put an ISO date in the row, which made the
+          # whole row a dated record and DISARMED the register plant — the guard went green
+          # over exactly the stale total it had been written to catch. `OQ-####` now uses the
+          # status cell, the same discriminator the board uses: `Open` is a live claim
+          # whatever dates sit beside it.
+          p = "/tmp/oqs-copy/docs/OPEN_QUESTIONS.md"
+          t = open(p, encoding="utf-8").read()
+          anchor = "\n**When one resolves:**"
+          assert anchor in t, "PLANT DID NOT LAND: anchor absent before edit"
+          row = "| OQ-9999 | Do the 250 guards still need a probe? Asked 2026-08-20 | operator | nothing | Open |\n"
+          open(p, "w", encoding="utf-8").write(t.replace(anchor, "\n" + row + anchor, 1))
+          assert "the 250 guards" in open(p, encoding="utf-8").read(), "PLANT DID NOT LAND"
+          EOF
+          if python3 /tmp/oqs-copy/test/validate.py; then
+            echo "ERROR: a date beside an OPEN question exempted a stale total — the shape that disarmed this guard once"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — an open question is a live claim whatever dates sit beside it"
+          fi
+
+      - name: Negative self-test (claim registry — a stale count in an OPEN row of a register)
+        run: |
+          set -eu
+          rm -rf /tmp/cr5c-copy && cp -R . /tmp/cr5c-copy
+          python3 - <<'EOF'
+          # `docs/OPEN_QUESTIONS.md` said "the 250 guards" against a workflow defining 390,
+          # in the exact phrasing the guard class already knew — the registers were simply
+          # outside the corpus that `docs/DOCMAP.md`'s matrix sends every stated number to.
+          # Planted in an OPEN board row, not in `docs/OPEN_QUESTIONS.md`. The first
+          # version used OQ-0002 and went dormant the moment that row gained an ISO date
+          # in its honesty note — a dated item is a record. On the board the State cell
+          # is the discriminator instead, so an open row is a live claim whatever dates
+          # it carries, and this plant cannot be disarmed by editing prose beside it.
+          p = "/tmp/cr5c-copy/docs/evidence/backlog.md"
+          t = open(p, encoding="utf-8").read()
+          needle = "**92 hand-written counts in prose against 12 registered claim classes.**"
+          assert needle in t, "PLANT DID NOT LAND: B-041 is not where this plant reads it"
+          open(p, "w", encoding="utf-8").write(
+              t.replace(needle, needle.replace("counts in prose", "counts in prose and the 250 guards"), 1))
+          assert "the 250 guards" in open(p, encoding="utf-8").read(), "PLANT DID NOT LAND"
+          EOF
+          if python3 /tmp/cr5c-copy/test/validate.py; then
+            echo "ERROR: validator passed a stale total in an OPEN row of a register the doc map names"
+            exit 1
+          else
+            echo "OK: validator correctly FAILs — the registers are in the claim-registry corpus"
+          fi
+
+      - name: Property check (a DATED row in a register is a record, not a claim about now)
+        run: |
+          set -eu
+          rm -rf /tmp/cr5d-copy && cp -R . /tmp/cr5d-copy
+          python3 - <<'EOF'
+          # The board and the retro exist to say what was true on a day. Correcting those
+          # numbers would rewrite the record, so a number inside a dated item is exempt —
+          # and that exemption is what let the registers into the corpus at all.
+          p = "/tmp/cr5d-copy/docs/evidence/backlog.md"
+          t = open(p, encoding="utf-8").read()
+          anchor = "| id | What | Source | Size | Sev | Blast | Age | Prio | State | Home |"
+          assert anchor in t, "PLANT DID NOT LAND: anchor absent before edit"
+          row = ("| B-000 | Measured 2026-08-11: the bundle held 32 reference files. | audit, "
+                 "2026-08-11 | S | 1 | 1 | 0 | **1** | **closed 2026-08-11** — record only. | \u2014 |")
+          t = t.replace(anchor, anchor + "\n" + row, 1)
+          open(p, "w", encoding="utf-8").write(t)
+          assert "32 reference files" in open(p, encoding="utf-8").read(), "PLANT DID NOT LAND"
+          EOF
+          if python3 /tmp/cr5d-copy/test/validate.py; then
+            echo "OK: validator correctly PASSES — a dated board row is a measurement of its date"
+          else
+            echo "ERROR: the registry refused a dated record; the board cannot record what was true"
+            exit 1
+          fi
+
       - name: Negative self-test (claim registry — a stale guard count)
         run: |
           set -eu
@@ -3700,7 +4317,10 @@ jobs:
           python3 - <<'EOF'
           p = "/tmp/vf6-copy/docs/evidence/verification.md"
           t = open(p, encoding="utf-8").read()
-          needle = "| Observed at | Auto | Human | Note |"
+          # The literal moved when `Environment` arrived (B-099). A plant that spells the
+          # whole header describes the table it was written against — which is the same
+          # lesson the property check below already carries about cell CONTENT.
+          needle = "| Observed at | Environment | Auto | Human | Note |"
           assert needle in t, "PLANT DID NOT LAND: the header is not where the guard reads it"
           open(p, "w", encoding="utf-8").write(t.replace(needle, "| Auto | Person | Note |", 1))
           EOF
@@ -3769,9 +4389,9 @@ jobs:
           import re
           p = "/tmp/hr-copy/docs/evidence/verification.md"
           t = open(p, encoding="utf-8").read()
-          old = "| REQ | What | Run | Shipped in | Observed at | Auto | Human | Note |"
+          old = "| REQ | What | Run | Shipped in | Observed at | Environment | Auto | Human | Note |"
           assert old in t, "PLANT DID NOT LAND: header absent"
-          t = t.replace(old, "| REQ | What | Run | Shipped in | Observed at | Auto | Note | Human |")
+          t = t.replace(old, "| REQ | What | Run | Shipped in | Observed at | Environment | Auto | Note | Human |")
           # Any Auto value, not just `pass`: four rows read `none` after a review round,
           # and a plant that skips them leaves half the table in the old column order.
           #
@@ -3799,16 +4419,17 @@ jobs:
           import re
           p = "/tmp/cl1-copy/CHANGELOG.md"
           t = open(p, encoding="utf-8").read()
-          # Scope to the NEWEST section, which is the only one the guard reads. The
-          # first version searched the whole file, so an entry writing the count in a
-          # slightly different form sent the plant into a released section and the
-          # guard stayed correctly silent — a probe that lands somewhere real and
-          # proves nothing (R-001).
-          heads = [x.start() for x in re.finditer(r"^## v", t, re.M)]
-          assert len(heads) >= 2, "PLANT DID NOT LAND: fewer than two release sections"
+          # The guard reads the TOPMOST `## ` section, which since B-104 may be
+          # `## Unreleased` — the home the count needs between a tag and the next bump.
+          # Scoping this to `^## v` sent the plant into a released section, where the
+          # guard is correctly silent: a probe that lands somewhere real and proves
+          # nothing (R-001), which is the same mistake this comment already records one
+          # scope out. Derive the guard's own scope, never assume the heading's name.
+          heads = [x.start() for x in re.finditer(r"^## ", t, re.M)]
+          assert len(heads) >= 2, "PLANT DID NOT LAND: fewer than two `## ` sections"
           top = t[heads[0]:heads[1]]
           m = re.search(r"(Guards:\s*\d+\s*→\s*\*\*)(\d+)(\*\*)", top)
-          assert m, "PLANT DID NOT LAND: no guard count in the NEWEST section"
+          assert m, "PLANT DID NOT LAND: no guard count in the TOPMOST section"
           patched = top[:m.start(2)] + str(int(m.group(2)) - 1) + top[m.end(2):]
           open(p, "w", encoding="utf-8").write(t[:heads[0]] + patched + t[heads[1]:])
           EOF
@@ -4757,11 +5378,12 @@ jobs:
           # string and broke on three consecutive releases, once letting a red CI reach
           # main. A needle that has to be maintained is a needle that goes stale between
           # the change and the run.
-          heads = [m.start() for m in re.finditer(r"^## v", t, re.M)]
-          assert len(heads) >= 2, "PLANT DID NOT LAND: fewer than two release sections"
+          # Same scope as the guard: the TOPMOST `## ` section, `## Unreleased` since B-104.
+          heads = [m.start() for m in re.finditer(r"^## ", t, re.M)]
+          assert len(heads) >= 2, "PLANT DID NOT LAND: fewer than two `## ` sections"
           top = t[heads[0]:heads[1]]
           m = re.search(r"Guards:\s*(\d+)\s*(?:\u2192|->)\s*(\*{0,2})(\d+)(\*{0,2})", top)
-          assert m, "PLANT DID NOT LAND: the newest section states no readable guard count"
+          assert m, "PLANT DID NOT LAND: the topmost section states no readable guard count"
           # The exact shape the guard went dormant on: same numbers, no colon.
           patched = top[:m.start()] + "Guards %s \u2192 %s%s%s" % (
               m.group(1), m.group(2), m.group(3), m.group(4)) + top[m.end():]
@@ -7547,7 +8169,19 @@ jobs:
           # direct index raised KeyError and this plant died before reaching its own assert.
           # A plant that crashes proves nothing — skip a branch shaped differently and let the
           # assert below speak when none matches.
-          hit = [c for c in n["allOf"]
+          # B-079 moved the node's conditionals behind `$ref`s in `definitions`, which is
+          # what proves the checker follows them — and it stopped six plants from finding
+          # their subject. Follow the reference the way the guard does; the resolved object
+          # IS the definitions entry, so mutating it still lands in the document.
+          def deref(o):
+              while isinstance(o, dict) and "$ref" in o:
+                  cur = d
+                  for part in o["$ref"].lstrip("#/").split("/"):
+                      cur = cur[part]
+                  o = cur
+              return o
+          hit = [deref(c) for c in n["allOf"]]
+          hit = [c for c in hit
                  if c.get("if", {}).get("properties", {}).get("status", {}).get("const") == "parked"]
           assert hit, "PLANT DID NOT LAND: gx8 — no parked rule to weaken"
           # A pattern is PRESENT and constrains nothing. Checking for the key's existence
@@ -7570,8 +8204,21 @@ jobs:
           import json
           p = "/tmp/gx9-copy/plugins/task-pipeline/skills/task-pipeline/graph.schema.json"
           d = json.load(open(p, encoding="utf-8"))
-          conds = d["definitions"]["node"]["allOf"]
-          assert conds, "PLANT DID NOT LAND: gx9 — no conditionals to disarm"
+          # B-079 moved the conditionals behind `$ref`s in `definitions`. Follow the
+          # reference the way the guard does — the resolved object IS the definitions
+          # entry, so mutating it still lands in the document. Seven plants read
+          # `node.allOf` inline; this was the seventh, and it died on `KeyError: 'if'`
+          # after the other six were repaired, which is why the class is written down.
+          def deref(o):
+              while isinstance(o, dict) and "$ref" in o:
+                  cur = d
+                  for part in o["$ref"].lstrip("#/").split("/"):
+                      cur = cur[part]
+                  o = cur
+              return o
+          conds = [deref(c) for c in d["definitions"]["node"]["allOf"]]
+          ok = bool(conds) and all("if" in c for c in conds)
+          assert ok, "PLANT DID NOT LAND: gx9 — no conditionals to disarm"
           # additionalProperties is false, so a node can never carry `_never`: both rules
           # go inert while every key the check reads is still in place.
           for c in conds:
@@ -7598,8 +8245,19 @@ jobs:
           # Tolerant traversal (B-080 added a branch keyed on `not: {const: parked}`, which
           # carries no `const` under `status`; a direct index raises KeyError and the plant
           # dies before its own assert can speak).
+          # B-079 moved the node's conditionals behind `$ref`s in `definitions`, which is
+          # what proves the checker follows them — and it stopped six plants from finding
+          # their subject. Follow the reference the way the guard does; the resolved object
+          # IS the definitions entry, so mutating it still lands in the document.
+          def deref(o):
+              while isinstance(o, dict) and "$ref" in o:
+                  cur = d
+                  for part in o["$ref"].lstrip("#/").split("/"):
+                      cur = cur[part]
+                  o = cur
+              return o
           n["allOf"] = [c for c in n["allOf"]
-                        if c.get("if", {}).get("properties", {}).get("status", {}).get("const") != "parked"]
+                        if deref(c).get("if", {}).get("properties", {}).get("status", {}).get("const") != "parked"]
           assert len(n["allOf"]) == before - 1, "PLANT DID NOT LAND: gx6 — no parked rule to remove"
           json.dump(d, open(p, "w", encoding="utf-8"), indent=2)
           EOF
@@ -7620,7 +8278,19 @@ jobs:
           # Tolerant traversal (B-080 added a branch keyed on `not: {const: parked}`, which
           # carries no `const` under `status`; a direct index raises KeyError and the plant
           # dies before its own assert can speak).
-          hit = [c for c in d["definitions"]["node"]["allOf"]
+          # B-079 moved the node's conditionals behind `$ref`s in `definitions`, which is
+          # what proves the checker follows them — and it stopped six plants from finding
+          # their subject. Follow the reference the way the guard does; the resolved object
+          # IS the definitions entry, so mutating it still lands in the document.
+          def deref(o):
+              while isinstance(o, dict) and "$ref" in o:
+                  cur = d
+                  for part in o["$ref"].lstrip("#/").split("/"):
+                      cur = cur[part]
+                  o = cur
+              return o
+          hit = [deref(c) for c in d["definitions"]["node"]["allOf"]]
+          hit = [c for c in hit
                  if c.get("if", {}).get("properties", {}).get("status", {}).get("const") == "parked"]
           dropped = [c["then"]["properties"]["parked_reason"].pop("pattern", None) for c in hit]
           assert any(dropped), "PLANT DID NOT LAND: gx7 — no non-whitespace pattern to drop"
@@ -7688,15 +8358,29 @@ jobs:
           # and it stopped landing the moment a second conditional arrived and the pair
           # moved into `allOf` — a green step that proved nothing, which is the exact
           # class that refused three releases on 2026-08-16.
-          conds = ([(n, None)] if n.get("if") else []) + [(c, n["allOf"]) for c in n.get("allOf") or []]
-          hit = [(c, owner) for c, owner in conds
-                 if ((c.get("if") or {}).get("properties") or {}).get("status", {}).get("const") == "done"]
-          assert hit, "PLANT DID NOT LAND: gx3 — no done rule to remove, inline or in allOf"
-          c, owner = hit[0]
+          # B-079 moved the node's conditionals behind `$ref`s in `definitions`, which is
+          # what proves the checker follows them — and it stopped six plants from finding
+          # their subject. Follow the reference the way the guard does; the resolved object
+          # IS the definitions entry, so mutating it still lands in the document.
+          def deref(o):
+              while isinstance(o, dict) and "$ref" in o:
+                  cur = d
+                  for part in o["$ref"].lstrip("#/").split("/"):
+                      cur = cur[part]
+                  o = cur
+              return o
+          # Carries the MEMBER as well as its resolved form: removing the rule means
+          # dropping the `$ref` that points at it, not the definition it points to.
+          conds = ([(n, n, None)] if n.get("if") else []) + [
+              (c, deref(c), n["allOf"]) for c in n.get("allOf") or []]
+          hit = [(member, res, owner) for member, res, owner in conds
+                 if ((res.get("if") or {}).get("properties") or {}).get("status", {}).get("const") == "done"]
+          assert hit, "PLANT DID NOT LAND: gx3 — no done rule to remove, inline, in allOf or behind a $ref"
+          member, res, owner = hit[0]
           if owner is None:
-              del c["if"]; del c["then"]
+              del res["if"]; del res["then"]
           else:
-              owner.remove(c)
+              owner.remove(member)
           json.dump(d, open(p, "w", encoding="utf-8"), indent=2)
           EOF
           if python3 /tmp/gx3-copy/test/validate.py; then
@@ -7760,8 +8444,19 @@ jobs:
           d = json.load(open(p, encoding="utf-8"))
           n = d["definitions"]["node"]
           before = len(n["allOf"])
+          # B-079 moved the node's conditionals behind `$ref`s in `definitions`, which is
+          # what proves the checker follows them — and it stopped six plants from finding
+          # their subject. Follow the reference the way the guard does; the resolved object
+          # IS the definitions entry, so mutating it still lands in the document.
+          def deref(o):
+              while isinstance(o, dict) and "$ref" in o:
+                  cur = d
+                  for part in o["$ref"].lstrip("#/").split("/"):
+                      cur = cur[part]
+                  o = cur
+              return o
           n["allOf"] = [c for c in n["allOf"]
-                        if "check" not in (c.get("then", {}).get("required") or [])]
+                        if "check" not in (deref(c).get("then", {}).get("required") or [])]
           assert len(n["allOf"]) == before - 1, "PLANT DID NOT LAND: b80b — no check rule to remove"
           json.dump(d, open(p, "w", encoding="utf-8"), indent=2)
           EOF
@@ -7781,7 +8476,19 @@ jobs:
           p = "/tmp/b80c-copy/plugins/task-pipeline/skills/task-pipeline/graph.schema.json"
           d = json.load(open(p, encoding="utf-8"))
           n = d["definitions"]["node"]
-          c = next((c for c in n["allOf"] if "check" in (c.get("then", {}).get("required") or [])), None)
+          # B-079 moved the node's conditionals behind `$ref`s in `definitions`, which is
+          # what proves the checker follows them — and it stopped six plants from finding
+          # their subject. Follow the reference the way the guard does; the resolved object
+          # IS the definitions entry, so mutating it still lands in the document.
+          def deref(o):
+              while isinstance(o, dict) and "$ref" in o:
+                  cur = d
+                  for part in o["$ref"].lstrip("#/").split("/"):
+                      cur = cur[part]
+                  o = cur
+              return o
+          c = next((r for r in map(deref, n["allOf"])
+                    if "check" in (r.get("then", {}).get("required") or [])), None)
           assert c and c["if"].get("required") == ["status"], "PLANT DID NOT LAND: b80c"
           # `additionalProperties: false` means no node can ever carry `impossible`, so the
           # rule is stated and inert. The same trick defeated the first parked_reason guard.

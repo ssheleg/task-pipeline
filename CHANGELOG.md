@@ -1,5 +1,66 @@
 # Changelog
 
+## Unreleased
+
+**The claim registry had the class for this exact incident and it fired on nothing.** Three
+shipped surfaces said *34 reference files* over a directory of 35 — `scripts/graph.py`'s
+`doctrine` docstring and `templates/run.md` twice — and `npm test` printed
+`reference files: dormant (truth 35)`. Two holes, either of which was enough: the pattern
+knew only the word order ``N files under `references/` ``, and the corpus was eight named
+files plus `references/**`, so `templates/` and `scripts/` were never opened. The class now
+reads any phrasing of the count, the corpus reads the templates and the shipped script, and
+the class is armed at three agreeing sites instead of dormant.
+
+**And it never read this repository's own registers.** `docs/DOCMAP.md` names decisions,
+open questions, the board, the ledger and the retro as the registers, and its propagation
+matrix sends *a number stated in a living document* to this registry — which could not see
+any of them. `docs/OPEN_QUESTIONS.md` said *the 250 guards* against a workflow defining 390,
+in a phrasing the guard class already knew. Bringing them in refused 26 statements and every
+one was narration, so a number inside a **dated item** is a record and exempt; on the board
+the discriminator is the State cell rather than the date, because every row names the day it
+was filed and B-001 — open — was stating its description budget and its reference-file count
+as facts about now.
+
+**Fourteen consecutive releases carry no run stamp**, `v1.60.1` through `v1.72.0`, and the
+retro's honest-gap section named only `v1.16.0`–`v1.23.0`. Its *Measured, not recalled*
+receipt could not produce the measurement: it grepped `docs/superpowers/retro.md`, removed at
+v1.53.0, and grepped for a tag's own commit when a stamp names the commit the *run* ended on.
+Rewritten as a tag-range walk that reads the archive too, and a guard now requires every
+release after the newest stamp to be named in that section.
+
+Also: `## Unreleased` is where the guard count lives between a tag and the next bump (B-104);
+`Environment` is a required cell on every verification row with the vocabulary read out of
+the shipped template (B-099's other half); the graph schema states its three node rules
+behind `$ref`s and the checker follows them (B-079, proved by moving them, not by a fixture);
+an open board row's `file:N-M` must quote the phrase it points at, which caught five stale
+citations and then caught this change's own edits four more times; the acceptance ladder is
+policy **`AP-1`** with an owner and an in-force date, and `gates.md`'s *the framework fixes
+no stage count* is scoped to the pipeline's shape; `read:` and `gate:` are reported
+**unattested** instead of claimed *never agent-written*, because the ledger is the file the
+agent appends to at every stage; `validate.yml` no longer re-validates a SHA on its own tag
+push; and every documented `npm` equation is compared against `package.json` — `CLAUDE.md`
+had `npm test` as `validate.py` alone, dropping 129 graph cases.
+
+**What the suite found that no reading did.** This change broke **thirteen** existing
+plants and `npm run test:all` named every one: the two verification-header probes spell
+the whole header and it gained a column; two CHANGELOG probes scoped themselves to
+`^## v` and the count now lives in `## Unreleased`; **seven** graph-schema probes walk
+`node.allOf` inline and the rules moved behind `$ref`. All thirteen were repaired by
+deriving the guard's own scope rather than restating it, which is what `learned.md`'s
+*sweep the class* asks for — and the sweep needed two rounds: six schema probes were
+repaired together and the seventh surfaced on the next full run, having died on
+`KeyError: 'if'` where the others had died on their own asserts. A class fixed in six of
+seven places is the shape standing instruction R-003 exists for.
+
+One of the twelve was sharper than the rest, and it was self-inflicted twice over: the
+honesty note explaining that `OQ-0002` no longer restates a total put an ISO date in the
+row, which made the row a dated record and **disarmed the register plant** — green over
+exactly the stale total it had been written to catch. `OQ-####` now uses its `Status`
+cell, the discriminator the board already uses, and the register plant sits on an open
+board row where no prose edit beside it can turn it off.
+
+Guards: 390 → **412** · property checks 9 → **14**
+
 ## v1.72.0 — a node says how it will be closed
 
 **B-080 closed, and with it the last of four requirements this pack's own manifesto named

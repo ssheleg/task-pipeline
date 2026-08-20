@@ -47,12 +47,21 @@ The method most audits use is **horizontal**: compare the documents against each
 other, then do it again. It works, and then it fails in a way that is invisible
 from inside it. Measured over seven passes on a production repository:
 
-| Pass | Findings | …of which the previous pass's own fixes caused |
-|---|---|---|
-| 4 | 12 | 5 |
-| 5 | 17 | 9 |
-| 6 | 13 | 10 |
-| 7 | 19 | 4 |
+| Pass | Findings | …of which the previous pass's own fixes caused | Self-inflicted share |
+|---|---|---|---|
+| 4 | 12 | 5 | 42% |
+| 5 | 17 | 9 | 53% |
+| 6 | 13 | 10 | 77% |
+| 7 | 19 | 4 | 21% — see the note below |
+
+**The trend above is measured over passes four to six, and pass seven is not part of
+it.** 42% → 53% → 77% is the decay this section teaches; the seventh pass fell back to
+4 of 19 and **the record does not say what that pass did differently.** The row stays,
+with the gap named, for two reasons. Deleting a measured row to protect a claim is the
+opposite of what this file asks of every gate it describes — and the vertical pass
+described below cannot be credited for the drop, because it is a separate pass over the
+same repository, not the seventh. Whatever pass seven did, it is unrecorded, and an
+unrecorded cause is what this table has to say about it.
 
 By pass six the audit was **mostly repairing itself**. Not fatigue — arithmetic.
 Each pass edits the corpus the next pass reads, so the newest edits are always the

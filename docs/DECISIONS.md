@@ -9,13 +9,61 @@ this repository did not — the same gap `B-009` found for open questions, and i
 surfaced the same way: a status vocabulary (`Resolved→DEC-####`) pointing at a file
 that was not there.
 
-**Next free ID:** `DEC-0005`
+**Next free ID:** `DEC-0006`
 
 Reading *"Next free ID"* is **not** reserving it — a second agent reading it in the
 same minute gets the same answer. Reserve it, then write.
 
 **To change your mind:** add a new entry, edit **only the status line** of the old
 one, leave its body intact. Never renumber. Never delete.
+
+---
+
+### DEC-0005 — the registers join the claim-registry corpus, and a dated item is a record
+
+- **Date:** 2026-08-20
+- **Status:** Accepted
+- **Context:** `docs/DOCMAP.md`'s propagation matrix sends *a number stated in a living
+  document* to the claim registry, and the registry could not see the registers that
+  same map names — `docs/DECISIONS.md`, `docs/OPEN_QUESTIONS.md`, and the board, ledger
+  and retro under the artifact root. Measured: `docs/OPEN_QUESTIONS.md` said
+  "the 250 guards" against a workflow defining 390, in a phrasing the guard class
+  already knew. Adding the six files raw refused **26** statements, and every one was
+  narration — a retro entry recounting how many guards caught a change, a closed board
+  row quoting a measurement from a named day.
+- **Decision:** the registers are in the corpus, and **a number inside a dated item is a
+  measurement of that date rather than a claim about now.** The unit is the row for a
+  table line, the bullet or numbered item for prose, and the section's heading-plus-first-block
+  stamp as the fallback — a retro entry is one dated section spanning many paragraphs, and
+  a decision record stamps its date under its heading rather than in every paragraph.
+  **On the board the discriminator is the `State` cell, not the date:** every row names the
+  day it was filed, so a date rule exempts open rows too, and `B-001` — open — was stating
+  its description budget and its reference-file count as facts about now. `closed …` is a
+  record; anything else is live. **`OQ-####` the same way, and that half was learned by
+  being caught:** the honesty note explaining that `OQ-0002` no longer restates a total
+  put an ISO date in its row, which made the row a dated record and **disarmed the very
+  plant written for that register** — green over the stale total it existed to catch,
+  found by `npm run test:all` and not by reading. A question's `Status` is already a
+  closed vocabulary, so `Open` is live whatever dates sit beside it.
+- **The cost, stated because it is real:** a live claim written into a dated item is
+  exempt. That is the semantics of a dated item, and the measured alternative is worse —
+  tightening the two loose classes (`N guards`, `N axes`, nouns this corpus also uses for
+  subsets) to require a totaliser disarms them on the surfaces their own incidents
+  happened on, including the Cursor rule's bare *Gates: three axes*. What carries the
+  residue instead is a **writing rule**: a subset count puts a qualifier between the
+  number and the noun (`three new guards`, `four proof-depth axes`), the device the
+  `rotation axes` class already relies on. It has no mechanism, it was broken twice
+  inside the change that wrote it, and `B-107` carries that.
+- **Consequences / affects:** `test/validate.py` (`_is_dated_record`, the corpus block,
+  and the three classes added the same day — description budget, description headroom,
+  registered claim classes), `docs/evidence/backlog.md` (`B-001`, `B-041`, `B-045`
+  collapsed, `B-057`, `B-107`), `docs/OPEN_QUESTIONS.md` (`OQ-0002`'s premise no longer
+  restates a total), `CONTRIBUTING.md` → invariant 57. Two plants and one property check
+  in `.github/workflows/validate.yml` hold the boundary: a stale total in an **open** row
+  of a register is refused, a dated **closed** board row is not, and a date beside an
+  **open question** does not exempt it. The register plant was moved off
+  `docs/OPEN_QUESTIONS.md` onto an open board row for the same reason — a plant a prose
+  edit beside it can disarm is a plant that will be disarmed.
 
 ---
 

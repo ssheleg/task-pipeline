@@ -8,9 +8,8 @@ writes, so a prune placed ahead of it can never run on real data
 
 **What stage 0 reads in full:** *Standing instructions* and *Run stamps*. Both are
 bounded by construction — ten rows and one line per run — which is why the cap is not
-negotiable. The **Recent log** and the **archive**
-(`docs/superpowers/retro/YYYY-QN.md`) are *queried* by the task's nouns and never read
-end to end.
+negotiable. The **Recent log** and the **archive** (`docs/evidence/retro/YYYY-QN.md`,
+which is `2026-Q3.md` today) are *queried* by the task's nouns and never read end to end.
 
 This said all three until 2026-08-10, and the claim that all three were bounded was
 false: measured, the log was **10 937 of this file's 14 756 tokens** and nothing caps
@@ -41,7 +40,7 @@ has not fired in the last five run stamps, or in the last sixty days. At eleven
 rows, the oldest never-fired
 row goes — the cap is not negotiable, ranking is.
 
-## Recent log — entries from the last five run stamps (newest first)
+## Recent log — narrative entries, uncapped and queried rather than read (newest first)
 
 ### 2026-08-16 · `graph-backlog` · the same rewrite mistake, two days running
 
@@ -292,11 +291,15 @@ the row that looks coldest is the row that goes. The four values were refreshed,
 fixes the **instance**; the class is that the column is derived and nothing derives it, and
 that is filed rather than fixed. Saying which of the two was done is R-006's whole point.
 
-**What is stated rather than fixed.** The *Recent log*'s heading says *entries from the
-last five run stamps*; it holds considerably more, reaching back to 2026-08-08. The
-doctrine above it says the log is queried rather than read and is deliberately uncapped —
-so the heading, not the length, is what is wrong. Filed, not fixed here: renaming a section
-that four guards may key on is its own change.
+**Fixed on 2026-08-20, after being stated three times.** The *Recent log*'s heading said
+*entries from the last five run stamps* over 25 entries reaching back nine days, while the
+doctrine above it said the log is queried rather than read and is deliberately uncapped —
+so the heading, not the length, was what was wrong. It was filed twice (`B-060`, `B-069`)
+and disclosed here, which is three records of one finding and no fix. The deferral said
+*renaming a section that four guards may key on is its own change*; measured, no guard keys
+on the wording — one keys on `## Recent log` and still matches. The heading now says what
+the section is, `templates/retro.md` no longer seeds the false bound into host projects, and
+a guard refuses a numeric bound in that heading in either file.
 
 ### 2026-08-11 · `hand-back` · the release built what it had just condemned
 
@@ -1292,34 +1295,76 @@ three quarters of the work on this run.
 
 ## Releases that carry no stamp — stated, not stamped
 
-Ten consecutive releases, **`v1.16.0` through `v1.23.0`**, shipped without a run of this
-pipeline: no brief, no spec, no acceptance, no stamp. Measured, not recalled —
+**The trailing gap right now is `v1.60.1` through `v1.72.0` — fourteen releases.** Guard
+work, doctrine and audit follow-up that shipped without being run as pipeline runs: no
+brief, no spec, no acceptance, no stamp. The first recorded stretch was `v1.16.0` through
+`v1.23.0`, and this one is longer.
+
+Measured, not recalled — and the measurement is a **tag range** rather than a grep for a
+tag's own commit, because a stamp names the commit the *run* ended on and never the release
+commit. The command below is the one this section's numbers come from; run as written it
+prints every unstamped tag and then the trailing stretch:
 
 ```bash
-git tag -l 'v1.*' --sort=-v:refname | while read -r t; do
-  s=$(git rev-list -n1 "$t" | cut -c1-7)
-  grep -q "$s" docs/superpowers/retro.md || echo "$t $s no stamp"
-done
+python3 - <<'PY'
+import glob, re, subprocess
+stamps = []
+for p in ["docs/evidence/retro.md"] + sorted(glob.glob("docs/evidence/retro/*.md")):
+    t = open(p, encoding="utf-8").read()
+    for h in re.finditer(r"^##+ Run stamps\b", t, re.M):        # the archive heading carries a suffix
+        sec = t[h.start():]
+        end = sec.find("\n## ", 5)
+        stamps += re.findall(r"^\s*\|\s*\d{4}-\d\d-\d\d\s*\|[^|]*\|\s*`([0-9a-f]{7,40})`",
+                             sec[:end] if end > 0 else sec, re.M)
+tags = subprocess.run(["git", "tag", "-l", "v*", "--sort=v:refname"],
+                      capture_output=True, text=True).stdout.split()
+prev, unstamped, trailing = None, [], []
+for tag in tags:
+    rng = f"{prev}..{tag}" if prev else tag
+    shipped = {c[:7] for c in subprocess.run(["git", "rev-list", rng],
+                                             capture_output=True, text=True).stdout.split()}
+    if [s for s in stamps if s[:7] in shipped]:
+        trailing = []
+    else:
+        unstamped.append(tag)
+        trailing.append(tag)
+    prev = tag
+print(f"{len(unstamped)} of {len(tags)} tags carry no stamp")
+print(f"trailing: {len(trailing)} — {trailing[0]} .. {trailing[-1]}" if trailing else "trailing: none")
+PY
 ```
 
-**No stamps were written for them, deliberately.** A stamp asserts that a run happened and
-that its gates were walked. Writing ten to make the table look continuous would be the exact
-defect this file exists to catch, on the file that catches it. The gap is recorded here
-instead, which is the honest form of the same information.
+**The register began mid-history and nothing is backfilled.** The first stamped release is
+`v1.41.0`, so most of the 84 unstamped tags predate the stamp section entirely; that is a
+fact about when the register was established, not a debt. A stamp asserts that a run happened
+and that its gates were walked, so writing fourteen to make the table look continuous would be
+the exact defect this file exists to catch, on the file that catches it.
+
+**What is checked, and it is only the trailing stretch.** `test/validate.py` computes the
+releases after the newest stamped one and requires this section to name every one of them —
+so the next release either carries a stamp or is written into the range above, and neither
+can be skipped in silence.
+
+**Where it fires matters.** `validate.yml` ignores tag pushes, so a branch run cannot see a
+tag that does not exist yet; `release.yml` runs the suite on the tag's own tree, where it
+can. So extending the range belongs in the **same commit as the release**, not after it — a
+release that reaches its own gate red has already been tagged.
+
+Nothing asks about a tag older than the newest stamp: that range is closed history, and a
+guard that reopened it would demand 84 rewrites.
 
 Two consequences worth stating rather than leaving to be rediscovered:
 
-- **The cold-retirement trigger was unreadable across that stretch.** It counts firings
-  across the last five run stamps, and the counter moved four times in fourteen releases. It
-  was not strict or lenient — there was nothing to read. That is why the condition now carries
-  a second unit, sixty days, which nothing can stall
-([`references/retrospective.md`](../../plugins/task-pipeline/skills/task-pipeline/references/retrospective.md)).
-- **The lessons of those ten releases are in `CHANGELOG.md` and nowhere else.** They are not
+- **The cold-retirement trigger is unreadable across a stretch like this.** It counts firings
+  across the last five run stamps, and across `v1.60.1`–`v1.72.0` the counter did not move at
+  all. It was not strict or lenient — there was nothing to read. That is why the condition now
+  carries a second unit, sixty days, which nothing can stall
+  ([`references/retrospective.md`](../../plugins/task-pipeline/skills/task-pipeline/references/retrospective.md)).
+- **The lessons of those releases are in `CHANGELOG.md` and nowhere else.** They are not
   lost, and they are not where the next run's stage 0 looks. Rules 17–21 of `learned.md` were
-  all earned in that stretch and reached the shipped doctrine directly, without passing
+  all earned in the first stretch and reached the shipped doctrine directly, without passing
   through a retro — which is why five of them sat outside the *Where these bind* map until
   `v1.23.1` found it.
-
 ## Run stamps
 
 One line per run, appended at stage 10, **capped at ten** — at the eleventh the

@@ -17,7 +17,7 @@ in silence.
 | ID | Question | Owner | Blocks | Status |
 |---|---|---|---|---|
 | OQ-0001 | Can `SURFACED` be checked at all? It is defined as what a run learned by accident — recoverable from no artefact — so *"nothing surfaced"* is a quiet decision by construction. The `hand:` line records that a hand-back happened, never that it was complete | operator | whether the hand-back's own gate means anything beyond its presence | Resolved→DEC-0001 |
-| OQ-0002 | Which of the 250 guards without a neighbour probe read a **scoped span**? The list cannot be computed from the code as written, so `B-057`'s remaining half has no work-list | operator | `B-057`, and the fourth consecutive release caught by a reader rather than a check | Resolved→DEC-0002 |
+| OQ-0002 | Which guards without a neighbour probe read a **scoped span**? The list cannot be computed from the code as written, so `B-057`'s remaining half has no work-list. *(The row said "the 250 guards" until 2026-08-20, when this register entered the claim registry's corpus and the suite held 390. A question's premise is not a live measurement, so the total is not restated here — `DEC-0002` carries what was measured, with its date.)* | operator | `B-057`, and the fourth consecutive release caught by a reader rather than a check | Resolved→DEC-0002 |
 | OQ-0003 | Playwright MCP as a second browser path beside chrome-devtools: is it a **second** recommended companion or **the** one where a project already runs it in CI? A pasted note of ~6 lines did not reach the agent and may hold the answer | operator | `B-056` | Resolved→DEC-0004 |
 
 **When one resolves:** flip the status to `Resolved→DEC-####` in the **same

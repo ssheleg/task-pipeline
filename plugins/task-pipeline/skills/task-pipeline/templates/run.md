@@ -20,15 +20,27 @@ Run: `<topic>` · started `<YYYY-MM-DD>` · module map: `<path or "none">`
 
 ## `read:` — which doctrine this run actually opened
 
-The bundle is 34 reference files and nothing recorded which of them a run read, so **a
+The bundle is 35 reference files and nothing recorded which of them a run read, so **a
 skipped file and a read one were indistinguishable** — the class every guard in this
 pipeline exists to catch, left standing over the doctrine itself.
 
-`read:` is **hook-written, never agent-written**, for the same reason `gate:` is: a claim
-about what somebody read, written by the party the claim is about, is not evidence. The
+`read:` is **written by a hook rather than by the agent**, for the same reason `gate:` is: a
+claim about what somebody read, written by the party the claim is about, is not evidence. The
 hook is in `hooks.example.json`, matches `Read`, records the path only
 when it is inside the bundle's `references/`, deduplicates, and **always exits 0** — a hook
 that can fail a `Read` would break every turn in every session.
+
+**That is an intent, not a proof, and the line says so.** This file is the one the agent
+appends to at every stage, so nothing in it distinguishes a hook-written line from one an
+agent typed: there is no writer field, and `scripts/graph.py` has no provenance check
+because the format gives it nothing to check. The doctrine here said *hook-written, never
+agent-written* until 2026-08-20 — a provenance claim in the file whose whole subject is that
+a claim by the interested party is not evidence, which is B-014's class committed by the
+mechanism built to close it. So `doctrine` and the `gate:` reader both report **`unattested`**
+beside their counts, and the two claims that survive are the ones the ledger can support:
+*this line is in the ledger*, and *nobody recorded who wrote it*. Attesting a writer needs a
+field this format does not have; inventing one that an agent can also fill would restate the
+same claim one level down.
 
 `scripts/graph.py doctrine` reads these lines and prints one of three things:
 
@@ -36,7 +48,7 @@ that can fail a `Read` would break every turn in every session.
 |---|---|---|
 | `unmeasured — no run ledger` | there is no ledger | nothing to read from |
 | `unmeasured — the ledger carries no read: lines` | the hook is absent, **or** the run opened no doctrine | two opposite facts, and the ledger cannot separate them, so neither is claimed |
-| `N of 34 reference files read`, then each unread one | the hook is installed and fired | the count alone says there is a gap, not where |
+| `N of 35 reference files read — unattested`, then each unread one | the hook is installed and fired | the count alone says there is a gap, not where — and `unattested` says the ledger cannot name who wrote the lines |
 
 **It is a disclosure: no floor, no direction, never a target.** A run that needs four files
 and reads four is not worse than one that reads thirty — and the moment the number becomes
@@ -58,15 +70,17 @@ hand:  <N|10> — task "<quoted>" — done <n> — surfaced <n> — decisions <n
 holds: <stage id> — <n> (<class: what, owner>; … or "none") — enumerated <n>/8 classes, <unlooked: classes not enumerable>
 gate:  <stage id> — command "<cmd>" — exit <N> — <ISO-8601>
 event: <compact|session-end|subagent> — <detail> — <ISO-8601>
-read:  references/<file>.md            # hook-written, deduplicated, one per file opened
+read:  references/<file>.md            # hook-appended, deduped, UNATTESTED (no writer field)
 ```
 
 - **`stage:`** — written when a gate **returns**, not when the stage is entered. The
   rail's `✓` is derived from this line and from nothing else; a glyph set from memory
   is a summary that is confidently wrong exactly when it matters.
-- **`gate:`** — written by `hooks/gate-observer.sh`, never by an agent. It is the
-  only line here that records what a command **did** rather than what somebody
-  concluded: the exit code of the stage's declared `gate.command`, observed. The
+- **`gate:`** — appended by `hooks/gate-observer.sh` rather than by an agent, and
+  **unattested** for the reason `read:` is: this file is agent-written at every stage
+  and carries no writer field, so the line's provenance is an intent the format cannot
+  prove. It is the only line here that records what a command **did** rather than what
+  somebody concluded: the exit code of the stage's declared `gate.command`, observed. The
   `stage:` line above it is the agent's claim, and the release gate requires the
   two to agree — without this, a gate reads a claim written by the party it
   constrains and confirms an assertion with itself. Absent where the project

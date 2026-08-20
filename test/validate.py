@@ -479,6 +479,26 @@ def _axis_keys():
 _RULE_ROW = r"^\|\s*\d+\s*\|\s*\*\*"
 _RULE_ROW_ID = r"^\|\s*(\d+)\s*\|\s*\*\*"
 
+# The description's length, read with the SAME regex the 1024-char platform check above
+# uses. A second reader of one line is how two numbers about one string start disagreeing.
+_desc_len = None
+_skm = os.path.join(ROOT, "plugins/task-pipeline/skills/task-pipeline/SKILL.md")
+if os.path.isfile(_skm):
+    _fmm = re.match(r"^---\n(.*?)\n---", open(_skm, encoding="utf-8").read(), re.S)
+    if _fmm:
+        _dmm = re.search(r"^description:\s*(.+)$", _fmm.group(1), re.M)
+        if _dmm:
+            _desc_len = len(_dmm.group(1).strip().strip('"').strip("'"))
+
+# Two of the classes below count a noun this corpus also uses for SUBSETS — «Two guards
+# caught the change as it landed», «two axes of four». The convention that keeps both
+# readable is the one the `rotation axes` class already relies on: **a subset count puts a
+# qualifier between the number and the noun** — `three new guards`, `four proof-depth axes`,
+# `six rotation axes` — and the bare form is reserved for the total. It is a writing rule
+# rather than a mechanism because the alternative was measured and is worse: requiring a
+# totaliser disarms both classes on the surfaces their own incidents happened on, including
+# the Cursor rule's bare *Gates: three axes*. Dated items in the registers are exempt for a
+# different reason (`_is_dated_record`).
 _CLAIM_REGISTRY = [
     ("negative self-tests",
      r"\b" + _NUM + r"\+?\s+(?:of\s+\d+\s+)?(?:structural\s+)?guards\b(?!\s+behind)",
@@ -529,10 +549,42 @@ _CLAIM_REGISTRY = [
      lambda: len(_COLD_SURFACES) if "_COLD_SURFACES" in globals() and _COLD_SURFACES else None,
      "prose said fourteen after an exclusion took the corpus to thirteen"),
 
+    # One class, every phrasing of the same count. The first version matched only the
+    # word order "N files under `references/`" — so the class sat DORMANT while three
+    # shipped surfaces said "34 reference files" over a directory holding 35
+    # (graph.py's `doctrine` docstring and templates/run.md twice, measured 2026-08-20).
+    # A pattern narrow enough to miss the wording the repository actually uses is a
+    # registered class that fires on nothing, which reads exactly like a class that passed.
+    # The one number in this repository that moves on every edit to one line, and the row
+    # carrying it had gone stale four times: 1015, then 956, then 1008 — and 962 measured
+    # 2026-08-20 while the board still said 1008 with 16 spare. Registered rather than
+    # re-corrected, because a budget nobody can compute is a budget nobody spends honestly.
+    # Read with the SAME regex the platform-limit check above uses, so the two can never
+    # disagree about what the description is.
+    ("description budget",
+     r"\b" + _NUM + r"\s+of\s+1024\b",
+     lambda: _desc_len,
+     "B-001 said 1008 of 1024 with 16 spare against a description of 962"),
+
+    ("description headroom",
+     r"\b" + _NUM + r"\s+spare\b",
+     lambda: (1024 - _desc_len) if _desc_len is not None else None,
+     "the same row's spare figure, which is the budget the next companion pays from"),
+
+    # The registry's own size, and it counts itself. B-045 said "10 registered claim
+    # classes" and B-041 said "9" over the same finding, which is the class this whole
+    # mechanism exists for, committed inside the rows that report it. Evaluated after the
+    # list is built, so the number includes this row.
+    ("registered claim classes",
+     r"\b" + _NUM + r"\s+registered\s+claim\s+classes\b",
+     lambda: len(_CLAIM_REGISTRY),
+     "two board rows about hand-written counts disagreed on the count, 10 against 9"),
+
     ("reference files",
-     r"\b" + _NUM + r"\s+files\s+under\s+`?references/`?",
+     _NUM + r"\s+(?:(?:reference|doctrine)\s+files|files\s+under\s+`?references/`?)",
      lambda: len([f for f in os.listdir(refdir) if f.endswith(".md")]) if os.path.isdir(refdir) else None,
-     "SKILL-CARD.md said 26 against a directory holding 28"),
+     "SKILL-CARD.md said 26 against a directory holding 28; then three surfaces said 34 "
+     "against 35 while the class was dormant because it only knew one word order"),
 ]
 
 # Living documents: what a reader takes as true NOW. CHANGELOG is excluded above; run
@@ -565,6 +617,100 @@ def _is_quoted(text, match):
         if _q.start() + off <= match.start() and match.end() <= _q.end() + off:
             return True
     return False
+
+
+_ISO_DATE = re.compile(r"\b20\d\d-[01]\d-[0-3]\d\b")
+
+
+def _is_dated_record(text, match):
+    """A number inside an item that stamps its own date is a MEASUREMENT of that date,
+    not a claim about now.
+
+    This is what let the registers into the corpus. `docs/DOCMAP.md` names
+    `docs/DECISIONS.md`, `docs/OPEN_QUESTIONS.md` and the board, ledger and retro under
+    the artifact root as the registers, and its propagation matrix sends *a number stated
+    in a living document* here — but they were outside the corpus, so
+    `docs/OPEN_QUESTIONS.md` could say *the 250 guards* against a workflow defining 390
+    in the exact phrasing this registry already knew.
+
+    Adding them raw refuses 26 statements, measured 2026-08-20, and every one is
+    narration: *"Two guards caught the change as it landed"*, *"1, 2, 3 and 4 guards not
+    firing"*, *"the guard held four reference files"*, *"32 reference files at 118 842"*.
+    A board row and a retro entry exist to say what was true on a day, and correcting
+    those numbers would rewrite the record — the thing this whole family refuses to do.
+
+    Structural, not a marker list: the discriminator is an ISO date inside the same item,
+    which these documents carry because their own doctrine makes them carry it (a board
+    row names its source date and its closing date; a retro entry is stamped with the
+    commits it came from). Scope is the row for a table line and the item — bullet or
+    numbered entry plus its continuation, else the paragraph — for prose, the same unit
+    `_carve_out` settled on after getting it wrong in three directions.
+
+    Cost, stated and deliberate: a live claim written into a dated item is exempt. That
+    is the semantics of a dated item, and the alternative measured worse — tightening
+    the two loose patterns instead (`N guards`, `N axes`, which this corpus also uses for
+    subsets) disarms them on the surfaces the original incidents happened on, including
+    the Cursor rule's bare *Gates: three axes*."""
+    _ls = text.rfind("\n", 0, match.start()) + 1
+    _le = text.find("\n", match.end())
+    _le = len(text) if _le < 0 else _le
+    _row = text[_ls:_le]
+    if _row.lstrip().startswith("|"):                   # a table row is its own record
+        # The board is the sharp case, and the date alone gets it wrong. Every row names
+        # the date it was FILED, so an OPEN row would be exempt for carrying its own
+        # provenance — and B-001, open, states its description budget and its reference-file
+        # count as facts about now. The State cell is the discriminator the board already
+        # has: `closed …` is a record of what was true at closing, anything else is a live
+        # claim. Measured 2026-08-20: without this, B-001's *32 reference files* against a
+        # directory of 35 stayed invisible in the very pass that widened the corpus.
+        _bc = _row.split("|")
+        _first = _bc[1] if len(_bc) > 1 else ""
+        if re.match(r"^\s*B-\d", _first):
+            return len(_bc) > 9 and _bc[9].strip().lower().replace("*", "").startswith("closed")
+        # `OQ-####` the same way, and this one was learned the hard way: the honesty note
+        # explaining that OQ-0002 no longer restates a total put an ISO date in the row,
+        # which made the whole row a record and DISARMED the register plant. The guard
+        # stayed green over a stale total it had been written to catch. A question with a
+        # closed-vocabulary status has the same discriminator the board has, so use it:
+        # `Open` is a live claim whatever dates sit beside it, `Resolved→DEC-####` and
+        # `Dropped (…)` are records.
+        if re.match(r"^\s*OQ-\d", _first):
+            return not _bc[-2].strip().lower().replace("*", "").startswith("open") \
+                if len(_bc) > 2 else False
+        return bool(_ISO_DATE.search(_row))
+    ps = text.rfind("\n\n", 0, match.start())
+    ps = 0 if ps < 0 else ps + 2
+    pe = text.find("\n\n", match.end())
+    pe = len(text) if pe < 0 else pe
+    para, off = text[ps:pe], ps
+    for _item in re.split(r"\n(?=\s*(?:[-*]|\d+\.)\s)", para):
+        _is = para.find(_item) + off
+        if _is <= match.start() and match.end() <= _is + len(_item):
+            if _ISO_DATE.search(_item):
+                return True
+            break
+    else:
+        if _ISO_DATE.search(para):
+            return True
+    # A retro entry is one dated section spanning many paragraphs — `### 2026-08-16 ·
+    # graph-backlog · …` — and a decision record stamps its date in the bullet block
+    # under its heading, not in every paragraph. So the fallback is the section's STAMP:
+    # its heading line plus the first block beneath it, never the whole section body.
+    # Whole-body would exempt every paragraph of `## Standing instructions` because the
+    # table rows below it carry dates, which is the over-scoping `_carve_out` has already
+    # paid for twice.
+    _h = None
+    for _hm in re.finditer(r"^#{1,6} .*$", text, re.M):
+        if _hm.start() > match.start():
+            break
+        _h = _hm
+    if _h is None:
+        return False
+    _be = text.find("\n\n", _h.end() + 1)
+    _be = len(text) if _be < 0 else _be
+    _stamp_end = text.find("\n\n", _be + 2)
+    _stamp_end = len(text) if _stamp_end < 0 else _stamp_end
+    return bool(_ISO_DATE.search(text[_h.start():_stamp_end]))
 
 # Each living document is read ONCE, not once per class. Nested class-outer/doc-inner
 # opened ~36 files six times over; the states logic below is unchanged.
@@ -651,6 +797,43 @@ for _extra in ["cursor/rules/task-pipeline.mdc",
     _xp = os.path.join(ROOT, _extra)
     if os.path.isfile(_xp) and _extra not in _LIVING_TEXT:
         _LIVING_TEXT[_extra] = open(_xp, encoding="utf-8").read()
+
+# The corpus was eight named files plus `references/**`, and the two widenings below are
+# both incident-driven, not tidiness.
+#
+# 1. `templates/` and `scripts/` — the templates are the documents a host project starts
+#    from and the script docstrings are read by anybody who opens the verb; both restate
+#    counts. Measured 2026-08-20: `graph.py`'s `doctrine` docstring and `templates/run.md`
+#    twice said "34 reference files" over a directory of 35, and the registry had the class
+#    registered and printed `dormant` — because the claim lived in the two directories the
+#    corpus never opened.
+# 2. The registers `docs/DOCMAP.md` itself names — decisions, open questions, and the
+#    board, ledger and retro under the artifact root. The matrix row *"a number stated in a
+#    living document"* points at this registry, and the registers were outside it:
+#    `docs/OPEN_QUESTIONS.md` claimed "the 250 guards" against a workflow defining 390, in
+#    the exact phrasing the guard class already knew.
+#
+# What stays out, and why it is not laziness: `CHANGELOG.md` and the run records under
+# `{ART}/specs/` and `{ART}/plans/` are frozen accounts of a past release or run, and
+# `{ART}/retro/` is the archive of pruned instructions. Correcting a number inside one of
+# those would rewrite what was true at a commit.
+for _root, _dirs, _fs in os.walk(os.path.join(ROOT, "plugins/task-pipeline/skills/task-pipeline")):
+    if os.path.basename(_root) not in ("templates", "scripts"):
+        continue
+    for _f in sorted(_fs):
+        if not _f.endswith((".md", ".py", ".sh")):
+            continue
+        _rp = os.path.relpath(os.path.join(_root, _f), ROOT)
+        if _rp not in _LIVING_TEXT:
+            _LIVING_TEXT[_rp] = open(os.path.join(_root, _f), encoding="utf-8").read()
+_RECORDS = set()                 # the documents whose dated items are records — see _is_dated_record
+for _reg in ["docs/DECISIONS.md", "docs/OPEN_QUESTIONS.md", "docs/AGENT_SYNC.md",
+             f"{ART}/backlog.md", f"{ART}/verification.md", f"{ART}/retro.md"]:
+    _rgp = os.path.join(ROOT, _reg)
+    if os.path.isfile(_rgp):
+        _RECORDS.add(_reg)
+        if _reg not in _LIVING_TEXT:
+            _LIVING_TEXT[_reg] = open(_rgp, encoding="utf-8").read()
 
 _UNLOOKED = []
 
@@ -1055,6 +1238,8 @@ for _label, _pat, _compute, _incident in _CLAIM_REGISTRY:
     for _living, _txt in _LIVING_TEXT.items():
         for _m in re.finditer(_pat, _txt, re.I):   # "## The ten canons" is a heading; case is not a claim
             if _is_quoted(_txt, _m):
+                continue
+            if _living in _RECORDS and _is_dated_record(_txt, _m):
                 continue
             _stated = _as_int(_m.group(1))
             if _stated is None:            # a word outside the map — say nothing rather than guess
@@ -1606,6 +1791,24 @@ if os.path.isfile(_VERIF):
                      "a pipe; a row that does not line up with its header is read one "
                      "column out by anything that trusts the header")
 
+    # The declared vocabulary, read out of the shipped template's own table. A project
+    # that deploys differently declares different values there and this follows it.
+    _VERIF_ENVS = set()
+    _vtmpl = os.path.join(ROOT,
+                          "plugins/task-pipeline/skills/task-pipeline/templates/verification.md")
+    if os.path.isfile(_vtmpl):
+        _vtt = open(_vtmpl, encoding="utf-8").read()
+        _vsec = re.search(r"^##\s*Environment\b.*?$(.*?)(?=^##\s|\Z)", _vtt, re.S | re.M)
+        if _vsec:
+            _VERIF_ENVS = {_c.strip("` ").lower() for _c in
+                           re.findall(r"^\|\s*`?([a-z—-]+)`?\s*\|", _vsec.group(1), re.M)
+                           if _c.strip("` ").lower() not in ("value", "---")}
+    if "environment" in (_vhdr or []) and not _VERIF_ENVS:
+        fail(f"{ART}/verification.md has an `Environment` column and "
+             "`templates/verification.md` declares no vocabulary for it — a column whose "
+             "values are invented per row cannot be compared across two rows, and the check "
+             "on it would pass by having nothing to compare against")
+
     _brief_reqs = set()
     _brief_by_slug = {}
     for _bf in glob.glob(os.path.join(ARTP, "specs/*brief.md")):
@@ -1645,6 +1848,29 @@ if os.path.isfile(_VERIF):
             fail(f"{ART}/verification.md: {_rid} has no `Human` value that is "
                  "either a date or the literal `never` — prose in that column is how the "
                  "one question this file exists to answer stops being answerable")
+        # B-099's other half. `Observed at` says WHICH TREE the check saw; nothing said
+        # WHERE it ran, so a smoke test against a preview URL entered the record in a shape
+        # indistinguishable from one against production, and a suite green on a laptop with
+        # accumulated state indistinguishable from one green on a clean runner. This pack
+        # owns the incident: `references/learned.md` records a suite green on every author's
+        # machine and 1039 failures on a runner that started clean, and the field was never
+        # added. The vocabulary is read out of the SHIPPED template, never listed here — a
+        # second list is the drift class this file is about — and `—` is a recorded absence
+        # rather than a value, which is exactly how `Observed at` was introduced.
+        if "environment" not in (_vhdr or []):
+            pass                           # the header check below reports the missing column
+        else:
+            _eidx = _vhdr.index("environment")
+            _env = _cells[_eidx].strip("` ").lower() if len(_cells) > _eidx else None
+            if _env is None or _env == "":
+                fail(f"{ART}/verification.md: {_rid} has no `Environment` cell — a row that "
+                     "omits the question is not the same as a row answering `—`, and a proof "
+                     "with no environment cannot say whether it saw production or a preview")
+            elif _VERIF_ENVS and _env not in _VERIF_ENVS:
+                fail(f"{ART}/verification.md: {_rid} records the environment {_env!r}, which "
+                     f"is not in the vocabulary `templates/verification.md` declares "
+                     f"({', '.join(sorted(_VERIF_ENVS))}) — an environment invented per row "
+                     "is a column nobody can compare two rows in")
         _VERIF_TOTAL += 1
         _ship = _cells[_vhdr.index("shipped in")] if "shipped in" in _vhdr and len(_cells) > _vhdr.index("shipped in") else ""
         if _human and _human[0].lower() == "never":
@@ -1692,13 +1918,31 @@ if _AT_TEXT is not None:
 # property counts are claims about now — and they went stale twice in one programme,
 # because checks get added after the entry is written. Older sections are history and
 # correct as of their own day; only the newest is checked.
+#
+# B-104: the newest section was read as *the newest `## vX.Y.Z`*, and between a tag and the
+# next bump there is no such section for the work in the tree — so a commit that adds guards
+# had **nowhere to state the count**, and writing it into the shipped version's section
+# would edit a released record. `## Unreleased` is that home: when it is the topmost
+# section it is what this check reads, and it is required to sit above every version
+# heading, because an `## Unreleased` block under a release is a claim about the past.
 _cl = os.path.join(ROOT, "CHANGELOG.md")
 _wf = os.path.join(ROOT, ".github/workflows/validate.yml")
 if os.path.isfile(_cl) and os.path.isfile(_wf):
     _true_neg, _true_prop = _neg_n, _prop_n
     _clt = chg
-    _top = _clt.split("\n## v", 2)
-    _top = _top[1] if len(_top) > 1 else ""
+    _unrel = re.search(r"^##\s*Unreleased\b", _clt, re.M)
+    _firstv = re.search(r"^##\s*v\d+\.\d+\.\d+", _clt, re.M)
+    if _unrel and _firstv and _unrel.start() > _firstv.start():
+        fail("CHANGELOG.md: an `## Unreleased` section sits below a released version "
+             "heading — it is the home for what is in the tree and not yet tagged, so "
+             "under a release it reads as a claim about the past and this check would "
+             "never read it")
+    _head = _unrel if (_unrel and (not _firstv or _unrel.start() < _firstv.start())) else _firstv
+    if _head is None:
+        _top = ""
+    else:
+        _nxt = re.search(r"^##\s", _clt[_head.end():], re.M)
+        _top = _clt[_head.end():_head.end() + (_nxt.start() if _nxt else len(_clt))]
     _g = re.search(r"Guards:\s*\d+\s*(?:→|->)\s*(\d+)", _flatten(_top))
     # 2026-08-10: this guard went DORMANT on its own release. The v1.39.0 entry was
     # written as `Guards **218 → 226**` — no colon — the pattern missed, the check
@@ -2628,13 +2872,27 @@ if gschema is not None:
         # working: it saw the shape change rather than the meaning survive. It now
         # collects every conditional wherever it sits, so a schema that states both in
         # `allOf`, both inline, or one of each all read the same.
-        def _conditionals(sch):
+        # B-079: this recursed into `allOf` and never dereferenced `$ref`, so a schema
+        # that factored its conditionals into `definitions` and pointed at them — legal
+        # draft-07 and the ordinary way to share a rule between two node kinds — read as a
+        # schema with no conditionals at all, and both REQ-006 and REQ-012 were reported
+        # missing from a schema that states them. Proved by moving them: `definitions.
+        # node_conditionals` now holds the pair and the node's `allOf` is two `$ref`s, so
+        # the shipped schema exercises the branch rather than a fixture doing it once.
+        # `_gderef` is the same follower every other field check uses, bounded at 8 hops,
+        # and `_seen` stops a self-referential `allOf` from spinning.
+        def _conditionals(sch, _seen=None):
+            _seen = set() if _seen is None else _seen
+            sch = _gderef(sch) if isinstance(sch, dict) and "$ref" in sch else sch
+            if not isinstance(sch, dict) or id(sch) in _seen:
+                return []
+            _seen.add(id(sch))
             out = []
             if sch.get("if") is not None:
-                out.append((sch.get("if") or {}, sch.get("then")))
+                out.append((_gderef(sch.get("if")) or {}, sch.get("then")))
             for _sub in sch.get("allOf") or []:
                 if isinstance(_sub, dict):
-                    out.extend(_conditionals(_sub))
+                    out.extend(_conditionals(_sub, _seen))
             return out
 
         _conds = _conditionals(_gnode)
@@ -2950,6 +3208,51 @@ else:
              + f" ({len(_absent)} of {len(_suites)} suites) — a suite outside the full run is "
                "a suite CI does not have, and *the full suite is green* is then a true "
                "sentence about a smaller set than it names")
+
+# A GLOSS on a command is a claim about what it runs, and two of them were false.
+# `CLAUDE.md` said `npm test` (= `python3 test/validate.py`) — dropping `graph_test.py` and
+# its 129 cases, which is the same suite-outside-the-run class the check above exists for,
+# stated the other way round — and that `npm run test:all` "runs both" where it runs eight
+# scripts. Neither was found by reading; nothing compared a documented equation against
+# `package.json`.
+#
+# Two shapes, one source of truth. An equation `` `npm run X` (= `Y`) `` must match the
+# script body after one level of `npm run` resolution; a bare `npm run X` anywhere in the
+# corpus must be a script that exists, which is the dead-command class the family already
+# refuses in prose.
+_GLOSS = re.compile(r"`npm (?:run\s+)?([a-z][a-z0-9:_-]*)`\s*\(=\s*`([^`]+)`\s*\)")
+_NPMRUN = re.compile(r"`npm run\s+([a-z][a-z0-9:_-]*)`")
+if _scripts:
+    def _resolve(_body):
+        for _n2 in sorted(_scripts, key=len, reverse=True):
+            _body = _body.replace(f"npm run {_n2}", _scripts[_n2])
+        return _flatten(_body)
+    for _doc, _dt in sorted(_LIVING_TEXT.items()):
+        if _doc.endswith((".py", ".sh")):
+            continue                      # code, not a claim a reader takes as the contract
+        # Scoped to the documents about THIS repository. Everything under `plugins/` and
+        # `cursor/` ships to a host project, and `npm run lint:paths` in
+        # `references/planning.md` is an example of a HOST's command — measured on the first
+        # run of this check, which reported four of them. A guard that refuses a portable
+        # example because this repo has no such script would teach the doctrine to stop
+        # naming commands at all.
+        if _doc.startswith(("plugins/", "cursor/")):
+            continue
+        for _gm in _GLOSS.finditer(_dt):
+            _name, _claim = _gm.group(1), _gm.group(2)
+            if _name not in _scripts:
+                continue                  # the existence check below owns that failure
+            if _resolve(_claim) != _resolve(_scripts[_name]):
+                fail(f"{_doc}:{_dt[:_gm.start()].count(chr(10)) + 1}: `{_name}` is glossed as "
+                     f"`{_claim}` and `package.json` runs `{_scripts[_name]}` — a gloss is a "
+                     "claim about what the command does, and this one dropped a suite. Write "
+                     "the script body or drop the equation")
+        for _rm in _NPMRUN.finditer(_dt):
+            if _rm.group(1) not in _scripts:
+                fail(f"{_doc}:{_dt[:_rm.start()].count(chr(10)) + 1}: names `npm run "
+                     f"{_rm.group(1)}` and `package.json` declares no such script — a "
+                     "document that quotes a dead command as runnable teaches a reader that "
+                     "the commands here are decoration")
 
 # --- T-7: the doctrine that names the graph ----------------------------------------------
 #
@@ -3314,9 +3617,12 @@ if os.path.isfile(_gs):
 # --- B-065: what the invariants bind together, coordination must guard together ----------
 #
 # Two agents, one checkout, no lease cost this project four version collisions and a
-# `files[]` entry silently dropped by a merge. `.claude/agent-sync.json` guards thirteen
-# files — and the version-sync invariant names FIVE surfaces that must move together, of
-# which four were guarded. The fifth is `SKILL-CARD.md`, whose omission had already
+# `files[]` entry silently dropped by a merge. `.claude/agent-sync.json` guards a set this
+# check reads rather than restates — the comment said *thirteen files* while the config
+# listed 15, measured 2026-08-20, in a comment above a check whose whole subject is a list
+# that drifted. The count is printed with the verdict below; it is not written here. The
+# version-sync invariant names FIVE surfaces that must move together, of which four were
+# guarded. The fifth is `SKILL-CARD.md`, whose omission had already
 # surfaced once on a release bump, from the validator rather than from a reader.
 #
 # The surfaces are DISCOVERED, not listed: a file DECLARING the current version — as JSON
@@ -3358,10 +3664,15 @@ else:
                      "invariant makes these surfaces move together, so two agents bumping a "
                      "version collide here with no lease. That is not hypothetical: this "
                      "project lost four version numbers and a `files[]` entry to exactly it")
+        # Printed, never written down: the comment above this check restated the size of
+        # this very list and was two behind. A count beside the verdict cannot drift.
+        _UNLOOKED.append(f"coordination: {len(_guarded)} guarded file pattern(s) in "
+                         f".claude/agent-sync.json, {len(_surfaces)} version surface(s) "
+                         "discovered")
 
 # --- B-061: which doctrine a run actually read ------------------------------------------
 #
-# The bundle is 34 reference files and nothing recorded which a run opened, so a skipped
+# The bundle is 35 reference files and nothing recorded which a run opened, so a skipped
 # file and a read one were indistinguishable — the class every guard here exists to catch,
 # left standing over the doctrine itself. The verb is RUN over all three of its states,
 # because the state that matters is the one that must NOT print a number.
@@ -3401,8 +3712,58 @@ if os.path.isfile(_gs):
             fail("`graph.py doctrine` prints a count without saying it is a disclosure — "
                  "the moment the number becomes something to raise, a run opens files to "
                  "raise it")
+        # B-014's class, committed by the mechanism built to close B-061: the doctrine said
+        # `read:` and `gate:` are «hook-written, never agent-written» while both land in
+        # `.task-pipeline/run.md`, the file the agent appends to at every stage. There is no
+        # writer field and `graph.py` has no provenance check, because the format gives it
+        # nothing to check — so the count is reported UNATTESTED, and the claim the ledger
+        # cannot support is not made. Either mark it or stop claiming it; this requires the
+        # mark, in the output and in every surface that describes the line.
+        # On the COUNT LINE, not anywhere in the output: the paragraph beneath it explains
+        # the word, and a substring check over the whole output was satisfied by the
+        # explanation after the mark had been stripped off the number. Watched passing that
+        # way — the number is what gets quoted, so the number is what carries the mark.
+        if not re.search(r"\d+ of \d+ reference files read[^\n]*unattested", _o, re.I):
+            fail("`graph.py doctrine` prints a count and never says `unattested` — the "
+                 "ledger it reads is agent-written at every stage and carries no writer "
+                 "field, so 'the hook wrote these lines' is an intent the format cannot "
+                 "prove. B-014's class, in the mechanism built to close B-061")
     finally:
         shutil.rmtree(_dtmp, ignore_errors=True)
+
+    _PROV = [("templates/run.md", os.path.join(_skill_dir, "templates", "run.md")),
+             ("references/progress.md", os.path.join(_skill_dir, "references", "progress.md"))]
+    for _pl, _pp in _PROV:
+        if not os.path.isfile(_pp):
+            continue
+        _raw = open(_pp, encoding="utf-8").read()
+        # Emphasis spans are dropped BEFORE the claim is looked for: both files now narrate
+        # the claim they used to make — *hook-written, never agent-written* — while marking
+        # it as what was wrong, and a guard that cannot tell an assertion from its own
+        # obituary forces the history out of the document. Same reasoning as `_is_quoted`
+        # in the claim registry, one markup level over.
+        # Newlines allowed INSIDE the span: this corpus wraps at ~80 characters and the
+        # narration *hook-written, never\nagent-written* is split across a line break — the
+        # fourth time a per-line predicate has been defeated by this wrapping, and the
+        # reason `_is_quoted` carries the same warning.
+        # Whitespace is collapsed first and the emphasis is stripped SECOND: `_flatten`
+        # removes `*` before anything can look for it, so calling it first deleted exactly
+        # the markup this predicate reads. Watched passing that way once, on both files.
+        _one = re.sub(r"\s+", " ", _raw)
+        # BOLD first, then italic. `**bold**` next to `*italic*` shifts the pairing of a
+        # single-asterisk pattern, and the italic citation two sentences later stopped being
+        # a citation — the guard reported an assertion that was not there.
+        _one = re.sub(r"\*\*[^*]{1,300}\*\*", " ", _one)
+        _pt = _flatten(re.sub(r"\*[^*]{1,200}\*", " ", _one), lower=True)
+        if "never agent-written" in _pt or "never by an agent" in _pt:
+            fail(f"{_pl}: claims a `read:`/`gate:` line is «never agent-written» — the ledger "
+                 "is `.task-pipeline/run.md`, which the agent appends to at every stage, and "
+                 "no writer field exists. A provenance claim nothing can check, in the file "
+                 "whose subject is that a claim by the interested party is not evidence")
+        elif "unattested" not in _flatten(_raw, lower=True):   # the mark may be emphasised
+            fail(f"{_pl}: describes the hook-appended ledger lines and never marks them "
+                 "`unattested` — dropping the false claim without stating the gap leaves a "
+                 "reader believing the provenance is established")
 
     # The hook that writes the lines must ship, and it must be unable to fail a Read.
     _hx = os.path.join(ROOT,
@@ -3714,6 +4075,11 @@ else:
             fail("templates/verification.md's header has no `Observed at` column — B-081: "
                  "every project seeding this ledger gets a staleness section that is "
                  "dormant forever, and dormant is green")
+        elif "environment" not in _vh[0].lower():
+            fail("templates/verification.md's header has no `Environment` column — B-099: "
+                 "every project seeding this ledger records WHICH TREE a check saw and "
+                 "never WHERE it ran, so a preview smoke test and a production one enter "
+                 "the record in the same shape")
 
 # --- templates/convergence.sh — B-087, and it is EXECUTED against real repositories ----
 #
@@ -5932,6 +6298,255 @@ if os.path.isfile(_RETRO_DOC):
              "2026-08-10 audit removed from the narrative log and left in its neighbour")
 
 
+# THE ACCEPTANCE POLICY IS VERSIONED AND HAS AN OWNER — B-091's doctrine half. Two rules
+# stood side by side in the shipped bundle and neither was scoped: `gates.md` said the
+# framework fixes no stage count and no gate assignment, `acceptance.md` fixed twelve
+# criteria and their statuses. Both true, so a reader could take either as the rule, and a
+# table accepted under v1.20 doctrine was indistinguishable from one accepted under v1.70
+# — in a pack where every SHA in the retro resolves. The block is checked rather than
+# trusted, because an unversioned policy is exactly what it looked like for seventy releases.
+_ACC = os.path.join(_skill_dir, "references", "acceptance.md")
+if os.path.isfile(_ACC):
+    _acct = open(_ACC, encoding="utf-8").read()
+    _gsec = re.search(r"^##\s*GATE\b.*?$(.*?)(?=^##\s|\Z)", _acct, re.S | re.M)
+    if _gsec is None:
+        fail("references/acceptance.md: no `## GATE` section — stage 10's criteria have no "
+             "home, and the policy block that versions them has nothing to sit above")
+    else:
+        # Anchored on the DECLARATION, not on the string appearing somewhere: the block's
+        # own prose says an amendment moves the version to `AP-2`, so a bare `AP-\d` search
+        # was satisfied by the sentence describing how to change the policy after the
+        # policy's own id had been removed. Watched passing that way once.
+        _flat_g = _flatten(_gsec.group(1), lower=True)
+        _pol = re.search(r"acceptance policy\s+ap-(\d+)\b", _flat_g)
+        if _pol is None:
+            fail("references/acceptance.md → GATE: the acceptance policy carries no `AP-N` "
+                 "id — B-091: a standard nobody can cite by version is one every run "
+                 "re-negotiates, and a table accepted under one version reads identically "
+                 "to one accepted under another")
+        if "owner:" not in _flat_g:
+            fail("references/acceptance.md → GATE: the acceptance policy names no owner — "
+                 "B-091: which evidence counts, which gates are manual and how long "
+                 "evidence stays valid are decisions, and a decision with no owner is one "
+                 "each run makes for itself")
+        if "in force since" not in _flat_g:
+            fail("references/acceptance.md → GATE: the acceptance policy states no date it "
+                 "came into force — without one an acceptance table cannot say which "
+                 "version of the standard admitted it")
+    # ...and `gates.md`'s sentence must be scoped to it, or the contradiction is back. The
+    # scoping sentence is what makes the two rules readable together; it went in with the
+    # policy block and a guard on one half only would let the other be reverted in silence.
+    _GT = os.path.join(_skill_dir, "references", "gates.md")
+    if os.path.isfile(_GT):
+        _gtt = _flatten(open(_GT, encoding="utf-8").read(), lower=True)
+        if "the framework fixes no stage count" in _gtt and "ap-1" not in _gtt:
+            fail("references/gates.md: *the framework fixes no stage count and no gate "
+                 "assignment* stands unscoped beside `acceptance.md`'s fixed ladder — "
+                 "B-091: name the policy the sentence does NOT govern (`AP-1`), or the two "
+                 "rules contradict each other in the shipped doctrine and a reader may take "
+                 "either as the whole rule")
+
+# A HEADING MAY NOT DECLARE A BOUND NOTHING ENFORCES. The retro's *Recent log* read
+# «entries from the last five run stamps» over 25 entries reaching back nine days, and the
+# doctrine one file over said in the same breath that the section is «capped by nothing».
+# Two board rows were open on it — B-060 and B-069, one defect under two ids — and the file
+# disclosed it about itself in its own honest-gaps section. A stated bound is what made the
+# stage-0 reading floor overstate what was bounded in the first place: the stamp section IS
+# capped and has a guard, and the log borrowed its wording without its mechanism.
+#
+# Checked in the live retro AND the shipped template, because the template seeds the same
+# heading into every host project — which is how a false bound stops being one file's defect.
+for _rl_p, _rl_label in ((os.path.join(ARTP, "retro.md"), f"{ART}/retro.md"),
+                         (os.path.join(_skill_dir, "templates", "retro.md"),
+                          "templates/retro.md")):
+    if not os.path.isfile(_rl_p):
+        continue
+    _rl_t = open(_rl_p, encoding="utf-8").read()
+    _rl_h = re.search(r"^##\s*Recent log\b[^\n]*", _rl_t, re.M)
+    if _rl_h is None:
+        fail(f"{_rl_label}: no `## Recent log` heading — the section stage 0 queries by the "
+             "task's nouns cannot be located")
+        continue
+    _bound = re.search(r"\blast\s+(" + "|".join(_NUM_WORDS) + r"|\d+)\b|\b(?:"
+                       + "|".join(_NUM_WORDS) + r"|\d+)\s+(?:entries|run stamps)\b",
+                       _rl_h.group(0), re.I)
+    if _bound:
+        fail(f"{_rl_label}:{_rl_t[:_rl_h.start()].count(chr(10)) + 1}: the Recent log's "
+             f"heading declares the bound {_bound.group(0)!r} and nothing enforces it — "
+             "the section is uncapped by design (`references/retrospective.md`), so the "
+             "heading is what is false. B-060 and B-069 were the same defect filed twice "
+             "while the file disclosed it about itself; a bound borrowed from the stamp "
+             "section's wording without the stamp section's guard is how a reader learns "
+             "which claims here are decoration")
+
+# A CITATION THAT RESOLVES IS NOT A CITATION THAT IS CURRENT. Measured 2026-08-20: five
+# `file:line-line` addresses in open board rows resolved to real lines and pointed at the
+# wrong text — B-094 cited `gates.md:135-137` for *«the check has been probed»* (it is at
+# 180), B-098 cited `:61-78` for the enforcement ladder (110-114), B-095 cited `:465-474`
+# for proof-depth (541-547), and B-091's two were both wrong, found only because adding a
+# needle forced somebody to read the span. A line number is the most fragile address a
+# document can carry: every edit above it moves it, and nothing notices, because the file
+# still exists and the line still exists.
+#
+# So a RANGE in an OPEN row carries the phrase it points at, and the phrase must be inside
+# the span. Scoped three ways, each on purpose:
+#   * open rows only — a closed row's citation was current at closing, and rewriting it
+#     would edit a record;
+#   * ranges only — `file:N` is a pointer at one line and cannot be quoted meaningfully;
+#     single-line citations are DISCLOSED as unanchored rather than failed;
+#   * the needle is matched on flattened text, because this corpus wraps at ~80 characters
+#     and a quoted phrase crosses a line break more often than not.
+_BL = os.path.join(ARTP, "backlog.md")
+_CITE = re.compile(r"`([A-Za-z0-9_./-]+\.(?:md|py|json|sh|js|yml)):(\d+)(?:-(\d+))?`")
+_NEEDLE = re.compile(r"[«\u201c\"](.{4,160}?)[»\u201d\"]", re.S)
+if os.path.isfile(_BL):
+    _unanchored, _checked = 0, 0
+    for _line in open(_BL, encoding="utf-8"):
+        _rm2 = re.match(r"^\|\s*(B-\d+\w*)\s*\|", _line)
+        if not _rm2:
+            continue
+        _bc = _line.split("|")
+        if len(_bc) < 10 or not _bc[9].strip().lower().startswith("open"):
+            continue                       # a closed row states what was true at closing
+        _rid2 = _rm2.group(1)
+        # A quoted address is a citation of what the row USED TO say — three rows narrate the
+        # stale address they carried before 2026-08-20, and a guard that cannot tell a live
+        # address from its own correction forces the history out of the record. Same rule as
+        # `_is_quoted` in the claim registry, one layer over: double quotes mark a quotation.
+        _quoted = [(_q.start(), _q.end()) for _q in re.finditer(r'"[^"\n]*"', _line)]
+        _spots = [_c for _c in _CITE.finditer(_line)
+                  if not any(_qs <= _c.start() and _c.end() <= _qe for _qs, _qe in _quoted)]
+        for _i2, _cm in enumerate(_spots):
+            _rel, _a2, _b2 = _cm.group(1), int(_cm.group(2)), _cm.group(3)
+            # Resolved against the skill bundle first, then the repo root: the board writes
+            # `references/gates.md` and `stages.md` for the same directory.
+            _cands = [os.path.join(_skill_dir, _rel), os.path.join(ROOT, _rel),
+                      os.path.join(refdir, os.path.basename(_rel)),
+                      os.path.join(_skill_dir, "templates", os.path.basename(_rel)),
+                      os.path.join(_skill_dir, "scripts", os.path.basename(_rel))]
+            _fp2 = next((_c for _c in _cands if os.path.isfile(_c)), None)
+            if _fp2 is None:
+                fail(f"{ART}/backlog.md: {_rid2} cites `{_rel}` and no such file resolves "
+                     "from the skill bundle or the repository root — an address a live row "
+                     "carries must resolve, or the row points at nothing")
+                continue
+            _flines = open(_fp2, encoding="utf-8").read().splitlines()
+            _hi = int(_b2) if _b2 else _a2
+            if _a2 < 1 or _hi > len(_flines) or _a2 > _hi:
+                fail(f"{ART}/backlog.md: {_rid2} cites `{_rel}:{_a2}"
+                     + (f"-{_b2}" if _b2 else "")
+                     + f"` and the file has {len(_flines)} lines — the span does not exist")
+                continue
+            if not _b2:
+                _unanchored += 1
+                continue                   # one line cannot be quoted; disclosed, not failed
+            _win_end = _spots[_i2 + 1].start() if _i2 + 1 < len(_spots) else min(len(_line), _cm.end() + 400)
+            _nm2 = _NEEDLE.search(_line[_cm.end():_win_end])
+            if _nm2 is None:
+                fail(f"{ART}/backlog.md: {_rid2} cites the span `{_rel}:{_a2}-{_b2}` and "
+                     "quotes no phrase from it — quote what you are pointing at, in "
+                     "«guillemets» or double quotes, so the address can be checked against "
+                     "the text rather than only against the file's length. Five citations in "
+                     "open rows resolved to the wrong text on 2026-08-20 and every one read "
+                     "as sound")
+                continue
+            _span = _flatten(" ".join(_flines[_a2 - 1:_hi]), lower=True)
+            if _flatten(_nm2.group(1), lower=True).rstrip(" .") not in _span:
+                fail(f"{ART}/backlog.md: {_rid2} cites `{_rel}:{_a2}-{_b2}` for "
+                     f"{_nm2.group(1)[:70]!r} and that phrase is not in those lines — the "
+                     "citation resolves and is no longer current, which is the failure a "
+                     "resolving address cannot report on its own")
+            else:
+                _checked += 1
+    _UNLOOKED.append(f"backlog citations: {_checked} span(s) checked against a quoted "
+                     f"needle, {_unanchored} single-line citation(s) unanchored — one line "
+                     "carries no phrase to compare")
+
+# A RELEASE with no run stamp has to be recorded, or the gap is invisible. Measured
+# 2026-08-20: fourteen consecutive releases — v1.60.1 through v1.72.0 — carried no stamp
+# while the retro's honest-gap section still named only v1.16.0-v1.23.0, and the
+# cold-retirement trigger, which reads the last five stamps, had nothing to read across
+# the whole stretch. Nothing failed, because nothing compared the tag list against the
+# stamps.
+#
+# Scoped to the TRAILING stretch on purpose. 84 of 117 tags carry no stamp; the register
+# began mid-history (first stamped release v1.41.0) and the doctrine forbids backfilling,
+# so a guard over the whole list would demand 84 rewrites of closed history and would be
+# switched off within a release. What is actionable is the releases since the newest
+# stamped one: each must be named in the gap section, so the next release either carries a
+# stamp or is written into the range — and neither can happen in silence.
+_GAP_HEAD = "## Releases that carry no stamp"
+_retro_live = os.path.join(ARTP, "retro.md")
+if os.path.isfile(_retro_live) and shutil.which("git") and os.path.isdir(os.path.join(ROOT, ".git")):
+    _stamp_shas = []
+    for _sp in [_retro_live] + sorted(glob.glob(os.path.join(ARTP, "retro", "*.md"))):
+        _st = open(_sp, encoding="utf-8").read()
+        for _h in re.finditer(r"^##+ Run stamps\b", _st, re.M):
+            _sec = _st[_h.start():]
+            _e = _sec.find("\n## ", 5)
+            _stamp_shas += re.findall(
+                r"^\s*\|\s*\d{4}-\d\d-\d\d\s*\|[^|]*\|\s*`([0-9a-f]{7,40})`",
+                _sec[:_e] if _e > 0 else _sec, re.M)
+    _tags = subprocess.run(["git", "tag", "-l", "v*", "--sort=v:refname"], cwd=ROOT,
+                           capture_output=True, text=True).stdout.split()
+    _rt = open(_retro_live, encoding="utf-8").read()
+    if not _stamp_shas:
+        fail(f"{ART}/retro.md: no run-stamp commits could be read out of the stamp "
+             "sections — the release-gap check has no source of truth and would pass by "
+             "having nothing to compare")
+    elif not _tags:
+        _UNLOOKED.append("release stamps: no v* tags in this checkout (shallow clone?)")
+    elif _GAP_HEAD not in _rt:
+        fail(f"{ART}/retro.md: no `{_GAP_HEAD}` section — a release that shipped without "
+             "a run of this pipeline has nowhere to be recorded, and an unrecorded gap is "
+             "indistinguishable from a stamped run")
+    else:
+        _prev, _trailing = None, []
+        for _tag in _tags:
+            _rng = f"{_prev}..{_tag}" if _prev else _tag
+            _shipped = {_c[:7] for _c in subprocess.run(
+                ["git", "rev-list", _rng], cwd=ROOT,
+                capture_output=True, text=True).stdout.split()}
+            _trailing = [] if [_s for _s in _stamp_shas if _s[:7] in _shipped] else _trailing + [_tag]
+            _prev = _tag
+        _gap = _rt[_rt.index(_GAP_HEAD):]
+        _ge = _gap.find("\n## ", 5)
+        _gap = _gap[:_ge] if _ge > 0 else _gap
+        # A range endpoint names the whole run between its two versions: the section is
+        # prose, and asking it to list fourteen tags one by one is how a record becomes
+        # something nobody updates. Expansion walks the real tag order, so a range cannot
+        # cover a tag that does not exist.
+        _named = set(re.findall(r"v\d+\.\d+\.\d+", _gap))
+        for _a, _b in re.findall(r"`?(v\d+\.\d+\.\d+)`?\s*(?:through|to|–|-|\.\.)\s*`?(v\d+\.\d+\.\d+)`?", _gap):
+            if _a in _tags and _b in _tags and _tags.index(_a) <= _tags.index(_b):
+                _named |= set(_tags[_tags.index(_a):_tags.index(_b) + 1])
+        _missing = [_t2 for _t2 in _trailing if _t2 not in _named]
+        if _missing:
+            fail(f"{ART}/retro.md: {len(_missing)} release(s) after the newest run stamp "
+                 f"are named nowhere in `{_GAP_HEAD}` — "
+                 + ", ".join(_missing[:6]) + ("…" if len(_missing) > 6 else "")
+                 + ". Stamp the run at stage 10, or extend that section's range in the SAME "
+                   "commit as the release. A release that neither ran the pipeline nor "
+                   "recorded that it did not is the shape this section exists to make "
+                   "impossible: the cold-retirement trigger reads the last five stamps and "
+                   "has nothing to read across a gap nobody declared. Note where this fires: "
+                   "`validate.yml` ignores tag pushes, so the branch run cannot see a tag that "
+                   "does not exist yet — `release.yml` runs the suite on the tag's own tree, "
+                   "where it does")
+
+# The live doctrine at the top of the retro tells stage 0 where the archive is, and it
+# named `docs/superpowers/retro/YYYY-QN.md` — the pre-v1.53.0 root — so the one line a
+# run reads to find the archive pointed at a directory that has not existed since. The
+# root is resolved, never spelled; this compares the two.
+if os.path.isfile(_retro_live):
+    _rt2 = open(_retro_live, encoding="utf-8").read()
+    for _m2 in re.finditer(r"`(docs/[a-z]+)/retro/[^`]*`", _rt2):
+        if _m2.group(1) != ART:
+            fail(f"{ART}/retro.md:{_rt2[:_m2.start()].count(chr(10)) + 1}: the archive is "
+                 f"named as `{_m2.group(0)}` and this project's artifact root is `{ART}` "
+                 "— stage 0 reads this line to find the archive, so a stale root here is "
+                 "a pointer at a directory that does not exist")
+
 # --- the hand-back (v1.43.0) --------------------------------------------------
 # The rail says WHERE a run is; it never said what happened, and an operator who
 # stepped away rebuilt that by asking. Measured on this project: a fourteen-iteration
@@ -6092,7 +6707,7 @@ _TDD_P = os.path.join(_skill_dir, "references", "tdd.md")
 _RETRO_D = os.path.join(_skill_dir, "references", "retrospective.md")
 
 def _section(path, heading_re):
-    """A named section, stopping at the next heading of the SAME depth or shallower.
+    r"""A named section, stopping at the next heading of the SAME depth or shallower.
 
     The first version said that and did something else: its lookahead was a flat
     `^#{1,3}\s`, which stops at a DEEPER heading too. Every section wired to it happened

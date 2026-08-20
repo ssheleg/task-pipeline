@@ -319,6 +319,29 @@ spends its length refusing.
 
 ## GATE (manual)
 
+> **Acceptance policy `AP-1` · owner: the operator of the project running this pipeline ·
+> in force since 2026-08-20 · supersedes: the unversioned ladder that stood before it.**
+>
+> This block is the policy, and naming it that closes a contradiction that stood in the
+> shipped doctrine. [`gates.md`](gates.md) → *Axis A — the stage gate type* says which stages are
+> manual is the operator's decision and that **the framework fixes no stage count and no
+> gate assignment** — while the ladder below fixes twelve criteria and the statuses they
+> may take. Both were true and neither was scoped, so a reader could take either as the
+> rule.
+>
+> **The scope, stated once:** `gates.md`'s sentence governs the **pipeline's shape** — how
+> many stages a project runs and which of them are `auto`, `judgment` or `manual`, all of
+> it in the project's own `pipeline.json`. `AP-1` governs **what stage 10's manual gate
+> asks when a project runs one.** A project may drop stage 10, or make it `auto` for a
+> class of work, and `AP-1` then does not apply to it; a project that keeps it manual gets
+> these criteria and this vocabulary, not a per-run selection from them.
+>
+> **Changing it is a decision, not an edit.** An amended criterion moves the version to
+> `AP-2` and lands with a row in the project's decision register, because a policy that can
+> be edited silently is the *«recorded in the slot reserved for what a machine
+> established»* failure one level up: an acceptance standard nobody can cite by version is
+> one every run re-negotiates.
+
 All of:
 
 1. **Every shipped REQ has a verification row, and every row names a REQ its own run

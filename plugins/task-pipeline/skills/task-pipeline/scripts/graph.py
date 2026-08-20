@@ -909,13 +909,21 @@ def cmd_producer(graph, args):
 def cmd_doctrine(graph, args):
     """Which doctrine this run actually read — B-061.
 
-    The bundle is 34 reference files. A run reads some subset and nothing recorded which,
+    The bundle is 35 reference files. A run reads some subset and nothing recorded which,
     so **a skipped file and a read one were indistinguishable** — the class every guard in
     this repository exists to catch, left standing over the doctrine itself.
 
-    `read:` lines in the run ledger are written by a hook, never by the agent, for the same
-    reason `gate:` is: a claim about what somebody read, written by the party the claim is
-    about, is not evidence.
+    `read:` lines are written by a hook rather than by the agent, for the same reason `gate:`
+    is: a claim about what somebody read, written by the party the claim is about, is not
+    evidence.
+
+    **And that is an intent, not a proof, so every line here is reported as UNATTESTED.**
+    The ledger is `.task-pipeline/run.md` — the file the agent appends to at every stage —
+    so nothing in it distinguishes a hook-written line from one an agent typed. The doctrine
+    said *hook-written, never agent-written*, which is a provenance claim this script cannot
+    check and no format here carries; B-014's class, committed by the mechanism built to
+    close it. Until the ledger can attest a writer, the honest output is the count plus the
+    word: read as *this is what the ledger says, and the ledger cannot say who wrote it*.
 
     **The one rule that matters here: no `read:` lines means UNMEASURED, never «read
     nothing».** Zero would be the reassuring answer to a question nobody asked, and this
@@ -958,7 +966,10 @@ def cmd_doctrine(graph, args):
         return 0
 
     unread = [r for r in refs if r not in read]
-    print(f"doctrine: {len(read)} of {len(refs)} reference files read")
+    print(f"doctrine: {len(read)} of {len(refs)} reference files read — unattested")
+    print("          unattested: the ledger is the file the agent appends to at every stage, "
+          "so nothing in it proves the hook wrote these lines rather than an agent. The "
+          "count is what the ledger says; who wrote it is not recorded.")
     print("          a disclosure: no floor, no direction, never a target. A run that needs "
           "four files and reads four is not worse than one that reads thirty.")
     for r in unread:

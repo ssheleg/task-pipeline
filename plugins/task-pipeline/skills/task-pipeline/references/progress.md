@@ -369,12 +369,18 @@ deduplicated, and always exiting 0 — a hook that can fail a `Read` breaks ever
 every session. `scripts/graph.py doctrine` reports how many of the bundle's reference files
 a run opened and lists the rest.
 
-Why it is hook-written is the same reason as above: a claim about what somebody read,
-written by the party the claim is about, is not evidence. And why the verb prints
+Why a hook appends it is the same reason as above: a claim about what somebody read,
+written by the party the claim is about, is not evidence. **And that is an intent rather
+than a proof, so the verb reports `unattested`:** the ledger is the file the agent appends
+to at every stage and carries no writer field, so nothing in it separates a hook-written
+line from one an agent typed. Saying *never agent-written* was a provenance claim the
+format cannot support — B-014's class, in the mechanism built to close it.
+
+And why the verb prints
 `unmeasured` rather than `0` when there are no such lines is the same reason again — the
 hook being absent and the run reading nothing are **opposite facts** the ledger cannot
 separate, so it claims neither. A `0` there would be the reassuring answer to a question
-nobody asked, over 34 files nobody checked.
+nobody asked, over 35 files nobody checked.
 
 It is a disclosure: no floor, no direction, never a target. The moment the number becomes
 something to raise, a run will open files to raise it.

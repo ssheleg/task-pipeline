@@ -149,83 +149,13 @@
       },
       "allOf": [
         {
-          "if": {
-            "properties": {
-              "status": {
-                "not": {
-                  "const": "parked"
-                }
-              }
-            },
-            "required": [
-              "status"
-            ]
-          },
-          "then": {
-            "required": [
-              "check"
-            ],
-            "properties": {
-              "check": {
-                "type": "string",
-                "minLength": 1,
-                "pattern": "\\S"
-              }
-            }
-          }
+          "$ref": "#/definitions/rule_check_unless_parked"
         },
         {
-          "if": {
-            "properties": {
-              "status": {
-                "const": "done"
-              }
-            },
-            "required": [
-              "status"
-            ]
-          },
-          "then": {
-            "required": [
-              "evidence"
-            ],
-            "properties": {
-              "evidence": {
-                "type": "array",
-                "minItems": 1,
-                "items": {
-                  "type": "string",
-                  "minLength": 1,
-                  "pattern": "\\S",
-                  "description": "At least one non-whitespace character. `minLength: 1` alone accepts a single space, which is the one shape where this schema and `graph.py`'s verdict gate disagreed — the gate strips, the schema counted. A cross-check fixture comparing the two found it."
-                }
-              }
-            }
-          }
+          "$ref": "#/definitions/rule_done_needs_evidence"
         },
         {
-          "if": {
-            "properties": {
-              "status": {
-                "const": "parked"
-              }
-            },
-            "required": [
-              "status"
-            ]
-          },
-          "then": {
-            "required": [
-              "parked_reason"
-            ],
-            "properties": {
-              "parked_reason": {
-                "type": "string",
-                "minLength": 1,
-                "pattern": "\\S"
-              }
-            }
-          }
+          "$ref": "#/definitions/rule_parked_needs_reason"
         }
       ]
     },
@@ -281,6 +211,88 @@
           "minLength": 1,
           "pattern": "\\S",
           "description": "The reason, written for a person reading it later. The non-whitespace pattern is required for the same reason `parked_reason` needs one: `minLength: 1` counts a space."
+        }
+      }
+    },
+    "rule_check_unless_parked": {
+      "description": "B-080's rule, factored out of `node.allOf` so it is stated once and referenced. Factoring it exposed B-079: `test/validate.py`'s `_conditionals()` recursed into `allOf` and never followed a `$ref`, so a schema that shares a rule this way read as a schema with NO conditionals and both REQ-006 and REQ-012 were reported missing from a schema that states them. The shipped schema now uses the `$ref` form, so the deref branch is exercised by every run of the gate rather than by one fixture.",
+      "if": {
+        "properties": {
+          "status": {
+            "not": {
+              "const": "parked"
+            }
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "then": {
+        "required": [
+          "check"
+        ],
+        "properties": {
+          "check": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "\\S"
+          }
+        }
+      }
+    },
+    "rule_done_needs_evidence": {
+      "description": "REQ-006 as draft-07 states it: `done` implies at least one non-whitespace evidence string. Referenced from `node.allOf`, never inlined, so the rule has one home.",
+      "if": {
+        "properties": {
+          "status": {
+            "const": "done"
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "then": {
+        "required": [
+          "evidence"
+        ],
+        "properties": {
+          "evidence": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "pattern": "\\S",
+              "description": "At least one non-whitespace character. `minLength: 1` alone accepts a single space, which is the one shape where this schema and `graph.py`'s verdict gate disagreed — the gate strips, the schema counted. A cross-check fixture comparing the two found it."
+            }
+          }
+        }
+      }
+    },
+    "rule_parked_needs_reason": {
+      "description": "REQ-012: a parked node names why it is parked. Referenced from `node.allOf`.",
+      "if": {
+        "properties": {
+          "status": {
+            "const": "parked"
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "then": {
+        "required": [
+          "parked_reason"
+        ],
+        "properties": {
+          "parked_reason": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "\\S"
+          }
         }
       }
     }

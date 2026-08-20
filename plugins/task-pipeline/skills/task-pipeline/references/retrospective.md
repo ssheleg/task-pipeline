@@ -19,7 +19,7 @@ justifies reading it protects one section while the file below it doubles.
 | Artifact | Parts | How it is read |
 |---|---|---|
 | `docs/evidence/retro.md` — **one per project** | **Standing instructions** (max **10**) · **Run stamps** (max **10**, oldest rotate out) | stage 0, **in full** — both are bounded by a **cap**, which *one line each* never was |
-| the same file's **Recent log** | entries from the last five run stamps — narrative, and capped by nothing | stage 0, **queried** by the task's nouns. It said *in full* until 2026-08-10, when it measured **74%** of the file: an uncapped section inside a binding source is what makes the capped part get skimmed |
+| the same file's **Recent log** | narrative entries, **uncapped by design** — the heading said *entries from the last five run stamps* until 2026-08-20 while the section held 25 going back nine days, a bound in a heading that nothing enforced | stage 0, **queried** by the task's nouns. It said *in full* until 2026-08-10, when it measured **74%** of the file: an uncapped section inside a binding source is what makes the capped part get skimmed |
 | `docs/evidence/retro/YYYY-QN.md` — the archive | every entry and every retirement ever written, append-only | **queried** by the task's nouns; never read end to end |
 
 Seed the archive from [`../templates/retro-archive.md`](../templates/retro-archive.md).

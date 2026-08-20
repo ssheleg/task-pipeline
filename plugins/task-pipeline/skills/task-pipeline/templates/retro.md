@@ -31,7 +31,7 @@ has not fired in the last five run stamps, or in the last sixty days. At eleven
 rows, the oldest never-fired
 row goes — the cap is not negotiable, ranking is.
 
-## Recent log — entries from the last five run stamps (newest first)
+## Recent log — narrative entries, uncapped and queried rather than read (newest first)
 
 Older entries and every retirement **move** to `docs/evidence/retro/YYYY-QN.md`
 at the prune. Moving is not deleting: the archive is append-only and holds the
