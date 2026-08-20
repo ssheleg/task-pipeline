@@ -1295,7 +1295,7 @@ three quarters of the work on this run.
 
 ## Releases that carry no stamp — stated, not stamped
 
-**The trailing gap right now is `v1.60.1` through `v1.72.0` — fourteen releases.** Guard
+**The trailing gap right now is `v1.60.1` through `v1.73.0` — fifteen releases.** Guard
 work, doctrine and audit follow-up that shipped without being run as pipeline runs: no
 brief, no spec, no acceptance, no stamp. The first recorded stretch was `v1.16.0` through
 `v1.23.0`, and this one is longer.
@@ -1356,7 +1356,7 @@ guard that reopened it would demand 84 rewrites.
 Two consequences worth stating rather than leaving to be rediscovered:
 
 - **The cold-retirement trigger is unreadable across a stretch like this.** It counts firings
-  across the last five run stamps, and across `v1.60.1`–`v1.72.0` the counter did not move at
+  across the last five run stamps, and across `v1.60.1`–`v1.73.0` the counter did not move at
   all. It was not strict or lenient — there was nothing to read. That is why the condition now
   carries a second unit, sixty days, which nothing can stall
   ([`references/retrospective.md`](../../plugins/task-pipeline/skills/task-pipeline/references/retrospective.md)).

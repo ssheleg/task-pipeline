@@ -1,6 +1,7 @@
 # Changelog
 
-## Unreleased
+## v1.73.0 — 2026-08-20 — the registry could not see the templates, the scripts, or its own registers
+
 
 **The claim registry had the class for this exact incident and it fired on nothing.** Three
 shipped surfaces said *34 reference files* over a directory of 35 — `scripts/graph.py`'s
@@ -60,6 +61,8 @@ cell, the discriminator the board already uses, and the register plant sits on a
 board row where no prose edit beside it can turn it off.
 
 Guards: 390 → **412** · property checks 9 → **14**
+
+**Guards: 390 → 412**, property checks 9 → 14, each watched failing.
 
 ## v1.72.0 — a node says how it will be closed
 
