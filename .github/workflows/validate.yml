@@ -3002,12 +3002,24 @@ jobs:
           # the last five stamps — had nothing to read across the whole stretch. Nothing
           # failed, because nothing compared the tag list against the stamps. Narrowing the
           # declared range must reopen the finding.
+          # The range moves on EVERY release that ships without a run stamp, so the plant
+          # reads its shape rather than its value. Pinned to the literal
+          # "`v1.60.1` through `v1.72.0`" it stopped landing the moment v1.73.0 extended the
+          # stretch — and a plant that does not land is a check nobody ran, reported green.
+          import re
           p = "/tmp/gap1-copy/docs/evidence/retro.md"
           t = open(p, encoding="utf-8").read()
-          needle = "`v1.60.1` through `v1.72.0`"
-          assert needle in t, "PLANT DID NOT LAND: the declared range is not where the plant expects it"
-          open(p, "w", encoding="utf-8").write(t.replace("v1.72.0", "v1.63.0"))
-          assert "v1.72.0" not in open(p, encoding="utf-8").read(), "PLANT DID NOT LAND"
+          m = re.search(r"`(v[0-9.]+)` through `(v[0-9.]+)`", t)
+          assert m, "PLANT DID NOT LAND: no declared gap range of the form `vA` through `vB`"
+          hi = m.group(2)
+          # narrow the declared range: the releases above the new upper bound become
+          # unstamped AND unnamed, which is the finding this guard exists for.
+          # Narrow to a single release: every release after the lower bound is then
+          # unstamped AND unnamed, which is unambiguously the finding. Computing a
+          # "middle" version was arithmetic on a string and produced a version nobody
+          # ever tagged, which the guard had no reason to complain about.
+          open(p, "w", encoding="utf-8").write(t.replace(hi, m.group(1)))
+          assert hi not in open(p, encoding="utf-8").read(), "PLANT DID NOT LAND"
           EOF
           if python3 /tmp/gap1-copy/test/validate.py; then
             echo "ERROR: validator passed unstamped releases named nowhere in the gap section"
@@ -3070,13 +3082,20 @@ jobs:
           python3 - <<'EOF'
           # Under a release heading the section reads as a claim about the past, and the count
           # check would never reach it — the silent shape B-104 was made of.
+          import re
+          # INSERTS the section rather than moving one. After a release there IS no
+          # `## Unreleased` — the release absorbs it — so a plant that relocates an existing
+          # one stops landing on every release commit, which is where it matters most.
           p = "/tmp/unr2-copy/CHANGELOG.md"
           t = open(p, encoding="utf-8").read()
-          i, j = t.index("## Unreleased"), t.index("## v1.")
-          assert i < j, "PLANT DID NOT LAND: Unreleased is not above the version heading"
-          open(p, "w", encoding="utf-8").write(t[:i] + t[j:j + 40] + "\n\n" + t[i:j] + t[j + 40:])
+          m = re.search(r"^## v[0-9]", t, re.M)
+          assert m, "PLANT DID NOT LAND: no released version heading to park below"
+          nxt = re.search(r"^## ", t[m.end():], re.M)
+          at = m.end() + (nxt.start() if nxt else 0)
+          open(p, "w", encoding="utf-8").write(
+              t[:at] + "## Unreleased\n\nGuards: 1 -> 2, parked under a release.\n\n" + t[at:])
           out = open(p, encoding="utf-8").read()
-          assert out.index("## Unreleased") > out.index("## v1."), "PLANT DID NOT LAND"
+          assert out.index("## Unreleased") > out.index(m.group(0)), "PLANT DID NOT LAND"
           EOF
           if python3 /tmp/unr2-copy/test/validate.py; then
             echo "ERROR: validator passed an Unreleased section sitting under a release"
@@ -5384,9 +5403,11 @@ jobs:
           top = t[heads[0]:heads[1]]
           m = re.search(r"Guards:\s*(\d+)\s*(?:\u2192|->)\s*(\*{0,2})(\d+)(\*{0,2})", top)
           assert m, "PLANT DID NOT LAND: the topmost section states no readable guard count"
-          # The exact shape the guard went dormant on: same numbers, no colon.
-          patched = top[:m.start()] + "Guards %s \u2192 %s%s%s" % (
-              m.group(1), m.group(2), m.group(3), m.group(4)) + top[m.end():]
+          # Talks about guards, states NO readable count — which is the finding. Dropping
+          # only the colon left `Guards 390 -> 412`, and the guard's own regex tolerates
+          # that, so the plant read as accepted when the guard was working: a plant weaker
+          # than the check it probes reports a hole that is not there.
+          patched = top[:m.start()] + "the guard suite grew again" + top[m.end():]
           open(p, "w", encoding="utf-8").write(t[:heads[0]] + patched + t[heads[1]:])
           EOF
           if python3 /tmp/cl9-copy/test/validate.py 2>&1 | grep -q "states no .Guards: N"; then

@@ -62,7 +62,6 @@ board row where no prose edit beside it can turn it off.
 
 Guards: 390 → **412** · property checks 9 → **14**
 
-**Guards: 390 → 412**, property checks 9 → 14, each watched failing.
 
 ## v1.72.0 — a node says how it will be closed
 
