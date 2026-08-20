@@ -41,6 +41,32 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ steps.t.outputs.tag }}
+          fetch-depth: 0
+
+      - name: The tag must be reachable from the default branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -eu
+          # A TAG PUSHED WITHOUT ITS BRANCH is a published release a fresh clone
+          # cannot reach, and nothing fails loudly: this workflow fires on the
+          # tag, so the release is created, npm publishes, and `origin/main`
+          # still reads the previous era. Hit twice here — the `v1.4.0` ghost on
+          # 2026-08-04 and `v1.18.0` on 2026-08-12, where `main` was two commits
+          # ahead of `origin/main` while the tag was public and served by npm.
+          #
+          # Checked against the repository's ACTUAL default branch, not a
+          # hardcoded `main`: a fork that renamed it would otherwise be told its
+          # correct tag is unreachable.
+          DEF="$(gh api "repos/$GITHUB_REPOSITORY" --jq .default_branch)"
+          git fetch --no-tags origin "$DEF"
+          if ! git merge-base --is-ancestor HEAD "origin/$DEF"; then
+            echo "::error::${{ steps.t.outputs.tag }} points at a commit that is not an" \
+                 "ancestor of origin/$DEF. The tag was pushed and the branch was not, so a" \
+                 "clone cannot reach this release. Push the branch, then re-run this job."
+            exit 1
+          fi
+          echo "$(git rev-parse --short HEAD) is an ancestor of origin/$DEF"
           fetch-depth: 0   # the suite's tag-ancestry check cannot answer on a shallow clone
       # AFTER the tag is checked out, never before: run on `workflow_dispatch` and the
       # ref the workflow started from is not necessarily the commit being released.
