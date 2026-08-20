@@ -20,7 +20,7 @@ Run: `<topic>` · started `<YYYY-MM-DD>` · module map: `<path or "none">`
 
 ## `read:` — which doctrine this run actually opened
 
-The bundle is 35 reference files and nothing recorded which of them a run read, so **a
+The bundle is 36 reference files and nothing recorded which of them a run read, so **a
 skipped file and a read one were indistinguishable** — the class every guard in this
 pipeline exists to catch, left standing over the doctrine itself.
 
@@ -48,7 +48,7 @@ same claim one level down.
 |---|---|---|
 | `unmeasured — no run ledger` | there is no ledger | nothing to read from |
 | `unmeasured — the ledger carries no read: lines` | the hook is absent, **or** the run opened no doctrine | two opposite facts, and the ledger cannot separate them, so neither is claimed |
-| `N of 35 reference files read — unattested`, then each unread one | the hook is installed and fired | the count alone says there is a gap, not where — and `unattested` says the ledger cannot name who wrote the lines |
+| `N of 36 reference files read — unattested`, then each unread one | the hook is installed and fired | the count alone says there is a gap, not where — and `unattested` says the ledger cannot name who wrote the lines |
 
 **It is a disclosure: no floor, no direction, never a target.** A run that needs four files
 and reads four is not worse than one that reads thirty — and the moment the number becomes

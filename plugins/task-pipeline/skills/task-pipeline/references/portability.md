@@ -71,6 +71,7 @@ a row pointing outside the bundle is the defect this file exists to catch.
 | What a spec must lock, the UX-track order, the module dossier | `references/spec.md` |
 | The zero-context plan format, parallel groups, set equality | `references/planning.md` |
 | The work graph: its fields, the verbs and their exit codes, and the three invariants a schema cannot state | `references/work-graph.md`, `scripts/graph.py`, `graph.schema.json` |
+| How a node is CLOSED: three blind readings at escalating visibility, all three required, and the round ledger the ceiling reads | `references/certification.md`, `agents/verifier-{unit,seam,product}.md`, `scripts/graph.py certify` |
 | Workspace isolation, the subagent loop, who may write the register | `references/build.md` |
 | The review rubric, diff packages, the three verdicts | `references/review.md` |
 | **False success** — the class, its known shapes and its two rules | `references/gates.md` |

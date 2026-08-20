@@ -59,6 +59,7 @@ gate stops until it is installed.
 | 3 Spec | `references/spec.md` |
 | 4 Plan | `references/planning.md` |
 | the queue the loop walks | `references/work-graph.md` |
+| 5–8 · how a node is CLOSED — three blind readings at three distances, all three required | `references/certification.md` |
 | 5 Build (worktree, subagents, fix loop) | `references/build.md` + `references/review.md` |
 | 5–6 TDD + suite gate | `references/tdd.md` |
 | 5, 6, 8 The browser — the look, the spec suite, and the difference | `references/browser.md` |

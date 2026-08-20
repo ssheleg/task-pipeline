@@ -1632,10 +1632,266 @@ def _():
     assert run(ex, "validate")[0] == 0, "the example no longer validates"
 
 
+# --- certification: three tiers, one node ------------------------------------
+#
+# `certify` is a gate in FRONT of `close`, so these fixtures prove two different
+# things and both matter: that a malformed or contradictory tier report is refused
+# by name, and that a certification which passes hands `close` a verdict `close`
+# itself accepts. The second is the one a unit test of either half would miss.
+
+
+def tier(t, verdict="pass", node="N-001", scope=("read src/x.py:10-40",),
+         confirms=("the requirement holds",), findings=(),
+         evidence=("ran the check: 1 passed",), not_examined=(), drop=None):
+    """One tier report. `drop` removes a key, which is the only way to test absence."""
+    r = {"node": node, "tier": t, "verdict": verdict, "scope": list(scope),
+         "confirms": list(confirms), "findings": list(findings),
+         "evidence": list(evidence), "not_examined": list(not_examined)}
+    if drop:
+        r.pop(drop)
+    return r
+
+
+def breaks(check="pytest tests/test_x.py -q"):
+    return {"what": "the caller still expects the old return", "where": "api/x.py:44",
+            "severity": "breaks", "fix": "update the caller", "check": check}
+
+
+def risk():
+    return {"what": "one caller has no test", "where": "jobs/y.py:19",
+            "severity": "risk", "fix": "add one", "check": "pytest tests/test_y.py -q"}
+
+
+def certify(graph, reports, *extra, workdir=None):
+    """Write a graph and its tier reports to one directory and run `certify`.
+
+    Returns (code, output, workdir) so a second round can run against the SAME
+    directory — which is the only way to prove the round count accumulates rather
+    than being recomputed from nothing each time.
+    """
+    d = workdir or tempfile.mkdtemp()
+    gp = pathlib.Path(d) / "graph.json"
+    if graph is not None:
+        gp.write_text(json.dumps(graph))
+    paths = []
+    for i, r in enumerate(reports):
+        tp = pathlib.Path(d) / ("tier%d.json" % i)
+        tp.write_text(json.dumps(r))
+        paths.append(str(tp))
+    argv = [sys.executable, str(GRAPH), "certify", "--node", "N-001"]
+    for tp in paths:
+        argv += ["--tier", tp]
+    argv += list(extra) + ["--graph", str(gp)]
+    r = subprocess.run(argv, capture_output=True, text=True)
+    return r.returncode, (r.stdout + r.stderr), d
+
+
+def three(**kw):
+    """The three passing reports — the shape every fixture below deviates from."""
+    return [tier("unit", **kw), tier("seam", **kw), tier("product", **kw)]
+
+
+ONE = g([node("N-001")])
+
+
+@case("certify: three passing tiers write a verdict close accepts")
+def _():
+    code, out, d = certify(ONE, three())
+    assert code == 0, out
+    vp = pathlib.Path(d) / "verdict-N-001.json"
+    assert vp.exists(), "no verdict was written: " + out
+    v = json.loads(vp.read_text())
+    # The mapping, field by field. A verdict that merely validates is not the
+    # claim -- the claim is that each tier's field lands where it means the same.
+    assert len(v["done"]) == 3, v["done"]
+    assert v["not_done"] == [], v["not_done"]
+    assert all(e.split(":")[0] in ("unit", "seam", "product") for e in v["evidence"]), v
+    r = subprocess.run([sys.executable, str(GRAPH), "close", "--verdict", str(vp),
+                        "--graph", str(pathlib.Path(d) / "graph.json")],
+                       capture_output=True, text=True)
+    assert r.returncode == 0, "close refused the verdict certify assembled: " + \
+        r.stdout + r.stderr
+
+
+@case("certify: not_examined becomes not_verified, a risk becomes a survivable blocker")
+def _():
+    reports = three()
+    reports[1]["not_examined"] = ["the broker integration test"]
+    reports[1]["findings"] = [risk()]
+    code, out, d = certify(ONE, reports)
+    assert code == 0, out
+    v = json.loads((pathlib.Path(d) / "verdict-N-001.json").read_text())
+    assert any("broker" in x for x in v["not_verified"]), v["not_verified"]
+    assert len(v["blockers"]) == 1 and v["blockers"][0]["can_continue_around"] is True, v
+
+
+@case("certify: a tier passing on an empty scope is refused as a rubber stamp")
+def _():
+    reports = three()
+    reports[0]["scope"] = []
+    code, out, _ = certify(ONE, reports)
+    assert code != 0 and "rubber stamp" in out, out
+
+
+@case("certify: a tier passing with empty evidence is refused")
+def _():
+    reports = three()
+    reports[2]["evidence"] = []
+    code, out, _ = certify(ONE, reports)
+    assert code != 0 and "empty `evidence`" in out, out
+
+
+@case("certify: a pass carrying a `breaks` finding is a contradiction, refused")
+def _():
+    reports = three()
+    reports[0]["findings"] = [breaks()]
+    code, out, _ = certify(ONE, reports)
+    assert code != 0 and "cannot both be true" in out, out
+
+
+@case("certify: a fail naming no `breaks` finding is refused")
+def _():
+    reports = three()
+    reports[1].update(verdict="fail", confirms=[], findings=[risk()])
+    code, out, _ = certify(ONE, reports)
+    assert code != 0 and "does not say what broke" in out, out
+
+
+@case("certify: a `breaks` finding with no check is refused — it becomes a node")
+def _():
+    reports = three()
+    reports[1].update(verdict="fail", confirms=[], findings=[breaks(check="  ")])
+    code, out, _ = certify(ONE, reports)
+    assert code != 0 and "names no `check`" in out, out
+
+
+@case("certify: a report missing one of the eight keys is refused, and the key is named")
+def _():
+    for key in ("node", "tier", "verdict", "scope", "confirms", "findings",
+                "evidence", "not_examined"):
+        reports = three()
+        reports[0] = tier("unit", drop=key)
+        code, out, _ = certify(ONE, reports)
+        assert code != 0 and ("has no `%s`" % key) in out, (key, out)
+
+
+@case("certify: a third verdict value is refused — no maybe")
+def _():
+    reports = three()
+    reports[0]["verdict"] = "partial"
+    code, out, _ = certify(ONE, reports)
+    assert code != 0 and "must be `pass` or `fail`" in out, out
+
+
+@case("certify: two readings at one distance leave another unread, refused")
+def _():
+    code, out, _ = certify(ONE, [tier("unit"), tier("unit"), tier("product")])
+    assert code != 0 and "second `unit` report" in out, out
+
+
+@case("certify: a missing tier is refused and named")
+def _():
+    code, out, _ = certify(ONE, [tier("unit"), tier("seam")])
+    assert code != 0 and "`product`" in out, out
+
+
+@case("certify: a report about another node is not evidence about this one")
+def _():
+    reports = three()
+    reports[0]["node"] = "N-009"
+    code, out, _ = certify(ONE, reports)
+    assert code != 0 and "about another node" in out, out
+
+
+@case("certify: a report citing another tier's verdict was not written blind")
+def _():
+    reports = three()
+    reports[2]["confirms"] = ["as the seam tier passed, the docs hold"]
+    code, out, _ = certify(ONE, reports)
+    assert code != 0 and "cites another tier" in out, out
+
+
+@case("certify: a failing tier exits 1, prints the fix and its check, and the node stays open")
+def _():
+    reports = three()
+    reports[1].update(verdict="fail", confirms=[], findings=[breaks()])
+    code, out, d = certify(ONE, reports)
+    assert code == 1, out
+    assert "update the caller" in out and "pytest tests/test_x.py" in out, out
+    n = json.loads((pathlib.Path(d) / "graph.json").read_text())["nodes"][0]
+    assert n["status"] == "pending", n
+    assert n["certification"]["round"] == 1, n["certification"]
+    assert n["certification"]["tiers"]["seam"] == "fail", n["certification"]
+    assert not (pathlib.Path(d) / "verdict-N-001.json").exists(), \
+        "a failing certification wrote a verdict"
+
+
+@case("certify: the round accumulates across attempts, so churn is countable")
+def _():
+    failing = three()
+    failing[1].update(verdict="fail", confirms=[], findings=[breaks()])
+    code, out, d = certify(ONE, failing)
+    assert code == 1, out
+    code, out, d = certify(None, failing, workdir=d)
+    assert code == 1, out
+    n = json.loads((pathlib.Path(d) / "graph.json").read_text())["nodes"][0]
+    assert n["certification"]["round"] == 2, n["certification"]
+    assert len(n["certification"]["history"]) == 2, n["certification"]
+
+
+@case("certify: at the ceiling the output names the tier that failed every round")
+def _():
+    failing = three()
+    failing[1].update(verdict="fail", confirms=[], findings=[breaks()])
+    code, out, d = certify(ONE, failing, "--ceiling", "2")
+    assert code == 1 and "ceiling" not in out, "round 1 is not at a ceiling of 2: " + out
+    code, out, d = certify(None, failing, "--ceiling", "2", workdir=d)
+    assert code == 1, out
+    assert "`seam`" in out and "failed every round" in out, out
+    assert "loop-guard" in out, "the ceiling does not point at the doctrine: " + out
+
+
+@case("certify: churn across levels is reported as such, not as one stuck tier")
+def _():
+    a = three(); a[0].update(verdict="fail", confirms=[], findings=[breaks()])
+    b = three(); b[1].update(verdict="fail", confirms=[], findings=[breaks()])
+    code, out, d = certify(ONE, a, "--ceiling", "2")
+    assert code == 1, out
+    code, out, d = certify(None, b, "--ceiling", "2", workdir=d)
+    assert code == 1, out
+    assert "churn across levels" in out, out
+
+
+@case("certify: a node that is already done cannot be certified again")
+def _():
+    done = g([node("N-001", status="done", evidence=["it was closed"])])
+    code, out, _ = certify(done, three())
+    assert code != 0 and "already done" in out, out
+
+
+@case("certify: a node whose blocker is open certifies nothing")
+def _():
+    blocked = g([node("N-000"), node("N-001", blocked=["N-000"])])
+    code, out, _ = certify(blocked, three())
+    assert code != 0 and "waits on N-000" in out, out
+
+
+@case("certify: the graph still validates after a round is recorded on a node")
+def _():
+    code, out, d = certify(ONE, three())
+    assert code == 0, out
+    gp = pathlib.Path(d) / "graph.json"
+    r = subprocess.run([sys.executable, str(GRAPH), "validate", "--graph", str(gp)],
+                       capture_output=True, text=True)
+    assert r.returncode == 0, "the certification field broke the graph: " + \
+        r.stdout + r.stderr
+
+print("\nPASS: graph.py — %d cases%s"
+      % (cases, (" (%d unlooked)" % len(skipped)) if skipped else ""))
+
+
 if failures:
     print("\n%d failure(s) out of %d cases" % (len(failures), cases))
     sys.exit(1)
 if skipped:
     print("\nunlooked: %d — %s" % (len(skipped), "; ".join(skipped)))
-print("\nPASS: graph.py — %d cases%s"
-      % (cases, (" (%d unlooked)" % len(skipped)) if skipped else ""))

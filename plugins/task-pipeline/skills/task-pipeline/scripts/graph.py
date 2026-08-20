@@ -515,6 +515,139 @@ def verdict_violations(v):
     return out
 
 
+# --- certification: three tiers, one node ------------------------------------
+#
+# One verifier reads the diff it was handed. That is the whole limitation this
+# section exists for: a change can be correct where it was made, and wrong one
+# level out — a caller whose contract moved, a module whose invariant the new
+# branch breaks, a documented behaviour nobody re-read. The single verdict cannot
+# see any of it, because the context it was given was the change.
+#
+# So a node is closed by THREE reports at escalating visibility, produced
+# independently and blind to each other:
+#
+#   unit     the code that changed — the functions, classes and branches in the
+#            diff, and the node's own `check`
+#   seam     one level out — callers, callees, shared state, the contracts and
+#            tests of the neighbours the change can reach
+#   product  one level out again — the documentation, the scenarios, how this
+#            behaviour interacts with the rest of the product
+#
+# **All three must pass, and blind is the point.** Three agents that read each
+# other's reports are one opinion with three signatures; the disagreement is the
+# instrument. `certify` refuses a report that cites another tier's verdict.
+#
+# **A tier cannot pass on an empty `scope`.** This is the rule the rest is built
+# around: a report that names nothing it read is a rubber stamp, and a rubber
+# stamp at three levels is worse than one verifier, because it costs three times
+# as much and reads as three times the assurance.
+TIERS = ("unit", "seam", "product")
+TIER_KEYS = ("node", "tier", "verdict", "scope", "confirms", "findings",
+             "evidence", "not_examined")
+TIER_VERDICTS = ("pass", "fail")
+SEVERITIES = ("breaks", "risk")
+# A tier report that quotes another tier's verdict was not written blind. Cheap
+# to detect and worth detecting: the failure it prevents is three reports that
+# agree because the second two read the first.
+CROSS_TIER = re.compile(r"\b(?:unit|seam|product)\s+tier\s+(?:passed|failed|says)"
+                        r"|\btier\s+\d\s+(?:passed|failed)"
+                        r"|as\s+the\s+(?:unit|seam|product)\s+tier", re.I)
+
+
+def tier_violations(t):
+    """Everything wrong with one tier report, in a stable order.
+
+    Same law as `verdict_violations`: the shape is checked rather than trusted,
+    and every refusal names the key, because a report rejected without naming its
+    fault is a report the next attempt reproduces.
+    """
+    out = []
+    if not isinstance(t, dict):
+        return ["tier report is not an object"]
+
+    for k in TIER_KEYS:
+        if k not in t:
+            out.append("tier report has no `%s` — all eight are required, because a "
+                       "report that omits one is silent about it rather than clear" % k)
+    if out:
+        return out
+
+    if not isinstance(t["node"], str) or not t["node"].startswith(NODE_ID):
+        out.append("tier report `node` is %r, which is not a node id" % (t["node"],))
+    if t["tier"] not in TIERS:
+        out.append("tier report `tier` is %r — it must be one of %s"
+                   % (t["tier"], ", ".join(TIERS)))
+    if t["verdict"] not in TIER_VERDICTS:
+        out.append("tier report `verdict` is %r — it must be `pass` or `fail`, because "
+                   "a certification that admits a third state admits a maybe"
+                   % (t["verdict"],))
+
+    for k in ("scope", "confirms", "findings", "evidence", "not_examined"):
+        if not isinstance(t[k], list):
+            out.append("tier report `%s` must be a list" % k)
+    if out:
+        return out
+
+    for k in ("scope", "confirms", "evidence", "not_examined"):
+        for i, e in enumerate(t[k]):
+            if not isinstance(e, str) or not e.strip():
+                out.append("tier report `%s[%d]` is %r — every entry must be a non-empty "
+                           "string, and a list of blanks is the shape a script emitting "
+                           "empty output produces" % (k, i, e))
+
+    findings = []
+    for i, f in enumerate(t["findings"]):
+        if not isinstance(f, dict):
+            out.append("tier report `findings[%d]` is not an object" % i)
+            continue
+        for k in ("what", "where", "severity"):
+            if not str(f.get(k, "")).strip():
+                out.append("tier report `findings[%d]` does not say `%s`" % (i, k))
+        sev = f.get("severity")
+        if sev is not None and sev not in SEVERITIES:
+            out.append("tier report `findings[%d].severity` is %r — it must be `breaks` "
+                       "(the node is not done) or `risk` (found, judged survivable, and "
+                       "named)" % (i, sev))
+        # A break has to say how its fix will be PROVEN, for the same reason
+        # `replan.add` does: the node it creates is one the next certification has
+        # to close, and handing it the absence is how the defect returns a round
+        # later.
+        if sev == "breaks" and not str(f.get("check", "")).strip():
+            out.append("tier report `findings[%d]` breaks the node and names no `check` "
+                       "— the fix node it becomes has to say how IT will be closed" % i)
+        findings.append(f)
+
+    breaks = [f for f in findings if isinstance(f, dict) and f.get("severity") == "breaks"]
+    if t["verdict"] == "pass":
+        # The two rules that make a pass mean something.
+        if not t["scope"]:
+            out.append("tier report `%s` passes on an empty `scope` — a report that names "
+                       "nothing it read is a rubber stamp, and three of those cost three "
+                       "times one verifier and read as three times the assurance"
+                       % t["tier"])
+        if not t["evidence"]:
+            out.append("tier report `%s` passes with empty `evidence` — the field exists "
+                       "for exactly this" % t["tier"])
+        if breaks:
+            out.append("tier report `%s` passes while carrying %d finding(s) at severity "
+                       "`breaks`: %s. Those two cannot both be true"
+                       % (t["tier"], len(breaks),
+                          "; ".join(str(f.get("what")) for f in breaks)))
+    elif t["verdict"] == "fail":
+        if not breaks:
+            out.append("tier report `%s` fails and names no finding at severity `breaks` "
+                       "— a fail that does not say what broke is a fail the next round "
+                       "cannot act on" % t["tier"])
+
+    # Blind, and checked. Only the prose fields can carry it.
+    for k in ("confirms", "evidence", "not_examined"):
+        for i, e in enumerate(t[k]):
+            if isinstance(e, str) and CROSS_TIER.search(e):
+                out.append("tier report `%s[%d]` cites another tier's verdict (%r) — the "
+                           "three run blind, because three reports that read each other "
+                           "are one opinion with three signatures" % (k, i, e.strip()[:70]))
+    return out
+
 # --- verbs --------------------------------------------------------------------
 
 def cmd_validate(graph, args):
@@ -909,7 +1042,7 @@ def cmd_producer(graph, args):
 def cmd_doctrine(graph, args):
     """Which doctrine this run actually read — B-061.
 
-    The bundle is 35 reference files. A run reads some subset and nothing recorded which,
+    The bundle is 36 reference files. A run reads some subset and nothing recorded which,
     so **a skipped file and a read one were indistinguishable** — the class every guard in
     this repository exists to catch, left standing over the doctrine itself.
 
@@ -974,6 +1107,170 @@ def cmd_doctrine(graph, args):
           "four files and reads four is not worse than one that reads thirty.")
     for r in unread:
         print(f"          unread: {r}")
+    return 0
+
+
+def cmd_certify(graph, args):
+    """Require three independent tier reports, then emit the verdict `close` consumes.
+
+    This is a gate in FRONT of `close`, not a replacement for it. `close`'s contract
+    is unchanged and its seven keys are still the only thing that moves the graph —
+    what changed is that the verdict is now assembled from three readings at
+    different distances instead of written from one.
+
+    **The round is recorded whether it passes or fails.** A failing round that
+    wrote nothing would erase the only evidence that a node is churning, which is
+    the number the ceiling below reads. The node stays `pending` on a failure; the
+    round count is the trail.
+
+    **The ceiling measures rather than stops** — `references/loop-guard.md`. At the
+    ceiling `certify` still runs and still tells the truth about the tiers; what it
+    adds is the name of the tier that keeps failing, because a run spinning on one
+    level needs the operator to see WHICH level, not to be halted.
+    """
+    guard(graph, args.graph)
+
+    nid = args.node
+    by_id = {n.get("id"): n for n in graph.get("nodes") or []}
+    node = by_id.get(nid)
+    if node is None:
+        die("no node %s in this graph — nothing was written" % nid)
+    if node.get("status") in TERMINAL:
+        die("%s is already %s — certifying it again would overwrite the record of the "
+            "close that already happened" % (nid, node.get("status")))
+    open_blockers = [b for b in node.get("blocked_by") or []
+                     if by_id.get(b, {}).get("status") not in TERMINAL]
+    if open_blockers:
+        die("%s waits on %s, which %s not closed — certifying work that could not have "
+            "run certifies nothing" % (nid, ", ".join(open_blockers),
+                                       "is" if len(open_blockers) == 1 else "are"))
+
+    reports, bad = {}, []
+    for path in args.tier:
+        try:
+            with open(path, encoding="utf-8") as fh:
+                t = json.load(fh)
+        except OSError as e:
+            die("cannot read the tier report at %s — %s" % (path, e), 2)
+        except ValueError as e:
+            die("%s: not readable as JSON — %s" % (path, e))
+        v = tier_violations(t)
+        if v:
+            bad += ["%s: %s" % (os.path.basename(path), line) for line in v]
+            continue
+        if t["node"] != nid:
+            bad.append("%s: reports on %s while this certification is for %s — a report "
+                       "about another node is not evidence about this one"
+                       % (os.path.basename(path), t["node"], nid))
+            continue
+        if t["tier"] in reports:
+            bad.append("%s: a second `%s` report — the three tiers are three distances, "
+                       "and two readings at one distance leave another unread"
+                       % (os.path.basename(path), t["tier"]))
+            continue
+        reports[t["tier"]] = t
+    if bad:
+        die("the tier reports are malformed — nothing was written:\n  " + "\n  ".join(bad))
+
+    missing = [x for x in TIERS if x not in reports]
+    if missing:
+        die("certification is missing the %s report(s) — all three are required, because "
+            "the level nobody read is the level the defect survives at"
+            % ", ".join("`%s`" % m for m in missing))
+
+    # The stamp, read here and never accepted from a report — same law as `close`.
+    import subprocess
+    try:
+        r = subprocess.run(["git", "rev-parse", "HEAD"], capture_output=True, text=True)
+        head = r.stdout.strip() if r.returncode == 0 else ""
+    except OSError:
+        head = ""
+
+    prior = node.get("certification") or {}
+    round_no = int(prior.get("round") or 0) + 1
+    tiers_now = {x: reports[x]["verdict"] for x in TIERS}
+    history = list(prior.get("history") or []) + [tiers_now]
+    node["certification"] = {
+        "round": round_no,
+        "tiers": tiers_now,
+        "at": head or "unavailable — not inside a git checkout",
+        "history": history,
+    }
+
+    failed = [x for x in TIERS if tiers_now[x] == "fail"]
+
+    # Churn, measured. A tier that has failed in every round so far is the one the
+    # operator needs named; counting it here is what makes the loop visible.
+    churning = [x for x in TIERS
+                if len(history) >= 2 and all(h.get(x) == "fail" for h in history)]
+
+    save(args.graph, graph)
+
+    if failed:
+        print("%s: certification round %d FAILED at %s"
+              % (nid, round_no, ", ".join("`%s`" % f for f in failed)), file=sys.stderr)
+        for tier in failed:
+            for f in reports[tier]["findings"]:
+                if f.get("severity") != "breaks":
+                    continue
+                print("  [%s] %s — %s" % (tier, f["where"], f["what"]), file=sys.stderr)
+                print("      fix:   %s" % f.get("fix", "(not stated)"), file=sys.stderr)
+                print("      check: %s" % f["check"], file=sys.stderr)
+        if round_no >= args.ceiling:
+            print("\n%s has been certified %d time(s), at or over the ceiling of %d."
+                  % (nid, round_no, args.ceiling), file=sys.stderr)
+            if churning:
+                print("The same tier has failed every round: %s. That is not a fix "
+                      "away — the level itself is being misread, or the node is the "
+                      "wrong shape. references/loop-guard.md."
+                      % ", ".join("`%s`" % c for c in churning), file=sys.stderr)
+            else:
+                print("No single tier is failing every round, so this is churn across "
+                      "levels rather than one stuck level.", file=sys.stderr)
+        print("\nThe node stays open. Round %d is recorded on it." % round_no,
+              file=sys.stderr)
+        return 1
+
+    # Passed at all three. Assemble the canonical verdict.
+    #
+    # The mapping is deliberate and uses no field for something it does not mean:
+    #   confirms      -> done          (asked for, and now true)
+    #   not_examined  -> not_verified  (present, and no check touched it)
+    #   risk findings -> blockers      (found, judged survivable, and named, which is
+    #                                   exactly what `can_continue_around: true` says)
+    verdict = {
+        "node": nid,
+        "done": [c for x in TIERS for c in reports[x]["confirms"]],
+        "not_done": [],
+        "not_verified": ["%s: %s" % (x, n)
+                         for x in TIERS for n in reports[x]["not_examined"]],
+        "blockers": [
+            {"what": "%s (%s, found by the `%s` tier)" % (f["what"], f["where"], x),
+             "blocks": [], "can_continue_around": True}
+            for x in TIERS for f in reports[x]["findings"]
+            if f.get("severity") == "risk"
+        ],
+        "replan": {"possible": True, "add": [], "park": [],
+                   "why": "certified at all three tiers in round %d" % round_no},
+        "evidence": ["%s: %s" % (x, e) for x in TIERS for e in reports[x]["evidence"]],
+    }
+    # Checked against the same gate `close` will apply, HERE, so a certification
+    # cannot hand the run a verdict its own consumer refuses.
+    broken = verdict_violations(verdict)
+    if broken:
+        die("all three tiers passed and the assembled verdict is still malformed — this "
+            "is a defect in `certify`, not in the reports:\n  " + "\n  ".join(broken))
+
+    out = args.verdict_out or os.path.join(os.path.dirname(args.graph) or ".",
+                                          "verdict-%s.json" % nid)
+    tmp = out + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as fh:
+        json.dump(verdict, fh, indent=2, ensure_ascii=False)
+        fh.write("\n")
+    os.replace(tmp, out)
+    print("%s: certified at unit, seam and product in round %d" % (nid, round_no))
+    print("verdict written to %s — close it with:" % out)
+    print("  graph.py close --verdict %s" % out)
     return 0
 
 
@@ -1105,6 +1402,8 @@ VERBS = {
     "coverage": (cmd_coverage, "every requirement and the nodes serving it; exits 1 on a gap"),
     "add": (cmd_add, "add a node mid-run"),
     "park": (cmd_park, "park a node, carrying the reason"),
+    "certify": (cmd_certify, "require three independent tier reports, then emit "
+                             "the verdict `close` consumes"),
     "close": (cmd_close, "consume a verdict, close one node and re-plan"),
 }
 
@@ -1147,6 +1446,16 @@ def main(argv=None):
     made["close"].add_argument("--verdict", required=True,
                                help="path to the verifier's seven-key verdict JSON")
 
+    p_cert = made["certify"]
+    p_cert.add_argument("--node", required=True, help="the node being certified")
+    p_cert.add_argument("--tier", action="append", required=True, default=[],
+                        help="path to one tier report; pass three times, one per tier")
+    p_cert.add_argument("--verdict-out", dest="verdict_out", default=None,
+                        help="where to write the assembled verdict (default: beside the graph)")
+    p_cert.add_argument("--ceiling", type=int, default=3,
+                        help="rounds after which the output names the churning tier; it "
+                             "measures rather than stops (references/loop-guard.md)")
+
     p_park = made["park"]
     p_park.add_argument("node")
     # `required=True` makes the MISSING flag a usage error (exit 2). The empty and
@@ -1158,7 +1467,7 @@ def main(argv=None):
     verbs = {k: v[0] for k, v in VERBS.items()}
     if args.verb in NO_GRAPH:
         return verbs[args.verb](None, args)
-    if args.verb in ("add", "park", "close"):
+    if args.verb in ("add", "park", "close", "certify"):
         # The READ happens inside the lock too. Loading first and locking second is the
         # same lost update with an extra step: the stale copy is already in memory.
         with held(args.graph):

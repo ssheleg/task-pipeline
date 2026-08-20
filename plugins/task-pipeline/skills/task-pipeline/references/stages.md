@@ -273,6 +273,12 @@ never that the work was skipped quietly.
   `next` refuses to walk one. The reason to prefer it over a prose plan is measured, not
   aesthetic: a 400-node graph and a 4-node graph produce the same 27-byte frontier, so the
   cost of knowing what is next does not grow with the programme.
+- **And the check is what THREE readings will run, not one**
+  ([`certification.md`](certification.md)). A node is closed by `unit`, `seam` and `product`
+  reports, dispatched blind and in parallel, and `certify` refuses the close until all three
+  pass. That is a planning fact, not only a verification one: a node whose blast radius nobody
+  can name is a node the seam and product tiers cannot scope, so `touches` and `serves` are
+  what make the two outer readings possible at all.
 - **The queue exists here, so the loop arms here** ([`continuity.md`](continuity.md) →
   *Part 1a*). Where `run.loop.arm` is `after-decomposition` and the map holds more than
   one module, arm the mode at the close of this stage and print one line: the mode, and

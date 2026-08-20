@@ -1,5 +1,104 @@
 # Changelog
 
+## v1.74.0 — 2026-08-20 — a node is closed by three readings, not one
+
+**A verifier reads the diff it was handed, and that is the definition of its context, not a
+shortcoming.** It also means a class of defect is invisible to it by construction: the change is
+correct where it was made and a caller's contract moved under it; a second implementation of the
+same rule did not get the fix; a documented behaviour is now false and the document still reads
+as true; another feature reaches the same path and nobody considered the interaction. None of
+those is a bug in the changed lines. All of them ship.
+
+A node is now closed by **three independent readings at escalating visibility**, and the run may
+not advance until all three pass.
+
+| Tier | Subject | Characteristic finding |
+|---|---|---|
+| `unit` | the changed functions, classes and branches, plus the node's own `check` | a branch nothing exercises; a boundary that moved |
+| `seam` | everything that can reach the change — callers, callees, implementors, shared state, the neighbours' tests | a contract that moved under a dependent; the duplicate that did not get the fix |
+| `product` | documentation, scenarios, user-visible strings, the neighbouring features sharing this path | a documented behaviour that is now false; an interaction nobody listed |
+
+**Blind is the design, not a detail.** The three dispatch in parallel and no tier reads another's
+report, because three readings that inform each other are one opinion with three signatures — and
+the failure is specific: an agent that has just read a convincing account of the implementation
+will paraphrase it back as product truth. `certify` refuses a report whose prose cites another
+tier's verdict.
+
+**`certify` is a gate in front of `close`, and `close`'s contract is unchanged.** It takes one
+report per tier, requires all three to pass, and assembles the same seven-key verdict `close`
+already consumed — then runs that verdict through `close`'s own `verdict_violations` before
+writing it, so a certification cannot hand the run a verdict its consumer refuses. No field is
+used for something it does not mean: `confirms` → `done`, `not_examined` → `not_verified`, a
+`risk` finding → a blocker with `can_continue_around: true`.
+
+**Two rules give a pass its meaning.** A tier cannot pass on an empty `scope` — a report naming
+nothing it read is a rubber stamp, and three rubber stamps cost three times one verifier while
+reading as three times the assurance, which is strictly worse than what they replaced. And a tier
+cannot pass while carrying a `breaks` finding. There are two severities and no third, because a
+certification that admits a maybe admits everything.
+
+**The fix cycle records itself.** A failing round leaves the node open and writes its round number,
+this round's three verdicts and the whole history onto the node — on failure too, because a failing
+round that wrote nothing would erase the only evidence that a node is churning. Every `breaks`
+finding carries the `check` that will prove its fix, so it becomes a node the next round can close.
+At the ceiling (`--ceiling`, default 3) the gate **measures rather than stops**: it names the tier
+that has failed *every* round, because the same tier failing three times is a planning defect
+wearing a verification failure's clothes, and different tiers each round is churn across levels.
+
+### The verification of this change, and what it caught in itself
+
+`test/certify_mutations.py` disables each of the gate's sixteen rules in a copy of the tree and
+requires a fixture whose name begins `certify:` to notice. **16 of 16 noticed.** It is wired into
+`test:all`, and it exists because the first two attempts at this pass were both wrong:
+
+* The first reported **11 of 11 killed** and proved nothing — every mutant had died of the same
+  unrelated fixture, because the copy has no `.git` and one pre-existing case checks the commit
+  stamp. A mutant is killed only by a `certify:` fixture now.
+* Fixing that reported **0 of 16** and explained why: the twenty new fixtures had been inserted
+  **below** `graph_test.py`'s `if failures: sys.exit(1)`, so any earlier failure skipped all of
+  them. Locally everything was green and they ran; in CI, on the run where they mattered, they
+  would not have. The block moved above the summary, and the mutation pass now asserts its own
+  control — that exactly twenty ran and none was red — before reporting a single result.
+
+149 graph fixtures, 20 of them new. `references/certification.md` is the doctrine; the three
+agents ship beside `verifier.md`, which now points at them.
+
+### The first live dispatch, and what it caught
+
+The fixtures prove the **gate**. Whether the shipped agent prose yields a usable report is a live
+dispatch, so one was run: all three tiers against `sheleg-design@f88c14b`, a strict reduced-motion
+check that had shipped green through a single verdict hours earlier.
+
+All three returned a well-formed eight-key report. **Two returned `fail`, with five `breaks`
+findings between them.** The unit tier ran the node's check in an isolated worktree at the
+certified commit, ran its own negative control, and put a cross-level observation in
+`not_examined` rather than claiming it — which is the instruction that keeps the levels apart.
+
+What the independence bought, stated as measurements rather than as a claim about the design:
+
+* the **seam** tier instrumented the gate's `check()` calls and found the ratchet prices the
+  *exception* rather than the rule — collapsing the four durations the requirement names as its
+  first remediation dropped the count by 4 against its floor and turned the suite red on the
+  stricter answer
+* the **product** tier planted a defect and watched it pass: a duration whose token name carries
+  no duration word was outside the walk entirely, and thirteen such tokens across ten layers were
+  clean by habit rather than by the check
+* **both outer tiers independently** found a propagation-matrix row still stating the obligation
+  the change had replaced — two blind readings converging is the signal that they are reading
+  different things
+
+None of the five is a bug in the changed lines, which is the class this gate was built for. They
+are fixed in `sheleg-design@874ba17`; four further findings are filed there as decisions rather
+than repairs. The one about the author is filed too: every ratchet floor set that day sits below
+its true count, because the sequence was measure, keep editing, restate.
+
+**Guards: 412 → 412**, and the flatness is the honest number: this release adds no validator
+negative, because every rule it adds lives in `scripts/graph.py` rather than in `validate.py`, and
+`.github/workflows/validate.yml` plants defects for the second. The certification's own negative
+control is `npm run test:certify` — **16 mutations, 16 noticed** — wired into `test:all` beside
+the 14 property checks. A guard count that rose here would be a number borrowed from a suite that
+never ran.
+
 ## v1.73.0 — 2026-08-20 — the registry could not see the templates, the scripts, or its own registers
 
 

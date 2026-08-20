@@ -117,7 +117,7 @@
           "not": {
             "pattern": "[\\n\\r]"
           },
-          "description": "**How this node will be closed** \u2014 the command a verifier runs, or the named judgement that stands in where no command can (`references/gates.md`'s third gate type: name the judge, record the verdict AS judgement). Its output becomes the node's `evidence` row.\n\nRequired on every node except a `parked` one, and that is the whole point of the field: `agents/verifier.md` tells the verifier to run *the check this node names*, so a node with none leaves it the two options that same paragraph forbids \u2014 invent a check, or run everything. Shipped doctrine read a field the schema did not have (B-080); the field the doctrine reads now exists.\n\nOne string, never a list, because the requirement it serves is singular throughout \u2014 one input, one job, one output, one owner, **one** completion test. A node needing two unrelated checks is a node doing two jobs, and the answer is to split it rather than to widen this field. One gate made of two commands is `a && b`, which is still one gate.\n\nA `parked` node is exempt because it is the one node nobody will close, and a placeholder there \u2014 *n/a, parked* \u2014 is the confidence-without-correctness this schema refuses everywhere else. The field survives a park: `park` sets the status and never removes what the node said it would run."
+          "description": "**How this node will be closed** — the command a verifier runs, or the named judgement that stands in where no command can (`references/gates.md`'s third gate type: name the judge, record the verdict AS judgement). Its output becomes the node's `evidence` row.\n\nRequired on every node except a `parked` one, and that is the whole point of the field: `agents/verifier.md` tells the verifier to run *the check this node names*, so a node with none leaves it the two options that same paragraph forbids — invent a check, or run everything. Shipped doctrine read a field the schema did not have (B-080); the field the doctrine reads now exists.\n\nOne string, never a list, because the requirement it serves is singular throughout — one input, one job, one output, one owner, **one** completion test. A node needing two unrelated checks is a node doing two jobs, and the answer is to split it rather than to widen this field. One gate made of two commands is `a && b`, which is still one gate.\n\nA `parked` node is exempt because it is the one node nobody will close, and a placeholder there — *n/a, parked* — is the confidence-without-correctness this schema refuses everywhere else. The field survives a park: `park` sets the status and never removes what the node said it would run."
         },
         "evidence": {
           "type": [
@@ -145,6 +145,89 @@
             "pattern": "\\S"
           },
           "description": "What this node MUTATES — paths, register names, remote resource ids. `references/planning.md` states the rule the frontier needs: *distinct is not the same as independent, and the check is what they touch, never what they are called.* That rule lived in the markdown plan, and the graph replaced the plan as the thing deciding what runs next — so `next` could hand two agents two runnable nodes that write the same file, with nothing able to report it.\\n\\nOptional, and its absence is DISCLOSED rather than treated as «touches nothing»: `next` prints how many frontier nodes declared no targets, because a quiet run and a checked one must not look alike."
+        },
+        "certification": {
+          "type": "object",
+          "description": "What the three-tier certification recorded for this node. Written by `graph.py certify` on every round, pass or fail: a failing round that wrote nothing would erase the only evidence that a node is churning, which is the number the loop-guard ceiling reads.",
+          "additionalProperties": false,
+          "required": [
+            "round",
+            "tiers",
+            "at",
+            "history"
+          ],
+          "properties": {
+            "round": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "tiers": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "unit",
+                "seam",
+                "product"
+              ],
+              "properties": {
+                "unit": {
+                  "enum": [
+                    "pass",
+                    "fail"
+                  ]
+                },
+                "seam": {
+                  "enum": [
+                    "pass",
+                    "fail"
+                  ]
+                },
+                "product": {
+                  "enum": [
+                    "pass",
+                    "fail"
+                  ]
+                }
+              }
+            },
+            "at": {
+              "type": "string",
+              "minLength": 1
+            },
+            "history": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "unit",
+                  "seam",
+                  "product"
+                ],
+                "properties": {
+                  "unit": {
+                    "enum": [
+                      "pass",
+                      "fail"
+                    ]
+                  },
+                  "seam": {
+                    "enum": [
+                      "pass",
+                      "fail"
+                    ]
+                  },
+                  "product": {
+                    "enum": [
+                      "pass",
+                      "fail"
+                    ]
+                  }
+                }
+              }
+            }
+          }
         }
       },
       "allOf": [
