@@ -92,12 +92,26 @@ are fixed in `sheleg-design@874ba17`; four further findings are filed there as d
 than repairs. The one about the author is filed too: every ratchet floor set that day sits below
 its true count, because the sequence was measure, keep editing, restate.
 
-**Guards: 412 → 412**, and the flatness is the honest number: this release adds no validator
+Guards: 412 → **412**, and the flatness is the honest number — written in that exact shape
+because the guard reads it:  this release adds no validator
 negative, because every rule it adds lives in `scripts/graph.py` rather than in `validate.py`, and
 `.github/workflows/validate.yml` plants defects for the second. The certification's own negative
 control is `npm run test:certify` — **16 mutations, 16 noticed** — wired into `test:all` beside
 the 14 property checks. A guard count that rose here would be a number borrowed from a suite that
 never ran.
+
+**The shape of that line is load-bearing, and this is the second time it has bitten.** The
+v1.39.0 entry wrote the count with no colon, the pattern missed, and `npm test` was green over
+a number it had never read. This release first wrote it with the bold around the whole phrase
+instead of around the second number, and the same guard went silent again. The readable shape is
+`Guards: N → **M**`, and the negative test that plants a stale count is the only reason either
+miss was caught.
+
+**Neither wrong form is reproduced here, and that is deliberate.** Writing the bad example with
+real digits makes it a second readable count in this section — which is exactly what happened on
+the first attempt: the plant removed the real count, the narrative about the mistake still
+matched, and the guard stayed silent over a section that no longer stated anything. A document
+that quotes a form as an example is indistinguishable from the form itself.
 
 ## v1.73.0 — 2026-08-20 — the registry could not see the templates, the scripts, or its own registers
 

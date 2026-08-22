@@ -3018,8 +3018,22 @@ jobs:
           # unstamped AND unnamed, which is unambiguously the finding. Computing a
           # "middle" version was arithmetic on a string and produced a version nobody
           # ever tagged, which the guard had no reason to complain about.
-          open(p, "w", encoding="utf-8").write(t.replace(hi, m.group(1)))
-          assert hi not in open(p, encoding="utf-8").read(), "PLANT DID NOT LAND"
+          t = t.replace(hi, m.group(1))
+          # AND remove the newest run stamp, because the guard reads releases AFTER it.
+          # Narrowing the range alone stopped exercising anything the moment a release
+          # shipped with a stamp of its own: v1.74.0 was both the newest release and the
+          # newest stamp, so nothing was "after" it and the plant landed while proving
+          # nothing. A plant has to create its own precondition, not inherit one from
+          # whatever the tree happens to look like on the day it runs.
+          import re as _re
+          rows = [mm for mm in _re.finditer(r"(?m)^\|\s*\d{4}-\d{2}-\d{2}\s*\|.*$", t)]
+          assert rows, "PLANT DID NOT LAND: no run stamp rows to remove"
+          newest = rows[0]          # the table is newest-first
+          t = t[:newest.start()] + t[newest.end() + 1:]
+          open(p, "w", encoding="utf-8").write(t)
+          after = open(p, encoding="utf-8").read()
+          assert hi not in after, "PLANT DID NOT LAND: the range did not narrow"
+          assert newest.group(0) not in after, "PLANT DID NOT LAND: the newest stamp is still there"
           EOF
           if python3 /tmp/gap1-copy/test/validate.py; then
             echo "ERROR: validator passed unstamped releases named nowhere in the gap section"
@@ -3063,10 +3077,37 @@ jobs:
           import re
           p = "/tmp/unr1-copy/CHANGELOG.md"
           t = open(p, encoding="utf-8").read()
-          m = re.search(r"(Guards:\s*\d+\s*→\s*\*\*)(\d+)(\*\*)", t)
-          assert m and t.index("## Unreleased") < m.start(), "PLANT DID NOT LAND: no count in Unreleased"
-          open(p, "w", encoding="utf-8").write(t[:m.start(2)] + "999" + t[m.end(2):])
-          assert "→ **999**" in open(p, encoding="utf-8").read(), "PLANT DID NOT LAND"
+          # The plant WRITES the count it is about to make stale, instead of hoping the
+          # tree has one. Immediately after a release `## Unreleased` is empty by
+          # design — there is no unreleased work and therefore no guard count — so a
+          # plant that required one landed on the day it was written and reported
+          # BROKEN on the first release after it. Creating the precondition is the
+          # only version that exercises the guard on any day.
+          # The section may not exist: after a release the release absorbs it, which is
+          # this repository's stated convention and the assumption the sibling plant
+          # below is built on. So create it where it belongs — above every version
+          # heading — and then make its count stale.
+          # `^## Unreleased` as a HEADING, never as a substring: this file discusses
+          # the section in prose — "the `## Unreleased` section" — and a bare `find`
+          # matched that sentence inside a released section, planting the stale count
+          # below a version heading where the topmost-section guard never looks. The
+          # plant landed and the guard stayed silent, which is the exact shape this
+          # whole negative suite exists to refuse.
+          h = re.search(r"^## Unreleased\b", t, re.M)
+          i = h.start() if h else -1
+          if i < 0:
+              v = re.search(r"^## v[0-9]", t, re.M)
+              assert v, "PLANT DID NOT LAND: no version heading to sit above"
+              t = t[:v.start()] + "## Unreleased\n\nGuards: 1 → **999**\n\n" + t[v.start():]
+          else:
+              end = i + len("## Unreleased")
+              t = t[:end] + "\n\nGuards: 1 → **999**\n" + t[end:]
+          open(p, "w", encoding="utf-8").write(t)
+          after = open(p, encoding="utf-8").read()
+          assert "→ **999**" in after, "PLANT DID NOT LAND: the stale count was not written"
+          hh = re.search(r"^## Unreleased\b", after, re.M)
+          assert hh and hh.start() < after.index("→ **999**"), \
+              "PLANT DID NOT LAND: the count is not under the Unreleased HEADING"
           EOF
           if python3 /tmp/unr1-copy/test/validate.py; then
             echo "ERROR: validator passed a guard count in Unreleased that disagrees with the workflow"
@@ -3117,10 +3158,18 @@ jobs:
           # the template AND in the wording that was invisible.
           p = "/tmp/cr5b-copy/plugins/task-pipeline/skills/task-pipeline/templates/run.md"
           t = open(p, encoding="utf-8").read()
-          needle = "The bundle is 35 reference files"
-          assert needle in t, "PLANT DID NOT LAND: anchor absent before edit"
-          open(p, "w", encoding="utf-8").write(t.replace(needle, "The bundle is 34 reference files", 1))
-          assert "34 reference files" in open(p, encoding="utf-8").read(), "PLANT DID NOT LAND"
+          # DERIVED. Pinned to "The bundle is 35 reference files" this stopped landing
+          # the day a reference file was added -- `certification.md`, and the count went
+          # to 36 -- so the plant reported BROKEN and the guard it probes went unexercised
+          # on the release that changed the very number it guards.
+          import re as _re
+          m = _re.search(r"The bundle is (\d+) reference files", t)
+          assert m, "PLANT DID NOT LAND: the template states no reference-file count"
+          wrong = str(int(m.group(1)) - 1)
+          open(p, "w", encoding="utf-8").write(
+              t[:m.start(1)] + wrong + t[m.end(1):])
+          assert f"The bundle is {wrong} reference files" in open(p, encoding="utf-8").read(), \
+              "PLANT DID NOT LAND: the count did not change"
           EOF
           if python3 /tmp/cr5b-copy/test/validate.py; then
             echo "ERROR: validator passed '34 reference files' in a shipped template over a directory of 35"
