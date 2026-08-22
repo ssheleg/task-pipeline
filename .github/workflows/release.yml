@@ -67,7 +67,6 @@ jobs:
             exit 1
           fi
           echo "$(git rev-parse --short HEAD) is an ancestor of origin/$DEF"
-          fetch-depth: 0   # the suite's tag-ancestry check cannot answer on a shallow clone
       # AFTER the tag is checked out, never before: run on `workflow_dispatch` and the
       # ref the workflow started from is not necessarily the commit being released.
       # Placed earlier, this step tested one commit and published another.
