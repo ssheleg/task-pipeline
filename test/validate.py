@@ -6477,7 +6477,23 @@ if os.path.isfile(_BL):
 # stamp or is written into the range — and neither can happen in silence.
 _GAP_HEAD = "## Releases that carry no stamp"
 _retro_live = os.path.join(ARTP, "retro.md")
-if os.path.isfile(_retro_live) and shutil.which("git") and os.path.isdir(os.path.join(ROOT, ".git")):
+# `exists`, never `isdir`. In a SUBMODULE checkout `.git` is a FILE holding a
+# gitdir pointer, so `isdir` is false and this entire release-gap check switched
+# itself off — silently, in exactly the checkout every member of this family is
+# developed in. It ran only in CI, which clones standalone, so a defect it exists
+# to catch reached a tag push four times before anyone asked why the local suite
+# was green. This repository had already recorded the class twice (docgate.sh and
+# the retro log both name `[ -d .git ]` as the wrong question) and this instance
+# was missed both times: knowing a class is not sweeping it.
+_have_git = shutil.which("git") and os.path.exists(os.path.join(ROOT, ".git"))
+if os.path.isfile(_retro_live) and not _have_git:
+    # DISCLOSE the silence. The branch below used to be guarded by a bare `and`, so
+    # when its precondition failed the whole release-gap check evaporated with no
+    # line of output — which is the one thing this file's own canon forbids: a check
+    # that cannot look must not read as one that looked.
+    _UNLOOKED.append("release stamps: no usable git checkout here, so the "
+                     "release-gap check could not run")
+if os.path.isfile(_retro_live) and _have_git:
     _stamp_shas = []
     for _sp in [_retro_live] + sorted(glob.glob(os.path.join(ARTP, "retro", "*.md"))):
         _st = open(_sp, encoding="utf-8").read()

@@ -456,6 +456,21 @@ run stamp, a stamp cap, and then four rotted probes — where a single local `te
 before the first push would have found the last four together. Every refusal was correct.
 The cost was entirely in asking the wrong machine.
 
+**A green local suite is not evidence until you know which checks LOOKED.** This
+instruction failed on its own release: the local run was green, CI was not, and the
+difference was a precondition asking `os.path.isdir(".git")` — false in a submodule
+checkout, where `.git` is a *file* holding a gitdir pointer. One check switched itself
+off in the only checkout the family is developed in, silently, and had been doing so
+since it was written. The repository had recorded that class **twice** already, in two
+other files, and this instance was missed both times: knowing a class is not sweeping
+it. Two consequences, and the second is the general one:
+
+- ask `exists`, never `isdir`, of anything named `.git`;
+- **a precondition that fails must disclose, not skip.** Where a check cannot run, it
+  appends to the unlooked list and the run prints it. A check guarded by a bare `and`
+  evaporates without a line of output, which is the one thing this file's own canon
+  forbids — and it evaporates most reliably in the environment its authors use.
+
 The rule has a second half, and it is the one that makes it stick: **a tag is the only
 thing that runs some checks.** A branch push cannot see a tag that does not exist yet, so
 the tag-ancestry check, the version-sync check and the run-stamp check have no earlier

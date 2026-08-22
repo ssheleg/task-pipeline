@@ -37,8 +37,29 @@ were a single twelve-minute local run apart — and the second half is what make
 a branch push cannot see a tag that does not exist yet, so three checks have no earlier
 chance to fire.
 
-Five board citations into `gates.md` were re-pointed, which is the ordinary cost of
-inserting text above them and the reason those citations carry a phrase as well as a range.
+### And R-010 failed on its own release, which is the finding
+
+The local suite was green and CI was not. The difference was one precondition asking
+`os.path.isdir(".git")` — false in a **submodule** checkout, where `.git` is a file holding a
+gitdir pointer. The whole release-gap check had been switching itself off in the only checkout
+this family is developed in, since the day it was written, with no line of output. It ran in CI
+alone, which clones standalone, so a class of defect reached four tag pushes before anyone asked
+why the local run was green.
+
+This repository had already recorded that class **twice**, in `docgate.sh` and in the retro log,
+both naming `[ -d .git ]` as the wrong question. This instance was missed both times. Knowing a
+class is not sweeping it — which is standing instruction R-003, also already in force.
+
+Two fixes, and the second is the general one: ask `exists`, never `isdir`, of anything named
+`.git`; and **a precondition that fails must disclose rather than skip**. A check guarded by a
+bare `and` evaporates without output, and it evaporates most reliably in the environment its
+authors work in. R-010 gains the half it learned by failing: *a green local suite is not
+evidence until you know which checks looked* — tag locally first, run, then read the `unlooked`
+line before believing the exit code.
+
+Seven board citations into `gates.md` were re-pointed across two passes, which is the ordinary
+cost of inserting text above them and the reason those citations carry a phrase as well as a
+range.
 
 Guards: 412 → **412**. Flat by construction: this release adds doctrine, not checks, and a
 guard count that rose on a documentation change would be a number borrowed from a suite that
