@@ -31,6 +31,9 @@ elsewhere and is not restated here:
 - Anatomy of a project gate
 - Writing the check itself
 - Probing — plant, run, restore
+- A probe rots, and every way it rots reports green
+- A ratchet prices the rule, not the exception
+- Run the whole suite locally before you push the tag
 - The neighbour probe — plant the evidence outside the subject
 - A ratchet's matcher is itself a check, and it needs a near-miss
 - A green probe is evidence only if the mutation is known to have landed
@@ -384,6 +387,80 @@ expect=<the guard's own words>)` rather than hand-rolling a fourth copy of the l
 Otherwise the next reader has to redo it to know whether it was ever done.
 
 ---
+
+## A probe rots, and every way it rots reports green
+
+The three assertions above prove a probe works **today**. They say nothing about the
+day after, and a probe is uniquely exposed: the thing it guards is the thing that moves
+it. Four rotted in one release on 2026-08-22, and none of them failed loudly — two
+reported `caught`, two reported nothing at all.
+
+**1. The anchor is a literal the guarded thing moves.** A probe pinned to *"the bundle
+is N reference files"* stops landing the day a reference file is added — on the release
+that changes the very number it guards. Same for a version, a count word, a phrase a
+release rewrites. **Derive the anchor**: read whatever the text currently says and make
+*that* wrong. A probe that computes `wrong = stated - 1` never needs maintaining.
+
+**2. The precondition is inherited from the tree rather than created.** This is the
+subtle one, because it is triggered by the system working correctly. A probe that
+narrows a declared gap to expose *releases after the newest run stamp* has nothing to
+expose the moment a release writes an honest stamp — the newest release is now the
+newest stamp. A probe requiring an `## Unreleased` section has none the moment a release
+absorbs it. **Both landed. Both proved nothing.** A probe must construct the state it
+needs: remove the stamp, write the section, then plant the defect.
+
+**3. The document quotes the form the probe removes.** Covered as
+[`documentation.md`](documentation.md) canon 2's second half, and it belongs here too
+because the probe is where it surfaces: prose describing the wrong shape *with real
+values in it* is a second instance of the shape. The probe deletes the real one, the
+narrative still matches, the guard is silent.
+
+**How to see it before CI does.** Ask one question per probe: *what does this probe
+LOOK FOR, and who is allowed to change it?* Where the answer is "the thing it guards",
+it is rotting already. A repository-wide sweep is one grep — a two-digit literal inside
+a needle, an `assert` or a `replace` — and the triage is: the number a probe **writes**
+is correct, the number it **looks for** is the defect.
+
+## A ratchet prices the rule, not the exception
+
+A floor that counts assertions is a floor that can be lowered by improving the code, if
+the assertions are attached to the wrong things.
+
+Measured: a coverage check called `check()` once per *exception* — a silent value, a kept
+value, a promise — and simply `continue`d on the ordinary case. Collapsing four kept
+values, **the remediation the requirement names first**, therefore dropped the count by
+four against its floor and turned the suite red on the stricter answer. The only way
+through was lowering a ratchet whose own reason says a falling count is how a deleted
+requirement hides — so a legitimate lowering and the failure the floor exists to catch
+became indistinguishable.
+
+**One assertion per subject examined, whatever its verdict.** The ordinary case asserts
+too. Then the floor is a function of how large the corpus is, not of how many exceptions
+it happens to contain, and doing the right thing can never lower it.
+
+**And measure the floor after the last edit, not before it.** Read the count, keep
+editing, restate the count you read — every floor set that way sits below the true one,
+and a floor is a minimum, so nothing ever says so. Where the gate cannot enforce
+equality — it must not, or the ratchet stops allowing growth — it can still **print the
+gap**: `floor 4026, ran 4027: 1 check is not pinned` turns a silent difference into a
+visible one for the cost of one line.
+
+## Run the whole suite locally before you push the tag
+
+Not a preference: an arithmetic. A release workflow that runs the full suite takes
+twenty-five to forty minutes per round, and it reports one failure at a time. The same
+suite on the machine that wrote the change takes twelve and reports all of them at once.
+
+On 2026-08-22 one tag took **five CI rounds** — a stray key in a `run:` block, a missing
+run stamp, a stamp cap, and then four rotted probes — where a single local `test:all`
+before the first push would have found the last four together. Every refusal was correct.
+The cost was entirely in asking the wrong machine.
+
+The rule has a second half, and it is the one that makes it stick: **a tag is the only
+thing that runs some checks.** A branch push cannot see a tag that does not exist yet, so
+the tag-ancestry check, the version-sync check and the run-stamp check have no earlier
+opportunity to fire. Locally, run them the way the release does — against the tree you are
+about to tag, with the suite the release claims.
 
 ## The neighbour probe — plant the evidence outside the subject
 

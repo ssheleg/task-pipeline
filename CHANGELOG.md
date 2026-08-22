@@ -1,5 +1,50 @@
 # Changelog
 
+## v1.75.0 — 2026-08-22 — the day's findings become doctrine
+
+Nothing new ships behind a flag here; what ships is the doctrine the previous release
+earned, written where the next run will read it instead of in a changelog nobody greps.
+
+**`documentation.md` canon 2 gains its dual.** *Numbers are computed, never restated* had
+a half nobody had written down: **an example that instantiates a number IS one.** A release
+note explaining that a count was written in the wrong shape — with the digits in it — places
+a second readable count in a section a gate reads, so a probe that removes the real one
+leaves the narrative matching and the guard silent. Measured three times in one hour, each
+time inside prose *about* this very failure. The umbrella already said it for commands:
+name a dead command, never claim it. It holds for a number, a version and a shape.
+
+**`gates.md` gains three sections.**
+
+*A probe rots, and every way it rots reports green.* The three assertions prove a probe
+works today; the thing it guards is the thing that moves it. An anchor pinned to a literal
+dies on the release that changes the number it guards. A precondition inherited from the
+tree evaporates **when the system works correctly** — an honest run stamp leaves nothing
+"after the newest stamp", a release absorbs the `## Unreleased` section — and the probe
+lands and proves nothing. The triage is one question: *what does this probe look for, and
+who is allowed to change it?*
+
+*A ratchet prices the rule, not the exception.* A coverage check that asserts once per
+exception and falls through on the ordinary case makes the correct remediation lower the
+count — so the gate goes red on the stricter answer and a legitimate lowering becomes
+indistinguishable from the failure the floor exists to catch. One assertion per subject
+examined, whatever its verdict. And measure the floor **after** the last edit: read, keep
+editing, restate is how every floor ends up below its true count, silently, because a floor
+is a minimum.
+
+*Run the whole suite locally before you push the tag.* Also **R-010**, because it is a
+run-level obligation rather than a note. One tag took five CI rounds where the last four
+were a single twelve-minute local run apart — and the second half is what makes it a rule:
+a branch push cannot see a tag that does not exist yet, so three checks have no earlier
+chance to fire.
+
+Five board citations into `gates.md` were re-pointed, which is the ordinary cost of
+inserting text above them and the reason those citations carry a phrase as well as a range.
+
+Guards: 412 → **412**. Flat by construction: this release adds doctrine, not checks, and a
+guard count that rose on a documentation change would be a number borrowed from a suite that
+never ran. The shape of that line is the one canon 2's new half is about, so it is written
+here in the form the guard reads and described nowhere else in this section.
+
 ## v1.74.0 — 2026-08-20 — a node is closed by three readings, not one
 
 **A verifier reads the diff it was handed, and that is the definition of its context, not a

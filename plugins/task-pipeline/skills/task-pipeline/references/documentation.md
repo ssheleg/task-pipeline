@@ -49,9 +49,23 @@ the same run and a description of the behaviour is not the behaviour. → the re
 SHA-resolution guard; the finding shape in [`setup.md`](setup.md); [`tdd.md`](tdd.md) →
 *When the thing under test is an agent*.
 
-**2. Numbers are computed, never restated.** A count in prose is a number that was true
-once. Derive it at check time and compare the stated one against the computed one as the
-same object. → [`learned.md`](learned.md) rule 8.
+**2. Numbers are computed, never restated — and an example that instantiates a number
+IS one.** A count in prose is a number that was true once. Derive it at check time and
+compare the stated one against the computed one as the same object. → [`learned.md`](learned.md)
+rule 8.
+
+The half that costs more, because it is written by the person who understands the rule:
+**a document quoting a form as an example is indistinguishable from the form.** A release
+note explaining *"the count was written wrongly as `Guards: 412 → 412`"* has just placed a
+second readable count in a section whose count a gate reads — so when the probe removes the
+real one, the narrative still matches and the guard reports green over a section that states
+nothing. Measured three times in one hour on 2026-08-22, each time inside prose *about* this
+very failure: the release note, the board row filed against it, and the repair to the probe.
+
+The rule the umbrella already states for commands — **name a dead command, never claim it**
+— holds for a number, a version and a shape. Describe the wrong form; do not write it.
+*"the bold sat around the whole phrase instead of around the second number"* is checkable by
+a reader and invisible to a pattern; the same sentence with the digits in it is a live claim.
 
 **3. Every fact has exactly one home.** Other documents link to it; they never restate
 it. Two homes do not disagree on the day they are written — they disagree on the day one
