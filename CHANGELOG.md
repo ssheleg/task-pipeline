@@ -1,5 +1,87 @@
 # Changelog
 
+## v1.76.0 — the audit that starts cold
+
+**`project-audit` ships as this plugin's third skill.** `references/audit.md` has
+been the family's audit *method* since v1.20.0 — the L0→L7 ladder, seams over
+artifacts, axis rotation, the exit criterion. It assumes a brief with REQ rows
+and a module map, which most repositories do not have; pointed at one that does
+not, its true first finding is *"your spine is missing"*, and that is not an
+audit. The new skill is the **procedure** around the method: discover what the
+project is, probe it from that, read the production evidence a repository cannot
+hold, hand phase 4 back to the ladder, and leave two artefacts. The method is
+not copied — a second copy would be a second rule.
+
+**Probes return three verdicts, and the third one is the design.** `clean`,
+`finding`, `blind`. A probe whose need is unmet, whose command is missing or
+whose output is empty returns `blind` **with the reason**, and the reason reaches
+the page as a section of its own rather than an appendix. Without it, "no error
+tracker is configured" and "no errors" render identically and a reader takes the
+second meaning. This is `audit.md`'s *silence is not a reading* raised from a
+command to a probe.
+
+**The class a version check cannot see.** A registry serves the **tag**; a plugin
+marketplace and a skills CLI serve the **branch tip**. Measured in this family on
+2026-08-22: npm served one file at 4344 lines while the marketplace served it at
+4575, and all three channels answered `1.15.0` — with the pin checker green
+throughout, correctly, because it compared the two strings. `channel-divergence`
+compares **trees**, and three of its traps are fixtures rather than prose:
+
+- the first draft compared the tarball against the **tag** and reported clean.
+  Those agree by construction, because the registry publishes *from* the tag —
+  a tautology returning green, which is the *false success* shape `gates.md`
+  names;
+- counting a path present in one channel and absent from the other produced
+  **22 findings** on a member where one file had moved. A tarball ships what its
+  `files` allowlist permits; that is packaging, not divergence;
+- a branch already bumped past its tag makes no common claim, so it is `blind`.
+
+Re-derived against a differently-shaped command: `git diff --name-only
+v1.15.0..HEAD` returns the same eight paths the probe reports for `agent-sync`,
+`sheleg-design` sits exactly on its tag and the probe is silent, and `make-skill`
+is one commit past and the probe returns one.
+
+**Two artefacts, and the second is what makes it a ratchet.**
+`docs/audit/<date>-audit.html` for a person and `docs/audit/<date>-audit.json`
+for the next run. A finding's id is derived from its probe and its place, so it
+survives a rewording; the next audit prints what closed, what is new, and what
+has now survived three runs — which is itself a finding, because a defect nobody
+picks up is a decision nobody wrote down.
+
+**Read-only, and the report is shareable by construction.** Findings leave as
+proposed board rows priced with the project's own formula; nothing is written.
+The page carries aggregates and pointers, never raw bodies — a secret is reported
+by `file:line` and class with the value in neither artefact nor on stdout, and
+the redaction is total rather than a prefix.
+
+**Found by the fixtures rather than by reading**, and both are now checks:
+
+- the audit read **its own output** as project state. Run 1 saw a clean tree; run
+  2 saw `docs/audit/` and reported the project dirty. Standing instruction #2 —
+  prove idempotence at the layer that repeats — is exactly this shape, and the
+  three-run fixture is what surfaced it;
+- the obvious fix was worse than the bug. `git status --porcelain` collapses an
+  untracked directory to its shallowest path, so excluding by path silently
+  failed to match; widening the match to *either is a prefix of the other* would
+  have hidden every new file under `docs/`. `-uall` asks git for the full list
+  instead, and a fixture holds the sibling case.
+
+**The refusal phrase is «без диагностики», not «без аудита».** `аудит` is this
+plugin's own trigger — kept deliberately after re-derivation — and
+`triggers_test.js` refuses any refusal phrase containing a trigger, because
+saying it would fire the hook it exists to silence.
+
+`npm test` now runs three suites: the validator, `graph.py`'s 149 cases and
+`project_audit_test.py`'s 43. The validator refused the release until the new
+suite joined both documented equations — a suite outside the full run is a suite
+CI does not have.
+
+Guards: 412 → **412**. Flat, and the flatness is the point: every check this
+release adds guards the shipped collector, so it lives in `project_audit_test.py`
+where the code it exercises is, not in the structural validator. Counting them
+as validator guards would inflate a number whose whole job is to make a dormant
+check visible.
+
 ## v1.75.0 — 2026-08-22 — the day's findings become doctrine
 
 Nothing new ships behind a flag here; what ships is the doctrine the previous release

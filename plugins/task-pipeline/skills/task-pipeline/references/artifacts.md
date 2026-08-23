@@ -200,10 +200,18 @@ plugins/task-pipeline/
     templates/                                # skeletons seeded into a host project
       hygiene.sh docgate.sh                 # -> scripts/check-hygiene.sh, check-docs.sh
       README.md                             # the index — and it is the list, not a copy of it
+    scripts/graph.py                          # the work graph, walked so the model never reads it
+  skills/evidence-docs/SKILL.md               # the ten canons, as a navigator
+  skills/project-audit/                       # a whole project as the subject
+    SKILL.md                                  #   the six phases, cold start
+    references/probes.md                      #   the probe catalogue, by stack and shape
+    scripts/audit.py                          #   discovery, registry, HTML + JSON sidecar
+  commands/project-audit.md                   # /project-audit
 cursor/rules/task-pipeline.mdc                # Cursor channel (self-contained rule)
 bin/task-pipeline.js                          # npx installer (package task-pipeline-skill)
 install.sh                                    # POSIX installer
 test/validate.py                              # structural validator (npm test)
+test/graph_test.py  test/project_audit_test.py  # the other two halves of `npm test`
 .github/workflows/{validate,release}.yml      # CI + toggleable release automation
 .github/ISSUE_TEMPLATE/  .github/PULL_REQUEST_TEMPLATE.md
 package.json  .gitignore

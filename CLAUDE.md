@@ -24,7 +24,7 @@ Human-facing entry points: [`README.md`](README.md) (what it is),
 
 | Job | Command |
 |---|---|
-| Test | `npm test` (= `python3 test/validate.py && python3 test/graph_test.py`) — the validator must print `PASS: task-pipeline structure valid` and the graph suite `PASS: graph.py — N cases`. The gloss said only `validate.py` until 2026-08-20, dropping 129 cases from what the command was documented to run; `test/validate.py` now compares every documented `npm` equation against `package.json` |
+| Test | `npm test` (= `python3 test/validate.py && python3 test/graph_test.py && python3 test/project_audit_test.py`) — the validator must print `PASS: task-pipeline structure valid` and the graph suite `PASS: graph.py — N cases`; `project_audit_test.py` exercises the shipped audit collector against planted defects. The gloss said only `validate.py` until 2026-08-20, dropping 129 cases from what the command was documented to run; `test/validate.py` now compares every documented `npm` equation against `package.json` |
 | Prove the guards | `npm run test:negatives` — feeds every guard a planted defect and requires it to reject one. `npm run test:all` is the full suite: `validate.py`, `graph_test.py`, `negatives.py`, then `test:exposure`, `test:probe`, `test:hooks`, `test:artifacts` and `test:docs` — eight scripts, ~20 minutes here, and the list lives in `package.json`, not in this cell. Corrupt files in **python, never `sed -i`** (not portable; the validator rejects it) |
 | Lint | none separate; the validator is the lint |
 | Install locally | `./install.sh` or `node bin/task-pipeline.js` — **both refuse when the Claude Code plugin is installed**, because a plain `~/.claude/skills/` copy shadows it; `--force` overrides deliberately |

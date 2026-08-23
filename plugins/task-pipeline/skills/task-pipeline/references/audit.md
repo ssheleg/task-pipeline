@@ -34,6 +34,14 @@ whose whole job is "audit X" runs nothing else.
 | [`acceptance.md`](acceptance.md) | stage 10 | did everything **on the list** ship, with evidence? |
 | [`loop-guard.md`](loop-guard.md) | any **editing** loop churns | is this pass undoing the last one? |
 | **this file** | any **audit** pass | what is broken or missing that nobody has compared? |
+| the `project-audit` skill | a **whole project** is the subject | what is true of this repository today — from a cold start, with no brief |
+
+**`project-audit` is the cold-start caller of this file, not a second copy of
+it.** This ladder needs a REQ row and a module map to walk; most repositories
+have neither, and *"your spine is missing"* is a true first finding and a useless
+audit. That skill discovers what the project is, probes it, reads the production
+evidence a repository cannot hold, and hands phase 4 back here — so the method
+below stays the one place it is written.
 
 `loop-guard.md` governs loops that *change* things — the fix loop, a re-entered
 stage. Its trip means a decision is being re-litigated at the wrong altitude. This

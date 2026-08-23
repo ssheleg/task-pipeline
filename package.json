@@ -1,20 +1,21 @@
 {
   "name": "task-pipeline-skill",
-  "version": "1.75.0",
+  "version": "1.76.0",
   "description": "Full-cycle delivery pipeline for coding agents: a mandatory built-in intake grill, then 10 gated stages (docs, brainstorm+decompose, spec, plan, build, tests, lint/deploy, post-deploy, docs/wiki, acceptance). Every stage's doctrine ships inside the skill — no companion plugin required. This package is the installer CLI.",
   "bin": {
     "task-pipeline": "bin/task-pipeline.js"
   },
   "scripts": {
-    "test": "python3 test/validate.py && python3 test/graph_test.py",
-    "test:all": "python3 test/validate.py && python3 test/graph_test.py && python3 test/negatives.py && npm run test:certify && npm run test:exposure && npm run test:probe && npm run test:hooks && npm run test:artifacts && npm run test:docs",
+    "test": "python3 test/validate.py && python3 test/graph_test.py && python3 test/project_audit_test.py",
+    "test:all": "python3 test/validate.py && python3 test/graph_test.py && python3 test/project_audit_test.py && python3 test/negatives.py && npm run test:certify && npm run test:exposure && npm run test:probe && npm run test:hooks && npm run test:artifacts && npm run test:docs",
     "test:negatives": "python3 test/negatives.py",
     "test:exposure": "python3 test/exposure_test.py",
     "test:probe": "python3 test/probe.py --self-test",
     "test:hooks": "python3 test/release_gate_test.py",
     "test:artifacts": "python3 test/artifact_root_test.py && python3 test/migrate_artifacts_test.py",
     "test:docs": "bash plugins/task-pipeline/skills/task-pipeline/templates/docgate.sh",
-    "test:certify": "python3 test/certify_mutations.py"
+    "test:certify": "python3 test/certify_mutations.py",
+    "test:audit": "python3 test/project_audit_test.py"
   },
   "files": [
     "bin",

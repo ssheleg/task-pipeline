@@ -147,6 +147,7 @@ until it is installed.
 | Stage | Built-in doctrine |
 |---|---|
 | **any claim read as true** | [`evidence-docs`](plugins/task-pipeline/skills/evidence-docs/SKILL.md) — **a second skill in this plugin**: the ten canons as an index, and where each is defined, enforced and seeded |
+| **a whole project as the subject** | [`project-audit`](plugins/task-pipeline/skills/project-audit/SKILL.md) — **a third skill in this plugin**: a cold-start audit with no brief required. Discovery, a probe registry whose unmet needs read `blind` rather than clean, production evidence including one artefact served under two channels, and an HTML report beside a JSON sidecar that says what moved. Read-only. `/project-audit` |
 | 0 Knowledge harvest | [`knowledge-sources.md`](plugins/task-pipeline/skills/task-pipeline/references/knowledge-sources.md) — source list, the wiki, the ledger, the stage-9 loop-back |
 | 0 Intake grill | [`grill.md`](plugins/task-pipeline/skills/task-pipeline/references/grill.md) — interview loop, domain awareness, autonomy sweep |
 | 2 Brainstorm | [`brainstorm.md`](plugins/task-pipeline/skills/task-pipeline/references/brainstorm.md) — approaches, YAGNI, the no-code-before-approval gate |
