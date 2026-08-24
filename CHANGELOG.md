@@ -1,5 +1,21 @@
 # Changelog
 
+## v1.76.1 — the number the published README had never checked
+
+The README's validator line said **all 23 references** and the tree it shipped
+held **36**. Not drift: the count was already wrong at the `v1.76.0` tag, so npm
+has been serving a false figure since that release, while a checkout of the
+umbrella — whose pin points at the branch tip — has been serving the true one.
+One version string, two documents, and the difference was a fact about the skill.
+
+Found by comparing trees rather than version strings, which is the only way this
+class is visible: `npm view` answered `1.76.0` for both.
+
+    published README   all 23 references
+    references in the tarball's own tree   36
+
+Nothing else changed. The tag exists so the published document stops lying.
+
 ## v1.76.0 — the audit that starts cold
 
 **`project-audit` ships as this plugin's third skill.** `references/audit.md` has
