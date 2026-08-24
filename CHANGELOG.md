@@ -1,5 +1,29 @@
 # Changelog
 
+## v1.77.0 — a mention is not a declaration
+
+The release-gap check counted every `vX.Y.Z` token in `## Releases that carry no stamp` as a
+declaration that the release carries no stamp. So one sentence explaining a *stamped* release
+— the words "the figure was already false at the `v1.76.0` tag" — exempted that release from
+the check, and the negative self-test that exists to catch exactly this read as accepted for
+the same reason: it too was reading the section's prose.
+
+Declarations are bold now, which is the convention every entry in that section already
+followed. Prose about a release can no longer excuse it.
+
+Two plants cover it. The new one leaves the trailing release in the section in the same
+words and removes only its bold — a mention where a declaration was — and requires the
+refusal; watched firing in a standalone clone of 122 tags, and printing SKIP with its reason
+in a submodule checkout, where no tags are visible and the check it probes cannot look.
+
+Also: the README no longer presents `npm test` as runnable from a package that ships no
+`test/` directory, and `test/residue.py` tags each workspace with the process group that made
+it, so a scan of the shared `$TMPDIR` stops reporting another session's trees — and an
+earlier run's deliberately kept evidence — as this run's leak.
+
+Guards: 412 → **413**. `test/negatives.py`'s floor moved with it, in this change, because a
+floor below the count cannot notice losing the difference.
+
 ## v1.76.1 — the number the published README had never checked
 
 The README's validator line said **all 23 references** and the tree it shipped

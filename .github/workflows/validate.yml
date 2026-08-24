@@ -3003,6 +3003,53 @@ jobs:
             exit 1
           fi
 
+      - name: Negative self-test (an unstamped release MENTIONED but not declared must fail)
+        run: |
+          set -eu
+          rm -rf /tmp/gapmention && cp -R . /tmp/gapmention
+          set +e
+          python3 - <<'EOF'
+          # The hole this closes, measured 2026-08-24: the check read every `vX.Y.Z` token in
+          # the gap section, so one sentence mentioning a tag in passing declared it unstamped
+          # and exempted it. Here the trailing release stays in the section, in the same words,
+          # with only its BOLD removed -- a mention instead of a declaration. A guard that
+          # cannot tell the two apart accepts this, which is what it did.
+          import re, subprocess, sys
+          p = "/tmp/gapmention/docs/evidence/retro.md"
+          t = open(p, encoding="utf-8").read()
+          tags = subprocess.run(["git", "tag", "-l", "v*", "--sort=v:refname"],
+                                cwd="/tmp/gapmention", capture_output=True, text=True).stdout.split()
+          if not tags:
+              print("SKIP: no v* tags visible in the copy, so the release-gap check cannot "
+                    "look and cannot be probed (submodule checkout)")
+              sys.exit(9)
+          GAP = "## Releases that carry no stamp"
+          i = t.index(GAP)
+          e = t.find("\n## ", i + 5)
+          sec = t[i:e] if e > 0 else t[i:]
+          # un-bold every span that names one of the newest tags: same words, same place,
+          # no longer a declaration.
+          def unbold(m):
+              return m.group(1) if re.search(r"v\d+\.\d+\.\d+", m.group(1)) else m.group(0)
+          out = re.sub(r"\*\*(.+?)\*\*", unbold, sec, flags=re.S)
+          assert out != sec, "PLANT DID NOT LAND: no bold span in the gap section names a version"
+          assert re.search(r"v\d+\.\d+\.\d+", out), "PLANT DID NOT LAND: the versions vanished too"
+          t = t[:i] + out + (t[e:] if e > 0 else "")
+          open(p, "w", encoding="utf-8").write(t)
+          EOF
+          EOF_RC=$?
+          if [ "$EOF_RC" = "9" ]; then
+            exit 0
+          elif [ "$EOF_RC" != "0" ]; then
+            echo "PLANT FAILED TO RUN (exit $EOF_RC)"; exit 1
+          fi
+          if python3 /tmp/gapmention/test/validate.py; then
+            echo "ERROR: a release merely MENTIONED in the gap section was accepted as declared"
+            exit 1
+          else
+            echo "OK: validator FAILs — a mention is not a declaration, only a bold one is"
+          fi
+
       - name: Negative self-test (a release after the newest stamp that the gap section does not name)
         run: |
           set -eu

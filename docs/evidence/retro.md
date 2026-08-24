@@ -1345,15 +1345,18 @@ three quarters of the work on this run.
 
 ## Releases that carry no stamp — stated, not stamped
 
-**The trailing gap right now is `v1.76.1` — one release.** A patch cut because the
+**The trailing gap right now is `v1.76.1` and `v1.77.0` — two releases.** A patch cut because the
 published README put the reference count at twenty-three where the tarball it shipped held
 36. The figure was already false at the previous tag, so npm served a wrong one from that
 release onward while a checkout of the umbrella — whose pin points at the branch tip —
-served the right one. **No version is named here but the unstamped one:** every `vX.Y.Z`
-token in this section reads as a declaration that the release carries no stamp, so a
-sentence explaining a stamped release would silence the check for it — which is exactly
-what the first draft of this paragraph did, and the plant below now creates its own
-precondition rather than inheriting one from the prose. Written in words on purpose: the claim registry reads a digit beside
+served the right one. **A declaration here is bold; a mention is not.** The check reads
+`vX.Y.Z` tokens inside `**bold**` spans only, which is the convention every entry in this
+section already follows. It read the whole section once, and then a sentence explaining a
+stamped release — *"the figure was already false at the `v1.76.0` tag"* — counted as a
+declaration and silenced the check for that release, while the negative self-test that
+should have caught it read as accepted for the same reason. Prose about a release can no
+longer excuse it, and the plant creates its own precondition rather than inheriting one
+from whatever the prose happens to say. Written in words on purpose: the claim registry reads a digit beside
 the word *references* as an assertion and recomputes it, which is exactly what it did to the
 first draft of this paragraph. Fixing a number in a shipped document is not a pipeline run
 and no stamp is claimed for it.

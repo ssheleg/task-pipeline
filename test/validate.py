@@ -6547,8 +6547,18 @@ if os.path.isfile(_retro_live) and _have_git:
         # prose, and asking it to list fourteen tags one by one is how a record becomes
         # something nobody updates. Expansion walks the real tag order, so a range cannot
         # cover a tag that does not exist.
-        _named = set(re.findall(r"v\d+\.\d+\.\d+", _gap))
-        for _a, _b in re.findall(r"`?(v\d+\.\d+\.\d+)`?\s*(?:through|to|–|-|\.\.)\s*`?(v\d+\.\d+\.\d+)`?", _gap):
+        #
+        # DECLARATIONS ARE BOLD, and mentions are not. Reading every `vX.Y.Z` token in the
+        # section counted a sentence explaining a release as a declaration that it carries no
+        # stamp: on 2026-08-24 the phrase "the figure was already false at the `v1.76.0` tag"
+        # exempted v1.76.0 from this check, and the negative self-test that should have caught
+        # it read as accepted for the same reason. The section's own convention already puts
+        # every declaration in a bold lead-in, so the bold span IS the shape — and prose about
+        # a release stops being able to excuse it. Spans are matched across newlines because a
+        # bold lead-in wraps at 80 characters here, which a per-line reading loses.
+        _decl = " ".join(re.findall(r"\*\*(.+?)\*\*", _gap, re.S))
+        _named = set(re.findall(r"v\d+\.\d+\.\d+", _decl))
+        for _a, _b in re.findall(r"`?(v\d+\.\d+\.\d+)`?\s*(?:through|to|–|-|\.\.)\s*`?(v\d+\.\d+\.\d+)`?", _decl):
             if _a in _tags and _b in _tags and _tags.index(_a) <= _tags.index(_b):
                 _named |= set(_tags[_tags.index(_a):_tags.index(_b) + 1])
         _missing = [_t2 for _t2 in _trailing if _t2 not in _named]
@@ -6557,7 +6567,9 @@ if os.path.isfile(_retro_live) and _have_git:
                  f"are named nowhere in `{_GAP_HEAD}` — "
                  + ", ".join(_missing[:6]) + ("…" if len(_missing) > 6 else "")
                  + ". Stamp the run at stage 10, or extend that section's range in the SAME "
-                   "commit as the release. A release that neither ran the pipeline nor "
+                   "commit as the release — inside a **bold** lead-in, because a version "
+                   "merely mentioned in that section's prose is a mention and no longer "
+                   "excuses a release. A release that neither ran the pipeline nor "
                    "recorded that it did not is the shape this section exists to make "
                    "impossible: the cold-retirement trigger reads the last five stamps and "
                    "has nothing to read across a gap nobody declared. Note where this fires: "

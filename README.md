@@ -928,6 +928,10 @@ surface, and the surfaces that must never drift apart). Security reports:
 [SECURITY.md](SECURITY.md). Everyone participating is expected to follow the
 [Code of Conduct](CODE_OF_CONDUCT.md).
 
+<!-- commands-run-in: a clone -->
+These run **in a clone of this repository**. The published npm package ships no
+`test/` directory, so from an install they are names, not commands.
+
 ```bash
 npm test        # python3 test/validate.py — the structural validator
 ```

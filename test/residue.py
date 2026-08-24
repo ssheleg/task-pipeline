@@ -58,6 +58,35 @@ import tempfile
 
 PREFIX = "task-pipeline-test-"
 
+# What makes residue attributable to ONE run rather than to a prefix every run shares.
+# `$TMPDIR` belongs to the whole machine, so a scan by PREFIX alone reports two things that
+# are not this run's leak: another session's trees, and a tree a FAILING case in an earlier
+# run kept ON PURPOSE as its evidence. Both turned a green suite red here — 37,301 entries
+# under the shared $TMPDIR from a concurrent session on 2026-08-24, and every later run of
+# the gate after any kept tree. The process group is inherited by every suite `npm test`
+# chains in one shell, and differs between two gate runs, which is exactly the line the scan
+# needs. `getpgrp` is POSIX; the pid fallback is per-process rather than per-run and is only
+# there so this module imports anywhere.
+RUN_TAG = "%d-" % (os.getpgrp() if hasattr(os, "getpgrp") else os.getpid())
+
+
+def strays_for_run(names, mine):
+    """Split what a shared TMPDIR holds into (this run's leaks, everybody else's).
+
+    Pure, so the split is a fixture rather than a scenario needing two sessions and a clock.
+    `mine` is the set of basenames this run created and still accounts for.
+    """
+    ours, foreign = [], []
+    for n in names:
+        if not n.startswith(PREFIX):
+            continue
+        if n.startswith(PREFIX + RUN_TAG):
+            if n not in mine:
+                ours.append(n)
+        else:
+            foreign.append(n)
+    return sorted(ours), sorted(foreign)
+
 _created = []        # [(path, owner)] every workspace this run made, in order
 _incomplete = set()  # cases that did not finish clean; their workspaces are kept
 _owner = None
@@ -81,7 +110,7 @@ def close_case(name, ok=True):
 
 def workspace(tag="tree"):
     """A temp directory this run owns and will account for at exit."""
-    path = tempfile.mkdtemp(prefix=PREFIX, suffix="-" + tag)
+    path = tempfile.mkdtemp(prefix=PREFIX + RUN_TAG, suffix="-" + tag)
     _created.append((path, _owner))
     return path
 
