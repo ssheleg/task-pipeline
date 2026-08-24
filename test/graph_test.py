@@ -25,6 +25,9 @@ import sys
 import tempfile
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+import residue  # noqa: E402 -- one ledger, copied not rewritten
+
 GRAPH = ROOT / "plugins/task-pipeline/skills/task-pipeline/scripts/graph.py"
 
 cases = 0
@@ -39,8 +42,10 @@ def case(name):
     def deco(fn):
         global cases
         cases += 1
+        residue.open_case(name)
         try:
             fn()
+            residue.close_case(name)
             print("  ok  %s" % name)
         except AssertionError as e:
             failures.append("%s: %s" % (name, e))
@@ -56,7 +61,7 @@ def case(name):
 
 def run(graph, *args):
     """Run graph.py against a graph written to a temp file. Returns (code, out)."""
-    d = tempfile.mkdtemp()
+    d = residue.workspace("graph")
     p = pathlib.Path(d) / "graph.json"
     p.write_text(json.dumps(graph))
     r = subprocess.run([sys.executable, str(GRAPH), *args, "--graph", str(p)],
@@ -109,7 +114,7 @@ def run_out(graph, *args):
     """stdout ONLY. The frontier's width contract is about stdout — `next` writes its
     collision and undeclared disclosures to stderr precisely so the rows stay parseable,
     and a helper that merges the two cannot tell the contract from its violation."""
-    d = tempfile.mkdtemp()
+    d = residue.workspace("graph")
     p = pathlib.Path(d) / "graph.json"
     p.write_text(json.dumps(graph))
     r = subprocess.run([sys.executable, str(GRAPH), *args, "--graph", str(p)],
@@ -148,7 +153,7 @@ def _flat(text):
 
 def written(graph):
     """A graph on disk, plus its path. The caller mutates it and reads it back."""
-    d = tempfile.mkdtemp()
+    d = residue.workspace("graph")
     p = pathlib.Path(d) / "graph.json"
     p.write_text(json.dumps(graph))
     return p
@@ -767,7 +772,7 @@ def _():
 
 @case("a symlinked graph is written THROUGH, not replaced")
 def _():
-    d = tempfile.mkdtemp()
+    d = residue.workspace("graph")
     real = pathlib.Path(d) / "real.json"
     real.write_text(json.dumps(g([node("N-001")])))
     link = pathlib.Path(d) / "graph.json"
@@ -1089,14 +1094,14 @@ def _():
 def _():
     code, f, out = producer(cwd=str(ROOT))
     assert re.match(r"^[0-9a-f]{40}$", f["commit"]), "commit inside a checkout: %r" % f["commit"]
-    code, f2, out2 = producer(cwd=tempfile.mkdtemp())
+    code, f2, out2 = producer(cwd=residue.workspace("graph"))
     assert f2["commit"].startswith("unavailable"), (
         "outside a checkout `commit` must say unavailable, not invent one: %r" % f2["commit"])
 
 
 @case("config is a digest of the project's pipeline.json, and it moves when the file does")
 def _():
-    d = tempfile.mkdtemp()
+    d = residue.workspace("graph")
     cfg = pathlib.Path(d) / "pipeline.json"
     cfg.write_text('{"stages": []}')
     _, a, _ = producer(cwd=d)
@@ -1125,7 +1130,7 @@ def _():
     # The branch `validate.py` cannot observe, because this repository always has the
     # manifest. Copy the bundle alone — which is exactly what a plain-skill install is —
     # and the version must say why it is absent instead of inventing one.
-    d = tempfile.mkdtemp()
+    d = residue.workspace("graph")
     bundle = pathlib.Path(d) / "task-pipeline"
     shutil.copytree(ROOT / "plugins/task-pipeline/skills/task-pipeline", bundle)
     lone = bundle / "scripts" / "graph.py"
@@ -1165,7 +1170,7 @@ def _():
 
 @case("the collision goes to stderr and never into the frontier rows")
 def _():
-    d = tempfile.mkdtemp()
+    d = residue.workspace("graph")
     p = pathlib.Path(d) / "graph.json"
     p.write_text(json.dumps(g([_touch_node("N-001", ["a.ts"]), _touch_node("N-002", ["a.ts"])])))
     r = subprocess.run([sys.executable, str(GRAPH), "next", "--graph", str(p)],
@@ -1669,7 +1674,7 @@ def certify(graph, reports, *extra, workdir=None):
     directory — which is the only way to prove the round count accumulates rather
     than being recomputed from nothing each time.
     """
-    d = workdir or tempfile.mkdtemp()
+    d = workdir or residue.workspace("graph")
     gp = pathlib.Path(d) / "graph.json"
     if graph is not None:
         gp.write_text(json.dumps(graph))
@@ -1885,6 +1890,13 @@ def _():
                        capture_output=True, text=True)
     assert r.returncode == 0, "the certification field broke the graph: " + \
         r.stdout + r.stderr
+
+# Before the verdict, and the position matters: `report()` is idempotent (the atexit
+# registration would find `_reported` already set), so a case defined BELOW this line
+# is created after the accounting and never appears in it. Found by planting a failing
+# case at the end of the file and watching the report say `left nothing` while the
+# suite exited 1. Every case in this file is above.
+residue.report()
 
 print("\nPASS: graph.py — %d cases%s"
       % (cases, (" (%d unlooked)" % len(skipped)) if skipped else ""))
