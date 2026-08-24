@@ -585,6 +585,21 @@ _CLAIM_REGISTRY = [
      lambda: len([f for f in os.listdir(refdir) if f.endswith(".md")]) if os.path.isdir(refdir) else None,
      "SKILL-CARD.md said 26 against a directory holding 28; then three surfaces said 34 "
      "against 35 while the class was dormant because it only knew one word order"),
+
+    # The same class, third phrasing, added 2026-08-24. The README said "all 23
+    # references linked directly from `SKILL.md`" over a directory of 36 and no earlier
+    # alternative reached the bare plural. It is a SEPARATE row rather than a widened
+    # alternation for a measured reason: matching a bare `N references` also flagged
+    # CONTRIBUTING.md's *"a PR that edits eight references for three unrelated reasons"*
+    # — a hypothetical in an example, not a count of the corpus. A registered class that
+    # flags a hypothesis teaches a reader to skip it, which is the same harm as a class
+    # that fires on nothing. `all` is what makes the claim totalising, so `all` is what
+    # the pattern requires.
+    ("reference files (totalising)",
+     r"all\s+" + _NUM + r"\s+references\b",
+     lambda: len([f for f in os.listdir(refdir) if f.endswith(".md")]) if os.path.isdir(refdir) else None,
+     "the README said 'all 23 references' against a directory of 36, and widening the "
+     "first row to reach it also flagged a hypothetical eight in CONTRIBUTING.md"),
 ]
 
 # Living documents: what a reader takes as true NOW. CHANGELOG is excluded above; run

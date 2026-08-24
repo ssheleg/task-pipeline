@@ -559,7 +559,7 @@ must say so.
 ### Held to Anthropic's own Skill authoring guidance
 
 Audited against the four Agent Skills pages. Most of it already held — `name`
-13/64 chars, `description` inside 1024, `SKILL.md` 334/500 lines, all 23 references
+13/64 chars, `description` inside 1024, `SKILL.md` 334/500 lines, all 36 references
 linked **directly** from `SKILL.md`, 436 KB against a 30 MB ceiling. What did not,
 now does:
 
