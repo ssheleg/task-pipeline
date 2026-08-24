@@ -15,6 +15,12 @@ duplicated here: a second copy of a corruption is a second thing to drift.
 
 Zero dependencies, same as the validator.
 """
+# shared-mechanism: negatives.py — 3 copies in this family, kept as one file
+#   rather than 3 dialects. The umbrella's gate computes which module-level
+#   constants actually differ between the copies and refuses a difference this line
+#   does not name: on 2026-08-24 an undeclared success-vocabulary constant made a
+#   ported runner report twenty healthy guards as broken, and nothing could see it.
+# diverges: MIN_EXPECTED, MIN_PROPS, SUCCESS_MARKERS
 import concurrent.futures
 import tempfile
 import os
