@@ -1345,10 +1345,23 @@ three quarters of the work on this run.
 
 ## Releases that carry no stamp — stated, not stamped
 
-**The trailing gap right now is `v1.60.1` through `v1.73.0` — fifteen releases.** Guard
-work, doctrine and audit follow-up that shipped without being run as pipeline runs: no
-brief, no spec, no acceptance, no stamp. The first recorded stretch was `v1.16.0` through
-`v1.23.0`, and this one is longer.
+**The trailing gap right now is `v1.76.1` — one release.** A patch cut because the
+published README put the reference count at twenty-three where the tarball it shipped held
+36. The figure was already false at the previous tag, so npm served a wrong one from that
+release onward while a checkout of the umbrella — whose pin points at the branch tip —
+served the right one. **No version is named here but the unstamped one:** every `vX.Y.Z`
+token in this section reads as a declaration that the release carries no stamp, so a
+sentence explaining a stamped release would silence the check for it — which is exactly
+what the first draft of this paragraph did, and the plant below now creates its own
+precondition rather than inheriting one from the prose. Written in words on purpose: the claim registry reads a digit beside
+the word *references* as an assertion and recomputes it, which is exactly what it did to the
+first draft of this paragraph. Fixing a number in a shipped document is not a pipeline run
+and no stamp is claimed for it.
+
+**The stretch before it, now closed history, was `v1.60.1` through `v1.73.0` — fifteen
+releases.** Guard work, doctrine and audit follow-up that shipped without being run as
+pipeline runs: no brief, no spec, no acceptance, no stamp. The first recorded stretch was
+`v1.16.0` through `v1.23.0`, and the second was longer than both.
 
 Measured, not recalled — and the measurement is a **tag range** rather than a grep for a
 tag's own commit, because a stamp names the commit the *run* ended on and never the release
@@ -1385,7 +1398,7 @@ PY
 ```
 
 **The register began mid-history and nothing is backfilled.** The first stamped release is
-`v1.41.0`, so most of the 84 unstamped tags predate the stamp section entirely; that is a
+`v1.41.0`, so most of the 86 unstamped tags predate the stamp section entirely; that is a
 fact about when the register was established, not a debt. A stamp asserts that a run happened
 and that its gates were walked, so writing fourteen to make the table look continuous would be
 the exact defect this file exists to catch, on the file that catches it.

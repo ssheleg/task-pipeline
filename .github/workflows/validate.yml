@@ -3007,6 +3007,7 @@ jobs:
         run: |
           set -eu
           rm -rf /tmp/gap1-copy && cp -R . /tmp/gap1-copy
+          set +e
           python3 - <<'EOF'
           # Fourteen consecutive releases carried no run stamp while the honest-gap section
           # still named only v1.16.0-v1.23.0, and the cold-retirement trigger — which reads
@@ -3041,11 +3042,45 @@ jobs:
           assert rows, "PLANT DID NOT LAND: no run stamp rows to remove"
           newest = rows[0]          # the table is newest-first
           t = t[:newest.start()] + t[newest.end() + 1:]
+          # AND strip every mention of a trailing tag from the gap section itself.
+          # Narrowing a range and dropping a stamp was not enough: the guard counts ANY
+          # `vX.Y.Z` token in that section as a declaration, so one sentence mentioning a
+          # tag in passing silenced the check for that release and the plant read as
+          # accepted. A plant creates its own precondition -- here, a section that names
+          # none of the releases the guard is about to ask about.
+          import subprocess as _sp, sys as _sys
+          _tags = _sp.run(["git", "tag", "-l", "v*", "--sort=v:refname"],
+                          cwd="/tmp/gap1-copy", capture_output=True, text=True).stdout.split()
+          if not _tags:
+              # No tags are visible in the copy, which happens in a SUBMODULE checkout:
+              # `.git` is a file holding a relative gitdir pointer and breaks under /tmp.
+              # The guard itself declines to look in that state and says so via `unlooked`
+              # -- so there is nothing here to probe, and reporting the guard as broken
+              # would be this plant asserting about a check that never ran. CI clones
+              # standalone and does exercise it.
+              print("SKIP: no v* tags visible in the copy, so the release-gap check "
+                    "cannot look and cannot be probed (submodule checkout)")
+              _sys.exit(9)
+          _GAP = "## Releases that carry no stamp"
+          _i = t.index(_GAP)
+          _e = t.find("\n## ", _i + 5)
+          _sec = t[_i:_e] if _e > 0 else t[_i:]
+          _stripped = _sec
+          for _tg in _tags[-6:]:                      # the only ones that can be trailing
+              _stripped = _stripped.replace("`%s`" % _tg, "`vREDACTED`").replace(_tg, "vREDACTED")
+          assert _stripped != _sec, "PLANT DID NOT LAND: the gap section named no recent tag"
+          t = t[:_i] + _stripped + (t[_e:] if _e > 0 else "")
           open(p, "w", encoding="utf-8").write(t)
           after = open(p, encoding="utf-8").read()
           assert hi not in after, "PLANT DID NOT LAND: the range did not narrow"
           assert newest.group(0) not in after, "PLANT DID NOT LAND: the newest stamp is still there"
           EOF
+          EOF_RC=$?
+          if [ "$EOF_RC" = "9" ]; then
+            exit 0
+          elif [ "$EOF_RC" != "0" ]; then
+            echo "PLANT FAILED TO RUN (exit $EOF_RC)"; exit 1
+          fi
           if python3 /tmp/gap1-copy/test/validate.py; then
             echo "ERROR: validator passed unstamped releases named nowhere in the gap section"
             exit 1
@@ -3228,12 +3263,23 @@ jobs:
           # in its honesty note — a dated item is a record. On the board the State cell
           # is the discriminator instead, so an open row is a live claim whatever dates
           # it carries, and this plant cannot be disarmed by editing prose beside it.
+          # DERIVED, not literal -- which this plant's own comment demanded and its code
+          # did not do. It matched the whole sentence including "12 registered claim
+          # classes", so the moment a thirteenth class was registered the needle stopped
+          # matching and the plant went silent: a check nobody ran, reported green. Anchor
+          # on the row's ID and on the OPEN state cell, both of which are structure.
+          import re
           p = "/tmp/cr5c-copy/docs/evidence/backlog.md"
           t = open(p, encoding="utf-8").read()
-          needle = "**92 hand-written counts in prose against 12 registered claim classes.**"
-          assert needle in t, "PLANT DID NOT LAND: B-041 is not where this plant reads it"
-          open(p, "w", encoding="utf-8").write(
-              t.replace(needle, needle.replace("counts in prose", "counts in prose and the 250 guards"), 1))
+          rows = [l for l in t.splitlines()
+                  if re.match(r"^\|\s*B-\d+\s*\|", l) and re.search(r"\|\s*open\s*\|", l)]
+          assert rows, "PLANT DID NOT LAND: no OPEN board row to plant a stale count in"
+          row = rows[0]
+          cells = row.split("|")
+          cells[2] = cells[2].rstrip() + " Against the 250 guards this suite defines."
+          t2 = t.replace(row, "|".join(cells), 1)
+          assert t2 != t, "PLANT DID NOT LAND: the row was not rewritten"
+          open(p, "w", encoding="utf-8").write(t2)
           assert "the 250 guards" in open(p, encoding="utf-8").read(), "PLANT DID NOT LAND"
           EOF
           if python3 /tmp/cr5c-copy/test/validate.py; then

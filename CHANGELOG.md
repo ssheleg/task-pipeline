@@ -16,6 +16,12 @@ class is visible: `npm view` answered `1.76.0` for both.
 
 Nothing else changed. The tag exists so the published document stops lying.
 
+Guards: 412 → **412**. Flat, and stating it is not decoration: the claim registry
+reads the topmost section for this number, and a section that omits it reports the
+class as *dormant* — which is how a release with no live count silently disarmed the
+two plants that probe it. Omitting the line is a change to the guard suite's own
+coverage, so it is written even when the number does not move.
+
 ## v1.76.0 — the audit that starts cold
 
 **`project-audit` ships as this plugin's third skill.** `references/audit.md` has
