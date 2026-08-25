@@ -1,0 +1,94 @@
+# Third-party notices — task-pipeline
+
+`LICENSE` is plain MIT so that GitHub, npm and every licence scanner can classify
+it without a human reading the file. The attributions that used to sit at the
+bottom of it live here instead: a compound `LICENSE` was reported as
+`NOASSERTION`, which reads as *"unlicensed"* on the repository page and in every
+dependency report that quotes it.
+
+Nothing about the terms changed. Each portion below is used under the licence
+quoted with it.
+
+================================================================================
+Third-party
+================================================================================
+
+1) Intake grill (stage 0)
+-------------------------
+
+The built-in intake grill (stage 0) is adapted from the `grilling` /
+`grill-with-docs` skills in https://github.com/mattpocock/skills — specifically
+its interview loop and its domain-awareness discipline (glossary challenges,
+CONTEXT.md, ADR criteria). Affected files:
+
+  plugins/task-pipeline/skills/task-pipeline/references/grill.md
+  plugins/task-pipeline/skills/task-pipeline/templates/context.md
+  plugins/task-pipeline/skills/task-pipeline/templates/adr.md
+
+Those portions are used under the following license:
+
+MIT License
+
+Copyright (c) 2026 Matt Pocock
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+
+2) Stage doctrine (stages 2-6)
+------------------------------
+
+The built-in doctrine for stages 2-6 is adapted from the `brainstorming`,
+`writing-plans`, `using-git-worktrees`, `subagent-driven-development`,
+`test-driven-development` and `requesting-code-review` skills in
+https://github.com/obra/superpowers — specifically the design-dialogue and
+design-approval discipline, the zero-context plan format, the worktree isolation
+procedure, the subagent task/review/fix loop with its ledger and breaker, the
+reviewer contracts, and the red-green-refactor rules. Rewritten for this
+pipeline's stages, gates, artifacts and single-model policy. Affected files:
+
+  plugins/task-pipeline/skills/task-pipeline/references/brainstorm.md
+  plugins/task-pipeline/skills/task-pipeline/references/spec.md
+  plugins/task-pipeline/skills/task-pipeline/references/planning.md
+  plugins/task-pipeline/skills/task-pipeline/references/build.md
+  plugins/task-pipeline/skills/task-pipeline/references/review.md
+  plugins/task-pipeline/skills/task-pipeline/references/tdd.md
+
+Those portions are used under the following license:
+
+MIT License
+
+Copyright (c) 2025 Jesse Vincent
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
