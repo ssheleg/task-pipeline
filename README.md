@@ -43,13 +43,14 @@ intake grill → docs study → brainstorm + decompose → spec → plan → sub
 ```
 
 ```mermaid
+%%{init: {'flowchart': {'curve': 'linear', 'useMaxWidth': true}}}%%
 flowchart TD
-    S0["0 · Harvest + intake grill<br/>brief · REQ table · source ledger"]
+    S0["0 · Harvest + intake grill"]
     S1["1 · Docs study"]
     S2["2 · Brainstorm + decompose"]
-    S3["3 · Spec — UX track first, if UI"]
+    S3["3 · Spec"]
     S4["4 · Plan"]
-    S5["5 · Dev — worktree, subagents, TDD"]
+    S5["5 · Dev"]
     S6["6 · Tests"]
     S7["7 · Lint + deploy"]
     S8["8 · Post-deploy"]
@@ -57,14 +58,20 @@ flowchart TD
     S10["10 · Acceptance"]
 
     S0 --> S1 --> S2 --> S3 --> S4 --> S5 --> S6 --> S7 --> S8 --> S9 --> S10
-    S10 -. "platform: next module" .-> S3
-    S10 -. "accounts for every REQ in the brief" .-> S0
+    S10 -.->|next module| S3
+    S10 -.->|every REQ| S0
 
     classDef manual fill:#fde68a,stroke:#b45309,color:#111827
     classDef auto fill:#dbeafe,stroke:#1d4ed8,color:#111827
     class S0,S2,S3,S7,S10 manual
     class S1,S4,S5,S6,S8,S9 auto
 ```
+
+**Amber is a human decision; blue the agent closes on its own.** Stage 0 carries the
+brief, the REQ table and the source ledger; stage 3 runs the UX track first when there
+is an interface. The two dotted returns are the loop that makes the pipeline a cycle
+rather than a line — acceptance either opens the next module at the spec, or goes back
+to stage 0 to account for every REQ in the brief.
 
 Every gate is **typed**: `auto` — the orchestrator verifies it itself, pass/fail
 (blue); `manual` — it waits for your explicit go (amber).

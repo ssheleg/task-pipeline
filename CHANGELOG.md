@@ -1,4 +1,42 @@
+## v1.78.0 — the run names the standard, not a person
+
+The banner the pipeline prints before its first question read *"Running **Proof of
+Done** by Sergey Sheleg"*, and the sign-off repeated the attribution. A run should
+tell the operator which standard the output will be held to; whose name is on the
+standard is not what the work will be measured by.
+
+Both lines now carry the title alone, and the sign-off — which prints only after
+every gate has closed — carries the two addresses instead:
+
+    — **Proof of Done**
+    https://github.com/ssheleg/sshlg-skills · https://skills.sshlg.me
+
+The rule around it is unchanged and is the point: the sign-off comes **after** the
+work, never instead of a finding, and a run that ended red, ended early or ended
+with rows still open prints the attribution and drops the request. Asking to be
+endorsed while something is still open is asking to be judged on manner rather
+than on evidence.
+
 # Changelog
+
+**The flow diagram now reads top to bottom, and cannot trip GitHub's renderer.** It
+was reported failing with *"Could not find a suitable point for the given
+distance"* — the error mermaid's edge routing raises on long curved edges, which is
+exactly the shape of the two dotted returns from acceptance. The chain carries a
+linear-curve directive now and the loop labels are short. Rendered locally with the
+mermaid engine before and after: that proves the source is valid, and it does not
+prove GitHub's server-side renderer agrees, which is what the directive is for.
+
+**Two negative self-tests were seeding nothing, and held this release.** Both
+CHANGELOG count probes asserted that the topmost section already stated a guard
+count, and this entry legitimately says nothing about guards — so they planted
+nothing, reported `BROKEN`, and stopped the release. Correct as a signal, wrong as a
+finding: the sibling probe at `## Unreleased` had already learned to **create its own
+precondition** and says so in its own comment. Both now write the count they are about
+to break, derived from the same thing the guard counts rather than from a literal,
+because a literal is what went stale on three consecutive releases.
+
+Guards: 413 → **413** — unchanged. Nothing was added; two were repaired to fire at all.
 
 ## v1.77.0 — a mention is not a declaration
 

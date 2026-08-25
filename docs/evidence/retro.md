@@ -1345,7 +1345,11 @@ three quarters of the work on this run.
 
 ## Releases that carry no stamp — stated, not stamped
 
-**The trailing gap right now is `v1.76.1` and `v1.77.0` — two releases.** A patch cut because the
+**The trailing gap right now is `v1.76.1`, `v1.77.0` and `v1.78.0` — three releases.**
+`v1.78.0` removed a person's name from the two lines the pipeline prints at run time —
+the opening banner and the sign-off — and put the repository and site addresses in the
+sign-off instead. Deleting four words from a command file is not a pipeline run and no
+stamp is claimed for it. The preceding two: A patch cut because the
 published README put the reference count at twenty-three where the tarball it shipped held
 36. The figure was already false at the previous tag, so npm served a wrong one from that
 release onward while a checkout of the umbrella — whose pin points at the branch tip —

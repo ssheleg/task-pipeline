@@ -4600,6 +4600,23 @@ jobs:
           heads = [x.start() for x in re.finditer(r"^## ", t, re.M)]
           assert len(heads) >= 2, "PLANT DID NOT LAND: fewer than two `## ` sections"
           top = t[heads[0]:heads[1]]
+          # SEED THE PRECONDITION, never inherit it. Both of this file's CHANGELOG
+          # count probes asserted that the topmost section already stated a guard
+          # count — and a release whose entry legitimately says nothing about guards
+          # (v1.78.0 removed a name from two printed lines) left them with nothing to
+          # plant. They reported BROKEN and held the release, correctly as a signal
+          # and wrongly as a finding: the sibling probe at `## Unreleased` had already
+          # learned this and says so in its own comment. The count written here is
+          # DERIVED from the same thing the guard counts, because a literal is what
+          # went stale on three consecutive releases.
+          neg = len(re.findall(r"^\s*- name:\s*Negative self-test",
+                               open("/tmp/cl1-copy/.github/workflows/validate.yml",
+                                    encoding="utf-8").read(), re.M))
+          if not re.search(r"Guards:\s*\d+\s*(?:\u2192|->)\s*\*{0,2}\d+", top):
+              top = top.rstrip("\n") + f"\n\nGuards: {neg - 1} \u2192 **{neg}**.\n\n"
+              t = t[:heads[0]] + top + t[heads[1]:]
+              heads = [x.start() for x in re.finditer(r"^## ", t, re.M)]
+          top = t[heads[0]:heads[1]]
           m = re.search(r"(Guards:\s*\d+\s*→\s*\*\*)(\d+)(\*\*)", top)
           assert m, "PLANT DID NOT LAND: no guard count in the TOPMOST section"
           patched = top[:m.start(2)] + str(int(m.group(2)) - 1) + top[m.end(2):]
@@ -5553,6 +5570,23 @@ jobs:
           # Same scope as the guard: the TOPMOST `## ` section, `## Unreleased` since B-104.
           heads = [m.start() for m in re.finditer(r"^## ", t, re.M)]
           assert len(heads) >= 2, "PLANT DID NOT LAND: fewer than two `## ` sections"
+          top = t[heads[0]:heads[1]]
+          # SEED THE PRECONDITION, never inherit it. Both of this file's CHANGELOG
+          # count probes asserted that the topmost section already stated a guard
+          # count — and a release whose entry legitimately says nothing about guards
+          # (v1.78.0 removed a name from two printed lines) left them with nothing to
+          # plant. They reported BROKEN and held the release, correctly as a signal
+          # and wrongly as a finding: the sibling probe at `## Unreleased` had already
+          # learned this and says so in its own comment. The count written here is
+          # DERIVED from the same thing the guard counts, because a literal is what
+          # went stale on three consecutive releases.
+          neg = len(re.findall(r"^\s*- name:\s*Negative self-test",
+                               open("/tmp/cl9-copy/.github/workflows/validate.yml",
+                                    encoding="utf-8").read(), re.M))
+          if not re.search(r"Guards:\s*\d+\s*(?:\u2192|->)\s*\*{0,2}\d+", top):
+              top = top.rstrip("\n") + f"\n\nGuards: {neg - 1} \u2192 **{neg}**.\n\n"
+              t = t[:heads[0]] + top + t[heads[1]:]
+              heads = [x.start() for x in re.finditer(r"^## ", t, re.M)]
           top = t[heads[0]:heads[1]]
           m = re.search(r"Guards:\s*(\d+)\s*(?:\u2192|->)\s*(\*{0,2})(\d+)(\*{0,2})", top)
           assert m, "PLANT DID NOT LAND: the topmost section states no readable guard count"
