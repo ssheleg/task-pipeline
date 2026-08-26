@@ -1345,8 +1345,10 @@ three quarters of the work on this run.
 
 ## Releases that carry no stamp — stated, not stamped
 
-**The trailing gap right now is `v1.76.1`, `v1.77.0` and `v1.78.0` — three releases.**
-`v1.78.0` removed a person's name from the two lines the pipeline prints at run time —
+**The trailing gap right now is `v1.76.1`, `v1.77.0`, `v1.78.0` and `v1.78.1` — four releases.**
+`v1.78.1` makes the repository's public contract inspectable — README entry point,
+skill card, eval fixtures, social card and CI gates — without running a product delivery
+through this pipeline, so no run stamp is claimed. `v1.78.0` removed a person's name from the two lines the pipeline prints at run time —
 the opening banner and the sign-off — and put the repository and site addresses in the
 sign-off instead. Deleting four words from a command file is not a pipeline run and no
 stamp is claimed for it. The preceding two: A patch cut because the
