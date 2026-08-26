@@ -1,3 +1,9 @@
+## v1.78.2 — the router and the shared mechanisms agree with the umbrella
+
+The description restores the exact `the full cycle` carrier used by the family
+router. The eval and social-preview validators now declare their umbrella-owned
+shared mechanisms.
+
 ## v1.78.1 — one discovery contract from intake to release
 
 The description now starts with the family's `Use when` shape while preserving

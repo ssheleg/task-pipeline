@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# shared-mechanism: sshlg-skills/public-contract-evals-v1
 """Validate the portable behavioral-evaluation data in test/evals."""
 
 from __future__ import annotations

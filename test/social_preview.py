@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# shared-mechanism: sshlg-skills/public-social-preview-v1
 """Check the committed GitHub social-preview asset without image dependencies."""
 
 from pathlib import Path
@@ -17,4 +18,3 @@ width, height = struct.unpack(">II", data[16:24])
 if (width, height) != (1200, 630):
     raise SystemExit(f"{path}: {width}x{height}, expected 1200x630")
 print(f"OK: {path} is {width}x{height}, {len(data)} bytes")
-

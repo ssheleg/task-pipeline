@@ -1345,7 +1345,9 @@ three quarters of the work on this run.
 
 ## Releases that carry no stamp — stated, not stamped
 
-**The trailing gap right now is `v1.76.1`, `v1.77.0`, `v1.78.0` and `v1.78.1` — four releases.**
+**The trailing gap right now is `v1.76.1`, `v1.77.0`, `v1.78.0`, `v1.78.1` and `v1.78.2` — five releases.**
+`v1.78.2` is the follow-up from the umbrella's cross-repository drift gate:
+router-carrier and shared-mechanism declarations, not a product delivery run.
 `v1.78.1` makes the repository's public contract inspectable — README entry point,
 skill card, eval fixtures, social card and CI gates — without running a product delivery
 through this pipeline, so no run stamp is claimed. `v1.78.0` removed a person's name from the two lines the pipeline prints at run time —
