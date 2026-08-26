@@ -1,3 +1,8 @@
+## v1.78.3 — the shared seam is explicit
+
+Both shared validators now state `diverges: none`, completing the umbrella
+mechanism contract.
+
 ## v1.78.2 — the router and the shared mechanisms agree with the umbrella
 
 The description restores the exact `the full cycle` carrier used by the family

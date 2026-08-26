@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # shared-mechanism: sshlg-skills/public-social-preview-v1
+# diverges: none
 """Check the committed GitHub social-preview asset without image dependencies."""
 
 from pathlib import Path
