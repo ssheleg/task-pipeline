@@ -1,3 +1,12 @@
+## v1.78.1 — one discovery contract from intake to release
+
+The description now starts with the family's `Use when` shape while preserving
+both routing boundaries and the explicit `Not for:` clause; its working headroom
+is recomputed and gated. Portable trigger and behavior evals, a generated social
+preview, and a one-command README viewport now ship. CI adds the pinned house
+audit and the eval validator's planted failure; the existing self-observed suite
+remains labelled separately from blind model evidence.
+
 ## v1.78.0 — the run names the standard, not a person
 
 The banner the pipeline prints before its first question read *"Running **Proof of

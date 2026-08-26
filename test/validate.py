@@ -84,22 +84,13 @@ else:
             fail("SKILL.md: empty/missing description")
         else:
             desc = dm.group(1).strip().strip('"').strip("'")
-            # Anthropic's authoring guidance: the description "must include both what
-            # the Skill does and when Claude should use it", written in third person,
-            # and their own examples lead with the capability — "Extracts text and
-            # tables from PDF files… Use when working with PDF files."
-            #
-            # This used to demand the string start with "Use when", which enforced the
-            # WHEN half and let the WHAT half be optional. The rule now checks what the
-            # guidance actually asks for: a capability statement, then the trigger.
-            _uw = desc.find("Use when")
-            if _uw < 0:
-                fail("SKILL.md: description has no 'Use when …' clause — the trigger half "
-                     "is what Claude matches a request against")
-            elif _uw < 40:
-                fail("SKILL.md: description opens with the trigger and never says what the "
-                     "skill DOES — lead with the capability in third person, then 'Use when …' "
-                     "(Anthropic skill-authoring guidance)")
+            # The family contract starts with the trigger so every member exposes the
+            # same discovery shape. The WHAT half remains mandatory and is stated as
+            # the capability sentence that follows the boundary.
+            if not desc.startswith("Use when "):
+                fail("SKILL.md: description must start with 'Use when …' (family contract)")
+            if "Runs a substantial task" not in desc:
+                fail("SKILL.md: description names when to route but not what the skill runs")
             if len(desc) > 1024:
                 fail(f"SKILL.md: description is {len(desc)} chars, the limit is 1024")
             if re.search(r"\b(I can|I'll|you can use this)\b", desc, re.I):

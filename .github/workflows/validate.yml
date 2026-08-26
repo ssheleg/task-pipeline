@@ -8836,3 +8836,47 @@ jobs:
           else
             echo "OK: what the verifier is told to read is compared against what the node has"
           fi
+
+  skill-audit:
+    name: House skill audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Checkout the pinned family auditor
+        uses: actions/checkout@v4
+        with:
+          repository: ssheleg/make-skill
+          ref: 991cbb415be3e856f05c974e631423df552883e3
+          path: .skill-auditor
+          persist-credentials: false
+
+      - name: Audit every shipped Agent Skill
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import subprocess
+          import sys
+
+          auditor = Path(".skill-auditor/plugins/make-skill/skills/make-skill/scripts/audit_skill.py")
+          skills = sorted({
+              *Path(".").glob("plugins/*/skills/*/SKILL.md"),
+              *Path(".").glob("skills/*/SKILL.md"),
+          })
+          if not skills:
+              raise SystemExit("no shipped SKILL.md found")
+          for manifest in skills:
+              subprocess.run(
+                  [sys.executable, str(auditor), "--house", str(manifest.parent)],
+                  check=True,
+              )
+          print(f"OK: {len(skills)} shipped skill(s) passed the pinned house audit")
+          PY
+
+      - name: Validate behavioral eval data and watch the guard fail
+        run: |
+          python3 test/evals_validate.py
+          python3 test/evals_validate.py --self-test
+
+      - name: Validate the committed social preview
+        run: python3 test/social_preview.py

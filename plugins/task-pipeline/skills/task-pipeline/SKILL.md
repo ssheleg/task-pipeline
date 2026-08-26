@@ -1,6 +1,6 @@
 ---
 name: task-pipeline
-description: "Runs a substantial task through a full delivery pipeline: an intake grill that locks the request into a brief, then docs study, brainstorm, spec, plan, subagent build, tests, lint/deploy, post-deploy, docs/wiki sync and acceptance. Use when work changes the repository — a feature, fix, refactor, migration, integration, rewrite, adoption or hardening; фича, фикс, рефактор, миграция, интеграция, доработать, починить, внедрить, перевести — or when the output is a finding that lands in it: audit/аудит, bug hunt/проверь ошибки, production check/проверь прод, PR review/ревью PR — or on 'run this through the pipeline' / 'прогони по конвейеру', 'the full cycle' / 'полный цикл', /task-pipeline. Two modes need no task at all: 'checkup' / 'чекап' reports what shipped unconfirmed and what to look at first; 'setup' audits existing documentation. Not for: answering a question, explaining code, a typo or a one-line edit — say 'без пайплайна' / 'quick' to opt out."
+description: "Use when work changes the repository — feature, fix, refactor, migration, integration, rewrite, adoption or hardening; фича, фикс, рефактор, миграция, интеграция, доработать, починить, внедрить, перевести — or when the output is a finding that lands in it: audit/аудит, bug hunt/проверь ошибки, production check/проверь прод, PR review/ревью PR — or on 'run this through the pipeline' / 'прогони по конвейеру', 'full cycle' / 'полный цикл', /task-pipeline. Runs a substantial task through an intake grill, docs study, brainstorm, spec, plan, build, tests, deploy, post-deploy, docs/wiki sync and acceptance with explicit gates. 'checkup' / 'чекап' reports unconfirmed releases; 'setup' audits existing docs. Not for: answering a question, explaining code, a typo or a one-line edit — say 'без пайплайна' / 'quick' to opt out."
 license: MIT
 ---
 
@@ -227,13 +227,6 @@ capable available — see `references/model-tiering.md`).
 [`references/stages.md`](references/stages.md) — one section per stage. What the
 ladder walk is, which eight environment classes stage 10 enumerates, what makes an
 edge fake, why a `200` is not a working page: all there, none here.
-
-That split is the budget rule this pack states for everyone else, applied to
-itself: the body was **6685 tokens against a 5000 budget**, the worst in the
-family, and most of the overrun sat in this table's Gate column restating files
-that already load on demand.
-
-
 
 **Several repositories?** A submodule is finished when its parent says so — the
 work can be committed, pushed and green while a clone of the parent still gets the

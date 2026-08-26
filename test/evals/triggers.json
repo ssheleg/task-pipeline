@@ -1,0 +1,109 @@
+{
+  "skill": "task-pipeline",
+  "note": "Behavioral trigger cases. Run each in a fresh session; the committed data contains no model results.",
+  "split": {
+    "train": [
+      "q01",
+      "q02",
+      "q03",
+      "q07",
+      "q08",
+      "q09"
+    ],
+    "validation": [
+      "q04",
+      "q05",
+      "q06",
+      "q10",
+      "q11",
+      "q12"
+    ]
+  },
+  "queries": [
+    {
+      "id": "q01",
+      "lang": "en",
+      "query": "Run this authentication feature through the full delivery pipeline",
+      "should_trigger": true,
+      "why": "explicit full-cycle trigger"
+    },
+    {
+      "id": "q02",
+      "lang": "ru",
+      "query": "прогони миграцию через конвейер от спеки до релиза",
+      "should_trigger": true,
+      "why": "Russian repository change"
+    },
+    {
+      "id": "q03",
+      "lang": "en",
+      "query": "Audit the production landing page and land every finding in the repository",
+      "should_trigger": true,
+      "why": "audit whose output changes the repo"
+    },
+    {
+      "id": "q04",
+      "lang": "ru",
+      "query": "сделай чекап — что выпущено без подтверждения",
+      "should_trigger": true,
+      "why": "checkup mode"
+    },
+    {
+      "id": "q05",
+      "lang": "en",
+      "query": "Set up the delivery pipeline for this existing repository",
+      "should_trigger": true,
+      "why": "setup mode"
+    },
+    {
+      "id": "q06",
+      "lang": "en",
+      "query": "Review this PR, file the findings and carry the fixes through acceptance",
+      "should_trigger": true,
+      "why": "review that lands changes"
+    },
+    {
+      "id": "q07",
+      "lang": "en",
+      "query": "Explain how this parser works",
+      "should_trigger": false,
+      "why": "answer only, no repository change"
+    },
+    {
+      "id": "q08",
+      "lang": "ru",
+      "query": "исправь опечатку в README одной строкой",
+      "should_trigger": false,
+      "why": "explicitly trivial edit"
+    },
+    {
+      "id": "q09",
+      "lang": "en",
+      "query": "What is the current project status? Do not change anything.",
+      "should_trigger": false,
+      "why": "read-only status question"
+    },
+    {
+      "id": "q10",
+      "lang": "en",
+      "query": "Draft a social post about the release without touching the repository",
+      "should_trigger": false,
+      "why": "copy-only external artifact"
+    },
+    {
+      "id": "q11",
+      "lang": "ru",
+      "query": "покажи возможные подходы, но ничего не внедряй",
+      "should_trigger": false,
+      "why": "exploration with no repository mutation"
+    },
+    {
+      "id": "q12",
+      "lang": "en",
+      "query": "Rename one local variable mechanically",
+      "should_trigger": false,
+      "why": "one-line mechanical edit"
+    }
+  ]
+}
+

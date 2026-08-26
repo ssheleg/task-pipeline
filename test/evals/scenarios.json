@@ -1,0 +1,51 @@
+{
+  "note": "Score each expected_behavior line independently. These are authored evaluations, not executed results.",
+  "scenarios": [
+    {
+      "id": "s01",
+      "title": "Substantial feature",
+      "skills": [
+        "task-pipeline"
+      ],
+      "query": "Add team invitations to an existing product and finish the repository change.",
+      "files": [],
+      "expected_behavior": [
+        "Runs the mandatory intake grill before implementation",
+        "Locks independently verifiable requirements in a brief",
+        "Uses stage gates and does not advance past a failed one",
+        "Ends with acceptance evidence, clean repositories and released residue"
+      ]
+    },
+    {
+      "id": "s02",
+      "title": "Cross-repository release",
+      "skills": [
+        "task-pipeline"
+      ],
+      "query": "Change a member skill, release it, then update the umbrella submodule and manifest.",
+      "files": [],
+      "expected_behavior": [
+        "Represents member and umbrella work as dependent graph nodes",
+        "Verifies the member commit is pushed and released before moving the pin",
+        "Runs member and umbrella gates at their own boundaries",
+        "Checks the parent pointer from a fresh-clone perspective"
+      ]
+    },
+    {
+      "id": "s03",
+      "title": "Trivial boundary",
+      "skills": [
+        "task-pipeline"
+      ],
+      "query": "Fix a single misspelled word in an internal Markdown note.",
+      "files": [],
+      "expected_behavior": [
+        "Recognizes the one-line exception",
+        "Does not run the ten-stage pipeline",
+        "Makes the scoped edit and proportionate check only",
+        "Does not fabricate briefs or evaluation evidence"
+      ]
+    }
+  ]
+}
+

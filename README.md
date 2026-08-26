@@ -5,6 +5,16 @@
 [![license](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 [![site](https://img.shields.io/badge/docs-skills.sshlg.me-8ab0ff)](https://skills.sshlg.me/skills/task-pipeline/)
 
+**Carry a substantial repository change from a locked brief through gated delivery and evidence-backed completion.**
+
+```bash
+npx skills add ssheleg/task-pipeline
+```
+
+Ask: `Run this authentication feature through the full delivery pipeline.`
+
+**[Detailed docs →](https://skills.sshlg.me/skills/task-pipeline/)**
+
 **[Docs, and every skill →](https://skills.sshlg.me/)** · [this skill's page](https://skills.sshlg.me/skills/task-pipeline/) · [follow @sshlg93 on X](https://x.com/intent/follow?screen_name=sshlg93)
 
 Loads in **DeepSeek Harness** (`dsh`) with **no plugin to write**: it reads the
@@ -133,12 +143,14 @@ software when agents write the code*. The manifesto has its own home:
 Its central claim is that the unit of progress is not generated code but an
 **evidence-carrying change**: one carrying the intent it implements, the evidence that
 verifies it, the **limits** of that evidence, and the decision that accepts it. This
-repository is where that stops being an argument — the ladder walk in
-[`references/acceptance.md`](plugins/task-pipeline/skills/task-pipeline/references/acceptance.md),
-the eight residue classes in
+repository is where that stops being an argument — the eight residue classes in
 [`references/residue.md`](plugins/task-pipeline/skills/task-pipeline/references/residue.md),
 the axis rotation in
 [`references/audit.md`](plugins/task-pipeline/skills/task-pipeline/references/audit.md),
+the documentation boundary in
+[`references/documentation.md`](plugins/task-pipeline/skills/task-pipeline/references/documentation.md),
+the acceptance ladder in
+[`references/acceptance.md`](plugins/task-pipeline/skills/task-pipeline/references/acceptance.md),
 and a guard suite in which **every** check has been watched rejecting a planted defect
 (`npm run test:negatives`).
 
