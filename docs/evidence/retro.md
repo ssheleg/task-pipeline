@@ -1345,7 +1345,10 @@ three quarters of the work on this run.
 
 ## Releases that carry no stamp — stated, not stamped
 
-**The trailing gap right now is `v1.76.1`, `v1.77.0`, `v1.78.0`, `v1.78.1`, `v1.78.2` and `v1.78.3` — six releases.**
+**The trailing gap right now is `v1.76.1`, `v1.77.0`, `v1.78.0`, `v1.78.1`, `v1.78.2`, `v1.78.3` and `v1.78.4` — seven releases.**
+`v1.78.4` carries the `skills.sh` badge and the canonical `homepage` from `main` to the
+package page: npm serves README and metadata from the last publish, so both had landed and
+stopped. Publishing metadata is not a product delivery run and no stamp is claimed.
 `v1.78.3` completes the shared-validator header required by the umbrella; it is
 cross-repository contract bookkeeping, not a product delivery run.
 `v1.78.2` is the follow-up from the umbrella's cross-repository drift gate:
