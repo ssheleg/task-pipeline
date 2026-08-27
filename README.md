@@ -4,6 +4,7 @@
 [![validate](https://github.com/ssheleg/task-pipeline/actions/workflows/validate.yml/badge.svg)](https://github.com/ssheleg/task-pipeline/actions/workflows/validate.yml)
 [![license](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 [![site](https://img.shields.io/badge/docs-skills.sshlg.me-8ab0ff)](https://skills.sshlg.me/skills/task-pipeline/)
+[![skills.sh](https://skills.sh/b/ssheleg/task-pipeline)](https://skills.sh/ssheleg/task-pipeline)
 
 **Carry a substantial repository change from a locked brief through gated delivery and evidence-backed completion.**
 
