@@ -66,6 +66,7 @@ never that the work was skipped quietly.
 - Cross-cutting — the Doc Loop
 - Cross-cutting — the loop guard
 - Cross-cutting — the audit
+- A stage that produces text a user will read
 
 ## 0 — Intake grill — MANDATORY
 - **Freedom: medium** — the interview adapts to the answers; its two phases and their order do not ([`gates.md`](gates.md) → *Axis C*).
@@ -860,3 +861,22 @@ nothing.
 - **Whatever can't be fixed now becomes a ratchet** — a named, counted set that may
   only shrink, printed beside every gate verdict, so "green" never reads as
   "verified".
+
+## A stage that produces text a user will read
+
+The framework has no opinion on which skills run where — `pipeline.json` is the contract —
+but two facts about copy are worth stating once, because a stage author rediscovers them
+expensively.
+
+**Route it through the copy skill, not through the stage's own prose.** A stage that writes
+interface strings, a landing page or a changelog entry for users is producing brand surface;
+the registers, terminology and canonical facts that constrain it live in `docs/brand/`, and
+a stage writing directly does not read them.
+
+**The humanization pass is decided once, in the brand pack, not per run.**
+`docs/brand/voice.md` carries an optional `Humanization pass:` field; absent means nobody
+has been asked, and the copy skill asks once and records the answer. A pipeline that asks
+every run has turned a settled decision into a prompt, and a pipeline that gates on a
+marker count has turned a writing-quality signal into a verdict — the false positives fall
+hardest on people writing in a second language, and nothing here fails a stage for them.
+`npx sshlg-skills humanizers` lists what is installed.
