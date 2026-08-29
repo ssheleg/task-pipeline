@@ -54,13 +54,36 @@ decide() {
   # JSON from there. Watched failing — the gate allowed every release, silently,
   # because `sys.stdin.read()` came back empty and an empty payload is a skip.
   HOOK_INPUT="$input" python3 - "$ledger" "$project" <<'PY'
-import json, shlex, sys, os, re
+import datetime, json, shlex, sys, os, re
 
 ledger, project = sys.argv[1], sys.argv[2]
 raw = os.environ.get("HOOK_INPUT", "")
 try:
     data = json.loads(raw)
-except Exception:
+    if not isinstance(data, dict):
+        raise ValueError("payload is not a JSON object")
+except Exception as exc:
+    # An empty or unreadable payload is the gate NOT SEEING — it says nothing
+    # about whether a release is happening. With no run in flight that is
+    # nobody's business, so stay silent. With a run in flight, a silent skip
+    # here is the fail-open this hook exists to close: watched happening —
+    # `printf '' | release-gate.sh` exited 0 with no output, and the gate
+    # allowed every release for as long as its stdin plumbing was broken. A
+    # component that never receives its input is indistinguishable from
+    # approval, so it fails CLOSED, and the blindness is written into the
+    # ledger (append-only, the lifecycle grammar) so the run can see the gate
+    # went blind even after the refusal scrolls away.
+    if os.path.exists(ledger):
+        why = ("empty payload" if not raw.strip()
+               else "unparseable payload (%s)" % type(exc).__name__)
+        try:
+            stamp = (datetime.datetime.now(datetime.timezone.utc)
+                     .replace(microsecond=0).isoformat().replace("+00:00", "Z"))
+            with open(ledger, "a", encoding="utf-8") as fh:
+                fh.write("event: gate-blind — %s — %s\n" % (why, stamp))
+        except Exception:
+            pass  # recording failed; the block below still stands
+        print("blind\t%s" % why); raise SystemExit(0)
     print("skip"); raise SystemExit(0)
 
 cmd = ((data.get("tool_input") or {}).get("command") or "")
@@ -99,8 +122,22 @@ def outward(tokens):
                         return "git push <tag>"
         if t.endswith("gh") and rest[:2] == ["release", "create"]:
             return "gh release create"
-        if t.endswith("npm") and "publish" in rest:
-            return "npm publish"
+        if t.endswith("npm"):
+            # `publish` must be npm's SUBCOMMAND — the first non-flag token after
+            # npm. `"publish" in rest` matched anywhere in the argument list, so a
+            # project's own `npm run publish` script was gated as the registry
+            # act; fail-closed overmatch is still overmatch, and a gate that
+            # fights an ordinary script daily is a gate that gets removed. Known
+            # narrowness, stated rather than discovered: a flag whose value is a
+            # separate token (`npm --loglevel silent publish`) hides the
+            # subcommand from this scan; the `--flag=value` spelling is read
+            # correctly.
+            for a in rest:
+                if a.startswith("-"):
+                    continue
+                if a == "publish":
+                    return "npm publish"
+                break
     return None
 
 
@@ -122,16 +159,25 @@ stage_lines = [l.strip() for l in text.splitlines() if l.strip().startswith("sta
 
 
 def declared_test_stage():
-    """The tests stage, from the project's own flow. `(id, command)` or None."""
+    """The tests stage, from the project's own flow. `(id, command)` or None.
+
+    TWO PASSES, and the order is the fix. One pass took the first stage that was
+    declared `tests` OR merely carried a gate command — so a lint stage declared
+    before the tests stage became "the tests stage", and its green observation
+    released a tag with the suite never run. A stage the project DECLARED as
+    tests outranks any stage that happens to carry a command; the command-bearing
+    fallback remains for flows that declare no `tests` state at all."""
     try:
         cfg = json.load(open(os.path.join(project, "pipeline.json"), encoding="utf-8"))
     except Exception:
         return None
-    for s in cfg.get("stages") or []:
-        if not isinstance(s, dict):
-            continue
+    stages = [s for s in cfg.get("stages") or [] if isinstance(s, dict)]
+    for s in stages:
+        if s.get("state") == "tests":
+            return (str(s.get("id")), (s.get("gate") or {}).get("command"))
+    for s in stages:
         gate = s.get("gate") or {}
-        if s.get("state") == "tests" or gate.get("command"):
+        if gate.get("command"):
             return (str(s.get("id")), gate.get("command"))
     return None
 
@@ -207,6 +253,21 @@ why=$(printf '%s' "$verdict" | cut -f3)
 
 case "$state" in
   skip|ok) exit 0 ;;
+  blind)
+    # act holds the reason here — the payload never carried a command to name.
+    cat >&2 <<EOF
+task-pipeline: this project has a run in flight ($ledger) and the release gate
+received an unreadable hook payload ($act), so it cannot tell whether this
+command is an outward act. A gate that cannot see fails CLOSED — a blind gate
+that waves things through is indistinguishable from approval, and that is the
+exact shape it once shipped with.
+
+An \`event: gate-blind\` line was appended to the ledger. Check the hook wiring
+(stdin must carry the PreToolUse JSON), then re-run the command. To work without
+the pipeline, remove the ledger ($ledger) or say «без пайплайна» and take the
+route by hand.
+EOF
+    exit 2 ;;
   block)
     cat >&2 <<EOF
 task-pipeline: \`$act\` is an outward, irreversible act and the tests gate has not

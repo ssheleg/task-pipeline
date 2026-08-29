@@ -59,9 +59,10 @@ source is a recorded decision, an unquoted one is an undetected divergence.
 - **Knowledge wiki:** installed / not installed
   ([obsidian-wiki](https://github.com/ar9av/obsidian-wiki); recommended, never a gate)
 - **Retro, in force:** `docs/evidence/retro.md` — none / N standing instructions
-  (read **in full**, together with the run stamps and the recent-log window; list
-  which ones bind this run, and stamp each as it fires **with the commit** — that
-  stamp is the only evidence behind stage 10's cold-retirement rule)
+  (read **in full**, together with the run stamps — both bounded by construction;
+  the recent log is **queried** by this task's nouns, never read end to end; list
+  which instructions bind this run, and stamp each as it fires **with the commit**
+  — that stamp is the only evidence behind stage 10's cold-retirement rule)
 - **Retro archive:** `docs/evidence/retro/` — **queried** by this task's nouns;
   what it returned: … (or `nothing`)
 - **Code graph:** built / installed-not-built / not installed

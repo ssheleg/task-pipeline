@@ -211,6 +211,89 @@ jobs:
           fi
           echo "OK: the release-gate fixtures detect a gate that fails open"
 
+      - name: Negative self-test (a blind gate must fail closed, not skip)
+        run: |
+          set -eu
+          rm -rf /tmp/gate-blind-copy && cp -R . /tmp/gate-blind-copy
+          # Revert the blind branch to the shape it actually shipped with: an
+          # unreadable payload with a run in flight printed "skip" and exited 0,
+          # so the gate allowed every release for as long as its stdin plumbing
+          # was broken. Anchored on the structural verdict line, not on prose.
+          python3 - <<'EOF'
+          import pathlib
+          p = pathlib.Path('/tmp/gate-blind-copy/plugins/task-pipeline/hooks/release-gate.sh')
+          s = p.read_text()
+          needle = 'print("blind\\t%s" % why); raise SystemExit(0)'
+          assert needle in s, "PLANT NO-OP: the blind verdict moved — re-anchor this plant"
+          p.write_text(s.replace(needle, 'print("skip"); raise SystemExit(0)', 1))
+          EOF
+          if python3 /tmp/gate-blind-copy/test/release_gate_test.py; then
+            echo "ERROR: the fixtures passed against a gate that skips when it cannot see"; exit 1
+          fi
+          echo "OK: the fixtures require a blind gate to fail closed"
+
+      - name: Negative self-test (a declared tests stage must outrank a command-bearing one)
+        run: |
+          set -eu
+          rm -rf /tmp/gate-twopass-copy && cp -R . /tmp/gate-twopass-copy
+          # Kill the first pass of the stage scan, so the gate falls back to the
+          # first command-bearing stage — the shape that let a green lint stage
+          # declared before the tests stage release a tag with the suite never
+          # run. Anchored on the pass-one condition, a structural marker.
+          python3 - <<'EOF'
+          import pathlib
+          p = pathlib.Path('/tmp/gate-twopass-copy/plugins/task-pipeline/hooks/release-gate.sh')
+          s = p.read_text()
+          needle = 'if s.get("state") == "tests":'
+          assert needle in s, "PLANT NO-OP: the two-pass scan moved — re-anchor this plant"
+          p.write_text(s.replace(needle, 'if False:', 1))
+          EOF
+          if python3 /tmp/gate-twopass-copy/test/release_gate_test.py; then
+            echo "ERROR: the fixtures passed while a lint stage could capture the tests gate"; exit 1
+          fi
+          echo "OK: the fixtures require the declared tests stage to win"
+
+      - name: Negative self-test (a project's publish script must not read as npm publish)
+        run: |
+          set -eu
+          rm -rf /tmp/gate-npmrun-copy && cp -R . /tmp/gate-npmrun-copy
+          # Restore the overmatch this gate shipped with: `publish` anywhere in
+          # npm's argument list classified `npm run publish` — a project's own
+          # script — as the registry act. Anchored on the subcommand scan.
+          python3 - <<'EOF'
+          import pathlib
+          p = pathlib.Path('/tmp/gate-npmrun-copy/plugins/task-pipeline/hooks/release-gate.sh')
+          s = p.read_text()
+          needle = 'for a in rest:'
+          assert needle in s, "PLANT NO-OP: the npm subcommand scan moved — re-anchor this plant"
+          p.write_text(s.replace(needle, 'for a in (["publish"] if "publish" in rest else []):', 1))
+          EOF
+          if python3 /tmp/gate-npmrun-copy/test/release_gate_test.py; then
+            echo "ERROR: the fixtures passed while npm run publish was gated as npm publish"; exit 1
+          fi
+          echo "OK: the fixtures tell a project script from the registry act"
+
+      - name: Negative self-test (the build gate must fire on the shipped example flow)
+        run: |
+          set -eu
+          rm -rf /tmp/build-dev-copy && cp -R . /tmp/build-dev-copy
+          # Narrow the build-stage match back to `build` alone. The shipped
+          # pipeline.example.json names its build stage `dev`, so this exact
+          # narrowing left the gate never firing on the flow the plugin ships.
+          # Anchored on the state tuple, a structural marker.
+          python3 - <<'EOF'
+          import pathlib
+          p = pathlib.Path('/tmp/build-dev-copy/plugins/task-pipeline/hooks/build-gate.sh')
+          s = p.read_text()
+          needle = 's.get("state") in ("build", "dev")'
+          assert needle in s, "PLANT NO-OP: the build-state match moved — re-anchor this plant"
+          p.write_text(s.replace(needle, 's.get("state") == "build"', 1))
+          EOF
+          if python3 /tmp/build-dev-copy/test/release_gate_test.py; then
+            echo "ERROR: the fixtures passed while the shipped example never armed the build gate"; exit 1
+          fi
+          echo "OK: the fixtures require the gate to fire on the example's own dev stage"
+
       - name: Negative self-test (validator must be able to fail)
         run: |
           set -eu

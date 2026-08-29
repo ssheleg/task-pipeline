@@ -64,7 +64,12 @@ def build_stage_id():
     try:
         cfg = json.load(open(os.path.join(project, "pipeline.json"), encoding="utf-8"))
         for s in cfg.get("stages") or []:
-            if isinstance(s, dict) and s.get("state") == "build":
+            # `build` OR `dev` — mirroring this hook's own ledger fallback
+            # (`build|dev`) below. Matching only `build` meant the shipped
+            # pipeline.example.json, whose build stage is `state: "dev"`, never
+            # armed this gate: the canonical config disarmed the hook it ships
+            # beside.
+            if isinstance(s, dict) and s.get("state") in ("build", "dev"):
                 return str(s.get("id"))
     except Exception:
         pass

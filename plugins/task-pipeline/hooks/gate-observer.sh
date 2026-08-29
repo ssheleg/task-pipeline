@@ -49,15 +49,16 @@ try:
 except Exception:
     raise SystemExit(0)
 
-target = None
-for s in cfg.get("stages") or []:
-    if isinstance(s, dict) and (s.get("gate") or {}).get("command"):
-        target = (str(s.get("id")), (s.get("gate") or {})["command"].strip())
-        break
-if not target:
+# EVERY stage that declares a command, not the first. A first-match scan meant
+# a lint stage declared before the tests stage was the only one ever observed,
+# so the real suite's runs left no trace for the release gate to corroborate —
+# the same first-match break the release gate's own stage scan shipped with,
+# fixed together (sweep the class, not the instance).
+declared = [(str(s.get("id")), (s.get("gate") or {})["command"].strip())
+            for s in cfg.get("stages") or []
+            if isinstance(s, dict) and (s.get("gate") or {}).get("command")]
+if not declared:
     raise SystemExit(0)
-
-stage_id, declared = target
 
 # Compared on the normalised command line, not on a substring: `echo "npm test"`
 # and `npm test --watch` are not the project's gate, and treating them as one puts
@@ -65,7 +66,8 @@ stage_id, declared = target
 def norm(s):
     return " ".join(s.split())
 
-if norm(cmd) != norm(declared):
+matches = [(sid, d) for sid, d in declared if norm(cmd) == norm(d)]
+if not matches:
     raise SystemExit(0)
 
 # PostToolUse fires on success; PostToolUseFailure carries the error. Both are
@@ -78,11 +80,13 @@ else:
     code = 1 if failed else 0
 
 stamp = datetime.datetime.now(datetime.timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
-line = 'gate:  %s — command "%s" — exit %d — %s\n' % (stage_id, norm(declared), code, stamp)
 
 # Append-only, like every other line in this file. A ledger that is rewritten is a
-# ledger whose history can be edited to say the suite passed.
+# ledger whose history can be edited to say the suite passed. One line per stage
+# that declared this exact command: two stages declaring the same command is two
+# observations, because each stage's gate is corroborated separately.
 with open(ledger, "a", encoding="utf-8") as fh:
-    fh.write(line)
+    for stage_id, decl in matches:
+        fh.write('gate:  %s — command "%s" — exit %d — %s\n' % (stage_id, norm(decl), code, stamp))
 PY
 exit 0

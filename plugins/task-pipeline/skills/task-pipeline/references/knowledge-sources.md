@@ -50,7 +50,7 @@ makes the grill's answers *checkable* instead of merely confident.
 | 4b | **The task register, for its *state*** | `docs/ROADMAP.md`, a board, a backlog, the tracker `CLAUDE.md` names | **what is open right now** — read with a command, never from memory; see *Carried-in claims* |
 | 5 | **Product/UX docs** | `docs/ux/` (super-ux chain), `README`, runbooks | user-facing behavior that is already specified |
 | 6 | **Pipeline history** | `<artifacts>/specs/`, `plans/`, past `-carryover.md` | what a previous run of this pipeline decided or deferred |
-| 7 | **The retro, in force** | `<artifacts>/retro.md` ([`retrospective.md`](retrospective.md)) | what previous runs got wrong here — **read in full**: standing instructions (capped at ten), run stamps and the recent-log window, all bounded by construction |
+| 7 | **The retro, in force** | `<artifacts>/retro.md` ([`retrospective.md`](retrospective.md)) | what previous runs got wrong here — **read in full**: standing instructions (capped at ten) and run stamps (one line each), both bounded by construction; the *Recent log* is **queried** by the task's nouns, like the archive — nothing caps it |
 | 7a | **The retro archive** | `<artifacts>/retro/YYYY-QN.md` | *have we been bitten by this class before?* — **queried** by the task's nouns, never read end to end |
 | 8 | **The knowledge wiki** | see below | distilled cross-project knowledge, prior sessions, why decisions were made |
 | 9 | **Other doc repos the project names** | a docs repo URL or submodule in `CLAUDE.md`/`README`, a sibling checkout, a `docs/` monorepo package | specs, contracts and runbooks that live outside this repo |

@@ -341,6 +341,143 @@ def a_later_green_clears_an_earlier_red():
 it("a later red beats an earlier green", a_later_red_beats_an_earlier_green)
 it("a later green clears an earlier red", a_later_green_clears_an_earlier_red)
 
+# --- a gate that cannot see must not wave the release through ----------------
+#
+# `printf '' | release-gate.sh` exited 0 with no output, with a run in flight —
+# the gate allowed EVERYTHING, silently, whenever its stdin plumbing broke. That
+# is this repo's own standing instruction #1 shape: a component that never
+# receives its input fails open and is indistinguishable from approval. Blind +
+# ledger present must fail CLOSED, say why, and leave a trace in the ledger.
+
+
+def run_raw(payload, ledger):
+    """Run the gate with a raw — possibly broken — stdin payload."""
+    with tempfile.TemporaryDirectory() as project:
+        path = os.path.join(project, ".task-pipeline", "run.md")
+        if ledger is not None:
+            os.makedirs(os.path.dirname(path))
+            with open(path, "w") as fh:
+                fh.write(ledger)
+        proc = subprocess.run(["bash", GATE], input=payload,
+                              env=dict(os.environ, CLAUDE_PROJECT_DIR=project),
+                              capture_output=True, text=True)
+        after = open(path, encoding="utf-8").read() if ledger is not None else ""
+        return proc.returncode, (proc.stderr or ""), after
+
+
+def an_empty_payload_with_a_run_in_flight_blocks():
+    code, err, after = run_raw("", NO_STAGE6_LEDGER)
+    assert code == BLOCK, "an empty payload waved the act through, silently"
+    assert "payload" in err, "the refusal does not name the payload failure: %r" % err
+    assert "event: gate-blind" in after, "the blindness left no trace in the ledger"
+
+
+def a_garbage_payload_with_a_run_in_flight_blocks():
+    code, err, after = run_raw("not json {{{", NO_STAGE6_LEDGER)
+    assert code == BLOCK, "an unparseable payload waved the act through"
+    assert "event: gate-blind" in after, "the blindness left no trace in the ledger"
+
+
+def a_non_object_payload_with_a_run_in_flight_blocks():
+    code, _, _ = run_raw("null", NO_STAGE6_LEDGER)
+    assert code == BLOCK, "a JSON payload that is not an object waved the act through"
+
+
+def a_blind_refusal_is_a_redirection():
+    """Same rule as every other refusal: no next step, and the gate gets removed."""
+    _, err, _ = run_raw("", NO_STAGE6_LEDGER)
+    assert "run.md" in err, "the reason does not name the ledger"
+    assert "без пайплайна" in err, "the reason does not name the opt-out"
+
+
+def an_empty_payload_with_no_ledger_stays_silent():
+    """Narrowness 2 survives the fix: no run in flight means no opinion, so
+    installing this plugin still changes nothing in an ungoverned repository."""
+    code, err, _ = run_raw("", None)
+    assert code == ALLOW, "a repository running no pipeline was blocked"
+    assert err.strip() == "", "the gate spoke in a repository running no pipeline"
+
+
+it("an empty payload with a run in flight blocks", an_empty_payload_with_a_run_in_flight_blocks)
+it("a garbage payload with a run in flight blocks", a_garbage_payload_with_a_run_in_flight_blocks)
+it("a non-object payload with a run in flight blocks", a_non_object_payload_with_a_run_in_flight_blocks)
+it("a blind refusal names the ledger and the opt-out", a_blind_refusal_is_a_redirection)
+it("an empty payload with no ledger stays silent", an_empty_payload_with_no_ledger_stays_silent)
+
+# --- a lint stage before the tests stage must not capture the gate -----------
+#
+# One pass took the FIRST stage carrying a gate command, so a lint stage declared
+# before the tests stage became "the tests stage": its green observation released
+# a tag with the suite never run. The declared `state: "tests"` outranks a stage
+# that merely carries a command. The observer had the same first-match break —
+# only the first command-bearing stage was ever observed, so the real suite's
+# runs left no trace for the release gate to corroborate.
+
+LINT_THEN_TESTS = {"stages": [
+    {"id": 5, "state": "lint", "gate": {"command": "npm run lint"}},
+    {"id": 6, "state": "tests", "gate": {"command": "npm test"}},
+]}
+GREEN_LINT_ONLY = (
+    "stage: 5 lint — gate auto — verdict pass — 2026-08-29T01:00:00Z\n"
+    'gate:  5 — command "npm run lint" — exit 0 — 2026-08-29T01:01:00Z\n'
+)
+
+
+def a_green_lint_stage_does_not_stand_in_for_tests():
+    code, err = run_with("git tag v1.0.0", GREEN_LINT_ONLY, LINT_THEN_TESTS)
+    assert code == BLOCK, (
+        "a green lint stage declared before the tests stage captured the gate — "
+        "the tag went out with the suite never run")
+    assert "6" in err, "the refusal does not name the tests stage: %r" % err.strip()[:200]
+
+
+def the_tests_stage_releases_past_a_lint_stage_before_it():
+    led = (GREEN_LINT_ONLY
+           + "stage: 6 tests — gate auto — verdict pass — 2026-08-29T01:10:00Z\n"
+           + 'gate:  6 — command "npm test" — exit 0 — 2026-08-29T01:11:00Z\n')
+    code, err = run_with("git tag v1.0.0", led, LINT_THEN_TESTS)
+    assert code == ALLOW, "a green tests stage was blocked behind a lint stage: %s" % err.strip()[:200]
+
+
+def the_observer_reaches_past_the_first_declared_command():
+    out = observe("npm test", LINT_THEN_TESTS)
+    assert 'gate:  6 — command "npm test" — exit 0' in out, \
+        "the suite ran and the observer left no trace of it: %r" % out
+
+
+def the_observer_still_records_the_lint_stage_under_its_own_id():
+    out = observe("npm run lint", LINT_THEN_TESTS)
+    assert 'gate:  5 — command "npm run lint" — exit 0' in out, \
+        "a declared lint command was not recorded under its own stage: %r" % out
+
+
+it("a green lint stage does not stand in for tests", a_green_lint_stage_does_not_stand_in_for_tests)
+it("the tests stage releases past a lint stage before it", the_tests_stage_releases_past_a_lint_stage_before_it)
+it("the observer reaches past the first declared command", the_observer_reaches_past_the_first_declared_command)
+it("the observer records the lint stage under its own id", the_observer_still_records_the_lint_stage_under_its_own_id)
+
+# --- `npm run publish` is a project's script, not the registry act -----------
+
+
+def npm_run_publish_is_not_npm_publish():
+    """`"publish" in rest` matched anywhere in the argument list, so a project's
+    own `npm run publish` script was gated as if it pushed to the registry.
+    Fail-closed overmatch is still overmatch: a gate that fights an ordinary
+    script daily is a gate that gets removed."""
+    for cmd in ("npm run publish", "npm run publish --tag x"):
+        expect(cmd, NO_STAGE6_LEDGER, ALLOW,
+               "a project script named publish was gated as the registry act")
+
+
+def npm_publish_is_still_caught_in_its_real_spellings():
+    for cmd in ("npm publish", "npm publish --access public",
+                "npm --registry=https://example.test publish"):
+        expect(cmd, NO_STAGE6_LEDGER, BLOCK, "a real publish slipped through")
+
+
+it("npm run publish is not npm publish", npm_run_publish_is_not_npm_publish)
+it("npm publish is still caught in its real spellings", npm_publish_is_still_caught_in_its_real_spellings)
+
 # --- the run's own lifecycle, written down as it happens --------------------
 
 LIFECYCLE = os.path.join(ROOT, "plugins", "task-pipeline", "hooks", "run-lifecycle.sh")
@@ -476,6 +613,36 @@ it("the pipeline's own artefacts are never gated", the_pipelines_own_artefacts_a
 it("once the build stage is entered the gate is silent", once_the_build_stage_is_entered_it_is_silent)
 it("an unresolvable flow is silent", an_unresolvable_flow_is_silent)
 it("no run, no gate", no_run_no_gate)
+
+# --- the gate must fire on the flow this plugin actually ships ---------------
+#
+# The shipped example names its build stage `state: "dev"` (id 5), and the gate
+# matched only `state == "build"` — so the canonical config, copied verbatim per
+# its own _note, never armed the gate. The hook's ledger fallback already read
+# `build|dev`; the declaration path now agrees with it. The fixture loads the
+# example UNMODIFIED, so it fails again the moment the two drift apart.
+
+EXAMPLE = os.path.join(ROOT, "plugins", "task-pipeline", "skills", "task-pipeline",
+                       "pipeline.example.json")
+
+
+def the_shipped_example_arms_the_build_gate():
+    with open(EXAMPLE, encoding="utf-8") as fh:
+        flow = json.load(fh)
+    assert build_gate("src/app.js", OPEN_RUN, flow) == "ask", \
+        "the canonical pipeline.example.json never arms the build gate"
+
+
+def the_shipped_example_is_silent_once_dev_is_entered():
+    with open(EXAMPLE, encoding="utf-8") as fh:
+        flow = json.load(fh)
+    led = OPEN_RUN + "stage: 5 dev — gate auto — 2026-08-29T01:30:00Z\n"
+    assert build_gate("src/app.js", led, flow) is None, \
+        "the gate fought the example's own dev stage"
+
+
+it("the shipped example arms the build gate", the_shipped_example_arms_the_build_gate)
+it("the shipped example is silent once dev is entered", the_shipped_example_is_silent_once_dev_is_entered)
 
 if failures:
     for f in failures:
