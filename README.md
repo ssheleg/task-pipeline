@@ -193,6 +193,7 @@ until it is installed.
 | run-wide reporting | [`progress.md`](plugins/task-pipeline/skills/task-pipeline/references/progress.md) — the header block at task start and the one-line iteration close: the stage rail computed from the project's own `pipeline.json`, every number borrowed from the gate that measured it |
 | run-wide pacing | [`continuity.md`](plugins/task-pipeline/skills/task-pipeline/references/continuity.md) — the loop mode (`run.loop`, default off, never collapses a manual gate) and the context budget (fires on a harness signal, never on an estimate) |
 | the board between runs | [`backlog.md`](plugins/task-pipeline/skills/task-pipeline/references/backlog.md) — the work-list that outlives a run: seeded at stage 0 or picked up, priority **computed** from three stated inputs rather than assigned, and the seam where the carry-over ledger's `backlog` pointer finally resolves |
+| what to do next | [`prioritisation.md`](plugins/task-pipeline/skills/task-pipeline/references/prioritisation.md) — an impact ladder that dominates, confidence × ease inside the rung, researchers dispatched **before** scoring, and the operator's word overriding all of it |
 | what a human confirmed | [`verification.md`](plugins/task-pipeline/skills/task-pipeline/references/verification.md) — one row per shipped REQ and the one column a machine may not fill: the date somebody **looked**, or `never`. No floor, no target — `never` is a fact, and a count driven down is a column that has started lying |
 | how much is unconfirmed | [`exposure.md`](plugins/task-pipeline/skills/task-pipeline/references/exposure.md) — the unconfirmed count as a **vector with its components named**, never a percentage: `P(defect)` is not computable from these inputs and a single score invites a threshold, which is a target on `never`. Plus the check-list, oldest first, and the `/task-pipeline checkup` mode that prints it with no task in flight |
 | 0 + 9 + any settled decision | [`documentation.md`](plugins/task-pipeline/skills/task-pipeline/references/documentation.md) — the inventory, registers and ids, SSOT, the Doc Loop, supersede semantics, the propagation matrix, intent vs as-built |
@@ -586,7 +587,7 @@ must say so.
 ### Held to Anthropic's own Skill authoring guidance
 
 Audited against the four Agent Skills pages. Most of it already held — `name`
-13/64 chars, `description` inside 1024, `SKILL.md` 334/500 lines, all 36 references
+13/64 chars, `description` inside 1024, `SKILL.md` 334/500 lines, all 37 references
 linked **directly** from `SKILL.md`, 436 KB against a 30 MB ceiling. What did not,
 now does:
 
