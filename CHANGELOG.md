@@ -1,3 +1,80 @@
+# Changelog
+
+## v1.79.0 — the gate that could not see, and the example that disarmed it
+
+Four defects in the release machinery, each demonstrated live before it was
+fixed, plus the two commits that had been sitting on `main` unreleased — one
+version string was serving different trees through different channels.
+
+**A blind release gate now fails closed.** `printf '' | release-gate.sh` exited
+0 with no output, with a run in flight — an empty or unparseable hook payload
+was a silent skip, so the gate allowed every release for as long as its stdin
+plumbing was broken. That is the exact shape this repository's own retro names:
+a component that never receives its input fails open and is indistinguishable
+from approval. With a ledger present the gate now refuses (exit 2), names the
+payload failure and the next step, and appends an `event: gate-blind` line to
+the ledger so the blindness survives the refusal scrolling away. With no run in
+flight it stays silent, as before — installing the plugin still changes nothing
+in an ungoverned repository.
+
+**A green lint stage can no longer stand in for the tests stage.** The stage
+scan took the first stage that was declared `tests` *or* merely carried a gate
+command — so a lint stage declared before the tests stage captured the gate,
+and its green observation released a tag with the suite never run. The scan is
+two-pass now: a stage the project declared as `tests` outranks any stage that
+happens to carry a command. The observer had the same first-match break — only
+the first command-bearing stage was ever recorded — and now records every
+declared command under its own stage id, so the real suite's runs leave the
+trace the release gate corroborates against.
+
+**`npm run publish` is a project's script, not the registry act.** `"publish"
+anywhere in npm's argument list` classified it as `npm publish`; the subcommand
+must now be the first non-flag token. Fail-closed overmatch is still overmatch —
+a gate that fights an ordinary script daily is a gate that gets removed.
+
+**The build gate now fires on the flow this plugin ships.** It matched
+`state == "build"` while the shipped `pipeline.example.json` names its build
+stage `dev` — the canonical config, copied verbatim per its own note, disarmed
+the hook it ships beside. The declaration path now matches `build` or `dev`,
+mirroring the hook's own ledger fallback, and the fixture loads the example
+unmodified so the two cannot drift apart silently again.
+
+**The example no longer arms a loop its own note calls off, and no longer
+teaches the retro deadlock.** `run.loop.mode` was `dynamic` under a `_run_note`
+saying "shipped explicitly OFF" — every project copying the example verbatim
+armed the loop. It is `off` now, with queue, arm and command kept as
+documentation of the shape. And stage 10's check ordered "prune before you add …
+then stamp", which is the deadlock the retro doctrine records: the
+cold-retirement trigger reads the stamp, so a prune placed ahead of it can never
+run on real data. The check now orders stamp → prune → entry and carries the
+sixty-day cold clause the doctrine already had.
+
+**Three stage-0 surfaces stopped telling the run to read the uncapped log in
+full.** `templates/retro.md`, `references/knowledge-sources.md` and
+`templates/brief.md` each instructed reading the retro's Recent log end to end —
+contradicting the retro's own header, measured at 74% of the file with nothing
+capping it. All three now say what the command surface already said: standing
+instructions and run stamps are read in full because they are bounded by
+construction; the Recent log and the archive are queried by the task's nouns.
+
+**Also in this release, previously on `main` with no section here:**
+`references/prioritisation.md` — the impact ladder that dominates (a gate, not a
+factor: confidence × ease orders within a rung and never across one) with the
+operator above it, and `references/stages.md`'s note on what a stage that
+produces user-facing text owes. Both shipped commits now share a heading with
+the version that carries them.
+
+**And this file itself is repaired:** the `# Changelog` H1 sat below five
+version sections with an unheaded block attached — the split half of v1.78.0's
+own entry, orphaned when the section was inserted above the title instead of
+below it. The H1 leads the file again and the orphan is back in its section.
+
+Guards: 413 → **417**. Four new plants, one per gate fix — a blind gate reverted
+to skip, the two-pass scan collapsed to first-match, the npm overmatch restored,
+the build-state match narrowed back — each watched failing against the fixtures
+before it shipped. `test/negatives.py`'s floor moved with the count, in this
+change.
+
 ## v1.78.4 — the channel that sends the installs, on npm too
 
 - The `skills.sh` badge and the canonical `homepage` reached GitHub in the previous cycle and stopped
@@ -45,8 +122,6 @@ work, never instead of a finding, and a run that ended red, ended early or ended
 with rows still open prints the attribution and drops the request. Asking to be
 endorsed while something is still open is asking to be judged on manner rather
 than on evidence.
-
-# Changelog
 
 **The flow diagram now reads top to bottom, and cannot trip GitHub's renderer.** It
 was reported failing with *"Could not find a suitable point for the given
