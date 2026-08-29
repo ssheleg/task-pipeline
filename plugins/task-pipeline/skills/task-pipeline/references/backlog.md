@@ -122,6 +122,12 @@ Two consequences worth stating, because both are the point:
 `sev` and `blast` are judgement, and they are written down *as* judgement: two small
 integers a reader can disagree with, rather than a ranking they can only accept.
 
+**This column ranks findings against each other.** When findings and product work compete
+in one list — which is what happens the moment somebody asks *what next* — the order comes
+from [`prioritisation.md`](prioritisation.md): an impact ladder that dominates, then
+confidence × ease inside the rung. `sev × blast` is evidence for the rung there, not a
+substitute for it.
+
 ## The shape is not fixed, so nothing may assume it
 
 This template ships one shape. Projects change it, and they are right to — the family

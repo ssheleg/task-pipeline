@@ -57,6 +57,7 @@ a row pointing outside the bundle is the defect this file exists to catch.
 | **The run mode** — item-by-item pacing, default off, what it never collapses | `references/continuity.md` |
 | **The context budget** — the evidence rule and what a flush actually updates | `references/continuity.md` |
 | **The board** — the work-list between runs, its computed priority, and the ledger seam it resolves | `references/backlog.md` |
+| **The order** — the impact ladder, confidence and ease, research before scoring, and where the human goes | `references/prioritisation.md` |
 | **The verification ledger** — what shipped, and whether a human ever confirmed it | `references/verification.md` |
 | **Exposure** — the unconfirmed count as a named vector, never a probability, and the `checkup` mode | `references/exposure.md` |
 | The retro: prune, cap, commits, archive | `references/retrospective.md` |

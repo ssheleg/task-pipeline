@@ -73,7 +73,7 @@ gate stops until it is installed.
 | run-wide · what the run **leaves running and leaves behind** — every gate, and stage 10 | `references/residue.md` |
 | run-wide · what the run **prints about itself** — the rail, the iteration line | `references/progress.md` |
 | run-wide · how a run keeps going (the loop mode + the context budget) | `references/continuity.md` |
-| run-wide · the work-list **between** runs, and how its priority is computed | `references/backlog.md` |
+| run-wide · the work-list **between** runs, and the order it comes off | `references/backlog.md` + `references/prioritisation.md` |
 | run-wide · whether a **human** ever confirmed what shipped, and when | `references/verification.md` |
 | run-wide · how much unconfirmed work has piled up, and what to look at first | `references/exposure.md` |
 | any stage · Where each artifact belongs | `references/artifacts.md` |

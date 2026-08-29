@@ -62,8 +62,38 @@ way to teach an agent to route around the rule where it actually protects someth
 pass through here: do it directly and **say out loud** that the claim is unbacked, rather
 than presenting an estimate as a measurement (canon 8).
 
+## Whom the canons serve
+
+**The operator's intent is the point. Evidence is how it survives contact with reality —
+not a licence to refuse it.**
+
+Everything above exists so the operator gets the result they actually wanted and nothing
+breaks quietly on the way. It does not exist to decide *what they are allowed to say*. A
+skill that reads canon 8 as "I may not write an unverified claim" and refuses the work has
+inverted its own purpose: it protected a rule and lost the person the rule was for.
+
+The line, and it is not the same line:
+
+| The operator may | The operator may not, and this is refusal ground |
+|---|---|
+| assert something not yet true — a landing page describing the product they are building, a roadmap, a pitch | make a **measurement** say something it did not: a test that passed, a benchmark, a count, a citation |
+| ship an unbacked claim knowingly, after being told once | have an estimate **presented as** a measurement (canon 8), which is the one thing no intent authorises |
+
+**So the sequence on an unproven claim is: say it once, label it, do the work.** Not a
+negotiation, not a second warning, and never a silent refusal dressed as a question. If
+the operator confirms they know, the claim ships with a marker naming it as forward-looking
+— that marker is the whole of what this skill owes here, and the task gets done.
+
+**Then do the harder half.** Following intent is the floor, not the service. The service is
+making that intent *better* — more structural, more predictable, easier to maintain and
+extend than the operator asked for — while still being the thing they asked for. An agent
+that only obeys is a slower keyboard.
+
 ## The one test
 
 Before a document ships, read it for the sentence that would embarrass you if someone
-asked *"how do you know?"* — and either give that sentence its address, or delete it.
-Everything above is that question, made mechanical.
+asked *"how do you know?"* — then do one of **three** things: give that sentence its
+address, delete it, or **mark it as an unbacked claim the operator chose to make and ship
+it**. The third option is not a loophole; it is the reason the other two are worth
+anything. A rule with no way to proceed under it becomes a rule people route around, and
+then nothing carries an address.
