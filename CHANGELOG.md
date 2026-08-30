@@ -1,5 +1,31 @@
 # Changelog
 
+## v1.79.1 — the probe that a healthy release disarmed
+
+The first round of `v1.79.0` failed in the release job on the
+mentioned-vs-declared probe — not because that guard regressed, but because
+v1.79.0 was the first release in seven to carry a run stamp, which emptied the
+trailing set the probe's mutation lived in. A plant that inherits its
+precondition from repository history switches itself off the moment the history
+improves; the healthiest possible release is exactly what disarmed it.
+
+The plant now creates its own precondition: it un-stamps every release newer
+than the newest declared tag — matching the stamp-row shape, because the first
+repair matched "any line naming the sha" and deleted a standing instruction's
+`Fired at` cell instead, leaving the stamp intact and the probe green over
+nothing — mentions those releases unbolded in the gap section's prose, and then
+un-bolds the declarations. Watched both ways on the tagged tree: the correct
+guard refuses (8 trailing releases named nowhere), and a deliberately regressed
+guard that reads mentions as declarations accepts.
+
+**`v1.79.0` is a dead tag.** Its round shipped nothing — the suite failed before
+the release step, publish was skipped, npm never saw it — and the tag ruleset
+forbids deleting the tag, so it stays pointed at a tree whose own release suite
+refuses it. The version is burned, not reused: this release carries the whole
+v1.79.0 payload below, plus the probe repair.
+
+Guards: 417 → **417** — the repaired plant changed shape, not count.
+
 ## v1.79.0 — the gate that could not see, and the example that disarmed it
 
 Four defects in the release machinery, each demonstrated live before it was
@@ -69,22 +95,11 @@ version sections with an unheaded block attached — the split half of v1.78.0's
 own entry, orphaned when the section was inserted above the title instead of
 below it. The H1 leads the file again and the orphan is back in its section.
 
-**And the release itself taught one more:** the first round of this version
-failed in the release job on the mentioned-vs-declared probe — not because the
-guard regressed, but because this release was the first in seven to carry a run
-stamp, which emptied the trailing set that probe's mutation lived in. A plant
-that inherits its precondition from repository history switches itself off when
-the history improves. It now creates its own precondition: un-stamps every
-release newer than the newest declared tag, mentions them unbolded, then
-un-bolds the declarations — watched refusing under the correct guard and
-accepted under a deliberately regressed one. The tag was re-pointed at the
-repaired tree; nothing had published from the failed round.
-
 Guards: 413 → **417**. Four new plants, one per gate fix — a blind gate reverted
 to skip, the two-pass scan collapsed to first-match, the npm overmatch restored,
 the build-state match narrowed back — each watched failing against the fixtures
-before it shipped. The repaired fifth is counted already; its shape changed, not
-its count. `test/negatives.py`'s floor moved with the count, in this change.
+before it shipped. `test/negatives.py`'s floor moved with the count, in this
+change.
 
 ## v1.78.4 — the channel that sends the installs, on npm too
 
