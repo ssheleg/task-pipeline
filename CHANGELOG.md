@@ -9,14 +9,16 @@ trailing set the probe's mutation lived in. A plant that inherits its
 precondition from repository history switches itself off the moment the history
 improves; the healthiest possible release is exactly what disarmed it.
 
-The plant now creates its own precondition: it un-stamps every release newer
-than the newest declared tag — matching the stamp-row shape, because the first
-repair matched "any line naming the sha" and deleted a standing instruction's
-`Fired at` cell instead, leaving the stamp intact and the probe green over
-nothing — mentions those releases unbolded in the gap section's prose, and then
-un-bolds the declarations. Watched both ways on the tagged tree: the correct
-guard refuses (8 trailing releases named nowhere), and a deliberately regressed
-guard that reads mentions as declarations accepts.
+The plant now manufactures the guard's own refusal state rather than a proxy
+for it: it computes the trailing set exactly the way the guard does — tag
+ranges walked against the stamp-row commits, matching the stamp-row shape,
+because one draft matched "any line naming the sha" and deleted a standing
+instruction's `Fired at` cell instead — un-stamps the newest stamped release
+when nothing trails, mentions every trailing release unbolded, and then
+un-bolds the declarations. The proxy version died twice on the way here: first
+on the inherited precondition, then on a bold span that truthfully named a
+stamped release. Watched both ways on both trees: the correct guard refuses, a
+deliberately regressed guard that reads mentions as declarations accepts.
 
 **`v1.79.0` is a dead tag.** Its round shipped nothing — the suite failed before
 the release step, publish was skipped, npm never saw it — and the tag ruleset

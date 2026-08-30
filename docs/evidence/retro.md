@@ -73,14 +73,21 @@ switches itself off when the repository gets healthier; the best possible
 release — the first one actually stamped — is exactly what disarmed it.
 
 **Fix, by grade (mechanical).** The plant creates its own precondition: it
-un-stamps every release newer than the newest declared tag (targeting the
-stamp-row shape, never "any line naming the sha"), mentions those releases
-unbolded in the section's prose, then un-bolds the declarations. Watched both
-ways: refused by the correct guard, accepted by a deliberately regressed one
-that reads mentions as declarations. Re-pointing the tag was refused by the
-repository's tag ruleset (*Cannot delete this tag*), so `v1.79.0` stays a dead
-tag — declared in the gap section below — and `v1.79.1` carries this run's
-release; nothing had reached npm or the release page from the failed round.
+manufactures the guard's own refusal state instead of a proxy for it. The first
+repair derived "the releases to un-stamp" from *the newest tag named in a bold
+span* — and died one tree later, when the dead tag's own declaration truthfully
+bold-named its stamped successor: "named in bold" is not what the guard means
+by declared. The plant now computes the trailing set exactly the way the guard
+does (tag ranges walked against the stamp-row commits, targeting the stamp-row
+shape, never "any line naming the sha"), un-stamps the newest stamped release
+when nothing trails, mentions every trailing release unbolded, then un-bolds
+the declarations — and the gap section's own text now keeps stamped releases
+outside its bold spans. Watched both ways on both trees: refused by the correct
+guard, accepted by a deliberately regressed one that reads mentions as
+declarations. Re-pointing the tag was refused by the repository's tag ruleset
+(*Cannot delete this tag*), so `v1.79.0` stays a dead tag — declared in the gap
+section below — and `v1.79.1` carries this run's release; nothing had reached
+npm or the release page from the failed round.
 
 ### 2026-08-23 · `project-audit` — the audit that starts cold, and three ways its own probe lied
 
@@ -1386,9 +1393,11 @@ three quarters of the work on this run.
 
 **`v1.79.0` is a dead tag and carries no stamp in its own range: its release round
 failed on the mentioned-vs-declared probe, publish was skipped, npm never saw it,
-and the tag ruleset forbids deletion — `v1.79.1` carries that run's stamp and its
-whole payload.** Declared here so the burned version has a written home rather
-than a shrug.
+and the tag ruleset forbids deletion.** The next release carries that run's stamp
+and its whole payload. Declared here so the burned version has a written home
+rather than a shrug — and the stamped successor is deliberately named OUTSIDE the
+bold span: a declaration bold-naming a stamped release is how this section's own
+probe was disarmed a second time.
 
 **The trailing gap before it was `v1.76.1`, `v1.77.0`, `v1.78.0`, `v1.78.1`, `v1.78.2`, `v1.78.3` and `v1.78.4` — seven releases.**
 `v1.78.4` carries the `skills.sh` badge and the canonical `homepage` from `main` to the
