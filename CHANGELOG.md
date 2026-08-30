@@ -69,11 +69,22 @@ version sections with an unheaded block attached — the split half of v1.78.0's
 own entry, orphaned when the section was inserted above the title instead of
 below it. The H1 leads the file again and the orphan is back in its section.
 
+**And the release itself taught one more:** the first round of this version
+failed in the release job on the mentioned-vs-declared probe — not because the
+guard regressed, but because this release was the first in seven to carry a run
+stamp, which emptied the trailing set that probe's mutation lived in. A plant
+that inherits its precondition from repository history switches itself off when
+the history improves. It now creates its own precondition: un-stamps every
+release newer than the newest declared tag, mentions them unbolded, then
+un-bolds the declarations — watched refusing under the correct guard and
+accepted under a deliberately regressed one. The tag was re-pointed at the
+repaired tree; nothing had published from the failed round.
+
 Guards: 413 → **417**. Four new plants, one per gate fix — a blind gate reverted
 to skip, the two-pass scan collapsed to first-match, the npm overmatch restored,
 the build-state match narrowed back — each watched failing against the fixtures
-before it shipped. `test/negatives.py`'s floor moved with the count, in this
-change.
+before it shipped. The repaired fifth is counted already; its shape changed, not
+its count. `test/negatives.py`'s floor moved with the count, in this change.
 
 ## v1.78.4 — the channel that sends the installs, on npm too
 

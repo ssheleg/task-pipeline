@@ -3094,31 +3094,88 @@ jobs:
           python3 - <<'EOF'
           # The hole this closes, measured 2026-08-24: the check read every `vX.Y.Z` token in
           # the gap section, so one sentence mentioning a tag in passing declared it unstamped
-          # and exempted it. Here the trailing release stays in the section, in the same words,
-          # with only its BOLD removed -- a mention instead of a declaration. A guard that
-          # cannot tell the two apart accepts this, which is what it did.
-          import re, subprocess, sys
-          p = "/tmp/gapmention/docs/evidence/retro.md"
-          t = open(p, encoding="utf-8").read()
+          # and exempted it. Here the trailing releases stay in the section, in the same
+          # words, with only their BOLD removed -- mentions instead of declarations. A guard
+          # that cannot tell the two apart accepts this, which is what it did.
+          #
+          # THE PLANT CREATES ITS OWN PRECONDITION, learned 2026-08-30 on the v1.79.0
+          # release: the guard checks only releases AFTER the newest run stamp, so the first
+          # release that actually carried a stamp emptied the trailing set and this plant's
+          # mutation became invisible -- a probe that no longer probed, reported green
+          # locally and caught only by the release job, whose tree is the first place the
+          # new tag and the new stamp coexist. So the plant now un-stamps every release
+          # newer than the newest DECLARED tag (removing those stamp rows from the copy),
+          # writes each such tag into the section's prose UNBOLDED, and then un-bolds every
+          # declaration. A guard that reads bold only must fail; one that reads mentions is
+          # satisfied -- exactly the defect this plant exists to keep dead.
+          import glob, re, subprocess, sys
+          base = "/tmp/gapmention"
+          p = base + "/docs/evidence/retro.md"
           tags = subprocess.run(["git", "tag", "-l", "v*", "--sort=v:refname"],
-                                cwd="/tmp/gapmention", capture_output=True, text=True).stdout.split()
+                                cwd=base, capture_output=True, text=True).stdout.split()
           if not tags:
               print("SKIP: no v* tags visible in the copy, so the release-gap check cannot "
                     "look and cannot be probed (submodule checkout)")
               sys.exit(9)
+          files = [p] + sorted(glob.glob(base + "/docs/evidence/retro/*.md"))
+          texts = {f: open(f, encoding="utf-8").read() for f in files}
           GAP = "## Releases that carry no stamp"
+          t = texts[p]
           i = t.index(GAP)
           e = t.find("\n## ", i + 5)
           sec = t[i:e] if e > 0 else t[i:]
-          # un-bold every span that names one of the newest tags: same words, same place,
-          # no longer a declaration.
+          # the declared set, computed the way the guard computes it: bold spans + ranges
+          decl = " ".join(re.findall(r"\*\*(.+?)\*\*", sec, re.S))
+          named = set(re.findall(r"v\d+\.\d+\.\d+", decl))
+          for a, b in re.findall(r"`?(v\d+\.\d+\.\d+)`?\s*(?:through|to|–|-|\.\.)\s*`?(v\d+\.\d+\.\d+)`?", decl):
+              if a in tags and b in tags and tags.index(a) <= tags.index(b):
+                  named |= set(tags[tags.index(a):tags.index(b) + 1])
+          declared = [g for g in tags if g in named]
+          assert declared, "PLANT DID NOT LAND: no bold declaration in the gap section names a tag"
+          after = tags[tags.index(declared[-1]) + 1:]
+          if after:
+              # un-stamp them, so they trail again: drop every stamp row whose commit
+              # shipped in a release newer than the newest declared tag
+              doomed, prev = set(), declared[-1]
+              for tg in after:
+                  shipped = {c[:7] for c in subprocess.run(
+                      ["git", "rev-list", "%s..%s" % (prev, tg)], cwd=base,
+                      capture_output=True, text=True).stdout.split()}
+                  for f, body in texts.items():
+                      for s in re.findall(r"^\s*\|\s*\d{4}-\d\d-\d\d\s*\|[^|]*\|\s*`([0-9a-f]{7,40})`",
+                                          body, re.M):
+                          if s[:7] in shipped:
+                              doomed.add((f, s))
+                  prev = tg
+              assert doomed, ("PLANT DID NOT LAND: %s trail the newest declared tag and no "
+                              "stamp row covers them -- the guard should already be failing" % after)
+              for f, s in doomed:
+                  # the STAMP row shape, not "any line naming the sha": the standing
+                  # instructions stamp the same commit in their `Fired at` cell, and a
+                  # first-line-that-matches removal deleted one of those instead --
+                  # leaving the stamp intact and this plant green over nothing.
+                  row = re.search(r"^\s*\|\s*\d{4}-\d\d-\d\d\s*\|[^|]*\|\s*`%s`.*$\n?" % s,
+                                  texts[f], re.M)
+                  assert row, "PLANT DID NOT LAND: stamp row for %s not found in %s" % (s, f)
+                  texts[f] = texts[f][:row.start()] + texts[f][row.end():]
+              t = texts[p]
+              i = t.index(GAP)
+              e = t.find("\n## ", i + 5)
+              sec = t[i:e] if e > 0 else t[i:]
+              # mention each now-trailing tag in prose, deliberately NOT bold
+              sec = sec.rstrip("\n") + ("\n\nProbe prose, not a declaration: the figures "
+                    "were already stale at the %s tag.\n"
+                    % " and ".join("`%s`" % g for g in after))
+          # un-bold every span that names a version: same words, same place, no longer a
+          # declaration.
           def unbold(m):
               return m.group(1) if re.search(r"v\d+\.\d+\.\d+", m.group(1)) else m.group(0)
           out = re.sub(r"\*\*(.+?)\*\*", unbold, sec, flags=re.S)
           assert out != sec, "PLANT DID NOT LAND: no bold span in the gap section names a version"
           assert re.search(r"v\d+\.\d+\.\d+", out), "PLANT DID NOT LAND: the versions vanished too"
-          t = t[:i] + out + (t[e:] if e > 0 else "")
-          open(p, "w", encoding="utf-8").write(t)
+          texts[p] = t[:i] + out + (t[e:] if e > 0 else "")
+          for f, body in texts.items():
+              open(f, "w", encoding="utf-8").write(body)
           EOF
           EOF_RC=$?
           if [ "$EOF_RC" = "9" ]; then
