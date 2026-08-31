@@ -1391,6 +1391,15 @@ three quarters of the work on this run.
 
 ## Releases that carry no stamp — stated, not stamped
 
+**`v1.81.0` is a dead tag and carries no stamp: it was pushed onto a concurrent
+session's commit by a run that had chosen the same version number and had not read the
+`gh pr merge` output telling it the merge had conflicted.** The tag started that
+session's release before its stamp was written, the release failed on this very probe,
+publish was skipped, npm never saw it, and the ruleset forbids deletion. The payload the
+other session intended for it — the derived negative-test anchors — ships from `main`
+under its own number; the work that mis-tagged it ships separately, one version up.
+Declared here so the burned version has a written home rather than a shrug.
+
 **`v1.79.0` is a dead tag and carries no stamp in its own range: its release round
 failed on the mentioned-vs-declared probe, publish was skipped, npm never saw it,
 and the tag ruleset forbids deletion.** The next release carries that run's stamp

@@ -33,7 +33,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 WORKFLOW = os.path.join(ROOT, ".github/workflows/validate.yml")
 MARKER = "Negative self-test"
 PROP_MARKER = "Property check"
-MIN_PROPS = 14
+MIN_PROPS = 15
 # A format change that silently matched nothing would report "0 failures" and look
 # like success. Refuse to be that quiet.
 #
@@ -41,7 +41,7 @@ MIN_PROPS = 14
 # which is the floor doing half its job: it would have caught a total collapse and
 # not the loss of a third of the suite. Set it to the real count, and treat a
 # mismatch as a finding rather than as noise to be lowered away.
-MIN_EXPECTED = 419
+MIN_EXPECTED = 423
 
 
 def parse_steps(path):
@@ -73,6 +73,41 @@ def parse_steps(path):
     if name is not None and body is not None:
         steps.append((name, "\n".join(body)))
     return steps
+
+
+def verdict(returncode, stdout, noop):
+    """One plant's status, as a function of what it did. PURE on purpose (B-113).
+
+    The `SKIP` branch cannot be reached on a healthy machine — all four skip-capable
+    plants run and fire here — so calling this directly is the only way to watch the
+    arithmetic that separates a dormant plant from a passing one. `test/runner_test.py`
+    does exactly that.
+    """
+    ok = returncode == 0 and any(k in stdout for k in ("OK:", "SKIP:"))
+    skipped = returncode == 0 and "SKIP:" in stdout
+    if noop and not skipped:
+        return "BROKEN"
+    return "SKIP" if skipped else ("PASS" if ok else "FAIL")
+
+
+def claim(n_tests, n_dormant, n_props, n_prop_dormant):
+    """The aggregate sentence. A dormant check is never inside *provably reject*."""
+    ran, pran = n_tests - n_dormant, n_props - n_prop_dormant
+    parts = []
+    if ran:
+        parts.append(("all %d" % ran if not n_dormant else "%d of %d" % (ran, n_tests))
+                     + " guards provably reject their planted defect")
+    if n_dormant:
+        parts.append("%d DORMANT, named above — not counted as passing" % n_dormant)
+    if pran:
+        parts.append("%d property check(s) printed what they assert" % pran)
+    if n_prop_dormant:
+        parts.append("%d property check(s) DORMANT, named above" % n_prop_dormant)
+    if not ran and not pran:
+        # Everything that ran declined to run. "PASS: K dormant" is a pass over an
+        # empty set, which this file's own comment forbids one paragraph down.
+        return None
+    return " · ".join(parts)
 
 
 def copy_dir_of(script):
@@ -264,7 +299,7 @@ def main(argv):
     # parallel. Collisions only happen between two SUITE runs, which is a different row.
     _WORKERS = min(8, (os.cpu_count() or 4))
 
-    failed, broken, prop_failed = [], [], []
+    failed, broken, prop_failed, dormant, prop_dormant = [], [], [], [], []
     print(f"running {len(tests)} negative self-tests"
           + (f" + {len(props)} property checks\n" if props else "\n"))
     def _run_one(name_script):
@@ -281,24 +316,17 @@ def main(argv):
         # A probe that cannot run says SKIP and exits 0. Counting only "OK:" turned
         # res8's honest degradation into a failure on any machine without PyYAML —
         # the regression this release claimed to have closed, still open one layer up.
-        passed = r.returncode == 0 and any(_k in r.stdout for _k in ("OK:", "SKIP:"))
-
         # The trap this runner exists to avoid: a corruption that quietly changed
         # nothing still makes the validator pass, which reads as "the guard is
         # broken" when in fact the *test* is. Tell them apart.
         # A probe that DECLARED a skip changed nothing on purpose. Reading that as a
         # corruption is the same conflation one layer up: "could not look" reported as
-        # "the guard is broken". Skips get their own status so they stay visible.
-        skipped = r.returncode == 0 and "SKIP:" in r.stdout
-        noop = cdir and os.path.isdir(cdir) and not differs_from_repo(cdir)
-        if noop and not skipped:
-            status, bucket = "BROKEN", broken
-        elif skipped:
-            status, bucket = "SKIP", None
-        elif passed:
-            status, bucket = "PASS", None
-        else:
-            status, bucket = "FAIL", failed
+        # "the guard is broken". Skips get their own status so they stay visible — and
+        # since B-113 their own BUCKET, because `bucket = None` meant the aggregate
+        # counted a dormant plant inside *all N guards provably reject*.
+        noop = bool(cdir and os.path.isdir(cdir) and not differs_from_repo(cdir))
+        status = verdict(r.returncode, r.stdout, noop)
+        bucket = {"BROKEN": broken, "SKIP": dormant, "FAIL": failed}.get(status)
         print(f"  {status:<7}{label(name)}")
         if bucket is not None:
             bucket.append((label(name), r.stdout[-500:], r.stderr[-500:]))
@@ -308,9 +336,14 @@ def main(argv):
         cdir = copy_dir_of(script)
         sweep([cdir])
         r = subprocess.run(["bash", "-c", script], cwd=_base, capture_output=True, text=True)
-        ok = r.returncode == 0 and any(_k in r.stdout for _k in ("OK:", "SKIP:"))
-        print(f"  {'PASS' if ok else 'FAIL':<7}[property] " + _plabel(name))
-        if not ok:
+        # B-113, the half the first pass left: a property check that printed `SKIP:`
+        # counted as one that "printed what it asserts". Same sentence, same defect,
+        # one category over — found by the independent reader.
+        _st = verdict(r.returncode, r.stdout, False)
+        print(f"  {'PASS' if _st == 'PASS' else _st:<7}[property] " + _plabel(name))
+        if _st == "SKIP":
+            prop_dormant.append((_plabel(name), r.stdout[-500:], r.stderr[-500:]))
+        elif _st != "PASS":
             prop_failed.append((_plabel(name), r.stdout[-500:], r.stderr[-500:]))
         sweep([cdir])
 
@@ -339,10 +372,32 @@ def main(argv):
         return 1
     # "all 0 guards ... provably reject" is a pass over an empty set, which is the
     # shape this repository calls a refused measurement. Say what actually ran.
-    _parts = ([f"all {len(tests)} guards provably reject their planted defect"] if tests else [])
-    _parts += ([f"{len(props)} property check(s) printed what they assert"] if props else [])
-    print("PASS: " + " · ".join(_parts) if _parts else
-          "PASS: nothing ran — no test matched, which is not a result")
+    # Named, never merely counted: a number alone invites the reader to assume the
+    # skips are the harmless ones, and on 2026-08-30 the harmless one was the plant
+    # guarding the release gate.
+    for _title, _rows in (("DORMANT — the plant could not construct its precondition in "
+                           "this environment, so it proved nothing:", dormant),
+                          ("DORMANT — the property check declined to run, so nothing was "
+                           "asserted:", prop_dormant)):
+        if _rows:
+            print(_title)
+            for _n, _o, _e in _rows:
+                _why = next((_l.strip() for _l in (_o or "").splitlines()
+                             if "SKIP:" in _l), "")
+                print(f"  * {_n}\n      {_why[:150]}")
+            print()
+    _line = claim(len(tests), len(dormant), len(props), len(prop_dormant))
+    if _line is None:
+        # Two ways to reach here and both are the same verdict: everything that ran
+        # declined to run, or nothing was present. `PASS: nothing ran` used to be
+        # printed with exit 0 for the second one — a pass over an empty set, which
+        # this file's own comment three lines up calls a refused measurement.
+        print("INCONCLUSIVE: nothing that ran proved anything — "
+              + ("no check matched the filter" if not tests and not props else
+                 "every check present declined to run")
+              + ". A pass over an empty set is not a result")
+        return 2
+    print("PASS: " + _line)
     return 0
 
 

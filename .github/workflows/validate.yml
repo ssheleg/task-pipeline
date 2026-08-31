@@ -1012,11 +1012,17 @@ jobs:
           set -eu
           rm -rf /tmp/seedred-copy && cp -R . /tmp/seedred-copy
           python3 - <<'EOF'
+          # DERIVED anchor (B-113): the seeded next-free id moves the moment the
+          # template's worked example gains a decision. Read the id the template
+          # states, and write one that is not the successor of its last DEC row —
+          # the shape the seeded gate refuses, whatever the digits are today.
+          import re
           p = "/tmp/seedred-copy/plugins/task-pipeline/skills/task-pipeline/templates/decisions.md"
           t = open(p, encoding="utf-8").read()
-          old = "**Next free ID:** `DEC-0002`"
-          assert old in t, "PLANT MISSED"
-          open(p, "w", encoding="utf-8").write(t.replace(old, "**Next free ID:** `DEC-0009`", 1))
+          m = re.search(r"\*\*Next free ID:\*\* `DEC-(\d+)`", t)
+          assert m, "PLANT DID NOT LAND: the template states no next free ID"
+          skewed = "**Next free ID:** `DEC-%04d`" % (int(m.group(1)) + 7)
+          open(p, "w", encoding="utf-8").write(t.replace(m.group(0), skewed, 1))
           EOF
           if python3 /tmp/seedred-copy/test/validate.py; then
             echo "ERROR: validator passed templates whose own gate rejects them — a project that starts red learns on day one that the gate is noise"
@@ -1759,12 +1765,17 @@ jobs:
           set -eu
           rm -rf /tmp/readback-map-copy && cp -R . /tmp/readback-map-copy
           python3 - <<'EOF'
+          # DERIVED anchor (B-113): the rule number bound to a stage is renumbered
+          # whenever a rule retires, and the needle `| 3 Spec | 14` would then match
+          # nothing — a plant that does not land is a check nobody ran, reported
+          # green. Read whatever rule the readback map binds to the spec stage.
+          import re
           p = "/tmp/readback-map-copy/plugins/task-pipeline/skills/task-pipeline/references/learned.md"
           t = open(p, encoding="utf-8").read()
-          n = "| 3 Spec | 14"
-          assert n in t, "plant would not land"
-          t2 = t.replace(n, "| 3 Spec | none", 1)
-          assert n not in t2, "plant did not land"
+          m = re.search(r"^\| 3 Spec \| (\d+)", t, re.M)
+          assert m, "PLANT DID NOT LAND: the readback map binds no rule to stage 3"
+          t2 = t[:m.start(1)] + "none" + t[m.end(1):]
+          assert t2 != t, "PLANT DID NOT LAND: the stage-3 binding was not cleared"
           open(p, "w", encoding="utf-8").write(t2)
           EOF
           if python3 /tmp/readback-map-copy/test/validate.py; then
@@ -3174,6 +3185,15 @@ jobs:
         run: |
           set -eu
           rm -rf /tmp/gapmention && cp -R . /tmp/gapmention
+          # dormant-when: `git tag -l` returns nothing inside the copy, so the trailing
+          #   set cannot be computed and the release-gap guard itself declines to look.
+          #   MEASURED 2026-08-31 and stated because the obvious cause is wrong: through
+          #   `test/negatives.py` this never fires, because the runner reconstructs a real
+          #   `.git` in its snapshot even from a submodule pointer, and CI checks out with
+          #   `fetch-depth: 0`, which fetches tags. It fires where the step is run on its
+          #   own against a checkout whose `.git` is a pointer file, or on a tagless
+          #   fetch. Cost: in that shape the release-gap check is unprobed and says so,
+          #   rather than an environment answering for the guard.
           set +e
           python3 - <<'EOF'
           # The hole this closes, measured 2026-08-24: the check read every `vX.Y.Z` token in
@@ -3295,6 +3315,11 @@ jobs:
         run: |
           set -eu
           rm -rf /tmp/gap1-copy && cp -R . /tmp/gap1-copy
+          # dormant-when: `git tag -l` returns nothing inside the copy, exactly as for
+          #   the sibling plant above and with the same measured correction: the local
+          #   runner repairs `.git` and CI fetches tags, so neither path reaches this
+          #   branch. Cost: the two go dormant together, so wherever it does fire the
+          #   whole release-gap check is unprobed rather than half of it.
           set +e
           python3 - <<'EOF'
           # Fourteen consecutive releases carried no run stamp while the honest-gap section
@@ -3981,13 +4006,22 @@ jobs:
           set -eu
           rm -rf /tmp/lrn1-copy && cp -R . /tmp/lrn1-copy
           python3 - <<'EOF'
+          # DERIVED anchor (B-113): rule 12 was a literal in a table that this
+          # repository adds a row to every time it learns something, so the needle
+          # was one release from matching nothing. What the guard is about is a
+          # GAP in the sequence, so the plant needs any rule that is not the first
+          # or the last — removing the highest leaves the numbers contiguous and
+          # trips the high-water guard next door instead.
           import re
           p = "/tmp/lrn1-copy/plugins/task-pipeline/skills/task-pipeline/references/learned.md"
           t = open(p, encoding="utf-8").read()
-          m = re.search(r"^\|\s*12\s*\|\s*\*\*.*$", t, re.M)
-          assert m, "PLANT DID NOT LAND: rule 12's row absent before edit"
+          rows = [mm for mm in re.finditer(r"(?m)^\|\s*(\d+)\s*\|\s*\*\*.*$", t)]
+          assert len(rows) >= 3, "PLANT DID NOT LAND: fewer than three rules to gap"
+          m = rows[len(rows) // 2]
+          num = m.group(1)
           open(p, "w", encoding="utf-8").write(t[:m.start()] + t[m.end() + 1:])
-          assert re.search(r"^\|\s*12\s*\|", open(p, encoding="utf-8").read(), re.M) is None, "PLANT DID NOT LAND"
+          assert re.search(r"(?m)^\|\s*%s\s*\|" % num,
+                           open(p, encoding="utf-8").read()) is None, "PLANT DID NOT LAND"
           EOF
           if python3 /tmp/lrn1-copy/test/validate.py; then
             echo "ERROR: validator passed a rule that vanished, taking its incident with it"
@@ -4087,11 +4121,15 @@ jobs:
           set -eu
           rm -rf /tmp/hw3-copy && cp -R . /tmp/hw3-copy
           python3 - <<'EOF'
+          # DERIVED anchor (B-113): the high-water mark rises with every rule this
+          # repository learns, so the literal was guaranteed to go stale — and a
+          # needle that stops matching removes the check in silence.
+          import re
           p = "/tmp/hw3-copy/plugins/task-pipeline/skills/task-pipeline/references/learned.md"
           t = open(p, encoding="utf-8").read()
-          needle = "**Numbers issued so far: 22.**"
-          assert needle in t, "PLANT DID NOT LAND: high-water mark absent before edit"
-          open(p, "w", encoding="utf-8").write(t.replace(needle, "**A note.**", 1))
+          m = re.search(r"\*\*Numbers issued so far: \d+\.\*\*", t)
+          assert m, "PLANT DID NOT LAND: high-water mark absent before edit"
+          open(p, "w", encoding="utf-8").write(t.replace(m.group(0), "**A note.**", 1))
           assert "Numbers issued so far" not in open(p, encoding="utf-8").read(), "PLANT DID NOT LAND"
           EOF
           if python3 /tmp/hw3-copy/test/validate.py; then
@@ -4246,12 +4284,26 @@ jobs:
           set -eu
           rm -rf /tmp/bd1-copy && cp -R . /tmp/bd1-copy
           python3 - <<'EOF'
+          # DERIVED anchor (B-113): which id a carry-over row points at is a fact
+          # about that ledger, not a constant — the rows were renumbered once
+          # already. Take the first pointer the file actually carries.
+          import re
           p = "/tmp/bd1-copy/docs/evidence/specs/2026-08-08-audit-followup-carryover.md"
           t = open(p, encoding="utf-8").read()
-          needle = " → `B-001`"
-          assert needle in t, "PLANT DID NOT LAND: the board id is absent before the edit"
-          open(p, "w", encoding="utf-8").write(t.replace(needle, "", 1))
-          assert "B-001" not in open(p, encoding="utf-8").read(), "PLANT DID NOT LAND"
+          # A WELL-FORMED row, chosen by shape: this ledger holds two rows whose cell
+          # count differs from its header, and those belong to the sibling plant below
+          # that probes the FALLBACK path. Three plants derived from "the first
+          # `B-\d+` in the file" collapsed onto one row and left two guard branches
+          # unprobed — the independent reader found it by replaying both trees.
+          _rows = [l for l in t.splitlines() if l.strip().startswith("|")
+                   and "---" not in l]
+          assert _rows, "PLANT DID NOT LAND: the ledger has no table"
+          _w = len(_rows[0].split("|"))
+          m = next((mm for l in _rows[1:] if len(l.split("|")) == _w
+                    for mm in re.finditer(r" → `B-\d+`", l)), None)
+          assert m, "PLANT DID NOT LAND: no well-formed row carries a board pointer"
+          open(p, "w", encoding="utf-8").write(t.replace(m.group(0), "", 1))
+          assert m.group(0) not in open(p, encoding="utf-8").read(), "PLANT DID NOT LAND"
           EOF
           if python3 /tmp/bd1-copy/test/validate.py; then
             echo "ERROR: an open row with no board id passed — the dangling pointer the board exists to resolve"
@@ -4265,10 +4317,24 @@ jobs:
           set -eu
           rm -rf /tmp/bd2-copy && cp -R . /tmp/bd2-copy
           python3 - <<'EOF'
+          # DERIVED anchor (B-113): any issued id will do — what is under test is a
+          # pointer at an id nobody issued, not the id `B-001` in particular, and
+          # that row has already been renumbered once in this ledger's life.
+          import re
           p = "/tmp/bd2-copy/docs/evidence/specs/2026-08-08-audit-followup-carryover.md"
           t = open(p, encoding="utf-8").read()
-          assert "B-001" in t, "PLANT DID NOT LAND: anchor absent before the edit"
-          open(p, "w", encoding="utf-8").write(t.replace("B-001", "B-999", 1))
+          # A WELL-FORMED row: the dangling-id check has two branches and the
+          # mismatched-shape row belongs to the sibling plant below. Derived from
+          # "the first `B-\d+`" this plant and that one performed byte-identical
+          # mutations and one guard branch went unprobed.
+          _rows = [l for l in t.splitlines() if l.strip().startswith("|")
+                   and "---" not in l]
+          assert _rows, "PLANT DID NOT LAND: the ledger has no table"
+          _w = len(_rows[0].split("|"))
+          m = next((mm for l in _rows[1:] if len(l.split("|")) == _w
+                    for mm in re.finditer(r"B-\d+", l)), None)
+          assert m, "PLANT DID NOT LAND: no well-formed row names a board id"
+          open(p, "w", encoding="utf-8").write(t.replace(m.group(0), "B-999", 1))
           assert "B-999" in open(p, encoding="utf-8").read(), "PLANT DID NOT LAND"
           EOF
           if python3 /tmp/bd2-copy/test/validate.py; then
@@ -4362,11 +4428,30 @@ jobs:
           set -eu
           rm -rf /tmp/bd6-copy && cp -R . /tmp/bd6-copy
           python3 - <<'EOF'
+          # DERIVED anchor (B-113), the sibling of the live-board plant below: the
+          # template's example carries an Age that this repository re-derives, so
+          # `| 12 | **2** | open` was one edit from matching nothing. Read an OPEN
+          # row's own priority and write a number that cannot follow from its inputs.
+          import re
           p = "/tmp/bd6-copy/plugins/task-pipeline/skills/task-pipeline/templates/backlog.md"
           t = open(p, encoding="utf-8").read()
-          needle = "| 12 | **2** | open"
-          assert needle in t, "PLANT DID NOT LAND: anchor absent before the edit"
-          open(p, "w", encoding="utf-8").write(t.replace(needle, "| 12 | **7** | open", 1))
+          planted = False
+          for l in t.splitlines():
+              if not re.match(r"^\|\s*B-\d+\s*\|", l):
+                  continue
+              c = l.split("|")
+              if len(c) < 11 or c[9].strip().lower().strip("*") != "open":
+                  continue
+              try:
+                  pr = int(c[8].strip().strip("*"))
+              except ValueError:
+                  continue
+              c[8] = " **%d** " % (pr + 5)
+              t = t.replace(l, "|".join(c), 1)
+              planted = True
+              break
+          assert planted, "PLANT DID NOT LAND: no open template row with a numeric prio"
+          open(p, "w", encoding="utf-8").write(t)
           EOF
           if python3 /tmp/bd6-copy/test/validate.py; then
             echo "ERROR: the file seeded verbatim into every host project shipped an example that fails its own formula"
@@ -4380,12 +4465,16 @@ jobs:
           set -eu
           rm -rf /tmp/bd7-copy && cp -R . /tmp/bd7-copy
           python3 - <<'EOF'
+          # DERIVED anchor (B-113): the pointer this ledger carries is a fact about
+          # the ledger. Pinned to `B-015` the plant would stop landing the day that
+          # row is renumbered or the ledger is re-pointed.
+          import re
           p = "/tmp/bd7-copy/docs/evidence/specs/2026-08-03-setup-and-autonomy-carryover.md"
           t = open(p, encoding="utf-8").read()
-          needle = " → `B-015`"
-          assert needle in t, "PLANT DID NOT LAND: the board id is absent before the edit"
-          open(p, "w", encoding="utf-8").write(t.replace(needle, "", 1))
-          assert "B-015" not in open(p, encoding="utf-8").read(), "PLANT DID NOT LAND"
+          m = re.search(r" → `B-\d+`", t)
+          assert m, "PLANT DID NOT LAND: the ledger carries no board pointer"
+          open(p, "w", encoding="utf-8").write(t.replace(m.group(0), "", 1))
+          assert m.group(0) not in open(p, encoding="utf-8").read(), "PLANT DID NOT LAND"
           EOF
           if python3 /tmp/bd7-copy/test/validate.py; then
             echo "ERROR: a ledger with both Status and Home hid an open row — five of ten ledgers here have that shape"
@@ -4399,10 +4488,17 @@ jobs:
           set -eu
           rm -rf /tmp/tbl-copy && cp -R . /tmp/tbl-copy
           python3 - <<'EOF'
+          # DERIVED anchor (B-113): pinned to `| B-015 |` this plant lands only
+          # while that row is open — a row closing moves it into the Closed list
+          # and the split would be planted into prose, or nowhere. Any row of the
+          # live table splits it, so take the last one, which is unambiguously
+          # inside the table rather than against its header.
+          import re
           p = "/tmp/tbl-copy/docs/evidence/backlog.md"
           t = open(p, encoding="utf-8").read()
-          needle = "| B-015 |"
-          assert needle in t, "PLANT DID NOT LAND: anchor absent before the edit"
+          rows = re.findall(r"^\| B-\d+[a-z]? \|", t, re.M)
+          assert rows, "PLANT DID NOT LAND: the board holds no rows to split"
+          needle = rows[-1]
           open(p, "w", encoding="utf-8").write(t.replace(needle, "\n" + needle, 1))
           EOF
           if python3 /tmp/tbl-copy/test/validate.py; then
@@ -4474,11 +4570,18 @@ jobs:
           set -eu
           rm -rf /tmp/bd10-copy && cp -R . /tmp/bd10-copy
           python3 - <<'EOF'
+          # DERIVED anchor (B-113), and this one is aimed at the LIVE board: pinned
+          # to `| B-008 |` the plant stops landing the day that row closes, which is
+          # the release doing its job. Take whatever row the board holds, and keep
+          # its id so the truncation is the only defect planted.
+          import re
           p = "/tmp/bd10-copy/docs/evidence/backlog.md"
           t = open(p, encoding="utf-8").read()
-          row = [l for l in t.splitlines() if l.startswith("| B-008 |")]
-          assert row, "PLANT DID NOT LAND: B-008 absent before the edit"
-          open(p, "w", encoding="utf-8").write(t.replace(row[0], "| B-008 | short | src | S | 999 |", 1))
+          row = [l for l in t.splitlines() if re.match(r"^\| B-\d+[a-z]? \|", l)]
+          assert row, "PLANT DID NOT LAND: the board holds no rows"
+          rid = row[0].split("|")[1].strip()
+          open(p, "w", encoding="utf-8").write(
+              t.replace(row[0], "| %s | short | src | S | 999 |" % rid, 1))
           EOF
           if python3 /tmp/bd10-copy/test/validate.py; then
             echo "ERROR: a malformed row was skipped in silence, carrying any priority it liked"
@@ -4492,11 +4595,14 @@ jobs:
           set -eu
           rm -rf /tmp/bd11-copy && cp -R . /tmp/bd11-copy
           python3 - <<'EOF'
+          # DERIVED anchor (B-113): which id the template's first row carries is a
+          # property of the template. Take whichever row still states a Source.
           import re
           p = "/tmp/bd11-copy/plugins/task-pipeline/skills/task-pipeline/templates/backlog.md"
           t = open(p, encoding="utf-8").read()
-          m = re.search(r"^\| B-001 \|([^|]*)\|([^|]*)\|", t, re.M)
-          assert m and m.group(2).strip(), "PLANT DID NOT LAND: Source already empty"
+          m = next((mm for mm in re.finditer(r"(?m)^\| B-\d+ \|([^|]*)\|([^|]*)\|", t)
+                    if mm.group(2).strip()), None)
+          assert m, "PLANT DID NOT LAND: no template row states a Source"
           open(p, "w", encoding="utf-8").write(t[:m.start(2)] + " " + t[m.end(2):])
           EOF
           if python3 /tmp/bd11-copy/test/validate.py; then
@@ -4568,10 +4674,25 @@ jobs:
           set -eu
           rm -rf /tmp/bd13-copy && cp -R . /tmp/bd13-copy
           python3 - <<'EOF'
+          # DERIVED anchor (B-113): the row under test is the one whose cell count
+          # differs from its header, and which id it carries is incidental — the
+          # ledger has been renumbered once already.
+          import re
           p = "/tmp/bd13-copy/docs/evidence/specs/2026-08-08-audit-followup-carryover.md"
           t = open(p, encoding="utf-8").read()
-          assert "B-019" in t, "PLANT DID NOT LAND: anchor absent before the edit"
-          open(p, "w", encoding="utf-8").write(t.replace("B-019", "B-999", 1))
+          # THE MISMATCHED ROW, derived by the property under test: this plant exists
+          # because a row whose cell count differs from its header was skipped before
+          # the id check ran, and taking "the first `B-\d+` in the file" made it the
+          # same mutation as the sibling plant above — true only until a row is
+          # inserted, and by then neither branch is probed.
+          _rows = [l for l in t.splitlines() if l.strip().startswith("|")
+                   and "---" not in l]
+          assert _rows, "PLANT DID NOT LAND: the ledger has no table"
+          _w = len(_rows[0].split("|"))
+          m = next((mm for l in _rows[1:] if len(l.split("|")) != _w
+                    for mm in re.finditer(r"B-\d+", l)), None)
+          assert m, "PLANT DID NOT LAND: no row's cell count differs from its header"
+          open(p, "w", encoding="utf-8").write(t.replace(m.group(0), "B-999", 1))
           EOF
           if python3 /tmp/bd13-copy/test/validate.py; then
             echo "ERROR: a row whose cell count differs from its header was skipped before the id check ran"
@@ -4622,13 +4743,17 @@ jobs:
           set -eu
           rm -rf /tmp/cot-copy && cp -R . /tmp/cot-copy
           python3 - <<'EOF'
+          # DERIVED anchor (B-113): the whole row was the needle, so every word of
+          # the seeded example — its id, its stage, its wording — was a promise the
+          # template would never be edited. What is under test is a Home cell
+          # holding a bare `backlog` instead of an id, so read the row by its shape.
+          import re
           p = "/tmp/cot-copy/plugins/task-pipeline/skills/task-pipeline/templates/carryover.md"
           t = open(p, encoding="utf-8").read()
-          needle = "| 2 | 5 Review | `export.ts` lacks a size guard | minor, non-blocking | — | `B-014` |"
-          assert needle in t, "PLANT DID NOT LAND: anchor absent before the edit"
-          open(p, "w", encoding="utf-8").write(t.replace(
-              needle,
-              "| 2 | 5 Review | `export.ts` lacks a size guard | minor, non-blocking | — | backlog |", 1))
+          m = re.search(r"(?m)^\|.*\| `(B-\d+)` \|\s*$", t)
+          assert m, "PLANT DID NOT LAND: the template has no worked row homed on a board id"
+          open(p, "w", encoding="utf-8").write(
+              t[:m.start(1) - 1] + "backlog" + t[m.end(1) + 1:])
           EOF
           if python3 /tmp/cot-copy/test/validate.py; then
             echo "ERROR: the file seeded into every host project taught that a bare `backlog` home is a settled outcome"
@@ -4666,10 +4791,17 @@ jobs:
           set -eu
           rm -rf /tmp/tbl2-copy && cp -R . /tmp/tbl2-copy
           python3 - <<'EOF'
+          # DERIVED anchor (B-113): pinned to `| B-015 |` this plant lands only
+          # while that row is open — a row closing moves it into the Closed list
+          # and the split would be planted into prose, or nowhere. Any row of the
+          # live table splits it, so take the last one, which is unambiguously
+          # inside the table rather than against its header.
+          import re
           p = "/tmp/tbl2-copy/docs/evidence/backlog.md"
           t = open(p, encoding="utf-8").read()
-          needle = "| B-015 |"
-          assert needle in t, "PLANT DID NOT LAND: anchor absent before the edit"
+          rows = re.findall(r"^\| B-\d+[a-z]? \|", t, re.M)
+          assert rows, "PLANT DID NOT LAND: the board holds no rows to split"
+          needle = rows[-1]
           open(p, "w", encoding="utf-8").write(t.replace(needle, "\n\n" + needle, 1))
           EOF
           if python3 /tmp/tbl2-copy/test/validate.py; then
@@ -5305,12 +5437,16 @@ jobs:
           set -eu
           rm -rf /tmp/cw5-copy && cp -R . /tmp/cw5-copy
           python3 - <<'EOF'
+          # DERIVED anchor (B-113): the stage number the row derives is exactly what
+          # the release renumbering the stage list would move, and the plant would
+          # then mutate nothing while reporting green. Read the number out of the row.
+          import re
           p = "/tmp/cw5-copy/plugins/task-pipeline/skills/task-pipeline/references/companion-skills.md"
           t = open(p, encoding="utf-8").read()
-          needle = "and `finish` for the stage-10 multi-repository close-out"
-          assert needle in t, "PLANT DID NOT LAND: the agent-sync row's stage reference moved"
+          m = re.search(r"and `finish` for the stage-\d+ multi-repository close-out", t)
+          assert m, "PLANT DID NOT LAND: the agent-sync row's stage reference moved"
           open(p, "w", encoding="utf-8").write(
-              t.replace(needle, "and `finish` for the multi-repository close-out", 1))
+              t.replace(m.group(0), "and `finish` for the multi-repository close-out", 1))
           EOF
           if python3 /tmp/cw5-copy/test/validate.py; then
             echo "ERROR: a row naming no stage leaves the matrix->stages check standing over an empty set, reporting agreement"
@@ -5381,11 +5517,15 @@ jobs:
           set -eu
           rm -rf /tmp/br4-copy && cp -R . /tmp/br4-copy
           python3 - <<'EOF'
+          # DERIVED anchor (B-113): the example URL and its port are illustration,
+          # and the check is about WHERE the fence lives, not what it opens. Find
+          # the recipe by its shape so an edited example cannot silence the plant.
+          import re
           p = "/tmp/br4-copy/plugins/task-pipeline/skills/task-pipeline/references/browser.md"
           t = open(p, encoding="utf-8").read()
-          needle = "playwright-cli open http://localhost:3000/checkout"
-          assert needle in t, "PLANT DID NOT LAND: the look's recipe moved"
-          i = t.index("```bash\n" + needle)
+          _m = re.search(r"(?m)^```bash\nplaywright-cli open \S+\n", t)
+          assert _m, "PLANT DID NOT LAND: the look's recipe moved"
+          i = _m.start()
           j = t.index("```", i + 3) + 3
           block = t[i:j]
           open(p, "w", encoding="utf-8").write(
@@ -6351,14 +6491,21 @@ jobs:
           set -eu
           rm -rf /tmp/nb01-copy && cp -R . /tmp/nb01-copy
           python3 - <<'EOF'
+          # DERIVED anchor (B-113): both caps are numbers this repository can change
+          # — the stamp cap already moved once — and the needle named both, so a
+          # single cap edit would have taken the neighbour probe with it.
+          import re
           p = "/tmp/nb01-copy/plugins/task-pipeline/skills/task-pipeline/references/retrospective.md"
           t = open(p, encoding="utf-8").read()
-          n = "**Standing instructions** (max **10**) · **Run stamps** (max **10**, oldest rotate out)"
-          assert n in t, "PLANT DID NOT LAND: nb01"
+          m = re.search(r"\*\*Standing instructions\*\* \(max \*\*(\d+)\*\*\) \u00b7 "
+                        r"\*\*Run stamps\*\* \(max \*\*\d+\*\*, oldest rotate out\)", t)
+          assert m, "PLANT DID NOT LAND: nb01"
           # Break the subject AND leave the neighbour's cap in the same cell — on the
           # other side of the separator, which is where the narrowed version fell.
-          open(p, "w", encoding="utf-8").write(
-              t.replace(n, "**Run stamps** (one line each) \u00b7 **Standing instructions** (max **10**)", 1))
+          open(p, "w", encoding="utf-8").write(t.replace(
+              m.group(0),
+              "**Run stamps** (one line each) \u00b7 **Standing instructions** (max **%s**)"
+              % m.group(1), 1))
           EOF
           if python3 /tmp/nb01-copy/test/validate.py 2>&1 | grep -q 'run stamps are given no cap'; then
             echo "OK: validator FAILs — the neighbour's cap does not answer for the stamps, on either side of the separator"
@@ -6551,11 +6698,15 @@ jobs:
           set -eu
           rm -rf /tmp/hb07-copy && cp -R . /tmp/hb07-copy
           python3 - <<'EOF'
+          # DERIVED anchor (B-113): the `<N|10>` placeholder carries the review cap,
+          # a number the doctrine has already moved once — the plant is about the
+          # LINE existing, so match its shape.
+          import re
           p = "/tmp/hb07-copy/plugins/task-pipeline/skills/task-pipeline/templates/run.md"
           t = open(p, encoding="utf-8").read()
-          n = "hand:  <N|10>"
-          assert n in t, "PLANT DID NOT LAND: hb07"
-          i = t.index(n); j = t.index("\n", i)
+          m = re.search(r"(?m)^hand:\s+<N\|\d+>", t)
+          assert m, "PLANT DID NOT LAND: hb07"
+          i = m.start(); j = t.index("\n", i)
           open(p, "w", encoding="utf-8").write(t[:i] + t[j+1:])
           EOF
           if python3 /tmp/hb07-copy/test/validate.py 2>&1 | grep -q 'no .hand:. line shape'; then
@@ -6989,9 +7140,13 @@ jobs:
           python3 - <<'EOF'
           p = "/tmp/res7-copy/plugins/task-pipeline/skills/task-pipeline/references/residue.md"
           t = open(p, encoding="utf-8").read()
-          n = '**Only stage 10 requires the count to reach zero**'
-          assert n in t, "PLANT DID NOT LAND: res7"
-          _planted = t.replace(n, '**Every stage should drive the count toward zero**, and stage 10 requires it', 1)
+          # DERIVED anchor (B-113): the stage number is structure the stage list can
+          # renumber, and this plant is about the sentence acquiring a DIRECTION.
+          import re
+          m = re.search(r"\*\*Only stage (\d+) requires the count to reach zero\*\*", t)
+          assert m, "PLANT DID NOT LAND: res7"
+          _planted = t.replace(m.group(0), "**Every stage should drive the count toward "
+                               "zero**, and stage %s requires it" % m.group(1), 1)
           assert _planted != t, "PLANT DID NOT LAND: res7"
           open(p, "w", encoding="utf-8").write(_planted)
           EOF
@@ -7004,6 +7159,11 @@ jobs:
       - name: Negative self-test (the workflow itself stops being valid YAML)
         run: |
           set -eu
+          # dormant-when: PyYAML is absent, so the guard under test cannot parse the
+          #   workflow at all and discloses that instead of passing. Cost: the parse
+          #   guard is unprobed on a bare interpreter, which is the machine most likely
+          #   to be missing it — the plant's ERROR branch would otherwise read as a
+          #   finding about the workflow rather than about the environment.
           rm -rf /tmp/res8-copy && cp -R . /tmp/res8-copy
           python3 - <<'EOF'
           p = "/tmp/res8-copy/.github/workflows/validate.yml"
@@ -7148,6 +7308,13 @@ jobs:
           set -eu
           rm -rf /tmp/res15-copy && cp -R . /tmp/res15-copy
           python3 - <<'EOF'
+          # anchor: ^13\. — the criterion NUMBER is the guard's own contract, not this
+          #   plant's convenience: `test/validate.py` locates the teardown criterion as
+          #   `^13\.` and its refusal says "stage 10 has no criterion 13". Deriving the
+          #   number here would make the plant land on whichever criterion happens to be
+          #   at that position and prove that the guard fired for some other reason —
+          #   assertion 3, the one hand-rolled probes keep missing. Falsified the moment
+          #   the guard stops naming 13: the two move together or neither moves.
           import os, re
           p = "/tmp/res15-copy/plugins/task-pipeline/skills/task-pipeline/references/acceptance.md"
           t = open(p, encoding="utf-8").read()
@@ -7313,9 +7480,13 @@ jobs:
           # The number is frozen — no command recomputes a container count from one
           # afternoon — so what is policed is the record's agreement with itself. An
           # external document quotes this number out of the prose, not out of the block.
-          n = "The 18 containers above"
-          assert n in t, "PLANT DID NOT LAND: res23"
-          _planted = t.replace(n, "The 12 containers above", 1)
+          # DERIVED anchor (B-113): the count is frozen but not immutable — a
+          # re-measurement would move it, and the plant would then mutate nothing.
+          # Read the number the prose states and write one that disagrees with it.
+          import re
+          m = re.search(r"The (\d+) containers above", t)
+          assert m, "PLANT DID NOT LAND: res23"
+          _planted = t.replace(m.group(0), "The %d containers above" % (int(m.group(1)) + 6), 1)
           assert _planted != t, "PLANT DID NOT LAND: res23"
           open(p, "w", encoding="utf-8").write(_planted)
           EOF
@@ -7332,9 +7503,12 @@ jobs:
           python3 - <<'EOF'
           p = "/tmp/res24-copy/plugins/task-pipeline/skills/task-pipeline/references/residue.md"
           t = open(p, encoding="utf-8").read()
-          n = "Measured 2026-08-11, enumerating"
-          assert n in t, "PLANT DID NOT LAND: res24"
-          _planted = t.replace(n, "Measured recently, enumerating", 1)
+          # DERIVED anchor (B-113): a re-measurement re-dates this line, and the
+          # plant pinned to the old date would land nowhere while reporting green.
+          import re
+          m = re.search(r"Measured \d{4}-\d\d-\d\d, enumerating", t)
+          assert m, "PLANT DID NOT LAND: res24"
+          _planted = t.replace(m.group(0), "Measured recently, enumerating", 1)
           assert _planted != t, "PLANT DID NOT LAND: res24"
           open(p, "w", encoding="utf-8").write(_planted)
           EOF
@@ -7431,9 +7605,13 @@ jobs:
           python3 - <<'EOF'
           p = "/tmp/r6b-copy/plugins/task-pipeline/skills/task-pipeline/references/acceptance.md"
           t = open(p, encoding="utf-8").read()
-          n = '12a. **Every finding closed in this run records which changed'
-          assert n in t, "PLANT DID NOT LAND: r6b"
-          _planted = t.replace(n, '12z. **Something else entirely', 1)
+          # DERIVED anchor (B-113): criteria are renumbered — 12a is a criterion
+          # inserted between two others and the next insertion moves it. Read the
+          # number off the criterion this plant is about.
+          import re
+          m = re.search(r"(?m)^(\d+)[a-z]\. \*\*Every finding closed in this run records which changed", t)
+          assert m, "PLANT DID NOT LAND: r6b"
+          _planted = t.replace(m.group(0), "%sz. **Something else entirely" % m.group(1), 1)
           assert _planted != t, "PLANT DID NOT LAND: r6b"
           open(p, "w", encoding="utf-8").write(_planted)
           EOF
@@ -7465,6 +7643,10 @@ jobs:
       - name: Negative self-test (a version number already spoken for by a tag)
         run: |
           set -eu
+          # dormant-when: the checkout is shallow, so ancestry is unknowable and a
+          #   second lineage cannot be staged for the version to collide with. Cost: on
+          #   a `fetch-depth: 1` runner the collision check is unprobed, and the plant
+          #   says so rather than letting an environment answer for the guard.
           rm -rf /tmp/vt1-copy && cp -R . /tmp/vt1-copy
           cd /tmp/vt1-copy
           # A collision is DIVERGENCE. Every tag in this repo is an ancestor of main,
@@ -8131,19 +8313,22 @@ jobs:
           # purely by ageing, and the run that picked them up re-derived both.
           rm -rf /tmp/wv1-copy && cp -R . /tmp/wv1-copy
           python3 - <<'EOF'
+          # DERIVED anchor (B-113): pinned to `B-005` this plant went silent the day
+          # the seeded template renumbered a row — and the independent reader found
+          # it only because the census could not SEE the needle at all: provenance
+          # was lost through `enumerate()`. What is under test is a row whose Prio
+          # cell is cleared, so read that instead of the id.
           import re
           p = "/tmp/wv1-copy/plugins/task-pipeline/skills/task-pipeline/templates/backlog.md"
           lines = open(p, encoding="utf-8").read().split("\n")
-          for n, ln in enumerate(lines):
-              if not re.match(r"^\|\s*B-005\s*\|", ln):
-                  continue
-              c = ln.split("|")
-              assert c[8].strip() == "\u2014", "PLANT DID NOT LAND: B-005 priority is not cleared"
-              c[8] = " 3 "
-              lines[n] = "|".join(c)
-              break
-          else:
-              raise AssertionError("PLANT DID NOT LAND: no waived B-005 row")
+          _t = next((n for n, ln in enumerate(lines)
+                     if re.match(r"^\|\s*B-\d+\s*\|", ln)
+                     and len(ln.split("|")) >= 11
+                     and ln.split("|")[8].strip() == "\u2014"), None)
+          assert _t is not None, "PLANT DID NOT LAND: no row with a cleared priority"
+          c = lines[_t].split("|")
+          c[8] = " 3 "
+          lines[_t] = "|".join(c)
           open(p, "w", encoding="utf-8").write("\n".join(lines))
           EOF
           if python3 /tmp/wv1-copy/test/validate.py 2>&1 | grep -q "waived but still carries priority"; then
@@ -8158,19 +8343,20 @@ jobs:
           set -eu
           rm -rf /tmp/wv2-copy && cp -R . /tmp/wv2-copy
           python3 - <<'EOF'
+          # DERIVED anchor (B-113), the sibling of the plant above and pinned the
+          # same way for the same invisible reason. What is under test is a waiver
+          # that names a revisit condition, so read the State cell.
           import re
           p = "/tmp/wv2-copy/plugins/task-pipeline/skills/task-pipeline/templates/backlog.md"
           lines = open(p, encoding="utf-8").read().split("\n")
-          for n, ln in enumerate(lines):
-              if not re.match(r"^\|\s*B-005\s*\|", ln):
-                  continue
-              c = ln.split("|")
-              assert "revisit:" in c[9], "PLANT DID NOT LAND: B-005 has no revisit clause"
-              c[9] = " waived "
-              lines[n] = "|".join(c)
-              break
-          else:
-              raise AssertionError("PLANT DID NOT LAND: no waived B-005 row")
+          _t = next((n for n, ln in enumerate(lines)
+                     if re.match(r"^\|\s*B-\d+\s*\|", ln)
+                     and len(ln.split("|")) >= 11
+                     and "revisit:" in ln.split("|")[9]), None)
+          assert _t is not None, "PLANT DID NOT LAND: no waiver naming a revisit condition"
+          c = lines[_t].split("|")
+          c[9] = " waived "
+          lines[_t] = "|".join(c)
           open(p, "w", encoding="utf-8").write("\n".join(lines))
           EOF
           if python3 /tmp/wv2-copy/test/validate.py 2>&1 | grep -q "names no .revisit:. condition"; then
@@ -8206,12 +8392,17 @@ jobs:
           set -eu
           rm -rf /tmp/prk2-copy && cp -R . /tmp/prk2-copy
           python3 - <<'EOF'
+          # DERIVED anchor (B-113): which template row is open is a property of the
+          # template, not a constant — the seeded example is edited whenever the
+          # board's own columns move. Take whichever row is open.
+          import re
           p = "/tmp/prk2-copy/plugins/task-pipeline/skills/task-pipeline/templates/backlog.md"
           t = open(p, encoding="utf-8").read()
-          line = [l for l in t.splitlines() if l.startswith("| B-002 |")]
-          assert line, "PLANT DID NOT LAND: no B-002 row"
+          line = [l for l in t.splitlines()
+                  if re.match(r"^\|\s*B-\d+\s*\|", l)
+                  and len(l.split("|")) > 3 and l.split("|")[-3].strip() == "open"]
+          assert line, "PLANT DID NOT LAND: the template holds no open row"
           cells = line[0].split("|")
-          assert "open" in cells[-3], "PLANT DID NOT LAND: B-002 is not open"
           cells[-3] = " open — held at scratchpad/b29/ "
           open(p, "w", encoding="utf-8").write(t.replace(line[0], "|".join(cells), 1))
           EOF
@@ -9133,6 +9324,151 @@ jobs:
                    sentence, and nothing compared it against the schema for a day"; exit 1
           else
             echo "OK: what the verifier is told to read is compared against what the node has"
+          fi
+
+      - name: Negative self-test (a plant re-pinned to a literal a release can move)
+        run: |
+          set -eu
+          rm -rf /tmp/anc1-copy && cp -R . /tmp/anc1-copy
+          python3 - <<'EOF'
+          # B-113, the class this plant guards: a needle pinned to a value the tree
+          # will move is a check the next release switches off, and it reports green
+          # while it does. Four confirmations, three of them caused by the repository
+          # getting HEALTHIER — a re-derived board, the first blind eval runs, the
+          # first honest run stamp.
+          #
+          # The plant un-derives one needle: it finds a `\d+` inside a plant's own
+          # regex and writes digits over it, which is precisely the edit the guard
+          # exists to refuse. The needle here is the escape `\d+` and carries no
+          # value of its own, so this plant cannot pin the thing it plants.
+          #
+          # It does not trust the FIRST such regex to be the right one. A plant that
+          # picks a position and hopes is the class this whole release is about: the
+          # first `\d+` in the file may sit on the write side, or in a look whose
+          # subject is not file text, and pinning it would change something real
+          # while proving nothing. So each candidate is tried and the census itself
+          # is asked whether a new refusal appeared — R-001's landed-mutation rule,
+          # applied to the check that enforces it.
+          import re, sys
+          sys.path.insert(0, "/tmp/anc1-copy/test")
+          import anchors
+          p = "/tmp/anc1-copy/.github/workflows/validate.yml"
+          orig = open(p, encoding="utf-8").read()
+          before = len(anchors.findings(p))
+          planted = None
+          for m in re.finditer(r'r"([^"\n]{4,}?)\\d\+([^"\n]*)"', orig):
+              cand = orig[:m.start()] + 'r"%s22%s"' % (m.group(1), m.group(2)) + orig[m.end():]
+              open(p, "w", encoding="utf-8").write(cand)
+              if len(anchors.findings(p)) > before:
+                  planted = m.group(0)
+                  break
+              open(p, "w", encoding="utf-8").write(orig)
+          assert planted, ("PLANT DID NOT LAND: no derived regex needle could be "
+                           "re-pinned into a needle the census reads")
+          print("re-pinned %s" % planted[:60])
+          EOF
+          if python3 /tmp/anc1-copy/test/validate.py 2>&1 | grep -q "is anchored on a value a release can move"; then
+            echo "OK: validator FAILs — the cheap gate refuses a pinned anchor, instead of a 35-minute suite finding it a release later"
+          else
+            echo "ERROR: a plant was re-pinned to a literal and the gate said nothing — the four B-113 confirmations were each found this way, one release after the damage"
+            exit 1
+          fi
+
+      - name: Negative self-test (a plant that can decline to run and never says when)
+        run: |
+          set -eu
+          rm -rf /tmp/anc2-copy && cp -R . /tmp/anc2-copy
+          python3 - <<'EOF'
+          # Dormant is not passing. A plant that prints SKIP proved nothing, and until
+          # B-113 the local runner folded such a plant into *all N guards provably
+          # reject* — the exact sentence the row is about. The half that is checkable
+          # in CI, where each plant is its own green step, is the declaration.
+          import re
+          p = "/tmp/anc2-copy/.github/workflows/validate.yml"
+          t = open(p, encoding="utf-8").read()
+          m = re.search(r"(?m)^\s*#\s*dormant-when:.*\n(?:\s*#\s{2,}.*\n)*", t)
+          assert m, "PLANT DID NOT LAND: no dormancy declaration to remove"
+          open(p, "w", encoding="utf-8").write(t[:m.start()] + t[m.end():])
+          EOF
+          if python3 /tmp/anc2-copy/test/validate.py 2>&1 | grep -q "declares no .# dormant-when:"; then
+            echo "OK: validator FAILs — a plant that declines to run says which state makes it decline, and what that costs"
+          else
+            echo "ERROR: a plant kept its SKIP branch with nothing naming the state behind it"
+            exit 1
+          fi
+
+      - name: Negative self-test (an anchor declaration that names nothing the plant reads)
+        run: |
+          set -eu
+          rm -rf /tmp/anc3-copy && cp -R . /tmp/anc3-copy
+          python3 - <<'EOF'
+          # The escape hatch may not become a silencer. A declaration naming a value
+          # this plant never looks for explains nothing and would silence the needle
+          # beside it — so the declaration has to resolve, the same rule this family
+          # applies to every other address a live document carries.
+          import re
+          p = "/tmp/anc3-copy/.github/workflows/validate.yml"
+          t = open(p, encoding="utf-8").read()
+          m = re.search(r"(?m)^(\s*#\s*anchor:\s*)(\S+)", t)
+          assert m, "PLANT DID NOT LAND: no anchor declaration to break"
+          open(p, "w", encoding="utf-8").write(
+              t[:m.start(2)] + "nothing-this-plant-reads" + t[m.end(2):])
+          EOF
+          if python3 /tmp/anc3-copy/test/validate.py 2>&1 | grep -q "names nothing this plant looks for"; then
+            echo "OK: validator FAILs — a declaration is an explanation, and one that resolves to nothing is a switch"
+          else
+            echo "ERROR: an anchor declaration could name anything at all and still exempt the needle beside it"
+            exit 1
+          fi
+
+      - name: Negative self-test (a restated fixture count that disagrees with the fixture file)
+        run: |
+          set -eu
+          rm -rf /tmp/anc4-copy && cp -R . /tmp/anc4-copy
+          python3 - <<'EOF'
+          # The loop guard tripped on B-113's own closure line: the same sentence in the
+          # same file returned twice with the same stale fixture count, inside the
+          # paragraph that narrates a stale count as the row's lesson. Each fix appended
+          # a corrected sentence instead of correcting the one already there, so the old
+          # one survived every round. Canon 8 ends it — the count is computed now, and
+          # this plant is what keeps it computed.
+          #
+          # DERIVED: read whatever the corpus states and move it, so the plant cannot go
+          # stale the way the sentence it guards did.
+          import re
+          p = "/tmp/anc4-copy/docs/evidence/backlog.md"
+          t = open(p, encoding="utf-8").read()
+          m = re.search(r"(\d+) whole-workflow fixtures", t)
+          assert m, "PLANT DID NOT LAND: the closure line states no fixture count"
+          skewed = "%d whole-workflow fixtures" % (int(m.group(1)) + 6)
+          open(p, "w", encoding="utf-8").write(t.replace(m.group(0), skewed, 1))
+          assert skewed in open(p, encoding="utf-8").read(), "PLANT DID NOT LAND"
+          EOF
+          if python3 /tmp/anc4-copy/test/validate.py 2>&1 | grep -q "anchor-census fixtures computes to"; then
+            echo "OK: validator FAILs — the fixture count is computed from the fixture file, so the fifth occurrence is a failing gate rather than a reader's patience"
+          else
+            echo "ERROR: a restated fixture count disagreed with the file and nothing objected — the class that recurred four times inside its own fix"
+            exit 1
+          fi
+
+      - name: Property check (the anchor census prints its disclosure beside the verdict)
+        run: |
+          set -eu
+          # A measurement nobody surfaces is the same silence as no measurement — the
+          # loudest canon in this repository, and the reason the never-count prints. The
+          # census is a disclosure with no floor and no target: how many plants there
+          # are, how many pin a value, how many declare, how many can decline to run.
+          # `|| true` because the disclosures print BESIDE the verdict, and the verdict
+          # block exits before them on a red tree: without it this check would report a
+          # missing disclosure whenever some unrelated guard is failing.
+          _out=$(python3 test/validate.py || true)
+          if printf '%s' "$_out" | grep -q "negative-test anchors: [0-9]* plants" \
+             && printf '%s' "$_out" | grep -q "can decline to run"; then
+            echo "OK: the anchor census prints its four numbers on every run"
+          else
+            echo "ERROR: the census printed no disclosure — either it was dropped, or the"
+            echo "       tree is red and the verdict block exited before the disclosures"
+            exit 1
           fi
 
   plugin-conformance:
