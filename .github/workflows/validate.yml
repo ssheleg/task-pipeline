@@ -3326,10 +3326,39 @@ jobs:
           # nothing. A plant has to create its own precondition, not inherit one from
           # whatever the tree happens to look like on the day it runs.
           import re as _re
+          import subprocess as _sp0
           rows = [mm for mm in _re.finditer(r"(?m)^\|\s*\d{4}-\d{2}-\d{2}\s*\|.*$", t)]
           assert rows, "PLANT DID NOT LAND: no run stamp rows to remove"
-          newest = rows[0]          # the table is newest-first
-          t = t[:newest.start()] + t[newest.end() + 1:]
+          # Remove newest rows until one of them covered the newest tag — removing
+          # exactly one stopped constructing the refusal state the day TWO stamps
+          # sat above the newest tag's range (the 2026-08-31 stamp cites the
+          # main-tip commit, which no tag contains, so deleting it alone left the
+          # previous stamp still covering v-newest and nothing trailed).
+          _tags0 = _sp0.run(["git", "tag", "-l", "v*", "--sort=v:refname"],
+                            cwd="/tmp/gap1-copy", capture_output=True, text=True).stdout.split()
+          _cover = set()
+          if len(_tags0) >= 2:
+              _cover = {c[:7] for c in _sp0.run(
+                  ["git", "rev-list", f"{_tags0[-2]}..{_tags0[-1]}"],
+                  cwd="/tmp/gap1-copy", capture_output=True, text=True).stdout.split()}
+          newest = rows[0]
+          removed_any = False
+          for mm in rows:
+              _sha = _re.search(r"`([0-9a-f]{7,40})`", mm.group(0))
+              # keep removing while the newest tag's range still holds a live stamp:
+              # stopping after the FIRST covering row left a second one (two stamps sat
+              # inside v-newest's range on 2026-08-31) and nothing trailed.
+              _rest_covered = any(
+                  (_s := _re.search(r"`([0-9a-f]{7,40})`", m2.group(0))) and _s.group(1)[:7] in _cover
+                  for m2 in rows if m2.group(0) != mm.group(0) and m2.group(0) in t)
+              t = t.replace(mm.group(0) + "\n", "", 1)
+              removed_any = True
+              if not _rest_covered:
+                  break
+          assert removed_any and not any(
+              (_s := _re.search(r"`([0-9a-f]{7,40})`", m2.group(0))) and _s.group(1)[:7] in _cover
+              for m2 in rows if m2.group(0) in t), \
+              "PLANT DID NOT LAND: a live stamp still covers the newest tag"
           # AND strip every mention of a trailing tag from the gap section itself.
           # Narrowing a range and dropping a stamp was not enough: the guard counts ANY
           # `vX.Y.Z` token in that section as a declaration, so one sentence mentioning a
@@ -4296,11 +4325,30 @@ jobs:
           set -eu
           rm -rf /tmp/bd5-copy && cp -R . /tmp/bd5-copy
           python3 - <<'EOF'
+          # DERIVED anchor (B-113): pinned to "| 1 | **6** | open" this stopped landing
+          # the day the board re-derived its ages — the exact release that made the
+          # priorities honest disarmed the plant that checks them. Pick any OPEN row,
+          # read its own prio, and write a number that cannot follow from its inputs.
+          import re
           p = "/tmp/bd5-copy/docs/evidence/backlog.md"
           t = open(p, encoding="utf-8").read()
-          needle = "| 1 | **6** | open"
-          assert needle in t, "PLANT DID NOT LAND: anchor absent before the edit"
-          open(p, "w", encoding="utf-8").write(t.replace(needle, "| 1 | **9** | open", 1))
+          planted = False
+          for l in t.splitlines():
+              if not re.match(r"^\|\s*B-\d+\s*\|", l):
+                  continue
+              c = l.split("|")
+              if len(c) < 11 or c[9].strip().lower().strip("*") != "open":
+                  continue
+              try:
+                  pr = int(c[8].strip().strip("*"))
+              except ValueError:
+                  continue
+              c[8] = f" **{pr + 3}** "
+              t = t.replace(l, "|".join(c), 1)
+              planted = True
+              break
+          assert planted, "PLANT DID NOT LAND: no open row with a numeric prio"
+          open(p, "w", encoding="utf-8").write(t)
           EOF
           if python3 /tmp/bd5-copy/test/validate.py; then
             echo "ERROR: a priority contradicting its own sev/blast/age passed — the hand-assigned number this column replaced"
@@ -5648,6 +5696,15 @@ jobs:
           set -eu
           rm -rf /tmp/pf1-copy && cp -R . /tmp/pf1-copy
           python3 - <<'EOF'
+          # The guard fires only while evals/RESULTS.md claims no blind run — a state
+          # the 2026-08-31 blind runs ended, which disarmed this plant the honest way
+          # (the gapmention class: a plant that inherits its precondition switches
+          # itself off when the repository gets healthier). Construct the state: a
+          # copy whose RESULTS claims no blind run AND whose preflight says nothing.
+          p = "/tmp/pf1-copy/evals/RESULTS.md"
+          t = open(p, encoding="utf-8").read()
+          t = "**Status note (planted): no blind run has been made on any model.**\n\n" + t
+          open(p, "w", encoding="utf-8").write(t)
           p = "/tmp/pf1-copy/plugins/task-pipeline/skills/task-pipeline/references/companion-skills.md"
           t = open(p, encoding="utf-8").read()
           n = "This skill's own behaviour is unverified"
