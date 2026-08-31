@@ -112,12 +112,11 @@ bind this run, the log queried because nothing caps it — are in
 `references/knowledge-sources.md` and `references/retrospective.md`.
 
 **Three artifacts close a run, not two — and they are a convergence, not a sequence.**
-Stage 9 syncs the docs, the wiki **and the code graph**. None consumes another; all three
-consume the same change, and the **graph↔docs divergence check is the gate over their
-convergence** — the only thing that compares two of the three against each other, which
-is why it is not optional where a graph exists. A stale graph is a false premise
-**carrying the authority of a machine**: a wrong doc gets argued with, a wrong graph gets
-believed (`references/knowledge-graph.md`, `references/audit.md`).
+Stage 9 syncs the docs, the wiki **and the code graph**; none consumes another, and the
+**graph↔docs divergence check is the gate over their convergence** — the only thing
+comparing two of the three against each other, so it is not optional where a graph
+exists. A stale graph is a false premise **carrying the authority of a machine**
+(`references/knowledge-graph.md`, `references/audit.md`).
 
 **Documentation is a deliverable, and it has a gate** (`references/documentation.md`).
 Stage 0 answers the four questions that make docs a *system* into `docs/DOCMAP.md`;
@@ -137,26 +136,14 @@ triggers and what an entry must carry are in `references/retrospective.md`; why
 the order cannot be swapped is `references/learned.md` rule 21.
 
 Stage 0 reads those standing instructions in full, which is why the prune is a gate
-criterion and not a good intention: a rule nobody reads to the end is worse than no
-rule, because everyone believes it is covered.
+criterion: a rule nobody reads to the end is worse than no rule, because everyone
+believes it is covered.
 
-Three things the grill does beyond clarifying the request:
-- **Domain awareness.** It reads the project's own `CONTEXT.md` / `docs/adr/` and
-  holds the operator to them — challenging terms that conflict with the glossary,
-  sharpening overloaded words, stress-testing with concrete scenarios, and
-  flagging where the code contradicts what was just said. Resolved terms are
-  written to `CONTEXT.md` as they land; genuinely hard-to-reverse decisions get an
-  ADR.
-- **The autonomy sweep.** It pre-resolves what would otherwise stop stages 1→10
-  mid-flight (test/lint/deploy commands, branch policy, log locations, docs
-  targets, the model decision, deploy authorization). Autonomy is bought here or
-  not at all — an unasked question is a scheduled interruption.
-- **The design destination**, when the project designs in Figma: *which* file, in
-  which team — a stage-0 decision, never a stage-3 side effect. Left to drawing
-  time the question is answered by whoever is holding the brush, and the answer is
-  usually *create a new file* — which is how a project ends up with three files
-  called some variation of "Design", each with real work in it and no way to tell
-  which one the team opens.
+Three things the grill does beyond clarifying the request, each in full in
+[`references/grill.md`](references/grill.md):
+- **Domain awareness** — it reads the project's `CONTEXT.md` / `docs/adr/` and holds the operator to them, writing resolved terms back as they land.
+- **The autonomy sweep** — it pre-resolves what would otherwise stop stages 1→10 mid-flight. Autonomy is bought here or not at all; an unasked question is a scheduled interruption.
+- **The design destination** with Figma on — *which* file, in which team, decided at stage 0. Left to drawing time it is answered by whoever holds the brush, and the answer is usually *create a new file*.
 
 ## How to run
 
@@ -235,24 +222,20 @@ capable available — see `references/model-tiering.md`).
 ladder walk is, which eight environment classes stage 10 enumerates, what makes an
 edge fake, why a `200` is not a working page: all there, none here.
 
-**Several repositories?** A submodule is finished when its parent says so — the
-work can be committed, pushed and green while a clone of the parent still gets the
-commit before it, and neither repository looks wrong alone. The two commands that
-prove it, and the two-command fix whose second half gets forgotten, are in
+**Several repositories?** A submodule is finished when its parent says so — a clone
+can still get the commit before it while neither repository looks wrong alone. The
+commands that prove it are in
 [`references/acceptance.md`](references/acceptance.md) → *A project of several
 repositories*.
 
 ## Model — ask once, at preflight
 
-Default recommendation: **the most capable reasoning model the environment
-offers** (currently the latest Opus generation — read that as a tier, not a
-string). **Never hardcode a model id**: generations ship, tiers get renamed, and
-the operator may be on another provider entirely — resolve the top tier available
-at runtime. Stage configs use provider-agnostic tokens (`default` / `inherit`).
-The preflight block to emit, word for word, is `references/model-tiering.md` →
-*Mechanic* — a reminder only: no such tier available means say which one is in
-use and continue. Record the answer in the brief; don't re-ask per stage.
-Stage-5 subagents are pinned to the confirmed model automatically.
+Recommend **the most capable reasoning model available** — a tier resolved at
+runtime, **never a hardcoded id**; stage configs use `default` / `inherit`. The
+block to emit is `references/model-tiering.md` → *Mechanic*, and it is a
+reminder: no such tier means say which one is in use and continue. Record the
+answer in the brief, don't re-ask per stage; stage-5 subagents are pinned to it
+automatically.
 
 ## Degradation
 
@@ -272,11 +255,8 @@ framework ships no fixed stage count and no opinion on which gates are manual �
 
 ## References
 
-References are routed from the **Built-in doctrine** table above, keyed by the
-stage that sends you there — one home for that mapping rather than two. The
-exceptions are routed by prose instead: `references/stages.md` (the gate list,
-named at every stage of *How to run*), `references/learned.md` (cited where a
-rule binds), and `references/probing.md` (reached from `references/gates.md`,
-whose checks it proves). The two config contracts sit beside this file:
-`pipeline.schema.json` (the universal stages + release contract) and
-`pipeline.example.json` (this plugin's default flow as config).
+Most references are routed from the **Built-in doctrine** table above, keyed by
+the stage that sends you there. The rest are routed by prose: `stages.md` (named
+at every stage of *How to run*), `learned.md` (cited where a rule binds) and
+`probing.md` (from `gates.md`, whose checks it proves). The config contracts sit
+beside this file: `pipeline.schema.json` and `pipeline.example.json`.
