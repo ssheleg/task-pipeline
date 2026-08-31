@@ -73,7 +73,12 @@ if not matches:
 # PostToolUse fires on success; PostToolUseFailure carries the error. Both are
 # wired to this script, and `error` present means the command did not exit 0.
 failed = bool(data.get("error")) or data.get("hook_event_name") == "PostToolUseFailure"
-out = data.get("tool_output") or {}
+# The harness documents the result field as `tool_response`; `tool_output` is the
+# name this script shipped reading, so it stays as a fallback rather than a
+# breaking change. Reading only the wrong name left the exit-code branch dead:
+# every observation degraded to the failed/ok guess, and a command that printed
+# an exit code was recorded from the event name instead.
+out = data.get("tool_response") or data.get("tool_output") or {}
 if isinstance(out, dict) and out.get("exit_code") is not None:
     code = int(out["exit_code"])
 else:

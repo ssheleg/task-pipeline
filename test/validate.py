@@ -6060,6 +6060,36 @@ def _loop_block(node):
 
 
 _schema_j = load_json(os.path.relpath(_SCHEMA_P, ROOT)) if os.path.isfile(_SCHEMA_P) else None
+
+# The gate-type vocabulary exists twice — the schema's enum and the sentence in
+# SKILL.md that teaches it — and nothing compared them: the schema gained
+# `judgment` in v1.73.0 and SKILL.md taught `auto`/`manual` for seven releases
+# (TP3-11). One direction on purpose: the schema is the contract, so a value it
+# holds must reach the sentence; a value the sentence invents fails the schema's
+# own conformance pass instead.
+try:
+    _gate_enum = (_schema_j["definitions"]["stage"]["properties"]["gate"]
+                  ["properties"]["type"]["enum"]) if _schema_j else []
+except (KeyError, TypeError):
+    _gate_enum = []
+    fail("pipeline.schema.json: no gate.type enum at definitions.stage.properties."
+         "gate.properties.type — the stage table's Type column has no contract")
+_SK_TXT_P = os.path.join(_skill_dir, "SKILL.md")
+if _gate_enum and os.path.isfile(_SK_TXT_P):
+    _sk_txt = open(_SK_TXT_P, encoding="utf-8").read()
+    _tm = re.search(r"Each gate has a \*\*type\*\*.*?(?:\n\n|\Z)", _sk_txt, re.S)
+    if _tm is None:
+        fail("SKILL.md: no `Each gate has a **type**` sentence — the schema's enum "
+             "has no teaching surface, and an operator learns the vocabulary from "
+             "this paragraph, not from the schema")
+    else:
+        for _tv in _gate_enum:
+            if f"`{_tv}`" not in _tm.group(0):
+                fail(f"SKILL.md: the gate-type sentence does not name `{_tv}` while "
+                     "pipeline.schema.json's enum holds it — the schema gained a "
+                     "type and the doctrine taught the old vocabulary for seven "
+                     "releases before anything compared the two")
+
 _loop_s = _loop_block(_schema_j) if _schema_j else None
 if _loop_s is None:
     # This was an _UNLOOKED skip and a reader deleted the whole block: the release's

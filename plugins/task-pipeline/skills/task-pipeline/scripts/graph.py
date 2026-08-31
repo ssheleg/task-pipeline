@@ -639,13 +639,23 @@ def tier_violations(t):
                        "— a fail that does not say what broke is a fail the next round "
                        "cannot act on" % t["tier"])
 
-    # Blind, and checked. Only the prose fields can carry it.
-    for k in ("confirms", "evidence", "not_examined"):
+    # Blind, and checked. EVERY prose field can carry it — the scan covered three
+    # of the six and a citation hiding in `scope` or a finding's `what`/`fix`
+    # passed untouched (certification.md claims the refusal for the whole report).
+    for k in ("confirms", "evidence", "not_examined", "scope"):
         for i, e in enumerate(t[k]):
             if isinstance(e, str) and CROSS_TIER.search(e):
                 out.append("tier report `%s[%d]` cites another tier's verdict (%r) — the "
                            "three run blind, because three reports that read each other "
                            "are one opinion with three signatures" % (k, i, e.strip()[:70]))
+    for i, f in enumerate(findings):
+        for k in ("what", "fix"):
+            v = f.get(k) if isinstance(f, dict) else None
+            if isinstance(v, str) and CROSS_TIER.search(v):
+                out.append("tier report `findings[%d].%s` cites another tier's verdict "
+                           "(%r) — the three run blind, because three reports that read "
+                           "each other are one opinion with three signatures"
+                           % (i, k, v.strip()[:70]))
     return out
 
 # --- verbs --------------------------------------------------------------------

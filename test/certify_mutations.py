@@ -34,7 +34,7 @@ import tempfile
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 GRAPH_REL = "plugins/task-pipeline/skills/task-pipeline/scripts/graph.py"
-EXPECTED_FIXTURES = 20
+EXPECTED_FIXTURES = 22
 
 # (name, the source to disable, what to replace it with). Each disables exactly one
 # rule; the fixture that must notice is named in the output when it does.
@@ -49,6 +49,8 @@ MUTATIONS = [
      'if False:\n            out.append("tier report `%s` fails and names'),
     ("the blind rule",
      'if isinstance(e, str) and CROSS_TIER.search(e):', 'if False:'),
+    ("the blind rule over findings",
+     'if isinstance(v, str) and CROSS_TIER.search(v):', 'if False:'),
     ("break-needs-a-check",
      'if sev == "breaks" and not str(f.get("check", "")).strip():', 'if False:'),
     ("all-three-required", 'if missing:', 'if False:'),
