@@ -80,11 +80,22 @@ being *unrecorded* is the defect, not the choice.
 Usually the map and the gate; often the register already exists in some shape.
 
 ```bash
-cp <skill>/templates/docmap.md   docs/DOCMAP.md          # only if absent
-cp <skill>/templates/docgate.sh  scripts/check-docs.sh   # only if absent
-cp <skill>/templates/exposure.sh scripts/exposure.sh     # only if absent
-chmod +x scripts/check-docs.sh scripts/exposure.sh
+cp <skill>/templates/docmap.md         docs/DOCMAP.md               # only if absent
+cp <skill>/templates/docgate.sh        scripts/check-docs.sh        # only if absent
+cp <skill>/templates/exposure.sh       scripts/exposure.sh          # only if absent
+cp <skill>/templates/hygiene.sh        scripts/check-hygiene.sh     # only if absent
+cp <skill>/templates/stage-coverage.sh scripts/stage-coverage.sh    # only if absent
+cp <skill>/templates/convergence.sh    scripts/check-convergence.sh # only if absent, and only where the project pins components
+chmod +x scripts/check-docs.sh scripts/exposure.sh scripts/check-hygiene.sh \
+         scripts/stage-coverage.sh scripts/check-convergence.sh
 ```
+
+The last three are the scripts the later gates run — stage 5 runs
+`check-hygiene.sh` after every task, stage 10 runs `stage-coverage.sh` before the
+coverage table and `check-convergence.sh` where components are pinned
+([`../templates/README.md`](../templates/README.md) is the full seeding map). A
+fresh host that skips them reaches gates whose commands do not resolve, which
+reads as a broken gate rather than a skipped seeding.
 
 **Seeding never overwrites.** An existing brief, register or map is the project's
 memory; the template is a skeleton.

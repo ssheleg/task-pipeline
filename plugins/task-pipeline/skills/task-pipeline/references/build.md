@@ -374,6 +374,13 @@ satisfied**, and code quality. The implementer's self-review never substitutes f
 it. Rubric, inputs, prompt templates and how to build the diff package:
 [`review.md`](review.md).
 
+**The boundary with certification:** this review closes a **prose-plan task** —
+one reviewer, the five-round cap of §4.5. A **work-graph node** is closed by the
+three blind tiers and `graph.py certify` instead
+([`certification.md`](certification.md), ceiling 3); the artifact the queue is —
+plan or graph — decides which protocol closes the work, never whichever is
+cheaper at the moment of closing.
+
 The REQ verdict is the one the other two can't produce: a task can meet every line
 of its brief and still miss the requirement it was written to deliver. A ❌ there
 enters the fix loop like any Important finding.
@@ -561,7 +568,10 @@ stages 7–9 run against an unintegrated branch.
 
 ## GATE (auto)
 
-All plan tasks DONE with all three review verdicts (spec compliance, REQ satisfied,
+**The hygiene gate green in diff mode after every task** (*The hygiene gate*,
+above) — six checks over what that task changed, no floor, a finding fixed
+in-task or carried over with a reason;
+all plan tasks DONE with all three review verdicts (spec compliance, REQ satisfied,
 code quality); **every group that actually fanned out has run its convergence check
 (§4.2a) before its first worktree was integrated, and logged a line either way** —
 findings with their ruling, or `convergence check clean`; the full test suite green;

@@ -4,6 +4,13 @@ A node is not closed by one agent's opinion. It is closed by **three independent
 readings at escalating visibility**, and the run may not advance until all three
 pass.
 
+**The boundary: this closes a node of the work graph.** Where the queue is a
+prose plan rather than a graph, a task closes through the per-task review instead
+([`build.md`](build.md) §4.4 and [`review.md`](review.md) — one reviewer, a
+five-round fix loop with an explicit breaker). Two closure protocols with no
+boundary sentence were how a run picked whichever was cheaper; the artifact the
+queue is — graph or plan — is what decides, not the mood of the closer.
+
 ## Contents
 
 - Why one verifier is not enough, stated as the failure it produces

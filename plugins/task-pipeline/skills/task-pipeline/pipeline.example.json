@@ -65,7 +65,7 @@
       ],
       "gate": {
         "type": "manual",
-        "check": "UX track ran FIRST for user-facing tasks (/ux -> ux-foundation CJM -> ux-flows screens -> ux-scenarios -> /ux-lint green); spec committed and user-reviewed; every user-facing requirement traces to a scenario ID. Every spec section carries covers: REQ-... and every REQ appears in at least one section. With Figma on: the destination the brief named was used — the canonical record (docs/ux/foundation.md -> Design tooling) holds exactly one file, no file was created while a recorded one resolved, and every screens.md frame link carries that same :fileKey (a string match, not a judgement — a differing key means the run drew in a second file nobody will open)."
+        "check": "UX track ran FIRST for user-facing tasks (/ux -> ux-foundation CJM -> ux-flows screens -> ux-scenarios -> /ux-lint green); spec committed and user-reviewed; every user-facing requirement traces to a scenario ID. Every spec section carries covers: REQ-... and every REQ appears in at least one section. With Figma on: the destination the brief named was used — the canonical record (docs/ux/foundation.md -> Design tooling) holds exactly one file, no file was created while a recorded one resolved, and every screens.md frame link carries that same :fileKey (a string match, not a judgement — a differing key means the run drew in a second file nobody will open). COPY and VISUAL are a parallel layer after UX: every user-facing string went through the COPY track or the refusal is recorded, the visual layer went through the VISUAL track or the refusal is recorded, and where both tracks ran their convergence check is recorded - findings with the ruling, or 'Tracks converge: clean'."
       }
     },
     {

@@ -58,6 +58,10 @@ better, plus one that is required only for user-facing work.
 | **playwright** (CLI — `playwright-cli open`, `snapshot`, `click`, `type`, and the two this pipeline actually asks for: `console` and `requests`; or MCP — `browser_navigate`, `browser_snapshot`, `browser_click`, `browser_console_messages`, `browser_network_requests`) | **stages 5–6 on any project with a web front end**, and **stage 8** on a deployed target — the same job as the row below: open the surface, snapshot it, read the console and the network log. Its own difference is **the channel a look arrives on**: the CLI is a shell command, so it does not put a tool schema in the context window the way an MCP channel does — that is upstream's own comparison and it is *CLI against MCP*, which makes it a claim about this row's own two halves before it is a claim about the row below. Both channels default to an **accessibility-tree snapshot rather than pixels**, so the ordinary look costs a page of text and no vision model; `screenshot` exists in both and costs one when you ask for it | **Recommended** — never a gate; absent → say the surface was verified **by reading the diff** and treat that as the weaker claim it is | CLI: `npm install -D @playwright/cli@latest` → `npx playwright-cli --help` (or `npm i -g` for the global binary; `playwright-cli install --skills` adds its agent skills, `--global` to the home directory). MCP: `claude mcp add playwright npx @playwright/mcp@latest` |
 | **chrome-devtools** (MCP — `list_pages`, `navigate_page`, `take_snapshot`, `take_screenshot`, `evaluate_script`, `list_console_messages`, `list_network_requests`, `lighthouse_audit`, `performance_start_trace`, `take_heapsnapshot`) | **stages 5–6 on any project with a web front end** — verify the **rendered** surface rather than the diff: computed layout, console errors, failed requests. **Stage 8** on a deployed web target: load the page and read what the browser did, not what the deploy said. Its own difference is **reach past the page**: a Lighthouse category (`lighthouse_audit`, which `seo-aeo-audit` builds on) and a heap snapshot have no equivalent in the row above. A performance trace has one — `playwright-cli tracing-start` records one — but only this row's arrives with `performance_analyze_insight` over it | **Recommended** — never a gate; absent → say the surface was verified **by reading the diff** and treat that as the weaker claim it is | `/plugin install chrome-devtools-mcp@claude-plugins-official` (or connect the MCP server directly) |
 | **[agent-sync](https://github.com/ssheleg/agent-sync)** (`/agent-sync`, **≥ 1.3.0** — `finish` did not exist before it, so an older install turns the stage-10 close-out into a command that is not there) | **guarded registers** — a lease before writing one, `reserve` before minting an id, `reconcile`/`record` for intent vs as-built, and `finish` for the stage-10 multi-repository close-out ([`documentation.md`](documentation.md)) | **Recommended** — never a gate. Absent → the run is **`ungated`** and must say so out loud; the discipline still applies, only the arbitration is missing | `npx sshlg-skills install` |
+| **sheleg-dev** (`stripe-billing`, `crypto-payments`, `error-tracking`, `ad-tracking`, `google-signin`, `google-auth`, `frontend-performance`) | **stage 5 when the task wires money, tracking, sign-in or page speed** — the seams a generated integration gets wrong in ways no screen shows: the webhook is the payment, a thank-you-page event cannot know the charge cleared, a duplicated `event_id` counts revenue twice | **Recommended** — never a gate; absent → the integration ships on the host's own doctrine and the close-out names the seam nobody checked | `/plugin marketplace add ssheleg/sheleg-dev` → `/plugin install sheleg-dev@sheleg-dev` |
+| **agent-stack** (`agent-orchestrator`, `agent-evals`, `agent-interop`, `agent-harness`) | **stage 5 when the thing being BUILT is an agent system** — the orchestrator's loop, evals that say whether it got better, the protocols it speaks (MCP/A2A), the wallet under LLM resale. Not for coordinating the agents editing this repository (that is agent-sync, above) | **Recommended** — never a gate; absent → the agent layer ships unevaluated and the close-out says so | `/plugin marketplace add ssheleg/agent-stack` → `/plugin install agent-stack@agent-stack` |
+| **telegram-dev** (`telegram-bots`, `telegram-userbots`, `telegram-miniapps`) | **stage 5 when Telegram is the platform, not the transport** — `update_id` as the only idempotency key, a session file that is a logged-in person, a Mini App authenticated by one signed query string | **Recommended** — never a gate; absent → the surface ships on the Bot API docs alone and the close-out names the dedup and auth seams unverified | `/plugin marketplace add ssheleg/telegram-dev` → `/plugin install telegram-dev@telegram-dev` |
+| **seo-aeo-audit** (`/seo-aeo-audit`) | **stage 8 when a logged-out reader or a crawler will see the shipped surface** — the check that a machine will find it; the design-time rule lives with the host, this is the audit after | **Recommended** — never a gate; absent → visibility ships undesigned and unaudited, said in those words | `/plugin marketplace add ssheleg/seo-aeo-audit` → `/plugin install seo-aeo-audit@seo-aeo-audit` |
 | ~~superpowers~~ | — | **Not a dependency.** Stages 2/4/5/6 run on the built-in doctrine above. See *Optional bridge* | — |
 | ~~grill-me / grilling~~ | — | **Not a dependency.** The stage-0 grill is built in (`references/grill.md`) | — |
 
@@ -127,6 +131,23 @@ Pipeline companions (stage doctrine is built in — nothing to install for it):
                            claude mcp add playwright npx @playwright/mcp@latest
                          (running without it — see the line below; without BOTH,
                           the surface is verified by reading the diff)
+  ✗ sheleg-dev         — this task wires money, tracking, sign-in or page speed;
+                         it owns the seams no screen shows (the webhook IS the
+                         payment, a thank-you event cannot know the charge cleared):
+                           /plugin marketplace add ssheleg/sheleg-dev
+                           /plugin install sheleg-dev@sheleg-dev
+  ✗ agent-stack        — the thing being BUILT here is an agent system; it owns
+                         the loop, the evals, the protocols and the wallet:
+                           /plugin marketplace add ssheleg/agent-stack
+                           /plugin install agent-stack@agent-stack
+  ✗ telegram-dev       — Telegram is this task's platform, not its transport;
+                         it owns update dedup, session files and Mini App auth:
+                           /plugin marketplace add ssheleg/telegram-dev
+                           /plugin install telegram-dev@telegram-dev
+  ✗ seo-aeo-audit      — a logged-out reader will see the shipped surface;
+                         stage 8 can audit what a machine will find:
+                           /plugin marketplace add ssheleg/seo-aeo-audit
+                           /plugin install seo-aeo-audit@seo-aeo-audit
   ✗ chrome-devtools    — recommended when this project has a web front end:
                          stages 5-6 check the RENDERED surface instead of the
                          diff, stage 8 reads what the browser did after a deploy.
@@ -204,14 +225,24 @@ Rules:
   the MCP and then *continues text-only on its own*, so without a recorded answer
   the run silently narrows from "designed" to "described". The sweep row is
   `3 Design surface` ([`grill.md`](grill.md) → *The autonomy sweep*).
+- **The four domain companions print only when stage-0's own reading warrants
+  them** — sheleg-dev when the task wires money, tracking, sign-in or speed;
+  agent-stack when the thing being built is an agent system; telegram-dev when
+  Telegram is the platform; seo-aeo-audit when a logged-out reader will see the
+  surface. A block that offers all four on a CSV parser teaches the operator to
+  stop reading the block.
 - **agent-sync**: detect via a resolving `/agent-sync` or a `.claude/agent-sync.json`
   in the project. Present → take a lease before writing a guarded register and
   reserve ids before minting them. Absent → print the line **once**, continue, and
   **record the run as `ungated`** — never describe the project as protected
   ([`documentation.md`](documentation.md) → *Registers are shared state*).
-- **The behaviour line prints whenever `evals/RESULTS.md` records no blind run**, and
+- **The behaviour line prints whenever the eval ledger records no blind run**, and
   disappears the moment one is recorded — it is a state of the evidence, not a warning
-  and not a ratchet. This bundle asks every project it touches for evidence rather than
+  and not a ratchet. The ledger is `evals/RESULTS.md` **in this skill's own
+  repository** (github.com/ssheleg/task-pipeline) — it does not ship in the bundle,
+  so an installed copy that cannot resolve it prints the line with `unknown` in
+  place of the counts rather than dropping it: an unreadable ledger and a clean one
+  are different facts. This bundle asks every project it touches for evidence rather than
   assertion, and until 2026-08-10 it made the opposite claim about itself by saying
   nothing: **one self-observed run by the author, zero blind runs on zero models**, with
   a preflight that reported companion availability in detail and its own confidence not

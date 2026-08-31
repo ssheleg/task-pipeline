@@ -354,7 +354,7 @@ All of:
    the table was written, and the two pass counts recorded.
 3. **Every check this gate leans on has been seen failing** at least once against a
    planted defect (`audit.md` → *Exit criterion*; the procedure, with the commands,
-   is [`gates.md`](gates.md) → *Probing*). An unproven check's green is not
+   is [`probing.md`](probing.md) → *Probing — plant, run, restore*). An unproven check's green is not
    evidence. That includes **the documentation gate** the project's doc map names
    ([`documentation.md`](documentation.md)) — stage 9 ran it, this stage is where it
    is *proven*, and its **ratchet counts are printed beside this verdict**. A

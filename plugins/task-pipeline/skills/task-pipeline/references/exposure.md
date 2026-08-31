@@ -82,9 +82,13 @@ invisible *precisely because nobody is running a pipeline*; a check that only ex
 inside a run can never say *"stop, fourteen things are unconfirmed."* So it takes no
 brief, opens no grill, and writes nothing on its own.
 
-It prints four sections, each read from a file this pipeline already keeps: the exposure
-line and its check-list, the board's open rows by computed priority, the carry-over
-ledgers' unresolved count, and the code graph's staleness where one exists.
+It prints one section per source, each read from a file this pipeline already keeps: the
+exposure line and its check-list, the board's open rows by computed priority, the
+carry-over ledgers' unresolved count, the code graph's staleness where one exists — and
+**abandoned runs**: any run ledger whose last `event:` line is `session-end` short of
+acceptance ([`progress.md`](progress.md) → *The run's own lifecycle*). Before that
+last one, a ledger that simply stopped was indistinguishable from a run still in
+progress, which is exactly the invisibility this mode exists to end.
 
 **Where the operator asks it to file findings**, it appends board rows whose `Source`
 names the checkup and its date — so a row a machine created is distinguishable from one a

@@ -499,7 +499,9 @@ type the run produced, then run the documentation gate and print its ratchet cou
 ## Gates: three axes, and how to build one that cannot lie
 
 **Axis A — the stage gate type.** `auto` = verify the check yourself and stop on
-fail; `manual` = wait for an explicit operator go. An auto gate never substitutes
+fail; `judgment` = a named judge rules where no deterministic check exists, and the
+ruling is recorded as judgement, never as a measurement; `manual` = wait for an
+explicit operator go. Neither of the first two ever substitutes
 for a required manual approval.
 
 **Axis B — where the rule is actually enforced**, and a rule climbs this ladder

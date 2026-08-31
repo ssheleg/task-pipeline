@@ -1,7 +1,8 @@
 ---
 name: task-pipeline
-description: "Use when work changes the repository — feature, fix, refactor, migration, integration, rewrite, adoption or hardening; фича, фикс, рефактор, миграция, интеграция, доработать, починить, внедрить, перевести — or when the output is a finding that lands in it: audit/аудит, bug hunt/проверь ошибки, production check/проверь прод, PR review/ревью PR — or on 'run this through the pipeline' / 'прогони по конвейеру', 'full cycle, the full cycle' / 'полный цикл', /task-pipeline. Runs a substantial task through an intake grill, docs study, brainstorm, spec, plan, build, tests, deploy, post-deploy, docs/wiki sync and acceptance with explicit gates. 'checkup' / 'чекап' reports unconfirmed releases; 'setup' audits existing docs. Not for: answering a question, explaining code, a typo or a one-line edit — say 'без пайплайна' / 'quick' to opt out."
+description: "Use when work changes the repository — feature, fix, refactor, migration, integration, rewrite, adoption or hardening; фича, фикс, рефактор, миграция, интеграция, доработать, починить, внедрить, перевести — or when the output is a finding that lands in it: audit/аудит, bug hunt/проверь ошибки, production check/проверь прод, PR review/ревью PR — or on 'run this through the pipeline' / 'прогони по конвейеру', 'full cycle, the full cycle' / 'полный цикл', /task-pipeline. Runs a substantial task through an intake grill, docs study, brainstorm, spec, plan, build, tests, deploy, post-deploy, docs/wiki sync and acceptance with explicit gates. 'checkup' / 'чекап' reports unconfirmed releases; 'setup' audits existing docs. Not for: answering a question, explaining code, a typo or a one-line edit, a mechanical rename, reconnaissance that lands nothing — say 'без пайплайна' / 'quick' to opt out."
 license: MIT
+compatibility: "Doctrine runs on any agent. The bundled scripts need python3; the run needs git. Missing either degrades, never blocks — the graph verbs and seeded gates go unused, and the run says so."
 ---
 
 # task-pipeline
@@ -27,8 +28,11 @@ that encodes this plugin's own default flow (stage 0 intake + the 1→10 stages
 tabled below) and an optional, toggleable `release` block. Any project replaces it
 wholesale — any number of stages, run by its own skills/agents, with its own gate
 types (see *Bring your own skills*). Each gate has a **type**: `auto` (the
-orchestrator verifies the `check` itself, pass/fail) or `manual` (wait for an
-explicit operator go); which stages are manual is the operator's call. In the
+orchestrator verifies the `check` itself, pass/fail), `judgment` (no complete
+deterministic check exists — a named judge rules, and the ruling is recorded as
+judgement, never as a measurement; `references/gates.md` → *The judgment gate*)
+or `manual` (wait for an explicit operator go); which stages are manual is the
+operator's call. In the
 example's `skills[]`, `task-pipeline:<name>` denotes this skill's own built-in
 doctrine (`references/<name>.md`) and `host:<name>` denotes the host project's own
 command for that job (`references/conventions.md`); everything else is a real skill
@@ -59,7 +63,7 @@ gate stops until it is installed.
 | 3 Spec | `references/spec.md` |
 | 4 Plan | `references/planning.md` |
 | the queue the loop walks | `references/work-graph.md` |
-| 5–8 · how a node is CLOSED — three blind readings at three distances, all three required | `references/certification.md` |
+| 5–8 · how a **work-graph node** is CLOSED — three blind readings at three distances, all three required (ceiling 3); a **prose-plan task** closes through `review.md` instead — one reviewer, five-round cap | `references/certification.md` |
 | 5 Build (worktree, subagents, fix loop) | `references/build.md` + `references/review.md` |
 | 5–6 TDD + suite gate | `references/tdd.md` |
 | 5, 6, 8 The browser — the look, the spec suite, and the difference | `references/browser.md` |
@@ -165,7 +169,9 @@ Three things the grill does beyond clarifying the request:
    the most capable model available, let the operator confirm or override, record
    it. Ask once, here. **The same block carries the run mode**
    (`references/continuity.md`): read `pipeline.json` → `run.loop`; where it is
-   recorded, arm it and print the job id and the cancel command — the config is
+   recorded, arm it **at the point `run.loop.arm` names** — here at preflight, or
+   at stage 2's close for `after-decomposition`, once the queue exists — and when
+   it arms, print the job id and the cancel command; the config is
    the authorization, so re-asking rebuilds the habit it exists to retire. Where
    it is **absent, the mode is off**; recommend it in one line and move on.
    Silence arms nothing, and the mode never collapses a `manual` gate.
@@ -193,9 +199,10 @@ Three things the grill does beyond clarifying the request:
    status column is the resume point (`references/stages.md` → *The program loop*).
 4. Do **not** advance until the stage **gate** passes (`references/stages.md`).
    Honor the gate **type**: for `auto`, verify the gate's `check` yourself and
-   stop/return on fail; for `manual`, present the result and **wait for the
-   operator's explicit "continue"/go** — an auto gate never substitutes for a
-   required manual approval.
+   stop/return on fail; for `judgment`, record the named judge's ruling as
+   judgement, never as a measurement; for `manual`, present the result and
+   **wait for the operator's explicit "continue"/go** — neither of the other
+   two ever substitutes for a required manual approval.
 5. **The cross-cutting rules fire at any stage**, not only here — the Doc Loop, the
    loop guard, the audit's exit, the frozen REQ list, the carry-over ledger, and
    what counts as evidence, and **every gate prints `holds: N`** — what this run left
@@ -217,9 +224,9 @@ capable available — see `references/model-tiering.md`).
 | 3 | Spec | committed + reviewed; UI: chain validated, linter green, scenarios and `SCR-` traced; COPY and VISUAL are a parallel layer after UX, and where both ran their convergence check is recorded | manual |
 | 4 | Plan | parallel-ready, DoD per task; **every edge names what it carries** — the fake-edge test run and its `Edges:` count computed | auto |
 | 5 | Dev | tasks DONE, TDD green per task, branch integrated per the brief; a fanned-out group gets **one convergence check over all its diffs together** before the first worktree lands | auto |
-| 6 | Tests | full suite green, new and changed code covered, every new check probed both ways and asserted on its exit code; **a web surface is checked in a browser, not in the diff** | auto |
+| 6 | Tests | full suite green, new and changed code covered, every new check probed both ways and asserted on its exit code; **a web surface is checked in a browser, not in the diff** — where a browser channel is connected; absent, the weaker claim is recorded | auto |
 | 7 | Lint + deploy | lint clean and suite green before deploy; deploy needs a go, or the brief's specific standing authorization | manual |
-| 8 | Post-deploy | clean boot or an honest degradation report; **a deployed web target is opened, not curled** — a `200` proves the server answered and nothing else | auto |
+| 8 | Post-deploy | clean boot or an honest degradation report; **a deployed web target is opened, not curled** — a `200` proves the server answered and nothing else; where no browser channel is connected, the weaker claim is recorded | auto |
 | 9 | Docs + wiki | every stale row of the stage-0 source ledger updated; the propagation matrix walked for every change type this run produced; the documentation gate green with its ratchets printed; docs, wiki and the code graph synced and checked against each other | auto |
 | 10 | **Acceptance** | the ladder walk ran and its absences became REQ rows; every REQ accounted for with evidence from a check seen failing once; no unresolved ledger row; **every repository clean, pushed and pointed at**; the hand-back written and the environment given back; the retrospective written **last**, and in order | manual |
 
@@ -242,28 +249,34 @@ offers** (currently the latest Opus generation — read that as a tier, not a
 string). **Never hardcode a model id**: generations ship, tiers get renamed, and
 the operator may be on another provider entirely — resolve the top tier available
 at runtime. Stage configs use provider-agnostic tokens (`default` / `inherit`).
+The preflight block to emit, word for word, is `references/model-tiering.md` →
+*Mechanic* — a reminder only: no such tier available means say which one is in
+use and continue. Record the answer in the brief; don't re-ask per stage.
+Stage-5 subagents are pinned to the confirmed model automatically.
 
-> 🧠 **Model for this run:** recommended **`<top tier available>`**. You're on
-> `<current>`. `/model <id>` to switch, or "keep current", or name per-stage
-> overrides. *(Reminder only — if that tier isn't available, say which one you're
-> using and continue.)*
+## Degradation
 
-Record the answer in the brief; don't re-ask per stage. Stage-5 subagents are
-pinned to the confirmed model automatically. Detail: `references/model-tiering.md`.
+- **No python3** → the work-graph verbs and the seeded gate scripts cannot run: the queue degrades to a prose plan, the gates to checklists — said out loud, never silently.
+- **No git** → no worktree isolation and no commit-addressed evidence: the run records the weaker claim instead of pretending to the stronger one.
+- **No browser channel** → a web surface is verified by reading the diff, and the close-out records that as the weaker claim it is.
 
 ## Bring your own skills
 
 The stages above are the **example** flow. A host project owns its pipeline: copy
 `pipeline.example.json` → `pipeline.json`, define its **own** stages (any count),
 point each `skills[]` at what its environment resolves, set each `gate.type`
-(`auto`/`manual`) to fit its process, and toggle its own `release` block. The
+(`auto`/`judgment`/`manual`) to fit its process, and toggle its own `release`
+block. The
 framework ships no fixed stage count and no opinion on which gates are manual —
 `pipeline.schema.json` is the only contract.
 
 ## References
 
-Every reference is routed from the **Built-in doctrine** table above, keyed by
-the stage that sends you there — one home for that mapping rather than two. The
-two config contracts sit beside this file: `pipeline.schema.json` (the universal
-stages + release contract) and `pipeline.example.json` (this plugin's default
-flow as config).
+References are routed from the **Built-in doctrine** table above, keyed by the
+stage that sends you there — one home for that mapping rather than two. The
+exceptions are routed by prose instead: `references/stages.md` (the gate list,
+named at every stage of *How to run*), `references/learned.md` (cited where a
+rule binds), and `references/probing.md` (reached from `references/gates.md`,
+whose checks it proves). The two config contracts sit beside this file:
+`pipeline.schema.json` (the universal stages + release contract) and
+`pipeline.example.json` (this plugin's default flow as config).
