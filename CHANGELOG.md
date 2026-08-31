@@ -56,12 +56,15 @@ why, refuses a declaration that resolves to nothing the plant reads, refuses a s
 branch with no dormancy declaration, and refuses an empty census — because "no anchors
 found" and "the parser matched nothing" are otherwise the same sentence. Four checks
 ride into the suite with it, each watched red before shipping, and `test/anchors_test.py`
-is 18 whole-workflow fixtures, 8 of them watched firing. Twenty of the 35 are watched
-firing, and half of them are retractions of the detector's own drafts: a `{7,40}`
-quantifier read as a year, `\u2192` in a raw string read as 2192, a payload built from
-local strings, a `validate.py | grep` read as a needle, a plant echoing `B-008` into
-its own replacement, and the four blind spots the R-005 reader found — `enumerate()`,
-`pathlib.Path.read_text()`, `re.compile` and an unrecognised heredoc spelling.
+is **44 whole-workflow fixtures, 25 of them watched firing** — a number that itself moved
+three times as the reader found what the census could not see. **Nineteen of the 44 assert SILENCE, and every
+one of those is a retraction** — a `{7,40}` quantifier read as a year, `\u2192` in a raw
+string read as 2192, a payload built from local strings, a `validate.py | grep` read as a
+needle, a plant echoing `B-008` into its own replacement, `json.dump(d, open(p, "w"))`
+unrecognised as a write, a comprehension variable outliving its comprehension, and an
+unquoted `grep` taking a filename for its pattern. The other 25 fire, and four of them
+name blind spots the R-005 reader found: `enumerate()`, `pathlib.Path.read_text()`,
+`re.compile` and a heredoc spelling.
 
 **The R-005 reader found five blocking defects the author's own fixtures did not, and
 this is the part worth keeping.** A dispatched independent reader wrote twenty
@@ -82,6 +85,19 @@ path SOURCE TEXT so a computed path matches itself; it refuses a heredoc spellin
 cannot read rather than reporting silence — while ignoring one quoted inside a payload,
 because a guard reads what would RUN; and it judges a declaration on characters **and**
 distinct words, because sixty dots satisfy a length floor.
+
+**Round two of the same reader found four more, and one of them is this row's own
+class for the third time.** `json.dump(d, open(p, "w"))` was not recorded as a write, so
+39 live plants' own read-backs were being refused — the write side had been extended to
+`Path().write_text()` and not to `json.dump`, two halves of one rule landing unmatched in
+one commit. A loop or comprehension variable kept its file provenance for the rest of the
+body, so an unrelated later local read as file text: 33 of 891 needles depended on it.
+The no-needle disclosure explained 41 plants as *a JSON key, which raises rather than
+passing* over a set of which 7 are JSON looks — so the breakdown is computed now, four
+reasons, none of them a gloss. And the fixture count was **stated as 18/8 in one sentence
+and 35/20 in the next**, which is B-113 itself, third occurrence inside its own fix
+(21 → 24 → 26, then 18/8 → 44/25). Every number in this entry and in the ledger rows is
+now pasted from the command that prints it.
 
 **A pure module for the arithmetic nobody can reach.** The dormant branch cannot fire on
 a healthy machine — all four skip-capable plants ran and their guards fired when the

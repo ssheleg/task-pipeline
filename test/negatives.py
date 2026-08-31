@@ -388,9 +388,14 @@ def main(argv):
             print()
     _line = claim(len(tests), len(dormant), len(props), len(prop_dormant))
     if _line is None:
-        print("INCONCLUSIVE: nothing that ran proved anything — every check present "
-              "either declined to run or none matched. A pass over an empty set is "
-              "the shape this file calls a refused measurement")
+        # Two ways to reach here and both are the same verdict: everything that ran
+        # declined to run, or nothing was present. `PASS: nothing ran` used to be
+        # printed with exit 0 for the second one — a pass over an empty set, which
+        # this file's own comment three lines up calls a refused measurement.
+        print("INCONCLUSIVE: nothing that ran proved anything — "
+              + ("no check matched the filter" if not tests and not props else
+                 "every check present declined to run")
+              + ". A pass over an empty set is not a result")
         return 2
     print("PASS: " + _line)
     return 0

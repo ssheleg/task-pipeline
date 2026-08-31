@@ -599,9 +599,12 @@ instances were caused by the repository getting *healthier* (a re-derived board,
 eval runs, the first honest run stamp), so nothing about them looked like a regression. Every
 needle a plant reads off disk before writing that path is extracted from the AST by
 `test/anchors.py`; one carrying a value a release can move must be derived at run time or
-declared in the plant's own body with what would falsify the declaration. Separately, a plant
-that can print `SKIP` declares the state it cannot construct, and `test/negatives.py` reports
-such a plant by name instead of counting it inside *all N guards provably reject*.
+declared in the plant's own body with what would falsify the declaration. Separately, any check
+that can print `SKIP` — a negative self-test **or a property check** — declares the state it
+cannot construct and what that costs, and `test/negatives.py` reports it by name instead of
+counting it inside *all N guards provably reject* or *N property check(s) printed what they
+assert*. Where nothing that ran proved anything the runner reports INCONCLUSIVE, because a
+pass over an empty set is a refused measurement.
 *(guard: `is anchored on a value a release can move` and `can print SKIP and declares no` and `the anchor census found no negative self-tests`)*
 
 ## Adding or changing doctrine

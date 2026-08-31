@@ -360,6 +360,86 @@ EOF
 ''', True)
 
 
+# -- round two of the same reader: four more blocking shapes ---------------------
+case("json.dump(d, open(p, 'w')) is a write, so the read-back after it is not an anchor", '''
+set -eu
+python3 - <<'EOF'
+import json
+p = "/tmp/fx-copy/pipeline.example.json"
+d = json.load(open(p))
+d["stages"][0]["model"] = "some-vendor-model"
+json.dump(d, open(p, "w"), indent=2)
+assert json.load(open(p))["stages"][0].get("model") == "some-vendor-model 18"
+EOF
+''', False)
+
+case("a comprehension variable's provenance dies with the comprehension", '''
+set -eu
+python3 - <<'EOF'
+t = open("/tmp/fx-copy/README.md", encoding="utf-8").read()
+rows = [ln for ln in t.splitlines() if ln.startswith("|")]
+ln = "a local string that has nothing to do with the file"
+assert "release 1.72.0" not in ln
+EOF
+''', False)
+
+case("a loop variable's provenance dies with the loop body", '''
+set -eu
+python3 - <<'EOF'
+t = open("/tmp/fx-copy/README.md", encoding="utf-8").read()
+for ln in t.splitlines():
+    pass
+ln = "a local string reassigned after the loop"
+assert "release 1.72.0" not in ln
+EOF
+''', False)
+
+case("a comprehension RESULT carries the file onward", '''
+set -eu
+python3 - <<'EOF'
+files = ["/tmp/fx-copy/README.md"]
+texts = {f: open(f, encoding="utf-8").read() for f in files}
+for f, body in texts.items():
+    assert "the 250 guards" in body, "PLANT NO-OP"
+EOF
+''', True)
+
+case("a heredoc opened after an env assignment is counted", '''
+set -eu
+HOOK_INPUT=x python3 - <<EOF
+t = open("/tmp/fx-copy/README.md", encoding="utf-8").read()
+assert "the 250 guards" in t
+EOF
+''', True)
+
+case("a heredoc opened after a pipe is counted", '''
+set -eu
+echo hi | python3 <<'EOF'
+t = open("/tmp/fx-copy/README.md", encoding="utf-8").read()
+assert "the 250 guards" in t
+EOF
+''', True)
+
+case("a `|`-delimited sed address is a needle", '''
+set -eu
+sed -n '|the 250 guards|p' /tmp/fx-copy/README.md
+''', True)
+
+case("an unquoted grep takes the pattern, never the path", '''
+set -eu
+grep -q needle /tmp/fx-copy/docs/2026-08-08-audit-followup-carryover.md
+''', False)
+
+case("a one-line declaration is judged on its own length, not on twice it", '''
+set -eu
+python3 - <<'EOF'
+# anchor: 2026-08-11 — frozen by design, and re-deriving it would be wrong here
+t = open("/tmp/fx-copy/references/residue.md", encoding="utf-8").read()
+assert "Measured 2026-08-11, enumerating" in t, "PLANT NO-OP"
+EOF
+''', True)
+
+
 def _run() -> int:
     bad = 0
     for name, doc, must_fail in CASES:
