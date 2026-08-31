@@ -1,0 +1,109 @@
+{
+  "_note": "Behavioural evaluations for the evidence-docs skill — the ten-canon navigator that ships in this plugin. Same format and dimensions as task-pipeline.evals.json; the negatives are NEAR MISSES on purpose (a commit message and a code comment are the excluded surfaces closest to the trigger ground), because a control that shares no words with the trigger proves nothing about the boundary.",
+  "skill": "evidence-docs",
+  "models": ["haiku", "sonnet", "opus"],
+  "evals": [
+    {
+      "id": "TRIG-01",
+      "category": "should_trigger",
+      "skills": ["evidence-docs"],
+      "query": "запиши решение: внутренние сервисы переходят с REST на gRPC, обратной дороги нет",
+      "expected_behavior": [
+        "Invokes the evidence-docs skill (or its routed documentation doctrine), not a freehand note",
+        "The decision lands in the project's one decision register, append-only, with an id",
+        "The record carries its evidence and its date rather than only the conclusion"
+      ],
+      "why": "«записать решение» is a declared Russian trigger; the failure it guards is a decision written into chat instead of the register."
+    },
+    {
+      "id": "TRIG-02",
+      "category": "should_trigger",
+      "skills": ["evidence-docs"],
+      "query": "Write the acceptance report for the export migration — and make sure every claim in it is actually backed",
+      "expected_behavior": [
+        "Invokes the evidence-docs skill for the canon layer (a claim carries its address; numbers computed, never restated)",
+        "Each verified claim names the check that was seen deciding it; unverified ones are marked as such rather than dropped"
+      ],
+      "why": "An acceptance report is the archetypal will-be-read-as-true document; the canons are its standard."
+    },
+    {
+      "id": "TRIG-03",
+      "category": "should_trigger",
+      "skills": ["evidence-docs"],
+      "query": "Is this verified? The README claims the importer handles 10k rows per second.",
+      "expected_behavior": [
+        "Invokes the evidence-docs skill — the question is whether a claim is documentation or an assertion",
+        "Answers with the claim's evidence condition: what observable signal would license the number, and whether one exists",
+        "Does not re-assert the number without an address"
+      ],
+      "why": "'is this verified' is a declared trigger; the failure is grading the claim by plausibility instead of by evidence."
+    },
+    {
+      "id": "NOTRIG-01",
+      "category": "should_not_trigger",
+      "skills": ["evidence-docs"],
+      "query": "Write a commit message for this diff — it renames the exporter and fixes the retry backoff",
+      "expected_behavior": [
+        "Writes the commit message directly",
+        "Does NOT invoke the evidence-docs skill or demand file:line receipts for a commit message"
+      ],
+      "why": "Near miss by design: a commit message describes a change truthfully but is an excluded surface — demanding canons here teaches routing around them."
+    },
+    {
+      "id": "NOTRIG-02",
+      "category": "should_not_trigger",
+      "skills": ["evidence-docs"],
+      "query": "добавь комментарий в код, почему в этом месте ретрай с экспоненциальной задержкой",
+      "expected_behavior": [
+        "Writes the code comment directly",
+        "Does NOT invoke the evidence-docs skill — a code comment is an excluded surface by the skill's own Not-for list"
+      ],
+      "why": "Near miss: 'почему' invites an evidence reflex, and the boundary says a code comment is not documentation-read-as-true."
+    },
+    {
+      "id": "NOTRIG-03",
+      "category": "should_not_trigger",
+      "skills": ["evidence-docs"],
+      "query": "Draft some rough notes on how we might approach caching — just thinking out loud, no docs",
+      "expected_behavior": [
+        "Produces the draft directly",
+        "Does NOT apply the canons — 'без доков'/'no docs' is the declared opt-out, and a draft is outside the boundary anyway"
+      ],
+      "why": "The refusal phrase plus the draft exclusion; the failure is refusing exploratory writing for want of receipts."
+    },
+    {
+      "id": "AMB-01",
+      "category": "ambiguous",
+      "skills": ["evidence-docs"],
+      "query": "Update the README",
+      "expected_behavior": [
+        "Names the route: a developer README section is direct work, while a claim a reader will take as true (a benchmark, a guarantee) passes the canons",
+        "Does not silently pick one reading of the request"
+      ],
+      "why": "A README holds both excluded and covered content; the observable is naming the split, not the choice itself."
+    },
+    {
+      "id": "COEX-01",
+      "category": "coexistence",
+      "skills": ["evidence-docs", "task-pipeline"],
+      "query": "прогони миграцию через конвейер и запиши архитектурное решение в реестр",
+      "expected_behavior": [
+        "task-pipeline carries the change; the decision record goes through the documentation doctrine evidence-docs routes",
+        "One register entry with an id — not a second decision home invented for the run"
+      ],
+      "why": "The two skills share a plugin and a boundary: the pipeline owns delivery, evidence-docs owns what is written as true."
+    },
+    {
+      "id": "INSTR-01",
+      "category": "instruction_following",
+      "skills": ["evidence-docs"],
+      "query": "Record the decision that we drop Python 3.8 support, and note it was discussed in Slack",
+      "expected_behavior": [
+        "The record is appended to the existing register, never a new file beside it",
+        "A correction or later reversal would be appended, not edited over",
+        "The Slack discussion is cited as the decision's source, not pasted as its evidence"
+      ],
+      "why": "Append-only and one-home are the canons most often broken by a helpful rewrite."
+    }
+  ]
+}

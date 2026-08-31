@@ -1,0 +1,108 @@
+{
+  "_note": "Behavioural evaluations for the project-audit skill. Same format and dimensions as task-pipeline.evals.json. The negatives are NEAR MISSES on purpose — «аудит модуля» against «аудит проекта» is one word apart and routes to a different skill (the pipeline's in-run ladder), which is exactly the boundary the descriptions draw.",
+  "skill": "project-audit",
+  "models": ["haiku", "sonnet", "opus"],
+  "evals": [
+    {
+      "id": "TRIG-01",
+      "category": "should_trigger",
+      "skills": ["project-audit"],
+      "query": "сделай аудит проекта — что реально готово, что наполовину, что сломано?",
+      "expected_behavior": [
+        "Invokes the project-audit skill, not the pipeline's in-run audit ladder",
+        "Starts with discovery (what the project IS) before choosing probes",
+        "Leaves the HTML report and the JSON sidecar; proposes board rows and commits nothing"
+      ],
+      "why": "«аудит проекта» is the declared trigger; the failure is running a fixed checklist or treating it as a change-task."
+    },
+    {
+      "id": "TRIG-02",
+      "category": "should_trigger",
+      "skills": ["project-audit"],
+      "query": "What is actually true of this project right now — what is finished, what is half-built, what has nobody looked at?",
+      "expected_behavior": [
+        "Invokes the project-audit skill — the subject is the whole project, not one change",
+        "Reads production evidence (published artefact vs source, CI history, telemetry presence), not only the working tree"
+      ],
+      "why": "The skill's own opening sentence as a user query; the failure is answering from the README."
+    },
+    {
+      "id": "TRIG-03",
+      "category": "should_trigger",
+      "skills": ["project-audit"],
+      "query": "Run a project health check on this repository and leave me the report",
+      "expected_behavior": [
+        "Invokes the project-audit skill",
+        "Blind probes are rendered as their own section with reasons — a probe that could not look is not a probe that found nothing"
+      ],
+      "why": "'project health check' is a declared trigger; the blind verdict is the design worth probing for."
+    },
+    {
+      "id": "NOTRIG-01",
+      "category": "should_not_trigger",
+      "skills": ["project-audit"],
+      "query": "сделай аудит модуля оплат",
+      "expected_behavior": [
+        "Routes to the pipeline's audit path (a finding that lands in the repository), not to project-audit",
+        "Does NOT start a cold whole-project discovery for a one-module question"
+      ],
+      "why": "Near miss by one word: «аудит проекта» is this skill, «аудит модуля» is one deliverable inside a run — the pipeline's own ladder."
+    },
+    {
+      "id": "NOTRIG-02",
+      "category": "should_not_trigger",
+      "skills": ["project-audit"],
+      "query": "Review PR #24 and tell me what is wrong with it",
+      "expected_behavior": [
+        "Routes to the pipeline's PR-review findings path or answers directly",
+        "Does NOT invoke project-audit — reviewing a diff is its declared Not-for"
+      ],
+      "why": "A diff has a change as its subject; project-audit's subject is the project."
+    },
+    {
+      "id": "NOTRIG-03",
+      "category": "should_not_trigger",
+      "skills": ["project-audit"],
+      "query": "проверь, соответствует ли этот скил стандарту Agent Skills",
+      "expected_behavior": [
+        "Routes to make-skill's audit (/skill-audit), not to project-audit",
+        "Does NOT run whole-project probes over a skill-construction question"
+      ],
+      "why": "The disambiguation table's own row: a skill's construction belongs to make-skill even when the word 'audit' appears."
+    },
+    {
+      "id": "AMB-01",
+      "category": "ambiguous",
+      "skills": ["project-audit"],
+      "query": "проверь проект",
+      "expected_behavior": [
+        "Names the route it is taking in one line — whole-project diagnosis (project-audit) versus a specific check the operator may mean",
+        "Does not silently start either the full audit or a random spot-check"
+      ],
+      "why": "Two words with no object; the observable is the named route, not the choice."
+    },
+    {
+      "id": "COEX-01",
+      "category": "coexistence",
+      "skills": ["project-audit", "task-pipeline"],
+      "query": "Audit the whole project, then fix the three worst things you find",
+      "expected_behavior": [
+        "project-audit produces the findings as proposed board rows, read-only",
+        "The fixes are carried by task-pipeline runs off those rows — the audit itself commits nothing"
+      ],
+      "why": "The seam the two skills share: diagnosis is read-only, delivery is the pipeline's; collapsing them makes the audit unrepeatable."
+    },
+    {
+      "id": "INSTR-01",
+      "category": "instruction_following",
+      "skills": ["project-audit"],
+      "query": "Audit this project",
+      "expected_behavior": [
+        "Discovery runs first and the probes are chosen from the profile, not from a fixed list",
+        "The three-verdict vocabulary is kept: clean, finding, blind — with blind reasons on the page",
+        "Findings leave priced with the board header's declared formula; effort never ranks"
+      ],
+      "why": "The procedure's own load-bearing steps, each of which a helpful shortcut would skip."
+    }
+  ]
+}

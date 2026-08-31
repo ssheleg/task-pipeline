@@ -17,12 +17,17 @@ What it does:
 
 Zero dependencies, same as the validator.
 """
+import glob
 import json
 import os
 import re
 import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+# EVERY suite, discovered — the directory held one suite per skill from
+# 2026-08-31 (evidence-docs and project-audit joined task-pipeline), and a
+# runner pinned to one filename would validate a third of what ships.
+SUITES = sorted(glob.glob(os.path.join(ROOT, "evals", "*.evals.json")))
 SUITE = os.path.join(ROOT, "evals", "task-pipeline.evals.json")
 RESULTS = os.path.join(ROOT, "evals", "RESULTS.md")
 
@@ -34,14 +39,12 @@ REQUIRED = ("should_trigger", "should_not_trigger", "ambiguous",
 MIN_EVALS = 3          # Anthropic: "At least three evaluations created"
 
 
-def main(argv):
+def validate_suite(path):
+    """Every gap in one suite, in a stable order. The rules are the same for
+    every skill's suite — a second rule set would drift."""
     errors = []
-    if not os.path.isfile(SUITE):
-        print(f"FAIL: no suite at {os.path.relpath(SUITE, ROOT)}")
-        return 2
-    suite = json.load(open(SUITE, encoding="utf-8"))
+    suite = json.load(open(path, encoding="utf-8"))
     evals = suite.get("evals") or []
-
     seen = set()
     for e in evals:
         where = e.get("id", "<no id>")
@@ -68,6 +71,18 @@ def main(argv):
     for cat in REQUIRED:
         if cat not in covered:
             errors.append(f"no eval covers {cat!r}")
+    return suite, evals, errors
+
+
+def main(argv):
+    if not os.path.isfile(SUITE):
+        print(f"FAIL: no suite at {os.path.relpath(SUITE, ROOT)}")
+        return 2
+    parsed, errors = [], []
+    for _sp in SUITES:
+        _suite, _evals, _errs = validate_suite(_sp)
+        parsed.append((os.path.basename(_sp), _suite, _evals))
+        errors += [f"{os.path.basename(_sp)}: {e}" for e in _errs]
 
     if errors:
         print("FAIL: evaluation suite invalid")
@@ -75,31 +90,42 @@ def main(argv):
             print("  - " + e)
         return 1
 
+    suite = next(s for n, s, ev in parsed if n == "task-pipeline.evals.json")
+    evals = [e for _, _, ev in parsed for e in ev]
     by_cat = {}
     for e in evals:
         by_cat.setdefault(e["category"], []).append(e)
 
     if "--list" in argv:
-        for cat in REQUIRED:
-            for e in by_cat.get(cat, []):
-                print(f"  {e['id']:<10} {cat:<22} {e['query'][:60]}")
-        print(f"\n{len(evals)} evals across {len(by_cat)} categories")
+        for name, _s, ev in parsed:
+            print(f"{name} — {_s.get('skill', '?')}")
+            for cat in REQUIRED:
+                for e in ev:
+                    if e["category"] == cat:
+                        print(f"  {e['id']:<10} {cat:<22} {e['query'][:60]}")
+        print(f"\n{len(evals)} evals across {len(by_cat)} categories, "
+              f"{len(parsed)} suite(s)")
         return 0
 
     print("=" * 72)
-    print("task-pipeline evaluation protocol")
+    print("task-pipeline plugin evaluation protocol (one section per suite)")
     print("=" * 72)
-    print("Run each query in a FRESH session with the skill installed, once per")
+    print("Run each query in a FRESH session with the pack installed, once per")
     print("model in", suite.get("models", []), "— effectiveness varies by model.")
     print("Record every verdict in evals/RESULTS.md with the date and the model.")
     print("A query you did not run is not a pass; leave it blank and say so.\n")
-    for cat in REQUIRED:
-        print(f"\n--- {cat} ---")
-        for e in by_cat.get(cat, []):
-            print(f"\n[{e['id']}] {e['query']}")
-            print(f"    why: {e['why']}")
-            for b in e["expected_behavior"]:
-                print(f"    [ ] {b}")
+    for name, _s, ev in parsed:
+        print(f"\n=== {name} — {_s.get('skill', '?')} ===")
+        for cat in REQUIRED:
+            group = [e for e in ev if e["category"] == cat]
+            if not group:
+                continue
+            print(f"\n--- {cat} ---")
+            for e in group:
+                print(f"\n[{e['id']}] {e['query']}")
+                print(f"    why: {e['why']}")
+                for b in e["expected_behavior"]:
+                    print(f"    [ ] {b}")
 
     print("\n" + "=" * 72)
     if not os.path.isfile(RESULTS):
@@ -118,6 +144,8 @@ def main(argv):
         if not infence:
             outside.append(ln)
     runs = [l for l in outside if re.match(r"^## 20\d{2}-\d{2}-\d{2}\b", l)]
+    print("suites: " + " · ".join(f"{n.replace('.evals.json', '')} {len(ev)}"
+                                    for n, _s, ev in parsed))
     print(f"suite: {len(evals)} evals · recorded runs: {len(runs)}")
     if not runs:
         print("RESULTS.md carries no dated run — the suite is authored and unexecuted.")
