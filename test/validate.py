@@ -2067,7 +2067,17 @@ if _AT_TEXT is not None:
 _contrib = os.path.join(ROOT, "CONTRIBUTING.md")
 if os.path.isfile(_contrib):
     _ct = open(_contrib, encoding="utf-8").read()
+    # The validator's messages no longer all live in one file: since v1.81.0 the anchor
+    # census prints its own refusals from `test/anchors.py`. Reading only this file made
+    # the guard report a cited literal as non-existent while the check that prints it was
+    # sitting in the same suite — so the corpus is this file PLUS the sibling modules it
+    # imports, discovered rather than listed.
     _self = open(os.path.abspath(__file__), encoding="utf-8").read()
+    for _mod in sorted(set(re.findall(r"^\s*import (\w+)(?:\s+as \w+)?\s*(?:#|$)",
+                                      _self, re.M))):
+        _mp = os.path.join(os.path.dirname(os.path.abspath(__file__)), _mod + ".py")
+        if os.path.isfile(_mp):
+            _self += open(_mp, encoding="utf-8").read()
     _cited = [_lit for _par in re.findall(r"\*\(guard: (.+?)\)\*", _ct, re.S)
                      for _lit in re.findall(r"`([^`]+)`", _par)]
     if len(_cited) < 8:
@@ -2077,8 +2087,8 @@ if os.path.isfile(_contrib):
     for _lit in _cited:
         if _lit not in _self:
             fail("CONTRIBUTING.md names a guard whose message does not appear in "
-                 "test/validate.py: %r — the invariant claims an enforcement that "
-                 "does not exist" % _lit)
+                 "test/validate.py or the sibling modules it imports: %r — the "
+                 "invariant claims an enforcement that does not exist" % _lit)
 
 # A new reference has to REACH the surfaces a human and a foreign agent read. Three
 # instances in two releases: adoption.md, setup.md and portability.md landed and the
@@ -7521,6 +7531,71 @@ if os.path.isfile(_PKG):
         fail("package.json: `test:all` does not include `test:docs`. A gate nobody's "
              "aggregate command calls is a gate that goes quiet the first busy week")
 
+# --- B-113: a plant pinned to a literal is a check the next release switches off -------
+#
+# Four confirmations, and every one of them was a release doing its job. The board
+# re-derived its ages and `bd5`'s needle stopped existing; the first blind eval runs
+# shipped and `pf1`'s guard went dormant; a release finally carried an honest run
+# stamp and `gap1`'s precondition emptied. All four were found by the 35-minute
+# negatives suite, one release after the damage, and until it ran everything was green.
+#
+# `test/anchors.py` answers the row's own question — *is the number the plant WRITES,
+# or the number it LOOKS FOR?* — statically, here, in the cheap gate. A needle read out
+# of a file before the plant writes may not pin a value a release can move unless the
+# plant declares why it cannot be derived. The census also prints itself beside the
+# verdict — plants, needles, pinned, declared, dormant-capable, and how many plants read
+# no file at all — as a disclosure with no floor, no direction and never a target.
+_ANCHOR_LINE = ""
+try:
+    import anchors as _anchors                                       # noqa: E402
+except Exception as _exc:                                            # pragma: no cover
+    _UNLOOKED.append(f"negative-test anchors — the census could not be imported ({_exc})")
+else:
+    if not os.path.isfile(_anchors.WORKFLOW):
+        _UNLOOKED.append("negative-test anchors — no workflow to read")
+    else:
+        _steps = _anchors.census(_anchors.WORKFLOW)
+        for _f in _anchors.findings(_anchors.WORKFLOW, _steps):
+            fail(_f)
+        if not _steps:
+            # Canon 9a one level up: a census over nothing reports nothing wrong, and
+            # "no anchors found" is then the same sentence whether the corpus is clean
+            # or gone. `negatives.py` keeps a floor for the same reason.
+            fail("the anchor census found no negative self-tests in "
+                 f"{os.path.relpath(_anchors.WORKFLOW, ROOT)} — a parser or a format "
+                 "change that quietly matched nothing reads exactly like a clean sweep")
+        # A check that can decline to run must say what state makes it decline. Locally
+        # `negatives.py` prints such a check by name and subtracts it from its own claim;
+        # in CI each one is its own step and a green step carrying SKIP is invisible.
+        # The declaration is the half that is checkable everywhere.
+        #
+        # Over BOTH categories: a property check that printed `SKIP:` needed no
+        # declaration in the first pass and was still counted as one that printed what
+        # it asserts — the same sentence, one category over.
+        _dormant = [s for s in _anchors.every_check(_anchors.WORKFLOW) if s.skip_capable]
+        for _s in _dormant:
+            _chars, _words = _anchors._substantive(_s.dormancy or "")
+            if _chars < _anchors.MIN_REASON or _words < _anchors.MIN_WORDS:
+                fail(f"negative self-test `{_s.label}` can print SKIP and declares no "
+                     "`# dormant-when: <the state it cannot construct, and what it costs>` "
+                     f"worth reading ({_chars} characters, {_words} distinct words, floor "
+                     f"{_anchors.MIN_REASON}/{_anchors.MIN_WORDS}). A check that declines "
+                     "to run is not a check that passed, and a dormancy nobody named is "
+                     "the shape B-113 was filed for. Both numbers are checked because a "
+                     "length threshold alone is satisfied by a row of dots")
+        # A body this census cannot parse is a body it cannot vouch for, and "no anchors
+        # found" would read identically to "could not look" — the one silence this file's
+        # own canon forbids. Named, not counted away.
+        _decl = sum(len(s.declarations) for s in _steps)
+        _ANCHOR_LINE = (f"negative-test anchors: {len(_steps)} plants · "
+                        f"{sum(len(s.needles) for s in _steps)} needles read off disk · "
+                        f"{sum(1 for s in _steps if s.anchors)} pinned to a value a release "
+                        f"can move · {_decl} declared undrivable · {len(_dormant)} can "
+                        f"decline to run · {sum(1 for s in _steps if not s.needles)} yield "
+                        "no text needle (their look is a JSON key, which raises rather "
+                        "than passing)  (disclosure — no floor, no target)")
+
+
 def check_routed_triggers_still_advertised():
     """The family's routing hook fires on words this description has to keep.
 
@@ -7570,6 +7645,8 @@ print("  claim registry — " + " · ".join(_CLAIM_STATES)
 if _LSHAPE:
     # A disclosure, not a ratchet: no floor, no direction, and never a target.
     print("  " + _LSHAPE + "  (disclosure — no floor, no target)")
+if _ANCHOR_LINE:
+    print("  " + _ANCHOR_LINE)
 # The other disclosure: what this run did not look at. Printed even when empty, because
 # "unlooked: 0" and a missing line are the same silence to a reader.
 # The never-count, printed. It was computed and dropped on the floor for one release —
