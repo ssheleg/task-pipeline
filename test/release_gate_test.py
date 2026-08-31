@@ -336,8 +336,31 @@ def observer_still_reads_the_legacy_field():
 
 it("the observer records a green run", observer_records_a_green_run)
 it("the observer records a red run too — it never judges", observer_records_a_red_run)
+def observer_falls_back_by_field_not_by_object():
+    """The real Bash tool_response is {stdout, stderr, interrupted} with no
+    exit_code. `resp or legacy` made a legacy exit_code unreachable behind it —
+    the R-005 reader measured `exit 0` here while the legacy field said 7."""
+    out = observe("npm test", OBSERVED,
+                  extra={"tool_response": {"stdout": "x", "stderr": "", "interrupted": False},
+                         "tool_output": {"exit_code": 7}})
+    assert 'gate:  6 — command "npm test" — exit 7' in out, \
+        "an exit_code behind a code-less tool_response was unreachable: %r" % out
+
+
+def observer_never_records_an_interrupted_gate_as_green():
+    """A gate cut short is not a gate that passed, whatever a stale exit_code
+    says — and a PostToolUseFailure with exit_code 0 was corroborating a green
+    claim before the reader planted exactly that payload."""
+    out = observe("npm test", OBSERVED, event="PostToolUseFailure", error="killed",
+                  extra={"tool_response": {"exit_code": 0, "interrupted": True}})
+    assert "exit 0" not in out and "gate:  6" in out, \
+        "a failed/interrupted gate was recorded as exit 0: %r" % out
+
+
 it("the documented tool_response.exit_code is read", observer_reads_the_documented_payload_field)
 it("the legacy tool_output.exit_code still works as fallback", observer_still_reads_the_legacy_field)
+it("the fallback is by field, not by object", observer_falls_back_by_field_not_by_object)
+it("a failed or interrupted gate never records exit 0", observer_never_records_an_interrupted_gate_as_green)
 it("only the declared command is observed, exactly", observer_ignores_anything_not_declared)
 it("no declaration, no observation", observer_is_silent_without_a_declaration)
 it("the ledger is appended to, never rewritten", observer_appends_and_never_rewrites)

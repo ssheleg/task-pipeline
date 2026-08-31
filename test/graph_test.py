@@ -1824,6 +1824,17 @@ def _():
     assert code != 0 and "cites another tier" in out, out
 
 
+@case("certify: a finding's check citing a tier with a verb the first net missed is still refused")
+def _():
+    reports = three()
+    reports[1]["verdict"] = "fail"
+    f = breaks()
+    f["check"] = "rerun after the seam tier confirmed the contract read"
+    reports[1]["findings"] = [f]
+    code, out, _ = certify(ONE, reports)
+    assert code != 0 and "cites another tier" in out and "findings[0].check" in out, out
+
+
 @case("certify: a finding whose what/fix leans on another tier's verdict was not written blind")
 def _():
     reports = three()

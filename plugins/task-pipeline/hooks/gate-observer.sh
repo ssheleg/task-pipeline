@@ -75,14 +75,26 @@ if not matches:
 failed = bool(data.get("error")) or data.get("hook_event_name") == "PostToolUseFailure"
 # The harness documents the result field as `tool_response`; `tool_output` is the
 # name this script shipped reading, so it stays as a fallback rather than a
-# breaking change. Reading only the wrong name left the exit-code branch dead:
-# every observation degraded to the failed/ok guess, and a command that printed
-# an exit code was recorded from the event name instead.
-out = data.get("tool_response") or data.get("tool_output") or {}
-if isinstance(out, dict) and out.get("exit_code") is not None:
+# breaking change. Reading only the wrong name left the exit-code branch dead.
+# The fallback is BY FIELD, not by object: the real Bash `tool_response` is
+# {stdout, stderr, interrupted} with no exit_code, and `resp or legacy` made a
+# legacy exit_code unreachable behind it — found by the R-005 reader, measured,
+# before this shipped. The same reading found `interrupted`: a gate cut short
+# is not a gate that passed, whatever a stale exit_code says, so a failure
+# event or an interruption is never recorded as exit 0.
+out = {}
+interrupted = False
+for cand in (data.get("tool_response"), data.get("tool_output")):
+    if isinstance(cand, dict):
+        interrupted = interrupted or bool(cand.get("interrupted"))
+        if not out and cand.get("exit_code") is not None:
+            out = cand
+if out:
     code = int(out["exit_code"])
 else:
     code = 1 if failed else 0
+if (failed or interrupted) and code == 0:
+    code = 1
 
 stamp = datetime.datetime.now(datetime.timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
 

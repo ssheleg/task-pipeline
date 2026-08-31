@@ -34,7 +34,7 @@ import tempfile
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 GRAPH_REL = "plugins/task-pipeline/skills/task-pipeline/scripts/graph.py"
-EXPECTED_FIXTURES = 22
+EXPECTED_FIXTURES = 23
 
 # (name, the source to disable, what to replace it with). Each disables exactly one
 # rule; the fixture that must notice is named in the output when it does.

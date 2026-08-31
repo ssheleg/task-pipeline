@@ -139,6 +139,12 @@ if pkg:
     # surface every release must bump, so the header moves in the same change or
     # this fails.
     _vl_p = os.path.join(ROOT, "docs/evidence/verification.md")
+    if pkg_ver and not os.path.isfile(_vl_p):
+        # The R-005 reader measured the first draft: editing the header failed,
+        # DELETING the ledger passed — an `isfile` precondition made the louder
+        # defect the quieter one.
+        fail("docs/evidence/verification.md is absent — the ledger the shipped-state "
+             "guard reads. Removing the file must not be quieter than mis-heading it")
     if pkg_ver and os.path.isfile(_vl_p):
         _vl_head = open(_vl_p, encoding="utf-8").read(2000)
         _vm = re.search(r"^## Shipped state — v(\d+\.\d+\.\d+)", _vl_head, re.M)
@@ -6107,6 +6113,17 @@ if _gate_enum and os.path.isfile(_SK_TXT_P):
                      "pipeline.schema.json's enum holds it — the schema gained a "
                      "type and the doctrine taught the old vocabulary for seven "
                      "releases before anything compared the two")
+        # BOTH directions (learned.md rule 2), and the reverse is the reachable
+        # one: the enum itself is already pinned by an earlier guard, so "the
+        # schema gained a type" fails there first — while SKILL.md teaching a
+        # type the schema does not hold had no guard at all (R-005 reader,
+        # measured). The teaching sentence's own shape is `name` (definition),
+        # so a backticked token followed by an open paren is a taught type.
+        for _tv in re.findall(r"`([a-z]+)`\s*\(", _tm.group(0)):
+            if _tv not in _gate_enum:
+                fail(f"SKILL.md: the gate-type sentence teaches `{_tv}` and "
+                     "pipeline.schema.json's enum does not hold it — a taught type "
+                     "no config can declare is doctrine about nothing")
 
 _loop_s = _loop_block(_schema_j) if _schema_j else None
 if _loop_s is None:
