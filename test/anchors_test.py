@@ -24,6 +24,12 @@ import anchors                                                       # noqa: E40
 
 CASES: list[tuple[str, str, bool]] = []
 
+# The checks `_run()` performs beyond the table below: the empty corpus, and the
+# validator's own refusal of one. Named as a constant because `test/validate.py`
+# computes the shipped fixture count from this file and a magic `+ 2` there would be
+# the restated number all over again.
+EXTRA_CHECKS = 2
+
 
 def case(name: str, body: str, must_fail: bool, step: str = "a plant") -> None:
     """`must_fail` — does the census have to report this workflow?"""
@@ -517,9 +523,9 @@ def _run() -> int:
 
     print()
     if bad:
-        print(f"FAIL: {bad} of {len(CASES) + 2} anchor-census cases behaved wrongly")
+        print(f"FAIL: {bad} of {len(CASES) + EXTRA_CHECKS} anchor-census cases behaved wrongly")
         return 1
-    print(f"PASS: anchors.py — {len(CASES) + 2} cases, "
+    print(f"PASS: anchors.py — {len(CASES) + EXTRA_CHECKS} cases, "
           f"{sum(1 for _n, _d, m in CASES if m)} of them watched firing")
     return 0
 

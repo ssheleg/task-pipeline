@@ -57,8 +57,9 @@ branch with no dormancy declaration, and refuses an empty census — because "no
 found" and "the parser matched nothing" are otherwise the same sentence. Four checks
 ride into the suite with it, each watched red before shipping, and `test/anchors_test.py`
 is **47 whole-workflow fixtures, 27 of them watched firing** — a number that itself moved
-three times as the reader found what the census could not see. **Eighteen of the 45 cases assert SILENCE, and every
-one of those is a retraction** (the other two of the 47 checks are the empty-corpus
+three times as the reader found what the census could not see. **Eighteen of the 45 cases assert SILENCE, and 16 of
+those 18 are retractions** — the other two are positive controls (`a derived needle passes`,
+`a declared anchor is accepted`) (the other two of the 47 checks are the empty-corpus
 census and a source check, which assert neither) — a `{7,40}` quantifier read as a year, `\u2192` in a raw
 string read as 2192, a payload built from local strings, a `validate.py | grep` read as a
 needle, a plant echoing `B-008` into its own replacement, `json.dump(d, open(p, "w"))`
@@ -94,16 +95,19 @@ refused — 39 plants write that way and **none was flagged yet**, which is a la
 positive and is said as one — the write side had been extended to
 `Path().write_text()` and not to `json.dump`, two halves of one rule landing unmatched in
 one commit. A loop or comprehension variable kept its file provenance for the rest of the
-body, so an unrelated later local read as file text. Needles 891 → **830**, and most of that
-drop is a second defect the decomposition found: 51 of the 891 were DOUBLE COUNTS, because
-a comprehension was dispatched twice. 891 shipped as a measurement in a ledger row.
+body, so an unrelated later local read as file text. Needles 891 → **832**, and most of that
+drop is a second defect: a comprehension was dispatched twice, so needles inside its `iter`
+and `ifs` were counted twice over. The size of that share is **not stated here** — two
+methods of counting it disagreed (50 and 88) and neither has a command written beside it,
+which is the same defect one level up. 891 shipped as a measurement in a ledger row.
 The no-needle disclosure explained 39 plants as *a JSON key, which raises rather than
 passing*, and by the classifier that now ships exactly **1 of those 39** was a JSON or
 dict key: 13 were shell-only, 11 read no file, 10 compared whole-file bytes and 4 lost
-provenance at a helper function — so the breakdown is computed now, four
-reasons, none of them a gloss. And the fixture count was **stated as 18/8 in one sentence
+provenance at a helper function — so the breakdown is computed now — **five**
+reasons at this tree, none of them a gloss, and the fifth (`provenance stopped at a helper
+function`) is the one the gloss was hiding. And the fixture count was **stated as 18/8 in one sentence
 and 35/20 in the next**, which is B-113 itself, third occurrence inside its own fix
-(21 → 24 → 26, then 18/8 → 44/25). Every number in this entry and in the ledger rows is
+(21 → 24 → 26, then 18/8 → 44/25 → 47/27). Every number in this entry and in the ledger rows is
 now pasted from the command that prints it.
 
 **A pure module for the arithmetic nobody can reach.** The dormant branch cannot fire on
@@ -122,7 +126,20 @@ exist* while the check printing it sat in the same suite. The corpus is now this
 plus the sibling modules it imports, discovered rather than listed. Invariant **64**
 carries the rule.
 
-Guards: 419 → **422** — the re-pinned needle, the undeclared dormancy and the
+**The loop guard tripped, and the trip is the release's own best evidence.** The fixture
+count returned twice with the same stale figure — inside the paragraph that narrates a
+stale figure as the row's lesson — because each fix APPENDED a corrected sentence instead
+of correcting the one already there. `build.md:417` says a tripped guard is not another
+round: stop, name the two shapes, escalate to the layer that owns the conflict. The layer
+is canon 8, and the escalation is mechanical: **`anchor-census fixtures` and
+`anchor-census fixtures watched firing` are registered claim classes now**, computed from
+the fixture file, with a plant watching them fail. Registered classes 13 → 15. Three
+figures this entry cannot compute are **deleted rather than corrected** — the share of the
+891 that was double-counted, the number of plants narrowing by order, and one the reader
+retracted itself — because a number whose definition is not written beside it is the
+defect this whole release is about.
+
+Guards: 419 → **423** — the re-pinned needle, the undeclared dormancy and the
 declaration that resolves to nothing, plus a property check that the census prints its
 disclosure beside the verdict.
 
