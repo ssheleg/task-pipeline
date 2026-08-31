@@ -383,7 +383,7 @@ assert "release 1.72.0" not in ln
 EOF
 ''', False)
 
-case("a loop variable's provenance dies with the loop body", '''
+case("a name rebound to a local string loses its provenance", '''
 set -eu
 python3 - <<'EOF'
 t = open("/tmp/fx-copy/README.md", encoding="utf-8").read()
@@ -438,6 +438,37 @@ t = open("/tmp/fx-copy/references/residue.md", encoding="utf-8").read()
 assert "Measured 2026-08-11, enumerating" in t, "PLANT NO-OP"
 EOF
 ''', True)
+
+
+# -- round three: scoping a `for` target killed provenance Python itself keeps ----
+case("a name assigned INSIDE a for-body keeps its provenance after the loop", '''
+set -eu
+python3 - <<'EOF'
+import glob
+t = ""
+for f in glob.glob("/tmp/fx-copy/*.md"):
+    t = open(f, encoding="utf-8").read()
+assert "the 250 guards" in t, "PLANT NO-OP"
+EOF
+''', True)
+
+case("a for target is still bound after the loop, as in real Python", '''
+set -eu
+python3 - <<'EOF'
+t = open("/tmp/fx-copy/README.md", encoding="utf-8").read()
+for l in t.splitlines():
+    break
+assert "the 250 guards" in l, "PLANT NO-OP"
+EOF
+''', True)
+
+case("a heredoc named after another command on the line is not python3's own", '''
+set -eu
+if python3 /tmp/fx-copy/test/validate.py; then cat <<EOT > /tmp/out
+nothing to see
+EOT
+fi
+''', False)
 
 
 def _run() -> int:

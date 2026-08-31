@@ -56,9 +56,10 @@ why, refuses a declaration that resolves to nothing the plant reads, refuses a s
 branch with no dormancy declaration, and refuses an empty census — because "no anchors
 found" and "the parser matched nothing" are otherwise the same sentence. Four checks
 ride into the suite with it, each watched red before shipping, and `test/anchors_test.py`
-is **44 whole-workflow fixtures, 25 of them watched firing** — a number that itself moved
-three times as the reader found what the census could not see. **Nineteen of the 44 assert SILENCE, and every
-one of those is a retraction** — a `{7,40}` quantifier read as a year, `\u2192` in a raw
+is **47 whole-workflow fixtures, 27 of them watched firing** — a number that itself moved
+three times as the reader found what the census could not see. **Eighteen of the 45 cases assert SILENCE, and every
+one of those is a retraction** (the other two of the 47 checks are the empty-corpus
+census and a source check, which assert neither) — a `{7,40}` quantifier read as a year, `\u2192` in a raw
 string read as 2192, a payload built from local strings, a `validate.py | grep` read as a
 needle, a plant echoing `B-008` into its own replacement, `json.dump(d, open(p, "w"))`
 unrecognised as a write, a comprehension variable outliving its comprehension, and an
@@ -88,12 +89,18 @@ distinct words, because sixty dots satisfy a length floor.
 
 **Round two of the same reader found four more, and one of them is this row's own
 class for the third time.** `json.dump(d, open(p, "w"))` was not recorded as a write, so
-39 live plants' own read-backs were being refused — the write side had been extended to
+the own-read-back of every plant that writes that way was one string literal from being
+refused — 39 plants write that way and **none was flagged yet**, which is a latent false
+positive and is said as one — the write side had been extended to
 `Path().write_text()` and not to `json.dump`, two halves of one rule landing unmatched in
 one commit. A loop or comprehension variable kept its file provenance for the rest of the
-body, so an unrelated later local read as file text: 33 of 891 needles depended on it.
-The no-needle disclosure explained 41 plants as *a JSON key, which raises rather than
-passing* over a set of which 7 are JSON looks — so the breakdown is computed now, four
+body, so an unrelated later local read as file text. Needles 891 → **830**, and most of that
+drop is a second defect the decomposition found: 51 of the 891 were DOUBLE COUNTS, because
+a comprehension was dispatched twice. 891 shipped as a measurement in a ledger row.
+The no-needle disclosure explained 39 plants as *a JSON key, which raises rather than
+passing*, and by the classifier that now ships exactly **1 of those 39** was a JSON or
+dict key: 13 were shell-only, 11 read no file, 10 compared whole-file bytes and 4 lost
+provenance at a helper function — so the breakdown is computed now, four
 reasons, none of them a gloss. And the fixture count was **stated as 18/8 in one sentence
 and 35/20 in the next**, which is B-113 itself, third occurrence inside its own fix
 (21 → 24 → 26, then 18/8 → 44/25). Every number in this entry and in the ledger rows is
