@@ -592,6 +592,18 @@ file about itself. Checked in the live retro and in `templates/retro.md`, which 
 false bound into every host project.
 *(guard: `declares the bound` and `and nothing enforces it`)*
 
+**64. A negative self-test may not promise that the tree will not change, and a plant that
+declines to run is not a plant that passed.** B-113, confirmed four times: a needle pinned to a
+value a release moves stops landing, and reports green while it does — and three of the four
+instances were caused by the repository getting *healthier* (a re-derived board, the first blind
+eval runs, the first honest run stamp), so nothing about them looked like a regression. Every
+needle a plant reads off disk before writing that path is extracted from the AST by
+`test/anchors.py`; one carrying a value a release can move must be derived at run time or
+declared in the plant's own body with what would falsify the declaration. Separately, a plant
+that can print `SKIP` declares the state it cannot construct, and `test/negatives.py` reports
+such a plant by name instead of counting it inside *all N guards provably reject*.
+*(guard: `is anchored on a value a release can move` and `can print SKIP and declares no` and `the anchor census found no negative self-tests`)*
+
 ## Adding or changing doctrine
 
 - **Change one idea per PR.** These files are read by agents under load; a PR that

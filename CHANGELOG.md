@@ -1,5 +1,108 @@
 # Changelog
 
+## v1.81.0 — the anchors are derived, and a dormant plant stops reading as a pass
+
+Board row **B-113**, filed 2026-08-22 and confirmed four times since: *negative-test
+anchors are pinned to literals that the releases they guard move, so a release
+disarms its own checks.* Every confirmation had the same cause and the same reason
+nobody noticed — the plants were disarmed by the repository getting **healthier**.
+The board re-derived its ages and `bd5`'s needle stopped existing; the first blind
+eval runs shipped and `pf1`'s guard went dormant; a release finally carried an honest
+run stamp and `gap1`'s precondition emptied. All four were found by the 35-minute
+negatives suite at release time, one release after the damage, and until it ran
+everything was green.
+
+**The census, measured rather than estimated.** `test/anchors.py` reads all 422
+negative self-tests out of the workflow and answers the row's own question — *is the
+number the plant WRITES, or the number it LOOKS FOR?* — from the AST rather than by
+grep. A needle is only what a plant reads out of a file, before it writes that path:
+provenance is tracked from `open(...).read()` through derived names, read-backs are
+tracked per path (a plant-wide "after the first write" rule exempts `pf1`'s second
+file, which is a genuine anchor), regex shape is stripped (`[0-9a-f]{7,40}` is a
+shape, `\u2192` in a raw string is an escape and not the year 2192), and a
+`validate.py | grep 'message'` is assertion 3 rather than a needle. Counted over the
+corpus at the commit this release branched from: **26 of 419 plants pinned a value a
+release can move.** The row's own count of 27 came from a grep that both over- and
+under-reported — it missed `bd5`'s single-digit `| 1 | **6** |` entirely — and this
+release's own first figure of 21 was wrong for the same reason one level in: the
+detector could not see a needle read through `enumerate()`, `pathlib` or a compiled
+pattern. The R-005 reader found that by fixture, and it is why the number moved twice
+before it was true.
+
+**25 of the 26 are derived now**, one declared. Each reads its anchor out of the tree at run
+time: the high-water mark by shape, the rule number the stage map binds, the seeded
+templates' open row and worked example, the carry-over ledgers' board pointers, the
+live board's rows, the criterion numbers, the caps, the container count and its date,
+the recipe fence. The live-board plants were the sharpest: `bd10` pinned `| B-008 |`
+and `tbl`/`tbl2` pinned `| B-015 |`, so all three would have stopped landing the day
+those rows closed. One literal stays and says so: `res15` pins `^13\.` because the
+criterion NUMBER is the *guard's* contract — `test/validate.py` locates the teardown
+criterion as `^13\.` and its refusal names 13 — and deriving it would prove some other
+criterion's guard fired instead.
+
+**Dormant is no longer counted as passing.** `test/negatives.py` folded every plant
+that printed `SKIP` into *all N guards provably reject their planted defect*: a check
+that could not construct its precondition, reported inside the claim that every check
+rejected one. Skips now have their own bucket, print with the reason they gave, and
+the aggregate says *N of M · K DORMANT, named above — not counted as passing*. In CI
+each plant is its own step and a green step carrying SKIP is invisible, so the half
+that is checkable everywhere is the declaration: every plant that can decline to run
+carries `# dormant-when: <the state it cannot construct, and what that costs>`, and
+all four now do.
+
+**The class is self-reporting, in the cheap gate rather than the 35-minute one.**
+`test/validate.py` refuses a plant whose needle pins a moving value unless it declares
+why, refuses a declaration that resolves to nothing the plant reads, refuses a skip
+branch with no dormancy declaration, and refuses an empty census — because "no anchors
+found" and "the parser matched nothing" are otherwise the same sentence. Four checks
+ride into the suite with it, each watched red before shipping, and `test/anchors_test.py`
+is 18 whole-workflow fixtures, 8 of them watched firing. Twenty of the 35 are watched
+firing, and half of them are retractions of the detector's own drafts: a `{7,40}`
+quantifier read as a year, `\u2192` in a raw string read as 2192, a payload built from
+local strings, a `validate.py | grep` read as a needle, a plant echoing `B-008` into
+its own replacement, and the four blind spots the R-005 reader found — `enumerate()`,
+`pathlib.Path.read_text()`, `re.compile` and an unrecognised heredoc spelling.
+
+**The R-005 reader found five blocking defects the author's own fixtures did not, and
+this is the part worth keeping.** A dispatched independent reader wrote twenty
+fixtures against the census and nineteen of them slipped past it. Provenance was lost
+through `enumerate()`, and **two live plants — `wv1` and `wv2` — were still pinned to
+`B-005` behind that blind spot** while the census called the corpus clean; the same for
+`pathlib.Path(...).read_text()` (seven plants) and `re.compile` (one). `bd2` and `bd13`
+had collapsed onto one row, so the dangling-id guard's well-formed branch went unprobed
+and `bd13` no longer proved what its name claims. And three documents restated a census
+of 21 that the detector itself put at 24. All five are closed, each with its own
+fixture; the true figure moved **21 → 24 → 26** as the detector stopped being blind, and
+that is the whole argument for the rule the reader exists to serve.
+
+Consequently the census now reads provenance through builtin wrappers, `pathlib`,
+`with`-handles, compiled patterns, `json.load`/`yaml.safe_load` and their structured
+looks, `sed`, `awk`, an unquoted `grep` and a `subprocess` argv; it keys read-backs by
+path SOURCE TEXT so a computed path matches itself; it refuses a heredoc spelling it
+cannot read rather than reporting silence — while ignoring one quoted inside a payload,
+because a guard reads what would RUN; and it judges a declaration on characters **and**
+distinct words, because sixty dots satisfy a length floor.
+
+**A pure module for the arithmetic nobody can reach.** The dormant branch cannot fire on
+a healthy machine — all four skip-capable plants ran and their guards fired when the
+reader drove them end to end, because the runner rebuilds `.git` in its snapshot and CI
+fetches tags. So the two declarations that claimed otherwise were corrected after
+measurement, and `verdict()` and `claim()` became pure functions with
+`test/runner_test.py` calling them directly: 14 cases, two of them the empty-set branch
+that used to print `PASS: K DORMANT` over nothing at all.
+
+**One defect this change surfaced in a neighbour, fixed in the same commit.**
+`CONTRIBUTING.md`'s invariant list cites the guard literal that enforces each entry, and
+`test/validate.py` looked for those literals in its own source only — so the first
+citation of an anchors-census refusal was reported as *an enforcement that does not
+exist* while the check printing it sat in the same suite. The corpus is now this file
+plus the sibling modules it imports, discovered rather than listed. Invariant **64**
+carries the rule.
+
+Guards: 419 → **422** — the re-pinned needle, the undeclared dormancy and the
+declaration that resolves to nothing, plus a property check that the census prints its
+disclosure beside the verdict.
+
 ## v1.80.0 — the doctrine pack: one home per rule, and the boundaries said out loud
 
 The largest doctrine reconciliation since the corpus was audited whole. The
