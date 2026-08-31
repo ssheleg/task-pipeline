@@ -6792,7 +6792,7 @@ jobs:
           set -eu
           rm -rf /tmp/ri03b-copy && cp -R . /tmp/ri03b-copy
           python3 - <<'EOF'
-          p = "/tmp/ri03b-copy/plugins/task-pipeline/skills/task-pipeline/references/gates.md"
+          p = "/tmp/ri03b-copy/plugins/task-pipeline/skills/task-pipeline/references/probing.md"
           t = open(p, encoding="utf-8").read()
           n = "asserts its plant landed"
           assert n in t, "PLANT DID NOT LAND: ri03b"
