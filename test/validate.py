@@ -514,11 +514,41 @@ if os.path.isfile(_skm):
 # totaliser disarms both classes on the surfaces their own incidents happened on, including
 # the Cursor rule's bare *Gates: three axes*. Dated items in the registers are exempt for a
 # different reason (`_is_dated_record`).
+# The checks `anchors_test._run()` performs beyond its `case(...)` table. Read from
+# that file, never typed here: a magic `+ 2` would be the restated number again.
+_EXTRA_ANCHOR_CHECKS = 0
+_AT_P = os.path.join(ROOT, "test", "anchors_test.py")
+if os.path.isfile(_AT_P):
+    _at_m = re.search(r"(?m)^EXTRA_CHECKS\s*=\s*(\d+)",
+                      open(_AT_P, encoding="utf-8").read())
+    _EXTRA_ANCHOR_CHECKS = int(_at_m.group(1)) if _at_m else 0
+# The fixture rows: one `case(` per case, and a case that must FIRE ends its payload
+# with `, True)`.
+_AT_CASE = r"^case\("
+_AT_FIRING = r"^" + "'''" + r"\s*,\s*True\)\s*$"
+
 _CLAIM_REGISTRY = [
     ("negative self-tests",
      r"\b" + _NUM + r"\+?\s+(?:of\s+\d+\s+)?(?:structural\s+)?guards\b(?!\s+behind)",
      lambda: _neg_n,          # one source: computed once above, not a second identical regex
      "two living documents claimed 46 after the suite reached 50"),
+
+    # B-113's own class, registered after it recurred FOUR times inside its own fix.
+    # The fixture count was written 18/8 in one sentence and 35/20 in the next, then
+    # survived two more reader rounds in the very paragraph that narrates it as the
+    # defect — because each fix APPENDED a corrected sentence instead of correcting
+    # the one already there. Canon 8 is the only ending that holds: the number is
+    # computed from the fixture file, so no document can restate it wrongly again.
+    ("anchor-census fixtures",
+     r"\b" + _NUM + r"\s+whole-workflow\s+fixtures\b",
+     lambda: _count_re("test/anchors_test.py", _AT_CASE) + _EXTRA_ANCHOR_CHECKS,
+     "the count was written 18/8 in one sentence and 35/20 in the next, and the "
+     "closure line narrating that defect kept 18/8 for two more rounds"),
+
+    ("anchor-census fixtures watched firing",
+     r"\b" + _NUM + r"\s+(?:of\s+)?(?:them\s+)?watched\s+firing\b",
+     lambda: _count_re("test/anchors_test.py", _AT_FIRING),
+     "the other half of the same sentence, and it moved with it every time"),
 
     ("rules in learned.md",
      r"\b" + _NUM + r"\s+rules\s+earned\b",

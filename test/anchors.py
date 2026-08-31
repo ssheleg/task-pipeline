@@ -392,9 +392,10 @@ class _Plant(ast.NodeVisitor):
         # NOT scoped, because Python does not scope it: a `for` target stays bound after
         # the loop, and so does anything the body assigned. Restoring the whole `reads`
         # map at the end of the body was the fix's own overreach — it silenced a look at
-        # a name the body had just read a file into (17 live plants assign inside a
-        # for-body, and three survived only because the same name was also bound
-        # before the loop: luck, not design). What the FALSE POSITIVE actually needed is
+        # a name the body had just read a file into (18 plants assign a name inside a
+        # for-body, across 24 such loops, and three survived only because the same name
+        # was also bound before the loop: luck, not design). What the FALSE POSITIVE
+        # actually needed is
         # in `_bind`: a rebinding to something with no provenance CLEARS it.
         src = self._file_src(node.iter)
         if src:
