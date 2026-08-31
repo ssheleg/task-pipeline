@@ -549,8 +549,14 @@ SEVERITIES = ("breaks", "risk")
 # A tier report that quotes another tier's verdict was not written blind. Cheap
 # to detect and worth detecting: the failure it prevents is three reports that
 # agree because the second two read the first.
-CROSS_TIER = re.compile(r"\b(?:unit|seam|product)\s+tier\s+(?:passed|failed|says)"
-                        r"|\btier\s+\d\s+(?:passed|failed)"
+# The verb set was `passed|failed|says` and the R-005 reader measured five
+# citations sliding past it ("the seam tier confirmed…", "the unit tier said…",
+# "the unit tier's verdict…"). Widened to the tense and possessive forms the
+# reader planted; still a closed list on purpose — a looser net here starts
+# matching a report's honest prose about its OWN tier.
+CROSS_TIER = re.compile(r"\b(?:unit|seam|product)\s+tier(?:'s)?\s+"
+                        r"(?:passed|failed|says|said|confirm\w*|verdict|report)"
+                        r"|\btier\s+\d\s+(?:passed|failed|says|said|confirm\w*)"
                         r"|as\s+the\s+(?:unit|seam|product)\s+tier", re.I)
 
 
@@ -648,9 +654,16 @@ def tier_violations(t):
                 out.append("tier report `%s[%d]` cites another tier's verdict (%r) — the "
                            "three run blind, because three reports that read each other "
                            "are one opinion with three signatures" % (k, i, e.strip()[:70]))
-    for i, f in enumerate(findings):
-        for k in ("what", "fix"):
-            v = f.get(k) if isinstance(f, dict) else None
+    # Enumerated over the RAW list, so the index in this refusal and the index
+    # in the shape refusals above name the same object — the filtered list
+    # renumbered them (R-005 reader). `check` and `where` scan too: `check` is
+    # mandatory on every breaks finding, so it is the field a failing tier most
+    # reliably writes prose into.
+    for i, f in enumerate(t["findings"]):
+        if not isinstance(f, dict):
+            continue
+        for k in ("what", "fix", "check", "where"):
+            v = f.get(k)
             if isinstance(v, str) and CROSS_TIER.search(v):
                 out.append("tier report `findings[%d].%s` cites another tier's verdict "
                            "(%r) — the three run blind, because three reports that read "
