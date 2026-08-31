@@ -158,7 +158,11 @@ class _Plant(ast.NodeVisitor):
       plant confirming its own landing, and its literal is the planted value by
       construction. The path is keyed by its **source text** when it is not a plain
       constant (`ast.unparse`), so `p = d + "/README.md"` matches itself and a
-      legitimate write-then-assert plant is not refused.
+      legitimate write-then-assert plant is not refused. **The reach that buys:** two
+      different files behind one unresolvable expression share a key, so a write to the
+      first exempts a read of the second. Refusing a real plant is the costlier error —
+      that is how a guard gets switched off — so the exemption is deliberately the wide
+      one, and this sentence is the record of the trade.
 
     A body this module cannot read is counted, never skipped: `parse_failures`
     surfaces as a refusal, because "no anchors found" and "could not look" are
@@ -327,6 +331,11 @@ class _Plant(ast.NodeVisitor):
         src = self._file_src(value)
         if src:
             self.reads[target.id] = src
+        else:
+            # A name rebound to something that came off no disk carries no provenance.
+            # Without this a loop variable's provenance outlived every later use of the
+            # name, and an unrelated local read as file text.
+            self.reads.pop(target.id, None)
         strs = self._strs(value)
         if len(strs) == 1 and isinstance(value, (ast.Constant, ast.JoinedStr, ast.BinOp)):
             self.consts[target.id] = strs[0]
@@ -380,19 +389,17 @@ class _Plant(ast.NodeVisitor):
                 self.reads[e.id] = src
 
     def visit_For(self, node):
-        # SCOPED. A loop variable that keeps its provenance for the rest of the body
-        # makes an unrelated later local read as file text — 33 of 891 needles depended
-        # on exactly that, and the R-005 reader measured it by scoping and re-counting.
-        _saved = dict(self.reads)
+        # NOT scoped, because Python does not scope it: a `for` target stays bound after
+        # the loop, and so does anything the body assigned. Restoring the whole `reads`
+        # map at the end of the body was the fix's own overreach — it silenced a look at
+        # a name the body had just read a file into (17 live plants assign inside a
+        # for-body, and three survived only because the same name was also bound
+        # before the loop: luck, not design). What the FALSE POSITIVE actually needed is
+        # in `_bind`: a rebinding to something with no provenance CLEARS it.
         src = self._file_src(node.iter)
         if src:
             self._bind_targets(node.target, src)
-        for _n in node.body:
-            self.visit(_n)
-        self.reads = _saved
-        for _n in node.orelse:
-            self.visit(_n)
-        self.visit(node.iter)
+        self.generic_visit(node)
 
     visit_AsyncFor = visit_For
 
@@ -617,8 +624,12 @@ class Step:
         # `HOOK_INPUT=x python3 - <<EOF` and `echo hi | python3 <<'EOF'`, which open a
         # heredoc, from `"          python3 - <<'XEOF'\n"`, which is `ri13`'s payload
         # quoting one inside a string.
+        # Anything may precede the interpreter — an env assignment, a pipe — but nothing
+        # may sit BETWEEN it and its `<<`, or `if python3 …/validate.py; then cat <<EOT`
+        # counts as a python heredoc. And no QUOTE may precede it, which is what keeps
+        # `ri13`'s payload — a heredoc opener quoted inside a string — from counting.
         _opened = len([ln for ln in script.splitlines()
-                       if re.match(r"""[^"'#\n]*\bpython3?\b[^"'\n]*<<""", ln)])
+                       if re.match(r"""[^"'#\n]*\bpython3?\b\s*-?\s*<<""", ln)])
         _read = 0
         for m in HEREDOC_RE.finditer(script):
             _read += 1
@@ -694,8 +705,13 @@ def no_needle_breakdown(steps) -> dict:
         reads = bool(re.search(r"read_text|json\.load|\.read\(\)|safe_load|readlines",
                                s.script))
         raw = bool(re.search(r'open\([^)]*"rb"\)|_orig_bytes', s.script))
+        # A helper function is the one cause this census cannot follow, and labelling
+        # three such plants "a JSON key, which raises" was right about their shape and
+        # wrong about why they are here — the reason a reader would act on.
+        helper = bool(re.search(r"(?m)^\s*def \w+\(", s.script))
         k = ("shell only, no python body" if not has_py else
              "a python body that reads no file" if not reads else
+             "provenance stopped at a helper function" if helper else
              "a whole-file byte comparison" if raw else
              "a JSON or dict key, which raises when it goes stale")
         out[k] = out.get(k, 0) + 1
