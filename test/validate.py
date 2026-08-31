@@ -133,6 +133,24 @@ if pkg:
         fail("package.json: missing version")
     elif plg_ver and pkg_ver != plg_ver:
         fail(f"version mismatch: package.json={pkg_ver!r} plugin.json={plg_ver!r}")
+    # The verification ledger's `Shipped state` header names the release its rows
+    # are read against, and it sat SIX releases stale (v1.72.0 under a v1.79.1
+    # tree) with nothing comparing it — TP2-73. package.json is the version
+    # surface every release must bump, so the header moves in the same change or
+    # this fails.
+    _vl_p = os.path.join(ROOT, "docs/evidence/verification.md")
+    if pkg_ver and os.path.isfile(_vl_p):
+        _vl_head = open(_vl_p, encoding="utf-8").read(2000)
+        _vm = re.search(r"^## Shipped state — v(\d+\.\d+\.\d+)", _vl_head, re.M)
+        if _vm is None:
+            fail("docs/evidence/verification.md: no `## Shipped state — vX.Y.Z` header — "
+                 "a ledger that does not say which artifact its rows are read against "
+                 "is a ledger nobody can navigate to")
+        elif _vm.group(1) != pkg_ver:
+            fail(f"docs/evidence/verification.md: `Shipped state — v{_vm.group(1)}` against "
+                 f"package.json {pkg_ver} — the header sat six releases stale once already; "
+                 "bump it in the same change as the version, or the ledger claims a state "
+                 "nobody shipped")
     bin_map = pkg.get("bin") or {}
     if not bin_map:
         fail("package.json: missing bin entry")

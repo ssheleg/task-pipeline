@@ -1,6 +1,12 @@
 # Verification — task-pipeline
 
-## Shipped state — v1.72.0
+## Shipped state — v1.79.1
+
+The version above is the release this ledger's rows are read against, and since
+2026-08-31 it is **gated, not remembered**: `test/validate.py` compares it to
+`package.json` on every run, because it had silently sat six releases stale
+(v1.72.0 under a tree at v1.79.1) — a ledger claiming a shipped state nobody
+could navigate to.
 
 This file recorded no version at all until 2026-08-17, so nothing said which artifact its rows were confirmed against — a ledger whose
 own rule is that a row sits at `never` until somebody watched its check pass on **what shipped**.
@@ -34,6 +40,12 @@ The umbrella's disclosure now reports that gap for every member on each `npm tes
 > stamp for a release that was never run — `docs/evidence/retro.md` → *Releases that carry no
 > stamp* records that gap and `B-106` carries it. The evidence for this session lives in
 > `docs/evidence/backlog.md`, per row, each naming the plants that were watched refusing it.
+>
+> **`v1.76.0` (2026-08-23, the project-audit skill) likewise wrote no rows here** — noted
+> 2026-08-31 beside the note above so the absence is a statement rather than an oversight:
+> that release shipped a third skill through guard work with no brief and no REQ table, and
+> this ledger's own rule is that a row whose id is in no brief is a row about nothing. Its
+> evidence lives in the run stamp and `CHANGELOG.md` → *v1.76.0*.
 >
 > **`Environment` arrived on 2026-08-20, and every row that predates it reads `—`.** B-099's
 > other half: the ledger recorded *which tree* a check saw and never *where it ran*, so a smoke
@@ -197,3 +209,5 @@ The umbrella's disclosure now reports that gap for every member on each `npm tes
 | REQ-005 | The shipped example demonstrates the default it claims: `run.loop.mode` is `off` under the note saying so, and stage 10 orders stamp → prune → entry with the sixty-day cold clause | `2026-08-29-wave1-gate-fixes` | v1.79.0 | — | — | pass | never | TP1-01 · TP1-02 · `npm test` validates the example against `pipeline.schema.json`; the prune-first order was the deadlock `docs/evidence/retro.md` header names |
 | REQ-006 | Three stage-0 surfaces (`templates/retro.md`, `references/knowledge-sources.md`, `templates/brief.md`) instruct reading standing instructions + run stamps in full and QUERYING the Recent log, matching `references/retrospective.md` and the command surface | `2026-08-29-wave1-gate-fixes` | v1.79.0 | — | — | pass | never | TP1-03 · each contradicted its own file (retro.md:34, knowledge-sources.md:69-71); swept for siblings — the command surface already carried the correct wording |
 | REQ-007 | `CHANGELOG.md` leads with its H1, v1.78.0's split entry is whole again, and the two commits that sat unreleased (`a34ebf6` prioritisation, `2a40ef0` stages) share the v1.79.0 heading with a stated guard count | `2026-08-29-wave1-gate-fixes` | v1.79.0 | — | — | pass | never | TP2-81 · TP2-82 · the topmost-section guard reads `Guards: 413 → 417` and compares it to the workflow on every `npm test` |
+| REQ-001 | Supersedes the `2026-08-17-role-agent-graph` row above (frozen at `Shipped in: unreleased`): the work shipped in **v1.72.0** — `git tag --contains 8b7de18` resolves it — and the cell was never revisited after the tag was cut | `2026-08-17-role-agent-graph` | v1.72.0 | `8b7de18` | — | pass | never | TP2-74 · appended 2026-08-31; the original row is a record and stays, this row is where the shipping tag lives |
+| REQ-001 | Supersedes the `2026-08-19-residue-record` row above (frozen at `Shipped in: unreleased`): the work shipped in **v1.72.0** — `git tag --contains f0402c2` resolves it | `2026-08-19-residue-record` | v1.72.0 | `f0402c2` | — | pass | never | TP2-74 · appended 2026-08-31; same supersession shape as the row above |
