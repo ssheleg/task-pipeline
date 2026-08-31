@@ -1,5 +1,84 @@
 # Changelog
 
+## v1.80.0 — the doctrine pack: one home per rule, and the boundaries said out loud
+
+The largest doctrine reconciliation since the corpus was audited whole. The
+wave-2/3 audit read all ~717KB of shipped doctrine against itself and this
+release closes its deferred pack: every contradiction between a short-form
+gate and its long form, every count restated where a list already was the
+count, and the two closure protocols that had no boundary sentence between
+them.
+
+**Two closure protocols, one boundary.** A work-graph node closes through the
+three blind tiers and `graph.py certify` (ceiling 3); a prose-plan task closes
+through `build.md` §4.4's single reviewer (five-round cap). Both were true and
+nothing said which applied — a run could pick whichever was cheaper at the
+moment of closing. The boundary sentence now lives in `SKILL.md`'s routing
+row, `certification.md` and `build.md`: the artifact the queue is decides.
+
+**The COPY/VISUAL track doctrine moved into `spec.md` whole** — its one home —
+and `stages.md`'s stage 3 keeps a routed summary; the example config's stage-3
+check now demands the tracks and their convergence record. `references/
+probing.md` is new: the four probe-authoring sections extracted from
+`gates.md` (plant/run/restore, how a probe rots, the neighbour probe, the
+landed-mutation rule), routed from the gate doctrine they prove; the guards
+and plants that read those sections moved with them, and the bundle's
+reference-file counts were re-derived to 38 by the registry that refuses a
+stale one.
+
+**The `judgment` gate type reaches every surface that taught `auto`/`manual`**
+— SKILL.md (three places), stages.md, the command, the Cursor rule, README,
+plugin.json — and a new cross-surface guard compares the schema's enum against
+the sentence that teaches it, so the next type cannot sit seven releases in
+the schema alone. The browser gate cells say when the look binds and what the
+weaker claim is; brainstorm's GATE names the queue-artifact and loop-arming
+criteria; the loop arms where `run.loop.arm` says, not unconditionally at
+preflight; stage-0 seeding covers the three gate scripts stages 5–10 run;
+the template board's State vocabulary admits `parked`/`waived`; project-audit
+prices with the board header's declared formula and never effort, and its
+disambiguation table gains the fifth audit (`/seo-aeo-audit`). Four domain
+companions (sheleg-dev, agent-stack, telegram-dev, seo-aeo-audit) enter the
+matrix, the preflight block and the stages they bind — recommended, never a
+gate. `model-tiering.md` gains the per-generation stress-test rule and the
+judgment gate the rubric-steering note, both with dated sources.
+
+**Mechanics: the PR gate now runs what `npm test` documents.** `graph_test.py`
+and `project_audit_test.py` reached CI only at tag time; a PR breaking
+`graph.py` merged green. The blind rule covers every prose field of a tier
+report — a cross-tier citation hiding in `scope` or a finding's `what`/`fix`
+is refused, fixtured, and mutation-proven (17/17 noticed, control 22).
+`gate-observer.sh` reads the documented `tool_response` payload with
+`tool_output` as fallback — the exit-code branch had been dead on the
+documented shape — with fixtures on both shapes, each watched red against the
+reverted hook. The upstream strict validation is its own CI job, so an npm
+outage and a house failure stop masking each other.
+
+**Ledgers: the board re-ranks on real ages.** Every open row's Age and Prio
+re-derived against its Source date — rows filed 08-17/08-20 still said Age 0
+on 08-29 under a header claiming re-derivation. The verification ledger's
+`Shipped state` header is gated against `package.json` (it had sat six
+releases stale), the two 2026-08-22 run stamps stop claiming retro entries
+that do not exist, the two rows frozen at `unreleased` gain superseding rows
+naming v1.72.0, and v1.76.0's absence from the ledger is stated beside the
+08-20 note. Five board rows filed from the harness-engineering articles
+(B-114…B-117) and from this release's own probes (B-118).
+
+**Evals: three blind runs, one per model.** evidence-docs and project-audit
+gain behavioural suites with near-miss negatives («аудит модуля» one word
+from «аудит проекта»); `evals/run.py` discovers every suite instead of the
+one filename it shipped pinned to; and 147 fresh-subagent probes (49 queries
+× haiku/sonnet/opus) produced the first dated blind rows in both RESULTS
+files — opus 42/42, sonnet 40/42, haiku 39/42, with haiku's three misses
+sharing one shape that is now B-118. Method and limits stated in the ledgers,
+INSTR cases recorded as not reproducible rather than guessed.
+
+`compatibility` frontmatter on task-pipeline and project-audit; a 3-line
+Degradation block in SKILL.md paid for by the model blockquote it displaced;
+`$schema` in both manifests.
+
+Guards: 417 → **419** — the gate-type vocabulary plant and the stale
+shipped-state-header plant, both watched red locally before shipping.
+
 ## v1.79.1 — the probe that a healthy release disarmed
 
 The first round of `v1.79.0` failed in the release job on the

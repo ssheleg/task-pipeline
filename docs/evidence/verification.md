@@ -1,6 +1,6 @@
 # Verification — task-pipeline
 
-## Shipped state — v1.79.1
+## Shipped state — v1.80.0
 
 The version above is the release this ledger's rows are read against, and since
 2026-08-31 it is **gated, not remembered**: `test/validate.py` compares it to
