@@ -1,6 +1,8 @@
 # Changelog
 
-## v1.81.0 — the anchors are derived, and a dormant plant stops reading as a pass
+## v1.81.1 — the anchors are derived, and a dormant plant stops reading as a pass
+
+> **Why 1.81.1 and not 1.81.0.** A `v1.81.0` tag was cut from outside this run, against a tree that did not yet carry the run stamp, and its release round failed on the release-gap check. Nothing published; npm never left 1.80.0. The tag ruleset forbids deletion, so `v1.81.0` is declared dead in `docs/evidence/retro.md` → *Releases that carry no stamp* and this version carries the payload.
 
 Board row **B-113**, filed 2026-08-22 and confirmed four times since: *negative-test
 anchors are pinned to literals that the releases they guard move, so a release

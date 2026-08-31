@@ -1477,6 +1477,19 @@ three quarters of the work on this run.
 
 ## Releases that carry no stamp — stated, not stamped
 
+**`v1.81.0` is a dead tag and carries no stamp in its own range: it was cut against a
+tree that did not yet contain this run's stamp, its release round failed on this very
+section's check, publish was skipped, npm never saw it, and the tag ruleset forbids
+deletion.** It was also cut by a different run — its annotation describes tier blindness
+and the two-severity rule, work this repository's `v1.81.1` payload does not contain — so
+the version was taken from outside the run that was mid-release, the tag equivalent of the
+two branches that each claimed `v1.56.0` by incrementing from their own checkout. The next
+release carries this run's stamp and its whole payload, and is deliberately named OUTSIDE
+the bold span. **The rule this cost a round to learn: cut the tag against a tree that
+already contains everything the release gate reads — the stamp included.** `B-124` says
+cite the tag rather than a pre-merge SHA; this is its mirror image, and the two together
+are one rule about ordering a tag against the record it must agree with.
+
 **`v1.79.0` is a dead tag and carries no stamp in its own range: its release round
 failed on the mentioned-vs-declared probe, publish was skipped, npm never saw it,
 and the tag ruleset forbids deletion.** The next release carries that run's stamp
