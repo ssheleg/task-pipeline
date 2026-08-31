@@ -1,6 +1,7 @@
 ---
 name: project-audit
 description: "Use when someone asks what is actually true of a whole project right now — what is finished, what is half-built, what is broken, and what nobody has looked at. Walks a cold start: discover what the project is, run a registry of probes chosen from that, read production evidence (published artefact against source, CI history, telemetry present or absent), then leave a self-contained HTML report and a JSON sidecar so the next audit can say what moved. Read-only: it proposes board rows and commits nothing. Triggers - 'project audit', 'audit the project', 'codebase audit', 'state of the project', 'what is unfinished', 'project health check', 'аудит проекта', 'проаудируй проект', 'состояние проекта', 'что не доделано', 'аудит кодовой базы'. Not for: auditing one deliverable inside a run (that is the pipeline's own ladder), reviewing a diff, or checking a skill's construction — say 'без диагностики' to opt out."
+compatibility: "The collector (scripts/audit.py) needs python3 and reads committed state, so it needs git. Probes needing gh, npm, network or a browser declare it and report blind when it is absent — degraded, never silent."
 ---
 
 # Project audit — what is true of this project right now
@@ -33,6 +34,7 @@ next audit reads.
 | this skill | the **procedure** — cold start, probes, production, the report | a whole project is the subject |
 | `/skill-audit` (make-skill) | a skill's construction against the standard | the thing audited is a skill or plugin |
 | `/ux-audit` (super-ux) | code against documented scenarios | the question is user-facing behaviour |
+| `/seo-aeo-audit` (seo-aeo-audit) | a public surface's search and answer-engine visibility | the question is whether a machine will find it |
 
 **The method is not restated here.** Phase 4 below hands off to `audit.md` and
 comes back; a second copy of the ladder would be a second rule, and the two
@@ -96,8 +98,11 @@ the same object.
 ### 6. Propose — rows, not edits
 
 **This skill commits nothing.** Findings leave as board rows in the project's
-own vocabulary, priced with the project's own formula —
-`P = blast × (1 + age_runs) / effort` — and the operator accepts them. An audit
+own vocabulary, priced with **the board header's declared formula** — the shipped
+default is `Sev × Blast + age_bonus` (`references/backlog.md`, the pipeline's
+board doctrine) — and the operator accepts them. Effort never ranks inside an
+audit: what a fix costs is the fixer's decision, not the finder's
+(`references/prioritisation.md`). An audit
 that edits while it reads cannot be re-run to check itself.
 
 ## Three verdicts, and why the third one exists

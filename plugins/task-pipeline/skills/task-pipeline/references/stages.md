@@ -2,7 +2,9 @@
 
 For each stage: what it does, what to invoke, artifacts, and the **GATE** that
 must pass before advancing. Each gate is tagged with its **type** — `auto` (the
-orchestrator verifies the check itself, pass/fail) or `manual` (wait for the
+orchestrator verifies the check itself, pass/fail), `judgment` (a named judge
+rules where no complete deterministic check exists — [`gates.md`](gates.md) →
+*The judgment gate*) or `manual` (wait for the
 operator's explicit go). These stages (0 intake + 1→10) are the plugin's
 **example** flow, encoded in `pipeline.example.json` against the universal contract
 `pipeline.schema.json`; a host project replaces it with its own
@@ -149,9 +151,10 @@ never that the work was skipped quietly.
 
   ```
   1. files the request names, resolved        git ls-files -- <paths>       -> N
-  2. any of them a public contract            the version-synced surfaces,
-                                              pipeline.schema.json, the
-                                              command, the README           -> yes/no
+  2. any of them a public contract            the surfaces the host's release
+                                              syncs, its schema or config
+                                              contracts, a shipped command,
+                                              its README                    -> yes/no
   3. behaviour a user or a caller observes changes                          -> yes/no
   ```
 
@@ -336,55 +339,18 @@ never that the work was skipped quietly.
   never rebuild from scratch. If the chain already exists and is validated (e.g.
   the task entered from super-ux), just verify (linter green) and embed it into
   the spec; only build the parts that are missing.
-- **COPY track — how it sounds.** Every string a product's user will read is written
-  through super-ux's `copywriting`, against the brand pack (`docs/brand/voice.md`,
-  `terminology.md`, `facts.md`). No pack ⇒ `/brand-init` **before** the first string,
-  not after: a voice reverse-engineered from copy already written is a description of
-  what happened, not a decision. In scope: interface strings, errors, empty states,
-  the landing, pricing, the user-facing changelog. **Out of scope, and saying so is
-  what keeps the track honest:** commit messages, PR descriptions, code comments, a
-  developer README, internal docs. Running a brand pack over a line in a contributors'
-  changelog is the fastest way to teach an agent to route around the track.
-- **VISUAL track — how it looks.** Where the task has a visual surface, the visual
-  layer goes through `sheleg-design` ([`companion-skills.md`](companion-skills.md)):
-  tokens and themes, typography and rhythm, motion and how it degrades to rest, the
-  boundary with Figma (tokens as variables, never raw values carried across). Not
-  through it: a purely structural change — what sits where is the UX track's — text,
-  a backend, an internal script.
-- **Each track's refusal is a sentence, never a silence.** *"Без дизайна" / "as is"*
-  ends the visual track; *"без бренда" / "draft"* ends the copy track. Either one is
-  the operator's to make and costs nothing — but it is **recorded in the brief and
-  said out loud in the close-out**, because a track skipped silently and a track that
-  ran are the same thing in a transcript. This is the `⊘` rule one layer up: a skip
-  nobody can see is indistinguishable from work that happened.
-- **Three tracks, three questions, and they do not substitute for each other.** super-ux
-  decides what the interface must **do**; `copywriting` how it **sounds**;
-  `sheleg-design` how it **looks**. Until 2026-08-10 this stage named only the first,
-  so a run designed a flow, then wrote its strings by taste and picked its values at the
-  keyboard — and every gate in the pipeline reported green over both.
-- **Two of the three are a parallel layer, and the third is their only real dependency.**
-  COPY and VISUAL both consume the UX track's scenarios; **neither consumes the other**.
-  Copy is written against the brand pack and the scenarios, not against tokens; the visual
-  is built from the frame and the style pack, not from strings. Writing them in a line —
-  which this file did until 2026-08-15 — teaches a run to wait for a result that never
-  arrives. The order is `UX → { COPY ∥ VISUAL }`, and the only thing crossing each of
-  those two arrows is **the scenario set**.
-- **Their convergence needs a check, and it has a real contradiction to catch.** Both land
-  on the same screen, so the failure is not that one is wrong: it is that each is right
-  alone and they disagree together. Before the spec is committed, compare the two outputs
-  and record the answer:
-  1. **A string the layout has no room for** — a label, an error or an empty state longer
-     than the frame's element, at the frame's own width.
-  2. **A state one track has and the other does not** — copy for an empty state the design
-     never drew, or a loading state drawn with no string.
-  3. **Two names for one thing** — the design system's component name against the
-     terminology file's noun, where a user reads both.
-  4. **A tone the visual contradicts** — a calm, plain register on a screen whose motion
-     and colour say urgency.
-  `Tracks converge: clean` is the answer most runs write, and writing it is the point —
-  a check whose silence is indistinguishable from not having run is not evidence. This is
-  the same rule the harvest applies at stage 0 and the build applies to a fanned-out group
-  at stage 5 ([`build.md`](build.md) §4.2a); one shape, three places.
+- **COPY track and VISUAL track — a parallel layer after UX, and their
+  convergence.** Three tracks, three questions, none substituting for another:
+  super-ux decides what the interface must **do**, `copywriting` how it
+  **sounds** (every string a product's user will read, against the brand pack),
+  `sheleg-design` how it **looks** (tokens, themes, typography, motion). COPY and
+  VISUAL are **parallel** — both consume the UX track's scenarios, neither
+  consumes the other — and where both ran, **their convergence check is run and
+  recorded before the spec is committed**: each can be right alone and the two
+  disagree together on one screen. The full doctrine — each track's scope and
+  out-of-scope, the refusal sentences, the four contradictions the check
+  catches — is [`spec.md`](spec.md) → *The COPY and VISUAL tracks, and their
+  convergence*, its one home.
 - **Spec:** write the approved design to
   `<artifacts>/specs/YYYY-MM-DD-<topic>-design.md` and commit it. Lock all
   shared contracts (types, schemas, signatures, file layout). For UI tasks the
@@ -468,6 +434,12 @@ never that the work was skipped quietly.
   implementer that wrote it is still dispatched. The matrix pointed this companion at
   stages 5–6 from the day it was added and **this stage had never named it** — found by
   the guard comparing the two, not by a reader.
+- **Domain companions, where the task is on their ground** — recommended, never a
+  gate ([`companion-skills.md`](companion-skills.md)): `sheleg-dev` when the build
+  wires money, tracking, sign-in or page speed; `agent-stack` when the thing being
+  built is an agent system; `telegram-dev` when Telegram is the platform rather
+  than the transport. Absent, the build ships on the host's own doctrine and the
+  close-out names the seam nobody checked.
 - **Integration closes the stage:** sync with the base branch, re-run the full suite
   on the result, land it the project's way (merge, or a PR — outward, so it needs a
   go), remove the worktree. Stages 7–9 act on the integrated result, so a branch the
@@ -493,7 +465,9 @@ never that the work was skipped quietly.
   same as stage 5.
 - **GATE (auto):** **the hygiene gate green over the whole tree**, its six counts
   printed beside their floors; the **full** suite is green (not just the new tests); new/changed code
-  is covered; no `skip`/`xfail` smuggling a red suite past the gate. Never advance
+  is covered; **every check this run added or widened has been probed both ways —
+  seen rejecting a planted defect and passing the clean tree, asserted on its exit
+  code** ([`probing.md`](probing.md)); no `skip`/`xfail` smuggling a red suite past the gate. Never advance
   to deploy on a red or partial run. **The carry-over count is printed beside this
   verdict** — a ratchet nobody prints is a TODO with a better name
   ([`audit.md`](audit.md)) — **and so are the disclosures**, `abstained` and
@@ -590,6 +564,10 @@ never that the work was skipped quietly.
   on anything but `success`, and one of the three states stated — including **`no run
   found`**, out loud, because a project without CI is a legitimate state and not a
   green one.
+- **A public surface a logged-out reader will see** can additionally be audited for
+  search and answer-engine visibility with `seo-aeo-audit`
+  ([`companion-skills.md`](companion-skills.md)) — recommended, never a gate;
+  absent, visibility ships unaudited and the close-out says so.
 - **GATE (auto):** clean boot confirmed, or an **honest degradation report** with next
   steps — never silent success. **The CI verdict is one of the reported facts, with
   its run id** — "CI is green" written without a command behind it prints the same

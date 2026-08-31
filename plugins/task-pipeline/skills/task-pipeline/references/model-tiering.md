@@ -63,3 +63,16 @@ and no silent downgrade to a cheaper tier.
 The recommendation is a **reminder, not a block**. If the recommended tier isn't
 available, keep the current model, state plainly which one is in use, and run. The
 pipeline never stalls on a model it can't get.
+
+## A harness clause encodes a model's weakness — stress-test it per generation
+
+Every fixed control in this pipeline — a cap, a mandatory checkpoint, a fix-loop
+ceiling — encodes an assumption about what the confirmed model cannot yet do
+reliably, and those assumptions expire: Anthropic reports removing an entire
+construct from its own long-running harness when a newer model generation stopped
+needing it (*Harness design for long-running agents*,
+anthropic.com/engineering, read 2026-08-30). So when the confirmed tier moves a
+generation, re-test the clauses that exist to compensate the old one instead of
+carrying them as doctrine — a control the model has outgrown is not free, it is a
+stop nobody can name the reason for. The retro's cold-retirement trigger is the
+same rule applied to standing instructions; this is it applied to the harness.

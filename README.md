@@ -587,7 +587,7 @@ must say so.
 ### Held to Anthropic's own Skill authoring guidance
 
 Audited against the four Agent Skills pages. Most of it already held — `name`
-13/64 chars, `description` inside 1024, `SKILL.md` 334/500 lines, all 37 references
+13/64 chars, `description` inside 1024, `SKILL.md` 334/500 lines, all 38 references
 linked **directly** from `SKILL.md`, 436 KB against a 30 MB ceiling. What did not,
 now does:
 
@@ -787,7 +787,7 @@ Stages 0→10 above are the plugin's **example** flow. It is a machine-readable 
 written against a universal contract
 ([`pipeline.schema.json`](plugins/task-pipeline/skills/task-pipeline/pipeline.schema.json)):
 copy the example to `pipeline.json` in your repo and rewrite it with your own stages
-(any count), your own `skills[]`, and your own `auto`/`manual` gate types. The
+(any count), your own `skills[]`, and your own `auto`/`judgment`/`manual` gate types. The
 framework bakes in no fixed stage count and no opinion on which gates are manual.
 
 ```jsonc
@@ -932,7 +932,8 @@ recommendation, so you arm the whole run in one exchange. Detail:
 | [`references/artifacts.md`](plugins/task-pipeline/skills/task-pipeline/references/artifacts.md) | the canonical document layout each stage writes to |
 | [`references/conventions.md`](plugins/task-pipeline/skills/task-pipeline/references/conventions.md) | how stages 6–10 read the host project's `CLAUDE.md`, and how the documentation regime is detected |
 | [`references/documentation.md`](plugins/task-pipeline/skills/task-pipeline/references/documentation.md) | the doc system: the inventory, registers and ids, SSOT, the Doc Loop, supersede semantics, the propagation matrix, intent vs as-built |
-| [`references/gates.md`](plugins/task-pipeline/skills/task-pipeline/references/gates.md) | the three axes, the promotion ladder, gate anatomy, the probe recipe, ratchet floors, where a gate runs |
+| [`references/gates.md`](plugins/task-pipeline/skills/task-pipeline/references/gates.md) | the three axes, the promotion ladder, gate anatomy, ratchet floors, where a gate runs |
+| [`references/probing.md`](plugins/task-pipeline/skills/task-pipeline/references/probing.md) | the probe recipe — plant, run, restore; how a probe rots; the neighbour probe; the landed-mutation rule |
 | [`references/deploy-targets.md`](plugins/task-pipeline/skills/task-pipeline/references/deploy-targets.md) | stages 7–8: writing the runbook when there is none, the template, per-platform deploy and log verbs, the verification trio |
 | [`references/hooks.md`](plugins/task-pipeline/skills/task-pipeline/references/hooks.md) | the `PreToolUse` contract, the fail-open hazard, placement, and the Claude-Code-only limit |
 | [`references/knowledge-graph.md`](plugins/task-pipeline/skills/task-pipeline/references/knowledge-graph.md) | the code graph: install line, stage-0 reach queries, the stage-9 refresh, the graph↔docs divergence check |

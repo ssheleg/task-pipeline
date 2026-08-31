@@ -24,6 +24,7 @@ The full statement of each canon, its rationale and its enforcement live in
 7. **Silence is not a pass** — ask what a mechanism prints when it did not look.
 8. **An estimate is never announced as a measurement** — a rule states its evidence condition.
 9. **What was not checked is printed beside what was.**
+   - **9a. A measured zero and an unmeasured quantity may not print the same** — canon 9 says carry the absence; 9a says refuse the number when nothing measured it.
 10. **The document ships in the change that made it true** — and a correction is appended, never written over.
 
 They are **epistemic**: what makes a claim documentation. The operational layer — what to

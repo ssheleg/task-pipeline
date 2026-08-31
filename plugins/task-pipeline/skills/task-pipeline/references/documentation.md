@@ -80,8 +80,8 @@ under every link checker, because the checker resolves from the file's home. →
 planted defect before its pass means anything — and the plant must be proven to have
 landed in the text the check actually parses. **A model used as a judge is the same
 object**: until it has been seen disagreeing with a human label on a case known to be
-bad, its pass is an opinion with a number attached. → [`gates.md`](gates.md) →
-*Probing*; [`learned.md`](learned.md) rules 4 and 5; [`tdd.md`](tdd.md) → *When the
+bad, its pass is an opinion with a number attached. → [`probing.md`](probing.md) →
+*Probing — plant, run, restore*; [`learned.md`](learned.md) rules 4 and 5; [`tdd.md`](tdd.md) → *When the
 thing under test is an agent*.
 
 **6. A check proves its scope and nothing beyond it.** Every gate carries what it does

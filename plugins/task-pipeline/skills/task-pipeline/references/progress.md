@@ -63,7 +63,7 @@ changes:
 task-pipeline v1.34.0 · pipeline-audit · module P1 «the progress print» (1 of 4)
   0 ✓  1 ✓  2 ✓  3 ▶  4 ·  5 ·  6 ·  7 ·  8 ·  9 · 10 ·
   ███████░░░░░░░░░░░░░░░░░░░  gates 3/11 · now 3 Spec · manual
-  board B-028 · carry-over 0 rows · exposure 99 never · unlooked 0
+  board B-028 · carry-over 0 rows · exposure N never · unlooked 0
 ```
 
 Four lines, and each one answers a question an operator otherwise has to ask:
@@ -142,7 +142,8 @@ its pair is task start and iteration close. The hand-back shares one and adds th
 end — a rail at task start has nothing to report, and a run that ends without a hand-back
 is the case this section exists for. A reader resolving *"both boundaries"* against the
 other section wrote one at task start, where TASK is the only field with content. The run
-writes a hand-back with **four sections and two lists**. It is a gate criterion **at stage
+writes a hand-back with **the sections and the two counted lists below** — the
+block is the count, and a number restated here said *four* over a block of six. It is a gate criterion **at stage
 10**, not a good intention: this file already carried one instruction with no gate behind
 it (*"copy it, tick it"*), and the v1.37.0 audit found no run had ever obeyed it.
 
@@ -380,7 +381,7 @@ And why the verb prints
 `unmeasured` rather than `0` when there are no such lines is the same reason again — the
 hook being absent and the run reading nothing are **opposite facts** the ledger cannot
 separate, so it claims neither. A `0` there would be the reassuring answer to a question
-nobody asked, over 35 files nobody checked.
+nobody asked, over a directory of reference files nobody checked.
 
 It is a disclosure: no floor, no direction, never a target. The moment the number becomes
 something to raise, a run will open files to raise it.
@@ -416,7 +417,10 @@ written by any run — the detector had no input, and the guard was doctrine wea
 script's clothes. One file serves both readers: the guard reads the `touch:` lines,
 this block reads the verdict rows and the iteration counter.
 
-Three kinds of line, appended, never rewritten:
+Appended, never rewritten. The full set of line shapes is declared under
+`## Lines` in [`../templates/run.md`](../templates/run.md) — the list is the count,
+and a count restated here drifted once already. The three these two readers
+consume:
 
 ```
 stage: 3 Spec — gate manual — verdict pass — 2026-08-10T14:02Z

@@ -89,8 +89,10 @@ validator). `test/artifact_root_test.py` runs both against one case table and fa
 they disagree — which is why one rule is allowed two implementations here.
 
 **Every** run keeps a **git-ignored** run ledger at `.task-pipeline/run.md`, seeded at
-stage 0 from [`../templates/run.md`](../templates/run.md). Three line shapes: a
-`stage:` verdict when a gate returns, an `iter:` line when an iteration closes, and a
+stage 0 from [`../templates/run.md`](../templates/run.md), whose *Lines* section
+declares every line shape — the list is the count, and a count restated here said
+*three* over a template of eight. Among them: a `stage:` verdict when a gate
+returns, an `iter:` line when an iteration closes, and a
 `touch:` line per file per repeating pass. Two readers depend on it —
 [`loop-guard.md`](loop-guard.md) detects churn from the `touch:` lines after a lost
 context, and [`progress.md`](progress.md) derives the stage rail and the iteration

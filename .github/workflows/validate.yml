@@ -5504,12 +5504,12 @@ jobs:
             echo "OK: validator correctly FAILs — the harness is runnable"
           fi
 
-      - name: Negative self-test (gates.md teaching probing without naming the harness)
+      - name: Negative self-test (probing.md teaching probing without naming the harness)
         run: |
           set -eu
           rm -rf /tmp/ph3-copy && cp -R . /tmp/ph3-copy
           python3 - <<'EOF'
-          p = "/tmp/ph3-copy/plugins/task-pipeline/skills/task-pipeline/references/gates.md"
+          p = "/tmp/ph3-copy/plugins/task-pipeline/skills/task-pipeline/references/probing.md"
           t = open(p, encoding="utf-8").read()
           n = "`test/probe.py` does all three"
           assert n in t, "PLANT DID NOT LAND: the pointer moved"
@@ -6485,7 +6485,7 @@ jobs:
           set -eu
           rm -rf /tmp/ri03-copy && cp -R . /tmp/ri03-copy
           python3 - <<'EOF'
-          p = "/tmp/ri03-copy/plugins/task-pipeline/skills/task-pipeline/references/gates.md"
+          p = "/tmp/ri03-copy/plugins/task-pipeline/skills/task-pipeline/references/probing.md"
           t = open(p, encoding="utf-8").read()
           n = '## A green probe is evidence only if'
           assert n in t, "PLANT DID NOT LAND: ri03"

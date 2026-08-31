@@ -13,6 +13,7 @@ Writing the approved design down so a zero-context implementer — human or suba
 
 - Order of operations
 - UX track (user-facing tasks only)
+- The COPY and VISUAL tracks, and their convergence
 - Write the spec
 - Module dossier — when the run is one brick of a platform
 - Self-review — before showing it
@@ -64,6 +65,60 @@ screenshot is named as such: *sighted* and *read from the file* are different cl
 These skills are **idempotent** — extend the existing `docs/ux/` layers, never
 rebuild them. If the chain already exists and is validated (typically when the run
 entered from super-ux), verify it and embed it; build only what's missing.
+
+## The COPY and VISUAL tracks, and their convergence
+
+Three tracks, three questions, and they do not substitute for each other:
+super-ux decides what the interface must **do**; `copywriting` how it
+**sounds**; `sheleg-design` how it **looks**. Until 2026-08-10 stage 3 named
+only the first, so a run designed a flow, then wrote its strings by taste and
+picked its values at the keyboard — and every gate in the pipeline reported
+green over both.
+
+- **COPY track — how it sounds.** Every string a product's user will read is written
+  through super-ux's `copywriting`, against the brand pack (`docs/brand/voice.md`,
+  `terminology.md`, `facts.md`). No pack ⇒ `/brand-init` **before** the first string,
+  not after: a voice reverse-engineered from copy already written is a description of
+  what happened, not a decision. In scope: interface strings, errors, empty states,
+  the landing, pricing, the user-facing changelog. **Out of scope, and saying so is
+  what keeps the track honest:** commit messages, PR descriptions, code comments, a
+  developer README, internal docs. Running a brand pack over a line in a contributors'
+  changelog is the fastest way to teach an agent to route around the track.
+- **VISUAL track — how it looks.** Where the task has a visual surface, the visual
+  layer goes through `sheleg-design` ([`companion-skills.md`](companion-skills.md)):
+  tokens and themes, typography and rhythm, motion and how it degrades to rest, the
+  boundary with Figma (tokens as variables, never raw values carried across). Not
+  through it: a purely structural change — what sits where is the UX track's — text,
+  a backend, an internal script.
+- **Each track's refusal is a sentence, never a silence.** *"Без дизайна" / "as is"*
+  ends the visual track; *"без бренда" / "draft"* ends the copy track. Either one is
+  the operator's to make and costs nothing — but it is **recorded in the brief and
+  said out loud in the close-out**, because a track skipped silently and a track that
+  ran are the same thing in a transcript. This is the rail's `⊘` rule one layer up: a
+  skip nobody can see is indistinguishable from work that happened.
+- **Two of the three are a parallel layer, and the third is their only real dependency.**
+  COPY and VISUAL both consume the UX track's scenarios; **neither consumes the other**.
+  Copy is written against the brand pack and the scenarios, not against tokens; the visual
+  is built from the frame and the style pack, not from strings. Writing them in a line —
+  which this doctrine did until 2026-08-15 — teaches a run to wait for a result that never
+  arrives. The order is `UX → { COPY ∥ VISUAL }`, and the only thing crossing each of
+  those two arrows is **the scenario set**.
+- **Their convergence needs a check, and it has a real contradiction to catch.** Both land
+  on the same screen, so the failure is not that one is wrong: it is that each is right
+  alone and they disagree together. Before the spec is committed, compare the two outputs
+  and record the answer:
+  1. **A string the layout has no room for** — a label, an error or an empty state longer
+     than the frame's element, at the frame's own width.
+  2. **A state one track has and the other does not** — copy for an empty state the design
+     never drew, or a loading state drawn with no string.
+  3. **Two names for one thing** — the design system's component name against the
+     terminology file's noun, where a user reads both.
+  4. **A tone the visual contradicts** — a calm, plain register on a screen whose motion
+     and colour say urgency.
+  `Tracks converge: clean` is the answer most runs write, and writing it is the point —
+  a check whose silence is indistinguishable from not having run is not evidence. This is
+  the same rule the harvest applies at stage 0 and the build applies to a fanned-out group
+  at stage 5 ([`build.md`](build.md) §4.2a); one shape, three places.
 
 ## Write the spec
 
@@ -212,7 +267,11 @@ and every REQ in the brief appears in at least one section.** For UI tasks it
 additionally requires: the chain (foundation → flows → screens → scenarios)
 designed, validated and approved; `/ux-lint` green; every user-facing requirement
 traced to a scenario ID — or an explicit waiver from the operator recorded in the
-spec.
+spec. **Every user-facing string went through the COPY track or the refusal is
+recorded, the visual layer went through the VISUAL track or the refusal is
+recorded** — a recorded refusal passes and an unmentioned one does not — **and
+where both tracks ran, their convergence check is recorded**: findings with the
+ruling, or `Tracks converge: clean` (*The COPY and VISUAL tracks*, above).
 
 With Figma on, one more, and it is mechanical: **the canonical record names a file,
 and every frame link in `screens.md` carries that same file key.** Deep links are

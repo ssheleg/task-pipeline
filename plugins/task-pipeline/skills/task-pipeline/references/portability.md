@@ -63,6 +63,7 @@ a row pointing outside the bundle is the defect this file exists to catch.
 | The retro: prune, cap, commits, archive | `references/retrospective.md` |
 | Rules earned by failure | `references/learned.md` |
 | **The routing default and its boundary** | `templates/routing-rule.md` |
+| **Probing** — plant, run, restore; how a probe rots; the neighbour probe; the landed-mutation rule | `references/probing.md` |
 | The seeded doc map, registers and gate | `templates/docmap.md`, `templates/decisions.md`, `templates/open-questions.md`, `templates/docgate.sh` |
 | Which agent-introduced defects are found, and that the agent fixes them rather than the script | `templates/hygiene.sh`, `references/build.md` |
 | What a stage-3/4 self-review must read back, and that its trace is computed numbers | `references/spec.md`, `references/planning.md`, `references/learned.md` |

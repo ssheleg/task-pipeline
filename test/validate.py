@@ -5766,10 +5766,15 @@ else:
     if "probe.py" not in json.dumps(_pkg.get("scripts", {})):
         fail("package.json: no script runs test/probe.py — a harness with no entry "
              "point is a file, not a gate")
-    _gt = open(os.path.join(ROOT, _SKILLDIR, "references/gates.md"), encoding="utf-8").read()
-    if "test/probe.py" not in _gt:
-        fail("references/gates.md teaches probing and never names test/probe.py — "
-             "the next probe will be hand-rolled for the fourth time")
+    # The harness must be named in BOTH homes: probing.md carries the authoring
+    # doctrine (it moved out of gates.md on 2026-08-31), and gates.md's own
+    # "the check has been probed" precondition is where a reader arrives first.
+    for _tf in ("references/probing.md", "references/gates.md"):
+        _gt_p = os.path.join(ROOT, _SKILLDIR, _tf)
+        _gt = open(_gt_p, encoding="utf-8").read() if os.path.isfile(_gt_p) else ""
+        if "test/probe.py" not in _gt:
+            fail(f"{_tf} teaches probing and never names test/probe.py — "
+                 "the next probe will be hand-rolled for the fourth time")
 
 # T3-G1. What stage 0 reads IN FULL is an obligation stated in four files, and the
 # one section nothing caps must not be in it. Measured 2026-08-10: the narrative log
@@ -6780,13 +6785,14 @@ elif not ("feed its matcher a near-miss it must reject" in _flatten(_rm, lower=T
 
 # #31 — R-001's class, returned by another project. Scoped to MUTATING probes, because
 #       this repository measured itself and found the file-writing ones structurally immune.
-_gp = _section(_GATES_P, r"A green probe is evidence")
+_PROBING_P = os.path.join(_skill_dir, "references", "probing.md")
+_gp = _section(_PROBING_P, r"A green probe is evidence")
 if _gp is not None and "asserts its plant landed" not in _flatten(_gp, lower=True):
-    fail("references/gates.md → A green probe: the obligation is gone. The section can be "
+    fail("references/probing.md → A green probe: the obligation is gone. The section can be "
          "emptied to a bare heading and its own rule — a probe that mutates an existing "
          "file asserts its plant landed — leaves with it")
 if _gp is None:
-    fail("references/gates.md: no section on a green probe whose mutation may not have "
+    fail("references/probing.md: no section on a green probe whose mutation may not have "
          "landed. `See it fail once` has an unstated precondition — that the thing you "
          "changed is the thing the check reads — and a plant that missed produces the same "
          "green as a check that cannot fail")

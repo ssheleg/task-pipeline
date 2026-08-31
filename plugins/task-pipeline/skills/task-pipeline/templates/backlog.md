@@ -35,8 +35,12 @@
   `age_bonus` is `1` past 14 days and `2` past 30. The formula is repeated here on
   purpose — the inputs are in this table, so a reader checks the arithmetic rather than
   trusting the ranking. Full doctrine: the skill's `references/backlog.md`.
-- **State** — `open` · `in-flight` · `closed` · `dropped`. `dropped` needs the
-  operator's agreement and the date they gave it.
+- **State** — `open` · `in-flight` · `closed` · `dropped` · `parked — <branch or
+  commit>` · `waived — revisit: <condition>`. `dropped` needs the operator's
+  agreement and the date they gave it. `parked` claims work exists and must say
+  where — a branch or a commit, never a directory. `waived` is a decision, not
+  debt: it carries the condition that reopens it. Both long forms:
+  the skill's `references/backlog.md`.
 - **Home** — an issue id where a tracker exists, `—` where this file *is* the tracker.
 
 ## Closed
