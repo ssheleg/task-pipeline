@@ -69,6 +69,14 @@ jobs:
       - name: Structural validator
         run: python3 test/validate.py
 
+      - name: The rest of the `npm test` equation (graph suite + shipped audit collector)
+        # CLAUDE.md documents `npm test` as three suites; this job ran only the
+        # first, so a PR breaking graph.py merged green and the defect surfaced
+        # at tag time, one failure per 25-minute round (TP3-04).
+        run: |
+          python3 test/graph_test.py
+          python3 test/project_audit_test.py
+
       - name: Stage-7 release gate (the hook this skill ships)
         run: python3 test/release_gate_test.py
 
@@ -1550,15 +1558,6 @@ jobs:
             echo "ERROR: unknown arg accepted"; exit 1
           fi
           echo "OK: npm installer behaves"
-      - name: Official Claude Code conformance (plugin + marketplace, strict)
-        run: |
-          set -eu
-          # The repo's own validator enforces house rules; this one is the
-          # upstream spec. --strict fails on unrecognized manifest fields and on
-          # front matter that silently drops at runtime -- both were real here.
-          npm install -g @anthropic-ai/claude-code
-          claude plugin validate . --strict
-          claude plugin validate plugins/task-pipeline --strict
       - name: Negative self-test (the hygiene gate catches conflict markers)
         run: |
           set -eu
@@ -3012,6 +3011,32 @@ jobs:
               f"the node's conditionals are not behind $refs: {refs}"
           print("OK: three conditionals, all behind #/definitions/ —", ", ".join(refs))
           EOF
+
+      - name: Negative self-test (SKILL.md teaching a gate-type vocabulary the schema outgrew)
+        run: |
+          set -eu
+          rm -rf /tmp/gt1-copy && cp -R . /tmp/gt1-copy
+          python3 - <<'EOF'
+          # The incident: pipeline.schema.json gained `judgment` in v1.73.0 and
+          # SKILL.md taught auto/manual for seven releases. The plant re-creates
+          # it by removing the type from the teaching sentence, not the schema —
+          # the schema is the contract, the sentence is what drifts.
+          import re
+          p = "/tmp/gt1-copy/plugins/task-pipeline/skills/task-pipeline/SKILL.md"
+          t = open(p, encoding="utf-8").read()
+          m = re.search(r"Each gate has a \*\*type\*\*.*?(?:\n\n)", t, re.S)
+          assert m and "`judgment`" in m.group(0), "PLANT DID NOT LAND: the teaching sentence moved"
+          span = m.group(0).replace("`judgment`", "`auto`", 1)
+          t2 = t[:m.start()] + span + t[m.end():]
+          assert t2 != t, "PLANT DID NOT LAND: nothing changed"
+          open(p, "w", encoding="utf-8").write(t2)
+          EOF
+          if python3 /tmp/gt1-copy/test/validate.py 2>&1 | grep -q 'the gate-type sentence does not name'; then
+            echo "OK: validator FAILs — the schema's vocabulary must reach the sentence that teaches it"
+          else
+            echo "ERROR: SKILL.md taught a stale gate-type vocabulary and nothing objected"
+            exit 1
+          fi
 
       - name: Negative self-test (an `npm` gloss that disagrees with package.json)
         run: |
@@ -8081,7 +8106,7 @@ jobs:
             exit 1
           fi
 
-      - name: Exposure suite (14 cases — the measurement that must not become a score)
+      - name: Exposure suite (the measurement that must not become a score)
         run: python3 test/exposure_test.py
 
       - name: Negative self-test (the seeded exposure script disappearing must fail)
@@ -8993,6 +9018,25 @@ jobs:
           else
             echo "OK: what the verifier is told to read is compared against what the node has"
           fi
+
+  plugin-conformance:
+    # Split out of `validate` (TPA-09): this job's first act is an npm install
+    # of the upstream CLI, so a registry outage failed the whole house suite —
+    # and a house failure hid whether the upstream spec still passed. Separate
+    # jobs fail separately, and each red means one thing.
+    name: Official Claude Code conformance (strict)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Official Claude Code conformance (plugin + marketplace, strict)
+        run: |
+          set -eu
+          # The repo's own validator enforces house rules; this one is the
+          # upstream spec. --strict fails on unrecognized manifest fields and on
+          # front matter that silently drops at runtime -- both were real here.
+          npm install -g @anthropic-ai/claude-code
+          claude plugin validate . --strict
+          claude plugin validate plugins/task-pipeline --strict
 
   skill-audit:
     name: House skill audit

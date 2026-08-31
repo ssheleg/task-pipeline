@@ -263,7 +263,8 @@ it("no declared command degrades to the claim, deliberately", no_declared_comman
 OBSERVER = os.path.join(ROOT, "plugins", "task-pipeline", "hooks", "gate-observer.sh")
 
 
-def observe(command, pipeline, ledger="", event="PostToolUse", error=None):
+def observe(command, pipeline, ledger="", event="PostToolUse", error=None,
+            extra=None):
     """Run the observer the way Claude Code does, and return the ledger after."""
     with tempfile.TemporaryDirectory() as project:
         os.makedirs(os.path.join(project, ".task-pipeline"))
@@ -277,6 +278,8 @@ def observe(command, pipeline, ledger="", event="PostToolUse", error=None):
                    "tool_input": {"command": command}}
         if error is not None:
             payload["error"] = error
+        if extra:
+            payload.update(extra)
         subprocess.run(["bash", OBSERVER], input=json.dumps(payload),
                        env=dict(os.environ, CLAUDE_PROJECT_DIR=project),
                        capture_output=True, text=True)
@@ -314,8 +317,27 @@ def observer_appends_and_never_rewrites():
     assert out.startswith(led), "the ledger was rewritten rather than appended to"
 
 
+def observer_reads_the_documented_payload_field():
+    """The harness's result field is `tool_response`. The observer shipped reading
+    `tool_output` only, so the exit-code branch was dead on the documented shape
+    and every observation degraded to the event-name guess."""
+    out = observe("npm test", OBSERVED, extra={"tool_response": {"exit_code": 2}})
+    assert 'gate:  6 — command "npm test" — exit 2' in out, \
+        "the documented tool_response.exit_code was not read: %r" % out
+
+
+def observer_still_reads_the_legacy_field():
+    """`tool_output` stays as a fallback — a harness that still sends it must not
+    lose the exit code it carries."""
+    out = observe("npm test", OBSERVED, extra={"tool_output": {"exit_code": 3}})
+    assert 'gate:  6 — command "npm test" — exit 3' in out, \
+        "the legacy tool_output.exit_code fallback broke: %r" % out
+
+
 it("the observer records a green run", observer_records_a_green_run)
 it("the observer records a red run too — it never judges", observer_records_a_red_run)
+it("the documented tool_response.exit_code is read", observer_reads_the_documented_payload_field)
+it("the legacy tool_output.exit_code still works as fallback", observer_still_reads_the_legacy_field)
 it("only the declared command is observed, exactly", observer_ignores_anything_not_declared)
 it("no declaration, no observation", observer_is_silent_without_a_declaration)
 it("the ledger is appended to, never rewritten", observer_appends_and_never_rewrites)

@@ -25,7 +25,7 @@ Human-facing entry points: [`README.md`](README.md) (what it is),
 | Job | Command |
 |---|---|
 | Test | `npm test` (= `python3 test/validate.py && python3 test/graph_test.py && python3 test/project_audit_test.py`) — the validator must print `PASS: task-pipeline structure valid` and the graph suite `PASS: graph.py — N cases`; `project_audit_test.py` exercises the shipped audit collector against planted defects. The gloss said only `validate.py` until 2026-08-20, dropping 129 cases from what the command was documented to run; `test/validate.py` now compares every documented `npm` equation against `package.json` |
-| Prove the guards | `npm run test:negatives` — feeds every guard a planted defect and requires it to reject one. `npm run test:all` is the full suite: `validate.py`, `graph_test.py`, `negatives.py`, then `test:exposure`, `test:probe`, `test:hooks`, `test:artifacts` and `test:docs` — eight scripts, ~20 minutes here, and the list lives in `package.json`, not in this cell. Corrupt files in **python, never `sed -i`** (not portable; the validator rejects it) |
+| Prove the guards | `npm run test:negatives` — feeds every guard a planted defect and requires it to reject one. `npm run test:all` is the full suite — the script list lives in `package.json`, not in this cell (an enumeration here said eight while the file ran ten, the same class as the recorded `npm test` incident one row up), ~20 minutes here. Corrupt files in **python, never `sed -i`** (not portable; the validator rejects it) |
 | Lint | none separate; the validator is the lint |
 | Install locally | `./install.sh` or `node bin/task-pipeline.js` — **both refuse when the Claude Code plugin is installed**, because a plain `~/.claude/skills/` copy shadows it; `--force` overrides deliberately |
 | Behavioural evals | `python3 evals/run.py` — validates the suite and prints the protocol; it never reports a pass it did not observe |
@@ -122,10 +122,11 @@ every `references/*.md` must be reachable from `SKILL.md`; the Cursor rule stays
 self-contained with no relative links; every new validator guard needs a matching
 negative self-test in `.github/workflows/validate.yml`.
 
-3. **`npm test` reads git, and prints two disclosures.** Its verdict is followed by the
+3. **`npm test` reads git, and prints its disclosures.** Its verdict is followed by the
    claim-registry states, `learned.md`'s shape (rules · rules with an incident ·
    incident words · binding rows), and `unlooked: N` — what this run could not look at,
-   listed. None of the three is a ratchet: no floor, no direction, **never a target**.
+   listed. The print is the count — a number written here said *two* while the run
+   printed more. None of them is a ratchet: no floor, no direction, **never a target**.
    One check compares `learned.md`'s high-water mark against **every value that file's
    history has held** (`git log -p`, last 80 commits) — comparing against `HEAD` was the
    first draft and never fired on a committed checkout, which is what CI runs. Outside a

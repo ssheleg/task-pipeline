@@ -1816,6 +1816,25 @@ def _():
     assert code != 0 and "cites another tier" in out, out
 
 
+@case("certify: a cross-tier citation hiding in scope is refused — blind covers every prose field")
+def _():
+    reports = three()
+    reports[0]["scope"] = ["read src/x.py:10-40, narrowed because the product tier says the docs moved"]
+    code, out, _ = certify(ONE, reports)
+    assert code != 0 and "cites another tier" in out, out
+
+
+@case("certify: a finding whose what/fix leans on another tier's verdict was not written blind")
+def _():
+    reports = three()
+    reports[1]["verdict"] = "fail"
+    f = breaks()
+    f["fix"] = "align the caller with what the unit tier says about the return shape"
+    reports[1]["findings"] = [f]
+    code, out, _ = certify(ONE, reports)
+    assert code != 0 and "cites another tier" in out and "findings[0].fix" in out, out
+
+
 @case("certify: a failing tier exits 1, prints the fix and its check, and the node stays open")
 def _():
     reports = three()
