@@ -1,3 +1,46 @@
+## v1.81.0 — the second axis of blindness, and the scope the two-severity rule never had
+
+Guards: 419 → **419** — this release adds doctrine and no mechanism. Both findings argue
+against a rule rather than against a missing check, and the vertical blindness rule is
+explicitly one `certify` cannot verify from a report.
+
+**`certification.md` decoupled the three readers from each other and never decoupled the
+fixer from the grader.** Tier blindness is horizontal — no tier reads another's report, and
+`certify` refuses a report whose prose cites another tier. Nothing said the *vertical* half:
+the agent that produced a change may not be the agent that certifies it.
+
+That gap matters because the optimisation which closes it is attractive. The fixer already
+holds the context; a fresh reader has to re-derive it. Taking that saving converts
+certification into self-assessment **while every report it writes stays sincere** — an
+optimiser that grades itself learns to game the metric rather than improve the work, and
+`certify` cannot detect the collapse from a report. It is now a dispatch rule beside the
+one it belongs with.
+
+**And the two-severity rule shipped without its scope.** *There are two severities and no
+third, because a certification that admits a maybe admits everything* is correct — for a
+**finding**, which is a claim a reader makes about a diff and either blocks or does not.
+It is the wrong shape for the **verdict of a check** whose subject is non-deterministic,
+where binary pass/fail has been measured at **0% detection** of regressions and trace
+fingerprinting at **86%**. A third value there is not laxity: `INCONCLUSIVE`, grounded in
+hypothesis testing, is how a run says *this sample cannot decide* instead of flipping a coin
+and reporting the result as a severity. Sequential testing cuts the trials it needs by
+**78%**.
+
+So the rule now carries its boundary: **two severities for a finding, three verdicts for a
+stochastic check**, with the second axis pointed at `agent-stack`'s `agent-evals` —
+`references/statistics.md` for how many runs make a difference real — and at the skill's
+`references/gates.md` → *Axis A* for where such a gate belongs.
+
+**A fourth invisible class, with a measurement.** *Why one verifier is not enough* listed
+three defects a diff-reader cannot see; the fourth is the one a blended score cannot see
+either: **the internal state is right and the message about it is stale.** The value was
+stored correctly and the final sentence to the user echoed the old one — passing on state,
+failing on truth, so any grader that averages the two calls it mostly fine. It was caught by
+a rubric with categorical outcomes rather than a number, and closing it moved the violation
+rate from **21% to 4%**. Its general form is this pipeline's own worst case: work that
+**looks like it is working** while quietly missing what was asked — which is the product
+tier's whole job, and why the tier that reads no code is not the soft one.
+
 # Changelog
 
 ## v1.80.0 — the doctrine pack: one home per rule, and the boundaries said out loud

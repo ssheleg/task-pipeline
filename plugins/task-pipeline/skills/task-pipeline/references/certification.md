@@ -33,10 +33,22 @@ to it by construction:
 - a **second implementation of the same rule** did not get the fix
 - a **documented behaviour** is now false, and the document still reads as true
 - **another feature** reaches the same path and nobody considered the interaction
+- the **internal state is right and the message about it is stale** — the value was
+  stored correctly and the final sentence to the user echoed the old one
 
 None of these is a bug in the changed lines. All of them ship. Each is found by
 looking one level further out than the change — which is a different reading, not a
 longer one, because the context that finds it is the context that excludes the diff.
+
+**The last one is worth its own sentence, because it is the shape a blended score cannot
+see.** A run that stores the right value and then reports the stale one passes on state
+and fails on truth, so any grader that averages the two calls it mostly fine. It was
+caught by a purpose-built rubric with categorical outcomes — *honoured / ignored /
+partial / none* — rather than a number, and closing it moved the violation rate from
+**21% to 4%**. The general form is the dangerous one for this pipeline: work that **looks
+like it is working** — confident answers, a plan that reads fine — while quietly missing
+what was actually asked. That is the product tier's whole job, and it is why the tier
+that reads no code is not the soft one.
 
 ## The three tiers
 
@@ -62,6 +74,16 @@ tier's verdict.
 Dispatch all three in one message so they run concurrently. Give each the node id,
 its `serves`, and the diff — nothing else, and never another tier's output.
 
+**The second axis, and it is the one an optimisation removes first: whoever produced
+the fix never grades it.** Tier blindness is horizontal — no tier reads another's
+report. This one is vertical: the agent that wrote the change, and the agent that
+certifies it, are different agents. The reason is not tidiness — *an optimizer that
+grades itself learns to game the metric instead of improving the work*, and it does so
+while every report it writes stays sincere. The saving on offer is real (the fixer
+already holds the context, a fresh reader must re-derive it) and it is the saving that
+converts certification into self-assessment. `certify` cannot detect the collapse from
+a report, so it is stated here as a dispatch rule.
+
 ## A pass has to mean something, so two rules have teeth
 
 **A tier cannot pass on an empty `scope`.** `scope` is what the tier actually
@@ -80,6 +102,24 @@ and no third, because a certification that admits a maybe admits everything:
 - **`risk`** — found, judged survivable, and named. It ships, and it reaches the
   closing verdict as a blocker with `can_continue_around: true`, which is exactly
   what a named survivable finding is.
+
+**And the scope of that rule, because it is not universal.** These are severities of a
+**finding**, and a finding is a claim a reader makes about a diff — it either blocks or
+it does not. That is a different object from the **verdict of a check**, and where the
+check's subject is non-deterministic the two-valued form is not strictness, it is
+blindness: binary pass/fail has been measured at **0% detection** of regressions in a
+non-deterministic workflow, where mapping execution traces to compact vectors and
+testing them multivariately reaches **86%**. A third value there — `INCONCLUSIVE`,
+grounded in hypothesis testing rather than in a reader's judgement — is what lets a
+run say *this sample cannot decide* instead of flipping a coin and reporting it as a
+severity. Sequential testing cuts the trials such a verdict needs by **78%**.
+
+So: **two severities for a finding, three verdicts for a stochastic check.** A
+deterministic command exits 0 or it does not, and admitting a maybe there does admit
+everything. The instrument for the other case is `agent-stack`'s `agent-evals` —
+`references/statistics.md` for how many runs make a difference real — and a gate whose
+subject is non-deterministic belongs on that axis rather than this one
+([`gates.md`](gates.md) → *Axis A*).
 
 ## The report, and where each field lands
 
