@@ -7572,28 +7572,32 @@ else:
         # Over BOTH categories: a property check that printed `SKIP:` needed no
         # declaration in the first pass and was still counted as one that printed what
         # it asserts — the same sentence, one category over.
-        _dormant = [s for s in _anchors.every_check(_anchors.WORKFLOW) if s.skip_capable]
+        _dormant = [s for s in _anchors.every_check(_anchors.WORKFLOW, _steps)
+                    if s.skip_capable]
         for _s in _dormant:
             _chars, _words = _anchors._substantive(_s.dormancy or "")
             if _chars < _anchors.MIN_REASON or _words < _anchors.MIN_WORDS:
-                fail(f"negative self-test `{_s.label}` can print SKIP and declares no "
+                fail(f"{_anchors.category(_s)} `{_s.label}` can print SKIP and declares no "
                      "`# dormant-when: <the state it cannot construct, and what it costs>` "
                      f"worth reading ({_chars} characters, {_words} distinct words, floor "
                      f"{_anchors.MIN_REASON}/{_anchors.MIN_WORDS}). A check that declines "
                      "to run is not a check that passed, and a dormancy nobody named is "
                      "the shape B-113 was filed for. Both numbers are checked because a "
                      "length threshold alone is satisfied by a row of dots")
-        # A body this census cannot parse is a body it cannot vouch for, and "no anchors
-        # found" would read identically to "could not look" — the one silence this file's
-        # own canon forbids. Named, not counted away.
         _decl = sum(len(s.declarations) for s in _steps)
+        # The four reasons a plant yields no needle, COMPUTED. The first version of this
+        # line glossed all of them as "a JSON key, which raises rather than passing" over
+        # a set of which a sixth were JSON looks — a count with a false explanation beside
+        # it tells the reader not to look, which is worse than the count alone.
+        _nb = _anchors.no_needle_breakdown(_steps)
         _ANCHOR_LINE = (f"negative-test anchors: {len(_steps)} plants · "
                         f"{sum(len(s.needles) for s in _steps)} needles read off disk · "
                         f"{sum(1 for s in _steps if s.anchors)} pinned to a value a release "
                         f"can move · {_decl} declared undrivable · {len(_dormant)} can "
-                        f"decline to run · {sum(1 for s in _steps if not s.needles)} yield "
-                        "no text needle (their look is a JSON key, which raises rather "
-                        "than passing)  (disclosure — no floor, no target)")
+                        f"decline to run · {sum(_nb.values())} yield no text needle ("
+                        + ", ".join(f"{_v} {_k}" for _k, _v in
+                                    sorted(_nb.items(), key=lambda _x: -_x[1]))
+                        + ")  (disclosure — no floor, no target)")
 
 
 def check_routed_triggers_still_advertised():

@@ -55,6 +55,8 @@ case("a dormant PROPERTY check is subtracted too — the same sentence, one cate
      "3 property check(s) DORMANT, named above")
 case("everything dormant is not a pass over an empty set", C(4, 4, 0, 0), None)
 case("everything dormant on both sides is not a pass either", C(4, 4, 2, 2), None)
+case("nothing present at all is not a pass either — the `-k` matched-nothing path",
+     C(0, 0, 0, 0), None)
 case("one plant left standing still makes a claim, about one",
      C(4, 3, 0, 0),
      "1 of 4 guards provably reject their planted defect · "

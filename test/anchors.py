@@ -298,6 +298,23 @@ class _Plant(ast.NodeVisitor):
                 src = self._file_src(v)
                 if src:
                     return src
+        if isinstance(node, (ast.ListComp, ast.SetComp, ast.GeneratorExp, ast.DictComp)):
+            # `texts = {f: open(f).read() for f in files}` — the RESULT holds file text,
+            # and tracking only the loop variable left the largest plant in the corpus
+            # (`gapmention`, reading 1+N files this way) yielding zero needles.
+            _saved = dict(self.reads)
+            try:
+                for c in node.generators:
+                    _s = self._file_src(c.iter)
+                    if _s:
+                        self._bind_targets(c.target, _s)
+                for _e in ([node.key, node.value] if isinstance(node, ast.DictComp)
+                           else [node.elt]):
+                    _s = self._file_src(_e)
+                    if _s:
+                        return _s
+            finally:
+                self.reads = _saved
         return None
 
     def _bind(self, target, value):
@@ -356,32 +373,51 @@ class _Plant(ast.NodeVisitor):
 
     visit_AsyncWith = visit_With
 
-    def visit_For(self, node):
-        src = self._file_src(node.iter)
-        if src:
-            for e in ([node.target] if isinstance(node.target, ast.Name)
-                      else getattr(node.target, "elts", [])):
-                if isinstance(e, ast.Name):
-                    self.reads[e.id] = src
-        self.generic_visit(node)
+    def _bind_targets(self, target, src):
+        for e in ([target] if isinstance(target, ast.Name)
+                  else getattr(target, "elts", [])):
+            if isinstance(e, ast.Name):
+                self.reads[e.id] = src
 
-    def visit_comprehension(self, node):
+    def visit_For(self, node):
+        # SCOPED. A loop variable that keeps its provenance for the rest of the body
+        # makes an unrelated later local read as file text — 33 of 891 needles depended
+        # on exactly that, and the R-005 reader measured it by scoping and re-counting.
+        _saved = dict(self.reads)
         src = self._file_src(node.iter)
         if src:
-            for e in ([node.target] if isinstance(node.target, ast.Name)
-                      else getattr(node.target, "elts", [])):
-                if isinstance(e, ast.Name):
-                    self.reads[e.id] = src
-        self.generic_visit(node)
+            self._bind_targets(node.target, src)
+        for _n in node.body:
+            self.visit(_n)
+        self.reads = _saved
+        for _n in node.orelse:
+            self.visit(_n)
+        self.visit(node.iter)
+
+    visit_AsyncFor = visit_For
+
+    def _visit_comp(self, node, elements):
+        """A comprehension's targets live only inside the comprehension."""
+        _saved = dict(self.reads)
+        for c in node.generators:
+            src = self._file_src(c.iter)
+            if src:
+                self._bind_targets(c.target, src)
+            self.visit(c.iter)
+            for _if in c.ifs:
+                self.visit(_if)
+        for e in elements:
+            self.visit(e)
+        self.reads = _saved
 
     def visit_ListComp(self, node):
-        for c in node.generators:
-            self.visit_comprehension(c)
-        self.generic_visit(node)
+        self._visit_comp(node, [node.elt])
 
     visit_SetComp = visit_ListComp
     visit_GeneratorExp = visit_ListComp
-    visit_DictComp = visit_ListComp
+
+    def visit_DictComp(self, node):
+        self._visit_comp(node, [node.key, node.value])
 
     def visit_Assert(self, node):
         # The message is commentary, never material: reading it as text the plant
@@ -441,6 +477,15 @@ class _Plant(ast.NodeVisitor):
 
     def visit_Call(self, node):
         f = node.func
+        # `json.dump(d, open(p, "w"))` writes the file without any `.write` this visitor
+        # can see, so 39 live plants' own read-backs were being refused. An `open` in
+        # WRITE mode is a write wherever it appears — as a receiver, as an argument, or
+        # in a `with`. The two halves of this rule landed unmatched in one commit:
+        # `Path().write_text()` was added and `json.dump` was not.
+        if self._is_open(node) and len(node.args) > 1:
+            _m = self._one(node.args[1]) or ""
+            if "w" in _m or "a" in _m:
+                self.writes.setdefault(self._path_key(node.args[0]), node.lineno)
         if isinstance(f, ast.Attribute):
             if f.attr in ("write", "writelines", "write_text", "write_bytes"):
                 self._record_write(node)
@@ -495,11 +540,20 @@ def _shell_needles(script: str) -> list[tuple[str, str]]:
                              r"(?:(['\"])(.*?)\1|([^\s|;&]+))", line):
             if 0 <= vpos < m.start():
                 continue                     # the guard's own message, not a needle
-            out.append((m.group(2) if m.group(2) is not None else m.group(3), "grep"))
-        for m in re.finditer(r"\bsed\b[^\n]*?['\"](?:-n\s*)?s?/([^/'\"]{3,})/", line):
-            out.append((m.group(1), "sed"))
-        for m in re.finditer(r"\bawk\b[^\n]*?['\"]/([^/'\"]{3,})/", line):
-            out.append((m.group(1), "awk"))
+            pat = m.group(2) if m.group(2) is not None else m.group(3)
+            # An unquoted token holding a path separator is the FILE, not the pattern:
+            # `grep -q pat /tmp/x-copy/2026-08-08-…md` yielded `2026` as a needle.
+            if m.group(2) is None and ("/" in pat or pat.startswith("$")):
+                continue
+            out.append((pat, "grep"))
+        # Both halves of `s/OLD/NEW/` and an address `/ADDR/p`, with `/` or `|` as the
+        # delimiter — the one live `sed` here uses `|`, so a `/`-only reader is blind to
+        # it while flagging the search half of an edit it can see.
+        for m in re.finditer(r"\bsed\b[^\n]*?['\"]\s*(?:-n\s*)?s?([/|])([^/|'\"]{3,})\1",
+                             line):
+            out.append((m.group(2), "sed"))
+        for m in re.finditer(r"\bawk\b[^\n]*?['\"]\s*([/|])([^/|'\"]{3,})\1", line):
+            out.append((m.group(2), "awk"))
     return out
 
 
@@ -534,8 +588,10 @@ class Step:
         self.script = script
         self.label = name.replace(MARKER, "").replace(PROP_MARKER, "").strip().strip("()")
         _lines = script.splitlines()
-        self.declarations = [(m.group(1), ((m.group(2) or "") + " "
-                                           + _comment_block(_lines, i)).strip())
+        # `_comment_block` already returns the first line's own text, so concatenating
+        # `m.group(2)` with it counted every one-line reason TWICE — a 47-character
+        # reason stored as 108 and passed a floor of 60.
+        self.declarations = [(m.group(1), _comment_block(_lines, i))
                              for i, line in enumerate(_lines)
                              if (m := DECL_RE.match(line))]
         self.dormancy = next((_comment_block(_lines, i) for i, line in enumerate(_lines)
@@ -557,8 +613,12 @@ class Step:
         # `python3 … <<` in the text called `ri13` unreadable, because that plant's
         # payload is the source of a workflow step and quotes the opener inside a
         # string. Only a LINE that begins with the interpreter opens a heredoc.
+        # No QUOTE may precede the interpreter: that is what separates
+        # `HOOK_INPUT=x python3 - <<EOF` and `echo hi | python3 <<'EOF'`, which open a
+        # heredoc, from `"          python3 - <<'XEOF'\n"`, which is `ri13`'s payload
+        # quoting one inside a string.
         _opened = len([ln for ln in script.splitlines()
-                       if re.match(r"\s*python3?\s*-?\s*<<", ln)])
+                       if re.match(r"""[^"'#\n]*\bpython3?\b[^"'\n]*<<""", ln)])
         _read = 0
         for m in HEREDOC_RE.finditer(script):
             _read += 1
@@ -619,15 +679,50 @@ def census(path: str = WORKFLOW) -> list[Step]:
     return [Step(n, s) for n, s in _parse_steps(path) if MARKER in n]
 
 
-def every_check(path: str = WORKFLOW) -> list[Step]:
+def no_needle_breakdown(steps) -> dict:
+    """Why a plant yields no text needle. Computed, because the first gloss was wrong.
+
+    That line read *"their look is a JSON key, which raises rather than passing"* over 41
+    plants of which 7 were JSON looks. A count with a false explanation beside it is worse
+    than the count alone: it tells the reader not to look.
+    """
+    out = {}
+    for s in steps:
+        if s.needles:
+            continue
+        has_py = bool(HEREDOC_RE.search(s.script))
+        reads = bool(re.search(r"read_text|json\.load|\.read\(\)|safe_load|readlines",
+                               s.script))
+        raw = bool(re.search(r'open\([^)]*"rb"\)|_orig_bytes', s.script))
+        k = ("shell only, no python body" if not has_py else
+             "a python body that reads no file" if not reads else
+             "a whole-file byte comparison" if raw else
+             "a JSON or dict key, which raises when it goes stale")
+        out[k] = out.get(k, 0) + 1
+    return out
+
+
+def every_check(path: str = WORKFLOW, steps: list | None = None) -> list[Step]:
     """Negative self-tests AND property checks.
 
     Dormancy is a property of both categories and the first pass covered one: a
     property check that printed `SKIP:` needed no declaration and was still counted
     as one that printed what it asserts.
     """
+    if steps is not None:
+        # The caller already parsed the negative self-tests; add only the property
+        # checks rather than re-reading a 9k-line workflow (board row B-010, which
+        # `findings()` cites in its own docstring one screen up).
+        _seen = {s.name for s in steps}
+        return steps + [Step(n, s) for n, s in _parse_steps(path)
+                        if PROP_MARKER in n and n not in _seen]
     return [Step(n, s) for n, s in _parse_steps(path)
             if MARKER in n or PROP_MARKER in n]
+
+
+def category(step) -> str:
+    """What to call this check in a refusal. Both categories can go dormant."""
+    return "property check" if PROP_MARKER in step.name else "negative self-test"
 
 
 def findings(path: str = WORKFLOW, steps: list | None = None) -> list[str]:
@@ -682,9 +777,9 @@ def _main(argv) -> int:
     print(f"  {len(anchored)} plant(s) still pin a value a release can move")
     print(f"  {len(declared)} plant(s) declare a value they cannot derive")
     print(f"  {len(skippers)} plant(s) can decline to run (dormant, never a pass)")
-    print(f"  {sum(1 for s in steps if not s.needles)} plant(s) yield no text needle "
-          f"— their look is a JSON key or a byte comparison, which RAISES when it goes "
-          f"stale instead of passing quietly")
+    _nb = no_needle_breakdown(steps)
+    print(f"  {sum(_nb.values())} plant(s) yield no text needle: "
+          + " · ".join(f"{v} {k}" for k, v in sorted(_nb.items(), key=lambda x: -x[1])))
     print(f"  {sum(s.parse_failures for s in steps)} python body/bodies this census "
           f"could not parse, {sum(s.unreadable_bodies for s in steps)} heredoc(s) it "
           f"could not recognise — a body it cannot read is a body it cannot vouch for")
