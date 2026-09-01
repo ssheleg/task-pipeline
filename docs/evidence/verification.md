@@ -1,6 +1,6 @@
 # Verification — task-pipeline
 
-## Shipped state — v1.82.2 (2026-09-01)
+## Shipped state — v1.82.3 (2026-09-01)
 
 Measured on the release-candidate tree before the tag exists. Queue positions 9–10 of the
 2026-08-31 harvest, both ARCH — each argues against a rule this repository ships.

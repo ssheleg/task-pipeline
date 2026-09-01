@@ -1477,6 +1477,23 @@ three quarters of the work on this run.
 
 ## Releases that carry no stamp — stated, not stamped
 
+**`v1.82.2` is a dead tag and carries no stamp: the same omission as `v1.82.1`, made by
+the run that had just written the rule down.** Its CHANGELOG entry explains that a
+release needs a stamp on its own tree — and the declaration it carried was for
+`v1.82.1`, the tag already dead. The payload merged as `9195590`, the tag was cut on
+`9195590`, and nothing in that tree stamped the run that produced it.
+
+**The mechanism, stated so the next run does not pay for it a fourth time.** A stamp must
+cite a commit inside the NEW tag's own range, and that commit does not exist until the
+payload merges — the ruleset rebase-merges, minting every SHA at merge time. So a
+release here is TWO merges and their order is load-bearing: the payload lands as `X`,
+a second change stamps the run citing `X` and lands as `Y`, and the tag is cut on `Y`.
+Cutting on `X` leaves the release unstamped, which is exactly what happened three times
+in one day — `v1.82.0` (stamp in the wrong shape), `v1.82.1` and `v1.82.2` (no stamp for
+the release's own run). **Nothing checks the ORDER before the tag exists**, because
+`validate.yml` ignores tag pushes and `release.yml` is the first thing to run on the
+tag's own tree. That gap is `B-134`.
+
 **`v1.82.1` is a dead tag and carries no stamp: it was cut against a tree that did
 not yet contain a stamp for its own run.** The version bump and the format repair
 landed together, and nothing in that commit stamped the run that produced them — so

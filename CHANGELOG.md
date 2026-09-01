@@ -1,3 +1,28 @@
+## v1.82.3 — the release protocol is two merges, and their order is written down now
+
+**`v1.82.2` is a dead tag for the same reason `v1.82.1` was, and the run that burned it
+had just written the rule into this file.** A release here needs a stamp on the tag's own
+tree; the declaration v1.82.2 carried was for v1.82.1, the tag already dead. The payload
+merged as `9195590`, the tag was cut there, and nothing in that tree stamped the run.
+
+**The mechanism, stated so nobody pays for it a fourth time.** A stamp must cite a commit
+inside the NEW tag's own range, and that commit does not exist until the payload merges —
+the ruleset rebase-merges and mints every SHA at merge time. So a release is **two merges
+and their order is load-bearing**: the payload lands as `X`, a second change stamps the
+run citing `X` and lands as `Y`, and the tag is cut on `Y`.
+
+**Nothing refuses the wrong order before the tag exists.** `validate.yml` ignores tag
+pushes; `release.yml` is the first thing to run on the tag's own tree. So the branch is
+green either way and the cost is always a burned version, because the ruleset forbids
+deleting a tag. Three in one day: `v1.82.0` (stamp written in the sibling repository's
+bullet shape into a section this gate reads as a table), `v1.82.1` and `v1.82.2` (tag cut
+on the payload commit). That gap is now `B-134`, which asks for a preflight that resolves
+the range the tag would create and asserts a stamp falls inside it — a check that can run
+*before* anything is spent.
+
+Guards: 424 → **424** — this release records a protocol and adds no mechanism; the
+mechanism it asks for is the board row.
+
 ## v1.82.2 — one id, one finding, and a status read from the wrong place
 
 **A board id identified two findings for the whole of v1.82.x.** `B-114` and `B-115`
