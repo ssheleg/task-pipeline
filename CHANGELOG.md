@@ -1,4 +1,4 @@
-## v1.82.0 — the second axis of blindness, and the scope the two-severity rule never had
+## v1.82.1 — the second axis of blindness, and the scope the two-severity rule never had
 
 **This release is 1.82.0 and not 1.81.0, and the reason is worth recording.** 1.81.0 was
 already in flight in a concurrent session — the anchors-are-derived release — and this run
@@ -10,6 +10,15 @@ guard that exists for it — *a release named nowhere in `Releases that carry no
 published nothing. The tag cannot be deleted (a repository rule refuses it), so 1.81.0 stays
 spent and this work moves up. Standing instruction #8 in the umbrella's retro covers the
 mechanism: a wrapper's exit status is not the verdict, and it was not read.
+
+**Shipped as 1.82.1 because `v1.82.0` is a dead tag, and the reason is a check that read the
+wrong thing.** The run stamp for this release was written as a **list item** — the shape the
+sibling `sshlg-skills` uses — into a section this repository keeps as a **table**. The release
+suite therefore found no stamp covering the tag, refused it, and published nothing. Worse than
+the format slip: the verification run before tagging grepped for the stamp's own title and
+reported it present. **That confirmed the text existed, not that the gate could read it.** The
+tag cannot be deleted, so it is declared in `retro.md`'s no-stamp section and the payload moves
+one patch up.
 
 Guards: 423 → **423** — this release adds doctrine and no mechanism. Both findings argue
 against a rule rather than against a missing check, and the vertical blindness rule is
