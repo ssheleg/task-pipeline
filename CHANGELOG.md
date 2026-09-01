@@ -16,7 +16,7 @@ rather than becoming a second definition, and it names both line numbers in its
 refusal. Watched failing before it shipped: a planted collision returns
 *"docs/evidence/backlog.md:110: id B-119 identifies a second row (the first is line
 109)"*. The umbrella has carried this guard for its own board; this repository is where
-the defect actually landed, and it had none. Guards: 423 → 424.
+the defect actually landed, and it had none. Guards: 423 → **424**.
 
 **Shipped as 1.82.2 because `v1.82.1` is a dead tag.** Its tree carried no stamp for its
 own run, so the release suite — which runs on the tag's own tree, where `validate.yml`
