@@ -1531,6 +1531,28 @@ _BOARD_IDS = set()
 if os.path.isfile(_BOARD):
     _bt = open(_BOARD, encoding="utf-8").read()
     _BOARD_IDS = set(re.findall(r"\bB-(\d+)\b", _bt))
+    # A board id is cited from outside this file — a run stamp says "B-119 closed",
+    # a CHANGELOG names a range — so an id that identifies two rows makes every one of
+    # those citations ambiguous, and the ambiguity is silent: the line above collects
+    # ids into a SET, where a repeat collapses without a trace. That is how this shipped.
+    # Measured 2026-09-01 on v1.82.0: FOUR rows under TWO ids (B-114, B-115), filed by a
+    # run that appended without reading, and invisible here for the whole of v1.82.x.
+    # The umbrella has carried this guard since its own board grew (sshlg-skills
+    # `test/validate.py`); this repository is where the defect actually landed.
+    # Row-leading only: `| B-NNN |` in the first cell. A prose mention of another row is
+    # a citation, which is the thing this protects, not a second definition of it.
+    _seen_row_id = {}
+    for _n, _line in enumerate(_bt.split("\n"), 1):
+        _m = re.match(r"\|\s*(B-\d+[a-z]?)\s*\|", _line)
+        if not _m:
+            continue
+        _rid = _m.group(1)
+        if _rid in _seen_row_id:
+            fail(f"{ART}/backlog.md:{_n}: id {_rid} identifies a second row "
+                 f"(the first is line {_seen_row_id[_rid]}). Every citation of "
+                 f"{_rid} — a run stamp, a CHANGELOG range, a sibling board — now "
+                 "names two different findings. Give the newer row the next free id.")
+        _seen_row_id[_rid] = _n
     # Each board file read ONCE and shared by both loops below. Re-opening them was
     # compounding the very cost this PR put on the board as row B-010.
     _BOARD_TEXT = {_BOARD: _bt}
