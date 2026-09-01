@@ -1477,6 +1477,23 @@ three quarters of the work on this run.
 
 ## Releases that carry no stamp — stated, not stamped
 
+**`v1.82.3` is a dead tag, and its cause is a fourth distinct one.** Its stamp was
+correct and in the right order — the payload merged as `9e2ab3e`, the stamp cited it and
+landed as `e4e0eb4`, the tag was cut there and the gate had accepted that tree. What
+failed was a NEGATIVE SELF-TEST added in the same programme: the duplicate-id plant
+copied one file and mutated the live tree, restoring it afterwards. Correct as a workflow
+step, and invisible to `test/negatives.py`, which locates a plant's scratch directory by
+searching its script for a literal `cp -R . <dir>` and then diffs that copy against the
+repository to tell a real defect from a no-op. With no scratch directory the harness
+could not confirm the plant had landed and reported the guard as one that **did not
+fire** — correctly, by its own rule.
+
+**`npm test` cannot see this**, because `negatives.py` is a CI step and not part of the
+suite. That is the fourth mechanism in one day by which a green local gate preceded a red
+release: a stamp in the wrong shape (`v1.82.0`), a tag cut before the stamp existed
+(`v1.82.1`, `v1.82.2`), and now a plant the harness cannot verify. The preflight `B-134`
+asks for must run the plant harness too, not only `npm test`.
+
 **`v1.82.2` is a dead tag and carries no stamp: the same omission as `v1.82.1`, made by
 the run that had just written the rule down.** Its CHANGELOG entry explains that a
 release needs a stamp on its own tree — and the declaration it carried was for
