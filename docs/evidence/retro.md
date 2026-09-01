@@ -43,6 +43,92 @@ row goes — the cap is not negotiable, ranking is.
 
 ## Recent log — narrative entries, uncapped and queried rather than read (newest first)
 
+### 2026-08-31 · `b113-derived-anchors` — the census was blind four ways, and the loop guard caught the fix restating its own lesson
+
+**Symptom.** `B-113` had four confirmations in nine days and every repair was an
+instance. Four plants stopped landing or stopped proving anything in one release on
+2026-08-22; `v1.78.4` recorded *"a literal is what went stale on three consecutive
+releases"*; the `v1.80.0` run found three more — `bd5`, `pf1`, `gap1` — and repaired
+those three.
+
+**What actually happened.** The three v1.80.0 instances share a cause that reads as the
+opposite of a defect: **the repository got healthier.** The board re-derived its ages, so
+the row `bd5` matched no longer existed. The first blind eval runs shipped, so the guard
+`pf1` probes stopped firing. A release finally carried an honest run stamp, so `gap1`'s
+trailing set emptied. Nothing about any of those looked like a regression, which is why
+each was found by the 35-minute suite at release time, one release after the damage.
+
+**Surfaced at:** the board, on its own priority ordering. **Owned by:** stage 6.
+
+**Root cause.** The row states the question and nothing answered it: *is the number the
+plant WRITES, or the number it LOOKS FOR?* The first count came from a grep — 27 of 412 —
+and a grep cannot answer that question. **The class was never measured, so every fix was
+an instance.**
+
+**Fix, by grade.** `test/anchors.py` extracts every needle from the AST with provenance
+tracked from the file to the look and read-backs tracked per path; **26 of 419 plants**
+pinned a value a release can move at the branch point, 25 derive it at run time now and
+one declares. Three had been pinned to LIVE board rows and would have stopped landing the
+day those rows closed. Dormant stopped reading as a pass in both categories, and the
+arithmetic moved into two pure functions because on a healthy machine no plant goes
+dormant — that branch is unreachable from outside. Guards 419 → **423**.
+
+**The finding worth keeping, and it is not any of the above.** R-005 was obeyed and the
+dispatched reader ran four rounds. **Round one: it wrote twenty fixtures against the
+census and nineteen slipped past.** Two live plants — `wv1` and `wv2` — were still pinned
+to `B-005` behind a provenance gap at `enumerate()`, *in the file this run had just swept*.
+Round two found `json.dump(d, open(p, "w"))` unrecognised as a write, a comprehension
+variable whose provenance never died, and a disclosure that explained 39 plants with a
+sentence true of one. Round three found that scoping a `for` target killed provenance
+Python itself keeps — my fix's own overreach — and three numbers I had restated.
+
+**The census figure moved 27 → 21 → 24 → 26, and the fixture count 18/8 → 44/25 → 47/27.**
+A detector is a claim about a corpus, and the author of a detector is the last person who
+can measure its reach.
+
+**The loop guard tripped, and that is the entry's real subject.** The closure line
+returned twice with the same stale fixture count — inside the paragraph narrating a stale
+count as the row's lesson. `build.md:417`: a tripped guard is not another round. The two
+shapes: **(a)** a document that teaches a lesson about a restated count *by restating one*,
+so the sentence a reader trusts most is the likeliest to be wrong; **(b)** a fix applied by
+APPENDING a corrected sentence rather than correcting the one already there, which leaves
+both in the file and lets the older survive every later round. Escalated to the layer that
+owns it — canon 8 — mechanically: `anchor-census fixtures` and `anchor-census fixtures
+watched firing` are registered claim classes now, computed from the fixture file, with
+plant `anc4` watching them fail. Registered classes 13 → 15. **Three figures were deleted
+rather than corrected**, because two counting methods disagreed and neither had a command
+written beside it — the double-counted share of 891 needles, the number of plants
+narrowing by ORDER, and one the reader retracted itself.
+
+**Deviations, stated rather than left implicit.** `build.md` calls for a **fresh** reader
+at rounds 4–5; this was the same reader resumed, with its own prior reports in context —
+which is the independence R-005 exists to protect. Its round-4 findings were re-derived
+here by running the commands rather than accepted. And the revert of the `for`-scope
+accepted a **latent false positive** (a for-target rebound across two loops) to close two
+real false negatives; the trade is written into the closure line, because a trade nobody
+records is a trade nobody can revisit.
+
+**Two neighbours this change broke and fixed.** `CONTRIBUTING.md` cites the guard literal
+enforcing each invariant and `test/validate.py` searched only its own source, so the first
+citation of an anchors-census refusal read as *an enforcement that does not exist* while
+the check printing it sat in the same suite — the corpus is the file plus the sibling
+modules it imports now. And a `fail()` message must keep its cited phrase on one source
+line, because a sentence split across an f-string concatenation is invisible to a
+substring search.
+
+**An environment finding, measured because it cost twenty minutes.** `agent_sync.py
+acquire` against a lock whose TTL has expired prints **`won B-113`** without refreshing the
+timestamp, so `status` still says `leases held: none` and the pre-commit guard still
+refuses. `renew` does not refresh it either. The sequence that works is `release` then
+`acquire`. A tool that says *won* while the guard says *no lease* is this entry's own shape
+one layer out: a green that was never a measurement.
+
+**What this run did not close, named rather than implied.** A needle that goes stale
+because prose was *reworded* carries no digits and this census cannot see it — `B-062`,
+whose extractor now exists; `B-067` owns the one decision left, because a needle inside
+`if not re.search(...)` is *expected* not to match. Provenance still stops at a `def`,
+which costs six plants every needle they have. And derived plants still narrow by ORDER.
+
 ### 2026-08-30 · `wave1-gate-fixes` — the first stamped release emptied a probe's precondition
 
 **Symptom.** The v1.79.0 release run failed its own negative self-test: *"an
@@ -1391,14 +1477,18 @@ three quarters of the work on this run.
 
 ## Releases that carry no stamp — stated, not stamped
 
-**`v1.81.0` is a dead tag and carries no stamp: it was pushed onto a concurrent
-session's commit by a run that had chosen the same version number and had not read the
-`gh pr merge` output telling it the merge had conflicted.** The tag started that
-session's release before its stamp was written, the release failed on this very probe,
-publish was skipped, npm never saw it, and the ruleset forbids deletion. The payload the
-other session intended for it — the derived negative-test anchors — ships from `main`
-under its own number; the work that mis-tagged it ships separately, one version up.
-Declared here so the burned version has a written home rather than a shrug.
+**`v1.81.0` is a dead tag and carries no stamp in its own range: it was cut against a
+tree that did not yet contain this run's stamp, its release round failed on this very
+section's check, publish was skipped, npm never saw it, and the tag ruleset forbids
+deletion.** It was also cut by a different run — its annotation describes tier blindness
+and the two-severity rule, work this repository's `v1.81.1` payload does not contain — so
+the version was taken from outside the run that was mid-release, the tag equivalent of the
+two branches that each claimed `v1.56.0` by incrementing from their own checkout. The next
+release carries this run's stamp and its whole payload, and is deliberately named OUTSIDE
+the bold span. **The rule this cost a round to learn: cut the tag against a tree that
+already contains everything the release gate reads — the stamp included.** `B-124` says
+cite the tag rather than a pre-merge SHA; this is its mirror image, and the two together
+are one rule about ordering a tag against the record it must agree with.
 
 **`v1.79.0` is a dead tag and carries no stamp in its own range: its release round
 failed on the mentioned-vs-declared probe, publish was skipped, npm never saw it,
@@ -1516,6 +1606,7 @@ without the cap the countable thing grows inside a section read in full.
 
 | Date | Topic | Commit | Verdict | Retro |
 |---|---|---|---|---|
+| 2026-09-01 | `b113-derived-anchors` / the census was blind four ways, and the loop guard caught the fix restating its own lesson | `6577e8a` | B-113 closed as a CLASS: `test/anchors.py` answers the row's own question from the AST — *is the number the plant WRITES or the number it LOOKS FOR?* — and **26 of 419 plants** pinned a value a release can move at the branch point; 25 derive it at run time now, one declares, and three had been pinned to LIVE board rows that would have disarmed them the day those rows closed · dormant stopped reading as a pass in BOTH categories, with the arithmetic in two pure functions because on a healthy machine no plant goes dormant and that branch is unreachable from outside · guards 419 → **423**, fixtures 47 with 27 watched firing, registered claim classes 13 → **15** | **R-005 ran four rounds and earned every one**: round 1 wrote twenty fixtures against the census and **nineteen slipped past**, two of them live plants (`wv1`, `wv2`) still pinned to `B-005` in the file this run had just swept; rounds 2–3 found `json.dump` unrecognised as a write, a comprehension variable whose provenance never died, a disclosure explaining 39 plants with a sentence true of one, and my own overreach in scoping a `for` target Python does not scope. **The census figure moved 27 → 21 → 24 → 26 and the fixture count 18/8 → 44/25 → 47/27** · **the loop guard tripped** on the closure line returning twice with the same stale count *inside the paragraph narrating it* — escalated to canon 8 rather than to a fifth round, so both counts are computed claim classes now with a plant behind them, and three figures whose definitions disagreed were DELETED rather than corrected · deviations stated: rounds 4–5 called for a fresh reader and this was the same one resumed, and the `for`-scope revert accepted one latent false positive to close two real false negatives | 1 entry · 8 standing · retired 0 · added 0 · **stamps 11 → 10 (1 rotated)** · R-003, R-005, R-008, R-009, R-010 fired |
 | 2026-08-31 | `wave3-doctrine-pack` / one home per rule, and the boundaries said out loud | `8b916c2` | the deferred wave-2/3 audit pack shipped as **v1.80.0**: the closure boundary written into three surfaces (graph node → certify, prose task → review), the COPY/VISUAL doctrine moved whole into spec.md, `references/probing.md` extracted from gates.md with its guards and plants moved alongside, the judgment gate type swept across seven surfaces with a cross-surface guard behind it, the PR gate running all of `npm test`, the blind rule over every prose field (17/17 mutations noticed), gate-observer reading the documented `tool_response`, the board re-ranked on real ages, the verification header gated against package.json, and the first three blind eval runs — one per model, 147 fresh-subagent probes, haiku's three misses filed as B-118 · guards 417 → **419**, both new plants watched red locally · **the cell cites `8b916c2`, and it could only be written after the merge**: the ruleset rebase-merges, which mints every SHA at merge time, and the release-gap check reads whether a stamp's commit falls inside the new tag's OWN range — so a stamp citing either a branch SHA or the pre-merge main tip fails it. Caught locally by tagging first and running the suite (R-010), which is the whole reason that instruction exists | no entry — the run did not diverge from doctrine; one compliance note: R-004 fired mid-run (an `npm test \| tail` laundered an exit code and a commit landed on a red gate; fixed forward in the next commit) · 8 standing · retired 0 (R-002 and R-007 outside the five-stamp window, inside the sixty-day one; both triggers must agree) · added 0 · **stamps 11 → 10 (1 rotated)** · R-003, R-004, R-005, R-008, R-010 fired |
 | 2026-08-29 | `wave1-gate-fixes` / the gate that could not see | `f4600f3` | four release-machinery defects, each demonstrated red before its fix: an empty or unparseable hook payload was a silent exit 0 **with a run in flight** — blind + ledger is exit 2 now, with `event: gate-blind` appended so the blindness outlives the refusal; a green lint stage declared before the tests stage captured the gate and released a tag with the suite never run — the stage scan is two-pass (declared `tests` outranks command-bearing) and the observer records **every** declared command under its own stage id; a project's own `publish` script, invoked through npm's `run`, was gated as the registry act (fail-closed overmatch is still overmatch); the shipped example's `dev` stage never armed the build gate — the canonical config disarmed the hook it ships beside — and the same example armed a `dynamic` loop under a note saying OFF and taught prune-before-stamp, the deadlock this file's own header names · three stage-0 surfaces stopped instructing a full read of the uncapped Recent log · CHANGELOG repaired: the H1 led five sections from below with v1.78.0's entry split around it, and the two unreleased commits (prioritisation, stages) now share a heading with the fixes · guards 413 → **417**, one plant per gate fix, each watched red locally before shipping · **`v1.79.1` shipped** — `v1.79.0` died on its own probe (entry below) and its tag is undeletable by ruleset, so the version is burned, not reused; the stamp's commit is `f4600f3`, the probe repair (the PR ruleset rebase-merged the branch, so the SHA it was authored under died with the branch and resolves nowhere a clone can follow — the cell cites what main holds), because the run's first commit sits inside the dead tag's range and a stamp there would leave `v1.79.1` reading as unstamped | 1 entry (the release round failed on its own probe — the first stamped release emptied the `gapmention` plant's precondition; entry above) · 8 standing · retired 0 (R-002 and R-007 are outside the five-stamp window and inside the sixty-day one; both triggers must agree, per the 2026-08-23 precedent) · added 0 · **stamps 11 → 10 (1 rotated)** · R-003, R-004, R-005, R-008, R-009, R-010 fired |
 | 2026-08-23 | `project-audit` / the audit that starts cold | `61d3e6e` | a third skill: the PROCEDURE around `audit.md`'s method, for a repository with no brief and no REQ spine · three verdicts, and `blind` is the design — without it *no tracker configured* and *no errors* render identically · `channel-divergence` compares TREES, and **three of its traps are fixtures rather than prose**: the first draft compared tarball against tag, which agree by construction (a tautology returning green), counting a path present in one channel only produced **22 findings where one file had moved**, and a branch past its tag makes no common claim · re-derived against `git diff --name-only v1.15.0..HEAD`: same 8 paths on `agent-sync`, silent on `sheleg-design`, 1 on `make-skill` · guards 412 → **412**, flat because the 43 new cases guard the shipped collector and live beside it | **every defect was found by a fixture, none by reading** — the audit read its own output as project state, and the obvious fix (prefix-match either way) would have hidden every new file under `docs/`; and this run **disarmed a plant by rewording the prose it was anchored on**, standing instruction #6 for the fourth time here, caught only because the plant asserts it landed. **R-005 did not fire**: a widened check shipped with no independent reader, stated rather than covered | 1 entry · 8 standing · retired 0 · added 0 · **stamps 11 → 10 (1 rotated)** · R-003, R-008, R-009 fired |
@@ -1525,4 +1616,3 @@ without the cap the countable thing grows inside a section read in full.
 | 2026-08-16 | `stamp-order` / never amend a commit a record already names | `4128b68` | the stamping procedure invited its own defect — stamp names the run's commit, the commit is amended to carry the stamp, the amend mints a new SHA — and it fired twice in one close-out, here and in the umbrella twenty minutes later · the doctrine states the freeze and the order; the documentation gate now requires **reachability from HEAD**, not merely resolution · B-45's remaining half: three id registers that could never allocate are removed, and the guard requiring the manual procedure fires on the backend so their removal could not retire it · `agent_sync.py check` exits 0 here for the first time | **this stamp is the rule's first use**: written in a commit that follows the work rather than folded into it by amend | 1 entry · 6 standing · retired 0 · added 0 · **stamps 11 → 10 (1 rotated)** · R-003, R-004 fired |
 | 2026-08-16 | `graph-backlog` / the same defect in four more places | `1aa38d6` | the convergence checker applied where this skill fans out: the stage-0 harvest, which converged eight independent sources on one brief and compared none of them with each other; stage 3's COPY and VISUAL, a **fake edge** written as a sequence with a real contradiction at their meeting point; stage 9's three artifacts named as what they are · id and version allocation written down where a declared register cannot serve one — two sessions had filed one `B-073` and two branches one version · guards 339 → **344** | **the fix for B-075 was wrong on its first attempt and the suite caught it**: rewriting every `/tmp/...` path per run broke two plants whose payload IS the workflow text — standing instruction #7 met twice in two days by the same author — and the shipped fix serialises the runs with a lock instead | 1 entry · **6 standing** · retired 0 · added 0 · **stamps 11 → 10 (1 rotated)** · R-002, R-003, R-004, R-008 fired |
 | 2026-08-15 | `graph-audit` / the graph model, and the edge that carried nothing | `42948c8` | the pipeline audited against a graph model it did not have: **nine of ten macro stage edges carry data**, so nothing was reordered · the fake-edge test as a procedure, a `Carries` column whose empty cell IS the finding, an `Edges:` count the gate reads · §4.2a, one convergence check over a fanned-out group's diffs together before the first worktree lands · `stages.md` had one of `build.md`'s three fan-out preconditions and now has all three · **`negatives.py` could not restore `.git` in a submodule checkout**, so two guards reported `fatal: not a git repository` and were counted as never firing — locally red, CI green, for as long as anyone worked from the umbrella · guards 322 → **339** | **three reader rounds, 13 findings, two of them defects rather than nits** — the convergence check reached neither GATE bullet, and the `.git` fix covered the submodule and left the linked worktree broken identically; the second was caught only because the reader **ran the experiment** and reported the restored copy on the wrong branch, against a CHANGELOG sentence claiming all three shapes · 1 entry · **6 standing (was 5)** · retired 0 · added 1 (R-008) · **stamps 11 → 10 (1 rotated)** · R-002, R-003, R-004, R-005, R-007 all fired |
-| 2026-08-14 | `playwright-browser-channel` / B-056 `two-channels-ranked-by-nothing` | `6264312` | `playwright` joins `chrome-devtools` as a second browser channel, **ranked by nothing** — capability stated instead of quality, one detection rule for both, stop at the first that answers · OQ-0003 closed as DEC-0004: a browser **test suite** is the coverage half and never the look, and what the look finds is fixed in the stage that found it · guards 315 → **316** · **the new guard found a pre-existing defect on its first run**: an escaped pipe in the `graphify` row had been truncating that row's cells since it was added, so the matrix→stages check had never compared anything for it · **this run broke the concurrent-agent doctrine this skill ships** — branched and edited inside a checkout a second session was writing, and carried its work into isolation twice | **the R-005 reader returned 2 blocking + 10 non-blocking, all reproduced** — the new guard closed only the escaped half of the class it claimed whole, and `agent-sync` still derived no stage from `stage-10`; three shipped claims were measured false against the tool's own `--help` · guards 315 → **318** | 1 entry · **5 standing (was 4)** · retired 0 · added 1 (R-007) · **stamps 11 → 10 (1 rotated)** · R-003, R-004, R-005 fired; R-002 did not |
