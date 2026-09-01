@@ -1,5 +1,22 @@
 # Verification — task-pipeline
 
+## Shipped state — v1.82.0 (2026-09-01)
+
+Measured on the release-candidate tree before the tag exists. Queue positions 9–10 of the
+2026-08-31 harvest, both ARCH — each argues against a rule this repository ships.
+
+| REQ | What ships | How it was confirmed | Confirmed |
+|---|---|---|---|
+| VB-1 | Blindness gains its vertical axis: whoever produced the fix never grades it | `certification.md` → *Blind, and it is the whole design* now carries the dispatch rule beside the horizontal one, with the reason it is stated rather than checked — `certify` cannot detect the collapse from a report, because a self-grading optimiser's reports stay sincere | **observed** |
+| VB-2 | The two-severity rule carries its scope instead of reading as universal | the same file distinguishes the **severity of a finding** (blocks or does not) from the **verdict of a check**, with the measurement that forces it: binary pass/fail at **0%** detection against **86%** for trace fingerprinting on a non-deterministic subject, and SPRT cutting trials **78%** | **observed** |
+| VB-3 | The third verdict is pointed at the instrument that owns it, not adopted here | the scope note routes a stochastic gate to `agent-stack`'s `agent-evals` (`references/statistics.md`) and to this skill's `references/gates.md` → *Axis A*; no third severity was added to `certify` | **observed** |
+| VB-4 | A fourth invisible class joins the three, with its number | *Why one verifier is not enough* gains **internal state right, message about it stale** — passing on state and failing on truth, so a blended score calls it mostly fine; caught by categorical outcomes rather than a score, violation rate **21% → 4%** | **observed** |
+| VB-5 | The gate is green and the ledger header moved with the version | `npm test` → rc=0; this header reads v1.81.0 against `package.json` 1.81.0, which the validator compares — it refused the pair once during this change | **observed** |
+
+---
+
+## Shipped state — v1.80.0
+## Shipped state — v1.81.0
 ## Shipped state — v1.81.1
 
 The version above is the release this ledger's rows are read against, and since
