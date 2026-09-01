@@ -1,3 +1,33 @@
+## v1.82.2 — one id, one finding, and a status read from the wrong place
+
+**A board id identified two findings for the whole of v1.82.x.** `B-114` and `B-115`
+each named two rows: the pair filed on 2026-08-31 from the harness-engineering
+articles, and the pair this programme appended on 2026-09-01 without reading what was
+already there. Four rows, two ids — so a run stamp saying *"B-115 filed"*, a CHANGELOG
+naming the range `B-114…B-117`, and a sibling board citing either one all pointed at
+two different findings at once. The newer pair is renumbered `B-119` and `B-120`, and
+the stamp that cited them is repointed in the same change.
+
+**The guard, because renumbering fixes the case and not the class.** `test/validate.py`
+collected board ids into a **set**, where a repeat collapses leaving no trace — which
+is precisely why this shipped and stayed invisible. The new check reads row-leading ids
+only (`| B-NNN |`, first cell), so a prose citation of another row stays a citation
+rather than becoming a second definition, and it names both line numbers in its
+refusal. Watched failing before it shipped: a planted collision returns
+*"docs/evidence/backlog.md:110: id B-119 identifies a second row (the first is line
+109)"*. The umbrella has carried this guard for its own board; this repository is where
+the defect actually landed, and it had none. Guards: 423 → **424**.
+
+**Shipped as 1.82.2 because `v1.82.1` is a dead tag.** Its tree carried no stamp for its
+own run, so the release suite — which runs on the tag's own tree, where `validate.yml`
+never looks — refused it. The round was not lost to skipping the check: the gate **was**
+run against the merge commit, and its exit status was read from a trailing `echo` in the
+same command rather than from the suite, so a zero belonging to the `echo` was taken for
+the suite's verdict. An explicit re-run returned 1 seconds later. The rule from v1.82.0
+therefore gains its second half: verify with the gate rather than a grep of your own
+prose, **read the gate's own exit status**, and cut the tag locally, run the suite on the
+tag's tree, and push only then — a local tag can be moved, a pushed one cannot.
+
 ## v1.82.1 — the second axis of blindness, and the scope the two-severity rule never had
 
 **This release is 1.82.0 and not 1.81.0, and the reason is worth recording.** 1.81.0 was

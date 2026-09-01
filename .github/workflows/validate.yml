@@ -83,6 +83,43 @@ jobs:
       - name: The artifact-root rule (two implementations, one table, compared)
         run: python3 test/artifact_root_test.py
 
+      - name: Negative self-test (a board id naming two rows must fail)
+        run: |
+          set -eu
+          cp docs/evidence/backlog.md /tmp/board.orig
+          python3 - <<'PY'
+          # The incident, 2026-09-01: v1.82.0 shipped FOUR rows under TWO ids. The
+          # validator collected board ids into a SET, where a repeat collapses leaving
+          # nothing to see — so a run stamp saying "B-115 filed" and a CHANGELOG naming
+          # the range B-114..B-117 each pointed at two different findings, silently.
+          # This plant gives the newest row an id an older row already holds.
+          import pathlib, re
+          p = pathlib.Path('docs/evidence/backlog.md')
+          lines = p.read_text(encoding='utf-8').split('\n')
+          ids, first, target = [], None, None
+          for i, ln in enumerate(lines):
+              m = re.match(r'\|\s*(B-\d+[a-z]?)\s*\|', ln)
+              if not m:
+                  continue
+              ids.append(i)
+              if first is None:
+                  first = m.group(1)
+              else:
+                  target = i
+          assert first and target is not None, 'need at least two board rows to collide'
+          lines[target] = re.sub(r'^\|\s*B-\d+[a-z]?\s*\|', f'| {first} |', lines[target], count=1)
+          p.write_text('\n'.join(lines), encoding='utf-8')
+          PY
+          if python3 test/validate.py > /tmp/dupid.out 2>&1; then
+            cp /tmp/board.orig docs/evidence/backlog.md
+            echo "NEGATIVE SELF-TEST FAILED: a duplicated board id passed the validator"
+            exit 1
+          fi
+          cp /tmp/board.orig docs/evidence/backlog.md
+          grep -q "identifies a second row" /tmp/dupid.out || {
+            echo "the validator refused, but not for the duplicate id:"; cat /tmp/dupid.out; exit 1; }
+          echo "ok — a duplicated board id is refused, and the refusal names both lines"
+
       - name: Negative self-test (a run missing a declared stage must fail)
         run: |
           set -eu
