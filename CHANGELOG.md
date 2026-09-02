@@ -1,3 +1,30 @@
+## v1.82.4 — the plant the harness could not see
+
+`v1.82.3` is a dead tag, and its cause is the **fourth distinct one**. Its stamp was
+correct and in the right order: the payload merged as `9e2ab3e`, the stamp cited it and
+landed as `e4e0eb4`, the tag was cut there, and the gate had accepted that tree.
+
+What failed was a negative self-test added in the same programme. `test/negatives.py`
+locates a plant's scratch directory by searching its script for a literal
+`cp -R . <dir>`, then diffs that copy against the repository to tell a real defect from a
+no-op. The duplicate-id plant copied **one file** and mutated the live tree, restoring it
+afterwards — correct as a workflow step, invisible to the harness. With no scratch
+directory it could not confirm the plant had landed, and reported the guard as one that
+**did not fire**. Correctly, by its own rule.
+
+The plant now follows the convention every other one uses: copy the tree, mutate the
+copy, run the validator from the copy, leave it mutated. Verified with the harness itself
+before shipping — `PASS: a board id naming two rows must fail`, the step that had never
+been run locally across four attempts.
+
+**`npm test` cannot see this**, because `negatives.py` is a CI step and not part of the
+suite. Four dead tags, four different mechanisms — a stamp in the wrong shape, a tag cut
+before the stamp existed twice, and now a plant the harness cannot verify — and one
+shared shape behind all of them: a green local gate that does not cover what the release
+runs. `B-134` carries it, and now asks for a preflight that runs the plant harness too.
+
+Guards: 424 → **424** — the plant is repaired, not added.
+
 ## v1.82.3 — the release protocol is two merges, and their order is written down now
 
 **`v1.82.2` is a dead tag for the same reason `v1.82.1` was, and the run that burned it
