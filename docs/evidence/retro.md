@@ -1477,6 +1477,26 @@ three quarters of the work on this run.
 
 ## Releases that carry no stamp — stated, not stamped
 
+**`v1.82.4` carries no stamp: no run of this pipeline produced it.** It is the repair
+for `v1.82.3`, authored by one run and landed by another twenty hours later, and neither
+walked the ten stages. Recorded here rather than stamped, because the alternative — a run
+stamp for a run that did not happen — is the one thing this section exists to prevent.
+
+**The fifth mechanism, and it was caught before the tag went out rather than by it.** The
+payload was green on all three branch checks and would have burned `v1.82.4` exactly as
+its four predecessors burned theirs: it repaired the plant harness and left the release
+UNDECLARED, so the release-gap check refused the tag's own tree. That check cannot fire on
+a branch — `validate.yml` ignores tag pushes, and the tag does not exist yet — so a PR
+repairing burn N is structurally blind to burn N+1. What saw it was the rule the previous
+round paid for: **the tag was cut locally, `npm run test:all` ran against the tag's tree,
+and the failure was read there.** The local tag was deleted; nothing was pushed. That is
+the whole difference between this round and the four before it, and it cost one command.
+
+**`npm test` is three checks of thirteen.** The release runs `test:all`; every one of the
+five rounds verified with the shorter one. The preflight `B-134` asks for is not a new
+check but the existing `test:all` against the tag's own tree, which is the only tree where
+four of the five failures are visible at all.
+
 **`v1.82.3` is a dead tag, and its cause is a fourth distinct one.** Its stamp was
 correct and in the right order — the payload merged as `9e2ab3e`, the stamp cited it and
 landed as `e4e0eb4`, the tag was cut there and the gate had accepted that tree. What

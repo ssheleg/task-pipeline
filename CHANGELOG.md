@@ -25,6 +25,14 @@ runs. `B-134` carries it, and now asks for a preflight that runs the plant harne
 
 Guards: 424 → **424** — the plant is repaired, not added.
 
+**Landed 2026-09-02, and the release-gap check refused this tree first.** The repair above
+was green on every branch check and still declared no stamp for the release it was
+creating — a fifth instance of the same shape, caught because the tag was cut locally and
+`npm run test:all` was run against the tag's own tree before anything was pushed. The
+preflight `B-134` asks for is therefore not a new check: it is `test:all` on that tree,
+which is the only tree where four of the five failures can be seen at all. `npm test` runs
+three of its thirteen.
+
 ## v1.82.3 — the release protocol is two merges, and their order is written down now
 
 **`v1.82.2` is a dead tag for the same reason `v1.82.1` was, and the run that burned it
