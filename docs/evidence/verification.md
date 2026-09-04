@@ -1,6 +1,6 @@
 # Verification — task-pipeline
 
-## Shipped state — v1.83.0 (2026-09-04)
+## Shipped state — v1.83.1 (2026-09-04)
 
 **`project-audit`: the page is asked for, and four filed findings close.** The run writes
 the JSON sidecar unconditionally — `carry_forward` reads the previous one, so skipping it
@@ -14,6 +14,7 @@ only with `--report`.
 | PA-3 | A home-grown error channel is no longer reported as absent (#83) | `test_a_homegrown_error_channel_is_not_reported_as_absent` builds a tree with `src/error-reporter.js` and no SDK dependency; verdict `clean`, reason names the module. **Watched failing** with the widening removed | yes |
 | PA-4 | Documentary evidence yields `blind`, not `finding` | the probe returns `blind` when only a doc mentions an error channel — it establishes neither that the channel works nor that it is absent | yes |
 | PA-5 | The exclusion filter is real, not a permanently-false branch | the first draft guarded on `hasattr(ctx, "excluded")` against a method that does not exist; it reads `ctx.out_rel`, the field `Ctx` actually carries | yes |
+| PA-7 | The release gate refused a tag whose tree had an unstamped run, and the repair was a version rather than a moved tag | `release.yml` on `v1.83.0`: *1 release(s) after the newest run stamp are named nowhere* — the branch was green because `validate.yml` ignores tag pushes. `git push --delete origin v1.83.0` → `push declined due to repository rule violations`, so `v1.83.1` is cut at the fixed tree | yes |
 | PA-6 | The consequence, already-decided and datastore rules are in the skill (#77, #78, #84) | three new `SKILL.md` sections, each carrying the measurement it came from — eight rows rewritten by production, five of eight already decided, and the connect-helper disagreement | yes |
 
 ## Shipped state — v1.82.4 (2026-09-01)
