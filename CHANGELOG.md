@@ -1,3 +1,21 @@
+## v1.83.1 — the tag that could not be moved, and why that is right
+
+**No change to the skill.** `v1.83.0`'s tree carried a run stamp with `—` where its
+commit belongs, so the release gate refused it on the tag's own tree — correctly, and in
+the only place that can see it, because `validate.yml` ignores tag pushes.
+
+The stamp names `48544ac` now. **The tag was not moved**: a repository rule refuses to
+delete or re-point one, and that rule is right. A tag is a promise about a tree, the tree
+at `v1.83.0` genuinely lacked the stamp, and quietly re-cutting the same version over a
+different tree would make every future reader of that tag wrong about what it contained.
+So the repair is a version, not a rewrite.
+
+This is `ssheleg/sshlg-skills#80` met from the inside on the run that closed its
+neighbours: **a commit reference is written after the commit exists.** The record ships
+in a following commit rather than claiming a sha that did not exist when it was written.
+
+Guards: 424 → **424** — no mechanism changed.
+
 ## v1.83.0 — an audit report is asked for, and four findings that had already cost something
 
 `project-audit`, closing `ssheleg/sshlg-skills#77`, `#78`, `#83`, `#84`.
