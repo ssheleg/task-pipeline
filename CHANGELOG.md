@@ -1,3 +1,18 @@
+## v1.83.2 — the declaration the two tags before it needed
+
+**No change to the skill.** `v1.83.0` shipped a real run whose stamp cell held `—` where
+the commit belongs; `v1.83.1` filled it; neither tag could then satisfy the release gate,
+because the gate asks for a stamp inside each tag's OWN commit range and a tag cannot be
+moved to acquire one. Both, and this one, are declared in `## Releases that carry no
+stamp` — the mechanism that section exists for.
+
+**The remedy was already in that file and this run walked past it.** It records, from five
+earlier burns: cut the tag locally, run `test:all` against the tag's own tree, read the
+failure there, delete the local tag, push nothing. Two tags were burned here by pushing
+first. That is the sixth mechanism, and it is not a new one.
+
+Guards: 424 → **424** — no mechanism changed.
+
 ## v1.83.1 — the tag that could not be moved, and why that is right
 
 **No change to the skill.** `v1.83.0`'s tree carried a run stamp with `—` where its

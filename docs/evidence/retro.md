@@ -1477,6 +1477,25 @@ three quarters of the work on this run.
 
 ## Releases that carry no stamp — stated, not stamped
 
+**`v1.83.0`, `v1.83.1` and `v1.83.2` carry no stamp, and the sixth mechanism is that I
+did not read this section before cutting.** Named one by one rather than as a range: the
+range form expands over tags that EXIST, and the declaration for a version has to be in
+the tree before that version is tagged — so a range can never cover the tag it is being
+written for. `v1.83.0` shipped a real run — four filed issues and
+the opt-in report — but its stamp cell held `—` where the commit belongs, so the gate saw
+a release with no stamp inside its own range and refused the tag's tree. The stamp names
+`48544ac` from `v1.83.1` onward; **the tag itself cannot be repaired**, because a
+repository rule refuses to delete or re-point one, and that rule is right — a tag is a
+promise about a tree and that tree genuinely lacked the stamp. `v1.83.1` is the repair and
+`v1.83.2` is the declaration, and neither ran the ten stages, so neither may be stamped.
+
+**The remedy was already written here and I walked past it.** Four paragraphs below, the
+fifth mechanism records what ends this class: *cut the tag locally, run `npm run test:all`
+against the tag's own tree, read the failure there, delete the local tag, push nothing.*
+Both of my burns were pushed first and diagnosed from the remote — the two rounds this
+section exists to make unnecessary. A section that records a remedy is only worth what the
+next run does with it, and the next run was this one.
+
 **`v1.82.4` carries no stamp: no run of this pipeline produced it.** It is the repair
 for `v1.82.3`, authored by one run and landed by another twenty hours later, and neither
 walked the ten stages. Recorded here rather than stamped, because the alternative — a run
