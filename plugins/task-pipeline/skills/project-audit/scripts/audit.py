@@ -940,6 +940,47 @@ def _p_worktree(ctx):
                            % len(state["paths"]))
 
 
+# A capability can be present without a dependency declaring it, and the words a
+# home-grown one is named after are predictable. Ordered cheapest-first; the probe
+# stops at the first hit.
+HOMEGROWN_TELEMETRY = re.compile(
+    r"(?:error|exception|crash)[-_]?(?:report|track|log|handler|monitor)"
+    r"|(?:report|track|capture)[-_]?(?:error|exception|crash)"
+    r"|error[-_]?(?:events?|feed)", re.I)
+
+
+def _telemetry_evidence(ctx):
+    """Everything short of a manifest dependency that says this capability exists.
+
+    The probe concluded from manifests alone, so a project with a working
+    home-grown error channel was reported as having none — and the finding read
+    `no error reporting found`, which is an assertion about the product rather than
+    about the manifest the probe actually read. Ordered cheapest-first, stopping at
+    the first hit, and the KIND of evidence is returned because it decides the
+    verdict: code or schema is `clean`, documentary alone is not a finding either.
+    """
+    # `out_rel` is where THIS run writes; a probe that reads it takes the audit's
+    # own artefacts for project state. There is no `ctx.excluded()` — the first draft
+    # guarded with `hasattr` and produced a branch that was permanently false, which
+    # is a filter that silently does nothing.
+    out = (ctx.out_rel or "").rstrip("/") + "/"
+    files = [f for f in (tracked_files(ctx.root) or []) if not f.startswith(out)]
+    for rel in files:
+        base = os.path.basename(rel)
+        if HOMEGROWN_TELEMETRY.search(base):
+            return ("module", rel)
+    for rel in files:
+        low = rel.lower()
+        if ("migration" in low or "schema" in low or low.endswith(".sql")) \
+                and HOMEGROWN_TELEMETRY.search(_read(os.path.join(ctx.root, rel), 40000)):
+            return ("schema", rel)
+    for marker in ("README.md", "CLAUDE.md", "AGENTS.md", "ARCHITECTURE.md"):
+        path = os.path.join(ctx.root, marker)
+        if os.path.exists(path) and HOMEGROWN_TELEMETRY.search(_read(path, 60000)):
+            return ("documented", marker)
+    return (None, None)
+
+
 @probe("telemetry", "prod", needs=())
 def _p_telemetry(ctx):
     found = ctx.profile.get("telemetry") or []
@@ -950,16 +991,29 @@ def _p_telemetry(ctx):
     if not deploy:
         return Result("clean", "no deploy target declared — a library or tool, "
                                "for which absent telemetry is a design, not a gap")
+    kind, where = _telemetry_evidence(ctx)
+    if kind in ("module", "schema"):
+        return Result("clean", "no telemetry dependency, but a home-grown channel "
+                               "is present (%s: %s) — the manifest was the wrong "
+                               "place to look" % (kind, where))
+    if kind == "documented":
+        # Documentary evidence cannot establish that the channel WORKS, and it
+        # cannot establish that it is absent either. Asserting absence over a
+        # document that describes the opposite is the defect this branch exists for.
+        return Result("blind", "no telemetry dependency and no module named for "
+                               "one, but %s describes an error channel — whether it "
+                               "works is not answerable from the tree" % where)
     return Result("finding", "no error reporting found", findings=[_finding(
         "telemetry", "manifests",
         "A deployed surface reports no errors anywhere its maintainer can see",
         "medium", 2, 2,
         "add an error reporter, or record the decision not to — the gap worth "
         "closing is that nobody wrote down which it is",
-        detail="Deploy targets declared (%s) with no telemetry dependency in "
-               "any manifest. A failure on a user's machine is invisible."
-               % (", ".join(deploy) or "none"),
-        evidence="languages=%s deploy=%s telemetry=[]"
+        detail="Deploy targets declared (%s) with no telemetry dependency in any "
+               "manifest, no module named for an error channel, and no mention in "
+               "the documentation entry points. A failure on a user's machine is "
+               "invisible." % (", ".join(deploy) or "none"),
+        evidence="languages=%s deploy=%s telemetry=[] homegrown=none"
                  % (",".join(langs), ",".join(deploy)))])
 
 
@@ -1207,8 +1261,11 @@ def main(argv=None):
     ap.add_argument("--root", default=".", help="project root (default: .)")
     ap.add_argument("--out", default=None,
                     help="output directory (default: <root>/docs/audit)")
+    ap.add_argument("--report", action="store_true",
+                    help="also write the HTML page and open it (default: the JSON "
+                         "sidecar and a stdout summary only)")
     ap.add_argument("--no-open", action="store_true",
-                    help="do not open the report in a browser")
+                    help="with --report, write the page but do not open it")
     ap.add_argument("--offline", action="store_true",
                     help="skip every probe that needs the network")
     ap.add_argument("--json", action="store_true",
@@ -1234,11 +1291,20 @@ def main(argv=None):
 
     json_path = os.path.join(out_dir, base + ".json")
     html_path = os.path.join(out_dir, base + ".html")
+    # The sidecar is unconditional: it is what makes this a ratchet rather than a
+    # snapshot, and `carry_forward` above has already read the previous one. Skipping
+    # it would silently turn every future run into a first run.
+    #
+    # The PAGE is a report, and a report is an artefact that outlives the
+    # conversation. Writing one nobody asked for leaves a document in the tree that
+    # nobody ordered and nobody maintains — and, being untracked HTML under `docs/`,
+    # it is one `git add -A` from the product's history. So it is opt-in.
     with open(json_path, "w", encoding="utf-8") as fh:
         json.dump(payload, fh, indent=1, ensure_ascii=False, sort_keys=True)
         fh.write("\n")
-    with open(html_path, "w", encoding="utf-8") as fh:
-        fh.write(render_html(payload))
+    if args.report:
+        with open(html_path, "w", encoding="utf-8") as fh:
+            fh.write(render_html(payload))
 
     if args.json:
         print(json.dumps(payload, indent=1, ensure_ascii=False))
@@ -1254,9 +1320,13 @@ def main(argv=None):
         else:
             print("  closed %d · new %d · still open %d"
                   % (len(r["closed"]), len(r["new"]), len(r["carried"])))
-        print("  %s\n  %s" % (html_path, json_path))
+        if args.report:
+            print("  %s\n  %s" % (html_path, json_path))
+        else:
+            print("  %s" % json_path)
+            print("  no page written — pass `--report` for the HTML view")
 
-    if not args.no_open:
+    if args.report and not args.no_open:
         ok, note = open_in_browser(html_path)
         if not ok:
             sys.stderr.write("could not open the report: %s\n" % note)
