@@ -1,5 +1,21 @@
 # Verification — task-pipeline
 
+## Shipped state — v1.83.0 (2026-09-04)
+
+**`project-audit`: the page is asked for, and four filed findings close.** The run writes
+the JSON sidecar unconditionally — `carry_forward` reads the previous one, so skipping it
+would turn every future run into a first run — and writes `docs/audit/<date>-audit.html`
+only with `--report`.
+
+| REQ | What ships | How it was confirmed | Confirmed |
+|---|---|---|---|
+| PA-1 | A plain run writes the sidecar and no page, and says the page was skipped | `test_a_plain_run_writes_the_sidecar_and_no_page` asserts no `.html`, a `.json`, and `no page written` on stdout — absence that does not announce itself reads as a failure to write | yes |
+| PA-2 | `--report` still writes both, byte-stable across three runs | `test_report_writes_both_artefacts`; the idempotence test passes `--report` and still finds one hash from three runs | yes |
+| PA-3 | A home-grown error channel is no longer reported as absent (#83) | `test_a_homegrown_error_channel_is_not_reported_as_absent` builds a tree with `src/error-reporter.js` and no SDK dependency; verdict `clean`, reason names the module. **Watched failing** with the widening removed | yes |
+| PA-4 | Documentary evidence yields `blind`, not `finding` | the probe returns `blind` when only a doc mentions an error channel — it establishes neither that the channel works nor that it is absent | yes |
+| PA-5 | The exclusion filter is real, not a permanently-false branch | the first draft guarded on `hasattr(ctx, "excluded")` against a method that does not exist; it reads `ctx.out_rel`, the field `Ctx` actually carries | yes |
+| PA-6 | The consequence, already-decided and datastore rules are in the skill (#77, #78, #84) | three new `SKILL.md` sections, each carrying the measurement it came from — eight rows rewritten by production, five of eight already decided, and the connect-helper disagreement | yes |
+
 ## Shipped state — v1.82.4 (2026-09-01)
 
 Measured on the release-candidate tree before the tag exists. Queue positions 9–10 of the

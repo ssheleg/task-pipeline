@@ -84,6 +84,21 @@ cannot admit about itself:
   blind. Read aggregates and pointers, never raw bodies (see *The two
   artefacts*).
 
+**Before ANY datastore read, in this order** — a figure from the wrong database is
+worse than no figure, because it is quoted with the authority of a measurement:
+
+1. **resolve the datastore from the platform's own attachment**, not from a script
+   in the repository and not from a name in the documentation;
+2. **prove liveness with a freshest-write aggregate** against a table the product
+   writes constantly, and put that timestamp in the report beside every figure it
+   underwrites;
+3. where **more than one** datastore is attached, name them all with their
+   freshness — an audit that reads one and does not mention the other cannot be
+   reproduced by its reader;
+4. the repository's connect helper is **evidence about the repository**, never about
+   the platform. Where the two disagree that is a finding of its own, and it is the
+   one this rule was written from.
+
 ### 4. Seams — hand off to the ladder
 
 Now, and only now, walk `audit.md`'s ladder over the capabilities the discovery
@@ -91,9 +106,10 @@ found. Bottom-up, seam-ordered. Absences found here are findings like any other.
 
 ### 5. Report — two files, one command
 
-`python3 scripts/audit.py --root <path>` writes both and opens the page. It is
-the same script the probes live in, so what the report claims and what ran are
-the same object.
+`python3 scripts/audit.py --root <path>` writes the sidecar and prints a summary.
+Add `--report` for the HTML page, and `--no-open` beside it to write without
+opening. It is the same script the probes live in, so what the report claims and
+what ran are the same object.
 
 ### 6. Propose — rows, not edits
 
@@ -104,6 +120,51 @@ board doctrine) — and the operator accepts them. Effort never ranks inside an
 audit: what a fix costs is the fixer's decision, not the finder's
 (`references/prioritisation.md`). An audit
 that edits while it reads cannot be re-run to check itself.
+
+## A finding carries its consequence, or it is a hypothesis
+
+**A mechanism is derived from the code; the consequence lives in production.** A row
+written from the mechanism alone is indistinguishable from a real finding until
+somebody measures it — and one audit had **eight consecutive rows** rewritten by that
+measurement, two of which would have destroyed inventory if remedied as written,
+because both read an absence of sales as an absence of demand.
+
+So before a row may be written as a `finding` rather than as a hypothesis:
+
+1. **how often does the mechanism fire?** A query, a log count, a telemetry read — or
+   an explicit statement that it has never been observed to fire;
+2. **where the answer is *never*, the row is still worth keeping**, priced as
+   **latent**: the remedy is weighed against zero rather than against the mechanism's
+   severity;
+3. **where the measurement is impossible, that is a `blind` on the consequence** and
+   the row says so. A blind consequence is not a finding.
+
+Two rules follow from the same place:
+
+- **Check a remedy against the population it would touch before proposing it.** Two
+  rows prescribed releasing an asset class; the measurement showed the asset class was
+  the product's own inventory, deliberately held.
+- **An absence is not evidence until the path that would produce the presence has been
+  walked.** Zero sales means no demand *or* no working path, and those two want
+  opposite remedies.
+
+## Already decided is not a finding, and it is not nothing either
+
+An audit that reads a module and not the places the module is used reports, as
+defects, the things the project has already decided — **in the project's own words**,
+because the decision is usually written a few lines from the code the finding cites.
+Five of eight rows in one run were that.
+
+- **Read the call site, not only the definition.** A finding about a module is not
+  written until the places that use it have been read.
+- **Every row states which of three it is:** *(a)* undecided, *(b)* decided and
+  documented right here, *(c)* decided elsewhere and not propagated. Only **(a)** and
+  **(c)** are work. **(b)** is the audit being wrong, and recording that is worth more
+  than deleting the row.
+- **Where the verdict is (c), the remedy is a mechanical check, not an edit.** A
+  written rule nobody verifies reaches exactly as far as the place it was written; the
+  durable fix in all five cases was a guard that asks the project's own instruction of
+  every copy, not a patch to the copy that happened to be found.
 
 ## Three verdicts, and why the third one exists
 
@@ -145,9 +206,17 @@ Two more traps, both of which shipped in the first draft and are now fixtures:
 - **Compare only when both sides claim the same version.** A branch already
   bumped past its tag makes no common claim, and is `blind`, not `clean`.
 
-## The two artefacts
+## The artefacts — the sidecar always, the page on request
 
-`docs/audit/<date>-audit.html` and `docs/audit/<date>-audit.json`.
+`docs/audit/<date>-audit.json` is written on every run. **The HTML page is written
+only with `--report`.**
+
+The split is not symmetry. The sidecar is what makes this a ratchet rather than a
+snapshot, and the next run reads it — skipping it would silently turn every future run
+into a first run. The page is a **report**, and a report is an artefact that outlives
+the conversation: one nobody asked for is a document nobody ordered and nobody
+maintains, sitting untracked under `docs/` one `git add -A` from the product's
+history. Answer in the conversation; write the page when somebody wants a page.
 
 **The page carries aggregates and pointers, never raw bodies.** Counts, top
 classes, trends, and a link to the issue in its own system — never a stack
@@ -170,7 +239,7 @@ picks up is a decision nobody wrote down.
 
 | The script | You |
 |---|---|
-| discovery, the registry, mechanical probes, both artefacts, the diff | the seam walk, MCP evidence, judgement about what a finding means |
+| discovery, the registry, mechanical probes, the sidecar, the page on `--report`, the diff | the seam walk, MCP evidence, judgement about what a finding means |
 | refuses a fourth verdict, redacts secrets, excludes its own output | deciding severity and effort, writing the remedy that fits this project |
 
 The split is not tidiness. **A judgement encoded in a script becomes a gate

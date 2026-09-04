@@ -1,3 +1,58 @@
+## v1.83.0 — an audit report is asked for, and four findings that had already cost something
+
+`project-audit`, closing `ssheleg/sshlg-skills#77`, `#78`, `#83`, `#84`.
+
+**A report is written when somebody wants a report.** The run wrote
+`docs/audit/<date>-audit.html` and opened it every time; it now writes the page only
+with **`--report`** (`--no-open` beside it to write without opening). The split is not
+symmetry: the **sidecar stays unconditional**, because `carry_forward` reads the previous
+one and skipping it would silently turn every future run into a first run. The page is
+different — a report outlives the conversation, and one nobody asked for is untracked
+HTML under `docs/`, one `git add -A` from the product's history.
+
+**`#83` — the telemetry probe read manifests and asserted about the product.** A project
+with a working home-grown error channel and no SDK dependency was reported as *"no error
+reporting found"*. The evidence is ordered and cheapest-first now, stopping at the first
+hit: a manifest dependency, a module named for the capability, a table or migration named
+for it, a mention in a documentation entry point. **And the KIND of evidence decides the
+verdict** — code or schema is `clean` with the channel named; a document alone is
+`blind`, because it establishes neither that the channel works nor that it is absent.
+The remedy sentence survives, which was the valuable half.
+
+**`#77` — a finding carries its consequence, or it is a hypothesis.** One audit had
+**eight consecutive rows** rewritten by measuring against production, two of which would
+have destroyed inventory if remedied as written, because both read an absence of sales as
+an absence of demand. A row now states how often the mechanism fires, or that it never
+has — in which case it is priced as **latent** and the remedy weighed against zero — or
+that the measurement is impossible, which is a `blind` on the consequence and not a
+finding.
+
+**`#78` — already decided is not a finding, and not nothing either.** Five of eight rows
+in one run reported decisions the project had already made, in the project's own words,
+because the decision sits a few lines from the cited code. The call site is read before a
+row is written, every row states which of three it is (undecided / decided here / decided
+elsewhere and not propagated), and where it is the third the remedy is **a mechanical
+check rather than an edit** — a written rule nobody verifies reaches exactly as far as
+the place it was written.
+
+**`#84` — an ordered preflight before any datastore read.** Resolve the store from the
+platform's own attachment rather than from a script or a document; prove liveness with a
+freshest-write aggregate and put that timestamp beside every figure it underwrites; name
+every attached store with its freshness; and treat the repository's connect helper as
+evidence about the repository, which is a finding of its own when the two disagree.
+
+Guards: 424 → **424** — this release adds no planted-defect guard. The three new checks
+live in `test/project_audit_test.py`, which `validate.yml` runs as an ordinary step
+rather than as one of its 429 `Negative self-test` steps, and the floor
+(`negatives.MIN_EXPECTED`) is unchanged. The new checks were still each watched failing
+against the un-fixed code, which is the property the count exists to protect and not the
+count itself.
+
+**One defect of my own, caught before it shipped:** the widened probe's first draft
+guarded with `hasattr(ctx, "excluded")` against a method that does not exist, producing a
+filter that was permanently false and silently did nothing. It reads `ctx.out_rel`, which
+is the real field.
+
 ## v1.82.4 — the plant the harness could not see
 
 `v1.82.3` is a dead tag, and its cause is the **fourth distinct one**. Its stamp was

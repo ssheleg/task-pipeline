@@ -515,8 +515,11 @@ class TestIdempotence(Fixtures):
         tree = self.trees["python-single"]
         hashes = []
         for _ in range(3):
+            # `--report`, because the page is opt-in now and this test is about
+            # the page being byte-stable across runs — the property still holds
+            # and the flag is what produces the subject.
             proc = subprocess.run(
-                [sys.executable, SCRIPT, "--root", tree, "--no-open",
+                [sys.executable, SCRIPT, "--root", tree, "--report", "--no-open",
                  "--offline"],
                 capture_output=True, text=True)
             self.assertEqual(proc.returncode, 0, proc.stderr[-800:])
@@ -530,16 +533,75 @@ class TestIdempotence(Fixtures):
                          "standing instruction #2 is about this layer")
         shutil.rmtree(os.path.join(tree, "docs/audit"), ignore_errors=True)
 
-    def test_the_run_writes_exactly_two_artefacts(self):
+    def test_a_plain_run_writes_the_sidecar_and_no_page(self):
+        """A report is an artefact that outlives the conversation, so it is asked for.
+
+        The sidecar is NOT optional: `carry_forward` reads the previous one, so
+        skipping it would silently turn every future run into a first run. The page
+        is what nobody ordered — untracked HTML under `docs/`, one `git add -A` from
+        the product's history.
+        """
         tree = self.trees["go-no-ci"]
-        subprocess.run([sys.executable, SCRIPT, "--root", tree, "--no-open",
-                        "--offline"], capture_output=True, text=True)
+        proc = subprocess.run([sys.executable, SCRIPT, "--root", tree, "--offline"],
+                              capture_output=True, text=True)
+        self.assertEqual(proc.returncode, 0, proc.stderr[-800:])
+        out = os.path.join(tree, "docs/audit")
+        names = sorted(os.listdir(out))
+        self.assertEqual([n for n in names if n.endswith(".html")], [],
+                         f"a page was written without --report: {names}")
+        self.assertTrue(any(n.endswith(".json") for n in names),
+                        f"the sidecar is not optional and is missing: {names}")
+        self.assertIn("no page written", proc.stdout,
+                      "the run did not say the page was skipped, so its absence "
+                      "reads as a failure to write one")
+        shutil.rmtree(out, ignore_errors=True)
+
+    def test_report_writes_both_artefacts(self):
+        tree = self.trees["go-no-ci"]
+        subprocess.run([sys.executable, SCRIPT, "--root", tree, "--report",
+                        "--no-open", "--offline"], capture_output=True, text=True)
         out = os.path.join(tree, "docs/audit")
         names = sorted(os.listdir(out))
         self.assertEqual(len(names), 2, f"expected html+json, got {names}")
         self.assertTrue(any(n.endswith(".html") for n in names))
         self.assertTrue(any(n.endswith(".json") for n in names))
         shutil.rmtree(out, ignore_errors=True)
+
+    def test_a_homegrown_error_channel_is_not_reported_as_absent(self):
+        """The probe read manifests and asserted about the product. (#83)
+
+        A project with a working home-grown error channel and no SDK dependency was
+        reported as `no error reporting found` — an assertion about the product made
+        from evidence about the manifest. The verdicts differ by the KIND of
+        evidence: code or schema is clean, a document alone cannot establish that
+        the channel works OR that it is absent.
+        """
+        tree = tempfile.mkdtemp(prefix="pa-homegrown-")
+        self.addCleanup(shutil.rmtree, tree, True)
+        subprocess.run(["git", "init", "-q", tree], capture_output=True)
+        with open(os.path.join(tree, "package.json"), "w", encoding="utf-8") as fh:
+            fh.write('{"name":"p","version":"1.0.0","dependencies":{}}\n')
+        os.makedirs(os.path.join(tree, "src"), exist_ok=True)
+        # No dependency names a telemetry SDK; the capability is a module.
+        with open(os.path.join(tree, "src", "error-reporter.js"), "w",
+                  encoding="utf-8") as fh:
+            fh.write("export function report(e) { /* our own channel */ }\n")
+        with open(os.path.join(tree, "Dockerfile"), "w", encoding="utf-8") as fh:
+            fh.write("FROM node:20\n")
+        subprocess.run(["git", "add", "-A"], cwd=tree, capture_output=True)
+        subprocess.run(["git", "-c", "user.email=t@t", "-c", "user.name=t",
+                        "commit", "-qm", "x"], cwd=tree, capture_output=True)
+        proc = subprocess.run([sys.executable, SCRIPT, "--root", tree, "--offline",
+                               "--json"], capture_output=True, text=True)
+        payload = json.loads(proc.stdout)
+        tele = [p for p in payload["probes"] if p["id"] == "telemetry"]
+        self.assertTrue(tele, "the telemetry probe did not run")
+        self.assertNotEqual(
+            tele[0]["verdict"], "finding",
+            "a module named for an error channel was still reported as no error "
+            "reporting — the manifest was the wrong place to look")
+        self.assertIn("error-reporter", tele[0].get("reason", ""),
+                      "the verdict does not name the evidence it found")
 
     def test_the_sidecar_validates_against_its_own_schema_claim(self):
         tree = self.trees["go-no-ci"]
