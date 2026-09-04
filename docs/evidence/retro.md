@@ -1477,8 +1477,9 @@ three quarters of the work on this run.
 
 ## Releases that carry no stamp — stated, not stamped
 
-**`v1.83.0`, `v1.83.1` and `v1.83.2` carry no stamp, and the sixth mechanism is that I
-did not read this section before cutting.** Named one by one rather than as a range: the
+**`v1.83.0` and `v1.83.1` carry no stamp, and the sixth mechanism is that I did not read
+this section before cutting.** `v1.83.2` was never cut — its content ships as `v1.84.0`,
+which runs the pipeline and is stamped like any other. Named one by one rather than as a range: the
 range form expands over tags that EXIST, and the declaration for a version has to be in
 the tree before that version is tagged — so a range can never cover the tag it is being
 written for. `v1.83.0` shipped a real run — four filed issues and

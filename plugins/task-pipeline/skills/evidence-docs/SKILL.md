@@ -16,10 +16,13 @@ The full statement of each canon, its rationale and its enforcement live in
 ## The ten canons
 
 1. **A claim carries its address** — `file:line`, a command with its output, a test name; a lesson names its commit.
+   - **1a. A token that looks like evidence is not evidence until it has been resolved.** A sha, a line number, a path, a flag, a test name: every one can be plausible and absent, and each is trusted at exactly the moment nobody re-reads it. A commit reference is filled **after** the commit exists and checked with a command.
 2. **Numbers are computed, never restated.**
+   - **2a. A number out of the shell is not a measurement until you have looked at what matched.** Print the matched items classified beside the count whenever the token can occur inside something else, and never pipe a command whose exit status governs what happens next — the shell then answers about the pager. *Eighteen lines containing these three digits* and *eighteen throttle events* are different claims.
 3. **Every fact has exactly one home** — others link, never restate.
 4. **A reference resolves from where the document is read** — not from where it lives.
 5. **Green nobody watched turn red is not evidence.**
+   - **5a. A model too small to reproduce the defect is too small to prove the fix.** Reproduce first, fix second: a harness that goes green on the unfixed input is not a harness. Where the model is smaller than the subject, the gap is stated as a list of what it omits, with numbers.
 6. **A check proves its scope and nothing beyond it.**
 7. **Silence is not a pass** — ask what a mechanism prints when it did not look.
 8. **An estimate is never announced as a measurement** — a rule states its evidence condition.
