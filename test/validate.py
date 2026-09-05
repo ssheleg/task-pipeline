@@ -4794,6 +4794,48 @@ if os.path.isfile(os.path.join(refdir, "knowledge-graph.md")):
     # greppable, which is the only property it has: a ledger row is prose, and the
     # marker is the one string a reader (or a later check) can look for. audit.md:
     # a class seen twice becomes a mechanism rather than a third ledger row.
+    # THE PLANT MECHANISM HAS A BUDGET, AND IT WAS SPENT SILENTLY.
+    #
+    # This repository's assurance story is one plant per guard, and plants live in one
+    # workflow file. On 2026-09-05 five inline plants took it from 508 189 to 518 928
+    # bytes and **GitHub stopped creating runs at all** — the workflow still reported
+    # `active` through the API, `head_sha` had zero runs, and `gh pr checks` printed
+    # *no checks reported*, which reads like a queue delay rather than a refusal. A PR
+    # sat with no CI and nothing said why.
+    #
+    # BRACKETED BY MEASUREMENT, not by the documentation alone: 508 189 bytes produced
+    # runs, 518 928 produced none, and 511 096 produced runs again after the plants were
+    # factored into `test/plant_stamp_needle.py`. GitHub's documented ceiling is 512 KB
+    # and it falls inside that bracket, which is why the hard number below is the
+    # documented one rather than a guess dressed as a measurement.
+    #
+    # Two bands, because a ceiling you only learn about by crossing it is the defect:
+    # `fail` at the documented limit, and DISCLOSE in the band before it, so the next
+    # author sees the room shrinking rather than the workflow going quiet.
+    #
+    # The rule that buys room: a plant's BODY belongs in `test/plant_*.py`, called with an
+    # argument. Five inline copies cost 10 739 bytes; one script and five four-line steps
+    # cost 2 907.
+    _WF = os.path.join(ROOT, ".github/workflows/validate.yml")
+    _WF_HARD = 512_000          # GitHub's documented 512 KB, inside the measured bracket
+    _WF_WARN = 505_000
+    _wf_bytes = os.path.getsize(_WF)
+    if _wf_bytes > _WF_HARD:
+        fail(f".github/workflows/validate.yml is {_wf_bytes:,} bytes, past GitHub's "
+             f"{_WF_HARD:,}-byte workflow limit. Above it the workflow stays `active`, "
+             "creates no runs, and `gh pr checks` says 'no checks reported' — measured "
+             "2026-09-05 at 518,928 bytes, when a PR sat with no CI and nothing said "
+             "why. Move the next plant's body into `test/plant_*.py` and call it with an "
+             "argument: five inline copies cost 10,739 bytes, one script and five "
+             "four-line steps cost 2,907")
+    elif _wf_bytes > _WF_WARN:
+        # Printed, not collected: this validator has no disclosure list, and inventing one
+        # for a single warning would be a second reporting channel nobody maintains.
+        print(f"  workflow size — validate.yml is {_wf_bytes:,} bytes, "
+              f"{_WF_HARD - _wf_bytes:,} under GitHub's {_WF_HARD:,}-byte limit. Past it "
+              "the workflow goes SILENT rather than red — the next plant's body belongs "
+              "in `test/plant_*.py`, called with an argument")
+
     # B-124 — the stamp class that survived the amend rule.
     #
     # The amend rule ("never amend a commit a record already names") is written and was

@@ -32,6 +32,41 @@ cannot rot into an intention the next author reads past — which is how it recu
 Guards: 424 → **429** — one plant per named string, each removing **every** occurrence
 inside the section.
 
+### And adding those five plants broke CI silently
+
+Not a side note — the mechanism this repository's whole assurance story rests on has a
+budget, and this release spent the last of it.
+
+The five plants, written inline, took `.github/workflows/validate.yml` from **508 189 to
+518 928 bytes**, and GitHub **stopped creating runs entirely**. The workflow still
+reported `active` through the API, `head_sha` had zero runs, and `gh pr checks` printed
+*no checks reported* — which reads like a queue delay, not a refusal. The PR sat with no
+CI and nothing said why.
+
+**Bracketed by measurement rather than by the documentation alone:**
+
+| workflow size | runs created |
+|---|---|
+| 508 189 bytes | yes |
+| **518 928 bytes** | **none** |
+| 511 096 bytes, after the plants were factored into a script | yes |
+
+GitHub's documented ceiling is 512 KB and it falls inside that bracket, which is why the
+hard number in the guard is the documented one rather than a guess dressed as a
+measurement. The guard has **two bands**: it fails past 512 000, and it *prints* the
+remaining room past 505 000 — because a ceiling you only learn about by crossing it is
+the defect, not the ceiling.
+
+It prints **904 bytes remaining** today.
+
+**The rule that bought the room:** a plant's body belongs in `test/plant_*.py`, called
+with an argument. Five inline copies cost 10 739 bytes; one script and five four-line
+steps cost 2 907.
+
+**My own measurement was wrong first.** I sized the file with `len(s)` — characters — and
+read 509 350 for a file of 511 096 bytes, because the workflow carries Cyrillic. The
+guard uses `os.path.getsize`.
+
 **The check's first draft was itself the defect it guards against.** It searched the whole
 file, and `git merge-base --is-ancestor` already appears under *Every lesson carries its
 commit* — so the plant that removed the command from the new rule **passed**, and the
