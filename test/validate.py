@@ -4794,6 +4794,96 @@ if os.path.isfile(os.path.join(refdir, "knowledge-graph.md")):
     # greppable, which is the only property it has: a ledger row is prose, and the
     # marker is the one string a reader (or a later check) can look for. audit.md:
     # a class seen twice becomes a mechanism rather than a third ledger row.
+    # THE PLANT MECHANISM HAS A BUDGET, AND IT WAS SPENT SILENTLY.
+    #
+    # This repository's assurance story is one plant per guard, and plants live in one
+    # workflow file. On 2026-09-05 five inline plants took it from 508 189 to 518 928
+    # bytes and **GitHub stopped creating runs at all** — the workflow still reported
+    # `active` through the API, `head_sha` had zero runs, and `gh pr checks` printed
+    # *no checks reported*, which reads like a queue delay rather than a refusal. A PR
+    # sat with no CI and nothing said why.
+    #
+    # BRACKETED BY MEASUREMENT, not by the documentation alone: 508 189 bytes produced
+    # runs, 518 928 produced none, and 511 096 produced runs again after the plants were
+    # factored into `test/plant_stamp_needle.py`. GitHub's documented ceiling is 512 KB
+    # and it falls inside that bracket, which is why the hard number below is the
+    # documented one rather than a guess dressed as a measurement.
+    #
+    # Two bands, because a ceiling you only learn about by crossing it is the defect:
+    # `fail` at the documented limit, and DISCLOSE in the band before it, so the next
+    # author sees the room shrinking rather than the workflow going quiet.
+    #
+    # The rule that buys room: a plant's BODY belongs in `test/plant_*.py`, called with an
+    # argument. Five inline copies cost 10 739 bytes; one script and five four-line steps
+    # cost 2 907.
+    _WF = os.path.join(ROOT, ".github/workflows/validate.yml")
+    _WF_HARD = 512_000          # GitHub's documented 512 KB, inside the measured bracket
+    _WF_WARN = 505_000
+    _wf_bytes = os.path.getsize(_WF)
+    if _wf_bytes > _WF_HARD:
+        fail(f".github/workflows/validate.yml is {_wf_bytes:,} bytes, past GitHub's "
+             f"{_WF_HARD:,}-byte workflow limit. Above it the workflow stays `active`, "
+             "creates no runs, and `gh pr checks` says 'no checks reported' — measured "
+             "2026-09-05 at 518,928 bytes, when a PR sat with no CI and nothing said "
+             "why. Move the next plant's body into `test/plant_*.py` and call it with an "
+             "argument: five inline copies cost 10,739 bytes, one script and five "
+             "four-line steps cost 2,907")
+    elif _wf_bytes > _WF_WARN:
+        # Printed, not collected: this validator has no disclosure list, and inventing one
+        # for a single warning would be a second reporting channel nobody maintains.
+        print(f"  workflow size — validate.yml is {_wf_bytes:,} bytes, "
+              f"{_WF_HARD - _wf_bytes:,} under GitHub's {_WF_HARD:,}-byte limit. Past it "
+              "the workflow goes SILENT rather than red — the next plant's body belongs "
+              "in `test/plant_*.py`, called with an argument")
+
+    # B-124 — the stamp class that survived the amend rule.
+    #
+    # The amend rule ("never amend a commit a record already names") is written and was
+    # followed, and the same class recurred THREE times one level up: the stamp is
+    # written on the PR branch and cites that branch's HEAD, `main` is rebase-merge-only
+    # by ruleset, and the rebase mints new SHAs. Two correct refusals follow — the
+    # unstamped-release guard finds no resolving stamp in the tag's range, and the
+    # documentation gate resolves backticked SHAs against a FRESH CLONE where the branch
+    # commit never existed — and each recurrence costs one extra PR and one full CI
+    # round, measured 57-97 minutes here.
+    #
+    # A rule this repository has recorded twice in its retro and still repeated is a
+    # MECHANISM gap, not a memory one (references/audit.md: a class seen twice becomes a
+    # mechanism). So the doctrine must name the two shapes that survive a rebase-merge
+    # and the command the release gate will ask, or it rots back into an intention the
+    # next author reads past — which is exactly how it recurred.
+    _retro_ref = open(os.path.join(refdir, "retrospective.md"), encoding="utf-8").read()
+    # Scoped to the SECTION, never the file. The first draft searched the whole document
+    # and `git merge-base --is-ancestor` already appears under "Every lesson carries its
+    # commit" — so the plant that removed it from this rule passed, and the check was
+    # resting on a different section's sentence. A needle that another section can
+    # satisfy is a check that guards nothing (references/gates.md: False success).
+    _stamp_sec = re.search(r"^## A release stamp names the TAG.*?(?=^## |\Z)",
+                           _retro_ref, re.M | re.S)
+    if _stamp_sec is None:
+        fail("references/retrospective.md: the release-stamp rule lost its own heading, "
+             "so a run scanning section titles at stage 10 cannot find it, and every "
+             "needle below would then be answered by some other section")
+    _stamp_txt = _stamp_sec.group(0) if _stamp_sec else ""
+    for _need, _why in (
+        ("rebase-merge", "the merge strategy that destroys the SHA — without it the rule "
+                         "reads as advice about tidiness"),
+        ("cite the release tag", "the first shape that survives, and the only one "
+                                 "available before the merge exists"),
+        ("merge commit", "the second shape, and the default — the amend rule already "
+                         "forces the SHA to exist before a file names it"),
+        ("git merge-base --is-ancestor", "the command the release gate asks, so a run "
+                                         "can ask it first instead of learning the "
+                                         "answer from a tag it cannot repair"),
+        ("test:all", "the local probe against the tag's OWN tree — a green branch build "
+                     "is a promise about a different tree"),
+    ):
+        if _need not in _stamp_txt:
+            fail(f"references/retrospective.md: the release-stamp rule no longer names "
+                 f"`{_need}` — {_why}. Measured across v1.79.1 (twice), v1.80.0 and two "
+                 "burned umbrella tags on 2026-09-05; a tag cannot be repaired, so the "
+                 "cost of this rule going quiet is paid in tags")
+
     _MARKER = "⚠ not trusted for reach until refreshed"
     _marker_scope = [
         os.path.join(ROOT, "README.md"),

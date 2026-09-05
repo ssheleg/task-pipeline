@@ -9494,6 +9494,61 @@ jobs:
             exit 1
           fi
 
+      - name: Negative self-test (a release-stamp rule that stops naming the merge strategy)
+        run: |
+          set -eu
+          rm -rf /tmp/rm1 && cp -R . /tmp/rm1
+          python3 test/plant_stamp_needle.py /tmp/rm1 'rebase-merge'
+          if python3 /tmp/rm1/test/validate.py 2>&1 | grep -q "release-stamp rule no longer names"; then
+            echo "OK: validator FAILs — without the strategy named, the rule reads as advice about tidiness"
+          else
+            echo "ERROR: the rule stopped naming the merge strategy and nothing objected"; exit 1
+          fi
+
+      - name: Negative self-test (a release-stamp rule that stops naming the tag shape)
+        run: |
+          set -eu
+          rm -rf /tmp/rm2 && cp -R . /tmp/rm2
+          python3 test/plant_stamp_needle.py /tmp/rm2 'cite the release tag'
+          if python3 /tmp/rm2/test/validate.py 2>&1 | grep -q "release-stamp rule no longer names"; then
+            echo "OK: validator FAILs — the only shape available BEFORE the merge exists"
+          else
+            echo "ERROR: the rule stopped naming the tag shape and nothing objected"; exit 1
+          fi
+
+      - name: Negative self-test (a release-stamp rule that stops naming the merge-commit shape)
+        run: |
+          set -eu
+          rm -rf /tmp/rm3 && cp -R . /tmp/rm3
+          python3 test/plant_stamp_needle.py /tmp/rm3 'merge commit'
+          if python3 /tmp/rm3/test/validate.py 2>&1 | grep -q "release-stamp rule no longer names"; then
+            echo "OK: validator FAILs — the default — a SHA has to exist before a file names it"
+          else
+            echo "ERROR: the rule stopped naming the merge-commit shape and nothing objected"; exit 1
+          fi
+
+      - name: Negative self-test (a release-stamp rule that stops naming the gate command)
+        run: |
+          set -eu
+          rm -rf /tmp/rm4 && cp -R . /tmp/rm4
+          python3 test/plant_stamp_needle.py /tmp/rm4 'git merge-base --is-ancestor'
+          if python3 /tmp/rm4/test/validate.py 2>&1 | grep -q "release-stamp rule no longer names"; then
+            echo "OK: validator FAILs — the question the release gate asks, so a run can ask it first"
+          else
+            echo "ERROR: the rule stopped naming the gate command and nothing objected"; exit 1
+          fi
+
+      - name: Negative self-test (a release-stamp rule that stops naming the local probe)
+        run: |
+          set -eu
+          rm -rf /tmp/rm5 && cp -R . /tmp/rm5
+          python3 test/plant_stamp_needle.py /tmp/rm5 'test:all'
+          if python3 /tmp/rm5/test/validate.py 2>&1 | grep -q "release-stamp rule no longer names"; then
+            echo "OK: validator FAILs — the tag has its own tree; a green branch build is a promise about a different one"
+          else
+            echo "ERROR: the rule stopped naming the local probe and nothing objected"; exit 1
+          fi
+
       - name: Property check (the anchor census prints its disclosure beside the verdict)
         run: |
           set -eu

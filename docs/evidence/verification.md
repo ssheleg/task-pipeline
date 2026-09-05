@@ -1,6 +1,6 @@
 # Verification — task-pipeline
 
-## Shipped state — v1.84.1 (2026-09-05)
+## Shipped state — v1.85.0 (2026-09-05)
 
 | REQ | What ships | How it was confirmed | Confirmed |
 |---|---|---|---|

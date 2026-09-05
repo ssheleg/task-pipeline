@@ -33,6 +33,7 @@ file exists to stop.
 - Write the entry only for a divergence — and name the layer that owned it
 - Every lesson carries its commit
 - Never amend a commit a record already names
+- A release stamp names the TAG, and the merge commit — never the branch's own SHA
 - The stamp table is capped at ten, and *one line per run* was never a cap
 - `publish:` is a line in the verdict, not a silence
 - Rotation — the archive is how pruning stops losing things
@@ -112,6 +113,48 @@ Practically, that makes the order:
 The stamp costs one line and one commit. A run that folds it back into the work to keep
 the history tidy is trading a reader's ability to find the incident for the appearance of
 tidiness — and the reader is the entire reason the stamp exists.
+
+## A release stamp names the TAG, and the merge commit — never the branch's own SHA
+
+The sibling of the amend rule, one level up, and it recurred three times after the amend
+rule was written because each step is right on its own: stamp the run on the PR branch →
+the stamp cites that branch's HEAD → `main` is **rebase-merge-only** by ruleset → the
+rebase mints new SHAs → the object the stamp names dies with the branch.
+
+Measured across `v1.79.1` (twice) and `v1.80.0`, and again on 2026-09-05 in the umbrella
+repository, where it burned **two tags** in one afternoon. Each recurrence costs the same
+two refusals, both of them correct:
+
+1. the **unstamped-release guard** reads the tag's own commit range, finds no stamp that
+   resolves, and refuses the release;
+2. the **documentation gate** resolves every backticked commit reference against a *fresh
+   clone*, where the branch SHA has never existed, and refuses again.
+
+Then it costs one extra PR and one full CI round — measured at 57–97 minutes here.
+
+**The shape that survives a rebase-merge is the tag.** A SHA the author can know before
+the merge is precisely the SHA the merge is about to destroy, so the rule cannot be
+"write a better SHA". Two spellings are allowed and nothing else:
+
+- **cite the release tag** — `v1.84.1` is immutable, it is the thing being released, and
+  it resolves in any clone;
+- **or write the stamp AFTER the merge**, in a second PR, naming the **merge commit**.
+  This is the default, because it is what the amend rule already forces one level down:
+  once a file names a SHA, that commit is frozen, so the SHA has to exist first.
+
+The order for a release run is therefore:
+
+1. merge the work; the merge commit is now a real object on `main`;
+2. **then** stamp, in a second PR, naming that merge commit;
+3. cut the tag **locally**, run `npm run test:all` against the tag's own tree, and push
+   the tag only if that run is green — `git merge-base --is-ancestor <stamp-sha> HEAD`
+   is what the release gate will ask, so ask it first.
+
+Step 3 is not optional and it is not the same as a green branch build: the branch tree
+and the tag's tree differ by whatever the merge did, and **a tag cannot be repaired** —
+deleting or re-pointing one is refused by repository rule, correctly, because a tag is a
+promise about a tree. A tag pushed on a green branch build is a promise about a tree
+nobody ran.
 
 ## The stamp table is capped at ten, and *one line per run* was never a cap
 
