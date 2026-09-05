@@ -1,3 +1,48 @@
+## v1.84.0 — fifteen filed findings, and the two rules they mostly refine
+
+Every one of the fifteen `ssheleg/sshlg-skills` issues this repository owned, closed in one
+release because they are one subject: **what a check is allowed to conclude.**
+
+**Ten new rules in `references/learned.md` (22 → 32), and two existing ones strengthened
+rather than duplicated** — the distinction matters, because a table that grows a row for
+every refinement stops being readable at exactly the point it starts being complete.
+
+- rule **4** (probe the detector) now demands the plant assert it **changed the file**, and
+  that the expected verdict be stated before the run — a green suite and an unlanded plant
+  are the same output (`#94`);
+- rule **8** (compute, never restate) now demands the matched items be printed classified
+  beside the count — *eighteen lines containing these three digits* and *eighteen throttle
+  events* are different claims, and only one was true (`#79`).
+
+The ten new ones, each carrying the incident it came from: a commit reference is a
+prediction until the object resolves (`#80`); a guard outliving the name it guards goes
+vacuous rather than red (`#81`); an item leaving a ranked list is not evidence about that
+item (`#87`); a model too small to reproduce cannot certify (`#89`); a sweep states its
+denominator before it starts (`#90`); guard capability, not incompleteness (`#91`); a
+census over a localised corpus reports per locale (`#92`); a gate scoped by exclusion
+judges every newcomer silently (`#93`); a gate needs a third verdict — *could not measure*
+(`#95`); a test whose assertion is implied by compilation is not a test (`#97`).
+
+**Three sub-canons in `evidence-docs`**, placed under the canons they refine rather than as
+an eleventh: **1a** a token that looks like evidence is not evidence until resolved; **2a**
+a number out of the shell is not a measurement until you look at what matched; **5a** a
+model too small to reproduce the defect is too small to prove the fix.
+
+**`prioritisation.md`** gains the half the existing rule was silent about (`#82`): the
+finder still may not rank by effort, the **fixer** weighs cost against *measured* harm, a
+zero-harm row is priced latent rather than deleted, and where the path is irreversible cost
+loses.
+
+**`retrospective.md`** gains two (`#85`, `#88`): what the prune does when it **cannot**
+run — an undefined case is where the spread between a careful run and a careless one lives
+— and that a fix to one call site closes a call site, not a class, with the sibling census
+taken by behaviour rather than from a list of names.
+
+**The high-water mark is derived now**, not typed: the validator caught `Numbers issued so
+far: 22` against a table reaching 32, which is the same defect these rules are about.
+
+Guards: 424 → **424** — doctrine, no mechanism.
+
 ## v1.83.1 — the tag that could not be moved, and why that is right
 
 **No change to the skill.** `v1.83.0`'s tree carried a run stamp with `—` where its

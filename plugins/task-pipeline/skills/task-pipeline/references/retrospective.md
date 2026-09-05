@@ -39,6 +39,8 @@ file exists to stop.
 - Three grades of fix — take the highest one that can work
 - Stamp first, then prune, then write
 - The prune — mandatory, and it runs after the stamp
+- When the prune cannot run, say so — it is not the same as nothing to prune
+- A fix to one call site closes a call site, not a class
 - The loop closes at stage 0
 - Where a lesson goes when it is not about this project
 - Publishing the insight — the skill learns from every project that runs it
@@ -299,6 +301,33 @@ GATE 10 acceptance: PASS — 14/14 REQ verified
 ```
 
 A pruned list that nobody prints is a list that quietly grows back.
+
+## When the prune cannot run, say so — it is not the same as nothing to prune
+
+The prune retires a standing instruction against its triggers, and the cold trigger counts
+run stamps. Meeting a list whose rows carry **no id and no retirement condition**, the
+honest behaviour was undefined — so a careful run printed counts and stopped while a
+careless one could delete nine rules, and both looked like *the prune ran*.
+
+- **Backfill first, once.** On meeting rows with no id, the prune's first act is to mint
+  ids and propose a retirement condition per row **from the row's own text**, printed for
+  the operator to accept. One pass, and the trigger works forever after.
+- **`blocked` is a named outcome**, printed like any other: what could not be evaluated
+  and why. An undefined case is where the spread between two runs lives.
+- **A hard cap plus an unrunnable retirement condition is a deadlock.** Either the cap
+  yields until the backfill is done, or the backfill is a precondition of enforcing it —
+  but not both, and the file says which.
+
+## A fix to one call site closes a call site, not a class
+
+- **A fix other call sites will need is exported before it is used.** The test is
+  mechanical: if the same defect could exist in a second file, the fix does not stay
+  private to the first.
+- **Closing a defect includes a census of its siblings, by BEHAVIOUR rather than by a list
+  of names** — *every script that spawns a browser*, found by searching for the spawn, not
+  by remembering the five. A list of names is how the previous pass missed four of them.
+- **The entry states how many call sites the class had and how many were fixed.** *Fixed*
+  and *fixed in one of five* currently read identically, and only one of them closes a row.
 
 ## The loop closes at stage 0
 

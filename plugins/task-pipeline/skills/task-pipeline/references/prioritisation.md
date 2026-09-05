@@ -14,6 +14,7 @@ the **order** the rows come off it.
 - 2. Confidence and Ease
 - 3. The order, and why it is not a product
 - 4. Research before scoring, not after
+- Effort does not rank a finding, but the fixer needs a cost rule
 - 5. Where the human goes
 - 6. Two models in one family, and why both are right
 
@@ -127,6 +128,27 @@ A researcher that comes back with "seems fine, medium effort" has returned nothi
 four fields are the contract; anything else is a subagent that spent context to guess.
 
 **Do not fan out to score two rows.** The dispatch costs more than reading them.
+
+## Effort does not rank a finding, but the fixer needs a cost rule
+
+The existing rule — **the finder may not rank by effort** — is about the finder, and it
+holds. It says nothing about the moment somebody decides what to do with the row, and the
+silence there was read as *cost never enters*, which is not what anyone means.
+
+So the split, stated rather than inferred:
+
+- **The finder** still may not rank by effort. What a fix costs is not a property of the
+  defect.
+- **The fixer**, at the point of deciding, weighs remedy cost against **measured harm** —
+  not against the finding's stated severity. Severity is the finder's estimate of what
+  could happen; harm is what did.
+- **Where the harm measures zero the row is not deleted.** It is priced as *latent* and
+  carries its measurement, so the next reader inherits the number rather than the alarm.
+  A row deleted for measuring zero takes the measurement with it and the next audit
+  re-derives the same alarm from the same mechanism.
+- **Where the path is irreversible, cost loses.** A cheap guard on something that cannot
+  be undone ships whether or not the failure has been observed — the asymmetry is the
+  whole reason to have a rule instead of a judgement.
 
 ## 5. Where the human goes
 

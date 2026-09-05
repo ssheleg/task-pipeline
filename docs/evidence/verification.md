@@ -1,6 +1,6 @@
 # Verification — task-pipeline
 
-## Shipped state — v1.83.1 (2026-09-04)
+## Shipped state — v1.84.0 (2026-09-05)
 
 **`project-audit`: the page is asked for, and four filed findings close.** The run writes
 the JSON sidecar unconditionally — `carry_forward` reads the previous one, so skipping it
