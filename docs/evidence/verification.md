@@ -1,5 +1,15 @@
 # Verification — task-pipeline
 
+## Shipped state — v1.84.1 (2026-09-05)
+
+| REQ | What ships | How it was confirmed | Confirmed |
+|---|---|---|---|
+| CS-1 | The README's four exact conformance figures are derived and compared each run | `check_the_conformance_sentence_is_computed`; planting `999/500 lines` gives *states lines = 999 and the tree gives 262* | yes |
+| CS-2 | A reworded sentence fails loudly rather than passing quietly | deleting the `all 38 references` clause gives *no longer states references in a shape this check can read* — the shape that twice made a healthy guard report itself broken | yes |
+| CS-3 | The size figure is a bound, not a value | it moved on four of the eight preceding commits (950 → 970 → 980 → 1128 KB); an exact figure would fire the check on nearly every edit | yes |
+| CS-4 | The line figure was wrong at birth, not merely stale | `git show 297a0cb:…/SKILL.md \| wc -l` → 339 against a stated 334 | yes |
+| CS-5 | The gate is green | `python3 test/validate.py` → `PASS: task-pipeline structure valid`; `npm test` rc=0, 0 `FAIL` lines | yes |
+
 ## Shipped state — v1.84.0 (2026-09-05)
 
 **`project-audit`: the page is asked for, and four filed findings close.** The run writes
