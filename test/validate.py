@@ -7690,6 +7690,84 @@ def check_routed_triggers_still_advertised():
 check_routed_triggers_still_advertised()
 
 
+def check_the_conformance_sentence_is_computed() -> None:
+    """The README's conformance sentence states four measured figures. Nothing derived
+    them, and two were wrong.
+
+    Measured 2026-09-05: `SKILL.md 334/500 lines` against a file of **262**, and
+    `436 KB` against a bundle of **1128 KB**. The line figure was already wrong when it
+    was written -- the file was **339** at commit `297a0cb`, not 334 -- so it was never a
+    measurement, and the reader had no way to know which of the four to trust.
+
+    **The size figure changed shape rather than value, and that is the load-bearing
+    decision.** It moved on four of the eight commits before this one (950 -> 970 -> 980
+    -> 1128 KB), so an exact figure in prose goes stale by construction and a check over
+    it would fire on nearly every edit -- and a check that fires constantly is one
+    somebody turns off. It is a bound now: *far under the 30 MB ceiling*, which stays
+    true across three orders of magnitude and still says what the sentence exists to say.
+
+    The parser **asserts it found all four** figures. A sentence reworded past it must
+    fail here saying so, not pass quietly -- the shape that made a healthy guard report
+    itself broken elsewhere in this family, twice.
+
+    Line count is `splitlines()`, stated because a reader running `wc -l` over a file
+    with no trailing newline gets a different number and would otherwise think it drifted.
+    """
+    readme = os.path.join(ROOT, "README.md")
+    if not os.path.isfile(readme):
+        return
+    with open(readme, encoding="utf-8") as fh:
+        text = fh.read()
+
+    pats = {
+        "name": r"`name`\s*\n?(\d+)/64 chars",
+        "description": r"`description`\s+(\d+)/1024 chars",
+        "lines": r"`SKILL\.md`\s+(\d+)/500 lines",
+        "references": r"all (\d+) references",
+    }
+    stated, missing = {}, []
+    for key, pat in pats.items():
+        m = re.search(pat, text)
+        if m:
+            stated[key] = int(m.group(1))
+        else:
+            missing.append(key)
+    if missing:
+        fail("README.md: the conformance sentence no longer states "
+             + ", ".join(missing) + " in a shape this check can read. It was reworded, "
+             "or the figure was dropped -- either way this check has stopped measuring "
+             "and must not pass quietly. Restore the shape, or delete the check with the "
+             "sentence")
+        return
+
+    skill_dir = os.path.join(ROOT, "plugins/task-pipeline/skills/task-pipeline")
+    with open(os.path.join(skill_dir, "SKILL.md"), encoding="utf-8") as fh:
+        body = fh.read()
+    fm = re.match(r"^---\n(.*?)\n---", body, re.S)
+    front = fm.group(1) if fm else ""
+    nm = re.search(r"^name:\s*(.+)$", front, re.M)
+    dm = re.search(r"^description:\s*(?:[>|]-?\s*\n)?([\s\S]*?)(?=\n[a-z-]+:|\Z)",
+                   front, re.M)
+    computed = {
+        "name": len(nm.group(1).strip()) if nm else -1,
+        "description": len(re.sub(r"\s+", " ", dm.group(1)).strip()) if dm else -1,
+        "lines": len(body.splitlines()),
+        "references": len([f for f in os.listdir(os.path.join(skill_dir, "references"))
+                           if f.endswith(".md")]),
+    }
+    for key in pats:
+        if stated[key] != computed[key]:
+            fail("README.md: the conformance sentence states " + key + " = "
+                 + str(stated[key]) + " and the tree gives " + str(computed[key])
+                 + ". Recompute it rather than editing this check -- the figure was wrong "
+                 "at birth once already (334 lines written over a 339-line file), which "
+                 "is why it is derived now. Lines are `splitlines()`, not `wc -l`")
+
+
+check_the_conformance_sentence_is_computed()
+
+
+
 if errors:
     print("FAIL: task-pipeline structure invalid")
     for e in errors:

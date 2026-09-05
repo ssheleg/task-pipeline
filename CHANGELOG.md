@@ -1,3 +1,41 @@
+## v1.84.1 — the conformance sentence is computed, and two of its five figures were wrong
+
+**A sentence of five measured figures, and nothing derived any of them.** The README's
+*Held to Anthropic's own Skill authoring guidance* paragraph states `name` length,
+`description` length, `SKILL.md` lines, the reference count and the bundle size. Measured
+2026-09-05:
+
+| stated | measured |
+|---|---|
+| `name` 13/64 | 13 ✓ |
+| `description` inside 1024 | 899 ✓ |
+| `SKILL.md` **334**/500 lines | **262** |
+| all **38** references | 38 ✓ |
+| **436 KB** against 30 MB | **1128 KB** |
+
+**The line figure was wrong when it was written.** At commit `297a0cb`, which added the
+sentence, the file was **339** lines — not 334. It was never a measurement, and a reader
+had no way to tell which of the five to trust.
+
+**The size figure changed SHAPE rather than value, and that is the decision worth
+recording.** It moved on four of the eight commits before this one — 950 → 970 → 980 →
+1128 KB — so an exact figure in prose goes stale by construction, and a check over it
+would fire on nearly every edit. *A check that fires constantly is one somebody turns
+off.* It is a bound now — **far under the 30 MB ceiling** — which stays true across three
+orders of magnitude and still says what the sentence exists to say.
+
+The other four are derived and compared on every run. The parser **asserts it found all
+four**: a sentence reworded past it fails here saying so rather than passing quietly,
+which is the shape that has twice made a healthy guard in this family report itself
+broken. Line count is `splitlines()`, stated in the failure message because `wc -l` over
+a file without a trailing newline gives a different number.
+
+Both directions watched failing, each plant asserting it landed first: a wrong figure
+gives *states lines = 999 and the tree gives 262*; deleting the reference clause gives
+*no longer states references in a shape this check can read*.
+
+Guards: 424 → **424** — the new check is an ordinary step, not a planted-defect guard.
+
 ## v1.84.0 — fifteen filed findings, and the two rules they mostly refine
 
 Every one of the fifteen `ssheleg/sshlg-skills` issues this repository owned, closed in one
