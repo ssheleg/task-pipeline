@@ -1,3 +1,45 @@
+## v1.85.0 — a release stamp names the tag, and the amend rule's sibling one level up
+
+`B-124`, filed by the umbrella's coordinator after watching the same class three times:
+`v1.79.1` twice and `v1.80.0`. It recurred again on 2026-09-05 in the umbrella
+repository and **burned two tags** in one afternoon, which is what turns it from a
+memory gap into a mechanism gap — this repository's retro had recorded the lesson twice
+already.
+
+**Each step is right on its own**, which is why the amend rule did not cover it: the
+stamp is written on the PR branch → it cites that branch's HEAD → `main` is
+**rebase-merge-only** by ruleset → the rebase mints new SHAs → the object the stamp names
+dies with the branch. Two correct refusals follow, and both cost a full CI round measured
+at 57–97 minutes here:
+
+1. the unstamped-release guard reads the tag's own commit range and finds no stamp that
+   resolves;
+2. the documentation gate resolves every backticked SHA against a **fresh clone**, where
+   the branch commit never existed.
+
+**A SHA the author can know before the merge is precisely the SHA the merge destroys**,
+so the rule cannot be *write a better SHA*. `references/retrospective.md` now carries the
+two shapes that survive — cite the release **tag**, or write the stamp **after** the
+merge naming the merge commit, which is the default because the amend rule already
+requires the SHA to exist before a file names it — and the step that ends the class: cut
+the tag locally, run `npm run test:all` against **its** tree, and push only if that is
+green. A tag cannot be repaired; deleting or re-pointing one is refused by repository
+rule, correctly, because a tag is a promise about a tree.
+
+`test/validate.py` asserts the section names all five load-bearing strings, so the rule
+cannot rot into an intention the next author reads past — which is how it recurred.
+
+Guards: 424 → **429** — one plant per named string, each removing **every** occurrence
+inside the section.
+
+**The check's first draft was itself the defect it guards against.** It searched the whole
+file, and `git merge-base --is-ancestor` already appears under *Every lesson carries its
+commit* — so the plant that removed the command from the new rule **passed**, and the
+check was resting on a different section's sentence. Scoped to the section now, with all
+five needles watched refusing their plant. Two of those plants had to be rewritten to
+remove **every** occurrence: a plant that leaves a second copy behind proves the check is
+inert when it is not.
+
 ## v1.84.1 — the conformance sentence is computed, and two of its five figures were wrong
 
 **A sentence of five measured figures, and nothing derived any of them.** The README's

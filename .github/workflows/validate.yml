@@ -9494,6 +9494,166 @@ jobs:
             exit 1
           fi
 
+      - name: Negative self-test (a release-stamp rule that stops naming the merge strategy)
+        run: |
+          set -eu
+          rm -rf /tmp/rm1-copy && cp -R . /tmp/rm1-copy
+          python3 - <<'EOF'
+          # B-124: the stamp class the amend rule did not cover. Recurred three times here
+          # (v1.79.1 twice, v1.80.0) and burned two umbrella tags on 2026-09-05, because a
+          # rule recorded twice in a retro and repeated anyway is a MECHANISM gap.
+          #
+          # Removes EVERY occurrence inside the section, never the first: the first draft of
+          # these plants replaced one and left a second behind, and reported the check inert
+          # when it was not. Scoped to the section for the mirror reason — searching the whole
+          # file let `git merge-base --is-ancestor` be answered by a different section.
+          import re
+          p = "/tmp/rm1-copy/plugins/task-pipeline/skills/task-pipeline/references/retrospective.md"
+          t = open(p, encoding="utf-8").read()
+          m = re.search(r"^## A release stamp names the TAG.*?(?=^## |\Z)", t, re.M | re.S)
+          assert m, "PLANT DID NOT LAND: the release-stamp section is gone"
+          assert "rebase-merge" in m.group(0), "PLANT DID NOT LAND: the section does not name it"
+          open(p, "w", encoding="utf-8").write(
+              t[:m.start()] + m.group(0).replace("rebase-merge", "XXX") + t[m.end():])
+          assert "rebase-merge" not in re.search(
+              r"^## A release stamp names the TAG.*?(?=^## |\Z)",
+              open(p, encoding="utf-8").read(), re.M | re.S).group(0), "PLANT DID NOT LAND"
+          EOF
+          if python3 /tmp/rm1-copy/test/validate.py 2>&1 | grep -q "release-stamp rule no longer names"; then
+            echo "OK: validator FAILs — without the strategy named, the rule reads as advice about tidiness rather than a fact about what destroys the SHA"
+          else
+            echo "ERROR: the release-stamp rule stopped naming the merge strategy and nothing objected — the rule rots back into an intention, which is how it recurred three times"
+            exit 1
+          fi
+
+      - name: Negative self-test (a release-stamp rule that stops naming the tag shape)
+        run: |
+          set -eu
+          rm -rf /tmp/rm2-copy && cp -R . /tmp/rm2-copy
+          python3 - <<'EOF'
+          # B-124: the stamp class the amend rule did not cover. Recurred three times here
+          # (v1.79.1 twice, v1.80.0) and burned two umbrella tags on 2026-09-05, because a
+          # rule recorded twice in a retro and repeated anyway is a MECHANISM gap.
+          #
+          # Removes EVERY occurrence inside the section, never the first: the first draft of
+          # these plants replaced one and left a second behind, and reported the check inert
+          # when it was not. Scoped to the section for the mirror reason — searching the whole
+          # file let `git merge-base --is-ancestor` be answered by a different section.
+          import re
+          p = "/tmp/rm2-copy/plugins/task-pipeline/skills/task-pipeline/references/retrospective.md"
+          t = open(p, encoding="utf-8").read()
+          m = re.search(r"^## A release stamp names the TAG.*?(?=^## |\Z)", t, re.M | re.S)
+          assert m, "PLANT DID NOT LAND: the release-stamp section is gone"
+          assert "cite the release tag" in m.group(0), "PLANT DID NOT LAND: the section does not name it"
+          open(p, "w", encoding="utf-8").write(
+              t[:m.start()] + m.group(0).replace("cite the release tag", "XXX") + t[m.end():])
+          assert "cite the release tag" not in re.search(
+              r"^## A release stamp names the TAG.*?(?=^## |\Z)",
+              open(p, encoding="utf-8").read(), re.M | re.S).group(0), "PLANT DID NOT LAND"
+          EOF
+          if python3 /tmp/rm2-copy/test/validate.py 2>&1 | grep -q "release-stamp rule no longer names"; then
+            echo "OK: validator FAILs — the only shape available BEFORE the merge exists — drop it and the rule offers nothing an author can do in time"
+          else
+            echo "ERROR: the release-stamp rule stopped naming the tag shape and nothing objected — the rule rots back into an intention, which is how it recurred three times"
+            exit 1
+          fi
+
+      - name: Negative self-test (a release-stamp rule that stops naming the merge-commit shape)
+        run: |
+          set -eu
+          rm -rf /tmp/rm3-copy && cp -R . /tmp/rm3-copy
+          python3 - <<'EOF'
+          # B-124: the stamp class the amend rule did not cover. Recurred three times here
+          # (v1.79.1 twice, v1.80.0) and burned two umbrella tags on 2026-09-05, because a
+          # rule recorded twice in a retro and repeated anyway is a MECHANISM gap.
+          #
+          # Removes EVERY occurrence inside the section, never the first: the first draft of
+          # these plants replaced one and left a second behind, and reported the check inert
+          # when it was not. Scoped to the section for the mirror reason — searching the whole
+          # file let `git merge-base --is-ancestor` be answered by a different section.
+          import re
+          p = "/tmp/rm3-copy/plugins/task-pipeline/skills/task-pipeline/references/retrospective.md"
+          t = open(p, encoding="utf-8").read()
+          m = re.search(r"^## A release stamp names the TAG.*?(?=^## |\Z)", t, re.M | re.S)
+          assert m, "PLANT DID NOT LAND: the release-stamp section is gone"
+          assert "merge commit" in m.group(0), "PLANT DID NOT LAND: the section does not name it"
+          open(p, "w", encoding="utf-8").write(
+              t[:m.start()] + m.group(0).replace("merge commit", "XXX") + t[m.end():])
+          assert "merge commit" not in re.search(
+              r"^## A release stamp names the TAG.*?(?=^## |\Z)",
+              open(p, encoding="utf-8").read(), re.M | re.S).group(0), "PLANT DID NOT LAND"
+          EOF
+          if python3 /tmp/rm3-copy/test/validate.py 2>&1 | grep -q "release-stamp rule no longer names"; then
+            echo "OK: validator FAILs — the default, and the one the amend rule already forces: a SHA has to exist before a file names it"
+          else
+            echo "ERROR: the release-stamp rule stopped naming the merge-commit shape and nothing objected — the rule rots back into an intention, which is how it recurred three times"
+            exit 1
+          fi
+
+      - name: Negative self-test (a release-stamp rule that stops naming the gate command)
+        run: |
+          set -eu
+          rm -rf /tmp/rm4-copy && cp -R . /tmp/rm4-copy
+          python3 - <<'EOF'
+          # B-124: the stamp class the amend rule did not cover. Recurred three times here
+          # (v1.79.1 twice, v1.80.0) and burned two umbrella tags on 2026-09-05, because a
+          # rule recorded twice in a retro and repeated anyway is a MECHANISM gap.
+          #
+          # Removes EVERY occurrence inside the section, never the first: the first draft of
+          # these plants replaced one and left a second behind, and reported the check inert
+          # when it was not. Scoped to the section for the mirror reason — searching the whole
+          # file let `git merge-base --is-ancestor` be answered by a different section.
+          import re
+          p = "/tmp/rm4-copy/plugins/task-pipeline/skills/task-pipeline/references/retrospective.md"
+          t = open(p, encoding="utf-8").read()
+          m = re.search(r"^## A release stamp names the TAG.*?(?=^## |\Z)", t, re.M | re.S)
+          assert m, "PLANT DID NOT LAND: the release-stamp section is gone"
+          assert "git merge-base --is-ancestor" in m.group(0), "PLANT DID NOT LAND: the section does not name it"
+          open(p, "w", encoding="utf-8").write(
+              t[:m.start()] + m.group(0).replace("git merge-base --is-ancestor", "XXX") + t[m.end():])
+          assert "git merge-base --is-ancestor" not in re.search(
+              r"^## A release stamp names the TAG.*?(?=^## |\Z)",
+              open(p, encoding="utf-8").read(), re.M | re.S).group(0), "PLANT DID NOT LAND"
+          EOF
+          if python3 /tmp/rm4-copy/test/validate.py 2>&1 | grep -q "release-stamp rule no longer names"; then
+            echo "OK: validator FAILs — the question the release gate asks — a run that cannot ask it first learns the answer from a tag it may not repair"
+          else
+            echo "ERROR: the release-stamp rule stopped naming the gate command and nothing objected — the rule rots back into an intention, which is how it recurred three times"
+            exit 1
+          fi
+
+      - name: Negative self-test (a release-stamp rule that stops naming the local probe)
+        run: |
+          set -eu
+          rm -rf /tmp/rm5-copy && cp -R . /tmp/rm5-copy
+          python3 - <<'EOF'
+          # B-124: the stamp class the amend rule did not cover. Recurred three times here
+          # (v1.79.1 twice, v1.80.0) and burned two umbrella tags on 2026-09-05, because a
+          # rule recorded twice in a retro and repeated anyway is a MECHANISM gap.
+          #
+          # Removes EVERY occurrence inside the section, never the first: the first draft of
+          # these plants replaced one and left a second behind, and reported the check inert
+          # when it was not. Scoped to the section for the mirror reason — searching the whole
+          # file let `git merge-base --is-ancestor` be answered by a different section.
+          import re
+          p = "/tmp/rm5-copy/plugins/task-pipeline/skills/task-pipeline/references/retrospective.md"
+          t = open(p, encoding="utf-8").read()
+          m = re.search(r"^## A release stamp names the TAG.*?(?=^## |\Z)", t, re.M | re.S)
+          assert m, "PLANT DID NOT LAND: the release-stamp section is gone"
+          assert "test:all" in m.group(0), "PLANT DID NOT LAND: the section does not name it"
+          open(p, "w", encoding="utf-8").write(
+              t[:m.start()] + m.group(0).replace("test:all", "XXX") + t[m.end():])
+          assert "test:all" not in re.search(
+              r"^## A release stamp names the TAG.*?(?=^## |\Z)",
+              open(p, encoding="utf-8").read(), re.M | re.S).group(0), "PLANT DID NOT LAND"
+          EOF
+          if python3 /tmp/rm5-copy/test/validate.py 2>&1 | grep -q "release-stamp rule no longer names"; then
+            echo "OK: validator FAILs — the tag has its own tree; a green branch build is a promise about a different one"
+          else
+            echo "ERROR: the release-stamp rule stopped naming the local probe and nothing objected — the rule rots back into an intention, which is how it recurred three times"
+            exit 1
+          fi
+
       - name: Property check (the anchor census prints its disclosure beside the verdict)
         run: |
           set -eu

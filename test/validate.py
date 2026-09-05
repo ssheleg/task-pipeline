@@ -4794,6 +4794,54 @@ if os.path.isfile(os.path.join(refdir, "knowledge-graph.md")):
     # greppable, which is the only property it has: a ledger row is prose, and the
     # marker is the one string a reader (or a later check) can look for. audit.md:
     # a class seen twice becomes a mechanism rather than a third ledger row.
+    # B-124 — the stamp class that survived the amend rule.
+    #
+    # The amend rule ("never amend a commit a record already names") is written and was
+    # followed, and the same class recurred THREE times one level up: the stamp is
+    # written on the PR branch and cites that branch's HEAD, `main` is rebase-merge-only
+    # by ruleset, and the rebase mints new SHAs. Two correct refusals follow — the
+    # unstamped-release guard finds no resolving stamp in the tag's range, and the
+    # documentation gate resolves backticked SHAs against a FRESH CLONE where the branch
+    # commit never existed — and each recurrence costs one extra PR and one full CI
+    # round, measured 57-97 minutes here.
+    #
+    # A rule this repository has recorded twice in its retro and still repeated is a
+    # MECHANISM gap, not a memory one (references/audit.md: a class seen twice becomes a
+    # mechanism). So the doctrine must name the two shapes that survive a rebase-merge
+    # and the command the release gate will ask, or it rots back into an intention the
+    # next author reads past — which is exactly how it recurred.
+    _retro_ref = open(os.path.join(refdir, "retrospective.md"), encoding="utf-8").read()
+    # Scoped to the SECTION, never the file. The first draft searched the whole document
+    # and `git merge-base --is-ancestor` already appears under "Every lesson carries its
+    # commit" — so the plant that removed it from this rule passed, and the check was
+    # resting on a different section's sentence. A needle that another section can
+    # satisfy is a check that guards nothing (references/gates.md: False success).
+    _stamp_sec = re.search(r"^## A release stamp names the TAG.*?(?=^## |\Z)",
+                           _retro_ref, re.M | re.S)
+    if _stamp_sec is None:
+        fail("references/retrospective.md: the release-stamp rule lost its own heading, "
+             "so a run scanning section titles at stage 10 cannot find it, and every "
+             "needle below would then be answered by some other section")
+    _stamp_txt = _stamp_sec.group(0) if _stamp_sec else ""
+    for _need, _why in (
+        ("rebase-merge", "the merge strategy that destroys the SHA — without it the rule "
+                         "reads as advice about tidiness"),
+        ("cite the release tag", "the first shape that survives, and the only one "
+                                 "available before the merge exists"),
+        ("merge commit", "the second shape, and the default — the amend rule already "
+                         "forces the SHA to exist before a file names it"),
+        ("git merge-base --is-ancestor", "the command the release gate asks, so a run "
+                                         "can ask it first instead of learning the "
+                                         "answer from a tag it cannot repair"),
+        ("test:all", "the local probe against the tag's OWN tree — a green branch build "
+                     "is a promise about a different tree"),
+    ):
+        if _need not in _stamp_txt:
+            fail(f"references/retrospective.md: the release-stamp rule no longer names "
+                 f"`{_need}` — {_why}. Measured across v1.79.1 (twice), v1.80.0 and two "
+                 "burned umbrella tags on 2026-09-05; a tag cannot be repaired, so the "
+                 "cost of this rule going quiet is paid in tags")
+
     _MARKER = "⚠ not trusted for reach until refreshed"
     _marker_scope = [
         os.path.join(ROOT, "README.md"),
