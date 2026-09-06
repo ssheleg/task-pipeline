@@ -1,3 +1,55 @@
+## v1.85.1 — five surfaces a reader trusts, each disagreeing with the tree it ships from
+
+The family audit of 2026-09-06 (wave `AUDIT-WAVE-0906`) read every member's shipped
+surfaces at once, and five of this member's disagreed with what the tree holds. No
+behaviour changed in this release; what changed is what a reader — a person on the
+marketplace page, or a resolver following a path — is told.
+
+- **The marketplace entry taught the old gate vocabulary.** `plugin.json` says *typed
+  auto/judgment/manual gates*; `.claude-plugin/marketplace.json` said *typed
+  auto/manual*. The `judgment` type has been in the schema since v1.73.0 and the
+  v1.80.0 sweep put it on seven surfaces — the marketplace blurb was not one of them,
+  because the cross-surface guard reads the schema and `SKILL.md`, never the
+  marketplace entry. The two descriptions are byte-equal now, compared rather than
+  eyeballed: `json.load` both, `==` → `True` (the sole difference was 9 bytes at
+  character 298, the string `judgment/`).
+- **Two in-directory references in `project-audit`'s `SKILL.md` resolved only in the
+  sibling skill.** Its §6 named `references/backlog.md` and
+  `references/prioritisation.md` bare — directories the flagship skill carries and
+  `project-audit` does not — while the routing table at the top of the same file
+  already used the `../task-pipeline/references/…` form. Both now use that form, as
+  links that resolve from the file that carries them.
+- **`certification.md` pointed at a file no install of this plugin can resolve.**
+  `references/statistics.md` lives in `agent-stack`'s `agent-evals` skill, another
+  member entirely; the sentence carried it as a bare path beside the owner's name. It
+  is a named-owner prose pointer now, with no bare in-repo path left to resolve.
+- **Front matter inside the pack moves together.** `evidence-docs` carried neither
+  `license:` nor `compatibility:`; `project-audit` carried no `license:`. Both now
+  carry the flagship's keys — `license: MIT`, and a compatibility line true of each
+  skill rather than copied: `evidence-docs` ships no scripts, and its line says so.
+- **The `quick` opt-out is retired; the canon refusal replaces it.** *"quick fix"*
+  carries the trigger `fix` and the opt-out `quick` in one natural breath, and the
+  board already records the escape being used on work that should not have taken it
+  (`B-095`). The description now names *'no pipeline' / 'без пайплайна'* — the refusal
+  wording the operator's routing doctrine states — and the opt-out guard in
+  `test/validate.py` demands exactly that pair, so a description that drops either
+  valve fails. No recorded decision protects the old token: the only decision-bearing
+  surfaces that name it are `B-095`, which argues against it, and dated records, which
+  are not rewritten. No advertised trigger phrase was removed. Measured with
+  make-skill's auditor before and after: description 897 → 903 of 1024, inside the
+  970-character working limit, all sixteen description checks green both times.
+
+The dated spec `docs/evidence/specs/2026-08-10-routing-taxonomy.md` still quotes the
+old opt-out pair, deliberately: it records what was true at its commit, and this
+repository has already decided that dated records are counted, not rewritten.
+
+Guards: 429 → 429 — no planted-defect step added or removed; one existing guard's
+needle moved with the surface it reads (`quick` → `no pipeline`). And the gate earned
+its keep on this very release: its first run refused three restated figures this entry's
+own change had gone stale — the board's description budget (897 → 903), its headroom
+(127 → 121 spare), and the README's conformance figure (899 → 905) — each rewritten to
+the value the owning check computes, so the next drift fails the same way this one did.
+
 ## v1.85.0 — a release stamp names the tag, and the amend rule's sibling one level up
 
 `B-124`, filed by the umbrella's coordinator after watching the same class three times:

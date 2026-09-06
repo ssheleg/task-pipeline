@@ -116,8 +116,9 @@ severity. Sequential testing cuts the trials such a verdict needs by **78%**.
 
 So: **two severities for a finding, three verdicts for a stochastic check.** A
 deterministic command exits 0 or it does not, and admitting a maybe there does admit
-everything. The instrument for the other case is `agent-stack`'s `agent-evals` —
-`references/statistics.md` for how many runs make a difference real — and a gate whose
+everything. The instrument for the other case is `agent-stack`'s `agent-evals` skill —
+its own `references/statistics.md`, shipped in that member, says how many runs make a
+difference real — and a gate whose
 subject is non-deterministic belongs on that axis rather than this one
 ([`gates.md`](gates.md) → *Axis A*).
 

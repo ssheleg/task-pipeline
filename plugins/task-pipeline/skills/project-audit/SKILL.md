@@ -1,6 +1,7 @@
 ---
 name: project-audit
 description: "Use when someone asks what is actually true of a whole project right now — what is finished, what is half-built, what is broken, and what nobody has looked at. Walks a cold start: discover what the project is, run a registry of probes chosen from that, read production evidence (published artefact against source, CI history, telemetry present or absent), then leave a self-contained HTML report and a JSON sidecar so the next audit can say what moved. Read-only: it proposes board rows and commits nothing. Triggers - 'project audit', 'audit the project', 'codebase audit', 'state of the project', 'what is unfinished', 'project health check', 'аудит проекта', 'проаудируй проект', 'состояние проекта', 'что не доделано', 'аудит кодовой базы'. Not for: auditing one deliverable inside a run (that is the pipeline's own ladder), reviewing a diff, or checking a skill's construction — say 'без диагностики' to opt out."
+license: MIT
 compatibility: "The collector (scripts/audit.py) needs python3 and reads committed state, so it needs git. Probes needing gh, npm, network or a browser declare it and report blind when it is absent — degraded, never silent."
 ---
 
@@ -115,10 +116,10 @@ what ran are the same object.
 
 **This skill commits nothing.** Findings leave as board rows in the project's
 own vocabulary, priced with **the board header's declared formula** — the shipped
-default is `Sev × Blast + age_bonus` (`references/backlog.md`, the pipeline's
+default is `Sev × Blast + age_bonus` ([`references/backlog.md`](../task-pipeline/references/backlog.md), the pipeline's
 board doctrine) — and the operator accepts them. Effort never ranks inside an
 audit: what a fix costs is the fixer's decision, not the finder's
-(`references/prioritisation.md`). An audit
+([`references/prioritisation.md`](../task-pipeline/references/prioritisation.md)). An audit
 that edits while it reads cannot be re-run to check itself.
 
 ## A finding carries its consequence, or it is a hypothesis

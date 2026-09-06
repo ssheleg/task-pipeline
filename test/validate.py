@@ -2233,7 +2233,7 @@ if fm_name and 'desc' in dir():
         fail("SKILL.md: the description widens to repo-changing work but states no "
              "'Not for: …' exclusion clause — that is the 'too broad, steals "
              "triggers' failure the enterprise guidance names")
-    for _phrase in ("без пайплайна", "quick"):
+    for _phrase in ("без пайплайна", "no pipeline"):
         if _phrase not in _d:
             fail(f"SKILL.md: the description does not name the opt-out phrase "
                  f"{_phrase!r} — default-on without a release valve is a trap")
