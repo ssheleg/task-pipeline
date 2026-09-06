@@ -5,6 +5,10 @@ surfaces at once, and five of this member's disagreed with what the tree holds. 
 behaviour changed in this release; what changed is what a reader — a person on the
 marketplace page, or a resolver following a path — is told.
 
+Guards: 429 → **429** — no planted-defect step moved; the release changes shipped
+surfaces (manifest text, front-matter keys, three pointer paths, the opt-out
+wording), and the negatives that police those surfaces run unchanged.
+
 - **The marketplace entry taught the old gate vocabulary.** `plugin.json` says *typed
   auto/judgment/manual gates*; `.claude-plugin/marketplace.json` said *typed
   auto/manual*. The `judgment` type has been in the schema since v1.73.0 and the
@@ -43,7 +47,7 @@ The dated spec `docs/evidence/specs/2026-08-10-routing-taxonomy.md` still quotes
 old opt-out pair, deliberately: it records what was true at its commit, and this
 repository has already decided that dated records are counted, not rewritten.
 
-Guards: 429 → 429 — no planted-defect step added or removed; one existing guard's
+Guards: 429 → **429** — no planted-defect step added or removed; one existing guard's
 needle moved with the surface it reads (`quick` → `no pipeline`). And the gate earned
 its keep on this very release: its first run refused three restated figures this entry's
 own change had gone stale — the board's description budget (897 → 903), its headroom
