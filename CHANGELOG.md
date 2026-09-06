@@ -5,10 +5,6 @@ surfaces at once, and five of this member's disagreed with what the tree holds. 
 behaviour changed in this release; what changed is what a reader — a person on the
 marketplace page, or a resolver following a path — is told.
 
-Guards: 429 → **429** — no planted-defect step moved; the release changes shipped
-surfaces (manifest text, front-matter keys, three pointer paths, the opt-out
-wording), and the negatives that police those surfaces run unchanged.
-
 - **The marketplace entry taught the old gate vocabulary.** `plugin.json` says *typed
   auto/judgment/manual gates*; `.claude-plugin/marketplace.json` said *typed
   auto/manual*. The `judgment` type has been in the schema since v1.73.0 and the
