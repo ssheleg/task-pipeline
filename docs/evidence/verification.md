@@ -1,6 +1,6 @@
 # Verification — task-pipeline
 
-## Shipped state — v1.85.1 (2026-09-06)
+## Shipped state — v1.85.2 (2026-09-06)
 
 Family-audit wave `AUDIT-WAVE-0906`: five shipped surfaces aligned with the tree. No
 behaviour change; every row is a reader-facing claim brought back to what is true.
