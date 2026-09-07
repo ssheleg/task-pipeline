@@ -1477,6 +1477,13 @@ three quarters of the work on this run.
 
 ## Releases that carry no stamp — stated, not stamped
 
+**`v1.85.1` carries no stamp, and the mechanism is the one this section already
+names twice:** the stamp gate reads the tag's own tree, the branch run cannot see
+a tag that does not exist yet, and the audit-wave release was cut without writing
+the stamp first. The gate refused it — correctly — before anything published, so
+nothing shipped under it; `v1.85.2` is the same change released by the two-merge
+protocol, payload first, stamp second, tag on the stamp.
+
 **`v1.83.0` and `v1.83.1` carry no stamp, and the sixth mechanism is that I did not read
 this section before cutting.** `v1.83.2` was never cut — its content ships as `v1.84.0`,
 which runs the pipeline and is stamped like any other. Named one by one rather than as a range: the

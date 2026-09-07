@@ -1,3 +1,16 @@
+## v1.85.2 — the two-merge protocol, followed this time
+
+**v1.85.1 is a burned tag** — the third of this wave's choreography lessons, and
+this member's own: the release gate on the tag's tree demands a run stamp inside
+the tag's range, the branch run cannot see a tag that does not exist yet, and the
+stamp was never written. Nothing shipped; npm never saw 1.85.1. This version is
+the same change released by the protocol B-134 wrote down: the payload merges
+first, the stamp merges second citing the payload's merge commit, and the tag
+lands on the stamp.
+
+Guards: 429 → **429** — nothing but version surfaces, this record, and the
+stamp's own choreography move in this release.
+
 ## v1.85.1 — five surfaces a reader trusts, each disagreeing with the tree it ships from
 
 The family audit of 2026-09-06 (wave `AUDIT-WAVE-0906`) read every member's shipped
