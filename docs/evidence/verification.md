@@ -1,5 +1,19 @@
 # Verification — task-pipeline
 
+## Shipped state — v1.85.1 (2026-09-06)
+
+Family-audit wave `AUDIT-WAVE-0906`: five shipped surfaces aligned with the tree. No
+behaviour change; every row is a reader-facing claim brought back to what is true.
+
+| REQ | What ships | How it was confirmed | Confirmed |
+|---|---|---|---|
+| AW-1 | The marketplace plugin description is byte-equal to `plugin.json`'s | `python3 -c` comparing `json.load` of both → `equal: True`; before the fix the sole difference was `judgment/` at character 298 | yes |
+| AW-2 | `project-audit`'s §6 references resolve from the file that carries them | both now use the `../task-pipeline/references/…` link form the same file's routing table already used; `references/backlog.md` and `references/prioritisation.md` exist at that target | yes |
+| AW-3 | `certification.md` carries no bare path into another member | the `references/statistics.md` pointer names its owner (`agent-stack`'s `agent-evals`) in prose; no path in that sentence resolves in-repo, and none reads as if it should | yes |
+| AW-4 | All three skills in the pack carry `license: MIT`; all three carry `compatibility:` | make-skill's `audit_skill.py --house` over each skill dir: `FM_UNKNOWN_KEY` green on all three; `evidence-docs`' compatibility line states it ships no scripts, which `find` confirms (one file, `SKILL.md`) | yes |
+| AW-5 | The opt-out pair is *'no pipeline' / 'без пайплайна'* and the guard demands it | `test/validate.py`'s opt-out loop iterates exactly that pair; description measured 903/1024 by the auditor after the change, all description checks green; the eval exercising *'без пайплайна'* is untouched | yes |
+| AW-6 | The gate is green on the release-candidate tree | `npm run test:all` rc=0, no `FAIL` lines — output quoted in the release PR | yes |
+
 ## Shipped state — v1.85.0 (2026-09-05)
 
 | REQ | What ships | How it was confirmed | Confirmed |

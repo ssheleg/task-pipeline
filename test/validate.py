@@ -2233,7 +2233,7 @@ if fm_name and 'desc' in dir():
         fail("SKILL.md: the description widens to repo-changing work but states no "
              "'Not for: …' exclusion clause — that is the 'too broad, steals "
              "triggers' failure the enterprise guidance names")
-    for _phrase in ("без пайплайна", "quick"):
+    for _phrase in ("без пайплайна", "no pipeline"):
         if _phrase not in _d:
             fail(f"SKILL.md: the description does not name the opt-out phrase "
                  f"{_phrase!r} — default-on without a release valve is a trap")
@@ -7840,7 +7840,11 @@ def check_the_conformance_sentence_is_computed() -> None:
                    front, re.M)
     computed = {
         "name": len(nm.group(1).strip()) if nm else -1,
-        "description": len(re.sub(r"\s+", " ", dm.group(1)).strip()) if dm else -1,
+        # `.strip('"')` for one recorded reason: the claim-registry reader strips the
+        # YAML quotes and this one did not, so two live surfaces stated 903 and 905
+        # about one string — found by the 2026-09-06 family audit's second round. One
+        # fact, one measurement: both readers now count the characters INSIDE the quotes.
+        "description": len(re.sub(r"\s+", " ", dm.group(1)).strip().strip('"')) if dm else -1,
         "lines": len(body.splitlines()),
         "references": len([f for f in os.listdir(os.path.join(skill_dir, "references"))
                            if f.endswith(".md")]),
