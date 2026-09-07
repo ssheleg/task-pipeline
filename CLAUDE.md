@@ -185,3 +185,8 @@ change — decisions and seams, not a diff summary.
 - Markdown hazard: a wrapped line that **starts** with `>` becomes a blockquote.
   Reflow precedence chains like `code > docs > wiki > memory` so no line begins
   with the character.
+
+## Active audit handoff
+
+Read [docs/HANDOFF.md](docs/HANDOFF.md) for the family audit, bounded task packets
+and cross-repository branch index before resuming that work.

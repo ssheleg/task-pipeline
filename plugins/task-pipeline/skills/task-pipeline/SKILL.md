@@ -61,7 +61,7 @@ gate stops until it is installed.
 | 2 Brainstorm | `references/brainstorm.md` |
 | 2 Decompose (platforms only) | `references/decomposition.md` |
 | 3 Spec | `references/spec.md` |
-| 4 Plan | `references/planning.md` |
+| 4 Plan and context packets for independent executors | `references/planning.md` |
 | the queue the loop walks | `references/work-graph.md` |
 | 5–8 · how a **work-graph node** is CLOSED — three blind readings at three distances, all three required (ceiling 3); a **prose-plan task** closes through `review.md` instead — one reviewer, five-round cap | `references/certification.md` |
 | 5 Build (worktree, subagents, fix loop) | `references/build.md` + `references/review.md` |
