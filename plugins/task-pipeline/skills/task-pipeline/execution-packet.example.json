@@ -1,0 +1,42 @@
+{
+  "schema_version": "execution-packet/1",
+  "id": "FIX-EX-01.01",
+  "parent_id": "FIX-EX-01",
+  "module": "example-module",
+  "intent": "Split received from completed in the webhook reference so a crash between them stops losing the event.",
+  "inputs": [
+    {
+      "address": "docs/evidence/audits/example/leaves/FIX-EX-01.01.md",
+      "sha256": "9b64e93e16025c61cce840b5facbeed619927a20c07f6f919ac92816d6ddc3b6",
+      "role": "primary packet brief"
+    }
+  ],
+  "decision_refs": [
+    {
+      "id": "DEC-0007",
+      "address": "docs/decisions.md#dec-0007",
+      "sha256": "276e15892305979ae04a402971c6632a53c249412d99fbea1cf49b4795dbf622"
+    }
+  ],
+  "source_scope": {
+    "edit_targets": [
+      {
+        "address": "plugins/example/skills/example/SKILL.md",
+        "mode": "Edit",
+        "baseline_sha256": "a0dcc36937f50a8da38261c1c39afe6caeb0f31674cdf3baaac48c4c81defe32"
+      },
+      {
+        "address": "test/audit_regressions/fix-ex-01.01.py",
+        "mode": "Create_or_extend"
+      }
+    ],
+    "claim": "FIX-EX-01.01"
+  },
+  "budgets": {
+    "context_bytes": 24576,
+    "token_note": "estimate: utf8 bytes / 3.9 chars-per-token (the family's measured divisor)"
+  },
+  "acceptance": [
+    "A crash after the receipt admits a repeat worker; a duplicate of a completed event never grants again."
+  ]
+}

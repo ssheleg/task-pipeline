@@ -1,0 +1,123 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://raw.githubusercontent.com/ssheleg/task-pipeline/main/plugins/task-pipeline/skills/task-pipeline/execution-packet.schema.json",
+  "title": "task-pipeline execution packet",
+  "description": "The family's versioned task/context contract (CTX-01). One packet is one dispatchable unit of work: what to do, under which module decisions, reading which inputs, inside which budget. Packets are IMMUTABLE once issued — a change is a new packet with a new id, never an edit. What ships is this schema, one example, and `scripts/packet.py`, the dependency-free validator every consumer runs before acting: a packet whose mandatory version major is unknown, whose input lacks a digest, or whose decision ref is unbound must be rejected at the door, because acting on a packet you could not verify is how two agents build different things from one plan.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "id", "module", "intent", "inputs", "decision_refs", "source_scope", "budgets"],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "pattern": "^execution-packet/[0-9]+$",
+      "description": "Contract version, `execution-packet/<major>`. A consumer that does not know the major REJECTS the packet — an unknown mandatory version is not a warning."
+    },
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Stable packet id. Immutable: revising the work issues a new id."
+    },
+    "parent_id": {
+      "type": "string",
+      "description": "The parent outcome or plan node this packet serves, when one exists."
+    },
+    "module": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The owning module/repository the packet's edits belong to."
+    },
+    "intent": {
+      "type": "string",
+      "minLength": 1,
+      "description": "One sentence of what this packet changes and why — the contract, not the diff."
+    },
+    "inputs": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/contextRef" },
+      "description": "Every context document the work READS. Each is content-addressed: an input without a digest cannot be verified fresh, so it does not dispatch."
+    },
+    "decision_refs": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/decisionRef" },
+      "description": "The module decisions this packet is bound by. BOUND means address+digest present — a decision named without its bytes is a rumour, and the packet is rejected."
+    },
+    "source_scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["edit_targets"],
+      "properties": {
+        "edit_targets": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/editTarget" },
+          "description": "The exact files the packet may change. A baseline digest per Edit target is what makes 'the source moved under the plan' detectable before dispatch."
+        },
+        "claim": {
+          "type": "string",
+          "description": "The coordination scope to claim before editing, where the project has agent-sync on."
+        }
+      }
+    },
+    "budgets": {
+      "type": "object",
+      "additionalProperties": false,
+      "minProperties": 1,
+      "properties": {
+        "context_bytes": { "type": "integer", "minimum": 1 },
+        "token_note": {
+          "type": "string",
+          "description": "How tokens were measured or estimated — a named tokenizer or the estimate's basis. A bare token count nothing computed is not a budget."
+        }
+      },
+      "description": "At least one bound. Budgets cut appendix material, never the packet's decisions or acceptance."
+    },
+    "acceptance": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "description": "Observable acceptance cases. Never truncated to fit a budget."
+    }
+  },
+  "definitions": {
+    "contextRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["address", "sha256"],
+      "properties": {
+        "address": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Where the bytes live: a repo-relative path or a portable `scheme://` address."
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$",
+          "description": "Digest of the exact bytes the plan was made against. Freshness is checked against this before dispatch; a mismatch blocks, it never silently becomes permission to use stale context."
+        },
+        "role": { "type": "string" }
+      }
+    },
+    "decisionRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "address", "sha256"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "address": { "type": "string", "minLength": 1 },
+        "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+      }
+    },
+    "editTarget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["address", "mode"],
+      "properties": {
+        "address": { "type": "string", "minLength": 1 },
+        "mode": { "type": "string", "enum": ["Edit", "Create", "Create_or_extend"] },
+        "baseline_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$",
+          "description": "Required when mode is Edit: the bytes the plan reviewed. Creates have no baseline."
+        }
+      }
+    }
+  }
+}

@@ -259,4 +259,9 @@ Most references are routed from the **Built-in doctrine** table above, keyed by
 the stage that sends you there. The rest are routed by prose: `stages.md` (named
 at every stage of *How to run*), `learned.md` (cited where a rule binds) and
 `probing.md` (from `gates.md`, whose checks it proves). The config contracts sit
-beside this file: `pipeline.schema.json` and `pipeline.example.json`.
+beside this file: `pipeline.schema.json` and `pipeline.example.json`. The
+family's task/context contract sits there too: `execution-packet.schema.json`
+with `execution-packet.example.json` — an immutable, content-addressed packet
+per dispatchable unit of work, validated dependency-free by
+`scripts/packet.py` before anything acts on it (an unknown mandatory version,
+a ref without its digest, or an unbound decision is rejected at the door).
