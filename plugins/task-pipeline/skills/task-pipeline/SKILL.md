@@ -269,4 +269,9 @@ and its answer half, `execution-result.schema.json` with
 `execution-result.example.json`: an AttemptGrant that a boolean can never
 substitute for, and a ResultEnvelope whose stale candidate (older revision, or
 a superseded fence) re-plans instead of landing as current
-(`scripts/packet.py validate-result`).
+(`scripts/packet.py validate-result`). The compiler's first stage maps an
+audit report onto parent tasks (`scripts/context_packets.py compile|verify`):
+ids derived from finding ids — never positional, so a shuffled report compiles
+byte-identically — evidence/limits/priority in their own fields separate from
+status, and any row it cannot map blocks the whole compile rather than being
+dropped silently.
