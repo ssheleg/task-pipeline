@@ -207,6 +207,15 @@ Three things the grill does beyond clarifying the request, each in full in
 3. Walk stages 1→10 on the model confirmed at preflight. **Don't re-ask about the
    model at every boundary** — only when the operator recorded a per-stage override
    map and the next stage's entry differs (`references/model-tiering.md`).
+   **The SELECTED profile is compiled once, at preflight, and only ITS declared
+   stages and gates run** (FIX-TP-03.02): the numbers "1→10" name the DEFAULT
+   profile, and a custom profile with three stages runs three — no hidden stage
+   0, 7 or 10 is injected because the default profile has one. What a custom
+   profile does NOT escape is the KERNEL (03.01): scope, evidence, deps and
+   resume are owed by every stage of every profile, so dropping stages never
+   drops the evidence gate. And an unknown MANDATORY capability blocks the
+   compile — a profile whose `must_understand` names a capability this runtime
+   does not have is refused, never run with the capability silently absent.
    **Is the brief a platform rather than a change?** Then stage 2 also cuts it into
    modules (`references/decomposition.md`) and stages 3→10 run **per module** in
    build order, one brick at a time — stages 0–2 run once, and the module map's
