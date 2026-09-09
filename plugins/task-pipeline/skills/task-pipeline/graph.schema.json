@@ -313,6 +313,33 @@
               }
             }
           }
+        },
+        "exception": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "default": null,
+          "additionalProperties": false,
+          "required": [
+            "reason",
+            "by",
+            "at"
+          ],
+          "properties": {
+            "reason": {
+              "type": "string",
+              "minLength": 1
+            },
+            "by": {
+              "type": "string",
+              "minLength": 1
+            },
+            "at": {
+              "type": "string"
+            }
+          },
+          "description": "An AUTHORIZED EXCEPTION (FIX-PF-03.02): the operator's recorded decision that this node ships without/despite certification — reason + identity + the tree it was granted at. Its own disposition: it never turns anything into a PASS, and a failed certification stays visible beside it."
         }
       },
       "allOf": [
@@ -369,7 +396,8 @@
             "add",
             "park",
             "close",
-            "invalidate"
+            "invalidate",
+            "waive"
           ],
           "description": "Which mutation made this entry. `close` joined the two on 2026-08-17 with T-5 — and it was caught by a probe rather than by the fixture asserting *the graph after a close still validates*, because `violations()` never reaches an enum. The same disagreement B-084 records, one field over. `invalidate` joined with PF-02.02: a REQ/interface/brief change supersedes a node and resets its downstream proofs."
         },

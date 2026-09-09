@@ -81,7 +81,7 @@ TERMINAL = {"done", "parked"}
 NO_GRAPH = {"producer", "doctrine"}
 # One place, and the schema enumerates the same three. Two homes for this set is
 # what let `close` write a verb the format forbade.
-REVISION_VERBS = {"add", "park", "close", "invalidate"}
+REVISION_VERBS = {"add", "park", "close", "invalidate", "waive"}
 # Parking a node PROMOTES its dependents: `parked` is terminal, so anything
 # blocked on it becomes runnable even though the payload it waited on never
 # arrived. That is deliberate — `can_continue_around` in the verdict is the
@@ -868,6 +868,44 @@ def cmd_release(graph, args):
     return 0
 
 
+def cmd_waive(graph, args):
+    """An AUTHORIZED EXCEPTION is its own disposition — never a fake PASS
+    (FIX-PF-03.02). Where an operator decides a node ships without (or despite)
+    certification, that decision is recorded as an exception carrying its
+    REASON and the IDENTITY that authorized it. The node is never marked
+    certified; a failed certification stays visible beside the exception, and
+    `close` stamps the exception into the evidence so a reader six weeks later
+    sees a decision, not a green."""
+    guard(graph, args.graph)
+    nid = args.node
+    by_id = {n.get("id"): n for n in graph.get("nodes") or []}
+    if nid not in by_id:
+        die("no node %s in this graph — nothing was waived" % nid)
+    reason = (args.reason or "").strip()
+    who = (args.by or "").strip()
+    if not reason:
+        die("waive needs --reason: an exception with no reason is a green with extra steps")
+    if not who:
+        die("waive needs --by: an exception nobody signed is nobody's decision")
+    node = by_id[nid]
+    import subprocess as _sp
+    try:
+        r = _sp.run(["git", "rev-parse", "HEAD"], capture_output=True, text=True)
+        at = r.stdout.strip() if r.returncode == 0 else "unavailable"
+    except OSError:
+        at = "unavailable"
+    node["exception"] = {"reason": reason, "by": who, "at": at}
+    revise(graph, "waive", nid, "authorized exception by %s: %s" % (who, reason),
+           precondition=at)
+    bad = violations(graph)
+    if bad:
+        die("waiving %s would break the graph — nothing was written:\n  %s"
+            % (nid, "\n  ".join(bad)))
+    save(args.graph, graph)
+    print("waived %s — authorized exception by %s (never a certification)" % (nid, who))
+    return 0
+
+
 def cmd_invalidate(graph, args):
     """A REQ / interface / brief change supersedes the node it touched and
     INVALIDATES the proofs downstream of it (FIX-PF-02.02).
@@ -1394,6 +1432,14 @@ def cmd_certify(graph, args):
         if v:
             bad += ["%s: %s" % (os.path.basename(path), line) for line in v]
             continue
+        # Reviewer EXPOSURE, stated honestly (FIX-PF-03.02): a report may say
+        # what the reviewer actually saw. A syntax lint is not a blind review,
+        # and recording one as a tier is the fake this refuses by name.
+        exposure = str(t.get("exposure", "")).strip().lower()
+        if exposure and re.search(r"\b(lint|syntax[- ]only|grep[- ]only|regex[- ]only)\b", exposure):
+            bad.append("%s: exposure is %r — a syntax lint is not a blind review, and a "
+                       "tier cannot be certified on one" % (os.path.basename(path), exposure))
+            continue
         if t["node"] != nid:
             bad.append("%s: reports on %s while this certification is for %s — a report "
                        "about another node is not evidence about this one"
@@ -1622,18 +1668,32 @@ def cmd_close(graph, args):
     # preflight someone can skip. Where certify never ran, the verdict is the
     # verifier's judgement and close proceeds as before.
     cert = node.get("certification")
+    exc = node.get("exception")
     if cert:
         tiers = cert.get("tiers") or {}
         failing = sorted(k for k, val in tiers.items() if val != "pass")
-        if failing:
+        if failing and not exc:
             die("%s has a certification (round %s) with failing tier(s): %s — a direct "
                 "close cannot step around a failed certification; fix the finding and "
-                "re-certify. Nothing was written." % (nid, cert.get("round"), ", ".join(failing)))
+                "re-certify, or record an AUTHORIZED EXCEPTION with `waive` (its own "
+                "disposition, never a pass). Nothing was written."
+                % (nid, cert.get("round"), ", ".join(failing)))
+        if failing and exc:
+            # The exception authorizes the close; the failure stays VISIBLE and
+            # the node is never marked certified.
+            stamp += "; closed under authorized exception by %s: %s (tier(s) %s still failing)" % (
+                exc.get("by", "?"), exc.get("reason", "?"), ", ".join(failing))
+        # Same-candidate check regardless of the exception: a certification of
+        # ANOTHER commit is stale either way.
         cert_at = cert.get("at") or ""
         if head and cert_at and not str(cert_at).startswith("unavailable") and cert_at != head:
             die("%s was certified at %s but HEAD is %s — the certification is for a "
                 "different candidate; re-certify at the current one. Nothing was written."
                 % (nid, str(cert_at)[:12], head[:12]))
+    if exc and not (cert and sorted(k for k, val in (cert.get("tiers") or {}).items()
+                                    if val != "pass")):
+        stamp += "; closed under authorized exception by %s: %s" % (
+            exc.get("by", "?"), exc.get("reason", "?"))
 
     node["status"] = "done"
     node["evidence"] = list(v["evidence"]) + [stamp]
@@ -1704,6 +1764,7 @@ VERBS = {
     "goal": (cmd_goal, "the release goal this graph serves"),
     "claim": (cmd_claim, "external mode: arbitrate one runnable node to a single owner (fail-closed)"),
     "invalidate": (cmd_invalidate, "a REQ/interface/brief change supersedes a node and invalidates proofs downstream"),
+    "waive": (cmd_waive, "record an AUTHORIZED EXCEPTION (reason + identity) — its own disposition, never a fake PASS"),
     "recover": (cmd_recover, "external mode: reclaim an EXPIRED node for a new owner (fenced)"),
     "complete": (cmd_complete, "external mode: record completion from the current fence-holder (late worker refused)"),
     "release": (cmd_release, "external mode: give back a hold this run owns"),
@@ -1786,6 +1847,11 @@ def main(argv=None):
                                     help="the node whose REQ/interface/brief changed")
     made["invalidate"].add_argument("--why", required=True,
                                     help="why the contract changed — enters the revision log")
+    made["waive"].add_argument("--node", required=True, help="the node the exception covers")
+    made["waive"].add_argument("--reason", required=True,
+                               help="why this node ships without/despite certification")
+    made["waive"].add_argument("--by", required=True,
+                               help="the identity that authorized the exception")
 
     p_park = made["park"]
     p_park.add_argument("node")
@@ -1798,7 +1864,7 @@ def main(argv=None):
     verbs = {k: v[0] for k, v in VERBS.items()}
     if args.verb in NO_GRAPH:
         return verbs[args.verb](None, args)
-    if args.verb in ("add", "park", "close", "certify", "invalidate"):
+    if args.verb in ("add", "park", "close", "certify", "invalidate", "waive"):
         # The READ happens inside the lock too. Loading first and locking second is the
         # same lost update with an extra step: the stale copy is already in memory.
         with held(args.graph):

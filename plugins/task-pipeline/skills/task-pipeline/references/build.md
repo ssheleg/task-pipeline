@@ -374,6 +374,16 @@ satisfied**, and code quality. The implementer's self-review never substitutes f
 it. Rubric, inputs, prompt templates and how to build the diff package:
 [`review.md`](review.md).
 
+**An authorized exception is its own disposition — never a fake PASS.** Where
+the operator decides a node ships without (or despite) certification, that is
+recorded with `graph.py waive --node … --reason … --by …`: an `exception`
+object carrying the reason and the IDENTITY that signed it. The failed
+certification stays visible beside it, the node is never marked certified, and
+`close` stamps the exception into the evidence — a reader later sees a
+decision, not a green. And reviewer EXPOSURE is stated honestly: a tier report
+may say what the reviewer actually saw, and a syntax lint recorded as a blind
+review is refused by `certify` by name.
+
 **The boundary with certification:** this review closes a **prose-plan task** —
 one reviewer, the five-round cap of §4.5. A **work-graph node** is closed by the
 three blind tiers and `graph.py certify` instead
