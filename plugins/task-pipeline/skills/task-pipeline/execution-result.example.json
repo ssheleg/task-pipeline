@@ -1,0 +1,49 @@
+{
+  "schema_version": "execution-result/1",
+  "packet_id": "FIX-EX-01.01",
+  "grant": {
+    "grant_id": "g-000042",
+    "packet_id": "FIX-EX-01.01",
+    "revision": 7,
+    "fence": 12,
+    "holder": "r-7f3a91",
+    "issued_at": "2026-09-08T21:14:00Z"
+  },
+  "built_against_revision": 7,
+  "candidate": {
+    "commit": "aabec96",
+    "changed": [
+      {
+        "address": "plugins/example/skills/example/SKILL.md",
+        "sha256": "a0dcc36937f50a8da38261c1c39afe6caeb0f31674cdf3baaac48c4c81defe32"
+      }
+    ]
+  },
+  "checks": [
+    {
+      "name": "focused regression",
+      "command": "python3 test/audit_regressions/fix-ex-01.01.py",
+      "status": "PASS",
+      "observed": "7/7 cases"
+    },
+    {
+      "name": "browser smoke",
+      "command": "npx playwright test smoke",
+      "status": "NOT_RUN",
+      "observed": "no browser on this host — needs playwright installed"
+    }
+  ],
+  "evidence": [
+    {
+      "class": "fact",
+      "statement": "the crash fixture reproduces the loss before the fix and passes after",
+      "source": "test output, this run"
+    },
+    {
+      "class": "unknown_effect",
+      "statement": "behaviour under the provider's real rate limits was not observed",
+      "source": "no live account in this environment"
+    }
+  ],
+  "status": "completed"
+}

@@ -264,4 +264,9 @@ family's task/context contract sits there too: `execution-packet.schema.json`
 with `execution-packet.example.json` — an immutable, content-addressed packet
 per dispatchable unit of work, validated dependency-free by
 `scripts/packet.py` before anything acts on it (an unknown mandatory version,
-a ref without its digest, or an unbound decision is rejected at the door).
+a ref without its digest, or an unbound decision is rejected at the door) —
+and its answer half, `execution-result.schema.json` with
+`execution-result.example.json`: an AttemptGrant that a boolean can never
+substitute for, and a ResultEnvelope whose stale candidate (older revision, or
+a superseded fence) re-plans instead of landing as current
+(`scripts/packet.py validate-result`).
