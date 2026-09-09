@@ -6,7 +6,18 @@ fallback path, no version skew, and no failure mode where a stage can't run beca
 something isn't installed.
 
 What remains is a short list of **optional** companions that make individual stages
-better, plus one that is required only for user-facing work.
+better, plus one whose ARTIFACT is required for user-facing work.
+
+**The provider rule — a gate checks artifacts and their quality, never package
+presence.** For every row below, three ways satisfy the same contract: the
+**preferred family provider**, an **alternative provider producing the same
+artifact contract** (a third-party design workflow whose output records tokens,
+states and decisions IS designed — judged on the result), or the **inline
+fallback** (write the artifact by hand against the contract). What a gate
+refuses is the missing ARTIFACT, not the missing package — and when a tool is
+absent, the run writes down WHICH check was therefore not done ("scenario lint
+NOT_RUN: /ux-lint unavailable"), because a silently skipped check and a passed
+one must never look alike.
 
 
 > **Decision `DEC-0004`** — two browser channels ranked by nothing, one detection rule,
@@ -49,8 +60,8 @@ better, plus one that is required only for user-facing work.
 
 | Skill / tool | Needed for | Required? | Install |
 |---|---|---|---|
-| **super-ux** (`ux-foundation`, `ux-flows`, `ux-scenarios`, `ux-audit`, `/ux`, `/ux-lint` — **and the copy half**: `copywriting`, `brand-voice`, `/brand-init`, `/copy`, `/brand-lint`, plus `/vision`) | stage 3 — the **UX track** *and* the **COPY track**. This row named six surfaces until 2026-08-10 while super-ux shipped eight skills and fifteen commands: the whole brand-and-copy half was invisible to this pipeline, so a run built scenarios and screens and then wrote the interface strings by taste | **Required for any user-facing task** | `/plugin marketplace add ssheleg/super-ux` → `/plugin install super-ux@super-ux` (or `npx skills add ssheleg/super-ux`) |
-| **sheleg-design** (`/sheleg-design`) | stage 3 — the **VISUAL track**: tokens and themes, typography and rhythm, motion and how it degrades to rest, the visual language a brand is recognised by. It answers *how it looks*, which no other companion here answers — `super-ux` decides what the interface must do, `copywriting` how it sounds. Before 2026-08-10 this skill appeared once in the whole bundle, as a name in a list | **Recommended** on any task with a visual surface; never a gate. Absent → the run says the visual layer shipped **undesigned**, which is the honest name for picking values at the keyboard | `/plugin marketplace add ssheleg/sheleg-design` → `/plugin install sheleg-design@sheleg-design-skill` |
+| **super-ux** (`ux-foundation`, `ux-flows`, `ux-scenarios`, `ux-audit`, `/ux`, `/ux-lint` — **and the copy half**: `copywriting`, `brand-voice`, `/brand-init`, `/copy`, `/brand-lint`, plus `/vision`) | stage 3 — the **UX track** *and* the **COPY track**. This row named six surfaces until 2026-08-10 while super-ux shipped eight skills and fifteen commands: the whole brand-and-copy half was invisible to this pipeline, so a run built scenarios and screens and then wrote the interface strings by taste | **Artifact required for any user-facing task** — the scenarios, not the package: an equivalent scenario set from another provider or the inline fallback passes the same gate | `/plugin marketplace add ssheleg/super-ux` → `/plugin install super-ux@super-ux` (or `npx skills add ssheleg/super-ux`) |
+| **sheleg-design** (`/sheleg-design`) | stage 3 — the **VISUAL track**: tokens and themes, typography and rhythm, motion and how it degrades to rest, the visual language a brand is recognised by. It answers *how it looks*, which no other companion here answers — `super-ux` decides what the interface must do, `copywriting` how it sounds. Before 2026-08-10 this skill appeared once in the whole bundle, as a name in a list | **Recommended** on any task with a visual surface; never a gate. Absent → judge the visual layer by its RESULT: a third-party design workflow that recorded tokens, states and decisions is designed; only a layer with no design evidence at all ships **undesigned**, which is the honest name for picking values at the keyboard | `/plugin marketplace add ssheleg/sheleg-design` → `/plugin install sheleg-design@sheleg-design-skill` |
 | **context7** (MCP — call tools fully qualified: `context7:resolve-library-id`, `context7:query-docs`) | stage 1 docs study | Recommended (web-search fallback) | connect the context7 MCP server |
 | **Figma** (MCP) | stage 3 UX track, when the project designs visually — super-ux mirrors each `SCR-` screen/state into a frame | Optional, **UI + Figma-on only**. Absent → super-ux degrades to text-only *by itself and never blocks*, so shipping a UI feature with no mockups becomes a silent scope call — which is why the stage-0 sweep decides it | connect the Figma MCP server (`/mcp`, or your claude.ai connectors) |
 | **[obsidian-wiki](https://github.com/ar9av/obsidian-wiki)** (`wiki-query`, `wiki-update`) | **stage 0 harvest** (query what's already known) **+ stage 9 sync** | **Recommended** — never a gate; absent → harvest runs on repo docs alone | `pip install obsidian-wiki` → `obsidian-wiki setup --vault /path/to/your/vault` |

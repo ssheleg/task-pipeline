@@ -93,11 +93,16 @@ onto stages 2/4/5/6 in `pipeline.json` → `skills[]`. That is a **substitution,
 requirement**: the built-in doctrine is normative, the gates in `references/stages.md`
 still govern, and nothing detects, recommends or waits for an external provider.
 
-**super-ux — recommended for ANY user-facing task**, and the one thing that can stop a
-gate. The moment a task implies an interface (web / mobile / CLI / TUI), the
-WHY→UI→scenario chain runs through `/ux` and its linter, which belongs in the host's
-CI so UX drift cannot merge. **Not installed on a UI task? The stage-3 spec gate
-stops** — offer the install and wait (`references/companion-skills.md`).
+**super-ux — the preferred provider for ANY user-facing task.** The moment a task
+implies an interface (web / mobile / CLI / TUI), the WHY→UI→scenario chain runs
+through `/ux` and its linter, which belongs in the host's CI so UX drift cannot
+merge. **But the stage-3 gate checks the ARTIFACT, not the package**: valid
+scenarios covering the change — produced by super-ux, by an alternative provider
+honouring the same contract, or written inline against
+`references/companion-skills.md`'s fallback — pass the gate. What stops the gate
+is the ABSENCE of any scenario artifact: then create one (super-ux is the
+preferred way, the inline fallback is the floor), and a missing tool is reported
+as the NAMED check that was not done, never as a failed task.
 
 **The grill is built in and mandatory** (`references/grill.md`). No "clear enough task"
 exemption and no stage 1 without a committed, operator-confirmed brief. It produces the
