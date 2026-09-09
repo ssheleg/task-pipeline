@@ -32,6 +32,14 @@
     },
     "retro": {
       "$ref": "#/definitions/retro"
+    },
+    "must_understand": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "description": "Must-understand extension names (FIX-PF-06.01). A consumer (an importer, an adapter — e.g. Fabric's taskPipeline adapter) that does not recognise an entry here REFUSES the whole config rather than importing what it understood: the fields named are load-bearing, and a silently-omitted constraint is the one failure mode an interop layer must not have. Unknown fields NOT named here may be carried verbatim as extensions."
     }
   },
   "definitions": {
@@ -200,7 +208,7 @@
             "check"
           ],
           "additionalProperties": true,
-          "description": "Condition that must pass before advancing to the next stage.",
+          "description": "Condition that must pass before advancing to the next stage. A consumer that meets a gate type outside the enum (or one it cannot execute) REJECTS the config naming the gate — an unknown gate silently omitted is a pipeline that advances ungated (FIX-PF-06.01).",
           "properties": {
             "type": {
               "enum": [
