@@ -386,6 +386,16 @@ compile-dispatch` builds it and the node records its address + digest
 (`dispatch_packet`), so a build in a git-ignored workspace still points at the
 durable context it ran under.
 
+**The result is typed, tied and comparable.** An attempt's result records its
+TYPED outputs (name + kind + address + digest), the `packet_digest` of the
+immutable packet it answered, and `consumed` — the predecessor outputs it read,
+by name + digest. Freshness is then a comparison, never a feeling: when a
+predecessor re-runs and an output digest changes, `scripts/packet.py`'s
+`consumed_stale` names every result that read the old bytes, and those nodes
+rebuild at a new revision. And the packet rule applies to the answer as to the
+question: **no credential rides in a result** — an output whose name reads as
+one is refused by `validate-result`.
+
 **An authorized exception is its own disposition — never a fake PASS.** Where
 the operator decides a node ships without (or despite) certification, that is
 recorded with `graph.py waive --node … --reason … --by …`: an `exception`

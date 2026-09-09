@@ -42,6 +42,9 @@ EDIT_MODES = {"Edit", "Create", "Create_or_extend"}
 DEP_KINDS = {"data", "control", "resource"}
 
 
+OUTPUT_KINDS = {"artifact", "report", "decision", "metric"}
+
+
 def _ref_problems(ref, where, need_id=False):
     out = []
     if not isinstance(ref, dict):
@@ -224,6 +227,31 @@ def result_problems(env, current_revision=None, current_fence=None):
             out.append(f"evidence[{i}]: class must be one of {sorted(EVIDENCE_CLASSES)} — "
                        "fact, defect and unknown effect are three verdicts, never blended")
 
+    secretish = re.compile(r"(?i)^(?:.*[_-])?(token|secret|password|passwd|api[_-]?key|"
+                           r"apikey|credential|authorization|cookie|private[_-]?key)s?$")
+    for i, row in enumerate(env.get("outputs") or []):
+        if not isinstance(row, dict) or not row.get("name") or not row.get("address"):
+            out.append(f"outputs[{i}]: needs name, kind, address, sha256 — an untyped "
+                       "output cannot be consumed by digest")
+            continue
+        if row.get("kind") not in OUTPUT_KINDS:
+            out.append(f"outputs[{i}]: kind {row.get('kind')!r} is not one of "
+                       f"{sorted(OUTPUT_KINDS)}")
+        if not SHA_RE.match(str(row.get("sha256", ""))):
+            out.append(f"outputs[{i}]: missing or malformed sha256")
+        if secretish.match(str(row["name"])):
+            out.append(f"outputs[{i}]: {row['name']!r} names a credential — a result "
+                       "outlives its session exactly like the packet; reference the "
+                       "store by name, never carry the value (FIX-PF-05.03)")
+    pd = env.get("packet_digest")
+    if pd is not None and not SHA_RE.match(str(pd)):
+        out.append("packet_digest: malformed — the tie to the dispatch packet must be "
+                   "a sha256 or absent, never a guess")
+    for i, row in enumerate(env.get("consumed") or []):
+        if not isinstance(row, dict) or not row.get("name")                 or not SHA_RE.match(str(row.get("sha256", ""))):
+            out.append(f"consumed[{i}]: needs name + sha256 — freshness is a comparison, "
+                       "and an unpinned consumption cannot be compared")
+
     status = env.get("status")
     if status not in RESULT_STATUSES:
         out.append(f"status {status!r} is not one of {sorted(RESULT_STATUSES)}")
@@ -232,6 +260,23 @@ def result_problems(env, current_revision=None, current_fence=None):
                    "attempt with red checks is a contradiction, not a nuance")
 
     return out
+
+
+def consumed_stale(env, current_outputs):
+    """Which of this result's consumed inputs have moved (FIX-PF-05.03).
+
+    `current_outputs`: {name: sha256} — the predecessors' outputs as they are
+    NOW. A name whose digest differs is returned; a non-empty list means this
+    result is STALE and the node rebuilds at a new revision. A consumed name
+    the predecessors no longer produce is stale too — an input that vanished
+    is not fresher than one that changed.
+    """
+    stale = []
+    for row in env.get("consumed") or []:
+        name = row.get("name")
+        if current_outputs.get(name) != row.get("sha256"):
+            stale.append(name)
+    return stale
 
 
 def graph_problems(packets):
