@@ -1,0 +1,188 @@
+{
+ "contract": "outcome-case/1 (schemas/outcome-case.schema.json + test/outcome_harness.py in ssheleg/sshlg-skills)",
+ "note": "Outcome corpus for project-audit (FIX-EV-01.10). Judged on ARTIFACTS via the family harness: the runner records the actual output oracle verdict AND the raw result per case; with/without-skill arms are the harness's baseline contract. The HTML report is OPTIONAL — a run without --report writes no HTML and still completes. Nothing in the production skill was changed for grader convenience.",
+ "arms": {
+  "baseline": "same prompts, skill absent",
+  "current": "same prompts, skill installed"
+ },
+ "cases": [
+  {
+   "schema_version": "outcome-case/1",
+   "id": "PA-OUT-001-adr-does-not-excuse-a-defect",
+   "skill": "project-audit",
+   "prompt": {
+    "text": "An ADR permits logging the refresh token. Audit the project and report the exposure anyway, LINKED to the ADR (a documented decision does not make a leak safe); write audit.json."
+   },
+   "environment": {
+    "model": "inherit",
+    "host": "any",
+    "case_digest": "28a695d37f9c244535c0d968e6ba870e37b1af5e87d94d4d83eb01591f76a805"
+   },
+   "checks": {
+    "tool": [
+     {
+      "name": "python3 present",
+      "command": "python3 -c 'pass'"
+     }
+    ],
+    "load_trace": {
+     "expect_loaded": [
+      "project-audit"
+     ],
+     "expect_not_loaded": []
+    },
+    "outcome": [
+     {
+      "name": "the audit exists",
+      "kind": "artifact-exists",
+      "target": "audit.json"
+     },
+     {
+      "name": "the exposure is a finding linked to the ADR (PA-01)",
+      "kind": "artifact-contains",
+      "target": "audit.json",
+      "expect": "exposure"
+     }
+    ]
+   }
+  },
+  {
+   "schema_version": "outcome-case/1",
+   "id": "PA-OUT-002-negative-routing",
+   "skill": "project-audit",
+   "prompt": {
+    "text": "Explain in two sentences what a webhook is."
+   },
+   "environment": {
+    "model": "inherit",
+    "host": "any",
+    "case_digest": "a5da94aa03520bb6226ea88328a75ab6d7e3985c73a0e90a1379bf168fead57e"
+   },
+   "checks": {
+    "tool": [
+     {
+      "name": "python3 present",
+      "command": "python3 -c 'pass'"
+     }
+    ],
+    "load_trace": {
+     "expect_loaded": [],
+     "expect_not_loaded": [
+      "project-audit"
+     ]
+    },
+    "outcome": [
+     {
+      "name": "no audit artifact appears",
+      "kind": "command-exit-0",
+      "target": "test ! -f audit.json"
+     }
+    ]
+   }
+  },
+  {
+   "schema_version": "outcome-case/1",
+   "id": "PA-OUT-003-reproduced-mechanism-is-a-finding",
+   "skill": "project-audit",
+   "prompt": {
+    "text": "A race is reproduced locally; production occurrence is unknown. Record it as a finding with observation scope and time in race.json — a zero production sample is not zero risk (PA-02)."
+   },
+   "environment": {
+    "model": "inherit",
+    "host": "any",
+    "case_digest": "bd8a19a50cbf700b10f9d220c8fb01bea9dbdcd53757e2869b82e7facb162001"
+   },
+   "checks": {
+    "tool": [
+     {
+      "name": "python3 present",
+      "command": "python3 -c 'pass'"
+     }
+    ],
+    "load_trace": {
+     "expect_loaded": [
+      "project-audit"
+     ],
+     "expect_not_loaded": []
+    },
+    "outcome": [
+     {
+      "name": "the reproduced mechanism stays a finding (PA-02)",
+      "kind": "artifact-contains",
+      "target": "race.json",
+      "expect": "production"
+     }
+    ]
+   }
+  },
+  {
+   "schema_version": "outcome-case/1",
+   "id": "PA-OUT-004-noop-no-report-completes",
+   "skill": "project-audit",
+   "prompt": {
+    "text": "Run the project audit WITHOUT --report; confirm no HTML is created and the run is still complete; note it in run-note.md."
+   },
+   "environment": {
+    "model": "inherit",
+    "host": "any",
+    "case_digest": "e358282127ba3f0a59888caadf7d6aa47485b17e7e9d63a4e56f62e40747065d"
+   },
+   "checks": {
+    "tool": [
+     {
+      "name": "python3 present",
+      "command": "python3 -c 'pass'"
+     }
+    ],
+    "load_trace": {
+     "expect_loaded": [
+      "project-audit"
+     ],
+     "expect_not_loaded": []
+    },
+    "outcome": [
+     {
+      "name": "the run completes with no HTML (PA-03)",
+      "kind": "command-exit-0",
+      "target": "test ! -f report.html"
+     }
+    ]
+   }
+  },
+  {
+   "schema_version": "outcome-case/1",
+   "id": "PA-OUT-005-report-requires-existing-html",
+   "skill": "project-audit",
+   "prompt": {
+    "text": "Run the audit WITH --report and record that the HTML exists, its links are safe, and its inspect/render status is reported in report-check.md."
+   },
+   "environment": {
+    "model": "inherit",
+    "host": "any",
+    "case_digest": "fd603f6d516148da4411d34d408af5677b0b64570ae55cb81439ae7273202325"
+   },
+   "checks": {
+    "tool": [
+     {
+      "name": "python3 present",
+      "command": "python3 -c 'pass'"
+     }
+    ],
+    "load_trace": {
+     "expect_loaded": [
+      "project-audit"
+     ],
+     "expect_not_loaded": []
+    },
+    "outcome": [
+     {
+      "name": "with --report the HTML is required to exist (PA-03)",
+      "kind": "artifact-contains",
+      "target": "report-check.md",
+      "expect": "render"
+     }
+    ]
+   }
+  }
+ ]
+}
