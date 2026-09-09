@@ -214,6 +214,20 @@ function migrateArtifacts(args) {
   return 0;
 }
 
+// The bundled HostContext resolver (FIX-UP-08.02) — one contract, a local
+// copy per member because these installers run via `npx` with no shared lib.
+// A host's config root is: an explicit root > the documented host env var >
+// the platform default `~/<dir>`. Used verbatim (spaces preserved), never
+// through a shell. Host EXISTENCE is a separate probe on the returned path.
+const HOST_ENV = { claude: 'CLAUDE_CONFIG_DIR', codex: 'CODEX_HOME', gemini: 'GEMINI_CONFIG_DIR' };
+const HOST_DIR = { claude: '.claude', codex: '.codex', gemini: '.gemini' };
+function hostRoot(agent, home, env, explicit) {
+  if (explicit) return explicit;
+  const e = (env || process.env)[HOST_ENV[agent]];
+  if (e) return e;
+  return path.join(home, HOST_DIR[agent]);
+}
+
 function main(argv) {
   const args = argv.slice(2);
   if (args.includes('--help') || args.includes('-h')) {
@@ -246,9 +260,10 @@ function main(argv) {
   // copy SHADOWS the plugin — silently serving whatever version was copied, forever.
   // The family launcher (sshlg-skills) prunes exactly these copies for that reason,
   // so creating one without saying so undoes the thing it is paired with.
+  const claude = hostRoot('claude', home, process.env);
   const pluginDirs = [
-    path.join(home, '.claude', 'plugins', 'marketplaces', 'task-pipeline'),
-    path.join(home, '.claude', 'plugins', 'cache', 'task-pipeline'),
+    path.join(claude, 'plugins', 'marketplaces', 'task-pipeline'),
+    path.join(claude, 'plugins', 'cache', 'task-pipeline'),
   ];
   if (!force && pluginDirs.some((d) => fs.existsSync(d))) {
     console.error(`refusing: task-pipeline is already installed as a Claude Code PLUGIN.
@@ -266,14 +281,14 @@ Rerun with --force if you deliberately want the plain copy instead.`);
   installOne(
     'task-pipeline skill  ',
     skillSrc,
-    path.join(home, '.claude', 'skills', 'task-pipeline'),
+    path.join(claude, 'skills', 'task-pipeline'),
     true,
     force
   );
   installOne(
     '/task-pipeline command',
     cmdSrc,
-    path.join(home, '.claude', 'commands', 'task-pipeline.md'),
+    path.join(claude, 'commands', 'task-pipeline.md'),
     false,
     force
   );
@@ -286,4 +301,4 @@ if (require.main === module) {
   process.exit(main(process.argv));
 }
 
-module.exports = { installOne, copyDir, verifyTree };
+module.exports = { installOne, copyDir, verifyTree, hostRoot };
