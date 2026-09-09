@@ -30,6 +30,25 @@ even be on the same provider. So:
   environment has no Opus-class model, the best available one is the right answer —
   say which one you settled on and keep going.
 
+## The operator's explicit choice is inherited, verbatim
+
+**Advice and choice are different things, and the second wins.** The
+recommendation above is ADVICE — printed once at preflight. A model or effort
+the operator has set explicitly (`/model`, `/fast`, a config entry, an answer
+at preflight) is the CHOICE, and the plan, every stage and every subagent
+inherit it unchanged. **Task size is not a basis for switching**: a large task
+does not upgrade the model, a mechanical stage does not downgrade it — the only
+thing that changes the model mid-run is an override the operator RECORDED, with
+its basis, in the per-stage map. A switch nobody recorded is a defect, whatever
+it saved.
+
+**An unsupported capability is its own line, never a silent swap.** When the
+confirmed model cannot do what a stage needs — vision it lacks, a context
+window the material exceeds, a tool the tier does not offer — the run states
+that limitation by NAME, records it in the brief, and asks (or proceeds with
+the gap named). Substituting a different model to cover the gap without the
+operator's say-so is the same defect as the silent downgrade.
+
 ## Mechanic — confirm at preflight, then stop asking
 
 Once, as part of the preflight (before stage 0):

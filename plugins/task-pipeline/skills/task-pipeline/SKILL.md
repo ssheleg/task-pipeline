@@ -156,7 +156,8 @@ Three things the grill does beyond clarifying the request, each in full in
    is built in, so this only checks the *optional* companions (super-ux for UI
    tasks, context7, wiki-update, graphify) and emits ONE block covering them
    **and the model decision** (`references/model-tiering.md`): recommend
-   the most capable model available, let the operator confirm or override, record
+   the most capable model available (advice), let the operator confirm or
+   override (the choice — inherited verbatim by plan, stages and subagents), record
    it. Ask once, here. **The same block carries the run mode**
    (`references/continuity.md`): read `pipeline.json` → `run.loop`; where it is
    recorded, arm it **at the point `run.loop.arm` names** — here at preflight, or
