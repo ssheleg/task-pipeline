@@ -12,12 +12,15 @@ own built-in doctrine — no companion plugin required. Keeps the main thread
 disciplined: no stage advances until its gate passes; the whole run uses one model,
 confirmed before it starts.
 
-**Grill first, then run autonomously.** A one-line task ("make me feature X") is
-never enough to finish without a human in the loop. Stage 0 is **mandatory**: a
-relentless, one-question-at-a-time interview that resolves every decision branch
-*and* sweeps stages 1→10 for anything that would stop the run later — then locks
-the answers into a brief. Autonomy is bought there or not at all; every question
-skipped at stage 0 comes back as an interruption at stage 6.
+**Grill first, then run autonomously.** Stage 0 is **mandatory**, but it is a
+GAP CHECK before it is an interview: the brief is built from the request, the
+files and the harvest first, and a question is asked only for a **material
+unknown** the sources cannot answer. A complete brief yields ZERO intake
+questions; what the request or the project already decided is recorded, never
+re-negotiated. The interview, where gaps remain, is one-question-at-a-time and
+sweeps stages 1→10 for anything that would stop the run later — then locks the
+answers into a brief. Autonomy is bought there or not at all; every MATERIAL
+question skipped at stage 0 comes back as an interruption at stage 6.
 
 **Config contract: [`pipeline.schema.json`](pipeline.schema.json).** A pipeline is
 a machine-readable config — an ordered list of stages, each with `skills[]` (the
