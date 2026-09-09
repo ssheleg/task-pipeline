@@ -38,7 +38,7 @@ turn of every loop.
 | `goal_clauses` | release work no requirement names. Enumerated, never matched against the goal's prose: substring-matching a sentence produces confidence without correctness |
 | `nodes[].owner` | which role does it. A node nobody can dispatch never leaves the frontier and nothing says why |
 | `nodes[].serves` | the REQ or goal clause it exists for. A node serving neither is **parked with that as the reason** |
-| `nodes[].blocked_by` | what must close first. This is what the frontier obeys |
+| `nodes[].blocked_by` | what must PRODUCE first. The frontier obeys a satisfaction predicate, and only `done` satisfies — a PARKED producer blocks its consumer, because a park is a decision not to produce, not a production. `next` names each held consumer with the park's reason; a valid alternative producer is an explicit, versioned edge change, never an implicit unblock |
 | `nodes[].touches` | what it **mutates**. Two runnable nodes writing one file is the false parallelism [`planning.md`](planning.md) refuses — *distinct is not the same as independent, and the check is what they touch, never what they are called* |
 | `nodes[].check` | **how this node will be closed** — one command, or the named judgement where no command can decide it. Required on every node except a `parked` one. The certification's `unit` tier runs it and reports its output as the evidence row ([`certification.md`](certification.md) — three blind tiers close a node, not one reader); before this field existed that instruction pointed at an absence, leaving a verifier the two things it forbids — invent a check, or run everything (B-080) |
 | `nodes[].evidence` | required when `status` is `done`. A node called done by assertion is what evidence exists to prevent |

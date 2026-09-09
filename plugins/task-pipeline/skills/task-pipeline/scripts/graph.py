@@ -77,6 +77,13 @@ ROLES = {
     "verifier", "decomposer", "ux", "ui", "researcher", "market-analyst", "bug-analyst",
 }
 
+# TERMINAL answers "is this node's own lifecycle over" — a parked node is over.
+# It does NOT answer "did this node produce what its consumers need": that
+# predicate is satisfaction, and only `done` satisfies (FIX-PF-04.01). A park
+# with reason "producer unavailable" used to make its CONSUMER runnable, which
+# ran work without its required input; frontier/close/certify now demand `done`
+# on a blocker, and a valid alternative producer is an explicit, versioned edge
+# change (`add`/`invalidate` with a revision), never an implicit unblock.
 TERMINAL = {"done", "parked"}
 NO_GRAPH = {"producer", "doctrine"}
 # One place, and the schema enumerates the same three. Two homes for this set is
@@ -429,7 +436,7 @@ def frontier(graph):
         if n.get("status") in TERMINAL or n.get("status") == "running":
             continue
         blockers = n.get("blocked_by") or []
-        if all(by_id.get(b, {}).get("status") in TERMINAL for b in blockers):
+        if all(by_id.get(b, {}).get("status") == "done" for b in blockers):
             ready.append(n)
     rank = unblocks(nodes)
     order = {n.get("id"): i for i, n in enumerate(nodes)}
@@ -722,6 +729,22 @@ def cmd_next(graph, args):
     if nodes and all(n.get("status") in TERMINAL for n in nodes):
         return 3
     ready = frontier(graph)
+    # A consumer whose producer is PARKED is not runnable and never will be by
+    # itself (FIX-PF-04.01) — say so BEFORE the empty-frontier exit, or the one
+    # moment the operator most needs the reason is the one moment it is silent.
+    _by_id = {n.get("id"): n for n in nodes}
+    for n in nodes:
+        if n.get("status") in TERMINAL or n.get("status") == "running":
+            continue
+        parked_blockers = [b for b in n.get("blocked_by") or []
+                           if _by_id.get(b, {}).get("status") == "parked"]
+        if parked_blockers:
+            reasons = "; ".join(
+                f"{b}: {_by_id[b].get('parked_reason', '?')}" for b in parked_blockers)
+            print(f"held: {n.get('id')} waits on parked {', '.join(parked_blockers)} "
+                  f"({reasons}) — a park does not produce the artifact; if an "
+                  f"alternative producer exists, change the edge explicitly",
+                  file=sys.stderr)
     if not ready:
         return 4
     # The frontier and nothing else. This is the line that enters a context on
@@ -1413,7 +1436,7 @@ def cmd_certify(graph, args):
         die("%s is already %s — certifying it again would overwrite the record of the "
             "close that already happened" % (nid, node.get("status")))
     open_blockers = [b for b in node.get("blocked_by") or []
-                     if by_id.get(b, {}).get("status") not in TERMINAL]
+                     if by_id.get(b, {}).get("status") != "done"]
     if open_blockers:
         die("%s waits on %s, which %s not closed — certifying work that could not have "
             "run certifies nothing" % (nid, ", ".join(open_blockers),
@@ -1612,7 +1635,7 @@ def cmd_close(graph, args):
         die("%s is already %s — a second close would overwrite the record of the first"
             % (nid, node.get("status")))
     open_blockers = [b for b in node.get("blocked_by") or []
-                     if by_id.get(b, {}).get("status") not in TERMINAL]
+                     if by_id.get(b, {}).get("status") != "done"]
     if open_blockers:
         die("%s waits on %s, which %s not closed — a verdict about work that could not have "
             "run is a verdict about nothing" % (nid, ", ".join(open_blockers),
