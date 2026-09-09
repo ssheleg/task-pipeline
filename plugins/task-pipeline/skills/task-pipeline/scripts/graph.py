@@ -81,7 +81,7 @@ TERMINAL = {"done", "parked"}
 NO_GRAPH = {"producer", "doctrine"}
 # One place, and the schema enumerates the same three. Two homes for this set is
 # what let `close` write a verb the format forbade.
-REVISION_VERBS = {"add", "park", "close"}
+REVISION_VERBS = {"add", "park", "close", "invalidate"}
 # Parking a node PROMOTES its dependents: `parked` is terminal, so anything
 # blocked on it becomes runnable even though the payload it waited on never
 # arrived. That is deliberate — `can_continue_around` in the verdict is the
@@ -378,6 +378,23 @@ def unblocks(nodes):
         return seen
 
     return {n.get("id"): len(reach(n.get("id"))) for n in nodes}
+
+
+def descendants(nodes, root):
+    """Every node transitively DOWNSTREAM of `root` — the nodes whose work
+    depends on it through `blocked_by`. Used by `invalidate` to find the proofs
+    a change to `root` makes stale (FIX-PF-02.02)."""
+    dependents = {}
+    for n in nodes:
+        for b in n.get("blocked_by") or []:
+            dependents.setdefault(b, set()).add(n.get("id"))
+    seen, stack = set(), [root]
+    while stack:
+        for d in dependents.get(stack.pop(), ()):
+            if d not in seen:
+                seen.add(d)
+                stack.append(d)
+    return seen
 
 
 def collisions(ready):
@@ -848,6 +865,55 @@ def cmd_release(graph, args):
               file=sys.stderr)
         return 5
     print(f"released {args.node}")
+    return 0
+
+
+def cmd_invalidate(graph, args):
+    """A REQ / interface / brief change supersedes the node it touched and
+    INVALIDATES the proofs downstream of it (FIX-PF-02.02).
+
+    A proof is a claim about a tree; when an upstream contract moves, every
+    descendant that was certified against the old contract is certified against
+    a tree that no longer exists. So `invalidate` records a superseding revision
+    on the changed node and, for the node itself and each `done` DESCENDANT,
+    resets it to `pending`, clears its evidence / proof / certification, and
+    records why. Nodes NOT downstream of the change keep their proof untouched —
+    an invalidation that reached the whole graph would be a reason nobody runs
+    it.
+    """
+    guard(graph, args.graph)
+    nid = args.node
+    by_id = {n.get("id"): n for n in graph.get("nodes") or []}
+    if nid not in by_id:
+        die("no node %s in this graph — nothing was invalidated" % nid)
+    why = (args.why or "").strip()
+    if not why:
+        die("invalidate needs --why: a superseding revision with no reason is "
+            "indistinguishable from a node quietly reset")
+
+    affected = {nid} | descendants(graph.get("nodes") or [], nid)
+    reset = []
+    for aid in sorted(affected):
+        node = by_id[aid]
+        if node.get("status") == "parked":
+            continue  # a parked node stays parked; its reason still stands
+        had_proof = node.get("status") == "done" or node.get("proof") or node.get("certification")
+        node["status"] = "pending"
+        node["evidence"] = None
+        node["proof"] = None
+        node["certification"] = None
+        if had_proof:
+            reset.append(aid)
+    revise(graph, "invalidate", nid, why,
+           precondition="supersedes proofs downstream of " + nid)
+
+    bad = violations(graph)
+    if bad:
+        die("invalidating %s would break the graph — nothing was written:\n  %s"
+            % (nid, "\n  ".join(bad)))
+    save(args.graph, graph)
+    print("invalidated %s and %d downstream node(s); reset %d certified proof(s): %s"
+          % (nid, len(affected) - 1, len(reset), ", ".join(reset) or "none"))
     return 0
 
 
@@ -1618,6 +1684,7 @@ VERBS = {
     "next": (cmd_next, "the frontier, ordered by what it unblocks"),
     "goal": (cmd_goal, "the release goal this graph serves"),
     "claim": (cmd_claim, "external mode: arbitrate one runnable node to a single owner (fail-closed)"),
+    "invalidate": (cmd_invalidate, "a REQ/interface/brief change supersedes a node and invalidates proofs downstream"),
     "recover": (cmd_recover, "external mode: reclaim an EXPIRED node for a new owner (fenced)"),
     "complete": (cmd_complete, "external mode: record completion from the current fence-holder (late worker refused)"),
     "release": (cmd_release, "external mode: give back a hold this run owns"),
@@ -1696,6 +1763,11 @@ def main(argv=None):
         made[verb].add_argument("--fence", type=int, required=True,
                                 help="the fence token from the grant; a stale fence is refused")
 
+    made["invalidate"].add_argument("--node", required=True,
+                                    help="the node whose REQ/interface/brief changed")
+    made["invalidate"].add_argument("--why", required=True,
+                                    help="why the contract changed — enters the revision log")
+
     p_park = made["park"]
     p_park.add_argument("node")
     # `required=True` makes the MISSING flag a usage error (exit 2). The empty and
@@ -1707,7 +1779,7 @@ def main(argv=None):
     verbs = {k: v[0] for k, v in VERBS.items()}
     if args.verb in NO_GRAPH:
         return verbs[args.verb](None, args)
-    if args.verb in ("add", "park", "close", "certify"):
+    if args.verb in ("add", "park", "close", "certify", "invalidate"):
         # The READ happens inside the lock too. Loading first and locking second is the
         # same lost update with an extra step: the stale copy is already in memory.
         with held(args.graph):

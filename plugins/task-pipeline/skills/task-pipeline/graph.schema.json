@@ -368,9 +368,10 @@
           "enum": [
             "add",
             "park",
-            "close"
+            "close",
+            "invalidate"
           ],
-          "description": "Which mutation made this entry. `close` joined the two on 2026-08-17 with T-5 — and it was caught by a probe rather than by the fixture asserting *the graph after a close still validates*, because `violations()` never reaches an enum. The same disagreement B-084 records, one field over."
+          "description": "Which mutation made this entry. `close` joined the two on 2026-08-17 with T-5 — and it was caught by a probe rather than by the fixture asserting *the graph after a close still validates*, because `violations()` never reaches an enum. The same disagreement B-084 records, one field over. `invalidate` joined with PF-02.02: a REQ/interface/brief change supersedes a node and resets its downstream proofs."
         },
         "node": {
           "type": "string",
