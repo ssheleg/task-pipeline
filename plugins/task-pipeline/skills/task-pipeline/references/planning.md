@@ -19,6 +19,7 @@ Built into this skill; nothing to install.
 - No placeholders
 - Self-review — before handing off
 - This stage settles nothing — and that is a rule, not an omission
+- The leaf compiler — a slice survives a cold reader or it does not dispatch
 - GATE (auto)
 
 ## Audience
