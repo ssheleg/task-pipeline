@@ -19,6 +19,7 @@ Built into this skill; nothing to install.
 - No placeholders
 - Self-review — before handing off
 - This stage settles nothing — and that is a rule, not an omission
+- Pre-dispatch — the last gate before a claim
 - The leaf compiler — a slice survives a cold reader or it does not dispatch
 - GATE (auto)
 
@@ -287,6 +288,18 @@ choice belongs to a lower layer.** A contract that turns out underspecified goes
 back to stage 3 and is recorded there; a scope question goes back to the operator.
 A decision first made while sequencing tasks is a decision nothing downstream will
 ever find, because nobody reads a plan after the build.
+
+## Pre-dispatch — the last gate before a claim
+
+Before a compiled leaf is claimed and worked
+(`scripts/context_packets.py predispatch`), it passes one final check: every
+input's digest is re-verified against the bytes on disk NOW (source drift
+blocks — the plan was made against other bytes), each data prerequisite's
+output must be materialized, the PRIMARY context must fit its budget (a
+breach BLOCKS and is never a silent truncation — the budget cuts appendix,
+never primary), and the declared capability and coordination claim must be
+present. Any failure blocks the claim and names itself; nothing is trimmed
+to fit.
 
 ## The leaf compiler — a slice survives a cold reader or it does not dispatch
 

@@ -53,6 +53,18 @@ name.
     python3 scripts/context_packets.py export-bundle <leaf.json> <src_root> <out_dir>
     python3 scripts/context_packets.py import-bundle <bundle_dir> <dest_root>
 
+The FOURTH stage (CTX-02.04) is the PRE-DISPATCH check — the last gate before
+a leaf is claimed and worked. It re-verifies every input's digest against the
+bytes on disk NOW (source drift blocks — the plan was made against other
+bytes), confirms each prerequisite output has been materialized (a missing
+upstream blocks), enforces the configured PRIMARY context budget (an oversized
+mandatory context blocks; the budget cuts appendix, never primary, and a
+breach is NEVER a silent truncation), and checks the declared capability and
+resource ownership. Any failure blocks the claim and names itself; nothing is
+trimmed to fit.
+
+    python3 scripts/context_packets.py predispatch <leaf.json> <root> [--capabilities cap,cap] [--produced id,id]
+
 Python stdlib only, like every validator here.
 """
 import hashlib
@@ -407,6 +419,66 @@ def import_bundle(bundle_dir, dest_root):
     return manifest, []
 
 
+def predispatch(leaf, root, capabilities=None, produced=None):
+    """The last gate before a claim. Returns problems, empty when the leaf is
+    safe to dispatch. Nothing here truncates — every breach BLOCKS."""
+    problems = []
+    if not isinstance(leaf, dict):
+        return ["leaf: not an object"]
+    have_caps = set(capabilities or [])
+    have_produced = set(produced or [])
+
+    # 1. Every input's digest against the bytes on disk NOW.
+    for i, ref in enumerate(leaf.get("inputs", [])):
+        addr, want = ref.get("address"), ref.get("sha256")
+        if not addr or not want:
+            problems.append(f"inputs[{i}]: missing address or digest — "
+                            "unverifiable, blocks dispatch")
+            continue
+        try:
+            with open(os.path.join(root, addr), "rb") as fh:
+                actual = hashlib.sha256(fh.read()).hexdigest()
+        except OSError:
+            problems.append(f"{addr}: not present under the root — the plan's "
+                            "input is gone, blocks dispatch")
+            continue
+        if actual != want:
+            problems.append(f"{addr}: source DRIFT — on disk {actual[:12]}…, the "
+                            f"plan was made against {want[:12]}…; recompile, do "
+                            "not dispatch stale context")
+
+    # 2. Prerequisite outputs materialized.
+    for dep in leaf.get("depends_on", []):
+        if not isinstance(dep, dict):
+            continue
+        if dep.get("kind") == "data" and dep.get("task_id") not in have_produced:
+            problems.append(f"dependency {dep.get('task_id')}: its output is not "
+                            "materialized — a data prerequisite blocks dispatch")
+
+    # 3. The PRIMARY context budget — never a silent truncation.
+    budget = (leaf.get("budgets") or {}).get("context_bytes")
+    primary = leaf.get("primary", [])
+    if isinstance(budget, int):
+        size = sum(len(canon(x)) for x in primary)
+        if size > budget:
+            problems.append(f"primary context is {size} bytes over the "
+                            f"{budget}-byte budget — the budget cuts appendix, "
+                            "never primary; split the leaf, do not truncate")
+
+    # 4. Declared capability and resource ownership.
+    for cap in leaf.get("required_capabilities", []):
+        if cap not in have_caps:
+            problems.append(f"capability {cap!r} is not available on this host — "
+                            "blocks dispatch")
+    scope = leaf.get("source_scope") or {}
+    claim = scope.get("claim")
+    if scope.get("edit_targets") and not claim:
+        problems.append("edit targets are declared but no coordination claim is "
+                        "named — take the claim before dispatch where the project "
+                        "has agent-sync on")
+    return problems
+
+
 def _load(path):
     with open(path, encoding="utf-8") as fh:
         return json.load(fh)
@@ -452,6 +524,33 @@ def main(argv):
             return 1
         print("READY — the cold reader's eight questions are answered")
         return 0
+    if len(argv) >= 3 and argv[0] == "predispatch":
+        try:
+            leaf = _load(argv[1])
+        except (OSError, ValueError) as e:
+            print(f"REJECTED: {e}", file=sys.stderr)
+            return 1
+        root = argv[2]
+        caps, produced = [], []
+        rest = argv[3:]
+        i = 0
+        while i < len(rest):
+            if rest[i] == "--capabilities" and i + 1 < len(rest):
+                caps = rest[i + 1].split(",")
+                i += 2
+            elif rest[i] == "--produced" and i + 1 < len(rest):
+                produced = rest[i + 1].split(",")
+                i += 2
+            else:
+                i += 1
+        problems = predispatch(leaf, root, caps, produced)
+        for pr in problems:
+            print(f"BLOCKED: {pr}", file=sys.stderr)
+        if problems:
+            return 1
+        print("CLEAR — inputs fresh, prerequisites materialized, budget met, "
+              "capabilities and claim present")
+        return 0
     if len(argv) == 4 and argv[0] == "export-bundle":
         try:
             leaf = _load(argv[1])
@@ -491,7 +590,9 @@ def main(argv):
           "verify <report.json> <parents.json> | "
           "compile-leaf <parent.json> <slice.json> | readiness <leaf.json> | "
           "export-bundle <leaf.json> <src_root> <out_dir> | "
-          "import-bundle <bundle_dir> <dest_root>", file=sys.stderr)
+          "import-bundle <bundle_dir> <dest_root> | "
+          "predispatch <leaf.json> <root> [--capabilities …] [--produced …]",
+          file=sys.stderr)
     return 2
 
 
