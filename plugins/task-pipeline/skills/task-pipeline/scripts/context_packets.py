@@ -41,9 +41,23 @@ through this compiler or they are not leaves.
     python3 scripts/context_packets.py compile-leaf <parent.json> <slice.json>
     python3 scripts/context_packets.py readiness <leaf.json>
 
+The THIRD stage (CTX-02.03) moves a leaf between machines as a
+content-addressed bundle: relative locators and digests only — an absolute
+path is a fact about the author's machine, a credential file is a leak, and
+both are refused at export. Import verifies every blob against the manifest
+BEFORE writing anything (all or nothing), then materializes the same bytes
+under whatever root the recipient has: two imports on two roots are
+byte-identical, and a missing or corrupt blob rejects the whole bundle by
+name.
+
+    python3 scripts/context_packets.py export-bundle <leaf.json> <src_root> <out_dir>
+    python3 scripts/context_packets.py import-bundle <bundle_dir> <dest_root>
+
 Python stdlib only, like every validator here.
 """
+import hashlib
 import json
+import os
 import sys
 
 SCHEMA_VERSION = "audit-plan/1"
@@ -291,6 +305,108 @@ def select_slice(slices, active_id):
     return matches[0]
 
 
+BUNDLE_SCHEMA = "context-bundle/1"
+CREDENTIAL_NAMES = (".env", "id_rsa", "id_ed25519", "credentials", ".netrc",
+                    "secrets", ".pem", ".key")
+
+
+def _locator_problems(addr):
+    a = str(addr)
+    if os.path.isabs(a) or (len(a) > 1 and a[1] == ":"):
+        return [f"{a}: absolute locator — a bundle carries relative locators "
+                "only; an absolute path is a fact about the author's machine"]
+    if ".." in a.replace("\\", "/").split("/"):
+        return [f"{a}: escaping locator — `..` walks out of any root"]
+    base = os.path.basename(a).lower()
+    for cred in CREDENTIAL_NAMES:
+        if cred in base:
+            return [f"{a}: looks like a credential ({cred}) — a bundle carries "
+                    "no credentials, ever"]
+    return []
+
+
+def export_bundle(leaf, src_root, out_dir):
+    """Leaf → content-addressed bundle. All or nothing: any problem exports
+    no bytes."""
+    problems = []
+    if not isinstance(leaf, dict):
+        return None, ["leaf: not an object"]
+    locators = {}
+    blobs = {}
+    for ref in leaf.get("inputs", []):
+        addr = ref.get("address", "")
+        lp = _locator_problems(addr)
+        if lp:
+            problems.extend(lp)
+            continue
+        src = os.path.join(src_root, addr)
+        try:
+            with open(src, "rb") as fh:
+                data = fh.read()
+        except OSError:
+            problems.append(f"{addr}: unreadable under the source root — an "
+                            "input the author cannot read cannot travel")
+            continue
+        digest = hashlib.sha256(data).hexdigest()
+        if digest != ref.get("sha256"):
+            problems.append(f"{addr}: bytes do not match the declared digest — "
+                            "the source moved under the plan; recompile first")
+            continue
+        locators[addr] = digest
+        blobs[digest] = data
+    if problems:
+        return None, problems
+
+    os.makedirs(os.path.join(out_dir, "blobs"), exist_ok=True)
+    for digest, data in sorted(blobs.items()):
+        with open(os.path.join(out_dir, "blobs", digest), "wb") as fh:
+            fh.write(data)
+    manifest = {"schema_version": BUNDLE_SCHEMA, "leaf": leaf,
+                "locators": locators}
+    with open(os.path.join(out_dir, "manifest.json"), "w", encoding="utf-8") as fh:
+        fh.write(canon(manifest))
+    return manifest, []
+
+
+def import_bundle(bundle_dir, dest_root):
+    """Bundle → files under the RECIPIENT's root. Every blob is verified
+    BEFORE anything is written — a corrupt bundle writes nothing."""
+    problems = []
+    try:
+        with open(os.path.join(bundle_dir, "manifest.json"), encoding="utf-8") as fh:
+            manifest = json.load(fh)
+    except (OSError, ValueError) as e:
+        return None, [f"manifest.json: unreadable — {e}"]
+    if manifest.get("schema_version") != BUNDLE_SCHEMA:
+        return None, ["manifest: missing or unknown schema_version — an "
+                      "unversioned bundle does not import"]
+    verified = {}
+    for addr, digest in sorted((manifest.get("locators") or {}).items()):
+        problems.extend(_locator_problems(addr))
+        blob = os.path.join(bundle_dir, "blobs", str(digest))
+        try:
+            with open(blob, "rb") as fh:
+                data = fh.read()
+        except OSError:
+            problems.append(f"{addr}: blob {digest} is MISSING — dispatch blocks")
+            continue
+        actual = hashlib.sha256(data).hexdigest()
+        if actual != digest:
+            problems.append(f"{addr}: blob is CORRUPT (manifest says {digest}, "
+                            f"bytes hash to {actual}) — dispatch blocks")
+            continue
+        verified[addr] = data
+    if problems:
+        return None, problems
+
+    for addr, data in sorted(verified.items()):
+        dest = os.path.join(dest_root, addr)
+        os.makedirs(os.path.dirname(dest) or dest_root, exist_ok=True)
+        with open(dest, "wb") as fh:
+            fh.write(data)
+    return manifest, []
+
+
 def _load(path):
     with open(path, encoding="utf-8") as fh:
         return json.load(fh)
@@ -336,6 +452,27 @@ def main(argv):
             return 1
         print("READY — the cold reader's eight questions are answered")
         return 0
+    if len(argv) == 4 and argv[0] == "export-bundle":
+        try:
+            leaf = _load(argv[1])
+        except (OSError, ValueError) as e:
+            print(f"REJECTED: {e}", file=sys.stderr)
+            return 1
+        _m, problems = export_bundle(leaf, argv[2], argv[3])
+        if problems:
+            for pr in problems:
+                print(f"REJECTED: {pr}", file=sys.stderr)
+            return 1
+        print(f"exported {len(_m['locators'])} blob(s) to {argv[3]}")
+        return 0
+    if len(argv) == 3 and argv[0] == "import-bundle":
+        _m, problems = import_bundle(argv[1], argv[2])
+        if problems:
+            for pr in problems:
+                print(f"REJECTED: {pr}", file=sys.stderr)
+            return 1
+        print(f"imported {len(_m['locators'])} file(s) under {argv[2]}")
+        return 0
     if len(argv) == 3 and argv[0] == "verify":
         try:
             report, plan = _load(argv[1]), _load(argv[2])
@@ -352,8 +489,9 @@ def main(argv):
     print(__doc__.strip().splitlines()[0], file=sys.stderr)
     print("usage: context_packets.py compile <report.json> | "
           "verify <report.json> <parents.json> | "
-          "compile-leaf <parent.json> <slice.json> | readiness <leaf.json>",
-          file=sys.stderr)
+          "compile-leaf <parent.json> <slice.json> | readiness <leaf.json> | "
+          "export-bundle <leaf.json> <src_root> <out_dir> | "
+          "import-bundle <bundle_dir> <dest_root>", file=sys.stderr)
     return 2
 
 
