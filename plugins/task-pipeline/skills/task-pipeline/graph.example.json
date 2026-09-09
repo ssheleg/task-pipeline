@@ -29,7 +29,16 @@
       ],
       "serves": "REQ-002",
       "check": "python3 test/graph_test.py — the validate fixtures",
-      "evidence": null
+      "evidence": null,
+      "claim": {
+        "owner": "sess-7f3a:attempt-1",
+        "attempt": 1,
+        "revision": 4,
+        "fence": 12,
+        "expiry": "2026-08-14T18:30:00Z",
+        "state": "claimed",
+        "installed_at": "2026-08-14T18:00:00Z"
+      }
     },
     {
       "id": "N-003",

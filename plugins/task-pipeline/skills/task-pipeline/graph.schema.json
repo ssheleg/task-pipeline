@@ -95,6 +95,38 @@
           ],
           "description": "`blocked` is waiting on an edge; `parked` is the verifier's deliberate *«this is a blocker, continue around it»*. The two are different facts and collapsing them loses the one a person needs."
         },
+        "claim": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "default": null,
+          "additionalProperties": false,
+          "description": "The live execution grant when this node is `running` — WHO (session/attempt), not the role in `owner`. It is the identity that lets two `next` runs race N-001 and only one win, and the fence that stops a lost holder from clobbering the run that reclaimed its node. The full contract, and the acquire/start/renew/release/recover verbs that write it, are `execution-attempt.schema.json` (PF-01). A `running` node carries one; every other status carries `null`.",
+          "required": [
+            "owner",
+            "attempt",
+            "revision",
+            "fence",
+            "expiry",
+            "state"
+          ],
+          "properties": {
+            "owner": { "type": "string", "minLength": 1 },
+            "attempt": { "type": "integer", "minimum": 1 },
+            "revision": { "type": "integer", "minimum": 0 },
+            "fence": { "type": "integer", "minimum": 1 },
+            "expiry": {
+              "type": "string",
+              "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]+)?Z$"
+            },
+            "state": { "enum": ["ready", "claimed"] },
+            "installed_at": {
+              "type": "string",
+              "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]+)?Z$"
+            }
+          }
+        },
         "blocked_by": {
           "type": "array",
           "items": {
@@ -239,6 +271,9 @@
         },
         {
           "$ref": "#/definitions/rule_parked_needs_reason"
+        },
+        {
+          "$ref": "#/definitions/rule_running_needs_claim"
         }
       ]
     },
@@ -375,6 +410,29 @@
             "type": "string",
             "minLength": 1,
             "pattern": "\\S"
+          }
+        }
+      }
+    },
+    "rule_running_needs_claim": {
+      "description": "PF-01: a `running` node carries a live grant, or two `next` runs both dispatch it and a lost holder orphans it forever. The grant is an identity (session/attempt), not the ROLE in `owner`, and it is fenced and expiring — the full contract is `execution-attempt.schema.json`. Referenced from `node.allOf`, same shape as done-needs-evidence.",
+      "if": {
+        "properties": {
+          "status": {
+            "const": "running"
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "then": {
+        "required": [
+          "claim"
+        ],
+        "properties": {
+          "claim": {
+            "type": "object"
           }
         }
       }

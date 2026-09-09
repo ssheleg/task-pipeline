@@ -1,0 +1,67 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://raw.githubusercontent.com/ssheleg/task-pipeline/main/plugins/task-pipeline/skills/task-pipeline/execution-attempt.schema.json",
+  "title": "task-pipeline execution attempt (grant)",
+  "description": "One attempt at running one node — the identity that a claim on a graph node carries, so `next` can be raced by two processes and only one wins. This is the record `graph.py acquire/start/renew/release/recover` reads and writes (the next implementation leaf); this schema is the contract those verbs must round-trip.\n\nThe defect this exists to close (PF-01): the node's `owner` is a ROLE name, not an identity. Two independent `next` runs both saw N-001 `pending`, both dispatched it, and a `running` node with no fenced grant could be left orphaned forever — `next` then exits 4 until a human edits the file. A grant is owned by a SESSION/ATTEMPT, fenced by a monotonic token and a node revision, and expires, so a lost holder is reclaimable and a stale holder's write is rejected by its own fence.\n\nState is `ready` → `claimed`: `ready` is a grant minted but not yet installed on the node; `claimed` is the live hold. There is no third value here — `done`/`blocked`/`parked` are the NODE's states in graph.schema.json, not the attempt's.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "node",
+    "owner",
+    "attempt",
+    "revision",
+    "fence",
+    "expiry",
+    "state"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "pattern": "^execution-attempt/[0-9]+$",
+      "description": "Contract version. A consumer that does not know the major REJECTS the grant."
+    },
+    "node": {
+      "type": "string",
+      "pattern": "^N-[0-9]{3,}$",
+      "description": "The graph node this attempt claims."
+    },
+    "owner": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The SESSION/ATTEMPT identity that holds the claim — never a role name. Two `next` runs of the same role are two owners; that is the whole point. `graph.schema.json`'s node `owner` stays the ROLE; this is who is actually running it right now."
+    },
+    "attempt": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Which attempt on this node this is. A recovered node's next claim increments it, so a retry is distinguishable from the run it replaced."
+    },
+    "revision": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "The node revision this claim was taken against. `start`/`renew`/`release` must present the revision they read; a write against a stale revision is refused — the compare in compare-and-swap."
+    },
+    "fence": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "A monotonic fence token, strictly increasing across the node's lifetime. A held-then-lost owner that wakes up and writes carries an OLD fence, and the store rejects it — the guarantee that a zombie cannot clobber the run that reclaimed its node."
+    },
+    "expiry": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]+)?Z$",
+      "description": "ISO-8601 UTC. Past it, `recover` may reclaim the node for a new attempt. UNKNOWN is not a value — a grant with no expiry is an orphan waiting to happen, so the field is required."
+    },
+    "state": {
+      "enum": [
+        "ready",
+        "claimed"
+      ],
+      "description": "`ready` — minted, not yet installed on the node; `claimed` — the live hold. The node's own lifecycle (pending/running/done/blocked/parked) lives in graph.schema.json, not here."
+    },
+    "installed_at": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]+)?Z$",
+      "description": "When the claim went `claimed`. Optional — a `ready` grant has none yet."
+    }
+  }
+}
