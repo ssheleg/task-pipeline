@@ -122,23 +122,36 @@ audit: what a fix costs is the fixer's decision, not the finder's
 ([`references/prioritisation.md`](../task-pipeline/references/prioritisation.md)). An audit
 that edits while it reads cannot be re-run to check itself.
 
-## A finding carries its consequence, or it is a hypothesis
+## A finding keeps its axes apart, or it is a guess wearing a verdict
 
-**A mechanism is derived from the code; the consequence lives in production.** A row
-written from the mechanism alone is indistinguishable from a real finding until
-somebody measures it — and one audit had **eight consecutive rows** rewritten by that
-measurement, two of which would have destroyed inventory if remedied as written,
-because both read an absence of sales as an absence of demand.
+**Mechanism status, exploit/reproduction, exposure, observed incidence and impact
+uncertainty are FIVE axes, not one.** A row written from the mechanism alone is
+indistinguishable from a real finding until each axis says what it knows — and one
+audit had **eight consecutive rows** rewritten by measurement, two of which would
+have destroyed inventory if remedied as written, because both read an absence of
+sales as an absence of demand. But the correction cuts both ways:
 
-So before a row may be written as a `finding` rather than as a hypothesis:
+- **A proven defect may have incidence UNKNOWN.** An auth bypass or a race
+  reproduced locally is a code defect BEFORE any incident — the reproduction is the
+  proof, and no production log is needed to license the row. A confirmed local
+  crash with no production logs stays a code defect, external incidence UNKNOWN.
+- **UNKNOWN ≠ 0.** A zero sample is not zero risk; absent telemetry lowers what can
+  be said about EXPOSURE, never the technical truth — and the row says which.
+- **Unknown attacker control lowers exploitability CONFIDENCE**, never the observed
+  behaviour: what was watched happening stays written as watched.
+- **A documented exception does not turn a failed invariant into PASS** — decision
+  status and technical validity are the separate axes of the section below.
 
-1. **how often does the mechanism fire?** A query, a log count, a telemetry read — or
-   an explicit statement that it has never been observed to fire;
-2. **where the answer is *never*, the row is still worth keeping**, priced as
-   **latent**: the remedy is weighed against zero rather than against the mechanism's
-   severity;
-3. **where the measurement is impossible, that is a `blind` on the consequence** and
-   the row says so. A blind consequence is not a finding.
+The incidence axis is still asked: **how often does the mechanism fire?** A query, a
+log count, a telemetry read. Where the answer is *never*, keep the row priced as
+**latent** (the remedy weighed against zero); where the measurement is impossible,
+the INCIDENCE axis records `blind` — and the finding stands on its mechanism and
+reproduction axes. Each row records its observation scope and time, keeping code
+mechanism, deployment observation and assumptions apart —
+`templates/finding-evidence.json` in task-pipeline is the minimal schema, and the
+collector writes `mechanism`/`incidence`/`observed_scope`/`observed_at` into the
+sidecar. Ask an operator only when the unknown would change the action — an
+interview is not a prerequisite for a row.
 
 Two rules follow from the same place:
 

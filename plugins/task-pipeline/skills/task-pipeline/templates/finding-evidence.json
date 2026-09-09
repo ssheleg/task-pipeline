@@ -1,0 +1,42 @@
+{
+ "schema": "finding-evidence/1",
+ "doc": "Minimal evidence record for one finding. The five axes are SEPARATE: a defect proven by reproduction stands with incidence unknown; UNKNOWN is not 0; absent telemetry lowers exposure claims, never mechanism truth; a documented exception never turns a failed invariant into PASS; unknown attacker control lowers exploitability confidence, not the observed behaviour. Keep observations and assumptions apart — a reader must be able to tell what was WATCHED from what was inferred.",
+ "fields": {
+  "mechanism_status": {
+   "one_of": ["confirmed", "suspected"],
+   "doc": "What the code/artefact was seen to do. Confirmed needs evidence (file:line, a command and its output, a reproduction)."
+  },
+  "reproduction": {
+   "one_of": ["reproduced", "not-attempted", "attempted-failed"],
+   "doc": "A local reproduction is proof BEFORE any incident — it licenses the finding on its own."
+  },
+  "exposure": {
+   "doc": "Who or what can reach the mechanism, or 'unknown'. This is the axis absent telemetry actually lowers."
+  },
+  "observed_incidence": {
+   "doc": "'unknown' | 'never-observed' | a count with its window. UNKNOWN is a word, never a zero.",
+   "default": "unknown"
+  },
+  "impact_uncertainty": {
+   "doc": "What is NOT known about the blast, stated — so a rare catastrophic path is not priced as a common trivial one."
+  },
+  "observed_scope": {
+   "doc": "What was actually looked at: 'local checkout', a deployment name, a log window."
+  },
+  "observed_at": {
+   "doc": "ISO-8601 UTC time of the observation."
+  },
+  "observations": {
+   "doc": "What was watched happening, each with its receipt."
+  },
+  "assumptions": {
+   "doc": "What was inferred, each named as such — never mixed into observations."
+  }
+ },
+ "rules": [
+  "a proven defect may have observed_incidence 'unknown' and remains a finding",
+  "observed_incidence 'unknown' never lowers mechanism_status",
+  "an operator interview is asked only when the unknown would change the action",
+  "a documented exception changes the decision axis, never the validity axis"
+ ]
+}

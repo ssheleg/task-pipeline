@@ -25,6 +25,7 @@ from `super-ux`.
 | `hygiene.sh` | `scripts/check-hygiene.sh` | 0 seeds it · **5 runs it after every task** · 6 and 9 run it · 10 proves it |
 | `stage-coverage.sh` | `scripts/stage-coverage.sh` | 0 seeds it · **10 runs it before the coverage table** — every stage the flow declares must carry a verdict, or the flow stops declaring one it merges |
 | `hooks.example.json` | the project's `.claude/settings.json` | 0 — offered, never installed silently |
+| `finding-evidence.json` | one record per audit finding, wherever the finding lives | the five-axes evidence schema: mechanism / reproduction / exposure / incidence / impact uncertainty, observations apart from assumptions |
 | `routing-rule.md` | the operator's `CLAUDE.md` — **offered by `setup`, never written silently** | 0 / `setup` |
 | `retro.md` | `docs/evidence/retro.md` — **one per project, not per run** | 10 writes (stamp → prune → entry), 0 reads it in full |
 | `retro-archive.md` | `docs/evidence/retro/YYYY-QN.md` | 10 rotates into it, 0 **queries** it |
