@@ -1616,6 +1616,25 @@ def cmd_close(graph, args):
                 "identifies the tree"
         node["proof"] = {"head": "unavailable"}
 
+    # Completion gate (FIX-PF-03.01): a certification that RAN and FAILED cannot
+    # be stepped around by a direct close with a hand-shaped verdict — the
+    # enforcement lives here, in the store mutation, not only in a UI or a
+    # preflight someone can skip. Where certify never ran, the verdict is the
+    # verifier's judgement and close proceeds as before.
+    cert = node.get("certification")
+    if cert:
+        tiers = cert.get("tiers") or {}
+        failing = sorted(k for k, val in tiers.items() if val != "pass")
+        if failing:
+            die("%s has a certification (round %s) with failing tier(s): %s — a direct "
+                "close cannot step around a failed certification; fix the finding and "
+                "re-certify. Nothing was written." % (nid, cert.get("round"), ", ".join(failing)))
+        cert_at = cert.get("at") or ""
+        if head and cert_at and not str(cert_at).startswith("unavailable") and cert_at != head:
+            die("%s was certified at %s but HEAD is %s — the certification is for a "
+                "different candidate; re-certify at the current one. Nothing was written."
+                % (nid, str(cert_at)[:12], head[:12]))
+
     node["status"] = "done"
     node["evidence"] = list(v["evidence"]) + [stamp]
 
