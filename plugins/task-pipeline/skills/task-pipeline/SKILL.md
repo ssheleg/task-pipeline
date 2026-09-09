@@ -28,9 +28,21 @@ skills/agents that run it) and a `gate {type, check}`. The schema is the univers
 contract; it imposes **no** specific stages, skills, or gate assignments.
 [`pipeline.example.json`](pipeline.example.json) is a **copy-and-rewrite example**
 that encodes this plugin's own default flow (stage 0 intake + the 1→10 stages
-tabled below) and an optional, toggleable `release` block. Any project replaces it
-wholesale — any number of stages, run by its own skills/agents, with its own gate
-types (see *Bring your own skills*). Each gate has a **type**: `auto` (the
+tabled below) and an optional, toggleable `release` block.
+
+**Two layers, and only one is replaceable.** The **KERNEL** is what every
+pipeline must carry no matter how few stages it has — for every unit of work:
+its **scope** (what it may change), its **evidence** (a claim carries its
+receipt), its **deps** (what it reads and what must precede it), and a
+**resume** point (it survives context loss). The kernel is invariant. The
+**PROFILE** is the STAGE LIST — how many stages, their names, their skills,
+their gates — and a project **replaces the profile wholesale** (any number of
+stages, its own skills/agents, its own gate types; see *Bring your own
+skills*). **The stage numbers belong to the SELECTED profile, never to the
+kernel:** a minimal three-stage profile has no "stage 7", and a rule keyed on a
+global stage number is a rule about the default profile, not about every
+pipeline. What a custom profile may drop is stages; what it may not drop is a
+kernel field. Each gate has a **type**: `auto` (the
 orchestrator verifies the `check` itself, pass/fail), `judgment` (no complete
 deterministic check exists — a named judge rules, and the ruling is recorded as
 judgement, never as a measurement; `references/gates.md` → *The judgment gate*)
@@ -90,8 +102,14 @@ gate stops until it is installed.
 
 **Optional bridge.** An equivalent skill set the operator already runs can be mapped
 onto stages 2/4/5/6 in `pipeline.json` → `skills[]`. That is a **substitution, never a
-requirement**: the built-in doctrine is normative, the gates in `references/stages.md`
-still govern, and nothing detects, recommends or waits for an external provider.
+requirement**. And the precedence is explicit, because two layers could seem to
+disagree: on a CUSTOM profile the **kernel wins** — scope, evidence, deps and
+resume are owed by every unit of work — while `references/stages.md` is the
+**default profile's** normative gate set, governing the stages that profile
+actually selects, not imposing its stage numbers on a profile that dropped
+them. The built-in doctrine is normative for the default profile; the kernel is
+normative for all. Nothing detects, recommends or waits for an external
+provider.
 
 **super-ux — the preferred provider for ANY user-facing task.** The moment a task
 implies an interface (web / mobile / CLI / TUI), the WHY→UI→scenario chain runs
