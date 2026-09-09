@@ -19,6 +19,7 @@ Built into this skill; nothing to install.
 - No placeholders
 - Self-review — before handing off
 - This stage settles nothing — and that is a rule, not an omission
+- The UI handoff annex — a packet an executor can build without re-deriving
 - Pre-dispatch — the last gate before a claim
 - The leaf compiler — a slice survives a cold reader or it does not dispatch
 - GATE (auto)
@@ -288,6 +289,23 @@ choice belongs to a lower layer.** A contract that turns out underspecified goes
 back to stage 3 and is recorded there; a scope question goes back to the operator.
 A decision first made while sequencing tasks is a decision nothing downstream will
 ever find, because nobody reads a plan after the build.
+
+## The UI handoff annex — a packet an executor can build without re-deriving
+
+A packet whose work is a screen carries a UI ANNEX beside its context: the
+state IDs it touches, the components it reuses and the props they take, the
+tokens and content strings, the accessibility requirements, and the exact
+asset versions. With it, an executor implements the fixture without going
+back to re-derive the visual spec; without it, the same work is re-decided
+per session and drifts. The annex ADDS to the task context — it never
+replaces the scheduler's claim or fence (that is `agent-sync`'s job, not the
+packet's), and a stale visual spec (an asset version or a token that moved
+under the plan) triggers a packet REVISION exactly as a moved source input
+does, never a silent dispatch against old pixels.
+
+The annex is a DOMAIN annex, optional by domain: a screen packet carries it,
+a migration or a CLI packet does not — a non-UI task owes no visual spec,
+and demanding one would be the mirror of the omission it fixes.
 
 ## Pre-dispatch — the last gate before a claim
 
