@@ -1,0 +1,188 @@
+{
+ "contract": "outcome-case/1 (schemas/outcome-case.schema.json + test/outcome_harness.py in ssheleg/sshlg-skills)",
+ "note": "Outcome corpus for evidence-docs (FIX-EV-01.09). Judged on ARTIFACTS via the family harness: the runner records the actual output oracle verdict AND the raw result per case; with/without-skill arms are the harness's baseline contract. Nothing in the production skill was changed for grader convenience.",
+ "arms": {
+  "baseline": "same prompts, skill absent",
+  "current": "same prompts, skill installed"
+ },
+ "cases": [
+  {
+   "schema_version": "outcome-case/1",
+   "id": "ED-OUT-001-positive-receipt-per-claim",
+   "skill": "evidence-docs",
+   "prompt": {
+    "text": "Document what test/validate.py checks, and attach a receipt to each claim — a file:line, a command and its output, or a test name; write claims-doc.md."
+   },
+   "environment": {
+    "model": "inherit",
+    "host": "any",
+    "case_digest": "9496eb52cebe5fe634295e2d6f92954b1a656f0b57fb85021e4f5471e333ec97"
+   },
+   "checks": {
+    "tool": [
+     {
+      "name": "python3 present",
+      "command": "python3 -c 'pass'"
+     }
+    ],
+    "load_trace": {
+     "expect_loaded": [
+      "evidence-docs"
+     ],
+     "expect_not_loaded": []
+    },
+    "outcome": [
+     {
+      "name": "doc exists",
+      "kind": "artifact-exists",
+      "target": "claims-doc.md"
+     },
+     {
+      "name": "each claim carries a receipt (a runnable command)",
+      "kind": "artifact-contains",
+      "target": "claims-doc.md",
+      "expect": "$"
+     }
+    ]
+   }
+  },
+  {
+   "schema_version": "outcome-case/1",
+   "id": "ED-OUT-002-negative-routing",
+   "skill": "evidence-docs",
+   "prompt": {
+    "text": "Explain in two sentences what a webhook is."
+   },
+   "environment": {
+    "model": "inherit",
+    "host": "any",
+    "case_digest": "a5da94aa03520bb6226ea88328a75ab6d7e3985c73a0e90a1379bf168fead57e"
+   },
+   "checks": {
+    "tool": [
+     {
+      "name": "python3 present",
+      "command": "python3 -c 'pass'"
+     }
+    ],
+    "load_trace": {
+     "expect_loaded": [],
+     "expect_not_loaded": [
+      "evidence-docs"
+     ]
+    },
+    "outcome": [
+     {
+      "name": "no evidence-doc artifact appears",
+      "kind": "command-exit-0",
+      "target": "test ! -f claims-doc.md"
+     }
+    ]
+   }
+  },
+  {
+   "schema_version": "outcome-case/1",
+   "id": "ED-OUT-003-unsupported-claim-refused",
+   "skill": "evidence-docs",
+   "prompt": {
+    "text": "State in a doc that 'docs are in sync' and back it — do not assert it on your word; write sync-claim.md that either shows the exit code proving it or says the claim is unsupported."
+   },
+   "environment": {
+    "model": "inherit",
+    "host": "any",
+    "case_digest": "84f9c3bfc90e1eba9a74c97eda8577fe2081d4cc9f500864d971e195cd2aa1c1"
+   },
+   "checks": {
+    "tool": [
+     {
+      "name": "python3 present",
+      "command": "python3 -c 'pass'"
+     }
+    ],
+    "load_trace": {
+     "expect_loaded": [
+      "evidence-docs"
+     ],
+     "expect_not_loaded": []
+    },
+    "outcome": [
+     {
+      "name": "the claim is proven by an exit code or marked unsupported",
+      "kind": "artifact-contains",
+      "target": "sync-claim.md",
+      "expect": "exit"
+     }
+    ]
+   }
+  },
+  {
+   "schema_version": "outcome-case/1",
+   "id": "ED-OUT-004-noop-chat-answer",
+   "skill": "evidence-docs",
+   "prompt": {
+    "text": "In this chat, roughly how many test suites does the repo have? Just answer me here."
+   },
+   "environment": {
+    "model": "inherit",
+    "host": "any",
+    "case_digest": "c29650fd684f6cf9cf0dd8c6db4a23d79c40ee4812b19bce1ccd257238e3e0b7"
+   },
+   "checks": {
+    "tool": [
+     {
+      "name": "python3 present",
+      "command": "python3 -c 'pass'"
+     }
+    ],
+    "load_trace": {
+     "expect_loaded": [],
+     "expect_not_loaded": [
+      "evidence-docs"
+     ]
+    },
+    "outcome": [
+     {
+      "name": "a chat answer writes no evidence document",
+      "kind": "command-exit-0",
+      "target": "test ! -f claims-doc.md"
+     }
+    ]
+   }
+  },
+  {
+   "schema_version": "outcome-case/1",
+   "id": "ED-OUT-005-dependency-unavailable-is-named",
+   "skill": "evidence-docs",
+   "prompt": {
+    "text": "Resolve every reference this doc names against a clean checkout with the neighbouring task-pipeline dependency ABSENT; where a link cannot resolve, print 'capability unavailable' rather than claiming all links resolve; write link-report.md."
+   },
+   "environment": {
+    "model": "inherit",
+    "host": "any",
+    "case_digest": "bf4961dfbbc8904814d771bb6e649df0e278d93611c75b563f63ba57d2d23569"
+   },
+   "checks": {
+    "tool": [
+     {
+      "name": "python3 present",
+      "command": "python3 -c 'pass'"
+     }
+    ],
+    "load_trace": {
+     "expect_loaded": [
+      "evidence-docs"
+     ],
+     "expect_not_loaded": []
+    },
+    "outcome": [
+     {
+      "name": "an unresolvable dependency prints capability unavailable (ED-01)",
+      "kind": "artifact-contains",
+      "target": "link-report.md",
+      "expect": "capability unavailable"
+     }
+    ]
+   }
+  }
+ ]
+}
