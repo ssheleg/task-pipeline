@@ -287,6 +287,23 @@ back to stage 3 and is recorded there; a scope question goes back to the operato
 A decision first made while sequencing tasks is a decision nothing downstream will
 ever find, because nobody reads a plan after the build.
 
+## The leaf compiler — a slice survives a cold reader or it does not dispatch
+
+Where the plan is compiled into execution packets
+(`scripts/context_packets.py compile-leaf`), each outcome slice carries its
+resolved decisions (bound by address+digest — an unresolved decision
+dispatches NO leaf), its exact scope, its mapping onto the parent's
+acceptance, and its material split into budgeted primary vs appendix — a
+budget cuts appendix only and records the cut, never acceptance. The test of
+a compiled packet is the **cold reader**: with no author history, the packet
+alone answers eight questions — goal, inputs, decisions, scope, outputs,
+acceptance, guards, resume (`readiness`); a missing version or output
+contract fails readiness. Acceptance names at least one positive and one
+negative case. A slice is selected by its explicit id, never by mtime; and
+neither a design flow nor a `.design/TASKS.md` becomes a parallel plan
+authority — leaves come from the plan through the compiler or they are not
+leaves.
+
 ## GATE (auto)
 
 **Set equality first:** the REQ ids in the brief equal the union of `Implements:`

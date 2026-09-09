@@ -26,6 +26,21 @@ sorted parents, stable separators), so a repeated compile can be compared with
 `diff` and a receipt can pin the plan by digest. `verify` recompiles and
 refuses a parents file that dropped, duplicated or mutated a mapping.
 
+The SECOND stage (CTX-02.02) compiles one parent + one outcome slice into a
+dispatchable leaf packet, and its contract is the COLD READER's: the packet
+alone, with no author history, must answer eight questions — goal, inputs,
+decisions, scope, outputs, acceptance, guards, resume. A broad parent with an
+unresolved decision dispatches NO leaf; a missing version or output contract
+fails readiness; acceptance carries at least one positive and one negative
+case; a budget cuts appendix material only and RECORDS the cut, never the
+acceptance; and a slice is selected by explicit id — never by mtime, because
+"newest file" is an authority nobody granted. Neither a design flow nor a
+.design/TASKS.md becomes a parallel plan authority: leaves come from the plan
+through this compiler or they are not leaves.
+
+    python3 scripts/context_packets.py compile-leaf <parent.json> <slice.json>
+    python3 scripts/context_packets.py readiness <leaf.json>
+
 Python stdlib only, like every validator here.
 """
 import json
@@ -149,6 +164,133 @@ def verify_parents(report, plan):
     return out
 
 
+LEAF_SCHEMA = "execution-packet/1"
+COLD_READER_QUESTIONS = ("goal", "inputs", "decisions", "scope", "outputs",
+                         "acceptance", "guards", "resume")
+SHA_RE_STR = r"^[0-9a-f]{64}$"
+
+
+def _bound(ref):
+    import re as _re
+    return (isinstance(ref, dict) and ref.get("address")
+            and _re.match(SHA_RE_STR, str(ref.get("sha256", ""))))
+
+
+def compile_leaf(parent, slice_spec):
+    """One parent + one outcome slice → one dispatchable leaf packet, or
+    problems. All or nothing: an unresolved parent dispatches no leaf."""
+    problems = []
+    if not isinstance(parent, dict) or not isinstance(slice_spec, dict):
+        return None, ["parent and slice must be objects"]
+    decisions = slice_spec.get("decision_refs", parent.get("decision_refs", []))
+    for i, ref in enumerate(decisions):
+        if not _bound(ref):
+            problems.append(
+                f"decision_refs[{i}]: unresolved — a decision without address+"
+                "digest is a rumour, and a broad unresolved parent dispatches "
+                "no leaf")
+    acceptance = slice_spec.get("acceptance", [])
+    kinds = {a.get("kind") for a in acceptance if isinstance(a, dict)}
+    if "positive" not in kinds or "negative" not in kinds:
+        problems.append("acceptance: needs at least one positive and one "
+                        "negative case — a slice provable only by success is "
+                        "not testable")
+    if not slice_spec.get("expected_result"):
+        problems.append("expected_result: missing — every slice has a concrete "
+                        "expected result")
+    if not slice_spec.get("outputs"):
+        problems.append("outputs: missing — a leaf without an output contract "
+                        "fails readiness")
+    for field in ("id", "module", "intent"):
+        if not slice_spec.get(field):
+            problems.append(f"{field}: missing")
+    for i, ref in enumerate(slice_spec.get("inputs", [])):
+        if not _bound(ref):
+            problems.append(f"inputs[{i}]: missing address or digest — an "
+                            "unverifiable input does not dispatch")
+    if problems:
+        return None, problems
+
+    primary = list(slice_spec.get("primary", []))
+    appendix = list(slice_spec.get("appendix", []))
+    budget = slice_spec.get("budgets", {}).get("context_bytes")
+    dropped = []
+    if isinstance(budget, int):
+        def size(items):
+            return sum(len(canon(x)) for x in items)
+        while appendix and size(primary) + size(appendix) > budget:
+            dropped.append(appendix.pop())
+        if size(primary) > budget:
+            return None, ["budgets.context_bytes: smaller than the primary "
+                          "material — a budget cuts appendix, never decisions "
+                          "or acceptance; raise it or split the slice"]
+
+    leaf = {
+        "schema_version": LEAF_SCHEMA,
+        "id": slice_spec["id"],
+        "parent_id": parent.get("id"),
+        "module": slice_spec["module"],
+        "intent": slice_spec["intent"],
+        "inputs": slice_spec.get("inputs", []),
+        "decision_refs": decisions,
+        "source_scope": slice_spec.get("source_scope", {"edit_targets": []}),
+        "budgets": slice_spec.get("budgets", {"context_bytes": 1}),
+        "acceptance": [a["text"] for a in acceptance],
+        "expected_result": slice_spec["expected_result"],
+        "outputs": slice_spec["outputs"],
+        "guards": slice_spec.get("guards", parent.get("non_goals", [])),
+        "resume": slice_spec.get(
+            "resume", "re-read this packet, verify input digests, continue at "
+                      "the first unmet acceptance case"),
+        "acceptance_map": {a["text"]: a.get("parent_acceptance")
+                           for a in acceptance},
+        "primary": primary,
+        "appendix": appendix,
+    }
+    if dropped:
+        leaf["appendix_dropped"] = dropped   # the cut is recorded, never silent
+    return leaf, []
+
+
+def leaf_readiness(leaf):
+    """The cold reader's eight questions, answered from the packet ALONE."""
+    problems = []
+    if not isinstance(leaf, dict):
+        return ["leaf: not an object"]
+    if leaf.get("schema_version") != LEAF_SCHEMA:
+        problems.append("schema_version: missing or unknown — an unversioned "
+                        "packet fails readiness")
+    answers = {
+        "goal": leaf.get("intent"),
+        "inputs": leaf.get("inputs"),
+        "decisions": leaf.get("decision_refs"),
+        "scope": (leaf.get("source_scope") or {}).get("edit_targets"),
+        "outputs": leaf.get("outputs"),
+        "acceptance": leaf.get("acceptance"),
+        "guards": leaf.get("guards"),
+        "resume": leaf.get("resume"),
+    }
+    for q in COLD_READER_QUESTIONS:
+        if not answers.get(q):
+            problems.append(f"cold reader cannot answer {q!r} from the packet "
+                            "alone — readiness fails")
+    return problems
+
+
+def select_slice(slices, active_id):
+    """A slice is chosen by explicit id. No id, no fallback — 'the newest
+    file' is an authority nobody granted (never mtime)."""
+    if not active_id:
+        raise ValueError("no active slice id given — selection by mtime or "
+                         "recency is refused; name the slice")
+    matches = [s for s in slices if isinstance(s, dict) and s.get("id") == active_id]
+    if not matches:
+        raise ValueError(f"slice {active_id!r} is not in the set")
+    if len(matches) > 1:
+        raise ValueError(f"slice {active_id!r} appears {len(matches)} times")
+    return matches[0]
+
+
 def _load(path):
     with open(path, encoding="utf-8") as fh:
         return json.load(fh)
@@ -168,6 +310,32 @@ def main(argv):
             return 1
         sys.stdout.write(canon(result))
         return 0
+    if len(argv) == 3 and argv[0] == "compile-leaf":
+        try:
+            parent, slice_spec = _load(argv[1]), _load(argv[2])
+        except (OSError, ValueError) as e:
+            print(f"REJECTED: {e}", file=sys.stderr)
+            return 1
+        leaf, problems = compile_leaf(parent, slice_spec)
+        if problems:
+            for pr in problems:
+                print(f"REJECTED: {pr}", file=sys.stderr)
+            return 1
+        sys.stdout.write(canon(leaf))
+        return 0
+    if len(argv) == 2 and argv[0] == "readiness":
+        try:
+            leaf = _load(argv[1])
+        except (OSError, ValueError) as e:
+            print(f"REJECTED: {e}", file=sys.stderr)
+            return 1
+        problems = leaf_readiness(leaf)
+        for pr in problems:
+            print(f"REJECTED: {pr}", file=sys.stderr)
+        if problems:
+            return 1
+        print("READY — the cold reader's eight questions are answered")
+        return 0
     if len(argv) == 3 and argv[0] == "verify":
         try:
             report, plan = _load(argv[1]), _load(argv[2])
@@ -183,7 +351,9 @@ def main(argv):
         return 0
     print(__doc__.strip().splitlines()[0], file=sys.stderr)
     print("usage: context_packets.py compile <report.json> | "
-          "verify <report.json> <parents.json>", file=sys.stderr)
+          "verify <report.json> <parents.json> | "
+          "compile-leaf <parent.json> <slice.json> | readiness <leaf.json>",
+          file=sys.stderr)
     return 2
 
 
