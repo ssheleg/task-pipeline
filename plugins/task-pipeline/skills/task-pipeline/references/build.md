@@ -374,6 +374,18 @@ satisfied**, and code quality. The implementer's self-review never substitutes f
 it. Rubric, inputs, prompt templates and how to build the diff package:
 [`review.md`](review.md).
 
+**The dispatch packet is compiled and IMMUTABLE.** Before a node is built, its
+context is compiled into one packet — the REQ references, the global
+constraints, the interfaces, the artifact digests, the base revision, the
+scope, the budget, the run profile and the skill lock — every ref bound
+(address + digest) or the compilation is refused; a missing required ref is a
+refusal, not a default. **No ephemeral secret rides inside**: a packet outlives
+the session that built it, so a value that must expire is referenced by the
+NAME of its store, never carried by value. `scripts/context_packets.py
+compile-dispatch` builds it and the node records its address + digest
+(`dispatch_packet`), so a build in a git-ignored workspace still points at the
+durable context it ran under.
+
 **An authorized exception is its own disposition — never a fake PASS.** Where
 the operator decides a node ships without (or despite) certification, that is
 recorded with `graph.py waive --node … --reason … --by …`: an `exception`

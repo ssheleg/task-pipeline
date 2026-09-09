@@ -340,6 +340,32 @@
             }
           },
           "description": "An AUTHORIZED EXCEPTION (FIX-PF-03.02): the operator's recorded decision that this node ships without/despite certification — reason + identity + the tree it was granted at. Its own disposition: it never turns anything into a PASS, and a failed certification stays visible beside it."
+        },
+        "dispatch_packet": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "default": null,
+          "additionalProperties": false,
+          "required": [
+            "address",
+            "sha256"
+          ],
+          "properties": {
+            "address": {
+              "type": "string",
+              "minLength": 1
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "base": {
+              "type": "string"
+            }
+          },
+          "description": "The IMMUTABLE dispatch packet this node was built from (FIX-PF-05.01): address + digest of the compiled packet (REQ refs, constraints, interfaces, artifact digests, base, scope, budget, profile, skill lock — no ephemeral secret). Links the node to the exact context it ran under, so a graph in a git-ignored workspace still points at a durable, content-addressed packet."
         }
       },
       "allOf": [

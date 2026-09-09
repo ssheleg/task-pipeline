@@ -70,6 +70,7 @@ Python stdlib only, like every validator here.
 import hashlib
 import json
 import os
+import re
 import sys
 
 SCHEMA_VERSION = "audit-plan/1"
@@ -276,6 +277,78 @@ def compile_leaf(parent, slice_spec):
     if dropped:
         leaf["appendix_dropped"] = dropped   # the cut is recorded, never silent
     return leaf, []
+
+
+DISPATCH_SCHEMA = "dispatch-packet/1"
+_SECRETISH = re.compile(
+    r"(?i)^(?:.*[_-])?(token|secret|password|passwd|api[_-]?key|apikey|credential|"
+    r"authorization|cookie|private[_-]?key)s?$")
+
+
+def compile_dispatch_packet(leaf, context):
+    """The IMMUTABLE packet a build runs from (FIX-PF-05.01): one leaf plus the
+    project context — REQ refs, global constraints, interfaces, artifact
+    digests, the base revision, scope, budget, the run profile and the skill
+    lock — every ref bound (address+digest) or the packet is refused, and NO
+    ephemeral secret rides inside: a packet outlives the session that built it,
+    so a value that must expire is referenced by the NAME of its store, never
+    carried by value.
+    """
+    problems = []
+    if not isinstance(leaf, dict) or not isinstance(context, dict):
+        return None, ["leaf and context must be objects"]
+
+    required = ("requirements", "constraints", "interfaces", "artifacts",
+                "base", "scope", "budget", "profile", "skill_lock")
+    for key in required:
+        if key not in context:
+            problems.append(f"{key}: missing — a fresh packet carries every "
+                            "required constraint, and an absent one is a refusal, "
+                            "not a default")
+    for key in ("requirements", "constraints", "interfaces", "artifacts"):
+        for i, ref in enumerate(context.get(key) or []):
+            if not _bound(ref):
+                problems.append(f"{key}[{i}]: unresolved — a required ref without "
+                                "address+digest does not compile")
+    base = context.get("base") or {}
+    if "base" in context and not base.get("head"):
+        problems.append("base.head: missing — a packet with no base revision is a "
+                        "packet about no tree")
+    if "skill_lock" in context and not _bound(context.get("skill_lock") or {}):
+        problems.append("skill_lock: unresolved — the skill versions the build ran "
+                        "under are part of the proof")
+
+    packet = {
+        "schema_version": DISPATCH_SCHEMA,
+        "leaf_id": leaf.get("id"),
+        "requirements": context.get("requirements") or [],
+        "constraints": context.get("constraints") or [],
+        "interfaces": context.get("interfaces") or [],
+        "artifacts": context.get("artifacts") or [],
+        "base": base,
+        "scope": context.get("scope") or {},
+        "budget": context.get("budget") or {},
+        "profile": context.get("profile") or {},
+        "skill_lock": context.get("skill_lock") or {},
+    }
+
+    def scan(node, path):
+        if isinstance(node, dict):
+            for k, v in node.items():
+                if _SECRETISH.match(str(k)):
+                    problems.append(
+                        f"{path}.{k}: a dispatch packet carries no ephemeral "
+                        "secret — it outlives the session; reference the store "
+                        "by NAME, never the value")
+                scan(v, f"{path}.{k}")
+        elif isinstance(node, list):
+            for i, v in enumerate(node):
+                scan(v, f"{path}[{i}]")
+    scan(packet, "packet")
+
+    if problems:
+        return None, problems
+    return packet, []
 
 
 def leaf_readiness(leaf):
@@ -510,6 +583,19 @@ def main(argv):
                 print(f"REJECTED: {pr}", file=sys.stderr)
             return 1
         sys.stdout.write(canon(leaf))
+        return 0
+    if len(argv) == 3 and argv[0] == "compile-dispatch":
+        try:
+            leaf, context = _load(argv[1]), _load(argv[2])
+        except (OSError, ValueError) as e:
+            print(f"REJECTED: {e}", file=sys.stderr)
+            return 1
+        packet, problems = compile_dispatch_packet(leaf, context)
+        if problems:
+            for pr in problems:
+                print(f"REJECTED: {pr}", file=sys.stderr)
+            return 1
+        sys.stdout.write(canon(packet))
         return 0
     if len(argv) == 2 and argv[0] == "readiness":
         try:
