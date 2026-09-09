@@ -453,6 +453,23 @@ def verdict_violations(v):
     if out:
         return out
 
+    # `tested` is the proof identity (FIX-PF-02.01): what the reviewer actually
+    # ran the check against. Optional in shape (the 7-key contract is unchanged),
+    # but when present every field is typed, and `close` REQUIRES it inside a
+    # checkout so a stale proof cannot be stamped onto a moved tree.
+    if "tested" in v:
+        tv = v["tested"]
+        if not isinstance(tv, dict):
+            out.append("verdict `tested` must be an object binding the proof to a tree")
+        else:
+            for k in ("head", "tree", "base", "packet", "graph_revision"):
+                if k in tv and not isinstance(tv[k], str):
+                    out.append(f"verdict `tested.{k}` must be a string")
+            if "checks" in tv and not isinstance(tv["checks"], list):
+                out.append("verdict `tested.checks` must be a list")
+        if out:
+            return out
+
     if not isinstance(v["node"], str) or not v["node"].startswith(NODE_ID):
         out.append(f"verdict `node` is {v['node']!r}, which is not a node id")
 
@@ -888,16 +905,23 @@ class held:
         return False
 
 
-def revise(graph, verb, node, why):
+def revise(graph, verb, node, why, precondition=None):
     """Append the revision. Both verbs call it; neither may skip it.
 
     `park` demanded a reason from the start and `add` demanded nothing, so half the
     graph's revision surface was silent — and a graph that changed for reasons nobody
     recorded can always explain its own completion by appealing to a plan that existed
     only at the end.
+
+    `precondition` (FIX-PF-02.01) records the tree the mutation was made against — the
+    proven HEAD for a `close` — so a revision carries a VERSION, not only a verb and a
+    reason. A brief/REQ/interface change that moves this tree is then visibly a
+    different precondition, which is what invalidates a proof taken before it.
     """
-    graph.setdefault("revisions", []).append(
-        {"verb": verb, "node": node, "why": why})
+    entry = {"verb": verb, "node": node, "why": why}
+    if precondition:
+        entry["precondition"] = precondition
+    graph.setdefault("revisions", []).append(entry)
 
 
 def guard(graph, path):
@@ -1400,6 +1424,22 @@ def cmd_certify(graph, args):
                    "why": "certified at all three tiers in round %d" % round_no},
         "evidence": ["%s: %s" % (x, e) for x in TIERS for e in reports[x]["evidence"]],
     }
+    # Proof identity (FIX-PF-02.01): the certification tested THIS tree, so it
+    # records the commit it tested into the verdict it hands `close`. Without it
+    # `close` — which now demands proof inside a checkout — would refuse the
+    # verdict certify just assembled. Read from git here, never from a report.
+    import subprocess as _sp
+    try:
+        _h = _sp.run(["git", "rev-parse", "HEAD"], capture_output=True, text=True)
+        _head = _h.stdout.strip() if _h.returncode == 0 else ""
+        _tr = _sp.run(["git", "rev-parse", "HEAD^{tree}"], capture_output=True, text=True)
+        _tree = _tr.stdout.strip() if _tr.returncode == 0 else ""
+    except OSError:
+        _head, _tree = "", ""
+    if _head:
+        verdict["tested"] = {"head": _head}
+        if _tree:
+            verdict["tested"]["tree"] = _tree
     # Checked against the same gate `close` will apply, HERE, so a certification
     # cannot hand the run a verdict its own consumer refuses.
     broken = verdict_violations(verdict)
@@ -1466,15 +1506,49 @@ def cmd_close(graph, args):
             "run is a verdict about nothing" % (nid, ", ".join(open_blockers),
                                                 "is" if len(open_blockers) == 1 else "are"))
 
-    # The stamp. Read here, never accepted from the verdict.
+    # Proof identity (FIX-PF-02.01). The stamp is not "the current HEAD, whatever
+    # it is" — that stamps a verdict earned at v1 onto a tree already at v2. The
+    # verdict must DECLARE the commit and tree it tested, and close COMPARES that
+    # to HEAD: an old proof against moved code is refused, never re-stamped.
     import subprocess
-    try:
-        r = subprocess.run(["git", "rev-parse", "HEAD"], capture_output=True, text=True)
-        head = r.stdout.strip() if r.returncode == 0 else ""
-    except OSError:
-        head = ""
-    stamp = ("observed at " + head) if head else \
-        "observed at unavailable — not inside a git checkout, so no commit identifies the tree"
+
+    def _git(*a):
+        try:
+            r = subprocess.run(["git", *a], capture_output=True, text=True)
+            return r.stdout.strip() if r.returncode == 0 else ""
+        except OSError:
+            return ""
+
+    head = _git("rev-parse", "HEAD")
+    tree = _git("rev-parse", "HEAD^{tree}")
+    tested = v.get("tested") or {}
+    if head:
+        # Inside a checkout: provenance must be PROVEN, not assumed.
+        if not tested.get("head"):
+            die("the verdict declares no `tested.head` — inside a checkout close must "
+                "confirm the reviewer saw THIS tree; re-run the verifier and record the "
+                "commit it tested. Nothing was written.")
+        if tested["head"] != head:
+            die("the verdict tested %s but HEAD is %s — the code moved under the proof. "
+                "A verdict written before the tree changed is evidence about a different "
+                "tree; re-verify at HEAD and issue a fresh verdict. Nothing was written."
+                % (tested["head"][:12], head[:12]))
+        if tested.get("tree") and tree and tested["tree"] != tree:
+            die("the verdict tested tree %s but HEAD's tree is %s — the working tree moved "
+                "under the proof even though the commit matches. Nothing was written."
+                % (tested["tree"][:12], tree[:12]))
+        stamp = "proven at " + head + ((" (tree " + tree + ")") if tree else "")
+        node["proof"] = {"head": head, "tree": tree or "",
+                         "graph_revision": str(len(graph.get("revisions") or []))}
+        for k in ("base", "packet", "attempt"):
+            if k in tested and isinstance(tested[k], str):
+                node["proof"][k] = tested[k]
+        if isinstance(tested.get("checks"), list):
+            node["proof"]["checks"] = list(tested["checks"])
+    else:
+        stamp = "observed at unavailable — not inside a git checkout, so no commit " \
+                "identifies the tree"
+        node["proof"] = {"head": "unavailable"}
 
     node["status"] = "done"
     node["evidence"] = list(v["evidence"]) + [stamp]
@@ -1513,7 +1587,8 @@ def cmd_close(graph, args):
         revise(graph, "park", pid, why)
         parked.append(pid)
 
-    revise(graph, "close", nid, why or "closed with no re-plan")
+    revise(graph, "close", nid, why or "closed with no re-plan",
+           precondition=(head or "unavailable"))
 
     bad = violations(graph)
     if bad:

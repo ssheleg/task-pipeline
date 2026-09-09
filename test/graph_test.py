@@ -1258,6 +1258,14 @@ def _():
 # `close` consumes* was reachable only from this file. And `agents/verifier.md` told an agent
 # to run `graph.py close` — shipped doctrine pointing at an absence, the same class as B-080.
 
+def _current_head():
+    # The close tests run inside this repo's checkout, so proof identity
+    # (FIX-PF-02.01) requires the verdict to declare the commit it tested; a
+    # verdict with no `tested.head` is now correctly refused inside a checkout.
+    r = subprocess.run(["git", "rev-parse", "HEAD"], capture_output=True, text=True)
+    return r.stdout.strip() if r.returncode == 0 else ""
+
+
 def full_verdict(node="N-001", **over):
     v = {"node": node,
          "done": ["the thing was built"],
@@ -1265,7 +1273,8 @@ def full_verdict(node="N-001", **over):
          "not_verified": [],
          "blockers": [],
          "replan": {"possible": True, "add": [], "park": [], "why": ""},
-         "evidence": ["npm test → PASS: 3 cases"]}
+         "evidence": ["npm test → PASS: 3 cases"],
+         "tested": {"head": _current_head()}}
     v.update(over)
     return v
 
@@ -1294,7 +1303,7 @@ def _():
     code, out = close_at(p, full_verdict())
     assert code == 0, out
     n = json.loads(p.read_text())["nodes"][0]
-    stamped = [e for e in n["evidence"] if re.search(r"\bobserved at\b", e)]
+    stamped = [e for e in n["evidence"] if re.search(r"\b(proven|observed) at\b", e)]
     assert stamped, "close recorded no commit stamp: %s" % n["evidence"]
     assert re.search(r"[0-9a-f]{7,40}|unavailable", stamped[0]), stamped[0]
 
