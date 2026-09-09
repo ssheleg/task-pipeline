@@ -52,6 +52,7 @@ import os
 import re
 import sys
 import tempfile
+import time
 
 # Who may OWN a node — which is a different axis from who ships as a subagent.
 #
@@ -708,6 +709,81 @@ def cmd_next(graph, args):
               f"`touches` ({', '.join(undeclared[:6])}) — a frontier nobody described cannot "
               "be checked for collisions, and no warning here is not the same as no "
               "collision", file=sys.stderr)
+    return 0
+
+
+def _load_authority(args):
+    """External mode's coordinator, fail-closed. Importing beside this script so
+    a checkout runs without install."""
+    import importlib.util
+    here = os.path.dirname(os.path.abspath(__file__))
+    spec = importlib.util.spec_from_file_location(
+        "execution_authority", os.path.join(here, "execution_authority.py"))
+    ea = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(ea)
+    return ea
+
+
+def cmd_claim(graph, args):
+    """External-executor mode: turn one ADVISORY frontier row into a durable,
+    arbitrated CLAIM. `next` says what could run; this says who may. Exactly one
+    of two racing runs wins; an authority that cannot answer BLOCKS dispatch
+    (fail-closed) rather than letting both proceed.
+
+    Exit codes: 0 won (grant on stdout), 5 lost the race (holder on stderr),
+    4 the node is not runnable, 1 the authority was unavailable — and 1 means
+    NO work starts, which is the whole point of fail-closed."""
+    if violations(graph):
+        die("graph does not validate — run `validate` first", 1)
+    node_id = args.node
+    ready = {n["id"]: n for n in frontier(graph)}
+    if node_id not in ready:
+        die(f"{node_id} is not in the frontier — claim only a runnable node", 4)
+    revision = int(ready[node_id].get("revision", 0) or 0)
+    ea = _load_authority(args)
+    try:
+        auth = ea.authority_for(args.authority)
+    except ea.AuthorityUnavailable as e:
+        die(f"authority unavailable — dispatch BLOCKED, no work started: {e}", 1)
+    try:
+        grant = auth.claim(node_id, args.owner, revision, now=time.time(),
+                           ttl_seconds=args.ttl)
+    except ea.AuthorityUnavailable as e:
+        die(f"arbitration failed — dispatch BLOCKED, no work started: {e}", 1)
+    finally:
+        auth.close()
+    if grant is None:
+        holder = None
+        try:
+            a2 = ea.authority_for(args.authority)
+            holder = a2.holder(node_id)
+            a2.close()
+        except ea.AuthorityUnavailable:
+            pass
+        who = holder.get("owner") if holder else "another run"
+        print(f"lost: {node_id} is already claimed by {who}", file=sys.stderr)
+        return 5
+    print(json.dumps(grant, ensure_ascii=False))
+    return 0
+
+
+def cmd_release(graph, args):
+    """Give back a hold this run actually owns (matching fence). A mismatch is a
+    no-op, not an error someone can use to steal a live node."""
+    ea = _load_authority(args)
+    try:
+        auth = ea.authority_for(args.authority)
+    except ea.AuthorityUnavailable as e:
+        die(f"authority unavailable: {e}", 1)
+    try:
+        ok = auth.release(args.node, args.owner, args.fence)
+    finally:
+        auth.close()
+    if not ok:
+        print(f"not released: {args.node} is not held by {args.owner} at fence {args.fence}",
+              file=sys.stderr)
+        return 5
+    print(f"released {args.node}")
     return 0
 
 
@@ -1419,6 +1495,8 @@ VERBS = {
     "validate": (cmd_validate, "every invariant a schema cannot state"),
     "next": (cmd_next, "the frontier, ordered by what it unblocks"),
     "goal": (cmd_goal, "the release goal this graph serves"),
+    "claim": (cmd_claim, "external mode: arbitrate one runnable node to a single owner (fail-closed)"),
+    "release": (cmd_release, "external mode: give back a hold this run owns"),
     "doctrine": (cmd_doctrine, "which of the bundle's reference files this run opened"),
     "producer": (cmd_producer, "what produced this proof: actor, model, runtime, skill, "
                                "config digest, commit, trace"),
@@ -1478,6 +1556,19 @@ def main(argv=None):
     p_cert.add_argument("--ceiling", type=int, default=3,
                         help="rounds after which the output names the churning tier; it "
                              "measures rather than stops (references/loop-guard.md)")
+
+    for verb in ("claim", "release"):
+        made[verb].add_argument("--authority", required=True,
+                                help="path to the local sqlite execution authority "
+                                     "(external mode; a Fabric adapter replaces this seam)")
+        made[verb].add_argument("--owner", required=True,
+                                help="the session/attempt identity making the claim — NOT a role")
+        made[verb].add_argument("--node", required=True, help="the node to claim/release")
+    made["claim"].add_argument("--ttl", type=int, default=1800,
+                               help="lease seconds; the OS lock is NOT held this long — the "
+                                    "lease is, and a crashed holder frees the node by expiry")
+    made["release"].add_argument("--fence", type=int, required=True,
+                                 help="the fence token from the grant; a mismatch is a no-op")
 
     p_park = made["park"]
     p_park.add_argument("node")

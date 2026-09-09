@@ -63,6 +63,8 @@ conditional on the code, never merely sequenced after it.**
 | `close` | the goal, the new frontier count, and what was not verified | `0` · `1` refused **or the verdict stops the run** |
 | `producer` | what produced this proof — actor, model, runtime, skill, config, commit, trace | `0` |
 | `doctrine` | how many of the bundle's reference files this run opened | `0` |
+| `claim` | **external mode** — arbitrate one runnable node to a single owner through the durable coordinator (`scripts/execution_authority.py`); prints the grant. `next` says what COULD run, `claim` says who MAY | `0` won · `5` lost the race · `4` not runnable · `1` authority unavailable — **and `1` means no work starts** (fail-closed) |
+| `release` | give back a hold this run owns, matching its fence; a mismatch is a no-op, never a way to steal a live node | `0` released · `5` not held at that fence · `1` authority unavailable |
 
 **`next` is ordered by what each node unblocks, transitively, and the number is computed.**
 A `priority` field is something somebody typed once and nobody revisits; this one moves when
