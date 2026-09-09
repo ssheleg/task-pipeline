@@ -54,7 +54,8 @@
     "state": {
       "enum": [
         "ready",
-        "claimed"
+        "claimed",
+        "completed"
       ],
       "description": "`ready` — minted, not yet installed on the node; `claimed` — the live hold. The node's own lifecycle (pending/running/done/blocked/parked) lives in graph.schema.json, not here."
     },

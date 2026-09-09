@@ -65,6 +65,8 @@ conditional on the code, never merely sequenced after it.**
 | `doctrine` | how many of the bundle's reference files this run opened | `0` |
 | `claim` | **external mode** — arbitrate one runnable node to a single owner through the durable coordinator (`scripts/execution_authority.py`); prints the grant. `next` says what COULD run, `claim` says who MAY | `0` won · `5` lost the race · `4` not runnable · `1` authority unavailable — **and `1` means no work starts** (fail-closed) |
 | `release` | give back a hold this run owns, matching its fence; a mismatch is a no-op, never a way to steal a live node | `0` released · `5` not held at that fence · `1` authority unavailable |
+| `recover` | **external mode** — reclaim an EXPIRED node for a new owner, minting a higher fence; a still-live claim is not recoverable (that is stealing a working node) | `0` recovered · `5` still live · `1` authority unavailable |
+| `complete` | **external mode** — record completion from the CURRENT fence-holder only; a late/superseded worker (stale fence) is refused, and the current holder completing twice is idempotent | `0` completed · `5` not the current holder · `1` authority unavailable |
 
 **`next` is ordered by what each node unblocks, transitively, and the number is computed.**
 A `priority` field is something somebody typed once and nobody revisits; this one moves when

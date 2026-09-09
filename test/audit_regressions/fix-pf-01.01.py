@@ -76,8 +76,8 @@ def t_attempt_schema_shape():
     req = set(s["required"])
     for field in ("owner", "attempt", "revision", "fence", "expiry", "state"):
         assert field in req, f"execution-attempt schema does not require {field}"
-    assert s["properties"]["state"]["enum"] == ["ready", "claimed"], \
-        "the attempt states are not ready→claimed"
+    assert s["properties"]["state"]["enum"][:2] == ["ready", "claimed"], \
+        "the attempt states do not begin ready→claimed"
     # owner is an identity string, and the description says NOT a role name
     assert "never a role name" in s["properties"]["owner"]["description"]
 

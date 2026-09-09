@@ -171,6 +171,82 @@ class Authority:
             self._db.execute("ROLLBACK;")
             raise AuthorityUnavailable(f"release failed: {e}") from e
 
+    def recover(self, node, new_owner, revision, now, ttl_seconds=1800):
+        """Explicitly reclaim an EXPIRED (or absent) node for a NEW owner, minting
+        a higher fence. A still-live claim cannot be recovered — that would be
+        stealing a working node — so this returns None while the current lease
+        holds."""
+        self._db.execute("BEGIN IMMEDIATE;")
+        try:
+            cur = self._db.execute(
+                "SELECT attempt, expiry, state FROM attempts WHERE node = ?;", (node,)).fetchone()
+            if cur is not None:
+                c_attempt, c_expiry, c_state = cur
+                if c_state == "claimed" and now < c_expiry:
+                    self._db.execute("COMMIT;")
+                    return None                      # still live: not recoverable
+                attempt = c_attempt + 1
+            else:
+                attempt = 1
+            fence = self._next_fence()
+            self._db.execute(
+                "INSERT INTO attempts (node, owner, attempt, revision, fence, expiry, state, installed_at) "
+                "VALUES (?, ?, ?, ?, ?, ?, 'claimed', ?) "
+                "ON CONFLICT(node) DO UPDATE SET owner=excluded.owner, attempt=excluded.attempt, "
+                "revision=excluded.revision, fence=excluded.fence, expiry=excluded.expiry, "
+                "state='claimed', installed_at=excluded.installed_at;",
+                (node, new_owner, attempt, revision, fence, now + ttl_seconds, now))
+            row = self._db.execute(
+                "SELECT node, owner, attempt, revision, fence, expiry, state, installed_at "
+                "FROM attempts WHERE node = ?;", (node,)).fetchone()
+            self._db.execute("COMMIT;")
+            return self._grant(row)
+        except sqlite3.Error as e:
+            self._db.execute("ROLLBACK;")
+            raise AuthorityUnavailable(f"recover failed: {e}") from e
+
+    def complete(self, node, owner, fence, now):
+        """Record a node's completion — but ONLY from the CURRENT fence-holder.
+
+        This is the guard against the late worker: a run whose node was
+        reclaimed (expired, then recovered by another) carries an OLD fence, and
+        its result is refused here rather than overwriting the run that took
+        over. Idempotent: the current holder completing twice both succeed, so a
+        retried completion is safe. Returns the grant on success, None on a
+        stale/late/absent attempt."""
+        self._db.execute("BEGIN IMMEDIATE;")
+        try:
+            cur = self._db.execute(
+                "SELECT owner, fence, state FROM attempts WHERE node = ?;", (node,)).fetchone()
+            if not cur:
+                self._db.execute("COMMIT;")
+                return None                          # nothing to complete
+            c_owner, c_fence, c_state = cur
+            if c_owner != owner or c_fence != fence:
+                self._db.execute("COMMIT;")
+                return None                          # a LATE OLD worker: refused
+            if c_state == "completed":
+                row = self._db.execute(
+                    "SELECT node, owner, attempt, revision, fence, expiry, state, installed_at "
+                    "FROM attempts WHERE node = ?;", (node,)).fetchone()
+                self._db.execute("COMMIT;")
+                return self._grant(row)              # already completed by me: idempotent
+            self._db.execute("UPDATE attempts SET state='completed' WHERE node = ?;", (node,))
+            row = self._db.execute(
+                "SELECT node, owner, attempt, revision, fence, expiry, state, installed_at "
+                "FROM attempts WHERE node = ?;", (node,)).fetchone()
+            self._db.execute("COMMIT;")
+            return self._grant(row)
+        except sqlite3.Error as e:
+            self._db.execute("ROLLBACK;")
+            raise AuthorityUnavailable(f"complete failed: {e}") from e
+
+    def cancel(self, node, owner, fence):
+        """Cancel a hold this run owns (matching fence), freeing the node. A
+        mismatch is a no-op — a late worker cannot cancel the run that replaced
+        it."""
+        return self.release(node, owner, fence)
+
     def holder(self, node):
         row = self._db.execute(
             "SELECT node, owner, attempt, revision, fence, expiry, state, installed_at "

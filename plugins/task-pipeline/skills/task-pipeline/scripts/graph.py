@@ -767,6 +767,53 @@ def cmd_claim(graph, args):
     return 0
 
 
+def cmd_recover(graph, args):
+    """External mode: reclaim an EXPIRED node for a new owner, minting a higher
+    fence. A still-live claim is not recoverable (that is stealing a working
+    node); this exits 5 while the lease holds."""
+    ea = _load_authority(args)
+    try:
+        auth = ea.authority_for(args.authority)
+    except ea.AuthorityUnavailable as e:
+        die(f"authority unavailable: {e}", 1)
+    revision = 0
+    ready = {n["id"]: n for n in (graph.get("nodes") or [])}
+    if args.node in ready:
+        revision = int(ready[args.node].get("revision", 0) or 0)
+    try:
+        import time as _t
+        grant = auth.recover(args.node, args.owner, revision, now=_t.time(), ttl_seconds=args.ttl)
+    finally:
+        auth.close()
+    if grant is None:
+        print(f"not recovered: {args.node} still holds a live claim", file=sys.stderr)
+        return 5
+    print(json.dumps(grant, ensure_ascii=False))
+    return 0
+
+
+def cmd_complete(graph, args):
+    """External mode: record completion from the CURRENT fence-holder only. A
+    late old worker (stale fence) is refused (exit 5), never overwriting the run
+    that took the node over; the current holder completing twice is idempotent."""
+    ea = _load_authority(args)
+    try:
+        auth = ea.authority_for(args.authority)
+    except ea.AuthorityUnavailable as e:
+        die(f"authority unavailable: {e}", 1)
+    import time as _t
+    try:
+        grant = auth.complete(args.node, args.owner, args.fence, now=_t.time())
+    finally:
+        auth.close()
+    if grant is None:
+        print(f"not completed: {args.node} is not held by {args.owner} at fence "
+              f"{args.fence} — a late or superseded worker cannot complete it", file=sys.stderr)
+        return 5
+    print(json.dumps(grant, ensure_ascii=False))
+    return 0
+
+
 def cmd_release(graph, args):
     """Give back a hold this run actually owns (matching fence). A mismatch is a
     no-op, not an error someone can use to steal a live node."""
@@ -1496,6 +1543,8 @@ VERBS = {
     "next": (cmd_next, "the frontier, ordered by what it unblocks"),
     "goal": (cmd_goal, "the release goal this graph serves"),
     "claim": (cmd_claim, "external mode: arbitrate one runnable node to a single owner (fail-closed)"),
+    "recover": (cmd_recover, "external mode: reclaim an EXPIRED node for a new owner (fenced)"),
+    "complete": (cmd_complete, "external mode: record completion from the current fence-holder (late worker refused)"),
     "release": (cmd_release, "external mode: give back a hold this run owns"),
     "doctrine": (cmd_doctrine, "which of the bundle's reference files this run opened"),
     "producer": (cmd_producer, "what produced this proof: actor, model, runtime, skill, "
@@ -1557,18 +1606,20 @@ def main(argv=None):
                         help="rounds after which the output names the churning tier; it "
                              "measures rather than stops (references/loop-guard.md)")
 
-    for verb in ("claim", "release"):
+    for verb in ("claim", "release", "recover", "complete"):
         made[verb].add_argument("--authority", required=True,
                                 help="path to the local sqlite execution authority "
                                      "(external mode; a Fabric adapter replaces this seam)")
         made[verb].add_argument("--owner", required=True,
                                 help="the session/attempt identity making the claim — NOT a role")
-        made[verb].add_argument("--node", required=True, help="the node to claim/release")
-    made["claim"].add_argument("--ttl", type=int, default=1800,
-                               help="lease seconds; the OS lock is NOT held this long — the "
-                                    "lease is, and a crashed holder frees the node by expiry")
-    made["release"].add_argument("--fence", type=int, required=True,
-                                 help="the fence token from the grant; a mismatch is a no-op")
+        made[verb].add_argument("--node", required=True, help="the node to act on")
+    for verb in ("claim", "recover"):
+        made[verb].add_argument("--ttl", type=int, default=1800,
+                                help="lease seconds; the OS lock is NOT held this long — the "
+                                     "lease is, and a crashed holder frees the node by expiry")
+    for verb in ("release", "complete"):
+        made[verb].add_argument("--fence", type=int, required=True,
+                                help="the fence token from the grant; a stale fence is refused")
 
     p_park = made["park"]
     p_park.add_argument("node")
