@@ -5,7 +5,16 @@
   "description": "The family's versioned task/context contract (CTX-01). One packet is one dispatchable unit of work: what to do, under which module decisions, reading which inputs, inside which budget. Packets are IMMUTABLE once issued — a change is a new packet with a new id, never an edit. What ships is this schema, one example, and `scripts/packet.py`, the dependency-free validator every consumer runs before acting: a packet whose mandatory version major is unknown, whose input lacks a digest, or whose decision ref is unbound must be rejected at the door, because acting on a packet you could not verify is how two agents build different things from one plan.",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schema_version", "id", "module", "intent", "inputs", "decision_refs", "source_scope", "budgets"],
+  "required": [
+    "schema_version",
+    "id",
+    "module",
+    "intent",
+    "inputs",
+    "decision_refs",
+    "source_scope",
+    "budgets"
+  ],
   "properties": {
     "schema_version": {
       "type": "string",
@@ -33,22 +42,30 @@
     },
     "inputs": {
       "type": "array",
-      "items": { "$ref": "#/definitions/contextRef" },
+      "items": {
+        "$ref": "#/definitions/contextRef"
+      },
       "description": "Every context document the work READS. Each is content-addressed: an input without a digest cannot be verified fresh, so it does not dispatch."
     },
     "decision_refs": {
       "type": "array",
-      "items": { "$ref": "#/definitions/decisionRef" },
+      "items": {
+        "$ref": "#/definitions/decisionRef"
+      },
       "description": "The module decisions this packet is bound by. BOUND means address+digest present — a decision named without its bytes is a rumour, and the packet is rejected."
     },
     "source_scope": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["edit_targets"],
+      "required": [
+        "edit_targets"
+      ],
       "properties": {
         "edit_targets": {
           "type": "array",
-          "items": { "$ref": "#/definitions/editTarget" },
+          "items": {
+            "$ref": "#/definitions/editTarget"
+          },
           "description": "The exact files the packet may change. A baseline digest per Edit target is what makes 'the source moved under the plan' detectable before dispatch."
         },
         "claim": {
@@ -62,7 +79,10 @@
       "additionalProperties": false,
       "minProperties": 1,
       "properties": {
-        "context_bytes": { "type": "integer", "minimum": 1 },
+        "context_bytes": {
+          "type": "integer",
+          "minimum": 1
+        },
         "token_note": {
           "type": "string",
           "description": "How tokens were measured or estimated — a named tokenizer or the estimate's basis. A bare token count nothing computed is not a budget."
@@ -72,15 +92,61 @@
     },
     "acceptance": {
       "type": "array",
-      "items": { "type": "string", "minLength": 1 },
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
       "description": "Observable acceptance cases. Never truncated to fit a budget."
+    },
+    "dependencies": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "task_id",
+          "kind",
+          "rationale"
+        ],
+        "properties": {
+          "task_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "data",
+              "control",
+              "resource"
+            ],
+            "description": "data: this packet consumes the other's output; control: ordering only — no payload, and the edge is PRESERVED, never pruned for being payload-less; resource: both touch one thing that tolerates one writer."
+          },
+          "rationale": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Why the edge exists — an edge nobody can explain is an edge nobody dares remove or trust."
+          },
+          "satisfaction": {
+            "type": "string",
+            "description": "What marks it satisfied: an artifact address, a state, a receipt. A control edge may leave this empty — ordering is its whole payload."
+          },
+          "owner": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Typed edges into the plan's graph. Uniqueness of packet ids, resolution of every task_id and acyclicity are properties of the packet SET — `scripts/packet.py validate-graph` owns them."
     }
   },
   "definitions": {
     "contextRef": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["address", "sha256"],
+      "required": [
+        "address",
+        "sha256"
+      ],
       "properties": {
         "address": {
           "type": "string",
@@ -92,26 +158,54 @@
           "pattern": "^[0-9a-f]{64}$",
           "description": "Digest of the exact bytes the plan was made against. Freshness is checked against this before dispatch; a mismatch blocks, it never silently becomes permission to use stale context."
         },
-        "role": { "type": "string" }
+        "role": {
+          "type": "string"
+        }
       }
     },
     "decisionRef": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["id", "address", "sha256"],
+      "required": [
+        "id",
+        "address",
+        "sha256"
+      ],
       "properties": {
-        "id": { "type": "string", "minLength": 1 },
-        "address": { "type": "string", "minLength": 1 },
-        "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "address": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
       }
     },
     "editTarget": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["address", "mode"],
+      "required": [
+        "address",
+        "mode"
+      ],
       "properties": {
-        "address": { "type": "string", "minLength": 1 },
-        "mode": { "type": "string", "enum": ["Edit", "Create", "Create_or_extend"] },
+        "address": {
+          "type": "string",
+          "minLength": 1
+        },
+        "mode": {
+          "type": "string",
+          "enum": [
+            "Edit",
+            "Create",
+            "Create_or_extend"
+          ]
+        },
         "baseline_sha256": {
           "type": "string",
           "pattern": "^[0-9a-f]{64}$",

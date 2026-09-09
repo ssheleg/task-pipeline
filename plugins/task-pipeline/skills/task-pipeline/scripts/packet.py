@@ -39,6 +39,7 @@ import sys
 KNOWN_MAJORS = {1}
 SHA_RE = re.compile(r"^[0-9a-f]{64}$")
 EDIT_MODES = {"Edit", "Create", "Create_or_extend"}
+DEP_KINDS = {"data", "control", "resource"}
 
 
 def _ref_problems(ref, where, need_id=False):
@@ -120,6 +121,27 @@ def problems(packet):
         cb = budgets.get("context_bytes")
         if cb is not None and (not isinstance(cb, int) or cb < 1):
             out.append("budgets.context_bytes must be a positive integer")
+
+    seen_edges = set()
+    for i, dep in enumerate(packet.get("dependencies") or []):
+        where = f"dependencies[{i}]"
+        if not isinstance(dep, dict) or not dep.get("task_id"):
+            out.append(f"{where}: missing task_id")
+            continue
+        if dep.get("kind") not in DEP_KINDS:
+            out.append(f"{where}: kind {dep.get('kind')!r} is not one of {sorted(DEP_KINDS)}")
+        if not dep.get("rationale"):
+            out.append(f"{where}: missing rationale — an edge nobody can explain is an "
+                       "edge nobody dares remove or trust")
+        edge = (dep["task_id"], dep.get("kind"))
+        if edge in seen_edges:
+            out.append(f"{where}: duplicate edge to {dep['task_id']} ({dep.get('kind')})")
+        seen_edges.add(edge)
+        # A CONTROL edge with no satisfaction is VALID and PRESERVED: ordering is
+        # its whole payload. Only data/resource edges owe a satisfaction.
+        if dep.get("kind") in ("data", "resource") and not dep.get("satisfaction"):
+            out.append(f"{where}: a {dep['kind']} edge without satisfaction — what would "
+                       "mark it met? A control edge may omit this; a payload edge may not")
 
     return out
 
@@ -212,6 +234,47 @@ def result_problems(env, current_revision=None, current_fence=None):
     return out
 
 
+def graph_problems(packets):
+    """Closure over a packet SET: unique ids, every edge resolves, no cycles.
+    A control edge participates in the cycle check like any other — ordering
+    that loops is still a loop."""
+    out = []
+    if not isinstance(packets, list) or not packets:
+        return ["the graph is not a non-empty list of packets"]
+    ids = [p.get("id") for p in packets if isinstance(p, dict)]
+    for dup in sorted({i for i in ids if ids.count(i) > 1}):
+        out.append(f"duplicate packet id {dup!r} — two packets, one name, no arbitration")
+    known = set(ids)
+    edges = {}
+    for p in packets:
+        if not isinstance(p, dict):
+            continue
+        edges[p.get("id")] = []
+        for dep in p.get("dependencies") or []:
+            tid = dep.get("task_id") if isinstance(dep, dict) else None
+            if tid is None:
+                continue
+            if tid not in known:
+                out.append(f"{p.get('id')}: depends on {tid!r}, which is not in the graph")
+                continue
+            edges[p.get("id")].append(tid)
+    state = {}
+    def visit(node, stack):
+        state[node] = "visiting"
+        for nxt in edges.get(node, []):
+            if state.get(nxt) == "visiting":
+                cycle = stack[stack.index(nxt):] + [nxt] if nxt in stack else [node, nxt]
+                out.append("cycle: " + " -> ".join(cycle))
+                continue
+            if nxt not in state:
+                visit(nxt, stack + [nxt])
+        state[node] = "done"
+    for node in edges:
+        if node not in state:
+            visit(node, [node])
+    return out
+
+
 def canon(packet):
     """Canonical bytes: sorted keys, stable separators — same packet, same hash."""
     return json.dumps(packet, sort_keys=True, ensure_ascii=False,
@@ -219,7 +282,8 @@ def canon(packet):
 
 
 def main(argv):
-    if len(argv) < 3 or argv[1] not in ("validate", "canon", "validate-result"):
+    if len(argv) < 3 or argv[1] not in ("validate", "canon", "validate-result",
+                                        "validate-graph"):
         print(__doc__.strip().splitlines()[0])
         print("usage: packet.py validate <packet.json> | packet.py canon <packet.json> | "
               "packet.py validate-result <envelope.json> [--current-revision N] "
@@ -231,6 +295,20 @@ def main(argv):
     except (OSError, json.JSONDecodeError) as exc:
         print(f"REJECTED: cannot read the packet — {exc}")
         return 1
+    if argv[1] == "validate-graph":
+        found = graph_problems(packet)
+        for p_ in packet if isinstance(packet, list) else []:
+            for pr in problems(p_) if isinstance(p_, dict) else []:
+                found.append(f"{p_.get('id')}: {pr}")
+        if found:
+            for pr in found:
+                print(f"REJECTED: {pr}")
+            return 1
+        n_ctrl = sum(1 for p_ in packet for dep in (p_.get("dependencies") or [])
+                     if dep.get("kind") == "control")
+        print(f"ok: {len(packet)} packet(s), acyclic, every edge resolves; "
+              f"{n_ctrl} control edge(s) preserved")
+        return 0
     if argv[1] == "validate-result":
         opts = argv[3:]
         current_revision = current_fence = None
