@@ -159,9 +159,20 @@ Five of eight rows in one run were that.
 - **Read the call site, not only the definition.** A finding about a module is not
   written until the places that use it have been read.
 - **Every row states which of three it is:** *(a)* undecided, *(b)* decided and
-  documented right here, *(c)* decided elsewhere and not propagated. Only **(a)** and
-  **(c)** are work. **(b)** is the audit being wrong, and recording that is worth more
-  than deleting the row.
+  documented right here, *(c)* decided elsewhere and not propagated. **(a)** and **(c)**
+  are work — and so is a **(b)** that is still WRONG, because **decision status and
+  technical validity are DIFFERENT AXES.** A documented decision can be mistaken, stale,
+  or break an external contract; "it's by design" is not a proof of correctness. So a
+  **(b)** splits:
+  - **accepted trade-off** — a conscious limitation with a real, named cost the project
+    chose to pay (single-browser support under a matching contract): mark it *accepted
+    limitation* with its cost, not a defect.
+  - **documented violation** — a decision that STILL breaks a security invariant, an
+    external contract, or its own stated goal (an ADR that permits logging a refresh
+    token): this REMAINS a `finding`, carrying the `decision_id`, the reason to revisit,
+    and the counter-evidence. Recording a **(b)** the audit got wrong (a false positive)
+    is worth more than deleting the row; but excluding every documented decision from
+    findings is a systemic source of false NEGATIVES, which is the more expensive miss.
 - **Where the verdict is (c), the remedy is a mechanical check, not an edit.** A
   written rule nobody verifies reaches exactly as far as the place it was written; the
   durable fix in all five cases was a guard that asks the project's own instruction of
