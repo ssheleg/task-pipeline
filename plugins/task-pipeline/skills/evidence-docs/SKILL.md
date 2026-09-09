@@ -103,3 +103,8 @@ address, delete it, or **mark it as an unbacked claim the operator chose to make
 it**. The third option is not a loophole; it is the reason the other two are worth
 anything. A rule with no way to proceed under it becomes a rule people route around, and
 then nothing carries an address.
+
+**Editing these references.** The files under `references/` and `templates/` here are
+GENERATED copies, so a single-skill install of this skill resolves every link without a
+neighbouring checkout. Edit the source home, never the copy — which file is generated,
+from where, and how to re-sync: [`GENERATED.md`](references/GENERATED.md).

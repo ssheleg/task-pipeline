@@ -63,42 +63,8 @@ wiki and the code graph are recommendations. The **one** exception is deliberate
 named: on a user-facing task the stage-3 UX track requires super-ux, and the spec
 gate stops until it is installed.
 
-| Stage | Built-in doctrine |
-|---|---|
-| 0, 9 · The documentation system | `references/documentation.md` |
-| any stage · The canons, and where each is enforced | [`evidence-docs`](../evidence-docs/SKILL.md) — the sibling skill in this plugin |
-| 6–10 · Gates | `references/gates.md` |
-| 7–8 · Deploy targets | `references/deploy-targets.md` |
-| any stage · Hooks | `references/hooks.md` |
-| 0 Knowledge harvest (pre-grill) | `references/knowledge-sources.md` |
-| 0, 9 The code graph (graphify — recommended, never required) | `references/knowledge-graph.md` |
-| 0 Intake grill | `references/grill.md` |
-| 2 Brainstorm | `references/brainstorm.md` |
-| 2 Decompose (platforms only) | `references/decomposition.md` |
-| 3 Spec | `references/spec.md` |
-| 4 Plan | `references/planning.md` |
-| the queue the loop walks | `references/work-graph.md` |
-| 5–8 · how a **work-graph node** is CLOSED — three blind readings at three distances, all three required (ceiling 3); a **prose-plan task** closes through `review.md` instead — one reviewer, five-round cap | `references/certification.md` |
-| 5 Build (worktree, subagents, fix loop) | `references/build.md` + `references/review.md` |
-| 5–6 TDD + suite gate | `references/tdd.md` |
-| 5, 6, 8 The browser — the look, the spec suite, and the difference | `references/browser.md` |
-| 10 Acceptance (REQ close-out) | `references/acceptance.md` |
-| 10 Retrospective (the run's last act) | `references/retrospective.md` |
-| 10 + any audit (what's *missing*) | `references/audit.md` |
-| **first run in a project** (new or existing) | `references/adoption.md` |
-| **first run · the entry audit** (offered once) | `references/setup.md` |
-| **what travels with the bundle vs stays in a project** | `references/portability.md` |
-| any repeating loop | `references/loop-guard.md` |
-| run-wide · what the run **leaves running and leaves behind** — every gate, and stage 10 | `references/residue.md` |
-| run-wide · what the run **prints about itself** — the rail, the iteration line | `references/progress.md` |
-| run-wide · how a run keeps going (the loop mode + the context budget) | `references/continuity.md` |
-| run-wide · the work-list **between** runs, and the order it comes off | `references/backlog.md` + `references/prioritisation.md` |
-| run-wide · whether a **human** ever confirmed what shipped, and when | `references/verification.md` |
-| run-wide · how much unconfirmed work has piled up, and what to look at first | `references/exposure.md` |
-| any stage · Where each artifact belongs | `references/artifacts.md` |
-| preflight · Companion skills and their fallbacks | `references/companion-skills.md` |
-| 6–10 · How the host project's CLAUDE.md is read | `references/conventions.md` |
-| preflight · Model map, ids and the override | `references/model-tiering.md` |
+Which reference owns which stage — all forty-odd of them, by stage number:
+[`references/doctrine-map.md`](./references/doctrine-map.md).
 
 **Optional bridge.** An equivalent skill set the operator already runs can be mapped
 onto stages 2/4/5/6 in `pipeline.json` → `skills[]`. That is a **substitution, never a

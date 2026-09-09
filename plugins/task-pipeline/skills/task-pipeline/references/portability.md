@@ -41,6 +41,7 @@ a row pointing outside the bundle is the defect this file exists to catch.
 |---|---|
 | The stage list, ids, names, gate types | `pipeline.example.json` |
 | Per-stage criteria, freedom levels, the run checklist | `references/stages.md` |
+| Which reference owns which stage (the doctrine map) | `references/doctrine-map.md` |
 | What the intake grill asks, and the autonomy sweep | `references/grill.md` |
 | **The escalation boundary** — what an agent may settle alone | `references/grill.md` |
 | The knowledge harvest and its source ledger | `references/knowledge-sources.md` |
