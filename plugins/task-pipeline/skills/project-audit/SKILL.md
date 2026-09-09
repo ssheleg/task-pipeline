@@ -1,6 +1,6 @@
 ---
 name: project-audit
-description: "Use when someone asks what is actually true of a whole project right now — what is finished, what is half-built, what is broken, and what nobody has looked at. Walks a cold start: discover what the project is, run a registry of probes chosen from that, read production evidence (published artefact against source, CI history, telemetry present or absent), then leave a self-contained HTML report and a JSON sidecar so the next audit can say what moved. Read-only: it proposes board rows and commits nothing. Triggers - 'project audit', 'audit the project', 'codebase audit', 'state of the project', 'what is unfinished', 'project health check', 'аудит проекта', 'проаудируй проект', 'состояние проекта', 'что не доделано', 'аудит кодовой базы'. Not for: auditing one deliverable inside a run (that is the pipeline's own ladder), reviewing a diff, or checking a skill's construction — say 'без диагностики' to opt out."
+description: "Use when someone asks what is actually true of a whole project right now — what is finished, what is half-built, what is broken, and what nobody has looked at. Walks a cold start: discover what the project is, run a registry of probes chosen from that, read production evidence (published artefact against source, CI history, telemetry present or absent), then leave a JSON sidecar so the next audit can say what moved, and a self-contained HTML report on request. Read-only: it proposes board rows and commits nothing. Triggers - 'project audit', 'audit the project', 'codebase audit', 'state of the project', 'what is unfinished', 'project health check', 'аудит проекта', 'проаудируй проект', 'состояние проекта', 'что не доделано', 'аудит кодовой базы'. Not for: auditing one deliverable inside a run (that is the pipeline's own ladder), reviewing a diff, or checking a skill's construction — say 'без диагностики' to opt out."
 license: MIT
 compatibility: "The collector (scripts/audit.py) needs python3 and reads committed state, so it needs git. Probes needing gh, npm, network or a browser declare it and report blind when it is absent — degraded, never silent."
 ---
@@ -234,7 +234,12 @@ Two more traps, both of which shipped in the first draft and are now fixtures:
 ## The artefacts — the sidecar always, the page on request
 
 `docs/audit/<date>-audit.json` is written on every run. **The HTML page is written
-only with `--report`.**
+only with `--report`.** Three output modes, and only one needs a browser:
+**stdout** (`--stdout` — the summary in the terminal, nothing written but the
+sidecar), **json** (the sidecar alone, the default — a machine reads it, no
+page and no browser), **html** (`--report` — the page too). A json-only or
+stdout run **never opens a browser and never requires one**; the browser is a
+concern of `--report` alone.
 
 The split is not symmetry. The sidecar is what makes this a ratchet rather than a
 snapshot, and the next run reads it — skipping it would silently turn every future run
@@ -253,6 +258,13 @@ credential it is, and the remedy. The value appears in neither artefact nor on
 stdout: an audit must not become the second place a credential leaks. Redaction
 is total rather than a prefix — half a credential plus its context is often
 enough to finish.
+
+**"Read-only" is about the TARGET, not the disk.** The audit reads the
+project's source, data and production evidence and mutates NONE of it, and it
+commits nothing. It DOES write its own artefacts into its allowed output
+directory (`docs/audit/` by default, `--out-dir` to relocate) — the sidecar
+always, the page on `--report`. Writing the sidecar there is not a violation of
+read-only; writing into the target's source, or `git add`-ing anything, is.
 
 **The sidecar is what makes this a ratchet rather than a snapshot.** Each
 finding carries an id derived from its probe and its place, so it survives a
@@ -276,16 +288,21 @@ could not look.
 
 ## Exit criterion
 
-An audit is finished when:
+An audit is finished when — the criterion is CONDITIONAL on the deliverables
+requested, not a fixed page-and-browser:
 
 1. every probe has a verdict, and every `blind` one names why;
-2. the page and the sidecar are written and the page has been opened;
+2. the sidecar is written (always). **On `--report`, and only then**, the HTML
+   page also exists, its internal links are safe and resolve, and its
+   inspect/render status is recorded (opened, or `--no-open` noted) — WITHOUT
+   `--report` no page is created and the run is still complete;
 3. **every number in the report was produced by a command this run executed** —
    a restated count is an assertion (`evidence-docs`);
 4. at least one figure was **re-derived by a differently-shaped command** and
    both were printed. Re-running the same command is a spell-check of the first
    run;
-5. the proposed rows are printed for the operator, with nothing written.
+5. the proposed rows are printed for the operator, with nothing written to the
+   target.
 
 ## Rationalizations
 
