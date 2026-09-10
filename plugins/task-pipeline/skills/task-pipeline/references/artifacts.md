@@ -11,6 +11,7 @@ shape.
 - Stage → input map — where each stage's information comes from
 - Stage → artifact map
 - This repo (task-pipeline itself), for reference
+- Durable handoff across agents and repositories
 
 ## In the host project
 
@@ -221,3 +222,25 @@ README.md  CHANGELOG.md  LICENSE  CLAUDE.md
 CONTRIBUTING.md  SECURITY.md  CODE_OF_CONDUCT.md
 <artifacts>/{specs,plans}/               # this repo's own design history
 ```
+
+## Durable handoff across agents and repositories
+
+Persist reports, plans, decisions and executor context in the owning repository,
+including work that stops at planning. An app preview or ignored scratch directory
+may be a working copy, never the only copy a successor needs. Before removing the
+build scratch directory, promote the durable task inputs, outputs and unresolved
+work into the artifact root; Git cannot recover files that were never tracked.
+
+Give the successor one tracked entry point with the objective, accepted decisions,
+completed and open task IDs, module/contracts context, evidence and next task.
+Use relative artifact paths; source references name repository and commit. For
+multiple repositories, one central index names each remote, branch, commit and
+handoff path. Keep task packets bounded and refresh their hashes after relocation.
+
+Before the handoff, commit task-owned changes and push the working branches when
+the operator has authorized it, including standing authorization. Verify each
+remote ref equals the recorded commit and open the entry from a fresh checkout.
+Report missing access as a delivery blocker, never as a successful push. Preserve
+unrelated edits and explicit local-only instructions. Exclude secrets, caches and
+foreign dependency trees. A pushed planning branch is not a release or deployment;
+production submodule pins change only through the normal integration process.
