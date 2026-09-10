@@ -4269,7 +4269,11 @@ jobs:
           python3 - <<'EOF'
           p = "/tmp/cite2-copy/CONTRIBUTING.md"
           t = open(p, encoding="utf-8").read()
-          needle = "`states the cold-retirement condition as`"
+          # The cited message lost its trailing "as <unit>" when the cold guard stopped
+          # naming a unit — naming one is what had tied it to a wording. The plant
+          # follows the citation; what it proves is unchanged: the SECOND literal in a
+          # `*(guard: A and B)*` parenthetical is checked too, not just the first.
+          needle = "`states the cold-retirement condition in one unit only`"
           assert needle in t, "PLANT DID NOT LAND: second citation absent before edit"
           open(p, "w", encoding="utf-8").write(t.replace(needle, "`this guard does not exist anywhere`", 1))
           assert "this guard does not exist anywhere" in open(p, encoding="utf-8").read(), "PLANT DID NOT LAND"
