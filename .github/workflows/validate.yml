@@ -3060,21 +3060,7 @@ jobs:
           fi
 
       - name: Property check (the shipped graph schema keeps its conditionals behind a `$ref`)
-        run: |
-          set -eu
-          python3 - <<'EOF'
-          # The deref branch is only exercised while the shipped schema actually uses it. If
-          # somebody inlines the three rules again the guard goes back to being untested by
-          # anything but a fixture, which is the state B-079 was found in.
-          import json
-          s = json.load(open("plugins/task-pipeline/skills/task-pipeline/graph.schema.json",
-                             encoding="utf-8"))
-          allof = s["definitions"]["node"]["allOf"]
-          refs = [x.get("$ref") for x in allof if isinstance(x, dict)]
-          assert len(refs) == 3 and all(r and r.startswith("#/definitions/") for r in refs), \
-              f"the node's conditionals are not behind $refs: {refs}"
-          print("OK: three conditionals, all behind #/definitions/ —", ", ".join(refs))
-          EOF
+        run: python3 test/property_graph_conditionals.py
 
       - name: Negative self-test (the verification ledger claiming a stale shipped state)
         run: |
