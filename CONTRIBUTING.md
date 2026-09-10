@@ -315,7 +315,7 @@ was neither strict nor lenient but **unreadable**. A list capped at ten whose re
 condition cannot be read fills up and stops being pruned. The calendar is the unit nothing can
 stall, which is why it is not belt-and-braces. Entry **rotation** ("entries older than five
 stamps move to the archive") is a different mechanism and is deliberately out of scope.
-*(guard: `states the cold-retirement condition as five run stamp`)*
+*(guard: `states the cold-retirement condition in one unit only`)*
 
 **38. Every worked GATE verdict prints both disclosures.** `abstained` — what the run
 declined to claim — and `unlooked` — what a check never looked at. Without them a `PASS`
@@ -372,7 +372,7 @@ rule and the command. Every miss was found by a reader or a sweep, never by the 
 **nobody notices a corpus that is too small, because everything inside it passes.**
 Exclusions are allowed and must each carry a reason in the code: a changelog narrates
 old formats, `docs/evidence/specs/` are point-in-time records.
-*(guard: `a worked GATE verdict omits ` and `states the cold-retirement condition as` — both now run over corpora walked from disk, so a new surface joins by existing)*
+*(guard: `a worked GATE verdict omits ` and `states the cold-retirement condition in one unit only` — both now run over corpora walked from disk, so a new surface joins by existing)*
 
 **44. A carry-over row still `open` names a board id, and the board row names it back.**
 `docs/evidence/backlog.md` is the project's queue between runs; the ledger's `open`
