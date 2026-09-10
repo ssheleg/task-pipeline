@@ -453,3 +453,10 @@ git add <submodule> && git commit -m "chore: bump <name> submodule — <why>"
 Moved out of `SKILL.md` on 2026-08-16: the body was 6685 tokens against a
 < 5000 budget, and stage-10 close-out is what this file is for.
 
+
+
+**Handoff is repository-backed.** Apply `artifacts.md` → *Durable handoff across
+agents and repositories*: reports, task context and next steps must be tracked,
+with verified remote refs where push is authorized. A local preview or clean but
+unpushed worktree is not delivery. Check a fresh checkout, not the author’s paths.
+

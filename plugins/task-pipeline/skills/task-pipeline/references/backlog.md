@@ -90,7 +90,14 @@ So:
   somebody else pick this up?"*, which is the only question the board is answering.
 - **The ref is checkable and that is the point.** `git rev-parse` either resolves it or it
   does not, so a row that has quietly expired can be found before somebody plans around
-  it.
+it.
+
+An audit row is an entry point, not a complete execution handoff. Before an
+independent agent takes it, attach the context closure, implementation decisions,
+input revisions, dependencies and result contract from
+[Execution packets](planning.md#execution-packets). Keep priority separate from dispatch
+readiness, and account for every finding without turning every finding into an
+isolated task that ignores shared module/interface changes.
 
 **A prose detector was tried first and discarded.** Matching *"parked"*, *"is built"*,
 *"ready to merge"* in the description cell fired on **three rows out of 187 and all three

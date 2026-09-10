@@ -5,8 +5,8 @@ brief describes more than one deliverable, more than one surface, or a system
 rather than a change — must be cut into modules first, and then built one brick at
 a time, each brick carrying its own documentation, spec, plan, build and gates.
 
-This runs at the end of **stage 2**, on the approved design, before any spec is
-written. It is skipped — explicitly, in writing — when the work is a single module.
+Module mapping runs at the end of **stage 2**, before the spec; a single-module change skips that map explicitly.
+Stage-4 leaf sizing still applies when work is handed to independent agents; skipping the map does not skip task sizing.
 
 ## Contents
 
@@ -15,6 +15,7 @@ written. It is skipped — explicitly, in writing — when the work is a single 
 - The module map — the artifact
 - GATE (part of stage 2, manual)
 - The program loop — one brick at a time
+- Executor-sized tasks and context
 - Program done
 
 ## When it applies
@@ -139,6 +140,86 @@ Rules for the loop:
 - **Loop discipline:** a module re-entering the same stage a third time trips the
   loop guard ([`loop-guard.md`](loop-guard.md)) — stop, name the oscillation, and
   fix the layer that owns it instead of iterating.
+
+## Executor-sized tasks and context
+
+The module map is not an execution queue. At stage 4, split each change into
+small, reviewable outcomes before handing it to another agent. Keep the original
+finding or feature as the parent; only its leaf tasks enter the dispatch queue.
+Do not mark the parent done because its plan exists.
+
+### Cut by outcome, with its proof
+
+One leaf owns one observable behavior, invariant, or artifact contract. Include
+the focused regression and necessary documentation with that outcome; do not
+create separate "write tests" and "write docs" jobs by ritual. Split when a leaf
+requires another independent decision, another resource owner, an unrelated
+failure mechanism, or more primary context than its declared budget permits.
+Do not split a transaction across tasks merely to reach a target task count.
+
+For example, "fix the updater" is a parent. A leaf can make `--dry-run` return
+an operation plan without mutation, proved by unchanged fixture bytes and no
+mutating child calls. Atomic generation switching and replacement verification
+are separate outcomes with their own prerequisites and tests.
+
+Before dispatch, the planner records for every leaf:
+
+- parent requirement/finding and module/interface owner;
+- the concrete change, why it is needed, and the observable expected result;
+- decisions already made, alternatives rejected, and explicit exclusions;
+- exact existing edit targets and proposed create targets; historical evidence,
+  migrations and ADRs remain read-only unless their own contract permits edits;
+- inputs, required predecessor outputs, and data/control/resource edge reasons;
+- ordered implementation steps and a focused positive and negative acceptance;
+- primary context manifest, source/context digests, outputs and rollback;
+- one integration owner and the claim/capability checks from
+  [`planning.md`](planning.md) → Execution packets.
+
+### Resolve material choices before implementation
+
+An implementation leaf is not ready while product behavior, public interface,
+data ownership, authorization, dependency policy, or failure semantics remain
+undecided. Create a bounded decision task instead: one precise question, named
+sources or experiment, time/context budget, required decision record, and the
+criterion that resolves it. Its consumers wait for that record and receive a
+new packet revision. Do not fill uncertainty with invented certainty.
+
+Routine local implementation choices can remain with the executor. A plan need
+not prescribe every variable name. New evidence that invalidates a recorded
+decision returns to its owner with the smallest counterexample; the executor
+does not silently redesign adjacent modules or restart the whole interview.
+
+### Budget what the executor actually reads
+
+Primary context contains the leaf brief, applicable module/interface decisions,
+acceptance, and the relevant source ranges. The full audit, other modules,
+alternative designs and historical discussion belong in an indexed appendix.
+Keep every required reference resolvable and digest-bound, but do not inject
+the entire reference closure into every prompt. Read deeper source on demand
+when needed to verify the local change.
+
+Set a primary-context budget for the chosen host before materialization. Record
+the tokenizer/model when measuring tokens; a byte or character count is a byte
+or character count, never a token measurement. If the materialized primary
+context exceeds the budget, split the outcome or move truly optional material
+to the appendix. Never truncate constraints, acceptance, error behavior or
+dependency outputs to make a packet fit. No universal task duration, file count
+or token limit establishes quality; use project defaults and report exceptions.
+
+### Cold-start and completion checks
+
+A fresh executor must be able to answer "what changes, where, why, under which
+decision, and how success is observed" from the primary packet without reading
+the planner's conversation. Validate this before dispatch; reading an ID or a
+title alone is not the test. Recheck hashes and materialize predecessor outputs
+after they exist. Planned input placeholders never count as satisfied inputs.
+
+Review the leaf's actual candidate code and evidence. Then check the parent's
+acceptance across its leaves so a collection of individually green tasks cannot
+drop an end-to-end requirement. Parent close requires current child receipts,
+cross-seam checks where applicable, and the integration result. Plan completeness,
+dispatch readiness, implemented behavior and released availability are separate
+states.
 
 ## Program done
 
