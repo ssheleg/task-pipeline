@@ -3060,7 +3060,9 @@ jobs:
           fi
 
       - name: Property check (the shipped graph schema keeps its conditionals behind a `$ref`)
-        run: python3 test/property_graph_conditionals.py
+        run: |
+          # Block scalar on purpose: negatives.py reads steps by `run: |`.
+          python3 test/property_graph_conditionals.py
 
       - name: Negative self-test (the verification ledger claiming a stale shipped state)
         run: |
