@@ -1477,6 +1477,23 @@ three quarters of the work on this run.
 
 ## Releases that carry no stamp — stated, not stamped
 
+**`v1.86.0` and `v1.86.1` carry no stamp, and the mechanism is the SEVENTH instance of the one
+this section already names six times:** the stamp gate reads the tag's own tree, a
+branch push cannot see a tag that does not exist yet, and the release was cut without
+writing the stamp first. The gate refused it — correctly — before anything published:
+the tag exists, the GitHub release does not, and npm never served it. `v1.86.1` is the
+same change released with the declaration in the tree before the tag — and it is named
+here too, because a declaration written for one version cannot cover the version it is
+being written for: the local tag caught exactly that, one round before CI would have.
+
+What makes this instance worth its own paragraph rather than a range entry: the
+repository's OWN retrospective already held the rule as `R-010` — *"before pushing a
+tag, run the suite the release runs — `test:all`, against the tree you are about to
+tag"* — and named the exact reason a branch run cannot substitute. The lesson was
+written, dated, and read past. A rule that exists and is skipped is not a missing rule;
+it is an unenforced one, and `R-010`'s own retirement condition ("it becomes a
+mechanical pre-push hook") is the fix this instance argues for.
+
 **`v1.85.1` carries no stamp, and the mechanism is the one this section already
 names twice:** the stamp gate reads the tag's own tree, the branch run cannot see
 a tag that does not exist yet, and the audit-wave release was cut without writing

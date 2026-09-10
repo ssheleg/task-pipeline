@@ -1,3 +1,18 @@
+## v1.86.1 — the release declares the stamp it does not carry
+
+`v1.86.0` was tagged and refused: the run-stamp gate reads the tag's own tree, a
+branch push cannot see a tag that does not exist yet, and the declaration was not
+in the tree when the tag was cut. Nothing published under it — the tag exists,
+the release does not, npm never served it.
+
+This is the seventh instance of a mechanism this repository's `retro.md` names
+six times, and `R-010` already held the rule: run the suite the RELEASE runs,
+against the tree you are about to tag. The lesson was written and read past,
+which is what its own retirement condition — "it becomes a mechanical pre-push
+hook" — exists to end.
+
+The v1.86.0 payload is unchanged. This release adds the declaration.
+
 ## v1.86.0 — the audit closes, and three guards stop passing on a wording
 
 Sherlock external-v3 (37 findings) plus the context-ready handoff (PR #85),

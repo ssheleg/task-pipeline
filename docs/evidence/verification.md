@@ -1,6 +1,6 @@
 # Verification — task-pipeline
 
-## Shipped state — v1.86.0 (2026-09-10)
+## Shipped state — v1.86.1 (2026-09-10)
 
 Sherlock external-v3 (37 findings) and the context-ready handoff. The rows worth
 reading are the three guards that were passing without running.
