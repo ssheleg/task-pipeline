@@ -1,3 +1,37 @@
+## v1.86.0 — the audit closes, and three guards stop passing on a wording
+
+Sherlock external-v3 (37 findings) plus the context-ready handoff (PR #85),
+each finding carrying its own executable regression.
+
+Guards: 429 → **429**, property checks 15 → **15** — no guard was added or
+removed. Three plants were REPOINTED to follow their subjects to the wording
+those subjects had moved to, and the conditionals check became a script when
+the workflow hit GitHub's size limit. A repointed plant is the same guard
+proving the same thing about a sentence that moved.
+
+- **A guard keyed to a wording had silently stopped running.** The retrospective
+  gained rule CLASSES — a cold rule is marked review-needed rather than deleted,
+  and the trigger reads *five exposure opportunities* instead of *five run
+  stamps*. The check requiring the condition to name BOTH units was keyed to the
+  old words, so its corpus predicate matched nothing, every surface dropped out
+  of scope, and it passed everything. Found only because a NEGATIVE SELF-TEST
+  refused to plant. The discovery predicate and the assertion are now built from
+  one pattern, and the failure message no longer names a unit — naming one is
+  what tied it to a wording.
+- **A property check pinned a count.**  went red when the graph
+  schema gained a fourth conditional, all four correctly behind a . It
+  compares the refs against the entries now, so inlining one still fails at any
+  number of rules.
+- Explaining that fix inline pushed  past
+  GitHub's 512,000-byte limit — above which the workflow stays `active`, creates
+  no runs, and `gh pr checks` says "no checks reported". The size guard names its
+  own remedy, and taking it moved the check into `test/property_graph_conditionals.py`.
+- The doctrine map moved to `references/doctrine-map.md` when the body breached
+  the 5000-token budget; the reachability walker is transitive, so every
+  reference it names is still reachable. `evidence-docs/references/GENERATED.md`
+  — the note saying those copies are generated — was reachable from nothing, so
+  the agent most likely to edit a copy never read it.
+
 ## v1.85.2 — the two-merge protocol, followed this time
 
 **v1.85.1 is a burned tag** — the third of this wave's choreography lessons, and
