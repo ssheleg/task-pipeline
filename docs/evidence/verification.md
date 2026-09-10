@@ -1,5 +1,20 @@
 # Verification — task-pipeline
 
+## Shipped state — v1.86.0 (2026-09-10)
+
+Sherlock external-v3 (37 findings) and the context-ready handoff. The rows worth
+reading are the three guards that were passing without running.
+
+| REQ | What ships | How it was confirmed | Confirmed |
+|---|---|---|---|
+| SH-regressions | Every sherlock finding assigned here closes with an executable regression | `test/audit_regressions/` holds 34 suites; `npm test` runs all of them and exits 0 | **observed** |
+| SH-cold-guard | The cold-retirement guard runs again, at any wording | it was keyed to *five run stamps*; the retrospective's rule classes made the trigger *five exposure opportunities*, its corpus predicate matched nothing, every surface dropped out of scope, and it passed everything. Discovery and assertion are now built from one `_COLD_UNITS` pattern; the message says "in one unit only" rather than naming a unit | **planted** — verified in both polarities: the clean tree passes and a copy with the sixty-days clause removed is refused |
+| SH-count-derived | The conditionals property check derives its count | `len(refs) == 3` went red on a fourth conditional, all four correctly behind a `$ref`. It compares the ref count against the entry count now — inlining one still fails at any number of rules | **planted** — a copy with one conditional inlined is refused |
+| SH-workflow-size | The workflow stays under GitHub's limit | explaining the previous fix inline pushed `.github/workflows/validate.yml` to 512,511 bytes, past the 512,000 above which it stays `active` and creates no runs. The size guard names its own remedy; the check moved to `test/property_graph_conditionals.py` and the file is 509,298 bytes | **planted** — the guard refused the tree at 512,511 |
+| SH-reachability | The doctrine map is a reference, and GENERATED.md is reachable | the body breached the 5000-token budget, so the forty-row map moved to `references/doctrine-map.md`; the reachability walker is transitive, so every reference it names is still reached. `evidence-docs/references/GENERATED.md` — the note saying those copies are generated — was reachable from nothing | **observed** |
+| SH-citation | B-088's citation is current, not merely resolvable | the handoff's 154 new lines in planning.md moved the passage; the guard reported "the citation resolves and is no longer current, which is the failure a resolving address cannot report on its own". Recomputed 83-100 → 101-105 | **planted** |
+| Gate | The whole suite on this tree | `npm test` EXIT=0; CI's 462-step validate job green | **observed** |
+
 ## Shipped state — v1.85.2 (2026-09-06)
 
 Family-audit wave `AUDIT-WAVE-0906`: five shipped surfaces aligned with the tree. No
