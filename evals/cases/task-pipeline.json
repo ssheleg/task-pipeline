@@ -1,0 +1,191 @@
+{
+ "contract": "outcome-case/1 (schemas/outcome-case.schema.json + test/outcome_harness.py in ssheleg/sshlg-skills)",
+ "note": "Outcome corpus for task-pipeline (FIX-EV-01.11). Judged on ARTIFACTS via the family harness: the runner records the actual output oracle verdict AND the raw result per case; with/without-skill arms are the harness's baseline contract. Nothing in the production skill was changed for grader convenience.",
+ "arms": {
+  "baseline": "same prompts, skill absent",
+  "current": "same prompts, skill installed"
+ },
+ "cases": [
+  {
+   "schema_version": "outcome-case/1",
+   "id": "TP-OUT-001-full-brief-no-extra-questions",
+   "skill": "task-pipeline",
+   "prompt": {
+    "text": "Given a fully specified brief (exact file, exact change, acceptance stated), run the pipeline and record in run-log.md that it asked ZERO clarifying questions and went straight to the plan (TP-01)."
+   },
+   "environment": {
+    "model": "inherit",
+    "host": "any",
+    "case_digest": "b69415f8f9515946adf5cacfe4e1e735885351d81f352444a8ab9885bc46eb96"
+   },
+   "checks": {
+    "tool": [
+     {
+      "name": "python3 present",
+      "command": "python3 -c 'pass'"
+     }
+    ],
+    "load_trace": {
+     "expect_loaded": [
+      "task-pipeline"
+     ],
+     "expect_not_loaded": []
+    },
+    "outcome": [
+     {
+      "name": "run-log exists",
+      "kind": "artifact-exists",
+      "target": "run-log.md"
+     },
+     {
+      "name": "a full brief triggers no extra questions (TP-01)",
+      "kind": "artifact-contains",
+      "target": "run-log.md",
+      "expect": "0 questions"
+     }
+    ]
+   }
+  },
+  {
+   "schema_version": "outcome-case/1",
+   "id": "TP-OUT-002-negative-routing",
+   "skill": "task-pipeline",
+   "prompt": {
+    "text": "Explain in two sentences what a webhook is."
+   },
+   "environment": {
+    "model": "inherit",
+    "host": "any",
+    "case_digest": "a5da94aa03520bb6226ea88328a75ab6d7e3985c73a0e90a1379bf168fead57e"
+   },
+   "checks": {
+    "tool": [
+     {
+      "name": "python3 present",
+      "command": "python3 -c 'pass'"
+     }
+    ],
+    "load_trace": {
+     "expect_loaded": [],
+     "expect_not_loaded": [
+      "task-pipeline"
+     ]
+    },
+    "outcome": [
+     {
+      "name": "no pipeline artifact appears",
+      "kind": "command-exit-0",
+      "target": "test ! -f run-log.md"
+     }
+    ]
+   }
+  },
+  {
+   "schema_version": "outcome-case/1",
+   "id": "TP-OUT-003-custom-profile-no-forced-stages",
+   "skill": "task-pipeline",
+   "prompt": {
+    "text": "Validate a three-stage custom pipeline profile — it must pass without gaining forced stage 0/7/10, while the kernel invariants are still checked; write profile-check.md (TP-03)."
+   },
+   "environment": {
+    "model": "inherit",
+    "host": "any",
+    "case_digest": "5b1b98d485c4dc61cf6f1acf7bd071cb01ef512c5c802eafd6b6f450cb7dd38c"
+   },
+   "checks": {
+    "tool": [
+     {
+      "name": "python3 present",
+      "command": "python3 -c 'pass'"
+     }
+    ],
+    "load_trace": {
+     "expect_loaded": [
+      "task-pipeline"
+     ],
+     "expect_not_loaded": []
+    },
+    "outcome": [
+     {
+      "name": "a custom profile keeps its stages (TP-03)",
+      "kind": "artifact-contains",
+      "target": "profile-check.md",
+      "expect": "three-stage"
+     }
+    ]
+   }
+  },
+  {
+   "schema_version": "outcome-case/1",
+   "id": "TP-OUT-004-unused-rule-not-auto-removed",
+   "skill": "task-pipeline",
+   "prompt": {
+    "text": "Five runs happened with no payments. Do NOT remove the payment-safety rule for being unused; explain every removal you do make; write pruning.md (TP-04)."
+   },
+   "environment": {
+    "model": "inherit",
+    "host": "any",
+    "case_digest": "1e8f20941ef80ebc9a1a6c399b042c7a683564c30419b5bae1f585a9a3671123"
+   },
+   "checks": {
+    "tool": [
+     {
+      "name": "python3 present",
+      "command": "python3 -c 'pass'"
+     }
+    ],
+    "load_trace": {
+     "expect_loaded": [
+      "task-pipeline"
+     ],
+     "expect_not_loaded": []
+    },
+    "outcome": [
+     {
+      "name": "an unused rule is not auto-removed (TP-04)",
+      "kind": "artifact-contains",
+      "target": "pruning.md",
+      "expect": "not removed"
+     }
+    ]
+   }
+  },
+  {
+   "schema_version": "outcome-case/1",
+   "id": "TP-OUT-005-scenarios-without-super-ux",
+   "skill": "task-pipeline",
+   "prompt": {
+    "text": "With valid docs/ux/scenarios.md present but super-ux NOT installed, run the pipeline; it should honour the scenarios contract and complete; write scenario-check.md (TP-02)."
+   },
+   "environment": {
+    "model": "inherit",
+    "host": "any",
+    "case_digest": "d28ba54adac84d3234566b3eeb566a527b75aeb337fc4328a3455cf3448f328a"
+   },
+   "checks": {
+    "tool": [
+     {
+      "name": "python3 present",
+      "command": "python3 -c 'pass'"
+     }
+    ],
+    "load_trace": {
+     "expect_loaded": [
+      "task-pipeline"
+     ],
+     "expect_not_loaded": [
+      "super-ux"
+     ]
+    },
+    "outcome": [
+     {
+      "name": "valid scenarios satisfy the contract without super-ux (TP-02)",
+      "kind": "artifact-contains",
+      "target": "scenario-check.md",
+      "expect": "scenarios"
+     }
+    ]
+   }
+  }
+ ]
+}

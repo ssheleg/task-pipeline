@@ -50,16 +50,58 @@ function copyDir(src, dest) {
   }
 }
 
+function verifyTree(src, staged, isDir) {
+  if (!isDir) {
+    if (!fs.readFileSync(src).equals(fs.readFileSync(staged))) {
+      throw new Error(`staged ${path.basename(staged)} does not match its source`);
+    }
+    return;
+  }
+  for (const entry of fs.readdirSync(src, { withFileTypes: true })) {
+    const s = path.join(src, entry.name);
+    const d = path.join(staged, entry.name);
+    if (entry.isDirectory()) verifyTree(s, d, true);
+    else if (!fs.readFileSync(s).equals(fs.readFileSync(d))) {
+      throw new Error(`staged ${entry.name} does not match its source`);
+    }
+  }
+}
+
+/**
+ * A TRANSACTIONAL install (FIX-UP-05.02): the writer contract from UP-05
+ * applied to this member's installer. The old code deleted `dest` and THEN
+ * copied into it, so a crash mid-copy left nothing (with --force) or a partial
+ * tree. Now the payload is staged into a same-filesystem sibling and VERIFIED
+ * first; only then is the old install moved aside (recoverable) and the staged
+ * one renamed into place. A stage crash leaves the ACTIVE install untouched;
+ * --force=false still skips, preserving the user's bytes.
+ */
 function installOne(label, src, dest, isDir, force) {
   if (fs.existsSync(dest) && !force) {
     console.log(`skip: ${label} already installed at ${dest} (rerun with --force to overwrite)`);
     return;
   }
-  fs.rmSync(dest, { recursive: true, force: true });
   fs.mkdirSync(path.dirname(dest), { recursive: true });
-  if (isDir) copyDir(src, dest);
-  else fs.copyFileSync(src, dest);
-  console.log(`Installed ${label} -> ${dest}`);
+  const staging = `${dest}.staging-${process.pid}`;   // same fs as dest
+  const prev = `${dest}.prev-${process.pid}`;
+  fs.rmSync(staging, { recursive: true, force: true });
+  try {
+    // 1. STAGE + VERIFY, before touching the active install.
+    if (isDir) copyDir(src, staging);
+    else { fs.mkdirSync(path.dirname(staging), { recursive: true }); fs.copyFileSync(src, staging); }
+    verifyTree(src, staging, isDir);
+    // 2. SWITCH: move the old aside (recoverable), rename staged into place.
+    fs.rmSync(prev, { recursive: true, force: true });
+    if (fs.existsSync(dest)) fs.renameSync(dest, prev);
+    fs.renameSync(staging, dest);
+    fs.rmSync(prev, { recursive: true, force: true });
+    console.log(`Installed ${label} -> ${dest}`);
+  } catch (err) {
+    // Abort: leave the active install intact, remove the half-built staging.
+    fs.rmSync(staging, { recursive: true, force: true });
+    if (fs.existsSync(prev) && !fs.existsSync(dest)) fs.renameSync(prev, dest);
+    throw new Error(`install aborted, previous install intact: ${err.message}`);
+  }
 }
 
 /**
@@ -172,6 +214,20 @@ function migrateArtifacts(args) {
   return 0;
 }
 
+// The bundled HostContext resolver (FIX-UP-08.02) — one contract, a local
+// copy per member because these installers run via `npx` with no shared lib.
+// A host's config root is: an explicit root > the documented host env var >
+// the platform default `~/<dir>`. Used verbatim (spaces preserved), never
+// through a shell. Host EXISTENCE is a separate probe on the returned path.
+const HOST_ENV = { claude: 'CLAUDE_CONFIG_DIR', codex: 'CODEX_HOME', gemini: 'GEMINI_CONFIG_DIR' };
+const HOST_DIR = { claude: '.claude', codex: '.codex', gemini: '.gemini' };
+function hostRoot(agent, home, env, explicit) {
+  if (explicit) return explicit;
+  const e = (env || process.env)[HOST_ENV[agent]];
+  if (e) return e;
+  return path.join(home, HOST_DIR[agent]);
+}
+
 function main(argv) {
   const args = argv.slice(2);
   if (args.includes('--help') || args.includes('-h')) {
@@ -204,9 +260,10 @@ function main(argv) {
   // copy SHADOWS the plugin — silently serving whatever version was copied, forever.
   // The family launcher (sshlg-skills) prunes exactly these copies for that reason,
   // so creating one without saying so undoes the thing it is paired with.
+  const claude = hostRoot('claude', home, process.env);
   const pluginDirs = [
-    path.join(home, '.claude', 'plugins', 'marketplaces', 'task-pipeline'),
-    path.join(home, '.claude', 'plugins', 'cache', 'task-pipeline'),
+    path.join(claude, 'plugins', 'marketplaces', 'task-pipeline'),
+    path.join(claude, 'plugins', 'cache', 'task-pipeline'),
   ];
   if (!force && pluginDirs.some((d) => fs.existsSync(d))) {
     console.error(`refusing: task-pipeline is already installed as a Claude Code PLUGIN.
@@ -224,14 +281,14 @@ Rerun with --force if you deliberately want the plain copy instead.`);
   installOne(
     'task-pipeline skill  ',
     skillSrc,
-    path.join(home, '.claude', 'skills', 'task-pipeline'),
+    path.join(claude, 'skills', 'task-pipeline'),
     true,
     force
   );
   installOne(
     '/task-pipeline command',
     cmdSrc,
-    path.join(home, '.claude', 'commands', 'task-pipeline.md'),
+    path.join(claude, 'commands', 'task-pipeline.md'),
     false,
     force
   );
@@ -240,4 +297,8 @@ Rerun with --force if you deliberately want the plain copy instead.`);
   return 0;
 }
 
-process.exit(main(process.argv));
+if (require.main === module) {
+  process.exit(main(process.argv));
+}
+
+module.exports = { installOne, copyDir, verifyTree, hostRoot };

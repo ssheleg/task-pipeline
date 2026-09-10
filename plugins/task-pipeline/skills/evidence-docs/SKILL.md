@@ -13,7 +13,7 @@ the standard and the map: ten canons, and where each is defined, enforced and se
 It is a **navigator, not a second copy**. Every law below has exactly one home — that is
 canon 3, and a navigator that restated the doctrine would break the rule it is indexing.
 The full statement of each canon, its rationale and its enforcement live in
-[`documentation.md`](../task-pipeline/references/documentation.md) → *The canons*.
+[`documentation.md`](references/documentation.md) → *The canons*.
 
 ## The ten canons
 
@@ -34,25 +34,25 @@ The full statement of each canon, its rationale and its enforcement live in
 
 They are **epistemic**: what makes a claim documentation. The operational layer — what to
 do at a given trigger, with a check and an exit criterion — is
-[`learned.md`](../task-pipeline/references/learned.md). When the two seem to say the same
+[`learned.md`](references/learned.md). When the two seem to say the same
 thing, the canon is the *why* and the rule is the *how*.
 
 ## Where next
 
 | You are about to… | Read | Because |
 |---|---|---|
-| set a project's documentation up from nothing | [`documentation.md`](../task-pipeline/references/documentation.md) → *The inventory* | four questions answered before the first line of work |
-| record a decision so it survives its author | *Registers and ids* + [`templates/decisions.md`](../task-pipeline/templates/decisions.md) | append-only ids, edge markers, one decision home |
+| set a project's documentation up from nothing | [`documentation.md`](references/documentation.md) → *The inventory* | four questions answered before the first line of work |
+| record a decision so it survives its author | *Registers and ids* + [`templates/decisions.md`](templates/decisions.md) | append-only ids, edge markers, one decision home |
 | change something and not orphan the docs | *The Doc Loop* + *The propagation matrix* | which documents a change owes, starting with the meta-row |
 | decide where a fact belongs | *Single source of truth* | two homes disagree the day one of them is updated |
-| build a check that cannot lie | [`gates.md`](../task-pipeline/references/gates.md) | three axes, the enforcement ladder, progressive arming, probing |
-| trust a mechanism that reports success | [`gates.md`](../task-pipeline/references/gates.md) → *False success* | the failure that removes the reason to look |
-| wire a check into the agent's own tooling | [`hooks.md`](../task-pipeline/references/hooks.md) | the hook contract, and why a crashed guard **allows** the action |
-| audit documentation a project already has | [`setup.md`](../task-pipeline/references/setup.md) | seven passes, cheapest first, output is a fix plan |
-| carry a lesson to the next run | [`retrospective.md`](../task-pipeline/references/retrospective.md) | stamp first (the cold trigger reads it), then prune to a cap of ten; every lesson names its commit |
-| seed a gate into a host project | [`templates/docgate.sh`](../task-pipeline/templates/docgate.sh) | it seeds **green**: dormant where there is no input yet |
+| build a check that cannot lie | [`gates.md`](references/gates.md) | three axes, the enforcement ladder, progressive arming, probing |
+| trust a mechanism that reports success | [`gates.md`](references/gates.md) → *False success* | the failure that removes the reason to look |
+| wire a check into the agent's own tooling | [`hooks.md`](references/hooks.md) | the hook contract, and why a crashed guard **allows** the action |
+| audit documentation a project already has | [`setup.md`](references/setup.md) | seven passes, cheapest first, output is a fix plan |
+| carry a lesson to the next run | [`retrospective.md`](references/retrospective.md) | stamp first (the cold trigger reads it), then prune to a cap of ten; every lesson names its commit |
+| seed a gate into a host project | [`templates/docgate.sh`](templates/docgate.sh) | it seeds **green**: dormant where there is no input yet |
 | claim that an **agent** behaves | `tdd.md` → *When the thing under test is an agent* — named rather than linked, because this navigator's out-of-directory links break wherever a packager ships this skill alone | the address is a trace id and the assertion that ran (canon 1); a judge nobody watched disagree is a green nobody watched turn red (canon 5) |
-| take a whole change through to acceptance | [`task-pipeline`](../task-pipeline/SKILL.md) | this skill is the standard; that one is how a change reaches the repository |
+| take a whole change through to acceptance | the `task-pipeline` skill (install it separately) | this skill is the standard; that one is how a change reaches the repository |
 
 ## When this applies
 
@@ -103,3 +103,8 @@ address, delete it, or **mark it as an unbacked claim the operator chose to make
 it**. The third option is not a loophole; it is the reason the other two are worth
 anything. A rule with no way to proceed under it becomes a rule people route around, and
 then nothing carries an address.
+
+**Editing these references.** The files under `references/` and `templates/` here are
+GENERATED copies, so a single-skill install of this skill resolves every link without a
+neighbouring checkout. Edit the source home, never the copy — which file is generated,
+from where, and how to re-sync: [`GENERATED.md`](references/GENERATED.md).

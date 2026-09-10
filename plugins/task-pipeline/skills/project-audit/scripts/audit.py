@@ -897,12 +897,23 @@ def open_in_browser(path, opener=None):
 
 def _finding(probe_id, where, title, severity, blast, effort, remedy,
              detail="", evidence=""):
+    # The axes stay apart (FIX-PA-02.01): every shipped probe reads the tree,
+    # so its MECHANISM is confirmed with evidence — while this collector
+    # measures no production, so INCIDENCE is "unknown", and UNKNOWN != 0: it
+    # never lowers the mechanism's truth, only what may be claimed about
+    # exposure. Scope and time of the observation ride in the sidecar so the
+    # next audit knows what was looked at, and when.
     return {
         "id": finding_id(probe_id, where, title), "probe": probe_id,
         "title": title, "severity": severity, "where": where,
         "detail": detail, "evidence": evidence, "remedy": remedy,
         "blast": blast, "effort": effort, "runs_open": 0,
         "first_seen": datetime.date.today().isoformat(),
+        "mechanism": "confirmed",
+        "incidence": "unknown",
+        "observed_scope": "local checkout",
+        "observed_at": datetime.datetime.now(datetime.timezone.utc)
+                       .strftime("%Y-%m-%dT%H:%M:%SZ"),
     }
 
 

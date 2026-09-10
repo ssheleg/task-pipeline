@@ -374,6 +374,38 @@ satisfied**, and code quality. The implementer's self-review never substitutes f
 it. Rubric, inputs, prompt templates and how to build the diff package:
 [`review.md`](review.md).
 
+**The dispatch packet is compiled and IMMUTABLE.** Before a node is built, its
+context is compiled into one packet — the REQ references, the global
+constraints, the interfaces, the artifact digests, the base revision, the
+scope, the budget, the run profile and the skill lock — every ref bound
+(address + digest) or the compilation is refused; a missing required ref is a
+refusal, not a default. **No ephemeral secret rides inside**: a packet outlives
+the session that built it, so a value that must expire is referenced by the
+NAME of its store, never carried by value. `scripts/context_packets.py
+compile-dispatch` builds it and the node records its address + digest
+(`dispatch_packet`), so a build in a git-ignored workspace still points at the
+durable context it ran under.
+
+**The result is typed, tied and comparable.** An attempt's result records its
+TYPED outputs (name + kind + address + digest), the `packet_digest` of the
+immutable packet it answered, and `consumed` — the predecessor outputs it read,
+by name + digest. Freshness is then a comparison, never a feeling: when a
+predecessor re-runs and an output digest changes, `scripts/packet.py`'s
+`consumed_stale` names every result that read the old bytes, and those nodes
+rebuild at a new revision. And the packet rule applies to the answer as to the
+question: **no credential rides in a result** — an output whose name reads as
+one is refused by `validate-result`.
+
+**An authorized exception is its own disposition — never a fake PASS.** Where
+the operator decides a node ships without (or despite) certification, that is
+recorded with `graph.py waive --node … --reason … --by …`: an `exception`
+object carrying the reason and the IDENTITY that signed it. The failed
+certification stays visible beside it, the node is never marked certified, and
+`close` stamps the exception into the evidence — a reader later sees a
+decision, not a green. And reviewer EXPOSURE is stated honestly: a tier report
+may say what the reviewer actually saw, and a syntax lint recorded as a blind
+review is refused by `certify` by name.
+
 **The boundary with certification:** this review closes a **prose-plan task** —
 one reviewer, the five-round cap of §4.5. A **work-graph node** is closed by the
 three blind tiers and `graph.py certify` instead

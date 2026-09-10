@@ -1,0 +1,54 @@
+{
+ "schema_version": "browser-claims/1",
+ "note": "One row = one browser claim: which REQ/scenario it serves, which STATE it was captured in, and which KIND of check produced it — the look, the spec suite or the library script (the browser.md split). A functional PASS never yields a visual PASS; an artifact closes only the state it was captured in (the initial screenshot does not close an opened/error claim); no browser channel means status NOT_RUN with the reason, never a quiet green. python3 test/browser_claims_test.py validates a filled copy with stdlib only.",
+ "claims": [
+  {
+   "id": "BC-01",
+   "req": "REQ-3",
+   "scenario": "SCN-004",
+   "component": "nav-menu",
+   "state": "initial",
+   "kind": "look",
+   "artifact": "shots/nav-menu-initial.png",
+   "artifact_state": "initial",
+   "status": "NOT_RUN",
+   "reason": "template row — replace with a real capture"
+  },
+  {
+   "id": "BC-02",
+   "req": "REQ-3",
+   "scenario": "SCN-004",
+   "component": "nav-menu",
+   "state": "opened",
+   "kind": "look",
+   "artifact": "shots/nav-menu-opened.png",
+   "artifact_state": "opened",
+   "status": "NOT_RUN",
+   "reason": "template row — replace with a real capture"
+  },
+  {
+   "id": "BC-03",
+   "req": "REQ-3",
+   "scenario": "SCN-004",
+   "component": "nav-menu",
+   "state": "closed-again",
+   "kind": "look",
+   "artifact": "shots/nav-menu-closed-again.png",
+   "artifact_state": "closed-again",
+   "status": "NOT_RUN",
+   "reason": "the full toggle cycle: initial -> opened -> closed-again, each with its own artifact"
+  },
+  {
+   "id": "BC-04",
+   "req": "REQ-3",
+   "scenario": "SCN-004",
+   "component": "nav-menu",
+   "state": "any",
+   "kind": "suite",
+   "artifact": null,
+   "artifact_state": null,
+   "status": "NOT_RUN",
+   "reason": "the spec suite half — its PASS counts for functional claims only"
+  }
+ ]
+}

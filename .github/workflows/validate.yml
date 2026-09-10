@@ -76,6 +76,10 @@ jobs:
         run: |
           python3 test/graph_test.py
           python3 test/project_audit_test.py
+          python3 test/packet_schema_test.py
+
+      - name: Audit regressions (sherlock plan, one file per closed finding)
+        run: npm run test:audit-regressions
 
       - name: Stage-7 release gate (the hook this skill ships)
         run: python3 test/release_gate_test.py
@@ -2478,10 +2482,16 @@ jobs:
           set -eu
           rm -rf /tmp/ed4-copy && cp -R . /tmp/ed4-copy
           python3 - <<'EOF'
+          # The link SHAPE this plant breaks changed with FIX-ED-01.01: evidence-docs
+          # now ships its own GENERATED copies of these references, so the link that
+          # used to navigate out of the skill (`../task-pipeline/references/gates.md`)
+          # is in-set (`references/gates.md`). The RULE is the same one — a link a
+          # live document claims must resolve from its own directory — so the plant
+          # follows the link to its new shape rather than asserting a dead one.
           p = "/tmp/ed4-copy/plugins/task-pipeline/skills/evidence-docs/SKILL.md"
           t = open(p, encoding="utf-8").read()
-          assert '../task-pipeline/references/gates.md' in t, "PLANT DID NOT LAND: needle absent before edit"
-          open(p, "w", encoding="utf-8").write(t.replace('../task-pipeline/references/gates.md', '../task-pipeline/references/gaits.md'))
+          assert '](references/gates.md)' in t, "PLANT DID NOT LAND: needle absent before edit"
+          open(p, "w", encoding="utf-8").write(t.replace('](references/gates.md)', '](references/gaits.md)'))
           EOF
           if python3 /tmp/ed4-copy/test/validate.py; then
             echo "ERROR: validator passed with a navigator link must resolve from its own directory broken"
@@ -3050,21 +3060,7 @@ jobs:
           fi
 
       - name: Property check (the shipped graph schema keeps its conditionals behind a `$ref`)
-        run: |
-          set -eu
-          python3 - <<'EOF'
-          # The deref branch is only exercised while the shipped schema actually uses it. If
-          # somebody inlines the three rules again the guard goes back to being untested by
-          # anything but a fixture, which is the state B-079 was found in.
-          import json
-          s = json.load(open("plugins/task-pipeline/skills/task-pipeline/graph.schema.json",
-                             encoding="utf-8"))
-          allof = s["definitions"]["node"]["allOf"]
-          refs = [x.get("$ref") for x in allof if isinstance(x, dict)]
-          assert len(refs) == 3 and all(r and r.startswith("#/definitions/") for r in refs), \
-              f"the node's conditionals are not behind $refs: {refs}"
-          print("OK: three conditionals, all behind #/definitions/ —", ", ".join(refs))
-          EOF
+        run: python3 test/property_graph_conditionals.py
 
       - name: Negative self-test (the verification ledger claiming a stale shipped state)
         run: |
@@ -3810,13 +3806,18 @@ jobs:
           python3 - <<'EOF'
           p = "/tmp/cold2-copy/plugins/task-pipeline/skills/task-pipeline/references/retrospective.md"
           t = open(p, encoding="utf-8").read()
-          needle = "**five run stamps** — **or** in the last **sixty days**"
+          # The canonical row moved when the retrospective gained rule CLASSES: a cold
+          # rule is now marked review-needed rather than deleted, and the trigger reads
+          # exposure opportunities. The guard's subject is unchanged — emphasis must be
+          # normalised before matching, or bolding defeats it — so the plant follows the
+          # row to its current wording.
+          needle = "**five exposure opportunities** — or no exposure occurred in **sixty days**"
           assert needle in t, "PLANT DID NOT LAND: canonical row absent before edit"
-          t = t.replace(needle, "**five run stamps**", 1)
+          t = t.replace(needle, "**five exposure opportunities**", 1)
           open(p, "w", encoding="utf-8").write(t)
           s = open(p, encoding="utf-8").read()
-          assert "**five run stamps** — **or**" not in s, "PLANT DID NOT LAND"
-          assert "**five run stamps**" in s, "PLANT WRONG: the bold phrase must survive"
+          assert "**five exposure opportunities** — or no" not in s, "PLANT DID NOT LAND"
+          assert "**five exposure opportunities**" in s, "PLANT WRONG: the bold phrase must survive"
           EOF
           if python3 /tmp/cold2-copy/test/validate.py; then
             echo "ERROR: the guard skipped the file that DEFINES the trigger — markdown emphasis defeated it"
@@ -4268,7 +4269,11 @@ jobs:
           python3 - <<'EOF'
           p = "/tmp/cite2-copy/CONTRIBUTING.md"
           t = open(p, encoding="utf-8").read()
-          needle = "`states the cold-retirement condition as`"
+          # The cited message lost its trailing "as <unit>" when the cold guard stopped
+          # naming a unit — naming one is what had tied it to a wording. The plant
+          # follows the citation; what it proves is unchanged: the SECOND literal in a
+          # `*(guard: A and B)*` parenthetical is checked too, not just the first.
+          needle = "`states the cold-retirement condition in one unit only`"
           assert needle in t, "PLANT DID NOT LAND: second citation absent before edit"
           open(p, "w", encoding="utf-8").write(t.replace(needle, "`this guard does not exist anywhere`", 1))
           assert "this guard does not exist anywhere" in open(p, encoding="utf-8").read(), "PLANT DID NOT LAND"
@@ -9598,9 +9603,12 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: ssheleg/make-skill
-          ref: 991cbb415be3e856f05c974e631423df552883e3
+          ref: 5ca5c367ba24295d4dd99ff670dbef97234140e7
           path: .skill-auditor
           persist-credentials: false
+
+      - name: Install a real tokenizer (the budget is MEASURED, never estimated)
+        run: python3 -m pip install --quiet tiktoken
 
       - name: Audit every shipped Agent Skill
         run: |

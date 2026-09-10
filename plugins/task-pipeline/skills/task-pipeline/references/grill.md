@@ -15,7 +15,7 @@ coming back to the operator.
 ## Contents
 
 - Phase 1 — harvest before you ask
-- Phase 2 — the loop
+- Phase 2 — the gap check, then the loop
 - Domain awareness
 - The autonomy sweep
 - The design destination — one file, decided here, never invented later
@@ -42,11 +42,28 @@ Everything below runs against that harvest. An answer you can't check against a
 source is a recollection, and the whole loop exists to stop the run from building
 on one.
 
-## Phase 2 — the loop
+## Phase 2 — the gap check, then the loop
 
-Interview the operator relentlessly about every aspect of the task until you reach
-a **shared understanding**. Walk down each branch of the decision tree, resolving
-dependencies between decisions one by one.
+**Phase 2 opens with a verdict, not a question.** Walk the decision tree against
+the harvest and the request FIRST and mark every branch: **answered** (the
+request, the code, an ADR, a past brief or the wiki already decides it — record
+the source, do not re-ask), **immaterial** (either answer ships the same work —
+decide it yourself and note it), or **material unknown** (the answer changes
+what gets built, is expensive to reverse, or would stop the run later). Only the
+third kind earns a question. **A complete brief yields zero intake questions**
+— the grill's output is then the brief itself, and going around the loop anyway
+is re-negotiating what is already decided, which costs a human round and buys
+nothing.
+
+**A material unknown the operator cannot answer now** does not hold the whole
+intake open: it becomes **one bounded decision task** — a named node in the
+plan with the question, the options, the recommendation and the latest date it
+can be decided without rework — and the run proceeds on the branches that do
+not depend on it.
+
+Where material unknowns remain, interview the operator about THOSE until you
+reach a **shared understanding**. Walk down each unresolved branch of the
+decision tree, resolving dependencies between decisions one by one.
 
 1. **One question per turn.** Never bundle. Wait for the answer before the next.
 2. **Recommend an answer with every question** (+ a one-line rationale). "What do
@@ -58,8 +75,10 @@ dependencies between decisions one by one.
    decisions first, so later answers don't invalidate earlier ones.
 5. **Reconcile contradictions immediately**, and chase dodges: "we'll decide
    later" → "what's the latest you can decide and still ship?"
-6. **Cover the autonomy sweep** (below). An unasked question is not neutral — it
-   is a scheduled interruption at stage 6.
+6. **Cover the autonomy sweep** (below). An unasked MATERIAL question is not
+   neutral — it is a scheduled interruption at stage 6. An answered or
+   immaterial one asked anyway is not neutral either — it is a human round
+   spent confirming what the sources already said.
 
 **Stop** when a re-scan surfaces no new branches. Don't grill past diminishing
 returns: genuinely reversible calls can be deferred with a note.

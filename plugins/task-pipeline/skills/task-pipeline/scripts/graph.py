@@ -52,6 +52,7 @@ import os
 import re
 import sys
 import tempfile
+import time
 
 # Who may OWN a node — which is a different axis from who ships as a subagent.
 #
@@ -76,11 +77,18 @@ ROLES = {
     "verifier", "decomposer", "ux", "ui", "researcher", "market-analyst", "bug-analyst",
 }
 
+# TERMINAL answers "is this node's own lifecycle over" — a parked node is over.
+# It does NOT answer "did this node produce what its consumers need": that
+# predicate is satisfaction, and only `done` satisfies (FIX-PF-04.01). A park
+# with reason "producer unavailable" used to make its CONSUMER runnable, which
+# ran work without its required input; frontier/close/certify now demand `done`
+# on a blocker, and a valid alternative producer is an explicit, versioned edge
+# change (`add`/`invalidate` with a revision), never an implicit unblock.
 TERMINAL = {"done", "parked"}
 NO_GRAPH = {"producer", "doctrine"}
 # One place, and the schema enumerates the same three. Two homes for this set is
 # what let `close` write a verb the format forbade.
-REVISION_VERBS = {"add", "park", "close"}
+REVISION_VERBS = {"add", "park", "close", "invalidate", "waive"}
 # Parking a node PROMOTES its dependents: `parked` is terminal, so anything
 # blocked on it becomes runnable even though the payload it waited on never
 # arrived. That is deliberate — `can_continue_around` in the verdict is the
@@ -379,6 +387,23 @@ def unblocks(nodes):
     return {n.get("id"): len(reach(n.get("id"))) for n in nodes}
 
 
+def descendants(nodes, root):
+    """Every node transitively DOWNSTREAM of `root` — the nodes whose work
+    depends on it through `blocked_by`. Used by `invalidate` to find the proofs
+    a change to `root` makes stale (FIX-PF-02.02)."""
+    dependents = {}
+    for n in nodes:
+        for b in n.get("blocked_by") or []:
+            dependents.setdefault(b, set()).add(n.get("id"))
+    seen, stack = set(), [root]
+    while stack:
+        for d in dependents.get(stack.pop(), ()):
+            if d not in seen:
+                seen.add(d)
+                stack.append(d)
+    return seen
+
+
 def collisions(ready):
     """Pairs of simultaneously-runnable nodes that mutate the same thing — B-093.
 
@@ -411,7 +436,7 @@ def frontier(graph):
         if n.get("status") in TERMINAL or n.get("status") == "running":
             continue
         blockers = n.get("blocked_by") or []
-        if all(by_id.get(b, {}).get("status") in TERMINAL for b in blockers):
+        if all(by_id.get(b, {}).get("status") == "done" for b in blockers):
             ready.append(n)
     rank = unblocks(nodes)
     order = {n.get("id"): i for i, n in enumerate(nodes)}
@@ -451,6 +476,23 @@ def verdict_violations(v):
                        "verdict that omits one is silent about it rather than clear")
     if out:
         return out
+
+    # `tested` is the proof identity (FIX-PF-02.01): what the reviewer actually
+    # ran the check against. Optional in shape (the 7-key contract is unchanged),
+    # but when present every field is typed, and `close` REQUIRES it inside a
+    # checkout so a stale proof cannot be stamped onto a moved tree.
+    if "tested" in v:
+        tv = v["tested"]
+        if not isinstance(tv, dict):
+            out.append("verdict `tested` must be an object binding the proof to a tree")
+        else:
+            for k in ("head", "tree", "base", "packet", "graph_revision"):
+                if k in tv and not isinstance(tv[k], str):
+                    out.append(f"verdict `tested.{k}` must be a string")
+            if "checks" in tv and not isinstance(tv["checks"], list):
+                out.append("verdict `tested.checks` must be a list")
+        if out:
+            return out
 
     if not isinstance(v["node"], str) or not v["node"].startswith(NODE_ID):
         out.append(f"verdict `node` is {v['node']!r}, which is not a node id")
@@ -687,6 +729,22 @@ def cmd_next(graph, args):
     if nodes and all(n.get("status") in TERMINAL for n in nodes):
         return 3
     ready = frontier(graph)
+    # A consumer whose producer is PARKED is not runnable and never will be by
+    # itself (FIX-PF-04.01) — say so BEFORE the empty-frontier exit, or the one
+    # moment the operator most needs the reason is the one moment it is silent.
+    _by_id = {n.get("id"): n for n in nodes}
+    for n in nodes:
+        if n.get("status") in TERMINAL or n.get("status") == "running":
+            continue
+        parked_blockers = [b for b in n.get("blocked_by") or []
+                           if _by_id.get(b, {}).get("status") == "parked"]
+        if parked_blockers:
+            reasons = "; ".join(
+                f"{b}: {_by_id[b].get('parked_reason', '?')}" for b in parked_blockers)
+            print(f"held: {n.get('id')} waits on parked {', '.join(parked_blockers)} "
+                  f"({reasons}) — a park does not produce the artifact; if an "
+                  f"alternative producer exists, change the edge explicitly",
+                  file=sys.stderr)
     if not ready:
         return 4
     # The frontier and nothing else. This is the line that enters a context on
@@ -708,6 +766,215 @@ def cmd_next(graph, args):
               f"`touches` ({', '.join(undeclared[:6])}) — a frontier nobody described cannot "
               "be checked for collisions, and no warning here is not the same as no "
               "collision", file=sys.stderr)
+    return 0
+
+
+def _load_authority(args):
+    """External mode's coordinator, fail-closed. Importing beside this script so
+    a checkout runs without install."""
+    import importlib.util
+    here = os.path.dirname(os.path.abspath(__file__))
+    spec = importlib.util.spec_from_file_location(
+        "execution_authority", os.path.join(here, "execution_authority.py"))
+    ea = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(ea)
+    return ea
+
+
+def cmd_claim(graph, args):
+    """External-executor mode: turn one ADVISORY frontier row into a durable,
+    arbitrated CLAIM. `next` says what could run; this says who may. Exactly one
+    of two racing runs wins; an authority that cannot answer BLOCKS dispatch
+    (fail-closed) rather than letting both proceed.
+
+    Exit codes: 0 won (grant on stdout), 5 lost the race (holder on stderr),
+    4 the node is not runnable, 1 the authority was unavailable — and 1 means
+    NO work starts, which is the whole point of fail-closed."""
+    if violations(graph):
+        die("graph does not validate — run `validate` first", 1)
+    node_id = args.node
+    ready = {n["id"]: n for n in frontier(graph)}
+    if node_id not in ready:
+        die(f"{node_id} is not in the frontier — claim only a runnable node", 4)
+    revision = int(ready[node_id].get("revision", 0) or 0)
+    ea = _load_authority(args)
+    try:
+        auth = ea.authority_for(args.authority)
+    except ea.AuthorityUnavailable as e:
+        die(f"authority unavailable — dispatch BLOCKED, no work started: {e}", 1)
+    try:
+        grant = auth.claim(node_id, args.owner, revision, now=time.time(),
+                           ttl_seconds=args.ttl)
+    except ea.AuthorityUnavailable as e:
+        die(f"arbitration failed — dispatch BLOCKED, no work started: {e}", 1)
+    finally:
+        auth.close()
+    if grant is None:
+        holder = None
+        try:
+            a2 = ea.authority_for(args.authority)
+            holder = a2.holder(node_id)
+            a2.close()
+        except ea.AuthorityUnavailable:
+            pass
+        who = holder.get("owner") if holder else "another run"
+        print(f"lost: {node_id} is already claimed by {who}", file=sys.stderr)
+        return 5
+    print(json.dumps(grant, ensure_ascii=False))
+    return 0
+
+
+def cmd_recover(graph, args):
+    """External mode: reclaim an EXPIRED node for a new owner, minting a higher
+    fence. A still-live claim is not recoverable (that is stealing a working
+    node); this exits 5 while the lease holds."""
+    ea = _load_authority(args)
+    try:
+        auth = ea.authority_for(args.authority)
+    except ea.AuthorityUnavailable as e:
+        die(f"authority unavailable: {e}", 1)
+    revision = 0
+    ready = {n["id"]: n for n in (graph.get("nodes") or [])}
+    if args.node in ready:
+        revision = int(ready[args.node].get("revision", 0) or 0)
+    try:
+        import time as _t
+        grant = auth.recover(args.node, args.owner, revision, now=_t.time(), ttl_seconds=args.ttl)
+    finally:
+        auth.close()
+    if grant is None:
+        print(f"not recovered: {args.node} still holds a live claim", file=sys.stderr)
+        return 5
+    print(json.dumps(grant, ensure_ascii=False))
+    return 0
+
+
+def cmd_complete(graph, args):
+    """External mode: record completion from the CURRENT fence-holder only. A
+    late old worker (stale fence) is refused (exit 5), never overwriting the run
+    that took the node over; the current holder completing twice is idempotent."""
+    ea = _load_authority(args)
+    try:
+        auth = ea.authority_for(args.authority)
+    except ea.AuthorityUnavailable as e:
+        die(f"authority unavailable: {e}", 1)
+    import time as _t
+    try:
+        grant = auth.complete(args.node, args.owner, args.fence, now=_t.time())
+    finally:
+        auth.close()
+    if grant is None:
+        print(f"not completed: {args.node} is not held by {args.owner} at fence "
+              f"{args.fence} — a late or superseded worker cannot complete it", file=sys.stderr)
+        return 5
+    print(json.dumps(grant, ensure_ascii=False))
+    return 0
+
+
+def cmd_release(graph, args):
+    """Give back a hold this run actually owns (matching fence). A mismatch is a
+    no-op, not an error someone can use to steal a live node."""
+    ea = _load_authority(args)
+    try:
+        auth = ea.authority_for(args.authority)
+    except ea.AuthorityUnavailable as e:
+        die(f"authority unavailable: {e}", 1)
+    try:
+        ok = auth.release(args.node, args.owner, args.fence)
+    finally:
+        auth.close()
+    if not ok:
+        print(f"not released: {args.node} is not held by {args.owner} at fence {args.fence}",
+              file=sys.stderr)
+        return 5
+    print(f"released {args.node}")
+    return 0
+
+
+def cmd_waive(graph, args):
+    """An AUTHORIZED EXCEPTION is its own disposition — never a fake PASS
+    (FIX-PF-03.02). Where an operator decides a node ships without (or despite)
+    certification, that decision is recorded as an exception carrying its
+    REASON and the IDENTITY that authorized it. The node is never marked
+    certified; a failed certification stays visible beside the exception, and
+    `close` stamps the exception into the evidence so a reader six weeks later
+    sees a decision, not a green."""
+    guard(graph, args.graph)
+    nid = args.node
+    by_id = {n.get("id"): n for n in graph.get("nodes") or []}
+    if nid not in by_id:
+        die("no node %s in this graph — nothing was waived" % nid)
+    reason = (args.reason or "").strip()
+    who = (args.by or "").strip()
+    if not reason:
+        die("waive needs --reason: an exception with no reason is a green with extra steps")
+    if not who:
+        die("waive needs --by: an exception nobody signed is nobody's decision")
+    node = by_id[nid]
+    import subprocess as _sp
+    try:
+        r = _sp.run(["git", "rev-parse", "HEAD"], capture_output=True, text=True)
+        at = r.stdout.strip() if r.returncode == 0 else "unavailable"
+    except OSError:
+        at = "unavailable"
+    node["exception"] = {"reason": reason, "by": who, "at": at}
+    revise(graph, "waive", nid, "authorized exception by %s: %s" % (who, reason),
+           precondition=at)
+    bad = violations(graph)
+    if bad:
+        die("waiving %s would break the graph — nothing was written:\n  %s"
+            % (nid, "\n  ".join(bad)))
+    save(args.graph, graph)
+    print("waived %s — authorized exception by %s (never a certification)" % (nid, who))
+    return 0
+
+
+def cmd_invalidate(graph, args):
+    """A REQ / interface / brief change supersedes the node it touched and
+    INVALIDATES the proofs downstream of it (FIX-PF-02.02).
+
+    A proof is a claim about a tree; when an upstream contract moves, every
+    descendant that was certified against the old contract is certified against
+    a tree that no longer exists. So `invalidate` records a superseding revision
+    on the changed node and, for the node itself and each `done` DESCENDANT,
+    resets it to `pending`, clears its evidence / proof / certification, and
+    records why. Nodes NOT downstream of the change keep their proof untouched —
+    an invalidation that reached the whole graph would be a reason nobody runs
+    it.
+    """
+    guard(graph, args.graph)
+    nid = args.node
+    by_id = {n.get("id"): n for n in graph.get("nodes") or []}
+    if nid not in by_id:
+        die("no node %s in this graph — nothing was invalidated" % nid)
+    why = (args.why or "").strip()
+    if not why:
+        die("invalidate needs --why: a superseding revision with no reason is "
+            "indistinguishable from a node quietly reset")
+
+    affected = {nid} | descendants(graph.get("nodes") or [], nid)
+    reset = []
+    for aid in sorted(affected):
+        node = by_id[aid]
+        if node.get("status") == "parked":
+            continue  # a parked node stays parked; its reason still stands
+        had_proof = node.get("status") == "done" or node.get("proof") or node.get("certification")
+        node["status"] = "pending"
+        node["evidence"] = None
+        node["proof"] = None
+        node["certification"] = None
+        if had_proof:
+            reset.append(aid)
+    revise(graph, "invalidate", nid, why,
+           precondition="supersedes proofs downstream of " + nid)
+
+    bad = violations(graph)
+    if bad:
+        die("invalidating %s would break the graph — nothing was written:\n  %s"
+            % (nid, "\n  ".join(bad)))
+    save(args.graph, graph)
+    print("invalidated %s and %d downstream node(s); reset %d certified proof(s): %s"
+          % (nid, len(affected) - 1, len(reset), ", ".join(reset) or "none"))
     return 0
 
 
@@ -765,16 +1032,23 @@ class held:
         return False
 
 
-def revise(graph, verb, node, why):
+def revise(graph, verb, node, why, precondition=None):
     """Append the revision. Both verbs call it; neither may skip it.
 
     `park` demanded a reason from the start and `add` demanded nothing, so half the
     graph's revision surface was silent — and a graph that changed for reasons nobody
     recorded can always explain its own completion by appealing to a plan that existed
     only at the end.
+
+    `precondition` (FIX-PF-02.01) records the tree the mutation was made against — the
+    proven HEAD for a `close` — so a revision carries a VERSION, not only a verb and a
+    reason. A brief/REQ/interface change that moves this tree is then visibly a
+    different precondition, which is what invalidates a proof taken before it.
     """
-    graph.setdefault("revisions", []).append(
-        {"verb": verb, "node": node, "why": why})
+    entry = {"verb": verb, "node": node, "why": why}
+    if precondition:
+        entry["precondition"] = precondition
+    graph.setdefault("revisions", []).append(entry)
 
 
 def guard(graph, path):
@@ -1065,7 +1339,7 @@ def cmd_producer(graph, args):
 def cmd_doctrine(graph, args):
     """Which doctrine this run actually read — B-061.
 
-    The bundle is 38 reference files. A run reads some subset and nothing recorded which,
+    The bundle is 39 reference files. A run reads some subset and nothing recorded which,
     so **a skipped file and a read one were indistinguishable** — the class every guard in
     this repository exists to catch, left standing over the doctrine itself.
 
@@ -1162,7 +1436,7 @@ def cmd_certify(graph, args):
         die("%s is already %s — certifying it again would overwrite the record of the "
             "close that already happened" % (nid, node.get("status")))
     open_blockers = [b for b in node.get("blocked_by") or []
-                     if by_id.get(b, {}).get("status") not in TERMINAL]
+                     if by_id.get(b, {}).get("status") != "done"]
     if open_blockers:
         die("%s waits on %s, which %s not closed — certifying work that could not have "
             "run certifies nothing" % (nid, ", ".join(open_blockers),
@@ -1180,6 +1454,14 @@ def cmd_certify(graph, args):
         v = tier_violations(t)
         if v:
             bad += ["%s: %s" % (os.path.basename(path), line) for line in v]
+            continue
+        # Reviewer EXPOSURE, stated honestly (FIX-PF-03.02): a report may say
+        # what the reviewer actually saw. A syntax lint is not a blind review,
+        # and recording one as a tier is the fake this refuses by name.
+        exposure = str(t.get("exposure", "")).strip().lower()
+        if exposure and re.search(r"\b(lint|syntax[- ]only|grep[- ]only|regex[- ]only)\b", exposure):
+            bad.append("%s: exposure is %r — a syntax lint is not a blind review, and a "
+                       "tier cannot be certified on one" % (os.path.basename(path), exposure))
             continue
         if t["node"] != nid:
             bad.append("%s: reports on %s while this certification is for %s — a report "
@@ -1277,6 +1559,22 @@ def cmd_certify(graph, args):
                    "why": "certified at all three tiers in round %d" % round_no},
         "evidence": ["%s: %s" % (x, e) for x in TIERS for e in reports[x]["evidence"]],
     }
+    # Proof identity (FIX-PF-02.01): the certification tested THIS tree, so it
+    # records the commit it tested into the verdict it hands `close`. Without it
+    # `close` — which now demands proof inside a checkout — would refuse the
+    # verdict certify just assembled. Read from git here, never from a report.
+    import subprocess as _sp
+    try:
+        _h = _sp.run(["git", "rev-parse", "HEAD"], capture_output=True, text=True)
+        _head = _h.stdout.strip() if _h.returncode == 0 else ""
+        _tr = _sp.run(["git", "rev-parse", "HEAD^{tree}"], capture_output=True, text=True)
+        _tree = _tr.stdout.strip() if _tr.returncode == 0 else ""
+    except OSError:
+        _head, _tree = "", ""
+    if _head:
+        verdict["tested"] = {"head": _head}
+        if _tree:
+            verdict["tested"]["tree"] = _tree
     # Checked against the same gate `close` will apply, HERE, so a certification
     # cannot hand the run a verdict its own consumer refuses.
     broken = verdict_violations(verdict)
@@ -1337,21 +1635,88 @@ def cmd_close(graph, args):
         die("%s is already %s — a second close would overwrite the record of the first"
             % (nid, node.get("status")))
     open_blockers = [b for b in node.get("blocked_by") or []
-                     if by_id.get(b, {}).get("status") not in TERMINAL]
+                     if by_id.get(b, {}).get("status") != "done"]
     if open_blockers:
         die("%s waits on %s, which %s not closed — a verdict about work that could not have "
             "run is a verdict about nothing" % (nid, ", ".join(open_blockers),
                                                 "is" if len(open_blockers) == 1 else "are"))
 
-    # The stamp. Read here, never accepted from the verdict.
+    # Proof identity (FIX-PF-02.01). The stamp is not "the current HEAD, whatever
+    # it is" — that stamps a verdict earned at v1 onto a tree already at v2. The
+    # verdict must DECLARE the commit and tree it tested, and close COMPARES that
+    # to HEAD: an old proof against moved code is refused, never re-stamped.
     import subprocess
-    try:
-        r = subprocess.run(["git", "rev-parse", "HEAD"], capture_output=True, text=True)
-        head = r.stdout.strip() if r.returncode == 0 else ""
-    except OSError:
-        head = ""
-    stamp = ("observed at " + head) if head else \
-        "observed at unavailable — not inside a git checkout, so no commit identifies the tree"
+
+    def _git(*a):
+        try:
+            r = subprocess.run(["git", *a], capture_output=True, text=True)
+            return r.stdout.strip() if r.returncode == 0 else ""
+        except OSError:
+            return ""
+
+    head = _git("rev-parse", "HEAD")
+    tree = _git("rev-parse", "HEAD^{tree}")
+    tested = v.get("tested") or {}
+    if head:
+        # Inside a checkout: provenance must be PROVEN, not assumed.
+        if not tested.get("head"):
+            die("the verdict declares no `tested.head` — inside a checkout close must "
+                "confirm the reviewer saw THIS tree; re-run the verifier and record the "
+                "commit it tested. Nothing was written.")
+        if tested["head"] != head:
+            die("the verdict tested %s but HEAD is %s — the code moved under the proof. "
+                "A verdict written before the tree changed is evidence about a different "
+                "tree; re-verify at HEAD and issue a fresh verdict. Nothing was written."
+                % (tested["head"][:12], head[:12]))
+        if tested.get("tree") and tree and tested["tree"] != tree:
+            die("the verdict tested tree %s but HEAD's tree is %s — the working tree moved "
+                "under the proof even though the commit matches. Nothing was written."
+                % (tested["tree"][:12], tree[:12]))
+        stamp = "proven at " + head + ((" (tree " + tree + ")") if tree else "")
+        node["proof"] = {"head": head, "tree": tree or "",
+                         "graph_revision": str(len(graph.get("revisions") or []))}
+        for k in ("base", "packet", "attempt"):
+            if k in tested and isinstance(tested[k], str):
+                node["proof"][k] = tested[k]
+        if isinstance(tested.get("checks"), list):
+            node["proof"]["checks"] = list(tested["checks"])
+    else:
+        stamp = "observed at unavailable — not inside a git checkout, so no commit " \
+                "identifies the tree"
+        node["proof"] = {"head": "unavailable"}
+
+    # Completion gate (FIX-PF-03.01): a certification that RAN and FAILED cannot
+    # be stepped around by a direct close with a hand-shaped verdict — the
+    # enforcement lives here, in the store mutation, not only in a UI or a
+    # preflight someone can skip. Where certify never ran, the verdict is the
+    # verifier's judgement and close proceeds as before.
+    cert = node.get("certification")
+    exc = node.get("exception")
+    if cert:
+        tiers = cert.get("tiers") or {}
+        failing = sorted(k for k, val in tiers.items() if val != "pass")
+        if failing and not exc:
+            die("%s has a certification (round %s) with failing tier(s): %s — a direct "
+                "close cannot step around a failed certification; fix the finding and "
+                "re-certify, or record an AUTHORIZED EXCEPTION with `waive` (its own "
+                "disposition, never a pass). Nothing was written."
+                % (nid, cert.get("round"), ", ".join(failing)))
+        if failing and exc:
+            # The exception authorizes the close; the failure stays VISIBLE and
+            # the node is never marked certified.
+            stamp += "; closed under authorized exception by %s: %s (tier(s) %s still failing)" % (
+                exc.get("by", "?"), exc.get("reason", "?"), ", ".join(failing))
+        # Same-candidate check regardless of the exception: a certification of
+        # ANOTHER commit is stale either way.
+        cert_at = cert.get("at") or ""
+        if head and cert_at and not str(cert_at).startswith("unavailable") and cert_at != head:
+            die("%s was certified at %s but HEAD is %s — the certification is for a "
+                "different candidate; re-certify at the current one. Nothing was written."
+                % (nid, str(cert_at)[:12], head[:12]))
+    if exc and not (cert and sorted(k for k, val in (cert.get("tiers") or {}).items()
+                                    if val != "pass")):
+        stamp += "; closed under authorized exception by %s: %s" % (
+            exc.get("by", "?"), exc.get("reason", "?"))
 
     node["status"] = "done"
     node["evidence"] = list(v["evidence"]) + [stamp]
@@ -1390,7 +1755,8 @@ def cmd_close(graph, args):
         revise(graph, "park", pid, why)
         parked.append(pid)
 
-    revise(graph, "close", nid, why or "closed with no re-plan")
+    revise(graph, "close", nid, why or "closed with no re-plan",
+           precondition=(head or "unavailable"))
 
     bad = violations(graph)
     if bad:
@@ -1419,6 +1785,12 @@ VERBS = {
     "validate": (cmd_validate, "every invariant a schema cannot state"),
     "next": (cmd_next, "the frontier, ordered by what it unblocks"),
     "goal": (cmd_goal, "the release goal this graph serves"),
+    "claim": (cmd_claim, "external mode: arbitrate one runnable node to a single owner (fail-closed)"),
+    "invalidate": (cmd_invalidate, "a REQ/interface/brief change supersedes a node and invalidates proofs downstream"),
+    "waive": (cmd_waive, "record an AUTHORIZED EXCEPTION (reason + identity) — its own disposition, never a fake PASS"),
+    "recover": (cmd_recover, "external mode: reclaim an EXPIRED node for a new owner (fenced)"),
+    "complete": (cmd_complete, "external mode: record completion from the current fence-holder (late worker refused)"),
+    "release": (cmd_release, "external mode: give back a hold this run owns"),
     "doctrine": (cmd_doctrine, "which of the bundle's reference files this run opened"),
     "producer": (cmd_producer, "what produced this proof: actor, model, runtime, skill, "
                                "config digest, commit, trace"),
@@ -1479,6 +1851,31 @@ def main(argv=None):
                         help="rounds after which the output names the churning tier; it "
                              "measures rather than stops (references/loop-guard.md)")
 
+    for verb in ("claim", "release", "recover", "complete"):
+        made[verb].add_argument("--authority", required=True,
+                                help="path to the local sqlite execution authority "
+                                     "(external mode; a Fabric adapter replaces this seam)")
+        made[verb].add_argument("--owner", required=True,
+                                help="the session/attempt identity making the claim — NOT a role")
+        made[verb].add_argument("--node", required=True, help="the node to act on")
+    for verb in ("claim", "recover"):
+        made[verb].add_argument("--ttl", type=int, default=1800,
+                                help="lease seconds; the OS lock is NOT held this long — the "
+                                     "lease is, and a crashed holder frees the node by expiry")
+    for verb in ("release", "complete"):
+        made[verb].add_argument("--fence", type=int, required=True,
+                                help="the fence token from the grant; a stale fence is refused")
+
+    made["invalidate"].add_argument("--node", required=True,
+                                    help="the node whose REQ/interface/brief changed")
+    made["invalidate"].add_argument("--why", required=True,
+                                    help="why the contract changed — enters the revision log")
+    made["waive"].add_argument("--node", required=True, help="the node the exception covers")
+    made["waive"].add_argument("--reason", required=True,
+                               help="why this node ships without/despite certification")
+    made["waive"].add_argument("--by", required=True,
+                               help="the identity that authorized the exception")
+
     p_park = made["park"]
     p_park.add_argument("node")
     # `required=True` makes the MISSING flag a usage error (exit 2). The empty and
@@ -1490,7 +1887,7 @@ def main(argv=None):
     verbs = {k: v[0] for k, v in VERBS.items()}
     if args.verb in NO_GRAPH:
         return verbs[args.verb](None, args)
-    if args.verb in ("add", "park", "close", "certify"):
+    if args.verb in ("add", "park", "close", "certify", "invalidate", "waive"):
         # The READ happens inside the lock too. Loading first and locking second is the
         # same lost update with an extra step: the stale copy is already in memory.
         with held(args.graph):

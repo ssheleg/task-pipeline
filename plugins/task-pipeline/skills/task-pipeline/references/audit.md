@@ -43,6 +43,12 @@ audit. That skill discovers what the project is, probes it, reads the production
 evidence a repository cannot hold, and hands phase 4 back here — so the method
 below stays the one place it is written.
 
+Its findings keep their axes apart: a defect proven by reproduction stands with
+incidence UNKNOWN — UNKNOWN ≠ 0, and absent telemetry lowers exposure claims,
+never technical truth. `templates/finding-evidence.json` is the minimal evidence
+schema (mechanism / reproduction / exposure / incidence / impact uncertainty,
+observations apart from assumptions, scope and time recorded).
+
 `loop-guard.md` governs loops that *change* things — the fix loop, a re-entered
 stage. Its trip means a decision is being re-litigated at the wrong altitude. This
 file governs loops that *look* for things. Its trip means the axis is exhausted,

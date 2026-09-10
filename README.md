@@ -587,7 +587,7 @@ must say so.
 ### Held to Anthropic's own Skill authoring guidance
 
 Audited against the four Agent Skills pages. Most of it already held — `name`
-13/64 chars, `description` 903/1024 chars, `SKILL.md` 262/500 lines, all 38 references
+13/64 chars, `description` 903/1024 chars, `SKILL.md` 279/500 lines, all 39 references
 linked **directly** from `SKILL.md`, and the bundle far under the 30 MB ceiling. What
 did not, now does:
 
@@ -929,6 +929,7 @@ recommendation, so you arm the whole run in one exchange. Detail:
 |---|---|
 | [`SKILL.md`](plugins/task-pipeline/skills/task-pipeline/SKILL.md) | the orchestrator: how to run, the stage table, the model decision |
 | [`references/stages.md`](plugins/task-pipeline/skills/task-pipeline/references/stages.md) | per-stage detail and the exact gate criteria |
+| [`references/doctrine-map.md`](plugins/task-pipeline/skills/task-pipeline/references/doctrine-map.md) | which reference owns which stage — the map SKILL.md used to carry inline |
 | [`references/artifacts.md`](plugins/task-pipeline/skills/task-pipeline/references/artifacts.md) | the canonical document layout each stage writes to |
 | [`references/conventions.md`](plugins/task-pipeline/skills/task-pipeline/references/conventions.md) | how stages 6–10 read the host project's `CLAUDE.md`, and how the documentation regime is detected |
 | [`references/documentation.md`](plugins/task-pipeline/skills/task-pipeline/references/documentation.md) | the doc system: the inventory, registers and ids, SSOT, the Doc Loop, supersede semantics, the propagation matrix, intent vs as-built |

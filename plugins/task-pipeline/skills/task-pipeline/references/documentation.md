@@ -110,6 +110,9 @@ files read` and *the recorder was never installed* are opposite facts, and a `0`
 the first while meaning the second — the most reassuring answer available, derived from
 an instrument nobody switched on. So the unmeasured case prints a word, and the word says
 why it cannot be a number.
+The same refusal covers findings: a defect proven by reproduction records
+incidence UNKNOWN — a word, never a zero — and stays a defect;
+`templates/finding-evidence.json` is the minimal schema that keeps the axes apart.
 
 The rule is written down because it arrived three times under three names before anyone
 named it: `references/knowledge-graph.md` → *State zero out loud* (a fresh graph must

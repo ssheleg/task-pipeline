@@ -38,7 +38,7 @@ turn of every loop.
 | `goal_clauses` | release work no requirement names. Enumerated, never matched against the goal's prose: substring-matching a sentence produces confidence without correctness |
 | `nodes[].owner` | which role does it. A node nobody can dispatch never leaves the frontier and nothing says why |
 | `nodes[].serves` | the REQ or goal clause it exists for. A node serving neither is **parked with that as the reason** |
-| `nodes[].blocked_by` | what must close first. This is what the frontier obeys |
+| `nodes[].blocked_by` | what must PRODUCE first. The frontier obeys a satisfaction predicate, and only `done` satisfies — a PARKED producer blocks its consumer, because a park is a decision not to produce, not a production. `next` names each held consumer with the park's reason; a valid alternative producer is an explicit, versioned edge change, never an implicit unblock |
 | `nodes[].touches` | what it **mutates**. Two runnable nodes writing one file is the false parallelism [`planning.md`](planning.md) refuses — *distinct is not the same as independent, and the check is what they touch, never what they are called* |
 | `nodes[].check` | **how this node will be closed** — one command, or the named judgement where no command can decide it. Required on every node except a `parked` one. The certification's `unit` tier runs it and reports its output as the evidence row ([`certification.md`](certification.md) — three blind tiers close a node, not one reader); before this field existed that instruction pointed at an absence, leaving a verifier the two things it forbids — invent a check, or run everything (B-080) |
 | `nodes[].evidence` | required when `status` is `done`. A node called done by assertion is what evidence exists to prevent |
@@ -63,6 +63,12 @@ conditional on the code, never merely sequenced after it.**
 | `close` | the goal, the new frontier count, and what was not verified | `0` · `1` refused **or the verdict stops the run** |
 | `producer` | what produced this proof — actor, model, runtime, skill, config, commit, trace | `0` |
 | `doctrine` | how many of the bundle's reference files this run opened | `0` |
+| `claim` | **external mode** — arbitrate one runnable node to a single owner through the durable coordinator (`scripts/execution_authority.py`); prints the grant. `next` says what COULD run, `claim` says who MAY | `0` won · `5` lost the race · `4` not runnable · `1` authority unavailable — **and `1` means no work starts** (fail-closed) |
+| `release` | give back a hold this run owns, matching its fence; a mismatch is a no-op, never a way to steal a live node | `0` released · `5` not held at that fence · `1` authority unavailable |
+| `recover` | **external mode** — reclaim an EXPIRED node for a new owner, minting a higher fence; a still-live claim is not recoverable (that is stealing a working node) | `0` recovered · `5` still live · `1` authority unavailable |
+| `complete` | **external mode** — record completion from the CURRENT fence-holder only; a late/superseded worker (stale fence) is refused, and the current holder completing twice is idempotent | `0` completed · `5` not the current holder · `1` authority unavailable |
+| `waive` | record an AUTHORIZED EXCEPTION — reason + identity, its own disposition: the node is never marked certified, a failed certification stays visible, and `close` stamps the exception into the evidence | `0` waived · `1` refused (no reason, no identity, unknown node) |
+| `invalidate` | a REQ/interface/brief change supersedes one node: a superseding revision is recorded, and the node plus every `done` DESCENDANT resets to pending with its evidence/proof/certification cleared — a proof certified against a contract that moved is a proof about a tree that no longer exists. Unrelated nodes keep their proofs; invalidation flows downstream only | `0` invalidated · `1` refused (no `--why`, unknown node, or the write would break the graph) |
 
 **`next` is ordered by what each node unblocks, transitively, and the number is computed.**
 A `priority` field is something somebody typed once and nobody revisits; this one moves when

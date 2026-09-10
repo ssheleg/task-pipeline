@@ -1,0 +1,261 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://raw.githubusercontent.com/ssheleg/task-pipeline/main/plugins/task-pipeline/skills/task-pipeline/execution-result.schema.json",
+  "title": "task-pipeline execution result",
+  "description": "The answer half of the family's task contract (CTX-01, beside execution-packet.schema.json). An attempt starts with an AttemptGrant — a structured object from the single authority, carrying the graph revision it was issued at and the fence that supersedes it; a bare boolean is NOT a grant, because `true` cannot say who granted what, against which revision, or whether it has since been superseded. The attempt answers with this envelope: the candidate change (content-addressed), every check actually run with its honest status (NOT_RUN is never PASS), and the evidence rows in the fact/defect/unknown-effect union. A candidate built against an older revision than the current one is STALE and cannot validate as current — it goes back through re-planning, never quietly forward. `scripts/packet.py validate-result` is the dependency-free runtime half.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "packet_id",
+    "grant",
+    "built_against_revision",
+    "candidate",
+    "checks",
+    "evidence",
+    "status"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "pattern": "^execution-result/[0-9]+$",
+      "description": "Contract version. An unknown major is rejected, never skimmed — same rule as the packet."
+    },
+    "packet_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "grant": {
+      "$ref": "#/definitions/attemptGrant"
+    },
+    "built_against_revision": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "The graph revision the candidate was built against. Compared to the CURRENT revision at validation: older means stale, and stale means re-plan."
+    },
+    "candidate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "changed"
+      ],
+      "properties": {
+        "commit": {
+          "type": "string",
+          "description": "The candidate commit, where one exists."
+        },
+        "changed": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "address",
+              "sha256"
+            ],
+            "properties": {
+              "address": {
+                "type": "string",
+                "minLength": 1
+              },
+              "sha256": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              }
+            }
+          },
+          "description": "Every path the candidate changed, content-addressed — the receipt a reviewer can verify against the tree."
+        }
+      }
+    },
+    "checks": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/check"
+      },
+      "description": "Every check actually run — and the ones that could not run, as NOT_RUN with what it would take. An empty list is a result nobody verified, which the consumer may refuse."
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/evidenceRow"
+      },
+      "description": "Observations in the union evidence-docs and project-audit share: a FACT (observed, with its receipt), a DEFECT (observed wrong), or an UNKNOWN_EFFECT (could not be established) — three different verdicts that never blend."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "completed",
+        "partial",
+        "blocked",
+        "abandoned"
+      ],
+      "description": "The attempt's own verdict about itself. `completed` with failing checks is a contradiction the validator refuses."
+    },
+    "outputs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "kind",
+          "address",
+          "sha256"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "description": "What the output IS to a consumer. Never a credential — a name that reads as one (token, secret, password, api_key, credential, cookie, private_key) is refused by the validator: a result outlives its session exactly like the packet (FIX-PF-05.03)."
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "artifact",
+              "report",
+              "decision",
+              "metric"
+            ]
+          },
+          "address": {
+            "type": "string",
+            "minLength": 1
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          }
+        }
+      },
+      "description": "TYPED outputs the attempt produced, content-addressed. A consumer binds to a named output's digest — which is what makes a changed predecessor output DETECTABLE downstream (see `consumed`)."
+    },
+    "packet_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$",
+      "description": "sha256 of the immutable dispatch packet this attempt ran from (FIX-PF-05.01). Ties the answer to the exact question; a result naming a packet digest the coordinator does not recognise is a result about different work."
+    },
+    "consumed": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "sha256"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "producer": {
+            "type": "string"
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          }
+        }
+      },
+      "description": "The predecessor outputs this attempt READ, by name + digest. Freshness is a comparison, not a feeling: when a predecessor re-runs and its output digest changes, every result that consumed the old digest is STALE and the node rebuilds at a new revision."
+    }
+  },
+  "definitions": {
+    "attemptGrant": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "grant_id",
+        "packet_id",
+        "revision",
+        "fence",
+        "holder"
+      ],
+      "description": "What the single authority issued. A boolean confirmation is not a grant: it names no issuer, no revision, no fence — nothing a later reader could check.",
+      "properties": {
+        "grant_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "packet_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "fence": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Monotonic token from the authority. A newer fence supersedes this grant: a result carrying an old fence lost its exclusivity mid-flight and must not land as current."
+        },
+        "holder": {
+          "type": "string",
+          "minLength": 1
+        },
+        "issued_at": {
+          "type": "string"
+        }
+      }
+    },
+    "check": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "command",
+        "status"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "command": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "PASS",
+            "FAIL",
+            "ERROR",
+            "NOT_RUN"
+          ],
+          "description": "NOT_RUN and ERROR are their own statuses — never upgraded to PASS, never folded into FAIL."
+        },
+        "observed": {
+          "type": "string"
+        }
+      }
+    },
+    "evidenceRow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "class",
+        "statement"
+      ],
+      "properties": {
+        "class": {
+          "type": "string",
+          "enum": [
+            "fact",
+            "defect",
+            "unknown_effect"
+          ]
+        },
+        "statement": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

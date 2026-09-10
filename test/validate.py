@@ -1218,14 +1218,21 @@ def _discover_md(skip, predicate):
     return _out, _texts
 
 
+# The condition is discovered by EITHER vocabulary. It read "five run stamps" until the
+# retrospective gained rule classes, when the trigger became "five exposure
+# opportunities" — and a guard keyed to one wording does not fail when the wording
+# moves, it silently stops running. That is what happened here: the corpus predicate
+# matched nothing, every surface dropped out, and the check passed everything.
+_COLD_UNITS = r"(?:run\s+stamps|exposure\s+opportunities)"
 _COLD_SURFACES, _COLD_TEXT = _discover_md(
-    _COLD_SKIP, lambda _c: "five run stamps" in _flatten(_c, lower=True))
+    _COLD_SKIP, lambda _c: re.search(r"five\s+" + _COLD_UNITS, _flatten(_c, lower=True)))
 # A NARRATION of what the rule said before the second unit existed is not a statement
 # of the rule — learned.md's own rule-21 incident quotes the old wording, and rewriting
 # it would falsify the incident. Same convention the claim registry uses: a
 # double-quoted span is a citation. Italics are not, deliberately — a marker vocabulary
 # that grows per incident is the drift this file exists to prevent.
-_COLD_RE = re.compile(r"(?:has\s+not\s+)?fired\s+in\s+(?:the\s+last\s+)?five\s+run\s+stamps", re.I | re.S)
+_COLD_RE = re.compile(
+    r"fired\s+in\s+(?:none\s+of\s+)?(?:the\s+last\s+)?five\s+" + _COLD_UNITS, re.I | re.S)
 for _f in _COLD_SURFACES:
     _fp = os.path.join(ROOT, _f)
     if not os.path.isfile(_fp):
@@ -1246,7 +1253,7 @@ for _f in _COLD_SURFACES:
             continue                    # a narration of the old wording, not a statement
         if not re.search(r"sixty\s+days|60\s+days", _flat, re.I):
             _line = _ft[:_ft.find(_para)].count("\n") + 1
-            fail(f"{_f}:{_line}: states the cold-retirement condition as five run stamps and "
+            fail(f"{_f}:{_line}: states the cold-retirement condition in one unit only and "
                  "omits the second unit — the stamp counter is written only by a run of this "
                  "pipeline and stops when the pipeline is not used, which is exactly when a "
                  "stale rule matters most. Both units, on every surface that states it.")

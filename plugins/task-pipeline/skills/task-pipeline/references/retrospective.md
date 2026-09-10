@@ -269,15 +269,31 @@ printf '%s · %s\n' "$(date +%F)" "$(git rev-parse --short HEAD)" >> docs/eviden
 A lesson that lands in a cluttered file is a lesson nobody will reach — so the prune still runs
 before the entry is written. It runs *after* the stamp, because it reads it.
 
-Every row carries its own trigger in a **`Retire when`** column, written at birth —
-a rule whose retirement condition is decided later is a rule the prune can only
-argue about. Check **every** standing instruction against three triggers:
+Every row carries its own trigger in a **`Retire when`** column AND a **class**,
+both written at birth — a rule whose retirement condition is decided later is a
+rule the prune can only argue about. Three classes, because coldness means
+three different things:
+
+- **permanent** — a safety invariant, a contract, a recovery procedure. The
+  absence of the rare event it guards is not absence of value: **coldness never
+  retires a permanent rule** — only *became a check* or *surface gone* do.
+- **situational** — fires when a named EXPOSURE occurs (a payment run, a
+  migration, a release). Its row names the exposure, and the prune counts
+  **exposure opportunities, not raw runs**: five runs that never touched
+  payments say nothing about a payment rule.
+- **temporary** — a workaround with a **TTL** and the replacing mechanism named
+  at birth. TTL only exists on this class.
+
+Check **every** standing instruction against three triggers:
 
 | Trigger | Test | Then |
 |---|---|---|
 | **It became a check** | the rule is now enforced by a test, lint, gate or hook | delete it — the check is the memory, and keeping both means it is read twice and obeyed once |
 | **Its surface is gone** | resolve every path, command, stage and tool it names; any that no longer exists | delete it — it now describes a system nobody is running |
-| **It went cold** | it has not fired in the last **five run stamps** — **or** in the last **sixty days**, whichever comes first | delete it: five runs without firing is the evidence it was situational, and the calendar is the unit that still moves when the stamp counter has stopped |
+| **It went cold** | *situational only*: it fired in none of the last **five exposure opportunities** — or no exposure occurred in **sixty days** | mark **review-needed** and put the question to the operator with the exposure counts — cold is evidence worth reviewing, never an automatic deletion. *temporary*: TTL expired → archive it **once the replacing mechanism is verified present** (its check resolves and runs); an expired workaround whose replacement is absent is a live defect, not a retirement. *permanent*: not applicable |
+
+Every removal stays explainable: the archive line names the class, the trigger
+and the evidence (the exposure counts, or the replacing mechanism's check).
 
 **Each trigger is a command, not a judgement.** A retirement condition nobody can run is a
 condition nobody applies, which is how a list reaches ten and stops being read:
@@ -297,10 +313,12 @@ tail -n 200 docs/evidence/retro.md | grep -c "$RULE_ID"
 git log -1 --format=%cd --date=short -S"$RULE_ID" -- docs/evidence/retro.md
 ```
 
-Anything the first two print is a deletion; a zero from the third **or** a last-fired date more
-than sixty days old is a deletion. What survives all three stays, and the run states the counts
-rather than the conclusion (`learned.md` rule 19 — an empty result and an unrun command look
-identical).
+Anything the first two print is a deletion. A zero from the third — counted against
+**exposure opportunities** for a situational rule (`grep -c "$EXPOSURE_MARK"` over the same
+stamps, so the denominator is runs that COULD have fired it) — marks **review-needed**, and the
+run states the counts rather than the conclusion (`learned.md` rule 19 — an empty result and an
+unrun command look identical). Only the operator's answer, or a temporary rule's verified
+replacement, turns review-needed into a removal.
 
 **Why the cold trigger needs two units, and it is not belt-and-braces.** A run stamp is written by
 a run *of this pipeline*. Where a project ships some of its work another way, the stamp counter

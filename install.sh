@@ -41,9 +41,17 @@ DEST="${HOME}/.claude/skills/task-pipeline"
 if [[ -e "$DEST" && "$FORCE" -eq 0 ]]; then
   echo "skip: skill already installed at $DEST (rerun with --force to overwrite)"
 else
+  # Transactional install (FIX-UP-05.02): stage on the same filesystem, then
+  # swap. A crash mid-copy leaves the ACTIVE install intact, not a partial tree.
   mkdir -p "$(dirname "$DEST")"
-  rm -rf "$DEST"
-  cp -R "$SRC" "$DEST"
+  STAGING="${DEST}.staging.$$"
+  rm -rf "$STAGING"
+  trap 'rm -rf "$STAGING"' EXIT
+  cp -R "$SRC" "$STAGING"
+  if [[ -e "$DEST" ]]; then rm -rf "${DEST}.prev.$$"; mv "$DEST" "${DEST}.prev.$$"; fi
+  mv "$STAGING" "$DEST"
+  rm -rf "${DEST}.prev.$$"
+  trap - EXIT
   echo "Installed task-pipeline skill   -> $DEST"
 fi
 
@@ -54,7 +62,11 @@ if [[ -e "$CMD_DEST" && "$FORCE" -eq 0 ]]; then
   echo "skip: command already installed at $CMD_DEST (rerun with --force to overwrite)"
 else
   mkdir -p "$(dirname "$CMD_DEST")"
-  cp "$CMD_SRC" "$CMD_DEST"
+  CMD_STAGING="${CMD_DEST}.staging.$$"
+  trap 'rm -f "$CMD_STAGING"' EXIT
+  cp "$CMD_SRC" "$CMD_STAGING"
+  mv "$CMD_STAGING" "$CMD_DEST"          # atomic rename, never a partial write
+  trap - EXIT
   echo "Installed /task-pipeline command -> $CMD_DEST"
 fi
 

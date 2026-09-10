@@ -1,6 +1,6 @@
 ---
 name: project-audit
-description: "Use when someone asks what is actually true of a whole project right now — what is finished, what is half-built, what is broken, and what nobody has looked at. Walks a cold start: discover what the project is, run a registry of probes chosen from that, read production evidence (published artefact against source, CI history, telemetry present or absent), then leave a self-contained HTML report and a JSON sidecar so the next audit can say what moved. Read-only: it proposes board rows and commits nothing. Triggers - 'project audit', 'audit the project', 'codebase audit', 'state of the project', 'what is unfinished', 'project health check', 'аудит проекта', 'проаудируй проект', 'состояние проекта', 'что не доделано', 'аудит кодовой базы'. Not for: auditing one deliverable inside a run (that is the pipeline's own ladder), reviewing a diff, or checking a skill's construction — say 'без диагностики' to opt out."
+description: "Use when someone asks what is actually true of a whole project right now — what is finished, what is half-built, what is broken, and what nobody has looked at. Walks a cold start: discover what the project is, run a registry of probes chosen from that, read production evidence (published artefact against source, CI history, telemetry present or absent), then leave a JSON sidecar so the next audit can say what moved, and a self-contained HTML report on request. Read-only: it proposes board rows and commits nothing. Triggers - 'project audit', 'audit the project', 'codebase audit', 'state of the project', 'what is unfinished', 'project health check', 'аудит проекта', 'проаудируй проект', 'состояние проекта', 'что не доделано', 'аудит кодовой базы'. Not for: auditing one deliverable inside a run (that is the pipeline's own ladder), reviewing a diff, or checking a skill's construction — say 'без диагностики' to opt out."
 license: MIT
 compatibility: "The collector (scripts/audit.py) needs python3 and reads committed state, so it needs git. Probes needing gh, npm, network or a browser declare it and report blind when it is absent — degraded, never silent."
 ---
@@ -122,23 +122,36 @@ audit: what a fix costs is the fixer's decision, not the finder's
 ([`references/prioritisation.md`](../task-pipeline/references/prioritisation.md)). An audit
 that edits while it reads cannot be re-run to check itself.
 
-## A finding carries its consequence, or it is a hypothesis
+## A finding keeps its axes apart, or it is a guess wearing a verdict
 
-**A mechanism is derived from the code; the consequence lives in production.** A row
-written from the mechanism alone is indistinguishable from a real finding until
-somebody measures it — and one audit had **eight consecutive rows** rewritten by that
-measurement, two of which would have destroyed inventory if remedied as written,
-because both read an absence of sales as an absence of demand.
+**Mechanism status, exploit/reproduction, exposure, observed incidence and impact
+uncertainty are FIVE axes, not one.** A row written from the mechanism alone is
+indistinguishable from a real finding until each axis says what it knows — and one
+audit had **eight consecutive rows** rewritten by measurement, two of which would
+have destroyed inventory if remedied as written, because both read an absence of
+sales as an absence of demand. But the correction cuts both ways:
 
-So before a row may be written as a `finding` rather than as a hypothesis:
+- **A proven defect may have incidence UNKNOWN.** An auth bypass or a race
+  reproduced locally is a code defect BEFORE any incident — the reproduction is the
+  proof, and no production log is needed to license the row. A confirmed local
+  crash with no production logs stays a code defect, external incidence UNKNOWN.
+- **UNKNOWN ≠ 0.** A zero sample is not zero risk; absent telemetry lowers what can
+  be said about EXPOSURE, never the technical truth — and the row says which.
+- **Unknown attacker control lowers exploitability CONFIDENCE**, never the observed
+  behaviour: what was watched happening stays written as watched.
+- **A documented exception does not turn a failed invariant into PASS** — decision
+  status and technical validity are the separate axes of the section below.
 
-1. **how often does the mechanism fire?** A query, a log count, a telemetry read — or
-   an explicit statement that it has never been observed to fire;
-2. **where the answer is *never*, the row is still worth keeping**, priced as
-   **latent**: the remedy is weighed against zero rather than against the mechanism's
-   severity;
-3. **where the measurement is impossible, that is a `blind` on the consequence** and
-   the row says so. A blind consequence is not a finding.
+The incidence axis is still asked: **how often does the mechanism fire?** A query, a
+log count, a telemetry read. Where the answer is *never*, keep the row priced as
+**latent** (the remedy weighed against zero); where the measurement is impossible,
+the INCIDENCE axis records `blind` — and the finding stands on its mechanism and
+reproduction axes. Each row records its observation scope and time, keeping code
+mechanism, deployment observation and assumptions apart —
+`templates/finding-evidence.json` in task-pipeline is the minimal schema, and the
+collector writes `mechanism`/`incidence`/`observed_scope`/`observed_at` into the
+sidecar. Ask an operator only when the unknown would change the action — an
+interview is not a prerequisite for a row.
 
 Two rules follow from the same place:
 
@@ -159,9 +172,20 @@ Five of eight rows in one run were that.
 - **Read the call site, not only the definition.** A finding about a module is not
   written until the places that use it have been read.
 - **Every row states which of three it is:** *(a)* undecided, *(b)* decided and
-  documented right here, *(c)* decided elsewhere and not propagated. Only **(a)** and
-  **(c)** are work. **(b)** is the audit being wrong, and recording that is worth more
-  than deleting the row.
+  documented right here, *(c)* decided elsewhere and not propagated. **(a)** and **(c)**
+  are work — and so is a **(b)** that is still WRONG, because **decision status and
+  technical validity are DIFFERENT AXES.** A documented decision can be mistaken, stale,
+  or break an external contract; "it's by design" is not a proof of correctness. So a
+  **(b)** splits:
+  - **accepted trade-off** — a conscious limitation with a real, named cost the project
+    chose to pay (single-browser support under a matching contract): mark it *accepted
+    limitation* with its cost, not a defect.
+  - **documented violation** — a decision that STILL breaks a security invariant, an
+    external contract, or its own stated goal (an ADR that permits logging a refresh
+    token): this REMAINS a `finding`, carrying the `decision_id`, the reason to revisit,
+    and the counter-evidence. Recording a **(b)** the audit got wrong (a false positive)
+    is worth more than deleting the row; but excluding every documented decision from
+    findings is a systemic source of false NEGATIVES, which is the more expensive miss.
 - **Where the verdict is (c), the remedy is a mechanical check, not an edit.** A
   written rule nobody verifies reaches exactly as far as the place it was written; the
   durable fix in all five cases was a guard that asks the project's own instruction of
@@ -210,7 +234,12 @@ Two more traps, both of which shipped in the first draft and are now fixtures:
 ## The artefacts — the sidecar always, the page on request
 
 `docs/audit/<date>-audit.json` is written on every run. **The HTML page is written
-only with `--report`.**
+only with `--report`.** Three output modes, and only one needs a browser:
+**stdout** (`--stdout` — the summary in the terminal, nothing written but the
+sidecar), **json** (the sidecar alone, the default — a machine reads it, no
+page and no browser), **html** (`--report` — the page too). A json-only or
+stdout run **never opens a browser and never requires one**; the browser is a
+concern of `--report` alone.
 
 The split is not symmetry. The sidecar is what makes this a ratchet rather than a
 snapshot, and the next run reads it — skipping it would silently turn every future run
@@ -229,6 +258,13 @@ credential it is, and the remedy. The value appears in neither artefact nor on
 stdout: an audit must not become the second place a credential leaks. Redaction
 is total rather than a prefix — half a credential plus its context is often
 enough to finish.
+
+**"Read-only" is about the TARGET, not the disk.** The audit reads the
+project's source, data and production evidence and mutates NONE of it, and it
+commits nothing. It DOES write its own artefacts into its allowed output
+directory (`docs/audit/` by default, `--out-dir` to relocate) — the sidecar
+always, the page on `--report`. Writing the sidecar there is not a violation of
+read-only; writing into the target's source, or `git add`-ing anything, is.
 
 **The sidecar is what makes this a ratchet rather than a snapshot.** Each
 finding carries an id derived from its probe and its place, so it survives a
@@ -252,16 +288,21 @@ could not look.
 
 ## Exit criterion
 
-An audit is finished when:
+An audit is finished when — the criterion is CONDITIONAL on the deliverables
+requested, not a fixed page-and-browser:
 
 1. every probe has a verdict, and every `blind` one names why;
-2. the page and the sidecar are written and the page has been opened;
+2. the sidecar is written (always). **On `--report`, and only then**, the HTML
+   page also exists, its internal links are safe and resolve, and its
+   inspect/render status is recorded (opened, or `--no-open` noted) — WITHOUT
+   `--report` no page is created and the run is still complete;
 3. **every number in the report was produced by a command this run executed** —
    a restated count is an assertion (`evidence-docs`);
 4. at least one figure was **re-derived by a differently-shaped command** and
    both were printed. Re-running the same command is a spell-check of the first
    run;
-5. the proposed rows are printed for the operator, with nothing written.
+5. the proposed rows are printed for the operator, with nothing written to the
+   target.
 
 ## Rationalizations
 

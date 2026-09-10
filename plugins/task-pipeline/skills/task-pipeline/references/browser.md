@@ -147,6 +147,14 @@ await browser.close();
 console error nobody asserted on is precisely what the look is for. This is `DEC-0004`
 and it is the reason both halves exist.
 
+**The claims are a contract, not prose** (PXS-05.01): `templates/browser-claims.json`
+links each REQ/scenario id to the STATE it was verified in and the KIND of check
+(this table's own look/suite/library split), and `python3 test/browser_claims_test.py`
+validates a filled copy with stdlib only — a visual PASS needs its artifact, captured
+in the claim's own state (the initial screenshot closes nothing about opened/error);
+a suite PASS closes no look claim; a toggle owes its full cycle; no browser channel
+is NOT_RUN with the reason.
+
 ## Getting past a login, and past a backend
 
 A surface behind auth is the usual reason a run skips the look. Both channels solve it,

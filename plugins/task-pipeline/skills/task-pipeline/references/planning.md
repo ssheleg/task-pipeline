@@ -19,6 +19,9 @@ Built into this skill; nothing to install.
 - No placeholders
 - Self-review — before handing off
 - This stage settles nothing — and that is a rule, not an omission
+- The UI handoff annex — a packet an executor can build without re-deriving
+- Pre-dispatch — the last gate before a claim
+- The leaf compiler — a slice survives a cold reader or it does not dispatch
 - GATE (auto)
 
 ## Audience
@@ -286,6 +289,52 @@ choice belongs to a lower layer.** A contract that turns out underspecified goes
 back to stage 3 and is recorded there; a scope question goes back to the operator.
 A decision first made while sequencing tasks is a decision nothing downstream will
 ever find, because nobody reads a plan after the build.
+
+## The UI handoff annex — a packet an executor can build without re-deriving
+
+A packet whose work is a screen carries a UI ANNEX beside its context: the
+state IDs it touches, the components it reuses and the props they take, the
+tokens and content strings, the accessibility requirements, and the exact
+asset versions. With it, an executor implements the fixture without going
+back to re-derive the visual spec; without it, the same work is re-decided
+per session and drifts. The annex ADDS to the task context — it never
+replaces the scheduler's claim or fence (that is `agent-sync`'s job, not the
+packet's), and a stale visual spec (an asset version or a token that moved
+under the plan) triggers a packet REVISION exactly as a moved source input
+does, never a silent dispatch against old pixels.
+
+The annex is a DOMAIN annex, optional by domain: a screen packet carries it,
+a migration or a CLI packet does not — a non-UI task owes no visual spec,
+and demanding one would be the mirror of the omission it fixes.
+
+## Pre-dispatch — the last gate before a claim
+
+Before a compiled leaf is claimed and worked
+(`scripts/context_packets.py predispatch`), it passes one final check: every
+input's digest is re-verified against the bytes on disk NOW (source drift
+blocks — the plan was made against other bytes), each data prerequisite's
+output must be materialized, the PRIMARY context must fit its budget (a
+breach BLOCKS and is never a silent truncation — the budget cuts appendix,
+never primary), and the declared capability and coordination claim must be
+present. Any failure blocks the claim and names itself; nothing is trimmed
+to fit.
+
+## The leaf compiler — a slice survives a cold reader or it does not dispatch
+
+Where the plan is compiled into execution packets
+(`scripts/context_packets.py compile-leaf`), each outcome slice carries its
+resolved decisions (bound by address+digest — an unresolved decision
+dispatches NO leaf), its exact scope, its mapping onto the parent's
+acceptance, and its material split into budgeted primary vs appendix — a
+budget cuts appendix only and records the cut, never acceptance. The test of
+a compiled packet is the **cold reader**: with no author history, the packet
+alone answers eight questions — goal, inputs, decisions, scope, outputs,
+acceptance, guards, resume (`readiness`); a missing version or output
+contract fails readiness. Acceptance names at least one positive and one
+negative case. A slice is selected by its explicit id, never by mtime; and
+neither a design flow nor a `.design/TASKS.md` becomes a parallel plan
+authority — leaves come from the plan through the compiler or they are not
+leaves.
 
 ## GATE (auto)
 
