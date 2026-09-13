@@ -1,8 +1,10 @@
 # Verification — task-pipeline
 
-## Shipped state — v1.86.2 (2026-09-13)
+## Shipped state — v1.86.3 (2026-09-14)
 
-The one hook this skill ships, with its filter where Claude Code reads it.
+The one hook this skill ships, with its filter where Claude Code reads it. `v1.86.2` carried
+the same payload, was tagged and refused by `release.yml` for lacking its stamp declaration
+(the eighth instance, `retro.md`); v1.86.3 adds the declaration.
 
 | REQ | What ships | How it was confirmed | Confirmed |
 |---|---|---|---|

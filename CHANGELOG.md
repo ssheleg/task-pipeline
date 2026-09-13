@@ -1,3 +1,14 @@
+## v1.86.3 — the release declares the stamp it does not carry, eighth time
+
+`v1.86.2` was tagged and refused by its own release workflow: `npm run test:all` against
+the tag's tree found the version named nowhere in `retro.md`'s `## Releases that carry no
+stamp`. Nothing published under it — the tag exists, the release does not, npm never
+served it. The tree had passed `npm test` locally and CI's `validate` job; the release
+runs `test:all`, and `R-010` says to run exactly that against the tree you are about to
+tag. Read that evening, skipped that evening.
+
+The v1.86.2 payload is unchanged. This release adds the declaration for both versions.
+
 ## v1.86.2 — the filter this skill exported filtered nothing
 
 Claude Code 2.1.270 started printing `hooks.json: unknown key "if" … ignored` at session
