@@ -1,5 +1,15 @@
 # Verification — task-pipeline
 
+## Shipped state — v1.86.2 (2026-09-13)
+
+The one hook this skill ships, with its filter where Claude Code reads it.
+
+| REQ | What ships | How it was confirmed | Confirmed |
+|---|---|---|---|
+| HK-shape | `templates/hooks.example.json` carries only keys Claude Code's hook schema knows — a group is `{matcher, hooks}`, the commit filter `if` sits on the handler | `test/validate.py` refuses a stray group key and requires exactly one handler-level `Bash(git commit *)`; keys read out of the 2.1.270 binary's zod schema (`Td()` handler, `Rt()` group) | **planted** — `test/audit_regressions/fix-hk-02.py` writes the pre-v1.86.2 shape (`if` beside `matcher`) into a copy and requires the validator to refuse it by name; a workflow step was impossible at 511,941 of 512,000 bytes (#91) |
+| HK-doctrine | `references/hooks.md` tells a reader to put `if` inside the handler, and the evidence-docs mirror says the same | `python3 test/audit_regressions/fix-ed-01.01.py` — every generated copy byte-equal to its source | **observed** |
+| Gate | The whole suite on this tree | `npm test` EXIT=0 | **observed** |
+
 ## Shipped state — v1.86.1 (2026-09-10)
 
 Sherlock external-v3 (37 findings) and the context-ready handoff. The rows worth
