@@ -2559,6 +2559,36 @@ else:
         except Exception as e:
             fail(f"templates/hooks.example.json: invalid JSON ({e}) — it is copied "
                  "verbatim into a settings file, so a broken one breaks the project")
+        else:
+            # Claude Code's hooks schema (read out of the 2.1.270 binary): a matcher GROUP is
+            # {matcher, hooks} and nothing else; a command HANDLER is the set below. A key
+            # outside is ignored silently — and from 2.1.270 announced at every session
+            # start. This template carried `if` beside `matcher` until v1.86.2: declared,
+            # never evaluated, so the docs gate ran on every Bash call of every project
+            # that copied it.
+            _GROUP = {"matcher", "hooks"}
+            _HANDLER = {"type", "command", "args", "if", "shell", "timeout", "statusMessage",
+                        "once", "async", "asyncRewake"}
+            _tpl = json.load(open(os.path.join(tpl_dir, "hooks.example.json"), encoding="utf-8"))
+            _commit_if = 0
+            for _ev, _groups in (_tpl.get("hooks") or {}).items():
+                for _i, _g in enumerate(_groups):
+                    _x = sorted(set(_g) - _GROUP)
+                    if _x:
+                        fail(f"templates/hooks.example.json: {_ev}[{_i}] carries {_x} beside "
+                             "`matcher` — a matcher group is only matcher+hooks; Claude Code ignores "
+                             "the key, so a filter written there filters nothing (it belongs on the handler)")
+                    for _j, _h in enumerate(_g.get("hooks") or []):
+                        _x = sorted(set(_h) - _HANDLER)
+                        if _x:
+                            fail(f"templates/hooks.example.json: {_ev}[{_i}].hooks[{_j}] carries "
+                                 f"{_x} — not a key Claude Code's hook handler schema knows")
+                        if _ev == "PreToolUse" and str(_h.get("if", "")).startswith("Bash(git commit"):
+                            _commit_if += 1
+            if _commit_if != 1:
+                fail("templates/hooks.example.json: the commit gate must carry exactly one "
+                     "handler-level `if` of the form `Bash(git commit *)` — that filter is what keeps "
+                     "the docs gate off every other shell command")
 
     # The seeded gate travels to macOS (bash 3.2) and to whatever CI the host runs.
     # These three constructs fail SILENTLY rather than loudly: BSD `sed -i` needs an

@@ -1,3 +1,30 @@
+## v1.86.2 — the filter this skill exported filtered nothing
+
+Claude Code 2.1.270 started printing `hooks.json: unknown key "if" … ignored` at session
+start for a sibling plugin. The same shape has been in this skill's one shipped template
+since 2026-08-03, and every project that copied it into `.claude/settings.json` got a
+documentation gate that ran on **every** Bash call — a red gate refused `ls`, not commits.
+
+Guards: 429 → **429**, property checks 15 → **15** — the regression for this release is
+`test/audit_regressions/fix-hk-02.py`, run by `npm test`, and NOT a workflow step:
+`validate.yml` sits at 511,941 of GitHub's 512,000 bytes (#91), and a 59-byte headroom holds
+no step. It plants the old shape into a copy and requires the validator to refuse it by name.
+
+- **`"if": "Bash(git commit *)"` sat beside `matcher`, and a matcher group is only
+  `matcher` + `hooks`.** Read out of the 2.1.270 binary's schema: `if` exists on a command
+  handler only. Moved there in `templates/hooks.example.json`; the group's `_note` moved to
+  a top-level `_filter_note` for the same reason, since the block is copied verbatim into a
+  settings file.
+- **`references/hooks.md` said "beside `matcher`" and now says "inside the handler,
+  beside `type` and `command`"** — the worked example too; the evidence-docs mirror was
+  regenerated with `fix-ed-01.01.py --sync`. The dated 2026-08-03 documentation-track plan
+  keeps its wording.
+- **A new validator check refuses any key the hook schema does not know** at either level
+  and requires exactly one handler-level `Bash(git commit *)`; `fix-hk-02.py` plants the
+  pre-v1.86.2 shape back and watches the check fire. `claude plugin validate
+  --strict` passes the defective file, so a repo gate is the only place this fails before a
+  session start.
+
 ## v1.86.1 — the release declares the stamp it does not carry
 
 `v1.86.0` was tagged and refused: the run-stamp gate reads the tag's own tree, a

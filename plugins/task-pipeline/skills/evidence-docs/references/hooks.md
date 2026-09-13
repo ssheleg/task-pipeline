@@ -129,8 +129,13 @@ machine, and the first surprising denial is debugged in the wrong project.
 ```
 
 - a tool-name pattern (`Edit|Write|…`), or `"*"` for every call;
-- for a specific shell command, add `"if": "Bash(git commit *)"` beside
-  `"matcher": "Bash"`.
+- for a specific shell command, add `"if": "Bash(git commit *)"` **inside the
+  handler object**, beside `"type"` and `"command"` — never beside `"matcher"`.
+  A matcher group is only `matcher` + `hooks`; a key Claude Code does not know
+  there is ignored, and from 2.1.270 announced at every session start as
+  `hooks.json: unknown key "if" … ignored`. This skill's own template carried it
+  at group level until v1.86.2, so its gate filtered nothing and ran on every
+  Bash call.
 
 `if` uses **permission-rule syntax** (`Bash(git *)`, `Edit(*.ts)`) and is evaluated
 **only on tool events** — `PreToolUse`, `PostToolUse`, `PostToolUseFailure`,
@@ -177,9 +182,9 @@ the project's `.claude/settings.json`.
 
 ```json
 { "hooks": { "PreToolUse": [
-  { "matcher": "Bash", "if": "Bash(git commit *)",
-    "hooks": [{ "type": "command", "shell": "bash", "timeout": 60,
-      "command": "bash scripts/check-docs.sh >&2 || exit 2" }] } ] } }
+  { "matcher": "Bash",
+    "hooks": [{ "type": "command", "if": "Bash(git commit *)", "shell": "bash",
+      "timeout": 60, "command": "bash scripts/check-docs.sh >&2 || exit 2" }] } ] } }
 ```
 
 `|| exit 2` is the contract, not a flourish: without it the gate's own `exit 1`
