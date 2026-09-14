@@ -1494,6 +1494,18 @@ written, dated, and read past. A rule that exists and is skipped is not a missin
 it is an unenforced one, and `R-010`'s own retirement condition ("it becomes a
 mechanical pre-push hook") is the fix this instance argues for.
 
+**`v1.86.2` and `v1.86.3` carry no stamp — the EIGHTH instance, one release after the
+seventh was written up.** The v1.86.2 tree passed `npm test` locally and CI's `validate`
+job, was squash-merged, tagged on the merge commit and pushed; `release.yml` then ran
+`npm run test:all` against the tag's tree and refused it here, because the version was
+named nowhere in this section. Nothing published under it. The session that cut it had
+read `R-010` in this file the same evening and still ran `npm test` — the gate command —
+instead of `test:all` — the release command — before tagging. `v1.86.3` is the same
+payload with the declaration in the tree first, and is named here for the same reason
+`v1.86.1` was. Eighth time: the rule is right and unenforced, and the pre-push hook its
+retirement condition names is now a task in the umbrella's plan (HK-05's neighbour) rather
+than a sentence.
+
 **`v1.85.1` carries no stamp, and the mechanism is the one this section already
 names twice:** the stamp gate reads the tag's own tree, the branch run cannot see
 a tag that does not exist yet, and the audit-wave release was cut without writing
