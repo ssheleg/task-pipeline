@@ -1,5 +1,19 @@
 # Verification — task-pipeline
 
+## Shipped state — v1.87.0 (2026-09-14)
+
+Stage 4 gains the gate that reads the plan as the next agent will.
+
+| REQ | What ships | How it was confirmed | Confirmed |
+|---|---|---|---|
+| PA-gate | A plan whose context lives in the conversation does not reach stage 5 | `scripts/plan_audit.py --self-test` → 11 cases; `fix-hk-20.py` runs the CLI end to end on a node with no packet: exit 1, *no execution packet*, *stage 5 does not open* | **planted** |
+| PA-collision | Two nodes the GRAPH leaves unordered cannot both edit one file | self-test: the unordered pair is refused, the ordered pair is not — the parallel-group rule reads declared groups and never looked outside one | **planted** |
+| PA-priority | Priority is computed from what each node unblocks, transitively, and terminates on a cycle | self-test: a 3-chain gives 2/1/0; a 2-cycle returns both ids instead of hanging (the cycle itself is `graph.py validate`'s finding) | **planted** |
+| PA-one-home | The cold-reader contract has one home | the gate imports `COLD_READER_QUESTIONS` from `context_packets.py`; `fix-hk-20.py` refuses a copy that restates the list | **planted** |
+| PA-model | The plan-then-execute profile is named, and a recorded map is checked | `model-tiering.md` carries the profile with its basis and keeps *task size still switches nothing*; a map naming stage 11 is refused | **planted** |
+| PA-budget | SKILL.md stayed inside the house limit by displacement | the References paragraph the first draft added was removed and the gate is named in the stage row instead: 4765 → **4721**/4750 (`audit_skill.py --house`, tiktoken) | **observed** — the auditor refused the tree at 4765 and 4753 first |
+| Gate | The whole suite on this tree | `npm test` EXIT=0 | **observed** |
+
 ## Shipped state — v1.86.3 (2026-09-14)
 
 The one hook this skill ships, with its filter where Claude Code reads it. `v1.86.2` carried

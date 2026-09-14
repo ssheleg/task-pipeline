@@ -22,6 +22,7 @@ Built into this skill; nothing to install.
 - The UI handoff annex — a packet an executor can build without re-deriving
 - Pre-dispatch — the last gate before a claim
 - The leaf compiler — a slice survives a cold reader or it does not dispatch
+- Plan audit — the plan read as the NEXT agent will read it
 - GATE (auto)
 - Execution packets
 
@@ -284,6 +285,7 @@ before the gate; every line a **computed number, not a tick**.
 - Hygiene: <n> checks, <n> findings, <n> open
 - Edges: <n> declared, <n> data, <n> control, <n> resource, <n> removed with reasons
 - Placeholders: <n> · Ambiguity: <n> found, <n> resolved inline
+- Plan audit: <n> live nodes, <n> with packets, <n> context findings, <n> collisions — top of the computed priority: <id> (unblocks <n>)
 ```
 
 ## This stage settles nothing — and that is a rule, not an omission
@@ -345,7 +347,61 @@ neither a design flow nor a `.design/TASKS.md` becomes a parallel plan
 authority — leaves come from the plan through the compiler or they are not
 leaves.
 
+## Plan audit — the plan read as the NEXT agent will read it
+
+Everything above is written for the planner. This is the pass that reads the same
+plan as somebody who was not there — because that is who executes it. **Agents change
+between sessions, and whatever a task does not say, the next one re-derives or gets
+wrong.** The self-review checks the plan against the brief; this checks it against a
+stranger.
+
+Run it, and record its four numbers in the `## Self-review` block:
+
+```bash
+python3 scripts/plan_audit.py --graph .task-pipeline/graph.json --packets <dir>
+python3 scripts/plan_audit.py --self-test     # the gate's own guards, 11 cases
+```
+
+It asks four questions no other gate asks:
+
+1. **Context — can a cold reader execute this node?** Every live node must carry an
+   execution packet, and the packet must answer the eight questions of
+   [the leaf compiler](#the-leaf-compiler--a-slice-survives-a-cold-reader-or-it-does-not-dispatch)
+   — goal, inputs, decisions, scope, outputs, acceptance, guards, resume. The check
+   imports that list from `scripts/context_packets.py` rather than restating it: one
+   home for the contract, so the gate cannot drift from the compiler that fills it.
+   A node whose context lives in the planning conversation fails here, where it costs
+   a paragraph, instead of at dispatch, where it costs a wrong implementation.
+2. **Contradiction — do two unordered nodes edit one file?** The parallel-safety rule
+   in the self-review reads the groups the planner *declared*; this reads the GRAPH.
+   Two nodes the planner never put in one group and never connected either race
+   exactly as hard, and the run finds out by losing an edit.
+3. **Priority — computed, never declared.** How many nodes each one unblocks,
+   transitively. A hand-assigned number is an opinion wearing a number's clothes
+   ([`prioritisation.md`](prioritisation.md)); this one is derived from the graph and
+   printed, so the order a run takes is a fact the plan states rather than a choice it
+   makes silently. Cycles terminate the walk instead of hanging it — the cycle itself
+   is `graph.py validate`'s finding, not this one's.
+4. **Model — is the recorded map real?** When the brief records a per-stage override
+   ([`model-tiering.md`](model-tiering.md) → *The plan-then-execute profile*), a stage
+   number this pipeline does not have, or an entry with no model behind it, fails here
+   rather than at the boundary it was written for.
+
+**A node that is `done`, `parked`, `waived`, `closed` or `superseded` needs no
+packet** — finished work is history, not a plan to hand over. **A packet attached to
+no node is reported, never guessed at**: a packet nothing can attach to and a node
+with no packet look identical from the outside and have different fixes.
+
+**What this gate does not do.** It does not judge whether the plan is a good plan, and
+it cannot: a packet that answers all eight questions wrongly passes. It refuses the
+plan that cannot be handed over at all, which is the failure that was actually
+costing runs.
+
 ## GATE (auto)
+
+**The plan audit runs and is clean** — `python3 scripts/plan_audit.py` exits 0, and
+its four numbers are in the self-review. A finding there is fixed here; stage 5 does
+not open over a plan a stranger cannot execute.
 
 **Set equality first:** the REQ ids in the brief equal the union of `Implements:`
 across the plan's tasks. A non-empty difference fails the gate and is reported as

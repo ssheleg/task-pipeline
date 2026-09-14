@@ -211,7 +211,7 @@ capable available — see `references/model-tiering.md`).
 | 1 | Docs study | contracts grounded on fetched docs | auto |
 | 2 | Brainstorm + decompose | design approved; UI verdict recorded; every REQ answered; **the queue is an artifact** — a work graph validates and its coverage names no unserved REQ; platform: module map approved | manual |
 | 3 | Spec | committed + reviewed; UI: chain validated, linter green, scenarios and `SCR-` traced; COPY and VISUAL are a parallel layer after UX, and where both ran their convergence check is recorded | manual |
-| 4 | Plan | parallel-ready, DoD per task; **every edge names what it carries** — the fake-edge test run and its `Edges:` count computed | auto |
+| 4 | Plan | parallel-ready, DoD per task; **every edge names what it carries** — the fake-edge test run and its `Edges:` count computed; **`scripts/plan_audit.py` clean** — every live node's packet survives a cold reader, and no two unordered nodes edit one file | auto |
 | 5 | Dev | tasks DONE, TDD green per task, branch integrated per the brief; a fanned-out group gets **one convergence check over all its diffs together** before the first worktree lands | auto |
 | 6 | Tests | full suite green, new and changed code covered, every new check probed both ways and asserted on its exit code; **a web surface is checked in a browser, not in the diff** — where a browser channel is connected; absent, the weaker claim is recorded | auto |
 | 7 | Lint + deploy | lint clean and suite green before deploy; deploy needs a go, or the brief's specific standing authorization | manual |
