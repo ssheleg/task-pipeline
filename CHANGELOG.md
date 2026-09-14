@@ -1,3 +1,38 @@
+## v1.87.0 — stage 4 stops handing over a plan the next agent cannot execute
+
+The operator's finding, 2026-09-13: **agents change between sessions, and whatever a
+task does not say, the next one re-derives or gets wrong.** The doctrine for this was
+already here — the cold reader's eight questions, the leaf compiler, executor-sized
+tasks and their context budgets — and none of it was mechanical. Nothing read the plan
+and refused it. A task whose context lived in the planning conversation reached an
+executor and failed there, four stages after it was written.
+
+Guards: 429 → **429**. The gate ships its own eleven-case `--self-test` plus
+`test/audit_regressions/fix-hk-20.py`, not a workflow step: `validate.yml` sits 59
+bytes under GitHub's ceiling (#91).
+
+- **`scripts/plan_audit.py`** — stage 4's gate, reading the plan the way somebody who
+  was not there will read it. Four questions no other gate asks: does every live node
+  carry a packet a **cold reader** can execute; do two nodes the graph leaves
+  **unordered** name one edit target (the parallel-safety rule reads the groups the
+  planner declared — this reads the graph, and two nodes in different groups race just
+  as hard); what does each node **unblock**, transitively, so priority is computed
+  rather than declared; and does a recorded per-stage **model map** name stages this
+  pipeline has. A `done`/`parked`/`waived` node needs no packet; a packet attached to
+  no node is reported, never guessed at. It imports the eight questions from
+  `context_packets.py` rather than restating them — one home for the contract, or the
+  gate drifts from the compiler that fills it.
+- **`references/planning.md` → *Plan audit*** states the four questions, what the gate
+  deliberately does NOT judge (a packet can answer all eight wrongly and pass), and
+  where its four numbers go in `## Self-review`. `references/stages.md`'s stage-4 GATE
+  and the SKILL.md stage row both name the script.
+- **`references/model-tiering.md` → *The plan-then-execute profile*** — the top
+  reasoning tier for stages 0–4 and 10, the strongest working tier for 5–9, with the
+  basis written down: stages 0–4 produce judgment the later stages consume, and a weak
+  plan is not recovered by a strong build. It changes nothing about the rule it sits
+  under — still an override the operator states and the brief records, and task size
+  still switches nothing.
+
 ## v1.86.3 — the release declares the stamp it does not carry, eighth time
 
 `v1.86.2` was tagged and refused by its own release workflow: `npm run test:all` against

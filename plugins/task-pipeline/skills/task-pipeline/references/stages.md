@@ -387,7 +387,12 @@ never that the work was skipped quietly.
   paths, complete code in every step, TDD steps with expected output, DoD each,
   dependency graph + parallel groups, non-overlapping file ownership, and the
   Global Constraints block copied verbatim from the spec.
-- **GATE (auto):** the **`## Self-review` section written with computed values**,
+- **GATE (auto):** `python3 scripts/plan_audit.py` clean — the plan read as the agent
+  who was NOT there will read it: every live node carries a packet answering the cold
+  reader's eight questions, no two nodes the graph leaves unordered edit one file, the
+  priority is computed from what each node unblocks, and a recorded per-stage model map
+  names stages this pipeline has ([`planning.md`](planning.md) → *Plan audit*). Then:
+  the **`## Self-review` section written with computed values**,
   every command, path and file a DoD names resolving; **set equality — the REQ ids in the brief equal the union of
   `Implements:` across plan tasks.** A non-empty difference fails the gate and is
   reported as the explicit list of dropped requirements; this is the seam where

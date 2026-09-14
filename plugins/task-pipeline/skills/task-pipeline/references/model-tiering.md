@@ -1,5 +1,16 @@
 # Model policy
 
+## Contents
+
+- The default
+- Never hardcode a model id
+- The operator's explicit choice is inherited, verbatim
+- Mechanic — confirm at preflight, then stop asking
+- The plan-then-execute profile
+- Subagents
+- Degradation
+- A harness clause encodes a model's weakness — stress-test it per generation
+
 **One model, confirmed once, before the run starts.** Not a per-stage tier list,
 not a hardcoded vendor id — a single decision the operator makes at preflight and
 the pipeline then honors without nagging.
@@ -70,6 +81,35 @@ that:
 - A skill runs inside the current context and **cannot change the main-loop
   model**; only the operator can, via `/model` (or `/fast`). Preflight is
   interactive anyway, so this costs one exchange.
+
+## The plan-then-execute profile
+
+The per-stage override the *Mechanic* block offers is usually declined, and the
+default — one tier for the whole run — is the right answer when one tier is what the
+environment has. Where two are available, one override has a basis worth writing down,
+so it ships as a named profile the operator can ask for by name instead of composing:
+
+> **plan-then-execute** — the most capable reasoning tier for stages 0–4 (intake,
+> docs, brainstorm, spec, plan) and stage 10 (acceptance); the strongest *working*
+> tier for stages 5–9 (build, tests, deploy, post-deploy, docs).
+
+**Its basis, which is the part that makes it a decision rather than a preference:**
+what stages 0–4 produce is *judgment that the later stages consume* — a brief that
+hears what was not said, contracts a zero-context implementer will follow, and a plan
+whose packets survive a stranger. A weak plan is not recovered by a strong build; a
+strong plan executed by a working tier is ordinary delivery. Stage 10 is back on the
+planning tier because acceptance is a judgment too: it decides whether the evidence
+answers the claim.
+
+**It changes nothing about how a switch is recorded.** This is still an override the
+operator states at preflight and the brief records with its basis, exactly as the rule
+above demands; naming it here saves the composing, not the recording. Task size still
+switches nothing. And it is still ADVICE — an environment with one tier runs the whole
+pipeline on that tier and says so.
+
+`scripts/plan_audit.py --models <map.json>` checks the recorded map at stage 4: a stage
+number this pipeline does not have, or an entry with no model behind it, fails there
+rather than at the boundary it was written for.
 
 ## Subagents
 

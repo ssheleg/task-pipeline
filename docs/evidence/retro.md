@@ -1494,8 +1494,10 @@ written, dated, and read past. A rule that exists and is skipped is not a missin
 it is an unenforced one, and `R-010`'s own retirement condition ("it becomes a
 mechanical pre-push hook") is the fix this instance argues for.
 
-**`v1.86.2` and `v1.86.3` carry no stamp — the EIGHTH instance, one release after the
-seventh was written up.** The v1.86.2 tree passed `npm test` locally and CI's `validate`
+**`v1.86.2`, `v1.86.3` and `v1.87.0` carry no stamp — the EIGHTH instance, one release
+after the seventh was written up.** `v1.87.0` is named here BEFORE its tag exists,
+which is the only difference that matters: the declaration is in the tree the tag will
+point at, so the gate that refused `v1.86.2` has something to read this time. The v1.86.2 tree passed `npm test` locally and CI's `validate`
 job, was squash-merged, tagged on the merge commit and pushed; `release.yml` then ran
 `npm run test:all` against the tag's tree and refused it here, because the version was
 named nowhere in this section. Nothing published under it. The session that cut it had
