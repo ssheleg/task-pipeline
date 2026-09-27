@@ -2590,6 +2590,28 @@ else:
                      "handler-level `if` of the form `Bash(git commit *)` — that filter is what keeps "
                      "the docs gate off every other shell command")
 
+    # SessionEnd fits the budget every host gives. Codex 0.157 clamps a SessionEnd
+    # handler's timeout to 3 s and prints `clamping SessionEnd hook timeout to 3s in
+    # …/hooks.json` at every session start; Claude Code sizes its SessionEnd wait from
+    # the largest handler timeout. The plugin's own hooks.json declared 10 s through
+    # v1.87.0 — a number no host honoured, and a warning on every Codex start. The
+    # template is held to the same cap, since it is copied into projects verbatim.
+    SESSION_END_TIMEOUT_CAP = 3
+    for _rel in ("plugins/task-pipeline/hooks/hooks.json",
+                 "plugins/task-pipeline/skills/task-pipeline/templates/hooks.example.json"):
+        try:
+            _hj = json.load(open(os.path.join(ROOT, _rel), encoding="utf-8"))
+        except Exception as e:
+            fail(f"{_rel}: unreadable ({e})")
+            continue
+        for _i, _g in enumerate(((_hj.get("hooks") or {}).get("SessionEnd")) or []):
+            for _j, _h in enumerate(_g.get("hooks") or []):
+                _t = _h.get("timeout")
+                if not isinstance(_t, (int, float)) or _t > SESSION_END_TIMEOUT_CAP:
+                    fail(f"{_rel}: SessionEnd[{_i}].hooks[{_j}] timeout {_t!r} — declare at most "
+                         f"{SESSION_END_TIMEOUT_CAP} s; Codex clamps anything larger and warns "
+                         "at every session start")
+
     # The seeded gate travels to macOS (bash 3.2) and to whatever CI the host runs.
     # These three constructs fail SILENTLY rather than loudly: BSD `sed -i` needs an
     # argument GNU refuses and `0,/re/` does not exist there at all.

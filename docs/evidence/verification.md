@@ -1,5 +1,16 @@
 # Verification — task-pipeline
 
+## Shipped state — v1.87.1 (2026-09-27)
+
+SessionEnd declares what every host gives.
+
+| REQ | What ships | How it was confirmed | Confirmed |
+|---|---|---|---|
+| SE-cap | Every SessionEnd handler in `hooks/hooks.json` and `templates/hooks.example.json` declares `timeout` ≤ 3 s | `test/validate.py` refuses the shipped 10 (watched failing on the pre-fix tree); negative step *a SessionEnd timeout a host clamps must fail* via `test/plant_sessionend_timeout.py` | **planted** |
+| SE-fits | `run-lifecycle.sh` fits the 3 s | one appended line and exit, as its header states; `codex exec` on this machine printed the clamp warning for 10 and nothing else from this plugin | **observed** |
+| WF-room | `validate.yml` is under GitHub's 512 000-byte limit | `wc -c` → 506 050; the moved plant passes `test/negatives.py -k MENTIONED` | **observed** |
+| Gate | The whole suite on this tree | `npm run test:all` EXIT=0 | **observed** |
+
 ## Shipped state — v1.87.0 (2026-09-14)
 
 Stage 4 gains the gate that reads the plan as the next agent will.

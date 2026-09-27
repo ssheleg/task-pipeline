@@ -1,3 +1,31 @@
+## v1.87.1 — the SessionEnd timeout no host gave
+
+Codex 0.157 prints `clamping SessionEnd hook timeout to 3s in …/task-pipeline/…/hooks.json`
+at every session start. `hooks.json` declared 10 s for `run-lifecycle.sh`; Codex clamps a
+SessionEnd handler to 3 s, and Claude Code sizes its SessionEnd wait from the largest
+handler timeout. The script already fitted: it appends one line, and its own header states
+the 1.5-second budget. So the number was the only defect, and a warning on every Codex
+start the only cost.
+
+Guards: 429 → **430**.
+
+- **`hooks/hooks.json` declares `timeout: 3`** for SessionEnd. `test/validate.py` now reads
+  the plugin's OWN hooks file, which it never checked before (only the template), and holds
+  it and `templates/hooks.example.json` to a 3 s SessionEnd cap. The new negative step
+  plants the shipped 10 through `test/plant_sessionend_timeout.py`, which asserts that the
+  plant landed.
+- **`validate.yml` gets room again, 512 419 → 506 050 bytes.** The new step on its own
+  pushed the workflow past GitHub's 512 000-byte limit, where it stays `active` and never
+  runs. The largest inline plant (*a release MENTIONED but not declared*, 7.9 kB) moved
+  verbatim into `test/plant_gap_mention.py`, with the same exit-9 skip. It is watched
+  rejecting its planted defect through `test/negatives.py -k MENTIONED`.
+- **The dormancy guard reads the script a step calls.** Moving that plant took its `SKIP:`
+  branch out of the step text, and `anchors.py` read only the step. So it stopped calling
+  the step skip-capable, and deleting its `# dormant-when:` passed. `test:all` caught this
+  through *a plant that can decline to run and never says when*. `Step.skip_capable` now
+  also follows `python3 test/plant_*.py` into the file. A new `anchors_test.py` case is red
+  without the fix.
+
 ## v1.87.0 — stage 4 stops handing over a plan the next agent cannot execute
 
 The operator's finding, 2026-09-13: **agents change between sessions, and whatever a

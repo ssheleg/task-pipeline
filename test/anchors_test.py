@@ -28,7 +28,7 @@ CASES: list[tuple[str, str, bool]] = []
 # validator's own refusal of one. Named as a constant because `test/validate.py`
 # computes the shipped fixture count from this file and a magic `+ 2` there would be
 # the restated number all over again.
-EXTRA_CHECKS = 2
+EXTRA_CHECKS = 3
 
 
 def case(name: str, body: str, must_fail: bool, step: str = "a plant") -> None:
@@ -512,6 +512,17 @@ def _run() -> int:
     ok = empty == []
     print(f"  {'PASS' if ok else 'FAIL':<6}an empty corpus yields an empty census, "
           "which the caller must refuse rather than read as clean")
+    bad += 0 if ok else 1
+
+    # A plant that lives in `test/plant_*.py` carries its SKIP branch there; the step
+    # that calls it is skip-capable although its own text never says SKIP (v1.87.1).
+    s_called = anchors.Step("Negative self-test (x)",
+                            "set -eu\npython3 test/plant_gap_mention.py /tmp/x\n")
+    s_plain = anchors.Step("Negative self-test (y)",
+                           "set -eu\npython3 test/plant_sessionend_timeout.py /tmp/y\n")
+    ok = s_called.skip_capable and not s_plain.skip_capable
+    print(f"  {'PASS' if ok else 'FAIL':<6}a step is skip-capable through the plant script it "
+          "calls, and only when that script can print SKIP")
     bad += 0 if ok else 1
 
     # And the caller does refuse it: the live wiring in `test/validate.py` fails when

@@ -590,6 +590,22 @@ def _substantive(text):
     return len(text.strip()), len(words)
 
 
+# A plant moved out of the workflow into `test/plant_*.py` (the 512 000-byte ceiling)
+# carries its SKIP branch with it. Reading only the step text then called that plant
+# unable to decline, and removing its `# dormant-when:` passed unnoticed — watched
+# happening on v1.87.1, when *a release MENTIONED but not declared* moved into
+# `test/plant_gap_mention.py`. The guard reads what would RUN: the script the step calls.
+PLANT_CALL_RE = re.compile(r"(?m)^\s*python3\s+(test/plant_[\w-]+\.py)\b")
+
+
+def _prints_skip(path):
+    try:
+        with open(path, encoding="utf-8") as fh:
+            return any("SKIP:" in ln for ln in fh if not ln.lstrip().startswith("#"))
+    except OSError:
+        return False
+
+
 class Step:
     def __init__(self, name, script):
         self.name = name
@@ -610,7 +626,8 @@ class Step:
         # how an operator learns to switch a guard off.
         self.skip_capable = any(
             "SKIP:" in ln for ln in script.splitlines()
-            if not ln.lstrip().startswith("#"))
+            if not ln.lstrip().startswith("#")) or any(
+            _prints_skip(os.path.join(ROOT, rel)) for rel in PLANT_CALL_RE.findall(script))
         self.needles: list[tuple[str, str]] = []      # every literal read off disk
         self.anchors: list[tuple[str, str, list[str]]] = []
         self.parse_failures = 0

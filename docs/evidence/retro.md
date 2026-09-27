@@ -1508,6 +1508,11 @@ payload with the declaration in the tree first, and is named here for the same r
 retirement condition names is now a task in the umbrella's plan (HK-05's neighbour) rather
 than a sentence.
 
+**`v1.87.1` carries no stamp.** It is a two-number configuration fix released outside a
+pipeline run, from a Codex warning on the operator's machine. It is declared here before
+its tag, in the tree the tag will point at, and it was cut after `npm run test:all` rather
+than `npm test`, which is what `R-010` asks for.
+
 **`v1.85.1` carries no stamp, and the mechanism is the one this section already
 names twice:** the stamp gate reads the tag's own tree, the branch run cannot see
 a tag that does not exist yet, and the audit-wave release was cut without writing
