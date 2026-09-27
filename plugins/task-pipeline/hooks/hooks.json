@@ -83,7 +83,7 @@
             "type": "command",
             "shell": "bash",
             "command": "\"${CLAUDE_PLUGIN_ROOT}/hooks/run-lifecycle.sh\"",
-            "timeout": 10
+            "timeout": 3
           }
         ]
       }
