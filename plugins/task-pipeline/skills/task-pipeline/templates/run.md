@@ -69,7 +69,7 @@ hand:  <N|10> — task "<quoted>" — done <n> — surfaced <n> — decisions <n
        scope <commit>/<env>/<REQ ids> — unverified <n|none-in-scope> (<what, or the literal>)
 holds: <stage id> — <n> (<class: what, owner>; … or "none") — enumerated <n>/8 classes, <unlooked: classes not enumerable>
 gate:  <stage id> — command "<cmd>" — exit <N> — <ISO-8601>
-event: <compact|session-end|subagent> — <detail> — <ISO-8601>
+event: <compact|session-end|subagent|memory> — <detail> — <ISO-8601>
 read:  references/<file>.md            # hook-appended, deduped, UNATTESTED (no writer field)
 ```
 

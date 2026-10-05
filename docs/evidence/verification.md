@@ -1,5 +1,18 @@
 # Verification — task-pipeline
 
+## Shipped state — v1.88.0 (2026-10-05)
+
+A stage boundary leaves a workflow checkpoint the next executor can continue from (PB-137 N-024).
+
+| REQ | What ships | How it was confirmed | Confirmed |
+|---|---|---|---|
+| CK-emit | `stage_checkpoint.py emit` builds the checkpoint from the ledger alone; constraints and key names carry to every later boundary | `test/stage_checkpoint_test.py` (39 cases); the carry-over case was added after the live receipt found constraints lost after the first boundary | **observed** |
+| CK-key | a retry replays, a repeated stage is a new checkpoint | the same suite; live: Observatory answered `replayed` to the retry | **observed** |
+| CK-lease | the lease token stays in `.task-pipeline/memory.json` (0600, git-ignored), out of the ledger and every output; a stale writer stops after one `LeaseLost` | the same suite; live: the old writer was refused after a handoff and dropped its token | **observed** |
+| CK-degrade | without memory tools the run continues with one `event: memory — unavailable` line | the same suite | **observed** |
+| CK-live | the arguments are accepted by Observatory's `observatory_checkpoint_write` and `memory.checkpoint.write` | a live receipt against the engine at main after PR #159: 7 of 7 | **observed** |
+| Gate | The whole suite on this tree | `npm run test:all` EXIT=0 ("all green") | **observed** |
+
 ## Shipped state — v1.87.1 (2026-09-27)
 
 SessionEnd declares what every host gives.
