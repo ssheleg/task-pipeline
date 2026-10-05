@@ -1513,6 +1513,16 @@ pipeline run, from a Codex warning on the operator's machine. It is declared her
 its tag, in the tree the tag will point at, and it was cut after `npm run test:all` rather
 than `npm test`, which is what `R-010` asks for.
 
+**`v1.88.0` and `v1.88.1` carry no stamp — the NINTH instance.** `v1.88.0` (PB-137 N-024, the
+stage-boundary checkpoint writer) was not a full ten-stage run: it has no stage-10 stamp to
+write. `npm run test:all` was green on its tree before the tag, which is what `R-010` asks
+for, but it ran with no local `v1.88.0` tag. So the release check had no tag to read and
+passed a tree the tag's own run then refused. Nothing published under it: `publish` was
+skipped, and there is no GitHub release and no npm version. `v1.88.1` is the same payload,
+with this declaration in the tree first. Its tag was cut locally BEFORE `test:all` ran on
+its tree, which is the remedy the fifth mechanism records, and it was pushed only after
+that run was green.
+
 **`v1.85.1` carries no stamp, and the mechanism is the one this section already
 names twice:** the stamp gate reads the tag's own tree, the branch run cannot see
 a tag that does not exist yet, and the audit-wave release was cut without writing

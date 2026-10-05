@@ -1,3 +1,11 @@
+## v1.88.1 — v1.88.0's payload, released with its no-stamp declaration
+
+The same payload as `v1.88.0`: the stage-boundary checkpoint writer, `scripts/stage_checkpoint.py`
+(PB-137 N-024). `release.yml` refused the `v1.88.0` tag's tree because that version was named
+nowhere in `docs/evidence/retro.md` → *Releases that carry no stamp*. Nothing published under
+it. This release names both versions there first, and its tag was cut locally before
+`npm run test:all` ran against its tree (`R-010`).
+
 ## v1.88.0 — a stage boundary leaves a checkpoint the next executor can continue from
 
 The run ledger survives a compaction. It does not survive a quota that ran out on another

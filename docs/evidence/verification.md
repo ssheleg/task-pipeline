@@ -1,5 +1,14 @@
 # Verification — task-pipeline
 
+## Shipped state — v1.88.1 (2026-10-05)
+
+The `v1.88.0` payload, released with its no-stamp declaration. The rows below `v1.88.0` are
+its evidence. This release adds one row.
+
+| REQ | What ships | How it was confirmed | Confirmed |
+|---|---|---|---|
+| Gate | The whole suite on this tree, with the local `v1.88.1` tag cut first | `npm run test:all` EXIT=0 ("all green"); after recording this row, `npm test` (which holds the stamp check) on the final tree with the tag moved to it | **observed** |
+
 ## Shipped state — v1.88.0 (2026-10-05)
 
 A stage boundary leaves a workflow checkpoint the next executor can continue from (PB-137 N-024).
