@@ -396,8 +396,12 @@ again, and it looks like enforcement while being a mirror.
 Three moments the rail cannot show, recorded by `hooks/run-lifecycle.sh` as
 
 ```
-event: <compact|session-end|subagent> — <detail> — <ISO-8601>
+event: <compact|session-end|subagent|memory> — <detail> — <ISO-8601>
 ```
+
+The fourth kind, `memory`, is appended by `scripts/stage_checkpoint.py` rather than
+by the hook. It records a workflow checkpoint written at a stage boundary, a refusal,
+or that memory was unavailable ([`continuity.md`](continuity.md) → *Part 3*).
 
 The rail reads none of them; `checkup` reads `session-end`, which is how an
 abandoned run stops being invisible. Before this the ledger simply stopped at

@@ -1,3 +1,47 @@
+## v1.88.0 — a stage boundary leaves a checkpoint the next executor can continue from
+
+The run ledger survives a compaction. It does not survive a quota that ran out on another
+account, or a run continued by a different agent. When the host has Project Observatory's
+memory tools (`observatory_checkpoint_write`, or `memory.checkpoint.write` under
+memory/0.1), every gate that returns now also writes a workflow checkpoint. Without the
+tools, nothing changes except one ledger line. This is PB-137 N-024 of the agent-memory
+program.
+
+- **`scripts/stage_checkpoint.py`** ships in the bundle and needs only the standard library.
+  It never talks to Observatory itself: `emit` builds the tool's arguments from the ledger,
+  and `record` keeps the answer.
+  - `emit` takes the run's topic as the goal, the verdicts as `done`, and the next stage
+    (named from `pipeline.example.json`) as `open`. Operator constraints and key *names*
+    are given once and carried to every later boundary.
+  - The idempotency key comes from the exact `stage:` line, so a retry replays and a stage
+    that runs again is a new checkpoint.
+  - `record` keeps `workflowId` and `leaseId` in `.task-pipeline/memory.json` (0600,
+    git-ignored). On a `LeaseLost` refusal it drops the token, so a stale writer stops
+    after one refusal.
+  - `record --unavailable` appends one `event: memory — unavailable` line and exits 0.
+- **`references/continuity.md` → Part 3** says when and how to write the checkpoint, and
+  what it is not: a second ledger, or the narrative.
+- **`event:` gains the `memory` kind** in `templates/run.md` and `references/progress.md`,
+  written by the script rather than the hook.
+- **`test/stage_checkpoint_test.py`** (39 cases), run by `npm test` and `test:all`:
+  - a boundary built from the ledger;
+  - retry versus repeat;
+  - continuation across boundaries, with the token absent from every output;
+  - provider loss;
+  - a stale writer and its successor;
+  - credentials by name only;
+  - a failed gate stays open and acceptance closes;
+  - no ledger.
+- **A live receipt against the Observatory engine** (main after PR #159, 7 of 7):
+  - the first write starts a workflow;
+  - a retry replays;
+  - `memory.checkpoint.write` continues it, with the constraints carried;
+  - after a handoff the old writer is refused `LeaseLost` and drops its token;
+  - no token reaches the ledger.
+
+  It also found the one defect fixed before release: constraints were lost after the
+  first boundary.
+
 ## v1.87.1 — the SessionEnd timeout no host gave
 
 Codex 0.157 prints `clamping SessionEnd hook timeout to 3s in …/task-pipeline/…/hooks.json`

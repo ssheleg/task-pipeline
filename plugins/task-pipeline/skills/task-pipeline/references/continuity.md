@@ -20,6 +20,7 @@ almost no window left, loses the middle of it, and re-derives what it already di
 - The evidence rule
 - What happens at the signal
 - The flush is not a new document
+- Part 3 — workflow memory at the stage boundary
 - Rationalizations
 
 ## The limit, before the capability
@@ -304,6 +305,22 @@ It does **not** mean writing a summary for the compactor. A summary is a fourth
 copy of the truth, it is written once, nobody updates it, and the next run reads
 it as current. The artifacts above are read by later stages anyway; making them
 right costs nothing extra and pays twice.
+
+## Part 3 — workflow memory at the stage boundary
+
+The ledger survives a compaction. It does not survive a quota that ran out on another
+account, or a run picked up by a different agent on another machine. When the host has
+Project Observatory's memory tools, **every gate that returns also writes a workflow
+checkpoint**, and the next executor continues from the last finished stage.
+
+- **When.** After the `stage:` line is appended, every time a gate returns, whatever the verdict. A failed gate's checkpoint says `blocked` and keeps the stage open. Acceptance closes the workflow.
+- **How.** `scripts/stage_checkpoint.py emit` prints the tool's arguments, built from the ledger alone: the topic, the verdicts, the next stage, the operator's constraints and key names. Pass them to `observatory_checkpoint_write`, or to `memory.checkpoint.write` under memory/0.1. Then hand the answer to `stage_checkpoint.py record --answer -`.
+- **The constraints.** Give the brief's restrictive rules once, as `--constraint`. They are carried to every later boundary, and a successor reads them first.
+- **Keys.** Pass keys by name, as `--credential PROJECT/ENV/NAME`, never as a value.
+- **Without the tools.** `stage_checkpoint.py record --unavailable "<why>"` appends one `event: memory — unavailable` line, and the run continues exactly as before. Missing memory is a state the ledger names, not a failure.
+- **A refusal.** `LeaseLost` means another executor holds the workflow now. The script drops the token. Read the workflow (`observatory_checkpoint_latest` with `stage_checkpoint.py state`'s id) before doing anything else. A stale writer stops after one refusal.
+- **The lease token.** It lives in `.task-pipeline/memory.json` (mode 0600, git-ignored) and never in the ledger, a reply or a commit.
+- **What this is not.** Not a second ledger and not the narrative. The checkpoint is the work's state for the next executor. The wiki and the ledger keep everything else.
 
 ## Rationalizations
 
