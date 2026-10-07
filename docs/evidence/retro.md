@@ -1523,6 +1523,16 @@ with this declaration in the tree first. Its tag was cut locally BEFORE `test:al
 its tree, which is the remedy the fifth mechanism records, and it was pushed only after
 that run was green.
 
+**`v1.89.0` and `v1.89.1` carry no stamp — the TENTH instance.** `v1.89.0` (the visual
+gates: `surface_class`, the director record, the contact sheet and `verifier-visual`) was a
+bounded change delivered through a PR, not a full ten-stage run, so it has no stage-10 stamp
+to write. Its tag was pushed on the squash-merge commit within a minute of the merge, before
+any declaration was in the tree, and `release.yml` refused it on this section — correctly,
+and before anything published: no GitHub release, no npm version. `v1.89.1` is the same
+payload with this declaration in the tree first. Its tag is cut locally on the merge commit
+and `npm run test:all` runs against that tree with the tag present before the tag is pushed,
+which is the remedy the fifth mechanism records.
+
 **`v1.85.1` carries no stamp, and the mechanism is the one this section already
 names twice:** the stamp gate reads the tag's own tree, the branch run cannot see
 a tag that does not exist yet, and the audit-wave release was cut without writing

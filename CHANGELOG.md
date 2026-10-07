@@ -1,3 +1,11 @@
+## v1.89.1 — v1.89.0's payload, released with its no-stamp declaration
+
+The same payload as `v1.89.0`: the visual gates (`surface_class`, the director record, the
+contact sheet and `verifier-visual`). `release.yml` refused the `v1.89.0` tag's tree, because
+that version was named nowhere in `docs/evidence/retro.md` → *Releases that carry no stamp*.
+Nothing was published under it. This release names both versions there first. Its tag is cut
+locally, and `npm run test:all` runs against its tree before the tag is pushed (`R-010`).
+
 ## v1.89.0 — the visual layer is checked by its trace, and a fourth reading opens the picture
 
 Until now the stage-3 VISUAL track passed on the fact that it ran, the look at stages 5–6

@@ -1,5 +1,14 @@
 # Verification — task-pipeline
 
+## Shipped state — v1.89.1 (2026-10-07)
+
+The `v1.89.0` payload, released with its no-stamp declaration. The rows below `v1.89.0` are
+its evidence. This release adds one row.
+
+| REQ | What ships | How it was confirmed | Confirmed |
+|---|---|---|---|
+| Gate | The whole suite on this tree, with the local `v1.89.1` tag cut first | `npm run test:all` on the tagged tree before the tag was pushed | **observed** |
+
 ## Shipped state — v1.89.0 (2026-10-07)
 
 The visual layer is checked by its trace, and a fourth reading opens the picture (`DEC-0006`).
