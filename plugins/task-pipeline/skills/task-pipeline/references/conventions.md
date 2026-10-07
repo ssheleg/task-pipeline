@@ -103,9 +103,9 @@ closing a stage with an unread CI verdict.
 - Host self-update rules (module docs, runbooks, agent-self cards, etc.) — update
   in the same change. Fix dangling links.
 - **The design destination, on a project with no `docs/ux/`.** When the work uses
-  Figma but super-ux isn't in play, there is no `foundation.md` to hold the file, so
-  the brief is canonical — and a brief is per-run. Write the team and the file URL
-  into the host's own docs (`CLAUDE.md`, or the README) in this change, so the next
+  Figma but super-ux isn't in play, there is no `foundation.md` to hold the files, so
+  the brief is canonical — and a brief is per-run. Write the team and each surface's
+  file URL into the host's own docs (`CLAUDE.md`, or the README) in this change, so the next
   run reads the destination instead of creating a second file
   ([`grill.md`](grill.md) → *The design destination*).
 - **The code graph:** [graphify](https://github.com/Graphify-Labs/graphify) —

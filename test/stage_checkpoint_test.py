@@ -14,7 +14,9 @@ way a run does, with the tool's answers simulated in the exact shapes Observator
   * provider loss is one ledger line and exit 0 — the run continues without memory;
   * a stale writer (`LeaseLost`) drops its token after the first refusal, and the next agent
     that took the workflow continues it;
-  * a credential is a name, never a value, and a malformed one is refused.
+  * a credential is a name, never a value, and a malformed one is refused;
+  * a `review:` line (the contact sheet's human rounds) travels in the checkpoint of the
+    stage it names, so the number of passes is measured rather than remembered.
 
 Run bare: prints PASS lines and exits non-zero on the first failure.
 """
@@ -174,6 +176,25 @@ def case_failed_gate_and_acceptance():
     print("PASS: a failed gate stays open; acceptance closes")
 
 
+def case_review_rounds():
+    d = fresh()
+    with (d / ".task-pipeline" / "run.md").open("a", encoding="utf-8") as f:
+        f.write("review: 6 — surface landing — rounds 1 — returned — 2026-10-05T13:10Z\n")
+    stage(d, 6, "Tests", "pass", "2026-10-05T13:30Z")
+    with (d / ".task-pipeline" / "run.md").open("a", encoding="utf-8") as f:
+        f.write("review: 10 — surface landing — rounds 2 — approved — 2026-10-05T15:00Z\n")
+    stage(d, 10, "Acceptance", "pass", "2026-10-05T15:10Z")
+    a = emit(d)
+    done = {x["step_id"]: x for x in a["body"]["done"]}
+    ok("review: landing rounds 1 returned" in done["stage-6"]["evidence"],
+       "the stage that returned the sheet carries its review round")
+    ok("review: landing rounds 2 approved" in done["stage-10"]["evidence"],
+       "acceptance carries the rounds it took to approve, so passes are measured")
+    ok(not [e for e in done["stage-6"]["evidence"] if "rounds 2" in e],
+       "a review line belongs to the stage it names, not to every stage")
+    print("PASS: review rounds travel in the checkpoint of the stage that recorded them")
+
+
 def case_no_ledger():
     d = pathlib.Path(tempfile.mkdtemp(prefix="tp-stage-ckpt-"))
     code, _, err = run(d, "emit")
@@ -184,6 +205,6 @@ def case_no_ledger():
 if __name__ == "__main__":
     for case in (case_first_boundary, case_idempotency, case_continue_and_never_leak,
                  case_provider_loss, case_stale_writer_and_successor, case_credentials_by_name,
-                 case_failed_gate_and_acceptance, case_no_ledger):
+                 case_failed_gate_and_acceptance, case_review_rounds, case_no_ledger):
         case()
     print(f"PASS: stage_checkpoint.py — {CASES} cases")

@@ -24,11 +24,15 @@ one must never look alike.
 > stop at the first that answers. The step stays **recommended and never a gate**: a gate
 > an environment cannot satisfy is one an agent learns to report around, and *verified by
 > reading the diff* already prices the absence honestly (`docs/DECISIONS.md`).
+> **`DEC-0006`** scopes that to the functional look: the **visual half** is a gate on a
+> `flagship`, `product` or `ad` surface, and its absent tool reads NOT_RUN and stops to
+> ask rather than passing ([`browser.md`](browser.md) → *The visual half*).
 
 ## Contents
 
 - Built in — nothing to install
 - The matrix
+- Visual lanes — tools, never entry points
 - Optional bridge — substituting an external skill set
 - Preflight (emit before stage 0)
 - Is this skill itself current?
@@ -75,6 +79,30 @@ one must never look alike.
 | **seo-aeo-audit** (`/seo-aeo-audit`) | **stage 8 when a logged-out reader or a crawler will see the shipped surface** — the check that a machine will find it; the design-time rule lives with the host, this is the audit after | **Recommended** — never a gate; absent → visibility ships undesigned and unaudited, said in those words | `/plugin marketplace add ssheleg/seo-aeo-audit` → `/plugin install seo-aeo-audit@seo-aeo-audit` |
 | ~~superpowers~~ | — | **Not a dependency.** Stages 2/4/5/6 run on the built-in doctrine above. See *Optional bridge* | — |
 | ~~grill-me / grilling~~ | — | **Not a dependency.** The stage-0 grill is built in (`references/grill.md`) | — |
+
+## Visual lanes — tools, never entry points
+
+The visual half ([`browser.md`](browser.md) → *The visual half*) asks for checks no
+companion above owns alone. These are the public tools that do each one. **Each is a
+tool a stage reaches for, never an entry point and never a second route**: the stage
+decides when, the tool does one job, and the close-out names which one it took. None is
+required; an absent one is a check recorded as NOT_RUN with its reason.
+
+| Tool | What it is for | Where in the stages |
+|---|---|---|
+| `break-ui` | seeds worst-case data — the longest name, the empty list, the 4-digit badge, the slow response — so frames show what a real account shows, not the demo | stage 6, **before** the contact-sheet screenshots |
+| `review-animations`, `improve-animations` | reviews motion against its intent: timing, easing, interruption, reduced-motion fallback | stage 6, on a surface with motion; findings as triples |
+| `mobile-native` | the mobile-web surface: viewport, safe areas, touch targets, keyboard-up states | stages 5–6, mobile-web frames of the matrix |
+| `animate-expo` | React Native and Expo motion, built and reviewed on the platform's own primitives | stage 5, an RN or Expo surface |
+| `webapp-testing`, `chrome-devtools` (`take_screenshot`, `lighthouse_audit`) | the frames of the matrix at each viewport and theme, and a Lighthouse pass as the deterministic floor | stage 6, the capture and the floor; stage 8 on a deployed target |
+| `accessibility-review`, `a11y-debugging` | accessibility review of the rendered surface and debugging what it finds | stage 6, beside axe or Lighthouse |
+| XCUITest `performAccessibilityAudit` | the iOS platform's own accessibility audit, run in UI tests | stage 6, a native iOS surface |
+| Compose `enableAccessibilityChecks` | Android's accessibility checks in Compose UI tests | stage 6, a native Android surface |
+| Playwright `toHaveScreenshot` | screenshot regression against the approved baseline, per state and theme | stage 6 (regression), and the nightly or release baseline after |
+| axe-core | the deterministic accessibility floor of a web surface | stage 6, first in the cheap-first order |
+
+A native screen is captured on a simulator or a device; a web render styled as a phone is
+a mockup, and the native rows of the sheet stay NOT_RUN without one.
 
 ## Optional bridge — substituting an external skill set
 

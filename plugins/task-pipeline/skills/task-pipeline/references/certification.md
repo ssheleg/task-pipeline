@@ -15,6 +15,7 @@ queue is — graph or plan — is what decides, not the mood of the closer.
 
 - Why one verifier is not enough, stated as the failure it produces
 - The three tiers
+- The fourth reading — `visual`, on a flagship or product surface
 - Blind, and it is the whole design
 - A pass has to mean something, so two rules have teeth
 - The report, and where each field lands
@@ -60,7 +61,42 @@ that reads no code is not the soft one.
 
 Agents: [`../../../agents/verifier-unit.md`](../../../agents/verifier-unit.md),
 [`verifier-seam.md`](../../../agents/verifier-seam.md),
-[`verifier-product.md`](../../../agents/verifier-product.md).
+[`verifier-product.md`](../../../agents/verifier-product.md) — and, on a visual surface,
+[`verifier-visual.md`](../../../agents/verifier-visual.md), below.
+
+## The fourth reading — `visual`, on a flagship or product surface
+
+The three tiers read code, what reaches it, and what the product says about it. **None
+of them opens a picture**, and on a surface whose look is part of the requirement that
+leaves a whole level unread: a node can pass unit, seam and product while its empty
+state renders grey on grey at 200 % text, and every report is truthful about what its
+tier saw.
+
+| Tier | Subject | Characteristic finding |
+|---|---|---|
+| `visual` | the contact sheet, the director record, the project linter's output, the rubric | a frame that contradicts the record's intent; a gate item failing under a PASS; a hole in the state × axes matrix; a judge verdict from an uncalibrated judge |
+
+**When it runs.** A node that builds a user-facing surface copies the brief's
+`surface_class` ([`stages.md`](stages.md) → stage 0, *The surface class*). On
+**`flagship` and `product`** the `visual` report is **required** — `graph.py certify`
+refuses the round without it and names the tier. On `internal` and `ad` it is accepted
+when given and counted like any other tier, and not demanded: an internal tool's floor
+is the linter, and an ad's gate is its rubric profile on the contact sheet.
+
+**It is the fourth blind reading, not a reviewer with a vision model.** Same eight-key
+report, same `breaks`/`risk`, same blindness — it never sees the other three reports
+and they never see it. Its own rules, because a judge of pixels fails in its own ways:
+
+- **A checklist per task, never a score.** It answers the rubric's binary items against
+  the record and the sheet; "looks polished" is not an item.
+- **Pairwise only against the approved reference, and in both orders**; three samples.
+  A verdict that flips with the order, or between samples, is **`uncertain`** and goes to
+  the person — it is neither a pass nor a `breaks`.
+- **It never overrides a deterministic FAIL.** A gate item (G) or a linter S1 that
+  failed is a `breaks` whatever the picture looks like to it.
+- **A judge item (J) is `NOT_ASSESSED` until a labelled set exists** and the judge's
+  agreement with it has been measured. It goes in `not_examined`, which reaches the
+  closing verdict as `not_verified` — the honest name for an opinion nobody calibrated.
 
 ## Blind, and it is the whole design
 
@@ -71,8 +107,10 @@ will paraphrase it back as product truth. The disagreement between blind reading
 the instrument, so `graph.py certify` refuses a report whose prose cites another
 tier's verdict.
 
-Dispatch all three in one message so they run concurrently. Give each the node id,
-its `serves`, and the diff — nothing else, and never another tier's output.
+Dispatch all three in one message so they run concurrently — all four on a visual
+node. Give each the node id, its `serves`, and the diff — the `visual` tier also the
+paths of the contact sheet, the director record and the linter output — nothing else,
+and never another tier's output.
 
 **The second axis, and it is the one an optimisation removes first: whoever produced
 the fix never grades it.** Tier blindness is horizontal — no tier reads another's
@@ -146,6 +184,9 @@ consumer refuses.
 # three reports in, one verdict out — exits 1 if any tier failed
 graph.py certify --node N-007 \
     --tier unit.json --tier seam.json --tier product.json
+# a node with surface_class flagship or product: four, or the round is refused
+graph.py certify --node N-008 \
+    --tier unit.json --tier seam.json --tier product.json --tier visual.json
 
 # unchanged, and still the only thing that moves the graph
 graph.py close --verdict .task-pipeline/verdict-N-007.json
@@ -176,8 +217,8 @@ has failed **every** round. A run spinning on one level needs the operator to se
 
 ## What this costs, said out loud
 
-Three agents per node instead of one. That is the price of the visibility, and it is
-paid per node rather than per run. The three are dispatched in parallel, so the
+Three agents per node instead of one — four on a flagship or product surface. That is
+the price of the visibility, and it is paid per node rather than per run. The three are dispatched in parallel, so the
 wall-clock cost is roughly one reading; the token cost is three. A node whose
 `check` is mechanical and whose blast radius is genuinely nil still pays it — and a
 tier with nothing to find says so in `scope` and `not_examined` rather than being

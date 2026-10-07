@@ -1,6 +1,11 @@
 {
  "schema_version": "browser-claims/1",
- "note": "One row = one browser claim: which REQ/scenario it serves, which STATE it was captured in, and which KIND of check produced it — the look, the spec suite or the library script (the browser.md split). A functional PASS never yields a visual PASS; an artifact closes only the state it was captured in (the initial screenshot does not close an opened/error claim); no browser channel means status NOT_RUN with the reason, never a quiet green. python3 test/browser_claims_test.py validates a filled copy with stdlib only.",
+ "note": "One row = one browser claim: which REQ/scenario it serves, which STATE it was captured in, and which KIND of check produced it — the look, the spec suite or the library script (the browser.md split). A functional PASS never yields a visual PASS; an artifact closes only the state it was captured in (the initial screenshot does not close an opened/error claim); no browser channel means status NOT_RUN with the reason, never a quiet green. python3 test/browser_claims_test.py validates a filled copy with stdlib only. THE VISUAL LOOK (references/browser.md → The visual half) is the same file, not a second schema: a look row that carries `axes` is a frame of the contact sheet — one SCR state at one viewport × theme × text × locale, with its `capture` record (revision, route, motion, captured_at, source), the Figma frame and/or approved `baseline` it is compared against, the `diff` of that comparison, and the `rubric` items read on it (type G gate / J judge / H human; a J item stays NOT_ASSESSED until a labelled set calibrates the judge; every FAIL carries its region → defect → fix triple). File-level: the `surface` and `revision` the sheet is for, `review_rounds` (each return from the person with triples adds one — the measure of passes), and `approved_by` / `approved_at`, which make its frames the next baseline. Rows cover the states pairwise across the axes plus the mandatory pairs (dark × large text, RTL × narrow), never the full cross product. Frames and the viewing HTML stay out of git; this JSON goes in. python3 scripts/visual_gate.py sheet <file> --class <surface_class> validates it.",
+ "surface": "landing",
+ "revision": "<commit the frames were captured at>",
+ "review_rounds": 0,
+ "approved_by": null,
+ "approved_at": null,
  "claims": [
   {
    "id": "BC-01",
@@ -49,6 +54,223 @@
    "artifact_state": null,
    "status": "NOT_RUN",
    "reason": "the spec suite half — its PASS counts for functional claims only"
+  },
+  {
+   "id": "BC-05",
+   "req": "REQ-5",
+   "scenario": "SCN-007",
+   "component": "SCR-01",
+   "state": "SCR-01/default",
+   "kind": "look",
+   "axes": {
+    "viewport": "375x667",
+    "theme": "light",
+    "text": "default",
+    "locale": "en"
+   },
+   "artifact": "shots/landing/SCR-01-default-375x667-light-default-en.png",
+   "artifact_state": "SCR-01/default",
+   "capture": {
+    "revision": "<commit the frames were captured at>",
+    "route": "/",
+    "motion": "reduced",
+    "captured_at": "2026-10-07T00:00:00Z",
+    "source": "the capability that took it, e.g. chrome-devtools take_screenshot"
+   },
+   "figma_frame": "https://www.figma.com/design/<fileKey>/<file>?node-id=<frame>",
+   "baseline": null,
+   "diff": {
+    "against": "figma",
+    "status": "NOT_RUN",
+    "reason": "template row — the frame is compared once it is captured"
+   },
+   "rubric": [
+    {
+     "id": "R1",
+     "type": "G",
+     "status": "NOT_ASSESSED"
+    },
+    {
+     "id": "R7",
+     "type": "J",
+     "status": "NOT_ASSESSED",
+     "note": "a judge item stays NOT_ASSESSED until a labelled set calibrates the judge"
+    }
+   ],
+   "status": "NOT_RUN",
+   "reason": "template row — the visual look: one SCR state at one point of the axes matrix"
+  },
+  {
+   "id": "BC-06",
+   "req": "REQ-5",
+   "scenario": "SCN-007",
+   "component": "SCR-01",
+   "state": "SCR-01/empty",
+   "kind": "look",
+   "axes": {
+    "viewport": "375x667",
+    "theme": "dark",
+    "text": "200%",
+    "locale": "ar"
+   },
+   "artifact": "shots/landing/SCR-01-empty-375x667-dark-200pct-ar.png",
+   "artifact_state": "SCR-01/empty",
+   "capture": {
+    "revision": "<commit the frames were captured at>",
+    "route": "/",
+    "motion": "reduced",
+    "captured_at": "2026-10-07T00:00:00Z",
+    "source": "the capability that took it, e.g. chrome-devtools take_screenshot"
+   },
+   "figma_frame": "https://www.figma.com/design/<fileKey>/<file>?node-id=<frame>",
+   "baseline": null,
+   "diff": {
+    "against": "figma",
+    "status": "NOT_RUN",
+    "reason": "template row — the frame is compared once it is captured"
+   },
+   "rubric": [
+    {
+     "id": "R1",
+     "type": "G",
+     "status": "NOT_ASSESSED"
+    },
+    {
+     "id": "R7",
+     "type": "J",
+     "status": "NOT_ASSESSED",
+     "note": "a judge item stays NOT_ASSESSED until a labelled set calibrates the judge"
+    }
+   ],
+   "status": "NOT_RUN",
+   "reason": "template row — the visual look: one SCR state at one point of the axes matrix"
+  },
+  {
+   "id": "BC-07",
+   "req": "REQ-5",
+   "scenario": "SCN-007",
+   "component": "SCR-01",
+   "state": "SCR-01/error",
+   "kind": "look",
+   "axes": {
+    "viewport": "1280x800",
+    "theme": "light",
+    "text": "200%",
+    "locale": "ar"
+   },
+   "artifact": "shots/landing/SCR-01-error-1280x800-light-200pct-ar.png",
+   "artifact_state": "SCR-01/error",
+   "capture": {
+    "revision": "<commit the frames were captured at>",
+    "route": "/",
+    "motion": "reduced",
+    "captured_at": "2026-10-07T00:00:00Z",
+    "source": "the capability that took it, e.g. chrome-devtools take_screenshot"
+   },
+   "figma_frame": "https://www.figma.com/design/<fileKey>/<file>?node-id=<frame>",
+   "baseline": null,
+   "diff": {
+    "against": "figma",
+    "status": "NOT_RUN",
+    "reason": "template row — the frame is compared once it is captured"
+   },
+   "rubric": [
+    {
+     "id": "R1",
+     "type": "G",
+     "status": "NOT_ASSESSED"
+    },
+    {
+     "id": "R7",
+     "type": "J",
+     "status": "NOT_ASSESSED",
+     "note": "a judge item stays NOT_ASSESSED until a labelled set calibrates the judge"
+    }
+   ],
+   "status": "NOT_RUN",
+   "reason": "template row — the visual look: one SCR state at one point of the axes matrix"
+  },
+  {
+   "id": "BC-08",
+   "req": "REQ-5",
+   "scenario": "SCN-007",
+   "component": "SCR-01",
+   "state": "SCR-01/loading",
+   "kind": "look",
+   "axes": {
+    "viewport": "1280x800",
+    "theme": "dark",
+    "text": "default",
+    "locale": "ar"
+   },
+   "artifact": "shots/landing/SCR-01-loading-1280x800-dark-default-ar.png",
+   "artifact_state": "SCR-01/loading",
+   "capture": {
+    "revision": "<commit the frames were captured at>",
+    "route": "/",
+    "motion": "reduced",
+    "captured_at": "2026-10-07T00:00:00Z",
+    "source": "the capability that took it, e.g. chrome-devtools take_screenshot"
+   },
+   "figma_frame": null,
+   "baseline": null,
+   "diff": null,
+   "rubric": [
+    {
+     "id": "R1",
+     "type": "G",
+     "status": "NOT_ASSESSED"
+    },
+    {
+     "id": "R7",
+     "type": "J",
+     "status": "NOT_ASSESSED",
+     "note": "a judge item stays NOT_ASSESSED until a labelled set calibrates the judge"
+    }
+   ],
+   "status": "NOT_RUN",
+   "reason": "template row — the visual look: one SCR state at one point of the axes matrix"
+  },
+  {
+   "id": "BC-09",
+   "req": "REQ-5",
+   "scenario": "SCN-007",
+   "component": "SCR-01",
+   "state": "SCR-01/long-content",
+   "kind": "look",
+   "axes": {
+    "viewport": "1280x800",
+    "theme": "dark",
+    "text": "200%",
+    "locale": "en"
+   },
+   "artifact": "shots/landing/SCR-01-long-content-1280x800-dark-200pct-en.png",
+   "artifact_state": "SCR-01/long-content",
+   "capture": {
+    "revision": "<commit the frames were captured at>",
+    "route": "/",
+    "motion": "reduced",
+    "captured_at": "2026-10-07T00:00:00Z",
+    "source": "the capability that took it, e.g. chrome-devtools take_screenshot"
+   },
+   "figma_frame": null,
+   "baseline": null,
+   "diff": null,
+   "rubric": [
+    {
+     "id": "R1",
+     "type": "G",
+     "status": "NOT_ASSESSED"
+    },
+    {
+     "id": "R7",
+     "type": "J",
+     "status": "NOT_ASSESSED",
+     "note": "a judge item stays NOT_ASSESSED until a labelled set calibrates the judge"
+    }
+   ],
+   "status": "NOT_RUN",
+   "reason": "template row — the visual look: one SCR state at one point of the axes matrix"
   }
  ]
 }

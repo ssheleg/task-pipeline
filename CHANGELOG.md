@@ -1,3 +1,58 @@
+## v1.89.0 — the visual layer is checked by its trace, and a fourth reading opens the picture
+
+Until now the stage-3 VISUAL track passed on the fact that it ran, the look at stages 5–6
+read the accessibility tree and never the pixels, and none of the three verifiers opened a
+picture. A landing could pass every gate while nobody compared what shipped with what was
+designed. This release adds the visual half, gated by a class the brief now records
+(`DEC-0006`).
+
+Guards: 430 → **430** — the new checks are suites of their own and the validator is unchanged.
+
+- **Stage 0 records `surface_class: flagship | product | internal | ad`** for every
+  user-facing task (`references/stages.md` → *The surface class*, the grill's UI branch,
+  `templates/brief.md`). The class selects the gate profile for stages 3, 6 and 10.
+- **Stage 3 reads the director record's fields, not the fact the track ran.**
+  `scripts/visual_gate.py record <file> --class <c>` checks the headings each class owes
+  (the full set on `flagship`; Brief, Mode, References, Markers, Open on `product`) and runs
+  sheleg-design's `--check-record` where it is installed and new enough. Where it is not,
+  the validator reads NOT_RUN beside the verdict, never PASS. `Mode: declined` with a reason
+  is the refusal, and it passes (`references/spec.md`).
+- **Figma: one file per surface (App, Web, ASO), not one for every frame.**
+  `visual_gate.py filekeys` checks every `screens.md` frame link's key against the recorded
+  set (`grill.md`, `stages.md`, `audit.md`'s `→F` seam).
+- **The visual half of the look** (`references/browser.md` → *The visual half*). Checks
+  run cheapest first: the project linter (`visual_gate.py lint`, NOT_RUN exit 3 where
+  absent), regression against the baseline, then the state × axes matrix (pairwise plus
+  the mandatory pairs dark × large text and RTL × narrow). Each frame carries its capture
+  record and a diff against its Figma frame or baseline. A judge reads the rubric. J items
+  stay NOT_ASSESSED until a labelled set calibrates the judge, and no judge overrides a G
+  FAIL. It is a gate on `flagship`, `product` and `ad`, and recommended on `internal`.
+  Re-render budget: one, two at most, then `unresolved` to the person. Only external,
+  specific feedback starts a round (`loop-guard.md` → *The re-render loop*).
+- **The contact sheet is `templates/browser-claims.json`, extended rather than replaced**
+  — row fields `axes`, `capture`, `figma_frame`, `baseline`, `diff`, `rubric[]`; file
+  fields `surface`, `revision`, `review_rounds`, `approved_by`, `approved_at`.
+  `visual_gate.py sheet` validates it and exits 0 · 1 · 2 · 3. The browser-claims rules now
+  live in that shipped script, so a host can run them. `test/browser_claims_test.py`
+  imports them under the old names.
+- **`agents/verifier-visual.md` — the fourth blind reading.** `graph.py certify` requires
+  a `visual` report on a node whose new `surface_class` is `flagship` or `product`, and
+  accepts one on any other node. `graph.schema.json` gains the field and the tier
+  (`references/certification.md` → *The fourth reading*).
+- **Acceptance walks visual intent ↔ the approved contact sheet** (`audit.md`'s `V→R`
+  seam). The run ledger gains a `review:` line. `stage_checkpoint.py` carries it into the
+  checkpoint of the stage it names, so the passes a surface took are measured.
+- **Visual lanes in `companion-skills.md`.** These are tools, never entry points:
+  `break-ui`, `review-animations` / `improve-animations`, `mobile-native`, `animate-expo`,
+  `webapp-testing` / `chrome-devtools`, `accessibility-review` / `a11y-debugging`, and the
+  platform audits.
+- **Tests:** `test/visual_gate_test.py` (24 cases); `test/browser_claims_test.py` (35
+  cases, 27 of them new contact-sheet plants); six `graph_test.py` cases for the visual tier and
+  the class; one `stage_checkpoint_test.py` case; and a `certify_mutations.py` mutation for
+  the visual requirement. A hand mutation pass over `visual_gate.py` disabled each of 34
+  rules in turn, and a fixture failed for every one. CI now also runs the three suites
+  `npm test` already ran.
+
 ## v1.88.1 — v1.88.0's payload, released with its no-stamp declaration
 
 The same payload as `v1.88.0`: the stage-boundary checkpoint writer, `scripts/stage_checkpoint.py`

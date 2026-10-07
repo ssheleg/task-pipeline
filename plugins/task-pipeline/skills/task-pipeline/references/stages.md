@@ -187,10 +187,28 @@ never that the work was skipped quietly.
 - **UI early-detect:** one branch of the grill is always "does this touch a
   user-facing surface (web/mobile/CLI/TUI)?". If yes → surface **super-ux**
   now (use it if installed; otherwise give the install line — see SKILL.md
-  *Prerequisites*); this arms the stage-3 UX track.
+  *Prerequisites*); this arms the stage-3 UX track. **And the same branch records
+  the surface's class** — the next bullet.
+- **The surface class.** Every user-facing task's brief carries
+  `surface_class: flagship | product | internal | ad`, and the class selects the gate
+  profile the visual layer is held to for the rest of the run:
+
+  | Class | What it is | Director record (stage 3) | Visual half (stages 5–6) | Stage 10 |
+  |---|---|---|---|---|
+  | `flagship` | the surface a product is judged by — landing, onboarding, paywall, a hero screen | the full record | **gate**: full matrix, pairwise across every axis, the full rubric | approved contact sheet |
+  | `product` | an ordinary screen of the product | the short record — Brief, Mode, References, Markers, Open | **gate**: every state and the mandatory pairs; the gate items of the rubric | approved contact sheet |
+  | `internal` | an admin panel, an internal tool, a CLI | none owed | recommended; the project linter is the floor | the functional look |
+  | `ad` | a creative that runs as an advertisement or a store asset | Brief, Mode, References, Markers, ADA (its rubric profile and safe zones), Open | **gate**: the ad profile and the safe zones | approved contact sheet |
+
+  Ask it as one question with a recommended answer read off the request — a landing or a
+  paywall is `flagship` unless the operator says otherwise — and never leave it to stage
+  5: a class decided at build time is decided by whoever wants the build to pass. A
+  work-graph node that builds the surface copies the class as `surface_class`, and
+  `graph.py certify` then owes the fourth, `visual` reading on `flagship` and `product`
+  ([`certification.md`](certification.md) → *The fourth reading*).
 - **Artifact:** lock the resolved decisions into a **task brief** committed at
-  `<artifacts>/specs/YYYY-MM-DD-<topic>-brief.md` (scope, users/UI verdict,
-  constraints, assumptions, explicitly-deferred items, done-criteria) **plus the
+  `<artifacts>/specs/YYYY-MM-DD-<topic>-brief.md` (scope, users/UI verdict and,
+  for a user-facing task, `surface_class`, constraints, assumptions, explicitly-deferred items, done-criteria) **plus the
   autonomy sweep's per-stage answers and the model decision**. Seed it from
   the skill's `templates/brief.md` skeleton — but only when absent, never
   overwrite an existing brief. Stages 2–4 build on this brief; stages 5–10 read
@@ -214,7 +232,8 @@ never that the work was skipped quietly.
   a recorded answer or an explicit deferral, **every answer that contradicted a
   harvested source has a recorded resolution** (which governs, and whether the doc
   is now stale), no open contradictions, **every
-  autonomy-sweep row is answered or explicitly marked "stop and ask here"**, the
+  autonomy-sweep row is answered or explicitly marked "stop and ask here"**, **a
+  user-facing task's brief names its `surface_class`**, the
   **REQ table is written and every row names its check**, the carry-over ledger is
   seeded, **`.task-pipeline/run.md` exists and the header block has been printed**
   ([`progress.md`](progress.md)), the model decision is recorded, and the operator
@@ -314,8 +333,9 @@ never that the work was skipped quietly.
   ssheleg/super-ux`). super-ux builds a traced chain — walk it top-down (see its
   `system-map.md`):
   0. **Destination first, when Figma is on.** The brief already names the team/org
-     and the file; `docs/ux/foundation.md` → *Design tooling* is the canonical
-     record. Confirm it **resolves** before drawing. **Never create a file while a
+     and the files — **one per surface** (App, Web, ASO: store screenshots, icon and
+     logo), never one file for every frame; `docs/ux/foundation.md` → *Design tooling*
+     is the canonical record. Confirm each **resolves** before drawing. **Never create a file while a
      recorded one resolves; if it doesn't resolve, stop and ask — never create a
      replacement** (that is the duplicate, and it hides a permissions problem).
      A creation happens at most once, in the named team, and its URL is written to
@@ -350,7 +370,10 @@ never that the work was skipped quietly.
   disagree together on one screen. The full doctrine — each track's scope and
   out-of-scope, the refusal sentences, the four contradictions the check
   catches — is [`spec.md`](spec.md) → *The COPY and VISUAL tracks, and their
-  convergence*, its one home.
+  convergence*, its one home. **The VISUAL track leaves a trace, not a fact**: a
+  director record at `docs/design/<surface>/director-record.md`, whose fields the gate
+  reads by the brief's `surface_class` (`python3 scripts/visual_gate.py record <file>
+  --class <c>`), and a refusal is that same file saying `Mode: declined` and why.
 - **Spec:** write the approved design to
   `<artifacts>/specs/YYYY-MM-DD-<topic>-design.md` and commit it. Lock all
   shared contracts (types, schemas, signatures, file layout). For UI tasks the
@@ -367,12 +390,23 @@ never that the work was skipped quietly.
   designed, validated and approved; scenarios validated in `docs/ux/scenarios.md`;
   the linter passes; every user-facing spec requirement traces to a scenario ID
   (or an explicit v1-mode/tiny-project waiver by the operator). **With Figma on:
-  the canonical record names one file, and every `screens.md` frame link carries
-  that same `:fileKey`** — a string match, not a judgement; a differing key means
-  the run drew in a second file nobody will open. **Every user-facing string went
+  the canonical record names one file per surface (App, Web, ASO), and every
+  `screens.md` frame link's `:fileKey` is one of them** — a string match, not a
+  judgement (`python3 scripts/visual_gate.py filekeys --record docs/ux/foundation.md
+  --screens docs/ux/screens.md`); a key outside the set means the run drew in a file
+  nobody recorded and nobody will open. **Every user-facing string went
   through the COPY track or the refusal is recorded**, and **the visual layer went
   through the VISUAL track or the refusal is recorded** — a recorded refusal passes
   this gate and an unmentioned one does not, which is the only difference that matters.
+  **And the VISUAL track is checked by its trace, not by the fact that it ran:** on a
+  `flagship`, `product` or `ad` surface the director record exists and carries the
+  fields its class owes — `python3 scripts/visual_gate.py record
+  docs/design/<surface>/director-record.md --class <surface_class>` exits 0. That
+  command checks the headings itself and runs the record's own validator from `sheleg-design`
+  (`--check-record`) where it is installed and new enough; where it is not, the
+  validator reads **NOT_RUN** beside the verdict — never PASS — and the gate stands on
+  the floor, said so. A record saying `Mode: declined` with its reason is the refusal,
+  and it passes.
   **Where both tracks ran, their convergence check is recorded** — findings with the
   ruling, or `Tracks converge: clean`; a screen where each track is right alone and they
   disagree together is the defect neither track's own review can see.
@@ -435,7 +469,12 @@ never that the work was skipped quietly.
   requires — never parked silently** — a browser finding filed without a ruling is the
   diff-review verdict wearing a screenshot; the look was worth taking only if it can
   still change the code or is on record as deliberately not doing so. Absent, say the surface was verified by reading
-  the diff and treat it as the weaker claim it is. Stage 6 repeats this over the whole tree; this one catches it while the
+  the diff and treat it as the weaker claim it is. **On a surface whose brief names a
+  `surface_class`, the project linter runs here too**, after each task that changes a
+  rendered surface — `python3 scripts/visual_gate.py lint <dir>`; an S1 finding is
+  fixed in the task, and NOT_RUN (exit 3) is recorded as such
+  ([`browser.md`](browser.md) → *The visual half*). A slop marker caught while the
+  implementer is dispatched costs a line; caught on the contact sheet it costs a round. Stage 6 repeats this over the whole tree; this one catches it while the
   implementer that wrote it is still dispatched. The matrix pointed this companion at
   stages 5–6 from the day it was added and **this stage had never named it** — found by
   the guard comparing the two, not by a reader.
@@ -472,7 +511,10 @@ never that the work was skipped quietly.
   printed beside their floors; the **full** suite is green (not just the new tests); new/changed code
   is covered; **every check this run added or widened has been probed both ways —
   seen rejecting a planted defect and passing the clean tree, asserted on its exit
-  code** ([`probing.md`](probing.md)); no `skip`/`xfail` smuggling a red suite past the gate. Never advance
+  code** ([`probing.md`](probing.md)); no `skip`/`xfail` smuggling a red suite past the gate; **on a
+  `flagship`, `product` or `ad` surface where the VISUAL track ran, the visual half's
+  `visual_gate.py sheet` exits 0** — NOT_RUN stops and asks, it is not green
+  ([`browser.md`](browser.md) → *The visual half*). Never advance
   to deploy on a red or partial run. **The carry-over count is printed beside this
   verdict** — a ratchet nobody prints is a TODO with a better name
   ([`audit.md`](audit.md)) — **and so are the disclosures**, `abstained` and
@@ -502,6 +544,19 @@ never that the work was skipped quietly.
   run that answers *the surface was checked* by pointing at its spec suite has answered
   a different question. Where the suite is the thing that changed, the look is what
   proves it runs against a page that renders.
+- **The visual half is a separate check, and on most user-facing classes a gate.** The
+  look above reads the accessibility tree; it cannot say whether the surface looks like
+  what was designed. Where the stage-3 VISUAL track ran on a `flagship`, `product` or
+  `ad` surface, stage 6 also owes **the contact sheet** — frames over the `SCR-NN` states
+  × viewport × theme × text × locale (pairwise, plus the mandatory pairs), each with its
+  capture record, diffed against its Figma frame or approved baseline, the project
+  linter run, and the rubric read by a judge that is not the builder — and its command
+  exits 0: `python3 scripts/visual_gate.py sheet <contact-sheet.json> --class
+  <surface_class> --artifact-root <frames>` (NOT_RUN, exit 3, is not green). On
+  `internal` it is recommended and the linter is the floor. The re-render budget is
+  **one, two at most**, then `unresolved` to the person — never round three — and only
+  external, specific feedback starts a round. The procedure and the order of the checks:
+  [`browser.md`](browser.md) → *The visual half*.
 - **What the look finds is fixed here.** A rendering defect found at stage 6 is a
   stage-6 finding: fix it, look again, then call the stage green. Filing it to the
   board and advancing is how a run reports *checked in a browser* for a page it has
@@ -672,7 +727,14 @@ never that the work was skipped quietly.
   surface**: read it against the spec section that covers its `SCR-` id and against
   what shipped. The super-ux linter proves a frame link exists, is named right and
   is not stale — it cannot read the picture, so a frame promising a limit, a meter
-  or a tier nobody built passes every lint there is. An absence
+  or a tier nobody built passes every lint there is. **Where the VISUAL track ran, the
+  walk carries one more row: visual intent ↔ final render** — the director record (the
+  brief's falsifier, the signature moment, the rubric written before any render) read
+  against the **approved contact sheet**. On a `flagship`, `product` or `ad` surface the
+  sheet is approved (`visual_gate.py sheet … --require-approval` exits 0), and the last
+  `review:` line per surface — how many human rounds it took — is copied into the
+  acceptance file, because `.task-pipeline/run.md` does not outlive the run
+  ([`audit.md`](audit.md) → the `V→R` seam). An absence
   becomes a **new REQ row with its check** and *then* the table is written;
   appending after the table is how acceptance goes green over a gap. Findings that
   belong to a lower layer go back to that layer (spec → stage 3, plan → stage 4).

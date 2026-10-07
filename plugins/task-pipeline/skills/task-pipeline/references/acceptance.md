@@ -48,6 +48,16 @@ surface and docs), checking the seam at each step. It is one pass, scoped to thi
 run's deliverables, and it is the only part of the pipeline that can find a gap
 that was never a row.
 
+**Where the stage-3 VISUAL track ran, the walk carries a row the REQ table cannot:
+visual intent (the director record) ↔ final render (the approved contact sheet)** —
+`audit.md`'s `V→R` seam. Read the record's falsifier, signature moment and rubric
+against the sheet the person approved, frame by frame where they disagree. On a
+`flagship`, `product` or `ad` surface the sheet must be approved — `python3
+scripts/visual_gate.py sheet <file> --class <surface_class> --require-approval` exits
+0 — and the rounds it took (the last `review:` line per surface in the run ledger) are
+written into the acceptance file, because the ledger does not outlive the run and the
+count of human passes is the number this whole layer exists to bring down.
+
 - **An absence found here becomes a new REQ row with its check**, then the table is
   written. The list is frozen against *narrowing*, never against additions
   ([`grill.md`](grill.md) → *The REQ spine*). Writing the table first and appending
@@ -69,6 +79,8 @@ Read all of them before writing anything:
 - git log for the run's branch; the test suite's final output
 - stage 8's post-deploy notes; stage 9's doc/wiki changes
 - for UI tasks: `docs/ux/scenarios.md` statuses and the `/ux-lint` result
+- where the VISUAL track ran: the director record, the approved contact sheet, and the
+  run ledger's `review:` lines
 
 ## Every declared stage is accounted for
 

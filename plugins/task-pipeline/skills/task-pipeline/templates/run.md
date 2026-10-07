@@ -70,6 +70,7 @@ hand:  <N|10> — task "<quoted>" — done <n> — surfaced <n> — decisions <n
 holds: <stage id> — <n> (<class: what, owner>; … or "none") — enumerated <n>/8 classes, <unlooked: classes not enumerable>
 gate:  <stage id> — command "<cmd>" — exit <N> — <ISO-8601>
 event: <compact|session-end|subagent|memory> — <detail> — <ISO-8601>
+review: <stage id> — surface <name> — rounds <N> — <returned|approved|unresolved> — <ISO-8601>
 read:  references/<file>.md            # hook-appended, deduped, UNATTESTED (no writer field)
 ```
 
@@ -109,6 +110,14 @@ read:  references/<file>.md            # hook-appended, deduped, UNATTESTED (no 
   it. A later audit reads `grep -c '^hand:'` against `grep -c '^iter:'` and the two
   should agree, plus one for stage 10.
   **`amb` prints its ids or `— no register`, never a bare `0` with nothing beside it.**
+- **`review:`** — one line each time the person reviewing a visual surface's contact sheet
+  answers it: `returned` with triples, `approved`, or `unresolved` items they took over.
+  `rounds` is the sheet's `review_rounds` after that answer — the count of human passes the
+  surface took, written where it happened rather than recalled at the end
+  (`references/browser.md` → *The visual half*). `scripts/stage_checkpoint.py` carries it
+  into the checkpoint of the stage it names, and stage 10 copies the last one per surface
+  into the acceptance file. **It is a measurement, never a target**: a number of passes to
+  beat is an instruction to stop showing the sheet.
 - **`touch:`** — one line per file per pass, and the reason names **what forced the
   edit**: a finding id, a failed gate item, an operator instruction. *"Cleanup"*,
   *"polish"* and *"while I was there"* are not reasons; they are churn with better
@@ -131,6 +140,7 @@ touch: src/export.ts — pass 3 (stage 5) — reason: F-014
 event: compact — auto — 2026-08-10T11:58Z
 event: subagent — general-purpose — 2026-08-10T12:00Z
 gate:  6 — command "npm test" — exit 0 — 2026-08-10T12:02Z
+review: 6 — surface landing — rounds 1 — returned — 2026-08-10T12:02Z
 stage: 6 Tests — gate manual — verdict pass — 2026-08-10T12:03Z
 hand:  3 — task "add CSV export to the orders table" — done 2 — surfaced 1 — decisions 1 — amb 2 (OQ-0007, ledger row 4)
        scope 5f21ac3/node-24-linux/REQ-001,REQ-004 — unverified 1 (XLSX path: no fixture)

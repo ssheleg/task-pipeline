@@ -37,6 +37,9 @@ What it keeps, and where:
   the episode Observatory kept (`keptAs`), the token is dropped, and the run is told to read
   the workflow before writing again. A stale writer therefore stops after one refusal.
 
+Ledger lines it reads besides `stage:`: `review:` (the contact sheet's human rounds, stage 6
+and 10 on a visual surface), each carried as evidence on the stage it names.
+
 Ledger lines it appends, all of the existing `event:` shape:
 
     event: memory — checkpoint <stepId> rev <n> <workflowId> — <ISO-8601>
@@ -63,6 +66,10 @@ STATE_NAME = "memory.json"
 OWNER = "agent:task-pipeline"
 STAGE = re.compile(r"^stage:\s*(\d+)\s+(.+?)\s+—\s+gate\s+(\S+)\s+—\s+verdict\s+(\S+)\s+—\s+(\S+)\s*$")
 TOPIC = re.compile(r"^Run:\s*`([^`]+)`")
+# The contact sheet's human rounds (`references/browser.md` → *The visual half*): one line per
+# return or approval. Carried into the checkpoint of the stage it names, so the number of
+# passes a surface took is measured at the boundary rather than remembered at the end.
+REVIEW = re.compile(r"^review:\s*(\d+)\s+—\s+surface\s+(.+?)\s+—\s+rounds\s+(\d+)\s+—\s+(\S+)\s+—\s+\S+\s*$")
 STATUS = {"pass": "done", "skip": "done", "fail": "blocked"}
 
 
@@ -79,6 +86,17 @@ def _stages() -> dict[int, str]:
 
 def _now() -> str:
     return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def _reviews(path: pathlib.Path) -> dict[int, list[str]]:
+    """`review:` lines by the stage id they name, as evidence strings."""
+    out: dict[int, list[str]] = {}
+    for line in path.read_text(encoding="utf-8").splitlines():
+        m = REVIEW.match(line)
+        if m:
+            out.setdefault(int(m.group(1)), []).append(
+                f"review: {m.group(2)} rounds {m.group(3)} {m.group(4)}")
+    return out
 
 
 def _read_ledger(path: pathlib.Path) -> tuple[str, list[tuple]]:
@@ -160,8 +178,10 @@ def emit(ledger: pathlib.Path, project: str | None, constraints: list[str],
     # one thing a successor must never act without (found by the live receipt, 2026-10-05).
     constraints = list(dict.fromkeys([*state.get("constraints", []), *constraints]))
     credentials = list(dict.fromkeys([*state.get("credentials", []), *credentials]))
+    reviews = _reviews(ledger)
     done = [{"step_id": f"stage-{s[0]}", "result": f"{s[1]}: gate {s[2]}, verdict {s[3]} at {s[4]}",
-             "evidence": [f"ledger: {ledger.name}"]} for s in stages if s[3] in ("pass", "skip")]
+             "evidence": [f"ledger: {ledger.name}", *reviews.get(s[0], [])]}
+            for s in stages if s[3] in ("pass", "skip")]
     nxt = sid + 1 if verdict in ("pass", "skip") else sid
     last = max(names) if names else 10
     open_steps = [] if sid >= last and verdict == "pass" else [{

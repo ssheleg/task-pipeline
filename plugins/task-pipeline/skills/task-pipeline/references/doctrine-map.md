@@ -30,7 +30,7 @@ UX track on a user-facing task.
 | 3 Spec | `references/spec.md` |
 | 4 Plan | `references/planning.md` |
 | the queue the loop walks | `references/work-graph.md` |
-| 5–8 · how a **work-graph node** is CLOSED — three blind readings at three distances, all three required (ceiling 3); a **prose-plan task** closes through `review.md` instead — one reviewer, five-round cap | `references/certification.md` |
+| 5–8 · how a **work-graph node** is CLOSED — three blind readings at three distances, all three required, plus a fourth `visual` reading on a flagship or product surface (ceiling 3); a **prose-plan task** closes through `review.md` instead — one reviewer, five-round cap | `references/certification.md` |
 | 5 Build (worktree, subagents, fix loop) | `references/build.md` + `references/review.md` |
 | 5–6 TDD + suite gate | `references/tdd.md` |
 | 5, 6, 8 The browser — the look, the spec suite, and the difference | `references/browser.md` |

@@ -34,7 +34,7 @@ import tempfile
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 GRAPH_REL = "plugins/task-pipeline/skills/task-pipeline/scripts/graph.py"
-EXPECTED_FIXTURES = 23
+EXPECTED_FIXTURES = 28
 
 # (name, the source to disable, what to replace it with). Each disables exactly one
 # rule; the fixture that must notice is named in the output when it does.
@@ -67,6 +67,8 @@ MUTATIONS = [
     ("terminal-node refusal",
      'if node.get("status") in TERMINAL:\n        die("%s is already %s — certifying',
      'if False:\n        die("%s is already %s — certifying'),
+    ("the visual tier on a flagship or product surface",
+     'if sclass in VISUAL_REQUIRED and VISUAL_TIER not in reports:', 'if False:'),
     ("open-blocker refusal",
      'if open_blockers:\n        die("%s waits on %s, which %s not closed — certifying',
      'if False:\n        die("%s waits on %s, which %s not closed — certifying'),
