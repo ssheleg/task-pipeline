@@ -9,13 +9,38 @@ this repository did not — the same gap `B-009` found for open questions, and i
 surfaced the same way: a status vocabulary (`Resolved→DEC-####`) pointing at a file
 that was not there.
 
-**Next free ID:** `DEC-0006`
+**Next free ID:** `DEC-0007`
 
 Reading *"Next free ID"* is **not** reserving it — a second agent reading it in the
 same minute gets the same answer. Reserve it, then write.
 
 **To change your mind:** add a new entry, edit **only the status line** of the old
 one, leave its body intact. Never renumber. Never delete.
+
+---
+
+### DEC-0006 — the visual half of the look is a gate where the surface class says so
+
+- **Date:** 2026-10-07
+- **Status:** Accepted
+- **Context:** `DEC-0004` kept the look *recommended, never a gate*: a gate an environment
+  cannot satisfy is one an agent learns to report around. That look reads the
+  accessibility tree, so on a landing, an onboarding or a paywall nothing in the pipeline
+  ever compared the pixels with what was designed — the stage-3 VISUAL track was checked
+  by the fact that it ran, and no verifier opened a picture. The family's design audit
+  (2026-10-07) found the same generated-look markers across the operator's projects,
+  with every gate green over them.
+- **Decision:** the brief carries `surface_class: flagship | product | internal | ad`
+  (stage 0), and the class selects the profile. On `flagship`, `product` and `ad` the
+  VISUAL track leaves a director record whose fields the stage-3 gate reads, stage 6 owes
+  the **visual half** — the contact sheet over the state × axes matrix, an extension of
+  `browser-claims/1` rather than a second schema — and stage 10 owes the person's approval
+  of that sheet. On `internal` it stays recommended and the project linter is the floor.
+  `DEC-0004` is unchanged for the functional look. Where a capture channel or the
+  sheleg-design validator is absent the check reads **NOT_RUN**: it is never written as
+  PASS, and on a gated class the stage stops and asks rather than reporting around it.
+- **Source:** run `2026-10-07-visual-gates` · v1.89.0
+- **Id allocation:** by hand under lease `visual-gates`, computed from the committed file.
 
 ---
 

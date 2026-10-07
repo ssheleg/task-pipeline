@@ -59,7 +59,7 @@ conditional on the code, never merely sequenced after it.**
 | `goal` | the release goal | `0` · `3` unstated |
 | `add` | the id it allocated | `0` · `1` refused |
 | `park` | the id and the reason | `0` · `1` refused |
-| `certify` | the round, and on a failure every `breaks` finding with its fix and its check | `0` all three tiers passed · `1` a tier failed, or a report is malformed |
+| `certify` | the round, and on a failure every `breaks` finding with its fix and its check | `0` every owed tier passed — three, or four with `visual` on a flagship or product node · `1` a tier failed, a required one is missing, or a report is malformed |
 | `close` | the goal, the new frontier count, and what was not verified | `0` · `1` refused **or the verdict stops the run** |
 | `producer` | what produced this proof — actor, model, runtime, skill, config, commit, trace | `0` |
 | `doctrine` | how many of the bundle's reference files this run opened | `0` |
@@ -84,7 +84,7 @@ A **`parked`** node is the single exemption: it is the one node nobody will clos
 *n/a — parked* in that field is confidence without correctness. `park` never removes what
 the node said it would run.
 
-**A node is closed by three readings, not one.** `certify` takes one tier report from each of `unit`, `seam` and `product` — dispatched blind and in parallel — requires all three to pass, and assembles the seven-key verdict `close` consumes. `close`'s contract is unchanged; what changed is that the verdict is now built from three readings at different distances instead of written from one, because a change can be correct where it was made and wrong one level out. A failing round records itself and leaves the node open. Doctrine: [`certification.md`](certification.md).
+**A node is closed by three readings, not one.** `certify` takes one tier report from each of `unit`, `seam` and `product` — dispatched blind and in parallel — requires all three to pass, and assembles the seven-key verdict `close` consumes. `close`'s contract is unchanged; what changed is that the verdict is now built from three readings at different distances instead of written from one, because a change can be correct where it was made and wrong one level out. A failing round records itself and leaves the node open. **A node whose `surface_class` is `flagship` or `product` owes a fourth, `visual` report** — the contact sheet read against the director record — and `certify` refuses the round without it; on any other node a `visual` report is accepted when given. Doctrine: [`certification.md`](certification.md).
 
 **`close` stamps the commit; the verifier never supplies it.** A verdict written after the
 tree moved is evidence about a different tree, and an agent cannot name the wrong commit if

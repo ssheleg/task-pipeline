@@ -8,6 +8,9 @@
 - **Task (one line):** <what the operator asked for, restated>
 - **UI verdict:** yes / no — does this touch a user-facing surface (web/mobile/CLI/TUI)?
   If yes, the stage-3 super-ux UX track is armed.
+- **surface_class:** flagship / product / internal / ad — UI tasks only. Selects the
+  visual gate profile: the director record's fields at stage 3, whether the visual half
+  of the look gates stage 6, and whether stage 10 needs the approved contact sheet.
 
 ## Contents
 
@@ -129,9 +132,9 @@ is not neutral — it is a scheduled interruption.
 | 0 Docs regime | Where settled things live (register or ADR set — one home, never both); who may write it; lease mechanism present, or is this run `ungated`? Gate command + ratchet floors; may this run raise a floor? | … |
 | 1 Docs | External libs/APIs/SDKs in play; any context7 can't resolve → where their docs live | … |
 | 2 Decompose | Platform (several capabilities/surfaces) or one module? If platform — deploy cadence: per module, or once at the end | … |
-| 2–3 Spec | UI verdict (arms super-ux); scenario-tracing waiver, if any | … |
+| 2–3 Spec | UI verdict (arms super-ux) and `surface_class`; scenario-tracing waiver, if any | … |
 | 3 Design surface | UI only: Figma on or text-only (check `docs/ux/foundation.md` → Design tooling first); Figma MCP connected? **If not — ship text-only, or stop and connect it?** | … (super-ux never blocks on a missing MCP, so an unanswered row here ships the feature without mockups) |
-| 3 Design file | Figma on only: **which team/org + which file** — existing URL, or "create one in team `<name>`" **with creation authorized**. Canonical record: `docs/ux/foundation.md` → Design tooling | … (team: `<name>` · file: `<url>` \| `create in <team>, authorized` — never create when a recorded file resolves) |
+| 3 Design file | Figma on only: **which team/org + which file per surface** (App, Web, ASO) — existing URL, or "create one in team `<name>`" **with creation authorized**. Canonical record: `docs/ux/foundation.md` → Design tooling | … (team: `<name>` · App: `<url>` · Web: `<url>` · ASO: `<url>` \| `create in <team>, authorized` — never create when a recorded file resolves) |
 | 4–5 Dev | Base branch; worktree/branch policy; is `main` off-limits; commit convention; task tracker | … |
 | 5 Integration | How the branch lands — direct merge, PR (who approves), or "leave it, I'll merge"; is parallel fan-out (one worktree per implementer) wanted? | … |
 | 6 Tests | Test command; what "green" means; known-red baseline; coverage expectation | … |

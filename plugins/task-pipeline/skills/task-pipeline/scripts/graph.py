@@ -268,6 +268,14 @@ def violations(graph):
                            "two commands cannot say which one closed the node, and the "
                            "verifier reports its output as one evidence row")
 
+        # The surface class (stage 0, `references/stages.md`) decides whether `certify`
+        # owes the fourth, `visual` reading. A class outside the four would silently
+        # require nothing, which is the one outcome a typo must not have.
+        if "surface_class" in n and n["surface_class"] not in SURFACE_CLASSES:
+            out.append(f"{nid}: surface_class is {n['surface_class']!r} — it must be one of "
+                       f"{', '.join(SURFACE_CLASSES)}. A class nobody recognises requires no "
+                       "visual reading, so a typo here would drop the tier that reads the pixels")
+
         if n.get("status") == "done":
             ev = n.get("evidence")
             if not isinstance(ev, list) or not [e for e in ev
@@ -574,6 +582,9 @@ def verdict_violations(v):
 #            tests of the neighbours the change can reach
 #   product  one level out again — the documentation, the scenarios, how this
 #            behaviour interacts with the rest of the product
+#   visual   the pixels — the contact sheet, the director record, the project
+#            linter and the rubric. Owed only where the node's `surface_class` is
+#            flagship or product; accepted, and counted, wherever it is given
 #
 # **All three must pass, and blind is the point.** Three agents that read each
 # other's reports are one opinion with three signatures; the disagreement is the
@@ -584,6 +595,15 @@ def verdict_violations(v):
 # stamp at three levels is worse than one verifier, because it costs three times
 # as much and reads as three times the assurance.
 TIERS = ("unit", "seam", "product")
+# The fourth reading, `visual`, reads the PIXELS — the contact sheet, the director
+# record, the project linter's output and the rubric — which none of the three opens.
+# It is owed by a node whose `surface_class` is one of VISUAL_REQUIRED, accepted when
+# given on any other node, and blind to the other three exactly as they are to each
+# other. `references/certification.md` → *The fourth reading*.
+VISUAL_TIER = "visual"
+ALL_TIERS = TIERS + (VISUAL_TIER,)
+SURFACE_CLASSES = ("flagship", "product", "internal", "ad")
+VISUAL_REQUIRED = ("flagship", "product")
 TIER_KEYS = ("node", "tier", "verdict", "scope", "confirms", "findings",
              "evidence", "not_examined")
 TIER_VERDICTS = ("pass", "fail")
@@ -596,10 +616,10 @@ SEVERITIES = ("breaks", "risk")
 # "the unit tier's verdict…"). Widened to the tense and possessive forms the
 # reader planted; still a closed list on purpose — a looser net here starts
 # matching a report's honest prose about its OWN tier.
-CROSS_TIER = re.compile(r"\b(?:unit|seam|product)\s+tier(?:'s)?\s+"
+CROSS_TIER = re.compile(r"\b(?:unit|seam|product|visual)\s+tier(?:'s)?\s+"
                         r"(?:passed|failed|says|said|confirm\w*|verdict|report)"
                         r"|\btier\s+\d\s+(?:passed|failed|says|said|confirm\w*)"
-                        r"|as\s+the\s+(?:unit|seam|product)\s+tier", re.I)
+                        r"|as\s+the\s+(?:unit|seam|product|visual)\s+tier", re.I)
 
 
 def tier_violations(t):
@@ -622,9 +642,9 @@ def tier_violations(t):
 
     if not isinstance(t["node"], str) or not t["node"].startswith(NODE_ID):
         out.append("tier report `node` is %r, which is not a node id" % (t["node"],))
-    if t["tier"] not in TIERS:
+    if t["tier"] not in ALL_TIERS:
         out.append("tier report `tier` is %r — it must be one of %s"
-                   % (t["tier"], ", ".join(TIERS)))
+                   % (t["tier"], ", ".join(ALL_TIERS)))
     if t["verdict"] not in TIER_VERDICTS:
         out.append("tier report `verdict` is %r — it must be `pass` or `fail`, because "
                    "a certification that admits a third state admits a maybe"
@@ -1482,6 +1502,14 @@ def cmd_certify(graph, args):
         die("certification is missing the %s report(s) — all three are required, because "
             "the level nobody read is the level the defect survives at"
             % ", ".join("`%s`" % m for m in missing))
+    sclass = node.get("surface_class")
+    if sclass in VISUAL_REQUIRED and VISUAL_TIER not in reports:
+        die("certification is missing the `%s` report — %s is a %s surface, and on one the "
+            "pixels are part of the requirement: none of unit, seam or product opens the "
+            "contact sheet, so without the fourth reading nobody looked at what a user sees "
+            "(references/certification.md → *The fourth reading*)" % (VISUAL_TIER, nid, sclass))
+    # The tiers THIS round read, in a stable order: the three always, `visual` when given.
+    tiers = [x for x in ALL_TIERS if x in reports]
 
     # The stamp, read here and never accepted from a report — same law as `close`.
     import subprocess
@@ -1493,7 +1521,7 @@ def cmd_certify(graph, args):
 
     prior = node.get("certification") or {}
     round_no = int(prior.get("round") or 0) + 1
-    tiers_now = {x: reports[x]["verdict"] for x in TIERS}
+    tiers_now = {x: reports[x]["verdict"] for x in tiers}
     history = list(prior.get("history") or []) + [tiers_now]
     node["certification"] = {
         "round": round_no,
@@ -1502,11 +1530,11 @@ def cmd_certify(graph, args):
         "history": history,
     }
 
-    failed = [x for x in TIERS if tiers_now[x] == "fail"]
+    failed = [x for x in tiers if tiers_now[x] == "fail"]
 
     # Churn, measured. A tier that has failed in every round so far is the one the
     # operator needs named; counting it here is what makes the loop visible.
-    churning = [x for x in TIERS
+    churning = [x for x in tiers
                 if len(history) >= 2 and all(h.get(x) == "fail" for h in history)]
 
     save(args.graph, graph)
@@ -1545,19 +1573,19 @@ def cmd_certify(graph, args):
     #                                   exactly what `can_continue_around: true` says)
     verdict = {
         "node": nid,
-        "done": [c for x in TIERS for c in reports[x]["confirms"]],
+        "done": [c for x in tiers for c in reports[x]["confirms"]],
         "not_done": [],
         "not_verified": ["%s: %s" % (x, n)
-                         for x in TIERS for n in reports[x]["not_examined"]],
+                         for x in tiers for n in reports[x]["not_examined"]],
         "blockers": [
             {"what": "%s (%s, found by the `%s` tier)" % (f["what"], f["where"], x),
              "blocks": [], "can_continue_around": True}
-            for x in TIERS for f in reports[x]["findings"]
+            for x in tiers for f in reports[x]["findings"]
             if f.get("severity") == "risk"
         ],
         "replan": {"possible": True, "add": [], "park": [],
-                   "why": "certified at all three tiers in round %d" % round_no},
-        "evidence": ["%s: %s" % (x, e) for x in TIERS for e in reports[x]["evidence"]],
+                   "why": "certified at all %d tiers in round %d" % (len(tiers), round_no)},
+        "evidence": ["%s: %s" % (x, e) for x in tiers for e in reports[x]["evidence"]],
     }
     # Proof identity (FIX-PF-02.01): the certification tested THIS tree, so it
     # records the commit it tested into the verdict it hands `close`. Without it
@@ -1579,7 +1607,7 @@ def cmd_certify(graph, args):
     # cannot hand the run a verdict its own consumer refuses.
     broken = verdict_violations(verdict)
     if broken:
-        die("all three tiers passed and the assembled verdict is still malformed — this "
+        die("every tier passed and the assembled verdict is still malformed — this "
             "is a defect in `certify`, not in the reports:\n  " + "\n  ".join(broken))
 
     out = args.verdict_out or os.path.join(os.path.dirname(args.graph) or ".",
@@ -1589,7 +1617,7 @@ def cmd_certify(graph, args):
         json.dump(verdict, fh, indent=2, ensure_ascii=False)
         fh.write("\n")
     os.replace(tmp, out)
-    print("%s: certified at unit, seam and product in round %d" % (nid, round_no))
+    print("%s: certified at %s in round %d" % (nid, ", ".join(tiers), round_no))
     print("verdict written to %s — close it with:" % out)
     print("  graph.py close --verdict %s" % out)
     return 0
@@ -1797,8 +1825,9 @@ VERBS = {
     "coverage": (cmd_coverage, "every requirement and the nodes serving it; exits 1 on a gap"),
     "add": (cmd_add, "add a node mid-run"),
     "park": (cmd_park, "park a node, carrying the reason"),
-    "certify": (cmd_certify, "require three independent tier reports, then emit "
-                             "the verdict `close` consumes"),
+    "certify": (cmd_certify, "require three independent tier reports (four on a "
+                             "flagship or product surface), then emit the verdict "
+                             "`close` consumes"),
     "close": (cmd_close, "consume a verdict, close one node and re-plan"),
 }
 

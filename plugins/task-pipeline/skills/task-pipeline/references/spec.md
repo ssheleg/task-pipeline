@@ -33,9 +33,9 @@ Runs on **super-ux** — the one companion this pipeline recommends by name
 give the install line and stop; don't improvise a half-chain.
 
 0. **The design destination is already decided — read it, don't re-open it.** When
-   Figma is on, the stage-0 brief names the team/org and the file
-   ([`grill.md`](grill.md) → *The design destination*), and
-   `docs/ux/foundation.md` → *Design tooling* is the canonical record. Confirm the
+   Figma is on, the stage-0 brief names the team/org and the files — one per surface
+   (App, Web, ASO) — ([`grill.md`](grill.md) → *The design destination*), and
+   `docs/ux/foundation.md` → *Design tooling* is the canonical record. Confirm each
    recorded file **resolves** before any drawing. **Never create a file when a
    recorded one resolves; if it doesn't resolve, stop and ask — never create a
    replacement.** A creation happens at most once per project, in the team the
@@ -90,6 +90,30 @@ green over both.
   boundary with Figma (tokens as variables, never raw values carried across). Not
   through it: a purely structural change — what sits where is the UX track's — text,
   a backend, an internal script.
+- **The VISUAL track leaves a trace, and the gate reads the trace.** "The track ran" is
+  not checkable; a record is. The track writes a **director record** in the product's
+  repository, beside `docs/ux/`: `docs/design/<surface>/director-record.md`, a header
+  line `surface_class: <class>` and one `## <Field>` heading per field. Which fields are
+  owed is the brief's `surface_class` ([`stages.md`](stages.md) → stage 0, *The surface
+  class*):
+
+  | Class | Fields the record owes |
+  |---|---|
+  | `flagship` | Brief, Mode, Taste, References, Cast, Fork, Rubric, Critique, Markers, Alignment, Quality, Signature, Surfaces, Haptics, ADA, Open |
+  | `product` | Brief, Mode, References, Markers, Open |
+  | `ad` | Brief, Mode, References, Markers, ADA (the ad rubric profile and safe zones), Open |
+  | `internal` | none — the project linter is the floor |
+
+  What each field must say is sheleg-design's contract, and its validator checks it:
+  `npx sheleg-design-skill --check-record <file>`. The pipeline's gate is `python3
+  scripts/visual_gate.py record <file> --class <surface_class>`: it checks the headings
+  itself — present, and not a placeholder — and runs that validator where sheleg-design
+  is installed and new enough. Where it is not, the validator reads **NOT_RUN**, never
+  PASS, and the gate stands on the heading floor with that said. **The refusal is the
+  same file**: `## Mode` saying `declined` and why — *«без дизайна»*, *as is* — passes,
+  and a bare `declined` with no reason does not. The Rubric is written **before** any
+  direction is rendered; a rubric written after the render grades the render it already
+  liked.
 - **Each track's refusal is a sentence, never a silence.** *"Без дизайна" / "as is"*
   ends the visual track; *"без бренда" / "draft"* ends the copy track. Either one is
   the operator's to make and costs nothing — but it is **recorded in the brief and

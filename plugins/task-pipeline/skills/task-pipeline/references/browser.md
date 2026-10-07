@@ -28,6 +28,7 @@ which is how a run says *I checked the browser* and means *I ran the unit tests*
 - Sessions, and why an agent needs them
 - Reading a look vs gating on one
 - "Tested in a browser" is three different claims
+- The visual half — pixels against intent, under a contract
 - Getting past a login, and past a backend
 - When the look finds something: debugging the spec that missed it
 - Evidence a reader can open
@@ -48,7 +49,9 @@ Three consequences the doctrine rests on:
 
 - **A look costs a page of text and no vision model.** This is why the pipeline can ask
   for one at three stages without the cost being an argument. A `screenshot` exists in
-  both channels and *is* pixels — take one for a human to look at, not for you to read.
+  both channels and *is* pixels — in the functional look, take one for a human, not for
+  you to read. Reading pixels against the design's intent is a different check with its
+  own contract: *The visual half*, below.
 - **The ref is a fact about the page as rendered**, so `click e12` after a snapshot is
   deterministic in a way a coordinate never is.
 - **A ref that no longer resolves is a finding, not an error to retry past.** The element
@@ -125,7 +128,7 @@ commonest way a run reports a green it does not have.
 
 | | What it is | What it proves | Where it counts |
 |---|---|---|---|
-| **The look** | an agent driving a page: open, snapshot, console, network | that this surface renders, right now, and what the browser said while it did | the **look**, stage 6 — recommended, never a gate |
+| **The look** | an agent driving a page: open, snapshot, console, network | that this surface renders, right now, and what the browser said while it did | the **functional look**, stage 6 — recommended, never a gate. Its **visual half** is a gate on a `flagship`, `product` or `ad` surface — *The visual half*, below |
 | **The spec suite** | `playwright test` — the **test runner** | that the assertions someone wrote still hold, on the paths someone thought to write | the **suite** half of the stage-6 gate, counted with every other test |
 | **The library** | `require('playwright')` — `chromium`/`firefox`/`webkit`, `devices`, `request`, `selectors` | whatever your own script asserts; it is an automation API, not a test framework | wherever the project already runs it |
 
@@ -154,6 +157,95 @@ validates a filled copy with stdlib only — a visual PASS needs its artifact, c
 in the claim's own state (the initial screenshot closes nothing about opened/error);
 a suite PASS closes no look claim; a toggle owes its full cycle; no browser channel
 is NOT_RUN with the reason.
+
+## The visual half — pixels against intent, under a contract
+
+Everything above reads the **accessibility tree**: it proves the surface renders and the
+browser stayed quiet. It cannot say whether the surface looks like what was designed —
+the wrong weight on a heading, a card that lost its spacing at 200 % text, a dark theme
+that drops a border, a frame that drifted from the Figma it was built from. That is a
+different question, and asking it of a snapshot is how a run reports *it looks right*
+having read no pixels at all. The **functional look** and the **visual half** are two
+checks; neither discharges the other.
+
+**When it runs, and when it gates — by the brief's `surface_class`**
+([`stages.md`](stages.md) → stage 0, *The surface class*):
+
+| Class | Visual half at stages 5–6 | Human pass at stage 10 |
+|---|---|---|
+| `flagship` | **gate** — full matrix, pairwise across every axis, judge items per the full rubric | **gate** — the approved contact sheet |
+| `product` | **gate** — every state, the mandatory pairs; pairwise holes reported | **gate** — the approved contact sheet |
+| `ad` | **gate** — the ad rubric profile and the safe zones | **gate** — the approved contact sheet |
+| `internal` | recommended — the project linter is the floor; a sheet, if made, is checked for honesty | the functional look closes it |
+
+It gates only where the stage-3 VISUAL track ran. A recorded refusal (*«без дизайна»*,
+`Mode: declined`) turns the visual half into the functional look plus the linter, said in
+the close-out — the same rule as every other refusal in the pipeline.
+
+**The checks run cheapest first, and the person last:**
+
+1. **Deterministic.** The project linter — `python3 scripts/visual_gate.py lint <dir>`,
+   which runs sheleg-design's `--lint` where it is installed and answers **NOT_RUN (exit 3)**
+   where it is not — plus axe or Lighthouse, the token check, the type checker. An S1
+   finding blocks, whatever anyone says about the picture later.
+2. **Regression** against the approved baseline, where one exists (`toHaveScreenshot`, or
+   the platform's snapshot test).
+3. **The matrix.** One frame per `SCR-NN` state the screen map lists (default, loading,
+   empty, error, offline, long-content, keyboard-up, first-run — the ones that apply),
+   across viewport × theme × text size × locale: **pairwise coverage** — every value of one
+   axis meets every value of every other in some frame — plus the **mandatory pairs**
+   (dark × large text, RTL × narrow). Never the full cross product: every state at every
+   combination of every axis value is hundreds of frames, and nobody reads them. Seed the
+   worst-case data first (`break-ui`, [`companion-skills.md`](companion-skills.md) →
+   *Visual lanes*) so the frames show long names and empty lists, not the demo account.
+4. **Each frame carries its capture record** — revision, route, state, viewport, locale,
+   theme, motion, captured-at, source — and is disqualified, not passed, when it is blank,
+   stale, of the wrong route or state, or taken before the fonts rendered. This is
+   sheleg-design's visual-review contract; the pipeline only refuses a frame without it.
+   Where a Figma frame or an approved baseline exists, the frame is **diffed against it**,
+   and a failing diff is never a PASS the run writes: either the build drifted, or the
+   person approves a new baseline.
+5. **The rubric**, read by a judge that is not the agent that built the surface: a
+   checklist per task, never a single score; pairwise only against the approved
+   reference and in both orders; three samples, and disagreement is `uncertain`, which
+   goes to the person rather than to a coin. **A judge item (J) is `NOT_ASSESSED` until a
+   labelled set exists and the judge's agreement with it is measured** — a verdict from an
+   uncalibrated judge is a guess with a format. A gate item (G) is deterministic and the
+   judge never overrides its FAIL. Every FAIL is a triple: *region → defect → fix*.
+6. **One human pass** over the contact sheet. Approval makes its frames the next baseline.
+
+**The contact sheet is the one surface the person reviews**, and its data is
+`templates/browser-claims.json` — the same file, **not a second schema**. A look row
+that carries `axes` is a frame: `axes{viewport,theme,text,locale}`, `capture{revision,
+route,motion,captured_at,source}`, `figma_frame`, `baseline`, `diff`, `rubric[]`. The file
+names its `surface`, `revision`, `review_rounds`, `approved_by` and `approved_at`. The
+viewing page is a self-contained local HTML beside the frames — a full document, `<meta
+charset="utf-8">`, no CDN. **Frames and the HTML stay out of git; the JSON goes in.**
+
+```bash
+python3 scripts/visual_gate.py sheet design/review/contact-sheet.json \
+    --class product --artifact-root design/review --states SCR-01/default,SCR-01/empty
+# stage 10 adds --require-approval
+```
+
+Exit `0` PASS · `1` FAIL · `2` unreadable · `3` NOT_RUN — a frame that did not run makes
+the whole verdict NOT_RUN, never PASS. **On a gated class NOT_RUN stops the stage and
+asks**: connect a capture channel, or the operator accepts the surface as `unverified`,
+recorded in the brief and named in the close-out. It is never reported around, which is
+the failure `DEC-0004` kept the functional look ungated to avoid; `DEC-0006` gates the
+visual half on these classes and keeps that exit open in words.
+
+**Two rules keep the loop from becoming the work** ([`loop-guard.md`](loop-guard.md) →
+*The re-render loop*): a re-render budget of **one, two at most**, after which a failing
+item goes to the person as `unresolved`; and **only external, specific feedback** starts a
+round — a linter line, a diff, an audit item, a triple — never "look again". Each return
+from the person adds one to `review_rounds` and one `review:` line to the run ledger, so the
+number of passes a surface took is measured, not remembered.
+
+**Native surfaces are not web surfaces.** A web render styled as a phone is a mockup. A
+native screen's frames come from a simulator or a device (XCUITest snapshots, Compose
+screenshot tests) and its accessibility from the platform's own audit; with neither, the
+native rows stay `NOT_RUN`, said in words.
 
 ## Getting past a login, and past a backend
 
@@ -277,7 +369,9 @@ On a CI box, headed is the failure you will spend an hour on.
 | The excuse | Why it fails |
 |---|---|
 | *"`playwright test` is green, the surface is checked."* | The suite asserts what someone wrote down. `DEC-0004`: it is the coverage half, never the look. |
-| *"I took a screenshot, so I looked."* | A screenshot is pixels you did not read. The look is `snapshot` + `console` + `requests`, and the verdict quotes them. |
+| *"I took a screenshot, so I looked."* | A screenshot is pixels you did not read. The functional look is `snapshot` + `console` + `requests`, and the verdict quotes them; reading the pixels is the visual half, with a capture record per frame and a matrix behind it. |
+| *"The snapshot is clean, so it looks right."* | The tree says the heading exists, not that it rendered at the right weight, in the dark theme, at 200 % text. That is the visual half's question, and on a flagship, product or ad surface it is a gate. |
+| *"The judge said it looks great."* | An uncalibrated judge's J items are `NOT_ASSESSED`, and no judge overrides a deterministic FAIL. A verdict needs a checklist, a reference, both orders and three samples. |
 | *"The click failed, I'll find a better selector."* | A ref that stopped resolving **is the finding**. Re-snapshot and report what moved. |
 | *"The docs say the CLI has no `tracing`."* | A vendor page is a claim; `--help` is the tool. This file was written against `--help` **because** a page-derived claim shipped here and was wrong. |
 | *"The tool list is in the docs."* | The page listed tools this version does not ship, and omitted that tracing, video and PDF need `--caps`. Ask the server: 24 tools default, 42 with all caps. |

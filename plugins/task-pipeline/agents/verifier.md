@@ -9,7 +9,8 @@ tools: Read, Grep, Glob, Bash
 
 > **A node is normally closed by three readings, not by this one.**
 > `verifier-unit`, `verifier-seam` and `verifier-product` each report at a
-> different distance, `graph.py certify` requires all three to pass and assembles
+> different distance — plus `verifier-visual` on a node whose `surface_class` is
+> flagship or product — `graph.py certify` requires every owed tier to pass and assembles
 > the verdict below from them — because a change can be correct where it was made
 > and wrong one level out, and a single context cannot see both. Doctrine:
 > `references/certification.md`. This agent remains for the case `certify` does not

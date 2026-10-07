@@ -110,7 +110,8 @@ absence findable.
 | **L5** | Change | the commits — the thing actually in the tree |
 | **L6** | Test | an **executed** assertion, by name — never "the tests pass" |
 | **L7** | Surface | what a user reaches: scenario, screen state, CLI output, runbook |
-| **F** | Frame — *conditional* | UI work with Figma on: one frame per `SCR-NN/<Screen>/<state>`, **in the one file the project recorded**. Not a step in the sequence — a **second, parallel statement of the same surface**, made in pictures |
+| **F** | Frame — *conditional* | UI work with Figma on: one frame per `SCR-NN/<Screen>/<state>`, **in one of the files the project recorded — one per surface (App, Web, ASO)**. Not a step in the sequence — a **second, parallel statement of the same surface**, made in pictures |
+| **V** | Visual intent — *conditional* | UI work where the stage-3 VISUAL track ran: the director record (`docs/design/<surface>/director-record.md`) — the falsifier, the signature moment, the rubric written before any render. Its counterpart **R** is the final render as the person approved it: the contact sheet (`browser.md` → *The visual half*) |
 
 **Audit the seams, not the artifacts.** Each rung is internally consistent most of
 the time — that is exactly what the horizontal pass is good at, and it has already
@@ -128,7 +129,8 @@ done it. What survives lives between rungs:
 | L7→L0 | does the shipped surface satisfy the requirement's **statement**? | it does what the task said and not what the requirement meant |
 | L2→F | *(UI)* does the frame render what the spec **says**? | a frame that promises a capability, limit or number the product does not have |
 | F→L7 | *(UI)* did what shipped match the frame, or did the frame become fiction? | the frame is still the design of record and no longer describes anything that exists |
-| →F | *(UI)* is every frame **in the recorded file**? | a second design file nobody opens, holding real work — the check is a `:fileKey` string match, so it is a gate, not an opinion |
+| →F | *(UI)* is every frame **in a recorded file**? | a design file outside the recorded set — one per surface — that nobody opens, holding real work; the check is a `:fileKey` set membership (`visual_gate.py filekeys`), so it is a gate, not an opinion |
+| V→R | *(UI, VISUAL track ran)* does the **approved contact sheet** carry the intent the **director record** set? | a render that passed every frame check and lost the falsifier, the signature moment or a rubric item the record wrote first; or a sheet nobody approved, standing in for the person's pass. The rounds it took (`review:` lines) go into the acceptance file |
 
 The L7→L0 seam is stage 10's question, expressed as a seam. When it fails, the run
 did every instruction correctly and delivered the wrong thing.
@@ -161,12 +163,16 @@ a deploy, or docs in another repository. **Creating** one is stronger still: it
 needs a named team and an explicit authorization recorded at intake
 ([`grill.md`](grill.md) → *The design destination*).
 
-**And check the file, not just the frames.** Every deep link is
-`figma.com/design/:fileKey/…`, so comparing each `screens.md` link's key against
-the canonical record (`docs/ux/foundation.md` → *Design tooling*) is a string
-match. A key that differs is a **second file with real work in it** — the failure
-that starts with one agent unable to open the recorded file and quietly making a
-new one. Nothing else in the chain notices: the new file is internally consistent,
+**And check the files, not just the frames.** Every deep link is
+`figma.com/design/:fileKey/…`, so checking each `screens.md` link's key against
+the set the canonical record names (`docs/ux/foundation.md` → *Design tooling*: one
+file per surface — App, Web, ASO) is a string match —
+`python3 scripts/visual_gate.py filekeys --record docs/ux/foundation.md --screens
+docs/ux/screens.md`. A key outside the set is a **file nobody recorded, with real work
+in it** — the failure that starts with one agent unable to open the recorded file and
+quietly making a new one. One file per surface is the shape, not one file for every
+frame: a store asset and an app screen have different owners, sizes and reviewers, and a
+single file holding both is the file nobody can hand to either. Nothing else in the chain notices: the new file is internally consistent,
 its frames are named correctly, and the linter is green.
 
 ## How one audit pass runs

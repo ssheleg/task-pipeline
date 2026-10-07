@@ -196,9 +196,18 @@
           },
           "description": "What this node MUTATES — paths, register names, remote resource ids. `references/planning.md` states the rule the frontier needs: *distinct is not the same as independent, and the check is what they touch, never what they are called.* That rule lived in the markdown plan, and the graph replaced the plan as the thing deciding what runs next — so `next` could hand two agents two runnable nodes that write the same file, with nothing able to report it.\\n\\nOptional, and its absence is DISCLOSED rather than treated as «touches nothing»: `next` prints how many frontier nodes declared no targets, because a quiet run and a checked one must not look alike."
         },
+        "surface_class": {
+          "enum": [
+            "flagship",
+            "product",
+            "internal",
+            "ad"
+          ],
+          "description": "The class of the user-facing surface this node builds, copied from the brief's `surface_class` (stage 0). It selects the gate profile, and `graph.py certify` reads it: on `flagship` or `product` the fourth, `visual` tier report is REQUIRED, because none of unit, seam or product opens the contact sheet; on any other class a `visual` report is accepted when given. Absent on a node that builds no user-facing surface. `references/certification.md` → *The fourth reading*."
+        },
         "certification": {
           "type": "object",
-          "description": "What the three-tier certification recorded for this node. Written by `graph.py certify` on every round, pass or fail: a failing round that wrote nothing would erase the only evidence that a node is churning, which is the number the loop-guard ceiling reads.",
+          "description": "What the tiered certification recorded for this node. Written by `graph.py certify` on every round, pass or fail: a failing round that wrote nothing would erase the only evidence that a node is churning, which is the number the loop-guard ceiling reads.",
           "additionalProperties": false,
           "required": [
             "round",
@@ -237,6 +246,12 @@
                     "pass",
                     "fail"
                   ]
+                },
+                "visual": {
+                  "enum": [
+                    "pass",
+                    "fail"
+                  ]
                 }
               }
             },
@@ -269,6 +284,12 @@
                     ]
                   },
                   "product": {
+                    "enum": [
+                      "pass",
+                      "fail"
+                    ]
+                  },
+                  "visual": {
                     "enum": [
                       "pass",
                       "fail"

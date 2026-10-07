@@ -1930,6 +1930,80 @@ def _():
     assert r.returncode == 0, "the certification field broke the graph: " + \
         r.stdout + r.stderr
 
+
+# --- the fourth reading: `visual`, owed by a flagship or product surface ------
+#
+# A node that declares `surface_class: flagship | product` builds a surface whose
+# pixels are part of the requirement. None of the three tiers reads them, so on that
+# node a `visual` report is REQUIRED, and on any other node it is accepted when given.
+
+VIS = g([dict(node("N-001"), surface_class="flagship")])
+
+
+@case("certify: a flagship node without the visual tier is refused and the tier is named")
+def _():
+    code, out, d = certify(VIS, three())
+    assert code != 0 and "`visual`" in out and "flagship" in out, out
+    assert not (pathlib.Path(d) / "verdict-N-001.json").exists(), out
+
+
+@case("certify: a flagship node with four passing tiers writes a verdict close accepts")
+def _():
+    code, out, d = certify(VIS, three() + [tier("visual")])
+    assert code == 0, out
+    assert "visual" in out, "the success line does not name the fourth tier: " + out
+    v = json.loads((pathlib.Path(d) / "verdict-N-001.json").read_text())
+    assert any(e.startswith("visual:") for e in v["evidence"]), v["evidence"]
+    n = json.loads((pathlib.Path(d) / "graph.json").read_text())["nodes"][0]
+    assert n["certification"]["tiers"]["visual"] == "pass", n["certification"]
+    r = subprocess.run([sys.executable, str(GRAPH), "close", "--verdict",
+                        str(pathlib.Path(d) / "verdict-N-001.json"),
+                        "--graph", str(pathlib.Path(d) / "graph.json")],
+                       capture_output=True, text=True)
+    assert r.returncode == 0, "close refused the four-tier verdict: " + r.stdout + r.stderr
+
+
+@case("certify: a failing visual tier fails the round and is recorded in its history")
+def _():
+    reports = three() + [tier("visual", verdict="fail", confirms=[], findings=[breaks(
+        check="judgement — the contact sheet's SCR-02 empty row read against R12")])]
+    code, out, d = certify(VIS, reports)
+    assert code == 1 and "`visual`" in out, out
+    n = json.loads((pathlib.Path(d) / "graph.json").read_text())["nodes"][0]
+    assert n["certification"]["history"][-1].get("visual") == "fail", n["certification"]
+
+
+@case("certify: an internal node takes a visual tier when given, and does not require one")
+def _():
+    internal = g([dict(node("N-001"), surface_class="internal")])
+    code, out, _ = certify(internal, three())
+    assert code == 0, out
+    code, out, _ = certify(internal, three() + [tier("visual")])
+    assert code == 0 and "visual" in out, out
+
+
+@case("certify: a visual report citing another tier's verdict was not written blind")
+def _():
+    reports = three() + [tier("visual", confirms=["as the product tier confirmed, it renders"])]
+    code, out, _ = certify(VIS, reports)
+    assert code != 0 and "cites another tier" in out, out
+    reports = three()
+    reports[0]["confirms"] = ["the visual tier passed, so the unit holds"]
+    code, out, _ = certify(VIS, reports + [tier("visual")])
+    assert code != 0 and "cites another tier" in out, out
+
+
+@case("validate: a node's surface_class outside the four classes is refused")
+def _():
+    bad = g([dict(node("N-001"), surface_class="marketing")])
+    d = residue.workspace("graph")
+    gp = pathlib.Path(d) / "graph.json"
+    gp.write_text(json.dumps(bad))
+    r = subprocess.run([sys.executable, str(GRAPH), "validate", "--graph", str(gp)],
+                       capture_output=True, text=True)
+    assert r.returncode != 0 and "surface_class" in (r.stdout + r.stderr), \
+        r.stdout + r.stderr
+
 # Before the verdict, and the position matters: `report()` is idempotent (the atexit
 # registration would find `_reported` already set), so a case defined BELOW this line
 # is created after the accounting and never appears in it. Found by planting a failing

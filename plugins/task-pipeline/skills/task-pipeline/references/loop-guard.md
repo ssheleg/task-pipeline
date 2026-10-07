@@ -23,6 +23,7 @@ searches.
 - Bookkeeping — the thing that makes detection mechanical
 - Detection — any one of these trips the guard
 - The review loop — a cap that measures rather than stops
+- The re-render loop — a budget of one, two at most
 - The break protocol
 - When to stop and hand back
 - Rationalizations
@@ -109,6 +110,28 @@ that was not.
 **Rounds are counted from the ledger, never from memory**: distinct `pass N` values on
 `touch:` lines at the review stage. A round that finds nothing ends the loop by
 definition and needs no counting.
+
+## The re-render loop — a budget of one, two at most
+
+A visual surface has a loop of its own: render, critique the render, render again. It
+is the one loop here with a **budget rather than a cap**, because its gain is measured
+to flatten fast — past the first or second refinement the change sits inside the noise
+of the judge reading it, and a third round mostly swaps one defect for another. So:
+
+- **One re-render per critique, two at the most.** After the second, the item still
+  failing is marked **`unresolved`** on the contact sheet with its triple and goes to the
+  person on their one pass — not into round three. Keep every rendered version; the last
+  is not automatically the best, and the sheet can show two side by side.
+- **Only external, specific feedback starts a round**: a linter finding, a failed audit
+  item, a diff against the frame or the approved baseline, a *region → defect → fix*
+  triple. "Look again" or "make it better" is not feedback and starts nothing — a round
+  with no named defect is churn with a screenshot.
+- **The person's rounds are counted, not remembered.** Each return of the contact sheet
+  with triples is a `review:` line in the run ledger ([`../templates/run.md`](../templates/run.md)),
+  and the sheet's `review_rounds` carries the same number
+  ([`browser.md`](browser.md) → *The visual half*). Like the review cap above it is a
+  measurement — a class of defect that keeps reaching the person is a rule missing from
+  the machine checks, and the fix is that rule, not more attention.
 
 ## The break protocol
 

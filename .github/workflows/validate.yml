@@ -77,6 +77,9 @@ jobs:
           python3 test/graph_test.py
           python3 test/project_audit_test.py
           python3 test/packet_schema_test.py
+          python3 test/browser_claims_test.py
+          python3 test/visual_gate_test.py
+          python3 test/stage_checkpoint_test.py
 
       - name: Audit regressions (sherlock plan, one file per closed finding)
         run: npm run test:audit-regressions

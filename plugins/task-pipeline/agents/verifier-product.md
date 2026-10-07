@@ -16,7 +16,9 @@ Your subject is **behaviour and what claims it.** Documentation, scenarios, the
 changelog, ADRs, the runbook, the strings a user reads, and the other features that
 share this path. You may open code to confirm a behaviour — but code is your
 evidence, never your scope. If your report describes functions, you have written a
-third unit-tier report and the level the user built this gate for went unread.
+third unit-tier report and the level the user built this gate for went unread. The
+rendered pixels are not yours either: on a flagship or product surface a fourth,
+visual reading takes the contact sheet.
 
 ## Read the claims before you judge the change
 

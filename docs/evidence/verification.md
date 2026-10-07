@@ -1,5 +1,19 @@
 # Verification — task-pipeline
 
+## Shipped state — v1.89.0 (2026-10-07)
+
+The visual layer is checked by its trace, and a fourth reading opens the picture (`DEC-0006`).
+
+| REQ | What ships | How it was confirmed | Confirmed |
+|---|---|---|---|
+| VG-class | stage 0 records `surface_class`; the class selects the gate profile | `stages.md` → *The surface class*; `templates/brief.md`; `graph_test.py` "validate: a node's surface_class outside the four classes is refused" | **observed** |
+| VG-record | stage 3 reads the director record's fields by class; the validator is NOT_RUN where absent; a reasoned refusal passes | `test/visual_gate_test.py` — "a flagship record without Rubric fails the gate", the class-profile, NOT_RUN and declined cases | **observed** |
+| VG-filekeys | frame links stay inside the recorded set, one file per surface | `test/visual_gate_test.py` filekeys cases | **observed** |
+| VG-sheet | the contact sheet extends `browser-claims/1`; `visual_gate.py sheet` refuses each planted lie and exits 0 · 1 · 2 · 3 | `test/browser_claims_test.py` (27 contact-sheet cases); 34 hand mutations of `visual_gate.py`, every one killed | **observed** |
+| VG-tier | `certify` requires a `visual` report on a flagship or product node | `test/graph_test.py` visual-tier cases; `test/certify_mutations.py` "the visual tier on a flagship or product surface" | **observed** |
+| VG-rounds | `review:` lines reach the stage checkpoint | `test/stage_checkpoint_test.py` "review rounds travel …" | **observed** |
+| Gate | The whole suite on this tree | `npm run test:all` | **observed** |
+
 ## Shipped state — v1.88.1 (2026-10-05)
 
 The `v1.88.0` payload, released with its no-stamp declaration. The rows below `v1.88.0` are
