@@ -1,3 +1,12 @@
+## v1.89.1 — v1.89.0's payload, released with its no-stamp declaration
+
+`v1.89.0` was refused by its own release check: the release carried no run stamp and was not
+named in `## Releases that carry no stamp`. Nothing was published under it. This release is the
+same payload with the declaration in `docs/evidence/retro.md`, the tenth such instance. What
+v1.89.0 ships is described in its section below.
+
+Guards: 430 → **430** — a declaration and a version bump; no check changes.
+
 ## v1.89.0 — the visual layer is checked by its trace, and a fourth reading opens the picture
 
 Until now the stage-3 VISUAL track passed on the fact that it ran, the look at stages 5–6
