@@ -1,6 +1,6 @@
 # Verification — task-pipeline
 
-## Shipped state — v1.89.0 (2026-10-07)
+## Shipped state — v1.89.1 (2026-10-07)
 
 The visual layer is checked by its trace, and a fourth reading opens the picture (`DEC-0006`).
 

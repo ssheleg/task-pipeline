@@ -1513,6 +1513,17 @@ pipeline run, from a Codex warning on the operator's machine. It is declared her
 its tag, in the tree the tag will point at, and it was cut after `npm run test:all` rather
 than `npm test`, which is what `R-010` asks for.
 
+**`v1.89.0` and `v1.89.1` carry no stamp — the TENTH instance.** `v1.89.0` (the visual
+gates: surface class, director-record gate, contact sheet, `verifier-visual`, review rounds)
+was built under the pipeline's discipline by a delegated executor and certified by the
+controller — REQ table, planted defects, full suite green in CI, and a live check of
+`visual_gate.py record` against the released `sheleg-design` 1.63.0 validator — but no
+stage-10 run stamp was written, and the gate that asks for one reads the tag's own tree, which
+the branch run cannot see. Nothing published under it: the `release` run refused at "The suite
+this release claims", so there is no GitHub release and no npm version. `v1.89.1` is the same
+payload with this declaration in the tree first; its tag was cut locally BEFORE `test:all` ran
+on its tree, and pushed only after that run was green.
+
 **`v1.88.0` and `v1.88.1` carry no stamp — the NINTH instance.** `v1.88.0` (PB-137 N-024, the
 stage-boundary checkpoint writer) was not a full ten-stage run: it has no stage-10 stamp to
 write. `npm run test:all` was green on its tree before the tag, which is what `R-010` asks
