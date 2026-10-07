@@ -135,7 +135,7 @@ Three things the grill does beyond clarifying the request, each in full in
 [`references/grill.md`](references/grill.md):
 - **Domain awareness** — it reads the project's `CONTEXT.md` / `docs/adr/` and holds the operator to them, writing resolved terms back as they land.
 - **The autonomy sweep** — it pre-resolves what would otherwise stop stages 1→10 mid-flight. Autonomy is bought here or not at all; an unasked question is a scheduled interruption.
-- **The design destination** with Figma on — *which* files, one per surface (App, Web, ASO), in which team, decided at stage 0. Left to drawing time it is answered by whoever holds the brush, and the answer is usually *create a new file*.
+- **The design destination** with Figma on — *which* file per surface, in which team, decided at stage 0. Left to drawing time it is answered by whoever holds the brush, and the answer is usually *create a new file*.
 
 ## How to run
 
@@ -207,17 +207,17 @@ capable available — see `references/model-tiering.md`).
 
 | # | Stage | Gate | Type |
 |---|---|---|---|
-| 0 | Intake grill — **mandatory** | source ledger written with its `Contradictions:` line; `docs/DOCMAP.md` answered and intent reconciled against as-built; the retro read in full; autonomy sweep covered; a UI task's `surface_class` recorded; brief locked and confirmed | manual |
+| 0 | Intake grill — **mandatory** | source ledger written with its `Contradictions:` line; `docs/DOCMAP.md` answered and intent reconciled against as-built; the retro read in full; autonomy sweep covered; UI: `surface_class` recorded; brief locked and confirmed | manual |
 | 1 | Docs study | contracts grounded on fetched docs | auto |
 | 2 | Brainstorm + decompose | design approved; UI verdict recorded; every REQ answered; **the queue is an artifact** — a work graph validates and its coverage names no unserved REQ; platform: module map approved | manual |
-| 3 | Spec | committed + reviewed; UI: chain validated, linter green, scenarios and `SCR-` traced; COPY and VISUAL are a parallel layer after UX, and where both ran their convergence check is recorded; **the VISUAL track is checked by its director record's fields for the surface class**, not by the fact it ran | manual |
+| 3 | Spec | committed + reviewed; UI: chain validated, linter green, scenarios and `SCR-` traced; COPY and VISUAL are a parallel layer after UX, and where both ran their convergence check is recorded; VISUAL is checked by its director record | manual |
 | 4 | Plan | parallel-ready, DoD per task; **every edge names what it carries** — the fake-edge test run and its `Edges:` count computed; **`scripts/plan_audit.py` clean** — every live node's packet survives a cold reader, and no two unordered nodes edit one file | auto |
 | 5 | Dev | tasks DONE, TDD green per task, branch integrated per the brief; a fanned-out group gets **one convergence check over all its diffs together** before the first worktree lands | auto |
-| 6 | Tests | full suite green, new and changed code covered, every new check probed both ways and asserted on its exit code; **a web surface is checked in a browser, not in the diff** — where a browser channel is connected; absent, the weaker claim is recorded; on a `flagship`, `product` or `ad` surface **the visual half** — the contact sheet — passes too | auto |
+| 6 | Tests | full suite green, new and changed code covered, every new check probed both ways and asserted on its exit code; **a web surface is checked in a browser, not in the diff** — where a browser channel is connected; absent, the weaker claim is recorded; a gated surface's contact sheet passes | auto |
 | 7 | Lint + deploy | lint clean and suite green before deploy; deploy needs a go, or the brief's specific standing authorization | manual |
 | 8 | Post-deploy | clean boot or an honest degradation report; **a deployed web target is opened, not curled** — a `200` proves the server answered and nothing else; where no browser channel is connected, the weaker claim is recorded | auto |
 | 9 | Docs + wiki | every stale row of the stage-0 source ledger updated; the propagation matrix walked for every change type this run produced; the documentation gate green with its ratchets printed; docs, wiki and the code graph synced and checked against each other | auto |
-| 10 | **Acceptance** | the ladder walk ran — with visual intent ↔ the approved contact sheet where the VISUAL track ran — and its absences became REQ rows; every REQ accounted for with evidence from a check seen failing once; no unresolved ledger row; **every repository clean, pushed and pointed at**; the hand-back written and the environment given back; the retrospective written **last**, and in order | manual |
+| 10 | **Acceptance** | the ladder walk ran and its absences became REQ rows; every REQ accounted for with evidence from a check seen failing once; no unresolved ledger row; **every repository clean, pushed and pointed at**; the hand-back written and the environment given back; the retrospective written **last**, and in order | manual |
 
 **Every gate above is the short form**, and the long form is the point of
 [`references/stages.md`](references/stages.md) — one section per stage. What the
