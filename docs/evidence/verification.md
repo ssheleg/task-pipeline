@@ -1,5 +1,20 @@
 # Verification — task-pipeline
 
+## Shipped state — v1.90.0 (2026-10-08)
+
+Code Connect is kept, and token names are measured against the file.
+
+| REQ | What ships | How it was confirmed | Confirmed |
+|---|---|---|---|
+| FC-maintain | a component whose API changes updates its Code Connect mapping in the same change, citing Figma's guidance (accessed 2026-10-08) | `references/build.md` → *Code Connect, kept*, first bullet; the quoted line re-read at the source on 2026-10-08 | **observed** |
+| FC-offer | a core component with no mapping gets an offer of `/figma-code-connect`, run only on a go; named in the close-out when absent | `build.md` → *Code Connect, kept*, second bullet; `companion-skills.md` → *Visual lanes* row | **observed** |
+| FC-keep | never rewrite a mapped component instead of using it | `build.md` §4a rule 3, unchanged, and the third bullet restates it | **observed** |
+| FC-number | Figma's measured benefit is labelled as Figma's unaudited number | `build.md` → *Code Connect, kept*, closing paragraph; the figures re-read at the source on 2026-10-08 | **observed** |
+| FC-tokens | `visual_gate.py tokens` reports figma-only, css-only, code-syntax mismatches and collisions; exits 0 · 1 · 2 · 3; no export is NOT_RUN, never PASS | `test/visual_gate_test.py` — 16 `tokens:` cases, all red before the verb existed; 15 hand mutations of the new code, every one killed | **observed** |
+| FC-wire | the probe is named in *The visual half*'s deterministic floor and in stages 5 and 6 | `references/browser.md` step 1; `references/stages.md` stage 5 bullet and stage 6 visual-half bullet | **observed** |
+| FC-route | the description carries `fix` and `bug` as words, inside 1024 and the 970 working limit; the body stays within 4750 tokens | `audit_skill.py --house`: description 908/1024, 908/970; body 4748/4750; the umbrella's `advertised_check.js`: all 52 routed triggers advertised | **observed** |
+| Gate | The whole suite on this tree, with the local `v1.90.0` tag cut first | `npm test`, then `npm run test:all` | **observed** |
+
 ## Shipped state — v1.89.1 (2026-10-07)
 
 The visual layer is checked by its trace, and a fourth reading opens the picture (`DEC-0006`).

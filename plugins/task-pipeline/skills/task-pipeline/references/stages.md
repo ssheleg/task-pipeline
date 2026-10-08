@@ -473,7 +473,13 @@ never that the work was skipped quietly.
   `surface_class`, the project linter runs here too**, after each task that changes a
   rendered surface — `python3 scripts/visual_gate.py lint <dir>`; an S1 finding is
   fixed in the task, and NOT_RUN (exit 3) is recorded as such
-  ([`browser.md`](browser.md) → *The visual half*). A slop marker caught while the
+  ([`browser.md`](browser.md) → *The visual half*). **With Figma on, the token drift
+  probe runs beside it** after a task that touches the token file or a tokenised
+  component: `python3 scripts/visual_gate.py tokens --figma <variables.json> --css
+  <tokens.css>`. A FAIL is fixed in the task, renaming one side to match the other.
+  No export is NOT_RUN, recorded as such. A component whose API the task changed
+  updates its Code Connect mapping in the same change
+  ([`build.md`](build.md) → *Code Connect, kept*). A slop marker caught while the
   implementer is dispatched costs a line; caught on the contact sheet it costs a round. Stage 6 repeats this over the whole tree; this one catches it while the
   implementer that wrote it is still dispatched. The matrix pointed this companion at
   stages 5–6 from the day it was added and **this stage had never named it** — found by
@@ -550,7 +556,9 @@ never that the work was skipped quietly.
   `ad` surface, stage 6 also owes **the contact sheet** — frames over the `SCR-NN` states
   × viewport × theme × text × locale (pairwise, plus the mandatory pairs), each with its
   capture record, diffed against its Figma frame or approved baseline, the project
-  linter run, and the rubric read by a judge that is not the builder — and its command
+  linter run, the token drift probe run over the whole token file where Figma is on
+  (`visual_gate.py tokens`; NOT_RUN without an export, never PASS), and the rubric
+  read by a judge that is not the builder — and its command
   exits 0: `python3 scripts/visual_gate.py sheet <contact-sheet.json> --class
   <surface_class> --artifact-root <frames>` (NOT_RUN, exit 3, is not green). On
   `internal` it is recommended and the linter is the floor. The re-render budget is

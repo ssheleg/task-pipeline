@@ -1477,6 +1477,15 @@ three quarters of the work on this run.
 
 ## Releases that carry no stamp — stated, not stamped
 
+**`v1.90.0` carries no stamp, declared before its tag.** It is a bounded change (Code
+Connect kept current at build time, the `visual_gate.py tokens` drift probe, and `bug` in
+the description). A delegated executor built it under the pipeline's discipline: REQ table
+first, planted defects watched failing, a mutation sweep, and `npm test` then `npm run
+test:all`. It was not a ten-stage run, so it has no stage-10 stamp to write. The
+declaration is in the tree the tag will point at, and a local `v1.90.0` tag was cut on
+the branch head and the validator run against it before the PR opened. That follows
+`R-010` and the remedy the ninth and tenth instances below record.
+
 **`v1.86.0` and `v1.86.1` carry no stamp, and the mechanism is the SEVENTH instance of the one
 this section already names six times:** the stamp gate reads the tag's own tree, a
 branch push cannot see a tag that does not exist yet, and the release was cut without

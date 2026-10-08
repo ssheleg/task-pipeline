@@ -1,3 +1,48 @@
+## v1.90.0 — Code Connect is kept, and token names are measured against the file
+
+The build stage already said a component with a Code Connect mapping is used, never
+rewritten. Nothing said the mapping had to stay true. A mapping that still names a
+component's old props hands the next agent a snippet that does not compile, and the agent
+reimplements the component, which is the fork the rule exists to prevent. Token names had
+the same gap: rule 4 made `get_variable_defs` the canon, and no check compared it with the
+code. A variable that is `color/primary` in the file and `--brand-primary` in CSS split in
+two without anything noticing. The scope comes from a 2026-10-08 reading of Figma's own
+guidance ([Code Connect integration][fcc-cl], [Figma MCP use cases][fuc-cl], both accessed
+2026-10-08).
+
+Guards: 430 → **430**. The new check is a verb of a shipped script with a suite of its
+own, and the validator is unchanged.
+
+- **`references/build.md` → *Code Connect, kept*.** A component whose API changes updates
+  its Code Connect mapping in the same change, quoting Figma's own line. A core component
+  the file draws and nothing maps gets an **offer** to map it with `/figma-code-connect`,
+  Figma's public plugin skill. Mapping publishes to the file, so it runs only on a go. The
+  rule against rewriting a mapped component stands unchanged. Figma's measured benefit is
+  quoted as **Figma's unaudited number**: a vendor's eval of its own feature, not
+  reproduced here.
+- **`visual_gate.py tokens --figma <variables.json> --css <tokens.css>`, the token drift
+  probe.** It reads the `get_variable_defs` map, the REST export (`meta.variables`) or a
+  `variables` list, and the custom properties the pack's token file declares (comments
+  stripped, `var()` uses not counted). It names each variable with no property, each
+  property with no variable, each variable whose WEB code syntax is not the property the
+  file declares, and two variables that land on one property. Exit `0` PASS · `1` FAIL ·
+  `2` unreadable · `3` NOT_RUN. No export, or an export holding no variables, is NOT_RUN
+  and never PASS. A nested token tree is refused as unreadable, so the check never
+  compares the code with group names.
+- **Wired in** to `references/browser.md` → *The visual half* (the deterministic floor),
+  `references/stages.md` stage 5 (after a task that touches tokens, beside the project
+  linter) and stage 6 (over the whole token file, inside the contact-sheet check). It is
+  also a row in `companion-skills.md` → *Visual lanes* for `figma-code-connect`.
+- **Routing words.** The description now carries `bug` as its own word next to `fix`, so
+  "fix this bug" is claimed by name and not through `bug hunt`. 903 → 908 of 1024 chars,
+  inside the 970 working limit. The body is unchanged at 4748/4750 tokens.
+- **Tests:** `test/visual_gate_test.py` 24 → **40** cases. The 16 new ones are planted
+  defects, and all 16 were watched failing before `tokens` existed. A sweep of 15
+  mutations of the new code was run, and every mutation was killed.
+
+[fcc-cl]: https://developers.figma.com/docs/figma-mcp-server/code-connect-integration/
+[fuc-cl]: https://www.figma.com/resource-library/figma-mcp-use-cases/
+
 ## v1.89.1 — v1.89.0's payload, released with its no-stamp declaration
 
 `v1.89.0` was refused by its own release check: the release carried no run stamp and was not
