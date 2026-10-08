@@ -17,6 +17,7 @@ The validator and linter are faked by a script that answers `--help` the way the
 CLI would, so the fixtures pin the contract (flag present? exit 0 / 1?) and not a
 network install.
 """
+import itertools
 import json
 import os
 import subprocess
@@ -114,6 +115,124 @@ def with_mode(mode, *args):
     env = dict(os.environ, FAKE_MODE=mode)
     r = subprocess.run([sys.executable, VG, *args], capture_output=True, text=True, env=env)
     return r.returncode, r.stdout + r.stderr
+
+
+CSS_CLEAN = """/* the pack's tokens */
+:root {
+  --color-primary: #0055ff;
+  --color-surface: #ffffff;
+  --color-text-muted: #6b6b6b;
+  --spacing-16: 16px;
+  --font-size-body-large: 18px;
+}
+[data-theme="dark"] { --color-surface: #111111; }
+.card { color: var(--color-ghost); padding: var(--spacing-16); }
+"""
+_SEQ = itertools.count()
+FIGMA_CLEAN = {"color/primary": "#0055ff", "color/surface": "#ffffff",
+               "Color/Text Muted": "#6b6b6b", "Spacing/16": "16",
+               "fontSize/bodyLarge": "18"}
+
+
+def tok(figma, css=CSS_CLEAN, *extra, raw=False):
+    """Run `tokens` over a planted pair; `figma` is a dict/list dumped as JSON, or raw text."""
+    n = next(_SEQ)
+    fp = write(f"tok/{n}-vars.json", figma if raw else json.dumps(figma))
+    cp = write(f"tok/{n}-tokens.css", css)
+    return run("tokens", "--figma", fp, "--css", cp, *extra)
+
+
+def rest(*vars_):
+    """The Figma REST export shape: meta.variables, keyed by id, codeSyntax per platform."""
+    return {"meta": {"variables": {
+        f"VariableID:1:{i}": {"name": n, **({"codeSyntax": {"WEB": cs}} if cs else {})}
+        for i, (n, cs) in enumerate(vars_)}}}
+
+
+def tokens_cases():
+    # --- tokens: Figma variable names against the pack's CSS custom properties -------
+    # Each plant is a way the comparison could be fooled; each was watched failing
+    # against a `tokens` that did not yet exist, then against a mutated one.
+    code, out = tok(FIGMA_CLEAN)
+    case("tokens: a get_variable_defs map whose every name has its property passes — "
+         "slash, space and camelCase all become kebab-case",
+         code == 0 and "tokens: PASS" in out, out)
+
+    code, out = tok({**FIGMA_CLEAN, "color/accent": "#ff0"})
+    case("tokens: a variable with no CSS property fails, naming both spellings",
+         code == 1 and "color/accent" in out and "--color-accent" in out, out)
+
+    code, out = tok(FIGMA_CLEAN, CSS_CLEAN.replace("}\n[data", "  --color-legacy: red;\n}\n[data", 1))
+    case("tokens: a CSS property no Figma variable names fails, named",
+         code == 1 and "--color-legacy" in out, out)
+
+    code, out = tok({**FIGMA_CLEAN, "color/accent": "#ff0"},
+                    CSS_CLEAN + "/* --color-accent: #ff0; */\n")
+    case("tokens: a declaration inside a comment is not a property — the accent still fails",
+         code == 1 and "--color-accent" in out, out)
+
+    code, out = tok(FIGMA_CLEAN)
+    case("tokens: a var() USE is not a declaration — --color-ghost is not reported CSS-only",
+         code == 0 and "--color-ghost" not in out, out)
+
+    code, out = tok(rest(("color/primary", "var(--brand-primary)"), ("color/surface", None),
+                         ("Color/Text Muted", None), ("Spacing/16", None),
+                         ("fontSize/bodyLarge", None)))
+    case("tokens: code syntax that differs from the CSS property fails, naming both",
+         code == 1 and "code syntax" in out and "--brand-primary" in out
+         and "--color-primary" in out, out)
+
+    code, out = tok(rest(("Brand/Primary 500", "var(--color-primary)"), ("color/surface", None),
+                         ("Color/Text Muted", None), ("Spacing/16", None),
+                         ("fontSize/bodyLarge", None)))
+    case("tokens: code syntax is canonical — a name that slugs elsewhere passes when its "
+         "code syntax is the property", code == 0, out)
+
+    code, out = tok(rest(("color/primary", "$color-primary"), ("color/surface", None),
+                         ("Color/Text Muted", None), ("Spacing/16", None),
+                         ("fontSize/bodyLarge", None)))
+    case("tokens: a WEB code syntax that is no CSS custom property fails, said so",
+         code == 1 and "not a CSS custom property" in out, out)
+
+    code, out = tok({"variables": [{"name": n} for n in FIGMA_CLEAN]})
+    case("tokens: a `variables` list export is read too", code == 0, out)
+
+    code, out = tok({**FIGMA_CLEAN, "color-primary": "#0055ff"})
+    case("tokens: two variables that land on one property fail — one property cannot "
+         "hold both", code == 1 and "both map to --color-primary" in out, out)
+
+    code, out = run("tokens", "--figma", os.path.join(TMP, "no-export.json"), "--css",
+                    write("tok/only.css", CSS_CLEAN))
+    case("tokens: no Figma export is NOT_RUN — exit 3, never 0",
+         code == 3 and "NOT_RUN" in out, out)
+
+    code, out = tok({})
+    case("tokens: an export with no variables is NOT_RUN, not a pass over nothing",
+         code == 3 and "NOT_RUN" in out, out)
+
+    code, out = tok("{not json", raw=True)
+    case("tokens: an export that is not JSON is unreadable — exit 2, said in words "
+         "(argparse's own usage error is also 2, so the message is the assertion)",
+         code == 2 and "cannot read" in out and "usage:" not in out, out)
+
+    code, out = tok({"color": {"primary": {"$value": "#0055ff"}}})
+    case("tokens: a nested token tree is not a variable export — exit 2, not a "
+         "comparison against the group names",
+         code == 2 and "not a variable export" in out and "usage:" not in out, out)
+
+    code, out = run("tokens", "--figma", write("tok/v.json", json.dumps(FIGMA_CLEAN)),
+                    "--css", os.path.join(TMP, "no-tokens.css"))
+    case("tokens: a token file that cannot be read is exit 2",
+         code == 2 and "cannot read" in out and "usage:" not in out, out)
+
+    code, out = tok({**FIGMA_CLEAN, "color/accent": "#ff0"}, CSS_CLEAN, "--json")
+    try:
+        rep = json.loads(out)
+    except ValueError:
+        rep = {}
+    case("tokens: --json lists each drift class and the matched count",
+         rep.get("verdict") == "FAIL" and rep.get("figma_only") == ["color/accent → --color-accent"]
+         and rep.get("css_only") == [] and rep.get("matched") == 5, rep or out)
 
 
 def main():
@@ -229,6 +348,8 @@ def main():
     code, out = run("filekeys", "--record", norec, "--screens", ok_scr)
     case("frames with no recorded file at all are refused",
          code == 1 and "names no file" in out, out)
+
+    tokens_cases()
 
     if failures:
         print(f"\n{len(failures)} failure(s)")

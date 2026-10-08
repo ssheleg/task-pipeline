@@ -100,6 +100,7 @@ required; an absent one is a check recorded as NOT_RUN with its reason.
 | Compose `enableAccessibilityChecks` | Android's accessibility checks in Compose UI tests | stage 6, a native Android surface |
 | Playwright `toHaveScreenshot` | screenshot regression against the approved baseline, per state and theme | stage 6 (regression), and the nightly or release baseline after |
 | axe-core | the deterministic accessibility floor of a web surface | stage 6, first in the cheap-first order |
+| `figma-code-connect` (Figma's public plugin skill) | maps a design-system component in the file to its code component, so `get_design_context` hands the agent the real import instead of approximated markup | stage 5, **offered** for a core component the file draws and nothing maps — publishes to the file, so it needs a go ([`build.md`](build.md) → *Code Connect, kept*) |
 
 A native screen is captured on a simulator or a device; a web render styled as a phone is
 a mockup, and the native rows of the sheet stay NOT_RUN without one.

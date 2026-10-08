@@ -15,6 +15,11 @@
     visual_gate.py filekeys --record <foundation.md or brief> --screens <screens.md> [--json]
         stage 3 with Figma on: every frame link's file key is one of the files the project
         recorded — one per surface (App, Web, ASO), never a file nobody recorded
+    visual_gate.py tokens   --figma <variables.json> --css <tokens.css> [--json]
+        stages 5–6 with Figma on, the token drift probe: every variable name exported from
+        the file (`get_variable_defs`, or the REST export) has its CSS custom property in
+        the pack's token file and the reverse, and WEB code syntax, where set, names the
+        property the file actually declares. No export is NOT_RUN (exit 3), never PASS
 
 `<surface_class>` is the brief's stage-0 answer: flagship | product | internal | ad. It
 selects what each check owes (`references/stages.md` → stage 0, *The surface class*).
@@ -536,6 +541,134 @@ def cmd_filekeys(a):
     return _emit(a, "filekeys", "FAIL" if problems else "PASS", problems, notes)
 
 
+# --- token-name drift: Figma variables against the pack's CSS custom properties ---
+# A token that has one name in the file and another in code has quietly split in two, and
+# nothing downstream notices: `get_design_context` hands the agent the Figma name, the agent
+# writes a raw value because no property answers to it, and the screen still looks right.
+
+CSS_DECL = re.compile(r"(?<![\w-])(--[A-Za-z0-9_-]+)\s*:")
+CS_PROP = re.compile(r"\s*(?:var\(\s*)?(--[A-Za-z0-9_-]+)\s*(?:,[^)]*)?\)?\s*")
+# Keys a variable's own record can carry. A dict value with none of them is a token GROUP
+# (a nested design-token tree), not a variable, and reading its key as a name would compare
+# the code against the group names.
+VAR_KEYS = ("codeSyntax", "value", "$value", "resolvedType", "type", "valuesByMode")
+
+
+def css_property(name):
+    """The CSS custom property a Figma variable name maps to when it carries no code syntax:
+    `Color/Text Muted` → `--color-text-muted`, `fontSize/bodyLarge` → `--font-size-body-large`.
+    A convention, not a law — WEB code syntax, where the file sets it, overrides it."""
+    s = re.sub(r"([a-z0-9])([A-Z])", r"\1-\2", name)
+    return "--" + re.sub(r"[^A-Za-z0-9]+", "-", s).strip("-").lower()
+
+
+def figma_variables(doc):
+    """[(name, web_code_syntax or None)] from a variable export. Accepts the map
+    `get_variable_defs` returns (name → value), the REST export (`meta.variables`, id →
+    variable) and a `variables` list. Raises ValueError on any other shape."""
+    if isinstance(doc, dict) and isinstance(doc.get("meta"), dict) and "variables" in doc["meta"]:
+        doc = doc["meta"]["variables"]
+    elif isinstance(doc, dict) and isinstance(doc.get("variables"), (list, dict)):
+        doc = doc["variables"]
+
+    def one(v):
+        cs = v.get("codeSyntax")
+        return v["name"], (cs.get("WEB") if isinstance(cs, dict) else None)
+
+    if isinstance(doc, list):
+        if not all(isinstance(v, dict) and isinstance(v.get("name"), str) for v in doc):
+            raise ValueError("a `variables` list whose items are not {name, …} objects")
+        return [one(v) for v in doc]
+    if not isinstance(doc, dict):
+        raise ValueError(f"a {type(doc).__name__}, not a variable map")
+    if doc and all(isinstance(v, dict) and isinstance(v.get("name"), str) for v in doc.values()):
+        return [one(v) for v in doc.values()]
+    out = []
+    for k, v in doc.items():
+        if isinstance(v, dict):
+            if not any(key in v for key in VAR_KEYS):
+                raise ValueError(f"{k!r} holds a group, not a variable — a nested token tree")
+            cs = v.get("codeSyntax")
+            out.append((k, cs.get("WEB") if isinstance(cs, dict) else None))
+        elif isinstance(v, list):
+            raise ValueError(f"{k!r} holds a list, not a variable's value")
+        else:
+            out.append((k, None))
+    return out
+
+
+def css_properties(text):
+    """Every custom property the token file DECLARES. Comments are stripped first, and a
+    `var(--x)` use is not a declaration."""
+    return set(CSS_DECL.findall(re.sub(r"/\*.*?\*/", "", text, flags=re.S)))
+
+
+def token_drift(variables, props):
+    """(problems, report) — names in one side and not the other, and code syntax that
+    disagrees with the property the token file actually has."""
+    problems, figma_only, syntax, used, owner = [], [], [], set(), {}
+    for name, cs in variables:
+        derived = css_property(name)
+        target = derived
+        if cs is not None:
+            m = CS_PROP.fullmatch(cs)
+            if not m:
+                syntax.append(f"{name}: WEB code syntax {cs!r} is not a CSS custom property")
+                continue
+            target = m.group(1)
+        if target in owner:
+            problems.append(f"{owner[target]!r} and {name!r} both map to {target} — one "
+                            "property cannot hold both")
+            continue
+        owner[target] = name
+        if target in props:
+            used.add(target)
+        elif cs is not None and derived in props:
+            used.add(derived)
+            syntax.append(f"{name}: code syntax names {target}, and the token file calls it "
+                          f"{derived}")
+        else:
+            figma_only.append(f"{name} → {target}")
+    css_only = sorted(props - used)
+    problems += [f"in Figma, not in the token file: {x}" for x in figma_only]
+    problems += [f"in the token file, not in Figma: {x}" for x in css_only]
+    problems += [f"code syntax: {x}" for x in syntax]
+    return problems, {"figma_only": figma_only, "css_only": css_only, "code_syntax": syntax,
+                      "matched": len(used)}
+
+
+def cmd_tokens(a):
+    try:
+        css = open(a.css, encoding="utf-8").read()
+    except OSError as e:
+        print(f"visual_gate: cannot read the token file {a.css} ({type(e).__name__})",
+              file=sys.stderr)
+        return 2
+    if not os.path.isfile(a.figma):
+        return _emit(a, "tokens", "NOT_RUN", [], [
+            f"no Figma variable export at {a.figma} — export it (`get_variable_defs`, or the "
+            "REST variables endpoint) and run again; until then the drift is unmeasured"])
+    try:
+        doc = json.load(open(a.figma, encoding="utf-8"))
+    except (OSError, ValueError) as e:  # JSONDecodeError and UnicodeDecodeError included
+        print(f"visual_gate: cannot read {a.figma} ({type(e).__name__})", file=sys.stderr)
+        return 2
+    try:
+        variables = figma_variables(doc)
+    except ValueError as e:
+        print(f"visual_gate: {a.figma} is not a variable export — {e}", file=sys.stderr)
+        return 2
+    if not variables:
+        return _emit(a, "tokens", "NOT_RUN", [], [
+            f"{a.figma} holds no variables — there is nothing to compare, and nothing "
+            "compared is not a pass"])
+    props = css_properties(css)
+    problems, rep = token_drift(variables, props)
+    notes = [f"{len(variables)} Figma variable(s), {len(props)} CSS custom propert"
+             f"{'y' if len(props) == 1 else 'ies'}, {rep['matched']} matched"]
+    return _emit(a, "tokens", "FAIL" if problems else "PASS", problems, notes, extra=rep)
+
+
 EXIT = {"PASS": 0, "FAIL": 1, "NOT_RUN": 3}
 
 
@@ -580,9 +713,15 @@ def main(argv):
     f.add_argument("--record", required=True)
     f.add_argument("--screens", required=True)
     f.add_argument("--json", action="store_true")
+    t = sub.add_parser("tokens", help="stages 5–6: Figma variable names against the CSS "
+                                      "custom properties of the pack's token file")
+    t.add_argument("--figma", required=True,
+                   help="the variable export (get_variable_defs JSON, or the REST export)")
+    t.add_argument("--css", required=True, help="the pack's token file")
+    t.add_argument("--json", action="store_true")
     a = p.parse_args(argv)
     return {"record": cmd_record, "sheet": cmd_sheet, "lint": cmd_lint,
-            "filekeys": cmd_filekeys}[a.cmd](a)
+            "filekeys": cmd_filekeys, "tokens": cmd_tokens}[a.cmd](a)
 
 
 if __name__ == "__main__":

@@ -532,10 +532,13 @@ it invents what was already decided.
    approximately, and approximate is indistinguishable from exact in a report.
 3. **A component with a Code Connect mapping is not rewritten.** If
    `get_code_connect_map` names a code component for that node, the screen uses it.
-   Reimplementing it is a silent fork of the design system.
+   Reimplementing it is a silent fork of the design system. *Code Connect, kept*, below,
+   is what keeps that mapping true.
 4. **A token names its variable.** A raw hex or px where the file has a variable is a
    token that has quietly split in two. `get_variable_defs` is the canon; a screenshot
-   is a way to *look*, never a way to *know*.
+   is a way to *look*, never a way to *know*. Whether the names still agree is
+   measured, not assumed: `visual_gate.py tokens` ([`browser.md`](browser.md) →
+   *The visual half*).
 5. **The frame is a contract at its own width.** It is one width and said nothing about
    the others, so behaviour at other breakpoints — and states the frame does not draw,
    like error, empty and loading — is a **decision that gets recorded**, not guessed.
@@ -558,6 +561,42 @@ same false confidence as an unproven green.
 **Deviation is a line, not a silence.** Where the implementation must differ — a
 platform constraint, an accessibility floor, a breakpoint — write what and why.
 Otherwise *"built from the frame"* and *"built to look like it"* read identically.
+
+### Code Connect, kept
+
+Rule 3 trusts the mapping. It is only worth trusting while it stays true. A mapping
+that still names a component's old props hands the next agent a snippet that does
+not compile, so it is followed by reimplementing the component. That is the fork
+rule 3 exists to prevent, reached by obeying it.
+
+- **A component whose API changes updates its Code Connect mapping in the same
+  change.** That covers a renamed or removed prop, a new variant, or a moved import
+  path. The mapping file is part of the component's diff and reviewed with it. A
+  mapping left for later is wrong from the next merge onwards. Figma's own guidance
+  says the same: *"When component APIs change in your codebase, update the
+  corresponding Code Connect mappings"* ([Code Connect integration][fcc], accessed
+  2026-10-08).
+- **A core component with no mapping gets an offer, not a silent skip.** Where a
+  task builds on a design-system component that the file draws and Code Connect does
+  not map, the run offers to map it with `/figma-code-connect`, Figma's public
+  plugin skill ([`companion-skills.md`](companion-skills.md)). The offer names which
+  components and which file. Mapping publishes to the Figma file, so it runs only on
+  an explicit go, like drawing a missing frame. Absent the skill, the run names the
+  unmapped components in the close-out and goes on.
+- **Never rewrite a mapped component instead of using it** — rule 3, unchanged. An
+  API that no longer fits the frame is a change to the component and its mapping
+  together, never a local copy.
+
+Why it pays, in Figma's words and on Figma's measurement: their own evals report *"a
+19.6% reduction in median task duration, a full point of improvement in code quality
+on a 1–4 scale, and a 29.5% reduction in token usage"* with Code Connect
+([Figma MCP use cases][fuc], accessed 2026-10-08). **That is Figma's unaudited
+number** — a vendor's eval of its own feature, with no published protocol here and
+not reproduced by this pipeline. Quote it as theirs, never as a measured property
+of a run.
+
+[fcc]: https://developers.figma.com/docs/figma-mcp-server/code-connect-integration/
+[fuc]: https://www.figma.com/resource-library/figma-mcp-use-cases/
 
 ## 5. Final whole-branch review
 

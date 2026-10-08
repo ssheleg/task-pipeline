@@ -187,7 +187,17 @@ the close-out — the same rule as every other refusal in the pipeline.
 1. **Deterministic.** The project linter — `python3 scripts/visual_gate.py lint <dir>`,
    which runs sheleg-design's `--lint` where it is installed and answers **NOT_RUN (exit 3)**
    where it is not — plus axe or Lighthouse, the token check, the type checker. An S1
-   finding blocks, whatever anyone says about the picture later.
+   finding blocks, whatever anyone says about the picture later. **With Figma on, the
+   token check includes the drift probe**: `python3 scripts/visual_gate.py tokens
+   --figma <variables.json> --css <tokens.css>` compares the variable names exported
+   from the file (the JSON `get_variable_defs` returns, or the REST export) with the
+   custom properties the pack's token file declares. It names each variable with no
+   property, each property with no variable, and each variable whose WEB code syntax
+   is not the property the file actually declares. A name maps by kebab-case
+   (`Color/Text Muted` → `--color-text-muted`) unless code syntax says otherwise.
+   Exit `0` PASS · `1` FAIL · `2` unreadable · `3` NOT_RUN. No export is NOT_RUN,
+   never PASS: save the export beside the frames and run again, or record the probe
+   as not run.
 2. **Regression** against the approved baseline, where one exists (`toHaveScreenshot`, or
    the platform's snapshot test).
 3. **The matrix.** One frame per `SCR-NN` state the screen map lists (default, loading,
