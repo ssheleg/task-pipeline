@@ -1,3 +1,11 @@
+## v1.90.1 — the description says «баг» as well as "bug"
+
+1.90.0 added `bug` to the description so a request phrased that way routes here. The Russian
+word stayed out, and «почини баг в оплате» reached the pipeline only through the umbrella's
+prompt hook, not through the skill's own description. «баг» now stands beside «фикс».
+
+Guards: 430 → **430** — one word in the description; no check changes.
+
 ## v1.90.0 — Code Connect is kept, and token names are measured against the file
 
 The build stage already said a component with a Code Connect mapping is used, never
