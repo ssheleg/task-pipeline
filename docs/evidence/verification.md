@@ -1,5 +1,14 @@
 # Verification — task-pipeline
 
+## Shipped state — v1.90.1 (2026-10-08)
+
+The description says «баг» as well as "bug".
+
+| REQ | What ships | How it was confirmed | Confirmed |
+|---|---|---|---|
+| FC-route-ru | «баг» beside «фикс» in the description, inside the 970 working limit | the description re-read after the edit; `npm test` (the validator measures the description) | **observed** |
+| Gate | The suite on this tree, with the local `v1.90.1` tag cut first | `npm test` locally; `npm run test:all` in the PR `validate` job and `release.yml` (local disk 3.8 GB, too small for the plants) | **observed** for `npm test`; the full suite by CI |
+
 ## Shipped state — v1.90.0 (2026-10-08)
 
 Code Connect is kept, and token names are measured against the file.

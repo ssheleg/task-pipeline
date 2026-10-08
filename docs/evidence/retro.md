@@ -1477,6 +1477,15 @@ three quarters of the work on this run.
 
 ## Releases that carry no stamp — stated, not stamped
 
+**`v1.90.1` carries no stamp, declared before its tag.** One word in the description
+(«баг» beside «фикс»), made by the controller session directly. It was not a ten-stage run,
+so there is no stage-10 stamp to write. The declaration is in the tree the tag will point
+at, and the local `v1.90.1` tag was cut and `test/validate.py` run against it before the
+push. `npm run test:all` did NOT run locally: the machine had 3.8 GB free and `negatives.py`
+holds about 10 GB of plant copies, so the full suite runs where it can — the PR's
+`validate` job and `release.yml` on the tag's own tree. That is a gap against `R-010`,
+stated here rather than papered over.
+
 **`v1.90.0` carries no stamp, declared before its tag.** It is a bounded change (Code
 Connect kept current at build time, the `visual_gate.py tokens` drift probe, and `bug` in
 the description). A delegated executor built it under the pipeline's discipline: REQ table
