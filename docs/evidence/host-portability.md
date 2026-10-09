@@ -20,8 +20,11 @@ from registration and verified refusal by this package's adapter.
 - make-skill 0.29.1 `audit_skill.py --house --quiet`: task-pipeline and project-audit
   each 0 GAP / 19 PASS after the draft exceeded headroom and was corrected.
 - Both `claude plugin validate ... --strict` commands: exit 0.
-- `npm test`: in progress at this source commit; completion receipt follows.
+- `npm test` on `a121c38c69db8a4d998a4af9202141fc97ad65c8`: exit 0 after reviewer corrections.
+  See `host-portability-checks.json` for the source identity and log hash.
+- Review corrected three contract regressions before delivery: HTML remains opt-in,
+  detector acceptance requires planted-defect proof plus opening/closing work-list
+  measurement, and inline tier readings cannot certify independent contexts.
 
 No model/provider calls, host configuration changes, release or installation are
-part of this source commit. Next: independent review, complete the owner gate,
-normal release and parent pin/readback verification. Existing project work is kept.
+part of this source commit. Next: independent review, normal release and parent pin/readback verification. Existing project work is kept.

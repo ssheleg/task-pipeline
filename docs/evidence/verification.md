@@ -7,7 +7,8 @@ guidance. `python3 test/audit_regressions/host-portability.py` initially failed
 when the portable verifier was absent; candidate passes copied-skill closure,
 missing-procedure refusal and offline JSON/HTML generation without a companion.
 This is filesystem/collector acceptance; agent judgment and native hook operation
-are NOT_RUN. Full gate and independent review remain pending.
+are NOT_RUN. `npm test` on `a121c38c69db8a4d998a4af9202141fc97ad65c8` exited 0;
+see `host-portability-checks.json`. Independent review and release remain separate.
 
 ## Shipped state — v1.90.0 (2026-10-08)
 
