@@ -31,15 +31,16 @@ next audit reads.
 
 | | Owns | Reach for it when |
 |---|---|---|
-| [`references/audit.md`](../task-pipeline/references/audit.md) | the **method** — the L0→L7 ladder, seams, axis rotation | one deliverable is being walked inside a run |
+| [`references/portable-method.md`](references/portable-method.md) | the **method** — the L0→L7 ladder, seams, axis rotation | one deliverable is being walked inside a run |
 | this skill | the **procedure** — cold start, probes, production, the report | a whole project is the subject |
 | `/skill-audit` (make-skill) | a skill's construction against the standard | the thing audited is a skill or plugin |
 | `/ux-audit` (super-ux) | code against documented scenarios | the question is user-facing behaviour |
 | `/seo-aeo-audit` (seo-aeo-audit) | a public surface's search and answer-engine visibility | the question is whether a machine will find it |
 
-**The method is not restated here.** Phase 4 below hands off to `audit.md` and
-comes back; a second copy of the ladder would be a second rule, and the two
-would disagree within a release.
+**Read `references/portable-method.md` before phase 4.** It carries the standalone
+audit floor and needs neither a sibling skill nor network access. The companion
+task-pipeline audit, backlog and prioritisation references are optional deeper
+reading when installed; their absence never blocks this procedure.
 
 ## The six phases
 
@@ -102,7 +103,7 @@ worse than no figure, because it is quoted with the authority of a measurement:
 
 ### 4. Seams — hand off to the ladder
 
-Now, and only now, walk `audit.md`'s ladder over the capabilities the discovery
+Now, and only now, walk the local portable method's ladder over the capabilities the discovery
 found. Bottom-up, seam-ordered. Absences found here are findings like any other.
 
 ### 5. Report — two files, one command
@@ -116,10 +117,10 @@ what ran are the same object.
 
 **This skill commits nothing.** Findings leave as board rows in the project's
 own vocabulary, priced with **the board header's declared formula** — the shipped
-default is `Sev × Blast + age_bonus` ([`references/backlog.md`](../task-pipeline/references/backlog.md), the pipeline's
-board doctrine) — and the operator accepts them. Effort never ranks inside an
+default is `Sev × Blast + age_bonus` ([`references/portable-method.md`](references/portable-method.md),
+the local priority contract) — and the operator accepts them. Effort never ranks inside an
 audit: what a fix costs is the fixer's decision, not the finder's
-([`references/prioritisation.md`](../task-pipeline/references/prioritisation.md)). An audit
+([`references/portable-method.md`](references/portable-method.md)). An audit
 that edits while it reads cannot be re-run to check itself.
 
 ## A finding keeps its axes apart, or it is a guess wearing a verdict
@@ -198,7 +199,7 @@ refused at construction.
 
 **`blind` is the whole design.** Without it, a probe that could not look and a
 probe that found nothing produce the same empty section, and a reader takes the
-second meaning every time. This is `audit.md`'s *silence is not a reading*
+second meaning every time. This is the local method's *silence is not a reading*
 raised from a command to a probe: a zero exit with no output has not answered.
 
 The page renders the blind list as a section of its own, never an appendix.

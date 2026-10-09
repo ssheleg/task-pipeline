@@ -1,5 +1,14 @@
 # Verification — task-pipeline
 
+## Shipped state — v1.90.1 (2026-10-09; candidate, release pending)
+
+Portable verifier procedures, standalone project-audit method, and scoped adapter
+guidance. `python3 test/audit_regressions/host-portability.py` initially failed
+when the portable verifier was absent; candidate passes copied-skill closure,
+missing-procedure refusal and offline JSON/HTML generation without a companion.
+This is filesystem/collector acceptance; agent judgment and native hook operation
+are NOT_RUN. Full gate and independent review remain pending.
+
 ## Shipped state — v1.90.0 (2026-10-08)
 
 Code Connect is kept, and token names are measured against the file.

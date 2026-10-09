@@ -587,7 +587,7 @@ must say so.
 ### Held to Anthropic's own Skill authoring guidance
 
 Audited against the four Agent Skills pages. Most of it already held — `name`
-13/64 chars, `description` 908/1024 chars, `SKILL.md` 279/500 lines, all 39 references
+13/64 chars, `description` 908/1024 chars, `SKILL.md` 278/500 lines, all 39 references
 linked **directly** from `SKILL.md`, and the bundle far under the 30 MB ceiling. What
 did not, now does:
 
@@ -991,3 +991,8 @@ updates is not the session that gets the new ones.
 
 MIT © 2026 ssheleg. Third-party portions (the ported stage doctrine) are credited
 and licensed in [LICENSE](LICENSE) → *Third-party*.
+
+Portable certification procedures ship in `assets/verifier-unit.md`,
+`assets/verifier-seam.md`, `assets/verifier-product.md` and `assets/verifier-visual.md`.
+A standalone `project-audit` install includes `references/portable-method.md`;
+it does not require a sibling pipeline installation or a network fetch.

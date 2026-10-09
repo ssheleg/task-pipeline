@@ -1,0 +1,18 @@
+Traceback (most recent call last):
+  File "$TEMP/baseline/test/audit_regressions/host-portability.py", line 85, in <module>
+    main()
+    ~~~~^^
+  File "$TEMP/baseline/test/audit_regressions/host-portability.py", line 52, in main
+    check_payloads(root)
+    ~~~~~~~~~~~~~~^^^^^^
+  File "$TEMP/baseline/test/audit_regressions/host-portability.py", line 23, in check_payloads
+    body = (pipeline / 'assets' / ('verifier-' + tier + '.md')).read_text()
+  File "/opt/homebrew/Cellar/python@3.14/3.14.7/Frameworks/Python.framework/Versions/3.14/lib/python3.14/pathlib/__init__.py", line 787, in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:
+         ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.7/Frameworks/Python.framework/Versions/3.14/lib/python3.14/pathlib/__init__.py", line 771, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/var/folders/3r/yrdx_c051cv22q3r3k0ylvdm0000gn/T/portable skills 54vvc07y/task-pipeline/assets/verifier-unit.md'
+
+exit=1

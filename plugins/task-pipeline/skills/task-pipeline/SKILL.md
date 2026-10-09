@@ -139,8 +139,7 @@ Three things the grill does beyond clarifying the request, each in full in
 
 ## How to run
 
-1. Restate the task in one line. Create a **TaskList: one task per stage, starting
-   with stage 0** (survives context loss; lets you resume). Then run the
+1. Restate the task in one line. Track each stage from 0 using the host task tool or a prose checklist (for resume). Then run the
    **companion preflight** (`references/companion-skills.md`): the stage doctrine
    is built in, so this only checks the *optional* companions (super-ux for UI
    tasks, context7, wiki-update, graphify) and emits ONE block covering them

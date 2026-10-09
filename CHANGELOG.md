@@ -1,3 +1,10 @@
+## v1.90.1 — independent skill payloads on every host
+
+Project audit now carries its own offline method instead of requiring a sibling
+skill's files. Certification includes the four portable verifier procedures with
+body parity against plugin agents. Hook guidance names the shipped adapter and
+requires observed adapter operation; other hosts retain explicit manual gate execution.
+
 ## v1.90.0 — Code Connect is kept, and token names are measured against the file
 
 The build stage already said a component with a Code Connect mapping is used, never
