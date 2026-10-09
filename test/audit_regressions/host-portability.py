@@ -78,6 +78,10 @@ def main():
         result = subprocess.run([sys.executable, str(isolated / 'scripts/audit.py'), '--root', str(project), '--out', str(root / 'alone.json'), '--report', '--no-open', '--offline'], capture_output=True, text=True)
         assert result.returncode == 0, result.stdout + result.stderr
         assert json.loads(next((root / 'alone.json').glob('*-audit.json')).read_text()) and len(list((root / 'alone.json').glob('*-audit.html'))) == 1
+        result = subprocess.run([sys.executable, str(isolated / 'scripts/audit.py'), '--root', str(project), '--out', str(root / 'json-only'), '--offline'], capture_output=True, text=True)
+        assert result.returncode == 0, result.stdout + result.stderr
+        assert len(list((root / 'json-only').glob('*-audit.json'))) == 1
+        assert not list((root / 'json-only').glob('*.html')), 'default unexpectedly created HTML'
     print('PASS: isolated payload closure, missing-procedure negative, offline JSON+HTML with no companion')
 
 

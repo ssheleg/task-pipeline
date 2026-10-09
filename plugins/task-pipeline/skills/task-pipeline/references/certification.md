@@ -65,6 +65,9 @@ Agents: [`verifier-unit.md`](../assets/verifier-unit.md),
 [`verifier-visual.md`](../assets/verifier-visual.md), below. These portable procedures live inside the skill.
 Use host-native delegation when available; without it, execute the same tier
 procedures inline and disclose that self-review lacks independent contexts.
+Do not count inline passes as independent certification or close the graph on
+that basis: independence-dependent gates remain incomplete/unverified until
+independent review is available.
 The Claude plugin agent definitions carry the same bodies with host frontmatter.
 
 ## The fourth reading — `visual`, on a flagship or product surface

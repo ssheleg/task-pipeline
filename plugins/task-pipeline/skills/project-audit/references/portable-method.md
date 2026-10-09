@@ -35,8 +35,11 @@ Every finding states the mechanism, reproduction or counterexample, exposure,
 observed incidence and impact uncertainty separately. Missing, blind, UNKNOWN and
 NOT_RUN are not zero and are not PASS. Quote the command and observed output or
 source location; an empty output must be distinguished from a broken invocation.
-Check output shape and run a known-positive or negative control before believing
-a silent detector. Scope a runtime conclusion to the artifact/version actually
+Check output shape before believing a silent detector. Every check relied on must
+fire against a planted defect: plant it in an isolated fixture, observe rejection,
+remove it, then observe the clean result. Record that proof; disclosure alone is
+not detector acceptance. A check without this proof remains unverified and the
+dependent audit conclusion incomplete or UNKNOWN, never clean. Scope a runtime conclusion to the artifact/version actually
 observed; source presence is not installation, deployment or provider acceptance.
 When two copies disagree, establish which one is actually selected and consumed
 before choosing the direction of a fix. Do not discard either side as stale by taste.
@@ -76,6 +79,15 @@ Accepted waivers remain decisions with a measured revisit condition, not open de
 that accumulates priority. Findings are proposals until accepted through the owning
 project process. The audit changes no application, deployment or shared board.
 
-Close when discovered capabilities and required rungs are accounted for, each
-seam has evidence or a named gap, detector controls are disclosed, and the JSON,
-HTML and manual findings identify exactly what was and was not verified.
+At opening, measure the work-list from its owning register. At closing, remeasure
+it from current state and print both counts and the actual changes beside them;
+never reuse the opening list as the closing truth. A missing register or inaccessible
+measurement is UNKNOWN and leaves that conclusion incomplete, not an invented zero.
+
+Close when discovered capabilities and required rungs are accounted for and every
+relied-on check has demonstrated detection of a planted defect. Unavailable proof
+is explicitly incomplete, with the dependent conclusions unverified. Always write
+the JSON sidecar. Produce and inspect HTML only when `--report` was requested;
+record `--no-open` when used. Without `--report`, JSON-only delivery is complete
+when the other conditions hold. The sidecar and requested human report name exactly
+what was and was not verified, including the opening/closing work-list comparison.
