@@ -1477,6 +1477,16 @@ three quarters of the work on this run.
 
 ## Releases that carry no stamp — stated, not stamped
 
+**`v1.90.1` carries no stamp, declared before its tag.** This bounded host-portability
+repair packages the verifier procedures and project-audit's offline method, and scopes
+hook adapter claims. It is not a ten-stage product run. The isolated payload fixture
+failed on the old pin, passed after repair, and an independent reviewer caught lost
+proof/conditional-output requirements before accepting `a121c38`. `npm test` passed
+that source; `6b7e092` records the receipt. Under R-010 the final candidate is tagged
+locally and `npm run test:all` must pass with its `unlooked` disclosures inspected
+before that tag is pushed. This explicit bounded-change declaration follows the
+v1.90.0 precedent below; it does not invent a stage-10 stamp.
+
 **`v1.90.0` carries no stamp, declared before its tag.** It is a bounded change (Code
 Connect kept current at build time, the `visual_gate.py tokens` drift probe, and `bug` in
 the description). A delegated executor built it under the pipeline's discipline: REQ table

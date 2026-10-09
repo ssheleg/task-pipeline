@@ -59,10 +59,16 @@ that reads no code is not the soft one.
 | `seam` | everything that can reach the change — callers, callees, implementors, shared state, the neighbours' tests | a contract that moved under a dependent; the duplicate that did not get the fix |
 | `product` | documentation, scenarios, user-visible strings, and the neighbouring features that share this path | a documented behaviour that is now false; an interaction nobody listed |
 
-Agents: [`../../../agents/verifier-unit.md`](../../../agents/verifier-unit.md),
-[`verifier-seam.md`](../../../agents/verifier-seam.md),
-[`verifier-product.md`](../../../agents/verifier-product.md) — and, on a visual surface,
-[`verifier-visual.md`](../../../agents/verifier-visual.md), below.
+Agents: [`verifier-unit.md`](../assets/verifier-unit.md),
+[`verifier-seam.md`](../assets/verifier-seam.md),
+[`verifier-product.md`](../assets/verifier-product.md) — and, on a visual surface,
+[`verifier-visual.md`](../assets/verifier-visual.md), below. These portable procedures live inside the skill.
+Use host-native delegation when available; without it, execute the same tier
+procedures inline and disclose that self-review lacks independent contexts.
+Do not count inline passes as independent certification or close the graph on
+that basis: independence-dependent gates remain incomplete/unverified until
+independent review is available.
+The Claude plugin agent definitions carry the same bodies with host frontmatter.
 
 ## The fourth reading — `visual`, on a flagship or product surface
 

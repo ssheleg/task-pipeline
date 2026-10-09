@@ -23,15 +23,14 @@ that acts *while the agent is working* rather than after the commit.
 
 ## The limit, before the capability
 
-**Hooks exist only in Claude Code.** On Cursor, Codex and the other agents a skill
-can be installed and read, but there is no `PreToolUse`, so nothing blocks anything.
-On those agents the same rules run as a self-check written into the skill body, and
-the run is recorded **`ungated`**.
+**This package ships a Claude Code hook adapter.** Other hosts may expose hooks,
+but capability does not register this package's adapter. Check the active host's
+version, adapter registration, event payload and a planted refusal before claiming
+enforcement. Without a verified adapter, run the same gates explicitly and record
+**`ungated`**. Native hook support alone is not protection for this project.
 
-**Never describe a project as protected when its agents run outside Claude Code.**
-The gap between "the rule exists" and "the rule is enforced" is invisible from
-inside a transcript, and a false guarantee is worse than a stated absence: everyone
-downstream stops checking.
+Never describe a project as protected merely because a rule or a hook file exists.
+A false guarantee makes downstream readers stop checking.
 
 > **Provenance.** Every contract below is quoted from the Claude Code hooks
 > reference (`code.claude.com/docs/en/hooks`), fetched **2026-08-03**. Re-fetch
@@ -271,7 +270,7 @@ entries carrying one id — which is the exact failure the lease existed to prev
 
 | Excuse | Reality |
 |---|---|
-| "The hook is installed, so the repo is protected" | Only in Claude Code, and only while the guard exits 2. Any other exit code fails open silently. |
+| "The hook is installed, so the repo is protected" | Only after this adapter was verified on the active host. For the documented Claude command hook, exit 2 refuses; other errors fail open. |
 | "It's fine, the guard can't crash" | Then it costs one line to make crashing block instead of pass. Write the line. |
 | "I'll match `*` and filter inside the script" | Now every tool call pays your script's startup. Match narrowly; the matcher is free and the script is not. |
 | "The hook is slow, I'll disable it for now" | "For now" survives the session and the memory of why. Fix the throttle. |
