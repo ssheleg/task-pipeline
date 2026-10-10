@@ -3,9 +3,11 @@
 v1.90.0 added `bug` to the description so "fix this bug" routes here by name. The Russian
 word stayed out, so «почини баг в оплате» reached the pipeline only through the umbrella's
 prompt hook, never through the skill's own description. «баг» now stands beside «фикс».
-908 → 913 of 1024 chars, inside the 970 working limit. This is the one-word change of the
-unmerged PR #102, redone on current `main` because that branch carried a version that
-v1.90.1 has since taken.
+This is the one-word change of the unmerged PR #102, redone on current `main` because that
+branch carried a version that v1.90.1 has since taken. To pay for it, the trigger quoted as
+'full cycle, the full cycle' is now 'the full cycle': the umbrella routes on that phrase,
+and the shorter one is inside it. 908 → 901 of 1024 chars, 69 under the 970 working
+limit, where the umbrella counts a skill within 60 of that limit as crowding it.
 
 - **`release.yml` refuses a lightweight tag.** `git describe` and `git submodule status`
   see annotated tags only. On 2026-10-09 four family members were cut with lightweight
