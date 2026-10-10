@@ -1,3 +1,11 @@
+## v1.90.2 — release evidence survives squash integration
+
+The host-portability payload from v1.90.1 is unchanged. Its release stopped at the
+documentation gate because source-branch test receipts were written as local
+ancestor citations, while squash integration preserves their files but not their
+ancestry. Those historical receipts now link to their immutable GitHub commits.
+The published v1.90.1 tag stays unchanged; this patch carries the corrected evidence.
+
 ## v1.90.1 — independent skill payloads on every host
 
 Project audit now carries its own offline method instead of requiring a sibling

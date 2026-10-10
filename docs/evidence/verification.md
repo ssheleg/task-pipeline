@@ -1,5 +1,15 @@
 # Verification — task-pipeline
 
+## Shipped state — v1.90.2 (2026-10-10; candidate, release pending)
+
+Citation-only recovery: the v1.90.1 skill/runtime payload is unchanged. Historical
+source-branch receipts use immutable remote commit links instead of claiming
+local ancestry after squash integration. The tagged v1.90.1 documentation gate
+failed with four unreachable citations; local reproduction also exited 1.
+Focused repaired docgate and `npm test` passed; required source CI and tagged
+release gates are pending.
+See [the publication recovery record](host-portability.md#v1902-publication-recovery).
+
 ## Shipped state — v1.90.1 (2026-10-09; candidate, release pending)
 
 Portable verifier procedures, standalone project-audit method, and scoped adapter
@@ -7,7 +17,7 @@ guidance. `python3 test/audit_regressions/host-portability.py` initially failed
 when the portable verifier was absent; candidate passes copied-skill closure,
 missing-procedure refusal and offline JSON/HTML generation without a companion.
 This is filesystem/collector acceptance; agent judgment and native hook operation
-are NOT_RUN. `npm test` on `a121c38c69db8a4d998a4af9202141fc97ad65c8` exited 0;
+are NOT_RUN. `npm test` on [a121c38c69db8a4d998a4af9202141fc97ad65c8](https://github.com/ssheleg/task-pipeline/commit/a121c38c69db8a4d998a4af9202141fc97ad65c8) exited 0;
 see `host-portability-checks.json`. Independent review and release remain separate.
 
 ## Shipped state — v1.90.0 (2026-10-08)

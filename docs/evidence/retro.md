@@ -1477,12 +1477,24 @@ three quarters of the work on this run.
 
 ## Releases that carry no stamp — stated, not stamped
 
+**`v1.90.2` carries no stamp, declared before its tag.** This citation-only release
+recovery changes immutable source links and version surfaces, not skill behavior.
+The v1.90.1 source/local gates passed, but its tagged
+[release run](https://github.com/ssheleg/task-pipeline/actions/runs/38003499991)
+failed the documentation gate: squash integration retained the tested tree while
+removing candidate commits from HEAD ancestry. This patch preserves the actual
+historical source identities as explicit remote links. No ten-stage product run
+or successful v1.90.1 publication is claimed. R-010 still requires a locally tagged
+full suite; after squash, run docgate on the actual merged commit before pushing
+the new tag. Full-tree equality alone is not a topology-sensitive gate receipt.
+
+
 **`v1.90.1` carries no stamp, declared before its tag.** This bounded host-portability
 repair packages the verifier procedures and project-audit's offline method, and scopes
 hook adapter claims. It is not a ten-stage product run. The isolated payload fixture
 failed on the old pin, passed after repair, and an independent reviewer caught lost
-proof/conditional-output requirements before accepting `a121c38`. `npm test` passed
-that source; `6b7e092` records the receipt. Under R-010 the final candidate is tagged
+proof/conditional-output requirements before accepting [a121c38](https://github.com/ssheleg/task-pipeline/commit/a121c38c69db8a4d998a4af9202141fc97ad65c8). `npm test` passed
+that source; [6b7e092](https://github.com/ssheleg/task-pipeline/commit/6b7e092dd346d08d6dfdc3e88df8fa91ddb0fc0a) records the receipt. Under R-010 the final candidate is tagged
 locally and `npm run test:all` must pass with its `unlooked` disclosures inspected
 before that tag is pushed. This explicit bounded-change declaration follows the
 v1.90.0 precedent below; it does not invent a stage-10 stamp.
