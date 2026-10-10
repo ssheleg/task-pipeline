@@ -1,3 +1,25 @@
+## v1.91.0 — the description says «баг», and a lightweight tag is refused before release
+
+v1.90.0 added `bug` to the description so "fix this bug" routes here by name. The Russian
+word stayed out, so «почини баг в оплате» reached the pipeline only through the umbrella's
+prompt hook, never through the skill's own description. «баг» now stands beside «фикс».
+908 → 913 of 1024 chars, inside the 970 working limit. This is the one-word change of the
+unmerged PR #102, redone on current `main` because that branch carried a version that
+v1.90.1 has since taken.
+
+- **`release.yml` refuses a lightweight tag.** `git describe` and `git submodule status`
+  see annotated tags only. On 2026-10-09 four family members were cut with lightweight
+  tags, and the umbrella read each one as its previous release. A step right after the
+  tag checkout now runs `git cat-file -t` on the tag and stops with a remedy unless it is
+  a tag object. Nothing has been published by the time it runs. It is the same step the
+  umbrella's own `release.yml` has run since its B-93.
+- **`test/project_audit_test.py` closes what it opens.** Four reads left their file handle
+  to the garbage collector, and `python3 -W always` printed a `ResourceWarning` for each.
+  They now read inside `with`, and the same run prints none.
+
+Guards: 430 → **430**. The validator is unchanged. The new release step is a workflow
+check, and a lightweight tag planted in a scratch repository was watched failing it.
+
 ## v1.90.2 — release evidence survives squash integration
 
 The host-portability payload from v1.90.1 is unchanged. Its release stopped at the

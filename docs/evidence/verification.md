@@ -1,5 +1,16 @@
 # Verification — task-pipeline
 
+## Shipped state — v1.91.0 (2026-10-10; candidate, release pending)
+
+The description says «баг»; a lightweight tag is refused before release.
+
+| REQ | What ships | How it was confirmed | Confirmed |
+|---|---|---|---|
+| FR-route-ru | «баг» beside «фикс» in the description, 913/1024, inside the 970 working limit | the description re-measured after the edit; `npm test` (the validator measures the description) | **observed** |
+| FR-tag-annotated | `release.yml` stops on a tag that is not a tag object, before anything publishes | the step's script run in a scratch repository: a lightweight tag exits 1, an annotated one exits 0; the workflow parsed as YAML | **observed**; the step on a real tag is pending the release run |
+| FR-handles | `test/project_audit_test.py` leaves no file handle open | `python3 -W always test/project_audit_test.py`: 6 `ResourceWarning` lines before, 0 after, 45 tests OK | **observed** |
+| Gate | `npm test` locally; the full suite where the disk allows it | `npm test` locally; `npm run test:all` in the PR `validate` job and in `release.yml` (local disk about 6 GB free) | **observed** for `npm test`; the full suite by CI |
+
 ## Shipped state — v1.90.2 (2026-10-10; candidate, release pending)
 
 Citation-only recovery: the v1.90.1 skill/runtime payload is unchanged. Historical
