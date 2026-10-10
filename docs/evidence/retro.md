@@ -1477,6 +1477,18 @@ three quarters of the work on this run.
 
 ## Releases that carry no stamp — stated, not stamped
 
+**`v1.91.0` carries no stamp, declared before its tag.** It is a bounded family-round
+change: «баг» in the description (the word PR #102 proposed, redone on current `main`),
+the annotated-tag step in `release.yml`, and four file handles closed in
+`test/project_audit_test.py`. It was not a ten-stage run, so there is no stage-10 stamp
+to write. The declaration is in the tree the tag will point at. `npm test` ran locally.
+`npm run test:all` did NOT run locally, because the machine had about 6 GB free and the
+negatives suite needs more for its plant copies. The full suite runs in the PR's
+`validate` job and in `release.yml` on the tag's own tree. That is a gap against
+`R-010`, stated here rather than papered over. After the squash, `validate.py` runs on
+the actual merged commit with a local `v1.91.0` tag before that tag is pushed, which is
+the topology lesson `v1.90.2` records.
+
 **`v1.90.2` carries no stamp, declared before its tag.** This citation-only release
 recovery changes immutable source links and version surfaces, not skill behavior.
 The v1.90.1 source/local gates passed, but its tagged
