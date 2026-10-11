@@ -17,7 +17,7 @@
       "expected_behavior": [
         "Invokes the task-pipeline skill rather than starting to design or code inline",
         "Runs the stage-0 knowledge harvest BEFORE the first interview question, and writes a source ledger",
-        "Asks interview questions one at a time, each with a recommended answer",
+        "Asks the material interview questions in one batch ordered by dependency, each with a recommended answer, after closing what the sources answer",
         "Writes no implementation code before a brief is committed and confirmed"
       ],
       "why": "The explicit invocation phrase is the primary trigger; the failure it guards is jumping to code."
@@ -360,6 +360,21 @@
         "Prints NO READER rather than staying silent when no independent reader is available"
       ],
       "why": "Measured before the change: answered `none` because no description offered a phrase for reviewing a PR, while review.md owns exactly that contract."
+    },
+    {
+      "id": "TRIG-11",
+      "category": "should_trigger",
+      "skills": [
+        "task-pipeline"
+      ],
+      "query": "собери все задачи с доски и новые запросы и закрой их волнами",
+      "expected_behavior": [
+        "Recognises this as wave mode and runs `/task-pipeline waves`, not one change at a time",
+        "Builds one machine-readable inventory of every open item by id, each verified against the code, before any design",
+        "Closes questions from the sources first and asks the operator the rest once, as one batch with a recommendation each, at the end of planning",
+        "Cuts the work into waves that each close in one pass, wave 1 the walking skeleton, each with its exit criteria named before it starts"
+      ],
+      "why": "Wave mode is the operator's standard approach for a whole board (2026-10-11). A model that cannot reach it from the natural Russian request runs the board item by item and builds the intermediate states the mode exists to refuse."
     },
     {
       "id": "NOTRIG-06",

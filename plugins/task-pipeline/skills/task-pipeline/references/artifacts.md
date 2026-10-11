@@ -33,6 +33,8 @@ docs/
       YYYY-MM-DD-<topic>-brief.md     # stage 0 — locked intake brief (grill output)
       YYYY-MM-DD-<topic>-carryover.md # stage 0 seeds it; EVERY stage appends; stage 10 reads it
       YYYY-MM-DD-<topic>-modules.md   # stage 2 — module map + build order (platforms only)
+      YYYY-MM-DD-<topic>-inventory.json # wave mode, stage 0 — every open item by id, verified
+      YYYY-MM-DD-<topic>-canvas.md    # wave mode, stages 2–3 — the target state over the current logic
       YYYY-MM-DD-<topic>-design.md    # stage 3 — the spec / module dossier (locks shared contracts)
       YYYY-MM-DD-<topic>-acceptance.md # stage 10 — REQ coverage table + evidence
     plans/
@@ -170,6 +172,8 @@ them is a finding, not a tie-break ([`knowledge-sources.md`](knowledge-sources.m
 | 10 Board resolution | `<artifacts>/backlog.md` — every unresolved ledger row — homed `backlog` or still `open` — arrives with a real id, and the ledger row is updated to name it; priority re-derived ([`backlog.md`](backlog.md)) | the next run's harvest, and every loop iteration |
 | 10 Retro rotation | `<artifacts>/retro/YYYY-QN.md` — entries older than five stamps, plus every retirement, each with its commit | queried by a later run's harvest |
 | 2 Decompose | `specs/<topic>-modules.md` — module map, build order, contracts, per-module status (platforms only) | stages 3–10, every module's run |
+| 0 Wave mode | `specs/<topic>-inventory.json` — every open item: id, source, status, area, node, wave, release ([`waves.md`](waves.md)) | stages 2–10, every wave's re-measure |
+| 2–3 Wave mode | `specs/<topic>-canvas.md` — as-is → to-be per module and contract, the seams, REQ → module → wave, what is deleted | every wave, and each re-cut |
 | 3 Spec | `specs/<topic>-design.md` — module dossier for a decomposed platform (+ links `docs/ux/*` for UI) | stage 4 |
 | 4 Plan | `plans/<topic>.md` | stage 5 |
 | 3 UX track | `docs/ux/{foundation,flows,screens,scenarios}.md` | stages 4–9 + `/ux-lint` |

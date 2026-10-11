@@ -137,6 +137,10 @@ Rules for the loop:
   lands, or build several and deploy once. Record it; don't decide it per module.
 - **Update the map's status column as each module closes**, in the same commit as
   that module's acceptance. The map is the resume point after a lost context.
+- **The whole board is waves, not bricks** ([`waves.md`](waves.md)). When the request
+  is every open item rather than one platform, stages 0–2 still run once, the map
+  becomes the canvas, and the loop runs **one wave at a time**. A wave may hold several
+  bricks or nodes, provided they close together in one pass.
 - **Loop discipline:** a module re-entering the same stage a third time trips the
   loop guard ([`loop-guard.md`](loop-guard.md)) — stop, name the oscillation, and
   fix the layer that owns it instead of iterating.

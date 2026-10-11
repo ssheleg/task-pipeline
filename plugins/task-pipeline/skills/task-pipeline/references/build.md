@@ -610,9 +610,9 @@ merge.
 
 If it returns findings, dispatch **ONE** fix subagent with the complete list — not
 one fixer per finding; per-finding fixers each rebuild context and re-run suites.
-Then exactly **one** scoped re-review of the fix wave. Adjudicate residuals as in
+Then exactly **one** scoped re-review of the fix round. Adjudicate residuals as in
 the breaker: park with rulings, or stop on load-bearing ones. There is no second
-fix wave.
+fix round.
 
 ## 6. Integrate, then finish
 

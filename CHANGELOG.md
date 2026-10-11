@@ -1,3 +1,69 @@
+## v1.92.0 — wave mode: the whole board, closed in its final form; the grill asks one batch
+
+The operator's standard approach, decided on 2026-10-11 and codified here: when the request
+is not one change but **the whole board** — every open item plus the new requests — gather
+it all first, close every question the sources can close, ask what remains **once, as one
+batch, at the end of planning**, lay the target state over the current logic on one canvas,
+plan from the post-integration target, and cut the work into waves that each close in one
+pass, with a verification, finishing, fixing and documentation pass after every wave. The
+run takes the next wave without asking, says once when the board is empty, and leaves every
+sign-in, consent, payment, message to a person and outward act to a human. The rule under
+all of it: **build the system in its final form, never through intermediate states.**
+
+- **`references/waves.md`, invoked as `/task-pipeline waves`** — a third mode beside `setup`
+  and `checkup`, and a program mode of the existing stages, not a parallel cycle: stages 0–4
+  once for the whole board, 5–8 per wave, 9–10 to close the release. Wave 0 is the survey
+  (with `project-audit` as a read-only sidecar for whole-project scope) and **one
+  machine-readable inventory**, every item by id with `id`, `source`, `status`, `area`,
+  `node`, `wave`, `release`, verified against the code — stale rows closed with their
+  receipt, duplicates clustered — and assigned to nodes and waves by a committed,
+  deterministic script. The **canvas** extends the module map: as-is → to-be per module and
+  contract, the integration seams, REQ → module → wave, and what the new version deletes.
+  No wave builds a shape a later wave undoes; a stub only at a declared contract with its
+  removal named. Wave 1 is the walking skeleton, and each wave names its exit criteria
+  before it starts. The close pass after each wave certifies, re-measures `audit.md`'s
+  exit, runs **one fix round** under the loop guard's caps, documents through the Doc Loop
+  scoped to the wave, marks the canvas, re-reads the goal, and re-cuts what is left. A board
+  bigger than one release becomes a program, carried on the canvas by node, never dropped.
+  The name is not "dynamic": that word is `run.loop.mode: dynamic`'s.
+- **The grill's default changed — a decision by the operator, 2026-10-11.** It was *one
+  question per turn, never bundle*. It is now: close from the sources first, then ONE batch
+  of the material unknowns, ordered by dependency, each with a recommended answer and what
+  each answer changes; one question at a time only where answers depend on each other
+  (then depth-first) or when the operator asks for it. The reason is the operator's time: a
+  question asked alone costs a human round and a batch costs one, and
+  `prioritisation.md` → *5. Where the human goes* already said so for the rest of the run.
+  Mirrored in `grill.md`, `stages.md` (stages 0 and 2), `brainstorm.md`, the command, the
+  Cursor rule, `HOW-IT-WORKS.md`, the README, `pipeline.example.json`, this repository's
+  `pipeline.json`, and eval TRIG-01; TRIG-11 is the wave-mode trigger in Russian.
+- **`continuity.md`: a block or an ambiguity stops its node, not the run.** The node is
+  parked `needs-operator` with the question written into it, the run continues on what it
+  does not block, and stops only when the whole frontier is blocked. An empty board is said
+  once. A goal re-read that moves the queue is a committed `revisions` entry.
+- **`planning.md`: a wave re-cut keeps the static-graph decision** — every move is a
+  `revisions` entry plus a canvas edit, written before the next pass begins.
+  **`decomposition.md`**: the whole board runs one wave at a time, and a wave may hold several
+  bricks. **`build.md`**: "fix wave" is now "fix round", so *wave* means one thing.
+  **`project-audit`**: its rows and sidecar are wave mode's wave-0 input.
+- **The work graph carries the wave.** `graph.schema.json` gains `nodes[].wave` (an integer
+  from 1) and the `wave` revision verb. `graph.py validate` refuses an edge from a later
+  wave's node into an earlier wave's node; `graph.py next --wave N` prints that wave's
+  frontier only, exiting `3` when the wave is done; `graph.py wave N-007 --to 3 --why …`
+  moves a node, writes the revision, and refuses a move that breaks the order, a `done`
+  node, or no reason. `test/graph_test.py` 158 → **166** cases.
+- **The description names the mode** and paid for it: `'waves' / 'волнами' closes the whole
+  board`, while the stage list reads *through gated stages: …* instead of *… with explicit
+  gates*, `docs study` reads `docs`, and `docs/wiki sync` reads `docs/wiki`. 901 → 909 of
+  1024 chars — inside the umbrella's 60-character reserve below the 970 working limit,
+  which a longer description would have broken. The `SKILL.md` body is 4736 tokens
+  (cl100k), one under where it was: the new sentence in *How to run* displaced a restated
+  kernel clause and the compiler sentence's tail.
+
+Guards: 430 → **433**. The three new negatives live in `test/plant_wave.py` (the workflow
+sits near GitHub's 512 000-byte limit) and disarm the order check, the `--wave` filter and
+the re-cut's revision in turn; each was watched turning `test/graph_test.py` red before the
+step was written.
+
 ## v1.91.2 — v1.91.1's payload, released with its no-stamp declaration
 
 `release.yml` refused the `v1.91.1` tag's own tree: the release carried no run stamp and was

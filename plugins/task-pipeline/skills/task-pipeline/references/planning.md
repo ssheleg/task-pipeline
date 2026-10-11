@@ -112,6 +112,14 @@ which grows but never reorders a stage. Discovery that lands in a committed
 artifact is not a dynamic graph; discovery that changes what runs next, silently,
 is.
 
+**Wave mode's re-cut is the same kind of discovery** ([`waves.md`](waves.md)). After
+each wave the remaining waves are re-cut from the re-measured inventory, and every move
+lands twice in committed form: a `revisions` entry in the work graph (`graph.py wave`,
+which refuses a move that breaks the wave order) and the canvas edit that says why. The
+stage list does not change and no stage is invented; what changes is which nodes the
+next pass of stages 5–8 takes, and that is written down before the pass begins. So the
+static-graph decision holds.
+
 ## Task right-sizing
 
 A task is the smallest unit that carries its own test cycle and is worth a fresh

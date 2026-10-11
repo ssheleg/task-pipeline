@@ -71,6 +71,7 @@ a row pointing outside the bundle is the defect this file exists to catch.
 | What a stage reads, and which host files bind it | `references/artifacts.md` |
 | The design conversation, its hard gate, UI detection, user paths | `references/brainstorm.md` |
 | Cutting a platform into modules, brick criteria, build order | `references/decomposition.md` |
+| **Wave mode** — the whole board: the inventory, the canvas, the one question batch, the wave cut and the close pass | `references/waves.md` |
 | What a spec must lock, the UX-track order, the module dossier | `references/spec.md` |
 | The zero-context plan format, parallel groups, set equality | `references/planning.md` |
 | The work graph: its fields, the verbs and their exit codes, and the three invariants a schema cannot state | `references/work-graph.md`, `scripts/graph.py`, `graph.schema.json` |

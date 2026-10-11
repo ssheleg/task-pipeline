@@ -166,9 +166,10 @@ never that the work was skipped quietly.
   ([`progress.md`](progress.md)), and a skip nobody can see is indistinguishable from a
   stage that was never entered.
 - **How it runs: [`grill.md`](grill.md)** — the full doctrine, built into this
-  skill (nothing to install). In short: one question per turn, a recommended
-  answer with each, explore the codebase before asking, depth-first through the
-  decision tree, contradictions reconciled on the spot; **every answer that touches
+  skill (nothing to install). In short: close what the sources can, then ONE batch
+  of the material unknowns, ordered by dependency, a recommended answer with each —
+  one at a time only where answers depend on each other or the operator asks;
+  contradictions reconciled on the spot; **every answer that touches
   a harvested source is checked against it** — the operator outranks any document,
   but only out loud, and the losing side is logged for the stage-9 doc update; plus
   **domain awareness**
@@ -267,9 +268,9 @@ never that the work was skipped quietly.
 - **Freedom: high** — many designs are valid — this is the open field, and the only fixed thing is the gate ([`gates.md`](gates.md) → *Axis C*).
 - **How it runs: [`brainstorm.md`](brainstorm.md)** — built into this skill. Read
   the brief first (stage 0 already answered scope/constraints/done-criteria), then
-  explore the codebase, scope-check for decomposition, one question at a time, 2–3
-  approaches with a recommendation, design presented in sections and approved
-  section by section. **Hard gate:** no code, no scaffolding, no implementation
+  explore the codebase, scope-check for decomposition, the open questions in one
+  batch, 2–3 approaches with a recommendation, design presented in sections and
+  approved section by section. **Hard gate:** no code, no scaffolding, no implementation
   skill before the operator approves the design — including on "obviously simple"
   tasks.
 - **UI detection (mandatory check):** decide whether the task touches any
@@ -859,6 +860,9 @@ module N → 3 spec (dossier) → 4 plan → 5 build → 6 tests → 7 lint+depl
 - **Program done** when every row is `done` or `deferred` with an agreed home, the
   cross-module contracts are covered by tests that cross the seam, and a final
   acceptance covers the platform's whole REQ table — not module by module.
+- **The whole board, rather than one platform, is wave mode**
+  ([`waves.md`](waves.md)): stages 0–4 once over every open item, 5–8 per wave with a
+  close pass after each, 9–10 to close the release.
 
 ## Cross-cutting — the Doc Loop
 

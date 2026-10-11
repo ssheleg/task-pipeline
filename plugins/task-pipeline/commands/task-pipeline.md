@@ -1,6 +1,6 @@
 ---
-description: "Run a task through task-pipeline's gated stages (intake grill → docs → brainstorm → spec → plan → build → tests → deploy → post-deploy → docs/wiki → acceptance). Also: `setup` — audit the docs you already have; `checkup` — what has shipped unverified, with no task running."
-argument-hint: "<one-line task> | setup | checkup"
+description: "Run a task through task-pipeline's gated stages (intake grill → docs → brainstorm → spec → plan → build → tests → deploy → post-deploy → docs/wiki → acceptance). Also: `waves` — close the whole board in waves; `setup` — audit the docs you already have; `checkup` — what has shipped unverified, with no task running."
+argument-hint: "<one-line task> | waves | setup | checkup"
 ---
 Run the task below through `task-pipeline`'s gated stages. **Every stage's doctrine
 ships inside the skill** — no companion plugin is required for any of it. The
@@ -8,9 +8,10 @@ reference files are indexed in `SKILL.md`; this page is the run order, not the i
 
 Task: $ARGUMENTS
 
-> **Two other modes.** `setup` audits the documentation this project already has;
-> `checkup` reports what has shipped without a person confirming it, with no task in
-> flight. Both are at the bottom of this page.
+> **Three other modes.** `waves` takes the whole board instead of one task;
+> `setup` audits the documentation this project already has; `checkup` reports what
+> has shipped without a person confirming it, with no task in flight. All three are at
+> the bottom of this page.
 
 **Idempotent entry — inspect state first, never restart blindly.** If a pipeline
 TaskList from a previous run exists for this task, **resume** from the first incomplete
@@ -59,9 +60,10 @@ Pull what the project already knows about *this task*:
 
 Write the **source ledger** into the brief: a row per source, or an explicit *none found*.
 
-**Then the grill, and it is mandatory** (`references/grill.md`). One question per turn,
-each with a recommended answer, exploring the codebase before asking, until every
-decision branch is resolved.
+**Then the grill, and it is mandatory** (`references/grill.md`). Close what the sources
+can, then ask the material unknowns in ONE batch, ordered by dependency, each with a
+recommended answer — one at a time only where answers depend on each other or the
+operator asks — until every decision branch is resolved.
 
 - **Validate every answer against the harvested sources.** The operator outranks any
   document — but only out loud, and a doc the run proves stale is logged for stage 9.
@@ -187,6 +189,19 @@ unresolved count, and the code graph's staleness where one exists.
 Where you ask it to file what it found, it appends board rows whose `Source` names the
 checkup and its date — printing what it would add first, never silently.
 Doctrine: `references/exposure.md`.
+
+## `/task-pipeline waves`
+
+**The whole board, closed in its final form.** Every open item — board, ledgers, plan
+rows, unverified rows, uncovered scenarios, other products' asks — plus the new requests,
+in one machine-readable inventory verified against the code. Questions are closed from
+the sources; what remains goes to the operator once, as one batch, at the end of
+planning. A committed canvas lays the target state over the current logic, and the work
+is cut into waves that each close in one pass. Stages 0–4 run once, 5–8 per wave with a
+close pass after each (verify, one fix round, docs, re-measure, re-cut), 9–10 to close.
+It takes the next wave without asking, says once when the board is empty, and leaves
+every sign-in, consent, payment and outward act to a person.
+Doctrine: `references/waves.md`.
 
 ## `/task-pipeline setup`
 

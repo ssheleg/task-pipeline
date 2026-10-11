@@ -88,7 +88,7 @@ TERMINAL = {"done", "parked"}
 NO_GRAPH = {"producer", "doctrine"}
 # One place, and the schema enumerates the same three. Two homes for this set is
 # what let `close` write a verb the format forbade.
-REVISION_VERBS = {"add", "park", "close", "invalidate", "waive"}
+REVISION_VERBS = {"add", "park", "close", "invalidate", "waive", "wave"}
 # Parking a node PROMOTES its dependents: `parked` is terminal, so anything
 # blocked on it becomes runnable even though the payload it waited on never
 # arrived. That is deliberate — `can_continue_around` in the verdict is the
@@ -276,6 +276,13 @@ def violations(graph):
                        f"{', '.join(SURFACE_CLASSES)}. A class nobody recognises requires no "
                        "visual reading, so a typo here would drop the tier that reads the pixels")
 
+        # Wave mode (`references/waves.md`). `True` is an int in Python, and a wave of
+        # `true` is a typo the ordering check below would read as wave 1.
+        if "wave" in n and not _is_wave(n["wave"]):
+            out.append(f"{nid}: wave is {n['wave']!r} — it must be an integer from 1. A wave "
+                       "nobody can order is a node no `next --wave` ever prints, and the "
+                       "order check below cannot see it")
+
         if n.get("status") == "done":
             ev = n.get("evidence")
             if not isinstance(ev, list) or not [e for e in ev
@@ -321,6 +328,17 @@ def violations(graph):
                            "obeys and the payload that justifies it are separate fields, "
                            "and a dependency handing over nothing is the one this check "
                            "exists to refuse")
+
+    # An earlier wave may not wait on a later one: a wave holds only what closes in one
+    # pass, and a node whose producer is scheduled after it cannot close in its own.
+    wave_of = {n.get("id"): n.get("wave") for n in nodes if _is_wave(n.get("wave"))}
+    for e in graph.get("edges") or []:
+        src, dst = e.get("from"), e.get("to")
+        if src in wave_of and dst in wave_of and wave_of[src] > wave_of[dst]:
+            out.append(f"edge {src}→{dst}: {src} is in wave {wave_of[src]} and {dst} in "
+                       f"wave {wave_of[dst]} — an earlier wave would wait on a later one, "
+                       "so it cannot close in its own pass (references/waves.md). Move "
+                       f"{dst} to wave {wave_of[src]} or later, or {src} earlier")
 
     for i, r in enumerate(graph.get("revisions") or []):
         if not isinstance(r, dict):
@@ -603,6 +621,11 @@ TIERS = ("unit", "seam", "product")
 VISUAL_TIER = "visual"
 ALL_TIERS = TIERS + (VISUAL_TIER,)
 SURFACE_CLASSES = ("flagship", "product", "internal", "ad")
+
+
+def _is_wave(w):
+    """A wave is an integer from 1 — and never a bool, which Python counts as an int."""
+    return isinstance(w, int) and not isinstance(w, bool) and w >= 1
 VISUAL_REQUIRED = ("flagship", "product")
 TIER_KEYS = ("node", "tier", "verdict", "scope", "confirms", "findings",
              "evidence", "not_examined")
@@ -746,13 +769,24 @@ def cmd_next(graph, args):
     if violations(graph):
         die("graph does not validate — run `validate` first", 1)
     nodes = graph.get("nodes") or []
+    wave = getattr(args, "wave", None)
+    if wave is not None:
+        # One wave's frontier, and its own endings: `3` is *this wave is done*, which is
+        # the close pass's cue, not the release's (references/waves.md).
+        if not _is_wave(wave):
+            die("--wave %r is not a wave — waves are integers from 1" % wave, 2)
+        nodes = [n for n in nodes if n.get("wave") == wave]
+        if not nodes:
+            die("no node is in wave %d — nothing to walk, and an empty wave is a wave plan "
+                "and a graph that disagree" % wave)
     if nodes and all(n.get("status") in TERMINAL for n in nodes):
         return 3
-    ready = frontier(graph)
+    in_scope = {n.get("id") for n in nodes}
+    ready = [n for n in frontier(graph) if n.get("id") in in_scope]
     # A consumer whose producer is PARKED is not runnable and never will be by
     # itself (FIX-PF-04.01) — say so BEFORE the empty-frontier exit, or the one
     # moment the operator most needs the reason is the one moment it is silent.
-    _by_id = {n.get("id"): n for n in nodes}
+    _by_id = {n.get("id"): n for n in graph.get("nodes") or []}
     for n in nodes:
         if n.get("status") in TERMINAL or n.get("status") == "running":
             continue
@@ -1123,6 +1157,46 @@ def cmd_park(graph, args):
     return 0
 
 
+def cmd_wave(graph, args):
+    """Move one node to another wave, carrying the reason — wave mode's re-cut.
+
+    The re-cut after every wave is a plan revision, and a revision nobody recorded is
+    the dynamic graph `references/planning.md` refuses. So the move is a verb: it
+    writes the `revisions` entry, and it refuses a move that would leave an earlier
+    wave waiting on a later one (`references/waves.md`).
+    """
+    guard(graph, args.graph)
+    why = (args.why or "").strip()
+    if not why:
+        die("`wave` needs a --why with something in it: a re-cut nobody gave a reason for "
+            "is the quiet edit the revision log exists to refuse — nothing was written")
+    if any(c in why for c in "\n\r"):
+        die("--why contains a line break — nothing was written")
+    if not _is_wave(args.to):
+        die("--to %r is not a wave — waves are integers from 1. Nothing was written"
+            % args.to)
+    node = next((n for n in graph.get("nodes") or [] if n.get("id") == args.node), None)
+    if node is None:
+        die("no node %s in this graph — nothing was written" % args.node)
+    if node.get("status") == "done":
+        die("%s is done, in wave %s — moving it would rewrite which pass closed it. "
+            "Nothing was written" % (args.node, node.get("wave")))
+    if node.get("wave") == args.to:
+        die("%s is already in wave %d — nothing was written" % (args.node, args.to))
+
+    before = node.get("wave")
+    node["wave"] = args.to
+    revise(graph, "wave", args.node, why)
+    bad = violations(graph)
+    if bad:
+        die("moving %s to wave %d would break the graph — nothing was written:\n  %s"
+            % (args.node, args.to, "\n  ".join(bad)))
+    save(args.graph, graph)
+    print("%s: wave %s → %d: %s" % (args.node, before if before is not None else "none",
+                                     args.to, why))
+    return 0
+
+
 def next_id(known):
     """The next id, from the MAXIMUM rather than from the count.
 
@@ -1359,7 +1433,7 @@ def cmd_producer(graph, args):
 def cmd_doctrine(graph, args):
     """Which doctrine this run actually read — B-061.
 
-    The bundle is 39 reference files. A run reads some subset and nothing recorded which,
+    The bundle is 40 reference files. A run reads some subset and nothing recorded which,
     so **a skipped file and a read one were indistinguishable** — the class every guard in
     this repository exists to catch, left standing over the doctrine itself.
 
@@ -1825,6 +1899,7 @@ VERBS = {
     "coverage": (cmd_coverage, "every requirement and the nodes serving it; exits 1 on a gap"),
     "add": (cmd_add, "add a node mid-run"),
     "park": (cmd_park, "park a node, carrying the reason"),
+    "wave": (cmd_wave, "move a node to another wave, carrying the reason"),
     "certify": (cmd_certify, "require three independent tier reports (four on a "
                              "flagship or product surface), then emit the verdict "
                              "`close` consumes"),
@@ -1905,6 +1980,15 @@ def main(argv=None):
     made["waive"].add_argument("--by", required=True,
                                help="the identity that authorized the exception")
 
+    made["next"].add_argument("--wave", type=int, default=None,
+                              help="print only this wave's frontier; exit 3 when the wave "
+                                   "is done (references/waves.md)")
+    p_wave = made["wave"]
+    p_wave.add_argument("node")
+    p_wave.add_argument("--to", type=int, required=True, help="the wave to move it to")
+    p_wave.add_argument("--why", required=True,
+                        help="why the re-cut moved it — it enters the revision log")
+
     p_park = made["park"]
     p_park.add_argument("node")
     # `required=True` makes the MISSING flag a usage error (exit 2). The empty and
@@ -1916,7 +2000,7 @@ def main(argv=None):
     verbs = {k: v[0] for k, v in VERBS.items()}
     if args.verb in NO_GRAPH:
         return verbs[args.verb](None, args)
-    if args.verb in ("add", "park", "close", "certify", "invalidate", "waive"):
+    if args.verb in ("add", "park", "wave", "close", "certify", "invalidate", "waive"):
         # The READ happens inside the lock too. Loading first and locking second is the
         # same lost update with an extra step: the stale copy is already in memory.
         with held(args.graph):

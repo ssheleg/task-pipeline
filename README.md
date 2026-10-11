@@ -214,9 +214,11 @@ an external provider.
 
 ### The intake grill (stage 0) — mandatory
 
-Before any technical work, task-pipeline interviews you relentlessly — one question
-per turn, each with a recommended answer, exploring the codebase before asking —
-until every decision branch is resolved and locked into a **task brief**. There is
+Before any technical work, task-pipeline closes every question the codebase and the
+project's records can answer, then asks you the rest in **one batch**, ordered by
+dependency, each with a recommended answer — one at a time only where the answers
+depend on each other or you ask for it — until every decision branch is resolved and
+locked into a **task brief**. There is
 no "clear enough task" exemption: no stage-1 work starts without a committed,
 confirmed brief.
 
@@ -444,6 +446,29 @@ stopped. Each module's spec is a full dossier: architecture, entities and
 ownership, contracts in and out with their failure behavior, business rules, edge
 and failure cases, UI/Figma chain, limits, open questions.
 
+### Wave mode — the whole board, closed in its final form
+
+`/task-pipeline waves` takes every open item a project carries — the board, the
+carry-over ledgers, plan rows, unverified rows, uncovered scenarios, other products'
+asks — plus your new requests, and closes them **in the system's final form rather
+than through intermediate states**
+([`waves.md`](plugins/task-pipeline/skills/task-pipeline/references/waves.md)). It is
+a program mode of the same stages: 0–4 once for the whole board, 5–8 once per wave,
+9–10 to close.
+
+Wave 0 is the survey: one machine-readable inventory of every item by id, each verified
+against the code — stale rows closed with their receipt, duplicates clustered. Questions
+are closed from the sources first; what is genuinely yours (access, consent, money,
+direction, an outward act) reaches you **once, as one batch, at the end of planning**,
+each with a recommendation. A committed **canvas** lays the target state over the
+current logic — as-is → to-be per module and contract, the integration seams, REQ →
+module → wave, and what the new version deletes. The work is then cut into waves that
+each close in one pass, the walking skeleton first, each with its exit criteria named
+before it starts, and no wave builds a shape a later wave undoes. After every wave a
+close pass verifies, runs one fix round, updates the docs, re-measures the inventory
+and re-cuts what is left. The run takes the next wave without asking; a board too big
+for one release becomes a program, carried on the canvas, never dropped.
+
 ### Loop guard — churn is detected, not endured
 
 Any repeating pass can start undoing the previous one: two shapes alternating, the
@@ -587,7 +612,7 @@ must say so.
 ### Held to Anthropic's own Skill authoring guidance
 
 Audited against the four Agent Skills pages. Most of it already held — `name`
-13/64 chars, `description` 901/1024 chars, `SKILL.md` 278/500 lines, all 39 references
+13/64 chars, `description` 909/1024 chars, `SKILL.md` 277/500 lines, all 40 references
 linked **directly** from `SKILL.md`, and the bundle far under the 30 MB ceiling. What
 did not, now does:
 
@@ -942,6 +967,7 @@ recommendation, so you arm the whole run in one exchange. Detail:
 | [`references/model-tiering.md`](plugins/task-pipeline/skills/task-pipeline/references/model-tiering.md) | model policy, the `/model` reminder, overrides |
 | [`templates/`](plugins/task-pipeline/skills/task-pipeline/templates/README.md) | brief, carry-over ledger, `CONTEXT.md` and ADR skeletons, the doc map, both registers, the retro and its archive, the seeded `docgate.sh` and `hygiene.sh`, a worked hook |
 | [`references/adoption.md`](plugins/task-pipeline/skills/task-pipeline/references/adoption.md) | the first run in a project: greenfield seeding, and the brownfield walkthrough |
+| [`references/waves.md`](plugins/task-pipeline/skills/task-pipeline/references/waves.md) | wave mode: the whole board as one inventory, one canvas of the target state, one question batch, then waves that each close in one pass |
 | [`references/setup.md`](plugins/task-pipeline/skills/task-pipeline/references/setup.md) | the entry audit: seven passes over the docs a project already has, offered once, output as a fix plan |
 | [`references/portability.md`](plugins/task-pipeline/skills/task-pipeline/references/portability.md) | the manifest of workflow decisions and their homes in the bundle, and the boundary against a project's own answers |
 | [`references/learned.md`](plugins/task-pipeline/skills/task-pipeline/references/learned.md) | rules earned by failure on a real multi-repository build, each with its incident, its check and its exit criterion — the table is the count, and it grows |

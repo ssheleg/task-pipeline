@@ -27,6 +27,7 @@ UX track on a user-facing task.
 | 0 Intake grill | `references/grill.md` |
 | 2 Brainstorm | `references/brainstorm.md` |
 | 2 Decompose (platforms only) | `references/decomposition.md` |
+| 0–10 · **wave mode** — the whole board: 0–4 once, 5–8 per wave, 9–10 to close | `references/waves.md` |
 | 3 Spec | `references/spec.md` |
 | 4 Plan | `references/planning.md` |
 | the queue the loop walks | `references/work-graph.md` |
