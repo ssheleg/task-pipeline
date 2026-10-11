@@ -46,7 +46,9 @@ It is written in three parts, and the middle one was learned the hard way:
   the pipeline entirely.
 
 Two modes need no task at all. `checkup` reports what has shipped without anyone
-confirming it. `setup` audits the documentation a project already has.
+confirming it. `setup` audits the documentation a project already has. A third,
+`waves`, takes the whole board as the task: one inventory, one canvas of the target
+state, one batch of questions, then waves that each close in one pass.
 
 **Honest limit:** this measures the *description's* discriminating power, not the
 host's selection machinery. Three measured runs scored 7/10, 9/10 and 8/10 — and
@@ -92,8 +94,10 @@ An absent source that is never named looks identical to a source that was read.
 
 ### Then the grill, and it is mandatory
 
-One question per turn, each with a recommended answer, exploring the codebase
-before asking, until every decision branch is resolved.
+Close what the sources can answer, then ask the material unknowns in one batch,
+ordered by dependency, each with a recommended answer — one at a time only where the
+answers depend on each other or the operator asks — until every decision branch is
+resolved.
 
 - **Every answer is validated against the harvested sources.** The operator
   outranks any document — but only *out loud*, and a document the run proves stale

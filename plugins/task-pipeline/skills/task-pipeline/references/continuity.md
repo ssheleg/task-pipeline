@@ -47,12 +47,20 @@ This spans the whole run, not one stage:
 
 - the plan's tasks at stage 5;
 - the boundary between stages whose gate is `auto`;
-- the per-module program loop when the brief was a platform;
+- the per-module program loop when the brief was a platform, and the waves when
+  the request was the whole board ([`waves.md`](waves.md));
 - the acceptance → retro tail, which is where runs most often stall one step from
   finished.
 
 It stops for exactly four things: a `manual` gate, a block it cannot resolve, a
 genuine ambiguity the brief does not answer, and completion.
+
+**A block or an ambiguity stops its node, not the run.** The node is parked with the
+question as its reason, marked `needs-operator` and answerable without context
+([`prioritisation.md`](prioritisation.md) → *5. Where the human goes*), and the run
+continues on every node it does not block. The run itself stops only when the whole
+frontier is blocked — `graph.py next` exits `4` — and the questions are then asked
+together. **When the board is empty, say so once**, and do not invent work to fill it.
 
 **This extends [`build.md`](build.md); it does not replace it.** That file's
 *Continuous execution* rule governs the inside of a stage-5 execution — do not
@@ -122,7 +130,9 @@ So at the bottom of an iteration, beside the re-derived `prio`:
 2. state whether the next item still serves it;
 3. if it does not, **re-order or re-scope the queue and say what moved and why.** A row
    that stops serving the goal leaves for the board with its reason
-   ([`backlog.md`](backlog.md)), it does not get worked because it was next.
+   ([`backlog.md`](backlog.md)), it does not get worked because it was next. On a work
+   graph the move is a committed `revisions` entry — `park`, `add`, or `wave` between
+   waves — never an untracked edit.
 
 A queue re-derived only by `age` and `sev` is a queue that is honest about priority and
 silent about purpose. Both numbers can be right while the run is finishing something the

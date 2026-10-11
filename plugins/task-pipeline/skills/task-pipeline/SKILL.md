@@ -1,6 +1,6 @@
 ---
 name: task-pipeline
-description: "Use when work changes the repository — feature, fix, bug, refactor, migration, integration, rewrite, adoption or hardening; фича, фикс, баг, рефактор, миграция, интеграция, доработать, починить, внедрить, перевести — or when the output is a finding that lands in it: audit/аудит, bug hunt/проверь ошибки, production check/проверь прод, PR review/ревью PR — or on 'run this through the pipeline' / 'прогони по конвейеру', 'the full cycle' / 'полный цикл', /task-pipeline. Runs a substantial task through an intake grill, docs study, brainstorm, spec, plan, build, tests, deploy, post-deploy, docs/wiki sync and acceptance with explicit gates. 'checkup' / 'чекап' reports unconfirmed releases; 'setup' audits existing docs. Not for: answering a question, explaining code, a typo or a one-line edit, a mechanical rename, reconnaissance that lands nothing — say 'no pipeline' / 'без пайплайна' to opt out."
+description: "Use when work changes the repository — feature, fix, bug, refactor, migration, integration, rewrite, adoption or hardening; фича, фикс, баг, рефактор, миграция, интеграция, доработать, починить, внедрить, перевести — or when the output is a finding that lands in it: audit/аудит, bug hunt/проверь ошибки, production check/проверь прод, PR review/ревью PR — or on 'run this through the pipeline' / 'прогони по конвейеру', 'the full cycle' / 'полный цикл', /task-pipeline. Runs a substantial task through gated stages: intake grill, docs, brainstorm, spec, plan, build, tests, deploy, post-deploy, docs/wiki, acceptance. 'waves' / 'волнами' closes the whole board; 'checkup' / 'чекап' lists unconfirmed releases; 'setup' audits docs. Not for: answering a question, explaining code, a typo, a one-line edit, a mechanical rename, reconnaissance that lands nothing — say 'no pipeline' / 'без пайплайна' to opt out."
 license: MIT
 compatibility: "Doctrine runs on any agent. The bundled scripts need python3; the run needs git. Missing either degrades, never blocks — the graph verbs and seeded gates go unused, and the run says so."
 ---
@@ -17,8 +17,8 @@ GAP CHECK before it is an interview: the brief is built from the request, the
 files and the harvest first, and a question is asked only for a **material
 unknown** the sources cannot answer. A complete brief yields ZERO intake
 questions; what the request or the project already decided is recorded, never
-re-negotiated. The interview, where gaps remain, is one-question-at-a-time and
-sweeps stages 1→10 for anything that would stop the run later — then locks the
+re-negotiated. The interview, where gaps remain, is ONE batch ordered by dependency
+and sweeps stages 1→10 for anything that would stop the run later — then locks the
 answers into a brief. Autonomy is bought there or not at all; every MATERIAL
 question skipped at stage 0 comes back as an interruption at stage 6.
 
@@ -176,15 +176,16 @@ Three things the grill does beyond clarifying the request, each in full in
    stages and gates run** (FIX-TP-03.02): the numbers "1→10" name the DEFAULT
    profile, and a custom profile with three stages runs three — no hidden stage
    0, 7 or 10 is injected because the default profile has one. What a custom
-   profile does NOT escape is the KERNEL (03.01): scope, evidence, deps and
-   resume are owed by every stage of every profile, so dropping stages never
-   drops the evidence gate. And an unknown MANDATORY capability blocks the
+   profile does NOT escape is the KERNEL (03.01): dropping stages never drops
+   the evidence gate. And an unknown MANDATORY capability blocks the
    compile — a profile whose `must_understand` names a capability this runtime
    does not have is refused, never run with the capability silently absent.
    **Is the brief a platform rather than a change?** Then stage 2 also cuts it into
    modules (`references/decomposition.md`) and stages 3→10 run **per module** in
    build order, one brick at a time — stages 0–2 run once, and the module map's
    status column is the resume point (`references/stages.md` → *The program loop*).
+   **The whole board?** `/task-pipeline waves` (`references/waves.md`): stages
+   0–4 once, 5–8 per wave, 9–10 to close.
 4. Do **not** advance until the stage **gate** passes (`references/stages.md`).
    Honor the gate **type**: for `auto`, verify the gate's `check` yourself and
    stop/return on fail; for `judgment`, record the named judge's ruling as
@@ -272,7 +273,5 @@ substitute for, and a ResultEnvelope whose stale candidate (older revision, or
 a superseded fence) re-plans instead of landing as current
 (`scripts/packet.py validate-result`). The compiler's first stage maps an
 audit report onto parent tasks (`scripts/context_packets.py compile|verify`):
-ids derived from finding ids — never positional, so a shuffled report compiles
-byte-identically — evidence/limits/priority in their own fields separate from
-status, and any row it cannot map blocks the whole compile rather than being
-dropped silently.
+ids derived from finding ids, never positional; evidence, limits and priority
+kept apart from status; and any row it cannot map blocks the compile.

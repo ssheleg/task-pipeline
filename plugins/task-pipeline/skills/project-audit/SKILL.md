@@ -121,7 +121,8 @@ default is `Sev × Blast + age_bonus` ([`references/portable-method.md`](referen
 the local priority contract) — and the operator accepts them. Effort never ranks inside an
 audit: what a fix costs is the fixer's decision, not the finder's
 ([`references/portable-method.md`](references/portable-method.md)). An audit
-that edits while it reads cannot be re-run to check itself.
+that edits while it reads cannot be re-run to check itself. In `task-pipeline`'s wave
+mode these rows and the JSON sidecar are wave 0's input: they join its inventory by id.
 
 ## A finding keeps its axes apart, or it is a guess wearing a verdict
 

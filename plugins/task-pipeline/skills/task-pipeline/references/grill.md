@@ -63,16 +63,25 @@ not depend on it.
 
 Where material unknowns remain, interview the operator about THOSE until you
 reach a **shared understanding**. Walk down each unresolved branch of the
-decision tree, resolving dependencies between decisions one by one.
+decision tree, resolving dependencies between decisions in order.
 
-1. **One question per turn.** Never bundle. Wait for the answer before the next.
+1. **Close from the sources first, then ask ONE batch.** Every material unknown
+   the harvest, the code and the recorded decisions leave open goes into one
+   message, ordered by dependency, each with a recommended answer and what each
+   answer changes. **One question at a time only when the answers depend on each
+   other** — the next question cannot be written until this one is answered, and
+   then you go depth-first — **or when the operator asks for it.** Decided by the
+   operator on 2026-10-11: a question asked alone costs a human round, and a batch
+   costs one. [`prioritisation.md`](prioritisation.md) → *5. Where the human goes*
+   says the same about the rest of the run.
 2. **Recommend an answer with every question** (+ a one-line rationale). "What do
    you think?" is lazy — you have the codebase in front of you, they don't.
 3. **If the codebase can answer it, go read the codebase.** Spending the
    operator's turn on something `grep`/`Read`/context7 would have told you is the
    most common way to waste a grill.
-4. **Depth-first.** Finish a branch before opening another; ask prerequisite
-   decisions first, so later answers don't invalidate earlier ones.
+4. **Prerequisites first.** Order the batch so prerequisite decisions come before
+   the ones they shape; where an answer can invalidate a later question, ask the
+   prerequisite alone and go depth-first.
 5. **Reconcile contradictions immediately**, and chase dodges: "we'll decide
    later" → "what's the latest you can decide and still ship?"
 6. **Cover the autonomy sweep** (below). An unasked MATERIAL question is not

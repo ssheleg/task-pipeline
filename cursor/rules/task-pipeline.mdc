@@ -108,7 +108,9 @@ built, recommend it once and continue: `uv tool install graphifyy` →
 
 **Phase 2 — grill the user against that harvest**, then run the rest without
 mid-flight questions:
-1. One question per turn — never bundle.
+1. Close what the sources answer; ask the rest in ONE batch, ordered by
+   dependency. One at a time only when answers depend on each other or the user
+   asks.
 2. Give a recommended answer with every question (+ one-line rationale).
 3. Explore the codebase before asking — if a search/read answers it, do that.
 4. **Validate every answer against the harvest.** When what the user says
@@ -211,7 +213,14 @@ not authorize an outward, irreversible action — stage 7 stops and asks.
    first**, then topologically, no cycles (a cycle means the cut is wrong). Every REQ
    maps to exactly one module. Then stages 3→10 run **per module**, one brick at a
    time; stages 0–2 run once, and the map's status column is the resume point. Single
-   module → record "single module: <name>" and move on.
+   module → record "single module: <name>" and move on. **If the request is the whole
+   board** (wave mode, `waves`) — every open item plus the new requests — stages 0–4
+   run once over one machine-readable inventory verified against the code and a
+   committed canvas of the target state; the work is cut into waves that each close
+   in one pass (wave 1 the walking skeleton, exit criteria named first); stages 5–8
+   run per wave with a close pass after each — verify, one fix round, docs,
+   re-measure, re-cut — and 9–10 close the release. No wave builds a shape a later
+   wave undoes.
 3. **Spec** (manual) — write and commit the design; lock every shared contract
    (types, schemas, signatures, file layout) plus a **Global Constraints** block of
    exact values every later task inherits. Self-review it for placeholders,

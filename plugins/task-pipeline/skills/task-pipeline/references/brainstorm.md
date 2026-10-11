@@ -56,9 +56,12 @@ not a question to re-open from scratch.
    the platform's shape — the pieces, how they relate, what order they land in —
    not the details of one corner; those belong to each module's own stage-3
    dossier. Don't refine something that needs splitting first.
-3. **Questions one at a time.** Never bundle. Multiple choice where it fits, open
-   where it doesn't. Purpose, constraints, success criteria — anything the brief
-   left at design level.
+3. **Questions in one batch, after the sources.** What the brief, the code and the
+   recorded decisions cannot answer goes in one message, ordered by dependency, each
+   with a recommendation; one at a time only where an answer reshapes the next
+   question or the operator asks ([`grill.md`](grill.md)). Multiple choice where it
+   fits, open where it doesn't. Purpose, constraints, success criteria — anything the
+   brief left at design level.
 4. **Propose 2–3 approaches with trade-offs**, lead with your recommendation and
    the reason for it. **YAGNI ruthlessly** — strip anything the task doesn't need
    from every option before presenting.
