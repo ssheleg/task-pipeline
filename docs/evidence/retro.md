@@ -1477,6 +1477,14 @@ three quarters of the work on this run.
 
 ## Releases that carry no stamp — stated, not stamped
 
+**`v1.92.0` carries no stamp, declared before its tag.** It is a doctrine change the
+operator specified on 2026-10-11 — wave mode (`references/waves.md`), the grill's
+one-batch default, and three graph mechanics — implemented on `feat/wave-mode` as a
+bounded change, not a ten-stage run, so there is no stage-10 stamp to write. The
+declaration is in the tree the tag will point at. Its first real application, a plan
+over a 701-item board in another repository, is the evidence the mode is shaped right;
+whether it closes a board as planned is measured by that program, not by this release.
+
 **`v1.91.0` carries no stamp, declared before its tag.** It is a bounded family-round
 change: «баг» in the description (the word PR #102 proposed, redone on current `main`),
 the annotated-tag step in `release.yml`, and four file handles closed in

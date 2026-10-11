@@ -1,5 +1,16 @@
 # Verification — task-pipeline
 
+## Shipped state — v1.92.0 (2026-10-11; candidate, release pending)
+
+Wave mode, and the grill asks one batch instead of one question per turn.
+
+| REQ | What ships | How it was confirmed | Confirmed |
+|---|---|---|---|
+| FR-waves | `references/waves.md` and `/task-pipeline waves`, reachable from `SKILL.md`, the doctrine map, the command, the Cursor rule, the README and the portability manifest | `npm test` (reachability, the README map and the manifest are validator checks) | **observed** |
+| FR-grill-batch | the grill, brainstorm and every mirror state close-from-sources-then-one-batch, one at a time only for dependent answers or on request | the mirrors re-read after the edit; eval TRIG-01's expected behaviour rewritten | **observed** in the text; the behaviour is unscored until an eval run |
+| FR-wave-graph | `nodes[].wave`, the order check, `next --wave N`, the `wave` verb | `test/graph_test.py` 166 cases; three plants in `test/plant_wave.py`, each watched failing the suite | **observed** |
+| Gate | the full suite | `npm run test:all` locally exited 0 on 2026-10-11 (433 guards, 15 property checks); a first run died of a full disk and is not counted; the PR `validate` job | **observed** locally; CI on the PR |
+
 ## Shipped state — v1.91.0 (2026-10-10; candidate, release pending)
 
 The description says «баг»; a lightweight tag is refused before release.
@@ -153,7 +164,7 @@ behaviour change; every row is a reader-facing claim brought back to what is tru
 | REQ | What ships | How it was confirmed | Confirmed |
 |---|---|---|---|
 | CS-1 | The README's four exact conformance figures are derived and compared each run | `check_the_conformance_sentence_is_computed`; planting `999/500 lines` gives *states lines = 999 and the tree gives 262* | yes |
-| CS-2 | A reworded sentence fails loudly rather than passing quietly | deleting the `all 39 references` clause gives *no longer states references in a shape this check can read* — the shape that twice made a healthy guard report itself broken | yes |
+| CS-2 | A reworded sentence fails loudly rather than passing quietly | deleting the `all N references` clause gives *no longer states references in a shape this check can read* — the shape that twice made a healthy guard report itself broken | yes |
 | CS-3 | The size figure is a bound, not a value | it moved on four of the eight preceding commits (950 → 970 → 980 → 1128 KB); an exact figure would fire the check on nearly every edit | yes |
 | CS-4 | The line figure was wrong at birth, not merely stale | `git show 297a0cb:…/SKILL.md \| wc -l` → 339 against a stated 334 | yes |
 | CS-5 | The gate is green | `python3 test/validate.py` → `PASS: task-pipeline structure valid`; `npm test` rc=0, 0 `FAIL` lines | yes |
