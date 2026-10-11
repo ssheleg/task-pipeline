@@ -1,6 +1,6 @@
 # Verification — task-pipeline
 
-## Shipped state — v1.91.1 (2026-10-11; candidate, release pending)
+## Shipped state — v1.91.2 (2026-10-11; candidate — v1.91.1's payload, which its release check refused for a missing no-stamp declaration)
 
 The gates read the current run only; a broken python3 stops only releases.
 

@@ -1477,6 +1477,17 @@ three quarters of the work on this run.
 
 ## Releases that carry no stamp — stated, not stamped
 
+**`v1.91.2` carries no stamp, declared before its tag.** It is `v1.91.1`'s payload — the
+release and build gates read only the current run (B-151), and a broken python3 stops
+only tag/push/release/publish (B-152) — released with this declaration. Not a ten-stage
+run; the umbrella's family round (`FAMILY-ROUND-1010`) stamps the run in its own retro.
+`validate.py` runs on the merged commit with a local `v1.91.2` tag before that tag is
+pushed; `npm run test:all` runs in the PR's `validate` job and in `release.yml`.
+
+**`v1.91.1` carries no stamp, and its tag published nothing.** `release.yml` refused the
+tag's own tree because this section did not name it — the check working as written.
+The tag cannot be removed (the remote forbids it); `v1.91.2` ships the same payload.
+
 **`v1.91.0` carries no stamp, declared before its tag.** It is a bounded family-round
 change: «баг» in the description (the word PR #102 proposed, redone on current `main`),
 the annotated-tag step in `release.yml`, and four file handles closed in
