@@ -43,6 +43,20 @@ jobs:
           ref: ${{ steps.t.outputs.tag }}
           fetch-depth: 0
 
+      - name: The tag must be annotated (a lightweight tag hides the release)
+        run: |
+          set -eu
+          # `git describe` and `git submodule status` see annotated tags only; the
+          # 2026-10-09 wave cut four lightweight tags and the hub read each member
+          # as its previous release. Refuse here, before anything is published.
+          TAG="${{ steps.t.outputs.tag }}"
+          KIND=$(git cat-file -t "$TAG")
+          if [ "$KIND" != "tag" ]; then
+            echo "::error::$TAG is a $KIND, not an annotated tag object. Remedy: git tag -a $TAG -m '<release>' at the same commit."
+            exit 1
+          fi
+          echo "$TAG is annotated"
+
       - name: The tag must be reachable from the default branch
         env:
           GH_TOKEN: ${{ github.token }}

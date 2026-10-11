@@ -1,3 +1,27 @@
+## v1.91.0 — the description says «баг», and a lightweight tag is refused before release
+
+v1.90.0 added `bug` to the description so "fix this bug" routes here by name. The Russian
+word stayed out, so «почини баг в оплате» reached the pipeline only through the umbrella's
+prompt hook, never through the skill's own description. «баг» now stands beside «фикс».
+This is the one-word change of the unmerged PR #102, redone on current `main` because that
+branch carried a version that v1.90.1 has since taken. To pay for it, the trigger quoted as
+'full cycle, the full cycle' is now 'the full cycle': the umbrella routes on that phrase,
+and the shorter one is inside it. 908 → 901 of 1024 chars, 69 under the 970 working
+limit, where the umbrella counts a skill within 60 of that limit as crowding it.
+
+- **`release.yml` refuses a lightweight tag.** `git describe` and `git submodule status`
+  see annotated tags only. On 2026-10-09 four family members were cut with lightweight
+  tags, and the umbrella read each one as its previous release. A step right after the
+  tag checkout now runs `git cat-file -t` on the tag and stops with a remedy unless it is
+  a tag object. Nothing has been published by the time it runs. It is the same step the
+  umbrella's own `release.yml` has run since its B-93.
+- **`test/project_audit_test.py` closes what it opens.** Four reads left their file handle
+  to the garbage collector, and `python3 -W always` printed a `ResourceWarning` for each.
+  They now read inside `with`, and the same run prints none.
+
+Guards: 430 → **430**. The validator is unchanged. The new release step is a workflow
+check, and a lightweight tag planted in a scratch repository was watched failing it.
+
 ## v1.90.2 — release evidence survives squash integration
 
 The host-portability payload from v1.90.1 is unchanged. Its release stopped at the

@@ -282,7 +282,8 @@ class TestChannelDivergence(unittest.TestCase):
     def test_a_version_string_match_alone_never_satisfies_the_check(self):
         """`check_pins.py` was green through yesterday's defect because it
         compared the string. Comparing strings must not be reachable here."""
-        source = open(SCRIPT, encoding="utf-8").read()
+        with open(SCRIPT, encoding="utf-8") as fh:
+            source = fh.read()
         fn = _function_source(source, "compare_channels")
         self.assertNotIn("version ==", fn,
                          "compare_channels decided on a version string")
@@ -499,7 +500,8 @@ class TestBoardRows(unittest.TestCase):
         self.assertIn(r"\|", row, "an unescaped pipe shifts every later column")
 
     def test_no_new_severity_vocabulary_is_invented(self):
-        source = open(SCRIPT, encoding="utf-8").read()
+        with open(SCRIPT, encoding="utf-8") as fh:
+            source = fh.read()
         self.assertIn("blast", source)
         self.assertNotIn("SEVERITY_WEIGHTS", source,
                          "a second scale beside the board's formula")
@@ -525,7 +527,8 @@ class TestIdempotence(Fixtures):
             self.assertEqual(proc.returncode, 0, proc.stderr[-800:])
             page = os.path.join(tree, "docs/audit")
             newest = sorted(f for f in os.listdir(page) if f.endswith(".html"))[-1]
-            body = open(os.path.join(page, newest), encoding="utf-8").read()
+            with open(os.path.join(page, newest), encoding="utf-8") as fh:
+                body = fh.read()
             hashes.append(hashlib.sha256(
                 audit.normalise_for_compare(body).encode()).hexdigest())
         self.assertEqual(len(set(hashes)), 1,
@@ -609,7 +612,8 @@ class TestIdempotence(Fixtures):
                         "--offline"], capture_output=True, text=True)
         out = os.path.join(tree, "docs/audit")
         js = [n for n in os.listdir(out) if n.endswith(".json")][0]
-        payload = json.load(open(os.path.join(out, js), encoding="utf-8"))
+        with open(os.path.join(out, js), encoding="utf-8") as fh:
+            payload = json.load(fh)
         for key in ("schema", "generated_at", "root", "profile", "probes",
                     "findings", "counts", "ratchet"):
             self.assertIn(key, payload, f"sidecar is missing {key}")
