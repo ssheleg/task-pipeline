@@ -1,6 +1,15 @@
 # Verification — task-pipeline
 
-## Shipped state — v1.91.0 (2026-10-10; candidate, release pending)
+## Shipped state — v1.91.1 (2026-10-11; candidate, release pending)
+
+The gates read the current run only; a broken python3 stops only releases.
+
+| REQ | What ships | How it was confirmed | Confirmed |
+|---|---|---|---|
+| FIX-B151 | release and build gates read only the ledger after the last `Run:` header | `test/release_gate_test.py`: "a previous run's pass does not admit this run's tag", "a previous run's dev stage does not silence a new run" — both failed before the fix | **observed** |
+| FIX-B152 | with python3 failing, only tag/push/release/publish commands are refused | `test/release_gate_test.py`: "with python3 broken, …" (two cases) — failed before the fix | **observed** |
+
+## Shipped state — v1.91.0 (2026-10-10; released, npm 1.91.0)
 
 The description says «баг»; a lightweight tag is refused before release.
 

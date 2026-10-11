@@ -54,6 +54,12 @@ try:
 except Exception:
     raise SystemExit(0)
 
+# Only the CURRENT run speaks: everything after the last `Run:` header. A previous
+# run that entered dev in a reused, append-only ledger silenced this gate (B-151).
+_lines = text.splitlines()
+_starts = [i for i, l in enumerate(_lines) if l.strip().startswith("Run:")]
+text = "\n".join(_lines[_starts[-1]:] if _starts else _lines)
+
 stage_lines = [l.strip() for l in text.splitlines() if l.strip().startswith("stage:")]
 if not stage_lines:
     raise SystemExit(0)
