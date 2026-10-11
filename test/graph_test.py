@@ -2004,6 +2004,95 @@ def _():
     assert r.returncode != 0 and "surface_class" in (r.stdout + r.stderr), \
         r.stdout + r.stderr
 
+# --- wave mode: references/waves.md ----------------------------------------------
+
+
+def waved(nid, wave, **kw):
+    """A node carrying a wave."""
+    return dict(node(nid, **kw), wave=wave)
+
+
+@case("validate: a wave that is not an integer from 1 is refused — 0, a string, a bool")
+def _():
+    for bad in (0, -1, "1", True, 1.5):
+        code, out = run(g([waved("N-001", bad)]), "validate")
+        assert code == 1 and "wave is" in out, "wave %r passed: %s" % (bad, out)
+    code, out = run(g([waved("N-001", 1), waved("N-002", 2)]), "validate")
+    assert code == 0, "integer waves were refused: %s" % out
+
+
+@case("validate: an earlier wave that waits on a later wave's node is refused")
+def _():
+    code, out = run(g([waved("N-001", 2), waved("N-002", 1, blocked=["N-001"])]), "validate")
+    assert code == 1, "wave 1 waiting on wave 2 passed: %s" % out
+    assert "N-001" in out and "N-002" in out and "earlier wave" in out, out
+
+
+@case("validate: a later wave waiting on an earlier one, or on its own, is accepted")
+def _():
+    code, out = run(g([waved("N-001", 1), waved("N-002", 2, blocked=["N-001"]),
+                       waved("N-003", 2, blocked=["N-002"])]), "validate")
+    assert code == 0, "a well-ordered wave graph was refused: %s" % out
+
+
+@case("next --wave N prints that wave's frontier and nothing from the others")
+def _():
+    gr = g([waved("N-001", 1), waved("N-002", 2), waved("N-003", 2, blocked=["N-001"])])
+    code, out = run_out(gr, "next", "--wave", "2")
+    assert code == 0, out
+    rows = [r.split()[0] for r in out.splitlines() if r.strip()]
+    assert rows == ["N-002"], "wave 2's frontier was %r" % rows
+    code, out = run_out(gr, "next", "--wave", "1")
+    assert code == 0 and [r.split()[0] for r in out.splitlines() if r.strip()] == ["N-001"], out
+
+
+@case("next --wave N exits 3 when that wave is done and others are not")
+def _():
+    gr = g([waved("N-001", 1, status="done", evidence=["ran"]), waved("N-002", 2)])
+    code, out = run_out(gr, "next", "--wave", "1")
+    assert code == 3, "a finished wave exited %d: %s" % (code, out)
+    code, _ = run_out(gr, "next")
+    assert code == 0, "the whole graph read as done while wave 2 is open"
+
+
+@case("next --wave N exits 4 when nothing in it is runnable, and 1 on an empty wave")
+def _():
+    gr = g([waved("N-001", 1), waved("N-002", 2, blocked=["N-001"])])
+    code, out = run_out(gr, "next", "--wave", "2")
+    assert code == 4, "a wave blocked on an earlier one exited %d: %s" % (code, out)
+    code, out = run(gr, "next", "--wave", "3")
+    assert code == 1 and "no node is in wave 3" in out, out
+
+
+@case("wave: moves a node, writes a `wave` revision, and the graph still validates")
+def _():
+    p = written(g([waved("N-001", 1), waved("N-002", 2, blocked=["N-001"])]))
+    code, out = run_at(p, "wave", "N-002", "--to", "3", "--why", "the seam moved")
+    assert code == 0, out
+    after = json.loads(p.read_text())
+    assert [n["wave"] for n in after["nodes"]] == [1, 3], after["nodes"]
+    revs = after.get("revisions") or []
+    assert revs and revs[-1] == {"verb": "wave", "node": "N-002", "why": "the seam moved"}, \
+        "the re-cut left no revision: %r" % revs
+    code, out = run_at(p, "validate")
+    assert code == 0, "the graph after a re-cut does not validate: %s" % out
+
+
+@case("wave: a move that breaks the order, a done node, or no reason is refused unwritten")
+def _():
+    p = written(g([waved("N-001", 1, status="done", evidence=["ran"]), waved("N-002", 2),
+                   waved("N-003", 2, blocked=["N-002"])]))
+    before = p.read_bytes()
+    for args, needle in ((("N-003", "--to", "1", "--why", "x"), "earlier wave"),
+                         (("N-001", "--to", "2", "--why", "x"), "is done"),
+                         (("N-002", "--to", "3", "--why", "  "), "--why"),
+                         (("N-002", "--to", "0", "--why", "x"), "not a wave"),
+                         (("N-009", "--to", "2", "--why", "x"), "no node")):
+        code, out = run_at(p, "wave", *args)
+        assert code == 1 and needle in out, "%r: exit %d, %s" % (args, code, out)
+        assert p.read_bytes() == before, "a refused move wrote to the file: %r" % (args,)
+
+
 # Before the verdict, and the position matters: `report()` is idempotent (the atexit
 # registration would find `_reported` already set), so a case defined BELOW this line
 # is created after the accounting and never appears in it. Found by planting a failing

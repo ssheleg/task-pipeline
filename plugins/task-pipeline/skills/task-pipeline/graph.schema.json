@@ -205,6 +205,11 @@
           ],
           "description": "The class of the user-facing surface this node builds, copied from the brief's `surface_class` (stage 0). It selects the gate profile, and `graph.py certify` reads it: on `flagship` or `product` the fourth, `visual` tier report is REQUIRED, because none of unit, seam or product opens the contact sheet; on any other class a `visual` report is accepted when given. Absent on a node that builds no user-facing surface. `references/certification.md` → *The fourth reading*."
         },
+        "wave": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Wave mode only (`references/waves.md`): the pass of stages 5–8 that closes this node, from 1, where wave 1 is the walking skeleton. `graph.py validate` refuses an edge from a later wave's node into an earlier wave's node, because an earlier wave waiting on a later one cannot close in its own pass; `graph.py next --wave N` prints that wave's frontier only; `graph.py wave` moves a node and records the re-cut as a revision. Absent outside wave mode."
+        },
         "certification": {
           "type": "object",
           "description": "What the tiered certification recorded for this node. Written by `graph.py certify` on every round, pass or fail: a failing round that wrote nothing would erase the only evidence that a node is churning, which is the number the loop-guard ceiling reads.",
@@ -444,9 +449,10 @@
             "park",
             "close",
             "invalidate",
-            "waive"
+            "waive",
+            "wave"
           ],
-          "description": "Which mutation made this entry. `close` joined the two on 2026-08-17 with T-5 — and it was caught by a probe rather than by the fixture asserting *the graph after a close still validates*, because `violations()` never reaches an enum. The same disagreement B-084 records, one field over. `invalidate` joined with PF-02.02: a REQ/interface/brief change supersedes a node and resets its downstream proofs."
+          "description": "Which mutation made this entry. `close` joined the two on 2026-08-17 with T-5 — and it was caught by a probe rather than by the fixture asserting *the graph after a close still validates*, because `violations()` never reaches an enum. The same disagreement B-084 records, one field over. `invalidate` joined with PF-02.02: a REQ/interface/brief change supersedes a node and resets its downstream proofs. `wave` joined with wave mode: the re-cut after every wave moves nodes between waves, and a move nobody recorded is the quiet re-plan `references/planning.md` refuses."
         },
         "node": {
           "type": "string",

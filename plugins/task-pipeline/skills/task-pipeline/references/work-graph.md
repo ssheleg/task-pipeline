@@ -41,6 +41,7 @@ turn of every loop.
 | `nodes[].blocked_by` | what must PRODUCE first. The frontier obeys a satisfaction predicate, and only `done` satisfies — a PARKED producer blocks its consumer, because a park is a decision not to produce, not a production. `next` names each held consumer with the park's reason; a valid alternative producer is an explicit, versioned edge change, never an implicit unblock |
 | `nodes[].touches` | what it **mutates**. Two runnable nodes writing one file is the false parallelism [`planning.md`](planning.md) refuses — *distinct is not the same as independent, and the check is what they touch, never what they are called* |
 | `nodes[].check` | **how this node will be closed** — one command, or the named judgement where no command can decide it. Required on every node except a `parked` one. The certification's `unit` tier runs it and reports its output as the evidence row ([`certification.md`](certification.md) — three blind tiers close a node, not one reader); before this field existed that instruction pointed at an absence, leaving a verifier the two things it forbids — invent a check, or run everything (B-080) |
+| `nodes[].wave` | wave mode only ([`waves.md`](waves.md)): the pass of stages 5–8 that closes the node, from 1. **An earlier wave may not wait on a later one** — `validate` refuses the edge, because a wave holds only what closes in its own pass |
 | `nodes[].evidence` | required when `status` is `done`. A node called done by assertion is what evidence exists to prevent |
 | `nodes[].parked_reason` | required when `status` is `parked`. A park with no reason is indistinguishable, a week later, from work quietly dropped |
 | `edges[].payload` | what the dependency hands over. **An edge carrying no named artifact is chronology drawn as architecture** |
@@ -54,11 +55,12 @@ conditional on the code, never merely sequenced after it.**
 | Verb | Prints | Codes |
 |---|---|---|
 | `validate` | every violation, in a stable order | `0` clean · `1` any |
-| `next` | the frontier, ordered by how much each node unblocks — **and nothing else** | `0` printed · `3` all done · `4` nothing runnable |
+| `next` | the frontier, ordered by how much each node unblocks — **and nothing else**. `--wave N` narrows it to one wave, and `3` then means *this wave is done* | `0` printed · `3` all done · `4` nothing runnable · `1` with `--wave`, a wave no node is in |
 | `coverage` | each requirement with the nodes serving it | `0` covered · `1` a gap, named |
 | `goal` | the release goal | `0` · `3` unstated |
 | `add` | the id it allocated | `0` · `1` refused |
 | `park` | the id and the reason | `0` · `1` refused |
+| `wave` | wave mode's re-cut: the node, its old and new wave, and the reason, which enters the revision log. Refuses a move that would leave an earlier wave waiting on a later one, and a `done` node | `0` · `1` refused |
 | `certify` | the round, and on a failure every `breaks` finding with its fix and its check | `0` every owed tier passed — three, or four with `visual` on a flagship or product node · `1` a tier failed, a required one is missing, or a report is malformed |
 | `close` | the goal, the new frontier count, and what was not verified | `0` · `1` refused **or the verdict stops the run** |
 | `producer` | what produced this proof — actor, model, runtime, skill, config, commit, trace | `0` |
