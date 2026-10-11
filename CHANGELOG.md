@@ -1,3 +1,10 @@
+## v1.91.2 — v1.91.1's payload, released with its no-stamp declaration
+
+`release.yml` refused the `v1.91.1` tag's own tree: the release carried no run stamp and was
+not named in `## Releases that carry no stamp`. Nothing was published under it. This
+release is the same payload with the declaration in `docs/evidence/retro.md`. What v1.91.1
+ships is described in its section below.
+
 ## v1.91.1 — the gates read the current run only, and a broken python3 stops only releases
 
 - **The release gate read every run in the ledger.** `.task-pipeline/run.md` is
