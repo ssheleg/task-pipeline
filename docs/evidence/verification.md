@@ -11,7 +11,16 @@ Wave mode, and the grill asks one batch instead of one question per turn.
 | FR-wave-graph | `nodes[].wave`, the order check, `next --wave N`, the `wave` verb | `test/graph_test.py` 166 cases; three plants in `test/plant_wave.py`, each watched failing the suite | **observed** |
 | Gate | the full suite | `npm run test:all` locally exited 0 on 2026-10-11 (433 guards, 15 property checks); a first run died of a full disk and is not counted; the PR `validate` job | **observed** locally; CI on the PR |
 
-## Shipped state — v1.91.0 (2026-10-10; candidate, release pending)
+## Shipped state — v1.91.2 (2026-10-11; candidate — v1.91.1's payload, which its release check refused for a missing no-stamp declaration)
+
+The gates read the current run only; a broken python3 stops only releases.
+
+| REQ | What ships | How it was confirmed | Confirmed |
+|---|---|---|---|
+| FIX-B151 | release and build gates read only the ledger after the last `Run:` header | `test/release_gate_test.py`: "a previous run's pass does not admit this run's tag", "a previous run's dev stage does not silence a new run" — both failed before the fix | **observed** |
+| FIX-B152 | with python3 failing, only tag/push/release/publish commands are refused | `test/release_gate_test.py`: "with python3 broken, …" (two cases) — failed before the fix | **observed** |
+
+## Shipped state — v1.91.0 (2026-10-10; released, npm 1.91.0)
 
 The description says «баг»; a lightweight tag is refused before release.
 

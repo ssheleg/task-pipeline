@@ -64,6 +64,31 @@ sits near GitHub's 512 000-byte limit) and disarm the order check, the `--wave` 
 the re-cut's revision in turn; each was watched turning `test/graph_test.py` red before the
 step was written.
 
+## v1.91.2 — v1.91.1's payload, released with its no-stamp declaration
+
+`release.yml` refused the `v1.91.1` tag's own tree: the release carried no run stamp and was
+not named in `## Releases that carry no stamp`. Nothing was published under it. This
+release is the same payload with the declaration in `docs/evidence/retro.md`. What v1.91.1
+ships is described in its section below.
+
+## v1.91.1 — the gates read the current run only, and a broken python3 stops only releases
+
+- **The release gate read every run in the ledger.** `.task-pipeline/run.md` is
+  append-only, and a project that reuses it holds earlier runs above the current one.
+  The gate took the FIRST `stage: … tests … verdict pass` in the whole file, so a
+  previous release's pass admitted `git tag` while this run's tests were still PENDING
+  (reported 2026-10-11 from a live ledger: the 0.2.0 pass would have released 0.4.0).
+  Both gates now read only what follows the last `Run:` header — the line
+  `templates/run.md` writes once per run; a ledger with no header is one run.
+- **The build gate had the same leak.** A previous run that had entered dev silenced
+  the ask for a new run still in planning. Same scoping, same fixture shape.
+- **A failed python3 no longer blocks every command.** With the disk full, python3
+  could not start, and the gate refused `ls` in any project with a run in flight. A
+  shell pre-filter now lets a command through when it carries none of
+  `tag`/`push`/`release`/`publish`; anything that could release still fails closed.
+
+Four fixtures in `test/release_gate_test.py`, each watched failing before its fix.
+
 ## v1.91.0 — the description says «баг», and a lightweight tag is refused before release
 
 v1.90.0 added `bug` to the description so "fix this bug" routes here by name. The Russian
