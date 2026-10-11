@@ -155,6 +155,14 @@ except Exception:
     # gate cannot tell. Fail closed, and say which file to look at.
     print("block\t%s\tthe run ledger could not be read" % act); raise SystemExit(0)
 
+# B-151: the ledger is append-only, and a project that reuses it holds earlier runs
+# above this one. Only the CURRENT run speaks — everything after the last `Run:`
+# header (templates/run.md writes one per run); a ledger with no header is one run.
+# A previous release's `verdict pass` admitted a tag whose own tests were PENDING.
+_lines = text.splitlines()
+_starts = [i for i, l in enumerate(_lines) if l.strip().startswith("Run:")]
+text = "\n".join(_lines[_starts[-1]:] if _starts else _lines)
+
 stage_lines = [l.strip() for l in text.splitlines() if l.strip().startswith("stage:")]
 
 
@@ -243,6 +251,13 @@ status=$?
 # A gate that cannot reach its own decision must not wave the release through.
 if [ $status -ne 0 ] || [ -z "$verdict" ]; then
   [ -f "$ledger" ] || exit 0
+  # B-152: without python3 the command cannot be classified, and refusing EVERY
+  # Bash call took the whole session down on a full disk. A word-level pre-filter
+  # keeps fail-closed exactly where it matters: anything that could tag, push,
+  # release or publish is still refused; `ls` is not.
+  if ! printf '%s' "$input" | grep -Eq '(^|[^[:alnum:]_])(tag|tags|push|release|publish)([^[:alnum:]_]|$)'; then
+    exit 0
+  fi
   echo "task-pipeline: the stage-7 gate could not run (python3 missing or failed), and this project has a run in flight ($ledger). Refusing an outward act rather than failing open." >&2
   exit 2
 fi

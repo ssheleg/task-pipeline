@@ -449,6 +449,58 @@ it("a non-object payload with a run in flight blocks", a_non_object_payload_with
 it("a blind refusal names the ledger and the opt-out", a_blind_refusal_is_a_redirection)
 it("an empty payload with no ledger stays silent", an_empty_payload_with_no_ledger_stays_silent)
 
+
+# B-151 (reported 2026-10-11 from sshlg-growth): the ledger is append-only across
+# runs, and the gate took the FIRST `verdict pass` in the whole file — a previous
+# release's pass admitted a tag while the current run's tests were still PENDING.
+TWO_RUN_LEDGER = (
+    "Run: `0.2.0` · 2026-10-06\n"
+    "stage: 6 tests — gate manual — verdict pass — 2026-10-06T10:30:00Z\n"
+    "Run: `0.4.0` · 2026-10-11\n"
+    "stage: 5 build — gate auto — verdict pass — 2026-10-11T09:00:00Z\n"
+    "stage: 6 tests — PENDING — 2026-10-11T09:10:00Z\n"
+)
+
+it("a previous run's pass does not admit this run's tag",
+   lambda: expect("git tag v0.4.0", TWO_RUN_LEDGER, BLOCK,
+                  "a pass from an earlier Run: section released this one"))
+it("this run's own pass still admits the tag",
+   lambda: expect("git tag v0.4.0",
+                  TWO_RUN_LEDGER.replace("stage: 6 tests — PENDING", "stage: 6 tests — gate manual — verdict pass"),
+                  ALLOW, "the current run's pass was not read"))
+
+
+# B-152: with python3 failing, the gate refused EVERY Bash call in a project with a
+# run in flight — `ls` included — because the failure path never looked at the command.
+def run_without_python(command):
+    with tempfile.TemporaryDirectory() as project, tempfile.TemporaryDirectory() as fake:
+        os.makedirs(os.path.join(project, ".task-pipeline"))
+        with open(os.path.join(project, ".task-pipeline", "run.md"), "w") as fh:
+            fh.write(NO_STAGE6_LEDGER)
+        broken = os.path.join(fake, "python3")
+        with open(broken, "w") as fh:
+            fh.write("#!/bin/sh\nexit 1\n")
+        os.chmod(broken, 0o755)
+        env = dict(os.environ, CLAUDE_PROJECT_DIR=project, PATH=fake + os.pathsep + os.environ["PATH"])
+        payload = json.dumps({"hook_event_name": "PreToolUse", "tool_name": "Bash",
+                              "tool_input": {"command": command}})
+        return subprocess.run(["bash", GATE], input=payload, env=env,
+                              capture_output=True, text=True).returncode
+
+
+def broken_python_still_blocks_a_release():
+    for c in ("git tag v1.2.3", "git push --tags", "npm publish", "gh release create v1"):
+        assert run_without_python(c) == BLOCK, "%s passed with the gate unable to decide" % c
+
+
+def broken_python_leaves_ordinary_commands_alone():
+    for c in ("ls -la", "git status", "npm test", "git commit -m 'fix'"):
+        assert run_without_python(c) == ALLOW, "%s was blocked only because python3 failed" % c
+
+
+it("with python3 broken, an outward act still fails closed", broken_python_still_blocks_a_release)
+it("with python3 broken, an ordinary command is not blocked", broken_python_leaves_ordinary_commands_alone)
+
 # --- a lint stage before the tests stage must not capture the gate -----------
 #
 # One pass took the FIRST stage carrying a gate command, so a lint stage declared
@@ -687,6 +739,22 @@ def the_shipped_example_is_silent_once_dev_is_entered():
 
 
 it("the shipped example arms the build gate", the_shipped_example_arms_the_build_gate)
+
+
+# B-151's sibling (2026-10-11): the build gate also read every run in an append-only
+# ledger, so a PREVIOUS run that entered dev silenced the gate for a new run still
+# in planning — source edits went through without the ask.
+def a_previous_runs_dev_stage_does_not_silence_a_new_run():
+    with open(EXAMPLE, encoding="utf-8") as fh:
+        flow = json.load(fh)
+    old = "Run: `old` · 2026-10-06\n" + OPEN_RUN + "stage: 5 dev — gate auto — 2026-10-06T01:30:00Z\n"
+    new = old + "Run: `new` · 2026-10-11\n" + OPEN_RUN
+    assert build_gate("src/app.js", old, flow) is None, "fixture premise: the old run was in dev"
+    assert build_gate("src/app.js", new, flow) == "ask", \
+        "a previous run's dev stage silenced the build gate for this one"
+
+
+it("a previous run's dev stage does not silence a new run", a_previous_runs_dev_stage_does_not_silence_a_new_run)
 it("the shipped example is silent once dev is entered", the_shipped_example_is_silent_once_dev_is_entered)
 
 if failures:
