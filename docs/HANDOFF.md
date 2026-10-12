@@ -1,7 +1,7 @@
 # Start here — task-pipeline
 
 Snapshot: 2026-10-12. Released: **v1.92.0** (npm `task-pipeline-skill`, 2026-10-11), wave mode.
-Released: **v1.93.1** (v1.93.0's payload; the v1.93.0 tag published nothing — see CHANGELOG).
+Released: **v1.93.2** (v1.93.0's payload; the v1.93.0 and v1.93.1 tags published nothing — see CHANGELOG).
 [Verification](evidence/verification.md) · [board](evidence/backlog.md) · [CHANGELOG](../CHANGELOG.md).
 
 ## In flight — integration wave 2 (branch `w2/hygiene-continuity`)
@@ -38,7 +38,7 @@ PR [#109](https://github.com/ssheleg/task-pipeline/pull/109): run `38242485458` 
 the slowest shard 6m45s and the whole run 6m50s, where the one job had taken 90–111 min.
 Verification row `R08-ci` holds the numbers. B-100 is closed with them.
 
-**Next task:** the hub (ssheleg/sshlg-skills) re-pins task-pipeline 1.93.1 in wave 5, which closes B-160. The family rows B-154 and HK-05 live in the
+**Next task:** the hub (ssheleg/sshlg-skills) re-pins task-pipeline 1.93.2 in wave 5, which closes B-160. The family rows B-154 and HK-05 live in the
 sshlg-skills board and close there, at the wave-5 re-pin, citing this branch.
 
 The previous page (the 2026-09-07 Sherlock audit branch) is history:

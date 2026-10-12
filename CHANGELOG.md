@@ -1,3 +1,14 @@
+## v1.93.2 — v1.93.0's payload, with evidence a clone can follow
+
+`v1.93.1` published nothing either: its release suite reached the documentation gate
+(`npm run test:docs`, run by `release.yml` and not by the PR's checks) and refused 17
+commit references in `docs/evidence/` — the wave-2 branch SHAs became unreachable when
+PR #109 was squash-merged as `8260042`, and five CI run ids in backticks read as SHAs.
+They now name the squash commit and the runs as plain numbers. Same payload; this is
+the third tag for it, and `docgate.sh` passed locally before this one was pushed.
+
+Guards: 438 → **438**; property checks 15 → **15**. No check changed.
+
 ## v1.93.1 — v1.93.0's payload, released with its stamp declaration
 
 `v1.93.0` published nothing: `release.yml` ran the suite on the tag's own tree and
