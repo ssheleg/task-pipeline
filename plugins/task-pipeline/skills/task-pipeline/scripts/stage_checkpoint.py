@@ -15,8 +15,10 @@ deterministic halves around that call, so nothing about the checkpoint is left t
         prints the tool's arguments as JSON, from the ledger's last `stage:` line
     stage_checkpoint.py record --answer FILE|-   [--ledger PATH]
         reads the tool's answer and keeps `workflowId` and `leaseId` for the next boundary
-    stage_checkpoint.py record --unavailable "<reason>"   [--ledger PATH]
-        the tools are absent or failed: one ledger line, exit 0, the run continues
+    stage_checkpoint.py record --unavailable "<reason>" [--for-run]   [--ledger PATH]
+        the tools are absent or failed: one ledger line, exit 0, the run continues.
+        --for-run says it once for the whole run: a marker in memory.json silences
+        hooks/memory-nudge.sh until a later `record --answer` clears it
     stage_checkpoint.py state  [--ledger PATH]
         the workflow this run writes to, for `observatory_checkpoint_latest` after a resume
 
@@ -45,6 +47,7 @@ Ledger lines it appends, all of the existing `event:` shape:
     event: memory — checkpoint <stepId> rev <n> <workflowId> — <ISO-8601>
     event: memory — refused <error> (kept as <id>) — <ISO-8601>
     event: memory — unavailable — <reason> — <ISO-8601>
+    event: memory — unavailable for this run — <reason> — <ISO-8601>
 
 Exit codes: 0 done (including "unavailable", which is a state, not a failure); 2 the ledger
 or the answer cannot be read.
@@ -221,10 +224,20 @@ def emit(ledger: pathlib.Path, project: str | None, constraints: list[str],
     return args
 
 
-def record(ledger: pathlib.Path, answer_text: str | None, unavailable: str | None) -> str:
+def record(ledger: pathlib.Path, answer_text: str | None, unavailable: str | None,
+           for_run: bool = False) -> str:
     if unavailable is not None:
         reason = " ".join(unavailable.split())[:200] or "no reason given"
-        line = f"event: memory — unavailable — {reason} — {_now()}"
+        if for_run:
+            # ONE marker for the run (USR-008). Without it a run on a machine with no
+            # Observatory paid one nudge and one ledger line per gate — about eleven of
+            # each — to restate a fact that does not change between gates.
+            line = f"event: memory — unavailable for this run — {reason} — {_now()}"
+            state = _load_state(ledger)
+            state["memory"] = {"unavailable": {"reason": reason, "at": _now(), "ledger_line": line}}
+            _save_state(ledger, state)
+        else:
+            line = f"event: memory — unavailable — {reason} — {_now()}"
         _append(ledger, line)
         return line
     try:
@@ -234,6 +247,9 @@ def record(ledger: pathlib.Path, answer_text: str | None, unavailable: str | Non
     if not isinstance(answer, dict):
         raise SystemExit("stage_checkpoint: the answer is not an object")
     state = _load_state(ledger)
+    # Any answer — a checkpoint or a refusal — means the tools answered: the run-level
+    # "unavailable" marker no longer holds, and the nudge comes back.
+    cleared = state.pop("memory", None) is not None
     if answer.get("error"):
         kept = answer.get("keptAs")
         if answer["error"] in ("LeaseLost", "WorkflowClosed"):
@@ -244,9 +260,13 @@ def record(ledger: pathlib.Path, answer_text: str | None, unavailable: str | Non
             _save_state(ledger, state)
         line = (f"event: memory — refused {answer['error']}"
                 f"{f' (kept as {kept})' if kept else ''} — {_now()}")
+        if cleared:
+            _save_state(ledger, state)
         _append(ledger, line)
         return line
     if answer.get("handoffId") and not answer.get("leaseId"):
+        if cleared:
+            _save_state(ledger, state)
         # An offer: the lease stays with this run until the successor accepts.
         line = f"event: memory — handoff offered {answer['handoffId']} — {_now()}"
         _append(ledger, line)
@@ -326,6 +346,8 @@ def main(argv: list[str]) -> int:
     g = r.add_mutually_exclusive_group(required=True)
     g.add_argument("--answer", help="a file with the tool's JSON answer, or - for stdin")
     g.add_argument("--unavailable", help="why the tools could not be used")
+    r.add_argument("--for-run", action="store_true",
+                   help="with --unavailable: once for the whole run; silences the nudge until an answer")
     s = sub.add_parser("state", help="the workflow this run writes to; never the token")
     s.add_argument("--ledger", default=DEFAULT_LEDGER)
     h = sub.add_parser("handoff", help="observatory_handoff_create arguments: a PLANNED executor change")
@@ -354,12 +376,15 @@ def main(argv: list[str]) -> int:
     if a.cmd == "state":
         st = _load_state(ledger)
         print(json.dumps({"workflowId": st.get("workflowId"), "holdsLease": bool(st.get("leaseId")),
-                          "stale": st.get("stale")}))
+                          "stale": st.get("stale"),
+                          "memoryUnavailable": ((st.get("memory") or {}).get("unavailable") or {}).get("reason")}))
         return 0
     text = None
     if a.answer is not None:
         text = sys.stdin.read() if a.answer == "-" else pathlib.Path(a.answer).read_text(encoding="utf-8")
-    print(record(ledger, text, a.unavailable))
+    if a.for_run and a.unavailable is None:
+        p.error("--for-run goes with --unavailable")
+    print(record(ledger, text, a.unavailable, a.for_run))
     return 0
 
 

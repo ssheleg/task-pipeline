@@ -276,6 +276,33 @@ def case_handoff_retry_ignores_unrelated_appends():
     print("PASS: an offer's retry survives unrelated ledger appends; a recorded offer moves the key")
 
 
+def case_unavailable_for_the_run():
+    """USR-008: one run-level marker instead of one line per gate; a later answer clears it."""
+    d = fresh()
+    stage(d, 0, "Intake grill", "pass", "2026-10-05T10:00Z")
+    code, out, _ = run(d, "record", "--unavailable", "no Observatory on this machine", "--for-run")
+    ok(code == 0, "--for-run is a state, not a failure")
+    lines = [ln for ln in ledger(d).splitlines() if ln.startswith("event: memory")]
+    ok(len(lines) == 1 and "unavailable for this run — no Observatory on this machine" in lines[0],
+       "--for-run appends exactly one line, naming the run scope")
+    st_path = d / ".task-pipeline" / "memory.json"
+    st = json.loads(st_path.read_text())
+    ok(st["memory"]["unavailable"]["reason"] == "no Observatory on this machine"
+       and st["memory"]["unavailable"]["ledger_line"] == lines[0], "the marker names its reason and its line")
+    ok(stat.S_IMODE(os.stat(st_path).st_mode) == 0o600, "the marker file is 0600")
+    code, out, _ = run(d, "state")
+    ok(json.loads(out)["memoryUnavailable"] == "no Observatory on this machine", "state reports the marker")
+    stage(d, 1, "Docs study", "pass", "2026-10-05T11:00Z")
+    a = emit(d, "--project", "project:alpha-web")
+    code, _, _ = record(d, {"workflowId": "wf:1", "leaseId": TOKEN, "stepId": a["stepId"],
+                            "checkpoint": {"revision": 1}})
+    ok(code == 0 and "memory" not in json.loads(st_path.read_text()),
+       "a later successful answer clears the marker: Observatory came back")
+    code, out, _ = run(d, "state")
+    ok(json.loads(out)["memoryUnavailable"] is None, "state no longer reports it")
+    print("PASS: memory unavailable for the run is one marker and one line; an answer clears it")
+
+
 def case_no_ledger():
     d = _tree()
     code, _, err = run(d, "emit")
@@ -287,6 +314,6 @@ if __name__ == "__main__":
     for case in (case_first_boundary, case_idempotency, case_continue_and_never_leak,
                  case_provider_loss, case_stale_writer_and_successor, case_credentials_by_name,
                  case_failed_gate_and_acceptance, case_review_rounds, case_planned_handoff,
-                 case_handoff_retry_ignores_unrelated_appends, case_no_ledger):
+                 case_handoff_retry_ignores_unrelated_appends, case_unavailable_for_the_run, case_no_ledger):
         case()
     print(f"PASS: stage_checkpoint.py — {CASES} cases")
