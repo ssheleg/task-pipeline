@@ -1,6 +1,6 @@
 ---
 name: task-pipeline
-description: "Use when work changes the repository — feature, fix, bug, refactor, migration, integration, rewrite, adoption or hardening; фича, фикс, баг, рефактор, миграция, интеграция, доработать, починить, внедрить, перевести — or a finding that lands in it: audit/аудит, bug hunt/проверь ошибки, production check/проверь прод, PR review/ревью PR — or on 'run this through the pipeline' / 'прогони по конвейеру', 'the full cycle' / 'полный цикл', /task-pipeline. Runs a substantial task through gated stages: intake grill, docs, brainstorm, spec, plan, build, tests, deploy, post-deploy, docs/wiki, acceptance. 'waves' / 'волнами' closes the whole board; 'checkup' / 'чекап' lists unconfirmed releases; 'setup' audits docs. Not for: answering a question, explaining code, a typo, a one-line edit, a mechanical rename, reconnaissance that lands nothing — say 'no pipeline' / 'без пайплайна' to opt out."
+description: "Use when work changes the repository — feature, fix, bug, refactor, migration, integration, rewrite, adoption or hardening; фича, фикс, баг, рефактор, миграция, интеграция, доработать, починить, внедрить, перевести — or a finding that lands in it: audit/аудит, bug hunt/проверь ошибки, production check/проверь прод, PR review/ревью PR — or on 'run this through the pipeline' / 'прогони по конвейеру', 'the full cycle' / 'полный цикл', /task-pipeline. Runs a substantial task through gated stages: intake grill, docs, brainstorm, spec, plan, build, tests, deploy, post-deploy, docs/wiki, acceptance. 'waves' / 'волнами' / 'release iteration' / 'итерация релиза' closes the whole board as one release; 'checkup' / 'чекап' lists unconfirmed releases; 'setup' audits docs. Not for: answering a question, explaining code, a typo, a one-line edit, a mechanical rename, reconnaissance that lands nothing — say 'no pipeline' / 'без пайплайна' to opt out."
 license: MIT
 compatibility: "Doctrine runs on any agent. The bundled scripts need python3; the run needs git. Missing either degrades, never blocks — the graph verbs and seeded gates go unused, and the run says so."
 ---
@@ -176,7 +176,10 @@ Three things the grill does beyond clarifying the request, each in full in
    build order, one brick at a time — stages 0–2 run once, and the module map's
    status column is the resume point (`references/stages.md` → *The program loop*).
    **The whole board?** `/task-pipeline waves` (`references/waves.md`): stages
-   0–4 once, 5–8 per wave, 9–10 to close.
+   0–4 once, 5–8 per wave, 9–10 to close. **The project moves in releases**: the loop
+   around the waves — survey, module dossiers, one design, parallel build, checks that
+   start as each node lands, release, post-release check, next pool — is
+   `references/iteration.md`. A finding joins the inventory; it is not fixed alone.
 4. Do **not** advance until the stage **gate** passes (`references/stages.md`).
    Honor the gate **type**: for `auto`, verify the gate's `check` yourself and
    stop/return on fail; for `judgment`, record the named judge's ruling as

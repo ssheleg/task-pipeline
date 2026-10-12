@@ -117,8 +117,10 @@ answer and the consequence of each answer, ordered so prerequisite decisions com
 ([`grill.md`](grill.md)). A go that leaves a question unanswered takes the
 recommendation, recorded as **assumed** in the decisions table, and every wave that
 depends on an assumption names it — so a different answer later re-plans exactly those
-waves and no others. After planning, a question is asked only at a wave boundary, in the
-hand-back's DECISIONS WAITING ([`progress.md`](progress.md)).
+waves and no others. After planning, a question is asked only in a question round
+([`iteration.md`](iteration.md) → *Question rounds*): a wave boundary, a blocked frontier
+or five open questions calls one, and its batch lands in the hand-back's DECISIONS
+WAITING ([`progress.md`](progress.md)). Never one question at a time.
 
 **An outward or irreversible act is never assumed.** Publishing, tagging, deploying
 without a specific standing authorization, sending to a person, spending money,
@@ -172,11 +174,17 @@ frontier is blocked. When the board is empty, it says so once.
 Research, the audit and the blind readings run in parallel agents; builds stay sequential
 wherever two of them share a seam ([`planning.md`](planning.md) → file ownership).
 
+**Verification does not wait for the wave.** A node is certified as soon as it lands, in
+the number of rounds its risk class sets, and a seam is checked once the last node on it
+lands ([`iteration.md`](iteration.md) → *Verification starts when a node lands*). The
+close pass below then re-measures what those rounds already proved.
+
 ## The close pass, after every wave
 
 In this order, inside the wave rather than after it:
 
 1. **Verify.** Every node the wave closes is certified ([`certification.md`](certification.md)),
+   most of it already, as each node landed,
    and [`audit.md`](audit.md)'s exit is re-measured over what the wave touched.
 2. **Finish and fix — one fix round**, inside [`loop-guard.md`](loop-guard.md)'s caps.
    Every finding is fixed in the wave or parked with a board row and its reason; nothing
@@ -192,6 +200,9 @@ In this order, inside the wave rather than after it:
    never from the original guess. New findings join the inventory with ids.
 
 ## A board bigger than one release
+
+**The loop around the waves — release, post-release check, next pool, and the next
+iteration — is [`iteration.md`](iteration.md).**
 
 **It becomes a program.** The release takes the first waves; the rest stays on the
 canvas by node, `release: program`, never dropped. The next release resumes from the

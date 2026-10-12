@@ -471,6 +471,22 @@ close pass verifies, runs one fix round, updates the docs, re-measures the inven
 and re-cuts what is left. The run takes the next wave without asking; a board too big
 for one release becomes a program, carried on the canvas, never dropped.
 
+**The project moves in releases, not fix by fix**
+([`iteration.md`](plugins/task-pipeline/skills/task-pipeline/references/iteration.md)).
+A finding joins the inventory; only a closed five-entry hotfix lane ships alone. Each
+iteration runs in this order:
+- the survey;
+- module dossiers written in parallel, laid onto one canvas until a pass changes nothing;
+- questions asked in rounds, never one at a time, while agents keep working;
+- a parallel build, each node checked the moment it lands, in one to three rounds by its
+  risk class;
+- one release, checked as released;
+- the next pool, handed to you grouped by module.
+
+Lessons carry over. Every install reads the project's retrospective. Where the host has
+a shared lesson store, such as an Observatory or a Fabric estate, agents also write their
+lessons there and read other projects' lessons at stage 0.
+
 ### Loop guard — churn is detected, not endured
 
 Any repeating pass can start undoing the previous one: two shapes alternating, the
@@ -614,7 +630,7 @@ must say so.
 ### Held to Anthropic's own Skill authoring guidance
 
 Audited against the four Agent Skills pages. Most of it already held — `name`
-13/64 chars, `description` 890/1024 chars, `SKILL.md` 268/500 lines, all 40 references
+13/64 chars, `description` 947/1024 chars, `SKILL.md` 271/500 lines, all 41 references
 linked **directly** from `SKILL.md`, and the bundle far under the 30 MB ceiling. What
 did not, now does:
 
@@ -970,6 +986,7 @@ recommendation, so you arm the whole run in one exchange. Detail:
 | [`templates/`](plugins/task-pipeline/skills/task-pipeline/templates/README.md) | brief, carry-over ledger, `CONTEXT.md` and ADR skeletons, the doc map, both registers, the retro and its archive, the seeded `docgate.sh` and `hygiene.sh`, a worked hook |
 | [`references/adoption.md`](plugins/task-pipeline/skills/task-pipeline/references/adoption.md) | the first run in a project: greenfield seeding, and the brownfield walkthrough |
 | [`references/waves.md`](plugins/task-pipeline/skills/task-pipeline/references/waves.md) | wave mode: the whole board as one inventory, one canvas of the target state, one question batch, then waves that each close in one pass |
+| [`references/iteration.md`](plugins/task-pipeline/skills/task-pipeline/references/iteration.md) | release iteration: the loop around the waves — dossiers, integration until it converges, question rounds, checks as each node lands (R1–R3), one release checked as released, the next pool, the shared lesson store |
 | [`references/setup.md`](plugins/task-pipeline/skills/task-pipeline/references/setup.md) | the entry audit: seven passes over the docs a project already has, offered once, output as a fix plan |
 | [`references/portability.md`](plugins/task-pipeline/skills/task-pipeline/references/portability.md) | the manifest of workflow decisions and their homes in the bundle, and the boundary against a project's own answers |
 | [`references/learned.md`](plugins/task-pipeline/skills/task-pipeline/references/learned.md) | rules earned by failure on a real multi-repository build, each with its incident, its check and its exit criterion — the table is the count, and it grows |

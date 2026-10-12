@@ -44,6 +44,7 @@ file exists to stop.
 - A fix to one call site closes a call site, not a class
 - The loop closes at stage 0
 - Where a lesson goes when it is not about this project
+- Recording to a shared lesson store, where the host has one
 - Publishing the insight — the skill learns from every project that runs it
 - The improvement iteration — what happens to a published insight next
 - What may leave the project — the redaction list
@@ -415,6 +416,17 @@ file that accumulates universal rules is a fork of the skill that nobody named.
 **This said *"open an issue upstream"* for eight releases and named no repository, no
 trigger and no authorization** — an instruction on rung 1 that everybody read as done.
 The rest of this section is the mechanism.
+
+## Recording to a shared lesson store, where the host has one
+
+**One job: let the next agent on another project read this lesson at its stage 0.** Where
+the session lists a shared lesson store's tools — an Observatory, a Fabric estate — each
+entry that is not private to the project is also recorded there as a *lesson*: its class,
+trigger, check, evidence commit and project id. It enters as a proposal; the redaction
+list below binds it exactly as it binds publication. The read side is source 7b of
+[`knowledge-sources.md`](knowledge-sources.md). Where no store exists this section does
+nothing, and the run says `shared lessons: absent` rather than nothing.
+Mechanics: [`iteration.md`](iteration.md) → *The learning loop*.
 
 ## Publishing the insight — the skill learns from every project that runs it
 
