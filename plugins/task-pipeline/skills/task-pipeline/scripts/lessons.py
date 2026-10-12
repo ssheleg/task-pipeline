@@ -36,9 +36,10 @@ entry is a pure function of its origins.
 
 **Where the index lives.** `--index PATH`, else `$TASK_PIPELINE_LESSONS`, else
 `~/.sshlg-skills/lessons/index.jsonl` when `~/.sshlg-skills` already exists — the family's
-machine-state home, where the family accepted `lessons/` as task-pipeline's on 2026-10-12
-("state-json.md gets the entry when it ships") — and `~/.task-pipeline/lessons/index.jsonl`
-otherwise, so a standalone install never creates the family's directory. Directories this
+machine-state home, where `lessons/` is proposed as task-pipeline's (pending an sshlg-skills
+board row and its `state-json.md` entry) — and `~/.task-pipeline/lessons/index.jsonl`
+otherwise, so a standalone install never creates the family's directory. When the family's
+directory appears later, the first run moves the standalone index there once and says so. Directories this
 script creates are 0700 (an existing one keeps its mode), the file 0600, written by a unique
 temp file and `os.replace`, under an exclusive lock (`index.jsonl.lock`, `flock`;
 `$TASK_PIPELINE_LESSONS_LOCK_TIMEOUT` seconds, default 10). git gets
@@ -135,13 +136,41 @@ def index_path(given: str | None) -> pathlib.Path:
     env = os.environ.get(ENV_INDEX)
     if env:
         return pathlib.Path(env).expanduser()
-    # The family's machine-state directory when it exists (sshlg-skills accepted `lessons/`
-    # there as task-pipeline's, 2026-10-12: "state-json.md gets the entry when it ships");
-    # otherwise task-pipeline's own, so a standalone install never creates the family's.
+    # The family's machine-state directory when it exists (`lessons/` there is proposed to the
+    # family as task-pipeline's — pending an sshlg-skills board row and its state-json.md
+    # entry); otherwise task-pipeline's own, so a standalone install never creates the family's.
     family = pathlib.Path.home() / ".sshlg-skills"
     if family.is_dir():
         return family / "lessons" / "index.jsonl"
+    return LEGACY_INDEX()
+
+
+def LEGACY_INDEX() -> pathlib.Path:
     return pathlib.Path.home() / ".task-pipeline" / "lessons" / "index.jsonl"
+
+
+def migrate_default(idx: pathlib.Path) -> None:
+    """Move the standalone index into the family's directory ONCE, and say so.
+
+    The default changes when `~/.sshlg-skills` appears. Without this, the next run read a new,
+    empty index while every lesson so far sat in the old one — a silent switch (verification
+    round 3). The old file is kept beside, renamed `.migrated`, so no run reads two indexes."""
+    legacy = LEGACY_INDEX()
+    if idx == legacy or idx.exists() or not legacy.is_file():
+        return
+    with locked(idx):
+        if idx.exists():
+            return
+        entries = load(legacy)
+        save(idx, entries)
+        try:
+            os.replace(legacy, legacy.with_name(legacy.name + ".migrated"))
+        except OSError as exc:
+            raise Refused(f"moved the local index to {idx} but could not rename {legacy} "
+                          f"({type(exc).__name__}) — remove it by hand so one index is read")
+    print(f"lessons: moved the local index from {legacy} to {idx} ({len(entries)} lessons) — "
+          "~/.sshlg-skills now exists; the old file is kept as index.jsonl.migrated",
+          file=sys.stderr)
 
 
 def _git(root: pathlib.Path, *args: str) -> str | None:
@@ -525,7 +554,7 @@ def cmd_add(a, idx: pathlib.Path) -> int:
     private, problems = 0, []
     if a.json is not None:
         try:
-            raw = sys.stdin.read() if a.json == "-" else pathlib.Path(a.json).read_text(encoding="utf-8")
+            raw = _stdin_utf8() if a.json == "-" else pathlib.Path(a.json).read_text(encoding="utf-8")
             data = json.loads(raw)
         except (OSError, ValueError) as exc:
             print(f"lessons: the lesson JSON cannot be read ({type(exc).__name__})", file=sys.stderr)
@@ -644,25 +673,37 @@ def cmd_rebuild(a, idx: pathlib.Path) -> int:
     lessons, problems, private, unresolved, seen_files = [], [], 0, 0, 0
     keys: dict[pathlib.Path, str] = {}
     for repo, retro in found:
+        # One repository's refusal — unreadable, no commit, a git that does not answer — is
+        # listed under "not read"; it never aborts the rebuild of every other one.
         try:
             if repo not in keys:
                 keys[repo] = project_key(repo)
             got, priv, probs = parse_retro(retro, repo, keys[repo])
+            mine, unres = [], 0
+            for le in got:
+                if validate(le):
+                    probs.append(f"{le['classKey']}: refused by lesson/1")
+                elif not commit_resolves(repo, le["origin"]["commit"]):
+                    unres += 1
+                else:
+                    mine.append(le)
         except Refused as exc:
-            problems.append(str(exc))
+            problems.append(f"{repo.name}: {exc}")
             continue
         seen_files += 1
         private += priv
+        unresolved += unres
+        lessons += mine
         problems += [f"{repo.name}: {p}" for p in probs]
-        for le in got:
-            if validate(le):
-                problems.append(f"{repo.name}: {le['classKey']}: refused by lesson/1")
-            elif not commit_resolves(repo, le["origin"]["commit"]):
-                unresolved += 1
-            else:
-                lessons.append(le)
     with locked(idx):
-        old = load(idx) if idx.exists() else {}
+        # The previous index only lends its memory ids. A corrupt one is the case this verb
+        # exists for (`load` names rebuild as the remedy), so it is replaced, not refused.
+        try:
+            old = load(idx) if idx.exists() else {}
+        except Refused:
+            old = {}
+            problems.append(f"the previous index {idx} could not be read — rebuilt without its "
+                            "recorded memory ids")
         memory = {(o["project"], o["retro"]): o["memory"]
                   for e in old.values() for o in e["origins"] if o.get("memory")}
         entries: dict[str, dict] = {}
@@ -723,8 +764,16 @@ def cmd_emit(a, idx: pathlib.Path) -> int:
     mem = re.match(r"^(mem:[^@\s]+)@([0-9]+)$", o.get("memory") or "")
     if mem:
         args["memoryId"], args["expectedRevision"] = mem.group(1), int(mem.group(2))
-    print(json.dumps({"tool": "observatory_record", "arguments": args}, ensure_ascii=False))
+    # ASCII-escaped JSON: lossless whatever the locale's codec (a '?' in a lesson's title
+    # would be stored in the shared store as the lesson).
+    print(json.dumps({"tool": "observatory_record", "arguments": args}, ensure_ascii=True))
     return 0
+
+
+def _stdin_utf8() -> str:
+    """stdin as UTF-8, whatever the locale: JSON is UTF-8 by definition, and decoding it in a
+    Latin-1 locale stored mojibake in the index (verification round 3)."""
+    return sys.stdin.buffer.read().decode("utf-8")
 
 
 def _ledger_line(ledger: pathlib.Path | None, line: str) -> None:
@@ -740,7 +789,7 @@ def cmd_record(a, idx: pathlib.Path) -> int:
     ledger = pathlib.Path(a.ledger) if a.ledger else (root / DEFAULT_LEDGER)
     ledger = ledger if ledger.exists() or a.ledger else None
     try:
-        raw = sys.stdin.read() if a.answer == "-" else pathlib.Path(a.answer).read_text(encoding="utf-8")
+        raw = _stdin_utf8() if a.answer == "-" else pathlib.Path(a.answer).read_text(encoding="utf-8")
         answer = json.loads(raw)
     except (OSError, ValueError) as exc:
         print(f"lessons: the answer cannot be read ({type(exc).__name__})", file=sys.stderr)
@@ -782,13 +831,15 @@ def cmd_record(a, idx: pathlib.Path) -> int:
 
 
 def cmd_show(a, idx: pathlib.Path) -> int:
-    print(json.dumps(_resolve(load(idx), a.id), ensure_ascii=False, indent=1, sort_keys=True))
+    print(json.dumps(_resolve(load(idx), a.id), ensure_ascii=True, indent=1, sort_keys=True))
     return 0
 
 
 def main(argv: list[str]) -> int:
     # Titles and anchors may be in any script, and the messages carry dashes: under a locale
     # that cannot encode them, print() raised and the verb exited 1 for no reason of its own.
+    # Human lines degrade to '?' there; what a machine reads (`emit-observatory`, `show`) is
+    # ASCII-escaped JSON and stdin is read as UTF-8, so nothing a lesson carries is lost.
     for stream in (sys.stdout, sys.stderr):
         try:
             stream.reconfigure(errors="replace")
@@ -796,7 +847,9 @@ def main(argv: list[str]) -> int:
             pass
     common = argparse.ArgumentParser(add_help=False)
     common.add_argument("--index", help=f"the index file; default ${ENV_INDEX}, else "
-                                        "~/.sshlg-skills/lessons/index.jsonl")
+                                        "~/.sshlg-skills/lessons/index.jsonl where "
+                                        "~/.sshlg-skills exists, else "
+                                        "~/.task-pipeline/lessons/index.jsonl")
     p = argparse.ArgumentParser(prog="lessons.py", description=__doc__.split("\n")[0])
     sub = p.add_subparsers(dest="cmd", required=True)
     ad = sub.add_parser("add", parents=[common], help="merge lessons into the index")
@@ -832,6 +885,12 @@ def main(argv: list[str]) -> int:
     if a.cmd == "path":
         print(idx)
         return 0
+    try:
+        if not a.index and not os.environ.get(ENV_INDEX):
+            migrate_default(idx)
+    except Refused as exc:
+        print(f"lessons: {exc}", file=sys.stderr)
+        return 1
     verbs = {"add": cmd_add, "query": cmd_query, "rebuild": cmd_rebuild, "candidates": cmd_candidates,
              "show": cmd_show, "emit-observatory": cmd_emit, "record": cmd_record}
     try:

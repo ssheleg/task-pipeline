@@ -309,7 +309,7 @@
         "Asks the operator in batches (rounds) with a recommendation per question, never one question at a time; never 'shall I continue?' between waves",
         "Gives each node its own risk class (R1-R3), and starts a node's verification when it lands rather than waiting for the wave"
       ],
-      "why": "Wave mode had one trigger eval and no instruction case (USR-015). An agent that reaches the mode but hand-edits the inventory, trusts stale rows or prompts between waves builds the intermediate states the mode exists to refuse."
+      "why": "Wave mode had one trigger eval and no instruction case. An agent that reaches the mode but hand-edits the inventory, trusts stale rows or prompts between waves builds the intermediate states the mode exists to refuse."
     },
     {
       "id": "NOTRIG-05",

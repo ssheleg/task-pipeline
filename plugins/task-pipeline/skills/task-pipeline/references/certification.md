@@ -230,8 +230,10 @@ In a release iteration a node carries `risk` (R1–R3, [`work-graph.md`](work-gr
 decides how many **passing** rounds the node owes before `close` accepts it: **R1 one, R2
 two, R3 three, of which one is adversarial.** A round is the three blind tiers (four on a
 flagship or product surface) plus one fix cycle. `graph.py certify` prints `round N of M
-owed — not closable yet` until the count is met, and `graph.py close` refuses the verdict
-until then — and, for R3, until one round was recorded with `--kind adversarial`
+owed passing rounds — not closable yet` until the count is met, and `graph.py close` refuses
+the verdict until then. **Only passing rounds count** — a round passes when every tier
+passes, read from `certification.history` — and, for R3, one of the passing rounds must be
+one recorded with `--kind adversarial`
 (`certification.kinds`, one entry per round). A node with a `risk` and no certification at
 all is refused by `close` too: its class owes at least one round.
 
@@ -247,7 +249,7 @@ and passes them is not "at round four" of anything; its owed rounds are the plan
 ceiling's warning is about failing rounds beyond what the class owes. Read the ceiling's
 output only when rounds fail.
 
-**The adversarial round** (R3's third, on another model where one is available):
+**The adversarial round** (one of R3's three, on another model where one is available):
 1. **Plant defects in the change** — off-by-one in a limit, an inverted check, a dropped
    error path — and require the node's own checks to fail on each. A plant that passes is a
    finding against the check, not against the plant.

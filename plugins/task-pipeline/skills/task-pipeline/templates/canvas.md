@@ -79,7 +79,7 @@ attached.
 Cut per `references/waves.md` → *Cutting the waves*: a wave holds only items closable in one
 pass; wave 1 is the walking skeleton; lanes run in parallel inside a wave and respect file
 ownership. Each node carries its own risk class (`references/iteration.md` → *Verification
-starts when a node lands*): R1 one round, R2 two, R3 three with the adversarial round always.
+starts when a node lands*): R1 one passing round, R2 two, R3 three, one of them recorded adversarial.
 
 **Counts:** <from `waves.py count` and the graph: nodes by risk, by wave, out of waves>.
 

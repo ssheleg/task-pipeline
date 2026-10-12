@@ -23,8 +23,9 @@ reviewed; a table and a re-run can. This script is that re-run:
         recorded module, node or wave is not what the tables now say, or when an open item
         lands nowhere. 0 otherwise.
     waves.py sync-graph --plan FILE --graph FILE --why TEXT [--only-present]
-        writes each plan node's wave onto the work graph with graph.py's own lock, loader
-        and revision log (one `wave` revision per move), applying every move together and
+        writes each plan node's wave and risk class onto the work graph with graph.py's own
+        lock, loader and revision log (one `wave` or `risk` revision per change; lowering a
+        risk class is refused without --lower-why), applying every move together and
         judging the end state once with graph.py's order rule, so a valid re-cut is never
         refused halfway and a refused one writes nothing. Plan nodes the graph lacks are named and exit 1, unless --only-present
         (a plan that spans several repositories' graphs).
@@ -429,7 +430,30 @@ def cmd_sync_graph(a) -> int:
         moves = sorted(((gid(n), _wave(n)) for n in nodes if _wave(n) is not None
                         and gid(n) in current and current[gid(n)].get("wave") != _wave(n)
                         and current[gid(n)].get("status") != "done"))
+        # RISK, from the plan: the class `close` enforces (graph.py `owed_shortfall`). Nothing
+        # else writes it onto a graph node, so without this the gate fired only on a
+        # hand-edited graph. A lowering owes its own reason — a class is never lowered to save
+        # time (references/iteration.md) — so it is refused without --lower-why.
+        rank = {"R1": 1, "R2": 2, "R3": 3}
+        risk_moves, lowered = [], []
+        for n in nodes:
+            r, nid = n.get("risk"), gid(n)
+            if r not in rank or nid not in current or current[nid].get("risk") == r:
+                continue
+            was = current[nid].get("risk")
+            if was in rank and rank[r] < rank[was]:
+                lowered.append(f"{nid}: {was} → {r}")
+            risk_moves.append((nid, was, r))
+        lower_why = " ".join((a.lower_why or "").split())
+        if lowered and not lower_why:
+            raise Fail(1, ["lowering a risk class needs its own reason (--lower-why) — nothing "
+                           "was written: " + ", ".join(lowered)])
         lines = []
+        for nid, was, r in sorted(risk_moves):
+            current[nid]["risk"] = r
+            low = was in rank and rank[r] < rank[was]
+            G.revise(graph, "risk", nid, f"{why}; lowered: {lower_why}" if low else why)
+            lines.append(f"{nid}: risk {was or 'none'} → {r}")
         for nid, wave in moves:
             old = current[nid].get("wave")
             current[nid]["wave"] = wave
@@ -438,11 +462,12 @@ def cmd_sync_graph(a) -> int:
         bad = G.violations(graph)
         if bad:
             raise Fail(1, ["the re-cut would break the graph — nothing was written:"] + bad)
-        if moves:
+        if moves or risk_moves:
             G.save(gpath, graph)
     for ln in lines:
         print(ln)
-    print(f"waves: {len(moves)} moved · graph.py's order rule holds on the result")
+    print(f"waves: {len(moves)} moved · {len(risk_moves)} risk class(es) set · graph.py's order "
+          "rule holds on the result")
     if absent and not a.only_present:
         for nid in absent:
             print(f"waves: {nid} is in the plan and not in {pathlib.Path(gpath).name} — add it, or "
@@ -474,6 +499,8 @@ def main(argv: list[str]) -> int:
     s.add_argument("--plan", required=True)
     s.add_argument("--graph", required=True)
     s.add_argument("--why", required=True)
+    s.add_argument("--lower-why", help="the reason a node's risk class is lowered; without it "
+                                        "a lowering is refused")
     s.add_argument("--only-present", action="store_true",
                    help="ignore plan nodes this graph does not hold")
     a = p.parse_args(argv)

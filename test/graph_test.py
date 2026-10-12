@@ -2116,12 +2116,12 @@ def _():
         assert ok_s == good, "the schema on risk %r says %s" % (risk, ok_s)
 
 
-@case("rounds owed by risk class: an R3 node is not closable after one passing round, nor after three with no adversarial one")
+@case("certify: rounds owed by risk class: an R3 node is not closable after one passing round, nor after three with no adversarial one")
 def _():
     gp_node = node("N-001")
     gp_node["risk"] = "R3"
     code, out, d = certify(g([gp_node]), three())
-    assert code == 0 and "round 1 of 3 owed" in out and "not closable yet" in out \
+    assert code == 0 and "1 of 3 owed" in out and "not closable yet" in out \
         and "close it with" not in out, out
     gpath = str(pathlib.Path(d) / "graph.json")
     vp = str(pathlib.Path(d) / "verdict-N-001.json")
@@ -2130,14 +2130,14 @@ def _():
     assert r.returncode != 0 and "1 of 3" in (r.stdout + r.stderr), r.stdout + r.stderr
     certify(None, three(), workdir=d)
     code, out, _ = certify(None, three(), workdir=d)
-    assert code == 0 and "round 3 of 3" in out, out
+    assert code == 0 and "3 of 3 owed" in out and "none of them adversarial" in out, out
     r = subprocess.run([sys.executable, str(GRAPH), "close", "--verdict", vp, "--graph", gpath],
                        capture_output=True, text=True)
     assert r.returncode != 0 and "adversarial" in (r.stdout + r.stderr), \
         "three blind rounds closed an R3 node: " + r.stdout + r.stderr
 
 
-@case("rounds owed by risk class: an R3 node closes after three rounds, the last adversarial; an R1 after one")
+@case("certify: rounds owed by risk class: an R3 node closes after three passing rounds, one of them adversarial; an R1 after one")
 def _():
     gp_node = node("N-001")
     gp_node["risk"] = "R3"
@@ -2160,6 +2160,51 @@ def _():
                         str(pathlib.Path(d1) / "verdict-N-001.json"),
                         "--graph", str(pathlib.Path(d1) / "graph.json")], capture_output=True, text=True)
     assert r.returncode == 0, r.stdout + r.stderr
+
+
+@case("certify: rounds owed count PASSING rounds: a failed round owes its replacement, and the adversarial round must pass")
+def _():
+    def failing():
+        r = three()
+        r[1].update(verdict="fail", confirms=[], findings=[breaks()])
+        return r
+
+    def try_close(d):
+        r = subprocess.run([sys.executable, str(GRAPH), "close", "--verdict",
+                            str(pathlib.Path(d) / "verdict-N-001.json"),
+                            "--graph", str(pathlib.Path(d) / "graph.json")], capture_output=True, text=True)
+        return r.returncode, r.stdout + r.stderr
+
+    def risky(cls):
+        n = node("N-001")
+        n["risk"] = cls
+        return g([n])
+
+    # R2: fail, pass -> one passing round of two
+    _, _, d = certify(risky("R2"), failing())
+    certify(None, three(), workdir=d)
+    code, out = try_close(d)
+    assert code != 0 and "1 of 2" in out, "R2 fail,pass closed or misreported: " + out
+    # R3: fail, fail, adversarial pass -> one passing round of three
+    _, _, d = certify(risky("R3"), failing())
+    certify(None, failing(), workdir=d)
+    certify(None, three(), "--kind", "adversarial", workdir=d)
+    code, out = try_close(d)
+    assert code != 0 and "1 of 3" in out, "R3 fail,fail,adv-pass closed: " + out
+    # R3: pass, pass, adversarial FAIL, pass -> three passes, none adversarial
+    _, _, d = certify(risky("R3"), three())
+    certify(None, three(), workdir=d)
+    certify(None, failing(), "--kind", "adversarial", workdir=d)
+    certify(None, three(), workdir=d)
+    code, out = try_close(d)
+    assert code != 0 and "adversarial" in out, "R3 with a FAILED adversarial round closed: " + out
+    # R3: adversarial pass first, then pass, pass -> closes
+    _, _, d = certify(risky("R3"), three(), "--kind", "adversarial")
+    certify(None, three(), workdir=d)
+    code, out, _ = certify(None, three(), workdir=d)
+    assert code == 0 and "close it with" in out, out
+    code, out = try_close(d)
+    assert code == 0, "R3 adv-pass,pass,pass refused: " + out
 
 
 # Before the verdict, and the position matters: `report()` is idempotent (the atexit

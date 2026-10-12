@@ -20,12 +20,17 @@ orchestrating repository, not here). CHANGELOG `## Unreleased` lists the payload
 - **#114 `iter1/M-5-N-1`**, base `feat/release-iteration` — `stage_checkpoint.py record
   --unavailable --for-run` and the hook that honours it; both installers deliver all three
   skills and name the hooks they cannot carry.
-- Both are in verification rounds (round 1 fixed; the seam tier runs in round 2). Not
-  merged, not versioned: the version, its CHANGELOG heading and the tag come with the
-  iteration's release.
+- Both are in verification rounds: rounds 1–3 found breaks and each was fixed in its one
+  fix cycle (round 3: owed rounds counted as PASSING rounds, `risk` carried onto graph
+  nodes by `waves.py sync-graph`, lossless lesson I/O under a non-UTF-8 locale, the
+  memory marker keyed to the run's topic and start date). Not merged, not versioned: the
+  version, its CHANGELOG heading and the tag come with the release iteration's release.
+- Open outside this repository: the `lessons/` directory under `~/.sshlg-skills` is
+  proposed to sshlg-skills, **pending its board row** — the docs say so and claim nothing.
 
-**Next task:** round 2 of verification on both PRs; then the orchestrator merges #114 into
-#112 and #112 into `main`, and the release step versions the `## Unreleased` section.
+**Next task:** round 4 of verification on both PRs, at their new heads; then the
+orchestrator merges #114 into #112 and #112 into `main`, and the release step versions the
+`## Unreleased` section.
 
 ## v1.93.3 (shipped, #113), a patch to wave 2
 

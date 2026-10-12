@@ -11,14 +11,15 @@ inventory; a closed hotfix lane of five entries is the only exception.
   wave paragraph names the loop.
 - **Risk classes R1–R3** on each node (`graph.schema.json` and `graph.py validate` accept
   `risk`; any other value is refused). A round is the three blind tiers plus one fix cycle;
-  the first is always the full three; R1 owes one round, R2 two, R3 three with the last
-  adversarial. A wave's stage 7 integrates without tagging; the release's stage-7 gate and
+  the first is always the full three; R1 owes one passing round, R2 two, R3 three, one of
+  them recorded adversarial. A wave's stage 7 integrates without tagging; the release's stage-7 gate and
   stage 8's trio run once, at steps 10 and 11.
 - **Lessons across projects.** lesson/1 (`templates/lesson.schema.json`) and
   `scripts/lessons.py`: a retro entry with a `**Lesson:**` line becomes a lesson in a local
   index every install has (`~/.sshlg-skills/lessons/index.jsonl` where the family's directory
-  exists, accepted by the family as task-pipeline's; `~/.task-pipeline/lessons/index.jsonl`
-  otherwise; `$TASK_PIPELINE_LESSONS` or `--index` move it). Source 7b
+  exists — proposed to the family, pending an sshlg-skills board row;
+  `~/.task-pipeline/lessons/index.jsonl` otherwise, moved there once, aloud, if the family's
+  directory appears later; `$TASK_PIPELINE_LESSONS` or `--index` move it). Source 7b
   of the harvest reads it by the task's nouns, then a shared store whose search filters by
   kind. Writing to Observatory works today through `observatory_record`. The redaction list
   binds every lesson; on the estate it relaxes rule 2 for the evidence commit and a
@@ -36,8 +37,10 @@ inventory; a closed hotfix lane of five entries is the only exception.
 - New suites in `npm test`: `lessons_test.py`, `waves_test.py`, `continuity_doc_test.py`;
   eval INSTR-08 (wave 0).
 - **Rounds owed are enforced.** `graph.py close` refuses a node with a `risk` until its
-  class's rounds have passed (R1 one, R2 two, R3 three, one recorded with `certify --kind
-  adversarial`); `certify` prints `round N of M owed — not closable yet`. certification.md
+  class's rounds have passed — passing rounds, read from the certification history; a
+  failed round counts for nothing (R1 one, R2 two, R3 three, one of them a passing round
+  recorded with `certify --kind adversarial`); `certify` prints `N of M owed passing rounds
+  — not closable yet`. certification.md
   gains *Rounds owed by risk class*, and the churn doctrine exempts owed rounds from "a clean
   round ends the loop".
 - `waves.py sync-graph` judges a re-cut as a whole, so a chain moved up a wave is never
@@ -46,6 +49,12 @@ inventory; a closed hotfix lane of five entries is the only exception.
 - `lessons.py emit-observatory` sends the commit as `commit:` + 12 hex (the store's redactor
   keeps that form and removes a 40-hex SHA) and revises a recorded lesson instead of minting
   a second; a git that does not answer in time is its own refusal.
+- `waves.py sync-graph` also writes each plan node's `risk` onto its work-graph node (a
+  `risk` revision; lowering a class needs `--lower-why`), so the rounds `close` enforces
+  apply to every planned node, not only to a hand-edited graph.
+- `lessons.py` reads stdin as UTF-8 and prints machine output as ASCII-escaped JSON, so a
+  non-UTF-8 locale loses nothing a lesson carries; `rebuild` lists a repository it cannot
+  read and goes on, and replaces a corrupt index instead of refusing it.
 
 ## v1.93.3 — the wave-2 evidence declares its dead commits; a retried handoff stays one offer
 

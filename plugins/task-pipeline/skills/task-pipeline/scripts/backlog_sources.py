@@ -27,7 +27,8 @@ outside one organisation.
 - `excludeIds` is a unique list of strings; `idPattern` is a literal prefix, optionally with
   `[0-9]+` or `\\d+`, anchored at both ends. Two identical declarations are refused.
 - A key the schema does not name is refused, at the top and on a source; `heading` is a
-  string; `statusColumn`, `defaultStatus`, `excludeIds` and `idPattern` are checked on every
+  string; `idColumn`, `titleColumn`, `statusColumn`, `defaultStatus`, `excludeIds` and
+  `idPattern` are checked on every
   source, whatever its kind. Where `jsonschema` is installed the shipped schema is applied too.
 
 Output, on success: one JSON object — `repository`, `tasks` (each declaration as given, the
@@ -135,8 +136,9 @@ def check(root: pathlib.Path, found: list[str]) -> tuple[int, dict | None, list[
             errs.append(f"{where}: `heading` is not a string")
         # These hold on EVERY source, whatever its kind or format: the schema says so, and
         # a rule checked only on a task table is a rule a context source can break.
-        if "statusColumn" in s and not _nonempty(s.get("statusColumn")):
-            errs.append(f"{where}: `statusColumn` is empty")
+        for col in ("idColumn", "titleColumn", "statusColumn"):
+            if col in s and not _nonempty(s.get(col)):
+                errs.append(f"{where}: `{col}` is empty")
         if "defaultStatus" in s and s.get("defaultStatus") != "open":
             errs.append(f"{where}: `defaultStatus` may only be \"open\"")
         ex = s.get("excludeIds")

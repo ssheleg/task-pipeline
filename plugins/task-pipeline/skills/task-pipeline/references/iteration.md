@@ -55,7 +55,7 @@ reason. "It is quick" is not one of the five entries.
 | 2 | Module dossiers | one dossier per cluster of items, written in parallel | every inventory item sits in exactly one dossier |
 | 3 | Integration | the canvas of the next version ([`waves.md`](waves.md) → *The canvas*) | a pass changes no dossier, or the remaining conflict became a question |
 | 4 | Question round | answers from the sources, then one batch to the operator | every question is answered, assumed, or blocks a named node |
-| 5 | Plan | the work graph with waves, and one packet per node | every REQ lands on a node; [`planning.md`](planning.md)'s set comparison holds |
+| 5 | Plan | the work graph with waves and risk classes — `scripts/waves.py sync-graph` writes each node's `wave` and `risk` from the plan, so `graph.py close` enforces the rounds it owes — and one packet per node | every REQ lands on a node; [`planning.md`](planning.md)'s set comparison holds |
 | 6 | Build | parallel agents, each owning disjoint files | each node is committed on its branch, with its own checks green |
 | 7 | Verify | rounds per node, starting as each node lands | each node passes its risk class's rounds |
 | 8 | Seam check | cross-module checks per seam group | every seam the canvas names is exercised end to end |
@@ -151,7 +151,7 @@ the node owes:
 |---|---|---|
 | R1 | docs, config, a mechanical change, one isolated file | 1: that first round |
 | R2 | an ordinary feature or fix inside one module | 2: the first round, then a second over the fix diff with its regression tests |
-| R3 | security, cryptography, money, a data migration, a public contract, a seam across repositories, concurrency | 3: the first two, then an adversarial round that plants defects and tries abuse cases, on another model where one is available |
+| R3 | security, cryptography, money, a data migration, a public contract, a seam across repositories, concurrency | 3, one of them recorded adversarial — a round that plants defects and tries abuse cases, on another model where one is available |
 
 - Each round's fix cycle stays inside [`loop-guard.md`](loop-guard.md)'s caps. A finding
   that cannot be fixed in the node is parked with a board row.
@@ -161,8 +161,9 @@ the node owes:
   adversarial round is run).
 - Every owed round runs, and every round re-runs all three tiers: a tier that passed in an
   earlier round read a tree the fix has since moved ([`certification.md`](certification.md)
-  → a passing tier is re-run). A clean round does not cancel the next one; R3's third round
-  asks a different question — it hunts for a planted defect — and always runs.
+  → a passing tier is re-run). A clean round does not cancel the next one, and only passing
+  rounds count. R3's adversarial round asks a different question — it hunts for a planted
+  defect — and always runs; it counts only when it passes.
 - Readers stay blind ([`certification.md`](certification.md) → *Blind*). Each reads the
   diff, the packet and the contract, never the builder's reasoning.
 
@@ -242,11 +243,12 @@ as before, plus a **local index** of every project's lessons on this machine:
 (`lessons.py rebuild --roots <dir>` re-derives it). Two projects holding one class key make
 one lesson seen twice, status `candidate`. The index path is a parameter — `--index`, then
 `$TASK_PIPELINE_LESSONS`, then `~/.sshlg-skills/lessons/index.jsonl` **when
-`~/.sshlg-skills` already exists** — the family's machine-state directory, where the family
-accepted `lessons/` as task-pipeline's on 2026-10-12 ("state-json.md gets the entry when it
-ships"; until it ships, that agreement is the contract) — and otherwise
+`~/.sshlg-skills` already exists** — the family's machine-state directory, where `lessons/`
+is proposed as task-pipeline's (**pending an sshlg-skills board row** and its
+`state-json.md` entry; not yet recorded there) — and otherwise
 `~/.task-pipeline/lessons/index.jsonl`, so a standalone install never creates the family's
-directory. Nothing in this skill writes anywhere else under either.
+directory. When `~/.sshlg-skills` appears later, the first run moves the standalone index
+there once and says so. Nothing in this skill writes anywhere else under either.
 
 **Layer 2 — where the session lists a shared store.** An Observatory (the public engine,
 [passioncode-ai/project-observatory-dashboard](https://github.com/passioncode-ai/project-observatory-dashboard)),

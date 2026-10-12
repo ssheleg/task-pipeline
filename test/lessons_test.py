@@ -337,7 +337,8 @@ def main():
     rc, out, err = run("add", "--retro", "docs/evidence/retro.md", "--all", cwd=c, index=idx)
     ok(rc == 0, f"a heading in Cyrillic is a valid anchor ({rc} {err!r})")
     rc, out, _ = run("show", lid, index=idx)
-    ok("ворота-открылись-дважды" in out, "the anchor keeps its Unicode letters")
+    ok("ворота-открылись-дважды" in json.dumps(json.loads(out), ensure_ascii=False),
+       "the anchor keeps its Unicode letters")
 
     # --- a directory the script did not create keeps its mode
     shared = tree("tp-lessons-shared-")
@@ -386,6 +387,24 @@ def main():
     rc, out, _ = run("query", "gate", index=idx, env_extra={"LC_ALL": "en_US.ISO8859-1", "PYTHONUTF8": "0",
                                                           "PYTHONIOENCODING": ""})
     ok(rc == 0, f"query under an ISO-8859-1 locale exits 0 ({rc})")
+    # ...and nothing is lost there: what a machine reads (emit, show) is lossless JSON, and
+    # what comes in on stdin is read as UTF-8 whatever the locale.
+    latin = {"LC_ALL": "en_US.ISO8859-1", "PYTHONUTF8": "0", "PYTHONIOENCODING": ""}
+    cyr = dict(single, classKey="cyrillic-title", title="проверка читает артефакт, а не строку успеха")
+    rc, _, err = run("add", "--json", "-", cwd=a, stdin=json.dumps(cyr, ensure_ascii=False), index=idx,
+                     env_extra=latin)
+    ok(rc == 0, f"add --json - under ISO-8859-1 ({rc} {err!r})")
+    stored = [json.loads(ln) for ln in idx.read_text(encoding="utf-8").splitlines()
+              if json.loads(ln)["classKey"] == "cyrillic-title"]
+    ok(stored and stored[0]["title"] == cyr["title"],
+       f"a Cyrillic title read from stdin under ISO-8859-1 is stored intact ({stored[0]['title'] if stored else None!r})")
+    cid = stored[0]["id"]
+    rc_u, out_u, _ = run("emit-observatory", cid, cwd=a, index=idx)
+    rc_l, out_l, _ = run("emit-observatory", cid, cwd=a, index=idx, env_extra=latin)
+    ok(rc_u == 0 and rc_l == 0 and json.loads(out_l) == json.loads(out_u),
+       "emit-observatory under ISO-8859-1 gives the same JSON as under UTF-8: lossless")
+    rc_s, out_s, _ = run("show", cid, index=idx, env_extra=latin)
+    ok(rc_s == 0 and json.loads(out_s)["title"] == cyr["title"], "show under ISO-8859-1 is lossless too")
 
     # --- the schema's anchor pattern is the script's, character for character
     ok(sch["properties"]["origin"]["properties"]["retro"]["pattern"] == L.RETRO_REF.pattern,
@@ -409,6 +428,18 @@ def main():
     js_known = tuple(_re2.findall(r"'([^']+)'", _re2.search(r"const KNOWN = \[(.*?)\]", js, _re2.S).group(1)))
     ok(L.ARTIFACT_REGISTERS == js_regs and L.ARTIFACT_KNOWN == js_known,
        f"lessons.py reads the artifact root with artifact-root.js's names and registers ({L.ARTIFACT_REGISTERS} vs {js_regs})")
+
+    # --- rebuild never aborts on one repository, nor on the corrupt index it exists to replace
+    rb2 = work / "rb2" / "index.jsonl"
+    rb2.parent.mkdir(parents=True, exist_ok=True)
+    rb2.write_text("{not json\n", encoding="utf-8")
+    rc, out, err = run("rebuild", "--roots", str(roots), index=rb2)
+    ok(rc == 0 and "previous index" in out and "absence-needs-its-own-check" in rb2.read_text(encoding="utf-8"),
+       f"rebuild replaces a corrupt index instead of refusing it ({rc} {out!r} {err!r})")
+    rc, out, err = run("rebuild", "--roots", str(roots), index=work / "rb3" / "index.jsonl",
+                       env_extra={"PATH": f"{shim}:{os.environ['PATH']}", "TASK_PIPELINE_GIT_TIMEOUT": "1"})
+    ok(rc == 0 and out.count("not read") >= 2 and "did not answer" in out,
+       f"a repository git cannot answer for is listed under not read, and the rebuild finishes ({rc} {out!r})")
 
     # --- lock contention: a held lock makes add refuse, nothing written
     try:
@@ -443,6 +474,24 @@ def main():
            f"four concurrent writers lose nothing; the env var names the index ({codes} {keys})")
     else:
         print("note: no fcntl here — the lock cases were not run")
+
+    # --- the default index never switches silently: once ~/.sshlg-skills appears, the
+    # standalone index is moved there once, and the move is said
+    h2 = tree("tp-lessons-home2-")
+    rc, _, err = run("add", "--json", "-", cwd=a, stdin=json.dumps(dict(single, classKey="before-the-move")),
+                     env_extra={"HOME": str(h2)})
+    legacy = h2 / ".task-pipeline" / "lessons" / "index.jsonl"
+    ok(rc == 0 and legacy.is_file(), f"a standalone add writes ~/.task-pipeline/lessons ({rc} {err!r})")
+    (h2 / ".sshlg-skills").mkdir()
+    rc, out, err = run("candidates", "--min-projects", "1", env_extra={"HOME": str(h2)})
+    moved = h2 / ".sshlg-skills" / "lessons" / "index.jsonl"
+    ok(rc == 0 and "before-the-move" in out, f"after ~/.sshlg-skills appears the lessons are still read ({out!r})")
+    ok(moved.is_file() and "moved the local index" in err and str(legacy) in err,
+       f"the index is moved once, and the move is said ({err!r})")
+    ok(not legacy.exists() and legacy.with_name("index.jsonl.migrated").is_file(),
+       "the old file is kept beside, renamed .migrated, so nothing reads two indexes")
+    rc, _, err = run("candidates", env_extra={"HOME": str(h2)})
+    ok("moved the local index" not in err, "the move is said once, not on every run")
 
     # --- the default index: task-pipeline's own, unless the family's directory already exists
     rc, out, _ = run("path")

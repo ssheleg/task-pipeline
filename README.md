@@ -479,8 +479,8 @@ iteration runs in this order:
 - module dossiers written in parallel, laid onto one canvas until a pass changes nothing;
 - questions asked in rounds, never one at a time, while agents keep working;
 - a parallel build, each node checked the moment it lands: one round of three blind
-  readings for every node, and two or three rounds by its risk class (R2, R3 — the third
-  adversarial);
+  readings for every node, and two or three passing rounds by its risk class (R2, R3 — one
+  of the three recorded adversarial);
 - one release, checked as released;
 - the next pool, handed to you grouped by module.
 

@@ -195,8 +195,29 @@ def case_doctrine_names_script():
     print("PASS: the doctrine and the script name each other")
 
 
+def case_hand_rules_without_jsonschema():
+    """The hand rules alone — `jsonschema` made unimportable — refuse what the schema refuses:
+    a blank idColumn or titleColumn on ANY source, not only on a table."""
+    with tempfile.TemporaryDirectory(prefix="tp-bsrc-nojs-") as stub:
+        pkg = pathlib.Path(stub) / "jsonschema"
+        pkg.mkdir()
+        (pkg / "__init__.py").write_text("raise ImportError('hidden for this case')\n")
+        env = dict(os.environ, PYTHONPATH=stub)
+        for name, fn in (("blank idColumn on a checklist", lambda g: g["sources"][1].update(idColumn=" ")),
+                         ("blank titleColumn on a context source", lambda g: g["sources"][3].update(titleColumn=""))):
+            with tempfile.TemporaryDirectory(prefix="tp-bsrc-") as t:
+                d = repo(t, _mut(fn))
+                r = subprocess.run([sys.executable, str(SCRIPT), "--root", str(d)], capture_output=True,
+                                   text=True, timeout=60, env=env)
+                ok(r.returncode == 1 and ("idColumn" in r.stderr or "titleColumn" in r.stderr)
+                   and "schema:" not in r.stderr,
+                   f"{name}: refused by the hand rules alone ({r.returncode}: {r.stderr.strip()})")
+    print("PASS: without jsonschema the hand rules refuse a blank column name on any source")
+
+
 if __name__ == "__main__":
     for case in (case_no_manifest, case_good_manifest, case_malformed, case_symlinked_source,
-                 case_undeclared_finding, case_doctrine_names_script):
+                 case_undeclared_finding, case_doctrine_names_script,
+                 case_hand_rules_without_jsonschema):
         case()
     print(f"PASS: backlog_sources.py — {CASES} cases")

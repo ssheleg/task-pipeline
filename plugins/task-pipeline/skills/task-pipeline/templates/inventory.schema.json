@@ -83,7 +83,8 @@
               "graph_id": {"type": "string", "pattern": "^N-[0-9]{3,}$", "description": "The work-graph node this canvas node is built as, where the two ids differ; `sync-graph` moves that node."},
               "wave": {"type": ["integer", "null"], "minimum": 1},
               "closes": {"type": "array", "items": {"type": "string"}},
-              "release": {"enum": ["this", "program"]}
+              "release": {"enum": ["this", "program"]},
+              "risk": {"enum": ["R1", "R2", "R3"], "description": "The node's risk class; `sync-graph` writes it onto the work-graph node (a lowering needs --lower-why), and `graph.py close` enforces the rounds it owes."}
             }
           }
         }

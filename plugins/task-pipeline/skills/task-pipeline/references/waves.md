@@ -105,8 +105,9 @@ ids, and the plan's nodes with their `wave` and the items each `closes` — writ
 `node`, `wave` and `release` onto every item, and prints the counts. `waves.py validate`
 exits 1 when an item lands on no module or an open item on no node: either the canvas has a
 gap or the item is closed with its receipt or carried (`status: carried`, `release:
-program`). `waves.py sync-graph` writes the plan's waves onto the work graph with
-graph.py's lock and revision log — one `wave` revision per move — and judges the re-cut as
+program`). `waves.py sync-graph` writes the plan's waves and risk classes onto the
+work graph with graph.py's lock and revision log — one `wave` or `risk` revision per
+change, a lowered risk only with `--lower-why` — and judges the re-cut as
 a whole with graph.py's order rule, so moving a chain up a wave is never refused halfway. A re-cut is then a diff to a table
 and a re-run, which a reviewer can read; seven hundred hand-edited rows are not. The canvas,
 the question queue and each dossier start from [`templates/canvas.md`](../templates/canvas.md),

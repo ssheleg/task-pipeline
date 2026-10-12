@@ -289,6 +289,45 @@ def main():
                 {"schema": "inventory/1", "items": [it]})))
             ok(hand == schema_says, f"{it['id']}: item_errors says {hand}, inventory/1 says {schema_says}")
 
+    # --- sync-graph carries each plan node's risk onto the graph, so `close` enforces it
+    rk = {"goal": "a goal", "requirements": ["REQ-001"], "edges": [],
+          "nodes": [{"id": "N-001", "title": "t", "owner": "implementer", "status": "pending",
+                     "blocked_by": [], "serves": "REQ-001", "check": "npm test"}]}
+    rp = d / "risk-graph.json"
+    rp.write_text(json.dumps(rk))
+    (d / "plan-risk.json").write_text(json.dumps({"nodes": [{"id": "N-001", "wave": 1, "risk": "R3"}]}))
+    rc, out, err = run("sync-graph", "--plan", str(d / "plan-risk.json"), "--graph", str(rp), "--why", "plan")
+    gn = json.loads(rp.read_text())
+    ok(rc == 0 and gn["nodes"][0].get("risk") == "R3"
+       and any(r.get("verb") == "risk" and r.get("node") == "N-001" for r in gn.get("revisions", [])),
+       f"sync-graph writes the plan's risk onto the graph node, with a revision ({rc} {err!r})")
+    tdir = d / "risk-tiers"
+    tdir.mkdir()
+    tiers = []
+    for t in ("unit", "seam", "product"):
+        tp = tdir / f"{t}.json"
+        tp.write_text(json.dumps({"node": "N-001", "tier": t, "verdict": "pass", "scope": ["read x:1"],
+                                  "confirms": ["holds"], "findings": [], "evidence": ["ran it"],
+                                  "not_examined": []}))
+        tiers += ["--tier", str(tp)]
+    subprocess.run([sys.executable, str(GRAPH), "certify", "--node", "N-001", *tiers, "--graph", str(rp)],
+                   capture_output=True, text=True, cwd=ROOT)
+    r = subprocess.run([sys.executable, str(GRAPH), "close", "--verdict", str(d / "verdict-N-001.json"),
+                        "--graph", str(rp)], capture_output=True, text=True, cwd=ROOT)
+    ok(r.returncode != 0 and "1 of 3" in r.stdout + r.stderr,
+       f"the synced R3 node is refused by close after one round ({r.stdout + r.stderr!r})")
+    (d / "plan-lower.json").write_text(json.dumps({"nodes": [{"id": "N-001", "wave": 1, "risk": "R1"}]}))
+    before_lower = rp.read_bytes()
+    rc, out, err = run("sync-graph", "--plan", str(d / "plan-lower.json"), "--graph", str(rp), "--why", "re-cut")
+    ok(rc == 1 and "lower" in err and rp.read_bytes() == before_lower,
+       f"lowering a node's risk is refused without --lower-why, nothing written ({rc} {err!r})")
+    rc, out, err = run("sync-graph", "--plan", str(d / "plan-lower.json"), "--graph", str(rp), "--why", "re-cut",
+                       "--lower-why", "the money path moved to another node")
+    gn = json.loads(rp.read_text())
+    ok(rc == 0 and gn["nodes"][0]["risk"] == "R1"
+       and any(r.get("verb") == "risk" and "money path" in r.get("why", "") for r in gn["revisions"]),
+       f"with --lower-why the lowering is written and its reason recorded ({rc} {err!r})")
+
     # --- templates and doctrine
     tpl = SKILL / "templates"
     for name in ("inventory.schema.json", "backlog-sources.schema.json", "canvas.md", "questions.md", "dossier.md"):

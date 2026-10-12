@@ -207,7 +207,7 @@
         },
         "risk": {
           "enum": ["R1", "R2", "R3"],
-          "description": "The node's risk class (`references/iteration.md` → *Verification starts when a node lands*), computed from what it touches and never lowered to save time. It sets how many certification rounds the node owes: R1 one, R2 two, R3 three with the last adversarial. A round is the three blind tiers plus one fix cycle. Absent outside wave mode or a release iteration. `graph.py close` refuses a node until the rounds its class owes have passed."
+          "description": "The node's risk class (`references/iteration.md` → *Verification starts when a node lands*), computed from what it touches and never lowered to save time. It sets how many PASSING certification rounds the node owes (a failed round counts for nothing): R1 one, R2 two, R3 three, one of them recorded adversarial (`certify --kind adversarial`). A round is the three blind tiers plus one fix cycle. Absent outside wave mode or a release iteration. `graph.py close` refuses a node until the rounds its class owes have passed."
         },
         "wave": {
           "type": "integer",
@@ -459,9 +459,10 @@
             "close",
             "invalidate",
             "waive",
-            "wave"
+            "wave",
+            "risk"
           ],
-          "description": "Which mutation made this entry. `close` joined the two on 2026-08-17 with T-5 — and it was caught by a probe rather than by the fixture asserting *the graph after a close still validates*, because `violations()` never reaches an enum. The same disagreement B-084 records, one field over. `invalidate` joined with PF-02.02: a REQ/interface/brief change supersedes a node and resets its downstream proofs. `wave` joined with wave mode: the re-cut after every wave moves nodes between waves, and a move nobody recorded is the quiet re-plan `references/planning.md` refuses."
+          "description": "Which mutation made this entry. `close` joined the two on 2026-08-17 with T-5 — and it was caught by a probe rather than by the fixture asserting *the graph after a close still validates*, because `violations()` never reaches an enum. The same disagreement B-084 records, one field over. `invalidate` joined with PF-02.02: a REQ/interface/brief change supersedes a node and resets its downstream proofs. `wave` joined with wave mode: the re-cut after every wave moves nodes between waves, and a move nobody recorded is the quiet re-plan `references/planning.md` refuses. `risk` joined with the release iteration: `waves.py sync-graph` sets a node's risk class from the plan, and a lowering carries its own reason."
         },
         "node": {
           "type": "string",

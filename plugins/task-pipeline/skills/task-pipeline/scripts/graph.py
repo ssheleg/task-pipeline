@@ -88,7 +88,7 @@ TERMINAL = {"done", "parked"}
 NO_GRAPH = {"producer", "doctrine"}
 # One place, and the schema enumerates the same three. Two homes for this set is
 # what let `close` write a verb the format forbade.
-REVISION_VERBS = {"add", "park", "close", "invalidate", "waive", "wave"}
+REVISION_VERBS = {"add", "park", "close", "invalidate", "waive", "wave", "risk"}
 # Parking a node PROMOTES its dependents: `parked` is terminal, so anything
 # blocked on it becomes runnable even though the payload it waited on never
 # arrived. That is deliberate — `can_continue_around` in the verdict is the
@@ -635,6 +635,34 @@ RISK_CLASSES = ("R1", "R2", "R3")
 # round recorded `--kind adversarial`.
 ROUNDS_OWED = {"R1": 1, "R2": 2, "R3": 3}
 ROUND_KINDS = ("blind", "adversarial")
+
+
+def passing_rounds(cert):
+    """The kinds of the rounds that PASSED — every tier of the round `pass` — in order.
+
+    Owed rounds are passing rounds. `certification.round` counts every round, failed ones
+    too, so reading it let a fail followed by a pass satisfy an R2 node (verification round 3
+    of the release iteration). Rounds recorded before `kinds` existed count as `blind`."""
+    cert = cert or {}
+    history = list(cert.get("history") or [])
+    kinds = list(cert.get("kinds") or [])
+    kinds += ["blind"] * (len(history) - len(kinds))
+    return [k for h, k in zip(history, kinds) if h and all(v == "pass" for v in h.values())]
+
+
+def owed_shortfall(node):
+    """None when the node's class is satisfied, else a sentence saying what it still owes."""
+    owed = ROUNDS_OWED.get(node.get("risk"))
+    if not owed:
+        return None
+    passed = passing_rounds(node.get("certification"))
+    if len(passed) < owed:
+        return "%d of %d owed passing rounds" % (len(passed), owed)
+    if node.get("risk") == "R3" and "adversarial" not in passed:
+        return ("%d of %d owed passing rounds, but none of them adversarial — a FAILED "
+                "adversarial round does not count; run one that passes with `--kind adversarial`"
+                % (len(passed), owed))
+    return None
 
 
 def _is_wave(w):
@@ -1709,21 +1737,15 @@ def cmd_certify(graph, args):
     os.replace(tmp, out)
     print("%s: certified at %s in round %d" % (nid, ", ".join(tiers), round_no))
     owed = ROUNDS_OWED.get(node.get("risk"))
-    if owed and round_no < owed:
-        print("round %d of %d owed — not closable yet. The next round reads the node's whole "
-              "diff at the new HEAD (references/certification.md → *Rounds owed by risk "
-              "class*)%s." % (round_no, owed,
-                              "; one round must be `--kind adversarial`"
-                              if node.get("risk") == "R3" and "adversarial" not in kinds else ""))
-        print("verdict written to %s" % out)
-        return 0
-    if node.get("risk") == "R3" and "adversarial" not in kinds:
-        print("round %d of %d owed, and none was adversarial — not closable yet: run the "
-              "adversarial round and record it with `--kind adversarial`" % (round_no, owed))
+    short = owed_shortfall(node)
+    if short:
+        print("round %d: %s — not closable yet. The next round reads the node's whole diff at "
+              "the new HEAD (references/certification.md → *Rounds owed by risk class*)."
+              % (round_no, short))
         print("verdict written to %s" % out)
         return 0
     if owed:
-        print("round %d of %d owed — closable." % (round_no, owed))
+        print("%d of %d owed passing rounds — closable." % (len(passing_rounds(node["certification"])), owed))
     print("verdict written to %s — close it with:" % out)
     print("  graph.py close --verdict %s" % out)
     return 0
@@ -1829,16 +1851,11 @@ def cmd_close(graph, args):
     # Rounds owed by risk class (`references/certification.md`). Enforced here, in the
     # mutation, for the reason the failing-tier gate below is: a hand-shaped verdict must
     # not step around it. An authorized exception (`waive`) stays the only way past.
-    owed = ROUNDS_OWED.get(node.get("risk"))
-    if owed and not exc:
-        done_rounds = int((cert or {}).get("round") or 0)
-        if done_rounds < owed:
-            die("%s is %s and owes %d certification round(s); %d of %d done — not closable "
-                "yet. Run the next round with `graph.py certify`. Nothing was written."
-                % (nid, node["risk"], owed, done_rounds, owed))
-        if node["risk"] == "R3" and "adversarial" not in ((cert or {}).get("kinds") or []):
-            die("%s is R3 and none of its %d rounds was adversarial — record one with "
-                "`certify --kind adversarial`. Nothing was written." % (nid, done_rounds))
+    short = owed_shortfall(node)
+    if short and not exc:
+        die("%s is %s: %s — not closable yet. Run the next round with `graph.py certify`, "
+            "or record an authorized exception with `waive`. Nothing was written."
+            % (nid, node["risk"], short))
     if cert:
         tiers = cert.get("tiers") or {}
         failing = sorted(k for k, val in tiers.items() if val != "pass")
