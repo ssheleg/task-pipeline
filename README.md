@@ -201,7 +201,7 @@ until it is installed.
 | 6–10 + any check you write | [`gates.md`](plugins/task-pipeline/skills/task-pipeline/references/gates.md) — the three axes, the promotion ladder, gate anatomy, the probe recipe, ratchet floors |
 | any agent-time enforcement | [`hooks.md`](plugins/task-pipeline/skills/task-pipeline/references/hooks.md) — the `PreToolUse` contract, the fail-open hazard, the Claude-Code-only limit |
 | 7 · the tag | [`deploy-targets.md`](plugins/task-pipeline/skills/task-pipeline/references/deploy-targets.md) → *When the release waits for an approval* — `pipeline.json` → `release.approval`: `checks` (tag, watch the run selected by the tag, report) or `reviewers` (the direct link to the run that is `waiting`) |
-| between stages | [`continuity.md`](plugins/task-pipeline/skills/task-pipeline/references/continuity.md) Part 3 — workflow memory through Observatory, a planned handoff (`stage_checkpoint.py handoff` / `accept`), and `hooks/memory-nudge.sh`, which reminds once when a gate returned with no memory line after it |
+| between stages | [`continuity.md`](plugins/task-pipeline/skills/task-pipeline/references/continuity.md) Part 3 — workflow memory through Observatory, a planned handoff (`stage_checkpoint.py handoff` / `accept`), and `hooks/memory-nudge.sh`, which reminds once when a gate returned with no memory line after it — unless the run recorded memory unavailable with `--for-run` |
 
 **Ported, not depended on.** Stage 0 is adapted from
 [Matt Pocock's `grilling` / `grill-with-docs`](https://github.com/mattpocock/skills)

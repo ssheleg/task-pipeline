@@ -90,6 +90,17 @@ def main():
     with (r / ".task-pipeline" / "run.md").open("a", encoding="utf-8") as f:
         f.write("stage: 8 S — gate auto — verdict pass — 2026-10-12T18:00Z\n")
     ok("stage 8" in hook(r), "an unreadable marker file nudges as before, never blocks")
+    # The marker belongs to the run that wrote it: a new run (another `Run:` line) is nudged,
+    # with the Observatory pointer, even when an old marker is still on disk.
+    m = project(HEAD.replace("Run: `x`", "Run: `run-a`") + STAGE)
+    hook(m)
+    subprocess.run([sys.executable, str(ck), "record", "--unavailable", "no Observatory", "--for-run"],
+                   cwd=m, check=True, capture_output=True)
+    (m / ".task-pipeline" / "run.md").write_text(
+        HEAD.replace("Run: `x`", "Run: `run-b`") + STAGE.replace("stage: 3", "stage: 1"), encoding="utf-8")
+    fresh_run = hook(m)
+    ok(fresh_run != "" and "stage 1" in fresh_run and "project-observatory-dashboard" in fresh_run,
+       "a marker written under Run a does not silence Run b: nudged, with the pointer")
     print(f"PASS: memory-nudge.sh — {CASES} cases")
 
 

@@ -233,8 +233,16 @@ def record(ledger: pathlib.Path, answer_text: str | None, unavailable: str | Non
             # Observatory paid one nudge and one ledger line per gate — about eleven of
             # each — to restate a fact that does not change between gates.
             line = f"event: memory — unavailable for this run — {reason} — {_now()}"
+            # The marker carries the run's topic: the hook honours it only while the ledger
+            # names the same run, so a marker left on disk cannot silence the next run.
+            try:
+                topic = next((m.group(1) for m in map(TOPIC.match, ledger.read_text(
+                    encoding="utf-8").splitlines()) if m), None)
+            except OSError:
+                topic = None
             state = _load_state(ledger)
-            state["memory"] = {"unavailable": {"reason": reason, "at": _now(), "ledger_line": line}}
+            state["memory"] = {"unavailable": {"reason": reason, "at": _now(), "ledger_line": line,
+                                               "run": topic}}
             _save_state(ledger, state)
         else:
             line = f"event: memory — unavailable — {reason} — {_now()}"

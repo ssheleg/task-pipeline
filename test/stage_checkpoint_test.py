@@ -300,6 +300,22 @@ def case_unavailable_for_the_run():
        "a later successful answer clears the marker: Observatory came back")
     code, out, _ = run(d, "state")
     ok(json.loads(out)["memoryUnavailable"] is None, "state no longer reports it")
+    for answer, what in (({"error": "LeaseLost", "keptAs": "mem:k"}, "a refusal"),
+                         ({"handoffId": "handoff:h1"}, "a handoff offer")):
+        e = fresh()
+        stage(e, 0, "Intake grill", "pass", "2026-10-05T10:00Z")
+        run(e, "record", "--unavailable", "none here", "--for-run")
+        sp = e / ".task-pipeline" / "memory.json"
+        if what == "a handoff offer":
+            sp.write_text(json.dumps({**json.loads(sp.read_text()), "workflowId": "wf:1"}))
+        code, _, _ = record(e, answer)
+        ok(code == 0 and "memory" not in json.loads(sp.read_text()),
+           f"{what} clears the marker too: the tools answered")
+    g = fresh()
+    stage(g, 0, "Intake grill", "pass", "2026-10-05T10:00Z")
+    run(g, "record", "--unavailable", "none here", "--for-run")
+    ok(json.loads((g / ".task-pipeline" / "memory.json").read_text())["memory"]["unavailable"]["run"]
+       == "ship the invoice exporter", "the marker carries the run's topic")
     print("PASS: memory unavailable for the run is one marker and one line; an answer clears it")
 
 

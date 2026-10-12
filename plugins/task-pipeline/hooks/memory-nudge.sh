@@ -10,7 +10,8 @@
 #
 # Silent for the rest of a run that recorded memory unavailable FOR THE RUN
 # (`stage_checkpoint.py record --unavailable "<why>" --for-run` writes a marker into
-# .task-pipeline/memory.json; a later `record --answer` clears it). Without that marker a
+# .task-pipeline/memory.json carrying the run's `Run:` topic; the marker is honoured only
+# while the ledger names that same run, and a later `record --answer` clears it). Without that marker a
 # machine with no Observatory paid about eleven nudges per run for one unchanging fact
 # (USR-008). The first nudge of a run also says where Observatory comes from, once.
 #
@@ -34,9 +35,12 @@ for i, l in enumerate(lines):
 if last_stage < 0 or last_mem > last_stage:
     sys.exit(0)
 here = os.path.dirname(ledger)
+topic = next((m.group(1) for m in (re.match(r"^Run:\s*`([^`]+)`", l) for l in lines) if m), None)
 try:
     marker = (json.load(open(os.path.join(here, "memory.json"), encoding="utf-8")).get("memory") or {})
-    if marker.get("unavailable"):
+    gone = marker.get("unavailable") or {}
+    # Honoured only for the run that wrote it: a marker from another `Run:` is stale.
+    if gone and topic is not None and gone.get("run") == topic:
         sys.exit(0)
 except (OSError, ValueError, AttributeError):
     pass  # no marker, or one that cannot be read: nudge as before, never block
