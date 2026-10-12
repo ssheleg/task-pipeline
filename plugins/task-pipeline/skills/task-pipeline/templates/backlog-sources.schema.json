@@ -1,0 +1,96 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/ssheleg/task-pipeline/blob/main/plugins/task-pipeline/skills/task-pipeline/templates/backlog-sources.schema.json",
+  "title": "backlog-sources/1 — docs/backlog-sources.json",
+  "description": "The declared task sources a wave-0 harvest reads (references/waves.md, Wave 0; references/backlog.md, A declared source list). Where a repository carries docs/backlog-sources.json, the harvest reads exactly the sources it lists, with the id, title and status columns each names, and a source of open work it does not list is reported as a finding. This schema is the rule for anyone using this skill. It is compatible with the Fabric workspace's source contract of the same name (cited as provenance, not authority), with one deliberate widening: `repository` may be any GitHub repository. Two rules a schema cannot state are the harvest's: each `path` exists as a regular file reached through no symlink, and no two declarations are identical.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "repository", "sources"],
+  "properties": {
+    "schema": {"const": 1},
+    "repository": {
+      "description": "The canonical URL of the repository the manifest lives in.",
+      "type": "string",
+      "pattern": "^https://github\\.com/[A-Za-z0-9][A-Za-z0-9-]{0,38}/\\.?[A-Za-z0-9][A-Za-z0-9._-]{0,99}$"
+    },
+    "sources": {
+      "description": "1-100 declarations. A context-only repository still declares one.",
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 100,
+      "items": {"$ref": "#/$defs/source"}
+    }
+  },
+  "$defs": {
+    "path": {
+      "description": "Relative, inside the repository, with no hidden, `.` or `..` segment.",
+      "type": "string",
+      "maxLength": 700,
+      "pattern": "^(?![./])(?!.*(?:^|/)\\.)(?!.*//)[^\\\\\\x00-\\x1f\\x7f?#%:]+$"
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "goal"],
+      "properties": {
+        "path": {"$ref": "#/$defs/path"},
+        "goal": {
+          "description": "The goal anchor the source serves.",
+          "enum": ["agent-workplace", "workflow-control", "interoperability", "reliable-work", "shared-context"]
+        },
+        "kind": {"enum": ["tasks", "context"], "default": "tasks"},
+        "format": {"enum": ["table", "checklist", "json-tasks"]},
+        "heading": {"type": "string", "description": "The section of the file the tasks sit under."},
+        "idColumn": {"type": "string", "minLength": 1, "pattern": "\\S"},
+        "titleColumn": {"type": "string", "minLength": 1, "pattern": "\\S"},
+        "statusColumn": {"type": "string", "minLength": 1, "pattern": "\\S"},
+        "defaultStatus": {"const": "open"},
+        "idPattern": {
+          "description": "A literal prefix, optionally followed by [0-9]+ or \\d+, anchored at both ends.",
+          "type": "string",
+          "pattern": "^\\^[A-Za-z0-9._/-]+(?:\\[0-9\\]\\+|\\\\d\\+)?\\$$"
+        },
+        "excludeIds": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"type": "string", "minLength": 1, "pattern": "\\S"}
+        }
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"kind": {"const": "context"}}, "required": ["kind"]},
+          "then": {"properties": {"path": {"pattern": "\\.md$"}}},
+          "else": {"required": ["format"]}
+        },
+        {
+          "if": {"properties": {"kind": {"const": "tasks"}, "format": {"const": "json-tasks"}}, "required": ["format"]},
+          "then": {"properties": {"path": {"pattern": "\\.json$"}}}
+        },
+        {
+          "if": {"properties": {"format": {"enum": ["table", "checklist"]}}, "required": ["format"]},
+          "then": {"properties": {"path": {"pattern": "\\.md$"}}}
+        },
+        {
+          "if": {"properties": {"format": {"const": "table"}}, "required": ["format"]},
+          "then": {
+            "required": ["idColumn", "titleColumn"],
+            "oneOf": [
+              {"required": ["statusColumn"], "not": {"required": ["defaultStatus"]}},
+              {"required": ["defaultStatus"], "not": {"required": ["statusColumn"]}}
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "examples": [
+    {
+      "schema": 1,
+      "repository": "https://github.com/example-org/example-repo",
+      "sources": [
+        {"path": "docs/BACKLOG.md", "goal": "reliable-work", "format": "table", "heading": "Open", "idColumn": "id", "titleColumn": "title", "statusColumn": "status", "idPattern": "^B-[0-9]+$"},
+        {"path": "docs/ROADMAP.md", "goal": "shared-context", "kind": "context"}
+      ]
+    }
+  ]
+}

@@ -21,6 +21,7 @@ exactly one seam, and that seam already existed as a dangling pointer.
 - A row that says work exists names where it lives
 - Priority is computed, not assigned
 - The shape is not fixed, so nothing may assume it
+- A declared source list — `docs/backlog-sources.json`
 - A decision is not debt — `waived`
 - What a loop iteration does with it
 - Rationalizations
@@ -160,6 +161,30 @@ So the rule, for anything that reads a board or a ledger:
 The same rule governs the verification ledger, where five shapes exist across this family
 and only one carries a column that can say a *person* looked
 ([`exposure.md`](exposure.md)).
+
+## A declared source list — `docs/backlog-sources.json`
+
+A project whose open work lives in several files — a board, a roadmap, a lane per product —
+can declare them, and then the board is exactly those files. Wave 0's harvest reads only the
+sources the manifest lists, with the id, title and status columns each one names
+([`waves.md`](waves.md) → *Wave 0*). A source of open work the manifest does not list is
+reported as a finding, never silently added; a status change lands only in the owning file,
+under a lease.
+
+**The shape is [`templates/backlog-sources.schema.json`](../templates/backlog-sources.schema.json)**
+(backlog-sources/1), and it is the rule for anyone using this skill:
+- `schema` is 1, `repository` the repository's canonical GitHub URL, `sources` 1–100 entries;
+- each source is a relative `path` (no hidden, `.` or `..` segment), a `goal` anchor, and a
+  `kind` — `tasks` (the default) or `context`;
+- a `tasks` source has a `format`: `table`, `checklist` or `json-tasks`. A table names its
+  `idColumn` and `titleColumn`, and exactly one of `statusColumn` or `defaultStatus: "open"`;
+- `idPattern` is a literal prefix, optionally `[0-9]+`, anchored at both ends; `excludeIds`
+  a unique list.
+
+Two rules a schema cannot state are the harvest's to check: each path is a regular file
+reached through no symlink, and no two declarations are identical. The Fabric workspace keeps
+a source contract this one is compatible with; that page is provenance, not authority, and a
+public reader never needs it.
 
 ## A decision is not debt — `waived`
 

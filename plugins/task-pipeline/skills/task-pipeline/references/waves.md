@@ -72,37 +72,41 @@ product has users, walk their real path in the built app on a fresh profile with
 disposable data. A finding is a fact with a receipt, never an impression.
 
 **A declared source list outranks discovery.** Where the repository carries
-`docs/backlog-sources.json` — the contract is owned by the Fabric workspace's
-`knowledge/backlog.md` — the harvest reads exactly the sources it lists, as the board,
+`docs/backlog-sources.json` — its shape is
+[`templates/backlog-sources.schema.json`](../templates/backlog-sources.schema.json)
+([`backlog.md`](backlog.md) → *A declared source list*) — the harvest reads exactly the
+sources it lists, as the board,
 with the id, title and status columns it names. Status changes land only in those owning
 files, under a lease. A new source joins the manifest in the same change. A generated
 view of them, such as a published common backlog, is never edited. A source of open
 work the manifest does not list is reported as a finding, not silently added.
 
 **One machine-readable inventory, nothing outside it.** A single committed file,
-`<artifacts>/specs/YYYY-MM-DD-<topic>-inventory.json`, one entry per open item:
-
-| Field | Carries |
-|---|---|
-| `id` | the item's id in its owning register; an item without one gets one there, in the same change |
-| `source` | where it was found, as `file:line` |
-| `status` | as measured, not as the register last said |
-| `area` | the part of the system it touches |
-| `node` | the canvas node it lands on |
-| `wave` | the wave that closes it, or the release it is carried to |
-| `release` | this release, or `program` |
-
-`blocked_by`, `closable_in_one_pass` and `notes` are worth carrying beside them.
+`<artifacts>/specs/YYYY-MM-DD-<topic>-inventory.json`, one item per open item. Its shape is
+[`templates/inventory.schema.json`](../templates/inventory.schema.json) (inventory/1): every
+item carries its `id` in the owning register, `title`, `area`, `kind`, `severity`, the
+`evidence` that is its receipt and a `proposed_fix`; `status` is as measured, not as the
+register last said; `module`, `node`, `wave` and `release` are written by the script below,
+never by hand. `scripts/waves.py merge <dir>` builds it from the survey outputs and refuses
+an item without evidence or an id seen twice.
 
 **Verify each open item against the code before trusting it.** A stale item is closed
 in its owning register with the receipt that shows it done; duplicates are clustered,
 both ids kept. A register that says *open* about shipped work is the commonest thing a
 survey finds.
 
-**Assign nodes and waves with a committed script, not by hand.** A deterministic script
-reads the inventory and a short wave table and writes `node`, `wave` and `release` onto
-every entry, then prints the counts per wave and per node. A re-cut is then a diff to a
-table and a re-run, which a reviewer can read; seven hundred hand-edited rows are not.
+**Assign nodes and waves with a committed script, not by hand.** `scripts/waves.py assign
+--modules <modules.json> --plan <plan.json> --write` reads two short tables — module → item
+ids, and the plan's nodes with their `wave` and the items each `closes` — writes `module`,
+`node`, `wave` and `release` onto every item, and prints the counts. `waves.py validate`
+exits 1 when an item lands on no module or an open item on no node: either the canvas has a
+gap or the item is closed with its receipt or carried (`status: carried`, `release:
+program`). `waves.py sync-graph` writes the plan's waves onto the work graph through
+`graph.py wave`, so each move is a recorded revision. A re-cut is then a diff to a table
+and a re-run, which a reviewer can read; seven hundred hand-edited rows are not. The canvas,
+the question queue and each dossier start from [`templates/canvas.md`](../templates/canvas.md),
+[`templates/questions.md`](../templates/questions.md) and
+[`templates/dossier.md`](../templates/dossier.md).
 
 ## The questions — closed from sources, then one batch
 

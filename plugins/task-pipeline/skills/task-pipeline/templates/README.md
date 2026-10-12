@@ -30,6 +30,11 @@ from `super-ux`.
 | `routing-rule.md` | the operator's `CLAUDE.md` — **offered by `setup`, never written silently** | 0 / `setup` |
 | `retro.md` | `docs/evidence/retro.md` — **one per project, not per run** | 10 writes (stamp → prune → entry), 0 reads it in full |
 | `retro-archive.md` | `docs/evidence/retro/YYYY-QN.md` | 10 rotates into it, 0 **queries** it |
+| `inventory.schema.json` | nothing is seeded: the shape of wave 0's `docs/evidence/specs/YYYY-MM-DD-<topic>-inventory.json` (inventory/1), and of the module table and plan `scripts/waves.py` reads | 0 (wave mode) — `waves.py merge` writes it, `assign` places it, `validate` refuses an item that lands nowhere |
+| `canvas.md` | `docs/evidence/specs/YYYY-MM-DD-<topic>-canvas.md` | 2–4 (wave mode, iteration step 3) — the target state over today's logic |
+| `questions.md` | `docs/evidence/specs/<topic>-questions.md` | 0–4, then every question round — the one queue: closed from sources, operator, peers, assumed |
+| `dossier.md` | `docs/evidence/specs/<topic>-dossiers/<letter>-<module>.md` | iteration step 2 — one per cluster, written in parallel; a risk class per node |
+| `backlog-sources.schema.json` | nothing is seeded: the shape of a project's `docs/backlog-sources.json` (backlog-sources/1) | 0 — the harvest reads exactly the sources it declares |
 | `lesson.schema.json` | nothing is seeded: the shape of one *lesson* (lesson/1), a retro entry's class carried by its `**Lesson:**` line into the local index (`scripts/lessons.py`, `~/.sshlg-skills/lessons/index.jsonl` by default) and, where the host lists one, the shared store | 10 writes (`lessons.py add`), 0 **queries** it (`lessons.py query`) |
 
 The documentation-track templates (`docmap.md`, `decisions.md`,
