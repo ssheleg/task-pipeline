@@ -1,6 +1,6 @@
 ---
 name: task-pipeline
-description: "Use when work changes the repository — feature, fix, bug, refactor, migration, integration, rewrite, adoption or hardening; фича, фикс, баг, рефактор, миграция, интеграция, доработать, починить, внедрить, перевести — or when the output is a finding that lands in it: audit/аудит, bug hunt/проверь ошибки, production check/проверь прод, PR review/ревью PR — or on 'run this through the pipeline' / 'прогони по конвейеру', 'the full cycle' / 'полный цикл', /task-pipeline. Runs a substantial task through gated stages: intake grill, docs, brainstorm, spec, plan, build, tests, deploy, post-deploy, docs/wiki, acceptance. 'waves' / 'волнами' closes the whole board; 'checkup' / 'чекап' lists unconfirmed releases; 'setup' audits docs. Not for: answering a question, explaining code, a typo, a one-line edit, a mechanical rename, reconnaissance that lands nothing — say 'no pipeline' / 'без пайплайна' to opt out."
+description: "Use when work changes the repository — feature, fix, bug, refactor, migration, integration, rewrite, adoption or hardening; фича, фикс, баг, рефактор, миграция, интеграция, доработать, починить, внедрить, перевести — or a finding that lands in it: audit/аудит, bug hunt/проверь ошибки, production check/проверь прод, PR review/ревью PR — or on 'run this through the pipeline' / 'прогони по конвейеру', 'the full cycle' / 'полный цикл', /task-pipeline. Runs a substantial task through gated stages: intake grill, docs, brainstorm, spec, plan, build, tests, deploy, post-deploy, docs/wiki, acceptance. 'waves' / 'волнами' closes the whole board; 'checkup' / 'чекап' lists unconfirmed releases; 'setup' audits docs. Not for: answering a question, explaining code, a typo, a one-line edit, a mechanical rename, reconnaissance that lands nothing — say 'no pipeline' / 'без пайплайна' to opt out."
 license: MIT
 compatibility: "Doctrine runs on any agent. The bundled scripts need python3; the run needs git. Missing either degrades, never blocks — the graph verbs and seeded gates go unused, and the run says so."
 ---
@@ -66,16 +66,7 @@ gate stops until it is installed.
 Which reference owns which stage — all forty-odd of them, by stage number:
 [`references/doctrine-map.md`](./references/doctrine-map.md).
 
-**Optional bridge.** An equivalent skill set the operator already runs can be mapped
-onto stages 2/4/5/6 in `pipeline.json` → `skills[]`. That is a **substitution, never a
-requirement**. And the precedence is explicit, because two layers could seem to
-disagree: on a CUSTOM profile the **kernel wins** — scope, evidence, deps and
-resume are owed by every unit of work — while `references/stages.md` is the
-**default profile's** normative gate set, governing the stages that profile
-actually selects, not imposing its stage numbers on a profile that dropped
-them. The built-in doctrine is normative for the default profile; the kernel is
-normative for all. Nothing detects, recommends or waits for an external
-provider.
+**Optional bridge** — mapping an equivalent skill set onto stages 2/4/5/6, and which layer wins on a custom profile: `references/companion-skills.md` → *Optional bridge — substituting an external skill set*.
 
 **super-ux — the preferred provider for ANY user-facing task.** The moment a task
 implies an interface (web / mobile / CLI / TUI), the WHY→UI→scenario chain runs

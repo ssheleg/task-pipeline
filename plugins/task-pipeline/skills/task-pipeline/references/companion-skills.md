@@ -120,6 +120,12 @@ Rules for that bridge:
   stage is done.
 - **Never mix providers inside one stage** — either the built-in doctrine runs it or
   the substitute does; interleaving two review loops produces neither.
+- **Which layer wins.** On a CUSTOM profile the **kernel wins** — scope, evidence,
+  deps and resume are owed by every unit of work — while `stages.md` is the
+  **default profile's** normative gate set, governing the stages that profile
+  actually selects and not imposing its stage numbers on a profile that dropped them.
+  The built-in doctrine is normative for the default profile; the kernel is normative
+  for all.
 
 ## Preflight (emit before stage 0)
 
