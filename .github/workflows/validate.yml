@@ -165,7 +165,7 @@ jobs:
     # Every guard watched rejecting a planted defect. The checks are files under
     # `test/negatives/`, one each, run by `test/negatives.py`. Until v1.93.0 they were
     # 448 inline steps of the validate job: 507,836 of GitHub's 512,000 bytes (past
-    # the limit a workflow creates no runs and reports nothing) and 62-105 minutes in
+    # the limit a workflow creates no runs and reports nothing) and 90-111 minutes in
     # one job. Each shard is its own runner, so the fixed `/tmp/<name>-copy` scratch
     # names never meet. fail-fast is off: one red shard must not cancel the evidence
     # the other seven would have produced. `test/validate.py` refuses a matrix that
@@ -191,6 +191,19 @@ jobs:
 
       - name: Negative self-tests and property checks, one shard
         run: python3 test/negatives.py --shard ${{ matrix.shard }}/8
+
+  negatives-all:
+    # One status for the eight shards, so the branch ruleset can require it: a matrix
+    # job reports eight contexts, and none of them was in main's required set, so a red
+    # shard did not block a merge (wave 2 seam reading). `always()` makes a failed or
+    # cancelled shard a failure here instead of a skip.
+    name: Negative self-tests
+    needs: negatives
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Every shard passed
+        run: test "${{ needs.negatives.result }}" = success
 
   plugin-conformance:
     # Split out of `validate` (TPA-09): this job's first act is an npm install
