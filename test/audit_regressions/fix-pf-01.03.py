@@ -25,6 +25,21 @@ import subprocess
 import sys
 import tempfile
 
+# Every temp tree this file makes goes at exit (hub waves R07: bare mkdtemp left
+# thousands of trees in a shared $TMPDIR). `test/validate.py` refuses a file that
+# calls mkdtemp with no cleanup.
+import atexit as _atexit
+import tempfile
+import shutil as _shutil
+_TMP_TREES = []
+_atexit.register(lambda: [_shutil.rmtree(_t, ignore_errors=True) for _t in _TMP_TREES])
+
+
+def _tmp(*a, **k):
+    _d = tempfile.mkdtemp(*a, **k)
+    _TMP_TREES.append(_d)
+    return _d
+
 sys.dont_write_bytecode = True
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -50,7 +65,7 @@ def case(name, fn):
 
 
 def fresh_db():
-    return os.path.join(tempfile.mkdtemp(), "auth.db")
+    return os.path.join(_tmp(), "auth.db")
 
 
 def t_expired_attempt_can_be_recovered():
@@ -101,7 +116,7 @@ def t_cancel_and_renew_fence_checked():
 
 
 def graph_env():
-    d = tempfile.mkdtemp()
+    d = _tmp()
     g = {"goal": "ship", "requirements": ["REQ-001"],
          "nodes": [{"id": "N-001", "title": "t", "owner": "implementer",
                     "status": "pending", "serves": "REQ-001", "check": "true"}],

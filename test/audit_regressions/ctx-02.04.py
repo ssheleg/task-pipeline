@@ -23,6 +23,21 @@ import subprocess
 import sys
 import tempfile
 
+# Every temp tree this file makes goes at exit (hub waves R07: bare mkdtemp left
+# thousands of trees in a shared $TMPDIR). `test/validate.py` refuses a file that
+# calls mkdtemp with no cleanup.
+import atexit as _atexit
+import tempfile
+import shutil as _shutil
+_TMP_TREES = []
+_atexit.register(lambda: [_shutil.rmtree(_t, ignore_errors=True) for _t in _TMP_TREES])
+
+
+def _tmp(*a, **k):
+    _d = tempfile.mkdtemp(*a, **k)
+    _TMP_TREES.append(_d)
+    return _d
+
 sys.dont_write_bytecode = True
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -50,7 +65,7 @@ def case(name, fn):
 
 
 def make(root_files=None):
-    root = tempfile.mkdtemp()
+    root = _tmp()
     files = root_files or {"docs/brief.md": b"# brief\n"}
     for rel, data in files.items():
         os.makedirs(os.path.join(root, os.path.dirname(rel)), exist_ok=True)
@@ -120,7 +135,7 @@ def t_missing_capability_and_claim_block():
 
 def t_cli_blocks_and_clears():
     root, leaf = make()
-    d = tempfile.mkdtemp()
+    d = _tmp()
     lp = os.path.join(d, "leaf.json")
     json.dump(leaf, open(lp, "w"))
     ok = subprocess.run([sys.executable, SCRIPT, "predispatch", lp, root,

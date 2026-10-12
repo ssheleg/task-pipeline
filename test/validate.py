@@ -3456,12 +3456,15 @@ if os.path.isfile(_gs) and os.path.isfile(_gex):
              "field as unconditional and writes `n/a — parked` into it")
     else:
         def _b80run(doc):
-            _pp = os.path.join(tempfile.mkdtemp(prefix="tp-b80-"), "graph.json")
-            with open(_pp, "w", encoding="utf-8") as _fh:
-                json.dump(doc, _fh)
-            _r = subprocess.run([sys.executable, _gs, "validate", "--graph", _pp],
-                                capture_output=True, text=True, timeout=60)
-            return _r.returncode, _r.stdout + _r.stderr
+            # Removed on return: five runs per validation left 15,146 `tp-b80-*` trees in
+            # one machine's $TMPDIR by 2026-10-12 (hub waves R07).
+            with tempfile.TemporaryDirectory(prefix="tp-b80-") as _td:
+                _pp = os.path.join(_td, "graph.json")
+                with open(_pp, "w", encoding="utf-8") as _fh:
+                    json.dump(doc, _fh)
+                _r = subprocess.run([sys.executable, _gs, "validate", "--graph", _pp],
+                                    capture_output=True, text=True, timeout=60)
+                return _r.returncode, _r.stdout + _r.stderr
         _c0, _o0 = _b80run(_b80)
         if _c0 != 0:
             fail(f"`graph.py validate` refuses the shipped example ({_c0}) — the passing "

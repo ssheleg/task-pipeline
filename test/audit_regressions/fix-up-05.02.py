@@ -19,6 +19,21 @@ import subprocess
 import sys
 import tempfile
 
+# Every temp tree this file makes goes at exit (hub waves R07: bare mkdtemp left
+# thousands of trees in a shared $TMPDIR). `test/validate.py` refuses a file that
+# calls mkdtemp with no cleanup.
+import atexit as _atexit
+import tempfile
+import shutil as _shutil
+_TMP_TREES = []
+_atexit.register(lambda: [_shutil.rmtree(_t, ignore_errors=True) for _t in _TMP_TREES])
+
+
+def _tmp(*a, **k):
+    _d = tempfile.mkdtemp(*a, **k)
+    _TMP_TREES.append(_d)
+    return _d
+
 sys.dont_write_bytecode = True
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -39,7 +54,7 @@ def case(name, fn):
 
 
 def make_src():
-    src = tempfile.mkdtemp()
+    src = _tmp()
     d = os.path.join(src, "skill")
     os.makedirs(os.path.join(d, "references"))
     with open(os.path.join(d, "SKILL.md"), "w") as fh:
@@ -57,7 +72,7 @@ def node(body):
 
 def t_clean_install_lands_the_new_tree():
     src = make_src()
-    dest = os.path.join(tempfile.mkdtemp(), "task-pipeline")
+    dest = os.path.join(_tmp(), "task-pipeline")
     r = node(f"m.installOne('skill', {json.dumps(src)}, {json.dumps(dest)}, true, true);")
     assert r.returncode == 0, r.stderr[:200]
     assert open(os.path.join(dest, "SKILL.md")).read() == "# new skill\n"
@@ -67,7 +82,7 @@ def t_clean_install_lands_the_new_tree():
 
 def t_force_false_preserves_user_bytes():
     src = make_src()
-    root = tempfile.mkdtemp()
+    root = _tmp()
     dest = os.path.join(root, "task-pipeline")
     os.makedirs(dest)
     with open(os.path.join(dest, "SKILL.md"), "w") as fh:
@@ -81,7 +96,7 @@ def t_force_false_preserves_user_bytes():
 
 def t_stage_crash_leaves_active_install_intact():
     src = make_src()
-    root = tempfile.mkdtemp()
+    root = _tmp()
     dest = os.path.join(root, "task-pipeline")
     os.makedirs(dest)
     with open(os.path.join(dest, "SKILL.md"), "w") as fh:

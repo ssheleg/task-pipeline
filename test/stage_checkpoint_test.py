@@ -26,7 +26,9 @@ import pathlib
 import stat
 import subprocess
 import sys
+import shutil
 import tempfile
+import atexit
 
 sys.dont_write_bytecode = True
 HERE = pathlib.Path(__file__).resolve().parent
@@ -51,8 +53,20 @@ def run(cwd, *args, stdin=None):
     return r.returncode, r.stdout, r.stderr
 
 
-def fresh():
+_TREES = []
+# Every tree this suite makes goes at exit — 134 `tp-stage-ckpt-*` were left in one
+# machine's $TMPDIR by 2026-10-12 (hub waves R07).
+atexit.register(lambda: [shutil.rmtree(t, ignore_errors=True) for t in _TREES])
+
+
+def _tree():
     d = pathlib.Path(tempfile.mkdtemp(prefix="tp-stage-ckpt-"))
+    _TREES.append(d)
+    return d
+
+
+def fresh():
+    d = _tree()
     (d / ".task-pipeline").mkdir()
     (d / ".task-pipeline" / "run.md").write_text(RUN_HEAD, encoding="utf-8")
     return d
@@ -196,7 +210,7 @@ def case_review_rounds():
 
 
 def case_no_ledger():
-    d = pathlib.Path(tempfile.mkdtemp(prefix="tp-stage-ckpt-"))
+    d = _tree()
     code, _, err = run(d, "emit")
     ok(code != 0 and "cannot be read" in err, "no ledger is refused, not invented")
     print("PASS: no ledger, no checkpoint")

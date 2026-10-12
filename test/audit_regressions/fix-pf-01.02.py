@@ -26,6 +26,21 @@ import subprocess
 import sys
 import tempfile
 
+# Every temp tree this file makes goes at exit (hub waves R07: bare mkdtemp left
+# thousands of trees in a shared $TMPDIR). `test/validate.py` refuses a file that
+# calls mkdtemp with no cleanup.
+import atexit as _atexit
+import tempfile
+import shutil as _shutil
+_TMP_TREES = []
+_atexit.register(lambda: [_shutil.rmtree(_t, ignore_errors=True) for _t in _TMP_TREES])
+
+
+def _tmp(*a, **k):
+    _d = tempfile.mkdtemp(*a, **k)
+    _TMP_TREES.append(_d)
+    return _d
+
 sys.dont_write_bytecode = True
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -54,7 +69,7 @@ def case(name, fn):
 
 
 def t_two_local_claims_one_winner():
-    d = tempfile.mkdtemp()
+    d = _tmp()
     db = os.path.join(d, "auth.db")
     a, b = A.authority_for(db), A.authority_for(db)
     g1 = a.claim("N-001", "sess-A", 0, now=1000.0)
@@ -65,7 +80,7 @@ def t_two_local_claims_one_winner():
 
 
 def t_fence_is_monotonic_and_expiry_reclaims():
-    d = tempfile.mkdtemp()
+    d = _tmp()
     db = os.path.join(d, "auth.db")
     a = A.authority_for(db)
     g1 = a.claim("N-001", "sess-A", 0, now=1000.0, ttl_seconds=100)
@@ -76,7 +91,7 @@ def t_fence_is_monotonic_and_expiry_reclaims():
 
 
 def t_stale_fence_is_refused():
-    d = tempfile.mkdtemp()
+    d = _tmp()
     db = os.path.join(d, "auth.db")
     a = A.authority_for(db)
     g = a.claim("N-001", "sess-A", 0, now=1000.0)
@@ -105,7 +120,7 @@ def t_unavailable_is_fail_closed():
 
 
 def graph_env():
-    d = tempfile.mkdtemp()
+    d = _tmp()
     g = {
         "goal": "ship", "requirements": ["REQ-001"],
         "nodes": [
