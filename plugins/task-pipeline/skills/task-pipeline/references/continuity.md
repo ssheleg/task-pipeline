@@ -28,17 +28,50 @@ almost no window left, loses the middle of it, and re-derives what it already di
 **The loop mode collapses discretionary check-ins. It collapses nothing else.**
 
 - A `manual` gate still waits for an explicit operator go. Always.
-- An outward or irreversible act — deploy, publish, opening a PR, creating or
-  editing a shared design file — still needs its own authorization. A recorded
-  loop mode is a **generic** flag, and a generic flag is not a specific
-  authorization; that floor is set in [`grill.md`](grill.md) and this file does
-  not lower it.
-- **Default off.** Absent config and absent instruction, the mode is off. Silence
-  arms nothing, exactly as silence authorizes no deploy.
+- An outward or irreversible act — deploy, publish, a tag or a release, sending to a
+  person, spending money, creating or editing a shared design file — still needs its own
+  **specific** authorization. A recorded loop mode is a **generic** flag, and a generic
+  flag is not a specific authorization; that floor is set in [`grill.md`](grill.md) and
+  this file does not lower it.
+- **Pushing this repository's work and opening its pull request** is armed by a specific
+  standing authorization that names it — a recorded instruction to push the requested work
+  to the repository's own remote ([`build.md`](build.md) → *6. Integrate, then finish*).
+  Without one it waits for the go like the acts above. Another repository's PR is outward
+  every time ([`conventions.md`](conventions.md)).
+
+**What arms the loop — exactly three sources, and the ledger says which.**
+1. `run.loop` in `pipeline.json` (Part 1);
+2. the operator's answer at preflight;
+3. **a standing instruction the host already carries** — an organisation's principle that
+   a free agent takes the next task, a global instruction file, a recorded decision.
+
+The run cites its source once, in the ledger: `loop: armed by <source:line>`.
+**Silence still arms nothing**: absent all three, the mode is off, exactly as silence authorizes no
+deploy. A project with no such instruction behaves as it always did.
+
+**What a watcher may do unasked.** A wait is not a stop: while a review, CI, a peer's
+answer or a release run is pending, the run starts a watcher and takes the next independent
+item (*Waits outlive turns*, below). When the wait clears, the watcher may take — **only
+where a standing instruction names that class of act** — these steps: merge under the
+repository's own integration policy, release a lease, rebase a stacked branch onto what
+landed, notify. Deploy, publish, tag and sending to people stay gated unless a *specific*
+standing authorization names them; a recorded "releases are the agent's" decision is one,
+for tags, and only for the repositories it names.
 
 The mode's whole content is the removal of *"should I continue?"* between items
 the operator already asked for. Anything beyond that is a different decision,
 taken separately.
+
+### Waits outlive turns
+
+A watcher started inside a session — a background loop, a monitor, a session cron —
+dies with the session. **A wait that can outlive the session goes on a durable trigger**: a
+launchd or systemd job, an `at` one-shot, a CI schedule, or a board row with a due time that
+a session-start hook surfaces. Its one line — what it waits on and which trigger acts on it —
+goes into the handoff or the board ([`backlog.md`](backlog.md)), not only into the chat,
+because the chat is the one place the next session will not read. On Claude Code the
+session-bound primitives are a `run_in_background` loop, a Monitor and `/loop`; on other
+harnesses, a background process or the host's own scheduler.
 
 ## Part 1 — the loop
 
@@ -294,7 +327,10 @@ true.
 ## What happens at the signal
 
 The four acts above, in order, and one prohibition: **do not begin an item you
-cannot finish inside what is left.** When the next item is plainly too large,
+cannot finish inside what is left.** This is the one carve-out from "take the next task in
+the same turn": **at the compaction signal, finish the current unit and write the next task
+into the handoff** — the ledger's next line, the board row — **instead of starting it.** The
+next turn, after compaction, takes it from there. When the next item is plainly too large,
 say so and take the smaller thing that fits — closing a ledger, writing a decision
 that is already settled, updating a REQ status.
 
@@ -317,6 +353,11 @@ it as current. The artifacts above are read by later stages anyway; making them
 right costs nothing extra and pays twice.
 
 ## Part 3 — workflow memory at the stage boundary
+
+Project Observatory is a separately installed, public engine:
+[passioncode-ai/project-observatory-dashboard](https://github.com/passioncode-ai/project-observatory-dashboard)
+— its README's *Install* and *MCP* sections say how to run it and connect it. Without it,
+everything below degrades to one ledger line and the run continues.
 
 Which of the five handoff mechanisms carries what — the Git record, Observatory's lease
 and checkpoint, a host's launch context, the inbound queue — and the order a successor
@@ -344,7 +385,9 @@ checkpoint**, and the next executor continues from the last finished stage.
 
 | Excuse | Reality |
 |---|---|
-| "The operator obviously wants it to keep going, I'll just loop" | Default off. Silence arms nothing — the same floor deploy authorization uses. Ask once at preflight, or read `run.loop`. |
+| "The operator obviously wants it to keep going, I'll just loop" | Default off. Silence arms nothing — the same floor deploy authorization uses. Arm from `run.loop`, the preflight answer, or a standing instruction the host carries, and cite which in the ledger. |
+| "The watcher can push the release through when CI goes green" | A watcher takes only the act classes a standing instruction names — merge, release a lease, rebase, notify. A tag or a deploy needs its own specific authorization. |
+| "My background loop will catch it tomorrow" | It dies with the session. A wait that can outlive it goes on a durable trigger, and its line goes into the handoff. |
 | "The mode is on, so I can push the deploy through" | The mode collapses check-ins, never gates or outward acts. A generic flag is not a specific authorization. |
 | "I'll tell it to keep going and it will" | On Claude Code, prose does not survive the turn boundary. Either a job is scheduled or the run stops; say which. |
 | "A one-minute interval is closest to no pause" | The interval must be longer than a typical item, or every fire lands on work already in progress and buys nothing. |
