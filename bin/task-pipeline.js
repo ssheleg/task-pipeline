@@ -296,6 +296,19 @@ Rerun with --force if you deliberately want the plain copy instead.`);
     return 3;
   }
 
+  // Mixed versions: an earlier install left some of the three skills and not the others.
+  // Installing only the missing ones would pair skills from two releases — refuse, name both
+  // sets, and let --force bring all three to this version (install.sh does the same).
+  if (!force) {
+    const present = SKILLS.filter((s) => fs.existsSync(path.join(claude, 'skills', s)));
+    const absent = SKILLS.filter((s) => !present.includes(s));
+    if (present.length && absent.length) {
+      console.error(`refusing: mixed versions — ${present.join(', ')} already installed, ` +
+                    `${absent.join(', ')} not. Rerun with --force to install all three at this ` +
+                    'version. Nothing was written.');
+      return 4;
+    }
+  }
   SKILLS.forEach((s, i) => installOne(
     `${s} skill`.padEnd(22),
     skillSrcs[i],

@@ -101,6 +101,18 @@ def main():
     fresh_run = hook(m)
     ok(fresh_run != "" and "stage 1" in fresh_run and "project-observatory-dashboard" in fresh_run,
        "a marker written under Run a does not silence Run b: nudged, with the pointer")
+    # Keyed on the WHOLE `Run:` line, as the pointer is: the same topic started again (a new
+    # date) is a new run, nudged with the pointer even though an old marker matches its topic.
+    q = project(HEAD.replace("Run: `x`", "Run: `same` · started `2026-10-12`") + STAGE)
+    hook(q)
+    subprocess.run([sys.executable, str(ck), "record", "--unavailable", "no Observatory", "--for-run"],
+                   cwd=q, check=True, capture_output=True)
+    (q / ".task-pipeline" / "run.md").write_text(
+        HEAD.replace("Run: `x`", "Run: `same` · started `2026-10-13`") + STAGE.replace("stage: 3", "stage: 2"),
+        encoding="utf-8")
+    again_run = hook(q)
+    ok("stage 2" in again_run and "project-observatory-dashboard" in again_run,
+       "the same topic with a new start date is a new run: nudged, with the pointer")
     print(f"PASS: memory-nudge.sh — {CASES} cases")
 
 

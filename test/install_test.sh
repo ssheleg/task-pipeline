@@ -65,4 +65,30 @@ for kind in sh node; do
   else out="$(HOME="$H" CLAUDE_CONFIG_DIR= node "$C/bin/task-pipeline.js" 2>&1)"; rc=$?; fi
   ok '[ "$rc" -ne 0 ] && [ ! -e "$H/.claude/skills" ]' "$kind: a missing third source installs nothing ($rc)"
 done
+# A missing command source installs nothing, on both paths (checked before anything is copied).
+C2="$TMP/corrupt-cmd"
+mkdir -p "$C2"
+cp -R "$ROOT/install.sh" "$ROOT/bin" "$ROOT/plugins" "$C2/"
+rm -f "$C2/plugins/task-pipeline/commands/task-pipeline.md"
+for kind in sh node; do
+  H="$TMP/home-corrupt-cmd-$kind"; mkdir -p "$H"
+  if [ "$kind" = sh ]; then out="$(HOME="$H" CLAUDE_CONFIG_DIR= bash "$C2/install.sh" 2>&1)"; rc=$?
+  else out="$(HOME="$H" CLAUDE_CONFIG_DIR= node "$C2/bin/task-pipeline.js" 2>&1)"; rc=$?; fi
+  ok '[ "$rc" -ne 0 ] && [ ! -e "$H/.claude/skills" ] && printf "%s" "$out" | grep -q "command source"' \
+     "$kind: a missing command source installs nothing ($rc)"
+done
+# Mixed versions: an earlier install left one skill, the others are absent. Without --force
+# both installers refuse and say so; with --force all three arrive at this version.
+for kind in sh node; do
+  H="$TMP/home-mixed-$kind"; mkdir -p "$H/.claude/skills/task-pipeline"
+  echo old > "$H/.claude/skills/task-pipeline/SKILL.md"
+  if [ "$kind" = sh ]; then out="$(HOME="$H" CLAUDE_CONFIG_DIR= bash "$ROOT/install.sh" 2>&1)"; rc=$?
+  else out="$(HOME="$H" CLAUDE_CONFIG_DIR= node "$ROOT/bin/task-pipeline.js" 2>&1)"; rc=$?; fi
+  ok '[ "$rc" -ne 0 ] && printf "%s" "$out" | grep -q "mixed versions" && printf "%s" "$out" | grep -q -- "--force" && [ ! -e "$H/.claude/skills/evidence-docs" ]' \
+     "$kind: a partial earlier install is refused as mixed versions, nothing written ($rc)"
+  if [ "$kind" = sh ]; then out="$(HOME="$H" CLAUDE_CONFIG_DIR= bash "$ROOT/install.sh" --force 2>&1)"; rc=$?
+  else out="$(HOME="$H" CLAUDE_CONFIG_DIR= node "$ROOT/bin/task-pipeline.js" --force 2>&1)"; rc=$?; fi
+  ok '[ "$rc" -eq 0 ] && cmp -s "$ROOT/plugins/task-pipeline/skills/task-pipeline/SKILL.md" "$H/.claude/skills/task-pipeline/SKILL.md" && [ -f "$H/.claude/skills/project-audit/SKILL.md" ]' \
+     "$kind: --force brings all three to this version"
+done
 echo "PASS: installers — $CASES cases"

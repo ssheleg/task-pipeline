@@ -106,22 +106,54 @@ def _reviews(path: pathlib.Path) -> dict[int, list[str]]:
     return out
 
 
+def run_line(lines: list[str]) -> str | None:
+    """The run's `Run:` line — the first one naming a real topic, not the template's.
+
+    ONE helper for everything that asks "which run is this": `_read_ledger` takes the topic
+    from it, and `run_key` hashes it for the run-level memory marker and for
+    `hooks/memory-nudge.sh`'s once-per-run pointer, which imports this function."""
+    for line in lines:
+        m = TOPIC.match(line)
+        if m and "<topic>" not in m.group(1):
+            return line.strip()
+    return None
+
+
+def run_key(lines: list[str]) -> str | None:
+    """16 hex of the whole `Run:` line: the same topic started again is another run."""
+    line = run_line(lines)
+    return hashlib.sha256(line.encode()).hexdigest()[:16] if line else None
+
+
 def _read_ledger(path: pathlib.Path) -> tuple[str, list[tuple]]:
     try:
         text = path.read_text(encoding="utf-8")
     except OSError as exc:
         raise SystemExit(f"stage_checkpoint: the ledger {path} cannot be read ({type(exc).__name__})")
-    topic, stages = None, []
-    for line in text.splitlines():
-        m = TOPIC.match(line)
-        if m and topic is None and "<topic>" not in m.group(1):
-            topic = m.group(1)
+    lines = text.splitlines()
+    rl = run_line(lines)
+    topic, stages = (TOPIC.match(rl).group(1) if rl else None), []
+    for line in lines:
         s = STAGE.match(line)
         if s:
             stages.append((int(s.group(1)), s.group(2), s.group(3), s.group(4), s.group(5), line))
     if not topic:
         raise SystemExit("stage_checkpoint: the ledger names no run (`Run: `<topic>`` line)")
     return topic, stages
+
+
+class UsageError(Exception):
+    """A call the script cannot act on as given: exit 2, nothing written."""
+
+
+def marker_for_this_run(ledger: pathlib.Path, state: dict) -> dict | None:
+    """The run-level "memory unavailable" marker, only when it was written for THIS run."""
+    gone = (state.get("memory") or {}).get("unavailable") or {}
+    try:
+        key = run_key(ledger.read_text(encoding="utf-8").splitlines())
+    except OSError:
+        return None
+    return gone if gone and key is not None and gone.get("run") == key else None
 
 
 def _state_path(ledger: pathlib.Path) -> pathlib.Path:
@@ -232,17 +264,20 @@ def record(ledger: pathlib.Path, answer_text: str | None, unavailable: str | Non
             # ONE marker for the run (CHANGELOG, Unreleased). Without it a run on a machine with no
             # Observatory paid one nudge and one ledger line per gate — about eleven of
             # each — to restate a fact that does not change between gates.
-            line = f"event: memory — unavailable for this run — {reason} — {_now()}"
-            # The marker carries the run's topic: the hook honours it only while the ledger
-            # names the same run, so a marker left on disk cannot silence the next run.
+            # The marker carries the run key (the whole `Run:` line, hashed): the hook and
+            # `state` honour it only while the ledger names the same run, so a marker left on
+            # disk — even under the same topic started again — cannot silence the next run.
             try:
-                topic = next((m.group(1) for m in map(TOPIC.match, ledger.read_text(
-                    encoding="utf-8").splitlines()) if m), None)
+                key = run_key(ledger.read_text(encoding="utf-8").splitlines())
             except OSError:
-                topic = None
+                key = None
+            if key is None:
+                raise UsageError("--for-run needs the ledger's `Run:` line: the marker is "
+                                 "keyed to the run, and a ledger that names no run has none")
+            line = f"event: memory — unavailable for this run — {reason} — {_now()}"
             state = _load_state(ledger)
             state["memory"] = {"unavailable": {"reason": reason, "at": _now(), "ledger_line": line,
-                                               "run": topic}}
+                                               "run": key}}
             _save_state(ledger, state)
         else:
             line = f"event: memory — unavailable — {reason} — {_now()}"
@@ -385,14 +420,18 @@ def main(argv: list[str]) -> int:
         st = _load_state(ledger)
         print(json.dumps({"workflowId": st.get("workflowId"), "holdsLease": bool(st.get("leaseId")),
                           "stale": st.get("stale"),
-                          "memoryUnavailable": ((st.get("memory") or {}).get("unavailable") or {}).get("reason")}))
+                          "memoryUnavailable": (marker_for_this_run(ledger, st) or {}).get("reason")}))
         return 0
     text = None
     if a.answer is not None:
         text = sys.stdin.read() if a.answer == "-" else pathlib.Path(a.answer).read_text(encoding="utf-8")
     if a.for_run and a.unavailable is None:
         p.error("--for-run goes with --unavailable")
-    print(record(ledger, text, a.unavailable, a.for_run))
+    try:
+        print(record(ledger, text, a.unavailable, a.for_run))
+    except UsageError as exc:
+        print(f"stage_checkpoint: {exc}", file=sys.stderr)
+        return 2
     return 0
 
 

@@ -19,6 +19,7 @@
 set -uo pipefail
 ledger="${CLAUDE_PROJECT_DIR:-$PWD}/.task-pipeline/run.md"
 [ -f "$ledger" ] || exit 0
+TP_SCRIPTS="$(cd "$(dirname "${BASH_SOURCE[0]}")/../skills/task-pipeline/scripts" 2>/dev/null && pwd)" \
 python3 - "$ledger" <<'PY' 2>/dev/null || true
 import hashlib, json, os, re, sys
 ledger = sys.argv[1]
@@ -35,12 +36,20 @@ for i, l in enumerate(lines):
 if last_stage < 0 or last_mem > last_stage:
     sys.exit(0)
 here = os.path.dirname(ledger)
-topic = next((m.group(1) for m in (re.match(r"^Run:\s*`([^`]+)`", l) for l in lines) if m), None)
+# The run key comes from stage_checkpoint.py's own helper — one definition of "this run" for
+# the marker it writes and the pointer below. Unimportable: no key, so the marker is not
+# honoured and the nudge behaves as before (never blocks).
+try:
+    sys.path.insert(0, os.environ["TP_SCRIPTS"])
+    from stage_checkpoint import run_key
+    this_run = run_key(lines)
+except Exception:
+    this_run = None
 try:
     marker = (json.load(open(os.path.join(here, "memory.json"), encoding="utf-8")).get("memory") or {})
     gone = marker.get("unavailable") or {}
-    # Honoured only for the run that wrote it: a marker from another `Run:` is stale.
-    if gone and topic is not None and gone.get("run") == topic:
+    # Honoured only for the run that wrote it: a marker from another `Run:` line is stale.
+    if gone and this_run is not None and gone.get("run") == this_run:
         sys.exit(0)
 except (OSError, ValueError, AttributeError):
     pass  # no marker, or one that cannot be read: nudge as before, never block
@@ -62,18 +71,17 @@ msg = (f"task-pipeline: stage {sid}'s gate returned and no workflow-memory line 
        "→ `stage_checkpoint.py record --answer -`. Without them, once for the whole run: "
        "`stage_checkpoint.py record --unavailable \"<why>\" --for-run`. (references/continuity.md, Part 3)")
 # Once per run, keyed by the ledger's `Run:` line: where the tools come from.
-run_line = next((l for l in lines if l.startswith("Run:")), ledger)
-run_key = hashlib.sha256(run_line.encode()).hexdigest()[:16]
+run_id = this_run or hashlib.sha256(ledger.encode()).hexdigest()[:16]
 pointer = os.path.join(here, ".memory-pointer")
 try:
-    shown = open(pointer).read().strip() == run_key
+    shown = open(pointer).read().strip() == run_id
 except OSError:
     shown = False
 if not shown:
     msg += (" Observatory is the public engine passioncode-ai/project-observatory-dashboard "
             "(its README: Install, MCP).")
     try:
-        open(pointer, "w").write(run_key + "\n")
+        open(pointer, "w").write(run_id + "\n")
     except OSError:
         pass
 print(json.dumps({"hookSpecificOutput": {"hookEventName": "PostToolUse", "additionalContext": msg}}))

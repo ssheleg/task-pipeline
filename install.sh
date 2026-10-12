@@ -13,6 +13,19 @@ elif [[ -n "${1:-}" ]]; then
   exit 2
 fi
 
+# 0. every source, checked before anything is copied — as bin/task-pipeline.js does. A
+# corrupted checkout that failed on the third skill used to leave the first two installed.
+for SKILL in task-pipeline evidence-docs project-audit; do
+  if [[ ! -f "$HERE/plugins/task-pipeline/skills/$SKILL/SKILL.md" ]]; then
+    echo "error: skill sources missing at $HERE/plugins/task-pipeline/skills/$SKILL — corrupted checkout? Nothing was installed." >&2
+    exit 1
+  fi
+done
+if [[ ! -f "$HERE/plugins/task-pipeline/commands/task-pipeline.md" ]]; then
+  echo "error: command source missing at $HERE/plugins/task-pipeline/commands/task-pipeline.md — corrupted checkout? Nothing was installed." >&2
+  exit 1
+fi
+
 # One channel per agent. This installer writes a PLAIN copy to
 # ~/.claude/skills/<id>, and while the Claude Code PLUGIN channel is active that copy
 # SHADOWS the plugin — silently serving whatever version was copied, forever. The
@@ -36,17 +49,18 @@ MSG
   fi
 done
 
-# 0. every source, checked before anything is copied — as bin/task-pipeline.js does. A
-# corrupted checkout that failed on the third skill used to leave the first two installed.
-for SKILL in task-pipeline evidence-docs project-audit; do
-  if [[ ! -f "$HERE/plugins/task-pipeline/skills/$SKILL/SKILL.md" ]]; then
-    echo "error: skill sources missing at $HERE/plugins/task-pipeline/skills/$SKILL — corrupted checkout? Nothing was installed." >&2
-    exit 1
+# Mixed versions: an earlier install left some of the three skills and not the others.
+# Installing only the missing ones would pair skills from two releases, a combination
+# nobody tested — so refuse, name both sets, and let --force bring all three to this version.
+if [[ "$FORCE" -eq 0 ]]; then
+  PRESENT=""; ABSENT=""
+  for SKILL in task-pipeline evidence-docs project-audit; do
+    if [[ -e "${HOME}/.claude/skills/$SKILL" ]]; then PRESENT="$PRESENT $SKILL"; else ABSENT="$ABSENT $SKILL"; fi
+  done
+  if [[ -n "$PRESENT" && -n "$ABSENT" ]]; then
+    echo "refusing: mixed versions —${PRESENT} already installed,${ABSENT} not. Rerun with --force to install all three at this version. Nothing was written." >&2
+    exit 4
   fi
-done
-if [[ ! -f "$HERE/plugins/task-pipeline/commands/task-pipeline.md" ]]; then
-  echo "error: command source missing at $HERE/plugins/task-pipeline/commands/task-pipeline.md — corrupted checkout? Nothing was installed." >&2
-  exit 1
 fi
 
 # 1. skills — all three the plugin ships. task-pipeline names evidence-docs as its doc

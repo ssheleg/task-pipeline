@@ -961,8 +961,8 @@ the same Claude Code install yields a duplicate, shadowing skill.
 | Claude Code (plugin) | `claude plugin marketplace update task-pipeline` → `claude plugin update task-pipeline@task-pipeline` → restart |
 | Any agent (skills CLI) | `npx skills update task-pipeline --global --yes`; to add: repeated `--agent <name>` (never `claude-code` when the plugin is installed) |
 | Cursor | skills CLI (above) with `--agent cursor`, or re-copy the `.mdc` per project |
-| npm | `npx task-pipeline-skill@latest` / `npx github:ssheleg/task-pipeline` (ephemeral — always latest) |
-| Plain skill | `git pull && ./install.sh --force` |
+| npm | `npx task-pipeline-skill@latest --force` / `npx github:ssheleg/task-pipeline --force` — `--force` brings all three skills and the command to that version; without it an existing install is skipped, and a partial one is refused as mixed versions |
+| Plain skill | `git pull && ./install.sh --force` (all three skills and the command) |
 
 ### Prerequisites
 

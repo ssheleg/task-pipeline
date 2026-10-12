@@ -314,8 +314,20 @@ def case_unavailable_for_the_run():
     g = fresh()
     stage(g, 0, "Intake grill", "pass", "2026-10-05T10:00Z")
     run(g, "record", "--unavailable", "none here", "--for-run")
-    ok(json.loads((g / ".task-pipeline" / "memory.json").read_text())["memory"]["unavailable"]["run"]
-       == "ship the invoice exporter", "the marker carries the run's topic")
+    marker = json.loads((g / ".task-pipeline" / "memory.json").read_text())["memory"]["unavailable"]
+    ok(len(marker["run"]) == 16 and all(c in "0123456789abcdef" for c in marker["run"]),
+       "the marker carries the run key — 16 hex of the whole `Run:` line, the pointer's key")
+    code, out, _ = run(g, "state")
+    ok(json.loads(out)["memoryUnavailable"] == "none here", "state reports the marker of this run")
+    led = g / ".task-pipeline" / "run.md"
+    led.write_text(led.read_text().replace("started `2026-10-05`", "started `2026-10-06`"))
+    code, out, _ = run(g, "state")
+    ok(json.loads(out)["memoryUnavailable"] is None, "state does not report a marker another run wrote")
+    h = _tree()
+    (h / ".task-pipeline").mkdir()
+    (h / ".task-pipeline" / "run.md").write_text("# Run ledger\n\n## Log\n\n", encoding="utf-8")
+    code, _, err = run(h, "record", "--unavailable", "none", "--for-run")
+    ok(code == 2 and "Run:" in err, "--for-run on a ledger with no `Run:` line is refused, exit 2")
     print("PASS: memory unavailable for the run is one marker and one line; an answer clears it")
 
 
