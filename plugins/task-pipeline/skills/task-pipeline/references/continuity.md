@@ -55,8 +55,17 @@ item (*Waits outlive turns*, below). When the wait clears, the watcher may take 
 where a standing instruction names that class of act** — these steps: merge under the
 repository's own integration policy, release a lease, rebase a stacked branch onto what
 landed, notify. Deploy, publish, tag and sending to people stay gated unless a *specific*
-standing authorization names them; a recorded "releases are the agent's" decision is one,
-for tags, and only for the repositories it names.
+standing authorization names them. A recorded "releases are the agent's" decision is one:
+it names the act class — the tag, and the publish its release run performs — and, when it
+names no repositories, it covers every repository its owner governs. It does not stretch to
+a deploy or a message it does not name.
+
+**Work that depends on a pending change is not blocked by it**: start it on a branch
+stacked on the pending one, open its PR against that branch, and rebase or merge when the
+pending change lands. **A watcher polls at the pace its wait changes** — a PR or a peer's
+answer every one to two minutes, a release run while it runs, a scheduled time at that time
+— and that pace is separate from the loop's `/loop` interval below, which paces items, not
+waits.
 
 The mode's whole content is the removal of *"should I continue?"* between items
 the operator already asked for. Anything beyond that is a different decision,
@@ -67,7 +76,7 @@ taken separately.
 A watcher started inside a session — a background loop, a monitor, a session cron —
 dies with the session. **A wait that can outlive the session goes on a durable trigger**: a
 launchd or systemd job, an `at` one-shot, a CI schedule, or a board row with a due time that
-a session-start hook surfaces. Its one line — what it waits on and which trigger acts on it —
+a session-start hook surfaces, where the host has one. Its one line — what it waits on and which trigger acts on it —
 goes into the handoff or the board ([`backlog.md`](backlog.md)), not only into the chat,
 because the chat is the one place the next session will not read. On Claude Code the
 session-bound primitives are a `run_in_background` loop, a Monitor and `/loop`; on other
@@ -88,8 +97,11 @@ This spans the whole run, not one stage:
 It stops for exactly four things: a `manual` gate, a block it cannot resolve, a
 genuine ambiguity the brief does not answer, and completion.
 
-**A block or an ambiguity stops its node, not the run.** The node is parked with the
-question as its reason, marked `needs-operator` and answerable without context
+**A block or an ambiguity stops its node, not the run.** An ambiguity whose answer is
+internal and reversible is not a stop at all: the run takes the recommended answer, records
+it as **assumed** on the node, and continues ([`iteration.md`](iteration.md) → *Question
+rounds*). Anything else — a block, or an answer that is outward, irreversible or the
+operator's — parks the node with the question as its reason, marked `needs-operator` and answerable without context
 ([`prioritisation.md`](prioritisation.md) → *5. Where the human goes*), and the run
 continues on every node it does not block. The run itself stops only when the whole
 frontier is blocked — `graph.py next` exits `4` — and the questions are then asked
@@ -129,6 +141,10 @@ is **recorded** and the queue has more than one item, the loop arms **at the clo
 stage 2** and the run says so in one line. It is not asked for at that point, for the
 same reason the mode is recorded rather than requested: re-asking would rebuild the habit
 the config exists to retire.
+
+**A standing instruction the host carries counts as recorded** (*The limit, before the
+capability*, source 3): it arms at the close of stage 2 like `run.loop`, unless the
+instruction itself says otherwise, and the ledger cites it.
 
 **Where nothing is recorded, nothing arms.** Silence arms nothing here too — this section
 moves *where* a recorded mode is armed, from preflight to the close of stage 2. It does

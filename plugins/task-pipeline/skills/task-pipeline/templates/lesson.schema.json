@@ -63,7 +63,7 @@
       "required": ["project", "commit", "retro"],
       "properties": {
         "project": {
-          "description": "The project's pseudonymous key: `p-` and the first 12 hex digits of the repository's root commit. Never its name: a repository name can be a customer's or a product's (redaction rule 4).",
+          "description": "The project's pseudonymous key: `p-` and the first 12 hex digits of the repository's root commit. Never its name: a repository name can be a customer's or a product's (redaction rule 4). The shared store receives the same key, never a `project:<slug>` id.",
           "type": "string",
           "pattern": "^p-[0-9a-f]{12}$"
         },
@@ -73,9 +73,9 @@
           "pattern": "^[0-9a-f]{7,40}$"
         },
         "retro": {
-          "description": "The retro file, relative to the repository, and the entry's anchor.",
+          "description": "The retro file, relative to the repository, and the entry's anchor: the heading's letters and digits in any script, lowercased, every other run one hyphen.",
           "type": "string",
-          "pattern": "^[A-Za-z0-9_][A-Za-z0-9_./-]*\\.md#[a-z0-9-]+$",
+          "pattern": "^[A-Za-z0-9_][A-Za-z0-9_./-]*\\.md#[^\\s#/_]+$",
           "maxLength": 200
         }
       }

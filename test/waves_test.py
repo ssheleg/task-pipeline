@@ -184,6 +184,31 @@ def main():
                        "--plan", str(d / "plan-gap.json"))
     ok(rc == 1 and "DOC-001" in out + err, "assign exits 1 on an open item no node closes")
 
+    # --- round-1 fixes: one predicate, names unknown ids, title length
+    short_title = json.loads(inv.read_text())
+    short_title["items"][0]["title"] = "ab"
+    (d / "short.json").write_text(json.dumps(short_title))
+    rc, _, err = run("validate", "--inventory", str(d / "short.json"))
+    ok(rc == 2 and "title" in err, "a title under 3 characters is refused, as the schema says")
+    ghost_mod = json.loads((d / "modules.json").read_text())
+    ghost_mod["A-core"].append("COR-404")
+    (d / "modules-ghost.json").write_text(json.dumps(ghost_mod))
+    rc, out, err = run("validate", "--inventory", str(inv), "--modules", str(d / "modules-ghost.json"))
+    ok(rc == 1 and "COR-404" in err, "an id the module table names and the inventory lacks is named")
+    ghost_plan = json.loads((d / "plan.json").read_text())
+    ghost_plan["nodes"][0]["closes"].append("DOC-404")
+    (d / "plan-ghost.json").write_text(json.dumps(ghost_plan))
+    rc, out, err = run("validate", "--inventory", str(inv), "--plan", str(d / "plan-ghost.json"))
+    ok(rc == 1 and "DOC-404" in err, "an id a node closes and the inventory lacks is named")
+    escaped = json.loads(inv.read_text())
+    for x in escaped["items"]:
+        if x["id"] == "DOC-001":
+            x.pop("node"); x["wave"] = None; x["release"] = "program"
+    (d / "escaped.json").write_text(json.dumps(escaped))
+    rc, out, err = run("validate", "--inventory", str(d / "escaped.json"), "--plan", str(d / "plan-gap.json"))
+    ok(rc == 1 and "DOC-001" in err,
+       "an open item is not excused by release: program — only status: carried is, in validate as in assign")
+
     # --- sync-graph: through graph.py wave, and graph.py validate agrees
     g = {"goal": "a goal", "requirements": ["REQ-001"], "edges": [
             {"from": "N-001", "to": "N-002", "payload": "the core fix"}],

@@ -54,7 +54,7 @@ on real agents, tasks and users rather than on the first guess.
 | 2 Brainstorm + decompose | once: the canvas extends the module map ([`decomposition.md`](decomposition.md)), and the work graph carries each node's wave |
 | 3 Spec | once: the canvas is the committed target-state spec; a wave's dossier may deepen a section, never contradict it |
 | 4 Plan | once: every wave's nodes, its exit criteria and the question batch. Re-cut at each wave boundary, as a recorded revision |
-| 5–8 Build → post-deploy | per wave, then the close pass |
+| 5–8 Build → post-deploy | per wave, then the close pass. A wave's stage 7 integrates to the main branch **without tagging**; the release's tag, its approval mode and its go are stage 7's full gate, run once at the release ([`iteration.md`](iteration.md) → *The cycle*, step 10), and stage 8's trio follows on what was released (step 11) |
 | 9 Docs + wiki · 10 Acceptance | once, to close the release, over everything the waves shipped |
 
 **One planning gate, not three prompts.** The manual gates of stages 0, 2 and 3 are

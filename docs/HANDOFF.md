@@ -2,10 +2,32 @@
 
 Snapshot: 2026-10-12. Released: **v1.92.0** (npm `task-pipeline-skill`, 2026-10-11), wave mode.
 Released: **v1.93.2** (v1.93.0's payload; the v1.93.0 and v1.93.1 tags published nothing — see CHANGELOG).
-In review: **v1.93.3** on `fix/w2-recert` — see the next section.
+Released: **v1.93.3** (#113 merged; the section below is its record).
+In flight: **#112** `feat/release-iteration` (release iteration, lessons, wave tooling,
+continuity) and **#114** `iter1/M-5-N-1`, stacked on it (run-level memory marker, installers)
+— see the next section.
 [Verification](evidence/verification.md) · [board](evidence/backlog.md) · [CHANGELOG](../CHANGELOG.md).
 
-## In flight — v1.93.3 (branch `fix/w2-recert`), a patch to wave 2
+## In flight — #112 and #114 (release iteration 1, wave 1)
+
+Driven by the release-iteration run of 2026-10-12 (its canvas and work graph live in the
+orchestrating repository, not here). CHANGELOG `## Unreleased` lists the payload.
+
+- **#112 `feat/release-iteration`** — `references/iteration.md` (the loop around the
+  waves, risk classes R1–R3, the learning loop's read/write recipes), `scripts/lessons.py`
+  + `templates/lesson.schema.json`, `scripts/waves.py` + inventory/canvas/questions/dossier/
+  backlog-sources templates, `continuity.md` arming and waits, `graph.schema.json` `risk`.
+- **#114 `iter1/M-5-N-1`**, base `feat/release-iteration` — `stage_checkpoint.py record
+  --unavailable --for-run` and the hook that honours it; both installers deliver all three
+  skills and name the hooks they cannot carry.
+- Both are in verification rounds (round 1 fixed; the seam tier runs in round 2). Not
+  merged, not versioned: the version, its CHANGELOG heading and the tag come with the
+  iteration's release.
+
+**Next task:** round 2 of verification on both PRs; then the orchestrator merges #114 into
+#112 and #112 into `main`, and the release step versions the `## Unreleased` section.
+
+## v1.93.3 (shipped, #113), a patch to wave 2
 
 Findings from a re-certification reading of v1.93.2 and an independent observer
 (CHANGELOG `v1.93.3`, verification section *Shipped state — v1.93.3*):
@@ -19,11 +41,7 @@ Findings from a re-certification reading of v1.93.2 and an independent observer
   `test/release_approval_test.py`. CI's validate job now also runs these two and
   `memory_nudge_test.py`, which was in `npm test` but not in CI.
 
-**Next task:** after the PR merges with checks green, push the `v1.93.3` tag and watch
-`release.yml`. The approval mode is not declared in `pipeline.json`, and on 2026-10-12
-`gh api repos/ssheleg/task-pipeline/environments/release` returned 404, so no reviewer
-gate exists (`references/deploy-targets.md`). Then the hub re-pins 1.93.3 instead of
-1.93.2 in wave 5.
+**Done:** #113 merged and the `v1.93.3` tag points at its merge commit `52fa75d`. Left from it: the hub re-pins 1.93.3 instead of 1.93.2 in wave 5.
 
 ## Wave 2 (shipped as v1.93.2; its branch is deleted, its commits are under `pull/109/head`)
 

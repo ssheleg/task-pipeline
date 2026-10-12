@@ -478,14 +478,18 @@ iteration runs in this order:
 - the survey;
 - module dossiers written in parallel, laid onto one canvas until a pass changes nothing;
 - questions asked in rounds, never one at a time, while agents keep working;
-- a parallel build, each node checked the moment it lands, in one to three rounds by its
-  risk class;
+- a parallel build, each node checked the moment it lands: one round of three blind
+  readings for every node, and two or three rounds by its risk class (R2, R3 — the third
+  adversarial);
 - one release, checked as released;
 - the next pool, handed to you grouped by module.
 
-Lessons carry over. Every install reads the project's retrospective. Where the host has
-a shared lesson store, such as an Observatory or a Fabric estate, agents also write their
-lessons there and read other projects' lessons at stage 0.
+Lessons carry over. Every install reads the project's retrospective, and keeps a local
+index of every project's lessons on the machine (`scripts/lessons.py`), which stage 0
+queries by the task's nouns. Where the session lists Project Observatory, agents also write
+their lessons there — that works today. Reading them back from the store needs an engine
+whose search filters by kind; until the session's engine has it, the ledger says
+`shared lessons: unfilterable` and only the local index is read.
 
 ### Loop guard — churn is detected, not endured
 

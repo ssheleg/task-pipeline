@@ -220,7 +220,12 @@ not authorize an outward, irreversible action — stage 7 stops and asks.
    in one pass (wave 1 the walking skeleton, exit criteria named first); stages 5–8
    run per wave with a close pass after each — verify, one fix round, docs,
    re-measure, re-cut — and 9–10 close the release. No wave builds a shape a later
-   wave undoes.
+   wave undoes. **Around the waves runs the release iteration** ("release iteration" /
+   "итерация релиза"): module dossiers integrated into one canvas, questions in batches,
+   each node verified as it lands in one to three rounds by its risk class (R1–R3), a
+   wave's stage 7 integrated without tagging, one release gated and verified as
+   released, the next pool handed back; a finding made mid-iteration joins the
+   inventory rather than being fixed alone.
 3. **Spec** (manual) — write and commit the design; lock every shared contract
    (types, schemas, signatures, file layout) plus a **Global Constraints** block of
    exact values every later task inherits. Self-review it for placeholders,

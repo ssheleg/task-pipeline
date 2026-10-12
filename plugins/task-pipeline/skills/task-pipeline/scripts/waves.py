@@ -90,9 +90,9 @@ def item_errors(x: object) -> list[str]:
              "under an `x-` prefix" for k in x if k not in REQUIRED + OPTIONAL and not EXT.match(k)]
     if "id" in x and (not isinstance(x["id"], str) or not ID.match(x["id"])):
         errs.append(f"{iid}: `id` is not an id (a letter, then letters, digits, . _ -)")
-    for k in ("title", "area", "proposed_fix"):
-        if k in x and (not isinstance(x[k], str) or not x[k].strip()):
-            errs.append(f"{iid}: `{k}` is empty")
+    for k, least in (("title", 3), ("area", 1), ("proposed_fix", 1)):
+        if k in x and (not isinstance(x[k], str) or len(x[k].strip()) < least):
+            errs.append(f"{iid}: `{k}` is shorter than {least} character{'s' if least > 1 else ''}")
     if "kind" in x and (not isinstance(x["kind"], str) or not KIND.match(x["kind"])):
         errs.append(f"{iid}: `kind` is not a lowercase word")
     if "severity" in x and x["severity"] not in SEVERITY:
@@ -218,6 +218,17 @@ def _status(x: dict) -> str:
     return x.get("status", "open")
 
 
+def _carried(x: dict) -> bool:
+    """The ONE predicate for an item that goes to the program without a node. `assign`
+    writes `release: program` from it and `validate` excuses an item by it — the same
+    test in both, so a hand-written `release: program` on an open item excuses nothing."""
+    return _status(x) == "carried"
+
+
+def _needs_node(x: dict) -> bool:
+    return _status(x) in OPEN
+
+
 def counts(items: list[dict], fields) -> dict:
     out = {}
     for f in fields:
@@ -290,9 +301,9 @@ def _assign(items: list[dict], owner: dict[str, str], nodes: list[dict] | None) 
             p = place.get(x["id"])
             if p:
                 x.update(node=p["node"], wave=p["wave"], release=p["release"])
-            elif _status(x) == "carried":
+            elif _carried(x):
                 x.update(wave=None, release="program")
-            elif _status(x) in OPEN:
+            elif _needs_node(x):
                 unplaced.append(x["id"])
         out.append(x)
     return out, unclaimed, unplaced
@@ -327,8 +338,11 @@ def cmd_count(a) -> int:
 def cmd_validate(a) -> int:
     _, items = load_inventory(pathlib.Path(a.inventory))
     problems = []
+    known = {x["id"] for x in items}
     if a.modules:
         owner = load_modules(pathlib.Path(a.modules))
+        problems += [f"{i}: the module table puts it on {owner[i]}, and the inventory has no "
+                     "such item" for i in sorted(set(owner) - known)]
         for x in items:
             mod = owner.get(x["id"])
             if mod is None:
@@ -336,7 +350,10 @@ def cmd_validate(a) -> int:
             elif "module" in x and x["module"] != mod:
                 problems.append(f"{x['id']}: recorded on {x['module']}, the table says {mod} — re-run assign")
     if a.plan:
-        place = placement(load_plan(pathlib.Path(a.plan)))
+        plan_nodes = load_plan(pathlib.Path(a.plan))
+        problems += [f"{i}: node {n['id']} closes it, and the inventory has no such item"
+                     for n in plan_nodes for i in (n.get("closes") or []) if i not in known]
+        place = placement(plan_nodes)
         for x in items:
             p = place.get(x["id"])
             if p:
@@ -347,8 +364,11 @@ def cmd_validate(a) -> int:
             elif "node" in x and x["node"]:
                 problems.append(f"{x['id']}: recorded on {', '.join(x['node'])}, which no longer "
                                 "close it")
-            elif _status(x) in OPEN and x.get("release") != "program":
-                problems.append(f"{x['id']}: open, and no node closes it — it lands nowhere")
+            elif _needs_node(x):
+                problems.append(f"{x['id']}: open, and no node closes it — it lands nowhere "
+                                "(carry it with `status: carried`, or put it on a node)")
+            elif _carried(x) and x.get("release") != "program":
+                problems.append(f"{x['id']}: carried, and its release is not program — re-run assign")
     for p in problems:
         print(f"waves: {p}", file=sys.stderr)
     print(json.dumps({"items": len(items), "problems": len(problems)}))

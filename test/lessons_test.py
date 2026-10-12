@@ -226,11 +226,15 @@ def main():
         "lesson: absence-needs-its-own-check — "), "the bridge write is observatory_record with a `lesson:` statement")
     ok({"kind": "commit", "sha": sha_a} in args["arguments"]["evidence"], "the evidence commit travels")
     ok(args["arguments"]["owner"] == "agent:task-pipeline", "owner is named, never operator")
-    rc, out, _ = run("emit-observatory", lid, "--tool", "observatory_lesson",
-                     "--project-id", "project:alpha", cwd=a, index=idx)
+    key_a = "p-" + git(a, "rev-list", "--max-parents=0", "HEAD").split()[0][:12]
+    ok("projectId" not in args["arguments"] and any(e.get("project") == key_a for e in args["arguments"]["evidence"]),
+       "the store gets the pseudonymous key, never a project:<slug> id")
+    rc, out, _ = run("emit-observatory", lid, "--tool", "observatory_lesson", cwd=a, index=idx)
     la = json.loads(out)["arguments"]
     ok(la["classKey"] == "absence-needs-its-own-check" and la["origin"] == {
-        "projectId": "project:alpha", "commit": sha_a}, "observatory_lesson arguments carry classKey and origin")
+        "projectId": key_a, "commit": sha_a}, "observatory_lesson arguments carry classKey and the pseudonymous origin")
+    rc, _, _ = run("emit-observatory", lid, "--project-id", "project:alpha", cwd=a, index=idx)
+    ok(rc == 2, "--project-id is gone: a slug never reaches the store")
     ledger = a / ".task-pipeline" / "run.md"
     ledger.parent.mkdir()
     ledger.write_text("# Run ledger\n\nRun: `x`\n\n## Log\n\n", encoding="utf-8")
@@ -238,10 +242,69 @@ def main():
                        stdin=json.dumps({"memoryId": "mem:abc", "revision": 1}), index=idx)
     ok(rc == 0 and "mem:abc@1" in idx.read_text(encoding="utf-8"), f"record keeps the memory id ({rc} {err})")
     ok("event: lessons — recorded" in ledger.read_text(encoding="utf-8"), "record appends one ledger line")
+    rc, _, err = run("record", lid, "--answer", "-", "--ledger", str(ledger), cwd=a,
+                     stdin=json.dumps({"memoryId": "mem:abc", "revision": "two"}), index=idx)
+    ok(rc == 2 and "revision" in err, f"a non-numeric revision is exit 2, named ({rc} {err!r})")
     rc, out, err = run("record", lid, "--answer", "-", "--ledger", str(ledger), cwd=a,
                        stdin=json.dumps({"error": "bounds", "message": "too long"}), index=idx)
     ok(rc == 0 and "event: lessons — store refused — bounds" in ledger.read_text(encoding="utf-8"),
        f"a refusal is one ledger line, exit 0, the local entry kept ({rc} {err})")
+
+    # --- origin.project is the repository's own key: a supplied other key is refused
+    before = idx.read_bytes()
+    forged = dict(single, classKey="forged-origin",
+                  origin={"project": "p-000000000000", "commit": sha_a, "retro": "docs/evidence/retro.md#x"})
+    rc, _, err = run("add", "--json", "-", cwd=a, stdin=json.dumps(forged), index=idx)
+    ok(rc == 1 and "p-000000000000" in err and key_a in err and idx.read_bytes() == before,
+       f"an add from alpha claiming p-000000000000 is refused, naming both keys ({rc} {err!r})")
+    rc, out, _ = run("candidates", index=idx)
+    ok("forged-origin" not in out, "candidates lists nothing from a refused origin")
+    bad_shape = dict(single, classKey="bad-shape",
+                     origin={"project": "alpha", "commit": sha_a, "retro": "docs/evidence/retro.md#x"})
+    rc, _, err = run("add", "--json", "-", cwd=a, stdin=json.dumps(bad_shape), index=idx)
+    ok(rc == 1 and "origin.project" in err, "an origin.project that is not a pseudonymous key is refused")
+
+    # --- seen counts origins, projects counts distinct projects
+    two = idx.parent / "two.jsonl"
+    one_proj = [dict(single, classKey="same-project-twice",
+                     origin={"commit": sha_a, "retro": f"docs/evidence/retro.md#entry-{i}"}) for i in (1, 2)]
+    run("add", "--json", "-", cwd=a, stdin=json.dumps(one_proj), index=two)
+    e = json.loads(two.read_text(encoding="utf-8").splitlines()[0])
+    ok(e["seen"] == 2 and e["projects"] == 1 and e["status"] == "local",
+       f"two entries of one project: seen 2, projects 1, not a candidate ({e['seen']} {e['projects']})")
+
+    # --- the e-mail and hex patterns
+    for field, bad, why in (("check", "ask someone@example.org first", "an e-mail address"),
+                            ("trigger", "after " + "deadbeef" * 5, "a long hex run")):
+        rc, _, err = run("add", "--json", "-", cwd=a, index=idx,
+                         stdin=json.dumps(dict(single, classKey="pattern-" + field, **{field: bad})))
+        ok(rc == 1 and why in err, f"{why} is refused by name ({rc} {err!r})")
+
+    # --- rebuild keeps the memory ids `record` stored
+    rc, _, _ = run("rebuild", "--roots", str(roots), index=idx)
+    ok(rc == 0 and "mem:abc@1" in idx.read_text(encoding="utf-8"), "rebuild keeps the recorded memory ids")
+
+    # --- Unicode headings keep their letters in the anchor
+    c, sha_c = project("gamma", 3)
+    rp = c / "docs" / "evidence" / "retro.md"
+    rp.write_text(rp.read_text(encoding="utf-8").replace("gate 6 reopened twice", "ворота открылись дважды"),
+                  encoding="utf-8")
+    rc, out, err = run("add", "--retro", "docs/evidence/retro.md", "--all", cwd=c, index=idx)
+    ok(rc == 0, f"a heading in Cyrillic is a valid anchor ({rc} {err!r})")
+    rc, out, _ = run("show", lid, index=idx)
+    ok("ворота-открылись-дважды" in out, "the anchor keeps its Unicode letters")
+
+    # --- a directory the script did not create keeps its mode
+    shared = tree("tp-lessons-shared-")
+    os.chmod(shared, 0o755)
+    rc, _, _ = run("add", "--json", "-", cwd=a, stdin=json.dumps(single), index=shared / "index.jsonl")
+    ok(rc == 0 and stat.S_IMODE(shared.stat().st_mode) == 0o755,
+       "a directory the script did not create is not chmod-ed")
+    ro = tree("tp-lessons-ro-")
+    os.chmod(ro, 0o500)
+    rc, _, err = run("add", "--json", "-", cwd=a, stdin=json.dumps(single), index=ro / "sub" / "index.jsonl")
+    os.chmod(ro, 0o700)
+    ok(rc == 1 and "Traceback" not in err, f"an unwritable index location is a refusal, not a traceback ({rc} {err!r})")
 
     # --- lock contention: a held lock makes add refuse, nothing written
     try:

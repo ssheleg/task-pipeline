@@ -276,6 +276,14 @@ def violations(graph):
                        f"{', '.join(SURFACE_CLASSES)}. A class nobody recognises requires no "
                        "visual reading, so a typo here would drop the tier that reads the pixels")
 
+        # The risk class (`references/iteration.md` → *Verification starts when a node
+        # lands*) sets how many certification rounds a node owes. A class outside the three
+        # would owe an unknown number, and the cheapest misreading is one round.
+        if "risk" in n and n["risk"] not in RISK_CLASSES:
+            out.append(f"{nid}: risk is {n['risk']!r} — it must be one of "
+                       f"{', '.join(RISK_CLASSES)}; a class nobody recognises owes no known "
+                       "number of rounds")
+
         # Wave mode (`references/waves.md`). `True` is an int in Python, and a wave of
         # `true` is a typo the ordering check below would read as wave 1.
         if "wave" in n and not _is_wave(n["wave"]):
@@ -621,6 +629,7 @@ TIERS = ("unit", "seam", "product")
 VISUAL_TIER = "visual"
 ALL_TIERS = TIERS + (VISUAL_TIER,)
 SURFACE_CLASSES = ("flagship", "product", "internal", "ad")
+RISK_CLASSES = ("R1", "R2", "R3")
 
 
 def _is_wave(w):

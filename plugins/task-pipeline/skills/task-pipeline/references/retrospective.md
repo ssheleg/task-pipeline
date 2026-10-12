@@ -427,11 +427,14 @@ local index every install has, and where the session lists a shared lesson store
 Observatory) it is also recorded there, as a proposal. An entry without the line stays
 private to this project.
 
-**A lesson is not a publication, and the redaction list below is split by audience.** That
-list binds whatever *leaves the estate*. A lesson kept on this machine or estate may carry
-its evidence commit and its project's id — pseudonymous in the local index — because both
-resolve only for someone who already holds the project; it never carries a path outside
-the repository, a URL, a name, a value or code, and `retro.publish` strips its whole origin.
+**A lesson is not a publication, but the redaction list below binds it too — with one
+relaxation.** On this machine or estate (the local index, a shared store), rule 2 is relaxed
+for exactly two fields: the evidence commit and the pseudonymous project key (`p-` and 12 hex
+of the root commit, the same key in the store, never the repository's name or a
+`project:<slug>` id). A private repository's SHA names nothing; a public repository's SHA is
+searchable, so it stays in its field and never in text. Rules 1, 3, 4 and 5 still bind every
+text field: no path at all, no code or value, no person's, company's, customer's or
+product's name, a title that states the class. `retro.publish` strips the whole origin.
 The read side is source 7b of [`knowledge-sources.md`](knowledge-sources.md). Where no store exists the run
 says `shared lessons: absent` rather than nothing.
 Mechanics and the read and write recipes: [`iteration.md`](iteration.md) → *The learning loop*.
@@ -528,8 +531,8 @@ is what you want them to do.
 
 An issue is a **public artefact in someone else's repository**. What travels is the
 *class*; what stays is everything that identifies where it happened. This list binds
-whatever leaves the estate. A lesson kept on this machine or estate is the other audience:
-*Recording to a shared lesson store* above says what it may carry.
+whatever leaves the estate, and every lesson too; *Recording to a shared lesson store*
+above names the one relaxation a lesson kept on this machine or estate gets.
 
 | Goes | Stays |
 |---|---|

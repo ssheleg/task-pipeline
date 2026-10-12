@@ -205,6 +205,10 @@
           ],
           "description": "The class of the user-facing surface this node builds, copied from the brief's `surface_class` (stage 0). It selects the gate profile, and `graph.py certify` reads it: on `flagship` or `product` the fourth, `visual` tier report is REQUIRED, because none of unit, seam or product opens the contact sheet; on any other class a `visual` report is accepted when given. Absent on a node that builds no user-facing surface. `references/certification.md` → *The fourth reading*."
         },
+        "risk": {
+          "enum": ["R1", "R2", "R3"],
+          "description": "The node's risk class (`references/iteration.md` → *Verification starts when a node lands*), computed from what it touches and never lowered to save time. It sets how many certification rounds the node owes: R1 one, R2 two, R3 three with the last adversarial. A round is the three blind tiers plus one fix cycle. Absent outside an iteration."
+        },
         "wave": {
           "type": "integer",
           "minimum": 1,

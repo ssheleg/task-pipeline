@@ -61,9 +61,14 @@ reason. "It is quick" is not one of the five entries.
 | 12 | Next pool | the re-measured inventory and the proposal | the hand-back is sent |
 | 13 | Retrospective | the project retro, plus the shared lesson store where one exists | written last ([`retrospective.md`](retrospective.md)) |
 
-Steps 1–4 are stages 0–4 run once. Steps 6–8 are stages 5–8 per wave. Steps 9–13 are
-stages 9–10 for the release. No gate in [`stages.md`](stages.md) is skipped. The cycle
-changes when each stage runs, and over what.
+Steps 1–4 are stages 0–4 run once. Steps 6–8 are stages 5–8 per wave, and a wave's
+stage 7 **integrates to the main branch without tagging**: its lint, suite and CI verdict
+hold, nothing is published. Step 9 is stage 9. **Step 10 runs stage 7's full release gate**
+once, for the release: the release's approval mode, the CI verdict read for the commit
+being tagged, and the operator's specific go or a standing authorization that names the
+act. **Step 11 runs stage 8's verification trio** on what was released. Steps 12–13 close
+with stage 10. No gate in [`stages.md`](stages.md) is skipped. The cycle changes when each
+stage runs, and over what.
 
 ## Module dossiers
 
@@ -132,18 +137,24 @@ starts at that moment, while other nodes are still being built. A wave never wai
 its slowest node before checking its fastest.
 
 **The number of rounds follows the node's risk class.** The class is recorded on the node
-as `risk`, computed from what the node touches. It is never lowered to save time.
+as `risk` (R1–R3, [`work-graph.md`](work-graph.md)), computed from what the node touches.
+It is never lowered to save time. **A round is the three blind tiers of
+[`certification.md`](certification.md) plus one fix cycle**, and the first round is always
+the full three tiers — there is no lighter first reading. The class sets how many rounds
+the node owes:
 
 | Class | Touches | Rounds |
 |---|---|---|
-| R1 | docs, config, a mechanical change, one isolated file | 1: the unit tier and the doc check |
-| R2 | an ordinary feature or fix inside one module | 2: the blind tiers, then a re-read of the fix diff with its regression tests |
+| R1 | docs, config, a mechanical change, one isolated file | 1: that first round |
+| R2 | an ordinary feature or fix inside one module | 2: the first round, then a second over the fix diff with its regression tests |
 | R3 | security, cryptography, money, a data migration, a public contract, a seam across repositories, concurrency | 3: the first two, then an adversarial round that plants defects and tries abuse cases, on another model where one is available |
 
-- Each round gets one fix cycle, inside [`loop-guard.md`](loop-guard.md)'s caps. A finding
+- Each round's fix cycle stays inside [`loop-guard.md`](loop-guard.md)'s caps. A finding
   that cannot be fixed in the node is parked with a board row.
-- R1 and R2 may stop early when a round finds nothing new. R3 always runs its adversarial
-  round.
+- Every owed round runs, and every round re-runs all three tiers: a tier that passed in an
+  earlier round read a tree the fix has since moved ([`certification.md`](certification.md)
+  → a passing tier is re-run). A clean round does not cancel the next one; R3's third round
+  asks a different question — it hunts for a planted defect — and always runs.
 - Readers stay blind ([`certification.md`](certification.md) → *Blind*). Each reads the
   diff, the packet and the contract, never the builder's reasoning.
 
@@ -216,10 +227,10 @@ as before, plus a **local index** of every project's lessons on this machine:
 (`lessons.py rebuild --roots <dir>` re-derives it). Two projects holding one class key make
 one lesson seen twice, status `candidate`. The index path is a parameter — `--index`, then
 `$TASK_PIPELINE_LESSONS`, then `~/.sshlg-skills/lessons/index.jsonl`. That default lives in
-the family's machine-state directory, and listing `lessons/` there as task-pipeline's is a
-proposal to the family, **not yet agreed**: until it is, a user who wants the index
-elsewhere sets the variable, and nothing in this skill writes anywhere else under that
-directory.
+the family's machine-state directory; the family accepted `lessons/` there as
+task-pipeline's on 2026-10-12 — "state-json.md gets the entry when it ships". Until that
+entry ships, the agreement is the contract; a user who wants the index elsewhere sets the
+variable, and nothing in this skill writes anywhere else under that directory.
 
 **Layer 2 — where the session lists a shared store.** An Observatory (the public engine,
 [passioncode-ai/project-observatory-dashboard](https://github.com/passioncode-ai/project-observatory-dashboard)),
@@ -227,23 +238,26 @@ detected by the tools the session lists, never by a path. Lessons there are the 
 work memory, written as proposals below full confidence; the store's own rules decide who
 promotes one.
 
-**What a lesson may carry — split by audience.** The redaction list in
-[`retrospective.md`](retrospective.md) → *What may leave the project* binds everything
-that **leaves the estate** (`retro.publish`): no commit, no repository, no project id. A
-lesson kept on the same machine or estate may carry two identifiers, because both resolve
-only for someone who already holds the project:
-- **the evidence commit**, as a SHA — a digest that names nothing, and the only way a later
-  reader (or the store's corroboration) can check the lesson against the change that taught it;
-- **the project, pseudonymous**: in the local index, `p-` and 12 hex digits of the
-  repository's root commit — stable across clones, never the repository's name, because the
-  index is read into *other* projects' briefs and a repository name can be a customer's or a
-  product's (redaction rule 4). In the shared store, the store's own project id, which already
-  keys every record there and which the store's access rules guard.
+**What a lesson may carry — one rule list, one relaxation.** The redaction list in
+[`retrospective.md`](retrospective.md) → *What may leave the project* binds every lesson.
+A lesson kept **on this machine or estate** — the local index, the shared store — relaxes
+rule 2 (no host identifiers) for exactly two fields, and nothing else:
+- **`origin.commit`, the evidence commit**, as a SHA: the only way a later reader, or the
+  store's corroboration, can check the lesson against the change that taught it. A private
+  repository's SHA names nothing to someone without the clone; **a public repository's SHA
+  is searchable** and leads to the repository, so it stays in this field and never in text;
+- **`origin.project`, the pseudonymous project key** — `p-` and 12 hex digits of the
+  repository's root commit — stable across clones and never the repository's name, because
+  lessons are read into *other* projects' briefs and a repository name can be a customer's
+  or a product's. The shared store receives the same key, never a `project:<slug>` id.
 
-Never, in either layer: a transcript, a value, a path outside the repository, a URL, a
-person's or customer's name, code. `lessons.py` refuses what a pattern can see (paths, URLs,
-addresses, credential shapes, long hex or base64 runs) and any field lesson/1 does not name;
-a name it cannot see stays the writer's duty. `retro.publish` strips the whole origin.
+Rules 1, 3, 4 and 5 still bind every text field, on the estate as off it: no path at all,
+no code or value, no person's, company's, customer's or product's name, and a title that
+states the class rather than the incident. Never, in either layer, a transcript or a URL.
+`lessons.py` refuses what a pattern can see (paths, URLs, addresses, credential shapes, long
+hex or base64 runs) and any field lesson/1 does not name; a name it cannot see stays the
+writer's duty. Off the estate (`retro.publish`) the relaxation ends: the whole origin is
+stripped.
 
 **Read, at stage 0 — source 7b of [`knowledge-sources.md`](knowledge-sources.md).**
 1. Always: `lessons.py query <the task's 3–6 nouns> --limit 5`. The source ledger prints
@@ -264,8 +278,8 @@ a name it cannot see stays the writer's duty. `retro.publish` strips the whole o
 1. `lessons.py add --retro <retro file> --entry <anchor>` — always. It validates lesson/1,
    checks that the commit resolves here, and merges; a repeat from the same project revises,
    never mints.
-2. If the session lists the store: `lessons.py emit-observatory <L-id>
-   [--project-id project:<slug>]` prints `{tool, arguments}`. The tool is
+2. If the session lists the store: `lessons.py emit-observatory <L-id>` prints
+   `{tool, arguments}`, carrying the pseudonymous key, never a `project:<slug>` id. The tool is
    `observatory_record` today — a note whose statement starts `lesson:`, so lessons accumulate
    and a later migration finds them — and `observatory_lesson` (`--tool observatory_lesson`)
    once the session lists it. `observatory_learn` is not the retro write: it contrasts a

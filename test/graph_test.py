@@ -2093,6 +2093,29 @@ def _():
         assert p.read_bytes() == before, "a refused move wrote to the file: %r" % (args,)
 
 
+@case("a node's risk class (R1-R3) validates under the schema and graph.py; any other value is refused by both")
+def _():
+    import json as _j
+    schema = _j.loads((ROOT / "plugins/task-pipeline/skills/task-pipeline"
+                       "/graph.schema.json").read_text())
+    for risk, good in (("R1", True), ("R2", True), ("R3", True), ("R4", False), ("high", False)):
+        n = node("N-001")
+        n["risk"] = risk
+        gr = g([n])
+        code, out = run_out(gr, "validate")
+        assert (code == 0) == good, "graph.py validate on risk %r: exit %d %s" % (risk, code, out)
+        try:
+            import jsonschema
+        except ImportError:
+            skipped.append("risk under jsonschema: not installed")
+            continue
+        try:
+            jsonschema.validate(gr, schema); ok_s = True
+        except jsonschema.ValidationError:
+            ok_s = False
+        assert ok_s == good, "the schema on risk %r says %s" % (risk, ok_s)
+
+
 # Before the verdict, and the position matters: `report()` is idempotent (the atexit
 # registration would find `_reported` already set), so a case defined BELOW this line
 # is created after the accounting and never appears in it. Found by planting a failing

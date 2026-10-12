@@ -9,11 +9,14 @@ the list the harvest works from.
 
     backlog_sources.py [--root DIR] [--found PATH ...]
 
-The contract is not this file's: it is owned by the Fabric workspace's `knowledge/backlog.md`
-(section *Source contract*; read at fabric-workspace d49b6f58, 2026-10-08), and its collector
-there is the authority. This checker refuses what that contract states in prose, with one
-deliberate widening: `repository` may be any `https://github.com/<owner>/<repo>`, because this
-skill runs outside one organisation.
+The rule a user of this skill reads is the shipped schema template,
+`templates/backlog-sources.schema.json` (backlog-sources/1), with `references/backlog.md` →
+*A declared source list*; this checker enforces it, plus the two rules a schema cannot state
+(a regular file reached through no symlink, no duplicate declaration). The Fabric workspace's
+`knowledge/backlog.md` (section *Source contract*; read at fabric-workspace d49b6f58,
+2026-10-08) is its provenance: the template is compatible with it, with one deliberate
+widening — `repository` may be any `https://github.com/<owner>/<repo>`, because this skill runs
+outside one organisation.
 
 - `schema` is 1; `repository` is a canonical GitHub URL; `sources` holds 1–100 entries.
 - Each `path` is relative, inside the repository, with no hidden, `.` or `..` segment and no

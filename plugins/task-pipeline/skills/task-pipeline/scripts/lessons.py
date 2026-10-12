@@ -24,9 +24,9 @@ entry is a pure function of its origins.
         lessons two or more projects hold: the `retro.publish` queue for learned.md
     lessons.py show L-<sha12>
         one entry, with its origins (pseudonymous project keys, commits, retro anchors)
-    lessons.py emit-observatory L-<sha12> [--tool observatory_record|observatory_lesson]
-                                          [--project-id project:<slug>] [--root DIR]
-        the shared store's arguments for this project's origin, as JSON; the agent calls the tool
+    lessons.py emit-observatory L-<sha12> [--tool observatory_record|observatory_lesson] [--root DIR]
+        the shared store's arguments for this project's origin, as JSON, carrying the same
+        pseudonymous project key — never a `project:<slug>` id; the agent calls the tool
     lessons.py record L-<sha12> --answer FILE|- [--ledger PATH] [--root DIR]
         keep the store's memory id beside this project's origin; a refusal becomes one ledger
         line (`event: lessons — store refused — <code>`) and the local entry stays
@@ -34,10 +34,10 @@ entry is a pure function of its origins.
         the index this invocation would use
 
 **Where the index lives.** `--index PATH`, else `$TASK_PIPELINE_LESSONS`, else
-`~/.sshlg-skills/lessons/index.jsonl`. The default is a proposal, not yet a contract: the
-directory is the family's machine-state home (sshlg-skills `docs/working-rules/state-json.md`),
-and listing `lessons/` there as task-pipeline's awaits that family's agreement. Until it is
-recorded, the path stays a parameter and the doctrine says so. Directory 0700, file 0600,
+`~/.sshlg-skills/lessons/index.jsonl`. The directory is the family's machine-state home
+(sshlg-skills `docs/working-rules/state-json.md`); the family accepted `lessons/` there as
+task-pipeline's on 2026-10-12 ("state-json.md gets the entry when it ships"). Until that
+entry ships, the contract is that agreement, and the path stays a parameter. Directory 0700, file 0600,
 written by a unique temp file and `os.replace`, under an exclusive lock
 (`index.jsonl.lock`, `flock`; `$TASK_PIPELINE_LESSONS_LOCK_TIMEOUT` seconds, default 10).
 
@@ -84,7 +84,7 @@ TEXT_CAPS = {"title": (8, 160), "trigger": (3, 200), "check": (3, 200)}
 CLASS_KEY = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
 PROJECT = re.compile(r"^p-[0-9a-f]{12}$")
 COMMIT = re.compile(r"^[0-9a-f]{7,40}$")
-RETRO_REF = re.compile(r"^[A-Za-z0-9_][A-Za-z0-9_./-]*\.md#[a-z0-9-]+$")
+RETRO_REF = re.compile(r"^[A-Za-z0-9_][A-Za-z0-9_./-]*\.md#[^\W_]+(?:-[^\W_]+)*$")
 LESSON_ID = re.compile(r"^L-[0-9a-f]{12}$")
 # What a pattern can see. Each one names what it refuses, so a refusal is a sentence.
 FORBIDDEN = (
@@ -159,8 +159,9 @@ def commit_resolves(root: pathlib.Path, sha: str) -> bool:
 
 
 def slug(text: str) -> str:
-    """An entry's anchor: lowercase, every run of other characters one hyphen."""
-    return re.sub(r"[^a-z0-9]+", "-", text.lower()).strip("-")
+    """An entry's anchor: lowercase letters and digits of any script, every run of other
+    characters one hyphen — a heading in Cyrillic keeps its words."""
+    return re.sub(r"[\W_]+", "-", text.lower()).strip("-")
 
 
 def lesson_id(class_key: str) -> str:
@@ -235,12 +236,23 @@ def validate(lesson: object) -> list[str]:
 
 
 def complete(lesson: dict, root: pathlib.Path) -> dict:
-    """Fill what the repository decides: the schema tag and the pseudonymous project key."""
+    """Fill what the repository decides: the schema tag and the pseudonymous project key.
+
+    The key is ALWAYS this repository's. A supplied key that is well-formed and different
+    is refused, naming both: an add from one project claiming another's key would make one
+    project look like two, and `projects ≥ 2` is what turns a lesson into a candidate.
+    A malformed one is left for `validate` to name."""
     out = dict(lesson)
     out.setdefault("schema", "lesson/1")
     if isinstance(out.get("origin"), dict):
         o = dict(out["origin"])
-        o.setdefault("project", project_key(root))
+        mine = project_key(root)
+        given = o.get("project")
+        if isinstance(given, str) and PROJECT.match(given) and given != mine:
+            raise Refused(f"{out.get('classKey', '?')}: origin.project is {given}, but this "
+                          f"repository's key is {mine} — a lesson is added from the project "
+                          "that learned it; nothing was written")
+        o.setdefault("project", mine)
         out["origin"] = o
     return out
 
@@ -390,8 +402,7 @@ class locked:
         self.fh = None
 
     def __enter__(self):
-        self.lock.parent.mkdir(parents=True, exist_ok=True)
-        os.chmod(self.lock.parent, 0o700)
+        _ensure_dir(self.lock.parent)
         try:
             import fcntl
         except ImportError:
@@ -402,7 +413,11 @@ class locked:
             timeout = float(os.environ.get(ENV_LOCK, "10"))
         except ValueError:
             timeout = 10.0
-        fd = os.open(self.lock, os.O_RDWR | os.O_CREAT, 0o600)
+        try:
+            fd = os.open(self.lock, os.O_RDWR | os.O_CREAT, 0o600)
+        except OSError as exc:
+            raise Refused(f"the index lock {self.lock} cannot be opened ({type(exc).__name__}) "
+                          "— nothing was written")
         self.fh = os.fdopen(fd, "a+")
         deadline = time.monotonic() + timeout
         while True:
@@ -423,20 +438,39 @@ class locked:
         return False
 
 
+def _ensure_dir(d: pathlib.Path) -> None:
+    """Create the index directory 0700 — only the levels this script creates. A directory
+    that already exists keeps its mode: it may be shared, and it is not ours to tighten."""
+    missing = []
+    cur = d
+    while not cur.exists():
+        missing.append(cur)
+        cur = cur.parent
+    try:
+        for m in reversed(missing):
+            m.mkdir(mode=0o700)
+            os.chmod(m, 0o700)
+    except OSError as exc:
+        raise Refused(f"the index directory {d} cannot be created ({type(exc).__name__}) — "
+                      "nothing was written")
+
+
 def save(path: pathlib.Path, entries: dict[str, dict]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    os.chmod(path.parent, 0o700)
+    _ensure_dir(path.parent)
     fd, tmp = tempfile.mkstemp(dir=path.parent, prefix=".index-", suffix=".tmp")
     try:
         with os.fdopen(fd, "w", encoding="utf-8") as f:
             f.write(dump(entries))
         os.chmod(tmp, 0o600)
         os.replace(tmp, path)
-    except BaseException:
+    except BaseException as exc:
         try:
             os.unlink(tmp)
         except OSError:
             pass
+        if isinstance(exc, OSError):
+            raise Refused(f"the index {path} cannot be written ({type(exc).__name__}) — "
+                          "the previous index is intact")
         raise
 
 
@@ -639,11 +673,12 @@ def cmd_emit(a, idx: pathlib.Path) -> int:
     o = _this_origin(e, repo_root(pathlib.Path(a.root or ".")))
     le = o["lesson"]
     if a.tool == "observatory_lesson":
+        # The store gets the same pseudonymous key the index holds — never a
+        # `project:<slug>` id, which would put a repository's name into other projects'
+        # reading (references/iteration.md → *What a lesson may carry*).
         args = {"owner": OWNER, "classKey": le["classKey"], "title": le["title"],
                 "trigger": le["trigger"], "check": le["check"], "nouns": le["nouns"],
-                "origin": {"projectId": a.project_id, "commit": o["commit"]}}
-        if not a.project_id:
-            del args["origin"]["projectId"]
+                "origin": {"projectId": o["project"], "commit": o["commit"]}}
     else:
         # The bridge until the store has a lesson kind: a note whose statement starts
         # `lesson:`, so a later migration can find every one (MN §3.8 step 1).
@@ -651,9 +686,7 @@ def cmd_emit(a, idx: pathlib.Path) -> int:
                 "why": f"{le['trigger']}; check: {le['check']}",
                 "evidence": [{"kind": "commit", "sha": o["commit"]},
                              {"kind": "lesson", "id": e["id"], "classKey": le["classKey"],
-                              "nouns": le["nouns"]}]}
-        if a.project_id:
-            args["projectId"] = a.project_id
+                              "project": o["project"], "nouns": le["nouns"]}]}
     print(json.dumps({"tool": a.tool, "arguments": args}, ensure_ascii=False))
     return 0
 
@@ -693,6 +726,9 @@ def cmd_record(a, idx: pathlib.Path) -> int:
         rev = answer.get("revision") or (answer.get("record") or {}).get("revision") or 1
         if not isinstance(mid, str) or not mid.startswith("mem:") or re.search(r"[@\s]", mid):
             print("lessons: the answer names no memory id (mem:…)", file=sys.stderr)
+            return 2
+        if isinstance(rev, bool) or not (isinstance(rev, int) or (isinstance(rev, str) and rev.isdigit())):
+            print(f"lessons: the answer's revision {rev!r} is not a number", file=sys.stderr)
             return 2
         memory = f"{mid}@{int(rev)}"
         origins = [dict(x, memory=memory) if _origin_key(x) == _origin_key(o) else x
@@ -737,7 +773,6 @@ def main(argv: list[str]) -> int:
     em.add_argument("id")
     em.add_argument("--tool", default="observatory_record",
                     choices=["observatory_record", "observatory_lesson"])
-    em.add_argument("--project-id", help="the store's project id, e.g. project:<slug>")
     em.add_argument("--root")
     rc = sub.add_parser("record", parents=[common], help="keep the store's answer")
     rc.add_argument("id")
