@@ -36,16 +36,25 @@ MSG
   fi
 done
 
+# 0. every source, checked before anything is copied — as bin/task-pipeline.js does. A
+# corrupted checkout that failed on the third skill used to leave the first two installed.
+for SKILL in task-pipeline evidence-docs project-audit; do
+  if [[ ! -f "$HERE/plugins/task-pipeline/skills/$SKILL/SKILL.md" ]]; then
+    echo "error: skill sources missing at $HERE/plugins/task-pipeline/skills/$SKILL — corrupted checkout? Nothing was installed." >&2
+    exit 1
+  fi
+done
+if [[ ! -f "$HERE/plugins/task-pipeline/commands/task-pipeline.md" ]]; then
+  echo "error: command source missing at $HERE/plugins/task-pipeline/commands/task-pipeline.md — corrupted checkout? Nothing was installed." >&2
+  exit 1
+fi
+
 # 1. skills — all three the plugin ships. task-pipeline names evidence-docs as its doc
 # doctrine and runs project-audit as wave 0's sidecar; a plain install that copied one of
-# three left both names resolving to nothing (USR-007).
+# three left both names resolving to nothing (CHANGELOG, Unreleased).
 for SKILL in task-pipeline evidence-docs project-audit; do
   SRC="$HERE/plugins/task-pipeline/skills/$SKILL"
   DEST="${HOME}/.claude/skills/$SKILL"
-  if [[ ! -f "$SRC/SKILL.md" ]]; then
-    echo "error: $SRC is missing — corrupted checkout?" >&2
-    exit 1
-  fi
   if [[ -e "$DEST" && "$FORCE" -eq 0 ]]; then
     echo "skip: skill already installed at $DEST (rerun with --force to overwrite)"
     continue

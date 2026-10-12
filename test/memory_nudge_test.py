@@ -66,7 +66,7 @@ def main():
     # A profile's stage ids need not be numbers (the hub's run ledger takes any \S+ id).
     s = project(HEAD + "stage: spec Spec — gate manual — verdict pass — 2026-10-12T12:00Z\n")
     ok("stage spec" in hook(s), "a non-numeric stage id is reminded too")
-    # USR-008: a run that recorded memory unavailable FOR THE RUN is not nudged again.
+    # A run that recorded memory unavailable FOR THE RUN is not nudged again.
     ck = ROOT / "plugins" / "task-pipeline" / "skills" / "task-pipeline" / "scripts" / "stage_checkpoint.py"
     r = project(HEAD + STAGE)
     first = json.loads(hook(r))["hookSpecificOutput"]["additionalContext"]

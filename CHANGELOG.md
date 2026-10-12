@@ -64,6 +64,18 @@ inventory; a closed hotfix lane of five entries is the only exception.
   (the lesson's own fields, plus `origin{projectId, commit}` — the engine's inputSchema); the agent
   picks it where the session lists that tool, `observatory_record` otherwise.
 - `waves.py` refuses a plan whose risk, wave, closes or release value it does not know.
+- **Memory unavailable, said once per run.** `stage_checkpoint.py record --unavailable
+  "<why>" --for-run` appends one `unavailable for this run` line and leaves a marker in
+  `.task-pipeline/memory.json` carrying the run's `Run:` topic; `hooks/memory-nudge.sh`
+  stays silent for the rest of that run only (a marker from another run nudges), and any
+  later `record --answer` clears it. The first nudge of a run names the Observatory engine.
+- **Plain and npm installs deliver all three skills.** `./install.sh` and
+  `npx task-pipeline-skill` now install `task-pipeline`, `evidence-docs` and
+  `project-audit` into `~/.claude/skills/<name>`, plus the command; every source is
+  verified present before anything is copied. **`--force` now overwrites all three skill
+  directories and the command**, not the task-pipeline skill alone. The closing notice
+  names the role agents and every hook a plain copy cannot carry, and the plugin command.
+- Suite `test/install_test.sh` (both installers, fresh `HOME`) joins `npm test`.
 
 ## v1.93.3 — the wave-2 evidence declares its dead commits; a retried handoff stays one offer
 

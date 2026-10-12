@@ -277,7 +277,7 @@ def case_handoff_retry_ignores_unrelated_appends():
 
 
 def case_unavailable_for_the_run():
-    """USR-008: one run-level marker instead of one line per gate; a later answer clears it."""
+    """One run-level marker instead of one line per gate; a later answer clears it."""
     d = fresh()
     stage(d, 0, "Intake grill", "pass", "2026-10-05T10:00Z")
     code, out, _ = run(d, "record", "--unavailable", "no Observatory on this machine", "--for-run")

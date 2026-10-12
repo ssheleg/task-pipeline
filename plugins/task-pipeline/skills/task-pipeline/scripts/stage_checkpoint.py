@@ -229,7 +229,7 @@ def record(ledger: pathlib.Path, answer_text: str | None, unavailable: str | Non
     if unavailable is not None:
         reason = " ".join(unavailable.split())[:200] or "no reason given"
         if for_run:
-            # ONE marker for the run (USR-008). Without it a run on a machine with no
+            # ONE marker for the run (CHANGELOG, Unreleased). Without it a run on a machine with no
             # Observatory paid one nudge and one ledger line per gate — about eleven of
             # each — to restate a fact that does not change between gates.
             line = f"event: memory — unavailable for this run — {reason} — {_now()}"

@@ -13,7 +13,7 @@
 # .task-pipeline/memory.json carrying the run's `Run:` topic; the marker is honoured only
 # while the ledger names that same run, and a later `record --answer` clears it). Without that marker a
 # machine with no Observatory paid about eleven nudges per run for one unchanging fact
-# (USR-008). The first nudge of a run also says where Observatory comes from, once.
+# (CHANGELOG, Unreleased). The first nudge of a run also says where Observatory comes from, once.
 #
 # Silent everywhere else: no ledger means exit 0 after one file test.
 set -uo pipefail

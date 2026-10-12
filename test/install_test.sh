@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # The plain-skill installers deliver every skill the plugin ships, and say what they do not
-# (USR-007, node N-1). Both installers — install.sh and bin/task-pipeline.js — run against a
+# (CHANGELOG, Unreleased). Both installers — install.sh and bin/task-pipeline.js — run against a
 # fresh HOME made here, so no case can touch the real ~/.claude:
 #
 #   * a fresh install lists task-pipeline, evidence-docs and project-audit under skills/;
@@ -53,5 +53,16 @@ for kind in sh node; do
   if [ "$kind" = sh ]; then out="$(HOME="$P" CLAUDE_CONFIG_DIR= bash "$ROOT/install.sh" 2>&1)"; rc=$?
   else out="$(HOME="$P" CLAUDE_CONFIG_DIR= node "$ROOT/bin/task-pipeline.js" 2>&1)"; rc=$?; fi
   ok '[ "$rc" -eq 3 ] && [ ! -e "$P/.claude/skills" ]' "$kind: an installed plugin is refused and nothing is copied"
+done
+# A corrupted checkout: every source is checked before anything is copied.
+C="$TMP/corrupt"
+mkdir -p "$C"
+cp -R "$ROOT/install.sh" "$ROOT/bin" "$ROOT/plugins" "$C/"
+rm -f "$C/plugins/task-pipeline/skills/project-audit/SKILL.md"
+for kind in sh node; do
+  H="$TMP/home-corrupt-$kind"; mkdir -p "$H"
+  if [ "$kind" = sh ]; then out="$(HOME="$H" CLAUDE_CONFIG_DIR= bash "$C/install.sh" 2>&1)"; rc=$?
+  else out="$(HOME="$H" CLAUDE_CONFIG_DIR= node "$C/bin/task-pipeline.js" 2>&1)"; rc=$?; fi
+  ok '[ "$rc" -ne 0 ] && [ ! -e "$H/.claude/skills" ]' "$kind: a missing third source installs nothing ($rc)"
 done
 echo "PASS: installers — $CASES cases"

@@ -128,11 +128,13 @@ function installOne(label, src, dest, isDir, force) {
 /**
  * Say what this path does NOT install, and what runs instead.
  *
- * `agents/` is a Claude Code plugin capability; `install()` copies the skill directory
- * and the command and nothing else. That is the design — the brief chose plugin agents
- * with honest degradation — and it was silent, which is the part that is not. An
- * operator reading doctrine that names `task-pipeline:verifier` finds a name that
- * resolves to nothing and no explanation anywhere in what they ran.
+ * `agents/` and `hooks/` are Claude Code plugin capabilities; `main()` copies the three
+ * skills and the command and nothing else. That is the design — the brief chose plugin
+ * agents with honest degradation — and it was silent about the hooks, which is the part
+ * that was not. An operator reading doctrine that names `task-pipeline:verifier` or
+ * `hooks/memory-nudge.sh` would find a name that resolves to nothing. The notice lists
+ * the agents' count and every hook by name, says what runs instead, gives the plugin
+ * command, and points at the optional Observatory engine.
  */
 function discloseAgents() {
   const base = path.join(ROOT, 'plugins', 'task-pipeline');
@@ -255,11 +257,14 @@ function main(argv) {
   }
 
   // All three skills the plugin ships: task-pipeline names evidence-docs as its doc
-  // doctrine and runs project-audit as wave 0's sidecar (USR-007).
+  // doctrine and runs project-audit as wave 0's sidecar (CHANGELOG, Unreleased).
   const SKILLS = ['task-pipeline', 'evidence-docs', 'project-audit'];
   const skillSrcs = SKILLS.map((s) => path.join(ROOT, 'plugins/task-pipeline/skills', s));
   const cmdSrc = path.join(ROOT, 'plugins/task-pipeline/commands/task-pipeline.md');
-  for (const [p, what] of [...skillSrcs.map((p) => [p, 'skill sources']), [cmdSrc, 'command source']]) {
+  // Every source is checked before anything is copied: a skill counts as present only
+  // with its SKILL.md, the same test install.sh makes.
+  for (const [p, what] of [...skillSrcs.map((p) => [path.join(p, 'SKILL.md'), 'skill sources']),
+                           [cmdSrc, 'command source']]) {
     if (!fs.existsSync(p)) {
       console.error(`error: ${what} missing at ${p} — corrupted package?`);
       return 1;
