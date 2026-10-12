@@ -256,7 +256,10 @@ never that the work was skipped quietly.
   own churn detection mechanical and reads the `touch:` lines, and
   [`progress.md`](progress.md) derives the rail and the iteration counter from the
   `stage:` and `iter:` lines. The header goes out before the interview because a run
-  that announces its position only at the end announced it to nobody.
+  that announces its position only at the end announced it to nobody. A new ledger starts a new
+  run's memory state: a previous run's "memory unavailable" marker is honoured only while
+  its own ledger line is in the ledger, so a reseeded ledger — even the same day — is nudged
+  again, and the stale marker is cleared at the next `stage_checkpoint.py record`.
 - **The board is read, or seeded.** `<artifacts>/backlog.md` ([`backlog.md`](backlog.md)) — its **open count is quoted in the brief**, measured by a command at the top of the run rather than inherited from the last run's report. Absent ⇒ seeded from the template and said so; an empty board and no board are the same thing to work on, and only one of them can be appended to.
 
 ## 1 — Docs study

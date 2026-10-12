@@ -66,10 +66,11 @@ inventory; a closed hotfix lane of five entries is the only exception.
 - `waves.py` refuses a plan whose risk, wave, closes or release value it does not know.
 - **Memory unavailable, said once per run.** `stage_checkpoint.py record --unavailable
   "<why>" --for-run` appends one `unavailable for this run` line and leaves a marker in
-  `.task-pipeline/memory.json` keyed to the whole `Run:` line (the same topic started again is
-  another run; a ledger with no `Run:` line is refused, exit 2); `hooks/memory-nudge.sh` and
-  `stage_checkpoint.py state` honour it for that run only, and any later `record --answer`
-  clears it. The first nudge of a run names the Observatory engine.
+  `.task-pipeline/memory.json` keyed to the run's topic and start date (the module-map field
+  may change mid-run; a ledger with no `Run:` line is refused, exit 2); `hooks/memory-nudge.sh`
+  and `stage_checkpoint.py state` honour it only while that run's ledger still carries the
+  marker's own line — a ledger reseeded at stage 0, even the same day, does not — and any
+  later `record --answer` clears it. The first nudge of a run names the Observatory engine.
 - **Plain and npm installs deliver all three skills.** `./install.sh` and
   `npx task-pipeline-skill` now install `task-pipeline`, `evidence-docs` and
   `project-audit` into `~/.claude/skills/<name>`, plus the command; every source is

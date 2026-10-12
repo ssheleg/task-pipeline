@@ -113,6 +113,25 @@ def main():
     again_run = hook(q)
     ok("stage 2" in again_run and "project-observatory-dashboard" in again_run,
        "the same topic with a new start date is a new run: nudged, with the pointer")
+    # A same-day restart: the ledger is reseeded with an identical `Run:` line. The old marker's
+    # own ledger line is gone with the old ledger, so the marker is not this run's: nudged.
+    line_run = "Run: `restart` · started `2026-10-13` · module map: none"
+    rs = project(HEAD.replace("Run: `x`", line_run) + STAGE)
+    hook(rs)
+    subprocess.run([sys.executable, str(ck), "record", "--unavailable", "no Observatory", "--for-run"],
+                   cwd=rs, check=True, capture_output=True)
+    (rs / ".task-pipeline" / "run.md").write_text(HEAD.replace("Run: `x`", line_run)
+                                                  + STAGE.replace("stage: 3", "stage: 0"), encoding="utf-8")
+    ok("stage 0" in hook(rs), "a ledger reseeded the same day with the same Run: line is nudged again")
+    # Filling in the module-map field mid-run is the same run: the marker still holds.
+    mm = project(HEAD.replace("Run: `x`", "Run: `mapped` · started `2026-10-13` · module map: none") + STAGE)
+    hook(mm)
+    subprocess.run([sys.executable, str(ck), "record", "--unavailable", "no Observatory", "--for-run"],
+                   cwd=mm, check=True, capture_output=True)
+    led = mm / ".task-pipeline" / "run.md"
+    led.write_text(led.read_text(encoding="utf-8").replace("module map: none", "module map: `docs/map.md`")
+                   + "stage: 4 Plan — gate manual — verdict pass — 2026-10-13T11:00Z\n", encoding="utf-8")
+    ok(hook(mm) == "", "changing only the module-map field mid-run keeps the marker: silent")
     print(f"PASS: memory-nudge.sh — {CASES} cases")
 
 

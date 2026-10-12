@@ -316,7 +316,7 @@ def case_unavailable_for_the_run():
     run(g, "record", "--unavailable", "none here", "--for-run")
     marker = json.loads((g / ".task-pipeline" / "memory.json").read_text())["memory"]["unavailable"]
     ok(len(marker["run"]) == 16 and all(c in "0123456789abcdef" for c in marker["run"]),
-       "the marker carries the run key — 16 hex of the whole `Run:` line, the pointer's key")
+       "the marker carries the run key — 16 hex of the run's topic and start date")
     code, out, _ = run(g, "state")
     ok(json.loads(out)["memoryUnavailable"] == "none here", "state reports the marker of this run")
     led = g / ".task-pipeline" / "run.md"

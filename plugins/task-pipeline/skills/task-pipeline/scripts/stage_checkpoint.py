@@ -119,10 +119,20 @@ def run_line(lines: list[str]) -> str | None:
     return None
 
 
+STARTED = re.compile(r"started\s*`([^`]+)`")
+
+
 def run_key(lines: list[str]) -> str | None:
-    """16 hex of the whole `Run:` line: the same topic started again is another run."""
+    """16 hex of the run's topic and start date — not the whole `Run:` line, whose module-map
+    field an agent may fill in mid-run. The same topic started on another day is another run;
+    a same-day restart is told apart by `marker_for_this_run`'s ledger-line test."""
     line = run_line(lines)
-    return hashlib.sha256(line.encode()).hexdigest()[:16] if line else None
+    if not line:
+        return None
+    topic = TOPIC.match(line).group(1)
+    started = STARTED.search(line)
+    ident = f"{topic}\n{started.group(1) if started else ''}"
+    return hashlib.sha256(ident.encode()).hexdigest()[:16]
 
 
 def _read_ledger(path: pathlib.Path) -> tuple[str, list[tuple]]:
@@ -147,13 +157,23 @@ class UsageError(Exception):
 
 
 def marker_for_this_run(ledger: pathlib.Path, state: dict) -> dict | None:
-    """The run-level "memory unavailable" marker, only when it was written for THIS run."""
+    """The run-level "memory unavailable" marker, only when it was written for THIS run.
+
+    Two tests, both needed: the run key (topic and start date) matches, AND the marker's own
+    `unavailable for this run` line is still in the ledger. A ledger reseeded at stage 0 the
+    same day carries an identical `Run:` line but not that line, so a restart never inherits
+    the previous run's silence (verification round 3)."""
     gone = (state.get("memory") or {}).get("unavailable") or {}
+    if not gone:
+        return None
     try:
-        key = run_key(ledger.read_text(encoding="utf-8").splitlines())
+        lines = ledger.read_text(encoding="utf-8").splitlines()
     except OSError:
         return None
-    return gone if gone and key is not None and gone.get("run") == key else None
+    key = run_key(lines)
+    if key is None or gone.get("run") != key or gone.get("ledger_line") not in lines:
+        return None
+    return gone
 
 
 def _state_path(ledger: pathlib.Path) -> pathlib.Path:
@@ -264,9 +284,10 @@ def record(ledger: pathlib.Path, answer_text: str | None, unavailable: str | Non
             # ONE marker for the run (CHANGELOG, Unreleased). Without it a run on a machine with no
             # Observatory paid one nudge and one ledger line per gate — about eleven of
             # each — to restate a fact that does not change between gates.
-            # The marker carries the run key (the whole `Run:` line, hashed): the hook and
-            # `state` honour it only while the ledger names the same run, so a marker left on
-            # disk — even under the same topic started again — cannot silence the next run.
+            # The marker carries the run key (topic and start date, hashed): the hook and
+            # `state` honour it only while the ledger names the same run AND still carries this
+            # line, so a marker left on disk — even after a same-day reseed — cannot silence
+            # the next run.
             try:
                 key = run_key(ledger.read_text(encoding="utf-8").splitlines())
             except OSError:
@@ -281,6 +302,10 @@ def record(ledger: pathlib.Path, answer_text: str | None, unavailable: str | Non
             _save_state(ledger, state)
         else:
             line = f"event: memory — unavailable — {reason} — {_now()}"
+            state = _load_state(ledger)
+            if state.get("memory") and marker_for_this_run(ledger, state) is None:
+                state.pop("memory")  # another run's marker: cleared, not inherited
+                _save_state(ledger, state)
         _append(ledger, line)
         return line
     try:

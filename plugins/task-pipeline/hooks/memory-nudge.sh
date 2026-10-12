@@ -10,8 +10,9 @@
 #
 # Silent for the rest of a run that recorded memory unavailable FOR THE RUN
 # (`stage_checkpoint.py record --unavailable "<why>" --for-run` writes a marker into
-# .task-pipeline/memory.json carrying the run's `Run:` topic; the marker is honoured only
-# while the ledger names that same run, and a later `record --answer` clears it). Without that marker a
+# .task-pipeline/memory.json carrying a hash of the Run: line's topic and date; the marker
+# is honoured only while the ledger names that same run and still carries the marker's own
+# ledger line, and a later `record --answer` clears it). Without that marker a
 # machine with no Observatory paid about eleven nudges per run for one unchanging fact
 # (CHANGELOG, Unreleased). The first nudge of a run also says where Observatory comes from, once.
 #
@@ -41,17 +42,18 @@ here = os.path.dirname(ledger)
 # honoured and the nudge behaves as before (never blocks).
 try:
     sys.path.insert(0, os.environ["TP_SCRIPTS"])
-    from stage_checkpoint import run_key
+    import pathlib
+    from stage_checkpoint import run_key, marker_for_this_run
     this_run = run_key(lines)
 except Exception:
-    this_run = None
+    this_run = marker_for_this_run = None
 try:
-    marker = (json.load(open(os.path.join(here, "memory.json"), encoding="utf-8")).get("memory") or {})
-    gone = marker.get("unavailable") or {}
-    # Honoured only for the run that wrote it: a marker from another `Run:` line is stale.
-    if gone and this_run is not None and gone.get("run") == this_run:
+    state = json.load(open(os.path.join(here, "memory.json"), encoding="utf-8"))
+    # Honoured only for the run that wrote it — same topic and start date, and its own
+    # `unavailable for this run` line still in this ledger (a reseeded ledger has none).
+    if marker_for_this_run and marker_for_this_run(pathlib.Path(ledger), state):
         sys.exit(0)
-except (OSError, ValueError, AttributeError):
+except (OSError, ValueError, AttributeError, TypeError):
     pass  # no marker, or one that cannot be read: nudge as before, never block
 line = lines[last_stage]
 mark = os.path.join(here, ".memory-nudged")
