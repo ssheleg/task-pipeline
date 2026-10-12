@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Wave tooling (`scripts/waves.py`, inventory/1) and the wave templates — stdlib only.
 
-MN §3.2, node M-3. Wave mode prescribed an inventory file, a canvas, a question queue and "a
+CHANGELOG, Unreleased (wave tooling). Wave mode prescribed an inventory file, a canvas, a question queue and "a
 committed deterministic script" for node and wave assignment, and shipped none of them, so
 every run wrote its own. These cases drive the real script as a process over fixtures built
 in temp directories:

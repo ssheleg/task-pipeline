@@ -681,7 +681,7 @@ def cmd_emit(a, idx: pathlib.Path) -> int:
                 "origin": {"projectId": o["project"], "commit": o["commit"]}}
     else:
         # The bridge until the store has a lesson kind: a note whose statement starts
-        # `lesson:`, so a later migration can find every one (MN §3.8 step 1).
+        # `lesson:`, so a later migration can find every one (CHANGELOG, Unreleased).
         args = {"owner": OWNER, "statement": f"lesson: {le['classKey']} — {le['title']}",
                 "why": f"{le['trigger']}; check: {le['check']}",
                 "evidence": [{"kind": "commit", "sha": o["commit"]},

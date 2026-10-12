@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """The local lesson index (`scripts/lessons.py`, lesson/1) — stdlib only.
 
-MN §3.1, node M-1. A retro entry that carries a `**Lesson:**` line is a lesson; the local
+CHANGELOG, Unreleased (lessons across projects). A retro entry that carries a `**Lesson:**` line is a lesson; the local
 index projects every such entry from every project's retro into one file, so an agent on
 another project reads it at stage 0 without any service. These cases drive the real script
 as a process, against git repositories made in temp directories, with `HOME` pointed at a

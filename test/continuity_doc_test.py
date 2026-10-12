@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""The loop doctrine and the wait rule agree (`references/continuity.md`, M-6) — stdlib only.
+"""The loop doctrine and the wait rule agree (`references/continuity.md`; CHANGELOG, Unreleased) — stdlib only.
 
-OPS-012: continuity.md said loop mode was "Default off … Ask once at preflight" and listed
+continuity.md said loop mode was "Default off … Ask once at preflight" and listed
 opening a PR among the acts that always need their own authorization, while a host's
 standing instruction ("a free agent takes the next task") already armed the loop and let a
-watcher merge. OPS-011: the doctrine named only session-bound watchers, which die with the
+watcher merge. And the doctrine named only session-bound watchers, which die with the
 session. These cases read the doctrine the way an agent does — by section — and fail on the
 sentences that made the two rules contradict:
 
