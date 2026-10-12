@@ -49,6 +49,10 @@ stays short precisely so that reading it in full at stage 0 stays cheap.
 - **Fix:** grade 1 (mechanical) — … / grade 2 → `R-00N` / grade 3, expires in
   2 runs
 - **The check:** … (what catches this the first time, from now on)
+- **Lesson:** `<class-key>` — <the class, one sentence> · **When:** <trigger> · **Nouns:** <a>, <b>, <c>
+  (optional, and on ONE line: write it only when the class would be true in another
+  project — it makes the entry a lesson for `scripts/lessons.py add`, lesson/1. Without
+  it the entry stays private to this project)
 - **Commit:** `<sha>` — the change that fixed it
 - **Upstream?** … (a lesson true in any repo belongs in the skill's own
   `references/learned.md` — open an issue and say so here)

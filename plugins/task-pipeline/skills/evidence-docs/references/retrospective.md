@@ -419,14 +419,22 @@ The rest of this section is the mechanism.
 
 ## Recording to a shared lesson store, where the host has one
 
-**One job: let the next agent on another project read this lesson at its stage 0.** Where
-the session lists a shared lesson store's tools — an Observatory, a Fabric estate — each
-entry that is not private to the project is also recorded there as a *lesson*: its class,
-trigger, check, evidence commit and project id. It enters as a proposal; the redaction
-list below binds it exactly as it binds publication. The read side is source 7b of
-[`knowledge-sources.md`](https://github.com/ssheleg/task-pipeline/blob/main/plugins/task-pipeline/skills/task-pipeline/references/knowledge-sources.md). Where no store exists this section does
-nothing, and the run says `shared lessons: absent` rather than nothing.
-Mechanics: [`iteration.md`](https://github.com/ssheleg/task-pipeline/blob/main/plugins/task-pipeline/skills/task-pipeline/references/iteration.md) → *The learning loop*.
+**One job: let the next agent on another project read this lesson at its stage 0.** An
+entry whose class would be true in another project carries a `**Lesson:**` line — the class
+key, the class in one sentence, when it applies, 3–8 search nouns. That line makes it a
+*lesson* ([`lesson.schema.json`](https://github.com/ssheleg/task-pipeline/blob/main/plugins/task-pipeline/skills/task-pipeline/templates/lesson.schema.json), lesson/1): `scripts/lessons.py add` puts it in the
+local index every install has, and where the session lists a shared lesson store (an
+Observatory) it is also recorded there, as a proposal. An entry without the line stays
+private to this project.
+
+**A lesson is not a publication, and the redaction list below is split by audience.** That
+list binds whatever *leaves the estate*. A lesson kept on this machine or estate may carry
+its evidence commit and its project's id — pseudonymous in the local index — because both
+resolve only for someone who already holds the project; it never carries a path outside
+the repository, a URL, a name, a value or code, and `retro.publish` strips its whole origin.
+The read side is source 7b of [`knowledge-sources.md`](https://github.com/ssheleg/task-pipeline/blob/main/plugins/task-pipeline/skills/task-pipeline/references/knowledge-sources.md). Where no store exists the run
+says `shared lessons: absent` rather than nothing.
+Mechanics and the read and write recipes: [`iteration.md`](https://github.com/ssheleg/task-pipeline/blob/main/plugins/task-pipeline/skills/task-pipeline/references/iteration.md) → *The learning loop*.
 
 ## Publishing the insight — the skill learns from every project that runs it
 
@@ -519,7 +527,9 @@ is what you want them to do.
 ## What may leave the project — the redaction list
 
 An issue is a **public artefact in someone else's repository**. What travels is the
-*class*; what stays is everything that identifies where it happened.
+*class*; what stays is everything that identifies where it happened. This list binds
+whatever leaves the estate. A lesson kept on this machine or estate is the other audience:
+*Recording to a shared lesson store* above says what it may carry.
 
 | Goes | Stays |
 |---|---|

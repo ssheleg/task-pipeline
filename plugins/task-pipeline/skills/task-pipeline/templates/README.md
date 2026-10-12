@@ -30,6 +30,7 @@ from `super-ux`.
 | `routing-rule.md` | the operator's `CLAUDE.md` — **offered by `setup`, never written silently** | 0 / `setup` |
 | `retro.md` | `docs/evidence/retro.md` — **one per project, not per run** | 10 writes (stamp → prune → entry), 0 reads it in full |
 | `retro-archive.md` | `docs/evidence/retro/YYYY-QN.md` | 10 rotates into it, 0 **queries** it |
+| `lesson.schema.json` | nothing is seeded: the shape of one *lesson* (lesson/1), a retro entry's class carried by its `**Lesson:**` line into the local index (`scripts/lessons.py`, `~/.sshlg-skills/lessons/index.jsonl` by default) and, where the host lists one, the shared store | 10 writes (`lessons.py add`), 0 **queries** it (`lessons.py query`) |
 
 The documentation-track templates (`docmap.md`, `decisions.md`,
 `open-questions.md`, `docgate.sh`) are seeded **together**, and they are useful at
