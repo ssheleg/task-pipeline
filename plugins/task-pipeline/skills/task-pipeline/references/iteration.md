@@ -216,6 +216,12 @@ session lists, never assumed from a path.
 - **Promote.** A lesson recorded by two or more projects is a candidate for
   [`learned.md`](learned.md), through `retro.publish`.
 
+**How the store is detected.** The session lists one tool that records a lesson and one
+that searches them. On an Observatory (the public engine, from 0.24) they are
+`observatory_learn` or `observatory_record` for the write, and `observatory_search` or
+`observatory_recall` for the read. A lesson written there is a proposal tied to its
+project, so the read side asks across projects by the task's nouns, not by the project id.
+
 **When there is no store, the source ledger says so.** It prints `shared lessons:
 absent`, and the first layer runs exactly as before. The store is never a hard dependency.
 
