@@ -204,6 +204,13 @@
         "_goal_note": {
           "type": "string",
           "description": "Free prose beside `goal`."
+        },
+        "approval": {
+          "enum": [
+            "checks",
+            "reviewers"
+          ],
+          "description": "Who admits a release: `checks` — a guard (tag on main, CI green on that commit) and no reviewers, so the run tags, watches and reports; `reviewers` — an environment with required reviewers, so the run reports the direct link to the run that is actually `waiting`. Absent: read the organisation's declaration or the environment's protection rules; never assume `checks` (references/deploy-targets.md)."
         }
       }
     },

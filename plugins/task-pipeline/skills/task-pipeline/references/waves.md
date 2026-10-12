@@ -71,6 +71,14 @@ findings, and its proposed rows join the inventory like any other source. Where 
 product has users, walk their real path in the built app on a fresh profile with
 disposable data. A finding is a fact with a receipt, never an impression.
 
+**A declared source list outranks discovery.** Where the repository carries
+`docs/backlog-sources.json` — the contract is owned by the Fabric workspace's
+`knowledge/backlog.md` — the harvest reads exactly the sources it lists, as the board,
+with the id, title and status columns it names. Status changes land only in those owning
+files, under a lease. A new source joins the manifest in the same change. A generated
+view of them, such as a published common backlog, is never edited. A source of open
+work the manifest does not list is reported as a finding, not silently added.
+
 **One machine-readable inventory, nothing outside it.** A single committed file,
 `<artifacts>/specs/YYYY-MM-DD-<topic>-inventory.json`, one entry per open item:
 
