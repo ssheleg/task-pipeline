@@ -1,6 +1,6 @@
 # Verification — task-pipeline
 
-## Shipped state — v1.92.0 (2026-10-11; candidate, release pending)
+## Shipped state — v1.92.0 (2026-10-11; released, npm 1.92.0)
 
 Wave mode, and the grill asks one batch instead of one question per turn.
 
@@ -11,7 +11,7 @@ Wave mode, and the grill asks one batch instead of one question per turn.
 | FR-wave-graph | `nodes[].wave`, the order check, `next --wave N`, the `wave` verb | `test/graph_test.py` 166 cases; three plants in `test/plant_wave.py`, each watched failing the suite | **observed** |
 | Gate | the full suite | `npm run test:all` locally exited 0 on 2026-10-11 (433 guards, 15 property checks); a first run died of a full disk and is not counted; the PR `validate` job | **observed** locally; CI on the PR |
 
-## Shipped state — v1.91.2 (2026-10-11; candidate — v1.91.1's payload, which its release check refused for a missing no-stamp declaration)
+## Shipped state — v1.91.2 (2026-10-11; released, npm 1.91.2 — v1.91.1's payload, which its release check refused for a missing no-stamp declaration)
 
 The gates read the current run only; a broken python3 stops only releases.
 
