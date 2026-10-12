@@ -1477,6 +1477,16 @@ three quarters of the work on this run.
 
 ## Releases that carry no stamp — stated, not stamped
 
+**`v1.93.1` carries no stamp, declared before its tag.** It is wave 2 of the sshlg-skills
+integration waves (`/task-pipeline waves`, plan `docs/evidence/plans/2026-10-11-integration-waves.md`
+in ssheleg/sshlg-skills): one wave of a run whose stage 10 closes in the umbrella, so
+the umbrella's retro stamps the run, not this file. The wave was certified by three blind
+readings (unit pass; seam and product with risks closed in `340556e` and `7357522`).
+
+**`v1.93.0` carries no stamp, and its tag published nothing.** `release.yml` refused the
+tag's own tree because this section did not name it — the check working as written, as
+with `v1.91.1`. The tag cannot be removed; `v1.93.1` ships the same payload.
+
 **`v1.92.0` carries no stamp, declared before its tag.** It is a doctrine change the
 operator specified on 2026-10-11 — wave mode (`references/waves.md`), the grill's
 one-batch default, and three graph mechanics — implemented on `feat/wave-mode` as a

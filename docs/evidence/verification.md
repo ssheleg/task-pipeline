@@ -1,6 +1,6 @@
 # Verification — task-pipeline
 
-## Shipped state — v1.93.0 (2026-10-12; candidate, release pending)
+## Shipped state — v1.93.1 (2026-10-12; v1.93.0's payload — the v1.93.0 tag published nothing)
 
 Integration wave 2: the negative self-tests leave the workflow and run in eight shards;
 temp state leaves with the run; budget, packet id, task sources, approval mode, the

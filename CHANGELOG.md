@@ -1,3 +1,13 @@
+## v1.93.1 — v1.93.0's payload, released with its stamp declaration
+
+`v1.93.0` published nothing: `release.yml` ran the suite on the tag's own tree and
+`validate.py` refused it, because `docs/evidence/retro.md` → *Releases that carry no
+stamp* did not name it — the check working as written (the same shape as `v1.91.1`).
+The tag cannot be removed, so this release ships the same payload with that declaration.
+Everything below under v1.93.0 is what 1.93.1 contains.
+
+Guards: 438 → **438**; property checks 15 → **15**. No check changed.
+
 ## v1.93.0 — the negative self-tests leave the workflow; temp state leaves with the run
 
 Integration wave 2 of the family's waves run (R07–R16), one release. The headline is
