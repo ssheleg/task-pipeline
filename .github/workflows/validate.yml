@@ -80,6 +80,8 @@ jobs:
           python3 test/browser_claims_test.py
           python3 test/visual_gate_test.py
           python3 test/stage_checkpoint_test.py
+          python3 test/backlog_sources_test.py
+          python3 test/release_approval_test.py
           python3 test/memory_nudge_test.py
           python3 test/lessons_test.py
           python3 test/waves_test.py

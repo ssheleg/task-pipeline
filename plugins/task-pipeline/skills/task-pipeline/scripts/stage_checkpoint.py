@@ -71,6 +71,10 @@ TOPIC = re.compile(r"^Run:\s*`([^`]+)`")
 # passes a surface took is measured at the boundary rather than remembered at the end.
 REVIEW = re.compile(r"^review:\s*(\d+)\s+—\s+surface\s+(.+?)\s+—\s+rounds\s+(\d+)\s+—\s+(\S+)\s+—\s+\S+\s*$")
 STATUS = {"pass": "done", "skip": "done", "fail": "blocked"}
+# What `handoff` counts for its idempotency key: the memory events this script appended
+# (checkpoint, refused, handoff offered) — never `unavailable`, which records no state change.
+MEMORY_EVENT = re.compile(r"^event:\s*memory\s+—\s")
+MEMORY_UNAVAILABLE = re.compile(r"^event:\s*memory\s+—\s+unavailable\b")
 
 
 def _stages() -> dict[int, str]:
@@ -276,11 +280,15 @@ def handoff(ledger: pathlib.Path, provider: str, model: str | None, reason: str,
                          "(emit → observatory_checkpoint_write → record)")
     to = {"provider": provider, **({"model": model} if model else {})}
     # Observatory digests the whole request, TTL included, so the TTL is in the key (another
-    # TTL is another offer, not an idempotency conflict). So is the ledger's length: once an
-    # offer is recorded the ledger grows, and offering again after it lapsed is a new offer —
-    # the same key would replay the first, expired answer. A retry before recording repeats.
+    # TTL is another offer, not an idempotency conflict). So is the count of memory events the
+    # ledger holds: once an offer (or a checkpoint) is recorded that count grows, and offering
+    # again after it lapsed is a new offer — the same key would replay the first, expired
+    # answer. ONLY memory events count. The whole ledger length did, until 1.93.3: a `gate:`
+    # line from hooks/gate-observer.sh or a `record --unavailable` line between two retries
+    # made the retry a NEW offer, and Observatory replaces an unaccepted older offer with it.
     try:
-        seen = len(ledger.read_text(encoding="utf-8").splitlines())
+        seen = sum(1 for ln in ledger.read_text(encoding="utf-8").splitlines()
+                   if MEMORY_EVENT.match(ln) and not MEMORY_UNAVAILABLE.match(ln))
     except OSError:
         seen = 0
     key = hashlib.sha256(f"{state['workflowId']}\n{json.dumps(to, sort_keys=True)}\n{reason}"
