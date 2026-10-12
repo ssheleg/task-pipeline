@@ -69,9 +69,11 @@ def problems(packet):
         return ["the packet is not a JSON object"]
 
     version = str(packet.get("schema_version", ""))
-    m = re.match(r"^execution-packet/(\d+)$", version)
+    # Namespaced since 1.93.0 (Fabric's former packet id was the bare one); the bare form
+    # is read for one release and refused from the next.
+    m = re.match(r"^(?:task-pipeline/)?execution-packet/(\d+)$", version)
     if not m:
-        out.append(f"schema_version {version!r} is not 'execution-packet/<major>' — "
+        out.append(f"schema_version {version!r} is not 'task-pipeline/execution-packet/<major>' — "
                    "a packet without a mandatory version is unversioned, rejected")
     elif int(m.group(1)) not in KNOWN_MAJORS:
         out.append(f"schema_version major {m.group(1)} is unknown to this consumer "

@@ -1,5 +1,5 @@
 {
-  "schema_version": "execution-packet/1",
+  "schema_version": "task-pipeline/execution-packet/1",
   "id": "FIX-EX-01.01",
   "parent_id": "FIX-EX-01",
   "module": "example-module",
