@@ -1477,11 +1477,17 @@ three quarters of the work on this run.
 
 ## Releases that carry no stamp — stated, not stamped
 
+**`v1.93.2` carries no stamp, declared before its tag.** The same wave-2 payload as
+`v1.93.0`; the umbrella's retro stamps the waves run. **`v1.93.1` carries no stamp, and
+its tag published nothing:** the release suite's documentation gate refused commit
+references that the squash merge of PR #109 had made unreachable — the check working as
+written. Neither tag can be removed.
+
 **`v1.93.1` carries no stamp, declared before its tag.** It is wave 2 of the sshlg-skills
 integration waves (`/task-pipeline waves`, plan `docs/evidence/plans/2026-10-11-integration-waves.md`
 in ssheleg/sshlg-skills): one wave of a run whose stage 10 closes in the umbrella, so
 the umbrella's retro stamps the run, not this file. The wave was certified by three blind
-readings (unit pass; seam and product with risks closed in `340556e` and `7357522`).
+readings (unit pass; seam and product with risks closed in 340556e (branch `w2/hygiene-continuity`, squashed into `8260042`) and 7357522 (branch `w2/hygiene-continuity`, squashed into `8260042`)).
 
 **`v1.93.0` carries no stamp, and its tag published nothing.** `release.yml` refused the
 tag's own tree because this section did not name it — the check working as written, as
