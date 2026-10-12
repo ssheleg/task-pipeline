@@ -27,9 +27,13 @@ npm run test:negatives    # python3 test/negatives.py
 npm run test:all          # both, in order
 ```
 
-The corruptions live in [`.github/workflows/validate.yml`](.github/workflows/validate.yml)
-and `test/negatives.py` reads them from there — never duplicated, because a second
-copy of a corruption is a second thing to drift. The runner also tells a **broken
+The corruptions live in [`test/negatives/`](test/negatives/), one file per check —
+`#!/usr/bin/env bash`, then `# name: Negative self-test (<what is planted>)`, then
+the script, run from the repository root. `test/negatives.py` reads that directory
+and nothing else, so it is the only list; CI runs it in eight shards
+(`--shard N/8`, the `negatives` job in `validate.yml`). Until v1.93.0 every plant was
+an inline workflow step, and the workflow reached 507,836 of GitHub's 512,000 bytes —
+past the limit a workflow creates no runs rather than going red. The runner also tells a **broken
 test** from a **guard that didn't fire**: if a planted defect changed nothing, the
 validator passing means the test proved nothing, and it is reported as `BROKEN`
 rather than as a failure of the guard.
@@ -37,7 +41,7 @@ rather than as a failure of the guard.
 **Corrupt files in python, never with `sed -i`.** BSD sed needs an argument GNU sed
 refuses, and `0,/re/` does not exist on BSD at all — there it edits nothing
 silently, and the test reads as a guard that failed. The validator rejects `sed -i`
-in the workflow for exactly this reason: a self-test that only runs on CI cannot be
+in a check file for exactly this reason: a self-test that only runs on CI cannot be
 used while you are writing the guard, which is the moment it is worth most.
 
 To try your change in a real agent:
@@ -616,8 +620,10 @@ pass over an empty set is a refused measurement.
   `pipeline.example.json`, the command, the Cursor rule and the README before you
   commit. The validator catches much of this — do not rely on it to think for you.
 - **A new guard needs a negative self-test.** If you teach `test/validate.py` a new
-  rule, add a step to `.github/workflows/validate.yml` that corrupts a copy and
-  asserts the validator fails, then watch it with `npm run test:negatives`. A guard
+  rule, add the next-numbered file to `test/negatives/` that corrupts a copy and
+  asserts the validator fails, then watch it with
+  `python3 test/negatives.py -k <words from its name>`. Never a step inline in the
+  workflow: the validator refuses one, because it would run on CI only. A guard
   nobody proved can fail is decoration. **Check the base is green first** — if the
   repo already fails your new rule, the self-test passes for the wrong reason and
   proves nothing.

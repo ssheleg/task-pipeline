@@ -1,5 +1,23 @@
 # Verification — task-pipeline
 
+## Shipped state — v1.93.0 (2026-10-12; candidate, release pending)
+
+Integration wave 2: the negative self-tests leave the workflow and run in eight shards;
+temp state leaves with the run; budget, packet id, task sources, approval mode, the
+Fabric contract fixture and Observatory continuity.
+
+| REQ | What ships | How it was confirmed | Confirmed |
+|---|---|---|---|
+| R08-move | the 433 negative self-tests and 15 property checks as `test/negatives/NNN-<slug>.sh`, the workflow's `run` values byte for byte; `validate.yml` 507,836 → 12,181 bytes | a script compared every file with `#!/usr/bin/env bash` + `# name:` + the YAML-parsed `run` of the step it came from on `ffa42ab` — 448 of 448 equal; `wc -c` before and after; the move printed `moved 448 steps (433 negative, 15 property)`, the old runner's `--list` 433 and the new one's 438 + 15 with the five new plants | **never** |
+| R08-shard | the `negatives` job: `--shard N/8` on an eight-value matrix, fail-fast off | `test/runner_test.py` (eight slices cover every check once, balanced, deterministic; seven malformed specs refused); the eight `--list --shard i/8` counts sum to 438 + 15; CI per-shard wall clock — see the R08-ci row | **never** |
+| R08-ci | per-shard wall clock on GitHub against 62–105 min for the single job before | pending the PR's first run | **never** |
+| R08-repoint | every validator check that read negatives from the workflow reads `test/negatives/` through the runner's loader; ten plants re-pointed; `test/anchors.py` and `test/anchors_test.py` read check directories | `npm test`; the full local suite in eight shards, every guard rejecting its plant (counts in the Gate row) | **never** |
+| R08-guards | refusals for an inline check in the workflow, a shard matrix missing a slice, an unreadable check file; a plant for the workflow-size guard | plants 449–452, each run in the full local suite | **never** |
+| R07 | test temp trees removed with the run; a validator check refusing a test file that makes temp state with no cleanup; the two leaks it surfaced in `test/validate.py` fixed | plant 453; two validator runs left no `graph.json` tree and no fake HOME in TMPDIR (`find -newer`), where the baseline suite had left 933 | **never** |
+| R09 | description 890/1024 chars, body 4646/4750 tokens | `audit_skill.py --house` (make-skill `60ca8e2`, tiktoken cl100k): `DESC_HEADROOM 890/970`, `BODY_HEADROOM 4646/4750`, 0 GAP | **never** |
+| R11 R13 R14 R15 R16 | Observatory handoff/accept and the memory nudge; declared task sources; the namespaced packet id; the Fabric contract fixture; the release approval mode | `npm test` runs `stage_checkpoint_test.py`, `memory_nudge_test.py`, `packet_schema_test.py` and `fix-pf-06.01`; R13/R16 are doctrine, read after the edit | **never** |
+| Gate | the full suite | pending | **never** |
+
 ## Shipped state — v1.92.0 (2026-10-11; released, npm 1.92.0)
 
 Wave mode, and the grill asks one batch instead of one question per turn.

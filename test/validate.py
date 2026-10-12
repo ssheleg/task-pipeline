@@ -417,12 +417,22 @@ def _as_int(tok):
         _UNPARSED_WORDS.add(tok)
     return val
 
-_neg_wf = os.path.join(ROOT, ".github/workflows/validate.yml")
-_NEG_WF_TEXT = open(_neg_wf, encoding="utf-8").read() if os.path.isfile(_neg_wf) else ""
-# Both counts, from ONE read, used by every check below that needs either. The workflow
-# was being opened three times for two numbers.
-_neg_n = len(re.findall(r"^\s*- name:\s*Negative self-test", _NEG_WF_TEXT, re.M))
-_prop_n = len(re.findall(r"^\s*- name:\s*Property check", _NEG_WF_TEXT, re.M))
+# The negative self-tests and property checks: one file each under `test/negatives/`,
+# read through the RUNNER'S OWN loader, so this validator and `test/negatives.py` cannot
+# disagree about what the corpus is. They lived inline in `.github/workflows/validate.yml`
+# until v1.93.0 and every check below read them from there with a regex; the workflow
+# reached 507,836 of GitHub's 512,000 bytes, past which it goes silent rather than red.
+_NEG_DIR = os.path.join(ROOT, "test", "negatives")
+try:
+    import negatives as _negmod                                      # noqa: E402
+    _NEG_FILES, _NEG_PROBLEMS = _negmod.scan(_NEG_DIR)
+except Exception as _neg_exc:                                        # pragma: no cover
+    _negmod, _NEG_FILES = None, []
+    _NEG_PROBLEMS = [f"the runner's loader could not be imported ({_neg_exc})"]
+_NEG_CHECKS = [(_n, _s) for _f, _n, _s in _NEG_FILES]
+# Both counts, from ONE read, used by every check below that needs either.
+_neg_n = sum(1 for _n, _s in _NEG_CHECKS if _n.startswith("Negative self-test"))
+_prop_n = sum(1 for _n, _s in _NEG_CHECKS if _n.startswith("Property check"))
 
 def _count_re(path, pattern, flags=re.M):
     p = os.path.join(ROOT, path)
@@ -2015,8 +2025,7 @@ if _AT_TEXT is not None:
 # section it is what this check reads, and it is required to sit above every version
 # heading, because an `## Unreleased` block under a release is a claim about the past.
 _cl = os.path.join(ROOT, "CHANGELOG.md")
-_wf = os.path.join(ROOT, ".github/workflows/validate.yml")
-if os.path.isfile(_cl) and os.path.isfile(_wf):
+if os.path.isfile(_cl) and os.path.isdir(_NEG_DIR):
     _true_neg, _true_prop = _neg_n, _prop_n
     _clt = chg
     _unrel = re.search(r"^##\s*Unreleased\b", _clt, re.M)
@@ -2047,13 +2056,13 @@ if os.path.isfile(_cl) and os.path.isfile(_wf):
              "and the suite stayed green over an unread number; write the count in "
              "that shape or say nothing about guards")
     if _g and int(_g.group(1)) != _true_neg:
-        fail(f"CHANGELOG.md: the newest section claims {_g.group(1)} guards but the "
-             f"workflow defines {_true_neg} — the entry is written before the last "
+        fail(f"CHANGELOG.md: the newest section claims {_g.group(1)} guards but "
+             f"test/negatives/ holds {_true_neg} — the entry is written before the last "
              "checks are added, and this count went stale twice in one programme")
     _p = re.search(r"property checks\s*\d+\s*(?:→|->)\s*(\d+)", _flatten(_top))
     if _p and int(_p.group(1)) != _true_prop:
         fail(f"CHANGELOG.md: the newest section claims {_p.group(1)} property checks but "
-             f"the workflow defines {_true_prop}")
+             f"test/negatives/ holds {_true_prop}")
 
 # The exposure line may never render as a probability. The request that produced it
 # asked for one; `P(defect)` is not computable from these inputs, and a number dressed
@@ -2314,18 +2323,59 @@ if os.path.isfile(_card_p):
 # is the one thing that reliably breaks that: BSD sed needs an argument GNU sed
 # refuses, and `0,/re/` does not exist on BSD at all — where it silently edits
 # nothing and the test reads as a guard that failed to fire. Corrupt in python.
-_wf = os.path.join(ROOT, ".github/workflows/validate.yml")
 if not os.path.isfile(os.path.join(ROOT, "test/negatives.py")):
-    fail("missing test/negatives.py — the local runner for the CI negative self-tests; "
-         "without it a guard can only ever be proven on CI")
-elif os.path.isfile(_wf):
-    _wf_txt = open(_wf, encoding="utf-8").read()
-    for _lineno, _line in enumerate(_wf_txt.splitlines(), start=1):
-        if re.search(r"\bsed -i\b", _line):
-            fail(f".github/workflows/validate.yml:{_lineno}: uses `sed -i`, which is not "
-                 "portable (BSD sed needs an argument, and `0,/re/` does not exist there) — "
-                 "corrupt the file in python so test/negatives.py runs the same script "
-                 "locally and on CI")
+    fail("missing test/negatives.py — the runner for the negative self-tests; "
+         "without it a guard can only ever be proven by hand")
+else:
+    # Read through the loader: the body each file hands `bash`, which is what has to
+    # stay portable. The `# name:` header is a label, not a command.
+    for _fn, _n, _s in _NEG_FILES:
+        for _lineno, _line in enumerate(_s.splitlines(), start=3):
+            if re.search(r"\bsed -i\b", _line):
+                fail(f"test/negatives/{_fn}:{_lineno}: uses `sed -i`, which is not "
+                     "portable (BSD sed needs an argument, and `0,/re/` does not exist "
+                     "there) — corrupt the file in python so test/negatives.py runs the "
+                     "same script locally and on CI")
+
+# The corpus itself. A file the loader cannot read as a check is a guard that stopped
+# being proven while every count stayed healthy — so every problem the runner would
+# refuse on is refused here first, in the cheap gate, instead of on eight CI shards.
+for _p in _NEG_PROBLEMS:
+    fail(f"test/negatives/: {_p}")
+if not _NEG_FILES:
+    fail("test/negatives/ holds no checks — every guard in this file is then unproven, "
+         "and a suite over an empty directory reports nothing wrong")
+
+# A plant written INLINE in the workflow again runs on CI only: outside the directory,
+# outside every count above and invisible to `npm run test:negatives` — and it pushes
+# the workflow back toward the 512,000-byte limit the move to `test/negatives/` left.
+_wf_inl = os.path.join(ROOT, ".github", "workflows", "validate.yml")
+if os.path.isfile(_wf_inl):
+    _wf_inl_t = open(_wf_inl, encoding="utf-8").read()
+    for _m in re.finditer(r"(?m)^\s*- name:\s*((?:Negative self-test|Property check)\b.*)$",
+                          _wf_inl_t):
+        fail(f".github/workflows/validate.yml:{_wf_inl_t.count(chr(10), 0, _m.start()) + 1}: "
+             f"`{_m.group(1)[:70]}` is a check written inline. It runs on CI only, outside "
+             "every count and invisible to the local runner — move it into its own file "
+             "under test/negatives/")
+    # The shard matrix must cover every slice the runner cuts. `--shard I/N` splits by
+    # position modulo N; a matrix that lists fewer values than N leaves whole slices of
+    # the suite that no runner ever starts, and the job is green over them.
+    _sh_n = re.findall(r"test/negatives\.py --shard \$\{\{ matrix\.shard \}\}/(\d+)",
+                       _wf_inl_t)
+    _sh_m = re.search(r"(?m)^\s*shard:\s*\[([^\]]*)\]", _wf_inl_t)
+    if not _sh_n or not _sh_m:
+        fail(".github/workflows/validate.yml: no `negatives` job runs "
+             "`test/negatives.py --shard ${{ matrix.shard }}/N` over a `shard: [...]` "
+             "matrix — the negative self-tests then run nowhere on CI")
+    else:
+        _sh_vals = sorted(int(_x) for _x in re.findall(r"\d+", _sh_m.group(1)))
+        _sh_want = list(range(1, int(_sh_n[0]) + 1))
+        if len(set(_sh_n)) != 1 or _sh_vals != _sh_want:
+            fail(f".github/workflows/validate.yml: the shard matrix is {_sh_vals} but the "
+                 f"runner is told to cut {'/'.join(sorted(set(_sh_n)))} slices — every "
+                 "slice a matrix value does not name is a set of guards no runner ever "
+                 "proves, under a job that reports green")
 
 # The stage list is published on three surfaces an agent may read independently:
 # SKILL.md's table (what it walks), references/stages.md (the per-stage detail and
@@ -3250,11 +3300,13 @@ if gschema is not None:
                                    if e["from"] in {n["id"] for n in _clean["nodes"]}
                                    and e["to"] in {n["id"] for n in _clean["nodes"]}]
                 _clean.pop("revisions", None)
-                _cp = _os2.path.join(_tf2.mkdtemp(), "graph.json")
-                with open(_cp, "w", encoding="utf-8") as _fh2:
-                    _j.dump(_clean, _fh2)
-                _cr2 = _sp2.run([sys.executable, _gs, "coverage", "--graph", _cp],
-                                capture_output=True, text=True, timeout=60)
+                # Removed with the check (R07): this tree leaked once per validator run.
+                with _tf2.TemporaryDirectory(prefix="tp-gcov-") as _gtd:
+                    _cp = _os2.path.join(_gtd, "graph.json")
+                    with open(_cp, "w", encoding="utf-8") as _fh2:
+                        _j.dump(_clean, _fh2)
+                    _cr2 = _sp2.run([sys.executable, _gs, "coverage", "--graph", _cp],
+                                    capture_output=True, text=True, timeout=60)
                 if _cr2.returncode != 0:
                     fail("`graph.py coverage` refuses a graph whose every requirement has a "
                          "live node — B-085: the verb cannot tell covered from uncovered. "
@@ -4359,7 +4411,9 @@ if _agents:
     # satisfies that exactly, which is how the first draft of this very fix shipped.
     # Presence is not behaviour; today that lesson cost two criticals elsewhere.
     import subprocess as _sp, tempfile as _tf
-    _probe = _tf.mkdtemp()
+    # The fake HOME both installers write into. Removed below (R07): it was ~1.8 MB a
+    # validator run, measured 2026-10-12 — every plant runs the validator once.
+    _probe = _tf.mkdtemp(prefix="tp-agents-home-")
     _env = dict(os.environ, HOME=_probe)
     _runs = {
         "install.sh": ["bash", os.path.join(ROOT, "install.sh")],
@@ -4392,6 +4446,7 @@ if _agents:
                  "disappears without a word leaves an operator reading doctrine that "
                  "names an agent which cannot resolve on their install. Print the "
                  "degradation and what runs instead")
+    shutil.rmtree(_probe, ignore_errors=True)
 
 gex = load_json(GRAPH_EXAMPLE_REL)
 if gschema is not None and gex is not None:
@@ -4875,9 +4930,11 @@ if os.path.isfile(os.path.join(refdir, "knowledge-graph.md")):
     # `fail` at the documented limit, and DISCLOSE in the band before it, so the next
     # author sees the room shrinking rather than the workflow going quiet.
     #
-    # The rule that buys room: a plant's BODY belongs in `test/plant_*.py`, called with an
-    # argument. Five inline copies cost 10 739 bytes; one script and five four-line steps
-    # cost 2 907.
+    # The rule that bought room first: a plant's BODY belongs in `test/plant_*.py`, called
+    # with an argument. Five inline copies cost 10 739 bytes; one script and five four-line
+    # steps cost 2 907. The rule that bought the rest (v1.93.0): plants do not live in the
+    # workflow at all — every one is a file under `test/negatives/`, and the workflow fell
+    # from 507,836 bytes to a few thousand.
     _WF = os.path.join(ROOT, ".github/workflows/validate.yml")
     _WF_HARD = 512_000          # GitHub's documented 512 KB, inside the measured bracket
     _WF_WARN = 505_000
@@ -4887,16 +4944,15 @@ if os.path.isfile(os.path.join(refdir, "knowledge-graph.md")):
              f"{_WF_HARD:,}-byte workflow limit. Above it the workflow stays `active`, "
              "creates no runs, and `gh pr checks` says 'no checks reported' — measured "
              "2026-09-05 at 518,928 bytes, when a PR sat with no CI and nothing said "
-             "why. Move the next plant's body into `test/plant_*.py` and call it with an "
-             "argument: five inline copies cost 10,739 bytes, one script and five "
-             "four-line steps cost 2,907")
+             "why. Plants belong in test/negatives/, one file each, never inline in the "
+             "workflow")
     elif _wf_bytes > _WF_WARN:
         # Printed, not collected: this validator has no disclosure list, and inventing one
         # for a single warning would be a second reporting channel nobody maintains.
         print(f"  workflow size — validate.yml is {_wf_bytes:,} bytes, "
               f"{_WF_HARD - _wf_bytes:,} under GitHub's {_WF_HARD:,}-byte limit. Past it "
-              "the workflow goes SILENT rather than red — the next plant's body belongs "
-              "in `test/plant_*.py`, called with an argument")
+              "the workflow goes SILENT rather than red — plants belong in "
+              "test/negatives/, never inline")
 
     # B-124 — the stamp class that survived the amend rule.
     #
@@ -4985,16 +5041,16 @@ if os.path.isfile(os.path.join(refdir, "knowledge-graph.md")):
                      "by recording the graph's own reply instead of measuring it")
 
 # The negatives floor is a number in a living document, so rule 8 binds it like any
-# other: MIN_EXPECTED must EQUAL the workflow's count, not merely be below it. Its own
+# other: MIN_EXPECTED must EQUAL the directory's count, not merely be below it. Its own
 # comment records the first time it lagged (20 while the workflow carried 34); the
 # second was v1.15.0, where four canon self-tests landed and the floor stayed at 104.
 # A floor below the count cannot notice losing the difference, which is the whole job.
 _neg_py = os.path.join(ROOT, "test/negatives.py")
-if os.path.isfile(_neg_py) and os.path.isfile(_neg_wf):
+if os.path.isfile(_neg_py) and os.path.isdir(_NEG_DIR):
     _neg_py_txt = open(_neg_py, encoding="utf-8").read()
     _m_floor = re.search(r"^MIN_EXPECTED\s*=\s*(\d+)", _neg_py_txt, re.M)
     if _m_floor and int(_m_floor.group(1)) != _neg_n:
-        fail(f"test/negatives.py: MIN_EXPECTED is {_m_floor.group(1)} but the workflow defines "
+        fail(f"test/negatives.py: MIN_EXPECTED is {_m_floor.group(1)} but test/negatives/ holds "
              f"{_neg_n} negative self-tests — a floor below the count is a floor that cannot "
              "notice losing the difference; raise it in the same change that adds the tests")
     # MIN_PROPS had NO such check at all — zero mentions in this file — while its sibling
@@ -5002,7 +5058,7 @@ if os.path.isfile(_neg_py) and os.path.isfile(_neg_wf):
     # not a floor, it is a number somebody typed once.
     _p_floor = re.search(r"^MIN_PROPS\s*=\s*(\d+)", _neg_py_txt, re.M)
     if _p_floor and int(_p_floor.group(1)) != _prop_n:
-        fail(f"test/negatives.py: MIN_PROPS is {_p_floor.group(1)} but the workflow defines "
+        fail(f"test/negatives.py: MIN_PROPS is {_p_floor.group(1)} but test/negatives/ holds "
              f"{_prop_n} property checks — the same drift MIN_EXPECTED suffered twice, on the "
              "floor nobody had wired up")
 
@@ -5165,9 +5221,9 @@ if os.path.isdir(_tpl):
 # test passes against the FIRST test's corruption instead of its own. Found by a
 # collision on /tmp/verdict-copy, in the release that ships a gate for exactly this
 # class of accident.
-_wf_p = os.path.join(ROOT, ".github/workflows/validate.yml")
-if os.path.isfile(_wf_p):
-    _wf_t = open(_wf_p, encoding="utf-8").read()
+if _NEG_FILES:
+    # Every check's body, in file order — what `bash` runs.
+    _wf_t = "\n".join(_s for _f, _n, _s in _NEG_FILES)
     # Strip heredoc bodies first. A step that PLANTS a duplicate as test data
     # contains the very string this scans for, and counting it made the guard fail
     # on its own negative self-test — the same class as the markdown fence strip
@@ -5190,16 +5246,57 @@ if os.path.isfile(_wf_p):
     for _l in _wf_scan:
         _m = re.search(r"rm -rf (/tmp/[A-Za-z0-9._-]+) && cp -R \. (/tmp/[A-Za-z0-9._-]+)", _l)
         if _m and _m.group(1) != _m.group(2):
-            fail(f"`.github/workflows/validate.yml`: a step removes `{_m.group(1)}` and "
+            fail(f"`test/negatives/`: a check removes `{_m.group(1)}` and "
                  f"copies into `{_m.group(2)}` — it wipes a directory it does not own, "
                  "which is a race the moment two tests run at once")
     _dirs = re.findall(r"cp -R \. (/tmp/[A-Za-z0-9._-]+)", "\n".join(_wf_scan))
     _dupes = sorted({d for d in _dirs if _dirs.count(d) > 1})
     if _dupes:
-        fail("`.github/workflows/validate.yml`: scratch directories reused across "
+        fail("`test/negatives/`: scratch directories reused across "
              f"negative self-tests: {_dupes} — a shared scratch dir lets one test "
              "corrupt another's copy, and a test that passes against the wrong "
              "corruption proves nothing")
+
+# R07 — temp state leaves with the run. A test that creates a temp tree or file with
+# no automatic cleanup and never removes it leaks one per run, and runs are many: one
+# machine's TMPDIR held 15,146 `tp-b80-*` trees from a single validator helper, and on
+# 2026-10-12 one full negatives run left ~1.8 MB per validator invocation (a fake
+# HOME the installer probe below never removed) — ~800 MB a suite. The rule is per
+# FILE, deliberately: a file that calls `mkdtemp(`, `mkstemp(` or keeps a
+# `NamedTemporaryFile(..., delete=False)` must also carry cleanup — `rmtree`,
+# `unlink`, `remove(`, the residue helper or a `_TMP_TREES` registry. A file holding
+# one cleanup and two leaks passes; that limit is stated rather than hidden, and the
+# two leaks of that shape found while writing this guard were fixed in the same change.
+#
+# The corpus is DISCOVERED: every `.py` and `.sh` under `test/`, the check files in
+# `test/negatives/` included, because their python heredocs make temp state too.
+# Excluded, with reasons: `__pycache__` (bytecode, not source) and `test/fixtures/`
+# (data the tests read, never executed as a test).
+_TMP_CALL = re.compile(r"mkdtemp\(|mkstemp\(|NamedTemporaryFile\([^)]*delete\s*=\s*False")
+_TMP_CLEAN = re.compile(r"rmtree|unlink|\bremove\(|residue|_TMP_TREES")
+_tmp_seen = 0
+for _dp, _dn, _fns in os.walk(os.path.join(ROOT, "test")):
+    _dn[:] = sorted(_d for _d in _dn if _d not in ("__pycache__", "fixtures"))
+    for _fn in sorted(_fns):
+        if not _fn.endswith((".py", ".sh")):
+            continue
+        _tp = os.path.join(_dp, _fn)
+        try:
+            _tt = open(_tp, encoding="utf-8").read()
+        except (OSError, UnicodeDecodeError):
+            continue
+        _tmp_seen += 1
+        # Whole-line comments are prose ABOUT the call, not the call.
+        _code = "\n".join(_l for _l in _tt.splitlines() if not _l.lstrip().startswith("#"))
+        if _TMP_CALL.search(_code) and not _TMP_CLEAN.search(_tt):
+            fail(f"{os.path.relpath(_tp, ROOT)}: creates temp state "
+                 f"(`{_TMP_CALL.search(_code).group(0)}`) and carries no cleanup — no "
+                 "`rmtree`, `unlink`, `remove(`, residue helper or `_TMP_TREES` registry. "
+                 "One leaked tree per run is thousands per machine; register it for "
+                 "removal at exit or use a context manager that removes it")
+if not _tmp_seen:
+    fail("the temp-state guard read no file under test/ — a guard over an empty corpus "
+         "reports nothing wrong")
 
 # The read-back guards (v1.13.0). Four rules already lived in this bundle and were
 # stranded in stages that never handed them to the stage which had to obey them; the
@@ -7079,10 +7176,11 @@ if _gp is None:
 # ...and the rule is enforced on the probes themselves: a probe that MUTATES a file must
 #    assert its plant landed. Measured 2026-08-11 before the guard existed: 206 of 206
 #    mutating probes already did, 55 file-writing ones needed nothing.
-_wf2 = os.path.join(ROOT, ".github/workflows/validate.yml")
-if os.path.isfile(_wf2):
-    _steps = re.findall(r"      - name: Negative self-test \(([^)]*)\)\n        run: \|\n"
-                        r"((?:          .*\n|\n)*)", open(_wf2, encoding="utf-8").read())
+if _NEG_FILES:
+    # (label, body) per negative self-test. The workflow regex this replaced read only
+    # names with no `)` inside the parentheses; the loader reads every one.
+    _steps = [(_n[len("Negative self-test ("):-1], _s) for _f, _n, _s in _NEG_FILES
+              if _n.startswith("Negative self-test (")]
     # Read-then-write, not two spellings of substitution. Keyed to `.replace(`/`re.sub(`
     # it missed every probe that slices, or that mutates a parsed structure and dumps it —
     # 40 shipped probes, 14 of them with no assertion.
@@ -7755,18 +7853,18 @@ try:
 except Exception as _exc:                                            # pragma: no cover
     _UNLOOKED.append(f"negative-test anchors — the census could not be imported ({_exc})")
 else:
-    if not os.path.isfile(_anchors.WORKFLOW):
-        _UNLOOKED.append("negative-test anchors — no workflow to read")
+    if not os.path.isdir(_anchors.NEGATIVES):
+        _UNLOOKED.append("negative-test anchors — no test/negatives/ to read")
     else:
-        _steps = _anchors.census(_anchors.WORKFLOW)
-        for _f in _anchors.findings(_anchors.WORKFLOW, _steps):
+        _steps = _anchors.census(_anchors.NEGATIVES)
+        for _f in _anchors.findings(_anchors.NEGATIVES, _steps):
             fail(_f)
         if not _steps:
             # Canon 9a one level up: a census over nothing reports nothing wrong, and
             # "no anchors found" is then the same sentence whether the corpus is clean
             # or gone. `negatives.py` keeps a floor for the same reason.
             fail("the anchor census found no negative self-tests in "
-                 f"{os.path.relpath(_anchors.WORKFLOW, ROOT)} — a parser or a format "
+                 f"{os.path.relpath(_anchors.NEGATIVES, ROOT)}/ — a loader or a format "
                  "change that quietly matched nothing reads exactly like a clean sweep")
         # A check that can decline to run must say what state makes it decline. Locally
         # `negatives.py` prints such a check by name and subtracts it from its own claim;
@@ -7776,7 +7874,7 @@ else:
         # Over BOTH categories: a property check that printed `SKIP:` needed no
         # declaration in the first pass and was still counted as one that printed what
         # it asserts — the same sentence, one category over.
-        _dormant = [s for s in _anchors.every_check(_anchors.WORKFLOW, _steps)
+        _dormant = [s for s in _anchors.every_check(_anchors.NEGATIVES, _steps)
                     if s.skip_capable]
         for _s in _dormant:
             _chars, _words = _anchors._substantive(_s.dormancy or "")

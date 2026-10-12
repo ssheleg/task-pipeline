@@ -72,7 +72,8 @@ import sys
 import textwrap
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-WORKFLOW = os.path.join(ROOT, ".github/workflows/validate.yml")
+# One file per check since v1.93.0; before that, steps inline in the workflow.
+NEGATIVES = os.path.join(ROOT, "test", "negatives")
 
 MARKER = "Negative self-test"
 PROP_MARKER = "Property check"
@@ -698,13 +699,13 @@ class Step:
 
 
 def _parse_steps(path):
-    """Reuse the runner's parser rather than growing a second dialect of it."""
+    """Reuse the runner's loader rather than growing a second dialect of it."""
     sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
     import negatives
-    return negatives.parse_steps(path)
+    return negatives.load_checks(path)
 
 
-def census(path: str = WORKFLOW) -> list[Step]:
+def census(path: str = NEGATIVES) -> list[Step]:
     return [Step(n, s) for n, s in _parse_steps(path) if MARKER in n]
 
 
@@ -736,7 +737,7 @@ def no_needle_breakdown(steps) -> dict:
     return out
 
 
-def every_check(path: str = WORKFLOW, steps: list | None = None) -> list[Step]:
+def every_check(path: str = NEGATIVES, steps: list | None = None) -> list[Step]:
     """Negative self-tests AND property checks.
 
     Dormancy is a property of both categories and the first pass covered one: a
@@ -745,7 +746,7 @@ def every_check(path: str = WORKFLOW, steps: list | None = None) -> list[Step]:
     """
     if steps is not None:
         # The caller already parsed the negative self-tests; add only the property
-        # checks rather than re-reading a 9k-line workflow (board row B-010, which
+        # checks rather than re-reading ~450 files (board row B-010, which
         # `findings()` cites in its own docstring one screen up).
         _seen = {s.name for s in steps}
         return steps + [Step(n, s) for n, s in _parse_steps(path)
@@ -759,10 +760,10 @@ def category(step) -> str:
     return "property check" if PROP_MARKER in step.name else "negative self-test"
 
 
-def findings(path: str = WORKFLOW, steps: list | None = None) -> list[str]:
+def findings(path: str = NEGATIVES, steps: list | None = None) -> list[str]:
     """One line per plant this module refuses. Empty list = the class is closed.
 
-    `steps` lets a caller that already holds a census reuse it: the workflow is 9k lines
+    `steps` lets a caller that already holds a census reuse it: the corpus is ~450 files
     and parsing it twice per validator run is the class board row B-010 counts.
     """
     out, seen = [], set()
@@ -829,7 +830,7 @@ def _main(argv) -> int:
             print(f"\n  declared · {s.label}\n      {target} — {reason}")
     for s in skippers:
         print(f"\n  dormant-capable · {s.label}")
-    bad = findings(WORKFLOW, steps)
+    bad = findings(NEGATIVES, steps)
     if bad:
         print()
         for b in bad:

@@ -120,7 +120,7 @@ most often:
 Also: no hardcoded vendor model ids anywhere in the shipped skill (name the tier);
 every `references/*.md` must be reachable from `SKILL.md`; the Cursor rule stays
 self-contained with no relative links; every new validator guard needs a matching
-negative self-test in `.github/workflows/validate.yml`.
+negative self-test — a file in `test/negatives/`, never a step inline in the workflow.
 
 3. **`npm test` reads git, and prints its disclosures.** Its verdict is followed by the
    claim-registry states, `learned.md`'s shape (rules · rules with an incident ·

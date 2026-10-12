@@ -32,7 +32,7 @@ at once. Tick what this PR touched — or "n/a" if it touched none of them.
 - [ ] `npm test` prints `PASS: task-pipeline structure valid`
 - [ ] Version bumped in all four places, or no version bump needed
 - [ ] No hardcoded vendor model id anywhere (name the tier, not the string)
-- [ ] New validator guard → matching negative self-test in `validate.yml`, or n/a
+- [ ] New validator guard → matching negative self-test file in `test/negatives/`, or n/a
 
 ```
 $ npm test
