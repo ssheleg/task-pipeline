@@ -22,8 +22,8 @@ Not tagged, not published: the release follows the PR's merge.
   in `test/negatives/`; `validate.yml` went from 507,836 to 12,181 bytes; the `negatives`
   job runs `test/negatives.py --shard N/8` on an eight-value matrix. All eight shards
   passed locally on `941bed8` (438 plants rejected, 15 property checks printed, none
-  dormant). The CI wall clock per shard goes into the verification row `R08-ci` and
-  closes board row B-100.
+  dormant). On CI the eight shards took 3m29s–6m45s (row `R08-ci`), and B-100 is
+  closed.
 - **R09 budget.** Description 909 → 890 chars; body 4736 → 4646 of 4750 tokens. B-120
   closed with the auditor's reading.
 - **R10 ledgers.** The verification headers read "released"; the merged branches
@@ -32,9 +32,11 @@ Not tagged, not published: the release follows the PR's merge.
   `backlog-sources.json` · **R14** namespaced packet id · **R15** Fabric contract
   fixture · **R16** release approval mode.
 
-**Next task:** read the PR's CI by run id, write each shard's duration into
-`docs/evidence/verification.md` (`R08-ci`), close B-100 with them, then merge and release
-1.93.0 per `CLAUDE.md` → *Deploy / release*. The family rows B-154 and HK-05 live in the
+PR [#109](https://github.com/ssheleg/task-pipeline/pull/109): run `38242485458` green —
+the slowest shard 6m45s and the whole run 6m50s, where the one job had taken 90–111 min.
+Verification row `R08-ci` holds the numbers. B-100 is closed with them.
+
+**Next task:** merge PR #109, then release 1.93.0 per `CLAUDE.md` → *Deploy / release*. The family rows B-154 and HK-05 live in the
 sshlg-skills board and close there, at the wave-5 re-pin, citing this branch.
 
 The previous page (the 2026-09-07 Sherlock audit branch) is history:
