@@ -70,7 +70,7 @@ def problems(packet):
 
     version = str(packet.get("schema_version", ""))
     # Namespaced since 1.93.0 (Fabric's former packet id was the bare one); the bare form
-    # is read for one release and refused from the next.
+    # is still read until the live packets carrying it are migrated (backlog B-135).
     m = re.match(r"^(?:task-pipeline/)?execution-packet/(\d+)$", version)
     if not m:
         out.append(f"schema_version {version!r} is not 'task-pipeline/execution-packet/<major>' — "

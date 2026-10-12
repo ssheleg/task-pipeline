@@ -275,8 +275,16 @@ def handoff(ledger: pathlib.Path, provider: str, model: str | None, reason: str,
         raise SystemExit("stage_checkpoint: no workflow yet — write a checkpoint first "
                          "(emit → observatory_checkpoint_write → record)")
     to = {"provider": provider, **({"model": model} if model else {})}
+    # Observatory digests the whole request, TTL included, so the TTL is in the key (another
+    # TTL is another offer, not an idempotency conflict). So is the ledger's length: once an
+    # offer is recorded the ledger grows, and offering again after it lapsed is a new offer —
+    # the same key would replay the first, expired answer. A retry before recording repeats.
+    try:
+        seen = len(ledger.read_text(encoding="utf-8").splitlines())
+    except OSError:
+        seen = 0
     key = hashlib.sha256(f"{state['workflowId']}\n{json.dumps(to, sort_keys=True)}\n{reason}"
-                         .encode()).hexdigest()[:32]
+                         f"\n{ttl}\n{seen}".encode()).hexdigest()[:32]
     args = {"owner": OWNER, "idempotencyKey": "tp-ho-" + key, "workflowId": state["workflowId"],
             "to": to, "reason": reason, "offerTtlSeconds": ttl}
     if state.get("leaseId"):

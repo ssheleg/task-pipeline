@@ -21,7 +21,7 @@ except OSError:
     sys.exit(0)
 last_stage = last_mem = -1
 for i, l in enumerate(lines):
-    if re.match(r"^stage:\s*\d+\s", l):
+    if re.match(r"^stage:\s*\S+\s", l):
         last_stage = i
     elif l.startswith("event: memory"):
         last_mem = i
@@ -39,7 +39,7 @@ try:
     open(mark, "w").write(key + "\n")
 except OSError:
     pass
-sid = re.match(r"^stage:\s*(\d+)", line).group(1)
+sid = re.match(r"^stage:\s*(\S+)", line).group(1)
 msg = (f"task-pipeline: stage {sid}'s gate returned and no workflow-memory line follows it. "
        "With Observatory's tools: `scripts/stage_checkpoint.py emit` → observatory_checkpoint_write "
        "→ `stage_checkpoint.py record --answer -`. Without them: "

@@ -4,7 +4,8 @@ Integration wave 2 of the family's waves run (R07–R16), one release. The headl
 the workflow: `.github/workflows/validate.yml` was **507,836 of GitHub's 512,000 bytes**,
 and past that limit a workflow does not go red — it creates no runs and `gh pr checks`
 says *no checks reported*. 448 of its 464 steps were plants and property checks, run one
-after another in one job for 62–105 minutes.
+after another in one job for 90–111 minutes (runs 38127381666, 38112068258,
+38104711459).
 
 - **Every plant is a file (R08, #91).** The 433 negative self-tests and 15 property checks
   moved verbatim into `test/negatives/NNN-<slug>.sh`: line 1 the shebang, line 2
@@ -49,12 +50,14 @@ after another in one job for 62–105 minutes.
 - **Budget (R09).** The description is 890 of 1024 chars (909 before; ≤ 900 was the
   target, B-154 in the family board), and the `SKILL.md` body 4646 of the 4750-token
   working limit (4736 before; B-120 asked for 100 spare, and 104 are). The Optional-bridge
-  paragraph moved into `references/companion-skills.md`; the kernel-precedence rule stays
+  paragraph is trimmed to a pointer (its full text was already in
+  `references/companion-skills.md`); the kernel-precedence rule stays
   in `SKILL.md`, which `fix-tp-03.01` pins.
 - **Execution packets carry a namespaced id (R14):** `task-pipeline/execution-packet/1`.
   Fabric's former packet used the bare `execution-packet/1` until it renamed its format
-  `session-handoff/1`; `packet.py`, `context_packets.py` and the schema read the bare id
-  until 1.94.0.
+  `session-handoff/1`; `packet.py`, `context_packets.py` and the schema still read the bare
+  id: 19 live packets in one consumer repository carry it (B-135), so it is refused only
+  after they are migrated.
 - **Wave mode reads declared task sources (R13).** Where a repository declares them in
   `docs/backlog-sources.json`, the harvest reads exactly those, updates status only in
   the owning files and never edits a generated view.

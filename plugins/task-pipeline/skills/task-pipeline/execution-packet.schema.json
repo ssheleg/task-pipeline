@@ -19,7 +19,7 @@
     "schema_version": {
       "type": "string",
       "pattern": "^(task-pipeline/)?execution-packet/[0-9]+$",
-      "description": "Contract version, `task-pipeline/execution-packet/<major>` (namespaced since 1.93.0 so Fabric's former packet id cannot be mistaken for it; the bare `execution-packet/<major>` is read for one release). A consumer that does not know the major REJECTS the packet — an unknown mandatory version is not a warning."
+      "description": "Contract version, `task-pipeline/execution-packet/<major>` (namespaced since 1.93.0 so Fabric's former packet id cannot be mistaken for it; the bare `execution-packet/<major>` is still read until live packets are migrated, backlog B-135). A consumer that does not know the major REJECTS the packet — an unknown mandatory version is not a warning."
     },
     "id": {
       "type": "string",

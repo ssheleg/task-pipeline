@@ -226,7 +226,13 @@ def case_planned_handoff():
     ok(json.loads(run(d, "handoff", "--to-provider", "openai", "--to-model", "gpt-x",
                       "--reason", "limit")[1])["idempotencyKey"] == a["idempotencyKey"],
        "a retried offer repeats its key")
+    ok(json.loads(run(d, "handoff", "--to-provider", "openai", "--to-model", "gpt-x",
+                      "--reason", "limit", "--offer-ttl", "600")[1])["idempotencyKey"]
+       != a["idempotencyKey"], "another offer TTL is another offer, not an idempotency conflict")
     code, out, _ = record(d, {"handoffId": "handoff:abc123"})
+    ok(json.loads(run(d, "handoff", "--to-provider", "openai", "--to-model", "gpt-x",
+                      "--reason", "limit")[1])["idempotencyKey"] != a["idempotencyKey"],
+       "an offer made again after one was recorded is new, so a lapsed offer is not replayed")
     ok(code == 0 and "event: memory — handoff offered handoff:abc123" in ledger(d),
        "the offer is one ledger line")
     ok(json.loads(run(d, "state")[1])["holdsLease"] is True, "the lease stays until the successor accepts")

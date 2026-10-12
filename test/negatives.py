@@ -17,7 +17,7 @@ and a file whose name says `Property check` asserts that something IS printed
 rather than planting a defect. They lived inline in `.github/workflows/validate.yml`
 until v1.93.0, which put the workflow at 507,836 of GitHub's 512,000 bytes — past
 the limit a workflow goes SILENT, it is not marked red — and ran all of them in one
-job for 62–105 minutes. CI now runs this file once per shard of a matrix.
+job for 90–111 minutes. CI now runs this file once per shard of a matrix.
 
     python3 test/negatives.py              # run them all
     python3 test/negatives.py --list       # just show what would run

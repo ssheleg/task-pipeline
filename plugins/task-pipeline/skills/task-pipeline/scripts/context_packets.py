@@ -194,8 +194,9 @@ def verify_parents(report, plan):
 LEAF_SCHEMA = "task-pipeline/execution-packet/1"
 # Fabric's content-addressed packet was also `execution-packet/1` until Fabric renamed its
 # format `session-handoff/1` (fabric-agent-contract R-01). The namespace keeps the two from
-# being read as each other. The bare id is still READ for one release (1.93.x) and refused
-# from the next — sshlg-skills waves canvas, "Deleted or superseded".
+# being read as each other. The bare id is still READ, until no live packet carries it:
+# 19 packets in one consumer repository did on 2026-10-12 (backlog B-135); refusing it
+# before they are migrated would break them.
 LEGACY_LEAF_SCHEMAS = ("execution-packet/1",)
 COLD_READER_QUESTIONS = ("goal", "inputs", "decisions", "scope", "outputs",
                          "acceptance", "guards", "resume")

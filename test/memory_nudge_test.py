@@ -63,6 +63,9 @@ def main():
     with (d / ".task-pipeline" / "run.md").open("a", encoding="utf-8") as f:
         f.write("stage: 4 Plan — gate manual — verdict pass — 2026-10-12T11:00Z\n")
     ok("stage 4" in hook(d), "the next returned gate is reminded")
+    # A profile's stage ids need not be numbers (the hub's run ledger takes any \S+ id).
+    s = project(HEAD + "stage: spec Spec — gate manual — verdict pass — 2026-10-12T12:00Z\n")
+    ok("stage spec" in hook(s), "a non-numeric stage id is reminded too")
     print(f"PASS: memory-nudge.sh — {CASES} cases")
 
 

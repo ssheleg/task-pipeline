@@ -19,7 +19,9 @@ Not tagged, not published: the release follows the PR's merge.
   file that makes temp state with no cleanup (plant `test/negatives/453-…`); writing it
   found and fixed two leaks in `test/validate.py` itself.
 - **R08 / HK-05 / #91.** The 433 negative self-tests and 15 property checks are files
-  in `test/negatives/`; `validate.yml` went from 507,836 to 12,181 bytes; the `negatives`
+  in `test/negatives/` (the hub plan said `test/negatives.json`; each check is a shell
+  script, so it ships as a directory, every file byte-checked against the YAML-parsed
+  `run` value it came from); `validate.yml` went from 507,836 to 12,181 bytes; the `negatives`
   job runs `test/negatives.py --shard N/8` on an eight-value matrix. All eight shards
   passed locally on `941bed8` (438 plants rejected, 15 property checks printed, none
   dormant). On CI the eight shards took 3m29s–6m45s (row `R08-ci`), and B-100 is

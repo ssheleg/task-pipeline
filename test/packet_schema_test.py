@@ -149,7 +149,7 @@ def t_packet_id_is_namespaced():
 
 
 def main():
-    case("the packet id is namespaced; the bare id is read for one release",
+    case("the packet id is namespaced; the bare id is still read",
          t_packet_id_is_namespaced)
     case("the schema declares the edge shape", t_schema_declares_the_edge_shape)
     case("a control edge without payload survives, preserved", t_control_edge_without_payload_survives)

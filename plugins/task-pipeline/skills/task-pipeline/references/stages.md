@@ -589,7 +589,11 @@ never that the work was skipped quietly.
   `partial` ships only with the operator's explicit acceptance. A gap is cheapest to
   close before it ships, and the operator is already present at this gate. **The
   carry-over count is printed beside this verdict.** Deploy is outward → explicit
-  operator go. Respect deploy-from-main rules if the project mandates them. **Before
+  operator go — unless the operator already authorised releases. **Before the tag, read
+  the release's approval mode** (`pipeline.json` → `release.approval`; then
+  [`deploy-targets.md`](deploy-targets.md) → *When the release waits for an approval*):
+  `checks` — push the tag, watch the run selected by the tag, report; `reviewers` — the
+  direct link to the run that is actually `waiting`, never a request without it. Respect deploy-from-main rules if the project mandates them. **Before
   tagging, the CI verdict for what was just pushed is READ, not assumed**
   ([`conventions.md`](conventions.md) → *The CI verdict*) — a tag on a commit whose
   run nobody read is how a red `main` ships.
