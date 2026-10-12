@@ -35,7 +35,7 @@ from `super-ux`.
 | `questions.md` | `docs/evidence/specs/<topic>-questions.md` | 0–4, then every question round — the one queue: closed from sources, operator, peers, assumed |
 | `dossier.md` | `docs/evidence/specs/<topic>-dossiers/<letter>-<module>.md` | iteration step 2 — one per cluster, written in parallel; a risk class per node |
 | `backlog-sources.schema.json` | nothing is seeded: the shape of a project's `docs/backlog-sources.json` (backlog-sources/1) | 0 — the harvest reads exactly the sources it declares |
-| `lesson.schema.json` | nothing is seeded: the shape of one *lesson* (lesson/1), a retro entry's class carried by its `**Lesson:**` line into the local index (`scripts/lessons.py`, `~/.sshlg-skills/lessons/index.jsonl` by default) and, where the host lists one, the shared store | 10 writes (`lessons.py add`), 0 **queries** it (`lessons.py query`) |
+| `lesson.schema.json` | nothing is seeded: the shape of one *lesson* (lesson/1), a retro entry's class carried by its `**Lesson:**` line into the local index (`scripts/lessons.py`; `~/.sshlg-skills/lessons/index.jsonl` where the family's directory exists, else `~/.task-pipeline/lessons/index.jsonl`) and, where the host lists one, the shared store | 10 writes (`lessons.py add`), 0 **queries** it (`lessons.py query`) |
 
 The documentation-track templates (`docmap.md`, `decisions.md`,
 `open-questions.md`, `docgate.sh`) are seeded **together**, and they are useful at

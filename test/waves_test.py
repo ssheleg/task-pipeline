@@ -209,6 +209,15 @@ def main():
     ok(rc == 1 and "DOC-001" in err,
        "an open item is not excused by release: program — only status: carried is, in validate as in assign")
 
+    hand = json.loads(inv.read_text())
+    for x in hand["items"]:
+        if x["id"] == "PLN-002":
+            x["release"] = "this"
+    (d / "hand.json").write_text(json.dumps(hand))
+    rc, out, err = run("validate", "--inventory", str(d / "hand.json"), "--plan", str(d / "plan.json"))
+    ok(rc == 1 and "PLN-002" in err and "carried" in err,
+       "a carried item whose release was hand-set to this is refused: carried means program")
+
     # --- sync-graph: through graph.py wave, and graph.py validate agrees
     g = {"goal": "a goal", "requirements": ["REQ-001"], "edges": [
             {"from": "N-001", "to": "N-002", "payload": "the core fix"}],
@@ -244,6 +253,41 @@ def main():
     ok(gp.read_bytes() == before, "a refused sync writes nothing: every move is tried on a copy first")
     r = subprocess.run([sys.executable, str(GRAPH), "validate", "--graph", str(gp)], capture_output=True, text=True)
     ok(r.returncode == 0, "graph.py validate still agrees after a refused sync")
+
+    # --- a re-cut that moves a whole chain up: no single step may be judged alone
+    chain = {"goal": "a goal", "requirements": ["REQ-001"],
+             "edges": [{"from": "N-001", "to": "N-002", "payload": "x"}],
+             "nodes": [{"id": "N-001", "title": "t", "owner": "implementer", "status": "pending",
+                        "blocked_by": [], "serves": "REQ-001", "check": "npm test", "wave": 1},
+                       {"id": "N-002", "title": "t", "owner": "implementer", "status": "pending",
+                        "blocked_by": ["N-001"], "serves": "REQ-001", "check": "npm test", "wave": 2}]}
+    cp = d / "chain.json"
+    cp.write_text(json.dumps(chain))
+    (d / "plan-chain.json").write_text(json.dumps({"nodes": [{"id": "N-001", "wave": 3}, {"id": "N-002", "wave": 4}]}))
+    rc, out, err = run("sync-graph", "--plan", str(d / "plan-chain.json"), "--graph", str(cp), "--why", "re-cut")
+    ok(rc == 0, f"A(w1)->B(w2) moved to A:3, B:4 is one valid re-cut, exit 0 ({rc} {out!r} {err!r})")
+    got_chain = {n["id"]: n["wave"] for n in json.loads(cp.read_text())["nodes"]}
+    ok(got_chain == {"N-001": 3, "N-002": 4}, f"both moves land ({got_chain})")
+
+    # --- the hand rules and inventory/1 give one verdict on the same items
+    try:
+        import jsonschema as _js
+    except ImportError:
+        _js = None
+    if _js:
+        sys.path.insert(0, str(SKILL / "scripts"))
+        import waves as W  # noqa: E402
+        sch_inv = json.loads((SKILL / "templates" / "inventory.schema.json").read_text())
+        good = item("OK-001")
+        cases_ = [good, item("BAD-1", title="ab"), item("BAD-2", severity="urgent"),
+                  item("BAD-3", kind="Bug"), item("BAD-4", evidence=""), item("BAD-5", status="done"),
+                  item("BAD-6", wave=0), item("BAD-7", release="next"), dict(item("BAD-8"), extra=1),
+                  item("BAD-9", node="A-1"), item("BAD-10", needs_operator="yes"), item("9BAD")]
+        for it in cases_:
+            hand = bool(W.item_errors(it))
+            schema_says = bool(list(_js.Draft202012Validator(sch_inv).iter_errors(
+                {"schema": "inventory/1", "items": [it]})))
+            ok(hand == schema_says, f"{it['id']}: item_errors says {hand}, inventory/1 says {schema_says}")
 
     # --- templates and doctrine
     tpl = SKILL / "templates"

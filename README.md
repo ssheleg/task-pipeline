@@ -634,7 +634,7 @@ must say so.
 ### Held to Anthropic's own Skill authoring guidance
 
 Audited against the four Agent Skills pages. Most of it already held — `name`
-13/64 chars, `description` 947/1024 chars, `SKILL.md` 271/500 lines, all 41 references
+13/64 chars, `description` 887/1024 chars, `SKILL.md` 271/500 lines, all 41 references
 linked **directly** from `SKILL.md`, and the bundle far under the 30 MB ceiling. What
 did not, now does:
 

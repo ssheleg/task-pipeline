@@ -5,9 +5,21 @@
   "description": "One lesson: a retro entry's class, stated so another project's agent can use it at stage 0. The project retro is canonical; a lesson is its projection (references/iteration.md, The learning loop). scripts/lessons.py builds one from a retro entry that carries a `**Lesson:**` line and refuses anything this schema does not allow. It never carries a transcript, a value, a path outside the repository, a URL, a person's or a customer's name, or code. The origin carries the project's pseudonymous key and the evidence commit: both stay on this machine or estate, and retro.publish strips the whole origin before anything leaves (references/retrospective.md, What may leave the project).",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schema", "classKey", "title", "trigger", "check", "grade", "stages", "nouns", "origin"],
+  "required": [
+    "schema",
+    "classKey",
+    "title",
+    "trigger",
+    "check",
+    "grade",
+    "stages",
+    "nouns",
+    "origin"
+  ],
   "properties": {
-    "schema": {"const": "lesson/1"},
+    "schema": {
+      "const": "lesson/1"
+    },
     "classKey": {
       "description": "The class as a slug. The identity across projects: two projects with one classKey hold one lesson, seen twice.",
       "type": "string",
@@ -42,10 +54,23 @@
       "description": "The stage that owned the failure and the stage that surfaced it. A profile's stage ids need not be numbers.",
       "type": "object",
       "additionalProperties": false,
-      "required": ["owned", "surfaced"],
+      "required": [
+        "owned",
+        "surfaced"
+      ],
       "properties": {
-        "owned": {"type": ["integer", "string"]},
-        "surfaced": {"type": ["integer", "string"]}
+        "owned": {
+          "type": [
+            "integer",
+            "string"
+          ]
+        },
+        "surfaced": {
+          "type": [
+            "integer",
+            "string"
+          ]
+        }
       }
     },
     "nouns": {
@@ -54,13 +79,21 @@
       "minItems": 3,
       "maxItems": 8,
       "uniqueItems": true,
-      "items": {"type": "string", "minLength": 2, "maxLength": 32}
+      "items": {
+        "type": "string",
+        "minLength": 2,
+        "maxLength": 32
+      }
     },
     "origin": {
       "description": "Where the lesson was learned. Local and estate only: retro.publish strips it.",
       "type": "object",
       "additionalProperties": false,
-      "required": ["project", "commit", "retro"],
+      "required": [
+        "project",
+        "commit",
+        "retro"
+      ],
       "properties": {
         "project": {
           "description": "The project's pseudonymous key: `p-` and the first 12 hex digits of the repository's root commit. Never its name: a repository name can be a customer's or a product's (redaction rule 4). The shared store receives the same key, never a `project:<slug>` id.",
@@ -73,9 +106,9 @@
           "pattern": "^[0-9a-f]{7,40}$"
         },
         "retro": {
-          "description": "The retro file, relative to the repository, and the entry's anchor: the heading's letters and digits in any script, lowercased, every other run one hyphen.",
+          "description": "The retro file, relative to the repository, and the entry's anchor: the heading's letters and digits in any script, lowercased, every other run one hyphen. The pattern is the script's RETRO_REF, read with Unicode word characters as Python's `re` reads it.",
           "type": "string",
-          "pattern": "^[A-Za-z0-9_][A-Za-z0-9_./-]*\\.md#[^\\s#/_]+$",
+          "pattern": "^[A-Za-z0-9_][A-Za-z0-9_./-]*\\.md#[^\\W_]+(?:-[^\\W_]+)*$",
           "maxLength": 200
         }
       }
@@ -86,32 +119,99 @@
       "description": "One line of the local index (lesson-index/1): one entry per classKey, a pure function of its origins, so a rebuild from the retros equals the incremental index byte for byte.",
       "type": "object",
       "additionalProperties": false,
-      "required": ["schema", "id", "classKey", "title", "trigger", "check", "grade", "stages", "nouns", "seen", "projects", "status", "origins"],
+      "required": [
+        "schema",
+        "id",
+        "classKey",
+        "title",
+        "trigger",
+        "check",
+        "grade",
+        "stages",
+        "nouns",
+        "seen",
+        "projects",
+        "status",
+        "origins"
+      ],
       "properties": {
-        "schema": {"const": "lesson-index/1"},
-        "id": {"type": "string", "pattern": "^L-[0-9a-f]{12}$", "description": "`L-` and the first 12 hex digits of sha256(classKey)."},
-        "classKey": {"type": "string"},
-        "title": {"type": "string"},
-        "trigger": {"type": "string"},
-        "check": {"type": "string"},
-        "grade": {"type": "integer"},
-        "stages": {"type": "object"},
-        "nouns": {"type": "array", "items": {"type": "string"}},
-        "seen": {"type": "integer", "minimum": 1, "description": "How many origins hold the class."},
-        "projects": {"type": "integer", "minimum": 1, "description": "How many distinct projects hold it."},
-        "status": {"enum": ["local", "candidate"], "description": "`candidate` when two or more projects hold it: the retro.publish queue for learned.md."},
+        "schema": {
+          "const": "lesson-index/1"
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^L-[0-9a-f]{12}$",
+          "description": "`L-` and the first 12 hex digits of sha256(classKey)."
+        },
+        "classKey": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "trigger": {
+          "type": "string"
+        },
+        "check": {
+          "type": "string"
+        },
+        "grade": {
+          "type": "integer"
+        },
+        "stages": {
+          "type": "object"
+        },
+        "nouns": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "seen": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "How many origins hold the class."
+        },
+        "projects": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "How many distinct projects hold it."
+        },
+        "status": {
+          "enum": [
+            "local",
+            "candidate"
+          ],
+          "description": "`candidate` when two or more projects hold it: the retro.publish queue for learned.md."
+        },
         "origins": {
           "type": "array",
           "items": {
             "type": "object",
             "description": "Each origin's own lesson fields, its origin, and the shared-store memory id once recorded (`mem:<id>@<revision>`).",
-            "required": ["project", "commit", "retro", "lesson"],
+            "required": [
+              "project",
+              "commit",
+              "retro",
+              "lesson"
+            ],
             "properties": {
-              "project": {"type": "string"},
-              "commit": {"type": "string"},
-              "retro": {"type": "string"},
-              "memory": {"type": "string", "pattern": "^mem:[^@\\s]+@[0-9]+$"},
-              "lesson": {"type": "object"}
+              "project": {
+                "type": "string"
+              },
+              "commit": {
+                "type": "string"
+              },
+              "retro": {
+                "type": "string"
+              },
+              "memory": {
+                "type": "string",
+                "pattern": "^mem:[^@\\s]+@[0-9]+$"
+              },
+              "lesson": {
+                "type": "object"
+              }
             }
           }
         }

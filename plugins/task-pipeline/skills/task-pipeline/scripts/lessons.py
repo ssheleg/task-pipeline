@@ -24,9 +24,10 @@ entry is a pure function of its origins.
         lessons two or more projects hold: the `retro.publish` queue for learned.md
     lessons.py show L-<sha12>
         one entry, with its origins (pseudonymous project keys, commits, retro anchors)
-    lessons.py emit-observatory L-<sha12> [--tool observatory_record|observatory_lesson] [--root DIR]
-        the shared store's arguments for this project's origin, as JSON, carrying the same
-        pseudonymous project key — never a `project:<slug>` id; the agent calls the tool
+    lessons.py emit-observatory L-<sha12> [--root DIR]
+        `observatory_record`'s arguments for this project's origin, as JSON — the same
+        pseudonymous project key, never a `project:<slug>` id; the commit as `commit:` + 12
+        hex; memoryId and expectedRevision once recorded. The agent calls the tool
     lessons.py record L-<sha12> --answer FILE|- [--ledger PATH] [--root DIR]
         keep the store's memory id beside this project's origin; a refusal becomes one ledger
         line (`event: lessons — store refused — <code>`) and the local entry stays
@@ -34,16 +35,21 @@ entry is a pure function of its origins.
         the index this invocation would use
 
 **Where the index lives.** `--index PATH`, else `$TASK_PIPELINE_LESSONS`, else
-`~/.sshlg-skills/lessons/index.jsonl`. The directory is the family's machine-state home
-(sshlg-skills `docs/working-rules/state-json.md`); the family accepted `lessons/` there as
-task-pipeline's on 2026-10-12 ("state-json.md gets the entry when it ships"). Until that
-entry ships, the contract is that agreement, and the path stays a parameter. Directory 0700, file 0600,
-written by a unique temp file and `os.replace`, under an exclusive lock
-(`index.jsonl.lock`, `flock`; `$TASK_PIPELINE_LESSONS_LOCK_TIMEOUT` seconds, default 10).
+`~/.sshlg-skills/lessons/index.jsonl` when `~/.sshlg-skills` already exists — the family's
+machine-state home, where the family accepted `lessons/` as task-pipeline's on 2026-10-12
+("state-json.md gets the entry when it ships") — and `~/.task-pipeline/lessons/index.jsonl`
+otherwise, so a standalone install never creates the family's directory. Directories this
+script creates are 0700 (an existing one keeps its mode), the file 0600, written by a unique
+temp file and `os.replace`, under an exclusive lock (`index.jsonl.lock`, `flock`;
+`$TASK_PIPELINE_LESSONS_LOCK_TIMEOUT` seconds, default 10). git gets
+`$TASK_PIPELINE_GIT_TIMEOUT` seconds (default 60), and a git that does not answer is its own
+refusal, never read as a missing commit.
 
 **What a lesson may carry.** The fields of lesson/1 and nothing else. The text fields are one
 line each and refused when they carry an absolute or home path, a URL, an e-mail address, a
-credential shape or a long hex/base64 run: what a pattern can see. A person's or a customer's
+credential shape or a long hex/base64 run: what a pattern can see. A RELATIVE path, a short
+SHA or a repository name in text no pattern can tell from an ordinary word — those stay the
+writer's duty, with names. A person's or a customer's
 name a pattern cannot see; that stays the writer's duty (`references/retrospective.md` →
 *What may leave the project*). The project is a pseudonymous key — `p-` and 12 hex digits
 of the repository's root commit — never its name, and the evidence commit must resolve in
@@ -110,6 +116,8 @@ OWNED = re.compile(r"\*\*Owned by:\*\*\s*stage\s+([^\s·,()]+)")
 GRADE = re.compile(r"\*\*Fix:\*\*\s*grade\s+([1-3])\b")
 CHECK = re.compile(r"^\s*-\s+\*\*The check:\*\*\s*(.+)$")
 COMMIT_LINE = re.compile(r"\*\*Commit:\*\*\s*`([0-9a-f]{7,40})`")
+ARTIFACT_KNOWN = ("docs/evidence", "docs/superpowers")
+ARTIFACT_REGISTERS = ("retro.md", "backlog.md", "verification.md", "specs", "plans", "briefs", "retro")
 SKIP_DIRS = {".git", "node_modules", ".venv", "venv", "__pycache__", "dist", "build", ".next",
              "target", ".cache"}
 
@@ -127,14 +135,32 @@ def index_path(given: str | None) -> pathlib.Path:
     env = os.environ.get(ENV_INDEX)
     if env:
         return pathlib.Path(env).expanduser()
-    return pathlib.Path.home() / ".sshlg-skills" / "lessons" / "index.jsonl"
+    # The family's machine-state directory when it exists (sshlg-skills accepted `lessons/`
+    # there as task-pipeline's, 2026-10-12: "state-json.md gets the entry when it ships");
+    # otherwise task-pipeline's own, so a standalone install never creates the family's.
+    family = pathlib.Path.home() / ".sshlg-skills"
+    if family.is_dir():
+        return family / "lessons" / "index.jsonl"
+    return pathlib.Path.home() / ".task-pipeline" / "lessons" / "index.jsonl"
 
 
 def _git(root: pathlib.Path, *args: str) -> str | None:
+    """git's answer, or None when git answered "no". A git that did not answer is NOT a
+    "no": until round 2 a timeout returned None too, so on a loaded machine a lesson was
+    refused as "no commit" or "does not resolve" — two of twelve verification runs failed
+    that way. A timeout or a missing git is its own refusal now."""
     try:
-        r = subprocess.run(["git", *args], cwd=root, capture_output=True, text=True, timeout=20)
-    except (OSError, subprocess.SubprocessError):
-        return None
+        timeout = float(os.environ.get("TASK_PIPELINE_GIT_TIMEOUT", "60"))
+    except ValueError:
+        timeout = 60.0
+    try:
+        r = subprocess.run(["git", *args], cwd=root, capture_output=True, text=True,
+                           timeout=timeout)
+    except subprocess.TimeoutExpired:
+        raise Refused(f"git {args[0]} did not answer within {timeout:g}s — the machine is "
+                      "busy, not the lesson wrong; nothing was written, retry")
+    except OSError as exc:
+        raise Refused(f"git cannot be run ({type(exc).__name__}) — a lesson needs its commit")
     return r.stdout.strip() if r.returncode == 0 else None
 
 
@@ -448,7 +474,12 @@ def _ensure_dir(d: pathlib.Path) -> None:
         cur = cur.parent
     try:
         for m in reversed(missing):
-            m.mkdir(mode=0o700)
+            try:
+                m.mkdir(mode=0o700)
+            except FileExistsError:
+                # Another first writer made it between our look and our mkdir: theirs,
+                # used as it is. Until round 2 this race was a refusal.
+                continue
             os.chmod(m, 0o700)
     except OSError as exc:
         raise Refused(f"the index directory {d} cannot be created ({type(exc).__name__}) — "
@@ -457,17 +488,19 @@ def _ensure_dir(d: pathlib.Path) -> None:
 
 def save(path: pathlib.Path, entries: dict[str, dict]) -> None:
     _ensure_dir(path.parent)
-    fd, tmp = tempfile.mkstemp(dir=path.parent, prefix=".index-", suffix=".tmp")
+    tmp = None
     try:
+        fd, tmp = tempfile.mkstemp(dir=path.parent, prefix=".index-", suffix=".tmp")
         with os.fdopen(fd, "w", encoding="utf-8") as f:
             f.write(dump(entries))
         os.chmod(tmp, 0o600)
         os.replace(tmp, path)
     except BaseException as exc:
-        try:
-            os.unlink(tmp)
-        except OSError:
-            pass
+        if tmp is not None:
+            try:
+                os.unlink(tmp)
+            except OSError:
+                pass
         if isinstance(exc, OSError):
             raise Refused(f"the index {path} cannot be written ({type(exc).__name__}) — "
                           "the previous index is intact")
@@ -590,7 +623,7 @@ def find_retros(roots: list[str], depth: int) -> list[tuple[pathlib.Path, pathli
 
 
 def _artifact_root(repo: pathlib.Path) -> pathlib.Path:
-    """`paths.artifacts` in pipeline.json, else docs/evidence, else docs/superpowers."""
+    """`paths.artifacts` in pipeline.json, else the first known root carrying a register."""
     try:
         conf = json.loads((repo / "pipeline.json").read_text(encoding="utf-8"))
         given = (conf.get("paths") or {}).get("artifacts")
@@ -598,10 +631,12 @@ def _artifact_root(repo: pathlib.Path) -> pathlib.Path:
             return repo / given
     except (OSError, ValueError, AttributeError):
         pass
-    for name in ("docs/evidence", "docs/superpowers"):
-        if (repo / name / "retro.md").is_file() or (repo / name / "retro").is_dir():
+    # The same rule, names and registers as bin/lib/artifact-root.js and test/artifact_root.py:
+    # the first KNOWN name that exists AND carries one of the REGISTERS, else the default.
+    for name in ARTIFACT_KNOWN:
+        if any((repo / name / reg).exists() for reg in ARTIFACT_REGISTERS):
             return repo / name
-    return repo / "docs/evidence"
+    return repo / ARTIFACT_KNOWN[0]
 
 
 def cmd_rebuild(a, idx: pathlib.Path) -> int:
@@ -669,25 +704,26 @@ def _this_origin(e: dict, root: pathlib.Path) -> dict:
 
 
 def cmd_emit(a, idx: pathlib.Path) -> int:
+    """The shared store's arguments for this project's origin.
+
+    Only `observatory_record` until the engine ships its lesson kind (an `observatory_lesson`
+    tool and a kind filter on search): a note whose statement starts `lesson:`, so a later
+    migration finds every one. The project travels as the same pseudonymous key the index
+    holds, never a `project:<slug>` id. The commit travels as `commit:` + 12 hex: the store's
+    redactor removes a 40-hex SHA as a credential shape and keeps exactly that short form.
+    A lesson already recorded from this origin is revised, not minted again."""
     e = _resolve(load(idx), a.id)
     o = _this_origin(e, repo_root(pathlib.Path(a.root or ".")))
     le = o["lesson"]
-    if a.tool == "observatory_lesson":
-        # The store gets the same pseudonymous key the index holds — never a
-        # `project:<slug>` id, which would put a repository's name into other projects'
-        # reading (references/iteration.md → *What a lesson may carry*).
-        args = {"owner": OWNER, "classKey": le["classKey"], "title": le["title"],
-                "trigger": le["trigger"], "check": le["check"], "nouns": le["nouns"],
-                "origin": {"projectId": o["project"], "commit": o["commit"]}}
-    else:
-        # The bridge until the store has a lesson kind: a note whose statement starts
-        # `lesson:`, so a later migration can find every one (CHANGELOG, Unreleased).
-        args = {"owner": OWNER, "statement": f"lesson: {le['classKey']} — {le['title']}",
-                "why": f"{le['trigger']}; check: {le['check']}",
-                "evidence": [{"kind": "commit", "sha": o["commit"]},
-                             {"kind": "lesson", "id": e["id"], "classKey": le["classKey"],
-                              "project": o["project"], "nouns": le["nouns"]}]}
-    print(json.dumps({"tool": a.tool, "arguments": args}, ensure_ascii=False))
+    args = {"owner": OWNER, "statement": f"lesson: {le['classKey']} — {le['title']}",
+            "why": f"{le['trigger']}; check: {le['check']}",
+            "evidence": [{"kind": "commit", "ref": "commit:" + o["commit"][:12]},
+                         {"kind": "lesson", "id": e["id"], "classKey": le["classKey"],
+                          "project": o["project"], "nouns": le["nouns"]}]}
+    mem = re.match(r"^(mem:[^@\s]+)@([0-9]+)$", o.get("memory") or "")
+    if mem:
+        args["memoryId"], args["expectedRevision"] = mem.group(1), int(mem.group(2))
+    print(json.dumps({"tool": "observatory_record", "arguments": args}, ensure_ascii=False))
     return 0
 
 
@@ -723,12 +759,16 @@ def cmd_record(a, idx: pathlib.Path) -> int:
             print(line)
             return 0
         mid = answer.get("memoryId") or answer.get("memory_id") or answer.get("id")
-        rev = answer.get("revision") or (answer.get("record") or {}).get("revision") or 1
+        # Absent means the store's first revision; a PRESENT 0 is a malformed answer, not 1.
+        rev = answer["revision"] if "revision" in answer else (answer.get("record") or {}).get("revision", 1)
         if not isinstance(mid, str) or not mid.startswith("mem:") or re.search(r"[@\s]", mid):
             print("lessons: the answer names no memory id (mem:…)", file=sys.stderr)
             return 2
-        if isinstance(rev, bool) or not (isinstance(rev, int) or (isinstance(rev, str) and rev.isdigit())):
-            print(f"lessons: the answer's revision {rev!r} is not a number", file=sys.stderr)
+        if isinstance(rev, bool) or not (
+                (isinstance(rev, int) and rev >= 1)
+                or (isinstance(rev, str) and re.fullmatch(r"[1-9][0-9]*", rev, re.ASCII))):
+            print(f"lessons: the answer's revision {rev!r} is not a whole number from 1",
+                  file=sys.stderr)
             return 2
         memory = f"{mid}@{int(rev)}"
         origins = [dict(x, memory=memory) if _origin_key(x) == _origin_key(o) else x
@@ -747,6 +787,13 @@ def cmd_show(a, idx: pathlib.Path) -> int:
 
 
 def main(argv: list[str]) -> int:
+    # Titles and anchors may be in any script, and the messages carry dashes: under a locale
+    # that cannot encode them, print() raised and the verb exited 1 for no reason of its own.
+    for stream in (sys.stdout, sys.stderr):
+        try:
+            stream.reconfigure(errors="replace")
+        except (AttributeError, ValueError):
+            pass
     common = argparse.ArgumentParser(add_help=False)
     common.add_argument("--index", help=f"the index file; default ${ENV_INDEX}, else "
                                         "~/.sshlg-skills/lessons/index.jsonl")
@@ -771,8 +818,6 @@ def main(argv: list[str]) -> int:
     sh.add_argument("id")
     em = sub.add_parser("emit-observatory", parents=[common], help="the shared store's arguments")
     em.add_argument("id")
-    em.add_argument("--tool", default="observatory_record",
-                    choices=["observatory_record", "observatory_lesson"])
     em.add_argument("--root")
     rc = sub.add_parser("record", parents=[common], help="keep the store's answer")
     rc.add_argument("id")

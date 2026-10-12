@@ -105,8 +105,9 @@ ids, and the plan's nodes with their `wave` and the items each `closes` — writ
 `node`, `wave` and `release` onto every item, and prints the counts. `waves.py validate`
 exits 1 when an item lands on no module or an open item on no node: either the canvas has a
 gap or the item is closed with its receipt or carried (`status: carried`, `release:
-program`). `waves.py sync-graph` writes the plan's waves onto the work graph through
-`graph.py wave`, so each move is a recorded revision. A re-cut is then a diff to a table
+program`). `waves.py sync-graph` writes the plan's waves onto the work graph with
+graph.py's lock and revision log — one `wave` revision per move — and judges the re-cut as
+a whole with graph.py's order rule, so moving a chain up a wave is never refused halfway. A re-cut is then a diff to a table
 and a re-run, which a reviewer can read; seven hundred hand-edited rows are not. The canvas,
 the question queue and each dossier start from [`templates/canvas.md`](../templates/canvas.md),
 [`templates/questions.md`](../templates/questions.md) and
@@ -219,8 +220,9 @@ waves are cut from the nodes still open.
 
 ## What stays human
 
-Sign-ins, consents, payments, sending to people, and every outward or irreversible act.
-The mode removes *"shall I continue?"* between waves and *"what did you mean?"* where a
+Sign-ins, consents, payments, sending to people, and every outward or irreversible act —
+unless a specific standing authorization names the act ([`continuity.md`](continuity.md) →
+*The limit, before the capability*). The mode removes *"shall I continue?"* between waves and *"what did you mean?"* where a
 source already says; it never removes a person from a decision that is theirs. A
 `manual` gate still waits for its go ([`continuity.md`](continuity.md) → *The limit,
 before the capability*).

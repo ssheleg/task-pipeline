@@ -422,7 +422,7 @@ The rest of this section is the mechanism.
 **One job: let the next agent on another project read this lesson at its stage 0.** An
 entry whose class would be true in another project carries a `**Lesson:**` line — the class
 key, the class in one sentence, when it applies, 3–8 search nouns. That line makes it a
-*lesson* ([`lesson.schema.json`](../templates/lesson.schema.json), lesson/1): `scripts/lessons.py add` puts it in the
+*lesson* ([`lesson.schema.json`](../templates/lesson.schema.json), lesson/1): with task-pipeline installed, its `scripts/lessons.py add` puts it in the
 local index every install has, and where the session lists a shared lesson store (an
 Observatory) it is also recorded there, as a proposal. An entry without the line stays
 private to this project.

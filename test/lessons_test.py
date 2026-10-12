@@ -67,8 +67,9 @@ def run(*args, cwd=None, stdin=None, index=None, env_extra=None):
     argv = [sys.executable, str(SCRIPT), *args]
     if index is not None:
         argv += ["--index", str(index)]
-    r = subprocess.run(argv, cwd=cwd, capture_output=True, text=True, input=stdin, timeout=60,
-                       env=env)
+    # Decoded as UTF-8 whatever the locale: the harness must not be the locale-dependent part.
+    r = subprocess.run(argv, cwd=cwd, capture_output=True, text=True, encoding="utf-8",
+                       errors="replace", input=stdin, timeout=120, env=env)
     return r.returncode, r.stdout, r.stderr
 
 
@@ -80,6 +81,42 @@ def git(repo, *args):
     if r.returncode != 0:
         raise SystemExit(f"git {' '.join(args)} failed: {r.stderr}")
     return r.stdout.strip()
+
+
+# The store's own redactor. The engine's `memory_redact.Redactor` when a checkout of the
+# public engine is on this machine; otherwise a FIXTURE COPY of its two rules that matter
+# here — the KEEP pattern (`commit:` + 7-12 hex survives) and the shape that redacts a long
+# hex run — named as a copy so nobody mistakes it for the engine.
+ENGINE = pathlib.Path(os.environ.get("OBSERVATORY_ENGINE_DIR",
+                                     pathlib.Path.home() / "DATA/.worktrees/engine-audit/observatory/engine"))
+try:
+    sys.path.insert(0, str(ENGINE))
+    import memory_redact as _mr  # noqa: E402
+    REDACTOR = f"engine memory_redact at {ENGINE.name}"
+
+    def redact(value):
+        return _mr.Redactor(known_loader=lambda: {}).scrub(value)[0]
+except Exception:  # noqa: BLE001 — absent or unimportable: the fixture copy below
+    import re as _re
+    REDACTOR = "fixture copy of the engine's KEEP pattern"
+    _KEEP = _re.compile(r"session:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+                        r"|commit:[0-9a-f]{7,12}\b")
+    _HEX = _re.compile(r"\b[0-9a-f]{32,}\b")
+
+    def redact(value):
+        def text(s):
+            kept = []
+            held = _KEEP.sub(lambda m: (kept.append(m.group(0)), f"\x00{len(kept) - 1}\x00")[1], s)
+            return _re.sub("\x00(\\d+)\x00", lambda m: kept[int(m.group(1))], _HEX.sub("[redacted]", held))
+        def walk(v):
+            if isinstance(v, str):
+                return text(v)
+            if isinstance(v, list):
+                return [walk(x) for x in v]
+            if isinstance(v, dict):
+                return {k: walk(x) for k, x in v.items()}
+            return v
+        return walk(value)
 
 
 ENTRY = """### 2026-10-0{n} · `{topic}` · gate 6 reopened twice
@@ -224,15 +261,19 @@ def main():
     args = json.loads(out)
     ok(args["tool"] == "observatory_record" and args["arguments"]["statement"].startswith(
         "lesson: absence-needs-its-own-check — "), "the bridge write is observatory_record with a `lesson:` statement")
-    ok({"kind": "commit", "sha": sha_a} in args["arguments"]["evidence"], "the evidence commit travels")
+    ok({"kind": "commit", "ref": "commit:" + sha_a[:12]} in args["arguments"]["evidence"],
+       "the evidence commit travels as commit:<12 hex>, the form the store keeps")
+    survived = redact(args["arguments"])
+    ok(json.dumps(survived) == json.dumps(args["arguments"]),
+       f"the store's redactor ({REDACTOR}) changes nothing in the emitted arguments: the commit survives")
+    full = redact({"evidence": [{"kind": "commit", "sha": sha_a}]})
+    ok(sha_a not in json.dumps(full), "a full 40-hex SHA would not survive the redactor — the reason for the short form")
     ok(args["arguments"]["owner"] == "agent:task-pipeline", "owner is named, never operator")
     key_a = "p-" + git(a, "rev-list", "--max-parents=0", "HEAD").split()[0][:12]
     ok("projectId" not in args["arguments"] and any(e.get("project") == key_a for e in args["arguments"]["evidence"]),
        "the store gets the pseudonymous key, never a project:<slug> id")
-    rc, out, _ = run("emit-observatory", lid, "--tool", "observatory_lesson", cwd=a, index=idx)
-    la = json.loads(out)["arguments"]
-    ok(la["classKey"] == "absence-needs-its-own-check" and la["origin"] == {
-        "projectId": key_a, "commit": sha_a}, "observatory_lesson arguments carry classKey and the pseudonymous origin")
+    rc, _, _ = run("emit-observatory", lid, "--tool", "observatory_lesson", cwd=a, index=idx)
+    ok(rc == 2, "observatory_lesson is not offered until the engine ships the lesson kind")
     rc, _, _ = run("emit-observatory", lid, "--project-id", "project:alpha", cwd=a, index=idx)
     ok(rc == 2, "--project-id is gone: a slug never reaches the store")
     ledger = a / ".task-pipeline" / "run.md"
@@ -245,6 +286,10 @@ def main():
     rc, _, err = run("record", lid, "--answer", "-", "--ledger", str(ledger), cwd=a,
                      stdin=json.dumps({"memoryId": "mem:abc", "revision": "two"}), index=idx)
     ok(rc == 2 and "revision" in err, f"a non-numeric revision is exit 2, named ({rc} {err!r})")
+    rc, out, _ = run("emit-observatory", lid, cwd=a, index=idx)
+    again = json.loads(out)["arguments"]
+    ok(again.get("memoryId") == "mem:abc" and again.get("expectedRevision") == 1,
+       "a recorded lesson is revised, not minted again: memoryId and expectedRevision are emitted")
     rc, out, err = run("record", lid, "--answer", "-", "--ledger", str(ledger), cwd=a,
                        stdin=json.dumps({"error": "bounds", "message": "too long"}), index=idx)
     ok(rc == 0 and "event: lessons — store refused — bounds" in ledger.read_text(encoding="utf-8"),
@@ -306,6 +351,65 @@ def main():
     os.chmod(ro, 0o700)
     ok(rc == 1 and "Traceback" not in err, f"an unwritable index location is a refusal, not a traceback ({rc} {err!r})")
 
+    # --- the two flakes of round 2, made deterministic. (1) A git that does not answer in
+    # time used to read as "no commit" / "does not resolve" — under parallel load that turned
+    # a busy machine into a refusal about the lesson. Now it is its own refusal, named.
+    shim = tree("tp-lessons-slowgit-")
+    real_git = shutil.which("git")
+    (shim / "git").write_text(f"#!/bin/sh\nsleep 3\nexec {real_git} \"$@\"\n")
+    os.chmod(shim / "git", 0o755)
+    rc, _, err = run("add", "--json", "-", cwd=a, stdin=json.dumps(dict(single, classKey="slow-git")),
+                     index=idx, env_extra={"PATH": f"{shim}:{os.environ['PATH']}",
+                                           "TASK_PIPELINE_GIT_TIMEOUT": "1"})
+    ok(rc == 1 and "did not answer" in err and "no commit" not in err and "resolve" not in err,
+       f"a git that times out is named as such, never as a missing commit ({rc} {err!r})")
+    # (2) Two first writers race between "the directory is missing" and mkdir: the loser's
+    # FileExistsError used to become a refusal. Simulated in-process: the check says missing,
+    # the directory exists.
+    sys.path.insert(0, str(SCRIPT.parent))
+    import lessons as L  # noqa: E402
+    raced = tree("tp-lessons-raced-") / "made-by-the-other-writer"
+    raced.mkdir(mode=0o755)
+    os.chmod(raced, 0o755)
+    real_exists = pathlib.Path.exists
+    pathlib.Path.exists = lambda self: False if self == raced else real_exists(self)
+    try:
+        L._ensure_dir(raced)
+        raced_ok = True
+    except L.Refused:
+        raced_ok = False
+    finally:
+        pathlib.Path.exists = real_exists
+    ok(raced_ok and stat.S_IMODE(raced.stat().st_mode) == 0o755,
+       "a directory another writer created first is used as it is, not refused nor chmod-ed")
+    # (3) Output under a non-UTF-8 locale: the script printed an em dash and crashed.
+    rc, out, _ = run("query", "gate", index=idx, env_extra={"LC_ALL": "en_US.ISO8859-1", "PYTHONUTF8": "0",
+                                                          "PYTHONIOENCODING": ""})
+    ok(rc == 0, f"query under an ISO-8859-1 locale exits 0 ({rc})")
+
+    # --- the schema's anchor pattern is the script's, character for character
+    ok(sch["properties"]["origin"]["properties"]["retro"]["pattern"] == L.RETRO_REF.pattern,
+       "lesson.schema.json's origin.retro pattern equals lessons.py's RETRO_REF")
+    # --- a lock that cannot be opened is a refusal, not a traceback
+    lockless = tree("tp-lessons-lockless-")
+    os.chmod(lockless, 0o500)
+    rc, _, err = run("add", "--json", "-", cwd=a, stdin=json.dumps(single), index=lockless / "index.jsonl")
+    os.chmod(lockless, 0o700)
+    ok(rc == 1 and "lock" in err and "Traceback" not in err, f"an unopenable lock is a refusal ({rc} {err!r})")
+    # --- a revision is ASCII digits from 1
+    for bad_rev in (0, "0", "\u0661", -1):
+        rc, _, err = run("record", lid, "--answer", "-", cwd=a, index=idx,
+                         stdin=json.dumps({"memoryId": "mem:abc", "revision": bad_rev}))
+        ok(rc == 2 and "revision" in err, f"revision {bad_rev!r} is refused, exit 2 ({rc})")
+
+    # --- the artifact-root rule is the shared one, register for register
+    js = (ROOT / "bin" / "lib" / "artifact-root.js").read_text(encoding="utf-8")
+    import re as _re2
+    js_regs = tuple(_re2.findall(r"'([^']+)'", _re2.search(r"const REGISTERS = \[(.*?)\]", js, _re2.S).group(1)))
+    js_known = tuple(_re2.findall(r"'([^']+)'", _re2.search(r"const KNOWN = \[(.*?)\]", js, _re2.S).group(1)))
+    ok(L.ARTIFACT_REGISTERS == js_regs and L.ARTIFACT_KNOWN == js_known,
+       f"lessons.py reads the artifact root with artifact-root.js's names and registers ({L.ARTIFACT_REGISTERS} vs {js_regs})")
+
     # --- lock contention: a held lock makes add refuse, nothing written
     try:
         import fcntl
@@ -340,10 +444,15 @@ def main():
     else:
         print("note: no fcntl here — the lock cases were not run")
 
-    # --- the default index lives under HOME, never anywhere else
+    # --- the default index: task-pipeline's own, unless the family's directory already exists
+    rc, out, _ = run("path")
+    ok(rc == 0 and out.strip() == str(HOME / ".task-pipeline" / "lessons" / "index.jsonl"),
+       f"without ~/.sshlg-skills the default is ~/.task-pipeline/lessons/index.jsonl ({out!r})")
+    ok(not (HOME / ".sshlg-skills").exists(), "a standalone install never creates the family's directory")
+    (HOME / ".sshlg-skills").mkdir()
     rc, out, _ = run("path")
     ok(rc == 0 and out.strip() == str(HOME / ".sshlg-skills" / "lessons" / "index.jsonl"),
-       f"the default index path is ~/.sshlg-skills/lessons/index.jsonl ({out!r})")
+       f"with ~/.sshlg-skills present the default is its lessons/index.jsonl ({out!r})")
     print(f"PASS: lessons.py — {CASES} cases")
 
 

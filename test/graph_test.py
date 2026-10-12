@@ -2116,6 +2116,52 @@ def _():
         assert ok_s == good, "the schema on risk %r says %s" % (risk, ok_s)
 
 
+@case("rounds owed by risk class: an R3 node is not closable after one passing round, nor after three with no adversarial one")
+def _():
+    gp_node = node("N-001")
+    gp_node["risk"] = "R3"
+    code, out, d = certify(g([gp_node]), three())
+    assert code == 0 and "round 1 of 3 owed" in out and "not closable yet" in out \
+        and "close it with" not in out, out
+    gpath = str(pathlib.Path(d) / "graph.json")
+    vp = str(pathlib.Path(d) / "verdict-N-001.json")
+    r = subprocess.run([sys.executable, str(GRAPH), "close", "--verdict", vp, "--graph", gpath],
+                       capture_output=True, text=True)
+    assert r.returncode != 0 and "1 of 3" in (r.stdout + r.stderr), r.stdout + r.stderr
+    certify(None, three(), workdir=d)
+    code, out, _ = certify(None, three(), workdir=d)
+    assert code == 0 and "round 3 of 3" in out, out
+    r = subprocess.run([sys.executable, str(GRAPH), "close", "--verdict", vp, "--graph", gpath],
+                       capture_output=True, text=True)
+    assert r.returncode != 0 and "adversarial" in (r.stdout + r.stderr), \
+        "three blind rounds closed an R3 node: " + r.stdout + r.stderr
+
+
+@case("rounds owed by risk class: an R3 node closes after three rounds, the last adversarial; an R1 after one")
+def _():
+    gp_node = node("N-001")
+    gp_node["risk"] = "R3"
+    _, _, d = certify(g([gp_node]), three())
+    certify(None, three(), workdir=d)
+    code, out, _ = certify(None, three(), "--kind", "adversarial", workdir=d)
+    assert code == 0 and "close it with" in out, out
+    gpath = pathlib.Path(d) / "graph.json"
+    kinds = json.loads(gpath.read_text())["nodes"][0]["certification"]["kinds"]
+    assert kinds == ["blind", "blind", "adversarial"], kinds
+    r = subprocess.run([sys.executable, str(GRAPH), "close", "--verdict",
+                        str(pathlib.Path(d) / "verdict-N-001.json"), "--graph", str(gpath)],
+                       capture_output=True, text=True)
+    assert r.returncode == 0, r.stdout + r.stderr
+    one = node("N-001")
+    one["risk"] = "R1"
+    code, out, d1 = certify(g([one]), three())
+    assert code == 0 and "close it with" in out, out
+    r = subprocess.run([sys.executable, str(GRAPH), "close", "--verdict",
+                        str(pathlib.Path(d1) / "verdict-N-001.json"),
+                        "--graph", str(pathlib.Path(d1) / "graph.json")], capture_output=True, text=True)
+    assert r.returncode == 0, r.stdout + r.stderr
+
+
 # Before the verdict, and the position matters: `report()` is idempotent (the atexit
 # registration would find `_reported` already set), so a case defined BELOW this line
 # is created after the accounting and never appears in it. Found by planting a failing

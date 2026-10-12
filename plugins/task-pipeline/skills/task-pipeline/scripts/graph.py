@@ -630,6 +630,11 @@ VISUAL_TIER = "visual"
 ALL_TIERS = TIERS + (VISUAL_TIER,)
 SURFACE_CLASSES = ("flagship", "product", "internal", "ad")
 RISK_CLASSES = ("R1", "R2", "R3")
+# Passing certification rounds a node owes before `close` accepts it, by risk class
+# (`references/certification.md` → *Rounds owed by risk class*). R3's must include one
+# round recorded `--kind adversarial`.
+ROUNDS_OWED = {"R1": 1, "R2": 2, "R3": 3}
+ROUND_KINDS = ("blind", "adversarial")
 
 
 def _is_wave(w):
@@ -1606,11 +1611,13 @@ def cmd_certify(graph, args):
     round_no = int(prior.get("round") or 0) + 1
     tiers_now = {x: reports[x]["verdict"] for x in tiers}
     history = list(prior.get("history") or []) + [tiers_now]
+    kinds = list(prior.get("kinds") or ["blind"] * (round_no - 1)) + [args.kind]
     node["certification"] = {
         "round": round_no,
         "tiers": tiers_now,
         "at": head or "unavailable — not inside a git checkout",
         "history": history,
+        "kinds": kinds,
     }
 
     failed = [x for x in tiers if tiers_now[x] == "fail"]
@@ -1701,6 +1708,22 @@ def cmd_certify(graph, args):
         fh.write("\n")
     os.replace(tmp, out)
     print("%s: certified at %s in round %d" % (nid, ", ".join(tiers), round_no))
+    owed = ROUNDS_OWED.get(node.get("risk"))
+    if owed and round_no < owed:
+        print("round %d of %d owed — not closable yet. The next round reads the node's whole "
+              "diff at the new HEAD (references/certification.md → *Rounds owed by risk "
+              "class*)%s." % (round_no, owed,
+                              "; one round must be `--kind adversarial`"
+                              if node.get("risk") == "R3" and "adversarial" not in kinds else ""))
+        print("verdict written to %s" % out)
+        return 0
+    if node.get("risk") == "R3" and "adversarial" not in kinds:
+        print("round %d of %d owed, and none was adversarial — not closable yet: run the "
+              "adversarial round and record it with `--kind adversarial`" % (round_no, owed))
+        print("verdict written to %s" % out)
+        return 0
+    if owed:
+        print("round %d of %d owed — closable." % (round_no, owed))
     print("verdict written to %s — close it with:" % out)
     print("  graph.py close --verdict %s" % out)
     return 0
@@ -1803,6 +1826,19 @@ def cmd_close(graph, args):
     # verifier's judgement and close proceeds as before.
     cert = node.get("certification")
     exc = node.get("exception")
+    # Rounds owed by risk class (`references/certification.md`). Enforced here, in the
+    # mutation, for the reason the failing-tier gate below is: a hand-shaped verdict must
+    # not step around it. An authorized exception (`waive`) stays the only way past.
+    owed = ROUNDS_OWED.get(node.get("risk"))
+    if owed and not exc:
+        done_rounds = int((cert or {}).get("round") or 0)
+        if done_rounds < owed:
+            die("%s is %s and owes %d certification round(s); %d of %d done — not closable "
+                "yet. Run the next round with `graph.py certify`. Nothing was written."
+                % (nid, node["risk"], owed, done_rounds, owed))
+        if node["risk"] == "R3" and "adversarial" not in ((cert or {}).get("kinds") or []):
+            die("%s is R3 and none of its %d rounds was adversarial — record one with "
+                "`certify --kind adversarial`. Nothing was written." % (nid, done_rounds))
     if cert:
         tiers = cert.get("tiers") or {}
         failing = sorted(k for k, val in tiers.items() if val != "pass")
@@ -1960,6 +1996,9 @@ def main(argv=None):
                         help="path to one tier report; pass three times, one per tier")
     p_cert.add_argument("--verdict-out", dest="verdict_out", default=None,
                         help="where to write the assembled verdict (default: beside the graph)")
+    p_cert.add_argument("--kind", choices=ROUND_KINDS, default="blind",
+                        help="the round's kind; R3 owes one `adversarial` round "
+                             "(references/certification.md → *Rounds owed by risk class*)")
     p_cert.add_argument("--ceiling", type=int, default=3,
                         help="rounds after which the output names the churning tier; it "
                              "measures rather than stops (references/loop-guard.md)")

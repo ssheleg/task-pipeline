@@ -16,8 +16,9 @@ inventory; a closed hotfix lane of five entries is the only exception.
   stage 8's trio run once, at steps 10 and 11.
 - **Lessons across projects.** lesson/1 (`templates/lesson.schema.json`) and
   `scripts/lessons.py`: a retro entry with a `**Lesson:**` line becomes a lesson in a local
-  index every install has (`~/.sshlg-skills/lessons/index.jsonl` by default, accepted by
-  the family as task-pipeline's; `$TASK_PIPELINE_LESSONS` or `--index` move it). Source 7b
+  index every install has (`~/.sshlg-skills/lessons/index.jsonl` where the family's directory
+  exists, accepted by the family as task-pipeline's; `~/.task-pipeline/lessons/index.jsonl`
+  otherwise; `$TASK_PIPELINE_LESSONS` or `--index` move it). Source 7b
   of the harvest reads it by the task's nouns, then a shared store whose search filters by
   kind. Writing to Observatory works today through `observatory_record`. The redaction list
   binds every lesson; on the estate it relaxes rule 2 for the evidence commit and a
@@ -34,6 +35,17 @@ inventory; a closed hotfix lane of five entries is the only exception.
   written down, not started.
 - New suites in `npm test`: `lessons_test.py`, `waves_test.py`, `continuity_doc_test.py`;
   eval INSTR-08 (wave 0).
+- **Rounds owed are enforced.** `graph.py close` refuses a node with a `risk` until its
+  class's rounds have passed (R1 one, R2 two, R3 three, one recorded with `certify --kind
+  adversarial`); `certify` prints `round N of M owed — not closable yet`. certification.md
+  gains *Rounds owed by risk class*, and the churn doctrine exempts owed rounds from "a clean
+  round ends the loop".
+- `waves.py sync-graph` judges a re-cut as a whole, so a chain moved up a wave is never
+  refused halfway. `backlog_sources.py` refuses unknown keys and applies every source rule
+  to every source, and the shipped schema where `jsonschema` is installed.
+- `lessons.py emit-observatory` sends the commit as `commit:` + 12 hex (the store's redactor
+  keeps that form and removes a 40-hex SHA) and revises a recorded lesson instead of minting
+  a second; a git that does not answer in time is its own refusal.
 
 ## v1.93.3 — the wave-2 evidence declares its dead commits; a retried handoff stays one offer
 

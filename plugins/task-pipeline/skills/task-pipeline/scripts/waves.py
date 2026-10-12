@@ -23,10 +23,10 @@ reviewed; a table and a re-run can. This script is that re-run:
         recorded module, node or wave is not what the tables now say, or when an open item
         lands nowhere. 0 otherwise.
     waves.py sync-graph --plan FILE --graph FILE --why TEXT [--only-present]
-        writes each plan node's wave onto the work graph through `graph.py wave`, so every
-        move is a recorded revision and graph.py's own order rule refuses an earlier wave
-        that waits on a later one. Every move is tried on a copy first: a refusal writes
-        nothing. Plan nodes the graph lacks are named and exit 1, unless --only-present
+        writes each plan node's wave onto the work graph with graph.py's own lock, loader
+        and revision log (one `wave` revision per move), applying every move together and
+        judging the end state once with graph.py's order rule, so a valid re-cut is never
+        refused halfway and a refused one writes nothing. Plan nodes the graph lacks are named and exit 1, unless --only-present
         (a plan that spans several repositories' graphs).
 
 **The plan** is any JSON whose `nodes` list `{id, wave, closes}` — a work graph that carries
@@ -51,12 +51,11 @@ import json
 import os
 import pathlib
 import re
-import shutil
-import subprocess
 import sys
 import tempfile
 
 HERE = pathlib.Path(__file__).resolve().parent
+SCHEMA = HERE.parent / "templates" / "inventory.schema.json"
 GRAPH_PY = HERE / "graph.py"
 REQUIRED = ("id", "title", "area", "kind", "severity", "evidence", "proposed_fix")
 OPTIONAL = ("status", "source", "source_file", "repo", "module", "node", "wave", "release",
@@ -116,6 +115,22 @@ def item_errors(x: object) -> list[str]:
     return errs
 
 
+def schema_errors(items: list) -> list[str]:
+    """inventory/1 itself, applied where `jsonschema` is installed. `item_errors` is the
+    hand copy every install has; test/waves_test.py holds the two to one verdict."""
+    try:
+        import jsonschema
+        schema = json.loads(SCHEMA.read_text(encoding="utf-8"))
+    except (ImportError, OSError, ValueError):
+        return []
+    v = jsonschema.Draft202012Validator(schema)
+    out = []
+    for e in sorted(v.iter_errors({"schema": "inventory/1", "items": items}), key=lambda e: list(e.path)):
+        where = "/".join(str(x) for x in e.path) or "(top)"
+        out.append(f"schema: {where}: {e.message[:200]}")
+    return out
+
+
 def read_json(path: pathlib.Path, what: str):
     try:
         return json.loads(path.read_text(encoding="utf-8"))
@@ -137,6 +152,7 @@ def load_inventory(path: pathlib.Path) -> tuple[dict, list[dict]]:
     if items is None:
         raise Fail(2, [f"{path} is neither an inventory/1 document nor an array of items"])
     errs = [e for x in items for e in item_errors(x)]
+    errs += schema_errors(items)
     ids = [x.get("id") for x in items]
     errs += [f"{i}: appears {ids.count(i)} times — an id is unique across the inventory"
              for i in sorted({i for i in ids if ids.count(i) > 1}, key=str)]
@@ -375,9 +391,13 @@ def cmd_validate(a) -> int:
     return 1 if problems else 0
 
 
-def _graph_wave(graph: pathlib.Path, node: str, to: int, why: str) -> subprocess.CompletedProcess:
-    return subprocess.run([sys.executable, str(GRAPH_PY), "wave", node, "--to", str(to), "--why", why,
-                           "--graph", str(graph)], capture_output=True, text=True, timeout=120)
+def _graph_module():
+    """graph.py, imported: its lock, its loader, its revision log and its order rule."""
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("tp_graph", GRAPH_PY)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
 
 
 def cmd_sync_graph(a) -> int:
@@ -385,44 +405,48 @@ def cmd_sync_graph(a) -> int:
     if not why:
         raise Fail(2, ["--why needs a reason: each move enters the graph's revision log"])
     nodes = load_plan(pathlib.Path(a.plan))
-    gpath = pathlib.Path(os.path.realpath(a.graph))
-    graph = read_json(gpath, "the work graph")
-    current = {n.get("id"): n for n in graph.get("nodes") or [] if isinstance(n, dict)}
+    gpath = os.path.realpath(a.graph)
+    G = _graph_module()
+    # ALL MOVES AT ONCE, JUDGED ONCE. Applied one at a time through `graph.py wave`, a valid
+    # re-cut could be refused halfway: moving A(w1)->B(w2) to A:3, B:4 passes through A:3,
+    # B:2, which breaks the order rule although the end state keeps it. So every move is
+    # applied in memory, under graph.py's own lock, each with its revision entry, and
+    # graph.py's `violations` judges the end state once. A refusal writes nothing.
+    with G.held(gpath):
+        try:
+            graph = G.shape(G.load(gpath), gpath)
+        except SystemExit as exc:
+            raise Fail(2, [f"the work graph {gpath} cannot be read ({exc})"])
+        before = G.violations(graph)
+        if before:
+            raise Fail(1, [f"{gpath} was already invalid — nothing was written:"] + before)
+        current = {n.get("id"): n for n in graph.get("nodes") or [] if isinstance(n, dict)}
 
-    def gid(n: dict) -> str:  # a canvas id need not be graph.py's `N-001` shape
-        return n.get("graph_id") or n["id"]
+        def gid(n: dict) -> str:  # a canvas id need not be graph.py's `N-001` shape
+            return n.get("graph_id") or n["id"]
 
-    absent = [gid(n) for n in nodes if _wave(n) is not None and gid(n) not in current]
-    moves = sorted(((_wave(n), gid(n)) for n in nodes if _wave(n) is not None and gid(n) in current
-                    and current[gid(n)].get("wave") != _wave(n)
-                    and current[gid(n)].get("status") != "done"))
-    # TRY EVERY MOVE ON A COPY FIRST. graph.py refuses a move that breaks its order rule and
-    # writes nothing for that move — but a sync of five moves whose fourth is refused would
-    # leave three applied. A refused sync writes nothing at all, like every graph.py verb.
-    with tempfile.TemporaryDirectory(prefix="tp-waves-sync-") as tmp:
-        trial = pathlib.Path(tmp) / gpath.name
-        shutil.copyfile(gpath, trial)
-        for wave, nid in moves:
-            r = _graph_wave(trial, nid, wave, why)
-            if r.returncode != 0:
-                print((r.stderr or r.stdout).strip(), file=sys.stderr)
-                raise Fail(1, [f"{nid} → wave {wave} refused by graph.py — nothing was written"])
-    for wave, nid in moves:
-        r = _graph_wave(gpath, nid, wave, why)
-        if r.returncode != 0:  # the graph changed between the trial and now
-            print((r.stderr or r.stdout).strip(), file=sys.stderr)
-            raise Fail(1, [f"{nid} → wave {wave} refused by graph.py on the live graph"])
-        print(r.stdout.strip())
-    v = subprocess.run([sys.executable, str(GRAPH_PY), "validate", "--graph", str(gpath)],
-                       capture_output=True, text=True, timeout=120)
-    print(f"waves: {len(moves)} moved · graph.py validate exit {v.returncode}")
-    if v.returncode != 0:
-        print((v.stdout + v.stderr).strip(), file=sys.stderr)
-        return 1
+        absent = [gid(n) for n in nodes if _wave(n) is not None and gid(n) not in current]
+        moves = sorted(((gid(n), _wave(n)) for n in nodes if _wave(n) is not None
+                        and gid(n) in current and current[gid(n)].get("wave") != _wave(n)
+                        and current[gid(n)].get("status") != "done"))
+        lines = []
+        for nid, wave in moves:
+            old = current[nid].get("wave")
+            current[nid]["wave"] = wave
+            G.revise(graph, "wave", nid, why)
+            lines.append(f"{nid}: wave {old if old is not None else 'none'} → {wave}: {why}")
+        bad = G.violations(graph)
+        if bad:
+            raise Fail(1, ["the re-cut would break the graph — nothing was written:"] + bad)
+        if moves:
+            G.save(gpath, graph)
+    for ln in lines:
+        print(ln)
+    print(f"waves: {len(moves)} moved · graph.py's order rule holds on the result")
     if absent and not a.only_present:
         for nid in absent:
-            print(f"waves: {nid} is in the plan and not in {gpath.name} — add it, or pass "
-                  "--only-present for a plan that spans several graphs", file=sys.stderr)
+            print(f"waves: {nid} is in the plan and not in {pathlib.Path(gpath).name} — add it, or "
+                  "pass --only-present for a plan that spans several graphs", file=sys.stderr)
         return 1
     return 0
 

@@ -1,5 +1,9 @@
 # Release iteration — the loop around the waves
 
+*Release iteration* here is the whole loop, survey to next pool. It is not the loop
+iteration of [`progress.md`](progress.md) and [`continuity.md`](continuity.md) — one item
+taken to its gate — and this file never shortens it to "iteration".
+
 [`waves.md`](waves.md) closes one board in one release. This file is the loop around it:
 **survey → design the next version → build in parallel → verify as each part lands →
 document → release → check the release → show the operator the next pool → repeat.** A
@@ -26,7 +30,7 @@ time they land. Seeing every problem at once lets the next version solve them to
 
 ## No fix travels alone
 
-**A finding made mid-iteration joins the inventory. It is not fixed where it was found.**
+**A finding made mid-release-iteration joins the inventory. It is not fixed where it was found.**
 A fix designed against today's state is the intermediate state that
 [`waves.md`](waves.md) → *The rule it exists for* refuses: the next version moves the
 seam, and the fix is then paid for twice. The finding gets an id in its owning register
@@ -40,7 +44,7 @@ and lands on a canvas node. Its wave decides when it is built.
 - money or a legal obligation is failing.
 
 A hotfix is minimal and ships alone. Within the same hour its node joins the canvas. The
-iteration then either designs the real fix or records the hotfix as final, with the
+release iteration then either designs the real fix or records the hotfix as final, with the
 reason. "It is quick" is not one of the five entries.
 
 ## The cycle
@@ -55,7 +59,7 @@ reason. "It is quick" is not one of the five entries.
 | 6 | Build | parallel agents, each owning disjoint files | each node is committed on its branch, with its own checks green |
 | 7 | Verify | rounds per node, starting as each node lands | each node passes its risk class's rounds |
 | 8 | Seam check | cross-module checks per seam group | every seam the canvas names is exercised end to end |
-| 9 | Docs | stage 9 over everything the iteration shipped | the doc gate passes and the docs match the code |
+| 9 | Docs | stage 9 over everything the release iteration shipped | the doc gate passes and the docs match the code |
 | 10 | Release | versions, tags, pins, changelogs, in dependency order | the published artefacts resolve |
 | 11 | Post-release check | the stage-8 trio on what was released | every item the release claims closed is checked on the released artefact |
 | 12 | Next pool | the re-measured inventory and the proposal | the hand-back is sent |
@@ -151,6 +155,10 @@ the node owes:
 
 - Each round's fix cycle stays inside [`loop-guard.md`](loop-guard.md)'s caps. A finding
   that cannot be fixed in the node is parked with a board row.
+- `graph.py close` refuses a node until its owed rounds have passed, and an R3 node until
+  one of them was recorded adversarial ([`certification.md`](certification.md) → *Rounds
+  owed by risk class*, which also says what a round after a clean one reads and how the
+  adversarial round is run).
 - Every owed round runs, and every round re-runs all three tiers: a tier that passed in an
   earlier round read a tree the fix has since moved ([`certification.md`](certification.md)
   → a passing tier is re-run). A clean round does not cancel the next one; R3's third round
@@ -183,7 +191,7 @@ The method is cheap by construction. These rules keep it cheap:
 
 ## Release, then check the release
 
-**One release per iteration** carries every repository the iteration touched:
+**One release per release iteration** carries every repository it touched:
 - versions, changelogs and tags;
 - every pin moved, in dependency order — a contract before its consumers;
 - every parent's submodule pointer ([`stages.md`](stages.md), stage 10).
@@ -203,12 +211,19 @@ lane if it is one of its five entries. Otherwise it goes to the next pool, with 
 3. **Hand back once** ([`progress.md`](progress.md) → *The hand-back*). The message holds:
    - what the release shipped, with evidence;
    - what is still open, by module;
-   - the proposed scope of the next iteration and its question batch.
+   - the proposed scope of the next release iteration and its question batch.
 
-The proposal is a recommendation. The next iteration starts on the operator's go, unless
+The proposal is a recommendation. The next release iteration starts on the operator's go, unless
 a standing instruction arms the loop ([`continuity.md`](continuity.md) → *The limit, before
 the capability*: the ledger then cites it as `loop: armed by <source>`). Its outward acts —
 a release, a tag, a deploy — still need their own specific authorization.
+
+**On an armed loop the run does not stand still at the sign-off.** Stage 10's sign-off
+of the release is the operator's; it goes on a watcher or a board row
+([`continuity.md`](continuity.md) → *Waits outlive turns*), and the next release
+iteration's survey may start meanwhile. **Nothing the unsigned release claims counts as
+closed** until the sign-off lands: the survey reads those items as open, with the release
+named beside them.
 
 ## The learning loop — every run reads what earlier runs learned
 
@@ -226,11 +241,12 @@ as before, plus a **local index** of every project's lessons on this machine:
 `scripts/lessons.py`, one JSON line per class, a pure function of the retros
 (`lessons.py rebuild --roots <dir>` re-derives it). Two projects holding one class key make
 one lesson seen twice, status `candidate`. The index path is a parameter — `--index`, then
-`$TASK_PIPELINE_LESSONS`, then `~/.sshlg-skills/lessons/index.jsonl`. That default lives in
-the family's machine-state directory; the family accepted `lessons/` there as
-task-pipeline's on 2026-10-12 — "state-json.md gets the entry when it ships". Until that
-entry ships, the agreement is the contract; a user who wants the index elsewhere sets the
-variable, and nothing in this skill writes anywhere else under that directory.
+`$TASK_PIPELINE_LESSONS`, then `~/.sshlg-skills/lessons/index.jsonl` **when
+`~/.sshlg-skills` already exists** — the family's machine-state directory, where the family
+accepted `lessons/` as task-pipeline's on 2026-10-12 ("state-json.md gets the entry when it
+ships"; until it ships, that agreement is the contract) — and otherwise
+`~/.task-pipeline/lessons/index.jsonl`, so a standalone install never creates the family's
+directory. Nothing in this skill writes anywhere else under either.
 
 **Layer 2 — where the session lists a shared store.** An Observatory (the public engine,
 [passioncode-ai/project-observatory-dashboard](https://github.com/passioncode-ai/project-observatory-dashboard)),
@@ -261,13 +277,20 @@ stripped.
 
 **Read, at stage 0 — source 7b of [`knowledge-sources.md`](knowledge-sources.md).**
 1. Always: `lessons.py query <the task's 3–6 nouns> --limit 5`. The source ledger prints
-   `local lessons: <N> match`, or `local lessons: absent` when there is no index.
-2. If the session lists `observatory_search` **and** its hits carry a `kind` field:
+   one of three local states: `local lessons: <N> match`, `local lessons: absent` (no index
+   yet), or `local lessons: unavailable (no python3)`.
+2. If the session lists `observatory_search`: **the first call is the probe** —
    `observatory_search(query=<the same nouns>, kinds=["lesson","learning"], limit=5)`, with
-   no project id — the question is what *other* projects learned. Hits without `kind` mean an
-   engine with no kind filter, where turn records crowd lessons out of the match window: do
-   not read, and print `shared lessons: unfilterable (no kind filter)`. No such tool:
-   `shared lessons: absent`.
+   no project id, because the question is what *other* projects learned. Its answer decides
+   the state:
+   - hits that carry a `kind` field: the filter works — cite the lessons that fire, and print
+     `shared lessons: <N> match`;
+   - hits without `kind`: an engine with no kind filter, where turn records crowd lessons out
+     of the match window — do not read them, print `shared lessons: unfilterable (no kind
+     filter)`;
+   - no hits at all: nothing says whether the filter ran — print `shared lessons: 0 match
+     (filter unknown)` and read nothing more.
+   No such tool: `shared lessons: absent`.
 3. Cite a lesson that fires as `[lesson L-<12 hex>]` (local) or
    `[lesson mem:<id>@<rev> · proposed|observed]` (store). A `proposed` lesson is advisory and
    the brief says so; an `observed` one binds like a standing instruction of the retro.
@@ -279,11 +302,16 @@ stripped.
    checks that the commit resolves here, and merges; a repeat from the same project revises,
    never mints.
 2. If the session lists the store: `lessons.py emit-observatory <L-id>` prints
-   `{tool, arguments}`, carrying the pseudonymous key, never a `project:<slug>` id. The tool is
-   `observatory_record` today — a note whose statement starts `lesson:`, so lessons accumulate
-   and a later migration finds them — and `observatory_lesson` (`--tool observatory_lesson`)
-   once the session lists it. `observatory_learn` is not the retro write: it contrasts a
-   failure record with its fix inside one project, and a retro entry is neither.
+   `{tool, arguments}` for `observatory_record` — a note whose statement starts `lesson:`, so
+   lessons accumulate today and a later migration finds them. It carries the pseudonymous
+   key, never a `project:<slug>` id, and the commit as **`commit:` + 12 hex**: the store's
+   redactor removes a 40-hex SHA as a credential shape and keeps exactly that short form. A
+   lesson already recorded from this origin is emitted with `memoryId` and
+   `expectedRevision`, so the store revises it instead of minting a second one. **The lesson
+   tool and the kind filter arrive with the engine's lesson kind** (an `observatory_lesson`
+   tool, `kinds` on search); until the session lists them this skill offers neither.
+   `observatory_learn` is not the retro write: it contrasts a failure record with its fix
+   inside one project, and a retro entry is neither.
 3. The agent calls that tool, then `lessons.py record <L-id> --answer -` keeps the memory id
    beside the local entry. A refusal is one ledger line, `event: lessons — store refused —
    <code>`, and the local entry stays.
@@ -300,14 +328,17 @@ prints `local lessons: unavailable (no python3)` and the retro is read as before
 
 ## What the operator sees, and when
 
-An iteration has three planned touchpoints, plus every human gate:
+A release iteration has three planned touchpoints, plus every human gate:
 1. **The planning gate** — the inventory summary, the canvas, the wave plan and the
    question batch, in one message ([`waves.md`](waves.md) → *How the stages map*).
 2. **A question round** — only when one of its three triggers fires.
 3. **The release hand-back**, with the next pool.
 
 Sign-ins, consents, payments, sending to people and every outward or irreversible act stay
-the operator's ([`waves.md`](waves.md) → *What stays human*).
+the operator's ([`waves.md`](waves.md) → *What stays human*) — unless a specific standing
+authorization names the act ([`continuity.md`](continuity.md) → *The limit, before the
+capability*): a recorded "releases are the agent's" decision is such a record for the tag
+and the publish its release run performs.
 
 ## Rationalizations
 
@@ -319,4 +350,4 @@ the operator's ([`waves.md`](waves.md) → *What stays human*).
 | "Ask the operator now, it is quick" | Each question is a human round. Queue it and take another node |
 | "The agent hit a rate limit, start it again" | Resume it with its context. Relaunching pays for the same reading twice |
 | "No Observatory here, so no learning loop" | The project retro and learned.md are the loop's first layer, and every install has them |
-| "Release first, check later" | An unchecked release is the item the next iteration rediscovers. Step 11 is inside the run |
+| "Release first, check later" | An unchecked release is the item the next release iteration rediscovers. Step 11 is inside the run |

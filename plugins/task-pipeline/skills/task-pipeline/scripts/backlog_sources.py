@@ -26,6 +26,9 @@ outside one organisation.
   `idColumn` and `titleColumn` and exactly one of `statusColumn` or `defaultStatus: "open"`.
 - `excludeIds` is a unique list of strings; `idPattern` is a literal prefix, optionally with
   `[0-9]+` or `\\d+`, anchored at both ends. Two identical declarations are refused.
+- A key the schema does not name is refused, at the top and on a source; `heading` is a
+  string; `statusColumn`, `defaultStatus`, `excludeIds` and `idPattern` are checked on every
+  source, whatever its kind. Where `jsonschema` is installed the shipped schema is applied too.
 
 Output, on success: one JSON object — `repository`, `tasks` (each declaration as given, the
 fields the harvest reads), `context` (paths), `undeclared` (each `--found` path the manifest
@@ -45,6 +48,10 @@ import re
 import sys
 
 MANIFEST = "docs/backlog-sources.json"
+SCHEMA = pathlib.Path(__file__).resolve().parents[1] / "templates" / "backlog-sources.schema.json"
+TOP_KEYS = ("schema", "repository", "sources")
+SOURCE_KEYS = ("path", "goal", "kind", "format", "heading", "idColumn", "titleColumn",
+               "statusColumn", "defaultStatus", "idPattern", "excludeIds")
 GOALS = ("agent-workplace", "workflow-control", "interoperability", "reliable-work", "shared-context")
 FORMATS = ("table", "checklist", "json-tasks")
 REPOSITORY = re.compile(r"^https://github\.com/[A-Za-z0-9][A-Za-z0-9-]{0,38}/\.?[A-Za-z0-9][A-Za-z0-9._-]{0,99}$")
@@ -74,6 +81,22 @@ def _nonempty(v: object) -> bool:
     return isinstance(v, str) and bool(v.strip())
 
 
+def _schema_errors(doc: dict) -> list[str]:
+    """The shipped schema, applied when `jsonschema` is installed — the authority this
+    checker hand-implements. Without the library the hand checks above stand alone, and
+    they cover every rule the schema states."""
+    try:
+        import jsonschema
+        schema = json.loads(SCHEMA.read_text(encoding="utf-8"))
+    except (ImportError, OSError, ValueError):
+        return []
+    out = []
+    for e in sorted(jsonschema.Draft202012Validator(schema).iter_errors(doc), key=lambda e: list(e.path)):
+        where = "/".join(str(p) for p in e.path) or "(top)"
+        out.append(f"{MANIFEST}: schema: {where}: {e.message[:200]}")
+    return out
+
+
 def check(root: pathlib.Path, found: list[str]) -> tuple[int, dict | None, list[str]]:
     """(exit code, the harvest list or None, reasons)."""
     mf = root / MANIFEST
@@ -86,6 +109,8 @@ def check(root: pathlib.Path, found: list[str]) -> tuple[int, dict | None, list[
     if not isinstance(doc, dict):
         return 1, None, [f"{MANIFEST}: not an object"]
     errs: list[str] = []
+    errs += [f"{MANIFEST}: unknown key `{k}` — backlog-sources/1 names {', '.join(TOP_KEYS)}"
+             for k in doc if k not in TOP_KEYS]
     if doc.get("schema") != 1:
         errs.append(f"{MANIFEST}: `schema` is {doc.get('schema')!r}, not 1")
     if not REPOSITORY.match(str(doc.get("repository") or "")):
@@ -104,6 +129,23 @@ def check(root: pathlib.Path, found: list[str]) -> tuple[int, dict | None, list[
             continue
         path, kind, fmt = s.get("path"), s.get("kind", "tasks"), s.get("format")
         where = f"{where} ({path})"
+        errs += [f"{where}: unknown key `{k}` — a source names only {', '.join(SOURCE_KEYS)}"
+                 for k in s if k not in SOURCE_KEYS]
+        if "heading" in s and not isinstance(s["heading"], str):
+            errs.append(f"{where}: `heading` is not a string")
+        # These hold on EVERY source, whatever its kind or format: the schema says so, and
+        # a rule checked only on a task table is a rule a context source can break.
+        if "statusColumn" in s and not _nonempty(s.get("statusColumn")):
+            errs.append(f"{where}: `statusColumn` is empty")
+        if "defaultStatus" in s and s.get("defaultStatus") != "open":
+            errs.append(f"{where}: `defaultStatus` may only be \"open\"")
+        ex = s.get("excludeIds")
+        if ex is not None and (not isinstance(ex, list) or not all(_nonempty(x) for x in ex)
+                               or len(set(ex)) != len(ex)):
+            errs.append(f"{where}: `excludeIds` is a unique list of stable ids")
+        if "idPattern" in s and not ID_PATTERN.match(str(s.get("idPattern"))):
+            errs.append(f"{where}: `idPattern` {s.get('idPattern')!r} is not a literal "
+                        "prefix with an optional [0-9]+, anchored at both ends")
         if kind not in ("tasks", "context"):
             errs.append(f"{where}: `kind` {kind!r} is neither tasks nor context")
         if s.get("goal") not in GOALS:
@@ -126,13 +168,6 @@ def check(root: pathlib.Path, found: list[str]) -> tuple[int, dict | None, list[
                         or (has_default and s.get("defaultStatus") != "open"):
                     errs.append(f"{where}: a table names exactly one of a non-empty "
                                 "`statusColumn` or `defaultStatus: \"open\"`")
-            ex = s.get("excludeIds")
-            if ex is not None and (not isinstance(ex, list) or not all(_nonempty(x) for x in ex)
-                                   or len(set(ex)) != len(ex)):
-                errs.append(f"{where}: `excludeIds` is a unique list of stable ids")
-            if "idPattern" in s and not ID_PATTERN.match(str(s.get("idPattern"))):
-                errs.append(f"{where}: `idPattern` {s.get('idPattern')!r} is not a literal "
-                            "prefix with an optional [0-9]+, anchored at both ends")
         key = json.dumps([path, s.get("heading", ""), s.get("idPattern", ""), fmt or "",
                           s.get("idColumn", ""), s.get("titleColumn", ""),
                           s.get("statusColumn", ""), s.get("excludeIds", [])])
@@ -145,8 +180,9 @@ def check(root: pathlib.Path, found: list[str]) -> tuple[int, dict | None, list[
                                              "excludeIds") if k in s})
         elif isinstance(path, str):
             context.append(path)
+    errs += _schema_errors(doc)
     if errs:
-        return 1, None, errs
+        return 1, None, list(dict.fromkeys(errs))
     declared = {t["path"] for t in tasks} | set(context)
     undeclared = sorted({f.strip().lstrip("./") for f in found if f.strip()} - declared)
     out = {"repository": doc["repository"], "tasks": tasks, "context": context,

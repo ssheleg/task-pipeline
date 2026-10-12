@@ -342,13 +342,12 @@ true.
 
 ## What happens at the signal
 
-The four acts above, in order, and one prohibition: **do not begin an item you
-cannot finish inside what is left.** This is the one carve-out from "take the next task in
-the same turn": **at the compaction signal, finish the current unit and write the next task
-into the handoff** — the ledger's next line, the board row — **instead of starting it.** The
-next turn, after compaction, takes it from there. When the next item is plainly too large,
-say so and take the smaller thing that fits — closing a ledger, writing a decision
-that is already settled, updating a REQ status.
+The four acts above, in order, and one prohibition: **no new item starts.** This is the one
+carve-out from "take the next task in the same turn": **at the compaction signal, finish the
+current unit and write the next task into the handoff** — the ledger's next line, the board
+row — **instead of starting it.** Until compaction, the only writes are to what already
+exists: the ledger, the plan, the decisions already settled, the REQ statuses. The next
+turn, after compaction, takes the written task from there.
 
 If the project has recorded that it must not cross a compaction mid-stage, stop at
 the stage boundary instead and hand off. That is a project answer, not a default:
