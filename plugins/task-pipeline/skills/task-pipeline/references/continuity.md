@@ -318,6 +318,12 @@ right costs nothing extra and pays twice.
 
 ## Part 3 — workflow memory at the stage boundary
 
+Which of the five handoff mechanisms carries what — the Git record, Observatory's lease
+and checkpoint, a host's launch context, the inbound queue — and the order a successor
+reads them in, has one home:
+[sshlg-skills `docs/working-rules/handoff-layers.md`](https://github.com/ssheleg/sshlg-skills/blob/main/docs/working-rules/handoff-layers.md).
+This part is the checkpoint and lease half of it.
+
 The ledger survives a compaction. It does not survive a quota that ran out on another
 account, or a run picked up by a different agent on another machine. When the host has
 Project Observatory's memory tools, **every gate that returns also writes a workflow

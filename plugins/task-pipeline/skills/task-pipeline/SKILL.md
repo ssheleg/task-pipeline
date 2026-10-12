@@ -66,7 +66,7 @@ gate stops until it is installed.
 Which reference owns which stage — all forty-odd of them, by stage number:
 [`references/doctrine-map.md`](./references/doctrine-map.md).
 
-**Optional bridge** — mapping an equivalent skill set onto stages 2/4/5/6, and which layer wins on a custom profile: `references/companion-skills.md` → *Optional bridge — substituting an external skill set*.
+**Precedence:** on a CUSTOM profile the **kernel wins** — scope, evidence, deps and resume are owed by every unit of work; `references/stages.md` is the **default profile's** normative gate set; the kernel is normative for all. Another skill set on stages 2/4/5/6: `references/companion-skills.md`.
 
 **super-ux — the preferred provider for ANY user-facing task.** The moment a task
 implies an interface (web / mobile / CLI / TUI), the WHY→UI→scenario chain runs

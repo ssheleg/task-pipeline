@@ -218,7 +218,9 @@ Since v1.50.0 the plugin carries hooks of its own. `hooks/release-gate.sh`
 (`PreToolUse` on `Bash`) refuses an **outward, irreversible act** — `git tag`, a
 tag push, `gh release create`, `npm publish` — while the run says the suite has not
 passed. `hooks/gate-observer.sh` (`PostToolUse` and `PostToolUseFailure`) records
-what the declared gate command actually did.
+what the declared gate command actually did. `hooks/memory-nudge.sh` (`PostToolUse` on `Bash|Edit|Write|MultiEdit`) reminds,
+once per returned gate, that no workflow-memory line follows it
+([`continuity.md`](https://github.com/ssheleg/task-pipeline/blob/main/plugins/task-pipeline/skills/task-pipeline/references/continuity.md), Part 3).
 
 **Two lessons from v1.50.0, both shipped as defects and both fixed in v1.51.0.**
 
