@@ -296,6 +296,22 @@
       "why": "Four PRs of check work merged on a review app's `skipping` with nobody noticing. A requested reader and a reader that reported are different facts that look identical afterwards."
     },
     {
+      "id": "INSTR-08",
+      "category": "instruction_following",
+      "skills": [
+        "task-pipeline"
+      ],
+      "query": "close the whole board in waves: here is a repo whose docs/evidence/backlog.md has 12 open rows; two of them were already shipped last month",
+      "expected_behavior": [
+        "Builds ONE inventory by id (inventory/1) from every source before any design, and runs `scripts/waves.py validate` on it, so no row lands nowhere",
+        "Verifies each row against the code first: the two shipped rows are closed in the board with the receipt that shows them done, not carried into a wave",
+        "Assigns modules, nodes and waves with `waves.py assign` from two short tables, not by hand, and shows the counts per wave",
+        "Asks the operator once, as one batch with a recommendation per question, at the end of planning; never 'shall I continue?' between waves",
+        "Gives each node its own risk class (R1-R3), and starts a node's verification when it lands rather than waiting for the wave"
+      ],
+      "why": "Wave mode had one trigger eval and no instruction case (USR-015). An agent that reaches the mode but hand-edits the inventory, trusts stale rows or prompts between waves builds the intermediate states the mode exists to refuse."
+    },
+    {
       "id": "NOTRIG-05",
       "category": "should_not_trigger",
       "skills": [

@@ -40,7 +40,7 @@ or it belongs in a check.
 
 | Metric | Value | Computed by | As of |
 |---|---|---|---|
-| Evals authored | 47 (three suites: task-pipeline 29, evidence-docs 9, project-audit 9) | `python3 evals/run.py` → `suite: N evals` | 2026-10-11 |
+| Evals authored | 48 (three suites: task-pipeline 30, evidence-docs 9, project-audit 9) | `python3 evals/run.py` → `suite: N evals` | 2026-10-12 |
 | Categories covered | 5 of 5, per suite | the suite's own `category` fields | 2026-08-31 |
 | Dated runs recorded | **4** | `python3 evals/run.py` → `recorded runs: N` | 2026-08-31 |
 | …of those, **blind** | **3** | run headings not marked `self-observed` | 2026-08-31 |

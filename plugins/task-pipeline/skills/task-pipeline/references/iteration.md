@@ -78,7 +78,11 @@ dossier carries:
 - the migration;
 - what it deletes ([`waves.md`](waves.md) → *The canvas*, item 4);
 - its open questions;
-- its risk class.
+- the nodes it proposes, each with **its own** risk class (*Verification starts when a node
+  lands*, below). A dossier has no risk class: one R3 node beside four R1 nodes is five
+  classes, and a dossier-wide class either over-checks the four or under-checks the one.
+
+The shape is [`templates/dossier.md`](../templates/dossier.md).
 
 **A dossier is a design, not a plan.** It does not cut waves. That is step 5, made once
 over all the dossiers together.
@@ -191,39 +195,94 @@ lane if it is one of its five entries. Otherwise it goes to the next pool, with 
    - the proposed scope of the next iteration and its question batch.
 
 The proposal is a recommendation. The next iteration starts on the operator's go, unless
-a standing loop authorization is recorded ([`continuity.md`](continuity.md)).
+a standing instruction arms the loop ([`continuity.md`](continuity.md) → *The limit, before
+the capability*: the ledger then cites it as `loop: armed by <source>`). Its outward acts —
+a release, a tag, a deploy — still need their own specific authorization.
 
 ## The learning loop — every run reads what earlier runs learned
 
-**Every install has the first layer, and it needs no service:**
-- the project's retro, read at stage 0 ([`retrospective.md`](retrospective.md));
-- the shipped rule list in [`learned.md`](learned.md);
-- the opt-in upstream publication (`retro.publish`), so the skill itself learns.
+**One lesson format, two layers, one read recipe.** A *lesson* is a retro entry's class,
+stated so an agent on another project can use it: lesson/1,
+[`templates/lesson.schema.json`](../templates/lesson.schema.json). The project retro stays
+canonical ([`retrospective.md`](retrospective.md)); everything below is a projection of it
+that can be lost and rebuilt. A retro entry becomes a lesson when its author gives it a
+`**Lesson:**` line — the class key, the class in one sentence, when it applies, and 3–8
+search nouns ([`templates/retro.md`](../templates/retro.md)). An entry without one is
+private to its project and never leaves it.
 
-**Where the host has a shared lesson store, a second layer runs on top of the first.** An
-Observatory or a Fabric estate is an example; the store is detected by the tools the
-session lists, never assumed from a path.
-- **Write, at step 13.** Each retro entry that is not private to the project is recorded
-  as a *lesson*. A lesson carries:
-  - its class, its trigger and the check that now catches it;
-  - its evidence commit and its project's id.
+**Layer 1 — every install, no service.** The project retro and [`learned.md`](learned.md),
+as before, plus a **local index** of every project's lessons on this machine:
+`scripts/lessons.py`, one JSON line per class, a pure function of the retros
+(`lessons.py rebuild --roots <dir>` re-derives it). Two projects holding one class key make
+one lesson seen twice, status `candidate`. The index path is a parameter — `--index`, then
+`$TASK_PIPELINE_LESSONS`, then `~/.sshlg-skills/lessons/index.jsonl`. That default lives in
+the family's machine-state directory, and listing `lessons/` there as task-pipeline's is a
+proposal to the family, **not yet agreed**: until it is, a user who wants the index
+elsewhere sets the variable, and nothing in this skill writes anywhere else under that
+directory.
 
-  It never carries a transcript, a value, a private path or a person's name. It enters as
-  a proposal, below full confidence, and the store's own rules decide who promotes it.
-- **Read, at stage 0.** The harvest queries the store by the task's nouns: source 7b in
-  [`knowledge-sources.md`](knowledge-sources.md). A lesson that fires is cited in the brief
-  as `[lesson <id>]`, like any source.
-- **Promote.** A lesson recorded by two or more projects is a candidate for
-  [`learned.md`](learned.md), through `retro.publish`.
+**Layer 2 — where the session lists a shared store.** An Observatory (the public engine,
+[passioncode-ai/project-observatory-dashboard](https://github.com/passioncode-ai/project-observatory-dashboard)),
+detected by the tools the session lists, never by a path. Lessons there are the agents'
+work memory, written as proposals below full confidence; the store's own rules decide who
+promotes one.
 
-**How the store is detected.** The session lists one tool that records a lesson and one
-that searches them. On an Observatory (the public engine, from 0.24) they are
-`observatory_learn` or `observatory_record` for the write, and `observatory_search` or
-`observatory_recall` for the read. A lesson written there is a proposal tied to its
-project, so the read side asks across projects by the task's nouns, not by the project id.
+**What a lesson may carry — split by audience.** The redaction list in
+[`retrospective.md`](retrospective.md) → *What may leave the project* binds everything
+that **leaves the estate** (`retro.publish`): no commit, no repository, no project id. A
+lesson kept on the same machine or estate may carry two identifiers, because both resolve
+only for someone who already holds the project:
+- **the evidence commit**, as a SHA — a digest that names nothing, and the only way a later
+  reader (or the store's corroboration) can check the lesson against the change that taught it;
+- **the project, pseudonymous**: in the local index, `p-` and 12 hex digits of the
+  repository's root commit — stable across clones, never the repository's name, because the
+  index is read into *other* projects' briefs and a repository name can be a customer's or a
+  product's (redaction rule 4). In the shared store, the store's own project id, which already
+  keys every record there and which the store's access rules guard.
 
-**When there is no store, the source ledger says so.** It prints `shared lessons:
-absent`, and the first layer runs exactly as before. The store is never a hard dependency.
+Never, in either layer: a transcript, a value, a path outside the repository, a URL, a
+person's or customer's name, code. `lessons.py` refuses what a pattern can see (paths, URLs,
+addresses, credential shapes, long hex or base64 runs) and any field lesson/1 does not name;
+a name it cannot see stays the writer's duty. `retro.publish` strips the whole origin.
+
+**Read, at stage 0 — source 7b of [`knowledge-sources.md`](knowledge-sources.md).**
+1. Always: `lessons.py query <the task's 3–6 nouns> --limit 5`. The source ledger prints
+   `local lessons: <N> match`, or `local lessons: absent` when there is no index.
+2. If the session lists `observatory_search` **and** its hits carry a `kind` field:
+   `observatory_search(query=<the same nouns>, kinds=["lesson","learning"], limit=5)`, with
+   no project id — the question is what *other* projects learned. Hits without `kind` mean an
+   engine with no kind filter, where turn records crowd lessons out of the match window: do
+   not read, and print `shared lessons: unfilterable (no kind filter)`. No such tool:
+   `shared lessons: absent`.
+3. Cite a lesson that fires as `[lesson L-<12 hex>]` (local) or
+   `[lesson mem:<id>@<rev> · proposed|observed]` (store). A `proposed` lesson is advisory and
+   the brief says so; an `observed` one binds like a standing instruction of the retro.
+4. Budget: at most ten lines from both layers together. The brief carries only the lessons
+   that fire.
+
+**Write, at step 13 (stage 10's retro).** For each entry that carries a `**Lesson:**` line:
+1. `lessons.py add --retro <retro file> --entry <anchor>` — always. It validates lesson/1,
+   checks that the commit resolves here, and merges; a repeat from the same project revises,
+   never mints.
+2. If the session lists the store: `lessons.py emit-observatory <L-id>
+   [--project-id project:<slug>]` prints `{tool, arguments}`. The tool is
+   `observatory_record` today — a note whose statement starts `lesson:`, so lessons accumulate
+   and a later migration finds them — and `observatory_lesson` (`--tool observatory_lesson`)
+   once the session lists it. `observatory_learn` is not the retro write: it contrasts a
+   failure record with its fix inside one project, and a retro entry is neither.
+3. The agent calls that tool, then `lessons.py record <L-id> --answer -` keeps the memory id
+   beside the local entry. A refusal is one ledger line, `event: lessons — store refused —
+   <code>`, and the local entry stays.
+4. No store: the ledger says `shared lessons: absent`, once per run.
+
+**Promote.** `lessons.py candidates` lists the lessons two or more projects hold: the
+[`learned.md`](learned.md) queue, through `retro.publish` and its redaction list. In the
+store, a lesson two projects recorded rises by the store's own corroboration rule, never by
+this skill.
+
+**When there is no store, the source ledger says so**, and the first layer runs exactly as
+before. The store is never a hard dependency; neither is python3 — without it the ledger
+prints `local lessons: unavailable (no python3)` and the retro is read as before.
 
 ## What the operator sees, and when
 
