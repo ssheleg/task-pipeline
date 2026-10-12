@@ -1477,6 +1477,22 @@ three quarters of the work on this run.
 
 ## Releases that carry no stamp — stated, not stamped
 
+**`v1.93.3` carries no stamp, declared before its tag.** It is a patch to the same wave 2,
+from a re-certification reading and an independent observer, inside the umbrella's
+waves run. The umbrella's retro stamps that run.
+
+<!-- docgate:known-dead 941bed8 36cfc1c ffa42ab 933cf63 340556e 7357522 60ca8e2 -->
+
+> **Seven commit references in the wave-2 evidence cannot be followed from a clone of
+> `main`. They are declared here, not rewritten.** Six are pre-squash commits of PR #109
+> (`941bed8`, `36cfc1c`, `ffa42ab`, `933cf63`, `340556e`, `7357522`). The squash merge
+> `8260042` left them off `main`, and their branch was deleted. All six are ancestors of
+> the PR's head ref: `git fetch origin pull/109/head` brings them back, and
+> `git show <sha>` then works. v1.93.2 had removed their backticks, and the gate does not
+> read SHAs without backticks, so it passed without resolving them. `60ca8e2` is a
+> commit of ssheleg/make-skill (the auditor that measured row R09), not of this
+> repository.
+
 **`v1.93.2` carries no stamp, declared before its tag.** The same wave-2 payload as
 `v1.93.0`; the umbrella's retro stamps the waves run. **`v1.93.1` carries no stamp, and
 its tag published nothing:** the release suite's documentation gate refused commit
@@ -1487,7 +1503,7 @@ written. Neither tag can be removed.
 integration waves (`/task-pipeline waves`, plan `docs/evidence/plans/2026-10-11-integration-waves.md`
 in ssheleg/sshlg-skills): one wave of a run whose stage 10 closes in the umbrella, so
 the umbrella's retro stamps the run, not this file. The wave was certified by three blind
-readings (unit pass; seam and product with risks closed in 340556e (branch `w2/hygiene-continuity`, squashed into `8260042`) and 7357522 (branch `w2/hygiene-continuity`, squashed into `8260042`)).
+readings (unit pass; seam and product with risks closed in `340556e` (pre-squash, PR #109) and `7357522` (pre-squash, PR #109)).
 
 **`v1.93.0` carries no stamp, and its tag published nothing.** `release.yml` refused the
 tag's own tree because this section did not name it — the check working as written, as

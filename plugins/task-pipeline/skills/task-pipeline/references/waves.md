@@ -78,6 +78,10 @@ with the id, title and status columns it names. Status changes land only in thos
 files, under a lease. A new source joins the manifest in the same change. A generated
 view of them, such as a published common backlog, is never edited. A source of open
 work the manifest does not list is reported as a finding, not silently added.
+`scripts/backlog_sources.py --root . [--found <path> ...]` reads the manifest first: it
+prints the sources the harvest reads, refuses a manifest the harvest could not follow
+(exit 1, every reason named) and reports each `--found` source it does not list (exit 3).
+No manifest is discovery, said aloud (exit 0).
 
 **One machine-readable inventory, nothing outside it.** A single committed file,
 `<artifacts>/specs/YYYY-MM-DD-<topic>-inventory.json`, one entry per open item:

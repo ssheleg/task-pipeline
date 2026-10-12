@@ -1,10 +1,55 @@
+## v1.93.3 — the wave-2 evidence declares its dead commits; a retried handoff stays one offer
+
+A re-certification reading of v1.93.2 and an independent observer found six things.
+
+- **The v1.93.2 evidence rewrite passed the documentation gate by de-backticking.** Six
+  pre-squash SHAs of PR #109 (`941bed8`, `36cfc1c`, `ffa42ab`, `933cf63`, `340556e`,
+  `7357522`) were left as plain text beside a branch that no longer exists; `docgate.sh`
+  only resolves backticked SHAs, so it read none of them. They are backticked again and
+  listed in a `docgate:known-dead` marker in `docs/evidence/retro.md`, with the reason and
+  the way to reach them: `git fetch origin pull/109/head` (all six are ancestors of that
+  ref). The deleted branch name is gone. The make-skill commit `60ca8e2` in row R09 and
+  B-120 is declared there too: it is make-skill's commit, not this repository's. A fresh
+  clone still cannot resolve the seven; the gate now passes because they are declared.
+- **A retried handoff no longer replaces itself (R11).** `stage_checkpoint.py handoff` put
+  the ledger's whole length in the idempotency key, so a `gate:` line from
+  `hooks/gate-observer.sh` or a `record --unavailable` line between two retries made the
+  retry a new offer, and Observatory replaces an unaccepted older offer with a new one.
+  The key now counts only memory events (checkpoint, refused, handoff offered), so
+  unrelated appends leave it alone and a recorded offer still moves it.
+  `test/stage_checkpoint_test.py` pins both; `references/continuity.md` Part 3 says it.
+- **Declared task sources have a mechanism and a test (R13).**
+  `scripts/backlog_sources.py` reads `docs/backlog-sources.json` (the Fabric workspace's
+  `knowledge/backlog.md` contract), prints the sources a wave-0 harvest reads, refuses a
+  manifest the harvest could not follow (exit 1) and reports a discovered source the
+  manifest does not list (exit 3). `test/backlog_sources_test.py` builds fixture
+  repositories: 19 malformed manifests, a symlinked source, the finding and the no-manifest
+  case. The script accepted all 22 manifests in the operator's checkouts.
+- **The release approval mode has a test (R16).** `test/release_approval_test.py` pins
+  the schema's `checks | reviewers` enum (six other values refused under `jsonschema`),
+  the example's value and the doctrine section in `references/deploy-targets.md`. No
+  script reads the mode, because the agent reads it at stage 7, so the test pins the
+  schema, the example and the doctrine.
+- **CI runs every suite of the `npm test` equation.** The validate job's explicit list
+  lacked `memory_nudge_test.py`, which `npm test` has run since v1.93.0. It now runs that
+  suite and the two new ones.
+- **Recorded late, from v1.93.0:** the eight `negatives` shards report as one status,
+  *Negative self-tests*, and the ruleset on `main` requires it beside `validate` and
+  *House skill audit*, so a red shard blocks a merge.
+- **Correction to v1.93.2's entry:** it says the SHAs "now name the squash commit". They
+  were still unresolvable, and only the gate stopped seeing them. This entry fixes that.
+
+Guards: 438 → **438**; property checks 15 → **15**. No plant changed; two suites were added
+to `npm test` and `test:all`.
+
 ## v1.93.2 — v1.93.0's payload, with evidence a clone can follow
 
 `v1.93.1` published nothing either: its release suite reached the documentation gate
 (`npm run test:docs`, run by `release.yml` and not by the PR's checks) and refused 17
 commit references in `docs/evidence/` — the wave-2 branch SHAs became unreachable when
 PR #109 was squash-merged as `8260042`, and five CI run ids in backticks read as SHAs.
-They now name the squash commit and the runs as plain numbers. Same payload; this is
+They now name the squash commit and the runs as plain numbers (corrected in v1.93.3: the six SHAs
+were de-backticked, not resolved). Same payload; this is
 the third tag for it, and `docgate.sh` passed locally before this one was pushed.
 
 Guards: 438 → **438**; property checks 15 → **15**. No check changed.

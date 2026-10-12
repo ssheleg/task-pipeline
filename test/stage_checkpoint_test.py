@@ -16,7 +16,9 @@ way a run does, with the tool's answers simulated in the exact shapes Observator
     that took the workflow continues it;
   * a credential is a name, never a value, and a malformed one is refused;
   * a `review:` line (the contact sheet's human rounds) travels in the checkpoint of the
-    stage it names, so the number of passes is measured rather than remembered.
+    stage it names, so the number of passes is measured rather than remembered;
+  * a planned handoff's retry keeps its key across ledger appends that are not memory
+    events (`gate:`, `stage:`, `unavailable`), and a recorded offer moves it.
 
 Run bare: prints PASS lines and exits non-zero on the first failure.
 """
@@ -246,6 +248,34 @@ def case_planned_handoff():
     print("PASS: a planned executor change offers the workflow, the successor accepts it")
 
 
+def case_handoff_retry_ignores_unrelated_appends():
+    """A retry of an unaccepted offer keeps its key across appends that are not memory
+    events. The key used to carry the ledger's whole length, so a `gate:` line from
+    `hooks/gate-observer.sh` or a `record --unavailable` line turned the retry into a NEW
+    offer — and Observatory replaces an unaccepted older offer with a new one."""
+    d = fresh()
+    stage(d, 0, "Intake grill", "pass", "2026-10-05T10:00Z")
+    emit(d)
+    record(d, {"workflowId": "wf_0123456789abcdef", "leaseId": TOKEN, "stepId": "stage-0",
+               "checkpoint": {"revision": 1}})
+    offer = ("handoff", "--to-provider", "openai", "--reason", "limit")
+    k1 = json.loads(run(d, *offer)[1])["idempotencyKey"]
+    with (d / ".task-pipeline" / "run.md").open("a", encoding="utf-8") as f:
+        f.write('gate:  6 — command "npm test" — exit 0 — 2026-10-05T10:05:00Z\n')
+    ok(json.loads(run(d, *offer)[1])["idempotencyKey"] == k1,
+       "a gate line appended between retries does not make the retry a new offer")
+    code, _, _ = run(d, "record", "--unavailable", "observatory restarting")
+    ok(code == 0 and json.loads(run(d, *offer)[1])["idempotencyKey"] == k1,
+       "an `unavailable` memory line does not make the retry a new offer either")
+    stage(d, 1, "Docs study", "pass", "2026-10-05T10:30Z")
+    ok(json.loads(run(d, *offer)[1])["idempotencyKey"] == k1,
+       "a stage line is not a memory event and does not move the key")
+    record(d, {"handoffId": "handoff:first"})
+    ok(json.loads(run(d, *offer)[1])["idempotencyKey"] != k1,
+       "after a recorded offer, offering again is a new offer")
+    print("PASS: an offer's retry survives unrelated ledger appends; a recorded offer moves the key")
+
+
 def case_no_ledger():
     d = _tree()
     code, _, err = run(d, "emit")
@@ -257,6 +287,6 @@ if __name__ == "__main__":
     for case in (case_first_boundary, case_idempotency, case_continue_and_never_leak,
                  case_provider_loss, case_stale_writer_and_successor, case_credentials_by_name,
                  case_failed_gate_and_acceptance, case_review_rounds, case_planned_handoff,
-                 case_no_ledger):
+                 case_handoff_retry_ignores_unrelated_appends, case_no_ledger):
         case()
     print(f"PASS: stage_checkpoint.py — {CASES} cases")
