@@ -37,6 +37,17 @@
             "timeout": 20
           }
         ]
+      },
+      {
+        "matcher": "Bash|Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "shell": "bash",
+            "command": "\"${CLAUDE_PLUGIN_ROOT}/hooks/memory-nudge.sh\"",
+            "timeout": 20
+          }
+        ]
       }
     ],
     "PostToolUseFailure": [

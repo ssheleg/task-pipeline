@@ -42,6 +42,7 @@ makes the grill's answers *checkable* instead of merely confident.
 
 | # | Source | How to find it | What it's good for |
 |---|---|---|---|
+| 0 | **A host's launch context** | a session started by Fabric or Fabric Dashboards (`session-handoff/1`): the brief arrives appended to the system prompt, the task as the first prompt, and `context.md` is the cited context pack | the request in the words the operator gave the host — taken as the request, not re-asked; the context pack is a harvest source like any other and is cited by its section |
 | 1 | **The code** | the repo you're in | what actually runs — the tiebreaker |
 | 2 | **The code graph** | `graphify-out/graph.json` — see below | *reach*: what calls this, what breaks if it moves, what every change passes through |
 | 3 | **Host agent docs** | `CLAUDE.md`, `AGENTS.md`, `.cursor/rules/` | conventions, commands, deploy path, house rules |
