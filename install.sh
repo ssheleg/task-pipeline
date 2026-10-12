@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Installs the task-pipeline skill + /task-pipeline command into ~/.claude.
+# Installs the plugin's three skills (task-pipeline, evidence-docs, project-audit) and the
+# /task-pipeline command into ~/.claude, and names what a plain copy cannot carry.
 # Idempotent: skips anything already installed; pass --force to overwrite.
 set -euo pipefail
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -35,12 +36,20 @@ MSG
   fi
 done
 
-# 1. skill
-SRC="$HERE/plugins/task-pipeline/skills/task-pipeline"
-DEST="${HOME}/.claude/skills/task-pipeline"
-if [[ -e "$DEST" && "$FORCE" -eq 0 ]]; then
-  echo "skip: skill already installed at $DEST (rerun with --force to overwrite)"
-else
+# 1. skills — all three the plugin ships. task-pipeline names evidence-docs as its doc
+# doctrine and runs project-audit as wave 0's sidecar; a plain install that copied one of
+# three left both names resolving to nothing (USR-007).
+for SKILL in task-pipeline evidence-docs project-audit; do
+  SRC="$HERE/plugins/task-pipeline/skills/$SKILL"
+  DEST="${HOME}/.claude/skills/$SKILL"
+  if [[ ! -f "$SRC/SKILL.md" ]]; then
+    echo "error: $SRC is missing — corrupted checkout?" >&2
+    exit 1
+  fi
+  if [[ -e "$DEST" && "$FORCE" -eq 0 ]]; then
+    echo "skip: skill already installed at $DEST (rerun with --force to overwrite)"
+    continue
+  fi
   # Transactional install (FIX-UP-05.02): stage on the same filesystem, then
   # swap. A crash mid-copy leaves the ACTIVE install intact, not a partial tree.
   mkdir -p "$(dirname "$DEST")"
@@ -52,8 +61,8 @@ else
   mv "$STAGING" "$DEST"
   rm -rf "${DEST}.prev.$$"
   trap - EXIT
-  echo "Installed task-pipeline skill   -> $DEST"
-fi
+  printf 'Installed %-15s skill -> %s\n' "$SKILL" "$DEST"
+done
 
 # 2. slash command (so /task-pipeline works for the plain-skill install too)
 CMD_SRC="$HERE/plugins/task-pipeline/commands/task-pipeline.md"
@@ -70,18 +79,26 @@ else
   echo "Installed /task-pipeline command -> $CMD_DEST"
 fi
 
-# The role agents are a Claude Code PLUGIN capability and this path does not install
-# them. Said out loud rather than left to be discovered: the doctrine names
-# `task-pipeline:verifier`, and an operator who reads that on this install path would
-# otherwise find a name that resolves to nothing and no explanation anywhere.
+# What a plain copy cannot carry, said out loud: the role agents and the hooks are Claude
+# Code PLUGIN capabilities. The doctrine names `task-pipeline:verifier` and the hooks by
+# file; an operator on this path would otherwise find names that resolve to nothing.
 AGENTS="$HERE/plugins/task-pipeline/agents"
-if [ -d "$AGENTS" ] && [ -n "$(ls -A "$AGENTS" 2>/dev/null)" ]; then
+HOOKS="$HERE/plugins/task-pipeline/hooks"
+N_AGENTS=0; HOOK_NAMES=""
+if [ -d "$AGENTS" ]; then N_AGENTS="$(ls -1 "$AGENTS" 2>/dev/null | wc -l | tr -d ' ')"; fi
+if [ -d "$HOOKS" ]; then
+  HOOK_NAMES="$(cd "$HOOKS" && ls -1 ./*.sh 2>/dev/null | sed 's|^\./||; s|\.sh$||' | paste -sd ',' - | sed 's/,/, /g')"
+fi
+if [ "$N_AGENTS" -gt 0 ] || [ -n "$HOOK_NAMES" ]; then
   echo ""
-  echo "Not installed: plugins/task-pipeline/agents/ ($(ls -1 "$AGENTS" | wc -l | tr -d ' ') file(s))."
-  echo "  Role agents are a Claude Code plugin capability; this path installs the skill"
-  echo "  and the command only. Every role still runs — on the main thread instead of in"
-  echo "  its own context, which costs context and speed, not doctrine."
-  echo "  For the agent-backed version, install the plugin:"
+  echo "Not installed — Claude Code plugin capabilities a plain copy cannot carry:"
+  [ "$N_AGENTS" -gt 0 ] && echo "  - plugins/task-pipeline/agents/ ($N_AGENTS role agents): every role still runs, on the"
+  [ "$N_AGENTS" -gt 0 ] && echo "    main thread instead of in its own context — context and speed, not doctrine."
+  [ -n "$HOOK_NAMES" ] && echo "  - hooks: $HOOK_NAMES. Without them the gates"
+  [ -n "$HOOK_NAMES" ] && echo "    are checked by the doctrine and the run ledger, not by the harness."
+  echo "  For both, install the plugin instead (then remove these plain copies):"
   echo "    claude plugin marketplace add ssheleg/task-pipeline"
   echo "    claude plugin install task-pipeline@task-pipeline"
+  echo "  Optional companion for checkpoints, handoffs and shared lessons: Project Observatory,"
+  echo "    https://github.com/passioncode-ai/project-observatory-dashboard (README: Install, MCP)."
 fi

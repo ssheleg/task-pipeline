@@ -2,9 +2,11 @@
 /*
  * task-pipeline installer CLI.
  *
- * Installs the task-pipeline skill into ~/.claude/skills/task-pipeline and
- * the /task-pipeline slash command into ~/.claude/commands/ (same layout as
- * install.sh). Idempotent: existing installs are skipped unless --force.
+ * Installs the plugin's three skills (task-pipeline, evidence-docs,
+ * project-audit) into ~/.claude/skills/<name> and the /task-pipeline slash
+ * command into ~/.claude/commands/ (same layout as install.sh), and names the
+ * agents and hooks a plain copy cannot carry. Idempotent: existing installs are
+ * skipped unless --force.
  *
  * Zero dependencies, non-interactive. For other agents (Cursor, Codex, 70+)
  * use: npx skills add ssheleg/task-pipeline
@@ -22,8 +24,10 @@ function usage() {
   console.log(`task-pipeline installer
 
 Usage:
-  npx task-pipeline-skill [--force]   install skill + /task-pipeline command
-                                      into ~/.claude (skip existing unless --force)
+  npx task-pipeline-skill [--force]   install the three skills (task-pipeline,
+                                      evidence-docs, project-audit) + /task-pipeline
+                                      command into ~/.claude (skip existing unless
+                                      --force); agents and hooks need the plugin
   npx task-pipeline-skill --help
 
   npx task-pipeline-skill migrate-artifacts [--dry-run]
@@ -131,23 +135,29 @@ function installOne(label, src, dest, isDir, force) {
  * resolves to nothing and no explanation anywhere in what they ran.
  */
 function discloseAgents() {
-  const dir = path.join(ROOT, 'plugins', 'task-pipeline', 'agents');
-  let files = [];
-  try {
-    files = fs.readdirSync(dir).filter((f) => f.endsWith('.md'));
-  } catch (e) {
-    return;               // no agents shipped: nothing to disclose
+  const base = path.join(ROOT, 'plugins', 'task-pipeline');
+  const list = (dir, ext) => {
+    try { return fs.readdirSync(path.join(base, dir)).filter((f) => f.endsWith(ext)).sort(); }
+    catch (e) { return []; }
+  };
+  const agents = list('agents', '.md');
+  const hooks = list('hooks', '.sh').map((f) => f.replace(/\.sh$/, ''));
+  if (!agents.length && !hooks.length) return;
+  const lines = ['', 'Not installed — Claude Code plugin capabilities a plain copy cannot carry:'];
+  if (agents.length) {
+    lines.push(`  - plugins/task-pipeline/agents/ (${agents.length} role agents): every role still runs, on the`,
+               '    main thread instead of in its own context — context and speed, not doctrine.');
   }
-  if (!files.length) return;
-  console.log(
-    `\nNot installed: plugins/task-pipeline/agents/ (${files.length} file(s)).\n` +
-    '  Role agents are a Claude Code plugin capability; this path installs the skill\n' +
-    '  and the command only. Every role still runs — on the main thread instead of in\n' +
-    '  its own context, which costs context and speed, not doctrine.\n' +
-    '  For the agent-backed version, install the plugin:\n' +
-    `    claude plugin marketplace add ${REPO}\n` +
-    '    claude plugin install task-pipeline@task-pipeline'
-  );
+  if (hooks.length) {
+    lines.push(`  - hooks: ${hooks.join(', ')}. Without them the gates`,
+               '    are checked by the doctrine and the run ledger, not by the harness.');
+  }
+  lines.push('  For both, install the plugin instead (then remove these plain copies):',
+             `    claude plugin marketplace add ${REPO}`,
+             '    claude plugin install task-pipeline@task-pipeline',
+             '  Optional companion for checkpoints, handoffs and shared lessons: Project Observatory,',
+             '    https://github.com/passioncode-ai/project-observatory-dashboard (README: Install, MCP).');
+  console.log(lines.join('\n'));
 }
 
 function offerRouters() {
@@ -244,9 +254,12 @@ function main(argv) {
     return 2;
   }
 
-  const skillSrc = path.join(ROOT, 'plugins/task-pipeline/skills/task-pipeline');
+  // All three skills the plugin ships: task-pipeline names evidence-docs as its doc
+  // doctrine and runs project-audit as wave 0's sidecar (USR-007).
+  const SKILLS = ['task-pipeline', 'evidence-docs', 'project-audit'];
+  const skillSrcs = SKILLS.map((s) => path.join(ROOT, 'plugins/task-pipeline/skills', s));
   const cmdSrc = path.join(ROOT, 'plugins/task-pipeline/commands/task-pipeline.md');
-  for (const [p, what] of [[skillSrc, 'skill sources'], [cmdSrc, 'command source']]) {
+  for (const [p, what] of [...skillSrcs.map((p) => [p, 'skill sources']), [cmdSrc, 'command source']]) {
     if (!fs.existsSync(p)) {
       console.error(`error: ${what} missing at ${p} — corrupted package?`);
       return 1;
@@ -278,13 +291,13 @@ Rerun with --force if you deliberately want the plain copy instead.`);
     return 3;
   }
 
-  installOne(
-    'task-pipeline skill  ',
-    skillSrc,
-    path.join(claude, 'skills', 'task-pipeline'),
+  SKILLS.forEach((s, i) => installOne(
+    `${s} skill`.padEnd(22),
+    skillSrcs[i],
+    path.join(claude, 'skills', s),
     true,
     force
-  );
+  ));
   installOne(
     '/task-pipeline command',
     cmdSrc,

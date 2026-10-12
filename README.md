@@ -894,8 +894,8 @@ npx github:ssheleg/task-pipeline          # straight from GitHub
 npx task-pipeline-skill                   # from the npm registry
 ```
 (package is `task-pipeline-skill` — the unscoped `task-pipeline` name is taken
-on npm; installs the same skill + `/task-pipeline` command into `~/.claude`,
-idempotent, `--force` to overwrite)
+on npm; installs the same three skills + `/task-pipeline` command into `~/.claude` as
+the plain-skill path below, idempotent, `--force` to overwrite)
 
 **Moving the paperwork off the legacy directory name — optional, always:**
 ```bash
@@ -922,9 +922,21 @@ Rules. The rule is self-contained (no external links), so it works copied anywhe
 git clone https://github.com/ssheleg/task-pipeline
 cd task-pipeline && ./install.sh
 ```
-(copies the skill into `~/.claude/skills/task-pipeline` and the `/task-pipeline`
-command into `~/.claude/commands/`; idempotent — rerun skips existing installs,
-`./install.sh --force` overwrites)
+(copies the plugin's three skills — `task-pipeline`, `evidence-docs`, `project-audit` —
+into `~/.claude/skills/<name>` and the `/task-pipeline` command into
+`~/.claude/commands/`; idempotent — rerun skips existing installs, `./install.sh --force`
+overwrites. **What it cannot carry, and says so at the end of the run:** the role agents
+(`plugins/task-pipeline/agents/`, which then run on the main thread) and the hooks
+(`build-gate`, `gate-observer`, `memory-nudge`, `release-gate`, `run-lifecycle`, so the
+gates are held by the doctrine and the run ledger rather than by the harness). Both
+arrive only with the plugin above. Both installers refuse while the plugin is installed,
+because a plain copy would shadow it.)
+
+**Optional companion — Project Observatory.** Workflow checkpoints, planned handoffs
+between executors and the shared lesson store come from a separately installed public
+engine, [passioncode-ai/project-observatory-dashboard](https://github.com/passioncode-ai/project-observatory-dashboard)
+(its README: *Install*, *MCP*). Without it every one of those degrades to one ledger line
+and the run continues.
 
 ### Updating
 
