@@ -265,7 +265,7 @@ def _self_test():
             print("FAIL  %s: %s" % (name, e))
 
     def pkt(node, targets=(), full=True):
-        p = {"schema_version": "execution-packet/1", "node": node,
+        p = {"schema_version": "task-pipeline/execution-packet/1", "node": node,
              "intent": "do the thing", "inputs": [{"address": "a", "sha256": "0" * 64}],
              "decision_refs": [{"address": "d", "sha256": "1" * 64}],
              "source_scope": {"edit_targets": list(targets)},

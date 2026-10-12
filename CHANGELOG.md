@@ -1,3 +1,84 @@
+## v1.93.0 — the negative self-tests leave the workflow; temp state leaves with the run
+
+Integration wave 2 of the family's waves run (R07–R16), one release. The headline is
+the workflow: `.github/workflows/validate.yml` was **507,836 of GitHub's 512,000 bytes**,
+and past that limit a workflow does not go red — it creates no runs and `gh pr checks`
+says *no checks reported*. 448 of its 464 steps were plants and property checks, run one
+after another in one job for 90–111 minutes (runs 38127381666, 38112068258,
+38104711459).
+
+- **Every plant is a file (R08, #91).** The 433 negative self-tests and 15 property checks
+  moved verbatim into `test/negatives/NNN-<slug>.sh`: line 1 the shebang, line 2
+  `# name: <the step's name>`, then the step's `run` value exactly as GitHub parsed it —
+  checked byte for byte against the YAML on the commit that moved them. The directory is
+  the only list. `validate.yml` fell to 12,181 bytes.
+- **CI shards them.** A `negatives` job runs `python3 test/negatives.py --shard N/8` on an
+  eight-value matrix, fail-fast off; each shard is its own runner, so the fixed
+  `/tmp/<name>-copy` scratch names still never meet. `--shard I/N` takes every Nth check
+  by position, so a red shard is the same set of checks on a maintainer's machine.
+  `--list` and `-k` work as before and with `--shard`.
+- **The runner reads the directory, and refuses what it cannot read.** A file with no
+  `# name:` header, a name that is neither kind, a bad file name, a duplicate number or
+  name — each one stops the run before it starts, and `test/validate.py` fails on the
+  same list, because a check the loader drops is a guard nobody proves while every count
+  stays green. MIN_EXPECTED and MIN_PROPS count the directory, before any shard.
+- **The runner runs `bash -e`, what GitHub ran.** A `run:` block with no `shell:` is
+  `bash -e {0}`; the local runner used plain `bash -c`, and it is now the thing CI runs.
+- **Scratch copies are judged and removed inside each worker.** They were swept only
+  after the whole pool returned, so one local run held every copy at once — 433 copies of
+  the tree with its `.git`, ~6 GB, measured filling a disk with 4 GB free.
+- **Every check that read the workflow reads the directory**, through the runner's own
+  loader: the guard and property counts, the newest CHANGELOG section's counts, the
+  floors, `sed -i`, scratch-directory reuse, a scratch dir wiped by a step that does not
+  own it, the plant-landed assertion, and the anchor census (`test/anchors.py`). The
+  plant-landed check used to skip a name with `)` inside its parentheses; it reads every
+  one now. The ten plants whose payload was the workflow text were re-pointed to the
+  check files and assert on the value the re-pointed guard reads; the YAML plant breaks
+  the first plain step name that is still in the workflow.
+- **New guards, each with its plant:** a `Negative self-test` or `Property check` written
+  inline in the workflow again; a shard matrix that does not list every slice the
+  runner cuts; a check file the loader cannot read. The workflow-size guard had no
+  plant while the file sat 4 KB under the limit — it has one now.
+- **Temp state leaves with the run (R07).** `tp-b80` in `test/validate.py`, the
+  `tp-stage-ckpt` trees and 15 test files with bare `mkdtemp` clean up after
+  themselves; one machine's TMPDIR held 15,146 `tp-b80-*` trees. A new validator check
+  refuses a test file under `test/` — the check files included — that calls `mkdtemp(`,
+  `mkstemp(` or keeps a `NamedTemporaryFile(..., delete=False)` and carries no cleanup.
+  It is per file, so a file with one cleanup and two leaks passes; writing it found two
+  such leaks in `test/validate.py` itself — the graph-coverage tree and the installers'
+  fake HOME, ~1.8 MB per validator run and so per plant — and both are fixed.
+- **Budget (R09).** The description is 890 of 1024 chars (909 before; ≤ 900 was the
+  target, B-154 in the family board), and the `SKILL.md` body 4646 of the 4750-token
+  working limit (4736 before; B-120 asked for 100 spare, and 104 are). The Optional-bridge
+  paragraph is trimmed to a pointer (its full text was already in
+  `references/companion-skills.md`); the kernel-precedence rule stays
+  in `SKILL.md`, which `fix-tp-03.01` pins.
+- **Execution packets carry a namespaced id (R14):** `task-pipeline/execution-packet/1`.
+  Fabric's former packet used the bare `execution-packet/1` until it renamed its format
+  `session-handoff/1`; `packet.py`, `context_packets.py` and the schema still read the bare
+  id: 19 live packets in one consumer repository carry it (B-135), so it is refused only
+  after they are migrated.
+- **Wave mode reads declared task sources (R13).** Where a repository declares them in
+  `docs/backlog-sources.json`, the harvest reads exactly those, updates status only in
+  the owning files and never edits a generated view.
+- **The release stage reads the approval mode (R16).** `pipeline.json` `release.approval`
+  is `checks` (tag, watch, report) or `reviewers` (the direct link to the run that is
+  actually waiting); absent, it is read from the organisation or the environment, never
+  assumed.
+- **Fabric's pipeline adapter is a pinned contract (R15).** `test/fixtures/
+  fabric-pipeline-contract.json` pins `passioncode-ai/fabric` main `5bf15e5c`, and
+  `fix-pf-06.01` checks the gate types and the example config against it with no Fabric
+  checkout.
+- **Continuity through Observatory (R11).** `stage_checkpoint.py` gains `handoff` and
+  `accept`; `hooks/memory-nudge.sh` reminds once per returned gate that wrote no memory
+  event.
+- **Ledgers (R10).** The verification headers say *released*; this repository's merged
+  branches are gone.
+
+Guards: 433 → **438**; property checks 15 → **15**. The five new plants are files in
+`test/negatives/` (449–453); every guard's plant was run on this tree, and the CI wall
+clock per shard is in `docs/evidence/verification.md`.
+
 ## v1.92.0 — wave mode: the whole board, closed in its final form; the grill asks one batch
 
 The operator's standard approach, decided on 2026-10-11 and codified here: when the request

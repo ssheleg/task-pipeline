@@ -242,7 +242,13 @@ def record(ledger: pathlib.Path, answer_text: str | None, unavailable: str | Non
                 f"{f' (kept as {kept})' if kept else ''} — {_now()}")
         _append(ledger, line)
         return line
-    wid = answer.get("workflowId") or state.get("workflowId")
+    if answer.get("handoffId") and not answer.get("leaseId"):
+        # An offer: the lease stays with this run until the successor accepts.
+        line = f"event: memory — handoff offered {answer['handoffId']} — {_now()}"
+        _append(ledger, line)
+        return line
+    wid = (answer.get("workflowId") or (answer.get("checkpoint") or {}).get("workflowId")
+           or state.get("workflowId"))
     lease = answer.get("leaseId") or state.get("leaseId")
     if not wid:
         raise SystemExit("stage_checkpoint: the answer names no workflowId")
@@ -253,6 +259,49 @@ def record(ledger: pathlib.Path, answer_text: str | None, unavailable: str | Non
     line = f"event: memory — checkpoint {step} rev {rev} {wid} — {_now()}"
     _append(ledger, line)
     return line
+
+
+def handoff(ledger: pathlib.Path, provider: str, model: str | None, reason: str,
+            ttl: int) -> dict:
+    """`observatory_handoff_create` arguments for a PLANNED change of executor (R11).
+
+    Without this the only way a workflow moved was a refusal: the next executor wrote,
+    got `LeaseLost`, and read the workflow after the fact. A planned move offers it
+    instead — the lease stays with this run until the successor accepts, and the pack
+    the successor receives is assembled by Observatory from the last checkpoint.
+    """
+    state = _load_state(ledger)
+    if not state.get("workflowId"):
+        raise SystemExit("stage_checkpoint: no workflow yet — write a checkpoint first "
+                         "(emit → observatory_checkpoint_write → record)")
+    to = {"provider": provider, **({"model": model} if model else {})}
+    # Observatory digests the whole request, TTL included, so the TTL is in the key (another
+    # TTL is another offer, not an idempotency conflict). So is the ledger's length: once an
+    # offer is recorded the ledger grows, and offering again after it lapsed is a new offer —
+    # the same key would replay the first, expired answer. A retry before recording repeats.
+    try:
+        seen = len(ledger.read_text(encoding="utf-8").splitlines())
+    except OSError:
+        seen = 0
+    key = hashlib.sha256(f"{state['workflowId']}\n{json.dumps(to, sort_keys=True)}\n{reason}"
+                         f"\n{ttl}\n{seen}".encode()).hexdigest()[:32]
+    args = {"owner": OWNER, "idempotencyKey": "tp-ho-" + key, "workflowId": state["workflowId"],
+            "to": to, "reason": reason, "offerTtlSeconds": ttl}
+    if state.get("leaseId"):
+        args["leaseId"] = state["leaseId"]
+    return args
+
+
+def accept(ledger: pathlib.Path, handoff_id: str, session: str | None) -> dict:
+    """`observatory_handoff_accept` arguments for the successor, before its first write."""
+    if not handoff_id.startswith("handoff:"):
+        raise SystemExit("stage_checkpoint: a handoff id starts with 'handoff:'")
+    args = {"owner": OWNER,
+            "idempotencyKey": "tp-ac-" + hashlib.sha256(handoff_id.encode()).hexdigest()[:32],
+            "handoffId": handoff_id}
+    if session:
+        args["sessionId"] = session
+    return args
 
 
 def main(argv: list[str]) -> int:
@@ -271,10 +320,28 @@ def main(argv: list[str]) -> int:
     g.add_argument("--unavailable", help="why the tools could not be used")
     s = sub.add_parser("state", help="the workflow this run writes to; never the token")
     s.add_argument("--ledger", default=DEFAULT_LEDGER)
+    h = sub.add_parser("handoff", help="observatory_handoff_create arguments: a PLANNED executor change")
+    h.add_argument("--ledger", default=DEFAULT_LEDGER)
+    h.add_argument("--to-provider", required=True)
+    h.add_argument("--to-model")
+    h.add_argument("--reason", default="plan_route",
+                   choices=["limit", "plan_route", "operator", "crash", "restart"])
+    h.add_argument("--offer-ttl", type=int, default=3600)
+    ac = sub.add_parser("accept", help="observatory_handoff_accept arguments, before the first write")
+    ac.add_argument("--ledger", default=DEFAULT_LEDGER)
+    ac.add_argument("--handoff-id", required=True)
+    ac.add_argument("--session")
     a = p.parse_args(argv)
     ledger = pathlib.Path(a.ledger)
     if a.cmd == "emit":
         print(json.dumps(emit(ledger, a.project, a.constraint, a.credential), ensure_ascii=False))
+        return 0
+    if a.cmd == "handoff":
+        print(json.dumps(handoff(ledger, a.to_provider, a.to_model, a.reason, a.offer_ttl),
+                         ensure_ascii=False))
+        return 0
+    if a.cmd == "accept":
+        print(json.dumps(accept(ledger, a.handoff_id, a.session), ensure_ascii=False))
         return 0
     if a.cmd == "state":
         st = _load_state(ledger)

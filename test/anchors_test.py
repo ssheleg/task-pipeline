@@ -8,9 +8,9 @@ produced four false positives that only a fixture could show: a regex quantifier
 read as a year, a `→` escape read as one, a payload built out of local strings,
 and a `validate.py | grep 'message'` read as a needle instead of as assertion 3.
 
-Each case below is a whole miniature workflow. They are fixtures rather than prose
-because the module reads YAML step bodies, and a rule stated in a comment is a rule
-nobody runs — `references/probing.md` in this bundle, and three of `project-audit`'s
+Each case below is a whole miniature check directory — one `test/negatives/`-shaped
+file, the corpus the module reads since v1.93.0 (it read YAML step bodies before). They
+are fixtures rather than prose because a rule stated in a comment is a rule nobody runs — `references/probing.md` in this bundle, and three of `project-audit`'s
 own traps, were written the same way for the same reason.
 """
 from __future__ import annotations
@@ -32,15 +32,22 @@ EXTRA_CHECKS = 3
 
 
 def case(name: str, body: str, must_fail: bool, step: str = "a plant") -> None:
-    """`must_fail` — does the census have to report this workflow?"""
-    indented = "\n".join("          " + l if l.strip() else "" for l in body.splitlines())
-    CASES.append((name, f"""jobs:
-  validate:
-    steps:
-      - name: Negative self-test ({step})
-        run: |
-{indented}
-""", must_fail))
+    """`must_fail` — does the census have to report this check?"""
+    CASES.append((name, check_file(f"Negative self-test ({step})", body), must_fail))
+
+
+def check_file(name: str, body: str) -> str:
+    """One file in the shape `test/negatives.py` loads: shebang, name, script."""
+    return "#!/usr/bin/env bash\n# name: " + name + "\n" + body.rstrip("\n") + "\n"
+
+
+def census_dir(text: str, fn: str = "001-fixture.sh"):
+    """Write one check into a fresh directory and hand back (findings, census). The
+    directory goes with the call (R07: temp state leaves with the run)."""
+    with tempfile.TemporaryDirectory(prefix="tp-anchors-") as d:
+        with open(os.path.join(d, fn), "w", encoding="utf-8") as fh:
+            fh.write(text)
+        return anchors.findings(d), anchors.census(d)
 
 
 # -- the class the row is about ------------------------------------------------
@@ -480,14 +487,7 @@ fi
 def _run() -> int:
     bad = 0
     for name, doc, must_fail in CASES:
-        with tempfile.NamedTemporaryFile("w", suffix=".yml", delete=False,
-                                         encoding="utf-8") as fh:
-            fh.write(doc)
-            path = fh.name
-        try:
-            found = anchors.findings(path)
-        finally:
-            os.unlink(path)
+        found, _census = census_dir(doc)
         ok = bool(found) == must_fail
         print(f"  {'PASS' if ok else 'FAIL':<6}{name}")
         if not ok:
@@ -500,15 +500,8 @@ def _run() -> int:
     # The empty corpus, which passes every rule above by having nothing to break.
     # `negatives.py` learned this at the suite level — *all 0 guards provably reject*
     # is a pass over an empty set — and a census with no plants must not read as one.
-    with tempfile.NamedTemporaryFile("w", suffix=".yml", delete=False,
-                                     encoding="utf-8") as fh:
-        fh.write("jobs:\n  validate:\n    steps:\n      - name: Lint\n        run: |\n"
-                 "          echo hi\n")
-        path = fh.name
-    try:
-        empty = anchors.census(path)
-    finally:
-        os.unlink(path)
+    # A directory whose only check is a property check holds no negative self-test.
+    _f, empty = census_dir(check_file("Property check (lint)", "echo hi\n"))
     ok = empty == []
     print(f"  {'PASS' if ok else 'FAIL':<6}an empty corpus yields an empty census, "
           "which the caller must refuse rather than read as clean")

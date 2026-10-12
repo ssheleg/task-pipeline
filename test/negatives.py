@@ -1,17 +1,28 @@
 #!/usr/bin/env python3
-"""Run the CI negative self-tests locally. Exit 0 = every guard provably fails.
+"""Run the negative self-tests. Exit 0 = every guard provably fails.
 
 `test/validate.py` proves the repo is well-formed. This proves the *validator* is
 not a decoration: each check is fed a planted defect and must reject it. A green
 result from a check nobody has watched fail is worth nothing — the same law the
 skill's own `references/audit.md` applies to every gate in a run.
 
-The tests live in `.github/workflows/validate.yml` and are read from there, never
-duplicated here: a second copy of a corruption is a second thing to drift.
+The tests live in `test/negatives/`, one file per check, and the directory is the
+whole source of truth: no manifest, no second list. Each file is
 
-    python3 test/negatives.py            # run them all
-    python3 test/negatives.py --list     # just show what would run
-    python3 test/negatives.py -k ladder  # only tests whose name matches
+    #!/usr/bin/env bash
+    # name: Negative self-test (<what the planted defect is>)
+    <the script, run from the repository root>
+
+and a file whose name says `Property check` asserts that something IS printed
+rather than planting a defect. They lived inline in `.github/workflows/validate.yml`
+until v1.93.0, which put the workflow at 507,836 of GitHub's 512,000 bytes — past
+the limit a workflow goes SILENT, it is not marked red — and ran all of them in one
+job for 90–111 minutes. CI now runs this file once per shard of a matrix.
+
+    python3 test/negatives.py              # run them all
+    python3 test/negatives.py --list       # just show what would run
+    python3 test/negatives.py -k ladder    # only checks whose name matches
+    python3 test/negatives.py --shard 3/8  # the third of eight deterministic slices
 
 Zero dependencies, same as the validator.
 """
@@ -20,7 +31,10 @@ Zero dependencies, same as the validator.
 #   constants actually differ between the copies and refuses a difference this line
 #   does not name: on 2026-08-24 an undeclared success-vocabulary constant made a
 #   ported runner report twenty healthy guards as broken, and nothing could see it.
-# diverges: MIN_EXPECTED, MIN_PROPS, SUCCESS_MARKERS
+#   Since v1.93.0 this copy reads `test/negatives/` (NEG_DIR, NAME_HEADER, FILE_RE)
+#   where the others read the workflow (WORKFLOW); measured against the sibling copies
+#   on 2026-10-12, which also differ from each other on ENV_ERROR_SIGNS and STAGES.
+# diverges: ENV_ERROR_SIGNS, FILE_RE, MIN_EXPECTED, MIN_PROPS, NAME_HEADER, NEG_DIR, STAGES, SUCCESS_MARKERS, WORKFLOW
 import concurrent.futures
 import tempfile
 import os
@@ -30,7 +44,13 @@ import subprocess
 import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-WORKFLOW = os.path.join(ROOT, ".github/workflows/validate.yml")
+# One file per check. The directory is the source of truth; nothing lists it.
+NEG_DIR = os.path.join(ROOT, "test", "negatives")
+# Line 2 of every file. Line 1 is the `#!/usr/bin/env bash` shebang, so a single
+# file can also be run by hand from the repository root.
+NAME_HEADER = "# name: "
+# `NNN-slug.sh`: the number orders the files and the slug says what they plant.
+FILE_RE = r"^\d{3}-[a-z0-9][a-z0-9-]*\.sh$"
 MARKER = "Negative self-test"
 PROP_MARKER = "Property check"
 MIN_PROPS = 15
@@ -41,38 +61,86 @@ MIN_PROPS = 15
 # which is the floor doing half its job: it would have caught a total collapse and
 # not the loss of a third of the suite. Set it to the real count, and treat a
 # mismatch as a finding rather than as noise to be lowered away.
-MIN_EXPECTED = 433
+MIN_EXPECTED = 438
 
 
-def parse_steps(path):
-    """(name, script) per `- name: … / run: |` step. Deliberately not PyYAML —
-    the validator ships dependency-free and so does this."""
-    steps, name, body, indent = [], None, None, None
-    for line in open(path, encoding="utf-8").read().splitlines():
-        m = re.match(r"^\s*- name:\s*(.+?)\s*$", line)
-        if m:
-            if name is not None and body is not None:
-                steps.append((name, "\n".join(body)))
-            name, body, indent = m.group(1), None, None
+def scan(path=NEG_DIR):
+    """([(file, name, script)], [problem]) for the check directory, in file order.
+
+    PURE over the directory: nothing runs. A file that does not have the shape is a
+    PROBLEM, never a silent skip — a check the loader quietly drops is a guard that
+    stopped being proven while every count still reads healthy, which is the failure
+    MIN_EXPECTED exists to refuse one level up. `test/validate.py` fails on every
+    problem; the runner refuses to start while one stands.
+    """
+    checks, problems, numbers, names = [], [], {}, {}
+    if not os.path.isdir(path):
+        return checks, [f"{path} is not a directory"]
+    for fn in sorted(os.listdir(path)):
+        full = os.path.join(path, fn)
+        if fn.startswith(".") or os.path.isdir(full):
+            problems.append(f"{fn}: not a check file — the directory holds checks only")
             continue
-        if name is not None and body is None and re.match(r"^\s*run:\s*\|\s*$", line):
-            body = []
+        if not re.match(FILE_RE, fn):
+            problems.append(f"{fn}: the name is not `NNN-slug.sh`, so it would never be "
+                            "read as a check")
             continue
-        if body is not None:
-            if line.strip() == "":
-                body.append("")
-                continue
-            cur = len(line) - len(line.lstrip())
-            if indent is None:
-                indent = cur
-            if cur < indent:                      # dedent ends the block
-                steps.append((name, "\n".join(body)))
-                name, body, indent = None, None, None
-                continue
-            body.append(line[indent:])
-    if name is not None and body is not None:
-        steps.append((name, "\n".join(body)))
-    return steps
+        try:
+            text = open(full, encoding="utf-8").read()
+        except (OSError, UnicodeDecodeError) as exc:
+            problems.append(f"{fn}: unreadable ({type(exc).__name__})")
+            continue
+        lines = text.split("\n")
+        if len(lines) < 3 or lines[0] != "#!/usr/bin/env bash" \
+                or not lines[1].startswith(NAME_HEADER):
+            problems.append(f"{fn}: line 1 must be `#!/usr/bin/env bash` and line 2 "
+                            f"`{NAME_HEADER}<step name>`")
+            continue
+        name = lines[1][len(NAME_HEADER):].strip()
+        if not (name.startswith(MARKER + " (") or name.startswith(PROP_MARKER + " (")) \
+                or not name.endswith(")"):
+            problems.append(f"{fn}: its name {name!r} is neither `{MARKER} (…)` nor "
+                            f"`{PROP_MARKER} (…)`, so no count would include it")
+            continue
+        script = "\n".join(lines[2:])
+        if not script.strip():
+            problems.append(f"{fn}: no script under the header")
+            continue
+        num = fn[:3]
+        if num in numbers:
+            problems.append(f"{fn}: number {num} is also {numbers[num]}")
+        numbers.setdefault(num, fn)
+        if name in names:
+            problems.append(f"{fn}: the name {name!r} is also {names[name]} — the runner "
+                            "and `-k` select by name, so two would be one")
+        names.setdefault(name, fn)
+        checks.append((fn, name, script))
+    return checks, problems
+
+
+def load_checks(path=NEG_DIR):
+    """(name, script) per check, in file order — what every reader of the corpus
+    consumes: this runner, `test/anchors.py` and `test/validate.py`."""
+    return [(n, s) for _f, n, s in scan(path)[0]]
+
+
+def parse_shard(spec):
+    """`I/N` -> (I, N), 1 <= I <= N. Anything else raises ValueError, never a guess:
+    a shard spec read wrongly is a slice of the suite that silently never runs."""
+    m = re.match(r"^\s*(\d+)\s*/\s*(\d+)\s*$", spec or "")
+    if not m:
+        raise ValueError(f"--shard wants I/N, got {spec!r}")
+    i, n = int(m.group(1)), int(m.group(2))
+    if n < 1 or not 1 <= i <= n:
+        raise ValueError(f"--shard {spec}: I must be in 1..N")
+    return i, n
+
+
+def shard(items, i, n):
+    """The I-th of N slices, by position modulo N. PURE and deterministic: every item
+    lands in exactly one slice, and the same directory always splits the same way, so
+    a red shard on CI is the same set of checks on a maintainer's machine."""
+    return [x for k, x in enumerate(items) if k % n == i - 1]
 
 
 def verdict(returncode, stdout, noop):
@@ -136,15 +204,29 @@ def main(argv):
     if "-k" in args:
         only = args[args.index("-k") + 1].lower()
     listing = "--list" in args
+    _shard = None
+    if "--shard" in args:
+        try:
+            _shard = parse_shard((args[args.index("--shard") + 1:] or [""])[0])
+        except ValueError as exc:
+            print(f"FAIL: {exc}")
+            return 2
 
-    if not os.path.isfile(WORKFLOW):
-        print(f"FAIL: no workflow at {WORKFLOW}")
+    _all, _problems = scan(NEG_DIR)
+    if _problems:
+        print(f"FAIL: {len(_problems)} file(s) in {os.path.relpath(NEG_DIR, ROOT)}/ are not "
+              "checks this runner can read — refusing to run a suite that would quietly "
+              "be smaller than the directory:")
+        for _p in _problems:
+            print("  * " + _p)
         return 2
+    # Parsed once; both filters read the same list. The floors below are about the
+    # WHOLE directory: a shard is a slice of a corpus that must first be complete.
+    _STEPS = [(n, s) for _f, n, s in _all]
+    _FILE = {n: f for f, n, _s in _all}
 
-    _STEPS = parse_steps(WORKFLOW)          # parsed once; both filters read the same list
-
-    # Every step copies the repo to a FIXED `/tmp` name. In CI that is correct — one
-    # runner per job, no neighbours. On a developer machine two suite runs share those
+    # Every step copies the repo to a FIXED `/tmp` name. In CI that is correct — each
+    # shard of the `negatives` job is its own runner, no neighbours. On a developer machine two suite runs share those
     # paths and overwrite each other mid-copy: four runs over an unchanged tree once
     # returned four different answers (1, 2, 3 and 4 guards "not firing"), and the cause
     # was never the tree. Board row B-075.
@@ -175,11 +257,15 @@ def main(argv):
 
     tests = [(n, s) for n, s in _STEPS if MARKER in n]
     if len(tests) < MIN_EXPECTED:
-        print(f"FAIL: found only {len(tests)} negative self-tests in the workflow "
-              f"(expected at least {MIN_EXPECTED}). The parser or the workflow "
-              f"format changed — a run that quietly tests nothing is the failure "
-              f"this check exists to prevent.")
+        print(f"FAIL: found only {len(tests)} negative self-tests in "
+              f"{os.path.relpath(NEG_DIR, ROOT)}/ (expected at least {MIN_EXPECTED}). "
+              f"Files went missing or the header format changed — a run that quietly "
+              f"tests nothing is the failure this check exists to prevent.")
         return 2
+    _n_props_all = sum(1 for n, _s in _STEPS if PROP_MARKER in n)
+    if _shard:
+        _STEPS = shard(_STEPS, *_shard)
+        tests = [(n, s) for n, s in _STEPS if MARKER in n]
     if only:
         tests = [(n, s) for n, s in tests if only in n.lower()]
         # The bail moved below the property filter: `-k property` matched no negative
@@ -199,7 +285,10 @@ def main(argv):
         for n, _ in [(n, s) for n, s in _STEPS if PROP_MARKER in n
                      and (not only or only.lower() in n.lower())]:
             print("  [property]", _plabel(n))
-        print(f"\n{len(tests)} negative self-tests")
+        _np = len([1 for n, _ in _STEPS if PROP_MARKER in n
+                   and (not only or only.lower() in n.lower())])
+        print(f"\n{len(tests)} negative self-tests + {_np} property checks"
+              + (f" (shard {_shard[0]}/{_shard[1]})" if _shard else ""))
         return 0
 
     # A leftover copy from an interrupted run would make the next one lie.
@@ -284,11 +373,12 @@ def main(argv):
     props = [(n, s) for n, s in _STEPS if PROP_MARKER in n]
     # Same floor, same reason as MIN_EXPECTED above, one level up: rename the sole
     # property step and this list empties, the runner skips it in silence and still
-    # exits 0 — which is the failure property checks were added to close.
-    if len(props) < MIN_PROPS:
-        print(f"FAIL: found only {len(props)} property checks in the workflow "
-              f"(expected at least {MIN_PROPS}). A category that quietly empties is "
-              f"a category nobody notices is gone.")
+    # exits 0 — which is the failure property checks were added to close. Counted on
+    # the whole directory, before the shard slice.
+    if _n_props_all < MIN_PROPS:
+        print(f"FAIL: found only {_n_props_all} property checks in "
+              f"{os.path.relpath(NEG_DIR, ROOT)}/ (expected at least {MIN_PROPS}). A "
+              f"category that quietly empties is a category nobody notices is gone.")
         return 2
     if only:
         props = [(n, s) for n, s in props if only.lower() in n.lower()]
@@ -301,18 +391,34 @@ def main(argv):
 
     failed, broken, prop_failed, dormant, prop_dormant = [], [], [], [], []
     print(f"running {len(tests)} negative self-tests"
-          + (f" + {len(props)} property checks\n" if props else "\n"))
+          + (f" + {len(props)} property checks" if props else "")
+          + (f" — shard {_shard[0]}/{_shard[1]} of {len(_all)} checks" if _shard else "")
+          + "\n")
+
+    # `bash -e`, because that is what GitHub ran: a `run:` block with no `shell:` is
+    # `bash -e {0}`. The runner used plain `bash -c` while CI was the authority, and
+    # since v1.93.0 CI runs THIS file — a plant whose construction errors halfway must
+    # still stop where CI's step stopped, not run on into a validator over a tree it
+    # never planted.
+    def _bash(script):
+        return subprocess.run(["bash", "-e", "-c", script], cwd=_base,
+                              capture_output=True, text=True)
+
     def _run_one(name_script):
         name, script = name_script
         cdir = copy_dir_of(script)
         sweep([cdir])
-        r = subprocess.run(["bash", "-c", script], cwd=_base,
-                           capture_output=True, text=True)
-        return name, script, cdir, r
+        r = _bash(script)
+        # Judged and swept HERE, inside the worker. Sweeping after the whole pool
+        # returned kept every scratch copy alive at once — 433 copies of the tree with
+        # its `.git`, ~6 GB, measured on 2026-10-12 filling a disk with 4 GB free.
+        noop = bool(cdir and os.path.isdir(cdir) and not differs_from_repo(cdir))
+        sweep([cdir])
+        return name, script, cdir, (r, noop)
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=_WORKERS) as _ex:
         _results = list(_ex.map(_run_one, tests))
-    for name, script, cdir, r in _results:
+    for name, script, cdir, (r, noop) in _results:
         # A probe that cannot run says SKIP and exits 0. Counting only "OK:" turned
         # res8's honest degradation into a failure on any machine without PyYAML —
         # the regression this release claimed to have closed, still open one layer up.
@@ -324,18 +430,16 @@ def main(argv):
         # "the guard is broken". Skips get their own status so they stay visible — and
         # since B-113 their own BUCKET, because `bucket = None` meant the aggregate
         # counted a dormant plant inside *all N guards provably reject*.
-        noop = bool(cdir and os.path.isdir(cdir) and not differs_from_repo(cdir))
         status = verdict(r.returncode, r.stdout, noop)
         bucket = {"BROKEN": broken, "SKIP": dormant, "FAIL": failed}.get(status)
         print(f"  {status:<7}{label(name)}")
         if bucket is not None:
-            bucket.append((label(name), r.stdout[-500:], r.stderr[-500:]))
-        sweep([cdir])
+            bucket.append((label(name) + f" [{_FILE[name]}]", r.stdout[-500:], r.stderr[-500:]))
 
     for name, script in props:
         cdir = copy_dir_of(script)
         sweep([cdir])
-        r = subprocess.run(["bash", "-c", script], cwd=_base, capture_output=True, text=True)
+        r = _bash(script)
         # B-113, the half the first pass left: a property check that printed `SKIP:`
         # counted as one that "printed what it asserts". Same sentence, same defect,
         # one category over — found by the independent reader.
@@ -344,13 +448,14 @@ def main(argv):
         if _st == "SKIP":
             prop_dormant.append((_plabel(name), r.stdout[-500:], r.stderr[-500:]))
         elif _st != "PASS":
-            prop_failed.append((_plabel(name), r.stdout[-500:], r.stderr[-500:]))
+            prop_failed.append((_plabel(name) + f" [{_FILE[name]}]", r.stdout[-500:],
+                                r.stderr[-500:]))
         sweep([cdir])
 
     print()
     for title, rows, why in (
         ("BROKEN — the planted defect changed nothing, so the test proves nothing", broken,
-         "fix the corruption in .github/workflows/validate.yml"),
+         "fix the corruption in its file under test/negatives/"),
         ("FAIL — the validator accepted a planted defect", failed,
          "the guard does not actually fire"),
         ("FAIL — a property the run must print was not printed", prop_failed,
@@ -397,7 +502,7 @@ def main(argv):
                  "every check present declined to run")
               + ". A pass over an empty set is not a result")
         return 2
-    print("PASS: " + _line)
+    print("PASS: " + _line + (f" — shard {_shard[0]}/{_shard[1]}" if _shard else ""))
     return 0
 
 

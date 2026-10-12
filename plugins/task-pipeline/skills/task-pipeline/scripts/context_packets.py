@@ -191,7 +191,13 @@ def verify_parents(report, plan):
     return out
 
 
-LEAF_SCHEMA = "execution-packet/1"
+LEAF_SCHEMA = "task-pipeline/execution-packet/1"
+# Fabric's content-addressed packet was also `execution-packet/1` until Fabric renamed its
+# format `session-handoff/1` (fabric-agent-contract R-01). The namespace keeps the two from
+# being read as each other. The bare id is still READ, until no live packet carries it:
+# 19 packets in one consumer repository did on 2026-10-12 (backlog B-135); refusing it
+# before they are migrated would break them.
+LEGACY_LEAF_SCHEMAS = ("execution-packet/1",)
 COLD_READER_QUESTIONS = ("goal", "inputs", "decisions", "scope", "outputs",
                          "acceptance", "guards", "resume")
 SHA_RE_STR = r"^[0-9a-f]{64}$"
@@ -356,7 +362,7 @@ def leaf_readiness(leaf):
     problems = []
     if not isinstance(leaf, dict):
         return ["leaf: not an object"]
-    if leaf.get("schema_version") != LEAF_SCHEMA:
+    if leaf.get("schema_version") not in (LEAF_SCHEMA,) + LEGACY_LEAF_SCHEMAS:
         problems.append("schema_version: missing or unknown — an unversioned "
                         "packet fails readiness")
     answers = {

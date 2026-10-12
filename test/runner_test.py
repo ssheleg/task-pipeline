@@ -63,6 +63,35 @@ case("one plant left standing still makes a claim, about one",
      "3 DORMANT, named above — not counted as passing")
 
 
+# --- the shard split (v1.93.0) -------------------------------------------------------
+# CI runs one slice per matrix value. Two properties make that safe, and both are
+# arithmetic a healthy run never exercises: every check lands in exactly one slice, and
+# a spec read wrongly is refused rather than guessed. A slice nobody runs is a set of
+# guards proven nowhere under a job that reports green.
+_ITEMS = list(range(451))
+_SLICES = [negatives.shard(_ITEMS, _i, 8) for _i in range(1, 9)]
+case("eight slices cover every check exactly once",
+     sorted(x for s in _SLICES for x in s), _ITEMS)
+case("slices are balanced to within one check",
+     max(map(len, _SLICES)) - min(map(len, _SLICES)) <= 1, True)
+case("the split is a function of position, so the same tree splits the same way",
+     negatives.shard(_ITEMS, 3, 8) == negatives.shard(list(_ITEMS), 3, 8), True)
+case("one slice of one is the whole suite", negatives.shard(_ITEMS, 1, 1), _ITEMS)
+case("`3/8` reads as the third of eight", negatives.parse_shard("3/8"), (3, 8))
+
+
+def _refused(spec):
+    try:
+        negatives.parse_shard(spec)
+    except ValueError:
+        return True
+    return False
+
+
+for _spec in ("0/8", "9/8", "8", "a/b", "", "3/0", "-1/8"):
+    case(f"`{_spec}` is refused, never guessed", _refused(_spec), True)
+
+
 def _run() -> int:
     bad = 0
     for name, got, want in CASES:
@@ -73,7 +102,7 @@ def _run() -> int:
             print(f"        wanted {want!r}\n        got    {got!r}")
     # The floors the runner refuses to go below are claims about the corpus, and a
     # ratchet nobody reads is a ratchet that drifts. Compare them against the corpus.
-    steps = negatives.parse_steps(negatives.WORKFLOW)
+    steps = negatives.load_checks(negatives.NEG_DIR)
     tests = [1 for n, _s in steps if negatives.MARKER in n]
     props = [1 for n, _s in steps if negatives.PROP_MARKER in n]
     for label, floor, real in (("MIN_EXPECTED", negatives.MIN_EXPECTED, len(tests)),

@@ -1,6 +1,24 @@
 # Verification — task-pipeline
 
-## Shipped state — v1.92.0 (2026-10-11; candidate, release pending)
+## Shipped state — v1.93.0 (2026-10-12; candidate, release pending)
+
+Integration wave 2: the negative self-tests leave the workflow and run in eight shards;
+temp state leaves with the run; budget, packet id, task sources, approval mode, the
+Fabric contract fixture and Observatory continuity.
+
+| REQ | What ships | How it was confirmed | Confirmed |
+|---|---|---|---|
+| R08-move | the 433 negative self-tests and 15 property checks as `test/negatives/NNN-<slug>.sh`, the workflow's `run` values byte for byte; `validate.yml` 507,836 → 12,181 bytes | a script compared every file with `#!/usr/bin/env bash` + `# name:` + the YAML-parsed `run` of the step it came from on `ffa42ab` — 448 of 448 equal; `wc -c` before and after; the move printed `moved 448 steps (433 negative, 15 property)`, the old runner's `--list` 433 and the new one's 438 + 15 with the five new plants | **never** |
+| R08-shard | the `negatives` job: `--shard N/8` on an eight-value matrix, fail-fast off | `test/runner_test.py` (eight slices cover every check once, balanced, deterministic; seven malformed specs refused); the eight `--list --shard i/8` counts sum to 438 + 15; CI per-shard wall clock — see the R08-ci row | **never** |
+| R08-ci | per-shard wall clock on GitHub against the single job before | PR #109, run `38242485458` on `933cf63`, conclusion success: shards 1–8 took 6m45s · 4m39s · 5m36s · 3m29s · 3m55s · 6m27s · 4m54s · 6m00s, each log ending `PASS: all N guards provably reject their planted defect` (53/56/57/55/54/56/52/55 = 438, 15 property checks, none DORMANT); the `validate` job 1m48s; the whole run 6m50s. Before, the `validate` job carrying every plant took 90m34s, 111m04s and 111m11s (runs `38127381666`, `38112068258`, `38104711459`) | **never** |
+| R08-repoint | every validator check that read negatives from the workflow reads `test/negatives/` through the runner's loader; ten plants re-pointed; `test/anchors.py` and `test/anchors_test.py` read check directories | `npm test`; the full local suite in eight shards, every guard rejecting its plant (counts in the Gate row) | **never** |
+| R08-guards | refusals for an inline check in the workflow, a shard matrix missing a slice, an unreadable check file; a plant for the workflow-size guard | plants 449–452, each run in the full local suite | **never** |
+| R07 | test temp trees removed with the run; a validator check refusing a test file that makes temp state with no cleanup; the two leaks it surfaced in `test/validate.py` fixed | plant 453; two validator runs left no `graph.json` tree and no fake HOME in TMPDIR (`find -newer`), where the baseline suite had left 933 | **never** |
+| R09 | description 890/1024 chars, body 4646/4750 tokens | `audit_skill.py --house` (make-skill `60ca8e2`, tiktoken cl100k): `DESC_HEADROOM 890/970`, `BODY_HEADROOM 4646/4750`, 0 GAP | **never** |
+| R11 R13 R14 R15 R16 | Observatory handoff/accept and the memory nudge; declared task sources; the namespaced packet id; the Fabric contract fixture; the release approval mode | `npm test` runs `stage_checkpoint_test.py`, `memory_nudge_test.py`, `packet_schema_test.py` and `fix-pf-06.01`; R13/R16 are doctrine, read after the edit | **never** |
+| Gate | the full suite | `npm test` exited 0 on `941bed8`; `python3 test/negatives.py --shard i/8` for i = 1…8 run in sequence on `941bed8`, every shard `PASS`: 53 + 56 + 57 + 55 + 54 + 56 + 52 + 55 = 438 plants rejected, 15 property checks printed, none DORMANT; 127–162 s a shard, 1,158 s in all (the same suite before the move, one process: 433 + 15, all PASS, 25 min 22 s, under a load average of 45–84). Each of the fifteen touched or new plants was also run by hand and named the guard it targets | **never** |
+
+## Shipped state — v1.92.0 (2026-10-11; released, npm 1.92.0)
 
 Wave mode, and the grill asks one batch instead of one question per turn.
 
@@ -11,7 +29,7 @@ Wave mode, and the grill asks one batch instead of one question per turn.
 | FR-wave-graph | `nodes[].wave`, the order check, `next --wave N`, the `wave` verb | `test/graph_test.py` 166 cases; three plants in `test/plant_wave.py`, each watched failing the suite | **observed** |
 | Gate | the full suite | `npm run test:all` locally exited 0 on 2026-10-11 (433 guards, 15 property checks); a first run died of a full disk and is not counted; the PR `validate` job | **observed** locally; CI on the PR |
 
-## Shipped state — v1.91.2 (2026-10-11; candidate — v1.91.1's payload, which its release check refused for a missing no-stamp declaration)
+## Shipped state — v1.91.2 (2026-10-11; released, npm 1.91.2 — v1.91.1's payload, which its release check refused for a missing no-stamp declaration)
 
 The gates read the current run only; a broken python3 stops only releases.
 

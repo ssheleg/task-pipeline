@@ -318,6 +318,12 @@ right costs nothing extra and pays twice.
 
 ## Part 3 — workflow memory at the stage boundary
 
+Which of the five handoff mechanisms carries what — the Git record, Observatory's lease
+and checkpoint, a host's launch context, the inbound queue — and the order a successor
+reads them in, has one home:
+[sshlg-skills `docs/working-rules/handoff-layers.md`](https://github.com/ssheleg/sshlg-skills/blob/main/docs/working-rules/handoff-layers.md).
+This part is the checkpoint and lease half of it.
+
 The ledger survives a compaction. It does not survive a quota that ran out on another
 account, or a run picked up by a different agent on another machine. When the host has
 Project Observatory's memory tools, **every gate that returns also writes a workflow
@@ -328,6 +334,8 @@ checkpoint**, and the next executor continues from the last finished stage.
 - **The constraints.** Give the brief's restrictive rules once, as `--constraint`. They are carried to every later boundary, and a successor reads them first.
 - **Keys.** Pass keys by name, as `--credential PROJECT/ENV/NAME`, never as a value.
 - **Without the tools.** `stage_checkpoint.py record --unavailable "<why>"` appends one `event: memory — unavailable` line, and the run continues exactly as before. Missing memory is a state the ledger names, not a failure.
+- **A planned change of executor** — a quota running out, a route moving the work to another model or account. `stage_checkpoint.py handoff --to-provider <p> [--to-model <m>] --reason limit|plan_route|operator` prints `observatory_handoff_create`'s arguments; `record --answer -` keeps the offer as one ledger line, and the lease stays with this run until the successor accepts. The successor runs `stage_checkpoint.py accept --handoff-id <id>` → `observatory_handoff_accept` → `record --answer -` **before its first write**, and obeys the constraints the answer carries first. `LeaseLost` is then left for the race nobody planned.
+- **The reminder.** `hooks/memory-nudge.sh` (PostToolUse) reads the ledger after each tool call and, once per `stage:` line with no `event: memory` line after it, puts one sentence in front of the model naming the two commands above. It decides nothing and blocks nothing; adoption measured before it was one write in 293 sessions.
 - **A refusal.** `LeaseLost` means another executor holds the workflow now. The script drops the token. Read the workflow (`observatory_checkpoint_latest` with `stage_checkpoint.py state`'s id) before doing anything else. A stale writer stops after one refusal.
 - **The lease token.** It lives in `.task-pipeline/memory.json` (mode 0600, git-ignored) and never in the ledger, a reply or a commit.
 - **What this is not.** Not a second ledger and not the narrative. The checkpoint is the work's state for the next executor. The wiki and the ledger keep everything else.

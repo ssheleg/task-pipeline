@@ -127,7 +127,62 @@ def t_pins_validated():
     assert out2["r"]["ok"] is False and any("graph_version" in x for x in out2["r"]["reasons"])
 
 
+FIXTURE = os.path.join(ROOT, "test", "fixtures", "fabric-pipeline-contract.json")
+EXAMPLE = os.path.join(ROOT, "plugins", "task-pipeline", "skills", "task-pipeline",
+                       "pipeline.example.json")
+
+
+def _contract():
+    return json.load(open(FIXTURE, encoding="utf-8"))
+
+
+def t_gate_types_match_the_contract():
+    """R15 (sshlg-skills waves): runs with NO Fabric checkout, so the seam is never NOT_RUN."""
+    d = json.load(open(SCHEMA, encoding="utf-8"))
+    ours = sorted(d["definitions"]["stage"]["properties"]["gate"]["properties"]["type"]["enum"])
+    assert ours == sorted(_contract()["supported_gates"]), \
+        f"gate types {ours} != Fabric adapter's {_contract()['supported_gates']}"
+
+
+def t_example_config_imports_under_the_contract():
+    c = _contract()
+    cfg = json.load(open(EXAMPLE, encoding="utf-8"))
+    bad = [n for n in cfg.get("must_understand", []) if n not in c["understood_must_understand"]]
+    assert not bad, f"pipeline.example.json names must_understand {bad} Fabric would refuse"
+    for i, st in enumerate(cfg.get("stages", [])):
+        assert st.get("state"), f"stages[{i}].state missing"
+        assert isinstance(st.get("skills"), list) and st["skills"], f"stages[{i}].skills empty"
+        g = st.get("gate") or {}
+        assert g.get("type") in c["supported_gates"], f"stages[{i}].gate.type {g.get('type')!r}"
+        assert g.get("check"), f"stages[{i}].gate.check missing"
+
+
+def t_contract_matches_the_adapter_source():
+    """Where a Fabric checkout exists, the fixture is checked against the adapter itself."""
+    if not os.path.isfile(ADAPTER):
+        not_run.append("fabric checkout absent — fixture-vs-adapter drift check NOT_RUN "
+                       "(the contract cases above still ran)")
+        return
+    import re
+    src = open(ADAPTER, encoding="utf-8").read()
+    gates = re.search(r"SUPPORTED_GATES = new Set\(\[([^\]]*)\]", src)
+    und = re.search(r"UNDERSTOOD = new Set\(\[([^\]]*)\]", src)
+    assert gates and und, "the adapter no longer declares SUPPORTED_GATES / UNDERSTOOD as read"
+    names = lambda m: sorted(re.findall(r"'([^']+)'", m.group(1)))
+    c = _contract()
+    assert names(gates) == sorted(c["supported_gates"]), \
+        f"adapter gates {names(gates)} != fixture {c['supported_gates']} — re-pin the fixture"
+    assert names(und) == sorted(c["understood_must_understand"]), \
+        f"adapter understood {names(und)} != fixture — re-pin the fixture"
+
+
 def main():
+    case("gate types match the Fabric contract (no checkout needed)",
+         t_gate_types_match_the_contract)
+    case("the example config imports under the Fabric contract",
+         t_example_config_imports_under_the_contract)
+    case("the contract fixture matches the adapter source",
+         t_contract_matches_the_adapter_source)
     case("the schema declares must_understand and the gate refusal rule",
          t_schema_declares_must_understand)
     case("a supported config round-trips with constraints preserved",

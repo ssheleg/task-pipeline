@@ -24,7 +24,7 @@ Human-facing entry points: [`README.md`](README.md) (what it is),
 
 | Job | Command |
 |---|---|
-| Test | `npm test` (= `python3 test/validate.py && python3 test/graph_test.py && python3 test/project_audit_test.py && python3 test/packet_schema_test.py && python3 test/browser_claims_test.py && python3 test/visual_gate_test.py && python3 test/stage_checkpoint_test.py && npm run test:audit-regressions`) — the validator must print `PASS: task-pipeline structure valid` and the graph suite `PASS: graph.py — N cases`; `project_audit_test.py` exercises the shipped audit collector against planted defects. The gloss said only `validate.py` until 2026-08-20, dropping 129 cases from what the command was documented to run; `test/validate.py` now compares every documented `npm` equation against `package.json` |
+| Test | `npm test` (= `python3 test/validate.py && python3 test/graph_test.py && python3 test/project_audit_test.py && python3 test/packet_schema_test.py && python3 test/browser_claims_test.py && python3 test/visual_gate_test.py && python3 test/stage_checkpoint_test.py && python3 test/memory_nudge_test.py && npm run test:audit-regressions`) — the validator must print `PASS: task-pipeline structure valid` and the graph suite `PASS: graph.py — N cases`; `project_audit_test.py` exercises the shipped audit collector against planted defects. The gloss said only `validate.py` until 2026-08-20, dropping 129 cases from what the command was documented to run; `test/validate.py` now compares every documented `npm` equation against `package.json` |
 | Prove the guards | `npm run test:negatives` — feeds every guard a planted defect and requires it to reject one. `npm run test:all` is the full suite — the script list lives in `package.json`, not in this cell (an enumeration here said eight while the file ran ten, the same class as the recorded `npm test` incident one row up), ~20 minutes here. Corrupt files in **python, never `sed -i`** (not portable; the validator rejects it) |
 | Lint | none separate; the validator is the lint |
 | Install locally | `./install.sh` or `node bin/task-pipeline.js` — **both refuse when the Claude Code plugin is installed**, because a plain `~/.claude/skills/` copy shadows it; `--force` overrides deliberately |
@@ -120,7 +120,7 @@ most often:
 Also: no hardcoded vendor model ids anywhere in the shipped skill (name the tier);
 every `references/*.md` must be reachable from `SKILL.md`; the Cursor rule stays
 self-contained with no relative links; every new validator guard needs a matching
-negative self-test in `.github/workflows/validate.yml`.
+negative self-test — a file in `test/negatives/`, never a step inline in the workflow.
 
 3. **`npm test` reads git, and prints its disclosures.** Its verdict is followed by the
    claim-registry states, `learned.md`'s shape (rules · rules with an incident ·

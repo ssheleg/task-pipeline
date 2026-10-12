@@ -26,7 +26,9 @@ import pathlib
 import stat
 import subprocess
 import sys
+import shutil
 import tempfile
+import atexit
 
 sys.dont_write_bytecode = True
 HERE = pathlib.Path(__file__).resolve().parent
@@ -51,8 +53,20 @@ def run(cwd, *args, stdin=None):
     return r.returncode, r.stdout, r.stderr
 
 
-def fresh():
+_TREES = []
+# Every tree this suite makes goes at exit — 134 `tp-stage-ckpt-*` were left in one
+# machine's $TMPDIR by 2026-10-12 (hub waves R07).
+atexit.register(lambda: [shutil.rmtree(t, ignore_errors=True) for t in _TREES])
+
+
+def _tree():
     d = pathlib.Path(tempfile.mkdtemp(prefix="tp-stage-ckpt-"))
+    _TREES.append(d)
+    return d
+
+
+def fresh():
+    d = _tree()
     (d / ".task-pipeline").mkdir()
     (d / ".task-pipeline" / "run.md").write_text(RUN_HEAD, encoding="utf-8")
     return d
@@ -195,8 +209,45 @@ def case_review_rounds():
     print("PASS: review rounds travel in the checkpoint of the stage that recorded them")
 
 
+def case_planned_handoff():
+    """R11 (sshlg-skills waves): a planned executor change OFFERS the workflow."""
+    d = fresh()
+    stage(d, 0, "Intake grill", "pass", "2026-10-05T10:00Z")
+    code, _, err = run(d, "handoff", "--to-provider", "openai")
+    ok(code != 0 and "write a checkpoint first" in err, "no workflow, nothing to hand off")
+    emit(d)
+    record(d, {"workflowId": "wf_0123456789abcdef", "leaseId": TOKEN, "stepId": "stage-0",
+               "checkpoint": {"revision": 1}})
+    code, out, _ = run(d, "handoff", "--to-provider", "openai", "--to-model", "gpt-x",
+                       "--reason", "limit")
+    a = json.loads(out)
+    ok(a["workflowId"] == "wf_0123456789abcdef" and a["leaseId"] == TOKEN and a["reason"] == "limit"
+       and a["to"] == {"provider": "openai", "model": "gpt-x"}, "the offer carries the workflow and lease")
+    ok(json.loads(run(d, "handoff", "--to-provider", "openai", "--to-model", "gpt-x",
+                      "--reason", "limit")[1])["idempotencyKey"] == a["idempotencyKey"],
+       "a retried offer repeats its key")
+    ok(json.loads(run(d, "handoff", "--to-provider", "openai", "--to-model", "gpt-x",
+                      "--reason", "limit", "--offer-ttl", "600")[1])["idempotencyKey"]
+       != a["idempotencyKey"], "another offer TTL is another offer, not an idempotency conflict")
+    code, out, _ = record(d, {"handoffId": "handoff:abc123"})
+    ok(json.loads(run(d, "handoff", "--to-provider", "openai", "--to-model", "gpt-x",
+                      "--reason", "limit")[1])["idempotencyKey"] != a["idempotencyKey"],
+       "an offer made again after one was recorded is new, so a lapsed offer is not replayed")
+    ok(code == 0 and "event: memory — handoff offered handoff:abc123" in ledger(d),
+       "the offer is one ledger line")
+    ok(json.loads(run(d, "state")[1])["holdsLease"] is True, "the lease stays until the successor accepts")
+    code, out, _ = run(d, "accept", "--handoff-id", "handoff:abc123", "--session", "s-1")
+    b = json.loads(out)
+    ok(b["handoffId"] == "handoff:abc123" and b["sessionId"] == "s-1", "the successor's accept arguments")
+    new = "lt_" + "z" * 40
+    code, out, _ = record(d, {"leaseId": new, "checkpoint": {"workflowId": "wf_0123456789abcdef",
+                                                               "revision": 2}, "stepId": "stage-0"})
+    ok(code == 0 and new not in out and new not in ledger(d), "accepting prints and logs no token")
+    print("PASS: a planned executor change offers the workflow, the successor accepts it")
+
+
 def case_no_ledger():
-    d = pathlib.Path(tempfile.mkdtemp(prefix="tp-stage-ckpt-"))
+    d = _tree()
     code, _, err = run(d, "emit")
     ok(code != 0 and "cannot be read" in err, "no ledger is refused, not invented")
     print("PASS: no ledger, no checkpoint")
@@ -205,6 +256,7 @@ def case_no_ledger():
 if __name__ == "__main__":
     for case in (case_first_boundary, case_idempotency, case_continue_and_never_leak,
                  case_provider_loss, case_stale_writer_and_successor, case_credentials_by_name,
-                 case_failed_gate_and_acceptance, case_review_rounds, case_no_ledger):
+                 case_failed_gate_and_acceptance, case_review_rounds, case_planned_handoff,
+                 case_no_ledger):
         case()
     print(f"PASS: stage_checkpoint.py — {CASES} cases")

@@ -242,7 +242,8 @@ This is the part most pipelines skip, and it is the reason this one is trustwort
 rather than merely tidy.
 
 **Every guard is proven against a planted defect.** `npm run test:all` breaks the
-thing each of the **309** checks is about, and requires that check to reject it. A
+thing each check is about, and requires that check to reject it — one file per
+check in `test/negatives/`, eight shards on CI. A
 guard that has never been watched failing is not a guard; it is a comment.
 
 **The neighbour probe.** A check has a *subject* — the rule it is about — and

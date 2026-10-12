@@ -102,7 +102,7 @@
       ],
       "gate": {
         "type": "auto",
-        "check": "npm test prints 'PASS: task-pipeline structure valid'. Every NEW guard also has a negative self-test in .github/workflows/validate.yml and has been watched rejecting a planted defect — assert on $? without a pipe, because $? after a pipeline is the last element's status (retro 2026-08-06). npm run test:all must print that all guards provably reject their planted defect."
+        "check": "npm test prints 'PASS: task-pipeline structure valid'. Every NEW guard also has a negative self-test file in test/negatives/ and has been watched rejecting a planted defect — assert on $? without a pipe, because $? after a pipeline is the last element's status (retro 2026-08-06). npm run test:all must print that all guards provably reject their planted defect."
       }
     },
     {

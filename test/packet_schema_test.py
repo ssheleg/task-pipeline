@@ -137,7 +137,20 @@ def t_unknown_kind_and_missing_rationale_rejected():
     assert any("missing rationale" in x for x in v2), f"a rationale-less edge passed: {v2}"
 
 
+def t_packet_id_is_namespaced():
+    """R14 (sshlg-skills waves): `execution-packet/1` was also Fabric's former packet id."""
+    base = packet("A")
+    assert base["schema_version"] == "task-pipeline/execution-packet/1", base["schema_version"]
+    for v, want in (("task-pipeline/execution-packet/1", True), ("execution-packet/1", True),
+                    ("fabric/execution-packet/1", False), ("session-handoff/1", False)):
+        b = dict(base, schema_version=v)
+        ok = not [x for x in P.problems(b) if "schema_version" in x]
+        assert ok == want, f"{v}: accepted={ok}, want {want}"
+
+
 def main():
+    case("the packet id is namespaced; the bare id is still read",
+         t_packet_id_is_namespaced)
     case("the schema declares the edge shape", t_schema_declares_the_edge_shape)
     case("a control edge without payload survives, preserved", t_control_edge_without_payload_survives)
     case("a payload edge needs its satisfaction", t_payload_edge_needs_satisfaction)

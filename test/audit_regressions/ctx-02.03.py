@@ -23,6 +23,21 @@ import subprocess
 import sys
 import tempfile
 
+# Every temp tree this file makes goes at exit (hub waves R07: bare mkdtemp left
+# thousands of trees in a shared $TMPDIR). `test/validate.py` refuses a file that
+# calls mkdtemp with no cleanup.
+import atexit as _atexit
+import tempfile
+import shutil as _shutil
+_TMP_TREES = []
+_atexit.register(lambda: [_shutil.rmtree(_t, ignore_errors=True) for _t in _TMP_TREES])
+
+
+def _tmp(*a, **k):
+    _d = tempfile.mkdtemp(*a, **k)
+    _TMP_TREES.append(_d)
+    return _d
+
 sys.dont_write_bytecode = True
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -50,7 +65,7 @@ def case(name, fn):
 
 
 def make_source():
-    src = tempfile.mkdtemp()
+    src = _tmp()
     files = {"docs/brief.md": b"# the brief\n", "context/decisions.json": b"{}\n"}
     for rel, data in files.items():
         os.makedirs(os.path.join(src, os.path.dirname(rel)), exist_ok=True)
@@ -74,10 +89,10 @@ def tree_bytes(root):
 
 def t_two_roots_identical_bytes_no_absolute_paths():
     src, leaf, files = make_source()
-    bundle = tempfile.mkdtemp()
+    bundle = _tmp()
     m, problems = M.export_bundle(leaf, src, bundle)
     assert problems == [], f"a clean export was refused: {problems[:2]}"
-    r1, r2 = tempfile.mkdtemp(), tempfile.mkdtemp()
+    r1, r2 = _tmp(), _tmp()
     for r in (r1, r2):
         _m, p2 = M.import_bundle(bundle, r)
         assert p2 == [], f"a clean import was refused: {p2[:2]}"
@@ -91,12 +106,12 @@ def t_two_roots_identical_bytes_no_absolute_paths():
 
 def t_corrupt_blob_rejects_everything():
     src, leaf, _files = make_source()
-    bundle = tempfile.mkdtemp()
+    bundle = _tmp()
     M.export_bundle(leaf, src, bundle)
     blobs = os.listdir(os.path.join(bundle, "blobs"))
     victim = os.path.join(bundle, "blobs", sorted(blobs)[0])
     open(victim, "ab").write(b"tampered")
-    dest = tempfile.mkdtemp()
+    dest = _tmp()
     m, problems = M.import_bundle(bundle, dest)
     assert m is None and any("CORRUPT" in p for p in problems), \
         f"a corrupt blob imported: {problems[:2]}"
@@ -106,11 +121,11 @@ def t_corrupt_blob_rejects_everything():
 
 def t_missing_blob_rejects_by_name():
     src, leaf, _files = make_source()
-    bundle = tempfile.mkdtemp()
+    bundle = _tmp()
     M.export_bundle(leaf, src, bundle)
     blobs = sorted(os.listdir(os.path.join(bundle, "blobs")))
     os.unlink(os.path.join(bundle, "blobs", blobs[0]))
-    dest = tempfile.mkdtemp()
+    dest = _tmp()
     m, problems = M.import_bundle(bundle, dest)
     assert m is None and any("MISSING" in p for p in problems)
     assert tree_bytes(dest) == {}
@@ -122,7 +137,7 @@ def t_absolute_escaping_and_credentials_refused_at_export():
                         (dict(address="../outside.md", sha256="0" * 64), "escaping"),
                         (dict(address="conf/.env", sha256="0" * 64), "credential")):
         crooked = dict(leaf, inputs=leaf["inputs"] + [bad])
-        m, problems = M.export_bundle(crooked, src, tempfile.mkdtemp())
+        m, problems = M.export_bundle(crooked, src, _tmp())
         assert m is None and any(needle in p for p in problems), \
             f"{bad['address']}: exported despite being {needle}: {problems[:2]}"
 
@@ -131,14 +146,14 @@ def t_moved_source_refuses_to_travel():
     src, leaf, _files = make_source()
     with open(os.path.join(src, "docs", "brief.md"), "a") as fh:
         fh.write("drifted\n")
-    m, problems = M.export_bundle(leaf, src, tempfile.mkdtemp())
+    m, problems = M.export_bundle(leaf, src, _tmp())
     assert m is None and any("moved under the plan" in p for p in problems), \
         "a drifted source travelled under its stale digest"
 
 
 def t_cli_round_trip():
     src, leaf, _files = make_source()
-    d = tempfile.mkdtemp()
+    d = _tmp()
     lp = os.path.join(d, "leaf.json")
     json.dump(leaf, open(lp, "w"))
     bundle, dest = os.path.join(d, "bundle"), os.path.join(d, "dest")

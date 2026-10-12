@@ -163,6 +163,37 @@ gh run view <run-id> --log-failed     # only the failed step's log
 or failed deploy is the most common way a run reports success while nothing
 shipped — and it is exactly what the stage-8 gate is for.
 
+### When the release waits for an approval
+
+**Read the project's approval mode before tagging, and do not guess it.** It is one of
+two, and each owes the operator something different.
+
+- **`checks`** — a guard admits the release, with no person on the path. For example,
+  `release-guard` checks that the tag is on main and that CI on that commit is green,
+  and the `release` environment has no reviewers. PassionCode products declare this in
+  `passioncode-ai/.github` `release-signing/products.json` (`"approval": "checks"`).
+  Push the tag, watch the run selected **by the tag you pushed**, and report what was
+  published, or the guard's refusal and its cause. A refusal is fixed at its cause,
+  never worked around. Send no approval request: there is nobody to send it to.
+- **`reviewers`** — the run stops at an environment with required reviewers. Find that
+  run by the tag, and confirm its status is `waiting` before saying anything:
+
+  ```bash
+  gh run list -w release.yml --json url,status,headBranch -L 5
+  ```
+
+  Then hand the operator the **direct link** to that run, where they press *Review
+  deployments*, together with the tag and the jobs that are waiting. A request without
+  the link is incomplete, and so is a link to a run that is not waiting.
+
+The mode comes from, in order:
+1. `pipeline.json` → `release.approval`;
+2. an organisation declaration such as the file above;
+3. the environment's own protection rules
+   (`gh api repos/<owner>/<repo>/environments/release`).
+
+A run that cannot establish the mode says so. It does not assume `checks`.
+
 ## Other platforms, quick verbs
 
 | Platform | Deploy | Verify |

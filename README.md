@@ -200,6 +200,8 @@ until it is installed.
 | 3 + 4 · every spec and plan | the self-review reads its rules back — is every named check real, does anything contradict a locked decision or a rejected option, and what does this cost now versus at design time. Answers land as a committed `## Self-review` of computed numbers |
 | 6–10 + any check you write | [`gates.md`](plugins/task-pipeline/skills/task-pipeline/references/gates.md) — the three axes, the promotion ladder, gate anatomy, the probe recipe, ratchet floors |
 | any agent-time enforcement | [`hooks.md`](plugins/task-pipeline/skills/task-pipeline/references/hooks.md) — the `PreToolUse` contract, the fail-open hazard, the Claude-Code-only limit |
+| 7 · the tag | [`deploy-targets.md`](plugins/task-pipeline/skills/task-pipeline/references/deploy-targets.md) → *When the release waits for an approval* — `pipeline.json` → `release.approval`: `checks` (tag, watch the run selected by the tag, report) or `reviewers` (the direct link to the run that is `waiting`) |
+| between stages | [`continuity.md`](plugins/task-pipeline/skills/task-pipeline/references/continuity.md) Part 3 — workflow memory through Observatory, a planned handoff (`stage_checkpoint.py handoff` / `accept`), and `hooks/memory-nudge.sh`, which reminds once when a gate returned with no memory line after it |
 
 **Ported, not depended on.** Stage 0 is adapted from
 [Matt Pocock's `grilling` / `grill-with-docs`](https://github.com/mattpocock/skills)
@@ -612,7 +614,7 @@ must say so.
 ### Held to Anthropic's own Skill authoring guidance
 
 Audited against the four Agent Skills pages. Most of it already held — `name`
-13/64 chars, `description` 909/1024 chars, `SKILL.md` 277/500 lines, all 40 references
+13/64 chars, `description` 890/1024 chars, `SKILL.md` 268/500 lines, all 40 references
 linked **directly** from `SKILL.md`, and the bundle far under the 30 MB ceiling. What
 did not, now does:
 
