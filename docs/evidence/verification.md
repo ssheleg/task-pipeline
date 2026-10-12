@@ -16,7 +16,7 @@ Fabric contract fixture and Observatory continuity.
 | R07 | test temp trees removed with the run; a validator check refusing a test file that makes temp state with no cleanup; the two leaks it surfaced in `test/validate.py` fixed | plant 453; two validator runs left no `graph.json` tree and no fake HOME in TMPDIR (`find -newer`), where the baseline suite had left 933 | **never** |
 | R09 | description 890/1024 chars, body 4646/4750 tokens | `audit_skill.py --house` (make-skill `60ca8e2`, tiktoken cl100k): `DESC_HEADROOM 890/970`, `BODY_HEADROOM 4646/4750`, 0 GAP | **never** |
 | R11 R13 R14 R15 R16 | Observatory handoff/accept and the memory nudge; declared task sources; the namespaced packet id; the Fabric contract fixture; the release approval mode | `npm test` runs `stage_checkpoint_test.py`, `memory_nudge_test.py`, `packet_schema_test.py` and `fix-pf-06.01`; R13/R16 are doctrine, read after the edit | **never** |
-| Gate | the full suite | pending | **never** |
+| Gate | the full suite | `npm test` exited 0 on `941bed8`; `python3 test/negatives.py --shard i/8` for i = 1…8 run in sequence on `941bed8`, every shard `PASS`: 53 + 56 + 57 + 55 + 54 + 56 + 52 + 55 = 438 plants rejected, 15 property checks printed, none DORMANT; 127–162 s a shard, 1,158 s in all (the same suite before the move, one process: 433 + 15, all PASS, 25 min 22 s, under a load average of 45–84). Each of the fifteen touched or new plants was also run by hand and named the guard it targets | **never** |
 
 ## Shipped state — v1.92.0 (2026-10-11; released, npm 1.92.0)
 
