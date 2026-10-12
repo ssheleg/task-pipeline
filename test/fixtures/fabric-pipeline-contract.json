@@ -1,0 +1,23 @@
+{
+  "_note": "Fabric's task-pipeline adapter contract, read from passioncode-ai/fabric at the commits below. test/audit_regressions/fix-pf-06.01.py checks task-pipeline against it with no Fabric checkout, and checks it against the adapter source when a checkout is present (FABRIC_ROOT or ~/DATA/fabric) - so drift on either side is a red, never a NOT_RUN. Re-read and re-pin when the adapter changes.",
+  "fabric_main": "5bf15e5cd2638755089b4767067335fc330bd496",
+  "adapter_last_changed": "03311c856b7771e5e4cfff967b138e89e292c67f",
+  "adapter": "apps/desktop/src/main/pipelineAdapters/taskPipeline.ts",
+  "supported_gates": [
+    "auto",
+    "judgment",
+    "manual"
+  ],
+  "understood_must_understand": [
+    "graph_version",
+    "profile",
+    "skill_lock"
+  ],
+  "stage_requires": [
+    "state",
+    "skills (non-empty)",
+    "gate.type",
+    "gate.check"
+  ],
+  "pin_sha256": "^[0-9a-f]{64}$"
+}
