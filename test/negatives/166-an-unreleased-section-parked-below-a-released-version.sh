@@ -11,16 +11,20 @@ import re
 # one stops landing on every release commit, which is where it matters most.
 p = "/tmp/unr2-copy/CHANGELOG.md"
 t = open(p, encoding="utf-8").read()
-m = re.search(r"^## v[0-9]", t, re.M)
+# The candidate may already have a legitimate top Unreleased section. Remove it
+# in this fixture before placing the single malformed section below a release.
+t = re.sub(r"^## Unreleased[^\n]*\n.*?(?=^## |\Z)", "", t, flags=re.M | re.S)
+m = re.search(r"^## v[0-9][^\n]*\n", t, re.M)
 assert m, "PLANT DID NOT LAND: no released version heading to park below"
 nxt = re.search(r"^## ", t[m.end():], re.M)
-at = m.end() + (nxt.start() if nxt else 0)
+at = m.end() + nxt.start() if nxt else len(t)
 open(p, "w", encoding="utf-8").write(
     t[:at] + "## Unreleased\n\nGuards: 1 -> 2, parked under a release.\n\n" + t[at:])
 out = open(p, encoding="utf-8").read()
 assert out.index("## Unreleased") > out.index(m.group(0)), "PLANT DID NOT LAND"
 EOF
-if python3 /tmp/unr2-copy/test/validate.py; then
+output=$(python3 /tmp/unr2-copy/test/validate.py 2>&1) && status=0 || status=$?
+if [ "$status" -eq 0 ] || ! printf '%s\n' "$output" | grep -q 'an `## Unreleased` section sits below a released version'; then
   echo "ERROR: validator passed an Unreleased section sitting under a release"
   exit 1
 else

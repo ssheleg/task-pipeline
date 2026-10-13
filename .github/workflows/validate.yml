@@ -1,16 +1,19 @@
 name: validate
 
 on:
-  # B-101: `push:` with no filter re-validated a SHA that had already passed. Observed
-  # 2026-08-17 releasing v1.69.0 — `validate` succeeded on `92fc3ea` at 14:15 and the tag
-  # push started a second run on the same `92fc3ea` eleven minutes later, at ~38 minutes a
-  # run. `tags-ignore` and not `paths-ignore`: the question is not which files changed, it
-  # is the same commit being asked the same question twice. The release workflow still runs
-  # the suite on its own tree, which is the run that proves what shipped.
-  push:
-    tags-ignore:
-      - '**'
+  # Deliberate promotion of a frozen reviewed candidate, never every push/PR edit.
   pull_request:
+    types: [ready_for_review]
+  schedule:
+    - cron: '0 23 * * *'
+      timezone: Europe/Warsaw
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: 'Why this frozen candidate needs an explicit full run'
+        required: true
+        type: string
+  workflow_call:
 
 jobs:
   validate:

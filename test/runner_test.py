@@ -92,6 +92,60 @@ for _spec in ("0/8", "9/8", "8", "a/b", "", "3/0", "-1/8"):
     case(f"`{_spec}` is refused, never guessed", _refused(_spec), True)
 
 
+# CLI admission must precede directory scanning, locking and snapshots. The old
+# parser treated --help/unknown flags as an instruction to run every plant.
+from contextlib import redirect_stdout, redirect_stderr
+from io import StringIO
+from unittest.mock import patch
+
+
+def _admission(args):
+    with patch.object(negatives, "scan", side_effect=RuntimeError("scan reached")), \
+            redirect_stdout(StringIO()), redirect_stderr(StringIO()):
+        try:
+            negatives.main(["negatives.py", *args])
+        except SystemExit as exc:
+            return exc.code
+        except RuntimeError as exc:
+            if str(exc) == "scan reached":
+                return "scan"
+            raise
+    return "returned"
+
+
+for _args, _want in [(["--help"], 0), (["-h"], 0), (["--unknown"], 2),
+                     (["--lis"], 2), (["-k"], 2), (["--shard"], 2),
+                     (["--list"], "scan"), (["-k", "exclusion"], "scan"),
+                     (["--shard", "1/8"], "scan")]:
+    case(f"CLI {_args!r} is admitted before scanning or allocation",
+         _admission(_args), _want)
+
+
+def _selection(args):
+    # Stop at the real shard function before any plant can run; the read-only list
+    # path still uses the normal parser and selection. Locks live in an owned temp.
+    import tempfile
+    from pathlib import Path
+    fixture = [("001-alpha.sh", "Negative self-test (alpha)", ""),
+               ("002-beta.sh", "Negative self-test (beta)", "")]
+    with tempfile.TemporaryDirectory(prefix="tp-runner-cli-") as folder, \
+            patch.object(negatives, "scan", return_value=(fixture, [])), \
+            patch.object(negatives, "MIN_EXPECTED", 2), \
+            patch.object(negatives.tempfile, "gettempdir", return_value=folder):
+        out = StringIO()
+        with redirect_stdout(out), redirect_stderr(StringIO()):
+            code = negatives.main(["negatives.py", "--list", *args])
+        return code, [x.strip() for x in out.getvalue().splitlines()
+                      if x.strip() in ("alpha", "beta")]
+
+
+for _args in (["-k", "alpha"], ["-kalpha"], ["--shard", "1/2"],
+              ["--shard=1/2"], ["-kbeta", "-kalpha"],
+              ["--shard=2/2", "--shard=1/2"]):
+    case(f"CLI selection {_args!r} retains its parsed filter",
+         _selection(_args), (0, ["alpha"]))
+
+
 def _run() -> int:
     bad = 0
     for name, got, want in CASES:
