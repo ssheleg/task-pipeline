@@ -1,0 +1,21 @@
+PASS FM_DUPLICATE_KEY   task-pipeline/SKILL.md       no duplicate frontmatter keys
+PASS FM_YAML_CONFORMANCE task-pipeline/SKILL.md       the subset parse matches the installed YAML parser
+PASS NAME_CHARSET       task-pipeline/SKILL.md:2     name 'task-pipeline' uses a legal charset
+PASS NAME_DIR           task-pipeline/SKILL.md:2     name matches the directory
+PASS NAME_RESERVED      task-pipeline/SKILL.md:2     no reserved word in name
+PASS DESC_LENGTH        task-pipeline/SKILL.md:3     description is 887/1024 chars
+PASS DESC_PERSON        task-pipeline/SKILL.md:3     description is third person
+PASS DESC_USEWHEN       task-pipeline/SKILL.md:3     description opens with 'Use when …' (house rule)
+PASS DESC_RU            task-pipeline/SKILL.md:3     description carries Russian trigger phrases (house rule)
+PASS DESC_WHAT          task-pipeline/SKILL.md:3     description states WHAT the skill does in 726 chars beyond its triggers (house rule)
+PASS DESC_HEADROOM      task-pipeline/SKILL.md:3     description is 887/970 chars, inside the working limit
+PASS FM_UNKNOWN_KEY     task-pipeline/SKILL.md       no frontmatter key outside spec ∪ host extensions
+PASS BODY_BUDGET        task-pipeline/SKILL.md       body is 265 lines / 4629 tokens (tiktoken:cl100k_base; budget 500 / 5000)
+PASS BODY_HEADROOM      task-pipeline/SKILL.md       body is 4629/4750 tokens (tiktoken:cl100k_base), inside the working limit
+PASS BUNDLE_LAYOUT                                   bundled directories present and checked
+PASS HOOKS_SCHEMA       task-pipeline/hooks/hooks.json every hooks.json key is one Claude Code evaluates
+PASS LINK_INTEGRITY     task-pipeline/SKILL.md       every relative link resolves and stays inside the skill
+PASS DIST_PAYLOAD       task-pipeline                publishable payload carries no outward symlink or undeclared secret
+PASS PROSE              task-pipeline/SKILL.md       no Windows paths, time-branching, or bare directory pointers
+
+0 GAP, 19 PASS — plugins/task-pipeline/skills/task-pipeline
