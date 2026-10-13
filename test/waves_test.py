@@ -90,6 +90,41 @@ def survey(d):
     return raw
 
 
+def conservative_plan_controls():
+    d = tree()
+    gp, pp = d / "graph.json", d / "plan.json"
+    base = {"goal": "goal", "requirements": ["REQ-001"], "edges": [],
+            "nodes": [{"id": "N-001", "title": "t", "owner": "implementer", "status": "pending",
+                       "blocked_by": [], "serves": "REQ-001", "check": "test", "wave": 1}]}
+    cases = [
+        [{"id": "N-001", "wave": 2}, {"id": "N-001", "wave": 3}],
+        [{"id": "A", "graph_id": "N-001", "wave": 2}, {"id": "B", "graph_id": "N-001", "wave": 3}],
+        [{"id": "A", "graph_id": [], "wave": 2}],
+        [{"id": "N-001", "wave": 2}, {"id": "N-002", "wave": 3}],
+    ]
+    for nodes in cases:
+        gp.write_text(json.dumps(base))
+        before = gp.read_bytes()
+        pp.write_text(json.dumps({"nodes": nodes}))
+        rc, out, err = run("sync-graph", "--plan", str(pp), "--graph", str(gp), "--why", "review")
+        ok(rc != 0 and gp.read_bytes() == before and "Traceback" not in err,
+           f"ambiguous/absent plan target refuses before any write ({rc} {out} {err})")
+    rc, out, err = run("sync-graph", "--plan", str(pp), "--graph", str(gp), "--why", "review", "--only-present")
+    ok(rc == 0 and json.loads(gp.read_text())["nodes"][0]["wave"] == 2,
+       "explicit only-present still supports a plan spanning graphs")
+    inv, mods = d / "inventory.json", d / "modules.json"
+    inv.write_text(json.dumps({"schema": "inventory/1", "items": [item("FIX-001", module="old",
+                          node=["OLD"], wave=1, release="this")]}))
+    pp.write_text(json.dumps({"nodes": []}))
+    for table in ({}, {"new": ["FIX-001"]}):
+        mods.write_text(json.dumps(table))
+        before = inv.read_bytes()
+        rc, out, err = run("assign", "--inventory", str(inv), "--modules", str(mods),
+                           "--plan", str(pp), "--write")
+        ok(rc == 1 and inv.read_bytes() == before and json.loads(out)["unplaced"] == ["FIX-001"],
+           "incomplete assignment reports gaps but preserves prior assignment bytes")
+
+
 def main():
     d = tree()
     raw = survey(d)
@@ -232,7 +267,11 @@ def main():
     gp.write_text(json.dumps(g))
     rc, out, err = run("sync-graph", "--plan", str(d / "plan.json"), "--graph", str(gp),
                        "--why", "wave plan of the fixture")
-    ok(rc == 1 and "N-004" in out + err, f"sync-graph names plan nodes the graph lacks and exits 1 ({rc} {out!r} {err!r})")
+    ok(rc == 1 and "N-004" in out + err and json.loads(gp.read_text()) == g,
+       f"sync-graph names absent nodes and writes nothing by default ({rc} {out!r} {err!r})")
+    rc, out, err = run("sync-graph", "--plan", str(d / "plan.json"), "--graph", str(gp),
+                       "--why", "explicit cross-graph plan", "--only-present")
+    ok(rc == 0, "explicit only-present permits the partial graph projection")
     waves = {n["id"]: n.get("wave") for n in json.loads(gp.read_text())["nodes"]}
     ok(waves == {"N-001": 1, "N-002": 2, "N-003": 1}, f"sync-graph wrote every wave it could ({waves})")
     revs = json.loads(gp.read_text()).get("revisions") or []
@@ -378,6 +417,7 @@ def main():
                 ok(True, f"backlog-sources refuses the path {bad_path!r}")
     else:
         print("note: jsonschema not installed — the schema conformance pass was not run")
+    conservative_plan_controls()
     print(f"PASS: waves.py — {CASES} cases")
 
 

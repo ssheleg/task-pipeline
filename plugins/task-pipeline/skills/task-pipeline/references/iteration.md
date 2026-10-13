@@ -240,7 +240,14 @@ private to its project and never leaves it.
 **Layer 1 — every install, no service.** The project retro and [`learned.md`](learned.md),
 as before, plus a **local index** of every project's lessons on this machine:
 `scripts/lessons.py`, one JSON line per class, a pure function of the retros
-(`lessons.py rebuild --roots <dir>` re-derives it). Two projects holding one class key make
+(`lessons.py rebuild --roots <dir>` re-derives it). Rebuild replaces the projection for
+its explicitly selected roots and depth: choose the whole intended scope. A readable empty
+scope can produce an empty index; a missing or unreadable root, discovery error, malformed
+artifact configuration, missing explicitly configured artifact directory, dangling source
+link, nonregular retro input, or invalid/unresolved lesson refuses before changing the index
+or its migration state. An absent default artifact directory in a new repository remains
+a valid empty source. Repair the named source and retry; unknown is never measured zero.
+Two projects holding one class key make
 one lesson seen twice, status `candidate`. The index path is a parameter — `--index`, then
 `$TASK_PIPELINE_LESSONS`, then `~/.sshlg-skills/lessons/index.jsonl` **when
 `~/.sshlg-skills` already exists** — the family's machine-state directory, where `lessons/`

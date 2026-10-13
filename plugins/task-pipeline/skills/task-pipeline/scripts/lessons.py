@@ -19,7 +19,8 @@ entry is a pure function of its origins.
     lessons.py query NOUN ... [--limit 5]
         at most --limit lines: `[lesson L-<sha12>] title — trigger — check (seen N, projects K)`
     lessons.py rebuild --roots DIR ... [--depth 3]
-        re-derive the whole index from every retro found under the roots
+        re-derive the whole index from every retro found under the roots; incomplete
+        discovery or an unreadable/invalid lesson source refuses without changing the index
     lessons.py candidates [--min-projects 2]
         lessons two or more projects hold: the `retro.publish` queue for learned.md
     lessons.py show L-<sha12>
@@ -88,6 +89,7 @@ import os
 import pathlib
 import re
 import subprocess
+import stat
 import sys
 import tempfile
 import time
@@ -438,7 +440,7 @@ def parse_retro(path: pathlib.Path, root: pathlib.Path, project: str) -> tuple[l
     """Lessons from one retro file: (lessons, entries without a Lesson line, refusals)."""
     try:
         text = path.read_text(encoding="utf-8")
-    except OSError as exc:
+    except (OSError, UnicodeError) as exc:
         raise Refused(f"{path} cannot be read ({type(exc).__name__})")
     rel = _relative(root, path)
     entries: list[tuple[str, list[str]]] = []
@@ -782,48 +784,110 @@ def cmd_query(a, idx: pathlib.Path) -> int:
     return 0
 
 
-def find_retros(roots: list[str], depth: int) -> list[tuple[pathlib.Path, pathlib.Path]]:
-    """(repository root, retro file) for every retro and archive file under the roots."""
-    found = []
+def _source_stat(path: pathlib.Path):
+    """Optional absent source, but never hide a dangling link or an unreadable parent.
+
+    Path.exists/is_file suppress different errors across Python versions. lstat names
+    the directory entry; stat follows a present link and must succeed. Ancestor admission
+    distinguishes a truly missing default tree from a broken link higher in that tree.
+    """
+    try:
+        info = path.lstat()
+    except FileNotFoundError:
+        if path.parent != path:
+            parent = _source_stat(path.parent)
+            if parent is not None and not stat.S_ISDIR(parent.st_mode):
+                raise Refused(f"{path.parent}: source parent is not a directory")
+        return None
+    if stat.S_ISLNK(info.st_mode):
+        try:
+            return path.stat()
+        except OSError as exc:
+            raise Refused(f"{path}: source link cannot be read ({type(exc).__name__})")
+    return info
+
+
+def find_retros(roots: list[str], depth: int) -> tuple[list[tuple[pathlib.Path, pathlib.Path]], list[str]]:
+    """Discovery and its unknowns, kept separate from a readable empty scope."""
+    found, problems = [], []
+    def unread(exc):
+        problems.append(f"{exc.filename}: cannot discover ({type(exc).__name__})")
     for r in roots:
         base = pathlib.Path(r).expanduser()
-        for cur, dirs, _files in os.walk(base, followlinks=True):
+        try:
+            base_info = _source_stat(base)
+            if base_info is None or not stat.S_ISDIR(base_info.st_mode):
+                raise Refused(f"{base}: root is missing or not a readable directory")
+        except (OSError, Refused) as exc:
+            problems.append(str(exc))
+            continue
+        for cur, dirs, _files in os.walk(base, followlinks=True, onerror=unread):
             here = pathlib.Path(cur)
             rel_depth = len(here.relative_to(base).parts)
             dirs[:] = sorted(d for d in dirs if d not in SKIP_DIRS and not d.startswith("."))
-            if (here / ".git").exists():
-                art = _artifact_root(here)
-                files = [art / "retro.md"] + sorted((art / "retro").glob("*.md"))
-                found += [(here, f) for f in files if f.is_file()]
+            try:
+                if _source_stat(here / ".git") is not None:
+                    art = _artifact_root(here)
+                    archive = art / "retro"
+                    archive_info = _source_stat(archive)
+                    if archive_info is not None and not stat.S_ISDIR(archive_info.st_mode):
+                        raise Refused(f"{archive}: retro archive is not a directory")
+                    archived = sorted(archive.iterdir()) if archive_info is not None else []
+                    files = [art / "retro.md"] + [p for p in archived if p.suffix == ".md"]
+                    for f in files:
+                        info = _source_stat(f)
+                        if info is None:
+                            continue
+                        if not stat.S_ISREG(info.st_mode):
+                            raise Refused(f"{f}: retro source is not a regular file")
+                        found.append((here, f))
+            except (OSError, Refused) as exc:
+                problems.append(f"{here}: {exc}")
             if rel_depth >= depth:
                 dirs[:] = []
-    return found
+    return found, problems
 
 
 def _artifact_root(repo: pathlib.Path) -> pathlib.Path:
     """`paths.artifacts` in pipeline.json, else the first known root carrying a register."""
     try:
-        conf = json.loads((repo / "pipeline.json").read_text(encoding="utf-8"))
-        given = (conf.get("paths") or {}).get("artifacts")
-        if isinstance(given, str) and given and not given.startswith("/"):
-            return repo / given
-    except (OSError, ValueError, AttributeError):
-        pass
+        config = repo / "pipeline.json"
+        info = _source_stat(config)
+        if info is not None and not stat.S_ISREG(info.st_mode):
+            raise Refused("pipeline.json is not a regular file")
+        conf = json.loads(config.read_text(encoding="utf-8")) if info is not None else {}
+    except (OSError, ValueError) as exc:
+        raise Refused(f"pipeline.json cannot be read ({type(exc).__name__})")
+    if not isinstance(conf, dict) or not isinstance(conf.get("paths", {}), dict):
+        raise Refused("pipeline.json must contain an object with an object paths field")
+    given = conf.get("paths", {}).get("artifacts")
+    if given is not None:
+        if not isinstance(given, str) or not given or pathlib.Path(given).is_absolute() or ".." in pathlib.Path(given).parts:
+            raise Refused("pipeline.json paths.artifacts is not a repository-relative directory")
+        art = repo / given
+        info = _source_stat(art)
+        if info is None or not stat.S_ISDIR(info.st_mode):
+            raise Refused(f"{art}: configured artifacts directory is missing or not a directory")
+        return art
     # The same rule, names and registers as bin/lib/artifact-root.js and test/artifact_root.py:
     # the first KNOWN name that exists AND carries one of the REGISTERS, else the default.
     for name in ARTIFACT_KNOWN:
-        if any((repo / name / reg).exists() for reg in ARTIFACT_REGISTERS):
-            return repo / name
+        art = repo / name
+        info = _source_stat(art)
+        if info is not None and not stat.S_ISDIR(info.st_mode):
+            raise Refused(f"{art}: default artifacts path is not a directory")
+        if any(_source_stat(art / reg) is not None for reg in ARTIFACT_REGISTERS):
+            return art
     return repo / ARTIFACT_KNOWN[0]
 
 
 def cmd_rebuild(a, idx: pathlib.Path) -> int:
-    found = find_retros(a.roots, a.depth)
-    lessons, problems, private, unresolved, seen_files = [], [], 0, 0, 0
+    found, problems = find_retros(a.roots, a.depth)
+    lessons, private, unresolved, seen_files = [], 0, 0, 0
     keys: dict[pathlib.Path, str] = {}
     for repo, retro in found:
-        # One repository's refusal — unreadable, no commit, a git that does not answer — is
-        # listed under "not read"; it never aborts the rebuild of every other one.
+        # Read the remaining sources to report every problem, but never replace a complete
+        # prior projection with an incomplete scan. The refusal precedes any index mutation.
         try:
             if repo not in keys:
                 keys[repo] = project_key(repo)
@@ -834,6 +898,7 @@ def cmd_rebuild(a, idx: pathlib.Path) -> int:
                     probs.append(f"{le['classKey']}: refused by lesson/1")
                 elif not commit_resolves(repo, le["origin"]["commit"]):
                     unres += 1
+                    probs.append(f"{le['classKey']}: evidence commit does not resolve")
                 else:
                     mine.append(le)
         except Refused as exc:
@@ -844,6 +909,11 @@ def cmd_rebuild(a, idx: pathlib.Path) -> int:
         unresolved += unres
         lessons += mine
         problems += [f"{repo.name}: {p}" for p in probs]
+    if problems:
+        for problem in problems:
+            print(f"  not read: {problem}")
+        print("lessons: incomplete rebuild refused — index and migration state unchanged", file=sys.stderr)
+        return 1
     with session(idx, a.default_index) as ss:
         # The previous index lends its memory ids. `session` already refused an unreadable one
         # (its contents may be good) and set a corrupt one aside; its notes go to stderr as for
@@ -1045,6 +1115,8 @@ def main(argv: list[str]) -> int:
     a = p.parse_args(argv)
     if a.cmd == "add" and a.retro and not (a.all or a.entry):
         p.error("add --retro needs --entry ANCHOR or --all")
+    if a.cmd == "rebuild" and a.depth < 0:
+        p.error("rebuild --depth must be non-negative")
     idx = index_path(a.index)
     if a.cmd == "path":
         print(idx)
