@@ -3,7 +3,7 @@
 # PR112: independent semantics review and conservative state fixes
 
 Reviewed 2026-10-13, exact candidate
-`a77c990dc32b0505a49a51da1ef38112f24d7243` (PR112 after the PR115 fixture
+[a77c990d](https://github.com/ssheleg/task-pipeline/commit/a77c990dc32b0505a49a51da1ef38112f24d7243) (PR112 after the PR115 fixture
 repair). Review checkout: isolated branch `fix/pr112-conservative-state`.
 The original author's worktree and branch were not changed. This receipt is
 acceptance evidence for a bounded change, not a claim that every pipeline gap

@@ -1,0 +1,11 @@
+{
+  "schema": "exact-release-chain/1",
+  "source": "4d750573ce53ea4c7ffa2bde192ee35b59acefa7",
+  "command": "npm run test:all && python3 /tmp/tp194-tagguard.py && git tag -a v1.94.0 -m 'task-pipeline v1.94.0' && git push origin refs/tags/v1.94.0",
+  "exit_code": 1,
+  "elapsed_seconds": 2716.03,
+  "minimum_free_bytes": 399126528,
+  "disk_stop": false,
+  "log_sha256": "36203b39867d58eadb7ae2a12ccc90323c624f4f9470dfe2584adda9d6f2fd0a",
+  "limits": "Exit0 means full gate plus exact-source guard/tag push chain; publication and installed state require independent readback."
+}
