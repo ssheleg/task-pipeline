@@ -189,8 +189,12 @@ nodes. A frontier blocked by CI, review
 or another external wait goes on watchers, with the waits and their next actions recorded
 ([`continuity.md`](continuity.md) → *Waits outlive turns*); it is not completion or a new
 request for permission. An unresolved human gate stops its dependent work. When the board
-is empty, the run says so once. Until the graph has distinct wait states, its exit 4 alone
-cannot distinguish these cases: read the recorded reasons before choosing the next action.
+is empty, the run says so once. `graph.py next --wave N` returns 6 when only recorded
+watched waits hold that wave, following prerequisite leaves across wave boundaries.
+Keep their watchers armed; `wait` records their locators and `resume --wait-id`
+refuses stale events. Exit 4 retains mixed or unclassified barriers: read the reasons
+before choosing the next action. Neither code is proof of completion or authority
+([`work-graph.md`](work-graph.md) → *Watched external waits*).
 
 Research, the audit and the blind readings run in parallel agents; builds stay sequential
 wherever two of them share a seam ([`planning.md`](planning.md) → file ownership).

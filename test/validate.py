@@ -2961,7 +2961,7 @@ MODEL_TOKENS = {"default", "inherit"}
 # the subschema, and this block reads the subschema.
 GRAPH_SCHEMA_REL = f"{SKILL_DIR}/graph.schema.json"
 GRAPH_EXAMPLE_REL = f"{SKILL_DIR}/graph.example.json"
-GRAPH_STATUSES = {"pending", "running", "done", "blocked", "parked"}
+GRAPH_STATUSES = {"pending", "running", "done", "blocked", "parked", "waiting"}
 
 gschema = load_json(GRAPH_SCHEMA_REL)
 
