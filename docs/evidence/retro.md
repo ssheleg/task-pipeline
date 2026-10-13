@@ -1477,6 +1477,18 @@ three quarters of the work on this run.
 
 ## Releases that carry no stamp — stated, not stamped
 
+**`v1.94.0` and `v1.94.1` carry no stamp.** The former is a failed immutable
+tag: [release run 38386280311](https://github.com/ssheleg/task-pipeline/actions/runs/38386280311)
+rejected the missing declaration before creating a release; the publish job was
+skipped. Its green branch checks did not exercise a tag that did not yet exist.
+The latter is this bounded metadata and gap-record repair, declared before its
+candidate tag. Neither is a completed stage-10 run, and no stamp is backfilled.
+The local full run on the earlier source was aborted for disk pressure, not
+accepted as green. R-010 still requires the full suite on the locally tagged
+accepted source before any new tag push. See the
+[repair packet](runs/2026-10-13-release-1941/README.md) for source-bound checks and
+remaining release gates.
+
 **`v1.93.3` carries no stamp, declared before its tag.** It is a patch to the same wave 2,
 from a re-certification reading and an independent observer, inside the umbrella's
 waves run. The umbrella's retro stamps that run.

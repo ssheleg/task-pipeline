@@ -1,0 +1,9 @@
+{
+  "source": "01c5c06cd3c24cce94263be2687e3c6ff883b895",
+  "tag_object": "ded01a8b13cc83fcfe057c8146be0ebc9ff99ecc",
+  "type": "tag",
+  "remote_absent_at_creation": true,
+  "replaces_only_owned_unpublished_object": "b529896618b114a0278480a5191a05d2b603b172",
+  "pushed": false,
+  "full_gate": "NOT_RUN"
+}

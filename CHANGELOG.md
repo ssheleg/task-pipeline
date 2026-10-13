@@ -21,6 +21,13 @@ These are the fixes from verification round 6 of release iteration 1.
   nodes before each cycle, across every tool's branch prefixes. `build.md` adds a
   command-hygiene block that every background dispatch carries.
 
+## v1.94.1 — 2026-10-13
+
+Records the missing retrospective declarations that stopped the v1.94.0 release
+before publication. The accepted release-iteration payload is unchanged; the
+version metadata advances so the failed tag remains immutable. Local-tag
+structural validation reads both declarations before another release attempt.
+
 ## v1.94.0 — 2026-10-13
 
 Guards: 438 → **438**; property checks 15 → **15**. The owner validator and

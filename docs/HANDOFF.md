@@ -18,6 +18,18 @@ merged, and no version or publication is claimed.
 Next task: run round 7 of verification on this branch's head. Then route it to `main` through
 a PR, before or together with the v1.94.0 tag, as the release lead decides.
 
+## Release repair candidate — v1.94.1 (2026-10-13)
+
+The immutable v1.94.0 tag reached accepted main but its release failed the
+missing-retrospective-declaration guard; publication was skipped. This patch
+records both unstamped versions and synchronizes metadata without changing the
+accepted skill payload. The earlier candidate notes below are historical.
+
+[Repair packet](evidence/runs/2026-10-13-release-1941/README.md) owns current
+source, checks, unpublished local-tag handling and the exact next task. Independent
+audit, safe-disk full validation on the accepted local tag, normal integration and
+release/readback remain separate gates. No completed stage-10 stamp is claimed.
+
 ## Release candidate — v1.94.0 (2026-10-13)
 
 Five version surfaces now name v1.94.0 for the accepted release-iteration feature
