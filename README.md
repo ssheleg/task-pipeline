@@ -201,7 +201,7 @@ until it is installed.
 | 6–10 + any check you write | [`gates.md`](plugins/task-pipeline/skills/task-pipeline/references/gates.md) — the three axes, the promotion ladder, gate anatomy, the probe recipe, ratchet floors |
 | any agent-time enforcement | [`hooks.md`](plugins/task-pipeline/skills/task-pipeline/references/hooks.md) — the `PreToolUse` contract, the fail-open hazard, the Claude-Code-only limit |
 | 7 · the tag | [`deploy-targets.md`](plugins/task-pipeline/skills/task-pipeline/references/deploy-targets.md) → *When the release waits for an approval* — `pipeline.json` → `release.approval`: `checks` (tag, watch the run selected by the tag, report) or `reviewers` (the direct link to the run that is `waiting`) |
-| between stages | [`continuity.md`](plugins/task-pipeline/skills/task-pipeline/references/continuity.md) Part 3 — workflow memory through Observatory, a planned handoff (`stage_checkpoint.py handoff` / `accept`), and `hooks/memory-nudge.sh`, which reminds once when a gate returned with no memory line after it |
+| between stages | [`continuity.md`](plugins/task-pipeline/skills/task-pipeline/references/continuity.md) Part 3 — workflow memory through Observatory, a planned handoff (`stage_checkpoint.py handoff` / `accept`), and `hooks/memory-nudge.sh`, which reminds once when a gate returned with no memory line after it — unless the run recorded memory unavailable with `--for-run` |
 
 **Ported, not depended on.** Stage 0 is adapted from
 [Matt Pocock's `grilling` / `grill-with-docs`](https://github.com/mattpocock/skills)
@@ -471,6 +471,26 @@ close pass verifies, runs one fix round, updates the docs, re-measures the inven
 and re-cuts what is left. The run takes the next wave without asking; a board too big
 for one release becomes a program, carried on the canvas, never dropped.
 
+**The project moves in releases, not fix by fix**
+([`iteration.md`](plugins/task-pipeline/skills/task-pipeline/references/iteration.md)).
+A finding joins the inventory; only a closed five-entry hotfix lane ships alone. Each
+iteration runs in this order:
+- the survey;
+- module dossiers written in parallel, laid onto one canvas until a pass changes nothing;
+- questions asked in rounds, never one at a time, while agents keep working;
+- a parallel build, each node checked the moment it lands: one round of three blind
+  readings for every node, and two or three passing rounds by its risk class (R2, R3 — one
+  of the three recorded adversarial);
+- one release, checked as released;
+- the next pool, handed to you grouped by module.
+
+Lessons carry over. Every install reads the project's retrospective, and keeps a local
+index of every project's lessons on the machine (`scripts/lessons.py`), which stage 0
+queries by the task's nouns. Where the session lists Project Observatory, agents also write
+their lessons there — that works today. Reading them back from the store needs an engine
+whose search filters by kind; until the session's engine has it, the ledger says
+`shared lessons: unfilterable` and only the local index is read.
+
 ### Loop guard — churn is detected, not endured
 
 Any repeating pass can start undoing the previous one: two shapes alternating, the
@@ -614,7 +634,7 @@ must say so.
 ### Held to Anthropic's own Skill authoring guidance
 
 Audited against the four Agent Skills pages. Most of it already held — `name`
-13/64 chars, `description` 890/1024 chars, `SKILL.md` 268/500 lines, all 40 references
+13/64 chars, `description` 887/1024 chars, `SKILL.md` 270/500 lines, all 41 references
 linked **directly** from `SKILL.md`, and the bundle far under the 30 MB ceiling. What
 did not, now does:
 
@@ -874,8 +894,8 @@ npx github:ssheleg/task-pipeline          # straight from GitHub
 npx task-pipeline-skill                   # from the npm registry
 ```
 (package is `task-pipeline-skill` — the unscoped `task-pipeline` name is taken
-on npm; installs the same skill + `/task-pipeline` command into `~/.claude`,
-idempotent, `--force` to overwrite)
+on npm; installs the same three skills + `/task-pipeline` command into `~/.claude` as
+the plain-skill path below, idempotent, `--force` to overwrite)
 
 **Moving the paperwork off the legacy directory name — optional, always:**
 ```bash
@@ -902,9 +922,21 @@ Rules. The rule is self-contained (no external links), so it works copied anywhe
 git clone https://github.com/ssheleg/task-pipeline
 cd task-pipeline && ./install.sh
 ```
-(copies the skill into `~/.claude/skills/task-pipeline` and the `/task-pipeline`
-command into `~/.claude/commands/`; idempotent — rerun skips existing installs,
-`./install.sh --force` overwrites)
+(copies the plugin's three skills — `task-pipeline`, `evidence-docs`, `project-audit` —
+into `~/.claude/skills/<name>` and the `/task-pipeline` command into
+`~/.claude/commands/`; idempotent — rerun skips existing installs, `./install.sh --force`
+overwrites. **What it cannot carry, and says so at the end of the run:** the role agents
+(`plugins/task-pipeline/agents/`, which then run on the main thread) and the hooks
+(`build-gate`, `gate-observer`, `memory-nudge`, `release-gate`, `run-lifecycle`, so the
+gates are held by the doctrine and the run ledger rather than by the harness). Both
+arrive only with the plugin above. Both installers refuse while the plugin is installed,
+because a plain copy would shadow it.)
+
+**Optional companion — Project Observatory.** Workflow checkpoints, planned handoffs
+between executors and the shared lesson store come from a separately installed public
+engine, [passioncode-ai/project-observatory-dashboard](https://github.com/passioncode-ai/project-observatory-dashboard)
+(its README: *Install*, *MCP*). Without it every one of those degrades to one ledger line
+and the run continues.
 
 ### Updating
 
@@ -929,8 +961,8 @@ the same Claude Code install yields a duplicate, shadowing skill.
 | Claude Code (plugin) | `claude plugin marketplace update task-pipeline` → `claude plugin update task-pipeline@task-pipeline` → restart |
 | Any agent (skills CLI) | `npx skills update task-pipeline --global --yes`; to add: repeated `--agent <name>` (never `claude-code` when the plugin is installed) |
 | Cursor | skills CLI (above) with `--agent cursor`, or re-copy the `.mdc` per project |
-| npm | `npx task-pipeline-skill@latest` / `npx github:ssheleg/task-pipeline` (ephemeral — always latest) |
-| Plain skill | `git pull && ./install.sh --force` |
+| npm | `npx task-pipeline-skill@latest --force` / `npx github:ssheleg/task-pipeline --force` — `--force` brings all three skills and the command to that version; without it an existing install is skipped, and a partial one is refused as mixed versions |
+| Plain skill | `git pull && ./install.sh --force` (all three skills and the command) |
 
 ### Prerequisites
 
@@ -970,6 +1002,7 @@ recommendation, so you arm the whole run in one exchange. Detail:
 | [`templates/`](plugins/task-pipeline/skills/task-pipeline/templates/README.md) | brief, carry-over ledger, `CONTEXT.md` and ADR skeletons, the doc map, both registers, the retro and its archive, the seeded `docgate.sh` and `hygiene.sh`, a worked hook |
 | [`references/adoption.md`](plugins/task-pipeline/skills/task-pipeline/references/adoption.md) | the first run in a project: greenfield seeding, and the brownfield walkthrough |
 | [`references/waves.md`](plugins/task-pipeline/skills/task-pipeline/references/waves.md) | wave mode: the whole board as one inventory, one canvas of the target state, one question batch, then waves that each close in one pass |
+| [`references/iteration.md`](plugins/task-pipeline/skills/task-pipeline/references/iteration.md) | release iteration: the loop around the waves — dossiers, integration until it converges, question rounds, checks as each node lands (R1–R3), one release checked as released, the next pool, the shared lesson store |
 | [`references/setup.md`](plugins/task-pipeline/skills/task-pipeline/references/setup.md) | the entry audit: seven passes over the docs a project already has, offered once, output as a fix plan |
 | [`references/portability.md`](plugins/task-pipeline/skills/task-pipeline/references/portability.md) | the manifest of workflow decisions and their homes in the bundle, and the boundary against a project's own answers |
 | [`references/learned.md`](plugins/task-pipeline/skills/task-pipeline/references/learned.md) | rules earned by failure on a real multi-repository build, each with its incident, its check and its exit criterion — the table is the count, and it grows |

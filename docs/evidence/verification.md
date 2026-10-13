@@ -1,5 +1,24 @@
 # Verification — task-pipeline
 
+## Shipped state — v1.94.0 (release target; NOT SHIPPED yet)
+
+This version header binds the candidate artifact for the release validator. It does
+not certify publication: the latest published release remains v1.93.3. Current
+source evidence is linked below; exact final-head, release and installed receipts
+are still pending. Earlier verification rows are preserved without new stamps.
+
+## Current evidence boundary — 2026-10-13
+
+Published v1.93.3 and the accepted release-iteration feature are separate states.
+The current entry is [HANDOFF](../HANDOFF.md); [feature integration evidence](runs/2026-10-13-feature-integration.json) binds the latest accepted PR119 candidate, its real hosted jobs and feature merge.
+The [R07–R16 map](runs/2026-10-13-r07-r16-acceptance.md) separates source checks from missing live-service acceptance. A new release remains pending.
+
+The historical rows below retain their original confirmation fields. A `never`
+cell means that row was not stamped by its original recording run; the adjacent
+reported test narrative is not independent confirmation and does not certify a
+newer source. Current receipts above take precedence for their named source and
+scope. No blanket re-certification or installed/model-quality claim is made.
+
 ## Shipped state — v1.93.3 (2026-10-12; a patch to wave 2 from a re-certification reading and an independent observer)
 
 | REQ | What ships | How it was confirmed | Confirmed |

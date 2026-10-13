@@ -5,7 +5,7 @@ rm -rf /tmp/rt10-copy && cp -R . /tmp/rt10-copy
 python3 - <<'EOF'
 p = "/tmp/rt10-copy/plugins/task-pipeline/skills/task-pipeline/SKILL.md"
 t = open(p, encoding="utf-8").read()
-n = 'answering a question, explaining code'
+n = 'answering a question, explaining'
 assert n in t, "PLANT DID NOT LAND: rt10"
 open(p, "w", encoding="utf-8").write(t.replace(n, 'answering a question, describing code', 1))
 EOF

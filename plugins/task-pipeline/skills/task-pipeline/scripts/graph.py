@@ -32,7 +32,9 @@ conditional on the code, never merely sequenced after it):
     1  a refusal — an invariant violated, a malformed verdict, a missing reason
     2  usage
     3  nothing left to do: every node is done
-    4  nothing runnable: what remains is blocked or parked
+    4  nothing runnable: an unclassified, running or parked dependency remains
+    5  external execution lease contention
+    6  nothing runnable: all remaining dependency leaves are recorded watched waits
 
 **The mutation verbs never leave a half-written queue.** `add` and `park` write to a
 temp file in the same directory and `os.replace` it into place, so a crash mid-write
@@ -86,14 +88,24 @@ ROLES = {
 # change (`add`/`invalidate` with a revision), never an implicit unblock.
 TERMINAL = {"done", "parked"}
 NO_GRAPH = {"producer", "doctrine"}
-# One place, and the schema enumerates the same three. Two homes for this set is
-# what let `close` write a verb the format forbade.
-REVISION_VERBS = {"add", "park", "close", "invalidate", "waive", "wave"}
-# Parking a node PROMOTES its dependents: `parked` is terminal, so anything
-# blocked on it becomes runnable even though the payload it waited on never
-# arrived. That is deliberate — `can_continue_around` in the verdict is the
-# same idea — but it is a real consequence of parking a blocker rather than a
-# leaf, and it is written here because the frontier will not explain it.
+STATUSES = {"pending", "running", "done", "blocked", "parked", "waiting"}
+WAIT_KINDS = {"ci", "review", "peer", "release", "time", "lease"}
+# The schema enumerates the same mutation verbs.
+REVISION_VERBS = {"add", "park", "close", "invalidate", "waive", "wave", "risk", "wait", "resume"}
+
+
+def wait_errors(record):
+    if not isinstance(record, dict) or set(record) != {"id", "kind", "watcher"}:
+        return ["waiting_on must contain exactly id, kind and watcher"]
+    out = []
+    if not isinstance(record['id'], str) or not re.fullmatch(r"[a-f0-9]{32}", record['id']):
+        out.append("waiting_on.id must be a 32-character hexadecimal wait identity")
+    if not isinstance(record['kind'], str) or record['kind'] not in WAIT_KINDS:
+        out.append("waiting_on.kind is not a supported external wait")
+    if (not isinstance(record['watcher'], str) or not record['watcher'].strip()
+            or any(c in record['watcher'] for c in "\r\n")):
+        out.append("waiting_on.watcher needs a nonblank single-line locator")
+    return out
 
 
 def die(msg, code=1):
@@ -207,6 +219,15 @@ def violations(graph):
         if not isinstance(nid, str) or not ID_SHAPE.match(nid):
             out.append(f"node id {nid!r} is not the shape `N-001` the schema requires — "
                        "and an id nothing can parse is an id no verdict can cite")
+        status = n.get("status")
+        if not isinstance(status, str) or status not in STATUSES:
+            out.append(f"{nid}: unknown status {status!r}")
+        if status == "waiting":
+            out.extend(f"{nid}: {err}" for err in wait_errors(n.get("waiting_on")))
+            if n.get("claim") is not None:
+                out.append(f"{nid}: a waiting node cannot carry an execution claim")
+        elif "waiting_on" in n:
+            out.append(f"{nid}: waiting_on is only admitted on a waiting node")
         owner = n.get("owner")
         if owner not in ROLES:
             near = [r for r in sorted(ROLES) if r[:4] == (owner or "")[:4]]
@@ -276,6 +297,14 @@ def violations(graph):
                        f"{', '.join(SURFACE_CLASSES)}. A class nobody recognises requires no "
                        "visual reading, so a typo here would drop the tier that reads the pixels")
 
+        # The risk class (`references/iteration.md` → *Verification starts when a node
+        # lands*) sets how many certification rounds a node owes. A class outside the three
+        # would owe an unknown number, and the cheapest misreading is one round.
+        if "risk" in n and n["risk"] not in RISK_CLASSES:
+            out.append(f"{nid}: risk is {n['risk']!r} — it must be one of "
+                       f"{', '.join(RISK_CLASSES)}; a class nobody recognises owes no known "
+                       "number of rounds")
+
         # Wave mode (`references/waves.md`). `True` is an int in Python, and a wave of
         # `true` is a typo the ordering check below would read as wave 1.
         if "wave" in n and not _is_wave(n["wave"]):
@@ -344,6 +373,8 @@ def violations(graph):
         if not isinstance(r, dict):
             out.append(f"revisions[{i}] is not an object")
             continue
+        if "waiting_on" in r:
+            out.extend(f"revisions[{i}]: {err}" for err in wait_errors(r['waiting_on']))
         if r.get("verb") not in REVISION_VERBS:
             out.append(f"revisions[{i}] records verb {r.get('verb')!r}, which is not one of "
                        f"{sorted(REVISION_VERBS)} — the schema enumerates them and "
@@ -459,7 +490,7 @@ def frontier(graph):
     by_id = {n.get("id"): n for n in nodes}
     ready = []
     for n in nodes:
-        if n.get("status") in TERMINAL or n.get("status") == "running":
+        if n.get("status") not in ("pending", "blocked"):
             continue
         blockers = n.get("blocked_by") or []
         if all(by_id.get(b, {}).get("status") == "done" for b in blockers):
@@ -621,6 +652,45 @@ TIERS = ("unit", "seam", "product")
 VISUAL_TIER = "visual"
 ALL_TIERS = TIERS + (VISUAL_TIER,)
 SURFACE_CLASSES = ("flagship", "product", "internal", "ad")
+RISK_CLASSES = ("R1", "R2", "R3")
+# Passing certification rounds a node owes before `close` accepts it, by risk class
+# (`references/certification.md` → *Rounds owed by risk class*). R3's must include one
+# round recorded `--kind adversarial`.
+ROUNDS_OWED = {"R1": 1, "R2": 2, "R3": 3}
+ROUND_KINDS = ("blind", "adversarial")
+
+
+def passing_rounds(cert):
+    """The kinds of the rounds that PASSED — every tier of the round `pass` — in order.
+
+    Owed rounds are passing rounds. `certification.round` counts every round, failed ones
+    too, so reading it let a fail followed by a pass satisfy an R2 node (verification round 3
+    of the release iteration). Rounds recorded before `kinds` existed count as `blind`."""
+    cert = cert or {}
+    history = list(cert.get("history") or [])
+    kinds = list(cert.get("kinds") or [])
+    kinds += ["blind"] * (len(history) - len(kinds))
+    return [k for h, k in zip(history, kinds) if h and all(v == "pass" for v in h.values())]
+
+
+def owed_shortfall(node):
+    """None when the node's class is satisfied, else a sentence saying what it still owes."""
+    owed = ROUNDS_OWED.get(node.get("risk"))
+    if not owed:
+        return None
+    passed = passing_rounds(node.get("certification"))
+    if len(passed) < owed:
+        return "%d of %d owed passing rounds" % (len(passed), owed)
+    if node.get("risk") == "R3" and "adversarial" not in passed:
+        cert = node.get("certification") or {}
+        kinds = list(cert.get("kinds") or [])
+        failed_adv = any(k == "adversarial" and not all(v == "pass" for v in (h or {}).values())
+                         for h, k in zip(cert.get("history") or [], kinds))
+        return ("%d of %d owed passing rounds, but none of them adversarial — %srun one that "
+                "passes with `--kind adversarial`"
+                % (len(passed), owed,
+                   "a FAILED adversarial round does not count; " if failed_adv else ""))
+    return None
 
 
 def _is_wave(w):
@@ -800,6 +870,36 @@ def cmd_next(graph, args):
                   f"alternative producer exists, change the edge explicitly",
                   file=sys.stderr)
     if not ready:
+        # Follow dependencies outside the selected wave as well. A wait does not
+        # hide an independently running/parked prerequisite behind its own label.
+        memo = {}
+        def held_by_wait(n):
+            nid = n['id']
+            if nid in memo:
+                return memo[nid]
+            if n.get('status') not in ('pending', 'blocked', 'waiting'):
+                memo[nid] = False
+                return False
+            deps = [_by_id[b] for b in n.get('blocked_by') or []
+                    if _by_id[b].get('status') != 'done']
+            memo[nid] = (all(held_by_wait(d) for d in deps)
+                         if deps else n.get('status') == 'waiting')
+            return memo[nid]
+        unresolved = [n for n in nodes if n.get('status') not in TERMINAL]
+        if unresolved and all(held_by_wait(n) for n in unresolved):
+            # Show each reachable watched leaf once; never print a runnable row.
+            todo = list(unresolved); seen = set()
+            while todo:
+                n = todo.pop()
+                if n['id'] in seen:
+                    continue
+                seen.add(n['id'])
+                if n.get('status') == 'waiting':
+                    w = n['waiting_on']
+                    print(f"waiting: {n['id']} {w['kind']} {w['id']} {w['watcher']}", file=sys.stderr)
+                todo.extend(_by_id[b] for b in n.get('blocked_by') or []
+                            if _by_id[b].get('status') != 'done')
+            return 6
         return 4
     # The frontier and nothing else. This is the line that enters a context on
     # every iteration of every loop, so every word here is paid for repeatedly.
@@ -882,6 +982,11 @@ def cmd_recover(graph, args):
     """External mode: reclaim an EXPIRED node for a new owner, minting a higher
     fence. A still-live claim is not recoverable (that is stealing a working
     node); this exits 5 while the lease holds."""
+    if violations(graph):
+        die("graph does not validate — run `validate` first", 1)
+    node = next((n for n in graph.get('nodes') or [] if n.get('id') == args.node), None)
+    if node is not None and node.get('status') == 'waiting':
+        die("node is waiting — resolve its recorded wait before recovery", 4)
     ea = _load_authority(args)
     try:
         auth = ea.authority_for(args.authority)
@@ -990,7 +1095,7 @@ def cmd_invalidate(graph, args):
     A proof is a claim about a tree; when an upstream contract moves, every
     descendant that was certified against the old contract is certified against
     a tree that no longer exists. So `invalidate` records a superseding revision
-    on the changed node and, for the node itself and each `done` DESCENDANT,
+    on the changed node and, for the node itself and each non-parked DESCENDANT,
     resets it to `pending`, clears its evidence / proof / certification, and
     records why. Nodes NOT downstream of the change keep their proof untouched —
     an invalidation that reached the whole graph would be a reason nobody runs
@@ -1013,6 +1118,9 @@ def cmd_invalidate(graph, args):
         if node.get("status") == "parked":
             continue  # a parked node stays parked; its reason still stands
         had_proof = node.get("status") == "done" or node.get("proof") or node.get("certification")
+        prior_wait = node.pop('waiting_on', None)
+        if prior_wait is not None:
+            revise(graph, 'invalidate', aid, why, waiting_on=prior_wait)
         node["status"] = "pending"
         node["evidence"] = None
         node["proof"] = None
@@ -1053,8 +1161,9 @@ class held:
     at once. `flock` releases when the process dies, which is why it is preferred over a
     lock FILE somebody has to clean up after a crash.
 
-    Where `fcntl` does not exist the mutation still runs and the run is TOLD it ran
-    unlocked — a silent downgrade is how a queue loses a node and nobody learns why.
+    A missing or failed lock refuses before reading or writing the graph. An atomic
+    replacement alone cannot prevent concurrent writers from losing an update.
+    Read-only verbs remain available where this platform has no `fcntl` support.
     """
 
     def __init__(self, path):
@@ -1065,9 +1174,8 @@ class held:
         try:
             import fcntl
         except ImportError:
-            print("note: no file locking on this platform — a concurrent mutation of "
-                  "%s could lose an update" % self.path, file=sys.stderr)
-            return self
+            die("graph mutation needs file locking on this platform — "
+                "nothing was written: %s" % self.path)
         d = os.path.dirname(self.path) or "."
         try:
             self.fh = open(os.path.join(d, ".graph.lock"), "a+")
@@ -1076,8 +1184,7 @@ class held:
             if self.fh:
                 self.fh.close()
                 self.fh = None
-            print("note: could not take the graph lock (%s) — proceeding unlocked" % e,
-                  file=sys.stderr)
+            die("could not take the graph lock (%s) — nothing was written" % e)
         return self
 
     def __exit__(self, *exc):
@@ -1086,7 +1193,7 @@ class held:
         return False
 
 
-def revise(graph, verb, node, why, precondition=None):
+def revise(graph, verb, node, why, precondition=None, waiting_on=None):
     """Append the revision. Both verbs call it; neither may skip it.
 
     `park` demanded a reason from the start and `add` demanded nothing, so half the
@@ -1102,6 +1209,8 @@ def revise(graph, verb, node, why, precondition=None):
     entry = {"verb": verb, "node": node, "why": why}
     if precondition:
         entry["precondition"] = precondition
+    if waiting_on is not None:
+        entry["waiting_on"] = waiting_on
     graph.setdefault("revisions", []).append(entry)
 
 
@@ -1115,6 +1224,44 @@ def guard(graph, path):
     if bad:
         die("%s was ALREADY invalid before this mutation — nothing was written. Fix "
             "these first:\n  %s" % (path, "\n  ".join(bad)))
+
+
+def cmd_wait(graph, args):
+    """Record or resolve a graph-local wait; never run a watcher locator."""
+    guard(graph, args.graph)
+    why = args.why.strip()
+    if not why or any(c in why for c in "\r\n"):
+        die("wait/resume needs a nonblank single-line --why — nothing was written")
+    node = next((n for n in graph['nodes'] if n['id'] == args.node), None)
+    if node is None:
+        die("no node %s — nothing was written" % args.node)
+    if node.get('claim') is not None:
+        die("node has a recorded execution claim — release it first; nothing was written")
+    if args.verb == 'wait':
+        if node['status'] not in ('pending', 'blocked'):
+            die("only pending or blocked nodes can wait — nothing was written")
+        import uuid
+        record = {'id': uuid.uuid4().hex, 'kind': args.kind, 'watcher': args.watcher}
+        bad = wait_errors(record)
+        if bad:
+            die('; '.join(bad) + ' — nothing was written')
+        node['status'] = 'waiting'
+        node['waiting_on'] = record
+    else:
+        if node['status'] != 'waiting':
+            die("node is not waiting — nothing was written")
+        record = node['waiting_on']
+        if args.wait_id != record['id']:
+            die("stale wait identity — nothing was written")
+        node.pop('waiting_on')
+        node['status'] = 'pending'
+    revise(graph, args.verb, args.node, why, waiting_on=record)
+    bad = violations(graph)
+    if bad:
+        die('wait transition would break the graph — nothing was written: ' + '; '.join(bad))
+    save(args.graph, graph)
+    print('%s %s: %s' % (args.node, args.verb, record['id']))
+    return 0
 
 
 def cmd_park(graph, args):
@@ -1147,7 +1294,7 @@ def cmd_park(graph, args):
 
     node["status"] = "parked"
     node["parked_reason"] = reason
-    revise(graph, "park", args.node, reason)
+    revise(graph, "park", args.node, reason, waiting_on=node.pop('waiting_on', None))
     bad = violations(graph)
     if bad:
         die("parking %s would break the graph — nothing was written:\n  %s"
@@ -1433,7 +1580,7 @@ def cmd_producer(graph, args):
 def cmd_doctrine(graph, args):
     """Which doctrine this run actually read — B-061.
 
-    The bundle is 40 reference files. A run reads some subset and nothing recorded which,
+    The bundle is 41 reference files. A run reads some subset and nothing recorded which,
     so **a skipped file and a read one were indistinguishable** — the class every guard in
     this repository exists to catch, left standing over the doctrine itself.
 
@@ -1526,6 +1673,8 @@ def cmd_certify(graph, args):
     node = by_id.get(nid)
     if node is None:
         die("no node %s in this graph — nothing was written" % nid)
+    if node.get("status") == "waiting":
+        die("node is waiting — resolve its recorded wait before certification/close; nothing was written")
     if node.get("status") in TERMINAL:
         die("%s is already %s — certifying it again would overwrite the record of the "
             "close that already happened" % (nid, node.get("status")))
@@ -1597,11 +1746,13 @@ def cmd_certify(graph, args):
     round_no = int(prior.get("round") or 0) + 1
     tiers_now = {x: reports[x]["verdict"] for x in tiers}
     history = list(prior.get("history") or []) + [tiers_now]
+    kinds = list(prior.get("kinds") or ["blind"] * (round_no - 1)) + [args.kind]
     node["certification"] = {
         "round": round_no,
         "tiers": tiers_now,
         "at": head or "unavailable — not inside a git checkout",
         "history": history,
+        "kinds": kinds,
     }
 
     failed = [x for x in tiers if tiers_now[x] == "fail"]
@@ -1692,6 +1843,16 @@ def cmd_certify(graph, args):
         fh.write("\n")
     os.replace(tmp, out)
     print("%s: certified at %s in round %d" % (nid, ", ".join(tiers), round_no))
+    owed = ROUNDS_OWED.get(node.get("risk"))
+    short = owed_shortfall(node)
+    if short:
+        print("round %d: %s — not closable yet. The next round reads the node's whole diff at "
+              "the new HEAD (references/certification.md → *Rounds owed by risk class*)."
+              % (round_no, short))
+        print("verdict written to %s" % out)
+        return 0
+    if owed:
+        print("%d of %d owed passing rounds — closable." % (len(passing_rounds(node["certification"])), owed))
     print("verdict written to %s — close it with:" % out)
     print("  graph.py close --verdict %s" % out)
     return 0
@@ -1733,6 +1894,8 @@ def cmd_close(graph, args):
     node = by_id.get(nid)
     if node is None:
         die("no node %s in this graph — nothing was written" % nid)
+    if node.get("status") == "waiting":
+        die("node is waiting — resolve its recorded wait before certification/close; nothing was written")
     if node.get("status") in TERMINAL:
         die("%s is already %s — a second close would overwrite the record of the first"
             % (nid, node.get("status")))
@@ -1794,6 +1957,14 @@ def cmd_close(graph, args):
     # verifier's judgement and close proceeds as before.
     cert = node.get("certification")
     exc = node.get("exception")
+    # Rounds owed by risk class (`references/certification.md`). Enforced here, in the
+    # mutation, for the reason the failing-tier gate below is: a hand-shaped verdict must
+    # not step around it. An authorized exception (`waive`) stays the only way past.
+    short = owed_shortfall(node)
+    if short and not exc:
+        die("%s is %s: %s — not closable yet. Run the next round with `graph.py certify`, "
+            "or record an authorized exception with `waive`. Nothing was written."
+            % (nid, node["risk"], short))
     if cert:
         tiers = cert.get("tiers") or {}
         failing = sorted(k for k, val in tiers.items() if val != "pass")
@@ -1899,6 +2070,8 @@ VERBS = {
     "coverage": (cmd_coverage, "every requirement and the nodes serving it; exits 1 on a gap"),
     "add": (cmd_add, "add a node mid-run"),
     "park": (cmd_park, "park a node, carrying the reason"),
+    "wait": (cmd_wait, "record a watched external wait, without executing its locator"),
+    "resume": (cmd_wait, "resolve the exact wait identity and return to pending"),
     "wave": (cmd_wave, "move a node to another wave, carrying the reason"),
     "certify": (cmd_certify, "require three independent tier reports (four on a "
                              "flagship or product surface), then emit the verdict "
@@ -1951,6 +2124,9 @@ def main(argv=None):
                         help="path to one tier report; pass three times, one per tier")
     p_cert.add_argument("--verdict-out", dest="verdict_out", default=None,
                         help="where to write the assembled verdict (default: beside the graph)")
+    p_cert.add_argument("--kind", choices=ROUND_KINDS, default="blind",
+                        help="the round's kind; R3 owes one `adversarial` round "
+                             "(references/certification.md → *Rounds owed by risk class*)")
     p_cert.add_argument("--ceiling", type=int, default=3,
                         help="rounds after which the output names the churning tier; it "
                              "measures rather than stops (references/loop-guard.md)")
@@ -1996,11 +2172,18 @@ def main(argv=None):
     # that was given from a reason that was written, and only the second is REQ-012.
     p_park.add_argument("--reason", required=True)
 
+    for verb in ('wait', 'resume'):
+        made[verb].add_argument('node')
+        made[verb].add_argument('--why', required=True)
+    made['wait'].add_argument('--kind', required=True, choices=sorted(WAIT_KINDS))
+    made['wait'].add_argument('--watcher', required=True)
+    made['resume'].add_argument('--wait-id', required=True)
+
     args = ap.parse_args(argv)
     verbs = {k: v[0] for k, v in VERBS.items()}
     if args.verb in NO_GRAPH:
         return verbs[args.verb](None, args)
-    if args.verb in ("add", "park", "wave", "close", "certify", "invalidate", "waive"):
+    if args.verb in ("add", "park", "wave", "close", "certify", "invalidate", "waive", "wait", "resume"):
         # The READ happens inside the lock too. Loading first and locking second is the
         # same lost update with an extra step: the stale copy is already in memory.
         with held(args.graph):

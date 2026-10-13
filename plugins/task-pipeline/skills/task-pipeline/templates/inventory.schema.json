@@ -1,0 +1,94 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/ssheleg/task-pipeline/blob/main/plugins/task-pipeline/skills/task-pipeline/templates/inventory.schema.json",
+  "title": "inventory/1 — <artifacts>/specs/YYYY-MM-DD-<topic>-inventory.json",
+  "description": "Wave 0's single machine-readable inventory: one item per open item of the board, every survey and every harvested source (references/waves.md, Wave 0). scripts/waves.py merges audit outputs into it (`merge`), writes `module`, `node`, `wave` and `release` from two short tables (`assign`), counts it (`count`) and refuses an item that lands nowhere (`validate`). The document is an object carrying `schema` and `items`; a bare array of items is read as the items of one. Fields a project needs beyond these go under an `x-` prefix.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "items"],
+  "properties": {
+    "schema": {"const": "inventory/1"},
+    "topic": {"type": "string"},
+    "items": {"type": "array", "items": {"$ref": "#/$defs/item"}}
+  },
+  "$defs": {
+    "item": {
+      "type": "object",
+      "additionalProperties": false,
+      "patternProperties": {"^x-[a-z0-9-]+$": {}},
+      "required": ["id", "title", "area", "kind", "severity", "evidence", "proposed_fix"],
+      "properties": {
+        "id": {
+          "description": "The item's id in its owning register. An item without one gets one there, in the same change. Unique across the inventory.",
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9._-]{0,63}$"
+        },
+        "title": {"type": "string", "minLength": 3},
+        "area": {"description": "The part of the system it touches.", "type": "string", "minLength": 1},
+        "kind": {
+          "description": "What sort of item: e.g. bug, gap, weak-impl, contradiction, doc-wrong, doc-missing, plan.",
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]*$"
+        },
+        "severity": {"enum": ["critical", "high", "medium", "low", "info"]},
+        "evidence": {
+          "description": "The receipt: file:line at a commit, or a command and its output. A finding is a fact with a receipt, never an impression.",
+          "oneOf": [
+            {"type": "string", "minLength": 3},
+            {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 3}}
+          ]
+        },
+        "proposed_fix": {"type": "string", "minLength": 1},
+        "status": {
+          "description": "As measured, not as the register last said. Absent means open. Every value but open and changed is terminal; carried means release program with a reason.",
+          "enum": ["open", "changed", "closed", "fixed", "fixed-elsewhere", "duplicate", "moved", "stale", "not-reproduced", "carried"],
+          "default": "open"
+        },
+        "source": {"description": "Where it was found, when that differs from the evidence: a register row as file:line, or the command that surfaced it.", "type": "string"},
+        "source_file": {"description": "The survey output it was merged from (written by `waves.py merge`).", "type": "string"},
+        "repo": {"type": "string"},
+        "module": {"description": "The dossier cluster it belongs to (written by `waves.py assign` from the module table).", "type": "string"},
+        "node": {
+          "description": "The canvas nodes that close it, in wave order (written by `waves.py assign` from the plan's `closes`).",
+          "type": "array",
+          "items": {"type": "string"},
+          "uniqueItems": true
+        },
+        "wave": {"description": "The wave that closes it: the last wave among its nodes. Null when it is carried to a later release.", "type": ["integer", "null"], "minimum": 1},
+        "release": {"enum": ["this", "program"]},
+        "register_id": {"type": ["string", "null"]},
+        "blocked_by": {"type": "array", "items": {"type": "string"}},
+        "closable_in_one_pass": {"type": "boolean"},
+        "needs_operator": {"type": "boolean"},
+        "notes": {"type": "string"}
+      }
+    },
+    "modules": {
+      "description": "The module table `assign --modules` reads: module name -> the item ids it holds. An id in two modules is refused. Edited as the canvas is cut; a re-cut is a diff to this table.",
+      "type": "object",
+      "additionalProperties": {"type": "array", "items": {"type": "string"}, "uniqueItems": true}
+    },
+    "plan": {
+      "description": "The wave plan `assign --plan` and `sync-graph` read: any JSON whose `nodes` lists {id, wave, closes}. A work graph that carries `closes` on its nodes is one. A node whose wave is not an integer is carried (`release: program`).",
+      "type": "object",
+      "required": ["nodes"],
+      "properties": {
+        "nodes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id"],
+            "properties": {
+              "id": {"type": "string"},
+              "graph_id": {"type": "string", "pattern": "^N-[0-9]{3,}$", "description": "The work-graph node this canvas node is built as, where the two ids differ; `sync-graph` moves that node."},
+              "wave": {"type": ["integer", "null"], "minimum": 1},
+              "closes": {"type": "array", "items": {"type": "string"}},
+              "release": {"enum": ["this", "program"]},
+              "risk": {"enum": ["R1", "R2", "R3"], "description": "The node's risk class; `sync-graph` writes it onto the work-graph node (a lowering needs --lower-why), and `graph.py close` enforces the rounds it owes."}
+            }
+          }
+        }
+      }
+    }
+  }
+}

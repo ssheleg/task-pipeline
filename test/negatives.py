@@ -199,15 +199,20 @@ def sweep(paths):
 
 
 def main(argv):
-    args = argv[1:]
-    only = None
-    if "-k" in args:
-        only = args[args.index("-k") + 1].lower()
-    listing = "--list" in args
+    # Parse before scanning, locking or copying. Unknown flags must not silently
+    # trigger the entire destructive-fixture suite (observed with --help).
+    import argparse
+    parser = argparse.ArgumentParser(description=__doc__, allow_abbrev=False)
+    parser.add_argument("-k", metavar="PATTERN")
+    parser.add_argument("--list", action="store_true")
+    parser.add_argument("--shard", metavar="INDEX/TOTAL")
+    parsed = parser.parse_args(argv[1:])
+    only = parsed.k.lower() if parsed.k is not None else None
+    listing = parsed.list
     _shard = None
-    if "--shard" in args:
+    if parsed.shard is not None:
         try:
-            _shard = parse_shard((args[args.index("--shard") + 1:] or [""])[0])
+            _shard = parse_shard(parsed.shard)
         except ValueError as exc:
             print(f"FAIL: {exc}")
             return 2

@@ -139,6 +139,19 @@ MALFORMED = [
      "`path`"),
     ("duplicate declaration", _mut(lambda g: g["sources"].append(dict(g["sources"][0]))),
      "duplicate declaration"),
+    # What the docstring claims and the checker did not enforce (round 2 of the iteration's
+    # verification): every source, not only a task table, and no key the schema lacks.
+    ("unknown source key", _mut(lambda g: g["sources"][0].update(owner="someone")), "unknown key `owner`"),
+    ("unknown top-level key", _mut(lambda g: g.update(extra=1)), "unknown key `extra`"),
+    ("heading not a string", _mut(lambda g: g["sources"][0].update(heading=3)), "`heading`"),
+    ("free-form idPattern on a context source", _mut(lambda g: g["sources"][3].update(idPattern="(a)")),
+     "`idPattern`"),
+    ("duplicate excludeIds on a context source", _mut(lambda g: g["sources"][3].update(excludeIds=["X", "X"])),
+     "`excludeIds`"),
+    ("defaultStatus other than open on a checklist", _mut(lambda g: g["sources"][1].update(defaultStatus="done")),
+     "`defaultStatus`"),
+    ("empty statusColumn on a json-tasks source", _mut(lambda g: g["sources"][2].update(statusColumn=" ")),
+     "`statusColumn`"),
 ]
 
 
@@ -182,8 +195,29 @@ def case_doctrine_names_script():
     print("PASS: the doctrine and the script name each other")
 
 
+def case_hand_rules_without_jsonschema():
+    """The hand rules alone — `jsonschema` made unimportable — refuse what the schema refuses:
+    a blank idColumn or titleColumn on ANY source, not only on a table."""
+    with tempfile.TemporaryDirectory(prefix="tp-bsrc-nojs-") as stub:
+        pkg = pathlib.Path(stub) / "jsonschema"
+        pkg.mkdir()
+        (pkg / "__init__.py").write_text("raise ImportError('hidden for this case')\n")
+        env = dict(os.environ, PYTHONPATH=stub)
+        for name, fn in (("blank idColumn on a checklist", lambda g: g["sources"][1].update(idColumn=" ")),
+                         ("blank titleColumn on a context source", lambda g: g["sources"][3].update(titleColumn=""))):
+            with tempfile.TemporaryDirectory(prefix="tp-bsrc-") as t:
+                d = repo(t, _mut(fn))
+                r = subprocess.run([sys.executable, str(SCRIPT), "--root", str(d)], capture_output=True,
+                                   text=True, timeout=60, env=env)
+                ok(r.returncode == 1 and ("idColumn" in r.stderr or "titleColumn" in r.stderr)
+                   and "schema:" not in r.stderr,
+                   f"{name}: refused by the hand rules alone ({r.returncode}: {r.stderr.strip()})")
+    print("PASS: without jsonschema the hand rules refuse a blank column name on any source")
+
+
 if __name__ == "__main__":
     for case in (case_no_manifest, case_good_manifest, case_malformed, case_symlinked_source,
-                 case_undeclared_finding, case_doctrine_names_script):
+                 case_undeclared_finding, case_doctrine_names_script,
+                 case_hand_rules_without_jsonschema):
         case()
     print(f"PASS: backlog_sources.py — {CASES} cases")

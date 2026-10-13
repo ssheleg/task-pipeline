@@ -2093,6 +2093,135 @@ def _():
         assert p.read_bytes() == before, "a refused move wrote to the file: %r" % (args,)
 
 
+@case("a node's risk class (R1-R3) validates under the schema and graph.py; any other value is refused by both")
+def _():
+    import json as _j
+    schema = _j.loads((ROOT / "plugins/task-pipeline/skills/task-pipeline"
+                       "/graph.schema.json").read_text())
+    for risk, good in (("R1", True), ("R2", True), ("R3", True), ("R4", False), ("high", False)):
+        n = node("N-001")
+        n["risk"] = risk
+        gr = g([n])
+        code, out = run_out(gr, "validate")
+        assert (code == 0) == good, "graph.py validate on risk %r: exit %d %s" % (risk, code, out)
+        try:
+            import jsonschema
+        except ImportError:
+            skipped.append("risk under jsonschema: not installed")
+            continue
+        try:
+            jsonschema.validate(gr, schema); ok_s = True
+        except jsonschema.ValidationError:
+            ok_s = False
+        assert ok_s == good, "the schema on risk %r says %s" % (risk, ok_s)
+
+
+@case("certify: rounds owed by risk class: an R3 node is not closable after one passing round, nor after three with no adversarial one")
+def _():
+    gp_node = node("N-001")
+    gp_node["risk"] = "R3"
+    code, out, d = certify(g([gp_node]), three())
+    assert code == 0 and "1 of 3 owed" in out and "not closable yet" in out \
+        and "close it with" not in out, out
+    gpath = str(pathlib.Path(d) / "graph.json")
+    vp = str(pathlib.Path(d) / "verdict-N-001.json")
+    r = subprocess.run([sys.executable, str(GRAPH), "close", "--verdict", vp, "--graph", gpath],
+                       capture_output=True, text=True)
+    assert r.returncode != 0 and "1 of 3" in (r.stdout + r.stderr), r.stdout + r.stderr
+    certify(None, three(), workdir=d)
+    code, out, _ = certify(None, three(), workdir=d)
+    assert code == 0 and "3 of 3 owed" in out and "none of them adversarial" in out, out
+    r = subprocess.run([sys.executable, str(GRAPH), "close", "--verdict", vp, "--graph", gpath],
+                       capture_output=True, text=True)
+    assert r.returncode != 0 and "adversarial" in (r.stdout + r.stderr), \
+        "three blind rounds closed an R3 node: " + r.stdout + r.stderr
+
+
+@case("certify: rounds owed by risk class: an R3 node closes after three passing rounds, one of them adversarial; an R1 after one")
+def _():
+    gp_node = node("N-001")
+    gp_node["risk"] = "R3"
+    _, _, d = certify(g([gp_node]), three())
+    certify(None, three(), workdir=d)
+    code, out, _ = certify(None, three(), "--kind", "adversarial", workdir=d)
+    assert code == 0 and "close it with" in out, out
+    gpath = pathlib.Path(d) / "graph.json"
+    kinds = json.loads(gpath.read_text())["nodes"][0]["certification"]["kinds"]
+    assert kinds == ["blind", "blind", "adversarial"], kinds
+    r = subprocess.run([sys.executable, str(GRAPH), "close", "--verdict",
+                        str(pathlib.Path(d) / "verdict-N-001.json"), "--graph", str(gpath)],
+                       capture_output=True, text=True)
+    assert r.returncode == 0, r.stdout + r.stderr
+    one = node("N-001")
+    one["risk"] = "R1"
+    code, out, d1 = certify(g([one]), three())
+    assert code == 0 and "close it with" in out, out
+    r = subprocess.run([sys.executable, str(GRAPH), "close", "--verdict",
+                        str(pathlib.Path(d1) / "verdict-N-001.json"),
+                        "--graph", str(pathlib.Path(d1) / "graph.json")], capture_output=True, text=True)
+    assert r.returncode == 0, r.stdout + r.stderr
+
+
+@case("certify: rounds owed count PASSING rounds: a failed round owes its replacement, and the adversarial round must pass")
+def _():
+    def failing():
+        r = three()
+        r[1].update(verdict="fail", confirms=[], findings=[breaks()])
+        return r
+
+    def try_close(d):
+        r = subprocess.run([sys.executable, str(GRAPH), "close", "--verdict",
+                            str(pathlib.Path(d) / "verdict-N-001.json"),
+                            "--graph", str(pathlib.Path(d) / "graph.json")], capture_output=True, text=True)
+        return r.returncode, r.stdout + r.stderr
+
+    def risky(cls):
+        n = node("N-001")
+        n["risk"] = cls
+        return g([n])
+
+    # R2: fail, pass -> one passing round of two
+    _, _, d = certify(risky("R2"), failing())
+    certify(None, three(), workdir=d)
+    code, out = try_close(d)
+    assert code != 0 and "1 of 2" in out, "R2 fail,pass closed or misreported: " + out
+    # R3: fail, fail, adversarial pass -> one passing round of three
+    _, _, d = certify(risky("R3"), failing())
+    certify(None, failing(), workdir=d)
+    certify(None, three(), "--kind", "adversarial", workdir=d)
+    code, out = try_close(d)
+    assert code != 0 and "1 of 3" in out, "R3 fail,fail,adv-pass closed: " + out
+    # R3: pass, pass, adversarial FAIL, pass -> three passes, none adversarial
+    _, _, d = certify(risky("R3"), three())
+    certify(None, three(), workdir=d)
+    certify(None, failing(), "--kind", "adversarial", workdir=d)
+    certify(None, three(), workdir=d)
+    code, out = try_close(d)
+    assert code != 0 and "adversarial" in out, "R3 with a FAILED adversarial round closed: " + out
+    # R3: adversarial pass first, then pass, pass -> closes
+    _, _, d = certify(risky("R3"), three(), "--kind", "adversarial")
+    certify(None, three(), workdir=d)
+    code, out, _ = certify(None, three(), workdir=d)
+    assert code == 0 and "close it with" in out, out
+    code, out = try_close(d)
+    assert code == 0, "R3 adv-pass,pass,pass refused: " + out
+
+
+@case("owed rounds message: a FAILED adversarial round is named only when one actually failed")
+def _():
+    n = node("N-001")
+    n["risk"] = "R3"
+    _, _, d = certify(g([n]), three())
+    certify(None, three(), workdir=d)
+    code, out, _ = certify(None, three(), workdir=d)
+    assert "none of them adversarial" in out and "FAILED adversarial" not in out, out
+    failing = three()
+    failing[1].update(verdict="fail", confirms=[], findings=[breaks()])
+    certify(None, failing, "--kind", "adversarial", workdir=d)
+    code, out, _ = certify(None, three(), workdir=d)
+    assert "FAILED adversarial" in out, out
+
+
 # Before the verdict, and the position matters: `report()` is idempotent (the atexit
 # registration would find `_reported` already set), so a case defined BELOW this line
 # is created after the accounting and never appears in it. Found by planting a failing

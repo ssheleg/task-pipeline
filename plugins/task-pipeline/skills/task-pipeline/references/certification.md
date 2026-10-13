@@ -21,6 +21,7 @@ queue is — graph or plan — is what decides, not the mood of the closer.
 - The report, and where each field lands
 - The commands
 - The fix cycle, and its ceiling
+- Rounds owed by risk class
 - What this costs, said out loud
 - Rationalizations
 
@@ -217,9 +218,52 @@ has failed **every** round. A run spinning on one level needs the operator to se
 *which* level:
 
 - the same tier every round → the level is being misread, or the node is the wrong
-  shape. Not one fix away. Re-plan the node, do not attempt round four.
+  shape. Not one fix away. Re-plan the node, do not attempt another failing round. (An R3
+  node's owed rounds are not this count — *Rounds owed by risk class*, below.)
 - different tiers each round → churn across levels. Usually one requirement that
   was never decided, surfacing at whichever distance looks at it.
+
+## Rounds owed by risk class
+
+In a release iteration a node carries `risk` (R1–R3, [`work-graph.md`](work-graph.md);
+[`iteration.md`](iteration.md) → *Verification starts when a node lands*), and the class
+decides how many **passing** rounds the node owes before `close` accepts it: **R1 one, R2
+two, R3 three, of which one is adversarial.** A round is the three blind tiers (four on a
+flagship or product surface) plus one fix cycle. `graph.py certify` prints `round N: k of M
+owed passing rounds — not closable yet` until the count is met (`k of M owed passing rounds —
+closable` once it is), and `graph.py close` refuses
+the verdict until then. **Only passing rounds count** — a round passes when every tier
+passes, read from `certification.history` — and, for R3, one of the passing rounds must be
+one recorded with `--kind adversarial`
+(`certification.kinds`, one entry per round). A node with a `risk` and no certification at
+all is refused by `close` too: its class owes at least one round.
+
+**What a round after a clean round reads.** The node's **whole diff at the new HEAD** — not
+the fix diff alone, and not the previous round's reports. A clean round proves the tree it
+read; the next owed round asks the same three distances again of the whole change as it
+stands, so a defect the first reading accepted has a second chance to be seen from a fresh
+context.
+
+**Owed rounds and the ceiling are different counts.** `--ceiling` measures churn: how many
+rounds a node has *failed*, and which tier keeps failing. An R3 node that owes three rounds
+and passes them is not "at round four" of anything; its owed rounds are the plan, and the
+ceiling's warning is about failing rounds beyond what the class owes. Read the ceiling's
+output only when rounds fail.
+
+**The adversarial round** (one of R3's three, on another model where one is available):
+1. **Plant defects in the change** — off-by-one in a limit, an inverted check, a dropped
+   error path — and require the node's own checks to fail on each. A plant that passes is a
+   finding against the check, not against the plant.
+2. **Model the external system's state across runs** — a policy edited between two runs, a
+   key or resource renamed, two writers at once, a provider that echoes a request back or
+   answers twice. The defects of a money or credential path live in the second run, not
+   the first.
+3. **Try the abuse cases** a caller outside the trust boundary would: inputs at and past
+   every bound, replays, a revoked identity, an out-of-order sequence.
+
+It is a different question, not a stricter reading: on 2026-10-12 one iteration's third
+round on a spend-limits node found three breaks of a money invariant that two blind rounds
+had passed. Record it with `certify --kind adversarial`.
 
 ## What this costs, said out loud
 

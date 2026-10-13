@@ -44,6 +44,7 @@ file exists to stop.
 - A fix to one call site closes a call site, not a class
 - The loop closes at stage 0
 - Where a lesson goes when it is not about this project
+- Recording to a shared lesson store, where the host has one
 - Publishing the insight — the skill learns from every project that runs it
 - The improvement iteration — what happens to a published insight next
 - What may leave the project — the redaction list
@@ -416,6 +417,28 @@ file that accumulates universal rules is a fork of the skill that nobody named.
 trigger and no authorization** — an instruction on rung 1 that everybody read as done.
 The rest of this section is the mechanism.
 
+## Recording to a shared lesson store, where the host has one
+
+**One job: let the next agent on another project read this lesson at its stage 0.** An
+entry whose class would be true in another project carries a `**Lesson:**` line — the class
+key, the class in one sentence, when it applies, 3–8 search nouns. That line makes it a
+*lesson* ([`lesson.schema.json`](../templates/lesson.schema.json), lesson/1): with task-pipeline installed, its `scripts/lessons.py add` puts it in the
+local index every install has, and where the session lists a shared lesson store (an
+Observatory) it is also recorded there, as a proposal. An entry without the line stays
+private to this project.
+
+**A lesson is not a publication, but the redaction list below binds it too — with one
+relaxation.** On this machine or estate (the local index, a shared store), rule 2 is relaxed
+for exactly two fields: the evidence commit and the pseudonymous project key (`p-` and 12 hex
+of the root commit, the same key in the store, never the repository's name or a
+`project:<slug>` id). A private repository's SHA names nothing; a public repository's SHA is
+searchable, so it stays in its field and never in text. Rules 1, 3, 4 and 5 still bind every
+text field: no path at all, no code or value, no person's, company's, customer's or
+product's name, a title that states the class. `retro.publish` strips the whole origin.
+The read side is source 7b of [`knowledge-sources.md`](knowledge-sources.md). Where no store exists the run
+says `shared lessons: absent` rather than nothing.
+Mechanics and the read and write recipes: [`iteration.md`](iteration.md) → *The learning loop*.
+
 ## Publishing the insight — the skill learns from every project that runs it
 
 **One job: stop a lesson dying in the repository that learned it.**
@@ -507,7 +530,9 @@ is what you want them to do.
 ## What may leave the project — the redaction list
 
 An issue is a **public artefact in someone else's repository**. What travels is the
-*class*; what stays is everything that identifies where it happened.
+*class*; what stays is everything that identifies where it happened. This list binds
+whatever leaves the estate, and every lesson too; *Recording to a shared lesson store*
+above names the one relaxation a lesson kept on this machine or estate gets.
 
 | Goes | Stays |
 |---|---|

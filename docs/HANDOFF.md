@@ -1,11 +1,59 @@
+## Release candidate — v1.94.0 (2026-10-13)
+
+Five version surfaces now name v1.94.0 for the accepted release-iteration feature
+and its independent fixes. This is a release candidate, not a publication claim.
+Published release remains v1.93.3 until an exact-SHA release run and npm payload
+readback prove otherwise. R30 owner gates merged through PR120 at9fb9cfb after genuine candidate checks.
+The final feature PR112 still governs main integration.
+
+Next: review this metadata diff, integrate via the feature branch, run the required
+checks on PR112's final head, then tag the normally merged source. Verify annotated
+tag, every release job, npm payload and installed copies before closing the hub pins.
+Historical verification rows below retain their original observations.
+
 # Start here — task-pipeline
 
-Snapshot: 2026-10-12. Released: **v1.92.0** (npm `task-pipeline-skill`, 2026-10-11), wave mode.
-Released: **v1.93.2** (v1.93.0's payload; the v1.93.0 and v1.93.1 tags published nothing — see CHANGELOG).
-In review: **v1.93.3** on `fix/w2-recert` — see the next section.
+## Current source state — 2026-10-13
+
+Published release remains **v1.93.3**. The accepted feature branch is
+[`feat/release-iteration` at its PR119 merge](https://github.com/ssheleg/task-pipeline/commit/3596355ae56bd067a243bd5d17a8d40aeec292a0).
+PR114 and PR115–119 are merged into that feature; PR112 is the pending route to
+`main`. No new version or publication is claimed for these changes.
 [Verification](evidence/verification.md) · [board](evidence/backlog.md) · [CHANGELOG](../CHANGELOG.md).
 
-## In flight — v1.93.3 (branch `fix/w2-recert`), a patch to wave 2
+The accumulated implementation contains the release-iteration loop, risk-based
+certification rounds, lossless lesson index operations, wave planning and graph
+synchronization, run-scoped memory-unavailable markers and complete plain-skill
+installers. The later corrections preserve graph state on refusals, require a
+supported locking backend, record watched waits without inventing an executor,
+and provide a release-authority source locator without treating it as a grant.
+The body headroom change relocates existing obligations to an explicit stage-0
+reference; it does not remove them.
+
+PR119's initial hosted run failed the graph-conditional reference invariant.
+The corrected exact candidate passed all jobs, including all eight negative
+shards, in the [source-bound receipt](evidence/runs/2026-10-13-feature-integration.json).
+Its earlier [local full gate](evidence/runs/2026-10-13-l3-graph-waits-full.json)
+remains bound to that earlier source; it is not a new full run at the merge SHA.
+The [R07–R16 map](evidence/runs/2026-10-13-r07-r16-acceptance.md) records remaining
+live-service and consumer-migration limits. Checkpoint/handoff fixtures are not
+a live Observatory exchange. Legacy packet reads remain because the named
+consumer still has legacy packets; a Fabric format rename is not assumed.
+
+**Exact next task:** integrate the separately reviewed R30 owner-validator
+correction, freeze the accumulated release candidate, run its required local and
+hosted gates, and merge PR112 normally. Then version, publish, verify the registry
+payload and update the hub pin and installations with source readback. Keep
+publication, native discovery and model task quality as separate acceptance.
+The lessons directory ownership remains in hub B-181 and `state-json.md`.
+
+## Historical release notes
+
+The sections below preserve observations at their stated releases. Their
+then-pending next actions do not override the current task above. Historical
+verification rows are not silently re-stamped from newer test results.
+
+## v1.93.3 (shipped, #113), a patch to wave 2
 
 Findings from a re-certification reading of v1.93.2 and an independent observer
 (CHANGELOG `v1.93.3`, verification section *Shipped state — v1.93.3*):
@@ -19,11 +67,7 @@ Findings from a re-certification reading of v1.93.2 and an independent observer
   `test/release_approval_test.py`. CI's validate job now also runs these two and
   `memory_nudge_test.py`, which was in `npm test` but not in CI.
 
-**Next task:** after the PR merges with checks green, push the `v1.93.3` tag and watch
-`release.yml`. The approval mode is not declared in `pipeline.json`, and on 2026-10-12
-`gh api repos/ssheleg/task-pipeline/environments/release` returned 404, so no reviewer
-gate exists (`references/deploy-targets.md`). Then the hub re-pins 1.93.3 instead of
-1.93.2 in wave 5.
+**Done:** #113 merged and the `v1.93.3` tag points at its merge commit `52fa75d`. Left from it: the hub re-pins 1.93.3 instead of 1.93.2 in wave 5.
 
 ## Wave 2 (shipped as v1.93.2; its branch is deleted, its commits are under `pull/109/head`)
 
@@ -31,9 +75,10 @@ Driven by the sshlg-skills waves run: plan
 [`docs/evidence/plans/2026-10-11-integration-waves.md`](https://github.com/ssheleg/sshlg-skills/blob/waves/2026-10-11-integration/docs/evidence/plans/2026-10-11-integration-waves.md)
 (Wave 2, R07–R16).
 
-Every wave-2 packet is committed on this branch, versioned **1.93.0** (CHANGELOG
-section `v1.93.0`, verification section *Shipped state — v1.93.0*, rows at `never`).
-Not tagged, not published: the release follows the PR's merge.
+At its original pre-release cut, wave 2 was versioned **1.93.0** and its
+verification rows were recorded at `never`. That was a candidate observation:
+v1.93.0 and v1.93.1 published nothing; the payload subsequently shipped as
+v1.93.2, as stated in this section heading and CHANGELOG.
 
 - **R07 test temp residue.** `tp-b80` (`test/validate.py`), `tp-stage-ckpt` and 15 files
   with bare `mkdtemp` clean up after themselves. A validator check now refuses a test

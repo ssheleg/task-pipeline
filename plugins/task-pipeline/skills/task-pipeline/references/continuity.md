@@ -27,18 +27,62 @@ almost no window left, loses the middle of it, and re-derives what it already di
 
 **The loop mode collapses discretionary check-ins. It collapses nothing else.**
 
-- A `manual` gate still waits for an explicit operator go. Always.
-- An outward or irreversible act — deploy, publish, opening a PR, creating or
-  editing a shared design file — still needs its own authorization. A recorded
-  loop mode is a **generic** flag, and a generic flag is not a specific
-  authorization; that floor is set in [`grill.md`](grill.md) and this file does
-  not lower it.
-- **Default off.** Absent config and absent instruction, the mode is off. Silence
-  arms nothing, exactly as silence authorizes no deploy.
+- A `manual` gate requires the operator's explicit go. A specific standing authorization
+  naming that gate's act is such a go; cite its source and scope in the gate record.
+  Without it, the gate waits. A generic instruction to continue is not authorization.
+- An outward or irreversible act — deploy, publish, a tag or a release, sending to a
+  person, spending money, creating or editing a shared design file — still needs its own
+  **specific** authorization. A recorded loop mode is a **generic** flag, and a generic
+  flag is not a specific authorization; that floor is set in [`grill.md`](grill.md) and
+  this file does not lower it.
+- **Pushing this repository's work and opening its pull request** is armed by a specific
+  standing authorization that names it — a recorded instruction to push the requested work
+  to the repository's own remote ([`build.md`](build.md) → *6. Integrate, then finish*).
+  Without one it waits for the go like the acts above. Another repository's PR is outward
+  every time ([`conventions.md`](conventions.md)).
+
+**What arms the loop — exactly three sources, and the ledger says which.**
+1. `run.loop` in `pipeline.json` (Part 1);
+2. the operator's answer at preflight;
+3. **a standing instruction the host already carries** — an organisation's principle that
+   a free agent takes the next task, a global instruction file, a recorded decision.
+
+The run cites its source once, in the ledger: `loop: armed by <source:line>`.
+**Silence still arms nothing**: absent all three, the mode is off, exactly as silence authorizes no
+deploy. A project with no such instruction behaves as it always did.
+
+**What a watcher may do unasked.** A wait is not a stop: while a review, CI, a peer's
+answer or a release run is pending, the run starts a watcher and takes the next independent
+item (*Waits outlive turns*, below). When the wait clears, the watcher may take — **only
+where a standing instruction names that class of act** — these steps: merge under the
+repository's own integration policy, release a lease, rebase a stacked branch onto what
+landed, notify. Deploy, publish, tag and sending to people stay gated unless a *specific*
+standing authorization names them. A recorded "releases are the agent's" decision is one:
+it names the act class — the tag, and the publish its release run performs — and, when it
+names no repositories, it covers every repository its owner governs. It does not stretch to
+a deploy or a message it does not name.
+
+**Work that depends on a pending change is not blocked by it**: start it on a branch
+stacked on the pending one, open its PR against that branch, and rebase or merge when the
+pending change lands. **A watcher polls at the pace its wait changes** — a PR or a peer's
+answer every one to two minutes, a release run while it runs, a scheduled time at that time
+— and that pace is separate from the loop's `/loop` interval below, which paces items, not
+waits.
 
 The mode's whole content is the removal of *"should I continue?"* between items
 the operator already asked for. Anything beyond that is a different decision,
 taken separately.
+
+### Waits outlive turns
+
+A watcher started inside a session — a background loop, a monitor, a session cron —
+dies with the session. **A wait that can outlive the session goes on a durable trigger**: a
+launchd or systemd job, an `at` one-shot, a CI schedule, or a board row with a due time that
+a session-start hook surfaces, where the host has one. Its one line — what it waits on and which trigger acts on it —
+goes into the handoff or the board ([`backlog.md`](backlog.md)), not only into the chat,
+because the chat is the one place the next session will not read. On Claude Code the
+session-bound primitives are a `run_in_background` loop, a Monitor and `/loop`; on other
+harnesses, a background process or the host's own scheduler.
 
 ## Part 1 — the loop
 
@@ -52,15 +96,21 @@ This spans the whole run, not one stage:
 - the acceptance → retro tail, which is where runs most often stall one step from
   finished.
 
-It stops for exactly four things: a `manual` gate, a block it cannot resolve, a
+It stops for exactly four things: an unmet `manual` gate, a block it cannot resolve, a
 genuine ambiguity the brief does not answer, and completion.
 
-**A block or an ambiguity stops its node, not the run.** The node is parked with the
-question as its reason, marked `needs-operator` and answerable without context
-([`prioritisation.md`](prioritisation.md) → *5. Where the human goes*), and the run
-continues on every node it does not block. The run itself stops only when the whole
-frontier is blocked — `graph.py next` exits `4` — and the questions are then asked
-together. **When the board is empty, say so once**, and do not invent work to fill it.
+**A block or an ambiguity stops its node, not the run.** An ambiguity whose answer is
+internal and reversible is not a stop at all: the run takes the recommended answer, records
+it as **assumed** on the node, and continues ([`iteration.md`](iteration.md) → *Question
+rounds*). Otherwise park the node with its actual reason and owner: only human-owned
+questions are marked `needs-operator` and made answerable without context
+([`prioritisation.md`](prioritisation.md) → *5. Where the human goes*); external waits
+get watchers, and project-owned questions go to the owning Project under
+[`iteration.md`](iteration.md)'s board rule. The run continues on every node it does
+not block. When the whole frontier is blocked — `graph.py next` exits `4` — classify the
+recorded reasons: external waits go on watchers, human decisions go into the question
+batch. Exit 4 does not prove a human gate or completion. A watcher keeps the recorded
+next action alive while no independent node is runnable. **When the board is empty, say so once**, and do not invent work to fill it.
 
 **This extends [`build.md`](build.md); it does not replace it.** That file's
 *Continuous execution* rule governs the inside of a stage-5 execution — do not
@@ -84,8 +134,13 @@ and still leave the run picking its next move by recollection — which is the f
 nodes and nothing else. It is preferred over the two below for one measured reason — a
 400-node graph and a 4-node graph produce the same 27-byte frontier, so the cost of knowing
 what is next does not grow with the programme. `run.loop.queue: work-graph` records it, and
-`next`'s exit codes are what the loop branches on: `3` is *every node is done*, `4` is
-*what remains is blocked or parked*, and those are different endings.
+`next`'s exit codes are what the loop branches on: `3` is *every node is terminal*
+(including deliberately parked nodes), `4` retains another unresolved barrier, and
+`6` means recorded watched waits hold every remaining dependency leaf. On 6, keep
+the recorded watchers armed and take independent work; it is neither completion
+nor a new human gate. `graph.py wait` records the locator and `resume --wait-id`
+resolves that exact wait; neither executes a watcher or grants authority. See
+[`work-graph.md`](work-graph.md) → *Watched external waits*.
 
 **Otherwise the queue is the module map** ([`decomposition.md`](decomposition.md)) when the brief
 was a platform, and the plan's task list otherwise. Both already exist and both are
@@ -97,6 +152,10 @@ stage 2** and the run says so in one line. It is not asked for at that point, fo
 same reason the mode is recorded rather than requested: re-asking would rebuild the habit
 the config exists to retire.
 
+**A standing instruction the host carries counts as recorded** (*The limit, before the
+capability*, source 3): it arms at the close of stage 2 like `run.loop`, unless the
+instruction itself says otherwise, and the ledger cites it.
+
 **Where nothing is recorded, nothing arms.** Silence arms nothing here too — this section
 moves *where* a recorded mode is armed, from preflight to the close of stage 2. It does
 not make arming unconditional, and a reader who takes it that way would arm a loop in a
@@ -104,7 +163,8 @@ project with no `pipeline.json` at all. That reading was in this section's first
 an independent reader found it before it shipped.
 
 **What arming does NOT change, and this is load-bearing:** the four stops are the four
-stops. A `manual` gate still waits. An outward or irreversible act still needs its own
+stops. A `manual` gate waits unless a specific standing authorization already names
+its act, cited with its source and scope. An outward or irreversible act still needs its own
 specific authorization — *a generic flag is not a specific authorization*, and arming a
 queue is the most generic flag there is. Arming decides only that the run does not stop
 to ask *"shall I take the next one?"*.
@@ -293,10 +353,12 @@ true.
 
 ## What happens at the signal
 
-The four acts above, in order, and one prohibition: **do not begin an item you
-cannot finish inside what is left.** When the next item is plainly too large,
-say so and take the smaller thing that fits — closing a ledger, writing a decision
-that is already settled, updating a REQ status.
+The four acts above, in order, and one prohibition: **no new item starts.** This is the one
+carve-out from "take the next task in the same turn": **at the compaction signal, finish the
+current unit and write the next task into the handoff** — the ledger's next line, the board
+row — **instead of starting it.** Until compaction, the only writes are to what already
+exists: the ledger, the plan, the decisions already settled, the REQ statuses. The next
+turn, after compaction, takes the written task from there.
 
 If the project has recorded that it must not cross a compaction mid-stage, stop at
 the stage boundary instead and hand off. That is a project answer, not a default:
@@ -318,6 +380,11 @@ right costs nothing extra and pays twice.
 
 ## Part 3 — workflow memory at the stage boundary
 
+Project Observatory is a separately installed, public engine:
+[passioncode-ai/project-observatory-dashboard](https://github.com/passioncode-ai/project-observatory-dashboard)
+— its README's *Install* and *MCP* sections say how to run it and connect it. Without it,
+everything below degrades to one ledger line and the run continues.
+
 Which of the five handoff mechanisms carries what — the Git record, Observatory's lease
 and checkpoint, a host's launch context, the inbound queue — and the order a successor
 reads them in, has one home:
@@ -333,9 +400,9 @@ checkpoint**, and the next executor continues from the last finished stage.
 - **How.** `scripts/stage_checkpoint.py emit` prints the tool's arguments, built from the ledger alone: the topic, the verdicts, the next stage, the operator's constraints and key names. Pass them to `observatory_checkpoint_write`, or to `memory.checkpoint.write` under memory/0.1. Then hand the answer to `stage_checkpoint.py record --answer -`.
 - **The constraints.** Give the brief's restrictive rules once, as `--constraint`. They are carried to every later boundary, and a successor reads them first.
 - **Keys.** Pass keys by name, as `--credential PROJECT/ENV/NAME`, never as a value.
-- **Without the tools.** `stage_checkpoint.py record --unavailable "<why>"` appends one `event: memory — unavailable` line, and the run continues exactly as before. Missing memory is a state the ledger names, not a failure.
+- **Without the tools.** `stage_checkpoint.py record --unavailable "<why>"` appends one `event: memory — unavailable` line, and the run continues exactly as before. Missing memory is a state the ledger names, not a failure. When the tools are absent for the whole run — no Observatory on this machine — say it **once**: `record --unavailable "<why>" --for-run` appends one `unavailable for this run` line and leaves a marker in `.task-pipeline/memory.json`; no later gate is nudged or needs a line. Any later `record --answer` (the tools came back) clears the marker.
 - **A planned change of executor** — a quota running out, a route moving the work to another model or account. `stage_checkpoint.py handoff --to-provider <p> [--to-model <m>] --reason limit|plan_route|operator` prints `observatory_handoff_create`'s arguments; `record --answer -` keeps the offer as one ledger line, and the lease stays with this run until the successor accepts. The successor runs `stage_checkpoint.py accept --handoff-id <id>` → `observatory_handoff_accept` → `record --answer -` **before its first write**, and obeys the constraints the answer carries first. `LeaseLost` is then left for the race nobody planned. A retried offer keeps its idempotency key until a memory event (a checkpoint, a refusal, a recorded offer — never `unavailable`) is appended, so a `gate:` or `stage:` line between retries does not turn it into a new offer that replaces the unaccepted one.
-- **The reminder.** `hooks/memory-nudge.sh` (PostToolUse) reads the ledger after each tool call and, once per `stage:` line with no `event: memory` line after it, puts one sentence in front of the model naming the two commands above. It decides nothing and blocks nothing; adoption measured before it was one write in 293 sessions.
+- **The reminder.** `hooks/memory-nudge.sh` (PostToolUse) reads the ledger after each tool call and, once per `stage:` line with no `event: memory` line after it, puts one sentence in front of the model naming the two commands above — unless the run-level marker says memory is unavailable for this run, in which case it stays silent. The first reminder of a run also says where Observatory comes from, once. It decides nothing and blocks nothing; adoption measured before it was one write in 293 sessions.
 - **A refusal.** `LeaseLost` means another executor holds the workflow now. The script drops the token. Read the workflow (`observatory_checkpoint_latest` with `stage_checkpoint.py state`'s id) before doing anything else. A stale writer stops after one refusal.
 - **The lease token.** It lives in `.task-pipeline/memory.json` (mode 0600, git-ignored) and never in the ledger, a reply or a commit.
 - **What this is not.** Not a second ledger and not the narrative. The checkpoint is the work's state for the next executor. The wiki and the ledger keep everything else.
@@ -344,7 +411,9 @@ checkpoint**, and the next executor continues from the last finished stage.
 
 | Excuse | Reality |
 |---|---|
-| "The operator obviously wants it to keep going, I'll just loop" | Default off. Silence arms nothing — the same floor deploy authorization uses. Ask once at preflight, or read `run.loop`. |
+| "The operator obviously wants it to keep going, I'll just loop" | Default off. Silence arms nothing — the same floor deploy authorization uses. Arm from `run.loop`, the preflight answer, or a standing instruction the host carries, and cite which in the ledger. |
+| "The watcher can push the release through when CI goes green" | A watcher takes only the act classes a standing instruction names — merge, release a lease, rebase, notify. A tag or a deploy needs its own specific authorization. |
+| "My background loop will catch it tomorrow" | It dies with the session. A wait that can outlive it goes on a durable trigger, and its line goes into the handoff. |
 | "The mode is on, so I can push the deploy through" | The mode collapses check-ins, never gates or outward acts. A generic flag is not a specific authorization. |
 | "I'll tell it to keep going and it will" | On Claude Code, prose does not survive the turn boundary. Either a job is scheduled or the run stops; say which. |
 | "A one-minute interval is closest to no pause" | The interval must be longer than a typical item, or every fire lands on work already in progress and buys nothing. |

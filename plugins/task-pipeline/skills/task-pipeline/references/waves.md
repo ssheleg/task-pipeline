@@ -54,7 +54,7 @@ on real agents, tasks and users rather than on the first guess.
 | 2 Brainstorm + decompose | once: the canvas extends the module map ([`decomposition.md`](decomposition.md)), and the work graph carries each node's wave |
 | 3 Spec | once: the canvas is the committed target-state spec; a wave's dossier may deepen a section, never contradict it |
 | 4 Plan | once: every wave's nodes, its exit criteria and the question batch. Re-cut at each wave boundary, as a recorded revision |
-| 5–8 Build → post-deploy | per wave, then the close pass |
+| 5–8 Build → post-deploy | per wave, then the close pass. A wave's stage 7 integrates to the main branch **without tagging**; the release's tag, its approval mode and its go are stage 7's full gate, run once at the release ([`iteration.md`](iteration.md) → *The cycle*, step 10), and stage 8's trio follows on what was released (step 11) |
 | 9 Docs + wiki · 10 Acceptance | once, to close the release, over everything the waves shipped |
 
 **One planning gate, not three prompts.** The manual gates of stages 0, 2 and 3 are
@@ -72,8 +72,10 @@ product has users, walk their real path in the built app on a fresh profile with
 disposable data. A finding is a fact with a receipt, never an impression.
 
 **A declared source list outranks discovery.** Where the repository carries
-`docs/backlog-sources.json` — the contract is owned by the Fabric workspace's
-`knowledge/backlog.md` — the harvest reads exactly the sources it lists, as the board,
+`docs/backlog-sources.json` — its shape is
+[`templates/backlog-sources.schema.json`](../templates/backlog-sources.schema.json)
+([`backlog.md`](backlog.md) → *A declared source list*) — the harvest reads exactly the
+sources it lists, as the board,
 with the id, title and status columns it names. Status changes land only in those owning
 files, under a lease. A new source joins the manifest in the same change. A generated
 view of them, such as a published common backlog, is never edited. A source of open
@@ -84,29 +86,37 @@ prints the sources the harvest reads, refuses a manifest the harvest could not f
 No manifest is discovery, said aloud (exit 0).
 
 **One machine-readable inventory, nothing outside it.** A single committed file,
-`<artifacts>/specs/YYYY-MM-DD-<topic>-inventory.json`, one entry per open item:
-
-| Field | Carries |
-|---|---|
-| `id` | the item's id in its owning register; an item without one gets one there, in the same change |
-| `source` | where it was found, as `file:line` |
-| `status` | as measured, not as the register last said |
-| `area` | the part of the system it touches |
-| `node` | the canvas node it lands on |
-| `wave` | the wave that closes it, or the release it is carried to |
-| `release` | this release, or `program` |
-
-`blocked_by`, `closable_in_one_pass` and `notes` are worth carrying beside them.
+`<artifacts>/specs/YYYY-MM-DD-<topic>-inventory.json`, one item per open item. Its shape is
+[`templates/inventory.schema.json`](../templates/inventory.schema.json) (inventory/1): every
+item carries its `id` in the owning register, `title`, `area`, `kind`, `severity`, the
+`evidence` that is its receipt and a `proposed_fix`; `status` is as measured, not as the
+register last said; `module`, `node`, `wave` and `release` are written by the script below,
+never by hand. `scripts/waves.py merge <dir>` builds it from the survey outputs and refuses
+an item without evidence or an id seen twice.
 
 **Verify each open item against the code before trusting it.** A stale item is closed
 in its owning register with the receipt that shows it done; duplicates are clustered,
 both ids kept. A register that says *open* about shipped work is the commonest thing a
 survey finds.
 
-**Assign nodes and waves with a committed script, not by hand.** A deterministic script
-reads the inventory and a short wave table and writes `node`, `wave` and `release` onto
-every entry, then prints the counts per wave and per node. A re-cut is then a diff to a
-table and a re-run, which a reviewer can read; seven hundred hand-edited rows are not.
+**Assign nodes and waves with a committed script, not by hand.** `scripts/waves.py assign
+--modules <modules.json> --plan <plan.json> --write` reads two short tables — module → item
+ids, and the plan's nodes with their `wave` and the items each `closes` — writes `module`,
+`node`, `wave` and `release` onto every item, and prints the counts. `waves.py validate`
+exits 1 when an item lands on no module or an open item on no node: either the canvas has a
+gap or the item is closed with its receipt or carried (`status: carried`, `release:
+program`). An incomplete `assign --write` prints the gaps but preserves the prior file;
+preview and repair the tables before retrying. Plan ids and effective `graph_id` targets
+must be unique. `waves.py sync-graph` writes the plan's waves and risk classes onto the
+work graph with graph.py's lock and revision log — one `wave` or `risk` revision per
+change, a lowered risk only with `--lower-why` — and judges the re-cut as
+a whole with graph.py's order rule, so moving a chain up a wave is never refused halfway.
+A missing graph target refuses before any write; `--only-present` explicitly opts into a
+plan spanning several graphs. A re-cut is then a diff to a table
+and a re-run, which a reviewer can read; seven hundred hand-edited rows are not. The canvas,
+the question queue and each dossier start from [`templates/canvas.md`](../templates/canvas.md),
+[`templates/questions.md`](../templates/questions.md) and
+[`templates/dossier.md`](../templates/dossier.md).
 
 ## The questions — closed from sources, then one batch
 
@@ -121,13 +131,16 @@ answer and the consequence of each answer, ordered so prerequisite decisions com
 ([`grill.md`](grill.md)). A go that leaves a question unanswered takes the
 recommendation, recorded as **assumed** in the decisions table, and every wave that
 depends on an assumption names it — so a different answer later re-plans exactly those
-waves and no others. After planning, a question is asked only at a wave boundary, in the
-hand-back's DECISIONS WAITING ([`progress.md`](progress.md)).
+waves and no others. After planning, a question is asked only in a question round
+([`iteration.md`](iteration.md) → *Question rounds*): a wave boundary, a blocked frontier
+or five open questions calls one, and its batch lands in the hand-back's DECISIONS
+WAITING ([`progress.md`](progress.md)). Never one question at a time.
 
-**An outward or irreversible act is never assumed.** Publishing, tagging, deploying
-without a specific standing authorization, sending to a person, spending money,
-deleting data: each waits for the operator's explicit go, asked with a verified direct
-link. A recommendation is not an authorization.
+**An outward or irreversible act is never assumed.** Publishing, tagging, deploying,
+sending to a person, spending money or deleting data needs authorization naming that act.
+Cite a specific standing authorization within its scope; otherwise ask for the operator's
+explicit go with the relevant verified direct link. A recommendation or generic loop mode
+is not authorization ([`continuity.md`](continuity.md) → *The limit, before the capability*).
 
 ## The canvas — the target state over the current logic
 
@@ -169,21 +182,39 @@ marked `needs-operator`, out of every wave until it is unblocked.
 
 Each wave runs stages 5–8 as [`stages.md`](stages.md) states them, then the close pass.
 Between waves the run does not ask whether to continue: it takes the next wave
-([`continuity.md`](continuity.md)). A genuine ambiguity parks its node `needs-operator`
-and the wave goes on with the nodes it does not block; the run stops only when the whole
-frontier is blocked. When the board is empty, it says so once.
+([`continuity.md`](continuity.md)). An unresolved ambiguity parks its node with its
+actual owner and reason; only a human-owned question is `needs-operator`. Project
+asks follow [`iteration.md`](iteration.md), and the wave continues on independent
+nodes. A frontier blocked by CI, review
+or another external wait goes on watchers, with the waits and their next actions recorded
+([`continuity.md`](continuity.md) → *Waits outlive turns*); it is not completion or a new
+request for permission. An unresolved human gate stops its dependent work. When the board
+is empty, the run says so once. `graph.py next --wave N` returns 6 when only recorded
+watched waits hold that wave, following prerequisite leaves across wave boundaries.
+Keep their watchers armed; `wait` records their locators and `resume --wait-id`
+refuses stale events. Exit 4 retains mixed or unclassified barriers: read the reasons
+before choosing the next action. Neither code is proof of completion or authority
+([`work-graph.md`](work-graph.md) → *Watched external waits*).
 
 Research, the audit and the blind readings run in parallel agents; builds stay sequential
 wherever two of them share a seam ([`planning.md`](planning.md) → file ownership).
+
+**Verification does not wait for the wave.** A node is certified as soon as it lands, in
+the number of rounds its risk class sets, and a seam is checked once the last node on it
+lands ([`iteration.md`](iteration.md) → *Verification starts when a node lands*). The
+close pass below then re-measures what those rounds already proved.
 
 ## The close pass, after every wave
 
 In this order, inside the wave rather than after it:
 
 1. **Verify.** Every node the wave closes is certified ([`certification.md`](certification.md)),
+   most of it already, as each node landed,
    and [`audit.md`](audit.md)'s exit is re-measured over what the wave touched.
 2. **Finish and fix — one fix round**, inside [`loop-guard.md`](loop-guard.md)'s caps.
-   Every finding is fixed in the wave or parked with a board row and its reason; nothing
+   Findings against this wave's nodes are fixed here or parked with a board row and reason.
+   Findings elsewhere join the inventory for a planned node; only the closed hotfix lane
+   bypasses that design ([`iteration.md`](iteration.md) → *No fix travels alone*). Nothing
    is dropped silently.
 3. **Document** — the Doc Loop and the stage-9 propagation matrix
    ([`documentation.md`](documentation.md)), scoped to the wave: scenarios, decisions,
@@ -197,6 +228,9 @@ In this order, inside the wave rather than after it:
 
 ## A board bigger than one release
 
+**The loop around the waves — release, post-release check, next pool, and the next
+iteration — is [`iteration.md`](iteration.md).**
+
 **It becomes a program.** The release takes the first waves; the rest stays on the
 canvas by node, `release: program`, never dropped. The next release resumes from the
 canvas: it re-measures the inventory rather than re-running wave 0 from nothing, and its
@@ -204,11 +238,17 @@ waves are cut from the nodes still open.
 
 ## What stays human
 
-Sign-ins, consents, payments, sending to people, and every outward or irreversible act.
-The mode removes *"shall I continue?"* between waves and *"what did you mean?"* where a
-source already says; it never removes a person from a decision that is theirs. A
-`manual` gate still waits for its go ([`continuity.md`](continuity.md) → *The limit,
-before the capability*).
+Sign-ins, consents, operator payments and typed secrets remain human. Record the
+required action and continue independent work; a release or loop grant cannot
+perform these actions for the person.
+
+Other outward or irreversible acts, including sending to people, require explicit
+authority. A specific standing authorization naming the act counts within its
+recorded source and scope ([`continuity.md`](continuity.md) → *The limit, before the
+capability*). A generic instruction to continue does not. A `manual` gate waits
+without such authority. The mode removes *"shall I continue?"* between waves and
+*"what did you mean?"* where a source already says; it never removes a person from
+a decision that is theirs.
 
 ## The graph carries the wave
 
@@ -233,5 +273,5 @@ said to be checked by hand.
 | "Ask each question as it comes up" | Each one is a human round. Close it from the sources, or put it in the batch |
 | "The board is too big to inventory" | The inventory is the plan. Without it the waves are cut from memory |
 | "Re-cutting waves makes the pipeline dynamic" | A re-cut is a committed revision and a canvas edit. The static-graph decision in [`planning.md`](planning.md) holds |
-| "The recommendation is obviously right, so assume the deploy go" | An outward act is never assumed. Ask for the specific go once, in the batch |
+| "The recommendation is obviously right, so assume the deploy go" | An outward act is never assumed. Cite the standing authorization naming it, or ask for the specific go once, in the batch |
 | "Wave 3 can stub what wave 5 will build properly" | Only at a declared contract, with wave 5 named as the stub's removal |

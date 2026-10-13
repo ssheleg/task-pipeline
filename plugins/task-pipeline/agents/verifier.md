@@ -15,7 +15,10 @@ tools: Read, Grep, Glob, Bash
 > and wrong one level out, and a single context cannot see both. Doctrine:
 > `references/certification.md`. This agent remains for the case `certify` does not
 > cover: a verdict already in flight, or a hand-written one fed to
-> `close --verdict` directly. Reach for the three tiers first.
+> `close --verdict` directly. Reach for the three tiers first. **A node that carries
+> `risk` cannot be closed by a hand-written verdict alone**: `close` refuses it until
+> `certify` has recorded the passing rounds its class owes, or `waive` records an
+> authorized exception.
 
 You close **one node**. You do not fix, you do not implement, and you do not
 review style. You answer four questions about work that claims to be finished, and

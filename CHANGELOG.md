@@ -1,3 +1,101 @@
+## v1.94.0 — 2026-10-13
+
+Guards: 438 → **438**; property checks 15 → **15**. The owner validator and
+focused regression suites gain coverage; the counted negative-file corpus is unchanged.
+
+The accepted feature now also rejects loss of node identity or evidence during
+inventory synchronization. Waiting nodes retain typed wait IDs and watcher
+locators, cannot certify or close while waiting, and report the runnable frontier
+with distinct exit states. Release authority is recorded separately from a locator;
+source policies and scoped grants are carried into execution packets. Local regression
+and history checks cover these boundaries. Native Observatory/Fabric handoff
+execution remains unverified in this release receipt.
+
+**The release iteration — the loop around the waves** (`references/iteration.md`). The
+project moves in whole releases: survey, module dossiers integrated into one canvas,
+question rounds in batches, a parallel build, verification as each node lands, one release
+verified as released, the next pool handed back. A finding made mid-iteration joins the
+inventory; a closed hotfix lane of five entries is the only exception.
+
+- **Trigger.** "release iteration" / "итерация релиза" reaches the mode beside "waves" /
+  "волнами"; `/task-pipeline iteration` is listed in the command, and the Cursor rule's
+  wave paragraph names the loop.
+- **Risk classes R1–R3** on each node (`graph.schema.json` and `graph.py validate` accept
+  `risk`; any other value is refused). A round is the three blind tiers plus one fix cycle;
+  the first is always the full three; R1 owes one passing round, R2 two, R3 three, one of
+  them recorded adversarial. A wave's stage 7 integrates without tagging; the release's stage-7 gate and
+  stage 8's trio run once, at steps 10 and 11.
+- **Lessons across projects.** lesson/1 (`templates/lesson.schema.json`) and
+  `scripts/lessons.py`: a retro entry with a `**Lesson:**` line becomes a lesson in a local
+  index every install has (`~/.sshlg-skills/lessons/index.jsonl` where the family's directory
+  exists — hosted there as task-pipeline's by the family: sshlg-skills B-181 and its
+  `state-json.md` section *Other members' files under `~/.sshlg-skills/`* (#209);
+  `~/.task-pipeline/lessons/index.jsonl` otherwise, moved there once, aloud, if the family's
+  directory appears later; `$TASK_PIPELINE_LESSONS` or `--index` move it). Source 7b
+  of the harvest reads it by the task's nouns, then a shared store whose search filters by
+  kind. Writing to Observatory works today through `observatory_record`. The redaction list
+  binds every lesson; on the estate it relaxes rule 2 for the evidence commit and a
+  pseudonymous project key only.
+- **Wave tooling.** `scripts/waves.py` (merge, assign, count, validate, sync-graph) with
+  inventory/1 (`templates/inventory.schema.json`), and the canvas, question-queue, dossier
+  and backlog-sources templates. waves.md links the schemas instead of a field table and
+  no longer sends public readers to a private repository; the shipped
+  `backlog-sources.schema.json` is the rule, the Fabric contract its provenance.
+- **Continuity.** The loop is armed by `run.loop`, the preflight answer or a standing
+  instruction the host carries, cited as `loop: armed by <source>`; a watcher may merge,
+  release a lease, rebase or notify where a standing instruction names the act; waits that
+  outlive the session go on a durable trigger; at the compaction signal the next task is
+  written down, not started.
+- New suites in `npm test`: `lessons_test.py`, `waves_test.py`, `continuity_doc_test.py`;
+  eval INSTR-08 (wave 0).
+- **Rounds owed are enforced.** `graph.py close` refuses a node with a `risk` until its
+  class's rounds have passed — passing rounds, read from the certification history; a
+  failed round counts for nothing (R1 one, R2 two, R3 three, one of them a passing round
+  recorded with `certify --kind adversarial`); `certify` prints `round N: k of M owed passing
+  rounds — not closable yet`. certification.md
+  gains *Rounds owed by risk class*, and the churn doctrine exempts owed rounds from "a clean
+  round ends the loop".
+- `waves.py sync-graph` judges a re-cut as a whole, so a chain moved up a wave is never
+  refused halfway. `backlog_sources.py` refuses unknown keys and applies every source rule
+  to every source, and the shipped schema where `jsonschema` is installed.
+- `lessons.py emit-observatory` sends the commit as `commit:` + 12 hex (the store's redactor
+  keeps that form and removes a 40-hex SHA) and revises a recorded lesson instead of minting
+  a second; a git that does not answer in time is its own refusal.
+- `waves.py sync-graph` also writes each plan node's `risk` onto its work-graph node (a
+  `risk` revision; lowering a class needs `--lower-why`), so the rounds `close` enforces
+  apply to every planned node, not only to a hand-edited graph.
+- `lessons.py` reads stdin as UTF-8 and prints machine output as ASCII-escaped JSON, so a
+  non-UTF-8 locale loses nothing a lesson carries. `rebuild` reports unreadable sources
+  and preserves the prior index. A complete scan can replace a corrupt index after
+  keeping its backup (`python3 test/lessons_test.py`).
+- Every lessons-index operation runs under one lock (the index directory's `.lock`, plus the
+  standalone directory's on the default path). A file that cannot be READ is a refusal that
+  names it and writes nothing; one that cannot be PARSED — the family index or the
+  standalone one alike — is kept as `.corrupt-<date>` and never makes a command exit 1. Lines
+  in a newer index format are skipped, counted and kept on write. When both index files
+  exist they are merged once: only lessons the family index lacks are copied, its own copy
+  wins, newer-format lines are carried across, and the old file becomes `.migrated`.
+- `emit-observatory --tool observatory_lesson` emits the engine's lesson-kind arguments
+  (the lesson's own fields, plus `origin{projectId, commit}` — the engine's inputSchema); the agent
+  picks it where the session lists that tool, `observatory_record` otherwise.
+- `waves.py` refuses a plan whose risk, wave, closes or release value it does not know.
+- **Memory unavailable, said once per run.** `stage_checkpoint.py record --unavailable
+  "<why>" --for-run` appends one `unavailable for this run` line and leaves a marker in
+  `.task-pipeline/memory.json` keyed to the run's topic and start date (the module-map field
+  may change mid-run; a ledger with no `Run:` line is refused, exit 2); `hooks/memory-nudge.sh`
+  and `stage_checkpoint.py state` honour it only while that run's ledger still carries the
+  marker's own line — a ledger reseeded at stage 0, even the same day, does not — and any
+  later `record --answer` clears it. The first nudge of a run names the Observatory engine.
+- **Plain and npm installs deliver all three skills.** `./install.sh` and
+  `npx task-pipeline-skill` now install `task-pipeline`, `evidence-docs` and
+  `project-audit` into `~/.claude/skills/<name>`, plus the command; every source is
+  verified present before anything is copied. **`--force` now overwrites all three skill
+  directories and the command**, not the task-pipeline skill alone. The closing notice
+  names the role agents and every hook a plain copy cannot carry, and the plugin command.
+  **A partial earlier install is refused as mixed versions** (some of the three skills
+  present, others not), nothing written, until `--force` brings all three to one version.
+- Suite `test/install_test.sh` (both installers, fresh `HOME`) joins `npm test`.
+
 ## v1.93.3 — the wave-2 evidence declares its dead commits; a retried handoff stays one offer
 
 A re-certification reading of v1.93.2 and an independent observer found six things.

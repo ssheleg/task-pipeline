@@ -4,8 +4,9 @@ For each stage: what it does, what to invoke, artifacts, and the **GATE** that
 must pass before advancing. Each gate is tagged with its **type** — `auto` (the
 orchestrator verifies the check itself, pass/fail), `judgment` (a named judge
 rules where no complete deterministic check exists — [`gates.md`](gates.md) →
-*The judgment gate*) or `manual` (wait for the
-operator's explicit go). These stages (0 intake + 1→10) are the plugin's
+*The judgment gate*) or `manual` (requires the operator's explicit go, including a
+specific standing authorization naming the act, cited with its source and scope;
+otherwise wait). These stages (0 intake + 1→10) are the plugin's
 **example** flow, encoded in `pipeline.example.json` against the universal contract
 `pipeline.schema.json`; a host project replaces it with its own
 stages/agents/types (see SKILL.md → *Bring your own skills*).
@@ -108,7 +109,10 @@ never that the work was skipped quietly.
   read **in full** — ten standing rows and ten stamps, both bounded **by a cap**, and they bind this
   run; stamp each instruction as it fires. Its *Recent log* is **queried** by the
   task's nouns, not read: uncapped narrative inside a binding source is what makes the
-  capped part get skimmed, [`retrospective.md`](retrospective.md)), the **knowledge wiki** if one is
+  capped part get skimmed, [`retrospective.md`](retrospective.md)), **lessons from other
+  projects** (source 7b, [`knowledge-sources.md`](knowledge-sources.md): `scripts/lessons.py
+  query` over the local index, then a shared store where the session lists one — each
+  layer's state printed in the source ledger), the **knowledge wiki** if one is
   installed
   ([obsidian-wiki](https://github.com/ar9av/obsidian-wiki) — recommended,
   never required), and any **other repo or hosted doc system the project names as
@@ -180,8 +184,10 @@ never that the work was skipped quietly.
   names the target and the preconditions.
 - **The run mode is settled here too** ([`continuity.md`](continuity.md)): does
   the run advance item-by-item with no check-in between items, and on what
-  interval? Read `pipeline.json` → `run.loop` first — a recorded mode is the
-  answer and is not re-asked; **absent, it is off**. It buys pacing, never
+  interval? Exactly three sources arm it: `pipeline.json` → `run.loop` (read
+  first — a recorded mode is the answer and is not re-asked), the operator's answer
+  here, or a standing instruction the host already carries. The ledger names which, once:
+  `loop: armed by <source:line>`. **Absent all three, it is off.** It buys pacing, never
   authorization: no loop mode collapses a `manual` gate or an outward act. The
   same file carries the other half of pacing — the context budget, which fires
   only on a harness signal or the operator's word, never on an estimate.
@@ -251,7 +257,10 @@ never that the work was skipped quietly.
   own churn detection mechanical and reads the `touch:` lines, and
   [`progress.md`](progress.md) derives the rail and the iteration counter from the
   `stage:` and `iter:` lines. The header goes out before the interview because a run
-  that announces its position only at the end announced it to nobody.
+  that announces its position only at the end announced it to nobody. A new ledger starts a new
+  run's memory state: a previous run's "memory unavailable" marker is honoured only while
+  its own ledger line is in the ledger, so a reseeded ledger — even the same day — is nudged
+  again, and the stale marker is cleared at the next `stage_checkpoint.py record`.
 - **The board is read, or seeded.** `<artifacts>/backlog.md` ([`backlog.md`](backlog.md)) — its **open count is quoted in the brief**, measured by a command at the top of the run rather than inherited from the last run's report. Absent ⇒ seeded from the template and said so; an empty board and no board are the same thing to work on, and only one of them can be appended to.
 
 ## 1 — Docs study
@@ -304,8 +313,11 @@ never that the work was skipped quietly.
   can name is a node the seam and product tiers cannot scope, so `touches` and `serves` are
   what make the two outer readings possible at all.
 - **The queue exists here, so the loop arms here** ([`continuity.md`](continuity.md) →
-  *Part 1a*). Where `run.loop.arm` is `after-decomposition` and the map holds more than
-  one module, arm the mode at the close of this stage and print one line: the mode, and
+  *Part 1a*). Where the loop is armed — `run.loop` with `arm: after-decomposition`, the
+  operator's preflight answer, or a standing instruction the host carries (which arms here
+  unless it says otherwise) — and the map holds more than one module, arm the mode at the
+  close of this stage, cite the source as `loop: armed by <source:line>`, and print one
+  line: the mode, and
   either the job id and its cancel command (`interval`) or the delay chosen and why
   (`dynamic`). Arming collapses no gate and authorizes no outward act; it decides only
   that the run does not stop to ask *"shall I take the next one?"*. Single-module work
@@ -589,7 +601,12 @@ never that the work was skipped quietly.
   `partial` ships only with the operator's explicit acceptance. A gap is cheapest to
   close before it ships, and the operator is already present at this gate. **The
   carry-over count is printed beside this verdict.** Deploy is outward → explicit
-  operator go — unless the operator already authorised releases. **Before the tag, read
+  operator go, or a specific standing authorization naming that act, cited with its source
+  and scope. Authorization to release does not silently authorize a separate deploy. If
+  `release.authorized_by` is present, read that source and verify its authority,
+  currentness and scope for the tag and publication; the locator is not authorization.
+  If absent, inspect existing recorded authority before asking for a missing grant.
+  **Before the tag, read
   the release's approval mode** (`pipeline.json` → `release.approval`; then
   [`deploy-targets.md`](deploy-targets.md) → *When the release waits for an approval*):
   `checks` — push the tag, watch the run selected by the tag, report; `reviewers` — the
@@ -790,7 +807,11 @@ never that the work was skipped quietly.
   commit that retired it**), then **write an entry only if
   the run diverged** (symptom · the stage it surfaced at · the stage that *owned* it
   · root cause · fix, mechanical before instruction before expiring note · the check
-  that catches it next time). Every run stamps and prunes; a retro left empty after
+  that catches it next time). An entry whose class would be true in another project
+  carries a `**Lesson:**` line, and **`scripts/lessons.py add --retro <retro> --entry
+  <anchor>` puts it in the local lesson index** — and, where the session lists a shared
+  store, `emit-observatory` → the tool → `record` ([`iteration.md`](iteration.md) → *The
+  learning loop*). Every run stamps and prunes; a retro left empty after
   a messy run is the failure the file exists to stop. Stage 0 reads the standing
   instructions in full next time, which is why the cap is not negotiable.
 - **GATE (manual):** the ladder walk ran and its absences became REQ rows before
@@ -814,7 +835,10 @@ never that the work was skipped quietly.
   the same archive, and both counts print beside the verdict** (the stamp table is read
   in full at stage 0, so *one line per run* is a slope the prune has to stop), the run
   stamped with its commit, every SHA in either file resolvable, and the
-  counts printed beside this verdict**; **where `pipeline.json` → `retro.publish` is
+  counts printed beside this verdict**; **every entry with a `**Lesson:**` line is in the
+  local index (`lessons.py add` printed its id) or its refusal is printed, and the shared
+  store's state is one ledger line** (`recorded`, `store refused — <code>`, or `shared
+  lessons: absent`); **where `pipeline.json` → `retro.publish` is
   set, the skill-level insight is published as an issue on the skill's repository —
   its body printed in full first, the printed string and the sent string being one
   string, and the five redaction rules applied

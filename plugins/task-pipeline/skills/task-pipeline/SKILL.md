@@ -1,6 +1,6 @@
 ---
 name: task-pipeline
-description: "Use when work changes the repository — feature, fix, bug, refactor, migration, integration, rewrite, adoption or hardening; фича, фикс, баг, рефактор, миграция, интеграция, доработать, починить, внедрить, перевести — or a finding that lands in it: audit/аудит, bug hunt/проверь ошибки, production check/проверь прод, PR review/ревью PR — or on 'run this through the pipeline' / 'прогони по конвейеру', 'the full cycle' / 'полный цикл', /task-pipeline. Runs a substantial task through gated stages: intake grill, docs, brainstorm, spec, plan, build, tests, deploy, post-deploy, docs/wiki, acceptance. 'waves' / 'волнами' closes the whole board; 'checkup' / 'чекап' lists unconfirmed releases; 'setup' audits docs. Not for: answering a question, explaining code, a typo, a one-line edit, a mechanical rename, reconnaissance that lands nothing — say 'no pipeline' / 'без пайплайна' to opt out."
+description: "Use when work changes the repository — feature, fix, bug, refactor, migration, integration, rewrite, adoption or hardening; фича, фикс, баг, рефактор, миграция, интеграция, доработать, починить, внедрить, перевести — or a finding that lands in it: audit/аудит, bug hunt/проверь ошибки, production check/проверь прод, PR review/ревью PR — or on 'run this through the pipeline'/'прогони по конвейеру', 'the full cycle'/'полный цикл', /task-pipeline. Runs a substantial task through gated stages: intake grill, docs, brainstorm, spec, plan, build, tests, deploy, post-deploy, docs/wiki, acceptance. 'waves'/'волнами'/'release iteration'/'итерация релиза' closes the board; 'checkup'/'чекап' lists unconfirmed releases; 'setup' audits docs. Not for: answering a question, explaining, a typo, a one-line edit, a rename, recon that lands nothing — say 'no pipeline'/'без пайплайна' to opt out."
 license: MIT
 compatibility: "Doctrine runs on any agent. The bundled scripts need python3; the run needs git. Missing either degrades, never blocks — the graph verbs and seeded gates go unused, and the run says so."
 ---
@@ -46,7 +46,7 @@ kernel field. Each gate has a **type**: `auto` (the
 orchestrator verifies the `check` itself, pass/fail), `judgment` (no complete
 deterministic check exists — a named judge rules, and the ruling is recorded as
 judgement, never as a measurement; `references/gates.md` → *The judgment gate*)
-or `manual` (wait for an explicit operator go); which stages are manual is the
+or `manual` (an explicit go, including specific standing authorization); which stages are manual is the
 operator's call. In the
 example's `skills[]`, `task-pipeline:<name>` denotes this skill's own built-in
 doctrine (`references/<name>.md`) and `host:<name>` denotes the host project's own
@@ -122,11 +122,10 @@ Stage 0 reads those standing instructions in full, which is why the prune is a g
 criterion: a rule nobody reads to the end is worse than no rule, because everyone
 believes it is covered.
 
-Three things the grill does beyond clarifying the request, each in full in
-[`references/grill.md`](references/grill.md):
-- **Domain awareness** — it reads the project's `CONTEXT.md` / `docs/adr/` and holds the operator to them, writing resolved terms back as they land.
-- **The autonomy sweep** — it pre-resolves what would otherwise stop stages 1→10 mid-flight. Autonomy is bought here or not at all; an unasked question is a scheduled interruption.
-- **The design destination** with Figma on — *which* file per surface, in which team, decided at stage 0. Left to drawing time it is answered by whoever holds the brush, and the answer is usually *create a new file*.
+**At stage 0, read [grill.md](references/grill.md)** for domain awareness
+(`CONTEXT.md` / ADRs; write resolved terms back), the autonomy sweep (pre-resolve
+stages 1→10), and the Figma design destination (file and team per surface, settled
+before drawing, never invented by the drawing agent).
 
 ## How to run
 
@@ -176,13 +175,16 @@ Three things the grill does beyond clarifying the request, each in full in
    build order, one brick at a time — stages 0–2 run once, and the module map's
    status column is the resume point (`references/stages.md` → *The program loop*).
    **The whole board?** `/task-pipeline waves` (`references/waves.md`): stages
-   0–4 once, 5–8 per wave, 9–10 to close.
+   0–4 once, 5–8 per wave, 9–10 to close. **The project moves in releases**: the loop
+   around the waves — survey, module dossiers, one design, parallel build, checks that
+   start as each node lands, release, post-release check, next pool — is
+   `references/iteration.md`. A finding joins the inventory; it is not fixed alone.
 4. Do **not** advance until the stage **gate** passes (`references/stages.md`).
    Honor the gate **type**: for `auto`, verify the gate's `check` yourself and
    stop/return on fail; for `judgment`, record the named judge's ruling as
-   judgement, never as a measurement; for `manual`, present the result and
-   **wait for the operator's explicit "continue"/go** — neither of the other
-   two ever substitutes for a required manual approval.
+   judgement, never as a measurement; for `manual`, present the result and cite the
+   **operator's explicit go or standing authorization naming this act**. Other gate
+   types and generic loop flags cannot supply that authority (`references/continuity.md`).
 5. **The cross-cutting rules fire at any stage**, not only here — the Doc Loop, the
    loop guard, the audit's exit, the frozen REQ list, the carry-over ledger, and
    what counts as evidence, and **every gate prints `holds: N`** — what this run left

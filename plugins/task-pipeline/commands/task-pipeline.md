@@ -1,6 +1,6 @@
 ---
-description: "Run a task through task-pipeline's gated stages (intake grill → docs → brainstorm → spec → plan → build → tests → deploy → post-deploy → docs/wiki → acceptance). Also: `waves` — close the whole board in waves; `setup` — audit the docs you already have; `checkup` — what has shipped unverified, with no task running."
-argument-hint: "<one-line task> | waves | setup | checkup"
+description: "Run a task through task-pipeline's gated stages (intake grill → docs → brainstorm → spec → plan → build → tests → deploy → post-deploy → docs/wiki → acceptance). Also: `waves` — close the whole board in waves; `iteration` — the release loop around the waves; `setup` — audit the docs you already have; `checkup` — what has shipped unverified, with no task running."
+argument-hint: "<one-line task> | waves | iteration | setup | checkup"
 ---
 Run the task below through `task-pipeline`'s gated stages. **Every stage's doctrine
 ships inside the skill** — no companion plugin is required for any of it. The
@@ -8,10 +8,11 @@ reference files are indexed in `SKILL.md`; this page is the run order, not the i
 
 Task: $ARGUMENTS
 
-> **Three other modes.** `waves` takes the whole board instead of one task;
-> `setup` audits the documentation this project already has; `checkup` reports what
-> has shipped without a person confirming it, with no task in flight. All three are at
-> the bottom of this page.
+> **Four other modes.** `waves` takes the whole board instead of one task;
+> `iteration` runs the release loop around the waves — survey, design, build, release,
+> the next pool; `setup` audits the documentation this project already has; `checkup`
+> reports what has shipped without a person confirming it, with no task in flight. All
+> four are at the bottom of this page.
 
 **Idempotent entry — inspect state first, never restart blindly.** If a pipeline
 TaskList from a previous run exists for this task, **resume** from the first incomplete
@@ -103,8 +104,8 @@ Anything deferred enters the carry-over ledger the moment it is said.
 | 10 | Acceptance | the ladder walk first, then the table, then the retrospective |
 
 **Honor every gate by its type**: `auto` — verify the check yourself; `judgment` —
-record the named judge's ruling as judgement, never as a measurement; `manual` — wait
-for an explicit go.
+record the named judge's ruling as judgement, never as a measurement; `manual` — cite
+an explicit go or specific standing authorization naming the act, otherwise wait.
 
 ## Cross-cutting — the three that fire at any stage
 
@@ -202,6 +203,19 @@ close pass after each (verify, one fix round, docs, re-measure, re-cut), 9–10 
 It takes the next wave without asking, says once when the board is empty, and leaves
 every sign-in, consent, payment and outward act to a person.
 Doctrine: `references/waves.md`.
+
+## `/task-pipeline iteration`
+
+**The loop around the waves: a project moves in whole releases.** Survey every source into
+one inventory (`scripts/waves.py merge`), write module dossiers in parallel, integrate them
+into one canvas until a pass changes nothing, ask the operator in batches (rounds), never
+one question at a time, then build in parallel. Each node is verified as it lands, in one
+to three rounds by its risk class (R1–R3); a wave's stage 7 integrates without tagging, and
+the release's stage-7 gate and stage 8's trio run once on what was released. The next pool
+is re-measured and handed back once. Every run reads earlier runs' lessons
+(`scripts/lessons.py query`) and writes its own at the retro. A finding made mid-iteration
+joins the inventory; only the closed hotfix lane ships alone.
+Doctrine: `references/iteration.md`.
 
 ## `/task-pipeline setup`
 

@@ -109,7 +109,10 @@ that was not.
 
 **Rounds are counted from the ledger, never from memory**: distinct `pass N` values on
 `touch:` lines at the review stage. A round that finds nothing ends the loop by
-definition and needs no counting.
+definition and needs no counting — **except a round a node's risk class owes**: an R2 or R3
+node's certification runs every owed round even after a clean one
+([`certification.md`](certification.md) → *Rounds owed by risk class*). Those rounds are
+the plan, not churn, and this guard does not count them.
 
 ## The re-render loop — a budget of one, two at most
 
