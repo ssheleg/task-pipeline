@@ -1,22 +1,22 @@
 #!/usr/bin/env bash
-# name: Negative self-test (an incomplete lesson rebuild dropping lessons the index held)
+# name: Negative self-test (a lesson rebuild that drops origins it could not re-derive)
 set -eu
 rm -rf /tmp/rebuild-loss-copy && cp -R . /tmp/rebuild-loss-copy
 python3 - <<'EOF'
-# The narrow form of #116's conservation guard: a scan with unread sources must not silently
-# replace a good projection with fewer lessons. Remove the guard; the suite must notice.
+# Round 7 of release iteration 1: rebuild never loses what it cannot re-derive. Remove the
+# carry-forward — an unread or unresolved origin is then dropped with its memory id.
 p = "/tmp/rebuild-loss-copy/plugins/task-pipeline/skills/task-pipeline/scripts/lessons.py"
 t = open(p, encoding="utf-8").read()
-needle = "        if incomplete and dropped and not a.force:\n"
+needle = "                else:\n                    carried.append((ck, dict(o, carried=reason)))\n"
 assert needle in t, "PLANT DID NOT LAND: anchor absent before edit"
-open(p, "w", encoding="utf-8").write(t.replace(needle, "        if False:\n", 1))
+open(p, "w", encoding="utf-8").write(t.replace(needle, "                else:\n                    removed.append((ck, o))\n", 1))
 assert needle not in open(p, encoding="utf-8").read(), "PLANT DID NOT LAND"
 EOF
 if python3 /tmp/rebuild-loss-copy/test/lessons_test.py; then
   rm -rf /tmp/rebuild-loss-copy
-  echo "ERROR: lessons_test passed an incomplete rebuild that drops lessons the index held"
+  echo "ERROR: lessons_test passed a rebuild that drops origins it could not re-derive"
   exit 1
 else
   rm -rf /tmp/rebuild-loss-copy
-  echo "OK: lessons_test correctly FAILs — an incomplete scan never silently drops a held lesson"
+  echo "OK: lessons_test correctly FAILs — an unread or unresolved origin is carried, never dropped"
 fi

@@ -86,7 +86,9 @@ gh pr list -R <owner>/<repo> --state merged -L 20 --json number,headRefName,merg
 Each node has one owner. When work has to be split, record the split on the PR you would
 otherwise collide with. *A lesson of release iteration 1 (2026-10-13): fix PRs from other
 tools' branches landed on nodes a fix cycle was rebuilding, and a later cycle was briefed on
-a PR that had already merged.*
+a PR that had already merged. Source: the iteration's run record, which is private, and
+[task-pipeline#125](https://github.com/ssheleg/task-pipeline/pull/125), which carries the
+rule.*
 
 ## Module dossiers
 
@@ -272,19 +274,28 @@ private to its project and never leaves it.
 **Layer 1 — every install, no service.** The project retro and [`learned.md`](learned.md),
 as before, plus a **local index** of every project's lessons on this machine:
 `scripts/lessons.py`, one JSON line per class, a pure function of the retros
-(`lessons.py rebuild --roots <dir>` re-derives it). Rebuild replaces the projection for
-its explicitly selected roots and depth: choose the whole intended scope. It rebuilds every
-lesson it can read and exits 0. A lesson whose evidence commit does not resolve — routine
-after a squash merge and a deleted branch — is counted in the summary and named. A missing or
-unreadable root, discovery error, malformed artifact configuration, missing explicitly
-configured artifact directory, dangling source link, nonregular retro input or invalid lesson
-is named under `not read`. A readable empty scope can produce an empty index; an absent
-default artifact directory in a new repository remains a valid empty source. Rebuild refuses,
-exit 1 and nothing written, in two cases only. The first is when no retro could be read at
-all; then no index, lock or migration is touched. The second is when the scan was incomplete
-and would drop a lesson the previous index holds: it names those lessons, and `--force` takes
-that loss deliberately. Unknown is never measured zero: repair the named source and retry.
-A held lock is its own refusal.
+(`lessons.py rebuild --roots <dir>` re-derives it). **Rebuild never loses what it cannot
+re-derive.** It derives every lesson from the retros it can read under the roots and depth
+given. It then merges in each origin of the previous index — one project's copy of a lesson,
+`(project, retro)` — whose source it could not re-derive:
+
+- the root, repository or retro was not read, or lay outside the roots scanned;
+- the evidence commit no longer resolves, which is routine after a squash merge and a
+  deleted branch;
+- the entry was refused.
+
+Such an origin is **carried**. It keeps everything recorded on it, the memory id included,
+and is marked `carried: <reason>`. It still counts toward `seen`, `projects` and `status`, so
+a lesson two projects hold stays a `candidate` while one root is unreadable. It is named in
+the summary, and it is re-derived and un-marked as soon as its source reads again. An origin
+leaves the index in only two ways. The first is when its retro was read, or its repository
+discovered in full, and no longer holds it; that removal is named. The second is on purpose,
+with `rebuild --prune-carried`. Unreadable sources are named under `not read`, and the run
+exits 0 whenever anything was read. It exits 1 only when nothing could be read; then no
+index, lock directory or migration is touched. A held lock or an unreadable index is its
+own refusal. On the default path the one-time merge of a standalone index, and setting a
+corrupt index aside, run first, as for every verb. Unknown is never measured zero, and never
+measured gone.
 Two projects holding one class key make
 one lesson seen twice, status `candidate`. The index path is a parameter — `--index`, then
 `$TASK_PIPELINE_LESSONS`, then `~/.sshlg-skills/lessons/index.jsonl` **when

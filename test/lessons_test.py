@@ -197,8 +197,13 @@ def conservative_rebuild_controls():
     ok(rc != 0 and not absent.parent.exists(), "incomplete first rebuild creates no index or lock directory")
     empty = work / "empty"
     empty.mkdir()
-    rc, _, _ = run("rebuild", "--roots", str(empty), index=idx)
-    ok(rc == 0 and idx.read_bytes() == b"", "an explicitly readable empty scope can rebuild to zero")
+    rc, out, _ = run("rebuild", "--roots", str(empty), index=idx)
+    # Round 7: a readable empty scope re-derives nothing and loses nothing — the held lesson is
+    # carried; --prune-carried is how it is emptied on purpose.
+    ok(rc == 0 and [o.get("carried") for o in lesson_of(idx)["origins"]] == ["source not read"],
+       f"a readable empty scope carries the held lesson ({rc} {out!r})")
+    rc, _, _ = run("rebuild", "--roots", str(empty), "--prune-carried", index=idx)
+    ok(rc == 0 and idx.read_bytes() == b"", "--prune-carried over a readable empty scope rebuilds to zero")
 
 
 def partial_rebuild_controls():
@@ -237,19 +242,170 @@ def partial_rebuild_controls():
        and "absence-needs-its-own-check" in unread_idx.read_text(encoding="utf-8"),
        f"rebuild: an unreadable directory among the roots is named, the other roots still rebuilt ({rc} {out!r} {err!r})")
 
-    # The narrow guard #116's refusal still owes: a rebuild with unread sources never silently
-    # drops a lesson the previous index holds. It refuses and names them; --force replaces.
+    # #116's conservation case, under the round-7 design: a lesson the scan does not reach is
+    # carried forward, never dropped, and the run still exits 0.
     held = work / "held" / "index.jsonl"
     ok(run("add", "--retro", str(good / "docs/evidence/retro.md"), "--all", cwd=good, index=held)[0] == 0,
        "partial-rebuild fixture seeds a lesson the scan will not reach")
-    before = held.read_bytes()
     rc, out, err = run("rebuild", "--roots", str(dangling), index=held)
-    ok(rc == 1 and held.read_bytes() == before and "absence-needs-its-own-check" in out + err
-       and "--force" in err,
-       f"rebuild: unread sources that would drop a held lesson refuse, naming it and --force ({rc} {out!r} {err!r})")
-    rc, out, err = run("rebuild", "--roots", str(dangling), "--force", index=held)
-    ok(rc == 0 and held.read_bytes() == b"",
-       f"rebuild --force: the operator's choice replaces the index with what was read ({rc} {err!r})")
+    kept = entries_of(held).get(KEY)
+    ok(rc == 0 and kept is not None and [o.get("carried") for o in kept["origins"]] == ["source not read"]
+       and "carried" in out,
+       f"rebuild: a held lesson outside the readable scan is carried, named, exit 0 ({rc} {out!r} {err!r})")
+
+
+KEY = "absence-needs-its-own-check"
+
+
+def entries_of(path):
+    return {e["classKey"]: e for e in
+            (json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip())}
+
+
+def lesson_of(path, class_key=KEY):
+    """The entry, or an empty stand-in so a dropped lesson fails its `ok` by name, not by KeyError."""
+    return entries_of(path).get(class_key) or {"id": None, "origins": [], "projects": 0, "seen": 0,
+                                                 "status": "absent"}
+
+
+def carry_forward_controls():
+    """Round 7 (loop guard): rebuild never loses what it cannot re-derive. An origin whose source
+    could not be read, or whose commit no longer resolves, is CARRIED with everything recorded on
+    it; status counts it; it is re-derived and un-marked when its source reads again; only
+    `--prune-carried` removes it on purpose."""
+    work = tree("tp-lessons-carry-")
+    f1, _ = project("carry-f1", 1)
+    f2, _ = project("carry-f2", 2)
+    idx = work / "index.jsonl"
+    for repo in (f1, f2):
+        ok(run("add", "--retro", "docs/evidence/retro.md", "--all", cwd=repo, index=idx)[0] == 0,
+           "carry fixture: both projects add the lesson")
+    lid = lesson_of(idx)["id"]
+    rc, _, err = run("record", lid, "--answer", "-", cwd=f2, index=idx,
+                     stdin=json.dumps({"memoryId": "mem:probe-f2", "revision": 1}))
+    ok(rc == 0, f"carry fixture: the store's answer is recorded on f2's origin ({rc} {err!r})")
+    f2_key = next(o["project"] for o in lesson_of(idx)["origins"] if o.get("memory"))
+
+    def f2_origin():
+        return next((o for o in lesson_of(idx)["origins"] if o["project"] == f2_key), None)
+
+    # N1: f2's root unreadable. Its origin and memory id are carried, the lesson stays a
+    # candidate held by two projects, exit 0.
+    f2.chmod(0)
+    try:
+        rc, out, err = run("rebuild", "--roots", str(f1), str(f2), index=idx)
+    finally:
+        f2.chmod(0o755)
+    e, o = lesson_of(idx), f2_origin()
+    ok(rc == 0 and o is not None and o.get("memory") == "mem:probe-f2@1"
+       and o.get("carried") == "source not read",
+       f"N1: an unreadable root's origin is carried with its memory id, exit 0 ({rc} {out!r} {err!r} {e})")
+    ok(e["projects"] == 2 and e["status"] == "candidate" and e["seen"] == 2,
+       f"N1: status, projects and seen count the carried origin ({e['status']} {e['projects']} {e['seen']})")
+    ok("carried" in out and f2_key in out, f"N1: the summary names the carried origin ({out!r})")
+
+    # Restored: re-derived from the retro, un-marked, memory id still there.
+    rc, out, err = run("rebuild", "--roots", str(f1), str(f2), index=idx)
+    o = f2_origin()
+    ok(rc == 0 and o is not None and "carried" not in o and o.get("memory") == "mem:probe-f2@1",
+       f"a carried origin is re-derived and un-marked once its root reads again ({rc} {o})")
+
+    # Origin granularity: f1 deletes the entry on a READABLE root while f2 is unreadable. f1's
+    # origin leaves (its source no longer holds it); f2's is carried. A class-key carry would
+    # keep f1's too.
+    retro1 = f1 / "docs/evidence/retro.md"
+    original1 = retro1.read_text(encoding="utf-8")
+    retro1.write_text("\n".join(ln for ln in original1.splitlines() if "**Lesson:**" not in ln) + "\n",
+                      encoding="utf-8")
+    f2.chmod(0)
+    try:
+        rc, out, err = run("rebuild", "--roots", str(f1), str(f2), index=idx)
+    finally:
+        f2.chmod(0o755)
+    e = lesson_of(idx)
+    ok(rc == 0 and [x["project"] for x in e["origins"]] == [f2_key]
+       and e["origins"][0].get("carried") == "source not read" and e["projects"] == 1
+       and e["status"] == "local" and "removed" in out,
+       f"carry is per origin: a readable root's deleted entry leaves, the unreadable one stays ({rc} {out!r} {e})")
+
+    # Identity is (project, retro) under the class key, never the title: f1 retitles the lesson
+    # while f2 is carried; one entry, two projects.
+    retro1.write_text(original1.replace("a check that reads a success line passes",
+                                        "a gate that reads a success line passes"), encoding="utf-8")
+    f2.chmod(0)
+    try:
+        rc, out, err = run("rebuild", "--roots", str(f1), str(f2), index=idx)
+    finally:
+        f2.chmod(0o755)
+    all_entries = entries_of(idx)
+    e = all_entries.get(KEY)
+    ok(rc == 0 and len(all_entries) == 1 and e is not None and e["projects"] == 2
+       and sorted(bool(x.get("carried")) for x in e["origins"]) == [False, True],
+       f"a retitled lesson keeps its carried origin under the same class key ({rc} {all_entries})")
+
+    # --prune-carried removes exactly the carried origins, on purpose.
+    f2.chmod(0)
+    try:
+        rc, out, err = run("rebuild", "--roots", str(f1), str(f2), "--prune-carried", index=idx)
+    finally:
+        f2.chmod(0o755)
+    e = lesson_of(idx)
+    ok(rc == 0 and [x["project"] for x in e["origins"]] != [] and f2_origin() is None
+       and all("carried" not in x for x in e["origins"]) and e["projects"] == 1 and "pruned" in out,
+       f"--prune-carried drops exactly the carried origins ({rc} {out!r} {e})")
+    retro1.write_text(original1, encoding="utf-8")
+
+    # N2, the routine case: a lesson already indexed, then its commit orphaned and pruned after a
+    # squash merge and branch deletion. It is carried (exit 0); another project's new lesson is
+    # added in the same run.
+    g = tree("tp-lessons-carry-g-")
+    git(g, "init", "-q")
+    (g / "README.md").write_text("# g\n", encoding="utf-8")
+    git(g, "add", "-A")
+    git(g, "commit", "-q", "-m", "root")
+    main_branch = git(g, "rev-parse", "--abbrev-ref", "HEAD")
+    git(g, "checkout", "-q", "-b", "side")
+    (g / "fix.txt").write_text("fixed\n", encoding="utf-8")
+    git(g, "add", "-A")
+    git(g, "commit", "-q", "-m", "the fix")
+    orphan = git(g, "rev-parse", "HEAD")
+    git(g, "checkout", "-q", main_branch)
+    (g / "docs" / "evidence").mkdir(parents=True)
+    (g / "docs/evidence/retro.md").write_text(
+        "# Pipeline retrospective\n\n## Recent log\n\n"
+        + ENTRY.format(n=3, topic="g-export", sha=orphan), encoding="utf-8")
+    git(g, "add", "-A")
+    git(g, "commit", "-q", "-m", "retro")
+    gidx = work / "g" / "index.jsonl"
+    ok(run("add", "--retro", "docs/evidence/retro.md", "--all", cwd=g, index=gidx)[0] == 0,
+       "N2 fixture: the lesson is indexed while its commit resolves")
+    git(g, "branch", "-q", "-D", "side")
+    git(g, "reflog", "expire", "--expire=now", "--all")
+    git(g, "gc", "-q", "--prune=now")
+    gone = subprocess.run(["git", "cat-file", "-e", f"{orphan}^{{commit}}"], cwd=g,
+                          capture_output=True).returncode != 0
+    ok(gone, "N2 fixture: the squashed branch's commit no longer resolves")
+    h, _ = project("carry-h", 4)
+    hr = h / "docs/evidence/retro.md"
+    hr.write_text(hr.read_text(encoding="utf-8").replace(KEY, "a-new-class-elsewhere"), encoding="utf-8")
+    rc, out, err = run("rebuild", "--roots", str(g), str(h), index=gidx)
+    es = entries_of(gidx)
+    ok(rc == 0 and KEY in es and [x.get("carried") for x in es[KEY]["origins"]] == ["commit does not resolve"]
+       and es[KEY]["origins"][0]["commit"] == orphan and "a-new-class-elsewhere" in es,
+       f"N2: an indexed lesson whose commit was pruned is carried, exit 0, new lessons added ({rc} {out!r} {err!r})")
+    rc, out, err = run("rebuild", "--roots", str(g), str(h), "--prune-carried", index=gidx)
+    es = entries_of(gidx)
+    ok(rc == 0 and KEY not in es and "a-new-class-elsewhere" in es,
+       f"N2: --prune-carried removes the carried lesson and keeps the rest ({rc} {sorted(es)})")
+
+    # Nothing read: exit 1, the index byte-identical.
+    before = idx.read_bytes()
+    f2.chmod(0)
+    try:
+        rc, out, err = run("rebuild", "--roots", str(f2), str(work / "absent"), index=idx)
+    finally:
+        f2.chmod(0o755)
+    ok(rc == 1 and idx.read_bytes() == before, f"nothing read: exit 1, index untouched ({rc} {err!r})")
 
 
 def source_admission_controls():
@@ -336,8 +492,10 @@ def source_admission_controls():
     (newrepo / "README.md").write_text("new repository")
     git(newrepo, "add", "README.md")
     git(newrepo, "commit", "-q", "-m", "initial")
-    rc, _, _ = run("rebuild", "--roots", str(newrepo), index=idx)
-    ok(rc == 0 and idx.read_bytes() == b"", "new repository without default artifacts is genuinely empty")
+    rc, out, _ = run("rebuild", "--roots", str(newrepo), index=idx)
+    # Genuinely empty: no refusal, nothing new derived; the held lesson (another project) is carried.
+    ok(rc == 0 and list(entries_of(idx)) == [KEY] and "  not read:" not in out,
+       f"new repository without default artifacts is genuinely empty, not a refusal ({rc} {out!r})")
 
 
 def main():
@@ -835,6 +993,7 @@ def main():
        f"with ~/.sshlg-skills present the default is its lessons/index.jsonl ({out!r})")
     conservative_rebuild_controls()
     partial_rebuild_controls()
+    carry_forward_controls()
     source_admission_controls()
     print(f"PASS: lessons.py — {CASES} cases")
 

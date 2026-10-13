@@ -18,12 +18,12 @@ entry is a pure function of its origins.
         classKey makes it a candidate, a repeat from the same project revises, never mints
     lessons.py query NOUN ... [--limit 5]
         at most --limit lines: `[lesson L-<sha12>] title — trigger — check (seen N, projects K)`
-    lessons.py rebuild --roots DIR ... [--depth 3] [--force]
-        re-derive the whole index from every retro found under the roots: every lesson it can
-        read is rebuilt; a lesson whose commit does not resolve is counted and named, an
-        unreadable root, directory or retro is named under `not read`, and the run exits 0.
-        It refuses (exit 1, nothing written) only when no retro could be read at all, or when
-        an incomplete scan would drop a lesson the previous index holds — unless --force
+    lessons.py rebuild --roots DIR ... [--depth 3] [--prune-carried]
+        re-derive the index from every retro found under the roots, and never lose what it
+        cannot re-derive: an origin whose source was not read, or whose commit no longer
+        resolves, is carried forward with its memory id, marked `carried`, and named. Exit 0
+        whenever anything was read; exit 1, touching nothing, only when nothing could be read.
+        --prune-carried removes the carried origins on purpose
     lessons.py candidates [--min-projects 2]
         lessons two or more projects hold: the `retro.publish` queue for learned.md
     lessons.py show L-<sha12>
@@ -80,9 +80,8 @@ with the entry's own `**Surfaced at:** stage N · **Owned by:** stage M`, `**Fix
 its project and is skipped, counted aloud.
 
 Exit codes: 0 done (an absent index on `query` is a state, printed; a `rebuild` that named
-what it skipped); 1 a refusal — a lesson that fails lesson/1 or whose commit does not resolve
-on `add`, a held lock, an unknown id, a `rebuild` that read nothing or would drop held
-lessons without --force; 2 usage or an
+what it skipped or carried); 1 a refusal — a lesson that fails lesson/1 or whose commit does
+not resolve on `add`, a held lock, an unknown id, a `rebuild` that read nothing; 2 usage or an
 unreadable input. Stdlib only (`references/portability.md`).
 """
 from __future__ import annotations
@@ -447,8 +446,10 @@ def _relative(root: pathlib.Path, path: pathlib.Path) -> str:
         raise Refused(f"{path} is outside the repository at {root}")
 
 
-def parse_retro(path: pathlib.Path, root: pathlib.Path, project: str) -> tuple[list[dict], int, list[str]]:
-    """Lessons from one retro file: (lessons, entries without a Lesson line, refusals)."""
+def parse_retro(path: pathlib.Path, root: pathlib.Path, project: str,
+                refused: set[str] | None = None) -> tuple[list[dict], int, list[str]]:
+    """Lessons from one retro file: (lessons, entries without a Lesson line, refusals).
+    `refused`, when given, collects the `retro#anchor` of every Lesson entry refused here."""
     try:
         text = path.read_text(encoding="utf-8")
     except (OSError, UnicodeError) as exc:
@@ -492,6 +493,8 @@ def parse_retro(path: pathlib.Path, root: pathlib.Path, project: str) -> tuple[l
         if missing:
             problems.append(f"{rel}#{anchor}: the Lesson line needs the entry's "
                             + ", ".join(missing))
+            if refused is not None:
+                refused.add(f"{rel}#{anchor}")
             continue
 
         def stage(v: str) -> int | str:
@@ -818,9 +821,15 @@ def _source_stat(path: pathlib.Path):
     return info
 
 
-def find_retros(roots: list[str], depth: int) -> tuple[list[tuple[pathlib.Path, pathlib.Path]], list[str]]:
-    """Discovery and its unknowns, kept separate from a readable empty scope."""
+def find_retros(roots: list[str], depth: int) -> tuple[list[tuple[pathlib.Path, pathlib.Path]], list[str],
+                                                        dict[pathlib.Path, bool]]:
+    """Discovery and its unknowns, kept separate from a readable empty scope.
+
+    Returns (retro files, problems, repositories): each repository discovered maps to whether
+    its retro sources were discovered in full — only a fully discovered repository can say an
+    origin's source no longer holds it."""
     found, problems = [], []
+    repos: dict[pathlib.Path, bool] = {}
     def unread(exc):
         problems.append(f"{exc.filename}: cannot discover ({type(exc).__name__})")
     for r in roots:
@@ -838,6 +847,7 @@ def find_retros(roots: list[str], depth: int) -> tuple[list[tuple[pathlib.Path, 
             dirs[:] = sorted(d for d in dirs if d not in SKIP_DIRS and not d.startswith("."))
             try:
                 if _source_stat(here / ".git") is not None:
+                    repos[here] = False
                     art = _artifact_root(here)
                     archive = art / "retro"
                     archive_info = _source_stat(archive)
@@ -852,11 +862,12 @@ def find_retros(roots: list[str], depth: int) -> tuple[list[tuple[pathlib.Path, 
                         if not stat.S_ISREG(info.st_mode):
                             raise Refused(f"{f}: retro source is not a regular file")
                         found.append((here, f))
+                    repos[here] = True
             except (OSError, Refused) as exc:
                 problems.append(f"{here}: {exc}")
             if rel_depth >= depth:
                 dirs[:] = []
-    return found, problems
+    return found, problems, repos
 
 
 def _artifact_root(repo: pathlib.Path) -> pathlib.Path:
@@ -892,56 +903,94 @@ def _artifact_root(repo: pathlib.Path) -> pathlib.Path:
     return repo / ARTIFACT_KNOWN[0]
 
 
+CARRY_UNREAD = "source not read"
+CARRY_UNRESOLVED = "commit does not resolve"
+CARRY_REFUSED = "lesson refused"
+
+
+def _carry_reason(o: dict, seen: dict) -> str | None:
+    """Why the previous index's origin `o` is carried forward, or None when its source was read
+    and no longer holds it — the one way an origin leaves without `--prune-carried`."""
+    k = _origin_key(o)
+    if k in seen["unresolved"]:
+        return CARRY_UNRESOLVED
+    if k in seen["refused"]:
+        return CARRY_REFUSED
+    if (o["project"], o["retro"].split("#", 1)[0]) in seen["files"] or o["project"] in seen["complete"]:
+        return None
+    return CARRY_UNREAD
+
+
 def cmd_rebuild(a, idx: pathlib.Path) -> int:
-    """Rebuild every lesson it can read; name every source it could not.
+    """Rebuild never loses what it cannot re-derive (verification round 7, loop guard).
 
-    One bad source never costs the whole rebuild (verification round 6): a squash merge plus a
-    deleted branch leaves an evidence commit dangling as a matter of routine, and when a
-    corrupt index has been set aside `rebuild --roots` is the recovery, so refusing the whole
-    scan left the index empty. Two refusals remain, both before any write:
+    The index becomes the lessons derived from every readable retro, merged with the previous
+    index's origins CARRIED FORWARD wherever their source could not be re-derived — its root,
+    repository or retro could not be read, it lay outside the roots scanned, its evidence commit
+    no longer resolves (routine after a squash merge and a deleted branch), or its entry was
+    refused. Carrying is per origin `(project, retro)`, never per class key: a carried origin
+    keeps everything recorded on it — commit, lesson fields, memory id — gains
+    `carried: <reason>`, and counts toward `seen`, `projects` and `status` like any other. It is
+    re-derived and un-marked as soon as its source reads again.
 
-      * nothing could be read at all — every root or retro failed — exit 1 before the session
-        opens, so no index, lock directory or migration is touched;
-      * the scan was incomplete AND the result would drop a lesson the previous index holds —
-        exit 1, naming the lessons, unless `--force`. This is the narrow form of #116's
-        conservation guard (an unreadable source silently erased a good projection); a
-        complete scan, or an incomplete one that loses nothing, replaces the index."""
-    found, problems = find_retros(a.roots, a.depth)
+    An origin leaves the index only when its retro was read (or its repository discovered in
+    full) and no longer holds it, or on purpose with `--prune-carried`. The run checks that
+    every previous origin is accounted for before it writes.
+
+    Exit 0 whenever anything was read. Exit 1 only when nothing could be read at all — before
+    the session opens, so no index, lock directory or migration is touched — or on a lock or
+    unreadable-index refusal. On the default path the one-time merge of the standalone index
+    (and setting a corrupt index aside) runs first, as for every verb."""
+    found, problems, repos = find_retros(a.roots, a.depth)
     lessons, private, seen_files = [], 0, 0
     unresolved: list[str] = []
     keys: dict[pathlib.Path, str] = {}
+    failed: set[pathlib.Path] = set()
+    seen: dict[str, set] = {"files": set(), "unresolved": set(), "refused": set(), "complete": set()}
     for repo, retro in found:
         try:
             if repo not in keys:
                 keys[repo] = project_key(repo)
-            got, priv, probs = parse_retro(retro, repo, keys[repo])
+            refused: set[str] = set()
+            got, priv, probs = parse_retro(retro, repo, keys[repo], refused)
             mine, unres = [], []
             for le in got:
                 if validate(le):
                     probs.append(f"{le['classKey']}: refused by lesson/1")
+                    refused.add(le["origin"]["retro"])
                 elif not commit_resolves(repo, le["origin"]["commit"]):
-                    unres.append(f"{repo.name}: {le['classKey']} (commit {le['origin']['commit']})")
+                    unres.append(le)
                 else:
                     mine.append(le)
         except Refused as exc:
             problems.append(f"{repo.name}: {exc}")
+            failed.add(repo)
             continue
         seen_files += 1
         private += priv
-        unresolved += unres
+        seen["files"].add((keys[repo], _relative(repo, retro)))
+        seen["refused"] |= {(keys[repo], r) for r in refused}
+        seen["unresolved"] |= {_origin_key(le["origin"]) for le in unres}
+        unresolved += [f"{repo.name}: {le['classKey']} (commit {le['origin']['commit']})" for le in unres]
         lessons += mine
         problems += [f"{repo.name}: {p}" for p in probs]
     if problems and not seen_files:
         for problem in problems:
             print(f"  not read: {problem}")
-        print("lessons: rebuild refused — no retro could be read; index and migration state unchanged",
-              file=sys.stderr)
+        print("lessons: rebuild refused — no retro could be read; the index, its lock directory "
+              "and any migration were not touched", file=sys.stderr)
         return 1
-    incomplete = bool(problems or unresolved)
+    for repo, whole in repos.items():
+        if not whole or repo in failed:
+            continue
+        try:
+            seen["complete"].add(keys[repo] if repo in keys else project_key(repo))
+        except Refused:
+            pass  # a repository with no commit holds no origin this index could name
     with session(idx, a.default_index) as ss:
-        # The previous index lends its memory ids. `session` already refused an unreadable one
-        # (its contents may be good) and set a corrupt one aside; its notes go to stderr as for
-        # every verb, and into this verb's report as well.
+        # The previous index lends its memory ids and its carried origins. `session` already
+        # refused an unreadable one (its contents may be good) and set a corrupt one aside; its
+        # notes go to stderr as for every verb, and into this verb's report as well.
         old = ss.entries
         problems += [f"the previous index: {n}" for n in ss.notes]
         memory = {(o["project"], o["retro"]): o["memory"]
@@ -955,31 +1004,49 @@ def cmd_rebuild(a, idx: pathlib.Path) -> int:
             origins = [dict(o, memory=memory[_origin_key(o)]) if _origin_key(o) in memory else o
                        for o in e["origins"]]
             entries[e["classKey"]] = derive(origins)
-        dropped = sorted(k for k in old if k not in entries)
-        if incomplete and dropped and not a.force:
-            for p in problems:
-                print(f"  not read: {p}")
-            for u in unresolved:
-                print(f"  skipped, commit does not resolve: {u}")
-            print(f"lessons: rebuild refused — the scan was incomplete and would drop "
-                  f"{len(dropped)} lesson{'' if len(dropped) == 1 else 's'} the index holds: "
-                  f"{', '.join(dropped)}. Repair the sources named above, or pass --force to "
-                  "replace the index with what was read; the index keeps every lesson it held",
-                  file=sys.stderr)
-            return 1
+        derived = {(ck, _origin_key(o)) for ck, e in entries.items() for o in e["origins"]}
+        carried, pruned, removed = [], [], []
+        for ck, e in sorted(old.items()):
+            for o in e["origins"]:
+                if (ck, _origin_key(o)) in derived:
+                    continue
+                reason = _carry_reason(o, seen)
+                if reason is None:
+                    removed.append((ck, o))
+                elif a.prune_carried:
+                    pruned.append((ck, dict(o, carried=reason)))
+                else:
+                    carried.append((ck, dict(o, carried=reason)))
+        for ck, o in carried:
+            held = [x for x in entries[ck]["origins"] if _origin_key(x) != _origin_key(o)] if ck in entries else []
+            entries[ck] = derive(held + [o])
+        # Nothing leaves implicitly: every previous origin is re-derived, carried, pruned on
+        # purpose, or removed because a read source no longer holds it.
+        now = {(ck, _origin_key(o)) for ck, e in entries.items() for o in e["origins"]}
+        lost = [(ck, _origin_key(o)) for ck, e in old.items() for o in e["origins"]
+                if (ck, _origin_key(o)) not in now
+                and not any(ck == c and _origin_key(o) == _origin_key(x) for c, x in pruned + removed)]
+        if lost:
+            raise Refused(f"rebuild would drop {len(lost)} origin(s) it cannot account for "
+                          f"({lost[:3]}) — nothing was written; this is a defect, report it")
         ss.entries = entries
         ss.save()
     print(f"lessons: rebuilt from {seen_files} retro file{'s' if seen_files != 1 else ''} in "
           f"{len(keys)} repositor{'y' if len(keys) == 1 else 'ies'} · {len(entries)} "
           f"lesson{'' if len(entries) == 1 else 's'} · {private} private entries skipped · "
-          f"{len(unresolved)} with a commit that does not resolve")
+          f"{len(unresolved)} with a commit that does not resolve · {len(carried)} origin"
+          f"{'' if len(carried) == 1 else 's'} carried forward")
+    for ck, o in carried:
+        print(f"  carried ({o['carried']}): {ck} — {o['project']} {o['retro']}"
+              + (f" · {o['memory']}" if o.get("memory") else ""))
+    for ck, o in pruned:
+        print(f"  pruned ({o['carried']}): {ck} — {o['project']} {o['retro']}")
+    for ck, o in removed:
+        print(f"  removed (its retro no longer holds it): {ck} — {o['project']} {o['retro']}")
     for u in unresolved:
         print(f"  skipped, commit does not resolve: {u}")
     for p in problems:
         print(f"  not read: {p}")
-    if incomplete and dropped:
-        print(f"lessons: --force dropped {len(dropped)} lesson{'' if len(dropped) == 1 else 's'} "
-              f"the previous index held: {', '.join(dropped)}", file=sys.stderr)
     return 0
 
 
@@ -1138,8 +1205,8 @@ def main(argv: list[str]) -> int:
     rb = sub.add_parser("rebuild", parents=[common], help="re-derive the index from the retros")
     rb.add_argument("--roots", nargs="+", required=True)
     rb.add_argument("--depth", type=int, default=3, help="directory levels below each root")
-    rb.add_argument("--force", action="store_true",
-                    help="replace the index even when an incomplete scan drops lessons it holds")
+    rb.add_argument("--prune-carried", action="store_true",
+                    help="remove, on purpose, every origin the rebuild would carry forward")
     c = sub.add_parser("candidates", parents=[common], help="lessons two or more projects hold")
     c.add_argument("--min-projects", type=int, default=2)
     sh = sub.add_parser("show", parents=[common], help="one entry with its origins")
