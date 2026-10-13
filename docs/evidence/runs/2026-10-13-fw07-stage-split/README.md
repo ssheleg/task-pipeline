@@ -105,3 +105,14 @@ unknown-header route control raise the focused route total from47 to51, all pass
 This is a bounded diagnostic correction, not a new runtime stage fallback. The
 prior structural/source review remains its original scope; final aggregate must
 include this correction.
+
+The coordinator independently reviewed the diagnostic-only correction at
+[7f39302](https://github.com/ssheleg/task-pipeline/commit/7f393022729b9403cf4c0535d4092dcb91474bf6)
+and replayed all 51 focused route controls: PASS. Unknown default ids still fail
+the route guard; no selected-runtime fallback was added.
+
+The standalone documentation gate at that exact source also passed:
+`bash plugins/task-pipeline/skills/task-pipeline/templates/docgate.sh`, exit 0.
+Its [complete output](docgate-passed.txt) records 96 linked files, 6 decisions,
+3 open questions, reachable evidence commits and both propagation/residue floors
+at zero. This does not replace the pending public plants or composed owner suite.
