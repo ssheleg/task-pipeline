@@ -190,3 +190,16 @@ Correction: both plants now assert survival in the detail file the validator rea
 which the plant does not touch; the spine edit and the expected validator message
 are unchanged. Both run green alone (exit0). The full owner gate must be rerun on
 the next composed source (with the child-lifetime correction), serially.
+
+### The nine suites that never ran, on a9e45af
+
+Run from a clean clone at exact a9e45af (the plant correction) with an owned
+TMPDIR, each suite separately so one failure cannot hide the next:
+[summary](tail-a9e45af.txt) — certify (873s), exposure, probe, anchors, runner,
+hooks, artifacts, docs and audit-regressions all exit0. This covers what875c6e6
+left NOT_RUN; it is still not the full chained gate, which owes one run on the next
+composed source. Observation, not a failure: the owned TMPDIR kept 37
+`task-pipeline-test-*-graph` trees. `certify_mutations.py` runs `graph_test.py`
+against mutants whose cases fail on purpose, and `test/residue.py` keeps a failing
+case's tree as evidence; a mutation run therefore leaves one tree per killed case
+in TMPDIR. Recorded for the backlog; not changed here.
