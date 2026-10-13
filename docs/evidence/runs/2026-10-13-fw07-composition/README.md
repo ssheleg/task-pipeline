@@ -154,3 +154,12 @@ accepted the final metadata delta; no tag or full-suite acceptance was inferred.
 The original two PRs remain open and their heads are preserved until accepted
 replacement merge. Full local gates and genuine eligible candidate checks precede
 normal merge/promotion; this draft is for source review while the serial slot is held.
+
+## Completed worktree cleanup
+
+[Cleanup receipt](completed-worktree-cleanup.json) records five completed own
+worktrees removed without force after exact remote-head, composed ancestry, clean
+status and no-open-handle checks. Their ignored local records were archived under
+the common Git directory with byte hashes verified before removal; branches and
+tags remain. The current candidate and active release clone were preserved.
+This maintenance operation does not add validation or release acceptance.
