@@ -154,3 +154,17 @@ extraction source; the current procedure has intentionally changed afterward.
 Current full/public negative and independently reviewed semantic acceptance remain
 pending. Do not run a broad old-branch suite against unrelated shared candidate tags;
 reconcile with the accepted release repair and use the coordinator's serial slot.
+
+## Semantic correction independently accepted
+
+The [independent peer receipt](https://github.com/ssheleg/sshlg-skills/blob/7dac283ca36f097e755d827af553b8a534b0ad66/docs/evidence/completion-1013/fw07-prerequisite-correction-peer.json)
+accepts exact source3a8e4ac within its bounded scope: the reviewer read both shipped
+reference changes and their tests, replayed10 contract checks and30 actual mutation
+controls, and confirmed artifact quality/NOT_RUN obligations remain. No complete
+suite, native or model acceptance is implied.
+
+The [proposed matched evaluation packet](https://github.com/ssheleg/sshlg-skills/tree/f3ae0002840b3dab60066cf3dea01df0a3bfb5dc/docs/evidence/completion-1013/fw07-behavioral-holdout-v1)
+binds this same semantic correction in both the monolithic control and split
+candidate. It remains a proposed protocol, with no model calls or new spending
+authority. Next: reconcile the accepted release repair, complete source/installer
+and serialized aggregate gates, and obtain separate runner/admission review.
