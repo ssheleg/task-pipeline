@@ -127,3 +127,40 @@ fresh serial complete gate, then eligible frozen-candidate PR checks and normal
 merge. No promotion, version/tag change or release was initiated at this stop.
 The [performance source census](performance-source-census.json) is a future
 measurement proposal only, not a time-saving result or permission to drop gates.
+
+## Independent review of 25fb09d and correction
+
+A non-author reviewer (clean clone, own TMPDIR, public lock inode unchanged, no
+`runner_test.py`/`negatives.py` aggregate) returned **ACCEPT-WITH-FIXES**: focused
+`fw07_scratch_lock.py` 30, `fw07_child_lifetime.py` 48, `plant_copy_cleanup.py` 18,
+all exit0; the six old TMPDIR selectors replayed with an `os.open` spy never opened
+the public lock. Confirmed correct: no `LOCK_UN`; handlers before any child; atomic
+start/register against cancellation; lock FD close-on-exec except plant Bash;
+children are drained before the parent closes its copy.
+
+Findings and their correction:
+
+1. MEDIUM, reproduced 229/300 in a stress loop and 22/40 real Ctrl-C runs: macOS
+   answers EPERM to `killpg` for a group of unreaped zombies; `_signal_group` caught
+   only ESRCH, so `cancel()` aborted before SIGKILL and `run()` skipped `_drain`.
+   Now EPERM is treated as nothing to signal, `_group_exists` treats it as gone and
+   waits a bounded second for reaping (also covering Linux zombies, reviewer's
+   PLAUSIBLE finding5), and `_drain` runs in a `finally` after `cancel()`.
+2. MEDIUM (evidence): the "bash" control never killed Bash — a single-command plant
+   lets Bash exec-replace itself, so the writer's parent was the runner and the case
+   duplicated "parent". The packet's earlier sentence "Actual Bash death is covered"
+   was false for 25fb09d. The plant now has a trailing command and each case asserts
+   the writer's parent is not the runner. The reviewer's own real-Bash replay held
+   15/15.
+3. LOW: a lifecycle `RuntimeError` escaped `main()` as a traceback; it is now a
+   refusal (`plant lifecycle refused (RuntimeError)`, exit1).
+4. LOW, pre-existing: the repository snapshot was removed only on the success path;
+   65 snapshots remained after 85 interrupted runs. It is now removed at exit.
+
+Not changed: an orphaned plant that hangs still holds the public lock without a
+timeout (design note), interruption exits1 rather than130/143. Not established:
+Linux, lock-file replacement while children hold it.
+
+Result: `fw07_child_lifetime.py` 62 controls (new EPERM control red against the
+25fb09d helper, exit1), `fw07_scratch_lock.py` 30, `plant_copy_cleanup.py`, and
+`test/validate.py` — all exit0. Full owner gate pending on the composed source.

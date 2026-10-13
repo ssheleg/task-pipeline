@@ -35,6 +35,7 @@ Zero dependencies, same as the validator.
 #   where the others read the workflow (WORKFLOW); measured against the sibling copies
 #   on 2026-10-12, which also differ from each other on ENV_ERROR_SIGNS and STAGES.
 # diverges: ENV_ERROR_SIGNS, FILE_RE, MIN_EXPECTED, MIN_PROPS, NAME_HEADER, NEG_DIR, STAGES, SUCCESS_MARKERS, WORKFLOW
+import atexit
 import concurrent.futures
 import tempfile
 import os
@@ -397,6 +398,8 @@ def _main(argv, plants):
     # So the suite copies ROOT once into a snapshot and runs every test with cwd there.
     # Editing while it runs is now harmless.
     _snap = tempfile.mkdtemp(prefix="tp-negatives-snap-")
+    # An interrupted or refused run must not leave a repository copy behind.
+    atexit.register(shutil.rmtree, _snap, True)
     _base = os.path.join(_snap, "repo")
     shutil.copytree(ROOT, _base, ignore=shutil.ignore_patterns(
         "node_modules", "graphify-out", ".git"), symlinks=True)
@@ -604,7 +607,7 @@ def main(argv):
             plants.check_running()
         plants.check_running()
         return result
-    except (InterruptedError, OSError) as exc:
+    except (InterruptedError, OSError, RuntimeError) as exc:
         print(f"FAIL: plant lifecycle refused ({type(exc).__name__}): {exc}")
         return 1
 

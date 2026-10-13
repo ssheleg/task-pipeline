@@ -72,13 +72,15 @@ for killed in ('parent', 'bash', 'term', 'int', 'normal'):
         base=Path(tmp);source=base/'source';neg=source/'negatives';neg.mkdir(parents=True)
         (source/'writer.py').write_text(WRITER)
         suffix=' ignore-term' if killed in ('term','int') else ''
-        script='#!/usr/bin/env bash\n# name: Negative self-test (owned child lifetime)\npython3 '+str(source/'writer.py')+' '+str(base)+suffix+'\n'
+        script='#!/usr/bin/env bash\n# name: Negative self-test (owned child lifetime)\npython3 '+str(source/'writer.py')+' '+str(base)+suffix+'\n:\n'
         (neg/'001-owned-lifetime.sh').write_text(script)
         parent=subprocess.Popen([sys.executable,'-u','-B','-c',BOOT,str(ROOT/'test'),str(base)],stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True)
         contender=None;info=None
         try:
             info=json.loads(wait_file(base/'ready'))
             check(bool(info['fds']), killed+': actual writing Python inherits lock')
+            # A trailing command stops Bash exec-replacing itself, so 'bash' kills Bash.
+            check(info['bash']!=parent.pid, killed+': writer parent is Bash, not the runner')
             inode=(base/'lock').stat().st_ino
             if killed in ('parent','bash'):
                 os.kill(parent.pid if killed=='parent' else info['bash'],signal.SIGKILL)
@@ -194,5 +196,53 @@ for sig in (signal.SIGINT, signal.SIGTERM):
                 check(waiter.returncode==1 and 'plant lock wait interrupted' in out,'waiting runner interruption refuses promptly')
             finally:
                 if waiter.poll() is None:waiter.kill();waiter.communicate(timeout=5)
+
+# macOS answers EPERM for a group whose members exited unreaped (another thread
+# owns the reap). Cancellation must keep going, escalate and drain; a group of
+# zombies is not a live group.
+class _Exited:
+    pid=999999
+    def poll(self):return 0
+for err in (PermissionError, ProcessLookupError):
+    sent=[]
+    def killpg(pid,sig,err=err):
+        sent.append(sig)
+        raise err(1,'owned fixture')
+    with patch.object(m.os,'killpg',side_effect=killpg):
+        plants=m.ScratchProcesses();plants._active={_Exited(),_Exited()}
+        plants.cancel()
+        check(sent.count(signal.SIGKILL)==2, err.__name__+': cancel escalates past a refused group')
+        check(m.ScratchProcesses._group_exists(_Exited(),settle=0) is False, err.__name__+': refused probe is no live group')
+with patch.object(m.os,'killpg',side_effect=lambda pid,sig:None):
+    check(m.ScratchProcesses._group_exists(_Exited(),settle=0.05) is True,'a group still answering after settle is live')
+# cancel() failing must not skip draining the child that run() started.
+with tempfile.TemporaryDirectory(prefix='fw07-child-cancelfault-') as tmp:
+    base=Path(tmp);m.scratch_lock_path=lambda:str(base/'lock')
+    with m.ScratchProcesses() as plants:
+        plants.hold(m.acquire_scratch_lock());started=[];drained=[]
+        real_popen=subprocess.Popen
+        def spawn(*a,**k):
+            proc=real_popen(*a,**k);started.append(proc)
+            def communicate(*x,**y):raise OSError('owned communicate fault')
+            proc.communicate=communicate
+            return proc
+        plants._drain=lambda proc:(drained.append(proc),proc.kill(),proc.wait())
+        def fault():raise RuntimeError('owned cancel fault')
+        plants.cancel=fault
+        try:
+            with patch.object(subprocess,'Popen',side_effect=spawn):
+                plants.run([sys.executable,'-c','import time;time.sleep(10)'],cwd=base)
+        except RuntimeError as exc:check(str(exc)=='owned cancel fault','cancel fault propagates')
+        else:raise AssertionError('cancel fault accepted')
+        check(drained==started and all(p.poll() is not None for p in started),'cancel fault still drains the child')
+# The runner reports a lifecycle RuntimeError as a refusal and removes its snapshot.
+with tempfile.TemporaryDirectory(prefix='fw07-child-runtime-') as tmp:
+    base=Path(tmp);neg=base/'source/negatives';neg.mkdir(parents=True)
+    (neg/'001-owned.sh').write_text('#!/usr/bin/env bash\n# name: Negative self-test (runtime refusal)\necho OK: owned\n')
+    snaps=base/'tmp';snaps.mkdir()
+    code=BOOT.replace("sys.exit(negatives.main(['fixture']))","negative_lock.ScratchProcesses._group_exists=staticmethod(lambda proc,settle=1.0:True)\nsys.exit(negatives.main(['fixture']))")
+    r=subprocess.run([sys.executable,'-B','-c',code,str(ROOT/'test'),str(base)],capture_output=True,text=True,timeout=60,env={**os.environ,'TMPDIR':str(snaps)})
+    check(r.returncode==1 and 'plant lifecycle refused (RuntimeError)' in r.stdout and 'Traceback' not in r.stderr,'lifecycle RuntimeError is a refusal, not a traceback: '+r.stdout[-300:]+r.stderr[-300:])
+    check(not [p for p in snaps.iterdir() if p.name.startswith('tp-negatives-snap-')],'refused run removes its snapshot')
 
 print(f'PASS: shared scratch child lifetime — {count} controls; owned namespaces only')

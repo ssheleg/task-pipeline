@@ -106,19 +106,28 @@ class ScratchProcesses:
     @staticmethod
     def _signal_group(proc, sig):
         # Reap an exited leader first: macOS can report EPERM for its zombie group.
+        # Another thread may hold the zombie unreaped, so EPERM is still possible:
+        # a group whose members have all exited has nothing left to signal.
         proc.poll()
         try:
             os.killpg(proc.pid, sig)
-        except ProcessLookupError:
+        except (ProcessLookupError, PermissionError):
             pass
 
     @staticmethod
-    def _group_exists(proc):
-        try:
-            os.killpg(proc.pid, 0)
-            return True
-        except ProcessLookupError:
-            return False
+    def _group_exists(proc, settle=1.0):
+        # macOS answers EPERM for a group of unreaped zombies; Linux reports them
+        # as present until init reaps them. Give reaping a bounded moment.
+        import time
+        stop = time.monotonic() + settle
+        while True:
+            try:
+                os.killpg(proc.pid, 0)
+            except (ProcessLookupError, PermissionError):
+                return False
+            if time.monotonic() >= stop:
+                return True
+            time.sleep(0.02)
 
     def cancel(self):
         import signal
@@ -168,8 +177,10 @@ class ScratchProcesses:
                 raise RuntimeError('plant left a live process group after Bash exit')
             return subprocess.CompletedProcess(args, proc.returncode, stdout, stderr)
         except BaseException:
-            self.cancel()
-            self._drain(proc)
+            try:
+                self.cancel()
+            finally:
+                self._drain(proc)
             raise
         finally:
             with self._mutex:
