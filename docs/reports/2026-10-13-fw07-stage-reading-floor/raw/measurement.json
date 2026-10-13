@@ -1,0 +1,149 @@
+{
+  "source": "4d750573ce53ea4c7ffa2bde192ee35b59acefa7",
+  "source_path": "plugins/task-pipeline/skills/task-pipeline/references/stages.md",
+  "source_sha256": "d6ede1b57b63ce9e5012d2cdfea6f8a8f2a646a316f848499b58cbb8714a5471",
+  "tokenizer": "tiktoken cl100k_base",
+  "version": "1.94.0",
+  "stages_tokens": 17616,
+  "stages_lines": 967,
+  "skill_body_tokens": 4638,
+  "skill_body_lines": 263,
+  "reference_files": 41,
+  "pre_stage_tokens": 933,
+  "cross_cutting_tokens": 1429,
+  "spine_model_tokens_before_routes": 8386,
+  "entry_model_tokens_before_routes": 11258,
+  "model_limit": "Syntactic estimate only; heading/freedom overhead is conservative double counting in the stage-0 detail. Final routes, conditions and actual host reads are unmeasured. Cumulative full-run savings are not asserted.",
+  "literal_consumer_lines": 327,
+  "literal_consumer_files": 108,
+  "consumer_categories": {
+    "documentation": 57,
+    "historical-evidence": 115,
+    "shipped": 36,
+    "test": 78,
+    "test-negative": 41
+  },
+  "stage_sections": [
+    {
+      "stage": 0,
+      "title": "Intake grill \u2014 MANDATORY",
+      "start_line": 74,
+      "end_line": 265,
+      "section_tokens": 3689,
+      "gate_suffix_tokens": 817,
+      "detail_prefix_tokens": 2872,
+      "section_sha256": "39b99199fcf7ea8825df4470b89928c0d7eaa18ffe8e3aae48b930a49645e89c",
+      "gate_suffix_sha256": "7791bd676e60e0b8202ddf9d3edc4530bf606906baee1312e2355f59da9e746f"
+    },
+    {
+      "stage": 1,
+      "title": "Docs study",
+      "start_line": 266,
+      "end_line": 275,
+      "section_tokens": 162,
+      "gate_suffix_tokens": 34,
+      "detail_prefix_tokens": 128,
+      "section_sha256": "330f43c625f1f5e1042f236f869b4907accea0c700d3ce371e4036ef1f8760eb",
+      "gate_suffix_sha256": "bf19fbbc04cd8cccbe676977132295121955571f5973b4a006bd18684703b05f"
+    },
+    {
+      "stage": 2,
+      "title": "Brainstorm + decompose",
+      "start_line": 276,
+      "end_line": 335,
+      "section_tokens": 1123,
+      "gate_suffix_tokens": 187,
+      "detail_prefix_tokens": 936,
+      "section_sha256": "afd49d45ff14092b9a81b47af31dc636b2ee434a5fb7bfa4d8dab73ce6ed4c34",
+      "gate_suffix_sha256": "5c18525105a1e5a5b19ccd3702539adcd9574063c7662ff233ce8dc314808043"
+    },
+    {
+      "stage": 3,
+      "title": "Spec \u2014 with UX track for user-facing tasks",
+      "start_line": 336,
+      "end_line": 428,
+      "section_tokens": 1773,
+      "gate_suffix_tokens": 577,
+      "detail_prefix_tokens": 1196,
+      "section_sha256": "672f55c0b04bc5ad71798894d458ddf672b935ce2fef5e7d051bd3bd8f8185b8",
+      "gate_suffix_sha256": "8a471d2fd58b0208df5c1ed14b6e7b096cf44b74e76dadb5d82f49440f890fda"
+    },
+    {
+      "stage": 4,
+      "title": "Plan",
+      "start_line": 429,
+      "end_line": 457,
+      "section_tokens": 527,
+      "gate_suffix_tokens": 383,
+      "detail_prefix_tokens": 144,
+      "section_sha256": "2489e7070843064cf0c713dccb9b24cc8634ba763d9f021efe3365e90ec922ba",
+      "gate_suffix_sha256": "a44e80cce22fad8d47d8019accab8267cf40abfde81489d6e616743584042fde"
+    },
+    {
+      "stage": 5,
+      "title": "Dev",
+      "start_line": 458,
+      "end_line": 520,
+      "section_tokens": 1249,
+      "gate_suffix_tokens": 195,
+      "detail_prefix_tokens": 1054,
+      "section_sha256": "ddd230dea82ef62fd8042fb1fe7441f1ff031080c37fdf645f2d9d6c7f5e8070",
+      "gate_suffix_sha256": "abd5fcd88f1db70b44310681c8bfaeba7de17318900289058c1c250f91b038ad"
+    },
+    {
+      "stage": 6,
+      "title": "Tests",
+      "start_line": 521,
+      "end_line": 586,
+      "section_tokens": 1325,
+      "gate_suffix_tokens": 1178,
+      "detail_prefix_tokens": 147,
+      "section_sha256": "6a3ca7da60ccc4cc942b4b1da67f52436dd42bfceee40cb00f47d95563e4f334",
+      "gate_suffix_sha256": "4517ccdecea84e1616dc4b072f51dc8b4c302473d451aa39a4ed50c1e7e9ea2c"
+    },
+    {
+      "stage": 7,
+      "title": "Lint + deploy",
+      "start_line": 587,
+      "end_line": 634,
+      "section_tokens": 956,
+      "gate_suffix_tokens": 704,
+      "detail_prefix_tokens": 252,
+      "section_sha256": "6e0e558e4501172b7e9d2c9b287fac04ef860096cad2e14f8544fd3b8a312c35",
+      "gate_suffix_sha256": "4810c2f8b13c1c5e64fa3440771839b9d5104bc5242ed35a62e2480897a436f4"
+    },
+    {
+      "stage": 8,
+      "title": "Post-deploy",
+      "start_line": 635,
+      "end_line": 671,
+      "section_tokens": 686,
+      "gate_suffix_tokens": 203,
+      "detail_prefix_tokens": 483,
+      "section_sha256": "56727d951be9fb25b13374513d4f396ec8b886e8c366fe4aee621fdc7bfeda41",
+      "gate_suffix_sha256": "b8260db462459155b844b9bb6d24ba8b4f2605d579bb052d8ac41267f93d0593"
+    },
+    {
+      "stage": 9,
+      "title": "Docs + wiki",
+      "start_line": 672,
+      "end_line": 728,
+      "section_tokens": 1064,
+      "gate_suffix_tokens": 269,
+      "detail_prefix_tokens": 795,
+      "section_sha256": "05a1514f2f4690d7a59549115708ed89eafc65e99ebbaaa1cbd04b768da6185c",
+      "gate_suffix_sha256": "e7e2b770fdba01e93fddb37a88e9f4e3fb8f1a6ae564692f5c9d9e953c720440"
+    },
+    {
+      "stage": 10,
+      "title": "Acceptance",
+      "start_line": 729,
+      "end_line": 865,
+      "section_tokens": 2700,
+      "gate_suffix_tokens": 949,
+      "detail_prefix_tokens": 1751,
+      "section_sha256": "bd2ea7e8b701c9d70f5280a2563cf55f47a83968f6ccad1d9aa25649f5f5872a",
+      "gate_suffix_sha256": "d1e0db4721b4a1b15db0e8f1f7c3f1630ac605c2a6ecb708d944777c1956a8cd"
+    }
+  ]
+}
