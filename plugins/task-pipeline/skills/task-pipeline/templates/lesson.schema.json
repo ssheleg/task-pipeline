@@ -211,13 +211,22 @@
               },
               "carried": {
                 "enum": [
-                  "source not read",
+                  "checkout not read",
+                  "retro file not read",
+                  "no provenance",
                   "commit does not resolve",
                   "retro cites a commit that does not resolve",
                   "lesson refused",
                   "no checkout read holds it"
                 ],
-                "description": "Set by `rebuild` on an origin it could not re-derive and kept with everything recorded on it; it still counts toward seen, projects and status. `no checkout read holds it` marks an origin with a memory id that no read retro holds any more: the store still has its record. Cleared when the source reads again; removed only by `rebuild --prune-carried`."
+                "description": "Set by `rebuild` on an origin it could not re-derive and kept with everything recorded on it; it still counts toward seen, projects and status. An origin is removed without `--prune-carried` only on positive evidence from every checkout in its provenance: read completely, its retro file read, the entry gone. `no checkout read holds it` marks an origin all its checkouts showed gone that still holds a memory id: the store still has its record. Cleared when a checkout holding it reads again; removed only by `rebuild --prune-carried`."
+              },
+              "checkouts": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Provenance: the real top-level paths of the checkouts this origin was derived from. Only these checkouts can show it gone. Local to this machine's index; never emitted to a store."
               },
               "lesson": {
                 "type": "object"

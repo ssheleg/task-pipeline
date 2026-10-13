@@ -3,12 +3,12 @@
 set -eu
 rm -rf /tmp/rebuild-memtwice-copy && cp -R . /tmp/rebuild-memtwice-copy
 python3 - <<'EOF'
-# Round 8, M1: one memory id is one store record, so it belongs to one class key. Stop repairing an index that holds it on two.
+# One memory id is one store record, so it belongs to one class key. Stop repairing an index that holds it on two.
 p = "/tmp/rebuild-memtwice-copy/plugins/task-pipeline/skills/task-pipeline/scripts/lessons.py"
 t = open(p, encoding="utf-8").read()
-needle = '        for ck in cks[1:]:\n'
+needle = '            if m and holders[mem_base(m)][0] != ck:\n'
 assert needle in t, "PLANT DID NOT LAND: anchor absent before edit"
-open(p, "w", encoding="utf-8").write(t.replace(needle, '        for ck in []:\n', 1))
+open(p, "w", encoding="utf-8").write(t.replace(needle, '            if False:\n', 1))
 assert needle not in open(p, encoding="utf-8").read(), "PLANT DID NOT LAND"
 EOF
 if python3 /tmp/rebuild-memtwice-copy/test/lessons_test.py; then

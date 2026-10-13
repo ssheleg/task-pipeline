@@ -1,9 +1,10 @@
-## Fix cycles 6–8 of the release iteration — #125, branch `iter1/M-5-N-1` (2026-10-13)
+## Fix cycles 6–9 of the release iteration — #125, branch `iter1/M-5-N-1` (2026-10-13)
 
-Rounds 6 and 7 failed on `lessons.py rebuild`. Cycle 7, under the loop guard, changed the
-design rather than the guard. Round 8 failed on identity. Cycle 8 made every checkout of a
-project count before one decides, discovered worktrees, and keyed memory ids by
-`(project, classKey)`; see `identity_controls`, `low_controls` and negatives 459–463. This branch merges `origin/main` (v1.94.1, #126) without
+Rounds 6 to 9 failed on `lessons.py rebuild`. Cycle 7, under the loop guard, changed the
+design rather than the guard. Cycle 9, under the loop guard again, replaced the identity
+logic with one rule: implicit removal needs positive evidence from the same checkout. Each
+origin records its `checkouts`, and memory ids are keyed by `(project, classKey)`. See
+`provenance_controls`, `index_shape_controls` and negatives 454–466. This branch merges `origin/main` (v1.94.1, #126) without
 rewriting history. The fixes are recorded in the CHANGELOG under *Unreleased*. The branch is
 pushed but not merged, and no version or publication is claimed.
 
@@ -17,7 +18,7 @@ pushed but not merged, and no version or publication is claimed.
 - **New rules:** a parallel-work check before each cycle (`iteration.md` → *The cycle*), and
   background-dispatch command hygiene (`build.md` §4.1).
 
-Next task: run round 9 of verification on #125's head. The release order with v1.94.1 is the
+Next task: run round 10 of verification on #125's head. The release order with v1.94.1 is the
 coordinator's.
 
 ## Release repair candidate — v1.94.1 (2026-10-13)

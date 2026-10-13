@@ -276,44 +276,69 @@ as before, plus a **local index** of every project's lessons on this machine:
 `scripts/lessons.py`, one JSON line per class, a pure function of the retros
 (`lessons.py rebuild --roots <dir>` re-derives it). **Rebuild never loses what it cannot
 re-derive.** It derives every lesson from the retros it can read under the roots and depth
-given, and from every git worktree of each checkout it finds; worktrees under `.worktrees/`
-or `.claude/worktrees/` are included even though the walk skips dot-directories. It then
-merges in each origin of the previous index whose source it could not re-derive. An origin is
-one project's copy of a lesson, `(project, retro)`. Such an origin is **carried** when:
+given, and from every git worktree of each checkout it finds. Worktrees under `.worktrees/`
+or `.claude/worktrees/` are included, even though the walk skips dot-directories.
 
-- its root, checkout or retro was not read, or lay outside the roots scanned;
-- its evidence commit no longer resolves, which is routine after a squash merge and a deleted
-  branch, or its retro now cites a commit that does not resolve;
-- its entry was refused;
-- it holds a memory id that no retro read in this run holds any more. The store still has
-  that record.
+An origin is one project's copy of a lesson, `(project, retro)`. It records its
+**provenance**: the checkouts it was derived from, by real path. That record stays in the
+local index and is never emitted.
 
-A carried origin keeps everything recorded on it and is marked `carried: <reason>`. It still
-counts toward `seen`, `projects` and `status`, so a lesson two projects hold stays a
-`candidate` while one root is unreadable. It is named in the summary, and it is re-derived and
-un-marked as soon as its source reads again.
+**The one rule: implicit removal needs positive evidence from the same checkout.** Without
+`--prune-carried`, rebuild removes an origin only when every checkout in its provenance meets
+all three conditions:
 
-**Identity.** A project key is `p-` plus the root commit, so every clone and worktree of a
-project shares it, and reading one checkout never decides for another. A retro counts as read
-only from a checkout that read completely. A project counts as complete only when every
-checkout of it discovered in the run read completely. An unreadable directory that could
-hide a checkout of any project leaves no project complete.
+- (a) the checkout was discovered in this run and read completely, with no problem owned by
+  it;
+- (b) its retro file at the origin's path was read;
+- (c) that file no longer holds the entry.
 
-A memory id belongs to `(project, classKey)`, the store's own identity, and never to a retro
-anchor. So a rotated or retitled entry keeps its id. A class key changed inside one entry
-does not inherit another key's id, and one id is never on two class keys.
+Every other origin is **carried**, with an accurate reason:
 
-An origin leaves the index in only two ways. The first is when a read retro, or a complete
-project, no longer holds it and it holds no memory id the run did not re-attach; that removal
-is named. The second is on purpose, with `rebuild --prune-carried`.
+- `checkout not read`: the checkout was not discovered, or a problem is owned by it. That
+  problem may be an unreadable retro, a refused `git worktree list` or a broken
+  configuration.
+- `retro file not read`: the checkout read completely, but that file was not read, for
+  example because it lies outside the artifact root or was moved.
+- `no provenance`: the origin was written before provenance existed.
+- `commit does not resolve`, `retro cites a commit that does not resolve` or
+  `lesson refused`: the entry is there but could not be derived. A dangling commit is routine
+  after a squash merge and a deleted branch.
+- `no checkout read holds it`: every checkout showed the entry gone, but it holds a memory id
+  the run did not re-attach. The store still has that record.
 
-Unreadable sources are named under `not read`. The run exits 0 whenever anything was read, a
-retro or a checkout discovered in full. It exits 1 only when nothing was read; then no index,
+Another checkout of the same project, even one reading the same retro path, decides nothing
+for an origin it never held. Problems carry their owner, a checkout or none, and are never
+matched by path prefix.
+
+A carried origin keeps everything recorded on it, including the checkouts that did not show
+it gone, and is marked `carried: <reason>`. It still counts toward `seen`, `projects` and
+`status`, so a lesson two projects hold stays a `candidate` while one root is unreadable. It
+is named in the summary. It is re-derived and un-marked as soon as a checkout holding it reads
+again. `rebuild --prune-carried` removes carried origins on purpose.
+
+**Memory ids.** A memory id belongs to `(project, classKey)`, the store's own identity, and
+never to a retro anchor:
+
+- A rotated or retitled entry keeps its id.
+- A class key changed inside one entry does not inherit another key's id.
+- One id is never on two class keys.
+- Ids compare on the part before `@`, and the highest revision wins.
+
+`emit-observatory` and `record` both use the origin of the project that holds the id. The run
+refuses to write if a memory id would vanish other than through `--prune-carried`.
+
+Unreadable sources are named under `not read`. The run exits 0 whenever anything was read: a
+retro, or a checkout discovered in full. It exits 1 only when nothing was read; then no index,
 lock directory or migration is touched. A held lock or an unreadable index is its own refusal.
 On the default path the one-time merge of a standalone index runs first, as for every verb.
-So does setting a corrupt index aside: it is kept whole as `.corrupt-<date>`, and every line
-that still parses is salvaged into the live index. Unknown is never measured zero, and never
-measured gone.
+
+So does setting a corrupt index aside:
+- The file is kept whole as `.corrupt-<date>`.
+- Every line that still parses is salvaged into the live index.
+- Two lines for one class key are merged.
+- A memory id that only a bad line held is named in the output.
+
+Unknown is never measured zero, and never measured gone.
 Two projects holding one class key make
 one lesson seen twice, status `candidate`. The index path is a parameter — `--index`, then
 `$TASK_PIPELINE_LESSONS`, then `~/.sshlg-skills/lessons/index.jsonl` **when

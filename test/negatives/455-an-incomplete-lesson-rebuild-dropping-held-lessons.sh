@@ -3,13 +3,12 @@
 set -eu
 rm -rf /tmp/rebuild-loss-copy && cp -R . /tmp/rebuild-loss-copy
 python3 - <<'EOF'
-# Round 7 of release iteration 1: rebuild never loses what it cannot re-derive. Remove the
-# carry-forward — an unread or unresolved origin is then dropped with its memory id.
+# Round 7: rebuild never loses what it cannot re-derive. Remove the carry-forward.
 p = "/tmp/rebuild-loss-copy/plugins/task-pipeline/skills/task-pipeline/scripts/lessons.py"
 t = open(p, encoding="utf-8").read()
-needle = "                else:\n                    carried.append((ck, dict(o, carried=reason)))\n"
+needle = '                (pruned if a.prune_carried else carried).append((ck, rec))\n'
 assert needle in t, "PLANT DID NOT LAND: anchor absent before edit"
-open(p, "w", encoding="utf-8").write(t.replace(needle, "                else:\n                    removed.append((ck, o))\n", 1))
+open(p, "w", encoding="utf-8").write(t.replace(needle, '                removed.append((ck, o))\n', 1))
 assert needle not in open(p, encoding="utf-8").read(), "PLANT DID NOT LAND"
 EOF
 if python3 /tmp/rebuild-loss-copy/test/lessons_test.py; then
@@ -18,5 +17,5 @@ if python3 /tmp/rebuild-loss-copy/test/lessons_test.py; then
   exit 1
 else
   rm -rf /tmp/rebuild-loss-copy
-  echo "OK: lessons_test correctly FAILs — an unread or unresolved origin is carried, never dropped"
+  echo "OK: lessons_test correctly FAILs — an unread or unresolved origin is carried"
 fi
