@@ -288,6 +288,13 @@ def _():
     assert run(target, 'next').returncode == 0
 
 
+@case('shipped wait schema retains owner conditional-reference contract')
+def _():
+    result = subprocess.run([sys.executable, '-B', str(ROOT / 'test/property_graph_conditionals.py')],
+                            cwd=ROOT, capture_output=True, text=True)
+    assert result.returncode == 0 and 'all behind #/definitions/' in result.stdout, result.stderr
+
+
 residue.report()
 print(f'Graph wait controls: {checks}, failures: {len(failures)}')
 raise SystemExit(bool(failures))

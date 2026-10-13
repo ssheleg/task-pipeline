@@ -114,3 +114,18 @@ that passed the composed owner aggregate. Incoming PR114 changes relative to
 already-composed31e0 are its three aggregate receipt files only. Final hosted
 checks bind the promoted PR119 head separately; no repeated local aggregate
 is claimed or required by this byte-equivalent evidence-only admission.
+
+
+## Hosted property correction
+
+The first exact-head PR119 validation38350663707 failed shard4 despite the
+local aggregate passing. `test/property_graph_conditionals.py` is a hosted
+property corpus entry: node conditionals must remain behind definitions refs
+so the validator dereference branch stays exercised. TP2 had inlined the new
+wait conditional. A direct replay on3f60b2e exited1 with the same diagnostic.
+The rule is now moved without changing its parsed content into
+`definitions.rule_waiting_needs_watcher`, and node.allOf references it. The
+existing property is also invoked by the local graph-wait regression, closing
+the local-gate omission. Direct property replay and16 graph-wait cases pass,
+with60 owned trees created and removed. The failed hosted run remains evidence;
+a corrected frozen candidate requires its own genuine hosted verdict.

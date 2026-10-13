@@ -421,33 +421,7 @@
           "$ref": "#/definitions/rule_running_needs_claim"
         },
         {
-          "if": {
-            "properties": {
-              "status": {
-                "const": "waiting"
-              }
-            },
-            "required": [
-              "status"
-            ]
-          },
-          "then": {
-            "required": [
-              "waiting_on"
-            ],
-            "properties": {
-              "claim": {
-                "type": "null"
-              }
-            }
-          },
-          "else": {
-            "not": {
-              "required": [
-                "waiting_on"
-              ]
-            }
-          }
+          "$ref": "#/definitions/rule_waiting_needs_watcher"
         }
       ]
     },
@@ -621,6 +595,35 @@
           "claim": {
             "type": "object"
           }
+        }
+      }
+    },
+    "rule_waiting_needs_watcher": {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "waiting"
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "then": {
+        "required": [
+          "waiting_on"
+        ],
+        "properties": {
+          "claim": {
+            "type": "null"
+          }
+        }
+      },
+      "else": {
+        "not": {
+          "required": [
+            "waiting_on"
+          ]
         }
       }
     },
