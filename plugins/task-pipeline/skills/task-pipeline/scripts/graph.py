@@ -1100,8 +1100,9 @@ class held:
     at once. `flock` releases when the process dies, which is why it is preferred over a
     lock FILE somebody has to clean up after a crash.
 
-    Where `fcntl` does not exist the mutation still runs and the run is TOLD it ran
-    unlocked — a silent downgrade is how a queue loses a node and nobody learns why.
+    A missing or failed lock refuses before reading or writing the graph. An atomic
+    replacement alone cannot prevent concurrent writers from losing an update.
+    Read-only verbs remain available where this platform has no `fcntl` support.
     """
 
     def __init__(self, path):
@@ -1112,9 +1113,8 @@ class held:
         try:
             import fcntl
         except ImportError:
-            print("note: no file locking on this platform — a concurrent mutation of "
-                  "%s could lose an update" % self.path, file=sys.stderr)
-            return self
+            die("graph mutation needs file locking on this platform — "
+                "nothing was written: %s" % self.path)
         d = os.path.dirname(self.path) or "."
         try:
             self.fh = open(os.path.join(d, ".graph.lock"), "a+")
@@ -1123,8 +1123,7 @@ class held:
             if self.fh:
                 self.fh.close()
                 self.fh = None
-            print("note: could not take the graph lock (%s) — proceeding unlocked" % e,
-                  file=sys.stderr)
+            die("could not take the graph lock (%s) — nothing was written" % e)
         return self
 
     def __exit__(self, *exc):

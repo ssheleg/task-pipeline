@@ -96,6 +96,14 @@ it is never the one naming one.
 **A stop closes its node and refuses the next step.** `replan.possible: false` says the run
 cannot continue *around* what it found — not that the work just verified did not happen.
 
+**A mutation needs a working file lock.** The lock covers loading, checking and
+replacing the graph. If `fcntl` is unavailable or opening/acquiring the lock fails,
+the command exits 1 before writing; it no longer warns and continues unlocked.
+Read-only verbs remain available on those platforms. An atomic file replacement
+alone cannot prevent concurrent writers from losing each other's updates. This
+is a local graph-file guarantee, not a transaction with the separate execution
+claim store.
+
 ## The three things a schema cannot state
 
 The split is where the format actually puts it, which is not where the first draft drew it.
