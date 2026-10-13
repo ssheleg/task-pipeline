@@ -153,6 +153,133 @@ def anchor():
     return "2026-10-0{n}-{topic}-gate-6-reopened-twice"
 
 
+def conservative_rebuild_controls():
+    repo, _ = project("rebuild-preservation", 1)
+    retro = repo / "docs/evidence/retro.md"
+    work = tree("tp-lessons-preservation-")
+    idx = work / "index.jsonl"
+    rc, _, _ = run("add", "--retro", str(retro), "--all", cwd=repo, index=idx)
+    ok(rc == 0, "preservation fixture seeds a real lesson")
+    before = idx.read_bytes()
+    for root in (repo / "missing-root", retro):
+        rc, out, err = run("rebuild", "--roots", str(root), index=idx)
+        ok(rc != 0 and idx.read_bytes() == before and "not read" in out + err,
+           f"missing/non-directory root refuses without replacing the index ({rc} {out} {err})")
+    retro.chmod(0)
+    try:
+        rc, out, err = run("rebuild", "--roots", str(repo), index=idx)
+        ok(rc != 0 and idx.read_bytes() == before and "not read" in out + err,
+           "unreadable retro retains every old lesson")
+    finally:
+        retro.chmod(0o644)
+    blocked = repo / "unreadable-child"
+    blocked.mkdir()
+    blocked.chmod(0)
+    try:
+        rc, out, err = run("rebuild", "--roots", str(repo), index=idx)
+        ok(rc != 0 and idx.read_bytes() == before and "not read" in out + err,
+           "unreadable discovery subtree cannot silently drop lessons")
+    finally:
+        blocked.chmod(0o755)
+    conf = repo / "pipeline.json"
+    conf.write_text('{"paths":')
+    rc, out, err = run("rebuild", "--roots", str(repo), index=idx)
+    ok(rc != 0 and idx.read_bytes() == before, "malformed artifact-root configuration refuses rebuild")
+    conf.unlink()
+    absent = work / "fresh" / "index.jsonl"
+    rc, _, _ = run("rebuild", "--roots", str(repo / "missing-root"), index=absent)
+    ok(rc != 0 and not absent.parent.exists(), "incomplete first rebuild creates no index or lock directory")
+    empty = work / "empty"
+    empty.mkdir()
+    rc, _, _ = run("rebuild", "--roots", str(empty), index=idx)
+    ok(rc == 0 and idx.read_bytes() == b"", "an explicitly readable empty scope can rebuild to zero")
+
+
+def source_admission_controls():
+    repo, _ = project("source-admission", 1)
+    retro = repo / "docs/evidence/retro.md"
+    work = tree("tp-lessons-source-admission-")
+    idx = work / "index.jsonl"
+    ok(run("add", "--retro", str(retro), "--all", cwd=repo, index=idx)[0] == 0,
+       "source-admission fixture seeds a valid index")
+    before = idx.read_bytes()
+    conf = repo / "pipeline.json"
+    conf.write_text(json.dumps({"paths": {"artifacts": "missing-artifacts"}}))
+    rc, out, err = run("rebuild", "--roots", str(repo), index=idx)
+    ok(rc != 0 and idx.read_bytes() == before and "not read" in out + err,
+       "explicit missing artifact directory is unknown, not empty")
+    conf.unlink()
+    original = retro.read_bytes()
+    retro.unlink()
+    retro.symlink_to("missing-retro.md")
+    try:
+        rc, out, err = run("rebuild", "--roots", str(repo), index=idx)
+        ok(rc != 0 and idx.read_bytes() == before, "dangling canonical retro preserves the index")
+    finally:
+        retro.unlink()
+        retro.write_bytes(original)
+    archive = retro.parent / "retro"
+    archive.mkdir()
+    bad = archive / "not-regular.md"
+    bad.mkdir()
+    try:
+        rc, _, _ = run("rebuild", "--roots", str(repo), index=idx)
+        ok(rc != 0 and idx.read_bytes() == before, "archive md directory is not silently skipped")
+    finally:
+        bad.rmdir()
+        archive.rmdir()
+    conf.symlink_to("missing-config.json")
+    try:
+        rc, _, _ = run("rebuild", "--roots", str(repo), index=idx)
+        ok(rc != 0 and idx.read_bytes() == before, "dangling artifact configuration is not absent configuration")
+    finally:
+        conf.unlink()
+    retro.unlink()
+    retro.mkdir()
+    try:
+        rc, _, _ = run("rebuild", "--roots", str(repo), index=idx)
+        ok(rc != 0 and idx.read_bytes() == before, "canonical retro directory refuses as nonregular")
+    finally:
+        retro.rmdir()
+        retro.write_bytes(original)
+    archive.symlink_to("absent-archive")
+    try:
+        rc, _, _ = run("rebuild", "--roots", str(repo), index=idx)
+        ok(rc != 0 and idx.read_bytes() == before, "dangling archive refuses as unknown")
+    finally:
+        archive.unlink()
+    docs, saved = repo / "docs", repo / "held-docs"
+    docs.rename(saved)
+    docs.symlink_to("absent-docs")
+    try:
+        rc, _, _ = run("rebuild", "--roots", str(repo), index=idx)
+        ok(rc != 0 and idx.read_bytes() == before, "dangling default ancestor is not a new empty repository")
+    finally:
+        docs.unlink()
+        saved.rename(docs)
+    # Explicit source is hidden from generic os.walk; direct stat must expose EACCES.
+    private = repo / ".private-artifacts"
+    private.mkdir()
+    conf.write_text(json.dumps({"paths": {"artifacts": ".private-artifacts"}}))
+    private.chmod(0)
+    try:
+        rc, _, _ = run("rebuild", "--roots", str(repo), index=idx)
+        ok(rc != 0 and idx.read_bytes() == before, "unreadable explicit hidden source preserves the index")
+    finally:
+        private.chmod(0o755)
+        private.rmdir()
+        conf.unlink()
+    # An absent DEFAULT directory is legitimate for a new repository with no lessons.
+    newrepo = work / "new-repo"
+    newrepo.mkdir()
+    git(newrepo, "init", "-q")
+    (newrepo / "README.md").write_text("new repository")
+    git(newrepo, "add", "README.md")
+    git(newrepo, "commit", "-q", "-m", "initial")
+    rc, _, _ = run("rebuild", "--roots", str(newrepo), index=idx)
+    ok(rc == 0 and idx.read_bytes() == b"", "new repository without default artifacts is genuinely empty")
+
+
 def main():
     a, sha_a = project("alpha", 1)
     b, sha_b = project("beta", 2)
@@ -441,7 +568,7 @@ def main():
     ok(L.ARTIFACT_REGISTERS == js_regs and L.ARTIFACT_KNOWN == js_known,
        f"lessons.py reads the artifact root with artifact-root.js's names and registers ({L.ARTIFACT_REGISTERS} vs {js_regs})")
 
-    # --- rebuild never aborts on one repository, nor on the corrupt index it exists to replace
+    # --- complete rebuild repairs corrupt projection; an unknown source cannot replace it
     rb2 = work / "rb2" / "index.jsonl"
     rb2.parent.mkdir(parents=True, exist_ok=True)
     rb2.write_text("{not json\n", encoding="utf-8")
@@ -450,8 +577,9 @@ def main():
        f"rebuild replaces a corrupt index instead of refusing it ({rc} {out!r} {err!r})")
     rc, out, err = run("rebuild", "--roots", str(roots), index=work / "rb3" / "index.jsonl",
                        env_extra={"PATH": f"{shim}:{os.environ['PATH']}", "TASK_PIPELINE_GIT_TIMEOUT": "1"})
-    ok(rc == 0 and out.count("not read") >= 2 and "did not answer" in out,
-       f"a repository git cannot answer for is listed under not read, and the rebuild finishes ({rc} {out!r})")
+    ok(rc == 1 and out.count("not read") >= 2 and "did not answer" in out
+       and not (work / "rb3" / "index.jsonl").exists(),
+       f"git timeouts report all unknown sources and refuse index replacement ({rc} {out!r})")
 
     # --- cycle 4: a corrupt old index never blocks; an unreadable index is never replaced
     h3 = tree("tp-lessons-home3-")
@@ -508,6 +636,72 @@ def main():
     rc, out, err = run("candidates", "--min-projects", "1", env_extra={"HOME": str(h4)})
     ok("both" not in err and "in-the-old-file" in out, "said once: the old file is merged and set aside")
 
+    # --- cycle 5: every index-file operation under one lock; corrupt handling the same for both
+    # files; a merge never overwrites. Each scenario is run by several processes AT ONCE.
+    def parallel(n, args, home, stdin=None):
+        env = {k: v for k, v in os.environ.items() if k != "TASK_PIPELINE_LESSONS"}
+        env["HOME"] = str(home)
+        procs = [subprocess.Popen([sys.executable, str(SCRIPT), *args], cwd=a, env=env,
+                                  stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                 for _ in range(n)]
+        outs = [pr.communicate(input=(stdin or "").encode(), timeout=120) for pr in procs]
+        return [(pr.returncode, o.decode("utf-8", "replace"), e.decode("utf-8", "replace"))
+                for pr, (o, e) in zip(procs, outs)]
+
+    def legacy_of(h):
+        return h / ".task-pipeline" / "lessons" / "index.jsonl"
+
+    def family_of(h):
+        return h / ".sshlg-skills" / "lessons" / "index.jsonl"
+
+    def entry_line(class_key, title):
+        le = dict(single, classKey=class_key, title=title)
+        h0 = tree("tp-lessons-mk-")
+        run("add", "--json", "-", cwd=a, stdin=json.dumps(le), index=h0 / "i.jsonl")
+        return (h0 / "i.jsonl").read_text(encoding="utf-8").strip()
+
+    # (1) a good old index and a corrupt new one: rebuild and query both exit 0, in parallel
+    h5 = tree("tp-lessons-c5a-")
+    legacy_of(h5).parent.mkdir(parents=True)
+    legacy_of(h5).write_text(entry_line("old-and-good", "an old lesson that is fine") + "\n", encoding="utf-8")
+    family_of(h5).parent.mkdir(parents=True)
+    family_of(h5).write_text("{corrupt\n", encoding="utf-8")
+    res = parallel(3, ["rebuild", "--roots", str(roots)], h5) + parallel(3, ["query", "gate"], h5)
+    ok(all(rc == 0 and "Traceback" not in err for rc, _, err in res),
+       f"good old + corrupt new: rebuild and query exit 0 ({[(rc, err[-160:]) for rc, _, err in res if rc]})")
+
+    # (2) six concurrent queries on a corrupt old index with the family directory present
+    bad_runs = []
+    for trial in range(30):
+        h6 = tree("tp-lessons-c5b-")
+        legacy_of(h6).parent.mkdir(parents=True)
+        legacy_of(h6).write_text("not json\n", encoding="utf-8")
+        (h6 / ".sshlg-skills").mkdir()
+        for rc, _, err in parallel(6, ["query", "gate"], h6):
+            if rc != 0 or "Traceback" in err:
+                bad_runs.append((trial, rc, err[-200:]))
+        shutil.rmtree(h6, ignore_errors=True)
+    ok(not bad_runs, f"6 concurrent queries x 30 trials on a corrupt old index: no traceback ({bad_runs[:2]})")
+
+    # (3) a stale old title never overwrites a newer family title; (4) a future line survives
+    h7 = tree("tp-lessons-c5c-")
+    legacy_of(h7).parent.mkdir(parents=True)
+    future_line = json.dumps({"schema": "lesson-index/2", "classKey": "next-format", "x": 1})
+    legacy_of(h7).write_text(entry_line("shared-class", "the stale old title of it") + "\n"
+                             + entry_line("only-in-old", "a lesson only the old file has") + "\n"
+                             + future_line + "\n", encoding="utf-8")
+    family_of(h7).parent.mkdir(parents=True)
+    family_of(h7).write_text(entry_line("shared-class", "the newer family title") + "\n", encoding="utf-8")
+    res = parallel(4, ["candidates", "--min-projects", "1"], h7)
+    body7 = family_of(h7).read_text(encoding="utf-8")
+    titles = {json.loads(ln)["classKey"]: json.loads(ln).get("title") for ln in body7.splitlines()}
+    ok(all(rc == 0 for rc, _, _ in res) and titles.get("shared-class") == "the newer family title",
+       f"the family copy wins: a stale old title never overwrites it ({titles.get('shared-class')!r})")
+    ok("only-in-old" in titles, "a lesson only the old file has is copied across")
+    ok(future_line in body7, "a lesson-index/2 line survives the merge verbatim")
+    ok(not legacy_of(h7).exists() and len(list(legacy_of(h7).parent.glob("index.jsonl.migrated*"))) == 1,
+       "the old file is renamed .migrated, once, by exactly one of the concurrent runs")
+
     # --- lock contention: a held lock makes add refuse, nothing written
     try:
         import fcntl
@@ -515,7 +709,7 @@ def main():
         fcntl = None
     if fcntl:
         before = idx.read_bytes()
-        fh = open(idx.parent / "index.jsonl.lock", "a+")
+        fh = open(idx.parent / ".lock", "a+")
         fcntl.flock(fh.fileno(), fcntl.LOCK_EX)
         t0 = time.time()
         late = dict(single, classKey="late-writer")
@@ -569,6 +763,8 @@ def main():
     rc, out, _ = run("path")
     ok(rc == 0 and out.strip() == str(HOME / ".sshlg-skills" / "lessons" / "index.jsonl"),
        f"with ~/.sshlg-skills present the default is its lessons/index.jsonl ({out!r})")
+    conservative_rebuild_controls()
+    source_admission_controls()
     print(f"PASS: lessons.py — {CASES} cases")
 
 

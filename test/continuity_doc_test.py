@@ -73,6 +73,40 @@ def main():
        "the rationalization row no longer makes asking at preflight the only arming")
     part3 = section(text, "Part 3 — workflow memory at the stage boundary")
     ok("project-observatory-dashboard" in part3, "Part 3 says where Observatory comes from")
+    # L3 review: inspect the paragraph that governs each decision, not keyword
+    # presence elsewhere. These are bounded doctrine checks, not model behavior.
+    refs = DOC.parent
+    stages = (refs / "stages.md").read_text()
+    gates = (refs / "gates.md").read_text()
+    waves = (refs / "waves.md").read_text()
+    iteration = (refs / "iteration.md").read_text()
+    def paragraph(source, marker):
+        return next(p for p in source.split("\n\n") if marker in p)
+    for source, marker, label in (
+        (stages, "Each gate is tagged", "stage type definition"),
+        (text, "What arming does NOT change", "loop arming limit"),
+        (gates, "This never licenses skipping a gate", "gate floor"),
+    ):
+        scope = paragraph(source, marker)
+        ok("specific standing authorization" in scope and "act" in scope,
+           label + " preserves existing act-specific authority")
+    for source, marker, label in (
+        (waves, "Sign-ins, consents", "waves human boundary"),
+        (iteration, "Sign-ins, consents", "iteration human boundary"),
+    ):
+        scope = paragraph(source, marker)
+        ok(all(term in scope for term in ("operator payments", "typed secrets", "remain human")),
+           label + " keeps sign-ins, consents, operator payments and typed secrets human")
+        ok("unless" not in scope and "standing authorization" not in scope,
+           label + " does not exempt human-only acts through an outward-act grant")
+    questions = paragraph(iteration, "In a round, the orchestrator")
+    ok("human-owned questions" in questions and "batch" in questions,
+       "question batch is restricted to human-owned questions")
+    ok("external waits" in questions and "watchers" in questions and "owning Project" in questions,
+       "question round routes external waits and Project asks separately")
+    blocked = paragraph(text, "A block or an ambiguity stops")
+    ok("owning Project" in blocked and "external waits" in blocked,
+       "continuity does not label every unresolved node needs-operator")
     print(f"PASS: continuity.md — {CASES} cases")
 
 

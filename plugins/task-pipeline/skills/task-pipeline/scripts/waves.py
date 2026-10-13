@@ -15,7 +15,7 @@ reviewed; a table and a re-run can. This script is that re-run:
         (the nodes whose `closes` name the item, in wave order), `wave` (the last of their
         waves) and `release` (`this`, or `program` when a node is carried). A carried item
         no node closes goes to `program`; a terminal one stays off the canvas. Prints the
-        counts. Exit 1 when an item lands on no module, or an open item on no node.
+        counts. Exit 1 without writing when an item lands on no module, or an open item on no node.
     waves.py count --inventory FILE [--by FIELD ...]
         counts per field (default: module, wave, release, kind, severity).
     waves.py validate --inventory FILE [--modules FILE] [--plan FILE]
@@ -27,12 +27,14 @@ reviewed; a table and a re-run can. This script is that re-run:
         lock, loader and revision log (one `wave` or `risk` revision per change; lowering a
         risk class is refused without --lower-why), applying every move together and
         judging the end state once with graph.py's order rule, so a valid re-cut is never
-        refused halfway and a refused one writes nothing. Plan nodes the graph lacks are named and exit 1, unless --only-present
+        refused halfway and a refused one writes nothing. Plan nodes the graph lacks are named
+        and exit 1 before any write, unless --only-present
         (a plan that spans several repositories' graphs).
 
 **The plan** is any JSON whose `nodes` list `{id, wave, closes}` — a work graph that carries
 `closes` on its nodes is one, and so is a short hand-written table. A node may carry
-`graph_id`, the work-graph id it is built as, where the canvas id is not graph.py's `N-001`. A node whose wave is
+`graph_id`, the work-graph id it is built as, where the canvas id is not graph.py's `N-001`.
+Both node ids and effective graph targets must be unique. A node whose wave is
 not an integer is carried to a later release (`release: program`). Both tables are
 described in `templates/inventory.schema.json` (`$defs.modules`, `$defs.plan`).
 
@@ -209,7 +211,19 @@ def load_plan(path: pathlib.Path) -> list[dict]:
     # The declared values, checked rather than skipped: a risk of `r1`, `high` or null was
     # silently ignored and the sync exited 0, leaving the node with no class to enforce.
     errs = []
+    ids, targets = set(), set()
     for n in nodes:
+        nid = n["id"]
+        target = n.get("graph_id", nid)
+        if not nid or nid in ids:
+            errs.append(f"{path}: repeated or empty node id {nid!r}")
+        ids.add(nid)
+        if not isinstance(target, str) or not target:
+            errs.append(f"{path}: node {nid}: graph_id must be a non-empty string")
+        elif target in targets:
+            errs.append(f"{path}: repeated effective graph target {target!r}")
+        else:
+            targets.add(target)
         if "risk" in n and n["risk"] not in ("R1", "R2", "R3"):
             errs.append(f"{path}: node {n['id']}: risk {n['risk']!r} is not R1, R2 or R3")
         if "wave" in n and n["wave"] is not None and _wave(n) is None:
@@ -346,7 +360,7 @@ def cmd_assign(a) -> int:
     owner = load_modules(pathlib.Path(a.modules))
     nodes = load_plan(pathlib.Path(a.plan)) if a.plan else None
     new, unclaimed, unplaced = _assign(items, owner, nodes)
-    if a.write:
+    if a.write and not (unclaimed or unplaced):
         write_json(path, {**doc, "items": new})
     fields = ("module", "wave", "release") if nodes is not None else ("module",)
     print(json.dumps({"items": len(new), **counts(new, fields), "unclaimed": unclaimed,
@@ -440,7 +454,12 @@ def cmd_sync_graph(a) -> int:
         def gid(n: dict) -> str:  # a canvas id need not be graph.py's `N-001` shape
             return n.get("graph_id") or n["id"]
 
-        absent = [gid(n) for n in nodes if _wave(n) is not None and gid(n) not in current]
+        absent = [gid(n) for n in nodes if (_wave(n) is not None or "risk" in n)
+                  and gid(n) not in current]
+        if absent and not a.only_present:
+            raise Fail(1, [f"{nid} is in the plan and not in {pathlib.Path(gpath).name} — "
+                           "nothing was written; add it, or pass --only-present for a plan "
+                           "that spans several graphs" for nid in absent])
         moves = sorted(((gid(n), _wave(n)) for n in nodes if _wave(n) is not None
                         and gid(n) in current and current[gid(n)].get("wave") != _wave(n)
                         and current[gid(n)].get("status") != "done"))
@@ -482,11 +501,6 @@ def cmd_sync_graph(a) -> int:
         print(ln)
     print(f"waves: {len(moves)} moved · {len(risk_moves)} risk class(es) set · graph.py's order "
           "rule holds on the result")
-    if absent and not a.only_present:
-        for nid in absent:
-            print(f"waves: {nid} is in the plan and not in {pathlib.Path(gpath).name} — add it, or "
-                  "pass --only-present for a plan that spans several graphs", file=sys.stderr)
-        return 1
     return 0
 
 

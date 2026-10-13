@@ -4,8 +4,9 @@ For each stage: what it does, what to invoke, artifacts, and the **GATE** that
 must pass before advancing. Each gate is tagged with its **type** — `auto` (the
 orchestrator verifies the check itself, pass/fail), `judgment` (a named judge
 rules where no complete deterministic check exists — [`gates.md`](gates.md) →
-*The judgment gate*) or `manual` (wait for the
-operator's explicit go). These stages (0 intake + 1→10) are the plugin's
+*The judgment gate*) or `manual` (requires the operator's explicit go, including a
+specific standing authorization naming the act, cited with its source and scope;
+otherwise wait). These stages (0 intake + 1→10) are the plugin's
 **example** flow, encoded in `pipeline.example.json` against the universal contract
 `pipeline.schema.json`; a host project replaces it with its own
 stages/agents/types (see SKILL.md → *Bring your own skills*).
@@ -600,7 +601,12 @@ never that the work was skipped quietly.
   `partial` ships only with the operator's explicit acceptance. A gap is cheapest to
   close before it ships, and the operator is already present at this gate. **The
   carry-over count is printed beside this verdict.** Deploy is outward → explicit
-  operator go — unless the operator already authorised releases. **Before the tag, read
+  operator go, or a specific standing authorization naming that act, cited with its source
+  and scope. Authorization to release does not silently authorize a separate deploy. If
+  `release.authorized_by` is present, read that source and verify its authority,
+  currentness and scope for the tag and publication; the locator is not authorization.
+  If absent, inspect existing recorded authority before asking for a missing grant.
+  **Before the tag, read
   the release's approval mode** (`pipeline.json` → `release.approval`; then
   [`deploy-targets.md`](deploy-targets.md) → *When the release waits for an approval*):
   `checks` — push the tag, watch the run selected by the tag, report; `reviewers` — the

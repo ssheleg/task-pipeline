@@ -54,12 +54,16 @@ inventory; a closed hotfix lane of five entries is the only exception.
   `risk` revision; lowering a class needs `--lower-why`), so the rounds `close` enforces
   apply to every planned node, not only to a hand-edited graph.
 - `lessons.py` reads stdin as UTF-8 and prints machine output as ASCII-escaped JSON, so a
-  non-UTF-8 locale loses nothing a lesson carries; `rebuild` lists a repository it cannot
-  read and goes on, and replaces a corrupt index instead of refusing it.
-- A lessons index that cannot be READ is a refusal that names it and writes nothing; only
-  one that cannot be PARSED is replaced, after it is kept as `.corrupt-<date>`. A corrupt
-  old standalone index never blocks a command. Lines in a newer index format are skipped,
-  counted and kept on write. When both index files exist, both are read and merged once.
+  non-UTF-8 locale loses nothing a lesson carries. `rebuild` reports unreadable sources
+  and preserves the prior index. A complete scan can replace a corrupt index after
+  keeping its backup (`python3 test/lessons_test.py`).
+- Every lessons-index operation runs under one lock (the index directory's `.lock`, plus the
+  standalone directory's on the default path). A file that cannot be READ is a refusal that
+  names it and writes nothing; one that cannot be PARSED — the family index or the
+  standalone one alike — is kept as `.corrupt-<date>` and never makes a command exit 1. Lines
+  in a newer index format are skipped, counted and kept on write. When both index files
+  exist they are merged once: only lessons the family index lacks are copied, its own copy
+  wins, newer-format lines are carried across, and the old file becomes `.migrated`.
 - `emit-observatory --tool observatory_lesson` emits the engine's lesson-kind arguments
   (the lesson's own fields, plus `origin{projectId, commit}` — the engine's inputSchema); the agent
   picks it where the session lists that tool, `observatory_record` otherwise.

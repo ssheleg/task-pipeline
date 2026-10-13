@@ -46,7 +46,7 @@ kernel field. Each gate has a **type**: `auto` (the
 orchestrator verifies the `check` itself, pass/fail), `judgment` (no complete
 deterministic check exists — a named judge rules, and the ruling is recorded as
 judgement, never as a measurement; `references/gates.md` → *The judgment gate*)
-or `manual` (wait for an explicit operator go); which stages are manual is the
+or `manual` (an explicit go, including specific standing authorization); which stages are manual is the
 operator's call. In the
 example's `skills[]`, `task-pipeline:<name>` denotes this skill's own built-in
 doctrine (`references/<name>.md`) and `host:<name>` denotes the host project's own
@@ -183,9 +183,9 @@ Three things the grill does beyond clarifying the request, each in full in
 4. Do **not** advance until the stage **gate** passes (`references/stages.md`).
    Honor the gate **type**: for `auto`, verify the gate's `check` yourself and
    stop/return on fail; for `judgment`, record the named judge's ruling as
-   judgement, never as a measurement; for `manual`, present the result and
-   **wait for the operator's explicit "continue"/go** — neither of the other
-   two ever substitutes for a required manual approval.
+   judgement, never as a measurement; for `manual`, present the result and cite the
+   **operator's explicit go or standing authorization naming this act**. Other gate
+   types and generic loop flags cannot supply that authority (`references/continuity.md`).
 5. **The cross-cutting rules fire at any stage**, not only here — the Doc Loop, the
    loop guard, the audit's exit, the frozen REQ list, the carry-over ledger, and
    what counts as evidence, and **every gate prints `holds: N`** — what this run left

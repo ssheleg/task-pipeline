@@ -1,0 +1,637 @@
+
+> task-pipeline-skill@1.93.3 test
+> python3 test/validate.py && python3 test/graph_test.py && python3 test/project_audit_test.py && python3 test/packet_schema_test.py && python3 test/browser_claims_test.py && python3 test/visual_gate_test.py && python3 test/stage_checkpoint_test.py && python3 test/backlog_sources_test.py && python3 test/release_approval_test.py && python3 test/memory_nudge_test.py && python3 test/lessons_test.py && python3 test/waves_test.py && python3 test/continuity_doc_test.py && npm run test:audit-regressions
+
+PASS: task-pipeline structure valid
+  claim registry — negative self-tests: dormant (truth 438) · anchor-census fixtures: agrees x1 (truth 48) · anchor-census fixtures watched firing: agrees x1 (truth 27) · rules in learned.md: dormant (truth 32) · dated eval runs: agrees x1 (truth 4) · standing instructions: dormant (truth 8) · evidence canons: agrees x4 (truth 10) · rotation axes: dormant (truth 6) · gates.md's own axes: agrees x7 (truth 3) · cold-trigger surfaces: dormant (truth 16) · description budget: agrees x1 (truth 887) · description headroom: agrees x1 (truth 137) · registered claim classes: agrees x1 (truth 15) · reference files: agrees x4 (truth 41) · reference files (totalising): agrees x1 (truth 41)
+  learned.md — rules 32 · rules with an incident 20 · incident words 1962 · binding rows 17  (disclosure — no floor, no target)
+  negative-test anchors: 438 plants · 838 needles read off disk · 1 pinned to a value a release can move · 1 declared undrivable · 4 can decline to run · 52 yield no text needle (23 shell only, no python body, 12 a python body that reads no file, 9 a whole-file byte comparison, 6 provenance stopped at a helper function, 2 a JSON or dict key, which raises when it goes stale)  (disclosure — no floor, no target)
+  verification: 149 shipped REQ · 149 never confirmed by a person  (disclosure — no floor, no target)
+  exposure: 149 unverified · never checked · 20 releases carry one
+      REQ-001  references/adoption.md — doctrine + greenfield walkthrough   v1.9.0
+      REQ-002  The docgate floor comments state each floor's kind — PROPF   v1.9.0
+      REQ-003  Trigger vocabulary widened (RU+EN work verbs) and an expli   v1.9.0
+      REQ-004  Evals match the intended behaviour: exclusions kept, a new   v1.9.0
+      REQ-005  Global CLAUDE.md carries the routing rule with D2's bounda   v1.9.0
+      REQ-006  agent-sync binding patched: config example valid against p   v1.9.0
+      REQ-007  companion-skills.md states the agent-sync ≥ 1.3.0 floor fo   v1.9.0
+      REQ-008  This repo adopts its own doc track: docs/DOCMAP.md recordi   v1.9.0
+      … and 141 more — the full list is `/task-pipeline checkup`, which prints all of them
+  unlooked: 3
+    · coordination: 15 guarded file pattern(s) in .claude/agent-sync.json, 4 version surface(s) discovered
+    · backlog citations: 9 span(s) checked against a quoted needle, 6 single-line citation(s) unanchored — one line carries no phrase to compare
+    · routed triggers — no sshlg-skills umbrella above this checkout
+  ok  an owner that is not a known role is refused, and the message names it
+  ok  a MISSPELT known role is refused — the near miss, not just the absent one
+  ok  every shipped role name is accepted
+  ok  a cycle is refused, and the message names the nodes in it
+  ok  a THREE-node cycle is refused too — not only the mutual pair
+  ok  a blocked_by naming a node that does not exist is refused
+  ok  an edge naming a node that does not exist is refused
+  ok  a duplicate node id is refused — two nodes one id is a graph nobody can cite
+  ok  a clean graph validates and says nothing else
+  ok  next prints only runnable nodes
+  ok  next prints the frontier and NOTHING else — this output is paid every iteration
+  ok  a graph with every node done exits 3, not 0 — done and stalled are different
+  ok  a graph where everything remaining is blocked exits 4
+  ok  a parked node is not in the frontier
+  ok  a complete verdict is accepted
+  ok  every one of the seven keys is required, and the message names the missing one
+  ok  done without evidence is refused — the whole reason the field exists
+  ok  done EMPTY with evidence empty is fine — nothing was claimed
+  ok  a blocker must say what it blocks and whether the run can continue around it
+  ok  replan.possible false must carry a why — a stop with no reason is a stall
+  ok  replan.park naming a node id shape that cannot exist is refused
+  ok  evidence entries must be non-empty strings, matching what the SCHEMA requires
+  ok  the verdict gate and the graph schema agree on evidence — checked against both
+  ok  manager and business-analyst may own a node — doctrine is not the same as absent
+  ok  project may NOT own a node — the brief defers it for having no stated job
+  ok  the refusal never names a role the set rejects
+  ok  agents/verifier.md ships, and the manifest does NOT declare the directory
+  ok  the agent declares only frontmatter keys plugin agents accept
+  ok  the agent names no vendor model id — the tier, never the id
+  ok  park with no --reason at all is a usage error, not a silent park
+  ok  park with an EMPTY --reason is refused — the flag present is not a reason given
+  ok  park with a WHITESPACE --reason is refused — the shape that satisfies argparse
+  ok  park records the reason, and it reads back off the file — REQ-012
+  ok  a parked node leaves the frontier
+  ok  park names a node that does not exist — refused, and the message names the id
+  ok  parking a DONE node is refused — a closed result is not re-openable this way
+  ok  re-parking is refused, and the refusal quotes the reason already recorded
+  ok  add appends a node and allocates the next id
+  ok  the id is allocated from the MAXIMUM, not from the count
+  ok  an explicit --id that already exists is refused
+  ok  add with an unknown owner is refused and NOTHING is written
+  ok  add --blocked-by naming a node that does not exist is refused
+  ok  add with an empty title is refused
+  ok  add with an empty --serves is refused — a node serving nothing is REQ-012's case
+  ok  a mutation on an ALREADY-invalid graph says so, rather than blaming the new node
+  ok  a refused mutation leaves the file byte-identical
+  ok  the frontier is ordered by how much each node unblocks
+  ok  a node added mid-walk re-prioritises the NEXT frontier — REQ-011
+  ok  the order is deterministic — the same graph gives the same frontier twice
+  ok  next prints the frontier and nothing else, priority or not
+  ok  a mutated graph still validates against graph.schema.json itself
+  ok  the schema REQUIRES the reason on a parked node — not merely permits it
+  ok  a duplicate blocked_by is refused — the schema calls the list unique
+  ok  add dedupes a repeated --blocked-by rather than writing what the schema rejects
+  ok  a line break in a title is refused — `next` prints one row per node
+  ok  done with no evidence is refused AT RUNTIME, not only by the shipped schema
+  ok  parked with no reason is refused at runtime, and `null` is one of the shapes
+  ok  a graph with no goal is refused — the loop prints it every iteration
+  ok  an id that does not match the schema's shape is refused
+  ok  a malformed graph is a named refusal, not a traceback
+  ok  a symlinked graph is written THROUGH, not replaced
+  ok  two concurrent adds do not share one temp file
+  ok  an edge with no payload is refused — the schema said so and nothing enforced it
+  ok  an edge whose payload is blank is refused too — presence is not content
+  ok  a blocked_by pair with no edge is refused — a dependency that hands over nothing
+  ok  the edge must run blocker → blocked, not the other way
+  ok  a matched dependency and edge validate
+  ok  an empty title or serves is refused at runtime, not only by the schema
+  ok  add --blocked-by requires --carries, and says so
+  ok  add writes the edge with the node, and the payload is what was given
+  ok  --carries and --blocked-by must pair up, and a mismatch names both counts
+  ok  add requires --why, and refuses a blank one
+  ok  every mutation appends a revision carrying its reason — B-084, and the graph says why it changed
+  ok  a revision with a blank why is refused by validate — the log is not decoration
+  ok  the shipped example still validates with the tightened rules
+  ok  a serves that names no declared requirement is refused, and the message names it
+  ok  a serves naming a declared goal clause resolves
+  ok  a graph declaring no requirements is refused — the intent side cannot be empty
+  ok  coverage prints each requirement and the nodes serving it
+  ok  coverage refuses a requirement no node serves, and names it
+  ok  coverage reports a requirement whose every node is parked — covered on paper only
+  ok  coverage names a done node whose evidence is empty rather than counting it
+  ok  coverage says plainly what it cannot see
+  ok  the shipped example declares its requirements and covers them
+  ok  add refuses a serves the brief never froze, and says who may add one
+  ok  producer prints every field, and needs no graph to do it
+  ok  an unresolved field says WHY it is unavailable, never blank and never absent
+  ok  the harness's values are passed through when it sets them
+  ok  commit resolves inside a checkout and says so outside one
+  ok  config is a digest of the project's pipeline.json, and it moves when the file does
+  ok  producer names no vendor model id of its own
+  ok  the output is deterministic — the same environment gives the same block
+  ok  without a plugin manifest the skill version says unavailable rather than guessing
+  ok  two runnable nodes sharing a touched target are named on stderr
+  ok  the collision goes to stderr and never into the frontier rows
+  ok  disjoint targets raise nothing
+  ok  nodes that cannot run at once do not collide
+  ok  a frontier whose nodes declare no targets says so — silence is not 'no collision'
+  ok  a partially-declared frontier discloses how many said nothing
+  ok  the schema binds `touches` — non-empty unique strings
+  ok  add --touches writes what the node will mutate
+  ok  close marks the node done and records the evidence
+  ok  close STAMPS the commit — the verifier never supplies it
+  ok  a verdict omitting `not_verified` is refused — all seven keys
+  ok  done with empty evidence is refused, and nothing is written
+  ok  replan.add appends the nodes the verifier asked for
+  ok  replan.park parks the nodes it names, carrying the verdict's why
+  ok  replan.possible false stops, and prints the verdict's own why
+  ok  close prints the goal and the new frontier count
+  ok  close records a revision carrying the verdict's why
+  ok  close refuses a node that is not runnable, and says why
+  ok  the graph after a close still validates
+  ok  the revision verb set agrees between the script and the schema
+  ok  a close writes a graph its own schema accepts — checked with jsonschema
+  ok  a node the verifier will close must name its `check`, and the refusal names the node
+  ok  a blank or whitespace `check` is refused AT RUNTIME, not only by the shipped schema
+  ok  a line break in a `check` is refused — two commands cannot be one completion test
+  ok  a parked node needs no `check` — the one node nobody will close
+  ok  a park does not remove what the node said it would run
+  ok  the schema refuses a node with no `check` where one is owed
+  ok  the schema accepts a parked node with no `check` — the exemption is stated, not assumed
+  ok  the `check` pattern REFUSES whitespace — measured, not read
+  ok  add requires --check, and refuses a blank one
+  ok  add writes the check on the node, and the graph still validates
+  ok  a verdict whose replan.add names no check is refused, and nothing is written
+  ok  close writes the replanned node with its own check
+  ok  the verifier is told to run a field the node ACTUALLY carries — B-080's own shape
+  ok  the fieldless phrasing is gone — «the checks the task named» named no field
+  ok  every node in the shipped example that will be closed names its check
+  ok  certify: three passing tiers write a verdict close accepts
+  ok  certify: not_examined becomes not_verified, a risk becomes a survivable blocker
+  ok  certify: a tier passing on an empty scope is refused as a rubber stamp
+  ok  certify: a tier passing with empty evidence is refused
+  ok  certify: a pass carrying a `breaks` finding is a contradiction, refused
+  ok  certify: a fail naming no `breaks` finding is refused
+  ok  certify: a `breaks` finding with no check is refused — it becomes a node
+  ok  certify: a report missing one of the eight keys is refused, and the key is named
+  ok  certify: a third verdict value is refused — no maybe
+  ok  certify: two readings at one distance leave another unread, refused
+  ok  certify: a missing tier is refused and named
+  ok  certify: a report about another node is not evidence about this one
+  ok  certify: a report citing another tier's verdict was not written blind
+  ok  certify: a cross-tier citation hiding in scope is refused — blind covers every prose field
+  ok  certify: a finding's check citing a tier with a verb the first net missed is still refused
+  ok  certify: a finding whose what/fix leans on another tier's verdict was not written blind
+  ok  certify: a failing tier exits 1, prints the fix and its check, and the node stays open
+  ok  certify: the round accumulates across attempts, so churn is countable
+  ok  certify: at the ceiling the output names the tier that failed every round
+  ok  certify: churn across levels is reported as such, not as one stuck tier
+  ok  certify: a node that is already done cannot be certified again
+  ok  certify: a node whose blocker is open certifies nothing
+  ok  certify: the graph still validates after a round is recorded on a node
+  ok  certify: a flagship node without the visual tier is refused and the tier is named
+  ok  certify: a flagship node with four passing tiers writes a verdict close accepts
+  ok  certify: a failing visual tier fails the round and is recorded in its history
+  ok  certify: an internal node takes a visual tier when given, and does not require one
+  ok  certify: a visual report citing another tier's verdict was not written blind
+  ok  validate: a node's surface_class outside the four classes is refused
+  ok  validate: a wave that is not an integer from 1 is refused — 0, a string, a bool
+  ok  validate: an earlier wave that waits on a later wave's node is refused
+  ok  validate: a later wave waiting on an earlier one, or on its own, is accepted
+  ok  next --wave N prints that wave's frontier and nothing from the others
+  ok  next --wave N exits 3 when that wave is done and others are not
+  ok  next --wave N exits 4 when nothing in it is runnable, and 1 on an empty wave
+  ok  wave: moves a node, writes a `wave` revision, and the graph still validates
+  ok  wave: a move that breaks the order, a done node, or no reason is refused unwritten
+  ok  a node's risk class (R1-R3) validates under the schema and graph.py; any other value is refused by both
+  ok  certify: rounds owed by risk class: an R3 node is not closable after one passing round, nor after three with no adversarial one
+  ok  certify: rounds owed by risk class: an R3 node closes after three passing rounds, one of them adversarial; an R1 after one
+  ok  certify: rounds owed count PASSING rounds: a failed round owes its replacement, and the adversarial round must pass
+  ok  owed rounds message: a FAILED adversarial round is named only when one actually failed
+residue: this run left nothing — 200 temp tree(s) created, 200 removed
+
+PASS: graph.py — 171 cases
+test_a_row_is_a_single_line_with_escaped_pipes (__main__.TestBoardRows.test_a_row_is_a_single_line_with_escaped_pipes) ... ok
+test_no_new_severity_vocabulary_is_invented (__main__.TestBoardRows.test_no_new_severity_vocabulary_is_invented) ... ok
+test_priority_uses_the_projects_formula (__main__.TestBoardRows.test_priority_uses_the_projects_formula) ... ok
+test_the_age_term_is_not_a_constant (__main__.TestBoardRows.test_the_age_term_is_not_a_constant)
+The umbrella board ranked newest-first for eleven days because the ... ok
+test_a_channel_that_could_not_be_fetched_is_blind_not_equal (__main__.TestChannelDivergence.test_a_channel_that_could_not_be_fetched_is_blind_not_equal) ... ok
+test_a_path_in_one_channel_only_is_packaging_not_divergence (__main__.TestChannelDivergence.test_a_path_in_one_channel_only_is_packaging_not_divergence)
+An npm tarball ships what `files` allows. Counting `.github/` as a ... ok
+test_a_shared_path_that_differs_is_still_divergence (__main__.TestChannelDivergence.test_a_shared_path_that_differs_is_still_divergence) ... ok
+test_a_version_string_match_alone_never_satisfies_the_check (__main__.TestChannelDivergence.test_a_version_string_match_alone_never_satisfies_the_check)
+`check_pins.py` was green through yesterday's defect because it ... ok
+test_identical_trees_are_silent (__main__.TestChannelDivergence.test_identical_trees_are_silent) ... ok
+test_same_version_different_trees_is_a_finding (__main__.TestChannelDivergence.test_same_version_different_trees_is_a_finding) ... ok
+test_an_excluded_directory_does_not_hide_its_siblings (__main__.TestCommittedState.test_an_excluded_directory_does_not_hide_its_siblings)
+The over-broad fix for the line above: matching either way round ... ok
+test_an_ignored_artefact_is_not_a_finding (__main__.TestCommittedState.test_an_ignored_artefact_is_not_a_finding)
+Yesterday's audit defect (7): the standard-keeper read the working ... ok
+test_the_audits_own_output_is_not_part_of_its_reading (__main__.TestCommittedState.test_the_audits_own_output_is_not_part_of_its_reading)
+Found by the three-run fixture: run 1 saw a clean tree, run 2 saw ... ok
+test_the_working_tree_disagreement_is_disclosed_not_dropped (__main__.TestCommittedState.test_the_working_tree_disagreement_is_disclosed_not_dropped) ... ok
+test_ci_absence_is_recorded_as_absence_not_omitted (__main__.TestDiscovery.test_ci_absence_is_recorded_as_absence_not_omitted) ... ok
+test_languages_and_managers_are_named (__main__.TestDiscovery.test_languages_and_managers_are_named) ... ok
+test_monorepo_is_detected_only_where_it_is_one (__main__.TestDiscovery.test_monorepo_is_detected_only_where_it_is_one) ... ok
+test_three_trees_give_three_different_profiles (__main__.TestDiscovery.test_three_trees_give_three_different_profiles) ... ok
+test_version_is_read_from_the_manifest_the_project_actually_uses (__main__.TestDiscovery.test_version_is_read_from_the_manifest_the_project_actually_uses) ... ok
+test_a_homegrown_error_channel_is_not_reported_as_absent (__main__.TestIdempotence.test_a_homegrown_error_channel_is_not_reported_as_absent)
+The probe read manifests and asserted about the product. (#83) ... ok
+test_a_plain_run_writes_the_sidecar_and_no_page (__main__.TestIdempotence.test_a_plain_run_writes_the_sidecar_and_no_page)
+A report is an artefact that outlives the conversation, so it is asked for. ... ok
+test_report_writes_both_artefacts (__main__.TestIdempotence.test_report_writes_both_artefacts) ... ok
+test_the_sidecar_validates_against_its_own_schema_claim (__main__.TestIdempotence.test_the_sidecar_validates_against_its_own_schema_claim) ... ok
+test_three_runs_agree_once_the_stamp_is_normalised (__main__.TestIdempotence.test_three_runs_agree_once_the_stamp_is_normalised) ... ok
+test_a_carried_finding_accumulates_runs_open (__main__.TestRatchet.test_a_carried_finding_accumulates_runs_open) ... ok
+test_a_different_place_is_a_different_finding (__main__.TestRatchet.test_a_different_place_is_a_different_finding) ... ok
+test_a_first_run_says_so_rather_than_reporting_zeros (__main__.TestRatchet.test_a_first_run_says_so_rather_than_reporting_zeros) ... ok
+test_a_stable_id_survives_a_reworded_title (__main__.TestRatchet.test_a_stable_id_survives_a_reworded_title) ... ok
+test_the_diff_names_closed_new_and_stale (__main__.TestRatchet.test_the_diff_names_closed_new_and_stale) ... ok
+test_the_sidecar_declares_its_schema (__main__.TestRatchet.test_the_sidecar_declares_its_schema) ... ok
+test_a_probe_that_raises_is_blind_and_the_run_continues (__main__.TestRegistry.test_a_probe_that_raises_is_blind_and_the_run_continues) ... ok
+test_an_empty_command_output_is_blind_not_clean (__main__.TestRegistry.test_an_empty_command_output_is_blind_not_clean)
+`silence is not a reading`, raised from a command to a probe. ... ok
+test_an_unmet_need_is_blind_with_a_reason_never_clean (__main__.TestRegistry.test_an_unmet_need_is_blind_with_a_reason_never_clean) ... ok
+test_every_registered_probe_declares_its_needs_and_phase (__main__.TestRegistry.test_every_registered_probe_declares_its_needs_and_phase) ... ok
+test_probe_ids_are_unique (__main__.TestRegistry.test_probe_ids_are_unique) ... ok
+test_verdict_vocabulary_is_closed (__main__.TestRegistry.test_verdict_vocabulary_is_closed) ... ok
+test_a_blind_probe_is_visible_on_the_page_with_its_reason (__main__.TestReport.test_a_blind_probe_is_visible_on_the_page_with_its_reason) ... ok
+test_a_first_run_page_says_first_run (__main__.TestReport.test_a_first_run_page_says_first_run) ... ok
+test_finding_text_is_escaped (__main__.TestReport.test_finding_text_is_escaped) ... ok
+test_open_failure_warns_and_does_not_fail_the_run (__main__.TestReport.test_open_failure_warns_and_does_not_fail_the_run) ... ok
+test_the_page_carries_both_themes (__main__.TestReport.test_the_page_carries_both_themes) ... ok
+test_the_page_makes_no_external_request (__main__.TestReport.test_the_page_makes_no_external_request) ... ok
+test_a_planted_token_is_found (__main__.TestSecrets.test_a_planted_token_is_found) ... ok
+test_the_redaction_still_says_which_secret_it_was (__main__.TestSecrets.test_the_redaction_still_says_which_secret_it_was) ... ok
+test_the_value_appears_in_no_artefact (__main__.TestSecrets.test_the_value_appears_in_no_artefact) ... ok
+
+----------------------------------------------------------------------
+Ran 45 tests in 3.167s
+
+OK
+  ok  the packet id is namespaced; the bare id is still read
+  ok  the schema declares the edge shape
+  ok  a control edge without payload survives, preserved
+  ok  a payload edge needs its satisfaction
+  ok  a duplicate edge is rejected; data+control to one target is two statements
+  ok  an unknown dependency is rejected
+  ok  a cycle is rejected
+  ok  duplicate packet ids are rejected
+  ok  unknown kinds and missing rationales are rejected
+OK (9 checks)
+  ok  the shipped template validates (honest NOT_RUNs)
+  ok  a visual PASS with no artifact is refused
+  ok  an initial-state screenshot cannot close the opened claim
+  ok  a named-but-absent artifact is refused
+  ok  an incomplete toggle cycle names the missing state
+  ok  the full cycle passes
+  ok  a suite PASS does not close an artifactless look claim
+  ok  NOT_RUN without a reason is refused
+  ok  the shipped template is an honest contact sheet: NOT_RUN, never PASS
+  ok  a captured, compared, pairwise-covered sheet passes at flagship
+  ok  a frame whose text axis nobody recorded is refused
+  ok  a PASS frame with no capture record is refused
+  ok  a frame captured at another revision is refused as stale
+  ok  a frame with a Figma reference and no diff is refused
+  ok  PASS over a failing diff is refused — only a person approves a new baseline
+  ok  a PASS frame carrying a gate-item FAIL is refused — the judge is below the floor
+  ok  a judge item reported PASS with no calibration is refused
+  ok  the same judge item with its calibration is accepted
+  ok  a FAIL with no region → defect → fix triple is refused
+  ok  a flagship sheet with three judge FAILs is over the profile's threshold
+  ok  a human item reported PASS on an unapproved sheet is refused
+  ok  a sheet that cannot say how many returns it took is refused
+  ok  at acceptance an unapproved sheet is refused
+  ok  the approved sheet passes at acceptance
+  ok  an approval with no parseable time is half an approval
+  ok  dark × large text is a mandatory pair even on a product surface
+  ok  on an internal surface the same hole is reported, not gated
+  ok  RTL with no narrow frame misses a mandatory pair
+  ok  a pairwise hole is a note on a product surface
+  ok  the same pairwise hole fails a flagship surface
+  ok  a state the brief names with no frame is a hole in the matrix
+  ok  a flagship surface whose sheet has no visual row is refused
+  ok  an internal surface may close on the functional look alone
+  ok  one frame that did not run makes the verdict NOT_RUN, never PASS
+  ok  the sheet command exits 0 · 1 · 3 · 2 for pass · fail · not run · unreadable
+
+all green
+  ok  a full flagship record passes the floor, and the absent validator says NOT_RUN
+  ok  a flagship record without Rubric fails the gate, and the field is named
+  ok  a heading with a placeholder under it is empty, not filled
+  ok  the product profile owes the short set: no Rubric is not a failure there
+  ok  the product profile still owes Markers
+  ok  the ad profile owes the ADA field (its rubric profile and safe zones)
+  ok  a record whose class disagrees with the brief is refused
+  ok  a record that declares no surface_class is refused
+  ok  a Mode outside new / redesign / update / audit / declined is refused
+  ok  a recorded refusal (Mode: declined + reason) still passes
+  ok  a refusal with no reason is a silence, and is refused
+  ok  no record at all fails a product surface
+  ok  an internal surface owes no record
+  ok  an installed validator that accepts the record reads PASS
+  ok  an installed validator that refuses the record fails the gate
+  ok  a validator older than --check-record is NOT_RUN, never PASS
+  ok  a missing validator binary is NOT_RUN with the reason
+  ok  --json separates the floor from the validator
+  ok  the project linter that finds no S1 reads PASS
+  ok  the project linter that exits 1 fails, with its severity count
+  ok  a linter that does not offer --lint is NOT_RUN — exit 3, never 0
+  ok  frames in two of the recorded surface files pass — a set, not one key
+  ok  a frame in a file outside the recorded set is refused, even one the doc mentions outside Design tooling
+  ok  frames with no recorded file at all are refused
+  ok  tokens: a get_variable_defs map whose every name has its property passes — slash, space and camelCase all become kebab-case
+  ok  tokens: a variable with no CSS property fails, naming both spellings
+  ok  tokens: a CSS property no Figma variable names fails, named
+  ok  tokens: a declaration inside a comment is not a property — the accent still fails
+  ok  tokens: a var() USE is not a declaration — --color-ghost is not reported CSS-only
+  ok  tokens: code syntax that differs from the CSS property fails, naming both
+  ok  tokens: code syntax is canonical — a name that slugs elsewhere passes when its code syntax is the property
+  ok  tokens: a WEB code syntax that is no CSS custom property fails, said so
+  ok  tokens: a `variables` list export is read too
+  ok  tokens: two variables that land on one property fail — one property cannot hold both
+  ok  tokens: no Figma export is NOT_RUN — exit 3, never 0
+  ok  tokens: an export with no variables is NOT_RUN, not a pass over nothing
+  ok  tokens: an export that is not JSON is unreadable — exit 2, said in words (argparse's own usage error is also 2, so the message is the assertion)
+  ok  tokens: a nested token tree is not a variable export — exit 2, not a comparison against the group names
+  ok  tokens: a token file that cannot be read is exit 2
+  ok  tokens: --json lists each drift class and the matched count
+
+all green
+PASS: a returned gate becomes one checkpoint built from the ledger
+PASS: retries replay, repeated stages are new
+PASS: the workflow continues across boundaries; the token stays out of every output
+PASS: provider loss is one ledger line and the run goes on
+PASS: a stale writer stops after one refusal; the successor continues
+PASS: credentials travel by name only
+PASS: a failed gate stays open; acceptance closes
+PASS: review rounds travel in the checkpoint of the stage that recorded them
+PASS: a planned executor change offers the workflow, the successor accepts it
+PASS: an offer's retry survives unrelated ledger appends; a recorded offer moves the key
+PASS: no ledger, no checkpoint
+PASS: stage_checkpoint.py — 58 cases
+PASS: no manifest → discovery, disclosed
+PASS: a well-formed manifest becomes the harvest list
+PASS: 26 malformed manifests each refused with its reason
+PASS: a symlinked source is refused
+PASS: an undeclared source is reported, not silently added
+PASS: the doctrine and the script name each other
+PASS: without jsonschema the hand rules refuse a blank column name on any source
+PASS: backlog_sources.py — 40 cases
+PASS: the schema declares release.approval as checks | reviewers, optional
+PASS: the schema accepts checks, reviewers and absence, and refuses six other values
+PASS: the example declares its approval mode
+PASS: the doctrine names both modes, the order they are read in, and no default
+PASS: release approval mode — 20 cases
+PASS: memory-nudge.sh — 14 cases
+skipped: the engine-redactor case — OBSERVATORY_ENGINE_DIR is unset — the engine's redactor is not on this machine's path
+PASS: lessons.py — 111 cases
+PASS: waves.py — 85 cases
+PASS: continuity.md — 21 cases
+
+> task-pipeline-skill@1.93.3 test:audit-regressions
+> for t in test/audit_regressions/*.py; do python3 "$t" || exit 1; done
+
+  ok  the doctrine states the UI annex
+  ok  a UI packet needs a complete annex
+  ok  a stale visual spec triggers a revision
+  ok  a non-UI task needs no annex
+  ok  the annex never replaces the scheduler claim
+
+all green
+  ok  the contract ships, the example validates, SKILL.md names it
+  ok  an unknown mandatory major is rejected with a remedy
+  ok  a missing ref/digest is rejected
+  ok  an unbound decision is rejected
+  ok  a valid packet round-trips to one canonical digest
+  ok  budgets must bound something
+OK (6 checks)
+  ok  the contract ships, the example validates, SKILL.md names it
+  ok  a boolean confirmation is not a grant
+  ok  a stale candidate cannot validate as current
+  ok  a superseded fence is rejected
+  ok  the check and evidence unions hold
+  ok  'completed' beside failing checks is a contradiction
+OK (6 checks)
+  ok  115 findings + 4 capabilities compile to 119 traced parents
+  ok  repeated and shuffled compiles are byte-identical
+  ok  evidence/limits/priority are separate fields; a smuggled status is refused
+  ok  a duplicate, a hole and a namespace squat each block the whole compile
+  ok  verify catches a dropped, a mutated and an invented parent
+  ok  the CLI round-trips and refuses an unreadable report
+OK (6 checks)
+  ok  a resolved slice compiles; the cold reader answers all eight
+  ok  an unresolved decision dispatches no leaf
+  ok  missing version and missing output contract fail readiness
+  ok  acceptance needs a positive AND a negative case
+  ok  a budget cuts appendix, records it, never acceptance
+  ok  a slice is selected by id, never by mtime
+  ok  the CLI round-trips and the doctrine states the rules
+OK (7 checks)
+  ok  two roots import identical bytes; no absolute path in the bundle
+  ok  a corrupt blob rejects everything, nothing is written
+  ok  a missing blob rejects by name
+  ok  absolute, escaping and credential locators are refused at export
+  ok  a source that moved under the plan refuses to travel
+  ok  the CLI round-trips
+OK (6 checks)
+  ok  a fully fresh, budgeted, capable leaf is CLEAR
+  ok  source drift blocks and names the file
+  ok  a missing prerequisite output blocks
+  ok  an oversized primary blocks without truncating
+  ok  a missing capability and a missing claim each block
+  ok  the CLI blocks and clears
+OK (6 checks)
+  ok  no link escapes the skill directory
+  ok  every generated copy is byte-equal to the source home
+  ok  the GENERATED marker names the source home and the sync
+  ok  an isolated copy of the directory resolves every link
+
+all green
+  ok  every case is structurally valid, none is name-picking
+  ok  the negative and chat-answer cases forbid loading
+  ok  the unsupported-claim and dependency cases are pinned
+  ok  the family harness validates each case (where present)
+
+all green
+  ok  every case is structurally valid, none is name-picking
+  ok  the negative case forbids the skill from loading
+  ok  the ADR/reproduced/report cases are pinned
+  ok  the family harness validates each case (where present)
+
+all green
+  ok  every case is structurally valid, none is name-picking
+  ok  the negative case forbids the skill from loading
+  ok  the four finding cases (TP-01/02/03/04) are pinned
+  ok  the family harness validates each case (where present)
+
+all green
+  ok  the template carries only keys Claude Code's hook schema knows, if on the handler
+  ok  hooks.md and its evidence-docs mirror say 'inside the handler object'
+  ok  plant: the pre-v1.86.2 shape (if beside matcher) is refused by name
+
+all green
+  ok  the gate's own guards pass
+  ok  a node whose context is missing is refused, end to end
+  ok  a graph that cannot be read exits 2, never 0
+  ok  the cold-reader contract has one home
+  ok  planning.md states what the gate does and how to run it
+  ok  both stage-4 gate statements name the script
+  ok  the model profile is named and carries its basis
+  ok  a settled node does not block the plan
+
+all green
+  ok  the doctrine separates decision status from technical validity
+  ok  a documented violation stays a finding
+  ok  an accepted trade-off is a limitation, not a defect
+  ok  undecided and unpropagated are findings
+  ok  a documented, valid, cost-free decision is clean
+
+all green
+  ok  the doctrine separates the five axes
+  ok  the collector writes mechanism/incidence/scope/time into every row
+  ok  incidence unknown never demotes a confirmed mechanism
+  ok  the template is the minimal evidence schema
+  ok  both references point at the schema
+
+all green
+  ok  the exit criterion is conditional on requested deliverables
+  ok  --report requires an existing page, safe links, render status
+  ok  three modes, only --report needs a browser
+  ok  read-only is about the target, with an allowed output dir
+  ok  fixture: a json-only run is complete without a page
+  ok  fixture: a --report run is incomplete until the page + status exist
+
+all green
+  ok  the attempt schema requires owner/attempt/revision/fence/expiry and states ready→claimed
+  ok  a grant missing owner/revision/fence/expiry is rejected; a valid grant round-trips
+  ok  a running node must carry a claim; others need not
+
+all green
+  ok  two independent local claims yield one winner
+  ok  the fence is monotonic and expiry reclaims
+  ok  a stale fence is refused on renew and release
+  ok  an unavailable authority fails closed
+  ok  graph claim: first wins, second loses (5)
+  ok  an unavailable authority blocks dispatch (1, no work)
+  ok  next is advisory: it issues no claim
+
+all green
+  ok  an expired attempt can be recovered, a live one cannot
+  ok  a late old result is rejected; the current holder completes
+  ok  a retried completion by the current holder is idempotent
+  ok  cancel and renew are fence-checked
+  ok  graph complete refuses a stale fence, accepts the current
+
+all green
+  ok  a current matching proof is accepted and recorded
+  ok  a stale proof after a code change is rejected
+  ok  a verdict with no tested identity is rejected inside a checkout
+  ok  a tree mismatch under a matching commit is rejected
+
+all green
+  ok  an upstream change invalidates all descendants' proofs
+  ok  an unrelated node keeps its proof
+  ok  invalidation flows downstream only, sparing upstream
+  ok  a superseding revision is recorded with a precondition
+  ok  invalidate refuses without a reason
+
+all green
+  ok  a failed certification blocks a direct close
+  ok  a certification of another candidate blocks
+  ok  a current successful certification closes normally
+  ok  a node with no certification closes as before
+
+all green
+  ok  waive records reason + identity, refuses empties
+  ok  a failed certification still blocks without an exception
+  ok  an exception closes with the stamp — and never certifies
+  ok  a lint exposure is refused as a blind review
+
+all green
+  ok  a parked producer blocks the frontier, named with its reason
+  ok  a done producer unblocks
+  ok  close refuses over a parked blocker
+  ok  all-done-or-parked still exits 3
+  ok  the doc states the satisfaction predicate
+
+all green
+  ok  a fresh packet carries every required constraint
+  ok  a missing required ref is rejected
+  ok  an unbound ref is rejected
+  ok  no ephemeral secret compiles in, at any depth
+  ok  the compile-dispatch CLI verb runs; the schema links the packet
+
+all green
+  ok  a fully-typed result validates
+  ok  a credential-named output is refused
+  ok  an untyped or unpinned output is refused
+  ok  a changed (or vanished) predecessor output is stale — rebuild
+  ok  malformed packet_digest / consumed rows are refused
+  ok  the schema declares the fields; build.md documents the rule
+
+all green
+  ok  gate types match the Fabric contract (no checkout needed)
+  ok  the example config imports under the Fabric contract
+  ok  the contract fixture matches the adapter source
+  ok  the schema declares must_understand and the gate refusal rule
+  ok  a supported config round-trips with constraints preserved
+  ok  an unknown gate is refused by name, never omitted
+  ok  an ununderstood must_understand refuses the whole config
+  ok  profile/skill_lock/graph_version pins are validated
+
+all green
+  ok  phase 2 opens with the answered/immaterial/material triage
+  ok  a complete brief yields zero intake questions
+  ok  an unanswerable material unknown becomes one bounded decision task
+  ok  the unconditional relentless-interview default is gone
+  ok  fixture: a full brief asks nothing
+  ok  fixture: a missing material decision is exactly one task
+
+all green
+  ok  advice and choice are separated; choice inherited verbatim
+  ok  task size is not a basis for switching
+  ok  an unsupported capability is its own line
+  ok  fixture: plan and executor keep the user model at any task size
+  ok  fixture: only a recorded override with a basis switches
+  ok  fixture: a capability gap is a named note, never a swap
+
+all green
+  ok  the gate checks the artifact, not the package
+  ok  three provider paths satisfy one contract
+  ok  a foreign design workflow is judged by its result
+  ok  an absent tool is the named check not done
+  ok  fixture: valid scenarios without super-ux pass
+  ok  fixture: no artifact → create it, preferred provider offered
+  ok  fixture: foreign design with evidence is designed
+
+all green
+  ok  the kernel and its four fields are named
+  ok  stage numbers belong to the profile, not the kernel
+  ok  precedence on a custom profile is resolved (kernel wins)
+  ok  the schema declares the kernel; stages stays the only top requirement
+  ok  a minimal three-stage profile has no stage 7 but keeps the kernel
+
+all green
+  ok  the selected profile compiles once; only its gates run
+  ok  a custom profile does not bypass the kernel
+  ok  an unknown mandatory capability blocks the compile
+  ok  fixture: a 3-stage profile runs 3 gates, kernel still required
+  ok  fixture: an unknown capability blocks the compile
+
+all green
+  ok  three classes declared at birth
+  ok  situational counts exposure opportunities, not raw runs
+  ok  cold means review-needed; the delete-on-cold doctrine is gone
+  ok  a temporary rule archives only with a verified replacement
+  ok  every removal is explainable
+  ok  fixture: payment safety survives payment-less runs; permanent never cold-retired
+  ok  fixture: expired workaround — archive with replacement, live defect without
+  ok  fixture: situational cold with real exposures → review-needed
+
+all green
+  ok  a clean install lands the new tree
+  ok  --force=false preserves user bytes
+  ok  a stage crash leaves the active install intact
+  ok  install.sh stages before swapping
+
+all green
+  ok  task-pipeline hostRoot follows the precedence
+  ok  task-pipeline hostRoot preserves spaces and isolates hosts
+  ok  all three installers carry the identical HostContext contract
+  ok  each installer routes the Claude registry through the resolver
+
+all green
+PASS: isolated payload closure, missing-procedure negative, offline JSON+HTML with no companion
+  ok  the template links REQ/scenario to state and kind
+  ok  a functional PASS is never a visual PASS
+  ok  wrong-state and missing artifacts are refused
+  ok  the toggle cycle and reasoned NOT_RUN are enforced
+  ok  browser.md names the contract; the gate runs the validator
+
+all green
