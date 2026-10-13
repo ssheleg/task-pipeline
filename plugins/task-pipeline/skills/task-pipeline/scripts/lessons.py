@@ -18,9 +18,12 @@ entry is a pure function of its origins.
         classKey makes it a candidate, a repeat from the same project revises, never mints
     lessons.py query NOUN ... [--limit 5]
         at most --limit lines: `[lesson L-<sha12>] title — trigger — check (seen N, projects K)`
-    lessons.py rebuild --roots DIR ... [--depth 3]
-        re-derive the whole index from every retro found under the roots; incomplete
-        discovery or an unreadable/invalid lesson source refuses without changing the index
+    lessons.py rebuild --roots DIR ... [--depth 3] [--force]
+        re-derive the whole index from every retro found under the roots: every lesson it can
+        read is rebuilt; a lesson whose commit does not resolve is counted and named, an
+        unreadable root, directory or retro is named under `not read`, and the run exits 0.
+        It refuses (exit 1, nothing written) only when no retro could be read at all, or when
+        an incomplete scan would drop a lesson the previous index holds — unless --force
     lessons.py candidates [--min-projects 2]
         lessons two or more projects hold: the `retro.publish` queue for learned.md
     lessons.py show L-<sha12>
@@ -76,8 +79,10 @@ with the entry's own `**Surfaced at:** stage N · **Owned by:** stage M`, `**Fix
 `**The check:**` and `**Commit:** `<sha>`` lines. An entry with no Lesson line is private to
 its project and is skipped, counted aloud.
 
-Exit codes: 0 done (an absent index on `query` is a state, printed); 1 a refusal — a lesson
-that fails lesson/1, a commit that does not resolve, a held lock, an unknown id; 2 usage or an
+Exit codes: 0 done (an absent index on `query` is a state, printed; a `rebuild` that named
+what it skipped); 1 a refusal — a lesson that fails lesson/1 or whose commit does not resolve
+on `add`, a held lock, an unknown id, a `rebuild` that read nothing or would drop held
+lessons without --force; 2 usage or an
 unreadable input. Stdlib only (`references/portability.md`).
 """
 from __future__ import annotations
@@ -223,6 +228,9 @@ def _merge_legacy(idx: pathlib.Path, notes: list[str]) -> None:
     old_future = list(_FUTURE.get(str(legacy), []))
     both = idx.exists()
     new = open_index(idx, notes) if both else {}
+    # A family file that did not parse was set aside by open_index: only one file was read.
+    set_aside_family = both and not idx.exists()
+    both = both and not set_aside_family
     copied = [k for k in sorted(old) if k not in new]
     for k in copied:
         new[k] = old[k]
@@ -236,9 +244,12 @@ def _merge_legacy(idx: pathlib.Path, notes: list[str]) -> None:
     except OSError as exc:
         raise Refused(f"merged the old index into {idx} but could not rename {legacy} "
                       f"({type(exc).__name__}) — remove it by hand so one index is read")
-    what = "both index files existed — read both: merged" if both else "moved the local index from"
-    notes.append(f"{what} {legacy} into {idx} — {len(copied)} of {len(old)} lessons copied, the "
-                 f"family copy kept wherever both had one; the old file is kept as {dest.name}")
+    what = ("both index files existed — read both: merged" if both else
+            "the family index was corrupt and set aside, so only the local one was read: moved"
+            if set_aside_family else "moved the local index from")
+    kept = "" if set_aside_family else ", the family copy kept wherever both had one"
+    notes.append(f"{what} {legacy} into {idx} — {len(copied)} of {len(old)} lessons copied"
+                 f"{kept}; the old file is kept as {dest.name}")
 
 
 class session:
@@ -882,23 +893,34 @@ def _artifact_root(repo: pathlib.Path) -> pathlib.Path:
 
 
 def cmd_rebuild(a, idx: pathlib.Path) -> int:
+    """Rebuild every lesson it can read; name every source it could not.
+
+    One bad source never costs the whole rebuild (verification round 6): a squash merge plus a
+    deleted branch leaves an evidence commit dangling as a matter of routine, and when a
+    corrupt index has been set aside `rebuild --roots` is the recovery, so refusing the whole
+    scan left the index empty. Two refusals remain, both before any write:
+
+      * nothing could be read at all — every root or retro failed — exit 1 before the session
+        opens, so no index, lock directory or migration is touched;
+      * the scan was incomplete AND the result would drop a lesson the previous index holds —
+        exit 1, naming the lessons, unless `--force`. This is the narrow form of #116's
+        conservation guard (an unreadable source silently erased a good projection); a
+        complete scan, or an incomplete one that loses nothing, replaces the index."""
     found, problems = find_retros(a.roots, a.depth)
-    lessons, private, unresolved, seen_files = [], 0, 0, 0
+    lessons, private, seen_files = [], 0, 0
+    unresolved: list[str] = []
     keys: dict[pathlib.Path, str] = {}
     for repo, retro in found:
-        # Read the remaining sources to report every problem, but never replace a complete
-        # prior projection with an incomplete scan. The refusal precedes any index mutation.
         try:
             if repo not in keys:
                 keys[repo] = project_key(repo)
             got, priv, probs = parse_retro(retro, repo, keys[repo])
-            mine, unres = [], 0
+            mine, unres = [], []
             for le in got:
                 if validate(le):
                     probs.append(f"{le['classKey']}: refused by lesson/1")
                 elif not commit_resolves(repo, le["origin"]["commit"]):
-                    unres += 1
-                    probs.append(f"{le['classKey']}: evidence commit does not resolve")
+                    unres.append(f"{repo.name}: {le['classKey']} (commit {le['origin']['commit']})")
                 else:
                     mine.append(le)
         except Refused as exc:
@@ -909,11 +931,13 @@ def cmd_rebuild(a, idx: pathlib.Path) -> int:
         unresolved += unres
         lessons += mine
         problems += [f"{repo.name}: {p}" for p in probs]
-    if problems:
+    if problems and not seen_files:
         for problem in problems:
             print(f"  not read: {problem}")
-        print("lessons: incomplete rebuild refused — index and migration state unchanged", file=sys.stderr)
+        print("lessons: rebuild refused — no retro could be read; index and migration state unchanged",
+              file=sys.stderr)
         return 1
+    incomplete = bool(problems or unresolved)
     with session(idx, a.default_index) as ss:
         # The previous index lends its memory ids. `session` already refused an unreadable one
         # (its contents may be good) and set a corrupt one aside; its notes go to stderr as for
@@ -931,13 +955,31 @@ def cmd_rebuild(a, idx: pathlib.Path) -> int:
             origins = [dict(o, memory=memory[_origin_key(o)]) if _origin_key(o) in memory else o
                        for o in e["origins"]]
             entries[e["classKey"]] = derive(origins)
+        dropped = sorted(k for k in old if k not in entries)
+        if incomplete and dropped and not a.force:
+            for p in problems:
+                print(f"  not read: {p}")
+            for u in unresolved:
+                print(f"  skipped, commit does not resolve: {u}")
+            print(f"lessons: rebuild refused — the scan was incomplete and would drop "
+                  f"{len(dropped)} lesson{'' if len(dropped) == 1 else 's'} the index holds: "
+                  f"{', '.join(dropped)}. Repair the sources named above, or pass --force to "
+                  "replace the index with what was read; the index keeps every lesson it held",
+                  file=sys.stderr)
+            return 1
         ss.entries = entries
         ss.save()
     print(f"lessons: rebuilt from {seen_files} retro file{'s' if seen_files != 1 else ''} in "
-          f"{len(keys)} repositor{'y' if len(keys) == 1 else 'ies'} · {len(entries)} lessons · "
-          f"{private} private entries skipped · {unresolved} with a commit that does not resolve")
+          f"{len(keys)} repositor{'y' if len(keys) == 1 else 'ies'} · {len(entries)} "
+          f"lesson{'' if len(entries) == 1 else 's'} · {private} private entries skipped · "
+          f"{len(unresolved)} with a commit that does not resolve")
+    for u in unresolved:
+        print(f"  skipped, commit does not resolve: {u}")
     for p in problems:
         print(f"  not read: {p}")
+    if incomplete and dropped:
+        print(f"lessons: --force dropped {len(dropped)} lesson{'' if len(dropped) == 1 else 's'} "
+              f"the previous index held: {', '.join(dropped)}", file=sys.stderr)
     return 0
 
 
@@ -1096,6 +1138,8 @@ def main(argv: list[str]) -> int:
     rb = sub.add_parser("rebuild", parents=[common], help="re-derive the index from the retros")
     rb.add_argument("--roots", nargs="+", required=True)
     rb.add_argument("--depth", type=int, default=3, help="directory levels below each root")
+    rb.add_argument("--force", action="store_true",
+                    help="replace the index even when an incomplete scan drops lessons it holds")
     c = sub.add_parser("candidates", parents=[common], help="lessons two or more projects hold")
     c.add_argument("--min-projects", type=int, default=2)
     sh = sub.add_parser("show", parents=[common], help="one entry with its origins")

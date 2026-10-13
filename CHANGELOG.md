@@ -1,3 +1,26 @@
+## Unreleased
+
+Guards: 438 → **440**; property checks 15 → **15**. Two new negatives plant the old
+whole-scan refusal and remove the loss guard in `lessons.py rebuild`.
+
+These are the fixes from verification round 6 of release iteration 1.
+
+- **`lessons.py rebuild` rebuilds what it can.** One lesson whose evidence commit does not
+  resolve, or one unreadable directory, no longer refuses the whole scan. A dangling commit is
+  routine after a squash merge and a deleted branch. The refusal also made the recovery for a
+  set-aside corrupt index unreachable. Skipped lessons are counted in the summary and named,
+  and unreadable sources are listed under `not read`; the run exits 0. Rebuild refuses only
+  when no retro could be read, or when an incomplete scan would drop a lesson the previous
+  index holds, unless `--force` is given. The second case is #116's conservation guard in a
+  narrower form.
+- The merge notice no longer says "read both" when the family index was corrupt and set aside.
+- Docs: `continuity.md` names `graph.py next` exit `6` beside `4`. The `graph.py` docstring
+  says exit `3` counts parked nodes as finished. In `stages.md`, `checks` mode puts the
+  release run on a watcher, and the release-authority rule has one home, `deploy-targets.md`.
+- Lessons of this run, now doctrine: `iteration.md` checks for parallel work on the same
+  nodes before each cycle, across every tool's branch prefixes. `build.md` adds a
+  command-hygiene block that every background dispatch carries.
+
 ## v1.94.0 — 2026-10-13
 
 Guards: 438 → **438**; property checks 15 → **15**. The owner validator and

@@ -26,6 +26,7 @@ import atexit
 import json
 import os
 import pathlib
+import re
 import shutil
 import stat
 import subprocess
@@ -149,6 +150,9 @@ def project(name, n):
     return repo, sha
 
 
+COMMIT_RE = re.compile(r"\*\*Commit:\*\*\s*`([0-9a-f]{7,40})`")
+
+
 def anchor():
     return "2026-10-0{n}-{topic}-gate-6-reopened-twice"
 
@@ -177,8 +181,10 @@ def conservative_rebuild_controls():
     blocked.chmod(0)
     try:
         rc, out, err = run("rebuild", "--roots", str(repo), index=idx)
-        ok(rc != 0 and idx.read_bytes() == before and "not read" in out + err,
-           "unreadable discovery subtree cannot silently drop lessons")
+        # Round 6: the readable rest is rebuilt; the lesson it holds is the one the index held,
+        # so nothing is dropped and the projection is byte-identical.
+        ok(rc == 0 and idx.read_bytes() == before and "not read" in out and str(blocked) in out,
+           f"unreadable discovery subtree is named and drops no lesson ({rc} {out!r} {err!r})")
     finally:
         blocked.chmod(0o755)
     conf = repo / "pipeline.json"
@@ -193,6 +199,57 @@ def conservative_rebuild_controls():
     empty.mkdir()
     rc, _, _ = run("rebuild", "--roots", str(empty), index=idx)
     ok(rc == 0 and idx.read_bytes() == b"", "an explicitly readable empty scope can rebuild to zero")
+
+
+def partial_rebuild_controls():
+    """Round 6: one bad source never costs the whole rebuild. Squash merges plus branch deletion
+    leave dangling evidence commits routinely, and a corrupt index has already been set aside
+    when `rebuild --roots` is asked to re-derive it, so an all-or-nothing rebuild left it empty."""
+    work = tree("tp-lessons-partial-")
+    good, _ = project("partial-good", 1)
+    dangling, _ = project("partial-dangling", 2)
+    retro = dangling / "docs/evidence/retro.md"
+    text = retro.read_text(encoding="utf-8")
+    sha = COMMIT_RE.search(text).group(1)
+    retro.write_text(text.replace(sha, "deadbeefcafe"), encoding="utf-8")
+    roots = tree("tp-lessons-partial-roots-")
+    os.symlink(good, roots / "good")
+    os.symlink(dangling, roots / "dangling")
+    idx = work / "dangling" / "index.jsonl"
+    rc, out, err = run("rebuild", "--roots", str(roots), index=idx)
+    ok(rc == 0 and "· 1 lesson ·" in out and "1 with a commit that does not resolve" in out
+       and "absence-needs-its-own-check" in out and "incomplete rebuild refused" not in err
+       and len(idx.read_text(encoding="utf-8").splitlines()) == 1,
+       f"rebuild: a dangling evidence commit is counted and named, the rest rebuilt, exit 0 ({rc} {out!r} {err!r})")
+    ok("2 retro files in 2 repositories" in out,
+       f"rebuild: the retro whose commit dangles was still read ({out!r})")
+
+    blocked = work / "unreadable-root"
+    blocked.mkdir()
+    (blocked / "inside").mkdir()
+    blocked.chmod(0)
+    unread_idx = work / "unreadable" / "index.jsonl"
+    try:
+        rc, out, err = run("rebuild", "--roots", str(roots), str(blocked), index=unread_idx)
+    finally:
+        blocked.chmod(0o755)
+    ok(rc == 0 and "not read" in out and str(blocked) in out and unread_idx.is_file()
+       and "absence-needs-its-own-check" in unread_idx.read_text(encoding="utf-8"),
+       f"rebuild: an unreadable directory among the roots is named, the other roots still rebuilt ({rc} {out!r} {err!r})")
+
+    # The narrow guard #116's refusal still owes: a rebuild with unread sources never silently
+    # drops a lesson the previous index holds. It refuses and names them; --force replaces.
+    held = work / "held" / "index.jsonl"
+    ok(run("add", "--retro", str(good / "docs/evidence/retro.md"), "--all", cwd=good, index=held)[0] == 0,
+       "partial-rebuild fixture seeds a lesson the scan will not reach")
+    before = held.read_bytes()
+    rc, out, err = run("rebuild", "--roots", str(dangling), index=held)
+    ok(rc == 1 and held.read_bytes() == before and "absence-needs-its-own-check" in out + err
+       and "--force" in err,
+       f"rebuild: unread sources that would drop a held lesson refuse, naming it and --force ({rc} {out!r} {err!r})")
+    rc, out, err = run("rebuild", "--roots", str(dangling), "--force", index=held)
+    ok(rc == 0 and held.read_bytes() == b"",
+       f"rebuild --force: the operator's choice replaces the index with what was read ({rc} {err!r})")
 
 
 def source_admission_controls():
@@ -223,8 +280,11 @@ def source_admission_controls():
     bad = archive / "not-regular.md"
     bad.mkdir()
     try:
-        rc, _, _ = run("rebuild", "--roots", str(repo), index=idx)
-        ok(rc != 0 and idx.read_bytes() == before, "archive md directory is not silently skipped")
+        rc, out, _ = run("rebuild", "--roots", str(repo), index=idx)
+        # Round 6: the canonical retro was read and holds the index's lesson, so the rebuild
+        # goes on — the bad archive entry is named, never silently skipped.
+        ok(rc == 0 and idx.read_bytes() == before and "not read" in out and "not-regular.md" in out,
+           f"archive md directory is named, not silently skipped ({rc} {out!r})")
     finally:
         bad.rmdir()
         archive.rmdir()
@@ -669,6 +729,16 @@ def main():
     res = parallel(3, ["rebuild", "--roots", str(roots)], h5) + parallel(3, ["query", "gate"], h5)
     ok(all(rc == 0 and "Traceback" not in err for rc, _, err in res),
        f"good old + corrupt new: rebuild and query exit 0 ({[(rc, err[-160:]) for rc, _, err in res if rc]})")
+    # Round 6: the merge notice says what was read — a family file set aside was not read.
+    h5b = tree("tp-lessons-c5a-msg-")
+    legacy_of(h5b).parent.mkdir(parents=True)
+    legacy_of(h5b).write_text(entry_line("old-and-good", "an old lesson that is fine") + "\n", encoding="utf-8")
+    family_of(h5b).parent.mkdir(parents=True)
+    family_of(h5b).write_text("{corrupt\n", encoding="utf-8")
+    rc, out, err = run("query", "gate", env_extra={"HOME": str(h5b)})
+    ok(rc == 0 and "read both" not in err and "corrupt and set aside" in err and "old-and-good" in
+       family_of(h5b).read_text(encoding="utf-8"),
+       f"a corrupt family index set aside is not reported as 'read both' ({rc} {err!r})")
 
     # (2) six concurrent queries on a corrupt old index with the family directory present
     bad_runs = []
@@ -764,6 +834,7 @@ def main():
     ok(rc == 0 and out.strip() == str(HOME / ".sshlg-skills" / "lessons" / "index.jsonl"),
        f"with ~/.sshlg-skills present the default is its lessons/index.jsonl ({out!r})")
     conservative_rebuild_controls()
+    partial_rebuild_controls()
     source_admission_controls()
     print(f"PASS: lessons.py — {CASES} cases")
 

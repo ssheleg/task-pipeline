@@ -74,6 +74,20 @@ act. **Step 11 runs stage 8's verification trio** on what was released. Steps 12
 with stage 10. No gate in [`stages.md`](stages.md) is skipped. The cycle changes when each
 stage runs, and over what.
 
+**Before each cycle, check for parallel work on the same nodes.** In every target repository,
+list the open PRs and the recently merged ones by branch prefix. Include other CLIs' prefixes,
+such as `codex/`, `fix/` and `release/`, and do not stop at your own tool's live sessions:
+
+```bash
+gh pr list -R <owner>/<repo> --state open   --json number,headRefName,title
+gh pr list -R <owner>/<repo> --state merged -L 20 --json number,headRefName,mergedAt
+```
+
+Each node has one owner. When work has to be split, record the split on the PR you would
+otherwise collide with. *A lesson of release iteration 1 (2026-10-13): fix PRs from other
+tools' branches landed on nodes a fix cycle was rebuilding, and a later cycle was briefed on
+a PR that had already merged.*
+
 ## Module dossiers
 
 **One dossier per cluster.** The inventory is grouped by the part of the system each item
@@ -259,12 +273,18 @@ private to its project and never leaves it.
 as before, plus a **local index** of every project's lessons on this machine:
 `scripts/lessons.py`, one JSON line per class, a pure function of the retros
 (`lessons.py rebuild --roots <dir>` re-derives it). Rebuild replaces the projection for
-its explicitly selected roots and depth: choose the whole intended scope. A readable empty
-scope can produce an empty index; a missing or unreadable root, discovery error, malformed
-artifact configuration, missing explicitly configured artifact directory, dangling source
-link, nonregular retro input, or invalid/unresolved lesson refuses before changing the index
-or its migration state. An absent default artifact directory in a new repository remains
-a valid empty source. Repair the named source and retry; unknown is never measured zero.
+its explicitly selected roots and depth: choose the whole intended scope. It rebuilds every
+lesson it can read and exits 0. A lesson whose evidence commit does not resolve — routine
+after a squash merge and a deleted branch — is counted in the summary and named. A missing or
+unreadable root, discovery error, malformed artifact configuration, missing explicitly
+configured artifact directory, dangling source link, nonregular retro input or invalid lesson
+is named under `not read`. A readable empty scope can produce an empty index; an absent
+default artifact directory in a new repository remains a valid empty source. Rebuild refuses,
+exit 1 and nothing written, in two cases only. The first is when no retro could be read at
+all; then no index, lock or migration is touched. The second is when the scan was incomplete
+and would drop a lesson the previous index holds: it names those lessons, and `--force` takes
+that loss deliberately. Unknown is never measured zero: repair the named source and retry.
+A held lock is its own refusal.
 Two projects holding one class key make
 one lesson seen twice, status `candidate`. The index path is a parameter — `--index`, then
 `$TASK_PIPELINE_LESSONS`, then `~/.sshlg-skills/lessons/index.jsonl` **when
