@@ -4,8 +4,9 @@ For each stage: what it does, what to invoke, artifacts, and the **GATE** that
 must pass before advancing. Each gate is tagged with its **type** — `auto` (the
 orchestrator verifies the check itself, pass/fail), `judgment` (a named judge
 rules where no complete deterministic check exists — [`gates.md`](gates.md) →
-*The judgment gate*) or `manual` (wait for the
-operator's explicit go). These stages (0 intake + 1→10) are the plugin's
+*The judgment gate*) or `manual` (requires the operator's explicit go, including a
+specific standing authorization naming the act, cited with its source and scope;
+otherwise wait). These stages (0 intake + 1→10) are the plugin's
 **example** flow, encoded in `pipeline.example.json` against the universal contract
 `pipeline.schema.json`; a host project replaces it with its own
 stages/agents/types (see SKILL.md → *Bring your own skills*).

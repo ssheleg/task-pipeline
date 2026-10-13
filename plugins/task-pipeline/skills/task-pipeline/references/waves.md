@@ -182,8 +182,10 @@ marked `needs-operator`, out of every wave until it is unblocked.
 
 Each wave runs stages 5–8 as [`stages.md`](stages.md) states them, then the close pass.
 Between waves the run does not ask whether to continue: it takes the next wave
-([`continuity.md`](continuity.md)). A genuine ambiguity parks its node `needs-operator`
-and the wave goes on with the nodes it does not block. A frontier blocked by CI, review
+([`continuity.md`](continuity.md)). An unresolved ambiguity parks its node with its
+actual owner and reason; only a human-owned question is `needs-operator`. Project
+asks follow [`iteration.md`](iteration.md), and the wave continues on independent
+nodes. A frontier blocked by CI, review
 or another external wait goes on watchers, with the waits and their next actions recorded
 ([`continuity.md`](continuity.md) → *Waits outlive turns*); it is not completion or a new
 request for permission. An unresolved human gate stops its dependent work. When the board
@@ -232,12 +234,17 @@ waves are cut from the nodes still open.
 
 ## What stays human
 
-Sign-ins, consents, payments, sending to people, and every outward or irreversible act —
-unless a specific standing authorization names the act ([`continuity.md`](continuity.md) →
-*The limit, before the capability*). The mode removes *"shall I continue?"* between waves and *"what did you mean?"* where a
-source already says; it never removes a person from a decision that is theirs. A
-`manual` gate still waits for its go ([`continuity.md`](continuity.md) → *The limit,
-before the capability*).
+Sign-ins, consents, operator payments and typed secrets remain human. Record the
+required action and continue independent work; a release or loop grant cannot
+perform these actions for the person.
+
+Other outward or irreversible acts, including sending to people, require explicit
+authority. A specific standing authorization naming the act counts within its
+recorded source and scope ([`continuity.md`](continuity.md) → *The limit, before the
+capability*). A generic instruction to continue does not. A `manual` gate waits
+without such authority. The mode removes *"shall I continue?"* between waves and
+*"what did you mean?"* where a source already says; it never removes a person from
+a decision that is theirs.
 
 ## The graph carries the wave
 

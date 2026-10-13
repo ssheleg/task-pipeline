@@ -58,6 +58,37 @@ literal checkout/home prefixes were sanitized. The external engine-redactor
 case is explicitly skipped without its checkout. This packet has not rerun
 the full owner suite or hosted checks.
 
+## Independent-review follow-up
+
+The parent review of `5e8890bb8c12e269399847593ce8376ba3eb14e6` found
+contradictory summaries left in the stage definition, loop-arming limit and gate
+floor. Those paragraphs now recognize an existing act-specific authorization
+with its source and scope. A generic loop flag still supplies none.
+
+The review also found that the broad standing-authority exception grammatically
+covered sign-ins, consents and payments. The human boundary in both waves and
+iteration now states separately that sign-ins, consents, operator payments and
+typed secrets remain human. The exception applies only to other outward acts
+within their recorded authority. Question rounds batch only human-owned
+questions; external waits get watchers and project-owned questions follow the
+declared Project-board route. The loop summaries use the same classification.
+
+Validation of the follow-up:
+
+- `python3 test/continuity_doc_test.py`: the new section-scoped checks first
+  failed against the prior source at the stage definition; corrected source
+  passes **31** checks, up from 21. This is a bounded doctrine check, not a
+  model-behavior evaluation.
+- Five isolated copies each restored one prior reference from `5e8890b`
+  (`stages`, `continuity`, `gates`, `waves`, `iteration`); all five exited 1
+  with their intended section-specific diagnostic. The working files were
+  never changed by these negative controls.
+- `python3 test/release_approval_test.py`: **20** checks pass.
+- Generated evidence-docs gates reference refreshed through the existing
+  `fix-ed-01.01.py --sync`; its read-only check passes **4** assertions.
+- `git diff --check`: exit 0. No broad suite, provider or native-host test
+  was rerun for this follow-up.
+
 ## Handoff and exact next task
 
 Independent review must check that a standing instruction is an existing

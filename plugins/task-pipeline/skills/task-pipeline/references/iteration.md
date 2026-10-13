@@ -121,7 +121,9 @@ conflict that remains becomes a question with both designs attached. Two designs
    questions*).
 2. Otherwise it writes a row.
 3. If the answer is internal and reversible, it proceeds on the recommendation, marked
-   **assumed** on the node. Otherwise it parks the node `needs-operator`.
+   **assumed** on the node. Otherwise it parks the node with its actual reason and
+   owner: human-owned questions are `needs-operator`; external waits get watchers;
+   an answer owned by another project follows the Project-ask rule below.
 4. It takes another node.
 
 **A round is called on the first of three triggers:**
@@ -130,8 +132,12 @@ conflict that remains becomes a question with both designs attached. Two designs
 - a wave boundary is reached.
 
 In a round, the orchestrator first re-closes from the sources, because a dossier or a
-landed node may have answered the question since. The rest go to the operator as one
-batch, each with its recommendation. Questions from peer sessions join the same queue.
+landed node may have answered the question since. Classify what remains by its actual
+owner: only human-owned questions go to the operator as one batch, each with its
+recommendation. Put external waits on watchers and send project-owned questions to
+the owning Project through the rule below. Questions from peer sessions join the
+same queue without changing who owns the answer. A blocked frontier alone does not
+make every queued question the operator's.
 
 **An answer owned by another project is a project ask, not a session message.** Where a
 Fabric project board is the host's declared coordination channel, use its callable admission
@@ -358,11 +364,15 @@ A release iteration has three planned touchpoints, plus every human gate:
 2. **A question round** — only when one of its three triggers fires.
 3. **The release hand-back**, with the next pool.
 
-Sign-ins, consents, payments, sending to people and every outward or irreversible act stay
-the operator's ([`waves.md`](waves.md) → *What stays human*) — unless a specific standing
-authorization names the act ([`continuity.md`](continuity.md) → *The limit, before the
-capability*): a recorded "releases are the agent's" decision is such a record for the tag
-and the publish its release run performs.
+Sign-ins, consents, operator payments and typed secrets remain human
+([`waves.md`](waves.md) → *What stays human*). Record the action the person must
+take and continue independent work.
+
+Other outward or irreversible acts, including sending to people, require explicit
+authority. A specific standing authorization naming the act counts only within its
+source and scope ([`continuity.md`](continuity.md) → *The limit, before the capability*):
+a recorded "releases are the agent's" decision covers the tag and the publish its
+release run performs, not unrelated deployments, messages or human-only actions.
 
 ## Rationalizations
 

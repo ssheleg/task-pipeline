@@ -497,8 +497,9 @@ run:
   what it does not cover, stated, beats two measurements and no decision.
 
 **This never licenses skipping a gate.** The gates are the floor, and the floor is
-not proportionate to anything — a `manual` gate waits, `unknown` fails stage 10, and
-a green nobody watched fail is not evidence at any blast radius. What is
+not proportionate to anything — a `manual` gate waits without an explicit go or a
+specific standing authorization naming its act, cited with source and scope;
+`unknown` fails stage 10, and a green nobody watched fail is not evidence at any blast radius. What is
 proportionate is the work *above* the floor: how many axes, how many passes, how
 much of the corpus. Cutting the floor to go faster is not speed; it is the failure
 this whole file exists to prevent, arriving on schedule.
