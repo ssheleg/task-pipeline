@@ -27,7 +27,9 @@ almost no window left, loses the middle of it, and re-derives what it already di
 
 **The loop mode collapses discretionary check-ins. It collapses nothing else.**
 
-- A `manual` gate still waits for an explicit operator go. Always.
+- A `manual` gate requires the operator's explicit go. A specific standing authorization
+  naming that gate's act is such a go; cite its source and scope in the gate record.
+  Without it, the gate waits. A generic instruction to continue is not authorization.
 - An outward or irreversible act — deploy, publish, a tag or a release, sending to a
   person, spending money, creating or editing a shared design file — still needs its own
   **specific** authorization. A recorded loop mode is a **generic** flag, and a generic
@@ -103,9 +105,10 @@ it as **assumed** on the node, and continues ([`iteration.md`](iteration.md) →
 rounds*). Anything else — a block, or an answer that is outward, irreversible or the
 operator's — parks the node with the question as its reason, marked `needs-operator` and answerable without context
 ([`prioritisation.md`](prioritisation.md) → *5. Where the human goes*), and the run
-continues on every node it does not block. The run itself stops only when the whole
-frontier is blocked — `graph.py next` exits `4` — and the questions are then asked
-together. **When the board is empty, say so once**, and do not invent work to fill it.
+continues on every node it does not block. When the whole frontier is blocked — `graph.py next` exits `4` — classify the
+recorded reasons: external waits go on watchers, human decisions go into the question
+batch. Exit 4 does not prove a human gate or completion. A watcher keeps the recorded
+next action alive while no independent node is runnable. **When the board is empty, say so once**, and do not invent work to fill it.
 
 **This extends [`build.md`](build.md); it does not replace it.** That file's
 *Continuous execution* rule governs the inside of a stage-5 execution — do not

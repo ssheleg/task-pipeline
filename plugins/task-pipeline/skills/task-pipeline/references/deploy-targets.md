@@ -172,8 +172,11 @@ two, and each owes the operator something different.
   `release-guard` checks that the tag is on main and that CI on that commit is green,
   and the `release` environment has no reviewers. PassionCode products declare this in
   `passioncode-ai/.github` `release-signing/products.json` (`"approval": "checks"`).
-  Push the tag, watch the run selected **by the tag you pushed**, and report what was
-  published, or the guard's refusal and its cause. A refusal is fixed at its cause,
+  Push the authorized tag and put the run selected **by that tag** on a watcher.
+  Follow [`continuity.md`](continuity.md) → *Waits outlive turns*: take independent work
+  meanwhile, and use a durable trigger if the wait may outlive the session. On success,
+  continue stage 8 on the published artefact and report; on failure, report the cause.
+  A refusal is fixed at its cause,
   never worked around. Send no approval request: there is nobody to send it to.
 - **`reviewers`** — the run stops at an environment with required reviewers. Find that
   run by the tag, and confirm its status is `waiting` before saying anything:
@@ -184,7 +187,11 @@ two, and each owes the operator something different.
 
   Then hand the operator the **direct link** to that run, where they press *Review
   deployments*, together with the tag and the jobs that are waiting. A request without
-  the link is incomplete, and so is a link to a run that is not waiting.
+  the link is incomplete, and so is a link to a run that is not waiting. Put that run
+  on a watcher that continues stage 8 after approval and successful publication. Where
+  standing host instructions name an approval-notification channel, send the same link
+  there with a stable event id per repository/tag/run. An unavailable channel is reported;
+  it is not a reason to invent another recipient or omit the direct link.
 
 The mode comes from, in order:
 1. `pipeline.json` → `release.approval`;
@@ -204,7 +211,7 @@ A run that cannot establish the mode says so. It does not assume `checks`.
 
 ## The verification trio
 
-Whatever the platform, stage 8's gate needs the same three, and all three:
+For a served application, stage 8's gate needs the same three, and all three:
 
 1. **Process/deployment state** — is the new version the running version
 2. **Runtime logs** — clean boot, no error spike
@@ -213,3 +220,12 @@ Whatever the platform, stage 8's gate needs the same three, and all three:
 One or two of the three is where "deployed successfully" gets said about a
 service that is crash-looping. If any of the three cannot be obtained, that is
 the honest degradation report the gate asks for — not a reason to call it green.
+
+**Installed artefacts use their consumer boundary.** For a package, plugin, skill or CLI,
+verify the registry's published version; refresh existing installations within the
+authorized rollout through the owner's update path, then read back their actual versions
+and installed payloads. Read the update/runtime diagnostics and run the supported consumer
+smoke check for each claimed channel. A registry version alone does not prove an installed
+update, and readable files do not prove native discovery or model/task quality. If a channel
+cannot be checked, name it and leave its acceptance open. Do not invent a server health
+URL or clean-boot log for a target that has neither.

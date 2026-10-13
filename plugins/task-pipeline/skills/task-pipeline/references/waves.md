@@ -136,10 +136,11 @@ waves and no others. After planning, a question is asked only in a question roun
 or five open questions calls one, and its batch lands in the hand-back's DECISIONS
 WAITING ([`progress.md`](progress.md)). Never one question at a time.
 
-**An outward or irreversible act is never assumed.** Publishing, tagging, deploying
-without a specific standing authorization, sending to a person, spending money,
-deleting data: each waits for the operator's explicit go, asked with a verified direct
-link. A recommendation is not an authorization.
+**An outward or irreversible act is never assumed.** Publishing, tagging, deploying,
+sending to a person, spending money or deleting data needs authorization naming that act.
+Cite a specific standing authorization within its scope; otherwise ask for the operator's
+explicit go with the relevant verified direct link. A recommendation or generic loop mode
+is not authorization ([`continuity.md`](continuity.md) → *The limit, before the capability*).
 
 ## The canvas — the target state over the current logic
 
@@ -182,8 +183,12 @@ marked `needs-operator`, out of every wave until it is unblocked.
 Each wave runs stages 5–8 as [`stages.md`](stages.md) states them, then the close pass.
 Between waves the run does not ask whether to continue: it takes the next wave
 ([`continuity.md`](continuity.md)). A genuine ambiguity parks its node `needs-operator`
-and the wave goes on with the nodes it does not block; the run stops only when the whole
-frontier is blocked. When the board is empty, it says so once.
+and the wave goes on with the nodes it does not block. A frontier blocked by CI, review
+or another external wait goes on watchers, with the waits and their next actions recorded
+([`continuity.md`](continuity.md) → *Waits outlive turns*); it is not completion or a new
+request for permission. An unresolved human gate stops its dependent work. When the board
+is empty, the run says so once. Until the graph has distinct wait states, its exit 4 alone
+cannot distinguish these cases: read the recorded reasons before choosing the next action.
 
 Research, the audit and the blind readings run in parallel agents; builds stay sequential
 wherever two of them share a seam ([`planning.md`](planning.md) → file ownership).
@@ -201,7 +206,9 @@ In this order, inside the wave rather than after it:
    most of it already, as each node landed,
    and [`audit.md`](audit.md)'s exit is re-measured over what the wave touched.
 2. **Finish and fix — one fix round**, inside [`loop-guard.md`](loop-guard.md)'s caps.
-   Every finding is fixed in the wave or parked with a board row and its reason; nothing
+   Findings against this wave's nodes are fixed here or parked with a board row and reason.
+   Findings elsewhere join the inventory for a planned node; only the closed hotfix lane
+   bypasses that design ([`iteration.md`](iteration.md) → *No fix travels alone*). Nothing
    is dropped silently.
 3. **Document** — the Doc Loop and the stage-9 propagation matrix
    ([`documentation.md`](documentation.md)), scoped to the wave: scenarios, decisions,
@@ -255,5 +262,5 @@ said to be checked by hand.
 | "Ask each question as it comes up" | Each one is a human round. Close it from the sources, or put it in the batch |
 | "The board is too big to inventory" | The inventory is the plan. Without it the waves are cut from memory |
 | "Re-cutting waves makes the pipeline dynamic" | A re-cut is a committed revision and a canvas edit. The static-graph decision in [`planning.md`](planning.md) holds |
-| "The recommendation is obviously right, so assume the deploy go" | An outward act is never assumed. Ask for the specific go once, in the batch |
+| "The recommendation is obviously right, so assume the deploy go" | An outward act is never assumed. Cite the standing authorization naming it, or ask for the specific go once, in the batch |
 | "Wave 3 can stub what wave 5 will build properly" | Only at a declared contract, with wave 5 named as the stub's removal |

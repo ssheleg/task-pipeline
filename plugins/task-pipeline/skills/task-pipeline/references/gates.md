@@ -50,12 +50,14 @@ From [`../pipeline.schema.json`](../pipeline.schema.json), one per stage:
 |---|---|---|
 | `auto` | the orchestrator verifies the `check` itself, pass/fail, and stops on fail | advancing on an unverified check |
 | `judgment` | somebody **rules** on it, because no complete deterministic check exists; the gate names its `judge` | recording the ruling in the slot reserved for what a machine established |
-| `manual` | wait for the operator's **explicit** go | treating an auto verification as the approval |
+| `manual` | the operator's **explicit** go, or specific standing authorization naming the act | treating an auto verification as the approval |
 
 **An auto gate never substitutes for a required manual approval.** A green table is
 not the operator confirming it is what they asked for, and no amount of checking
 makes it one. Which stages are manual is the **operator's** decision, recorded in
 their `pipeline.json`; the framework fixes no stage count and no gate assignment.
+A standing authorization is cited with its source and scope, not inferred from a generic
+loop flag ([`continuity.md`](continuity.md) → *The limit, before the capability*).
 
 **That sentence is about the pipeline's SHAPE, and nothing else.** It says a project
 chooses how many stages it runs and which of them wait for a person. It does not say the

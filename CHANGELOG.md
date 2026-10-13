@@ -54,8 +54,9 @@ inventory; a closed hotfix lane of five entries is the only exception.
   `risk` revision; lowering a class needs `--lower-why`), so the rounds `close` enforces
   apply to every planned node, not only to a hand-edited graph.
 - `lessons.py` reads stdin as UTF-8 and prints machine output as ASCII-escaped JSON, so a
-  non-UTF-8 locale loses nothing a lesson carries; `rebuild` lists a repository it cannot
-  read and goes on, and replaces a corrupt index instead of refusing it.
+  non-UTF-8 locale loses nothing a lesson carries. `rebuild` reports unreadable sources
+  and preserves the prior index. A complete scan can replace a corrupt index after
+  keeping its backup (`python3 test/lessons_test.py`).
 - Every lessons-index operation runs under one lock (the index directory's `.lock`, plus the
   standalone directory's on the default path). A file that cannot be READ is a refusal that
   names it and writes nothing; one that cannot be PARSED — the family index or the

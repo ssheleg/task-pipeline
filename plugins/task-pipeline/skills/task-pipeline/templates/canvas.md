@@ -34,7 +34,7 @@ its citation>.
 
 | Contract | Owner | Change | Nodes |
 |---|---|---|---|
-| <schema, wire format, doc of record, register> | <repository or peer session> | <additive / breaking / new> | <node ids> |
+| <schema, wire format, doc of record, register> | <owning repository or Project on the board> | <additive / breaking / new> | <node ids> |
 
 ## 2. The integration seams
 
