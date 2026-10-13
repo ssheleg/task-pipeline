@@ -243,8 +243,10 @@ as before, plus a **local index** of every project's lessons on this machine:
 (`lessons.py rebuild --roots <dir>` re-derives it). Rebuild replaces the projection for
 its explicitly selected roots and depth: choose the whole intended scope. A readable empty
 scope can produce an empty index; a missing or unreadable root, discovery error, malformed
-artifact configuration, or invalid/unresolved lesson refuses before changing the index or
-its migration state. Repair the named source and retry; unknown is never measured zero.
+artifact configuration, missing explicitly configured artifact directory, dangling source
+link, nonregular retro input, or invalid/unresolved lesson refuses before changing the index
+or its migration state. An absent default artifact directory in a new repository remains
+a valid empty source. Repair the named source and retry; unknown is never measured zero.
 Two projects holding one class key make
 one lesson seen twice, status `candidate`. The index path is a parameter — `--index`, then
 `$TASK_PIPELINE_LESSONS`, then `~/.sshlg-skills/lessons/index.jsonl` **when

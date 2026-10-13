@@ -98,6 +98,33 @@ inventory items. The lesson suite prints its external engine-redactor case as
 SKIPPED because `OBSERVATORY_ENGINE_DIR` is unset; no live Observatory/provider
 integration or native-model quality is claimed.
 
+## Independent review follow-up: explicit source admission
+
+The coordinator's review of `4fdbbca8f24378ff2719007d6b585c87705406ee`
+found a remaining conservation hole. A configured but absent artifact directory,
+or a dangling `retro.md`, was silently excluded by `exists`/`is_file`. Both
+were independently reproduced: rebuilding with the dangling retro exited 0
+and reduced a 1027-byte synthetic index to zero without a warning. The first
+new admission regression also failed before the correction.
+
+`_source_stat` now uses `lstat` plus `stat` for present links and checks missing
+ancestors explicitly. It does not rely on Python-version-dependent suppression
+of filesystem errors in `Path.exists`/`is_file`. Declared artifact directories
+must exist as directories. Existing config/retro/archive inputs cannot be
+silently treated as absent if dangling, unreadable or of the wrong type.
+A genuinely new repository without default artifacts is the positive empty
+case; the contract does not require creating retrospective files in new repos.
+
+`source_admission_controls` adds ten cases: fixture admission, explicit missing
+directory, dangling canonical retro, archive `.md` directory, dangling config,
+canonical retro directory, dangling archive, dangling default ancestor, hidden
+configured directory EACCES, and a new empty repository. These join the prior
+eight rebuild-preservation cases: the isolated 18-case replay passed, then
+`python3 test/lessons_test.py` passed 111 cases. Its external engine-redactor
+case remains explicitly skipped. No broad owner or hosted suite was repeated
+for this correction. The earlier 101-case/structural results above bind to the
+initial fix; waves85 and continuity21 source are unchanged by this follow-up.
+
 ## Business-semantics verdict and exact next task
 
 The reviewed doctrine supplies the requested survey/design/build/verify/

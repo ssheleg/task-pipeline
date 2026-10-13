@@ -195,6 +195,91 @@ def conservative_rebuild_controls():
     ok(rc == 0 and idx.read_bytes() == b"", "an explicitly readable empty scope can rebuild to zero")
 
 
+def source_admission_controls():
+    repo, _ = project("source-admission", 1)
+    retro = repo / "docs/evidence/retro.md"
+    work = tree("tp-lessons-source-admission-")
+    idx = work / "index.jsonl"
+    ok(run("add", "--retro", str(retro), "--all", cwd=repo, index=idx)[0] == 0,
+       "source-admission fixture seeds a valid index")
+    before = idx.read_bytes()
+    conf = repo / "pipeline.json"
+    conf.write_text(json.dumps({"paths": {"artifacts": "missing-artifacts"}}))
+    rc, out, err = run("rebuild", "--roots", str(repo), index=idx)
+    ok(rc != 0 and idx.read_bytes() == before and "not read" in out + err,
+       "explicit missing artifact directory is unknown, not empty")
+    conf.unlink()
+    original = retro.read_bytes()
+    retro.unlink()
+    retro.symlink_to("missing-retro.md")
+    try:
+        rc, out, err = run("rebuild", "--roots", str(repo), index=idx)
+        ok(rc != 0 and idx.read_bytes() == before, "dangling canonical retro preserves the index")
+    finally:
+        retro.unlink()
+        retro.write_bytes(original)
+    archive = retro.parent / "retro"
+    archive.mkdir()
+    bad = archive / "not-regular.md"
+    bad.mkdir()
+    try:
+        rc, _, _ = run("rebuild", "--roots", str(repo), index=idx)
+        ok(rc != 0 and idx.read_bytes() == before, "archive md directory is not silently skipped")
+    finally:
+        bad.rmdir()
+        archive.rmdir()
+    conf.symlink_to("missing-config.json")
+    try:
+        rc, _, _ = run("rebuild", "--roots", str(repo), index=idx)
+        ok(rc != 0 and idx.read_bytes() == before, "dangling artifact configuration is not absent configuration")
+    finally:
+        conf.unlink()
+    retro.unlink()
+    retro.mkdir()
+    try:
+        rc, _, _ = run("rebuild", "--roots", str(repo), index=idx)
+        ok(rc != 0 and idx.read_bytes() == before, "canonical retro directory refuses as nonregular")
+    finally:
+        retro.rmdir()
+        retro.write_bytes(original)
+    archive.symlink_to("absent-archive")
+    try:
+        rc, _, _ = run("rebuild", "--roots", str(repo), index=idx)
+        ok(rc != 0 and idx.read_bytes() == before, "dangling archive refuses as unknown")
+    finally:
+        archive.unlink()
+    docs, saved = repo / "docs", repo / "held-docs"
+    docs.rename(saved)
+    docs.symlink_to("absent-docs")
+    try:
+        rc, _, _ = run("rebuild", "--roots", str(repo), index=idx)
+        ok(rc != 0 and idx.read_bytes() == before, "dangling default ancestor is not a new empty repository")
+    finally:
+        docs.unlink()
+        saved.rename(docs)
+    # Explicit source is hidden from generic os.walk; direct stat must expose EACCES.
+    private = repo / ".private-artifacts"
+    private.mkdir()
+    conf.write_text(json.dumps({"paths": {"artifacts": ".private-artifacts"}}))
+    private.chmod(0)
+    try:
+        rc, _, _ = run("rebuild", "--roots", str(repo), index=idx)
+        ok(rc != 0 and idx.read_bytes() == before, "unreadable explicit hidden source preserves the index")
+    finally:
+        private.chmod(0o755)
+        private.rmdir()
+        conf.unlink()
+    # An absent DEFAULT directory is legitimate for a new repository with no lessons.
+    newrepo = work / "new-repo"
+    newrepo.mkdir()
+    git(newrepo, "init", "-q")
+    (newrepo / "README.md").write_text("new repository")
+    git(newrepo, "add", "README.md")
+    git(newrepo, "commit", "-q", "-m", "initial")
+    rc, _, _ = run("rebuild", "--roots", str(newrepo), index=idx)
+    ok(rc == 0 and idx.read_bytes() == b"", "new repository without default artifacts is genuinely empty")
+
+
 def main():
     a, sha_a = project("alpha", 1)
     b, sha_b = project("beta", 2)
@@ -679,6 +764,7 @@ def main():
     ok(rc == 0 and out.strip() == str(HOME / ".sshlg-skills" / "lessons" / "index.jsonl"),
        f"with ~/.sshlg-skills present the default is its lessons/index.jsonl ({out!r})")
     conservative_rebuild_controls()
+    source_admission_controls()
     print(f"PASS: lessons.py — {CASES} cases")
 
 

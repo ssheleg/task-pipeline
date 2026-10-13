@@ -89,6 +89,7 @@ import os
 import pathlib
 import re
 import subprocess
+import stat
 import sys
 import tempfile
 import time
@@ -783,6 +784,29 @@ def cmd_query(a, idx: pathlib.Path) -> int:
     return 0
 
 
+def _source_stat(path: pathlib.Path):
+    """Optional absent source, but never hide a dangling link or an unreadable parent.
+
+    Path.exists/is_file suppress different errors across Python versions. lstat names
+    the directory entry; stat follows a present link and must succeed. Ancestor admission
+    distinguishes a truly missing default tree from a broken link higher in that tree.
+    """
+    try:
+        info = path.lstat()
+    except FileNotFoundError:
+        if path.parent != path:
+            parent = _source_stat(path.parent)
+            if parent is not None and not stat.S_ISDIR(parent.st_mode):
+                raise Refused(f"{path.parent}: source parent is not a directory")
+        return None
+    if stat.S_ISLNK(info.st_mode):
+        try:
+            return path.stat()
+        except OSError as exc:
+            raise Refused(f"{path}: source link cannot be read ({type(exc).__name__})")
+    return info
+
+
 def find_retros(roots: list[str], depth: int) -> tuple[list[tuple[pathlib.Path, pathlib.Path]], list[str]]:
     """Discovery and its unknowns, kept separate from a readable empty scope."""
     found, problems = [], []
@@ -790,23 +814,35 @@ def find_retros(roots: list[str], depth: int) -> tuple[list[tuple[pathlib.Path, 
         problems.append(f"{exc.filename}: cannot discover ({type(exc).__name__})")
     for r in roots:
         base = pathlib.Path(r).expanduser()
-        if not base.is_dir():
-            problems.append(f"{base}: root is missing or not a readable directory")
+        try:
+            base_info = _source_stat(base)
+            if base_info is None or not stat.S_ISDIR(base_info.st_mode):
+                raise Refused(f"{base}: root is missing or not a readable directory")
+        except (OSError, Refused) as exc:
+            problems.append(str(exc))
             continue
         for cur, dirs, _files in os.walk(base, followlinks=True, onerror=unread):
             here = pathlib.Path(cur)
             rel_depth = len(here.relative_to(base).parts)
             dirs[:] = sorted(d for d in dirs if d not in SKIP_DIRS and not d.startswith("."))
-            if (here / ".git").exists():
-                try:
+            try:
+                if _source_stat(here / ".git") is not None:
                     art = _artifact_root(here)
-                    # listdir surfaces unreadable archive directories; Path.glob can hide them.
                     archive = art / "retro"
-                    archived = sorted(archive.iterdir()) if archive.exists() else []
+                    archive_info = _source_stat(archive)
+                    if archive_info is not None and not stat.S_ISDIR(archive_info.st_mode):
+                        raise Refused(f"{archive}: retro archive is not a directory")
+                    archived = sorted(archive.iterdir()) if archive_info is not None else []
                     files = [art / "retro.md"] + [p for p in archived if p.suffix == ".md"]
-                    found += [(here, f) for f in files if f.is_file()]
-                except (OSError, Refused) as exc:
-                    problems.append(f"{here}: {exc}")
+                    for f in files:
+                        info = _source_stat(f)
+                        if info is None:
+                            continue
+                        if not stat.S_ISREG(info.st_mode):
+                            raise Refused(f"{f}: retro source is not a regular file")
+                        found.append((here, f))
+            except (OSError, Refused) as exc:
+                problems.append(f"{here}: {exc}")
             if rel_depth >= depth:
                 dirs[:] = []
     return found, problems
@@ -815,9 +851,11 @@ def find_retros(roots: list[str], depth: int) -> tuple[list[tuple[pathlib.Path, 
 def _artifact_root(repo: pathlib.Path) -> pathlib.Path:
     """`paths.artifacts` in pipeline.json, else the first known root carrying a register."""
     try:
-        conf = json.loads((repo / "pipeline.json").read_text(encoding="utf-8"))
-    except FileNotFoundError:
-        conf = {}
+        config = repo / "pipeline.json"
+        info = _source_stat(config)
+        if info is not None and not stat.S_ISREG(info.st_mode):
+            raise Refused("pipeline.json is not a regular file")
+        conf = json.loads(config.read_text(encoding="utf-8")) if info is not None else {}
     except (OSError, ValueError) as exc:
         raise Refused(f"pipeline.json cannot be read ({type(exc).__name__})")
     if not isinstance(conf, dict) or not isinstance(conf.get("paths", {}), dict):
@@ -826,12 +864,20 @@ def _artifact_root(repo: pathlib.Path) -> pathlib.Path:
     if given is not None:
         if not isinstance(given, str) or not given or pathlib.Path(given).is_absolute() or ".." in pathlib.Path(given).parts:
             raise Refused("pipeline.json paths.artifacts is not a repository-relative directory")
-        return repo / given
+        art = repo / given
+        info = _source_stat(art)
+        if info is None or not stat.S_ISDIR(info.st_mode):
+            raise Refused(f"{art}: configured artifacts directory is missing or not a directory")
+        return art
     # The same rule, names and registers as bin/lib/artifact-root.js and test/artifact_root.py:
     # the first KNOWN name that exists AND carries one of the REGISTERS, else the default.
     for name in ARTIFACT_KNOWN:
-        if any((repo / name / reg).exists() for reg in ARTIFACT_REGISTERS):
-            return repo / name
+        art = repo / name
+        info = _source_stat(art)
+        if info is not None and not stat.S_ISDIR(info.st_mode):
+            raise Refused(f"{art}: default artifacts path is not a directory")
+        if any(_source_stat(art / reg) is not None for reg in ARTIFACT_REGISTERS):
+            return art
     return repo / ARTIFACT_KNOWN[0]
 
 
