@@ -42,6 +42,7 @@ import re
 import shutil
 import subprocess
 import sys
+from negative_lock import acquire_scratch_lock
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # One file per check. The directory is the source of truth; nothing lists it.
@@ -245,20 +246,13 @@ def main(argv):
     # So the paths stay exactly as CI has them, and the runs are serialised instead. An
     # exclusive lock for the duration of the suite: the second run waits rather than
     # corrupting the first, and says so instead of producing a number nobody can trust.
-    _LOCK_PATH = os.path.join(tempfile.gettempdir(), "tp-negatives.lock")
-    _lock = open(_LOCK_PATH, "w")
+    # The shared helper binds physical /tmp across owners and TMPDIR settings.
+    # Old runner versions and direct plant invocation do not participate.
     try:
-        import fcntl
-        try:
-            fcntl.flock(_lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
-        except OSError:
-            print("another run of this suite holds the scratch paths — waiting for it.\n"
-                  "  (every step copies the repo to a fixed /tmp name, so two runs at once\n"
-                  "   overwrite each other and both report about a tree neither one saw)")
-            fcntl.flock(_lock, fcntl.LOCK_EX)
-    except ImportError:
-        # No flock (Windows): say what is not guaranteed rather than implying it is.
-        print("note: no file locking available here — do not run two suites at once")
+        _lock = acquire_scratch_lock()
+    except (OSError, RuntimeError) as exc:
+        print(f"FAIL: cannot acquire family scratch lock ({type(exc).__name__}): {exc}")
+        return 1
 
     tests = [(n, s) for n, s in _STEPS if MARKER in n]
     if len(tests) < MIN_EXPECTED:
