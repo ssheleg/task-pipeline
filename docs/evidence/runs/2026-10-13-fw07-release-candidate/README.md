@@ -147,3 +147,15 @@ All remotes/tags were disposable fixtures; no production ref was changed.
 These portable probes resolve the owning checkout from their tracked location and
 extract the specified historical commits; the historical objects must be fetched.
 Independent review of the final correction and the full owner gate remain pending.
+
+## Final independent bounded acceptance
+
+The independent reviewer accepted exact
+[4612024](https://github.com/ssheleg/task-pipeline/commit/46120248934e0b4573b4ffcc00cc565df39ef552):
+54 helper controls,65 existing hook controls and4 additional actual-owner controls
+passed. [Captured peer receipt](independent-peer-final.json) binds the source and
+original pushurl/followTags refusals, immutable object publication and failed-ledger
+refusal on the actual command. All fixtures were removed; reviewed source unchanged.
+The coordinator accepted this bounded result for future FW07 composition. Full
+owner validation and release remain pending; packaged hook changes require the
+next coherent version, never a changed1.94.1 republish.
