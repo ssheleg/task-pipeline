@@ -165,6 +165,16 @@ shipped — and it is exactly what the stage-8 gate is for.
 
 ### When the release waits for an approval
 
+**Establish the authority for the act separately from the approval mode.** Optional
+`release.authorized_by` records a single-line source locator, such as a committed
+`source:line`, for the standing grant covering the tag and publication. A locator
+is not authorization: read its source and verify the issuer's authority, the grant's
+currentness and its exact act and scope. A missing, unreadable or ambiguous source
+cannot establish a grant. If the field is absent, inspect existing recorded authority
+before asking; neither field presence nor `approval: checks` supplies permission.
+Human-only actions remain human, and a release grant does not authorize a separate
+deployment or message it does not name.
+
 **Read the project's approval mode before tagging, and do not guess it.** It is one of
 two, and each owes the operator something different.
 

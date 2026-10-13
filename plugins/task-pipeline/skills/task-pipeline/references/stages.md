@@ -599,7 +599,10 @@ never that the work was skipped quietly.
   close before it ships, and the operator is already present at this gate. **The
   carry-over count is printed beside this verdict.** Deploy is outward → explicit
   operator go, or a specific standing authorization naming that act, cited with its source
-  and scope. Authorization to release does not silently authorize a separate deploy.
+  and scope. Authorization to release does not silently authorize a separate deploy. If
+  `release.authorized_by` is present, read that source and verify its authority,
+  currentness and scope for the tag and publication; the locator is not authorization.
+  If absent, inspect existing recorded authority before asking for a missing grant.
   **Before the tag, read
   the release's approval mode** (`pipeline.json` → `release.approval`; then
   [`deploy-targets.md`](deploy-targets.md) → *When the release waits for an approval*):
