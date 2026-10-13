@@ -48,3 +48,32 @@ Acceptance, frozen before code:
 Check the existing negative-runner regression homes and shared-mechanism contract
 before adding code. Keep this repair separate from the already frozen FW07
 composition until reviewed. No release tag or production pin changes in this packet.
+
+## Shared-owner namespace decision
+
+[Current fetched-main census](owner-census.json) binds TP540679, SEO1e86edf
+and sheleg-dev21e0c53. Literal `cp -R . /tmp/...` destinations overlap across all
+three owner pairs: anchor/card/corrupt/count-copy (SEO/TP), drift/stray-copy
+(SEO/dev), and desc-copy (dev/TP). Counts445/32/48 are distinct literal targets
+in the scanned canonical workflow/plant homes, not executed operations.
+An initial scan used stale local remote refs; it was superseded by fetch+this
+source-bound census before choosing the design.
+
+Therefore retaining three owner-specific lock filenames is insufficient. Use one
+shared `sshlg-family-negatives.lock` under the physical `/tmp` directory, resolved
+independently of TMPDIR, cwd, checkout and owner. Add the same pure path helper to
+all three runner copies; no new divergent module-level constants. Keep the
+existing exclusive whole-suite lock acquisition/release lifetime. The spelling
+of the owner/test source does not select a separate lock namespace.
+
+Focused fixtures evaluate the actual pure helper under different TMPDIR/cwd
+contexts, then substitute only an owned physical scratch root to exercise the
+actual flock block in child processes. They never acquire the live family lock
+or create/remove a public plant. Same-holder refusal and post-release success,
+exit release and unreadable/invalid path refusal must be observed.
+
+Prepare source-addressed owner port packets for SEO and sheleg-dev with the
+identical mechanism delta and each owner's local tests before integration. The
+coordination rule remains necessary during migration: old binaries using old
+lock names do not participate in the new lock. This does not claim safety for
+unmigrated runners or direct manual plant invocation outside the runner.
