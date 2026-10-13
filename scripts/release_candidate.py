@@ -256,6 +256,7 @@ class Candidate:
                     except subprocess.TimeoutExpired: os.killpg(p.pid, signal.SIGKILL); p.wait()
             finally:
                 for sig, handler in previous.items(): signal.signal(sig, handler)
+        if interrupted: reason = 'interrupted'
         return p.returncode if p is not None else -1, reason
 
     def check(self):

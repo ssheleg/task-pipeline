@@ -88,3 +88,15 @@ Corrected composed replay: `python3 -B test/audit_regressions/fw07_release_candi
 passes [56 controls](helper56.txt), exit0. This supersedes only the failed helper
 replay; no whole-owner gate is implied. The source correction is isolated in its
 own commit after the normal helper merge.
+
+## Final cleanup interruption correction
+
+Independent review found a smaller late-flag window at bc2c0f8: a finished child's
+second poll in final cleanup can receive TERM/INT after the earlier flag read.
+The [portable peer probe](late-signal-peer.py) and [baseline](late-signal-peer-baseline.json)
+show `(0,None)` for both signals. No real child or external operation is involved
+in this controlled finished-handle probe. The helper now consumes the flag again
+after cleanup/restoring handlers and before returning. The regression's exact
+`late_signal_controls` function [passes2 cases](late-signal2.txt), including restored
+handlers. The earlier56-case source run remains a separate historical verdict;
+a complete58-case replay is not claimed by this focused delta.

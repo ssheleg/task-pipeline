@@ -19,6 +19,28 @@ m = importlib.util.module_from_spec(spec); spec.loader.exec_module(m)
 checks = 0
 
 
+def late_signal_controls(root):
+    """A finished child may receive cancellation during final cleanup polling."""
+    original = m.subprocess.Popen
+    try:
+        for sig in (signal.SIGTERM, signal.SIGINT):
+            class Finished:
+                returncode = 0
+                polls = 0
+                def poll(self):
+                    self.polls += 1
+                    if self.polls == 2: signal.raise_signal(sig)
+                    return 0
+            m.subprocess.Popen = lambda *args, **kwargs: Finished()
+            candidate = object.__new__(m.Candidate); candidate.root = root
+            previous = signal.getsignal(sig)
+            assert candidate._run_suite(None) == (0, 'interrupted')
+            assert signal.getsignal(sig) == previous
+    finally:
+        m.subprocess.Popen = original
+    return 2
+
+
 def git(root, *args):
     r = subprocess.run(['git', *args], cwd=root, text=True, capture_output=True)
     assert r.returncode == 0, (args, r.stderr)
@@ -258,4 +280,5 @@ print(json.dumps(result))
             checks+=1
         finally:
             if proc.poll() is None:proc.kill();proc.wait()
+    checks += late_signal_controls(base)
     print(f'PASS: owner release candidate — {checks} controls; fixture refs only; owned tree removed on exit')
