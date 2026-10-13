@@ -1,3 +1,5 @@
+<sub>ssheleg skills — task-pipeline · make-skill · evidence-docs · agent-sync · copywriting</sub>
+
 # Release repair candidate: v1.94.1
 
 Status: AUTHORING; no publication or local full-gate acceptance.
@@ -69,3 +71,7 @@ The candidate structural pass is not a full gate or final-merge acceptance.
 
 Independent audit of the frozen metadata/gap diff and focused receipts, followed
 by the serial full gate when disk permits. No tag push is authorized by this packet.
+
+Used: task-pipeline for delivery, make-skill for version surfaces, evidence-docs
+for receipts, agent-sync for exclusive file claims, copywriting for release notes.
+Humanization: on; own pass, no rewrite needed after the concise factual draft.
