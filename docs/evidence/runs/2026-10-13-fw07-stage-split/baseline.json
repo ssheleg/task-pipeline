@@ -1,0 +1,14 @@
+{
+  "commit": "cfa5248240df71a55ca6c1742ab9a02ba7867949",
+  "url": "https://github.com/ssheleg/task-pipeline/commit/cfa5248240df71a55ca6c1742ab9a02ba7867949",
+  "files": {
+    "SKILL.md": {
+      "archive": "baseline-skill.md.gz",
+      "sha256": "2c272979df4273ae03b2237ae14aff0855e14964688acf1084055f8f3894f07c"
+    },
+    "references/stages.md": {
+      "archive": "baseline-stages.md.gz",
+      "sha256": "d6ede1b57b63ce9e5012d2cdfea6f8a8f2a646a316f848499b58cbb8714a5471"
+    }
+  }
+}

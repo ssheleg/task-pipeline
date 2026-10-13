@@ -146,7 +146,7 @@ is either covered now or explicitly dropped by the operator, with the drop writt
 into the carry-over ledger. For a platform, the module map
 ([`decomposition.md`](decomposition.md)) is committed and approved as part of this
 same gate. Two more criteria close it, and the gate of record —
-[`stages.md`](stages.md) → *2 — Brainstorm + decompose* — states both in full:
+[`stage-02-brainstorm.md`](stage-02-brainstorm.md) → *2 — Brainstorm + decompose* — states both in full:
 **the queue is an artifact rather than a recollection** (where it is a work graph,
 `graph.py validate` exits 0 and `graph.py coverage` names any requirement no node
 serves), and **the loop's arming state is printed** — armed with its queue and

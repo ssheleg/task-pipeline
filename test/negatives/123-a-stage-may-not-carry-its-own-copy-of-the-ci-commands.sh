@@ -3,7 +3,7 @@
 set -eu
 rm -rf /tmp/ci04-copy && cp -R . /tmp/ci04-copy
 python3 - <<'EOF'
-p = "/tmp/ci04-copy/plugins/task-pipeline/skills/task-pipeline/references/stages.md"
+p = "/tmp/ci04-copy/plugins/task-pipeline/skills/task-pipeline/references/stage-08-post-deploy.md"
 t = open(p, encoding="utf-8").read()
 anchor = "- **Read the CI verdict for the deploy's own commit**"
 assert anchor in t, "PLANT DID NOT LAND: anchor absent before edit"

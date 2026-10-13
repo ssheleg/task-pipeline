@@ -201,7 +201,7 @@ plugins/task-pipeline/
       audit.md                                #   cross-cutting: the ladder + seams
       loop-guard.md                           #   cross-cutting: churn detection
       progress.md                             #   cross-cutting: what the run prints about itself
-      stages.md model-tiering.md              #   gates, model policy
+      stages.md stage-*.md model-tiering.md   #   gates, per-stage detail, model policy
       conventions.md artifacts.md             #   host conventions, this layout
       companion-skills.md                     #   optional companions + preflight
     templates/                                # skeletons seeded into a host project

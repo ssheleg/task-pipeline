@@ -5,7 +5,7 @@ rm -rf /tmp/gs02-copy && cp -R . /tmp/gs02-copy
 python3 - <<'EOF'
 p = "/tmp/gs02-copy/plugins/task-pipeline/skills/task-pipeline/references/stages.md"
 t = open(p, encoding="utf-8").read()
-assert t.count("measured lag") == 2, "PLANT DID NOT LAND: expected 2 needles before edit"
+assert t.count("measured lag") == 1, "PLANT DID NOT LAND: expected the gate needle before edit"
 t = t.replace("measured lag", "build date")
 open(p, "w", encoding="utf-8").write(t)
 EOF

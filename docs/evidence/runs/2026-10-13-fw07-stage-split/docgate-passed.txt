@@ -1,0 +1,14 @@
+ok:      decision home: register (6 entries, ids DEC-####)
+ok:      relative links resolve (96 files)
+ok:      every referenced id is defined (6 decisions, 3 open questions)
+ok:      next free DEC id is correct (DEC-0007)
+ok:      next free OQ id is correct (OQ-0004)
+dormant: register-size cross-check — no 'Register size:' line stated
+ok:      consequences propagate (backlog below the floor: 0)
+ok:      supersede and contradict targets are annotated
+ok:      no retired decisions yet
+ok:      decision statuses are inside the closed vocabulary
+ok:      open-question statuses are inside the closed vocabulary
+ok:      every commit reference in docs/evidence resolves AND is reachable from HEAD
+ok:      doc map and registers agree in both directions
+OK: documentation gate — shape register · 6 decisions · 3 open questions · propagation backlog 0 (floor 0) · retired residue 0 (floor 0)

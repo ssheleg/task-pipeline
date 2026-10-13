@@ -1,0 +1,2 @@
+FAIL: task-pipeline structure invalid
+ - docs/reports/2026-10-13-fw07-stage-reading-floor/raw/measurement.json declares version 1.94.0 and is not in `.claude/agent-sync.json` → `guardedFiles` — B-065: the version-sync invariant makes these surfaces move together, so two agents bumping a version collide here with no lease. That is not hypothetical: this project lost four version numbers and a `files[]` entry to exactly it

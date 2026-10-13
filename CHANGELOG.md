@@ -1,3 +1,16 @@
+## Unreleased
+
+Guards: 438 → **439**; property checks 15 → **15**.
+
+The default stage list keeps every full gate and routes each stage to its own
+procedure before work on entry or resume. Custom profiles keep their own stages
+and doctrine. The split preserves the original stage text and reduces the measured
+entry reading component; it does not claim a native-host or billed-token result.
+Scenario artifacts remain mandatory for user-facing work, while an equivalent
+provider or the documented inline fallback can supply them without installing a
+specific companion plugin. The new route refusal and relocated source checks keep
+these obligations addressable after the split.
+
 ## v1.94.0 — 2026-10-13
 
 Guards: 438 → **438**; property checks 15 → **15**. The owner validator and

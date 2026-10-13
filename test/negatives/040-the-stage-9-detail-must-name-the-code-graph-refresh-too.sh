@@ -4,7 +4,7 @@ set -eu
 rm -rf /tmp/graph-doc-copy && cp -R . /tmp/graph-doc-copy
 python3 - <<'EOF'
 import re
-p = "/tmp/graph-doc-copy/plugins/task-pipeline/skills/task-pipeline/references/stages.md"
+p = "/tmp/graph-doc-copy/plugins/task-pipeline/skills/task-pipeline/references/stage-09-docs-wiki.md"
 _orig_bytes = open(p, "rb").read()
 t = open(p, encoding="utf-8").read()
 m = re.search(r"^## 9 — .*?(?=^## |\Z)", t, re.M | re.S)

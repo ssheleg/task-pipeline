@@ -4,9 +4,9 @@ set -eu
 rm -rf /tmp/cx4-copy && cp -R . /tmp/cx4-copy
 python3 - <<'EOF'
 import re
-p = "/tmp/cx4-copy/plugins/task-pipeline/skills/task-pipeline/references/stages.md"
+p = "/tmp/cx4-copy/plugins/task-pipeline/skills/task-pipeline/references/stage-03-spec.md"
 t = open(p, encoding="utf-8").read()
-m = re.search(r"^## 3 — Spec.*?(?=^## )", t, re.S | re.M)
+m = re.search(r"^## 3 — Spec.*?(?=^## |\Z)", t, re.S | re.M)
 assert m, "PLANT DID NOT LAND: cx4 — no stage 3 section"
 sec = re.sub(r"(?i)parallel", "ordered", m.group(0))
 assert sec != m.group(0), "PLANT DID NOT LAND: cx4 — stage 3 never named it"
