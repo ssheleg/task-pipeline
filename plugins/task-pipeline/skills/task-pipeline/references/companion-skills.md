@@ -287,7 +287,8 @@ Rules:
   nothing: **one self-observed run by the author, zero blind runs on zero models**, with
   a preflight that reported companion availability in detail and its own confidence not
   at all. A skill silent about its own evidence is read as tested.
-- **Never gate any stage on an install** except the stage-3 UX track on a UI task.
+- **Never gate any stage on an install.** On UI tasks the stage-3 gate requires the
+  valid scenario artifact under the provider rule above, not a package.
 - Optional tools missing → state the fallback, don't block.
 - Re-detect after the operator installs; don't assume.
 - The model answer goes into the brief. Don't ask again per stage

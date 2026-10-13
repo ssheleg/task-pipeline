@@ -1,3 +1,18 @@
+## FW07 prerequisite correction in progress
+
+[Execution receipt](evidence/runs/2026-10-13-fw07-prerequisites/README.md) binds the
+separate semantic correction to the accepted artifact-provider decision. Seven
+shipped source homes now agree; focused9 + actual mutation18 + house19/0 pass.
+The original structural failure is retained; corrected structural passes. Independent
+review precedes extraction. No stages.md bytes or default gate types changed.
+
+Exact next task: freeze this bounded correction after review, then implement the
+accepted B-043 gate-spine and deterministic per-stage routes on this isolated branch.
+The coordinator permits source work alongside the separate immutable release gate;
+no overlapping full suite or publication is authorized by this handoff.
+
+## Historical source feasibility handoff
+
 ## FW07 / B-043 source feasibility — 2026-10-13
 
 Entry: [decision-input report](reports/2026-10-13-fw07-stage-reading-floor/README.md),

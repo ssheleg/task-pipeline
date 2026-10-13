@@ -193,6 +193,16 @@ front-matter boundary and newline-count convention, without stripping the body.
 Only the body measurement changed; stages/spine estimates and source bytes did not.
 This is an explicit measurement correction, not newly created headroom.
 
+## Generated schema correction — source observations unchanged
+
+The first implementation structural check classified the generated `version` field
+as a mutable release home. It now reads `source_release`; every value and all other
+fields are equal. The original measurement payload is retained byte-for-byte in
+[measurement-original.json.gz](raw/measurement-original.json.gz), SHA256
+68970bbaa9f7e309696c1fbc62f21af8f65278583187d561f1e97dfd93f46097 after decompression.
+The generator still reads only the original frozen Git source. This format correction
+does not change the proposal's historical body/stage measurements or claim a new run.
+
 ---
 
 **Made with [ssheleg skills](https://github.com/ssheleg/sshlg-skills)**

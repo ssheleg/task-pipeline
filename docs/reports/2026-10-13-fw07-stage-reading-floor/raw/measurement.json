@@ -3,7 +3,7 @@
   "source_path": "plugins/task-pipeline/skills/task-pipeline/references/stages.md",
   "source_sha256": "d6ede1b57b63ce9e5012d2cdfea6f8a8f2a646a316f848499b58cbb8714a5471",
   "tokenizer": "tiktoken cl100k_base",
-  "version": "1.94.0",
+  "source_release": "1.94.0",
   "stages_tokens": 17616,
   "stages_lines": 967,
   "skill_body_tokens": 4639,

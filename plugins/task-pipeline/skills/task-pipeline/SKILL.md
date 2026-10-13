@@ -59,9 +59,9 @@ the environment resolves.
 plugin, nothing to resolve at preflight and no version skew with someone else's
 repo. Stages 1 and 6–9 additionally run the *host's own* commands and optional
 tools, and **no stage blocks on an install** — stage 1 falls back to web search, the
-wiki and the code graph are recommendations. The **one** exception is deliberate and
-named: on a user-facing task the stage-3 UX track requires super-ux, and the spec
-gate stops until it is installed.
+wiki and the code graph are recommendations. On user-facing tasks stage 3 requires
+a valid scenario artifact; the provider rule below governs equivalent providers
+and the inline fallback.
 
 Which reference owns which stage — all forty-odd of them, by stage number:
 [`references/doctrine-map.md`](./references/doctrine-map.md).

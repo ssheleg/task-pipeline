@@ -167,9 +167,9 @@ ledgers, so the link is the repository's rather than the package's.
 The doctrine each stage runs on ships inside the skill. Nothing to install for it,
 nothing to resolve at preflight, no version skew with someone else's repo, and
 **no stage blocks on an install** — stage 1 falls back to web search, the wiki and
-the code graph are recommendations. The one exception is deliberate and named: on a
-user-facing task the stage-3 UX track requires super-ux, and the spec gate stops
-until it is installed.
+the code graph are recommendations. On user-facing tasks the stage-3 UX gate
+requires a valid scenario artifact. The preferred provider, an equivalent provider
+and the inline fallback satisfy the same [provider contract](plugins/task-pipeline/skills/task-pipeline/references/companion-skills.md).
 
 | Stage | Built-in doctrine |
 |---|---|
@@ -971,7 +971,7 @@ skill. Four optional companions make individual stages better:
 
 | Companion | For | Required? |
 |---|---|---|
-| [super-ux](https://github.com/ssheleg/super-ux) | the stage-3 UX track | only for user-facing tasks |
+| [super-ux](https://github.com/ssheleg/super-ux) | the stage-3 UX track | preferred provider; valid scenario artifact required for user-facing tasks |
 | context7 (MCP) | stage-1 docs study | recommended — web-search fallback |
 | [obsidian-wiki](https://github.com/ar9av/obsidian-wiki) | stage-0 harvest + stage-9 sync | recommended — never a gate |
 | [graphify](https://github.com/Graphify-Labs/graphify) | stage-0 reach queries + stage-9 refresh + the graph↔docs divergence check | recommended — never a gate |

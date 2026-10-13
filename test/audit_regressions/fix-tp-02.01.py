@@ -19,6 +19,7 @@ The fix under test (SKILL.md + references/companion-skills.md):
 Standard library only.
 """
 import os
+import re
 import sys
 
 sys.dont_write_bytecode = True
@@ -51,6 +52,41 @@ def t_gate_checks_artifact_not_package():
         "the package-presence gate survived"
     c = flat("references/companion-skills.md")
     assert "a gate checks artifacts and their quality, never package presence" in c
+
+
+# Bounded source guard for the actual stale prerequisite formulations. This is
+# not a natural-language contradiction detector or a native-agent evaluation.
+PREREQUISITE_HOMES = (
+    "plugins/task-pipeline/skills/task-pipeline/SKILL.md",
+    "plugins/task-pipeline/skills/task-pipeline/references/doctrine-map.md",
+    "plugins/task-pipeline/skills/task-pipeline/references/companion-skills.md",
+    "plugins/task-pipeline/commands/task-pipeline.md",
+    "README.md", "HOW-IT-WORKS.md", "SKILL-CARD.md",
+)
+
+
+def prerequisite_problems(text):
+    normalized = " ".join(re.sub(r"[*`]", "", text).lower().split())
+    patterns = (
+        r"stage-3 ux track requires super-ux",
+        r"gate stops until it is installed",
+        r"single deliberate exception is the stage-3 ux track",
+        r"never gate any stage on an install except the stage-3 ux track",
+        r"none is a gate except the stage-3 ux track",
+        r"single exception being the stage-3 ux track",
+        r"one conditional requirement is super-ux",
+        r"\| \[super-ux\]\([^)]*\) \|[^|]*\| only for user-facing tasks \|",
+    )
+    return [pattern for pattern in patterns if re.search(pattern, normalized)]
+
+
+def t_current_prerequisites_do_not_require_package():
+    problems = []
+    for name in PREREQUISITE_HOMES:
+        with open(os.path.join(ROOT, name), encoding="utf-8") as fh:
+            if prerequisite_problems(fh.read()):
+                problems.append(name)
+    assert not problems, "package-install prerequisite survived: " + ", ".join(problems)
 
 
 def t_three_providers_same_contract():
@@ -100,6 +136,13 @@ def t_no_artifact_requires_creation():
     assert v["preferred"] == "super-ux", "the preferred provider is not offered"
 
 
+def t_invalid_artifact_refuses_every_provider():
+    for provider in ("super-ux", "equivalent-provider", "inline"):
+        v = stage3_gate({"scenarios_artifact": True, "scenarios_valid": False,
+                         "provider": provider})
+        assert v["pass"] is False, "provider presence bypassed artifact validity"
+
+
 def t_foreign_design_fixture():
     def design_verdict(evidence):
         return "designed" if evidence else "undesigned"
@@ -111,6 +154,8 @@ def t_foreign_design_fixture():
 def main():
     case("the gate checks the artifact, not the package",
          t_gate_checks_artifact_not_package)
+    case("current prerequisite homes reject package-install gates",
+         t_current_prerequisites_do_not_require_package)
     case("three provider paths satisfy one contract", t_three_providers_same_contract)
     case("a foreign design workflow is judged by its result",
          t_foreign_design_judged_by_result)
@@ -119,6 +164,7 @@ def main():
          t_valid_scenarios_without_superux_pass)
     case("fixture: no artifact → create it, preferred provider offered",
          t_no_artifact_requires_creation)
+    case("fixture: invalid artifact refuses every provider", t_invalid_artifact_refuses_every_provider)
     case("fixture: foreign design with evidence is designed", t_foreign_design_fixture)
     if failures:
         print(f"\n{len(failures)} failure(s)")

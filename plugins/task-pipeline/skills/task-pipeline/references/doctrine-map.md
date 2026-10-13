@@ -6,8 +6,9 @@ built-in doctrine lives, so an agent loads the one file the stage needs instead 
 carrying the whole index in every turn.
 
 The rule the table serves stays in `SKILL.md`: every stage's doctrine ships inside this
-skill, no stage blocks on an install, and the single deliberate exception is the stage-3
-UX track on a user-facing task.
+skill and no stage blocks on an install. The stage-3 UX gate on a user-facing task
+requires a valid scenario artifact; [the provider rule](companion-skills.md) governs
+the preferred provider, equivalent providers and inline fallback.
 
 ## Contents
 
