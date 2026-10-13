@@ -111,8 +111,8 @@
     }
   ],
   "card_stage_text_equal_except_version": true,
-  "version": "1.94.1",
   "helper_absent": true,
   "release_hook_equal_to_accepted_base": true,
-  "historical_patch_gzip_roundtrip_equal": true
+  "historical_patch_gzip_roundtrip_equal": true,
+  "accepted_base_version": "1.94.1"
 }

@@ -1,13 +1,13 @@
-## Current FW07 composition after accepted1.94.1
+## Current FW07 source candidate —1.95.0
 
 [Composition entry](evidence/runs/2026-10-13-fw07-composition/README.md) binds
-the original stage and checkpoint candidates, focused results and pending gates.
-This isolated branch preserves both original PR heads; package metadata remains
-1.94.1 pending a future coherent candidate. Accepted owner helper is now composed;
-its packaged hook delta requires that future version. No tag or publication. Next:
-independent composition review and holdout source rebinding, then moved public
-plants and full validation when the coordinator releases the serial slot.
-Older isolated-candidate handoffs below are historical source context.
+stage routes, checkpoint recovery, independently reviewed owner helper and shared
+scratch lock. Metadata names the next minor; no tag or publication. The prior
+1.94.1 release clone remains untouched. Exact next task: source/metadata review,
+then moved public plants and complete owner validation in the coordinator's serial
+slot, normal genuine-check integration, and local-tag-aware accepted-source gate.
+Native/model/token-quality results remain NOT_RUN. Original PR heads are preserved;
+older isolated-candidate handoffs below describe their historical source cuts.
 
 ## FW07 checkpoint correction — isolated source slice
 

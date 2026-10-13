@@ -1,4 +1,6 @@
-## Unreleased
+## v1.95.0 — 2026-10-13
+
+Source candidate; not published.
 
 Guards: 438 → **439**; property checks 15 → **15**.
 
@@ -16,6 +18,16 @@ including custom names and nonconsecutive ids. Malformed or changed profiles ref
 instead of silently injecting default stages into a saved workflow. Run-local profile
 binding survives record/retry; relocated ledgers can name their project root explicitly.
 This is an offline-tested payload correction, not a live Observatory acceptance claim.
+
+Owner release preparation now records an unpublished local annotated tag before the
+complete suite, binds its exact source/context/evidence, and publishes only the
+verified annotation to one destination. The existing release hook recognizes
+explicit tag-destination refspecs. Mechanical evidence does not confer external
+authority, native interception or successful registry publication.
+
+Test runners use one safely opened family scratch lock across TMPDIR settings and
+owners, matching their shared fixed scratch paths. Existing older runner versions
+and direct plant invocation remain outside that mechanism.
 
 ## v1.94.1 — 2026-10-13
 

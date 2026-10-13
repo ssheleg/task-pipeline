@@ -121,3 +121,26 @@ R-010's operative sentence now says local tag first explicitly, matching its
 existing explanation; historical incident prose remains unchanged. No new human
 approval flow or native hook exemption is added. CONTRIBUTING is a published
 document, so this change belongs to the future composed package version.
+
+## Future1.95.0 source candidate
+
+Fetched origin/main still names1.94.1; remote v1.95.0 is absent at preparation.
+The coordinator accepted a new minor for changed stage/checkpoint behavior. Five
+manifest/card/changelog surfaces now name1.95.0, with truthful NOT_SHIPPED ledger
+and no-stamp declaration. No tag was created. Stage/checkpoint/helper/lock source
+remains the reviewed composition; metadata preparation is not release acceptance.
+
+The [pre-version structural run](structural-preversion-failure.txt) failed because
+1.94.1 was already bound to a different local shared-repository tag, and a historical
+source-map JSON key `version` was interpreted as another synchronized manifest.
+The future version resolves the first issue. The receipt key now explicitly says
+`accepted_base_version`, preserving1.94.1 as historical data without making that
+receipt an artifact manifest. No validator or release-gap check was weakened.
+
+[Candidate metadata binding](candidate-1950.json) records the new five surfaces.
+`python3 -B test/validate.py` [passes](structural-1950.txt), exit0; its three
+unlooked disclosures remain coordination, backlog citation anchoring and absent
+umbrella routing observation. This is an untagged structural run, not the required
+complete tagged-source release gate. Both actual strict manifest validations pass:
+[marketplace](marketplace-1950.txt) and [plugin](plugin-1950.txt). All executable
+source remains the reviewed composition; complete aggregate and release are pending.

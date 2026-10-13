@@ -1477,6 +1477,13 @@ three quarters of the work on this run.
 
 ## Releases that carry no stamp — stated, not stamped
 
+**`v1.95.0` carries no stamp, declared before any tag.** It is the bounded FW07
+composition inside the family correction wave: stage routes, selected-profile
+checkpoint recovery, owner release admission and scratch-runner coordination.
+Source and focused evidence do not constitute a completed ten-stage run. No
+stage-10 stamp is invented; the [composition receipt](runs/2026-10-13-fw07-composition/README.md)
+keeps final aggregate, native/model observation and publication separate.
+
 **`v1.94.0` and `v1.94.1` carry no stamp.** The former is a failed immutable
 tag: [release run 38386280311](https://github.com/ssheleg/task-pipeline/actions/runs/38386280311)
 rejected the missing declaration before creating a release; the publish job was

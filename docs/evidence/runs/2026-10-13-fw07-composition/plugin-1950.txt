@@ -1,0 +1,3 @@
+Validating plugin manifest: /Users/sshlg/DATA/_wt/tp-fw07-composed/plugins/task-pipeline/.claude-plugin/plugin.json
+
+✔ Validation passed
