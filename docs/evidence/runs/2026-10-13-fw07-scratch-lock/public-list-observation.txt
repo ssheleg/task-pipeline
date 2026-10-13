@@ -1,0 +1,456 @@
+  a board id naming two rows must fail
+  a run missing a declared stage must fail
+  stage coverage must refuse when it cannot look
+  the two artifact-root implementations must be compared, not merely run
+  an abandoned run must be told from a finished one
+  the gate must require the observation, not just the claim
+  the release gate must be able to block
+  a blind gate must fail closed, not skip
+  a declared tests stage must outrank a command-bearing one
+  a project's publish script must not read as npm publish
+  the build gate must fire on the shipped example flow
+  validator must be able to fail
+  bad gate type in pipeline.example.json must fail
+  release.enabled true but workflow missing must fail
+  hardcoded vendor model id must fail
+  non-token stage model must fail
+  intake grill must stay mandatory + manual
+  brief template must keep the autonomy sweep
+  the grill doctrine must ship with the skill
+  a real broken link still fails past the fence stripper
+  the REQ spine must stay in the brief template
+  REQ rows must name how they are verified
+  acceptance must close the flow, manually, with evidence
+  the plan gate must be a set comparison
+  the brief must keep the knowledge-source ledger
+  stage 0 must harvest before it interviews
+  stage 9 must close the loop on the ledger
+  a description that drops the final stage must fail
+  verdict count must not drift from the dev gate
+  a doctrine file's gate type must match the config
+  a stage-10 close-out rule must reach the surfaces that enforce it
+  intake must settle the Figma design destination
+  the autonomy sweep must not drift between its two homes
+  acceptance must walk the ladder before the table
+  the audit doctrine must ship with the skill
+  the open-source surface must stay present
+  npm test must run the validator
+  the negative self-tests must stay runnable off CI
+  a shipped code-graph doctrine must reach the stage-9 gate
+  the stage-9 detail must name the code-graph refresh too
+  the retrospective must reach the surfaces that enforce stage 10
+  the retro template must ship
+  a standing instruction must carry its retirement trigger
+  a task-pipeline:<name> skill must resolve to its doctrine file
+  an unresolved merge conflict must fail
+  the documentation-track doctrine must ship
+  the doc map must carry its propagation matrix
+  a retro lesson must carry its commit
+  the retro archive template must ship
+  the seeded gate must stay portable
+  the seeded gate must seed GREEN
+  every template must be listed in templates/README.md
+  the doc track must reach the surfaces that enforce it
+  the two decision shapes must agree on fields
+  the seeded gate must read BOTH register shapes
+  the Doc Loop must reach the stages that settle decisions
+  the autonomy sweep is compared by topic, not by stage number
+  a long reference's Contents must match its headings
+  the evaluation suite must cover every category
+  the description must say WHAT before WHEN
+  the skill card must answer every risk indicator
+  a citation must name a section that exists
+  a living document may not restate a stale count
+  a README link must ship in the npm package
+  adoption must cover the brownfield half
+  default-on needs an opt-out that is exercised
+  the stage/artifact relation must be mapped both ways
+  a workflow decision must have a home inside the bundle
+  the routing rule must ship as a file
+  stage 2 must produce user paths and error paths
+  a new reference must reach the README and the manifest
+  a long seeded template needs its own Contents
+  an invariant may not claim a guard that does not exist
+  a seeded matrix without the meta-row has a hole
+  the example must set run.loop.mode explicitly
+  a run-wide rule every stage must name
+  the context-evidence clause may not be softened
+  the harness-limit clause may not be softened
+  a seeded template may not carry a relative link
+  the hygiene gate catches conflict markers
+  the hygiene gate catches a surviving placeholder
+  the hygiene gate catches an unterminated fence
+  the hygiene gate catches a truncation stub
+  the hygiene gate catches a duplicated adjacent block
+  the hygiene gate catches an empty section
+  a gate script must keep its VERDICT block last
+  two self-tests may not share a scratch directory
+  the spec must keep asking whether a named check is real
+  a plan must keep asking whether a DoD's targets resolve
+  the self-review must leave a committed trace
+  rule 14 must bind the stages that write the targets
+  the False success section must exist
+  the False success law must be stated
+  the did-not-look test must survive
+  rule 1 must survive
+  rule 2 must survive
+  audit.md must cite the class
+  build.md must cite the class
+  review.md must cite the class
+  continuity.md must cite the class
+  the report must require verified-by lines
+  the implementer contract keeps the re-reading clause
+  the hygiene gate must name its blind side
+  the rubric keeps the Effect verification item
+  an unverified effect must stay Important
+  a guard below the verdict must be rejected
+  stage 0's config gate must require the measured lag
+  stage 0's own section must state the measured lag
+  the measured-lag rule must keep its commands
+  a graph that cannot be measured needs its own state
+  the seeded brief must not ship a bare build date
+  the distrust marker keeps its sigil, even wrapped
+  the distrust marker gets no second spelling
+  the hygiene gate catches a blank line inside a table
+  the hygiene gate refuses an undeclared floor
+  the canon list must exist
+  a dropped canon must be caught
+  canons must keep naming their enforcement
+  the canon/rule boundary must stay stated
+  the CI verdict must keep its commands
+  a run that cannot be established needs its own state
+  a pushing stage must name the CI verdict
+  a stage may not carry its own copy of the CI commands
+  the stage-8 gate must require the CI verdict
+  a SessionEnd timeout a host clamps must fail
+  the negatives floor may not lag the workflow
+  the navigator must exist
+  the index must not drift from the canons
+  the navigator must point at the one home
+  a navigator link must resolve from its own directory
+  a colon-space in frontmatter must be rejected
+  rule 16 in force with a consumer that dropped its citation
+  retro order — an adjacent enumeration puts prune before stamp
+  retro order — an ordered list runs prune before stamp
+  retro order — a then-sequence without the word first
+  retro order — a lone prune-first directive with no second act
+  claim registry — a restated rule count that disagrees
+  claim registry — a restated standing-instruction count
+  claim registry — a stale canon count in word form
+  claim registry — a stale reference-file count
+  the doctrine claiming a provenance the ledger cannot prove
+  `graph.py doctrine` dropping the `unattested` mark
+  the acceptance policy losing its version
+  the acceptance policy losing its owner
+  gates.md's fixes-nothing sentence left unscoped
+  the Recent log's heading declaring a bound nothing enforces
+  the SHIPPED retro template seeding the false bound
+  an open board row whose cited span no longer holds its phrase
+  an open board row citing a span and quoting nothing from it
+  a ledger row with no `Environment` cell
+  an `Environment` value outside the declared vocabulary
+  the shipped ledger template losing its `Environment` column
+  a graph conditional dropped from behind its `$ref`
+  the verification ledger claiming a stale shipped state
+  SKILL.md teaching a gate-type vocabulary the schema outgrew
+  an `npm` gloss that disagrees with package.json
+  a document naming an `npm run` script that does not exist
+  an unstamped release MENTIONED but not declared must fail
+  a release after the newest stamp that the gap section does not name
+  the retro's archive pointer naming a root this project does not use
+  a stale guard count in the `## Unreleased` section
+  an `## Unreleased` section parked below a released version
+  claim registry — a stale reference-file count in the SHIPPED template
+  a stale count in an OPEN question, dated beside it
+  claim registry — a stale count in an OPEN row of a register
+  claim registry — a stale guard count
+  claim registry — a stale dated-eval-run count
+  a companion in the matrix and not in the preflight block
+  the cold trigger stated with one unit on one surface
+  cold trigger — the canonical row, where bold interrupts the phrase
+  a worked GATE verdict that omits only `unlooked`
+  a worked GATE verdict that omits only `abstained`
+  a worked GATE verdict that prints no disclosures
+  a summary that names most of the rotation axes
+  an axis added to audit.md that no summary echoes
+  the axis list moved out from under its own guard
+  a restated count of gates.md's own axes
+  the re-derivation axis stops printing its pair
+  the re-derivation axis renamed out from under its guard
+  the Cursor rule restating a stale count of gates.md's axes
+  a stated count of the rotation axes, the dormant class proven
+  a rule leaves learned.md with no logged line
+  the Retired log itself removed from learned.md
+  a NEW surface states the cold trigger with one unit
+  the HIGHEST-numbered rule deleted — the gap that does not open
+  a digit in the log body masking a real deletion
+  the high-water mark removed from learned.md
+  a worked verdict on a surface no list named
+  the high-water mark lowered in a COMMITTED change
+  every rule row deleted at once
+  a second guard named inside one citation, and it does not exist
+  a rule numbered above the high-water mark
+  a rule listed as retired that is still in the table
+  an open ledger row with no board id
+  a ledger pointing at a board id nobody issued
+  a board row with no Source — the reverse direction
+  the board emptied of every row
+  a board priority that does not follow from its inputs
+  the seeded template's own worked example broken
+  an open row whose ledger has two status columns
+  a blank line splitting a markdown table
+  a row homed `backlog` — the trigger the templates promise
+  a row homed `unresolved` — the third promised trigger
+  a board row too short to compute a priority
+  a blanked Source in the seeded template
+  a status column worded in prose — "open as a printed exclusion"
+  a mismatched-shape row losing its board id
+  a trigger the code accepts and the doctrine never names
+  the trigger regex renamed out from under its own comparison
+  the seeded ledger template showing `backlog` as settled
+  a trigger named on the page but not in the enumerating paragraph
+  a table split by TWO blank lines
+  a verification row whose REQ is in no brief
+  prose in the Human column
+  the verification ledger emptied of rows
+  prose in Human, rescued by a date in Note
+  the Human column renamed away
+  the layout tree drifting from the tables above it
+  the layout tree block gone entirely
+  a stale guard count in the newest CHANGELOG section
+  MIN_PROPS drifting from the workflow's property count
+  a REQ paired with a run whose brief does not carry it
+  a percentage reaching the exposure line
+  the exposure doctrine dropping its never-checked rule
+  a step wiping a scratch dir it does not own
+  the header block drifting between its two copies
+  a rail glyph the legend does not define
+  the rail claiming a stage count of its own
+  a ledger shape declared and never shown
+  a ledger shape no reader names
+  the review loop left with no cap
+  the review cap moved in one file only
+  the review cap with no config key
+  the short path marking a stage with an undefined glyph
+  the exposure example drifting from its own print
+  a live count baked into the exposure example
+  a companion pointed at a stage that never names it
+  a stage dropping the companion the matrix aims at it
+  an escaped pipe truncating a matrix row's cells
+  a BARE pipe truncating a matrix row's cells
+  a matrix row that derives no stage at all
+  a stage demanding the look with no mechanism to point at
+  the mechanism file dropping one of the four moves
+  a browser pointer that renders as nothing
+  the look's recipe moved out of the section that is the mechanism
+  a stage-3 track with no owning skill
+  a stage-3 track deleted outright
+  a redaction rule added without the count moving
+  the redaction rules flattened into prose
+  an absolute host path in the worked issue body
+  a commit id in the worked issue body
+  a host repository slug in the worked issue body
+  the schema losing the key the doctrine names
+  no stage naming the publish step
+  the reader losing its NO READER state
+  a stage dropping a reader state
+  the probe harness losing its target-guard assertion
+  the probe harness losing its entry point
+  probing.md teaching probing without naming the harness
+  the retro's uncapped log slipping back into "read in full"
+  a consumer re-binding the log to "in full"
+  a preflight silent about the skill's own evidence
+  the change half of the boundary leaves the description
+  the findings half of the boundary leaves the description
+  reading returns to the exclusion clause
+  an exclusion locked in 2026-08-03 drops out
+  a verb locked by the design never reaches the surface
+  a findings class is missing from the portable routing rule
+  a findings class is missing from the Cursor rule
+  a findings class has no eval query
+  a release entry that talks about guards without a readable count
+  a findings class added with no eval-query alias
+  the explanation exclusion leaves the clause
+  the findings clause loses the shape four checks read
+  the locked verb list stops being readable
+  a class separator the parser cannot see
+  reading returns as an exclusion in the portable rule
+  the loop loses its queue
+  the loop loses its arming point
+  the self-pacing mode is withdrawn
+  the queue names a source no stage produces
+  the authorization floor leaves the file that defines the mode
+  a dynamic run owes no disclosure
+  stage 2 keeps its gate but loses where the queue comes from
+  the machine-readable stage 2 drops the arming
+  the whole loop contract is deleted from the schema
+  the queue enum becomes an open string
+  the arming point loses the one this release moved to
+  Part 1a stops stating its precondition
+  the floor leaves one section while a copy elsewhere keeps the guard green
+  the example reverts to its pre-v1.40 loop block
+  the dynamic rule is inverted while its words are kept
+  the run-stamp table loses its cap
+  the run-stamp table grows past its cap
+  neighbour probe — the stamps lose their cap while the cell keeps another
+  neighbour probe — Part 1a loses the floor while the file keeps it
+  neighbour probe — stage 2 loses the arming while keeping the word
+  the hand-back loses the section a returning reader needs most
+  waiting decisions become a list instead of a question
+  the ambiguity list stops being computed
+  stage 10's gate stops requiring the hand-back
+  neighbour probe — the gate loses the hand-back while the section keeps the word
+  the example's acceptance gate drops the hand-back
+  the hand-back loses its trace in the ledger
+  the doctrine stops naming where its trace lands
+  the ratchet-matcher section is deleted
+  the near-miss leaves the ratchet-matcher rule
+  the unlanded-plant section is deleted
+  the verified-by section is deleted
+  an unresolvable verified-by name keeps reading verified
+  the seam section is deleted
+  the seam loses its unlooked fallback
+  the consumption section is deleted
+  a timeout becomes a slow result again
+  the publish disclosure section is deleted
+  the publish line loses its not-configured form
+  stage 10's verdict drops the publish line
+  a mutating probe ships with no plant-landed assertion
+  the green-probe section keeps its heading and loses its rule
+  the teardown keeps its first half and loses the one that protects other agents
+  the holds disclosure is given a direction
+  stage 10's criterion 13 loses the report-do-not-end half
+  NEIGHBOUR PROBE — criterion 13 is broken and its needle planted just outside the item
+  INVERSION — criterion 13 keeps both needles and gains an exception clause
+  INVERSION — the foreign lease loses its absolute form
+  INVERSION — the holds count acquires a direction while 'never a target' still stands
+  the workflow itself stops being valid YAML
+  the third owner state loses its proof requirement
+  the third owner state stops being bounded to this project
+  the routing surface and the doctrine disagree on the ledger field's name
+  the cross-cutting rules stop naming the field every gate prints
+  the residue doctrine file is deleted outright
+  the not-torn-down section is deleted, not merely reworded
+  stage 10 loses criterion 13 entirely
+  the owner table loses its earlier-run row
+  INVERSION — the foreign lease keeps its sentence and gains a carve-out
+  INVERSION — the foreign-item boundary keeps its sentence and gains a carve-out
+  INVERSION — the carve-out is a separate sentence, not a clause
+  the prose drops the elapsed time its own `ps` receipt quotes
+  the opening record stops saying its two readings are two moments
+  the record stops naming the times it never observed
+  the containers measurement and the prose citing it disagree
+  the frozen containers measurement loses its date
+  the SURFACED zero stops being checked against what the run filed
+  the SURFACED check loses the residual that keeps it honest
+  the behaviour-or-reporting field loses one of its two values
+  criterion 12a is deleted outright
+  the release path stops running the suite it advertises
+  a version number already spoken for by a tag
+  the design skill is allowed to run before the file it should follow
+  the frame becomes a contract without a width
+  the missing-frame branch loses the offer to draw
+  generated frames stop being marked as generated
+  the screen-is-the-frame section is deleted outright
+  the worktree-per-agent rule is removed
+  the lease rule is removed
+  what to do on finding the other agent mid-run is removed
+  the another-agent section is deleted outright
+  the fake-edge test is removed from planning.md
+  the Carries column is dropped from the plan template
+  the stage-4 gate stops reading the Carries cells
+  the group convergence check is deleted outright
+  the convergence check stops saying it runs before integration
+  stages.md drops the convergence check from its stage-5 summary
+  the computed Edges count is removed from the self-review
+  planning.md's GATE section is renamed away
+  the convergence check stops logging a clean group
+  stages.md drops the same-group fan-out precondition
+  stages.md drops the worktree fan-out precondition
+  build.md's GATE stops requiring the convergence check
+  stages.md drops the exclusive-file-ownership precondition
+  build.md's GATE heading is renamed away
+  stages.md's stage-5 heading is renamed away
+  only the stage-5 GATE bullet loses the convergence check
+  the stage-4 gate stops reading the Edges count
+  the source ledger loses its contradictions line
+  the stage-0 gate stops reading the contradictions line
+  stage 3 loses the tracks convergence
+  stage 3's two tracks go back to a sequence
+  a waived row that keeps its priority must fail
+  a waiver naming no revisit condition must fail
+  a `parked` row naming no branch or commit must fail
+  an open row homed in a scratchpad must fail
+  the seeded exposure script disappearing must fail
+  doctrine that stops naming the script must fail
+  an exposure line carrying a percentage must fail
+  this project's own pipeline.json is validated, not only the example
+  the verdict gate and the graph schema must not diverge
+  the agents disclosure is defined but never called
+  coverage stops refusing a requirement nothing serves
+  serves resolving against nothing
+  a producer field vanishing when it cannot be resolved
+  a moved component pointer needing no convergence record
+  staleness counts that vanish when every row is current
+  a judgment gate that need not name its judge
+  a gate-verdict example that omits what the rule mandates
+  unmeasured doctrine reported as a zero count
+  a version surface outside the guarded set
+  a collision warning inside the frontier rows
+  canon 9a — a count printed with no unmeasured case
+  a hand-back with no NOT VERIFIED field
+  a replan that stops while close exits 0
+  a shipped verb the doctrine never documents
+  wave mode — an earlier wave waiting on a later one
+  wave mode — next --wave printing other waves' nodes
+  wave mode — a wave re-cut that records no revision
+  a revision log that records the change and not the reason
+  a parked-reason pattern that accepts the empty string
+  a conditional whose `if` can never be satisfied
+  the parked-reason rule removed from the schema
+  the parked reason accepts a single space
+  a graph schema whose node shape does not bind
+  a required field whose subschema constrains nothing
+  done without evidence, expressible and unexpressed
+  the stage-3 gate stops requiring the convergence
+  a node that cannot say how it will be closed
+  the check rule declared and never required
+  a check rule whose `if` can never be satisfied
+  a check pattern that accepts whitespace
+  a nullable check, which satisfies every string rule vacuously
+  the runtime check rule disarmed, and the schema left intact
+  the same disarm, against the graph fixtures
+  a ledger row whose cell count does not match its header
+  the verifier told to read a field again by name only
+  a plant re-pinned to a literal a release can move
+  a plant that can decline to run and never says when
+  an anchor declaration that names nothing the plant reads
+  a restated fixture count that disagrees with the fixture file
+  a release-stamp rule that stops naming the merge strategy
+  a release-stamp rule that stops naming the tag shape
+  a release-stamp rule that stops naming the merge-commit shape
+  a release-stamp rule that stops naming the gate command
+  a release-stamp rule that stops naming the local probe
+  a check written inline in the workflow again
+  a shard matrix that leaves a slice of the suite unrun
+  a check file the loader cannot read
+  the workflow grows past GitHub's size limit
+  a test file creates temp state and never cleans it up
+  a default stage route points at a sibling
+  [property] a document may narrate the provenance claim it used to make
+  [property] a CLOSED board row's citation is a record and is left alone
+  [property] the shipped graph schema keeps its conditionals behind a `$ref`
+  [property] a portable example command in shipped doctrine is not this repo's script
+  [property] a DATED row in a register is a record, not a claim about now
+  [property] the cross-commit skip is printed, never swallowed
+  [property] two adjacent tables are not a split table
+  [property] a description beginning "Open" is not an open row
+  [property] a hyphenated "Open-source" in a description is not a status
+  [property] a real date in the Human column is accepted
+  [property] the never-count is printed beside the verdict
+  [property] the Human column survives a header reorder
+  [property] older CHANGELOG sections are history, not claims about now
+  [property] a legitimate exception two rules away does not trip the carve-out guard
+  [property] the anchor census prints its disclosure beside the verdict
+
+439 negative self-tests + 15 property checks
