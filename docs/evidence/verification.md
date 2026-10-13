@@ -1,5 +1,12 @@
 # Verification — task-pipeline
 
+## Shipped state — v1.94.0 (release target; NOT SHIPPED yet)
+
+This version header binds the candidate artifact for the release validator. It does
+not certify publication: the latest published release remains v1.93.3. Current
+source evidence is linked below; exact final-head, release and installed receipts
+are still pending. Earlier verification rows are preserved without new stamps.
+
 ## Current evidence boundary — 2026-10-13
 
 Published v1.93.3 and the accepted release-iteration feature are separate states.

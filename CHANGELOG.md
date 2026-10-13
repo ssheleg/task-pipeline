@@ -1,4 +1,15 @@
-## Unreleased
+## v1.94.0 — 2026-10-13
+
+Guards: 438 → **438**; property checks 15 → **15**. The owner validator and
+focused regression suites gain coverage; the counted negative-file corpus is unchanged.
+
+The accepted feature now also rejects loss of node identity or evidence during
+inventory synchronization. Waiting nodes retain typed wait IDs and watcher
+locators, cannot certify or close while waiting, and report the runnable frontier
+with distinct exit states. Release authority is recorded separately from a locator;
+source policies and scoped grants are carried into execution packets. Local regression
+and history checks cover these boundaries. Native Observatory/Fabric handoff
+execution remains unverified in this release receipt.
 
 **The release iteration — the loop around the waves** (`references/iteration.md`). The
 project moves in whole releases: survey, module dossiers integrated into one canvas,
