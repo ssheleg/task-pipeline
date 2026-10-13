@@ -111,8 +111,8 @@
       "name": "Lint + deploy",
       "model": "default",
       "skills": [
-        "host:npm run test:all",
-        "host:git tag"
+        "host:git tag",
+        "host:npm run test:all"
       ],
       "gate": {
         "type": "manual",
