@@ -101,3 +101,16 @@ that absence is not a redactor pass. No source files changed during the run.
 Final SKILL.md bytes equal the accepted R09 dac8bc9 body (4639/4750 cl100k),
 so composition retains111 working-budget tokens. Hosted exact-head integration
 remains pending.
+
+
+## Accepted PR114 base admission
+
+PR114 merged normally at25dc4f898c143d410cb8cc0b8f17e4edd73da6eb.
+It was merged without conflicts into this branch at
+6173a3caf0ae087f09cfaa3631fd430d30836ab2. `git diff --name-only
+71ff0f0..6173a3c` contains only seven evidence files under docs/evidence/runs;
+all executable, schema, skill, reference and workflow bytes equal the source
+that passed the composed owner aggregate. Incoming PR114 changes relative to
+already-composed31e0 are its three aggregate receipt files only. Final hosted
+checks bind the promoted PR119 head separately; no repeated local aggregate
+is claimed or required by this byte-equivalent evidence-only admission.
