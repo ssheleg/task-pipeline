@@ -1,0 +1,13 @@
+PASS: a returned gate becomes one checkpoint built from the ledger
+PASS: retries replay, repeated stages are new
+PASS: the workflow continues across boundaries; the token stays out of every output
+PASS: provider loss is one ledger line and the run goes on
+PASS: a stale writer stops after one refusal; the successor continues
+PASS: credentials travel by name only
+PASS: a failed gate stays open; acceptance closes
+PASS: review rounds travel in the checkpoint of the stage that recorded them
+PASS: a planned executor change offers the workflow, the successor accepts it
+PASS: an offer's retry survives unrelated ledger appends; a recorded offer moves the key
+PASS: memory unavailable for the run is one marker and one line; an answer clears it
+PASS: no ledger, no checkpoint
+PASS: stage_checkpoint.py — 72 cases

@@ -1,3 +1,13 @@
+## Current FW07 composition after accepted1.94.1
+
+[Composition entry](evidence/runs/2026-10-13-fw07-composition/README.md) binds
+the original stage and checkpoint candidates, focused results and pending gates.
+This isolated branch preserves both original PR heads; package metadata remains
+1.94.1 pending a future coherent candidate. No helper, tag or publication. Next:
+independent composition review and holdout source rebinding, then moved public
+plants and full validation when the coordinator releases the serial slot.
+Older isolated-candidate handoffs below are historical source context.
+
 ## FW07 checkpoint correction — isolated source slice
 
 The [frozen packet and receipt](evidence/runs/2026-10-13-fw07-checkpoint-profile/README.md)
