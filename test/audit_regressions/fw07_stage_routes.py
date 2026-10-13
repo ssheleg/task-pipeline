@@ -7,7 +7,7 @@ import tempfile
 sys.dont_write_bytecode = True
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / 'test'))
-from stage_routes import DETAILS, ROUTE, route_errors
+from stage_routes import DETAILS, ROUTE, route_errors, detail_text
 
 
 def main():
@@ -18,6 +18,8 @@ def main():
         count += 1
     original = ROOT / 'plugins/task-pipeline/skills/task-pipeline/references'
     check(not route_errors(original), 'live source routes')
+    for invalid in (-1, len(DETAILS), 'not-a-stage'):
+        check(detail_text(original, invalid) == '', 'invalid default id cannot crash or select a sibling')
     with tempfile.TemporaryDirectory(prefix='fw07-routes-') as folder:
         refs = Path(folder)
         for name in ('stages.md', *DETAILS):shutil.copyfile(original / name, refs / name)
@@ -31,6 +33,9 @@ def main():
             check(bool(route_errors(refs)), f'wrong stage {sid} route')
             (refs / 'stages.md').write_text(spine)
             check(f'[{name}]({name}) before stage work' in spine, f'exact entry/resume route {sid}')
+        (refs / 'stages.md').write_text(spine.replace('## 0 — Intake', '## 11 — Intake'))
+        check(bool(route_errors(refs)), 'unknown default id is refused')
+        (refs / 'stages.md').write_text(spine)
         target = refs / DETAILS[0]; data = target.read_bytes()
         for malformed in (b'', b'\xff', data.replace(b'## 0 ', b'## 1 '), data + b'\n- **GATE (manual):** duplicate\n'):
             target.write_bytes(malformed);check(bool(route_errors(refs)), 'unreadable/empty/wrong-stage/duplicate-gate detail')

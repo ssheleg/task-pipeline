@@ -93,3 +93,15 @@ executed their original Python mutation payloads in owned minimal fixtures and
 confirmed each still targets a complete spine gate. This is not a public shell
 entry verdict. A separate [recovery/read-evidence follow-up packet](../../plans/2026-10-13-fw07-recovery-evidence.md)
 names the unobserved next layer while the broad slot is held elsewhere.
+
+## Defensive reader correction after source review
+
+A follow-up source inspection reproduced `detail_text(refs, 11)` raising IndexError.
+The route guard already refuses unknown default ids, but the downstream migrated
+matrix reader could still reach that id while reporting the malformed source.
+The reader now returns empty for invalid default ids, including negative ids, while
+the route guard retains its explicit refusal. Three direct controls plus an actual
+unknown-header route control raise the focused route total from47 to51, all passing.
+This is a bounded diagnostic correction, not a new runtime stage fallback. The
+prior structural/source review remains its original scope; final aggregate must
+include this correction.

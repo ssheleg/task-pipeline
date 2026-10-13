@@ -12,14 +12,17 @@ ROUTE = re.compile(r'^\*\*On entry or resume:\*\* read \[([^\]]+)\]\(([^)]+)\) b
 
 
 def detail_path(refs, stage):
-    return Path(refs) / DETAILS[int(stage)]
+    index = int(stage)
+    if not 0 <= index < len(DETAILS):
+        raise ValueError("not a default stage id")
+    return Path(refs) / DETAILS[index]
 
 
 def detail_text(refs, stage):
     # route_errors separately reports absent/unreadable targets, never a silent pass.
     try:
         return detail_path(refs, stage).read_text(encoding='utf-8')
-    except (OSError, UnicodeError):
+    except (OSError, UnicodeError, ValueError, TypeError):
         return ''
 
 
