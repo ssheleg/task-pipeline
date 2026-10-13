@@ -64,6 +64,7 @@ import json
 import os
 import pathlib
 import re
+import stat
 import subprocess
 import sys
 from datetime import datetime, timezone
@@ -97,6 +98,8 @@ def _profile(root: pathlib.Path) -> tuple[list[dict], dict]:
     if not configured:
         path = pathlib.Path(__file__).resolve().parents[1] / "pipeline.example.json"
     try:
+        if not stat.S_ISREG(path.stat().st_mode):
+            raise SystemExit("stage_checkpoint: selected profile is not a regular file")
         doc = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, ValueError, UnicodeError):
         raise SystemExit("stage_checkpoint: selected profile cannot be read as JSON")
@@ -235,8 +238,35 @@ def marker_for_this_run(ledger: pathlib.Path, state: dict) -> dict | None:
     return gone
 
 
+def _canonical_ledger(ledger: pathlib.Path) -> pathlib.Path:
+    # A file alias can put a prior record beside the link while emit read its target.
+    # Refuse it rather than choosing one of two potentially live workflow receipts.
+    try:
+        mode = ledger.lstat().st_mode
+    except FileNotFoundError:
+        return ledger.resolve()
+    except OSError:
+        raise SystemExit("stage_checkpoint: ledger cannot be read")
+    if stat.S_ISLNK(mode):
+        raise SystemExit("stage_checkpoint: ledger file alias is unsupported; reconcile and use the real ledger path")
+    if not stat.S_ISREG(mode):
+        raise SystemExit("stage_checkpoint: ledger is not a regular file")
+    return ledger.resolve()
+
+
 def _state_path(ledger: pathlib.Path) -> pathlib.Path:
-    return ledger.parent / STATE_NAME
+    path = _canonical_ledger(ledger).parent / STATE_NAME
+    try:
+        mode = path.lstat().st_mode
+    except FileNotFoundError:
+        return path
+    except OSError:
+        raise SystemExit("stage_checkpoint: memory state cannot be read")
+    if stat.S_ISLNK(mode):
+        raise SystemExit("stage_checkpoint: memory state link is unsafe; reconcile it before continuing")
+    if not stat.S_ISREG(mode):
+        raise SystemExit("stage_checkpoint: memory state is not a regular file")
+    return path
 
 
 def _load_state(ledger: pathlib.Path, strict: bool = False) -> dict:
@@ -291,7 +321,7 @@ def _project(root: pathlib.Path, given: str | None) -> str:
 
 def emit(ledger: pathlib.Path, project: str | None, constraints: list[str],
          credentials: list[str], project_root: str | None = None) -> dict:
-    ledger = ledger.resolve()
+    ledger = _canonical_ledger(ledger)
     topic, stages = _read_ledger(ledger)
     root = _root(ledger, project_root)
     profile, identity = _profile(root)
@@ -522,7 +552,8 @@ def main(argv: list[str]) -> int:
     ac.add_argument("--handoff-id", required=True)
     ac.add_argument("--session")
     a = p.parse_args(argv)
-    ledger = pathlib.Path(a.ledger)
+    ledger = _canonical_ledger(pathlib.Path(a.ledger))
+    _state_path(ledger)  # every command refuses unsafe aliases before producing tool arguments
     if a.cmd == "emit":
         print(json.dumps(emit(ledger, a.project, a.constraint, a.credential, a.project_root), ensure_ascii=False))
         return 0

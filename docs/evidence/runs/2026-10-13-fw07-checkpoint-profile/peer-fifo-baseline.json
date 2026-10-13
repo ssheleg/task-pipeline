@@ -1,0 +1,8 @@
+{
+  "timed_out": true,
+  "timeout_seconds": 2,
+  "owned_process_killed_by_subprocess_run": true,
+  "source": "db6b24797c5dcbddc7189ef373a619e6a3e7c0d9",
+  "case": "selected pipeline.json FIFO without writer",
+  "memory_created": false
+}

@@ -103,3 +103,24 @@ non-string/multiline labels still refuse as unrepresentable in this ledger. The
 new positive controls replace the prior empty-name negative. The prior 119-control
 receipt remains historical; the [final focused replay](focused-final.txt) records
 120 passing controls. No other emission, admission or persistence behavior changed.
+
+### Independent review findings and input-kind correction
+
+The independent reviewer replayed the prior 120 controls but did not approve that
+candidate: actual CLI fixtures exposed [two state/ledger alias failures](peer-seams-baseline.json)
+and a [FIFO profile read that blocked](peer-fifo-baseline.json). Those observations
+remain evidence against that exact earlier source.
+
+The shared command entry now canonicalizes accepted ledger paths for every verb.
+A ledger file symlink refuses explicitly rather than choosing between potentially
+conflicting receipts; memory-state links also refuse, including dangling links.
+Neither existing target bytes nor missing targets are changed. Ordinary directory
+aliases keep one canonical state location through emit/record/emit. Profile, ledger
+and existing state inputs are checked for regular file kind before text reads;
+FIFO controls terminate promptly instead of awaiting a writer. This is bounded
+input admission, not a claim of an adversarial filesystem race/transaction proof.
+
+The [final seam-focused actual CLI replay](focused-seams-final.txt) passes 162
+controls; the prior 119/120 outputs remain historical. The unchanged checkpoint
+suite72 and memory-nudge40 pass after this correction. Independent re-review and
+the serialized aggregate remain pending; no provider was called.

@@ -171,6 +171,54 @@ with tempfile.TemporaryDirectory(prefix='tp-fw07-profile-') as temp:
     check(emit(root, '--ledger', str(target))['close'], 'Git root resolves relocated ledger consistently')
     result = cli(root, 'emit', '--ledger', str(target), '--project-root', str(base / 'default'))
     check(result.returncode != 0 and not result.stdout, 'foreign root refused')
+    for target_exists in (False, True):
+        root, ledger = fixture(base, f'state-link-{target_exists}', profile())
+        target = root / 'state-target.json'
+        if target_exists:
+            target.write_text('{"workflowId":"workflow:keep","leaseId":"lease-keep"}')
+        link = ledger.parent / 'memory.json'; link.symlink_to(target)
+        before = target.read_bytes() if target.exists() else None
+        for args in [('emit',), ('record', '--unavailable', 'fixture'), ('state',),
+                     ('handoff', '--to-provider', 'fixture'), ('accept', '--handoff-id', 'handoff:fixture')]:
+            result = cli(root, *args)
+            check(result.returncode != 0 and result.stdout == '' and 'state link is unsafe' in result.stderr,
+                  'linked state refused consistently')
+            check(link.is_symlink() and (target.read_bytes() if target.exists() else None) == before,
+                  'state symlink and missing/existing target preserved')
+    root, ledger = fixture(base, 'ledger-link', profile())
+    target = root / 'notes/run.md'; target.parent.mkdir()
+    target.write_bytes(ledger.read_bytes()); ledger.unlink(); ledger.symlink_to(target)
+    (target.parent / 'memory.json').write_text('{"workflowId":"workflow:target"}')
+    (ledger.parent / 'memory.json').write_text('{"workflowId":"workflow:link"}')
+    snapshots = {p: p.read_bytes() for p in (target, target.parent / 'memory.json', ledger.parent / 'memory.json')}
+    answer = root / 'answer.json'; answer.write_text('{"workflowId":"workflow:new"}')
+    for args in [('emit', '--project-root', str(root)), ('record', '--answer', str(answer)),
+                 ('record', '--unavailable', 'fixture'), ('state',),
+                 ('handoff', '--to-provider', 'fixture'), ('accept', '--handoff-id', 'handoff:fixture')]:
+        result = cli(root, *args)
+        check(result.returncode != 0 and not result.stdout and 'ledger file alias is unsupported' in result.stderr,
+              'ledger file alias refuses all command entries')
+        check(ledger.is_symlink() and all(p.read_bytes() == data for p, data in snapshots.items()),
+              'conflicting workflow receipts are not silently migrated or overwritten')
+    root, ledger = fixture(base, 'directory-alias', profile())
+    alias = base / 'directory-alias-link'; alias.symlink_to(root, target_is_directory=True)
+    alias_ledger = alias / '.task-pipeline/run.md'
+    a = emit(root, '--ledger', str(alias_ledger))
+    answer = root / 'answer.json'; answer.write_text('{"workflowId":"workflow:canonical","leaseId":"lease:canonical"}')
+    check(cli(root, 'record', '--ledger', str(alias_ledger), '--answer', str(answer)).returncode == 0,
+          'record resolves accepted directory aliases to the same state')
+    check(emit(root, '--ledger', str(ledger))['workflowId'] == 'workflow:canonical',
+          'real path resumes workflow recorded through directory alias')
+    for kind in ('profile', 'ledger', 'state'):
+        root, ledger = fixture(base, f'fifo-{kind}', profile())
+        target = {'profile': root / 'pipeline.json', 'ledger': ledger,
+                  'state': ledger.parent / 'memory.json'}[kind]
+        target.unlink(missing_ok=True); os.mkfifo(target)
+        result = subprocess.run([sys.executable, '-B', str(SCRIPT), 'emit'], cwd=root,
+                                text=True, capture_output=True, timeout=3)
+        check(result.returncode != 0 and not result.stdout and 'not a regular file' in result.stderr,
+              f'{kind} FIFO refuses promptly without reading')
+        check(target.is_fifo(), 'FIFO input is never replaced')
     root, ledger = fixture(base, 'missing-ledger', profile()); ledger.unlink()
     refuse(root, text='cannot be read')
 
