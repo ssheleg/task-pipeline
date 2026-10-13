@@ -163,3 +163,30 @@ status and no-open-handle checks. Their ignored local records were archived unde
 the common Git directory with byte hashes verified before removal; branches and
 tags remain. The current candidate and active release clone were preserved.
 This maintenance operation does not add validation or release acceptance.
+
+## Pre-integration owner gate on875c6e6: exit1, and most of it never ran
+
+`npm run test:all` on exact875c6e6 (tree cc947755), started 13:50UTC, 2380.9s,
+**exit1**: [result](preintegration-875c6e6.json), [log](preintegration-875c6e6.log.gz)
+(gzip of the 57289-byte log, sha256 1d3fa5b4…, equal after decompression). Source,
+tree, status and tag refs were unchanged after the run; the owned TMPDIR was removed.
+
+Failure: `test/negatives.py` reported `0 guard(s) did not fire, 2 test(s) broken` —
+plants 388 and 429 stopped with `PLANT OVERREACHED`. Cause: 23060e8 moved stage 3 and
+stage 5 narrative into `stage-03-spec.md`/`stage-05-dev.md`; the validator reads it
+there through `test/stage_routes.py::detail_text`, and plant 393 was migrated, but 388
+and 429 still asserted the narrative inside the spine section, where only the GATE
+bullet remains. Deterministic, not a scratch race: the same assertion fails on a
+plain read of the composed `stages.md`.
+
+`test:all` chains with `&&`, so **nothing after `negatives.py` ran**: test:certify,
+exposure, probe, anchors, runner, hooks, artifacts, docs and audit-regressions are
+NOT_RUN on this source. The suites before it passed (validate, graph171,
+project_audit, packet_schema, browser_claims, visual_gate, stage_checkpoint72,
+backlog_sources40, release_approval41, memory_nudge, lessons, waves, continuity_doc,
+install_test). This result is no gate for any later source.
+
+Correction: both plants now assert survival in the detail file the validator reads,
+which the plant does not touch; the spine edit and the expected validator message
+are unchanged. Both run green alone (exit0). The full owner gate must be rerun on
+the next composed source (with the child-lifetime correction), serially.
