@@ -602,14 +602,11 @@ never that the work was skipped quietly.
   close before it ships, and the operator is already present at this gate. **The
   carry-over count is printed beside this verdict.** Deploy is outward → explicit
   operator go, or a specific standing authorization naming that act, cited with its source
-  and scope. Authorization to release does not silently authorize a separate deploy. If
-  `release.authorized_by` is present, read that source and verify its authority,
-  currentness and scope for the tag and publication; the locator is not authorization.
-  If absent, inspect existing recorded authority before asking for a missing grant.
-  **Before the tag, read
-  the release's approval mode** (`pipeline.json` → `release.approval`; then
-  [`deploy-targets.md`](deploy-targets.md) → *When the release waits for an approval*):
-  `checks` — push the tag, watch the run selected by the tag, report; `reviewers` — the
+  and scope. How a release's authority is established, `release.authorized_by` included,
+  has one home: [`deploy-targets.md`](deploy-targets.md) → *When the release waits for an
+  approval*. **Before the tag, read the release's approval mode** (`pipeline.json` →
+  `release.approval`; the same section): `checks` — push the tag, put the run selected by
+  the tag on a watcher and take independent work until it reports; `reviewers` — the
   direct link to the run that is actually `waiting`, never a request without it. Respect deploy-from-main rules if the project mandates them. **Before
   tagging, the CI verdict for what was just pushed is READ, not assumed**
   ([`conventions.md`](conventions.md) → *The CI verdict*) — a tag on a commit whose

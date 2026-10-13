@@ -107,9 +107,12 @@ questions are marked `needs-operator` and made answerable without context
 ([`prioritisation.md`](prioritisation.md) → *5. Where the human goes*); external waits
 get watchers, and project-owned questions go to the owning Project under
 [`iteration.md`](iteration.md)'s board rule. The run continues on every node it does
-not block. When the whole frontier is blocked — `graph.py next` exits `4` — classify the
-recorded reasons: external waits go on watchers, human decisions go into the question
-batch. Exit 4 does not prove a human gate or completion. A watcher keeps the recorded
+not block. When the whole frontier is blocked, `graph.py next` says which kind of block it
+is. Exit `6` means every remaining dependency leaf is a recorded watched wait: keep those
+watchers armed and take independent work ([`work-graph.md`](work-graph.md) → *Watched
+external waits*). Exit `4` means a mixed, unclassified, running or parked barrier remains:
+classify the recorded reasons, put external waits on watchers and human decisions into the
+question batch ([`waves.md`](waves.md)). Neither code proves a human gate or completion. A watcher keeps the recorded
 next action alive while no independent node is runnable. **When the board is empty, say so once**, and do not invent work to fill it.
 
 **This extends [`build.md`](build.md); it does not replace it.** That file's

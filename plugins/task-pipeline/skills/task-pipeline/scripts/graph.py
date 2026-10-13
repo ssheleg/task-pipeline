@@ -31,7 +31,8 @@ conditional on the code, never merely sequenced after it):
     0  the verb succeeded; for `next`, runnable nodes were printed
     1  a refusal — an invariant violated, a malformed verdict, a missing reason
     2  usage
-    3  nothing left to do: every node is done
+    3  nothing left to do: every node in scope is terminal — `done` or `parked`
+       (a parked node is finished for the walk; its reason stays on the node)
     4  nothing runnable: an unclassified, running or parked dependency remains
     5  external execution lease contention
     6  nothing runnable: all remaining dependency leaves are recorded watched waits
