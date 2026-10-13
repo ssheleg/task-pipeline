@@ -1,0 +1,60 @@
+{
+  "source": "0a7aa591ba82603aac1b0d765cc8cdb8d98b5378",
+  "scope": "previously unreached suffix only; not single full run",
+  "checks": [
+    {
+      "command": "npm run test:certify",
+      "exit_code": 0,
+      "elapsed_seconds": 321.02,
+      "log": "/tmp/r30-tp-test-certify.log"
+    },
+    {
+      "command": "npm run test:exposure",
+      "exit_code": 0,
+      "elapsed_seconds": 4.01,
+      "log": "/tmp/r30-tp-test-exposure.log"
+    },
+    {
+      "command": "npm run test:probe",
+      "exit_code": 0,
+      "elapsed_seconds": 66.21,
+      "log": "/tmp/r30-tp-test-probe.log"
+    },
+    {
+      "command": "npm run test:anchors",
+      "exit_code": 0,
+      "elapsed_seconds": 2.01,
+      "log": "/tmp/r30-tp-test-anchors.log"
+    },
+    {
+      "command": "npm run test:runner",
+      "exit_code": 0,
+      "elapsed_seconds": 2.01,
+      "log": "/tmp/r30-tp-test-runner.log"
+    },
+    {
+      "command": "npm run test:hooks",
+      "exit_code": 0,
+      "elapsed_seconds": 6.02,
+      "log": "/tmp/r30-tp-test-hooks.log"
+    },
+    {
+      "command": "npm run test:artifacts",
+      "exit_code": 0,
+      "elapsed_seconds": 2.01,
+      "log": "/tmp/r30-tp-test-artifacts.log"
+    },
+    {
+      "command": "npm run test:docs",
+      "exit_code": 0,
+      "elapsed_seconds": 6.03,
+      "log": "/tmp/r30-tp-test-docs.log"
+    },
+    {
+      "command": "npm run test:audit-regressions",
+      "exit_code": 0,
+      "elapsed_seconds": 102.34,
+      "log": "/tmp/r30-tp-test-audit-regressions.log"
+    }
+  ]
+}

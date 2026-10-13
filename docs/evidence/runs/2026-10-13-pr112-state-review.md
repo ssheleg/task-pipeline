@@ -3,7 +3,7 @@
 # PR112: independent semantics review and conservative state fixes
 
 Reviewed 2026-10-13, exact candidate
-`a77c990dc32b0505a49a51da1ef38112f24d7243` (PR112 after the PR115 fixture
+[a77c990d](https://github.com/ssheleg/task-pipeline/commit/a77c990dc32b0505a49a51da1ef38112f24d7243) (PR112 after the PR115 fixture
 repair). Review checkout: isolated branch `fix/pr112-conservative-state`.
 The original author's worktree and branch were not changed. This receipt is
 acceptance evidence for a bounded change, not a claim that every pipeline gap
@@ -100,7 +100,7 @@ integration or native-model quality is claimed.
 
 ## Independent review follow-up: explicit source admission
 
-The coordinator's review of `4fdbbca8f24378ff2719007d6b585c87705406ee`
+The coordinator's review of [4fdbbca8f24378ff2719007d6b585c87705406ee](https://github.com/ssheleg/task-pipeline/commit/4fdbbca8f24378ff2719007d6b585c87705406ee)
 found a remaining conservation hole. A configured but absent artifact directory,
 or a dangling `retro.md`, was silently excluded by `exists`/`is_file`. Both
 were independently reproduced: rebuilding with the dangling retro exited 0

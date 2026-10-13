@@ -1,0 +1,48 @@
+{
+  "before": [
+    {
+      "verdict": "PASS",
+      "check": "DESC_LENGTH",
+      "message": "description is 887/1024 chars",
+      "file": "task-pipeline/SKILL.md",
+      "line": 3
+    },
+    {
+      "verdict": "PASS",
+      "check": "BODY_BUDGET",
+      "message": "body is 266 lines / 4724 tokens (tiktoken:cl100k_base; budget 500 / 5000)",
+      "file": "task-pipeline/SKILL.md",
+      "line": null
+    },
+    {
+      "verdict": "PASS",
+      "check": "BODY_HEADROOM",
+      "message": "body is 4724/4750 tokens (tiktoken:cl100k_base), inside the working limit",
+      "file": "task-pipeline/SKILL.md",
+      "line": null
+    }
+  ],
+  "after": [
+    {
+      "verdict": "PASS",
+      "check": "DESC_LENGTH",
+      "message": "description is 887/1024 chars",
+      "file": "task-pipeline/SKILL.md",
+      "line": 3
+    },
+    {
+      "verdict": "PASS",
+      "check": "BODY_BUDGET",
+      "message": "body is 265 lines / 4639 tokens (tiktoken:cl100k_base; budget 500 / 5000)",
+      "file": "task-pipeline/SKILL.md",
+      "line": null
+    },
+    {
+      "verdict": "PASS",
+      "check": "BODY_HEADROOM",
+      "message": "body is 4639/4750 tokens (tiktoken:cl100k_base), inside the working limit",
+      "file": "task-pipeline/SKILL.md",
+      "line": null
+    }
+  ]
+}
