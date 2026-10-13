@@ -41,10 +41,19 @@ machine-state home, which hosts `lessons/` as task-pipeline's (sshlg-skills boar
 its `docs/working-rules/state-json.md`, "Other members' files under ~/.sshlg-skills/",
 ssheleg/sshlg-skills#209) — and `~/.task-pipeline/lessons/index.jsonl`
 otherwise, so a standalone install never creates the family's directory. When the family's
-directory appears later, the first run moves the standalone index there once and says so. Directories this
-script creates are 0700 (an existing one keeps its mode), the file 0600, written by a unique
-temp file and `os.replace`, under an exclusive lock (`index.jsonl.lock`, `flock`;
-`$TASK_PIPELINE_LESSONS_LOCK_TIMEOUT` seconds, default 10). git gets
+directory appears later, the first run merges the standalone index into it once — copying
+only lessons it lacks, the family copy winning on any lesson both hold, newer-format lines
+carried verbatim — renames the old file `.migrated`, and says so.
+
+**Every index operation runs under one lock** (`session`): the index directory's `.lock`
+(`flock`; `$TASK_PIPELINE_LESSONS_LOCK_TIMEOUT` seconds, default 10), and on the default path
+the standalone directory's `.lock` too, family first. Reads, writes, the merge, setting a
+corrupt file aside: all under it. An index that does not parse — the family's or the
+standalone one — is a derived file gone bad, never a reason to exit 1: it is kept as
+`.corrupt-<date>[-n]` and the run goes on; `rebuild --roots` re-derives it. One that cannot be
+READ is the one refusal, since its contents may be good. Directories this script creates are
+0700 (an existing one keeps its mode), the file 0600, written by a unique temp file and
+`os.replace`. git gets
 `$TASK_PIPELINE_GIT_TIMEOUT` seconds (default 60), and a git that does not answer is its own
 refusal, never read as a missing commit.
 
@@ -152,54 +161,128 @@ def LEGACY_INDEX() -> pathlib.Path:
     return pathlib.Path.home() / ".task-pipeline" / "lessons" / "index.jsonl"
 
 
-def migrate_default(idx: pathlib.Path) -> None:
-    """Bring the standalone index into the family's directory ONCE, and say so.
+def _unique(path: pathlib.Path, suffix: str) -> pathlib.Path:
+    dest = path.with_name(f"{path.name}.{suffix}")
+    n = 1
+    while dest.exists():
+        n += 1
+        dest = path.with_name(f"{path.name}.{suffix}-{n}")
+    return dest
 
-    The default changes when `~/.sshlg-skills` appears. Without this, the next run read a new,
-    empty index while every lesson so far sat in the old one — a silent switch. When both files
-    exist, both are read: the old one's entries are merged into the new one. Either way the old
-    file is then kept beside as `.migrated`, so the notice is printed once and no later run
-    reads two indexes.
 
-    It never refuses on the OLD file: a corrupt one is kept as `.corrupt-<date>` and skipped,
-    an unreadable one is left where it is and named — neither blocks the command, and least of
-    all the `rebuild` that would repair the new one."""
+def set_aside(path: pathlib.Path) -> pathlib.Path:
+    """Rename a corrupt index to `<name>.corrupt-<UTC date>[-N]` beside it. Called only under
+    `session`'s lock, so no other run can have moved it first; an OSError is still a refusal
+    that names the file, never a traceback."""
+    dest = _unique(path, "corrupt-" + datetime.now(timezone.utc).strftime("%Y-%m-%d"))
+    try:
+        os.replace(path, dest)
+    except OSError as exc:
+        raise Refused(f"the corrupt index {path} could not be set aside ({type(exc).__name__}) — "
+                      "nothing was written; move it away by hand")
+    return dest
+
+
+def open_index(idx: pathlib.Path, notes: list[str]) -> dict[str, dict]:
+    """The index's entries — the same corrupt handling for the family index and the standalone
+    one: a file that does not parse is a DERIVED file gone bad, never a reason to exit 1. It is
+    set aside as `.corrupt-<date>[-n]` and the run goes on from empty; `rebuild --roots`
+    re-derives it. A file that cannot be READ (permissions) is the one refusal: its contents may
+    be good, so nothing replaces it."""
+    try:
+        return load(idx)
+    except IndexCorrupt:
+        dest = set_aside(idx)
+        notes.append(f"the index {idx} could not be parsed — kept as {dest.name}; "
+                     "`lessons.py rebuild --roots <dir>` re-derives it from the retros")
+        _FUTURE[str(idx)] = []
+        return {}
+
+
+def _merge_legacy(idx: pathlib.Path, notes: list[str]) -> None:
+    """Bring the standalone index into the family's, ONCE. Runs under BOTH directories' locks.
+
+    A merge never overwrites: only lessons the family index lacks are copied, the family copy
+    wins on any lesson in both, and newer-format lines from either file are carried verbatim.
+    The old file is then renamed `.migrated` — so the notice is printed once, by one run."""
     legacy = LEGACY_INDEX()
     if idx == legacy or not legacy.is_file():
         return
-    both = idx.exists()
     try:
         old = load(legacy)
     except IndexCorrupt:
         dest = set_aside(legacy)
-        print(f"lessons: the old index {legacy} is corrupt — kept as {dest.name}, not moved; "
-              "`lessons.py rebuild --roots <dir>` re-derives the lessons from the retros",
-              file=sys.stderr)
+        notes.append(f"the old index {legacy} is corrupt — kept as {dest.name}, not merged; "
+                     "`lessons.py rebuild --roots <dir>` re-derives the lessons from the retros")
         return
     except IndexUnreadable as exc:
-        print(f"lessons: {exc} — the old index was not moved", file=sys.stderr)
+        notes.append(f"{exc} — the old index was not merged")
         return
-    with locked(idx):
-        entries = load(idx) if idx.exists() else {}
-        for e in old.values():
-            for o in e["origins"]:
-                le = dict(o["lesson"], schema="lesson/1", classKey=e["classKey"],
-                          origin={"project": o["project"], "commit": o["commit"], "retro": o["retro"]})
-                merge(entries, [le])
-                if o.get("memory"):
-                    cur = entries[e["classKey"]]
-                    origins = [dict(x, memory=o["memory"]) if _origin_key(x) == _origin_key(o)
-                               and not x.get("memory") else x for x in cur["origins"]]
-                    entries[e["classKey"]] = derive(origins)
-        save(idx, entries)
+    old_future = list(_FUTURE.get(str(legacy), []))
+    both = idx.exists()
+    new = open_index(idx, notes) if both else {}
+    copied = [k for k in sorted(old) if k not in new]
+    for k in copied:
+        new[k] = old[k]
+    future = list(_FUTURE.get(str(idx), [])) if both else []
+    future += [ln for ln in old_future if ln not in future]
+    _FUTURE[str(idx)] = future
+    save(idx, new)
+    dest = _unique(legacy, "migrated")
+    try:
+        os.replace(legacy, dest)
+    except OSError as exc:
+        raise Refused(f"merged the old index into {idx} but could not rename {legacy} "
+                      f"({type(exc).__name__}) — remove it by hand so one index is read")
+    what = "both index files existed — read both: merged" if both else "moved the local index from"
+    notes.append(f"{what} {legacy} into {idx} — {len(copied)} of {len(old)} lessons copied, the "
+                 f"family copy kept wherever both had one; the old file is kept as {dest.name}")
+
+
+class session:
+    """Every index operation, under one lock. `with session(idx, default) as s:` takes the
+    index directory's lock — and, on the default path, the standalone directory's too (family
+    first, always in that order) — then merges the standalone index once, sets a corrupt index
+    aside, and loads. `s.entries` is the index; `s.save()` writes it. Notes print on exit."""
+
+    def __init__(self, idx: pathlib.Path, default: bool):
+        self.idx, self.default = idx, default
+        self.notes: list[str] = []
+        self.locks: list[locked] = []
+        self.entries: dict[str, dict] = {}
+
+    def __enter__(self):
+        dirs = [self.idx.parent]
+        legacy = LEGACY_INDEX()
+        if self.default and legacy != self.idx and legacy.parent.is_dir():
+            dirs.append(legacy.parent)
         try:
-            os.replace(legacy, legacy.with_name(legacy.name + ".migrated"))
-        except OSError as exc:
-            raise Refused(f"merged the old index into {idx} but could not rename {legacy} "
-                          f"({type(exc).__name__}) — remove it by hand so one index is read")
-    what = ("both index files existed — read both: merged" if both else "moved the local index from")
-    print(f"lessons: {what} {legacy} into {idx} ({len(old)} lessons) — ~/.sshlg-skills now "
-          "exists; the old file is kept as index.jsonl.migrated", file=sys.stderr)
+            for d in dirs:
+                lk = locked(d)
+                lk.__enter__()
+                self.locks.append(lk)
+            if self.default:
+                _merge_legacy(self.idx, self.notes)
+            self.entries = open_index(self.idx, self.notes)
+        except BaseException:
+            self._release()
+            raise
+        return self
+
+    def save(self) -> None:
+        save(self.idx, self.entries)
+
+    def _release(self) -> None:
+        for lk in reversed(self.locks):
+            lk.__exit__(None, None, None)
+        self.locks = []
+        for n in self.notes:
+            print(f"lessons: {n}", file=sys.stderr)
+        self.notes = []
+
+    def __exit__(self, *exc):
+        self._release()
+        return False
 
 
 def _git(root: pathlib.Path, *args: str) -> str | None:
@@ -506,18 +589,6 @@ def load(path: pathlib.Path) -> dict[str, dict]:
     return out
 
 
-def set_aside(path: pathlib.Path) -> pathlib.Path:
-    """Rename a corrupt index to `<name>.corrupt-<UTC date>[-N]` beside it, and return that."""
-    stamp = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-    dest = path.with_name(f"{path.name}.corrupt-{stamp}")
-    n = 1
-    while dest.exists():
-        n += 1
-        dest = path.with_name(f"{path.name}.corrupt-{stamp}-{n}")
-    os.replace(path, dest)
-    return dest
-
-
 def dump(entries: dict[str, dict], future: list[str] | None = None) -> str:
     return ("".join(json.dumps(entries[k], ensure_ascii=False, sort_keys=True) + "\n"
                     for k in sorted(entries))
@@ -525,11 +596,12 @@ def dump(entries: dict[str, dict], future: list[str] | None = None) -> str:
 
 
 class locked:
-    """An exclusive lock around a whole read-modify-write of the index (graph.py's `held`,
-    with a timeout: a writer that cannot get the lock refuses rather than waiting forever)."""
+    """An exclusive lock on an index DIRECTORY (`<dir>/.lock`), around every operation on any
+    file in it — the index, its `.migrated` and `.corrupt-*` copies (graph.py's `held`, with a
+    timeout: a writer that cannot get the lock refuses rather than waiting forever)."""
 
-    def __init__(self, path: pathlib.Path):
-        self.lock = path.parent / (path.name + ".lock")
+    def __init__(self, directory: pathlib.Path):
+        self.lock = directory / ".lock"
         self.fh = None
 
     def __enter__(self):
@@ -659,11 +731,11 @@ def cmd_add(a, idx: pathlib.Path) -> int:
     errors += problems
     if errors:
         raise Refused("refused, nothing written:\n  " + "\n  ".join(errors))
-    with locked(idx):
-        entries = load(idx)
+    with session(idx, a.default_index) as ss:
+        entries = ss.entries
         changed = merge(entries, lessons)
         if changed:
-            save(idx, entries)
+            ss.save()
     n = len(lessons)
     note = (f" · {private} entr{'y carries' if private == 1 else 'ies carry'} no Lesson line "
             "(project-private)") if private else ""
@@ -685,11 +757,12 @@ def _hit(q: str, words: set[str]) -> bool:
 
 
 def cmd_query(a, idx: pathlib.Path) -> int:
-    if not idx.exists():
+    with session(idx, a.default_index) as ss:
+        entries = ss.entries
+    if not entries and not idx.exists():
         print(f"lessons: local index absent ({idx}) — nothing to read; the retro and "
               "learned.md still run")
         return 0
-    entries = load(idx)
     query = [part.strip().casefold() for arg in a.nouns for part in arg.split(",") if part.strip()]
     qwords = set(query) | {w for q in query for w in _words(q)}
     scored = []
@@ -771,19 +844,12 @@ def cmd_rebuild(a, idx: pathlib.Path) -> int:
         unresolved += unres
         lessons += mine
         problems += [f"{repo.name}: {p}" for p in probs]
-    with locked(idx):
-        # The previous index only lends its memory ids. A corrupt one is the case this verb
-        # exists for (`load` names rebuild as the remedy), so it is replaced, not refused.
-        # The previous index lends its memory ids. Unreadable (permissions) means its contents
-        # may be good: refuse and write nothing. Unparseable is the case this verb exists for:
-        # keep it as `.corrupt-<date>`, then rebuild without its memory ids.
-        try:
-            old = load(idx) if idx.exists() else {}
-        except IndexCorrupt:
-            dest = set_aside(idx)
-            old = {}
-            problems.append(f"the previous index could not be parsed — kept as {dest.name}; "
-                            "rebuilt without its recorded memory ids")
+    with session(idx, a.default_index) as ss:
+        # The previous index lends its memory ids. `session` already refused an unreadable one
+        # (its contents may be good) and set a corrupt one aside; its notes go to stderr as for
+        # every verb, and into this verb's report as well.
+        old = ss.entries
+        problems += [f"the previous index: {n}" for n in ss.notes]
         memory = {(o["project"], o["retro"]): o["memory"]
                   for e in old.values() for o in e["origins"] if o.get("memory")}
         entries: dict[str, dict] = {}
@@ -795,7 +861,8 @@ def cmd_rebuild(a, idx: pathlib.Path) -> int:
             origins = [dict(o, memory=memory[_origin_key(o)]) if _origin_key(o) in memory else o
                        for o in e["origins"]]
             entries[e["classKey"]] = derive(origins)
-        save(idx, entries)
+        ss.entries = entries
+        ss.save()
     print(f"lessons: rebuilt from {seen_files} retro file{'s' if seen_files != 1 else ''} in "
           f"{len(keys)} repositor{'y' if len(keys) == 1 else 'ies'} · {len(entries)} lessons · "
           f"{private} private entries skipped · {unresolved} with a commit that does not resolve")
@@ -805,7 +872,8 @@ def cmd_rebuild(a, idx: pathlib.Path) -> int:
 
 
 def cmd_candidates(a, idx: pathlib.Path) -> int:
-    entries = load(idx)
+    with session(idx, a.default_index) as ss:
+        entries = ss.entries
     hits = sorted((e for e in entries.values() if e["projects"] >= a.min_projects),
                   key=lambda e: (-e["projects"], e["classKey"]))
     for e in hits:
@@ -837,7 +905,8 @@ def cmd_emit(a, idx: pathlib.Path) -> int:
     Either way the project travels as the same pseudonymous key the index holds, never a
     `project:<slug>` id, and the commit as `commit:` + 12 hex — the store's redactor removes a
     40-hex SHA as a credential shape and keeps exactly that short form."""
-    e = _resolve(load(idx), a.id)
+    with session(idx, a.default_index) as ss:
+        e = _resolve(ss.entries, a.id)
     o = _this_origin(e, repo_root(pathlib.Path(a.root or ".")))
     le = o["lesson"]
     if a.tool == "observatory_lesson":
@@ -887,8 +956,8 @@ def cmd_record(a, idx: pathlib.Path) -> int:
     if not isinstance(answer, dict):
         print("lessons: the answer is not a JSON object", file=sys.stderr)
         return 2
-    with locked(idx):
-        entries = load(idx)
+    with session(idx, a.default_index) as ss:
+        entries = ss.entries
         e = _resolve(entries, a.id)
         o = _this_origin(e, root)
         if answer.get("error"):
@@ -913,7 +982,7 @@ def cmd_record(a, idx: pathlib.Path) -> int:
         origins = [dict(x, memory=memory) if _origin_key(x) == _origin_key(o) else x
                    for x in e["origins"]]
         entries[e["classKey"]] = derive(origins)
-        save(idx, entries)
+        ss.save()
     line = f"event: lessons — recorded {e['id']} as {memory} — {_now()}"
     _ledger_line(ledger, line)
     print(line)
@@ -921,7 +990,9 @@ def cmd_record(a, idx: pathlib.Path) -> int:
 
 
 def cmd_show(a, idx: pathlib.Path) -> int:
-    print(json.dumps(_resolve(load(idx), a.id), ensure_ascii=True, indent=1, sort_keys=True))
+    with session(idx, a.default_index) as ss:
+        e = _resolve(ss.entries, a.id)
+    print(json.dumps(e, ensure_ascii=True, indent=1, sort_keys=True))
     return 0
 
 
@@ -978,12 +1049,9 @@ def main(argv: list[str]) -> int:
     if a.cmd == "path":
         print(idx)
         return 0
-    try:
-        if not a.index and not os.environ.get(ENV_INDEX):
-            migrate_default(idx)
-    except Refused as exc:
-        print(f"lessons: {exc}", file=sys.stderr)
-        return 1
+    # The default path (no --index, no $TASK_PIPELINE_LESSONS) is the one a standalone index
+    # may still need merging into: `session` does it, once, under both directories' locks.
+    a.default_index = not a.index and not os.environ.get(ENV_INDEX)
     verbs = {"add": cmd_add, "query": cmd_query, "rebuild": cmd_rebuild, "candidates": cmd_candidates,
              "show": cmd_show, "emit-observatory": cmd_emit, "record": cmd_record}
     try:

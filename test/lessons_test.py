@@ -508,6 +508,72 @@ def main():
     rc, out, err = run("candidates", "--min-projects", "1", env_extra={"HOME": str(h4)})
     ok("both" not in err and "in-the-old-file" in out, "said once: the old file is merged and set aside")
 
+    # --- cycle 5: every index-file operation under one lock; corrupt handling the same for both
+    # files; a merge never overwrites. Each scenario is run by several processes AT ONCE.
+    def parallel(n, args, home, stdin=None):
+        env = {k: v for k, v in os.environ.items() if k != "TASK_PIPELINE_LESSONS"}
+        env["HOME"] = str(home)
+        procs = [subprocess.Popen([sys.executable, str(SCRIPT), *args], cwd=a, env=env,
+                                  stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                 for _ in range(n)]
+        outs = [pr.communicate(input=(stdin or "").encode(), timeout=120) for pr in procs]
+        return [(pr.returncode, o.decode("utf-8", "replace"), e.decode("utf-8", "replace"))
+                for pr, (o, e) in zip(procs, outs)]
+
+    def legacy_of(h):
+        return h / ".task-pipeline" / "lessons" / "index.jsonl"
+
+    def family_of(h):
+        return h / ".sshlg-skills" / "lessons" / "index.jsonl"
+
+    def entry_line(class_key, title):
+        le = dict(single, classKey=class_key, title=title)
+        h0 = tree("tp-lessons-mk-")
+        run("add", "--json", "-", cwd=a, stdin=json.dumps(le), index=h0 / "i.jsonl")
+        return (h0 / "i.jsonl").read_text(encoding="utf-8").strip()
+
+    # (1) a good old index and a corrupt new one: rebuild and query both exit 0, in parallel
+    h5 = tree("tp-lessons-c5a-")
+    legacy_of(h5).parent.mkdir(parents=True)
+    legacy_of(h5).write_text(entry_line("old-and-good", "an old lesson that is fine") + "\n", encoding="utf-8")
+    family_of(h5).parent.mkdir(parents=True)
+    family_of(h5).write_text("{corrupt\n", encoding="utf-8")
+    res = parallel(3, ["rebuild", "--roots", str(roots)], h5) + parallel(3, ["query", "gate"], h5)
+    ok(all(rc == 0 and "Traceback" not in err for rc, _, err in res),
+       f"good old + corrupt new: rebuild and query exit 0 ({[(rc, err[-160:]) for rc, _, err in res if rc]})")
+
+    # (2) six concurrent queries on a corrupt old index with the family directory present
+    bad_runs = []
+    for trial in range(30):
+        h6 = tree("tp-lessons-c5b-")
+        legacy_of(h6).parent.mkdir(parents=True)
+        legacy_of(h6).write_text("not json\n", encoding="utf-8")
+        (h6 / ".sshlg-skills").mkdir()
+        for rc, _, err in parallel(6, ["query", "gate"], h6):
+            if rc != 0 or "Traceback" in err:
+                bad_runs.append((trial, rc, err[-200:]))
+        shutil.rmtree(h6, ignore_errors=True)
+    ok(not bad_runs, f"6 concurrent queries x 30 trials on a corrupt old index: no traceback ({bad_runs[:2]})")
+
+    # (3) a stale old title never overwrites a newer family title; (4) a future line survives
+    h7 = tree("tp-lessons-c5c-")
+    legacy_of(h7).parent.mkdir(parents=True)
+    future_line = json.dumps({"schema": "lesson-index/2", "classKey": "next-format", "x": 1})
+    legacy_of(h7).write_text(entry_line("shared-class", "the stale old title of it") + "\n"
+                             + entry_line("only-in-old", "a lesson only the old file has") + "\n"
+                             + future_line + "\n", encoding="utf-8")
+    family_of(h7).parent.mkdir(parents=True)
+    family_of(h7).write_text(entry_line("shared-class", "the newer family title") + "\n", encoding="utf-8")
+    res = parallel(4, ["candidates", "--min-projects", "1"], h7)
+    body7 = family_of(h7).read_text(encoding="utf-8")
+    titles = {json.loads(ln)["classKey"]: json.loads(ln).get("title") for ln in body7.splitlines()}
+    ok(all(rc == 0 for rc, _, _ in res) and titles.get("shared-class") == "the newer family title",
+       f"the family copy wins: a stale old title never overwrites it ({titles.get('shared-class')!r})")
+    ok("only-in-old" in titles, "a lesson only the old file has is copied across")
+    ok(future_line in body7, "a lesson-index/2 line survives the merge verbatim")
+    ok(not legacy_of(h7).exists() and len(list(legacy_of(h7).parent.glob("index.jsonl.migrated*"))) == 1,
+       "the old file is renamed .migrated, once, by exactly one of the concurrent runs")
+
     # --- lock contention: a held lock makes add refuse, nothing written
     try:
         import fcntl
@@ -515,7 +581,7 @@ def main():
         fcntl = None
     if fcntl:
         before = idx.read_bytes()
-        fh = open(idx.parent / "index.jsonl.lock", "a+")
+        fh = open(idx.parent / ".lock", "a+")
         fcntl.flock(fh.fileno(), fcntl.LOCK_EX)
         t0 = time.time()
         late = dict(single, classKey="late-writer")
