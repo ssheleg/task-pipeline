@@ -7,17 +7,6 @@
   "log_sha256": "b629ef1532d5d3f1a59b2fff8b6c7954e896685f22e5776c93931008cd8527ab",
   "scope": "Composed TP2 and R09 on independently reviewed PR11431e0; hosted integration, release and installed/native quality are separate gates.",
   "skips": [
-    "  ok  the shipped template validates (honest NOT_RUNs)",
-    "  ok  NOT_RUN without a reason is refused",
-    "  ok  the shipped template is an honest contact sheet: NOT_RUN, never PASS",
-    "  ok  one frame that did not run makes the verdict NOT_RUN, never PASS",
-    "  ok  a full flagship record passes the floor, and the absent validator says NOT_RUN",
-    "  ok  a validator older than --check-record is NOT_RUN, never PASS",
-    "  ok  a missing validator binary is NOT_RUN with the reason",
-    "  ok  a linter that does not offer --lint is NOT_RUN \u2014 exit 3, never 0",
-    "  ok  tokens: no Figma export is NOT_RUN \u2014 exit 3, never 0",
-    "  ok  tokens: an export with no variables is NOT_RUN, not a pass over nothing",
-    "skipped: the engine-redactor case \u2014 OBSERVATORY_ENGINE_DIR is unset \u2014 the engine's redactor is not on this machine's path",
-    "  ok  the toggle cycle and reasoned NOT_RUN are enforced"
+    "skipped: the engine-redactor case \u2014 OBSERVATORY_ENGINE_DIR is unset \u2014 the engine's redactor is not on this machine's path"
   ]
 }
