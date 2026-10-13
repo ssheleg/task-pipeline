@@ -102,6 +102,24 @@ class Candidate:
         finally:
             path.unlink()
 
+    def destination(self):
+        fetch = self.git('remote', 'get-url', '--all', 'origin').splitlines()
+        push = self.git('remote', 'get-url', '--push', '--all', 'origin').splitlines()
+        need(len(fetch) == 1 and push == fetch, 'one identical effective fetch/push destination required')
+        # An already resolved URL can itself match another rewrite when used
+        # literally. Resolve fetch rewrites through Git and conservatively refuse
+        # matching push-only prefixes (explicit origin.pushurl would mask these).
+        need(self.git('ls-remote', '--get-url', fetch[0]) == fetch[0],
+             'literal bound destination would be rewritten')
+        rewrites = self.git('config', '--null', '--get-regexp', r'^url\..*\.pushinsteadof$', check=False)
+        need(rewrites.returncode in (0, 1), 'cannot inspect push URL rewrites')
+        for record in rewrites.stdout.split('\0'):
+            if not record: continue
+            key, separator, prefix = record.partition('\n')
+            need(separator and not fetch[0].startswith(prefix),
+                 'literal bound destination would be rewritten')
+        return fetch[0]
+
     def source(self):
         need(self.git('rev-parse', '--is-shallow-repository') == 'false', 'full history required')
         need(not self.git('status', '--porcelain'), 'clean source required')
@@ -124,20 +142,21 @@ class Candidate:
         self.git('ls-files', '--error-unmatch', 'scripts/release_candidate.py')
         need(read_file(helper) == read_file(Path(__file__).resolve()), 'executing helper differs from tracked candidate source')
         return dict(commit=self.git('rev-parse', 'HEAD'), tree=self.git('rev-parse', 'HEAD^{tree}'),
-                    origin=self.git('remote', 'get-url', 'origin'),
+                    origin=self.destination(),
                     suite_sha256=hashlib.sha256(read_file(self.root / 'package.json')).hexdigest(),
                     helper_sha256=hashlib.sha256(read_file(Path(__file__).resolve())).hexdigest(),
                     hook_sha256=hashlib.sha256(read_file(self.root / HOOK)).hexdigest())
 
     def remote(self):
-        lines = self.git('ls-remote', '--symref', 'origin', 'HEAD').splitlines()
+        destination = self.destination()
+        lines = self.git('ls-remote', '--symref', destination, 'HEAD').splitlines()
         branches = [s.split()[1] for s in lines if s.startswith('ref: refs/heads/')]
         need(len(branches) == 1, 'actual default branch unavailable')
         branch = branches[0]
-        self.git('fetch', '--no-tags', 'origin', branch)
+        self.git('fetch', '--no-tags', destination, branch)
         need(self.git('merge-base', '--is-ancestor', 'HEAD', 'FETCH_HEAD', check=False).returncode == 0,
              'HEAD not reachable from remote default')
-        refs = self.git('ls-remote', 'origin', 'refs/tags/' + self.tag)
+        refs = self.git('ls-remote', destination, 'refs/tags/' + self.tag)
         need(not refs, 'remote tag exists; published refs are immutable')
         return branch
 
@@ -187,7 +206,7 @@ class Candidate:
         with self.lock():
             need(not self.record.exists() and not self.record.is_symlink(), 'candidate already recorded; no automatic replacement')
             source = self.source(); branch = self.remote()
-            self.git('fetch', '--tags', 'origin')
+            self.git('fetch', '--tags', source['origin'])
             need(self.git('show-ref', '--verify', 'refs/tags/' + self.tag, check=False).returncode != 0,
                  'unowned local tag already exists')
             context = self.context(context_root, source)
@@ -266,7 +285,7 @@ class Candidate:
             private(self.log)
             need(digest_file(self.log) == evidence.get('log_sha256'), 'suite output changed')
             need(self.remote() == data['default_branch'], 'remote default branch changed')
-            command = ['git', 'push', 'origin', data['object'] + ':refs/tags/' + self.tag]
+            command = ['git', 'push', data['source']['origin'], data['object'] + ':refs/tags/' + self.tag]
             observation = self.observe_hook(data['context'], command)
             data['hook_observation'] = observation; write_json(self.record, data)
             need(observation['exit'] == 0, 'existing release hook refused publication')
@@ -276,7 +295,7 @@ class Candidate:
                 r = self.git(*command[1:], check=False)
                 data.update(state='PUSH_UNCONFIRMED', push=dict(exit=r.returncode, stdout=r.stdout, stderr=r.stderr))
                 if r.returncode == 0:
-                    remote = self.git('ls-remote', 'origin', 'refs/tags/' + self.tag, 'refs/tags/' + self.tag + '^{}')
+                    remote = self.git('ls-remote', data['source']['origin'], 'refs/tags/' + self.tag, 'refs/tags/' + self.tag + '^{}')
                     refs = dict((line.split()[1], line.split()[0]) for line in remote.splitlines())
                     data['remote_readback'] = refs
                     if refs.get('refs/tags/' + self.tag) == data['object'] and refs.get('refs/tags/' + self.tag + '^{}') == data['source']['commit']:

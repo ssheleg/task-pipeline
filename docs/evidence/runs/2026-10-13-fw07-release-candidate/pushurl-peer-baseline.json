@@ -1,0 +1,1 @@
+{"source": "abf3dff485788528ab3f0dbfe3139946a6a3ab78", "case": "configured pushurl differs from checked origin", "refusal": "push not confirmed; reconcile remote read-only before any retry", "checked_origin_tag": "", "alternate_tag": "v1.2.3", "receipt_state": "PUSH_UNCONFIRMED", "scope": "Both remotes are disposable local bare fixtures; all temporary trees removed on exit."}

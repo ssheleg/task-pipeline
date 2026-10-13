@@ -174,7 +174,7 @@ with tempfile.TemporaryDirectory(prefix='tp-release-candidate-') as folder:
     git(origin,'tag','-d',c.tag)
     c=prepared();c.check();original_git=c.git
     def missing_readback(*args,**kwargs):
-        if args[:3]==('ls-remote','origin','refs/tags/'+c.tag) and len(args)==4:return ''
+        if args[:1]==('ls-remote',) and len(args)==4 and args[2]=='refs/tags/'+c.tag:return ''
         return original_git(*args,**kwargs)
     c.git=missing_readback
     refuse(c.publish,'push not confirmed');assert c.load()['state']!='PUBLISHED'
@@ -189,6 +189,28 @@ with tempfile.TemporaryDirectory(prefix='tp-release-candidate-') as folder:
         assert c.observe_hook(context,command)['exit']==expected;checks+=1
     ledger.write_text('Run: fixture\nstage: 6 tests — verdict pass\n')
     assert c.observe_hook(context,['git','push','origin','a'*40+':refs/tags/v1.2.3'])['exit']==0;checks+=1
+    # Effective push destinations, including Git rewrites, cannot silently
+    # diverge from the origin whose absence/default branch we checked.
+    alternate=base/'alternate.git';git(base,'init','--bare',str(alternate))
+    for kind in ('different','multiple','rewrite','literal-rewrite'):
+        c=prepared();c.check()
+        if kind=='different':git(c.root,'config','remote.origin.pushurl',str(alternate))
+        if kind=='multiple':
+            git(c.root,'config','--add','remote.origin.pushurl',str(origin))
+            git(c.root,'config','--add','remote.origin.pushurl',str(alternate))
+        if kind in ('rewrite','literal-rewrite'):
+            if kind=='literal-rewrite':git(c.root,'config','remote.origin.pushurl',str(origin))
+            git(c.root,'config','url.'+str(alternate)+'.pushInsteadOf',str(origin))
+        refuse(c.publish,'literal bound destination' if kind=='literal-rewrite' else 'effective fetch/push destination')
+        remote_absent();assert not git(alternate,'tag','-l',c.tag)
+    c=prepared();c.check();original_git=c.git
+    def changed_pushurl(*args,**kwargs):
+        if args[:1]==('push',):git(c.root,'config','remote.origin.pushurl',str(alternate))
+        return original_git(*args,**kwargs)
+    c.git=changed_pushurl;c.publish()
+    assert git(origin,'rev-parse',c.tag)==c.load()['object']
+    assert not git(alternate,'tag','-l',c.tag);checks+=1
+    git(origin,'tag','-d',c.tag)
     # Real owned child-process cleanup, without invoking an actual broad suite.
     driver=base/'suite-driver.py'
     driver.write_text("""import importlib.util,json,pathlib,sys,types

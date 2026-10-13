@@ -105,3 +105,30 @@ guard was weakened to accommodate the expectation.
 This is source-level review evidence only; the final implementation still needs
 independent acceptance and the full serialized owner gate. No real tag was created,
 changed or pushed by these tests, and no v1.94.1 repair source was edited.
+
+## Effective destination correction
+
+A second independent probe found an actual unintended write at abf3dff:
+`remote.origin.pushurl` pointed at another owned bare repository. The helper checked
+fetch origin but pushed to the alternate remote, then correctly reported unconfirmed
+readback too late to prevent that mutation. The [exact-source probe](pushurl-peer-probe.py)
+and [baseline result](pushurl-peer-baseline.json) preserve the failure; all those
+remote repositories were disposable local fixtures.
+
+The helper now requires one identical effective fetch/push URL, checks that its
+literal use will not undergo another rewrite, and uses the bound URL for default
+branch/tag checks, push and readback. Multiple push destinations and matching
+push-only prefixes refuse. It reads Git configuration and never changes it.
+Git documents that `pushInsteadOf` rewrites push destinations and that an explicit
+remote pushurl masks that setting for the named remote; this is why checking only
+the named remote is insufficient when switching to a literal URL.
+[Git configuration reference](https://git-scm.com/docs/git-config#Documentation/git-config.txt-urlltbasegtpushInsteadOf)
+
+An attempted command-scoped temporary remote probe failed with `No such remote` on
+the local Git and is retained in [the first correction output](destination-first-failure.txt).
+The correction uses Git's literal fetch URL expansion and reads matching push-only
+prefixes conservatively. [Final52 controls](destination52.txt) pass, including alternate
+pushurl, multiple pushurl, pushInsteadOf, explicit-pushurl-masked rewrite, and a late
+pushurl change that cannot redirect the already bound literal destination.
+No claim of resistance to an adversarial process modifying Git configuration during
+an operation is made. No real repository tag or configuration was changed by tests.
