@@ -1,0 +1,8 @@
+{
+  "source": "7e91ced85ca5cfd7a4b3206beee97a116f3c1261",
+  "command": [
+    "python3",
+    "test/validate.py"
+  ],
+  "exit_code": 1
+}

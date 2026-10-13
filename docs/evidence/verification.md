@@ -1,5 +1,12 @@
 # Verification — task-pipeline
 
+## Shipped state — v1.94.1 (release target; NOT SHIPPED yet)
+
+The [repair packet](runs/2026-10-13-release-1941/README.md) records the failed
+v1.94.0 release and bounded local candidate validation. Publication, final accepted
+source full validation and installation remain pending. The historical candidate
+header below does not override this state; no completed run stamp is added.
+
 ## Shipped state — v1.94.0 (release target; NOT SHIPPED yet)
 
 This version header binds the candidate artifact for the release validator. It does

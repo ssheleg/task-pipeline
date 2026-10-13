@@ -1,0 +1,14 @@
+{
+  "baseline-validate": {
+    "sha256": "0cd615d0a2af3b551eee1407fd802a9092e911c4d6e69431e15f6e77a1ec9b5a",
+    "output": "FAIL: task-pipeline structure invalid\n - docs/evidence/retro.md: 1 release(s) after the newest run stamp are named nowhere in `## Releases that carry no stamp` \u2014 v1.94.0. Stamp the run at stage 10, or extend that section's range in the SAME commit as the release \u2014 inside a **bold** lead-in, because a version merely mentioned in that section's prose is a mention and no longer excuses a release. A release that neither ran the pipeline nor recorded that it did not is the shape this section exists to make impossible: the cold-retirement trigger reads the last five stamps and has nothing to read across a gap nobody declared. Note where this fires: `validate.yml` ignores tag pushes, so the branch run cannot see a tag that does not exist yet \u2014 `release.yml` runs the suite on the tag's own tree, where it does\n"
+  },
+  "first-candidate-validate": {
+    "sha256": "1ad2ddfa68c4e2778a38abadb5b650b0e727dc7239101fb4b78b8c57fbe86952",
+    "output": "FAIL: task-pipeline structure invalid\n - docs/evidence/verification.md: `Shipped state \u2014 v1.94.0` against package.json 1.94.1 \u2014 the header sat six releases stale once already; bump it in the same change as the version, or the ledger claims a state nobody shipped\n - CHANGELOG.md: the newest section talks about guards but states no `Guards: N \u2192 M` count this check can read \u2014 it went dormant here once and the suite stayed green over an unread number; write the count in that shape or say nothing about guards\n"
+  },
+  "second-candidate-validate": {
+    "sha256": "37dffbe3ecfe4f0e90782aed79a7c0dfcf4d3870d0b9f498ea0fbda5e4ebd8eb",
+    "output": "FAIL: task-pipeline structure invalid\n - CHANGELOG.md: the newest section talks about guards but states no `Guards: N \u2192 M` count this check can read \u2014 it went dormant here once and the suite stayed green over an unread number; write the count in that shape or say nothing about guards\n"
+  }
+}
