@@ -12,9 +12,11 @@ new routing overhead is feasibility only, not observed host or billing savings.
 The plan freezes conservation, exact on-entry/resume routes, custom-profile scope,
 consumer migration, negative controls and portable install/read-accounting limits.
 
-Exact next task: parent reviews the packet and the named pre-existing UX prerequisite
-contradiction. After that review and current release completion, freeze the paragraph
-migration map on a new implementation branch. B-043 is still open; no runtime/model
+Parent accepted the bounded extraction packet and the separately recovered
+[UX prerequisite correction](evidence/plans/2026-10-13-fw07-ux-prerequisite-correction.md).
+Exact next task after current release completion: normalize the two stale package
+prerequisites in a separate commit with actual negative controls, then freeze the
+paragraph migration map on a new implementation branch. B-043 is still open; no runtime/model
 quality or full-suite verdict is claimed by this planning slice.
 
 ## Release candidate — v1.94.0 (2026-10-13)
