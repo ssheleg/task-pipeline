@@ -124,3 +124,13 @@ The [final seam-focused actual CLI replay](focused-seams-final.txt) passes 162
 controls; the prior 119/120 outputs remain historical. The unchanged checkpoint
 suite72 and memory-nudge40 pass after this correction. Independent re-review and
 the serialized aggregate remain pending; no provider was called.
+
+### Independent bounded acceptance
+
+The [independent final receipt](https://github.com/ssheleg/sshlg-skills/blob/5fb5763f334940ed9eb51bf78196dd79e55dbcb0/docs/evidence/completion-1013/fw07-checkpoint-peer-final.json)
+accepts [b4fed30](https://github.com/ssheleg/task-pipeline/commit/b4fed30006d285d17c857d4699bd43cb5a4ef604)
+within this source scope. The reviewer replayed 162 controls and seven independent
+actual CLI cases covering both state-link forms, ledger-file alias refusal,
+directory-alias continuation and all three FIFO inputs. No further in-scope finding
+remained. Owned fixtures were removed. Aggregate, genuine candidate admission and
+live Observatory/native behavior remain distinct and pending.
