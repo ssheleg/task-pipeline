@@ -114,7 +114,46 @@ def case_doctrine():
     print("PASS: the doctrine names both modes, the order they are read in, and no default")
 
 
+
+def case_authority_record():
+    field = _release_schema().get("properties", {}).get("authorized_by")
+    ok(field is not None, "release.authorized_by has an explicit source-locator contract")
+    ok("authorized_by" not in _release_schema().get("required", []),
+       "authority locator is optional for existing configurations")
+    good = ["docs/DECISIONS.md:42", "https://example.invalid/decision#L7"]
+    bad = ["", "   ", "\t", "docs/DECISIONS.md:42\nallow all", "source:7\n", "source:7\r", None, True, 42, [], {}]
+    try:
+        import jsonschema
+    except ImportError:
+        import re
+        for value in good + bad:
+            accepted = (field.get("type") == "string" and isinstance(value, str)
+                        and bool(re.search(field.get("pattern", ""), value))
+                        and not re.search(field["not"]["pattern"], value))
+            ok(accepted == (value in good), "declared authority-locator string constraints")
+        print("NOTE: authority locator checked from schema fields only; jsonschema unavailable")
+    else:
+        validator = jsonschema.validators.validator_for(SCHEMA)(SCHEMA)
+        for value in good + bad:
+            doc = copy.deepcopy(EXAMPLE)
+            doc["release"]["authorized_by"] = value
+            errors = list(validator.iter_errors(doc))
+            ok((not errors) == (value in good), f"authority locator {value!r} validation")
+        doc = copy.deepcopy(EXAMPLE)
+        doc["release"].pop("authorized_by", None)
+        ok(not list(validator.iter_errors(doc)), "absent authority locator keeps existing configuration valid")
+    ok("authorized_by" not in EXAMPLE["release"], "example does not invent a release grant")
+    for name in ("stages.md", "deploy-targets.md"):
+        text = (SKILL / "references" / name).read_text()
+        paragraphs = [p for p in text.split("\n\n") if "release.authorized_by" in p]
+        ok(bool(paragraphs), name + " explains the authority record")
+        meaning = " ".join(paragraphs)
+        ok("not authorization" in meaning and "source" in meaning and "scope" in meaning,
+           name + " requires source/scope verification rather than trusting a config string")
+    print("PASS: optional authority record validates shape, not the grant")
+
+
 if __name__ == "__main__":
-    for case in (case_enum, case_validation, case_example, case_doctrine):
+    for case in (case_enum, case_validation, case_example, case_doctrine, case_authority_record):
         case()
     print(f"PASS: release approval mode — {CASES} cases")
