@@ -1,0 +1,24 @@
+{
+  "source": "31e0f5aeacb709639c37e621c9fe73dec0f11f2e",
+  "command": "npm test",
+  "exit_code": 0,
+  "log": "2026-10-13-pr114-current.log.gz",
+  "log_sha256": "5d680fb6eaa4f0c1eb9789102e2e9d8ed75932a37f7467c370c9ab152c988133",
+  "parents": [
+    "6875e04b1a5d4ec2c3ca599d8bbb61e480b401f3",
+    "1788b94f63dc87c1b741c7e7261aac1d04b12b65"
+  ],
+  "focused": {
+    "checkpoint": 72,
+    "memory_nudge": 40,
+    "installer": 48,
+    "continuity": 31
+  },
+  "independent_composition_review": "PASS;12 original-only blobs and27 feature-only blobs exact; four shared merge hunks read;5 extra realCLI seam controls PASS",
+  "limits": [
+    "Per-path installer staging, not atomic three-skill transaction",
+    "Live Observatory checkpoint/handoff NOT_RUN",
+    "No publication or installed acceptance from local checks"
+  ],
+  "coordination": "TP114-INTEGRATE-1013 acquired after isolated automatic merge, before manual guarded changes; no other active owner reported. This order missed the before-merge registry claim, without observed collision."
+}
