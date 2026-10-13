@@ -1,0 +1,1341 @@
+{
+  "schema": "plant-copy-collision-census/1",
+  "source": "9d9a99be6369daee0a8739d1500b607a76fd7253",
+  "reader_sha256": "66085773964828c6b5596da2485249df6c31113abab2316a8b6f49dfba8acb67",
+  "plant_files": 454,
+  "unique_destinations": 443,
+  "duplicate_destinations": {},
+  "ancestor_overlap_pairs": [],
+  "destination_owners": {
+    "/tmp/dupid-copy": [
+      "001-a-board-id-naming-two-rows-must-fail.sh"
+    ],
+    "/tmp/ar-copy": [
+      "004-the-two-artifact-root-implementations-must-be-compared-not-m.sh"
+    ],
+    "/tmp/lifecycle-copy": [
+      "005-an-abandoned-run-must-be-told-from-a-finished-one.sh"
+    ],
+    "/tmp/gate-obs-copy": [
+      "006-the-gate-must-require-the-observation-not-just-the-claim.sh"
+    ],
+    "/tmp/gate-hook-copy": [
+      "007-the-release-gate-must-be-able-to-block.sh"
+    ],
+    "/tmp/gate-blind-copy": [
+      "008-a-blind-gate-must-fail-closed-not-skip.sh"
+    ],
+    "/tmp/gate-twopass-copy": [
+      "009-a-declared-tests-stage-must-outrank-a-command-bearing-one.sh"
+    ],
+    "/tmp/gate-npmrun-copy": [
+      "010-a-project-s-publish-script-must-not-read-as-npm-publish.sh"
+    ],
+    "/tmp/build-dev-copy": [
+      "011-the-build-gate-must-fire-on-the-shipped-example-flow.sh"
+    ],
+    "/tmp/corrupt-copy": [
+      "012-validator-must-be-able-to-fail.sh"
+    ],
+    "/tmp/gate-copy": [
+      "013-bad-gate-type-in-pipeline-example-json-must-fail.sh"
+    ],
+    "/tmp/rel-copy": [
+      "014-release-enabled-true-but-workflow-missing-must-fail.sh"
+    ],
+    "/tmp/model-copy": [
+      "015-hardcoded-vendor-model-id-must-fail.sh"
+    ],
+    "/tmp/token-copy": [
+      "016-non-token-stage-model-must-fail.sh"
+    ],
+    "/tmp/grill-copy": [
+      "017-intake-grill-must-stay-mandatory-manual.sh"
+    ],
+    "/tmp/brief-copy": [
+      "018-brief-template-must-keep-the-autonomy-sweep.sh"
+    ],
+    "/tmp/doctrine-copy": [
+      "019-the-grill-doctrine-must-ship-with-the-skill.sh"
+    ],
+    "/tmp/link-copy": [
+      "020-a-real-broken-link-still-fails-past-the-fence-stripper.sh"
+    ],
+    "/tmp/req-copy": [
+      "021-the-req-spine-must-stay-in-the-brief-template.sh"
+    ],
+    "/tmp/verify-copy": [
+      "022-req-rows-must-name-how-they-are-verified.sh"
+    ],
+    "/tmp/acc-copy": [
+      "023-acceptance-must-close-the-flow-manually-with-evidence.sh"
+    ],
+    "/tmp/seam-copy": [
+      "024-the-plan-gate-must-be-a-set-comparison.sh"
+    ],
+    "/tmp/ledger-copy": [
+      "025-the-brief-must-keep-the-knowledge-source-ledger.sh"
+    ],
+    "/tmp/harvest-copy": [
+      "026-stage-0-must-harvest-before-it-interviews.sh"
+    ],
+    "/tmp/loopback-copy": [
+      "027-stage-9-must-close-the-loop-on-the-ledger.sh"
+    ],
+    "/tmp/blurb-copy": [
+      "028-a-description-that-drops-the-final-stage-must-fail.sh"
+    ],
+    "/tmp/verdict-copy": [
+      "029-verdict-count-must-not-drift-from-the-dev-gate.sh"
+    ],
+    "/tmp/doctrinegate-copy": [
+      "030-a-doctrine-file-s-gate-type-must-match-the-config.sh"
+    ],
+    "/tmp/closeout-copy": [
+      "031-a-stage-10-close-out-rule-must-reach-the-surfaces-that-enfor.sh"
+    ],
+    "/tmp/dest-copy": [
+      "032-intake-must-settle-the-figma-design-destination.sh"
+    ],
+    "/tmp/sweep-copy": [
+      "033-the-autonomy-sweep-must-not-drift-between-its-two-homes.sh"
+    ],
+    "/tmp/ladder-copy": [
+      "034-acceptance-must-walk-the-ladder-before-the-table.sh"
+    ],
+    "/tmp/audit-copy": [
+      "035-the-audit-doctrine-must-ship-with-the-skill.sh"
+    ],
+    "/tmp/oss-copy": [
+      "036-the-open-source-surface-must-stay-present.sh"
+    ],
+    "/tmp/script-copy": [
+      "037-npm-test-must-run-the-validator.sh"
+    ],
+    "/tmp/portable-copy": [
+      "038-the-negative-self-tests-must-stay-runnable-off-ci.sh"
+    ],
+    "/tmp/graph-copy": [
+      "039-a-shipped-code-graph-doctrine-must-reach-the-stage-9-gate.sh"
+    ],
+    "/tmp/graph-doc-copy": [
+      "040-the-stage-9-detail-must-name-the-code-graph-refresh-too.sh"
+    ],
+    "/tmp/retro-anchor-copy": [
+      "041-the-retrospective-must-reach-the-surfaces-that-enforce-stage.sh"
+    ],
+    "/tmp/retro-tpl-copy": [
+      "042-the-retro-template-must-ship.sh"
+    ],
+    "/tmp/retro-prune-copy": [
+      "043-a-standing-instruction-must-carry-its-retirement-trigger.sh"
+    ],
+    "/tmp/doctrine-ptr-copy": [
+      "044-a-task-pipeline-name-skill-must-resolve-to-its-doctrine-file.sh"
+    ],
+    "/tmp/conflict-copy": [
+      "045-an-unresolved-merge-conflict-must-fail.sh"
+    ],
+    "/tmp/doctrine-copy-2": [
+      "046-the-documentation-track-doctrine-must-ship.sh"
+    ],
+    "/tmp/docmap-copy": [
+      "047-the-doc-map-must-carry-its-propagation-matrix.sh"
+    ],
+    "/tmp/retrocommit-copy": [
+      "048-a-retro-lesson-must-carry-its-commit.sh"
+    ],
+    "/tmp/retroarch-copy": [
+      "049-the-retro-archive-template-must-ship.sh"
+    ],
+    "/tmp/portable-copy-2": [
+      "050-the-seeded-gate-must-stay-portable.sh"
+    ],
+    "/tmp/seedred-copy": [
+      "051-the-seeded-gate-must-seed-green.sh"
+    ],
+    "/tmp/tplreadme-copy": [
+      "052-every-template-must-be-listed-in-templates-readme-md.sh"
+    ],
+    "/tmp/anchor-copy": [
+      "053-the-doc-track-must-reach-the-surfaces-that-enforce-it.sh"
+    ],
+    "/tmp/adrparity-copy": [
+      "054-the-two-decision-shapes-must-agree-on-fields.sh"
+    ],
+    "/tmp/blindadr-copy": [
+      "055-the-seeded-gate-must-read-both-register-shapes.sh"
+    ],
+    "/tmp/docloop-copy": [
+      "056-the-doc-loop-must-reach-the-stages-that-settle-decisions.sh"
+    ],
+    "/tmp/sweep-copy-2": [
+      "057-the-autonomy-sweep-is-compared-by-topic-not-by-stage-number.sh"
+    ],
+    "/tmp/toc-copy": [
+      "058-a-long-reference-s-contents-must-match-its-headings.sh"
+    ],
+    "/tmp/evals-copy": [
+      "059-the-evaluation-suite-must-cover-every-category.sh"
+    ],
+    "/tmp/desc-copy": [
+      "060-the-description-must-say-what-before-when.sh"
+    ],
+    "/tmp/card-copy": [
+      "061-the-skill-card-must-answer-every-risk-indicator.sh"
+    ],
+    "/tmp/cite-copy": [
+      "062-a-citation-must-name-a-section-that-exists.sh"
+    ],
+    "/tmp/count-copy": [
+      "063-a-living-document-may-not-restate-a-stale-count.sh"
+    ],
+    "/tmp/pkg-copy": [
+      "064-a-readme-link-must-ship-in-the-npm-package.sh"
+    ],
+    "/tmp/adopt-copy": [
+      "065-adoption-must-cover-the-brownfield-half.sh"
+    ],
+    "/tmp/optout-copy": [
+      "066-default-on-needs-an-opt-out-that-is-exercised.sh"
+    ],
+    "/tmp/artmap-copy": [
+      "067-the-stage-artifact-relation-must-be-mapped-both-ways.sh"
+    ],
+    "/tmp/port-copy": [
+      "068-a-workflow-decision-must-have-a-home-inside-the-bundle.sh"
+    ],
+    "/tmp/rule-copy": [
+      "069-the-routing-rule-must-ship-as-a-file.sh"
+    ],
+    "/tmp/ux2-copy": [
+      "070-stage-2-must-produce-user-paths-and-error-paths.sh"
+    ],
+    "/tmp/reach-copy": [
+      "071-a-new-reference-must-reach-the-readme-and-the-manifest.sh"
+    ],
+    "/tmp/tpltoc-copy": [
+      "072-a-long-seeded-template-needs-its-own-contents.sh"
+    ],
+    "/tmp/inv-copy": [
+      "073-an-invariant-may-not-claim-a-guard-that-does-not-exist.sh"
+    ],
+    "/tmp/meta-copy": [
+      "074-a-seeded-matrix-without-the-meta-row-has-a-hole.sh"
+    ],
+    "/tmp/runmode-copy": [
+      "075-the-example-must-set-run-loop-mode-explicitly.sh"
+    ],
+    "/tmp/reach-copy-2": [
+      "076-a-run-wide-rule-every-stage-must-name.sh"
+    ],
+    "/tmp/clause1-copy": [
+      "077-the-context-evidence-clause-may-not-be-softened.sh"
+    ],
+    "/tmp/clause2-copy": [
+      "078-the-harness-limit-clause-may-not-be-softened.sh"
+    ],
+    "/tmp/tpl-copy": [
+      "079-a-seeded-template-may-not-carry-a-relative-link.sh"
+    ],
+    "/tmp/hyg-verdict-copy": [
+      "086-a-gate-script-must-keep-its-verdict-block-last.sh"
+    ],
+    "/tmp/scratchdupe-copy": [
+      "087-two-self-tests-may-not-share-a-scratch-directory.sh"
+    ],
+    "/tmp/readback-spec-copy": [
+      "088-the-spec-must-keep-asking-whether-a-named-check-is-real.sh"
+    ],
+    "/tmp/readback-plan-copy": [
+      "089-a-plan-must-keep-asking-whether-a-dod-s-targets-resolve.sh"
+    ],
+    "/tmp/readback-trace-copy": [
+      "090-the-self-review-must-leave-a-committed-trace.sh"
+    ],
+    "/tmp/readback-map-copy": [
+      "091-rule-14-must-bind-the-stages-that-write-the-targets.sh"
+    ],
+    "/tmp/fs01-copy": [
+      "092-the-false-success-section-must-exist.sh"
+    ],
+    "/tmp/fs02-copy": [
+      "093-the-false-success-law-must-be-stated.sh"
+    ],
+    "/tmp/fs03-copy": [
+      "094-the-did-not-look-test-must-survive.sh"
+    ],
+    "/tmp/fs04-copy": [
+      "095-rule-1-must-survive.sh"
+    ],
+    "/tmp/fs05-copy": [
+      "096-rule-2-must-survive.sh"
+    ],
+    "/tmp/fs06-copy": [
+      "097-audit-md-must-cite-the-class.sh"
+    ],
+    "/tmp/fs07-copy": [
+      "098-build-md-must-cite-the-class.sh"
+    ],
+    "/tmp/fs08-copy": [
+      "099-review-md-must-cite-the-class.sh"
+    ],
+    "/tmp/fs09-copy": [
+      "100-continuity-md-must-cite-the-class.sh"
+    ],
+    "/tmp/fs10-copy": [
+      "101-the-report-must-require-verified-by-lines.sh"
+    ],
+    "/tmp/fs11-copy": [
+      "102-the-implementer-contract-keeps-the-re-reading-clause.sh"
+    ],
+    "/tmp/fs12-copy": [
+      "103-the-hygiene-gate-must-name-its-blind-side.sh"
+    ],
+    "/tmp/fs13-copy": [
+      "104-the-rubric-keeps-the-effect-verification-item.sh"
+    ],
+    "/tmp/fs14-copy": [
+      "105-an-unverified-effect-must-stay-important.sh"
+    ],
+    "/tmp/fs15-copy": [
+      "106-a-guard-below-the-verdict-must-be-rejected.sh"
+    ],
+    "/tmp/gs01-copy": [
+      "107-stage-0-s-config-gate-must-require-the-measured-lag.sh"
+    ],
+    "/tmp/gs02-copy": [
+      "108-stage-0-s-own-section-must-state-the-measured-lag.sh"
+    ],
+    "/tmp/gs03-copy": [
+      "109-the-measured-lag-rule-must-keep-its-commands.sh"
+    ],
+    "/tmp/gs04-copy": [
+      "110-a-graph-that-cannot-be-measured-needs-its-own-state.sh"
+    ],
+    "/tmp/gs05-copy": [
+      "111-the-seeded-brief-must-not-ship-a-bare-build-date.sh"
+    ],
+    "/tmp/gs06-copy": [
+      "112-the-distrust-marker-keeps-its-sigil-even-wrapped.sh"
+    ],
+    "/tmp/gs07-copy": [
+      "113-the-distrust-marker-gets-no-second-spelling.sh"
+    ],
+    "/tmp/cn1-copy": [
+      "116-the-canon-list-must-exist.sh"
+    ],
+    "/tmp/cn2-copy": [
+      "117-a-dropped-canon-must-be-caught.sh"
+    ],
+    "/tmp/cn3-copy": [
+      "118-canons-must-keep-naming-their-enforcement.sh"
+    ],
+    "/tmp/cn4-copy": [
+      "119-the-canon-rule-boundary-must-stay-stated.sh"
+    ],
+    "/tmp/ci01-copy": [
+      "120-the-ci-verdict-must-keep-its-commands.sh"
+    ],
+    "/tmp/ci02-copy": [
+      "121-a-run-that-cannot-be-established-needs-its-own-state.sh"
+    ],
+    "/tmp/ci03-copy": [
+      "122-a-pushing-stage-must-name-the-ci-verdict.sh"
+    ],
+    "/tmp/ci04-copy": [
+      "123-a-stage-may-not-carry-its-own-copy-of-the-ci-commands.sh"
+    ],
+    "/tmp/ci05-copy": [
+      "124-the-stage-8-gate-must-require-the-ci-verdict.sh"
+    ],
+    "/tmp/se3": [
+      "125-a-sessionend-timeout-a-host-clamps-must-fail.sh"
+    ],
+    "/tmp/ci06-copy": [
+      "126-the-negatives-floor-may-not-lag-the-workflow.sh"
+    ],
+    "/tmp/ed1-copy": [
+      "127-the-navigator-must-exist.sh"
+    ],
+    "/tmp/ed2-copy": [
+      "128-the-index-must-not-drift-from-the-canons.sh"
+    ],
+    "/tmp/ed3-copy": [
+      "129-the-navigator-must-point-at-the-one-home.sh"
+    ],
+    "/tmp/ed4-copy": [
+      "130-a-navigator-link-must-resolve-from-its-own-directory.sh"
+    ],
+    "/tmp/ed5-copy": [
+      "131-a-colon-space-in-frontmatter-must-be-rejected.sh"
+    ],
+    "/tmp/r16-copy": [
+      "132-rule-16-in-force-with-a-consumer-that-dropped-its-citation.sh"
+    ],
+    "/tmp/ord1-copy": [
+      "133-retro-order-an-adjacent-enumeration-puts-prune-before-stamp.sh"
+    ],
+    "/tmp/ord2-copy": [
+      "134-retro-order-an-ordered-list-runs-prune-before-stamp.sh"
+    ],
+    "/tmp/ord3-copy": [
+      "135-retro-order-a-then-sequence-without-the-word-first.sh"
+    ],
+    "/tmp/ord4-copy": [
+      "136-retro-order-a-lone-prune-first-directive-with-no-second-act.sh"
+    ],
+    "/tmp/cr1-copy": [
+      "137-claim-registry-a-restated-rule-count-that-disagrees.sh"
+    ],
+    "/tmp/cr2-copy": [
+      "138-claim-registry-a-restated-standing-instruction-count.sh"
+    ],
+    "/tmp/cr4-copy": [
+      "139-claim-registry-a-stale-canon-count-in-word-form.sh"
+    ],
+    "/tmp/cr5-copy": [
+      "140-claim-registry-a-stale-reference-file-count.sh"
+    ],
+    "/tmp/prov1-copy": [
+      "141-the-doctrine-claiming-a-provenance-the-ledger-cannot-prove.sh"
+    ],
+    "/tmp/prov2-copy": [
+      "142-graph-py-doctrine-dropping-the-unattested-mark.sh"
+    ],
+    "/tmp/ap1-copy": [
+      "144-the-acceptance-policy-losing-its-version.sh"
+    ],
+    "/tmp/ap2-copy": [
+      "145-the-acceptance-policy-losing-its-owner.sh"
+    ],
+    "/tmp/ap3-copy": [
+      "146-gates-md-s-fixes-nothing-sentence-left-unscoped.sh"
+    ],
+    "/tmp/rlog1-copy": [
+      "147-the-recent-log-s-heading-declaring-a-bound-nothing-enforces.sh"
+    ],
+    "/tmp/rlog2-copy": [
+      "148-the-shipped-retro-template-seeding-the-false-bound.sh"
+    ],
+    "/tmp/cite1-copy": [
+      "149-an-open-board-row-whose-cited-span-no-longer-holds-its-phras.sh"
+    ],
+    "/tmp/bcite2-copy": [
+      "150-an-open-board-row-citing-a-span-and-quoting-nothing-from-it.sh"
+    ],
+    "/tmp/cite3-copy": [
+      "151-property-a-closed-board-row-s-citation-is-a-record-and-is-left-alone.sh"
+    ],
+    "/tmp/env1-copy": [
+      "152-a-ledger-row-with-no-environment-cell.sh"
+    ],
+    "/tmp/env2-copy": [
+      "153-an-environment-value-outside-the-declared-vocabulary.sh"
+    ],
+    "/tmp/env3-copy": [
+      "154-the-shipped-ledger-template-losing-its-environment-column.sh"
+    ],
+    "/tmp/b79a-copy": [
+      "155-a-graph-conditional-dropped-from-behind-its-ref.sh"
+    ],
+    "/tmp/vh1-copy": [
+      "157-the-verification-ledger-claiming-a-stale-shipped-state.sh"
+    ],
+    "/tmp/vh1b-copy": [
+      "157-the-verification-ledger-claiming-a-stale-shipped-state.sh"
+    ],
+    "/tmp/gt1-copy": [
+      "158-skill-md-teaching-a-gate-type-vocabulary-the-schema-outgrew.sh"
+    ],
+    "/tmp/gt1b-copy": [
+      "158-skill-md-teaching-a-gate-type-vocabulary-the-schema-outgrew.sh"
+    ],
+    "/tmp/gloss1-copy": [
+      "159-an-npm-gloss-that-disagrees-with-package-json.sh"
+    ],
+    "/tmp/gloss2-copy": [
+      "160-a-document-naming-an-npm-run-script-that-does-not-exist.sh"
+    ],
+    "/tmp/gloss3-copy": [
+      "161-property-a-portable-example-command-in-shipped-doctrine-is-not-this-r.sh"
+    ],
+    "/tmp/gapmention": [
+      "162-an-unstamped-release-mentioned-but-not-declared-must-fail.sh"
+    ],
+    "/tmp/gap1-copy": [
+      "163-a-release-after-the-newest-stamp-that-the-gap-section-does-n.sh"
+    ],
+    "/tmp/gap2-copy": [
+      "164-the-retro-s-archive-pointer-naming-a-root-this-project-does.sh"
+    ],
+    "/tmp/unr1-copy": [
+      "165-a-stale-guard-count-in-the-unreleased-section.sh"
+    ],
+    "/tmp/unr2-copy": [
+      "166-an-unreleased-section-parked-below-a-released-version.sh"
+    ],
+    "/tmp/cr5b-copy": [
+      "167-claim-registry-a-stale-reference-file-count-in-the-shipped-t.sh"
+    ],
+    "/tmp/oqs-copy": [
+      "168-a-stale-count-in-an-open-question-dated-beside-it.sh"
+    ],
+    "/tmp/cr5c-copy": [
+      "169-claim-registry-a-stale-count-in-an-open-row-of-a-register.sh"
+    ],
+    "/tmp/cr5d-copy": [
+      "170-property-a-dated-row-in-a-register-is-a-record-not-a-claim-about-now.sh"
+    ],
+    "/tmp/cr6-copy": [
+      "171-claim-registry-a-stale-guard-count.sh"
+    ],
+    "/tmp/cr7-copy": [
+      "172-claim-registry-a-stale-dated-eval-run-count.sh"
+    ],
+    "/tmp/comp-copy": [
+      "173-a-companion-in-the-matrix-and-not-in-the-preflight-block.sh"
+    ],
+    "/tmp/cold-copy": [
+      "174-the-cold-trigger-stated-with-one-unit-on-one-surface.sh"
+    ],
+    "/tmp/cold2-copy": [
+      "175-cold-trigger-the-canonical-row-where-bold-interrupts-the-phr.sh"
+    ],
+    "/tmp/disc2-copy": [
+      "176-a-worked-gate-verdict-that-omits-only-unlooked.sh"
+    ],
+    "/tmp/disc3-copy": [
+      "177-a-worked-gate-verdict-that-omits-only-abstained.sh"
+    ],
+    "/tmp/disc-copy": [
+      "178-a-worked-gate-verdict-that-prints-no-disclosures.sh"
+    ],
+    "/tmp/axis1-copy": [
+      "179-a-summary-that-names-most-of-the-rotation-axes.sh"
+    ],
+    "/tmp/axis2-copy": [
+      "180-an-axis-added-to-audit-md-that-no-summary-echoes.sh"
+    ],
+    "/tmp/axis3-copy": [
+      "181-the-axis-list-moved-out-from-under-its-own-guard.sh"
+    ],
+    "/tmp/axis4-copy": [
+      "182-a-restated-count-of-gates-md-s-own-axes.sh"
+    ],
+    "/tmp/axis5-copy": [
+      "183-the-re-derivation-axis-stops-printing-its-pair.sh"
+    ],
+    "/tmp/axis6-copy": [
+      "184-the-re-derivation-axis-renamed-out-from-under-its-guard.sh"
+    ],
+    "/tmp/axis7-copy": [
+      "185-the-cursor-rule-restating-a-stale-count-of-gates-md-s-axes.sh"
+    ],
+    "/tmp/axis8-copy": [
+      "186-a-stated-count-of-the-rotation-axes-the-dormant-class-proven.sh"
+    ],
+    "/tmp/lrn1-copy": [
+      "187-a-rule-leaves-learned-md-with-no-logged-line.sh"
+    ],
+    "/tmp/lrn2-copy": [
+      "188-the-retired-log-itself-removed-from-learned-md.sh"
+    ],
+    "/tmp/coldnew-copy": [
+      "189-a-new-surface-states-the-cold-trigger-with-one-unit.sh"
+    ],
+    "/tmp/hw1-copy": [
+      "190-the-highest-numbered-rule-deleted-the-gap-that-does-not-open.sh"
+    ],
+    "/tmp/hw2-copy": [
+      "191-a-digit-in-the-log-body-masking-a-real-deletion.sh"
+    ],
+    "/tmp/hw3-copy": [
+      "192-the-high-water-mark-removed-from-learned-md.sh"
+    ],
+    "/tmp/discnew-copy": [
+      "193-a-worked-verdict-on-a-surface-no-list-named.sh"
+    ],
+    "/tmp/hw4-copy": [
+      "194-the-high-water-mark-lowered-in-a-committed-change.sh"
+    ],
+    "/tmp/hw7-copy": [
+      "195-every-rule-row-deleted-at-once.sh"
+    ],
+    "/tmp/hw5-copy": [
+      "196-property-the-cross-commit-skip-is-printed-never-swallowed.sh"
+    ],
+    "/tmp/cite2-copy": [
+      "197-a-second-guard-named-inside-one-citation-and-it-does-not-exi.sh"
+    ],
+    "/tmp/hw6-copy": [
+      "198-a-rule-numbered-above-the-high-water-mark.sh"
+    ],
+    "/tmp/hw8-copy": [
+      "199-a-rule-listed-as-retired-that-is-still-in-the-table.sh"
+    ],
+    "/tmp/bd1-copy": [
+      "200-an-open-ledger-row-with-no-board-id.sh"
+    ],
+    "/tmp/bd2-copy": [
+      "201-a-ledger-pointing-at-a-board-id-nobody-issued.sh"
+    ],
+    "/tmp/bd3-copy": [
+      "202-a-board-row-with-no-source-the-reverse-direction.sh"
+    ],
+    "/tmp/bd4-copy": [
+      "203-the-board-emptied-of-every-row.sh"
+    ],
+    "/tmp/bd5-copy": [
+      "204-a-board-priority-that-does-not-follow-from-its-inputs.sh"
+    ],
+    "/tmp/bd6-copy": [
+      "205-the-seeded-template-s-own-worked-example-broken.sh"
+    ],
+    "/tmp/bd7-copy": [
+      "206-an-open-row-whose-ledger-has-two-status-columns.sh"
+    ],
+    "/tmp/tbl-copy": [
+      "207-a-blank-line-splitting-a-markdown-table.sh"
+    ],
+    "/tmp/bd8-copy": [
+      "208-a-row-homed-backlog-the-trigger-the-templates-promise.sh"
+    ],
+    "/tmp/adj-copy": [
+      "209-property-two-adjacent-tables-are-not-a-split-table.sh"
+    ],
+    "/tmp/bd9-copy": [
+      "210-a-row-homed-unresolved-the-third-promised-trigger.sh"
+    ],
+    "/tmp/bd10-copy": [
+      "211-a-board-row-too-short-to-compute-a-priority.sh"
+    ],
+    "/tmp/bd11-copy": [
+      "212-a-blanked-source-in-the-seeded-template.sh"
+    ],
+    "/tmp/fp-copy": [
+      "213-property-a-description-beginning-open-is-not-an-open-row.sh"
+    ],
+    "/tmp/bd12-copy": [
+      "214-a-status-column-worded-in-prose-open-as-a-printed-exclusion.sh"
+    ],
+    "/tmp/hyp-copy": [
+      "215-property-a-hyphenated-open-source-in-a-description-is-not-a-status.sh"
+    ],
+    "/tmp/bd13-copy": [
+      "216-a-mismatched-shape-row-losing-its-board-id.sh"
+    ],
+    "/tmp/tg1-copy": [
+      "217-a-trigger-the-code-accepts-and-the-doctrine-never-names.sh"
+    ],
+    "/tmp/tg3-copy": [
+      "218-the-trigger-regex-renamed-out-from-under-its-own-comparison.sh"
+    ],
+    "/tmp/cot-copy": [
+      "219-the-seeded-ledger-template-showing-backlog-as-settled.sh"
+    ],
+    "/tmp/tg4-copy": [
+      "220-a-trigger-named-on-the-page-but-not-in-the-enumerating-parag.sh"
+    ],
+    "/tmp/tbl2-copy": [
+      "221-a-table-split-by-two-blank-lines.sh"
+    ],
+    "/tmp/vf1-copy": [
+      "222-a-verification-row-whose-req-is-in-no-brief.sh"
+    ],
+    "/tmp/vf2-copy": [
+      "223-prose-in-the-human-column.sh"
+    ],
+    "/tmp/vf3-copy": [
+      "224-the-verification-ledger-emptied-of-rows.sh"
+    ],
+    "/tmp/vf4-copy": [
+      "225-property-a-real-date-in-the-human-column-is-accepted.sh"
+    ],
+    "/tmp/vf5-copy": [
+      "226-prose-in-human-rescued-by-a-date-in-note.sh"
+    ],
+    "/tmp/vf6-copy": [
+      "227-the-human-column-renamed-away.sh"
+    ],
+    "/tmp/tr1-copy": [
+      "228-the-layout-tree-drifting-from-the-tables-above-it.sh"
+    ],
+    "/tmp/vf7-copy": [
+      "229-property-the-never-count-is-printed-beside-the-verdict.sh"
+    ],
+    "/tmp/tr2-copy": [
+      "230-the-layout-tree-block-gone-entirely.sh"
+    ],
+    "/tmp/hr-copy": [
+      "231-property-the-human-column-survives-a-header-reorder.sh"
+    ],
+    "/tmp/cl1-copy": [
+      "232-a-stale-guard-count-in-the-newest-changelog-section.sh"
+    ],
+    "/tmp/cl3-copy": [
+      "233-property-older-changelog-sections-are-history-not-claims-about-now.sh"
+    ],
+    "/tmp/mp-copy": [
+      "234-min-props-drifting-from-the-workflow-s-property-count.sh"
+    ],
+    "/tmp/wr-copy": [
+      "235-a-req-paired-with-a-run-whose-brief-does-not-carry-it.sh"
+    ],
+    "/tmp/pct-copy": [
+      "236-a-percentage-reaching-the-exposure-line.sh"
+    ],
+    "/tmp/nc-copy": [
+      "237-the-exposure-doctrine-dropping-its-never-checked-rule.sh"
+    ],
+    "/tmp/mm-copy": [
+      "238-a-step-wiping-a-scratch-dir-it-does-not-own.sh"
+    ],
+    "/tmp/hdr-copy": [
+      "239-the-header-block-drifting-between-its-two-copies.sh"
+    ],
+    "/tmp/glyph-copy": [
+      "240-a-rail-glyph-the-legend-does-not-define.sh"
+    ],
+    "/tmp/rail-copy": [
+      "241-the-rail-claiming-a-stage-count-of-its-own.sh"
+    ],
+    "/tmp/led-copy": [
+      "242-a-ledger-shape-declared-and-never-shown.sh"
+    ],
+    "/tmp/ledr-copy": [
+      "243-a-ledger-shape-no-reader-names.sh"
+    ],
+    "/tmp/rc1-copy": [
+      "244-the-review-loop-left-with-no-cap.sh"
+    ],
+    "/tmp/rc2-copy": [
+      "245-the-review-cap-moved-in-one-file-only.sh"
+    ],
+    "/tmp/rc3-copy": [
+      "246-the-review-cap-with-no-config-key.sh"
+    ],
+    "/tmp/sp-copy": [
+      "247-the-short-path-marking-a-stage-with-an-undefined-glyph.sh"
+    ],
+    "/tmp/ex1-copy": [
+      "248-the-exposure-example-drifting-from-its-own-print.sh"
+    ],
+    "/tmp/ex2-copy": [
+      "249-a-live-count-baked-into-the-exposure-example.sh"
+    ],
+    "/tmp/cw1-copy": [
+      "250-a-companion-pointed-at-a-stage-that-never-names-it.sh"
+    ],
+    "/tmp/cw2-copy": [
+      "251-a-stage-dropping-the-companion-the-matrix-aims-at-it.sh"
+    ],
+    "/tmp/cw3-copy": [
+      "252-an-escaped-pipe-truncating-a-matrix-row-s-cells.sh"
+    ],
+    "/tmp/cw4-copy": [
+      "253-a-bare-pipe-truncating-a-matrix-row-s-cells.sh"
+    ],
+    "/tmp/cw5-copy": [
+      "254-a-matrix-row-that-derives-no-stage-at-all.sh"
+    ],
+    "/tmp/br1-copy": [
+      "255-a-stage-demanding-the-look-with-no-mechanism-to-point-at.sh"
+    ],
+    "/tmp/br2-copy": [
+      "256-the-mechanism-file-dropping-one-of-the-four-moves.sh"
+    ],
+    "/tmp/br3-copy": [
+      "257-a-browser-pointer-that-renders-as-nothing.sh"
+    ],
+    "/tmp/br4-copy": [
+      "258-the-look-s-recipe-moved-out-of-the-section-that-is-the-mecha.sh"
+    ],
+    "/tmp/trk1-copy": [
+      "259-a-stage-3-track-with-no-owning-skill.sh"
+    ],
+    "/tmp/trk2-copy": [
+      "260-a-stage-3-track-deleted-outright.sh"
+    ],
+    "/tmp/rp1-copy": [
+      "261-a-redaction-rule-added-without-the-count-moving.sh"
+    ],
+    "/tmp/rp2-copy": [
+      "262-the-redaction-rules-flattened-into-prose.sh"
+    ],
+    "/tmp/rp3-copy": [
+      "263-an-absolute-host-path-in-the-worked-issue-body.sh"
+    ],
+    "/tmp/rp4-copy": [
+      "264-a-commit-id-in-the-worked-issue-body.sh"
+    ],
+    "/tmp/rp5-copy": [
+      "265-a-host-repository-slug-in-the-worked-issue-body.sh"
+    ],
+    "/tmp/rp6-copy": [
+      "266-the-schema-losing-the-key-the-doctrine-names.sh"
+    ],
+    "/tmp/rp7-copy": [
+      "267-no-stage-naming-the-publish-step.sh"
+    ],
+    "/tmp/rd1-copy": [
+      "268-the-reader-losing-its-no-reader-state.sh"
+    ],
+    "/tmp/rd2-copy": [
+      "269-a-stage-dropping-a-reader-state.sh"
+    ],
+    "/tmp/ph1-copy": [
+      "270-the-probe-harness-losing-its-target-guard-assertion.sh"
+    ],
+    "/tmp/ph2-copy": [
+      "271-the-probe-harness-losing-its-entry-point.sh"
+    ],
+    "/tmp/ph3-copy": [
+      "272-probing-md-teaching-probing-without-naming-the-harness.sh"
+    ],
+    "/tmp/rf1-copy": [
+      "273-the-retro-s-uncapped-log-slipping-back-into-read-in-full.sh"
+    ],
+    "/tmp/rf2-copy": [
+      "274-a-consumer-re-binding-the-log-to-in-full.sh"
+    ],
+    "/tmp/pf1-copy": [
+      "275-a-preflight-silent-about-the-skill-s-own-evidence.sh"
+    ],
+    "/tmp/rt01-copy": [
+      "276-the-change-half-of-the-boundary-leaves-the-description.sh"
+    ],
+    "/tmp/rt02-copy": [
+      "277-the-findings-half-of-the-boundary-leaves-the-description.sh"
+    ],
+    "/tmp/rt03-copy": [
+      "278-reading-returns-to-the-exclusion-clause.sh"
+    ],
+    "/tmp/rt04-copy": [
+      "279-an-exclusion-locked-in-2026-08-03-drops-out.sh"
+    ],
+    "/tmp/rt05-copy": [
+      "280-a-verb-locked-by-the-design-never-reaches-the-surface.sh"
+    ],
+    "/tmp/rt06-copy": [
+      "281-a-findings-class-is-missing-from-the-portable-routing-rule.sh"
+    ],
+    "/tmp/rt07-copy": [
+      "282-a-findings-class-is-missing-from-the-cursor-rule.sh"
+    ],
+    "/tmp/rt08-copy": [
+      "283-a-findings-class-has-no-eval-query.sh"
+    ],
+    "/tmp/cl9-copy": [
+      "284-a-release-entry-that-talks-about-guards-without-a-readable-c.sh"
+    ],
+    "/tmp/rt09-copy": [
+      "285-a-findings-class-added-with-no-eval-query-alias.sh"
+    ],
+    "/tmp/rt10-copy": [
+      "286-the-explanation-exclusion-leaves-the-clause.sh"
+    ],
+    "/tmp/rt11-copy": [
+      "287-the-findings-clause-loses-the-shape-four-checks-read.sh"
+    ],
+    "/tmp/rt12-copy": [
+      "288-the-locked-verb-list-stops-being-readable.sh"
+    ],
+    "/tmp/rt13-copy": [
+      "289-a-class-separator-the-parser-cannot-see.sh"
+    ],
+    "/tmp/rt15-copy": [
+      "290-reading-returns-as-an-exclusion-in-the-portable-rule.sh"
+    ],
+    "/tmp/lp01-copy": [
+      "291-the-loop-loses-its-queue.sh"
+    ],
+    "/tmp/lp02-copy": [
+      "292-the-loop-loses-its-arming-point.sh"
+    ],
+    "/tmp/lp03-copy": [
+      "293-the-self-pacing-mode-is-withdrawn.sh"
+    ],
+    "/tmp/lp04-copy": [
+      "294-the-queue-names-a-source-no-stage-produces.sh"
+    ],
+    "/tmp/lp05-copy": [
+      "295-the-authorization-floor-leaves-the-file-that-defines-the-mod.sh"
+    ],
+    "/tmp/lp06-copy": [
+      "296-a-dynamic-run-owes-no-disclosure.sh"
+    ],
+    "/tmp/lp07-copy": [
+      "297-stage-2-keeps-its-gate-but-loses-where-the-queue-comes-from.sh"
+    ],
+    "/tmp/lp08-copy": [
+      "298-the-machine-readable-stage-2-drops-the-arming.sh"
+    ],
+    "/tmp/lp09-copy": [
+      "299-the-whole-loop-contract-is-deleted-from-the-schema.sh"
+    ],
+    "/tmp/lp10-copy": [
+      "300-the-queue-enum-becomes-an-open-string.sh"
+    ],
+    "/tmp/lp11-copy": [
+      "301-the-arming-point-loses-the-one-this-release-moved-to.sh"
+    ],
+    "/tmp/lp12-copy": [
+      "302-part-1a-stops-stating-its-precondition.sh"
+    ],
+    "/tmp/lp13-copy": [
+      "303-the-floor-leaves-one-section-while-a-copy-elsewhere-keeps-th.sh"
+    ],
+    "/tmp/lp14-copy": [
+      "304-the-example-reverts-to-its-pre-v1-40-loop-block.sh"
+    ],
+    "/tmp/lp15-copy": [
+      "305-the-dynamic-rule-is-inverted-while-its-words-are-kept.sh"
+    ],
+    "/tmp/rs01-copy": [
+      "306-the-run-stamp-table-loses-its-cap.sh"
+    ],
+    "/tmp/rs02-copy": [
+      "307-the-run-stamp-table-grows-past-its-cap.sh"
+    ],
+    "/tmp/nb01-copy": [
+      "308-neighbour-probe-the-stamps-lose-their-cap-while-the-cell-kee.sh"
+    ],
+    "/tmp/nb02-copy": [
+      "309-neighbour-probe-part-1a-loses-the-floor-while-the-file-keeps.sh"
+    ],
+    "/tmp/nb03-copy": [
+      "310-neighbour-probe-stage-2-loses-the-arming-while-keeping-the-w.sh"
+    ],
+    "/tmp/hb01-copy": [
+      "311-the-hand-back-loses-the-section-a-returning-reader-needs-mos.sh"
+    ],
+    "/tmp/hb02-copy": [
+      "312-waiting-decisions-become-a-list-instead-of-a-question.sh"
+    ],
+    "/tmp/hb03-copy": [
+      "313-the-ambiguity-list-stops-being-computed.sh"
+    ],
+    "/tmp/hb04-copy": [
+      "314-stage-10-s-gate-stops-requiring-the-hand-back.sh"
+    ],
+    "/tmp/hb05-copy": [
+      "315-neighbour-probe-the-gate-loses-the-hand-back-while-the-secti.sh"
+    ],
+    "/tmp/hb06-copy": [
+      "316-the-example-s-acceptance-gate-drops-the-hand-back.sh"
+    ],
+    "/tmp/hb07-copy": [
+      "317-the-hand-back-loses-its-trace-in-the-ledger.sh"
+    ],
+    "/tmp/hb08-copy": [
+      "318-the-doctrine-stops-naming-where-its-trace-lands.sh"
+    ],
+    "/tmp/ri01-copy": [
+      "319-the-ratchet-matcher-section-is-deleted.sh"
+    ],
+    "/tmp/ri02-copy": [
+      "320-the-near-miss-leaves-the-ratchet-matcher-rule.sh"
+    ],
+    "/tmp/ri03-copy": [
+      "321-the-unlanded-plant-section-is-deleted.sh"
+    ],
+    "/tmp/ri04-copy": [
+      "322-the-verified-by-section-is-deleted.sh"
+    ],
+    "/tmp/ri05-copy": [
+      "323-an-unresolvable-verified-by-name-keeps-reading-verified.sh"
+    ],
+    "/tmp/ri06-copy": [
+      "324-the-seam-section-is-deleted.sh"
+    ],
+    "/tmp/ri07-copy": [
+      "325-the-seam-loses-its-unlooked-fallback.sh"
+    ],
+    "/tmp/ri08-copy": [
+      "326-the-consumption-section-is-deleted.sh"
+    ],
+    "/tmp/ri09-copy": [
+      "327-a-timeout-becomes-a-slow-result-again.sh"
+    ],
+    "/tmp/ri10-copy": [
+      "328-the-publish-disclosure-section-is-deleted.sh"
+    ],
+    "/tmp/ri11-copy": [
+      "329-the-publish-line-loses-its-not-configured-form.sh"
+    ],
+    "/tmp/ri12-copy": [
+      "330-stage-10-s-verdict-drops-the-publish-line.sh"
+    ],
+    "/tmp/ri13-copy": [
+      "331-a-mutating-probe-ships-with-no-plant-landed-assertion.sh"
+    ],
+    "/tmp/ri03b-copy": [
+      "332-the-green-probe-section-keeps-its-heading-and-loses-its-rule.sh"
+    ],
+    "/tmp/res1-copy": [
+      "333-the-teardown-keeps-its-first-half-and-loses-the-one-that-pro.sh"
+    ],
+    "/tmp/res2-copy": [
+      "334-the-holds-disclosure-is-given-a-direction.sh"
+    ],
+    "/tmp/res3-copy": [
+      "335-stage-10-s-criterion-13-loses-the-report-do-not-end-half.sh"
+    ],
+    "/tmp/res4-copy": [
+      "336-neighbour-probe-criterion-13-is-broken-and-its-needle-plante.sh"
+    ],
+    "/tmp/res5-copy": [
+      "337-inversion-criterion-13-keeps-both-needles-and-gains-an-excep.sh"
+    ],
+    "/tmp/res6-copy": [
+      "338-inversion-the-foreign-lease-loses-its-absolute-form.sh"
+    ],
+    "/tmp/res7-copy": [
+      "339-inversion-the-holds-count-acquires-a-direction-while-never-a.sh"
+    ],
+    "/tmp/res8-copy": [
+      "340-the-workflow-itself-stops-being-valid-yaml.sh"
+    ],
+    "/tmp/res9-copy": [
+      "341-the-third-owner-state-loses-its-proof-requirement.sh"
+    ],
+    "/tmp/res10-copy": [
+      "342-the-third-owner-state-stops-being-bounded-to-this-project.sh"
+    ],
+    "/tmp/res11-copy": [
+      "343-the-routing-surface-and-the-doctrine-disagree-on-the-ledger.sh"
+    ],
+    "/tmp/res12-copy": [
+      "344-the-cross-cutting-rules-stop-naming-the-field-every-gate-pri.sh"
+    ],
+    "/tmp/res13-copy": [
+      "345-the-residue-doctrine-file-is-deleted-outright.sh"
+    ],
+    "/tmp/res14-copy": [
+      "346-the-not-torn-down-section-is-deleted-not-merely-reworded.sh"
+    ],
+    "/tmp/res15-copy": [
+      "347-stage-10-loses-criterion-13-entirely.sh"
+    ],
+    "/tmp/res16-copy": [
+      "348-the-owner-table-loses-its-earlier-run-row.sh"
+    ],
+    "/tmp/res17-copy": [
+      "349-inversion-the-foreign-lease-keeps-its-sentence-and-gains-a-c.sh"
+    ],
+    "/tmp/res18-copy": [
+      "350-inversion-the-foreign-item-boundary-keeps-its-sentence-and-g.sh"
+    ],
+    "/tmp/res19-copy": [
+      "351-inversion-the-carve-out-is-a-separate-sentence-not-a-clause.sh"
+    ],
+    "/tmp/res20-copy": [
+      "352-the-prose-drops-the-elapsed-time-its-own-ps-receipt-quotes.sh"
+    ],
+    "/tmp/res21-copy": [
+      "353-the-opening-record-stops-saying-its-two-readings-are-two-mom.sh"
+    ],
+    "/tmp/res22-copy": [
+      "354-the-record-stops-naming-the-times-it-never-observed.sh"
+    ],
+    "/tmp/res23-copy": [
+      "355-the-containers-measurement-and-the-prose-citing-it-disagree.sh"
+    ],
+    "/tmp/res24-copy": [
+      "356-the-frozen-containers-measurement-loses-its-date.sh"
+    ],
+    "/tmp/carve-ctl-copy": [
+      "357-property-a-legitimate-exception-two-rules-away-does-not-trip-the-carv.sh"
+    ],
+    "/tmp/sf1-copy": [
+      "358-the-surfaced-zero-stops-being-checked-against-what-the-run-f.sh"
+    ],
+    "/tmp/sf2-copy": [
+      "359-the-surfaced-check-loses-the-residual-that-keeps-it-honest.sh"
+    ],
+    "/tmp/r6a-copy": [
+      "360-the-behaviour-or-reporting-field-loses-one-of-its-two-values.sh"
+    ],
+    "/tmp/r6b-copy": [
+      "361-criterion-12a-is-deleted-outright.sh"
+    ],
+    "/tmp/rel1-copy": [
+      "362-the-release-path-stops-running-the-suite-it-advertises.sh"
+    ],
+    "/tmp/vt1-copy": [
+      "363-a-version-number-already-spoken-for-by-a-tag.sh"
+    ],
+    "/tmp/fig1-copy": [
+      "364-the-design-skill-is-allowed-to-run-before-the-file-it-should.sh"
+    ],
+    "/tmp/fig2-copy": [
+      "365-the-frame-becomes-a-contract-without-a-width.sh"
+    ],
+    "/tmp/fig3-copy": [
+      "366-the-missing-frame-branch-loses-the-offer-to-draw.sh"
+    ],
+    "/tmp/fig4-copy": [
+      "367-generated-frames-stop-being-marked-as-generated.sh"
+    ],
+    "/tmp/fig5-copy": [
+      "368-the-screen-is-the-frame-section-is-deleted-outright.sh"
+    ],
+    "/tmp/ag1-copy": [
+      "369-the-worktree-per-agent-rule-is-removed.sh"
+    ],
+    "/tmp/ag2-copy": [
+      "370-the-lease-rule-is-removed.sh"
+    ],
+    "/tmp/ag3-copy": [
+      "371-what-to-do-on-finding-the-other-agent-mid-run-is-removed.sh"
+    ],
+    "/tmp/ag4-copy": [
+      "372-the-another-agent-section-is-deleted-outright.sh"
+    ],
+    "/tmp/fe1-copy": [
+      "373-the-fake-edge-test-is-removed-from-planning-md.sh"
+    ],
+    "/tmp/fe2-copy": [
+      "374-the-carries-column-is-dropped-from-the-plan-template.sh"
+    ],
+    "/tmp/fe3-copy": [
+      "375-the-stage-4-gate-stops-reading-the-carries-cells.sh"
+    ],
+    "/tmp/cv1-copy": [
+      "376-the-group-convergence-check-is-deleted-outright.sh"
+    ],
+    "/tmp/cv2-copy": [
+      "377-the-convergence-check-stops-saying-it-runs-before-integratio.sh"
+    ],
+    "/tmp/cv3-copy": [
+      "378-stages-md-drops-the-convergence-check-from-its-stage-5-summa.sh"
+    ],
+    "/tmp/fe4-copy": [
+      "379-the-computed-edges-count-is-removed-from-the-self-review.sh"
+    ],
+    "/tmp/fe5-copy": [
+      "380-planning-md-s-gate-section-is-renamed-away.sh"
+    ],
+    "/tmp/cv4-copy": [
+      "381-the-convergence-check-stops-logging-a-clean-group.sh"
+    ],
+    "/tmp/cv5-copy": [
+      "382-stages-md-drops-the-same-group-fan-out-precondition.sh"
+    ],
+    "/tmp/cv6-copy": [
+      "383-stages-md-drops-the-worktree-fan-out-precondition.sh"
+    ],
+    "/tmp/cv7-copy": [
+      "384-build-md-s-gate-stops-requiring-the-convergence-check.sh"
+    ],
+    "/tmp/cv8-copy": [
+      "385-stages-md-drops-the-exclusive-file-ownership-precondition.sh"
+    ],
+    "/tmp/cv9-copy": [
+      "386-build-md-s-gate-heading-is-renamed-away.sh"
+    ],
+    "/tmp/cv10-copy": [
+      "387-stages-md-s-stage-5-heading-is-renamed-away.sh"
+    ],
+    "/tmp/cv11-copy": [
+      "388-only-the-stage-5-gate-bullet-loses-the-convergence-check.sh"
+    ],
+    "/tmp/fe6-copy": [
+      "389-the-stage-4-gate-stops-reading-the-edges-count.sh"
+    ],
+    "/tmp/cx1-copy": [
+      "390-the-source-ledger-loses-its-contradictions-line.sh"
+    ],
+    "/tmp/cx2-copy": [
+      "391-the-stage-0-gate-stops-reading-the-contradictions-line.sh"
+    ],
+    "/tmp/cx3-copy": [
+      "392-stage-3-loses-the-tracks-convergence.sh"
+    ],
+    "/tmp/cx4-copy": [
+      "393-stage-3-s-two-tracks-go-back-to-a-sequence.sh"
+    ],
+    "/tmp/wv1-copy": [
+      "394-a-waived-row-that-keeps-its-priority-must-fail.sh"
+    ],
+    "/tmp/wv2-copy": [
+      "395-a-waiver-naming-no-revisit-condition-must-fail.sh"
+    ],
+    "/tmp/prk1-copy": [
+      "396-a-parked-row-naming-no-branch-or-commit-must-fail.sh"
+    ],
+    "/tmp/prk2-copy": [
+      "397-an-open-row-homed-in-a-scratchpad-must-fail.sh"
+    ],
+    "/tmp/exp1-copy": [
+      "398-the-seeded-exposure-script-disappearing-must-fail.sh"
+    ],
+    "/tmp/exp2-copy": [
+      "399-doctrine-that-stops-naming-the-script-must-fail.sh"
+    ],
+    "/tmp/exp3-copy": [
+      "400-an-exposure-line-carrying-a-percentage-must-fail.sh"
+    ],
+    "/tmp/gx4-copy": [
+      "401-this-project-s-own-pipeline-json-is-validated-not-only-the-e.sh"
+    ],
+    "/tmp/gx5-copy": [
+      "402-the-verdict-gate-and-the-graph-schema-must-not-diverge.sh"
+    ],
+    "/tmp/agz1-copy": [
+      "403-the-agents-disclosure-is-defined-but-never-called.sh"
+    ],
+    "/tmp/cov1-copy": [
+      "404-coverage-stops-refusing-a-requirement-nothing-serves.sh"
+    ],
+    "/tmp/cov2-copy": [
+      "405-serves-resolving-against-nothing.sh"
+    ],
+    "/tmp/prd1-copy": [
+      "406-a-producer-field-vanishing-when-it-cannot-be-resolved.sh"
+    ],
+    "/tmp/cnv1-copy": [
+      "407-a-moved-component-pointer-needing-no-convergence-record.sh"
+    ],
+    "/tmp/stl1-copy": [
+      "408-staleness-counts-that-vanish-when-every-row-is-current.sh"
+    ],
+    "/tmp/jdg1-copy": [
+      "409-a-judgment-gate-that-need-not-name-its-judge.sh"
+    ],
+    "/tmp/wex1-copy": [
+      "410-a-gate-verdict-example-that-omits-what-the-rule-mandates.sh"
+    ],
+    "/tmp/doc1-copy": [
+      "411-unmeasured-doctrine-reported-as-a-zero-count.sh"
+    ],
+    "/tmp/lse1-copy": [
+      "412-a-version-surface-outside-the-guarded-set.sh"
+    ],
+    "/tmp/col1-copy": [
+      "413-a-collision-warning-inside-the-frontier-rows.sh"
+    ],
+    "/tmp/c9a-copy": [
+      "414-canon-9a-a-count-printed-with-no-unmeasured-case.sh"
+    ],
+    "/tmp/hnd1-copy": [
+      "415-a-hand-back-with-no-not-verified-field.sh"
+    ],
+    "/tmp/cls1-copy": [
+      "416-a-replan-that-stops-while-close-exits-0.sh"
+    ],
+    "/tmp/wg1-copy": [
+      "417-a-shipped-verb-the-doctrine-never-documents.sh"
+    ],
+    "/tmp/wave-ord": [
+      "418-wave-mode-an-earlier-wave-waiting-on-a-later-one.sh"
+    ],
+    "/tmp/wave-flt": [
+      "419-wave-mode-next-wave-printing-other-waves-nodes.sh"
+    ],
+    "/tmp/wave-rcut": [
+      "420-wave-mode-a-wave-re-cut-that-records-no-revision.sh"
+    ],
+    "/tmp/rev1-copy": [
+      "421-a-revision-log-that-records-the-change-and-not-the-reason.sh"
+    ],
+    "/tmp/gx8-copy": [
+      "422-a-parked-reason-pattern-that-accepts-the-empty-string.sh"
+    ],
+    "/tmp/gx9-copy": [
+      "423-a-conditional-whose-if-can-never-be-satisfied.sh"
+    ],
+    "/tmp/gx6-copy": [
+      "424-the-parked-reason-rule-removed-from-the-schema.sh"
+    ],
+    "/tmp/gx7-copy": [
+      "425-the-parked-reason-accepts-a-single-space.sh"
+    ],
+    "/tmp/gx1-copy": [
+      "426-a-graph-schema-whose-node-shape-does-not-bind.sh"
+    ],
+    "/tmp/gx2-copy": [
+      "427-a-required-field-whose-subschema-constrains-nothing.sh"
+    ],
+    "/tmp/gx3-copy": [
+      "428-done-without-evidence-expressible-and-unexpressed.sh"
+    ],
+    "/tmp/cx5-copy": [
+      "429-the-stage-3-gate-stops-requiring-the-convergence.sh"
+    ],
+    "/tmp/b80a-copy": [
+      "430-a-node-that-cannot-say-how-it-will-be-closed.sh"
+    ],
+    "/tmp/b80b-copy": [
+      "431-the-check-rule-declared-and-never-required.sh"
+    ],
+    "/tmp/b80c-copy": [
+      "432-a-check-rule-whose-if-can-never-be-satisfied.sh"
+    ],
+    "/tmp/b80d-copy": [
+      "433-a-check-pattern-that-accepts-whitespace.sh"
+    ],
+    "/tmp/b80e-copy": [
+      "434-a-nullable-check-which-satisfies-every-string-rule-vacuously.sh"
+    ],
+    "/tmp/b80f-copy": [
+      "435-the-runtime-check-rule-disarmed-and-the-schema-left-intact.sh"
+    ],
+    "/tmp/b80g-copy": [
+      "436-the-same-disarm-against-the-graph-fixtures.sh"
+    ],
+    "/tmp/b80i-copy": [
+      "437-a-ledger-row-whose-cell-count-does-not-match-its-header.sh"
+    ],
+    "/tmp/b80h-copy": [
+      "438-the-verifier-told-to-read-a-field-again-by-name-only.sh"
+    ],
+    "/tmp/anc1-copy": [
+      "439-a-plant-re-pinned-to-a-literal-a-release-can-move.sh"
+    ],
+    "/tmp/anc2-copy": [
+      "440-a-plant-that-can-decline-to-run-and-never-says-when.sh"
+    ],
+    "/tmp/anc3-copy": [
+      "441-an-anchor-declaration-that-names-nothing-the-plant-reads.sh"
+    ],
+    "/tmp/anc4-copy": [
+      "442-a-restated-fixture-count-that-disagrees-with-the-fixture-fil.sh"
+    ],
+    "/tmp/rm1": [
+      "443-a-release-stamp-rule-that-stops-naming-the-merge-strategy.sh"
+    ],
+    "/tmp/rm2": [
+      "444-a-release-stamp-rule-that-stops-naming-the-tag-shape.sh"
+    ],
+    "/tmp/rm3": [
+      "445-a-release-stamp-rule-that-stops-naming-the-merge-commit-shap.sh"
+    ],
+    "/tmp/rm4": [
+      "446-a-release-stamp-rule-that-stops-naming-the-gate-command.sh"
+    ],
+    "/tmp/rm5": [
+      "447-a-release-stamp-rule-that-stops-naming-the-local-probe.sh"
+    ],
+    "/tmp/inl1-copy": [
+      "449-a-check-written-inline-in-the-workflow-again.sh"
+    ],
+    "/tmp/shd1-copy": [
+      "450-a-shard-matrix-that-leaves-a-slice-unrun.sh"
+    ],
+    "/tmp/fmt1-copy": [
+      "451-a-check-file-the-loader-cannot-read.sh"
+    ],
+    "/tmp/wfsz-copy": [
+      "452-the-workflow-grows-past-github-s-size-limit.sh"
+    ],
+    "/tmp/tmpst-copy": [
+      "453-a-test-file-leaves-temp-state-behind.sh"
+    ],
+    "/tmp/fw07-route-copy": [
+      "454-a-default-stage-route-points-at-a-sibling.sh"
+    ]
+  },
+  "scope": "Read source declarations only; no public directory reads, writes or plant execution. Admitted normalized literal /tmp paths compared including every secondary destination."
+}

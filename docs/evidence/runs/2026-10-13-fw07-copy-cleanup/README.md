@@ -86,3 +86,13 @@ is made.
 - [`task-pipeline`](https://github.com/ssheleg/task-pipeline) — bounded runner correction
 - [`agent-sync`](https://github.com/ssheleg/agent-sync) — isolated ownership
 - [`evidence-docs`](https://github.com/ssheleg/task-pipeline) — baseline and focused receipts
+
+## Independent acceptance and collision census
+
+The [root peer receipt](root-peer.json) binds independent source review and actual
+18 + 42 focused replays to `9d9a99b`; both logs are retained beside it.
+The [complete destination census](collision-census.json) reads all 454 plants and
+finds 443 distinct admitted destinations, no duplicates and no ancestor overlaps,
+including both secondary destinations. This checks the current corpus, not future
+concurrent writers or unsupported dynamic shell paths. The coordinator authorized
+composition after this bounded peer; the future complete owner gate remains open.
