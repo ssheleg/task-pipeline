@@ -94,3 +94,12 @@ installation was performed by this slice. Existing state persistence/storage
 mechanics outside this selected-profile admission remain their prior contract.
 Next: independent source review, then aggregate and normal candidate admission
 under the coordinator's serial queue. Do not fold this into extraction PR123.
+
+### Optional-label correction
+
+Self-review against the actual schema found that optional `name` permits an empty
+string. The reader now uses the required stable `state` for absent or blank labels;
+non-string/multiline labels still refuse as unrepresentable in this ledger. The
+new positive controls replace the prior empty-name negative. The prior 119-control
+receipt remains historical; the [final focused replay](focused-final.txt) records
+120 passing controls. No other emission, admission or persistence behavior changed.

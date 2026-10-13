@@ -111,6 +111,8 @@ def _profile(root: pathlib.Path) -> tuple[list[dict], dict]:
             raise SystemExit("stage_checkpoint: malformed selected stage")
         sid, state = stage.get("id", ordinal), stage.get("state")
         name = stage.get("name", state)
+        if isinstance(name, str) and not name.strip():
+            name = state  # optional human label may be empty; stable state still identifies it
         skills, gate = stage.get("skills"), stage.get("gate")
         if (type(sid) is not int or sid < 0 or sid in ids or
                 not isinstance(state, str) or not state.strip() or state in states or

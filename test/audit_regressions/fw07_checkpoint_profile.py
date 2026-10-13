@@ -103,6 +103,12 @@ with tempfile.TemporaryDirectory(prefix='tp-fw07-profile-') as temp:
     root, _ = fixture(base, 'ordinal', {'stages': [stage('one'), stage('two')]}, sid=0, name='one')
     a = emit(root)
     check(a['body']['open'][0] == {'step_id': 'stage-1', 'next_action': 'enter stage 1 two'}, 'optional ids/names project deterministically')
+    for i, label in enumerate(('', '   ')):
+        cfg = {'stages': [stage('one', label)]}
+        root, _ = fixture(base, f'empty-name-{i}', cfg, sid=0, name='one')
+        a = emit(root)
+        check(a['body']['plan'] == [{'step_id': 'stage-0', 'title': 'one'}] and a['close'],
+              'empty optional label uses required stable state')
     cfg = {'stages': [stage('one', 'One', 9), stage('two', 'Two', 3)]}
     root, _ = fixture(base, 'ordered', cfg, sid=9, name='One')
     a = emit(root)
@@ -115,7 +121,7 @@ with tempfile.TemporaryDirectory(prefix='tp-fw07-profile-') as temp:
 
     variants = [[], {}, {'stages': []}, {'stages': ['secret:do-not-disclose-fixture']}]
     for mutate in ('duplicate-id', 'duplicate-state', 'bool-id', 'negative-id', 'unknown-gate',
-                   'unknown-capability', 'bad-skills', 'nameless', 'judge-absent'):
+                   'unknown-capability', 'bad-skills', 'judge-absent'):
         cfg = profile()
         if mutate == 'duplicate-id': cfg['stages'][1]['id'] = 0
         elif mutate == 'duplicate-state': cfg['stages'][1]['state'] = 'collect'
@@ -124,7 +130,6 @@ with tempfile.TemporaryDirectory(prefix='tp-fw07-profile-') as temp:
         elif mutate == 'unknown-gate': cfg['stages'][0]['gate']['type'] = 'do-not-disclose-fixture'
         elif mutate == 'unknown-capability': cfg['must_understand'] = ['do-not-disclose-fixture']
         elif mutate == 'bad-skills': cfg['stages'][0]['skills'] = []
-        elif mutate == 'nameless': cfg['stages'][0]['name'] = ''
         elif mutate == 'judge-absent': cfg['stages'][0]['gate']['type'] = 'judgment'
         variants.append(cfg)
     for i, cfg in enumerate(variants):
