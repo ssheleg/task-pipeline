@@ -111,3 +111,13 @@ source-identity binding and is explicitly contaminated, not a candidate failure
 or success. The implementer changed the worktree after a correction request while
 that replay was still running; immutable source extraction prevented recurrence.
 No complete owner suite, native interception or production release is claimed.
+
+## Standing release-order reconciliation
+
+`pipeline.json` stage7 already names local annotation → complete tagged-tree
+check → publication. CONTRIBUTING now gives the actual owner helper commands
+in that order with conditional chaining and real context/authority boundaries.
+R-010's operative sentence now says local tag first explicitly, matching its
+existing explanation; historical incident prose remains unchanged. No new human
+approval flow or native hook exemption is added. CONTRIBUTING is a published
+document, so this change belongs to the future composed package version.
