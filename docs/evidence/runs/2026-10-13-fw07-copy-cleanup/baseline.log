@@ -1,0 +1,101 @@
+FFFFFFFF
+======================================================================
+FAIL: test_all_copies_runner_exception (__main__.CopyCleanup.test_all_copies_runner_exception)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/sshlg/DATA/_wt/tp-fw07-plant-copies/test/audit_regressions/plant_copy_cleanup.py", line 84, in test_all_copies_runner_exception
+    self.assert_copies_gone()
+    ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/sshlg/DATA/_wt/tp-fw07-plant-copies/test/audit_regressions/plant_copy_cleanup.py", line 70, in assert_copies_gone
+    self.assertFalse(self.first.exists(), 'first copy leaked')
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: True is not false : first copy leaked
+
+======================================================================
+FAIL: test_all_copies_shell_failure (__main__.CopyCleanup.test_all_copies_shell_failure)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/sshlg/DATA/_wt/tp-fw07-plant-copies/test/audit_regressions/plant_copy_cleanup.py", line 80, in test_all_copies_shell_failure
+    self.assert_copies_gone()
+    ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/sshlg/DATA/_wt/tp-fw07-plant-copies/test/audit_regressions/plant_copy_cleanup.py", line 71, in assert_copies_gone
+    self.assertFalse(self.second.exists(), 'second copy leaked')
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: True is not false : second copy leaked
+
+======================================================================
+FAIL: test_all_copies_success (__main__.CopyCleanup.test_all_copies_success)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/sshlg/DATA/_wt/tp-fw07-plant-copies/test/audit_regressions/plant_copy_cleanup.py", line 76, in test_all_copies_success
+    self.assert_copies_gone()
+    ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/sshlg/DATA/_wt/tp-fw07-plant-copies/test/audit_regressions/plant_copy_cleanup.py", line 71, in assert_copies_gone
+    self.assertFalse(self.second.exists(), 'second copy leaked')
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: True is not false : second copy leaked
+
+======================================================================
+FAIL: test_heredoc_and_comment_are_not_cleanup_authority (__main__.CopyCleanup.test_heredoc_and_comment_are_not_cleanup_authority)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/sshlg/DATA/_wt/tp-fw07-plant-copies/test/audit_regressions/plant_copy_cleanup.py", line 108, in test_heredoc_and_comment_are_not_cleanup_authority
+    self.assert_copies_gone()
+    ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/sshlg/DATA/_wt/tp-fw07-plant-copies/test/audit_regressions/plant_copy_cleanup.py", line 71, in assert_copies_gone
+    self.assertFalse(self.second.exists(), 'second copy leaked')
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: True is not false : second copy leaked
+
+======================================================================
+FAIL: test_primary_unchanged_stays_broken_despite_secondary_change (__main__.CopyCleanup.test_primary_unchanged_stays_broken_despite_secondary_change)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/sshlg/DATA/_wt/tp-fw07-plant-copies/test/audit_regressions/plant_copy_cleanup.py", line 98, in test_primary_unchanged_stays_broken_despite_secondary_change
+    self.assert_copies_gone()
+    ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/sshlg/DATA/_wt/tp-fw07-plant-copies/test/audit_regressions/plant_copy_cleanup.py", line 71, in assert_copies_gone
+    self.assertFalse(self.second.exists(), 'second copy leaked')
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: True is not false : second copy leaked
+
+======================================================================
+FAIL: test_property_copies_exception (__main__.CopyCleanup.test_property_copies_exception)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/sshlg/DATA/_wt/tp-fw07-plant-copies/test/audit_regressions/plant_copy_cleanup.py", line 92, in test_property_copies_exception
+    self.assert_copies_gone()
+    ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/sshlg/DATA/_wt/tp-fw07-plant-copies/test/audit_regressions/plant_copy_cleanup.py", line 70, in assert_copies_gone
+    self.assertFalse(self.first.exists(), 'first copy leaked')
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: True is not false : first copy leaked
+
+======================================================================
+FAIL: test_property_copies_success (__main__.CopyCleanup.test_property_copies_success)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/sshlg/DATA/_wt/tp-fw07-plant-copies/test/audit_regressions/plant_copy_cleanup.py", line 88, in test_property_copies_success
+    self.assert_copies_gone()
+    ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/sshlg/DATA/_wt/tp-fw07-plant-copies/test/audit_regressions/plant_copy_cleanup.py", line 71, in assert_copies_gone
+    self.assertFalse(self.second.exists(), 'second copy leaked')
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: True is not false : second copy leaked
+
+======================================================================
+FAIL: test_secondary_unchanged_does_not_change_primary_verdict (__main__.CopyCleanup.test_secondary_unchanged_does_not_change_primary_verdict)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/sshlg/DATA/_wt/tp-fw07-plant-copies/test/audit_regressions/plant_copy_cleanup.py", line 102, in test_secondary_unchanged_does_not_change_primary_verdict
+    self.assert_copies_gone()
+    ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/sshlg/DATA/_wt/tp-fw07-plant-copies/test/audit_regressions/plant_copy_cleanup.py", line 71, in assert_copies_gone
+    self.assertFalse(self.second.exists(), 'second copy leaked')
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: True is not false : second copy leaked
+
+----------------------------------------------------------------------
+Ran 8 tests in 0.274s
+
+FAILED (failures=8)
