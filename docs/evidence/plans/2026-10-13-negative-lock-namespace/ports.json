@@ -1,0 +1,26 @@
+[
+  {
+    "owner": "task-pipeline",
+    "source": "540679ea7552f8a37e99560e287a69c23cbd3c4a",
+    "path": "test/negatives.py",
+    "proposal": "task-pipeline-proposal.patch.gz",
+    "status": "PROPOSED_NOT_APPLIED",
+    "mechanism": "identical pure path helper and actual lock-path call"
+  },
+  {
+    "owner": "seo-aeo-audit",
+    "source": "1e86edf178f0445ad2bace5fbbf79013de43f605",
+    "path": "test/negatives.py",
+    "proposal": "seo-aeo-audit-proposal.patch.gz",
+    "status": "PROPOSED_NOT_APPLIED",
+    "mechanism": "identical pure path helper and actual lock-path call"
+  },
+  {
+    "owner": "sheleg-dev",
+    "source": "21e0c531a0fdd306aa8a8e408f5b8d34d9f9b369",
+    "path": "test/negatives.py",
+    "proposal": "sheleg-dev-proposal.patch.gz",
+    "status": "PROPOSED_NOT_APPLIED",
+    "mechanism": "identical pure path helper and actual lock-path call"
+  }
+]

@@ -77,3 +77,19 @@ identical mechanism delta and each owner's local tests before integration. The
 coordination rule remains necessary during migration: old binaries using old
 lock names do not participate in the new lock. This does not claim safety for
 unmigrated runners or direct manual plant invocation outside the runner.
+
+## Admission refinement before implementation
+
+The coordinator accepted the shared identity but requires safe public-lock file
+admission: exclusive-create or no-follow open, regular current-user-owned file,
+private mode and stable inode checks; never truncate, unlink or steal a lock.
+Symlink and nonregular preexisting paths must refuse unchanged. Tests use only
+owned directories and actual subprocess contention, never the public lock.
+
+The [three minimal proposal deltas](ports.json) preserve the earlier identity-only
+proposal for source mapping; they are NOT implementation-ready because their
+legacy open-with-write acquisition lacks this new admission. The implementation
+will use one byte-identical excluded `test/negative_lock.py` helper in all owners
+and replace the legacy inline lock acquisition, with truthful shared-mechanism
+headers. Unsupported flock/no-follow platforms refuse explicitly rather than
+pretend serialization. Existing old runners and direct plants remain outside it.
