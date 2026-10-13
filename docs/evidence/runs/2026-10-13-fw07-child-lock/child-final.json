@@ -1,0 +1,12 @@
+{
+  "command": "python3 -B test/audit_regressions/fw07_child_lifetime.py",
+  "exit": 0,
+  "output": "PASS: shared scratch child lifetime \u2014 48 controls; owned namespaces only\n",
+  "source_hashes": {
+    "test/negative_lock.py": "48d22d80ed442a17bb36b21e99638ddd20f6dcad1756f1888c1f2d7052dbaca6",
+    "test/negatives.py": "415e3b4432fff8e3d4091eb24220ba9ff3cc833bec5d677f00ade0fbe615c935",
+    "test/runner_test.py": "fe4cd1bc51894e0756e366d17754a7761d4aa4c532d54a762dc1b13dfd9984d0",
+    "test/audit_regressions/plant_copy_cleanup.py": "269f1027a36b9dbf4e902f736cc76630de29a6bd6f8017aaa6eef7235b1edba2",
+    "test/audit_regressions/fw07_child_lifetime.py": "957e9a976e4adec80becb74055272ad997e196088960896c58cc5083eb2794dc"
+  }
+}

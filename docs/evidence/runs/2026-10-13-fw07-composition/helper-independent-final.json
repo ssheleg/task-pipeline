@@ -1,0 +1,32 @@
+{
+  "source": "9b3fa1a27dc3487e69927f5bd3a491b560ad0d0e",
+  "files": [
+    {
+      "path": "package.json",
+      "sha256": "d1c00ce7a9073b73b0608a6a1e988cfe7bd46e83e2e22884e9a8ad5465446b32",
+      "bytes": 3255
+    },
+    {
+      "path": "scripts/release_candidate.py",
+      "sha256": "ec57354e309a452beecc385fcd684ea8d3393ecc7bf2240d9f5b16ef4934db62",
+      "bytes": 18158
+    },
+    {
+      "path": "plugins/task-pipeline/hooks/release-gate.sh",
+      "sha256": "29b30f85220398c5a17dbaaba1cb7977ab36e0c2f86855abd08040dcf5ed4350",
+      "bytes": 14083
+    },
+    {
+      "path": "test/audit_regressions/fw07_release_candidate.py",
+      "sha256": "4df2ff0648f33fb565bbb06dc47632ede6c11f593dc45aa70c1e7ade1934b471",
+      "bytes": 16265
+    }
+  ],
+  "command": "python3 -B test/audit_regressions/fw07_release_candidate.py",
+  "elapsed_seconds": 114.47809195518494,
+  "exit": 0,
+  "stdout": "PASS: owner release candidate \u2014 58 controls; fixture refs only; owned tree removed on exit\n",
+  "stderr": "",
+  "scope": "Four immutable Git blobs; focused tests use synthetic local Git refs and fake expensive suite. No broad suite/provider calls.",
+  "snapshot_removed": true
+}

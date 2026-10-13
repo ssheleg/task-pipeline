@@ -4,9 +4,9 @@ set -eu
 rm -rf /tmp/cv6-copy && cp -R . /tmp/cv6-copy
 python3 - <<'EOF'
 import re
-p = "/tmp/cv6-copy/plugins/task-pipeline/skills/task-pipeline/references/stages.md"
+p = "/tmp/cv6-copy/plugins/task-pipeline/skills/task-pipeline/references/stage-05-dev.md"
 t = open(p, encoding="utf-8").read()
-m = re.search(r"^## 5 — Dev.*?(?=^## )", t, re.S | re.M)
+m = re.search(r"^## 5 — Dev.*?(?=^## |\Z)", t, re.S | re.M)
 assert m, "PLANT DID NOT LAND: cv6 — no stage 5 section"
 _sec = re.sub(r"(?i)worktree", "workspace", m.group(0))
 assert _sec != m.group(0), "PLANT DID NOT LAND: cv6 — stage 5 never named it"

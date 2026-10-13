@@ -13,7 +13,9 @@ assert g, "PLANT DID NOT LAND: cx5 — no GATE bullet"
 _g = re.sub(r"(?i)converge\w*", "combine", g.group(0))
 assert _g != g.group(0), "PLANT DID NOT LAND: cx5 — the gate never named it"
 sec = m.group(0)[:g.start()] + _g + m.group(0)[g.end():]
-assert "converge" in sec, "PLANT OVERREACHED: the prose must survive"
+# The prose lives in the stage-3 detail the validator reads beside the spine.
+_detail = open("/tmp/cx5-copy/plugins/task-pipeline/skills/task-pipeline/references/stage-03-spec.md", encoding="utf-8").read()
+assert "converge" in _detail, "PLANT OVERREACHED: the prose must survive"
 open(p, "w", encoding="utf-8").write(t[:m.start()] + sec + t[m.end():])
 EOF
 if python3 /tmp/cx5-copy/test/validate.py 2>&1 | grep -q "GATE does not require the tracks"; then

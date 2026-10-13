@@ -1,0 +1,8 @@
+{
+  "source": "10b9a4a8840e4e093b16a2f7289b41777bb60ae6",
+  "driver_exit": -15,
+  "driver_stdout": "",
+  "driver_stderr": "",
+  "owned_child_alive_after_driver_exit": true,
+  "cleanup": "explicit SIGTERM to exact recorded owned child process group; temporary context removed"
+}

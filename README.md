@@ -167,9 +167,9 @@ ledgers, so the link is the repository's rather than the package's.
 The doctrine each stage runs on ships inside the skill. Nothing to install for it,
 nothing to resolve at preflight, no version skew with someone else's repo, and
 **no stage blocks on an install** — stage 1 falls back to web search, the wiki and
-the code graph are recommendations. The one exception is deliberate and named: on a
-user-facing task the stage-3 UX track requires super-ux, and the spec gate stops
-until it is installed.
+the code graph are recommendations. On user-facing tasks the stage-3 UX gate
+requires a valid scenario artifact. The preferred provider, an equivalent provider
+and the inline fallback satisfy the same [provider contract](plugins/task-pipeline/skills/task-pipeline/references/companion-skills.md).
 
 | Stage | Built-in doctrine |
 |---|---|
@@ -634,8 +634,8 @@ must say so.
 ### Held to Anthropic's own Skill authoring guidance
 
 Audited against the four Agent Skills pages. Most of it already held — `name`
-13/64 chars, `description` 887/1024 chars, `SKILL.md` 270/500 lines, all 41 references
-linked **directly** from `SKILL.md`, and the bundle far under the 30 MB ceiling. What
+13/64 chars, `description` 887/1024 chars, `SKILL.md` 272/500 lines, all 52 references
+reachable from `SKILL.md` through explicit reference routes, and the bundle far under the 30 MB ceiling. What
 did not, now does:
 
 - **Every reference over 100 lines carries a `## Contents` list**, and the list is
@@ -971,7 +971,7 @@ skill. Four optional companions make individual stages better:
 
 | Companion | For | Required? |
 |---|---|---|
-| [super-ux](https://github.com/ssheleg/super-ux) | the stage-3 UX track | only for user-facing tasks |
+| [super-ux](https://github.com/ssheleg/super-ux) | the stage-3 UX track | preferred provider; valid scenario artifact required for user-facing tasks |
 | context7 (MCP) | stage-1 docs study | recommended — web-search fallback |
 | [obsidian-wiki](https://github.com/ar9av/obsidian-wiki) | stage-0 harvest + stage-9 sync | recommended — never a gate |
 | [graphify](https://github.com/Graphify-Labs/graphify) | stage-0 reach queries + stage-9 refresh + the graph↔docs divergence check | recommended — never a gate |
@@ -987,7 +987,18 @@ recommendation, so you arm the whole run in one exchange. Detail:
 | File | What's in it |
 |---|---|
 | [`SKILL.md`](plugins/task-pipeline/skills/task-pipeline/SKILL.md) | the orchestrator: how to run, the stage table, the model decision |
-| [`references/stages.md`](plugins/task-pipeline/skills/task-pipeline/references/stages.md) | per-stage detail and the exact gate criteria |
+| [`references/stages.md`](plugins/task-pipeline/skills/task-pipeline/references/stages.md) | complete gate criteria and exact per-stage detail routes |
+| [`references/stage-00-intake.md`](plugins/task-pipeline/skills/task-pipeline/references/stage-00-intake.md) | stage 0 procedure, read on entry or resume |
+| [`references/stage-01-docs-study.md`](plugins/task-pipeline/skills/task-pipeline/references/stage-01-docs-study.md) | stage 1 procedure, read on entry or resume |
+| [`references/stage-02-brainstorm.md`](plugins/task-pipeline/skills/task-pipeline/references/stage-02-brainstorm.md) | stage 2 procedure, read on entry or resume |
+| [`references/stage-03-spec.md`](plugins/task-pipeline/skills/task-pipeline/references/stage-03-spec.md) | stage 3 procedure, read on entry or resume |
+| [`references/stage-04-plan.md`](plugins/task-pipeline/skills/task-pipeline/references/stage-04-plan.md) | stage 4 procedure, read on entry or resume |
+| [`references/stage-05-dev.md`](plugins/task-pipeline/skills/task-pipeline/references/stage-05-dev.md) | stage 5 procedure, read on entry or resume |
+| [`references/stage-06-tests.md`](plugins/task-pipeline/skills/task-pipeline/references/stage-06-tests.md) | stage 6 procedure, read on entry or resume |
+| [`references/stage-07-lint-deploy.md`](plugins/task-pipeline/skills/task-pipeline/references/stage-07-lint-deploy.md) | stage 7 procedure, read on entry or resume |
+| [`references/stage-08-post-deploy.md`](plugins/task-pipeline/skills/task-pipeline/references/stage-08-post-deploy.md) | stage 8 procedure, read on entry or resume |
+| [`references/stage-09-docs-wiki.md`](plugins/task-pipeline/skills/task-pipeline/references/stage-09-docs-wiki.md) | stage 9 procedure, read on entry or resume |
+| [`references/stage-10-acceptance.md`](plugins/task-pipeline/skills/task-pipeline/references/stage-10-acceptance.md) | stage 10 procedure, read on entry or resume |
 | [`references/doctrine-map.md`](plugins/task-pipeline/skills/task-pipeline/references/doctrine-map.md) | which reference owns which stage — the map SKILL.md used to carry inline |
 | [`references/artifacts.md`](plugins/task-pipeline/skills/task-pipeline/references/artifacts.md) | the canonical document layout each stage writes to |
 | [`references/conventions.md`](plugins/task-pipeline/skills/task-pipeline/references/conventions.md) | how stages 6–10 read the host project's `CLAUDE.md`, and how the documentation regime is detected |

@@ -1,0 +1,21 @@
+{
+  "accepted_base": "540679ea7552f8a37e99560e287a69c23cbd3c4a",
+  "composed_source_before_metadata": "0d8320ce68366e716908baa34da7f63b77c20b14",
+  "candidate_semver": "1.95.0",
+  "remote_main_semver_at_prepare": "1.94.1",
+  "remote_candidate_tag_at_prepare": "ABSENT",
+  "local_candidate_tag_created": false,
+  "metadata_sha256": {
+    "package.json": "c463a211f2c04ce42062a30bf563ad880c2af7ec7ea535019e4f739c62cb254c",
+    ".claude-plugin/marketplace.json": "820efe2415339c69271012fcd838fd84233586a6a2ffef45dc1b0da558d2956d",
+    "plugins/task-pipeline/.claude-plugin/plugin.json": "787dd14074da0abe882ec2615b13239a4535f73ae09642d2747ac2a95d5e6ef7",
+    "SKILL-CARD.md": "94177d498e6fb94d2b161d6951d8c7d7f52d7fc385da17038d4f3b582fc0625f",
+    "CHANGELOG.md": "1939e0bc265c71046beaf7c087c01faf64bc02019eadedc02492dbeff54422ed"
+  },
+  "local_structural_exit": 0,
+  "strict_marketplace_exit": 0,
+  "strict_plugin_exit": 0,
+  "full_owner_suite": "NOT_RUN",
+  "native_model_quality": "NOT_RUN",
+  "registry_publication": "NOT_RUN"
+}

@@ -1,0 +1,27 @@
+Traceback (most recent call last):
+  File "/Users/sshlg/DATA/_wt/tp-fw07-pretag-admission/test/audit_regressions/fw07_release_candidate.py", line 30, in refuse
+    try: fn()
+         ~~^^
+  File "/Users/sshlg/DATA/_wt/tp-fw07-pretag-admission/scripts/release_candidate.py", line 261, in publish
+    data = self.load(); self.verify(data)
+                        ~~~~~~~~~~~^^^^^^
+  File "/Users/sshlg/DATA/_wt/tp-fw07-pretag-admission/scripts/release_candidate.py", line 178, in verify
+    need(data['source'] == self.source(), 'source identity changed')
+                           ~~~~~~~~~~~^^
+  File "/Users/sshlg/DATA/_wt/tp-fw07-pretag-admission/scripts/release_candidate.py", line 107, in source
+    need(not self.git('status', '--porcelain'), 'clean source required')
+    ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/sshlg/DATA/_wt/tp-fw07-pretag-admission/scripts/release_candidate.py", line 30, in need
+    raise Refusal(message)
+release_candidate.Refusal: clean source required
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/sshlg/DATA/_wt/tp-fw07-pretag-admission/test/audit_regressions/fw07_release_candidate.py", line 151, in <module>
+    refuse(c.publish,'regular project context directory');assert (foreign/'run.md').exists()
+    ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/sshlg/DATA/_wt/tp-fw07-pretag-admission/test/audit_regressions/fw07_release_candidate.py", line 32, in refuse
+    assert phrase in str(e), str(e)
+           ^^^^^^^^^^^^^^^^
+AssertionError: clean source required

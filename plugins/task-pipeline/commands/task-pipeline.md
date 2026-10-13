@@ -35,8 +35,9 @@ naming the standard is one an operator can call out for missing it.
 - **Model.** Recommend the most capable one the environment offers, never a hardcoded
   id. Confirmed once, then the whole run uses it without re-asking.
 - **Companions.** Print the detection block once (`references/companion-skills.md`).
-  Absent ones state their fallback; none is a gate except the stage-3 UX track on a
-  user-facing task.
+  Absent ones state their fallback and name any unavailable check as NOT_RUN.
+  On user-facing tasks stage 3 gates the valid scenario artifact, not package
+  presence; use the provider rule in that reference.
 
 ## Stage 0 — the harvest, then the grill
 

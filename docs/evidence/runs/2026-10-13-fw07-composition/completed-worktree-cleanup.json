@@ -1,0 +1,130 @@
+{
+  "as_of": "2026-10-13T13:01:08.278180+00:00",
+  "scope": "Own completed source worktrees; branches and tags retained. No active suite or public scratch touched.",
+  "archive_local_only": "/Users/sshlg/DATA/task-pipeline/.git/recovery-audit-worktree-archive-20261013",
+  "removed": [
+    {
+      "name": "tp-fw07-checkpoint-profile",
+      "head": "cb4c9db7e83909ad081dfe4cd0e5f9de6c8e8757",
+      "branch": "fix/fw07-checkpoint-profile",
+      "exact_remote_verified": true,
+      "ancestor_composed": true,
+      "no_open_handles": true,
+      "size_kib_before": 7816,
+      "archive_sha256": "7290b285b9228ee625ae883b63167bd0d138ee2b5ca9b2b68fbcc88d750c96c3",
+      "ignored_inventory": [
+        {
+          "path": ".agent-sync/70-as-built-r-codexfeb704d.md",
+          "sha256": "6c15aaae2a6776de9fc03cdeced901be976c4dca976b4c71e89bc8d91ac173dd",
+          "bytes": 489
+        },
+        {
+          "path": ".agent-sync/renew/r-codexfeb704d--FW07-CHECKPOINT-PROFILE",
+          "sha256": "675d04798f8afd49775b3ec44c2a53079a379350f1a9d71e9699fbce552feadd",
+          "bytes": 20
+        },
+        {
+          "path": "plugins/task-pipeline/skills/task-pipeline/scripts/__pycache__/stage_checkpoint.cpython-314.pyc",
+          "sha256": "e7d8cf4f127489193e1ca1125a2243dc3cce3fed261e583f55d62dc66c58a6cc",
+          "bytes": 44720
+        }
+      ],
+      "removed_without_force": true
+    },
+    {
+      "name": "tp-fw07-prerequisites",
+      "head": "cfa5248240df71a55ca6c1742ab9a02ba7867949",
+      "branch": "fix/fw07-artifact-prerequisites",
+      "exact_remote_verified": true,
+      "ancestor_composed": true,
+      "no_open_handles": true,
+      "size_kib_before": 7884,
+      "archive_sha256": "a32de9815f81fb051eac4e64ed2dadff6f33a0e506a77ae3d7491b60f4662e83",
+      "ignored_inventory": [
+        {
+          "path": ".agent-sync/renew/r-codexf26b62d--FW07-ARTIFACT-PREREQUISITES",
+          "sha256": "0487bf69b803375724efbb77c3b26138f3b1a11a35ce04941e3e81db05cadea7",
+          "bytes": 20
+        }
+      ],
+      "removed_without_force": true
+    },
+    {
+      "name": "tp-fw07-pretag-admission",
+      "head": "95c8626434df4a1e3f496d2a01396c68d26a5e13",
+      "branch": "feat/fw07-pretag-admission",
+      "exact_remote_verified": true,
+      "ancestor_composed": true,
+      "no_open_handles": true,
+      "size_kib_before": 7840,
+      "archive_sha256": "c0b0545b1786d9767755191ee5b3c3c54f191f9273604a2b4951289a803237d8",
+      "ignored_inventory": [
+        {
+          "path": ".agent-sync/renew/r-codexfab6f17--FW07-PRETAG-ADMISSION",
+          "sha256": "9d4c80fa9508465d60e90ffc7a36a560bdd087caf0f45983a5abee858d5822bf",
+          "bytes": 20
+        }
+      ],
+      "removed_without_force": true
+    },
+    {
+      "name": "tp-fw07-reading-floor",
+      "head": "35d5c22d7ab9a15d4e5c0251ab2fb9ea55a5dfbf",
+      "branch": "plan/fw07-stage-reading-floor",
+      "exact_remote_verified": true,
+      "ancestor_composed": true,
+      "no_open_handles": true,
+      "size_kib_before": 7836,
+      "archive_sha256": "5499319d37e670222879b50ce99162cd97ca8adddcc3ae074d96fcbe95d0fdca",
+      "ignored_inventory": [
+        {
+          "path": ".agent-sync/70-as-built-r-codexf98879b.md",
+          "sha256": "bf9616d94ffcc37e049dcd6ecda289f3d03caffd740248906def3d24b0c8d655",
+          "bytes": 382
+        },
+        {
+          "path": ".agent-sync/renew/r-codexf98879b--FW07-STAGE-READING-FLOOR",
+          "sha256": "fbf09fad27a8c4a0f8afe7d2f80ffd8fd0bb29575571e242c16234dda8ccf5bf",
+          "bytes": 20
+        },
+        {
+          "path": ".agent-sync/run-id",
+          "sha256": "2f68ffdae4c789b4001ddfc1aacba6346176003c8b438abde1cc974f7c6ae47c",
+          "bytes": 94
+        },
+        {
+          "path": ".agent-sync/seen.json",
+          "sha256": "1f26a5d875a3d3ae7005a0d6635a419fd9ac65c2545fb7792c4ab5e0f5270d18",
+          "bytes": 46
+        }
+      ],
+      "removed_without_force": true
+    },
+    {
+      "name": "tp-fw07-scratch-lock",
+      "head": "74a676e846aba7d0f740d1df34aebc943a8975ad",
+      "branch": "fix/fw07-shared-scratch-lock",
+      "exact_remote_verified": true,
+      "ancestor_composed": true,
+      "no_open_handles": true,
+      "size_kib_before": 8528,
+      "archive_sha256": "c40217dc98cdb76426126d10a885f0190eb97364d7d0cbff1590c1e191f046e5",
+      "ignored_inventory": [
+        {
+          "path": ".agent-sync/renew/r-codexf89fac6--FW07-SCRATCH-LOCK",
+          "sha256": "73e09337c07851878585cd905a159e81ebb6e0a8d0a641267251b2ea7f14639b",
+          "bytes": 20
+        }
+      ],
+      "removed_without_force": true
+    }
+  ],
+  "preserved": [
+    "tp-fw07-composed",
+    "tp-publish-1.94.1-clean",
+    "tp-fw07-stage-routes (old lease record retained)",
+    "all foreign/unproven owner worktrees including named hub candidates",
+    "hub-blocks-preview (explicit preservation)"
+  ],
+  "sum_worktree_kib_removed": 39904
+}

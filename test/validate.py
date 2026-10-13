@@ -19,6 +19,7 @@ errors = []
 # `test/artifact_root_test.py` fails when the two disagree — that comparison is why
 # two implementations of one rule are affordable here.
 import artifact_root                                        # noqa: E402
+from stage_routes import detail_path, detail_text, route_errors
 
 _ART_INFO = artifact_root.resolve(ROOT)
 ART = _ART_INFO["root"]          # e.g. "docs/evidence", or "docs/superpowers" (legacy)
@@ -2391,6 +2392,8 @@ if os.path.isfile(_wf_inl):
 # and has no doctrine. Compare ids, names and gate types across all three.
 _sk_txt = open(skill_path, encoding="utf-8").read() if os.path.isfile(skill_path) else ""
 _st_path = os.path.join(refdir, "stages.md")
+for _route_problem in route_errors(refdir):
+    fail(_route_problem)
 _st_txt = open(_st_path, encoding="utf-8").read() if os.path.isfile(_st_path) else ""
 _cfg_path = os.path.join(ROOT, "plugins/task-pipeline/skills/task-pipeline/pipeline.example.json")
 if os.path.isfile(_cfg_path) and _sk_txt and _st_txt:
@@ -3592,13 +3595,14 @@ if os.path.isfile(_st):
     # search of the file was satisfied by either — the third time in this release that a check
     # meant for two places passed on one of them.
     _stl = open(_st, encoding="utf-8").read().splitlines()
-    _body = [l for l in _stl if l.strip().startswith("- **Where the queue is a work graph")]
+    _detail2 = detail_text(refdir, 2).splitlines()
+    _body = [l for l in _detail2 if l.strip().startswith("- **Where the queue is a work graph")]
     if not _body:
         fail("references/stages.md: stage 2 does not say the work graph is WRITTEN there — "
              "T-7: the queue has to be an artifact before a loop can walk it")
     else:
-        _bi = _stl.index(_body[0])
-        _blk = "\n".join(_stl[_bi:_bi + 10])
+        _bi = _detail2.index(_body[0])
+        _blk = "\n".join(_detail2[_bi:_bi + 10])
         if "graph.py validate" not in _blk:
             fail("references/stages.md: stage 2 writes the graph and never says how it is "
                  "checked — a graph that does not validate is not a queue, and `next` refuses "
@@ -4865,7 +4869,7 @@ if os.path.isfile(os.path.join(refdir, "knowledge-graph.md")):
              "doctrine but the stage-9 gate.check never mentions the graph — the refresh is "
              "declared where it is not enforced, so a run closes with a stale graph the NEXT "
              "run's harvest will read as truth")
-    _s9_doc = re.search(r"^## 9 — .*?(?=^## |\Z)", _st_txt, re.M | re.S)
+    _s9_doc = re.search(r"^## 9 — .*?(?=^## |\Z)", detail_text(refdir, 9), re.M | re.S)
     if _s9_doc and "graph" not in _s9_doc.group(0).lower():
         fail("references/stages.md stage 9: references/knowledge-graph.md ships the code-graph "
              "doctrine but the stage-9 section never mentions the graph — an agent reading the "
@@ -4892,6 +4896,8 @@ if os.path.isfile(os.path.join(refdir, "knowledge-graph.md")):
         fail("references/stages.md stage 0: references/knowledge-graph.md ships the measured-lag "
              "rule but the stage-0 section never states it — an agent reading the stage detail "
              "records a build date and believes it has recorded freshness")
+    if "measured lag" not in _flatten(detail_text(refdir, 0), lower=True):
+        fail("references/stage-00-intake.md: harvest procedure drops the measured lag")
     # The surfaces above cite a section by name; if it stops delivering the commands
     # or drops a state, they cite an empty promise. All three states are load-bearing:
     # graph.json carries built_at_commit only when the caller passed it, so a doctrine
@@ -5101,7 +5107,7 @@ if os.path.isfile(_conv_p):
             fail(f"references/stages.md stage {_num}: this stage pushes, and "
                  "references/conventions.md ships the CI-verdict rule, but the section "
                  "never names it — the run it triggers is closed on an unread verdict")
-        if _sec and "gh run list --branch" in _sec.group(0):
+        if "gh run list --branch" in detail_text(refdir, int(_num)) or (_sec and "gh run list --branch" in _sec.group(0)):
             fail(f"references/stages.md stage {_num}: carries its own copy of the CI-verdict "
                  "commands — cite conventions.md instead; two homes do not disagree the day "
                  "they are written, they disagree the day one is updated")
@@ -5708,7 +5714,7 @@ if os.path.isfile(_LG_P) and os.path.isfile(_ST_P):
 # bullet, so a glyph introduced in a following bullet is out of scope.
 if _PTXT and os.path.isfile(_ST_P):
     _legend2 = set(re.findall(r"^\|\s*`(\S)`\s*\|", _PTXT, re.M))
-    _stx = open(_ST_P, encoding="utf-8").read()
+    _stx = detail_text(refdir, 0)
     _at = _stx.find("short-path triage")
     if _at == -1:
         fail("references/stages.md: no short-path triage — a pipeline with eleven "
@@ -5794,7 +5800,11 @@ if os.path.isfile(_CS_P) and os.path.isfile(_ST_P):
     _heads = list(re.finditer(r"^##\s+(\d+)\s+—", _st_t2, re.M))
     for _i, _h in enumerate(_heads):
         _to = _heads[_i + 1].start() if _i + 1 < len(_heads) else len(_st_t2)
-        _sections[_h.group(1)] = _flatten(_st_t2[_h.start():_to], lower=True)
+        _sections[_h.group(1)] = _flatten(detail_text(refdir, int(_h.group(1))), lower=True)
+    _gate_sections = {}
+    for _i, _h in enumerate(_heads):
+        _to = _heads[_i + 1].start() if _i + 1 < len(_heads) else len(_st_t2)
+        _gate_sections[_h.group(1)] = _flatten(_st_t2[_h.start():_to], lower=True)
     for _row in re.findall(r"^\|\s*\*\*([^*|]+)\*\*[^|]*\|([^|]*)\|", _cs_t, re.M):
         _nm = re.sub(r"^\[|\]$", "", re.split(r"\s*\(", _row[0])[0].strip())
         _need = _row[1]
@@ -5807,7 +5817,7 @@ if os.path.isfile(_CS_P) and os.path.isfile(_ST_P):
         for _sid in sorted(_want):
             if _sid not in _sections:
                 continue          # a stage this example flow does not have
-            if _nm.lower() not in _sections[_sid]:
+            if not any(_nm.lower() in record for record in (_sections[_sid], _gate_sections[_sid])):
                 fail(f"references/companion-skills.md points {_nm!r} at stage {_sid} "
                      f"and references/stages.md's stage {_sid} never names it — "
                      "a companion the operator is told to install for a stage that "
@@ -5876,7 +5886,7 @@ if os.path.isfile(_CS_P) and os.path.isfile(_ST_P):
         # the reader R-005 requires satisfied it with `<!-- browser.md -->` — invisible in
         # rendered markdown, so the stage still demanded the look and left no route to the
         # mechanism. CONTRIBUTING #55 says *link*; now the code says it too.
-        for _sid, _sec in sorted(_sections.items()):
+        for _sid, _sec in sorted(list(_sections.items()) + list(_gate_sections.items())):
             if "playwright" not in _sec and "chrome-devtools" not in _sec:
                 continue
             if "](browser.md)" not in _sec:
@@ -6131,7 +6141,7 @@ _FULL_READERS = [
     (f"{ART}/retro.md", os.path.join(ARTP, "retro.md")),
     ("references/retrospective.md", os.path.join(ROOT, _SKILLDIR, "references/retrospective.md")),
     ("references/knowledge-sources.md", os.path.join(ROOT, _SKILLDIR, "references/knowledge-sources.md")),
-    ("references/stages.md", _ST_P),
+    ("references/stage-00-intake.md", str(detail_path(refdir, 0))),
     ("SKILL.md", os.path.join(ROOT, _SKILLDIR, "SKILL.md")),
 ]
 _seen_reader = 0
@@ -6569,7 +6579,7 @@ if os.path.isfile(_STG_P):
         fail("references/stages.md stage 2: the GATE does not require the loop's arming "
              "state to be printed. Arming at preflight arms a loop with nothing to walk, "
              "and what a stage must DO lives in its gate — prose above it can say anything")
-    elif not re.search(r"loop arms here", _flatten(_m2.group(1), lower=True)):
+    elif not re.search(r"loop arms here", _flatten(detail_text(refdir, 2), lower=True)):
         # Rekeying to the gate silently dropped this: deleting the whole queue bullet
         # passed, while lp07 kept firing only because it ALSO deletes the gate clause.
         # A probe whose stated claim has quietly become another probe's claim is the
@@ -7727,7 +7737,7 @@ if os.path.isfile(_STG):
     if _s5 is None:
         fail("references/stages.md: no `5 — Dev` section")
     else:
-        _s5f = _flatten(_s5, lower=True)
+        _s5f = _flatten(detail_text(refdir, 5), lower=True)
         # The GATE bullet specifically, not the section: prose that describes a criterion
         # and a gate that requires it are different things, and only the second stops a run.
         if "convergence" not in _flatten(_gate_bullet(_s5), lower=True):
@@ -7780,7 +7790,7 @@ if os.path.isfile(_STG):
     if _s3 is None:
         fail("references/stages.md: no `3 — Spec` section")
     else:
-        _s3f = _flatten(_s3, lower=True)
+        _s3f = _flatten(detail_text(refdir, 3), lower=True)
         if "converge" not in _s3f:
             fail("references/stages.md 3: COPY and VISUAL are stated without their "
                  "convergence. Both land on the same screen, so the failure is not that "

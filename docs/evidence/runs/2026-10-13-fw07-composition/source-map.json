@@ -1,0 +1,118 @@
+{
+  "schema": "fw07-composition/1",
+  "composition": "4fa9ff1c81808e828ed2b3be65be7df0c84a201a",
+  "accepted_base": "540679ea7552f8a37e99560e287a69c23cbd3c4a",
+  "stage_source": "5316132edd8133dd8bd06eeb8b55f010355b04b9",
+  "checkpoint_source": "cb4c9db7e83909ad081dfe4cd0e5f9de6c8e8757",
+  "merges": [
+    "fb740c8eecb732da26077c11e3199bce182d4acc",
+    "4fa9ff1c81808e828ed2b3be65be7df0c84a201a"
+  ],
+  "byte_checks": [
+    {
+      "path": "package.json",
+      "equal_to": "540679ea7552f8a37e99560e287a69c23cbd3c4a",
+      "sha256": "d1c00ce7a9073b73b0608a6a1e988cfe7bd46e83e2e22884e9a8ad5465446b32"
+    },
+    {
+      "path": ".claude-plugin/marketplace.json",
+      "equal_to": "540679ea7552f8a37e99560e287a69c23cbd3c4a",
+      "sha256": "4ef8d0e0b229e8f31aa7818b88d1d9d65929a47429c764c7253d8c562f6027e0"
+    },
+    {
+      "path": "plugins/task-pipeline/.claude-plugin/plugin.json",
+      "equal_to": "540679ea7552f8a37e99560e287a69c23cbd3c4a",
+      "sha256": "22ec0770f2039fc07aba0389c10cf7615da7b7aae6276f67ea5e092cdfa6d6a5"
+    },
+    {
+      "path": "pipeline.json",
+      "equal_to": "540679ea7552f8a37e99560e287a69c23cbd3c4a",
+      "sha256": "8185563fcfeb7a9ed01c2084351a3e21be27342581cc2feb12f5cb145c041a72"
+    },
+    {
+      "path": "plugins/task-pipeline/skills/task-pipeline/pipeline.schema.json",
+      "equal_to": "540679ea7552f8a37e99560e287a69c23cbd3c4a",
+      "sha256": "83e79764e07b2dbc53662e5eb871bf372dedcb653eea22feca8d157129301672"
+    },
+    {
+      "path": "plugins/task-pipeline/skills/task-pipeline/SKILL.md",
+      "equal_to": "5316132edd8133dd8bd06eeb8b55f010355b04b9",
+      "sha256": "16cebba6aa7de43178fd68e462b4ada2852fef0290e0593006e055d3f43f60b4"
+    },
+    {
+      "path": "plugins/task-pipeline/skills/task-pipeline/references/spec.md",
+      "equal_to": "5316132edd8133dd8bd06eeb8b55f010355b04b9",
+      "sha256": "d2651b02ac11392903b1ba5510869cec499d3f96a89e0c61b7e5ab5fac24b425"
+    },
+    {
+      "path": "plugins/task-pipeline/skills/task-pipeline/references/stage-00-intake.md",
+      "equal_to": "5316132edd8133dd8bd06eeb8b55f010355b04b9",
+      "sha256": "4e255a02436c329d22c4b37e0aa4110d16fbc4870148c891f7331e67db553e0c"
+    },
+    {
+      "path": "plugins/task-pipeline/skills/task-pipeline/references/stage-01-docs-study.md",
+      "equal_to": "5316132edd8133dd8bd06eeb8b55f010355b04b9",
+      "sha256": "178e2e2e168a59359a22867de028cbb92ca5d96c148593f3369e060fe78dd348"
+    },
+    {
+      "path": "plugins/task-pipeline/skills/task-pipeline/references/stage-02-brainstorm.md",
+      "equal_to": "5316132edd8133dd8bd06eeb8b55f010355b04b9",
+      "sha256": "69bfd110bd69fe6a527629011797233a58a1c48cb2e397fcb980466577747c27"
+    },
+    {
+      "path": "plugins/task-pipeline/skills/task-pipeline/references/stage-03-spec.md",
+      "equal_to": "5316132edd8133dd8bd06eeb8b55f010355b04b9",
+      "sha256": "d2173206ef45c41d9e86627583daca4309fe816f456f6848f9ad22fb6f96c222"
+    },
+    {
+      "path": "plugins/task-pipeline/skills/task-pipeline/references/stage-04-plan.md",
+      "equal_to": "5316132edd8133dd8bd06eeb8b55f010355b04b9",
+      "sha256": "fe999f7f9ffa968c88ea9016dc0bc33c911ae8ecc5240b08c50014ae0c3d9170"
+    },
+    {
+      "path": "plugins/task-pipeline/skills/task-pipeline/references/stage-05-dev.md",
+      "equal_to": "5316132edd8133dd8bd06eeb8b55f010355b04b9",
+      "sha256": "dfd62c8bd6a035968a2f33376d16429fc3f6f2df284556c60b36070daefb5bfe"
+    },
+    {
+      "path": "plugins/task-pipeline/skills/task-pipeline/references/stage-06-tests.md",
+      "equal_to": "5316132edd8133dd8bd06eeb8b55f010355b04b9",
+      "sha256": "bcc1ef374e5cd3f70b155213f9d35f41775421f211620358062588ce9d8ff9f3"
+    },
+    {
+      "path": "plugins/task-pipeline/skills/task-pipeline/references/stage-07-lint-deploy.md",
+      "equal_to": "5316132edd8133dd8bd06eeb8b55f010355b04b9",
+      "sha256": "2a1eeb370e346a679d05b2e1670f0cd4a2e8ebc485538f92e63ec3b185d6f138"
+    },
+    {
+      "path": "plugins/task-pipeline/skills/task-pipeline/references/stage-08-post-deploy.md",
+      "equal_to": "5316132edd8133dd8bd06eeb8b55f010355b04b9",
+      "sha256": "f82ee0d6d169a77e7a4c53ab0526cdead3f2685fbba9145ba2ca946c56fc812f"
+    },
+    {
+      "path": "plugins/task-pipeline/skills/task-pipeline/references/stage-09-docs-wiki.md",
+      "equal_to": "5316132edd8133dd8bd06eeb8b55f010355b04b9",
+      "sha256": "cdee1ff7cc986e1fec17e54c3071aaafb66010f0a8507acbaec2f52c5560c4e7"
+    },
+    {
+      "path": "plugins/task-pipeline/skills/task-pipeline/references/stage-10-acceptance.md",
+      "equal_to": "5316132edd8133dd8bd06eeb8b55f010355b04b9",
+      "sha256": "044c6a0385c729b4b975d2bb3a146f9ad6efcbcdd33febee65bcbb16f9c959ff"
+    },
+    {
+      "path": "plugins/task-pipeline/skills/task-pipeline/references/stages.md",
+      "equal_to": "5316132edd8133dd8bd06eeb8b55f010355b04b9",
+      "sha256": "2405a0e0ff14c16d538bc65910c9ed5d034af69bb0c38893dfca016e675b8a06"
+    },
+    {
+      "path": "plugins/task-pipeline/skills/task-pipeline/scripts/stage_checkpoint.py",
+      "equal_to": "cb4c9db7e83909ad081dfe4cd0e5f9de6c8e8757",
+      "sha256": "5515ea6640751c4856f56e8416eb3020df6cf5a33831aef07e4a601d72547adc"
+    }
+  ],
+  "card_stage_text_equal_except_version": true,
+  "helper_absent": true,
+  "release_hook_equal_to_accepted_base": true,
+  "historical_patch_gzip_roundtrip_equal": true,
+  "accepted_base_version": "1.94.1"
+}

@@ -1,0 +1,10 @@
+{
+  "base": "771b7cd6b364837422adf6f6cd23f4420a393b6b",
+  "sweep_files": 111,
+  "predicate": "bounded prerequisite_problems from fix-tp-02.01.py",
+  "remaining_matches": {},
+  "shipped_hashes": {
+    "plugins/task-pipeline/skills/task-pipeline/references/stage-03-spec.md": "d2173206ef45c41d9e86627583daca4309fe816f456f6848f9ad22fb6f96c222",
+    "plugins/task-pipeline/skills/task-pipeline/references/spec.md": "d2651b02ac11392903b1ba5510869cec499d3f96a89e0c61b7e5ab5fac24b425"
+  }
+}

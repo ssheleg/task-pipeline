@@ -1,5 +1,6 @@
 # shared-mechanism: sshlg-skills/member-release-v1
-# diverges: release-only extraction; readable file failures include invalid UTF-8.
+# diverges: none
+# Extraction scope: release-only extraction; readable file failures include invalid UTF-8.
 # Source: agent-stack 792e3f6cb2e46517f0187066db55edc63ae7d12c:test/member_gates.py.
 """Bounded release workflow contract; not an arbitrary YAML or shell parser."""
 from pathlib import Path

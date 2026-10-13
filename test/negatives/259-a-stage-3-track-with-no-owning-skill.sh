@@ -3,7 +3,7 @@
 set -eu
 rm -rf /tmp/trk1-copy && cp -R . /tmp/trk1-copy
 python3 - <<'EOF'
-p = "/tmp/trk1-copy/plugins/task-pipeline/skills/task-pipeline/references/stages.md"
+p = "/tmp/trk1-copy/plugins/task-pipeline/skills/task-pipeline/references/stage-03-spec.md"
 t = open(p, encoding="utf-8").read()
 assert "`copywriting`" in t, "PLANT DID NOT LAND: the copy companion moved"
 open(p, "w", encoding="utf-8").write(t.replace("`copywriting`", "the writing skill"))

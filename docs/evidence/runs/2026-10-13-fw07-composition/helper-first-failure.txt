@@ -1,0 +1,9 @@
+Command: python3 -B test/audit_regressions/fw07_release_candidate.py
+Source: 10b9a4a8840e4e093b16a2f7289b41777bb60ae6
+Exit:1
+Traceback (most recent call last):
+  File "test/audit_regressions/fw07_release_candidate.py", line241, in <module>
+    assert proc.returncode==0,stderr
+AssertionError
+Captured stdout empty. Exit/signal identity was not logged by this first assertion;
+the separate deterministic baseline confirms the startup seam independently.

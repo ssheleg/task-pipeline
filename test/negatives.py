@@ -35,6 +35,7 @@ Zero dependencies, same as the validator.
 #   where the others read the workflow (WORKFLOW); measured against the sibling copies
 #   on 2026-10-12, which also differ from each other on ENV_ERROR_SIGNS and STAGES.
 # diverges: ENV_ERROR_SIGNS, FILE_RE, MIN_EXPECTED, MIN_PROPS, NAME_HEADER, NEG_DIR, STAGES, SUCCESS_MARKERS, WORKFLOW
+import atexit
 import concurrent.futures
 import tempfile
 import os
@@ -42,6 +43,9 @@ import re
 import shutil
 import subprocess
 import sys
+import stat
+import shlex
+from negative_lock import acquire_scratch_lock, ScratchProcesses
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # One file per check. The directory is the source of truth; nothing lists it.
@@ -61,7 +65,7 @@ MIN_PROPS = 15
 # which is the floor doing half its job: it would have caught a total collapse and
 # not the loss of a third of the suite. Set it to the real count, and treat a
 # mismatch as a finding rather than as noise to be lowered away.
-MIN_EXPECTED = 451
+MIN_EXPECTED = 452
 
 
 def scan(path=NEG_DIR):
@@ -184,6 +188,74 @@ def copy_dir_of(script):
     return m.group(1) if m else None
 
 
+def copy_dirs_of(script):
+    """All literal plant copies in the corpus's bounded shell declaration grammar.
+
+    Only standalone `rm -rf PATH && cp -R . PATH` (or bare `cp -R . PATH`)
+    lines grant cleanup authority; the corpus's optional trailing removal of the
+    same target's `.git` is admitted too. Ignore comments and heredoc payloads, never
+    regex-search quoted test data. Unsupported executable copy spellings refuse.
+    This is not a general shell parser or an ownership claim over arbitrary /tmp.
+    """
+    result, heredoc, pending = [], None, ""
+    for line in script.splitlines():
+        stripped = line.strip()
+        if heredoc is not None:
+            delimiter, tabs = heredoc
+            if (line.lstrip('\t') if tabs else line) == delimiter:
+                heredoc = None
+            continue
+        if not pending and (not stripped or stripped.startswith('#')):
+            continue
+        # Wait for a complete quoted/continued command before admitting a line;
+        # a standalone-looking declaration inside an echo string is only data.
+        pending += line + '\n'
+        if (len(line) - len(line.rstrip('\\'))) % 2:
+            continue
+        try:
+            words = shlex.split(pending, comments=True)
+        except ValueError:
+            continue
+        stripped, pending = pending.strip(), ''
+        # Corpus payloads use one literal heredoc per command. Do not interpret it.
+        opener = re.search(r"<<(-?)[ \t]*(?:'([A-Za-z_][A-Za-z0-9_]*)'|\"([A-Za-z_][A-Za-z0-9_]*)\"|([A-Za-z_][A-Za-z0-9_]*))", stripped)
+        if opener and re.match(r"(?:python3? -|cat)\s+<<", stripped):
+            heredoc = (next(x for x in opener.groups()[1:] if x), bool(opener[1]))
+            continue
+        if any(word.startswith('<<') for word in words):
+            raise ValueError('unsupported plant heredoc; refusing cleanup and execution')
+        match = re.fullmatch(r"(?:rm -rf (\S+) && )?cp -R \. (\S+)(?: && rm -rf (\S+))?", stripped)
+        if match:
+            removed, target, strip_git = match.groups()
+            parts = target.split('/')
+            if (not target.startswith('/tmp/') or len(parts) < 3 or
+                    any(not re.fullmatch(r'[A-Za-z0-9_.-]+', part) or part in ('.', '..')
+                        for part in parts[2:]) or removed not in (None, target) or
+                    strip_git not in (None, target + '/.git')):
+                raise ValueError('ambiguous plant copy path; refusing cleanup and execution')
+            if target not in result:
+                result.append(target)
+        elif re.match(r'(?:rm\b.*&&\s*)?cp\s+-R\s+\.(?:\s|$)', stripped):
+            raise ValueError('unsupported plant copy declaration; refusing cleanup and execution')
+    if heredoc is not None or pending:
+        raise ValueError('unterminated plant quoting/heredoc; refusing cleanup and execution')
+    return result
+
+
+def run_plant(script, bash, *, check_noop=True):
+    """Sweep every declared copy even if execution or no-op observation raises."""
+    copies = copy_dirs_of(script)
+    primary = copy_dir_of(script)  # preserve the existing first-copy verdict contract
+    sweep(copies)
+    try:
+        result = bash(script)
+        noop = bool(check_noop and primary and os.path.isdir(primary)
+                    and not differs_from_repo(primary))
+        return primary, (result, noop)
+    finally:
+        sweep(copies)
+
+
 def differs_from_repo(path):
     r = subprocess.run(
         ["diff", "-rq", "--exclude=.git", "--exclude=node_modules", "--exclude=graphify-out", path, ROOT],
@@ -193,12 +265,38 @@ def differs_from_repo(path):
 
 
 def sweep(paths):
-    for p in paths:
-        if p and p.startswith("/tmp/"):
-            shutil.rmtree(p, ignore_errors=True)
+    # Admit the complete set before deleting anything. /tmp itself may be the
+    # platform alias; no descendant symlink or non-directory grants authority.
+    paths = list(dict.fromkeys(p for p in paths if p))
+    for path in paths:
+        parts = path.split('/')
+        if (not path.startswith('/tmp/') or
+                any(not re.fullmatch(r'[A-Za-z0-9_.-]+', part) or part in ('.', '..')
+                    for part in parts[2:])):
+            raise ValueError('unsafe plant cleanup path')
+        current = os.path.realpath('/tmp')
+        for part in parts[2:]:
+            current = os.path.join(current, part)
+            try:
+                info = os.lstat(current)
+            except FileNotFoundError:
+                break
+            if not stat.S_ISDIR(info.st_mode) or info.st_uid != os.getuid():
+                raise ValueError('plant cleanup requires owned directory components, no symlinks')
+    failures = []
+    for path in paths:
+        try:
+            shutil.rmtree(path)
+        except FileNotFoundError:
+            pass
+        except OSError as exc:
+            failures.append(exc)
+    if failures:
+        # Attempt independent copies too; never turn incomplete cleanup into PASS.
+        raise OSError(f'plant cleanup failed for {len(failures)} path(s)') from failures[0]
 
 
-def main(argv):
+def _main(argv, plants):
     # Parse before scanning, locking or copying. Unknown flags must not silently
     # trigger the entire destructive-fixture suite (observed with --help).
     import argparse
@@ -245,20 +343,13 @@ def main(argv):
     # So the paths stay exactly as CI has them, and the runs are serialised instead. An
     # exclusive lock for the duration of the suite: the second run waits rather than
     # corrupting the first, and says so instead of producing a number nobody can trust.
-    _LOCK_PATH = os.path.join(tempfile.gettempdir(), "tp-negatives.lock")
-    _lock = open(_LOCK_PATH, "w")
+    # The shared helper binds physical /tmp across owners and TMPDIR settings.
+    # Old runner versions and direct plant invocation do not participate.
     try:
-        import fcntl
-        try:
-            fcntl.flock(_lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
-        except OSError:
-            print("another run of this suite holds the scratch paths — waiting for it.\n"
-                  "  (every step copies the repo to a fixed /tmp name, so two runs at once\n"
-                  "   overwrite each other and both report about a tree neither one saw)")
-            fcntl.flock(_lock, fcntl.LOCK_EX)
-    except ImportError:
-        # No flock (Windows): say what is not guaranteed rather than implying it is.
-        print("note: no file locking available here — do not run two suites at once")
+        _lock = plants.hold(acquire_scratch_lock())
+    except (OSError, RuntimeError) as exc:
+        print(f"FAIL: cannot acquire family scratch lock ({type(exc).__name__}): {exc}")
+        return 1
 
     tests = [(n, s) for n, s in _STEPS if MARKER in n]
     if len(tests) < MIN_EXPECTED:
@@ -297,7 +388,7 @@ def main(argv):
         return 0
 
     # A leftover copy from an interrupted run would make the next one lie.
-    sweep([copy_dir_of(s) for _, s in tests])
+    sweep([path for _, script in tests for path in copy_dirs_of(script)])
 
     # Every test does `cp -R .` — from the CURRENT WORKING DIRECTORY. Run with cwd=ROOT
     # that is the live tree, so editing a file mid-run hands some tests a half-written
@@ -307,6 +398,8 @@ def main(argv):
     # So the suite copies ROOT once into a snapshot and runs every test with cwd there.
     # Editing while it runs is now harmless.
     _snap = tempfile.mkdtemp(prefix="tp-negatives-snap-")
+    # An interrupted or refused run must not leave a repository copy behind.
+    atexit.register(shutil.rmtree, _snap, True)
     _base = os.path.join(_snap, "repo")
     shutil.copytree(ROOT, _base, ignore=shutil.ignore_patterns(
         "node_modules", "graphify-out", ".git"), symlinks=True)
@@ -406,20 +499,19 @@ def main(argv):
     # still stop where CI's step stopped, not run on into a validator over a tree it
     # never planted.
     def _bash(script):
-        return subprocess.run(["bash", "-e", "-c", script], cwd=_base,
-                              capture_output=True, text=True)
+        return plants.run(["bash", "-e", "-c", script], cwd=_base)
 
     def _run_one(name_script):
         name, script = name_script
-        cdir = copy_dir_of(script)
-        sweep([cdir])
-        r = _bash(script)
-        # Judged and swept HERE, inside the worker. Sweeping after the whole pool
-        # returned kept every scratch copy alive at once — 433 copies of the tree with
-        # its `.git`, ~6 GB, measured on 2026-10-12 filling a disk with 4 GB free.
-        noop = bool(cdir and os.path.isdir(cdir) and not differs_from_repo(cdir))
-        sweep([cdir])
-        return name, script, cdir, (r, noop)
+        # Retire copies inside the worker, including secondary plants and errors;
+        # waiting for the whole pool retains every tree at once.
+        plants.check_running()
+        try:
+            cdir, outcome = run_plant(script, _bash)
+            return name, script, cdir, outcome
+        except BaseException:
+            plants.cancel()
+            raise
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=_WORKERS) as _ex:
         _results = list(_ex.map(_run_one, tests))
@@ -442,9 +534,7 @@ def main(argv):
             bucket.append((label(name) + f" [{_FILE[name]}]", r.stdout[-500:], r.stderr[-500:]))
 
     for name, script in props:
-        cdir = copy_dir_of(script)
-        sweep([cdir])
-        r = _bash(script)
+        cdir, (r, _noop) = run_plant(script, _bash, check_noop=False)
         # B-113, the half the first pass left: a property check that printed `SKIP:`
         # counted as one that "printed what it asserts". Same sentence, same defect,
         # one category over — found by the independent reader.
@@ -455,7 +545,6 @@ def main(argv):
         elif _st != "PASS":
             prop_failed.append((_plabel(name) + f" [{_FILE[name]}]", r.stdout[-500:],
                                 r.stderr[-500:]))
-        sweep([cdir])
 
     print()
     for title, rows, why in (
@@ -509,6 +598,18 @@ def main(argv):
         return 2
     print("PASS: " + _line + (f" — shard {_shard[0]}/{_shard[1]}" if _shard else ""))
     return 0
+
+
+def main(argv):
+    try:
+        with ScratchProcesses() as plants:
+            result = _main(argv, plants)
+            plants.check_running()
+        plants.check_running()
+        return result
+    except (InterruptedError, OSError, RuntimeError) as exc:
+        print(f"FAIL: plant lifecycle refused ({type(exc).__name__}): {exc}")
+        return 1
 
 
 if __name__ == "__main__":

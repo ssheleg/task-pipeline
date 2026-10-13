@@ -1,0 +1,10 @@
+test:certify exit=0 secs=873
+test:exposure exit=0 secs=7
+test:probe exit=0 secs=147
+test:anchors exit=0 secs=1
+test:runner exit=0 secs=0
+test:hooks exit=0 secs=9
+test:artifacts exit=0 secs=5
+test:docs exit=0 secs=17
+test:audit-regressions exit=0 secs=377
+ALL rc=0

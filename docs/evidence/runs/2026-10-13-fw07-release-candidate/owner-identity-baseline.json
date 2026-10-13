@@ -1,0 +1,7 @@
+{
+  "source": "5d9adf2dd3ff8260013ea4eb4ef06092e54f16a2",
+  "actual_owner_name": "task-pipeline-skill",
+  "actual_version": "1.94.0",
+  "outcome": "REFUSED_ACTUAL_OWNER",
+  "diagnostic": "owner repository required"
+}

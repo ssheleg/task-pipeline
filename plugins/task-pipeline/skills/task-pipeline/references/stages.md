@@ -1,5 +1,13 @@
 # Stages — detail & gates
 
+For the selected **default profile**, read this spine at entry, then the one detail
+linked in the current stage before work on every entry or resume, including wave
+iterations and approved short paths. Do not preload all stage details. Missing or
+unreadable detail means stop that stage and repair its route, never guess. A custom
+profile uses its own declared doctrine and stages; numeric ids do not select these
+default details, and the kernel still applies.
+
+
 For each stage: what it does, what to invoke, artifacts, and the **GATE** that
 must pass before advancing. Each gate is tagged with its **type** — `auto` (the
 orchestrator verifies the check itself, pass/fail), `judgment` (a named judge
@@ -73,155 +81,9 @@ never that the work was skipped quietly.
 
 ## 0 — Intake grill — MANDATORY
 - **Freedom: medium** — the interview adapts to the answers; its two phases and their order do not ([`gates.md`](gates.md) → *Axis C*).
-- **Stage 0 is not optional and not skippable.** There is no "small enough task"
-  exemption, no "the request was already clear" exemption, no starting stage 1
-  "while the operator thinks". The only sanctioned bypass is the
-  entry-from-super-ux short-circuit below, and even that still requires a scope
-  confirmation and a record of what was adopted vs skipped. A run that reaches
-  stage 1 without a committed, operator-confirmed brief is a **failed run** —
-  stop and go back.
-- **Entry-from-super-ux short-circuit (check FIRST).** task-pipeline is often
-  launched *from* super-ux — its `/ux` action menu offers "execute autonomously
-  via the task-pipeline plugin" once the UX chain (and often a
-  `docs/ux/plans/…` fix plan) is already built. Before grilling, detect that:
-  if `docs/ux/` already holds a validated chain (foundation → flows → screens →
-  scenarios) and/or a fresh fix plan, **do not re-run the grill or the stage-3
-  UX track from scratch.** Instead: (1) run a quick check — `/ux-lint`
-  (`docs/ux/lint.py`) green, chain present, plan (if any) readable; (2) confirm
-  the scope with the operator in ONE line; (3) skip to the first stage that
-  still has real work (usually stage 4 Plan if a UX fix plan already exists, or
-  stage 3 Spec to formalize it). Record what was adopted vs skipped. If the
-  check finds drift/gaps, fall back to the normal flow for the missing parts
-  only.
-- **What (normal entry):** the operator's one-line task is almost never enough to
-  run autonomously. Before anything else, **grill the operator** to expand that
-  one line into a complete, unambiguous brief — resolve every decision branch
-  up front so stages 1→10 need no further human input beyond the manual gates.
-  This is input expansion, not design: turn "make me feature X" into locked
-  answers for scope, users, constraints, data, edge cases, done-criteria.
-- **Phase 1 — harvest the knowledge sources FIRST**
-  ([`knowledge-sources.md`](knowledge-sources.md)). Before the first question:
-  query what the project already knows about this task — code, **the code graph**
-  when one is built ([`knowledge-graph.md`](knowledge-graph.md): `graphify query` /
-  `affected` / `god-nodes` answer *reach*, which is what grep cannot), `CLAUDE.md`,
-  `CONTEXT.md`/ADRs, `docs/` + `docs/ux/`, past pipeline briefs and carry-over
-  ledgers, **the retro's standing instructions and run stamps** (`<artifacts>/retro.md`,
-  read **in full** — ten standing rows and ten stamps, both bounded **by a cap**, and they bind this
-  run; stamp each instruction as it fires. Its *Recent log* is **queried** by the
-  task's nouns, not read: uncapped narrative inside a binding source is what makes the
-  capped part get skimmed, [`retrospective.md`](retrospective.md)), **lessons from other
-  projects** (source 7b, [`knowledge-sources.md`](knowledge-sources.md): `scripts/lessons.py
-  query` over the local index, then a shared store where the session lists one — each
-  layer's state printed in the source ledger), the **knowledge wiki** if one is
-  installed
-  ([obsidian-wiki](https://github.com/ar9av/obsidian-wiki) — recommended,
-  never required), and any **other repo or hosted doc system the project names as
-  its docs**. Write the **source ledger** into the brief (a row per source, or an
-  explicit "none found"; **the graph's row carries its measured lag — commits and
-  days behind `HEAD`, the signal that measured it, and `⚠ not trusted for reach
-  until refreshed` on anything but `current`**
-  ([`knowledge-graph.md`](knowledge-graph.md) → *Measure the lag*; a build date is
-  the graph's own reply about itself, not a measurement of it). It is retrieval
-  scoped by the task's own nouns, not a read of everything — and it is what makes
-  phase 2's answers checkable instead of merely confident.
-- **Phase 1b — the documentation inventory**
-  ([`documentation.md`](documentation.md)). Four questions, answered before the
-  interview and written to `docs/DOCMAP.md` (seeded from
-  [`../templates/docmap.md`](../templates/docmap.md), **only when absent**): where
-  do settled things live, what is each fact's single home, what does a change of
-  type X oblige, and what proves it. A project with no answers gets them seeded —
-  registers, the matrix and `scripts/check-docs.sh` — and the seeding is itself
-  recorded as the register's first entry. **One decision home per project:** an
-  existing `docs/adr/` *is* the register and is recorded as such, never duplicated.
-  The gate is seeded so that it exits `0` on its own seeds; a project that starts
-  red learns on day one that the gate is noise.
-- **Phase 1b+ — offer the entry audit, once** ([`setup.md`](setup.md)). When
-  `docs/DOCMAP.md` is absent or its regime line predates the project's last release,
-  ask whether to audit the documentation that already exists **before** building on
-  it. Record the answer — including a refusal — in the brief's autonomy sweep and
-  never ask again. `audit.md`'s ladder runs at the *end* over the change; this runs
-  at the *start* over what is already there.
-- **Phase 1c — reconcile intent against as-built.** Git says how it *should* be;
-  the run record says how it *turned out*. Read both for the area you are about to
-  touch and resolve every divergence — the document is stale, the record is wrong,
-  or they genuinely disagree and that is a decision. There is no fourth option, and
-  starting on an unresolved divergence means building against a system that does
-  not exist.
-- **Phase 1d — the short-path triage: printed, proposed, never taken silently.** This
-  pipeline's own boundary exempts a typo, a one-line fix and a mechanical rename — and
-  nothing measured that until 2026-08-10, so the exemption depended on an agent
-  remembering it while eleven stages and four manual gates stood in front of a
-  one-paragraph edit. Three questions, each with something behind it:
 
-  ```
-  1. files the request names, resolved        git ls-files -- <paths>       -> N
-  2. any of them a public contract            the surfaces the host's release
-                                              syncs, its schema or config
-                                              contracts, a shipped command,
-                                              its README                    -> yes/no
-  3. behaviour a user or a caller observes changes                          -> yes/no
-  ```
+**On entry or resume:** read [stage-00-intake.md](stage-00-intake.md) before stage work.
 
-  Few files, no contract, no observable change ⇒ **propose** the short path: stages 1,
-  2, 3 and 4 marked `⊘` with the triage answer as the reason, and 5→10 running
-  unchanged. **Propose, never take.** The answer goes in the brief's autonomy sweep and
-  silence takes the full flow — the same floor deploy authorization uses. The glyph is
-  what makes it safe: a skipped stage is printed on the rail **with its reason**
-  ([`progress.md`](progress.md)), and a skip nobody can see is indistinguishable from a
-  stage that was never entered.
-- **How it runs: [`grill.md`](grill.md)** — the full doctrine, built into this
-  skill (nothing to install). In short: close what the sources can, then ONE batch
-  of the material unknowns, ordered by dependency, a recommended answer with each —
-  one at a time only where answers depend on each other or the operator asks;
-  contradictions reconciled on the spot; **every answer that touches
-  a harvested source is checked against it** — the operator outranks any document,
-  but only out loud, and the losing side is logged for the stage-9 doc update; plus
-  **domain awareness**
-  (challenge terms against `CONTEXT.md`, sharpen fuzzy language, stress-test with
-  concrete scenarios, cross-reference the code, record ADRs for hard-to-reverse
-  calls) and the **autonomy sweep** that pre-resolves every stage-1→10 blocker.
-  Deploy authorization has a hard floor there: a standing go counts only when it
-  names the target and the preconditions.
-- **The run mode is settled here too** ([`continuity.md`](continuity.md)): does
-  the run advance item-by-item with no check-in between items, and on what
-  interval? Exactly three sources arm it: `pipeline.json` → `run.loop` (read
-  first — a recorded mode is the answer and is not re-asked), the operator's answer
-  here, or a standing instruction the host already carries. The ledger names which, once:
-  `loop: armed by <source:line>`. **Absent all three, it is off.** It buys pacing, never
-  authorization: no loop mode collapses a `manual` gate or an outward act. The
-  same file carries the other half of pacing — the context budget, which fires
-  only on a harness signal or the operator's word, never on an estimate.
-- **UI early-detect:** one branch of the grill is always "does this touch a
-  user-facing surface (web/mobile/CLI/TUI)?". If yes → surface **super-ux**
-  now (use it if installed; otherwise give the install line — see SKILL.md
-  *Prerequisites*); this arms the stage-3 UX track. **And the same branch records
-  the surface's class** — the next bullet.
-- **The surface class.** Every user-facing task's brief carries
-  `surface_class: flagship | product | internal | ad`, and the class selects the gate
-  profile the visual layer is held to for the rest of the run:
-
-  | Class | What it is | Director record (stage 3) | Visual half (stages 5–6) | Stage 10 |
-  |---|---|---|---|---|
-  | `flagship` | the surface a product is judged by — landing, onboarding, paywall, a hero screen | the full record | **gate**: full matrix, pairwise across every axis, the full rubric | approved contact sheet |
-  | `product` | an ordinary screen of the product | the short record — Brief, Mode, References, Markers, Open | **gate**: every state and the mandatory pairs; the gate items of the rubric | approved contact sheet |
-  | `internal` | an admin panel, an internal tool, a CLI | none owed | recommended; the project linter is the floor | the functional look |
-  | `ad` | a creative that runs as an advertisement or a store asset | Brief, Mode, References, Markers, ADA (its rubric profile and safe zones), Open | **gate**: the ad profile and the safe zones | approved contact sheet |
-
-  Ask it as one question with a recommended answer read off the request — a landing or a
-  paywall is `flagship` unless the operator says otherwise — and never leave it to stage
-  5: a class decided at build time is decided by whoever wants the build to pass. A
-  work-graph node that builds the surface copies the class as `surface_class`, and
-  `graph.py certify` then owes the fourth, `visual` reading on `flagship` and `product`
-  ([`certification.md`](certification.md) → *The fourth reading*).
-- **Artifact:** lock the resolved decisions into a **task brief** committed at
-  `<artifacts>/specs/YYYY-MM-DD-<topic>-brief.md` (scope, users/UI verdict and,
-  for a user-facing task, `surface_class`, constraints, assumptions, explicitly-deferred items, done-criteria) **plus the
-  autonomy sweep's per-stage answers and the model decision**. Seed it from
-  the skill's `templates/brief.md` skeleton — but only when absent, never
-  overwrite an existing brief. Stages 2–4 build on this brief; stages 5–10 read
-  its autonomy section instead of asking. Where the session produced them, also:
-  an updated `CONTEXT.md` (terms written as they resolved) and any ADRs under
-  `docs/adr/` — see `grill.md` → *Domain awareness*.
 - **GATE (manual):** shared understanding reached — **the source ledger is written
   (every source consulted, or an explicit "none found")** and **its `Contradictions:`
   line is written under it** — the harvest is a fan-out that converges on one brief, and
@@ -265,63 +127,17 @@ never that the work was skipped quietly.
 
 ## 1 — Docs study
 - **Freedom: medium** — which sources to fetch is judgement; grounding contracts on fetched docs is not ([`gates.md`](gates.md) → *Axis C*).
-- **What:** ground every external library / API / SDK the task touches on the
-  *current* docs, before locking any contract.
-- **Invoke:** the `context7` MCP — `context7:resolve-library-id` → `context7:query-docs`,
-  scoped by topic or the `context7-docs` skill. Web-search fallback for libs context7
-  can't resolve.
+
+**On entry or resume:** read [stage-01-docs-study.md](stage-01-docs-study.md) before stage work.
+
 - **GATE (auto):** every contract the design will lock is grounded in fetched docs,
   not recall. Unresolvable libraries are flagged in the spec.
 
 ## 2 — Brainstorm + decompose
 - **Freedom: high** — many designs are valid — this is the open field, and the only fixed thing is the gate ([`gates.md`](gates.md) → *Axis C*).
-- **How it runs: [`brainstorm.md`](brainstorm.md)** — built into this skill. Read
-  the brief first (stage 0 already answered scope/constraints/done-criteria), then
-  explore the codebase, scope-check for decomposition, the open questions in one
-  batch, 2–3 approaches with a recommendation, design presented in sections and
-  approved section by section. **Hard gate:** no code, no scaffolding, no implementation
-  skill before the operator approves the design — including on "obviously simple"
-  tasks.
-- **UI detection (mandatory check):** decide whether the task touches any
-  user-facing surface (web, mobile, CLI, TUI — new feature, new screen/command,
-  or a change to user-visible behavior). Record the verdict; it arms the UX
-  track in stage 3.
-- **Decomposition (platforms only): [`decomposition.md`](decomposition.md).** If
-  the brief describes a platform rather than a change — several independent
-  capabilities, several surfaces that could ship separately, REQs no single
-  deliverable satisfies — cut it into **modules** before any spec is written, and
-  commit the module map (`specs/<topic>-modules.md`): what each module delivers,
-  the entities it owns, what it depends on, the contracts it exposes, its REQs and
-  its status, in build order with the walking skeleton first. Single-module work
-  records `single module: <name>` in the design and moves on — a skipped
-  decomposition is a decision, never an omission.
-- **Where the queue is a work graph, it is WRITTEN here**
-  ([`work-graph.md`](work-graph.md)): `.task-pipeline/graph.json`, carrying the frozen REQ
-  ids so `serves` resolves, one node per unit of work with its owner, what it touches and
-  **the check that will close it**, and an edge per dependency **naming what it hands
-  over**. The check is the planner's job and not the verifier's: a node whose completion
-  test is decided by whoever happens to close it is a node two closes will disagree about,
-  and `validate` refuses one that names none. Then
-  `python3 scripts/graph.py validate` — a graph that does not validate is not a queue, and
-  `next` refuses to walk one. The reason to prefer it over a prose plan is measured, not
-  aesthetic: a 400-node graph and a 4-node graph produce the same 27-byte frontier, so the
-  cost of knowing what is next does not grow with the programme.
-- **And the check is what THREE readings will run, not one**
-  ([`certification.md`](certification.md)). A node is closed by `unit`, `seam` and `product`
-  reports, dispatched blind and in parallel, and `certify` refuses the close until all three
-  pass. That is a planning fact, not only a verification one: a node whose blast radius nobody
-  can name is a node the seam and product tiers cannot scope, so `touches` and `serves` are
-  what make the two outer readings possible at all.
-- **The queue exists here, so the loop arms here** ([`continuity.md`](continuity.md) →
-  *Part 1a*). Where the loop is armed — `run.loop` with `arm: after-decomposition`, the
-  operator's preflight answer, or a standing instruction the host carries (which arms here
-  unless it says otherwise) — and the map holds more than one module, arm the mode at the
-  close of this stage, cite the source as `loop: armed by <source:line>`, and print one
-  line: the mode, and
-  either the job id and its cancel command (`interval`) or the delay chosen and why
-  (`dynamic`). Arming collapses no gate and authorizes no outward act; it decides only
-  that the run does not stop to ask *"shall I take the next one?"*. Single-module work
-  arms nothing and says so — a loop with one item is a timer.
+
+**On entry or resume:** read [stage-02-brainstorm.md](stage-02-brainstorm.md) before stage work.
+
 - **GATE (manual):** the user approves the design, the UI verdict is recorded, **the
   queue is an artifact rather than a recollection** — where it is a work graph,
   `graph.py validate` exits 0 and `graph.py coverage` names any requirement no node serves,
@@ -335,65 +151,9 @@ never that the work was skipped quietly.
 
 ## 3 — Spec — with UX track for user-facing tasks
 - **Freedom: medium** — what the contract says is judgement; which contracts must be locked is a list ([`gates.md`](gates.md) → *Axis C*).
-- **How it runs: [`spec.md`](spec.md)** — built into this skill: the UX-track order,
-  what the spec must lock (types, schemas, signatures, file layout, the **Global
-  Constraints** block stages 4–5 depend on), the self-review pass and the operator
-  review gate.
-- **UX track (runs FIRST when stage 2 flagged UI; skip entirely otherwise).**
-  Requires the **super-ux** skills. If missing on a UI task → give the install
-  line and stop (see SKILL.md *Prerequisites*: `/plugin marketplace add
-  ssheleg/super-ux` → `/plugin install super-ux@super-ux`, or `npx skills add
-  ssheleg/super-ux`). super-ux builds a traced chain — walk it top-down (see its
-  `system-map.md`):
-  0. **Destination first, when Figma is on.** The brief already names the team/org
-     and the files — **one per surface** (App, Web, ASO: store screenshots, icon and
-     logo), never one file for every frame; `docs/ux/foundation.md` → *Design tooling*
-     is the canonical record. Confirm each **resolves** before drawing. **Never create a file while a
-     recorded one resolves; if it doesn't resolve, stop and ask — never create a
-     replacement** (that is the duplicate, and it hides a permissions problem).
-     A creation happens at most once, in the named team, and its URL is written to
-     the canonical record before the first frame.
-  1. `/ux` (the only super-ux entry) — reports which `docs/ux/` layers exist,
-     repairs the skeleton, records the Figma on/off choice, recommends the next
-     action. Never make the operator pick skills.
-  2. `ux-foundation` → `docs/ux/foundation.md` — the **WHY**: personas, Jobs to
-     Be Done, **customer journey maps (CJM)**, user stories (Given/When/Then).
-  3. `ux-flows` → `docs/ux/flows.md` + `docs/ux/screens.md` — the **HOW + UI
-     map**: task analysis, user-flow diagrams (branches, error paths), every
-     screen + state with wireframe and (Figma on) a Figma frame link.
-  4. `ux-scenarios` → `docs/ux/scenarios.md` — the **WHAT** (source of truth for
-     behavior): scenarios validated against the scenario-format contract super-ux
-     itself ships (`scenario-format.md` — read its current version there, never
-     pin one here) — IDs, statuses, `Traces:` to stories/journey stages/flows,
-     edge/error states enumerated.
-  5. **Run the super-ux linter** (`/ux-lint` or `python3 docs/ux/lint.py`) — it
-     must pass: no drift, no orphans, no broken traces or stale Figma links.
-  These skills are **idempotent** — reuse and extend existing `docs/ux/` layers,
-  never rebuild from scratch. If the chain already exists and is validated (e.g.
-  the task entered from super-ux), just verify (linter green) and embed it into
-  the spec; only build the parts that are missing.
-- **COPY track and VISUAL track — a parallel layer after UX, and their
-  convergence.** Three tracks, three questions, none substituting for another:
-  super-ux decides what the interface must **do**, `copywriting` how it
-  **sounds** (every string a product's user will read, against the brand pack),
-  `sheleg-design` how it **looks** (tokens, themes, typography, motion). COPY and
-  VISUAL are **parallel** — both consume the UX track's scenarios, neither
-  consumes the other — and where both ran, **their convergence check is run and
-  recorded before the spec is committed**: each can be right alone and the two
-  disagree together on one screen. The full doctrine — each track's scope and
-  out-of-scope, the refusal sentences, the four contradictions the check
-  catches — is [`spec.md`](spec.md) → *The COPY and VISUAL tracks, and their
-  convergence*, its one home. **The VISUAL track leaves a trace, not a fact**: a
-  director record at `docs/design/<surface>/director-record.md`, whose fields the gate
-  reads by the brief's `surface_class` (`python3 scripts/visual_gate.py record <file>
-  --class <c>`), and a refusal is that same file saying `Mode: declined` and why.
-- **Spec:** write the approved design to
-  `<artifacts>/specs/YYYY-MM-DD-<topic>-design.md` and commit it. Lock all
-  shared contracts (types, schemas, signatures, file layout). For UI tasks the
-  spec **embeds the UX layer**: links the validated scenario IDs, the flows and
-  `SCR-` screens, the CJM stages the feature serves, and the UX
-  patterns/principles from super-ux that apply (`best-practices.md`,
-  `ux-design-principles.md`, `component-guidelines.md`).
+
+**On entry or resume:** read [stage-03-spec.md](stage-03-spec.md) before stage work.
+
 - **GATE (manual):** the **`## Self-review` section written and committed with
   computed values** — every check the spec names resolving or marked `review`, the
   brief's decisions and stage 2's rejected options read back with no unresolved
@@ -428,12 +188,9 @@ never that the work was skipped quietly.
 
 ## 4 — Plan
 - **Freedom: low** — the task format is prescribed and the REQ set-comparison is mechanical ([`gates.md`](gates.md) → *Axis C*).
-- **How it runs: [`planning.md`](planning.md)** — built into this skill →
-  `<artifacts>/plans/YYYY-MM-DD-<topic>.md` (same slug as the brief and the
-  spec). Zero-context tasks, exact
-  paths, complete code in every step, TDD steps with expected output, DoD each,
-  dependency graph + parallel groups, non-overlapping file ownership, and the
-  Global Constraints block copied verbatim from the spec.
+
+**On entry or resume:** read [stage-04-plan.md](stage-04-plan.md) before stage work.
+
 - **GATE (auto):** `python3 scripts/plan_audit.py` clean — the plan read as the agent
   who was NOT there will read it: every live node carries a packet answering the cold
   reader's eight questions, no two nodes the graph leaves unordered edit one file, the
@@ -457,56 +214,9 @@ never that the work was skipped quietly.
 
 ## 5 — Dev
 - **Freedom: low** — TDD order, worktree isolation and 'a subagent never writes the register' are the narrow bridge ([`gates.md`](gates.md) → *Axis C*).
-- **How it runs: [`build.md`](build.md)** — built into this skill: isolate the
-  workspace (native worktree tool first, git fallback, baseline tests), keep a
-  ledger under `.task-pipeline/build/<plan>/` so a compacted context can resume,
-  then one fresh implementer subagent per task with a file-based brief and report,
-  a review after every task ([`review.md`](review.md)), and a five-round fix loop
-  with an explicit breaker. TDD per task ([`tdd.md`](tdd.md)): failing test →
-  watch it fail → minimal impl → watch it pass → commit. Pin subagents to the
-  run's confirmed model (`model-tiering.md`). The plan's parallel groups fan out
-  **only when all three hold** — the tasks share no `depends:`, their file ownership
-  is exclusive per the plan, and each implementer gets its own worktree; otherwise
-  sequential. A group that did fan out gets **one convergence check over all its
-  reports and diffs together, before the first worktree is integrated**
-  ([`build.md`](build.md) §4.2a) — a per-task review reads one diff and cannot see a
-  contradiction that exists only between two of them.
-- **Web front end? The task's own surface is checked in a browser, not in the diff.**
-  Where a browser channel is connected — `playwright` **or** `chrome-devtools`, either
-  one, whichever answers first (**how**: [`browser.md`](browser.md); which:
-  [`companion-skills.md`](companion-skills.md)): after a
-  task that changes a rendered surface, load it, take a snapshot and read the
-  console and the network log **before the task is marked DONE** — a component can be
-  correct and land under a fixed header, and a review of the diff cannot see that.
-  **What the look finds is fixed in this task, or parked with the ruling the GATE below
-  requires — never parked silently** — a browser finding filed without a ruling is the
-  diff-review verdict wearing a screenshot; the look was worth taking only if it can
-  still change the code or is on record as deliberately not doing so. Absent, say the surface was verified by reading
-  the diff and treat it as the weaker claim it is. **On a surface whose brief names a
-  `surface_class`, the project linter runs here too**, after each task that changes a
-  rendered surface — `python3 scripts/visual_gate.py lint <dir>`; an S1 finding is
-  fixed in the task, and NOT_RUN (exit 3) is recorded as such
-  ([`browser.md`](browser.md) → *The visual half*). **With Figma on, the token drift
-  probe runs beside it** after a task that touches the token file or a tokenised
-  component: `python3 scripts/visual_gate.py tokens --figma <variables.json> --css
-  <tokens.css>`. A FAIL is fixed in the task, renaming one side to match the other.
-  No export is NOT_RUN, recorded as such. A component whose API the task changed
-  updates its Code Connect mapping in the same change
-  ([`build.md`](build.md) → *Code Connect, kept*). A slop marker caught while the
-  implementer is dispatched costs a line; caught on the contact sheet it costs a round. Stage 6 repeats this over the whole tree; this one catches it while the
-  implementer that wrote it is still dispatched. The matrix pointed this companion at
-  stages 5–6 from the day it was added and **this stage had never named it** — found by
-  the guard comparing the two, not by a reader.
-- **Domain companions, where the task is on their ground** — recommended, never a
-  gate ([`companion-skills.md`](companion-skills.md)): `sheleg-dev` when the build
-  wires money, tracking, sign-in or page speed; `agent-stack` when the thing being
-  built is an agent system; `telegram-dev` when Telegram is the platform rather
-  than the transport. Absent, the build ships on the host's own doctrine and the
-  close-out names the seam nobody checked.
-- **Integration closes the stage:** sync with the base branch, re-run the full suite
-  on the result, land it the project's way (merge, or a PR — outward, so it needs a
-  go), remove the worktree. Stages 7–9 act on the integrated result, so a branch the
-  operator chose to leave unmerged is recorded as such.
+
+**On entry or resume:** read [stage-05-dev.md](stage-05-dev.md) before stage work.
+
 - **GATE (auto):** **the hygiene gate green in diff mode after every task**
   (`references/build.md`) — six checks over what that task changed, no floor, and a
   finding fixed in-task or carried over with a reason; all plan tasks DONE (three review verdicts per task: spec
@@ -520,12 +230,9 @@ never that the work was skipped quietly.
 
 ## 6 — Tests
 - **Freedom: low** — green means the full suite, and no skip smuggles a red one past ([`gates.md`](gates.md) → *Axis C*).
-- **What:** consolidate test coverage for the change: confirm new functionality
-  has tests (written test-first in stage 5), update/repair existing tests the
-  change touched, and add edge-case + failure-path tests per DoD.
-- **Invoke:** the host test runner (see `conventions.md` → *Lint + test*); the
-  built-in [`tdd.md`](tdd.md) cycle for any uncovered gap — failing test first,
-  same as stage 5.
+
+**On entry or resume:** read [stage-06-tests.md](stage-06-tests.md) before stage work.
+
 - **GATE (auto):** **the hygiene gate green over the whole tree**, its six counts
   printed beside their floors; the **full** suite is green (not just the new tests); new/changed code
   is covered; **every check this run added or widened has been probed both ways —
@@ -586,16 +293,9 @@ never that the work was skipped quietly.
 
 ## 7 — Lint + deploy
 - **Freedom: low** — outward and irreversible — the authorization floor is exact or the stage stops ([`gates.md`](gates.md) → *Axis C*).
-- Read host conventions (`conventions.md`): run the linter; fix failures. The suite
-  is already green from stage 6 — re-run it if code changed since. For UI projects,
-  the **super-ux linter** (`python3 docs/ux/lint.py` / `/ux-lint`) is part of lint —
-  it must pass too (no UX drift merges). Then deploy per the project's convention;
-  if the project defines release automation (`pipeline.json` → `release`, toggle
-  on), that is what "deploy" runs here. **No runbook, or one too thin to act on?
-  Write it first** ([`deploy-targets.md`](deploy-targets.md)) — a deploy performed
-  from inference about the project is one nobody can repeat or roll back, and the
-  operator is standing at this gate anyway. That reference also carries the CLI
-  verbs per target for when the runbook names a platform you have to recall.
+
+**On entry or resume:** read [stage-07-lint-deploy.md](stage-07-lint-deploy.md) before stage work.
+
 - **GATE (manual):** lint clean (host linter **and**, for UI projects, the super-ux
   linter) **and** suite green **before** deploy, **and no REQ is still `open`** — a
   `partial` ships only with the operator's explicit acceptance. A gap is cheapest to
@@ -631,30 +331,9 @@ never that the work was skipped quietly.
 
 ## 8 — Post-deploy
 - **Freedom: medium** — where the logs live varies; 'clean boot or an honest degradation report' does not ([`gates.md`](gates.md) → *Axis C*).
-- Tail deploy logs / health-check per conventions. Confirm clean boot, no error
-  spike, live subsystems healthy. **All three of the verification trio, not one of
-  them** ([`deploy-targets.md`](deploy-targets.md) → *The verification trio*):
-  deployment/process state, runtime logs, and a health-check request from outside.
-  Where deploy happens in CI, verify the **deploy** job and not only the build —
-  a green build beside a skipped deploy is the commonest way a run reports success
-  while nothing shipped.
-- **A deployed web target is opened, not curled.** A `200` proves the server
-  answered; it says nothing about whether the page rendered, whether a bundle 404'd,
-  or whether the console filled with errors on load — all three ship green past a
-  health check. Where a browser channel is connected — `playwright` **or**
-  `chrome-devtools`, either one ([`browser.md`](browser.md)) — load the deployed URL and read
-  the console and the network log; quote what you read, not that you looked
-  ([`companion-skills.md`](companion-skills.md)). Absent → say the check was an HTTP
-  response only, which is the honest name for it.
-- **Read the CI verdict for the deploy's own commit** ([`conventions.md`](conventions.md)
-  → *The CI verdict*): the run's conclusion quoted, the **failing step's log quoted**
-  on anything but `success`, and one of the three states stated — including **`no run
-  found`**, out loud, because a project without CI is a legitimate state and not a
-  green one.
-- **A public surface a logged-out reader will see** can additionally be audited for
-  search and answer-engine visibility with `seo-aeo-audit`
-  ([`companion-skills.md`](companion-skills.md)) — recommended, never a gate;
-  absent, visibility ships unaudited and the close-out says so.
+
+**On entry or resume:** read [stage-08-post-deploy.md](stage-08-post-deploy.md) before stage work.
+
 - **GATE (auto):** clean boot confirmed, or an **honest degradation report** with next
   steps — never silent success. **The CI verdict is one of the reported facts, with
   its run id** — "CI is green" written without a command behind it prints the same
@@ -668,46 +347,9 @@ never that the work was skipped quietly.
 
 ## 9 — Docs + wiki
 - **Freedom: low** — the matrix walk and the gate are mechanical; what a doc says is not this stage's call ([`gates.md`](gates.md) → *Axis C*).
-- **The propagation sweep runs first** ([`documentation.md`](documentation.md)).
-  The ledger below names the documents you **read**; the matrix in `docs/DOCMAP.md`
-  names the documents you **owe**. They are not the same list, and the gap between
-  them is where documentation rots — the document nobody read is exactly the
-  document nobody updated. Walk the matrix row for **every** change type this run
-  produced. Every settled thing gets an id in the register, every answered question
-  is flipped to `Resolved→<id>`, and every document named in a
-  `Consequences / affects:` line cites its decision.
-- **Then run the documentation gate** (`bash scripts/check-docs.sh`, or whatever
-  `docs/DOCMAP.md` → *Gates* names) and print its **ratchet counts** beside the
-  verdict, so "green" reads as *"green, and here is exactly what was not looked
-  at"* ([`gates.md`](gates.md)). A check that skipped says so.
-- **The stage-0 source ledger is the work list** ([`knowledge-sources.md`](knowledge-sources.md)
-  → *Close the loop*): every source the harvest read gets updated if this run
-  changed or disproved it. What was worth reading at stage 0 and is wrong now is
-  the next run's false premise.
-- Update host module docs / runbooks per the project's self-update rules, in the
-  **same change**. For UI tasks, confirm the super-ux layers were updated in this
-  change and the linter is green (super-ux *same-change* + *no-drift* rules).
-- **Sync the knowledge wiki** — `wiki-update` when
-  [obsidian-wiki](https://github.com/ar9av/obsidian-wiki) is installed (detect:
-  `~/.obsidian-wiki/config`, or the skill resolves). Not installed → recommend it
-  once with its install line and continue; a missing wiki never blocks the gate.
-  Distil the knowledge (decisions, seams, why), not a diff summary.
-- **Refresh the code graph** — `/graphify . --update` when one exists
-  ([`knowledge-graph.md`](knowledge-graph.md)). The close-out has **three**
-  artifacts, not two: docs, wiki, graph. The graph is the source the *next* run's
-  harvest queries first, so a stale one is a false premise carrying the authority of
-  a machine — a wrong doc gets argued with, a wrong graph gets believed. Incremental
-  and model-free for code; a run that deleted code legitimately rebuilds smaller
-  (`--force`).
-- **Then check the graph against the docs** — the cheap half of the divergence sweep
-  (`graphify god-nodes`; any doc naming a module the graph no longer has). A hub no
-  doc names, or an edge the docs deny, is either a leak in the code or a lie in the
-  docs; a doc naming a node that no longer exists is a stale ledger row found
-  mechanically. Doc-side findings are fixed here; **absences go to stage 10's ladder
-  walk as REQ rows** ([`audit.md`](audit.md)).
-- **Docs living in another repository** are outward: propose the edit, get an
-  explicit go, then open a PR there. No go → the exact edit goes in the carry-over
-  ledger.
+
+**On entry or resume:** read [stage-09-docs-wiki.md](stage-09-docs-wiki.md) before stage work.
+
 - **GATE (auto):** **the hygiene gate green**, counts printed; **the propagation matrix walked for every change type this run
   produced**, with every settled thing recorded under an id and every answered
   question resolved; **the documentation gate green, its ratchet counts printed and
@@ -725,92 +367,9 @@ never that the work was skipped quietly.
 
 ## 10 — Acceptance
 - **Freedom: medium** — the walk and the evidence rule are fixed; whether it is what was asked for is the operator's ([`gates.md`](gates.md) → *Axis C*).
-- **What:** the closing stage — go back to the brief and account for **every**
-  requirement. Doctrine: [`acceptance.md`](acceptance.md).
-- **Every REQ this run shipped has a verification row, and every row names a REQ some
-  brief carries.** Both directions: a shipped feature that entered no ledger and a
-  ledger row about nothing are different failures ([`verification.md`](verification.md)).
-- **The ledger's open rows are resolved onto the board.** Every carry-over row still
-  `open` leaves with a `B-NNN` id on `<artifacts>/backlog.md`, and the ledger row
-  is updated to name it ([`backlog.md`](backlog.md)). Both directions, because they are
-  different failures: a ledger row pointing at an id nobody issued, and a board row
-  traceable to nothing. Measured before this was built: across the ledgers in
-  this repository, **twenty-four rows sat `open` with no home at all** — deferred out
-  loud and filed nowhere. The first count said sixteen across six ledgers; it read the
-  status column by position and was wrong wherever a ledger carried two of them. Then the board's priority is re-derived, because `age` moved while the
-  run was happening. Every earlier gate asks
-  "is this artifact good?"; none asks "does this still contain everything that was
-  asked for?" The loss happens on the seams between stages, and this is where it
-  surfaces.
-- **Runs last**, after docs and wiki — those are deliverables too, and a REQ may
-  name them.
-- **The ladder walk runs FIRST** ([`audit.md`](audit.md)). The REQ table can only
-  find what was named and lost; it cannot find what was never named, because a
-  comparison needs two sides and an absence has one. So before the table: walk each
-  REQ bottom-up through its rungs (decision → spec section → contract **and its
-  failure behavior** → task → change → executed test → surface/docs), check the
-  seam at each step, and order the findings **by seam, not by file**. On UI work
-  designed visually, the frame is a **second, parallel statement of the same
-  surface**: read it against the spec section that covers its `SCR-` id and against
-  what shipped. The super-ux linter proves a frame link exists, is named right and
-  is not stale — it cannot read the picture, so a frame promising a limit, a meter
-  or a tier nobody built passes every lint there is. **Where the VISUAL track ran, the
-  walk carries one more row: visual intent ↔ final render** — the director record (the
-  brief's falsifier, the signature moment, the rubric written before any render) read
-  against the **approved contact sheet**. On a `flagship`, `product` or `ad` surface the
-  sheet is approved (`visual_gate.py sheet … --require-approval` exits 0), and the last
-  `review:` line per surface — how many human rounds it took — is copied into the
-  acceptance file, because `.task-pipeline/run.md` does not outlive the run
-  ([`audit.md`](audit.md) → the `V→R` seam). An absence
-  becomes a **new REQ row with its check** and *then* the table is written;
-  appending after the table is how acceptance goes green over a gap. Findings that
-  belong to a lower layer go back to that layer (spec → stage 3, plan → stage 4).
-  Record the pass's two counts — new findings, and findings caused by this run's
-  own fixes — so the next pass can tell whether the axis is exhausted.
-- **How it runs:** built in. Read the brief's REQ table, the carry-over ledger in
-  full, the plan's task statuses, git log, the final suite output, stage-8 notes and
-  stage-9 doc changes (plus `docs/ux/scenarios.md` + `/ux-lint` for UI tasks). Write
-  `<artifacts>/specs/YYYY-MM-DD-<topic>-acceptance.md` — one row per REQ,
-  status `verified` / `partial` / `deferred` / `dropped`, each with **evidence** (a
-  passing test name, `file:line`, a command and its output, or a scenario ID).
-  "Done" without evidence is not done: downgrade to `partial` and say so rather
-  than upgrading the claim.
-- Then ask the operator the closing question out loud, list in hand: *here's what
-  you asked for, here's what shipped, here's what's deferred and where it lives —
-  what's missing?* Ask it even when the table is green; the operator holds context
-  the brief never captured, and this is the cheapest moment in the run to hear it.
-- **Several repositories: a submodule is finished when its parent says so.** A
-  parent records each submodule as a **pointer to one commit**, and moving the
-  submodule does not move the pointer — so the work is committed, pushed, CI green
-  and done in its own roadmap, while a clone of the parent still gets the commit
-  before it. Neither repo looks wrong alone; the disagreement lives between them,
-  which is why it survives every check that runs inside one. Before closing, this
-  reports nothing **for the parent as well as every submodule**:
-  `git submodule status` (no line starting `+`), plus `git -C <repo> status
-  --porcelain` and `git -C <repo> log @{u}..HEAD --oneline` per repo. With
-  [agent-sync](https://github.com/ssheleg/agent-sync) installed,
-  `/agent-sync finish` runs exactly that. The fix is two commands and the second is
-  the forgotten one: `git -C <submodule> push`, then
-  `git add <submodule> && git commit`.
-- **The retrospective is the run's last act** ([`retrospective.md`](retrospective.md)),
-  written to `<artifacts>/retro.md` — one file per project, not per run. The
-  pipeline's gates are good at *this* run and blind across runs: the same class of
-  failure can be caught, fixed and forgotten five times and nothing in the flow
-  notices it is the same one. So, in this order: **stamp the run first** (one line,
-  with its commit — and the only thing that makes the next step computable), **then
-  prune** (every standing instruction against its three retirement triggers — it
-  became a check, its surface is gone, it hasn't fired in five run stamps or in sixty days — and the
-  list held to its cap of ten, every deletion logged **in the archive, with the
-  commit that retired it**), then **write an entry only if
-  the run diverged** (symptom · the stage it surfaced at · the stage that *owned* it
-  · root cause · fix, mechanical before instruction before expiring note · the check
-  that catches it next time). An entry whose class would be true in another project
-  carries a `**Lesson:**` line, and **`scripts/lessons.py add --retro <retro> --entry
-  <anchor>` puts it in the local lesson index** — and, where the session lists a shared
-  store, `emit-observatory` → the tool → `record` ([`iteration.md`](iteration.md) → *The
-  learning loop*). Every run stamps and prunes; a retro left empty after
-  a messy run is the failure the file exists to stop. Stage 0 reads the standing
-  instructions in full next time, which is why the cap is not negotiable.
+
+**On entry or resume:** read [stage-10-acceptance.md](stage-10-acceptance.md) before stage work.
+
 - **GATE (manual):** the ladder walk ran and its absences became REQ rows before
   the table was written; **the hand-back is written** — the request quoted as it was
   GIVEN, where the run stands against it, what was solved with its evidence, what
@@ -962,3 +521,5 @@ every run has turned a settled decision into a prompt, and a pipeline that gates
 marker count has turned a writing-quality signal into a verdict — the false positives fall
 hardest on people writing in a second language, and nothing here fails a stage for them.
 `npx sshlg-skills humanizers` lists what is installed.
+
+Entry and resume use the recorded run state ([`continuity.md`](continuity.md)).

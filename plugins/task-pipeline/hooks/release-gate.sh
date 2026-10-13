@@ -118,7 +118,7 @@ def outward(tokens):
                 if sub == "push":
                     if any(a in ("--tags", "--follow-tags") for a in args):
                         return "git push --tags"
-                    if any(a.startswith("refs/tags/") or re.fullmatch(r"v?\d+\.\d+\.\d+.*", a) for a in args):
+                    if any(a.startswith("refs/tags/") or a.partition(":")[2].startswith("refs/tags/") or re.fullmatch(r"v?\d+\.\d+\.\d+.*", a) for a in args):
                         return "git push <tag>"
         if t.endswith("gh") and rest[:2] == ["release", "create"]:
             return "gh release create"

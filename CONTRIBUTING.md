@@ -51,6 +51,38 @@ To try your change in a real agent:
 node bin/task-pipeline.js --force   # the same, through the npm installer
 ```
 
+## Owner release admission
+
+For this repository's release, the unpublished annotated candidate tag must exist
+locally on the accepted commit **before** the complete suite runs. A green untagged
+run is insufficient: inspect whether release-stamp checks actually looked.
+`pipeline.json` stage7 and standing instruction R-010 in `docs/evidence/retro.md`
+use this same order; R-004 requires the next operation to depend on gate success.
+
+In a standalone full clone of the owning source repository, use the owner-only
+`scripts/release_candidate.py`. Set `candidate_tag` to the chosen unpublished
+version and `actual_project_root` to the same-source project holding the real
+current run context. These are operator/run inputs, not generated approval:
+
+```bash
+python3 scripts/release_candidate.py prepare --tag "$candidate_tag" --context-root "$actual_project_root" &&
+python3 scripts/release_candidate.py check --tag "$candidate_tag" &&
+python3 scripts/release_candidate.py publish --tag "$candidate_tag"
+```
+
+`prepare` creates and binds the owned local annotation; `check` runs the fixed
+`npm run test:all` with that tag visible and retains its exact evidence.
+`publish` requires faithful bound context, the existing release hook, unchanged
+source/tag/evidence and the verified single destination/ref. The helper does not
+verify external authorization or create a ledger. Without faithful context,
+prepare/check remain usable and publication refuses. Never move a published tag;
+changed or ambiguous state requires read-only reconciliation before another action.
+
+Its PUBLISHED state confirms the tag's remote object and peel, not successful npm
+publication. Watch every release job and verify the published payload separately.
+The helper and private Git-directory receipts belong to the owner checkout and
+are not a plugin API or part of the installed skill.
+
 ## Repository layout
 
 | Path | What it is |
