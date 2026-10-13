@@ -2,7 +2,7 @@
 
 # Release repair candidate: v1.94.1
 
-Status: AUTHORING; no publication or local full-gate acceptance.
+Status: FOCUSED PASS; independent audit, full gate and publication pending.
 
 ## Objective and authority
 
@@ -75,3 +75,39 @@ by the serial full gate when disk permits. No tag push is authorized by this pac
 Used: task-pipeline for delivery, make-skill for version surfaces, evidence-docs
 for receipts, agent-sync for exclusive file claims, copywriting for release notes.
 Humanization: on; own pass, no rewrite needed after the concise factual draft.
+
+## Author observations
+
+- Frozen metadata source: 4f323883391730a497333d7609b92e67ffdb1b54.
+- Annotated local candidate object: 1434a0217766f6df9bada615b7f367c3a609cfcb.
+  [Local candidate receipt](local-candidate.json) binds target and prior owned
+  unpublished object; remote candidate tag was absent. No tag was pushed.
+- [Structural validation](candidate-validation.json): exit 0 with three explicit
+  unlooked categories (coordination metadata, unanchored backlog citations, no
+  enclosing umbrella). None is the release-gap check. This is not test:all.
+- [Focused controls](focused.json): eight passed, including omission of each gap
+  declaration, plain-mention refusal, version surfaces, payload preservation and
+  no invented stamp. The harness executes the actual extracted gap section with
+  real Git tags/history and in-memory retro variants; its scope is explicit.
+- [Official strict manifests](strict-manifests.json): both exit 0. These ran on
+  unchanged manifest bytes from the preceding metadata commit.
+- [Earlier diagnostics](historical-validation-output.json) retain the original
+  missing declaration and two candidate metadata failures. The original baseline
+  shell wrapper returned its tail command status, so its record is the observed
+  FAIL diagnostic, not a independently captured Python exit code. Candidate Python
+  exit codes were captured directly. The changelog detector reads the verb
+  `checks` as count vocabulary; final prose states what the validation reads
+  without asserting a changed negative-test count.
+- [Publication boundary](publication-boundary.json): failed v1.94.0 annotated
+  object/target unchanged, remote v1.94.1 absent, registry still v1.93.3.
+
+The active pipeline.json stage-7 sample orders local tag creation after the full
+suite, whereas R-010 needs local tag context before the suite. The separate
+release-admission packet owns reconciliation of that policy contradiction.
+This repair does not silently relax either condition or claim pre-tag readiness.
+
+Propagation: version metadata, CHANGELOG, SKILL-CARD, HANDOFF and verification
+candidate header updated. Historical records retained. No behavior changed in
+Cursor, hooks, installers, validator, workflows or shipped skill bodies. Full
+suite, peer acceptance, final merge, remote tag, npm payload and installed/native
+readback remain separate, unclaimed gates.
