@@ -1,0 +1,69 @@
+# L3 TP-2 watched graph waits
+
+Status: implemented locally; independent review, owner aggregate and integration
+remain pending. No publication, installed-host or original-goal completion claim.
+The [frozen plan](../plans/2026-10-13-l3-graph-waits.md) is the context packet;
+[the lock prerequisite](2026-10-13-l3-graph-lock.md) was independently accepted at
+`d369942dfaa9d9c9c5fc5aca2a73cbdb433c8510` before this implementation.
+
+## Counterexamples and correction
+
+On the lock-only baseline, three new real-process controls failed: a waiting node
+was printed as runnable with exit 0; unknown status `mystery` was also runnable;
+`wait` was not a recognized verb. Six existing lock controls passed. The source
+fixtures are in `test/audit_regressions/l3_graph_waits.py`; the original local
+run output was retained as `/tmp/tp2-wait-red.log`.
+
+Waiting nodes now require a closed record containing generated identity, external
+kind and nonblank single-line watcher locator. Runtime validation and JSON Schema
+admit the same wait shapes. `wait` and `resume --wait-id` use the existing exclusive
+read/modify/write lock; duplicate or stale resumes refuse without writing. A new
+identity on each wait prevents an old event resolving a later wait even when both
+use the same watcher locator. The locator is inert data and is never executed.
+
+`next` excludes waits and returns 6 only when recorded waits hold all remaining
+dependency leaves, following cross-wave dependencies. Runnable siblings still get
+0; mixed running, parked or unclassified barriers get 4. Existing all-terminal
+exit 3 is unchanged and includes deliberately parked nodes. Park and invalidation
+archive prior wait records; close/certify refuse unresolved waits.
+
+An additional real-process red control found `recover` bypassed the frontier and
+created an execution grant for a waiting node, even without an existing authority
+DB. Its output was retained in `/tmp/tp2-recover-red.log`. Recovery now validates
+the graph and refuses an unresolved wait before opening the authority. `claim`
+already refuses through the frontier. Four exact owned failure fixtures were
+inspected and removed; their run logs remain, and no foreign temporary trees were
+removed.
+
+## Checks actually run
+
+- `python3 -B test/audit_regressions/l3_graph_waits.py`: 15 cases PASS, 60 owned
+  temporary trees created/removed. Covers lock failures/concurrency; runtime and
+  actual JSON Schema malformed-wait controls; transition admission and byte
+  preservation; cross-wave/mixed barriers; history; no claim/recover/certify/close;
+  same-identity concurrent resumes with exactly one success.
+- `python3 -B test/graph_test.py`: 171 cases PASS, 200 owned trees created/removed.
+- `python3 -B test/continuity_doc_test.py`: 31 cases PASS.
+- `python3 -B test/waves_test.py`: 85 cases PASS.
+- `python3 -B test/validate.py`: exit 0 after synchronizing its admitted status
+  enum; three existing unlooked coordination/citation/routing conditions retained.
+  The preceding structural refusal of the old five-status enum was real, not
+  counted as a pass.
+
+The optional JSON Schema engine was present for this replay. Without it the
+focused suite explicitly reports that schema-engine validation is NOT_RUN while
+retaining runtime controls; runtime ships with standard-library dependencies only.
+
+## Boundaries and next task
+
+This is a graph-local wait record, not a watcher launcher, liveness monitor,
+approval grant or transaction spanning the separate SQLite execution authority.
+An unrecorded external grant cannot be discovered from graph JSON. External-mode
+coordinators must stop/release their grant and serialize dispatch before recording
+a wait; this packet does not promise cross-store fencing. Human-only actions and
+act-specific standing authority remain governed by L3.
+
+Exact next task: independently review this bounded contract, run a serialized owner aggregate, then merge normally into
+`feat/release-iteration` through exact-head eligible CI. Reconcile final feature
+requirements including the original working-budget headroom definition before
+claiming PR112 complete.

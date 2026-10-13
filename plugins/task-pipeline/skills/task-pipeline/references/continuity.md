@@ -134,8 +134,13 @@ and still leave the run picking its next move by recollection — which is the f
 nodes and nothing else. It is preferred over the two below for one measured reason — a
 400-node graph and a 4-node graph produce the same 27-byte frontier, so the cost of knowing
 what is next does not grow with the programme. `run.loop.queue: work-graph` records it, and
-`next`'s exit codes are what the loop branches on: `3` is *every node is done*, `4` is
-*what remains is blocked or parked*, and those are different endings.
+`next`'s exit codes are what the loop branches on: `3` is *every node is terminal*
+(including deliberately parked nodes), `4` retains another unresolved barrier, and
+`6` means recorded watched waits hold every remaining dependency leaf. On 6, keep
+the recorded watchers armed and take independent work; it is neither completion
+nor a new human gate. `graph.py wait` records the locator and `resume --wait-id`
+resolves that exact wait; neither executes a watcher or grants authority. See
+[`work-graph.md`](work-graph.md) → *Watched external waits*.
 
 **Otherwise the queue is the module map** ([`decomposition.md`](decomposition.md)) when the brief
 was a platform, and the plan's task list otherwise. Both already exist and both are

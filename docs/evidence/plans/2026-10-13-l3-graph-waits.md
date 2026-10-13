@@ -1,14 +1,15 @@
 # L3 TP-2: watched waits in the work graph
 
 Source baseline: `61871e6c35945596b236011ceadda5073f48ff25` (TP-6 stacked
-on independently reviewed L3; TP-6 has not yet been independently accepted).
+on independently reviewed L3; TP-6 later passed independent review and merged
+through PR118 at `1788b94f63dc87c1b741c7e7261aac1d04b12b65`).
 Owner: task-pipeline. Implementation worktree: `fix/l3-graph-waits`.
 This packet records a design and measured counterexamples, not implementation.
 
 ## Required result
 
 A queue containing only recorded external waits must not look like a human gate,
-a runnable task or completion. A wait records `kind` and a concrete watcher or
+a runnable task or completion. A wait records a generated identity, `kind` and a concrete watcher or
 durable-trigger locator. It neither proves the watcher is alive nor authorizes
 its eventual action. Human-only actions and act-specific authority retain L3's
 boundaries. No model or provider calls are needed for this packet.
@@ -54,8 +55,9 @@ No real graph or project configuration was touched.
    malformed/unknown status instead of dispatching it.
 3. Add locked, reasoned wait/resume transitions for pending or edge-blocked
    nodes without a recorded execution claim. Refuse running and terminal nodes;
-   do not steal or cancel execution grants. Resume names the recorded watcher
-   it is completing so a stale watcher cannot release a replaced wait. Preserve
+   do not steal or cancel execution grants. Resume names the generated wait identity
+   it is completing so a stale callback cannot release a replaced wait, even when
+   the same watcher locator is reused. Preserve
    the prior wait in the revision record. No command in a watcher field is run.
 4. Exclude waits from `frontier` and therefore `claim`. `next` returns **6** only
    when every unresolved dependency leaf for the requested scope is a recorded
@@ -81,7 +83,7 @@ No real graph or project configuration was touched.
 - Single wait, wait plus pending descendants, cross-wave held consumer, multiple
   waits, independent runnable sibling, mixed parked/running barrier, empty graph.
 - Missing/blank/multiline/invalid watcher and kind; unknown status; stale metadata.
-- Wrong watcher cannot resume a newer wait; terminal/running/claimed admission
+- Wrong wait identity cannot resume a newer wait; terminal/running/claimed admission
   refuses with graph bytes unchanged. Missing node/reason also refuses.
 - Park/invalidate/close/certify boundaries preserve a truthful wait history and
   never leave contradictory active metadata.

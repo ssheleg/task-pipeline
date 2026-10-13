@@ -91,9 +91,10 @@
             "running",
             "done",
             "blocked",
-            "parked"
+            "parked",
+            "waiting"
           ],
-          "description": "`blocked` is waiting on an edge; `parked` is the verifier's deliberate *«this is a blocker, continue around it»*. The two are different facts and collapsing them loses the one a person needs."
+          "description": "`blocked` is waiting on an edge; `parked` is the verifier's deliberate *«this is a blocker, continue around it»*. The two are different facts and collapsing them loses the one a person needs. `waiting` records an external event and a watcher locator; it is never runnable."
         },
         "claim": {
           "type": [
@@ -401,6 +402,9 @@
             }
           },
           "description": "The IMMUTABLE dispatch packet this node was built from (FIX-PF-05.01): address + digest of the compiled packet (REQ refs, constraints, interfaces, artifact digests, base, scope, budget, profile, skill lock — no ephemeral secret). Links the node to the exact context it ran under, so a graph in a git-ignored workspace still points at a durable, content-addressed packet."
+        },
+        "waiting_on": {
+          "$ref": "#/definitions/wait_record"
         }
       },
       "allOf": [
@@ -415,6 +419,35 @@
         },
         {
           "$ref": "#/definitions/rule_running_needs_claim"
+        },
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "waiting"
+              }
+            },
+            "required": [
+              "status"
+            ]
+          },
+          "then": {
+            "required": [
+              "waiting_on"
+            ],
+            "properties": {
+              "claim": {
+                "type": "null"
+              }
+            }
+          },
+          "else": {
+            "not": {
+              "required": [
+                "waiting_on"
+              ]
+            }
+          }
         }
       ]
     },
@@ -460,7 +493,9 @@
             "invalidate",
             "waive",
             "wave",
-            "risk"
+            "risk",
+            "wait",
+            "resume"
           ],
           "description": "Which mutation made this entry. `close` joined the two on 2026-08-17 with T-5 — and it was caught by a probe rather than by the fixture asserting *the graph after a close still validates*, because `violations()` never reaches an enum. The same disagreement B-084 records, one field over. `invalidate` joined with PF-02.02: a REQ/interface/brief change supersedes a node and resets its downstream proofs. `wave` joined with wave mode: the re-cut after every wave moves nodes between waves, and a move nobody recorded is the quiet re-plan `references/planning.md` refuses. `risk` joined with the release iteration: `waves.py sync-graph` sets a node's risk class from the plan, and a lowering carries its own reason."
         },
@@ -478,6 +513,9 @@
         "precondition": {
           "type": "string",
           "description": "The tree the mutation was made against — the proven HEAD for a `close` (FIX-PF-02.01). A revision then carries a VERSION, so a brief/REQ/interface change that moves the tree is a visibly different precondition, which is what invalidates a proof taken before it."
+        },
+        "waiting_on": {
+          "$ref": "#/definitions/wait_record"
         }
       }
     },
@@ -582,6 +620,40 @@
         "properties": {
           "claim": {
             "type": "object"
+          }
+        }
+      }
+    },
+    "wait_record": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "kind",
+        "watcher"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{32}$",
+          "minLength": 32,
+          "maxLength": 32
+        },
+        "kind": {
+          "enum": [
+            "ci",
+            "review",
+            "peer",
+            "release",
+            "time",
+            "lease"
+          ]
+        },
+        "watcher": {
+          "type": "string",
+          "pattern": "\\S",
+          "not": {
+            "pattern": "[\\r\\n]"
           }
         }
       }

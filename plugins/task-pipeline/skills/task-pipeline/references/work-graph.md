@@ -56,11 +56,13 @@ conditional on the code, never merely sequenced after it.**
 | Verb | Prints | Codes |
 |---|---|---|
 | `validate` | every violation, in a stable order | `0` clean · `1` any |
-| `next` | the frontier, ordered by how much each node unblocks — **and nothing else**. `--wave N` narrows it to one wave, and `3` then means *this wave is done* | `0` printed · `3` all done · `4` nothing runnable · `1` with `--wave`, a wave no node is in |
+| `next` | the frontier, ordered by how much each node unblocks — **and nothing else**. `--wave N` narrows it to one wave, and `3` then means *this wave is done* | `0` printed · `3` all terminal · `4` nothing runnable with another barrier · `6` only recorded watched waits hold remaining dependency leaves · `1` with `--wave`, a wave no node is in |
 | `coverage` | each requirement with the nodes serving it | `0` covered · `1` a gap, named |
 | `goal` | the release goal | `0` · `3` unstated |
 | `add` | the id it allocated | `0` · `1` refused |
 | `park` | the id and the reason | `0` · `1` refused |
+| `wait` | the node and new wait identity; records kind, watcher locator and reason, never executes the locator | `0` recorded · `1` refused · `2` usage |
+| `resume` | the node and resolved wait identity; returns to pending and archives the wait in revisions | `0` resolved · `1` stale identity or refused · `2` usage |
 | `wave` | wave mode's re-cut: the node, its old and new wave, and the reason, which enters the revision log. Refuses a move that would leave an earlier wave waiting on a later one, and a `done` node | `0` · `1` refused |
 | `certify` | the round — with a risk class, `round N: k of M owed passing rounds — not closable yet` or `k of M owed passing rounds — closable`; `--kind adversarial` records an adversarial round — and on a failure every `breaks` finding with its fix and its check | `0` every owed tier passed — three, or four with `visual` on a flagship or product node · `1` a tier failed, a required one is missing, or a report is malformed |
 | `close` | the goal, the new frontier count, and what was not verified | `0` · `1` refused — including a node whose risk class owes rounds not yet passed — **or the verdict stops the run** |
@@ -68,10 +70,48 @@ conditional on the code, never merely sequenced after it.**
 | `doctrine` | how many of the bundle's reference files this run opened | `0` |
 | `claim` | **external mode** — arbitrate one runnable node to a single owner through the durable coordinator (`scripts/execution_authority.py`); prints the grant. `next` says what COULD run, `claim` says who MAY | `0` won · `5` lost the race · `4` not runnable · `1` authority unavailable — **and `1` means no work starts** (fail-closed) |
 | `release` | give back a hold this run owns, matching its fence; a mismatch is a no-op, never a way to steal a live node | `0` released · `5` not held at that fence · `1` authority unavailable |
-| `recover` | **external mode** — reclaim an EXPIRED node for a new owner, minting a higher fence; a still-live claim is not recoverable (that is stealing a working node) | `0` recovered · `5` still live · `1` authority unavailable |
+| `recover` | **external mode** — reclaim an EXPIRED node for a new owner, minting a higher fence; a still-live claim is not recoverable (that is stealing a working node) | `0` recovered · `5` still live · `4` recorded wait unresolved · `1` invalid graph or authority unavailable |
 | `complete` | **external mode** — record completion from the CURRENT fence-holder only; a late/superseded worker (stale fence) is refused, and the current holder completing twice is idempotent | `0` completed · `5` not the current holder · `1` authority unavailable |
 | `waive` | record an AUTHORIZED EXCEPTION — reason + identity, its own disposition: the node is never marked certified, a failed certification stays visible, and `close` stamps the exception into the evidence | `0` waived · `1` refused (no reason, no identity, unknown node) |
-| `invalidate` | a REQ/interface/brief change supersedes one node: a superseding revision is recorded, and the node plus every `done` DESCENDANT resets to pending with its evidence/proof/certification cleared — a proof certified against a contract that moved is a proof about a tree that no longer exists. Unrelated nodes keep their proofs; invalidation flows downstream only | `0` invalidated · `1` refused (no `--why`, unknown node, or the write would break the graph) |
+| `invalidate` | a REQ/interface/brief change supersedes one node: a superseding revision is recorded, and the node plus every non-parked DESCENDANT resets to pending with its evidence/proof/certification cleared — a proof certified against a contract that moved is a proof about a tree that no longer exists. Unrelated nodes keep their proofs; invalidation flows downstream only | `0` invalidated · `1` refused (no `--why`, unknown node, or the write would break the graph) |
+
+### Watched external waits
+
+A node waiting on CI, review, a peer, release, time or a lease uses `status: waiting`
+and `waiting_on: {id, kind, watcher}`. The closed `kind` vocabulary is `ci`, `review`,
+`peer`, `release`, `time`, `lease`; `watcher` is a nonblank single-line durable
+trigger locator. The generated 32-hex identity distinguishes repeated waits even
+when the locator is reused. Runtime validation and the schema reject unknown
+statuses, malformed waits and live wait metadata on another status.
+
+```bash
+python3 scripts/graph.py wait N-001 --kind ci --watcher '<durable trigger locator>' --why 'candidate checks pending'
+python3 scripts/graph.py resume N-001 --wait-id '<identity returned by wait>' --why 'exact candidate checks resolved'
+```
+
+These transitions take the same exclusive graph lock as other mutations. `wait`
+accepts only pending/blocked nodes without a recorded execution claim; `resume`
+requires the current identity. Running, terminal and already-waiting nodes refuse
+a new wait. The prior record survives resume, park and invalidation in revisions.
+Close and certification refuse an unresolved wait; resume does not imply success
+or completion. It only allows the existing dependency and verification rules to
+consider the node again.
+
+`next` excludes waits from runnable stdout; external `claim` and `recover` therefore refuse
+one. Exit **6** means every remaining dependency leaf is a recorded wait, including
+leaves outside `--wave`. Wait identity/locator diagnostics go to stderr. A ready
+sibling still returns 0; a running, parked dependency or unclassified barrier keeps
+4. Exit 3 retains its existing all-terminal meaning, including intentionally parked
+nodes; it is not proof every requirement was delivered.
+
+Recording a locator does not start a watcher, prove it is alive, or authorize its
+action. Arm the actual watcher through the host and retain its receipt as described
+in [`continuity.md`](continuity.md). Human-only actions retain their boundary;
+resuming a graph node cannot grant approval. Graph-local state and the separate
+SQLite execution authority are not one transaction: this command refuses recorded
+graph claims but cannot discover an unrecorded external grant. In external mode,
+the coordinator must stop/release that grant before recording the wait and prevent
+concurrent dispatch. No cross-store fencing guarantee is claimed here.
 
 **`next` is ordered by what each node unblocks, transitively, and the number is computed.**
 A `priority` field is something somebody typed once and nobody revisits; this one moves when
