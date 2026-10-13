@@ -26,8 +26,17 @@ explicit tag-destination refspecs. Mechanical evidence does not confer external
 authority, native interception or successful registry publication.
 
 Test runners use one safely opened family scratch lock across TMPDIR settings and
-owners, matching their shared fixed scratch paths. Existing older runner versions
-and direct plant invocation remain outside that mechanism.
+owners, matching their shared fixed scratch paths. The lock now stays held while a
+plant's Bash or its synchronously writing child is alive, even if the runner itself is
+killed; an interrupted runner signals and drains its own process groups before it
+closes its copy, and on macOS a group of exited-but-unreaped members no longer aborts
+that cancellation. An interrupted run no longer leaves its repository snapshot in
+TMPDIR. Existing older runner versions, deliberately detached descendants and direct
+plant invocation remain outside that mechanism.
+
+The owner-gate helpers' seam headers declare `diverges: none` with their extraction
+scope on a separate line, so the umbrella's shared-copy check reads them as identical
+to the other members' copies.
 
 ## v1.94.1 — 2026-10-13
 
