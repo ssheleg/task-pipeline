@@ -1,0 +1,19 @@
+{
+  "baseline": "cfa5248240df71a55ca6c1742ab9a02ba7867949",
+  "tokenizer": "tiktoken cl100k_base",
+  "before_stages": 17616,
+  "after_spine": 8793,
+  "after_intake_detail": 2871,
+  "before_entry_component": 17616,
+  "after_entry_component": 11664,
+  "before_skill_body": 4629,
+  "after_skill_body": 4653,
+  "before_body_plus_stage_entry": 22245,
+  "after_body_plus_stage_entry": 16317,
+  "all_split_files": 18384,
+  "detail_files": 11,
+  "reference_files": 52,
+  "frontmatter_unchanged": true,
+  "source_hash_before": "d6ede1b57b63ce9e5012d2cdfea6f8a8f2a646a316f848499b58cbb8714a5471",
+  "limits": "Source-only reading components, each file read once; other routed subject doctrine and changed inventories are outside this component. Cumulative full run can grow. Native read traces, compaction/re-reads, model quality and billed usage NOT_RUN."
+}

@@ -36,6 +36,11 @@ for kind in sh node; do
     ok 'cmp -s "$ROOT/plugins/task-pipeline/skills/$s/SKILL.md" "$H/.claude/skills/$s/SKILL.md"' \
        "$kind: skills/$s is the shipped bytes"
   done
+  for detail in "$ROOT/plugins/task-pipeline/skills/task-pipeline/references"/stage-*.md; do
+    filename="${detail##*/}"
+    ok 'cmp -s "$detail" "$H/.claude/skills/task-pipeline/references/$filename"' \
+       "$kind: routed detail $filename is delivered byte-for-byte"
+  done
   ok '[ -f "$H/.claude/commands/task-pipeline.md" ]' "$kind: the command is installed"
   for h in $HOOKS; do
     ok 'grep -q "$h" <<<"$out"' "$kind: the notice names the hook $h"

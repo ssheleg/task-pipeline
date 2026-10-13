@@ -1,0 +1,102 @@
+FFFFFFFF
+======================================================================
+FAIL: test_all_copies_success (__main__.CopyCleanup.test_all_copies_success)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/var/folders/3r/yrdx_c051cv22q3r3k0ylvdm0000gn/T/tp-copy-baseline-ruk77hrx/test/audit_regressions/plant_copy_cleanup.py", line 77, in test_all_copies_success
+    self.assert_copies_gone()
+    ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/var/folders/3r/yrdx_c051cv22q3r3k0ylvdm0000gn/T/tp-copy-baseline-ruk77hrx/test/audit_regressions/plant_copy_cleanup.py", line 72, in assert_copies_gone
+    self.assertFalse(self.second.exists(), 'second copy leaked')
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: True is not false : second copy leaked
+
+======================================================================
+FAIL: test_all_copies_shell_failure (__main__.CopyCleanup.test_all_copies_shell_failure)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/var/folders/3r/yrdx_c051cv22q3r3k0ylvdm0000gn/T/tp-copy-baseline-ruk77hrx/test/audit_regressions/plant_copy_cleanup.py", line 81, in test_all_copies_shell_failure
+    self.assert_copies_gone()
+    ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/var/folders/3r/yrdx_c051cv22q3r3k0ylvdm0000gn/T/tp-copy-baseline-ruk77hrx/test/audit_regressions/plant_copy_cleanup.py", line 72, in assert_copies_gone
+    self.assertFalse(self.second.exists(), 'second copy leaked')
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: True is not false : second copy leaked
+
+======================================================================
+FAIL: test_all_copies_runner_exception (__main__.CopyCleanup.test_all_copies_runner_exception)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/var/folders/3r/yrdx_c051cv22q3r3k0ylvdm0000gn/T/tp-copy-baseline-ruk77hrx/test/audit_regressions/plant_copy_cleanup.py", line 85, in test_all_copies_runner_exception
+    self.assert_copies_gone()
+    ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/var/folders/3r/yrdx_c051cv22q3r3k0ylvdm0000gn/T/tp-copy-baseline-ruk77hrx/test/audit_regressions/plant_copy_cleanup.py", line 71, in assert_copies_gone
+    self.assertFalse(self.first.exists(), 'first copy leaked')
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: True is not false : first copy leaked
+
+======================================================================
+FAIL: test_property_copies_success (__main__.CopyCleanup.test_property_copies_success)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/var/folders/3r/yrdx_c051cv22q3r3k0ylvdm0000gn/T/tp-copy-baseline-ruk77hrx/test/audit_regressions/plant_copy_cleanup.py", line 89, in test_property_copies_success
+    self.assert_copies_gone()
+    ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/var/folders/3r/yrdx_c051cv22q3r3k0ylvdm0000gn/T/tp-copy-baseline-ruk77hrx/test/audit_regressions/plant_copy_cleanup.py", line 72, in assert_copies_gone
+    self.assertFalse(self.second.exists(), 'second copy leaked')
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: True is not false : second copy leaked
+
+======================================================================
+FAIL: test_property_copies_exception (__main__.CopyCleanup.test_property_copies_exception)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/var/folders/3r/yrdx_c051cv22q3r3k0ylvdm0000gn/T/tp-copy-baseline-ruk77hrx/test/audit_regressions/plant_copy_cleanup.py", line 93, in test_property_copies_exception
+    self.assert_copies_gone()
+    ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/var/folders/3r/yrdx_c051cv22q3r3k0ylvdm0000gn/T/tp-copy-baseline-ruk77hrx/test/audit_regressions/plant_copy_cleanup.py", line 71, in assert_copies_gone
+    self.assertFalse(self.first.exists(), 'first copy leaked')
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: True is not false : first copy leaked
+
+======================================================================
+FAIL: test_primary_unchanged_stays_broken_despite_secondary_change (__main__.CopyCleanup.test_primary_unchanged_stays_broken_despite_secondary_change)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/var/folders/3r/yrdx_c051cv22q3r3k0ylvdm0000gn/T/tp-copy-baseline-ruk77hrx/test/audit_regressions/plant_copy_cleanup.py", line 99, in test_primary_unchanged_stays_broken_despite_secondary_change
+    self.assert_copies_gone()
+    ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/var/folders/3r/yrdx_c051cv22q3r3k0ylvdm0000gn/T/tp-copy-baseline-ruk77hrx/test/audit_regressions/plant_copy_cleanup.py", line 72, in assert_copies_gone
+    self.assertFalse(self.second.exists(), 'second copy leaked')
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: True is not false : second copy leaked
+
+======================================================================
+FAIL: test_secondary_unchanged_does_not_change_primary_verdict (__main__.CopyCleanup.test_secondary_unchanged_does_not_change_primary_verdict)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/var/folders/3r/yrdx_c051cv22q3r3k0ylvdm0000gn/T/tp-copy-baseline-ruk77hrx/test/audit_regressions/plant_copy_cleanup.py", line 103, in test_secondary_unchanged_does_not_change_primary_verdict
+    self.assert_copies_gone()
+    ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/var/folders/3r/yrdx_c051cv22q3r3k0ylvdm0000gn/T/tp-copy-baseline-ruk77hrx/test/audit_regressions/plant_copy_cleanup.py", line 72, in assert_copies_gone
+    self.assertFalse(self.second.exists(), 'second copy leaked')
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: True is not false : second copy leaked
+
+======================================================================
+FAIL: test_heredoc_and_comment_are_not_cleanup_authority (__main__.CopyCleanup.test_heredoc_and_comment_are_not_cleanup_authority)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/var/folders/3r/yrdx_c051cv22q3r3k0ylvdm0000gn/T/tp-copy-baseline-ruk77hrx/test/audit_regressions/plant_copy_cleanup.py", line 109, in test_heredoc_and_comment_are_not_cleanup_authority
+    self.assert_copies_gone()
+    ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/var/folders/3r/yrdx_c051cv22q3r3k0ylvdm0000gn/T/tp-copy-baseline-ruk77hrx/test/audit_regressions/plant_copy_cleanup.py", line 72, in assert_copies_gone
+    self.assertFalse(self.second.exists(), 'second copy leaked')
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: True is not false : second copy leaked
+
+----------------------------------------------------------------------
+Ran 8 tests in 0.264s
+
+FAILED (failures=8)
+{"baseline": "7d18df5464fad6fdbaa77a91d48580ebbe3f5d9a", "expected_failures": 8, "fixture_sha256": "f1db5913de28efd04903da5f2220430d290b80da0935f30ccc4e3aa317486ff9", "owned_temporary_removed": true}

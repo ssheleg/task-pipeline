@@ -1,0 +1,66 @@
+{
+  "schema": "tp-plant-copy-cleanup/1",
+  "base_commit": "7d18df5464fad6fdbaa77a91d48580ebbe3f5d9a",
+  "source_sha256": {
+    "test/negatives.py": "66085773964828c6b5596da2485249df6c31113abab2316a8b6f49dfba8acb67",
+    "test/audit_regressions/plant_copy_cleanup.py": "f1db5913de28efd04903da5f2220430d290b80da0935f30ccc4e3aa317486ff9"
+  },
+  "runs": [
+    {
+      "command": [
+        "-B",
+        "test/audit_regressions/plant_copy_cleanup.py"
+      ],
+      "exit_code": 0,
+      "seconds": 0.564,
+      "log": "focused.log",
+      "sha256": "abc8f5e9169658b896eacac42ffff7a4fcde647520a5c2033915c17a60c3b685"
+    },
+    {
+      "command": [
+        "-B",
+        "test/runner_test.py"
+      ],
+      "exit_code": 0,
+      "seconds": 0.117,
+      "log": "runner.log",
+      "sha256": "b064f56e4652fcb2f8b879dc58182952b2b659b5468207c81b896e6e5052e556"
+    }
+  ],
+  "baseline": {
+    "source": "7d18df5464fad6fdbaa77a91d48580ebbe3f5d9a",
+    "test_count": 8,
+    "failure_count": 8,
+    "exit_code": 1,
+    "log": "baseline.log",
+    "sha256": "05f6ded1a10f07132bbe4b96a97dec7abfea898c0595afcbee6469e558fbfb4d"
+  },
+  "corpus_read_only": {
+    "plant_files": 454,
+    "copy_declarations": 443,
+    "multiple_copy_plants": {
+      "157-the-verification-ledger-claiming-a-stale-shipped-state.sh": [
+        "/tmp/vh1-copy",
+        "/tmp/vh1b-copy"
+      ],
+      "158-skill-md-teaching-a-gate-type-vocabulary-the-schema-outgrew.sh": [
+        "/tmp/gt1-copy",
+        "/tmp/gt1b-copy"
+      ]
+    }
+  },
+  "scope": {
+    "public_namespace_used": false,
+    "provider_calls": 0,
+    "broad_suite": "NOT_RUN",
+    "caller_corpus": "trusted owner scripts; not a general shell parser"
+  },
+  "temporary_controls": "All fixtures under unique TemporaryDirectory(dir=/tmp) cleaned by unittest addCleanup; public family lock mocked; tiny source and snapshots owned.",
+  "baseline_replay": {
+    "command": "python3 -B docs/evidence/runs/2026-10-13-fw07-copy-cleanup/baseline-replay.py",
+    "exit_code": 0,
+    "meaning": "expected eight pre-fix failures observed",
+    "log": "baseline-replay.log",
+    "sha256": "3dbc45a2914b5edd0702e5b258f1ac9bfa234fb7cc2b977ebfcd38690f10a6d6"
+  }
+}

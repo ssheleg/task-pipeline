@@ -1,0 +1,26 @@
+[
+  {
+    "plant": "053-the-doc-track-must-reach-the-surfaces-that-enforce-it.sh",
+    "python_payload_exit": 0,
+    "landed": true,
+    "subject": "propagation gate agreement",
+    "decision": "remains on complete gate spine",
+    "limit": "original Python mutation executed on owned minimal fixture; full validator shell entry remains pending"
+  },
+  {
+    "plant": "122-a-pushing-stage-must-name-the-ci-verdict.sh",
+    "python_payload_exit": 0,
+    "landed": true,
+    "subject": "stage7 CI verdict",
+    "decision": "remains on complete gate spine",
+    "limit": "original Python mutation executed on owned minimal fixture; full validator shell entry remains pending"
+  },
+  {
+    "plant": "310-neighbour-probe-stage-2-loses-the-arming-while-keeping-the-w.sh",
+    "python_payload_exit": 0,
+    "landed": true,
+    "subject": "stage2 gate obligation versus neighbor",
+    "decision": "remains on complete gate spine",
+    "limit": "original Python mutation executed on owned minimal fixture; full validator shell entry remains pending"
+  }
+]

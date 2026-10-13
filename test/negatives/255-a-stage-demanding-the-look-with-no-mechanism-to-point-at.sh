@@ -3,7 +3,7 @@
 set -eu
 rm -rf /tmp/br1-copy && cp -R . /tmp/br1-copy
 python3 - <<'EOF'
-p = "/tmp/br1-copy/plugins/task-pipeline/skills/task-pipeline/references/stages.md"
+p = "/tmp/br1-copy/plugins/task-pipeline/skills/task-pipeline/references/stage-08-post-deploy.md"
 t = open(p, encoding="utf-8").read()
 needle = "either one ([`browser.md`](browser.md)) — load the deployed URL"
 assert needle in t, "PLANT DID NOT LAND: stage 8's browser pointer moved"

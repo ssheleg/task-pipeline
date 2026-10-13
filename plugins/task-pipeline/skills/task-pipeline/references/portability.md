@@ -39,8 +39,19 @@ a row pointing outside the bundle is the defect this file exists to catch.
 
 | Workflow decision | Home |
 |---|---|
+| 0 · Stage procedure | `references/stage-00-intake.md` |
+| 1 · Stage procedure | `references/stage-01-docs-study.md` |
+| 2 · Stage procedure | `references/stage-02-brainstorm.md` |
+| 3 · Stage procedure | `references/stage-03-spec.md` |
+| 4 · Stage procedure | `references/stage-04-plan.md` |
+| 5 · Stage procedure | `references/stage-05-dev.md` |
+| 6 · Stage procedure | `references/stage-06-tests.md` |
+| 7 · Stage procedure | `references/stage-07-lint-deploy.md` |
+| 8 · Stage procedure | `references/stage-08-post-deploy.md` |
+| 9 · Stage procedure | `references/stage-09-docs-wiki.md` |
+| 10 · Stage procedure | `references/stage-10-acceptance.md` |
 | The stage list, ids, names, gate types | `pipeline.example.json` |
-| Per-stage criteria, freedom levels, the run checklist | `references/stages.md` |
+| Full gates, freedom levels, the run checklist and exact stage-detail routes | `references/stages.md` |
 | Which reference owns which stage (the doctrine map) | `references/doctrine-map.md` |
 | What the intake grill asks, and the autonomy sweep | `references/grill.md` |
 | **The escalation boundary** — what an agent may settle alone | `references/grill.md` |

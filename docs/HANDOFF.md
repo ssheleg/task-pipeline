@@ -1,3 +1,49 @@
+## Operator stop: Claude continuation — FW07 child lifetime
+
+The operator requested a handoff, not another wave. Start with the
+[child-lock continuation packet](evidence/runs/2026-10-13-fw07-child-lock/README.md#claude-continuation-after-operator-stop).
+Implementation25fb09d is pushed and focused-tested, with independent review and
+canonical owner ports still pending. The existing complete gate on older875c6e6
+continues under its owned watchdog; its partial checkpoint, exact process/source
+identity, log and final-result paths are preserved in that packet. Inspect it
+before starting any suite. No new full run or PR promotion is authorized by this
+handoff itself; continue under the operator's resumed instruction and existing
+repository policy. Do not unlink the permanent family scratch lock.
+
+## FW07 R07 runner cleanup correction — composed, complete gate pending
+
+[Packet and source-bound checks](evidence/runs/2026-10-13-fw07-copy-cleanup/README.md)
+reproduce secondary-copy residue on the future 1.95.0 candidate and retire all
+admitted literal plant copies while preserving the first-copy verdict. The active
+1.94.1 clone and its public scratch directories were not touched. Independent
+parser/cleanup review accepted the bounded correction; all declared destinations
+are distinct, including secondary copies. The correction is now composed in PR127.
+Next: the complete owner gate in the serial slot. Focused checks are not aggregate
+or release acceptance.
+
+## Current FW07 source candidate —1.95.0
+
+[Draft integration PR127](https://github.com/ssheleg/task-pipeline/pull/127)
+replaces PR123/PR124 only after accepted merge; both remain open meanwhile.
+
+[Composition entry](evidence/runs/2026-10-13-fw07-composition/README.md) binds
+stage routes, checkpoint recovery, independently reviewed owner helper and shared
+scratch lock. Metadata names the next minor; no tag or publication. The prior
+1.94.1 release clone remains untouched. Exact next task: source/metadata review,
+then moved public plants and complete owner validation in the coordinator's serial
+slot, normal genuine-check integration, and local-tag-aware accepted-source gate.
+Native/model/token-quality results remain NOT_RUN. Original PR heads are preserved;
+older isolated-candidate handoffs below describe their historical source cuts.
+
+## FW07 checkpoint correction — isolated source slice
+
+The [frozen packet and receipt](evidence/runs/2026-10-13-fw07-checkpoint-profile/README.md)
+reproduces default-stage injection into a custom-profile checkpoint. Implementation
+and actual CLI controls are isolated from stage-extraction PR123 and from the pending
+release gate. Next: independent source review, then composed owner validation in the
+coordinator's serial slot, genuine candidate checks and normal integration. No tag,
+live Observatory exchange, native loading, task-quality or billing claim is made.
+
 ## Release repair candidate — v1.94.1 (2026-10-13)
 
 The immutable v1.94.0 tag reached accepted main but its release failed the
@@ -9,6 +55,83 @@ accepted skill payload. The earlier candidate notes below are historical.
 source, checks, unpublished local-tag handling and the exact next task. Independent
 audit, safe-disk full validation on the accepted local tag, normal integration and
 release/readback remain separate gates. No completed stage-10 stamp is claimed.
+
+## FW07 stage-3 prerequisite follow-up — 2026-10-13
+
+The split stage-3 procedure and spec subject reference now follow the accepted
+artifact-provider contract. Equivalent providers/inline fallback remain valid;
+missing or invalid scenarios still refuse and unavailable lint stays NOT_RUN.
+[Source correction and evidence](evidence/runs/2026-10-13-fw07-stage-split/README.md)
+preserve the earlier lossless extraction claim at its original source.
+Next: independent review, correct both evaluation arms identically, then public
+plants and composed aggregate after release repair reconciliation and slot grant.
+
+## FW07 stage split — current isolated implementation
+
+Entry: [execution receipt](evidence/runs/2026-10-13-fw07-stage-split/README.md).
+The independently accepted prerequisite correction is followed by lossless
+stage extraction, explicit default entry/resume routes, consumer migration and
+source controls. B-043 remains open. No version, release, native host or billed
+usage result is claimed.
+
+Structural validation passes. Exact next task: public-entry refusal, independent review,
+then the moved negative corpus and composed owner aggregate in the serialized slot.
+Keep every full gate and the selected custom profile's precedence intact. The
+receipt preserves failed intermediate checks and names all validation not run.
+
+## Prior prerequisite handoff
+
+## FW07 prerequisite correction in progress
+
+[Execution receipt](evidence/runs/2026-10-13-fw07-prerequisites/README.md) binds the
+separate semantic correction to the accepted artifact-provider decision. Seven
+shipped source homes now agree; focused9 + actual mutation18 + house19/0 pass.
+The original structural failure is retained; corrected structural passes. Independent
+review precedes extraction. No stages.md bytes or default gate types changed.
+
+Exact next task: freeze this bounded correction after review, then implement the
+accepted B-043 gate-spine and deterministic per-stage routes on this isolated branch.
+The coordinator permits source work alongside the separate immutable release gate;
+no overlapping full suite or publication is authorized by this handoff.
+
+## Historical source feasibility handoff
+
+## FW07 / B-043 source feasibility — 2026-10-13
+
+Entry: [decision-input report](reports/2026-10-13-fw07-stage-reading-floor/README.md),
+then [bounded execution packet](evidence/plans/2026-10-13-fw07-stage-reading-floor.md).
+Frozen source: accepted 1.94.0 `4d750573ce53ea4c7ffa2bde192ee35b59acefa7`.
+This branch changes only the report, its reproducible raw census, this handoff and
+the packet. No shipped doctrine, gate, test, profile or workflow was edited.
+
+Measured stages.md: 17,616 cl100k tokens/967 lines; literal-address census 327 lines
+in 108 files, including historical evidence. Conservative entry model 11,258 before
+new routing overhead is feasibility only, not observed host or billing savings.
+The plan freezes conservation, exact on-entry/resume routes, custom-profile scope,
+consumer migration, negative controls and portable install/read-accounting limits.
+
+Parent accepted the bounded extraction packet and the separately recovered
+[UX prerequisite correction](evidence/plans/2026-10-13-fw07-ux-prerequisite-correction.md).
+Exact next task after current release completion: normalize the stale package
+prerequisites across the packet's eight current source locations in a separate commit with actual negative controls, then freeze the
+paragraph migration map on a new implementation branch. B-043 is still open; no runtime/model
+quality or full-suite verdict is claimed by this planning slice.
+## Owner-only release candidate implementation — 2026-10-13
+
+[FW07 source and focused receipt](evidence/runs/2026-10-13-fw07-release-candidate/README.md)
+implements the reviewed standalone-clone prepare/check/publish design and reconciles
+the owner stage-7 ordering. Private exact-source evidence grants no authority;
+publication requires faithful actual run context and the existing hook.
+Next: independent source review and correction, then serialized owner aggregate.
+No production tag, full gate or release claimed; v1.94.1 repair remains separate.
+
+## Source-only release admission follow-up — 2026-10-13
+
+[FW07 pre-tag packet](evidence/plans/2026-10-13-pretag-admission/README.md)
+recovers the failed v1.94.0 admission and the stage-7/R-010 ordering conflict.
+It proposes an exact local-tag-aware complete-suite receipt and distinct local
+preparation versus publication, without modifying the v1.94.1 repair.
+Next: independent packet review before implementation. No gate or tag changed.
 
 ## Release candidate — v1.94.0 (2026-10-13)
 

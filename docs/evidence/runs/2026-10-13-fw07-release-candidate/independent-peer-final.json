@@ -1,0 +1,21 @@
+{
+  "source": "46120248934e0b4573b4ffcc00cc565df39ef552",
+  "verdict": "BOUNDED_PASS",
+  "exit_code": 0,
+  "output": "PASS: owner release candidate — 54 controls; fixture refs only; owned tree removed on exit\nOK (65 checks)\n{\"source\": \"46120248934e0b4573b4ffcc00cc565df39ef552\", \"independent_controls\": [{\"case\": \"actual canonical package, both manifests, changelog, card admission\", \"passed\": true}, {\"case\": \"original alternate pushurl reproducer now refuses before any remote tag\", \"passed\": true}, {\"case\": \"original followTags reproducer now pushes only bound object; foreign local tag retained\", \"passed\": true}, {\"case\": \"actual final object/URL/no-follow-tags command still blocked by failed bound ledger\", \"passed\": true}], \"fixture_cleanup\": \"all trees context-managed and removed\", \"real_release\": \"NOT_RUN\"}\n",
+  "reviewed": [
+    "Entire owner helper and hook classifier against baseline78c42124: actual manifests, private mode/UID/type, receipt states, bound project/run/profile, exact object URL push and object/peel readback.",
+    "Original configured-pushurl and ambient-followTags defects reproduced on real local bare fixture remotes; baseline probes retained; both corrected."
+  ],
+  "checks": [
+    "Final helper54 controls",
+    "Existing hook65 controls",
+    "Four independent actual-manifest/original-pushurl/original-followTags/current-failed-ledger controls"
+  ],
+  "limits": [
+    "Expensive suite replaced only at fixture seam; no production test:all, actual tag/release, provider calls or native interception.",
+    "Helper grants no authority; hook observation is separate from native interception.",
+    "No hostile concurrent config/receipt mutation or automatic crash-lock retirement guarantee. Packaged hook requires a later versioned release, separate from1.94.1."
+  ],
+  "implementation_edits_by_peer": false
+}

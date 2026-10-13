@@ -1,0 +1,28 @@
+{
+  "source": "9d9a99be6369daee0a8739d1500b607a76fd7253",
+  "checks": [
+    {
+      "command": [
+        "python3",
+        "-B",
+        "test/audit_regressions/plant_copy_cleanup.py"
+      ],
+      "exit": 0,
+      "seconds": 0.526,
+      "log_sha256": "b80172f43b5c5f1c12a500e75db1100c67609b8a896c073393493236eccb1eb3",
+      "log": "root-peer-copies.log"
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "test/runner_test.py"
+      ],
+      "exit": 0,
+      "seconds": 0.105,
+      "log_sha256": "b064f56e4652fcb2f8b879dc58182952b2b659b5468207c81b896e6e5052e556",
+      "log": "root-peer-runner.log"
+    }
+  ],
+  "scope": "Independent real runner focused replay on unchanged source; temporary fixtures owned by suite, public plants/lock and broad suite not run."
+}

@@ -1,0 +1,25 @@
+{
+  "observed_at": "2026-10-13T14:19:52.245235+00:00",
+  "active": {
+    "pid": 92541,
+    "sha": "875c6e6a9a02c5c18e77945fc4fa56a43588cb5c",
+    "tree": "cc94775507fba027b42586f7ef539714d24e2b06",
+    "tmp": "/var/folders/3r/yrdx_c051cv22q3r3k0ylvdm0000gn/T/tp-fw07-875c6e6-owned-x68oijvs",
+    "started": "2026-10-13T13:50:26.626991+00:00",
+    "command": [
+      "npm",
+      "run",
+      "test:all"
+    ]
+  },
+  "driver_path": "/tmp/tp-fw07-preintegration-875c6e6-run.py",
+  "log_path": "/tmp/tp-fw07-preintegration-875c6e6.log",
+  "final_result_path": "/tmp/tp-fw07-preintegration-875c6e6.json",
+  "result_exists_at_checkpoint": false,
+  "checkpoint_log_sha256": "9369b1d4c7674d6d9d79ab7fc09f161cbb03f6150266c8050586d29237cac907",
+  "checkpoint_log_bytes": 29984,
+  "driver_process": "92541 92525 29:26",
+  "free_bytes": 2875080704,
+  "classification": "RUNNING; not PASS, not final result; old source has independently reproduced child-lifetime gap",
+  "tool_session_id": 45625
+}

@@ -1,0 +1,11 @@
+{
+  "intended_source": "bc2c0f89efb01220d3de283c337ddb310d9e56b0",
+  "worktree": "/Users/sshlg/DATA/_wt/tp-fw07-composed",
+  "command": "python3 -B test/audit_regressions/fw07_release_candidate.py",
+  "tool_session": 43975,
+  "exit": 1,
+  "classification": "CONTAMINATED_SOURCE_CHANGED_DURING_REPLAY",
+  "error": "release_candidate.Refusal: source identity changed",
+  "observed_source_change": "scripts/release_candidate.py post-cleanup interrupted flag assignment and test/audit_regressions/fw07_release_candidate.py late-signal controls were edited while the peer process was active",
+  "verdict": "NO_CANDIDATE_VERDICT; not counted as peer PASS or a stable-source regression"
+}

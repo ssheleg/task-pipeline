@@ -1,5 +1,6 @@
 # shared-mechanism: sshlg-skills/member-gates-v1
-# diverges: board-only extraction; identifiers allow a lowercase hyphen suffix for AW-0906-desc/refusal.
+# diverges: none
+# Extraction scope: board-only extraction; identifiers allow a lowercase hyphen suffix for AW-0906-desc/refusal.
 # Source: agent-stack 792e3f6cb2e46517f0187066db55edc63ae7d12c:test/member_gates.py.
 """Bounded ID-table grammar: explicit declarations, no implicit continuation.
 

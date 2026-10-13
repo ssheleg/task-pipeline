@@ -1,0 +1,17 @@
+{
+  "source_base": "875c6e6a9a02c5c18e77945fc4fa56a43588cb5c",
+  "scripts": 454,
+  "lexical_spawn_shape_patterns": {
+    "python_subprocess": "subprocess\\.(Popen|run|call|check_output|check_call)\\s*\\(",
+    "python_detach": "os\\.(fork|setsid|spawn[a-z]*)\\s*\\(",
+    "shell_detach": "^\\s*(?:nohup|setsid)\\s",
+    "shell_background": "(?<!&)\\s&\\s*$"
+  },
+  "matches": {
+    "python_subprocess": [],
+    "python_detach": [],
+    "shell_detach": [],
+    "shell_background": []
+  },
+  "scope": "Read-only lexical census of supported corpus scripts, not a shell interpreter or proof over arbitrary executable content. Actual parent/Bash child lifetime controls complement it. Validator subprocesses are synchronous; no claim for uncooperative detached descriptor-closing code."
+}

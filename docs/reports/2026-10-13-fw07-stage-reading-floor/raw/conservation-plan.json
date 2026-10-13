@@ -1,0 +1,290 @@
+{
+  "source": "4d750573ce53ea4c7ffa2bde192ee35b59acefa7",
+  "source_path": "plugins/task-pipeline/skills/task-pipeline/references/stages.md",
+  "source_sha256": "d6ede1b57b63ce9e5012d2cdfea6f8a8f2a646a316f848499b58cbb8714a5471",
+  "status": "proposed source partition; no source relocation performed",
+  "coverage": "every source line exactly once in original order; full byte reconstruction equal",
+  "route_names": "proposed, pending source-owner review",
+  "chunks": [
+    {
+      "source_start": 1,
+      "source_end": 73,
+      "destination": "references/stages.md",
+      "kind": "spine-introduction",
+      "sha256": "7cc515dfd32be8ca0294bb1751e684e82010c28f74b4acc99afa2117089780f5",
+      "bytes": 3459
+    },
+    {
+      "source_start": 74,
+      "source_end": 75,
+      "destination": "references/stages.md",
+      "kind": "stage-heading-and-freedom",
+      "sha256": "577a862824b8254550f5446ade6fccfad7fe92f8b1aef540ad7f7f25beaf684a",
+      "bytes": 176
+    },
+    {
+      "source_start": 76,
+      "source_end": 224,
+      "destination": "references/stage-00-intake.md",
+      "kind": "stage-detail",
+      "sha256": "dd76af751766986774648afdb8c465a2197e7f3efdde3398b0661a706cc0d087",
+      "bytes": 11406
+    },
+    {
+      "source_start": 225,
+      "source_end": 265,
+      "destination": "references/stages.md",
+      "kind": "complete-gate-suffix",
+      "sha256": "7791bd676e60e0b8202ddf9d3edc4530bf606906baee1312e2355f59da9e746f",
+      "bytes": 3445
+    },
+    {
+      "source_start": 266,
+      "source_end": 267,
+      "destination": "references/stages.md",
+      "kind": "stage-heading-and-freedom",
+      "sha256": "6950ad15283dd7295172f6845449c5fb0b19556f4d352cf596050f7791e7a2e0",
+      "bytes": 165
+    },
+    {
+      "source_start": 268,
+      "source_end": 272,
+      "destination": "references/stage-01-docs-study.md",
+      "kind": "stage-detail",
+      "sha256": "d05334b1777b7ebbb012b6e4f873cedb1c51ea2a5908eb3d0d283eb5a0050ef4",
+      "bytes": 322
+    },
+    {
+      "source_start": 273,
+      "source_end": 275,
+      "destination": "references/stages.md",
+      "kind": "complete-gate-suffix",
+      "sha256": "bf19fbbc04cd8cccbe676977132295121955571f5973b4a006bd18684703b05f",
+      "bytes": 147
+    },
+    {
+      "source_start": 276,
+      "source_end": 277,
+      "destination": "references/stages.md",
+      "kind": "stage-heading-and-freedom",
+      "sha256": "0b02ae212849801c994194571c4ec5839538494e3e268805d1061cd33847105a",
+      "bytes": 183
+    },
+    {
+      "source_start": 278,
+      "source_end": 324,
+      "destination": "references/stage-02-brainstorm.md",
+      "kind": "stage-detail",
+      "sha256": "b5e7fb9e453c97ec80e1853ac88432efc5030118212b689b30a6d97a28f6e560",
+      "bytes": 3627
+    },
+    {
+      "source_start": 325,
+      "source_end": 335,
+      "destination": "references/stages.md",
+      "kind": "complete-gate-suffix",
+      "sha256": "5c18525105a1e5a5b19ccd3702539adcd9574063c7662ff233ce8dc314808043",
+      "bytes": 816
+    },
+    {
+      "source_start": 336,
+      "source_end": 337,
+      "destination": "references/stages.md",
+      "kind": "stage-heading-and-freedom",
+      "sha256": "41ca9b71bf25a0441a2606aa86d9b77535d1e378fdc943df82f8d49ac6f0330d",
+      "bytes": 197
+    },
+    {
+      "source_start": 338,
+      "source_end": 396,
+      "destination": "references/stage-03-spec.md",
+      "kind": "stage-detail",
+      "sha256": "4372eb37b54b7f36d69a9bf6a3d7db203306aee52d5feb02fd7f4ecc3d885373",
+      "bytes": 4418
+    },
+    {
+      "source_start": 397,
+      "source_end": 428,
+      "destination": "references/stages.md",
+      "kind": "complete-gate-suffix",
+      "sha256": "8a471d2fd58b0208df5c1ed14b6e7b096cf44b74e76dadb5d82f49440f890fda",
+      "bytes": 2435
+    },
+    {
+      "source_start": 429,
+      "source_end": 430,
+      "destination": "references/stages.md",
+      "kind": "stage-heading-and-freedom",
+      "sha256": "bfcdd763b5ee49f929996f1ba01aa5d8dbad179f937e31ad6b589c4c700924f0",
+      "bytes": 147
+    },
+    {
+      "source_start": 431,
+      "source_end": 436,
+      "destination": "references/stage-04-plan.md",
+      "kind": "stage-detail",
+      "sha256": "78e5e01cff2f8fde1dd8f399a5ddf25ffbde68282618337f58ba72daec81c18e",
+      "bytes": 405
+    },
+    {
+      "source_start": 437,
+      "source_end": 457,
+      "destination": "references/stages.md",
+      "kind": "complete-gate-suffix",
+      "sha256": "a44e80cce22fad8d47d8019accab8267cf40abfde81489d6e616743584042fde",
+      "bytes": 1593
+    },
+    {
+      "source_start": 458,
+      "source_end": 459,
+      "destination": "references/stages.md",
+      "kind": "stage-heading-and-freedom",
+      "sha256": "6d2a168e34ad5c7c9af61a56455c74108e5b4b475a0bbdb6d7c07f110f26f7b9",
+      "bytes": 170
+    },
+    {
+      "source_start": 460,
+      "source_end": 509,
+      "destination": "references/stage-05-dev.md",
+      "kind": "stage-detail",
+      "sha256": "b01aeef150850662c676d9dd6f80074cdce8b3e4b226616fbf2ea00a88ada9e4",
+      "bytes": 4082
+    },
+    {
+      "source_start": 510,
+      "source_end": 520,
+      "destination": "references/stages.md",
+      "kind": "complete-gate-suffix",
+      "sha256": "abd5fcd88f1db70b44310681c8bfaeba7de17318900289058c1c250f91b038ad",
+      "bytes": 823
+    },
+    {
+      "source_start": 521,
+      "source_end": 522,
+      "destination": "references/stages.md",
+      "kind": "stage-heading-and-freedom",
+      "sha256": "1858dbaffaac5997f80b238548155a94e1c77520ef0cfc55748d3fb3969d5017",
+      "bytes": 141
+    },
+    {
+      "source_start": 523,
+      "source_end": 528,
+      "destination": "references/stage-06-tests.md",
+      "kind": "stage-detail",
+      "sha256": "ebce28f2addc09ca4c1ca200047ae9974372e643b5532806f88b5aed680a9155",
+      "bytes": 406
+    },
+    {
+      "source_start": 529,
+      "source_end": 586,
+      "destination": "references/stages.md",
+      "kind": "complete-gate-suffix",
+      "sha256": "4517ccdecea84e1616dc4b072f51dc8b4c302473d451aa39a4ed50c1e7e9ea2c",
+      "bytes": 4664
+    },
+    {
+      "source_start": 587,
+      "source_end": 588,
+      "destination": "references/stages.md",
+      "kind": "stage-heading-and-freedom",
+      "sha256": "44aa59db66310b8c64a3d31e0840f0679af8fb3905bdd6909c88ab169815eb88",
+      "bytes": 166
+    },
+    {
+      "source_start": 589,
+      "source_end": 598,
+      "destination": "references/stage-07-lint-deploy.md",
+      "kind": "stage-detail",
+      "sha256": "a18a3d0b0ef9c088d34277a977132f75d7f20c369d26bca0a78a20bae548ae74",
+      "bytes": 828
+    },
+    {
+      "source_start": 599,
+      "source_end": 634,
+      "destination": "references/stages.md",
+      "kind": "complete-gate-suffix",
+      "sha256": "4810c2f8b13c1c5e64fa3440771839b9d5104bc5242ed35a62e2480897a436f4",
+      "bytes": 2886
+    },
+    {
+      "source_start": 635,
+      "source_end": 636,
+      "destination": "references/stages.md",
+      "kind": "stage-heading-and-freedom",
+      "sha256": "fbcdcdd6aa12231120cc498122a0314200260bd1dbb1f9aa4c9814d2ea28527b",
+      "bytes": 168
+    },
+    {
+      "source_start": 637,
+      "source_end": 660,
+      "destination": "references/stage-08-post-deploy.md",
+      "kind": "stage-detail",
+      "sha256": "652705427c112dc57da758e06a0eb221cefa287fd22db4d9242557855e8b04e5",
+      "bytes": 1799
+    },
+    {
+      "source_start": 661,
+      "source_end": 671,
+      "destination": "references/stages.md",
+      "kind": "complete-gate-suffix",
+      "sha256": "b8260db462459155b844b9bb6d24ba8b4f2605d579bb052d8ac41267f93d0593",
+      "bytes": 820
+    },
+    {
+      "source_start": 672,
+      "source_end": 673,
+      "destination": "references/stages.md",
+      "kind": "stage-heading-and-freedom",
+      "sha256": "09a37cd8d9767c5d017a6e3d7fd5d1320e7933c29be54f6ec859f26aa45bf6f2",
+      "bytes": 169
+    },
+    {
+      "source_start": 674,
+      "source_end": 713,
+      "destination": "references/stage-09-docs-wiki.md",
+      "kind": "stage-detail",
+      "sha256": "4ce11f94d0c0642ecc2c715f451d33d027354aea2d015130c5aaddacf054d392",
+      "bytes": 2950
+    },
+    {
+      "source_start": 714,
+      "source_end": 728,
+      "destination": "references/stages.md",
+      "kind": "complete-gate-suffix",
+      "sha256": "e7e2b770fdba01e93fddb37a88e9f4e3fb8f1a6ae564692f5c9d9e953c720440",
+      "bytes": 1136
+    },
+    {
+      "source_start": 729,
+      "source_end": 730,
+      "destination": "references/stages.md",
+      "kind": "stage-heading-and-freedom",
+      "sha256": "8a2e95ba1a6b837056ff69585c1bfce50ba68fe49b091deb589c081c2e1af04e",
+      "bytes": 179
+    },
+    {
+      "source_start": 731,
+      "source_end": 816,
+      "destination": "references/stage-10-acceptance.md",
+      "kind": "stage-detail",
+      "sha256": "156001a07fadf92a579c26d6dae8ce59fc2f034fda926ab0193b0e6f1059f443",
+      "bytes": 6812
+    },
+    {
+      "source_start": 817,
+      "source_end": 865,
+      "destination": "references/stages.md",
+      "kind": "complete-gate-suffix",
+      "sha256": "d1e0db4721b4a1b15db0e8f1f7c3f1630ac605c2a6ecb708d944777c1956a8cd",
+      "bytes": 3899
+    },
+    {
+      "source_start": 866,
+      "source_end": 967,
+      "destination": "references/stages.md",
+      "kind": "run-wide-sections",
+      "sha256": "33f0ceae2888e0d5196a1832f991d488dbde53c1b99de3f87235909354aee175",
+      "bytes": 5892
+    }
+  ]
+}

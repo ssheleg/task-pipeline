@@ -6,8 +6,9 @@ built-in doctrine lives, so an agent loads the one file the stage needs instead 
 carrying the whole index in every turn.
 
 The rule the table serves stays in `SKILL.md`: every stage's doctrine ships inside this
-skill, no stage blocks on an install, and the single deliberate exception is the stage-3
-UX track on a user-facing task.
+skill and no stage blocks on an install. The stage-3 UX gate on a user-facing task
+requires a valid scenario artifact; [the provider rule](companion-skills.md) governs
+the preferred provider, equivalent providers and inline fallback.
 
 ## Contents
 
@@ -15,8 +16,24 @@ UX track on a user-facing task.
 
 ## Which reference owns which stage
 
+For the default profile, `references/stages.md` owns the full gates and exact
+on-entry/resume route to each `references/stage-*.md` detail. Read the selected
+stage detail before its work; this table routes additional subject doctrine.
+Custom profiles use their own declared stages and doctrine, with the kernel intact.
+
 | Stage | Built-in doctrine |
 |---|---|
+| 0 · Stage procedure | `references/stage-00-intake.md` |
+| 1 · Stage procedure | `references/stage-01-docs-study.md` |
+| 2 · Stage procedure | `references/stage-02-brainstorm.md` |
+| 3 · Stage procedure | `references/stage-03-spec.md` |
+| 4 · Stage procedure | `references/stage-04-plan.md` |
+| 5 · Stage procedure | `references/stage-05-dev.md` |
+| 6 · Stage procedure | `references/stage-06-tests.md` |
+| 7 · Stage procedure | `references/stage-07-lint-deploy.md` |
+| 8 · Stage procedure | `references/stage-08-post-deploy.md` |
+| 9 · Stage procedure | `references/stage-09-docs-wiki.md` |
+| 10 · Stage procedure | `references/stage-10-acceptance.md` |
 | 0, 9 · The documentation system | `references/documentation.md` |
 | any stage · The canons, and where each is enforced | [`evidence-docs`](../../evidence-docs/SKILL.md) — the sibling skill in this plugin |
 | 6–10 · Gates | `references/gates.md` |

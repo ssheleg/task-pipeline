@@ -1,0 +1,120 @@
+{
+  "status": "PLANNED_NOT_RUN",
+  "production_command": "npm run test:all",
+  "cases": [
+    {
+      "id": "prepare-publishes-nothing",
+      "given": "valid clean standalone accepted repository",
+      "operation": "prepare",
+      "expected": "owned annotated local tag exists; bare remote has no tag"
+    },
+    {
+      "id": "branch-only-green",
+      "given": "suite succeeded before candidate exists",
+      "operation": "publish",
+      "expected": "refuse; remote unchanged"
+    },
+    {
+      "id": "candidate-visible",
+      "given": "suite process records tag type and peel while running",
+      "operation": "check",
+      "expected": "observed annotation and expected commit match receipt"
+    },
+    {
+      "id": "lightweight-local",
+      "given": "unowned lightweight tag same name and peel",
+      "operation": "prepare",
+      "expected": "refuse; original ref bytes preserved"
+    },
+    {
+      "id": "foreign-annotated",
+      "given": "unowned annotated tag with same peel",
+      "operation": "prepare",
+      "expected": "refuse; original object preserved"
+    },
+    {
+      "id": "remote-version-exists",
+      "given": "published tag exists including failed version",
+      "operation": "prepare",
+      "expected": "refuse; no remote/local rewrite"
+    },
+    {
+      "id": "worktree-shared-ref",
+      "given": "linked worktree shares common Git directory",
+      "operation": "prepare",
+      "expected": "refuse standalone requirement"
+    },
+    {
+      "id": "shallow-history",
+      "given": "standalone shallow clone",
+      "operation": "prepare",
+      "expected": "refuse incomplete history"
+    },
+    {
+      "id": "unreachable-head",
+      "given": "clean branch commit absent from default ancestry",
+      "operation": "prepare",
+      "expected": "refuse before local candidate creation"
+    },
+    {
+      "id": "suite-failed",
+      "given": "suite writes output then exits nonzero",
+      "operation": "check then publish",
+      "expected": "failure/log preserved; no remote tag"
+    },
+    {
+      "id": "suite-interrupted",
+      "given": "suite child interrupted before completion",
+      "operation": "check then publish",
+      "expected": "incomplete disposition persists; no remote tag"
+    },
+    {
+      "id": "unlooked-release-gap",
+      "given": "fake successful suite prints release-gap unlooked diagnostic",
+      "operation": "check then publish",
+      "expected": "refuse admission despite exit zero"
+    },
+    {
+      "id": "source-changed",
+      "given": "change a tracked source after successful check",
+      "operation": "publish",
+      "expected": "refuse; no remote tag"
+    },
+    {
+      "id": "tag-changed",
+      "given": "replace owned local annotation after successful check",
+      "operation": "publish",
+      "expected": "refuse object mismatch; do not repair automatically"
+    },
+    {
+      "id": "log-truncated",
+      "given": "truncate successful output after check",
+      "operation": "publish",
+      "expected": "digest mismatch refusal"
+    },
+    {
+      "id": "receipt-symlink",
+      "given": "replace receipt by symlink or nonregular file",
+      "operation": "publish",
+      "expected": "prompt refusal; target unchanged"
+    },
+    {
+      "id": "gate-refusal",
+      "given": "existing release hook refuses exact outward command from real fixture ledger",
+      "operation": "publish",
+      "expected": "no remote tag; preserve gate diagnostic"
+    },
+    {
+      "id": "remote-race",
+      "given": "remote tag appears between precheck and explicit nonforce push",
+      "operation": "publish",
+      "expected": "Git refuses conflicting ref; preserve both observations"
+    },
+    {
+      "id": "happy-exact",
+      "given": "same clean accepted source/tag, complete receipt, admitted existing gate",
+      "operation": "publish",
+      "expected": "one exact annotated ref appears; unrelated refs unchanged"
+    }
+  ]
+}

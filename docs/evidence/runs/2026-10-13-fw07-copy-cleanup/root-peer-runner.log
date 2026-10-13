@@ -1,0 +1,44 @@
+  ok    a plant whose validator refused the defect passes
+  ok    a plant whose validator accepted it fails
+  ok    a plant that changed nothing is BROKEN, not FAIL
+  ok    a plant that declared a skip is SKIP, not PASS
+  ok    a declared skip changed nothing on purpose, so it is not BROKEN
+  ok    an exit-0 run that printed neither marker is a FAIL, not a pass
+  ok    with no dormant plant the claim says `all N`
+  ok    a dormant plant is subtracted from the claim and named
+  ok    a dormant PROPERTY check is subtracted too — the same sentence, one category over
+  ok    everything dormant is not a pass over an empty set
+  ok    everything dormant on both sides is not a pass either
+  ok    nothing present at all is not a pass either — the `-k` matched-nothing path
+  ok    one plant left standing still makes a claim, about one
+  ok    eight slices cover every check exactly once
+  ok    slices are balanced to within one check
+  ok    the split is a function of position, so the same tree splits the same way
+  ok    one slice of one is the whole suite
+  ok    `3/8` reads as the third of eight
+  ok    `0/8` is refused, never guessed
+  ok    `9/8` is refused, never guessed
+  ok    `8` is refused, never guessed
+  ok    `a/b` is refused, never guessed
+  ok    `` is refused, never guessed
+  ok    `3/0` is refused, never guessed
+  ok    `-1/8` is refused, never guessed
+  ok    CLI ['--help'] is admitted before scanning or allocation
+  ok    CLI ['-h'] is admitted before scanning or allocation
+  ok    CLI ['--unknown'] is admitted before scanning or allocation
+  ok    CLI ['--lis'] is admitted before scanning or allocation
+  ok    CLI ['-k'] is admitted before scanning or allocation
+  ok    CLI ['--shard'] is admitted before scanning or allocation
+  ok    CLI ['--list'] is admitted before scanning or allocation
+  ok    CLI ['-k', 'exclusion'] is admitted before scanning or allocation
+  ok    CLI ['--shard', '1/8'] is admitted before scanning or allocation
+  ok    CLI selection ['-k', 'alpha'] retains its parsed filter
+  ok    CLI selection ['-kalpha'] retains its parsed filter
+  ok    CLI selection ['--shard', '1/2'] retains its parsed filter
+  ok    CLI selection ['--shard=1/2'] retains its parsed filter
+  ok    CLI selection ['-kbeta', '-kalpha'] retains its parsed filter
+  ok    CLI selection ['--shard=2/2', '--shard=1/2'] retains its parsed filter
+  ok    MIN_EXPECTED is the counted number, not a carried-over one (439 vs 439)
+  ok    MIN_PROPS is the counted number, not a carried-over one (15 vs 15)
+
+PASS: negatives runner — 42 cases, 3 of them the empty-set branch

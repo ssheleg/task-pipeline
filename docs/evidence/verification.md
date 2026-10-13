@@ -1,5 +1,14 @@
 # Verification — task-pipeline
 
+## Shipped state — v1.95.0 (source candidate; NOT SHIPPED yet)
+
+The [FW07 composition receipt](runs/2026-10-13-fw07-composition/README.md)
+binds reviewed stage/checkpoint/helper slices, shared scratch coordination and
+focused checks. Complete candidate validation, accepted tagged-source validation,
+release jobs, npm payload and installed readback remain pending. Native host/model
+quality and billed-token savings are NOT_RUN. Historical confirmation cells are
+unchanged; the future version declaration is not a shipped-state assertion.
+
 ## Shipped state — v1.94.1 (release target; NOT SHIPPED yet)
 
 The [repair packet](runs/2026-10-13-release-1941/README.md) records the failed

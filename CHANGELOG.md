@@ -1,3 +1,43 @@
+## v1.95.0 — 2026-10-13
+
+Source candidate; not published.
+
+Guards: 438 → **439**; property checks 15 → **15**.
+
+The default stage list keeps every full gate and routes each stage to its own
+procedure before work on entry or resume. Custom profiles keep their own stages
+and doctrine. The split preserves the original stage text and reduces the measured
+entry reading component; it does not claim a native-host or billed-token result.
+Scenario artifacts remain mandatory for user-facing work, while an equivalent
+provider or the documented inline fallback can supply them without installing a
+specific companion plugin. The new route refusal and relocated source checks keep
+these obligations addressable after the split.
+
+Checkpoint recovery now follows the selected project profile's declared stage order,
+including custom names and nonconsecutive ids. Malformed or changed profiles refuse
+instead of silently injecting default stages into a saved workflow. Run-local profile
+binding survives record/retry; relocated ledgers can name their project root explicitly.
+This is an offline-tested payload correction, not a live Observatory acceptance claim.
+
+Owner release preparation now records an unpublished local annotated tag before the
+complete suite, binds its exact source/context/evidence, and publishes only the
+verified annotation to one destination. The existing release hook recognizes
+explicit tag-destination refspecs. Mechanical evidence does not confer external
+authority, native interception or successful registry publication.
+
+Test runners use one safely opened family scratch lock across TMPDIR settings and
+owners, matching their shared fixed scratch paths. The lock now stays held while a
+plant's Bash or its synchronously writing child is alive, even if the runner itself is
+killed; an interrupted runner signals and drains its own process groups before it
+closes its copy, and on macOS a group of exited-but-unreaped members no longer aborts
+that cancellation. An interrupted run no longer leaves its repository snapshot in
+TMPDIR. Existing older runner versions, deliberately detached descendants and direct
+plant invocation remain outside that mechanism.
+
+The owner-gate helpers' seam headers declare `diverges: none` with their extraction
+scope on a separate line, so the umbrella's shared-copy check reads them as identical
+to the other members' copies.
+
 ## v1.94.1 — 2026-10-13
 
 Records the missing retrospective declarations that stopped the v1.94.0 release

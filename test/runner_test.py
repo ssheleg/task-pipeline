@@ -97,19 +97,22 @@ for _spec in ("0/8", "9/8", "8", "a/b", "", "3/0", "-1/8"):
 from contextlib import redirect_stdout, redirect_stderr
 from io import StringIO
 from unittest.mock import patch
+import negative_lock
+
+
+class _ScanReached(Exception):
+    """Not a RuntimeError: main() reports lifecycle RuntimeErrors as a refusal."""
 
 
 def _admission(args):
-    with patch.object(negatives, "scan", side_effect=RuntimeError("scan reached")), \
+    with patch.object(negatives, "scan", side_effect=_ScanReached()), \
             redirect_stdout(StringIO()), redirect_stderr(StringIO()):
         try:
             negatives.main(["negatives.py", *args])
         except SystemExit as exc:
             return exc.code
-        except RuntimeError as exc:
-            if str(exc) == "scan reached":
-                return "scan"
-            raise
+        except _ScanReached:
+            return "scan"
     return "returned"
 
 
@@ -131,7 +134,8 @@ def _selection(args):
     with tempfile.TemporaryDirectory(prefix="tp-runner-cli-") as folder, \
             patch.object(negatives, "scan", return_value=(fixture, [])), \
             patch.object(negatives, "MIN_EXPECTED", 2), \
-            patch.object(negatives.tempfile, "gettempdir", return_value=folder):
+            patch.object(negative_lock, "scratch_lock_path",
+                         return_value=str(Path(folder) / "owned-family.lock")):
         out = StringIO()
         with redirect_stdout(out), redirect_stderr(StringIO()):
             code = negatives.main(["negatives.py", "--list", *args])

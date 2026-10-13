@@ -1,0 +1,21 @@
+{
+  "source_argument": "/Users/sshlg/DATA/_wt/tp-fw07-composed",
+  "controls": [
+    {
+      "signal": "SIGTERM",
+      "result": [
+        0,
+        null
+      ],
+      "interrupt_preserved": false
+    },
+    {
+      "signal": "SIGINT",
+      "result": [
+        0,
+        null
+      ],
+      "interrupt_preserved": false
+    }
+  ]
+}

@@ -1,0 +1,3 @@
+FAIL: task-pipeline structure invalid
+ - docs/evidence/runs/2026-10-13-fw07-composition/source-map.json declares version 1.94.1 and is not in `.claude/agent-sync.json` → `guardedFiles` — B-065: the version-sync invariant makes these surfaces move together, so two agents bumping a version collide here with no lease. That is not hypothetical: this project lost four version numbers and a `files[]` entry to exactly it
+ - package.json claims 1.94.1 and tag v1.94.1 already points at 4f32388, which is not this commit. The number is spoken for; pick the next one before the merge finds out for you

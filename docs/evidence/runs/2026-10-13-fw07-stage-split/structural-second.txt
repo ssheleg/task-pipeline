@@ -1,0 +1,2 @@
+FAIL: task-pipeline structure invalid
+ - negative self-test `a default stage route points at a sibling` is anchored on a value a release can move: 03 in the .count needle '[stage-03-spec.md](stage-03-spec.md)'. Derive it from the tree at run time, or declare it with `# anchor: <literal> — <why it cannot be derived, and what would falsify it>` (B-113: a plant pinned to a literal is a check the next release switches off, and it reports green while it does)
