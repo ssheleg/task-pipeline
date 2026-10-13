@@ -1,22 +1,22 @@
-## Fix cycle 6 of the release iteration — branch `iter1/M-5-N-1` (2026-10-13)
+## Fix cycles 6–7 of the release iteration — #125, branch `iter1/M-5-N-1` (2026-10-13)
 
-Verification round 6 read 55663a7. It failed one product finding and listed five drifts.
-PR112 had already merged into `main` as 4d75057, followed by #122. This branch merges
-`origin/main` without rewriting history and carries the six fixes plus two doctrine rules.
-The fixes are recorded in the CHANGELOG under *Unreleased*. The branch is pushed but not
-merged, and no version or publication is claimed.
+Rounds 6 and 7 failed on `lessons.py rebuild`. Cycle 7, under the loop guard, changed the
+design rather than the guard. This branch merges `origin/main` (v1.94.1, #126) without
+rewriting history. The fixes are recorded in the CHANGELOG under *Unreleased*. The branch is
+pushed but not merged, and no version or publication is claimed.
 
-- **F1:** `lessons.py rebuild` rebuilds what it can read. It refuses only when nothing was
-  read, or when an incomplete scan would drop held lessons without `--force`. The tests are
-  `partial_rebuild_controls` in `test/lessons_test.py` and negatives 454–455.
+- **Rebuild:** `lessons.py rebuild` never loses what it cannot re-derive. Unread or
+  unresolved origins are carried per `(project, retro)` with their memory ids, and only
+  `--prune-carried` removes them. The tests are `carry_forward_controls` and
+  `partial_rebuild_controls` in `test/lessons_test.py`, plus negatives 454–458.
 - **F2–F5:** documentation drifts in `continuity.md`, the `graph.py` docstring and
   `stages.md`. The authority rule now has one home, guarded by `test/release_approval_test.py`.
 - **F6:** the merge notice is accurate when the family index was set aside.
 - **New rules:** a parallel-work check before each cycle (`iteration.md` → *The cycle*), and
   background-dispatch command hygiene (`build.md` §4.1).
 
-Next task: run round 7 of verification on this branch's head. Then route it to `main` through
-a PR, before or together with the v1.94.0 tag, as the release lead decides.
+Next task: run round 8 of verification on #125's head. The release order with v1.94.1 is the
+coordinator's.
 
 ## Release repair candidate — v1.94.1 (2026-10-13)
 

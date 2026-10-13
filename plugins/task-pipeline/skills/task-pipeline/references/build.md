@@ -242,7 +242,11 @@ implementer, a reviewer or a verifier:
 > If a command has not returned in about 5 minutes and no process is running, rephrase it.
 
 *A lesson of release iteration 1 (2026-10-13): background agents stopped silently. Each was
-waiting on a command the harness held for a permission no one could see.*
+waiting on a command the harness held for a permission no one could see. The triggers were a
+`cd X; python3 - <<EOF` compound and `rm -rf $HOME` with HOME overridden. Source: the
+iteration's run record, which is private, and
+[task-pipeline#125](https://github.com/ssheleg/task-pipeline/pull/125), which carries the
+rule.*
 
 ### 4.1a Decisions settled inside a task — and who may write them down
 
