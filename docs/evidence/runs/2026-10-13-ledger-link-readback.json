@@ -1,0 +1,125 @@
+{
+  "purpose": "Resolve historical pre-squash source citations through immutable remote commits; no ancestry assertion",
+  "entries": [
+    {
+      "path": "docs/evidence/plans/2026-10-13-l3-graph-waits.md",
+      "old_token": "61871e6c35945596b236011ceadda5073f48ff25",
+      "url": "https://github.com/ssheleg/task-pipeline/commit/61871e6c35945596b236011ceadda5073f48ff25",
+      "resolved": "61871e6c35945596b236011ceadda5073f48ff25"
+    },
+    {
+      "path": "docs/evidence/runs/2026-10-13-l3-authority-record.md",
+      "old_token": "40070a0765e16423cf0c78c54b51a811c290fb62",
+      "url": "https://github.com/ssheleg/task-pipeline/commit/40070a0765e16423cf0c78c54b51a811c290fb62",
+      "resolved": "40070a0765e16423cf0c78c54b51a811c290fb62"
+    },
+    {
+      "path": "docs/evidence/runs/2026-10-13-l3-authority-waits.md",
+      "old_token": "0fec61250e8e4314a96edc15887834e0e978f26d",
+      "url": "https://github.com/ssheleg/task-pipeline/commit/0fec61250e8e4314a96edc15887834e0e978f26d",
+      "resolved": "0fec61250e8e4314a96edc15887834e0e978f26d"
+    },
+    {
+      "path": "docs/evidence/runs/2026-10-13-l3-authority-waits.md",
+      "old_token": "38344001686",
+      "url": "https://github.com/ssheleg/task-pipeline/actions/runs/38344001686",
+      "resolved": "run"
+    },
+    {
+      "path": "docs/evidence/runs/2026-10-13-l3-authority-waits.md",
+      "old_token": "5e8890bb8c12e269399847593ce8376ba3eb14e6",
+      "url": "https://github.com/ssheleg/task-pipeline/commit/5e8890bb8c12e269399847593ce8376ba3eb14e6",
+      "resolved": "5e8890bb8c12e269399847593ce8376ba3eb14e6"
+    },
+    {
+      "path": "docs/evidence/runs/2026-10-13-l3-authority-waits.md",
+      "old_token": "5e8890b",
+      "url": "https://github.com/ssheleg/task-pipeline/commit/5e8890bb8c12e269399847593ce8376ba3eb14e6",
+      "resolved": "5e8890bb8c12e269399847593ce8376ba3eb14e6"
+    },
+    {
+      "path": "docs/evidence/runs/2026-10-13-l3-body-headroom.md",
+      "old_token": "adb82f7c97a4a82b7d2bd8f8f17fee97a111ab8b",
+      "url": "https://github.com/ssheleg/task-pipeline/commit/adb82f7c97a4a82b7d2bd8f8f17fee97a111ab8b",
+      "resolved": "adb82f7c97a4a82b7d2bd8f8f17fee97a111ab8b"
+    },
+    {
+      "path": "docs/evidence/runs/2026-10-13-l3-graph-lock.md",
+      "old_token": "1af2e80",
+      "url": "https://github.com/ssheleg/task-pipeline/commit/1af2e802f96ab8f35f12c963a2ee2f96b75bc2d5",
+      "resolved": "1af2e802f96ab8f35f12c963a2ee2f96b75bc2d5"
+    },
+    {
+      "path": "docs/evidence/runs/2026-10-13-l3-graph-waits.md",
+      "old_token": "d369942dfaa9d9c9c5fc5aca2a73cbdb433c8510",
+      "url": "https://github.com/ssheleg/task-pipeline/commit/d369942dfaa9d9c9c5fc5aca2a73cbdb433c8510",
+      "resolved": "d369942dfaa9d9c9c5fc5aca2a73cbdb433c8510"
+    },
+    {
+      "path": "docs/evidence/runs/2026-10-13-l3-graph-waits.md",
+      "old_token": "adb82f7c97a4a82b7d2bd8f8f17fee97a111ab8b",
+      "url": "https://github.com/ssheleg/task-pipeline/commit/adb82f7c97a4a82b7d2bd8f8f17fee97a111ab8b",
+      "resolved": "adb82f7c97a4a82b7d2bd8f8f17fee97a111ab8b"
+    },
+    {
+      "path": "docs/evidence/runs/2026-10-13-l3-graph-waits.md",
+      "old_token": "dac8bc9aaf7ef98f554917f38d6780cd0d948ee0",
+      "url": "https://github.com/ssheleg/task-pipeline/commit/dac8bc9aaf7ef98f554917f38d6780cd0d948ee0",
+      "resolved": "dac8bc9aaf7ef98f554917f38d6780cd0d948ee0"
+    },
+    {
+      "path": "docs/evidence/runs/2026-10-13-l3-graph-waits.md",
+      "old_token": "31e0f5aeacb709639c37e621c9fe73dec0f11f2e",
+      "url": "https://github.com/ssheleg/task-pipeline/commit/31e0f5aeacb709639c37e621c9fe73dec0f11f2e",
+      "resolved": "31e0f5aeacb709639c37e621c9fe73dec0f11f2e"
+    },
+    {
+      "path": "docs/evidence/runs/2026-10-13-l3-graph-waits.md",
+      "old_token": "24e745e3d35781d8421b0cbecfe20767a3e39970",
+      "url": "https://github.com/ssheleg/task-pipeline/commit/24e745e3d35781d8421b0cbecfe20767a3e39970",
+      "resolved": "24e745e3d35781d8421b0cbecfe20767a3e39970"
+    },
+    {
+      "path": "docs/evidence/runs/2026-10-13-l3-graph-waits.md",
+      "old_token": "71ff0f07189854a8373113ee21435262ddc723b3",
+      "url": "https://github.com/ssheleg/task-pipeline/commit/71ff0f07189854a8373113ee21435262ddc723b3",
+      "resolved": "71ff0f07189854a8373113ee21435262ddc723b3"
+    },
+    {
+      "path": "docs/evidence/runs/2026-10-13-pr112-plants.md",
+      "old_token": "a149b09",
+      "url": "https://github.com/ssheleg/task-pipeline/commit/a149b0934ae8539e13fca650a64adf1b22a84cb6",
+      "resolved": "a149b0934ae8539e13fca650a64adf1b22a84cb6"
+    },
+    {
+      "path": "docs/evidence/runs/2026-10-13-pr112-state-review.md",
+      "old_token": "4fdbbca8f24378ff2719007d6b585c87705406ee",
+      "url": "https://github.com/ssheleg/task-pipeline/commit/4fdbbca8f24378ff2719007d6b585c87705406ee",
+      "resolved": "4fdbbca8f24378ff2719007d6b585c87705406ee"
+    },
+    {
+      "path": "docs/evidence/runs/2026-10-13-r07-r16-acceptance.md",
+      "old_token": "31e0f5aeacb709639c37e621c9fe73dec0f11f2e",
+      "url": "https://github.com/ssheleg/task-pipeline/commit/31e0f5aeacb709639c37e621c9fe73dec0f11f2e",
+      "resolved": "31e0f5aeacb709639c37e621c9fe73dec0f11f2e"
+    },
+    {
+      "path": "docs/evidence/runs/2026-10-13-r07-r16-acceptance.md",
+      "old_token": "24e745e3d35781d8421b0cbecfe20767a3e39970",
+      "url": "https://github.com/ssheleg/task-pipeline/commit/24e745e3d35781d8421b0cbecfe20767a3e39970",
+      "resolved": "24e745e3d35781d8421b0cbecfe20767a3e39970"
+    },
+    {
+      "path": "docs/evidence/runs/2026-10-13-r07-r16-acceptance.md",
+      "old_token": "cd3b3bda479acb0e9d0f57355841b71bccbe1646",
+      "url": "https://github.com/ssheleg/task-pipeline/commit/cd3b3bda479acb0e9d0f57355841b71bccbe1646",
+      "resolved": "cd3b3bda479acb0e9d0f57355841b71bccbe1646"
+    },
+    {
+      "path": "docs/evidence/runs/2026-10-13-r07-r16-acceptance.md",
+      "old_token": "1bac9d70c0d07a4b3143a2fcd1554ded64ab3ba2",
+      "url": "https://github.com/passioncode-ai/fabric/commit/1bac9d70c0d07a4b3143a2fcd1554ded64ab3ba2",
+      "resolved": "1bac9d70c0d07a4b3143a2fcd1554ded64ab3ba2"
+    }
+  ]
+}

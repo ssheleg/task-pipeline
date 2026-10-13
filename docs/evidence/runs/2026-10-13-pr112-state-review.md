@@ -100,7 +100,7 @@ integration or native-model quality is claimed.
 
 ## Independent review follow-up: explicit source admission
 
-The coordinator's review of `4fdbbca8f24378ff2719007d6b585c87705406ee`
+The coordinator's review of [4fdbbca8f24378ff2719007d6b585c87705406ee](https://github.com/ssheleg/task-pipeline/commit/4fdbbca8f24378ff2719007d6b585c87705406ee)
 found a remaining conservation hole. A configured but absent artifact directory,
 or a dangling `retro.md`, was silently excluded by `exists`/`is_file`. Both
 were independently reproduced: rebuilding with the dangling retro exited 0

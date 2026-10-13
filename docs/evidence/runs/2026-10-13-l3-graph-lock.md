@@ -2,7 +2,7 @@
 
 # L3 TP-2 prerequisite: refuse unlocked graph mutation
 
-Source baseline: `1af2e80`, the
+Source baseline: [1af2e80](https://github.com/ssheleg/task-pipeline/commit/1af2e802f96ab8f35f12c963a2ee2f96b75bc2d5), the
 [watched-wait packet](../plans/2026-10-13-l3-graph-waits.md), stacked on the
 independently reviewed TP-6 implementation. This slice fixes the measured lock
 failure before adding wait/resume mutations. **The waiting state is not yet

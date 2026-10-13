@@ -1,0 +1,109 @@
+{
+  "conclusion": "success",
+  "databaseId": 38351822641,
+  "event": "pull_request",
+  "headSha": "8798e905298062eb8e751f8ed0b018b2f7f72b1f",
+  "jobs": [
+    {
+      "name": "House skill audit",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-10-13T05:31:31Z",
+      "completedAt": "2026-10-13T05:31:40Z",
+      "url": "https://github.com/ssheleg/task-pipeline/actions/runs/38351822641/job/115145710845"
+    },
+    {
+      "name": "Negative self-tests (shard 1 of 8)",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-10-13T05:31:31Z",
+      "completedAt": "2026-10-13T05:38:58Z",
+      "url": "https://github.com/ssheleg/task-pipeline/actions/runs/38351822641/job/115145711019"
+    },
+    {
+      "name": "Official Claude Code conformance (strict)",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-10-13T05:31:31Z",
+      "completedAt": "2026-10-13T05:31:45Z",
+      "url": "https://github.com/ssheleg/task-pipeline/actions/runs/38351822641/job/115145711061"
+    },
+    {
+      "name": "validate",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-10-13T05:31:31Z",
+      "completedAt": "2026-10-13T05:33:37Z",
+      "url": "https://github.com/ssheleg/task-pipeline/actions/runs/38351822641/job/115145711095"
+    },
+    {
+      "name": "Negative self-tests (shard 6 of 8)",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-10-13T05:31:31Z",
+      "completedAt": "2026-10-13T05:38:29Z",
+      "url": "https://github.com/ssheleg/task-pipeline/actions/runs/38351822641/job/115145711105"
+    },
+    {
+      "name": "Negative self-tests (shard 8 of 8)",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-10-13T05:31:31Z",
+      "completedAt": "2026-10-13T05:38:08Z",
+      "url": "https://github.com/ssheleg/task-pipeline/actions/runs/38351822641/job/115145711115"
+    },
+    {
+      "name": "Negative self-tests (shard 5 of 8)",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-10-13T05:31:31Z",
+      "completedAt": "2026-10-13T05:39:00Z",
+      "url": "https://github.com/ssheleg/task-pipeline/actions/runs/38351822641/job/115145711128"
+    },
+    {
+      "name": "Negative self-tests (shard 4 of 8)",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-10-13T05:31:31Z",
+      "completedAt": "2026-10-13T05:38:15Z",
+      "url": "https://github.com/ssheleg/task-pipeline/actions/runs/38351822641/job/115145711148"
+    },
+    {
+      "name": "Negative self-tests (shard 7 of 8)",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-10-13T05:31:31Z",
+      "completedAt": "2026-10-13T05:35:27Z",
+      "url": "https://github.com/ssheleg/task-pipeline/actions/runs/38351822641/job/115145711171"
+    },
+    {
+      "name": "Negative self-tests (shard 3 of 8)",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-10-13T05:31:31Z",
+      "completedAt": "2026-10-13T05:35:14Z",
+      "url": "https://github.com/ssheleg/task-pipeline/actions/runs/38351822641/job/115145711190"
+    },
+    {
+      "name": "Negative self-tests (shard 2 of 8)",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-10-13T05:31:31Z",
+      "completedAt": "2026-10-13T05:36:30Z",
+      "url": "https://github.com/ssheleg/task-pipeline/actions/runs/38351822641/job/115145711215"
+    },
+    {
+      "name": "Negative self-tests",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-10-13T05:39:02Z",
+      "completedAt": "2026-10-13T05:39:05Z",
+      "url": "https://github.com/ssheleg/task-pipeline/actions/runs/38351822641/job/115147764306"
+    }
+  ],
+  "status": "completed",
+  "url": "https://github.com/ssheleg/task-pipeline/actions/runs/38351822641",
+  "merge_commit": "3596355ae56bd067a243bd5d17a8d40aeec292a0",
+  "base": "feat/release-iteration",
+  "scope": "Accepted feature only; no main integration, release or installed acceptance."
+}
