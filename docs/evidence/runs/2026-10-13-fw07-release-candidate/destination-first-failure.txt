@@ -1,0 +1,22 @@
+Traceback (most recent call last):
+  File "/Users/sshlg/DATA/_wt/tp-fw07-pretag-admission/test/audit_regressions/fw07_release_candidate.py", line 81, in <module>
+    c=prepared();assert c.git('cat-file','-t',c.tag)=='tag';remote_absent();checks+=1
+  File "/Users/sshlg/DATA/_wt/tp-fw07-pretag-admission/test/audit_regressions/fw07_release_candidate.py", line 77, in prepared
+    c=fresh(context);c.prepare(c.root if context else None);fake_suite(c);return c
+                     ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/sshlg/DATA/_wt/tp-fw07-pretag-admission/scripts/release_candidate.py", line 202, in prepare
+    source = self.source(); branch = self.remote()
+  File "/Users/sshlg/DATA/_wt/tp-fw07-pretag-admission/scripts/release_candidate.py", line 139, in source
+    origin=self.destination(),
+           ~~~~~~~~~~~~~~~~^^
+  File "/Users/sshlg/DATA/_wt/tp-fw07-pretag-admission/scripts/release_candidate.py", line 112, in destination
+    literal = self.git('-c', 'remote.' + alias + '.url=' + fetch[0],
+              ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                       'remote', 'get-url', '--push', '--all', alias).splitlines()
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/sshlg/DATA/_wt/tp-fw07-pretag-admission/scripts/release_candidate.py", line 89, in git
+    need(r.returncode == 0, 'git operation failed: ' + ' '.join(args[:2]) + ': ' + r.stderr.strip())
+    ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/sshlg/DATA/_wt/tp-fw07-pretag-admission/scripts/release_candidate.py", line 30, in need
+    raise Refusal(message)
+release_candidate.Refusal: git operation failed: -c remote.releaseprobea3d38fdc96e948cf86554f71a3b667d5.url=/var/folders/3r/yrdx_c051cv22q3r3k0ylvdm0000gn/T/tp-release-candidate-3hxid2r_/origin.git: error: No such remote 'releaseprobea3d38fdc96e948cf86554f71a3b667d5'

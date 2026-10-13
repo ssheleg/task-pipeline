@@ -3,7 +3,8 @@
 [Composition entry](evidence/runs/2026-10-13-fw07-composition/README.md) binds
 the original stage and checkpoint candidates, focused results and pending gates.
 This isolated branch preserves both original PR heads; package metadata remains
-1.94.1 pending a future coherent candidate. No helper, tag or publication. Next:
+1.94.1 pending a future coherent candidate. Accepted owner helper is now composed;
+its packaged hook delta requires that future version. No tag or publication. Next:
 independent composition review and holdout source rebinding, then moved public
 plants and full validation when the coordinator releases the serial slot.
 Older isolated-candidate handoffs below are historical source context.
@@ -89,6 +90,22 @@ Exact next task after current release completion: normalize the stale package
 prerequisites across the packet's eight current source locations in a separate commit with actual negative controls, then freeze the
 paragraph migration map on a new implementation branch. B-043 is still open; no runtime/model
 quality or full-suite verdict is claimed by this planning slice.
+## Owner-only release candidate implementation — 2026-10-13
+
+[FW07 source and focused receipt](evidence/runs/2026-10-13-fw07-release-candidate/README.md)
+implements the reviewed standalone-clone prepare/check/publish design and reconciles
+the owner stage-7 ordering. Private exact-source evidence grants no authority;
+publication requires faithful actual run context and the existing hook.
+Next: independent source review and correction, then serialized owner aggregate.
+No production tag, full gate or release claimed; v1.94.1 repair remains separate.
+
+## Source-only release admission follow-up — 2026-10-13
+
+[FW07 pre-tag packet](evidence/plans/2026-10-13-pretag-admission/README.md)
+recovers the failed v1.94.0 admission and the stage-7/R-010 ordering conflict.
+It proposes an exact local-tag-aware complete-suite receipt and distinct local
+preparation versus publication, without modifying the v1.94.1 repair.
+Next: independent packet review before implementation. No gate or tag changed.
 
 ## Release candidate — v1.94.0 (2026-10-13)
 
