@@ -8,7 +8,7 @@ The release helper extracts the reviewed bounded family grammar from agent-stack
 
 The 27 focused release controls execute the workflow's own annotation and ancestry shell in local Git fixtures. Annotated current/ancestor tags pass; missing/lightweight tags and an unmerged commit refuse. A real shallow clone establishes the shallow fixture and the structural guard rejects depth one. Only `gh api` default-branch lookup is a stand-in; this is not hosted publication evidence. Annotation removal is covered by the aggregate runtime regression, not by the structural helper alone.
 
-The board helper comes from the same reviewed source with one explicit historical lowercase-suffix grammar extension. Immediate matching separator, exact per-table width and duplicate identifiers across declared tables are required; fenced examples and prose references are not declarations. The owner validator applies it to both the backlog and shipped template. Existing priority, source and board-home checks use the same escaped-pipe splitting rather than raw delimiters. The 25 focused board controls exercise this contract. Parent's independently reviewed ledger `9caf406ca78a6b2661419ee1331af8879a665fa6` is composed as `ebd79a5`; no ledger runtime change is claimed.
+The board helper comes from the same reviewed source with one explicit historical lowercase-suffix grammar extension. Immediate matching separator, exact per-table width and duplicate identifiers across declared tables are required; fenced examples and prose references are not declarations. The owner validator applies it to both the backlog and shipped template. Existing priority, source and board-home checks use the same escaped-pipe splitting rather than raw delimiters. The 25 focused board controls exercise this contract. Parent's independently reviewed ledger [original ledger 9caf406](https://github.com/ssheleg/task-pipeline/commit/9caf406ca78a6b2661419ee1331af8879a665fa6) is composed as `ebd79a5`; no ledger runtime change is claimed.
 
 ## Handoff
 
@@ -17,3 +17,7 @@ This candidate is source-only. Focused final-tree controls, independent review a
 ## Focused observation before freeze
 
 The final-tree process suite passed 6 controls: [focused-process.json](focused-process.json). Exact implementation and test bytes are [source-hashes.json](source-hashes.json). The shared release suite passed 27 controls and board suite passed 25 controls. Independent source review and the full owner gate remain separate next steps.
+
+## Provenance correction before the full gate
+
+The first full run at `c229d7f` was deliberately stopped after independent review found the original ledger SHA was written as a bare nonancestor citation. Its partial output and stop reason are retained in `aborted-full.json` and `aborted-full.log.gz`; no full pass is claimed. The original source now has an immutable GitHub commit link while the local cherry-pick remains explicitly identified. Re-run the documentation gate and then the full suite on the corrected commit.
