@@ -37,6 +37,13 @@ def read_file(path):
     return path.read_bytes()
 
 
+def private(path, directory=False):
+    info = path.lstat()
+    need((stat.S_ISDIR(info.st_mode) if directory else stat.S_ISREG(info.st_mode)) and
+         info.st_uid == os.geteuid() and not (info.st_mode & 0o077),
+         'private owned ' + ('directory' if directory else 'file') + ' required: ' + str(path))
+
+
 def digest_file(path):
     need(stat.S_ISREG(path.lstat().st_mode), 'regular log required')
     h = hashlib.sha256()
@@ -66,10 +73,10 @@ class Candidate:
         need(common == self.gitdir.resolve(), 'shared Git directory refused')
         self.area = self.gitdir / 'sshlg-release-candidates'
         self.area.mkdir(mode=0o700, exist_ok=True)
-        need(not self.area.is_symlink() and self.area.is_dir(), 'unsafe private namespace')
+        private(self.area, directory=True)
         self.directory = self.area / tag
         if self.directory.exists() or self.directory.is_symlink():
-            need(not self.directory.is_symlink() and self.directory.is_dir(), 'unsafe candidate directory')
+            private(self.directory, directory=True)
         else:
             self.directory.mkdir(mode=0o700)
         self.record = self.directory / 'candidate.json'
@@ -99,7 +106,7 @@ class Candidate:
         need(self.git('rev-parse', '--is-shallow-repository') == 'false', 'full history required')
         need(not self.git('status', '--porcelain'), 'clean source required')
         package = json.loads(read_file(self.root / 'package.json'))
-        need(package.get('name') == '@ssheleg/task-pipeline', 'owner repository required')
+        need(package.get('name') == 'task-pipeline-skill', 'owner repository required')
         version = self.tag[1:]
         need(package.get('version') == version, 'package version mismatch')
         need(package.get('scripts', {}).get('test:all'), 'complete owner suite missing')
@@ -113,6 +120,9 @@ class Candidate:
         need(first and first[1] == version, 'changelog version mismatch')
         card = read_file(self.root / 'SKILL-CARD.md').decode().replace('**', '')
         need(re.search(r'\|\s*Version\s*\|\s*`?v?' + re.escape(version) + r'`?\s*\|', card), 'card version mismatch')
+        helper = self.root / 'scripts/release_candidate.py'
+        self.git('ls-files', '--error-unmatch', 'scripts/release_candidate.py')
+        need(read_file(helper) == read_file(Path(__file__).resolve()), 'executing helper differs from tracked candidate source')
         return dict(commit=self.git('rev-parse', 'HEAD'), tree=self.git('rev-parse', 'HEAD^{tree}'),
                     origin=self.git('remote', 'get-url', 'origin'),
                     suite_sha256=hashlib.sha256(read_file(self.root / 'package.json')).hexdigest(),
@@ -139,7 +149,9 @@ class Candidate:
         need(self.git('rev-parse', 'HEAD', root=root) == source['commit'], 'context source mismatch')
         need(self.git('remote', 'get-url', 'origin', root=root) == source['origin'], 'unrelated context origin')
         need(not self.git('status', '--porcelain', root=root), 'context tracked source changed')
-        ledger = read_file(root / '.task-pipeline/run.md').decode()
+        context_dir = root / '.task-pipeline'
+        need(stat.S_ISDIR(context_dir.lstat().st_mode), 'regular project context directory required')
+        ledger = read_file(context_dir / 'run.md').decode()
         headers = re.findall(r'^Run:\s*(.+)$', ledger, re.M)
         need(headers and headers[-1].strip(), 'current run identity unavailable')
         profile = read_file(root / 'pipeline.json')
@@ -156,6 +168,7 @@ class Candidate:
                     command=command, native_interception=False, authority_verified=False)
 
     def load(self):
+        private(self.record)
         data = json.loads(read_file(self.record))
         need(isinstance(data, dict) and data.get('schema') == 1 and data.get('tag') == self.tag,
              'invalid candidate receipt')
@@ -217,7 +230,8 @@ class Candidate:
 
     def check(self):
         with self.lock():
-            data = self.load(); self.verify(data); self.remote()
+            data = self.load(); self.verify(data)
+            need(self.remote() == data['default_branch'], 'remote default branch changed')
             need(not self.log.exists() and not self.log.is_symlink(), 'suite log already exists; retain prior evidence')
             data.update(state='CHECKING', mechanical_evidence=dict(command=COMMAND, started=time.time()))
             write_json(self.record, data)
@@ -249,9 +263,10 @@ class Candidate:
             need(data['state'] == 'CHECK_PASSED' and evidence.get('command') == COMMAND and
                  evidence.get('exit') == 0 and evidence.get('release_gap_looked') is True and
                  evidence.get('interruption') is None and evidence.get('ended'), 'successful complete receipt required')
+            private(self.log)
             need(digest_file(self.log) == evidence.get('log_sha256'), 'suite output changed')
-            self.remote()
-            command = ['git', 'push', 'origin', 'refs/tags/' + self.tag + ':refs/tags/' + self.tag]
+            need(self.remote() == data['default_branch'], 'remote default branch changed')
+            command = ['git', 'push', 'origin', data['object'] + ':refs/tags/' + self.tag]
             observation = self.observe_hook(data['context'], command)
             data['hook_observation'] = observation; write_json(self.record, data)
             need(observation['exit'] == 0, 'existing release hook refused publication')
@@ -259,9 +274,14 @@ class Candidate:
             data['state'] = 'PUBLISHING'; write_json(self.record, data)
             try:
                 r = self.git(*command[1:], check=False)
-                data.update(state='PUBLISHED' if r.returncode == 0 else 'PUSH_UNCONFIRMED',
-                            push=dict(exit=r.returncode, stdout=r.stdout, stderr=r.stderr))
-            except subprocess.TimeoutExpired:
+                data.update(state='PUSH_UNCONFIRMED', push=dict(exit=r.returncode, stdout=r.stdout, stderr=r.stderr))
+                if r.returncode == 0:
+                    remote = self.git('ls-remote', 'origin', 'refs/tags/' + self.tag, 'refs/tags/' + self.tag + '^{}')
+                    refs = dict((line.split()[1], line.split()[0]) for line in remote.splitlines())
+                    data['remote_readback'] = refs
+                    if refs.get('refs/tags/' + self.tag) == data['object'] and refs.get('refs/tags/' + self.tag + '^{}') == data['source']['commit']:
+                        data['state'] = 'PUBLISHED'
+            except (subprocess.TimeoutExpired, Refusal, OSError, ValueError):
                 data.update(state='PUSH_OUTCOME_UNKNOWN')
             write_json(self.record, data)
             need(data['state'] == 'PUBLISHED', 'push not confirmed; reconcile remote read-only before any retry')

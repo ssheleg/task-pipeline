@@ -27,12 +27,14 @@ prepare/check without context remain usable. The existing release-gate.sh execut
 with that real context and exact outward command; its refusal is retained. A nested
 subprocess is not claimed as native PreToolUse interception, and hook exit zero is
 not an operator grant. Existing external authorization still governs the caller.
-No broad local-tag exemption or change to the shipped hook was made.
+No broad local-tag exemption is added. The narrow shipped-hook correction below
+is required for the exact object-to-tag destination used by publication.
 
 The stage-7 owner `pipeline.json` wording now distinguishes local preparation from
 publication and follows R-010: tag visible first, complete check, inspected unlooked,
-then only the same candidate may push. This owner config and helper are excluded
-from the package's `files` list; no version or packaged skill text changes here.
+then only the same candidate may push. The owner config and helper are excluded from the package files list. The later
+peer correction changes the packaged hook; a future composed release must version
+and verify that payload. This branch does not widen the v1.94.1 repair.
 
 ## Focused evidence and limits
 
@@ -64,3 +66,42 @@ Next: independent review of source identity, real run-context binding, hook reus
 interrupt/push uncertainty and the 34-control corpus; fix any findings before one
 composed owner aggregate and normal candidate integration. Published failed v1.94.0
 and the separate v1.94.1 repair remain untouched.
+
+## Independent findings and correction
+
+The first implementation's fixture used a guessed package name and reproduced it
+in admission. Root review found the actual owner is `task-pipeline-skill`.
+[The archived-source reproduction](owner-identity-baseline.json) confirms the old
+helper refused the actual owner manifest. The corrected fixture now imports the
+canonical package manifest rather than inventing its name/scripts; this observation
+supersedes the initial source acceptance assumption, not the historical test output.
+
+Other reviewed corrections:
+
+- Private namespace directories and receipt/log files require this user's ownership,
+  regular type and no group/other access. Unsafe existing paths refuse without
+  silently changing their mode or adopting them.
+- Executing helper bytes must equal the tracked candidate helper. The candidate
+  source is clean and includes that file; an external different helper refuses.
+- Publish uses the bound annotation OBJECT as its refspec source, then reads the
+  remote tag object and peeled commit before reporting PUBLISHED. Local alias
+  replacement at the last call cannot substitute a different object. Missing or
+  ambiguous readback stays unconfirmed and does not trigger a second push.
+- The existing hook now recognizes a refspec whose destination is `refs/tags/`.
+  This permits faithful evaluation of the exact object-to-tag command. It still
+  blocks that actual command under a failed ledger, preserves named-tag behavior,
+  and leaves a branch destination outside its tag classifier.
+- Actual context directories cannot alias a foreign ledger, and a changed remote
+  default branch invalidates the prepared identity.
+
+[Final focused47 controls](focused47.txt) pass, as do all [existing hook65 controls](existing-hook65.txt).
+The first new context-alias fixture failed its expected diagnostic because Git
+already refused its untracked symlink as dirty source. That [failed test output](fixture-expectation-failure.txt)
+is retained. The corrected control explicitly ignores the alias in the fixture's
+local Git excludes, then observes the intended context-kind refusal. No production
+guard was weakened to accommodate the expectation.
+
+[Packaged-source change identity](packaged-change.json) records the hook delta.
+This is source-level review evidence only; the final implementation still needs
+independent acceptance and the full serialized owner gate. No real tag was created,
+changed or pushed by these tests, and no v1.94.1 repair source was edited.

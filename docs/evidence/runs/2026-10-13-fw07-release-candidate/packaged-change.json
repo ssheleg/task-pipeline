@@ -1,0 +1,8 @@
+{
+  "path": "plugins/task-pipeline/hooks/release-gate.sh",
+  "sha256": "29b30f85220398c5a17dbaaba1cb7977ab36e0c2f86855abd08040dcf5ed4350",
+  "scope": "tag destination classifier only",
+  "published_payload_changed": true,
+  "version_update": "required in next composed TP release, not current 1.94.1 metadata repair",
+  "production_release": "NOT_RUN"
+}

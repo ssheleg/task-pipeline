@@ -48,13 +48,17 @@ with tempfile.TemporaryDirectory(prefix='tp-release-candidate-') as folder:
     git(base, 'init', '--bare', str(origin)); git(origin, 'symbolic-ref', 'HEAD', 'refs/heads/main')
     git(base, 'clone', str(origin), str(seed))
     git(seed, 'config', 'user.email', 'fixture@example.invalid'); git(seed, 'config', 'user.name', 'Fixture')
+    # Use the actual owner manifest, not a guessed registry name. The version is
+    # synthetic; the name, script shape and other package fields remain canonical.
+    actual_package=json.loads((ROOT/'package.json').read_text())
+    fixture_package=dict(actual_package,version='1.2.3')
     files = {
-        'package.json': json.dumps({'name':'@ssheleg/task-pipeline','version':'1.2.3','scripts':{'test:all':'fixed-owner-suite'}}),
+        'package.json': json.dumps(fixture_package),
         '.claude-plugin/marketplace.json':json.dumps({'plugins':[{'version':'1.2.3'}]}),
         'plugins/task-pipeline/.claude-plugin/plugin.json':json.dumps({'version':'1.2.3'}),
         'CHANGELOG.md':'## v1.2.3\nFixture\n', 'SKILL-CARD.md':'| **Version** | 1.2.3 |\n',
         'pipeline.json':json.dumps({'stages':[{'id':6,'state':'tests'}]}),
-        '.gitignore':'.task-pipeline/\n', m.HOOK:(ROOT / m.HOOK).read_text(),
+        '.gitignore':'.task-pipeline/\n', 'scripts/release_candidate.py':(ROOT/'scripts/release_candidate.py').read_text(), m.HOOK:(ROOT / m.HOOK).read_text(),
     }
     for name, text in files.items():
         path=seed/name; path.parent.mkdir(parents=True,exist_ok=True);path.write_text(text)
@@ -103,7 +107,7 @@ with tempfile.TemporaryDirectory(prefix='tp-release-candidate-') as folder:
     c=prepared();c.check();c.log.write_text('truncated')
     refuse(c.publish,'suite output changed')
     c=prepared();c.check();target=c.directory/'original.json';c.record.rename(target);c.record.symlink_to(target)
-    before=target.read_bytes();refuse(c.publish,'regular bounded input');assert target.read_bytes()==before
+    before=target.read_bytes();refuse(c.publish,'private owned file');assert target.read_bytes()==before
     c=prepared();c.check();(c.root/'.task-pipeline/run.md').write_text('Run: fixture\nstage: 6 tests — verdict fail\n')
     refuse(c.publish,'hook refused publication');assert c.load()['hook_observation']['exit']==2;remote_absent()
     c=prepared(False);c.check();refuse(c.publish,'no bound actual project context')
@@ -127,7 +131,7 @@ with tempfile.TemporaryDirectory(prefix='tp-release-candidate-') as folder:
     c=prepared();c.check();(c.root/'pipeline.json').write_text('{}')
     refuse(c.publish,'clean source')
     c=prepared();c.check();c.record.unlink();os.mkfifo(c.record)
-    refuse(c.publish,'regular bounded input')
+    refuse(c.publish,'private owned file')
     c=prepared()
     def silent(self,stream):stream.write(b'other success\n');return 0,None
     c._run_suite=types.MethodType(silent,c)
@@ -141,6 +145,50 @@ with tempfile.TemporaryDirectory(prefix='tp-release-candidate-') as folder:
     bad = subprocess.run([sys.executable,str(ROOT/'scripts/release_candidate.py'),
                           'check','--tag','v1.2.3','--command','true'],cwd=c.root,capture_output=True,text=True)
     assert bad.returncode==2 and 'unrecognized arguments' in bad.stderr;checks+=1
+    c=prepared();c.check();foreign=base/'unrelated-ledger';foreign.mkdir()
+    (foreign/'run.md').write_text('Run: fixture\nstage: 6 tests — verdict pass\n')
+    with (c.gitdir/'info/exclude').open('a') as out:out.write('\n.task-pipeline\n')
+    shutil.rmtree(c.root/'.task-pipeline');(c.root/'.task-pipeline').symlink_to(foreign,target_is_directory=True)
+    refuse(c.publish,'regular project context directory');assert (foreign/'run.md').exists()
+    c=prepared();c.check();git(origin,'update-ref','refs/heads/renamed',git(origin,'rev-parse','main'))
+    git(origin,'symbolic-ref','HEAD','refs/heads/renamed')
+    refuse(c.publish,'remote default branch changed');remote_absent()
+    git(origin,'symbolic-ref','HEAD','refs/heads/main')
+    for part in ('area','directory'):
+        c=fresh();path=getattr(c,part);path.chmod(0o755)
+        refuse(lambda:m.Candidate(c.root,c.tag),'private owned directory')
+        assert path.stat().st_mode & 0o077;path.chmod(0o700)
+    for part in ('record','log'):
+        c=prepared();c.check();path=getattr(c,part);path.chmod(0o644)
+        refuse(c.publish,'private owned file');assert path.stat().st_mode & 0o077
+    c=fresh();helper=c.root/'scripts/release_candidate.py'
+    helper.write_text(helper.read_text()+'\n# different reviewed source\n');git(c.root,'add','.');git(c.root,'commit','-m','different helper')
+    refuse(lambda:c.prepare(c.root),'executing helper differs')
+    c=prepared();c.check();bound=c.load()['object'];original_git=c.git
+    def local_race(*args,**kwargs):
+        if args[:1]==('push',):
+            git(c.root,'tag','-d',c.tag);git(c.root,'tag','-a',c.tag,'-m','late local alias replacement')
+        return original_git(*args,**kwargs)
+    c.git=local_race;c.publish()
+    assert git(origin,'rev-parse',c.tag)==bound!=git(c.root,'rev-parse',c.tag);checks+=1
+    git(origin,'tag','-d',c.tag)
+    c=prepared();c.check();original_git=c.git
+    def missing_readback(*args,**kwargs):
+        if args[:3]==('ls-remote','origin','refs/tags/'+c.tag) and len(args)==4:return ''
+        return original_git(*args,**kwargs)
+    c.git=missing_readback
+    refuse(c.publish,'push not confirmed');assert c.load()['state']!='PUBLISHED'
+    git(origin,'tag','-d',c.tag)
+    # The real shipped hook sees the exact immutable-object refspec, not a
+    # substituted named command. Existing branch-only behavior remains allowed.
+    c=fresh();context=c.context(c.root,c.source());ledger=c.root/'.task-pipeline/run.md'
+    ledger.write_text('Run: fixture\nstage: 6 tests — verdict fail\n')
+    for command,expected in [(['git','push','origin','a'*40+':refs/tags/v1.2.3'],2),
+                             (['git','push','origin','refs/tags/v1.2.3'],2),
+                             (['git','push','origin','a'*40+':refs/heads/fixture'],0)]:
+        assert c.observe_hook(context,command)['exit']==expected;checks+=1
+    ledger.write_text('Run: fixture\nstage: 6 tests — verdict pass\n')
+    assert c.observe_hook(context,['git','push','origin','a'*40+':refs/tags/v1.2.3'])['exit']==0;checks+=1
     # Real owned child-process cleanup, without invoking an actual broad suite.
     driver=base/'suite-driver.py'
     driver.write_text("""import importlib.util,json,pathlib,sys,types
