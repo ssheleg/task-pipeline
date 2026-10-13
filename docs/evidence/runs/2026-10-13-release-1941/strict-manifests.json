@@ -1,0 +1,26 @@
+[
+  {
+    "command": [
+      "claude",
+      "plugin",
+      "validate",
+      ".",
+      "--strict"
+    ],
+    "exit_code": 0,
+    "stdout": "Validating marketplace manifest: /Users/sshlg/DATA/_wt/tp-release-1.94.1/.claude-plugin/marketplace.json\n\n\u2714 Validation passed\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "claude",
+      "plugin",
+      "validate",
+      "plugins/task-pipeline",
+      "--strict"
+    ],
+    "exit_code": 0,
+    "stdout": "Validating plugin manifest: /Users/sshlg/DATA/_wt/tp-release-1.94.1/plugins/task-pipeline/.claude-plugin/plugin.json\n\n\u2714 Validation passed\n",
+    "stderr": ""
+  }
+]
