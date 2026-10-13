@@ -82,3 +82,48 @@ Next: independent frozen-source peer review, byte-identical SEO/dev helper ports
 and adapted runner lifecycle, then a fresh composed full gate after the active
 875c6e6 pre-integration run completes. No release, native-host or final aggregate
 acceptance is claimed here.
+
+
+## Claude continuation after operator stop
+
+The operator requested finishing this session and leaving context for Claude.
+Implementation is frozen at `25fb09d1d7bfe59c9019584a581cb421718ba6c6` on
+`fix/fw07-scratch-child-lifetime`, worktree
+`/Users/sshlg/DATA/_wt/tp-fw07-child-lock`. The branch is pushed. It is a focused
+candidate awaiting independent peer review; no whole-suite, merge or release
+acceptance is claimed. The later handoff commit changes evidence/docs only.
+
+**First next action:** inspect the already-running complete gate before launching
+anything. [Active checkpoint](preintegration-active.json),
+[owned driver](preintegration-driver.py) and [partial log](preintegration-partial.log.gz)
+bind source 875c6e6, tree cc947755, start time, process, temporary directory and
+absolute final-result/log paths. The driver continues separately, records the
+final code/duration/hash/source/tag refs, removes only its own TMPDIR and stops its
+own process group below 300 MiB free. Do not rerun this preserved driver: inspect
+its current result first. Do not kill a process based only on an old PID or delete
+the permanent public scratch lock. The current candidate checkout remains frozen.
+This old-source pre-integration run cannot accept the new child-lifetime fix and
+is never an accepted-commit local-tag release gate.
+
+Then have an independent reader review immutable 25fb09d and replay the bounded
+owned controls. The final child fixture48 passed; other focused source controls
+30+42+18 passed and structural validation passed at the recorded source cut.
+Historical failures remain in this packet. Review startup/cancellation/drain,
+normal descriptor close versus LOCK_UN, actual parent/Bash death and helper
+path overrides; do not infer arbitrary detached-descendant containment.
+
+After correction acceptance, port the common helper bytes and lifecycle adapter
+to SEO `/Users/sshlg/DATA/_wt/seo-fw07-scratch-lock` (branch
+`fix/fw07-shared-scratch-lock`, policy packet78f2dd4) and sheleg-dev
+`/Users/sshlg/DATA/_wt/sheleg-dev-fw07-scratch-lock` (same branch name, packet4678ef4).
+Those two owner Git packets retain versions0.26.6/0.13.4 because all46/68 npm
+payload files matched their base. No PR has been opened: owner policy requires
+local gates first, and lifetime acceptance is held. Their original30-control
+review remains historical and does not cover surviving children.
+
+Compose the accepted correction into TP PR127 only after peer acceptance; preserve
+PR123/PR124 and their historical receipts until normal integration. Coordinate a
+fresh serial complete gate, then eligible frozen-candidate PR checks and normal
+merge. No promotion, version/tag change or release was initiated at this stop.
+The [performance source census](performance-source-census.json) is a future
+measurement proposal only, not a time-saving result or permission to drop gates.
