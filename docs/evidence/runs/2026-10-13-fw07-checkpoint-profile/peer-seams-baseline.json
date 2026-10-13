@@ -1,0 +1,34 @@
+{
+  "source": "db6b24797c5dcbddc7189ef373a619e6a3e7c0d9",
+  "cases": [
+    {
+      "case": "dangling memory state",
+      "exit": 0,
+      "payload_emitted": true,
+      "missing_target_created": true,
+      "stderr": ""
+    },
+    {
+      "case": "same ledger file alias emit-record-emit",
+      "first_emit_exit": 0,
+      "record_exit": 0,
+      "second_emit_exit": 0,
+      "second_emits_workflowId": null,
+      "second_emits_projectId": "project:peer",
+      "real_state": {
+        "constraints": [],
+        "credentials": [],
+        "profile": {
+          "root": "/private/var/folders/3r/yrdx_c051cv22q3r3k0ylvdm0000gn/T/visibility-tp-profile-peer-som9yzab/alias",
+          "source": "pipeline.json",
+          "digest": "9105330ecf5fe58e53114a5f18353d2fd2da264be26538343a10543fe75f10eb",
+          "run": "7878d559d1f34d10"
+        }
+      },
+      "alias_state": {
+        "workflowId": "workflow:peer",
+        "leaseId": "lease-fixture"
+      }
+    }
+  ]
+}

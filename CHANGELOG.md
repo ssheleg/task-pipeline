@@ -11,6 +11,12 @@ provider or the documented inline fallback can supply them without installing a
 specific companion plugin. The new route refusal and relocated source checks keep
 these obligations addressable after the split.
 
+Checkpoint recovery now follows the selected project profile's declared stage order,
+including custom names and nonconsecutive ids. Malformed or changed profiles refuse
+instead of silently injecting default stages into a saved workflow. Run-local profile
+binding survives record/retry; relocated ledgers can name their project root explicitly.
+This is an offline-tested payload correction, not a live Observatory acceptance claim.
+
 ## v1.94.1 — 2026-10-13
 
 Records the missing retrospective declarations that stopped the v1.94.0 release

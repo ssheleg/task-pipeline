@@ -141,7 +141,7 @@ The existing route controls still pass51. The [bounded shipped-source sweep and
 hashes](prerequisite-correction/sources.json) cover111 Markdown/JSON/Cursor files
 with zero matching stale clauses; this is not an arbitrary prose contradiction proof.
 
-[Exact shipped delta](prerequisite-correction/source-delta.patch) is available for
+[Exact shipped delta](prerequisite-correction/source-delta.patch.gz) is available for
 the independent extraction evaluation. Apply this SAME semantic correction to its
 monolithic control and split candidate before freezing that comparison. Do not
 compare a corrected candidate with an intentionally untreated contradiction.

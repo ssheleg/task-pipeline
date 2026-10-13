@@ -10,9 +10,9 @@ run goes on exactly as before, and the ledger says memory was unavailable.
 This script never talks to Observatory: the agent calls the tool. The script does the two
 deterministic halves around that call, so nothing about the checkpoint is left to recall:
 
-    stage_checkpoint.py emit   [--ledger PATH] [--project project:<slug>]
+    stage_checkpoint.py emit   [--ledger PATH] [--project-root PATH] [--project project:<slug>]
                                [--constraint TEXT ...] [--credential PROJECT/ENV/NAME ...]
-        prints the tool's arguments as JSON, from the ledger's last `stage:` line
+        prints the tool's arguments as JSON, from the ledger and selected project profile
     stage_checkpoint.py record --answer FILE|-   [--ledger PATH]
         reads the tool's answer and keeps `workflowId` and `leaseId` for the next boundary
     stage_checkpoint.py record --unavailable "<reason>" [--for-run]   [--ledger PATH]
@@ -24,13 +24,17 @@ deterministic halves around that call, so nothing about the checkpoint is left t
 
 What it keeps, and where:
 
-- The arguments carry no prose the ledger does not hold: the run's topic is the goal, the
+- The ledger supplies the observed verdicts; the selected project `pipeline.json` supplies
+  stage order and names (bundled default only when project config is absent). The run's topic is the goal, the
   ledger's verdicts are `done`, the next stage is `open`, the operator's constraints come in
   as `--constraint`, keys are passed by NAME only (`--credential`), and the git checkout is
   an artifact (branch and a 12-character head). Observatory redacts what it stores as well.
-- `idempotencyKey` is derived from the run's topic and the exact `stage:` line, so a retry
+- `idempotencyKey` is derived from the run's topic and the exact `stage:` line (also the
+  profile digest for a configured profile), so a retry
   of the same boundary replays the first answer, and a stage that runs again (a new line, a
   new time) is a new checkpoint.
+- The first emit saves a run-scoped profile binding before returning arguments. A changed
+  profile/run or unreadable saved state refuses instead of switching an existing workflow.
 - `workflowId` and `leaseId` live in `.task-pipeline/memory.json`, mode 0600, beside the
   ledger in the git-ignored run directory, with the constraints and key names given so far:
   they are stated once and carried to every later boundary. The lease token is a write right: it is never
@@ -60,6 +64,7 @@ import json
 import os
 import pathlib
 import re
+import stat
 import subprocess
 import sys
 from datetime import datetime, timezone
@@ -80,15 +85,70 @@ MEMORY_EVENT = re.compile(r"^event:\s*memory\s+—\s")
 MEMORY_UNAVAILABLE = re.compile(r"^event:\s*memory\s+—\s+unavailable\b")
 
 
-def _stages() -> dict[int, str]:
-    """The stage names by id, from the bundle's own `pipeline.example.json` — the file the
-    validator compares with `references/stages.md`, so this list cannot drift from it."""
-    path = pathlib.Path(__file__).resolve().parents[1] / "pipeline.example.json"
+def _profile(root: pathlib.Path) -> tuple[list[dict], dict]:
+    """Admit the selected profile for the numeric checkpoint ledger, not execute gates."""
+    path = root / "pipeline.json"
     try:
+        path.lstat()
+        configured = True
+    except FileNotFoundError:
+        configured = False
+    except OSError:
+        raise SystemExit("stage_checkpoint: selected profile cannot be read")
+    if not configured:
+        path = pathlib.Path(__file__).resolve().parents[1] / "pipeline.example.json"
+    try:
+        if not stat.S_ISREG(path.stat().st_mode):
+            raise SystemExit("stage_checkpoint: selected profile is not a regular file")
         doc = json.loads(path.read_text(encoding="utf-8"))
-        return {int(s["id"]): str(s["name"]) for s in doc["stages"]}
-    except (OSError, ValueError, KeyError, TypeError):
-        return {}
+    except (OSError, ValueError, UnicodeError):
+        raise SystemExit("stage_checkpoint: selected profile cannot be read as JSON")
+    if not isinstance(doc, dict) or not isinstance(doc.get("stages"), list) or not doc["stages"]:
+        raise SystemExit("stage_checkpoint: selected profile needs a nonempty stages array")
+    mandatory = doc.get("must_understand", [])
+    if not isinstance(mandatory, list) or mandatory:
+        raise SystemExit("stage_checkpoint: unsupported mandatory profile capabilities")
+    stages, ids, states = [], set(), set()
+    for ordinal, stage in enumerate(doc["stages"]):
+        if not isinstance(stage, dict):
+            raise SystemExit("stage_checkpoint: malformed selected stage")
+        sid, state = stage.get("id", ordinal), stage.get("state")
+        name = stage.get("name", state)
+        if isinstance(name, str) and not name.strip():
+            name = state  # optional human label may be empty; stable state still identifies it
+        skills, gate = stage.get("skills"), stage.get("gate")
+        if (type(sid) is not int or sid < 0 or sid in ids or
+                not isinstance(state, str) or not state.strip() or state in states or
+                not isinstance(name, str) or not name.strip() or "\n" in name or "\r" in name or
+                not isinstance(skills, list) or not skills or
+                any(not isinstance(v, str) or not v.strip() for v in skills) or
+                not isinstance(gate, dict) or gate.get("type") not in ("auto", "manual", "judgment") or
+                not isinstance(gate.get("check"), str) or not gate["check"].strip() or
+                (gate["type"] == "judgment" and
+                 (not isinstance(gate.get("judge"), str) or not gate["judge"].strip()))):
+            raise SystemExit("stage_checkpoint: malformed or ambiguous selected stage")
+        ids.add(sid)
+        states.add(state)
+        stages.append({"id": sid, "name": name, "gate": gate["type"]})
+    semantic = {k: doc[k] for k in ("stages", "kernel", "must_understand") if k in doc}
+    identity = {"root": str(root), "source": "pipeline.json" if configured else "bundled-default",
+                "digest": hashlib.sha256(json.dumps(semantic, sort_keys=True,
+                                                    ensure_ascii=False).encode()).hexdigest()}
+    return stages, identity
+
+
+def _root(ledger: pathlib.Path, given: str | None) -> pathlib.Path:
+    if given:
+        root = pathlib.Path(given).resolve()
+        if not root.is_dir() or not ledger.is_relative_to(root):
+            raise SystemExit("stage_checkpoint: --project-root must contain the ledger")
+        return root
+    if ledger.parent.name == ".task-pipeline":
+        return ledger.parent.parent
+    git_root = _git(ledger.parent, "rev-parse", "--show-toplevel")
+    if not git_root:
+        raise SystemExit("stage_checkpoint: relocated ledger requires --project-root")
+    return pathlib.Path(git_root).resolve()
 
 
 def _now() -> str:
@@ -145,6 +205,8 @@ def _read_ledger(path: pathlib.Path) -> tuple[str, list[tuple]]:
     topic, stages = (TOPIC.match(rl).group(1) if rl else None), []
     for line in lines:
         s = STAGE.match(line)
+        if line.startswith("stage:") and not s:
+            raise SystemExit("stage_checkpoint: malformed stage ledger line")
         if s:
             stages.append((int(s.group(1)), s.group(2), s.group(3), s.group(4), s.group(5), line))
     if not topic:
@@ -176,14 +238,48 @@ def marker_for_this_run(ledger: pathlib.Path, state: dict) -> dict | None:
     return gone
 
 
-def _state_path(ledger: pathlib.Path) -> pathlib.Path:
-    return ledger.parent / STATE_NAME
-
-
-def _load_state(ledger: pathlib.Path) -> dict:
+def _canonical_ledger(ledger: pathlib.Path) -> pathlib.Path:
+    # A file alias can put a prior record beside the link while emit read its target.
+    # Refuse it rather than choosing one of two potentially live workflow receipts.
     try:
-        return json.loads(_state_path(ledger).read_text(encoding="utf-8"))
-    except (OSError, ValueError):
+        mode = ledger.lstat().st_mode
+    except FileNotFoundError:
+        return ledger.resolve()
+    except OSError:
+        raise SystemExit("stage_checkpoint: ledger cannot be read")
+    if stat.S_ISLNK(mode):
+        raise SystemExit("stage_checkpoint: ledger file alias is unsupported; reconcile and use the real ledger path")
+    if not stat.S_ISREG(mode):
+        raise SystemExit("stage_checkpoint: ledger is not a regular file")
+    return ledger.resolve()
+
+
+def _state_path(ledger: pathlib.Path) -> pathlib.Path:
+    path = _canonical_ledger(ledger).parent / STATE_NAME
+    try:
+        mode = path.lstat().st_mode
+    except FileNotFoundError:
+        return path
+    except OSError:
+        raise SystemExit("stage_checkpoint: memory state cannot be read")
+    if stat.S_ISLNK(mode):
+        raise SystemExit("stage_checkpoint: memory state link is unsafe; reconcile it before continuing")
+    if not stat.S_ISREG(mode):
+        raise SystemExit("stage_checkpoint: memory state is not a regular file")
+    return path
+
+
+def _load_state(ledger: pathlib.Path, strict: bool = False) -> dict:
+    try:
+        state = json.loads(_state_path(ledger).read_text(encoding="utf-8"))
+        if not isinstance(state, dict):
+            raise ValueError("state is not an object")
+        return state
+    except FileNotFoundError:
+        return {}
+    except (OSError, ValueError, UnicodeError):
+        if strict:
+            raise SystemExit("stage_checkpoint: memory state cannot be read")
         return {}
 
 
@@ -224,14 +320,28 @@ def _project(root: pathlib.Path, given: str | None) -> str:
 
 
 def emit(ledger: pathlib.Path, project: str | None, constraints: list[str],
-         credentials: list[str]) -> dict:
+         credentials: list[str], project_root: str | None = None) -> dict:
+    ledger = _canonical_ledger(ledger)
     topic, stages = _read_ledger(ledger)
-    names = _stages()
+    root = _root(ledger, project_root)
+    profile, identity = _profile(root)
+    names = {s["id"]: s["name"] for s in profile}
     if not stages:
         raise SystemExit("stage_checkpoint: no `stage:` line yet — a checkpoint follows a gate")
     sid, name, gate, verdict, at, line = stages[-1]
-    root = ledger.parent.parent if ledger.parent.name == ".task-pipeline" else ledger.parent
-    state = _load_state(ledger)
+    state = _load_state(ledger, strict=True)
+    run = run_key(ledger.read_text(encoding="utf-8").splitlines())
+    binding = {**identity, "run": run}
+    previous = state.get("profile")
+    if previous is None and state.get("workflowId") and identity["source"] != "bundled-default":
+        raise SystemExit("stage_checkpoint: legacy workflow has no selected-profile binding; reconcile before emitting")
+    if previous is not None and previous != binding:
+        raise SystemExit("stage_checkpoint: selected profile or run changed; reconcile the saved workflow before emitting")
+    for observed in stages:
+        selected = next((s for s in profile if s["id"] == observed[0]), None)
+        if selected is None or (identity["source"] != "bundled-default" and
+                                (selected["name"] != observed[1] or selected["gate"] != observed[2])):
+            raise SystemExit("stage_checkpoint: ledger stage does not match the selected profile")
     # CONSTRAINTS AND KEYS OUTLIVE THE BOUNDARY THEY WERE GIVEN AT. The operator states them
     # once; a later boundary that dropped them would hand a successor an empty list — the
     # one thing a successor must never act without (found by the live receipt, 2026-10-05).
@@ -241,12 +351,18 @@ def emit(ledger: pathlib.Path, project: str | None, constraints: list[str],
     done = [{"step_id": f"stage-{s[0]}", "result": f"{s[1]}: gate {s[2]}, verdict {s[3]} at {s[4]}",
              "evidence": [f"ledger: {ledger.name}", *reviews.get(s[0], [])]}
             for s in stages if s[3] in ("pass", "skip")]
-    nxt = sid + 1 if verdict in ("pass", "skip") else sid
-    last = max(names) if names else 10
-    open_steps = [] if sid >= last and verdict == "pass" else [{
-        "step_id": f"stage-{nxt}",
-        "next_action": (f"enter stage {nxt} {names.get(nxt, '')}".strip() if nxt != sid
-                        else f"repair stage {sid} {name}: its gate failed")}]
+    position = next(i for i, s in enumerate(profile) if s["id"] == sid)
+    terminal = position == len(profile) - 1
+    closed = terminal and verdict == "pass"
+    if closed:
+        open_steps = []
+    elif verdict in ("pass", "skip") and not terminal:
+        nxt = profile[position + 1]["id"]
+        open_steps = [{"step_id": f"stage-{nxt}", "next_action": f"enter stage {nxt} {names[nxt]}"}]
+    else:
+        action = (f"confirm stage {sid} {name}: final stage was skipped" if verdict == "skip"
+                  else f"repair stage {sid} {name}: its gate did not pass")
+        open_steps = [{"step_id": f"stage-{sid}", "next_action": action}]
     creds = []
     for c in credentials:
         parts = c.split("/")
@@ -258,21 +374,26 @@ def emit(ledger: pathlib.Path, project: str | None, constraints: list[str],
     if head:
         artifacts.append({"kind": "git", "path": str(root), "branch": branch or "", "head": head[:12]})
     body = {"goal": topic,
-            "plan": [{"step_id": f"stage-{i}", "title": names[i]} for i in sorted(names)],
+            "plan": [{"step_id": f"stage-{i}", "title": names[i]} for i in names],
             "done": done, "open": open_steps, "constraints": constraints,
             "artifacts": artifacts, "notes": f"task-pipeline stage boundary; run ledger {ledger}"}
     if creds:
         body["credentials"] = creds
+    key = f"{topic}\n{line}"
+    if identity["source"] != "bundled-default":
+        key += "\n" + identity["digest"]
     args = {"owner": OWNER,
-            "idempotencyKey": "tp-" + hashlib.sha256(f"{topic}\n{line}".encode()).hexdigest()[:32],
+            "idempotencyKey": "tp-" + hashlib.sha256(key.encode()).hexdigest()[:32],
             "stepId": f"stage-{sid}", "status": STATUS.get(verdict, "in_progress"), "body": body,
-            "close": sid >= last and verdict == "pass"}
+            "close": closed}
     if state.get("workflowId") and state.get("leaseId"):
         args["workflowId"], args["leaseId"] = state["workflowId"], state["leaseId"]
     else:
         args["projectId"] = _project(root, project)
-    if constraints != state.get("constraints", []) or credentials != state.get("credentials", []):
-        _save_state(ledger, {**state, "constraints": constraints, "credentials": credentials})
+    if (previous != binding or constraints != state.get("constraints", []) or
+            credentials != state.get("credentials", [])):
+        _save_state(ledger, {**state, "constraints": constraints, "credentials": credentials,
+                             "profile": binding})
     return args
 
 
@@ -344,7 +465,7 @@ def record(ledger: pathlib.Path, answer_text: str | None, unavailable: str | Non
     lease = answer.get("leaseId") or state.get("leaseId")
     if not wid:
         raise SystemExit("stage_checkpoint: the answer names no workflowId")
-    _save_state(ledger, {**{k: v for k, v in state.items() if k in ("constraints", "credentials")},
+    _save_state(ledger, {**{k: v for k, v in state.items() if k in ("constraints", "credentials", "profile")},
                          "workflowId": wid, **({"leaseId": lease} if lease else {})})
     rev = (answer.get("checkpoint") or {}).get("revision") or answer.get("revision") or "?"
     step = answer.get("stepId") or "?"
@@ -406,6 +527,7 @@ def main(argv: list[str]) -> int:
     sub = p.add_subparsers(dest="cmd", required=True)
     e = sub.add_parser("emit", help="print the checkpoint tool's arguments")
     e.add_argument("--ledger", default=DEFAULT_LEDGER)
+    e.add_argument("--project-root", help="explicit project root for a relocated ledger")
     e.add_argument("--project", help="project:<slug>; default the checkout's folder name")
     e.add_argument("--constraint", action="append", default=[], help="repeatable")
     e.add_argument("--credential", action="append", default=[], help="PROJECT/ENV/NAME, repeatable")
@@ -430,9 +552,10 @@ def main(argv: list[str]) -> int:
     ac.add_argument("--handoff-id", required=True)
     ac.add_argument("--session")
     a = p.parse_args(argv)
-    ledger = pathlib.Path(a.ledger)
+    ledger = _canonical_ledger(pathlib.Path(a.ledger))
+    _state_path(ledger)  # every command refuses unsafe aliases before producing tool arguments
     if a.cmd == "emit":
-        print(json.dumps(emit(ledger, a.project, a.constraint, a.credential), ensure_ascii=False))
+        print(json.dumps(emit(ledger, a.project, a.constraint, a.credential, a.project_root), ensure_ascii=False))
         return 0
     if a.cmd == "handoff":
         print(json.dumps(handoff(ledger, a.to_provider, a.to_model, a.reason, a.offer_ttl),

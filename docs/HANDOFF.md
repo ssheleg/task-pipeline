@@ -1,3 +1,12 @@
+## FW07 checkpoint correction — isolated source slice
+
+The [frozen packet and receipt](evidence/runs/2026-10-13-fw07-checkpoint-profile/README.md)
+reproduces default-stage injection into a custom-profile checkpoint. Implementation
+and actual CLI controls are isolated from stage-extraction PR123 and from the pending
+release gate. Next: independent source review, then composed owner validation in the
+coordinator's serial slot, genuine candidate checks and normal integration. No tag,
+live Observatory exchange, native loading, task-quality or billing claim is made.
+
 ## Release repair candidate — v1.94.1 (2026-10-13)
 
 The immutable v1.94.0 tag reached accepted main but its release failed the
