@@ -92,6 +92,35 @@ for _spec in ("0/8", "9/8", "8", "a/b", "", "3/0", "-1/8"):
     case(f"`{_spec}` is refused, never guessed", _refused(_spec), True)
 
 
+# CLI admission must precede directory scanning, locking and snapshots. The old
+# parser treated --help/unknown flags as an instruction to run every plant.
+from contextlib import redirect_stdout, redirect_stderr
+from io import StringIO
+from unittest.mock import patch
+
+
+def _admission(args):
+    with patch.object(negatives, "scan", side_effect=RuntimeError("scan reached")), \
+            redirect_stdout(StringIO()), redirect_stderr(StringIO()):
+        try:
+            negatives.main(["negatives.py", *args])
+        except SystemExit as exc:
+            return exc.code
+        except RuntimeError as exc:
+            if str(exc) == "scan reached":
+                return "scan"
+            raise
+    return "returned"
+
+
+for _args, _want in [(["--help"], 0), (["-h"], 0), (["--unknown"], 2),
+                     (["--lis"], 2), (["-k"], 2), (["--shard"], 2),
+                     (["--list"], "scan"), (["-k", "exclusion"], "scan"),
+                     (["--shard", "1/8"], "scan")]:
+    case(f"CLI {_args!r} is admitted before scanning or allocation",
+         _admission(_args), _want)
+
+
 def _run() -> int:
     bad = 0
     for name, got, want in CASES:
