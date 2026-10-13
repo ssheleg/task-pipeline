@@ -14,8 +14,8 @@ consumer migration, negative controls and portable install/read-accounting limit
 
 Parent accepted the bounded extraction packet and the separately recovered
 [UX prerequisite correction](evidence/plans/2026-10-13-fw07-ux-prerequisite-correction.md).
-Exact next task after current release completion: normalize the two stale package
-prerequisites in a separate commit with actual negative controls, then freeze the
+Exact next task after current release completion: normalize the stale package
+prerequisites across the packet's eight current source locations in a separate commit with actual negative controls, then freeze the
 paragraph migration map on a new implementation branch. B-043 is still open; no runtime/model
 quality or full-suite verdict is claimed by this planning slice.
 

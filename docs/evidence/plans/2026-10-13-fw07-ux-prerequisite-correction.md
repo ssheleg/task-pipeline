@@ -34,14 +34,15 @@ after the current 1.94.0 release closes.
 1. Replace the stale SKILL prerequisite exception with the already accepted
    artifact requirement; keep the family provider preferred and keep unavailable
    check reporting. Link to the existing provider contract rather than duplicating it.
-2. Normalize the stale doctrine-map preface to the same meaning. Do not weaken
+2. Normalize the stale doctrine-map preface and the sibling surfaces below to the
+   same meaning. Do not weaken
    scenario validity, coverage, custom-profile precedence or explicit manual gates.
 3. Strengthen the existing regression against both actual stale variants at their
    normative homes. Add bounded whitespace/line-wrap variants, missing-artifact
    and invalid-artifact negatives, equivalent-provider and inline positives.
    A synthetic decision helper remains a contract fixture, not a model evaluation.
 4. Execute mutations against the real validator/test entry and restore source in
-   owned isolation: reinstall either stale paragraph must fail by a named diagnostic;
+   owned isolation: reinstall each stale rule must fail by a named diagnostic;
    harmless reflow and the accepted fallback must pass. Do not claim arbitrary
    natural-language contradiction detection.
 5. Commit this correction separately. Rebase the conservation baseline for the
@@ -56,3 +57,27 @@ No change to stage ids, gate types, user authorization, release workflow, browse
 requirements, provider keys or installations. Native execution, comprehension and
 quality remain NOT_RUN without actual traces. B-043 stays open until extraction's
 own conservation and routing acceptance pass.
+
+## Sibling surface census (same accepted-intent correction)
+
+A follow-up literal search after the first packet found the same exception in
+additional current shipped homes. This broadens the exact location inventory,
+not the intended semantic change:
+
+| Frozen source location | Stale meaning | Correction boundary |
+|---|---|---|
+| SKILL.md:59–64 | Installation is the stage3 exception | Existing artifact/provider rule |
+| references/doctrine-map.md:8–10 | Same exception in navigation preface | Link to accepted provider rule |
+| references/companion-skills.md:290 | Preflight says never gate installs except stage3 | Remove contradiction with this file's own provider rule |
+| commands/task-pipeline.md:38–39 | Absent companions become stage3 gate | Artifact gate, named missing checks |
+| README.md:170–172 | Same explicit install requirement, blame `59e16493` (2026-08-03) | Existing artifact/provider rule |
+| README.md:974 | super-ux marked required for user-facing work | Preferred provider; scenario artifact required |
+| HOW-IT-WORKS.md:67–70 | Missing companion is a blocking exception | Existing artifact/provider rule |
+| SKILL-CARD.md:17 | Package is the conditional dependency | Scenario artifact required, provider preferred |
+
+Paths without a prefix are repository-relative for README/HOW-IT-WORKS/SKILL-CARD;
+SKILL.md and references are under `plugins/task-pipeline/skills/task-pipeline`;
+commands is under `plugins/task-pipeline`. Historical changelog/audit snapshots
+remain unchanged. The current Cursor UX line already says recommended; inspect
+its context for consistency but do not change it merely to equalize wording.
+Actual source-negative coverage must name all seven files/eight listed locations.
