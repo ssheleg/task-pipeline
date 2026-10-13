@@ -1,3 +1,12 @@
+## Owner-only release candidate implementation — 2026-10-13
+
+[FW07 source and focused receipt](evidence/runs/2026-10-13-fw07-release-candidate/README.md)
+implements the reviewed standalone-clone prepare/check/publish design and reconciles
+the owner stage-7 ordering. Private exact-source evidence grants no authority;
+publication requires faithful actual run context and the existing hook.
+Next: independent source review and correction, then serialized owner aggregate.
+No production tag, full gate or release claimed; v1.94.1 repair remains separate.
+
 ## Source-only release admission follow-up — 2026-10-13
 
 [FW07 pre-tag packet](evidence/plans/2026-10-13-pretag-admission/README.md)

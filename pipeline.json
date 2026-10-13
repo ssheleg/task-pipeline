@@ -116,7 +116,7 @@
       ],
       "gate": {
         "type": "manual",
-        "check": "The validator IS the lint; there is no separate linter. Four-way version sync across package.json, .claude-plugin/marketplace.json, plugins/task-pipeline/.claude-plugin/plugin.json and the top CHANGELOG heading. Never tag before npm run test:all is green ON THE COMMIT THE TAG POINTS AT, and chain it — `npm run test:all && git tag -a vX.Y.Z && git push origin vX.Y.Z` — never a gate and a mutating command as two lines (retro R-004). Pushing the tag IS the deploy: it publishes to npm."
+        "check": "The validator IS the lint; there is no separate linter. Four-way version sync across package.json, .claude-plugin/marketplace.json, plugins/task-pipeline/.claude-plugin/plugin.json and the top CHANGELOG heading. Prepare the owned unpublished annotated candidate locally FIRST, then run npm run test:all with that exact tag visible and inspect release-stamp unlooked disclosures (retro R-010). Never publish before the complete tagged-tree gate passes. In a standalone clone use the owner-only scripts/release_candidate.py prepare/check/publish sequence, binding the actual project/run context at prepare; chain check and publish with && (retro R-004). The helper grants no authority, preserves the existing release gate, and refuses publication without faithful bound context. A changed source, tag object or incomplete receipt requires reconciliation, never moving a published ref. Pushing the tag IS the deploy: it publishes to npm."
       }
     },
     {
