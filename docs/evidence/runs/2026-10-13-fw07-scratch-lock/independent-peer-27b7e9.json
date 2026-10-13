@@ -1,0 +1,37 @@
+{
+  "schema": "shared-scratch-lock-peer/1",
+  "reviewer": "root",
+  "source": "27b7e9ef5722a79fd314216af183eb4db3a8ec5a",
+  "status": "PASS_BOUNDED",
+  "checks": [
+    {
+      "command": "python3 -B test/audit_regressions/fw07_scratch_lock.py",
+      "exit_code": 0,
+      "controls": 30,
+      "namespace": "owned temporary directory only"
+    },
+    {
+      "command": "python3 -B test/runner_test.py",
+      "exit_code": 0,
+      "controls": 42
+    }
+  ],
+  "manual_review": [
+    "Physical /tmp identity independent of TMPDIR and owner",
+    "No-follow exclusive create/open; regular current UID mode600 single-link object",
+    "Path/descriptor inode checked before flock and after waiting",
+    "No truncate, unlink, chmod or steal",
+    "Runner refuses before any plants when lock admission fails"
+  ],
+  "hashes": {
+    "test/negative_lock.py": "8d847c6744490818da51b1e60d0b5c7bc9cacd093587de626282d2a13009d67f",
+    "test/negatives.py": "05141c79f0f86eb3901cb0ceb23f6371bd31f831f3fd4a9a3572fa54f03f4896",
+    "test/audit_regressions/fw07_scratch_lock.py": "137228f5efce9aa9b4f14a89bca5133fefd355cc213e8e74ef0781fbbd8fc756"
+  },
+  "limits": [
+    "Only updated runners join shared lock; old versions and direct plant execution excluded",
+    "No hostile-process race immunity claimed",
+    "Actual three-owner identical helper ports still pending",
+    "No public plant, package publication or broad suite in this review"
+  ]
+}

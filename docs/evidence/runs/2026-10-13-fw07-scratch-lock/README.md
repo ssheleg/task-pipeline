@@ -50,3 +50,13 @@ not represented as an owned-namespace-only control.
 Independent exact-source review, identical helper/admission ports with each owner
 fixture replay, then composed validation in the coordinator's serial slot. No
 version, package, tag, hosted run or release acceptance is claimed by this slice.
+
+## Independent canonical acceptance and portable listing assertion
+
+[Root independent review](independent-peer-27b7e9.json) accepts exact27b7e9
+source and replayed30+42 controls. Porting found the positive listing assertion
+was needlessly TP-specific: sibling outputs have no property-check suffix. The
+fixture now requires their common negative-self-test listing plus exit0; unsafe
+lock refusal still requires exit1 and its actual admission diagnostic. The
+[corrected canonical30 controls](focused30-portable.txt) pass. Helper code unchanged.
+SEO/dev port receipts preserve their first assertion failures and source bindings.
