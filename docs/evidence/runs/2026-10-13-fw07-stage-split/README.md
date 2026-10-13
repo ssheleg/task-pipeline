@@ -116,3 +116,41 @@ The standalone documentation gate at that exact source also passed:
 Its [complete output](docgate-passed.txt) records 96 linked files, 6 decisions,
 3 open questions, reachable evidence commits and both propagation/residue floors
 at zero. This does not replace the pending public plants or composed owner suite.
+
+## Separate semantic correction after lossless extraction
+
+A later independent reading found the old install-stop requirement in the relocated
+stage-3 procedure **and** its `spec.md` subject reference. The extraction conserved
+that old contradiction; it did not introduce it. The prior cfa5248 prerequisite
+sweep covered seven entry homes and missed these two deeper consumers.
+[The expanded guard's red result](prerequisite-correction/baseline-red.txt)
+refuses both on the otherwise unchanged 771b7cd candidate.
+
+This follow-up changes those two sources to route to the existing
+`companion-skills.md` artifact-provider contract. Equivalent artifacts and inline
+fallback remain permitted; missing or invalid artifacts still stop the gate.
+Unavailable checks are named NOT_RUN, and no linter execution is invented.
+The provider-specific command sequence is explicitly scoped to using super-ux.
+Figma authority, scenario trace obligations and complete stage gates are unchanged.
+
+[Contract checks](prerequisite-correction/contract-green.txt) pass10 cases;
+[actual subprocess mutations](prerequisite-correction/mutations-green.txt) pass30,
+including both stale formulations in original/reflowed text and removal of quality,
+provider fallback and unavailable-check obligations in either corrected home.
+The existing route controls still pass51. The [bounded shipped-source sweep and
+hashes](prerequisite-correction/sources.json) cover111 Markdown/JSON/Cursor files
+with zero matching stale clauses; this is not an arbitrary prose contradiction proof.
+
+[Exact shipped delta](prerequisite-correction/source-delta.patch) is available for
+the independent extraction evaluation. Apply this SAME semantic correction to its
+monolithic control and split candidate before freezing that comparison. Do not
+compare a corrected candidate with an intentionally untreated contradiction.
+Native task behavior, model quality and billed tokens remain unobserved.
+
+The original conservation map, archived baseline and token measurement above remain
+historical evidence at the cited extraction source. They are not rewritten to label
+this semantic change lossless. To reproduce conservation, use the original frozen
+extraction source; the current procedure has intentionally changed afterward.
+Current full/public negative and independently reviewed semantic acceptance remain
+pending. Do not run a broad old-branch suite against unrelated shared candidate tags;
+reconcile with the accepted release repair and use the coordinator's serial slot.

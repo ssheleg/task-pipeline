@@ -28,9 +28,12 @@ spec*.
 
 ## UX track (user-facing tasks only)
 
-Runs on **super-ux** — the one companion this pipeline recommends by name
-([`companion-skills.md`](companion-skills.md)). If it isn't installed on a UI task,
-give the install line and stop; don't improvise a half-chain.
+Apply [the artifact-provider contract](companion-skills.md): super-ux is the
+preferred provider; equivalent artifacts or the inline fallback remain valid.
+Missing or invalid scenario artifacts stop the gate, regardless of provider.
+Record each unavailable check by name as NOT_RUN; do not claim a linter ran.
+The following chain describes the super-ux provider when available. Other
+providers owe the same scenario quality and traces, not these package commands.
 
 0. **The design destination is already decided — read it, don't re-open it.** When
    Figma is on, the stage-0 brief names the team/org and the files — one per surface

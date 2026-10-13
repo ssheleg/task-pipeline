@@ -1,3 +1,13 @@
+## FW07 stage-3 prerequisite follow-up — 2026-10-13
+
+The split stage-3 procedure and spec subject reference now follow the accepted
+artifact-provider contract. Equivalent providers/inline fallback remain valid;
+missing or invalid scenarios still refuse and unavailable lint stays NOT_RUN.
+[Source correction and evidence](evidence/runs/2026-10-13-fw07-stage-split/README.md)
+preserve the earlier lossless extraction claim at its original source.
+Next: independent review, correct both evaluation arms identically, then public
+plants and composed aggregate after release repair reconciliation and slot grant.
+
 ## FW07 stage split — current isolated implementation
 
 Entry: [execution receipt](evidence/runs/2026-10-13-fw07-stage-split/README.md).

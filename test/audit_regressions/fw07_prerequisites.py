@@ -16,6 +16,8 @@ ROOT = Path(__file__).resolve().parents[2]
 TEST = Path('test/audit_regressions/fix-tp-02.01.py')
 BASE = 'plugins/task-pipeline/skills/task-pipeline/'
 PLANTS = (
+    (BASE + 'references/stage-03-spec.md', 'Requires the **super-ux** skills.'),
+    (BASE + 'references/spec.md', "If it isn’t installed on a UI task, give the install line and stop."),
     (BASE + 'SKILL.md', 'The stage-3 UX track requires super-ux, and the spec gate stops until it is installed.'),
     (BASE + 'references/doctrine-map.md', 'The single deliberate exception is the stage-3 UX track on a user-facing task.'),
     (BASE + 'references/companion-skills.md', '**Never gate any stage on an install** except the stage-3 UX track on a UI task.'),
@@ -54,6 +56,24 @@ def main():
                     assert result.returncode == 1, (rel, result.stdout, result.stderr)
                     assert 'package-install prerequisite survived: ' + rel in result.stdout, result.stdout
                     assert 'Traceback' not in result.stderr, result.stderr
+                    count += 1
+                finally:
+                    target.write_text(before)
+        # Each relocated entry must preserve the real artifact gate and named
+        # unavailable-check disclosure; provider fallback is not a quality bypass.
+        for name in ('stage-03-spec.md', 'spec.md'):
+            target = fixture / (BASE + 'references/' + name)
+            before = target.read_text()
+            for obligation in ('Missing or invalid scenario artifacts stop the gate, regardless of provider.',
+                               'Record each unavailable check by name as NOT_RUN',
+                               'equivalent artifacts', 'inline fallback'):
+                try:
+                    assert obligation in before
+                    target.write_text(before.replace(obligation, 'omitted obligation', 1))
+                    result = run()
+                    assert result.returncode == 1, (name, obligation, result.stdout)
+                    assert 'stage entry preserves quality and tool uncertainty' in result.stdout
+                    assert 'Traceback' not in result.stderr
                     count += 1
                 finally:
                     target.write_text(before)
