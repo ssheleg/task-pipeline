@@ -100,3 +100,14 @@ after cleanup/restoring handlers and before returning. The regression's exact
 `late_signal_controls` function [passes2 cases](late-signal2.txt), including restored
 handlers. The earlier56-case source run remains a separate historical verdict;
 a complete58-case replay is not claimed by this focused delta.
+
+## Final independent helper correction acceptance
+
+The reviewer accepted exact9b3fa1a via an immutable four-blob Git snapshot:
+[58 controls passed](helper-independent-final.json), exit0,114.48seconds, snapshot
+removed. The [replay script](helper-independent-replay.py) retains that procedure.
+Earlier [peer replay during source edits](helper-peer-source-churn.json) failed
+source-identity binding and is explicitly contaminated, not a candidate failure
+or success. The implementer changed the worktree after a correction request while
+that replay was still running; immutable source extraction prevented recurrence.
+No complete owner suite, native interception or production release is claimed.
