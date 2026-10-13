@@ -201,7 +201,7 @@ until it is installed.
 | 6–10 + any check you write | [`gates.md`](plugins/task-pipeline/skills/task-pipeline/references/gates.md) — the three axes, the promotion ladder, gate anatomy, the probe recipe, ratchet floors |
 | any agent-time enforcement | [`hooks.md`](plugins/task-pipeline/skills/task-pipeline/references/hooks.md) — the `PreToolUse` contract, the fail-open hazard, the Claude-Code-only limit |
 | 7 · the tag | [`deploy-targets.md`](plugins/task-pipeline/skills/task-pipeline/references/deploy-targets.md) → *When the release waits for an approval* — `pipeline.json` → `release.approval`: `checks` (tag, watch the run selected by the tag, report) or `reviewers` (the direct link to the run that is `waiting`) |
-| between stages | [`continuity.md`](plugins/task-pipeline/skills/task-pipeline/references/continuity.md) Part 3 — workflow memory through Observatory, a planned handoff (`stage_checkpoint.py handoff` / `accept`), and `hooks/memory-nudge.sh`, which reminds once when a gate returned with no memory line after it |
+| between stages | [`continuity.md`](plugins/task-pipeline/skills/task-pipeline/references/continuity.md) Part 3 — workflow memory through Observatory, a planned handoff (`stage_checkpoint.py handoff` / `accept`), and `hooks/memory-nudge.sh`, which reminds once when a gate returned with no memory line after it — unless the run recorded memory unavailable with `--for-run` |
 
 **Ported, not depended on.** Stage 0 is adapted from
 [Matt Pocock's `grilling` / `grill-with-docs`](https://github.com/mattpocock/skills)
@@ -894,8 +894,8 @@ npx github:ssheleg/task-pipeline          # straight from GitHub
 npx task-pipeline-skill                   # from the npm registry
 ```
 (package is `task-pipeline-skill` — the unscoped `task-pipeline` name is taken
-on npm; installs the same skill + `/task-pipeline` command into `~/.claude`,
-idempotent, `--force` to overwrite)
+on npm; installs the same three skills + `/task-pipeline` command into `~/.claude` as
+the plain-skill path below, idempotent, `--force` to overwrite)
 
 **Moving the paperwork off the legacy directory name — optional, always:**
 ```bash
@@ -922,9 +922,21 @@ Rules. The rule is self-contained (no external links), so it works copied anywhe
 git clone https://github.com/ssheleg/task-pipeline
 cd task-pipeline && ./install.sh
 ```
-(copies the skill into `~/.claude/skills/task-pipeline` and the `/task-pipeline`
-command into `~/.claude/commands/`; idempotent — rerun skips existing installs,
-`./install.sh --force` overwrites)
+(copies the plugin's three skills — `task-pipeline`, `evidence-docs`, `project-audit` —
+into `~/.claude/skills/<name>` and the `/task-pipeline` command into
+`~/.claude/commands/`; idempotent — rerun skips existing installs, `./install.sh --force`
+overwrites. **What it cannot carry, and says so at the end of the run:** the role agents
+(`plugins/task-pipeline/agents/`, which then run on the main thread) and the hooks
+(`build-gate`, `gate-observer`, `memory-nudge`, `release-gate`, `run-lifecycle`, so the
+gates are held by the doctrine and the run ledger rather than by the harness). Both
+arrive only with the plugin above. Both installers refuse while the plugin is installed,
+because a plain copy would shadow it.)
+
+**Optional companion — Project Observatory.** Workflow checkpoints, planned handoffs
+between executors and the shared lesson store come from a separately installed public
+engine, [passioncode-ai/project-observatory-dashboard](https://github.com/passioncode-ai/project-observatory-dashboard)
+(its README: *Install*, *MCP*). Without it every one of those degrades to one ledger line
+and the run continues.
 
 ### Updating
 
@@ -949,8 +961,8 @@ the same Claude Code install yields a duplicate, shadowing skill.
 | Claude Code (plugin) | `claude plugin marketplace update task-pipeline` → `claude plugin update task-pipeline@task-pipeline` → restart |
 | Any agent (skills CLI) | `npx skills update task-pipeline --global --yes`; to add: repeated `--agent <name>` (never `claude-code` when the plugin is installed) |
 | Cursor | skills CLI (above) with `--agent cursor`, or re-copy the `.mdc` per project |
-| npm | `npx task-pipeline-skill@latest` / `npx github:ssheleg/task-pipeline` (ephemeral — always latest) |
-| Plain skill | `git pull && ./install.sh --force` |
+| npm | `npx task-pipeline-skill@latest --force` / `npx github:ssheleg/task-pipeline --force` — `--force` brings all three skills and the command to that version; without it an existing install is skipped, and a partial one is refused as mixed versions |
+| Plain skill | `git pull && ./install.sh --force` (all three skills and the command) |
 
 ### Prerequisites
 

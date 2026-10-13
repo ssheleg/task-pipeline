@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Installs the task-pipeline skill + /task-pipeline command into ~/.claude.
+# Installs the plugin's three skills (task-pipeline, evidence-docs, project-audit) and the
+# /task-pipeline command into ~/.claude, and names what a plain copy cannot carry.
 # Idempotent: skips anything already installed; pass --force to overwrite.
 set -euo pipefail
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -10,6 +11,19 @@ if [[ "${1:-}" == "--force" ]]; then
 elif [[ -n "${1:-}" ]]; then
   echo "usage: $0 [--force]" >&2
   exit 2
+fi
+
+# 0. every source, checked before anything is copied — as bin/task-pipeline.js does. A
+# corrupted checkout that failed on the third skill used to leave the first two installed.
+for SKILL in task-pipeline evidence-docs project-audit; do
+  if [[ ! -f "$HERE/plugins/task-pipeline/skills/$SKILL/SKILL.md" ]]; then
+    echo "error: skill sources missing at $HERE/plugins/task-pipeline/skills/$SKILL — corrupted checkout? Nothing was installed." >&2
+    exit 1
+  fi
+done
+if [[ ! -f "$HERE/plugins/task-pipeline/commands/task-pipeline.md" ]]; then
+  echo "error: command source missing at $HERE/plugins/task-pipeline/commands/task-pipeline.md — corrupted checkout? Nothing was installed." >&2
+  exit 1
 fi
 
 # One channel per agent. This installer writes a PLAIN copy to
@@ -35,12 +49,30 @@ MSG
   fi
 done
 
-# 1. skill
-SRC="$HERE/plugins/task-pipeline/skills/task-pipeline"
-DEST="${HOME}/.claude/skills/task-pipeline"
-if [[ -e "$DEST" && "$FORCE" -eq 0 ]]; then
-  echo "skip: skill already installed at $DEST (rerun with --force to overwrite)"
-else
+# Mixed versions: an earlier install left some of the three skills and not the others.
+# Installing only the missing ones would pair skills from two releases, a combination
+# nobody tested — so refuse, name both sets, and let --force bring all three to this version.
+if [[ "$FORCE" -eq 0 ]]; then
+  PRESENT=""; ABSENT=""
+  for SKILL in task-pipeline evidence-docs project-audit; do
+    if [[ -e "${HOME}/.claude/skills/$SKILL" ]]; then PRESENT="$PRESENT $SKILL"; else ABSENT="$ABSENT $SKILL"; fi
+  done
+  if [[ -n "$PRESENT" && -n "$ABSENT" ]]; then
+    echo "refusing: mixed versions —${PRESENT} already installed,${ABSENT} not. Rerun with --force to install all three at this version. Nothing was written." >&2
+    exit 4
+  fi
+fi
+
+# 1. skills — all three the plugin ships. task-pipeline names evidence-docs as its doc
+# doctrine and runs project-audit as wave 0's sidecar; a plain install that copied one of
+# three left both names resolving to nothing (CHANGELOG, Unreleased).
+for SKILL in task-pipeline evidence-docs project-audit; do
+  SRC="$HERE/plugins/task-pipeline/skills/$SKILL"
+  DEST="${HOME}/.claude/skills/$SKILL"
+  if [[ -e "$DEST" && "$FORCE" -eq 0 ]]; then
+    echo "skip: skill already installed at $DEST (rerun with --force to overwrite)"
+    continue
+  fi
   # Transactional install (FIX-UP-05.02): stage on the same filesystem, then
   # swap. A crash mid-copy leaves the ACTIVE install intact, not a partial tree.
   mkdir -p "$(dirname "$DEST")"
@@ -52,8 +84,8 @@ else
   mv "$STAGING" "$DEST"
   rm -rf "${DEST}.prev.$$"
   trap - EXIT
-  echo "Installed task-pipeline skill   -> $DEST"
-fi
+  printf 'Installed %-15s skill -> %s\n' "$SKILL" "$DEST"
+done
 
 # 2. slash command (so /task-pipeline works for the plain-skill install too)
 CMD_SRC="$HERE/plugins/task-pipeline/commands/task-pipeline.md"
@@ -70,18 +102,26 @@ else
   echo "Installed /task-pipeline command -> $CMD_DEST"
 fi
 
-# The role agents are a Claude Code PLUGIN capability and this path does not install
-# them. Said out loud rather than left to be discovered: the doctrine names
-# `task-pipeline:verifier`, and an operator who reads that on this install path would
-# otherwise find a name that resolves to nothing and no explanation anywhere.
+# What a plain copy cannot carry, said out loud: the role agents and the hooks are Claude
+# Code PLUGIN capabilities. The doctrine names `task-pipeline:verifier` and the hooks by
+# file; an operator on this path would otherwise find names that resolve to nothing.
 AGENTS="$HERE/plugins/task-pipeline/agents"
-if [ -d "$AGENTS" ] && [ -n "$(ls -A "$AGENTS" 2>/dev/null)" ]; then
+HOOKS="$HERE/plugins/task-pipeline/hooks"
+N_AGENTS=0; HOOK_NAMES=""
+if [ -d "$AGENTS" ]; then N_AGENTS="$(ls -1 "$AGENTS" 2>/dev/null | wc -l | tr -d ' ')"; fi
+if [ -d "$HOOKS" ]; then
+  HOOK_NAMES="$(cd "$HOOKS" && ls -1 ./*.sh 2>/dev/null | sed 's|^\./||; s|\.sh$||' | paste -sd ',' - | sed 's/,/, /g')"
+fi
+if [ "$N_AGENTS" -gt 0 ] || [ -n "$HOOK_NAMES" ]; then
   echo ""
-  echo "Not installed: plugins/task-pipeline/agents/ ($(ls -1 "$AGENTS" | wc -l | tr -d ' ') file(s))."
-  echo "  Role agents are a Claude Code plugin capability; this path installs the skill"
-  echo "  and the command only. Every role still runs — on the main thread instead of in"
-  echo "  its own context, which costs context and speed, not doctrine."
-  echo "  For the agent-backed version, install the plugin:"
+  echo "Not installed — Claude Code plugin capabilities a plain copy cannot carry:"
+  [ "$N_AGENTS" -gt 0 ] && echo "  - plugins/task-pipeline/agents/ ($N_AGENTS role agents): every role still runs, on the"
+  [ "$N_AGENTS" -gt 0 ] && echo "    main thread instead of in its own context — context and speed, not doctrine."
+  [ -n "$HOOK_NAMES" ] && echo "  - hooks: $HOOK_NAMES. Without them the gates"
+  [ -n "$HOOK_NAMES" ] && echo "    are checked by the doctrine and the run ledger, not by the harness."
+  echo "  For both, install the plugin instead (then remove these plain copies):"
   echo "    claude plugin marketplace add ssheleg/task-pipeline"
   echo "    claude plugin install task-pipeline@task-pipeline"
+  echo "  Optional companion for checkpoints, handoffs and shared lessons: Project Observatory,"
+  echo "    https://github.com/passioncode-ai/project-observatory-dashboard (README: Install, MCP)."
 fi
