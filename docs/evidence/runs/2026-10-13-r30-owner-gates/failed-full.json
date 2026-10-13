@@ -1,0 +1,13 @@
+{
+  "owner": "tp-r30",
+  "source": "b86478c12faf445c01b5f4f3ac1ea99ec78be52b",
+  "command": "npm run test:all",
+  "returncode": 1,
+  "disk_stop": false,
+  "elapsed_seconds": 1472.93,
+  "free_before": 752578560,
+  "free_after": 1239756800,
+  "log": "/tmp/r30-full-tp-r30.log",
+  "temporary_root": "/var/folders/3r/yrdx_c051cv22q3r3k0ylvdm0000gn/T/r30-gate-tp-r30-ki5onf5p",
+  "owned_temporary_removed": true
+}

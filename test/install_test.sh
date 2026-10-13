@@ -9,6 +9,10 @@
 #   * an installed Claude Code plugin is refused (exit 3), so no plain copy shadows it.
 #
 # Prints PASS and exits non-zero on the first failure.
+#
+# Every match reads a here-string (`grep -q … <<<"$out"`), never `printf | grep -q`: under
+# `pipefail`, grep -q exits at its first match and the writer can take SIGPIPE, which made
+# the pipeline fail although the text was there — 4 of 15 runs, three wide, under load.
 set -uo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 TMP="$(mktemp -d "${TMPDIR:-/tmp}/tp-install-XXXXXX")"
@@ -34,15 +38,15 @@ for kind in sh node; do
   done
   ok '[ -f "$H/.claude/commands/task-pipeline.md" ]' "$kind: the command is installed"
   for h in $HOOKS; do
-    ok 'printf "%s" "$out" | grep -q "$h"' "$kind: the notice names the hook $h"
+    ok 'grep -q "$h" <<<"$out"' "$kind: the notice names the hook $h"
   done
-  ok 'printf "%s" "$out" | grep -q "claude plugin install task-pipeline@task-pipeline"' \
+  ok 'grep -q "claude plugin install task-pipeline@task-pipeline" <<<"$out"' \
      "$kind: the notice gives the plugin command"
   ok '[ ! -e "$H/.claude/hooks" ] && [ ! -e "$H/.claude/settings.json" ]' \
      "$kind: no hook is wired silently into settings"
   out="$(run 2>&1)"
   for s in $SKILLS; do
-    ok 'printf "%s" "$out" | grep -q "skip: .*skills/$s"' "$kind: a rerun skips $s"
+    ok 'grep -q "skip: .*skills/$s" <<<"$out"' "$kind: a rerun skips $s"
   done
   echo stale > "$H/.claude/skills/evidence-docs/SKILL.md"
   out="$(run --force 2>&1)"; rc=$?
@@ -74,7 +78,7 @@ for kind in sh node; do
   H="$TMP/home-corrupt-cmd-$kind"; mkdir -p "$H"
   if [ "$kind" = sh ]; then out="$(HOME="$H" CLAUDE_CONFIG_DIR= bash "$C2/install.sh" 2>&1)"; rc=$?
   else out="$(HOME="$H" CLAUDE_CONFIG_DIR= node "$C2/bin/task-pipeline.js" 2>&1)"; rc=$?; fi
-  ok '[ "$rc" -ne 0 ] && [ ! -e "$H/.claude/skills" ] && printf "%s" "$out" | grep -q "command source"' \
+  ok '[ "$rc" -ne 0 ] && [ ! -e "$H/.claude/skills" ] && grep -q "command source" <<<"$out"' \
      "$kind: a missing command source installs nothing ($rc)"
 done
 # Mixed versions: an earlier install left one skill, the others are absent. Without --force
@@ -84,7 +88,7 @@ for kind in sh node; do
   echo old > "$H/.claude/skills/task-pipeline/SKILL.md"
   if [ "$kind" = sh ]; then out="$(HOME="$H" CLAUDE_CONFIG_DIR= bash "$ROOT/install.sh" 2>&1)"; rc=$?
   else out="$(HOME="$H" CLAUDE_CONFIG_DIR= node "$ROOT/bin/task-pipeline.js" 2>&1)"; rc=$?; fi
-  ok '[ "$rc" -ne 0 ] && printf "%s" "$out" | grep -q "mixed versions" && printf "%s" "$out" | grep -q -- "--force" && [ ! -e "$H/.claude/skills/evidence-docs" ]' \
+  ok '[ "$rc" -ne 0 ] && grep -q "mixed versions" <<<"$out" && grep -q -- "--force" <<<"$out" && [ ! -e "$H/.claude/skills/evidence-docs" ]' \
      "$kind: a partial earlier install is refused as mixed versions, nothing written ($rc)"
   if [ "$kind" = sh ]; then out="$(HOME="$H" CLAUDE_CONFIG_DIR= bash "$ROOT/install.sh" --force 2>&1)"; rc=$?
   else out="$(HOME="$H" CLAUDE_CONFIG_DIR= node "$ROOT/bin/task-pipeline.js" --force 2>&1)"; rc=$?; fi
