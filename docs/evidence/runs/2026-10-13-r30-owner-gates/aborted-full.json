@@ -1,0 +1,18 @@
+{
+  "owner": "tp-r30",
+  "source": "c229d7ffc3230ebccb21d77375dbf7c0f575fbb6",
+  "command": "npm run test:all",
+  "returncode": -15,
+  "disk_stop": false,
+  "elapsed_seconds": 381.29,
+  "free_before": 1606918144,
+  "free_after": 1352626176,
+  "log": "/tmp/r30-full-tp-r30.log",
+  "temporary_root": "/var/folders/3r/yrdx_c051cv22q3r3k0ylvdm0000gn/T/r30-gate-tp-r30-98kq3d8p",
+  "owned_temporary_removed": true,
+  "status": "ABORTED_KNOWN_DOCGATE_DEFECT",
+  "reason": "Independent metadata-stack docgate found original cherry-picked ledger SHA was a bare nonancestor citation. Owned npm process group stopped before later docgate; no pass claimed.",
+  "original_log_sha256": "72e0eb944cf7475041da7302a8229e55e50ad966252e16f8d52cbb0bacc419ce",
+  "sanitized_log_sha256": "72e0eb944cf7475041da7302a8229e55e50ad966252e16f8d52cbb0bacc419ce",
+  "sanitization": "literal local HOME prefix only"
+}
