@@ -169,7 +169,7 @@ having read no pixels at all. The **functional look** and the **visual half** ar
 checks; neither discharges the other.
 
 **When it runs, and when it gates — by the brief's `surface_class`**
-([`stages.md`](stages.md) → stage 0, *The surface class*):
+([`stage-00-intake.md`](stage-00-intake.md) → *0 — Intake grill — MANDATORY*, the surface-class bullet):
 
 | Class | Visual half at stages 5–6 | Human pass at stage 10 |
 |---|---|---|

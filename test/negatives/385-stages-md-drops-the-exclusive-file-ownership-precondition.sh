@@ -4,9 +4,9 @@ set -eu
 rm -rf /tmp/cv8-copy && cp -R . /tmp/cv8-copy
 python3 - <<'EOF'
 import re
-p = "/tmp/cv8-copy/plugins/task-pipeline/skills/task-pipeline/references/stages.md"
+p = "/tmp/cv8-copy/plugins/task-pipeline/skills/task-pipeline/references/stage-05-dev.md"
 t = open(p, encoding="utf-8").read()
-m = re.search(r"^## 5 — Dev.*?(?=^## )", t, re.S | re.M)
+m = re.search(r"^## 5 — Dev.*?(?=^## |\Z)", t, re.S | re.M)
 assert m, "PLANT DID NOT LAND: cv8 — no stage 5 section"
 _sec = re.sub(r"(?i)exclusive|file ownership", "separate", m.group(0))
 assert _sec != m.group(0), "PLANT DID NOT LAND: cv8 — stage 5 never named it"

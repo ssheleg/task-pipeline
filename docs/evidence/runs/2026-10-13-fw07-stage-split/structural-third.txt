@@ -1,0 +1,3 @@
+FAIL: task-pipeline structure invalid
+ - CHANGELOG.md: the newest section claims 438 guards but test/negatives/ holds 439 — the entry is written before the last checks are added, and this count went stale twice in one programme
+ - test/negatives.py: MIN_EXPECTED is 438 but test/negatives/ holds 439 negative self-tests — a floor below the count is a floor that cannot notice losing the difference; raise it in the same change that adds the tests

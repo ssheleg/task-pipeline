@@ -94,8 +94,7 @@ green over both.
   not checkable; a record is. The track writes a **director record** in the product's
   repository, beside `docs/ux/`: `docs/design/<surface>/director-record.md`, a header
   line `surface_class: <class>` and one `## <Field>` heading per field. Which fields are
-  owed is the brief's `surface_class` ([`stages.md`](stages.md) → stage 0, *The surface
-  class*):
+  owed is the brief's `surface_class` ([`stage-00-intake.md`](stage-00-intake.md) → *0 — Intake grill — MANDATORY*, the surface-class bullet):
 
   | Class | Fields the record owes |
   |---|---|

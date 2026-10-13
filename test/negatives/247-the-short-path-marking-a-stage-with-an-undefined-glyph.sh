@@ -3,7 +3,7 @@
 set -eu
 rm -rf /tmp/sp-copy && cp -R . /tmp/sp-copy
 python3 - <<'EOF'
-p = "/tmp/sp-copy/plugins/task-pipeline/skills/task-pipeline/references/stages.md"
+p = "/tmp/sp-copy/plugins/task-pipeline/skills/task-pipeline/references/stage-00-intake.md"
 t = open(p, encoding="utf-8").read()
 needle = "marked `⊘` with the triage answer"
 assert needle in t, "PLANT DID NOT LAND: the short path's glyph moved"

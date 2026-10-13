@@ -111,6 +111,6 @@ ledger exists to catch.
 
 ## Where the doctrine is
 
-`references/stages.md` → stage 8 for what verification means here;
+`references/stage-08-post-deploy.md` for what verification means here;
 `references/verification.md` for the ledger your evidence lands in;
 `references/gates.md` for what a gate's exit code obliges.

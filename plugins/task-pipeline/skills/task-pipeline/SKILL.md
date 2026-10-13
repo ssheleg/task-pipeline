@@ -153,12 +153,12 @@ before drawing, never invented by the drawing agent).
    autonomy sweep is covered, **the REQ table is
    written (one row per independently verifiable deliverable, each naming its
    check)** and the brief is locked
-   (`references/stages.md` → 0). Do not touch stage 1 before the brief is
+   (`references/stage-00-intake.md`). Do not touch stage 1 before the brief is
    committed and confirmed. **Entered from super-ux?**
    (a validated `docs/ux/` chain and/or a `docs/ux/plans/…` fix plan already
    exists — super-ux's `/ux` hands off here) → don't re-grill or rebuild the UX
    chain: just check it's OK (`/ux-lint` green), confirm scope in one line, and
-   skip ahead to the first stage with real work (see `references/stages.md` → 0).
+   skip ahead to the first stage with real work (see `references/stage-00-intake.md`).
 3. Walk stages 1→10 on the model confirmed at preflight. **Don't re-ask about the
    model at every boundary** — only when the operator recorded a per-stage override
    map and the next stage's entry differs (`references/model-tiering.md`).
@@ -193,7 +193,7 @@ before drawing, never invented by the drawing agent).
    unaccounted (`references/residue.md`). The rest are in
    [`references/gates.md`](references/gates.md) → *Cross-cutting, at every stage*.
 
-## Stages (detail in `references/stages.md`)
+## Stages (gates and routes in `references/stages.md`)
 
 All stages run on the **one model confirmed at preflight** (default: the most
 capable available — see `references/model-tiering.md`).
@@ -213,9 +213,11 @@ capable available — see `references/model-tiering.md`).
 | 10 | **Acceptance** | the ladder walk ran and its absences became REQ rows; every REQ accounted for with evidence from a check seen failing once; no unresolved ledger row; **every repository clean, pushed and pointed at**; the hand-back written and the environment given back; the retrospective written **last**, and in order | manual |
 
 **Every gate above is the short form**, and the long form is the point of
-[`references/stages.md`](references/stages.md) — one section per stage. What the
-ladder walk is, which eight environment classes stage 10 enumerates, what makes an
-edge fake, why a `200` is not a working page: all there, none here.
+[`references/stages.md`](references/stages.md) — one gate and exact detail route per
+default stage. Before work on entry or resume, read that stage’s routed detail,
+including waves and approved short paths; never preload all details. CUSTOM
+profiles use their own declared doctrine; matching numeric ids do not select
+default details. Full obligations stay in the spine and the selected detail.
 
 **Several repositories?** A submodule is finished when its parent says so — a clone
 can still get the commit before it while neither repository looks wrong alone. The

@@ -343,5 +343,5 @@ Both notices live in the repo `LICENSE` → *Third-party*.
 ## Hand-off the other direction
 
 super-ux's `/ux` menu can hand off *to* this pipeline (its "execute autonomously"
-action). When entered that way the UX chain already exists — see `stages.md` → 0
+action). When entered that way the UX chain already exists — see `stage-00-intake.md`
 *Entry-from-super-ux short-circuit*: verify, don't rebuild.

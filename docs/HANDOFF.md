@@ -1,3 +1,18 @@
+## FW07 stage split — current isolated implementation
+
+Entry: [execution receipt](evidence/runs/2026-10-13-fw07-stage-split/README.md).
+The independently accepted prerequisite correction is followed by lossless
+stage extraction, explicit default entry/resume routes, consumer migration and
+source controls. B-043 remains open. No version, release, native host or billed
+usage result is claimed.
+
+Structural validation passes. Exact next task: public-entry refusal, independent review,
+then the moved negative corpus and composed owner aggregate in the serialized slot.
+Keep every full gate and the selected custom profile's precedence intact. The
+receipt preserves failed intermediate checks and names all validation not run.
+
+## Prior prerequisite handoff
+
 ## FW07 prerequisite correction in progress
 
 [Execution receipt](evidence/runs/2026-10-13-fw07-prerequisites/README.md) binds the

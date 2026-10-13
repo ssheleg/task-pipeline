@@ -1,6 +1,6 @@
 # FW07 consumer migration map
 
-Prepared from frozen prerequisite source `cfa5248240df71a55ca6c1742ab9a02ba7867949`.
+Prepared from frozen prerequisite source [cfa5248](https://github.com/ssheleg/task-pipeline/commit/cfa5248240df71a55ca6c1742ab9a02ba7867949).
 This is an implementation map, not evidence that relocation or validation happened.
 The accepted [partition](../../reports/2026-10-13-fw07-stage-reading-floor/raw/conservation-plan.json)
 still matches stages.md byte-for-byte. The extraction will keep each complete gate

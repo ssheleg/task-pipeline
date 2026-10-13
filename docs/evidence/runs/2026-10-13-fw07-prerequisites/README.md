@@ -40,3 +40,14 @@ Next: independent source/negative review, then the
 accepted lossless stage extraction on this isolated line. Preserve complete gates,
 exact entry/resume routes and custom-profile precedence. One composed full suite
 follows peer acceptance; no model/native quality or billed-token claim is made here.
+
+## Independent source review
+
+The coordinator independently reviewed frozen [cfa5248](https://github.com/ssheleg/task-pipeline/commit/cfa5248240df71a55ca6c1742ab9a02ba7867949)
+against the accepted artifact-provider contract and replayed the real regression
+entry (9 controls) plus its public-entry mutation harness (18 controls), all passing.
+The canonical default profile is
+`plugins/task-pipeline/skills/task-pipeline/pipeline.example.json`; Git comparison
+from the accepted base to that reviewed commit shows that profile and stages.md
+unchanged. This accepts the bounded semantic correction, not native host behavior.
+The following extraction is a separate source change with its own conservation proof.

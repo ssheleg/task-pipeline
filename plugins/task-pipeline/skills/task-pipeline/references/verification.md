@@ -3,7 +3,7 @@
 **One job: record whether a human ever looked at what shipped, and when.**
 
 Stage 8 already performs the verification trio, reads the CI verdict and opens the
-rendered page ([`stages.md`](stages.md) → *8 — Post-deploy*). All of it is **per run**,
+rendered page ([`stage-08-post-deploy.md`](stage-08-post-deploy.md) → *8 — Post-deploy*). All of it is **per run**,
 and none of it accumulates. Ask a project *"which features has nobody confirmed since
 they shipped?"* and before this file the honest answer was: nobody knows, and no
 artifact could be consulted.
