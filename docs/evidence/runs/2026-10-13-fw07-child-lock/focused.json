@@ -1,0 +1,38 @@
+[
+  {
+    "command": [
+      "python3",
+      "-B",
+      "test/audit_regressions/fw07_scratch_lock.py"
+    ],
+    "exit": 0,
+    "output": "PASS: shared scratch lock \u2014 30 controls; owned namespace only\n"
+  },
+  {
+    "command": [
+      "python3",
+      "-B",
+      "test/runner_test.py"
+    ],
+    "exit": 0,
+    "output": "  ok    a plant whose validator refused the defect passes\n  ok    a plant whose validator accepted it fails\n  ok    a plant that changed nothing is BROKEN, not FAIL\n  ok    a plant that declared a skip is SKIP, not PASS\n  ok    a declared skip changed nothing on purpose, so it is not BROKEN\n  ok    an exit-0 run that printed neither marker is a FAIL, not a pass\n  ok    with no dormant plant the claim says `all N`\n  ok    a dormant plant is subtracted from the claim and named\n  ok    a dormant PROPERTY check is subtracted too \u2014 the same sentence, one category over\n  ok    everything dormant is not a pass over an empty set\n  ok    everything dormant on both sides is not a pass either\n  ok    nothing present at all is not a pass either \u2014 the `-k` matched-nothing path\n  ok    one plant left standing still makes a claim, about one\n  ok    eight slices cover every check exactly once\n  ok    slices are balanced to within one check\n  ok    the split is a function of position, so the same tree splits the same way\n  ok    one slice of one is the whole suite\n  ok    `3/8` reads as the third of eight\n  ok    `0/8` is refused, never guessed\n  ok    `9/8` is refused, never guessed\n  ok    `8` is refused, never guessed\n  ok    `a/b` is refused, never guessed\n  ok    `` is refused, never guessed\n  ok    `3/0` is refused, never guessed\n  ok    `-1/8` is refused, never guessed\n  ok    CLI ['--help'] is admitted before scanning or allocation\n  ok    CLI ['-h'] is admitted before scanning or allocation\n  ok    CLI ['--unknown'] is admitted before scanning or allocation\n  ok    CLI ['--lis'] is admitted before scanning or allocation\n  ok    CLI ['-k'] is admitted before scanning or allocation\n  ok    CLI ['--shard'] is admitted before scanning or allocation\n  ok    CLI ['--list'] is admitted before scanning or allocation\n  ok    CLI ['-k', 'exclusion'] is admitted before scanning or allocation\n  ok    CLI ['--shard', '1/8'] is admitted before scanning or allocation\n  ok    CLI selection ['-k', 'alpha'] retains its parsed filter\n  ok    CLI selection ['-kalpha'] retains its parsed filter\n  ok    CLI selection ['--shard', '1/2'] retains its parsed filter\n  ok    CLI selection ['--shard=1/2'] retains its parsed filter\n  ok    CLI selection ['-kbeta', '-kalpha'] retains its parsed filter\n  ok    CLI selection ['--shard=2/2', '--shard=1/2'] retains its parsed filter\n  ok    MIN_EXPECTED is the counted number, not a carried-over one (439 vs 439)\n  ok    MIN_PROPS is the counted number, not a carried-over one (15 vs 15)\n\nPASS: negatives runner \u2014 42 cases, 3 of them the empty-set branch\n"
+  },
+  {
+    "command": [
+      "python3",
+      "-B",
+      "test/audit_regressions/plant_copy_cleanup.py"
+    ],
+    "exit": 0,
+    "output": "..................\n----------------------------------------------------------------------\nRan 18 tests in 1.392s\n\nOK\n"
+  },
+  {
+    "command": [
+      "python3",
+      "-B",
+      "test/audit_regressions/fw07_child_lifetime.py"
+    ],
+    "exit": 0,
+    "output": "PASS: shared scratch child lifetime \u2014 44 controls; owned namespaces only\n"
+  }
+]

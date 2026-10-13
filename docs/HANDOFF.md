@@ -1,3 +1,15 @@
+## Operator stop: Claude continuation — FW07 child lifetime
+
+The operator requested a handoff, not another wave. Start with the
+[child-lock continuation packet](evidence/runs/2026-10-13-fw07-child-lock/README.md#claude-continuation-after-operator-stop).
+Implementation25fb09d is pushed and focused-tested, with independent review and
+canonical owner ports still pending. The existing complete gate on older875c6e6
+continues under its owned watchdog; its partial checkpoint, exact process/source
+identity, log and final-result paths are preserved in that packet. Inspect it
+before starting any suite. No new full run or PR promotion is authorized by this
+handoff itself; continue under the operator's resumed instruction and existing
+repository policy. Do not unlink the permanent family scratch lock.
+
 ## FW07 R07 runner cleanup correction — composed, complete gate pending
 
 [Packet and source-bound checks](evidence/runs/2026-10-13-fw07-copy-cleanup/README.md)

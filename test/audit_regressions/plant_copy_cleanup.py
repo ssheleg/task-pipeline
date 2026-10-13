@@ -13,6 +13,7 @@ from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import negatives as N
+import negative_lock
 
 
 class CopyCleanup(unittest.TestCase):
@@ -34,9 +35,9 @@ class CopyCleanup(unittest.TestCase):
     def run_script(self, script, *, prop=False, exception=False):
         name = ('Property check' if prop else 'Negative self-test') + ' (owned fixture)'
         rows = [('001-owned.sh', name, script)]
-        real_run = subprocess.run
-        def run(args, **kw):
-            result = real_run(args, **kw)
+        real_run = N.ScratchProcesses.run
+        def run(owner, args, **kw):
+            result = real_run(owner, args, **kw)
             if exception and args[0] == 'bash':
                 raise OSError('injected runner observation failure after child completion')
             return result
@@ -51,9 +52,10 @@ class CopyCleanup(unittest.TestCase):
              patch.object(N, 'scan', return_value=(rows, [])), \
              patch.object(N, 'MIN_EXPECTED', 0 if prop else 1), \
              patch.object(N, 'MIN_PROPS', 1 if prop else 0), \
-             patch.object(N, 'acquire_scratch_lock', return_value=io.StringIO()), \
+             patch.object(negative_lock, 'scratch_lock_path',
+                          return_value=str(self.box / 'owned-family.lock')), \
              patch.object(N.tempfile, 'mkdtemp', side_effect=allocate), \
-             patch.object(N.subprocess, 'run', side_effect=run), \
+             patch.object(N.ScratchProcesses, 'run', run), \
              contextlib.redirect_stdout(out):
             try:
                 code = N.main(['negatives.py'])
@@ -81,7 +83,9 @@ class CopyCleanup(unittest.TestCase):
         self.assert_copies_gone()
 
     def test_all_copies_runner_exception(self):
-        self.assertEqual(self.run_script(self.script(), exception=True)[0], 'OSError')
+        code, output = self.run_script(self.script(), exception=True)
+        self.assertEqual(code, 1)
+        self.assertIn('injected runner observation failure after child completion', output)
         self.assert_copies_gone()
 
     def test_property_copies_success(self):
@@ -89,7 +93,9 @@ class CopyCleanup(unittest.TestCase):
         self.assert_copies_gone()
 
     def test_property_copies_exception(self):
-        self.assertEqual(self.run_script(self.script(), prop=True, exception=True)[0], 'OSError')
+        code, output = self.run_script(self.script(), prop=True, exception=True)
+        self.assertEqual(code, 1)
+        self.assertIn('injected runner observation failure after child completion', output)
         self.assert_copies_gone()
 
     def test_primary_unchanged_stays_broken_despite_secondary_change(self):
@@ -159,7 +165,9 @@ class CopyCleanup(unittest.TestCase):
 
     def test_observation_failure_still_cleans_both(self):
         with patch.object(N, 'differs_from_repo', side_effect=OSError('injected diff failure')):
-            self.assertEqual(self.run_script(self.script())[0], 'OSError')
+            code, output = self.run_script(self.script())
+            self.assertEqual(code, 1)
+            self.assertIn('injected diff failure', output)
         self.assert_copies_gone()
 
     def test_duplicate_declaration_cleanup_once(self):

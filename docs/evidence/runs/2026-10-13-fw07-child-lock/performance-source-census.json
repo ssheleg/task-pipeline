@@ -1,0 +1,118 @@
+{
+  "source": "875c6e6a9a02c5c18e77945fc4fa56a43588cb5c",
+  "kind": "source-only algorithm census; no attribution of actual elapsed duration",
+  "files": [
+    {
+      "path": "test/negatives.py",
+      "sha256": "66085773964828c6b5596da2485249df6c31113abab2316a8b6f49dfba8acb67",
+      "anchors": [
+        {
+          "term": "shutil.copytree(_common",
+          "lines": [
+            447
+          ]
+        },
+        {
+          "term": "_WORKERS =",
+          "lines": [
+            485
+          ]
+        },
+        {
+          "term": "_results = list",
+          "lines": [
+            510
+          ]
+        },
+        {
+          "term": "for name, script in props:",
+          "lines": [
+            529
+          ]
+        }
+      ]
+    },
+    {
+      "path": "test/certify_mutations.py",
+      "sha256": "89810c28504bc2a3f399b4431328717af1281eddbb36b4824326b045191822ae",
+      "anchors": [
+        {
+          "term": "def run_suite",
+          "lines": [
+            86
+          ]
+        },
+        {
+          "term": "test/graph_test.py",
+          "lines": [
+            94
+          ]
+        },
+        {
+          "term": "red, ran = run_suite()",
+          "lines": [
+            110
+          ]
+        },
+        {
+          "term": "for name, old, new in MUTATIONS:",
+          "lines": [
+            122
+          ]
+        }
+      ]
+    },
+    {
+      "path": "test/graph_test.py",
+      "sha256": "37fdc2723f02e7aa2f1611f206c88eb2265cda9b542ccf57e29df43fc7b95d73",
+      "anchors": [
+        {
+          "term": "def case(name):",
+          "lines": [
+            41
+          ]
+        },
+        {
+          "term": "fn()",
+          "lines": [
+            47
+          ]
+        },
+        {
+          "term": "subprocess.run([sys.executable",
+          "lines": [
+            67,
+            120,
+            127,
+            139,
+            1059,
+            1137,
+            1176,
+            1723,
+            1928,
+            1959,
+            2002,
+            2128,
+            2134,
+            2151,
+            2159,
+            2173
+          ]
+        }
+      ]
+    }
+  ],
+  "candidate_hypotheses": [
+    "full common Git directory snapshot once, then repeated corpus copies may cost IO; measure bytes and clone shapes before changing",
+    "negative pool reports only after all futures finish; missing live progress is observability not necessarily inactivity",
+    "15 properties run sequentially after negatives; prove all secondary copy sets and side effects independent before any pooling",
+    "certify mutation harness executes entire graph suite22 times and filters certification lines after; preserve full control + each mutation attribution before considering a dedicated certification group"
+  ],
+  "acceptance": [
+    "same discovered complete corpus with named PASS/FAIL/BROKEN/DORMANT and unchanged verdict rules",
+    "same exact source/localtag visibility for actual accepted-release gate; this current preintegration run remains untagged",
+    "owned isolated timing controls; no public scratch overlap; same shared lock across all owners",
+    "record phase times, copy bytes, minimum disk and fixture counts on controlled before/after sources; no theoretical time claim",
+    "public negative baseline and counterexamples remain mandatory; no caching across mutated source identities"
+  ]
+}

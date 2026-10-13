@@ -97,6 +97,7 @@ for _spec in ("0/8", "9/8", "8", "a/b", "", "3/0", "-1/8"):
 from contextlib import redirect_stdout, redirect_stderr
 from io import StringIO
 from unittest.mock import patch
+import negative_lock
 
 
 def _admission(args):
@@ -131,7 +132,8 @@ def _selection(args):
     with tempfile.TemporaryDirectory(prefix="tp-runner-cli-") as folder, \
             patch.object(negatives, "scan", return_value=(fixture, [])), \
             patch.object(negatives, "MIN_EXPECTED", 2), \
-            patch.object(negatives.tempfile, "gettempdir", return_value=folder):
+            patch.object(negative_lock, "scratch_lock_path",
+                         return_value=str(Path(folder) / "owned-family.lock")):
         out = StringIO()
         with redirect_stdout(out), redirect_stderr(StringIO()):
             code = negatives.main(["negatives.py", "--list", *args])

@@ -1,0 +1,12 @@
+{
+  "command": "python3 -B test/audit_regressions/fw07_child_lifetime.py",
+  "exit": 1,
+  "observed": "TERM cancellation case timed out after8seconds waiting for actual runner. Parent handler sentTERM only; writing child deliberately ignoredTERM, retained captured pipes, and ThreadPoolExecutor waited before helper exit could escalate.",
+  "correction": "Cancellation now escalates owned groups before waiting for pool shutdown. First run is failed, not acceptance.",
+  "second_failed_replay": {
+    "command": "python3 -B test/audit_regressions/fw07_child_lifetime.py",
+    "exit": 1,
+    "observed": "Injected communicate fault reached cancellation; macOS killpg SIGKILL after TERM reported EPERM for an already-exited unreaped child, masking the original OSError.",
+    "correction": "Poll/reap exited leader before owned group signal; no generic EPERM ignore."
+  }
+}
