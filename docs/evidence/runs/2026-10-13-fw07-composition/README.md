@@ -56,3 +56,35 @@ available run moved public plants and the owner aggregate. The separately review
 release helper must not enter this branch until its independent acceptance.
 Choose the next coherent package version only after source freeze;1.94.1 remains
 the accepted base and must not be republished with these changed instructions.
+
+## Independent stage/checkpoint composition acceptance
+
+[Peer receipt](independent-peer-01b1928.json) accepts exact01b1928 at source level:
+20bindings, every nonconflicting merge path, retained old HANDOFF/CHANGELOG lines,
+card composition and lossless gzip patch verified. Existing focused receipts were
+read, not independently rerun. Full and native outcomes remain unobserved.
+
+## Accepted helper composition and newly exposed startup seam
+
+Normal merge10b9a4a adds helper source4612024 plus independent receipt95c8626.
+Only HANDOFF conflicted; both contexts retained. The reviewed helper was unchanged
+by that merge. Package metadata still1.94.1 pending future candidate version.
+
+Its composed focused replay [failed](helper-first-failure.txt) at real interruption
+cleanup. Source review found Popen preceding SIGTERM handler registration. A
+[deterministic owned-child probe](early-term-baseline.json) delivers SIGTERM before
+Popen returns: driver exits-15 and child survives. That exact child process group
+was terminated explicitly. The first probe setup mistakenly constructed Candidate
+in a linked worktree and produced no child marker; it is not baseline evidence.
+
+The correction registers SIGTERM/SIGINT handlers before launch and records a flag
+instead of raising during Popen. Once the process handle is acquired, normal
+cleanup reaps the owned child and restores both previous handlers. Deterministic
+early-term and early-int controls supplement the existing real interruption/disk
+controls. This is bounded process cleanup evidence, not protection from SIGKILL
+or every possible hostile race. Independent correction review remains required.
+
+Corrected composed replay: `python3 -B test/audit_regressions/fw07_release_candidate.py`
+passes [56 controls](helper56.txt), exit0. This supersedes only the failed helper
+replay; no whole-owner gate is implied. The source correction is isolated in its
+own commit after the normal helper merge.

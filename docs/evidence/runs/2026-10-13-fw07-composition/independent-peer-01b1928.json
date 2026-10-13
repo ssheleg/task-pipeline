@@ -1,0 +1,58 @@
+{
+  "source": "01b1928e17c4b888d2f93f139425209dcf90388d",
+  "verdict": "BOUNDED_SOURCE_COMPOSITION_PASS",
+  "scope": "Independent read-only merge conservation and semantic seam review; no broad or focused behavioral test rerun.",
+  "source_map_bindings_verified": 20,
+  "accepted_base": "540679ea7552f8a37e99560e287a69c23cbd3c4a",
+  "stage_source": "5316132edd8133dd8bd06eeb8b55f010355b04b9",
+  "checkpoint_source": "cb4c9db7e83909ad081dfe4cd0e5f9de6c8e8757",
+  "all_nondisputed_merge_files_exact": {
+    "first_merge": 872,
+    "second_merge": 879
+  },
+  "manual_review": [
+    "Both merges preserve every original nonblank CHANGELOG/HANDOFF line from accepted base and both task candidates. Current handoff explicitly supersedes older entries.",
+    "SKILL-CARD equals complete stage candidate except exact accepted Version1.94.1 row; all three manifests/profile/schema unchanged from accepted base.",
+    "Only intentional non-parent blob changes during second merge are historical patch->gzip and its link; decompression exactly reproduces original5316132 patch.",
+    "Default stage details retain entry/resume routing and missing-detail refusal; custom profile doctrine and stage order remain authoritative. Checkpoint executable is byte-identical to independently reviewed cb4c9db, continuity owns its profile/recovery contract. No source overlap introduced a competing stage selector.",
+    "Release helper absent and shipped hook byte-identical to accepted base; after4fa9ff1 only composition documentation/receipts changed."
+  ],
+  "existing_focused_receipts_read_not_rerun": [
+    {
+      "receipt": "contract.txt",
+      "sha256": "c88aa935cf0a66c84e86ad726a8b32ee611ebab190d9f74d8925869d5c75eeeb",
+      "output": "  ok  the gate checks the artifact, not the package\n  ok  current prerequisite homes reject package-install gates\n  ok  stage entry preserves quality and tool uncertainty\n  ok  three provider paths satisfy one contract\n  ok  a foreign design workflow is judged by its result\n  ok  an absent tool is the named check not done\n  ok  fixture: valid scenarios without super-ux pass\n  ok  fixture: no artifact \u2192 create it, preferred provider offered\n  ok  fixture: invalid artifact refuses every provider\n  ok  fixture: foreign design with evidence is designed\n\nall green\n"
+    },
+    {
+      "receipt": "prereq.txt",
+      "sha256": "6eb9246f6d8b52319dea697dfda0b15884c9a622a40ffb0bcdaa3fc8f33d47f2",
+      "output": "PASS: FW07 prerequisite source controls \u2014 30 (owned fixture removed)\n"
+    },
+    {
+      "receipt": "routes.txt",
+      "sha256": "a0240454cfa7ba0f12fb39eaa822abc5df6dd6007fc395b23a18518612df4592",
+      "output": "PASS: FW07 stage route source controls \u2014 51; native reads and task quality NOT_RUN\n"
+    },
+    {
+      "receipt": "checkpoint.txt",
+      "sha256": "d318454ce9cdbf7be2b9b6b128f4b31ebb73a27b870041fcca3926b02bce382d",
+      "output": "PASS: FW07 selected-profile checkpoint \u2014 162 controls\n"
+    },
+    {
+      "receipt": "existing-checkpoint.txt",
+      "sha256": "416eeff9b47ac8e4858b91c71015dbf85c85462866779fb3df82068911f98442",
+      "output": "PASS: a returned gate becomes one checkpoint built from the ledger\nPASS: retries replay, repeated stages are new\nPASS: the workflow continues across boundaries; the token stays out of every output\nPASS: provider loss is one ledger line and the run goes on\nPASS: a stale writer stops after one refusal; the successor continues\nPASS: credentials travel by name only\nPASS: a failed gate stays open; acceptance closes\nPASS: review rounds travel in the checkpoint of the stage that recorded them\nPASS: a planned executor change offers the workflow, the successor accepts it\nPASS: an offer's retry survives unrelated ledger appends; a recorded offer moves the key\nPASS: memory unavailable for the run is one marker and one line; an answer clears it\nPASS: no ledger, no checkpoint\nPASS: stage_checkpoint.py \u2014 72 cases\n"
+    },
+    {
+      "receipt": "memory.txt",
+      "sha256": "70d7726cb90a763b6815930d86f57bd50484cd9077bbade031bd56ba59cf0989",
+      "output": "PASS: memory-nudge.sh \u2014 40 cases\n"
+    }
+  ],
+  "limits": [
+    "This accepts merge composition, not a fresh behavioral audit of every inherited stage/checkpoint rule.",
+    "Public moved-negative runner, composed owner aggregate, genuine candidate CI, model/native/token evaluation and release remain pending as documented.",
+    "Version1.94.1 is preserved source metadata only; these changed packaged instructions must not republish that immutable version."
+  ],
+  "edits_by_peer": false
+}

@@ -224,10 +224,19 @@ spec=importlib.util.spec_from_file_location('m',sys.argv[1]);m=importlib.util.mo
 c=m.Candidate(sys.argv[2],'v1.2.3')
 m.COMMAND=[sys.executable,'-c',"import os,time,pathlib;pathlib.Path("+repr(sys.argv[3])+").write_text(str(os.getpid()));time.sleep(60)"]
 m.shutil.disk_usage=lambda p:types.SimpleNamespace(free=0 if sys.argv[4]=='disk' else 2**40)
+if sys.argv[4].startswith('early-'):
+ original=m.subprocess.Popen
+ def launch(*args,**kwargs):
+  child=original(*args,**kwargs)
+  pathlib.Path(sys.argv[3]).write_text(str(child.pid))
+  import os,signal
+  os.kill(os.getpid(),signal.SIGTERM if sys.argv[4]=='early-term' else signal.SIGINT)
+  return child
+ m.subprocess.Popen=launch
 with open(sys.argv[3]+'.log','wb') as out: result=c._run_suite(out)
 print(json.dumps(result))
 """)
-    for mode in ('interrupt','disk'):
+    for mode in ('interrupt','disk','early-term','early-int'):
         c=fresh();marker=base/('child-'+mode)
         proc=subprocess.Popen([sys.executable,'-B',str(driver),str(ROOT/'scripts/release_candidate.py'),
                                str(c.root),str(marker),mode],stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True)
@@ -238,9 +247,9 @@ print(json.dumps(result))
                 assert marker.exists(), 'owned child did not start'
                 proc.send_signal(signal.SIGTERM)
             stdout,stderr=proc.communicate(timeout=10)
-            assert proc.returncode==0,stderr
+            assert proc.returncode==0,(mode,proc.returncode,stderr)
             code,reason=json.loads(stdout)
-            assert code!=0 and reason==('interrupted' if mode=='interrupt' else 'disk-stopped')
+            assert code!=0 and reason==('disk-stopped' if mode=='disk' else 'interrupted')
             if marker.exists():
                 pid=int(marker.read_text())
                 try:os.kill(pid,0)

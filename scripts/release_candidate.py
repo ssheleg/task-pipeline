@@ -225,27 +225,38 @@ class Candidate:
             return data
 
     def _run_suite(self, stream):
-        p = subprocess.Popen(COMMAND, cwd=self.root, stdout=stream, stderr=subprocess.STDOUT,
-                             start_new_session=True)
-        reason = None
-        previous_term = signal.getsignal(signal.SIGTERM)
+        # Register before launching: a fast child can signal readiness before
+        # Popen returns. A flag also avoids an exception interrupting Popen before
+        # we acquire the child handle needed for cleanup.
+        interrupted = False
         def terminated(signum, frame):
-            raise SystemExit('terminated')
-        signal.signal(signal.SIGTERM, terminated)
+            nonlocal interrupted
+            interrupted = True
+        previous = {sig: signal.getsignal(sig) for sig in (signal.SIGTERM, signal.SIGINT)}
+        for sig in previous: signal.signal(sig, terminated)
+        p = None
+        reason = None
         try:
+            p = subprocess.Popen(COMMAND, cwd=self.root, stdout=stream, stderr=subprocess.STDOUT,
+                                 start_new_session=True)
             while p.poll() is None:
+                if interrupted:
+                    reason = 'interrupted'; break
                 if shutil.disk_usage(self.root).free < 400 * 1024**2:
                     reason = 'disk-stopped'; break
                 time.sleep(1)
+            if interrupted: reason = 'interrupted'
         except (KeyboardInterrupt, SystemExit):
             reason = 'interrupted'
         finally:
-            if p.poll() is None:
-                os.killpg(p.pid, signal.SIGTERM)
-                try: p.wait(timeout=10)
-                except subprocess.TimeoutExpired: os.killpg(p.pid, signal.SIGKILL); p.wait()
-            signal.signal(signal.SIGTERM, previous_term)
-        return p.returncode, reason
+            try:
+                if p is not None and p.poll() is None:
+                    os.killpg(p.pid, signal.SIGTERM)
+                    try: p.wait(timeout=10)
+                    except subprocess.TimeoutExpired: os.killpg(p.pid, signal.SIGKILL); p.wait()
+            finally:
+                for sig, handler in previous.items(): signal.signal(sig, handler)
+        return p.returncode if p is not None else -1, reason
 
     def check(self):
         with self.lock():
