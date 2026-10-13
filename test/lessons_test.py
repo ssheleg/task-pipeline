@@ -153,6 +153,48 @@ def anchor():
     return "2026-10-0{n}-{topic}-gate-6-reopened-twice"
 
 
+def conservative_rebuild_controls():
+    repo, _ = project("rebuild-preservation", 1)
+    retro = repo / "docs/evidence/retro.md"
+    work = tree("tp-lessons-preservation-")
+    idx = work / "index.jsonl"
+    rc, _, _ = run("add", "--retro", str(retro), "--all", cwd=repo, index=idx)
+    ok(rc == 0, "preservation fixture seeds a real lesson")
+    before = idx.read_bytes()
+    for root in (repo / "missing-root", retro):
+        rc, out, err = run("rebuild", "--roots", str(root), index=idx)
+        ok(rc != 0 and idx.read_bytes() == before and "not read" in out + err,
+           f"missing/non-directory root refuses without replacing the index ({rc} {out} {err})")
+    retro.chmod(0)
+    try:
+        rc, out, err = run("rebuild", "--roots", str(repo), index=idx)
+        ok(rc != 0 and idx.read_bytes() == before and "not read" in out + err,
+           "unreadable retro retains every old lesson")
+    finally:
+        retro.chmod(0o644)
+    blocked = repo / "unreadable-child"
+    blocked.mkdir()
+    blocked.chmod(0)
+    try:
+        rc, out, err = run("rebuild", "--roots", str(repo), index=idx)
+        ok(rc != 0 and idx.read_bytes() == before and "not read" in out + err,
+           "unreadable discovery subtree cannot silently drop lessons")
+    finally:
+        blocked.chmod(0o755)
+    conf = repo / "pipeline.json"
+    conf.write_text('{"paths":')
+    rc, out, err = run("rebuild", "--roots", str(repo), index=idx)
+    ok(rc != 0 and idx.read_bytes() == before, "malformed artifact-root configuration refuses rebuild")
+    conf.unlink()
+    absent = work / "fresh" / "index.jsonl"
+    rc, _, _ = run("rebuild", "--roots", str(repo / "missing-root"), index=absent)
+    ok(rc != 0 and not absent.parent.exists(), "incomplete first rebuild creates no index or lock directory")
+    empty = work / "empty"
+    empty.mkdir()
+    rc, _, _ = run("rebuild", "--roots", str(empty), index=idx)
+    ok(rc == 0 and idx.read_bytes() == b"", "an explicitly readable empty scope can rebuild to zero")
+
+
 def main():
     a, sha_a = project("alpha", 1)
     b, sha_b = project("beta", 2)
@@ -441,7 +483,7 @@ def main():
     ok(L.ARTIFACT_REGISTERS == js_regs and L.ARTIFACT_KNOWN == js_known,
        f"lessons.py reads the artifact root with artifact-root.js's names and registers ({L.ARTIFACT_REGISTERS} vs {js_regs})")
 
-    # --- rebuild never aborts on one repository, nor on the corrupt index it exists to replace
+    # --- complete rebuild repairs corrupt projection; an unknown source cannot replace it
     rb2 = work / "rb2" / "index.jsonl"
     rb2.parent.mkdir(parents=True, exist_ok=True)
     rb2.write_text("{not json\n", encoding="utf-8")
@@ -450,8 +492,9 @@ def main():
        f"rebuild replaces a corrupt index instead of refusing it ({rc} {out!r} {err!r})")
     rc, out, err = run("rebuild", "--roots", str(roots), index=work / "rb3" / "index.jsonl",
                        env_extra={"PATH": f"{shim}:{os.environ['PATH']}", "TASK_PIPELINE_GIT_TIMEOUT": "1"})
-    ok(rc == 0 and out.count("not read") >= 2 and "did not answer" in out,
-       f"a repository git cannot answer for is listed under not read, and the rebuild finishes ({rc} {out!r})")
+    ok(rc == 1 and out.count("not read") >= 2 and "did not answer" in out
+       and not (work / "rb3" / "index.jsonl").exists(),
+       f"git timeouts report all unknown sources and refuse index replacement ({rc} {out!r})")
 
     # --- cycle 4: a corrupt old index never blocks; an unreadable index is never replaced
     h3 = tree("tp-lessons-home3-")
@@ -635,6 +678,7 @@ def main():
     rc, out, _ = run("path")
     ok(rc == 0 and out.strip() == str(HOME / ".sshlg-skills" / "lessons" / "index.jsonl"),
        f"with ~/.sshlg-skills present the default is its lessons/index.jsonl ({out!r})")
+    conservative_rebuild_controls()
     print(f"PASS: lessons.py — {CASES} cases")
 
 
