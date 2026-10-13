@@ -1,0 +1,9 @@
+{
+  "baseline_source": "78c42124db910c56e74c8fbd524bdc9a4f8fb6c9",
+  "command": "python3 -B test/audit_regressions/fw07_checkpoint_profile.py",
+  "exit": 1,
+  "expected_refusal": "AssertionError: only selected stages",
+  "stdout": "",
+  "stderr_tail": "AssertionError: only selected stages",
+  "live_provider_calls": false
+}

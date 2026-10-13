@@ -60,3 +60,37 @@ This is a wrong checkpoint payload, not an observed live Observatory write.
 
 Implementation and focused results follow in later source-bound sections. Broad
 suite and genuine candidate CI remain pending the coordinator's serial slot.
+
+## Implemented source slice
+
+The selected profile now drives plan order and the next step; only the final passed
+selected stage closes. `--project-root` names the authority for a relocated ledger;
+without that option a non-Git relocated ledger refuses instead of guessing.
+The default ledger location and configured artifact root remain separate. The
+numeric checkpoint ledger supports optional profile ids/names via ordinal/state
+projection; negative ids, duplicate ids/states and unsupported gate/capability
+shapes refuse. This does not claim full JSON Schema validation or gate execution.
+
+First emit persists a run-scoped profile source/digest binding before returning its
+arguments. A semantic change, removal of a formerly selected config or changed run
+identity refuses without writing state or emitting arguments. Record retains the
+binding. A legacy custom workflow without binding refuses pending reconciliation;
+a legacy default workflow retains its prior continuation behavior. A distinct run
+uses a separately identified ledger/state after the old workflow is reconciled;
+there is no automatic lease deletion or migration.
+
+The new actual-CLI regression was replayed against an isolated original-source
+copy and failed on the first behavioral assertion, `only selected stages`:
+[baseline receipt](baseline-red.json). It now passes
+[119 controls](focused.txt), including permission-denied input, dangling source,
+malformed state, profile change/restore, JSON-format-only retry, configured default,
+array-order custom stages, configured artifacts and explicit/Git project roots.
+The test removes only its own temporary fixture tree on exit.
+
+Existing focused checks also passed: `test/stage_checkpoint_test.py` 72 cases,
+`test/memory_nudge_test.py` 40 cases and `test/continuity_doc_test.py` 31 cases.
+No live checkpoint, provider/model request, full owner suite, genuine CI or
+installation was performed by this slice. Existing state persistence/storage
+mechanics outside this selected-profile admission remain their prior contract.
+Next: independent source review, then aggregate and normal candidate admission
+under the coordinator's serial queue. Do not fold this into extraction PR123.

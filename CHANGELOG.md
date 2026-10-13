@@ -1,3 +1,11 @@
+## Unreleased
+
+Checkpoint recovery now follows the selected project profile's declared stage order,
+including custom names and nonconsecutive ids. Malformed or changed profiles refuse
+instead of silently injecting default stages into a saved workflow. Run-local profile
+binding survives record/retry; relocated ledgers can name their project root explicitly.
+This is an offline-tested payload correction, not a live Observatory acceptance claim.
+
 ## v1.94.0 — 2026-10-13
 
 Guards: 438 → **438**; property checks 15 → **15**. The owner validator and
