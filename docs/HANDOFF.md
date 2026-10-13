@@ -1,3 +1,24 @@
+## FW07 / B-043 source feasibility — 2026-10-13
+
+Entry: [decision-input report](reports/2026-10-13-fw07-stage-reading-floor/README.md),
+then [bounded execution packet](evidence/plans/2026-10-13-fw07-stage-reading-floor.md).
+Frozen source: accepted 1.94.0 `4d750573ce53ea4c7ffa2bde192ee35b59acefa7`.
+This branch changes only the report, its reproducible raw census, this handoff and
+the packet. No shipped doctrine, gate, test, profile or workflow was edited.
+
+Measured stages.md: 17,616 cl100k tokens/967 lines; literal-address census 327 lines
+in 108 files, including historical evidence. Conservative entry model 11,258 before
+new routing overhead is feasibility only, not observed host or billing savings.
+The plan freezes conservation, exact on-entry/resume routes, custom-profile scope,
+consumer migration, negative controls and portable install/read-accounting limits.
+
+Parent accepted the bounded extraction packet and the separately recovered
+[UX prerequisite correction](evidence/plans/2026-10-13-fw07-ux-prerequisite-correction.md).
+Exact next task after current release completion: normalize the stale package
+prerequisites across the packet's eight current source locations in a separate commit with actual negative controls, then freeze the
+paragraph migration map on a new implementation branch. B-043 is still open; no runtime/model
+quality or full-suite verdict is claimed by this planning slice.
+
 ## Release candidate — v1.94.0 (2026-10-13)
 
 Five version surfaces now name v1.94.0 for the accepted release-iteration feature
