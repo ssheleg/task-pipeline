@@ -1,3 +1,16 @@
+## Release candidate — v1.94.0 (2026-10-13)
+
+Five version surfaces now name v1.94.0 for the accepted release-iteration feature
+and its independent fixes. This is a release candidate, not a publication claim.
+Published release remains v1.93.3 until an exact-SHA release run and npm payload
+readback prove otherwise. R30 owner gates are stacked from c229d7f; their genuine
+integration and the final feature PR112 still govern admission.
+
+Next: review this metadata diff, integrate via the feature branch, run the required
+checks on PR112's final head, then tag the normally merged source. Verify annotated
+tag, every release job, npm payload and installed copies before closing the hub pins.
+Historical verification rows below retain their original observations.
+
 # Start here — task-pipeline
 
 ## Current source state — 2026-10-13
