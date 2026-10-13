@@ -1,0 +1,27 @@
+{
+  "schema": "local-gate-receipt/1",
+  "head": "0fec61250e8e4314a96edc15887834e0e978f26d",
+  "command": "npm test",
+  "exit_code": 0,
+  "worktree_clean_after": true,
+  "original_log_sha256": "566d4c4285ad03da47b2f9adc423a36128f1ac77e80ce395b6ef9502a5579eb1",
+  "published_log_sha256": "566d4c4285ad03da47b2f9adc423a36128f1ac77e80ce395b6ef9502a5579eb1",
+  "sanitization": "literal checkout and operator-home prefixes only",
+  "log": "2026-10-13-pr116-owner-full.txt",
+  "external_engine_redactor": "SKIPPED: OBSERVATORY_ENGINE_DIR unset",
+  "scope": "PR116 source; not the later L3 doctrine edits",
+  "hosted": {
+    "run_id": 38344001686,
+    "event": "pull_request",
+    "head": "0fec61250e8e4314a96edc15887834e0e978f26d",
+    "conclusion": "success",
+    "all_jobs": "success"
+  },
+  "integration": {
+    "pull_request": 116,
+    "base": "feat/release-iteration",
+    "merge_commit": "52be103706d3f53b22f2ca28e4896079b2d48b67",
+    "method": "squash",
+    "release": false
+  }
+}

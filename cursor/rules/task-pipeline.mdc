@@ -8,7 +8,7 @@ alwaysApply: false
 Self-contained rule (Cursor copies this file into projects — no external links).
 Run a substantial task through an up-front **intake grill + 10 gated stages**. No
 stage advances until its **gate** passes. Each gate is `auto` (verify it yourself,
-pass/fail) or `manual` (wait for the user's explicit go).
+pass/fail) or `manual` (the user's explicit go or specific standing authorization naming the act).
 
 **No companion skill is required.** Every rule below is the doctrine itself — the
 grill, the design gate, the plan format, the build loop and TDD. Nothing to
@@ -514,9 +514,9 @@ type the run produced, then run the documentation gate and print its ratchet cou
 
 **Axis A — the stage gate type.** `auto` = verify the check yourself and stop on
 fail; `judgment` = a named judge rules where no deterministic check exists, and the
-ruling is recorded as judgement, never as a measurement; `manual` = wait for an
-explicit operator go. Neither of the first two ever substitutes
-for a required manual approval.
+ruling is recorded as judgement, never as a measurement; `manual` = an explicit
+operator go or specific standing authorization naming this act. Cite its source and scope;
+otherwise wait. Neither an auto/judgment result nor a generic loop flag supplies authority.
 
 **Axis B — where the rule is actually enforced**, and a rule climbs this ladder
 rather than starting at the top: doctrine line → review question at a named gate →

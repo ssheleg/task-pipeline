@@ -27,7 +27,9 @@ almost no window left, loses the middle of it, and re-derives what it already di
 
 **The loop mode collapses discretionary check-ins. It collapses nothing else.**
 
-- A `manual` gate still waits for an explicit operator go. Always.
+- A `manual` gate requires the operator's explicit go. A specific standing authorization
+  naming that gate's act is such a go; cite its source and scope in the gate record.
+  Without it, the gate waits. A generic instruction to continue is not authorization.
 - An outward or irreversible act — deploy, publish, a tag or a release, sending to a
   person, spending money, creating or editing a shared design file — still needs its own
   **specific** authorization. A recorded loop mode is a **generic** flag, and a generic
@@ -94,18 +96,21 @@ This spans the whole run, not one stage:
 - the acceptance → retro tail, which is where runs most often stall one step from
   finished.
 
-It stops for exactly four things: a `manual` gate, a block it cannot resolve, a
+It stops for exactly four things: an unmet `manual` gate, a block it cannot resolve, a
 genuine ambiguity the brief does not answer, and completion.
 
 **A block or an ambiguity stops its node, not the run.** An ambiguity whose answer is
 internal and reversible is not a stop at all: the run takes the recommended answer, records
 it as **assumed** on the node, and continues ([`iteration.md`](iteration.md) → *Question
-rounds*). Anything else — a block, or an answer that is outward, irreversible or the
-operator's — parks the node with the question as its reason, marked `needs-operator` and answerable without context
-([`prioritisation.md`](prioritisation.md) → *5. Where the human goes*), and the run
-continues on every node it does not block. The run itself stops only when the whole
-frontier is blocked — `graph.py next` exits `4` — and the questions are then asked
-together. **When the board is empty, say so once**, and do not invent work to fill it.
+rounds*). Otherwise park the node with its actual reason and owner: only human-owned
+questions are marked `needs-operator` and made answerable without context
+([`prioritisation.md`](prioritisation.md) → *5. Where the human goes*); external waits
+get watchers, and project-owned questions go to the owning Project under
+[`iteration.md`](iteration.md)'s board rule. The run continues on every node it does
+not block. When the whole frontier is blocked — `graph.py next` exits `4` — classify the
+recorded reasons: external waits go on watchers, human decisions go into the question
+batch. Exit 4 does not prove a human gate or completion. A watcher keeps the recorded
+next action alive while no independent node is runnable. **When the board is empty, say so once**, and do not invent work to fill it.
 
 **This extends [`build.md`](build.md); it does not replace it.** That file's
 *Continuous execution* rule governs the inside of a stage-5 execution — do not
@@ -153,7 +158,8 @@ project with no `pipeline.json` at all. That reading was in this section's first
 an independent reader found it before it shipped.
 
 **What arming does NOT change, and this is load-bearing:** the four stops are the four
-stops. A `manual` gate still waits. An outward or irreversible act still needs its own
+stops. A `manual` gate waits unless a specific standing authorization already names
+its act, cited with its source and scope. An outward or irreversible act still needs its own
 specific authorization — *a generic flag is not a specific authorization*, and arming a
 queue is the most generic flag there is. Arming decides only that the run does not stop
 to ask *"shall I take the next one?"*.

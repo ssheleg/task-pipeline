@@ -104,8 +104,8 @@ Anything deferred enters the carry-over ledger the moment it is said.
 | 10 | Acceptance | the ladder walk first, then the table, then the retrospective |
 
 **Honor every gate by its type**: `auto` — verify the check yourself; `judgment` —
-record the named judge's ruling as judgement, never as a measurement; `manual` — wait
-for an explicit go.
+record the named judge's ruling as judgement, never as a measurement; `manual` — cite
+an explicit go or specific standing authorization naming the act, otherwise wait.
 
 ## Cross-cutting — the three that fire at any stage
 
