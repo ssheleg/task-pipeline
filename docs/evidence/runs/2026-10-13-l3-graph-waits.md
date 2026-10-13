@@ -88,3 +88,16 @@ The reviewed TP2 paragraph was retained. Other incoming executable files belong
 to PR114; the diff against 31e0 contains only TP2/R09-owned paths and receipts.
 Post-composition focused replays passed: graph-wait 15, continuity 31, approval 41.
 A single serialized aggregate on the composed frozen candidate remains pending.
+
+
+## Composed owner aggregate
+
+`npm test` exited 0 on clean frozen source
+`71ff0f07189854a8373113ee21435262ddc723b3`.
+[Exact source, output hash and skips](2026-10-13-l3-graph-waits-full.json) bind
+[the compressed full output](2026-10-13-l3-graph-waits-full.log.gz). The engine
+redactor case was explicitly skipped because OBSERVATORY_ENGINE_DIR was unset;
+that absence is not a redactor pass. No source files changed during the run.
+Final SKILL.md bytes equal the accepted R09 dac8bc9 body (4639/4750 cl100k),
+so composition retains111 working-budget tokens. Hosted exact-head integration
+remains pending.
