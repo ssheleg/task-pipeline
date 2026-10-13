@@ -42,3 +42,43 @@ blanket all-descendant claim. No installed runtime code or release tag changes.
 The current complete gate continues on immutable 875c6e6 in another checkout. Its
 result cannot accept this correction. Freeze focused red/green evidence first,
 then independent peer, canonical ports, and a new composed gate in the serial slot.
+
+
+## Implementation and observed checks
+
+The common helper now owns the runner's process lifecycle: an inherited lock
+file descriptor, separate groups for each Bash, cancellation before any new
+admission and TERM/KILL drain before worker cleanup. Signals are recorded instead
+of raising inside Popen before a child handle can be registered; result checks
+refuse interruption. The parent closes its reference without LOCK_UN. Actual
+Bash death is covered by the synchronous writing Python child retaining the fd.
+[Corpus census](source-census.json) records the bounded lexical spawn inventory;
+it is not a general shell parser or an arbitrary-descendant guarantee.
+
+[Focused output](focused.json) records 30 existing lock controls, 42 runner
+controls, 18 copy-cleanup tests and the earlier 44 child-lifetime controls, all exit 0.
+[Final child controls](child-final.json) add actual INT/TERM cancellation while
+waiting for another lock holder: 48 controls, exit 0.
+The [new control on old source](new-control-red.json) fails at child descriptor
+inheritance; its snapshot and writing processes are removed.
+[Structural output](structural.json) records the separate validator result.
+
+[Implementation failures](first-local-failure.json) preserve the first TERM
+hang and the later exited-group signaling failure; neither is acceptance.
+[Copy-fixture baseline](copy-fixture-first-failure.json) exposed its StringIO
+lock fake lacking a real descriptor. It now uses an actual private owned lock and
+injects the same post-child observation error at the lifecycle method. Its three
+error assertions retain exact diagnostics and both-copy cleanup while expecting
+the runner's explicit failure exit. The [remaining old exception expectation](focused-fixture-adapter-failure.json)
+was preserved before that final assertion was corrected.
+
+The earlier scratch-lock README's broad owned-namespace sentence was corrected:
+six selectors in the historical 42-case run still acquired the public lock because
+they patched TMPDIR, which the new helper deliberately ignores. Their prior logs
+remain unchanged; `runner_test.py` now redirects the actual helper path before
+replay. No public lock or public plant was used for this correction's focused tests.
+
+Next: independent frozen-source peer review, byte-identical SEO/dev helper ports
+and adapted runner lifecycle, then a fresh composed full gate after the active
+875c6e6 pre-integration run completes. No release, native-host or final aggregate
+acceptance is claimed here.

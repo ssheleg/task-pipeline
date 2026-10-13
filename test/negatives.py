@@ -44,7 +44,7 @@ import subprocess
 import sys
 import stat
 import shlex
-from negative_lock import acquire_scratch_lock
+from negative_lock import acquire_scratch_lock, ScratchProcesses
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # One file per check. The directory is the source of truth; nothing lists it.
@@ -295,7 +295,7 @@ def sweep(paths):
         raise OSError(f'plant cleanup failed for {len(failures)} path(s)') from failures[0]
 
 
-def main(argv):
+def _main(argv, plants):
     # Parse before scanning, locking or copying. Unknown flags must not silently
     # trigger the entire destructive-fixture suite (observed with --help).
     import argparse
@@ -345,7 +345,7 @@ def main(argv):
     # The shared helper binds physical /tmp across owners and TMPDIR settings.
     # Old runner versions and direct plant invocation do not participate.
     try:
-        _lock = acquire_scratch_lock()
+        _lock = plants.hold(acquire_scratch_lock())
     except (OSError, RuntimeError) as exc:
         print(f"FAIL: cannot acquire family scratch lock ({type(exc).__name__}): {exc}")
         return 1
@@ -496,15 +496,19 @@ def main(argv):
     # still stop where CI's step stopped, not run on into a validator over a tree it
     # never planted.
     def _bash(script):
-        return subprocess.run(["bash", "-e", "-c", script], cwd=_base,
-                              capture_output=True, text=True)
+        return plants.run(["bash", "-e", "-c", script], cwd=_base)
 
     def _run_one(name_script):
         name, script = name_script
         # Retire copies inside the worker, including secondary plants and errors;
         # waiting for the whole pool retains every tree at once.
-        cdir, outcome = run_plant(script, _bash)
-        return name, script, cdir, outcome
+        plants.check_running()
+        try:
+            cdir, outcome = run_plant(script, _bash)
+            return name, script, cdir, outcome
+        except BaseException:
+            plants.cancel()
+            raise
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=_WORKERS) as _ex:
         _results = list(_ex.map(_run_one, tests))
@@ -591,6 +595,18 @@ def main(argv):
         return 2
     print("PASS: " + _line + (f" — shard {_shard[0]}/{_shard[1]}" if _shard else ""))
     return 0
+
+
+def main(argv):
+    try:
+        with ScratchProcesses() as plants:
+            result = _main(argv, plants)
+            plants.check_running()
+        plants.check_running()
+        return result
+    except (InterruptedError, OSError) as exc:
+        print(f"FAIL: plant lifecycle refused ({type(exc).__name__}): {exc}")
+        return 1
 
 
 if __name__ == "__main__":

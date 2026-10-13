@@ -10,8 +10,10 @@ and evidence. Active accepted1.94.1 release source/tag is untouched.
 `test/negative_lock.py` selects one lock below physical `/tmp`, independent of
 TMPDIR, cwd or owner. Exclusive-create or no-follow nonblocking open admits only
 a regular current-user file, mode600, one link and matching descriptor/path inode.
-A held file never gets truncated, chmodded, unlinked or stolen. The descriptor
-holds flock for the suite lifetime; ordinary close/process exit releases it.
+A held file never gets truncated, chmodded, unlinked or stolen. At this historical source cut the descriptor
+held flock only for the runner parent lifetime; close/process exit released it.
+The later [writing-child finding and correction](../2026-10-13-fw07-child-lock/README.md)
+show why that was insufficient for surviving plant processes.
 A waiting acquisition rechecks the named inode after waking. Unsupported flock
 or no-follow platforms refuse explicitly. Existing old versions and direct
 manual plant execution do not join this lock; migration remains coordinated.
@@ -42,8 +44,12 @@ to be lock-free. It [listed439+15](public-list-observation.txt), exit0, but sour
 acquires the lock before listing. It briefly acquired the new public family lock
 and left it present; the helper never truncates/writes/unlinks it. No scratch
 plant ran. The coordinator was informed and the public lock was left untouched.
-Subsequent runner probes redirect the lock into owned fixtures. That command is
-not represented as an owned-namespace-only control.
+The dedicated 30-control suite redirects the helper path into owned fixtures.
+A later source review found that `runner_test.py` still redirected only TMPDIR:
+its six listing selections also acquired the public lock, including the recorded
+42-case independent replay. Those logs remain unchanged; they are not
+owned-namespace-only evidence. The child-lifetime correction changes that fixture
+to redirect `negative_lock.scratch_lock_path` before any subsequent replay.
 
 ## Next task
 

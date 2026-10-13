@@ -59,3 +59,135 @@ def acquire_scratch_lock():
         else:
             held.close()
         raise
+
+
+class ScratchProcesses:
+    """Hold writer admission through supported synchronous plant subprocesses.
+
+    Bash and ordinary exec descendants inherit the lock. Deliberately detached
+    descendants that close inherited descriptors are outside this protocol.
+    """
+    def __init__(self):
+        import threading
+        self.lock = None
+        self._active = set()
+        self._mutex = threading.RLock()
+        self._cancelled = threading.Event()
+        self._handlers = {}
+
+    def __enter__(self):
+        import signal
+        import threading
+        if threading.current_thread() is not threading.main_thread():
+            raise RuntimeError('plant lifecycle must start on the main thread')
+        for sig in (signal.SIGINT, signal.SIGTERM):
+            self._handlers[sig] = signal.getsignal(sig)
+            signal.signal(sig, self._interrupt)
+        return self
+
+    def _interrupt(self, signum, _frame):
+        # Record cancellation without raising inside Popen before registration.
+        # The next admission/result check refuses; an in-flight spawn is drained.
+        self.cancel()
+        if self.lock is None:
+            # No child can exist before admission; interrupt a blocking flock.
+            raise InterruptedError(f'plant lock wait interrupted by signal {signum}')
+
+    def hold(self, lock):
+        if self.lock is not None:
+            raise RuntimeError('plant lock already bound')
+        self.lock = lock
+        return lock
+
+    def check_running(self):
+        if self._cancelled.is_set():
+            raise InterruptedError('plant runner cancelled; no new child admitted')
+
+    @staticmethod
+    def _signal_group(proc, sig):
+        # Reap an exited leader first: macOS can report EPERM for its zombie group.
+        proc.poll()
+        try:
+            os.killpg(proc.pid, sig)
+        except ProcessLookupError:
+            pass
+
+    @staticmethod
+    def _group_exists(proc):
+        try:
+            os.killpg(proc.pid, 0)
+            return True
+        except ProcessLookupError:
+            return False
+
+    def cancel(self):
+        import signal
+        import time
+        already = self._cancelled.is_set()
+        self._cancelled.set()
+        with self._mutex:
+            active = tuple(self._active)
+        for proc in active:
+            self._signal_group(proc, signal.SIGTERM)
+        if not already:
+            # A descendant may ignore TERM while holding captured output pipes.
+            # Escalate here, before ThreadPoolExecutor waits for its workers.
+            time.sleep(0.1)
+            for proc in active:
+                self._signal_group(proc, signal.SIGKILL)
+
+    def _drain(self, proc):
+        import signal
+        import subprocess
+        self._signal_group(proc, signal.SIGTERM)
+        try:
+            proc.communicate(timeout=0.5)
+        except subprocess.TimeoutExpired:
+            pass
+        # The Bash leader can exit before a descendant. Signal the owned group,
+        # not just proc.kill(), before waiting for inherited output pipes to close.
+        self._signal_group(proc, signal.SIGKILL)
+        proc.communicate()
+
+    def run(self, args, *, cwd, timeout=None):
+        import subprocess
+        if self.lock is None:
+            raise RuntimeError('plant writer has no scratch lock')
+        with self._mutex:
+            self.check_running()
+            proc = subprocess.Popen(args, cwd=cwd, stdout=subprocess.PIPE,
+                                    stderr=subprocess.PIPE, text=True,
+                                    start_new_session=True,
+                                    pass_fds=(self.lock.fileno(),))
+            self._active.add(proc)
+        try:
+            self.check_running()
+            stdout, stderr = proc.communicate(timeout=timeout)
+            self.check_running()
+            if self._group_exists(proc):
+                raise RuntimeError('plant left a live process group after Bash exit')
+            return subprocess.CompletedProcess(args, proc.returncode, stdout, stderr)
+        except BaseException:
+            self.cancel()
+            self._drain(proc)
+            raise
+        finally:
+            with self._mutex:
+                self._active.discard(proc)
+
+    def __exit__(self, kind, _value, _traceback):
+        import signal
+        try:
+            if kind is not None:
+                self.cancel()
+            with self._mutex:
+                active = tuple(self._active)
+            for proc in active:
+                self._drain(proc)
+            if self.lock is not None:
+                # Never LOCK_UN: descendants share the open-file description.
+                # Closing our copy cannot release their inherited references.
+                self.lock.close()
+        finally:
+            for sig, handler in self._handlers.items():
+                signal.signal(sig, handler)

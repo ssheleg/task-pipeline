@@ -1,0 +1,7 @@
+{
+  "source": "875c6e6a9a02c5c18e77945fc4fa56a43588cb5c",
+  "exit": 1,
+  "output": "Traceback (most recent call last):\n  File \"/var/folders/3r/yrdx_c051cv22q3r3k0ylvdm0000gn/T/fw07-child-red-source-3u2y6de6/test/audit_regressions/fw07_child_lifetime.py\", line 81, in <module>\n    check(bool(info['fds']), killed+': actual writing Python inherits lock')\n    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/var/folders/3r/yrdx_c051cv22q3r3k0ylvdm0000gn/T/fw07-child-red-source-3u2y6de6/test/audit_regressions/fw07_child_lifetime.py\", line 21, in check\n    assert value, name\n           ^^^^^\nAssertionError: parent: actual writing Python inherits lock\n",
+  "kind": "New actual runner control against immutable pre-fix helper/runner blobs",
+  "owned_snapshot_removed": true
+}
