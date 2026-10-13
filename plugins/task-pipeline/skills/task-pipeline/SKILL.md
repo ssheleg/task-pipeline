@@ -122,11 +122,10 @@ Stage 0 reads those standing instructions in full, which is why the prune is a g
 criterion: a rule nobody reads to the end is worse than no rule, because everyone
 believes it is covered.
 
-Three things the grill does beyond clarifying the request, each in full in
-[`references/grill.md`](references/grill.md):
-- **Domain awareness** — it reads the project's `CONTEXT.md` / `docs/adr/` and holds the operator to them, writing resolved terms back as they land.
-- **The autonomy sweep** — it pre-resolves what would otherwise stop stages 1→10 mid-flight. Autonomy is bought here or not at all; an unasked question is a scheduled interruption.
-- **The design destination** with Figma on — *which* file per surface, in which team, decided at stage 0. Left to drawing time it is answered by whoever holds the brush, and the answer is usually *create a new file*.
+**At stage 0, read [grill.md](references/grill.md)** for domain awareness
+(`CONTEXT.md` / ADRs; write resolved terms back), the autonomy sweep (pre-resolve
+stages 1→10), and the Figma design destination (file and team per surface, settled
+before drawing, never invented by the drawing agent).
 
 ## How to run
 
