@@ -129,3 +129,10 @@ helper interface. Then an isolated implementation branch adds source-first negat
 controls, reconciles the stage-7 wording and narrow hook route together, obtains
 independent review, and enters the serialized complete owner gate. Keep FW07 stage
 extraction, checkpoint correction and the v1.94.1 metadata repair distinct.
+
+## Interface freeze after source review
+
+The coordinator accepted the bounded direction, with an owner-only helper and no
+broad native hook exemption. The [proposed operations and evidence contract](interface.md)
+and [planned initial refusal corpus](first-controls.json) now freeze the interface
+for a second source review before implementation. These controls are NOT_RUN.
