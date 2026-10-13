@@ -30,7 +30,8 @@ front=s[:heads[0].start()];cross=s[s.index('## The program loop'):]
 # Conservative syntactic model only: keeps complete gate suffixes, headings,
 # freedom levels and all run-wide sections. No semantic relocation is performed.
 model=front+''.join(pieces)+cross
-skill=text(BASE+'SKILL.md');body=skill.split('---',2)[2].strip()
+skill=text(BASE+'SKILL.md');frontmatter=re.match(r'^---\n(.*?)\n---\n',skill,re.S);assert frontmatter
+body=skill[frontmatter.end():]
 refs=git('ls-tree','-r','--name-only',SOURCE).splitlines()
 refpaths=[p for p in refs if p.startswith(BASE+'references/') and p.endswith('.md')]
 consumer=[]
@@ -39,7 +40,7 @@ for line in raw.splitlines():
     _,path,number,content=line.split(':',3)
     category=('test-negative' if path.startswith('test/negatives/') else 'test' if path.startswith('test/') else 'shipped' if path.startswith(('plugins/','cursor/')) else 'historical-evidence' if path.startswith('docs/evidence/') else 'documentation')
     consumer.append({'path':path,'line':int(number),'category':category,'text':content})
-summary={'source':SOURCE,'source_path':BASE+'references/stages.md','source_sha256':hashlib.sha256(s.encode()).hexdigest(),'tokenizer':'tiktoken cl100k_base','version':json.loads(text('package.json'))['version'],'stages_tokens':tok(s),'stages_lines':len(lines),'skill_body_tokens':tok(body),'skill_body_lines':len(body.splitlines()),'reference_files':len(refpaths),'pre_stage_tokens':tok(front),'cross_cutting_tokens':tok(cross),'spine_model_tokens_before_routes':tok(model),'entry_model_tokens_before_routes':tok(model)+sections[0]['detail_prefix_tokens'],'model_limit':'Syntactic estimate only; heading/freedom overhead is conservative double counting in the stage-0 detail. Final routes, conditions and actual host reads are unmeasured. Cumulative full-run savings are not asserted.','literal_consumer_lines':len(consumer),'literal_consumer_files':len({r['path'] for r in consumer}),'consumer_categories':dict(Counter(x['category'] for x in consumer)),'stage_sections':sections}
+summary={'source':SOURCE,'source_path':BASE+'references/stages.md','source_sha256':hashlib.sha256(s.encode()).hexdigest(),'tokenizer':'tiktoken cl100k_base','version':json.loads(text('package.json'))['version'],'stages_tokens':tok(s),'stages_lines':len(lines),'skill_body_tokens':tok(body),'skill_body_lines':body.count('\n')+1,'reference_files':len(refpaths),'pre_stage_tokens':tok(front),'cross_cutting_tokens':tok(cross),'spine_model_tokens_before_routes':tok(model),'entry_model_tokens_before_routes':tok(model)+sections[0]['detail_prefix_tokens'],'model_limit':'Syntactic estimate only; heading/freedom overhead is conservative double counting in the stage-0 detail. Final routes, conditions and actual host reads are unmeasured. Cumulative full-run savings are not asserted.','literal_consumer_lines':len(consumer),'literal_consumer_files':len({r['path'] for r in consumer}),'consumer_categories':dict(Counter(x['category'] for x in consumer)),'stage_sections':sections}
 OUT.mkdir(exist_ok=True)
 (OUT/'measurement.json').write_text(json.dumps(summary,indent=2)+'\n')
 (OUT/'consumers.json').write_text(json.dumps(consumer,indent=2)+'\n')

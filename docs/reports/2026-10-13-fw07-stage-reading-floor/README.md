@@ -61,7 +61,7 @@ catalogue contained no prior task-pipeline report at this cut.
 | Measurement | Frozen observation |
 |---|---:|
 | Entire stages.md | 17,616 tokens; 967 lines |
-| SKILL.md body, excluding front matter | 4,638 tokens; 263 lines |
+| SKILL.md body, excluding front matter | 4,639 tokens; 265 lines |
 | Reference files directly in the skill | 41 |
 | Literal stages.md occurrences across tracked text | 327 lines in 108 files |
 | Shipped-surface occurrences | 36 lines |
@@ -182,6 +182,16 @@ pending parent review. Implementation begins only after that review and closure 
 the current release work. No model-quality or billed-token PASS is supported by this
 report; native-host behavioral comparisons remain NOT_RUN.
 
+
+
+## Measurement correction — 2026-10-13
+
+The first draft trimmed body boundary whitespace, reporting 4,638 tokens/263 lines.
+The installed make-skill 0.31.2 house auditor reported **4,639/4,750 tokens and
+265/500 lines**, 19 PASS/0 GAP. The reproducible script now uses that auditor's
+front-matter boundary and newline-count convention, without stripping the body.
+Only the body measurement changed; stages/spine estimates and source bytes did not.
+This is an explicit measurement correction, not newly created headroom.
 
 ---
 
