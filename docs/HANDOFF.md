@@ -3,8 +3,8 @@
 Five version surfaces now name v1.94.0 for the accepted release-iteration feature
 and its independent fixes. This is a release candidate, not a publication claim.
 Published release remains v1.93.3 until an exact-SHA release run and npm payload
-readback prove otherwise. R30 owner gates are stacked from c229d7f; their genuine
-integration and the final feature PR112 still govern admission.
+readback prove otherwise. R30 owner gates merged through PR120 at9fb9cfb after genuine candidate checks.
+The final feature PR112 still governs main integration.
 
 Next: review this metadata diff, integrate via the feature branch, run the required
 checks on PR112's final head, then tag the normally merged source. Verify annotated
