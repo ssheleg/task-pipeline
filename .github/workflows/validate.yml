@@ -89,6 +89,7 @@ jobs:
           python3 test/lessons_test.py
           python3 test/waves_test.py
           python3 test/continuity_doc_test.py
+          bash test/install_test.sh
 
       - name: Audit regressions (sherlock plan, one file per closed finding)
         run: npm run test:audit-regressions
