@@ -1542,6 +1542,10 @@ if os.path.isfile(_lp):
 #
 # Floor 0, and it is a ratchet: every open row was given a board id at the seam's
 # closing, so a new one arriving unhomed fails rather than joining a backlog of debt.
+from owner_board import board_errors as _r30_board_errors, cells as _r30_cells
+from owner_release import check as _r30_release_check
+_r30_release_check(ROOT, fail)
+
 _BOARD = os.path.join(ARTP, "backlog.md")
 _UNHOMED = []
 _BOARD_IDS = set()
@@ -1618,7 +1622,7 @@ if os.path.isfile(_BOARD):
         for line in text.splitlines():
             if not line.startswith("| B-"):
                 continue
-            cells = [c.strip() for c in line.split("|")]
+            cells = [""] + _r30_cells(line) + [""]
             if len(cells) < 5:
                 continue
             # POSITION-FREE, like every other board check in this file, and the first
@@ -1640,6 +1644,8 @@ if os.path.isfile(_BOARD):
                          "up (B-58)")
 
     for _bp, _bt in _BOARD_TEXT.items():
+        for _error in _r30_board_errors(_bt):
+            fail(f"{os.path.relpath(_bp, ROOT)}: {_error}")
         _board_home_rules(_bp, _bt)
 
     _LEDGER_ID = {"#", "id", "row"}
@@ -1711,7 +1717,7 @@ if os.path.isfile(_BOARD):
         for _l in _btext.splitlines():
             if not re.match(r"^\|\s*B-\d+\s*\|", _l):
                 continue
-            _cl = [_flatten(_x).strip() for _x in _l.split("|")[1:-1]]
+            _cl = [_flatten(_x).strip() for _x in _r30_cells(_l)]
             if len(_cl) < 8:
                 fail(f"{_bfr}: row {_cl[0]} has {len(_cl)} cells where the board's shape "
                      "needs at least 8 — skipping it silently is how a malformed row "
@@ -1748,7 +1754,7 @@ if os.path.isfile(_BOARD):
     # the reverse pass finds it (learned.md rule 2).
     for _srcf, _stext in _BOARD_TEXT.items():
       for _row in re.findall(r"^\|\s*B-\d+\s*\|(.+)$", _stext, re.M):
-        _cells = [_x.strip() for _x in _row.split("|")]
+        _cells = _r30_cells("|" + _row)
         if len(_cells) < 2 or not _cells[1]:
             fail(f"{os.path.relpath(_srcf, ROOT)}: a row names no Source — a row nobody can "
                  "trace back is a wish somebody typed, and six weeks later it is either "

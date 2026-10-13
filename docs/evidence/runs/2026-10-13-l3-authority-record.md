@@ -2,7 +2,7 @@
 
 # L3 TP-6: record the source of release authority
 
-Base: `40070a0765e16423cf0c78c54b51a811c290fb62`, the reviewed L3 doctrine
+Base: [40070a0765e16423cf0c78c54b51a811c290fb62](https://github.com/ssheleg/task-pipeline/commit/40070a0765e16423cf0c78c54b51a811c290fb62), the reviewed L3 doctrine
 candidate in [PR117](https://github.com/ssheleg/task-pipeline/pull/117).
 Requested contract: TP-6 in the hub's
 [principles gap table](https://github.com/ssheleg/sshlg-skills/blob/392e8f3787d37a32ca1ebc261addee3cdea6994e/docs/evidence/specs/2026-10-13-pipeline-principles-gaps.md).

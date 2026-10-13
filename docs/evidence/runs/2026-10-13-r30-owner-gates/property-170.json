@@ -1,0 +1,8 @@
+{
+  "command": "python3 test/negatives.py -k 'DATED row'",
+  "exit_code": 0,
+  "fixture": "test/negatives/170-property-a-dated-row-in-a-register-is-a-record-not-a-claim-about-now.sh",
+  "fixture_sha256": "2abf60c7d70b600a4a717842be169476364487c13ce7052ee49233a4a902a0f1",
+  "output": "running 0 negative self-tests + 1 property checks\n\n  PASS   [property] a DATED row in a register is a record, not a claim about now\n\nPASS: 1 property check(s) printed what they assert\n",
+  "scope": "corrected positive fixture only; no full final-source pass"
+}
