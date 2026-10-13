@@ -1,3 +1,11 @@
+## Source-only release admission follow-up — 2026-10-13
+
+[FW07 pre-tag packet](evidence/plans/2026-10-13-pretag-admission/README.md)
+recovers the failed v1.94.0 admission and the stage-7/R-010 ordering conflict.
+It proposes an exact local-tag-aware complete-suite receipt and distinct local
+preparation versus publication, without modifying the v1.94.1 repair.
+Next: independent packet review before implementation. No gate or tag changed.
+
 ## Release candidate — v1.94.0 (2026-10-13)
 
 Five version surfaces now name v1.94.0 for the accepted release-iteration feature
