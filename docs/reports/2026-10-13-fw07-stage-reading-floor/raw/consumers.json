@@ -1,0 +1,1964 @@
+[
+  {
+    "path": ".github/PULL_REQUEST_TEMPLATE.md",
+    "line": 20,
+    "category": "documentation",
+    "text": "- [ ] `references/stages.md`"
+  },
+  {
+    "path": "CHANGELOG.md",
+    "line": 281,
+    "category": "documentation",
+    "text": "  Mirrored in `grill.md`, `stages.md` (stages 0 and 2), `brainstorm.md`, the command, the"
+  },
+  {
+    "path": "CHANGELOG.md",
+    "line": 408,
+    "category": "documentation",
+    "text": "  `references/stages.md` stage 5 (after a task that touches tokens, beside the project"
+  },
+  {
+    "path": "CHANGELOG.md",
+    "line": 441,
+    "category": "documentation",
+    "text": "  user-facing task (`references/stages.md` \u2192 *The surface class*, the grill's UI branch,"
+  },
+  {
+    "path": "CHANGELOG.md",
+    "line": 451,
+    "category": "documentation",
+    "text": "  set (`grill.md`, `stages.md`, `audit.md`'s `\u2192F` seam)."
+  },
+  {
+    "path": "CHANGELOG.md",
+    "line": 591,
+    "category": "documentation",
+    "text": "  where its four numbers go in `## Self-review`. `references/stages.md`'s stage-4 GATE"
+  },
+  {
+    "path": "CHANGELOG.md",
+    "line": 1302,
+    "category": "documentation",
+    "text": "and `stages.md`'s stage 3 keeps a routed summary; the example config's stage-3"
+  },
+  {
+    "path": "CHANGELOG.md",
+    "line": 1312,
+    "category": "documentation",
+    "text": "\u2014 SKILL.md (three places), stages.md, the command, the Cursor rule, README,"
+  },
+  {
+    "path": "CHANGELOG.md",
+    "line": 1452,
+    "category": "documentation",
+    "text": "operator above it, and `references/stages.md`'s note on what a stage that"
+  },
+  {
+    "path": "CHANGELOG.md",
+    "line": 2214,
+    "category": "documentation",
+    "text": "`SKILL.md`'s stage-table row and `stages.md`'s prose \u2014 the stage list is compared across"
+  },
+  {
+    "path": "CHANGELOG.md",
+    "line": 2854,
+    "category": "documentation",
+    "text": "`references/stages.md` under a heading that literally says *(detail in"
+  },
+  {
+    "path": "CHANGELOG.md",
+    "line": 2855,
+    "category": "documentation",
+    "text": "`references/stages.md`)*. The table is the index and the run order now; the"
+  },
+  {
+    "path": "CHANGELOG.md",
+    "line": 3369,
+    "category": "documentation",
+    "text": "  `stages.md`.** The summary kept *own worktree* and dropped *same group* and *exclusive"
+  },
+  {
+    "path": "CHANGELOG.md",
+    "line": 3387,
+    "category": "documentation",
+    "text": "deleted outright, \u00a74.2a losing its *before integration*, and `stages.md` dropping the"
+  },
+  {
+    "path": "CHANGELOG.md",
+    "line": 3401,
+    "category": "documentation",
+    "text": "reach stage 6 having never run it. `build.md`'s and `stages.md`'s gates now require it,"
+  },
+  {
+    "path": "CHANGELOG.md",
+    "line": 3508,
+    "category": "documentation",
+    "text": "`tdd.md` could drop both its pointers because only `stages.md` was read."
+  },
+  {
+    "path": "CHANGELOG.md",
+    "line": 3806,
+    "category": "documentation",
+    "text": "  agent time.** `stages.md` has always said a release does not leave stage 7 until"
+  },
+  {
+    "path": "CHANGELOG.md",
+    "line": 3889,
+    "category": "documentation",
+    "text": "(`grep -c '^\\*\\*Gate' references/stages.md` \u2192 **0**: the body is its only home)"
+  },
+  {
+    "path": "CHANGELOG.md",
+    "line": 4581,
+    "category": "documentation",
+    "text": "The contradiction was in the phrasing, not the intent \u2014 `stages.md` had already restated"
+  },
+  {
+    "path": "CHANGELOG.md",
+    "line": 4800,
+    "category": "documentation",
+    "text": "`stages.md` was *\"read in full at stage 0\"*; grepping the obligation returns only the"
+  },
+  {
+    "path": "CHANGELOG.md",
+    "line": 5432,
+    "category": "documentation",
+    "text": "`stages.md` of enumerating three axes whose three hits were 595 lines apart and meant"
+  },
+  {
+    "path": "CHANGELOG.md",
+    "line": 5567,
+    "category": "documentation",
+    "text": "reaches* \u2014 and no stage owned it. A grep over `stages.md` and `tdd.md` for *rendered*,"
+  },
+  {
+    "path": "CHANGELOG.md",
+    "line": 5679,
+    "category": "documentation",
+    "text": "the stage-10 gate row), `references/acceptance.md` three times, `references/stages.md`"
+  },
+  {
+    "path": "CHANGELOG.md",
+    "line": 6177,
+    "category": "documentation",
+    "text": "so in `README.md` and `stages.md`, where the marker is split across two lines, it"
+  },
+  {
+    "path": "CHANGELOG.md",
+    "line": 6732,
+    "category": "documentation",
+    "text": "preview is real, and `references/stages.md` is 500 lines \u2014 an agent that previewed"
+  },
+  {
+    "path": "CHANGELOG.md",
+    "line": 7118,
+    "category": "documentation",
+    "text": "*and* the stage-9 section of `references/stages.md`. That is the third time this repo"
+  },
+  {
+    "path": "CHANGELOG.md",
+    "line": 7156,
+    "category": "documentation",
+    "text": "  links to it \u2014 `SKILL.md`, `references/stages.md`, `references/acceptance.md` \u2014"
+  },
+  {
+    "path": "CHANGELOG.md",
+    "line": 7243,
+    "category": "documentation",
+    "text": "`references/stages.md`, the doctrine in `references/acceptance.md`, the machine-readable check in"
+  },
+  {
+    "path": "CHANGELOG.md",
+    "line": 7250,
+    "category": "documentation",
+    "text": "`build.md` and `conventions.md` while `acceptance.md`, `stages.md` and the config \u2014 *the three"
+  },
+  {
+    "path": "CHANGELOG.md",
+    "line": 7498,
+    "category": "documentation",
+    "text": "- **A version pin on someone else's contract.** The README and `stages.md` both"
+  },
+  {
+    "path": "CHANGELOG.md",
+    "line": 7639,
+    "category": "documentation",
+    "text": "  plan header, `stages.md` and the Cursor rule."
+  },
+  {
+    "path": "CHANGELOG.md",
+    "line": 7644,
+    "category": "documentation",
+    "text": "  `stages.md`:** `planning.md` didn't state the REQ **set-equality** check (the"
+  },
+  {
+    "path": "CHANGELOG.md",
+    "line": 7659,
+    "category": "documentation",
+    "text": "  `stages.md` wrote `implements:` where the plan format writes `Implements:`;"
+  },
+  {
+    "path": "CHANGELOG.md",
+    "line": 7685,
+    "category": "documentation",
+    "text": "  stage-2 gate in `stages.md`, the example config, the Cursor rule, the command and"
+  },
+  {
+    "path": "CHANGELOG.md",
+    "line": 7702,
+    "category": "documentation",
+    "text": "  referenced from `SKILL.md`'s cross-cutting rules, a `stages.md` section, the"
+  },
+  {
+    "path": "CHANGELOG.md",
+    "line": 7722,
+    "category": "documentation",
+    "text": "  `SKILL.md`'s table, `references/stages.md` and `pipeline.example.json`: identical"
+  },
+  {
+    "path": "CHANGELOG.md",
+    "line": 7724,
+    "category": "documentation",
+    "text": "  `stages.md` carrying a `**GATE (auto|manual)**` line. Drift between surfaces is"
+  },
+  {
+    "path": "CHANGELOG.md",
+    "line": 7735,
+    "category": "documentation",
+    "text": "  description, the command, the Cursor rule, `stages.md`, `grill.md`, the brief"
+  },
+  {
+    "path": "CHANGELOG.md",
+    "line": 7857,
+    "category": "documentation",
+    "text": "  `references/stages.md`; stage 4's gate now also names type/name consistency and"
+  },
+  {
+    "path": "CHANGELOG.md",
+    "line": 7927,
+    "category": "documentation",
+    "text": "  references list), `references/stages.md`, `references/companion-skills.md` (matrix"
+  },
+  {
+    "path": "CHANGELOG.md",
+    "line": 8021,
+    "category": "documentation",
+    "text": "- Docs realigned across every channel \u2014 SKILL.md, `references/stages.md`,"
+  },
+  {
+    "path": "CHANGELOG.md",
+    "line": 8032,
+    "category": "documentation",
+    "text": "  skills CLI / npx / install.sh installs had no such file while `stages.md` told"
+  },
+  {
+    "path": "CHANGELOG.md",
+    "line": 8039,
+    "category": "documentation",
+    "text": "  matching SKILL.md and `stages.md`. Stage-4 gate now also names `SCR-` screens."
+  },
+  {
+    "path": "CHANGELOG.md",
+    "line": 8131,
+    "category": "documentation",
+    "text": "  in `references/stages.md`."
+  },
+  {
+    "path": "CHANGELOG.md",
+    "line": 8152,
+    "category": "documentation",
+    "text": "  SKILL.md gained a **Type** column; `stages.md` tags each gate; SKILL.md's"
+  },
+  {
+    "path": "CLAUDE.md",
+    "line": 111,
+    "category": "documentation",
+    "text": "   are compared mechanically \u2014 `SKILL.md`'s table, `references/stages.md` and"
+  },
+  {
+    "path": "CONTRIBUTING.md",
+    "line": 83,
+    "category": "documentation",
+    "text": "table, `references/stages.md`'s per-stage sections, and `pipeline.example.json`."
+  },
+  {
+    "path": "CONTRIBUTING.md",
+    "line": 201,
+    "category": "documentation",
+    "text": "`SKILL.md`, `references/grill.md`, `references/build.md`, `references/stages.md`"
+  },
+  {
+    "path": "CONTRIBUTING.md",
+    "line": 239,
+    "category": "documentation",
+    "text": "about whether it describes the tree the run is about to change. `stages.md`'s stage-0"
+  },
+  {
+    "path": "CONTRIBUTING.md",
+    "line": 343,
+    "category": "documentation",
+    "text": "`stages.md` for three hits 595 lines apart that meant three different things. Either"
+  },
+  {
+    "path": "CONTRIBUTING.md",
+    "line": 420,
+    "category": "documentation",
+    "text": "`references/stages.md` restates it \u2014 learned.md rule 20's shape, and the drift is silent"
+  },
+  {
+    "path": "CONTRIBUTING.md",
+    "line": 619,
+    "category": "documentation",
+    "text": "  gate types or the review verdict count, walk `SKILL.md`, `references/stages.md`,"
+  },
+  {
+    "path": "README.md",
+    "line": 644,
+    "category": "documentation",
+    "text": "  `stages.md` is 500 lines."
+  },
+  {
+    "path": "README.md",
+    "line": 990,
+    "category": "documentation",
+    "text": "| [`references/stages.md`](plugins/task-pipeline/skills/task-pipeline/references/stages.md) | per-stage detail and the exact gate criteria |"
+  },
+  {
+    "path": "docs/DECISIONS.md",
+    "line": 217,
+    "category": "documentation",
+    "text": "  detection rule, the tie-breaker, the preflight block), `references/stages.md`"
+  },
+  {
+    "path": "docs/DOCMAP.md",
+    "line": 37,
+    "category": "documentation",
+    "text": "| The stage list, its ids, names and gate types | `pipeline.example.json` | `SKILL.md`'s table and `references/stages.md` are compared against it mechanically |"
+  },
+  {
+    "path": "docs/DOCMAP.md",
+    "line": 51,
+    "category": "documentation",
+    "text": "| A stage's id, name or gate type | `pipeline.example.json`, `SKILL.md` table, `references/stages.md`, that stage's doctrine file | `test/validate.py` \u2014 cross-surface comparison |"
+  },
+  {
+    "path": "docs/evidence/backlog.md",
+    "line": 68,
+    "category": "historical-evidence",
+    "text": "| B-061 | **Nothing measures which doctrine a run actually read, and the bundle is 127k tokens.** Measured 2026-08-11: `SKILL.md` 7 912 tok plus 32 reference files at 118 842 \u2014 `stages.md` alone 13 668. The routing surface fits in 1008 characters; the doctrine behind it does not fit in a context window. There is a reading floor naming what is mandatory, and `unlooked: N` for checks that did not look \u2014 but no equivalent for doctrine a run skipped. A skipped file and a read one are indistinguishable, which is the same class every guard in this repo exists to catch. | stage 10 of `six-lessons`, 2026-08-11 | M | 3 | 3 | 0 | **9** | **closed 2026-08-17** \u2014 a `PostToolUse` hook on `Read` appends `read: references/<file>.md` to the run ledger, deduplicated and always exiting 0; `scripts/graph.py doctrine` reports the count and names every unread file. The load-bearing part is what it **refuses** to print: with no ledger or no `read:` lines it says `unmeasured` and why, because the hook being absent and the run reading nothing are opposite facts the ledger cannot separate \u2014 `0 of 34` would be the reassuring answer to a question nobody asked. A disclosure with no floor and no target. **No per-file reading floor was invented**: stage 0's mandatory items are the floor that exists and they are not per-file, and declaring one inside a measurement would smuggle a doctrine decision in as a count. Two existing guards caught the change as it landed \u2014 a relative link in a seeded template, and a ledger shape with no reader. Seven planted defects refused. Guards 369 \u2192 370. | \u2014 |"
+  },
+  {
+    "path": "docs/evidence/backlog.md",
+    "line": 83,
+    "category": "historical-evidence",
+    "text": "| B-043 | **`stages.md` is 13 161 tokens and is the gate list every run must satisfy.** Splitting it into a spine (gates + criteria) and per-stage detail loaded on entry is the remaining half of the reading-floor work | `2026-08-10-skill-audit` | M | 1 | 3 | 21 | 4 | open | \u2014 |"
+  },
+  {
+    "path": "docs/evidence/backlog.md",
+    "line": 89,
+    "category": "historical-evidence",
+    "text": "| B-048 | **\"Decide, don't build\" has no contract.** \u00ab\u043f\u0440\u043e\u0434\u0443\u043c\u0430\u0439 \u0444\u0438\u0447\u0443\u00bb wants stages 0\u20134 and a stop; the bundle has the stages (brainstorm at 2, spec at 3, plan at 4) and no way to ask for them without the six that follow. The short-path triage (`stages.md:143`) shrinks a run, it does not truncate one, and it is proposed for *small* work \u2014 the opposite case. Absent this, the request either becomes a full run nobody asked for or falls out of the pipeline into an ungated conversation | `2026-08-10-routing-taxonomy` | M | 2 | 2 | 21 | 5 | open | \u2014 |"
+  },
+  {
+    "path": "docs/evidence/backlog.md",
+    "line": 91,
+    "category": "historical-evidence",
+    "text": "| B-050 | **Pull requests exist only as steps inside stage 7, never as requests.** Opening one is a line in `stages.md:400` and an outward-authorization rule in `conventions.md:125`; reviewing one is `review.md`, bound to a run that is already at stage 7. Neither \u00ab\u0441\u0434\u0435\u043b\u0430\u0439 PR\u00bb nor \u00ab\u043f\u0440\u043e\u0432\u0435\u0440\u044c PR #24\u00bb reaches anything, and the second is the more expensive miss: `review.md` carries the three reader states and the `NO READER` rule that v1.38.0 shipped, and a standalone review request gets none of it | `2026-08-10-routing-taxonomy` | S | 2 | 2 | 21 | 5 | open | \u2014 |"
+  },
+  {
+    "path": "docs/evidence/backlog.md",
+    "line": 102,
+    "category": "historical-evidence",
+    "text": "| B-072 | **Nothing compares the browser doctrine across the surfaces that mirror it.** The matrix\u2192stages check reads `references/stages.md` only. The `R-005` reader rewrote `SKILL.md`'s stage-6 gate row to name a single channel, and deleted the `playwright` channel from `cursor/rules/task-pipeline.mdc` \u2014 the validator passed both times. `README.md` and `SKILL-CARD.md` are equally unguarded. v1.55.0 doubled what these four surfaces have to keep in step, which is what makes the gap worth closing now rather than at the next channel. | reader `R-005`, run `2026-08-14-playwright-browser-channel` | M | 2 | 3 | 17 | 7 | open | \u2014 |"
+  },
+  {
+    "path": "docs/evidence/backlog.md",
+    "line": 150,
+    "category": "historical-evidence",
+    "text": "- **B-003 \u00b7 The independent reviewer is not in the stage list** \u2014 it is now: `stages.md:469` *\"The independent reader is dispatched by this stage, and read by its output\"*, with `NO READER` as a printed state. Shipped in v1.38.0 and left open on the board for two days; found by the goal-check `continuity.md` Part 1a added, on its first run. Closed 2026-08-10."
+  },
+  {
+    "path": "docs/evidence/backlog.md",
+    "line": 160,
+    "category": "historical-evidence",
+    "text": "- **B-039 \u00b7 The stage-0 reading floor is ~48k tokens before the first grill question \u2014 `retro.md` ~14.9k and** \u2014 the retro's uncapped narrative log is queried rather than read in full; stage-0 floor ~47 750 \u2192 ~36 950 tokens. Splitting `stages.md` into a spine plus per-stage detail remains open as B-043. Closed in part, v1.38.0."
+  },
+  {
+    "path": "docs/evidence/plans/2026-08-03-documentation-track.md",
+    "line": 44,
+    "category": "historical-evidence",
+    "text": "| E | T8, T9 | **yes** | T8 `SKILL.md` + `references/stages.md` + `pipeline.example.json`; T9 the six remaining references + `templates/brief.md` + `templates/README.md` |"
+  },
+  {
+    "path": "docs/evidence/plans/2026-08-03-documentation-track.md",
+    "line": 132,
+    "category": "historical-evidence",
+    "text": "| 11 | `## Where this binds in the pipeline` | table: stage 0 inventory + reconcile \u00b7 any stage \u2192 the Doc Loop \u00b7 stage 9 propagation sweep + gate \u00b7 stage 10 evidence. Links `stages.md`, `gates.md` |"
+  },
+  {
+    "path": "docs/evidence/plans/2026-08-03-documentation-track.md",
+    "line": 592,
+    "category": "historical-evidence",
+    "text": "**Scene.** `SKILL.md`'s table, `references/stages.md` and `pipeline.example.json`"
+  },
+  {
+    "path": "docs/evidence/plans/2026-08-03-documentation-track.md",
+    "line": 595,
+    "category": "historical-evidence",
+    "text": "`acceptance.md`, `stages.md` and the config. **No stage id, name, order or gate type"
+  },
+  {
+    "path": "docs/evidence/plans/2026-08-03-documentation-track.md",
+    "line": 598,
+    "category": "historical-evidence",
+    "text": "**Owns:** `SKILL.md`, `references/stages.md`, `pipeline.example.json`."
+  },
+  {
+    "path": "docs/evidence/plans/2026-08-03-documentation-track.md",
+    "line": 626,
+    "category": "historical-evidence",
+    "text": "**Step 2 \u2014 `references/stages.md`.**"
+  },
+  {
+    "path": "docs/evidence/plans/2026-08-03-documentation-track.md",
+    "line": 670,
+    "category": "historical-evidence",
+    "text": "changed); two new negative steps (strip `propagation` from `stages.md`; strip"
+  },
+  {
+    "path": "docs/evidence/plans/2026-08-03-documentation-track.md",
+    "line": 881,
+    "category": "historical-evidence",
+    "text": "   enforces it (`stages.md` / config / validator) \u2192 L5 the file in the tree \u2192 L6 the"
+  },
+  {
+    "path": "docs/evidence/plans/2026-08-04-run-continuity.md",
+    "line": 75,
+    "category": "historical-evidence",
+    "text": "**Files:** `SKILL.md`, `references/stages.md`, `references/grill.md`,"
+  },
+  {
+    "path": "docs/evidence/plans/2026-08-04-run-continuity.md",
+    "line": 86,
+    "category": "historical-evidence",
+    "text": "5. `references/stages.md` \u2014 stage-0 detail names the run-mode decision."
+  },
+  {
+    "path": "docs/evidence/plans/2026-08-05-artifact-hygiene.md",
+    "line": 198,
+    "category": "historical-evidence",
+    "text": "- Modify: `references/stages.md` \u2014 \u00a75, \u00a76, \u00a79 gate criteria name it and its counts."
+  },
+  {
+    "path": "docs/evidence/plans/2026-08-05-spec-plan-quality.md",
+    "line": 34,
+    "category": "historical-evidence",
+    "text": "| A | 1 (spec.md), 2 (planning.md), 3 (learned.md + stages.md) | \u2014 |"
+  },
+  {
+    "path": "docs/evidence/plans/2026-08-05-spec-plan-quality.md",
+    "line": 90,
+    "category": "historical-evidence",
+    "text": "**Files:** Modify `references/learned.md`, `references/stages.md`"
+  },
+  {
+    "path": "docs/evidence/plans/2026-08-06-ci-run-verified.md",
+    "line": 13,
+    "category": "historical-evidence",
+    "text": "| T2 | Stages 7, 8 and 9 cite it; none restates the commands | REQ-003 | `references/stages.md` | each section names the rule; a guard rejects a second copy of the commands |"
+  },
+  {
+    "path": "docs/evidence/plans/2026-08-06-graph-staleness.md",
+    "line": 14,
+    "category": "historical-evidence",
+    "text": "| T3 | Stage 0 names it in both halves \u2014 the agent-facing section and the config gate | REQ-005 REQ-006 | `references/stages.md`, `pipeline.example.json` | both mention the measured lag; existing gate-type guard still green |"
+  },
+  {
+    "path": "docs/evidence/retro.md",
+    "line": 294,
+    "category": "historical-evidence",
+    "text": "guard requiring `build.md`'s and `stages.md`'s GATE bullets to name the convergence check,"
+  },
+  {
+    "path": "docs/evidence/retro.md",
+    "line": 754,
+    "category": "historical-evidence",
+    "text": "`stages.md` is still 13 161 tokens (B-043); 340 prohibitions still carry equal weight"
+  },
+  {
+    "path": "docs/evidence/retro.md",
+    "line": 760,
+    "category": "historical-evidence",
+    "text": "said `stages.md` was *\"read in full at stage 0\"*. Grepping the obligation returns only"
+  },
+  {
+    "path": "docs/evidence/retro.md",
+    "line": 1051,
+    "category": "historical-evidence",
+    "text": "it accused `stages.md` of enumerating three axes whose three hits were 595 lines apart"
+  },
+  {
+    "path": "docs/evidence/retro.md",
+    "line": 1097,
+    "category": "historical-evidence",
+    "text": "at once and so proved neither was required alone; and `stages.md`'s stage-10 gate was left"
+  },
+  {
+    "path": "docs/evidence/retro.md",
+    "line": 1339,
+    "category": "historical-evidence",
+    "text": "`acceptance.md` (three places), `stages.md` (three places), `templates/retro.md`,"
+  },
+  {
+    "path": "docs/evidence/retro.md",
+    "line": 1362,
+    "category": "historical-evidence",
+    "text": "or `stages.md`. (c) is stage 5 and cost nothing."
+  },
+  {
+    "path": "docs/evidence/retro.md",
+    "line": 1435,
+    "category": "historical-evidence",
+    "text": "doctrine wraps at ~80 columns, so in `README.md` and `stages.md` \u2014 where the marker is"
+  },
+  {
+    "path": "docs/evidence/retro/2026-Q3.md",
+    "line": 101,
+    "category": "historical-evidence",
+    "text": "  while SKILL.md, stages.md and documentation.md all called the Doc Loop"
+  },
+  {
+    "path": "docs/evidence/retro/2026-Q3.md",
+    "line": 477,
+    "category": "historical-evidence",
+    "text": "| 2026-08-15 | `graph-audit` / the graph model, and the edge that carried nothing | `42948c8` | the pipeline audited against a graph model it did not have: **nine of ten macro stage edges carry data**, so nothing was reordered \u00b7 the fake-edge test as a procedure, a `Carries` column whose empty cell IS the finding, an `Edges:` count the gate reads \u00b7 \u00a74.2a, one convergence check over a fanned-out group's diffs together before the first worktree lands \u00b7 `stages.md` had one of `build.md`'s three fan-out preconditions and now has all three \u00b7 **`negatives.py` could not restore `.git` in a submodule checkout**, so two guards reported `fatal: not a git repository` and were counted as never firing \u2014 locally red, CI green, for as long as anyone worked from the umbrella \u00b7 guards 322 \u2192 **339** | **three reader rounds, 13 findings, two of them defects rather than nits** \u2014 the convergence check reached neither GATE bullet, and the `.git` fix covered the submodule and left the linked worktree broken identically; the second was caught only because the reader **ran the experiment** and reported the restored copy on the wrong branch, against a CHANGELOG sentence claiming all three shapes \u00b7 1 entry \u00b7 **6 standing (was 5)** \u00b7 retired 0 \u00b7 added 1 (R-008) \u00b7 **stamps 11 \u2192 10 (1 rotated)** \u00b7 R-002, R-003, R-004, R-005, R-007 all fired |"
+  },
+  {
+    "path": "docs/evidence/runs/2026-10-13-l3-authority-record.md",
+    "line": 19,
+    "category": "historical-evidence",
+    "text": "[Stage 7](../../../plugins/task-pipeline/skills/task-pipeline/references/stages.md)"
+  },
+  {
+    "path": "docs/evidence/runs/2026-10-13-r30-owner-gates/payload-parity.json",
+    "line": 412,
+    "category": "historical-evidence",
+    "text": "      \"path\": \"plugins/task-pipeline/skills/task-pipeline/references/stages.md\","
+  },
+  {
+    "path": "docs/evidence/specs/2026-07-18-task-pipeline-design.md",
+    "line": 58,
+    "category": "historical-evidence",
+    "text": "\u2502       \u2514\u2500\u2500 references/{stages.md,model-tiering.md,conventions.md}"
+  },
+  {
+    "path": "docs/evidence/specs/2026-08-03-documentation-track-acceptance.md",
+    "line": 60,
+    "category": "historical-evidence",
+    "text": "| \u00a73.4 the Doc Loop, seven steps | `verified` | `documentation.md` \u00a7*The Doc Loop*; `stages.md` \u00a7*Cross-cutting \u2014 the Doc Loop*; `SKILL.md` *How to run* step 5 |"
+  },
+  {
+    "path": "docs/evidence/specs/2026-08-03-documentation-track-acceptance.md",
+    "line": 63,
+    "category": "historical-evidence",
+    "text": "| \u00a73.7 intent vs as-built | `verified` | `documentation.md` \u00a7*Intent and as-built*; `stages.md` stage 0 phase 1c; stage-0 gate text in `pipeline.example.json` |"
+  },
+  {
+    "path": "docs/evidence/specs/2026-08-03-documentation-track-acceptance.md",
+    "line": 67,
+    "category": "historical-evidence",
+    "text": "| \u00a74.1 stage-0 gate additions | `verified` | `SKILL.md` stage row 0, `stages.md` \u00a70 GATE, `pipeline.example.json` `intake.gate.check` |"
+  },
+  {
+    "path": "docs/evidence/specs/2026-08-03-documentation-track-acceptance.md",
+    "line": 81,
+    "category": "historical-evidence",
+    "text": "| F3 | `verified` | `stages.md` stage-9 GATE no longer contains *\"docs in sync with code\"* as its criterion; replaced by the matrix walk + the gate command |"
+  },
+  {
+    "path": "docs/evidence/specs/2026-08-03-documentation-track-acceptance.md",
+    "line": 86,
+    "category": "historical-evidence",
+    "text": "| F8 | `verified` | `stages.md` gates 6, 7 and 9 each carry *\"the carry-over count is printed beside this verdict\"* |"
+  },
+  {
+    "path": "docs/evidence/specs/2026-08-03-documentation-track-design.md",
+    "line": 138,
+    "category": "historical-evidence",
+    "text": "| Ratchets | `audit.md` \u00a73, `learned.md` rule 7, `retrospective.md`, `stages.md` | **floor variables** and where the count is printed inside a gate script |"
+  },
+  {
+    "path": "docs/evidence/specs/2026-08-03-documentation-track-design.md",
+    "line": 155,
+    "category": "historical-evidence",
+    "text": "`SKILL.md` \u00b7 `references/stages.md` \u00b7 `references/knowledge-sources.md` \u00b7"
+  },
+  {
+    "path": "docs/evidence/specs/2026-08-03-documentation-track-design.md",
+    "line": 525,
+    "category": "historical-evidence",
+    "text": "| V10 | The SKILL.md anchor guard extended with `propagation` and `doc map` | The stage-10/9 close-out concept must reach `stages.md`, the config **and** `documentation.md` |"
+  },
+  {
+    "path": "docs/evidence/specs/2026-08-03-documentation-track-design.md",
+    "line": 540,
+    "category": "historical-evidence",
+    "text": "| F1 | **The \"read in full\" justification covers one of three parts.** `knowledge-sources.md` says `docs/superpowers/retro.md` is \"the one harvested source read in full rather than queried: the standing instructions are capped at ten precisely so that this is cheap\" \u2014 but the same file also holds the Log, which is unbounded, and `artifacts.md` repeats \"in full\" for the whole file. The cap justifies reading one part and is used to justify reading all three | `knowledge-sources.md:55-57`, `stages.md:44`, `artifacts.md:65` | fixed by D3 + wording |"
+  },
+  {
+    "path": "docs/evidence/specs/2026-08-03-documentation-track-design.md",
+    "line": 542,
+    "category": "historical-evidence",
+    "text": "| F3 | **Stage 9's gate is unfalsifiable.** \"docs in sync with code\" names no artefact and no check | `stages.md:281` | fixed by \u00a74.2 |"
+  },
+  {
+    "path": "docs/evidence/specs/2026-08-03-documentation-track-design.md",
+    "line": 547,
+    "category": "historical-evidence",
+    "text": "| F8 | **The carry-over ratchet is specified as printed \"at every gate\" but no gate criterion requires it** except stage 10 | `audit.md:228`, `stages.md` | make the print an explicit line in the stage 6/7/9 gate text |"
+  },
+  {
+    "path": "docs/evidence/specs/2026-08-03-documentation-track-design.md",
+    "line": 548,
+    "category": "historical-evidence",
+    "text": "| F9 | **`companion-skills.md` never mentions `agent-sync`**, while `SKILL.md` and `stages.md` both reference `/agent-sync finish` in the stage-10 close-out \u2014 a companion used in doctrine and absent from the companion matrix and the preflight | `companion-skills.md:31` | add the row and the preflight line |"
+  },
+  {
+    "path": "docs/evidence/specs/2026-08-03-documentation-track-design.md",
+    "line": 551,
+    "category": "historical-evidence",
+    "text": "| F12 | **`agent-sync` is doctrine in three files and absent from the preflight.** It is named in `SKILL.md`, `stages.md`, `acceptance.md` and the README as the thing that runs the stage-10 multi-repository close-out, and appears **zero** times in `companion-skills.md` \u2014 the one file that decides what gets detected and offered before stage 0 | grep: 4 files vs `companion-skills.md` | same fix as F9; recorded separately because it is measured, not inferred |"
+  },
+  {
+    "path": "docs/evidence/specs/2026-08-03-setup-and-autonomy-acceptance.md",
+    "line": 32,
+    "category": "historical-evidence",
+    "text": "| REQ-002 offered once | **verified** | stage-0 phase 1b+ in `stages.md`; sweep rows in both tables, parity guard green |"
+  },
+  {
+    "path": "docs/evidence/specs/2026-08-03-setup-and-autonomy-brief.md",
+    "line": 36,
+    "category": "historical-evidence",
+    "text": "| REQ-002 | Stage 0 offers it **once** when the doc map is absent or stale; the answer is recorded in the brief's sweep and never re-asked | `stages.md` stage-0 section + `templates/brief.md` sweep row; sweep-drift guard compares both tables |"
+  },
+  {
+    "path": "docs/evidence/specs/2026-08-04-run-continuity-acceptance.md",
+    "line": 40,
+    "category": "historical-evidence",
+    "text": "| 004 | verified | `build.md` and `stages.md` name it; `build.md`'s *Continuous execution* paragraph keeps its full force and gained a scope sentence. Same guard G2 |"
+  },
+  {
+    "path": "docs/evidence/specs/2026-08-04-run-continuity-brief.md",
+    "line": 33,
+    "category": "historical-evidence",
+    "text": "| `references/stages.md:281` | The build ledger exists *\"so a compacted context can resume\"* \u2014 the context problem is acknowledged, never given a rule | partial |"
+  },
+  {
+    "path": "docs/evidence/specs/2026-08-04-run-continuity-brief.md",
+    "line": 78,
+    "category": "historical-evidence",
+    "text": "| REQ-004 | `build.md`'s unconditional *\"Continuous execution\"* is reconciled with a default-off recorded mode \u2014 no two surfaces disagree | new guard: `build.md` and `stages.md` must cite `continuity.md`, the precedent being the doc-loop reach guard; plus review | open |"
+  },
+  {
+    "path": "docs/evidence/specs/2026-08-04-run-continuity-design.md",
+    "line": 152,
+    "category": "historical-evidence",
+    "text": "| `references/stages.md` | Stage-0 detail names the run-mode decision; a pointer to `continuity.md` |"
+  },
+  {
+    "path": "docs/evidence/specs/2026-08-04-run-continuity-design.md",
+    "line": 175,
+    "category": "historical-evidence",
+    "text": "| G2 | The continuity reach guard \u2014 `SKILL.md`, `references/grill.md`, `references/build.md`, `references/stages.md` and `templates/brief.md` must each name `continuity.md` | `does not name continuity.md \u2014 a run-wide rule no stage has heard of` | 003, 004 |"
+  },
+  {
+    "path": "docs/evidence/specs/2026-08-04-run-continuity-design.md",
+    "line": 275,
+    "category": "historical-evidence",
+    "text": "| 004 | Contract 3 (build.md, stages.md) \u00b7 G2 |"
+  },
+  {
+    "path": "docs/evidence/specs/2026-08-05-artifact-hygiene-acceptance.md",
+    "line": 32,
+    "category": "historical-evidence",
+    "text": "| REQ-009 | \u2705 | `build.md` \u00a7*The hygiene gate*, `stages.md` \u00a75/\u00a76/\u00a79, `artifacts.md`, `portability.md`, `templates/README.md`. `npm test` green over all of them |"
+  },
+  {
+    "path": "docs/evidence/specs/2026-08-05-artifact-hygiene-brief.md",
+    "line": 106,
+    "category": "historical-evidence",
+    "text": "| REQ-009 | Doctrine: `build.md` runs it after each task; `stages.md` \u00a75, \u00a76 and \u00a79 name it in their gate criteria; `gates.md` gains it as a worked example | cross-surface stage guard + review |"
+  },
+  {
+    "path": "docs/evidence/specs/2026-08-05-artifact-hygiene-design.md",
+    "line": 153,
+    "category": "historical-evidence",
+    "text": "- **`references/stages.md`** \u2014 \u00a75, \u00a76 and \u00a79 gate criteria name the gate and its"
+  },
+  {
+    "path": "docs/evidence/specs/2026-08-05-spec-plan-quality-acceptance.md",
+    "line": 29,
+    "category": "historical-evidence",
+    "text": "| REQ-008 | \u2705 / \u26a0\ufe0f | The cross-surface stage guard checks gate **types**; the criteria **prose** is `review`, as it is for every other criterion in `stages.md` |"
+  },
+  {
+    "path": "docs/evidence/specs/2026-08-05-spec-plan-quality-brief.md",
+    "line": 71,
+    "category": "historical-evidence",
+    "text": "- the stage-3 and stage-4 gate criteria in `references/stages.md` updated to demand"
+  },
+  {
+    "path": "docs/evidence/specs/2026-08-05-spec-plan-quality-brief.md",
+    "line": 100,
+    "category": "historical-evidence",
+    "text": "| REQ-008 | `references/stages.md` \u00a73 and \u00a74 gate criteria demand the `## Self-review` section and name what it must contain | the existing cross-surface stage guard + review |"
+  },
+  {
+    "path": "docs/evidence/specs/2026-08-05-spec-plan-quality-design.md",
+    "line": 22,
+    "category": "historical-evidence",
+    "text": "- Contract 5 \u2014 stages.md gate criteria"
+  },
+  {
+    "path": "docs/evidence/specs/2026-08-05-spec-plan-quality-design.md",
+    "line": 124,
+    "category": "historical-evidence",
+    "text": "## Contract 5 \u2014 stages.md gate criteria"
+  },
+  {
+    "path": "docs/evidence/specs/2026-08-06-ci-run-verified-brief.md",
+    "line": 13,
+    "category": "historical-evidence",
+    "text": "| `references/stages.md` \u00a7 7 GATE | requires lint + **suite green**, which is the *local* run; says nothing about the CI run the push triggers | current | gate | **yes** |"
+  },
+  {
+    "path": "docs/evidence/specs/2026-08-06-ci-run-verified-brief.md",
+    "line": 14,
+    "category": "historical-evidence",
+    "text": "| `references/stages.md` \u00a7 8 GATE | *\"clean boot confirmed, or an honest degradation report \u2014 never silent success\"* \u2014 the right shape, applied to deploy logs rather than to the CI run | current | gate | **yes** |"
+  },
+  {
+    "path": "docs/evidence/specs/2026-08-06-ci-run-verified-brief.md",
+    "line": 55,
+    "category": "historical-evidence",
+    "text": "| REQ-003 | `stages.md` \u00a7 7, \u00a7 8 and \u00a7 9 gates require the run's verdict to be **read and quoted**, citing `conventions.md` rather than restating it | guard: each of the three sections names the rule; none carries a second copy of the commands |"
+  },
+  {
+    "path": "docs/evidence/specs/2026-08-06-graph-staleness-acceptance.md",
+    "line": 15,
+    "category": "historical-evidence",
+    "text": "| guard \u2192 the text it parses | the new marker guard compared **per line**, and the doctrine wraps at ~80 columns, so it matched nothing in `README.md`/`stages.md` and printed a pass | found by probing, not reading; whitespace-normalised |"
+  },
+  {
+    "path": "docs/evidence/specs/2026-08-06-graph-staleness-acceptance.md",
+    "line": 29,
+    "category": "historical-evidence",
+    "text": "| REQ-005 | verified | `stages.md` stage-0 harvest **and** its `GATE (manual)`; negative *\"stage 0's own section must state the measured lag\"* PASS |"
+  },
+  {
+    "path": "docs/evidence/specs/2026-08-06-graph-staleness-brief.md",
+    "line": 14,
+    "category": "historical-evidence",
+    "text": "| `references/stages.md:96` | stage-0 harvest: \"the graph's row carries its build date\" | current | doctrine | **yes** |"
+  },
+  {
+    "path": "docs/evidence/specs/2026-08-06-graph-staleness-brief.md",
+    "line": 15,
+    "category": "historical-evidence",
+    "text": "| `references/stages.md:100` | stage-0 **GATE (manual)**: \"the source ledger is written\u2026\" | current | gate | **yes** |"
+  },
+  {
+    "path": "docs/evidence/specs/2026-08-06-graph-staleness-brief.md",
+    "line": 24,
+    "category": "historical-evidence",
+    "text": "| `test/validate.py:1405\u20131426` | the existing code-graph guard: doctrine shipping \u21d2 stage 9 must name it in **both** the config gate and `stages.md` | current | guard | **yes \u2014 the sibling to extend (R-003)** |"
+  },
+  {
+    "path": "docs/evidence/specs/2026-08-06-graph-staleness-brief.md",
+    "line": 58,
+    "category": "historical-evidence",
+    "text": "| D-6 | Stage 0 must name the measurement in **both** places \u2014 `pipeline.example.json` gate check and `stages.md`'s stage-0 section \u2014 and the existing guard is **extended** to cover stage 0, not duplicated | settled by the sources, not asked: `test/validate.py:1405` already enforces exactly this for stage 9, with the comment *\"the file reads as law and the run never does it\"*. **R-003** requires running a fixed defect's definition against its siblings; stage 0 is stage 9's sibling here | a second, parallel guard \u2014 the duplicate `audit.md` warns about |"
+  },
+  {
+    "path": "docs/evidence/specs/2026-08-06-graph-staleness-brief.md",
+    "line": 69,
+    "category": "historical-evidence",
+    "text": "| REQ-005 | `stages.md` stage-0 harvest line **and** its `GATE (manual)` criteria require the measured row | guard (the stage-9 guard extended to stage 0) |"
+  },
+  {
+    "path": "docs/evidence/specs/2026-08-06-graph-staleness-design.md",
+    "line": 88,
+    "category": "historical-evidence",
+    "text": "in both halves \u2014 `pipeline.example.json`'s stage-0 `gate.check` and `stages.md`'s stage-0"
+  },
+  {
+    "path": "docs/evidence/specs/2026-08-08-audit-followup-M8-acceptance.md",
+    "line": 26,
+    "category": "historical-evidence",
+    "text": "`SKILL.md` \u00d72 \u00b7 `references/acceptance.md` \u00d73 \u00b7 `references/stages.md` \u00d73 \u00b7"
+  },
+  {
+    "path": "docs/evidence/specs/2026-08-08-audit-followup-brief.md",
+    "line": 39,
+    "category": "historical-evidence",
+    "text": "| grep over `companion-skills.md`, `stages.md` | **zero** mentions of a browser / devtools / rendered-surface companion | current | measured |"
+  },
+  {
+    "path": "docs/evidence/specs/2026-08-08-audit-followup-brief.md",
+    "line": 101,
+    "category": "historical-evidence",
+    "text": "`acceptance.md:179/184/228`, `stages.md:487/494/498`, `templates/retro.md:4` and"
+  },
+  {
+    "path": "docs/evidence/specs/2026-08-08-audit-followup-carryover.md",
+    "line": 18,
+    "category": "historical-evidence",
+    "text": "| 11 | **The incremental graph refresh is not idempotent, and it erodes the graph.** Each refresh dispatches a subagent with a prompt emphasising *what this release changed*, so a re-extracted file is read through a release-shaped lens and loses its general nodes. Measured across two refreshes: `references/stages.md` 5\u21922 nodes for a 595-line file, `templates/retro.md` 8\u21922, `companion-skills.md` 12\u21924, `SKILL.md` 17\u21929. Net 864\u2192839\u2192(798 refused). The shrink guard refused twice; the first time verification showed a legitimate tightening, **the second time it showed erosion** \u2014 same procedure, opposite answer, which is why the check is run rather than remembered | **M3** stage 9 | the refresh prompt must ask for the file's full content, not the release's chain \u2014 or the practice needs a periodic full rebuild. **The graph is left at `2fc201e` with its lag recorded rather than force-written**, because forcing would bake the erosion in | **decided 2026-08-09 (option C)** \u2014 per-module incremental refresh is **stopped** for the rest of this programme; one full rebuild runs at programme end, from a prompt that asks for the file, not the release. Rationale: the erosion is caused by the refresh's own prompt shape, so refreshing more often makes it worse, and a stale graph whose lag is printed is honest where a shrunk one is not. Closes when the rebuild lands and `graphify-out/graph.json` reports \u2265864 nodes. **Not closed at programme end \u2014 stated, not done.** Measured at close: 839 nodes \u00b7 1024 links \u00b7 `built_at_commit 2fc201e`, **11 commits stale**. The full rebuild needs semantic extraction over a corpus that is almost entirely prose, and that needs either a Gemini key (absent) or subagent dispatch (not available to this run). The AST half would run keyless and would cover the three executable files out of ~40, which is not a rebuild. So the graph stays where it is, with its lag printed rather than a smaller graph written over it |"
+  },
+  {
+    "path": "docs/evidence/specs/2026-08-09-M5-re-derive-axis.md",
+    "line": 33,
+    "category": "historical-evidence",
+    "text": "| R3 | Every surface that enumerates the axes enumerates **all** of them | guard: a **paragraph** naming \u22653 axis keywords must name all of them \u2014 three, not two, because a lower bar false-positived on `stages.md`; keywords derived from `audit.md` at check time, never hand-listed |"
+  },
+  {
+    "path": "docs/evidence/specs/2026-08-09-planning-system-brief.md",
+    "line": 20,
+    "category": "historical-evidence",
+    "text": "| `references/stages.md` \u00a78 | the verification trio, the CI verdict, the rendered page. All **per run**; nothing accumulates |"
+  },
+  {
+    "path": "docs/evidence/specs/2026-08-09-planning-system-brief.md",
+    "line": 55,
+    "category": "historical-evidence",
+    "text": "| REQ-007 | Stage 8 writes the row; stage 10 refuses a REQ with no row | `stages.md` + guard | N2 |"
+  },
+  {
+    "path": "docs/evidence/specs/2026-08-10-pipeline-audit-acceptance.md",
+    "line": 24,
+    "category": "historical-evidence",
+    "text": "| REQ-011 header block at task start | verified | `references/progress.md` \u2192 *The header block*; guard P1-G1 compares its field set with `stages.md` both ways, probed |"
+  },
+  {
+    "path": "docs/evidence/specs/2026-08-10-pipeline-audit-acceptance.md",
+    "line": 28,
+    "category": "historical-evidence",
+    "text": "| REQ-014 review-round cap | verified | `loop-guard.md` \u2192 *The review loop*; guard P2-G1 computes the number from that file and requires it in `stages.md`; three plants |"
+  },
+  {
+    "path": "docs/evidence/specs/2026-08-10-pipeline-audit-acceptance.md",
+    "line": 29,
+    "category": "historical-evidence",
+    "text": "| REQ-016 short-path triage | verified | `stages.md` phase 1d; guard P2-G2 requires the skip glyph to be in `progress.md`'s legend, probed with `\u203b` |"
+  },
+  {
+    "path": "docs/evidence/specs/2026-08-10-pipeline-audit-acceptance.md",
+    "line": 31,
+    "category": "historical-evidence",
+    "text": "| REQ-018 COPY and VISUAL tracks at stage 3 | verified | `stages.md` stage 3 + its gate; guard P3-G2 requires all three tracks and their owners, probed by deleting one and by orphaning another |"
+  },
+  {
+    "path": "docs/evidence/specs/2026-08-10-pipeline-audit-brief.md",
+    "line": 62,
+    "category": "historical-evidence",
+    "text": "| REQ-014 | Stage 7's review loop carries a **declared cap**; past it the run enters loop-guard's break protocol instead of another round | `loop-guard.md` + `stages.md` state the same cap; guard both | P2 |"
+  },
+  {
+    "path": "docs/evidence/specs/2026-08-10-pipeline-audit-brief.md",
+    "line": 64,
+    "category": "historical-evidence",
+    "text": "| REQ-016 | Stage 0 **measures the change** and proposes the short path when the work is below the pipeline's own boundary | `grill.md` sweep row + `stages.md`; the measurement is a command, not a feeling | P2 |"
+  },
+  {
+    "path": "docs/evidence/specs/2026-08-10-pipeline-audit-brief.md",
+    "line": 66,
+    "category": "historical-evidence",
+    "text": "| REQ-018 | Stage 3 gains a **COPY track** (copywriting / brand pack) and a **VISUAL track** (sheleg-design), each with gate criteria and a refusal phrase recorded out loud | `stages.md` + `spec.md` gate text; guard | P3 |"
+  },
+  {
+    "path": "docs/evidence/specs/2026-08-10-routing-taxonomy.md",
+    "line": 49,
+    "category": "historical-evidence",
+    "text": "| 1 | Feature build | \u00ab\u0434\u043e\u0431\u0430\u0432\u044c X\u00bb | \u2713 | \u2014 | `stages.md` | **TRIG-03** \u00b7 TRIG-01 (expl.) | routed |"
+  },
+  {
+    "path": "docs/evidence/specs/2026-08-10-routing-taxonomy.md",
+    "line": 50,
+    "category": "historical-evidence",
+    "text": "| 2 | Defect fix | \u00ab\u043f\u043e\u0447\u0438\u043d\u0438\u0442\u044c\u00bb | \u2713 | \u2014 | `stages.md` | \u2014 \u00b7 INSTR-06 (expl.) | named, untested |"
+  },
+  {
+    "path": "docs/evidence/specs/2026-08-10-routing-taxonomy.md",
+    "line": 51,
+    "category": "historical-evidence",
+    "text": "| 3 | Refactor | \u00ab\u0440\u0435\u0444\u0430\u043a\u0442\u043e\u0440\u00bb | \u2713 | \u2014 | `stages.md` | \u2014 \u00b7 AMB-01 is `ambiguous` | named, untested |"
+  },
+  {
+    "path": "docs/evidence/specs/2026-08-10-routing-taxonomy.md",
+    "line": 52,
+    "category": "historical-evidence",
+    "text": "| 4 | Migration | \u00ab\u043c\u0438\u0433\u0440\u0430\u0446\u0438\u044f\u00bb | \u2713 | \u2014 | `stages.md` | \u2014 \u00b7 TRIG-02 (expl.) | named, untested |"
+  },
+  {
+    "path": "docs/evidence/specs/2026-08-10-routing-taxonomy.md",
+    "line": 53,
+    "category": "historical-evidence",
+    "text": "| 5 | Integration | \u00ab\u0438\u043d\u0442\u0435\u0433\u0440\u0430\u0446\u0438\u044f\u00bb | \u2713 | \u2014 | `stages.md` | \u2014 | named, untested |"
+  },
+  {
+    "path": "docs/evidence/specs/2026-08-10-routing-taxonomy.md",
+    "line": 54,
+    "category": "historical-evidence",
+    "text": "| 6 | Rewrite | \u00ab\u043f\u0435\u0440\u0435\u043f\u0438\u0448\u0438\u00bb | \u2713 | \u2014 | `stages.md` | **TRIG-04** | routed |"
+  },
+  {
+    "path": "docs/evidence/specs/2026-08-10-routing-taxonomy.md",
+    "line": 56,
+    "category": "historical-evidence",
+    "text": "| 8 | Hardening | \u00ab\u0445\u0430\u0440\u0434\u0435\u043d\u0438\u043d\u0433\u00bb | \u2713 | \u2014 | `stages.md` | \u2014 \u00b7 INSTR-07 (expl.) | named, untested |"
+  },
+  {
+    "path": "docs/evidence/specs/2026-08-10-routing-taxonomy.md",
+    "line": 64,
+    "category": "historical-evidence",
+    "text": "| 16 | **Open a PR** | \u00ab\u0441\u0434\u0435\u043b\u0430\u0439 PR\u00bb | \u2014 | \u2014 | inside stage 7 only \u2014 `stages.md:400`, `conventions.md:125` | \u2014 | **unrouted** |"
+  },
+  {
+    "path": "docs/evidence/specs/2026-08-10-routing-taxonomy.md",
+    "line": 67,
+    "category": "historical-evidence",
+    "text": "| 19 | Incident / hotfix | \u00ab\u0443\u043f\u0430\u043b\u043e \u0432 \u043f\u0440\u043e\u0434\u0435, \u0441\u0440\u043e\u0447\u043d\u043e\u00bb | \u2014 | \u2014 | short-path triage (`stages.md:143`) is the nearest thing | \u2014 | **unrouted** |"
+  },
+  {
+    "path": "docs/evidence/specs/2026-08-10-skill-audit-report.md",
+    "line": 19,
+    "category": "historical-evidence",
+    "text": "references/stages.md              ~13 161 tok    \u2190 the gates a run must satisfy"
+  },
+  {
+    "path": "docs/evidence/specs/2026-08-10-skill-audit-report.md",
+    "line": 31,
+    "category": "historical-evidence",
+    "text": "only the retro. `stages.md` is the gate list a run must satisfy, which is a weaker and"
+  },
+  {
+    "path": "docs/evidence/specs/2026-08-10-skill-audit-report.md",
+    "line": 207,
+    "category": "historical-evidence",
+    "text": "Stage 0 obliges ~48 000 tokens of reading, of which `retro.md` (~14 900) and `stages.md`"
+  },
+  {
+    "path": "docs/evidence/specs/2026-08-10-skill-audit-report.md",
+    "line": 280,
+    "category": "historical-evidence",
+    "text": "| **P-07** | **Cut the stage-0 floor below ~25k tokens.** `stages.md` splits into a spine (gates + criteria) and per-stage detail loaded on entry; `retro.md`'s *read in full* narrows to the standing instructions, with stamps and the log queried | F-13. The biggest single lever on agent quality here |"
+  },
+  {
+    "path": "docs/evidence/specs/2026-08-15-graph-audit.md",
+    "line": 34,
+    "category": "historical-evidence",
+    "text": "| F-3 | **The pipeline never says it is a static graph, or why.** Its shape is fixed and audited; that is its central property and it is written nowhere. Meanwhile it does have a dynamic element \u2014 the module map cut at stage 2 (`decomposition.md:61`, `:106`) and the program loop \u2014 and nothing names the boundary. An unstated design choice is indistinguishable from an oversight, and the next run to \"improve\" the pipeline into something that decides its own stages will find no rule against it | absence across `stages.md`, `planning.md`, `decomposition.md` | documented | 2 | 1 | 2.0 | **accept** |"
+  },
+  {
+    "path": "docs/evidence/specs/2026-08-15-graph-audit.md",
+    "line": 35,
+    "category": "historical-evidence",
+    "text": "| F-4 | **Stage 8 \u2192 9 may be a fake edge.** Stage 9 (docs, wiki, graph) consumes the stage-0 source ledger and the stage-5 changes; it needs the *version* from stage 7, not the post-deploy result from stage 8 | `stages.md:508`, `:541` | judgement | 1 | 2 | 0.5 | **reject** \u2014 two reasons. A single agent session executes serially, so removing the edge buys no wall-clock; and a post-deploy check can change what stage 9 must write (an honest-degradation report is a documented fact). The edge is weak, not fake |"
+  },
+  {
+    "path": "docs/evidence/specs/2026-08-15-graph-audit.md",
+    "line": 36,
+    "category": "historical-evidence",
+    "text": "| F-5 | **The fan-out rule is stated with three conditions in one file and one condition in another.** `build.md:273-276` requires all three \u2014 same group, exclusive file ownership, own worktree. `stages.md:395-396` summarises it as *\"fan out **only** when each implementer gets its own worktree; otherwise sequential\"*, dropping the first two. A reader who takes the summary as the rule fans out two tasks that share a file, in separate worktrees, and meets the conflict at integration | `build.md:273-276` vs `stages.md:395-396` | **measured** | 2 | 1 | 2.0 | **accept** |"
+  },
+  {
+    "path": "docs/evidence/specs/2026-08-15-graph-audit.md",
+    "line": 54,
+    "category": "historical-evidence",
+    "text": "| F-1 | `planning.md` carries the numbered procedure; the `## Self-review` template carries an `Edges:` line; the stage-4 GATE names it in `planning.md`, `stages.md` and `SKILL.md`'s table |"
+  },
+  {
+    "path": "docs/evidence/specs/2026-08-15-graph-audit.md",
+    "line": 57,
+    "category": "historical-evidence",
+    "text": "| F-5 | `stages.md:395-396` states all three conditions; `grep` shows the two files agree |"
+  },
+  {
+    "path": "docs/evidence/verification.md",
+    "line": 112,
+    "category": "historical-evidence",
+    "text": "| FC-wire | the probe is named in *The visual half*'s deterministic floor and in stages 5 and 6 | `references/browser.md` step 1; `references/stages.md` stage 5 bullet and stage 6 visual-half bullet | **observed** |"
+  },
+  {
+    "path": "docs/evidence/verification.md",
+    "line": 122,
+    "category": "historical-evidence",
+    "text": "| VG-class | stage 0 records `surface_class`; the class selects the gate profile | `stages.md` \u2192 *The surface class*; `templates/brief.md`; `graph_test.py` \"validate: a node's surface_class outside the four classes is refused\" | **observed** |"
+  },
+  {
+    "path": "docs/evidence/verification.md",
+    "line": 371,
+    "category": "historical-evidence",
+    "text": "| REQ-009 | Doctrine: `build.md` runs it after each task; `stages.md` \u00a75, \u00a76 and \u00a79 name it in their gate criteria; `gates.md` gains it as a worked example | `2026-08-05-artifact-hygiene` | v1.12.0^0 | \u2014 | \u2014 | pass | never | \u2014 |"
+  },
+  {
+    "path": "docs/evidence/verification.md",
+    "line": 384,
+    "category": "historical-evidence",
+    "text": "| REQ-008 | `references/stages.md` \u00a73 and \u00a74 gate criteria demand the `## Self-review` section and name what it must contain | `2026-08-05-spec-plan-quality` | v1.13.0^0 | \u2014 | \u2014 | none | never | \u2014 |"
+  },
+  {
+    "path": "docs/evidence/verification.md",
+    "line": 390,
+    "category": "historical-evidence",
+    "text": "| REQ-003 | `stages.md` \u00a7 7, \u00a7 8 and \u00a7 9 gates require the run's verdict to be **read and quoted**, citing `conventions.md` rather than restating it | `2026-08-06-ci-run-verified` | v1.16.2 | \u2014 | \u2014 | pass | never | \u2014 |"
+  },
+  {
+    "path": "docs/evidence/verification.md",
+    "line": 401,
+    "category": "historical-evidence",
+    "text": "| REQ-005 | `stages.md` stage-0 harvest line **and** its `GATE (manual)` criteria require the measured row | `2026-08-06-graph-staleness` | v1.15.0 | \u2014 | \u2014 | pass | never | \u2014 |"
+  },
+  {
+    "path": "docs/evidence/verification.md",
+    "line": 431,
+    "category": "historical-evidence",
+    "text": "| REQ-017 | A browser test suite is the coverage half of stage 6 and never the look \u2014 stated in stages.md, tdd.md and SKILL.md | `2026-08-14-playwright-browser-channel` | v1.55.0 | \u2014 | \u2014 | pass | never | \u2014 |"
+  },
+  {
+    "path": "docs/evidence/verification.md",
+    "line": 439,
+    "category": "historical-evidence",
+    "text": "| REQ-006 | `stages.md` stage 5 states all three fan-out preconditions and names the convergence check \u2014 the drift that had it at one condition is guarded in the direction it drifted | `2026-08-15-graph-audit` | v1.56.0 | \u2014 | \u2014 | pass | never | F-5 \u00b7 F-6 |"
+  },
+  {
+    "path": "plugins/task-pipeline/agents/verifier.md",
+    "line": 114,
+    "category": "shipped",
+    "text": "`references/stages.md` \u2192 stage 8 for what verification means here;"
+  },
+  {
+    "path": "plugins/task-pipeline/hooks/build-gate.sh",
+    "line": 4,
+    "category": "shipped",
+    "text": "# `stages.md` says no stage advances until its gate passes, and stage 5 is where"
+  },
+  {
+    "path": "plugins/task-pipeline/hooks/release-gate.sh",
+    "line": 4,
+    "category": "shipped",
+    "text": "# `stages.md` already says a release does not leave stage 7 until the full suite"
+  },
+  {
+    "path": "plugins/task-pipeline/skills/evidence-docs/references/documentation.md",
+    "line": 9,
+    "category": "shipped",
+    "text": "enforces it gets written; [`stages.md`](https://github.com/ssheleg/task-pipeline/blob/main/plugins/task-pipeline/skills/task-pipeline/references/stages.md) says where each piece binds."
+  },
+  {
+    "path": "plugins/task-pipeline/skills/evidence-docs/references/gates.md",
+    "line": 170,
+    "category": "shipped",
+    "text": "Every stage in [`stages.md`](https://github.com/ssheleg/task-pipeline/blob/main/plugins/task-pipeline/skills/task-pipeline/references/stages.md) declares its level and its reason, on the"
+  },
+  {
+    "path": "plugins/task-pipeline/skills/task-pipeline/SKILL.md",
+    "line": 69,
+    "category": "shipped",
+    "text": "**Precedence:** on a CUSTOM profile the **kernel wins** \u2014 scope, evidence, deps and resume are owed by every unit of work; `references/stages.md` is the **default profile's** normative gate set; the kernel is normative for all. Another skill set on stages 2/4/5/6: `references/companion-skills.md`."
+  },
+  {
+    "path": "plugins/task-pipeline/skills/task-pipeline/SKILL.md",
+    "line": 156,
+    "category": "shipped",
+    "text": "   (`references/stages.md` \u2192 0). Do not touch stage 1 before the brief is"
+  },
+  {
+    "path": "plugins/task-pipeline/skills/task-pipeline/SKILL.md",
+    "line": 161,
+    "category": "shipped",
+    "text": "   skip ahead to the first stage with real work (see `references/stages.md` \u2192 0)."
+  },
+  {
+    "path": "plugins/task-pipeline/skills/task-pipeline/SKILL.md",
+    "line": 176,
+    "category": "shipped",
+    "text": "   status column is the resume point (`references/stages.md` \u2192 *The program loop*)."
+  },
+  {
+    "path": "plugins/task-pipeline/skills/task-pipeline/SKILL.md",
+    "line": 182,
+    "category": "shipped",
+    "text": "4. Do **not** advance until the stage **gate** passes (`references/stages.md`)."
+  },
+  {
+    "path": "plugins/task-pipeline/skills/task-pipeline/SKILL.md",
+    "line": 196,
+    "category": "shipped",
+    "text": "## Stages (detail in `references/stages.md`)"
+  },
+  {
+    "path": "plugins/task-pipeline/skills/task-pipeline/SKILL.md",
+    "line": 216,
+    "category": "shipped",
+    "text": "[`references/stages.md`](references/stages.md) \u2014 one section per stage. What the"
+  },
+  {
+    "path": "plugins/task-pipeline/skills/task-pipeline/SKILL.md",
+    "line": 254,
+    "category": "shipped",
+    "text": "the stage that sends you there. The rest are routed by prose: `stages.md` (named"
+  },
+  {
+    "path": "plugins/task-pipeline/skills/task-pipeline/pipeline.example.json",
+    "line": 21,
+    "category": "shipped",
+    "text": "        \"check\": \"MANDATORY stage \u2014 never skipped (only sanctioned bypass: the entry-from-super-ux short-circuit). PHASE 1, before the first question: harvest the knowledge sources (references/knowledge-sources.md) \u2014 code, THE CODE GRAPH when one is built (references/knowledge-graph.md: graphify query/affected/god-nodes answer reach, which grep cannot; detect graphify-out/graph.json \u2014 recommended, never required), CLAUDE.md/AGENTS.md, CONTEXT.md + docs/adr, docs/ + docs/ux, past pipeline briefs and carry-over ledgers, THE RETRO'S STANDING INSTRUCTIONS (docs/evidence/retro.md \u2014 read IN FULL, not queried: they are capped at ten and they BIND this run; stamp each one the moment it fires, since that date is the only evidence behind stage 10's cold-retirement rule \u2014 references/retrospective.md), the knowledge wiki when installed (obsidian-wiki \u2014 recommended, never required; detect ~/.obsidian-wiki/config), and any other repo or hosted doc system the project names as its docs \u2014 queried by this task's own terms, with the SOURCE LEDGER written into the brief (a row per source consulted, or an explicit 'none found'; THE GRAPH'S ROW CARRIES ITS MEASURED LAG \u2014 commits and days behind HEAD, the signal it was measured with (built_at_commit exact / mtime approximate / unresolvable), and the marker '\u26a0 not trusted for reach until refreshed' \u2014 that exact string, so one marker is greppable across every ledger \u2014 on anything but current. A bare build date does NOT satisfy this: it is the graph's own reply about itself, true and self-reported and silent about whether the graph describes the tree this run is about to change \u2014 references/knowledge-graph.md -> Measure the lag, and references/gates.md -> False success for the class). PHASE 2, the grill, built into the skill (references/grill.md) \u2014 no companion to install. Per its contract: close what the code/docs answer first, then ONE batch of the material unknowns ordered by dependency, a recommended answer with each (one at a time only where answers depend on each other or the operator asks), contradictions reconciled; EVERY answer that touches a harvested source is validated against that source \u2014 the operator outranks any document, but only out loud, and the losing side is logged for the stage-9 doc update; domain awareness applied (terms challenged against CONTEXT.md, ADRs recorded for hard-to-reverse calls). The autonomy sweep is covered \u2014 every stage 1-10 has its blockers pre-resolved (docs sources, branch/tracker policy, test + lint commands, deploy target and authorization, log/health locations, docs+wiki targets, and for UI tasks the design surface: Figma on or text-only, is the Figma MCP connected, and if it is not \u2014 ship text-only or stop and connect it, since the UX chain degrades on its own and never blocks; plus, with Figma on, the DESIGN DESTINATION \u2014 which team/org by name and which file per surface, App / Web / ASO (the recorded one, a URL the operator gives, or creation in that named team with the creation explicitly authorized), written into the project's canonical record before the first frame, and never created while a recorded file resolves \u2014 an unreachable recorded file means stop and ask, never make a replacement) or is explicitly marked 'stop and ask here'. UI verdict recorded (arms super-ux), and for a user-facing task its SURFACE CLASS \u2014 surface_class: flagship | product | internal | ad \u2014 which selects the visual gate profile for stages 3, 6 and 10 (references/stages.md -> The surface class); model decision recorded. All of it locked into a committed task brief the operator confirms before stage 1. The REQ table is written \u2014 one row per independently verifiable deliverable, each naming how it is verified \u2014 and frozen: adding later is free, removing or narrowing needs the operator's explicit agreement. The carry-over ledger is seeded. PHASE 1b, THE DOCUMENTATION INVENTORY (references/documentation.md): four questions answered into docs/DOCMAP.md before the interview \u2014 where settled things live (the DECISION HOME, and there is exactly one per project: an existing docs/adr/ IS the register and is recorded as such, never duplicated), what each fact's single home is, what a change of type X obliges (THE PROPAGATION MATRIX, non-empty, every row naming the check that enforces it or the word 'review' with a one-line reason), and what proves it (the gate command). A project with no answers gets them seeded \u2014 registers, matrix and scripts/check-docs.sh from the skill's templates \u2014 and the seeding is recorded as the register's first entry; the seeded gate must exit 0 on its own seeds, because a project that starts red teaches everyone on day one that the gate is noise. The regime is recorded. PHASE 1c, RECONCILE: git says how it should be, the run record says how it turned out \u2014 read both for the area about to be touched and resolve every divergence (the document is stale, the record is wrong, or they genuinely disagree and that is a decision), because starting on an unresolved divergence means building against a system that does not exist. The retro's in-force sections are read IN FULL and its archive is QUERIED by the task's nouns.\""
+  },
+  {
+    "path": "plugins/task-pipeline/skills/task-pipeline/references/artifacts.md",
+    "line": 204,
+    "category": "shipped",
+    "text": "      stages.md model-tiering.md              #   gates, model policy"
+  },
+  {
+    "path": "plugins/task-pipeline/skills/task-pipeline/references/brainstorm.md",
+    "line": 149,
+    "category": "shipped",
+    "text": "[`stages.md`](stages.md) \u2192 *2 \u2014 Brainstorm + decompose* \u2014 states both in full:"
+  },
+  {
+    "path": "plugins/task-pipeline/skills/task-pipeline/references/browser.md",
+    "line": 8,
+    "category": "shipped",
+    "text": "Stages 5, 6 and 8 ([`stages.md`](stages.md)) and [`tdd.md`](tdd.md) demand a look at the"
+  },
+  {
+    "path": "plugins/task-pipeline/skills/task-pipeline/references/browser.md",
+    "line": 172,
+    "category": "shipped",
+    "text": "([`stages.md`](stages.md) \u2192 stage 0, *The surface class*):"
+  },
+  {
+    "path": "plugins/task-pipeline/skills/task-pipeline/references/certification.md",
+    "line": 87,
+    "category": "shipped",
+    "text": "`surface_class` ([`stages.md`](stages.md) \u2192 stage 0, *The surface class*). On"
+  },
+  {
+    "path": "plugins/task-pipeline/skills/task-pipeline/references/companion-skills.md",
+    "line": 119,
+    "category": "shipped",
+    "text": "- **The gates still govern.** Whatever runs a stage, `stages.md` decides when the"
+  },
+  {
+    "path": "plugins/task-pipeline/skills/task-pipeline/references/companion-skills.md",
+    "line": 345,
+    "category": "shipped",
+    "text": "action). When entered that way the UX chain already exists \u2014 see `stages.md` \u2192 0"
+  },
+  {
+    "path": "plugins/task-pipeline/skills/task-pipeline/references/documentation.md",
+    "line": 9,
+    "category": "shipped",
+    "text": "enforces it gets written; [`stages.md`](stages.md) says where each piece binds."
+  },
+  {
+    "path": "plugins/task-pipeline/skills/task-pipeline/references/gates.md",
+    "line": 170,
+    "category": "shipped",
+    "text": "Every stage in [`stages.md`](stages.md) declares its level and its reason, on the"
+  },
+  {
+    "path": "plugins/task-pipeline/skills/task-pipeline/references/grill.md",
+    "line": 182,
+    "category": "shipped",
+    "text": "| 2\u20133 Spec | UI verdict (arms super-ux) **and the surface class** \u2014 `flagship`, `product`, `internal` or `ad`, which selects the visual gate profile ([`stages.md`](stages.md) \u2192 stage 0, *The surface class*); any scenario-tracing waiver |"
+  },
+  {
+    "path": "plugins/task-pipeline/skills/task-pipeline/references/iteration.md",
+    "line": 74,
+    "category": "shipped",
+    "text": "with stage 10. No gate in [`stages.md`](stages.md) is skipped. The cycle changes when each"
+  },
+  {
+    "path": "plugins/task-pipeline/skills/task-pipeline/references/iteration.md",
+    "line": 214,
+    "category": "shipped",
+    "text": "- every parent's submodule pointer ([`stages.md`](stages.md), stage 10)."
+  },
+  {
+    "path": "plugins/task-pipeline/skills/task-pipeline/references/portability.md",
+    "line": 43,
+    "category": "shipped",
+    "text": "| Per-stage criteria, freedom levels, the run checklist | `references/stages.md` |"
+  },
+  {
+    "path": "plugins/task-pipeline/skills/task-pipeline/references/progress.md",
+    "line": 8,
+    "category": "shipped",
+    "text": "[`stages.md`](stages.md) opens with a checklist for exactly that reason and then marks"
+  },
+  {
+    "path": "plugins/task-pipeline/skills/task-pipeline/references/progress.md",
+    "line": 443,
+    "category": "shipped",
+    "text": "| \"The operator can see the stages scroll by\" | They can see that *something* printed. A stage that ended silently and a stage that never started look identical in a transcript, which is the failure `stages.md`'s checklist was written for and never enforced. |"
+  },
+  {
+    "path": "plugins/task-pipeline/skills/task-pipeline/references/spec.md",
+    "line": 97,
+    "category": "shipped",
+    "text": "  owed is the brief's `surface_class` ([`stages.md`](stages.md) \u2192 stage 0, *The surface"
+  },
+  {
+    "path": "plugins/task-pipeline/skills/task-pipeline/references/verification.md",
+    "line": 6,
+    "category": "shipped",
+    "text": "rendered page ([`stages.md`](stages.md) \u2192 *8 \u2014 Post-deploy*). All of it is **per run**,"
+  },
+  {
+    "path": "plugins/task-pipeline/skills/task-pipeline/references/waves.md",
+    "line": 10,
+    "category": "shipped",
+    "text": "Every gate in [`stages.md`](stages.md) still holds where its stage runs; what the mode"
+  },
+  {
+    "path": "plugins/task-pipeline/skills/task-pipeline/references/waves.md",
+    "line": 183,
+    "category": "shipped",
+    "text": "Each wave runs stages 5\u20138 as [`stages.md`](stages.md) states them, then the close pass."
+  },
+  {
+    "path": "plugins/task-pipeline/skills/task-pipeline/scripts/graph.py",
+    "line": 292,
+    "category": "shipped",
+    "text": "        # The surface class (stage 0, `references/stages.md`) decides whether `certify`"
+  },
+  {
+    "path": "plugins/task-pipeline/skills/task-pipeline/scripts/stage_checkpoint.py",
+    "line": 85,
+    "category": "shipped",
+    "text": "    validator compares with `references/stages.md`, so this list cannot drift from it.\"\"\""
+  },
+  {
+    "path": "plugins/task-pipeline/skills/task-pipeline/scripts/visual_gate.py",
+    "line": 25,
+    "category": "shipped",
+    "text": "selects what each check owes (`references/stages.md` \u2192 stage 0, *The surface class*)."
+  },
+  {
+    "path": "test/audit_regressions/fix-hk-20.py",
+    "line": 29,
+    "category": "test",
+    "text": "STAGES = os.path.join(SKILL, \"references\", \"stages.md\")"
+  },
+  {
+    "path": "test/audit_regressions/fix-hk-20.py",
+    "line": 103,
+    "category": "test",
+    "text": "        \"stages.md's stage-4 GATE does not name it\""
+  },
+  {
+    "path": "test/audit_regressions/fix-tp-03.01.py",
+    "line": 5,
+    "category": "test",
+    "text": "proceeding without a concrete stage 0 and kept references/stages.md normative"
+  },
+  {
+    "path": "test/audit_regressions/fix-tp-03.01.py",
+    "line": 14,
+    "category": "test",
+    "text": "* precedence on a custom profile: the kernel wins; references/stages.md is"
+  },
+  {
+    "path": "test/continuity_doc_test.py",
+    "line": 79,
+    "category": "test",
+    "text": "    stages = (refs / \"stages.md\").read_text()"
+  },
+  {
+    "path": "test/negatives/040-the-stage-9-detail-must-name-the-code-graph-refresh-too.sh",
+    "line": 7,
+    "category": "test-negative",
+    "text": "p = \"/tmp/graph-doc-copy/plugins/task-pipeline/skills/task-pipeline/references/stages.md\""
+  },
+  {
+    "path": "test/negatives/040-the-stage-9-detail-must-name-the-code-graph-refresh-too.sh",
+    "line": 19,
+    "category": "test-negative",
+    "text": "  echo \"OK: validator requires stages.md stage 9 to name the code-graph refresh\""
+  },
+  {
+    "path": "test/negatives/053-the-doc-track-must-reach-the-surfaces-that-enforce-it.sh",
+    "line": 7,
+    "category": "test-negative",
+    "text": "p = \"/tmp/anchor-copy/plugins/task-pipeline/skills/task-pipeline/references/stages.md\""
+  },
+  {
+    "path": "test/negatives/053-the-doc-track-must-reach-the-surfaces-that-enforce-it.sh",
+    "line": 13,
+    "category": "test-negative",
+    "text": "  echo \"ERROR: validator passed with the propagation sweep declared in SKILL.md and absent from stages.md \u2014 declared where it is not enforced is inert\""
+  },
+  {
+    "path": "test/negatives/058-a-long-reference-s-contents-must-match-its-headings.sh",
+    "line": 6,
+    "category": "test-negative",
+    "text": "p = \"/tmp/toc-copy/plugins/task-pipeline/skills/task-pipeline/references/stages.md\""
+  },
+  {
+    "path": "test/negatives/062-a-citation-must-name-a-section-that-exists.sh",
+    "line": 6,
+    "category": "test-negative",
+    "text": "p = \"/tmp/cite-copy/plugins/task-pipeline/skills/task-pipeline/references/stages.md\""
+  },
+  {
+    "path": "test/negatives/108-stage-0-s-own-section-must-state-the-measured-lag.sh",
+    "line": 6,
+    "category": "test-negative",
+    "text": "p = \"/tmp/gs02-copy/plugins/task-pipeline/skills/task-pipeline/references/stages.md\""
+  },
+  {
+    "path": "test/negatives/122-a-pushing-stage-must-name-the-ci-verdict.sh",
+    "line": 6,
+    "category": "test-negative",
+    "text": "p = \"/tmp/ci03-copy/plugins/task-pipeline/skills/task-pipeline/references/stages.md\""
+  },
+  {
+    "path": "test/negatives/123-a-stage-may-not-carry-its-own-copy-of-the-ci-commands.sh",
+    "line": 6,
+    "category": "test-negative",
+    "text": "p = \"/tmp/ci04-copy/plugins/task-pipeline/skills/task-pipeline/references/stages.md\""
+  },
+  {
+    "path": "test/negatives/239-the-header-block-drifting-between-its-two-copies.sh",
+    "line": 6,
+    "category": "test-negative",
+    "text": "p = \"/tmp/hdr-copy/plugins/task-pipeline/skills/task-pipeline/references/stages.md\""
+  },
+  {
+    "path": "test/negatives/246-the-review-cap-with-no-config-key.sh",
+    "line": 6,
+    "category": "test-negative",
+    "text": "p = \"/tmp/rc3-copy/plugins/task-pipeline/skills/task-pipeline/references/stages.md\""
+  },
+  {
+    "path": "test/negatives/247-the-short-path-marking-a-stage-with-an-undefined-glyph.sh",
+    "line": 6,
+    "category": "test-negative",
+    "text": "p = \"/tmp/sp-copy/plugins/task-pipeline/skills/task-pipeline/references/stages.md\""
+  },
+  {
+    "path": "test/negatives/251-a-stage-dropping-the-companion-the-matrix-aims-at-it.sh",
+    "line": 6,
+    "category": "test-negative",
+    "text": "p = \"/tmp/cw2-copy/plugins/task-pipeline/skills/task-pipeline/references/stages.md\""
+  },
+  {
+    "path": "test/negatives/255-a-stage-demanding-the-look-with-no-mechanism-to-point-at.sh",
+    "line": 6,
+    "category": "test-negative",
+    "text": "p = \"/tmp/br1-copy/plugins/task-pipeline/skills/task-pipeline/references/stages.md\""
+  },
+  {
+    "path": "test/negatives/257-a-browser-pointer-that-renders-as-nothing.sh",
+    "line": 6,
+    "category": "test-negative",
+    "text": "p = \"/tmp/br3-copy/plugins/task-pipeline/skills/task-pipeline/references/stages.md\""
+  },
+  {
+    "path": "test/negatives/259-a-stage-3-track-with-no-owning-skill.sh",
+    "line": 6,
+    "category": "test-negative",
+    "text": "p = \"/tmp/trk1-copy/plugins/task-pipeline/skills/task-pipeline/references/stages.md\""
+  },
+  {
+    "path": "test/negatives/260-a-stage-3-track-deleted-outright.sh",
+    "line": 7,
+    "category": "test-negative",
+    "text": "p = \"/tmp/trk2-copy/plugins/task-pipeline/skills/task-pipeline/references/stages.md\""
+  },
+  {
+    "path": "test/negatives/267-no-stage-naming-the-publish-step.sh",
+    "line": 6,
+    "category": "test-negative",
+    "text": "p = \"/tmp/rp7-copy/plugins/task-pipeline/skills/task-pipeline/references/stages.md\""
+  },
+  {
+    "path": "test/negatives/269-a-stage-dropping-a-reader-state.sh",
+    "line": 6,
+    "category": "test-negative",
+    "text": "p = \"/tmp/rd2-copy/plugins/task-pipeline/skills/task-pipeline/references/stages.md\""
+  },
+  {
+    "path": "test/negatives/297-stage-2-keeps-its-gate-but-loses-where-the-queue-comes-from.sh",
+    "line": 6,
+    "category": "test-negative",
+    "text": "p = \"/tmp/lp07-copy/plugins/task-pipeline/skills/task-pipeline/references/stages.md\""
+  },
+  {
+    "path": "test/negatives/310-neighbour-probe-stage-2-loses-the-arming-while-keeping-the-w.sh",
+    "line": 6,
+    "category": "test-negative",
+    "text": "p = \"/tmp/nb03-copy/plugins/task-pipeline/skills/task-pipeline/references/stages.md\""
+  },
+  {
+    "path": "test/negatives/314-stage-10-s-gate-stops-requiring-the-hand-back.sh",
+    "line": 6,
+    "category": "test-negative",
+    "text": "p = \"/tmp/hb04-copy/plugins/task-pipeline/skills/task-pipeline/references/stages.md\""
+  },
+  {
+    "path": "test/negatives/315-neighbour-probe-the-gate-loses-the-hand-back-while-the-secti.sh",
+    "line": 6,
+    "category": "test-negative",
+    "text": "p = \"/tmp/hb05-copy/plugins/task-pipeline/skills/task-pipeline/references/stages.md\""
+  },
+  {
+    "path": "test/negatives/330-stage-10-s-verdict-drops-the-publish-line.sh",
+    "line": 6,
+    "category": "test-negative",
+    "text": "p = \"/tmp/ri12-copy/plugins/task-pipeline/skills/task-pipeline/references/stages.md\""
+  },
+  {
+    "path": "test/negatives/378-stages-md-drops-the-convergence-check-from-its-stage-5-summa.sh",
+    "line": 2,
+    "category": "test-negative",
+    "text": "# name: Negative self-test (stages.md drops the convergence check from its stage-5 summary)"
+  },
+  {
+    "path": "test/negatives/378-stages-md-drops-the-convergence-check-from-its-stage-5-summa.sh",
+    "line": 7,
+    "category": "test-negative",
+    "text": "p = \"/tmp/cv3-copy/plugins/task-pipeline/skills/task-pipeline/references/stages.md\""
+  },
+  {
+    "path": "test/negatives/382-stages-md-drops-the-same-group-fan-out-precondition.sh",
+    "line": 2,
+    "category": "test-negative",
+    "text": "# name: Negative self-test (stages.md drops the same-group fan-out precondition)"
+  },
+  {
+    "path": "test/negatives/382-stages-md-drops-the-same-group-fan-out-precondition.sh",
+    "line": 7,
+    "category": "test-negative",
+    "text": "p = \"/tmp/cv5-copy/plugins/task-pipeline/skills/task-pipeline/references/stages.md\""
+  },
+  {
+    "path": "test/negatives/383-stages-md-drops-the-worktree-fan-out-precondition.sh",
+    "line": 2,
+    "category": "test-negative",
+    "text": "# name: Negative self-test (stages.md drops the worktree fan-out precondition)"
+  },
+  {
+    "path": "test/negatives/383-stages-md-drops-the-worktree-fan-out-precondition.sh",
+    "line": 7,
+    "category": "test-negative",
+    "text": "p = \"/tmp/cv6-copy/plugins/task-pipeline/skills/task-pipeline/references/stages.md\""
+  },
+  {
+    "path": "test/negatives/385-stages-md-drops-the-exclusive-file-ownership-precondition.sh",
+    "line": 2,
+    "category": "test-negative",
+    "text": "# name: Negative self-test (stages.md drops the exclusive-file-ownership precondition)"
+  },
+  {
+    "path": "test/negatives/385-stages-md-drops-the-exclusive-file-ownership-precondition.sh",
+    "line": 7,
+    "category": "test-negative",
+    "text": "p = \"/tmp/cv8-copy/plugins/task-pipeline/skills/task-pipeline/references/stages.md\""
+  },
+  {
+    "path": "test/negatives/387-stages-md-s-stage-5-heading-is-renamed-away.sh",
+    "line": 2,
+    "category": "test-negative",
+    "text": "# name: Negative self-test (stages.md's stage-5 heading is renamed away)"
+  },
+  {
+    "path": "test/negatives/387-stages-md-s-stage-5-heading-is-renamed-away.sh",
+    "line": 6,
+    "category": "test-negative",
+    "text": "p = \"/tmp/cv10-copy/plugins/task-pipeline/skills/task-pipeline/references/stages.md\""
+  },
+  {
+    "path": "test/negatives/387-stages-md-s-stage-5-heading-is-renamed-away.sh",
+    "line": 16,
+    "category": "test-negative",
+    "text": "if echo \"$out\" | grep -q \"references/stages.md: no .5 \u2014 Dev. section\"; then"
+  },
+  {
+    "path": "test/negatives/387-stages-md-s-stage-5-heading-is-renamed-away.sh",
+    "line": 19,
+    "category": "test-negative",
+    "text": "  echo \"ERROR: the None branch of the stages.md site is unproven\""
+  },
+  {
+    "path": "test/negatives/388-only-the-stage-5-gate-bullet-loses-the-convergence-check.sh",
+    "line": 7,
+    "category": "test-negative",
+    "text": "p = \"/tmp/cv11-copy/plugins/task-pipeline/skills/task-pipeline/references/stages.md\""
+  },
+  {
+    "path": "test/negatives/391-the-stage-0-gate-stops-reading-the-contradictions-line.sh",
+    "line": 7,
+    "category": "test-negative",
+    "text": "p = \"/tmp/cx2-copy/plugins/task-pipeline/skills/task-pipeline/references/stages.md\""
+  },
+  {
+    "path": "test/negatives/392-stage-3-loses-the-tracks-convergence.sh",
+    "line": 7,
+    "category": "test-negative",
+    "text": "p = \"/tmp/cx3-copy/plugins/task-pipeline/skills/task-pipeline/references/stages.md\""
+  },
+  {
+    "path": "test/negatives/393-stage-3-s-two-tracks-go-back-to-a-sequence.sh",
+    "line": 7,
+    "category": "test-negative",
+    "text": "p = \"/tmp/cx4-copy/plugins/task-pipeline/skills/task-pipeline/references/stages.md\""
+  },
+  {
+    "path": "test/negatives/429-the-stage-3-gate-stops-requiring-the-convergence.sh",
+    "line": 7,
+    "category": "test-negative",
+    "text": "p = \"/tmp/cx5-copy/plugins/task-pipeline/skills/task-pipeline/references/stages.md\""
+  },
+  {
+    "path": "test/release_approval_test.py",
+    "line": 146,
+    "category": "test",
+    "text": "    for name in (\"stages.md\", \"deploy-targets.md\"):"
+  },
+  {
+    "path": "test/validate.py",
+    "line": 236,
+    "category": "test",
+    "text": "for r in (\"grill.md\", \"stages.md\", \"model-tiering.md\", \"conventions.md\", \"companion-skills.md\", \"artifacts.md\"):"
+  },
+  {
+    "path": "test/validate.py",
+    "line": 262,
+    "category": "test",
+    "text": "# real \u2014 a long file gets `head -100`'d, and references/stages.md is 500 lines: an"
+  },
+  {
+    "path": "test/validate.py",
+    "line": 1036,
+    "category": "test",
+    "text": "#      \u2014 the shape acceptance.md and stages.md used, which P1 and P2 both missed because a"
+  },
+  {
+    "path": "test/validate.py",
+    "line": 1367,
+    "category": "test",
+    "text": "        # accused stages.md of enumerating three axes when its three hits were 595 lines"
+  },
+  {
+    "path": "test/validate.py",
+    "line": 2387,
+    "category": "test",
+    "text": "# SKILL.md's table (what it walks), references/stages.md (the per-stage detail and"
+  },
+  {
+    "path": "test/validate.py",
+    "line": 2393,
+    "category": "test",
+    "text": "_st_path = os.path.join(refdir, \"stages.md\")"
+  },
+  {
+    "path": "test/validate.py",
+    "line": 2418,
+    "category": "test",
+    "text": "        fail(f\"stage ids differ: pipeline.example.json {[r[0] for r in _cfg_rows]} vs references/stages.md {[r[0] for r in _st_rows]}\")"
+  },
+  {
+    "path": "test/validate.py",
+    "line": 2426,
+    "category": "test",
+    "text": "            fail(f\"references/stages.md stage {_t[0]}: no '**GATE (auto|manual)**' line \u2014 every stage states its gate\")"
+  },
+  {
+    "path": "test/validate.py",
+    "line": 2428,
+    "category": "test",
+    "text": "            fail(f\"stage {_c[0]}: gate type differs \u2014 pipeline.example.json {_c[2]!r} vs references/stages.md {_t[2]!r}\")"
+  },
+  {
+    "path": "test/validate.py",
+    "line": 2430,
+    "category": "test",
+    "text": "            fail(f\"stage {_c[0]}: name differs \u2014 pipeline.example.json {_c[1]!r} vs references/stages.md {_t[1]!r}\")"
+  },
+  {
+    "path": "test/validate.py",
+    "line": 3589,
+    "category": "test",
+    "text": "_st = os.path.join(ROOT, \"plugins/task-pipeline/skills/task-pipeline/references/stages.md\")"
+  },
+  {
+    "path": "test/validate.py",
+    "line": 3597,
+    "category": "test",
+    "text": "        fail(\"references/stages.md: stage 2 does not say the work graph is WRITTEN there \u2014 \""
+  },
+  {
+    "path": "test/validate.py",
+    "line": 3603,
+    "category": "test",
+    "text": "            fail(\"references/stages.md: stage 2 writes the graph and never says how it is \""
+  },
+  {
+    "path": "test/validate.py",
+    "line": 3609,
+    "category": "test",
+    "text": "        fail(\"references/stages.md: stage 2's GATE does not require the queue to be an \""
+  },
+  {
+    "path": "test/validate.py",
+    "line": 4543,
+    "category": "test",
+    "text": "    # config can't drift from the doctrine in references/stages.md."
+  },
+  {
+    "path": "test/validate.py",
+    "line": 4756,
+    "category": "test",
+    "text": "                     f\"{SKILL_DIR}/references/planning.md\", f\"{SKILL_DIR}/references/stages.md\","
+  },
+  {
+    "path": "test/validate.py",
+    "line": 4769,
+    "category": "test",
+    "text": "    # to SKILL.md, build.md and conventions.md while acceptance.md, stages.md and the"
+  },
+  {
+    "path": "test/validate.py",
+    "line": 4792,
+    "category": "test",
+    "text": "            (f\"{SKILL_DIR}/references/stages.md\", _st_txt),"
+  },
+  {
+    "path": "test/validate.py",
+    "line": 4814,
+    "category": "test",
+    "text": "            (f\"{SKILL_DIR}/references/stages.md\", _st_txt),"
+  },
+  {
+    "path": "test/validate.py",
+    "line": 4822,
+    "category": "test",
+    "text": "    # stages.md and documentation.md. It shipped that way while not one stage"
+  },
+  {
+    "path": "test/validate.py",
+    "line": 4856,
+    "category": "test",
+    "text": "# places: the config gate (what the orchestrator verifies) and stages.md's stage-9"
+  },
+  {
+    "path": "test/validate.py",
+    "line": 4870,
+    "category": "test",
+    "text": "        fail(\"references/stages.md stage 9: references/knowledge-graph.md ships the code-graph \""
+  },
+  {
+    "path": "test/validate.py",
+    "line": 4892,
+    "category": "test",
+    "text": "        fail(\"references/stages.md stage 0: references/knowledge-graph.md ships the measured-lag \""
+  },
+  {
+    "path": "test/validate.py",
+    "line": 5029,
+    "category": "test",
+    "text": "        # nothing in README.md and stages.md and report that as a pass \u2014 a guard that"
+  },
+  {
+    "path": "test/validate.py",
+    "line": 5097,
+    "category": "test",
+    "text": "    _st_all = open(os.path.join(refdir, \"stages.md\"), encoding=\"utf-8\").read()"
+  },
+  {
+    "path": "test/validate.py",
+    "line": 5101,
+    "category": "test",
+    "text": "            fail(f\"references/stages.md stage {_num}: this stage pushes, and \""
+  },
+  {
+    "path": "test/validate.py",
+    "line": 5105,
+    "category": "test",
+    "text": "            fail(f\"references/stages.md stage {_num}: carries its own copy of the CI-verdict \""
+  },
+  {
+    "path": "test/validate.py",
+    "line": 5182,
+    "category": "test",
+    "text": "             \"references/stages.md\", \"templates/brief.md\"):"
+  },
+  {
+    "path": "test/validate.py",
+    "line": 5586,
+    "category": "test",
+    "text": "_sf = _header_fields(os.path.join(ROOT, _SKILLDIR, \"references/stages.md\"))"
+  },
+  {
+    "path": "test/validate.py",
+    "line": 5589,
+    "category": "test",
+    "text": "                     \"progress.md or stages.md\")"
+  },
+  {
+    "path": "test/validate.py",
+    "line": 5591,
+    "category": "test",
+    "text": "    for _miss, _where, _other in ((_pf - _sf, \"references/stages.md\", \"progress.md\"),"
+  },
+  {
+    "path": "test/validate.py",
+    "line": 5592,
+    "category": "test",
+    "text": "                                  (_sf - _pf, _PROG_REL, \"stages.md\")):"
+  },
+  {
+    "path": "test/validate.py",
+    "line": 5676,
+    "category": "test",
+    "text": "_ST_P = os.path.join(ROOT, _SKILLDIR, \"references/stages.md\")"
+  },
+  {
+    "path": "test/validate.py",
+    "line": 5693,
+    "category": "test",
+    "text": "            fail(f\"references/stages.md: the stage running the review loop does not \""
+  },
+  {
+    "path": "test/validate.py",
+    "line": 5696,
+    "category": "test",
+    "text": "    for _f, _t in ((\"references/loop-guard.md\", _lg_t), (\"references/stages.md\", _st_t)):"
+  },
+  {
+    "path": "test/validate.py",
+    "line": 5714,
+    "category": "test",
+    "text": "        fail(\"references/stages.md: no short-path triage \u2014 a pipeline with eleven \""
+  },
+  {
+    "path": "test/validate.py",
+    "line": 5725,
+    "category": "test",
+    "text": "                fail(f\"references/stages.md: the short path marks a stage {_tok!r} \""
+  },
+  {
+    "path": "test/validate.py",
+    "line": 5792,
+    "category": "test",
+    "text": "    # Stage sections of stages.md, keyed by id."
+  },
+  {
+    "path": "test/validate.py",
+    "line": 5812,
+    "category": "test",
+    "text": "                     f\"and references/stages.md's stage {_sid} never names it \u2014 \""
+  },
+  {
+    "path": "test/validate.py",
+    "line": 5883,
+    "category": "test",
+    "text": "                fail(f\"references/stages.md: stage {_sid} asks for a browser channel and \""
+  },
+  {
+    "path": "test/validate.py",
+    "line": 5889,
+    "category": "test",
+    "text": "        # draft read stages.md only, so both of tdd.md's pointers could be dropped in"
+  },
+  {
+    "path": "test/validate.py",
+    "line": 5962,
+    "category": "test",
+    "text": "                fail(f\"references/stages.md stage 3: no {_track!r} \u2014 the stage names \""
+  },
+  {
+    "path": "test/validate.py",
+    "line": 5965,
+    "category": "test",
+    "text": "                fail(f\"references/stages.md stage 3: the {_track!r} names no owner \u2014 \""
+  },
+  {
+    "path": "test/validate.py",
+    "line": 6052,
+    "category": "test",
+    "text": "        fail(\"references/stages.md: no stage names `retro.publish` \u2014 a step described \""
+  },
+  {
+    "path": "test/validate.py",
+    "line": 6088,
+    "category": "test",
+    "text": "            fail(f\"references/stages.md: the stage running the review never names the \""
+  },
+  {
+    "path": "test/validate.py",
+    "line": 6134,
+    "category": "test",
+    "text": "    (\"references/stages.md\", _ST_P),"
+  },
+  {
+    "path": "test/validate.py",
+    "line": 6385,
+    "category": "test",
+    "text": "_STG_P = os.path.join(_skill_dir, \"references\", \"stages.md\")"
+  },
+  {
+    "path": "test/validate.py",
+    "line": 6550,
+    "category": "test",
+    "text": "        _UNLOOKED.append(\"skip: stage-2 arming \u2014 no `## 2 \u2014` section in stages.md\")"
+  },
+  {
+    "path": "test/validate.py",
+    "line": 6569,
+    "category": "test",
+    "text": "        fail(\"references/stages.md stage 2: the GATE does not require the loop's arming \""
+  },
+  {
+    "path": "test/validate.py",
+    "line": 6577,
+    "category": "test",
+    "text": "        fail(\"references/stages.md stage 2: the gate requires the arming state and the \""
+  },
+  {
+    "path": "test/validate.py",
+    "line": 6589,
+    "category": "test",
+    "text": "             \"require the loop's arming state to be printed. stages.md says it does, and \""
+  },
+  {
+    "path": "test/validate.py",
+    "line": 6815,
+    "category": "test",
+    "text": "            # `references/gates.md` and `stages.md` for the same directory."
+  },
+  {
+    "path": "test/validate.py",
+    "line": 6978,
+    "category": "test",
+    "text": "_STG_P2 = os.path.join(_skill_dir, \"references\", \"stages.md\")"
+  },
+  {
+    "path": "test/validate.py",
+    "line": 7067,
+    "category": "test",
+    "text": "        _UNLOOKED.append(\"skip: the hand-back gate \u2014 no `## 10 \u2014` section in stages.md\")"
+  },
+  {
+    "path": "test/validate.py",
+    "line": 7075,
+    "category": "test",
+    "text": "            fail(\"references/stages.md stage 10: the GATE does not require the hand-back. \""
+  },
+  {
+    "path": "test/validate.py",
+    "line": 7084,
+    "category": "test",
+    "text": "             \"hand-back while stages.md does \u2014 the pair of surfaces that states one rule \""
+  },
+  {
+    "path": "test/validate.py",
+    "line": 7268,
+    "category": "test",
+    "text": "        _UNLOOKED.append(\"skip: the publish: line \u2014 no `## 10 \u2014` section in stages.md\")"
+  },
+  {
+    "path": "test/validate.py",
+    "line": 7272,
+    "category": "test",
+    "text": "        fail(\"references/stages.md stage 10: the verdict carries no `publish:` line. The \""
+  },
+  {
+    "path": "test/validate.py",
+    "line": 7695,
+    "category": "test",
+    "text": "#    stages.md, and a summary that drops it is how the two surfaces disagreed about"
+  },
+  {
+    "path": "test/validate.py",
+    "line": 7724,
+    "category": "test",
+    "text": "_STG = os.path.join(_skill_dir, \"references\", \"stages.md\")"
+  },
+  {
+    "path": "test/validate.py",
+    "line": 7728,
+    "category": "test",
+    "text": "        fail(\"references/stages.md: no `5 \u2014 Dev` section\")"
+  },
+  {
+    "path": "test/validate.py",
+    "line": 7734,
+    "category": "test",
+    "text": "            fail(\"references/stages.md 5: the GATE bullet does not require the group \""
+  },
+  {
+    "path": "test/validate.py",
+    "line": 7738,
+    "category": "test",
+    "text": "            fail(\"references/stages.md 5: the stage summary never mentions the group \""
+  },
+  {
+    "path": "test/validate.py",
+    "line": 7744,
+    "category": "test",
+    "text": "            fail(\"references/stages.md 5: the fan-out summary drops exclusive file \""
+  },
+  {
+    "path": "test/validate.py",
+    "line": 7750,
+    "category": "test",
+    "text": "            fail(\"references/stages.md 5: the fan-out summary drops the same-group \""
+  },
+  {
+    "path": "test/validate.py",
+    "line": 7754,
+    "category": "test",
+    "text": "            fail(\"references/stages.md 5: the fan-out summary drops the worktree \""
+  },
+  {
+    "path": "test/validate.py",
+    "line": 7774,
+    "category": "test",
+    "text": "        fail(\"references/stages.md: no `0 \u2014 Intake grill` section\")"
+  },
+  {
+    "path": "test/validate.py",
+    "line": 7776,
+    "category": "test",
+    "text": "        fail(\"references/stages.md 0: the GATE does not read the ledger's \""
+  },
+  {
+    "path": "test/validate.py",
+    "line": 7781,
+    "category": "test",
+    "text": "        fail(\"references/stages.md: no `3 \u2014 Spec` section\")"
+  },
+  {
+    "path": "test/validate.py",
+    "line": 7785,
+    "category": "test",
+    "text": "            fail(\"references/stages.md 3: COPY and VISUAL are stated without their \""
+  },
+  {
+    "path": "test/validate.py",
+    "line": 7789,
+    "category": "test",
+    "text": "            fail(\"references/stages.md 3: the two tracks are still written as a sequence. \""
+  },
+  {
+    "path": "test/validate.py",
+    "line": 7793,
+    "category": "test",
+    "text": "            fail(\"references/stages.md 3: the GATE does not require the tracks' \""
+  }
+]

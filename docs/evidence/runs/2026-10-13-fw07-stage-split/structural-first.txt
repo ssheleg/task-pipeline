@@ -1,0 +1,45 @@
+FAIL: task-pipeline structure invalid
+ - references/browser.md cites stage-00-intake.md → *The surface class*, which has no such section — a citation whose file resolves and whose section does not is the one a link checker cannot catch and a reader believes
+ - references/certification.md cites stage-00-intake.md → *The surface class*, which has no such section — a citation whose file resolves and whose section does not is the one a link checker cannot catch and a reader believes
+ - references/grill.md cites stage-00-intake.md → *The surface class*, which has no such section — a citation whose file resolves and whose section does not is the one a link checker cannot catch and a reader believes
+ - references/spec.md cites stage-00-intake.md → *The surface class*, which has no such section — a citation whose file resolves and whose section does not is the one a link checker cannot catch and a reader believes
+ - references/stage-01-docs-study.md: unreachable from SKILL.md — dead context, wire it in or delete it
+ - references/stage-02-brainstorm.md: unreachable from SKILL.md — dead context, wire it in or delete it
+ - references/stage-03-spec.md: unreachable from SKILL.md — dead context, wire it in or delete it
+ - references/stage-04-plan.md: unreachable from SKILL.md — dead context, wire it in or delete it
+ - references/stage-05-dev.md: unreachable from SKILL.md — dead context, wire it in or delete it
+ - references/stage-06-tests.md: unreachable from SKILL.md — dead context, wire it in or delete it
+ - references/stage-07-lint-deploy.md: unreachable from SKILL.md — dead context, wire it in or delete it
+ - references/stage-08-post-deploy.md: unreachable from SKILL.md — dead context, wire it in or delete it
+ - references/stage-09-docs-wiki.md: unreachable from SKILL.md — dead context, wire it in or delete it
+ - references/stage-10-acceptance.md: unreachable from SKILL.md — dead context, wire it in or delete it
+ - plugins/task-pipeline/skills/task-pipeline/scripts/graph.py: states '41 reference files' but reference files computes to 52 — derive the number or delete it. This class is registered because: SKILL-CARD.md said 26 against a directory holding 28; then three surfaces said 34 against 35 while the class was dormant because it only knew one word order
+ - plugins/task-pipeline/skills/task-pipeline/templates/run.md: states '41 reference files' but reference files computes to 52 — derive the number or delete it. This class is registered because: SKILL-CARD.md said 26 against a directory holding 28; then three surfaces said 34 against 35 while the class was dormant because it only knew one word order
+ - plugins/task-pipeline/skills/task-pipeline/templates/run.md: states '41 reference files' but reference files computes to 52 — derive the number or delete it. This class is registered because: SKILL-CARD.md said 26 against a directory holding 28; then three surfaces said 34 against 35 while the class was dormant because it only knew one word order
+ - docs/evidence/backlog.md: states '41 reference files' but reference files computes to 52 — derive the number or delete it. This class is registered because: SKILL-CARD.md said 26 against a directory holding 28; then three surfaces said 34 against 35 while the class was dormant because it only knew one word order
+ - README.md: states 'all 41 references' but reference files (totalising) computes to 52 — derive the number or delete it. This class is registered because: the README said 'all 23 references' against a directory of 36, and widening the first row to reach it also flagged a hypothetical eight in CONTRIBUTING.md
+ - references/stage-00-intake.md is not in references/portability.md's manifest — a workflow decision with no manifest row is one nobody can check travels with the bundle
+ - references/stage-00-intake.md is named nowhere in README.md — it ships and no reader is told it exists
+ - references/stage-01-docs-study.md is not in references/portability.md's manifest — a workflow decision with no manifest row is one nobody can check travels with the bundle
+ - references/stage-01-docs-study.md is named nowhere in README.md — it ships and no reader is told it exists
+ - references/stage-02-brainstorm.md is not in references/portability.md's manifest — a workflow decision with no manifest row is one nobody can check travels with the bundle
+ - references/stage-02-brainstorm.md is named nowhere in README.md — it ships and no reader is told it exists
+ - references/stage-03-spec.md is not in references/portability.md's manifest — a workflow decision with no manifest row is one nobody can check travels with the bundle
+ - references/stage-03-spec.md is named nowhere in README.md — it ships and no reader is told it exists
+ - references/stage-04-plan.md is not in references/portability.md's manifest — a workflow decision with no manifest row is one nobody can check travels with the bundle
+ - references/stage-04-plan.md is named nowhere in README.md — it ships and no reader is told it exists
+ - references/stage-05-dev.md is not in references/portability.md's manifest — a workflow decision with no manifest row is one nobody can check travels with the bundle
+ - references/stage-05-dev.md is named nowhere in README.md — it ships and no reader is told it exists
+ - references/stage-06-tests.md is not in references/portability.md's manifest — a workflow decision with no manifest row is one nobody can check travels with the bundle
+ - references/stage-06-tests.md is named nowhere in README.md — it ships and no reader is told it exists
+ - references/stage-07-lint-deploy.md is not in references/portability.md's manifest — a workflow decision with no manifest row is one nobody can check travels with the bundle
+ - references/stage-07-lint-deploy.md is named nowhere in README.md — it ships and no reader is told it exists
+ - references/stage-08-post-deploy.md is not in references/portability.md's manifest — a workflow decision with no manifest row is one nobody can check travels with the bundle
+ - references/stage-08-post-deploy.md is named nowhere in README.md — it ships and no reader is told it exists
+ - references/stage-09-docs-wiki.md is not in references/portability.md's manifest — a workflow decision with no manifest row is one nobody can check travels with the bundle
+ - references/stage-09-docs-wiki.md is named nowhere in README.md — it ships and no reader is told it exists
+ - references/stage-10-acceptance.md is not in references/portability.md's manifest — a workflow decision with no manifest row is one nobody can check travels with the bundle
+ - references/stage-10-acceptance.md is named nowhere in README.md — it ships and no reader is told it exists
+ - references/stages.md does not name continuity.md — a run-wide rule no stage has heard of is a rule that does not run
+ - README.md: the conformance sentence states lines = 270 and the tree gives 272. Recompute it rather than editing this check -- the figure was wrong at birth once already (334 lines written over a 339-line file), which is why it is derived now. Lines are `splitlines()`, not `wc -l`
+ - README.md: the conformance sentence states references = 41 and the tree gives 52. Recompute it rather than editing this check -- the figure was wrong at birth once already (334 lines written over a 339-line file), which is why it is derived now. Lines are `splitlines()`, not `wc -l`

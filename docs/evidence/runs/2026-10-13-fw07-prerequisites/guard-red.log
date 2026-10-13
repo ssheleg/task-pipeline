@@ -1,0 +1,11 @@
+  ok  the gate checks the artifact, not the package
+FAIL  current prerequisite homes reject package-install gates: package-install prerequisite survived: plugins/task-pipeline/skills/task-pipeline/SKILL.md, plugins/task-pipeline/skills/task-pipeline/references/doctrine-map.md, plugins/task-pipeline/skills/task-pipeline/references/companion-skills.md, plugins/task-pipeline/commands/task-pipeline.md, README.md, HOW-IT-WORKS.md, SKILL-CARD.md
+  ok  three provider paths satisfy one contract
+  ok  a foreign design workflow is judged by its result
+  ok  an absent tool is the named check not done
+  ok  fixture: valid scenarios without super-ux pass
+  ok  fixture: no artifact → create it, preferred provider offered
+  ok  fixture: invalid artifact refuses every provider
+  ok  fixture: foreign design with evidence is designed
+
+1 failure(s)

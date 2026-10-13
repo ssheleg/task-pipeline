@@ -10,6 +10,67 @@ source, checks, unpublished local-tag handling and the exact next task. Independ
 audit, safe-disk full validation on the accepted local tag, normal integration and
 release/readback remain separate gates. No completed stage-10 stamp is claimed.
 
+## FW07 stage-3 prerequisite follow-up — 2026-10-13
+
+The split stage-3 procedure and spec subject reference now follow the accepted
+artifact-provider contract. Equivalent providers/inline fallback remain valid;
+missing or invalid scenarios still refuse and unavailable lint stays NOT_RUN.
+[Source correction and evidence](evidence/runs/2026-10-13-fw07-stage-split/README.md)
+preserve the earlier lossless extraction claim at its original source.
+Next: independent review, correct both evaluation arms identically, then public
+plants and composed aggregate after release repair reconciliation and slot grant.
+
+## FW07 stage split — current isolated implementation
+
+Entry: [execution receipt](evidence/runs/2026-10-13-fw07-stage-split/README.md).
+The independently accepted prerequisite correction is followed by lossless
+stage extraction, explicit default entry/resume routes, consumer migration and
+source controls. B-043 remains open. No version, release, native host or billed
+usage result is claimed.
+
+Structural validation passes. Exact next task: public-entry refusal, independent review,
+then the moved negative corpus and composed owner aggregate in the serialized slot.
+Keep every full gate and the selected custom profile's precedence intact. The
+receipt preserves failed intermediate checks and names all validation not run.
+
+## Prior prerequisite handoff
+
+## FW07 prerequisite correction in progress
+
+[Execution receipt](evidence/runs/2026-10-13-fw07-prerequisites/README.md) binds the
+separate semantic correction to the accepted artifact-provider decision. Seven
+shipped source homes now agree; focused9 + actual mutation18 + house19/0 pass.
+The original structural failure is retained; corrected structural passes. Independent
+review precedes extraction. No stages.md bytes or default gate types changed.
+
+Exact next task: freeze this bounded correction after review, then implement the
+accepted B-043 gate-spine and deterministic per-stage routes on this isolated branch.
+The coordinator permits source work alongside the separate immutable release gate;
+no overlapping full suite or publication is authorized by this handoff.
+
+## Historical source feasibility handoff
+
+## FW07 / B-043 source feasibility — 2026-10-13
+
+Entry: [decision-input report](reports/2026-10-13-fw07-stage-reading-floor/README.md),
+then [bounded execution packet](evidence/plans/2026-10-13-fw07-stage-reading-floor.md).
+Frozen source: accepted 1.94.0 `4d750573ce53ea4c7ffa2bde192ee35b59acefa7`.
+This branch changes only the report, its reproducible raw census, this handoff and
+the packet. No shipped doctrine, gate, test, profile or workflow was edited.
+
+Measured stages.md: 17,616 cl100k tokens/967 lines; literal-address census 327 lines
+in 108 files, including historical evidence. Conservative entry model 11,258 before
+new routing overhead is feasibility only, not observed host or billing savings.
+The plan freezes conservation, exact on-entry/resume routes, custom-profile scope,
+consumer migration, negative controls and portable install/read-accounting limits.
+
+Parent accepted the bounded extraction packet and the separately recovered
+[UX prerequisite correction](evidence/plans/2026-10-13-fw07-ux-prerequisite-correction.md).
+Exact next task after current release completion: normalize the stale package
+prerequisites across the packet's eight current source locations in a separate commit with actual negative controls, then freeze the
+paragraph migration map on a new implementation branch. B-043 is still open; no runtime/model
+quality or full-suite verdict is claimed by this planning slice.
+
 ## Release candidate — v1.94.0 (2026-10-13)
 
 Five version surfaces now name v1.94.0 for the accepted release-iteration feature

@@ -4,9 +4,9 @@ set -eu
 rm -rf /tmp/cv3-copy && cp -R . /tmp/cv3-copy
 python3 - <<'EOF'
 import re
-p = "/tmp/cv3-copy/plugins/task-pipeline/skills/task-pipeline/references/stages.md"
+p = "/tmp/cv3-copy/plugins/task-pipeline/skills/task-pipeline/references/stage-05-dev.md"
 t = open(p, encoding="utf-8").read()
-m = re.search(r"^## 5 — Dev.*?(?=^## )", t, re.S | re.M)
+m = re.search(r"^## 5 — Dev.*?(?=^## |\Z)", t, re.S | re.M)
 assert m, "PLANT DID NOT LAND: cv3 — no stage 5 section"
 _sec = m.group(0).replace("convergence check", "review")
 assert _sec != m.group(0), "PLANT DID NOT LAND: cv3 — stage 5 never named it"

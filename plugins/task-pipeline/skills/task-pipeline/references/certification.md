@@ -84,7 +84,7 @@ tier saw.
 | `visual` | the contact sheet, the director record, the project linter's output, the rubric | a frame that contradicts the record's intent; a gate item failing under a PASS; a hole in the state × axes matrix; a judge verdict from an uncalibrated judge |
 
 **When it runs.** A node that builds a user-facing surface copies the brief's
-`surface_class` ([`stages.md`](stages.md) → stage 0, *The surface class*). On
+`surface_class` ([`stage-00-intake.md`](stage-00-intake.md) → *0 — Intake grill — MANDATORY*, the surface-class bullet). On
 **`flagship` and `product`** the `visual` report is **required** — `graph.py certify`
 refuses the round without it and names the tier. On `internal` and `ad` it is accepted
 when given and counted like any other tier, and not demanded: an internal tool's floor

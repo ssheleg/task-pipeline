@@ -65,9 +65,10 @@ because it rots the moment the vendor ships a new one.
 
 **Companions.** `super-ux`, `copywriting`, `sheleg-design`, `graphify`, the wiki.
 The detection block prints once. A missing companion states its fallback and
-**does not block** — the single exception being the stage-3 UX track on
-user-facing work, where shipping without it is a decision someone has to make out
-loud.
+**does not block on installation**. For user-facing work, stage 3 requires a valid
+scenario artifact under the [provider rule](plugins/task-pipeline/skills/task-pipeline/references/companion-skills.md).
+Unavailable checks are named as NOT_RUN; a fallback is not evidence that a missing
+tool ran.
 
 ---
 
