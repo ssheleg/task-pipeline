@@ -1,5 +1,8 @@
 ## Current FW07 source candidate —1.95.0
 
+[Draft integration PR127](https://github.com/ssheleg/task-pipeline/pull/127)
+replaces PR123/PR124 only after accepted merge; both remain open meanwhile.
+
 [Composition entry](evidence/runs/2026-10-13-fw07-composition/README.md) binds
 stage routes, checkpoint recovery, independently reviewed owner helper and shared
 scratch lock. Metadata names the next minor; no tag or publication. The prior

@@ -144,3 +144,13 @@ umbrella routing observation. This is an untagged structural run, not the requir
 complete tagged-source release gate. Both actual strict manifest validations pass:
 [marketplace](marketplace-1950.txt) and [plugin](plugin-1950.txt). All executable
 source remains the reviewed composition; complete aggregate and release are pending.
+
+## Draft integration entry
+
+[Draft PR127](https://github.com/ssheleg/task-pipeline/pull/127) is the coherent
+successor to PR123/PR124. [Creation readback](draft-pr127-created.json) records
+OPEN/draft at0cb1044 with no check runs requested. The coordinator independently
+accepted the final metadata delta; no tag or full-suite acceptance was inferred.
+The original two PRs remain open and their heads are preserved until accepted
+replacement merge. Full local gates and genuine eligible candidate checks precede
+normal merge/promotion; this draft is for source review while the serial slot is held.
