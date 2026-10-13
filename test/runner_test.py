@@ -100,17 +100,19 @@ from unittest.mock import patch
 import negative_lock
 
 
+class _ScanReached(Exception):
+    """Not a RuntimeError: main() reports lifecycle RuntimeErrors as a refusal."""
+
+
 def _admission(args):
-    with patch.object(negatives, "scan", side_effect=RuntimeError("scan reached")), \
+    with patch.object(negatives, "scan", side_effect=_ScanReached()), \
             redirect_stdout(StringIO()), redirect_stderr(StringIO()):
         try:
             negatives.main(["negatives.py", *args])
         except SystemExit as exc:
             return exc.code
-        except RuntimeError as exc:
-            if str(exc) == "scan reached":
-                return "scan"
-            raise
+        except _ScanReached:
+            return "scan"
     return "returned"
 
 

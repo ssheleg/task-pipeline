@@ -203,3 +203,28 @@ composed source. Observation, not a failure: the owned TMPDIR kept 37
 against mutants whose cases fail on purpose, and `test/residue.py` keeps a failing
 case's tree as evidence; a mutation run therefore leaves one tree per killed case
 in TMPDIR. Recorded for the backlog; not changed here.
+
+## Full owner gate on 6b6d625 (child lifetime composed): two runs, then a test fix
+
+1. First run, standalone clone, owned TMPDIR: exit1 after 1682s —
+   [result](owner-6b6d625-enospc.json). `0 guards did not fire, 0 broken, 7 property
+   checks silent`; five of the seven printed `cp: … No space left on device`. The
+   disk was exhausted by machine swap growth (22GB in use) while the run copied plant
+   trees. No verdict on the code. Stale test temp trees older than a day, the npm
+   cache, unreferenced pnpm store entries, old /tmp plant copies and an older
+   Playwright WebKit build were removed to recover space; nothing in use was touched.
+2. Rerun, same exact source, free-space sampled every 10s: exit1 after 5814s,
+   minimum free 550MB — [result](owner-6b6d625-rerun.json),
+   [log](owner-6b6d625-rerun.log.gz). **All 439 guards and 15 property checks
+   passed**; graph, checkpoint, installers and the earlier suites passed. The chain
+   stopped at `test:runner`: 3 of 42 cases (`--list`, `-k exclusion`, `--shard 1/8`)
+   returned instead of reaching `scan`.
+
+Cause: the review correction made `main()` report a lifecycle `RuntimeError` as a
+refusal, and `_admission` used `RuntimeError("scan reached")` as its sentinel, which
+that handler now swallowed. The sentinel is now its own exception class; the runner
+behaviour is unchanged. `scan` runs before the lock, so these cases never took the
+public lock. After the fix, in the worktree at this commit: `test:runner` 42 cases,
+`test:hooks` 65, `test:artifacts` 7, `test:docs` OK, `test:audit-regressions` exit0
+(328s) — the suites the chained run never reached. The complete chained gate is
+owed once more on the accepted tag.
