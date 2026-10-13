@@ -1,0 +1,9 @@
+{
+  "source_parent": "9556c59941e3e2d5f46f4e40e204f0ba6e1f45f7",
+  "command": "python3 -B test/validate.py",
+  "exit_code": 0,
+  "log": "composed-structural.log",
+  "sha256": "1061b52d601b1c81f6ed1370c340270a02913ed2090325210736abf444b09e8c",
+  "scope": "Focused structure only; no npm test or test:all. Current HANDOFF composition update was present during the check.",
+  "implementation_sha256": "66085773964828c6b5596da2485249df6c31113abab2316a8b6f49dfba8acb67"
+}
