@@ -9,7 +9,9 @@ python3 - <<'EOF'
 p = "/tmp/cr5d-copy/docs/evidence/backlog.md"
 t = open(p, encoding="utf-8").read()
 anchor = "| id | What | Source | Size | Sev | Blast | Age | Prio | State | Home |"
-assert anchor in t, "PLANT DID NOT LAND: anchor absent before edit"
+separator = "|---|---|---|---|---|---|---|---|---|---|"
+anchor += "\n" + separator
+assert anchor in t, "PLANT DID NOT LAND: complete table header absent before edit"
 row = ("| B-000 | Measured 2026-08-11: the bundle held 32 reference files. | audit, "
        "2026-08-11 | S | 1 | 1 | 0 | **1** | **closed 2026-08-11** — record only. | \u2014 |")
 t = t.replace(anchor, anchor + "\n" + row, 1)

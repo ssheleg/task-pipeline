@@ -21,3 +21,9 @@ The final-tree process suite passed 6 controls: [focused-process.json](focused-p
 ## Provenance correction before the full gate
 
 The first full run at `c229d7f` was deliberately stopped after independent review found the original ledger SHA was written as a bare nonancestor citation. Its partial output and stop reason are retained in `aborted-full.json` and `aborted-full.log.gz`; no full pass is claimed. The original source now has an immutable GitHub commit link while the local cherry-pick remains explicitly identified. Re-run the documentation gate and then the full suite on the corrected commit.
+
+## Failed full gate and bounded correction
+
+The full `npm run test:all` at `b86478c` exited 1 after 1472.93 seconds: [failed-full.json](failed-full.json), [compressed complete output](failed-full.log.gz). All 438 negative guards passed; one of 22 property cases failed. Property 170 inserted its historical DATED row between a Markdown header and its separator. The new strict table grammar correctly refused that malformed positive fixture. The fixture now anchors the complete header and separator before inserting the same historical row; validator behavior is unchanged. The focused replay passed: [property-170.json](property-170.json).
+
+Independent coordinator review accepted the fixture correction and a transparent split verification: retain the completed unchanged components of the failed run, replay the corrected property, then execute the previously unreached suffix and final structural/documentation checks. This is not a single final-SHA full PASS, and the failed full result remains failed. Hosted exact-candidate checks remain required before integration. Next: run and record the remaining suffix when the serial slot is free.
