@@ -1,3 +1,12 @@
+## FW07 R07 runner cleanup correction — isolated, awaiting peer
+
+[Packet and source-bound checks](evidence/runs/2026-10-13-fw07-copy-cleanup/README.md)
+reproduce secondary-copy residue on the future 1.95.0 candidate and retire all
+admitted literal plant copies while preserving the first-copy verdict. The active
+1.94.1 clone and its public scratch directories were not touched. Next: independent
+parser/cleanup review, then composition and the complete owner gate in the serial
+slot. Focused checks are not aggregate or release acceptance.
+
 ## Current FW07 source candidate —1.95.0
 
 [Draft integration PR127](https://github.com/ssheleg/task-pipeline/pull/127)
