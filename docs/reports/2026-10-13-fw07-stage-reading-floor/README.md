@@ -93,6 +93,10 @@ house budgets without trimming unrelated obligations to make this split fit.
 ## Source slices
 
 Exact line intervals and section/gate SHA-256 digests are in measurement.json.
+The proposed [conservation partition](raw/conservation-plan.json) assigns every one
+of 967 source lines exactly once across 35 chunks. Reconstructing those chunks in
+source order is byte-identical to the frozen file; this verifies bookkeeping only,
+not equivalence after implementation or agent comprehension.
 Gate suffixes are kept whole in the conservative model, including material after
 the first gate sentence; shortening them to one bullet line would lose obligations.
 

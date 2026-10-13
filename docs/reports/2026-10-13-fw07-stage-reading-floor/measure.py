@@ -43,4 +43,26 @@ summary={'source':SOURCE,'source_path':BASE+'references/stages.md','source_sha25
 OUT.mkdir(exist_ok=True)
 (OUT/'measurement.json').write_text(json.dumps(summary,indent=2)+'\n')
 (OUT/'consumers.json').write_text(json.dumps(consumer,indent=2)+'\n')
+# A proposed lossless partition, not an implementation or semantic verdict.
+kept=s.splitlines(keepends=True)
+names=['intake','docs-study','brainstorm','spec','plan','dev','tests','lint-deploy','post-deploy','docs-wiki','acceptance']
+starts=[i for i,line in enumerate(kept) if re.match(r'^## \d+ — ',line)]
+end_stages=next(i for i,line in enumerate(kept) if line.startswith('## The program loop'))
+chunks=[]
+def chunk(start,end,destination,kind):
+    payload=''.join(kept[start:end]).encode()
+    chunks.append({'source_start':start+1,'source_end':end,'destination':destination,'kind':kind,'sha256':hashlib.sha256(payload).hexdigest(),'bytes':len(payload)})
+chunk(0,starts[0],'references/stages.md','spine-introduction')
+for stage,start in enumerate(starts):
+    end=starts[stage+1] if stage+1<len(starts) else end_stages
+    assert kept[start+1].startswith('- **Freedom:')
+    gate=next(i for i in range(start,end) if kept[i].startswith('- **GATE ('))
+    chunk(start,start+2,'references/stages.md','stage-heading-and-freedom')
+    chunk(start+2,gate,f'references/stage-{stage:02d}-{names[stage]}.md','stage-detail')
+    chunk(gate,end,'references/stages.md','complete-gate-suffix')
+chunk(end_stages,len(kept),'references/stages.md','run-wide-sections')
+assert [i for c in chunks for i in range(c['source_start'],c['source_end']+1)]==list(range(1,len(kept)+1))
+assert ''.join(''.join(kept[c['source_start']-1:c['source_end']]) for c in chunks)==s
+partition={'source':SOURCE,'source_path':BASE+'references/stages.md','source_sha256':summary['source_sha256'],'status':'proposed source partition; no source relocation performed','coverage':'every source line exactly once in original order; full byte reconstruction equal','route_names':'proposed, pending source-owner review','chunks':chunks}
+(OUT/'conservation-plan.json').write_text(json.dumps(partition,indent=2)+'\n')
 print(json.dumps({k:v for k,v in summary.items() if k!='stage_sections'},indent=2))
