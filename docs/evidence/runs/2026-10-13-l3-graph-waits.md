@@ -4,7 +4,7 @@ Status: implemented locally; independent review, owner aggregate and integration
 remain pending. No publication, installed-host or original-goal completion claim.
 The [frozen plan](../plans/2026-10-13-l3-graph-waits.md) is the context packet;
 [the lock prerequisite](2026-10-13-l3-graph-lock.md) was independently accepted at
-`d369942dfaa9d9c9c5fc5aca2a73cbdb433c8510` before this implementation.
+[d369942dfaa9d9c9c5fc5aca2a73cbdb433c8510](https://github.com/ssheleg/task-pipeline/commit/d369942dfaa9d9c9c5fc5aca2a73cbdb433c8510) before this implementation.
 
 ## Counterexamples and correction
 
@@ -71,18 +71,18 @@ claiming PR112 complete.
 
 ## Independent review and accepted-base composition
 
-Parent/root independently reviewed `adb82f7c97a4a82b7d2bd8f8f17fee97a111ab8b`
+Parent/root independently reviewed [adb82f7c97a4a82b7d2bd8f8f17fee97a111ab8b](https://github.com/ssheleg/task-pipeline/commit/adb82f7c97a4a82b7d2bd8f8f17fee97a111ab8b)
 and returned bounded PASS: source/schema/transitions/docs read; 15 focused cases
 replayed with 60 owned trees removed; five additional real CLI observations
 covered an inert shell-like watcher, a runnable sibling, cross-node stale-ID
 refusal with byte preservation, wait-only exit 6, and concurrent waits with exactly
 one success. Cross-store and watcher-liveness limits remain explicit.
 
-The separate R09 prose change `dac8bc9aaf7ef98f554917f38d6780cd0d948ee0` also
+The separate R09 prose change [dac8bc9aaf7ef98f554917f38d6780cd0d948ee0](https://github.com/ssheleg/task-pipeline/commit/dac8bc9aaf7ef98f554917f38d6780cd0d948ee0) also
 received parent/root bounded PASS. It was fast-forwarded into this branch before
 merging independently reviewed PR114 composition
-`31e0f5aeacb709639c37e621c9fe73dec0f11f2e`. Merge
-`24e745e3d35781d8421b0cbecfe20767a3e39970` had one conflict: the old paragraph
+[31e0f5aeacb709639c37e621c9fe73dec0f11f2e](https://github.com/ssheleg/task-pipeline/commit/31e0f5aeacb709639c37e621c9fe73dec0f11f2e). Merge
+[24e745e3d35781d8421b0cbecfe20767a3e39970](https://github.com/ssheleg/task-pipeline/commit/24e745e3d35781d8421b0cbecfe20767a3e39970) had one conflict: the old paragraph
 saying distinct wait states did not yet exist versus TP2's exit-6 paragraph.
 The reviewed TP2 paragraph was retained. Other incoming executable files belong
 to PR114; the diff against 31e0 contains only TP2/R09-owned paths and receipts.
@@ -93,7 +93,7 @@ A single serialized aggregate on the composed frozen candidate remains pending.
 ## Composed owner aggregate
 
 `npm test` exited 0 on clean frozen source
-`71ff0f07189854a8373113ee21435262ddc723b3`.
+[71ff0f07189854a8373113ee21435262ddc723b3](https://github.com/ssheleg/task-pipeline/commit/71ff0f07189854a8373113ee21435262ddc723b3).
 [Exact source, output hash and skips](2026-10-13-l3-graph-waits-full.json) bind
 [the compressed full output](2026-10-13-l3-graph-waits-full.log.gz). The engine
 redactor case was explicitly skipped because OBSERVATORY_ENGINE_DIR was unset;

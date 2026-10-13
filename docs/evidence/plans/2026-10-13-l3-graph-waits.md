@@ -1,6 +1,6 @@
 # L3 TP-2: watched waits in the work graph
 
-Source baseline: `61871e6c35945596b236011ceadda5073f48ff25` (TP-6 stacked
+Source baseline: [61871e6c35945596b236011ceadda5073f48ff25](https://github.com/ssheleg/task-pipeline/commit/61871e6c35945596b236011ceadda5073f48ff25) (TP-6 stacked
 on independently reviewed L3; TP-6 later passed independent review and merged
 through PR118 at `1788b94f63dc87c1b741c7e7261aac1d04b12b65`).
 Owner: task-pipeline. Implementation worktree: `fix/l3-graph-waits`.

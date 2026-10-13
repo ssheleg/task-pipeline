@@ -1,0 +1,40 @@
+{
+  "source_base": "3596355ae56bd067a243bd5d17a8d40aeec292a0",
+  "scope": "Current-state documentation and historical citation repair; context_packets.py comment only, no executable behavior change. No release claim.",
+  "checks": [
+    {
+      "command": "python3 -B test/packet_schema_test.py",
+      "exit_code": 0,
+      "log_sha256": "72b396f4137addd2021754c641d239a6a31272bab5920b111079e9dd31b06294",
+      "log_bytes": 460
+    },
+    {
+      "command": "python3 -B test/validate.py",
+      "exit_code": 0,
+      "log_sha256": "10d75f285f006b42cb392794d4d0b19b7ce77138bee2401ea8eacacdfa254d99",
+      "log_bytes": 2575
+    },
+    {
+      "command": "npm run test:docs before citation repair",
+      "exit_code": 1,
+      "log_sha256": "44d9cef1ebf8283a246df3b48cd3cc349cbca636187d094fce2eda00ad4f24c1",
+      "log_bytes": 4841
+    },
+    {
+      "command": "npm run test:docs after citation repair",
+      "exit_code": 0,
+      "log_sha256": "6f788d449ff77ffd5430fc14a0b52403468078502ff0a08d051c827379b0e82c",
+      "log_bytes": 1011
+    }
+  ],
+  "findings": [
+    "HANDOFF still called merged PR114 in flight and v1.93.0 unshipped despite later publication.",
+    "20 pre-squash/foreign/run references failed local ancestry docgate. Resolved GitHub source commits and replaced with immutable remote links; run ID linked as a run.",
+    "Fabric format rename was unverified; comment now explains namespace without it."
+  ],
+  "limits": [
+    "Historical confirmation fields not restamped.",
+    "PR119 hosted receipt covers exact candidate8798e90, not a local full suite on current docs.",
+    "Live Observatory/native host acceptance remains separate."
+  ]
+}

@@ -1,7 +1,7 @@
 # R09 working-budget headroom restoration
 
 Status: bounded prose change; peer review and integration pending. Base
-`adb82f7c97a4a82b7d2bd8f8f17fee97a111ab8b` includes the separately reviewed L3
+[adb82f7c97a4a82b7d2bd8f8f17fee97a111ab8b](https://github.com/ssheleg/task-pipeline/commit/adb82f7c97a4a82b7d2bd8f8f17fee97a111ab8b) includes the separately reviewed L3
 packets and the still-pending TP2 graph waits. No description, authority clause,
 stage gate, runtime script or provider/native behavior change is claimed.
 
