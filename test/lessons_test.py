@@ -408,6 +408,245 @@ def carry_forward_controls():
     ok(rc == 1 and idx.read_bytes() == before, f"nothing read: exit 1, index untouched ({rc} {err!r})")
 
 
+HEADED = """### {head}
+
+- **Symptom:** the export passed its gate with no file written
+- **Surfaced at:** stage 6 · **Owned by:** stage 4
+- **Fix:** grade 1 (mechanical) — the check reads the artefact
+- **The check:** `test/export_test.py` asserts the file exists
+- **Lesson:** `{key}` — a check that reads a success line passes when the artefact is absent · **When:** a gate verifies an output by its log line · **Nouns:** gate, artefact, absence
+- **Commit:** `{sha}`
+"""
+K2 = "absence-renamed-class"
+
+
+def write_retros(repo, entries, sha):
+    """entries: (file under docs/evidence, heading, class key). Replaces every retro file."""
+    art = repo / "docs" / "evidence"
+    for f in (list(art.rglob("*.md")) if art.exists() else []):
+        f.unlink()
+    files = {}
+    for f, head, key in entries:
+        files.setdefault(f, []).append(HEADED.format(head=head, key=key, sha=sha))
+    files.setdefault("retro.md", [])
+    for f, bodies in files.items():
+        p = art / f
+        p.parent.mkdir(parents=True, exist_ok=True)
+        p.write_text("# Retro\n\n## Log\n\n" + "\n".join(bodies), encoding="utf-8")
+
+
+def headed_repo(name, entries):
+    repo = tree(f"tp-lessons-{name}-")
+    git(repo, "init", "-q")
+    (repo / "README.md").write_text(name, encoding="utf-8")
+    git(repo, "add", "-A")
+    git(repo, "commit", "-q", "-m", "root")
+    (repo / "fix.txt").write_text("x", encoding="utf-8")
+    git(repo, "add", "-A")
+    git(repo, "commit", "-q", "-m", "fix")
+    sha = git(repo, "rev-parse", "HEAD")
+    write_retros(repo, entries, sha)
+    git(repo, "add", "-A")
+    git(repo, "commit", "-q", "-m", "retro")
+    return repo, sha
+
+
+def record_mem(idx, cwd, class_key, mem):
+    lid = entries_of(idx)[class_key]["id"]
+    return run("record", lid, "--answer", "-", cwd=cwd, index=idx,
+               stdin=json.dumps({"memoryId": mem, "revision": 1}))[0]
+
+
+def mems(idx):
+    """{memory id: sorted class keys holding it} — one id on two keys is the M1 defect."""
+    out = {}
+    for ck, e in entries_of(idx).items():
+        for o in e["origins"]:
+            if o.get("memory"):
+                out.setdefault(o["memory"], set()).add(ck)
+    return {m: sorted(v) for m, v in out.items()}
+
+
+def identity_controls():
+    """Round 8 (adversarial): identity. A project key names every checkout of a project, so one
+    checkout read never decides for another; a memory id belongs to (project, classKey), the
+    store's own identity, never to a retro anchor."""
+    work = tree("tp-lessons-identity-")
+
+    # Q1 — the routine branch flow, with the worktree under a dot-directory the walk skips:
+    # the lesson is added and recorded in the worktree, then a rebuild runs over main only.
+    main_repo, sha = headed_repo("q1", [("retro.md", "old entry", "an-older-class")])
+    wt = main_repo / ".claude" / "worktrees" / "feature"
+    git(main_repo, "worktree", "add", "-q", "-b", "feature", str(wt))
+    write_retros(wt, [("retro.md", "old entry", "an-older-class"), ("retro.md", "new entry", KEY)], sha)
+    git(wt, "add", "-A")
+    git(wt, "commit", "-q", "-m", "retro on branch")
+    idx = work / "q1.jsonl"
+    ok(run("add", "--retro", "docs/evidence/retro.md", "--all", cwd=wt, index=idx)[0] == 0
+       and record_mem(idx, wt, KEY, "mem:q1-branch") == 0, "Q1 fixture: added and recorded in the worktree")
+    rc, out, err = run("rebuild", "--roots", str(main_repo), index=idx)
+    o = lesson_of(idx)["origins"]
+    ok(rc == 0 and len(o) == 1 and o[0].get("memory") == "mem:q1-branch@1" and "carried" not in o[0],
+       f"Q1: a worktree under .claude/worktrees is discovered; its lesson keeps its memory id ({rc} {out!r} {o})")
+    git(main_repo, "merge", "-q", "feature")
+    git(main_repo, "worktree", "remove", "--force", str(wt))
+    rc, out, err = run("rebuild", "--roots", str(main_repo), index=idx)
+    ok(rc == 0 and mems(idx) == {"mem:q1-branch@1": [KEY]},
+       f"Q1: after the merge the lesson keeps its one memory id ({rc} {mems(idx)})")
+
+    # P5 — two clones of one project; only clone A holds an archived, recorded entry. A rebuild
+    # over clone B alone does not remove A's origin: it carries it with its memory id.
+    a, sha = headed_repo("p5a", [("retro.md", "main entry", KEY)])
+    b = work / "p5b"
+    git(work, "clone", "-q", str(a), str(b))
+    arch = a / "docs/evidence/retro/2026-Q3.md"
+    arch.parent.mkdir(parents=True)
+    arch.write_text("# Retro\n\n## Log\n\n" + HEADED.format(head="archived entry", key=K2, sha=sha),
+                    encoding="utf-8")
+    idx = work / "p5.jsonl"
+    ok(run("rebuild", "--roots", str(a), str(b), index=idx)[0] == 0
+       and record_mem(idx, a, K2, "mem:p5-archive") == 0, "P5 fixture: both clones read, the archive recorded")
+    rc, out, err = run("rebuild", "--roots", str(b), index=idx)
+    e = entries_of(idx).get(K2)
+    ok(rc == 0 and e is not None and e["origins"][0].get("memory") == "mem:p5-archive@1"
+       and e["origins"][0].get("carried"),
+       f"P5: another clone's recorded origin is carried, never removed, by a narrower rebuild ({rc} {out!r})")
+
+    # P5b — clone A scanned with its archive unreadable, clone B complete: A failed, so the
+    # project is not complete and A's files decide nothing.
+    idx = work / "p5b.jsonl"
+    run("rebuild", "--roots", str(a), str(b), index=idx)
+    record_mem(idx, a, K2, "mem:p5b-archive")
+    arch.chmod(0)
+    try:
+        rc, out, err = run("rebuild", "--roots", str(a), str(b), index=idx)
+    finally:
+        arch.chmod(0o644)
+    e = entries_of(idx).get(K2)
+    ok(rc == 0 and e is not None and e["origins"][0].get("carried") == "source not read"
+       and e["origins"][0].get("memory") == "mem:p5b-archive@1" and "2026-Q3.md" in out
+       and "removed" not in out,
+       f"P5b: an unreadable archive is not read, so its origin is carried, not removed ({rc} {out!r})")
+
+    # P1 — rotation: the entry moves from retro.md into the archive. The id follows the class.
+    d, sha = headed_repo("p1", [("retro.md", "2026-10-01 export gate", KEY)])
+    idx = work / "p1.jsonl"
+    run("add", "--retro", "docs/evidence/retro.md", "--all", cwd=d, index=idx)
+    record_mem(idx, d, KEY, "mem:p1")
+    write_retros(d, [("retro/2026-Q4.md", "2026-10-01 export gate", KEY)], sha)
+    rc, out, err = run("rebuild", "--roots", str(d), index=idx)
+    o = lesson_of(idx)["origins"]
+    ok(rc == 0 and len(o) == 1 and o[0]["retro"].startswith("docs/evidence/retro/2026-Q4.md#")
+       and o[0].get("memory") == "mem:p1@1" and "carried" not in o[0],
+       f"P1: a rotated entry keeps its memory id ({rc} {o})")
+
+    # P2 — the heading is reworded (the anchor changes); the id stays with the class.
+    d, sha = headed_repo("p2", [("retro.md", "2026-10-01 export gate", KEY)])
+    idx = work / "p2.jsonl"
+    run("add", "--retro", "docs/evidence/retro.md", "--all", cwd=d, index=idx)
+    record_mem(idx, d, KEY, "mem:p2")
+    write_retros(d, [("retro.md", "2026-10-01 export gate reopened", KEY)], sha)
+    rc, out, err = run("rebuild", "--roots", str(d), index=idx)
+    o = lesson_of(idx)["origins"]
+    ok(rc == 0 and len(o) == 1 and o[0].get("memory") == "mem:p2@1" and "reopened" in o[0]["retro"],
+       f"P2: a reworded heading keeps the memory id ({rc} {o})")
+
+    # P3 — the class key changes inside the same entry. k1's id never moves to k2: k2 starts
+    # with no id, and k1's recorded origin is carried with its own.
+    d, sha = headed_repo("p3", [("retro.md", "2026-10-01 export gate", KEY)])
+    idx = work / "p3.jsonl"
+    run("add", "--retro", "docs/evidence/retro.md", "--all", cwd=d, index=idx)
+    record_mem(idx, d, KEY, "mem:p3-k1")
+    write_retros(d, [("retro.md", "2026-10-01 export gate", K2)], sha)
+    rc, out, err = run("rebuild", "--roots", str(d), index=idx)
+    es = entries_of(idx)
+    ok(rc == 0 and mems(idx) == {"mem:p3-k1@1": [KEY]} and K2 in es
+       and not any(x.get("memory") for x in es[K2]["origins"])
+       and es[KEY]["origins"][0].get("carried"),
+       f"P3: a changed class key does not inherit the old key's memory id ({rc} {mems(idx)})")
+    rc, out, _ = run("emit-observatory", es[K2]["id"], cwd=d, index=idx)
+    ok(rc == 0 and "memoryId" not in out, f"P3: emit for the new class creates, never revises k1's record ({out!r})")
+
+    # P4 — two entries share one heading (one anchor) with different class keys; one id each.
+    d, sha = headed_repo("p4", [("retro.md", "same heading", KEY), ("retro.md", "same heading", K2)])
+    idx = work / "p4.jsonl"
+    run("add", "--retro", "docs/evidence/retro.md", "--all", cwd=d, index=idx)
+    record_mem(idx, d, KEY, "mem:p4-k1-only")
+    rc, out, err = run("rebuild", "--roots", str(d), index=idx)
+    ok(rc == 0 and mems(idx) == {"mem:p4-k1-only@1": [KEY]},
+       f"P4: one heading, two classes — the id stays on its own class ({rc} {mems(idx)})")
+    # An index already carrying one id on two classes (the round-7 defect) is repaired, said aloud.
+    lines = [json.loads(x) for x in idx.read_text(encoding="utf-8").splitlines()]
+    for line in lines:
+        if line["classKey"] == K2:
+            line["origins"][0]["memory"] = "mem:p4-k1-only@1"
+    idx.write_text("".join(json.dumps(x) + "\n" for x in lines), encoding="utf-8")
+    rc, out, err = run("rebuild", "--roots", str(d), index=idx)
+    ok(rc == 0 and len(mems(idx)["mem:p4-k1-only@1"]) == 1 and "memory id" in out + err,
+       f"one memory id is never attached to two class keys ({rc} {mems(idx)} {out!r} {err!r})")
+
+
+def low_controls():
+    """Round 8 LOW findings: L1 a line without origins, L2 a corrupt line among good ones,
+    L4 something read is never 'nothing read', L5 the unresolved label names whose commit."""
+    work = tree("tp-lessons-low-")
+    d, sha = headed_repo("low", [("retro.md", "x entry", KEY)])
+    other, _ = headed_repo("low-other", [("retro.md", "y entry", K2)])
+
+    # L1 — a previous-index line without origins is a corrupt index, never a traceback.
+    idx = work / "l1.jsonl"
+    idx.write_text(json.dumps({"classKey": "old-shape", "title": "t"}) + "\n", encoding="utf-8")
+    rc, out, err = run("rebuild", "--roots", str(d), index=idx)
+    ok(rc == 0 and "Traceback" not in err and list(work.glob("l1.jsonl.corrupt-*")) and KEY in entries_of(idx),
+       f"L1: a line without origins is set aside as corrupt, the rebuild goes on ({rc} {err[-300:]!r})")
+
+    # L2 — a corrupt line among good ones: the good lines are salvaged (memory ids and carried
+    # origins kept), the file is kept whole as .corrupt-<date>, and the notice says so.
+    idx = work / "l2.jsonl"
+    run("rebuild", "--roots", str(d), str(other), index=idx)
+    record_mem(idx, d, KEY, "mem:l2")
+    idx.write_text(idx.read_text(encoding="utf-8") + "{not json\n", encoding="utf-8")
+    d.chmod(0)
+    try:
+        rc, out, err = run("rebuild", "--roots", str(d), str(other), index=idx)
+    finally:
+        d.chmod(0o755)
+    o = lesson_of(idx)["origins"]
+    ok(rc == 0 and o and o[0].get("memory") == "mem:l2@1" and o[0].get("carried") == "source not read"
+       and list(work.glob("l2.jsonl.corrupt-*")) and "salvaged" in err,
+       f"L2: good lines of a corrupt index are salvaged with their memory ids ({rc} {err!r} {o})")
+
+    # L4 — one repository read in full (no retro) and another's retro unreadable: something was
+    # read, so exit 0, the unreadable retro named, its origin carried.
+    emp = tree("tp-lessons-low-empty-")
+    git(emp, "init", "-q")
+    (emp / "a").write_text("a", encoding="utf-8")
+    git(emp, "add", "-A")
+    git(emp, "commit", "-q", "-m", "r")
+    idx = work / "l4.jsonl"
+    run("rebuild", "--roots", str(d), index=idx)
+    retro = d / "docs/evidence/retro.md"
+    retro.chmod(0)
+    try:
+        rc, out, err = run("rebuild", "--roots", str(emp), str(d), index=idx)
+    finally:
+        retro.chmod(0o644)
+    ok(rc == 0 and "retro.md" in out and lesson_of(idx)["origins"][0].get("carried") == "source not read",
+       f"L4: a fully read repository counts as read — exit 0, the unreadable retro named ({rc} {out!r} {err!r})")
+
+    # L5 — the retro now cites a commit that does not resolve, while the indexed origin's own
+    # commit still does: the label says which side failed, and the origin keeps its commit.
+    idx = work / "l5.jsonl"
+    run("rebuild", "--roots", str(d), index=idx)
+    write_retros(d, [("retro.md", "x entry", KEY)], "deadbeefcafe")
+    rc, out, err = run("rebuild", "--roots", str(d), index=idx)
+    o = lesson_of(idx)["origins"][0]
+    ok(rc == 0 and o.get("carried") == "retro cites a commit that does not resolve" and o["commit"] == sha
+       and "deadbeefcafe" in out,
+       f"L5: the carried label names the retro's unresolvable commit, the origin keeps its own ({rc} {o} {out!r})")
+    write_retros(d, [("retro.md", "x entry", KEY)], sha)
+
+
 def source_admission_controls():
     repo, _ = project("source-admission", 1)
     retro = repo / "docs/evidence/retro.md"
@@ -994,6 +1233,8 @@ def main():
     conservative_rebuild_controls()
     partial_rebuild_controls()
     carry_forward_controls()
+    identity_controls()
+    low_controls()
     source_admission_controls()
     print(f"PASS: lessons.py — {CASES} cases")
 

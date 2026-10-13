@@ -116,7 +116,7 @@
   },
   "$defs": {
     "indexEntry": {
-      "description": "One line of the local index (lesson-index/1): one entry per classKey, a pure function of its origins, so a rebuild from the retros equals the incremental index byte for byte.",
+      "description": "One line of the local index (lesson-index/1): one entry per classKey, a pure function of its origins, so a complete rebuild of the same retros with nothing carried and no memory id recorded equals the incremental index byte for byte.",
       "type": "object",
       "additionalProperties": false,
       "required": [
@@ -213,9 +213,11 @@
                 "enum": [
                   "source not read",
                   "commit does not resolve",
-                  "lesson refused"
+                  "retro cites a commit that does not resolve",
+                  "lesson refused",
+                  "no checkout read holds it"
                 ],
-                "description": "Set by `rebuild` on an origin it could not re-derive and kept with everything recorded on it; it still counts toward seen, projects and status. Cleared when the source reads again; removed only by `rebuild --prune-carried`."
+                "description": "Set by `rebuild` on an origin it could not re-derive and kept with everything recorded on it; it still counts toward seen, projects and status. `no checkout read holds it` marks an origin with a memory id that no read retro holds any more: the store still has its record. Cleared when the source reads again; removed only by `rebuild --prune-carried`."
               },
               "lesson": {
                 "type": "object"

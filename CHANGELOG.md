@@ -1,11 +1,35 @@
 ## Unreleased
 
-Guards: 438 → **443**; property checks 15 → **15**. Five new negatives in `lessons.py
-rebuild`. One puts back the whole-scan refusal. The others remove the carry-forward, carry
+Guards: 438 → **448**; property checks 15 → **15**. Ten new negatives in `lessons.py
+rebuild`. One puts back the whole-scan refusal. Four more remove the carry-forward, carry
 whole class keys instead of origins, compute status without carried origins, and prune on
-every run.
+every run. The last five undo the round-8 identity rules:
+- a project counted complete when one checkout read;
+- git worktrees no longer discovered;
+- a recorded origin removed;
+- memory ids keyed by retro anchor;
+- one memory id left on two class keys.
 
-These are the fixes from verification rounds 6 and 7 of release iteration 1.
+These are the fixes from verification rounds 6, 7 and 8 of release iteration 1.
+
+- **Identity in `lessons.py rebuild`** (round 8). A project key is shared by every clone and
+  worktree, so reading one checkout no longer removes another checkout's origin.
+  - Git worktrees of every checkout found are discovered, including those under
+    `.worktrees/` and `.claude/worktrees/`.
+  - A retro counts as read only from a checkout that read completely. A project is complete
+    only when every checkout of it discovered in the run read completely.
+  - An origin holding a memory id that no read retro holds any more is carried
+    (`no checkout read holds it`) until `--prune-carried`.
+  - Memory ids follow `(project, classKey)`, the store's identity, instead of the retro
+    anchor. A rotated or retitled entry keeps its id, a changed class key never inherits
+    another's, and one id is never on two class keys; an index that already holds an id twice
+    is repaired aloud.
+  - A previous-index line without origins is treated as corrupt. A corrupt index is kept
+    whole as `.corrupt-<date>`, and its good lines are salvaged into the live index.
+  - A checkout read in full counts as something read, so the run exits 0.
+  - An unresolved carry says whether the origin's own commit failed or the one its retro now
+    cites failed.
+  - The run refuses to write if a memory id would vanish other than by `--prune-carried`.
 
 - **`lessons.py rebuild` never loses what it cannot re-derive.** Round 6's narrowed refusal
   dropped an origin and its memory id while a project's root was unreadable. It also still

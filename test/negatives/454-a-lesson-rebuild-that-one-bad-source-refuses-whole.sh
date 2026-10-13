@@ -8,7 +8,7 @@ python3 - <<'EOF'
 # set-aside corrupt index is promised became unreachable. Plant that refusal back.
 p = "/tmp/rebuild-partial-copy/plugins/task-pipeline/skills/task-pipeline/scripts/lessons.py"
 t = open(p, encoding="utf-8").read()
-needle = "    if problems and not seen_files:\n"
+needle = "    if problems and not seen_files and not whole:\n"
 assert needle in t, "PLANT DID NOT LAND: anchor absent before edit"
 open(p, "w", encoding="utf-8").write(t.replace(needle, "    if problems or unresolved:\n", 1))
 assert needle not in open(p, encoding="utf-8").read(), "PLANT DID NOT LAND"

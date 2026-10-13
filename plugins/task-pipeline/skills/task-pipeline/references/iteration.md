@@ -276,25 +276,43 @@ as before, plus a **local index** of every project's lessons on this machine:
 `scripts/lessons.py`, one JSON line per class, a pure function of the retros
 (`lessons.py rebuild --roots <dir>` re-derives it). **Rebuild never loses what it cannot
 re-derive.** It derives every lesson from the retros it can read under the roots and depth
-given. It then merges in each origin of the previous index — one project's copy of a lesson,
-`(project, retro)` — whose source it could not re-derive:
+given, and from every git worktree of each checkout it finds; worktrees under `.worktrees/`
+or `.claude/worktrees/` are included even though the walk skips dot-directories. It then
+merges in each origin of the previous index whose source it could not re-derive. An origin is
+one project's copy of a lesson, `(project, retro)`. Such an origin is **carried** when:
 
-- the root, repository or retro was not read, or lay outside the roots scanned;
-- the evidence commit no longer resolves, which is routine after a squash merge and a
-  deleted branch;
-- the entry was refused.
+- its root, checkout or retro was not read, or lay outside the roots scanned;
+- its evidence commit no longer resolves, which is routine after a squash merge and a deleted
+  branch, or its retro now cites a commit that does not resolve;
+- its entry was refused;
+- it holds a memory id that no retro read in this run holds any more. The store still has
+  that record.
 
-Such an origin is **carried**. It keeps everything recorded on it, the memory id included,
-and is marked `carried: <reason>`. It still counts toward `seen`, `projects` and `status`, so
-a lesson two projects hold stays a `candidate` while one root is unreadable. It is named in
-the summary, and it is re-derived and un-marked as soon as its source reads again. An origin
-leaves the index in only two ways. The first is when its retro was read, or its repository
-discovered in full, and no longer holds it; that removal is named. The second is on purpose,
-with `rebuild --prune-carried`. Unreadable sources are named under `not read`, and the run
-exits 0 whenever anything was read. It exits 1 only when nothing could be read; then no
-index, lock directory or migration is touched. A held lock or an unreadable index is its
-own refusal. On the default path the one-time merge of a standalone index, and setting a
-corrupt index aside, run first, as for every verb. Unknown is never measured zero, and never
+A carried origin keeps everything recorded on it and is marked `carried: <reason>`. It still
+counts toward `seen`, `projects` and `status`, so a lesson two projects hold stays a
+`candidate` while one root is unreadable. It is named in the summary, and it is re-derived and
+un-marked as soon as its source reads again.
+
+**Identity.** A project key is `p-` plus the root commit, so every clone and worktree of a
+project shares it, and reading one checkout never decides for another. A retro counts as read
+only from a checkout that read completely. A project counts as complete only when every
+checkout of it discovered in the run read completely. An unreadable directory that could
+hide a checkout of any project leaves no project complete.
+
+A memory id belongs to `(project, classKey)`, the store's own identity, and never to a retro
+anchor. So a rotated or retitled entry keeps its id. A class key changed inside one entry
+does not inherit another key's id, and one id is never on two class keys.
+
+An origin leaves the index in only two ways. The first is when a read retro, or a complete
+project, no longer holds it and it holds no memory id the run did not re-attach; that removal
+is named. The second is on purpose, with `rebuild --prune-carried`.
+
+Unreadable sources are named under `not read`. The run exits 0 whenever anything was read, a
+retro or a checkout discovered in full. It exits 1 only when nothing was read; then no index,
+lock directory or migration is touched. A held lock or an unreadable index is its own refusal.
+On the default path the one-time merge of a standalone index runs first, as for every verb.
+So does setting a corrupt index aside: it is kept whole as `.corrupt-<date>`, and every line
+that still parses is salvaged into the live index. Unknown is never measured zero, and never
 measured gone.
 Two projects holding one class key make
 one lesson seen twice, status `candidate`. The index path is a parameter — `--index`, then

@@ -9,8 +9,10 @@ lesson/1), and the index projects every such entry from every project on this ma
 one file that stage 0 queries by the task's nouns.
 
 **The retro stays canonical; the index is a projection.** It can be lost and rebuilt from
-the retros (`rebuild`), and a rebuild equals the incremental index byte for byte, because an
-entry is a pure function of its origins.
+the retros (`rebuild`). An entry is a pure function of its origins, so a complete rebuild of
+the same retros, with nothing carried and no memory id recorded, equals the incremental index
+byte for byte. Otherwise the rebuild also holds what only the previous index knew: carried
+origins and memory ids.
 
     lessons.py add --retro FILE (--entry ANCHOR ... | --all) [--root DIR]
     lessons.py add --json FILE|-                              [--root DIR]
@@ -19,9 +21,10 @@ entry is a pure function of its origins.
     lessons.py query NOUN ... [--limit 5]
         at most --limit lines: `[lesson L-<sha12>] title — trigger — check (seen N, projects K)`
     lessons.py rebuild --roots DIR ... [--depth 3] [--prune-carried]
-        re-derive the index from every retro found under the roots, and never lose what it
-        cannot re-derive: an origin whose source was not read, or whose commit no longer
-        resolves, is carried forward with its memory id, marked `carried`, and named. Exit 0
+        re-derive the index from every retro found under the roots and their git worktrees,
+        and never lose what it cannot re-derive: an origin whose source was not read, whose
+        commit no longer resolves, or whose memory id no read retro holds any more is carried
+        forward, marked `carried`, and named. Memory ids follow (project, classKey). Exit 0
         whenever anything was read; exit 1, touching nothing, only when nothing could be read.
         --prune-carried removes the carried origins on purpose
     lessons.py candidates [--min-projects 2]
@@ -192,17 +195,23 @@ def set_aside(path: pathlib.Path) -> pathlib.Path:
 def open_index(idx: pathlib.Path, notes: list[str]) -> dict[str, dict]:
     """The index's entries — the same corrupt handling for the family index and the standalone
     one: a file that does not parse is a DERIVED file gone bad, never a reason to exit 1. It is
-    set aside as `.corrupt-<date>[-n]` and the run goes on from empty; `rebuild --roots`
-    re-derives it. A file that cannot be READ (permissions) is the one refusal: its contents may
-    be good, so nothing replaces it."""
+    set aside whole as `.corrupt-<date>[-n]`; every line that still parses (memory ids and
+    carried origins included) is salvaged into the live index at once, and the run goes on from
+    that; `rebuild --roots` re-derives the rest. A file that cannot be READ (permissions) is the
+    one refusal: its contents may be good, so nothing replaces it."""
     try:
         return load(idx)
     except IndexCorrupt:
+        good, future, bad = _salvage(idx)
         dest = set_aside(idx)
-        notes.append(f"the index {idx} could not be parsed — kept as {dest.name}; "
-                     "`lessons.py rebuild --roots <dir>` re-derives it from the retros")
-        _FUTURE[str(idx)] = []
-        return {}
+        notes.append(f"the index {idx} could not be parsed — kept whole as {dest.name}; "
+                     f"{len(good)} lesson line{'' if len(good) == 1 else 's'} salvaged into the "
+                     f"live index, {bad} bad line{'' if bad == 1 else 's'} left only in {dest.name}; "
+                     "`lessons.py rebuild --roots <dir>` re-derives the rest from the retros")
+        _FUTURE[str(idx)] = future
+        if good or future:
+            save(idx, good)  # under the session's lock: a read-only verb keeps the salvage too
+        return good
 
 
 def _merge_legacy(idx: pathlib.Path, notes: list[str]) -> None:
@@ -517,7 +526,8 @@ def _origin_key(o: dict) -> tuple:
 
 
 def derive(origins: list[dict]) -> dict:
-    """One index entry as a pure function of its origins — so rebuild equals incremental."""
+    """One index entry as a pure function of its origins (carried ones and their memory ids
+    included) — so a complete rebuild with nothing carried equals the incremental index."""
     origins = sorted(origins, key=lambda o: (_origin_key(o), json.dumps(o, sort_keys=True)))
     first = origins[0]["lesson"]
     nouns = sorted({n for o in origins for n in o["lesson"]["nouns"]}, key=str.casefold)
@@ -571,6 +581,45 @@ class IndexCorrupt(Refused):
 _FUTURE: dict[str, list[str]] = {}
 
 
+def _entry_shape(e: object) -> bool:
+    """A lesson-index/1 line every verb can use: a class key and a list of origins, each with
+    its project, retro and lesson fields. A line without them (verification round 8, L1) is a
+    corrupt line, never a KeyError in the middle of a rebuild."""
+    if not isinstance(e, dict) or not isinstance(e.get("classKey"), str):
+        return False
+    origins = e.get("origins")
+    return isinstance(origins, list) and bool(origins) and all(
+        isinstance(o, dict) and isinstance(o.get("project"), str) and isinstance(o.get("retro"), str)
+        and isinstance(o.get("commit"), str) and isinstance(o.get("lesson"), dict) for o in origins)
+
+
+def _salvage(path: pathlib.Path) -> tuple[dict[str, dict], list[str], int]:
+    """The lines of a corrupt index that still parse: (entries, newer-format lines, bad lines).
+    A corrupt index is set aside whole; what parses is carried into the live index, so one bad
+    line never costs every memory id and carried origin beside it (round 8, L2)."""
+    out, future, bad = {}, [], 0
+    try:
+        raw = path.read_bytes()
+    except OSError:
+        return out, future, 0
+    for chunk in raw.splitlines():
+        if not chunk.strip():
+            continue
+        try:
+            line = chunk.decode("utf-8")
+            e = json.loads(line)
+        except (UnicodeDecodeError, ValueError):
+            bad += 1
+            continue
+        if isinstance(e, dict) and e.get("schema", "lesson-index/1") != "lesson-index/1":
+            future.append(line)
+        elif _entry_shape(e):
+            out[e["classKey"]] = e
+        else:
+            bad += 1
+    return out, future, bad
+
+
 def load(path: pathlib.Path) -> dict[str, dict]:
     if not path.exists():
         return {}
@@ -594,7 +643,7 @@ def load(path: pathlib.Path) -> dict[str, dict]:
         if isinstance(e, dict) and e.get("schema", "lesson-index/1") != "lesson-index/1":
             future.append(line)
             continue
-        if not isinstance(e, dict) or not isinstance(e.get("classKey"), str):
+        if not _entry_shape(e):
             raise IndexCorrupt(f"the index {path} has a line that is not a lesson (line {i}) — "
                                "`lessons.py rebuild` keeps it as .corrupt-<date> and re-derives it")
         out[e["classKey"]] = e
@@ -825,13 +874,48 @@ def find_retros(roots: list[str], depth: int) -> tuple[list[tuple[pathlib.Path, 
                                                         dict[pathlib.Path, bool]]:
     """Discovery and its unknowns, kept separate from a readable empty scope.
 
-    Returns (retro files, problems, repositories): each repository discovered maps to whether
-    its retro sources were discovered in full — only a fully discovered repository can say an
-    origin's source no longer holds it."""
+    Returns (retro files, problems, repositories): each checkout discovered maps to whether
+    its retro sources were discovered in full — only a fully discovered checkout can say an
+    origin's source no longer holds it.
+
+    Every git worktree of a checkout found is discovered too (`git worktree list --porcelain`,
+    round 8): the walk skips dot-directories, and `.worktrees/` or `.claude/worktrees/` is
+    where a feature branch's retro usually lives. A checkout is visited once, by its real path."""
     found, problems = [], []
     repos: dict[pathlib.Path, bool] = {}
+    visited: set[pathlib.Path] = set()
+
     def unread(exc):
         problems.append(f"{exc.filename}: cannot discover ({type(exc).__name__})")
+
+    def visit(here: pathlib.Path) -> None:
+        try:
+            real = here.resolve()
+        except OSError:
+            real = here
+        if real in visited:
+            return
+        visited.add(real)
+        repos[here] = False
+        try:
+            art = _artifact_root(here)
+            archive = art / "retro"
+            archive_info = _source_stat(archive)
+            if archive_info is not None and not stat.S_ISDIR(archive_info.st_mode):
+                raise Refused(f"{archive}: retro archive is not a directory")
+            archived = sorted(archive.iterdir()) if archive_info is not None else []
+            files = [art / "retro.md"] + [p for p in archived if p.suffix == ".md"]
+            for f in files:
+                info = _source_stat(f)
+                if info is None:
+                    continue
+                if not stat.S_ISREG(info.st_mode):
+                    raise Refused(f"{f}: retro source is not a regular file")
+                found.append((here, f))
+            repos[here] = True
+        except (OSError, Refused) as exc:
+            problems.append(f"{here}: {exc}")
+
     for r in roots:
         base = pathlib.Path(r).expanduser()
         try:
@@ -846,28 +930,39 @@ def find_retros(roots: list[str], depth: int) -> tuple[list[tuple[pathlib.Path, 
             rel_depth = len(here.relative_to(base).parts)
             dirs[:] = sorted(d for d in dirs if d not in SKIP_DIRS and not d.startswith("."))
             try:
-                if _source_stat(here / ".git") is not None:
-                    repos[here] = False
-                    art = _artifact_root(here)
-                    archive = art / "retro"
-                    archive_info = _source_stat(archive)
-                    if archive_info is not None and not stat.S_ISDIR(archive_info.st_mode):
-                        raise Refused(f"{archive}: retro archive is not a directory")
-                    archived = sorted(archive.iterdir()) if archive_info is not None else []
-                    files = [art / "retro.md"] + [p for p in archived if p.suffix == ".md"]
-                    for f in files:
-                        info = _source_stat(f)
-                        if info is None:
-                            continue
-                        if not stat.S_ISREG(info.st_mode):
-                            raise Refused(f"{f}: retro source is not a regular file")
-                        found.append((here, f))
-                    repos[here] = True
+                is_repo = _source_stat(here / ".git") is not None
             except (OSError, Refused) as exc:
                 problems.append(f"{here}: {exc}")
+                is_repo = False
+            if is_repo:
+                visit(here)
             if rel_depth >= depth:
                 dirs[:] = []
+    for repo in list(repos):
+        for wt in _worktrees(repo, problems, repos):
+            visit(wt)
     return found, problems, repos
+
+
+def _worktrees(repo: pathlib.Path, problems: list[str], repos: dict[pathlib.Path, bool]) -> list[pathlib.Path]:
+    """The live worktrees git lists for `repo` (bare and prunable ones skipped). A listing that
+    cannot be read leaves that checkout's project incomplete: its siblings are unknown."""
+    try:
+        listing = _git(repo, "worktree", "list", "--porcelain")
+    except Refused as exc:
+        problems.append(f"{repo}: worktrees cannot be listed ({exc})")
+        repos[repo] = False
+        return []
+    out = []
+    for block in (listing or "").split("\n\n"):
+        lines = block.splitlines()
+        head = next((ln[len("worktree "):] for ln in lines if ln.startswith("worktree ")), None)
+        if head is None or any(ln == "bare" or ln.startswith("prunable") for ln in lines):
+            continue
+        path = pathlib.Path(head)
+        if path.is_dir():
+            out.append(path)
+    return out
 
 
 def _artifact_root(repo: pathlib.Path) -> pathlib.Path:
@@ -905,15 +1000,20 @@ def _artifact_root(repo: pathlib.Path) -> pathlib.Path:
 
 CARRY_UNREAD = "source not read"
 CARRY_UNRESOLVED = "commit does not resolve"
+CARRY_CITES_UNRESOLVED = "retro cites a commit that does not resolve"
 CARRY_REFUSED = "lesson refused"
+CARRY_RECORDED = "no checkout read holds it"
 
 
 def _carry_reason(o: dict, seen: dict) -> str | None:
-    """Why the previous index's origin `o` is carried forward, or None when its source was read
-    and no longer holds it — the one way an origin leaves without `--prune-carried`."""
+    """Why the previous index's origin `o` is carried forward, or None when a read retro no longer
+    holds it. None is not yet removal: an origin carrying a memory id the run did not re-attach
+    is carried anyway (cmd_rebuild), since the store still holds that record."""
     k = _origin_key(o)
     if k in seen["unresolved"]:
-        return CARRY_UNRESOLVED
+        # Label by which commit failed (round 8, L5): the origin's own, or a different one the
+        # retro now cites while the indexed origin keeps its resolving commit.
+        return CARRY_UNRESOLVED if seen["unresolved"][k] == o["commit"] else CARRY_CITES_UNRESOLVED
     if k in seen["refused"]:
         return CARRY_REFUSED
     if (o["project"], o["retro"].split("#", 1)[0]) in seen["files"] or o["project"] in seen["complete"]:
@@ -921,32 +1021,98 @@ def _carry_reason(o: dict, seen: dict) -> str | None:
     return CARRY_UNREAD
 
 
+def _attach_memory(entries: dict[str, dict], old: dict[str, dict], notes: list[str]) -> None:
+    """Memory ids follow the store's own identity, (project, classKey) — never a retro anchor
+    (round 8, M1): a rotated archive or a reworded heading keeps its id, a class key changed
+    inside one entry never inherits another key's id, and two entries under one heading keep one
+    id each. Within (project, classKey) the id goes on the origin `emit-observatory` reads (the
+    first by (project, retro)). Only when one (project, classKey) held several ids does the
+    exact (project, retro) decide, and only where that match is unique."""
+    by_pc: dict[tuple, dict[str, set]] = {}
+    for ck, e in old.items():
+        for o in e["origins"]:
+            if o.get("memory"):
+                by_pc.setdefault((o["project"], ck), {}).setdefault(o["memory"], set()).add(o["retro"])
+    for ck, e in list(entries.items()):
+        origins = sorted(e["origins"], key=_origin_key)
+        changed = False
+        for project in sorted({o["project"] for o in origins}):
+            ids = by_pc.get((project, ck), {})
+            mine = [o for o in origins if o["project"] == project]
+            if len(ids) == 1:
+                (mem,) = ids
+                target = mine[0]
+                target["memory"] = mem
+                changed = True
+            elif len(ids) > 1:
+                for o in mine:
+                    exact = [m for m, retros in ids.items() if o["retro"] in retros]
+                    if len(exact) == 1:
+                        o["memory"] = exact[0]
+                        changed = True
+                if not any(o.get("memory") for o in mine):
+                    notes.append(f"{ck} — {project}: several memory ids and none matches a retro "
+                                 "anchor uniquely; the previous origins keep them")
+        if changed:
+            entries[ck] = derive(origins)
+
+
+def _one_class_per_memory(entries: dict[str, dict], notes: list[str]) -> None:
+    """One memory id is one store record, so it belongs to one class key. An index that already
+    holds an id on two keys (the round-7 defect) keeps it on the first and says so."""
+    holders: dict[str, list[str]] = {}
+    for ck in sorted(entries):
+        for o in entries[ck]["origins"]:
+            if o.get("memory") and ck not in holders.setdefault(o["memory"], []):
+                holders[o["memory"]].append(ck)
+    for mem, cks in holders.items():
+        for ck in cks[1:]:
+            entries[ck] = derive([{k: v for k, v in o.items() if not (k == "memory" and v == mem)}
+                                  for o in entries[ck]["origins"]])
+            notes.append(f"memory id {mem} was on {cks[0]} and {ck}; one id is one store record, so "
+                         f"it stays on {cks[0]} only")
+    for ck, e in entries.items():
+        for o in e["origins"]:
+            if o.get("memory") and holders.get(o["memory"], [ck])[0] != ck:
+                raise Refused(f"memory id {o['memory']} is on two class keys — nothing was written")
+
+
 def cmd_rebuild(a, idx: pathlib.Path) -> int:
-    """Rebuild never loses what it cannot re-derive (verification round 7, loop guard).
+    """Rebuild never loses what it cannot re-derive (rounds 7–8 of release iteration 1).
 
     The index becomes the lessons derived from every readable retro, merged with the previous
-    index's origins CARRIED FORWARD wherever their source could not be re-derived — its root,
-    repository or retro could not be read, it lay outside the roots scanned, its evidence commit
-    no longer resolves (routine after a squash merge and a deleted branch), or its entry was
-    refused. Carrying is per origin `(project, retro)`, never per class key: a carried origin
-    keeps everything recorded on it — commit, lesson fields, memory id — gains
-    `carried: <reason>`, and counts toward `seen`, `projects` and `status` like any other. It is
-    re-derived and un-marked as soon as its source reads again.
+    index's origins CARRIED FORWARD wherever they could not be re-derived. An origin is one
+    project's copy of a lesson, `(project, retro#anchor)` under its class key. It is carried
+    when its retro was not read (unreadable, outside the roots, or in a checkout that failed),
+    when its commit, or the one its retro now cites, does not resolve, or when its entry was
+    refused. A carried origin keeps everything recorded on it, gains `carried: <reason>`, and
+    counts toward `seen`, `projects` and `status`. It is re-derived and un-marked as soon as its
+    source reads again.
 
-    An origin leaves the index only when its retro was read (or its repository discovered in
-    full) and no longer holds it, or on purpose with `--prune-carried`. The run checks that
-    every previous origin is accounted for before it writes.
+    Identity (round 8). A project key is `p-` + the root commit, shared by every clone and
+    worktree, so one checkout never decides for another:
+      * git worktrees of every checkout found are discovered, even under dot-directories;
+      * a retro file counts as read only from a checkout that read completely, and a project
+        counts as complete only when EVERY checkout of it discovered in this run did;
+      * an origin leaves only when a read retro (or a complete project) no longer holds it AND
+        it carries no memory id the run did not re-attach — a recorded origin is carried
+        (`no checkout read holds it`) until `--prune-carried`;
+      * memory ids follow `(project, classKey)`, the store's identity, never the anchor; one id
+        is never on two class keys.
 
-    Exit 0 whenever anything was read. Exit 1 only when nothing could be read at all — before
-    the session opens, so no index, lock directory or migration is touched — or on a lock or
-    unreadable-index refusal. On the default path the one-time merge of the standalone index
-    (and setting a corrupt index aside) runs first, as for every verb."""
+    The run refuses to write if a memory id of the previous index would vanish other than by
+    `--prune-carried`. Exit 0 whenever anything was read — a retro, or a checkout discovered in
+    full. Exit 1 only when nothing was read — before the session opens, so no index, lock
+    directory or migration is touched — or on a lock or unreadable-index refusal. On the default
+    path the one-time merge of the standalone index, and setting a corrupt index aside (its good
+    lines salvaged), run first, as for every verb."""
     found, problems, repos = find_retros(a.roots, a.depth)
     lessons, private, seen_files = [], 0, 0
     unresolved: list[str] = []
     keys: dict[pathlib.Path, str] = {}
     failed: set[pathlib.Path] = set()
-    seen: dict[str, set] = {"files": set(), "unresolved": set(), "refused": set(), "complete": set()}
+    read_files: dict[pathlib.Path, set] = {}
+    seen: dict = {"files": set(), "unresolved": {}, "refused": set(), "complete": set()}
     for repo, retro in found:
         try:
             if repo not in keys:
@@ -968,42 +1134,56 @@ def cmd_rebuild(a, idx: pathlib.Path) -> int:
             continue
         seen_files += 1
         private += priv
-        seen["files"].add((keys[repo], _relative(repo, retro)))
+        read_files.setdefault(repo, set()).add((keys[repo], _relative(repo, retro)))
         seen["refused"] |= {(keys[repo], r) for r in refused}
-        seen["unresolved"] |= {_origin_key(le["origin"]) for le in unres}
+        for le in unres:
+            seen["unresolved"][_origin_key(le["origin"])] = le["origin"]["commit"]
         unresolved += [f"{repo.name}: {le['classKey']} (commit {le['origin']['commit']})" for le in unres]
         lessons += mine
         problems += [f"{repo.name}: {p}" for p in probs]
-    if problems and not seen_files:
+    # A file counts as read only from a checkout that read completely (round 8, H1).
+    for repo, files in read_files.items():
+        if repo not in failed and repos.get(repo):
+            seen["files"] |= files
+    whole = [r for r, ok_ in repos.items() if ok_ and r not in failed]
+    if problems and not seen_files and not whole:
         for problem in problems:
             print(f"  not read: {problem}")
-        print("lessons: rebuild refused — no retro could be read; the index, its lock directory "
+        print("lessons: rebuild refused — nothing could be read; the index, its lock directory "
               "and any migration were not touched", file=sys.stderr)
         return 1
-    for repo, whole in repos.items():
-        if not whole or repo in failed:
-            continue
+    # A project is complete only when every checkout of it discovered here read completely. A
+    # problem no checkout can own (an unreadable directory, a missing root, a checkout with no
+    # readable key) may hide a checkout of any project: then no project is complete.
+    owned = True
+    project_of: dict[pathlib.Path, str] = {}
+    for repo in repos:
         try:
-            seen["complete"].add(keys[repo] if repo in keys else project_key(repo))
+            project_of[repo] = keys[repo] if repo in keys else project_key(repo)
         except Refused:
-            pass  # a repository with no commit holds no origin this index could name
+            if not repos[repo] or repo in failed:
+                owned = False
+    attributed = {str(r) for r in repos} | {r.name for r in repos}
+    if any(not any(p.startswith(x) for x in attributed) for p in problems):
+        owned = False
+    if owned:
+        for project in set(project_of.values()):
+            if all(repos[r] and r not in failed for r, p in project_of.items() if p == project):
+                seen["complete"].add(project)
     with session(idx, a.default_index) as ss:
         # The previous index lends its memory ids and its carried origins. `session` already
-        # refused an unreadable one (its contents may be good) and set a corrupt one aside; its
-        # notes go to stderr as for every verb, and into this verb's report as well.
+        # refused an unreadable one (its contents may be good) and set a corrupt one aside, its
+        # good lines salvaged; its notes go to stderr as for every verb, and into this report.
         old = ss.entries
         problems += [f"the previous index: {n}" for n in ss.notes]
-        memory = {(o["project"], o["retro"]): o["memory"]
-                  for e in old.values() for o in e["origins"] if o.get("memory")}
+        notes: list[str] = []
         entries: dict[str, dict] = {}
         # Worktrees of one project hold the same entries: one origin per (project, anchor),
         # and where two copies differ the order below decides, the same way every time.
         for le in sorted(lessons, key=lambda x: json.dumps(x, sort_keys=True)):
             merge(entries, [le])
-        for e in entries.values():
-            origins = [dict(o, memory=memory[_origin_key(o)]) if _origin_key(o) in memory else o
-                       for o in e["origins"]]
-            entries[e["classKey"]] = derive(origins)
+        _attach_memory(entries, old, notes)
+        attached = {o["memory"] for e in entries.values() for o in e["origins"] if o.get("memory")}
         derived = {(ck, _origin_key(o)) for ck, e in entries.items() for o in e["origins"]}
         carried, pruned, removed = [], [], []
         for ck, e in sorted(old.items()):
@@ -1011,6 +1191,8 @@ def cmd_rebuild(a, idx: pathlib.Path) -> int:
                 if (ck, _origin_key(o)) in derived:
                     continue
                 reason = _carry_reason(o, seen)
+                if reason is None and o.get("memory") and o["memory"] not in attached:
+                    reason = CARRY_RECORDED
                 if reason is None:
                     removed.append((ck, o))
                 elif a.prune_carried:
@@ -1020,15 +1202,14 @@ def cmd_rebuild(a, idx: pathlib.Path) -> int:
         for ck, o in carried:
             held = [x for x in entries[ck]["origins"] if _origin_key(x) != _origin_key(o)] if ck in entries else []
             entries[ck] = derive(held + [o])
-        # Nothing leaves implicitly: every previous origin is re-derived, carried, pruned on
-        # purpose, or removed because a read source no longer holds it.
-        now = {(ck, _origin_key(o)) for ck, e in entries.items() for o in e["origins"]}
-        lost = [(ck, _origin_key(o)) for ck, e in old.items() for o in e["origins"]
-                if (ck, _origin_key(o)) not in now
-                and not any(ck == c and _origin_key(o) == _origin_key(x) for c, x in pruned + removed)]
-        if lost:
-            raise Refused(f"rebuild would drop {len(lost)} origin(s) it cannot account for "
-                          f"({lost[:3]}) — nothing was written; this is a defect, report it")
+        _one_class_per_memory(entries, notes)
+        # A memory id of the previous index vanishes only through --prune-carried (round 8, L6).
+        before = {o["memory"] for e in old.values() for o in e["origins"] if o.get("memory")}
+        after = {o["memory"] for e in entries.values() for o in e["origins"] if o.get("memory")}
+        gone = before - after - {o["memory"] for _, o in pruned if o.get("memory")}
+        if gone:
+            raise Refused(f"rebuild would lose {len(gone)} memory id(s) ({sorted(gone)[:3]}) — "
+                          "nothing was written; this is a defect, report it")
         ss.entries = entries
         ss.save()
     print(f"lessons: rebuilt from {seen_files} retro file{'s' if seen_files != 1 else ''} in "
@@ -1045,6 +1226,8 @@ def cmd_rebuild(a, idx: pathlib.Path) -> int:
         print(f"  removed (its retro no longer holds it): {ck} — {o['project']} {o['retro']}")
     for u in unresolved:
         print(f"  skipped, commit does not resolve: {u}")
+    for n in notes:
+        print(f"  memory: {n}")
     for p in problems:
         print(f"  not read: {p}")
     return 0
