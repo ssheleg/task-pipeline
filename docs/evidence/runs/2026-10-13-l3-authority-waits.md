@@ -52,7 +52,7 @@ worktree. Its [machine receipt](2026-10-13-pr116-owner-full.json) and
 [sanitized full output](2026-10-13-pr116-owner-full.txt) bind to that exact SHA,
 not to this later doctrine diff. After all eligible hosted jobs passed in run
 [38344001686](https://github.com/ssheleg/task-pipeline/actions/runs/38344001686), the reviewed fix merged through PR116 as
-`52be103706d3f53b22f2ca28e4896079b2d48b67` into `feat/release-iteration`.
+[52be1037](https://github.com/ssheleg/task-pipeline/commit/52be103706d3f53b22f2ca28e4896079b2d48b67) into `feat/release-iteration`.
 It was not released. The original log hash is retained; only
 literal checkout/home prefixes were sanitized. The external engine-redactor
 case is explicitly skipped without its checkout. This packet has not rerun
