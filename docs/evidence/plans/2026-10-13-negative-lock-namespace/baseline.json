@@ -1,0 +1,15 @@
+{
+  "source_sha256": "1e502e50550cc38f9554549815ed85746210785471ec227c92dbab29926aaf60",
+  "expression": "os.path.join(tempfile.gettempdir(), 'tp-negatives.lock')",
+  "different_TMPDIR_locks_both_acquired": true,
+  "same_lock_contender_refused": true,
+  "plants_with_tmp_and_copy_literals": 431,
+  "examples": [
+    "test/negatives/001-a-board-id-naming-two-rows-must-fail.sh",
+    "test/negatives/004-the-two-artifact-root-implementations-must-be-compared-not-m.sh",
+    "test/negatives/005-an-abandoned-run-must-be-told-from-a-finished-one.sh",
+    "test/negatives/006-the-gate-must-require-the-observation-not-just-the-claim.sh",
+    "test/negatives/007-the-release-gate-must-be-able-to-block.sh"
+  ],
+  "scope": "Only expression and owned locks executed; no public plant, actual suite lock or scratch path touched."
+}
