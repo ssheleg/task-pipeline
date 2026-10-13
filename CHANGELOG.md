@@ -2,8 +2,8 @@
 
 Records the missing retrospective declarations that stopped the v1.94.0 release
 before publication. The accepted release-iteration payload is unchanged; the
-version metadata advances so the failed tag remains immutable. The local-tag
-structural gate checks the declarations before another release attempt.
+version metadata advances so the failed tag remains immutable. Local-tag
+structural validation checks the declarations before another release attempt.
 
 ## v1.94.0 — 2026-10-13
 
