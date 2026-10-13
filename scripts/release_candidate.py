@@ -285,7 +285,7 @@ class Candidate:
             private(self.log)
             need(digest_file(self.log) == evidence.get('log_sha256'), 'suite output changed')
             need(self.remote() == data['default_branch'], 'remote default branch changed')
-            command = ['git', 'push', data['source']['origin'], data['object'] + ':refs/tags/' + self.tag]
+            command = ['git', 'push', '--no-follow-tags', data['source']['origin'], data['object'] + ':refs/tags/' + self.tag]
             observation = self.observe_hook(data['context'], command)
             data['hook_observation'] = observation; write_json(self.record, data)
             need(observation['exit'] == 0, 'existing release hook refused publication')

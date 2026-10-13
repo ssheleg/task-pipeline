@@ -211,6 +211,12 @@ with tempfile.TemporaryDirectory(prefix='tp-release-candidate-') as folder:
     assert git(origin,'rev-parse',c.tag)==c.load()['object']
     assert not git(alternate,'tag','-l',c.tag);checks+=1
     git(origin,'tag','-d',c.tag)
+    c=prepared();c.check();git(c.root,'tag','-a','v9.9.9','-m','foreign local annotation')
+    git(c.root,'config','push.followTags','true');c.publish()
+    assert git(origin,'tag','-l')==c.tag
+    assert git(c.root,'tag','-l','v9.9.9')=='v9.9.9';checks+=1
+    assert '--no-follow-tags' in c.load()['hook_observation']['command'];checks+=1
+    git(origin,'tag','-d',c.tag)
     # Real owned child-process cleanup, without invoking an actual broad suite.
     driver=base/'suite-driver.py'
     driver.write_text("""import importlib.util,json,pathlib,sys,types

@@ -132,3 +132,18 @@ pushurl, multiple pushurl, pushInsteadOf, explicit-pushurl-masked rewrite, and a
 pushurl change that cannot redirect the already bound literal destination.
 No claim of resistance to an adversarial process modifying Git configuration during
 an operation is made. No real repository tag or configuration was changed by tests.
+
+## Single-ref correction
+
+The independent [exact-source probe](followtags-peer-probe.py) at ce548b3
+created an unrelated annotated fixture tag and enabled `push.followTags`.
+The prior helper reported PUBLISHED while both tags reached the fixture remote;
+[baseline result](followtags-peer-baseline.json) preserves that failure.
+The actual hook-checked and executed command now explicitly uses
+`git push --no-follow-tags <bound-url> <bound-object>:refs/tags/<owned-tag>`.
+[54 focused controls](single-ref54.txt) pass, including foreign-tag absence on the
+remote, its preservation locally, and exact command binding in hook observation.
+All remotes/tags were disposable fixtures; no production ref was changed.
+These portable probes resolve the owning checkout from their tracked location and
+extract the specified historical commits; the historical objects must be fetched.
+Independent review of the final correction and the full owner gate remain pending.

@@ -1,5 +1,5 @@
 import pathlib,subprocess,tempfile,json,sys
-repo=pathlib.Path('/Users/sshlg/DATA/_wt/tp-fw07-pretag-admission');revision='abf3dff485788528ab3f0dbfe3139946a6a3ab78'
+repo=pathlib.Path(__file__).resolve().parents[4];revision='abf3dff485788528ab3f0dbfe3139946a6a3ab78'
 with tempfile.TemporaryDirectory(prefix='fresh-fw07-pushurl-peer-') as d:
  root=pathlib.Path(d)
  for rel in ['package.json','scripts/release_candidate.py','plugins/task-pipeline/hooks/release-gate.sh','test/audit_regressions/fw07_release_candidate.py']:
