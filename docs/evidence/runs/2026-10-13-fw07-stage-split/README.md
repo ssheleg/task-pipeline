@@ -77,3 +77,19 @@ slot is available. Review this frozen source independently, then run relocated
 negative plants and one composed owner aggregate in the coordinator's serial slot.
 B-043 remains open until source acceptance and integration; model/native quality
 and billing remain a separate, unobserved layer.
+
+## Independent bounded review
+
+The coordinator independently reviewed [23060e8](https://github.com/ssheleg/task-pipeline/commit/23060e81079022abaf8f87e755e2d29f7a73bbde):
+spine/SKILL routing semantics, actual validator migrations and the consumer map.
+It independently replayed the 36-chunk/967-line conservation proof, 26 corruption
+controls and 47 route controls, and compared the canonical default profile/schema
+bytes. Bounded source-shape acceptance: PASS. The reviewer explicitly retained
+relocated public-entry plants and the full aggregate as required, and made no
+native-host, task-quality or billing claim.
+
+The requested [inspection of remaining plants053/122/310](remaining-plant-inspection.json)
+executed their original Python mutation payloads in owned minimal fixtures and
+confirmed each still targets a complete spine gate. This is not a public shell
+entry verdict. A separate [recovery/read-evidence follow-up packet](../../plans/2026-10-13-fw07-recovery-evidence.md)
+names the unobserved next layer while the broad slot is held elsewhere.

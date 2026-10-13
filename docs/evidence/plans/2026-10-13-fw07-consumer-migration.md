@@ -56,3 +56,14 @@ a custom profile uses its declared doctrine, preserving the kernel. The route gu
 must reject missing, duplicate, sibling and unreadable targets. It does not claim a
 native host actually read them. Installed-skill isolation and source conservation
 are measured independently from model task quality and billed token usage.
+
+## Frozen implementation inspection
+
+The [source slice](../runs/2026-10-13-fw07-stage-split/README.md) is implemented.
+After reading the actual payloads, 053,122,310 intentionally stay on stages.md:
+053 protects propagation in the enforcing gate spine, 122 removes the exact stage7
+CI gate block, and 310 removes stage2's first-paragraph obligation while preserving
+a neighboring note. Their original Python payloads each landed in a minimal owned
+fixture. The public-entry verdicts remain required. 108 stays gate-only with its
+needle count now one; the intake procedure has a separate source check. 123 moves
+to stage-08-post-deploy.md. No body was reconstructed into a monolith for a guard.
