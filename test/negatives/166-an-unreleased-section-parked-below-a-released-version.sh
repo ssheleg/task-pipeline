@@ -21,9 +21,6 @@ at = m.end() + nxt.start() if nxt else len(t)
 open(p, "w", encoding="utf-8").write(
     t[:at] + "## Unreleased\n\nGuards: 1 -> 2, parked under a release.\n\n" + t[at:])
 out = open(p, encoding="utf-8").read()
-# The candidate may already have a legitimate top Unreleased section. Remove it
-# in this fixture before placing the single malformed section below a release.
-t = re.sub(r"^## Unreleased[^\n]*\n.*?(?=^## |\Z)", "", t, flags=re.M | re.S)
 assert out.index("## Unreleased") > out.index(m.group(0)), "PLANT DID NOT LAND"
 EOF
 output=$(python3 /tmp/unr2-copy/test/validate.py 2>&1) && status=0 || status=$?

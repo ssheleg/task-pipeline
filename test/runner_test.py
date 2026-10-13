@@ -121,6 +121,31 @@ for _args, _want in [(["--help"], 0), (["-h"], 0), (["--unknown"], 2),
          _admission(_args), _want)
 
 
+def _selection(args):
+    # Stop at the real shard function before any plant can run; the read-only list
+    # path still uses the normal parser and selection. Locks live in an owned temp.
+    import tempfile
+    from pathlib import Path
+    fixture = [("001-alpha.sh", "Negative self-test (alpha)", ""),
+               ("002-beta.sh", "Negative self-test (beta)", "")]
+    with tempfile.TemporaryDirectory(prefix="tp-runner-cli-") as folder, \
+            patch.object(negatives, "scan", return_value=(fixture, [])), \
+            patch.object(negatives, "MIN_EXPECTED", 2), \
+            patch.object(negatives.tempfile, "gettempdir", return_value=folder):
+        out = StringIO()
+        with redirect_stdout(out), redirect_stderr(StringIO()):
+            code = negatives.main(["negatives.py", "--list", *args])
+        return code, [x.strip() for x in out.getvalue().splitlines()
+                      if x.strip() in ("alpha", "beta")]
+
+
+for _args in (["-k", "alpha"], ["-kalpha"], ["--shard", "1/2"],
+              ["--shard=1/2"], ["-kbeta", "-kalpha"],
+              ["--shard=2/2", "--shard=1/2"]):
+    case(f"CLI selection {_args!r} retains its parsed filter",
+         _selection(_args), (0, ["alpha"]))
+
+
 def _run() -> int:
     bad = 0
     for name, got, want in CASES:

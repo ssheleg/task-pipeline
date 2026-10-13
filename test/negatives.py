@@ -206,16 +206,13 @@ def main(argv):
     parser.add_argument("-k", metavar="PATTERN")
     parser.add_argument("--list", action="store_true")
     parser.add_argument("--shard", metavar="INDEX/TOTAL")
-    parser.parse_args(argv[1:])
-    args = argv[1:]
-    only = None
-    if "-k" in args:
-        only = args[args.index("-k") + 1].lower()
-    listing = "--list" in args
+    parsed = parser.parse_args(argv[1:])
+    only = parsed.k.lower() if parsed.k is not None else None
+    listing = parsed.list
     _shard = None
-    if "--shard" in args:
+    if parsed.shard is not None:
         try:
-            _shard = parse_shard((args[args.index("--shard") + 1:] or [""])[0])
+            _shard = parse_shard(parsed.shard)
         except ValueError as exc:
             print(f"FAIL: {exc}")
             return 2
