@@ -11,7 +11,7 @@ after the current 1.94.0 release closes.
 
 - `git blame` attributes `plugins/task-pipeline/skills/task-pipeline/SKILL.md:59–64`
   to `dbe4f43e` (2026-08-03): user-facing stage3 stops until super-ux is installed.
-- The later `a1d6bcce9175e8c79436e8f66ffb8f6b591f8791` explicitly fixes
+- The later [source commit a1d6bcc](https://github.com/ssheleg/task-pipeline/commit/a1d6bcce9175e8c79436e8f66ffb8f6b591f8791) explicitly fixes
   FIX-TP-02.01: gates check artifact quality, never package presence. It adds
   preferred, equivalent-provider and inline-fallback paths, plus a named NOT_RUN
   for any unavailable check. It changed SKILL.md and companion-skills.md but left
@@ -81,3 +81,7 @@ commands is under `plugins/task-pipeline`. Historical changelog/audit snapshots
 remain unchanged. The current Cursor UX line already says recommended; inspect
 its context for consistency but do not change it merely to equalize wording.
 Actual source-negative coverage must name all seven files/eight listed locations.
+
+The PR86 source commit is linked to its verified GitHub archive (API readback
+resolved the exact hash on 2026-10-13); it is not an ancestor of the squash-merged
+main. Only its accepted merge is represented as local-history evidence.
