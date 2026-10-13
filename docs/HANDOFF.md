@@ -25,8 +25,9 @@ orchestrating repository, not here). CHANGELOG `## Unreleased` lists the payload
   nodes by `waves.py sync-graph`, lossless lesson I/O under a non-UTF-8 locale, the
   memory marker keyed to the run's topic and start date). Not merged, not versioned: the
   version, its CHANGELOG heading and the tag come with the release iteration's release.
-- Open outside this repository: the `lessons/` directory under `~/.sshlg-skills` is
-  proposed to sshlg-skills, **pending its board row** — the docs say so and claim nothing.
+- The `lessons/` directory under `~/.sshlg-skills` is task-pipeline's by the family's
+  record: sshlg-skills B-181 and `state-json.md` → *Other members' files under
+  `~/.sshlg-skills/`* (ssheleg/sshlg-skills#209, merged).
 
 **Next task:** round 4 of verification on both PRs, at their new heads; then the
 orchestrator merges #114 into #112 and #112 into `main`, and the release step versions the

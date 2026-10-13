@@ -206,6 +206,20 @@ def load_plan(path: pathlib.Path) -> list[dict]:
     if not isinstance(nodes, list) or not all(isinstance(n, dict) and isinstance(n.get("id"), str)
                                               for n in nodes):
         raise Fail(2, [f"{path}: a plan is an object whose `nodes` list {{id, wave, closes}}"])
+    # The declared values, checked rather than skipped: a risk of `r1`, `high` or null was
+    # silently ignored and the sync exited 0, leaving the node with no class to enforce.
+    errs = []
+    for n in nodes:
+        if "risk" in n and n["risk"] not in ("R1", "R2", "R3"):
+            errs.append(f"{path}: node {n['id']}: risk {n['risk']!r} is not R1, R2 or R3")
+        if "wave" in n and n["wave"] is not None and _wave(n) is None:
+            errs.append(f"{path}: node {n['id']}: wave {n['wave']!r} is not an integer from 1, or null")
+        if "closes" in n and not (isinstance(n["closes"], list) and all(isinstance(i, str) for i in n["closes"])):
+            errs.append(f"{path}: node {n['id']}: closes is not a list of item ids")
+        if "release" in n and n["release"] not in ("this", "program"):
+            errs.append(f"{path}: node {n['id']}: release {n['release']!r} is neither this nor program")
+    if errs:
+        raise Fail(2, errs)
     return nodes
 
 

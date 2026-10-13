@@ -24,10 +24,11 @@ entry is a pure function of its origins.
         lessons two or more projects hold: the `retro.publish` queue for learned.md
     lessons.py show L-<sha12>
         one entry, with its origins (pseudonymous project keys, commits, retro anchors)
-    lessons.py emit-observatory L-<sha12> [--root DIR]
-        `observatory_record`'s arguments for this project's origin, as JSON — the same
-        pseudonymous project key, never a `project:<slug>` id; the commit as `commit:` + 12
-        hex; memoryId and expectedRevision once recorded. The agent calls the tool
+    lessons.py emit-observatory L-<sha12> [--tool observatory_record|observatory_lesson] [--root DIR]
+        the store's arguments for this project's origin, as JSON: `observatory_lesson` where the
+        session lists it, else `observatory_record` (the default; memoryId and expectedRevision
+        once recorded). The same pseudonymous project key, never a `project:<slug>` id; the
+        commit as `commit:` + 12 hex. The agent calls the tool
     lessons.py record L-<sha12> --answer FILE|- [--ledger PATH] [--root DIR]
         keep the store's memory id beside this project's origin; a refusal becomes one ledger
         line (`event: lessons — store refused — <code>`) and the local entry stays
@@ -36,8 +37,9 @@ entry is a pure function of its origins.
 
 **Where the index lives.** `--index PATH`, else `$TASK_PIPELINE_LESSONS`, else
 `~/.sshlg-skills/lessons/index.jsonl` when `~/.sshlg-skills` already exists — the family's
-machine-state home, where `lessons/` is proposed as task-pipeline's (pending an sshlg-skills
-board row and its `state-json.md` entry) — and `~/.task-pipeline/lessons/index.jsonl`
+machine-state home, which hosts `lessons/` as task-pipeline's (sshlg-skills board row B-181;
+its `docs/working-rules/state-json.md`, "Other members' files under ~/.sshlg-skills/",
+ssheleg/sshlg-skills#209) — and `~/.task-pipeline/lessons/index.jsonl`
 otherwise, so a standalone install never creates the family's directory. When the family's
 directory appears later, the first run moves the standalone index there once and says so. Directories this
 script creates are 0700 (an existing one keeps its mode), the file 0600, written by a unique
@@ -136,9 +138,10 @@ def index_path(given: str | None) -> pathlib.Path:
     env = os.environ.get(ENV_INDEX)
     if env:
         return pathlib.Path(env).expanduser()
-    # The family's machine-state directory when it exists (`lessons/` there is proposed to the
-    # family as task-pipeline's — pending an sshlg-skills board row and its state-json.md
-    # entry); otherwise task-pipeline's own, so a standalone install never creates the family's.
+    # The family's machine-state directory when it exists — it hosts `lessons/` as
+    # task-pipeline's (sshlg-skills B-181; state-json.md "Other members' files under
+    # ~/.sshlg-skills/", #209) — otherwise task-pipeline's own, so a standalone install never
+    # creates the family's directory.
     family = pathlib.Path.home() / ".sshlg-skills"
     if family.is_dir():
         return family / "lessons" / "index.jsonl"
@@ -150,27 +153,53 @@ def LEGACY_INDEX() -> pathlib.Path:
 
 
 def migrate_default(idx: pathlib.Path) -> None:
-    """Move the standalone index into the family's directory ONCE, and say so.
+    """Bring the standalone index into the family's directory ONCE, and say so.
 
     The default changes when `~/.sshlg-skills` appears. Without this, the next run read a new,
-    empty index while every lesson so far sat in the old one — a silent switch (verification
-    round 3). The old file is kept beside, renamed `.migrated`, so no run reads two indexes."""
+    empty index while every lesson so far sat in the old one — a silent switch. When both files
+    exist, both are read: the old one's entries are merged into the new one. Either way the old
+    file is then kept beside as `.migrated`, so the notice is printed once and no later run
+    reads two indexes.
+
+    It never refuses on the OLD file: a corrupt one is kept as `.corrupt-<date>` and skipped,
+    an unreadable one is left where it is and named — neither blocks the command, and least of
+    all the `rebuild` that would repair the new one."""
     legacy = LEGACY_INDEX()
-    if idx == legacy or idx.exists() or not legacy.is_file():
+    if idx == legacy or not legacy.is_file():
+        return
+    both = idx.exists()
+    try:
+        old = load(legacy)
+    except IndexCorrupt:
+        dest = set_aside(legacy)
+        print(f"lessons: the old index {legacy} is corrupt — kept as {dest.name}, not moved; "
+              "`lessons.py rebuild --roots <dir>` re-derives the lessons from the retros",
+              file=sys.stderr)
+        return
+    except IndexUnreadable as exc:
+        print(f"lessons: {exc} — the old index was not moved", file=sys.stderr)
         return
     with locked(idx):
-        if idx.exists():
-            return
-        entries = load(legacy)
+        entries = load(idx) if idx.exists() else {}
+        for e in old.values():
+            for o in e["origins"]:
+                le = dict(o["lesson"], schema="lesson/1", classKey=e["classKey"],
+                          origin={"project": o["project"], "commit": o["commit"], "retro": o["retro"]})
+                merge(entries, [le])
+                if o.get("memory"):
+                    cur = entries[e["classKey"]]
+                    origins = [dict(x, memory=o["memory"]) if _origin_key(x) == _origin_key(o)
+                               and not x.get("memory") else x for x in cur["origins"]]
+                    entries[e["classKey"]] = derive(origins)
         save(idx, entries)
         try:
             os.replace(legacy, legacy.with_name(legacy.name + ".migrated"))
         except OSError as exc:
-            raise Refused(f"moved the local index to {idx} but could not rename {legacy} "
+            raise Refused(f"merged the old index into {idx} but could not rename {legacy} "
                           f"({type(exc).__name__}) — remove it by hand so one index is read")
-    print(f"lessons: moved the local index from {legacy} to {idx} ({len(entries)} lessons) — "
-          "~/.sshlg-skills now exists; the old file is kept as index.jsonl.migrated",
-          file=sys.stderr)
+    what = ("both index files existed — read both: merged" if both else "moved the local index from")
+    print(f"lessons: {what} {legacy} into {idx} ({len(old)} lessons) — ~/.sshlg-skills now "
+          "exists; the old file is kept as index.jsonl.migrated", file=sys.stderr)
 
 
 def _git(root: pathlib.Path, *args: str) -> str | None:
@@ -428,24 +457,71 @@ def merge(entries: dict[str, dict], lessons: list[dict]) -> int:
     return changed
 
 
+class IndexUnreadable(Refused):
+    """The file is there and cannot be READ (permissions, I/O). Its contents may be perfectly
+    good — memory ids included — so nothing ever replaces it: refuse, name it, write nothing."""
+
+
+class IndexCorrupt(Refused):
+    """The file was read and does not parse as lesson-index/1. Only this one may be replaced,
+    and only after it is kept beside as `.corrupt-<date>`."""
+
+
+# Lines in a NEWER format, per index path: skipped on read, counted, and written back on save,
+# so an older script never destroys what a newer one wrote.
+_FUTURE: dict[str, list[str]] = {}
+
+
 def load(path: pathlib.Path) -> dict[str, dict]:
     if not path.exists():
         return {}
-    out = {}
     try:
-        for i, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
-            if line.strip():
-                e = json.loads(line)
-                out[e["classKey"]] = e
-    except (OSError, ValueError, KeyError, TypeError) as exc:
-        raise Refused(f"the index {path} cannot be read ({type(exc).__name__}) — "
-                      "`lessons.py rebuild` re-derives it from the retros")
+        text = path.read_text(encoding="utf-8")
+    except (OSError, UnicodeDecodeError) as exc:
+        if isinstance(exc, UnicodeDecodeError):
+            raise IndexCorrupt(f"the index {path} is not UTF-8 text — `lessons.py rebuild` "
+                               "keeps it as .corrupt-<date> and re-derives it")
+        raise IndexUnreadable(f"the index {path} cannot be read ({type(exc).__name__}) — fix "
+                              "its permissions; nothing was written")
+    out, future = {}, []
+    for i, line in enumerate(text.splitlines(), 1):
+        if not line.strip():
+            continue
+        try:
+            e = json.loads(line)
+        except ValueError:
+            raise IndexCorrupt(f"the index {path} does not parse (line {i}) — `lessons.py "
+                               "rebuild` keeps it as .corrupt-<date> and re-derives it")
+        if isinstance(e, dict) and e.get("schema", "lesson-index/1") != "lesson-index/1":
+            future.append(line)
+            continue
+        if not isinstance(e, dict) or not isinstance(e.get("classKey"), str):
+            raise IndexCorrupt(f"the index {path} has a line that is not a lesson (line {i}) — "
+                               "`lessons.py rebuild` keeps it as .corrupt-<date> and re-derives it")
+        out[e["classKey"]] = e
+    _FUTURE[str(path)] = future
+    if future:
+        print(f"lessons: {len(future)} line{'' if len(future) == 1 else 's'} in a newer format "
+              f"skipped in {path} (kept on write; a newer lessons.py reads them)", file=sys.stderr)
     return out
 
 
-def dump(entries: dict[str, dict]) -> str:
-    return "".join(json.dumps(entries[k], ensure_ascii=False, sort_keys=True) + "\n"
-                   for k in sorted(entries))
+def set_aside(path: pathlib.Path) -> pathlib.Path:
+    """Rename a corrupt index to `<name>.corrupt-<UTC date>[-N]` beside it, and return that."""
+    stamp = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    dest = path.with_name(f"{path.name}.corrupt-{stamp}")
+    n = 1
+    while dest.exists():
+        n += 1
+        dest = path.with_name(f"{path.name}.corrupt-{stamp}-{n}")
+    os.replace(path, dest)
+    return dest
+
+
+def dump(entries: dict[str, dict], future: list[str] | None = None) -> str:
+    return ("".join(json.dumps(entries[k], ensure_ascii=False, sort_keys=True) + "\n"
+                    for k in sorted(entries))
+            + "".join(line + "\n" for line in (future or [])))
 
 
 class locked:
@@ -521,7 +597,7 @@ def save(path: pathlib.Path, entries: dict[str, dict]) -> None:
     try:
         fd, tmp = tempfile.mkstemp(dir=path.parent, prefix=".index-", suffix=".tmp")
         with os.fdopen(fd, "w", encoding="utf-8") as f:
-            f.write(dump(entries))
+            f.write(dump(entries, _FUTURE.get(str(path))))
         os.chmod(tmp, 0o600)
         os.replace(tmp, path)
     except BaseException as exc:
@@ -698,12 +774,16 @@ def cmd_rebuild(a, idx: pathlib.Path) -> int:
     with locked(idx):
         # The previous index only lends its memory ids. A corrupt one is the case this verb
         # exists for (`load` names rebuild as the remedy), so it is replaced, not refused.
+        # The previous index lends its memory ids. Unreadable (permissions) means its contents
+        # may be good: refuse and write nothing. Unparseable is the case this verb exists for:
+        # keep it as `.corrupt-<date>`, then rebuild without its memory ids.
         try:
             old = load(idx) if idx.exists() else {}
-        except Refused:
+        except IndexCorrupt:
+            dest = set_aside(idx)
             old = {}
-            problems.append(f"the previous index {idx} could not be read — rebuilt without its "
-                            "recorded memory ids")
+            problems.append(f"the previous index could not be parsed — kept as {dest.name}; "
+                            "rebuilt without its recorded memory ids")
         memory = {(o["project"], o["retro"]): o["memory"]
                   for e in old.values() for o in e["origins"] if o.get("memory")}
         entries: dict[str, dict] = {}
@@ -747,15 +827,25 @@ def _this_origin(e: dict, root: pathlib.Path) -> dict:
 def cmd_emit(a, idx: pathlib.Path) -> int:
     """The shared store's arguments for this project's origin.
 
-    Only `observatory_record` until the engine ships its lesson kind (an `observatory_lesson`
-    tool and a kind filter on search): a note whose statement starts `lesson:`, so a later
-    migration finds every one. The project travels as the same pseudonymous key the index
-    holds, never a `project:<slug>` id. The commit travels as `commit:` + 12 hex: the store's
-    redactor removes a 40-hex SHA as a credential shape and keeps exactly that short form.
-    A lesson already recorded from this origin is revised, not minted again."""
+    Two routes, chosen by the agent from the tools its session lists — this script cannot see
+    them offline, so the choice is `--tool`, defaulting to the one every engine has:
+    - `observatory_lesson` where the session lists it (the engine's lesson kind): exactly
+      `owner, classKey, title, trigger, check, nouns, origin{projectId, commit}`, the engine's
+      published inputSchema; idempotent on (classKey, projectId) in the store itself.
+    - `observatory_record` otherwise: a note whose statement starts `lesson:`, so a later
+      migration finds every one; a recorded lesson is revised (memoryId, expectedRevision).
+    Either way the project travels as the same pseudonymous key the index holds, never a
+    `project:<slug>` id, and the commit as `commit:` + 12 hex — the store's redactor removes a
+    40-hex SHA as a credential shape and keeps exactly that short form."""
     e = _resolve(load(idx), a.id)
     o = _this_origin(e, repo_root(pathlib.Path(a.root or ".")))
     le = o["lesson"]
+    if a.tool == "observatory_lesson":
+        args = {"owner": OWNER, "classKey": le["classKey"], "title": le["title"],
+                "trigger": le["trigger"], "check": le["check"], "nouns": le["nouns"],
+                "origin": {"projectId": o["project"], "commit": "commit:" + o["commit"][:12]}}
+        print(json.dumps({"tool": "observatory_lesson", "arguments": args}, ensure_ascii=True))
+        return 0
     args = {"owner": OWNER, "statement": f"lesson: {le['classKey']} — {le['title']}",
             "why": f"{le['trigger']}; check: {le['check']}",
             "evidence": [{"kind": "commit", "ref": "commit:" + o["commit"][:12]},
@@ -871,6 +961,9 @@ def main(argv: list[str]) -> int:
     sh.add_argument("id")
     em = sub.add_parser("emit-observatory", parents=[common], help="the shared store's arguments")
     em.add_argument("id")
+    em.add_argument("--tool", default="observatory_record",
+                    choices=["observatory_record", "observatory_lesson"],
+                    help="observatory_lesson where the session lists it, else observatory_record")
     em.add_argument("--root")
     rc = sub.add_parser("record", parents=[common], help="keep the store's answer")
     rc.add_argument("id")

@@ -83,40 +83,26 @@ def git(repo, *args):
     return r.stdout.strip()
 
 
-# The store's own redactor. The engine's `memory_redact.Redactor` when a checkout of the
-# public engine is on this machine; otherwise a FIXTURE COPY of its two rules that matter
-# here — the KEEP pattern (`commit:` + 7-12 hex survives) and the shape that redacts a long
-# hex run — named as a copy so nobody mistakes it for the engine.
-ENGINE = pathlib.Path(os.environ.get("OBSERVATORY_ENGINE_DIR",
-                                     pathlib.Path.home() / "DATA/.worktrees/engine-audit/observatory/engine"))
-try:
-    sys.path.insert(0, str(ENGINE))
-    import memory_redact as _mr  # noqa: E402
-    REDACTOR = f"engine memory_redact at {ENGINE.name}"
+# The store's own redactor: the public engine's `memory_redact.Redactor`, imported from the
+# checkout `OBSERVATORY_ENGINE_DIR` names (its `observatory/engine` directory). No default: a
+# path on one machine has no place in a public test. Unset or unimportable, the redactor case
+# is SKIPPED and says why; the shape cases around it still run.
+ENGINE_DIR = os.environ.get("OBSERVATORY_ENGINE_DIR")
+REDACTOR = None
+redact = None
+if ENGINE_DIR:
+    try:
+        sys.path.insert(0, ENGINE_DIR)
+        import memory_redact as _mr  # noqa: E402
+        REDACTOR = f"engine memory_redact from $OBSERVATORY_ENGINE_DIR"
 
-    def redact(value):
-        return _mr.Redactor(known_loader=lambda: {}).scrub(value)[0]
-except Exception:  # noqa: BLE001 — absent or unimportable: the fixture copy below
-    import re as _re
-    REDACTOR = "fixture copy of the engine's KEEP pattern"
-    _KEEP = _re.compile(r"session:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
-                        r"|commit:[0-9a-f]{7,12}\b")
-    _HEX = _re.compile(r"\b[0-9a-f]{32,}\b")
-
-    def redact(value):
-        def text(s):
-            kept = []
-            held = _KEEP.sub(lambda m: (kept.append(m.group(0)), f"\x00{len(kept) - 1}\x00")[1], s)
-            return _re.sub("\x00(\\d+)\x00", lambda m: kept[int(m.group(1))], _HEX.sub("[redacted]", held))
-        def walk(v):
-            if isinstance(v, str):
-                return text(v)
-            if isinstance(v, list):
-                return [walk(x) for x in v]
-            if isinstance(v, dict):
-                return {k: walk(x) for k, x in v.items()}
-            return v
-        return walk(value)
+        def redact(value):
+            return _mr.Redactor(known_loader=lambda: {}).scrub(value)[0]
+    except Exception as exc:  # noqa: BLE001 — named in the skip line below
+        REDACTOR = None
+        SKIP_WHY = f"OBSERVATORY_ENGINE_DIR is set but memory_redact did not import ({type(exc).__name__})"
+else:
+    SKIP_WHY = "OBSERVATORY_ENGINE_DIR is unset — the engine's redactor is not on this machine's path"
 
 
 ENTRY = """### 2026-10-0{n} · `{topic}` · gate 6 reopened twice
@@ -263,17 +249,43 @@ def main():
         "lesson: absence-needs-its-own-check — "), "the bridge write is observatory_record with a `lesson:` statement")
     ok({"kind": "commit", "ref": "commit:" + sha_a[:12]} in args["arguments"]["evidence"],
        "the evidence commit travels as commit:<12 hex>, the form the store keeps")
-    survived = redact(args["arguments"])
-    ok(json.dumps(survived) == json.dumps(args["arguments"]),
-       f"the store's redactor ({REDACTOR}) changes nothing in the emitted arguments: the commit survives")
-    full = redact({"evidence": [{"kind": "commit", "sha": sha_a}]})
-    ok(sha_a not in json.dumps(full), "a full 40-hex SHA would not survive the redactor — the reason for the short form")
+    if redact is not None:
+        survived = redact(args["arguments"])
+        ok(json.dumps(survived) == json.dumps(args["arguments"]),
+           f"the store's redactor ({REDACTOR}) changes nothing in the emitted arguments: the commit survives")
+        full = redact({"evidence": [{"kind": "commit", "sha": sha_a}]})
+        ok(sha_a not in json.dumps(full),
+           "a full 40-hex SHA would not survive the redactor — the reason for the short form")
+    else:
+        print(f"skipped: the engine-redactor case — {SKIP_WHY}")
     ok(args["arguments"]["owner"] == "agent:task-pipeline", "owner is named, never operator")
     key_a = "p-" + git(a, "rev-list", "--max-parents=0", "HEAD").split()[0][:12]
     ok("projectId" not in args["arguments"] and any(e.get("project") == key_a for e in args["arguments"]["evidence"]),
        "the store gets the pseudonymous key, never a project:<slug> id")
-    rc, _, _ = run("emit-observatory", lid, "--tool", "observatory_lesson", cwd=a, index=idx)
-    ok(rc == 2, "observatory_lesson is not offered until the engine ships the lesson kind")
+    # observatory_lesson's arguments, pinned to the engine's published inputSchema
+    # (project-observatory-dashboard #251: `observatory_lesson` with a LessonOrigin model,
+    # extra fields forbidden). The engine's own fixture is pinned to this output in turn.
+    rc, out, err = run("emit-observatory", lid, "--tool", "observatory_lesson", cwd=a, index=idx)
+    ok(rc == 0, f"--tool observatory_lesson ({rc} {err!r})")
+    lo = json.loads(out)
+    la = lo["arguments"]
+    ok(lo["tool"] == "observatory_lesson"
+       and set(la) == {"owner", "classKey", "title", "trigger", "check", "nouns", "origin"}
+       and set(la["origin"]) == {"projectId", "commit"},
+       f"observatory_lesson carries exactly owner, classKey, title, trigger, check, nouns, origin ({sorted(la)})")
+    import re as _re3
+    ok(_re3.fullmatch(r"p-[0-9a-f]{12}", la["origin"]["projectId"])
+       and la["origin"]["projectId"] == key_a
+       and la["origin"]["commit"] == "commit:" + sha_a[:12]
+       and _re3.fullmatch(r"(?:commit:)?[0-9a-f]{7,40}", la["origin"]["commit"])
+       and _re3.fullmatch(r"[a-z0-9]+(-[a-z0-9]+)*", la["classKey"])
+       and 8 <= len(la["title"]) <= 160 and 3 <= len(la["trigger"]) <= 200 and 3 <= len(la["check"]) <= 200
+       and 3 <= len(la["nouns"]) <= 8 and la["owner"] == "agent:task-pipeline",
+       f"each field meets the engine's pattern and bounds ({la['origin']})")
+    rc, out, _ = run("emit-observatory", lid, cwd=a, index=idx)
+    ok(json.loads(out)["tool"] == "observatory_record", "without --tool the route is observatory_record")
+    rc, _, _ = run("emit-observatory", lid, "--tool", "observatory_learn", cwd=a, index=idx)
+    ok(rc == 2, "no other tool is offered: observatory_learn is not the retro write")
     rc, _, _ = run("emit-observatory", lid, "--project-id", "project:alpha", cwd=a, index=idx)
     ok(rc == 2, "--project-id is gone: a slug never reaches the store")
     ledger = a / ".task-pipeline" / "run.md"
@@ -440,6 +452,61 @@ def main():
                        env_extra={"PATH": f"{shim}:{os.environ['PATH']}", "TASK_PIPELINE_GIT_TIMEOUT": "1"})
     ok(rc == 0 and out.count("not read") >= 2 and "did not answer" in out,
        f"a repository git cannot answer for is listed under not read, and the rebuild finishes ({rc} {out!r})")
+
+    # --- cycle 4: a corrupt old index never blocks; an unreadable index is never replaced
+    h3 = tree("tp-lessons-home3-")
+    leg3 = h3 / ".task-pipeline" / "lessons" / "index.jsonl"
+    leg3.parent.mkdir(parents=True)
+    leg3.write_text("not json\n", encoding="utf-8")
+    (h3 / ".sshlg-skills").mkdir()
+    rc, out, err = run("rebuild", "--roots", str(roots), env_extra={"HOME": str(h3)})
+    kept = list(leg3.parent.glob("index.jsonl.corrupt-*"))
+    ok(rc == 0 and kept and not leg3.exists() and "corrupt" in err,
+       f"a corrupt old index is set aside as .corrupt-<date>, said once, and rebuild works ({rc} {err!r})")
+    rc, out, err = run("query", "gate", env_extra={"HOME": str(h3)})
+    ok(rc == 0 and "corrupt" not in err, f"query works after, and the notice is not repeated ({rc} {err!r})")
+
+    locked_idx = work / "rb-locked" / "index.jsonl"
+    run("add", "--retro", "docs/evidence/retro.md", "--all", cwd=a, index=locked_idx)
+    lk_lid = json.loads(locked_idx.read_text(encoding="utf-8").splitlines()[0])["id"]
+    run("record", lk_lid, "--answer", "-", cwd=a, index=locked_idx,
+        stdin=json.dumps({"memoryId": "mem:abc", "revision": 3}))
+    os.chmod(locked_idx, 0o000)
+    rc, out, err = run("rebuild", "--roots", str(roots), index=locked_idx)
+    os.chmod(locked_idx, 0o600)
+    ok(rc == 1 and str(locked_idx) in err and "mem:abc@3" in locked_idx.read_text(encoding="utf-8"),
+       f"an index that cannot be READ is a refusal naming it, and nothing is replaced ({rc} {err!r})")
+
+    corrupt_idx = work / "rb-corrupt" / "index.jsonl"
+    corrupt_idx.parent.mkdir(parents=True)
+    corrupt_idx.write_text("{broken\n", encoding="utf-8")
+    rc, out, err = run("rebuild", "--roots", str(roots), index=corrupt_idx)
+    ok(rc == 0 and list(corrupt_idx.parent.glob("index.jsonl.corrupt-*"))
+       and "absence-needs-its-own-check" in corrupt_idx.read_text(encoding="utf-8"),
+       f"an index that cannot be PARSED is kept as .corrupt-<date>, then replaced ({rc} {err!r})")
+
+    future_idx = work / "rb-future" / "index.jsonl"
+    run("add", "--json", "-", cwd=a, stdin=json.dumps(dict(single, classKey="present-day")), index=future_idx)
+    fline = json.dumps({"schema": "lesson-index/2", "classKey": "from-the-future", "x": 1})
+    with future_idx.open("a", encoding="utf-8") as fh:
+        fh.write(fline + "\n")
+    rc, out, err = run("add", "--json", "-", cwd=a, stdin=json.dumps(dict(single, classKey="added-later")),
+                       index=future_idx)
+    body = future_idx.read_text(encoding="utf-8")
+    ok(rc == 0 and "1 line" in err and "newer format" in err and fline in body and "added-later" in body,
+       f"a line in a newer format is skipped, counted, and kept on write ({rc} {err!r})")
+
+    h4 = tree("tp-lessons-home4-")
+    run("add", "--json", "-", cwd=a, stdin=json.dumps(dict(single, classKey="in-the-old-file")),
+        env_extra={"HOME": str(h4)})
+    (h4 / ".sshlg-skills").mkdir()
+    run("add", "--json", "-", cwd=a, stdin=json.dumps(dict(single, classKey="in-the-new-file")),
+        index=h4 / ".sshlg-skills" / "lessons" / "index.jsonl")
+    rc, out, err = run("candidates", "--min-projects", "1", env_extra={"HOME": str(h4)})
+    ok(rc == 0 and "in-the-old-file" in out and "in-the-new-file" in out and "both" in err,
+       f"when both index files exist both are read, and that is said ({rc} {out!r} {err!r})")
+    rc, out, err = run("candidates", "--min-projects", "1", env_extra={"HOME": str(h4)})
+    ok("both" not in err and "in-the-old-file" in out, "said once: the old file is merged and set aside")
 
     # --- lock contention: a held lock makes add refuse, nothing written
     try:

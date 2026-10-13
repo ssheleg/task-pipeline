@@ -659,9 +659,14 @@ def owed_shortfall(node):
     if len(passed) < owed:
         return "%d of %d owed passing rounds" % (len(passed), owed)
     if node.get("risk") == "R3" and "adversarial" not in passed:
-        return ("%d of %d owed passing rounds, but none of them adversarial — a FAILED "
-                "adversarial round does not count; run one that passes with `--kind adversarial`"
-                % (len(passed), owed))
+        cert = node.get("certification") or {}
+        kinds = list(cert.get("kinds") or [])
+        failed_adv = any(k == "adversarial" and not all(v == "pass" for v in (h or {}).values())
+                         for h, k in zip(cert.get("history") or [], kinds))
+        return ("%d of %d owed passing rounds, but none of them adversarial — %srun one that "
+                "passes with `--kind adversarial`"
+                % (len(passed), owed,
+                   "a FAILED adversarial round does not count; " if failed_adv else ""))
     return None
 
 

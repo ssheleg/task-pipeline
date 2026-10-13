@@ -62,7 +62,7 @@ conditional on the code, never merely sequenced after it.**
 | `add` | the id it allocated | `0` · `1` refused |
 | `park` | the id and the reason | `0` · `1` refused |
 | `wave` | wave mode's re-cut: the node, its old and new wave, and the reason, which enters the revision log. Refuses a move that would leave an earlier wave waiting on a later one, and a `done` node | `0` · `1` refused |
-| `certify` | the round — with a risk class, `round N of M owed` and whether the node is closable yet; `--kind adversarial` records an adversarial round — and on a failure every `breaks` finding with its fix and its check | `0` every owed tier passed — three, or four with `visual` on a flagship or product node · `1` a tier failed, a required one is missing, or a report is malformed |
+| `certify` | the round — with a risk class, `round N: k of M owed passing rounds — not closable yet` or `k of M owed passing rounds — closable`; `--kind adversarial` records an adversarial round — and on a failure every `breaks` finding with its fix and its check | `0` every owed tier passed — three, or four with `visual` on a flagship or product node · `1` a tier failed, a required one is missing, or a report is malformed |
 | `close` | the goal, the new frontier count, and what was not verified | `0` · `1` refused — including a node whose risk class owes rounds not yet passed — **or the verdict stops the run** |
 | `producer` | what produced this proof — actor, model, runtime, skill, config, commit, trace | `0` |
 | `doctrine` | how many of the bundle's reference files this run opened | `0` |

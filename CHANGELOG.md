@@ -17,7 +17,8 @@ inventory; a closed hotfix lane of five entries is the only exception.
 - **Lessons across projects.** lesson/1 (`templates/lesson.schema.json`) and
   `scripts/lessons.py`: a retro entry with a `**Lesson:**` line becomes a lesson in a local
   index every install has (`~/.sshlg-skills/lessons/index.jsonl` where the family's directory
-  exists — proposed to the family, pending an sshlg-skills board row;
+  exists — hosted there as task-pipeline's by the family: sshlg-skills B-181 and its
+  `state-json.md` section *Other members' files under `~/.sshlg-skills/`* (#209);
   `~/.task-pipeline/lessons/index.jsonl` otherwise, moved there once, aloud, if the family's
   directory appears later; `$TASK_PIPELINE_LESSONS` or `--index` move it). Source 7b
   of the harvest reads it by the task's nouns, then a shared store whose search filters by
@@ -39,8 +40,8 @@ inventory; a closed hotfix lane of five entries is the only exception.
 - **Rounds owed are enforced.** `graph.py close` refuses a node with a `risk` until its
   class's rounds have passed — passing rounds, read from the certification history; a
   failed round counts for nothing (R1 one, R2 two, R3 three, one of them a passing round
-  recorded with `certify --kind adversarial`); `certify` prints `N of M owed passing rounds
-  — not closable yet`. certification.md
+  recorded with `certify --kind adversarial`); `certify` prints `round N: k of M owed passing
+  rounds — not closable yet`. certification.md
   gains *Rounds owed by risk class*, and the churn doctrine exempts owed rounds from "a clean
   round ends the loop".
 - `waves.py sync-graph` judges a re-cut as a whole, so a chain moved up a wave is never
@@ -55,6 +56,14 @@ inventory; a closed hotfix lane of five entries is the only exception.
 - `lessons.py` reads stdin as UTF-8 and prints machine output as ASCII-escaped JSON, so a
   non-UTF-8 locale loses nothing a lesson carries; `rebuild` lists a repository it cannot
   read and goes on, and replaces a corrupt index instead of refusing it.
+- A lessons index that cannot be READ is a refusal that names it and writes nothing; only
+  one that cannot be PARSED is replaced, after it is kept as `.corrupt-<date>`. A corrupt
+  old standalone index never blocks a command. Lines in a newer index format are skipped,
+  counted and kept on write. When both index files exist, both are read and merged once.
+- `emit-observatory --tool observatory_lesson` emits the engine's lesson-kind arguments
+  (the lesson's own fields, plus `origin{projectId, commit}` — the engine's inputSchema); the agent
+  picks it where the session lists that tool, `observatory_record` otherwise.
+- `waves.py` refuses a plan whose risk, wave, closes or release value it does not know.
 
 ## v1.93.3 — the wave-2 evidence declares its dead commits; a retried handoff stays one offer
 

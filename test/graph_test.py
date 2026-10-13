@@ -2207,6 +2207,21 @@ def _():
     assert code == 0, "R3 adv-pass,pass,pass refused: " + out
 
 
+@case("owed rounds message: a FAILED adversarial round is named only when one actually failed")
+def _():
+    n = node("N-001")
+    n["risk"] = "R3"
+    _, _, d = certify(g([n]), three())
+    certify(None, three(), workdir=d)
+    code, out, _ = certify(None, three(), workdir=d)
+    assert "none of them adversarial" in out and "FAILED adversarial" not in out, out
+    failing = three()
+    failing[1].update(verdict="fail", confirms=[], findings=[breaks()])
+    certify(None, failing, "--kind", "adversarial", workdir=d)
+    code, out, _ = certify(None, three(), workdir=d)
+    assert "FAILED adversarial" in out, out
+
+
 # Before the verdict, and the position matters: `report()` is idempotent (the atexit
 # registration would find `_reported` already set), so a case defined BELOW this line
 # is created after the accounting and never appears in it. Found by planting a failing

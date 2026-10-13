@@ -244,8 +244,7 @@ as before, plus a **local index** of every project's lessons on this machine:
 one lesson seen twice, status `candidate`. The index path is a parameter — `--index`, then
 `$TASK_PIPELINE_LESSONS`, then `~/.sshlg-skills/lessons/index.jsonl` **when
 `~/.sshlg-skills` already exists** — the family's machine-state directory, where `lessons/`
-is proposed as task-pipeline's (**pending an sshlg-skills board row** and its
-`state-json.md` entry; not yet recorded there) — and otherwise
+is task-pipeline's by the family's own record — sshlg-skills board row B-181 and `docs/working-rules/state-json.md` → *Other members' files under `~/.sshlg-skills/`* (ssheleg/sshlg-skills#209, merged) — and otherwise
 `~/.task-pipeline/lessons/index.jsonl`, so a standalone install never creates the family's
 directory. When `~/.sshlg-skills` appears later, the first run moves the standalone index
 there once and says so. Nothing in this skill writes anywhere else under either.
@@ -303,17 +302,18 @@ stripped.
 1. `lessons.py add --retro <retro file> --entry <anchor>` — always. It validates lesson/1,
    checks that the commit resolves here, and merges; a repeat from the same project revises,
    never mints.
-2. If the session lists the store: `lessons.py emit-observatory <L-id>` prints
-   `{tool, arguments}` for `observatory_record` — a note whose statement starts `lesson:`, so
-   lessons accumulate today and a later migration finds them. It carries the pseudonymous
-   key, never a `project:<slug>` id, and the commit as **`commit:` + 12 hex**: the store's
-   redactor removes a 40-hex SHA as a credential shape and keeps exactly that short form. A
-   lesson already recorded from this origin is emitted with `memoryId` and
-   `expectedRevision`, so the store revises it instead of minting a second one. **The lesson
-   tool and the kind filter arrive with the engine's lesson kind** (an `observatory_lesson`
-   tool, `kinds` on search); until the session lists them this skill offers neither.
-   `observatory_learn` is not the retro write: it contrasts a failure record with its fix
-   inside one project, and a retro entry is neither.
+2. If the session lists the store: `lessons.py emit-observatory <L-id> [--tool …]` prints
+   `{tool, arguments}`. **The agent chooses the tool from the tools its session lists** (the
+   script cannot see them): `--tool observatory_lesson` where the session lists it — the
+   engine's lesson kind, whose arguments are exactly `owner, classKey, title, trigger,
+   check, nouns, origin{projectId, commit}` and which the store keeps once per (classKey,
+   project) — and otherwise the default, `observatory_record`: a note whose statement starts
+   `lesson:`, so lessons accumulate on any engine and a later migration finds them; a lesson
+   already recorded that way is emitted with `memoryId` and `expectedRevision`, so the store
+   revises it. Both carry the pseudonymous key, never a `project:<slug>` id, and the commit
+   as **`commit:` + 12 hex**: the store's redactor removes a 40-hex SHA as a credential shape
+   and keeps exactly that short form. `observatory_learn` is not the retro write: it
+   contrasts a failure record with its fix inside one project, and a retro entry is neither.
 3. The agent calls that tool, then `lessons.py record <L-id> --answer -` keeps the memory id
    beside the local entry. A refusal is one ledger line, `event: lessons — store refused —
    <code>`, and the local entry stays.
@@ -348,7 +348,7 @@ and the publish its release run performs.
 |---|---|
 | "This bug is tiny, fix it now" | Tiny fixes are what move a seam twice. It joins the inventory, or it is one of the hotfix lane's five entries |
 | "Wait for the whole wave, then verify" | A barrier idles every finished node. Each node is certified when it lands |
-| "R3 found nothing in round 2, skip the adversarial round" | Round 3 asks a different question: it hunts for a planted defect. A clean round 2 does not answer it |
+| "R3 found nothing in round 2, skip the adversarial round" | The adversarial round, in any position, asks a different question: it hunts for a planted defect. A clean blind round does not answer it |
 | "Ask the operator now, it is quick" | Each question is a human round. Queue it and take another node |
 | "The agent hit a rate limit, start it again" | Resume it with its context. Relaunching pays for the same reading twice |
 | "No Observatory here, so no learning loop" | The project retro and learned.md are the loop's first layer, and every install has them |

@@ -328,6 +328,14 @@ def main():
        and any(r.get("verb") == "risk" and "money path" in r.get("why", "") for r in gn["revisions"]),
        f"with --lower-why the lowering is written and its reason recorded ({rc} {err!r})")
 
+    # --- an unknown risk value is refused, not skipped with exit 0
+    for bad in ("r1", None, "high"):
+        (d / "plan-badrisk.json").write_text(json.dumps({"nodes": [{"id": "N-001", "wave": 1, "risk": bad}]}))
+        before_bad = rp.read_bytes()
+        rc, out, err = run("sync-graph", "--plan", str(d / "plan-badrisk.json"), "--graph", str(rp), "--why", "x")
+        ok(rc == 2 and "risk" in err and rp.read_bytes() == before_bad,
+           f"a plan risk of {bad!r} is refused (exit 2), nothing written ({rc} {err!r})")
+
     # --- templates and doctrine
     tpl = SKILL / "templates"
     for name in ("inventory.schema.json", "backlog-sources.schema.json", "canvas.md", "questions.md", "dossier.md"):

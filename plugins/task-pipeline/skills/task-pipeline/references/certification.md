@@ -229,8 +229,9 @@ In a release iteration a node carries `risk` (R1–R3, [`work-graph.md`](work-gr
 [`iteration.md`](iteration.md) → *Verification starts when a node lands*), and the class
 decides how many **passing** rounds the node owes before `close` accepts it: **R1 one, R2
 two, R3 three, of which one is adversarial.** A round is the three blind tiers (four on a
-flagship or product surface) plus one fix cycle. `graph.py certify` prints `round N of M
-owed passing rounds — not closable yet` until the count is met, and `graph.py close` refuses
+flagship or product surface) plus one fix cycle. `graph.py certify` prints `round N: k of M
+owed passing rounds — not closable yet` until the count is met (`k of M owed passing rounds —
+closable` once it is), and `graph.py close` refuses
 the verdict until then. **Only passing rounds count** — a round passes when every tier
 passes, read from `certification.history` — and, for R3, one of the passing rounds must be
 one recorded with `--kind adversarial`
