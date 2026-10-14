@@ -1,77 +1,66 @@
 ## Unreleased
 
-Guards: 439 → **455**; property checks 15 → **15**. There are 16 new negatives in
+Guards: 439 → **454**; property checks 15 → **15**. There are 15 new negatives in
 `lessons.py`. Each one plants a revert, and the suite must catch it:
 
 - the whole-scan refusal put back;
 - the carry-forward removed;
-- carry by class key instead of by origin;
 - status computed without carried origins;
 - prune on every run;
-- removal decided by a project-level read set;
 - git worktrees no longer discovered;
-- a recorded origin removed;
 - memory ids keyed by retro anchor;
 - one memory id left on two class keys;
 - problems attributed by path prefix;
 - `emit`/`record` ignoring the origin that holds the memory id;
 - memory ids compared together with their `@revision`;
-- a path trusted over the project checked out there;
-- a project counted twice after its key changed;
-- `record` putting one memory id on two class keys.
+- a stranger at the same path not recognised;
+- `record` putting one memory id on two class keys;
+- an origin removed on its own;
+- a memory id moved to another project's origin;
+- an origin carried as `checkout holds another project` counted.
 
-These are the fixes from verification rounds 6 to 10 of release iteration 1.
+These are the fixes from verification rounds 6 to 11 of release iteration 1.
 
-- **Identity in `lessons.py rebuild`** (rounds 8–10). The rule is: **implicit removal needs
-  positive evidence from the same checkout.**
-  - Each origin records its provenance, `checkouts`: the real paths of the checkouts it was
-    derived from, and `worktreeOf`, the main checkout of each git worktree among them. The
-    paths stay in the local index; they are never emitted, and `show` omits them.
-  - A path is not an identity (round 10). A checkout decides for an origin only while it holds
-    the origin's project; otherwise the origin is carried as `checkout holds another project`.
-  - A checkout whose project key changed (`fetch --unshallow`, a re-init) but that still holds
-    the entry supersedes its old-key origin. The memory id moves, the output prints
-    `moved: project key changed`, and no phantom second project appears. A shallow clone is a
-    problem owned by its checkout.
-  - A worktree that its main checkout, read completely, no longer lists was removed: it counts
-    as gone.
-  - Retro files are stamped when read and again under the lock. A file that changed in
-    between, such as an `add` landing mid-run, leaves its checkout incomplete, so that run never
-    removes the lesson.
-  - `record` refuses, with exit 1 and nothing written, a memory id that another class key holds
-    or a revision older than the one held.
-  - An index line whose fields have the wrong types is a corrupt line, never a traceback. Each
-    origin's lesson must pass lesson/1. Merged duplicate lines keep both provenances.
-  - Exit 1 means nothing could be read: every root missing or unreadable. A readable empty
-    root exits 0.
-  - Without `--prune-carried`, an origin is removed only when every checkout in its
-    provenance meets all three conditions. It was discovered and read completely, with no
-    problem owned by it. Its retro file at that path was read. That file no longer holds the
-    entry.
-  - Every other origin is carried, with an accurate reason. The reasons are
-    `checkout not read`, `retro file not read`, `no provenance`, `commit does not resolve`,
-    `retro cites a commit that does not resolve`, `lesson refused` and
-    `no checkout read holds it`. The last covers an origin whose memory id the run did not
-    re-attach.
-  - Other clones and worktrees decide nothing for an origin they never held. The round-8
-    "complete project" and file-path read-set logic is gone.
-  - Problems carry a structural owner, a checkout or none, and are never matched by path
-    prefix. A `git worktree list` that fails or exits non-zero is a problem owned by that
-    checkout.
+- **`lessons.py rebuild` never removes or moves anything on its own** (round 11, narrowed
+  under the loop guard).
+  - Every previous origin the run does not re-derive is carried with everything recorded on
+    it, its memory id included, and marked `carried: <reason>`.
+  - `--prune-carried`, optionally narrowed by `--prune-carried-reason <reason>`, is the only way
+    an origin leaves the index.
+  - Nothing supersedes and nothing moves: a memory id stays on the origin that holds it, and is
+    re-attached only to the same `(project, classKey)`.
+  - The reasons are `checkout not read`, `retro file not read`, `no checkout read holds it`
+    (the checkout read the file and the entry is gone), `commit does not resolve`,
+    `retro cites a commit that does not resolve`, `lesson refused`, `no provenance` and
+    `checkout holds another project`. The last one is kept but not counted in `seen`,
+    `projects` and `status`; the others count as temporary unavailabilities. So no phantom
+    project appears, and an unreadable root never demotes a lesson.
+  - A shallow clone is never a source: a problem owned by its checkout, with nothing derived
+    under its unstable key. `add`, `emit-observatory` and `record` refuse there, exit 1, and say
+    to deepen it.
+  - Known limit: a project whose root commit changes (re-init, unshallow) starts new store
+    records. The operator re-attaches by `record`-ing the old id on the new origin of the same
+    class key.
+  - `record` over a different id the origin already holds needs `--replace`. It also refuses an
+    id another class key holds and a revision older than the one held.
+  - Each origin records its provenance, `checkouts`, the real paths it was derived from. It
+    decides only the carried reason; it stays in the local index, is never emitted, and `show`
+    omits it. A path is not an identity.
   - Git worktrees of every checkout found are discovered, including those under
-    `.worktrees/` and `.claude/worktrees/`.
-  - Memory ids follow `(project, classKey)`, the store's identity, instead of the retro
-    anchor. They compare on the part before `@`, and the highest revision wins everywhere.
-    One id is never on two class keys; an index that already holds an id twice is repaired,
-    and the output says so.
-  - `emit-observatory` and `record` use the origin of the project that holds the memory id.
-  - An index line is valid only with every entry field and every lesson/1 field in each
-    origin; anything less is a corrupt line, reported without a traceback.
-  - A corrupt index is kept whole as `.corrupt-<date>`, and its good lines are salvaged into
-    the live index. A memory id that only a bad line held is named in the run output. Two
-    lines for one class key are merged, not resolved as last-one-wins.
-  - A checkout read in full counts as something read, so the run exits 0.
-  - The run refuses to write if a memory id would vanish other than by `--prune-carried`.
+    `.worktrees/` and `.claude/worktrees/`. Problems carry a structural owner and are printed by
+    name, never by absolute path or prefix match.
+  - Retro files are stamped when read and again under the lock. A file that changed in
+    between, such as an `add` landing mid-run, leaves its checkout not read for that run.
+  - Memory ids follow `(project, classKey)`, compare on the part before `@`, start at revision
+    1, and keep the highest revision everywhere. One id is never on two class keys, and the run
+    refuses to write if an id would vanish other than by `--prune-carried`.
+  - Index lines are re-derived from their origins on every read: `seen`, `projects`, `status`
+    and the rest are never trusted from disk, and duplicate origins and duplicate lines merge.
+    A line with wrong types, an origin lesson that fails lesson/1, a `carried` outside the
+    enum, or `mem:…@0` is a corrupt line. It is salvaged around and never causes a traceback.
+    A memory id that only a bad line held is named in the output.
+  - Exit 1 means nothing could be read: every root was missing or unreadable. A readable empty
+    root, or one holding only a shallow clone, exits 0.
 
 - **`lessons.py rebuild` never loses what it cannot re-derive.** Round 6's narrowed refusal
   dropped an origin and its memory id while a project's root was unreadable. It also still

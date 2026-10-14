@@ -6,7 +6,7 @@ python3 - <<'EOF'
 # Round 6: one dangling commit or unreadable directory must not refuse the whole scan.
 p = "/tmp/rebuild-partial-copy/plugins/task-pipeline/skills/task-pipeline/scripts/lessons.py"
 t = open(p, encoding="utf-8").read()
-needle = '    if problems and not seen_files and not run["complete"]:\n'
+needle = '    if problems and not seen_files and not run["complete"] and not shallow:\n'
 assert needle in t, "PLANT DID NOT LAND: anchor absent before edit"
 open(p, "w", encoding="utf-8").write(t.replace(needle, '    if problems or unresolved:\n', 1))
 assert needle not in open(p, encoding="utf-8").read(), "PLANT DID NOT LAND"

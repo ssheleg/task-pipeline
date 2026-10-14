@@ -1,13 +1,16 @@
-## Fix cycles 6–10 of the release iteration — #125, branch `iter1/M-5-N-1` (2026-10-14)
+## Fix cycles 6–11 of the release iteration — #125, branch `iter1/M-5-N-1` (2026-10-14)
 
-Rounds 6 to 10 failed on `lessons.py rebuild`. Cycle 7, under the loop guard, changed the
-design rather than the guard. Cycle 9, under the loop guard again, replaced the identity
-logic with one rule: implicit removal needs positive evidence from the same checkout. Each
-origin records its `checkouts`, and memory ids are keyed by `(project, classKey)`. Cycle 10
-made the checked-out project part of that evidence. A changed project key supersedes the
-old one instead of doubling it, and `record` refuses an id that another class holds. See
-`provenance_controls`, `index_shape_controls`, `round10_controls` and negatives 455–470. This
-branch merges `origin/main` (v1.95.0 with #128) without rewriting history. The fixes are recorded in the CHANGELOG under *Unreleased*. The branch is
+Rounds 6 to 11 failed on `lessons.py rebuild`. The loop guard fired three times. The third
+time, in cycle 11, narrowed the contract: **a rebuild never removes or moves anything on its
+own.**
+- Every origin not re-derived is carried with an accurate reason.
+- `--prune-carried`, optionally narrowed by `--prune-carried-reason`, is the only way out.
+- Origins carried as `checkout holds another project` are kept but not counted.
+- A shallow clone is never a source.
+
+The tests are `round11_controls` and the rewritten `round10_controls`, plus negatives 455–473
+(some numbers retired). This branch merges `origin/main` (v1.95.0, #128, #129) without
+rewriting history. The fixes are recorded in the CHANGELOG under *Unreleased*. The branch is
 pushed but not merged, and no version or publication is claimed.
 
 - **Rebuild:** `lessons.py rebuild` never loses what it cannot re-derive. Unread or
@@ -20,7 +23,7 @@ pushed but not merged, and no version or publication is claimed.
 - **New rules:** a parallel-work check before each cycle (`iteration.md` → *The cycle*), and
   background-dispatch command hygiene (`build.md` §4.1).
 
-Next task: run round 11 of verification on #125's head. The release order after v1.95.0 is
+Next task: run round 12 of verification on #125's head. The release order after v1.95.0 is
 the coordinator's.
 
 ## Operator stop: Claude continuation — FW07 child lifetime

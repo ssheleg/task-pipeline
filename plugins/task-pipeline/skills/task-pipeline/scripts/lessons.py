@@ -20,15 +20,15 @@ previous index knew: carried origins, their provenance and memory ids.
         classKey makes it a candidate, a repeat from the same project revises, never mints
     lessons.py query NOUN ... [--limit 5]
         at most --limit lines: `[lesson L-<sha12>] title — trigger — check (seen N, projects K)`
-    lessons.py rebuild --roots DIR ... [--depth 3] [--prune-carried]
+    lessons.py rebuild --roots DIR ... [--depth 3] [--prune-carried [--prune-carried-reason R]]
         re-derive the index from every retro found under the roots and their git worktrees.
-        Each origin records the checkouts it came from; it is removed only on positive
-        evidence from those same checkouts — read completely, holding the origin's project,
-        its retro file read, the entry gone. A checkout whose project key changed supersedes
-        its old-key origin. Every other origin is carried forward, marked `carried: <reason>`,
-        and named. Memory ids follow (project, classKey). Exit 1, touching nothing, only when
-        nothing could be read: every root missing or unreadable. A readable empty root exits 0
-        and writes the index. --prune-carried removes the carried origins on purpose
+        A rebuild never removes or moves anything on its own: every previous origin it does
+        not re-derive is carried forward, marked `carried: <reason>`, and named, keeping its
+        memory id. `--prune-carried` (optionally one reason) is the only way an origin leaves
+        the index. An origin whose checkout now holds another project is kept but not counted.
+        A shallow clone is never a source. Memory ids follow (project, classKey). Exit 1,
+        touching nothing, only when nothing could be read: every root missing or unreadable;
+        a readable empty root exits 0 and writes the index
     lessons.py candidates [--min-projects 2]
         lessons two or more projects hold: the `retro.publish` queue for learned.md
     lessons.py show L-<sha12>
@@ -38,9 +38,11 @@ previous index knew: carried origins, their provenance and memory ids.
         session lists it, else `observatory_record` (the default; memoryId and expectedRevision
         once recorded). The same pseudonymous project key, never a `project:<slug>` id; the
         commit as `commit:` + 12 hex. The agent calls the tool
-    lessons.py record L-<sha12> --answer FILE|- [--ledger PATH] [--root DIR]
+    lessons.py record L-<sha12> --answer FILE|- [--ledger PATH] [--root DIR] [--replace]
         keep the store's memory id beside this project's origin; a refusal becomes one ledger
-        line (`event: lessons — store refused — <code>`) and the local entry stays
+        line (`event: lessons — store refused — <code>`) and the local entry stays. Replacing a
+        different id this origin holds needs --replace. add, emit-observatory and record refuse
+        in a shallow clone: its project key is not stable until it is deepened
     lessons.py path
         the index this invocation would use
 
@@ -87,7 +89,8 @@ its project and is skipped, counted aloud.
 Exit codes: 0 done (an absent index on `query` is a state, printed; a `rebuild` that named
 what it skipped or carried); 1 a refusal — a lesson that fails lesson/1 or whose commit does
 not resolve on `add`, a held lock, an unknown id, a `rebuild` whose every root was missing or
-unreadable, a `record` naming an id another class holds or an older revision; 2 usage or an
+unreadable, a `record` naming an id another class holds, an older revision or (without
+--replace) a different id, and add/emit/record in a shallow clone; 2 usage or an
 unreadable input. Stdlib only (`references/portability.md`).
 """
 from __future__ import annotations
@@ -537,15 +540,22 @@ def _origin_key(o: dict) -> tuple:
 
 def derive(origins: list[dict]) -> dict:
     """One index entry as a pure function of its origins (carried ones and their memory ids
-    included) — so a complete rebuild with nothing carried equals the incremental index."""
+    included) — so a complete rebuild with nothing carried equals the incremental index.
+
+    `seen`, `projects` and `status` count re-derived origins and origins carried for a
+    temporary unavailability; an origin carried as `checkout holds another project` is kept but
+    NOT counted (round 11): a stranger at a path, or one checkout under a new root commit, never
+    makes a phantom second project. Applied at load too, so these fields are never trusted from
+    disk (round 11, #6)."""
     origins = sorted(origins, key=lambda o: (_origin_key(o), json.dumps(o, sort_keys=True)))
     first = origins[0]["lesson"]
     nouns = sorted({n for o in origins for n in o["lesson"]["nouns"]}, key=str.casefold)
-    projects = len({o["project"] for o in origins})
+    counted = [o for o in origins if o.get("carried") != CARRY_FOREIGN]
+    projects = len({o["project"] for o in counted})
     return {"schema": "lesson-index/1", "id": lesson_id(first["classKey"]),
             "classKey": first["classKey"], "title": first["title"], "trigger": first["trigger"],
             "check": first["check"], "grade": min(o["lesson"]["grade"] for o in origins),
-            "stages": first["stages"], "nouns": nouns, "seen": len(origins),
+            "stages": first["stages"], "nouns": nouns, "seen": len(counted),
             "projects": projects, "status": "candidate" if projects >= 2 else "local",
             "origins": origins}
 
@@ -605,7 +615,7 @@ _CORRUPT_ONLY: dict[str, tuple[str, set[str]]] = {}
 
 ENTRY_TEXT = ("id", "title", "trigger", "check")
 LESSON_KEYS = tuple(k for k in FIELDS if k not in ("schema", "origin"))
-MEM_RE = re.compile(r"mem:[^@\s\"\\]+@[0-9]+")
+MEM_RE = re.compile(r"mem:[^@\s\"\\]+@[1-9][0-9]*")  # revisions start at 1 (round 11, #5)
 
 
 def mem_base(memory: str) -> str:
@@ -621,13 +631,14 @@ def mem_rev(memory: str) -> int:
 
 
 def _entry_shape(e: object) -> bool:
-    """A lesson-index/1 line every verb can use (rounds 8–10, L1/L2/H2): the entry's own fields
+    """A lesson-index/1 line every verb can use (rounds 8–11, L1/L2/H2): the entry's own fields
     with their types — class key, id, title, trigger, check, nouns (strings), seen, projects —
     and a non-empty list of origins, each with its project, retro, commit and a lesson that
     lesson/1 itself accepts (`validate`, with that origin), of the entry's class. Optional
-    fields keep their types: memory `mem:<id>@<rev>`, checkouts non-empty strings, worktreeOf
-    string to string, carried a string. Anything less is a corrupt line — set aside, its good
-    neighbours salvaged — never a TypeError in the middle of a verb."""
+    fields keep their types: memory `mem:<id>@<rev>` with rev from 1, checkouts non-empty
+    strings, carried one of CARRY_REASONS. Anything less is a corrupt line — set aside, its good
+    neighbours salvaged — never a TypeError in the middle of a verb. Derived fields (seen,
+    projects, status, id…) are recomputed by `_put` anyway."""
     if not isinstance(e, dict) or not isinstance(e.get("classKey"), str):
         return False
     if not all(isinstance(e.get(k), str) for k in ENTRY_TEXT):
@@ -653,34 +664,30 @@ def _entry_shape(e: object) -> bool:
         if "checkouts" in o and not (isinstance(o["checkouts"], list)
                                      and all(isinstance(c, str) and c for c in o["checkouts"])):
             return False
-        if "worktreeOf" in o and not (isinstance(o["worktreeOf"], dict) and all(
-                isinstance(k, str) and isinstance(v, str) and k and v for k, v in o["worktreeOf"].items())):
-            return False
-        if "carried" in o and not isinstance(o["carried"], str):
+        if "carried" in o and o["carried"] not in CARRY_REASONS:
             return False
     return True
 
 
 def _put(out: dict[str, dict], e: dict, notes: list[str] | None) -> None:
-    """Two lines for one class key (a hand-concatenated index) merge their origins — one origin
-    per (project, retro), the one with the higher memory revision winning, its provenance the
-    union of both copies' (round 10, G5) — never last-one-wins (round 9, L4/D3). Said aloud."""
+    """Every line read is normalised: one origin per (project, retro) — the one with the higher
+    memory revision winning, its provenance the union of both copies' (round 10, G5) — and the
+    entry re-derived from its origins, so `seen`, `projects`, `status` and the rest are never
+    trusted from disk (round 11, #6). Two lines for one class key (a hand-concatenated index)
+    merge their origins, never last-one-wins (round 9, L4/D3), and that is said aloud."""
     ck = e["classKey"]
-    if ck not in out:
-        out[ck] = e
-        return
+    twice = ck in out
     by_key: dict[tuple, dict] = {}
-    for o in out[ck]["origins"] + e["origins"]:
+    for o in (out[ck]["origins"] if twice else []) + e["origins"]:
         k = _origin_key(o)
         if k in by_key:
             keep, other = ((o, by_key[k]) if mem_rev(o.get("memory") or "")
                            > mem_rev(by_key[k].get("memory") or "") else (by_key[k], o))
             prov = sorted(set(keep.get("checkouts") or []) | set(other.get("checkouts") or []))
-            parents = dict(other.get("worktreeOf") or {}, **(keep.get("worktreeOf") or {}))
-            o = dict(keep, **({"checkouts": prov} if prov else {}), **({"worktreeOf": parents} if parents else {}))
+            o = dict(keep, **({"checkouts": prov} if prov else {}))
         by_key[k] = o
     out[ck] = derive(list(by_key.values()))
-    if notes is not None:
+    if twice and notes is not None:
         notes.append(f"two lines for {ck} merged — {len(by_key)} origin"
                      f"{'' if len(by_key) == 1 else 's'} kept, none dropped")
 
@@ -859,8 +866,18 @@ def _resolve(entries: dict[str, dict], lid: str) -> dict:
 # ---------------------------------------------------------------------------- verbs
 
 
+def refuse_shallow(root: pathlib.Path) -> None:
+    """A shallow clone's project key — its root commit — moves whenever its boundary moves, so
+    add, emit and record refuse there (round 11): nothing written, the store never sees a key
+    that will not last."""
+    if _git(root, "rev-parse", "--is-shallow-repository") == "true":
+        raise Refused(f"{root.name} is a shallow clone: its project key changes when it is "
+                      "deepened — deepen it first (git fetch --unshallow); nothing was written")
+
+
 def cmd_add(a, idx: pathlib.Path) -> int:
     root = repo_root(pathlib.Path(a.root or "."))
+    refuse_shallow(root)
     project = project_key(root)
     private, problems = 0, []
     if a.json is not None:
@@ -989,7 +1006,8 @@ def find_retros(roots: list[str], depth: int) -> tuple[list[tuple[pathlib.Path, 
     repos: dict[pathlib.Path, bool] = {}
 
     def unread(exc):
-        problems.append((None, f"{exc.filename}: cannot discover ({type(exc).__name__})"))
+        problems.append((None, f"{pathlib.Path(exc.filename or '?').name}: cannot discover "
+                               f"({type(exc).__name__})"))
 
     def visit(here: pathlib.Path) -> None:
         try:
@@ -1016,7 +1034,7 @@ def find_retros(roots: list[str], depth: int) -> tuple[list[tuple[pathlib.Path, 
                 found.append((here, f))
             repos[here] = True
         except (OSError, Refused) as exc:
-            problems.append((here, f"{here}: {exc}"))
+            problems.append((here, f"{here.name}: {exc}"))
 
     for r in roots:
         base = pathlib.Path(r).expanduser()
@@ -1056,34 +1074,18 @@ def _worktrees(repo: pathlib.Path, problems: list[Problem]) -> list[pathlib.Path
     else:
         why = "git exited non-zero"
     if listing is None:
-        problems.append((repo, f"{repo}: worktrees cannot be listed ({why})"))
+        problems.append((repo, f"{repo.name}: worktrees cannot be listed ({why})"))
         return []
-    out, main = [], None
-    for n, block in enumerate(listing.split("\n\n")):
+    out = []
+    for block in listing.split("\n\n"):
         lines = block.splitlines()
         head = next((ln[len("worktree "):] for ln in lines if ln.startswith("worktree ")), None)
-        if head is None:
-            continue
-        if n == 0 and "bare" not in lines:
-            main = checkout_id(pathlib.Path(head))  # git lists the main worktree first
-        if any(ln == "bare" or ln.startswith("prunable") for ln in lines):
+        if head is None or any(ln == "bare" or ln.startswith("prunable") for ln in lines):
             continue
         path = pathlib.Path(head)
         if path.is_dir():
             out.append(path)
-    # Parentage (round 10, F2): which worktrees the main checkout lists right now. A worktree
-    # it no longer lists was removed, and an origin's provenance may then count it gone.
-    if main is not None:
-        _TREES[main] = {checkout_id(p) for p in out}
-        for p in out:
-            if checkout_id(p) != main:
-                _PARENT[checkout_id(p)] = main
     return out
-
-
-# Per run: main checkout → the worktrees it lists (listing read), and worktree → its main.
-_TREES: dict[str, set[str]] = {}
-_PARENT: dict[str, str] = {}
 
 
 def _artifact_root(repo: pathlib.Path) -> pathlib.Path:
@@ -1126,48 +1128,46 @@ CARRY_FOREIGN = "checkout holds another project"
 CARRY_UNRESOLVED = "commit does not resolve"
 CARRY_CITES_UNRESOLVED = "retro cites a commit that does not resolve"
 CARRY_REFUSED = "lesson refused"
-CARRY_RECORDED = "no checkout read holds it"
+CARRY_GONE = "no checkout read holds it"
+CARRY_SOURCE = "source not read"  # the round-7 label, still accepted in an index line
+CARRY_REASONS = (CARRY_CHECKOUT, CARRY_FILE, CARRY_LEGACY, CARRY_FOREIGN, CARRY_UNRESOLVED,
+                 CARRY_CITES_UNRESOLVED, CARRY_REFUSED, CARRY_GONE, CARRY_SOURCE)
 
 
-def _gone_from(c: str, ck: str, o: dict, run: dict) -> bool:
-    """Positive evidence, from checkout `c` itself, that it no longer holds origin `o` of class
-    `ck` (round 9): `c` was discovered and read completely with no problem owned by it, it holds
-    the origin's PROJECT (round 10, F1 — a path is not an identity), its retro file at the
-    origin's path was read, and that file holds no such entry. Or (round 10, F2) `c` was a
-    worktree whose main checkout read completely and no longer lists it: it was removed."""
-    if c not in run["project"]:
-        main = (o.get("worktreeOf") or {}).get(c)
-        return bool(main) and main in run["complete"] and main in run["trees"] and c not in run["trees"][main]
-    rel = o["retro"].split("#", 1)[0]
-    if (c not in run["complete"] or run["project"][c] != o["project"]
-            or rel not in run["files"].get(c, ())):
-        return False
-    return (ck, o["retro"]) not in run["held"].get(c, ()) and o["retro"] not in run["refused"].get(c, ())
+def _carry_reason(ck: str, o: dict, run: dict) -> str:
+    """Why a previous origin this run did not re-derive is carried — every one is (round 11):
+    a rebuild never removes or moves anything on its own. The reason is accurate and decides
+    one thing only: an origin whose every checkout now holds ANOTHER project is not counted in
+    `seen`/`projects`/`status` (`derive`); every other reason is a temporary unavailability.
 
-
-def _moved_in(c: str, ck: str, o: dict, run: dict) -> str | None:
-    """The new project key when checkout `c` now holds another project key AND the same
-    (classKey, retro) — the same checkout after `fetch --unshallow` or a re-init, not a stranger
-    (round 10, J1/J2). The old-key origin is then superseded by the one `c` derives."""
-    p = run["project"].get(c)
-    if (p is None or p == o["project"] or c not in run["complete"]
-            or (ck, o["retro"]) not in run["held"].get(c, ())):
-        return None
-    return p
-
-
-def _carry_reason(ck: str, o: dict, still: list[str], run: dict) -> str:
-    """The accurate reason an origin is carried, given the checkouts that did not show it gone."""
+    Per checkout in the origin's provenance: not discovered, shallow, or owning a problem →
+    `checkout not read`; holding another project → `checkout holds another project`; the
+    entry refused there → `lesson refused`; its retro file not read → `retro file not read`;
+    read, same project, entry absent → `no checkout read holds it`. The most available
+    explanation wins; `checkout holds another project` only when every checkout says so."""
     k = _origin_key(o)
     if k in run["unresolved"]:
         return CARRY_UNRESOLVED if run["unresolved"][k] == o["commit"] else CARRY_CITES_UNRESOLVED
-    if any(o["retro"] in run["refused"].get(c, ()) for c in still):
-        return CARRY_REFUSED
-    if any(c in run["complete"] and run["project"].get(c) not in (None, o["project"]) for c in still):
-        return CARRY_FOREIGN
-    if any(c not in run["complete"] for c in still):
-        return CARRY_CHECKOUT
-    return CARRY_FILE
+    prov = o.get("checkouts") or []
+    if not prov:
+        return CARRY_LEGACY
+    states = set()
+    rel = o["retro"].split("#", 1)[0]
+    for c in prov:
+        if c not in run["complete"] or c not in run["project"]:
+            states.add(CARRY_CHECKOUT)
+        elif run["project"][c] != o["project"]:
+            states.add(CARRY_FOREIGN)
+        elif o["retro"] in run["refused"].get(c, ()):
+            states.add(CARRY_REFUSED)
+        elif rel not in run["files"].get(c, ()):
+            states.add(CARRY_FILE)
+        else:
+            states.add(CARRY_GONE)
+    for reason in (CARRY_REFUSED, CARRY_CHECKOUT, CARRY_FILE, CARRY_GONE):
+        if reason in states:
+            return reason
+    return CARRY_FOREIGN
 
 
 def _attach_memory(entries: dict[str, dict], old: dict[str, dict], notes: list[str]) -> None:
@@ -1186,8 +1186,8 @@ def _attach_memory(entries: dict[str, dict], old: dict[str, dict], notes: list[s
             m = o.get("memory")
             if m:
                 by_pc.setdefault((o["project"], ck), {}).setdefault(mem_base(m), set()).add(o["retro"])
-                if mem_rev(m) > mem_rev(best.get(mem_base(m), "")):
-                    best[mem_base(m)] = m
+                if mem_base(m) not in best or mem_rev(m) > mem_rev(best[mem_base(m)]):
+                    best[mem_base(m)] = m  # seeded unconditionally (round 11, #5)
     for ck, e in list(entries.items()):
         origins = sorted(e["origins"], key=_origin_key)
         changed = False
@@ -1222,8 +1222,8 @@ def _one_class_per_memory(entries: dict[str, dict], notes: list[str]) -> None:
             m = o.get("memory")
             if m:
                 b = mem_base(m)
-                if mem_rev(m) > mem_rev(top.get(b, "")):
-                    top[b] = m
+                if b not in top or mem_rev(m) > mem_rev(top[b]):
+                    top[b] = m  # seeded unconditionally (round 11, #5)
                 if ck not in holders.setdefault(b, []):
                     holders[b].append(ck)
     for ck in list(entries):
@@ -1248,67 +1248,65 @@ def _one_class_per_memory(entries: dict[str, dict], notes: list[str]) -> None:
 
 
 def cmd_rebuild(a, idx: pathlib.Path) -> int:
-    """Rebuild never loses what it cannot re-derive (rounds 7–10 of release iteration 1).
+    """A rebuild never removes or moves anything on its own (rounds 7–11 of release iteration 1;
+    round 11 narrowed the contract under the loop guard).
 
     The index becomes the lessons derived from every readable retro — under the roots, and in
-    every git worktree of each checkout found — merged with the previous index's origins that
-    could not be re-derived, CARRIED FORWARD. An origin is one project's copy of a lesson,
-    `(project, retro#anchor)` under its class key, and it records its PROVENANCE: `checkouts`,
-    the real paths of the checkouts it was derived from, and `worktreeOf`, the main checkout of
-    each that was a git worktree. Provenance stays in the index file; `show` and `emit` omit it.
+    every git worktree of each checkout found — merged with EVERY origin of the previous index
+    this run did not re-derive, CARRIED FORWARD. An origin is one project's copy of a lesson,
+    `(project, retro#anchor)` under its class key; it records its provenance, `checkouts`, the
+    real paths of the checkouts it was derived from (local; `show` and `emit` omit it).
 
-    The one rule (round 9): implicit removal needs positive evidence from the same checkout.
-    Without `--prune-carried`, an origin leaves only when, for EVERY checkout in its provenance,
-    (a) that checkout was discovered in this run and read completely, with no problem owned by
-    it, and holds the origin's PROJECT — a path is not an identity (round 10); (b) its retro
-    file at the origin's path was read; and (c) that file no longer holds the entry. A worktree
-    whose main checkout read completely and no longer lists it was removed: it counts as gone.
+    No implicit removal: the only way an origin leaves the index is `--prune-carried`, narrowed
+    to one reason by `--prune-carried-reason`. No supersede, no move: a memory id stays on the
+    origin that holds it; `_attach_memory` re-attaches it only to the same (project, classKey).
 
-    A checkout that now holds ANOTHER project key and the same (classKey, retro) is the same
-    checkout after `fetch --unshallow` or a re-init: its old-key origin is superseded by the one
-    it derives — the memory id moves, the run says `moved: project key changed`, and `projects`
-    does not count it twice (round 10). A shallow clone is a problem owned by its checkout: its
-    key is not stable yet.
+    A carried origin keeps everything recorded on it and is marked `carried: <reason>`
+    (`_carry_reason`): `checkout not read`, `retro file not read`, `no checkout read holds it`,
+    `commit does not resolve`, `retro cites a commit that does not resolve`, `lesson refused`,
+    `no provenance` — temporary unavailabilities, counted in `seen`/`projects`/`status` — or
+    `checkout holds another project`, kept but NOT counted, so a stranger at a path or one
+    checkout under a new root commit never makes a phantom second project.
 
-    Every other case carries the origin, with the reason:
-      * `checkout not read` — not discovered, or a problem is owned by it (an unreadable retro,
-        a refused `git worktree list`, a shallow clone, a retro that changed during the run);
-      * `checkout holds another project` — a different project now sits at that path;
-      * `retro file not read` — the checkout read completely, but not that file (outside the
-        artifact root, moved, deleted);
-      * `no provenance` — an origin written before provenance existed;
-      * `commit does not resolve` / `retro cites a commit that does not resolve` /
-        `lesson refused` — the entry is there and could not be derived;
-      * `no checkout read holds it` — every checkout showed it gone, but it holds a memory id
-        the run did not re-attach elsewhere: the store still has that record.
-    A carried origin keeps everything recorded on it, the checkouts that did not show it gone,
-    and `carried: <reason>`; it counts toward `seen`, `projects` and `status`, and is re-derived
-    and un-marked as soon as a checkout holding it reads again.
+    A shallow clone (`git rev-parse --is-shallow-repository`) is never a source: a problem owned
+    by that checkout, nothing derived under its unstable key, its origins carried as `checkout
+    not read`. Known limit: a project whose root commit changes (re-init, unshallow) starts new
+    store records; the operator re-attaches by `record`-ing the old id on the new origin of the
+    same class key.
 
     Retro files are stamped when read and stamped again under the lock: a file that changed in
-    between — an `add` landing mid-run — leaves its checkout incomplete for this run (round 10).
-
-    Memory ids follow (project, classKey) and compare before `@` (`_attach_memory`,
-    `_one_class_per_memory`). The run refuses to write if a memory id of the previous index would
-    vanish other than by `--prune-carried`; an id that only a corrupt line held is named, with
-    the `.corrupt-<date>` file that keeps it.
+    between — an `add` landing mid-run — leaves its checkout not read for this run. Memory ids
+    follow (project, classKey) and compare before `@`; the run refuses to write if a memory id
+    of the previous index would vanish other than by `--prune-carried`, and names an id that only
+    a corrupt line held.
 
     Exit 0 whenever anything was read — a retro, or a checkout discovered in full — and for a
-    readable root that holds no checkout at all (an empty scope: the index is written, every
-    origin carried). Exit 1 only when nothing could be read because every root was missing or
-    unreadable — before the session opens, so no index, lock directory or migration is touched —
-    or on a lock or unreadable-index refusal. On the default path the one-time merge of the
-    standalone index, and setting a corrupt index aside (its good lines salvaged), run first, as
-    for every verb."""
+    readable root holding no checkout at all (the index is written, every origin carried). Exit 1
+    only when nothing could be read because every root was missing or unreadable — before the
+    session opens, so no index, lock directory or migration is touched — or on a lock or
+    unreadable-index refusal. On the default path the one-time merge of the standalone index,
+    and setting a corrupt index aside (its good lines salvaged), run first, as for every verb."""
     found, problems, repos = find_retros(a.roots, a.depth)
     lessons: list[tuple[str, dict]] = []
     private, seen_files = 0, 0
     unresolved: list[str] = []
     keys: dict[pathlib.Path, str] = {}
     stats: dict[tuple, tuple] = {}
-    run: dict = {"files": {}, "held": {}, "refused": {}, "unresolved": {}, "complete": set(),
-                 "project": {}, "trees": dict(_TREES)}
+    run: dict = {"files": {}, "refused": {}, "unresolved": {}, "complete": set(), "project": {}}
+    # A shallow clone is never a source (round 11): its root commit — the project key — moves
+    # whenever its boundary does, so nothing is derived from it until it is deepened.
+    shallow = set()
+    for repo in repos:
+        try:
+            if _git(repo, "rev-parse", "--is-shallow-repository") == "true":
+                shallow.add(repo)
+                problems.append((repo, f"{repo.name}: a shallow clone — never a source; deepen it "
+                                       "(git fetch --unshallow) for its lessons to be read"))
+        except Refused:
+            continue
     for repo, retro in found:
+        if repo in shallow:
+            continue
         c = checkout_id(repo)
         try:
             if repo not in keys:
@@ -1331,32 +1329,26 @@ def cmd_rebuild(a, idx: pathlib.Path) -> int:
         seen_files += 1
         private += priv
         run["files"].setdefault(c, set()).add(_relative(repo, retro))
-        run["held"].setdefault(c, set()).update((le["classKey"], le["origin"]["retro"]) for le in mine + unres)
         run["refused"].setdefault(c, set()).update(refused)
         for le in unres:
             run["unresolved"][_origin_key(le["origin"])] = le["origin"]["commit"]
         unresolved += [f"{repo.name}: {le['classKey']} (commit {le['origin']['commit']})" for le in unres]
         lessons += [(c, le) for le in mine]
         problems += [(repo, f"{repo.name}: {p}") for p in probs]
-    # Which project each checkout holds (round 10, F1: a path is not an identity), and whether its
-    # key is stable: a shallow clone's root commit moves when it is deepened (J1).
+    # Which project each checkout holds: a path is not an identity (round 10, F1).
     for repo in repos:
+        if repo in shallow:
+            continue
         try:
             if repo not in keys:
                 keys[repo] = project_key(repo)
             run["project"][checkout_id(repo)] = keys[repo]
         except Refused:
             continue
-        try:
-            shallow = _git(repo, "rev-parse", "--is-shallow-repository") == "true"
-        except Refused:
-            shallow = False
-        if shallow:
-            problems.append((repo, f"{repo}: a shallow clone — its project key changes when it is "
-                                   "deepened, so it shows nothing gone until then"))
     owners = {owner for owner, _ in problems}
     run["complete"] = {checkout_id(r) for r, whole in repos.items() if whole and r not in owners}
-    if problems and not seen_files and not run["complete"]:
+    # A shallow checkout was found and read far enough to know it is shallow: something was read.
+    if problems and not seen_files and not run["complete"] and not shallow:
         for _, problem in problems:
             print(f"  not read: {problem}")
         print("lessons: rebuild refused — nothing could be read; the index, its lock directory "
@@ -1364,88 +1356,43 @@ def cmd_rebuild(a, idx: pathlib.Path) -> int:
         return 1
     with session(idx, a.default_index) as ss:
         # A retro that changed after it was read — an `add` landing between discovery and this
-        # lock (round 10, H1) — decides nothing: its checkout is not complete for this run.
+        # lock (round 10, H1) — leaves its checkout not read for this run.
         for (repo, retro), stamp in stats.items():
             if _stamp(retro) != stamp:
                 problems.append((repo, f"{repo.name}: {_relative(repo, retro)} changed while the "
                                        "rebuild ran — read again next run"))
                 run["complete"].discard(checkout_id(repo))
-        # The previous index lends its memory ids, its provenance and its carried origins.
-        # `session` already refused an unreadable one (its contents may be good) and set a
-        # corrupt one aside, its good lines salvaged; its notes go to stderr as for every verb,
-        # and into this report.
+        # The previous index lends its memory ids and its carried origins. `session` already
+        # refused an unreadable one (its contents may be good) and set a corrupt one aside, its
+        # good lines salvaged; its notes go to stderr as for every verb, and into this report.
         old = ss.entries
         index_notes = list(ss.notes)
         corrupt_name, corrupt_only = _CORRUPT_ONLY.get(str(idx), ("", set()))
         notes: list[str] = []
         entries: dict[str, dict] = {}
         # Worktrees of one project hold the same entries: one origin per (project, anchor), its
-        # provenance the union of the checkouts that hold it; where two copies differ the order
+        # provenance the checkouts that hold it in this run; where two copies differ the order
         # below decides, the same way every time.
         for c, le in sorted(lessons, key=lambda x: (x[0], json.dumps(x[1], sort_keys=True))):
             merge(entries, [le], c)
-        # A re-derived origin keeps the previous provenance that did not show it gone, and every
-        # worktree in it remembers its main checkout (round 10, F2).
-        for ck, e in list(entries.items()):
-            prev = {_origin_key(o): o for o in old.get(ck, {}).get("origins", [])}
-            origins = []
-            for o in e["origins"]:
-                was = prev.get(_origin_key(o)) or {}
-                extra = [c for c in was.get("checkouts") or []
-                         if c not in o["checkouts"] and not _gone_from(c, ck, dict(o, worktreeOf=was.get("worktreeOf") or {}), run)]
-                prov = sorted(set(o["checkouts"]) | set(extra))
-                parents = {c: m for c, m in (was.get("worktreeOf") or {}).items() if c in prov}
-                parents.update({c: _PARENT[c] for c in prov if c in _PARENT})
-                o = dict(o, checkouts=prov)
-                if parents:
-                    o["worktreeOf"] = parents
-                origins.append(o)
-            entries[ck] = derive(origins)
         _attach_memory(entries, old, notes)
         derived = {(ck, _origin_key(o)) for ck, e in entries.items() for o in e["origins"]}
-        carried, pruned, removed, moved, all_gone = [], [], [], [], []
+        carried, pruned = [], []
         for ck, e in sorted(old.items()):
             for o in e["origins"]:
                 if (ck, _origin_key(o)) in derived:
                     continue
-                prov = o.get("checkouts") or []
-                newkey = {c: _moved_in(c, ck, o, run) for c in prov}
-                still = [c for c in prov if not newkey[c] and not _gone_from(c, ck, o, run)]
-                target = next((x for c in prov if newkey[c] for x in entries.get(ck, {}).get("origins", [])
-                               if _origin_key(x) == (newkey[c], o["retro"])), None)
-                if not prov:
-                    reason, keep = CARRY_LEGACY, prov
-                elif still or (any(newkey.values()) and target is None):
-                    still = still or [c for c in prov if newkey[c]]
-                    reason, keep = _carry_reason(ck, o, still, run), still
-                elif target is not None:
-                    # The same checkout under a new project key (J1/J2): superseded, not doubled.
-                    if o.get("memory") and not target.get("memory"):
-                        target["memory"] = o["memory"]
-                        entries[ck] = derive(entries[ck]["origins"])
-                    if not o.get("memory") or mem_base(target["memory"]) == mem_base(o["memory"]):
-                        moved.append((ck, o, target["project"]))
-                        continue
-                    reason, keep = CARRY_RECORDED, prov
+                rec = dict(o, carried=_carry_reason(ck, o, run))
+                if a.prune_carried and a.prune_carried_reason in (None, rec["carried"]):
+                    pruned.append((ck, rec))
                 else:
-                    all_gone.append((ck, o))
-                    continue
-                rec = dict(o, carried=reason)
-                if keep:
-                    rec["checkouts"] = sorted(keep)
-                (pruned if a.prune_carried else carried).append((ck, rec))
-        attached = {mem_base(o["memory"]) for e in entries.values() for o in e["origins"] if o.get("memory")}
-        for ck, o in all_gone:
-            if o.get("memory") and mem_base(o["memory"]) not in attached:
-                (pruned if a.prune_carried else carried).append((ck, dict(o, carried=CARRY_RECORDED)))
-            else:
-                removed.append((ck, o))
+                    carried.append((ck, rec))
         for ck, o in carried:
             held = [x for x in entries[ck]["origins"] if _origin_key(x) != _origin_key(o)] if ck in entries else []
             entries[ck] = derive(held + [o])
         _one_class_per_memory(entries, notes)
-        # A memory id of the previous index vanishes only through --prune-carried (round 8, L6;
-        # compared before `@`, round 9). An id only a corrupt line held is counted and named.
+        # A memory id of the previous index vanishes only through --prune-carried (compared
+        # before `@`). An id only a corrupt line held is counted and named.
         before = {mem_base(o["memory"]) for e in old.values() for o in e["origins"] if o.get("memory")}
         after = {mem_base(o["memory"]) for e in entries.values() for o in e["origins"] if o.get("memory")}
         gone = before - after - {mem_base(o["memory"]) for _, o in pruned if o.get("memory")}
@@ -1459,17 +1406,13 @@ def cmd_rebuild(a, idx: pathlib.Path) -> int:
           f"{len(keys)} repositor{'y' if len(keys) == 1 else 'ies'} · {len(entries)} "
           f"lesson{'' if len(entries) == 1 else 's'} · {private} private entries skipped · "
           f"{len(unresolved)} with a commit that does not resolve · {len(carried)} origin"
-          f"{'' if len(carried) == 1 else 's'} carried forward")
+          f"{'' if len(carried) == 1 else 's'} carried forward (an origin leaves the index only "
+          "by --prune-carried)")
     for ck, o in carried:
         print(f"  carried ({o['carried']}): {ck} — {o['project']} {o['retro']}"
               + (f" · {o['memory']}" if o.get("memory") else ""))
     for ck, o in pruned:
         print(f"  pruned ({o['carried']}): {ck} — {o['project']} {o['retro']}")
-    for ck, o, new in moved:
-        print(f"  moved: project key changed — {ck} {o['retro']}: {o['project']} → {new}"
-              + (f" · {o['memory']}" if o.get("memory") else ""))
-    for ck, o in removed:
-        print(f"  removed (its checkout read it and no longer holds it): {ck} — {o['project']} {o['retro']}")
     for u in unresolved:
         print(f"  skipped, commit does not resolve: {u}")
     for n in notes:
@@ -1528,9 +1471,11 @@ def cmd_emit(a, idx: pathlib.Path) -> int:
     Either way the project travels as the same pseudonymous key the index holds, never a
     `project:<slug>` id, and the commit as `commit:` + 12 hex — the store's redactor removes a
     40-hex SHA as a credential shape and keeps exactly that short form."""
+    root = repo_root(pathlib.Path(a.root or "."))
+    refuse_shallow(root)
     with session(idx, a.default_index) as ss:
         e = _resolve(ss.entries, a.id)
-    o = _this_origin(e, repo_root(pathlib.Path(a.root or ".")))
+    o = _this_origin(e, root)
     le = o["lesson"]
     if a.tool == "observatory_lesson":
         args = {"owner": OWNER, "classKey": le["classKey"], "title": le["title"],
@@ -1568,6 +1513,7 @@ def _ledger_line(ledger: pathlib.Path | None, line: str) -> None:
 
 def cmd_record(a, idx: pathlib.Path) -> int:
     root = repo_root(pathlib.Path(a.root or "."))
+    refuse_shallow(root)
     ledger = pathlib.Path(a.ledger) if a.ledger else (root / DEFAULT_LEDGER)
     ledger = ledger if ledger.exists() or a.ledger else None
     try:
@@ -1617,6 +1563,12 @@ def cmd_record(a, idx: pathlib.Path) -> int:
         if int(rev) < held:
             print(f"lessons: {mid} is at revision {held}; revision {int(rev)} is older — refused, "
                   "nothing written", file=sys.stderr)
+            return 1
+        # Replacing the id this origin already holds is a deliberate act (round 11, R5): without
+        # --replace the old store record would be orphaned in silence.
+        if o.get("memory") and mem_base(o["memory"]) != mid and not a.replace:
+            print(f"lessons: this origin holds {o['memory']}; {mid} would replace it — pass "
+                  "--replace to do that on purpose; nothing written", file=sys.stderr)
             return 1
         # The same id elsewhere in this entry takes the new revision too: one record, one revision.
         origins = [dict(x, memory=memory) if _origin_key(x) == _origin_key(o)
@@ -1672,7 +1624,10 @@ def main(argv: list[str]) -> int:
     rb.add_argument("--roots", nargs="+", required=True)
     rb.add_argument("--depth", type=int, default=3, help="directory levels below each root")
     rb.add_argument("--prune-carried", action="store_true",
-                    help="remove, on purpose, every origin the rebuild would carry forward")
+                    help="remove, on purpose, every origin the rebuild would carry forward — the "
+                         "only way an origin leaves the index")
+    rb.add_argument("--prune-carried-reason", choices=CARRY_REASONS, default=None,
+                    help="with --prune-carried: prune only the origins carried for this reason")
     c = sub.add_parser("candidates", parents=[common], help="lessons two or more projects hold")
     c.add_argument("--min-projects", type=int, default=2)
     sh = sub.add_parser("show", parents=[common], help="one entry with its origins")
@@ -1688,6 +1643,8 @@ def main(argv: list[str]) -> int:
     rc.add_argument("--answer", required=True, help="the tool's JSON answer, a file or -")
     rc.add_argument("--ledger", help=f"the run ledger (default {DEFAULT_LEDGER} when it exists)")
     rc.add_argument("--root")
+    rc.add_argument("--replace", action="store_true",
+                    help="replace a different memory id this origin already holds")
     sub.add_parser("path", parents=[common], help="the index this invocation would use")
     a = p.parse_args(argv)
     if a.cmd == "add" and a.retro and not (a.all or a.entry):

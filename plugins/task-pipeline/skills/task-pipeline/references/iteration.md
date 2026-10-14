@@ -274,76 +274,81 @@ private to its project and never leaves it.
 **Layer 1 — every install, no service.** The project retro and [`learned.md`](learned.md),
 as before, plus a **local index** of every project's lessons on this machine:
 `scripts/lessons.py`, one JSON line per class, a pure function of the retros
-(`lessons.py rebuild --roots <dir>` re-derives it). **Rebuild never loses what it cannot
-re-derive.** It derives every lesson from the retros it can read under the roots and depth
-given, and from every git worktree of each checkout it finds. Worktrees under `.worktrees/`
-or `.claude/worktrees/` are included, even though the walk skips dot-directories.
+(`lessons.py rebuild --roots <dir>` re-derives it). **A rebuild never removes or moves
+anything on its own.** It derives every lesson from the retros it can read under the roots and
+depth given, and from every git worktree of each checkout it finds. Worktrees under
+`.worktrees/` or `.claude/worktrees/` are included, even though the walk skips
+dot-directories.
 
 An origin is one project's copy of a lesson, `(project, retro)`. It records its
-**provenance**: the checkouts it was derived from, by real path, and for a git worktree its
-main checkout. That record stays in the local index; it is never emitted, and `show` omits it.
+**provenance**: the checkouts it was derived from, by real path. That record stays in the
+local index; it is never emitted, and `show` omits it. Provenance decides only the reason an
+origin is carried, never a removal.
 
-**The one rule: implicit removal needs positive evidence from the same checkout.** Without
-`--prune-carried`, rebuild removes an origin only when every checkout in its provenance meets
-all three conditions:
-
-- (a) the checkout was discovered in this run and read completely, with no problem owned by
-  it, and it still holds the origin's **project**, because a path is not an identity;
-- (b) its retro file at the origin's path was read;
-- (c) that file no longer holds the entry.
-
-A worktree that its main checkout, read completely, no longer lists was removed. It counts
-as gone.
-
-**A project key that changes.** A checkout may now hold another project key but the same
-`(classKey, retro)`. That is the same checkout after `fetch --unshallow` or a re-init, so its
-old-key origin is superseded by the one it derives. The memory id moves to the new origin, the
-run prints `moved: project key changed`, and `projects` does not count the project twice. A
-shallow clone is a problem owned by its checkout until it is deepened.
-
-Every other origin is **carried**, with an accurate reason:
+**Every previous origin the run does not re-derive is carried.** Nothing is removed and nothing
+is moved: no origin is dropped because a checkout read its retro and no longer found the entry,
+and no memory id moves to another project's origin. **`rebuild --prune-carried` is the only way
+an origin leaves the index**; `--prune-carried-reason <reason>` narrows it to one reason. A
+carried origin keeps everything recorded on it, including its memory id, and is marked
+`carried: <reason>`, named in the summary. It is re-derived and un-marked as soon as a checkout
+holding it reads again. The reasons are:
 
 - `checkout not read`: the checkout was not discovered, or a problem is owned by it. That
   problem may be an unreadable retro, a refused `git worktree list`, a shallow clone, a broken
   configuration, or a retro that changed while the rebuild ran (an `add` landing mid-run).
-- `checkout holds another project`: a different project now sits at that path.
 - `retro file not read`: the checkout read completely, but that file was not read, for
   example because it lies outside the artifact root or was moved.
-- `no provenance`: the origin was written before provenance existed.
+- `no checkout read holds it`: the checkout read the file, holds the same project, and the
+  entry is no longer there.
 - `commit does not resolve`, `retro cites a commit that does not resolve` or
   `lesson refused`: the entry is there but could not be derived. A dangling commit is routine
   after a squash merge and a deleted branch.
-- `no checkout read holds it`: every checkout showed the entry gone, but it holds a memory id
-  the run did not re-attach. The store still has that record.
+- `no provenance`: the origin was written before provenance existed.
+- `checkout holds another project`: every checkout in its provenance now holds a different
+  project. A path is not an identity.
+
+**Counting.** `seen`, `projects` and `status` count re-derived origins and every carried origin
+except `checkout holds another project`. Those are kept, with their memory ids, but not counted.
+So a temporarily unreadable root never demotes a lesson two projects hold, and a stranger at a
+path, or one checkout under a new root commit, never makes a phantom second project. Derived
+fields are recomputed from the origins whenever the index is read; they are never trusted from
+disk.
+
+**Shallow clones.** A shallow checkout is never a source. It is a problem owned by that
+checkout, nothing is derived from it under its unstable key, and its origins are carried as
+`checkout not read`. `add`, `emit-observatory` and `record` refuse in a shallow clone, exit 1
+and write nothing, and say to deepen it with `git fetch --unshallow`.
+
+**Known limit.** A project whose root commit changes, through a re-init or an unshallow, starts
+new store records: its old origins are carried as `checkout holds another project` with their
+memory ids, and the new origins start without one. The operator re-attaches by running
+`record` with the old id on the new origin. That is allowed, because the new origin is of the
+same class key.
 
 Another checkout of the same project, even one reading the same retro path, decides nothing
 for an origin it never held. Problems carry their owner, a checkout or none, and are never
 matched by path prefix.
 
-A carried origin keeps everything recorded on it, including the checkouts that did not show
-it gone, and is marked `carried: <reason>`. It still counts toward `seen`, `projects` and
-`status`, so a lesson two projects hold stays a `candidate` while one root is unreadable. It
-is named in the summary. It is re-derived and un-marked as soon as a checkout holding it reads
-again. `rebuild --prune-carried` removes carried origins on purpose.
-
 **Memory ids.** A memory id belongs to `(project, classKey)`, the store's own identity, and
 never to a retro anchor:
 
-- A rotated or retitled entry keeps its id.
+- A rotated or retitled entry keeps its id on the re-derived origin. The old anchor is carried.
 - A class key changed inside one entry does not inherit another key's id.
-- One id is never on two class keys. `record` refuses an id that another class key holds, and
-  a revision older than the one held. It exits 1 and writes nothing.
-- Ids compare on the part before `@`, and the highest revision wins.
+- One id is never on two class keys. `record` refuses an id that another class key holds, a
+  revision older than the one held, and, without `--replace`, a different id over the one the
+  origin already holds. Each refusal exits 1 and writes nothing.
+- Ids compare on the part before `@`, revisions start at 1, and the highest revision wins.
 
 `emit-observatory` and `record` both use the origin of the project that holds the id. The run
 refuses to write if a memory id would vanish other than through `--prune-carried`.
 
-Unreadable sources are named under `not read`. The run exits 0 whenever anything was read: a
-retro, or a checkout discovered in full. A readable root that holds no checkout also exits 0:
-the index is written, and every origin is carried. The run exits 1 only when nothing could be
-read because every root was missing or unreadable; then no index, lock directory or migration
-is touched. A held lock or an unreadable index is its own refusal. On the default path the
-one-time merge of a standalone index runs first, as for every verb.
+Unreadable sources are named under `not read`, by name rather than by absolute path. The run
+exits 0 whenever anything was read: a retro, a checkout discovered in full, or a shallow
+checkout found. A readable root that holds no checkout also exits 0: the index is written,
+and every origin is carried. The run exits 1 only when nothing could be read because every
+root was missing or unreadable; then no index, lock directory or migration is touched. A held
+lock or an unreadable index is its own refusal. On the default path the one-time merge of a
+standalone index runs first, as for every verb.
 
 So does setting a corrupt index aside:
 - The file is kept whole as `.corrupt-<date>`.

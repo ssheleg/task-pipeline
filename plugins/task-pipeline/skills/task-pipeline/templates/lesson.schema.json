@@ -169,13 +169,13 @@
         },
         "seen": {
           "type": "integer",
-          "minimum": 1,
-          "description": "How many origins hold the class."
+          "minimum": 0,
+          "description": "How many origins hold the class, counting re-derived and temporarily unavailable carried origins — not those carried as `checkout holds another project`."
         },
         "projects": {
           "type": "integer",
-          "minimum": 1,
-          "description": "How many distinct projects hold it."
+          "minimum": 0,
+          "description": "How many distinct projects hold it, counted like `seen`: an origin carried as `checkout holds another project` is kept but not counted."
         },
         "status": {
           "enum": [
@@ -207,7 +207,7 @@
               },
               "memory": {
                 "type": "string",
-                "pattern": "^mem:[^@\\s]+@[0-9]+$"
+                "pattern": "^mem:[^@\\s]+@[1-9][0-9]*$"
               },
               "carried": {
                 "enum": [
@@ -218,23 +218,17 @@
                   "commit does not resolve",
                   "retro cites a commit that does not resolve",
                   "lesson refused",
-                  "no checkout read holds it"
+                  "no checkout read holds it",
+                  "source not read"
                 ],
-                "description": "Set by `rebuild` on an origin it could not re-derive and kept with everything recorded on it; it still counts toward seen, projects and status. An origin is removed without `--prune-carried` only on positive evidence from every checkout in its provenance: read completely, its retro file read, the entry gone. `no checkout read holds it` marks an origin all its checkouts showed gone that still holds a memory id: the store still has its record. Cleared when a checkout holding it reads again; removed only by `rebuild --prune-carried`."
+                "description": "Set by `rebuild` on every previous origin it did not re-derive: a rebuild never removes or moves anything on its own, and `rebuild --prune-carried` (optionally `--prune-carried-reason`) is the only way an origin leaves the index. The origin keeps everything recorded on it, its memory id included. `checkout holds another project` is kept but not counted in seen/projects/status; every other reason is a temporary unavailability and is counted. `source not read` is the round-7 label, still accepted. Cleared when a checkout holding the origin reads it again."
               },
               "checkouts": {
                 "type": "array",
                 "items": {
                   "type": "string"
                 },
-                "description": "Provenance: the real top-level paths of the checkouts this origin was derived from. Only these checkouts, while they hold the origin's project, can show it gone. Local to this machine's index; never emitted to a store, and not printed by `show`."
-              },
-              "worktreeOf": {
-                "type": "object",
-                "additionalProperties": {
-                  "type": "string"
-                },
-                "description": "For each checkout in `checkouts` that was a git worktree: its main checkout. A worktree its main checkout no longer lists was removed, and counts as gone. Local, like `checkouts`."
+                "description": "Provenance: the real top-level paths of the checkouts this origin was derived from; they decide only the carried reason, never a removal. Local to this machine's index; never emitted to a store, and not printed by `show`."
               },
               "lesson": {
                 "type": "object"

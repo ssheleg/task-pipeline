@@ -6,9 +6,9 @@ python3 - <<'EOF'
 # Pruning carried origins is an explicit choice (--prune-carried). Make it the default.
 p = "/tmp/rebuild-prune-copy/plugins/task-pipeline/skills/task-pipeline/scripts/lessons.py"
 t = open(p, encoding="utf-8").read()
-needle = '                (pruned if a.prune_carried else carried).append((ck, rec))\n'
+needle = '                if a.prune_carried and a.prune_carried_reason in (None, rec["carried"]):\n'
 assert needle in t, "PLANT DID NOT LAND: anchor absent before edit"
-open(p, "w", encoding="utf-8").write(t.replace(needle, '                pruned.append((ck, rec))\n', 1))
+open(p, "w", encoding="utf-8").write(t.replace(needle, '                if True:\n', 1))
 assert needle not in open(p, encoding="utf-8").read(), "PLANT DID NOT LAND"
 EOF
 if python3 /tmp/rebuild-prune-copy/test/lessons_test.py; then

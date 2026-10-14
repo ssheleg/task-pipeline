@@ -23,6 +23,7 @@ temp directory too — no case can reach the operator's real index:
 Run bare: prints PASS and exits non-zero on the first failure.
 """
 import atexit
+import hashlib
 import json
 import os
 import pathlib
@@ -183,7 +184,8 @@ def conservative_rebuild_controls():
         rc, out, err = run("rebuild", "--roots", str(repo), index=idx)
         # Round 6: the readable rest is rebuilt; the lesson it holds is the one the index held,
         # so nothing is dropped and the projection is byte-identical.
-        ok(rc == 0 and idx.read_bytes() == before and "not read" in out and str(blocked) in out,
+        ok(rc == 0 and idx.read_bytes() == before and "not read" in out and blocked.name in out
+           and str(blocked) not in out,
            f"unreadable discovery subtree is named and drops no lesson ({rc} {out!r} {err!r})")
     finally:
         blocked.chmod(0o755)
@@ -238,7 +240,7 @@ def partial_rebuild_controls():
         rc, out, err = run("rebuild", "--roots", str(roots), str(blocked), index=unread_idx)
     finally:
         blocked.chmod(0o755)
-    ok(rc == 0 and "not read" in out and str(blocked) in out and unread_idx.is_file()
+    ok(rc == 0 and "not read" in out and blocked.name in out and unread_idx.is_file()
        and "absence-needs-its-own-check" in unread_idx.read_text(encoding="utf-8"),
        f"rebuild: an unreadable directory among the roots is named, the other roots still rebuilt ({rc} {out!r} {err!r})")
 
@@ -323,10 +325,13 @@ def carry_forward_controls():
     finally:
         f2.chmod(0o755)
     e = lesson_of(idx)
-    ok(rc == 0 and [x["project"] for x in e["origins"]] == [f2_key]
-       and e["origins"][0].get("carried") == "checkout not read" and e["projects"] == 1
-       and e["status"] == "local" and "removed" in out,
-       f"carry is per origin: a readable root's deleted entry leaves, the unreadable one stays ({rc} {out!r} {e})")
+    reasons = {x["project"]: x.get("carried") for x in e["origins"]}
+    # Round 11 (narrowed): nothing leaves on its own. f1's withdrawn entry is carried as
+    # `no checkout read holds it`, f2's as `checkout not read` — per origin, each its own reason.
+    ok(rc == 0 and reasons.get(f2_key) == "checkout not read" and len(reasons) == 2
+       and sorted(reasons.values()) == ["checkout not read", "no checkout read holds it"]
+       and "removed" not in out,
+       f"carry is per origin: a withdrawn entry and an unreadable root each carried with their reason ({rc} {out!r} {e})")
 
     # Identity is (project, retro) under the class key, never the title: f1 retitles the lesson
     # while f2 is carried; one entry, two projects.
@@ -541,10 +546,15 @@ def identity_controls():
     record_mem(idx, d, KEY, "mem:p1")
     write_retros(d, [("retro/2026-Q4.md", "2026-10-01 export gate", KEY)], sha)
     rc, out, err = run("rebuild", "--roots", str(d), index=idx)
-    o = lesson_of(idx)["origins"]
-    ok(rc == 0 and len(o) == 1 and o[0]["retro"].startswith("docs/evidence/retro/2026-Q4.md#")
-       and o[0].get("memory") == "mem:p1@1" and "carried" not in o[0],
-       f"P1: a rotated entry keeps its memory id ({rc} {o})")
+    e = lesson_of(idx)
+    new = [x for x in e["origins"] if "carried" not in x]
+    old = [x for x in e["origins"] if x.get("carried")]
+    # Round 11: the old anchor is carried (`no checkout read holds it`), never removed; the id
+    # follows the class onto the re-derived origin, and one project is counted.
+    ok(rc == 0 and len(new) == 1 and new[0]["retro"].startswith("docs/evidence/retro/2026-Q4.md#")
+       and new[0].get("memory") == "mem:p1@1" and [x["carried"] for x in old] == ["no checkout read holds it"]
+       and e["projects"] == 1,
+       f"P1: a rotated entry keeps its memory id; the old anchor is carried ({rc} {e['origins']})")
 
     # P2 — the heading is reworded (the anchor changes); the id stays with the class.
     d, sha = headed_repo("p2", [("retro.md", "2026-10-01 export gate", KEY)])
@@ -553,9 +563,9 @@ def identity_controls():
     record_mem(idx, d, KEY, "mem:p2")
     write_retros(d, [("retro.md", "2026-10-01 export gate reopened", KEY)], sha)
     rc, out, err = run("rebuild", "--roots", str(d), index=idx)
-    o = lesson_of(idx)["origins"]
-    ok(rc == 0 and len(o) == 1 and o[0].get("memory") == "mem:p2@1" and "reopened" in o[0]["retro"],
-       f"P2: a reworded heading keeps the memory id ({rc} {o})")
+    new = [x for x in lesson_of(idx)["origins"] if "carried" not in x]
+    ok(rc == 0 and len(new) == 1 and new[0].get("memory") == "mem:p2@1" and "reopened" in new[0]["retro"],
+       f"P2: a reworded heading keeps the memory id on the re-derived origin ({rc} {lesson_of(idx)['origins']})")
 
     # P3 — the class key changes inside the same entry. k1's id never moves to k2: k2 starts
     # with no id, and k1's recorded origin is carried with its own.
@@ -769,8 +779,12 @@ def provenance_controls():
         finally:
             hidden.chmod(0o755)
         kept(idx, f"{tag} a clone hidden by an unreadable sibling directory")
-        ok(K2 not in entries_of(idx) and "removed" in out,
-           f"{tag}: x's own deleted entry leaves — its checkout read completely ({out!r})")
+        # Round 11: x read completely and no longer holds it — carried with exactly that reason
+        # (attribution by owner, never by prefix: an `x-old` problem does not make x unread).
+        k2 = entries_of(idx).get(K2)
+        ok(k2 is not None and [o.get("carried") for o in k2["origins"]] == ["no checkout read holds it"]
+           and "removed" not in out,
+           f"{tag}: x's own withdrawn entry is carried as read-and-gone, not as unread ({out!r} {k2})")
 
     # C2 — `git worktree list` exits non-zero: a problem owned by that checkout; the hidden
     # worktree's origin is carried.
@@ -893,12 +907,13 @@ def index_shape_controls():
 
 
 def round10_controls():
-    """Round 10 (adversarial): provenance is a checkout path AND the project checked out there.
-    F1 a different project at the same path decides nothing; J1/J2 a project-key change at one
-    path supersedes, never doubles; F2 a removed worktree counts as gone; G1 record never puts
-    one id on two classes nor lowers a revision; H1 an add racing a rebuild is kept; H2/G2 a
-    type-malformed line is corrupt, never a traceback; G3 show prints no local paths; G5 merged
-    lines keep both provenances."""
+    """Rounds 10–11: provenance is a checkout path AND the project checked out there, and (round
+    11, narrowed) a rebuild never removes or moves anything on its own. F1 a different project at
+    the same path: carried, not counted; J1/J2 a project-key change: the old-key origin carried
+    with its id, not counted, nothing moved; F2 a removed worktree: carried until
+    --prune-carried; G1 record never puts one id on two classes nor lowers a revision; H1 an add
+    racing a rebuild is kept; H2/G2 a type-malformed line is corrupt, never a traceback; G3 show
+    prints no local paths; G5 merged lines keep both provenances."""
     work = tree("tp-lessons-r10-")
 
     # F1 — project A at root/app; A moves out; project B (its own root commit) takes root/app.
@@ -912,12 +927,16 @@ def round10_controls():
     b, _ = headed_repo("app-b", [("retro.md", "other entry", "an-unrelated-class")], parent=work)
     b.rename(root / "app")
     rc, out, _ = run("rebuild", "--roots", str(root), index=idx)
-    o = lesson_of(idx)["origins"]
-    ok(rc == 0 and len(o) == 1 and o[0].get("carried") == "checkout holds another project",
-       f"F1: a different project at the same path decides nothing for A's origin ({rc} {o} {out!r})")
+    e = lesson_of(idx)
+    o = e["origins"]
+    ok(rc == 0 and len(o) == 1 and o[0].get("carried") == "checkout holds another project"
+       and e["projects"] == 0 and e["seen"] == 0,
+       f"F1: a different project at the same path decides nothing; A's origin carried, not counted ({rc} {e} {out!r})")
 
     # J2 — the repository is re-initialised in place (new root commit), same retro, a memory id
-    # recorded: the old-key origin is superseded, its id moves, one project.
+    # recorded. Round 11: nothing moves — the old-key origin is carried with its id as
+    # `checkout holds another project` and not counted; the new origin starts without an id.
+    # Known limit: re-attach by recording the old id on the new origin (same class key).
     root = work / "j2"
     root.mkdir()
     x, sha = headed_repo("app", [("retro.md", "export gate", KEY)], parent=root)
@@ -933,13 +952,21 @@ def round10_controls():
     write_retros(x, [("retro.md", "export gate", KEY)], git(x, "rev-parse", "HEAD"))
     rc, out, _ = run("rebuild", "--roots", str(root), index=idx)
     e = lesson_of(idx)
-    ok(rc == 0 and e["projects"] == 1 and e["status"] == "local" and len(e["origins"]) == 1
-       and e["origins"][0]["project"] != old_key and e["origins"][0].get("memory") == "mem:j2@1"
-       and "project key changed" in out,
-       f"J2: a re-initialised repository supersedes its old key; the id moves ({rc} {e['projects']} {out!r})")
+    olds = [y for y in e["origins"] if y["project"] == old_key]
+    news = [y for y in e["origins"] if y["project"] != old_key]
+    ok(rc == 0 and e["projects"] == 1 and e["status"] == "local"
+       and [y.get("carried") for y in olds] == ["checkout holds another project"]
+       and olds[0].get("memory") == "mem:j2@1" and len(news) == 1 and "memory" not in news[0]
+       and "moved" not in out,
+       f"J2: a re-init carries the old key with its id, counts one project, moves nothing ({rc} {e} {out!r})")
+    ok(emit_mem(idx, x, KEY) == (None, None), f"J2: emit from the new history opens a new record ({emit_mem(idx, x, KEY)})")
+    rc, _, err = run("record", e["id"], "--answer", "-", cwd=x, index=idx,
+                     stdin=json.dumps({"memoryId": "mem:j2", "revision": 1}))
+    ok(rc == 0 and emit_mem(idx, x, KEY) == ("mem:j2", 1),
+       f"J2 known limit: the operator re-attaches the old id on the new origin ({rc} {err!r})")
 
-    # J1 — a shallow clone is a problem owned by its checkout (its key is unstable); once
-    # deepened, the old-key origin is superseded, never a phantom second project.
+    # J1 — a shallow clone is never a source: a problem owned by its checkout, nothing derived
+    # under its unstable key. Once deepened it is read; one project.
     src, _ = headed_repo("j1-src", [("retro.md", "export gate", KEY)])
     root = work / "j1"
     root.mkdir()
@@ -947,15 +974,16 @@ def round10_controls():
     git(work, "clone", "-q", "--depth", "2", f"file://{src}", str(sh))
     idx = work / "j1.jsonl"
     rc, out, _ = run("rebuild", "--roots", str(root), index=idx)
-    ok(rc == 0 and "shallow" in out and KEY in entries_of(idx), f"J1: a shallow clone is named ({rc} {out!r})")
+    ok(rc == 0 and "shallow" in out and KEY not in entries_of(idx) and str(sh) not in out,
+       f"J1: a shallow clone is named by its name and nothing is derived from it ({rc} {out!r})")
     git(sh, "fetch", "-q", "--unshallow")
     rc, out, _ = run("rebuild", "--roots", str(root), index=idx)
     e = lesson_of(idx)
-    ok(rc == 0 and e["projects"] == 1 and e["status"] == "local" and "project key changed" in out,
-       f"J1: --unshallow supersedes the shallow key; one project ({rc} {e['projects']} {out!r})")
+    ok(rc == 0 and e["projects"] == 1 and e["status"] == "local" and len(e["origins"]) == 1,
+       f"J1: once deepened it is read; one project ({rc} {e} {out!r})")
 
-    # F2 — a lesson born in a worktree, merged, the worktree removed, then withdrawn from main:
-    # the removed worktree counts as gone (its main checkout no longer lists it), so it leaves.
+    # F2 — a lesson born in a worktree, merged, the worktree removed, then withdrawn from main.
+    # Round 11: carried (`no checkout read holds it`), counted, until --prune-carried.
     root = work / "f2"
     root.mkdir()
     m, sha = headed_repo("app", [("retro.md", "old entry", "an-older-class")], parent=root)
@@ -973,8 +1001,12 @@ def round10_controls():
     run("rebuild", "--roots", str(root), index=idx)
     write_retros(m, [("retro.md", "old entry", "an-older-class")], sha)
     rc, out, _ = run("rebuild", "--roots", str(root), index=idx)
-    ok(rc == 0 and KEY not in entries_of(idx) and "removed" in out,
-       f"F2: a removed worktree counts as gone; the withdrawn lesson leaves ({rc} {out!r} {entries_of(idx).get(KEY)})")
+    e = entries_of(idx).get(KEY)
+    ok(rc == 0 and e is not None and all(y.get("carried") for y in e["origins"]) and "removed" not in out,
+       f"F2: a withdrawn lesson is carried, never removed on its own ({rc} {out!r} {e})")
+    rc, out, _ = run("rebuild", "--roots", str(root), "--prune-carried", index=idx)
+    ok(rc == 0 and KEY not in entries_of(idx) and "pruned" in out,
+       f"F2: --prune-carried is the way out ({rc} {out!r})")
 
     # G1/G1b — record refuses an id another class already holds, and a lower revision.
     root = work / "g1"
@@ -1058,6 +1090,154 @@ def round10_controls():
     out, err = proc.communicate(timeout=120)
     ok(rc_add == 0 and proc.returncode == 0 and K2 in entries_of(idx),
        f"H1: an add racing a rebuild is kept ({rc_add} {proc.returncode} {out!r} {err!r})")
+
+
+def round11_controls():
+    """Round 11 (loop guard, contract narrowed): a rebuild never removes or moves anything on
+    its own. R1 a stranger at the same path; R2/R6 shallow clones; R3/R3b a locked or prunable
+    worktree; R4 a worktree whose main path is now a stranger; R5 record over an existing id;
+    #5 `mem:…@0`; #6/R7 lines missing derived fields; --prune-carried-reason."""
+    work = tree("tp-lessons-r11-")
+
+    # R1 — A records an id and moves out of the roots; an unrelated B, holding the same class at
+    # the same anchor, takes A's path. A's origin keeps its id (carried, not counted); emit from
+    # B opens B's own record; reading A again re-derives A's origin with its id.
+    root = work / "r1"
+    root.mkdir()
+    a, _ = headed_repo("app", [("retro.md", "export gate", KEY)], parent=root)
+    idx = work / "r1.jsonl"
+    run("rebuild", "--roots", str(root), index=idx)
+    record_mem(idx, a, KEY, "mem:store-record-of-a")
+    proj_a = lesson_of(idx)["origins"][0]["project"]
+    a.rename(work / "elsewhere-app")
+    b, _ = headed_repo("b-src", [("retro.md", "export gate", KEY)], parent=work)
+    b.rename(root / "app")
+    b = root / "app"
+    rc, out, _ = run("rebuild", "--roots", str(root), index=idx)
+    e = lesson_of(idx)
+    mine = [o for o in e["origins"] if o["project"] == proj_a]
+    ok(rc == 0 and [o.get("carried") for o in mine] == ["checkout holds another project"]
+       and mine[0].get("memory") == "mem:store-record-of-a@1" and e["projects"] == 1,
+       f"R1: A's origin is carried with its id, not counted; B counts once ({rc} {e} {out!r})")
+    ok(emit_mem(idx, b, KEY) == (None, None), f"R1: emit from B never revises A's record ({emit_mem(idx, b, KEY)})")
+    run("rebuild", "--roots", str(root), str(work / "elsewhere-app"), "--depth", "0", index=idx)
+    ok(emit_mem(idx, work / "elsewhere-app", KEY) == ("mem:store-record-of-a", 1),
+       f"R1: A read again keeps its own record ({emit_mem(idx, work / 'elsewhere-app', KEY)})")
+
+    # R2/R6 — a shallow clone whose boundary moves while it stays shallow: never a source, so
+    # never a second project; add/emit/record refuse there, saying to deepen it.
+    src, _ = headed_repo("r2-src", [("retro.md", "export gate", KEY)])
+    for n in ("a", "b"):
+        (src / f"{n}.txt").write_text(n, encoding="utf-8")
+        git(src, "add", "-A")
+        git(src, "commit", "-q", "-m", n)
+    root = work / "r2"
+    root.mkdir()
+    sh = root / "app"
+    git(work, "clone", "-q", "--depth", "3", f"file://{src}", str(sh))
+    idx = work / "r2.jsonl"
+    rc, out, _ = run("rebuild", "--roots", str(root), index=idx)
+    git(sh, "fetch", "-q", "--deepen=1")
+    rc2, out2, _ = run("rebuild", "--roots", str(root), index=idx)
+    ok(rc == 0 and rc2 == 0 and KEY not in entries_of(idx) and "shallow" in out2,
+       f"R2: a shallow clone, deepened but still shallow, is never a source ({rc} {rc2} {out2!r})")
+    before = idx.read_bytes()
+    lid = "L-" + hashlib.sha256(KEY.encode()).hexdigest()[:12]
+    for verb in (["add", "--retro", "docs/evidence/retro.md", "--all"], ["emit-observatory", lid],
+                 ["record", lid, "--answer", "-"]):
+        rc, out, err = run(*verb, cwd=sh, index=idx, stdin=json.dumps({"memoryId": "mem:one", "revision": 1}))
+        ok(rc == 1 and "shallow" in err and "deepen" in err and idx.read_bytes() == before,
+           f"R6: {verb[0]} refuses in a shallow clone, writing nothing ({rc} {err!r})")
+
+    # R3/R3b — a worktree (locked, or merely absent and prunable) whose directory is gone for now;
+    # R4 — a worktree outside the roots whose main checkout's path now holds a stranger.
+    for tag in ("r3", "r3b", "r4"):
+        root = work / tag / "root"
+        root.mkdir(parents=True)
+        m, sha = headed_repo("app", [("retro.md", "old entry", "an-older-class")], parent=root)
+        wt = work / tag / "wt-feat"
+        git(m, "worktree", "add", "-q", "-b", "feat", str(wt))
+        write_retros(wt, [("retro.md", "old entry", "an-older-class"), ("retro.md", "export gate", KEY)], sha)
+        idx = work / tag / "i.jsonl"
+        run("rebuild", "--roots", str(root), index=idx)
+        ok(KEY in entries_of(idx), f"{tag} fixture: the worktree's lesson is indexed")
+        if tag == "r3":
+            git(m, "worktree", "lock", "--reason", "on a removable drive", str(wt))
+        if tag in ("r3", "r3b"):
+            wt.rename(work / tag / "unmounted")
+        else:
+            m.rename(work / tag / "elsewhere-app")
+            stranger, _ = headed_repo("b-src", [("retro.md", "other", "an-unrelated-class")], parent=work / tag)
+            stranger.rename(root / "app")
+        rc, out, _ = run("rebuild", "--roots", str(root), index=idx)
+        o = entries_of(idx).get(KEY, {"origins": []})["origins"]
+        ok(rc == 0 and [x.get("carried") for x in o] == ["checkout not read"] and "removed" not in out,
+           f"{tag}: the worktree's origin is carried as not read, never removed ({rc} {o} {out!r})")
+
+    # R5 — record over an existing, different id needs --replace.
+    root = work / "r5"
+    root.mkdir()
+    a, _ = headed_repo("app", [("retro.md", "export gate", KEY)], parent=root)
+    idx = work / "r5.jsonl"
+    run("rebuild", "--roots", str(root), index=idx)
+    lid = lesson_of(idx)["id"]
+    run("record", lid, "--answer", "-", cwd=a, index=idx, stdin=json.dumps({"memoryId": "mem:first", "revision": 2}))
+    before = idx.read_bytes()
+    rc, _, err = run("record", lid, "--answer", "-", cwd=a, index=idx,
+                     stdin=json.dumps({"memoryId": "mem:second", "revision": 1}))
+    ok(rc == 1 and idx.read_bytes() == before and "--replace" in err,
+       f"R5: record over a different id refuses without --replace ({rc} {err!r})")
+    rc, _, err = run("record", lid, "--answer", "-", "--replace", cwd=a, index=idx,
+                     stdin=json.dumps({"memoryId": "mem:second", "revision": 1}))
+    ok(rc == 0 and mems(idx) == {"mem:second@1": [KEY]}, f"R5: --replace replaces on purpose ({rc} {err!r} {mems(idx)})")
+
+    # --prune-carried-reason narrows the prune to one reason.
+    root = work / "pr"
+    root.mkdir()
+    x, sha = headed_repo("app", [("retro.md", "one", KEY), ("retro.md", "two", K2)], parent=root)
+    idx = work / "pr.jsonl"
+    run("rebuild", "--roots", str(root), index=idx)
+    write_retros(x, [("retro.md", "one", KEY)], sha)
+    other = work / "pr-other"
+    other.mkdir()
+    rc, out, _ = run("rebuild", "--roots", str(other), "--prune-carried", "--prune-carried-reason",
+                     "no checkout read holds it", index=idx)
+    ok(rc == 0 and KEY in entries_of(idx) and K2 in entries_of(idx),
+       f"--prune-carried-reason prunes only that reason ({rc} {out!r} {sorted(entries_of(idx))})")
+    rc, out, _ = run("rebuild", "--roots", str(root), "--prune-carried", "--prune-carried-reason",
+                     "no checkout read holds it", index=idx)
+    ok(rc == 0 and KEY in entries_of(idx) and K2 not in entries_of(idx) and "pruned" in out,
+       f"--prune-carried-reason removes exactly the origins carried for that reason ({rc} {out!r})")
+
+    # #5/#6/R7 — lines that pass the shape check but used to crash a verb.
+    d, _ = headed_repo("r7", [("retro.md", "export gate", KEY)])
+    base_idx = work / "r7-base.jsonl"
+    run("add", "--retro", "docs/evidence/retro.md", "--all", cwd=d, index=base_idx)
+    base = json.loads(base_idx.read_text(encoding="utf-8"))
+    muts = {
+        "no status": lambda e: e.pop("status"),
+        "no stages/grade": lambda e: (e.pop("stages"), e.pop("grade")),
+        "id of another class": lambda e: e.__setitem__("id", "L-000000000000"),
+        "carried not in the enum": lambda e: e["origins"][0].__setitem__("carried", "whatever"),
+        "memory @0": lambda e: e["origins"][0].__setitem__("memory", "mem:z@0"),
+        "duplicate origin": lambda e: e["origins"].append(dict(e["origins"][0])),
+        "status lies": lambda e: (e.__setitem__("status", "candidate"), e.__setitem__("projects", 7)),
+    }
+    for name, mut in muts.items():
+        bad = json.loads(json.dumps(base))
+        mut(bad)
+        for verb in (["query", "gate"], ["candidates", "--min-projects", "1"], ["show", base["id"]],
+                     ["emit-observatory", base["id"]], ["add", "--retro", "docs/evidence/retro.md", "--all"],
+                     ["rebuild", "--roots", str(d), "--depth", "0"]):
+            h = work / f"r7-{len(name)}-{verb[0]}.jsonl"
+            h.write_text(json.dumps(bad) + "\n", encoding="utf-8")
+            rc, out, err = run(*verb, cwd=d, index=h)
+            ok("Traceback" not in err, f"R7 {name}: {verb[0]} never crashes ({rc} {err[-200:]!r})")
+            if name == "status lies" and verb[0] == "query":
+                ok("projects 1" in out and "candidate" not in out,
+                   f"#6: derived fields are recomputed at load, never trusted from disk ({out!r})")
+            if name == "duplicate origin" and verb[0] == "query":
+                ok("seen 1" in out, f"R7: a duplicated origin is one origin ({out!r})")
 
 
 def source_admission_controls():
@@ -1651,6 +1831,7 @@ def main():
     provenance_controls()
     index_shape_controls()
     round10_controls()
+    round11_controls()
     source_admission_controls()
     print(f"PASS: lessons.py — {CASES} cases")
 
