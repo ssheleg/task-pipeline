@@ -1,7 +1,7 @@
 ## Unreleased
 
-Guards: 439 → **452**; property checks 15 → **15**. There are 13 new negatives in
-`lessons.py rebuild`. Each one plants a revert, and the suite must catch it:
+Guards: 439 → **455**; property checks 15 → **15**. There are 16 new negatives in
+`lessons.py`. Each one plants a revert, and the suite must catch it:
 
 - the whole-scan refusal put back;
 - the carry-forward removed;
@@ -15,14 +15,35 @@ Guards: 439 → **452**; property checks 15 → **15**. There are 13 new negativ
 - one memory id left on two class keys;
 - problems attributed by path prefix;
 - `emit`/`record` ignoring the origin that holds the memory id;
-- memory ids compared together with their `@revision`.
+- memory ids compared together with their `@revision`;
+- a path trusted over the project checked out there;
+- a project counted twice after its key changed;
+- `record` putting one memory id on two class keys.
 
-These are the fixes from verification rounds 6 to 9 of release iteration 1.
+These are the fixes from verification rounds 6 to 10 of release iteration 1.
 
-- **Identity in `lessons.py rebuild`** (rounds 8–9). The rule is: **implicit removal needs
+- **Identity in `lessons.py rebuild`** (rounds 8–10). The rule is: **implicit removal needs
   positive evidence from the same checkout.**
   - Each origin records its provenance, `checkouts`: the real paths of the checkouts it was
-    derived from. The paths stay in the local index and are never emitted.
+    derived from, and `worktreeOf`, the main checkout of each git worktree among them. The
+    paths stay in the local index; they are never emitted, and `show` omits them.
+  - A path is not an identity (round 10). A checkout decides for an origin only while it holds
+    the origin's project; otherwise the origin is carried as `checkout holds another project`.
+  - A checkout whose project key changed (`fetch --unshallow`, a re-init) but that still holds
+    the entry supersedes its old-key origin. The memory id moves, the output prints
+    `moved: project key changed`, and no phantom second project appears. A shallow clone is a
+    problem owned by its checkout.
+  - A worktree that its main checkout, read completely, no longer lists was removed: it counts
+    as gone.
+  - Retro files are stamped when read and again under the lock. A file that changed in
+    between, such as an `add` landing mid-run, leaves its checkout incomplete, so that run never
+    removes the lesson.
+  - `record` refuses, with exit 1 and nothing written, a memory id that another class key holds
+    or a revision older than the one held.
+  - An index line whose fields have the wrong types is a corrupt line, never a traceback. Each
+    origin's lesson must pass lesson/1. Merged duplicate lines keep both provenances.
+  - Exit 1 means nothing could be read: every root missing or unreadable. A readable empty
+    root exits 0.
   - Without `--prune-carried`, an origin is removed only when every checkout in its
     provenance meets all three conditions. It was discovered and read completely, with no
     problem owned by it. Its retro file at that path was read. That file no longer holds the

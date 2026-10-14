@@ -23,11 +23,12 @@ previous index knew: carried origins, their provenance and memory ids.
     lessons.py rebuild --roots DIR ... [--depth 3] [--prune-carried]
         re-derive the index from every retro found under the roots and their git worktrees.
         Each origin records the checkouts it came from; it is removed only on positive
-        evidence from those same checkouts — read completely, its retro file read, the entry
-        gone. Every other origin is carried forward, marked `carried: <reason>`, and named.
-        Memory ids follow (project, classKey). Exit 0 whenever anything was read; exit 1,
-        touching nothing, only when nothing could be read. --prune-carried removes the
-        carried origins on purpose
+        evidence from those same checkouts — read completely, holding the origin's project,
+        its retro file read, the entry gone. A checkout whose project key changed supersedes
+        its old-key origin. Every other origin is carried forward, marked `carried: <reason>`,
+        and named. Memory ids follow (project, classKey). Exit 1, touching nothing, only when
+        nothing could be read: every root missing or unreadable. A readable empty root exits 0
+        and writes the index. --prune-carried removes the carried origins on purpose
     lessons.py candidates [--min-projects 2]
         lessons two or more projects hold: the `retro.publish` queue for learned.md
     lessons.py show L-<sha12>
@@ -85,7 +86,8 @@ its project and is skipped, counted aloud.
 
 Exit codes: 0 done (an absent index on `query` is a state, printed; a `rebuild` that named
 what it skipped or carried); 1 a refusal — a lesson that fails lesson/1 or whose commit does
-not resolve on `add`, a held lock, an unknown id, a `rebuild` that read nothing; 2 usage or an
+not resolve on `add`, a held lock, an unknown id, a `rebuild` whose every root was missing or
+unreadable, a `record` naming an id another class holds or an older revision; 2 usage or an
 unreadable input. Stdlib only (`references/portability.md`).
 """
 from __future__ import annotations
@@ -619,13 +621,18 @@ def mem_rev(memory: str) -> int:
 
 
 def _entry_shape(e: object) -> bool:
-    """A lesson-index/1 line every verb can use (rounds 8–9, L1/L2): the entry's own fields —
-    class key, id, title, trigger, check, nouns, seen, projects — and a non-empty list of
-    origins, each with its project, retro, commit and a lesson carrying every lesson/1 field.
-    Anything less is a corrupt line, never a KeyError in the middle of a verb."""
+    """A lesson-index/1 line every verb can use (rounds 8–10, L1/L2/H2): the entry's own fields
+    with their types — class key, id, title, trigger, check, nouns (strings), seen, projects —
+    and a non-empty list of origins, each with its project, retro, commit and a lesson that
+    lesson/1 itself accepts (`validate`, with that origin), of the entry's class. Optional
+    fields keep their types: memory `mem:<id>@<rev>`, checkouts non-empty strings, worktreeOf
+    string to string, carried a string. Anything less is a corrupt line — set aside, its good
+    neighbours salvaged — never a TypeError in the middle of a verb."""
     if not isinstance(e, dict) or not isinstance(e.get("classKey"), str):
         return False
-    if not all(isinstance(e.get(k), str) for k in ENTRY_TEXT) or not isinstance(e.get("nouns"), list):
+    if not all(isinstance(e.get(k), str) for k in ENTRY_TEXT):
+        return False
+    if not isinstance(e.get("nouns"), list) or not all(isinstance(n, str) for n in e["nouns"]):
         return False
     if not all(isinstance(e.get(k), int) and not isinstance(e.get(k), bool) for k in ("seen", "projects")):
         return False
@@ -634,21 +641,30 @@ def _entry_shape(e: object) -> bool:
         return False
     for o in origins:
         if not (isinstance(o, dict) and all(isinstance(o.get(k), str) for k in ("project", "retro", "commit"))
-                and isinstance(o.get("lesson"), dict) and all(k in o["lesson"] for k in LESSON_KEYS)
-                and isinstance(o["lesson"].get("nouns"), list)):
+                and isinstance(o.get("lesson"), dict) and all(k in o["lesson"] for k in LESSON_KEYS)):
+            return False
+        body = {k: o["lesson"][k] for k in LESSON_KEYS}
+        whole = dict(body, schema="lesson/1",
+                     origin={"project": o["project"], "commit": o["commit"], "retro": o["retro"]})
+        if validate(whole) or body["classKey"] != e["classKey"]:
             return False
         if "memory" in o and not (isinstance(o["memory"], str) and MEM_RE.fullmatch(o["memory"])):
             return False
         if "checkouts" in o and not (isinstance(o["checkouts"], list)
-                                     and all(isinstance(c, str) for c in o["checkouts"])):
+                                     and all(isinstance(c, str) and c for c in o["checkouts"])):
+            return False
+        if "worktreeOf" in o and not (isinstance(o["worktreeOf"], dict) and all(
+                isinstance(k, str) and isinstance(v, str) and k and v for k, v in o["worktreeOf"].items())):
+            return False
+        if "carried" in o and not isinstance(o["carried"], str):
             return False
     return True
 
 
 def _put(out: dict[str, dict], e: dict, notes: list[str] | None) -> None:
     """Two lines for one class key (a hand-concatenated index) merge their origins — one origin
-    per (project, retro), the one with the higher memory revision winning — never last-one-wins
-    (round 9, L4/D3). The merge is said aloud."""
+    per (project, retro), the one with the higher memory revision winning, its provenance the
+    union of both copies' (round 10, G5) — never last-one-wins (round 9, L4/D3). Said aloud."""
     ck = e["classKey"]
     if ck not in out:
         out[ck] = e
@@ -656,8 +672,13 @@ def _put(out: dict[str, dict], e: dict, notes: list[str] | None) -> None:
     by_key: dict[tuple, dict] = {}
     for o in out[ck]["origins"] + e["origins"]:
         k = _origin_key(o)
-        if k not in by_key or mem_rev(o.get("memory") or "") > mem_rev(by_key[k].get("memory") or ""):
-            by_key[k] = o
+        if k in by_key:
+            keep, other = ((o, by_key[k]) if mem_rev(o.get("memory") or "")
+                           > mem_rev(by_key[k].get("memory") or "") else (by_key[k], o))
+            prov = sorted(set(keep.get("checkouts") or []) | set(other.get("checkouts") or []))
+            parents = dict(other.get("worktreeOf") or {}, **(keep.get("worktreeOf") or {}))
+            o = dict(keep, **({"checkouts": prov} if prov else {}), **({"worktreeOf": parents} if parents else {}))
+        by_key[k] = o
     out[ck] = derive(list(by_key.values()))
     if notes is not None:
         notes.append(f"two lines for {ck} merged — {len(by_key)} origin"
@@ -1037,16 +1058,32 @@ def _worktrees(repo: pathlib.Path, problems: list[Problem]) -> list[pathlib.Path
     if listing is None:
         problems.append((repo, f"{repo}: worktrees cannot be listed ({why})"))
         return []
-    out = []
-    for block in listing.split("\n\n"):
+    out, main = [], None
+    for n, block in enumerate(listing.split("\n\n")):
         lines = block.splitlines()
         head = next((ln[len("worktree "):] for ln in lines if ln.startswith("worktree ")), None)
-        if head is None or any(ln == "bare" or ln.startswith("prunable") for ln in lines):
+        if head is None:
+            continue
+        if n == 0 and "bare" not in lines:
+            main = checkout_id(pathlib.Path(head))  # git lists the main worktree first
+        if any(ln == "bare" or ln.startswith("prunable") for ln in lines):
             continue
         path = pathlib.Path(head)
         if path.is_dir():
             out.append(path)
+    # Parentage (round 10, F2): which worktrees the main checkout lists right now. A worktree
+    # it no longer lists was removed, and an origin's provenance may then count it gone.
+    if main is not None:
+        _TREES[main] = {checkout_id(p) for p in out}
+        for p in out:
+            if checkout_id(p) != main:
+                _PARENT[checkout_id(p)] = main
     return out
+
+
+# Per run: main checkout → the worktrees it lists (listing read), and worktree → its main.
+_TREES: dict[str, set[str]] = {}
+_PARENT: dict[str, str] = {}
 
 
 def _artifact_root(repo: pathlib.Path) -> pathlib.Path:
@@ -1085,6 +1122,7 @@ def _artifact_root(repo: pathlib.Path) -> pathlib.Path:
 CARRY_CHECKOUT = "checkout not read"
 CARRY_FILE = "retro file not read"
 CARRY_LEGACY = "no provenance"
+CARRY_FOREIGN = "checkout holds another project"
 CARRY_UNRESOLVED = "commit does not resolve"
 CARRY_CITES_UNRESOLVED = "retro cites a commit that does not resolve"
 CARRY_REFUSED = "lesson refused"
@@ -1093,12 +1131,29 @@ CARRY_RECORDED = "no checkout read holds it"
 
 def _gone_from(c: str, ck: str, o: dict, run: dict) -> bool:
     """Positive evidence, from checkout `c` itself, that it no longer holds origin `o` of class
-    `ck` (round 9): `c` was discovered and read completely with no problem owned by it, its
-    retro file at the origin's path was read, and that file holds no such entry."""
+    `ck` (round 9): `c` was discovered and read completely with no problem owned by it, it holds
+    the origin's PROJECT (round 10, F1 — a path is not an identity), its retro file at the
+    origin's path was read, and that file holds no such entry. Or (round 10, F2) `c` was a
+    worktree whose main checkout read completely and no longer lists it: it was removed."""
+    if c not in run["project"]:
+        main = (o.get("worktreeOf") or {}).get(c)
+        return bool(main) and main in run["complete"] and main in run["trees"] and c not in run["trees"][main]
     rel = o["retro"].split("#", 1)[0]
-    if c not in run["complete"] or rel not in run["files"].get(c, ()):
+    if (c not in run["complete"] or run["project"][c] != o["project"]
+            or rel not in run["files"].get(c, ())):
         return False
     return (ck, o["retro"]) not in run["held"].get(c, ()) and o["retro"] not in run["refused"].get(c, ())
+
+
+def _moved_in(c: str, ck: str, o: dict, run: dict) -> str | None:
+    """The new project key when checkout `c` now holds another project key AND the same
+    (classKey, retro) — the same checkout after `fetch --unshallow` or a re-init, not a stranger
+    (round 10, J1/J2). The old-key origin is then superseded by the one `c` derives."""
+    p = run["project"].get(c)
+    if (p is None or p == o["project"] or c not in run["complete"]
+            or (ck, o["retro"]) not in run["held"].get(c, ())):
+        return None
+    return p
 
 
 def _carry_reason(ck: str, o: dict, still: list[str], run: dict) -> str:
@@ -1108,6 +1163,8 @@ def _carry_reason(ck: str, o: dict, still: list[str], run: dict) -> str:
         return CARRY_UNRESOLVED if run["unresolved"][k] == o["commit"] else CARRY_CITES_UNRESOLVED
     if any(o["retro"] in run["refused"].get(c, ()) for c in still):
         return CARRY_REFUSED
+    if any(c in run["complete"] and run["project"].get(c) not in (None, o["project"]) for c in still):
+        return CARRY_FOREIGN
     if any(c not in run["complete"] for c in still):
         return CARRY_CHECKOUT
     return CARRY_FILE
@@ -1191,21 +1248,32 @@ def _one_class_per_memory(entries: dict[str, dict], notes: list[str]) -> None:
 
 
 def cmd_rebuild(a, idx: pathlib.Path) -> int:
-    """Rebuild never loses what it cannot re-derive (rounds 7–9 of release iteration 1).
+    """Rebuild never loses what it cannot re-derive (rounds 7–10 of release iteration 1).
 
     The index becomes the lessons derived from every readable retro — under the roots, and in
     every git worktree of each checkout found — merged with the previous index's origins that
     could not be re-derived, CARRIED FORWARD. An origin is one project's copy of a lesson,
     `(project, retro#anchor)` under its class key, and it records its PROVENANCE: `checkouts`,
-    the real paths of the checkouts it was derived from.
+    the real paths of the checkouts it was derived from, and `worktreeOf`, the main checkout of
+    each that was a git worktree. Provenance stays in the index file; `show` and `emit` omit it.
 
     The one rule (round 9): implicit removal needs positive evidence from the same checkout.
     Without `--prune-carried`, an origin leaves only when, for EVERY checkout in its provenance,
     (a) that checkout was discovered in this run and read completely, with no problem owned by
-    it; (b) its retro file at the origin's path was read; and (c) that file no longer holds the
-    entry. Every other case carries the origin, with the reason:
+    it, and holds the origin's PROJECT — a path is not an identity (round 10); (b) its retro
+    file at the origin's path was read; and (c) that file no longer holds the entry. A worktree
+    whose main checkout read completely and no longer lists it was removed: it counts as gone.
+
+    A checkout that now holds ANOTHER project key and the same (classKey, retro) is the same
+    checkout after `fetch --unshallow` or a re-init: its old-key origin is superseded by the one
+    it derives — the memory id moves, the run says `moved: project key changed`, and `projects`
+    does not count it twice (round 10). A shallow clone is a problem owned by its checkout: its
+    key is not stable yet.
+
+    Every other case carries the origin, with the reason:
       * `checkout not read` — not discovered, or a problem is owned by it (an unreadable retro,
-        a refused `git worktree list`, a broken configuration);
+        a refused `git worktree list`, a shallow clone, a retro that changed during the run);
+      * `checkout holds another project` — a different project now sits at that path;
       * `retro file not read` — the checkout read completely, but not that file (outside the
         artifact root, moved, deleted);
       * `no provenance` — an origin written before provenance existed;
@@ -1217,27 +1285,35 @@ def cmd_rebuild(a, idx: pathlib.Path) -> int:
     and `carried: <reason>`; it counts toward `seen`, `projects` and `status`, and is re-derived
     and un-marked as soon as a checkout holding it reads again.
 
+    Retro files are stamped when read and stamped again under the lock: a file that changed in
+    between — an `add` landing mid-run — leaves its checkout incomplete for this run (round 10).
+
     Memory ids follow (project, classKey) and compare before `@` (`_attach_memory`,
     `_one_class_per_memory`). The run refuses to write if a memory id of the previous index would
     vanish other than by `--prune-carried`; an id that only a corrupt line held is named, with
     the `.corrupt-<date>` file that keeps it.
 
-    Exit 0 whenever anything was read — a retro, or a checkout discovered in full. Exit 1 only
-    when nothing was read — before the session opens, so no index, lock directory or migration
-    is touched — or on a lock or unreadable-index refusal. On the default path the one-time merge
-    of the standalone index, and setting a corrupt index aside (its good lines salvaged), run
-    first, as for every verb."""
+    Exit 0 whenever anything was read — a retro, or a checkout discovered in full — and for a
+    readable root that holds no checkout at all (an empty scope: the index is written, every
+    origin carried). Exit 1 only when nothing could be read because every root was missing or
+    unreadable — before the session opens, so no index, lock directory or migration is touched —
+    or on a lock or unreadable-index refusal. On the default path the one-time merge of the
+    standalone index, and setting a corrupt index aside (its good lines salvaged), run first, as
+    for every verb."""
     found, problems, repos = find_retros(a.roots, a.depth)
     lessons: list[tuple[str, dict]] = []
     private, seen_files = 0, 0
     unresolved: list[str] = []
     keys: dict[pathlib.Path, str] = {}
-    run: dict = {"files": {}, "held": {}, "refused": {}, "unresolved": {}, "complete": set()}
+    stats: dict[tuple, tuple] = {}
+    run: dict = {"files": {}, "held": {}, "refused": {}, "unresolved": {}, "complete": set(),
+                 "project": {}, "trees": dict(_TREES)}
     for repo, retro in found:
         c = checkout_id(repo)
         try:
             if repo not in keys:
                 keys[repo] = project_key(repo)
+            stats[(repo, retro)] = _stamp(retro)
             refused: set[str] = set()
             got, priv, probs = parse_retro(retro, repo, keys[repo], refused)
             mine, unres = [], []
@@ -1262,6 +1338,22 @@ def cmd_rebuild(a, idx: pathlib.Path) -> int:
         unresolved += [f"{repo.name}: {le['classKey']} (commit {le['origin']['commit']})" for le in unres]
         lessons += [(c, le) for le in mine]
         problems += [(repo, f"{repo.name}: {p}") for p in probs]
+    # Which project each checkout holds (round 10, F1: a path is not an identity), and whether its
+    # key is stable: a shallow clone's root commit moves when it is deepened (J1).
+    for repo in repos:
+        try:
+            if repo not in keys:
+                keys[repo] = project_key(repo)
+            run["project"][checkout_id(repo)] = keys[repo]
+        except Refused:
+            continue
+        try:
+            shallow = _git(repo, "rev-parse", "--is-shallow-repository") == "true"
+        except Refused:
+            shallow = False
+        if shallow:
+            problems.append((repo, f"{repo}: a shallow clone — its project key changes when it is "
+                                   "deepened, so it shows nothing gone until then"))
     owners = {owner for owner, _ in problems}
     run["complete"] = {checkout_id(r) for r, whole in repos.items() if whole and r not in owners}
     if problems and not seen_files and not run["complete"]:
@@ -1271,6 +1363,13 @@ def cmd_rebuild(a, idx: pathlib.Path) -> int:
               "and any migration were not touched", file=sys.stderr)
         return 1
     with session(idx, a.default_index) as ss:
+        # A retro that changed after it was read — an `add` landing between discovery and this
+        # lock (round 10, H1) — decides nothing: its checkout is not complete for this run.
+        for (repo, retro), stamp in stats.items():
+            if _stamp(retro) != stamp:
+                problems.append((repo, f"{repo.name}: {_relative(repo, retro)} changed while the "
+                                       "rebuild ran — read again next run"))
+                run["complete"].discard(checkout_id(repo))
         # The previous index lends its memory ids, its provenance and its carried origins.
         # `session` already refused an unreadable one (its contents may be good) and set a
         # corrupt one aside, its good lines salvaged; its notes go to stderr as for every verb,
@@ -1285,39 +1384,62 @@ def cmd_rebuild(a, idx: pathlib.Path) -> int:
         # below decides, the same way every time.
         for c, le in sorted(lessons, key=lambda x: (x[0], json.dumps(x[1], sort_keys=True))):
             merge(entries, [le], c)
-        # A re-derived origin keeps the previous provenance that did not show it gone.
+        # A re-derived origin keeps the previous provenance that did not show it gone, and every
+        # worktree in it remembers its main checkout (round 10, F2).
         for ck, e in list(entries.items()):
             prev = {_origin_key(o): o for o in old.get(ck, {}).get("origins", [])}
             origins = []
             for o in e["origins"]:
-                was = prev.get(_origin_key(o))
-                extra = [c for c in (was or {}).get("checkouts") or []
-                         if c not in o["checkouts"] and not _gone_from(c, ck, o, run)]
-                origins.append(dict(o, checkouts=sorted(set(o["checkouts"]) | set(extra))) if extra else o)
+                was = prev.get(_origin_key(o)) or {}
+                extra = [c for c in was.get("checkouts") or []
+                         if c not in o["checkouts"] and not _gone_from(c, ck, dict(o, worktreeOf=was.get("worktreeOf") or {}), run)]
+                prov = sorted(set(o["checkouts"]) | set(extra))
+                parents = {c: m for c, m in (was.get("worktreeOf") or {}).items() if c in prov}
+                parents.update({c: _PARENT[c] for c in prov if c in _PARENT})
+                o = dict(o, checkouts=prov)
+                if parents:
+                    o["worktreeOf"] = parents
+                origins.append(o)
             entries[ck] = derive(origins)
         _attach_memory(entries, old, notes)
-        attached = {mem_base(o["memory"]) for e in entries.values() for o in e["origins"] if o.get("memory")}
         derived = {(ck, _origin_key(o)) for ck, e in entries.items() for o in e["origins"]}
-        carried, pruned, removed = [], [], []
+        carried, pruned, removed, moved, all_gone = [], [], [], [], []
         for ck, e in sorted(old.items()):
             for o in e["origins"]:
                 if (ck, _origin_key(o)) in derived:
                     continue
                 prov = o.get("checkouts") or []
-                still = [c for c in prov if not _gone_from(c, ck, o, run)]
+                newkey = {c: _moved_in(c, ck, o, run) for c in prov}
+                still = [c for c in prov if not newkey[c] and not _gone_from(c, ck, o, run)]
+                target = next((x for c in prov if newkey[c] for x in entries.get(ck, {}).get("origins", [])
+                               if _origin_key(x) == (newkey[c], o["retro"])), None)
                 if not prov:
                     reason, keep = CARRY_LEGACY, prov
-                elif still:
+                elif still or (any(newkey.values()) and target is None):
+                    still = still or [c for c in prov if newkey[c]]
                     reason, keep = _carry_reason(ck, o, still, run), still
-                elif o.get("memory") and mem_base(o["memory"]) not in attached:
+                elif target is not None:
+                    # The same checkout under a new project key (J1/J2): superseded, not doubled.
+                    if o.get("memory") and not target.get("memory"):
+                        target["memory"] = o["memory"]
+                        entries[ck] = derive(entries[ck]["origins"])
+                    if not o.get("memory") or mem_base(target["memory"]) == mem_base(o["memory"]):
+                        moved.append((ck, o, target["project"]))
+                        continue
                     reason, keep = CARRY_RECORDED, prov
                 else:
-                    removed.append((ck, o))
+                    all_gone.append((ck, o))
                     continue
                 rec = dict(o, carried=reason)
                 if keep:
                     rec["checkouts"] = sorted(keep)
                 (pruned if a.prune_carried else carried).append((ck, rec))
+        attached = {mem_base(o["memory"]) for e in entries.values() for o in e["origins"] if o.get("memory")}
+        for ck, o in all_gone:
+            if o.get("memory") and mem_base(o["memory"]) not in attached:
+                (pruned if a.prune_carried else carried).append((ck, dict(o, carried=CARRY_RECORDED)))
+            else:
+                removed.append((ck, o))
         for ck, o in carried:
             held = [x for x in entries[ck]["origins"] if _origin_key(x) != _origin_key(o)] if ck in entries else []
             entries[ck] = derive(held + [o])
@@ -1343,6 +1465,9 @@ def cmd_rebuild(a, idx: pathlib.Path) -> int:
               + (f" · {o['memory']}" if o.get("memory") else ""))
     for ck, o in pruned:
         print(f"  pruned ({o['carried']}): {ck} — {o['project']} {o['retro']}")
+    for ck, o, new in moved:
+        print(f"  moved: project key changed — {ck} {o['retro']}: {o['project']} → {new}"
+              + (f" · {o['memory']}" if o.get("memory") else ""))
     for ck, o in removed:
         print(f"  removed (its checkout read it and no longer holds it): {ck} — {o['project']} {o['retro']}")
     for u in unresolved:
@@ -1356,6 +1481,15 @@ def cmd_rebuild(a, idx: pathlib.Path) -> int:
     for _, p in problems:
         print(f"  not read: {p}")
     return 0
+
+
+def _stamp(path: pathlib.Path) -> tuple:
+    """A retro file's (mtime_ns, size, inode) — compared under the lock to see it changed."""
+    try:
+        st = path.stat()
+    except OSError:
+        return ()
+    return (st.st_mtime_ns, st.st_size, st.st_ino)
 
 
 def cmd_candidates(a, idx: pathlib.Path) -> int:
@@ -1468,6 +1602,22 @@ def cmd_record(a, idx: pathlib.Path) -> int:
                   file=sys.stderr)
             return 2
         memory = f"{mid}@{int(rev)}"
+        # One id is one store record of one class (round 10, G1): an answer naming an id another
+        # class key holds is a stale or misplaced answer — refused, nothing written, or `emit`
+        # for this class would revise the other class's record.
+        others = sorted(ck for ck, x in entries.items() if ck != e["classKey"]
+                        and any(mem_base(y.get("memory") or "") == mid for y in x["origins"]))
+        if others:
+            print(f"lessons: {mid} is the store record of {', '.join(others)} — refused for "
+                  f"{e['classKey']}, nothing written", file=sys.stderr)
+            return 1
+        # A revision never goes back (G1b): a replayed older answer is refused.
+        held = max((mem_rev(y["memory"]) for y in e["origins"]
+                    if y.get("memory") and mem_base(y["memory"]) == mid), default=0)
+        if int(rev) < held:
+            print(f"lessons: {mid} is at revision {held}; revision {int(rev)} is older — refused, "
+                  "nothing written", file=sys.stderr)
+            return 1
         # The same id elsewhere in this entry takes the new revision too: one record, one revision.
         origins = [dict(x, memory=memory) if _origin_key(x) == _origin_key(o)
                    or (x.get("memory") and mem_base(x["memory"]) == mid) else x
@@ -1483,6 +1633,10 @@ def cmd_record(a, idx: pathlib.Path) -> int:
 def cmd_show(a, idx: pathlib.Path) -> int:
     with session(idx, a.default_index) as ss:
         e = _resolve(ss.entries, a.id)
+    # Provenance is local machine state — absolute checkout paths — and stays in the index file:
+    # `show` prints the entry without it (round 10, G3), like everything that leaves the index.
+    e = dict(e, origins=[{k: v for k, v in o.items() if k not in ("checkouts", "worktreeOf")}
+                         for o in e["origins"]])
     print(json.dumps(e, ensure_ascii=True, indent=1, sort_keys=True))
     return 0
 

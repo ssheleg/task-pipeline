@@ -1,11 +1,13 @@
-## Fix cycles 6–9 of the release iteration — #125, branch `iter1/M-5-N-1` (2026-10-13)
+## Fix cycles 6–10 of the release iteration — #125, branch `iter1/M-5-N-1` (2026-10-14)
 
-Rounds 6 to 9 failed on `lessons.py rebuild`. Cycle 7, under the loop guard, changed the
+Rounds 6 to 10 failed on `lessons.py rebuild`. Cycle 7, under the loop guard, changed the
 design rather than the guard. Cycle 9, under the loop guard again, replaced the identity
 logic with one rule: implicit removal needs positive evidence from the same checkout. Each
-origin records its `checkouts`, and memory ids are keyed by `(project, classKey)`. See
-`provenance_controls`, `index_shape_controls` and negatives 455–467. This branch merges
-`origin/main` (v1.95.0, #127) without rewriting history. The fixes are recorded in the CHANGELOG under *Unreleased*. The branch is
+origin records its `checkouts`, and memory ids are keyed by `(project, classKey)`. Cycle 10
+made the checked-out project part of that evidence. A changed project key supersedes the
+old one instead of doubling it, and `record` refuses an id that another class holds. See
+`provenance_controls`, `index_shape_controls`, `round10_controls` and negatives 455–470. This
+branch merges `origin/main` (v1.95.0 with #128) without rewriting history. The fixes are recorded in the CHANGELOG under *Unreleased*. The branch is
 pushed but not merged, and no version or publication is claimed.
 
 - **Rebuild:** `lessons.py rebuild` never loses what it cannot re-derive. Unread or
@@ -18,7 +20,7 @@ pushed but not merged, and no version or publication is claimed.
 - **New rules:** a parallel-work check before each cycle (`iteration.md` → *The cycle*), and
   background-dispatch command hygiene (`build.md` §4.1).
 
-Next task: run round 10 of verification on #125's head. The release order after v1.95.0 is
+Next task: run round 11 of verification on #125's head. The release order after v1.95.0 is
 the coordinator's.
 
 ## Operator stop: Claude continuation — FW07 child lifetime

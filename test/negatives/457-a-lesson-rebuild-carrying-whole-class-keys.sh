@@ -6,7 +6,7 @@ python3 - <<'EOF'
 # Carrying is per origin. Decide for the whole class instead: an origin its own checkout shows gone then survives because another origin of the class was not read.
 p = "/tmp/rebuild-classkey-copy/plugins/task-pipeline/skills/task-pipeline/scripts/lessons.py"
 t = open(p, encoding="utf-8").read()
-needle = '                still = [c for c in prov if not _gone_from(c, ck, o, run)]\n'
+needle = '                still = [c for c in prov if not newkey[c] and not _gone_from(c, ck, o, run)]\n'
 assert needle in t, "PLANT DID NOT LAND: anchor absent before edit"
 open(p, "w", encoding="utf-8").write(t.replace(needle, '                still = [c for x in e["origins"] for c in (x.get("checkouts") or []) if not _gone_from(c, ck, x, run)]\n', 1))
 assert needle not in open(p, encoding="utf-8").read(), "PLANT DID NOT LAND"

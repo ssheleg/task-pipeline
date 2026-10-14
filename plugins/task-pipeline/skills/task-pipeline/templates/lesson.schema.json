@@ -212,6 +212,7 @@
               "carried": {
                 "enum": [
                   "checkout not read",
+                  "checkout holds another project",
                   "retro file not read",
                   "no provenance",
                   "commit does not resolve",
@@ -226,7 +227,14 @@
                 "items": {
                   "type": "string"
                 },
-                "description": "Provenance: the real top-level paths of the checkouts this origin was derived from. Only these checkouts can show it gone. Local to this machine's index; never emitted to a store."
+                "description": "Provenance: the real top-level paths of the checkouts this origin was derived from. Only these checkouts, while they hold the origin's project, can show it gone. Local to this machine's index; never emitted to a store, and not printed by `show`."
+              },
+              "worktreeOf": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "description": "For each checkout in `checkouts` that was a git worktree: its main checkout. A worktree its main checkout no longer lists was removed, and counts as gone. Local, like `checkouts`."
               },
               "lesson": {
                 "type": "object"

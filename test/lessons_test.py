@@ -892,6 +892,174 @@ def index_shape_controls():
        f"D3: two lines for one class key merge their origins, said aloud ({rc} {ids} {out!r} {err!r})")
 
 
+def round10_controls():
+    """Round 10 (adversarial): provenance is a checkout path AND the project checked out there.
+    F1 a different project at the same path decides nothing; J1/J2 a project-key change at one
+    path supersedes, never doubles; F2 a removed worktree counts as gone; G1 record never puts
+    one id on two classes nor lowers a revision; H1 an add racing a rebuild is kept; H2/G2 a
+    type-malformed line is corrupt, never a traceback; G3 show prints no local paths; G5 merged
+    lines keep both provenances."""
+    work = tree("tp-lessons-r10-")
+
+    # F1 — project A at root/app; A moves out; project B (its own root commit) takes root/app.
+    root = work / "f1"
+    root.mkdir()
+    a, _ = headed_repo("app", [("retro.md", "export gate", KEY)], parent=root)
+    idx = work / "f1.jsonl"
+    run("rebuild", "--roots", str(root), index=idx)
+    a.rename(work / "elsewhere-app")
+    # Its own root commit: a repo named alike, made in the same second, would share A's root SHA.
+    b, _ = headed_repo("app-b", [("retro.md", "other entry", "an-unrelated-class")], parent=work)
+    b.rename(root / "app")
+    rc, out, _ = run("rebuild", "--roots", str(root), index=idx)
+    o = lesson_of(idx)["origins"]
+    ok(rc == 0 and len(o) == 1 and o[0].get("carried") == "checkout holds another project",
+       f"F1: a different project at the same path decides nothing for A's origin ({rc} {o} {out!r})")
+
+    # J2 — the repository is re-initialised in place (new root commit), same retro, a memory id
+    # recorded: the old-key origin is superseded, its id moves, one project.
+    root = work / "j2"
+    root.mkdir()
+    x, sha = headed_repo("app", [("retro.md", "export gate", KEY)], parent=root)
+    idx = work / "j2.jsonl"
+    run("rebuild", "--roots", str(root), index=idx)
+    record_mem(idx, x, KEY, "mem:j2")
+    old_key = lesson_of(idx)["origins"][0]["project"]
+    shutil.rmtree(x / ".git")
+    git(x, "init", "-q")
+    (x / "NEW").write_text("reinit", encoding="utf-8")
+    git(x, "add", "-A")
+    git(x, "commit", "-q", "-m", "reinit")
+    write_retros(x, [("retro.md", "export gate", KEY)], git(x, "rev-parse", "HEAD"))
+    rc, out, _ = run("rebuild", "--roots", str(root), index=idx)
+    e = lesson_of(idx)
+    ok(rc == 0 and e["projects"] == 1 and e["status"] == "local" and len(e["origins"]) == 1
+       and e["origins"][0]["project"] != old_key and e["origins"][0].get("memory") == "mem:j2@1"
+       and "project key changed" in out,
+       f"J2: a re-initialised repository supersedes its old key; the id moves ({rc} {e['projects']} {out!r})")
+
+    # J1 — a shallow clone is a problem owned by its checkout (its key is unstable); once
+    # deepened, the old-key origin is superseded, never a phantom second project.
+    src, _ = headed_repo("j1-src", [("retro.md", "export gate", KEY)])
+    root = work / "j1"
+    root.mkdir()
+    sh = root / "app"
+    git(work, "clone", "-q", "--depth", "2", f"file://{src}", str(sh))
+    idx = work / "j1.jsonl"
+    rc, out, _ = run("rebuild", "--roots", str(root), index=idx)
+    ok(rc == 0 and "shallow" in out and KEY in entries_of(idx), f"J1: a shallow clone is named ({rc} {out!r})")
+    git(sh, "fetch", "-q", "--unshallow")
+    rc, out, _ = run("rebuild", "--roots", str(root), index=idx)
+    e = lesson_of(idx)
+    ok(rc == 0 and e["projects"] == 1 and e["status"] == "local" and "project key changed" in out,
+       f"J1: --unshallow supersedes the shallow key; one project ({rc} {e['projects']} {out!r})")
+
+    # F2 — a lesson born in a worktree, merged, the worktree removed, then withdrawn from main:
+    # the removed worktree counts as gone (its main checkout no longer lists it), so it leaves.
+    root = work / "f2"
+    root.mkdir()
+    m, sha = headed_repo("app", [("retro.md", "old entry", "an-older-class")], parent=root)
+    wt = m / ".claude" / "worktrees" / "feat"
+    git(m, "worktree", "add", "-q", "-b", "feat", str(wt))
+    write_retros(wt, [("retro.md", "old entry", "an-older-class"), ("retro.md", "export gate", KEY)], sha)
+    git(wt, "add", "-A")
+    git(wt, "commit", "-q", "-m", "lesson")
+    idx = work / "f2.jsonl"
+    run("rebuild", "--roots", str(root), index=idx)
+    git(m, "merge", "-q", "feat")
+    run("rebuild", "--roots", str(root), index=idx)
+    git(m, "worktree", "remove", "--force", str(wt))
+    git(m, "branch", "-q", "-D", "feat")
+    run("rebuild", "--roots", str(root), index=idx)
+    write_retros(m, [("retro.md", "old entry", "an-older-class")], sha)
+    rc, out, _ = run("rebuild", "--roots", str(root), index=idx)
+    ok(rc == 0 and KEY not in entries_of(idx) and "removed" in out,
+       f"F2: a removed worktree counts as gone; the withdrawn lesson leaves ({rc} {out!r} {entries_of(idx).get(KEY)})")
+
+    # G1/G1b — record refuses an id another class already holds, and a lower revision.
+    root = work / "g1"
+    root.mkdir()
+    x, _ = headed_repo("app", [("retro.md", "export gate", KEY), ("retro.md", "second", K2)], parent=root)
+    idx = work / "g1.jsonl"
+    run("rebuild", "--roots", str(root), index=idx)
+    ok(record_mem(idx, x, KEY, "mem:aaa") == 0, "G1 fixture")
+    before = idx.read_bytes()
+    rc, out, err = run("record", entries_of(idx)[K2]["id"], "--answer", "-", cwd=x, index=idx,
+                       stdin=json.dumps({"memoryId": "mem:aaa", "revision": 1}))
+    ok(rc == 1 and idx.read_bytes() == before and KEY in err,
+       f"G1: record refuses an id another class key holds, writing nothing ({rc} {err!r})")
+    lid = entries_of(idx)[KEY]["id"]
+    run("record", lid, "--answer", "-", cwd=x, index=idx, stdin=json.dumps({"memoryId": "mem:aaa", "revision": 5}))
+    before = idx.read_bytes()
+    rc, out, err = run("record", lid, "--answer", "-", cwd=x, index=idx,
+                       stdin=json.dumps({"memoryId": "mem:aaa", "revision": 2}))
+    ok(rc == 1 and idx.read_bytes() == before and mems(idx) == {"mem:aaa@5": [KEY]},
+       f"G1b: record refuses a revision lower than the one held ({rc} {err!r} {mems(idx)})")
+
+    # G3 — show prints no checkout paths. G5 — merged lines keep both provenances.
+    rc, out, _ = run("show", lid, index=idx)
+    ok(rc == 0 and "checkouts" not in out and str(root) not in out and str(root.resolve()) not in out,
+       f"G3: show prints no local checkout paths ({out[:200]!r})")
+    e = json.loads(idx.read_text(encoding="utf-8").splitlines()[0])
+    e1 = json.loads(json.dumps(e))
+    e1["origins"][0]["checkouts"] = ["/elsewhere/clone-p"]
+    e2 = json.loads(json.dumps(e))
+    e2["origins"][0]["checkouts"] = ["/elsewhere/clone-q"]
+    g5 = work / "g5.jsonl"
+    g5.write_text(json.dumps(e2) + "\n" + json.dumps(e1) + "\n", encoding="utf-8")
+    empty = work / "g5-empty"
+    empty.mkdir()
+    run("rebuild", "--roots", str(empty), index=g5)
+    prov = json.loads(g5.read_text(encoding="utf-8").splitlines()[0])["origins"][0].get("checkouts")
+    ok(prov == ["/elsewhere/clone-p", "/elsewhere/clone-q"], f"G5: merged lines keep both provenances ({prov})")
+
+    # H2/G2 — type-malformed fields are a corrupt line for every verb, never a traceback.
+    base = json.loads(idx.read_text(encoding="utf-8").splitlines()[0])
+    muts = {
+        "noun-int": lambda e: (e["origins"][0]["lesson"].__setitem__("nouns", [1, 2, 3]),
+                               e.__setitem__("nouns", [1, 2, 3])),
+        "grade-str": lambda e: e["origins"][0]["lesson"].__setitem__("grade", "2"),
+        "classkey-int": lambda e: e["origins"][0]["lesson"].__setitem__("classKey", 7),
+        "title-list": lambda e: e["origins"][0]["lesson"].__setitem__("title", ["x"]),
+        "checkouts-empty": lambda e: e["origins"][0].__setitem__("checkouts", [""]),
+        "entry-nouns-int": lambda e: e.__setitem__("nouns", [1]),
+    }
+    for name, mut in muts.items():
+        bad = json.loads(json.dumps(base))
+        mut(bad)
+        for verb in (["query", "gate"], ["show", base["id"]], ["candidates", "--min-projects", "1"],
+                     ["rebuild", "--roots", str(root)], ["emit-observatory", base["id"]]):
+            h = work / f"h2-{name}-{verb[0]}.jsonl"
+            h.write_text(json.dumps(bad) + "\n", encoding="utf-8")
+            rc, out, err = run(*verb, cwd=x, index=h)
+            ok("Traceback" not in err, f"H2/G2: {name} under {verb[0]} is a corrupt line, not a traceback ({rc} {err[-200:]!r})")
+
+    # H1 — an add that lands while a rebuild is between reading the retro and writing.
+    root = work / "h1"
+    root.mkdir()
+    x, sha = headed_repo("app", [("retro.md", "export gate", KEY)], parent=root)
+    idx = work / "h1.jsonl"
+    run("rebuild", "--roots", str(root), index=idx)
+    binp = work / "h1-bin"
+    binp.mkdir()
+    flag = work / "h1-slow"
+    (binp / "git").write_text(f"#!/bin/sh\nif [ \"$1\" = cat-file ] && [ -f {flag} ]; then sleep 4; fi\n"
+                              f"exec {shutil.which('git')} \"$@\"\n", encoding="utf-8")
+    (binp / "git").chmod(0o755)
+    flag.write_text("1", encoding="utf-8")
+    env = {k: v for k, v in os.environ.items() if k != "TASK_PIPELINE_LESSONS"}
+    env.update(HOME=str(HOME), PATH=f"{binp}:{env['PATH']}")
+    proc = subprocess.Popen([sys.executable, str(SCRIPT), "rebuild", "--roots", str(root), "--index", str(idx)],
+                            env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    time.sleep(1.5)
+    flag.unlink()
+    write_retros(x, [("retro.md", "export gate", KEY), ("retro.md", "added mid run", K2)], sha)
+    rc_add = run("add", "--retro", "docs/evidence/retro.md", "--entry", "added mid run", cwd=x, index=idx)[0]
+    out, err = proc.communicate(timeout=120)
+    ok(rc_add == 0 and proc.returncode == 0 and K2 in entries_of(idx),
+       f"H1: an add racing a rebuild is kept ({rc_add} {proc.returncode} {out!r} {err!r})")
+
+
 def source_admission_controls():
     repo, _ = project("source-admission", 1)
     retro = repo / "docs/evidence/retro.md"
@@ -1482,6 +1650,7 @@ def main():
     low_controls()
     provenance_controls()
     index_shape_controls()
+    round10_controls()
     source_admission_controls()
     print(f"PASS: lessons.py — {CASES} cases")
 
