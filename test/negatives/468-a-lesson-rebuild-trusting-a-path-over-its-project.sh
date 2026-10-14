@@ -6,7 +6,7 @@ python3 - <<'EOF'
 # Round 10: a path is not an identity. Stop noticing that a checkout now holds another project.
 p = "/tmp/rebuild-foreign-copy/plugins/task-pipeline/skills/task-pipeline/scripts/lessons.py"
 t = open(p, encoding="utf-8").read()
-needle = '        elif run["project"][c] != o["project"]:\n'
+needle = '        elif run["project"][c] != o["project"] and not _resolves_in(c, o["commit"]):\n'
 assert needle in t, "PLANT DID NOT LAND: anchor absent before edit"
 open(p, "w", encoding="utf-8").write(t.replace(needle, '        elif False:\n', 1))
 assert needle not in open(p, encoding="utf-8").read(), "PLANT DID NOT LAND"

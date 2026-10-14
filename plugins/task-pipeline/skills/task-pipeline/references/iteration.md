@@ -288,7 +288,9 @@ origin is carried, never a removal.
 **Every previous origin the run does not re-derive is carried.** Nothing is removed and nothing
 is moved: no origin is dropped because a checkout read its retro and no longer found the entry,
 and no memory id moves to another project's origin. **`rebuild --prune-carried` is the only way
-an origin leaves the index**; `--prune-carried-reason <reason>` narrows it to one reason. A
+an origin leaves the index**. `--prune-carried-reason <reason>` narrows it to one reason. It
+needs `--prune-carried`, and it offers only the reasons listed below; anything else is a usage
+error, exit 2. A
 carried origin keeps everything recorded on it, including its memory id, and is marked
 `carried: <reason>`, named in the summary. It is re-derived and un-marked as soon as a checkout
 holding it reads again. The reasons are:
@@ -305,7 +307,14 @@ holding it reads again. The reasons are:
   after a squash merge and a deleted branch.
 - `no provenance`: the origin was written before provenance existed.
 - `checkout holds another project`: every checkout in its provenance now holds a different
-  project. A path is not an identity.
+  project key, and the origin's own commit does not resolve there. A path is not an identity.
+  The same repository under another key still holds the commit, so it is not a stranger;
+  `add` applies the same rule to its own checkout's old-key origin.
+
+The project key is the repository's own: the first-parent root of its default branch
+(`origin/HEAD`, then `main`, then `master`, then HEAD's first-parent root). It is computed once
+per git common directory. A worktree on a branch that merged an unrelated history, or a
+checkout sitting on an orphan `gh-pages` branch, is still its project.
 
 **Counting.** `seen`, `projects` and `status` count re-derived origins and every carried origin
 except `checkout holds another project`. Those are kept, with their memory ids, but not counted.
@@ -316,14 +325,16 @@ disk.
 
 **Shallow clones.** A shallow checkout is never a source. It is a problem owned by that
 checkout, nothing is derived from it under its unstable key, and its origins are carried as
-`checkout not read`. `add`, `emit-observatory` and `record` refuse in a shallow clone, exit 1
-and write nothing, and say to deepen it with `git fetch --unshallow`.
+`checkout not read`. A shallow check that does not answer is refused the same way, and since
+it taught nothing, it does not count as something read. `add`, `emit-observatory` and
+`record` refuse in a shallow clone, exit 1 and write nothing, and say to deepen it with
+`git fetch --unshallow`.
 
 **Known limit.** A project whose root commit changes, through a re-init or an unshallow, starts
 new store records: its old origins are carried as `checkout holds another project` with their
 memory ids, and the new origins start without one. The operator re-attaches by running
 `record` with the old id on the new origin. That is allowed, because the new origin is of the
-same class key.
+same class key and the origin holding the id is carried as `checkout holds another project`.
 
 Another checkout of the same project, even one reading the same retro path, decides nothing
 for an origin it never held. Problems carry their owner, a checkout or none, and are never
@@ -334,15 +345,26 @@ never to a retro anchor:
 
 - A rotated or retitled entry keeps its id on the re-derived origin. The old anchor is carried.
 - A class key changed inside one entry does not inherit another key's id.
-- One id is never on two class keys. `record` refuses an id that another class key holds, a
-  revision older than the one held, and, without `--replace`, a different id over the one the
-  origin already holds. Each refusal exits 1 and writes nothing.
+- One id is one `(project, classKey)`. `record` refuses each of the following, exits 1 and
+  writes nothing:
+  - an id that another class key holds;
+  - an id that another project's origin holds (the refusal names that project), unless that
+    origin is carried as `checkout holds another project`;
+  - a revision older than the one held;
+  - without `--replace`, a different id over the one the origin already holds.
+
+  It also refuses an id the index cannot hold, such as `mem:`, a quote, a backslash or a
+  space: that exits 2.
+- Merged duplicate lines name every id they drop.
 - Ids compare on the part before `@`, revisions start at 1, and the highest revision wins.
 
 `emit-observatory` and `record` both use the origin of the project that holds the id. The run
 refuses to write if a memory id would vanish other than through `--prune-carried`.
 
-Unreadable sources are named under `not read`, by name rather than by absolute path. The run
+Unreadable sources are named under `not read`, by name rather than by absolute path. Every
+root, checkout and the index path is shown by its name. The index is split on `\n` only, and
+lesson/1 text refuses every line separator, including U+2028, U+2029 and U+0085. So no value
+can make a good index read as corrupt. The run
 exits 0 whenever anything was read: a retro, a checkout discovered in full, or a shallow
 checkout found. A readable root that holds no checkout also exits 0: the index is written,
 and every origin is carried. The run exits 1 only when nothing could be read because every
@@ -381,7 +403,8 @@ rule 2 (no host identifiers) for exactly two fields, and nothing else:
   repository's SHA names nothing to someone without the clone; **a public repository's SHA
   is searchable** and leads to the repository, so it stays in this field and never in text;
 - **`origin.project`, the pseudonymous project key** — `p-` and 12 hex digits of the
-  repository's root commit — stable across clones and never the repository's name, because
+  repository's root commit (the first-parent root of its default branch, so every worktree
+  and branch of one repository shares it) — stable across clones and never the repository's name, because
   lessons are read into *other* projects' briefs and a repository name can be a customer's
   or a product's. The shared store receives the same key, never a `project:<slug>` id.
 

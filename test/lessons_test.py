@@ -1240,6 +1240,212 @@ def round11_controls():
                 ok("seen 1" in out, f"R7: a duplicated origin is one origin ({out!r})")
 
 
+def round12_controls():
+    """Round 12 (adversarial): A/F a project key is the repository's, not the checked-out
+    branch's; C/H record never puts an id on another project's origin nor one the loader would
+    refuse; B a line separator never corrupts the index; E rebuild prints no absolute path; and
+    the LOW items: load-side rejection of `mem:…@0` and an unknown `carried`, the prune-reason
+    usage, duplicate lines naming the dropped id, add after a re-init, a shallow check that
+    times out."""
+    work = tree("tp-lessons-r12-")
+
+    def main_branch(repo):
+        return git(repo, "rev-parse", "--abbrev-ref", "HEAD")
+
+    # A — one repository, two worktrees; the feature branch merged an unrelated history (a
+    # subtree-style --allow-unrelated-histories merge). One project, read once per repository.
+    root = work / "a"
+    repo, _ = headed_repo("repo", [("retro.md", "export gate", KEY)], parent=root)
+    other = tree("tp-lessons-r12-other-")
+    git(other, "init", "-q")
+    (other / "o.txt").write_text("o", encoding="utf-8")
+    git(other, "add", "-A")
+    git(other, "commit", "-q", "-m", "an unrelated root")
+    base = main_branch(repo)
+    git(repo, "checkout", "-q", "-b", "feature")
+    git(repo, "fetch", "-q", str(other), "HEAD:otherhist")
+    git(repo, "merge", "-q", "--allow-unrelated-histories", "-m", "subtree", "otherhist")
+    git(repo, "checkout", "-q", base)
+    git(repo, "worktree", "add", "-q", str(repo / ".worktrees" / "feat"), "feature")
+    idx = work / "a.jsonl"
+    rc, out, _ = run("rebuild", "--roots", str(root), index=idx)
+    e = entries_of(idx).get(KEY, {"origins": [], "projects": None})
+    ok(rc == 0 and e["projects"] == 1 and len({o["project"] for o in e["origins"]}) == 1,
+       f"A: worktrees of one repository are one project whatever branch they hold ({rc} {e} {out!r})")
+
+    # F — a checkout temporarily on an orphan gh-pages branch is still its project; with its
+    # default branch gone its key changes, but the origin's commit still resolves there, so it
+    # is never `checkout holds another project`. Two projects stay a candidate.
+    for variant in ("pages", "pages-no-main"):
+        root = work / f"f-{variant}"
+        r1, _ = headed_repo("r1", [("retro.md", "export gate", KEY)], parent=root)
+        r2, _ = headed_repo("r2-" + variant, [("retro.md", "gate export", KEY)], parent=root)
+        idx = work / f"f-{variant}.jsonl"
+        run("rebuild", "--roots", str(root), index=idx)
+        ok(lesson_of(idx)["projects"] == 2, f"F fixture {variant}: two projects")
+        base = main_branch(r2)
+        git(r2, "checkout", "-q", "--orphan", "gh-pages")
+        git(r2, "rm", "-rqf", ".")
+        (r2 / "index.html").write_text("x", encoding="utf-8")
+        git(r2, "add", "-A")
+        git(r2, "commit", "-q", "-m", "pages")
+        if variant == "pages-no-main":
+            git(r2, "branch", "-q", "-D", base)
+        rc, out, _ = run("rebuild", "--roots", str(root), index=idx)
+        e = lesson_of(idx)
+        reasons = sorted(o.get("carried") or "derived" for o in e["origins"])
+        ok(rc == 0 and e["projects"] == 2 and e["status"] == "candidate"
+           and "checkout holds another project" not in reasons,
+           f"F {variant}: a checkout on another branch is not a stranger ({rc} {reasons} {e['projects']} {out!r})")
+        if variant == "pages":
+            # The project key is the default branch's root, not HEAD's: on gh-pages, r2 is still
+            # its project, so emit finds its origin (a HEAD-rooted key would refuse here).
+            rc, out, err = run("emit-observatory", e["id"], cwd=r2, index=idx)
+            ok(rc == 0 and '"tool"' in out, f"F: emit from a checkout on an orphan branch finds its origin ({rc} {err!r})")
+
+    # C — record an id another PROJECT's origin of the same class holds: refused, named.
+    root = work / "c"
+    r1, _ = headed_repo("r1", [("retro.md", "export gate", KEY)], parent=root)
+    r2, _ = headed_repo("r2-c", [("retro.md", "gate export", KEY)], parent=root)
+    idx = work / "c.jsonl"
+    for r in (r1, r2):
+        run("add", "--retro", "docs/evidence/retro.md", "--all", cwd=r, index=idx)
+    lid = lesson_of(idx)["id"]
+    ok(record_mem(idx, r2, KEY, "mem:abc") == 0, "C fixture: r2 records mem:abc")
+    p2 = next(o["project"] for o in lesson_of(idx)["origins"] if o.get("memory"))
+    before = idx.read_bytes()
+    rc, _, err = run("record", lid, "--answer", "-", cwd=r1, index=idx,
+                     stdin=json.dumps({"memoryId": "mem:abc", "revision": 2}))
+    ok(rc == 1 and idx.read_bytes() == before and p2 in err,
+       f"C: record refuses an id another project's origin holds, naming it ({rc} {err!r})")
+
+    # H — ids the loader would refuse are refused by record (exit 2), and nothing is lost.
+    for n, bad in enumerate(("mem:", 'mem:a"b', "mem:a\\b")):
+        before = idx.read_bytes()
+        rc, _, err = run("record", lid, "--answer", "-", cwd=r1, index=idx,
+                         stdin=json.dumps({"memoryId": bad, "revision": 1}))
+        rcq, _, errq = run("query", "gate", index=idx)
+        ok(rc == 2 and idx.read_bytes() == before and rcq == 0 and "could not be parsed" not in errq
+           and any(o.get("memory") == "mem:abc@1" for o in lesson_of(idx)["origins"]),
+           f"H: record refuses {bad!r} with exit 2; the other project's id survives ({rc} {err!r} {errq!r})")
+
+    # B — a line separator in a title is refused by lesson/1; a separator in a field lesson/1
+    # does not check (a checkout path) never makes the index corrupt.
+    root = work / "b"
+    x, sha = headed_repo("x", [("retro.md", "export gate", KEY)], parent=root)
+    idx = work / "b.jsonl"
+    for sep in (" ", " ", "\x85"):
+        lesson = {"classKey": "ls-sep", "title": f"a title with a{sep}separator in it",
+                  "trigger": "when it fires", "check": "the check runs", "grade": 1,
+                  "stages": {"owned": 4, "surfaced": 6}, "nouns": ["gate", "artefact", "absence"],
+                  "origin": {"commit": sha, "retro": "docs/evidence/retro.md#x"}}
+        rc, _, err = run("add", "--json", "-", cwd=x, index=idx, stdin=json.dumps(lesson))
+        ok(rc == 1 and not idx.exists() and "line break" in err,
+           f"B: a title carrying {sep!r} is refused, nothing written ({rc} {err!r})")
+    run("add", "--retro", "docs/evidence/retro.md", "--all", cwd=x, index=idx)
+    line = json.loads(idx.read_text(encoding="utf-8"))
+    line["origins"][0]["checkouts"] = [line["origins"][0]["checkouts"][0] + " odd"]
+    idx.write_text(json.dumps(line, ensure_ascii=False) + "\n", encoding="utf-8")
+    for _ in range(3):
+        rc, out, err = run("query", "gate", index=idx)
+        ok(rc == 0 and "could not be parsed" not in err, f"B: a separator inside a value is not a line ({err!r})")
+    ok(not list(work.glob("b.jsonl.corrupt-*")), "B: three reads leave no .corrupt file")
+
+    # E — three failing checkouts under one scratch root: no absolute path in any message.
+    root = work / "e"
+    repo, _ = headed_repo("repo", [("retro.md", "export gate", KEY)], parent=root)
+    (repo / "docs/evidence/retro").write_text("not a dir", encoding="utf-8")
+    repo2, _ = headed_repo("repo2", [("retro.md", "export gate", KEY)], parent=root)
+    (repo2 / "pipeline.json").write_text('{"paths": {"artifacts": "nope"}}', encoding="utf-8")
+    repo3, _ = headed_repo("repo3", [("retro.md", "export gate", KEY)], parent=root)
+    (repo3 / "docs/evidence/retro.md").chmod(0)
+    try:
+        rc, out, err = run("rebuild", "--roots", str(root), str(work / "e-missing"), index=work / "e.jsonl")
+    finally:
+        (repo3 / "docs/evidence/retro.md").chmod(0o644)
+    ok(out.count("not read") >= 4 and str(work) not in out + err and str(work.resolve()) not in out + err,
+       f"E: rebuild names checkouts and files, never an absolute path ({rc} {out!r} {err!r})")
+
+    # LOW — the loader rejects `mem:…@0` and an unknown `carried` (each line set aside).
+    d, _ = headed_repo("low12", [("retro.md", "export gate", KEY)])
+    base_idx = work / "low-base.jsonl"
+    run("add", "--retro", "docs/evidence/retro.md", "--all", cwd=d, index=base_idx)
+    for name, field, value in (("mem0", "memory", "mem:x@0"), ("carried", "carried", "whatever")):
+        bad = json.loads(base_idx.read_text(encoding="utf-8"))
+        bad["origins"][0][field] = value
+        h = work / f"low-{name}.jsonl"
+        h.write_text(json.dumps(bad) + "\n", encoding="utf-8")
+        rc, _, err = run("query", "gate", index=h)
+        ok(rc == 0 and "could not be parsed" in err and list(work.glob(f"low-{name}.jsonl.corrupt-*")),
+           f"LOW: a line with {field}={value!r} is rejected by the loader ({rc} {err!r})")
+
+    # LOW — --prune-carried-reason: needs --prune-carried; only reasons that can occur.
+    empty = work / "empty-root"
+    empty.mkdir()
+    for args, what in ((["--prune-carried-reason", "no checkout read holds it"], "without --prune-carried"),
+                       (["--prune-carried", "--prune-carried-reason", "bogus"], "an unknown reason"),
+                       (["--prune-carried", "--prune-carried-reason", "source not read"], "a reason that cannot occur")):
+        rc, _, err = run("rebuild", "--roots", str(empty), *args, index=base_idx)
+        ok(rc == 2, f"LOW: --prune-carried-reason {what} is a usage error ({rc} {err[-160:]!r})")
+
+    # LOW — two lines for one class with different ids for the same origin: the higher revision
+    # is kept and the dropped id is named (probe3).
+    lesson_body = {"classKey": "dup-ids", "title": "a title long enough", "trigger": "when it fires",
+                   "check": "the check runs", "grade": 1, "stages": {"owned": 4, "surfaced": 6},
+                   "nouns": ["gate", "artefact", "absence"]}
+
+    def dup_line(mem):
+        o = {"project": "p-0123456789ab", "commit": "0123456", "retro": "docs/evidence/retro.md#x",
+             "lesson": lesson_body, "memory": mem}
+        return json.dumps({"schema": "lesson-index/1", "id": "L-000000000000", "classKey": "dup-ids",
+                           "title": lesson_body["title"], "trigger": lesson_body["trigger"],
+                           "check": lesson_body["check"], "grade": 1, "stages": lesson_body["stages"],
+                           "nouns": lesson_body["nouns"], "seen": 1, "projects": 1, "status": "local",
+                           "origins": [o]})
+    dup = work / "dup.jsonl"
+    dup.write_text(dup_line("mem:aaa@1") + "\n" + dup_line("mem:bbb@2") + "\n", encoding="utf-8")
+    rc, out, err = run("rebuild", "--roots", str(empty), index=dup)
+    mem_now = [o.get("memory") for o in entries_of(dup)["dup-ids"]["origins"]]
+    ok(rc == 0 and mem_now == ["mem:bbb@2"] and "dropped mem:aaa@1" in out + err and "none dropped" not in out + err,
+       f"LOW: merged duplicate lines keep the higher revision and name the dropped id ({mem_now} {out!r} {err!r})")
+
+    # LOW — add after a re-init at the same path: the old-key origin is `checkout holds another
+    # project` at once, so add never counts a phantom project (repro G).
+    root = work / "g"
+    g, _ = headed_repo("repo", [("retro.md", "export gate", KEY)], parent=root)
+    idx = work / "g.jsonl"
+    run("add", "--retro", "docs/evidence/retro.md", "--all", cwd=g, index=idx)
+    shutil.rmtree(g / ".git")
+    git(g, "init", "-q")
+    (g / "NEW").write_text("reinit", encoding="utf-8")
+    git(g, "add", "-A")
+    git(g, "commit", "-q", "-m", "reinit")
+    write_retros(g, [("retro.md", "export gate", KEY)], git(g, "rev-parse", "HEAD"))
+    rc, out, _ = run("add", "--retro", "docs/evidence/retro.md", "--all", cwd=g, index=idx)
+    e = lesson_of(idx)
+    ok(rc == 0 and e["projects"] == 1 and e["status"] == "local"
+       and sorted(o.get("carried") or "derived" for o in e["origins"]) == ["checkout holds another project", "derived"],
+       f"LOW: add after a re-init counts one project ({rc} {e} {out!r})")
+
+    # LOW — a shallow check that does not answer counts as refused: not a source, named.
+    root = work / "sh-timeout"
+    s, _ = headed_repo("repo", [("retro.md", "export gate", KEY)], parent=root)
+    binp = work / "slow-shallow-bin"
+    binp.mkdir()
+    (binp / "git").write_text(
+        # `exec sleep`: the timeout kills the sleeper itself, leaving no orphan in the group.
+        "#!/bin/sh\nfor a in \"$@\"; do if [ \"$a\" = --is-shallow-repository ]; then exec sleep 3; fi; done\n"
+        f"exec {shutil.which('git')} \"$@\"\n", encoding="utf-8")
+    (binp / "git").chmod(0o755)
+    idx = work / "sh.jsonl"
+    rc, out, _ = run("rebuild", "--roots", str(root), index=idx,
+                     env_extra={"PATH": f"{binp}:{os.environ['PATH']}", "TASK_PIPELINE_GIT_TIMEOUT": "1"})
+    ok(KEY not in entries_of(idx) if idx.exists() else True, "LOW: an unanswered shallow check derives nothing")
+    # Nothing was learned from that checkout, so nothing was read: exit 1, nothing written.
+    ok(rc == 1 and "shallow" in out and "did not answer" in out and not idx.exists(),
+       f"LOW: an unanswered shallow check is a problem owned by the checkout ({rc} {out!r})")
+
+
 def source_admission_controls():
     repo, _ = project("source-admission", 1)
     retro = repo / "docs/evidence/retro.md"
@@ -1832,6 +2038,7 @@ def main():
     index_shape_controls()
     round10_controls()
     round11_controls()
+    round12_controls()
     source_admission_controls()
     print(f"PASS: lessons.py — {CASES} cases")
 

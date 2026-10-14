@@ -1,6 +1,6 @@
 ## Unreleased
 
-Guards: 439 → **454**; property checks 15 → **15**. There are 15 new negatives in
+Guards: 439 → **469**; property checks 15 → **15**. There are 30 new negatives in
 `lessons.py`. Each one plants a revert, and the suite must catch it:
 
 - the whole-scan refusal put back;
@@ -17,9 +17,39 @@ Guards: 439 → **454**; property checks 15 → **15**. There are 15 new negativ
 - `record` putting one memory id on two class keys;
 - an origin removed on its own;
 - a memory id moved to another project's origin;
-- an origin carried as `checkout holds another project` counted.
+- an origin carried as `checkout holds another project` counted;
+- a project key taken from the checked-out branch;
+- a stranger called on a key alone, though the origin's commit resolves;
+- `record` taking another project's id;
+- `record` writing an id the loader refuses;
+- a title carrying a Unicode line separator;
+- the index split on Unicode line breaks;
+- a rebuild printing absolute paths;
+- `--prune-carried-reason` accepted alone, or taking any string, or offering a reason that
+  never occurs;
+- merged duplicate lines dropping an id silently;
+- `add` counting a phantom project after a re-init;
+- a shallow check trusted when it times out;
+- an index line accepted with `mem:x@0` or with an unknown `carried` reason.
 
-These are the fixes from verification rounds 6 to 11 of release iteration 1.
+These are the fixes from verification rounds 6 to 12 of release iteration 1.
+
+- **Identity and safety in `lessons.py`** (round 12).
+  - The project key is the repository's: the first-parent root of its default branch, once
+    per git common dir. A worktree on a branch that merged an unrelated history, or a checkout
+    on an orphan `gh-pages`, is still its project.
+  - `checkout holds another project` applies only when the origin's own commit does not
+    resolve in that checkout. `add` applies the same rule to its checkout's old-key origin, so
+    a re-init never counts a phantom project, even before the next rebuild.
+  - `record` refuses an id another project's origin holds, naming the project (exit 1), and an
+    id the loader would refuse (exit 2).
+  - lesson/1 text refuses every line separator, including U+2028, U+2029 and U+0085. The index
+    is split on `\n` only, so a value can never make it read as corrupt.
+  - Rebuild messages name checkouts and files, never an absolute path.
+  - `--prune-carried-reason` needs `--prune-carried` and offers only the reasons a rebuild
+    produces; otherwise it is a usage error, exit 2.
+  - Merged duplicate lines name the id they drop and keep the higher revision.
+  - A shallow check that does not answer is refused: no source, and a problem named.
 
 - **`lessons.py rebuild` never removes or moves anything on its own** (round 11, narrowed
   under the loop guard).

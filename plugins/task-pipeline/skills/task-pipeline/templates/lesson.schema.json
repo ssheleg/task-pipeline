@@ -96,7 +96,7 @@
       ],
       "properties": {
         "project": {
-          "description": "The project's pseudonymous key: `p-` and the first 12 hex digits of the repository's root commit. Never its name: a repository name can be a customer's or a product's (redaction rule 4). The shared store receives the same key, never a `project:<slug>` id.",
+          "description": "The project's pseudonymous key: `p-` and the first 12 hex digits of the repository's root commit — the first-parent root of its default branch, so every worktree and branch of one repository shares it. Never its name: a repository name can be a customer's or a product's (redaction rule 4). The shared store receives the same key, never a `project:<slug>` id.",
           "type": "string",
           "pattern": "^p-[0-9a-f]{12}$"
         },
@@ -207,7 +207,8 @@
               },
               "memory": {
                 "type": "string",
-                "pattern": "^mem:[^@\\s]+@[1-9][0-9]*$"
+                "pattern": "^mem:[^@\\s]+@[1-9][0-9]*$",
+                "description": "The shared store's id, `mem:<id>@<revision>` with the revision from 1. One id belongs to one (project, classKey): `record` refuses an id another project's or class's origin holds, and one the loader would refuse."
               },
               "carried": {
                 "enum": [
@@ -221,7 +222,7 @@
                   "no checkout read holds it",
                   "source not read"
                 ],
-                "description": "Set by `rebuild` on every previous origin it did not re-derive: a rebuild never removes or moves anything on its own, and `rebuild --prune-carried` (optionally `--prune-carried-reason`) is the only way an origin leaves the index. The origin keeps everything recorded on it, its memory id included. `checkout holds another project` is kept but not counted in seen/projects/status; every other reason is a temporary unavailability and is counted. `source not read` is the round-7 label, still accepted. Cleared when a checkout holding the origin reads it again."
+                "description": "Set by `rebuild` on every previous origin it did not re-derive: a rebuild never removes or moves anything on its own, and `rebuild --prune-carried` (optionally `--prune-carried-reason`) is the only way an origin leaves the index. The origin keeps everything recorded on it, its memory id included. `checkout holds another project` — every checkout in the provenance now holds another project key AND the origin's own commit does not resolve there — is kept but not counted in seen/projects/status; every other reason is a temporary unavailability and is counted. `source not read` is the round-7 label, still accepted. Cleared when a checkout holding the origin reads it again."
               },
               "checkouts": {
                 "type": "array",

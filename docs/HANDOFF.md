@@ -1,4 +1,14 @@
-## Fix cycles 6–11 of the release iteration — #125, branch `iter1/M-5-N-1` (2026-10-14)
+## Fix cycles 6–12 of the release iteration — #125, branch `iter1/M-5-N-1` (2026-10-14)
+
+Cycle 12 kept the narrowed contract and fixed five MEDIUM findings and the LOW ones:
+- the project key is the repository's;
+- `checkout holds another project` applies only when the origin's commit does not resolve
+  there;
+- `record` refuses another project's id and ids the loader would refuse;
+- Unicode line separators are refused, and the index is split on `\n` only;
+- messages carry no absolute paths.
+
+The tests are in `round12_controls`, plus negatives 474–488.
 
 Rounds 6 to 11 failed on `lessons.py rebuild`. The loop guard fired three times. The third
 time, in cycle 11, narrowed the contract: **a rebuild never removes or moves anything on its
@@ -23,7 +33,7 @@ pushed but not merged, and no version or publication is claimed.
 - **New rules:** a parallel-work check before each cycle (`iteration.md` → *The cycle*), and
   background-dispatch command hygiene (`build.md` §4.1).
 
-Next task: run round 12 of verification on #125's head. The release order after v1.95.0 is
+Next task: run round 13 of verification on #125's head. The release order after v1.95.0 is
 the coordinator's.
 
 ## Operator stop: Claude continuation — FW07 child lifetime
