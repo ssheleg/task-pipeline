@@ -1,0 +1,38 @@
+{
+  "schema": 1,
+  "tag": "v1.95.0",
+  "source": {
+    "commit": "5a787b4cce4e53aaa76b0971cf9c0293e4dc126b",
+    "tree": "1a9f4243f12d47ee03a5ab6041d4bf3efce96d8c",
+    "origin": "https://github.com/ssheleg/task-pipeline.git",
+    "suite_sha256": "c463a211f2c04ce42062a30bf563ad880c2af7ec7ea535019e4f739c62cb254c",
+    "helper_sha256": "ec57354e309a452beecc385fcd684ea8d3393ecc7bf2240d9f5b16ef4934db62",
+    "hook_sha256": "29b30f85220398c5a17dbaaba1cb7977ab36e0c2f86855abd08040dcf5ed4350"
+  },
+  "default_branch": "refs/heads/main",
+  "owner_nonce": "cc8fb81a140b4cb0a53b31996d0e666d",
+  "context": null,
+  "state": "CHECK_PASSED",
+  "external_authority": "NOT_VERIFIED_BY_HELPER",
+  "mechanical_evidence": {
+    "command": [
+      "npm",
+      "run",
+      "test:all"
+    ],
+    "started": 1791938598.748538,
+    "exit": 0,
+    "interruption": null,
+    "ended": 1791941652.385401,
+    "log_sha256": "29ba28f9fea7f80d662ffda40f2d8a4a81933c0c5420acb9ab90d6daa6e37696",
+    "unlooked": [
+      "unlooked: 3",
+      "\"output\": \"PASS: task-pipeline structure valid\\n  claim registry \\u2014 negative self-tests: dormant (truth 439) \\u00b7 anchor-census fixtures: agrees x1 (truth 48) \\u00b7 anchor-census fixtures watched firing: agrees x1 (truth 27) \\u00b7 rules in learned.md: dormant (truth 32) \\u00b7 dated eval runs: agrees x1 (truth 4) \\u00b7 standing instructions: dormant (truth 8) \\u00b7 evidence canons: agrees x4 (truth 10) \\u00b7 rotation axes: dormant (truth 6) \\u00b7 gates.md's own axes: agrees x7 (truth 3) \\u00b7 cold-trigger surfaces: dormant (truth 17) \\u00b7 description budget: agrees x1 (truth 887) \\u00b7 description headroom: agrees x1 (truth 137) \\u00b7 registered claim classes: agrees x1 (truth 15) \\u00b7 reference files: agrees x3 (truth 52) \\u00b7 reference files (totalising): agrees x1 (truth 52)\\n  learned.md \\u2014 rules 32 \\u00b7 rules with an incident 20 \\u00b7 incident words 1962 \\u00b7 binding rows 17  (disclosure \\u2014 no floor, no target)\\n  negative-test anchors: 439 plants \\u00b7 839 needles read off disk \\u00b7 1 pinned to a value a release can move \\u00b7 1 declared undrivable \\u00b7 4 can decline to run \\u00b7 52 yield no text needle (23 shell only, no python body, 12 a python body that reads no file, 9 a whole-file byte comparison, 6 provenance stopped at a helper function, 2 a JSON or dict key, which raises when it goes stale)  (disclosure \\u2014 no floor, no target)\\n  verification: 149 shipped REQ \\u00b7 149 never confirmed by a person  (disclosure \\u2014 no floor, no target)\\n  exposure: 149 unverified \\u00b7 never checked \\u00b7 20 releases carry one\\n      REQ-001  references/adoption.md \\u2014 doctrine + greenfield walkthrough   v1.9.0\\n      REQ-002  The docgate floor comments state each floor's kind \\u2014 PROPF   v1.9.0\\n      REQ-003  Trigger vocabulary widened (RU+EN work verbs) and an expli   v1.9.0\\n      REQ-004  Evals match the intended behaviour: exclusions kept, a new   v1.9.0\\n      REQ-005  Global CLAUDE.md carries the routing rule with D2's bounda   v1.9.0\\n      REQ-006  agent-sync binding patched: config example valid against p   v1.9.0\\n      REQ-007  companion-skills.md states the agent-sync \\u2265 1.3.0 floor fo   v1.9.0\\n      REQ-008  This repo adopts its own doc track: docs/DOCMAP.md recordi   v1.9.0\\n      \\u2026 and 141 more \\u2014 the full list is `/task-pipeline checkup`, which prints all of them\\n  unlooked: 6\\n    \\u00b7 learned.md high-water mark vs its own history (no git, no prior revision, or the mark is new) \\u2014 a lowering would not be seen\\n    \\u00b7 coordination: 15 guarded file pattern(s) in .claude/agent-sync.json, 4 version surface(s) discovered\\n    \\u00b7 backlog citations: 9 span(s) checked against a quoted needle, 6 single-line citation(s) unanchored \\u2014 one line carries no phrase to compare\\n    \\u00b7 release stamps: no usable git checkout here, so the release-gap check could not run\\n    \\u00b7 skip: version v1.95.0 vs its tag \\u2014 no git history here\\n    \\u00b7 routed triggers \\u2014 no sshlg-skills umbrella above this checkout\\n\"",
+      "\"output\": \"PASS: task-pipeline structure valid\\n  claim registry \\u2014 negative self-tests: dormant (truth 439) \\u00b7 anchor-census fixtures: agrees x1 (truth 48) \\u00b7 anchor-census fixtures watched firing: agrees x1 (truth 27) \\u00b7 rules in learned.md: dormant (truth 32) \\u00b7 dated eval runs: agrees x1 (truth 4) \\u00b7 standing instructions: dormant (truth 8) \\u00b7 evidence canons: agrees x4 (truth 10) \\u00b7 rotation axes: dormant (truth 6) \\u00b7 gates.md's own axes: agrees x7 (truth 3) \\u00b7 cold-trigger surfaces: dormant (truth 17) \\u00b7 description budget: agrees x1 (truth 887) \\u00b7 description headroom: agrees x1 (truth 137) \\u00b7 registered claim classes: agrees x1 (truth 15) \\u00b7 reference files: agrees x3 (truth 52) \\u00b7 reference files (totalising): agrees x1 (truth 52)\\n  learned.md \\u2014 rules 32 \\u00b7 rules with an incident 20 \\u00b7 incident words 1962 \\u00b7 binding rows 17  (disclosure \\u2014 no floor, no target)\\n  negative-test anchors: 439 plants \\u00b7 839 needles read off disk \\u00b7 1 pinned to a value a release can move \\u00b7 1 declared undrivable \\u00b7 4 can decline to run \\u00b7 52 yield no text needle (23 shell only, no python body, 12 a python body that reads no file, 9 a whole-file byte comparison, 6 provenance stopped at a helper function, 2 a JSON or dict key, which raises when it goes stale)  (disclosure \\u2014 no floor, no target)\\n  verification: 149 shipped REQ \\u00b7 149 never confirmed by a person  (disclosure \\u2014 no floor, no target)\\n  exposure: 149 unverified \\u00b7 never checked \\u00b7 20 releases carry one\\n      REQ-001  references/adoption.md \\u2014 doctrine + greenfield walkthrough   v1.9.0\\n      REQ-002  The docgate floor comments state each floor's kind \\u2014 PROPF   v1.9.0\\n      REQ-003  Trigger vocabulary widened (RU+EN work verbs) and an expli   v1.9.0\\n      REQ-004  Evals match the intended behaviour: exclusions kept, a new   v1.9.0\\n      REQ-005  Global CLAUDE.md carries the routing rule with D2's bounda   v1.9.0\\n      REQ-006  agent-sync binding patched: config example valid against p   v1.9.0\\n      REQ-007  companion-skills.md states the agent-sync \\u2265 1.3.0 floor fo   v1.9.0\\n      REQ-008  This repo adopts its own doc track: docs/DOCMAP.md recordi   v1.9.0\\n      \\u2026 and 141 more \\u2014 the full list is `/task-pipeline checkup`, which prints all of them\\n  unlooked: 6\\n    \\u00b7 learned.md high-water mark vs its own history (no git, no prior revision, or the mark is new) \\u2014 a lowering would not be seen\\n    \\u00b7 coordination: 15 guarded file pattern(s) in .claude/agent-sync.json, 4 version surface(s) discovered\\n    \\u00b7 backlog citations: 9 span(s) checked against a quoted needle, 6 single-line citation(s) unanchored \\u2014 one line carries no phrase to compare\\n    \\u00b7 release stamps: no usable git checkout here, so the release-gap check could not run\\n    \\u00b7 skip: version v1.95.0 vs its tag \\u2014 no git history here\\n    \\u00b7 routed triggers \\u2014 no sshlg-skills umbrella above this checkout\\n\""
+    ],
+    "initial_unlooked": [],
+    "release_gap_looked": true
+  },
+  "hook_observation": null,
+  "object": "ada20cbb9c1e0437f8e6ffaeecc7582f11202cab"
+}

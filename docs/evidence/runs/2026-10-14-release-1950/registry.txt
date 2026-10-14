@@ -1,0 +1,3 @@
+version = '1.95.0'
+gitHead = '5a787b4cce4e53aaa76b0971cf9c0293e4dc126b'
+dist.integrity = 'sha512-g4Uhgpy1SwTZ03elpIoV9G1O5fvRngwRYjlZ0zFS3b0esoEUQi+XyxDz5+/LksM0kcQNdqVanQoZ9iBygrCYPw=='

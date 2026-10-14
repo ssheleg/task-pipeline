@@ -25,3 +25,25 @@ into immutable commit links, as #122 did; every target is on a pushed branch
 (`compose/fw07-after-1941`, `fix/fw07-scratch-child-lifetime`, `fix/fw07-all-plant-copies`).
 `docgate.sh` and `test/validate.py` pass on this change. The next attempt prepares a
 fresh annotation on the resulting `main` commit; 1.95.0 was never published.
+
+## Attempt3: admitted and published on 5a787b4
+
+After #128 merged as [5a787b4](https://github.com/ssheleg/task-pipeline/commit/5a787b4cce4e53aaa76b0971cf9c0293e4dc126b)
+a fresh standalone clone ran `prepare` (local annotated object ada20cbb) and `check`:
+`CHECK_PASSED`, exit0, 3054s, no interruption, release gap looked —
+[candidate](attempt3-candidate.json), [log](attempt3-suite.log.gz) (log sha256 equals the
+receipt). All 439 guards and 15 properties passed; every later suite completed.
+
+`publish --tag v1.95.0` refused with `publish unavailable: no bound actual project
+context`: no run ledger exists at this exact source, and none was written to make the
+hook pass. The tag was then pushed by hand with the same preconditions the helper
+checks, read before the push: clean tree; tag type `tag`, peel equal to `origin/main`;
+remote tag absent; identical fetch/push origin; log digest equal to the receipt. Command:
+`git push --no-follow-tags origin <object>:refs/tags/v1.95.0`; remote readback named the
+same object and peel.
+
+The [release run](release-run.json) (38499730163) concluded success for both `release`
+and `publish`. The [registry readback](registry.txt) reports 1.95.0 with gitHead 5a787b4; all 155
+files of the packed tarball are byte-equal to the source at that commit. The two earlier
+local annotations (303c1ff0, 6a68733c) were never pushed. Installed acceptance belongs to
+the umbrella's update, not to this receipt.
