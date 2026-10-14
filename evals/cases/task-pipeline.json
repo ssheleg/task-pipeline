@@ -186,6 +186,145 @@
      }
     ]
    }
+  },
+  {
+   "schema_version": "outcome-case/1",
+   "id": "TP-OUT-006-waves-validate-refuses-unclaimed-item",
+   "skill": "task-pipeline",
+   "prompt": {
+    "text": "Wave 0 of `/task-pipeline waves`: the inventory, module table and wave plan are the frozen files under evals/fixtures/waves-unclaimed/. Check that every item lands on a node with the skill's own inventory validator, without editing the fixture, and write waves-validate.md with the command you ran, its exit code and what it reported (USR-015).",
+    "files": [
+     {
+      "path": "evals/fixtures/waves-unclaimed/inventory.json",
+      "sha256": "8ffb7e0f291c8cfb5b77910424b3dac55459e8f6b58f7e63343fcef258bb2102"
+     },
+     {
+      "path": "evals/fixtures/waves-unclaimed/modules.json",
+      "sha256": "9d13ac48c1c49d0bd315ed5643b68de993d1f33ee125e1e23718f6c60fe296d5"
+     },
+     {
+      "path": "evals/fixtures/waves-unclaimed/plan.json",
+      "sha256": "cc42a367ac8a966214beb21d8459c04e3704c461f220dd3a34d7f5fca315dbc8"
+     },
+     {
+      "path": "evals/fixtures/waves-unclaimed/expect-refusal.sh",
+      "sha256": "857a48783bdb89ff82c4d16d5adb93dc2159e3d89cb5b8dea069fa0439d60517"
+     }
+    ]
+   },
+   "environment": {
+    "model": "inherit",
+    "host": "any",
+    "case_digest": "480a16d5aef3efa8ae30e872e15948d2fa4906fd50211803295e5084d7403fe8"
+   },
+   "checks": {
+    "tool": [
+     {
+      "name": "python3 present",
+      "command": "python3 -c 'pass'"
+     },
+     {
+      "name": "bash present",
+      "command": "bash -c 'true'"
+     }
+    ],
+    "load_trace": {
+     "expect_loaded": [
+      "task-pipeline"
+     ],
+     "expect_not_loaded": []
+    },
+    "outcome": [
+     {
+      "name": "the validator still refuses the frozen fixture (inverted through the wrapper)",
+      "kind": "command-exit-0",
+      "target": "bash evals/fixtures/waves-unclaimed/expect-refusal.sh"
+     },
+     {
+      "name": "the record exists",
+      "kind": "artifact-exists",
+      "target": "waves-validate.md"
+     },
+     {
+      "name": "the record names the item that lands nowhere",
+      "kind": "artifact-contains",
+      "target": "waves-validate.md",
+      "expect": "B-103"
+     },
+     {
+      "name": "the record carries the refusal's exit code",
+      "kind": "artifact-contains",
+      "target": "waves-validate.md",
+      "expect": "exit 1"
+     }
+    ]
+   }
+  },
+  {
+   "schema_version": "outcome-case/1",
+   "id": "TP-OUT-007-lessons-query-fires-on-fixture",
+   "skill": "task-pipeline",
+   "prompt": {
+    "text": "Stage 0 of a run for 'add a retry policy to the webhook handler'. The machine's local lesson index is the frozen file evals/fixtures/lessons/index.jsonl and the session lists no shared lesson store. Read the lessons source the way the skill's harvest does, and write ledger.md with the source-ledger lines for both lesson layers and the citation of every lesson that fires (USR-015).",
+    "files": [
+     {
+      "path": "evals/fixtures/lessons/index.jsonl",
+      "sha256": "6b73a4345e8f361a565e15a93a1fa204a141f791b82946a08260d475b2aef28d"
+     },
+     {
+      "path": "evals/fixtures/lessons/expect-match.sh",
+      "sha256": "bed8b0b6363128108ff6a6985240d4b1fdeda01448ddc32ef32caa43c4e2a814"
+     }
+    ]
+   },
+   "environment": {
+    "model": "inherit",
+    "host": "any",
+    "case_digest": "eef134f07ba724082236b6a5977009dd744076ca7391fd562fe562bdd171cd88"
+   },
+   "checks": {
+    "tool": [
+     {
+      "name": "python3 present",
+      "command": "python3 -c 'pass'"
+     },
+     {
+      "name": "bash present",
+      "command": "bash -c 'true'"
+     }
+    ],
+    "load_trace": {
+     "expect_loaded": [
+      "task-pipeline"
+     ],
+     "expect_not_loaded": []
+    },
+    "outcome": [
+     {
+      "name": "the query over a copy of the fixture fires the webhook lesson only",
+      "kind": "command-exit-0",
+      "target": "bash evals/fixtures/lessons/expect-match.sh"
+     },
+     {
+      "name": "the ledger cites the lesson that fires",
+      "kind": "artifact-contains",
+      "target": "ledger.md",
+      "expect": "[lesson L-70cf4d4825df]"
+     },
+     {
+      "name": "the ledger states the local layer's count",
+      "kind": "artifact-contains",
+      "target": "ledger.md",
+      "expect": "local lessons: 1 match"
+     },
+     {
+      "name": "the ledger states the shared layer is absent",
+      "kind": "artifact-contains",
+      "target": "ledger.md",
+      "expect": "shared lessons: absent"
+     }
+    ]
+   }
   }
  ]
 }

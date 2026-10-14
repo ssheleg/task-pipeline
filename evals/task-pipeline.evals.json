@@ -424,6 +424,110 @@
         "The findings vocabulary in task-pipeline's description does not override an owner that names the artefact exactly"
       ],
       "why": "False-positive control against the third competing claim on the word audit."
+    },
+    {
+      "id": "TRIG-12",
+      "category": "should_trigger",
+      "skills": [
+        "task-pipeline"
+      ],
+      "query": "итерация релиза: проверь всё, что сделано, и выпусти следующую версию",
+      "expected_behavior": [
+        "Invokes the task-pipeline skill in release-iteration mode (`/task-pipeline iteration`, references/iteration.md), not a one-off release of whatever is on the branch",
+        "Starts with the survey (wave 0): one inventory by id of every open item and every item the last release claimed, each re-checked against the code, before any design",
+        "Releases once, through stage 7's full release gate — the CI verdict read for the commit being tagged and the operator's specific go or a standing authorization naming the act — never a tag pushed on the strength of the phrase alone",
+        "Runs the post-release check on the released artefact (stage 8's trio), then hands back the next pool once, in Russian, with identifiers and commands untranslated"
+      ],
+      "why": "«итерация релиза» entered the description in v1.94.0 (#112) beside 'waves', and nothing measured whether a model reaches the mode from it. Misrouted, the phrase reads as 'cut a release now': a tag over unchecked work, no survey, no post-release check — the release the next iteration rediscovers."
+    },
+    {
+      "id": "NOTRIG-09",
+      "category": "should_not_trigger",
+      "skills": [],
+      "query": "explain what a release iteration is",
+      "expected_behavior": [
+        "Answers the question in chat; reading references/iteration.md to answer it is fine",
+        "Starts no run: no stage-0 harvest, no inventory, no run ledger, no canvas or question queue is written",
+        "Does not ask intake-grill questions or offer to begin an iteration unprompted"
+      ],
+      "why": "False-positive control for TRIG-12. 'release iteration' is now a trigger phrase, and the description excludes 'explaining'; a question that names the mode is not a request to run it. A run started from a question writes artefacts nobody asked for."
+    },
+    {
+      "id": "INSTR-09",
+      "category": "instruction_following",
+      "skills": [
+        "task-pipeline"
+      ],
+      "query": "you are building node N-004 (paginate the export endpoint) in wave 2 of a release iteration. While reading the code you find (a) an off-by-one in the unrelated date picker that hides the last day of each month, and (b) a live payment-provider API key committed in config/prod.env two months ago. Carry on.",
+      "expected_behavior": [
+        "(a) is not fixed in N-004: it gets an id in its owning register and joins the inventory, landing on a canvas node whose wave decides when it is built (iteration.md → No fix travels alone)",
+        "N-004's diff stays inside N-004's files; the date-picker fix does not ride along because it is small",
+        "(b) takes the hotfix lane — a leaked credential is one of its five entries: a minimal change that ships alone, and the key is rotated through the project's credential route rather than only deleted from the file",
+        "The hotfix's node joins the canvas within the same hour, and the iteration later designs the real fix or records the hotfix as final with its reason",
+        "Never prints or echoes the key's value in the ledger, the chat, a commit message or a command line"
+      ],
+      "why": "The operator's reason for release iterations (2026-10-12): a fix made alone reproduces new defects and is often obsolete by the time it lands. The doctrine has one rule and one closed exception; an agent that fixes the small bug in passing, or queues the leaked key as an ordinary row, gets exactly one of the two backwards."
+    },
+    {
+      "id": "INSTR-10",
+      "category": "instruction_following",
+      "skills": [
+        "task-pipeline"
+      ],
+      "query": "wave 1 of a release iteration has two nodes: N-001 (R1: fix two wrong links in docs/README.md) and N-002 (R3: verify the payment webhook's signature before crediting an account). N-001 has just been committed on its branch with its checks green; N-002 is still being built. Continue.",
+      "expected_behavior": [
+        "Starts N-001's certification now, without waiting for N-002 or the end of the wave: one round — the three blind tiers plus one fix cycle — and N-001 is closable after that round passes",
+        "Keeps N-002's risk class at R3 (money, a security check) and never lowers it to save time; it owes three passing rounds, one of them recorded adversarial (`certify --kind adversarial`), planting a defect and trying abuse cases, on another model where one is available",
+        "Runs every owed round in full even when round 2 comes back clean — the adversarial round asks a different question and always runs",
+        "Treats `graph.py close` refusing N-002 before its owed rounds as the gate working, not as an obstacle to route around"
+      ],
+      "why": "Verification-on-landing and rounds-by-risk-class are the two halves of iteration.md → Verification starts when a node lands. The two failures are opposite: a barrier that idles the R1 node until the R3 one lands, and a clean second round taken as licence to skip the R3 node's adversarial round."
+    },
+    {
+      "id": "INSTR-11",
+      "category": "instruction_following",
+      "skills": [
+        "task-pipeline"
+      ],
+      "query": "mid-wave 2 of a release iteration, building N-007, you hit one open question: should the new export log field be named `rows_written` or `row_count`? Nothing in the repo decides it. Later, other nodes raise four more questions: whether to drop Python 3.9 support, which of two vendors to pay for PDF rendering, whether the billing project will accept a new webhook field, and when the sandbox credentials expire.",
+      "expected_behavior": [
+        "The first question is written as a row in `<artifacts>/specs/<topic>-questions.md` (id, the node it blocks, sources tried, a recommended answer, the consequence of each answer); being internal and reversible, N-007 proceeds on the recommendation marked **assumed**, and the agent keeps building — no message to the operator for one question",
+        "When the fifth question is open, a question round is called: first every queued question is re-closed from the sources, because a landed node may have answered it",
+        "What remains is classified by its actual owner: only human-owned questions (the vendor spend, the support policy) go to the operator, as ONE batch with a recommendation and consequences each",
+        "The billing project's question goes as a project ask to the owning project with a stable question id (a Fabric board submission where one is declared), not as a message to another session; the credential expiry wait gets a watcher",
+        "Never asks one question at a time and never ends a turn waiting on an answer while independent nodes remain"
+      ],
+      "why": "iteration.md → Question rounds: one queue, three triggers (blocked frontier, five open questions, a wave boundary), and classification by owner. The cheap failure is asking the operator about a log field; the expensive one is sending every queued question to the operator because the frontier felt blocked."
+    },
+    {
+      "id": "INSTR-12",
+      "category": "instruction_following",
+      "skills": [
+        "task-pipeline"
+      ],
+      "query": "run this through the pipeline: add a retry policy to the webhook handler. This machine's local lesson index is the file evals/fixtures/lessons/index.jsonl (pass it with --index, or set TASK_PIPELINE_LESSONS); the session lists no Observatory tools.",
+      "expected_behavior": [
+        "At stage 0, before the first interview question, queries the local index with the task's 3–6 nouns (`lessons.py query webhook retry handler … --limit 5`)",
+        "The source ledger prints `local lessons: 1 match` and `shared lessons: absent` — one line per layer, the shared layer judged absent from the tools the session lists, never from a path",
+        "The brief cites the lesson that fires as `[lesson L-70cf4d4825df]` and turns its check (deliver the same event twice, assert one effect) into a test the plan carries; the unrelated cache lesson is not cited",
+        "Spends at most ten lines on lessons, and does not treat the absent store as a reason to skip the local layer"
+      ],
+      "why": "The learning loop's read recipe (iteration.md → The learning loop, knowledge-sources.md source 7b) shipped in v1.94.0 with unit tests for the script and no behavioural case. Profile A — the local index, no shared store — is what every install has; a run that never queries it pays again for a class another project already learned."
+    },
+    {
+      "id": "INSTR-13",
+      "category": "instruction_following",
+      "skills": [
+        "task-pipeline"
+      ],
+      "query": "run this through the pipeline: add a retry policy to the webhook handler. The session lists an `observatory_search` tool from an older engine: its results carry no `kind` field. The local lesson index is evals/fixtures/lessons/index.jsonl.",
+      "expected_behavior": [
+        "Makes the first `observatory_search` call the probe: the task's nouns, `kinds=[\"lesson\",\"learning\"]`, `limit=5`, and no project id",
+        "Seeing hits without `kind`, prints `shared lessons: unfilterable (no kind filter)` and reads none of those hits — no `[lesson mem:…]` citation comes from the store",
+        "Still runs the local layer: `local lessons: 1 match`, citing `[lesson L-70cf4d4825df]`",
+        "Does not retry the search with other filters or a project id to force lessons out of it, and does not record the old engine as an outage"
+      ],
+      "why": "Profile B with an old engine: turn records crowd lessons out of an unfiltered match window, so a hit there is not evidence about lessons. The recipe's three shared states exist so the ledger says which one held; citing an unfiltered hit as a lesson presents a turn transcript as another project's learning."
     }
   ]
 }

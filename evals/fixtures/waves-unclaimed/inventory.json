@@ -1,0 +1,33 @@
+{
+  "schema": "inventory/1",
+  "topic": "eval-fixture-unclaimed-item",
+  "items": [
+    {
+      "id": "B-101",
+      "title": "export endpoint times out past ten thousand rows",
+      "area": "export",
+      "kind": "bug",
+      "severity": "high",
+      "evidence": "src/export.py:42 buffers the whole result set before the first byte",
+      "proposed_fix": "stream rows in pages"
+    },
+    {
+      "id": "B-102",
+      "title": "export CSV header omits the timezone",
+      "area": "export",
+      "kind": "gap",
+      "severity": "low",
+      "evidence": "src/export.py:17 writes created_at without an offset",
+      "proposed_fix": "write ISO 8601 with offset"
+    },
+    {
+      "id": "B-103",
+      "title": "settings page loses unsaved edits on navigation",
+      "area": "settings",
+      "kind": "bug",
+      "severity": "medium",
+      "evidence": "web/settings.tsx:88 drops the draft on route change",
+      "proposed_fix": "keep the draft in route state"
+    }
+  ]
+}
