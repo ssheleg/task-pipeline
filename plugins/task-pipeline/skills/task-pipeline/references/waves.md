@@ -211,11 +211,13 @@ In this order, inside the wave rather than after it:
 1. **Verify.** Every node the wave closes is certified ([`certification.md`](certification.md)),
    most of it already, as each node landed,
    and [`audit.md`](audit.md)'s exit is re-measured over what the wave touched.
-2. **Finish and fix — one fix round**, inside [`loop-guard.md`](loop-guard.md)'s caps.
-   Findings against this wave's nodes are fixed here or parked with a board row and reason.
-   Findings elsewhere join the inventory for a planned node; only the closed hotfix lane
-   bypasses that design ([`iteration.md`](iteration.md) → *No fix travels alone*). Nothing
-   is dropped silently.
+2. **Finish and fix — one fix round, for blocking findings only**, inside
+   [`loop-guard.md`](loop-guard.md)'s caps. Every finding is triaged when found
+   ([`finish-line.md`](finish-line.md) → *Triage at discovery*): blocking findings against
+   this wave's nodes are fixed here or parked with a board row and reason; deferred ones
+   become board rows; noise is one ledger line. Findings elsewhere join the inventory for a
+   planned node; only the closed hotfix lane bypasses that design
+   ([`iteration.md`](iteration.md) → *No fix travels alone*). Nothing is dropped silently.
 3. **Document** — the Doc Loop and the stage-9 propagation matrix
    ([`documentation.md`](documentation.md)), scoped to the wave: scenarios, decisions,
    docs and registers in the same change as the code.
@@ -224,7 +226,8 @@ In this order, inside the wave rather than after it:
    items, not only the board*). A re-plan is a committed `revisions` entry plus a canvas
    edit, never a quiet change.
 6. **Re-measure the inventory and re-cut the remaining waves** from the updated target —
-   never from the original guess. New findings join the inventory with ids.
+   never from the original guess. New findings join the inventory with ids and their
+   triage class; a deferred one never adds a wave to this release.
 
 ## A board bigger than one release
 

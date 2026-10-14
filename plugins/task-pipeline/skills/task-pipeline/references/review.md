@@ -108,13 +108,18 @@ Review in this order; stop reading the diff only when you've covered all of it.
 **Severities:**
 
 - **Critical** — wrong behavior, data loss, security hole, a red or dishonest test
-  suite. Blocks.
+  suite. Blocks the node when the defect is in its diff or caused by it.
 - **Important** — a real defect or spec gap that will bite: missing requirement,
-  unhandled failure path, a magic value the constraints named. Blocks.
+  unhandled failure path, a magic value the constraints named. Blocks the node when the
+  defect is in its diff or caused by it.
 - **Minor** — style, naming, a nit with no behavioral consequence. Never blocks;
   goes to the ledger.
 - **⚠️ Cannot verify from diff** — the requirement lives in unchanged code or spans
   tasks. Not a blocker for the reviewer; the controller resolves it.
+
+**A pre-existing defect the reviewer notices** — one the diff neither contains nor
+causes — does not block the node, whatever its severity. It goes to finish-line triage
+([`finish-line.md`](finish-line.md) → *Triage at discovery*).
 
 Formatting nits that don't change meaning are not findings. Praise is not a
 finding either.

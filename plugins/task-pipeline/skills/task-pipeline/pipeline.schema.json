@@ -156,6 +156,25 @@
               "description": "Rounds per artifact before the run stops reviewing and measures. Counted from the run ledger's `touch:` pass numbers, never from memory; a round that finds nothing ends the loop by definition and is not counted."
             }
           }
+        },
+        "finish": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "The iteration's budget at its finish line. Absent, the defaults hold: 3 rounds and 2 releases. A round is every exit check once plus one independent reading over the scope; only new blocking findings count. Reaching either budget with a blocker open stops the iteration and hands it back blocked; no round runs past it without the operator's go, given with the numbers. Doctrine: references/finish-line.md; verdict: scripts/waves.py finish.",
+          "properties": {
+            "maxRounds": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 3,
+              "description": "Finish-line rounds per iteration. Rotating the audit axis happens inside this budget and never adds a round."
+            },
+            "maxReleases": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 2,
+              "description": "Releases per iteration, the first included; every corrective release after a post-release failure counts against it."
+            }
+          }
         }
       }
     },

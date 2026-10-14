@@ -18,6 +18,7 @@
 - Documentation (the phase-1b inventory — the four questions)
 - Scope
 - Requirements (the REQ spine — every later stage traces to these IDs)
+- Finish line (when this iteration stops)
 - Users & context
 - Decisions locked (the grill's output)
 - Autonomy (the sweep — stages 1→10 read this instead of asking)
@@ -100,6 +101,19 @@ not continuously): `open` → `planned` → `built` → `verified` \| `partial` 
 > explicit agreement**, recorded in the carry-over ledger. Silently restating the
 > task in smaller terms is the failure this table exists to prevent: every gate
 > after it goes green on the shrunken task and nothing reports the loss.
+
+## Finish line (when this iteration stops)
+
+The contract the iteration stops against (the skill's `references/finish-line.md`). Written
+here, confirmed with the brief, and revised only as a recorded revision — a finding is not one.
+
+- **Objective:** <one sentence: what is true when this iteration is done>
+- **Exit checks:** <REQ id → command, run on the artefact the operator uses: released /
+  installed / deployed — one line each>
+- **Scope:** <the modules, paths and REQ ids this iteration may change, as a list>
+- **Budget:** `maxRounds` 3 · `maxReleases` 2 (the defaults; `pipeline.json` →
+  `run.finish` overrides them)
+- **Base:** <the commit this iteration started from>
 
 ## Users & context
 

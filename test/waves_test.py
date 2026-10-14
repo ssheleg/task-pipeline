@@ -16,7 +16,11 @@ in temp directories:
     node closes;
   * `sync-graph` moves graph nodes through `graph.py wave`, and `graph.py validate` agrees
     afterwards; a move graph.py refuses is a refusal here too;
-  * the templates ship, are listed, and waves.md links the schema instead of a field table.
+  * the templates ship, are listed, and waves.md links the schema instead of a field table;
+  * `finish` computes the finish line (references/finish-line.md) from the triaged items:
+    two clean rounds exit 0, one exits 3, forty deferred items change nothing, a blocker open
+    at the round budget exits 5, blocking 2 → 3 exits 6, noise is ignored, and a blocking
+    item without its B test is malformed (exit 1).
 
 Run bare: prints PASS and exits non-zero on the first failure.
 """
@@ -123,6 +127,76 @@ def conservative_plan_controls():
                            "--plan", str(pp), "--write")
         ok(rc == 1 and inv.read_bytes() == before and json.loads(out)["unplaced"] == ["FIX-001"],
            "incomplete assignment reports gaps but preserves prior assignment bytes")
+
+
+def finish_cases():
+    """`waves.py finish`: the finish line from the triaged items (references/finish-line.md)."""
+    d = tree()
+    inv = d / "finish.json"
+
+    def fin(items, *extra):
+        inv.write_text(json.dumps({"schema": "inventory/1", "items": items}))
+        return run("finish", "--inventory", str(inv), "--max-rounds", "3", "--max-releases", "2",
+                   *extra)
+
+    def blk(i, r, **kw):
+        return item(i, triage="blocking", test="B1", round=r, **kw)
+
+    fixed_r1 = [blk("F-001", 1, status="fixed")]
+    rc, out, err = fin(fixed_r1, "--rounds", "3")
+    ok(rc == 0 and out.startswith("finish: done — rounds 3/3"),
+       f"a blocker fixed in round 1 and two clean rounds after it: done, exit 0 ({rc} {out!r} {err!r})")
+    rc, out, err = fin([], "--rounds", "2")
+    ok(rc == 0, f"two clean rounds: done, exit 0 ({rc} {out!r} {err!r})")
+    rc, out, err = fin([], "--rounds", "1")
+    ok(rc == 3 and out.startswith("next round: 2/3"),
+       f"one clean round owes a second: continue, exit 3 ({rc} {out!r} {err!r})")
+    rc, out, err = fin(fixed_r1, "--rounds", "2")
+    ok(rc == 3, f"the fix round then one clean round owes a second clean one: exit 3 ({rc} {out!r})")
+    many = [item(f"D-{n:03d}", triage="deferred", severity="high", register_id=f"B-{n:03d}")
+            for n in range(40)]
+    rc, out, err = fin(many, "--rounds", "2")
+    ok(rc == 0 and "deferred: 40 → " in out,
+       f"40 deferred, 0 blocking, two clean rounds: done, exit 0, and the 40 counted ({rc} {out!r} {err!r})")
+    rc, out, err = fin([blk("O-001", 1, status="fixed"), blk("O-002", 3)], "--rounds", "3")
+    ok(rc == 5 and out.startswith("finish: budget — rounds 3/3") and "open: O-002" in out,
+       f"round 3/3 with a blocker open: budget spent, exit 5 ({rc} {out!r} {err!r})")
+    rc, out, err = fin([blk("R-001", 1)], "--rounds", "1", "--releases", "2")
+    ok(rc == 5 and "releases 2/2" in out,
+       f"releases 2/2 with a blocker open: budget spent, exit 5 ({rc} {out!r} {err!r})")
+    rising = [blk("V-001", 1, status="fixed"), blk("V-002", 1, status="fixed"),
+              blk("V-003", 2), blk("V-004", 2), blk("V-005", 2)]
+    rc, out, err = fin(rising, "--rounds", "2")
+    ok(rc == 6 and out.startswith("finish: blocked") and "2 → 3" in out,
+       f"new blocking 2 → 3 did not fall: diverging, exit 6 ({rc} {out!r} {err!r})")
+    selfinf = [blk("S-001", 1, status="fixed"), blk("S-002", 1, status="fixed"),
+               blk("S-003", 1, status="fixed"), blk("S-004", 2, base_repro="no")]
+    rc, out, err = fin(selfinf, "--rounds", "2")
+    ok(rc == 6 and "self-inflicted" in out,
+       f"round 2's only blocker is self-inflicted: diverging, exit 6 ({rc} {out!r} {err!r})")
+    noisy = [item(f"N-{n}", triage="noise", round=n % 2 + 1) for n in range(6)]
+    rc, out, err = fin(noisy, "--rounds", "2")
+    ok(rc == 0 and "noise: 6" in out, f"noise in both rounds is ignored: done, exit 0 ({rc} {out!r} {err!r})")
+    rc, out, err = fin([item("M-001", triage="blocking", round=1)], "--rounds", "1")
+    ok(rc == 1 and "M-001: blocking without `test`" in err,
+       f"a blocking item without its B test is malformed, exit 1 ({rc} {out!r} {err!r})")
+    rc, out, err = fin([blk("L-001", 3)], "--rounds", "2")
+    ok(rc == 1 and "only 2 round(s) ran" in err, f"a round past the rounds run is malformed ({rc} {err!r})")
+    rc, out, err = fin([], "--rounds", "2", "--checks", "3/4")
+    ok(rc == 3 and "exit checks not all green" in out,
+       f"two clean rounds over a red exit check are not done ({rc} {out!r})")
+    rc, out, err = fin([], "--rounds", "2", "--checks", "4/4", "--artefact", "pkg@abc1234")
+    ok(rc == 0 and "4/4 green on pkg@abc1234" in out, f"the exit checks print on their artefact ({out!r})")
+    risky = [item("K-001", triage="deferred", blast=3, register_id="B-201"),
+             item("K-002", triage="deferred", rung="I5", register_id="B-202"),
+             item("K-003", triage="deferred", register_id="B-203")]
+    rc, out, err = fin(risky, "--rounds", "2")
+    ok("known risks: B-202, B-201" in out and "next: B-202 (new iteration)" in out,
+       f"known risks are the deferred rows at blast 3 or rung I4+, next is the top priority ({out!r})")
+    # Derived rounds: with --rounds absent, the highest recorded round is the count, so a
+    # derived count can never claim the clean rounds no item recorded.
+    rc, out, err = fin([blk("G-001", 1, status="fixed"), item("G-002", triage="noise", round=2)])
+    ok(rc == 3, f"rounds derived from the items: 2, one clean round after the fix — a second is owed ({rc} {out!r})")
 
 
 def main():
@@ -321,7 +395,14 @@ def main():
         cases_ = [good, item("BAD-1", title="ab"), item("BAD-2", severity="urgent"),
                   item("BAD-3", kind="Bug"), item("BAD-4", evidence=""), item("BAD-5", status="done"),
                   item("BAD-6", wave=0), item("BAD-7", release="next"), dict(item("BAD-8"), extra=1),
-                  item("BAD-9", node="A-1"), item("BAD-10", needs_operator="yes"), item("9BAD")]
+                  item("BAD-9", node="A-1"), item("BAD-10", needs_operator="yes"), item("9BAD"),
+                  item("OK-002", triage="blocking", test="B3", round=2, base_repro="no"),
+                  item("OK-003", triage="deferred", blast=3, rung="I4"), item("OK-004", triage="noise"),
+                  item("BAD-11", triage="urgent"), item("BAD-12", triage="blocking", round=1),
+                  item("BAD-13", triage="blocking", test="B5", round=1),
+                  item("BAD-14", triage="blocking", test="B1"), item("BAD-15", triage="deferred", test="B2"),
+                  item("BAD-16", test="B1", round=1), item("BAD-17", triage="noise", round=0),
+                  item("BAD-18", base_repro="maybe"), item("BAD-19", blast=4), item("BAD-20", rung="I6")]
         for it in cases_:
             hand = bool(W.item_errors(it))
             schema_says = bool(list(_js.Draft202012Validator(sch_inv).iter_errors(
@@ -418,6 +499,7 @@ def main():
     else:
         print("note: jsonschema not installed — the schema conformance pass was not run")
     conservative_plan_controls()
+    finish_cases()
     print(f"PASS: waves.py — {CASES} cases")
 
 

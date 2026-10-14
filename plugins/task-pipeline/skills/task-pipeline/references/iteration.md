@@ -36,7 +36,8 @@ A fix designed against today's state is the intermediate state that
 seam, and the fix is then paid for twice. The finding gets an id in its owning register
 and lands on a canvas node. Its wave decides when it is built.
 
-**The hotfix lane is the only exception, and it is closed.** It has five entries:
+**The hotfix lane is the only exception, and it is closed.** This list is its single home;
+[`finish-line.md`](finish-line.md)'s blocking test B2 cites it. It has five entries:
 - production is down;
 - data is being lost or corrupted;
 - a credential has leaked;
@@ -57,12 +58,12 @@ reason. "It is quick" is not one of the five entries.
 | 4 | Question round | answers from the sources, then one batch to the operator | every question is answered, assumed, or blocks a named node |
 | 5 | Plan | the work graph with waves and risk classes — `scripts/waves.py sync-graph` writes each node's `wave` and `risk` from the plan, so `graph.py close` enforces the rounds it owes — and one packet per node | every REQ lands on a node; [`planning.md`](planning.md)'s set comparison holds |
 | 6 | Build | parallel agents, each owning disjoint files | each node is committed on its branch, with its own checks green |
-| 7 | Verify | rounds per node, starting as each node lands | each node passes its risk class's rounds |
+| 7 | Verify | rounds per node, starting as each node lands; each finding triaged at discovery ([`finish-line.md`](finish-line.md)) | each node passes its risk class's rounds |
 | 8 | Seam check | cross-module checks per seam group | every seam the canvas names is exercised end to end |
 | 9 | Docs | stage 9 over everything the release iteration shipped | the doc gate passes and the docs match the code |
 | 10 | Release | versions, tags, pins, changelogs, in dependency order | the published artefacts resolve |
-| 11 | Post-release check | the stage-8 trio on what was released | every item the release claims closed is checked on the released artefact |
-| 12 | Next pool | the re-measured inventory and the proposal | the hand-back is sent |
+| 11 | Post-release check | the stage-8 trio on what was released, read as a finish-line round | every item the release claims closed is checked on the released artefact, and `finish:` is computed |
+| 12 | Next pool | the re-measured inventory and the proposal | the hand-back, with its `finish:` line, is sent |
 | 13 | Retrospective | the project retro, plus the shared lesson store where one exists | written last ([`retrospective.md`](retrospective.md)) |
 
 Steps 1–4 are stages 0–4 run once. Steps 6–8 are stages 5–8 per wave, and a wave's
@@ -218,7 +219,10 @@ actually published, installed or deployed — never on the branch. Each item the
 claims closed is re-checked against the released artefact. For installed packages and
 skills, follow [`deploy-targets.md`](deploy-targets.md) → *The verification trio*: update
 within the authorized rollout and read back each claimed installed channel. A failure goes to the hotfix
-lane if it is one of its five entries. Otherwise it goes to the next pool, with an id.
+lane if it is one of its five entries. Every post-release failure is triaged at the finish
+line ([`finish-line.md`](finish-line.md) → *Triage at discovery*): a blocking one is fixed in
+this release iteration, and the corrective release counts against `run.finish.maxReleases`; a
+deferred one goes to the next pool, with an id.
 
 ## The next pool
 

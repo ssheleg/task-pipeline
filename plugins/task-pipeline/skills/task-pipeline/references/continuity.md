@@ -97,7 +97,8 @@ This spans the whole run, not one stage:
   finished.
 
 It stops for exactly four things: an unmet `manual` gate, a block it cannot resolve, a
-genuine ambiguity the brief does not answer, and completion.
+genuine ambiguity the brief does not answer, and completion — the iteration's finish line
+reached ([`finish-line.md`](finish-line.md)), never a search that ran dry.
 
 **A block or an ambiguity stops its node, not the run.** An ambiguity whose answer is
 internal and reversible is not a stop at all: the run takes the recommended answer, records
@@ -111,6 +112,11 @@ not block. When the whole frontier is blocked — `graph.py next` exits `4` — 
 recorded reasons: external waits go on watchers, human decisions go into the question
 batch. Exit 4 does not prove a human gate or completion. A watcher keeps the recorded
 next action alive while no independent node is runnable. **When the board is empty, say so once**, and do not invent work to fill it.
+
+**Stop is not idle.** A finish line reached closes that iteration — stages 9–10, the
+hand-back, the retro — and on an armed loop the highest-priority board row starts a new
+iteration with its own contract. Re-opening the closed one to polish it is not continuing
+([`finish-line.md`](finish-line.md) → *Stop is not idle*).
 
 **This extends [`build.md`](build.md); it does not replace it.** That file's
 *Continuous execution* rule governs the inside of a stage-5 execution — do not

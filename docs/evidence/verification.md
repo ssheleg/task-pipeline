@@ -1,5 +1,13 @@
 # Verification — task-pipeline
 
+## Shipped state — v1.96.0 (source candidate; NOT SHIPPED yet)
+
+The finish-line change (`references/finish-line.md`, `waves.py finish`, guards
+FL-G1..FL-G7) is on a draft PR with focused suites and the complete local suite run
+on the candidate source. Review, integration, tag, release jobs, npm payload and
+installed readback remain pending. Historical confirmation cells are unchanged; the
+version declaration is not a shipped-state assertion.
+
 ## Shipped state — v1.95.0 (source candidate; NOT SHIPPED yet)
 
 The [FW07 composition receipt](runs/2026-10-13-fw07-composition/README.md)
