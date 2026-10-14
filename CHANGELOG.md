@@ -1,6 +1,6 @@
 ## Unreleased
 
-Guards: 439 → **469**; property checks 15 → **15**. There are 30 new negatives in
+Guards: 439 → **489**; property checks 15 → **15**. There are 50 new negatives in
 `lessons.py`. Each one plants a revert, and the suite must catch it:
 
 - the whole-scan refusal put back;
@@ -30,9 +30,41 @@ Guards: 439 → **469**; property checks 15 → **15**. There are 30 new negativ
 - merged duplicate lines dropping an id silently;
 - `add` counting a phantom project after a re-init;
 - a shallow check trusted when it times out;
-- an index line accepted with `mem:x@0` or with an unknown `carried` reason.
+- an index line accepted with `mem:x@0` or with an unknown `carried` reason;
+- an origin v1.95.0 wrote kept as a second project, by `rebuild` or by `add`;
+- that re-key made without the origin's commit resolving, for an origin with provenance, for
+  one whose own key is re-derived, between two candidate repositories, or merging two memory
+  ids (in `rebuild` and in `add`);
+- `record` re-attaching an id from another checkout;
+- one memory id left on two live projects, or kept by the later holder;
+- a project key skipping the main worktree's HEAD or `init.defaultBranch`;
+- redaction replacing a relative name, or inside a longer name;
+- a session note, a newer-format notice or a refusal printing an absolute path;
+- a stage id carrying a line break or a path;
+- a same-revision duplicate decided by the order of lines.
 
-These are the fixes from verification rounds 6 to 12 of release iteration 1.
+These are the fixes from verification rounds 6 to 13 of release iteration 1.
+
+- **Upgrade and ownership in `lessons.py`** (round 13).
+  - An index written by v1.95.0 (keyed on the smallest root of HEAD, no provenance) no longer
+    turns a repository that merged an unrelated history into two projects. An origin with no
+    provenance whose `retro#anchor` this run re-derives under exactly one other key, and whose
+    commit resolves in that checkout, is re-keyed: its memory id follows, and `emit` and
+    `record` keep using it. `add` does the same for its own checkout. Never with provenance,
+    never when its own key is re-derived, never between two candidates, never merging two ids.
+  - `record` re-attaches an id held by an origin carried as `checkout holds another project`
+    only from a checkout in that origin's provenance (a re-init at the same path).
+  - A rebuild never leaves one memory id on two live projects: the earlier holder keeps it,
+    and the other origin is named and keeps its place without it.
+  - Without `origin/HEAD`, `main` or `master`, the project key is the main worktree's HEAD,
+    then `init.defaultBranch`, so a linked worktree on an orphan branch is the same project.
+  - Redaction replaces only absolute paths, as whole path components (`--roots .` deleted every
+    dot), and stderr — the session's notes, the newer-format notice, a refusal — is redacted
+    like stdout.
+  - A stage id given as a string gets the text checks: one line, at most 32 characters, no
+    path or credential shape.
+  - Two copies of one origin at the same revision keep the lexically smaller id, whatever the
+    order of the lines.
 
 - **Identity and safety in `lessons.py`** (round 12).
   - The project key is the repository's: the first-parent root of its default branch, once
@@ -43,7 +75,8 @@ These are the fixes from verification rounds 6 to 12 of release iteration 1.
     a re-init never counts a phantom project, even before the next rebuild.
   - `record` refuses an id another project's origin holds, naming the project (exit 1), and an
     id the loader would refuse (exit 2).
-  - lesson/1 text refuses every line separator, including U+2028, U+2029 and U+0085. The index
+  - lesson/1 text — a string stage id too, since round 13 — refuses every line separator,
+    including U+2028, U+2029 and U+0085. The index
     is split on `\n` only, so a value can never make it read as corrupt.
   - Rebuild messages name checkouts and files, never an absolute path.
   - `--prune-carried-reason` needs `--prune-carried` and offers only the reasons a rebuild

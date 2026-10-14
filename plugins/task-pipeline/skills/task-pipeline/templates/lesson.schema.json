@@ -51,7 +51,7 @@
       "maximum": 3
     },
     "stages": {
-      "description": "The stage that owned the failure and the stage that surfaced it. A profile's stage ids need not be numbers.",
+      "description": "The stage that owned the failure and the stage that surfaced it. A profile's stage ids need not be numbers; a string id is one line of at most 32 characters and gets the text fields' checks (no path, URL or credential shape).",
       "type": "object",
       "additionalProperties": false,
       "required": [
@@ -63,13 +63,17 @@
           "type": [
             "integer",
             "string"
-          ]
+          ],
+          "minLength": 1,
+          "maxLength": 32
         },
         "surfaced": {
           "type": [
             "integer",
             "string"
-          ]
+          ],
+          "minLength": 1,
+          "maxLength": 32
         }
       }
     },
@@ -96,7 +100,7 @@
       ],
       "properties": {
         "project": {
-          "description": "The project's pseudonymous key: `p-` and the first 12 hex digits of the repository's root commit — the first-parent root of its default branch, so every worktree and branch of one repository shares it. Never its name: a repository name can be a customer's or a product's (redaction rule 4). The shared store receives the same key, never a `project:<slug>` id.",
+          "description": "The project's pseudonymous key: `p-` and the first 12 hex digits of the repository's root commit — the first-parent root of its default branch (origin/HEAD, main or master; without them the main worktree's HEAD, then init.defaultBranch), so every worktree and branch of one repository shares it. Never its name: a repository name can be a customer's or a product's (redaction rule 4). The shared store receives the same key, never a `project:<slug>` id.",
           "type": "string",
           "pattern": "^p-[0-9a-f]{12}$"
         },

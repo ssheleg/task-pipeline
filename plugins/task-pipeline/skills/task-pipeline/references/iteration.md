@@ -293,7 +293,14 @@ needs `--prune-carried`, and it offers only the reasons listed below; anything e
 error, exit 2. A
 carried origin keeps everything recorded on it, including its memory id, and is marked
 `carried: <reason>`, named in the summary. It is re-derived and un-marked as soon as a checkout
-holding it reads again. The reasons are:
+holding it reads again. One thing is re-keyed rather than carried, on positive evidence only:
+an origin written before provenance existed (v1.95.0 keyed a project on the smallest root
+commit of HEAD) whose `retro#anchor`, under the same class key, this run re-derives under
+exactly one other key, and whose own commit resolves in the checkout that re-derived it. It is
+the same repository, so it takes the new key and its memory id follows; `add` does the same for
+its own checkout. It is never re-keyed when it has provenance, when its own key is re-derived
+too, when two keys could claim it, or when the copy under the new key holds a different memory
+id (then it stays carried, and that is named). The reasons are:
 
 - `checkout not read`: the checkout was not discovered, or a problem is owned by it. That
   problem may be an unreadable retro, a refused `git worktree list`, a shallow clone, a broken
@@ -305,15 +312,17 @@ holding it reads again. The reasons are:
 - `commit does not resolve`, `retro cites a commit that does not resolve` or
   `lesson refused`: the entry is there but could not be derived. A dangling commit is routine
   after a squash merge and a deleted branch.
-- `no provenance`: the origin was written before provenance existed.
+- `no provenance`: the origin was written before provenance existed, and no re-derived origin
+  proves it is the same repository's.
 - `checkout holds another project`: every checkout in its provenance now holds a different
   project key, and the origin's own commit does not resolve there. A path is not an identity.
   The same repository under another key still holds the commit, so it is not a stranger;
   `add` applies the same rule to its own checkout's old-key origin.
 
 The project key is the repository's own: the first-parent root of its default branch
-(`origin/HEAD`, then `main`, then `master`, then HEAD's first-parent root). It is computed once
-per git common directory. A worktree on a branch that merged an unrelated history, or a
+(`origin/HEAD`, then `main`, then `master`). Without any of them it is the main worktree's
+HEAD, read in the common directory, so every worktree gets one answer; then
+`init.defaultBranch`; then this checkout's HEAD. It is computed once per git common directory. A worktree on a branch that merged an unrelated history, or a
 checkout sitting on an orphan `gh-pages` branch, is still its project.
 
 **Counting.** `seen`, `projects` and `status` count re-derived origins and every carried origin
@@ -333,8 +342,10 @@ it taught nothing, it does not count as something read. `add`, `emit-observatory
 **Known limit.** A project whose root commit changes, through a re-init or an unshallow, starts
 new store records: its old origins are carried as `checkout holds another project` with their
 memory ids, and the new origins start without one. The operator re-attaches by running
-`record` with the old id on the new origin. That is allowed, because the new origin is of the
-same class key and the origin holding the id is carried as `checkout holds another project`.
+`record` with the old id on the new origin, from the same checkout. That is allowed, because
+the new origin is of the same class key and the origin holding the id is carried as `checkout
+holds another project` with this checkout in its provenance. From any other checkout it is
+refused.
 
 Another checkout of the same project, even one reading the same retro path, decides nothing
 for an origin it never held. Problems carry their owner, a checkout or none, and are never
@@ -349,20 +360,29 @@ never to a retro anchor:
   writes nothing:
   - an id that another class key holds;
   - an id that another project's origin holds (the refusal names that project), unless that
-    origin is carried as `checkout holds another project`;
+    origin is carried as `checkout holds another project` and this checkout is in its
+    provenance (the re-attach above);
   - a revision older than the one held;
   - without `--replace`, a different id over the one the origin already holds.
 
   It also refuses an id the index cannot hold, such as `mem:`, a quote, a backslash or a
   space: that exits 2.
-- Merged duplicate lines name every id they drop.
+- One id is one project's store record. Two projects may hold it only while one of them is
+  carried as `checkout holds another project`. When a rebuild would leave it on two live
+  projects (that checkout came back), the id stays on the earlier holder: the project the
+  previous index carried as `checkout holds another project` with it, else the smaller project
+  key. The other origin keeps its place without the id, and the run names it.
+- Merged duplicate lines name every id they drop. Of two copies of one origin the higher
+  revision wins; on equal revisions, the lexically smaller id.
 - Ids compare on the part before `@`, revisions start at 1, and the highest revision wins.
 
 `emit-observatory` and `record` both use the origin of the project that holds the id. The run
 refuses to write if a memory id would vanish other than through `--prune-carried`.
 
 Unreadable sources are named under `not read`, by name rather than by absolute path. Every
-root, checkout and the index path is shown by its name. The index is split on `\n` only, and
+root, checkout, the index and its directory is shown by its name, on stdout and stderr alike
+(the session's notes and a refusal too). Only absolute paths are replaced, and only as whole
+path components, so a root given as `.` changes no other text. The index is split on `\n` only, and
 lesson/1 text refuses every line separator, including U+2028, U+2029 and U+0085. So no value
 can make a good index read as corrupt. The run
 exits 0 whenever anything was read: a retro, a checkout discovered in full, or a shallow
@@ -412,7 +432,8 @@ Rules 1, 3, 4 and 5 still bind every text field, on the estate as off it: no pat
 no code or value, no person's, company's, customer's or product's name, and a title that
 states the class rather than the incident. Never, in either layer, a transcript or a URL.
 `lessons.py` refuses what a pattern can see (paths, URLs, addresses, credential shapes, long
-hex or base64 runs) and any field lesson/1 does not name; a name it cannot see stays the
+hex or base64 runs, line breaks) in every text field and in a stage id given as a string (at
+most 32 characters), and any field lesson/1 does not name; a name it cannot see stays the
 writer's duty. Off the estate (`retro.publish`) the relaxation ends: the whole origin is
 stripped.
 

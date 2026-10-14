@@ -1,4 +1,16 @@
-## Fix cycles 6–12 of the release iteration — #125, branch `iter1/M-5-N-1` (2026-10-14)
+## Fix cycles 6–13 of the release iteration — #125, branch `iter1/M-5-N-1` (2026-10-15)
+
+Cycle 13 kept the contract and fixed two MEDIUM findings and five LOW ones:
+- an index written by v1.95.0 is re-keyed to its repository on positive evidence (no
+  provenance, one re-derived origin of another key at its anchor, its commit resolving
+  there), never counted as a second project;
+- `record`'s re-attach exception holds only from the carried origin's own checkout, and a
+  rebuild keeps one memory id on one live project (the earlier holder);
+- the project key falls back to the main worktree's HEAD, then `init.defaultBranch`;
+- redaction replaces whole absolute path components only, on stderr too;
+- string stage ids get the text checks; a same-revision tie is deterministic.
+
+The tests are in `round13_controls`, plus negatives 489–508 (474 re-anchored).
 
 Cycle 12 kept the narrowed contract and fixed five MEDIUM findings and the LOW ones:
 - the project key is the repository's;
@@ -33,7 +45,7 @@ pushed but not merged, and no version or publication is claimed.
 - **New rules:** a parallel-work check before each cycle (`iteration.md` → *The cycle*), and
   background-dispatch command hygiene (`build.md` §4.1).
 
-Next task: run round 13 of verification on #125's head. The release order after v1.95.0 is
+Next task: run round 14 of verification on #125's head. The release order after v1.95.0 is
 the coordinator's.
 
 ## Operator stop: Claude continuation — FW07 child lifetime
