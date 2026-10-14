@@ -1,10 +1,11 @@
 # Evaluation results — task-pipeline
 
 **Status: three suites authored (task-pipeline, evidence-docs, project-audit);
-one self-observed run and, since 2026-08-31, three blind trigger runs — one per
-model (haiku, sonnet, opus).** The instruction-following cases remain unexecuted
-and say so per run, because they need a full interactive session — a skip is not
-a pass, and a guessed verdict is worse than a vacant row.
+one self-observed run, three blind trigger runs on 2026-08-31 — one per model
+(haiku, sonnet, opus) — and three more on 2026-10-14 over the release-iteration
+phrasings (TRIG-11, TRIG-12, NOTRIG-09), one per model.** The instruction-following
+cases remain unexecuted and say so per run, because they need a full interactive
+session — a skip is not a pass, and a guessed verdict is worse than a vacant row.
 
 **The numbers below are computed, not asserted.** `python3 evals/run.py` counts the
 suite and the dated run headings in this file. A value typed here that disagrees with
@@ -40,11 +41,11 @@ or it belongs in a check.
 
 | Metric | Value | Computed by | As of |
 |---|---|---|---|
-| Evals authored | 48 (three suites: task-pipeline 30, evidence-docs 9, project-audit 9) | `python3 evals/run.py` → `suite: N evals` | 2026-10-12 |
+| Evals authored | 55 (three suites: task-pipeline 37, evidence-docs 9, project-audit 9) | `python3 evals/run.py` → `suite: N evals` | 2026-10-14 |
 | Categories covered | 5 of 5, per suite | the suite's own `category` fields | 2026-08-31 |
-| Dated runs recorded | **4** | `python3 evals/run.py` → `recorded runs: N` | 2026-08-31 |
-| …of those, **blind** | **3** | run headings not marked `self-observed` | 2026-08-31 |
-| Models exercised blind | **3 of 3** | distinct models across blind runs | 2026-08-31 |
+| Dated runs recorded | **7** | `python3 evals/run.py` → `recorded runs: N` | 2026-10-14 |
+| …of those, **blind** | **6** | run headings not marked `self-observed` | 2026-10-14 |
+| Models exercised blind | **3 of 3** | distinct models across blind runs | 2026-10-14 |
 
 **The last three rows are the honest state of this skill's behavioural evidence**, and
 the split matters more than the total: a run the author watched, knowing the expected
@@ -83,6 +84,52 @@ tightened to "choose only from that file's list"). A trigger `pass` means the
 model NAMED the skill; it does not prove a full session loaded and obeyed the
 doctrine — the INSTR cases need exactly that and are recorded as **not
 reproducible from this harness**, not guessed.
+
+## 2026-10-14 · haiku · blind trigger probes, subagent protocol
+
+**3 of 3 scored cases passed** — the two release-iteration triggers and their
+explanation control, added by release iteration 1 (node M-4, USR-015). Method as
+2026-08-31 below, with two differences, stated rather than implied: the offered
+list was the family's **38** skills (the family grew from 28), built once from the
+members' `SKILL.md` frontmatters on 2026-10-14 (sha256 `12115a8b24f1…`); and each
+subagent reported the model id from its own system context, recorded here as the
+model that answered: `claude-haiku-5-5`. The other new cases of that node
+(INSTR-09…13, TP-OUT-006/007) were not run: the INSTR cases need a full interactive
+session, and the two outcome cases need an executor driving an arm in a sandbox —
+their fixtures' command checks are proven to pass and to fail by
+`test/audit_regressions/usr_015_evals.py`, which is not a run of the case.
+
+| id | verdict | what happened |
+|---|---|---|
+| TRIG-11 | pass | named `task-pipeline` — cited the description's 'waves'/'волнами' |
+| TRIG-12 | pass | named `task-pipeline` — cited 'итерация релиза' in the description |
+| NOTRIG-09 | pass | answered `none` — the description excludes explaining |
+
+## 2026-10-14 · sonnet · blind trigger probes, subagent protocol
+
+**3 of 3 scored cases passed.** Same protocol and list as the haiku run above;
+the answering model reported `claude-sonnet-5-5`.
+
+| id | verdict | what happened |
+|---|---|---|
+| TRIG-11 | pass | named `task-pipeline` — matched «закрой их волнами» to the waves mode |
+| TRIG-12 | pass | named `task-pipeline` — matched the 'release iteration' trigger |
+| NOTRIG-09 | pass | answered `none` — a plain explanation question |
+
+## 2026-10-14 · opus · blind trigger probes, subagent protocol
+
+**3 of 3 scored cases passed.** Same protocol and list as the haiku run above;
+the answering model reported `claude-opus-5-5[1m]`.
+
+| id | verdict | what happened |
+|---|---|---|
+| TRIG-11 | pass | named `task-pipeline` — the board closed «волнами» |
+| TRIG-12 | pass | named `task-pipeline` — the board-closing release loop |
+| NOTRIG-09 | pass | answered `none` — named the trigger phrase and the explaining exclusion |
+
+INSTR-09…13 and TP-OUT-006/007: **not run** in any of the three 2026-10-14 runs,
+for the reasons given under the haiku run. A trigger `pass` still means only that
+the model NAMED the skill.
 
 ## 2026-08-31 · haiku · blind trigger probes, subagent protocol
 
