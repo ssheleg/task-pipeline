@@ -1380,7 +1380,8 @@ def cmd_rebuild(a, idx: pathlib.Path) -> int:
     for p in [pathlib.Path(r).expanduser() for r in a.roots] + list(repos) + [idx]:
         for form in (p, p.resolve()):
             shown[str(form)] = p.name
-    redact = lambda text: _redact(text, shown)  # noqa: E731
+    def redact(text: str) -> str:
+        return _redact(text, shown)
     lessons: list[tuple[str, dict]] = []
     private, seen_files = 0, 0
     unresolved: list[str] = []
