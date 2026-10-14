@@ -1,6 +1,6 @@
 # FW07 shared scratch lock: writing-child lifetime
 
-Source `875c6e6a9a02c5c18e77945fc4fa56a43588cb5c`. Independent observer
+Source [875c6e6a9a02c5c18e77945fc4fa56a43588cb5c](https://github.com/ssheleg/task-pipeline/commit/875c6e6a9a02c5c18e77945fc4fa56a43588cb5c). Independent observer
 [IO09](https://github.com/ssheleg/sshlg-skills/blob/868c9d7b3bade59ab834abaeb0110d50fd948365/docs/reports/2026-10-13-independent-observer-runtime-3898236/README.md#io-09-shared-scratch-lock-ends-before-orphan-plant-writers)
 found that killing the parent releases its flock while its writing child lives.
 [Actual replay](baseline.json), from the [portable original probe](baseline-probe.py),
@@ -87,7 +87,7 @@ acceptance is claimed here.
 ## Claude continuation after operator stop
 
 The operator requested finishing this session and leaving context for Claude.
-Implementation is frozen at `25fb09d1d7bfe59c9019584a581cb421718ba6c6` on
+Implementation is frozen at [25fb09d1d7bfe59c9019584a581cb421718ba6c6](https://github.com/ssheleg/task-pipeline/commit/25fb09d1d7bfe59c9019584a581cb421718ba6c6) on
 `fix/fw07-scratch-child-lifetime`, worktree
 `/Users/sshlg/DATA/_wt/tp-fw07-child-lock`. The branch is pushed. It is a focused
 candidate awaiting independent peer review; no whole-suite, merge or release
