@@ -90,15 +90,15 @@ is made.
 ## Independent acceptance and collision census
 
 The [root peer receipt](root-peer.json) binds independent source review and actual
-18 + 42 focused replays to `9d9a99b`; both logs are retained beside it.
+18 + 42 focused replays to [9d9a99b](https://github.com/ssheleg/task-pipeline/commit/9d9a99be6369daee0a8739d1500b607a76fd7253); both logs are retained beside it.
 The [complete destination census](collision-census.json) reads all 454 plants and
 finds 443 distinct admitted destinations, no duplicates and no ancestor overlaps,
 including both secondary destinations. This checks the current corpus, not future
 concurrent writers or unsupported dynamic shell paths. The coordinator authorized
 composition after this bounded peer; the future complete owner gate remains open.
 
-Composition fast-forwarded the unchanged future candidate from `7d18df5` through
-the accepted correction and peer receipt `9556c59`. The [focused structural
+Composition fast-forwarded the unchanged future candidate from [7d18df5](https://github.com/ssheleg/task-pipeline/commit/7d18df5464fad6fdbaa77a91d48580ebbe3f5d9a) through
+the accepted correction and peer receipt [9556c59](https://github.com/ssheleg/task-pipeline/commit/9556c59941e3e2d5f46f4e40e204f0ba6e1f45f7). The [focused structural
 check](composed-structural.json) exited 0 on that implementation with the composed
 HANDOFF update; [the log](composed-structural.log) retains its disclosures. No
 complete owner run or candidate CI was performed by this composition step.
