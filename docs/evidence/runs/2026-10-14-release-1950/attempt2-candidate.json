@@ -1,0 +1,36 @@
+{
+  "schema": 1,
+  "tag": "v1.95.0",
+  "source": {
+    "commit": "4fa7ec6d27218dd240ae1e758d034db1543905f7",
+    "tree": "6b79a404e705b0799ef39aaa2c179d8f2b640e63",
+    "origin": "https://github.com/ssheleg/task-pipeline.git",
+    "suite_sha256": "c463a211f2c04ce42062a30bf563ad880c2af7ec7ea535019e4f739c62cb254c",
+    "helper_sha256": "ec57354e309a452beecc385fcd684ea8d3393ecc7bf2240d9f5b16ef4934db62",
+    "hook_sha256": "29b30f85220398c5a17dbaaba1cb7977ab36e0c2f86855abd08040dcf5ed4350"
+  },
+  "default_branch": "refs/heads/main",
+  "owner_nonce": "4d8ec7465e294f3bbd4e54500f37e23c",
+  "context": null,
+  "state": "CHECK_FAILED",
+  "external_authority": "NOT_VERIFIED_BY_HELPER",
+  "mechanical_evidence": {
+    "command": [
+      "npm",
+      "run",
+      "test:all"
+    ],
+    "started": 1791934929.927192,
+    "exit": 1,
+    "interruption": null,
+    "ended": 1791936639.950963,
+    "log_sha256": "a102dc6b4da2da5b80a85a2e7c63df6dcfdd753559c0968ffe2768a002a547b2",
+    "unlooked": [
+      "unlooked: 3"
+    ],
+    "initial_unlooked": [],
+    "release_gap_looked": true
+  },
+  "hook_observation": null,
+  "object": "6a68733c86070a8523313e4bd4bc4191cb077397"
+}
