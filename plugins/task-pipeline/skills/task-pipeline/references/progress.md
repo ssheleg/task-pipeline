@@ -169,6 +169,9 @@ SCOPE       what this claim covers: the commit, the environment, the REQ
 NOT VERIFIED what was built and NOT checked, or could not be. The literal
             `none within the stated scope` is a valid answer; an empty
             field is not
+FINISH      finish: done | budget | blocked — the finish block, as
+            finish-line.md prints it; mid-iteration, the round and
+            the open blocking count
 
 DECISIONS WAITING  <n>   each as a question with options, asked HERE
 AMBIGUITIES        <n>   computed, below
@@ -188,6 +191,11 @@ touched. Composing it by hand is how it becomes a summary of the parts somebody 
 And `none within the stated scope` is a claim with a subject — it says *nothing inside
 what SCOPE names is unverified*. Leaving the field empty says nothing at all, which reads
 as the same thing and is not: canon 9a, one artifact over.
+
+**`FINISH` says why the iteration stopped** ([`finish-line.md`](finish-line.md) → *The
+finish block*): `done` with its exit checks green on the artefact, `budget` with each open
+blocker a `needs-operator` board row, or `blocked`. A hand-back that cannot fill it has not
+reached a finish line, and says which round it is in.
 
 **Where there is no brief** — `checkup`, `setup`, a short path — TASK quotes the
 operator's own sentence instead, marked as such. An unquotable TASK is a run that cannot

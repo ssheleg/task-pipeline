@@ -1,3 +1,12 @@
+## 1.96.0 source candidate — the finish line (2026-10-15)
+
+Branch `feat/finish-line`, draft PR "1.96.0 — a finish line: iterations stop when the
+work is done, not when the search runs dry". Ships
+[`references/finish-line.md`](../plugins/task-pipeline/skills/task-pipeline/references/finish-line.md),
+`waves.py finish`, the brief's `## Finish line`, `run.finish` budgets and guards FL-G1..G7
+with eight negative plants (455–462). No tag, publication or install readback. Exact next task:
+independent review of the draft PR, then normal integration and the release gate.
+
 ## Operator stop: Claude continuation — FW07 child lifetime
 
 The operator requested a handoff, not another wave. Start with the

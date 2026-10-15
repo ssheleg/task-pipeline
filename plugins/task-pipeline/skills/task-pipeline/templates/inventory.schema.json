@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/ssheleg/task-pipeline/blob/main/plugins/task-pipeline/skills/task-pipeline/templates/inventory.schema.json",
   "title": "inventory/1 — <artifacts>/specs/YYYY-MM-DD-<topic>-inventory.json",
-  "description": "Wave 0's single machine-readable inventory: one item per open item of the board, every survey and every harvested source (references/waves.md, Wave 0). scripts/waves.py merges audit outputs into it (`merge`), writes `module`, `node`, `wave` and `release` from two short tables (`assign`), counts it (`count`) and refuses an item that lands nowhere (`validate`). The document is an object carrying `schema` and `items`; a bare array of items is read as the items of one. Fields a project needs beyond these go under an `x-` prefix.",
+  "description": "Wave 0's single machine-readable inventory: one item per open item of the board, every survey and every harvested source (references/waves.md, Wave 0). scripts/waves.py merges audit outputs into it (`merge`), writes `module`, `node`, `wave` and `release` from two short tables (`assign`), counts it (`count`), refuses an item that lands nowhere (`validate`) and computes the finish-line verdict from the triaged items (`finish`, references/finish-line.md). The document is an object carrying `schema` and `items`; a bare array of items is read as the items of one. Fields a project needs beyond these go under an `x-` prefix.",
   "type": "object",
   "additionalProperties": false,
   "required": ["schema", "items"],
@@ -17,6 +17,14 @@
       "additionalProperties": false,
       "patternProperties": {"^x-[a-z0-9-]+$": {}},
       "required": ["id", "title", "area", "kind", "severity", "evidence", "proposed_fix"],
+      "allOf": [
+        {"if": {"required": ["triage"], "properties": {"triage": {"const": "blocking"}}},
+         "then": {"required": ["test", "round"]}},
+        {"if": {"required": ["test"]},
+         "then": {"required": ["triage"], "properties": {"triage": {"const": "blocking"}}}},
+        {"if": {"required": ["test", "base_repro"], "properties": {"test": {"const": "B3"}}},
+         "then": {"properties": {"base_repro": {"not": {"const": "yes"}}}}}
+      ],
       "properties": {
         "id": {
           "description": "The item's id in its owning register. An item without one gets one there, in the same change. Unique across the inventory.",
@@ -60,6 +68,12 @@
         "blocked_by": {"type": "array", "items": {"type": "string"}},
         "closable_in_one_pass": {"type": "boolean"},
         "needs_operator": {"type": "boolean"},
+        "triage": {"description": "The finish-line class, set when the finding is found (references/finish-line.md → Triage at discovery). Only blocking findings argue for another round; deferred and noise never affect `waves.py finish`.", "enum": ["blocking", "deferred", "noise"]},
+        "test": {"description": "The blocking test that matched, first match wins: B1 an exit check is red; B2 a hotfix-lane entry; B3 it passes at Base; B4 a verified REQ or a published claim is false on the artefact. Required on a blocking item, refused on any other.", "enum": ["B1", "B2", "B3", "B4"]},
+        "round": {"description": "The finish-line round that found it, from 1. Required on a blocking item.", "type": "integer", "minimum": 1},
+        "base_repro": {"description": "Does the failure reproduce at the iteration's Base? `no` is a finding this iteration caused (self-inflicted).", "enum": ["yes", "no", "n/a"]},
+        "blast": {"description": "Who it hurts, 1–3 (references/prioritisation.md, backlog `sev × blast`): a priority input of a deferred row. `waves.py finish` lists a deferred item at blast 3 as a known risk.", "type": "integer", "minimum": 1, "maximum": 3},
+        "rung": {"description": "The impact rung (references/prioritisation.md): a priority input of a deferred row. `waves.py finish` lists a deferred item at I4 or I5 as a known risk.", "enum": ["I1", "I2", "I3", "I4", "I5"]},
         "notes": {"type": "string"}
       }
     },

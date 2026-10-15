@@ -250,6 +250,9 @@ for r in (
     # that can stop a bad edit before it lands. A stub here turns each of those
     # back into "the agent will remember", which is the state the track ends.
     "documentation.md", "gates.md", "hooks.md",
+    # The finish line (v1.96.0): the one rule that says when an iteration STOPS. Without it
+    # find -> fix -> find has no end of its own, and a stub here brings that loop back.
+    "finish-line.md",
 ):
     rp = os.path.join(refdir, r)
     if not os.path.isfile(rp):
@@ -8035,6 +8038,148 @@ def check_the_conformance_sentence_is_computed() -> None:
 
 
 check_the_conformance_sentence_is_computed()
+
+
+# ============================================================================
+# THE FINISH LINE (v1.96.0) — FL-G1..FL-G7
+# ============================================================================
+# references/finish-line.md says when an iteration stops: a contract fixed at intake,
+# every finding triaged at discovery, a stop at two clean rounds or at the budget. Its
+# vocabulary lives on five surfaces — the doctrine, the run-ledger grammar, inventory/1,
+# waves.py and the brief template — and the hotfix list it cites lives in iteration.md.
+# Each of these guards COMPUTES both sides; none of them restates the expected value.
+def check_the_finish_line():
+    _sk = os.path.join(ROOT, "plugins/task-pipeline/skills/task-pipeline")
+
+    def _read(rel):
+        try:
+            return open(os.path.join(_sk, rel), encoding="utf-8").read()
+        except OSError:
+            return ""
+
+    _fl = _read("references/finish-line.md")
+    if not _fl:
+        return  # the built-in doctrine tuple already reports the missing file
+    # FL-G1 — routed: an unrouted doctrine file is read by nobody.
+    if "references/finish-line.md" not in _read("SKILL.md"):
+        fail("FL-G1: SKILL.md does not route to references/finish-line.md — the rule that "
+             "says when an iteration stops is unreachable from the entry point")
+    if not re.search(r"(?m)^\|[^\n]*\|\s*`references/finish-line\.md`\s*\|\s*$",
+                     _read("references/doctrine-map.md")):
+        fail("FL-G1: references/doctrine-map.md has no row routing to references/finish-line.md "
+             "— the map that says which reference owns which stage does not name it")
+
+    # FL-G2 — B2 is the hotfix lane, and the two lists are one set.
+    def _norm(t):
+        return re.sub(r"\s+", " ", t).strip().rstrip(";.").strip().lower()
+
+    _it = _read("references/iteration.md")
+    _hm = re.search(r"It has five entries:\n((?:- [^\n]+\n)+)", _it)
+    _hot = {_norm(l[2:]) for l in _hm.group(1).splitlines()} if _hm else set()
+    _bm = re.search(r"(?m)^- \*\*B2\*\*[^\n]*\n(?:  [^\n]*\n)*?((?:  - [^\n]+\n)+)", _fl)
+    _b2 = {_norm(l.strip()[2:]) for l in _bm.group(1).splitlines()} if _bm else set()
+    if not _hot:
+        fail("FL-G2: references/iteration.md → No fix travels alone: no hotfix-lane list "
+             "after 'It has five entries:' — B2 cites a list that cannot be read")
+    elif _b2 != _hot:
+        fail(f"FL-G2: finish-line.md's B2 entries {sorted(_b2)} differ from iteration.md's "
+             f"hotfix lane {sorted(_hot)} — B2 IS that lane; a restatement that drifts makes "
+             "a hotfix and a blocker two different things")
+
+    # FL-G3 — the default budgets agree on all three surfaces.
+    _want = {}
+    for _k in ("maxRounds", "maxReleases"):
+        _m = re.search(r"`run\.finish\." + _k + r"` \(default (\d+)\)", _fl)
+        _want[_k] = int(_m.group(1)) if _m else None
+    try:
+        _sch = json.loads(_read("pipeline.schema.json"))
+        _fin = _sch["definitions"]["run"]["properties"]["finish"]["properties"]
+        _sv = {_k: _fin[_k].get("default") for _k in _want}
+    except (ValueError, KeyError, TypeError):
+        _sv = {_k: None for _k in _want}
+    _br = _read("templates/brief.md")
+    _bv = {_k: (int(_m.group(1)) if (_m := re.search(r"`" + _k + r"` (\d+)", _br)) else None)
+           for _k in _want}
+    for _k in _want:
+        if None in (_want[_k], _sv[_k], _bv[_k]) or not (_want[_k] == _sv[_k] == _bv[_k]):
+            fail(f"FL-G3: the default {_k} disagrees — finish-line.md {_want[_k]}, "
+                 f"pipeline.schema.json run.finish {_sv[_k]}, templates/brief.md {_bv[_k]}; "
+                 "a budget with two defaults is spent by whichever one the reader opened")
+
+    # FL-G4 — one vocabulary: classes and B tests on four surfaces.
+    def _classes(txt):
+        _m = re.search(r"(?m)^finding: <id> — (.+?) — round", txt)
+        return {re.split(r"[:\s]", c.strip())[0] for c in _m.group(1).split("|")} if _m else set()
+
+    _tests_fl = set(re.findall(r"\*\*(B\d)\*\*", _fl))
+    _rm = _read("templates/run.md")
+    _rb = re.search(r"(?ms)^- \*\*`finding:`\*\*.*?(?=^- \*\*`)", _rm)
+    _tests_run = set(re.findall(r"`(B\d)`", _rb.group(0))) if _rb else set()
+    try:
+        _inv = json.loads(_read("templates/inventory.schema.json"))["$defs"]["item"]["properties"]
+        _cls_inv, _tests_inv = set(_inv["triage"]["enum"]), set(_inv["test"]["enum"])
+    except (ValueError, KeyError, TypeError):
+        _cls_inv, _tests_inv = set(), set()
+    _wp = _read("scripts/waves.py")
+
+    def _tuple(name):
+        _m = re.search(r"(?m)^" + name + r" = \(([^)]*)\)", _wp)
+        return set(re.findall(r'"([^"]+)"', _m.group(1))) if _m else set()
+
+    _surfaces = {
+        "finish-line.md": (_classes(_fl), _tests_fl),
+        "templates/run.md": (_classes(_rm), _tests_run),
+        "inventory.schema.json": (_cls_inv, _tests_inv),
+        "scripts/waves.py": (_tuple("TRIAGE"), _tuple("TESTS")),
+    }
+    _ref_c, _ref_t = _surfaces["finish-line.md"]
+    if not _ref_c or not _ref_t:
+        fail("FL-G4: finish-line.md has no readable `finding:` grammar or no **B<n>** tests")
+    for _name, (_c, _t) in _surfaces.items():
+        if _c != _ref_c or _t != _ref_t:
+            fail(f"FL-G4: {_name} carries classes {sorted(_c)} and tests {sorted(_t)}; "
+                 f"finish-line.md carries {sorted(_ref_c)} and {sorted(_ref_t)} — a triage "
+                 "word one surface does not know is a finding that lands nowhere")
+    # The script's other two enums against inventory/1's: the hand copy and the schema
+    # must refuse the same values, or `finish` reads a field the schema calls invalid.
+    for _const, _field in (("BASE_REPRO", "base_repro"), ("RUNGS", "rung")):
+        try:
+            _se = set(_inv[_field]["enum"])
+        except (KeyError, TypeError, NameError):
+            _se = set()
+        if not _se or _tuple(_const) != _se:
+            fail(f"FL-G4: scripts/waves.py {_const} {sorted(_tuple(_const))} differs from "
+                 f"inventory.schema.json `{_field}` {sorted(_se)}")
+
+    # FL-G5 — the brief template carries the contract's five fields.
+    _sec = re.search(r"(?ms)^## Finish line[^\n]*\n(.*?)(?=^## )", _br)
+    _have = set(re.findall(r"(?m)^- \*\*([A-Za-z ]+):\*\*", _sec.group(1))) if _sec else set()
+    _miss = [f for f in ("Objective", "Exit checks", "Scope", "Budget", "Base") if f not in _have]
+    if _miss:
+        fail(f"FL-G5: templates/brief.md's `## Finish line` lacks {_miss} — a contract written "
+             "without its fields is filled in at the end, by whoever wants to stop")
+
+    # FL-G6 — the stop is printed: hand-back and run ledger both carry the finish word.
+    _fw = r"finish:\s*done\s*\|\s*budget\s*\|\s*blocked"
+    _pg = _read("references/progress.md")
+    _hb = re.search(r"(?ms)^## The hand-back.*?(?=^## )", _pg)
+    if not (_hb and re.search(r"(?m)^FINISH\s+" + _fw, _hb.group(0))):
+        fail("FL-G6: references/progress.md → The hand-back has no `FINISH  finish: done | "
+             "budget | blocked` field — the operator is not told why the iteration stopped")
+    _lines = re.search(r"(?ms)^## Lines\n.*?```\n(.*?)```", _rm)
+    if not (_lines and re.search(r"(?m)^" + _fw, _lines.group(1))):
+        fail("FL-G6: templates/run.md → Lines has no `finish: done|budget|blocked` shape — "
+             "the stop leaves no trace a later audit can read")
+
+    # FL-G7 — continuity's completion is the finish line, by citation.
+    if not re.search(r"It stops for exactly four things[^.]*completion[^.]*finish line[^.]*"
+                     r"finish-line\.md", _read("references/continuity.md")):
+        fail("FL-G7: references/continuity.md's 'It stops for exactly four things' sentence "
+             "does not cite finish-line.md for completion — 'completion' read alone is a "
+             "search that ran dry")
+
+
+check_the_finish_line()
 
 
 

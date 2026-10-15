@@ -179,6 +179,9 @@ before drawing, never invented by the drawing agent).
    around the waves — survey, module dossiers, one design, parallel build, checks that
    start as each node lands, release, post-release check, next pool — is
    `references/iteration.md`. A finding joins the inventory; it is not fixed alone.
+   **Findings are triaged when found, and the iteration stops at its finish line** —
+   exit checks green on the artefact, two rounds with no new blocking finding, or the
+   budget spent (`references/finish-line.md`).
 4. Do **not** advance until the stage **gate** passes (`references/stages.md`).
    Honor the gate **type**: for `auto`, verify the gate's `check` yourself and
    stop/return on fail; for `judgment`, record the named judge's ruling as
@@ -186,8 +189,8 @@ before drawing, never invented by the drawing agent).
    **operator's explicit go or standing authorization naming this act**. Other gate
    types and generic loop flags cannot supply that authority (`references/continuity.md`).
 5. **The cross-cutting rules fire at any stage**, not only here — the Doc Loop, the
-   loop guard, the audit's exit, the frozen REQ list, the carry-over ledger, and
-   what counts as evidence, and **every gate prints `holds: N`** — what this run left
+   loop guard, the audit's exit, the finish line, the frozen REQ list, the carry-over
+   ledger, and what counts as evidence, and **every gate prints `holds: N`** — what this run left
    running, across all eight classes, enumerated by class and never by a single
    tool — and stage 10 does not close while this run's residue is live and
    unaccounted (`references/residue.md`). The rest are in
