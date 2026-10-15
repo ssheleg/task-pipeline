@@ -8,7 +8,8 @@ Cycle 14 closed round 14's three MEDIUM findings and six LOW ones:
   verb, legacy stage ids normalised on read, a non-blank schema stage id, and the pre-tag
   packet citing a commit instead of a tag object.
 
-The tests are in `round14_controls`, plus negatives 514–525; `MIN_EXPECTED` is 509.
+The tests are in `round14_controls`, plus negatives 514–525; 490 is retired (the roots check
+subsumes it) and 492 and 515 re-anchored; `MIN_EXPECTED` is 508.
 
 Cycle 13 kept the contract and fixed two MEDIUM findings and five LOW ones:
 - an index written by v1.95.0 is re-keyed to its repository on positive evidence (no

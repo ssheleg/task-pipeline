@@ -1891,6 +1891,27 @@ def round14_controls():
     ok(rc == 0 and held == [("p-000000000000", "mem:b@1")] and "re-keyed" not in out,
        f"F1b: a key v1.95.0 would not have computed here is not re-keyed ({held} {out!r})")
 
+    # F1c — every other condition holds (X's own commit, X merged a history whose root sorts
+    # lower, so v1.95.0 keyed X under that root), but the old-key origin HAS provenance: it was
+    # not written by v1.95.0, so nothing proves it is X's under an old key. Never re-keyed.
+    base = work / "f1c"
+    x, _ = headed_repo("x", [("retro.md", "export gate", KEY)], parent=base / "roots")
+    rx = root_of(x)
+    o_repo = base / "other"
+    init_root(o_repo, "other", lambda r: r < rx)
+    git(x, "fetch", "-q", str(o_repo), "HEAD:ohist")
+    git(x, "merge", "-q", "--allow-unrelated-histories", "-m", "other in", "ohist")
+    idx = base / "index.jsonl"
+    run("add", "--retro", "docs/evidence/retro.md", "--all", cwd=x, index=idx)
+    line = json.loads(idx.read_text(encoding="utf-8"))
+    ro = "p-" + root_of(o_repo)[:12]
+    line["origins"][0].update(project=ro, memory="mem:c@1")  # checkouts kept
+    idx.write_text(json.dumps(line, sort_keys=True) + "\n", encoding="utf-8")
+    rc, out, _ = run("rebuild", "--roots", str(base / "roots"), index=idx)
+    held = [(o["project"], o.get("memory")) for o in lesson_of(idx)["origins"] if o.get("memory")]
+    ok(rc == 0 and held == [(ro, "mem:c@1")] and "re-keyed" not in out,
+       f"F1c: an origin with provenance is never re-keyed ({rc} {held} {out!r})")
+
     # F2 — X merged Y's root (Y's sorts lower: v1.95.0 keyed X as Y). X's origin, written by
     # v1.95.0 under Y's key, sits at X's anchor; Y itself is read this run with its entry
     # retitled. Y's project is here, so nothing is moved into X.

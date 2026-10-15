@@ -6,9 +6,9 @@ python3 - <<'EOF'
 # Round 13, K: only an origin with no provenance is re-keyed. Re-key any origin.
 p = "/tmp/r13-rekey-prov-copy/plugins/task-pipeline/skills/task-pipeline/scripts/lessons.py"
 t = open(p, encoding="utf-8").read()
-needle = '    if o.get("checkouts"):\n        return None\n    hits'
+needle = '    if o.get("checkouts"):\n        return None\n\n    def same_repository'
 assert needle in t, "PLANT DID NOT LAND: anchor absent before edit"
-open(p, "w", encoding="utf-8").write(t.replace(needle, '    hits', 1))
+open(p, "w", encoding="utf-8").write(t.replace(needle, '\n    def same_repository', 1))
 assert needle not in open(p, encoding="utf-8").read(), "PLANT DID NOT LAND"
 EOF
 if python3 /tmp/r13-rekey-prov-copy/test/lessons_test.py; then

@@ -6,9 +6,9 @@ python3 - <<'EOF'
 # Round 14, F1: v1.95.0 must have computed the origin's key in that checkout. Drop that.
 p = "/tmp/r14-v195-copy/plugins/task-pipeline/skills/task-pipeline/scripts/lessons.py"
 t = open(p, encoding="utf-8").read()
-needle = ' and _legacy_key(c) == o["project"]\n'
+needle = '        return (_legacy_key(c) == o["project"]\n                and '
 assert needle in t, "PLANT DID NOT LAND: anchor absent before edit"
-open(p, "w", encoding="utf-8").write(t.replace(needle, '\n', 1))
+open(p, "w", encoding="utf-8").write(t.replace(needle, '        return (True\n                and ', 1))
 assert needle not in open(p, encoding="utf-8").read(), "PLANT DID NOT LAND"
 EOF
 if python3 /tmp/r14-v195-copy/test/lessons_test.py; then

@@ -1352,15 +1352,6 @@ def _say(text: str) -> str:
     return _redact(text, _SHOWN)
 
 
-def _resolves_strict(checkout: str, sha: str) -> bool:
-    """Does `sha` resolve in this checkout — positive evidence only: a git that does not answer
-    is a no, so it never proves two keys are one repository."""
-    try:
-        return commit_resolves(pathlib.Path(checkout), sha)
-    except Refused:
-        return False
-
-
 def _legacy_twin(o: dict, candidates: list[dict]) -> dict | None:
     """The re-derived origin a provenance-less origin is, or None (round 13, K).
 
@@ -1369,16 +1360,17 @@ def _legacy_twin(o: dict, candidates: list[dict]) -> dict | None:
     now. Such an origin is the same repository's — re-keyed, never counted twice — only on
     positive evidence: it has no `checkouts`, exactly one candidate of another key holds the
     same `retro#anchor` under the same class key, and in a checkout that candidate was derived
-    from (round 14, F1) the origin's own commit resolves, v1.95.0 would have computed exactly
-    the origin's key (`_legacy_key`), and the commit descends from the root the candidate's key
-    names — its own history, not a history it merged. A monorepo that merged another
+    from (round 14, F1) the origin's own commit resolves AND descends from the root the
+    candidate's key names (`_roots_of`: its own history, not a history it merged; a commit that
+    does not resolve has no roots, and a git that does not answer is a no), and v1.95.0 would
+    have computed exactly the origin's key there (`_legacy_key`). A monorepo that merged another
     repository's history holds that repository's commits too, and under v1.95.0 may even have
     shared its key; the commit's roots tell them apart."""
     if o.get("checkouts"):
         return None
 
     def same_repository(n: dict, c: str) -> bool:
-        return (_resolves_strict(c, o["commit"]) and _legacy_key(c) == o["project"]
+        return (_legacy_key(c) == o["project"]
                 and n["project"][2:] in _roots_of(c, o["commit"]))
     hits = [n for n in candidates if n.get("checkouts") and n["project"] != o["project"]
             and n["retro"] == o["retro"]

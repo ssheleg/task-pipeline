@@ -1,6 +1,6 @@
 ## Unreleased
 
-Guards: 447 → **509**; property checks 15 → **15**. There are 62 new negatives in
+Guards: 447 → **508**; property checks 15 → **15**. There are 61 new negatives in
 `lessons.py`. Each one plants a revert, and the suite must catch it:
 
 - the whole-scan refusal put back;
@@ -32,9 +32,8 @@ Guards: 447 → **509**; property checks 15 → **15**. There are 62 new negativ
 - a shallow check trusted when it times out;
 - an index line accepted with `mem:x@0` or with an unknown `carried` reason;
 - an origin v1.95.0 wrote kept as a second project, by `rebuild` or by `add`;
-- that re-key made without the origin's commit resolving, for an origin with provenance, for
-  one whose own key is re-derived, between two candidate repositories, or merging two memory
-  ids (in `rebuild` and in `add`);
+- that re-key made for an origin with provenance, for one whose own key is re-derived,
+  between two candidate repositories, or merging two memory ids (in `rebuild` and in `add`);
 - `record` re-attaching an id from another checkout;
 - one memory id left on two live projects, or kept by the later holder;
 - a project key skipping the main worktree's HEAD or `init.defaultBranch`;
@@ -55,8 +54,9 @@ These are the fixes from verification rounds 6 to 14 of release iteration 1.
 
 - **The re-key and the one-project rule, closed** (round 14).
   - A provenance-less origin is re-keyed only when, in the checkout that re-derived its anchor,
-    its commit resolves, v1.95.0 would have computed its key there, and the commit descends
-    from the root the new key names. A monorepo that merged another repository's history keeps
+    its commit descends from the root the new key names (so it resolves there) and v1.95.0
+    would have computed its key there. Round 13's separate "commit resolves" plant (490) is
+    retired: the roots check subsumes it, so reverting it alone changes nothing. A monorepo that merged another repository's history keeps
     its hands off that repository's origin and memory id.
   - An origin whose project key any checkout read this run holds is never re-keyed, whatever
     its anchor.
