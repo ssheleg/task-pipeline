@@ -72,6 +72,7 @@ gate:  <stage id> — command "<cmd>" — exit <N> — <ISO-8601>
 event: <compact|session-end|subagent|memory> — <detail> — <ISO-8601>
 review: <stage id> — surface <name> — rounds <N> — <returned|approved|unresolved> — <ISO-8601>
 finding: <id> — blocking:B<n> | deferred:B-NNN | noise — round <N> — base-repro yes|no|n/a
+round: <N> — <reading> — new blocking <k>
 finish: done|budget|blocked — rounds <n>/<max> — releases <n>/<max>
 read:  references/<file>.md            # hook-appended, deduped, UNATTESTED (no writer field)
 ```
@@ -125,6 +126,11 @@ read:  references/<file>.md            # hook-appended, deduped, UNATTESTED (no 
   one of `blocking`, `deferred`, `noise`; a blocking line names its test, one of `B1`, `B2`,
   `B3`, `B4`; a deferred line names its board row. `base-repro` says whether the failure
   reproduces at the iteration's Base — `no` is a finding this iteration caused.
+- **`round:`** — one line per finish-line round, **clean rounds included**: its number, the
+  independent reading it ran (an audit axis, an observer, the post-release readback) and how
+  many new blocking findings it produced. A clean round leaves no `finding:` line, so without
+  this line two clean rounds and no rounds look the same; `scripts/waves.py finish --ledger`
+  counts the rounds from it and refuses when its counts disagree with the inventory.
 - **`finish:`** — one line when the iteration stops, beside stage 10's verdict: `done`,
   `budget` or `blocked`, with the rounds and releases spent against their budget. The
   block under it is `references/finish-line.md` → *The finish block*;
@@ -154,7 +160,10 @@ gate:  6 — command "npm test" — exit 0 — 2026-08-10T12:02Z
 review: 6 — surface landing — rounds 1 — returned — 2026-08-10T12:02Z
 finding: F-021 — blocking:B3 — round 1 — base-repro no
 finding: F-022 — deferred:B-118 — round 1 — base-repro yes
+round: 1 — exit checks + audit axis seams — new blocking 1
 finding: F-023 — noise — round 2 — base-repro n/a
+round: 2 — exit checks + observer — new blocking 0
+round: 3 — exit checks + post-release readback — new blocking 0
 stage: 6 Tests — gate manual — verdict pass — 2026-08-10T12:03Z
 hand:  3 — task "add CSV export to the orders table" — done 2 — surfaced 1 — decisions 1 — amb 2 (OQ-0007, ledger row 4)
        scope 5f21ac3/node-24-linux/REQ-001,REQ-004 — unverified 1 (XLSX path: no fixture)

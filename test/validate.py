@@ -8140,6 +8140,16 @@ def check_the_finish_line():
             fail(f"FL-G4: {_name} carries classes {sorted(_c)} and tests {sorted(_t)}; "
                  f"finish-line.md carries {sorted(_ref_c)} and {sorted(_ref_t)} — a triage "
                  "word one surface does not know is a finding that lands nowhere")
+    # The script's other two enums against inventory/1's: the hand copy and the schema
+    # must refuse the same values, or `finish` reads a field the schema calls invalid.
+    for _const, _field in (("BASE_REPRO", "base_repro"), ("RUNGS", "rung")):
+        try:
+            _se = set(_inv[_field]["enum"])
+        except (KeyError, TypeError, NameError):
+            _se = set()
+        if not _se or _tuple(_const) != _se:
+            fail(f"FL-G4: scripts/waves.py {_const} {sorted(_tuple(_const))} differs from "
+                 f"inventory.schema.json `{_field}` {sorted(_se)}")
 
     # FL-G5 — the brief template carries the contract's five fields.
     _sec = re.search(r"(?ms)^## Finish line[^\n]*\n(.*?)(?=^## )", _br)
@@ -8162,8 +8172,8 @@ def check_the_finish_line():
              "the stop leaves no trace a later audit can read")
 
     # FL-G7 — continuity's completion is the finish line, by citation.
-    if not re.search(r"It stops for exactly four things[^.]*finish-line\.md",
-                     _read("references/continuity.md")):
+    if not re.search(r"It stops for exactly four things[^.]*completion[^.]*finish line[^.]*"
+                     r"finish-line\.md", _read("references/continuity.md")):
         fail("FL-G7: references/continuity.md's 'It stops for exactly four things' sentence "
              "does not cite finish-line.md for completion — 'completion' read alone is a "
              "search that ran dry")

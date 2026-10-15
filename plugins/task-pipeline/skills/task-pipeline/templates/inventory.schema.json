@@ -21,7 +21,9 @@
         {"if": {"required": ["triage"], "properties": {"triage": {"const": "blocking"}}},
          "then": {"required": ["test", "round"]}},
         {"if": {"required": ["test"]},
-         "then": {"required": ["triage"], "properties": {"triage": {"const": "blocking"}}}}
+         "then": {"required": ["triage"], "properties": {"triage": {"const": "blocking"}}}},
+        {"if": {"required": ["test", "base_repro"], "properties": {"test": {"const": "B3"}}},
+         "then": {"properties": {"base_repro": {"not": {"const": "yes"}}}}}
       ],
       "properties": {
         "id": {

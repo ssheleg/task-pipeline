@@ -10,6 +10,7 @@ its own. This file is that end. The verdict is computed by `scripts/waves.py fin
 - The contract, fixed at intake
 - Triage at discovery
 - Rounds and the stop
+- Computing the verdict
 - Stop is not idle
 - The finish block
 - Rationalizations
@@ -32,11 +33,13 @@ not one.
 
 ## Triage at discovery
 
-Every finding is classed when it is found, before anyone fixes it. First match wins.
+Every finding that reaches a round is classed when it is found, before anyone fixes it. First
+match wins. A defect in a node's own diff, caught before the node closes, follows
+[`review.md`](review.md) instead: Critical and Important block that node.
 
 **Blocking**, when:
 - **B1** — an exit check is red.
-- **B2** — it is a hotfix-lane entry. The list's single home is [`iteration.md`](iteration.md)
+- **B2** — it is, or once released would be, a hotfix-lane entry. The list's single home is [`iteration.md`](iteration.md)
   → *No fix travels alone*; restated here, kept equal by the validator:
   - production is down
   - data is being lost or corrupted
@@ -72,12 +75,37 @@ audit axis, an observer, or the post-release readback. Rotating the axis
   blocking finding. The second of them may read only the last fix's diff.
 - **Diverging** — new blocking findings did not fall from one round to the next, or
   self-inflicted ≥ new. Run [`loop-guard.md`](loop-guard.md)'s break protocol.
-- **Budget spent** — `maxRounds` or `maxReleases` reached with a blocker open. Stop and hand
-  the iteration back blocked: each open blocker becomes a top board row marked
-  `needs-operator`. No round runs past the budget without the operator's go, given with the
-  numbers.
+- **Budget spent** — `maxRounds` or `maxReleases` reached before done: a blocker open, or the
+  second clean round still owed. Stop and hand the iteration back: each open blocker becomes a
+  top board row marked `needs-operator`. No round runs past the budget without the operator's
+  go, given with the numbers; a done reached past it without that go is still `budget`.
 
-Deferred findings never extend an iteration.
+The finish word is one of three: `done`; `budget`, the budget reached before done; `blocked`,
+the rounds diverging, handed to the loop guard. Deferred findings never extend an iteration.
+
+Each round leaves one ledger line, clean rounds included, because a clean round leaves no
+finding to count:
+
+```
+round: <N> — <reading> — new blocking <k>
+```
+
+## Computing the verdict
+
+```
+python3 scripts/waves.py finish --inventory <inventory.json> --ledger .task-pipeline/run.md \
+  --max-rounds 3 --max-releases 2 --releases <n> --checks <k>/<m> --artefact <name>@<sha>
+```
+
+`--rounds N` may stand in for `--ledger`; with neither the count is unknown and the script
+refuses. Exit codes:
+
+- `0` — done: the last two rounds found no new blocking item, none is open, and every exit
+  check is green on the artefact.
+- `3` — continue: a blocker open, a second clean round owed, or no `--checks` given.
+- `5` — budget: reached before done, or done past it without `--operator-go`.
+- `6` — blocked: diverging; run the loop guard's break protocol.
+- `1` — malformed: the inventory, the ledger or the arguments, each reason named.
 
 ## Stop is not idle
 

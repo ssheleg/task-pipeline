@@ -104,7 +104,7 @@ review cap reached — 3 rounds — artifact: test/validate.py
 At the level of a whole iteration only new **blocking** findings argue for continuing; a
 deferred or noise finding is paid for on the board, not with another round
 ([`finish-line.md`](finish-line.md) → *Rounds and the stop*). The class is read from the
-run ledger's `finding:` lines, never from memory.
+run ledger's `finding:` lines and the rounds from its `round:` lines, never from memory.
 
 **The pair is the whole point.** A round count alone says how tired everyone is; the
 pair says whether the loop still produces anything. Measured on one file once, the
