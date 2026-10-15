@@ -1400,10 +1400,9 @@ def _rekey_legacy(old: dict[str, dict], entries: dict[str, dict],
         if ck not in entries:
             continue
         origins, changed = list(old[ck]["origins"]), False
-        derived = {_origin_key(x) for x in entries[ck]["origins"]}
         for o in list(origins):
-            if _origin_key(o) in derived or o["project"] in live:
-                continue  # its project is here this run: it is that project's, never moved
+            if o["project"] in live:
+                continue  # its project is here this run (its own origin re-derived or not): never moved
             n = _legacy_twin(o, entries[ck]["origins"])
             if n is None:
                 continue

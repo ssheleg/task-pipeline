@@ -6,9 +6,9 @@ python3 - <<'EOF'
 # Round 14, F2: an origin whose project any checkout read this run holds is never re-keyed. Drop that.
 p = "/tmp/r14-live-copy/plugins/task-pipeline/skills/task-pipeline/scripts/lessons.py"
 t = open(p, encoding="utf-8").read()
-needle = ' or o["project"] in live:\n'
+needle = '            if o["project"] in live:\n'
 assert needle in t, "PLANT DID NOT LAND: anchor absent before edit"
-open(p, "w", encoding="utf-8").write(t.replace(needle, ':\n', 1))
+open(p, "w", encoding="utf-8").write(t.replace(needle, '            if False:\n', 1))
 assert needle not in open(p, encoding="utf-8").read(), "PLANT DID NOT LAND"
 EOF
 if python3 /tmp/r14-live-copy/test/lessons_test.py; then

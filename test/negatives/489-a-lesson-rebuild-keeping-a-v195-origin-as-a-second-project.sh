@@ -6,7 +6,7 @@ python3 - <<'EOF'
 # Round 13, K: a rebuild re-keys a provenance-less origin its repository re-derives. Skip the re-key.
 p = "/tmp/r13-rekey-rebuild-copy/plugins/task-pipeline/skills/task-pipeline/scripts/lessons.py"
 t = open(p, encoding="utf-8").read()
-needle = '        rekeyed = _rekey_legacy(old, entries)\n'
+needle = '        rekeyed = _rekey_legacy(old, entries, set(run["project"].values()))\n'
 assert needle in t, "PLANT DID NOT LAND: anchor absent before edit"
 open(p, "w", encoding="utf-8").write(t.replace(needle, '        rekeyed = []\n', 1))
 assert needle not in open(p, encoding="utf-8").read(), "PLANT DID NOT LAND"

@@ -1912,6 +1912,64 @@ def round14_controls():
     ok(rc == 0 and held == [(ro, "mem:c@1")] and "re-keyed" not in out,
        f"F1c: an origin with provenance is never re-keyed ({rc} {held} {out!r})")
 
+    # F1d — two repositories each qualify on every other condition: one history H with roots
+    # R0 < R1, R2 (first-parent R1) and a second checkout whose first-parent root is R2 holding
+    # the same commit and retro. A v1.95.0 origin keyed R0 could be either: never re-keyed.
+    base = work / "f1d"
+    h = base / "roots" / "h"
+    h.mkdir(parents=True)
+    git(h, "init", "-q")
+
+    def orphan_root(branch, name, want):
+        for attempt in range(200):
+            if branch != "main" or attempt:
+                git(h, "checkout", "-q", "--orphan", f"{branch}-{attempt}")
+                git(h, "rm", "-rqf", "--ignore-unmatch", ".")
+            (h / name).write_text(f"{name} {attempt}", encoding="utf-8")
+            git(h, "add", "-A")
+            git(h, "commit", "-q", "-m", f"{name} {attempt}")
+            sha = git(h, "rev-parse", "HEAD")
+            if want(sha):
+                git(h, "branch", "-q", "-f", branch, sha)
+                return sha
+        raise SystemExit(f"F1d fixture: no {name} root in 200 tries")
+    r1 = orphan_root("main", "r1.md", lambda s: True)
+    r2 = orphan_root("r2", "r2.md", lambda s: True)
+    r0 = orphan_root("r0", "r0.md", lambda s: s < r1 and s < r2)
+    git(h, "checkout", "-q", "main")
+    for other in ("r0", "r2"):
+        git(h, "merge", "-q", "--allow-unrelated-histories", "-m", f"{other} in", other)
+    (h / "fix.txt").write_text("fix", encoding="utf-8")
+    git(h, "add", "-A")
+    git(h, "commit", "-q", "-m", "fix")
+    c = git(h, "rev-parse", "HEAD")
+    write_retros(h, [("retro.md", "export gate", KEY)], c)
+    git(h, "add", "-A")
+    git(h, "commit", "-q", "-m", "retro")
+    for b in git(h, "branch", "--format=%(refname:short)").split():
+        if b not in ("main", "r2"):
+            git(h, "branch", "-q", "-D", b)
+    h2 = base / "roots" / "h2"
+    git(base, "clone", "-q", str(h), str(h2))
+    git(h2, "checkout", "-q", "-b", "trunk", "origin/r2")
+    git(h2, "merge", "-q", "--no-ff", "-m", "H in", "origin/main")
+    git(h2, "remote", "remove", "origin")
+    git(h2, "branch", "-q", "-D", "main")
+    idx = base / "index.jsonl"
+    for repo in (h, h2):
+        run("add", "--retro", "docs/evidence/retro.md", "--all", cwd=repo, index=idx)
+    ok(sorted({o["project"] for o in lesson_of(idx)["origins"]}) == sorted({"p-" + r1[:12], "p-" + r2[:12]}),
+       f"F1d fixture: two repositories, keyed R1 and R2 ({lesson_of(idx)['origins']})")
+    line = json.loads(idx.read_text(encoding="utf-8"))
+    ghost = {k: v for k, v in line["origins"][0].items() if k not in ("checkouts", "carried")}
+    ghost.update(project="p-" + r0[:12], memory="mem:d@1")
+    line["origins"].append(ghost)
+    idx.write_text(json.dumps(line, sort_keys=True) + "\n", encoding="utf-8")
+    rc, out, _ = run("rebuild", "--roots", str(base / "roots"), index=idx)
+    held = [(o["project"], o.get("memory")) for o in lesson_of(idx)["origins"] if o.get("memory")]
+    ok(rc == 0 and held == [("p-" + r0[:12], "mem:d@1")] and "re-keyed" not in out,
+       f"F1d: an origin two repositories could each be is never re-keyed ({rc} {held} {out!r})")
+
     # F2 — X merged Y's root (Y's sorts lower: v1.95.0 keyed X as Y). X's origin, written by
     # v1.95.0 under Y's key, sits at X's anchor; Y itself is read this run with its entry
     # retitled. Y's project is here, so nothing is moved into X.
