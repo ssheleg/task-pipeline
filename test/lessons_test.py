@@ -1619,8 +1619,15 @@ def round13_controls():
     ok(record_mem(idx, p1, KEY, "mem:x") == 0, "M fixture: P1 records mem:x")
     k1 = lesson_of(idx)["origins"][0]["project"]
     move(p1, root / "away" / "p1")
-    # The stranger: its own content, so its commits never coincide with P1's within one second.
-    s0, _ = headed_repo("stranger", [("retro.md", "export gate", KEY)], parent=root / "tmp")
+    # The stranger: its own content, so its commits never coincide with P1's within one second,
+    # and a root that sorts BELOW P1's (round 14, L1): "the smaller key" would then pick the
+    # stranger, so only the earlier-holder rule keeps the id on P1 — every run, not 3 in 4.
+    for attempt in range(60):
+        s0, _ = headed_repo("stranger", [("retro.md", "export gate", KEY)], parent=root / "tmp" / str(attempt))
+        if "p-" + git(s0, "rev-list", "--max-parents=0", "HEAD")[:12] < k1:
+            break
+    else:
+        raise SystemExit("M fixture: no stranger root sorted below P1's in 60 tries")
     move(s0, root / "here" / "p1")
     run("add", "--retro", "docs/evidence/retro.md", "--all", cwd=p3, index=idx)
     run("rebuild", "--roots", str(root / "here"), str(root / "p3home"), index=idx)
@@ -1655,11 +1662,18 @@ def round13_controls():
     ok(record_mem(idx, r, KEY, "mem:y") == 0, "M2 fixture: the project records mem:y")
     k_old = lesson_of(idx)["origins"][0]["project"]
     git(root, "clone", "-q", str(r), str(root / "attic" / "old"))
-    shutil.rmtree(r / ".git")
-    git(r, "init", "-q")
-    (r / "NEW").write_text("reinit", encoding="utf-8")
-    git(r, "add", "-A")
-    git(r, "commit", "-q", "-m", "reinit")
+    # The re-initialised root sorts BELOW the old one (round 14, L1), so "the smaller key" would
+    # pick the later holder: only the earlier-holder rule passes, every run.
+    for attempt in range(60):
+        shutil.rmtree(r / ".git")
+        git(r, "init", "-q")
+        (r / "NEW").write_text(f"reinit {attempt}", encoding="utf-8")
+        git(r, "add", "-A")
+        git(r, "commit", "-q", "-m", f"reinit {attempt}")
+        if "p-" + git(r, "rev-parse", "HEAD")[:12] < k_old:
+            break
+    else:
+        raise SystemExit("M2 fixture: no re-init root sorted below the old one in 60 tries")
     write_retros(r, [("retro.md", "export gate", KEY)], git(r, "rev-parse", "HEAD"))
     git(r, "add", "-A")
     git(r, "commit", "-q", "-m", "retro")
@@ -1792,6 +1806,236 @@ def round13_controls():
         kept.append([o.get("memory") for o in entries_of(q)["dot-ids"]["origins"]])
         ok(rc == 0 and "dropped mem:bbb@2" in out + err, f"Q: the dropped id is named ({order} {out!r} {err!r})")
     ok(kept == [["mem:aaa@2"], ["mem:aaa@2"]], f"Q: a same-revision tie keeps the smaller id either way ({kept})")
+
+
+def round14_controls():
+    """Round 14 (adversarial): F1 a monorepo that merged another repository's history never
+    takes that repository's v1.95.0 origin (the commit's roots and the key v1.95.0 would have
+    computed decide); F2 an origin whose project is read this run is never re-keyed; F3 `add`
+    keeps one memory id on one live project; and the LOW items: L2 one git question per
+    (checkout, commit); L3 no absolute path in `add` or `query` messages; L5 a stage id v1.95.0
+    accepted is normalised on read, never set aside with its memory id; L6 the schema's stage
+    ids are not blank."""
+    work = tree("tp-lessons-r14-")
+
+    def root_of(repo):
+        return git(repo, "rev-list", "--max-parents=0", "--first-parent", "HEAD").split()[-1]
+
+    def legacy(idx, memory, project=None):
+        """Rewrite every origin of the one line as v1.95.0 wrote it: no checkouts, a memory id,
+        optionally another project key."""
+        line = json.loads(idx.read_text(encoding="utf-8").splitlines()[0])
+        for o in line["origins"]:
+            o.pop("checkouts", None)
+            o.pop("carried", None)
+            o["memory"] = memory
+            if project:
+                o["project"] = project
+        idx.write_text(json.dumps(line, ensure_ascii=False, sort_keys=True) + "\n", encoding="utf-8")
+
+    def init_root(repo, text, want):
+        """A fresh repository whose root commit satisfies want(root), retried."""
+        for attempt in range(200):
+            if (repo / ".git").exists():
+                shutil.rmtree(repo / ".git")
+            repo.mkdir(parents=True, exist_ok=True)
+            git(repo, "init", "-q")
+            (repo / f"ROOT-{text.replace(' ', '-')}.md").write_text(f"{text} {attempt}", encoding="utf-8")
+            git(repo, "add", "-A")
+            git(repo, "commit", "-q", "-m", f"{text} {attempt}")
+            if want(git(repo, "rev-parse", "HEAD")):
+                return
+        raise SystemExit(f"fixture {text}: no root satisfied the order in 200 tries")
+
+    # F1 — monorepo B merged A's whole history (retro included) at its root. A's v1.95.0
+    # origin holds mem:a. Neither a rebuild over B alone nor an add in B moves it, whichever
+    # root sorts lower (when A's sorts lower, v1.95.0 would even have keyed B as A).
+    for order in ("a-lower", "a-higher"):
+        for verb in ("rebuild", "add"):
+            base = work / f"f1-{order}-{verb}"
+            # A's root in the middle of the range, so either order is a few tries away.
+            for attempt in range(60):
+                a_repo, _ = headed_repo("a", [("retro.md", "export gate", KEY)], parent=base / "ra" / str(attempt))
+                ra = root_of(a_repo)
+                if ra[0] in "56789a":
+                    break
+            b_repo = base / "rb" / "b"
+            init_root(b_repo, "monorepo", (lambda r: ra < r) if order == "a-lower" else (lambda r: ra > r))
+            git(b_repo, "fetch", "-q", str(a_repo), "HEAD:ahist")
+            git(b_repo, "merge", "-q", "--allow-unrelated-histories", "-m", "mono", "ahist")
+            idx = base / "index.jsonl"
+            run("add", "--retro", "docs/evidence/retro.md", "--all", cwd=a_repo, index=idx)
+            ka = lesson_of(idx)["origins"][0]["project"]
+            legacy(idx, "mem:a@1")
+            if verb == "rebuild":
+                rc, out, err = run("rebuild", "--roots", str(base / "rb"), index=idx)
+            else:
+                rc, out, err = run("add", "--retro", "docs/evidence/retro.md", "--all", cwd=b_repo, index=idx)
+            e = lesson_of(idx)
+            held = [(o["project"], o.get("memory")) for o in e["origins"] if o.get("memory")]
+            ok(rc == 0 and held == [(ka, "mem:a@1")] and "re-keyed" not in out,
+               f"F1 {order} {verb}: a monorepo never takes the merged repository's id ({rc} {held} {out!r} {err!r})")
+            rc, _, err = run("record", e["id"], "--answer", "-", cwd=a_repo, index=idx,
+                             stdin=json.dumps({"memoryId": "mem:a", "revision": 2}))
+            ok(rc == 0, f"F1 {order} {verb}: A still records its own id ({rc} {err!r})")
+
+    # F1b — the commit is this checkout's own, but v1.95.0 would never have given this checkout
+    # the origin's key: no evidence it is this repository's, so it is not re-keyed.
+    base = work / "f1b"
+    x, _ = headed_repo("x", [("retro.md", "export gate", KEY)], parent=base / "roots")
+    idx = base / "index.jsonl"
+    run("add", "--retro", "docs/evidence/retro.md", "--all", cwd=x, index=idx)
+    legacy(idx, "mem:b@1", project="p-000000000000")
+    rc, out, _ = run("rebuild", "--roots", str(base / "roots"), index=idx)
+    held = [(o["project"], o.get("memory")) for o in lesson_of(idx)["origins"] if o.get("memory")]
+    ok(rc == 0 and held == [("p-000000000000", "mem:b@1")] and "re-keyed" not in out,
+       f"F1b: a key v1.95.0 would not have computed here is not re-keyed ({held} {out!r})")
+
+    # F2 — X merged Y's root (Y's sorts lower: v1.95.0 keyed X as Y). X's origin, written by
+    # v1.95.0 under Y's key, sits at X's anchor; Y itself is read this run with its entry
+    # retitled. Y's project is here, so nothing is moved into X.
+    base = work / "f2"
+    y = base / "ry" / "y"
+    x = base / "rx" / "x"
+    init_root(y, "y root", lambda r: True)
+    ry = root_of(y)
+    init_root(x, "x root", lambda r: ry < r)
+    git(x, "fetch", "-q", str(y), "HEAD:yhist")
+    git(x, "merge", "-q", "--allow-unrelated-histories", "-m", "y in", "yhist")
+    (x / "fix.txt").write_text("x", encoding="utf-8")
+    git(x, "add", "-A")
+    git(x, "commit", "-q", "-m", "fix")
+    write_retros(x, [("retro.md", "export gate", KEY)], git(x, "rev-parse", "HEAD"))
+    git(x, "add", "-A")
+    git(x, "commit", "-q", "-m", "retro")
+    (y / "fix.txt").write_text("y", encoding="utf-8")
+    git(y, "add", "-A")
+    git(y, "commit", "-q", "-m", "fix")
+    write_retros(y, [("retro.md", "retitled gate", KEY)], git(y, "rev-parse", "HEAD"))
+    git(y, "add", "-A")
+    git(y, "commit", "-q", "-m", "retro")
+    idx = base / "index.jsonl"
+    run("add", "--retro", "docs/evidence/retro.md", "--all", cwd=x, index=idx)
+    legacy(idx, "mem:f2@1", project="p-" + ry[:12])
+    rc, out, err = run("rebuild", "--roots", str(base), index=idx)
+    held = [(o["project"], o.get("memory")) for o in lesson_of(idx)["origins"] if o.get("memory")]
+    # The id stays with Y's project — on the carried origin and, following (project, classKey),
+    # on Y's retitled entry — and never reaches X's.
+    ok(rc == 0 and held and {h[0] for h in held} == {"p-" + ry[:12]} and "re-keyed" not in out,
+       f"F2: an origin whose project is read this run is never re-keyed ({rc} {held} {out!r} {err!r})")
+
+    # F3 — the M2 sequence, then `add` in the old clone instead of a rebuild: the id stays on
+    # the project that held it first, and the add says so.
+    base = work / "f3"
+    r, _ = headed_repo("repo", [("retro.md", "export gate", KEY)], parent=base / "roots")
+    idx = base / "index.jsonl"
+    run("add", "--retro", "docs/evidence/retro.md", "--all", cwd=r, index=idx)
+    ok(record_mem(idx, r, KEY, "mem:y") == 0, "F3 fixture: the project records mem:y")
+    k_old = lesson_of(idx)["origins"][0]["project"]
+    git(base, "clone", "-q", str(r), str(base / "attic" / "old"))
+    init_root(r, "reinit", lambda s: "p-" + s[:12] < k_old)
+    write_retros(r, [("retro.md", "export gate", KEY)], git(r, "rev-parse", "HEAD"))
+    git(r, "add", "-A")
+    git(r, "commit", "-q", "-m", "retro")
+    run("rebuild", "--roots", str(base / "roots"), index=idx)
+    rc = run("record", lesson_of(idx)["id"], "--answer", "-", cwd=r, index=idx,
+             stdin=json.dumps({"memoryId": "mem:y", "revision": 2}))[0]
+    ok(rc == 0, f"F3 fixture: the re-attach at the same path is accepted ({rc})")
+    rc, out, err = run("add", "--retro", "docs/evidence/retro.md", "--all", cwd=base / "attic" / "old", index=idx)
+    holders = sorted(o["project"] for o in lesson_of(idx)["origins"] if o.get("memory"))
+    ok(rc == 0 and holders == [k_old] and "mem:y is held by" in out,
+       f"F3: add leaves one id on one live project, the earlier holder ({rc} {holders} {out!r} {err!r})")
+    rc, out, _ = run("rebuild", "--roots", str(base / "roots"), str(base / "attic"), index=idx)
+    ok(rc == 0 and sorted(o["project"] for o in lesson_of(idx)["origins"] if o.get("memory")) == [k_old],
+       f"F3: the next rebuild agrees ({out!r})")
+
+    # L2 — one `cat-file` per (checkout, commit) in a run, however many origins ask.
+    base = work / "l2"
+    keys3 = (KEY, K2, "third-class-key")
+    r, _ = headed_repo("repo", [("retro.md", f"gate {i}", k) for i, k in enumerate(keys3)], parent=base / "roots")
+    idx = base / "index.jsonl"
+    run("add", "--retro", "docs/evidence/retro.md", "--all", cwd=r, index=idx)
+    init_root(r, "reinit", lambda s: True)
+    write_retros(r, [("retro.md", f"gate {i}", k) for i, k in enumerate(keys3)], git(r, "rev-parse", "HEAD"))
+    git(r, "add", "-A")
+    git(r, "commit", "-q", "-m", "retro")
+    log = base / "cat-file.log"
+    binp = base / "bin"
+    binp.mkdir()
+    (binp / "git").write_text(
+        f"#!/bin/sh\nif [ \"$1\" = cat-file ]; then echo \"$(pwd -P) $*\" >> {log}; fi\n"
+        f"exec {shutil.which('git')} \"$@\"\n", encoding="utf-8")
+    (binp / "git").chmod(0o755)
+    rc, out, _ = run("rebuild", "--roots", str(base / "roots"), index=idx,
+                     env_extra={"PATH": f"{binp}:{os.environ['PATH']}"})
+    asked = log.read_text(encoding="utf-8").splitlines() if log.exists() else []
+    ok(rc == 0 and asked and len(asked) == len(set(asked)),
+       f"L2: git is asked once per (checkout, commit) ({len(asked)} asked, {len(set(asked))} distinct)")
+
+    # L3 — add and query messages name files, never an absolute path.
+    base = work / "l3"
+    base.mkdir()
+    plain = base / "plain"
+    plain.mkdir()
+    (base / "a-file").write_text("x", encoding="utf-8")
+    x, _ = headed_repo("x", [("retro.md", "export gate", KEY)], parent=base / "repos")
+    outside = base / "elsewhere" / "retro.md"
+    outside.parent.mkdir()
+    outside.write_text("# r\n", encoding="utf-8")
+    cases = (("query absent", ["query", "gate"], None, base / "absent" / "index.jsonl", "absent"),
+             ("add outside git", ["add", "--retro", "r.md", "--all", "--root", str(plain)], None,
+              base / "i1.jsonl", "not inside a git repository"),
+             ("add unwritable index", ["add", "--retro", "docs/evidence/retro.md", "--all"], x,
+              base / "a-file" / "sub" / "index.jsonl", "cannot be"),
+             ("add outside retro", ["add", "--retro", str(outside), "--all"], x,
+              base / "i2.jsonl", "outside the repository"),
+             # From a subdirectory, with the index in no ancestor of the repository: the
+             # repository's top is neither the directory given nor under a named one, and is
+             # still named, not printed.
+             ("add from a subdirectory", ["add", "--retro", str(outside), "--all"], x / "docs",
+              work / "l3-index" / "i3.jsonl", "outside the repository"))
+    for what, args, cwd, index, says in cases:
+        rc, out, err = run(*args, cwd=cwd, index=index)
+        ok(says in out + err and str(work) not in out + err and str(work.resolve()) not in out + err,
+           f"L3 {what}: the message names files, not absolute paths ({rc} {out!r} {err!r})")
+
+    # L5 — stage ids v1.95.0 accepted (long, a line separator, a path) are normalised on read;
+    # the line and its memory id are kept, never set aside as corrupt.
+    base = work / "l5"
+    x, _ = headed_repo("x", [("retro.md", "export gate", KEY)], parent=base / "roots")
+    idx = base / "index.jsonl"
+    run("add", "--retro", "docs/evidence/retro.md", "--all", cwd=x, index=idx)
+    line = json.loads(idx.read_text(encoding="utf-8"))
+    old_stages = {"owned": "a stage identifier far longer than thirty-two characters",
+                  "surfaced": "4 x"}
+    for holder in [line] + [o["lesson"] for o in line["origins"]]:
+        holder["stages"] = dict(old_stages)
+    line["origins"][0]["memory"] = "mem:l5@1"
+    idx.write_text(json.dumps(line, ensure_ascii=False) + "\n", encoding="utf-8")
+    rc, out, err = run("query", "gate", index=idx)
+    ok(rc == 0 and "could not be parsed" not in err and "normalised" in err
+       and not list(base.glob("index.jsonl.corrupt-*")),
+       f"L5: a v1.95.0 stage id is normalised on read, not set aside ({rc} {err!r})")
+    (base / "empty").mkdir()
+    rc, out, err = run("rebuild", "--roots", str(base / "empty"), index=idx)  # carried: body kept
+    e = lesson_of(idx)
+    st = e["origins"][0]["lesson"]["stages"]
+    ok(rc == 0 and e["origins"][0].get("memory") == "mem:l5@1"
+       and st == {"owned": "a stage identifier far longer th", "surfaced": "4 x"}
+       and e["stages"] == st and "normalised" not in run("query", "gate", index=idx)[2],
+       f"L5: the memory id survives and the next write stores the normalised ids ({rc} {e} {out!r})")
+    sys.path.insert(0, str(SCRIPT.parent))
+    import lessons as L  # noqa: E402
+    ok([L._stage_id(v) for v in (old_stages["owned"], old_stages["surfaced"], "/home/someone/plan", 6, "plan")]
+       == ["a stage identifier far longer th", "4 x", "stage", 6, "plan"],
+       "L5: _stage_id folds, cuts, and replaces what it cannot keep")
+
+    # L6 — the schema's string stage ids: at most 32 characters and never blank.
+    sch = json.loads(SCHEMA.read_text(encoding="utf-8"))
+    for k in ("owned", "surfaced"):
+        spec = sch["properties"]["stages"]["properties"][k]
+        ok(spec.get("maxLength") == 32 and spec.get("minLength") == 1 and spec.get("pattern") == "\\S",
+           f"L6: stages.{k} in the schema is 1-32 characters and not blank ({spec})")
 
 
 def source_admission_controls():
@@ -2367,7 +2611,9 @@ def main():
     rc, out, err = run("candidates", "--min-projects", "1", env_extra={"HOME": str(h2)})
     moved = h2 / ".sshlg-skills" / "lessons" / "index.jsonl"
     ok(rc == 0 and "before-the-move" in out, f"after ~/.sshlg-skills appears the lessons are still read ({out!r})")
-    ok(moved.is_file() and "moved the local index" in err and str(legacy) in err,
+    # Named home-relative, never absolute (round 14, L3): both files are `index.jsonl`.
+    ok(moved.is_file() and "moved the local index" in err
+       and "~/.task-pipeline/lessons/index.jsonl" in err and str(h2) not in err,
        f"the index is moved once, and the move is said ({err!r})")
     ok(not legacy.exists() and legacy.with_name("index.jsonl.migrated").is_file(),
        "the old file is kept beside, renamed .migrated, so nothing reads two indexes")
@@ -2394,6 +2640,7 @@ def main():
     round11_controls()
     round12_controls()
     round13_controls()
+    round14_controls()
     source_admission_controls()
     print(f"PASS: lessons.py — {CASES} cases")
 

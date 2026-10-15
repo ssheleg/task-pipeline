@@ -51,7 +51,7 @@
       "maximum": 3
     },
     "stages": {
-      "description": "The stage that owned the failure and the stage that surfaced it. A profile's stage ids need not be numbers; a string id is one line of at most 32 characters and gets the text fields' checks (no path, URL or credential shape).",
+      "description": "The stage that owned the failure and the stage that surfaced it. A profile's stage ids need not be numbers; a string id is one line of at most 32 characters, not blank, and gets the text fields' checks (no path, URL or credential shape). A longer or ill-shaped id an older index holds is normalised when read, never set aside.",
       "type": "object",
       "additionalProperties": false,
       "required": [
@@ -65,7 +65,8 @@
             "string"
           ],
           "minLength": 1,
-          "maxLength": 32
+          "maxLength": 32,
+          "pattern": "\\S"
         },
         "surfaced": {
           "type": [
@@ -73,7 +74,8 @@
             "string"
           ],
           "minLength": 1,
-          "maxLength": 32
+          "maxLength": 32,
+          "pattern": "\\S"
         }
       }
     },

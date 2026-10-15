@@ -300,11 +300,14 @@ carried origin keeps everything recorded on it, including its memory id, and is 
 holding it reads again. One thing is re-keyed rather than carried, on positive evidence only:
 an origin written before provenance existed (v1.95.0 keyed a project on the smallest root
 commit of HEAD) whose `retro#anchor`, under the same class key, this run re-derives under
-exactly one other key, and whose own commit resolves in the checkout that re-derived it. It is
-the same repository, so it takes the new key and its memory id follows; `add` does the same for
-its own checkout. It is never re-keyed when it has provenance, when its own key is re-derived
-too, when two keys could claim it, or when the copy under the new key holds a different memory
-id (then it stays carried, and that is named). The reasons are:
+exactly one other key, and in the checkout that re-derived it: its own commit resolves there,
+v1.95.0 would have computed exactly its key there, and the commit descends from the root the new
+key names (its own history, not a history the repository merged). It is the same repository, so
+it takes the new key and its memory id follows; `add` does the same for its own checkout. It is
+never re-keyed when it has provenance, when its project key is held by any checkout read this
+run, when two keys could claim it, or when the copy under the new key holds a different memory
+id (then it stays carried, and that is named). A monorepo that merged another repository's
+history therefore never takes that repository's origin. The reasons are:
 
 - `checkout not read`: the checkout was not discovered, or a problem is owned by it. That
   problem may be an unreadable retro, a refused `git worktree list`, a shallow clone, a broken
@@ -375,7 +378,9 @@ never to a retro anchor:
   carried as `checkout holds another project`. When a rebuild would leave it on two live
   projects (that checkout came back), the id stays on the earlier holder: the project the
   previous index carried as `checkout holds another project` with it, else the smaller project
-  key. The other origin keeps its place without the id, and the run names it.
+  key. The other origin keeps its place without the id, and the run names it. `add` applies the
+  same rule against the index as it read it, so an add from an old clone never leaves the id on
+  both projects either.
 - Merged duplicate lines name every id they drop. Of two copies of one origin the higher
   revision wins; on equal revisions, the lexically smaller id.
 - Ids compare on the part before `@`, revisions start at 1, and the highest revision wins.
@@ -384,8 +389,10 @@ never to a retro anchor:
 refuses to write if a memory id would vanish other than through `--prune-carried`.
 
 Unreadable sources are named under `not read`, by name rather than by absolute path. Every
-root, checkout, the index and its directory is shown by its name, on stdout and stderr alike
-(the session's notes and a refusal too). Only absolute paths are replaced, and only as whole
+root, checkout, repository top, file given and directory is shown by its name — the index files
+home-relative, such as `~/.sshlg-skills/lessons/index.jsonl` — in every verb's messages, on stdout
+and stderr alike (the session's notes and a refusal too). `path` alone prints the path: that is
+its answer. A git question about one commit in one checkout is asked once per run. Only absolute paths are replaced, and only as whole
 path components, so a root given as `.` changes no other text. The index is split on `\n` only, and
 lesson/1 text refuses every line separator, including U+2028, U+2029 and U+0085. So no value
 can make a good index read as corrupt. The run
@@ -437,7 +444,9 @@ no code or value, no person's, company's, customer's or product's name, and a ti
 states the class rather than the incident. Never, in either layer, a transcript or a URL.
 `lessons.py` refuses what a pattern can see (paths, URLs, addresses, credential shapes, long
 hex or base64 runs, line breaks) in every text field and in a stage id given as a string (at
-most 32 characters), and any field lesson/1 does not name; a name it cannot see stays the
+most 32 characters, never blank), and any field lesson/1 does not name. A stage id an older
+index holds that fails those checks is normalised when the index is read (one line, cut to 32
+characters, or `stage`), and said, so the line and its memory id are never set aside; a name it cannot see stays the
 writer's duty. Off the estate (`retro.publish`) the relaxation ends: the whole origin is
 stripped.
 

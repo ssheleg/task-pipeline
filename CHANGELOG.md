@@ -1,6 +1,6 @@
 ## Unreleased
 
-Guards: 447 → **497**; property checks 15 → **15**. There are 50 new negatives in
+Guards: 447 → **509**; property checks 15 → **15**. There are 62 new negatives in
 `lessons.py`. Each one plants a revert, and the suite must catch it:
 
 - the whole-scan refusal put back;
@@ -41,9 +41,34 @@ Guards: 447 → **497**; property checks 15 → **15**. There are 50 new negativ
 - redaction replacing a relative name, or inside a longer name;
 - a session note, a newer-format notice or a refusal printing an absolute path;
 - a stage id carrying a line break or a path;
-- a same-revision duplicate decided by the order of lines.
+- a same-revision duplicate decided by the order of lines;
+- a re-key taking a commit from a merged history, ignoring the key v1.95.0 would compute, or
+  moving a project read this run;
+- `add` leaving one id on two live projects; the id kept by the smaller key instead of the
+  earlier holder;
+- a rebuild asking git the same question again;
+- `query`, an `add` refusal or the repository top printing an absolute path;
+- an index set aside for a stage id v1.95.0 accepted, or one normalised past 32 characters;
+- the schema admitting a blank stage id.
 
-These are the fixes from verification rounds 6 to 13 of release iteration 1.
+These are the fixes from verification rounds 6 to 14 of release iteration 1.
+
+- **The re-key and the one-project rule, closed** (round 14).
+  - A provenance-less origin is re-keyed only when, in the checkout that re-derived its anchor,
+    its commit resolves, v1.95.0 would have computed its key there, and the commit descends
+    from the root the new key names. A monorepo that merged another repository's history keeps
+    its hands off that repository's origin and memory id.
+  - An origin whose project key any checkout read this run holds is never re-keyed, whatever
+    its anchor.
+  - `add` keeps one memory id on one live project, against the index as it read it.
+  - The M/M2 fixtures put the earlier holder's key above the later one, so "the smaller key"
+    fails every run.
+  - One `cat-file` per (checkout, commit) in a run.
+  - Every verb's messages name files, the index home-relative; `path` alone prints a path.
+  - A stage id v1.95.0 accepted that lesson/1 now refuses is normalised on read and said, so no
+    line and no memory id goes to the corrupt file. The schema's string stage ids are not blank.
+  - The pre-tag admission packet cites the v1.94.0 commit, not the tag object, which a clone
+    without tags does not hold.
 
 - **Upgrade and ownership in `lessons.py`** (round 13).
   - An index written by v1.95.0 (keyed on the smallest root of HEAD, no provenance) no longer
@@ -60,7 +85,7 @@ These are the fixes from verification rounds 6 to 13 of release iteration 1.
     then `init.defaultBranch`, so a linked worktree on an orphan branch is the same project.
   - Redaction replaces only absolute paths, as whole path components (`--roots .` deleted every
     dot), and stderr — the session's notes, the newer-format notice, a refusal — is redacted
-    like stdout.
+    like stdout (in `rebuild`; every verb since round 14).
   - A stage id given as a string gets the text checks: one line, at most 32 characters, no
     path or credential shape.
   - Two copies of one origin at the same revision keep the lexically smaller id, whatever the

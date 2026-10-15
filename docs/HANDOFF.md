@@ -1,4 +1,14 @@
-## Fix cycles 6–13 of the release iteration — #125, branch `iter1/M-5-N-1` (2026-10-15)
+## Fix cycles 6–14 of the release iteration — #125, branch `iter1/M-5-N-1` (2026-10-15)
+
+Cycle 14 closed round 14's three MEDIUM findings and six LOW ones:
+- the re-key now also needs the key v1.95.0 would have computed in that checkout and a commit
+  descending from the new key's root, and never moves a project read this run;
+- `add` keeps one memory id on one live project;
+- deterministic M/M2 fixtures, one git question per (checkout, commit), redaction in every
+  verb, legacy stage ids normalised on read, a non-blank schema stage id, and the pre-tag
+  packet citing a commit instead of a tag object.
+
+The tests are in `round14_controls`, plus negatives 514–525; `MIN_EXPECTED` is 509.
 
 Cycle 13 kept the contract and fixed two MEDIUM findings and five LOW ones:
 - an index written by v1.95.0 is re-keyed to its repository on positive evidence (no
@@ -47,7 +57,7 @@ pushed but not merged, and no version or publication is claimed.
 - **New rules:** a parallel-work check before each cycle (`iteration.md` → *The cycle*), and
   background-dispatch command hygiene (`build.md` §4.1).
 
-Next task: run round 14 of verification on #125's head. The release order after v1.95.0 is
+Next task: run round 15 of verification on #125's head. The release order after v1.95.0 is
 the coordinator's.
 
 ## 1.96.0 source candidate — the finish line (2026-10-15)
