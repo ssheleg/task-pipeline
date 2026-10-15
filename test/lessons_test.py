@@ -2099,8 +2099,11 @@ def main():
     # time used to read as "no commit" / "does not resolve" — under parallel load that turned
     # a busy machine into a refusal about the lesson. Now it is its own refusal, named.
     shim = tree("tp-lessons-slowgit-")
-    real_git = shutil.which("git")
-    (shim / "git").write_text(f"#!/bin/sh\nsleep 3\nexec {real_git} \"$@\"\n")
+    # `exec sleep`, never `sleep; exec git`: the timeout kills the shim's own process, so no
+    # orphaned sleeper outlives it in the process group. One that did made a negative whose
+    # first failure landed within three seconds of this case refuse its plant on a loaded CI
+    # runner ("plant left a live process group", round 13). The real git is never needed here.
+    (shim / "git").write_text("#!/bin/sh\nexec sleep 3\n")
     os.chmod(shim / "git", 0o755)
     rc, _, err = run("add", "--json", "-", cwd=a, stdin=json.dumps(dict(single, classKey="slow-git")),
                      index=idx, env_extra={"PATH": f"{shim}:{os.environ['PATH']}",
