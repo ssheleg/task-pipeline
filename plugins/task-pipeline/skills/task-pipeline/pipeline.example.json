@@ -178,6 +178,10 @@
       "queue": "module-map",
       "arm": "after-decomposition",
       "command": "/loop"
+    },
+    "finish": {
+      "maxRounds": 3,
+      "maxReleases": 2
     }
   },
   "release": {

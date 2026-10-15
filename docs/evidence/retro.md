@@ -1477,6 +1477,12 @@ three quarters of the work on this run.
 
 ## Releases that carry no stamp — stated, not stamped
 
+**`v1.96.0` carries no stamp, declared before any tag.** It is the finish-line
+change — continuation necessity, triage at discovery, the round and release budget,
+and `waves.py finish` — delivered as a reviewed design on a draft PR. Source and
+focused evidence do not constitute a completed ten-stage run; no stage-10 stamp is
+invented.
+
 **`v1.95.0` carries no stamp, declared before any tag.** It is the bounded FW07
 composition inside the family correction wave: stage routes, selected-profile
 checkpoint recovery, owner release admission and scratch-runner coordination.

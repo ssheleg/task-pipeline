@@ -344,7 +344,8 @@ construction**:
 findings, and findings caused by the previous pass's own fixes. When the second
 overtakes the first, the axis is exhausted — **rotate it, don't push harder.** Both
 counts go in the ledger; an audit that reports only "found N" cannot see its own
-exhaustion.
+exhaustion. **Rotation happens inside the round budget**: a new axis is the next round's
+reading, never an extra round ([`finish-line.md`](finish-line.md) → *Rounds and the stop*).
 
 ### 3. What can't be fixed now becomes a ratchet, never a TODO
 
@@ -380,7 +381,9 @@ explaining why; a ratchet nobody prints is a TODO with a better name.
   produce findings and fixes rather than a feature, and the exit criterion above is
   the stage-10 gate.
 - **Never as an eighth "look again" pass.** If the last two passes found mostly
-  self-inflicted findings, the answer is rule 2, not another pass.
+  self-inflicted findings, the answer is rule 2, not another pass — and rule 2's rotation
+  spends the iteration's round budget rather than extending it
+  ([`finish-line.md`](finish-line.md)).
 
 Once both axes are exhausted, the next finding of a known class should be caught by
 a script — and if it cannot be, **that is the finding: write the check.**

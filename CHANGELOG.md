@@ -1,6 +1,6 @@
 ## Unreleased
 
-Guards: 439 → **489**; property checks 15 → **15**. There are 50 new negatives in
+Guards: 447 → **497**; property checks 15 → **15**. There are 50 new negatives in
 `lessons.py`. Each one plants a revert, and the suite must catch it:
 
 - the whole-scan refusal put back;
@@ -145,6 +145,39 @@ These are the fixes from verification rounds 6 to 13 of release iteration 1.
 - Lessons of this run, now doctrine: `iteration.md` checks for parallel work on the same
   nodes before each cycle, across every tool's branch prefixes. `build.md` adds a
   command-hygiene block that every background dispatch carries.
+
+## v1.96.0 — 2026-10-15
+
+Source candidate; not published.
+
+Guards: 439 → **447**; property checks 15 → **15**.
+
+An iteration now stops at a finish line instead of when a search runs dry. The new
+`references/finish-line.md` fixes a contract at intake — objective, exit checks run on
+the released, installed or deployed artefact, scope, budget and base — in the brief's
+`## Finish line`. Every finding is triaged when found: blocking only by one of four
+tests (a red exit check, a hotfix-lane entry, a regression against base, a verified
+REQ or published claim false on the artefact), deferred to the board with its
+evidence, or noise as one ledger line. Severity words and effort never change the
+class. An iteration is done after two consecutive rounds with no new blocking
+finding; it stops at `run.finish.maxRounds` (default 3) or `maxReleases` (default 2)
+with each open blocker handed back as a `needs-operator` row, and diverging rounds go
+to the loop guard. Stopping is not idle: the next iteration starts from the board by
+priority, never by re-opening the closed one.
+
+`scripts/waves.py finish` computes the verdict from the inventory's new optional item
+fields (`triage`, `test`, `round`, `base_repro`, plus `blast` and `rung` for known
+risks) and prints the finish block; deferred and noise items never change it. The round
+count is explicit — `--rounds` or the run ledger's new `round:` lines, which must agree
+with the inventory — because a clean round leaves no item to count. Done needs the exit
+checks supplied and green (`--checks`), stays within `maxRounds` (at least 2) unless the
+operator's go is passed, and `next:` ranks every open non-blocking row by priority,
+never by freshness. B2 also covers a defect that would be a hotfix-lane entry once
+released; a defect in a node's own diff stays with review. Stage 0's
+gate requires the finish line filled; stage 10's requires the `finish:` line printed.
+Iteration, waves, loop-guard, audit, continuity, review and progress doctrine point to
+the one rule, and seven validator guards hold its vocabulary, budgets, hotfix set,
+brief fields, hand-back field and script enums equal across their surfaces.
 
 ## v1.95.0 — 2026-10-13
 

@@ -30,6 +30,22 @@ reviewed; a table and a re-run can. This script is that re-run:
         refused halfway and a refused one writes nothing. Plan nodes the graph lacks are named
         and exit 1 before any write, unless --only-present
         (a plan that spans several repositories' graphs).
+    waves.py finish --inventory FILE --max-rounds N --max-releases M (--rounds K | --ledger RUN.md)
+                    --checks K/M --artefact NAME@SHA [--releases R] [--operator-go]
+        the finish-line verdict (`references/finish-line.md`) from the triaged items, and the
+        finish block printed. Only `triage: blocking` items count, less those closed as
+        duplicate, stale or not-reproduced; deferred and noise never change the verdict. The
+        round count is explicit: --rounds, or the ledger's `round: <N> — <reading> — new
+        blocking <k>` lines, whose counts must match the inventory. Exit 0 done (the last two
+        rounds found no new blocking item, none is open, --checks is all green, and the rounds
+        are within --max-rounds or --operator-go is passed); 5 the budget reached before done
+        (rounds at --max-rounds, releases at --max-releases with a blocker open, or done past
+        the round budget without --operator-go); 6 diverging (the blocking count did not fall
+        from one round that found some to the next, or it did not fall and the last round's
+        self-inflicted >= new, from round 2 on); 3 continue (including no --checks); 1
+        malformed (a schema error, a blocking item without `test` or `round`, B3 with
+        base_repro yes, a round past the rounds run, no round count, a ledger that disagrees,
+        --max-rounds below 2, an artefact that is not NAME@SHA).
 
 **The plan** is any JSON whose `nodes` list `{id, wave, closes}` — a work graph that carries
 `closes` on its nodes is one, and so is a short hand-written table. A node may carry
@@ -42,7 +58,7 @@ described in `templates/inventory.schema.json` (`$defs.modules`, `$defs.plan`).
 are listed in (wave, id) order, counts are sorted. A re-cut is a diff to a table and a
 re-run, which a reviewer can read.
 
-Exit codes: 0 done; 1 an item lands nowhere, or the tables and the inventory disagree, or a
+Exit codes (every verb but `finish`, whose own are above): 0 done; 1 an item lands nowhere, or the tables and the inventory disagree, or a
 graph move was refused; 2 a schema error, a table error (an id on two modules), usage, or an
 unreadable file. Stdlib only (`references/portability.md`).
 """
@@ -62,11 +78,18 @@ SCHEMA = HERE.parent / "templates" / "inventory.schema.json"
 GRAPH_PY = HERE / "graph.py"
 REQUIRED = ("id", "title", "area", "kind", "severity", "evidence", "proposed_fix")
 OPTIONAL = ("status", "source", "source_file", "repo", "module", "node", "wave", "release",
-            "register_id", "blocked_by", "closable_in_one_pass", "needs_operator", "notes")
+            "register_id", "blocked_by", "closable_in_one_pass", "needs_operator", "notes",
+            "triage", "test", "round", "base_repro", "blast", "rung")
 SEVERITY = ("critical", "high", "medium", "low", "info")
 STATUS = ("open", "changed", "closed", "fixed", "fixed-elsewhere", "duplicate", "moved", "stale",
           "not-reproduced", "carried")
 OPEN = ("open", "changed")
+# The finish line's vocabulary (references/finish-line.md → Triage at discovery). The
+# validator holds these to the doctrine, the run-ledger grammar and inventory/1's enums.
+TRIAGE = ("blocking", "deferred", "noise")
+TESTS = ("B1", "B2", "B3", "B4")
+BASE_REPRO = ("yes", "no", "n/a")
+RUNGS = ("I1", "I2", "I3", "I4", "I5")
 ID = re.compile(r"^[A-Za-z][A-Za-z0-9._-]{0,63}$")
 KIND = re.compile(r"^[a-z][a-z0-9-]*$")
 EXT = re.compile(r"^x-[a-z0-9-]+$")
@@ -115,7 +138,32 @@ def item_errors(x: object) -> list[str]:
     for k in ("closable_in_one_pass", "needs_operator"):
         if k in x and not isinstance(x[k], bool):
             errs.append(f"{iid}: `{k}` is not a boolean")
+    if "triage" in x and x["triage"] not in TRIAGE:
+        errs.append(f"{iid}: `triage` {x['triage']!r} is not one of {', '.join(TRIAGE)}")
+    if "test" in x and x["test"] not in TESTS:
+        errs.append(f"{iid}: `test` {x['test']!r} is not one of {', '.join(TESTS)}")
+    if "round" in x and not _posint(x["round"]):
+        errs.append(f"{iid}: `round` is not an integer from 1")
+    if "base_repro" in x and x["base_repro"] not in BASE_REPRO:
+        errs.append(f"{iid}: `base_repro` {x['base_repro']!r} is not one of {', '.join(BASE_REPRO)}")
+    if "blast" in x and not (_posint(x["blast"]) and x["blast"] <= 3):
+        errs.append(f"{iid}: `blast` is not 1, 2 or 3")
+    if "rung" in x and x["rung"] not in RUNGS:
+        errs.append(f"{iid}: `rung` {x['rung']!r} is not one of {', '.join(RUNGS)}")
+    if x.get("triage") == "blocking":
+        errs += [f"{iid}: blocking without `{k}` — a blocking finding names the B test that "
+                 "matched and the round that found it" for k in ("test", "round") if k not in x]
+        if x.get("test") == "B3" and x.get("base_repro") == "yes":
+            errs.append(f"{iid}: B3 says it passes at Base, and `base_repro: yes` says it fails "
+                        "there — one of the two is wrong")
+    elif "test" in x:
+        errs.append(f"{iid}: `test` on an item that is not blocking — a B test is what makes a "
+                    "finding blocking; without one it is deferred or noise")
     return errs
+
+
+def _posint(v) -> bool:
+    return isinstance(v, int) and not isinstance(v, bool) and v >= 1
 
 
 def schema_errors(items: list) -> list[str]:
@@ -504,6 +552,163 @@ def cmd_sync_graph(a) -> int:
     return 0
 
 
+# ---------------------------------------------------------------------------- the finish line
+
+# A blocking item closed as one of these was never a blocker: it counts in no round.
+NOT_COUNTED = ("duplicate", "stale", "not-reproduced")
+ROUND_LINE = re.compile(r"^round:\s*(\d+)\s*[—-]\s*(.*?)\s*[—-]\s*new blocking\s*(\d+)\s*$")
+ARTEFACT = re.compile(r"^[^@\s]+@[0-9a-f]{7,40}$")
+
+
+def _priority(x: dict):
+    """Top priority first: the impact rung, then blast, then severity, then the id. Where an
+    item was found is not an input — a fresh finding is not next because it is fresh."""
+    rung = RUNGS.index(x["rung"]) + 1 if x.get("rung") in RUNGS else 0
+    return (-rung, -(x.get("blast") or 0), SEVERITY.index(x["severity"]), _natural(x["id"]))
+
+
+def _board_id(x: dict) -> str:
+    return x.get("register_id") or x["id"]
+
+
+def ledger_rounds(path: pathlib.Path) -> dict[int, int]:
+    """{round: new blocking} from the run ledger's `round:` lines (templates/run.md)."""
+    try:
+        text = path.read_text(encoding="utf-8")
+    except (OSError, UnicodeError) as exc:
+        raise Fail(1, [f"the run ledger {path} cannot be read ({type(exc).__name__})"])
+    out, errs = {}, []
+    for n, line in enumerate(text.splitlines(), 1):
+        if not line.startswith("round:"):
+            continue
+        m = ROUND_LINE.match(line.strip())
+        if not m:
+            errs.append(f"{path}:{n}: not `round: <N> — <reading> — new blocking <k>`")
+            continue
+        r = int(m[1])
+        if r < 1 or r in out:
+            errs.append(f"{path}:{n}: round {r} is below 1 or written twice")
+        out[r] = int(m[3])
+    if out and sorted(out) != list(range(1, max(out) + 1)):
+        errs.append(f"{path}: rounds {sorted(out)} are not 1..{max(out)} — a round line is missing")
+    if errs:
+        raise Fail(1, errs)
+    return out
+
+
+def finish_verdict(items: list[dict], rounds: int, max_rounds: int, max_releases: int,
+                   releases: int, checks: tuple[int, int] | None,
+                   operator_go: bool = False) -> tuple[int, str, dict]:
+    """(exit code, word, facts) — the finish line computed from the triaged items alone.
+    Deferred and noise items are counted for the block and never read for the verdict."""
+    triaged = [x for x in items if "triage" in x]
+    late = [f"{x['id']}: found in round {x['round']}, and only {rounds} round(s) ran"
+            for x in triaged if _posint(x.get("round")) and x["round"] > rounds]
+    if late:
+        raise Fail(1, late)
+    blocking = [x for x in triaged if x["triage"] == "blocking" and _status(x) not in NOT_COUNTED]
+    new = [sum(1 for x in blocking if x["round"] == r) for r in range(1, rounds + 1)]
+    selfinf = sum(1 for x in blocking if x["round"] == rounds and x.get("base_repro") == "no")
+    open_b = [x for x in blocking if _needs_node(x)]
+    facts = {"rounds": rounds, "new": new, "open": open_b, "fixed": len(blocking) - len(open_b),
+             "self_inflicted": selfinf}
+    clean = rounds >= 2 and new[-1] == 0 and new[-2] == 0 and not open_b
+    green = checks is not None and checks[0] == checks[1]
+    if clean and green:
+        if rounds <= max_rounds:
+            return 0, "done", facts
+        if operator_go:
+            return 0, "done", dict(facts, why=f"past budget — rounds {rounds}/{max_rounds} on the "
+                                              "operator's go")
+        return 5, "budget", dict(facts, why=f"past budget — operator's go required: done at round "
+                                            f"{rounds}/{max_rounds}")
+    if rounds >= max_rounds:
+        owed = (f"{len(open_b)} blocker(s) open" if open_b else
+                "exit checks not supplied" if checks is None else
+                "exit checks not all green" if not green else "the second clean round still owed")
+        return 5, "budget", dict(facts, why=f"rounds {rounds}/{max_rounds} reached before done — {owed}")
+    if open_b and releases >= max_releases:
+        return 5, "budget", dict(facts, why=f"releases {releases}/{max_releases} reached before "
+                                            f"done — {len(open_b)} blocker(s) open")
+    if rounds >= 2 and new[-1] >= new[-2] > 0:
+        return 6, "blocked", dict(facts, why=f"diverging — new blocking {new[-2]} → {new[-1]} "
+                                             "did not fall; run the loop guard's break protocol")
+    if rounds >= 2 and new[-1] >= new[-2] and selfinf and selfinf >= new[-1] - selfinf:
+        return 6, "blocked", dict(facts, why=f"diverging — round {rounds}: {selfinf} self-inflicted "
+                                             f"≥ {new[-1] - selfinf} new, and the count did not "
+                                             "fall; run the loop guard's break protocol")
+    why = (f"{len(open_b)} blocker(s) open" if open_b else
+           "exit checks not supplied — pass --checks K/M read on the artefact" if checks is None else
+           "exit checks not all green" if not green else
+           "a second round with no new blocking finding is owed")
+    return 3, "continue", dict(facts, why=why)
+
+
+def cmd_finish(a) -> int:
+    try:
+        _, items = load_inventory(pathlib.Path(a.inventory))
+    except Fail as exc:
+        raise Fail(1, exc.reasons)  # a malformed inventory is malformed here, never usage
+    for flag, v, least in (("--max-rounds", a.max_rounds, 2), ("--max-releases", a.max_releases, 1),
+                           ("--releases", a.releases, 0), ("--rounds", a.rounds, 0)):
+        if v is not None and v < least:
+            raise Fail(1, [f"{flag} {v} is below {least}" + (
+                " — done needs two clean rounds, so a budget of one can never be met"
+                if flag == "--max-rounds" else "")])
+    # THE ROUND COUNT IS EXPLICIT. A clean round leaves no item, so a count derived from the
+    # items can never see the two clean rounds `done` needs: the verdict would stay
+    # `continue` for ever. It comes from --rounds or from the ledger's `round:` lines.
+    led = ledger_rounds(pathlib.Path(a.ledger)) if a.ledger else None
+    if led is not None and not led and a.rounds is None:
+        raise Fail(1, [f"{a.ledger} carries no `round:` line and --rounds is absent — the round "
+                       "count cannot be read"])
+    if led is None and a.rounds is None:
+        raise Fail(1, ["the round count is not given — pass --rounds N, or --ledger with the run "
+                       "ledger's `round:` lines; clean rounds leave no item to count"])
+    rounds = a.rounds if a.rounds is not None else max(led)
+    if led and a.rounds is not None and a.rounds != max(led):
+        raise Fail(1, [f"--rounds {a.rounds} and the ledger's {max(led)} round(s) disagree"])
+    if led:
+        counted = {r: sum(1 for x in items if x.get("triage") == "blocking" and x.get("round") == r)
+                   for r in led}
+        bad = [f"round {r}: the ledger says new blocking {k}, the inventory holds {counted[r]}"
+               for r, k in sorted(led.items()) if counted[r] != k]
+        if bad:
+            raise Fail(1, bad)
+    checks = None
+    if a.checks:
+        m = re.fullmatch(r"(\d+)/(\d+)", a.checks.strip())
+        if not m or int(m[1]) > int(m[2]) or int(m[2]) == 0:
+            raise Fail(1, [f"--checks {a.checks!r} is not K/M green of M exit checks"])
+        checks = (int(m[1]), int(m[2]))
+    if a.artefact and not ARTEFACT.match(a.artefact):
+        raise Fail(1, [f"--artefact {a.artefact!r} is not NAME@SHA (a commit of 7-40 hex digits)"])
+    code, word, f = finish_verdict(items, rounds, a.max_rounds, a.max_releases, a.releases, checks,
+                                   a.operator_go)
+    deferred = sorted((x for x in items if x.get("triage") == "deferred"), key=_priority)
+    noise = [x for x in items if x.get("triage") == "noise"]
+    risks = [x for x in deferred if x.get("blast") == 3 or x.get("rung") in ("I4", "I5")]
+    pool = sorted((x for x in items if x.get("triage") != "blocking" and _needs_node(x)
+                   and x.get("triage") != "noise"), key=_priority)
+    budget = f"rounds {f['rounds']}/{a.max_rounds} — releases {a.releases}/{a.max_releases}"
+    if word == "continue":
+        print(f"next round: {f['rounds'] + 1}/{a.max_rounds} — {f['why']} — {budget}")
+    else:
+        print(f"finish: {word} — {budget}" + (f" — {f['why']}" if f.get("why") else ""))
+    print("  exit checks: " + (f"{checks[0]}/{checks[1]} green on {a.artefact or '<artefact not named>'}"
+                               if checks else "not supplied — read them on the artefact (--checks K/M)"))
+    print(f"  blocking: {len(f['open'])} open · {f['fixed']} fixed — new per round "
+          f"{' · '.join(str(n) for n in f['new']) or 'none'}"
+          + (f" — open: {', '.join(x['id'] for x in f['open'])}" if f["open"] else ""))
+    top = ", ".join(_board_id(x) for x in deferred[:5]) + (" …" if len(deferred) > 5 else "")
+    print(f"  deferred: {len(deferred)}" + (f" → {top}" if deferred else ""))
+    print(f"  noise: {len(noise)}")
+    print("  known risks: " + (", ".join(_board_id(x) for x in risks) or "none"))
+    print("  next: " + (f"{_board_id(pool[0])} (new iteration)" if pool
+                         else "highest-priority board row (read the board)"))
+    return code
+
+
 def main(argv: list[str]) -> int:
     p = argparse.ArgumentParser(prog="waves.py", description=__doc__.split("\n")[0])
     sub = p.add_subparsers(dest="cmd", required=True)
@@ -531,9 +736,20 @@ def main(argv: list[str]) -> int:
                                         "a lowering is refused")
     s.add_argument("--only-present", action="store_true",
                    help="ignore plan nodes this graph does not hold")
+    f = sub.add_parser("finish", help="the finish-line verdict from the triaged items, and the block")
+    f.add_argument("--inventory", required=True)
+    f.add_argument("--max-rounds", type=int, required=True, help="run.finish.maxRounds (default 3, at least 2)")
+    f.add_argument("--max-releases", type=int, required=True, help="run.finish.maxReleases (default 2)")
+    f.add_argument("--releases", type=int, default=0, help="releases this iteration made so far")
+    f.add_argument("--rounds", type=int, help="rounds run, clean ones included")
+    f.add_argument("--ledger", help="the run ledger; its `round:` lines are the round count")
+    f.add_argument("--operator-go", action="store_true",
+                   help="the operator's recorded go for rounds past --max-rounds")
+    f.add_argument("--checks", help="K/M — exit checks green on the artefact")
+    f.add_argument("--artefact", help="what they ran on, as NAME@SHA")
     a = p.parse_args(argv)
     verbs = {"merge": cmd_merge, "assign": cmd_assign, "count": cmd_count, "validate": cmd_validate,
-             "sync-graph": cmd_sync_graph}
+             "sync-graph": cmd_sync_graph, "finish": cmd_finish}
     try:
         return verbs[a.cmd](a)
     except Fail as exc:

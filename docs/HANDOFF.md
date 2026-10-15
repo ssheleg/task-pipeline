@@ -10,7 +10,9 @@ Cycle 13 kept the contract and fixed two MEDIUM findings and five LOW ones:
 - redaction replaces whole absolute path components only, on stderr too;
 - string stage ids get the text checks; a same-revision tie is deterministic.
 
-The tests are in `round13_controls`, plus negatives 489–508 (474 re-anchored).
+The tests are in `round13_controls`, plus negatives 489–508 (474 re-anchored). This branch merges
+`origin/main` at v1.96.0; its finish-line plants took 455–462, so the five colliding lesson
+negatives were renumbered 509–513 and `MIN_EXPECTED` is 497.
 
 Cycle 12 kept the narrowed contract and fixed five MEDIUM findings and the LOW ones:
 - the project key is the repository's;
@@ -30,15 +32,15 @@ own.**
 - Origins carried as `checkout holds another project` are kept but not counted.
 - A shallow clone is never a source.
 
-The tests are `round11_controls` and the rewritten `round10_controls`, plus negatives 455–473
-(some numbers retired). This branch merges `origin/main` (v1.95.0, #128, #129) without
+The tests are `round11_controls` and the rewritten `round10_controls`, plus negatives 457–473
+(some numbers retired; 455, 456, 458, 459 and 461 became 509–513 when v1.96.0 took those numbers). This branch merges `origin/main` (v1.95.0, #128, #129) without
 rewriting history. The fixes are recorded in the CHANGELOG under *Unreleased*. The branch is
 pushed but not merged, and no version or publication is claimed.
 
 - **Rebuild:** `lessons.py rebuild` never loses what it cannot re-derive. Unread or
   unresolved origins are carried per `(project, retro)` with their memory ids, and only
   `--prune-carried` removes them. The tests are `carry_forward_controls` and
-  `partial_rebuild_controls` in `test/lessons_test.py`, plus negatives 455–459.
+  `partial_rebuild_controls` in `test/lessons_test.py`, plus negatives 509–512 (once 455–459).
 - **F2–F5:** documentation drifts in `continuity.md`, the `graph.py` docstring and
   `stages.md`. The authority rule now has one home, guarded by `test/release_approval_test.py`.
 - **F6:** the merge notice is accurate when the family index was set aside.
@@ -47,6 +49,15 @@ pushed but not merged, and no version or publication is claimed.
 
 Next task: run round 14 of verification on #125's head. The release order after v1.95.0 is
 the coordinator's.
+
+## 1.96.0 source candidate — the finish line (2026-10-15)
+
+Branch `feat/finish-line`, draft PR "1.96.0 — a finish line: iterations stop when the
+work is done, not when the search runs dry". Ships
+[`references/finish-line.md`](../plugins/task-pipeline/skills/task-pipeline/references/finish-line.md),
+`waves.py finish`, the brief's `## Finish line`, `run.finish` budgets and guards FL-G1..G7
+with eight negative plants (455–462). No tag, publication or install readback. Exact next task:
+independent review of the draft PR, then normal integration and the release gate.
 
 ## Operator stop: Claude continuation — FW07 child lifetime
 

@@ -103,7 +103,9 @@ never that the work was skipped quietly.
   is now stale), no open contradictions, **every
   autonomy-sweep row is answered or explicitly marked "stop and ask here"**, **a
   user-facing task's brief names its `surface_class`**, the
-  **REQ table is written and every row names its check**, the carry-over ledger is
+  **REQ table is written and every row names its check**, **the brief's `## Finish line`
+  is filled — objective, exit checks on the artefact the operator uses, scope, budget and
+  base** ([`finish-line.md`](finish-line.md)), the carry-over ledger is
   seeded, **`.task-pipeline/run.md` exists and the header block has been printed**
   ([`progress.md`](progress.md)), the model decision is recorded, and the operator
   confirms the brief. Stop when a
@@ -376,7 +378,9 @@ never that the work was skipped quietly.
   surfaced that nobody asked for, every decision still waiting **asked here with
   options rather than listed**, and the ambiguity count computed from the four
   registers with its ids ([`progress.md`](progress.md) → *The hand-back*) — a run
-  that cannot say what happened has not finished, it has stopped; **the environment is
+  that cannot say what happened has not finished, it has stopped; **the `finish:` line is
+  printed beside this verdict — `done`, `budget` or `blocked`, with its block**
+  ([`finish-line.md`](finish-line.md) → *The finish block*); **the environment is
   given back** — all eight classes enumerated, everything this run started ended and
   verified by re-enumerating rather than by the teardown's reply, an earlier run of
   this project ended only when **provably spent**, an item this project does not own

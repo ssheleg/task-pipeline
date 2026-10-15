@@ -189,6 +189,7 @@ and the inline fallback satisfy the same [provider contract](plugins/task-pipeli
 | 10 Acceptance | [`acceptance.md`](plugins/task-pipeline/skills/task-pipeline/references/acceptance.md) — REQ coverage table, evidence rules, the closing question |
 | 10 + any audit | [`audit.md`](plugins/task-pipeline/skills/task-pipeline/references/audit.md) — the L0→L7 ladder and its seams, axis rotation, ratchets, proven checks |
 | any loop | [`loop-guard.md`](plugins/task-pipeline/skills/task-pipeline/references/loop-guard.md) — churn detection, caps, the break protocol |
+| when an iteration stops | [`finish-line.md`](plugins/task-pipeline/skills/task-pipeline/references/finish-line.md) — a contract fixed at intake (objective, exit checks on the artefact, scope, budget, base), every finding triaged when found — blocking, deferred or noise — and a stop at two rounds with no new blocking finding or at the budget, computed by `waves.py finish` |
 | every gate + stage 10 | [`residue.md`](plugins/task-pipeline/skills/task-pipeline/references/residue.md) — what the run leaves **running** and leaves **behind**: eight classes enumerated by class rather than by one tool, `holds: N` beside every verdict, and a teardown that ends what this run started and only reports what it did not |
 | run-wide reporting | [`progress.md`](plugins/task-pipeline/skills/task-pipeline/references/progress.md) — the header block at task start and the one-line iteration close: the stage rail computed from the project's own `pipeline.json`, every number borrowed from the gate that measured it |
 | run-wide pacing | [`continuity.md`](plugins/task-pipeline/skills/task-pipeline/references/continuity.md) — the loop mode (`run.loop`, default off, never collapses a manual gate) and the context budget (fires on a harness signal, never on an estimate) |
@@ -634,7 +635,7 @@ must say so.
 ### Held to Anthropic's own Skill authoring guidance
 
 Audited against the four Agent Skills pages. Most of it already held — `name`
-13/64 chars, `description` 887/1024 chars, `SKILL.md` 272/500 lines, all 52 references
+13/64 chars, `description` 887/1024 chars, `SKILL.md` 275/500 lines, all 53 references
 reachable from `SKILL.md` through explicit reference routes, and the bundle far under the 30 MB ceiling. What
 did not, now does:
 

@@ -64,6 +64,7 @@ a row pointing outside the bundle is the defect this file exists to catch.
 | The entry audit and what it inspects | `references/setup.md` |
 | The ladder, seams, axis rotation, ratchets | `references/audit.md` |
 | Loop detection and its caps | `references/loop-guard.md` |
+| **The finish line** — when an iteration stops: the contract, triage at discovery, the round budget | `references/finish-line.md` |
 | **What the run prints about itself** — the header block, the rail, the iteration line | `references/progress.md` |
 | **What the run leaves running and leaves behind** — the eight classes, the `holds:` field, the teardown | `references/residue.md` |
 | **The run mode** — item-by-item pacing, default off, what it never collapses | `references/continuity.md` |
