@@ -51,7 +51,7 @@
       "maximum": 3
     },
     "stages": {
-      "description": "The stage that owned the failure and the stage that surfaced it. A profile's stage ids need not be numbers.",
+      "description": "The stage that owned the failure and the stage that surfaced it. A profile's stage ids need not be numbers; a string id is one line of at most 32 characters, not blank, and gets the text fields' checks (no path, URL or credential shape). A longer or ill-shaped id an older index holds is normalised when read, never set aside.",
       "type": "object",
       "additionalProperties": false,
       "required": [
@@ -63,13 +63,19 @@
           "type": [
             "integer",
             "string"
-          ]
+          ],
+          "minLength": 1,
+          "maxLength": 32,
+          "pattern": "\\S"
         },
         "surfaced": {
           "type": [
             "integer",
             "string"
-          ]
+          ],
+          "minLength": 1,
+          "maxLength": 32,
+          "pattern": "\\S"
         }
       }
     },
@@ -96,7 +102,7 @@
       ],
       "properties": {
         "project": {
-          "description": "The project's pseudonymous key: `p-` and the first 12 hex digits of the repository's root commit. Never its name: a repository name can be a customer's or a product's (redaction rule 4). The shared store receives the same key, never a `project:<slug>` id.",
+          "description": "The project's pseudonymous key: `p-` and the first 12 hex digits of the repository's root commit — the first-parent root of its default branch (origin/HEAD, main or master; without them the main worktree's HEAD, then init.defaultBranch), so every worktree and branch of one repository shares it. Never its name: a repository name can be a customer's or a product's (redaction rule 4). The shared store receives the same key, never a `project:<slug>` id.",
           "type": "string",
           "pattern": "^p-[0-9a-f]{12}$"
         },
@@ -116,7 +122,7 @@
   },
   "$defs": {
     "indexEntry": {
-      "description": "One line of the local index (lesson-index/1): one entry per classKey, a pure function of its origins, so a rebuild from the retros equals the incremental index byte for byte.",
+      "description": "One line of the local index (lesson-index/1): one entry per classKey, a pure function of its origins, so a complete rebuild of the same retros with nothing carried and no memory id recorded equals the incremental index byte for byte.",
       "type": "object",
       "additionalProperties": false,
       "required": [
@@ -169,13 +175,13 @@
         },
         "seen": {
           "type": "integer",
-          "minimum": 1,
-          "description": "How many origins hold the class."
+          "minimum": 0,
+          "description": "How many origins hold the class, counting re-derived and temporarily unavailable carried origins — not those carried as `checkout holds another project`."
         },
         "projects": {
           "type": "integer",
-          "minimum": 1,
-          "description": "How many distinct projects hold it."
+          "minimum": 0,
+          "description": "How many distinct projects hold it, counted like `seen`: an origin carried as `checkout holds another project` is kept but not counted."
         },
         "status": {
           "enum": [
@@ -207,7 +213,29 @@
               },
               "memory": {
                 "type": "string",
-                "pattern": "^mem:[^@\\s]+@[0-9]+$"
+                "pattern": "^mem:[^@\\s]+@[1-9][0-9]*$",
+                "description": "The shared store's id, `mem:<id>@<revision>` with the revision from 1. One id belongs to one (project, classKey): `record` refuses an id another project's or class's origin holds, and one the loader would refuse."
+              },
+              "carried": {
+                "enum": [
+                  "checkout not read",
+                  "checkout holds another project",
+                  "retro file not read",
+                  "no provenance",
+                  "commit does not resolve",
+                  "retro cites a commit that does not resolve",
+                  "lesson refused",
+                  "no checkout read holds it",
+                  "source not read"
+                ],
+                "description": "Set by `rebuild` on every previous origin it did not re-derive: a rebuild never removes or moves anything on its own, and `rebuild --prune-carried` (optionally `--prune-carried-reason`) is the only way an origin leaves the index. The origin keeps everything recorded on it, its memory id included. `checkout holds another project` — every checkout in the provenance now holds another project key AND the origin's own commit does not resolve there — is kept but not counted in seen/projects/status; every other reason is a temporary unavailability and is counted. `source not read` is the round-7 label, still accepted. Cleared when a checkout holding the origin reads it again."
+              },
+              "checkouts": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Provenance: the real top-level paths of the checkouts this origin was derived from; they decide only the carried reason, never a removal. Local to this machine's index; never emitted to a store, and not printed by `show`."
               },
               "lesson": {
                 "type": "object"

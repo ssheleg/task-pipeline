@@ -75,6 +75,22 @@ act. **Step 11 runs stage 8's verification trio** on what was released. Steps 12
 with stage 10. No gate in [`stages.md`](stages.md) is skipped. The cycle changes when each
 stage runs, and over what.
 
+**Before each cycle, check for parallel work on the same nodes.** In every target repository,
+list the open PRs and the recently merged ones by branch prefix. Include other CLIs' prefixes,
+such as `codex/`, `fix/` and `release/`, and do not stop at your own tool's live sessions:
+
+```bash
+gh pr list -R <owner>/<repo> --state open   --json number,headRefName,title
+gh pr list -R <owner>/<repo> --state merged -L 20 --json number,headRefName,mergedAt
+```
+
+Each node has one owner. When work has to be split, record the split on the PR you would
+otherwise collide with. *A lesson of release iteration 1 (2026-10-13): fix PRs from other
+tools' branches landed on nodes a fix cycle was rebuilding, and a later cycle was briefed on
+a PR that had already merged. Source: the iteration's run record, which is private, and
+[task-pipeline#125](https://github.com/ssheleg/task-pipeline/pull/125), which carries the
+rule.*
+
 ## Module dossiers
 
 **One dossier per cluster.** The inventory is grouped by the part of the system each item
@@ -262,13 +278,138 @@ private to its project and never leaves it.
 **Layer 1 — every install, no service.** The project retro and [`learned.md`](learned.md),
 as before, plus a **local index** of every project's lessons on this machine:
 `scripts/lessons.py`, one JSON line per class, a pure function of the retros
-(`lessons.py rebuild --roots <dir>` re-derives it). Rebuild replaces the projection for
-its explicitly selected roots and depth: choose the whole intended scope. A readable empty
-scope can produce an empty index; a missing or unreadable root, discovery error, malformed
-artifact configuration, missing explicitly configured artifact directory, dangling source
-link, nonregular retro input, or invalid/unresolved lesson refuses before changing the index
-or its migration state. An absent default artifact directory in a new repository remains
-a valid empty source. Repair the named source and retry; unknown is never measured zero.
+(`lessons.py rebuild --roots <dir>` re-derives it). **A rebuild never removes or moves
+anything on its own.** It derives every lesson from the retros it can read under the roots and
+depth given, and from every git worktree of each checkout it finds. Worktrees under
+`.worktrees/` or `.claude/worktrees/` are included, even though the walk skips
+dot-directories.
+
+An origin is one project's copy of a lesson, `(project, retro)`. It records its
+**provenance**: the checkouts it was derived from, by real path. That record stays in the
+local index; it is never emitted, and `show` omits it. Provenance decides only the reason an
+origin is carried, never a removal.
+
+**Every previous origin the run does not re-derive is carried.** Nothing is removed and nothing
+is moved: no origin is dropped because a checkout read its retro and no longer found the entry,
+and no memory id moves to another project's origin. **`rebuild --prune-carried` is the only way
+an origin leaves the index**. `--prune-carried-reason <reason>` narrows it to one reason. It
+needs `--prune-carried`, and it offers only the reasons listed below; anything else is a usage
+error, exit 2. A
+carried origin keeps everything recorded on it, including its memory id, and is marked
+`carried: <reason>`, named in the summary. It is re-derived and un-marked as soon as a checkout
+holding it reads again. One thing is re-keyed rather than carried, on positive evidence only:
+an origin written before provenance existed (v1.95.0 keyed a project on the smallest root
+commit of HEAD) whose `retro#anchor`, under the same class key, this run re-derives under
+exactly one other key, and in the checkout that re-derived it: its own commit resolves there,
+v1.95.0 would have computed exactly its key there, and the commit descends from the root the new
+key names (its own history, not a history the repository merged). It is the same repository, so
+it takes the new key and its memory id follows; `add` does the same for its own checkout. It is
+never re-keyed when it has provenance, when its project key is held by any checkout read this
+run, when two keys could claim it, or when the copy under the new key holds a different memory
+id (then it stays carried, and that is named). A monorepo that merged another repository's
+history therefore never takes that repository's origin. The reasons are:
+
+- `checkout not read`: the checkout was not discovered, or a problem is owned by it. That
+  problem may be an unreadable retro, a refused `git worktree list`, a shallow clone, a broken
+  configuration, or a retro that changed while the rebuild ran (an `add` landing mid-run).
+- `retro file not read`: the checkout read completely, but that file was not read, for
+  example because it lies outside the artifact root or was moved.
+- `no checkout read holds it`: the checkout read the file, holds the same project, and the
+  entry is no longer there.
+- `commit does not resolve`, `retro cites a commit that does not resolve` or
+  `lesson refused`: the entry is there but could not be derived. A dangling commit is routine
+  after a squash merge and a deleted branch.
+- `no provenance`: the origin was written before provenance existed, and no re-derived origin
+  proves it is the same repository's.
+- `checkout holds another project`: every checkout in its provenance now holds a different
+  project key, and the origin's own commit does not resolve there. A path is not an identity.
+  The same repository under another key still holds the commit, so it is not a stranger;
+  `add` applies the same rule to its own checkout's old-key origin.
+
+The project key is the repository's own: the first-parent root of its default branch
+(`origin/HEAD`, then `main`, then `master`). Without any of them it is the main worktree's
+HEAD, read in the common directory, so every worktree gets one answer; then
+`init.defaultBranch`; then this checkout's HEAD. It is computed once per git common directory. A worktree on a branch that merged an unrelated history, or a
+checkout sitting on an orphan `gh-pages` branch, is still its project.
+
+**Counting.** `seen`, `projects` and `status` count re-derived origins and every carried origin
+except `checkout holds another project`. Those are kept, with their memory ids, but not counted.
+So a temporarily unreadable root never demotes a lesson two projects hold, and a stranger at a
+path, or one checkout under a new root commit, never makes a phantom second project. Derived
+fields are recomputed from the origins whenever the index is read; they are never trusted from
+disk.
+
+**Shallow clones.** A shallow checkout is never a source. It is a problem owned by that
+checkout, nothing is derived from it under its unstable key, and its origins are carried as
+`checkout not read`. A shallow check that does not answer is refused the same way, and since
+it taught nothing, it does not count as something read. `add`, `emit-observatory` and
+`record` refuse in a shallow clone, exit 1 and write nothing, and say to deepen it with
+`git fetch --unshallow`.
+
+**Known limit.** A project whose root commit changes, through a re-init or an unshallow, starts
+new store records: its old origins are carried as `checkout holds another project` with their
+memory ids, and the new origins start without one. The operator re-attaches by running
+`record` with the old id on the new origin, from the same checkout. That is allowed, because
+the new origin is of the same class key and the origin holding the id is carried as `checkout
+holds another project` with this checkout in its provenance. From any other checkout it is
+refused.
+
+Another checkout of the same project, even one reading the same retro path, decides nothing
+for an origin it never held. Problems carry their owner, a checkout or none, and are never
+matched by path prefix.
+
+**Memory ids.** A memory id belongs to `(project, classKey)`, the store's own identity, and
+never to a retro anchor:
+
+- A rotated or retitled entry keeps its id on the re-derived origin. The old anchor is carried.
+- A class key changed inside one entry does not inherit another key's id.
+- One id is one `(project, classKey)`. `record` refuses each of the following, exits 1 and
+  writes nothing:
+  - an id that another class key holds;
+  - an id that another project's origin holds (the refusal names that project), unless that
+    origin is carried as `checkout holds another project` and this checkout is in its
+    provenance (the re-attach above);
+  - a revision older than the one held;
+  - without `--replace`, a different id over the one the origin already holds.
+
+  It also refuses an id the index cannot hold, such as `mem:`, a quote, a backslash or a
+  space: that exits 2.
+- One id is one project's store record. Two projects may hold it only while one of them is
+  carried as `checkout holds another project`. When a rebuild would leave it on two live
+  projects (that checkout came back), the id stays on the earlier holder: the project the
+  previous index carried as `checkout holds another project` with it, else the smaller project
+  key. The other origin keeps its place without the id, and the run names it. `add` applies the
+  same rule against the index as it read it, so an add from an old clone never leaves the id on
+  both projects either.
+- Merged duplicate lines name every id they drop. Of two copies of one origin the higher
+  revision wins; on equal revisions, the lexically smaller id.
+- Ids compare on the part before `@`, revisions start at 1, and the highest revision wins.
+
+`emit-observatory` and `record` both use the origin of the project that holds the id. The run
+refuses to write if a memory id would vanish other than through `--prune-carried`.
+
+Unreadable sources are named under `not read`, by name rather than by absolute path. Every
+root, checkout, repository top, file given and directory is shown by its name — the index files
+home-relative, such as `~/.sshlg-skills/lessons/index.jsonl` — in every verb's messages, on stdout
+and stderr alike (the session's notes and a refusal too). `path` alone prints the path: that is
+its answer. A git question about one commit in one checkout is asked once per run. Only absolute paths are replaced, and only as whole
+path components, so a root given as `.` changes no other text. The index is split on `\n` only, and
+lesson/1 text refuses every line separator, including U+2028, U+2029 and U+0085. So no value
+can make a good index read as corrupt. The run
+exits 0 whenever anything was read: a retro, a checkout discovered in full, or a shallow
+checkout found. A readable root that holds no checkout also exits 0: the index is written,
+and every origin is carried. The run exits 1 only when nothing could be read because every
+root was missing or unreadable; then no index, lock directory or migration is touched. A held
+lock or an unreadable index is its own refusal. On the default path the one-time merge of a
+standalone index runs first, as for every verb.
+
+So does setting a corrupt index aside:
+- The file is kept whole as `.corrupt-<date>`.
+- Every line that still parses is salvaged into the live index.
+- Two lines for one class key are merged.
+- A memory id that only a bad line held is named in the output.
+
+Unknown is never measured zero, and never measured gone.
 Two projects holding one class key make
 one lesson seen twice, status `candidate`. The index path is a parameter — `--index`, then
 `$TASK_PIPELINE_LESSONS`, then `~/.sshlg-skills/lessons/index.jsonl` **when
@@ -293,7 +434,8 @@ rule 2 (no host identifiers) for exactly two fields, and nothing else:
   repository's SHA names nothing to someone without the clone; **a public repository's SHA
   is searchable** and leads to the repository, so it stays in this field and never in text;
 - **`origin.project`, the pseudonymous project key** — `p-` and 12 hex digits of the
-  repository's root commit — stable across clones and never the repository's name, because
+  repository's root commit (the first-parent root of its default branch, so every worktree
+  and branch of one repository shares it) — stable across clones and never the repository's name, because
   lessons are read into *other* projects' briefs and a repository name can be a customer's
   or a product's. The shared store receives the same key, never a `project:<slug>` id.
 
@@ -301,7 +443,10 @@ Rules 1, 3, 4 and 5 still bind every text field, on the estate as off it: no pat
 no code or value, no person's, company's, customer's or product's name, and a title that
 states the class rather than the incident. Never, in either layer, a transcript or a URL.
 `lessons.py` refuses what a pattern can see (paths, URLs, addresses, credential shapes, long
-hex or base64 runs) and any field lesson/1 does not name; a name it cannot see stays the
+hex or base64 runs, line breaks) in every text field and in a stage id given as a string (at
+most 32 characters, never blank), and any field lesson/1 does not name. A stage id an older
+index holds that fails those checks is normalised when the index is read (one line, cut to 32
+characters, or `stage`), and said, so the line and its memory id are never set aside; a name it cannot see stays the
 writer's duty. Off the estate (`retro.publish`) the relaxation ends: the whole origin is
 stripped.
 

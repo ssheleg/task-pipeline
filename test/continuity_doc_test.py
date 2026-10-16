@@ -107,6 +107,15 @@ def main():
     blocked = paragraph(text, "A block or an ambiguity stops")
     ok("owning Project" in blocked and "external waits" in blocked,
        "continuity does not label every unresolved node needs-operator")
+    # Round 7 (N5): a fully blocked frontier names both of graph.py next's codes — `6` for
+    # recorded watched waits only, `4` for any other barrier — here and in waves.md.
+    flat = " ".join(blocked.split())
+    ok("Exit `6` means every remaining dependency leaf is a recorded watched wait" in flat
+       and "Exit `4` means a mixed, unclassified, running or parked barrier remains" in flat,
+       "continuity names exit 6 (watched waits only) beside exit 4 for a blocked frontier")
+    wave_next = " ".join(paragraph(waves, "`graph.py next --wave N` prints").split())
+    ok("`6` that only recorded watched waits hold it" in wave_next and "`4`" in wave_next,
+       "waves.md lists exit 6 for next --wave N")
     print(f"PASS: continuity.md — {CASES} cases")
 
 

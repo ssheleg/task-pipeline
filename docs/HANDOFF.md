@@ -1,3 +1,67 @@
+## Fix cycles 6–14 of the release iteration — #125, branch `iter1/M-5-N-1` (2026-10-15)
+
+Cycle 14 closed round 14's three MEDIUM findings and six LOW ones:
+- the re-key now also needs the key v1.95.0 would have computed in that checkout and a commit
+  descending from the new key's root, and never moves a project read this run;
+- `add` keeps one memory id on one live project;
+- deterministic M/M2 fixtures, one git question per (checkout, commit), redaction in every
+  verb, legacy stage ids normalised on read, a non-blank schema stage id, and the pre-tag
+  packet citing a commit instead of a tag object.
+
+The tests are in `round14_controls`, plus negatives 514–525; 490 and 493 are retired (the roots
+check and the live-project rule subsume them), 489, 492 and 515 re-anchored; `MIN_EXPECTED`
+is 507.
+
+Cycle 13 kept the contract and fixed two MEDIUM findings and five LOW ones:
+- an index written by v1.95.0 is re-keyed to its repository on positive evidence (no
+  provenance, one re-derived origin of another key at its anchor, its commit resolving
+  there), never counted as a second project;
+- `record`'s re-attach exception holds only from the carried origin's own checkout, and a
+  rebuild keeps one memory id on one live project (the earlier holder);
+- the project key falls back to the main worktree's HEAD, then `init.defaultBranch`;
+- redaction replaces whole absolute path components only, on stderr too;
+- string stage ids get the text checks; a same-revision tie is deterministic.
+
+The tests are in `round13_controls`, plus negatives 489–508 (474 re-anchored). This branch merges
+`origin/main` at v1.96.0; its finish-line plants took 455–462, so the five colliding lesson
+negatives were renumbered 509–513 and `MIN_EXPECTED` is 497.
+
+Cycle 12 kept the narrowed contract and fixed five MEDIUM findings and the LOW ones:
+- the project key is the repository's;
+- `checkout holds another project` applies only when the origin's commit does not resolve
+  there;
+- `record` refuses another project's id and ids the loader would refuse;
+- Unicode line separators are refused, and the index is split on `\n` only;
+- messages carry no absolute paths.
+
+The tests are in `round12_controls`, plus negatives 474–488.
+
+Rounds 6 to 11 failed on `lessons.py rebuild`. The loop guard fired three times. The third
+time, in cycle 11, narrowed the contract: **a rebuild never removes or moves anything on its
+own.**
+- Every origin not re-derived is carried with an accurate reason.
+- `--prune-carried`, optionally narrowed by `--prune-carried-reason`, is the only way out.
+- Origins carried as `checkout holds another project` are kept but not counted.
+- A shallow clone is never a source.
+
+The tests are `round11_controls` and the rewritten `round10_controls`, plus negatives 457–473
+(some numbers retired; 455, 456, 458, 459 and 461 became 509–513 when v1.96.0 took those numbers). This branch merges `origin/main` (v1.95.0, #128, #129) without
+rewriting history. The fixes are recorded in the CHANGELOG under *Unreleased*. The branch is
+pushed but not merged, and no version or publication is claimed.
+
+- **Rebuild:** `lessons.py rebuild` never loses what it cannot re-derive. Unread or
+  unresolved origins are carried per `(project, retro)` with their memory ids, and only
+  `--prune-carried` removes them. The tests are `carry_forward_controls` and
+  `partial_rebuild_controls` in `test/lessons_test.py`, plus negatives 509–512 (once 455–459).
+- **F2–F5:** documentation drifts in `continuity.md`, the `graph.py` docstring and
+  `stages.md`. The authority rule now has one home, guarded by `test/release_approval_test.py`.
+- **F6:** the merge notice is accurate when the family index was set aside.
+- **New rules:** a parallel-work check before each cycle (`iteration.md` → *The cycle*), and
+  background-dispatch command hygiene (`build.md` §4.1).
+
+Next task: run round 15 of verification on #125's head. The release order after v1.95.0 is
+the coordinator's.
+
 ## 1.96.0 source candidate — the finish line (2026-10-15)
 
 Branch `feat/finish-line`, draft PR "1.96.0 — a finish line: iterations stop when the

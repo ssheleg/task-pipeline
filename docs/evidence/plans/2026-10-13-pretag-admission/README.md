@@ -10,8 +10,12 @@ locally tagged candidate, while preserving every published tag and all failed ev
 
 The actual failed release is
 [run 38386280311](https://github.com/ssheleg/task-pipeline/actions/runs/38386280311).
-Its immutable annotated v1.94.0 object is
-`9def0fa8fe361b9abc71e2ecefd09b14f83c9421`, pointing at the owner source above.
+Its immutable annotated v1.94.0 tag points at the owner source above, commit
+[78c42124](https://github.com/ssheleg/task-pipeline/commit/78c42124db910c56e74c8fbd524bdc9a4f8fb6c9);
+the tag object's own id is recorded in
+[`publication-boundary.json`](../../runs/2026-10-13-release-1941/publication-boundary.json). A tag
+object is not a commit and does not reach a clone fetched without tags, so it is cited by
+name and file here, never as a commit reference.
 The release job failed its first structural check because v1.94.0 appeared in no
 run stamp or bold no-stamp declaration; publish was skipped. The coordinator's
 [admission correction and preserved outputs](https://github.com/ssheleg/sshlg-skills/tree/85d1758e02cbf1759be861a7af2108d267c339a3/docs/evidence/completion-1013/tp-current-gate)

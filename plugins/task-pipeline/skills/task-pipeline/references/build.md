@@ -233,6 +233,21 @@ Record the implementer's agent identity: fix rounds 1–3 resume it.
 > commit range, a one-line test summary, and your concerns. Ask before starting
 > if anything in the brief is ambiguous — questions are cheaper than rework.
 
+**Command hygiene** — put this in every background dispatch, whether it goes to an
+implementer, a reviewer or a verifier:
+
+> Avoid commands that the harness holds for permission. Do not write `cd X;` compounds: use
+> absolute paths or `git -C`. Do not write `rm -rf $VAR`: use a literal path or `"${VAR:?}"`.
+> Do not edit repository files with inline heredocs: use the editor tool or a script file.
+> If a command has not returned in about 5 minutes and no process is running, rephrase it.
+
+*A lesson of release iteration 1 (2026-10-13): background agents stopped silently. Each was
+waiting on a command the harness held for a permission no one could see. The triggers were a
+`cd X; python3 - <<EOF` compound and `rm -rf $HOME` with HOME overridden. Source: the
+iteration's run record, which is private, and
+[task-pipeline#125](https://github.com/ssheleg/task-pipeline/pull/125), which carries the
+rule.*
+
 ### 4.1a Decisions settled inside a task — and who may write them down
 
 The report above already asks for *"decisions you made"*, and stage 5 settles more

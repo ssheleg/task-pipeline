@@ -430,7 +430,8 @@ private to this project.
 **A lesson is not a publication, but the redaction list below binds it too — with one
 relaxation.** On this machine or estate (the local index, a shared store), rule 2 is relaxed
 for exactly two fields: the evidence commit and the pseudonymous project key (`p-` and 12 hex
-of the root commit, the same key in the store, never the repository's name or a
+of the root commit — the first-parent root of the default branch — the same key in the store,
+never the repository's name or a
 `project:<slug>` id). A private repository's SHA names nothing; a public repository's SHA is
 searchable, so it stays in its field and never in text. Rules 1, 3, 4 and 5 still bind every
 text field: no path at all, no code or value, no person's, company's, customer's or
