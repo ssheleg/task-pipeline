@@ -5956,6 +5956,33 @@ if os.path.isfile(_CS_P) and os.path.isfile(_ST_P):
                         "Each move appears, none in one runnable recipe. ")
                      + "Four commands a reader has to assemble is not a mechanism")
 
+        # P3-G0d. The ENGINE the look runs on is ranked: WebKit (Safari) first, Chromium
+        # a stated exception (DEC-0007, v1.97.0). Before it, every example opened the
+        # tool's default — a Chromium-family browser — so "checked in a browser" meant
+        # "checked in Chromium" without saying so, and a Safari-only layout bug shipped
+        # past a green look. Two halves: the section that states the order exists ABOVE
+        # the model the look rests on, and the runnable recipe itself opens WebKit — a
+        # doctrine whose own example contradicts it teaches the example.
+        _ENG = "## Engine order — WebKit (Safari) first"
+        _eng_i = _brt.find(_ENG)
+        _mod_i = _brt.find("## The one model")
+        if _eng_i < 0 or (_mod_i >= 0 and _eng_i > _mod_i):
+            fail("references/browser.md: no "
+                 f"{_ENG!r} section ahead of 'The one model' — the look then runs on "
+                 "whatever engine the tool defaults to, a Chromium-family browser, and "
+                 "'tested in a browser' silently means 'tested in Chromium' (DEC-0007)")
+        _rec_i = _brt.find(_HEAD)
+        if _rec_i >= 0:
+            _rnx = _brt.find("\n## ", _rec_i + len(_HEAD))
+            _rsec = _brt[_rec_i:_rnx if _rnx > 0 else len(_brt)]
+            _opens = re.findall(r"(?m)^\s*playwright-cli (?:(?:--json|--raw|-s=\S+)\s+)*open\b.*$",
+                                _rsec)
+            if not _opens or not all(re.search(r"--browser[ =]webkit\b", _o) for _o in _opens):
+                fail("references/browser.md: the look's recipe opens a page without "
+                     "`--browser webkit` — the runnable example is the doctrine a reader "
+                     "copies, and an example on the default engine teaches Chromium first "
+                     "(DEC-0007: WebKit first, Chromium a stated exception)")
+
     # P3-G2. The guard above reads matrix ROW NAMES, so a sub-skill named inside a
     # row's own cell is out of its scope — and that is exactly where super-ux's copy
     # half lived while being invisible to every stage. A probe found the hole, which

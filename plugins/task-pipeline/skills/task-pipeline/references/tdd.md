@@ -102,8 +102,9 @@ database created ten seconds ago" are different claims, and only the second one 
   code does what its assertions say; it cannot see a component that renders correctly
   and lands under a fixed header, a request that 404s while every unit test mocks it,
   or a console error that costs nothing at test time. Where a browser channel is
-  connected — `playwright` **or** `chrome-devtools`, either one
-  ([`companion-skills.md`](companion-skills.md)) — open the surface and read
+  connected — `playwright` **or** `chrome-devtools`, either one, on WebKit first with
+  Chromium a stated exception ([`companion-skills.md`](companion-skills.md);
+  [`browser.md`](browser.md) → *Engine order*) — open the surface and read
   the console and the network log before calling it done — and **quote what you read**,
   not that you looked. Absent, the honest sentence is *"verified by reading the diff"*,
   which is a weaker claim and is recorded as one. Same family as a test that passes

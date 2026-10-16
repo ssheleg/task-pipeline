@@ -9,13 +9,46 @@ this repository did not — the same gap `B-009` found for open questions, and i
 surfaced the same way: a status vocabulary (`Resolved→DEC-####`) pointing at a file
 that was not there.
 
-**Next free ID:** `DEC-0007`
+**Next free ID:** `DEC-0008`
 
 Reading *"Next free ID"* is **not** reserving it — a second agent reading it in the
 same minute gets the same answer. Reserve it, then write.
 
 **To change your mind:** add a new entry, edit **only the status line** of the old
 one, leave its body intact. Never renumber. Never delete.
+
+---
+
+### DEC-0007 — the look's engine is ranked: WebKit (Safari) first, Chromium a stated exception
+
+- **Date:** 2026-10-16
+- **Status:** Accepted
+- **Context:** `DEC-0004` put two browser channels on equal footing and said a run that
+  ranks them invents a fact. That held for the channels' quality and hid the engine:
+  `chrome-devtools` drives Chrome only, and every Playwright example in the bundle
+  opened the tool's default, a Chromium-family browser. So every look the doctrine
+  taught was a Chromium look, reported as *tested in a browser*. The operator set the
+  order on 2026-10-10 — Safari first for browser work, Chrome only when the task needs
+  Chrome itself — and the family's 2026-10-16 host-validation iteration carried it into
+  the members.
+- **Decision:** the **engine** is ranked, the tools' quality is not. A rendered surface is
+  checked in WebKit first: Playwright's `webkit` (`--browser webkit` on the CLI and the
+  MCP, a `webkit` project), Safari itself through `safaridriver`, Safari Web Inspector to
+  debug, and `open -a Safari` rather than the system default browser on macOS.
+  Chromium is used only when the task needs Chrome itself — Lighthouse, a CDP trace, a
+  heap snapshot, a Chrome-only API, the `chrome-devtools` MCP — said with the reason; a
+  self-launched Chrome gets a temporary profile and is closed before the run ends. A
+  surface checked only in Chromium is reported as exactly that. `DEC-0004` parts 2 and 3
+  are unchanged; part 1's "ranked by nothing" now reads as *no channel is the better
+  browser*, with the engine order on top.
+- **Consequences / affects:** `plugins/task-pipeline/skills/task-pipeline/references/browser.md`
+  (*Engine order*, the recipe, the library example), `references/companion-skills.md`
+  (the two rows, the preflight lines, the one rule for both), `references/stages.md`, `stage-05-dev.md`,
+  `stage-08-post-deploy.md`, `references/tdd.md`, `templates/browser-claims.json`,
+  `README.md`, `cursor/rules/task-pipeline.mdc`, `SKILL-CARD.md`; guard `P3-G0d` in
+  `test/validate.py` with its negative self-test.
+- **Source:** iteration `2026-10-16-host-validation` REQ R11 · v1.97.0
+- **Id allocation:** by hand under lease `docs/DECISIONS.md`, computed from the committed file.
 
 ---
 
@@ -183,7 +216,7 @@ one, leave its body intact. Never renumber. Never delete.
 ### DEC-0004 — two browser channels, ranked by nothing, and a browser test suite is not the look
 
 - **Date:** 2026-08-14
-- **Status:** Accepted
+- **Status:** Accepted; part 1 amended by `DEC-0007` (the engine is ranked: WebKit first)
 - **Context:** `OQ-0003` / `B-056` asked three things at once: is Playwright a *second*
   browser companion or *the* one where a project already runs it in CI; what stage 6's
   *checked in a browser, not in the diff* means when the check is a Playwright spec CI

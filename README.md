@@ -280,14 +280,17 @@ and neither can a **browser test suite**, which asserts what someone wrote down 
 counted as coverage rather than as the look. Absent, the run says *"verified by reading
 the diff"* — a weaker claim, recorded as one.
 
-There are **two channels and either is enough**, ranked by nothing: `playwright`
-(`npm install -D @playwright/cli@latest`, or
-`claude mcp add playwright npx @playwright/mcp@latest`) needs no plugin and is already
-there on a project that runs Playwright, and its CLI half puts no tool schema in the
-context window; `chrome-devtools`
-(`/plugin install chrome-devtools-mcp@claude-plugins-official`) is the one that reaches
-past the page to Lighthouse and heap snapshots, and analyses a performance trace rather
-than only recording one. Neither is a gate,
+There are **two channels and either is enough**, and the **engine** is ranked:
+**WebKit (Safari) first, Chromium a stated exception**. `playwright`
+(`npm install -D @playwright/cli@latest` then `playwright-cli open --browser webkit`, or
+`claude mcp add playwright -- npx @playwright/mcp@latest --browser webkit`) is the default
+look: it reaches WebKit, needs no plugin, is already there on a project that runs
+Playwright, and its CLI half puts no tool schema in the context window; on macOS Safari
+itself is driven through `safaridriver`. `chrome-devtools`
+(`/plugin install chrome-devtools-mcp@claude-plugins-official`) drives Chrome only and is
+reached for when the question needs Chrome — Lighthouse, heap snapshots, a performance
+trace analysed rather than only recorded — said with the reason; a look taken only there
+is reported as *checked in Chromium*. Neither is a gate,
 and a CLI, a library or a backend service is never offered either.
 
 **The wiki is [obsidian-wiki](https://github.com/ar9av/obsidian-wiki)** (Karpathy's
