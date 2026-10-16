@@ -1477,6 +1477,13 @@ three quarters of the work on this run.
 
 ## Releases that carry no stamp — stated, not stamped
 
+**`v1.97.0` and `v1.97.1` carry no stamp.** The former is a failed immutable tag:
+[release run 38976060549](https://github.com/ssheleg/task-pipeline/actions/runs/38976060549) rejected the
+missing declaration before creating a release; the publish job was skipped. The latter is this declaration,
+made before its tag. Both carry the WebKit (Safari) first engine order (DEC-0007) built as REQ R11 of the
+umbrella's `2026-10-16-host-validation` iteration (ITER-1016); the umbrella's retro stamps that run. No
+stage-10 stamp is invented here.
+
 **`v1.96.0` carries no stamp, declared before any tag.** It is the finish-line
 change — continuation necessity, triage at discovery, the round and release budget,
 and `waves.py finish` — delivered as a reviewed design on a draft PR. Source and

@@ -1,3 +1,11 @@
+## v1.97.1 — 2026-10-17
+
+The same source as v1.97.0, plus its release declaration. The v1.97.0 tag failed its own release run
+([38976060549](https://github.com/ssheleg/task-pipeline/actions/runs/38976060549)): `retro.md` named no
+release after its newest stamp, so the validator on the tag's tree refused and `publish` was skipped. Tags
+are immutable here, so v1.97.0 stays as a failed tag and this patch carries the declaration (the v1.94.0 →
+v1.94.1 precedent). No doctrine change.
+
 ## v1.97.0 — 2026-10-16
 
 Source candidate; not published.
