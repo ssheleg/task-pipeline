@@ -75,7 +75,7 @@
     "route": "/",
     "motion": "reduced",
     "captured_at": "2026-10-07T00:00:00Z",
-    "source": "the capability that took it, e.g. chrome-devtools take_screenshot"
+    "source": "the capability and engine that took it, e.g. playwright-cli screenshot (webkit)"
    },
    "figma_frame": "https://www.figma.com/design/<fileKey>/<file>?node-id=<frame>",
    "baseline": null,
@@ -120,7 +120,7 @@
     "route": "/",
     "motion": "reduced",
     "captured_at": "2026-10-07T00:00:00Z",
-    "source": "the capability that took it, e.g. chrome-devtools take_screenshot"
+    "source": "the capability and engine that took it, e.g. playwright-cli screenshot (webkit)"
    },
    "figma_frame": "https://www.figma.com/design/<fileKey>/<file>?node-id=<frame>",
    "baseline": null,
@@ -165,7 +165,7 @@
     "route": "/",
     "motion": "reduced",
     "captured_at": "2026-10-07T00:00:00Z",
-    "source": "the capability that took it, e.g. chrome-devtools take_screenshot"
+    "source": "the capability and engine that took it, e.g. playwright-cli screenshot (webkit)"
    },
    "figma_frame": "https://www.figma.com/design/<fileKey>/<file>?node-id=<frame>",
    "baseline": null,
@@ -210,7 +210,7 @@
     "route": "/",
     "motion": "reduced",
     "captured_at": "2026-10-07T00:00:00Z",
-    "source": "the capability that took it, e.g. chrome-devtools take_screenshot"
+    "source": "the capability and engine that took it, e.g. playwright-cli screenshot (webkit)"
    },
    "figma_frame": null,
    "baseline": null,
@@ -251,7 +251,7 @@
     "route": "/",
     "motion": "reduced",
     "captured_at": "2026-10-07T00:00:00Z",
-    "source": "the capability that took it, e.g. chrome-devtools take_screenshot"
+    "source": "the capability and engine that took it, e.g. playwright-cli screenshot (webkit)"
    },
    "figma_frame": null,
    "baseline": null,

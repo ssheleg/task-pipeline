@@ -1,5 +1,14 @@
 # Verification — task-pipeline
 
+## Shipped state — v1.97.0 (source candidate; NOT SHIPPED yet)
+
+The WebKit-first engine order (`DEC-0007`; `references/browser.md` → *Engine order*,
+`companion-skills.md`, stages 5/6/8, `tdd.md`, guard `P3-G0d` with negative 463) is on
+a draft PR. `--browser webkit` was read from `npx @playwright/cli@latest open --help`
+(0.1.22) and `npx @playwright/mcp@latest --help` (0.0.83) on 2026-10-16; no WebKit
+page was opened for this change. Review, integration, tag, release jobs, npm payload
+and installed readback remain pending.
+
 ## Shipped state — v1.96.0 (source candidate; NOT SHIPPED yet)
 
 The finish-line change (`references/finish-line.md`, `waves.py finish`, guards

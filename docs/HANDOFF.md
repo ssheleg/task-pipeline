@@ -1,3 +1,15 @@
+## 1.97.0 source candidate — WebKit (Safari) first (2026-10-16)
+
+Branch `docs/safari-first`, draft PR "1.97.0 — the look runs on WebKit first". REQ R11
+of the 2026-10-16 family host-validation iteration. Ships the *Engine order — WebKit
+(Safari) first* section of
+[`references/browser.md`](../plugins/task-pipeline/skills/task-pipeline/references/browser.md),
+the WebKit-first channel rule in `companion-skills.md`, aligned stages 5/6/8 and
+`tdd.md`, [`DEC-0007`](DECISIONS.md), guard `P3-G0d` with negative plant 463. No tag,
+publication or install readback; no WebKit page was opened (the flag was read from each
+tool's `--help`). Exact next task: independent review of the draft PR, then normal
+integration and the release gate; the umbrella pin stays with the iteration owner.
+
 ## 1.96.0 source candidate — the finish line (2026-10-15)
 
 Branch `feat/finish-line`, draft PR "1.96.0 — a finish line: iterations stop when the

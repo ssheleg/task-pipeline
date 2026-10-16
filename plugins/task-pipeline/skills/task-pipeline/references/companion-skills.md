@@ -27,6 +27,10 @@ one must never look alike.
 > **`DEC-0006`** scopes that to the functional look: the **visual half** is a gate on a
 > `flagship`, `product` or `ad` surface, and its absent tool reads NOT_RUN and stops to
 > ask rather than passing ([`browser.md`](browser.md) → *The visual half*).
+> **`DEC-0007`** ranks the **engine**, not the channel's quality: WebKit (Safari) first,
+> Chromium a stated exception. `playwright` reaches WebKit and `chrome-devtools` does
+> not, so `playwright` on WebKit is the default look and `chrome-devtools` is reached for
+> when the question needs Chrome ([`browser.md`](browser.md) → *Engine order*).
 
 ## Contents
 
@@ -70,8 +74,8 @@ one must never look alike.
 | **Figma** (MCP) | stage 3 UX track, when the project designs visually — super-ux mirrors each `SCR-` screen/state into a frame | Optional, **UI + Figma-on only**. Absent → super-ux degrades to text-only *by itself and never blocks*, so shipping a UI feature with no mockups becomes a silent scope call — which is why the stage-0 sweep decides it | connect the Figma MCP server (`/mcp`, or your claude.ai connectors) |
 | **[obsidian-wiki](https://github.com/ar9av/obsidian-wiki)** (`wiki-query`, `wiki-update`) | **stage 0 harvest** (query what's already known) **+ stage 9 sync** | **Recommended** — never a gate; absent → harvest runs on repo docs alone | `pip install obsidian-wiki` → `obsidian-wiki setup --vault /path/to/your/vault` |
 | **[graphify](https://github.com/Graphify-Labs/graphify)** (`/graphify`, `graphify query`, `graphify affected`, `graphify god-nodes`) | **stage 0 harvest** (reach: what calls this, what breaks if it moves) **+ stage 9 refresh + the graph↔docs divergence check** ([`knowledge-graph.md`](knowledge-graph.md)) | **Recommended** — never a gate; absent → the harvest greps instead, and the divergence axis is unavailable | `uv tool install graphifyy` → `graphify install` → `/graphify .` |
-| **playwright** (CLI — `playwright-cli open`, `snapshot`, `click`, `type`, and the two this pipeline actually asks for: `console` and `requests`; or MCP — `browser_navigate`, `browser_snapshot`, `browser_click`, `browser_console_messages`, `browser_network_requests`) | **stages 5–6 on any project with a web front end**, and **stage 8** on a deployed target — the same job as the row below: open the surface, snapshot it, read the console and the network log. Its own difference is **the channel a look arrives on**: the CLI is a shell command, so it does not put a tool schema in the context window the way an MCP channel does — that is upstream's own comparison and it is *CLI against MCP*, which makes it a claim about this row's own two halves before it is a claim about the row below. Both channels default to an **accessibility-tree snapshot rather than pixels**, so the ordinary look costs a page of text and no vision model; `screenshot` exists in both and costs one when you ask for it | **Recommended** — never a gate; absent → say the surface was verified **by reading the diff** and treat that as the weaker claim it is | CLI: `npm install -D @playwright/cli@latest` → `npx playwright-cli --help` (or `npm i -g` for the global binary; `playwright-cli install --skills` adds its agent skills, `--global` to the home directory). MCP: `claude mcp add playwright npx @playwright/mcp@latest` |
-| **chrome-devtools** (MCP — `list_pages`, `navigate_page`, `take_snapshot`, `take_screenshot`, `evaluate_script`, `list_console_messages`, `list_network_requests`, `lighthouse_audit`, `performance_start_trace`, `take_heapsnapshot`) | **stages 5–6 on any project with a web front end** — verify the **rendered** surface rather than the diff: computed layout, console errors, failed requests. **Stage 8** on a deployed web target: load the page and read what the browser did, not what the deploy said. Its own difference is **reach past the page**: a Lighthouse category (`lighthouse_audit`, which `seo-aeo-audit` builds on) and a heap snapshot have no equivalent in the row above. A performance trace has one — `playwright-cli tracing-start` records one — but only this row's arrives with `performance_analyze_insight` over it | **Recommended** — never a gate; absent → say the surface was verified **by reading the diff** and treat that as the weaker claim it is | `/plugin install chrome-devtools-mcp@claude-plugins-official` (or connect the MCP server directly) |
+| **playwright** (CLI — `playwright-cli open`, `snapshot`, `click`, `type`, and the two this pipeline actually asks for: `console` and `requests`; or MCP — `browser_navigate`, `browser_snapshot`, `browser_click`, `browser_console_messages`, `browser_network_requests`) | **The default route — WebKit first** (`DEC-0007`): `playwright-cli open --browser webkit`, or the MCP started with `--browser webkit`; on macOS, Safari itself through `safaridriver` and Safari Web Inspector to debug ([`browser.md`](browser.md) → *Engine order*). **Stages 5–6 on any project with a web front end**, and **stage 8** on a deployed target — the same job as the row below: open the surface, snapshot it, read the console and the network log. Its own difference is **the channel a look arrives on**: the CLI is a shell command, so it does not put a tool schema in the context window the way an MCP channel does — that is upstream's own comparison and it is *CLI against MCP*, which makes it a claim about this row's own two halves before it is a claim about the row below. Both channels default to an **accessibility-tree snapshot rather than pixels**, so the ordinary look costs a page of text and no vision model; `screenshot` exists in both and costs one when you ask for it | **Recommended** — never a gate; absent → say the surface was verified **by reading the diff** and treat that as the weaker claim it is | CLI: `npm install -D @playwright/cli@latest` → `npx playwright-cli --help` (or `npm i -g` for the global binary; `playwright-cli install --skills` adds its agent skills, `--global` to the home directory), then `playwright-cli install-browser webkit`. MCP: `claude mcp add playwright -- npx @playwright/mcp@latest --browser webkit` |
+| **chrome-devtools** (MCP — `list_pages`, `navigate_page`, `take_snapshot`, `take_screenshot`, `evaluate_script`, `list_console_messages`, `list_network_requests`, `lighthouse_audit`, `performance_start_trace`, `take_heapsnapshot`) | **The stated Chromium exception** — it drives Chrome only, so it is reached for when the question needs Chrome, said with the reason, and a look taken only here is reported as *checked in Chromium*. **Stages 5–6 on any project with a web front end** — verify the **rendered** surface rather than the diff: computed layout, console errors, failed requests. **Stage 8** on a deployed web target: load the page and read what the browser did, not what the deploy said. Its own difference is **reach past the page**: a Lighthouse category (`lighthouse_audit`, which `seo-aeo-audit` builds on) and a heap snapshot have no equivalent in the row above. A performance trace has one — `playwright-cli tracing-start` records one — but only this row's arrives with `performance_analyze_insight` over it | **Recommended** — never a gate; absent → say the surface was verified **by reading the diff** and treat that as the weaker claim it is | `/plugin install chrome-devtools-mcp@claude-plugins-official` (or connect the MCP server directly) |
 | **[agent-sync](https://github.com/ssheleg/agent-sync)** (`/agent-sync`, **≥ 1.3.0** — `finish` did not exist before it, so an older install turns the stage-10 close-out into a command that is not there) | **guarded registers** — a lease before writing one, `reserve` before minting an id, `reconcile`/`record` for intent vs as-built, and `finish` for the stage-10 multi-repository close-out ([`documentation.md`](documentation.md)) | **Recommended** — never a gate. Absent → the run is **`ungated`** and must say so out loud; the discipline still applies, only the arbitration is missing | `npx sshlg-skills install` |
 | **sheleg-dev** (`stripe-billing`, `crypto-payments`, `error-tracking`, `ad-tracking`, `google-signin`, `google-auth`, `frontend-performance`) | **stage 5 when the task wires money, tracking, sign-in or page speed** — the seams a generated integration gets wrong in ways no screen shows: the webhook is the payment, a thank-you-page event cannot know the charge cleared, a duplicated `event_id` counts revenue twice | **Recommended** — never a gate; absent → the integration ships on the host's own doctrine and the close-out names the seam nobody checked | `/plugin marketplace add ssheleg/sheleg-dev` → `/plugin install sheleg-dev@sheleg-dev` |
 | **agent-stack** (`agent-orchestrator`, `agent-evals`, `agent-interop`, `agent-harness`) | **stage 5 when the thing being BUILT is an agent system** — the orchestrator's loop, evals that say whether it got better, the protocols it speaks (MCP/A2A), the wallet under LLM resale. Not for coordinating the agents editing this repository (that is agent-sync, above) | **Recommended** — never a gate; absent → the agent layer ships unevaluated and the close-out says so | `/plugin marketplace add ssheleg/agent-stack` → `/plugin install agent-stack@agent-stack` |
@@ -94,11 +98,11 @@ required; an absent one is a check recorded as NOT_RUN with its reason.
 | `review-animations`, `improve-animations` | reviews motion against its intent: timing, easing, interruption, reduced-motion fallback | stage 6, on a surface with motion; findings as triples |
 | `mobile-native` | the mobile-web surface: viewport, safe areas, touch targets, keyboard-up states | stages 5–6, mobile-web frames of the matrix |
 | `animate-expo` | React Native and Expo motion, built and reviewed on the platform's own primitives | stage 5, an RN or Expo surface |
-| `webapp-testing`, `chrome-devtools` (`take_screenshot`, `lighthouse_audit`) | the frames of the matrix at each viewport and theme, and a Lighthouse pass as the deterministic floor | stage 6, the capture and the floor; stage 8 on a deployed target |
+| `playwright-cli open --browser webkit` + `screenshot`, `webapp-testing`; `chrome-devtools` (`lighthouse_audit`, the stated Chromium exception) | the frames of the matrix at each viewport and theme, captured in WebKit first, and a Lighthouse pass as the deterministic floor | stage 6, the capture and the floor; stage 8 on a deployed target |
 | `accessibility-review`, `a11y-debugging` | accessibility review of the rendered surface and debugging what it finds | stage 6, beside axe or Lighthouse |
 | XCUITest `performAccessibilityAudit` | the iOS platform's own accessibility audit, run in UI tests | stage 6, a native iOS surface |
 | Compose `enableAccessibilityChecks` | Android's accessibility checks in Compose UI tests | stage 6, a native Android surface |
-| Playwright `toHaveScreenshot` | screenshot regression against the approved baseline, per state and theme | stage 6 (regression), and the nightly or release baseline after |
+| Playwright `toHaveScreenshot` | screenshot regression against the approved baseline, per state and theme — the `webkit` project first | stage 6 (regression), and the nightly or release baseline after |
 | axe-core | the deterministic accessibility floor of a web surface | stage 6, first in the cheap-first order |
 | `figma-code-connect` (Figma's public plugin skill) | maps a design-system component in the file to its code component, so `get_design_context` hands the agent the real import instead of approximated markup | stage 5, **offered** for a core component the file draws and nothing maps — publishes to the file, so it needs a go ([`build.md`](build.md) → *Code Connect, kept*) |
 
@@ -164,11 +168,12 @@ Pipeline companions (stage doctrine is built in — nothing to install for it):
                          (running without it — no reach queries, no graph↔docs
                           divergence check)
   ✗ playwright         — recommended when this project has a web front end.
-                         One of TWO channels that do the same look; either is
-                         enough, and a project that already runs Playwright has
-                         this one for free:
+                         The default look: it reaches WebKit (Safari's engine),
+                         which is checked first; a project that already runs
+                         Playwright has this one for free:
                            npm install -D @playwright/cli@latest   (then npx playwright-cli)
-                           claude mcp add playwright npx @playwright/mcp@latest
+                           playwright-cli install-browser webkit
+                           claude mcp add playwright -- npx @playwright/mcp@latest --browser webkit
                          (running without it — see the line below; without BOTH,
                           the surface is verified by reading the diff)
   ✗ sheleg-dev         — this task wires money, tracking, sign-in or page speed;
@@ -191,9 +196,9 @@ Pipeline companions (stage doctrine is built in — nothing to install for it):
   ✗ chrome-devtools    — recommended when this project has a web front end:
                          stages 5-6 check the RENDERED surface instead of the
                          diff, stage 8 reads what the browser did after a deploy.
-                         The other channel; it alone reaches lighthouse_audit
-                         and heap snapshots, and analyses a trace rather than
-                         only recording one:
+                         The stated Chromium exception: Chrome only, and it
+                         alone reaches lighthouse_audit and heap snapshots, and
+                         analyses a trace rather than only recording one:
                            /plugin install chrome-devtools-mcp@claude-plugins-official
                          (running without it — the surface is verified by reading
                           the diff, and the close-out says so in those words)
@@ -226,7 +231,8 @@ Rules:
   `wiki-query`/`wiki-update`. Present → say `✓ ready` and use it in the harvest.
   Absent → print the two install lines **once** and continue; never ask twice in a
   run and never block a stage on it ([`knowledge-sources.md`](knowledge-sources.md)).
-- **The browser channels — `playwright` and `chrome-devtools`, one rule for both.**
+- **The browser channels — `playwright` and `chrome-devtools`, one rule for both, WebKit
+  first.**
   Flag them only when the project **has a web front end** — an `index.html`, a
   `package.json` naming a browser framework, a `docs/ux/screens.md`, or a deploy target
   that serves pages. **A CLI, a library or a backend service does not flag either** —
@@ -237,18 +243,20 @@ Rules:
   `mcp__chrome-devtools__list_pages` (either one under whatever prefix the host uses).
   Present → `✓ ready`. Absent → print its install lines **once** and continue; neither
   is a gate.
-- **They are two channels for one look, and the run needs one of them, not both.**
-  Both open the page, snapshot it and read the console and the network log, so **stop
-  at the first one that answers** — running the same look twice is a cost with no
-  second fact. Where neither is present, say the surface was verified **by reading the
-  diff**; where both are, the tie-breakers are stated rather than left to taste:
-  **`playwright` when the project already runs it**, or when context budget is tight —
-  its own upstream sells the CLI on not loading large tool schemas and verbose
-  accessibility trees into the model context. **`chrome-devtools` when the question is
-  past the page** — a Lighthouse category or a heap snapshot, neither of which the
-  Playwright channel has, or a performance trace you want *analysed* rather than only
-  recorded. Neither is *the better
-  browser*, and a run that ranks them has invented a fact this matrix does not carry.
+- **They are two channels for one look, and the run needs one of them, not both —
+  on WebKit first** (`DEC-0007`, [`browser.md`](browser.md) → *Engine order*). Both open
+  the page, snapshot it and read the console and the network log, so the look is taken
+  once: **`playwright` with `--browser webkit`** (on macOS, Safari itself through
+  `safaridriver` is the same engine) — running the same look twice is a cost with no
+  second fact. **`chrome-devtools` is the stated Chromium exception**: it drives Chrome
+  only, so it is reached for when the question needs Chrome — a Lighthouse category or a
+  heap snapshot, neither of which the Playwright channel has, a performance trace you
+  want *analysed* rather than only recorded, or a Chrome-only API — and the verdict says
+  which and why. Where only `chrome-devtools` is present, the look is reported as
+  *checked in Chromium*, never as *tested in a browser*; where neither is, say the
+  surface was verified **by reading the diff**. The rank is of the **engine**, not of the
+  tools' quality: neither channel is *the better browser*, and a run that claims one is
+  has invented a fact this matrix does not carry.
 - **graphify**: detect via `graphify-out/graph.json` (built → `✓ ready`, query it in
   the harvest) or a resolving `graphify` binary with no `graphify-out/` (installed,
   not built → offer the one-line `/graphify .`). Absent → print the install lines

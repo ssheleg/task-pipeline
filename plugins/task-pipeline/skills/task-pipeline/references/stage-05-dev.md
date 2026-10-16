@@ -19,8 +19,8 @@ The full gate and freedom level remain in [stages.md](stages.md).
   contradiction that exists only between two of them.
 - **Web front end? The task's own surface is checked in a browser, not in the diff.**
   Where a browser channel is connected — `playwright` **or** `chrome-devtools`, either
-  one, whichever answers first (**how**: [`browser.md`](browser.md); which:
-  [`companion-skills.md`](companion-skills.md)): after a
+  one, on WebKit first with Chromium a stated exception (**how**, and the engine order:
+  [`browser.md`](browser.md); which: [`companion-skills.md`](companion-skills.md)): after a
   task that changes a rendered surface, load it, take a snapshot and read the
   console and the network log **before the task is marked DONE** — a component can be
   correct and land under a fixed header, and a review of the diff cannot see that.
