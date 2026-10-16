@@ -1,6 +1,6 @@
 # Verification — task-pipeline
 
-## Shipped state — v1.97.0 (source candidate; NOT SHIPPED yet)
+## Shipped state — v1.97.1 (v1.97.0 failed its immutable tag; NOT SHIPPED until the v1.97.1 release run is read)
 
 The WebKit-first engine order (`DEC-0007`; `references/browser.md` → *Engine order*,
 `companion-skills.md`, stages 5/6/8, `tdd.md`, guard `P3-G0d` with negative 463) is on
