@@ -1,4 +1,13 @@
-## Fix cycles 6–14 of the release iteration — #125, branch `iter1/M-5-N-1` (2026-10-15)
+## Fix cycles 6–15 of the release iteration — #125, branch `iter1/M-5-N-1` (2026-10-17)
+
+Cycle 15 merged `origin/main` at v1.97.1 (our negative 463 became 526) and closed round 15's
+MEDIUM: the live set for re-keying, in `rebuild` and in `add`, now includes every project the
+previous index records with provenance (`_known_projects`). Tests: the F2 fixture through
+`add` in X and through a rebuild of X alone, and m10 (a re-attached id survives a rebuild).
+Negatives 527–529; `MIN_EXPECTED` 511. Known, not fixed: case-insensitive APFS reads one
+checkout twice through two path spellings (dedupe by device and inode is the fix).
+
+Previously, cycles 6–14 (2026-10-15):
 
 Cycle 14 closed round 14's three MEDIUM findings and six LOW ones:
 - the re-key now also needs the key v1.95.0 would have computed in that checkout and a commit

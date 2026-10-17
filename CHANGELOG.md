@@ -1,6 +1,6 @@
 ## Unreleased
 
-Guards: 448 → **508**; property checks 15 → **15**. There are 60 new negatives in
+Guards: 448 → **511**; property checks 15 → **15**. There are 63 new negatives in
 `lessons.py`. Each one plants a revert, and the suite must catch it:
 
 - the whole-scan refusal put back;
@@ -48,9 +48,19 @@ Guards: 448 → **508**; property checks 15 → **15**. There are 60 new negativ
 - a rebuild asking git the same question again;
 - `query`, an `add` refusal or the repository top printing an absolute path;
 - an index set aside for a stage id v1.95.0 accepted, or one normalised past 32 characters;
-- the schema admitting a blank stage id.
+- the schema admitting a blank stage id;
+- a partial rebuild or an `add` moving an origin of a project the index already knows;
+- an origin carried as `checkout holds another project` counted as a live holder of its id.
 
-These are the fixes from verification rounds 6 to 14 of release iteration 1.
+These are the fixes from verification rounds 6 to 15 of release iteration 1.
+
+- **Ownership no longer depends on verb order** (round 15). The live-project rule now covers
+  every project the previous index records with provenance, not only the projects this run
+  read: an `add` in a repository, or a rebuild over its root alone, never re-keys another
+  known project's origin, and a later full rebuild agrees. Known limit, not fixed here: on a
+  case-insensitive file system one checkout reached by two spellings of its path is read
+  twice (real paths do not fold case), which can count a phantom second project; no memory
+  id ends on two projects.
 
 - **The re-key and the one-project rule, closed** (round 14).
   - A provenance-less origin is re-keyed only when, in the checkout that re-derived its anchor,

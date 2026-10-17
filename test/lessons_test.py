@@ -1933,8 +1933,9 @@ def round14_controls():
                 git(h, "branch", "-q", "-f", branch, sha)
                 return sha
         raise SystemExit(f"F1d fixture: no {name} root in 200 tries")
-    r1 = orphan_root("main", "r1.md", lambda s: True)
-    r2 = orphan_root("r2", "r2.md", lambda s: True)
+    # R1 and R2 sort in the upper half, so a lower R0 is a few tries away, never a flake.
+    r1 = orphan_root("main", "r1.md", lambda s: s[0] in "89abcdef")
+    r2 = orphan_root("r2", "r2.md", lambda s: s[0] in "89abcdef")
     r0 = orphan_root("r0", "r0.md", lambda s: s < r1 and s < r2)
     git(h, "checkout", "-q", "main")
     for other in ("r0", "r2"):
@@ -2002,6 +2003,66 @@ def round14_controls():
     # on Y's retitled entry — and never reaches X's.
     ok(rc == 0 and held and {h[0] for h in held} == {"p-" + ry[:12]} and "re-keyed" not in out,
        f"F2: an origin whose project is read this run is never re-keyed ({rc} {held} {out!r} {err!r})")
+
+    # F2 across verbs (round 15) — the same fixture after an `add` in Y, so the index records
+    # Y with provenance. Then an `add` in X, or a rebuild of X's root alone: Y is not read, but
+    # it is a known project, so nothing moves into X; a later full rebuild agrees, and Y still
+    # records its own id. Who owns the id never depends on verb order or on the roots given.
+    def f2_fixture(name):
+        b = work / name
+        y2, x2 = b / "ry" / "y", b / "rx" / "x"
+        init_root(y2, "y root", lambda r: True)
+        r_y = root_of(y2)
+        init_root(x2, "x root", lambda r: r_y < r)
+        git(x2, "fetch", "-q", str(y2), "HEAD:yhist")
+        git(x2, "merge", "-q", "--allow-unrelated-histories", "-m", "y in", "yhist")
+        for repo, head in ((x2, "export gate"), (y2, "retitled gate")):
+            (repo / "fix.txt").write_text(name, encoding="utf-8")
+            git(repo, "add", "-A")
+            git(repo, "commit", "-q", "-m", "fix")
+            write_retros(repo, [("retro.md", head, KEY)], git(repo, "rev-parse", "HEAD"))
+            git(repo, "add", "-A")
+            git(repo, "commit", "-q", "-m", "retro")
+        ix = b / "index.jsonl"
+        run("add", "--retro", "docs/evidence/retro.md", "--all", cwd=x2, index=ix)
+        legacy(ix, "mem:f2@1", project="p-" + r_y[:12])
+        run("add", "--retro", "docs/evidence/retro.md", "--all", cwd=y2, index=ix)
+        return b, x2, y2, "p-" + r_y[:12], ix
+    for verb in ("add in X", "rebuild of X alone"):
+        b, x2, y2, ky, ix = f2_fixture("f2-" + verb.split()[0])
+        if verb == "add in X":
+            rc, out, err = run("add", "--retro", "docs/evidence/retro.md", "--all", cwd=x2, index=ix)
+        else:
+            rc, out, err = run("rebuild", "--roots", str(b / "rx"), index=ix)
+        held = {o["project"] for o in lesson_of(ix)["origins"] if o.get("memory")}
+        ok(rc == 0 and held == {ky} and "re-keyed" not in out,
+           f"F2 {verb}: a known project's origin is never re-keyed ({rc} {held} {out!r} {err!r})")
+        rc, out, _ = run("rebuild", "--roots", str(b), index=ix)
+        held = {o["project"] for o in lesson_of(ix)["origins"] if o.get("memory")}
+        rc2, _, err2 = run("record", lesson_of(ix)["id"], "--answer", "-", cwd=y2, index=ix,
+                           stdin=json.dumps({"memoryId": "mem:f2", "revision": 2}))
+        ok(rc == 0 and held == {ky} and rc2 == 0,
+           f"F2 {verb}: a later full rebuild agrees and Y records its own id ({held} {rc2} {err2!r})")
+
+    # m10 (round 15) — re-init, rebuild, the documented re-attach, rebuild again: the carried
+    # FOREIGN holder is not live, so the id stays on the new origin and is never stripped.
+    base = work / "m10"
+    r, _ = headed_repo("repo", [("retro.md", "export gate", KEY)], parent=base / "roots")
+    idx = base / "index.jsonl"
+    run("add", "--retro", "docs/evidence/retro.md", "--all", cwd=r, index=idx)
+    ok(record_mem(idx, r, KEY, "mem:z") == 0, "m10 fixture: mem:z recorded")
+    init_root(r, "reinit", lambda s: True)
+    write_retros(r, [("retro.md", "export gate", KEY)], git(r, "rev-parse", "HEAD"))
+    git(r, "add", "-A")
+    git(r, "commit", "-q", "-m", "retro")
+    run("rebuild", "--roots", str(base / "roots"), index=idx)
+    rc = run("record", lesson_of(idx)["id"], "--answer", "-", cwd=r, index=idx,
+             stdin=json.dumps({"memoryId": "mem:z", "revision": 2}))[0]
+    ok(rc == 0, f"m10 fixture: the re-attach at the same checkout is accepted ({rc})")
+    rc, out, _ = run("rebuild", "--roots", str(base / "roots"), index=idx)
+    live_mem = [o.get("memory") for o in lesson_of(idx)["origins"] if not o.get("carried")]
+    ok(rc == 0 and live_mem == ["mem:z@2"] and "is held by" not in out,
+       f"m10: after the re-attach a rebuild keeps the id on the new origin ({live_mem} {out!r})")
 
     # F3 — the M2 sequence, then `add` in the old clone instead of a rebuild: the id stays on
     # the project that held it first, and the add says so.

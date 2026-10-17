@@ -1081,6 +1081,9 @@ def cmd_add(a, idx: pathlib.Path) -> int:
         # old identity (a re-init) — kept, marked, not counted, so add never adds a phantom.
         here = checkout_id(root)
         rekeyed: list[str] = []
+        # The same live-project rule as rebuild (round 15): never re-key an origin into this
+        # project when its key is a project the index already records with provenance.
+        known = _known_projects(before)
         for ck in sorted({le["classKey"] for le in lessons}):
             origins = entries[ck]["origins"]
             marked = [dict(o, carried=CARRY_FOREIGN)
@@ -1092,7 +1095,7 @@ def cmd_add(a, idx: pathlib.Path) -> int:
             # (round 13, K): it takes this key and gives its memory id to the origin just added.
             fresh = [o for o in marked if here in (o.get("checkouts") or []) and o["project"] == project]
             for o in list(marked):
-                n = _legacy_twin(o, fresh)
+                n = None if o["project"] in known else _legacy_twin(o, fresh)
                 if n is None or (o.get("memory") and n.get("memory")
                                  and mem_base(o["memory"]) != mem_base(n["memory"])):
                     continue
@@ -1385,6 +1388,14 @@ def _newer_memory(a: str | None, b: str | None) -> str | None:
     return a if mem_rev(a) >= mem_rev(b) else b
 
 
+def _known_projects(index: dict[str, dict]) -> set[str]:
+    """Every project key an index records with provenance — an origin with `checkouts` (round
+    15). Only the current key derivation writes provenance, so such a key is a real project of
+    this version, never v1.95.0's name for another one. Every verb treats it as live: a project
+    absent from THIS run's roots is not thereby another repository's to take."""
+    return {o["project"] for e in index.values() for o in e["origins"] if o.get("checkouts")}
+
+
 def _rekey_legacy(old: dict[str, dict], entries: dict[str, dict],
                   live: set[str] | frozenset = frozenset()) -> list[str]:
     """Re-key, in the previous index, every provenance-less origin `_legacy_twin` proves is
@@ -1394,7 +1405,10 @@ def _rekey_legacy(old: dict[str, dict], entries: dict[str, dict],
     the new key is left as it is — carried, named — since two store records are not one. An
     origin whose own key this run re-derives is never re-keyed: it is that project's — nor is
     one whose PROJECT key any checkout read this run holds (round 14, F2), whatever its anchor:
-    that project is here, and its retitled entry is not another repository's."""
+    that project is here, and its retitled entry is not another repository's. `live` is this
+    run's projects plus every project the previous index records with provenance
+    (`_known_projects`, round 15): which project owns an id never depends on verb order or on
+    which roots a rebuild was given."""
     said: list[str] = []
     for ck in sorted(old):
         if ck not in entries:
@@ -1761,7 +1775,7 @@ def cmd_rebuild(a, idx: pathlib.Path) -> int:
         # An origin v1.95.0 wrote — no provenance, keyed on the smallest root — that is the same
         # repository as one re-derived here takes its key first (round 13, K), so its memory id
         # follows and it is never a second project.
-        rekeyed = _rekey_legacy(old, entries, set(run["project"].values()))
+        rekeyed = _rekey_legacy(old, entries, set(run["project"].values()) | _known_projects(old))
         _attach_memory(entries, old, notes)
         derived = {(ck, _origin_key(o)) for ck, e in entries.items() for o in e["origins"]}
         carried, pruned = [], []

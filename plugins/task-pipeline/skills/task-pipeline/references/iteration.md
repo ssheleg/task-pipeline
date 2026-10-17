@@ -305,7 +305,8 @@ v1.95.0 would have computed exactly its key there, and the commit descends from 
 key names (its own history, not a history the repository merged). It is the same repository, so
 it takes the new key and its memory id follows; `add` does the same for its own checkout. It is
 never re-keyed when it has provenance, when its project key is held by any checkout read this
-run, when two keys could claim it, or when the copy under the new key holds a different memory
+run or by any origin of the previous index that has provenance (so the verb and the roots
+given never decide who owns an id), when two keys could claim it, or when the copy under the new key holds a different memory
 id (then it stays carried, and that is named). A monorepo that merged another repository's
 history therefore never takes that repository's origin. The reasons are:
 
