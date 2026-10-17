@@ -254,8 +254,9 @@ never that the work was skipped quietly.
   page rendered — a component can be correct and land under a fixed header, a request
   can 404 while every unit test mocks it, and a console error costs nothing at test
   time. Where a browser channel is connected — `playwright` **or** `chrome-devtools`,
-  either one ([`browser.md`](browser.md) is the four commands this sentence means;
-  [`companion-skills.md`](companion-skills.md) is which channel):
+  either one, on WebKit first with Chromium a stated exception
+  ([`browser.md`](browser.md) is the four commands this sentence means and the engine
+  order; [`companion-skills.md`](companion-skills.md) is which channel):
   load the surface, take a snapshot, and read **the console and the network log**
   before calling it green. Absent, say the surface was verified **by reading the
   diff** — that is a weaker claim and the close-out records it as one, rather than

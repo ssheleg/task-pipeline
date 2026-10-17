@@ -9,7 +9,7 @@ python3 - <<'EOF'
 import re
 p = "/tmp/br4-copy/plugins/task-pipeline/skills/task-pipeline/references/browser.md"
 t = open(p, encoding="utf-8").read()
-_m = re.search(r"(?m)^```bash\nplaywright-cli open \S+\n", t)
+_m = re.search(r"(?m)^```bash\nplaywright-cli open (?:--\S+[ =]\S+ )*\S+\n", t)
 assert _m, "PLANT DID NOT LAND: the look's recipe moved"
 i = _m.start()
 j = t.index("```", i + 3) + 3

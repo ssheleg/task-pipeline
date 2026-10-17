@@ -1,6 +1,6 @@
 ## Unreleased
 
-Guards: 447 → **507**; property checks 15 → **15**. There are 60 new negatives in
+Guards: 448 → **508**; property checks 15 → **15**. There are 60 new negatives in
 `lessons.py`. Each one plants a revert, and the suite must catch it:
 
 - the whole-scan refusal put back;
@@ -172,6 +172,43 @@ These are the fixes from verification rounds 6 to 14 of release iteration 1.
 - Lessons of this run, now doctrine: `iteration.md` checks for parallel work on the same
   nodes before each cycle, across every tool's branch prefixes. `build.md` adds a
   command-hygiene block that every background dispatch carries.
+
+## v1.97.1 — 2026-10-17
+
+The same source as v1.97.0, plus its release declaration. The v1.97.0 tag failed its own release run
+([38976060549](https://github.com/ssheleg/task-pipeline/actions/runs/38976060549)): `retro.md` named no
+release after its newest stamp, so the validator on the tag's tree refused and `publish` was skipped. Tags
+are immutable here, so v1.97.0 stays as a failed tag and this patch carries the declaration (the v1.94.0 →
+v1.94.1 precedent). No doctrine change.
+
+## v1.97.0 — 2026-10-16
+
+Source candidate; not published.
+
+Guards: 447 → **448**; property checks 15 → **15**.
+
+The look now runs on WebKit first. Every browser example in the bundle opened the
+tool's default engine, a Chromium-family browser, and `chrome-devtools` drives Chrome
+only — so the look the pipeline taught was a Chromium look reported as *tested in a
+browser*, and a layout that breaks only in Safari passed it. `references/browser.md`
+opens with *Engine order — WebKit (Safari) first*: Safari through `safaridriver` for a
+real browser, Playwright's `webkit` for automation (`playwright-cli open --browser
+webkit`, the MCP's `--browser webkit`, read from each tool's `--help`), Safari Web
+Inspector for debugging, and `open -a Safari` instead of the system default browser.
+Chromium is a stated exception — Lighthouse, a CDP trace, a heap snapshot, a
+Chrome-only API — named with its reason, on a temporary profile the run closes; a
+surface checked only in Chromium is reported as exactly that. The recipe, the
+sign-in example and the library example (`const { webkit } = require('playwright')`)
+now open WebKit.
+
+`references/companion-skills.md` makes `playwright` on WebKit the default look and
+`chrome-devtools` the stated Chromium exception, in the matrix, the preflight lines
+and the one rule for both channels; stages 5, 6 and 8, `tdd.md`, the README, the
+Cursor rule, the skill card and the contact-sheet template say the same. `DEC-0007`
+records the order: the engine is ranked, the tools' quality still is not, so
+`DEC-0004` keeps its other two parts. The new guard holds the section above the model
+and the recipe's `--browser webkit`; its negative self-test strips the flag and
+requires the validator to refuse.
 
 ## v1.96.0 — 2026-10-15
 

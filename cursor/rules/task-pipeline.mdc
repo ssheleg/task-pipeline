@@ -272,13 +272,17 @@ not authorize an outward, irreversible action — stage 7 stops and asks.
    look. With a browser channel connected: load the surface, snapshot it, read the
    console and the network log, and quote what you read. Fix what the look finds
    before calling the stage green. Without one, say "verified by reading the diff" and
-   treat that as the weaker claim it is. Two channels, either is enough, ranked by
-   nothing: `npm install -D @playwright/cli@latest` (or
-   `claude mcp add playwright npx @playwright/mcp@latest`) needs no plugin, and its CLI
-   half puts no tool schema in the context window;
-   `/plugin install chrome-devtools-mcp@claude-plugins-official` is the one that
-   reaches Lighthouse and heap snapshots, and analyses a trace rather than only
-   recording one. Never a gate. A CLI, a
+   treat that as the weaker claim it is. Two channels, either is enough, on WebKit
+   (Safari) first with Chromium a stated exception: `npm install -D @playwright/cli@latest`
+   then `playwright-cli open --browser webkit <url>` (or
+   `claude mcp add playwright -- npx @playwright/mcp@latest --browser webkit`) is the
+   default look, needs no plugin, and its CLI half puts no tool schema in the context
+   window; on macOS, Safari itself through `safaridriver`, and `open -a Safari <url>`
+   rather than the system default browser for a person.
+   `/plugin install chrome-devtools-mcp@claude-plugins-official` drives Chrome only and
+   is reached for when the question needs Chrome — Lighthouse, heap snapshots, a trace
+   analysed rather than only recorded — said with the reason; a look taken only there
+   is reported as "checked in Chromium", never "tested in a browser". Never a gate. A CLI, a
    library or a backend service is never offered either.
 7. **Lint + deploy** (manual) — lint clean AND suite green before deploy; deploy is
    outward → explicit user go, or the specific standing authorization recorded in

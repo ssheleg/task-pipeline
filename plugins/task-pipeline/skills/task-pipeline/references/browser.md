@@ -12,7 +12,9 @@ which is how a run says *I checked the browser* and means *I ran the unit tests*
 > **Every command and flag below was read from the tool's own `--help`**, not from a
 > vendor page. Where the two disagreed, `--help` won and the page was wrong — see
 > *Rationalizations*. Re-derive before quoting:
-> `npx @playwright/cli@latest --help` and `npx @playwright/mcp@latest --help`.
+> `npx @playwright/cli@latest --help` and `npx @playwright/mcp@latest --help`. The
+> `--browser webkit` flag on both was last read from `@playwright/cli` 0.1.22 (`open
+> --help`) and `@playwright/mcp` 0.0.83 on 2026-10-16.
 >
 > **Use the scoped name with `npx`.** `npx playwright-cli --help` fails outside a project
 > that has already installed it (`could not determine executable to run`), and the bare
@@ -23,6 +25,7 @@ which is how a run says *I checked the browser* and means *I ran the unit tests*
 
 ## Contents
 
+- Engine order — WebKit (Safari) first
 - The one model: a tree, and a ref
 - The look, as commands you can run
 - Sessions, and why an agent needs them
@@ -34,6 +37,35 @@ which is how a run says *I checked the browser* and means *I ran the unit tests*
 - Evidence a reader can open
 - What the channel can reach — the part a recommendation owes you
 - Rationalizations
+
+## Engine order — WebKit (Safari) first
+
+**Check a rendered surface in WebKit first** (`DEC-0007`). The channel is how a look
+arrives; the engine is what renders it, and the two are separate choices:
+
+| Need | WebKit route — the default |
+|---|---|
+| A real browser | Safari itself, through `safaridriver` (WebDriver; enable it once with `sudo safaridriver --enable`) |
+| Automation, the look | Playwright's `webkit`: `playwright-cli open --browser webkit <url>`, the MCP started with `--browser webkit`, a `webkit` project in `playwright.config.*`. Install the engine with `playwright-cli install-browser webkit` or `npx playwright install webkit` |
+| Debugging | Safari Web Inspector |
+| A page for a person, on macOS | `open -a Safari <url>` — never bare `open <url>`, which hands the page to the system default browser, and the default may be another browser |
+| An automation library (browser-use and the like) | its WebKit or Safari backend, where it has one |
+
+Name the engine every time. Without `--browser`, the CLI falls back to a Chromium-family
+browser (read from its own bundle, 0.1.22, not from `--help`) — so a recipe that leaves
+the flag off has chosen Chromium without saying so. Playwright's `webkit` is the engine,
+not Safari itself: a question about Safari's own behaviour goes to `safaridriver`.
+
+**Chromium is a stated fallback, never the default.** Use it only when the task needs
+Chrome itself — a Chrome-only API, Lighthouse, a CDP performance trace, a heap snapshot,
+the `chrome-devtools` MCP — and say which and why in the verdict. Prefer the Chrome Dev
+build for that. When you launch your own Chrome or Chromium for a UI run, give it a
+temporary profile (never the user's), record what you started, and close every process
+you started before you finish ([`residue.md`](residue.md)).
+
+**A surface checked only in Chromium is reported as exactly that** — *"checked in
+Chromium (`chrome-devtools`, for `lighthouse_audit`)"*, never *"tested in a browser"*.
+The engine is part of the claim, the same way the command is.
 
 ## The one model: a tree, and a ref
 
@@ -68,14 +100,15 @@ The pipeline asks for the same four things every time: **open it, snapshot it, r
 console, read the network.** In the CLI that is literally four commands:
 
 ```bash
-playwright-cli open http://localhost:3000/checkout
+playwright-cli open --browser webkit http://localhost:3000/checkout
 playwright-cli snapshot
 playwright-cli console warning     # min-level: only warnings and errors
 playwright-cli requests            # then: request <n> for headers, body, response
 ```
 
 The MCP is the same four moves under different names: `browser_navigate`,
-`browser_snapshot`, `browser_console_messages`, `browser_network_requests`.
+`browser_snapshot`, `browser_console_messages`, `browser_network_requests` — on WebKit
+when the server was started with `--browser webkit`.
 
 **Quote what you read, not that you looked.** *"Console clean, all requests fine"* is a
 claim. *"`console warning` → empty; `requests` → no status ≥ 400"* is the same claim with
@@ -87,8 +120,9 @@ resources by default and says so in its own footer (*"N static request(s) not sh
 appears without the flag — so *no status ≥ 400* is a safe claim and *14 requests* is not.
 
 `chrome-devtools` takes the identical four moves — `navigate_page`, `take_snapshot`,
-`list_console_messages`, `list_network_requests` — which is why the matrix ranks neither:
-the look is the same look.
+`list_console_messages`, `list_network_requests` — but only in Chrome. The moves are the
+same look; the engine is not, so for the look it is the **stated Chromium exception**,
+reached for when the question needs Chrome (*Engine order*, above).
 
 ## Sessions, and why an agent needs them
 
@@ -130,17 +164,17 @@ commonest way a run reports a green it does not have.
 |---|---|---|---|
 | **The look** | an agent driving a page: open, snapshot, console, network | that this surface renders, right now, and what the browser said while it did | the **functional look**, stage 6 — recommended, never a gate. Its **visual half** is a gate on a `flagship`, `product` or `ad` surface — *The visual half*, below |
 | **The spec suite** | `playwright test` — the **test runner** | that the assertions someone wrote still hold, on the paths someone thought to write | the **suite** half of the stage-6 gate, counted with every other test |
-| **The library** | `require('playwright')` — `chromium`/`firefox`/`webkit`, `devices`, `request`, `selectors` | whatever your own script asserts; it is an automation API, not a test framework | wherever the project already runs it |
+| **The library** | `require('playwright')` — `webkit`/`chromium`/`firefox`, `devices`, `request`, `selectors` | whatever your own script asserts; it is an automation API, not a test framework | wherever the project already runs it |
 
-The library and the runner are **separate APIs** — a script built on `chromium.launch()`
+The library and the runner are **separate APIs** — a script built on `webkit.launch()`
 has no `expect`, no fixtures, no reporter, and no retry. Choosing the library where a
 runner was wanted is how a project ends up with a bespoke half-runner nobody trusts.
 
 The minimal library shape, for reading a script that already exists:
 
 ```js
-const { chromium } = require('playwright');
-const browser = await chromium.launch();
+const { webkit } = require('playwright');
+const browser = await webkit.launch();
 const page = await browser.newPage();
 await page.goto('http://example.com');
 await browser.close();
@@ -186,7 +220,8 @@ the close-out — the same rule as every other refusal in the pipeline.
 
 1. **Deterministic.** The project linter — `python3 scripts/visual_gate.py lint <dir>`,
    which runs sheleg-design's `--lint` where it is installed and answers **NOT_RUN (exit 3)**
-   where it is not — plus axe or Lighthouse, the token check, the type checker. An S1
+   where it is not — plus axe or Lighthouse (the stated Chromium exception), the token
+   check, the type checker. An S1
    finding blocks, whatever anyone says about the picture later. **With Figma on, the
    token check includes the drift probe**: `python3 scripts/visual_gate.py tokens
    --figma <variables.json> --css <tokens.css>` compares the variable names exported
@@ -266,7 +301,7 @@ and neither needs a password in a transcript.
 
 ```bash
 mkdir -p .auth                                  # state-save does not create it
-playwright-cli open https://app.example.com/login
+playwright-cli open --browser webkit https://app.example.com/login
 #  … sign in by hand, or drive the form …
 playwright-cli state-save .auth/state.json      # cookies + localStorage
 playwright-cli state-load .auth/state.json      # every later look starts signed in
@@ -387,4 +422,6 @@ On a CI box, headed is the failure you will spend an hour on.
 | *"The tool list is in the docs."* | The page listed tools this version does not ship, and omitted that tracing, video and PDF need `--caps`. Ask the server: 24 tools default, 42 with all caps. |
 | *"It's behind a login, so the look isn't possible."* | `state-save` / `state-load`, or `--storage-state`. Auth is a solved step, not an exemption. |
 | *"No browser channel is installed, so the step doesn't apply."* | The step still applies; the claim weakens. Say *verified by reading the diff* and let the close-out record it as the weaker claim it is. |
+| *"Tested in a browser."* | Which engine? A look taken only in Chromium is reported as *checked in Chromium*, with the reason Chrome was needed. WebKit is the default (*Engine order*). |
+| *"I opened it with `open <url>`."* | That is the system default browser, which may not be Safari. `open -a Safari <url>` for a person; `--browser webkit` for automation. |
 | *"I closed the browser."* | `list` is the evidence. The command you typed is not the state you left ([`residue.md`](residue.md)). |

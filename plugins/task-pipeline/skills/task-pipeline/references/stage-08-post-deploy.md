@@ -13,8 +13,9 @@ The full gate and freedom level remain in [stages.md](stages.md).
 - **A deployed web target is opened, not curled.** A `200` proves the server
   answered; it says nothing about whether the page rendered, whether a bundle 404'd,
   or whether the console filled with errors on load — all three ship green past a
-  health check. Where a browser channel is connected — `playwright` **or**
-  `chrome-devtools`, either one ([`browser.md`](browser.md)) — load the deployed URL and read
+  health check. Where a browser channel is connected — `playwright` on WebKit first
+  **or** `chrome-devtools` as the stated Chromium exception, and a Chromium-only look
+  is reported as such; either one ([`browser.md`](browser.md)) — load the deployed URL and read
   the console and the network log; quote what you read, not that you looked
   ([`companion-skills.md`](companion-skills.md)). Absent → say the check was an HTTP
   response only, which is the honest name for it.

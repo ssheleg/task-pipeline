@@ -8,7 +8,8 @@ Cycle 14 closed round 14's three MEDIUM findings and six LOW ones:
   verb, legacy stage ids normalised on read, a non-blank schema stage id, and the pre-tag
   packet citing a commit instead of a tag object.
 
-The tests are in `round14_controls`, plus negatives 514–525; 490 and 493 are retired (the roots
+Cycle 15 merged `origin/main` at v1.97.1: main's WebKit plant took 463, so the lesson
+negative there became 526 and `MIN_EXPECTED` is 508. The tests are in `round14_controls`, plus negatives 514–525; 490 and 493 are retired (the roots
 check and the live-project rule subsume them), 489, 492 and 515 re-anchored; `MIN_EXPECTED`
 is 507.
 
@@ -59,8 +60,20 @@ pushed but not merged, and no version or publication is claimed.
 - **New rules:** a parallel-work check before each cycle (`iteration.md` → *The cycle*), and
   background-dispatch command hygiene (`build.md` §4.1).
 
-Next task: run round 15 of verification on #125's head. The release order after v1.95.0 is
+Next task: run round 16 of verification on #125's head. The release order after v1.95.0 is
 the coordinator's.
+
+## 1.97.0 source candidate — WebKit (Safari) first (2026-10-16)
+
+Branch `docs/safari-first`, draft PR "1.97.0 — the look runs on WebKit first". REQ R11
+of the 2026-10-16 family host-validation iteration. Ships the *Engine order — WebKit
+(Safari) first* section of
+[`references/browser.md`](../plugins/task-pipeline/skills/task-pipeline/references/browser.md),
+the WebKit-first channel rule in `companion-skills.md`, aligned stages 5/6/8 and
+`tdd.md`, [`DEC-0007`](DECISIONS.md), guard `P3-G0d` with negative plant 463. No tag,
+publication or install readback; no WebKit page was opened (the flag was read from each
+tool's `--help`). Exact next task: independent review of the draft PR, then normal
+integration and the release gate; the umbrella pin stays with the iteration owner.
 
 ## 1.96.0 source candidate — the finish line (2026-10-15)
 
