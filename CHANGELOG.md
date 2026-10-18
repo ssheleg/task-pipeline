@@ -98,7 +98,7 @@ These are the fixes from verification rounds 6 to 15 of release iteration 1.
   - Without `origin/HEAD`, `main` or `master`, the project key is the main worktree's HEAD,
     then `init.defaultBranch`, so a linked worktree on an orphan branch is the same project.
   - Redaction replaces only absolute paths, as whole path components (`--roots .` deleted every
-    dot), and stderr — the session's notes, the newer-format notice, a refusal — is redacted
+    dot), and stderr (the session's notes, the newer-format notice, a refusal) is redacted
     like stdout (in `rebuild`; every verb since round 14).
   - A stage id given as a string gets the text checks: one line, at most 32 characters, no
     path or credential shape.
@@ -114,7 +114,7 @@ These are the fixes from verification rounds 6 to 15 of release iteration 1.
     a re-init never counts a phantom project, even before the next rebuild.
   - `record` refuses an id another project's origin holds, naming the project (exit 1), and an
     id the loader would refuse (exit 2).
-  - lesson/1 text — a string stage id too, since round 13 — refuses every line separator,
+  - lesson/1 text (a string stage id too, since round 13) refuses every line separator,
     including U+2028, U+2029 and U+0085. The index
     is split on `\n` only, so a value can never make it read as corrupt.
   - Rebuild messages name checkouts and files, never an absolute path.
