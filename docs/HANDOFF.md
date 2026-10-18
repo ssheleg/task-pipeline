@@ -1,4 +1,13 @@
-## Fix cycles 6–15 of the release iteration — #125, branch `iter1/M-5-N-1` (2026-10-17)
+## Fix cycles 6 to 16 of the release iteration, #125, branch `iter1/M-5-N-1` (2026-10-18)
+
+Cycle 16 made ownership recoverable: a re-key records `rekeyedFrom`, and the source project
+reclaims the id when it is first read (add or rebuild) or records it, so verb order never
+decides the owner. Tests in `round16_controls`; negatives 530 to 540; `MIN_EXPECTED` 521.
+Every lesson plant now requires its own first FAIL label (472 and 474 name one alternate).
+Fixture flakes removed (upper-half old roots, lower-half y root, atomic retro writes).
+Row, not fixed: `_known_projects` is index-wide, not per class key.
+
+Earlier, cycle 15 (2026-10-17):
 
 Cycle 15 merged `origin/main` at v1.97.1 (our negative 463 became 526) and closed round 15's
 MEDIUM: the live set for re-keying, in `rebuild` and in `add`, now includes every project the
@@ -69,7 +78,7 @@ pushed but not merged, and no version or publication is claimed.
 - **New rules:** a parallel-work check before each cycle (`iteration.md` → *The cycle*), and
   background-dispatch command hygiene (`build.md` §4.1).
 
-Next task: run round 16 of verification on #125's head. The release order after v1.95.0 is
+Next task: run round 17 of verification on #125's head. The release order after v1.95.0 is
 the coordinator's.
 
 ## 1.97.0 source candidate — WebKit (Safari) first (2026-10-16)
