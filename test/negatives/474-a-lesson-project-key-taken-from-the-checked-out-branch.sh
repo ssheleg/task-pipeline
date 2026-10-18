@@ -13,12 +13,14 @@ assert needle not in open(p, encoding="utf-8").read(), "PLANT DID NOT LAND"
 EOF
 # The plant must fail with ITS defect, not any non-zero exit (round 16).
 expect='F: emit from a checkout on an orphan branch finds its origin'
+# Also accepted: A detects the revert only when the merged history's root sorts lower, a coin toss per run.
+also='A: worktrees of one repository are one project whatever branch they hold'
 out=$(python3 /tmp/key-head-copy/test/lessons_test.py 2>&1) && rc=0 || rc=$?
 rm -rf /tmp/key-head-copy
 if [ "$rc" -eq 0 ]; then
   echo "ERROR: lessons_test passed a project key that follows the checked-out branch"
   exit 1
-elif printf '%s\n' "$out" | grep -qF "FAIL: $expect"; then
+elif printf '%s\n' "$out" | grep -qF -e "FAIL: $expect" -e "FAIL: $also"; then
   echo "OK: lessons_test correctly FAILs — the key is the repository's"
 else
   echo "ERROR: lessons_test failed, but not with: FAIL: $expect"

@@ -13,12 +13,14 @@ assert needle not in open(p, encoding="utf-8").read(), "PLANT DID NOT LAND"
 EOF
 # The plant must fail with ITS defect, not any non-zero exit (round 16).
 expect='N1: an unreadable root'\''s origin is carried with its memory id, exit 0'
+# Also accepted: both detect the revert; which fails first depends on the checkout the suite runs in.
+also='J2: a re-init carries the old key with its id, counts one project, moves nothing'
 out=$(python3 /tmp/rebuild-supersede-copy/test/lessons_test.py 2>&1) && rc=0 || rc=$?
 rm -rf /tmp/rebuild-supersede-copy
 if [ "$rc" -eq 0 ]; then
   echo "ERROR: lessons_test passed a memory id moved across projects"
   exit 1
-elif printf '%s\n' "$out" | grep -qF "FAIL: $expect"; then
+elif printf '%s\n' "$out" | grep -qF -e "FAIL: $expect" -e "FAIL: $also"; then
   echo "OK: lessons_test correctly FAILs — a memory id stays with its own project"
 else
   echo "ERROR: lessons_test failed, but not with: FAIL: $expect"
