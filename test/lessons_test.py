@@ -471,7 +471,9 @@ def high_root_repo(name, entries, parent):
     sort BELOW it is then a few tries away, never a fixture flake."""
     for attempt in range(60):
         stage = parent.parent / f".stage-{parent.name}-{name}-{attempt}"
-        repo, sha = headed_repo(name, entries, parent=stage)
+        # Content per attempt: an identical first commit in the same second is the same root,
+        # and a fast runner made 60 tries of one root (CI shard 4, round 16).
+        repo, sha = headed_repo(f"{name}-{attempt}", entries, parent=stage)
         if git(repo, "rev-list", "--max-parents=0", "HEAD")[0] in "89abcdef":
             parent.mkdir(parents=True, exist_ok=True)
             shutil.move(str(repo), str(parent / name))
@@ -1479,7 +1481,7 @@ def round13_controls():
     # v1.95.0 keyed it on that smaller root; the key now is the default branch's first-parent root.
     def merged_repo(root, name):
         for attempt in range(40):
-            repo, sha = headed_repo(name, [("retro.md", "export gate", KEY)], parent=root / str(attempt))
+            repo, sha = headed_repo(f"{name}{attempt}", [("retro.md", "export gate", KEY)], parent=root / str(attempt))
             other = tree("tp-lessons-r13-other-")
             git(other, "init", "-q")
             (other / "o.txt").write_text(f"o{attempt}", encoding="utf-8")
@@ -1875,7 +1877,7 @@ def round14_controls():
             base = work / f"f1-{order}-{verb}"
             # A's root in the middle of the range, so either order is a few tries away.
             for attempt in range(60):
-                a_repo, _ = headed_repo("a", [("retro.md", "export gate", KEY)], parent=base / "ra" / str(attempt))
+                a_repo, _ = headed_repo(f"a{attempt}", [("retro.md", "export gate", KEY)], parent=base / "ra" / str(attempt))
                 ra = root_of(a_repo)
                 if ra[0] in "56789a":
                     break
