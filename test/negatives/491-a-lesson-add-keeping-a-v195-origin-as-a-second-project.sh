@@ -6,7 +6,7 @@ python3 - <<'EOF'
 # Round 13, K: add re-keys a provenance-less origin of this repository. Skip it.
 p = "/tmp/r13-rekey-add-copy/plugins/task-pipeline/skills/task-pipeline/scripts/lessons.py"
 t = open(p, encoding="utf-8").read()
-needle = '                n = _legacy_twin(o, fresh)\n'
+needle = '                n = None if o["project"] in known else _legacy_twin(o, fresh)\n'
 assert needle in t, "PLANT DID NOT LAND: anchor absent before edit"
 open(p, "w", encoding="utf-8").write(t.replace(needle, '                n = None\n', 1))
 assert needle not in open(p, encoding="utf-8").read(), "PLANT DID NOT LAND"

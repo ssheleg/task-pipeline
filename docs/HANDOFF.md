@@ -4,7 +4,7 @@ Cycle 15 merged `origin/main` at v1.97.1 (our negative 463 became 526) and close
 MEDIUM: the live set for re-keying, in `rebuild` and in `add`, now includes every project the
 previous index records with provenance (`_known_projects`). Tests: the F2 fixture through
 `add` in X and through a rebuild of X alone, and m10 (a re-attached id survives a rebuild).
-Negatives 527–529; `MIN_EXPECTED` 511. Known, not fixed: case-insensitive APFS reads one
+Negatives 527–529; 492 retired (subsumed), 489 and 491 re-anchored; `MIN_EXPECTED` 510. Known, not fixed: case-insensitive APFS reads one
 checkout twice through two path spellings (dedupe by device and inode is the fix).
 
 Previously, cycles 6–14 (2026-10-15):

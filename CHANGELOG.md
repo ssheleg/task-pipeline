@@ -1,6 +1,6 @@
 ## Unreleased
 
-Guards: 448 → **511**; property checks 15 → **15**. There are 63 new negatives in
+Guards: 448 → **510**; property checks 15 → **15**. There are 62 new negatives in
 `lessons.py`. Each one plants a revert, and the suite must catch it:
 
 - the whole-scan refusal put back;
@@ -57,7 +57,9 @@ These are the fixes from verification rounds 6 to 15 of release iteration 1.
 - **Ownership no longer depends on verb order** (round 15). The live-project rule now covers
   every project the previous index records with provenance, not only the projects this run
   read: an `add` in a repository, or a rebuild over its root alone, never re-keys another
-  known project's origin, and a later full rebuild agrees. Known limit, not fixed here: on a
+  known project's origin, and a later full rebuild agrees. That rule subsumes the separate
+  "no re-key with provenance" check (an origin with provenance names a known project), so the
+  check and its plant (492) are retired; the F1c test stays. Known limit, not fixed here: on a
   case-insensitive file system one checkout reached by two spellings of its path is read
   twice (real paths do not fold case), which can count a phantom second project; no memory
   id ends on two projects.

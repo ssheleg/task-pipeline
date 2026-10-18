@@ -1369,8 +1369,8 @@ def _legacy_twin(o: dict, candidates: list[dict]) -> dict | None:
     have computed exactly the origin's key there (`_legacy_key`). A monorepo that merged another
     repository's history holds that repository's commits too, and under v1.95.0 may even have
     shared its key; the commit's roots tell them apart."""
-    if o.get("checkouts"):
-        return None
+    # No `checkouts` check here (round 15): an origin with provenance names a project the
+    # index knows (`_known_projects`), and both callers skip those before asking.
 
     def same_repository(n: dict, c: str) -> bool:
         return (_legacy_key(c) == o["project"]
