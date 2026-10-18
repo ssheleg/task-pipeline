@@ -308,7 +308,15 @@ never re-keyed when it has provenance, when its project key is held by any check
 run or by any origin of the previous index that has provenance (so the verb and the roots
 given never decide who owns an id), when two keys could claim it, or when the copy under the new key holds a different memory
 id (then it stays carried, and that is named). A monorepo that merged another repository's
-history therefore never takes that repository's origin. The reasons are:
+history therefore never takes that repository's origin.
+
+A re-key can only judge the projects already seen, so ownership is made recoverable: the
+re-keyed origin records its source key as `rekeyedFrom`. The first time that project is read
+with an origin of the same class key (by `add` or `rebuild`), or records the id itself, it
+takes the id back; the other origin keeps its place without it, and a `reclaimed:` line says
+so. Whichever verb runs first, the final owner is the project whose key the legacy store used.
+If that project already holds its own id for the class, nothing moves, and that is named. The
+reasons are:
 
 - `checkout not read`: the checkout was not discovered, or a problem is owned by it. That
   problem may be an unreadable retro, a refused `git worktree list`, a shallow clone, a broken

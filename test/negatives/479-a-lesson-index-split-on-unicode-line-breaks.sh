@@ -11,11 +11,17 @@ assert needle in t, "PLANT DID NOT LAND: anchor absent before edit"
 open(p, "w", encoding="utf-8").write(t.replace(needle, '    for i, line in enumerate(text.splitlines(), 1):\n', 1))
 assert needle not in open(p, encoding="utf-8").read(), "PLANT DID NOT LAND"
 EOF
-if python3 /tmp/load-split-copy/test/lessons_test.py; then
-  rm -rf /tmp/load-split-copy
+# The plant must fail with ITS defect, not any non-zero exit (round 16).
+expect='B: a separator inside a value is not a line'
+out=$(python3 /tmp/load-split-copy/test/lessons_test.py 2>&1) && rc=0 || rc=$?
+rm -rf /tmp/load-split-copy
+if [ "$rc" -eq 0 ]; then
   echo "ERROR: lessons_test passed an index split on U+2028"
   exit 1
-else
-  rm -rf /tmp/load-split-copy
+elif printf '%s\n' "$out" | grep -qF "FAIL: $expect"; then
   echo "OK: lessons_test correctly FAILs — the index is split on \n only"
+else
+  echo "ERROR: lessons_test failed, but not with: FAIL: $expect"
+  printf '%s\n' "$out" | tail -3
+  exit 1
 fi

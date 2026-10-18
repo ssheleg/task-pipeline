@@ -27,10 +27,13 @@ previous index knew: carried origins, their provenance and memory ids.
         memory id — except an origin v1.95.0 wrote (no provenance) that this run proves is the
         same repository under a new key (its commit resolves in that checkout, descends from the
         new key's root, and v1.95.0 would have keyed that checkout as the origin; its project is
-        not read this run): it is re-keyed, its memory id kept. One memory id stays on one live
-        project (the earlier holder), in rebuild and add; the other is named.
-        `--prune-carried` (optionally one reason) is the only way an origin leaves the index; --prune-carried-reason needs --prune-carried and takes only a reason a
-        rebuild produces. An origin whose every checkout now holds another project, without
+        not known to the index): it is re-keyed, its memory id kept and its source key recorded
+        (`rekeyedFrom`). When that source project is read later (rebuild or add) or records
+        the id, it takes the id back, named as `reclaimed:`, so the final owner never depends
+        on which verb ran first. One memory id stays on one live project (the earlier holder),
+        in rebuild and add; the other is named. `--prune-carried` (optionally one reason) is
+        the only way an origin leaves the index; --prune-carried-reason needs --prune-carried
+        and takes only a reason a rebuild produces. An origin whose every checkout now holds another project, without
         the origin's own commit, is kept but not counted. A shallow clone — or one whose
         shallow check does not answer — is never a source. Memory ids follow (project,
         classKey). Messages — stdout and stderr, in every verb but `path` — name checkouts and
@@ -51,7 +54,8 @@ previous index knew: carried origins, their provenance and memory ids.
         line (`event: lessons — store refused — <code>`) and the local entry stays. Replacing a
         different id this origin holds needs --replace; an id another project's or class's
         origin holds is refused (exit 1) — unless that origin is carried as `checkout holds
-        another project` from this very checkout (the re-attach after a re-init) — and one the
+        another project` from this very checkout (the re-attach after a re-init), or took the
+        id by a re-key from this project (then this project reclaims it) — and one the
         index cannot hold (`mem:<id>@<rev>`, no
         quote, backslash or space) exits 2. add, emit-observatory and record refuse in a
         shallow clone: its project key is not stable until it is deepened
@@ -704,6 +708,8 @@ def merge(entries: dict[str, dict], lessons: list[dict], checkout: str | None = 
         old = next((o for o in origins if _origin_key(o) == key), None)
         prov = list((old or {}).get("checkouts") or []) + ([checkout] if checkout else [])
         new = _origin(le, old.get("memory") if old else None, prov)
+        if old and old.get("memory") and old.get("rekeyedFrom"):
+            new["rekeyedFrom"] = old["rekeyedFrom"]  # the id's source key travels with it (round 16)
         if old == new:
             continue
         origins = [o for o in origins if _origin_key(o) != key] + [new]
@@ -781,6 +787,9 @@ def _entry_shape(e: object) -> bool:
                                      and all(isinstance(c, str) and c for c in o["checkouts"])):
             return False
         if "carried" in o and o["carried"] not in CARRY_REASONS:
+            return False
+        if "rekeyedFrom" in o and not (isinstance(o["rekeyedFrom"], str)
+                                       and PROJECT.match(o["rekeyedFrom"]) and o.get("memory")):
             return False
     return True
 
@@ -1100,13 +1109,17 @@ def cmd_add(a, idx: pathlib.Path) -> int:
                                  and mem_base(o["memory"]) != mem_base(n["memory"])):
                     continue
                 memory = _newer_memory(o.get("memory"), n.get("memory"))
-                marked = [dict(x, **({"memory": memory} if memory else {}))
+                source = {"memory": memory, "rekeyedFrom": o.get("rekeyedFrom") or o["project"]} if memory else {}
+                marked = [dict(x, **source)
                           if _origin_key(x) == _origin_key(n) else x for x in marked if x is not o]
                 rekeyed.append(f"{ck} — {o['retro']}: {o['project']} is {project} (written before "
                                "provenance; its commit resolves here)" + (f" · {memory}" if memory else ""))
             if marked != origins:
                 entries[ck] = derive(marked)
                 changed += 1
+        # The project a re-key took an id from takes it back when it is read (round 16).
+        reclaimed = _reclaim(entries)
+        changed += len(reclaimed)
         # One memory id stays on one live project at add time too (round 14, F3): an add from
         # an old clone that brings a carried holder back to life must not leave its id on both.
         shared = _one_project_per_memory(entries, before)
@@ -1122,6 +1135,8 @@ def cmd_add(a, idx: pathlib.Path) -> int:
         print(f"  {e['id']} {e['classKey']} — {e['status']} (seen {e['seen']}, projects {e['projects']})")
     for n in rekeyed:
         print(f"  re-keyed: {n}")
+    for n in reclaimed:
+        print(f"  reclaimed: {n}")
     for n in shared:
         print(f"  memory: {n}")
     return 0
@@ -1431,6 +1446,9 @@ def _rekey_legacy(old: dict[str, dict], entries: dict[str, dict],
             memory = _newer_memory(o.get("memory"), (twin or {}).get("memory"))
             if memory:
                 moved["memory"] = memory
+                # Where the id came from (round 16): the project whose key the legacy store
+                # used may still be read later, and then it takes its id back (`_reclaim`).
+                moved["rekeyedFrom"] = o.get("rekeyedFrom") or o["project"]
             origins = [x for x in origins if x is not o and x is not twin] + [moved]
             said.append(f"{ck} — {o['retro']}: {o['project']} is {n['project']} (written before "
                         "provenance; its commit resolves in the checkout that re-derived it)"
@@ -1438,6 +1456,56 @@ def _rekey_legacy(old: dict[str, dict], entries: dict[str, dict],
             changed = True
         if changed:
             old[ck] = derive(origins)
+    return said
+
+
+def _reclaim(entries: dict[str, dict]) -> list[str]:
+    """Give a re-keyed memory id back to the project it was taken from (round 16).
+
+    A re-key can only judge the projects it has seen: an `add` in X, or a rebuild over X's root
+    alone, may re-key a v1.95.0 origin into X before the repository Y whose key the legacy store
+    used has ever been read. So ownership is made recoverable instead of predicted: the re-keyed
+    origin records `rekeyedFrom: <Y's key>`, and when Y is read with an origin of the same class
+    key — the store's identity is (classKey, project) — the id moves to Y's first origin by
+    (project, retro) and is dropped from X. A project enters the index only by being read, and a
+    known project is never re-keyed (`_known_projects`), so Y holding an origin here means Y was
+    read after the re-key: by this `add`, or by this or an earlier run since. So
+    whichever verb runs first, the final owner is the project the legacy store keyed. When Y
+    already holds a different id for that class, two store records are not one: nothing moves,
+    and that is said. Returns the lines to print."""
+    said: list[str] = []
+    for ck in sorted(entries):
+        origins = entries[ck]["origins"]
+        changed = False
+        for o in sorted(origins, key=_origin_key):
+            src = o.get("rekeyedFrom")
+            if not src or not o.get("memory") or src == o["project"]:
+                continue
+            mine = sorted((y for y in origins if y["project"] == src), key=_origin_key)
+            if not mine:
+                continue
+            base = mem_base(o["memory"])
+            other = next((y["memory"] for y in origins if y["project"] == src and y.get("memory")
+                          and mem_base(y["memory"]) != base), None)
+            if other:
+                said.append(f"{ck}: {base} was re-keyed from {src} into {o['project']}, but {src} now "
+                            f"holds its own {mem_base(other)} — nothing moved; two store records are not one")
+                continue
+            keep = _newer_memory(o["memory"], next((y["memory"] for y in origins if y["project"] == src
+                                                    and y.get("memory")), None))
+            new = []
+            for y in origins:
+                if y is o or (y.get("memory") and mem_base(y["memory"]) == base and y["project"] != src):
+                    y = {k: v for k, v in y.items() if k not in ("memory", "rekeyedFrom")}
+                elif y is mine[0]:
+                    y = dict({k: v for k, v in y.items() if k != "rekeyedFrom"}, memory=keep)
+                new.append(y)
+            said.append(f"{ck}: {keep} goes back to {src}, the project the legacy store keyed it under; "
+                        f"{o['project']} {o['retro']} keeps its place without it")
+            origins = new
+            changed = True
+        if changed:
+            entries[ck] = derive(origins)
     return said
 
 
@@ -1543,6 +1611,11 @@ def _attach_memory(entries: dict[str, dict], old: dict[str, dict], notes: list[s
     (project, retro) decide, and only where that match is unique."""
     by_pc: dict[tuple, dict[str, set]] = {}
     best: dict[str, str] = {}
+    source: dict[str, str] = {}  # memory base → the key a re-key took it from (round 16)
+    for e in old.values():
+        for o in e["origins"]:
+            if o.get("memory") and o.get("rekeyedFrom"):
+                source[mem_base(o["memory"])] = o["rekeyedFrom"]
     for ck, e in old.items():
         for o in e["origins"]:
             m = o.get("memory")
@@ -1559,12 +1632,16 @@ def _attach_memory(entries: dict[str, dict], old: dict[str, dict], notes: list[s
             if len(ids) == 1:
                 (base,) = ids
                 mine[0]["memory"] = best[base]
+                if base in source:
+                    mine[0]["rekeyedFrom"] = source[base]
                 changed = True
             elif len(ids) > 1:
                 for o in mine:
                     exact = [b for b, retros in ids.items() if o["retro"] in retros]
                     if len(exact) == 1:
                         o["memory"] = best[exact[0]]
+                        if exact[0] in source:
+                            o["rekeyedFrom"] = source[exact[0]]
                         changed = True
                 if not any(o.get("memory") for o in mine):
                     notes.append(f"{ck} — {project}: several memory ids and none matches a retro "
@@ -1792,6 +1869,7 @@ def cmd_rebuild(a, idx: pathlib.Path) -> int:
             held = [x for x in entries[ck]["origins"] if _origin_key(x) != _origin_key(o)] if ck in entries else []
             entries[ck] = derive(held + [o])
         _one_class_per_memory(entries, notes)
+        reclaimed = _reclaim(entries)
         shared = _one_project_per_memory(entries, old)
         # A memory id of the previous index vanishes only through --prune-carried (compared
         # before `@`). An id only a corrupt line held is counted and named.
@@ -1819,6 +1897,8 @@ def cmd_rebuild(a, idx: pathlib.Path) -> int:
         print(f"  skipped, commit does not resolve: {u}")
     for n in rekeyed:
         print(f"  re-keyed: {redact(n)}")
+    for n in reclaimed:
+        print(f"  reclaimed: {redact(n)}")
     for n in shared:
         print(f"  memory: {redact(n)}")
     for n in notes:
@@ -1966,8 +2046,12 @@ def cmd_record(a, idx: pathlib.Path) -> int:
         # root-commit limit, where the operator re-attaches the old id on purpose. A stranger
         # elsewhere never takes it.
         here = checkout_id(root)
+        # A holder that took the id by a re-key FROM this project gives it back (round 16).
+        reclaim = [y for y in e["origins"] if y["project"] != o["project"]
+                   and mem_base(y.get("memory") or "") == mid and y.get("rekeyedFrom") == o["project"]]
         holders = sorted({y["project"] for y in e["origins"] if y["project"] != o["project"]
                           and mem_base(y.get("memory") or "") == mid
+                          and not any(y is r for r in reclaim)
                           and not (y.get("carried") == CARRY_FOREIGN and here in (y.get("checkouts") or []))})
         if holders:
             print(f"lessons: {mid} is the store record of project {', '.join(holders)} for "
@@ -1996,11 +2080,17 @@ def cmd_record(a, idx: pathlib.Path) -> int:
                   "--replace to do that on purpose; nothing written", file=sys.stderr)
             return 1
         # The same id elsewhere in this entry takes the new revision too: one record, one revision.
-        origins = [dict(x, memory=memory) if _origin_key(x) == _origin_key(o)
+        # A re-keyed holder this project reclaims drops it instead (round 16).
+        origins = [{k: v for k, v in x.items() if k not in ("memory", "rekeyedFrom")}
+                   if any(x is r for r in reclaim) else
+                   dict(x, memory=memory) if _origin_key(x) == _origin_key(o)
                    or (x.get("memory") and mem_base(x["memory"]) == mid) else x
                    for x in e["origins"]]
         entries[e["classKey"]] = derive(origins)
         ss.save()
+    for y in reclaim:
+        print(f"  reclaimed: {mid} goes back to {o['project']}, the project it was re-keyed from; "
+              f"{y['project']} {y['retro']} keeps its place without it")
     line = f"event: lessons — recorded {e['id']} as {memory} — {_now()}"
     _ledger_line(ledger, line)
     print(line)

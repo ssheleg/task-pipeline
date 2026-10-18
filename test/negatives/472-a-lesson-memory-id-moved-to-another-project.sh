@@ -11,11 +11,17 @@ assert needle in t, "PLANT DID NOT LAND: anchor absent before edit"
 open(p, "w", encoding="utf-8").write(t.replace(needle, '            ids = by_pc.get((project, ck), {}) or {b: r for (p, c), d in by_pc.items() if c == ck\n                                                   for b, r in d.items()}\n', 1))
 assert needle not in open(p, encoding="utf-8").read(), "PLANT DID NOT LAND"
 EOF
-if python3 /tmp/rebuild-supersede-copy/test/lessons_test.py; then
-  rm -rf /tmp/rebuild-supersede-copy
+# The plant must fail with ITS defect, not any non-zero exit (round 16).
+expect='N1: an unreadable root'\''s origin is carried with its memory id, exit 0'
+out=$(python3 /tmp/rebuild-supersede-copy/test/lessons_test.py 2>&1) && rc=0 || rc=$?
+rm -rf /tmp/rebuild-supersede-copy
+if [ "$rc" -eq 0 ]; then
   echo "ERROR: lessons_test passed a memory id moved across projects"
   exit 1
-else
-  rm -rf /tmp/rebuild-supersede-copy
+elif printf '%s\n' "$out" | grep -qF "FAIL: $expect"; then
   echo "OK: lessons_test correctly FAILs — a memory id stays with its own project"
+else
+  echo "ERROR: lessons_test failed, but not with: FAIL: $expect"
+  printf '%s\n' "$out" | tail -3
+  exit 1
 fi

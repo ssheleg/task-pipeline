@@ -439,7 +439,11 @@ def write_retros(repo, entries, sha, keep=False):
     for f, bodies in files.items():
         p = art / f
         p.parent.mkdir(parents=True, exist_ok=True)
-        p.write_text("# Retro\n\n## Log\n\n" + "\n".join(bodies), encoding="utf-8")
+        # Atomically (round 16): a rebuild racing this write (H1) reads the old file or the new
+        # one, never half of either.
+        tmp = p.with_name(p.name + ".tmp")
+        tmp.write_text("# Retro\n\n## Log\n\n" + "\n".join(bodies), encoding="utf-8")
+        os.replace(tmp, p)
 
 
 def headed_repo(name, entries, parent=None):
@@ -461,6 +465,20 @@ def headed_repo(name, entries, parent=None):
     git(repo, "commit", "-q", "-m", "retro")
     return repo, sha
 
+
+def high_root_repo(name, entries, parent):
+    """headed_repo whose root commit sorts in the upper half (round 16): a later root that must
+    sort BELOW it is then a few tries away, never a fixture flake."""
+    for attempt in range(60):
+        stage = parent.parent / f".stage-{parent.name}-{name}-{attempt}"
+        repo, sha = headed_repo(name, entries, parent=stage)
+        if git(repo, "rev-list", "--max-parents=0", "HEAD")[0] in "89abcdef":
+            parent.mkdir(parents=True, exist_ok=True)
+            shutil.move(str(repo), str(parent / name))
+            shutil.rmtree(stage)
+            return parent / name, sha
+        shutil.rmtree(stage)  # a failed attempt leaves no repository behind
+    raise SystemExit(f"fixture {name}: no upper-half root in 60 tries")
 
 def record_mem(idx, cwd, class_key, mem):
     lid = entries_of(idx)[class_key]["id"]
@@ -1612,7 +1630,7 @@ def round13_controls():
     # M — P1 records mem:x; a stranger takes P1's path; an unrelated P3 elsewhere records
     # mem:x: refused, P1's id is not P3's to take.
     root = work / "m"
-    p1, _ = headed_repo("p1", [("retro.md", "export gate", KEY)], parent=root / "here")
+    p1, _ = high_root_repo("p1", [("retro.md", "export gate", KEY)], parent=root / "here")
     p3, _ = headed_repo("p3", [("retro.md", "gate export", KEY)], parent=root / "p3home")
     idx = work / "m.jsonl"
     run("add", "--retro", "docs/evidence/retro.md", "--all", cwd=p1, index=idx)
@@ -1623,7 +1641,9 @@ def round13_controls():
     # and a root that sorts BELOW P1's (round 14, L1): "the smaller key" would then pick the
     # stranger, so only the earlier-holder rule keeps the id on P1 — every run, not 3 in 4.
     for attempt in range(60):
-        s0, _ = headed_repo("stranger", [("retro.md", "export gate", KEY)], parent=root / "tmp" / str(attempt))
+        # Its own content per attempt (round 16): an identical commit in the same second is the
+        # same root, and no retry would ever change the order.
+        s0, _ = headed_repo(f"stranger-{attempt}", [("retro.md", "export gate", KEY)], parent=root / "tmp" / str(attempt))
         if "p-" + git(s0, "rev-list", "--max-parents=0", "HEAD")[:12] < k1:
             break
     else:
@@ -1656,7 +1676,7 @@ def round13_controls():
     # M2 — the documented re-attach after a re-init at the same path, then an old clone of the
     # pre-re-init history under the roots: the id stays on the project that held it first.
     root = work / "m2"
-    r, _ = headed_repo("repo", [("retro.md", "export gate", KEY)], parent=root / "roots")
+    r, _ = high_root_repo("repo", [("retro.md", "export gate", KEY)], parent=root / "roots")
     idx = work / "m2.jsonl"
     run("add", "--retro", "docs/evidence/retro.md", "--all", cwd=r, index=idx)
     ok(record_mem(idx, r, KEY, "mem:y") == 0, "M2 fixture: the project records mem:y")
@@ -1977,7 +1997,7 @@ def round14_controls():
     base = work / "f2"
     y = base / "ry" / "y"
     x = base / "rx" / "x"
-    init_root(y, "y root", lambda r: True)
+    init_root(y, "y root", lambda r: r[0] in "01234567")  # lower half: X's root above it is quick
     ry = root_of(y)
     init_root(x, "x root", lambda r: ry < r)
     git(x, "fetch", "-q", str(y), "HEAD:yhist")
@@ -2011,7 +2031,7 @@ def round14_controls():
     def f2_fixture(name):
         b = work / name
         y2, x2 = b / "ry" / "y", b / "rx" / "x"
-        init_root(y2, "y root", lambda r: True)
+        init_root(y2, "y root", lambda r: r[0] in "01234567")
         r_y = root_of(y2)
         init_root(x2, "x root", lambda r: r_y < r)
         git(x2, "fetch", "-q", str(y2), "HEAD:yhist")
@@ -2067,7 +2087,7 @@ def round14_controls():
     # F3 — the M2 sequence, then `add` in the old clone instead of a rebuild: the id stays on
     # the project that held it first, and the add says so.
     base = work / "f3"
-    r, _ = headed_repo("repo", [("retro.md", "export gate", KEY)], parent=base / "roots")
+    r, _ = high_root_repo("repo", [("retro.md", "export gate", KEY)], parent=base / "roots")
     idx = base / "index.jsonl"
     run("add", "--retro", "docs/evidence/retro.md", "--all", cwd=r, index=idx)
     ok(record_mem(idx, r, KEY, "mem:y") == 0, "F3 fixture: the project records mem:y")
@@ -2176,6 +2196,150 @@ def round14_controls():
         spec = sch["properties"]["stages"]["properties"][k]
         ok(spec.get("maxLength") == 32 and spec.get("minLength") == 1 and spec.get("pattern") == "\\S",
            f"L6: stages.{k} in the schema is 1-32 characters and not blank ({spec})")
+
+
+def round16_controls():
+    """Round 16 (adversarial): ownership is recoverable, not predicted. X merged Y's history; a
+    v1.95.0 origin keyed under Y's root holds mem:f2. When X is read before Y ever was (an `add`
+    in X, or a rebuild of X's root alone), the re-key moves the id into X and records
+    `rekeyedFrom: <Y>`; the first time Y is read (add or rebuild), or Y records the id, it takes
+    it back. Whichever verb runs first, the final owner is Y. P4: a known Y is never re-keyed at
+    all. And when Y already holds its own id, nothing moves."""
+    work = tree("tp-lessons-r16-")
+
+    def root_of(repo):
+        return git(repo, "rev-list", "--max-parents=0", "--first-parent", "HEAD").split()[-1]
+
+    def init_root(repo, text, want):
+        for attempt in range(200):
+            if (repo / ".git").exists():
+                shutil.rmtree(repo / ".git")
+            repo.mkdir(parents=True, exist_ok=True)
+            git(repo, "init", "-q")
+            (repo / f"ROOT-{text.replace(' ', '-')}.md").write_text(f"{text} {attempt}", encoding="utf-8")
+            git(repo, "add", "-A")
+            git(repo, "commit", "-q", "-m", f"{text} {attempt}")
+            if want(git(repo, "rev-parse", "HEAD")):
+                return
+        raise SystemExit(f"r16 fixture {text}: no root satisfied the order in 200 tries")
+
+    def fixture(name):
+        """X merged Y (Y's root in the lower half, below X's); X's entry and Y's retitled one
+        share the class key; the index holds only the v1.95.0 origin, keyed under Y's root."""
+        b = work / name
+        y, x = b / "ry" / "y", b / "rx" / "x"
+        init_root(y, "y root", lambda r: r[0] in "01234567")
+        ry = root_of(y)
+        init_root(x, "x root", lambda r: ry < r)
+        git(x, "fetch", "-q", str(y), "HEAD:yhist")
+        git(x, "merge", "-q", "--allow-unrelated-histories", "-m", "y in", "yhist")
+        for repo, head in ((x, "export gate"), (y, "retitled gate")):
+            (repo / "fix.txt").write_text(name, encoding="utf-8")
+            git(repo, "add", "-A")
+            git(repo, "commit", "-q", "-m", "fix")
+            write_retros(repo, [("retro.md", head, KEY)], git(repo, "rev-parse", "HEAD"))
+            git(repo, "add", "-A")
+            git(repo, "commit", "-q", "-m", "retro")
+        ix = b / "index.jsonl"
+        run("add", "--retro", "docs/evidence/retro.md", "--all", cwd=x, index=ix)
+        kx = lesson_of(ix)["origins"][0]["project"]
+        line = json.loads(ix.read_text(encoding="utf-8").splitlines()[0])
+        for o in line["origins"]:
+            o.pop("checkouts", None)
+            o.update(project="p-" + ry[:12], memory="mem:f2@1")
+        ix.write_text(json.dumps(line, ensure_ascii=False, sort_keys=True) + "\n", encoding="utf-8")
+        return b, x, y, kx, "p-" + ry[:12], ix
+
+    def holders(ix):
+        return sorted((o["project"], o.get("memory"), o.get("rekeyedFrom"))
+                      for o in lesson_of(ix)["origins"] if o.get("memory"))
+
+    def x_first(verb, b, x, ix):
+        if verb == "add in X":
+            return run("add", "--retro", "docs/evidence/retro.md", "--all", cwd=x, index=ix)
+        return run("rebuild", "--roots", str(b / "rx"), index=ix)
+
+    def add_y(y, ix):
+        return run("add", "--retro", "docs/evidence/retro.md", "--all", cwd=y, index=ix)
+
+    for verb in ("add in X", "rebuild of X alone"):
+        # Then: add Y, a full rebuild, and Y records its own id.
+        b, x, y, kx, ky, ix = fixture("a-" + verb.split()[0])
+        rc, out, err = x_first(verb, b, x, ix)
+        ok(rc == 0 and holders(ix) == [(kx, "mem:f2@1", ky)] and "re-keyed" in out,
+           f"r16 {verb}: X read first re-keys the id and records its source ({rc} {holders(ix)} {out!r} {err!r})")
+        # A repeated add in X keeps the source with the id.
+        run("add", "--retro", "docs/evidence/retro.md", "--all", cwd=x, index=ix)
+        ok(holders(ix) == [(kx, "mem:f2@1", ky)], f"r16 {verb}: a repeated add in X keeps rekeyedFrom ({holders(ix)})")
+        rc, out, err = add_y(y, ix)
+        ok(rc == 0 and holders(ix) == [(ky, "mem:f2@1", None)] and "reclaimed" in out and "goes back to " + ky in out,
+           f"r16 {verb}: the first add in Y reclaims its id, said aloud ({rc} {holders(ix)} {out!r} {err!r})")
+        rc, out, _ = run("rebuild", "--roots", str(b), index=ix)
+        ok(rc == 0 and holders(ix) == [(ky, "mem:f2@1", None)],
+           f"r16 {verb}: a full rebuild after the reclaim agrees ({holders(ix)} {out!r})")
+        rc, _, err = run("record", lesson_of(ix)["id"], "--answer", "-", cwd=y, index=ix,
+                         stdin=json.dumps({"memoryId": "mem:f2", "revision": 2}))
+        ok(rc == 0 and holders(ix) == [(ky, "mem:f2@2", None)],
+           f"r16 {verb}: Y records its own id ({rc} {err!r} {holders(ix)})")
+
+        # Or: the full rebuild reclaims it by itself.
+        b, x, y, kx, ky, ix = fixture("b-" + verb.split()[0])
+        x_first(verb, b, x, ix)
+        rc, out, _ = run("rebuild", "--roots", str(b), index=ix)
+        ok(rc == 0 and holders(ix) == [(ky, "mem:f2@1", None)] and "reclaimed" in out,
+           f"r16 {verb}: a full rebuild reclaims the id for Y ({holders(ix)} {out!r})")
+
+
+    # record alone reclaims: X holds the re-keyed id and Y has an origin that holds nothing
+    # (written by hand, as an index from before round 16 could hold it).
+    b, x, y, kx, ky, ix = fixture("record")
+    x_first("add in X", b, x, ix)
+    yi = b / "y-only.jsonl"
+    add_y(y, yi)
+    line = json.loads(ix.read_text(encoding="utf-8"))
+    line["origins"] += [o for o in json.loads(yi.read_text(encoding="utf-8"))["origins"]]
+    ix.write_text(json.dumps(line, ensure_ascii=False, sort_keys=True) + "\n", encoding="utf-8")
+    ok(holders(ix) == [(kx, "mem:f2@1", ky)], f"r16 record fixture: X holds the id, Y holds none ({holders(ix)})")
+    rc, out, err = run("record", lesson_of(ix)["id"], "--answer", "-", cwd=y, index=ix,
+                       stdin=json.dumps({"memoryId": "mem:f2", "revision": 2}))
+    ok(rc == 0 and holders(ix) == [(ky, "mem:f2@2", None)] and "reclaimed" in out,
+       f"r16: Y's record reclaims the id from X ({rc} {holders(ix)} {out!r} {err!r})")
+
+    # Y already holds its own id: two store records stay two, and that is said.
+    b, x, y, kx, ky, ix = fixture("own")
+    x_first("add in X", b, x, ix)
+    line = json.loads(ix.read_text(encoding="utf-8"))
+    add_y(y, b / "y2.jsonl")
+    yo = json.loads((b / "y2.jsonl").read_text(encoding="utf-8"))["origins"][0]
+    line["origins"].append(dict(yo, memory="mem:own@1"))
+    ix.write_text(json.dumps(line, ensure_ascii=False, sort_keys=True) + "\n", encoding="utf-8")
+    rc, out, _ = run("rebuild", "--roots", str(b), index=ix)
+    ok(rc == 0 and holders(ix) == sorted([(kx, "mem:f2@1", ky), (ky, "mem:own@1", None)])
+       and "nothing moved" in out,
+       f"r16: Y holding its own id keeps it and X keeps the re-keyed one ({holders(ix)} {out!r})")
+
+    # The loader accepts `rekeyedFrom` only as a project key beside a memory id.
+    good = json.loads(ix.read_text(encoding="utf-8"))
+    for name, value, mem in (("not-a-key", "Y", "mem:q@1"), ("no-memory", "p-0123456789ab", None)):
+        bad = json.loads(json.dumps(good))
+        o = bad["origins"][0]
+        o["rekeyedFrom"] = value
+        if mem is None:
+            o.pop("memory", None)
+        else:
+            o["memory"] = mem
+        h = work / f"shape-{name}.jsonl"
+        h.write_text(json.dumps(bad) + "\n", encoding="utf-8")
+        rc, _, err = run("query", "gate", index=h)
+        ok(rc == 0 and "could not be parsed" in err, f"r16: a line with rekeyedFrom {name} is set aside ({rc} {err!r})")
+
+    # P4 — Y known first (add Y), then a rebuild of X alone, then an add in X: never re-keyed.
+    b, x, y, kx, ky, ix = fixture("p4")
+    add_y(y, ix)
+    run("rebuild", "--roots", str(b / "rx"), index=ix)
+    rc, out, _ = run("add", "--retro", "docs/evidence/retro.md", "--all", cwd=x, index=ix)
+    ok(rc == 0 and {h[0] for h in holders(ix)} == {ky} and "re-keyed" not in out,
+       f"r16 P4: a known Y keeps its id through any order ({holders(ix)} {out!r})")
 
 
 def source_admission_controls():
@@ -2781,6 +2945,7 @@ def main():
     round12_controls()
     round13_controls()
     round14_controls()
+    round16_controls()
     source_admission_controls()
     print(f"PASS: lessons.py — {CASES} cases")
 

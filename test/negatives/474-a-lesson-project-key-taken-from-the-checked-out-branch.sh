@@ -11,11 +11,17 @@ assert needle in t, "PLANT DID NOT LAND: anchor absent before edit"
 open(p, "w", encoding="utf-8").write(t.replace(needle, '    roots = _git(root, "rev-list", "--max-parents=0", "HEAD")\n    if roots:\n        return "p-" + sorted(roots.split())[0][:12]\n', 1))
 assert needle not in open(p, encoding="utf-8").read(), "PLANT DID NOT LAND"
 EOF
-if python3 /tmp/key-head-copy/test/lessons_test.py; then
-  rm -rf /tmp/key-head-copy
+# The plant must fail with ITS defect, not any non-zero exit (round 16).
+expect='F: emit from a checkout on an orphan branch finds its origin'
+out=$(python3 /tmp/key-head-copy/test/lessons_test.py 2>&1) && rc=0 || rc=$?
+rm -rf /tmp/key-head-copy
+if [ "$rc" -eq 0 ]; then
   echo "ERROR: lessons_test passed a project key that follows the checked-out branch"
   exit 1
-else
-  rm -rf /tmp/key-head-copy
+elif printf '%s\n' "$out" | grep -qF "FAIL: $expect"; then
   echo "OK: lessons_test correctly FAILs — the key is the repository's"
+else
+  echo "ERROR: lessons_test failed, but not with: FAIL: $expect"
+  printf '%s\n' "$out" | tail -3
+  exit 1
 fi

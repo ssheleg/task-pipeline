@@ -1,6 +1,6 @@
 ## Unreleased
 
-Guards: 448 → **510**; property checks 15 → **15**. There are 62 new negatives in
+Guards: 448 → **521**; property checks 15 → **15**. There are 73 new negatives in
 `lessons.py`. Each one plants a revert, and the suite must catch it:
 
 - the whole-scan refusal put back;
@@ -50,9 +50,25 @@ Guards: 448 → **510**; property checks 15 → **15**. There are 62 new negativ
 - an index set aside for a stage id v1.95.0 accepted, or one normalised past 32 characters;
 - the schema admitting a blank stage id;
 - a partial rebuild or an `add` moving an origin of a project the index already knows;
-- an origin carried as `checkout holds another project` counted as a live holder of its id.
+- an origin carried as `checkout holds another project` counted as a live holder of its id;
+- a re-key that does not record where the id came from, in `rebuild` or `add`, or loses that
+  source on a repeated `add` or a rebuild;
+- `rebuild`, `add` or `record` never giving a re-keyed id back to its source project, or
+  giving it back while leaving it on the other project too, or over that project's own id;
+- an index line accepted with an impossible `rekeyedFrom`.
 
-These are the fixes from verification rounds 6 to 15 of release iteration 1.
+These are the fixes from verification rounds 6 to 16 of release iteration 1.
+
+- **Ownership is recoverable, not predicted** (round 16). A re-key can only judge the projects
+  it has already seen, so an `add` in X, or a rebuild of X's root alone, could take an id
+  from a repository Y that had never been read. A re-key now records its source key on the
+  origin (`rekeyedFrom`). The first time Y is read with an origin of that class key, by
+  `add` or `rebuild`, or Y records the id, the id moves back to Y, is dropped from X, and a
+  `reclaimed:` line names it. Whichever verb runs first, the final owner is the project
+  whose key the legacy store used. When Y already holds its own id for that class, nothing
+  moves, and that is said. Each lesson plant now requires its own expected failure line, not
+  any non-zero exit. Known, not fixed here: the known-project set is index-wide, not per
+  class key.
 
 - **Ownership no longer depends on verb order** (round 15). The live-project rule now covers
   every project the previous index records with provenance, not only the projects this run
