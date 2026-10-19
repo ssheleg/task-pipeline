@@ -91,8 +91,8 @@ SHA or a repository name in text no pattern can tell from an ordinary word — t
 writer's duty, with names. A person's or a customer's
 name a pattern cannot see; that stays the writer's duty (`references/retrospective.md` →
 *What may leave the project*). The project is a pseudonymous key — `p-` and 12 hex digits
-of the repository's root commit, the first-parent root of its default branch (else the main
-worktree's HEAD, then init.defaultBranch), shared by every worktree of it — never its name, and the evidence commit must resolve in
+of the repository's root commit, the first-parent root of its default branch (else the branch
+init.defaultBranch names, then the main worktree's HEAD), shared by every worktree of it; never its name, and the evidence commit must resolve in
 the repository it came from.
 
 **The retro line it reads**, inside a `### ` entry of the retro or its archive:
@@ -396,10 +396,11 @@ def project_key(root: pathlib.Path) -> str:
     """`p-` + 12 hex of the repository's root commit: stable across clones, names nothing.
 
     The REPOSITORY's root, not the checked-out branch's (round 12): the first-parent root of the
-    default branch — `origin/HEAD`, else `main`, else `master`; without any of them the MAIN
-    worktree's HEAD, read in the common directory (round 13: one answer for every worktree, so a
-    linked worktree on an orphan branch is not a second project), else `init.defaultBranch`,
-    else this checkout's HEAD. A worktree on a branch that merged an unrelated history, or a
+    default branch: `origin/HEAD`, else `main`, else `master`, else the branch
+    `init.defaultBranch` names (round 17, L1: it names the default, wherever the main worktree
+    stands); without any of them the MAIN worktree's HEAD, read in the common directory (round
+    13: one answer for every worktree, so a linked worktree on an orphan branch is not a second
+    project), else this checkout's HEAD. A worktree on a branch that merged an unrelated history, or a
     checkout sitting on an orphan `gh-pages`, is still its repository's project. Computed once
     per `git rev-parse --git-common-dir`, so every worktree of one repository shares it."""
     common = _git(root, "rev-parse", "--path-format=absolute", "--git-common-dir")
@@ -411,11 +412,13 @@ def project_key(root: pathlib.Path) -> str:
     if head:
         refs.append(((), head))
     refs += [((), "refs/heads/main"), ((), "refs/heads/master")]
-    if common:
-        refs.append((("--git-dir", common), "HEAD"))  # the main worktree's HEAD
+    # The configured default before the main worktree's HEAD (see the docstring): a main
+    # worktree checked out on an orphan `pages` branch must not move the repository's key.
     default = _git(root, "config", "--get", "init.defaultBranch")
     if default:
         refs.append(((), "refs/heads/" + default))
+    if common:
+        refs.append((("--git-dir", common), "HEAD"))  # the main worktree's HEAD
     refs.append(((), "HEAD"))
     for extra, ref in refs:
         if _git(root, *extra, "rev-parse", "-q", "--verify", ref + "^{commit}") is None:
@@ -1003,7 +1006,32 @@ def _ensure_dir(d: pathlib.Path) -> None:
                       "nothing was written")
 
 
+def _unloadable(entries: dict[str, dict]) -> list[str]:
+    """The class keys whose line, as `dump` writes it, the loader would refuse (round 17, F1):
+    each line is read back exactly as `load` reads it (JSON, stage ids normalised, then
+    `_entry_shape`). A writer that produced such a line once made the next command set the
+    whole index aside as `.corrupt-<date>`, taking every lesson beside it out of the live index."""
+    bad = []
+    for ck in sorted(entries):
+        try:
+            e = json.loads(json.dumps(entries[ck], ensure_ascii=False, sort_keys=True))
+        except (TypeError, ValueError):
+            bad.append(str(ck))
+            continue
+        _migrate_stages(e, None)
+        if not _entry_shape(e):
+            bad.append(str(ck))
+    return bad
+
+
 def save(path: pathlib.Path, entries: dict[str, dict]) -> None:
+    # Never write a line the loader refuses (round 17, F1): fail loudly, the previous index
+    # intact, rather than hand the next command an index it sets aside.
+    bad = _unloadable(entries)
+    if bad:
+        raise Refused(f"the index would hold {len(bad)} line{'' if len(bad) == 1 else 's'} the "
+                      f"loader refuses ({', '.join(bad[:3])}); nothing was written, the previous "
+                      "index is intact; this is a defect, report it")
     _ensure_dir(path.parent)
     tmp = None
     try:
@@ -1466,13 +1494,19 @@ def _reclaim(entries: dict[str, dict]) -> list[str]:
     alone, may re-key a v1.95.0 origin into X before the repository Y whose key the legacy store
     used has ever been read. So ownership is made recoverable instead of predicted: the re-keyed
     origin records `rekeyedFrom: <Y's key>`, and when Y is read with an origin of the same class
-    key — the store's identity is (classKey, project) — the id moves to Y's first origin by
-    (project, retro) and is dropped from X. A project enters the index only by being read, and a
-    known project is never re-keyed (`_known_projects`), so Y holding an origin here means Y was
-    read after the re-key: by this `add`, or by this or an earlier run since. So
-    whichever verb runs first, the final owner is the project the legacy store keyed. When Y
-    already holds a different id for that class, two store records are not one: nothing moves,
-    and that is said. Returns the lines to print."""
+    key (the store's identity is (classKey, project)), the id moves to Y's first READ origin by
+    (project, retro) and is dropped from X.
+
+    Y counts as read only by an origin that carries provenance (`checkouts`) and is not carried
+    (round 17, F2): one this `add` merged, or this rebuild re-derived. A v1.95.0 origin under
+    Y's key that could not be re-keyed (no provenance, carried `no provenance`) proves nothing
+    about Y: it may be X's own entry whose twin X no longer holds. Round 16 counted any Y origin
+    and reclaimed in the very run that re-keyed, to a project nobody had read. A project with
+    provenance is known and never re-keyed (`_known_projects`), so a read Y origin here was read
+    after the re-key. So whichever verb runs first, the final owner is the project the legacy
+    store keyed, once that project is actually read. When Y already holds a different id for
+    that class, two store records are not one: nothing moves, and that is said. Returns the
+    lines to print."""
     said: list[str] = []
     for ck in sorted(entries):
         origins = entries[ck]["origins"]
@@ -1481,9 +1515,10 @@ def _reclaim(entries: dict[str, dict]) -> list[str]:
             src = o.get("rekeyedFrom")
             if not src or not o.get("memory") or src == o["project"]:
                 continue
-            mine = sorted((y for y in origins if y["project"] == src), key=_origin_key)
+            mine = sorted((y for y in origins if y["project"] == src and y.get("checkouts")
+                           and not y.get("carried")), key=_origin_key)
             if not mine:
-                continue
+                continue  # Y not read this run: a carried or provenance-less origin proves nothing
             base = mem_base(o["memory"])
             other = next((y["memory"] for y in origins if y["project"] == src and y.get("memory")
                           and mem_base(y["memory"]) != base), None)
@@ -1542,7 +1577,9 @@ def _one_project_per_memory(entries: dict[str, dict], old: dict[str, dict]) -> l
                                 f"one project's store record, so it stays on {keep}, which held it "
                                 f"first — {o['project']} {o['retro']} keeps its place without it "
                                 "(record that project's own id there)")
-                    o = {k: v for k, v in o.items() if k != "memory"}
+                    # `rekeyedFrom` goes with the id (round 17, F1): the loader refuses a source
+                    # beside no memory id, and would set the whole index aside.
+                    o = {k: v for k, v in o.items() if k not in ("memory", "rekeyedFrom")}
                     changed = True
                 out.append(o)
             origins = out
@@ -1611,11 +1648,14 @@ def _attach_memory(entries: dict[str, dict], old: dict[str, dict], notes: list[s
     (project, retro) decide, and only where that match is unique."""
     by_pc: dict[tuple, dict[str, set]] = {}
     best: dict[str, str] = {}
-    source: dict[str, str] = {}  # memory base → the key a re-key took it from (round 16)
+    # (memory base, project) → the key a re-key took that id from, into that project (round 16).
+    # Keyed by the project too (round 17, F1): another project holding the same id was never
+    # re-keyed, and must not be given a source it never had.
+    source: dict[tuple[str, str], str] = {}
     for e in old.values():
         for o in e["origins"]:
             if o.get("memory") and o.get("rekeyedFrom"):
-                source[mem_base(o["memory"])] = o["rekeyedFrom"]
+                source[(mem_base(o["memory"]), o["project"])] = o["rekeyedFrom"]
     for ck, e in old.items():
         for o in e["origins"]:
             m = o.get("memory")
@@ -1632,16 +1672,16 @@ def _attach_memory(entries: dict[str, dict], old: dict[str, dict], notes: list[s
             if len(ids) == 1:
                 (base,) = ids
                 mine[0]["memory"] = best[base]
-                if base in source:
-                    mine[0]["rekeyedFrom"] = source[base]
+                if (base, project) in source:
+                    mine[0]["rekeyedFrom"] = source[(base, project)]
                 changed = True
             elif len(ids) > 1:
                 for o in mine:
                     exact = [b for b, retros in ids.items() if o["retro"] in retros]
                     if len(exact) == 1:
                         o["memory"] = best[exact[0]]
-                        if exact[0] in source:
-                            o["rekeyedFrom"] = source[exact[0]]
+                        if (exact[0], project) in source:
+                            o["rekeyedFrom"] = source[(exact[0], project)]
                         changed = True
                 if not any(o.get("memory") for o in mine):
                     notes.append(f"{ck} — {project}: several memory ids and none matches a retro "
@@ -1670,7 +1710,8 @@ def _one_class_per_memory(entries: dict[str, dict], notes: list[str]) -> None:
         for o in entries[ck]["origins"]:
             m = o.get("memory")
             if m and holders[mem_base(m)][0] != ck:
-                o = {k: v for k, v in o.items() if k != "memory"}
+                # The id's source goes with it (round 17, F1), as in `_one_project_per_memory`.
+                o = {k: v for k, v in o.items() if k not in ("memory", "rekeyedFrom")}
                 changed = True
                 notes.append(f"memory id {mem_base(m)} was on {holders[mem_base(m)][0]} and {ck}; one id "
                              f"is one store record, so it stays on {holders[mem_base(m)][0]} only")

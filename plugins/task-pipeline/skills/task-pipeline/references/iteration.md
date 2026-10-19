@@ -314,9 +314,13 @@ A re-key can only judge the projects already seen, so ownership is made recovera
 re-keyed origin records its source key as `rekeyedFrom`. The first time that project is read
 with an origin of the same class key (by `add` or `rebuild`), or records the id itself, it
 takes the id back; the other origin keeps its place without it, and a `reclaimed:` line says
-so. Whichever verb runs first, the final owner is the project whose key the legacy store used.
-If that project already holds its own id for the class, nothing moves, and that is named. The
-reasons are:
+so. Read means an origin with provenance that is not carried: a v1.95.0 origin under that key
+that could not be re-keyed is not a read, so the run that re-keys never hands the id back to
+it. Whichever verb runs first, the final owner is the project whose key the legacy store used,
+once that project is read. If that project already holds its own id for the class, nothing
+moves, and that is named. An origin that loses its id to the one-project or the one-class rule
+loses `rekeyedFrom` with it, and no verb writes an index line the loader would refuse: `save`
+refuses instead, the previous index intact. The reasons are:
 
 - `checkout not read`: the checkout was not discovered, or a problem is owned by it. That
   problem may be an unreadable retro, a refused `git worktree list`, a shallow clone, a broken
@@ -336,9 +340,9 @@ reasons are:
   `add` applies the same rule to its own checkout's old-key origin.
 
 The project key is the repository's own: the first-parent root of its default branch
-(`origin/HEAD`, then `main`, then `master`). Without any of them it is the main worktree's
-HEAD, read in the common directory, so every worktree gets one answer; then
-`init.defaultBranch`; then this checkout's HEAD. It is computed once per git common directory. A worktree on a branch that merged an unrelated history, or a
+(`origin/HEAD`, then `main`, then `master`, then the branch `init.defaultBranch` names).
+Without any of them it is the main worktree's HEAD, read in the common directory, so every
+worktree gets one answer; then this checkout's HEAD. It is computed once per git common directory. A worktree on a branch that merged an unrelated history, or a
 checkout sitting on an orphan `gh-pages` branch, is still its project.
 
 **Counting.** `seen`, `projects` and `status` count re-derived origins and every carried origin

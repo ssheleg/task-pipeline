@@ -1,6 +1,6 @@
 ## Unreleased
 
-Guards: 448 → **521**; property checks 15 → **15**. There are 73 new negatives in
+Guards: 448 → **527**; property checks 15 → **15**. There are 79 new negatives in
 `lessons.py`. Each one plants a revert, and the suite must catch it:
 
 - the whole-scan refusal put back;
@@ -55,9 +55,28 @@ Guards: 448 → **521**; property checks 15 → **15**. There are 73 new negativ
   source on a repeated `add` or a rebuild;
 - `rebuild`, `add` or `record` never giving a re-keyed id back to its source project, or
   giving it back while leaving it on the other project too, or over that project's own id;
-- an index line accepted with an impossible `rekeyedFrom`.
+- an index line accepted with an impossible `rekeyedFrom`;
+- an id dropped by the one-project or the one-class rule keeping its `rekeyedFrom`, a re-key
+  source given to every project holding that id, a reclaim to a project never read, the main
+  worktree's HEAD keying the repository before `init.defaultBranch`, and `save` writing a line
+  the loader refuses.
 
-These are the fixes from verification rounds 6 to 16 of release iteration 1.
+These are the fixes from verification rounds 6 to 17 of release iteration 1.
+
+- **No write leaves a line the loader refuses; only a read project reclaims** (round 17).
+  When the one-project or the one-class rule took a memory id off an origin, `rekeyedFrom`
+  stayed behind; the loader refuses a source beside no id, so the next command set the whole
+  index aside as `.corrupt-<date>` and every lesson in it left the live index. The source now
+  leaves with the id, and it follows the (id, project) it was recorded for: another project
+  holding the same id is never given one. `save` reads every line back as the loader does and
+  refuses to write one it would refuse, the previous index intact. A re-keyed id goes back
+  only to a project actually read (an origin with provenance, not carried), never to a
+  v1.95.0 origin that could not be re-keyed in the same run. `init.defaultBranch` now keys
+  the repository before the main worktree's HEAD, so a main worktree on an orphan branch does
+  not move the key. Known, not fixed here, each with a backlog row: a `git replace --graft`
+  moves the key (B-141); a v1.95.0 origin with no twin still counts as a second project
+  (B-142); the known-project set is index-wide (B-143); a case-insensitive path read twice
+  (B-144).
 
 - **Ownership is recoverable, not predicted** (round 16). A re-key can only judge the projects
   it has already seen, so an `add` in X, or a rebuild of X's root alone, could take an id

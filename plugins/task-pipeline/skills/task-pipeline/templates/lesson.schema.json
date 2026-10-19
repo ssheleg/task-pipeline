@@ -102,7 +102,7 @@
       ],
       "properties": {
         "project": {
-          "description": "The project's pseudonymous key: `p-` and the first 12 hex digits of the repository's root commit — the first-parent root of its default branch (origin/HEAD, main or master; without them the main worktree's HEAD, then init.defaultBranch), so every worktree and branch of one repository shares it. Never its name: a repository name can be a customer's or a product's (redaction rule 4). The shared store receives the same key, never a `project:<slug>` id.",
+          "description": "The project's pseudonymous key: `p-` and the first 12 hex digits of the repository's root commit: the first-parent root of its default branch (origin/HEAD, main, master or the branch init.defaultBranch names; without them the main worktree's HEAD), so every worktree and branch of one repository shares it. Never its name: a repository name can be a customer's or a product's (redaction rule 4). The shared store receives the same key, never a `project:<slug>` id.",
           "type": "string",
           "pattern": "^p-[0-9a-f]{12}$"
         },

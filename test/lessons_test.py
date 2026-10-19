@@ -2344,6 +2344,202 @@ def round16_controls():
        f"r16 P4: a known Y keeps its id through any order ({holders(ix)} {out!r})")
 
 
+def round17_controls():
+    """Round 17 (adversarial): F1 an origin that loses its memory id loses `rekeyedFrom` with it
+    (in `_one_project_per_memory` and `_one_class_per_memory`), the id's source follows the
+    (id, project) it was recorded for, never the id alone, and no verb writes an index line the
+    loader refuses; F2 a re-keyed id is reclaimed only by a project actually read, never by a
+    carried v1.95.0 origin in the run that re-keyed it; L1 `init.defaultBranch` keys the
+    repository before the main worktree's HEAD."""
+    work = tree("tp-lessons-r17-")
+
+    def root_of(repo):
+        return git(repo, "rev-list", "--max-parents=0", "--first-parent", "HEAD").split()[-1]
+
+    def init_root(repo, text, want):
+        for attempt in range(600):
+            if (repo / ".git").exists():
+                shutil.rmtree(repo / ".git")
+            repo.mkdir(parents=True, exist_ok=True)
+            git(repo, "init", "-q")
+            (repo / f"ROOT-{text.replace(' ', '-')}.md").write_text(f"{text} {attempt}", encoding="utf-8")
+            git(repo, "add", "-A")
+            git(repo, "commit", "-q", "-m", f"{text} {attempt}")
+            if want(git(repo, "rev-parse", "HEAD")):
+                return
+        raise SystemExit(f"r17 fixture {text}: no root satisfied the order in 600 tries")
+
+    def x_merged_y(b, y_want=lambda r: r[0] in "01234567", x_want=None):
+        """Y's root below X's; X merged Y's history, so v1.95.0 keyed X on Y's root."""
+        y, x = b / "ry" / "y", b / "rx" / "x"
+        init_root(y, "y root", y_want)
+        ry = root_of(y)
+        init_root(x, "x root", (lambda r: ry < r and x_want(r)) if x_want else (lambda r: ry < r))
+        git(x, "fetch", "-q", str(y), "HEAD:yhist")
+        git(x, "merge", "-q", "--allow-unrelated-histories", "-m", "y in", "yhist")
+        return x, y, "p-" + ry[:12]
+
+    def commit_retros(repo, entries):
+        (repo / "fix.txt").write_text(repo.name, encoding="utf-8")
+        git(repo, "add", "-A")
+        git(repo, "commit", "-q", "-m", "fix")
+        sha = git(repo, "rev-parse", "HEAD")
+        write_retros(repo, entries, sha)
+        git(repo, "add", "-A")
+        git(repo, "commit", "-q", "-m", "retro")
+        return sha
+
+    def add_all(repo, ix):
+        return run("add", "--retro", "docs/evidence/retro.md", "--all", cwd=repo, index=ix)
+
+    def corrupt_beside(ix):
+        return sorted(p.name for p in ix.parent.iterdir() if ".corrupt-" in p.name)
+
+    def view(ix, ck=KEY):
+        return sorted((o["project"], o.get("memory"), o.get("rekeyedFrom"))
+                      for o in entries_of(ix)[ck]["origins"])
+
+    # F1 (one project per id) — a v1.95.0 index holds mem:dup on two projects' origins of one
+    # class: X's, keyed under Y's root (re-keyed into X), and Z's, keyed on its own root. The
+    # earlier holder keeps the id; X loses it, and `rekeyedFrom` with it. Z never gets a source.
+    for verb in ("rebuild", "add"):
+        b = work / f"f1-{verb}"
+        x, y, ky = x_merged_y(b, y_want=lambda r: r[0] in "0123", x_want=lambda r: r[0] in "cdef")
+        rx = root_of(x)
+        z = b / "rz" / "z"
+        init_root(z, "z root", lambda r: ky[2:] < r[:12] and r < rx)
+        commit_retros(x, [("retro.md", "export gate", KEY)])
+        commit_retros(z, [("retro.md", "z gate", KEY)])
+        ix = b / "index.jsonl"
+        for repo in (x, z):
+            rc, _, err = add_all(repo, ix)
+            ok(rc == 0, f"r17 F1 {verb} fixture: add ({err!r})")
+        kz = "p-" + root_of(z)[:12]
+        line = json.loads(ix.read_text(encoding="utf-8").splitlines()[0])
+        for o in line["origins"]:
+            o.pop("checkouts", None)
+            o["memory"] = "mem:dup@1"
+            if o["retro"].endswith("#export-gate"):
+                o["project"] = ky
+        ix.write_text(json.dumps(line, ensure_ascii=False, sort_keys=True) + "\n", encoding="utf-8")
+        if verb == "rebuild":
+            rc, out, err = run("rebuild", "--roots", str(b / "rx"), str(b / "rz"), index=ix)
+        else:
+            rc, out, err = add_all(x, ix)
+        kx = "p-" + root_of(x)[:12]
+        rc2, _, err2 = run("show", lesson_of(ix)["id"], index=ix)
+        ok(rc == 0 and rc2 == 0 and not corrupt_beside(ix) and "could not be parsed" not in err2,
+           f"r17 F1 {verb}: an id dropped by the one-project rule leaves a line the loader reads "
+           f"({rc} {rc2} {corrupt_beside(ix)} {out!r} {err!r} {err2!r})")
+        ok(view(ix) == sorted([(kz, "mem:dup@1", None), (kx, None, None)]),
+           f"r17 F1 {verb}: rekeyedFrom leaves with the id, and Z is given no source it never had ({view(ix)})")
+
+    # F1 (one class per id) — a v1.95.0 index holds mem:dup on two class keys, both X's origins
+    # under Y's root; Z holds mem:z on the second key. The second key's X origin loses mem:dup and
+    # its `rekeyedFrom`; the line stays readable, so Z's carried mem:z never leaves the index.
+    b = work / "f1-class"
+    x, y, ky = x_merged_y(b)
+    commit_retros(x, [("retro.md", "export gate", KEY), ("retro.md", "second gate", K2)])
+    ix = b / "index.jsonl"
+    add_all(x, ix)
+    z, _ = headed_repo("z", [("retro.md", "z gate", K2)], parent=b / "rz")
+    add_all(z, ix)
+    ok(record_mem(ix, z, K2, "mem:z") == 0, "r17 F1 class fixture: Z records mem:z")
+    lines = []
+    for ln in ix.read_text(encoding="utf-8").splitlines():
+        e = json.loads(ln)
+        for o in e["origins"]:
+            if o.get("memory") == "mem:z@1":
+                continue
+            o.pop("checkouts", None)
+            o.update(project=ky, memory="mem:dup@1")
+        lines.append(json.dumps(e, ensure_ascii=False, sort_keys=True))
+    ix.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    rc, out, err = run("rebuild", "--roots", str(b / "rx"), index=ix)
+    rc2, _, err2 = run("query", "gate", index=ix)
+    ok(rc == 0 and rc2 == 0 and not corrupt_beside(ix) and "could not be parsed" not in err2
+       and "mem:z@1" in ix.read_text(encoding="utf-8")
+       and not any(o.get("rekeyedFrom") and not o.get("memory") for o in entries_of(ix)[K2]["origins"]),
+       f"r17 F1: an id dropped by the one-class rule leaves a line the loader reads, mem:z kept "
+       f"({rc} {rc2} {corrupt_beside(ix)} {view(ix, K2)} {out!r} {err2!r})")
+
+    # F1 guard — no write path emits a line `_entry_shape` refuses: `save` refuses, loudly, and
+    # the previous index is untouched.
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("lessons_r17", SCRIPT)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    good = entries_of(ix)
+    before = ix.read_bytes()
+    bad = json.loads(json.dumps(good))
+    o = bad[KEY]["origins"][0]
+    o.pop("memory", None)
+    o["rekeyedFrom"] = "p-0123456789ab"
+    try:
+        mod.save(ix, bad)
+        refused = ""
+    except mod.Refused as exc:
+        refused = str(exc)
+    ok("the loader refuses" in refused and KEY in refused and ix.read_bytes() == before,
+       f"r17 F1: save refuses a line the loader refuses, the index intact ({refused!r})")
+    mod.save(ix, good)
+    ok(entries_of(ix) == good, "r17 F1: save writes a line the loader reads")
+
+    # F2 — two v1.95.0 origins under Y's key in one class; only X's export gate still has a twin
+    # (the second gate was dropped). One rebuild of X re-keys the id into X; Y is never read, so
+    # nothing reclaims it to the carried, provenance-less second gate, and X records its own id.
+    b = work / "f2"
+    x, y, ky = x_merged_y(b)
+    commit_retros(x, [("retro.md", "export gate", KEY), ("retro.md", "second gate", KEY)])
+    ix = b / "index.jsonl"
+    add_all(x, ix)
+    line = json.loads(ix.read_text(encoding="utf-8").splitlines()[0])
+    for o in line["origins"]:
+        o.pop("checkouts", None)
+        o["project"] = ky
+        if o["retro"].endswith("#export-gate"):
+            o["memory"] = "mem:f2@1"
+    ix.write_text(json.dumps(line, ensure_ascii=False, sort_keys=True) + "\n", encoding="utf-8")
+    write_retros(x, [("retro.md", "export gate", KEY)], line["origins"][0]["commit"])
+    git(x, "add", "-A")
+    git(x, "commit", "-q", "-m", "drop second")
+    rc, out, err = run("rebuild", "--roots", str(b / "rx"), index=ix)
+    kx = "p-" + root_of(x)[:12]
+    held = [(o["project"], o["retro"].split("#")[1], o.get("memory"), o.get("rekeyedFrom"))
+            for o in lesson_of(ix)["origins"] if o.get("memory")]
+    ok(rc == 0 and "reclaimed" not in out and held == [(kx, "export-gate", "mem:f2@1", ky)],
+       f"r17 F2: a project never read does not reclaim in the run that re-keyed ({held} {out!r} {err!r})")
+    b1 = ix.read_bytes()
+    run("rebuild", "--roots", str(b / "rx"), index=ix)
+    ok(ix.read_bytes() == b1, "r17 F2: a second rebuild of X changes nothing")
+    rc, _, err = run("record", lesson_of(ix)["id"], "--answer", "-", cwd=x, index=ix,
+                     stdin=json.dumps({"memoryId": "mem:f2", "revision": 2}))
+    ok(rc == 0 and [(o["project"], o.get("memory")) for o in lesson_of(ix)["origins"] if o.get("memory")]
+       == [(kx, "mem:f2@2")], f"r17 F2: X records the id it holds ({rc} {err!r})")
+
+    # L1 — no origin/HEAD, main or master; init.defaultBranch names `trunk`. The main worktree
+    # moving to an orphan `pages` branch does not move the key.
+    r = work / "l1" / "roots" / "a"
+    r.mkdir(parents=True)
+    git(r, "init", "-q", "-b", "trunk")
+    git(r, "config", "init.defaultBranch", "trunk")
+    (r / "README.md").write_text("a", encoding="utf-8")
+    git(r, "add", "-A")
+    git(r, "commit", "-q", "-m", "root")
+    commit_retros(r, [("retro.md", "export gate", KEY)])
+    ix = work / "l1" / "ix.jsonl"
+    rc, _, _ = run("rebuild", "--roots", str(work / "l1" / "roots"), index=ix)
+    k1 = lesson_of(ix)["origins"][0]["project"]
+    git(r, "checkout", "-q", "--orphan", "pages")
+    git(r, "commit", "-q", "-m", "pages")
+    rc, out, _ = run("rebuild", "--roots", str(work / "l1" / "roots"), index=ix)
+    e = lesson_of(ix)
+    ok(rc == 0 and [o["project"] for o in e["origins"]] == [k1] and e["projects"] == 1
+       and "carried" not in out.split("\n", 1)[-1],
+       f"r17 L1: init.defaultBranch keys the repository before the main worktree's HEAD "
+       f"({k1} {[(o['project'], o.get('carried')) for o in e['origins']]} {out!r})")
+
+
 def source_admission_controls():
     repo, _ = project("source-admission", 1)
     retro = repo / "docs/evidence/retro.md"
@@ -2948,6 +3144,7 @@ def main():
     round13_controls()
     round14_controls()
     round16_controls()
+    round17_controls()
     source_admission_controls()
     print(f"PASS: lessons.py — {CASES} cases")
 

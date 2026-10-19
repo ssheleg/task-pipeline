@@ -1,4 +1,17 @@
-## Fix cycles 6 to 16 of the release iteration, #125, branch `iter1/M-5-N-1` (2026-10-18)
+## Fix cycles 6 to 17 of the release iteration, #125, branch `iter1/M-5-N-1` (2026-10-19)
+
+Cycle 17 closed round 17's two MEDIUM findings and L1. F1: an origin that loses its memory id
+to the one-project or the one-class rule loses `rekeyedFrom` with it, the source is keyed by
+(id, project) in `_attach_memory`, and `save` refuses to write a line the loader would refuse
+(the index stays intact). F2: `_reclaim` moves an id only to an origin of the source project
+that was read (provenance, not carried). L1: `init.defaultBranch` before the main worktree's
+HEAD. Tests in `round17_controls` (the reviewer's repro1, repro2 part 1, repro3, repro4 and
+repro4_add); negatives 541 to 546; `MIN_EXPECTED` 527. Backlog rows B-141 (graft, L2, out of
+scope), B-142 (a twinless v1.95.0 origin still counted as a second project), B-143 and B-144
+(the two "known, not fixed" items of cycles 16 and 15). Next task: round 18 verification of
+this head.
+
+Earlier, cycle 16 (2026-10-18):
 
 Cycle 16 made ownership recoverable: a re-key records `rekeyedFrom`, and the source project
 reclaims the id when it is first read (add or rebuild) or records it, so verb order never

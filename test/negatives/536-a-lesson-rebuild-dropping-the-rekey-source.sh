@@ -6,7 +6,7 @@ python3 - <<'EOF'
 # Round 16: the reclaim. Put back a lesson rebuild dropping the re-key source.
 p = "/tmp/r16-attach-copy/plugins/task-pipeline/skills/task-pipeline/scripts/lessons.py"
 t = open(p, encoding="utf-8").read()
-needle = '                if base in source:\n                    mine[0]["rekeyedFrom"] = source[base]\n'
+needle = '                if (base, project) in source:\n                    mine[0]["rekeyedFrom"] = source[(base, project)]\n'
 assert needle in t, "PLANT DID NOT LAND: anchor absent before edit"
 open(p, "w", encoding="utf-8").write(t.replace(needle, '', 1))
 assert needle not in open(p, encoding="utf-8").read(), "PLANT DID NOT LAND"
