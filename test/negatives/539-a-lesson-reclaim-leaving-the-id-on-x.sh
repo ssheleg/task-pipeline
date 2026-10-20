@@ -12,7 +12,7 @@ open(p, "w", encoding="utf-8").write(t.replace(needle, '                if False
 assert needle not in open(p, encoding="utf-8").read(), "PLANT DID NOT LAND"
 EOF
 # The plant must fail with ITS defect, not any non-zero exit (round 16).
-expect='r16 add in X: a full rebuild after the reclaim agrees'
+expect='r16 add in X: the first add in Y reclaims its id, said aloud'
 out=$(python3 /tmp/r16-strip-copy/test/lessons_test.py 2>&1) && rc=0 || rc=$?
 rm -rf /tmp/r16-strip-copy
 if [ "$rc" -eq 0 ]; then

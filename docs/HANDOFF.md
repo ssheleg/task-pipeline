@@ -6,7 +6,8 @@ to the one-project or the one-class rule loses `rekeyedFrom` with it, the source
 (the index stays intact). F2: `_reclaim` moves an id only to an origin of the source project
 that was read (provenance, not carried). L1: `init.defaultBranch` before the main worktree's
 HEAD. Tests in `round17_controls` (the reviewer's repro1, repro2 part 1, repro3, repro4 and
-repro4_add); negatives 541 to 546; `MIN_EXPECTED` 527. Backlog rows B-141 (graft, L2, out of
+repro4_add); negatives 541 to 546, 474 and 536 re-anchored, 539 now caught by the r16 reclaim
+check refusing a one-project tidy-up after the reclaim; `MIN_EXPECTED` 527. Backlog rows B-141 (graft, L2, out of
 scope), B-142 (a twinless v1.95.0 origin still counted as a second project), B-143 and B-144
 (the two "known, not fixed" items of cycles 16 and 15). Next task: round 18 verification of
 this head.

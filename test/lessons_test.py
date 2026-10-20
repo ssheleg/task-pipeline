@@ -2274,7 +2274,10 @@ def round16_controls():
         run("add", "--retro", "docs/evidence/retro.md", "--all", cwd=x, index=ix)
         ok(holders(ix) == [(kx, "mem:f2@1", ky)], f"r16 {verb}: a repeated add in X keeps rekeyedFrom ({holders(ix)})")
         rc, out, err = add_y(y, ix)
-        ok(rc == 0 and holders(ix) == [(ky, "mem:f2@1", None)] and "reclaimed" in out and "goes back to " + ky in out,
+        # A clean reclaim leaves nothing for the one-project rule (round 17: with F1 fixed, that
+        # rule would otherwise tidy up after a reclaim that left the id on X too).
+        ok(rc == 0 and holders(ix) == [(ky, "mem:f2@1", None)] and "reclaimed" in out and "goes back to " + ky in out
+           and "is held by" not in out,
            f"r16 {verb}: the first add in Y reclaims its id, said aloud ({rc} {holders(ix)} {out!r} {err!r})")
         rc, out, _ = run("rebuild", "--roots", str(b), index=ix)
         ok(rc == 0 and holders(ix) == [(ky, "mem:f2@1", None)],
