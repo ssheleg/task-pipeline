@@ -24,8 +24,8 @@ sets a gate `manual` in its own `pipeline.json`.
 each stage's section of `stages.md` and its detail load when the stage starts; grill,
 knowledge-sources, companion-skills, continuity, model-tiering and gates.md load on named
 triggers. The command is a 1.5 KB pointer. Measured, the floor before code on the short
-path is 34 KB (was 236 KB); `SKILL.md` is 15.5 KB, 3 600 cl100k tokens of body (was 4 709,
-cap 5 000). The three descriptions are 386, 399 and 395 characters; every trigger phrase
+path is 35 KB (was 236 KB; 80 KB when the grill and knowledge-sources triggers fire);
+`SKILL.md` is 16.2 KB, 3 753 cl100k tokens of body (was 4 709, cap 5 000). The three descriptions are 386, 399 and 395 characters; every trigger phrase
 they dropped moved verbatim into a `## Triggers` section of the same `SKILL.md`.
 
 **C. Anti-loop.** `graph.py certify`: an R1 node certifies with one blind tier; R2 owes one
@@ -47,8 +47,9 @@ retrospectives. evidence-docs' 34.7 KB copy of the retro doctrine is now a point
 
 Tests: `graph_test.py` 171 → 173 cases (tier count by risk, unchanged-input refusal,
 ceiling stops), `waves_test.py` 135 cases with `--clean-rounds`,
-`test/audit_regressions/diet_retro_budget.py` (8 cases, over-budget plants must fail) and
-`diet_proportional.py` (6 cases).
+`test/audit_regressions/diet_retro_budget.py` (9 cases, over-budget plants must fail) and
+`diet_proportional.py` (6 cases). Twelve negative plants retargeted to the new wording
+(stage 0 and 10 gates name their authorization and the hand-back instead of `manual`).
 
 ## v1.97.1 — 2026-10-17
 

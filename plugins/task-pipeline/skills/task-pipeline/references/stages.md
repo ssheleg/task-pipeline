@@ -2,9 +2,9 @@
 
 For the selected **default profile**, read **one stage section of this file when that
 stage starts** (the stage table in `SKILL.md` is the index), then the one detail it
-links, on every entry or resume, including wave iterations and the short path. Do not
-read this file end to end and do not preload all stage details. Missing or
-unreadable detail means stop that stage and repair its route, never guess. A custom
+links, on every entry or resume, including wave iterations and approved short paths
+(the triage approves the short path itself since 1.98.0). Never read this file end to
+end. Do not preload all stage details. Missing or unreadable detail means stop that stage and repair its route, never guess. A custom
 profile uses its own declared doctrine and stages; numeric ids do not select these
 default details, and the kernel still applies.
 

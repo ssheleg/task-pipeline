@@ -98,7 +98,7 @@ with tempfile.TemporaryDirectory(prefix='tp-fw07-profile-') as temp:
     check(len(a['body']['plan']) == 11 and a['body']['open'][0]['step_id'] == 'stage-1', 'absent config selects default')
     default = json.loads((SCRIPT.parent.parent / 'pipeline.example.json').read_text())
     root, ledger = fixture(base, 'explicit-default', default, sid=0, name='Intake grill')
-    ledger.write_text(ledger.read_text().replace('gate auto', 'gate manual'))
+    # stage 0's example gate is auto since 1.98.0, so the seeded ledger line already matches
     check(len(emit(root)['body']['plan']) == 11, 'configured default profile remains supported')
     root, _ = fixture(base, 'ordinal', {'stages': [stage('one'), stage('two')]}, sid=0, name='one')
     a = emit(root)

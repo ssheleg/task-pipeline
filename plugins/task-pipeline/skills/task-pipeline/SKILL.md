@@ -14,14 +14,16 @@ gate passes, and the whole run uses one model, confirmed before it starts.
 **Proportional, then autonomous.** Stage 0 is a **gap check** before it is an
 interview: the brief is built from the request, the files and the harvest, and a
 question is asked only for a **material unknown** the sources cannot answer. A
-complete brief asks nothing. When the change is also small (R1 risk, at most five
+complete brief yields ZERO intake questions; what the request or the project already
+decided is recorded, never re-negotiated. When the change is also small (R1 risk, at most five
 files, no public contract, no user-facing change, no deploy), the run **takes the short
 path by default** and says so in one line: brief in the run ledger, build with tests,
 one verification, docs and handoff, a retro entry only for a new lesson
 ([`references/stage-00-intake.md`](references/stage-00-intake.md) → Phase 1d, which
 also names the triggers that bring a skipped stage back). Anything larger runs the
 full flow, with the interview, where gaps remain, as ONE batch that pre-resolves
-stages 1→10.
+stages 1→10: every MATERIAL question skipped at stage 0 comes back as an interruption
+later.
 
 **Config contract: [`pipeline.schema.json`](pipeline.schema.json).** A pipeline is an
 ordered list of stages, each with `skills[]` and a `gate {type, check}`; the schema
@@ -32,10 +34,11 @@ this plugin's default flow (stage 0 plus the 1→10 stages below) and an optiona
 
 **Two layers, and only one is replaceable.** The **KERNEL** is what every unit of
 work carries in any pipeline: its **scope**, its **evidence**, its **deps** and a
-**resume** point. The **PROFILE** is the stage list, and a project replaces it
-wholesale. **The stage numbers belong to the SELECTED profile, never to the kernel:**
-a three-stage profile has no "stage 7". A custom profile may drop stages, never a
-kernel field. Each gate has a **type**: `auto` (the orchestrator verifies the
+**resume** point. The kernel is invariant. The **PROFILE** is the stage list, and a
+project replaces it wholesale. **The stage numbers belong to the SELECTED profile,
+never to the kernel:** a minimal three-stage profile has no "stage 7", and a rule
+keyed on a global stage number is a rule about the default profile. A custom profile
+may drop stages, never a kernel field. Each gate has a **type**: `auto` (the orchestrator verifies the
 `check`), `judgment` (a named judge rules, recorded as judgement, never as a
 measurement; `references/gates.md` → *The judgment gate*) or `manual` (an explicit go).
 **The
@@ -51,8 +54,8 @@ Every stage's doctrine ships inside this skill, and **no stage blocks on an inst
 stage 1 falls back to web search, the wiki and the code graph are recommendations.
 Which reference owns which stage:
 [`references/doctrine-map.md`](./references/doctrine-map.md). **Precedence:** on a
-custom profile the **kernel wins**; `references/stages.md` is the default profile's
-normative gate set; another skill set on stages 2/4/5/6 is
+CUSTOM profile the **kernel wins**; `references/stages.md` is the **default
+profile's** normative gate set; the kernel is normative for all; another skill set on stages 2/4/5/6 is
 `references/companion-skills.md`.
 
 **super-ux is the preferred provider for ANY user-facing task**, and **the stage-3
@@ -87,7 +90,9 @@ archive, verbatim and hash-proved.
 
 1. Restate the task in one line, track each stage from 0 (host task tool or a prose
    checklist, for resume), then emit the **preflight block** once: the model decision
-   (`references/model-tiering.md`), the run mode (`pipeline.json` → `run.loop`,
+   (`references/model-tiering.md`: recommend the most capable model as advice, the
+   operator confirms or overrides, the choice — inherited verbatim by plan, stages and
+   subagents), the run mode (`pipeline.json` → `run.loop`,
    `references/continuity.md`; absent means off, and the mode never collapses a
    `manual` gate) and the optional companions: super-ux for UI tasks, context7,
    wiki-update, graphify (`references/companion-skills.md`).
@@ -97,9 +102,11 @@ archive, verbatim and hash-proved.
    confirm scope in one line and skip to the first stage with real work.
 3. Walk the stages on the model confirmed at preflight; don't re-ask it per stage.
    **The SELECTED profile is compiled once, at preflight, and only ITS declared
-   stages and gates run**: a custom profile with three stages runs three, the KERNEL
-   still applies, and an unknown MANDATORY capability in `must_understand` blocks the
-   compile. **A platform rather than a change?** Stage 2 cuts it into modules
+   stages and gates run**: a custom profile with three stages runs three, and no
+   hidden stage 0, 7 or 10 is injected. What a custom profile does NOT escape is the
+   KERNEL: dropping stages never drops the evidence gate. And an unknown MANDATORY
+   capability blocks the compile: a `must_understand` capability this runtime lacks is
+   refused, never run with the capability silently absent. **A platform rather than a change?** Stage 2 cuts it into modules
    (`references/decomposition.md`) and stages 3→10 run per module
    (`references/stages.md` → *The program loop*). **The whole board?**
    `/task-pipeline waves` (`references/waves.md`). **Releases:**
