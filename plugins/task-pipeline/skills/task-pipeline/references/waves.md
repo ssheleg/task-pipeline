@@ -57,10 +57,12 @@ on real agents, tasks and users rather than on the first guess.
 | 5–8 Build → post-deploy | per wave, then the close pass. A wave's stage 7 integrates to the main branch **without tagging**; the release's tag, its approval mode and its go are stage 7's full gate, run once at the release ([`iteration.md`](iteration.md) → *The cycle*, step 10), and stage 8's trio follows on what was released (step 11) |
 | 9 Docs + wiki · 10 Acceptance | once, to close the release, over everything the waves shipped |
 
-**One planning gate, not three prompts.** The manual gates of stages 0, 2 and 3 are
-presented together at the end of planning: the brief, the canvas, the wave plan and the
-question batch in one message. Each gate's criteria are still checked and printed; the
-operator is asked once, and the go names the gates it closes. Silence closes none.
+**One planning gate, not three prompts.** The gates of stages 0, 2 and 3 are presented
+together at the end of planning: the brief, the canvas, the wave plan and the question
+batch in one message. Each gate's criteria are still checked and printed. They are `auto`
+by default (since 1.98.0): the standing authorization recorded in the brief closes them
+and the run continues; where the project made them `manual`, the operator is asked once,
+the go names the gates it closes, and silence closes none.
 
 ## Wave 0 — the survey and the inventory
 

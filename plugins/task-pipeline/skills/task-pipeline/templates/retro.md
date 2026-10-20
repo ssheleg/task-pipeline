@@ -13,6 +13,11 @@ not negotiable. The **Recent log** and the **archive**
 read end to end: nothing caps the log's length, and an uncapped section read in
 full is the volume that stops the ten binding rows being read.
 
+**The floor has a byte budget:** standing instructions plus run stamps under 12 000
+bytes, a standing row at most 600 characters (the story goes to the archive), a stamp
+one line of at most 300. `scripts/retro_budget.py check` measures it at stage 0 and at
+gate 10; `migrate --write` moves narrative to the archive verbatim, hash-proved.
+
 ## Standing instructions (max 10 — in force right now)
 
 Every row is a rule an agent must follow, that **no check can decide**. A rule a
@@ -49,6 +54,10 @@ stays short precisely so that reading it in full at stage 0 stays cheap.
 - **Fix:** grade 1 (mechanical) — … / grade 2 → `R-00N` / grade 3, expires in
   2 runs
 - **The check:** … (what catches this the first time, from now on)
+- **Class:** `exit-code` | `unwatched-check` | `release` | `collision` |
+  `destructive-undo` | `claim-by-say-so` | `stale-doc` | `wrong-copy` | `sibling` |
+  `truncated-output` | `shell-instrument` | `handback` | `loop` (recurrence is counted
+  by class) · **Cost:** … (rounds, burned tags, time)
 - **Lesson:** `<class-key>` — <the class, one sentence> · **When:** <trigger> · **Nouns:** <a>, <b>, <c>
   (optional, and on ONE line: write it only when the class would be true in another
   project — it makes the entry a lesson for `scripts/lessons.py add`, lesson/1. Without
@@ -74,7 +83,7 @@ this section is read in full at stage 0.
 | Date | Topic | Commit | Verdict | Retro |
 |---|---|---|---|---|
 | 2026-05-04 | `<topic>` | `<sha>` | 14/14 verified | 1 entry · 7 standing (was 9) · retired 3 · added 1 |
-| 2026-05-02 | `<topic>` | `<sha>` | 9/9 verified | no divergence · 9 standing · retired 0 |
+| 2026-05-02 | `<topic>` | `<sha>` | 9/9 verified | no divergence · 9 standing · prune: 0 retired |
 
 The `Commit` column is what turns a stamp from a date into a navigable point in
 history: `git show <sha>` is the run, and `git log <sha>..HEAD` is everything that

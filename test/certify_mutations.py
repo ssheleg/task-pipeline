@@ -34,7 +34,7 @@ import tempfile
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 GRAPH_REL = "plugins/task-pipeline/skills/task-pipeline/scripts/graph.py"
-EXPECTED_FIXTURES = 31
+EXPECTED_FIXTURES = 33
 
 # (name, the source to disable, what to replace it with). Each disables exactly one
 # rule; the fixture that must notice is named in the output when it does.
@@ -60,8 +60,12 @@ MUTATIONS = [
      'return [k for h, k in zip(history, kinds) if h and all(v == "pass" for v in h.values())]',
      'return [k for h, k in zip(history, kinds)]'),
     ("R3 owes a passing adversarial round",
-     'if node.get("risk") == "R3" and "adversarial" not in passed:', 'if False:'),
+     'if adversarial and "adversarial" not in passed:', 'if False:'),
     ("close enforces the owed rounds", 'if short and not exc:', 'if False:'),
+    # 1.98.0: the cost follows the risk, and loops stop.
+    ("R1 needs one blind tier", 'if len(missing) == len(TIERS):', 'if False:'),
+    ("no re-run on an unchanged tree", 'if (tree and prior.get("tree") == tree', 'if (False and prior.get("tree") == tree'),
+    ("the ceiling stops", 'stop = bool(failed) and failed_rounds >= args.ceiling', 'stop = False'),
     ("one-report-per-tier", 'if t["tier"] in reports:', 'if False:'),
     ("same-node", 'if t["node"] != nid:', 'if False:'),
     ("the round increments",

@@ -7,7 +7,7 @@ The full gate and freedom level remain in [stages.md](stages.md).
   workspace (native worktree tool first, git fallback, baseline tests), keep a
   ledger under `.task-pipeline/build/<plan>/` so a compacted context can resume,
   then one fresh implementer subagent per task with a file-based brief and report,
-  a review after every task ([`review.md`](review.md)), and a five-round fix loop
+  a review after every task ([`review.md`](review.md)), and a three-round fix loop
   with an explicit breaker. TDD per task ([`tdd.md`](tdd.md)): failing test →
   watch it fail → minimal impl → watch it pass → commit. Pin subagents to the
   run's confirmed model (`model-tiering.md`). The plan's parallel groups fan out

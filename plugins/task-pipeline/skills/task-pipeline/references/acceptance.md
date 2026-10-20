@@ -20,7 +20,7 @@ requirement.** It is what turns the pipeline from a funnel into a circle.
 - The retrospective — the run's last act
 - A `verified by` name is a claim until it resolves
 - A seam is not a deliverable, and REQ rows are written against deliverables
-- GATE (manual)
+- GATE (auto)
 - When the answer is "something's missing"
 - A project of several repositories
 
@@ -329,7 +329,7 @@ client write on the other — the table says so under `unlooked` rather than sho
 green rows. Two green halves reporting a working whole is exactly the shape this file
 spends its length refusing.
 
-## GATE (manual)
+## GATE (auto)
 
 > **Acceptance policy `AP-1` · owner: the operator of the project running this pipeline ·
 > in force since 2026-08-20 · supersedes: the unversioned ladder that stood before it.**

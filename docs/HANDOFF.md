@@ -1,3 +1,28 @@
+## 1.98.0: proportional run, reading diet, anti-loop, retro byte budget (2026-10-20)
+
+Objective (operator task, 2026-10-20): make a run cheaper, stop it looping, and put the
+operators' retro insights into the retro doctrine; release it. Branch `feat/diet-1020`.
+
+- **Done.** A: stage 0's triage decides the short path (`scripts/short_path.py`), the
+  example's gates are `auto`. B: entry reads `SKILL.md` only, the rest loads per stage or
+  on named triggers (`SKILL.md` → *What to read, and when*); the command is a pointer;
+  descriptions 386/399/395 chars with the old trigger lists verbatim under `## Triggers`.
+  C: `graph.py certify` tiers and rounds by risk, unchanged-input refusal, ceiling parks
+  (exit 7); `waves.py finish --clean-rounds`; fix and review loops cap at three. D:
+  `scripts/retro_budget.py`, the floor budget, Class and Cost per entry, `learned.md`
+  rules 33 to 39, evidence-docs' retro doctrine a pointer; this repo's floor migrated
+  (27 620 → 6 532 bytes, archive `docs/evidence/retro/2026-Q4.md`, hash-proved).
+- **Decisions.** R3 owes two rounds (blind plus adversarial), not three; a flagship
+  surface owes two with one adversarial; "small" is R1, at most five files, no contract,
+  no user-facing change, no deploy; the budget is 12 000 bytes, rows 600, stamps 300;
+  the validator's description checks read the description plus `## Triggers`.
+- **Checks run.** `npm test` and `npm run test:all` locally (exit codes read directly);
+  new suites `test/audit_regressions/diet_retro_budget.py`, `diet_proportional.py`.
+- **Open.** The hub re-pin (ssheleg/sshlg-skills, B-154 closes there) is the hub's.
+- **Next task.** After the merge: the stamp PR naming the merge commit, then the local
+  annotated tag `v1.98.0`, `npm run test:all` on it, push, watch the release run, read
+  the published package back (`npm view task-pipeline-skill version`).
+
 ## 1.97.0 source candidate — WebKit (Safari) first (2026-10-16)
 
 Branch `docs/safari-first`, draft PR "1.97.0 — the look runs on WebKit first". REQ R11

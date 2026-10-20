@@ -176,7 +176,7 @@ overall.
 - **The final whole-branch review.** If the run is on a tier below the most capable
   one available, say so and offer to run this one review there; if the operator
   declines or the tier doesn't exist, run it on the confirmed model and note it.
-- **Fix-loop rounds 4–5.** One tier above the implementer that got stuck, when the
+- **Fix-loop round 3.** One tier above the implementer that got stuck, when the
   environment has one and the override map or the operator allows it; otherwise
   say so and rely on fresh eyes alone.
 
@@ -407,7 +407,7 @@ may say what the reviewer actually saw, and a syntax lint recorded as a blind
 review is refused by `certify` by name.
 
 **The boundary with certification:** this review closes a **prose-plan task** —
-one reviewer, the five-round cap of §4.5. A **work-graph node** is closed by the
+one reviewer, the three-round cap of §4.5. A **work-graph node** is closed by the
 three blind tiers and `graph.py certify` instead
 ([`certification.md`](certification.md), ceiling 3); the artifact the queue is —
 plan or graph — decides which protocol closes the work, never whichever is
@@ -444,7 +444,7 @@ Two routes leave before the loop starts:
   without asking.
 
 Everything else loops. One round = one fix dispatch + one scoped re-review.
-**Five rounds maximum per task.**
+**Three rounds maximum per task**, then the open findings become blocker rows and the run moves on.
 
 **The loop guard runs alongside the counter** ([`loop-guard.md`](loop-guard.md)):
 log every repeat touch (`touch: <file> — round N — reason: <finding id>`) and trip
@@ -453,13 +453,13 @@ the same reason, or when a finding already ADDRESSED reappears. A tripped guard 
 not another round: stop, name the two shapes, escalate to the layer that owns the
 conflict, then re-check in a planned order.
 
-- **Rounds 1–3:** resume the original implementer with the open findings verbatim —
+- **Rounds 1–2:** resume the original implementer with the open findings verbatim —
   its context is intact. If the harness can't message a live subagent, dispatch a
   fresh one with the brief path, the report path and the findings; the report file
   is the persistent memory either way.
-- **Rounds 4–5:** fresh implementer, one tier up if available, framed as: "a prior
+- **Round 3:** fresh implementer, one tier up if available, framed as: "a prior
   implementer attempted this task N times; you own it now — read the report file
-  for what was tried." A loop that survives three resumes usually means the
+  for what was tried." A loop that survives two resumes usually means the
   implementer can't see its own problem.
 - **Every round:** the implementer fixes, re-runs the tests covering the amended
   code, appends its fix report to the same report file, returns the short contract.
@@ -471,7 +471,7 @@ conflict, then re-check in a planned order.
   breakage joins the open list; out-of-scope observations go to the ledger as
   deferred minors — they never extend the loop.
 - **Ledger, every round:**
-  `Task <N>: fix round <R>/5 (<X> addressed, <Y> open — <one-liners>; commits <a7>..<b7>)`
+  `Task <N>: fix round <R>/3 (<X> addressed, <Y> open — <one-liners>; commits <a7>..<b7>)`
 
 **In a subagent run, never fix findings yourself in the controller session** —
 controller fixes skip review and pollute the context you need for coordination. In a

@@ -159,28 +159,25 @@ its slowest node before checking its fastest.
 
 **The number of rounds follows the node's risk class.** The class is recorded on the node
 as `risk` (R1–R3, [`work-graph.md`](work-graph.md)), computed from what the node touches.
-It is never lowered to save time. **A round is the three blind tiers of
-[`certification.md`](certification.md) plus one fix cycle**, and the first round is always
-the full three tiers — there is no lighter first reading. The class sets how many rounds
-the node owes:
+It is never lowered to save time. **A round is the blind tiers the class owes, plus one
+fix cycle** ([`certification.md`](certification.md)), and a clean round ends the node
+unless the class is R3 or the surface is flagship:
 
-| Class | Touches | Rounds |
-|---|---|---|
-| R1 | docs, config, a mechanical change, one isolated file | 1: that first round |
-| R2 | an ordinary feature or fix inside one module | 2: the first round, then a second over the fix diff with its regression tests |
-| R3 | security, cryptography, money, a data migration, a public contract, a seam across repositories, concurrency | 3, one of them recorded adversarial — a round that plants defects and tries abuse cases, on another model where one is available |
+| Class | Touches | Tiers | Rounds |
+|---|---|---|---|
+| R1 | docs, config, a mechanical change, one isolated file | one | 1 |
+| R2 | an ordinary feature or fix inside one module | three | 1 |
+| R3 | security, cryptography, money, a data migration, a public contract, a seam across repositories, concurrency | three | 2: one blind, one adversarial (plants defects, tries abuse cases, on another model where one is available) |
 
-- Each round's fix cycle stays inside [`loop-guard.md`](loop-guard.md)'s caps. A finding
-  that cannot be fixed in the node is parked with a board row.
-- `graph.py close` refuses a node until its owed rounds have passed, and an R3 node until
-  one of them was recorded adversarial ([`certification.md`](certification.md) → *Rounds
-  owed by risk class*, which also says what a round after a clean one reads and how the
-  adversarial round is run).
-- Every owed round runs, and every round re-runs all three tiers: a tier that passed in an
-  earlier round read a tree the fix has since moved ([`certification.md`](certification.md)
-  → a passing tier is re-run). A clean round does not cancel the next one, and only passing
-  rounds count. R3's adversarial round asks a different question — it hunts for a planted
-  defect — and always runs; it counts only when it passes.
+A flagship surface owes four tiers and two rounds, one adversarial, whatever its class.
+
+- Each round's fix cycle stays inside [`loop-guard.md`](loop-guard.md)'s caps, and the
+  certification ceiling stops the node: it is parked with its evidence and a board row.
+- `graph.py close` refuses a node until its owed rounds have passed, and an R3 or
+  flagship node until one of them was recorded adversarial
+  ([`certification.md`](certification.md) → *Rounds owed by risk class*).
+- A round after a fix re-runs every tier the class owes; a round on an unchanged tree is
+  refused unless it is the other kind. Only passing rounds count.
 - Readers stay blind ([`certification.md`](certification.md) → *Blind*). Each reads the
   diff, the packet and the contract, never the builder's reasoning.
 
@@ -384,7 +381,7 @@ release run performs, not unrelated deployments, messages or human-only actions.
 |---|---|
 | "This bug is tiny, fix it now" | Tiny fixes are what move a seam twice. It joins the inventory, or it is one of the hotfix lane's five entries |
 | "Wait for the whole wave, then verify" | A barrier idles every finished node. Each node is certified when it lands |
-| "R3 found nothing in round 2, skip the adversarial round" | The adversarial round, in any position, asks a different question: it hunts for a planted defect. A clean blind round does not answer it |
+| "R3 found nothing in its blind round, skip the adversarial round" | The adversarial round, in any position, asks a different question: it hunts for a planted defect. A clean blind round does not answer it |
 | "Ask the operator now, it is quick" | Each question is a human round. Queue it and take another node |
 | "The agent hit a rate limit, start it again" | Resume it with its context. Relaunching pays for the same reading twice |
 | "No Observatory here, so no learning loop" | The project retro and learned.md are the loop's first layer, and every install has them |

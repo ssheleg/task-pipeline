@@ -7,7 +7,7 @@ import re
 p = "/tmp/doctrinegate-copy/plugins/task-pipeline/skills/task-pipeline/references/acceptance.md"
 _orig_bytes = open(p, "rb").read()
 t = open(p, encoding="utf-8").read()
-open(p, "w", encoding="utf-8").write(re.sub(r"^## GATE \(manual\)", "## GATE (auto)", t, flags=re.M))
+open(p, "w", encoding="utf-8").write(re.sub(r"^## GATE \(auto\)", "## GATE (manual)", t, flags=re.M))
 assert open(p, "rb").read() != _orig_bytes, "PLANT DID NOT LAND: a-doctrine-file-s-gate-type-must-mat"
 EOF
 if python3 /tmp/doctrinegate-copy/test/validate.py; then

@@ -32,12 +32,14 @@ reviewed; a table and a re-run can. This script is that re-run:
         (a plan that spans several repositories' graphs).
     waves.py finish --inventory FILE --max-rounds N --max-releases M (--rounds K | --ledger RUN.md)
                     --checks K/M --artefact NAME@SHA [--releases R] [--operator-go]
+                    [--clean-rounds 1|2]
         the finish-line verdict (`references/finish-line.md`) from the triaged items, and the
         finish block printed. Only `triage: blocking` items count, less those closed as
         duplicate, stale or not-reproduced; deferred and noise never change the verdict. The
         round count is explicit: --rounds, or the ledger's `round: <N> — <reading> — new
-        blocking <k>` lines, whose counts must match the inventory. Exit 0 done (the last two
-        rounds found no new blocking item, none is open, --checks is all green, and the rounds
+        blocking <k>` lines, whose counts must match the inventory. Exit 0 done (the last
+        --clean-rounds rounds found no new blocking item: one by default, two when the
+        iteration carries an R3 or flagship node; none is open, --checks is all green, and the rounds
         are within --max-rounds or --operator-go is passed); 5 the budget reached before done
         (rounds at --max-rounds, releases at --max-releases with a blocker open, or done past
         the round budget without --operator-go); 6 diverging (the blocking count did not fall
@@ -598,7 +600,7 @@ def ledger_rounds(path: pathlib.Path) -> dict[int, int]:
 
 def finish_verdict(items: list[dict], rounds: int, max_rounds: int, max_releases: int,
                    releases: int, checks: tuple[int, int] | None,
-                   operator_go: bool = False) -> tuple[int, str, dict]:
+                   operator_go: bool = False, clean_rounds: int = 1) -> tuple[int, str, dict]:
     """(exit code, word, facts) — the finish line computed from the triaged items alone.
     Deferred and noise items are counted for the block and never read for the verdict."""
     triaged = [x for x in items if "triage" in x]
@@ -612,7 +614,9 @@ def finish_verdict(items: list[dict], rounds: int, max_rounds: int, max_releases
     open_b = [x for x in blocking if _needs_node(x)]
     facts = {"rounds": rounds, "new": new, "open": open_b, "fixed": len(blocking) - len(open_b),
              "self_inflicted": selfinf}
-    clean = rounds >= 2 and new[-1] == 0 and new[-2] == 0 and not open_b
+    # One clean round ends an iteration; two only where it carries an R3 or flagship node
+    # (`--clean-rounds 2`). Two for everything was the loop the 2026-10-20 cost audit measured.
+    clean = rounds >= clean_rounds and all(n == 0 for n in new[-clean_rounds:]) and not open_b
     green = checks is not None and checks[0] == checks[1]
     if clean and green:
         if rounds <= max_rounds:
@@ -625,7 +629,7 @@ def finish_verdict(items: list[dict], rounds: int, max_rounds: int, max_releases
     if rounds >= max_rounds:
         owed = (f"{len(open_b)} blocker(s) open" if open_b else
                 "exit checks not supplied" if checks is None else
-                "exit checks not all green" if not green else "the second clean round still owed")
+                "exit checks not all green" if not green else "a clean round still owed")
         return 5, "budget", dict(facts, why=f"rounds {rounds}/{max_rounds} reached before done — {owed}")
     if open_b and releases >= max_releases:
         return 5, "budget", dict(facts, why=f"releases {releases}/{max_releases} reached before "
@@ -640,7 +644,8 @@ def finish_verdict(items: list[dict], rounds: int, max_rounds: int, max_releases
     why = (f"{len(open_b)} blocker(s) open" if open_b else
            "exit checks not supplied — pass --checks K/M read on the artefact" if checks is None else
            "exit checks not all green" if not green else
-           "a second round with no new blocking finding is owed")
+           ("a second round with no new blocking finding is owed" if clean_rounds > 1 else
+            "a round with no new blocking finding is owed"))
     return 3, "continue", dict(facts, why=why)
 
 
@@ -649,11 +654,14 @@ def cmd_finish(a) -> int:
         _, items = load_inventory(pathlib.Path(a.inventory))
     except Fail as exc:
         raise Fail(1, exc.reasons)  # a malformed inventory is malformed here, never usage
-    for flag, v, least in (("--max-rounds", a.max_rounds, 2), ("--max-releases", a.max_releases, 1),
+    if a.clean_rounds not in (1, 2):
+        raise Fail(1, [f"--clean-rounds {a.clean_rounds} is not 1 or 2"])
+    for flag, v, least in (("--max-rounds", a.max_rounds, a.clean_rounds),
+                           ("--max-releases", a.max_releases, 1),
                            ("--releases", a.releases, 0), ("--rounds", a.rounds, 0)):
         if v is not None and v < least:
             raise Fail(1, [f"{flag} {v} is below {least}" + (
-                " — done needs two clean rounds, so a budget of one can never be met"
+                f" — done needs {a.clean_rounds} clean rounds, so a smaller budget can never be met"
                 if flag == "--max-rounds" else "")])
     # THE ROUND COUNT IS EXPLICIT. A clean round leaves no item, so a count derived from the
     # items can never see the two clean rounds `done` needs: the verdict would stay
@@ -684,7 +692,7 @@ def cmd_finish(a) -> int:
     if a.artefact and not ARTEFACT.match(a.artefact):
         raise Fail(1, [f"--artefact {a.artefact!r} is not NAME@SHA (a commit of 7-40 hex digits)"])
     code, word, f = finish_verdict(items, rounds, a.max_rounds, a.max_releases, a.releases, checks,
-                                   a.operator_go)
+                                   a.operator_go, a.clean_rounds)
     deferred = sorted((x for x in items if x.get("triage") == "deferred"), key=_priority)
     noise = [x for x in items if x.get("triage") == "noise"]
     risks = [x for x in deferred if x.get("blast") == 3 or x.get("rung") in ("I4", "I5")]
@@ -738,7 +746,11 @@ def main(argv: list[str]) -> int:
                    help="ignore plan nodes this graph does not hold")
     f = sub.add_parser("finish", help="the finish-line verdict from the triaged items, and the block")
     f.add_argument("--inventory", required=True)
-    f.add_argument("--max-rounds", type=int, required=True, help="run.finish.maxRounds (default 3, at least 2)")
+    f.add_argument("--max-rounds", type=int, required=True,
+                   help="run.finish.maxRounds (default 3, at least --clean-rounds)")
+    f.add_argument("--clean-rounds", type=int, default=1,
+                   help="run.finish.cleanRounds: clean rounds that end the iteration, 1 by "
+                        "default, 2 when it carries an R3 or flagship node")
     f.add_argument("--max-releases", type=int, required=True, help="run.finish.maxReleases (default 2)")
     f.add_argument("--releases", type=int, default=0, help="releases this iteration made so far")
     f.add_argument("--rounds", type=int, help="rounds run, clean ones included")

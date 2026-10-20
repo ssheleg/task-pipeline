@@ -25,6 +25,8 @@ resolve — the documentation gate checks it.
   one, and it produces no fix)
 - **Fix:** grade 1 (mechanical) — … / grade 2 → `R-00N` / grade 3, expires in 2 runs
 - **The check:** … (what catches this the first time, from now on)
+- **Class:** one of the classes in `references/retrospective.md` · **Cost:** rounds,
+  burned tags, time
 - **Commit:** `<sha>` — the change that fixed it (a real short SHA, and it must
   resolve: the gate runs `git rev-parse --verify` over every one)
 - **Upstream?** … (a lesson true in any repository belongs in the skill's own
@@ -39,6 +41,13 @@ history attached**, which is what this section is for.
 | Date | id | Instruction | Trigger that retired it | Commit |
 |---|---|---|---|---|
 | <YYYY-MM-DD> | R-000 | … | became a check (`npm run lint:paths`) | `<sha>` |
+
+## Moved by `retro_budget.py migrate`
+
+Narrative the floor's byte budget moved out of `retro.md`: each block is the original
+text, verbatim, under a `<!-- sha256:… -->` line that hashes it, and the floor keeps a
+pointer (`retro/YYYY-QN.md sha256:<prefix>`). `retro_budget.py verify` proves every
+pointer. Blocks are appended at the end of this file.
 
 ## Run stamps
 
