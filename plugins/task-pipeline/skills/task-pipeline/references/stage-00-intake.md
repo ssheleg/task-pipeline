@@ -7,13 +7,13 @@ The full gate and freedom level remain in [stages.md](stages.md).
 - 0 — Intake grill — MANDATORY
 
 ## 0 — Intake grill — MANDATORY
-- **Stage 0 is not optional and not skippable.** There is no "small enough task"
-  exemption, no "the request was already clear" exemption, no starting stage 1
-  "while the operator thinks". The only sanctioned bypass is the
-  entry-from-super-ux short-circuit below, and even that still requires a scope
-  confirmation and a record of what was adopted vs skipped. A run that reaches
-  stage 1 without a committed, operator-confirmed brief is a **failed run** —
-  stop and go back.
+- **Stage 0 always runs, and its depth is proportional.** The gap check, the
+  harvest and the brief are never skipped; the interview, the committed brief file
+  and stages 1-4 are what a small change does without (Phase 1d below, the
+  *proportional run*). A run that starts building without a brief and its REQ rows
+  (in the brief file, or on the short path in the run ledger) is a **failed run**:
+  stop and go back. The entry-from-super-ux short-circuit below is the other
+  sanctioned shortening.
 - **Entry-from-super-ux short-circuit (check FIRST).** task-pipeline is often
   launched *from* super-ux — its `/ux` action menu offers "execute autonomously
   via the task-pipeline plugin" once the UX chain (and often a
@@ -40,8 +40,9 @@ The full gate and freedom level remain in [stages.md](stages.md).
   `affected` / `god-nodes` answer *reach*, which is what grep cannot), `CLAUDE.md`,
   `CONTEXT.md`/ADRs, `docs/` + `docs/ux/`, past pipeline briefs and carry-over
   ledgers, **the retro's standing instructions and run stamps** (`<artifacts>/retro.md`,
-  read **in full** — ten standing rows and ten stamps, both bounded **by a cap**, and they bind this
-  run; stamp each instruction as it fires. Its *Recent log* is **queried** by the
+  read **in full**: ten standing rows and ten stamps, bounded by a cap and by a byte
+  budget; print `scripts/retro_budget.py check` first, which states the floor's bytes and
+  bytes/4 tokens. They bind this run; stamp each instruction as it fires. Its *Recent log* is **queried** by the
   task's nouns, not read: uncapped narrative inside a binding source is what makes the
   capped part get skimmed, [`retrospective.md`](retrospective.md)), **lessons from other
   projects** (source 7b, [`knowledge-sources.md`](knowledge-sources.md): `scripts/lessons.py
@@ -81,30 +82,43 @@ The full gate and freedom level remain in [stages.md](stages.md).
   or they genuinely disagree and that is a decision. There is no fourth option, and
   starting on an unresolved divergence means building against a system that does
   not exist.
-- **Phase 1d — the short-path triage: printed, proposed, never taken silently.** This
-  pipeline's own boundary exempts a typo, a one-line fix and a mechanical rename — and
-  nothing measured that until 2026-08-10, so the exemption depended on an agent
-  remembering it while eleven stages and four manual gates stood in front of a
-  one-paragraph edit. Three questions, each with something behind it:
+- **Phase 1d — the short-path triage, and the proportional run: a small change
+  takes the short path by default.** This pipeline's boundary exempts a typo and a one-line edit; until 1.98.0
+  the next size up still met eleven stages and five manual gates, because the short
+  path was only *proposed* and silence took the full flow. Under a standing "decide and
+  act" instruction silence is the normal answer, so a proposal was the full flow every
+  time. The triage now **decides**, from five answers with something behind each:
 
   ```
-  1. files the request names, resolved        git ls-files -- <paths>       -> N
+  1. files the change touches, resolved      git ls-files -- <paths>       -> N
   2. any of them a public contract            the surfaces the host's release
                                               syncs, its schema or config
                                               contracts, a shipped command,
                                               its README                    -> yes/no
-  3. behaviour a user or a caller observes changes                          -> yes/no
+  3. behaviour a user observes changes        a UI, a message, an output    -> yes/no
+  4. a deploy target in the brief             stage 7's target exists       -> yes/no
+  5. risk class                               work-graph.md R1-R3           -> R1/R2/R3
   ```
 
-  Few files, no contract, no observable change ⇒ **propose** the short path: stages 1,
-  2, 3 and 4 marked `⊘` with the triage answer as the reason, and 5→10 running
-  unchanged. **Propose, never take.** The answer goes in the brief's autonomy sweep and
-  silence takes the full flow — the same floor deploy authorization uses. The glyph is
-  what makes it safe: a skipped stage is printed on the rail **with its reason**
-  ([`progress.md`](progress.md)), and a skip nobody can see is indistinguishable from a
-  stage that was never entered.
-- **How it runs: [`grill.md`](grill.md)** — the full doctrine, built into this
-  skill (nothing to install). In short: close what the sources can, then ONE batch
+  **Small** means all of: the gap check left zero material unknowns, N ≤ 5, no public
+  contract, no user-observable change, no deploy, and risk **R1**. Small ⇒ the run takes
+  the short path and prints one line:
+  `short path: R1 · N files · no contract · no user-facing change · no deploy`.
+  `scripts/short_path.py` computes the decision from the five answers (exit 0 short,
+  3 full) and prints that line.
+  The short path is: the brief and its REQ rows written into the run ledger (no grill,
+  no committed brief file) → stage 5, build with tests → stage 6, the suite plus **one**
+  verification (one blind tier, [`certification.md`](certification.md)) → stage 9, the
+  docs the change makes false and the handoff → stage 10, the hand-back and a run stamp;
+  a retro entry only when the run taught a new lesson. Stages 1-4, 7 and 8 print `⊘`
+  with the triage line as their reason ([`progress.md`](progress.md)).
+  **Triggers that bring a skipped stage back:** a deploy target appears (7, 8); a wiki or
+  code graph exists and the change touched what it indexes (9 in full); a check reveals a
+  contract or a user-facing effect (leave the short path, resume at stage 2); the
+  operator asks for the full cycle. Any answer outside *small* takes the full flow,
+  printed the same way with the failing answer as its reason.
+- **How it runs: [`grill.md`](grill.md)**, read only when the gap check leaves a
+  material unknown (a complete brief asks nothing). In short: close what the sources can, then ONE batch
   of the material unknowns, ordered by dependency, a recommended answer with each —
   one at a time only where answers depend on each other or the operator asks;
   contradictions reconciled on the spot; **every answer that touches

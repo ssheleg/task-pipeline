@@ -2,12 +2,15 @@
 
 A node is not closed by one agent's opinion. It is closed by **three independent
 readings at escalating visibility**, and the run may not advance until all three
-pass.
+pass. **The cost follows the risk** (since 1.98.0): an **R1** node certifies with **one**
+blind tier (`unit` by default; `graph.py certify` accepts any one of the three), and a
+clean round ends a node unless it is **R3 or a flagship surface** (*Rounds owed by risk
+class*, below).
 
 **The boundary: this closes a node of the work graph.** Where the queue is a
 prose plan rather than a graph, a task closes through the per-task review instead
 ([`build.md`](build.md) §4.4 and [`review.md`](review.md) — one reviewer, a
-five-round fix loop with an explicit breaker). Two closure protocols with no
+three-round fix loop with an explicit breaker). Two closure protocols with no
 boundary sentence were how a run picked whichever was cheaper; the artifact the
 queue is — graph or plan — is what decides, not the mood of the closer.
 
@@ -208,14 +211,18 @@ erase the only evidence that a node is churning.
 
 The cycle is: `certify` → fail → the `breaks` findings become nodes (each already
 carrying its `check`) → fix → `certify` again, round `N+1`. Same three tiers, same
-blind dispatch. A tier that passed in an earlier round is **re-run**, because the
-fix is a new change and the level it passed on is not the level it now faces.
+blind dispatch. A tier that passed in an earlier round is **re-run** after a fix,
+because the fix is a new change. **It is never re-run on unchanged input:** `certify`
+records the tree each round read and refuses a round of the same kind on the same
+tree, before writing anything. A tier's second answer about a tree it already read is
+its first answer again, and asking twice is the loop.
 
-**At the ceiling the gate measures rather than stops** —
-[`loop-guard.md`](loop-guard.md). `--ceiling` defaults to 3. At or over it, `certify`
-still runs and still reports the tiers; what it adds is the name of the tier that
-has failed **every** round. A run spinning on one level needs the operator to see
-*which* level:
+**At the ceiling the gate STOPS** ([`loop-guard.md`](loop-guard.md), since 1.98.0).
+`--ceiling` defaults to 3 failing rounds. The round that reaches it still reports the
+tiers, names the tier that has failed **every** round, and then **parks the node** with
+the evidence (failing tiers, the first break and its check) as its reason, exit `7`.
+The run records a blocker row with that evidence and moves on to the next node. It
+used to measure only, and a loop that is measured is still a loop:
 
 - the same tier every round → the level is being misread, or the node is the wrong
   shape. Not one fix away. Re-plan the node, do not attempt another failing round. (An R3
@@ -227,30 +234,29 @@ has failed **every** round. A run spinning on one level needs the operator to se
 
 In a release iteration a node carries `risk` (R1–R3, [`work-graph.md`](work-graph.md);
 [`iteration.md`](iteration.md) → *Verification starts when a node lands*), and the class
-decides how many **passing** rounds the node owes before `close` accepts it: **R1 one, R2
-two, R3 three, of which one is adversarial.** A round is the three blind tiers (four on a
-flagship or product surface) plus one fix cycle. `graph.py certify` prints `round N: k of M
-owed passing rounds — not closable yet` until the count is met (`k of M owed passing rounds —
-closable` once it is), and `graph.py close` refuses
-the verdict until then. **Only passing rounds count** — a round passes when every tier
-passes, read from `certification.history` — and, for R3, one of the passing rounds must be
-one recorded with `--kind adversarial`
-(`certification.kinds`, one entry per round). A node with a `risk` and no certification at
-all is refused by `close` too: its class owes at least one round.
+decides how many **passing** rounds the node owes before `close` accepts it: **R1 one
+(with one blind tier), R2 one, R3 two, of which one is adversarial.** A node on a
+**flagship** surface owes two as well, one of them adversarial, whatever its class. A
+round is the blind tiers the class owes (three; four on a flagship or product surface;
+one on R1) plus one fix cycle. `graph.py certify` prints `round N: k of M owed passing
+rounds — not closable yet` until the count is met (`k of M owed passing rounds —
+closable` once it is), and `graph.py close` refuses the verdict until then. **Only
+passing rounds count**, read from `certification.history`, and for R3 or a flagship one
+of them must be recorded with `--kind adversarial` (`certification.kinds`). A node with
+a `risk` and no certification at all is refused by `close` too. R2 owed two blind
+rounds until 1.98.0, and a clean round did not cancel the next: the second reading of
+an unchanged diff found nothing it had not already been asked.
 
 **What a round after a clean round reads.** The node's **whole diff at the new HEAD** — not
-the fix diff alone, and not the previous round's reports. A clean round proves the tree it
-read; the next owed round asks the same three distances again of the whole change as it
-stands, so a defect the first reading accepted has a second chance to be seen from a fresh
-context.
+the fix diff alone, and not the previous round's reports. On an unchanged tree the only
+round that may follow a clean one is the other kind: the adversarial round asks a
+different question of the same change.
 
-**Owed rounds and the ceiling are different counts.** `--ceiling` measures churn: how many
-rounds a node has *failed*, and which tier keeps failing. An R3 node that owes three rounds
-and passes them is not "at round four" of anything; its owed rounds are the plan, and the
-ceiling's warning is about failing rounds beyond what the class owes. Read the ceiling's
-output only when rounds fail.
+**Owed rounds and the ceiling are different counts.** `--ceiling` counts *failing*
+rounds and stops the node at the limit; owed rounds count *passing* ones. An R3 node
+that passes its two is not near any ceiling.
 
-**The adversarial round** (one of R3's three, on another model where one is available):
+**The adversarial round** (one of R3's two, on another model where one is available):
 1. **Plant defects in the change** — off-by-one in a limit, an inverted check, a dropped
    error path — and require the node's own checks to fail on each. A plant that passes is a
    finding against the check, not against the plant.
@@ -261,19 +267,18 @@ output only when rounds fail.
 3. **Try the abuse cases** a caller outside the trust boundary would: inputs at and past
    every bound, replays, a revoked identity, an out-of-order sequence.
 
-It is a different question, not a stricter reading: on 2026-10-12 one iteration's third
-round on a spend-limits node found three breaks of a money invariant that two blind rounds
-had passed. Record it with `certify --kind adversarial`.
+It is a different question, not a stricter reading: on 2026-10-12 one iteration's
+adversarial round on a spend-limits node found three breaks of a money invariant that two
+blind rounds had passed. That is why R3 keeps it and drops the second blind round. Record it with `certify --kind adversarial`.
 
 ## What this costs, said out loud
 
-Three agents per node instead of one — four on a flagship or product surface. That is
-the price of the visibility, and it is paid per node rather than per run. The three are dispatched in parallel, so the
-wall-clock cost is roughly one reading; the token cost is three. A node whose
-`check` is mechanical and whose blast radius is genuinely nil still pays it — and a
-tier with nothing to find says so in `scope` and `not_examined` rather than being
-skipped, because **a skipped level and a clean level are indistinguishable
-afterwards**, and only one of them is evidence.
+Three agents per node instead of one, four on a flagship or product surface, one on R1.
+The tiers are dispatched in parallel, so the wall-clock cost is roughly one reading and
+the token cost is the tier count. Where a tier runs and finds nothing it says so in
+`scope` and `not_examined`, because **a skipped level and a clean level are
+indistinguishable afterwards**. What the class does not owe is not run: an R1 node's
+second and third tiers are not skipped levels, they are levels its risk never reached.
 
 ## Rationalizations
 
@@ -281,5 +286,5 @@ afterwards**, and only one of them is evidence.
 |---|---|
 | «All three would say the same thing» | Then all three say it, at a cost you already know, and the run has three signatures instead of one guess about what the other two would have found |
 | «The seam tier can read the unit report first — it saves tokens» | It saves tokens by removing the second opinion. The reports are cheap; the independence is the product |
-| «Tier 3 passed last round, skip it» | The fix is a new change. A tier's pass is about the tree it read, and that tree moved |
-| «Round 4 will get it» | Read the ceiling's output. The same tier failing three times is a planning defect wearing a verification failure's clothes |
+| «Tier 3 passed last round, skip it» | The fix is a new change. A tier's pass is about the tree it read, and that tree moved. On an unchanged tree the round is refused instead |
+| «Round 4 will get it» | There is no round 4: the ceiling parks the node with its evidence. The same tier failing three times is a planning defect wearing a verification failure's clothes |

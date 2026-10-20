@@ -1,6 +1,6 @@
 ---
 name: task-pipeline
-description: "Use when work changes the repository — feature, fix, bug, refactor, migration, integration, rewrite, adoption or hardening; фича, фикс, баг, рефактор, миграция, интеграция, доработать, починить, внедрить, перевести — or a finding that lands in it: audit/аудит, bug hunt/проверь ошибки, production check/проверь прод, PR review/ревью PR — or on 'run this through the pipeline'/'прогони по конвейеру', 'the full cycle'/'полный цикл', /task-pipeline. Runs a substantial task through gated stages: intake grill, docs, brainstorm, spec, plan, build, tests, deploy, post-deploy, docs/wiki, acceptance. 'waves'/'волнами'/'release iteration'/'итерация релиза' closes the board; 'checkup'/'чекап' lists unconfirmed releases; 'setup' audits docs. Not for: answering a question, explaining, a typo, a one-line edit, a rename, recon that lands nothing — say 'no pipeline'/'без пайплайна' to opt out."
+description: "Use when work changes the repository: feature, fix, bug, refactor, migration, integration, audit, PR review; фича, фикс, баг, рефактор, миграция, интеграция, аудит. Runs a substantial task through gated stages, intake grill to docs/wiki and acceptance; a small change takes a short path. 'waves'/'волнами' closes the board. Not for questions or one-line edits; 'без пайплайна' opts out."
 license: MIT
 compatibility: "Doctrine runs on any agent. The bundled scripts need python3; the run needs git. Missing either degrades, never blocks — the graph verbs and seeded gates go unused, and the run says so."
 ---
@@ -8,234 +8,164 @@ compatibility: "Doctrine runs on any agent. The bundled scripts need python3; th
 # task-pipeline
 
 Self-contained orchestrator. Runs a task through **gated stages**, each carrying its
-own built-in doctrine — no companion plugin required. Keeps the main thread
-disciplined: no stage advances until its gate passes; the whole run uses one model,
-confirmed before it starts.
+own built-in doctrine; no companion plugin is required. No stage advances until its
+gate passes, and the whole run uses one model, confirmed before it starts.
 
-**Grill first, then run autonomously.** Stage 0 is **mandatory**, but it is a
-GAP CHECK before it is an interview: the brief is built from the request, the
-files and the harvest first, and a question is asked only for a **material
-unknown** the sources cannot answer. A complete brief yields ZERO intake
-questions; what the request or the project already decided is recorded, never
-re-negotiated. The interview, where gaps remain, is ONE batch ordered by dependency
-and sweeps stages 1→10 for anything that would stop the run later — then locks the
-answers into a brief. Autonomy is bought there or not at all; every MATERIAL
-question skipped at stage 0 comes back as an interruption at stage 6.
+**Proportional, then autonomous.** Stage 0 is a **gap check** before it is an
+interview: the brief is built from the request, the files and the harvest, and a
+question is asked only for a **material unknown** the sources cannot answer. A
+complete brief asks nothing. When the change is also small (R1 risk, at most five
+files, no public contract, no user-facing change, no deploy), the run **takes the short
+path by default** and says so in one line: brief in the run ledger, build with tests,
+one verification, docs and handoff, a retro entry only for a new lesson
+([`references/stage-00-intake.md`](references/stage-00-intake.md) → Phase 1d, which
+also names the triggers that bring a skipped stage back). Anything larger runs the
+full flow, with the interview, where gaps remain, as ONE batch that pre-resolves
+stages 1→10.
 
-**Config contract: [`pipeline.schema.json`](pipeline.schema.json).** A pipeline is
-a machine-readable config — an ordered list of stages, each with `skills[]` (the
-skills/agents that run it) and a `gate {type, check}`. The schema is the universal
-contract; it imposes **no** specific stages, skills, or gate assignments.
-[`pipeline.example.json`](pipeline.example.json) is a **copy-and-rewrite example**
-that encodes this plugin's own default flow (stage 0 intake + the 1→10 stages
-tabled below) and an optional, toggleable `release` block.
+**Config contract: [`pipeline.schema.json`](pipeline.schema.json).** A pipeline is an
+ordered list of stages, each with `skills[]` and a `gate {type, check}`; the schema
+imposes no stages, skills or gate assignments.
+[`pipeline.example.json`](pipeline.example.json) is the copy-and-rewrite example of
+this plugin's default flow (stage 0 plus the 1→10 stages below) and an optional
+`release` block.
 
-**Two layers, and only one is replaceable.** The **KERNEL** is what every
-pipeline must carry no matter how few stages it has — for every unit of work:
-its **scope** (what it may change), its **evidence** (a claim carries its
-receipt), its **deps** (what it reads and what must precede it), and a
-**resume** point (it survives context loss). The kernel is invariant. The
-**PROFILE** is the STAGE LIST — how many stages, their names, their skills,
-their gates — and a project **replaces the profile wholesale** (any number of
-stages, its own skills/agents, its own gate types; see *Bring your own
-skills*). **The stage numbers belong to the SELECTED profile, never to the
-kernel:** a minimal three-stage profile has no "stage 7", and a rule keyed on a
-global stage number is a rule about the default profile, not about every
-pipeline. What a custom profile may drop is stages; what it may not drop is a
-kernel field. Each gate has a **type**: `auto` (the
-orchestrator verifies the `check` itself, pass/fail), `judgment` (no complete
-deterministic check exists — a named judge rules, and the ruling is recorded as
-judgement, never as a measurement; `references/gates.md` → *The judgment gate*)
-or `manual` (an explicit go, including specific standing authorization); which stages are manual is the
-operator's call. In the
-example's `skills[]`, `task-pipeline:<name>` denotes this skill's own built-in
-doctrine (`references/<name>.md`) and `host:<name>` denotes the host project's own
-command for that job (`references/conventions.md`); everything else is a real skill
-the environment resolves.
+**Two layers, and only one is replaceable.** The **KERNEL** is what every unit of
+work carries in any pipeline: its **scope**, its **evidence**, its **deps** and a
+**resume** point. The **PROFILE** is the stage list, and a project replaces it
+wholesale. **The stage numbers belong to the SELECTED profile, never to the kernel:**
+a three-stage profile has no "stage 7". A custom profile may drop stages, never a
+kernel field. Each gate has a **type**: `auto` (the orchestrator verifies the
+`check`), `judgment` (a named judge rules, recorded as judgement, never as a
+measurement; `references/gates.md` → *The judgment gate*) or `manual` (an explicit go).
+**The
+default profile's gates are `auto`; a gate is `manual` only where the operator's
+`pipeline.json` says so, and a standing operator authorization naming the act counts
+as the go.** In `skills[]`, `task-pipeline:<name>` is this skill's own doctrine
+(`references/<name>.md`) and `host:<name>` the host project's own command
+(`references/conventions.md`).
 
-## Prerequisites — none required
+## Prerequisites: none required
 
-**Every stage's doctrine ships inside this skill.** There is no required companion
-plugin, nothing to resolve at preflight and no version skew with someone else's
-repo. Stages 1 and 6–9 additionally run the *host's own* commands and optional
-tools, and **no stage blocks on an install** — stage 1 falls back to web search, the
-wiki and the code graph are recommendations. On user-facing tasks stage 3 requires
-a valid scenario artifact; the provider rule below governs equivalent providers
-and the inline fallback.
+Every stage's doctrine ships inside this skill, and **no stage blocks on an install**:
+stage 1 falls back to web search, the wiki and the code graph are recommendations.
+Which reference owns which stage:
+[`references/doctrine-map.md`](./references/doctrine-map.md). **Precedence:** on a
+custom profile the **kernel wins**; `references/stages.md` is the default profile's
+normative gate set; another skill set on stages 2/4/5/6 is
+`references/companion-skills.md`.
 
-Which reference owns which stage — all forty-odd of them, by stage number:
-[`references/doctrine-map.md`](./references/doctrine-map.md).
+**super-ux is the preferred provider for ANY user-facing task**, and **the stage-3
+gate checks the ARTIFACT, not the package**: valid scenarios covering the change, from
+super-ux, an equivalent provider or the inline fallback in
+`references/companion-skills.md`, pass. The ABSENCE of any scenario artifact stops the
+gate; a missing tool is reported as the NAMED check that was not done, never as a
+failed task.
 
-**Precedence:** on a CUSTOM profile the **kernel wins** — scope, evidence, deps and resume are owed by every unit of work; `references/stages.md` is the **default profile's** normative gate set; the kernel is normative for all. Another skill set on stages 2/4/5/6: `references/companion-skills.md`.
+**The grill is built in** (`references/grill.md`) and produces the **REQ spine**: the
+request as an addressable list, each row naming how it is verified, which stages 3–5
+trace to and **stage 10 accounts for every one of**. **Harvest before you ask**
+(`references/knowledge-sources.md`): stage 0 pulls what the project already knows,
+writes the source ledger, and checks every answer against it; the operator outranks a
+document **but only out loud**.
 
-**super-ux — the preferred provider for ANY user-facing task.** The moment a task
-implies an interface (web / mobile / CLI / TUI), the WHY→UI→scenario chain runs
-through `/ux` and its linter, which belongs in the host's CI so UX drift cannot
-merge. **But the stage-3 gate checks the ARTIFACT, not the package**: valid
-scenarios covering the change — produced by super-ux, by an alternative provider
-honouring the same contract, or written inline against
-`references/companion-skills.md`'s fallback — pass the gate. What stops the gate
-is the ABSENCE of any scenario artifact: then create one (super-ux is the
-preferred way, the inline fallback is the floor), and a missing tool is reported
-as the NAMED check that was not done, never as a failed task.
-
-**The grill is built in and mandatory** (`references/grill.md`). No "clear enough task"
-exemption and no stage 1 without a committed, operator-confirmed brief. It produces the
-**REQ spine** — the request as an addressable list, each row naming how it is verified —
-which stages 3–5 trace to, stage 4 set-compares against, and **stage 10 accounts for
-every one of**, turning the pipeline from a funnel into a circle.
-
-**Harvest before you ask** (`references/knowledge-sources.md`). Stage 0 opens by
-pulling what the project already knows about *this* task, writes the source ledger
-into the brief, and then interviews **against** it — so the operator outranks any
-document, **but only out loud**, and an override is a recorded decision rather than
-an undetected divergence. That ledger is also stage 9's work list. Which sources,
-and the two ways the retro is read — standing instructions in full because they
-bind this run, the log queried because nothing caps it — are in
-`references/knowledge-sources.md` and `references/retrospective.md`.
-
-**Three artifacts close a run, not two — and they are a convergence, not a sequence.**
-Stage 9 syncs the docs, the wiki **and the code graph**; none consumes another, and the
-**graph↔docs divergence check is the gate over their convergence** — the only thing
-comparing two of the three against each other, so it is not optional where a graph
-exists. A stale graph is a false premise **carrying the authority of a machine**
-(`references/knowledge-graph.md`, `references/audit.md`).
-
-**Documentation is a deliverable, and it has a gate** (`references/documentation.md`).
-Stage 0 answers the four questions that make docs a *system* into `docs/DOCMAP.md`;
-from then the **Doc Loop** fires whenever anything is settled, at **any** stage rather
-than only at stage 9, the stage-9 sweep walks the **propagation matrix** — the harvest
-ledger names what you *read*, the matrix names what you *owe* — and *"docs in sync"*
-becomes a command with an exit code.
+**Three artifacts close a run and they converge:** stage 9 syncs the docs, the wiki
+and the code graph, and the graph↔docs divergence check is the gate over them where a
+graph exists (`references/knowledge-graph.md`). **Documentation is a deliverable with a
+gate** (`references/documentation.md`): `docs/DOCMAP.md`, the Doc Loop at any stage,
+the propagation matrix at stage 9, and *"docs in sync"* as a command with an exit code.
 
 **The run teaches the next run, and the list stays short**
-(`references/retrospective.md`). Every gate is good at *this* run and blind across
-runs, so one class of failure can be caught, fixed and forgotten five times with
-nothing noticing it is the same one. Stage 10's last act, **in this order and the
-order is load-bearing**: stamp the run, then prune, then write the entry — a
-retirement trigger counts firings across the last five stamps, so a prune placed
-ahead of the stamp reads a counter its own stage has not written yet. The cap, the
-triggers and what an entry must carry are in `references/retrospective.md`; why
-the order cannot be swapped is `references/learned.md` rule 21.
-
-Stage 0 reads those standing instructions in full, which is why the prune is a gate
-criterion: a rule nobody reads to the end is worse than no rule, because everyone
-believes it is covered.
-
-**At stage 0, read [grill.md](references/grill.md)** for domain awareness
-(`CONTEXT.md` / ADRs; write resolved terms back), the autonomy sweep (pre-resolve
-stages 1→10), and the Figma design destination (file and team per surface, settled
-before drawing, never invented by the drawing agent).
+(`references/retrospective.md`). Stage 10's last act, **in this order and the order is
+load-bearing**: stamp the run, then prune, then write the entry (`references/learned.md`
+rule 21). The floor stage 0 reads in full (standing instructions plus run stamps) has
+a **byte budget**: `scripts/retro_budget.py check` prints its bytes and bytes/4 tokens
+at stage 0, and gate 10 fails over budget until `migrate` moves the narrative to the
+archive, verbatim and hash-proved.
 
 ## How to run
 
-1. Restate the task in one line. Track each stage from 0 using the host task tool or a prose checklist (for resume). Then run the
-   **companion preflight** (`references/companion-skills.md`): the stage doctrine
-   is built in, so this only checks the *optional* companions (super-ux for UI
-   tasks, context7, wiki-update, graphify) and emits ONE block covering them
-   **and the model decision** (`references/model-tiering.md`): recommend
-   the most capable model available (advice), let the operator confirm or
-   override (the choice — inherited verbatim by plan, stages and subagents), record
-   it. Ask once, here. **The same block carries the run mode**
-   (`references/continuity.md`): read `pipeline.json` → `run.loop`; where it is
-   recorded, arm it **at the point `run.loop.arm` names** — here at preflight, or
-   at stage 2's close for `after-decomposition`, once the queue exists — and when
-   it arms, print the job id and the cancel command; the config is
-   the authorization, so re-asking rebuilds the habit it exists to retire. Where
-   it is **absent, the mode is off**; recommend it in one line and move on.
-   Silence arms nothing, and the mode never collapses a `manual` gate.
-2. **Run stage 0 — always, no exceptions.** It opens with the **knowledge harvest**
-   (`references/knowledge-sources.md`): query the project's own sources — repo docs,
-   ADRs, `docs/ux/`, past briefs, the wiki if installed, any doc repo the project
-   names — for this task's terms, and write the **source ledger** into the brief
-   before question one. Then grill until shared
-   understanding is reached, **each answer checked against the harvest**, the
-   autonomy sweep is covered, **the REQ table is
-   written (one row per independently verifiable deliverable, each naming its
-   check)** and the brief is locked
-   (`references/stage-00-intake.md`). Do not touch stage 1 before the brief is
-   committed and confirmed. **Entered from super-ux?**
-   (a validated `docs/ux/` chain and/or a `docs/ux/plans/…` fix plan already
-   exists — super-ux's `/ux` hands off here) → don't re-grill or rebuild the UX
-   chain: just check it's OK (`/ux-lint` green), confirm scope in one line, and
-   skip ahead to the first stage with real work (see `references/stage-00-intake.md`).
-3. Walk stages 1→10 on the model confirmed at preflight. **Don't re-ask about the
-   model at every boundary** — only when the operator recorded a per-stage override
-   map and the next stage's entry differs (`references/model-tiering.md`).
+1. Restate the task in one line, track each stage from 0 (host task tool or a prose
+   checklist, for resume), then emit the **preflight block** once: the model decision
+   (`references/model-tiering.md`), the run mode (`pipeline.json` → `run.loop`,
+   `references/continuity.md`; absent means off, and the mode never collapses a
+   `manual` gate) and the optional companions: super-ux for UI tasks, context7,
+   wiki-update, graphify (`references/companion-skills.md`).
+2. **Run stage 0.** Harvest, then the gap check, then the proportional decision
+   (`references/stage-00-intake.md`). **Entered from super-ux** (a validated
+   `docs/ux/` chain or a `docs/ux/plans/…` fix plan exists)? Check `/ux-lint` green,
+   confirm scope in one line and skip to the first stage with real work.
+3. Walk the stages on the model confirmed at preflight; don't re-ask it per stage.
    **The SELECTED profile is compiled once, at preflight, and only ITS declared
-   stages and gates run** (FIX-TP-03.02): the numbers "1→10" name the DEFAULT
-   profile, and a custom profile with three stages runs three — no hidden stage
-   0, 7 or 10 is injected because the default profile has one. What a custom
-   profile does NOT escape is the KERNEL (03.01): dropping stages never drops
-   the evidence gate. And an unknown MANDATORY capability blocks the
-   compile — a profile whose `must_understand` names a capability this runtime
-   does not have is refused, never run with the capability silently absent.
-   **Is the brief a platform rather than a change?** Then stage 2 also cuts it into
-   modules (`references/decomposition.md`) and stages 3→10 run **per module** in
-   build order, one brick at a time — stages 0–2 run once, and the module map's
-   status column is the resume point (`references/stages.md` → *The program loop*).
-   **The whole board?** `/task-pipeline waves` (`references/waves.md`): stages
-   0–4 once, 5–8 per wave, 9–10 to close. **The project moves in releases**: the loop
-   around the waves — survey, module dossiers, one design, parallel build, checks that
-   start as each node lands, release, post-release check, next pool — is
-   `references/iteration.md`. A finding joins the inventory; it is not fixed alone.
-   **Findings are triaged when found, and the iteration stops at its finish line** —
-   exit checks green on the artefact, two rounds with no new blocking finding, or the
-   budget spent (`references/finish-line.md`).
-4. Do **not** advance until the stage **gate** passes (`references/stages.md`).
-   Honor the gate **type**: for `auto`, verify the gate's `check` yourself and
-   stop/return on fail; for `judgment`, record the named judge's ruling as
-   judgement, never as a measurement; for `manual`, present the result and cite the
-   **operator's explicit go or standing authorization naming this act**. Other gate
-   types and generic loop flags cannot supply that authority (`references/continuity.md`).
-5. **The cross-cutting rules fire at any stage**, not only here — the Doc Loop, the
-   loop guard, the audit's exit, the finish line, the frozen REQ list, the carry-over
-   ledger, and what counts as evidence, and **every gate prints `holds: N`** — what this run left
-   running, across all eight classes, enumerated by class and never by a single
-   tool — and stage 10 does not close while this run's residue is live and
-   unaccounted (`references/residue.md`). The rest are in
+   stages and gates run**: a custom profile with three stages runs three, the KERNEL
+   still applies, and an unknown MANDATORY capability in `must_understand` blocks the
+   compile. **A platform rather than a change?** Stage 2 cuts it into modules
+   (`references/decomposition.md`) and stages 3→10 run per module
+   (`references/stages.md` → *The program loop*). **The whole board?**
+   `/task-pipeline waves` (`references/waves.md`). **Releases:**
+   `references/iteration.md`; findings are triaged when found, and the iteration stops
+   at its finish line: exit checks green on the artefact and one round with no new
+   blocking finding (two for an R3 or flagship node), or the budget spent
+   (`references/finish-line.md`).
+4. Do **not** advance until the stage **gate** passes (`references/stages.md`). For
+   `auto`, verify the `check` yourself; for `judgment`, record the ruling as judgement;
+   for `manual`, cite the operator's go or the standing authorization naming this act.
+   **Loops stop:** an R1 node certifies with one blind tier and a clean round ends a
+   node unless it is R3 or flagship; the certification ceiling parks the node with its
+   evidence and moves on; no tier re-runs on unchanged input; the review loop caps at
+   three rounds (`references/certification.md`, `references/loop-guard.md`).
+5. **Cross-cutting rules fire at any stage** (the Doc Loop, the loop guard, the
+   audit's exit, the finish line, the frozen REQ list, the carry-over ledger, and
+   what counts as evidence), and every gate prints `holds: N` across all eight residue
+   classes; stage 10 does not close while this run's residue is live
+   (`references/residue.md`). Their long form is
    [`references/gates.md`](references/gates.md) → *Cross-cutting, at every stage*.
+
+## What to read, and when
+
+At entry read **this file only**; its stage table below is the stage index. Each
+stage's detail is read **when that stage starts** (`references/stages.md` routes it,
+one section at a time; never preload all details). The rest loads on its trigger:
+
+| Reference | Read when |
+|---|---|
+| `references/grill.md` | the gap check leaves a material unknown |
+| `references/knowledge-sources.md` | a source needs more than its ledger row: the code graph, the wiki, a lesson store, a carried-in claim, a stale row |
+| `references/companion-skills.md` | a user-facing task (the provider rule), a substituted skill set, or a companion is missing |
+| `references/continuity.md` | `run.loop` is armed, a context-budget signal arrives, or a run resumes |
+| `references/model-tiering.md` | the operator overrides the model, or a stage map differs |
+| `references/gates.md` | you write or change a check, a gate's verdict is disputed, or a judgment gate runs |
 
 ## Stages (gates and routes in `references/stages.md`)
 
-All stages run on the **one model confirmed at preflight** (default: the most
-capable available — see `references/model-tiering.md`).
+All stages run on the **one model confirmed at preflight**.
 
 | # | Stage | Gate | Type |
 |---|---|---|---|
-| 0 | Intake grill — **mandatory** | source ledger written with its `Contradictions:` line; `docs/DOCMAP.md` answered and intent reconciled against as-built; the retro read in full; autonomy sweep covered; UI: `surface_class` recorded; brief locked and confirmed | manual |
+| 0 | Intake grill — **mandatory** | source ledger written with its `Contradictions:` line; `docs/DOCMAP.md` answered and intent reconciled against as-built; the retro floor read in full, its bytes printed; autonomy sweep covered; UI: `surface_class` recorded; brief locked and confirmed | auto |
 | 1 | Docs study | contracts grounded on fetched docs | auto |
-| 2 | Brainstorm + decompose | design approved; UI verdict recorded; every REQ answered; **the queue is an artifact** — a work graph validates and its coverage names no unserved REQ; platform: module map approved | manual |
-| 3 | Spec | committed + reviewed; UI: chain validated, linter green, scenarios and `SCR-` traced; COPY and VISUAL are a parallel layer after UX, and where both ran their convergence check is recorded; VISUAL is checked by its director record | manual |
+| 2 | Brainstorm + decompose | design approved; UI verdict recorded; every REQ answered; **the queue is an artifact** — a work graph validates and its coverage names no unserved REQ; platform: module map approved | auto |
+| 3 | Spec | committed + reviewed; UI: chain validated, linter green, scenarios and `SCR-` traced; COPY and VISUAL are a parallel layer after UX, and where both ran their convergence check is recorded; VISUAL is checked by its director record | auto |
 | 4 | Plan | parallel-ready, DoD per task; **every edge names what it carries** — the fake-edge test run and its `Edges:` count computed; **`scripts/plan_audit.py` clean** — every live node's packet survives a cold reader, and no two unordered nodes edit one file | auto |
 | 5 | Dev | tasks DONE, TDD green per task, branch integrated per the brief; a fanned-out group gets **one convergence check over all its diffs together** before the first worktree lands | auto |
 | 6 | Tests | full suite green, new and changed code covered, every new check probed both ways and asserted on its exit code; **a web surface is checked in a browser, not in the diff** — where a browser channel is connected; absent, the weaker claim is recorded; a gated surface's contact sheet passes | auto |
-| 7 | Lint + deploy | lint clean and suite green before deploy; deploy needs a go, or the brief's specific standing authorization | manual |
+| 7 | Lint + deploy | lint clean and suite green before deploy; deploy needs a go, or the brief's specific standing authorization | auto |
 | 8 | Post-deploy | clean boot or an honest degradation report; **a deployed web target is opened, not curled** — a `200` proves the server answered and nothing else; where no browser channel is connected, the weaker claim is recorded | auto |
 | 9 | Docs + wiki | every stale row of the stage-0 source ledger updated; the propagation matrix walked for every change type this run produced; the documentation gate green with its ratchets printed; docs, wiki and the code graph synced and checked against each other | auto |
-| 10 | **Acceptance** | the ladder walk ran and its absences became REQ rows; every REQ accounted for with evidence from a check seen failing once; no unresolved ledger row; **every repository clean, pushed and pointed at**; the hand-back written and the environment given back; the retrospective written **last**, and in order | manual |
+| 10 | **Acceptance** | the ladder walk ran and its absences became REQ rows; every REQ accounted for with evidence from a check seen failing once; no unresolved ledger row; **every repository clean, pushed and pointed at**; the hand-back written and the environment given back; the retrospective written **last**, in order and within its byte budget | auto |
 
-**Every gate above is the short form**, and the long form is the point of
-[`references/stages.md`](references/stages.md) — one gate and exact detail route per
-default stage. Before work on entry or resume, read that stage’s routed detail,
-including waves and approved short paths; never preload all details. CUSTOM
-profiles use their own declared doctrine; matching numeric ids do not select
-default details. Full obligations stay in the spine and the selected detail.
-
-**Several repositories?** A submodule is finished when its parent says so — a clone
-can still get the commit before it while neither repository looks wrong alone. The
-commands that prove it are in
+**Every gate above is the short form**; the long form is
+[`references/stages.md`](references/stages.md). CUSTOM profiles use their own declared
+doctrine; matching numeric ids do not select default details. **Several
+repositories?** A submodule is finished when its parent says so:
 [`references/acceptance.md`](references/acceptance.md) → *A project of several
 repositories*.
 
-## Model — ask once, at preflight
+## Model: ask once, at preflight
 
-Recommend **the most capable reasoning model available** — a tier resolved at
-runtime, **never a hardcoded id**; stage configs use `default` / `inherit`. The
-block to emit is `references/model-tiering.md` → *Mechanic*, and it is a
-reminder: no such tier means say which one is in use and continue. Record the
-answer in the brief, don't re-ask per stage; stage-5 subagents are pinned to it
-automatically.
+Recommend **the most capable reasoning model available**, a tier resolved at runtime,
+**never a hardcoded id** (`references/model-tiering.md` → *Mechanic*). Record the
+answer in the brief; stage-5 subagents are pinned to it.
 
 ## Degradation
 
@@ -245,31 +175,26 @@ automatically.
 
 ## Bring your own skills
 
-The stages above are the **example** flow. A host project owns its pipeline: copy
-`pipeline.example.json` → `pipeline.json`, define its **own** stages (any count),
-point each `skills[]` at what its environment resolves, set each `gate.type`
-(`auto`/`judgment`/`manual`) to fit its process, and toggle its own `release`
-block. The
-framework ships no fixed stage count and no opinion on which gates are manual —
-`pipeline.schema.json` is the only contract.
+The stages above are the **example** flow. A host copies `pipeline.example.json` →
+`pipeline.json`, defines its own stages (any count), points each `skills[]` at what its
+environment resolves, sets each `gate.type` (`auto`/`judgment`/`manual`) and toggles its
+own `release` block. `pipeline.schema.json` is the only contract.
 
 ## References
 
-Most references are routed from the **Built-in doctrine** table above, keyed by
-the stage that sends you there. The rest are routed by prose: `stages.md` (named
-at every stage of *How to run*), `learned.md` (cited where a rule binds) and
-`probing.md` (from `gates.md`, whose checks it proves). The config contracts sit
-beside this file: `pipeline.schema.json` and `pipeline.example.json`. The
-family's task/context contract sits there too: `execution-packet.schema.json`
-with `execution-packet.example.json` — an immutable, content-addressed packet
-per dispatchable unit of work, validated dependency-free by
-`scripts/packet.py` before anything acts on it (an unknown mandatory version,
-a ref without its digest, or an unbound decision is rejected at the door) —
-and its answer half, `execution-result.schema.json` with
-`execution-result.example.json`: an AttemptGrant that a boolean can never
-substitute for, and a ResultEnvelope whose stale candidate (older revision, or
-a superseded fence) re-plans instead of landing as current
-(`scripts/packet.py validate-result`). The compiler's first stage maps an
-audit report onto parent tasks (`scripts/context_packets.py compile|verify`):
-ids derived from finding ids, never positional; evidence, limits and priority
-kept apart from status; and any row it cannot map blocks the compile.
+Most references are routed from `references/doctrine-map.md` by stage. The rest are
+routed by prose: `stages.md`, `learned.md` (cited where a rule binds) and `probing.md`
+(from `gates.md`). Beside this file: the config contracts, and the family's
+task/context contract, `execution-packet.schema.json` and `execution-result.schema.json`
+with their examples, validated dependency-free by `scripts/packet.py` (an unknown
+mandatory version, a ref without its digest, or an unbound decision is rejected; a stale
+result re-plans instead of landing). `scripts/context_packets.py compile|verify` maps an
+audit report onto parent tasks: ids derived from finding ids, never positional, and any
+row it cannot map blocks the compile.
+
+## Triggers
+
+The description is the short form. The full trigger list it carried until 1.98.0,
+moved here verbatim, still routes to this skill:
+
+"Use when work changes the repository — feature, fix, bug, refactor, migration, integration, rewrite, adoption or hardening; фича, фикс, баг, рефактор, миграция, интеграция, доработать, починить, внедрить, перевести — or a finding that lands in it: audit/аудит, bug hunt/проверь ошибки, production check/проверь прод, PR review/ревью PR — or on 'run this through the pipeline'/'прогони по конвейеру', 'the full cycle'/'полный цикл', /task-pipeline. Runs a substantial task through gated stages: intake grill, docs, brainstorm, spec, plan, build, tests, deploy, post-deploy, docs/wiki, acceptance. 'waves'/'волнами'/'release iteration'/'итерация релиза' closes the board; 'checkup'/'чекап' lists unconfirmed releases; 'setup' audits docs. Not for: answering a question, explaining, a typo, a one-line edit, a rename, recon that lands nothing — say 'no pipeline'/'без пайплайна' to opt out."

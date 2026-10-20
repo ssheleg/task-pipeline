@@ -36,8 +36,11 @@ ED = os.path.join(SKILLS, "evidence-docs")
 TP = os.path.join(SKILLS, "task-pipeline")
 
 REFS = ["documentation.md", "learned.md", "gates.md", "hooks.md",
-        "setup.md", "retrospective.md"]
+        "setup.md"]
 TPLS = ["decisions.md", "docgate.sh"]
+# Hand-written pointers, not generated copies (1.98.0): the retro doctrine was a 34.7 KB
+# near-verbatim copy with no delta of its own, so evidence-docs points at its one home.
+POINTERS = ["retrospective.md"]
 
 
 HOME_URL = ("https://github.com/ssheleg/task-pipeline/blob/main/"
@@ -53,7 +56,7 @@ def generate(src_text, kind):
     canonical URL — resolvable from anywhere, so the closure stays 8 files
     instead of the whole neighbouring skill.
     """
-    local_refs = set(REFS)
+    local_refs = set(REFS) | set(POINTERS)
     local_tpls = set(TPLS)
 
     def rewrite(m):
@@ -121,6 +124,13 @@ def t_copies_match_source_home():
         assert src == cp, f"templates/{f} drifted from the source home — re-run --sync"
 
 
+def t_pointers_are_pointers():
+    for f in POINTERS:
+        t = read(os.path.join(ED, "references", f))
+        assert len(t.encode("utf-8")) < 2500, f"references/{f} grew back into a copy ({len(t)} chars)"
+        assert HOME_URL + "references/" + f in t, f"references/{f} does not point at its home"
+
+
 def t_generated_marker():
     m = read(os.path.join(ED, "references", "GENERATED.md"))
     assert "do not edit here" in m and "source home" in m
@@ -132,7 +142,7 @@ def t_isolated_copy_resolves():
         shutil.copytree(ED, iso)
         broken = []
         for rel_dir, name in [(".", "SKILL.md")] + \
-                [("references", f) for f in REFS]:
+                [("references", f) for f in REFS + POINTERS]:
             t = read(os.path.join(iso, rel_dir, name))
             for target in re.findall(r"\]\(([^)#]+?)(?:#[^)]*)?\)", t):
                 if target.startswith(("http://", "https://")):
@@ -149,6 +159,7 @@ def main():
     case("no link escapes the skill directory", t_no_escaping_links)
     case("every generated copy is byte-equal to the source home",
          t_copies_match_source_home)
+    case("a pointer stays a pointer to its source home", t_pointers_are_pointers)
     case("the GENERATED marker names the source home and the sync",
          t_generated_marker)
     case("an isolated copy of the directory resolves every link",

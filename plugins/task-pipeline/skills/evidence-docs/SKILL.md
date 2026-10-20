@@ -1,6 +1,6 @@
 ---
 name: evidence-docs
-description: "Use when writing or reviewing anything that will be read as true — a decision record, a README, an acceptance report, a runbook, a changelog entry, an audit finding, or any claim that something was verified. Applies the ten canons of evidence-backed documentation — what makes a claim documentation rather than an assertion — and routes to the doctrine that enforces each one. Also use when a project needs a documentation gate, a decision register, a propagation matrix, or a retrospective that outlives its author. Triggers - 'documentation gate', 'decision record', 'ADR', 'acceptance report', 'runbook', 'is this verified', 'доказательная документация', 'записать решение', 'запиши решение', 'отчёт о приёмке', 'раннбук', 'чем это подтверждено', 'доки в синхроне'. Not for: drafts, chat answers, commit messages or code comments — say 'без доков' to opt out."
+description: "Use when writing or reviewing anything read as true: a decision record, ADR, README, acceptance report, runbook, changelog, audit finding, or a claim that something was verified. Applies the ten canons of evidence-backed documentation and routes to the doctrine enforcing each; also a documentation gate or decision register. Not for: drafts, chat answers, commit messages; 'без доков' opts out."
 license: MIT
 compatibility: "Doctrine runs on any agent. No bundled scripts — nothing to install and nothing to degrade."
 ---
@@ -108,3 +108,10 @@ then nothing carries an address.
 GENERATED copies, so a single-skill install of this skill resolves every link without a
 neighbouring checkout. Edit the source home, never the copy — which file is generated,
 from where, and how to re-sync: [`GENERATED.md`](references/GENERATED.md).
+
+## Triggers
+
+The description is the short form. The full trigger list it carried until 1.98.0,
+moved here verbatim, still routes to this skill:
+
+"Use when writing or reviewing anything that will be read as true — a decision record, a README, an acceptance report, a runbook, a changelog entry, an audit finding, or any claim that something was verified. Applies the ten canons of evidence-backed documentation — what makes a claim documentation rather than an assertion — and routes to the doctrine that enforces each one. Also use when a project needs a documentation gate, a decision register, a propagation matrix, or a retrospective that outlives its author. Triggers - 'documentation gate', 'decision record', 'ADR', 'acceptance report', 'runbook', 'is this verified', 'доказательная документация', 'записать решение', 'запиши решение', 'отчёт о приёмке', 'раннбук', 'чем это подтверждено', 'доки в синхроне'. Not for: drafts, chat answers, commit messages or code comments — say 'без доков' to opt out."

@@ -25,7 +25,8 @@ fields, written at stage 0 and confirmed with the brief:
   released, installed or deployed. A branch is not that artefact.
 - **Scope** — the modules, paths and REQ ids this iteration may change, as a list.
 - **Budget** — `run.finish.maxRounds` (default 3) and `run.finish.maxReleases` (default 2),
-  from `pipeline.json` ([`../pipeline.schema.json`](../pipeline.schema.json)).
+  from `pipeline.json` ([`../pipeline.schema.json`](../pipeline.schema.json)), and
+  `run.finish.cleanRounds`: 1, or 2 when the iteration carries an R3 or flagship node.
 - **Base** — the commit the iteration started from.
 
 Widening the scope is a recorded revision of the brief, with the operator's go. A finding is
@@ -71,12 +72,15 @@ A **round** is every exit check run once, plus one independent reading over the 
 audit axis, an observer, or the post-release readback. Rotating the axis
 ([`audit.md`](audit.md)) never adds a round. Only new blocking findings count.
 
-- **Done** — every exit check green on the artefact, and two consecutive rounds with no new
-  blocking finding. The second of them may read only the last fix's diff.
+- **Done** — every exit check green on the artefact, and one round with no new blocking
+  finding; two consecutive ones when the iteration carries an R3 or flagship node, the
+  second of which may read only the last fix's diff. Two for every iteration was the
+  default until 1.98.0, and a clean round that changed nothing bought a second reading
+  of the same tree.
 - **Diverging** — new blocking findings did not fall from one round to the next, or
   self-inflicted ≥ new. Run [`loop-guard.md`](loop-guard.md)'s break protocol.
 - **Budget spent** — `maxRounds` or `maxReleases` reached before done: a blocker open, or the
-  second clean round still owed. Stop and hand the iteration back: each open blocker becomes a
+  clean round still owed. Stop and hand the iteration back: each open blocker becomes a
   top board row marked `needs-operator`. No round runs past the budget without the operator's
   go, given with the numbers; a done reached past it without that go is still `budget`.
 
@@ -94,15 +98,16 @@ round: <N> — <reading> — new blocking <k>
 
 ```
 python3 scripts/waves.py finish --inventory <inventory.json> --ledger .task-pipeline/run.md \
-  --max-rounds 3 --max-releases 2 --releases <n> --checks <k>/<m> --artefact <name>@<sha>
+  --max-rounds 3 --max-releases 2 --releases <n> --checks <k>/<m> --artefact <name>@<sha> \
+  [--clean-rounds 2]
 ```
 
 `--rounds N` may stand in for `--ledger`; with neither the count is unknown and the script
 refuses. Exit codes:
 
-- `0` — done: the last two rounds found no new blocking item, none is open, and every exit
-  check is green on the artefact.
-- `3` — continue: a blocker open, a second clean round owed, or no `--checks` given.
+- `0` — done: the last `--clean-rounds` rounds (1 by default) found no new blocking item,
+  none is open, and every exit check is green on the artefact.
+- `3` — continue: a blocker open, a clean round owed, or no `--checks` given.
 - `5` — budget: reached before done, or done past it without `--operator-go`.
 - `6` — blocked: diverging; run the loop guard's break protocol.
 - `1` — malformed: the inventory, the ledger or the arguments, each reason named.

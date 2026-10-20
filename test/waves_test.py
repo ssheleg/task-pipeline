@@ -151,10 +151,17 @@ def finish_cases():
     rc, out, err = fin([], "--rounds", "2", *GREEN)
     ok(rc == 0, f"two clean rounds: done, exit 0 ({rc} {out!r} {err!r})")
     rc, out, err = fin([], "--rounds", "1", *GREEN)
+    ok(rc == 0 and out.startswith("finish: done — rounds 1/3"),
+       f"one clean round ends an iteration by default (1.98.0): done, exit 0 ({rc} {out!r} {err!r})")
+    rc, out, err = fin([], "--rounds", "1", "--clean-rounds", "2", *GREEN)
     ok(rc == 3 and out.startswith("next round: 2/3"),
-       f"one clean round owes a second: continue, exit 3 ({rc} {out!r} {err!r})")
+       f"with --clean-rounds 2 (R3 or flagship) one clean round owes a second: exit 3 ({rc} {out!r} {err!r})")
     rc, out, err = fin(fixed_r1, "--rounds", "2", *GREEN)
-    ok(rc == 3, f"the fix round then one clean round owes a second clean one: exit 3 ({rc} {out!r})")
+    ok(rc == 0, f"the fix round then one clean round: done by default ({rc} {out!r})")
+    rc, out, err = fin(fixed_r1, "--rounds", "2", "--clean-rounds", "2", *GREEN)
+    ok(rc == 3, f"the fix round then one clean round owes a second under --clean-rounds 2: exit 3 ({rc} {out!r})")
+    rc, out, err = fin([], "--rounds", "1", "--clean-rounds", "3", *GREEN)
+    ok(rc == 1 and "not 1 or 2" in err, f"--clean-rounds outside 1..2 is refused ({rc} {err!r})")
     many = [item(f"D-{n:03d}", triage="deferred", severity="high", register_id=f"B-{n:03d}")
             for n in range(40)]
     rc, out, err = fin(many, "--rounds", "2", *GREEN)
@@ -219,9 +226,12 @@ def finish_cases():
     empty.write_text("stage: 0 Intake — gate manual — verdict pass — 2026-10-15T09:00Z\n")
     rc, out, err = fin([], "--ledger", str(empty), *GREEN)
     ok(rc == 1 and "round:" in err, f"a ledger with no round: lines and no --rounds is refused ({rc} {err!r})")
-    # Fix 7: a budget of one round can never see two clean rounds.
+    # Fix 7: a budget of one round can never see two clean rounds (--clean-rounds 2).
+    rc, out, err = fin([], "--rounds", "1", "--clean-rounds", "2", *GREEN, max_rounds="1")
+    ok(rc == 1 and "--max-rounds" in err,
+       f"--max-rounds 1 under --clean-rounds 2 is refused, exit 1 ({rc} {err!r})")
     rc, out, err = fin([], "--rounds", "1", *GREEN, max_rounds="1")
-    ok(rc == 1 and "--max-rounds" in err, f"--max-rounds 1 is refused, exit 1 ({rc} {err!r})")
+    ok(rc == 0, f"--max-rounds 1 with one clean round owed is a budget that can be met ({rc} {err!r})")
     # Fix 8: done past the budget needs the operator's go.
     rc, out, err = fin([], "--rounds", "4", *GREEN)
     ok(rc == 5 and "past budget — operator's go required" in out,
@@ -494,7 +504,7 @@ def main():
                    capture_output=True, text=True, cwd=ROOT)
     r = subprocess.run([sys.executable, str(GRAPH), "close", "--verdict", str(d / "verdict-N-001.json"),
                         "--graph", str(rp)], capture_output=True, text=True, cwd=ROOT)
-    ok(r.returncode != 0 and "1 of 3" in r.stdout + r.stderr,
+    ok(r.returncode != 0 and "1 of 2" in r.stdout + r.stderr,
        f"the synced R3 node is refused by close after one round ({r.stdout + r.stderr!r})")
     (d / "plan-lower.json").write_text(json.dumps({"nodes": [{"id": "N-001", "wave": 1, "risk": "R1"}]}))
     before_lower = rp.read_bytes()

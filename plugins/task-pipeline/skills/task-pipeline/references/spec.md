@@ -18,7 +18,7 @@ Writing the approved design down so a zero-context implementer — human or suba
 - Module dossier — when the run is one brick of a platform
 - Self-review — before showing it
 - Locked contracts are decisions — the register, not only the spec
-- GATE (manual)
+- GATE (auto)
 
 ## Order of operations
 
@@ -280,13 +280,14 @@ spec section instead of restating the reasoning there.
 and the next one supersedes it; an id survives. If this stage settled something and
 no entry names it, the run has agreed to decide it again later.
 
-## GATE (manual)
+## GATE (auto)
 
 > "Spec written and committed to `<path>`. Review it and tell me if anything should
 > change before I write the implementation plan."
 
-Wait for the operator. Changes requested → apply, re-run the self-review, ask
-again.
+Where the brief records a standing authorization (the default gate is `auto` since
+1.98.0), an independent reader reviews the spec and the run continues; otherwise wait
+for the operator. Changes requested → apply, re-run the self-review, and review again.
 
 The gate is not only the operator's word: **every section carries `covers: REQ-…`
 and every REQ in the brief appears in at least one section.** For UI tasks it

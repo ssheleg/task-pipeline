@@ -1676,14 +1676,47 @@ def risk():
             "severity": "risk", "fix": "add one", "check": "pytest tests/test_y.py -q"}
 
 
-def certify(graph, reports, *extra, workdir=None):
+def _git(d, *args):
+    r = subprocess.run(["git", "-c", "user.name=t", "-c", "user.email=t@t", "-c",
+                        "commit.gpgsign=false"] + list(args), cwd=d, capture_output=True, text=True)
+    assert r.returncode == 0, "git %s: %s" % (" ".join(args), r.stdout + r.stderr)
+
+
+def _bump(d):
+    """A new commit with a new tree: the fix a next round reads."""
+    f = pathlib.Path(d) / "src.txt"
+    f.write_text(f.read_text() + "x\n" if f.exists() else "x\n")
+    _git(d, "add", "src.txt")
+    _git(d, "commit", "-q", "-m", "fix")
+
+
+def close_in(d):
+    """`close`, run where `certify` ran, so HEAD is the tree the verdict tested."""
+    cwd = d if (pathlib.Path(d) / ".git").exists() else None
+    r = subprocess.run([sys.executable, str(GRAPH), "close", "--verdict",
+                        str(pathlib.Path(d) / "verdict-N-001.json"),
+                        "--graph", str(pathlib.Path(d) / "graph.json")],
+                       capture_output=True, text=True, cwd=cwd)
+    return r.returncode, r.stdout + r.stderr
+
+
+def certify(graph, reports, *extra, workdir=None, git=False, same_tree=False):
     """Write a graph and its tier reports to one directory and run `certify`.
 
     Returns (code, output, workdir) so a second round can run against the SAME
     directory — which is the only way to prove the round count accumulates rather
     than being recomputed from nothing each time.
+
+    `git=True` makes the workspace its own repository, and every later round in it
+    commits a change first (a fix), unless `same_tree=True`: since 1.98.0 `certify`
+    refuses a round of the same kind on a tree the previous round already read.
     """
     d = workdir or residue.workspace("graph")
+    if git and workdir is None:
+        _git(d, "init", "-q")
+        _bump(d)
+    elif workdir and (pathlib.Path(d) / ".git").exists() and not same_tree:
+        _bump(d)
     gp = pathlib.Path(d) / "graph.json"
     if graph is not None:
         gp.write_text(json.dumps(graph))
@@ -1696,7 +1729,8 @@ def certify(graph, reports, *extra, workdir=None):
     for tp in paths:
         argv += ["--tier", tp]
     argv += list(extra) + ["--graph", str(gp)]
-    r = subprocess.run(argv, capture_output=True, text=True)
+    cwd = d if (pathlib.Path(d) / ".git").exists() else None
+    r = subprocess.run(argv, capture_output=True, text=True, cwd=cwd)
     return r.returncode, (r.stdout + r.stderr), d
 
 
@@ -1874,7 +1908,7 @@ def _():
 def _():
     failing = three()
     failing[1].update(verdict="fail", confirms=[], findings=[breaks()])
-    code, out, d = certify(ONE, failing)
+    code, out, d = certify(ONE, failing, git=True)
     assert code == 1, out
     code, out, d = certify(None, failing, workdir=d)
     assert code == 1, out
@@ -1883,27 +1917,56 @@ def _():
     assert len(n["certification"]["history"]) == 2, n["certification"]
 
 
-@case("certify: at the ceiling the output names the tier that failed every round")
+@case("certify: at the ceiling it STOPS: the node is parked with the evidence, exit 7, and the tier is named")
 def _():
     failing = three()
     failing[1].update(verdict="fail", confirms=[], findings=[breaks()])
-    code, out, d = certify(ONE, failing, "--ceiling", "2")
+    code, out, d = certify(ONE, failing, "--ceiling", "2", git=True)
     assert code == 1 and "ceiling" not in out, "round 1 is not at a ceiling of 2: " + out
     code, out, d = certify(None, failing, "--ceiling", "2", workdir=d)
-    assert code == 1, out
-    assert "`seam`" in out and "failed every round" in out, out
+    assert code == 7, "the ceiling measured instead of stopping: exit %d %s" % (code, out)
+    assert "`seam`" in out and "failed every round" in out and "STOPPED" in out, out
     assert "loop-guard" in out, "the ceiling does not point at the doctrine: " + out
+    gp = pathlib.Path(d) / "graph.json"
+    n = json.loads(gp.read_text())["nodes"][0]
+    assert n["status"] == "parked", n
+    assert "certification ceiling" in n["parked_reason"] and "pytest tests/test_x.py" in \
+        n["parked_reason"], "the park carries no evidence: %r" % n.get("parked_reason")
+    r = subprocess.run([sys.executable, str(GRAPH), "validate", "--graph", str(gp)],
+                       capture_output=True, text=True)
+    assert r.returncode == 0, "the stop left an invalid graph: " + r.stdout + r.stderr
+    code, out, d = certify(None, failing, "--ceiling", "2", workdir=d)
+    assert code != 0 and "already parked" in out, "a stopped node took another round: " + out
 
 
 @case("certify: churn across levels is reported as such, not as one stuck tier")
 def _():
     a = three(); a[0].update(verdict="fail", confirms=[], findings=[breaks()])
     b = three(); b[1].update(verdict="fail", confirms=[], findings=[breaks()])
-    code, out, d = certify(ONE, a, "--ceiling", "2")
+    code, out, d = certify(ONE, a, "--ceiling", "2", git=True)
     assert code == 1, out
     code, out, d = certify(None, b, "--ceiling", "2", workdir=d)
-    assert code == 1, out
+    assert code == 7, out
     assert "churn across levels" in out, out
+
+
+@case("certify: a round of the same kind on an unchanged tree is refused and writes nothing")
+def _():
+    failing = three()
+    failing[1].update(verdict="fail", confirms=[], findings=[breaks()])
+    code, out, d = certify(ONE, failing, git=True)
+    assert code == 1, out
+    gp = pathlib.Path(d) / "graph.json"
+    before = gp.read_text()
+    code, out, _ = certify(None, three(), workdir=d, same_tree=True)
+    assert code != 0 and "unchanged input" in out, out
+    assert gp.read_text() == before, "a refused re-run wrote the graph"
+    # the other kind of round asks a different question, so it may read the same tree
+    code, out, _ = certify(None, three(), "--kind", "adversarial", workdir=d, same_tree=True)
+    assert code == 0, out
+    # and a fix (a new tree) is what a blind re-run needs
+    code, out, _ = certify(None, three(), workdir=d)
+    assert code == 0, out
 
 
 @case("certify: a node that is already done cannot be certified again")
@@ -1947,20 +2010,22 @@ def _():
     assert not (pathlib.Path(d) / "verdict-N-001.json").exists(), out
 
 
-@case("certify: a flagship node with four passing tiers writes a verdict close accepts")
+@case("certify: a flagship node with four passing tiers writes a verdict, and closes after its adversarial round")
 def _():
-    code, out, d = certify(VIS, three() + [tier("visual")])
+    code, out, d = certify(VIS, three() + [tier("visual")], git=True)
     assert code == 0, out
     assert "visual" in out, "the success line does not name the fourth tier: " + out
     v = json.loads((pathlib.Path(d) / "verdict-N-001.json").read_text())
     assert any(e.startswith("visual:") for e in v["evidence"]), v["evidence"]
     n = json.loads((pathlib.Path(d) / "graph.json").read_text())["nodes"][0]
     assert n["certification"]["tiers"]["visual"] == "pass", n["certification"]
-    r = subprocess.run([sys.executable, str(GRAPH), "close", "--verdict",
-                        str(pathlib.Path(d) / "verdict-N-001.json"),
-                        "--graph", str(pathlib.Path(d) / "graph.json")],
-                       capture_output=True, text=True)
-    assert r.returncode == 0, "close refused the four-tier verdict: " + r.stdout + r.stderr
+    code, out2 = close_in(d)
+    assert code != 0 and "1 of 2" in out2, "a flagship closed on one blind round: " + out2
+    code, out, _ = certify(None, three() + [tier("visual")], "--kind", "adversarial",
+                           workdir=d, same_tree=True)
+    assert code == 0 and "close it with" in out, out
+    code, out2 = close_in(d)
+    assert code == 0, "close refused the four-tier verdict: " + out2
 
 
 @case("certify: a failing visual tier fails the round and is recorded in its history")
@@ -2116,50 +2181,55 @@ def _():
         assert ok_s == good, "the schema on risk %r says %s" % (risk, ok_s)
 
 
-@case("certify: rounds owed by risk class: an R3 node is not closable after one passing round, nor after three with no adversarial one")
+@case("certify: rounds owed by risk class: an R3 node is not closable after one passing round, nor after two blind ones")
 def _():
     gp_node = node("N-001")
     gp_node["risk"] = "R3"
-    code, out, d = certify(g([gp_node]), three())
-    assert code == 0 and "1 of 3 owed" in out and "not closable yet" in out \
+    code, out, d = certify(g([gp_node]), three(), git=True)
+    assert code == 0 and "1 of 2 owed" in out and "not closable yet" in out \
         and "close it with" not in out, out
-    gpath = str(pathlib.Path(d) / "graph.json")
-    vp = str(pathlib.Path(d) / "verdict-N-001.json")
-    r = subprocess.run([sys.executable, str(GRAPH), "close", "--verdict", vp, "--graph", gpath],
-                       capture_output=True, text=True)
-    assert r.returncode != 0 and "1 of 3" in (r.stdout + r.stderr), r.stdout + r.stderr
-    certify(None, three(), workdir=d)
+    code, out = close_in(d)
+    assert code != 0 and "1 of 2" in out, out
     code, out, _ = certify(None, three(), workdir=d)
-    assert code == 0 and "3 of 3 owed" in out and "none of them adversarial" in out, out
-    r = subprocess.run([sys.executable, str(GRAPH), "close", "--verdict", vp, "--graph", gpath],
-                       capture_output=True, text=True)
-    assert r.returncode != 0 and "adversarial" in (r.stdout + r.stderr), \
-        "three blind rounds closed an R3 node: " + r.stdout + r.stderr
+    assert code == 0 and "2 of 2 owed" in out and "none of them adversarial" in out, out
+    code, out = close_in(d)
+    assert code != 0 and "adversarial" in out, "two blind rounds closed an R3 node: " + out
 
 
-@case("certify: rounds owed by risk class: an R3 node closes after three passing rounds, one of them adversarial; an R1 after one")
+@case("certify: rounds owed by risk class: R3 closes after a blind and an adversarial round; R1 and R2 after one clean round")
 def _():
     gp_node = node("N-001")
     gp_node["risk"] = "R3"
-    _, _, d = certify(g([gp_node]), three())
-    certify(None, three(), workdir=d)
-    code, out, _ = certify(None, three(), "--kind", "adversarial", workdir=d)
+    _, _, d = certify(g([gp_node]), three(), git=True)
+    code, out, _ = certify(None, three(), "--kind", "adversarial", workdir=d, same_tree=True)
     assert code == 0 and "close it with" in out, out
-    gpath = pathlib.Path(d) / "graph.json"
-    kinds = json.loads(gpath.read_text())["nodes"][0]["certification"]["kinds"]
-    assert kinds == ["blind", "blind", "adversarial"], kinds
-    r = subprocess.run([sys.executable, str(GRAPH), "close", "--verdict",
-                        str(pathlib.Path(d) / "verdict-N-001.json"), "--graph", str(gpath)],
-                       capture_output=True, text=True)
-    assert r.returncode == 0, r.stdout + r.stderr
+    kinds = json.loads((pathlib.Path(d) / "graph.json").read_text())["nodes"][0]["certification"]["kinds"]
+    assert kinds == ["blind", "adversarial"], kinds
+    code, out = close_in(d)
+    assert code == 0, out
+    for cls in ("R1", "R2"):
+        one = node("N-001")
+        one["risk"] = cls
+        code, out, d1 = certify(g([one]), three(), git=True)
+        assert code == 0 and "close it with" in out, (cls, out)
+        code, out = close_in(d1)
+        assert code == 0, (cls, out)
+
+
+@case("certify: an R1 node certifies with ONE blind tier; an R2 node with one is refused")
+def _():
     one = node("N-001")
     one["risk"] = "R1"
-    code, out, d1 = certify(g([one]), three())
-    assert code == 0 and "close it with" in out, out
-    r = subprocess.run([sys.executable, str(GRAPH), "close", "--verdict",
-                        str(pathlib.Path(d1) / "verdict-N-001.json"),
-                        "--graph", str(pathlib.Path(d1) / "graph.json")], capture_output=True, text=True)
-    assert r.returncode == 0, r.stdout + r.stderr
+    code, out, d = certify(g([one]), [tier("unit")], git=True)
+    assert code == 0 and "certified at unit" in out and "close it with" in out, out
+    code, out = close_in(d)
+    assert code == 0, out
+    code, out, _ = certify(g([one]), [], git=True)
+    assert code != 0, "an R1 round with no tier at all was accepted: " + out
+    two = node("N-001")
+    two["risk"] = "R2"
+    code, out, _ = certify(g([two]), [tier("unit")], git=True)
+    assert code != 0 and "`seam`" in out and "`product`" in out, out
 
 
 @case("certify: rounds owed count PASSING rounds: a failed round owes its replacement, and the adversarial round must pass")
@@ -2169,55 +2239,45 @@ def _():
         r[1].update(verdict="fail", confirms=[], findings=[breaks()])
         return r
 
-    def try_close(d):
-        r = subprocess.run([sys.executable, str(GRAPH), "close", "--verdict",
-                            str(pathlib.Path(d) / "verdict-N-001.json"),
-                            "--graph", str(pathlib.Path(d) / "graph.json")], capture_output=True, text=True)
-        return r.returncode, r.stdout + r.stderr
-
     def risky(cls):
         n = node("N-001")
         n["risk"] = cls
         return g([n])
 
-    # R2: fail, pass -> one passing round of two
-    _, _, d = certify(risky("R2"), failing())
+    # R2: fail, pass -> the one owed passing round
+    _, _, d = certify(risky("R2"), failing(), git=True)
     certify(None, three(), workdir=d)
-    code, out = try_close(d)
-    assert code != 0 and "1 of 2" in out, "R2 fail,pass closed or misreported: " + out
-    # R3: fail, fail, adversarial pass -> one passing round of three
-    _, _, d = certify(risky("R3"), failing())
-    certify(None, failing(), workdir=d)
-    certify(None, three(), "--kind", "adversarial", workdir=d)
-    code, out = try_close(d)
-    assert code != 0 and "1 of 3" in out, "R3 fail,fail,adv-pass closed: " + out
-    # R3: pass, pass, adversarial FAIL, pass -> three passes, none adversarial
-    _, _, d = certify(risky("R3"), three())
+    code, out = close_in(d)
+    assert code == 0, "R2 fail,pass refused: " + out
+    # R3: blind fail, adversarial pass -> one passing round of two
+    _, _, d = certify(risky("R3"), failing(), git=True)
+    certify(None, three(), "--kind", "adversarial", workdir=d, same_tree=True)
+    code, out = close_in(d)
+    assert code != 0 and "1 of 2" in out, "R3 fail,adv-pass closed: " + out
+    # R3: blind pass, adversarial FAIL, blind pass -> two passes, none adversarial
+    _, _, d = certify(risky("R3"), three(), git=True)
+    certify(None, failing(), "--kind", "adversarial", workdir=d, same_tree=True)
     certify(None, three(), workdir=d)
-    certify(None, failing(), "--kind", "adversarial", workdir=d)
-    certify(None, three(), workdir=d)
-    code, out = try_close(d)
+    code, out = close_in(d)
     assert code != 0 and "adversarial" in out, "R3 with a FAILED adversarial round closed: " + out
-    # R3: adversarial pass first, then pass, pass -> closes
-    _, _, d = certify(risky("R3"), three(), "--kind", "adversarial")
-    certify(None, three(), workdir=d)
-    code, out, _ = certify(None, three(), workdir=d)
+    # R3: adversarial pass first, then a blind pass -> closes
+    _, _, d = certify(risky("R3"), three(), "--kind", "adversarial", git=True)
+    code, out, _ = certify(None, three(), workdir=d, same_tree=True)
     assert code == 0 and "close it with" in out, out
-    code, out = try_close(d)
-    assert code == 0, "R3 adv-pass,pass,pass refused: " + out
+    code, out = close_in(d)
+    assert code == 0, "R3 adv-pass,pass refused: " + out
 
 
 @case("owed rounds message: a FAILED adversarial round is named only when one actually failed")
 def _():
     n = node("N-001")
     n["risk"] = "R3"
-    _, _, d = certify(g([n]), three())
-    certify(None, three(), workdir=d)
+    _, _, d = certify(g([n]), three(), git=True)
     code, out, _ = certify(None, three(), workdir=d)
     assert "none of them adversarial" in out and "FAILED adversarial" not in out, out
     failing = three()
     failing[1].update(verdict="fail", confirms=[], findings=[breaks()])
-    certify(None, failing, "--kind", "adversarial", workdir=d)
+    certify(None, failing, "--kind", "adversarial", workdir=d, same_tree=True)
     code, out, _ = certify(None, three(), workdir=d)
     assert "FAILED adversarial" in out, out
 
