@@ -8,7 +8,8 @@ writes, so a prune placed ahead of it can never run on real data
 
 **What stage 0 reads in full:** *Standing instructions* and *Run stamps*. Both are
 bounded by construction — ten rows and one line per run — which is why the cap is not
-negotiable. The **Recent log** and the **archive** (`docs/evidence/retro/YYYY-QN.md`,
+negotiable. Since 1.98.0 the two together also stay under 12 000 bytes, a row at most
+600 characters and a stamp at most 300 (`scripts/retro_budget.py check`). The **Recent log** and the **archive** (`docs/evidence/retro/YYYY-QN.md`,
 which is `2026-Q3.md` today) are *queried* by the task's nouns and never read end to end.
 
 This said all three until 2026-08-10, and the claim that all three were bounded was
@@ -33,8 +34,8 @@ over all of them.
 | R-005 | 2026-08-08 · `audit-followup`/M8 | `5726f7f` | When a change adds or widens a **check**, get an independent reader on it before merge — your own probes only exercise the shapes you already thought of. | story: retro/2026-Q4.md sha256:1c7294807208 | a second reader — human or agent — is dispatched by a stage rather than by the repository happening to run a bot on PRs | 2026-08-29 | `d13613d` |
 | R-007 | 2026-08-14 · `playwright-browser-channel` | `6264312` | When the checkout may hold another session's uncommitted work, **do not copy the working tree into isolation** — rebuild every file you carry from `HEAD` and re-apply your own edits, then diff the result and account for every hunk. | story: retro/2026-Q4.md sha256:2312912711c9 | a check can compare the staged set against the files this run actually wrote — which needs a run to record its own writes first | 2026-08-15 | `42948c8` |
 | R-008 | 2026-08-15 · `graph-audit` | `42948c8` | Before writing a fix, **enumerate the shapes the defect can take** and say which the fix covers. A change that closes one of two is half a fix, and the half it leaves reads as closed. | story: retro/2026-Q4.md sha256:9a511493b616 | a check can compare a fix against a named list of the shapes its defect takes — which needs the shapes written down per class first | 2026-08-29 | `d13613d` |
-| R-009 | 2026-08-17 · `manifesto-audit` | `84bbf0c` | **Take the lease before the edit, not after the collision.** A shared register is claimed when you decide to write it, not when a second agent proves you should have. The guard refuses an unleased edit to a guarded file — but only *at* the edit, which is already too late to have avoided the race. | story: retro/2026-Q4.md sha256:478b5cc87fff | when `agent_sync status` can show a run that took no lease, or two consecutive releases pass with no collision recorded in this file | 2026-08-29 | `d13613d` |
-| R-010 | 2026-08-22 · `three-member-release` | `1e61f6a` | **Before pushing a tag, create the owned unpublished annotation locally, then run the suite the release runs — `test:all` — with that exact tag visible on the accepted commit.** A release workflow reports one failure per round and takes twenty-five to forty minutes; the same suite locally takes twelve and reports all of them at once. | story: retro/2026-Q4.md sha256:c93cb7b3acd1 | it becomes a mechanical pre-push hook, or the release suite drops under five minutes | 2026-08-29 | `d13613d` |
+| R-009 | 2026-08-17 · `manifesto-audit` | `84bbf0c` | **Take the lease before the edit, not after the collision.** A shared register is claimed when you decide to write it, not when a second agent proves you should have. The guard refuses an unleased edit to a guarded file — but only *at* the edit, which is already too late to have avoided the race. | story: retro/2026-Q4.md sha256:478b5cc87fff | when `agent_sync status` can show a run that took no lease, or two consecutive releases pass with no collision recorded in this file | 2026-10-20 | `4e9a90a` |
+| R-010 | 2026-08-22 · `three-member-release` | `1e61f6a` | **Before pushing a tag, create the owned unpublished annotation locally, then run the suite the release runs — `test:all` — with that exact tag visible on the accepted commit.** A release workflow reports one failure per round and takes twenty-five to forty minutes; the same suite locally takes twelve and reports all of them at once. | story: retro/2026-Q4.md sha256:c93cb7b3acd1 | it becomes a mechanical pre-push hook, or the release suite drops under five minutes | 2026-10-20 | `4e9a90a` |
 
 Retire on **any** of: it became a check · every path/command it names is gone · it
 has not fired in the last five run stamps, or in the last sixty days. At eleven
@@ -42,6 +43,19 @@ rows, the oldest never-fired
 row goes — the cap is not negotiable, ranking is.
 
 ## Recent log — narrative entries, uncapped and queried rather than read (newest first)
+
+### 2026-10-20 · `feat/diet-1020` · the shell and the scratch space were both shared instruments
+
+- **Symptom:** two measuring commands failed under zsh (`--include=*.py`: no matches found;
+  `echo ===`: `=` expansion), and an `rm -rf /tmp/*-copy` cleanup ran while another session's
+  negative suite held the family scratch lock, so its in-flight copies may have gone.
+- **Surfaced at:** stage 5 · **Owned by:** stage 0 (the autonomy sweep names no shell and no
+  scratch owner). Leases on the guarded files were taken after the edits (R-009 fired late).
+- **Root cause:** unquoted expansions; a fixed `/tmp` namespace owned by whoever holds the lock.
+- **Fix:** grade 1 upstream, `learned.md` rules 33 and 34 (cited, not restated here).
+- **The check:** `test/negative_lock.py` already serializes the suites; a cleanup must ask it first.
+- **Class:** `shell-instrument`, `collision` · **Cost:** two failed commands, one foreign run to repeat.
+- **Commit:** `4e9a90a`
 
 ### 2026-08-31 · `b113-derived-anchors` — the census was blind four ways, and the loop guard caught the fix restating its own lesson
 
@@ -1897,6 +1911,7 @@ without the cap the countable thing grows inside a section read in full.
 
 | Date | Topic | Commit | Verdict | Retro |
 |---|---|---|---|---|
+| 2026-10-20 | `feat/diet-1020` / proportional run, reading diet, anti-loop, retro budget | `4e9a90a` | 1.98.0 · A-E shipped · test:all green | 1 entry · 8 standing · prune: 0 retired |
 | 2026-09-07 | `rel/audit-wave` / the family audit's wave, and the stamp gate that refused its own absence | `ebcc882` | moved: retro/2026-Q4.md sha256:6376edea4289 | · |
 | 2026-09-06 | `fix/release-stamp-names-the-tag` / a stamp names the tag, and the plants broke CI silently | `e2ffe91` | moved: retro/2026-Q4.md sha256:c780fbf773db | · |
 | 2026-09-05 | `fix/conformance-sentence` / the conformance sentence is computed | `b3077f8` | moved: retro/2026-Q4.md sha256:7b30d7d9a08d | · |
@@ -1906,4 +1921,3 @@ without the cap the countable thing grows inside a section read in full.
 | 2026-09-01 | `feat/verdicts` / the second axis of blindness, and a version taken from under another run | `7fb185a` | moved: retro/2026-Q4.md sha256:1c03db779eb2 | · |
 | 2026-09-01 | `b113-derived-anchors` / the census was blind four ways, and the loop guard caught the fix restating its own lesson | `6577e8a` | moved: retro/2026-Q4.md sha256:fd80d4a97acf | · |
 | 2026-08-31 | `wave3-doctrine-pack` / one home per rule, and the boundaries said out loud | `8b916c2` | moved: retro/2026-Q4.md sha256:9ca48dad0a87 | · |
-| 2026-08-29 | `wave1-gate-fixes` / the gate that could not see | `f4600f3` | moved: retro/2026-Q4.md sha256:e54c484f818b | · |
