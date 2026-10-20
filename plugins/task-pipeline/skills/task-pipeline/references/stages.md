@@ -88,7 +88,7 @@ never that the work was skipped quietly.
 
 **On entry or resume:** read [stage-00-intake.md](stage-00-intake.md) before stage work.
 
-- **On the short path** ([stage-00-intake.md](stage-00-intake.md) → Phase 1d) this gate
+- **On the short path** (`stage-00-intake.md` → Phase 1d) this gate
   is: the triage line printed, the brief and its REQ rows in the run ledger, the retro
   floor read with its byte count, and the source ledger. Everything else below applies
   to the full flow.

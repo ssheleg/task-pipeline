@@ -132,6 +132,18 @@ def _():
         assert code == 1 and "unproved" in out, out
 
 
+@case("a stamp whose narrative holds a `|` keeps the table's column count after migrate")
+def _():
+    with tempfile.TemporaryDirectory() as d:
+        bad = plant(SEED, STAMP_NEEDLE, "| a | b | " + "narrative with a pipe | inside. " * 12 + " |")
+        p = write(d, bad)
+        code, out = run("migrate", "--retro", p, "--write")
+        assert code == 0, out
+        row = [l for l in pathlib.Path(p).read_text(encoding="utf-8").split("\n")
+               if l.startswith("| 2026-05-04 |")][0]
+        assert row.count("|") == 6, "the migrated stamp has %d pipes, the table 6: %s" % (row.count("|"), row)
+
+
 @case("an instruction too long to shorten by moving its story stays a failure after migrate")
 def _():
     with tempfile.TemporaryDirectory() as d:

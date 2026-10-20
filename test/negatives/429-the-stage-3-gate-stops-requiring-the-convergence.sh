@@ -8,7 +8,7 @@ p = "/tmp/cx5-copy/plugins/task-pipeline/skills/task-pipeline/references/stages.
 t = open(p, encoding="utf-8").read()
 m = re.search(r"^## 3 — Spec.*?(?=^## )", t, re.S | re.M)
 assert m, "PLANT DID NOT LAND: cx5 — no stage 3 section"
-g = re.search(r"\n- \*\*GATE \(manual\).*?(?=\n\S|\Z)", m.group(0), re.S)
+g = re.search(r"\n- \*\*GATE \((?:manual|auto)\).*?(?=\n\S|\Z)", m.group(0), re.S)
 assert g, "PLANT DID NOT LAND: cx5 — no GATE bullet"
 _g = re.sub(r"(?i)converge\w*", "combine", g.group(0))
 assert _g != g.group(0), "PLANT DID NOT LAND: cx5 — the gate never named it"

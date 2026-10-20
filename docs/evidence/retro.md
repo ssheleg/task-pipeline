@@ -1899,11 +1899,11 @@ without the cap the countable thing grows inside a section read in full.
 |---|---|---|---|---|
 | 2026-09-07 | `rel/audit-wave` / the family audit's wave, and the stamp gate that refused its own absence | `ebcc882` | moved: retro/2026-Q4.md sha256:6376edea4289 | · |
 | 2026-09-06 | `fix/release-stamp-names-the-tag` / a stamp names the tag, and the plants broke CI silently | `e2ffe91` | moved: retro/2026-Q4.md sha256:c780fbf773db | · |
-| 2026-09-05 | `fix/conformance-sentence` / the conformance sentence is computed | `b3077f8` | moved: retro/2026-Q4.md sha256:7b30d7d9a08d | · | · |
-| 2026-09-05 | `rel/v1832` / fifteen filed findings, and the two rules they mostly refine | `f4e0331` | moved: retro/2026-Q4.md sha256:2b8c164ba82b | · | · |
-| 2026-09-04 | `fix/audit-batch` / a report is asked for, and four filed findings close | `48544ac` | moved: retro/2026-Q4.md sha256:4861ae29ebe9 | · | · |
+| 2026-09-05 | `fix/conformance-sentence` / the conformance sentence is computed | `b3077f8` | moved: retro/2026-Q4.md sha256:7b30d7d9a08d | · |
+| 2026-09-05 | `rel/v1832` / fifteen filed findings, and the two rules they mostly refine | `f4e0331` | moved: retro/2026-Q4.md sha256:2b8c164ba82b | · |
+| 2026-09-04 | `fix/audit-batch` / a report is asked for, and four filed findings close | `48544ac` | moved: retro/2026-Q4.md sha256:4861ae29ebe9 | · |
 | 2026-09-01 | `rel/v1823` / the release protocol is two merges, and their order is written down | `9e2ab3e` | moved: retro/2026-Q4.md sha256:f6612565bdc1 | · |
 | 2026-09-01 | `feat/verdicts` / the second axis of blindness, and a version taken from under another run | `7fb185a` | moved: retro/2026-Q4.md sha256:1c03db779eb2 | · |
-| 2026-09-01 | `b113-derived-anchors` / the census was blind four ways, and the loop guard caught the fix restating its own lesson | `6577e8a` | moved: retro/2026-Q4.md sha256:fd80d4a97acf | · | · |
-| 2026-08-31 | `wave3-doctrine-pack` / one home per rule, and the boundaries said out loud | `8b916c2` | moved: retro/2026-Q4.md sha256:9ca48dad0a87 | · | · |
+| 2026-09-01 | `b113-derived-anchors` / the census was blind four ways, and the loop guard caught the fix restating its own lesson | `6577e8a` | moved: retro/2026-Q4.md sha256:fd80d4a97acf | · |
+| 2026-08-31 | `wave3-doctrine-pack` / one home per rule, and the boundaries said out loud | `8b916c2` | moved: retro/2026-Q4.md sha256:9ca48dad0a87 | · |
 | 2026-08-29 | `wave1-gate-fixes` / the gate that could not see | `f4600f3` | moved: retro/2026-Q4.md sha256:e54c484f818b | · |

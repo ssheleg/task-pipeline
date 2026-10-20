@@ -15,9 +15,11 @@ t = open(p, encoding="utf-8").read()
 m = re.search(r'^description: "(.*)"\s*$', t, re.M)
 assert m, "PLANT DID NOT LAND: description is not a quoted scalar"
 _unquoted = "description: " + m.group(1)
-needle = "will be read as true — a decision record"
+# Since 1.98.0 the description itself carries `read as true: a decision record`, legal
+# between quotes; unquoting it is the plant.
+needle = "read as true: a decision record"
 assert needle in _unquoted, "PLANT DID NOT LAND: needle absent before edit"
-_planted = t[:m.start()] + _unquoted.replace(needle, "will be read as true: a decision record", 1) + t[m.end():]
+_planted = t[:m.start()] + _unquoted + t[m.end():]
 assert _planted != t, "PLANT DID NOT LAND"
 open(p, "w", encoding="utf-8").write(_planted)
 EOF

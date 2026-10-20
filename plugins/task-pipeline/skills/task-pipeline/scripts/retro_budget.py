@@ -86,6 +86,15 @@ def cells(row):
     return [c.strip() for c in parts[1:-1]]
 
 
+def header_cols(lines, i):
+    """Column count of the table holding row i, read from its header (a `|` inside a
+    cell's text must not widen the row that replaces it)."""
+    k = i
+    while k > 0 and lines[k - 1].startswith("|"):
+        k -= 1
+    return len(cells(lines[k]))
+
+
 def measure(text, budget=BUDGET, row=ROW, stamp=STAMP):
     lines, spans = sections(text)
     floor = "\n".join(lines[spans[STANDING][0]:spans[STANDING][1]]) + "\n" + \
@@ -178,7 +187,7 @@ def cmd_migrate(a):
         h, b = block("stamp", "%s %s" % (c[0], c[2]), lines[i])
         ptr = "moved: %s sha256:%s" % (rel, h[:12])
         # the table keeps its column count: the pointer fills Verdict, `·` the rest
-        tail = ["·"] * max(0, len(c) - 4)
+        tail = ["·"] * max(0, header_cols(lines, i) - 4)
 
         def row_of(topic):
             return "| " + " | ".join([c[0], topic, c[2], ptr] + tail) + " |"
