@@ -2224,8 +2224,8 @@ def _():
     assert code == 0 and "certified at unit" in out and "close it with" in out, out
     code, out = close_in(d)
     assert code == 0, out
-    code, out, _ = certify(g([one]), [], git=True)
-    assert code != 0, "an R1 round with no tier at all was accepted: " + out
+    code, out, _ = certify(g([one]), [tier("visual")], git=True)
+    assert code != 0 and "one blind tier" in out, "an R1 round with no blind tier was accepted: " + out
     two = node("N-001")
     two["risk"] = "R2"
     code, out, _ = certify(g([two]), [tier("unit")], git=True)
