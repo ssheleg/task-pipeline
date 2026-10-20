@@ -22,7 +22,7 @@ approved design — not at code.
 - UI detection — a required output
 - The approved design is a set of decisions — record them
 - User paths are a design output, not a spec detail
-- GATE (manual)
+- GATE (auto)
 - Rationalizations
 
 ## The hard gate
@@ -139,9 +139,9 @@ Feed them into [`spec.md`](spec.md)'s UX track — super-ux turns them into flow
 screens and traced scenarios. **Do not draft scenario IDs here**; that is the
 chain's job, and two sources for one scenario is worse than one.
 
-## GATE (manual)
+## GATE (auto)
 
-The operator approves the design, **the UI verdict is recorded**, and — where that verdict is *yes* — **the paths, the states and the error paths are named** (above) rather than deferred to the spec. **Every REQ in the brief is answered by the design** — a requirement the design doesn't address
+The design is approved (the operator's go, or the standing authorization recorded in the brief; `auto` by default since 1.98.0), **the UI verdict is recorded**, and — where that verdict is *yes* — **the paths, the states and the error paths are named** (above) rather than deferred to the spec. **Every REQ in the brief is answered by the design** — a requirement the design doesn't address
 is either covered now or explicitly dropped by the operator, with the drop written
 into the carry-over ledger. For a platform, the module map
 ([`decomposition.md`](decomposition.md)) is committed and approved as part of this

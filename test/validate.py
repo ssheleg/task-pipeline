@@ -2253,8 +2253,11 @@ if os.path.isfile(_adopt):
 # too broad steals triggers from narrower skills. So the exclusion clause is required
 # in the description, and the opt-out phrase must appear in the eval suite — an
 # escape hatch nobody tests is a trap rather than a default.
+# 1.98.0: the full trigger list lives in SKILL.md's `## Triggers`; routing reads both.
+_TRIG = (re.search(r"(?ms)^## Triggers\n(.*?)(?=^## |\Z)", open(skill_path, encoding="utf-8")
+                   .read()) or [None, ""])[1] if os.path.isfile(skill_path) else ""
 if fm_name and 'desc' in dir():
-    _d = desc if 'desc' in dir() else ""
+    _d = (desc if 'desc' in dir() else "") + "\n" + _TRIG
     if "Not for:" not in _d:
         fail("SKILL.md: the description widens to repo-changing work but states no "
              "'Not for: …' exclusion clause — that is the 'too broad, steals "
@@ -3610,7 +3613,7 @@ if os.path.isfile(_st):
             fail("references/stages.md: stage 2 writes the graph and never says how it is "
                  "checked — a graph that does not validate is not a queue, and `next` refuses "
                  "to walk one")
-    _gate = [l for l in _stl if "GATE (manual):" in l and "queue is an artifact" in
+    _gate = [l for l in _stl if "GATE (" in l and "queue is an artifact" in
              "\n".join(_stl[_stl.index(l):_stl.index(l) + 6])]
     if not _gate:
         fail("references/stages.md: stage 2's GATE does not require the queue to be an "
@@ -4545,15 +4548,13 @@ if pipe is not None:
                 if not (isinstance(gate.get("check"), str) and gate.get("check").strip()):
                     fail(f"{where}: empty/missing gate.check")
 
-    # Stage 0 is the mandatory intake grill: its gate must be manual (the operator
-    # confirms the brief) and must state that the stage is mandatory, so the
-    # config can't drift from the doctrine in references/stages.md.
+    # Stage 0: MANDATORY; auto since 1.98.0, so its check names the standing authorization.
     if isinstance(stages, list) and stages:
         s0 = stages[0] if isinstance(stages[0], dict) else {}
         s0_gate = s0.get("gate") if isinstance(s0.get("gate"), dict) else {}
         s0_check = str(s0_gate.get("check", "")).lower()
-        if s0_gate.get("type") != "manual":
-            fail(f"{EXAMPLE_REL} stage[1]: the intake grill gate must be 'manual' (the operator confirms the brief)")
+        if s0_gate.get("type") not in ("auto", "manual") or "standing authorization" not in s0_check:
+            fail(f"{EXAMPLE_REL} stage[1]: the intake gate must name the standing authorization that confirms the brief")
         if "mandatory" not in s0_check:
             fail(f"{EXAMPLE_REL} stage[1]: gate.check must state that the intake grill is MANDATORY (never skipped)")
         # The interview is phase 2. Dropping phase 1 from the gate turns the grill
@@ -4615,10 +4616,8 @@ if pipe is not None:
                         "the built-in doctrine (references/*.md), not an external provider"
                     )
 
-    # The shipped default flow must close the circle: the last stage is acceptance,
-    # and it is manual. Every earlier gate asks "is this artifact good?"; only this
-    # one asks "does this still contain everything that was asked for?" — and only
-    # the person who asked can answer that, so an auto gate here would be a lie.
+    # The default flow closes the circle: the last stage is acceptance, and its hand-back
+    # asks the operator "is this everything you asked for?" (auto since 1.98.0).
     # (Host projects are unconstrained: pipeline.schema.json fixes no stage count.
     # This checks the EXAMPLE we ship.)
     if isinstance(stages, list) and stages:
@@ -4627,9 +4626,8 @@ if pipe is not None:
         if last.get("state") != "acceptance":
             fail(f"{EXAMPLE_REL}: the default flow's last stage must be 'acceptance' "
                  f"(the REQ close-out), got {last.get('state')!r}")
-        elif last_gate.get("type") != "manual":
-            fail(f"{EXAMPLE_REL}: the acceptance gate must be 'manual' — a green table "
-                 "is not the operator confirming it is what they asked for")
+        elif "hand-back" not in str(last_gate.get("check", "")).lower():
+            fail(f"{EXAMPLE_REL}: the acceptance gate must require the hand-back")
         elif "evidence" not in str(last_gate.get("check", "")).lower():
             fail(f"{EXAMPLE_REL}: the acceptance gate.check must require EVIDENCE per "
                  "requirement — 'done' without evidence is the gap this stage exists to catch")
@@ -6255,7 +6253,7 @@ if _DESC_M is None:
     _UNLOOKED.append("skip: the routing boundary — SKILL.md has no double-quoted "
                      "description, so none of its seven checks ran")
 else:
-    _desc_txt = _DESC_M.group(1)
+    _desc_txt = _DESC_M.group(1) + "\n" + _TRIG
     _not_for = _desc_txt.split("Not for:")[-1] if "Not for:" in _desc_txt else ""
     _use_when = _desc_txt.split("Not for:")[0]
 

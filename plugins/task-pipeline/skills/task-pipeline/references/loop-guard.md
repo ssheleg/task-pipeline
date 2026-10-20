@@ -22,7 +22,7 @@ searches.
 
 - Bookkeeping — the thing that makes detection mechanical
 - Detection — any one of these trips the guard
-- The review loop — a cap that measures rather than stops
+- The review loop: a cap that stops, and says why
 - The re-render loop — a budget of one, two at most
 - The break protocol
 - When to stop and hand back
@@ -66,12 +66,20 @@ stage's gate — which is the whole difference between a rule and a rule that ru
    loop (another task, another module) already closed in this run — two owners for
    one file.
 
-Caps that trip the guard by themselves: **5 fix rounds** per task
+Caps that trip the guard by themselves: **3 fix rounds** per task
 ([`build.md`](build.md)), **2 re-entries** per stage per artifact, **3 passes** per
-module in the program loop, and **3 review rounds** per artifact — which is not a stop
-but a measurement, below.
+module in the program loop, **3 review rounds** per artifact, and **3 failing
+certification rounds** per node ([`certification.md`](certification.md)). Each one
+**stops**: the remaining findings become blocker rows with their evidence and the run
+moves on (since 1.98.0; the review cap used to measure only).
 
-## The review loop — a cap that measures rather than stops
+**Two rules hold under every cap.** Never retry an unchanged failing action: the same
+command on the same input gives the same answer, so a retry is a loop with no
+information in it. After two failed approaches to one problem, change the approach or
+record a blocker; a third attempt of the same shape is the loop this file exists to
+end ([`learned.md`](learned.md) rule 39).
+
+## The review loop: a cap that stops, and says why
 
 The caps above govern loops that **edit**. A review loop does both: the reader finds,
 the run fixes, the reader reads again. It had no cap at all until 2026-08-10, and this
@@ -98,8 +106,10 @@ review cap reached — 3 rounds — artifact: test/validate.py
 - **Self-inflicted ≥ new** — the axis is exhausted ([`audit.md`](audit.md) → *Every
   pass changes the axis*). Stop. Every remaining finding becomes a board row with its
   evidence ([`backlog.md`](backlog.md)); none is dropped.
-- **New > self-inflicted** — the reader is still paying. Continuing is then the
-  operator's call, made with the numbers in hand rather than out of fatigue.
+- **New > self-inflicted** — the reader is still paying, and the loop still stops: the
+  open findings become board rows with the numbers beside them. A further round runs
+  only on the operator's explicit request, which is read when given and never waited
+  for.
 
 At the level of a whole iteration only new **blocking** findings argue for continuing; a
 deferred or noise finding is paid for on the board, not with another round

@@ -208,7 +208,7 @@
         },
         "risk": {
           "enum": ["R1", "R2", "R3"],
-          "description": "The node's risk class (`references/iteration.md` → *Verification starts when a node lands*), computed from what it touches and never lowered to save time. It sets how many PASSING certification rounds the node owes (a failed round counts for nothing): R1 one, R2 two, R3 three, one of them recorded adversarial (`certify --kind adversarial`). A round is the three blind tiers plus one fix cycle. Absent outside wave mode or a release iteration. `graph.py close` refuses a node until the rounds its class owes have passed."
+          "description": "The node's risk class (`references/iteration.md` → *Verification starts when a node lands*), computed from what it touches and never lowered to save time. It sets how many PASSING certification rounds the node owes (a failed round counts for nothing): R1 one (with one blind tier), R2 one, R3 two, one of them recorded adversarial (`certify --kind adversarial`); a flagship surface owes two, one adversarial. A round is the blind tiers the class owes (three; one on R1) plus one fix cycle. Absent outside wave mode or a release iteration. `graph.py close` refuses a node until the rounds its class owes have passed."
         },
         "wave": {
           "type": "integer",

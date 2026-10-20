@@ -1,9 +1,10 @@
 # Stages — detail & gates
 
-For the selected **default profile**, read this spine at entry, then the one detail
-linked in the current stage before work on every entry or resume, including wave
-iterations and approved short paths. Do not preload all stage details. Missing or
-unreadable detail means stop that stage and repair its route, never guess. A custom
+For the selected **default profile**, read **one stage section of this file when that
+stage starts** (the stage table in `SKILL.md` is the index), then the one detail it
+links, on every entry or resume, including wave iterations and approved short paths
+(the triage approves the short path itself since 1.98.0). Never read this file end to
+end. Do not preload all stage details. Missing or unreadable detail means stop that stage and repair its route, never guess. A custom
 profile uses its own declared doctrine and stages; numeric ids do not select these
 default details, and the kernel still applies.
 
@@ -14,7 +15,10 @@ orchestrator verifies the check itself, pass/fail), `judgment` (a named judge
 rules where no complete deterministic check exists — [`gates.md`](gates.md) →
 *The judgment gate*) or `manual` (requires the operator's explicit go, including a
 specific standing authorization naming the act, cited with its source and scope;
-otherwise wait). These stages (0 intake + 1→10) are the plugin's
+otherwise wait). **This example ships every gate `auto`** (since 1.98.0): where it
+names an approval, the operator's answer or the standing authorization recorded in the
+brief satisfies it without a pause. A project makes a gate `manual` in its own
+`pipeline.json`. These stages (0 intake + 1→10) are the plugin's
 **example** flow, encoded in `pipeline.example.json` against the universal contract
 `pipeline.schema.json`; a host project replaces it with its own
 stages/agents/types (see SKILL.md → *Bring your own skills*).
@@ -84,7 +88,11 @@ never that the work was skipped quietly.
 
 **On entry or resume:** read [stage-00-intake.md](stage-00-intake.md) before stage work.
 
-- **GATE (manual):** shared understanding reached — **the source ledger is written
+- **On the short path** (`stage-00-intake.md` → Phase 1d) this gate
+  is: the triage line printed, the brief and its REQ rows in the run ledger, the retro
+  floor read with its byte count, and the source ledger. Everything else below applies
+  to the full flow.
+- **GATE (auto):** shared understanding reached — **the source ledger is written
   (every source consulted, or an explicit "none found")** and **its `Contradictions:`
   line is written under it** — the harvest is a fan-out that converges on one brief, and
   nothing else compares the sources *with each other*; `Contradictions: none` is the
@@ -107,8 +115,8 @@ never that the work was skipped quietly.
   is filled — objective, exit checks on the artefact the operator uses, scope, budget and
   base** ([`finish-line.md`](finish-line.md)), the carry-over ledger is
   seeded, **`.task-pipeline/run.md` exists and the header block has been printed**
-  ([`progress.md`](progress.md)), the model decision is recorded, and the operator
-  confirms the brief. Stop when a
+  ([`progress.md`](progress.md)), the model decision is recorded, and the brief is
+  confirmed: the operator's answer, or the standing authorization recorded in it. Stop when a
   re-scan surfaces no new branches (don't grill past diminishing returns;
   reversible calls can be deferred with a note). Only then start stage 1.
 - **The verification ledger is read.** `<artifacts>/verification.md` — the harvest
@@ -140,7 +148,8 @@ never that the work was skipped quietly.
 
 **On entry or resume:** read [stage-02-brainstorm.md](stage-02-brainstorm.md) before stage work.
 
-- **GATE (manual):** the user approves the design, the UI verdict is recorded, **the
+- **GATE (auto):** the design is approved (the operator's go, or the brief's standing
+  authorization), the UI verdict is recorded, **the
   queue is an artifact rather than a recollection** — where it is a work graph,
   `graph.py validate` exits 0 and `graph.py coverage` names any requirement no node serves,
   **every REQ is answered by the design** — a requirement the design doesn't
@@ -156,10 +165,11 @@ never that the work was skipped quietly.
 
 **On entry or resume:** read [stage-03-spec.md](stage-03-spec.md) before stage work.
 
-- **GATE (manual):** the **`## Self-review` section written and committed with
+- **GATE (auto):** the **`## Self-review` section written and committed with
   computed values** — every check the spec names resolving or marked `review`, the
   brief's decisions and stage 2's rejected options read back with no unresolved
-  contradiction, and the cost delta printed; spec committed **and** user-reviewed; **every section carries
+  contradiction, and the cost delta printed; spec committed **and** reviewed (by the
+  operator, or under the brief's standing authorization by an independent reader); **every section carries
   `covers: REQ-…` and every REQ appears in at least one section**; for UI tasks
   additionally: the super-ux chain (foundation → flows → screens → scenarios) is
   designed, validated and approved; scenarios validated in `docs/ux/scenarios.md`;
@@ -299,10 +309,10 @@ never that the work was skipped quietly.
 
 **On entry or resume:** read [stage-07-lint-deploy.md](stage-07-lint-deploy.md) before stage work.
 
-- **GATE (manual):** lint clean (host linter **and**, for UI projects, the super-ux
+- **GATE (auto):** lint clean (host linter **and**, for UI projects, the super-ux
   linter) **and** suite green **before** deploy, **and no REQ is still `open`** — a
   `partial` ships only with the operator's explicit acceptance. A gap is cheapest to
-  close before it ships, and the operator is already present at this gate. **The
+  close before it ships. **The
   carry-over count is printed beside this verdict.** Deploy is outward → explicit
   operator go, or a specific standing authorization naming that act, cited with its source
   and scope. How a release's authority is established, `release.authorized_by` included,
@@ -373,7 +383,7 @@ never that the work was skipped quietly.
 
 **On entry or resume:** read [stage-10-acceptance.md](stage-10-acceptance.md) before stage work.
 
-- **GATE (manual):** the ladder walk ran and its absences became REQ rows before
+- **GATE (auto):** the ladder walk ran and its absences became REQ rows before
   the table was written; **the hand-back is written** — the request quoted as it was
   GIVEN, where the run stands against it, what was solved with its evidence, what
   surfaced that nobody asked for, every decision still waiting **asked here with
@@ -419,10 +429,11 @@ never that the work was skipped quietly.
   carries evidence; every `partial` names what's missing and where it's tracked;
   every `deferred`/`dropped` has the operator's agreement and, for `deferred`, a
   tracker entry; no carry-over row left `unresolved`, and the ledger's counts are
-  printed with the verdict; the operator answers the
-  closing question and signs off. Manual by design — an automated check can prove
-  the table is well-formed, only the person who asked can confirm it is what they
-  asked for.
+  printed with the verdict; the hand-back asks the closing question and carries
+  the answer the operator can give at any time. `auto` by default since 1.98.0: a
+  check proves the table well-formed, and only the person who asked can confirm it is
+  what they asked for, so the run hands that question back rather than waiting on it.
+  A project that wants the wait sets this gate `manual`.
 
 ## The program loop — a platform, one brick at a time
 
@@ -483,8 +494,8 @@ cycle.
   a feeling, and the ledger is what survives compaction.
 - **Trips on:** revert-oscillation (A→B→A); the same file edited twice for the same
   reason; a finding already ADDRESSED or parked coming back; a stage entered a third
-  time for one artifact; two loops editing one file. Hard caps: 5 fix rounds per
-  task, 2 re-entries per stage per artifact, 3 passes per module.
+  time for one artifact; two loops editing one file. Hard caps, each a stop: 3 fix
+  rounds per task, 2 re-entries per stage per artifact, 3 passes per module.
 - **On a trip: stop editing.** Name shapes A and B with their evidence, escalate to
   the layer that owns the conflict (rubric → operator → plan → spec → module map),
   re-plan the check as an ordered one-item-per-line checklist, then go through it in

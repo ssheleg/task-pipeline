@@ -220,6 +220,59 @@ These are the fixes from verification rounds 6 to 17 of release iteration 1.
   nodes before each cycle, across every tool's branch prefixes. `build.md` adds a
   command-hygiene block that every background dispatch carries.
 
+## v1.98.0 (2026-10-20)
+
+Guards: 448 → **448**; property checks 15 → **15**.
+
+A cheaper run that stops looping, and the operators' retro insights in the retro doctrine.
+Measured on 2026-10-20: before any code a run was told to read about 236 KB of doctrine
+(the command 14 KB restating `SKILL.md` 21 KB, plus companion-skills, model-tiering,
+continuity, stages, stage 0, grill, knowledge-sources and gates.md "at every stage"); a
+small fix met eleven stages because the short path was only proposed and silence took the
+full flow; every node closed through three blind tiers, R2 owed two rounds, the
+certification ceiling only measured, the review loop ran to five rounds; and the retro
+floor stage 0 reads in full ran up to ~76k tokens in one project, 27 620 bytes here.
+
+**A. Proportional run.** Stage 0's short-path triage now decides instead of proposing:
+when the gap check leaves no material unknown and the change is R1, at most five files,
+no public contract, no user-facing change and no deploy, the run takes the short path and
+says so in one line (brief in the run ledger, build with tests, one verification, docs
+and handoff, a retro entry only for a new lesson). `scripts/short_path.py` computes it.
+The example's gates at stages 0, 2, 3, 7 and 10 are `auto`; the operator's answer or the
+standing authorization recorded in the brief is the go, and a project that wants the wait
+sets a gate `manual` in its own `pipeline.json`.
+
+**B. Reading diet.** At entry a run reads `SKILL.md` only (its stage table is the index);
+each stage's section of `stages.md` and its detail load when the stage starts; grill,
+knowledge-sources, companion-skills, continuity, model-tiering and gates.md load on named
+triggers. The command is a 1.5 KB pointer. Measured, the floor before code on the short
+path is 35 KB (was 236 KB; 80 KB when the grill and knowledge-sources triggers fire);
+`SKILL.md` is 16.2 KB, 3 753 cl100k tokens of body (was 4 709, cap 5 000). The three descriptions are 386, 399 and 395 characters; every trigger phrase
+they dropped moved verbatim into a `## Triggers` section of the same `SKILL.md`.
+
+**C. Anti-loop.** `graph.py certify`: an R1 node certifies with one blind tier; R2 owes one
+passing round, R3 two (one blind, one adversarial), a flagship surface two with one
+adversarial; a round of the same kind on an unchanged tree is refused; at the ceiling the
+node is parked with its evidence (exit 7) instead of measured. `waves.py finish
+--clean-rounds` (default 1; 2 for an R3 or flagship iteration). The fix loop and the
+review loop cap at three rounds and stop.
+
+**D. Retro doctrine.** The floor (standing instructions plus run stamps) has a 12 000-byte
+budget, a standing row at most 600 characters, a stamp at most 300; stage 0 prints the
+bytes and bytes/4 tokens, gate 10 fails over budget. `scripts/retro_budget.py`
+(`check`, `migrate --write`, `verify`) moves narrative to the archive verbatim with a
+sha256 per block; this repository's floor went from 27 620 to 6 532 bytes that way. Each
+entry names its Class (13 classes) and Cost; a standing row is searched against
+`learned.md` and the lesson index first; a lesson standing in two projects goes upstream
+in the same run. `learned.md` gains rules 33 to 39 from the 2026-10-20 audit of ~54
+retrospectives. evidence-docs' 34.7 KB copy of the retro doctrine is now a pointer.
+
+Tests: `graph_test.py` 171 → 173 cases (tier count by risk, unchanged-input refusal,
+ceiling stops), `waves_test.py` 135 cases with `--clean-rounds`,
+`test/audit_regressions/diet_retro_budget.py` (9 cases, over-budget plants must fail) and
+`diet_proportional.py` (6 cases). Twelve negative plants retargeted to the new wording
+(stage 0 and 10 gates name their authorization and the hand-back instead of `manual`).
+
 ## v1.97.1 — 2026-10-17
 
 The same source as v1.97.0, plus its release declaration. The v1.97.0 tag failed its own release run

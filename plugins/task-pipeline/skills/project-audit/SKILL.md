@@ -1,6 +1,6 @@
 ---
 name: project-audit
-description: "Use when someone asks what is actually true of a whole project right now — what is finished, what is half-built, what is broken, and what nobody has looked at. Walks a cold start: discover what the project is, run a registry of probes chosen from that, read production evidence (published artefact against source, CI history, telemetry present or absent), then leave a JSON sidecar so the next audit can say what moved, and a self-contained HTML report on request. Read-only: it proposes board rows and commits nothing. Triggers - 'project audit', 'audit the project', 'codebase audit', 'state of the project', 'what is unfinished', 'project health check', 'аудит проекта', 'проаудируй проект', 'состояние проекта', 'что не доделано', 'аудит кодовой базы'. Not for: auditing one deliverable inside a run (that is the pipeline's own ladder), reviewing a diff, or checking a skill's construction — say 'без диагностики' to opt out."
+description: "Use when someone asks what is true of a whole project: finished, half-built, broken, unexplored ('project audit', 'аудит проекта'). Discovers the project, runs probes, reads production evidence, leaves a JSON sidecar, an HTML report on request. Read-only: proposes board rows, commits nothing. Not for: one deliverable inside a run, a diff review, a skill's construction; 'без диагностики' opts out."
 license: MIT
 compatibility: "The collector (scripts/audit.py) needs python3 and reads committed state, so it needs git. Probes needing gh, npm, network or a browser declare it and report blind when it is absent — degraded, never silent."
 ---
@@ -318,3 +318,10 @@ requested, not a fixed page-and-browser:
 | "Findings should just be fixed while I'm in there" | An audit that edits while it reads cannot re-run to check itself, and the next run cannot tell a fix from a rewording. |
 | "It's the same nine checks every time, so I can skip discovery" | Then the instrument returns the same answer for every input, which is a fact about the instrument and not about the project. |
 | "No findings — clean bill" | Only against the probes that ran. Read the blind list before saying that sentence out loud. |
+
+## Triggers
+
+The description is the short form. The full trigger list it carried until 1.98.0,
+moved here verbatim, still routes to this skill:
+
+"Use when someone asks what is actually true of a whole project right now — what is finished, what is half-built, what is broken, and what nobody has looked at. Walks a cold start: discover what the project is, run a registry of probes chosen from that, read production evidence (published artefact against source, CI history, telemetry present or absent), then leave a JSON sidecar so the next audit can say what moved, and a self-contained HTML report on request. Read-only: it proposes board rows and commits nothing. Triggers - 'project audit', 'audit the project', 'codebase audit', 'state of the project', 'what is unfinished', 'project health check', 'аудит проекта', 'проаудируй проект', 'состояние проекта', 'что не доделано', 'аудит кодовой базы'. Not for: auditing one deliverable inside a run (that is the pipeline's own ladder), reviewing a diff, or checking a skill's construction — say 'без диагностики' to opt out."

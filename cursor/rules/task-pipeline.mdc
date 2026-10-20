@@ -67,9 +67,14 @@ event, not the end of the run — what loses work is crossing it mid-item.
 
 ## Stage 0 — intake grill (MANDATORY, do this FIRST)
 
-Never skipped, and nothing to install — the grill is part of this rule. No "the
-task was already clear" exemption, no starting stage 1 while the user thinks. A
-one-line task ("build feature X") is not enough to finish autonomously.
+Never skipped, and nothing to install: the grill is part of this rule. Its depth is
+proportional. **A small change takes the short path by default** when the gap check
+leaves no material unknown and the change is R1 risk, at most five files, no public
+contract, no user-facing change and no deploy: say so in one line, write the brief and
+its REQ rows into the run ledger, build with tests, run one verification, update the
+docs and handoff, and write a retro entry only for a new lesson. Anything larger runs
+the full flow, and a one-line task ("build feature X") is not enough to finish it
+autonomously.
 
 **Phase 1 — harvest the sources BEFORE the first question.** Find what the project
 already knows about this task and read it: the code; **the code graph if one is
@@ -98,7 +103,8 @@ like any other source, and it **points while the code decides** — never the
 tiebreaker.
 **Read `docs/evidence/retro.md` in full if it exists** — its *standing
 instructions* are what previous runs of this pipeline got wrong in this project, and
-they bind this run (they are capped at ten, so reading them all is cheap). Stamp
+they bind this run (ten rows, ten stamps, and a 12 000-byte budget for the two, so
+reading them all is cheap; say the byte count). Stamp
 each one the moment it fires: that date is the only evidence behind the
 cold-retirement rule at stage 10.
 If no wiki is installed, recommend it once and continue:
@@ -199,7 +205,7 @@ not authorize an outward, irreversible action — stage 7 stops and asks.
 ## Stages 1→10
 
 1. **Docs study** (auto) — ground every external lib/API on current docs, not recall.
-2. **Brainstorm + decompose** (manual) — read the brief, explore the code, then 2–3
+2. **Brainstorm + decompose** (auto; the brief's standing authorization is the go) — read the brief, explore the code, then 2–3
    approaches with a recommendation, YAGNI applied, design presented in sections and
    approved. **Hard gate: no code, no scaffolding before that approval** — including
    on "obviously simple" tasks. Record whether the task touches a user-facing surface
@@ -222,11 +228,12 @@ not authorize an outward, irreversible action — stage 7 stops and asks.
    re-measure, re-cut — and 9–10 close the release. No wave builds a shape a later
    wave undoes. **Around the waves runs the release iteration** ("release iteration" /
    "итерация релиза"): module dossiers integrated into one canvas, questions in batches,
-   each node verified as it lands in one to three rounds by its risk class (R1–R3), a
+   each node verified as it lands, one clean round ending it unless it is R3 or a
+   flagship surface (R1 on one blind tier; the ceiling parks a churning node), a
    wave's stage 7 integrated without tagging, one release gated and verified as
    released, the next pool handed back; a finding made mid-iteration joins the
    inventory rather than being fixed alone.
-3. **Spec** (manual) — write and commit the design; lock every shared contract
+3. **Spec** (auto; the brief's standing authorization is the go) — write and commit the design; lock every shared contract
    (types, schemas, signatures, file layout) plus a **Global Constraints** block of
    exact values every later task inherits. Self-review it for placeholders,
    contradictions, ambiguity and scope before showing it. For UI tasks, run the UX
@@ -284,7 +291,7 @@ not authorize an outward, irreversible action — stage 7 stops and asks.
    analysed rather than only recorded — said with the reason; a look taken only there
    is reported as "checked in Chromium", never "tested in a browser". Never a gate. A CLI, a
    library or a backend service is never offered either.
-7. **Lint + deploy** (manual) — lint clean AND suite green before deploy; deploy is
+7. **Lint + deploy** (auto; the brief's standing authorization is the go) — lint clean AND suite green before deploy; deploy is
    outward → explicit user go, or the specific standing authorization recorded in
    the stage-0 brief.
 8. **Post-deploy** (auto) — tail logs / health-check; clean boot or an honest
@@ -320,7 +327,7 @@ not authorize an outward, irreversible action — stage 7 stops and asks.
     propose the edit and get an explicit go, or carry it over with the exact change
     written down. A doc that was worth reading at stage 0 and is wrong now is the
     next run's false premise.
-10. **Acceptance** (manual) — the closing stage, in two halves.
+10. **Acceptance** (auto; the brief's standing authorization is the go) — the closing stage, in two halves.
     **First the ladder walk**, because the REQ table only finds what was named and
     lost: a comparison needs two sides and **an absence has one**. Walk each REQ
     bottom-up through its rungs — recorded decision → spec section → contract *and
@@ -418,9 +425,10 @@ not authorize an outward, irreversible action — stage 7 stops and asks.
     of the next run reads those standing instructions **in full**, which is why the
     cap is not negotiable and the prune is a gate item, not a good intention.
     Gate: ladder walk ran, no REQ `unknown`, no ledger row without
-    a home, every repository clean/pushed/pointed-at, user signs off, **and the
-    retro is written — stamped first, then pruned before anything was added, at or
-    under its cap, every deletion logged, and the counts printed beside this verdict**.
+    a home, every repository clean/pushed/pointed-at, the hand-back written, **and the
+    retro is written: stamped first, then pruned before anything was added, at or
+    under its cap and its byte budget, every deletion logged, and the counts printed
+    beside this verdict**.
 
 Cross-cutting: answer from the brief's autonomy section rather than re-asking, log every deferral in the ledger, never narrow the task silently, track
 tasks, conventional commits, honest degradation (never claim a failed/skipped step
@@ -436,8 +444,8 @@ file, the pass, and the reason that forced it — a finding id or a failed gate 
 "Cleanup" is not a reason. **Stop immediately** when: an edit undoes what an earlier
 pass in this run deliberately did (A→B→A); the same file is edited twice for the
 same reason; a finding already fixed or parked comes back; a stage is entered a
-third time for one artifact; two loops edit one file. Hard caps: 5 fix rounds per
-task, 2 re-entries per stage, 3 passes per module. On a stop: name shape A and shape
+third time for one artifact; two loops edit one file. Hard caps, each a stop: 3 fix
+rounds per task, 2 re-entries per stage, 3 passes per module. On a stop: name shape A and shape
 B with their evidence and who asks for each; escalate to the layer that owns the
 conflict (two findings → the review rubric; finding vs plan → the user; plan vs spec
 → back to planning; ambiguous spec → back to spec; two modules claiming one file →

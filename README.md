@@ -182,7 +182,7 @@ and the inline fallback satisfy the same [provider contract](plugins/task-pipeli
 | 3 Spec | [`spec.md`](plugins/task-pipeline/skills/task-pipeline/references/spec.md) — UX-track order, locked contracts, global constraints, self-review |
 | 4 Plan | [`planning.md`](plugins/task-pipeline/skills/task-pipeline/references/planning.md) — zero-context tasks, parallel groups, no placeholders |
 | the queue | [`work-graph.md`](plugins/task-pipeline/skills/task-pipeline/references/work-graph.md) — a script walks the graph so the model never reads it: 400 nodes and 4 print the same 27-byte frontier |
-| closing a node | [`certification.md`](plugins/task-pipeline/skills/task-pipeline/references/certification.md) — three blind readings at escalating visibility (the changed code, what reaches it, the product around it), all three required to pass — and a fourth, `verifier-visual`, on a flagship or product surface, which reads the contact sheet against the director record; a failing round records itself and the node stays open |
+| closing a node | [`certification.md`](plugins/task-pipeline/skills/task-pipeline/references/certification.md) — three blind readings at escalating visibility (the changed code, what reaches it, the product around it), all three required to pass (one on an R1 node; a clean round ends a node unless it is R3 or flagship) — and a fourth, `verifier-visual`, on a flagship or product surface, which reads the contact sheet against the director record; a failing round records itself and the node stays open, and at the ceiling the node is parked with its evidence |
 | 5 Build | [`build.md`](plugins/task-pipeline/skills/task-pipeline/references/build.md) + [`review.md`](plugins/task-pipeline/skills/task-pipeline/references/review.md) — isolation, ledger, subagent loop, review rubric, fix loop |
 | 5–6 TDD | [`tdd.md`](plugins/task-pipeline/skills/task-pipeline/references/tdd.md) — the iron law, red/green/refactor, the suite gate |
 | 5, 6, 8 The browser | [`browser.md`](plugins/task-pipeline/skills/task-pipeline/references/browser.md) — the ref model both channels share, the four commands the look is made of, sessions, and the three different things *"tested in a browser"* means |
@@ -221,9 +221,11 @@ Before any technical work, task-pipeline closes every question the codebase and 
 project's records can answer, then asks you the rest in **one batch**, ordered by
 dependency, each with a recommended answer — one at a time only where the answers
 depend on each other or you ask for it — until every decision branch is resolved and
-locked into a **task brief**. There is
-no "clear enough task" exemption: no stage-1 work starts without a committed,
-confirmed brief.
+locked into a **task brief**. The depth is proportional: a small change (R1, at
+most five files, no public contract, no user-facing change, no deploy) takes the
+**short path** by default, printed in one line: the brief in the run ledger, build
+with tests, one verification, docs and handoff. Anything larger starts stage 1 only
+on a committed, confirmed brief.
 
 **Domain awareness.** While exploring, the grill reads the project's own
 `CONTEXT.md` / `docs/adr/` and holds you to them — calling out terms that conflict
@@ -482,9 +484,9 @@ iteration runs in this order:
 - the survey;
 - module dossiers written in parallel, laid onto one canvas until a pass changes nothing;
 - questions asked in rounds, never one at a time, while agents keep working;
-- a parallel build, each node checked the moment it lands: one round of three blind
-  readings for every node, and two or three passing rounds by its risk class (R2, R3 — one
-  of the three recorded adversarial);
+- a parallel build, each node checked the moment it lands: one clean round ends it (one
+  blind reading on R1, three on R2), and an R3 or flagship node owes a second, adversarial
+  round;
 - one release, checked as released;
 - the next pool, handed to you grouped by module.
 
@@ -506,7 +508,8 @@ every repeat pass logs one line per touched file with **the reason that forced i
 
 It trips on revert-oscillation, a file edited twice for the same reason, a
 resurrected finding, a third entry into one stage, or two loops editing one file —
-plus hard caps (5 fix rounds per task, 2 re-entries per stage, 3 passes per module).
+plus hard caps that stop (3 fix rounds per task, 3 review rounds, 3 failing certification
+rounds per node, 2 re-entries per stage, 3 passes per module).
 On a trip the run **stops editing**, names shape A and shape B with their evidence,
 escalates to the layer that owns the conflict (rubric → operator → plan → spec →
 module map), re-plans the check as an ordered checklist with one verification
@@ -638,7 +641,7 @@ must say so.
 ### Held to Anthropic's own Skill authoring guidance
 
 Audited against the four Agent Skills pages. Most of it already held — `name`
-13/64 chars, `description` 887/1024 chars, `SKILL.md` 275/500 lines, all 53 references
+13/64 chars, `description` 386/1024 chars, `SKILL.md` 207/500 lines, all 53 references
 reachable from `SKILL.md` through explicit reference routes, and the bundle far under the 30 MB ceiling. What
 did not, now does:
 

@@ -28,11 +28,12 @@ you asked for.
 ## 1. How a request finds the pipeline
 
 An agent choosing skills sees exactly one thing: the `description` field in
-`SKILL.md`. It is capped at **1024 characters** and currently uses **1008** — that
-headroom is the budget every future addition pays from, which is why it is
-tracked as a board row rather than left to be discovered.
+`SKILL.md`. It is capped at **1024 characters**, and since 1.98.0 it is the short
+form (`B-001` on the board tracks the measured length): every host preloads it into
+every session. The full trigger list, unchanged, sits under `## Triggers` in the same
+file, where the family's routing hook and this repository's checks read it.
 
-It is written in three parts, and the middle one was learned the hard way:
+That list is written in three parts, and the middle one was learned the hard way:
 
 - **Work that changes the repository** — a feature, fix, refactor, migration,
   integration, rewrite, adoption or hardening, in English and Russian both.
@@ -125,23 +126,26 @@ it has been forgotten.
 | | Stage | What must be true to leave it | Gate |
 |---|---|---|---|
 | 1 | Docs study | every contract the design will lock is grounded on **fetched** docs, not recall | auto |
-| 2 | Brainstorm + decompose | design approved, every REQ answered by it. A platform is cut into modules, **walking skeleton first**, every REQ in exactly one module | manual |
-| 3 | Spec | contracts locked. User-facing work runs three tracks — what it **does**, how it **sounds**, how it **looks**. A declined track is recorded, never silent | manual |
+| 2 | Brainstorm + decompose | design approved, every REQ answered by it. A platform is cut into modules, **walking skeleton first**, every REQ in exactly one module | auto |
+| 3 | Spec | contracts locked. User-facing work runs three tracks — what it **does**, how it **sounds**, how it **looks**. A declined track is recorded, never silent | auto |
 | 4 | Plan | the REQ set-comparison holds: brief REQs == union of `Implements:` | auto |
 | 5 | Build | TDD per task, a review after each, findings fixed or parked **with a ruling** | auto |
 | 6 | Tests | the **full** suite green; a web surface checked in a browser, not in the diff | auto |
-| 7 | Lint + deploy | the authorization is specific, and the CI verdict is **read** before any tag | manual |
+| 7 | Lint + deploy | the authorization is specific, and the CI verdict is **read** before any tag | auto |
 | 8 | Post-deploy | the verification trio, not one of three; a verification row per shipped REQ | auto |
 | 9 | Docs + wiki | **three** artifacts — module docs, the wiki, and the code graph | auto |
-| 10 | Acceptance | the ladder walk first, then the table, then the retrospective | manual |
+| 10 | Acceptance | the ladder walk first, then the table, then the retrospective | auto |
 
-### Why the manual gates are where they are
+### Why every gate ships `auto`
 
 `auto` means the agent verifies the check itself and proceeds. `manual` means it
-waits for an explicit go. The four manual gates sit at the four places where a
-wrong turn is expensive and hard to reverse: **what we are building** (2), **the
-contracts** (3), **the outside world** (7), and **whether it is done** (10).
-Everywhere else, stopping to ask costs more than it saves.
+waits for an explicit go. Until 1.98.0 the example made stages 0, 2, 3, 7 and 10
+manual, the places where a wrong turn is expensive: **the brief**, **what we are
+building**, **the contracts**, **the outside world** and **whether it is done**. Under an
+operator's standing "decide and act" instruction each of them was a pause nobody
+answered, so the example ships them `auto`: the approval they name is read from the
+operator's answer or the standing authorization recorded in the brief, and a project
+that wants the wait sets the gate `manual` in its own `pipeline.json`.
 
 ---
 

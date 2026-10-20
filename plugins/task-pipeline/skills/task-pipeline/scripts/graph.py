@@ -36,6 +36,7 @@ conditional on the code, never merely sequenced after it):
     4  nothing runnable: an unclassified, running or parked dependency remains
     5  external execution lease contention
     6  nothing runnable: all remaining dependency leaves are recorded watched waits
+    7  `certify` stopped at its ceiling: the node is parked with the evidence
 
 **The mutation verbs never leave a half-written queue.** `add` and `park` write to a
 temp file in the same directory and `os.replace` it into place, so a crash mid-write
@@ -655,10 +656,25 @@ ALL_TIERS = TIERS + (VISUAL_TIER,)
 SURFACE_CLASSES = ("flagship", "product", "internal", "ad")
 RISK_CLASSES = ("R1", "R2", "R3")
 # Passing certification rounds a node owes before `close` accepts it, by risk class
-# (`references/certification.md` → *Rounds owed by risk class*). R3's must include one
-# round recorded `--kind adversarial`.
-ROUNDS_OWED = {"R1": 1, "R2": 2, "R3": 3}
+# (`references/certification.md` → *Rounds owed by risk class*). A clean round ends the
+# node unless it is R3 or a flagship surface: those owe a second passing round, and it is
+# the adversarial one, a different question rather than the same reading again. R2 owed
+# two blind rounds until 1.98.0, and a clean round did not cancel the next one: the loop
+# the 2026-10-20 cost audit measured.
+ROUNDS_OWED = {"R1": 1, "R2": 1, "R3": 2}
 ROUND_KINDS = ("blind", "adversarial")
+# An R1 node certifies with ONE blind tier (any of the three; `unit` is the default
+# reading). Every other node owes all three, and a flagship or product surface the fourth.
+ONE_TIER_RISK = ("R1",)
+
+
+def owed_rounds(node):
+    """(rounds owed, adversarial owed) for a node, or (0, False) when it owes no count."""
+    owed = ROUNDS_OWED.get(node.get("risk"), 0)
+    adversarial = node.get("risk") == "R3" or node.get("surface_class") == "flagship"
+    if node.get("surface_class") == "flagship":
+        owed = max(owed, 2)
+    return owed, adversarial
 
 
 def passing_rounds(cert):
@@ -676,13 +692,13 @@ def passing_rounds(cert):
 
 def owed_shortfall(node):
     """None when the node's class is satisfied, else a sentence saying what it still owes."""
-    owed = ROUNDS_OWED.get(node.get("risk"))
+    owed, adversarial = owed_rounds(node)
     if not owed:
         return None
     passed = passing_rounds(node.get("certification"))
     if len(passed) < owed:
         return "%d of %d owed passing rounds" % (len(passed), owed)
-    if node.get("risk") == "R3" and "adversarial" not in passed:
+    if adversarial and "adversarial" not in passed:
         cert = node.get("certification") or {}
         kinds = list(cert.get("kinds") or [])
         failed_adv = any(k == "adversarial" and not all(v == "pass" for v in (h or {}).values())
@@ -1662,10 +1678,14 @@ def cmd_certify(graph, args):
     the number the ceiling below reads. The node stays `pending` on a failure; the
     round count is the trail.
 
-    **The ceiling measures rather than stops** — `references/loop-guard.md`. At the
-    ceiling `certify` still runs and still tells the truth about the tiers; what it
-    adds is the name of the tier that keeps failing, because a run spinning on one
-    level needs the operator to see WHICH level, not to be halted.
+    **The ceiling stops** (`references/loop-guard.md`, since 1.98.0). A round that fails
+    with the node's failing rounds at the ceiling parks the node with the evidence as its
+    reason (exit 7): the run records a blocker row and moves on. It used to measure
+    only, and a measured loop is still a loop.
+
+    **No re-run on unchanged input.** A round of the same kind on the same tree as the
+    round before it is refused before anything is written: a tier's answer about a tree
+    it already read is the answer it gave.
     """
     guard(graph, args.graph)
 
@@ -1722,10 +1742,14 @@ def cmd_certify(graph, args):
         die("the tier reports are malformed — nothing was written:\n  " + "\n  ".join(bad))
 
     missing = [x for x in TIERS if x not in reports]
-    if missing:
+    if node.get("risk") in ONE_TIER_RISK:
+        if len(missing) == len(TIERS):
+            die("certification of an %s node needs one blind tier report (unit, seam or "
+                "product); none was given" % node.get("risk"))
+    elif missing:
         die("certification is missing the %s report(s) — all three are required, because "
-            "the level nobody read is the level the defect survives at"
-            % ", ".join("`%s`" % m for m in missing))
+            "the level nobody read is the level the defect survives at (an R1 node "
+            "certifies with one)" % ", ".join("`%s`" % m for m in missing))
     sclass = node.get("surface_class")
     if sclass in VISUAL_REQUIRED and VISUAL_TIER not in reports:
         die("certification is missing the `%s` report — %s is a %s surface, and on one the "
@@ -1744,6 +1768,18 @@ def cmd_certify(graph, args):
         head = ""
 
     prior = node.get("certification") or {}
+    try:
+        _t = subprocess.run(["git", "rev-parse", "HEAD^{tree}"], capture_output=True, text=True)
+        tree = _t.stdout.strip() if _t.returncode == 0 else ""
+    except OSError:
+        tree = ""
+    prior_kinds = list(prior.get("kinds") or [])
+    if (tree and prior.get("tree") == tree
+            and (prior_kinds[-1] if prior_kinds else "blind") == args.kind):
+        die("%s: round %d already read tree %s as a %s round: re-running a tier on "
+            "unchanged input repeats its answer. Change the code, run the other kind of round, "
+            "or record a blocker (references/loop-guard.md). Nothing was written."
+            % (nid, int(prior.get("round") or 0), tree[:12], args.kind))
     round_no = int(prior.get("round") or 0) + 1
     tiers_now = {x: reports[x]["verdict"] for x in tiers}
     history = list(prior.get("history") or []) + [tiers_now]
@@ -1755,6 +1791,8 @@ def cmd_certify(graph, args):
         "history": history,
         "kinds": kinds,
     }
+    if tree:
+        node["certification"]["tree"] = tree
 
     failed = [x for x in tiers if tiers_now[x] == "fail"]
 
@@ -1762,6 +1800,20 @@ def cmd_certify(graph, args):
     # operator needs named; counting it here is what makes the loop visible.
     churning = [x for x in tiers
                 if len(history) >= 2 and all(h.get(x) == "fail" for h in history)]
+    failed_rounds = sum(1 for h in history if any(v == "fail" for v in h.values()))
+    stop = bool(failed) and failed_rounds >= args.ceiling
+    if stop:
+        first = next((f for x in failed for f in reports[x]["findings"]
+                      if f.get("severity") == "breaks"), {})
+        reason = ("certification ceiling: %d failing round(s), ceiling %d; failing tier(s) %s; "
+                  "%s; first break %s: %s; check: %s. Blocker row owed on the board"
+                  % (failed_rounds, args.ceiling, ", ".join(failed),
+                     ("stuck on " + ", ".join(churning)) if churning else "churn across levels",
+                     first.get("where", "?"), first.get("what", "?"), first.get("check", "?")))
+        reason = " ".join(reason.split())
+        node["status"] = "parked"
+        node["parked_reason"] = reason
+        revise(graph, "park", nid, reason)
 
     save(args.graph, graph)
 
@@ -1775,9 +1827,10 @@ def cmd_certify(graph, args):
                 print("  [%s] %s — %s" % (tier, f["where"], f["what"]), file=sys.stderr)
                 print("      fix:   %s" % f.get("fix", "(not stated)"), file=sys.stderr)
                 print("      check: %s" % f["check"], file=sys.stderr)
-        if round_no >= args.ceiling:
-            print("\n%s has been certified %d time(s), at or over the ceiling of %d."
-                  % (nid, round_no, args.ceiling), file=sys.stderr)
+        if stop:
+            print("\n%s has failed %d round(s), at the ceiling of %d. STOPPED: the node is "
+                  "parked with this evidence as its reason; record a blocker row and move on."
+                  % (nid, failed_rounds, args.ceiling), file=sys.stderr)
             if churning:
                 print("The same tier has failed every round: %s. That is not a fix "
                       "away — the level itself is being misread, or the node is the "
@@ -1786,6 +1839,8 @@ def cmd_certify(graph, args):
             else:
                 print("No single tier is failing every round, so this is churn across "
                       "levels rather than one stuck level.", file=sys.stderr)
+        if stop:
+            return 7
         print("\nThe node stays open. Round %d is recorded on it." % round_no,
               file=sys.stderr)
         return 1
@@ -1844,7 +1899,7 @@ def cmd_certify(graph, args):
         fh.write("\n")
     os.replace(tmp, out)
     print("%s: certified at %s in round %d" % (nid, ", ".join(tiers), round_no))
-    owed = ROUNDS_OWED.get(node.get("risk"))
+    owed, _adv = owed_rounds(node)
     short = owed_shortfall(node)
     if short:
         print("round %d: %s — not closable yet. The next round reads the node's whole diff at "
@@ -1965,7 +2020,7 @@ def cmd_close(graph, args):
     if short and not exc:
         die("%s is %s: %s — not closable yet. Run the next round with `graph.py certify`, "
             "or record an authorized exception with `waive`. Nothing was written."
-            % (nid, node["risk"], short))
+            % (nid, node.get("risk") or "a %s surface" % node.get("surface_class"), short))
     if cert:
         tiers = cert.get("tiers") or {}
         failing = sorted(k for k, val in tiers.items() if val != "pass")
@@ -2074,8 +2129,8 @@ VERBS = {
     "wait": (cmd_wait, "record a watched external wait, without executing its locator"),
     "resume": (cmd_wait, "resolve the exact wait identity and return to pending"),
     "wave": (cmd_wave, "move a node to another wave, carrying the reason"),
-    "certify": (cmd_certify, "require three independent tier reports (four on a "
-                             "flagship or product surface), then emit the verdict "
+    "certify": (cmd_certify, "require three independent tier reports (one on an R1 node, "
+                             "four on a flagship or product surface), then emit the verdict "
                              "`close` consumes"),
     "close": (cmd_close, "consume a verdict, close one node and re-plan"),
 }
@@ -2129,8 +2184,9 @@ def main(argv=None):
                         help="the round's kind; R3 owes one `adversarial` round "
                              "(references/certification.md → *Rounds owed by risk class*)")
     p_cert.add_argument("--ceiling", type=int, default=3,
-                        help="rounds after which the output names the churning tier; it "
-                             "measures rather than stops (references/loop-guard.md)")
+                        help="failing rounds after which certify STOPS: the node is parked "
+                             "with the evidence and the run records a blocker row and moves "
+                             "on, exit 7 (references/loop-guard.md)")
 
     for verb in ("claim", "release", "recover", "complete"):
         made[verb].add_argument("--authority", required=True,

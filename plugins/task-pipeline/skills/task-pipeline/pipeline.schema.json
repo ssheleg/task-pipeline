@@ -160,13 +160,20 @@
         "finish": {
           "type": "object",
           "additionalProperties": false,
-          "description": "The iteration's budget at its finish line. Absent, the defaults hold: 3 rounds and 2 releases. A round is every exit check once plus one independent reading over the scope; only new blocking findings count. Reaching either budget before done — a blocker open, or the second clean round still owed — stops the iteration and hands it back; no round runs past it without the operator's go, given with the numbers. Doctrine: references/finish-line.md; verdict: scripts/waves.py finish.",
+          "description": "The iteration's budget at its finish line. Absent, the defaults hold: 3 rounds and 2 releases. A round is every exit check once plus one independent reading over the scope; only new blocking findings count. Reaching either budget before done — a blocker open, or a clean round still owed — stops the iteration and hands it back; no round runs past it without the operator's go, given with the numbers. Doctrine: references/finish-line.md; verdict: scripts/waves.py finish.",
           "properties": {
             "maxRounds": {
               "type": "integer",
-              "minimum": 2,
+              "minimum": 1,
               "default": 3,
-              "description": "Finish-line rounds per iteration, at least 2: done needs two consecutive rounds with no new blocking finding. Rotating the audit axis happens inside this budget and never adds a round."
+              "description": "Finish-line rounds per iteration, at least cleanRounds: done needs that many consecutive rounds with no new blocking finding. Rotating the audit axis happens inside this budget and never adds a round."
+            },
+            "cleanRounds": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2,
+              "default": 1,
+              "description": "Consecutive rounds with no new blocking finding that end the iteration: 1, or 2 when it carries an R3 or flagship node (since 1.98.0; two for every iteration was the default before). Passed to waves.py finish as --clean-rounds."
             },
             "maxReleases": {
               "type": "integer",

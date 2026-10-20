@@ -33,7 +33,7 @@ p = "/tmp/gt1b-copy/plugins/task-pipeline/skills/task-pipeline/SKILL.md"
 t = open(p, encoding="utf-8").read()
 m = re.search(r"Each gate has a \*\*type\*\*.*?(?:\n\n)", t, re.S)
 assert m and "`judgment`" in m.group(0), "PLANT DID NOT LAND: gt1b"
-span = m.group(0).replace("`judgment` (no complete", "`advisory` (a made-up ruling), `judgment` (no complete", 1)
+span = m.group(0).replace("`judgment` (a named judge", "`advisory` (a made-up ruling), `judgment` (a named judge", 1)
 t2 = t[:m.start()] + span + t[m.end():]
 assert t2 != t, "PLANT DID NOT LAND: gt1b"
 open(p, "w", encoding="utf-8").write(t2)

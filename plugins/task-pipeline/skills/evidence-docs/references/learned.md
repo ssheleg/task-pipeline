@@ -58,6 +58,13 @@ to be enforced and is not is the same failure as a gate that prints `FAIL` and e
 | 30 | **A gate scoped by exclusion judges every newcomer silently** | any lint, format or check configured with an ignore list rather than an include list | scope by what it COVERS; where the tool has no such switch, assert the covered set and fail on additions, deriving the allowlist by measuring the tool's own reach | the failure message names the intruder and the remedy, because the operator meets it mid-release |
 | 31 | **A gate needs a third verdict — could not measure** | any check that can time out, lose a dependency, or run on a contended machine | distinguish *failed* from *could not measure* with different exit codes, and say which; neither is a verdict about the code | the refusal names its remedy, and a test that waits for a DURATION rather than an event is treated as a defect in the test |
 | 32 | **A test whose assertion is implied by compilation is not a test** | any test whose name promises a behaviour | delete the subject: if that is a type or import error rather than a red test, the test is decoration | removing one asks what the name PROMISED and whether anything checks it — four of five such cases here were covered elsewhere and the fifth was a real gap only visible because the name was read as a claim |
+| 33 | **Snapshot before you undo** | any `git checkout`, `git restore`, `git stash` or `reset` in a tree that may hold uncommitted work you did not write | copy the affected files first (to a dated folder, or `git diff > <file>.patch`) and restore from that copy, never from git | the run names the copy it took before the first destructive command |
+| 34 | **One answer for inputs that should differ is a broken instrument** | any shell measurement, zsh above all | quote every expansion (`"$var"`, `'*.py'`), read data from files rather than inline literals, and feed it two inputs that should answer differently | the two answers differ, or the instrument is rewritten before its answer is used |
+| 35 | **Release the tree you tested** | any tag or release | run the release workflow's own suite on the exact commit the tag will name, and select the CI run by that tag, never by branch | the run the tag triggered is green and its head SHA is the tagged commit |
+| 36 | **A fix after a passing review is unreviewed** | any change made after a review or verifier passed | re-read the delta (`git diff <reviewed>..HEAD`) before merge | the merge names the reviewed SHA and who read the delta |
+| 37 | **Call the real service once before writing its fake** | any mock, stub or fixture of an external API, CLI or service | make one real call, or read a recorded real response, and shape the fake from it | the fake cites the response it was shaped from |
+| 38 | **Close blockers yourself; park only human gates** | any blocker about to be handed back | try every route the run holds (an API, a CLI, a credential door) first; park only a sign-in, consent, payment, typed secret or recorded operator decision | every handed-back item is a human gate, listed in one block with the route that failed |
+| 39 | **Never retry an unchanged failing action** | any failed command, check or approach | change the input or the approach before trying again; after two failed approaches, change approach or record a blocker | no identical retry in the run ledger, and a third attempt names what changed |
 
 ---
 
@@ -163,6 +170,17 @@ that document is checked. This one governs a fact that crossed a **session bound
 reported as current — the case where there is no document to check, only a memory that reads like
 one.
 
+**33 to 39 · The 2026-10-20 retro audit.** Read across ~54 retrospectives from ~50
+projects, the same lessons recurred under different words, each in at least the number
+of runs given: uncommitted work overwritten by a checkout, restore or stash with no copy
+taken (17); a zsh glob or `=` left unquoted, so a command failed or a loop printed one
+count for every file (8; this release's own run hit both); a tag cut from a tree the
+release suite never ran on, or a CI run picked by branch rather than by tag (24, with
+immutable tags burned); a fix landed after the review passed and merged unread; a fake
+shaped from documentation that the real service contradicted (11); a hand-back listing
+steps the agent could have done itself (12); and the same failing action retried
+unchanged, round after round. None of them was new to the project that hit it again.
+
 ---
 
 ## The two that are not in the table, and why
@@ -214,6 +232,11 @@ answer would have exposed it in a minute.
 | any command run to establish a fact — 6 Tests · 9 Docs · 10 Acceptance · 5 review | 19 — the output asserted non-empty and shaped as expected, and **quoted** rather than concluded from, [`audit.md`](https://github.com/ssheleg/task-pipeline/blob/main/plugins/task-pipeline/skills/task-pipeline/references/audit.md) → *Silence is not a reading*; the reviewer's half is in [`review.md`](https://github.com/ssheleg/task-pipeline/blob/main/plugins/task-pipeline/skills/task-pipeline/references/review.md) |
 | 0 Harvest · 10 Acceptance | 20 — the **consumer** read to learn which copy ships, never the copies compared against each other, [`audit.md`](https://github.com/ssheleg/task-pipeline/blob/main/plugins/task-pipeline/skills/task-pipeline/references/audit.md) → *Two copies, and which one wins*; asked as row `0 Duplicates` of [`grill.md`](https://github.com/ssheleg/task-pipeline/blob/main/plugins/task-pipeline/skills/task-pipeline/references/grill.md) → *The autonomy sweep* |
 | 10 Retro · **any gate or check you order** | 21 — each input traced to the step that writes it, and that step proven upstream, [`retrospective.md`](retrospective.md) → *Stamp first, then prune, then write* |
+| any stage · a destructive git command · a shell measurement | 33, 34 |
+| 7 Release · 5 Dev after review | 35, 36 |
+| 5 Dev · 6 Tests · a fake of an external service | 37 |
+| 10 Acceptance · the hand-back | 38 |
+| every stage · any retry | 39, [`loop-guard.md`](https://github.com/ssheleg/task-pipeline/blob/main/plugins/task-pipeline/skills/task-pipeline/references/loop-guard.md) |
 
 **This file is the shipped list; a project keeps its own.** Every rule in the table
 above was earned on someone else's build and travels with the skill. The lessons *your*
@@ -276,7 +299,7 @@ evidence that something left, and the log below says what.
 
 ### Retired
 
-**Numbers issued so far: 32.** This is the high-water mark, and it is the only number
+**Numbers issued so far: 39.** This is the high-water mark, and it is the only number
 this file states about itself — deliberately, because the gap that proves a rule left
 cannot be computed from the table alone: **deleting the highest-numbered rule shrinks
 the maximum with it, and no gap ever opens.** That false negative shipped in the first

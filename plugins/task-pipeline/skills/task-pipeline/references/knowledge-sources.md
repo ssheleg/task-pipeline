@@ -51,7 +51,7 @@ makes the grill's answers *checkable* instead of merely confident.
 | 4b | **The task register, for its *state*** | `docs/ROADMAP.md`, a board, a backlog, the tracker `CLAUDE.md` names | **what is open right now** — read with a command, never from memory; see *Carried-in claims* |
 | 5 | **Product/UX docs** | `docs/ux/` (super-ux chain), `README`, runbooks | user-facing behavior that is already specified |
 | 6 | **Pipeline history** | `<artifacts>/specs/`, `plans/`, past `-carryover.md` | what a previous run of this pipeline decided or deferred |
-| 7 | **The retro, in force** | `<artifacts>/retro.md` ([`retrospective.md`](retrospective.md)) | what previous runs got wrong here — **read in full**: standing instructions (capped at ten) and run stamps (one line each), both bounded by construction; the *Recent log* is **queried** by the task's nouns, like the archive — nothing caps it |
+| 7 | **The retro, in force** | `<artifacts>/retro.md` ([`retrospective.md`](retrospective.md)) | what previous runs got wrong here — **read in full**: standing instructions (capped at ten) and run stamps (one line each), both under the floor's 12 000-byte budget, whose bytes and bytes/4 tokens `scripts/retro_budget.py check` prints into this row; the *Recent log* is **queried** by the task's nouns, like the archive — nothing caps it |
 | 7a | **The retro archive** | `<artifacts>/retro/YYYY-QN.md` | *have we been bitten by this class before?* — **queried** by the task's nouns, never read end to end |
 | 7b | **Lessons from other projects** | the local index every install has (`scripts/lessons.py query`), and a shared lesson store only where the session lists one — an Observatory — detected by its tools, never by a path ([`iteration.md`](iteration.md) → *The learning loop*, the read recipe) | *what did other projects' agents learn about this class?* — **queried** by the task's 3–6 nouns, at most ten lines from both; a lesson that fires is cited `[lesson L-…]` or `[lesson mem:…]`. The ledger names each layer's state: `local lessons: N match | absent | unavailable (no python3)`; `shared lessons: N match | 0 match (filter unknown) | unfilterable | absent`, where the first `observatory_search` call is the probe — and nothing else changes |
 | 8 | **The knowledge wiki** | see below | distilled cross-project knowledge, prior sessions, why decisions were made |
@@ -79,8 +79,10 @@ Rules for the list:
 
 `<artifacts>/retro.md` ([`retrospective.md`](retrospective.md)) is the one
 harvested source whose binding part is **read in full rather than queried**: the
-standing instructions are capped at ten precisely so that this is cheap, and the run
-stamps are one line each. Its narrative log is queried, not read — an uncapped section
+standing instructions are capped at ten rows of at most 600 characters, the run stamps
+at ten lines of at most 300, and the two together at 12 000 bytes
+([`retrospective.md`](retrospective.md) → *The floor has a byte budget*), precisely so
+that this is cheap. Its narrative log is queried, not read — an uncapped section
 inside a source that binds is how the capped part stops being read. They are what
 previous runs of this pipeline got wrong *in this project* — the rules no check
 could decide — and they bind this run.

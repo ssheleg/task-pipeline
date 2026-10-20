@@ -18,7 +18,7 @@ justifies reading it protects one section while the file below it doubles.
 
 | Artifact | Parts | How it is read |
 |---|---|---|
-| `docs/evidence/retro.md` — **one per project** | **Standing instructions** (max **10**) · **Run stamps** (max **10**, oldest rotate out) | stage 0, **in full** — both are bounded by a **cap**, which *one line each* never was |
+| `docs/evidence/retro.md` — **one per project** | **Standing instructions** (max **10**) · **Run stamps** (max **10**, oldest rotate out) | stage 0, **in full**: both are bounded by a **cap** and, since 1.98.0, by a **byte budget** (*The floor has a byte budget*) |
 | the same file's **Recent log** | narrative entries, **uncapped by design** — the heading said *entries from the last five run stamps* until 2026-08-20 while the section held 25 going back nine days, a bound in a heading that nothing enforced | stage 0, **queried** by the task's nouns. It said *in full* until 2026-08-10, when it measured **74%** of the file: an uncapped section inside a binding source is what makes the capped part get skimmed |
 | `docs/evidence/retro/YYYY-QN.md` — the archive | every entry and every retirement ever written, append-only | **queried** by the task's nouns; never read end to end |
 
@@ -35,6 +35,8 @@ file exists to stop.
 - Never amend a commit a record already names
 - A release stamp names the TAG, and the merge commit — never the branch's own SHA
 - The stamp table is capped at ten, and *one line per run* was never a cap
+- The floor has a byte budget
+- Before a standing row: search, cite, send upstream
 - `publish:` is a line in the verdict, not a silence
 - Rotation — the archive is how pruning stops losing things
 - Three grades of fix — take the highest one that can work
@@ -66,7 +68,15 @@ Required fields, and none of them is optional:
 | **Root cause** | why the pipeline permitted it. "The agent was careless" is not a cause — it is the absence of one, and it produces no fix |
 | **Fix** | one of the three grades below |
 | **The check** | what would have caught this the first time. If the honest answer is "nothing yet", that is the fix, and it is grade 1 |
+| **Class** | one of: `exit-code`, `unwatched-check`, `release`, `collision`, `destructive-undo`, `claim-by-say-so`, `stale-doc`, `wrong-copy`, `sibling`, `truncated-output`, `shell-instrument`, `handback`, `loop`. **Recurrence is counted by class**, so a class seen before is named as such |
+| **Cost** | what it cost: rounds, burned tags, time. An entry with no cost cannot be weighed against the check that would prevent it |
 | **Commit** | the short SHA of the change that fixed it |
+
+The classes come from the 2026-10-20 audit of ~54 retrospectives across ~50 projects,
+where the same lessons recurred under different words: a gate's exit code read through
+a pipe (≥26 runs), a check trusted before it was seen failing (≥26), a tag cut from a
+tree the release suite never ran on (≥24), a shared checkout (≥20), uncommitted work
+overwritten (≥17). Words hid the recurrence; a class key makes it a count.
 
 ## Every lesson carries its commit
 
@@ -177,6 +187,38 @@ like every other rotation. **The count is printed at the prune**, beside the sta
 instructions' own count, so a table that stops rotating is visible rather than merely
 large.
 
+## The floor has a byte budget
+
+A cap of ten rows never bounded their **size**. Measured 2026-10-20 across ~50
+projects, the floor stage 0 reads in full (standing instructions plus run stamps) ran
+from ~3k to **~76k tokens**; one floor was 304 KB, and this repository's own was
+27 620 bytes. A row that carries its incident and a stamp that carries its release
+narrative are how a capped list grows anyway.
+
+- **Budget:** the floor stays under **12 000 bytes**. A standing row is at most **600
+  characters**: the rule, why (one clause), the retire-when trigger and the id; the
+  story lives in the archive. A run stamp is **one line of at most 300 characters**.
+- **Stage 0 prints it:** `python3 scripts/retro_budget.py check` gives the floor's bytes
+  and bytes/4 tokens, beside the source ledger's retro row.
+- **Gate 10 fails over budget.** Before the new entry is written, `retro_budget.py
+  migrate --write` moves the narrative (an over-long stamp's verdict, a standing row's
+  `Because`) **verbatim** into the quarter's archive, each block carrying the sha256 of
+  its text, and leaves a pointer; `retro_budget.py verify` proves every pointer. An
+  instruction still over 600 characters after its story moved is rewritten by hand.
+- **A prune that retires nothing writes its count into the stamp row**, as
+  `prune: 0 retired`, and no paragraph. Repeated "nothing to prune" notes were a
+  measured share of the floor.
+
+## Before a standing row: search, cite, send upstream
+
+- **Search first:** `references/learned.md` and the lesson index
+  (`scripts/lessons.py query`, by the class key and the nouns). A rule already there is
+  **cited by its number** (`learned.md` rule 22), never restated in a row.
+- **A lesson standing in two projects goes upstream in the same run:** the entry gets
+  its `**Lesson:**` line and `scripts/lessons.py add`, and a universal rule is proposed
+  for `learned.md` (*Publishing the insight*, below). Two projects holding one rule is
+  a fork nobody named.
+
 ## `publish:` is a line in the verdict, not a silence
 
 Reported from another project, and the report is about this file: an operator asked, after
@@ -264,6 +306,10 @@ computable, which is why it goes first:
 ```bash
 printf '%s · %s\n' "$(date +%F)" "$(git rev-parse --short HEAD)" >> docs/evidence/retro.md
 ```
+
+**The budget runs between the prune and the entry:** stamp, prune, `retro_budget.py
+check` (and `migrate --write` when it fails), then write. An entry written onto a floor
+already over budget is the growth the budget exists to stop.
 
 ## The prune — mandatory, and it runs after the stamp
 

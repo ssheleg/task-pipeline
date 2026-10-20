@@ -12,7 +12,7 @@ k = j + len("a run\n  that cannot say what happened has not finished, it has sto
 t = t[:i] + t[k:]
 # Plant the CURRENT needle next door: same stage, not the gate bullet.
 needle = "- **The hand-back** is described in progress.md and printed by the harness."
-t = t.replace("- **GATE (manual):** the ladder walk ran", needle + "\n- **GATE (manual):** the ladder walk ran", 1)
+t = t.replace("- **GATE (auto):** the ladder walk ran", needle + "\n- **GATE (auto):** the ladder walk ran", 1)
 assert needle in t, "PLANT DID NOT LAND: hb05 neighbour"
 open(p, "w", encoding="utf-8").write(t)
 EOF
