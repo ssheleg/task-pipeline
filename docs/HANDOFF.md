@@ -19,9 +19,15 @@ operators' retro insights into the retro doctrine; release it. Branch `feat/diet
 - **Checks run.** `npm test` and `npm run test:all` locally (exit codes read directly);
   new suites `test/audit_regressions/diet_retro_budget.py`, `diet_proportional.py`.
 - **Open.** The hub re-pin (ssheleg/sshlg-skills, B-154 closes there) is the hub's.
-- **Next task.** After the merge: the stamp PR naming the merge commit, then the local
-  annotated tag `v1.98.0`, `npm run test:all` on it, push, watch the release run, read
-  the published package back (`npm view task-pipeline-skill version`).
+- **Integrated.** PR #135 squash-merged as `4e9a90a` after its CI round (validate, house
+  audit, eight negative shards, strict conformance) and a local `npm run test:all` exit 0.
+  The run stamp naming `4e9a90a` and the retro entry follow in their own PR.
+- **Side effect to repeat.** An `rm -rf /tmp/*-copy` here ran while the session in
+  `_worktrees/tp125-fix17` held the family scratch lock; its in-flight negative suite may
+  report a spurious failure and should be re-run.
+- **Next task.** After the stamp PR: the local annotated tag `v1.98.0` on `main`,
+  `npm run test:all` on it, push, watch the release run, read the published package back
+  (`npm view task-pipeline-skill version`).
 
 ## 1.97.0 source candidate — WebKit (Safari) first (2026-10-16)
 
