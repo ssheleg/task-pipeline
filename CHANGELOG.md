@@ -1,3 +1,233 @@
+## Unreleased
+
+Guards: 448 → **530**; property checks 15 → **15**. There are 82 new negatives in
+`lessons.py`. Each one plants a revert, and the suite must catch it:
+
+- the whole-scan refusal put back;
+- the carry-forward removed;
+- status computed without carried origins;
+- prune on every run;
+- git worktrees no longer discovered;
+- memory ids keyed by retro anchor;
+- one memory id left on two class keys;
+- problems attributed by path prefix;
+- `emit`/`record` ignoring the origin that holds the memory id;
+- memory ids compared together with their `@revision`;
+- a stranger at the same path not recognised;
+- `record` putting one memory id on two class keys;
+- an origin removed on its own;
+- a memory id moved to another project's origin;
+- an origin carried as `checkout holds another project` counted;
+- a project key taken from the checked-out branch;
+- a stranger called on a key alone, though the origin's commit resolves;
+- `record` taking another project's id;
+- `record` writing an id the loader refuses;
+- a title carrying a Unicode line separator;
+- the index split on Unicode line breaks;
+- a rebuild printing absolute paths;
+- `--prune-carried-reason` accepted alone, or taking any string, or offering a reason that
+  never occurs;
+- merged duplicate lines dropping an id silently;
+- `add` counting a phantom project after a re-init;
+- a shallow check trusted when it times out;
+- an index line accepted with `mem:x@0` or with an unknown `carried` reason;
+- an origin v1.95.0 wrote kept as a second project, by `rebuild` or by `add`;
+- that re-key made for an origin with provenance, between two candidate repositories, or
+  merging two memory ids (in `rebuild` and in `add`);
+- `record` re-attaching an id from another checkout;
+- one memory id left on two live projects, or kept by the later holder;
+- a project key skipping the main worktree's HEAD or `init.defaultBranch`;
+- redaction replacing a relative name, or inside a longer name;
+- a session note, a newer-format notice or a refusal printing an absolute path;
+- a stage id carrying a line break or a path;
+- a same-revision duplicate decided by the order of lines;
+- a re-key taking a commit from a merged history, ignoring the key v1.95.0 would compute, or
+  moving a project read this run;
+- `add` leaving one id on two live projects; the id kept by the smaller key instead of the
+  earlier holder;
+- a rebuild asking git the same question again;
+- `query`, an `add` refusal or the repository top printing an absolute path;
+- an index set aside for a stage id v1.95.0 accepted, or one normalised past 32 characters;
+- the schema admitting a blank stage id;
+- a partial rebuild or an `add` moving an origin of a project the index already knows;
+- an origin carried as `checkout holds another project` counted as a live holder of its id;
+- a re-key that does not record where the id came from, in `rebuild` or `add`, or loses that
+  source on a repeated `add` or a rebuild;
+- `rebuild`, `add` or `record` never giving a re-keyed id back to its source project, or
+  giving it back while leaving it on the other project too, or over that project's own id;
+- an index line accepted with an impossible `rekeyedFrom`;
+- an id dropped by the one-project or the one-class rule keeping its `rekeyedFrom`, a re-key
+  source given to every project holding that id, a reclaim to a project never read, the main
+  worktree's HEAD keying the repository before `init.defaultBranch`, and `save` writing a line
+  the loader refuses;
+- `record --replace` keeping the replaced id's `rekeyedFrom`, and an `add` or rebuild re-key
+  giving a twin's own id a source it never had.
+
+These are the fixes from verification rounds 6 to 18 of release iteration 1.
+
+- **A replaced id takes its source with it** (round 18). `record --replace` gave the origin a
+  new id but kept the `rekeyedFrom` of the re-keyed id it replaced, so the next read of that
+  source project took X's own record, and X's later record of it was refused. An origin given
+  another id now drops the source. A re-key whose legacy origin held no id no longer tags the
+  twin's own id with the legacy project as its source.
+
+- **No write leaves a line the loader refuses; only a read project reclaims** (round 17).
+  When the one-project or the one-class rule took a memory id off an origin, `rekeyedFrom`
+  stayed behind; the loader refuses a source beside no id, so the next command set the whole
+  index aside as `.corrupt-<date>` and every lesson in it left the live index. The source now
+  leaves with the id, and it follows the (id, project) it was recorded for: another project
+  holding the same id is never given one. `save` reads every line back as the loader does and
+  refuses to write one it would refuse, the previous index intact. A re-keyed id goes back
+  only to a project actually read (an origin with provenance, not carried), never to a
+  v1.95.0 origin that could not be re-keyed in the same run. `init.defaultBranch` now keys
+  the repository before the main worktree's HEAD, so a main worktree on an orphan branch does
+  not move the key. Known, not fixed here, each with a backlog row: a `git replace --graft`
+  moves the key (B-141); a v1.95.0 origin with no twin still counts as a second project
+  (B-142); the known-project set is index-wide (B-143); a case-insensitive path read twice
+  (B-144).
+
+- **Ownership is recoverable, not predicted** (round 16). A re-key can only judge the projects
+  it has already seen, so an `add` in X, or a rebuild of X's root alone, could take an id
+  from a repository Y that had never been read. A re-key now records its source key on the
+  origin (`rekeyedFrom`). The first time Y is read with an origin of that class key, by
+  `add` or `rebuild`, or Y records the id, the id moves back to Y, is dropped from X, and a
+  `reclaimed:` line names it. Whichever verb runs first, the final owner is the project
+  whose key the legacy store used. When Y already holds its own id for that class, nothing
+  moves, and that is said. Each lesson plant now requires its own expected failure line, not
+  any non-zero exit. Known, not fixed here: the known-project set is index-wide, not per
+  class key.
+
+- **Ownership no longer depends on verb order** (round 15). The live-project rule now covers
+  every project the previous index records with provenance, not only the projects this run
+  read: an `add` in a repository, or a rebuild over its root alone, never re-keys another
+  known project's origin, and a later full rebuild agrees. That rule subsumes the separate
+  "no re-key with provenance" check (an origin with provenance names a known project), so the
+  check and its plant (492) are retired; the F1c test stays. Known limit, not fixed here: on a
+  case-insensitive file system one checkout reached by two spellings of its path is read
+  twice (real paths do not fold case), which can count a phantom second project; no memory
+  id ends on two projects.
+
+- **The re-key and the one-project rule, closed** (round 14).
+  - A provenance-less origin is re-keyed only when, in the checkout that re-derived its anchor,
+    its commit descends from the root the new key names (so it resolves there) and v1.95.0
+    would have computed its key there. Round 13's separate "commit resolves" plant (490) is
+    retired: the roots check subsumes it, so reverting it alone changes nothing. So is its
+    "own key re-derived" plant (493): an origin whose own key is re-derived belongs to a project
+    read this run, which the next rule already keeps. A monorepo that merged another repository's history keeps
+    its hands off that repository's origin and memory id.
+  - An origin whose project key any checkout read this run holds is never re-keyed, whatever
+    its anchor.
+  - `add` keeps one memory id on one live project, against the index as it read it.
+  - The M/M2 fixtures put the earlier holder's key above the later one, so "the smaller key"
+    fails every run.
+  - One `cat-file` per (checkout, commit) in a run.
+  - Every verb's messages name files, the index home-relative; `path` alone prints a path.
+  - A stage id v1.95.0 accepted that lesson/1 now refuses is normalised on read and said, so no
+    line and no memory id goes to the corrupt file. The schema's string stage ids are not blank.
+  - The pre-tag admission packet cites the v1.94.0 commit, not the tag object, which a clone
+    without tags does not hold.
+
+- **Upgrade and ownership in `lessons.py`** (round 13).
+  - An index written by v1.95.0 (keyed on the smallest root of HEAD, no provenance) no longer
+    turns a repository that merged an unrelated history into two projects. An origin with no
+    provenance whose `retro#anchor` this run re-derives under exactly one other key, and whose
+    commit resolves in that checkout, is re-keyed: its memory id follows, and `emit` and
+    `record` keep using it. `add` does the same for its own checkout. Never with provenance,
+    never when its own key is re-derived, never between two candidates, never merging two ids.
+  - `record` re-attaches an id held by an origin carried as `checkout holds another project`
+    only from a checkout in that origin's provenance (a re-init at the same path).
+  - A rebuild never leaves one memory id on two live projects: the earlier holder keeps it,
+    and the other origin is named and keeps its place without it.
+  - Without `origin/HEAD`, `main` or `master`, the project key is the main worktree's HEAD,
+    then `init.defaultBranch`, so a linked worktree on an orphan branch is the same project.
+  - Redaction replaces only absolute paths, as whole path components (`--roots .` deleted every
+    dot), and stderr (the session's notes, the newer-format notice, a refusal) is redacted
+    like stdout (in `rebuild`; every verb since round 14).
+  - A stage id given as a string gets the text checks: one line, at most 32 characters, no
+    path or credential shape.
+  - Two copies of one origin at the same revision keep the lexically smaller id, whatever the
+    order of the lines.
+
+- **Identity and safety in `lessons.py`** (round 12).
+  - The project key is the repository's: the first-parent root of its default branch, once
+    per git common dir. A worktree on a branch that merged an unrelated history, or a checkout
+    on an orphan `gh-pages`, is still its project.
+  - `checkout holds another project` applies only when the origin's own commit does not
+    resolve in that checkout. `add` applies the same rule to its checkout's old-key origin, so
+    a re-init never counts a phantom project, even before the next rebuild.
+  - `record` refuses an id another project's origin holds, naming the project (exit 1), and an
+    id the loader would refuse (exit 2).
+  - lesson/1 text (a string stage id too, since round 13) refuses every line separator,
+    including U+2028, U+2029 and U+0085. The index
+    is split on `\n` only, so a value can never make it read as corrupt.
+  - Rebuild messages name checkouts and files, never an absolute path.
+  - `--prune-carried-reason` needs `--prune-carried` and offers only the reasons a rebuild
+    produces; otherwise it is a usage error, exit 2.
+  - Merged duplicate lines name the id they drop and keep the higher revision.
+  - A shallow check that does not answer is refused: no source, and a problem named.
+
+- **`lessons.py rebuild` never removes or moves anything on its own** (round 11, narrowed
+  under the loop guard).
+  - Every previous origin the run does not re-derive is carried with everything recorded on
+    it, its memory id included, and marked `carried: <reason>`.
+  - `--prune-carried`, optionally narrowed by `--prune-carried-reason <reason>`, is the only way
+    an origin leaves the index.
+  - Nothing supersedes and nothing moves: a memory id stays on the origin that holds it, and is
+    re-attached only to the same `(project, classKey)`.
+  - The reasons are `checkout not read`, `retro file not read`, `no checkout read holds it`
+    (the checkout read the file and the entry is gone), `commit does not resolve`,
+    `retro cites a commit that does not resolve`, `lesson refused`, `no provenance` and
+    `checkout holds another project`. The last one is kept but not counted in `seen`,
+    `projects` and `status`; the others count as temporary unavailabilities. So no phantom
+    project appears, and an unreadable root never demotes a lesson.
+  - A shallow clone is never a source: a problem owned by its checkout, with nothing derived
+    under its unstable key. `add`, `emit-observatory` and `record` refuse there, exit 1, and say
+    to deepen it.
+  - Known limit: a project whose root commit changes (re-init, unshallow) starts new store
+    records. The operator re-attaches by `record`-ing the old id on the new origin of the same
+    class key.
+  - `record` over a different id the origin already holds needs `--replace`. It also refuses an
+    id another class key holds and a revision older than the one held.
+  - Each origin records its provenance, `checkouts`, the real paths it was derived from. It
+    decides only the carried reason; it stays in the local index, is never emitted, and `show`
+    omits it. A path is not an identity.
+  - Git worktrees of every checkout found are discovered, including those under
+    `.worktrees/` and `.claude/worktrees/`. Problems carry a structural owner and are printed by
+    name, never by absolute path or prefix match.
+  - Retro files are stamped when read and again under the lock. A file that changed in
+    between, such as an `add` landing mid-run, leaves its checkout not read for that run.
+  - Memory ids follow `(project, classKey)`, compare on the part before `@`, start at revision
+    1, and keep the highest revision everywhere. One id is never on two class keys, and the run
+    refuses to write if an id would vanish other than by `--prune-carried`.
+  - Index lines are re-derived from their origins on every read: `seen`, `projects`, `status`
+    and the rest are never trusted from disk, and duplicate origins and duplicate lines merge.
+    A line with wrong types, an origin lesson that fails lesson/1, a `carried` outside the
+    enum, or `mem:…@0` is a corrupt line. It is salvaged around and never causes a traceback.
+    A memory id that only a bad line held is named in the output.
+  - Exit 1 means nothing could be read: every root was missing or unreadable. A readable empty
+    root, or one holding only a shallow clone, exits 0.
+
+- **`lessons.py rebuild` never loses what it cannot re-derive.** Round 6's narrowed refusal
+  dropped an origin and its memory id while a project's root was unreadable. It also still
+  refused the routine case: an indexed lesson whose commit was pruned after a squash merge.
+  Rebuild now derives every lesson it can read. Every previous origin whose source it could
+  not re-derive is carried forward with everything recorded on it, marked `carried`, and
+  named. That covers a root not read or outside the scan, a commit that no longer resolves,
+  and a refused entry. Carried origins count toward `seen`, `projects` and `status`. They are
+  re-derived and un-marked when the source reads again, and are removed only by the new
+  `--prune-carried`. Rebuild exits 0 whenever anything was read, and exits 1, touching
+  nothing, only when nothing could be read. The loss guard and `--force` are gone.
+  `templates/lesson.schema.json` declares the `carried` field.
+- The merge notice no longer says "read both" when the family index was corrupt and set aside.
+- Docs: `continuity.md` names `graph.py next` exit `6` beside `4`, pinned by
+  `continuity_doc_test.py`, and `waves.md` lists `6` for `next --wave N`. The `graph.py`
+  docstring says exit `3` counts parked nodes as finished. In `stages.md` and `README.md`,
+  `checks` mode puts the release run on a watcher. The release-authority rule has one home,
+  `deploy-targets.md`, and `pipeline.schema.json` points to it.
+- Lessons of this run, now doctrine: `iteration.md` checks for parallel work on the same
+  nodes before each cycle, across every tool's branch prefixes. `build.md` adds a
+  command-hygiene block that every background dispatch carries.
+
 ## v1.98.0 (2026-10-20)
 
 Guards: 448 → **448**; property checks 15 → **15**.

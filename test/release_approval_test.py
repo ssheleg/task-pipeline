@@ -143,13 +143,21 @@ def case_authority_record():
         doc["release"].pop("authorized_by", None)
         ok(not list(validator.iter_errors(doc)), "absent authority locator keeps existing configuration valid")
     ok("authorized_by" not in EXAMPLE["release"], "example does not invent a release grant")
-    for name in ("stages.md", "deploy-targets.md"):
-        text = (SKILL / "references" / name).read_text()
-        paragraphs = [p for p in text.split("\n\n") if "release.authorized_by" in p]
-        ok(bool(paragraphs), name + " explains the authority record")
-        meaning = " ".join(paragraphs)
-        ok("not authorization" in meaning and "source" in meaning and "scope" in meaning,
-           name + " requires source/scope verification rather than trusting a config string")
+    text = (SKILL / "references" / "deploy-targets.md").read_text()
+    paragraphs = [p for p in text.split("\n\n") if "release.authorized_by" in p]
+    ok(bool(paragraphs), "deploy-targets.md explains the authority record")
+    meaning = " ".join(paragraphs)
+    ok("not authorization" in meaning and "source" in meaning and "scope" in meaning,
+       "deploy-targets.md requires source/scope verification rather than trusting a config string")
+    # One home (verification round 6): stages.md points at deploy-targets.md and does not
+    # restate the rule, so the two copies cannot drift apart.
+    stages = (SKILL / "references" / "stages.md").read_text()
+    pointer = [" ".join(p.split()) for p in stages.split("\n\n") if "release.authorized_by" in p]
+    ok(bool(pointer) and all("deploy-targets.md" in p and "When the release waits for an approval" in p
+                             for p in pointer),
+       "stages.md links the authority record to its one home in deploy-targets.md")
+    ok("currentness" not in stages and "locator is not authorization" not in stages,
+       "stages.md does not restate the authority rule deploy-targets.md owns")
     print("PASS: optional authority record validates shape, not the grant")
 
 

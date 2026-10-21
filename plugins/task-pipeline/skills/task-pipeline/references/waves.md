@@ -263,7 +263,8 @@ The work graph ([`work-graph.md`](work-graph.md)) carries `wave` on a node, an i
 - `graph.py validate` refuses an edge from a later wave's node into an earlier wave's
   node: an earlier wave that waits on a later one cannot close in its own pass.
 - `graph.py next --wave N` prints wave N's frontier only. Exit `3` says the wave is done,
-  `4` that nothing in it is runnable, `1` that no node is in wave N.
+  `4` that nothing in it is runnable behind a mixed or unclassified barrier, `6` that only
+  recorded watched waits hold it, `1` that no node is in wave N.
 - `graph.py wave N-007 --to 3 --why "<reason>"` moves a node and writes the revision.
   It refuses a move that would break the order above.
 

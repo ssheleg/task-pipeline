@@ -1,3 +1,110 @@
+## Fix cycles 6 to 18 of the release iteration, #125, branch `iter1/M-5-N-1` (2026-10-21)
+
+Cycle 18 closed round 18's MEDIUM and two LOWs. M1: `record --replace` drops the replaced
+id's `rekeyedFrom` (`_given` in `lessons.py`), so reading the source project later takes
+nothing from X's own record. L1: the `add` and rebuild re-keys set `rekeyedFrom` only when the
+id came from the legacy origin; a twin's own id keeps its own source. L2: the F1c fixture
+builds X's root in the upper half (`high_root_repo`), removing a ~0.5% flake. Tests in
+`round18_controls` (the reviewer's r18_replace and r18_replace_rb); negatives 547 to 549; 533
+and 534 re-anchored; `MIN_EXPECTED` 530. Next task: round 19 verification of this head.
+
+Earlier, cycle 17 (2026-10-19):
+
+Cycle 17 closed round 17's two MEDIUM findings and L1. F1: an origin that loses its memory id
+to the one-project or the one-class rule loses `rekeyedFrom` with it, the source is keyed by
+(id, project) in `_attach_memory`, and `save` refuses to write a line the loader would refuse
+(the index stays intact). F2: `_reclaim` moves an id only to an origin of the source project
+that was read (provenance, not carried). L1: `init.defaultBranch` before the main worktree's
+HEAD. Tests in `round17_controls` (the reviewer's repro1, repro2 part 1, repro3, repro4 and
+repro4_add); negatives 541 to 546, 474 and 536 re-anchored, 539 now caught by the r16 reclaim
+check refusing a one-project tidy-up after the reclaim; `MIN_EXPECTED` 527. Backlog rows B-141 (graft, L2, out of
+scope), B-142 (a twinless v1.95.0 origin still counted as a second project), B-143 and B-144
+(the two "known, not fixed" items of cycles 16 and 15). Next task: round 18 verification of
+this head.
+
+Earlier, cycle 16 (2026-10-18):
+
+Cycle 16 made ownership recoverable: a re-key records `rekeyedFrom`, and the source project
+reclaims the id when it is first read (add or rebuild) or records it, so verb order never
+decides the owner. Tests in `round16_controls`; negatives 530 to 540; `MIN_EXPECTED` 521.
+Every lesson plant now requires its own first FAIL label (472 and 474 name one alternate).
+Fixture flakes removed (upper-half old roots, lower-half y root, atomic retro writes).
+Row, not fixed: `_known_projects` is index-wide, not per class key.
+
+Earlier, cycle 15 (2026-10-17):
+
+Cycle 15 merged `origin/main` at v1.97.1 (our negative 463 became 526) and closed round 15's
+MEDIUM: the live set for re-keying, in `rebuild` and in `add`, now includes every project the
+previous index records with provenance (`_known_projects`). Tests: the F2 fixture through
+`add` in X and through a rebuild of X alone, and m10 (a re-attached id survives a rebuild).
+Negatives 527–529; 492 retired (subsumed), 489 and 491 re-anchored; `MIN_EXPECTED` 510. Known, not fixed: case-insensitive APFS reads one
+checkout twice through two path spellings (dedupe by device and inode is the fix).
+
+Previously, cycles 6–14 (2026-10-15):
+
+Cycle 14 closed round 14's three MEDIUM findings and six LOW ones:
+- the re-key now also needs the key v1.95.0 would have computed in that checkout and a commit
+  descending from the new key's root, and never moves a project read this run;
+- `add` keeps one memory id on one live project;
+- deterministic M/M2 fixtures, one git question per (checkout, commit), redaction in every
+  verb, legacy stage ids normalised on read, a non-blank schema stage id, and the pre-tag
+  packet citing a commit instead of a tag object.
+
+Cycle 15 merged `origin/main` at v1.97.1: main's WebKit plant took 463, so the lesson
+negative there became 526 and `MIN_EXPECTED` is 508. The tests are in `round14_controls`, plus negatives 514–525; 490 and 493 are retired (the roots
+check and the live-project rule subsume them), 489, 492 and 515 re-anchored; `MIN_EXPECTED`
+is 507.
+
+Cycle 13 kept the contract and fixed two MEDIUM findings and five LOW ones:
+- an index written by v1.95.0 is re-keyed to its repository on positive evidence (no
+  provenance, one re-derived origin of another key at its anchor, its commit resolving
+  there), never counted as a second project;
+- `record`'s re-attach exception holds only from the carried origin's own checkout, and a
+  rebuild keeps one memory id on one live project (the earlier holder);
+- the project key falls back to the main worktree's HEAD, then `init.defaultBranch`;
+- redaction replaces whole absolute path components only, on stderr too;
+- string stage ids get the text checks; a same-revision tie is deterministic.
+
+The tests are in `round13_controls`, plus negatives 489–508 (474 re-anchored). This branch merges
+`origin/main` at v1.96.0; its finish-line plants took 455–462, so the five colliding lesson
+negatives were renumbered 509–513 and `MIN_EXPECTED` is 497.
+
+Cycle 12 kept the narrowed contract and fixed five MEDIUM findings and the LOW ones:
+- the project key is the repository's;
+- `checkout holds another project` applies only when the origin's commit does not resolve
+  there;
+- `record` refuses another project's id and ids the loader would refuse;
+- Unicode line separators are refused, and the index is split on `\n` only;
+- messages carry no absolute paths.
+
+The tests are in `round12_controls`, plus negatives 474–488.
+
+Rounds 6 to 11 failed on `lessons.py rebuild`. The loop guard fired three times. The third
+time, in cycle 11, narrowed the contract: **a rebuild never removes or moves anything on its
+own.**
+- Every origin not re-derived is carried with an accurate reason.
+- `--prune-carried`, optionally narrowed by `--prune-carried-reason`, is the only way out.
+- Origins carried as `checkout holds another project` are kept but not counted.
+- A shallow clone is never a source.
+
+The tests are `round11_controls` and the rewritten `round10_controls`, plus negatives 457–473
+(some numbers retired; 455, 456, 458, 459 and 461 became 509–513 when v1.96.0 took those numbers). This branch merges `origin/main` (v1.95.0, #128, #129) without
+rewriting history. The fixes are recorded in the CHANGELOG under *Unreleased*. The branch is
+pushed but not merged, and no version or publication is claimed.
+
+- **Rebuild:** `lessons.py rebuild` never loses what it cannot re-derive. Unread or
+  unresolved origins are carried per `(project, retro)` with their memory ids, and only
+  `--prune-carried` removes them. The tests are `carry_forward_controls` and
+  `partial_rebuild_controls` in `test/lessons_test.py`, plus negatives 509–512 (once 455–459).
+- **F2–F5:** documentation drifts in `continuity.md`, the `graph.py` docstring and
+  `stages.md`. The authority rule now has one home, guarded by `test/release_approval_test.py`.
+- **F6:** the merge notice is accurate when the family index was set aside.
+- **New rules:** a parallel-work check before each cycle (`iteration.md` → *The cycle*), and
+  background-dispatch command hygiene (`build.md` §4.1).
+
+Next task: run round 17 of verification on #125's head. The release order after v1.95.0 is
+the coordinator's.
+
 ## 1.98.0: proportional run, reading diet, anti-loop, retro byte budget (2026-10-20)
 
 Objective (operator task, 2026-10-20): make a run cheaper, stop it looping, and put the

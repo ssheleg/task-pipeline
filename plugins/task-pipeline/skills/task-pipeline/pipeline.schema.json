@@ -236,7 +236,7 @@
           "minLength": 1,
           "pattern": "\\S",
           "not": {"pattern": "[\\r\\n]"},
-          "description": "Optional single-line source locator (for example docs/DECISIONS.md:42) for the specific standing authorization covering the tag and its publication. The locator is not authorization: read the source and verify its authority, currentness and scope at stage 7. Absent: inspect existing recorded authority before asking; do not infer a grant from checks approval, loop mode or this field's mere presence (references/deploy-targets.md)."
+          "description": "Optional single-line source locator (for example docs/DECISIONS.md:42) for the standing authorization covering the tag and its publication. A locator, not a grant: how it is read and verified lives in references/deploy-targets.md, When the release waits for an approval."
         },
         "approval": {
           "enum": [
