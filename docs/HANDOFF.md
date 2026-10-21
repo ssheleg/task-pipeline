@@ -1,3 +1,18 @@
+## 1.99.0 release of #125, branch `rel/v1990` (2026-10-21)
+
+- **Objective.** Integrate PR #125 after review round 19 (no MEDIUM or higher), file round 19's
+  LOW findings, release 1.99.0 and update local installs.
+- **Done.** CI run [39557530881](https://github.com/ssheleg/task-pipeline/actions/runs/39557530881)
+  green on head `4be47b0` (validate, house audit, eight negative shards, strict conformance);
+  #125 squash-merged as `056f9db`. This change bumps the five version surfaces to 1.99.0, turns
+  `## Unreleased` into `## v1.99.0 (2026-10-21)`, declares v1.99.0 in the retro gap section (no
+  stage-10 stamp: the fix cycles were review rounds) and files B-145, B-146 and B-147.
+- **Open.** B-145 to B-147 (LOW, test gaps found by round 19); B-141 to B-144 from earlier rounds.
+- **Next task.** After this PR merges: the local annotated tag `v1.99.0` on `main`
+  (`scripts/release_candidate.py prepare` then `check`, which runs `npm run test:all` with the tag
+  visible), push the tag, watch `release.yml`, read back `npm view task-pipeline-skill version`,
+  then `npx --yes sshlg-skills@latest update` and compare the installed plugin bytes.
+
 ## Fix cycles 6 to 18 of the release iteration, #125, branch `iter1/M-5-N-1` (2026-10-21)
 
 Cycle 18 closed round 18's MEDIUM and two LOWs. M1: `record --replace` drops the replaced

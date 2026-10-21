@@ -1,6 +1,9 @@
 # Verification — task-pipeline
 
-## Shipped state — v1.98.0 (NOT SHIPPED until the v1.98.0 release run is read)
+## Shipped state — v1.99.0 (NOT SHIPPED until the v1.99.0 release run is read)
+
+v1.99.0 adds PR #125 (`056f9db`): the lesson index fixes of release iteration 1, fix cycles 6 to 18.
+The rows below still describe v1.98.0 and earlier; none is re-verified by this release.
 
 The WebKit-first engine order (`DEC-0007`; `references/browser.md` → *Engine order*,
 `companion-skills.md`, stages 5/6/8, `tdd.md`, guard `P3-G0d` with negative 463) is on
