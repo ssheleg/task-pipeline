@@ -7,6 +7,11 @@
   #125 squash-merged as `056f9db`. This change bumps the five version surfaces to 1.99.0, turns
   `## Unreleased` into `## v1.99.0 (2026-10-21)`, declares v1.99.0 in the retro gap section (no
   stage-10 stamp: the fix cycles were review rounds) and files B-145, B-146 and B-147.
+- **First candidate refused.** The local candidate `v1.99.0` on `2c7c957` (#137) failed its
+  tagged `npm run test:all`: the documentation gate (`test:docs`) found B-145 to B-147 citing the
+  squash-unreachable PR commits `4be47b0` and `490dbed` in backticks. The PR CI round does not run
+  `test:docs`, so it passed. The rows now link those commits instead; the unpublished local tag was
+  removed and its receipt kept beside the new one (`.git/sshlg-release-candidates/`).
 - **Open.** B-145 to B-147 (LOW, test gaps found by round 19); B-141 to B-144 from earlier rounds.
 - **Next task.** After this PR merges: the local annotated tag `v1.99.0` on `main`
   (`scripts/release_candidate.py prepare` then `check`, which runs `npm run test:all` with the tag
