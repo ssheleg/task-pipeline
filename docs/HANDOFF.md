@@ -1,4 +1,14 @@
-## Fix cycles 6 to 17 of the release iteration, #125, branch `iter1/M-5-N-1` (2026-10-19)
+## Fix cycles 6 to 18 of the release iteration, #125, branch `iter1/M-5-N-1` (2026-10-21)
+
+Cycle 18 closed round 18's MEDIUM and two LOWs. M1: `record --replace` drops the replaced
+id's `rekeyedFrom` (`_given` in `lessons.py`), so reading the source project later takes
+nothing from X's own record. L1: the `add` and rebuild re-keys set `rekeyedFrom` only when the
+id came from the legacy origin; a twin's own id keeps its own source. L2: the F1c fixture
+builds X's root in the upper half (`high_root_repo`), removing a ~0.5% flake. Tests in
+`round18_controls` (the reviewer's r18_replace and r18_replace_rb); negatives 547 to 549; 533
+and 534 re-anchored; `MIN_EXPECTED` 530. Next task: round 19 verification of this head.
+
+Earlier, cycle 17 (2026-10-19):
 
 Cycle 17 closed round 17's two MEDIUM findings and L1. F1: an origin that loses its memory id
 to the one-project or the one-class rule loses `rekeyedFrom` with it, the source is keyed by

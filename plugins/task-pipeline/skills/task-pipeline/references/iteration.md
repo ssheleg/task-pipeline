@@ -316,7 +316,8 @@ that could not be re-keyed is not a read, so the run that re-keys never hands th
 it. Whichever verb runs first, the final owner is the project whose key the legacy store used,
 once that project is read. If that project already holds its own id for the class, nothing
 moves, and that is named. An origin that loses its id to the one-project or the one-class rule
-loses `rekeyedFrom` with it, and no verb writes an index line the loader would refuse: `save`
+loses `rekeyedFrom` with it, so does an origin `record --replace` gives another id, and a
+re-key records a source only for an id it moved from the legacy origin; and no verb writes an index line the loader would refuse: `save`
 refuses instead, the previous index intact. The reasons are:
 
 - `checkout not read`: the checkout was not discovered, or a problem is owned by it. That

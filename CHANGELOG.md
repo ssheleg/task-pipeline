@@ -1,6 +1,6 @@
 ## Unreleased
 
-Guards: 448 → **527**; property checks 15 → **15**. There are 79 new negatives in
+Guards: 448 → **530**; property checks 15 → **15**. There are 82 new negatives in
 `lessons.py`. Each one plants a revert, and the suite must catch it:
 
 - the whole-scan refusal put back;
@@ -59,9 +59,17 @@ Guards: 448 → **527**; property checks 15 → **15**. There are 79 new negativ
 - an id dropped by the one-project or the one-class rule keeping its `rekeyedFrom`, a re-key
   source given to every project holding that id, a reclaim to a project never read, the main
   worktree's HEAD keying the repository before `init.defaultBranch`, and `save` writing a line
-  the loader refuses.
+  the loader refuses;
+- `record --replace` keeping the replaced id's `rekeyedFrom`, and an `add` or rebuild re-key
+  giving a twin's own id a source it never had.
 
-These are the fixes from verification rounds 6 to 17 of release iteration 1.
+These are the fixes from verification rounds 6 to 18 of release iteration 1.
+
+- **A replaced id takes its source with it** (round 18). `record --replace` gave the origin a
+  new id but kept the `rekeyedFrom` of the re-keyed id it replaced, so the next read of that
+  source project took X's own record, and X's later record of it was refused. An origin given
+  another id now drops the source. A re-key whose legacy origin held no id no longer tags the
+  twin's own id with the legacy project as its source.
 
 - **No write leaves a line the loader refuses; only a read project reclaims** (round 17).
   When the one-project or the one-class rule took a memory id off an origin, `rekeyedFrom`

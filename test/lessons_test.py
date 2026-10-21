@@ -1917,7 +1917,9 @@ def round14_controls():
     # lower, so v1.95.0 keyed X under that root), but the old-key origin HAS provenance: it was
     # not written by v1.95.0, so nothing proves it is X's under an old key. Never re-keyed.
     base = work / "f1c"
-    x, _ = headed_repo("x", [("retro.md", "export gate", KEY)], parent=base / "roots")
+    # X's root sorts in the upper half (round 18, L2): a root below it is then a few tries away,
+    # where a low rx made the order unsatisfiable in 200 tries about once in 200 runs.
+    x, _ = high_root_repo("x", [("retro.md", "export gate", KEY)], parent=base / "roots")
     rx = root_of(x)
     o_repo = base / "other"
     init_root(o_repo, "other", lambda r: r < rx)
@@ -2543,6 +2545,114 @@ def round17_controls():
        f"({k1} {[(o['project'], o.get('carried')) for o in e['origins']]} {out!r})")
 
 
+def round18_controls():
+    """Round 18 (adversarial): M1 `record --replace` gives the origin an id of its own, so the
+    re-key source of the id it held (`rekeyedFrom`) leaves with that id, and no later read of the
+    source project takes X's own record; L1 a re-key whose legacy origin held no id leaves the
+    twin's own id without a source it never had (`add` and `rebuild`)."""
+    work = tree("tp-lessons-r18-")
+
+    def root_of(repo):
+        return git(repo, "rev-list", "--max-parents=0", "--first-parent", "HEAD").split()[-1]
+
+    def init_root(repo, text, want):
+        for attempt in range(600):
+            if (repo / ".git").exists():
+                shutil.rmtree(repo / ".git")
+            repo.mkdir(parents=True, exist_ok=True)
+            git(repo, "init", "-q")
+            (repo / f"ROOT-{text.replace(' ', '-')}.md").write_text(f"{text} {attempt}", encoding="utf-8")
+            git(repo, "add", "-A")
+            git(repo, "commit", "-q", "-m", f"{text} {attempt}")
+            if want(git(repo, "rev-parse", "HEAD")):
+                return
+        raise SystemExit(f"r18 fixture {text}: no root satisfied the order in 600 tries")
+
+    def x_merged_y(b):
+        """Y's root below X's; X merged Y's history, so v1.95.0 keyed X on Y's root. Both hold a
+        retro of the same class."""
+        y, x = b / "ry" / "y", b / "rx" / "x"
+        init_root(y, "y root", lambda r: r[0] in "0123")
+        ry = root_of(y)
+        init_root(x, "x root", lambda r: ry < r and r[0] in "cdef")
+        git(x, "fetch", "-q", str(y), "HEAD:yhist")
+        git(x, "merge", "-q", "--allow-unrelated-histories", "-m", "y in", "yhist")
+        for repo, head in ((x, "export gate"), (y, "y gate")):
+            (repo / "fix.txt").write_text(repo.name, encoding="utf-8")
+            git(repo, "add", "-A")
+            git(repo, "commit", "-q", "-m", "fix")
+            write_retros(repo, [("retro.md", head, KEY)], git(repo, "rev-parse", "HEAD"))
+            git(repo, "add", "-A")
+            git(repo, "commit", "-q", "-m", "retro")
+        return x, y, "p-" + ry[:12], "p-" + root_of(x)[:12]
+
+    def add_all(repo, ix):
+        return run("add", "--retro", "docs/evidence/retro.md", "--all", cwd=repo, index=ix)
+
+    def held(ix):
+        return sorted((o["project"], o["retro"].split("#")[1], o.get("memory"), o.get("rekeyedFrom"))
+                      for o in lesson_of(ix)["origins"] if o.get("memory"))
+
+    # M1 — a v1.95.0 origin under Y holds mem:legacy@1; `add` in X re-keys it into X with
+    # rekeyedFrom Y; X records its own id with --replace. Y read later (by `add` in Y, or by a
+    # rebuild of both) takes nothing: mem:xown is X's own record, and X records it again.
+    for verb in ("add", "rebuild"):
+        b = work / f"m1-{verb}"
+        x, y, ky, kx = x_merged_y(b)
+        ix = b / "index.jsonl"
+        rc, _, err = add_all(x, ix)
+        ok(rc == 0, f"r18 M1 {verb} fixture: add ({err!r})")
+        line = json.loads(ix.read_text(encoding="utf-8"))
+        for o in line["origins"]:
+            o.pop("checkouts", None)
+            o.update(project=ky, memory="mem:legacy@1")
+        ix.write_text(json.dumps(line, ensure_ascii=False, sort_keys=True) + "\n", encoding="utf-8")
+        add_all(x, ix)
+        ok(held(ix) == [(kx, "export-gate", "mem:legacy@1", ky)],
+           f"r18 M1 {verb} fixture: the legacy id is re-keyed into X from Y ({held(ix)})")
+        lid = lesson_of(ix)["id"]
+        rc, _, err = run("record", lid, "--answer", "-", "--replace", cwd=x, index=ix,
+                         stdin=json.dumps({"memoryId": "mem:xown", "revision": 1}))
+        ok(rc == 0 and held(ix) == [(kx, "export-gate", "mem:xown@1", None)],
+           f"r18 M1 {verb}: record --replace drops the source of the id it replaced ({rc} {held(ix)} {err!r})")
+        if verb == "add":
+            rc, out, err = add_all(y, ix)
+        else:
+            rc, out, err = run("rebuild", "--roots", str(b / "rx"), str(b / "ry"), index=ix)
+        ok(rc == 0 and "reclaimed" not in out and held(ix) == [(kx, "export-gate", "mem:xown@1", None)],
+           f"r18 M1 {verb}: reading Y takes nothing from X's own record ({held(ix)} {out!r} {err!r})")
+        rc, _, err = run("record", lid, "--answer", "-", cwd=x, index=ix,
+                         stdin=json.dumps({"memoryId": "mem:xown", "revision": 2}))
+        ok(rc == 0 and held(ix) == [(kx, "export-gate", "mem:xown@2", None)],
+           f"r18 M1 {verb}: X records its own id again ({rc} {held(ix)} {err!r})")
+
+    # L1 — the legacy origin under Y holds no id; X's re-derived twin holds its own. The re-key
+    # (by `add` in X, or by a rebuild of X) keeps the twin's id with no source; Y read later
+    # takes nothing.
+    for verb in ("add", "rebuild"):
+        b = work / f"l1-{verb}"
+        x, y, ky, kx = x_merged_y(b)
+        ix = b / "index.jsonl"
+        rc, _, err = add_all(x, ix)
+        ok(rc == 0, f"r18 L1 {verb} fixture: add ({err!r})")
+        line = json.loads(ix.read_text(encoding="utf-8"))
+        mine = line["origins"][0]
+        legacy = {k: v for k, v in mine.items() if k not in ("checkouts", "memory", "rekeyedFrom")}
+        mine["memory"] = "mem:own@1"
+        line["origins"].append(dict(legacy, project=ky))
+        ix.write_text(json.dumps(line, ensure_ascii=False, sort_keys=True) + "\n", encoding="utf-8")
+        if verb == "add":
+            rc, out, err = add_all(x, ix)
+        else:
+            rc, out, err = run("rebuild", "--roots", str(b / "rx"), index=ix)
+        ok(rc == 0 and "re-keyed" in out and held(ix) == [(kx, "export-gate", "mem:own@1", None)]
+           and [o["project"] for o in lesson_of(ix)["origins"]] == [kx],
+           f"r18 L1 {verb}: a twin's own id is given no source by a re-key ({held(ix)} {out!r} {err!r})")
+        rc, out, err = add_all(y, ix)
+        ok(rc == 0 and "reclaimed" not in out and (kx, "export-gate", "mem:own@1", None) in held(ix),
+           f"r18 L1 {verb}: reading Y takes nothing from X's own id ({held(ix)} {out!r})")
+
+
 def source_admission_controls():
     repo, _ = project("source-admission", 1)
     retro = repo / "docs/evidence/retro.md"
@@ -3148,6 +3258,7 @@ def main():
     round14_controls()
     round16_controls()
     round17_controls()
+    round18_controls()
     source_admission_controls()
     print(f"PASS: lessons.py — {CASES} cases")
 

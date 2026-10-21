@@ -1137,7 +1137,11 @@ def cmd_add(a, idx: pathlib.Path) -> int:
                                  and mem_base(o["memory"]) != mem_base(n["memory"])):
                     continue
                 memory = _newer_memory(o.get("memory"), n.get("memory"))
-                source = {"memory": memory, "rekeyedFrom": o.get("rekeyedFrom") or o["project"]} if memory else {}
+                # The source is o's project only when the id came from o (round 18, L1): a twin
+                # keeping its own id keeps its own source, if any.
+                source = ({"memory": memory} if not o.get("memory") else
+                          {"memory": memory, "rekeyedFrom": o.get("rekeyedFrom") or o["project"]}
+                          ) if memory else {}
                 marked = [dict(x, **source)
                           if _origin_key(x) == _origin_key(n) else x for x in marked if x is not o]
                 rekeyed.append(f"{ck} — {o['retro']}: {o['project']} is {project} (written before "
@@ -1469,14 +1473,19 @@ def _rekey_legacy(old: dict[str, dict], entries: dict[str, dict],
                 said.append(f"{ck} — {o['project']} {o['retro']}: the same repository as "
                             f"{n['project']}, but each holds its own memory id — left carried")
                 continue
-            moved = {k: v for k, v in o.items() if k != "carried"}
+            moved = {k: v for k, v in o.items() if k not in ("carried", "rekeyedFrom")}
             moved["project"] = n["project"]
             memory = _newer_memory(o.get("memory"), (twin or {}).get("memory"))
             if memory:
                 moved["memory"] = memory
                 # Where the id came from (round 16): the project whose key the legacy store
                 # used may still be read later, and then it takes its id back (`_reclaim`).
-                moved["rekeyedFrom"] = o.get("rekeyedFrom") or o["project"]
+                # Only when the id came from o (round 18, L1): the twin's own id keeps the
+                # twin's own source, if it had one.
+                if o.get("memory"):
+                    moved["rekeyedFrom"] = o.get("rekeyedFrom") or o["project"]
+                elif (twin or {}).get("rekeyedFrom"):
+                    moved["rekeyedFrom"] = twin["rekeyedFrom"]
             origins = [x for x in origins if x is not o and x is not twin] + [moved]
             said.append(f"{ck} — {o['retro']}: {o['project']} is {n['project']} (written before "
                         "provenance; its commit resolves in the checkout that re-derived it)"
@@ -1485,6 +1494,15 @@ def _rekey_legacy(old: dict[str, dict], entries: dict[str, dict],
         if changed:
             old[ck] = derive(origins)
     return said
+
+
+def _given(o: dict, memory: str) -> dict:
+    """o holding `memory`. Where the id it held came from (`rekeyedFrom`) stays only while the id
+    is the same one (round 18, M1): an origin given another id (`record --replace`) holds a record
+    of its own, which no other project may take back."""
+    same = bool(o.get("memory")) and mem_base(o["memory"]) == mem_base(memory)
+    return dict(o, memory=memory) if same else {
+        k: v for k, v in dict(o, memory=memory).items() if k != "rekeyedFrom"}
 
 
 def _reclaim(entries: dict[str, dict]) -> list[str]:
@@ -2124,7 +2142,7 @@ def cmd_record(a, idx: pathlib.Path) -> int:
         # A re-keyed holder this project reclaims drops it instead (round 16).
         origins = [{k: v for k, v in x.items() if k not in ("memory", "rekeyedFrom")}
                    if any(x is r for r in reclaim) else
-                   dict(x, memory=memory) if _origin_key(x) == _origin_key(o)
+                   _given(x, memory) if _origin_key(x) == _origin_key(o)
                    or (x.get("memory") and mem_base(x["memory"]) == mid) else x
                    for x in e["origins"]]
         entries[e["classKey"]] = derive(origins)

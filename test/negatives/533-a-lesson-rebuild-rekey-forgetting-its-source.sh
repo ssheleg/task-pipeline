@@ -6,9 +6,9 @@ python3 - <<'EOF'
 # Round 16: the reclaim. Put back a lesson rebuild re-key forgetting its source.
 p = "/tmp/r16-src-rb-copy/plugins/task-pipeline/skills/task-pipeline/scripts/lessons.py"
 t = open(p, encoding="utf-8").read()
-needle = '                moved["rekeyedFrom"] = o.get("rekeyedFrom") or o["project"]\n'
+needle = '                    moved["rekeyedFrom"] = o.get("rekeyedFrom") or o["project"]\n'
 assert needle in t, "PLANT DID NOT LAND: anchor absent before edit"
-open(p, "w", encoding="utf-8").write(t.replace(needle, '                pass\n', 1))
+open(p, "w", encoding="utf-8").write(t.replace(needle, '                    pass\n', 1))
 assert needle not in open(p, encoding="utf-8").read(), "PLANT DID NOT LAND"
 EOF
 # The plant must fail with ITS defect, not any non-zero exit (round 16).
