@@ -1,4 +1,4 @@
-## Unreleased
+## v1.99.0 (2026-10-21)
 
 Guards: 448 → **530**; property checks 15 → **15**. There are 82 new negatives in
 `lessons.py`. Each one plants a revert, and the suite must catch it:

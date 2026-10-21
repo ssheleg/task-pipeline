@@ -1491,6 +1491,14 @@ three quarters of the work on this run.
 
 ## Releases that carry no stamp — stated, not stamped
 
+**`v1.99.0` carries no stamp, declared before its tag.** It ships PR #125 (squash `056f9db`):
+fix cycles 6 to 18 of release iteration 1 on `lessons.py` (a rebuild never removes or moves an
+origin on its own, the repository-level project key, the v1.95.0 upgrade re-key, one memory id per
+project), closed by review round 19 with no MEDIUM or higher finding and a green CI round
+([39557530881](https://github.com/ssheleg/task-pipeline/actions/runs/39557530881)). The fix cycles
+were review rounds, not a completed ten-stage run, so no stage-10 stamp is invented here. Round 19's
+three LOW findings are B-145, B-146 and B-147.
+
 **`v1.97.0` and `v1.97.1` carry no stamp.** The former is a failed immutable tag:
 [release run 38976060549](https://github.com/ssheleg/task-pipeline/actions/runs/38976060549) rejected the
 missing declaration before creating a release; the publish job was skipped. The latter is this declaration,
