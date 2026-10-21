@@ -1,3 +1,17 @@
+## 1.99.1: `retro_budget.py` reads a numbered-list retro, branch `fix/retro-budget-numbered` (2026-10-21)
+
+- **Objective.** sshlg-skills B-244: `retro_budget.py` read that repository's retro floor
+  (numbered standing instructions, list stamps, 103,737 bytes) as `standing 0/10` and
+  `migrate` moved nothing, so its stage-10 budget could never pass.
+- **Done.** B-149 closed: list items and list stamps measured; stamps past the cap rotate by
+  date; long items keep their rule and retire trigger; prune prose moves only over budget.
+  `test/audit_regressions/diet_retro_budget.py` seventeen new cases, each red on the 1.99.0 script or a reviewed intermediate version.
+  Five version surfaces at 1.99.1; retro declares the release unstamped (the run's stamp is in
+  sshlg-skills).
+- **Next task.** After this PR merges: `scripts/release_candidate.py prepare` then `check` on
+  `main`, push tag `v1.99.1`, watch `release.yml`, read back `npm view task-pipeline-skill
+  version`; then the sshlg-skills pin bump to 1.99.1 and its retro migration.
+
 ## 1.99.0 release of #125, branch `rel/v1990` (2026-10-21)
 
 - **Objective.** Integrate PR #125 after review round 19 (no MEDIUM or higher), file round 19's

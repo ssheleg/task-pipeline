@@ -1491,6 +1491,11 @@ three quarters of the work on this run.
 
 ## Releases that carry no stamp — stated, not stamped
 
+**`v1.99.1` carries no stamp, declared before its tag.** It ships B-149 (`retro_budget.py` reads
+a numbered-list floor and list stamps, rotates stamps past the cap by date, and moves prune prose
+only over budget). The run that found and fixed it was sshlg-skills B-242/B-244 on 2026-10-21,
+driven from that repository, so its stage-10 stamp belongs there, not here.
+
 **`v1.99.0` carries no stamp, declared before its tag.** It ships PR #125 (squash `056f9db`):
 fix cycles 6 to 18 of release iteration 1 on `lessons.py` (a rebuild never removes or moves an
 origin on its own, the repository-level project key, the v1.95.0 upgrade re-key, one memory id per

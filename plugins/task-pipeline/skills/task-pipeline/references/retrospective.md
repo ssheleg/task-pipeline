@@ -205,6 +205,10 @@ narrative are how a capped list grows anyway.
   `Because`) **verbatim** into the quarter's archive, each block carrying the sha256 of
   its text, and leaves a pointer; `retro_budget.py verify` proves every pointer. An
   instruction still over 600 characters after its story moved is rewritten by hand.
+  An older retro whose standing instructions are a numbered list and whose stamps are
+  `- **date: title**` items is read the same way: the item keeps its bold rule and its
+  `*(Retire ...)*` trigger, a stamp keeps its title, stamps past the cap rotate out by date,
+  and, over budget, the Run stamps section's loose prune paragraphs move.
 - **A prune that retires nothing writes its count into the stamp row**, as
   `prune: 0 retired`, and no paragraph. Repeated "nothing to prune" notes were a
   measured share of the floor.

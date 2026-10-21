@@ -1,8 +1,10 @@
 # Verification — task-pipeline
 
-## Shipped state — v1.99.0 (NOT SHIPPED until the v1.99.0 release run is read)
+## Shipped state — v1.99.1 (NOT SHIPPED until the v1.99.1 release run is read)
 
-v1.99.0 adds PR #125 (`056f9db`): the lesson index fixes of release iteration 1, fix cycles 6 to 18.
+v1.99.1 adds B-149: `retro_budget.py` measures and migrates a retro whose floor is a numbered
+list and list stamps (`test/audit_regressions/diet_retro_budget.py`, seventeen new cases).
+v1.99.0 added PR #125 (`056f9db`): the lesson index fixes of release iteration 1, fix cycles 6 to 18.
 The rows below still describe v1.98.0 and earlier; none is re-verified by this release.
 
 The WebKit-first engine order (`DEC-0007`; `references/browser.md` → *Engine order*,
