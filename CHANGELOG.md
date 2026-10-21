@@ -1,3 +1,32 @@
+## v1.99.1 (2026-10-21)
+
+Guards: 530 → **530**; property checks 15 → **15**. No negative was added: the new cases
+are regression tests in `test/audit_regressions/diet_retro_budget.py`.
+
+**`retro_budget.py` reads an older retro's floor and migrates it** (B-149, from sshlg-skills
+B-244). That retro writes its standing instructions as a numbered list and its run stamps as
+`- **date: title** ...` narrative items beside a table. `check` printed `standing 0/10 rows`
+for ten instructions, and `migrate` answered `nothing to move` on a 103,737-byte floor with 89
+stamps, so stage 10's byte budget could never pass there.
+
+- `check` counts numbered-list standing instructions and list stamps, measures each item
+  whole and names it (`standing row #6`, `stamp 2026-09-06 (list)`).
+- `migrate` rotates the oldest stamps past the cap of ten, ordered by their date and never by
+  position, verbatim into the quarter's archive (a table row travels under its table's
+  header); keeps a long list item's bold rule and its `*(Retire ...)*` trigger and moves the
+  rest; keeps a long list stamp's bold title; and, only over budget, moves the Run stamps
+  section's loose prune paragraphs. Every move leaves a `sha256:` pointer that `verify` proves.
+- Edge rules from two review rounds: a lead of several bold spans stays whole and a date-only
+  lead refuses by name; a same-day tie follows its own block's direction; a paragraph holding
+  a heading stays in the floor; the script's own pointer notes never move again, so a floor
+  still over budget is left alone by the next run; a table's header leaves only with the rows
+  this run rotated; a list marker, a quote, a rule or a `*(` note ends an item; a rule still
+  over 600 characters after its story moved is reported, never moved again.
+- On a copy of the sshlg-skills retro: 103,737 bytes to 6,446, every pointer proved, no
+  non-blank line lost, the text outside the floor unchanged.
+- Tests: `test/audit_regressions/diet_retro_budget.py` gains seventeen cases. Each failed on the
+  1.99.0 script (it crashed with no archive to read) or on a reviewed intermediate version.
+
 ## v1.99.0 (2026-10-21)
 
 Guards: 448 → **530**; property checks 15 → **15**. There are 82 new negatives in
