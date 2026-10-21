@@ -12,7 +12,7 @@
   squash-unreachable PR commits `4be47b0` and `490dbed` in backticks. The PR CI round does not run
   `test:docs`, so it passed. The rows now link those commits instead; the unpublished local tag was
   removed and its receipt kept beside the new one (`.git/sshlg-release-candidates/`).
-- **Open.** B-145 to B-147 (LOW, test gaps found by round 19); B-141 to B-144 from earlier rounds.
+- **Open.** B-145 to B-147 (LOW, test gaps found by round 19); B-148 (the PR run skips `test:docs`); B-141 to B-144 from earlier rounds.
 - **Next task.** After this PR merges: the local annotated tag `v1.99.0` on `main`
   (`scripts/release_candidate.py prepare` then `check`, which runs `npm run test:all` with the tag
   visible), push the tag, watch `release.yml`, read back `npm view task-pipeline-skill version`,
