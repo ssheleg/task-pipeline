@@ -1,3 +1,14 @@
+## v1.101.1 (2026-10-23)
+
+Guards: 530 → **530**; property checks 15 → **15**. No negative was added: the new checks are
+two cases in `test/release_gate_test.py` (65 to 67).
+
+- **B-153:** when the release gate's python3 decision fails, its fallback refused any command
+  that spelled `tag`, `push`, `release` or `publish` anywhere, so reading
+  `.git/sshlg-release-candidates/` was refused as an outward act (2026-10-22). It now matches the
+  command shapes (`git … tag|push`, `gh … release`, `npm … publish`); every outward act it
+  refused before is still refused. Filed as B-152, an id v1.91.1 had already used.
+
 ## v1.101.0 (2026-10-22)
 
 Guards: 530 → **530**; property checks 15 → **15**. No negative was added: the new checks are

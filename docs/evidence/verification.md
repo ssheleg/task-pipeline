@@ -1,8 +1,12 @@
 # Verification — task-pipeline
 
-## Shipped state — v1.101.0 (NOT SHIPPED until the v1.101.0 release run is read)
+## Shipped state — v1.101.1 (NOT SHIPPED until the v1.101.1 release run is read)
 
-v1.101.0 adds cancel parity on subscription surfaces (`design_gate.py report --subscription`)
+v1.101.1 adds B-153: the release gate's python3-failure fallback matches command shapes, not
+words (`test/release_gate_test.py`, 67 checks).
+
+
+v1.101.0 added cancel parity on subscription surfaces (`design_gate.py report --subscription`)
 and the locals/tourists panel rule (`test/design_gate_test.py`, 91 cases), and B-151, one
 rotation line per archive (`test/audit_regressions/diet_retro_budget.py`, two new cases).
 

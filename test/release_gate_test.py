@@ -498,8 +498,29 @@ def broken_python_leaves_ordinary_commands_alone():
         assert run_without_python(c) == ALLOW, "%s was blocked only because python3 failed" % c
 
 
+# B-153 (2026-10-22): the fallback matched the WORD `release` inside a path
+# (`.git/sshlg-release-candidates/`), so a read was refused as an outward act.
+# It now matches command shapes, not words.
+def broken_python_reads_paths_that_spell_release_words():
+    for c in ("ls ~/w/.git/sshlg-release-candidates/v1.101.0/",
+              "cat docs/release-notes.md | grep tag",
+              "grep -n 'push' scripts/publish-helper.sh",
+              "python3 scripts/release_candidate.py --help",
+              "git log --grep=tag --oneline"):
+        assert run_without_python(c) == ALLOW, "%s was refused only for a word in a path" % c
+
+
+def broken_python_still_blocks_wrapped_release_commands():
+    for c in ("git -C ../repo tag -a v1.2.3 -m x", "cd x && git push origin v1.2.3",
+              "git push origin refs/tags/v2", "npx npm publish --access public",
+              "true; gh release create v3 --notes x"):
+        assert run_without_python(c) == BLOCK, "%s passed with the gate unable to decide" % c
+
+
 it("with python3 broken, an outward act still fails closed", broken_python_still_blocks_a_release)
 it("with python3 broken, an ordinary command is not blocked", broken_python_leaves_ordinary_commands_alone)
+it("with python3 broken, a path that spells a release word is read", broken_python_reads_paths_that_spell_release_words)
+it("with python3 broken, a wrapped release command still fails closed", broken_python_still_blocks_wrapped_release_commands)
 
 # --- a lint stage before the tests stage must not capture the gate -----------
 #

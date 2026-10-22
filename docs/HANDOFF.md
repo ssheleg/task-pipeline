@@ -1,3 +1,12 @@
+## 1.101.1: the release gate reads command shapes, branch `fix/b153-release-gate-paths` (2026-10-23)
+
+- **Objective.** sshlg-skills milestone M3 wave 2: B-153 (filed as B-152), the release gate's
+  fallback refused a read-only command for a word in a path.
+- **Done.** `hooks/release-gate.sh` fallback matches `git … tag|push`, `gh … release`,
+  `npm … publish`; two cases in `test/release_gate_test.py`, the first red on 1.101.0.
+- **Next task.** After merge: release 1.101.1 from a fresh clone (`release_candidate.py
+  prepare`, `check`, `publish`), then the sshlg-skills pin bump; then B-150.
+
 ## 1.101.0: cancel parity, locals and tourists, one rotation line, branch `fix/b246-rotation-line` (2026-10-22)
 
 - **Objective.** sshlg-skills milestone M1 wave 3 (B-246: each stamp rotation added one pointer
@@ -15,9 +24,9 @@
   clone: `prepare`, `check` (CHECK_PASSED), `publish` (PUBLISHED, `v1.101.0` peels to `8c0a064`).
   Release run 39818118825 succeeded; `npm view task-pipeline-skill version` 1.101.0;
   sshlg-skills pins it in 1.74.0.
-- **Filed.** B-152: the installed 1.99.1 `release-gate.sh` refused a read-only command as an
-  outward act.
-- **Next task.** B-152, then B-150.
+- **Filed.** B-152 (renumbered B-153 in 1.101.1: v1.91.1 had used B-152): the installed 1.99.1
+  `release-gate.sh` refused a read-only command as an outward act.
+- **Next task.** B-153 (fixed in 1.101.1), then B-150.
 
 ## 1.100.0: the design-review gate, branch `feat/design-review-gate` (2026-10-22)
 
