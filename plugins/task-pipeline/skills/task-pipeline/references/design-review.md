@@ -26,9 +26,11 @@ unmentioned one does not. Waves and iterations owe it per UI node, never once pe
 `docs/ux/test-panel.md`, owned by super-ux (`ux-foundation` → *The test panel*): ten portraits,
 each with **basis** (`evidence RE-NN` or `hypothesis`), **situation**, **goals**, **features**,
 **scenarios** (composite chains by `SCR-` id), **activation** (steps to first value, and where
-it drops), **retention** (trigger → action → reward → what brings it back) and **needs**
-(device, engine, locale, accessibility). The operator confirms it once; a later change of the
-product revises it. `python3 scripts/design_gate.py panel docs/ux/test-panel.md` gates it.
+it drops), **retention** (opening with `local` or `tourist`, then trigger → action → reward →
+what brings it back) and **needs** (device, engine, locale, accessibility). At least two
+portraits are locals and two are tourists: lifetime value rests on the first, churn on the
+second (since 1.101.0). The operator confirms it once; a later change of the product revises
+it. `python3 scripts/design_gate.py panel docs/ux/test-panel.md` gates it.
 
 A portrait marked `hypothesis` chooses what to test, never what to build: the super-ux rule
 that a synthetic persona is never evidence still holds.

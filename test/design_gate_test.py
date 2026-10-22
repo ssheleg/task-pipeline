@@ -31,7 +31,8 @@ def run(script, *args):
     return r.returncode, r.stdout, r.stderr
 
 
-def portrait(n, scenarios="SCR-01, SCR-02", basis="hypothesis"):
+def portrait(n, scenarios="SCR-01, SCR-02", basis="hypothesis", segment=None):
+    segment = segment or ("local" if n % 2 else "tourist")
     return f"""## P-{n:02d} Persona {n}
 
 - **basis**: {basis}
@@ -40,7 +41,7 @@ def portrait(n, scenarios="SCR-01, SCR-02", basis="hypothesis"):
 - **features**: search, checkout
 - **scenarios**: {scenarios}
 - **activation**: sign up, first order; drops at the payment step
-- **retention**: weekly reminder, reorder, saved cart brings them back
+- **retention**: {segment}: weekly reminder, reorder, saved cart brings them back
 - **needs**: iOS Safari, large text
 """
 
@@ -94,6 +95,15 @@ with tempfile.TemporaryDirectory() as d:
     noscr.write_text(panel_text().replace("SCR-01, SCR-02", "checkout flow", 1))
     rc, out, _ = run(DG, "panel", noscr)
     ok(rc == 1 and "cite no SCR- id" in out, f"composite scenarios without SCR ids fail ({rc} {out!r})")
+    # 1.101.0 (M2 R3): at least two locals and two tourists among the portraits.
+    one_tourist = d / "one-tourist.md"
+    one_tourist.write_text("# Test panel\n\n" + "\n".join(portrait(i, segment="tourist" if i == 1 else "local") for i in range(1, 11)))
+    rc, out, _ = run(DG, "panel", one_tourist)
+    ok(rc == 1 and "9 locals and 1 tourist" in out, f"a panel with one tourist fails, counted ({rc} {out!r})")
+    unmarked = d / "unmarked.md"
+    unmarked.write_text(panel_text().replace("local: ", "").replace("tourist: ", ""))
+    rc, out, _ = run(DG, "panel", unmarked)
+    ok(rc == 1 and "opens with `local` or `tourist`" in out, f"a retention line without its segment fails, named ({rc} {out!r})")
     rc, out, _ = run(DG, "panel", d / "absent.md")
     ok(rc == 3 and "NOT_RUN" in out, f"no panel is NOT_RUN, never PASS ({rc} {out!r})")
 

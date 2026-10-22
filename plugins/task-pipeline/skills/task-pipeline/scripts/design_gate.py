@@ -6,7 +6,8 @@ with an exit code. Stdlib only.
         the test panel the design-tester walks: ten portraits (or --min), each with its
         basis, situation, goals, features, composite scenarios, activation funnel,
         retention loop and needs. A portrait without a basis line is refused: a panel is a
-        hypothesis instrument, and saying so is part of the portrait.
+        hypothesis instrument, and saying so is part of the portrait. Each retention line
+        opens with `local` or `tourist`, and the panel holds at least two of each (1.101.0).
     design_gate.py report <design-review.json> --class <surface_class>
                           [--panel <test-panel.md>] [--scope SCR-01,SCR-02] [--require build]
                           [--max-passes 1] [--subscription] [--json]
@@ -55,6 +56,7 @@ ALIASES = {"composite scenarios": "scenarios", "activation funnel": "activation"
 FIELD = re.compile(r"^\s*[-*]\s+\*\*(%s)\s*:?\*\*\s*[:—–-]?\s*(.+?)\s*$"
                    % "|".join(sorted(list(FIELDS) + list(ALIASES), key=len, reverse=True)), re.I)
 SCR = re.compile(r"\bSCR-\d+\b")
+SEGMENT = re.compile(r"^\s*(local|tourist)\b\s*:?", re.I)
 
 
 def read_text(path):
@@ -113,6 +115,17 @@ def panel_problems(panel, minimum):
             out.append("%s: basis is `evidence RE-NN` or `hypothesis`, not %r" % (pid, basis[:40]))
         if p.get("scenarios") and not SCR.search(p["scenarios"]):
             out.append("%s: composite scenarios cite no SCR- id" % pid)
+    # M2 R3 (1.101.0): lifetime value rests on locals and churn on tourists, so the panel
+    # walks both. The retention line opens with the segment (super-ux templates/test-panel.md).
+    seg = {pid: SEGMENT.match(p.get("retention", "")) for pid, p in panel.items()}
+    for pid, m in sorted(seg.items()):
+        if panel[pid].get("retention") and not m:
+            out.append("%s: the retention line opens with `local` or `tourist`" % pid)
+    locals_ = sum(1 for m in seg.values() if m and m.group(1).lower() == "local")
+    tourists = sum(1 for m in seg.values() if m and m.group(1).lower() == "tourist")
+    if panel and (locals_ < 2 or tourists < 2):
+        out.append("the panel carries %d local%s and %d tourist%s; it owes at least two of each"
+                   % (locals_, "" if locals_ == 1 else "s", tourists, "" if tourists == 1 else "s"))
     return out
 
 
