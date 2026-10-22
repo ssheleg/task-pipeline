@@ -12,9 +12,8 @@ the list the harvest works from.
 The rule a user of this skill reads is the shipped schema template,
 `templates/backlog-sources.schema.json` (backlog-sources/1), with `references/backlog.md` →
 *A declared source list*; this checker enforces it, plus the two rules a schema cannot state
-(a regular file reached through no symlink, no duplicate declaration). The Fabric workspace's
-`knowledge/backlog.md` (section *Source contract*; read at fabric-workspace d49b6f58,
-2026-10-08) is its provenance: the template is compatible with it, with one deliberate
+(a regular file reached through no symlink, no duplicate declaration). Fabric's
+`knowledge/backlog.md` (its *Source contract* section, read on 2026-10-08) is its provenance: the template is compatible with it, with one deliberate
 widening — `repository` may be any `https://github.com/<owner>/<repo>`, because this skill runs
 outside one organisation.
 

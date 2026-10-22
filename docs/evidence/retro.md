@@ -1491,6 +1491,10 @@ three quarters of the work on this run.
 
 ## Releases that carry no stamp — stated, not stamped
 
+**`v1.100.0` carries no stamp, declared before its tag.** It ships the design-review gate and the
+parallel-agent budget the operator asked for on 2026-10-22. The run was driven from
+sshlg-skills, so its stage-10 stamp belongs there, not here.
+
 **`v1.99.1` carries no stamp, declared before its tag.** It ships B-149 (`retro_budget.py` reads
 a numbered-list floor and list stamps, rotates stamps past the cap by date, and moves prune prose
 only over budget). The run that found and fixed it was sshlg-skills B-242/B-244 on 2026-10-21,

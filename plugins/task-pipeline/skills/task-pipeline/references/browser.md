@@ -32,6 +32,7 @@ which is how a run says *I checked the browser* and means *I ran the unit tests*
 - Reading a look vs gating on one
 - "Tested in a browser" is three different claims
 - The visual half — pixels against intent, under a contract
+- The tester's browser: asked once, prepared, bounded, closed
 - Getting past a login, and past a backend
 - When the look finds something: debugging the spec that missed it
 - Evidence a reader can open
@@ -291,6 +292,33 @@ number of passes a surface took is measured, not remembered.
 native screen's frames come from a simulator or a device (XCUITest snapshots, Compose
 screenshot tests) and its accessibility from the platform's own audit; with neither, the
 native rows stay `NOT_RUN`, said in words.
+
+## The tester's browser: asked once, prepared, bounded, closed
+
+The design-tester ([`design-review.md`](design-review.md)) and every look use the browser the
+project recorded in `pipeline.json` → `browser`. When the block is absent, stage 0 asks the
+operator once: which browser the tests use (`safari` through `safaridriver`,
+`playwright-webkit`, `chrome-dev`, `playwright-chromium`) and the fallback order, WebKit first
+as above. The answer is recorded and never asked again in that project.
+
+- **Prepared session.** Safari reuses the operator's signed-in Safari through `safaridriver`
+  (Remote Automation enabled once: `sudo safaridriver --enable`, a human gate). Playwright
+  reuses `browser.storageState`, a file outside the repository (below). A sign-in, a one-time
+  code or a consent is named once; the steps behind it are NOT_RUN and the rest run.
+- **Fallback, said.** A driver that fails to start or attach twice yields to the next in
+  `browser.fallback`; every capture names its engine.
+- **Load.** `python3 scripts/resource_guard.py check` before starting and between scenarios:
+  exit 4 (load over cores × `limits.maxLoadRatio`, memory pressure, low disk) means wait, then
+  run with fewer pages.
+- **Caps and close.** Every process the run starts (browser, driver, dev server) is recorded
+  with `resource_guard.py record`, which refuses past `limits.maxBrowsers`, `maxPages`,
+  `maxServers`; at the end `resource_guard.py close` then `verify` prove nothing is left. The
+  operator's own windows are never recorded, so they are never touched.
+- **Where the ledger lives, and what to record.** `.task-pipeline/resources.json`, outside the
+  tracked tree. Record the process that stays alive (the browser, the server), not a launcher
+  that exits after starting it: a child reparented after its launcher died is not a
+  descendant any more, and `close` cannot find it. `record` refuses its own process, its
+  ancestors and pid 1; `close` never signals them.
 
 ## Getting past a login, and past a backend
 

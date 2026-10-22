@@ -43,6 +43,11 @@ One line per file per pass. The reason must name **what forced the edit** — a
 finding id, a failed gate item, an operator instruction. "Cleanup", "polish" and
 "while I was there" are not reasons; they are churn with better manners.
 
+Fan-out is bookkept too (since 1.100.0): each round writes `agents: <N> — <k>`, the most
+sub-agents that ran at once in it. `waves.py finish` charges the peak against
+`run.finish.maxAgents` (2 by default), so a loop that tries to escape its round budget by
+spawning wider is stopped by the same verdict ([`finish-line.md`](finish-line.md)).
+
 **This ledger was required here from the day the file shipped and written by no run
 until 2026-08-10.** The detection below calls itself mechanical; with no ledger it had
 no input at all, so the guard sat on rung 1 while every reader took it for rung 3
