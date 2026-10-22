@@ -8,9 +8,14 @@
   `test/audit_regressions/diet_retro_budget.py` seventeen new cases, each red on the 1.99.0 script or a reviewed intermediate version.
   Five version surfaces at 1.99.1; retro declares the release unstamped (the run's stamp is in
   sshlg-skills).
-- **Next task.** After this PR merges: `scripts/release_candidate.py prepare` then `check` on
-  `main`, push tag `v1.99.1`, watch `release.yml`, read back `npm view task-pipeline-skill
-  version`; then the sshlg-skills pin bump to 1.99.1 and its retro migration.
+- **Released (2026-10-22).** PR #139 squash `5974fb4` (CI run 39692469477 green). From a fresh
+  clone: `release_candidate.py prepare` then `check` (CHECK_PASSED, `npm run test:all` with the
+  tag visible) then `publish` (PUBLISHED, tag `v1.99.1` peels to `5974fb4`). Release run
+  39699028230: release and publish succeeded; `npm view task-pipeline-skill version` 1.99.1.
+  sshlg-skills pinned it in 1.73.1 (its PR #252) and migrated its retro floor 103,737 to 6,621
+  bytes with this script; the installed script's bytes equal the tag's.
+- **Next task.** sshlg-skills B-246: each stamp rotation adds one `Rotated out:` pointer line to
+  the floor; merge them into one line per archive quarter in `retro_budget.py migrate`.
 
 ## 1.99.0 release of #125, branch `rel/v1990` (2026-10-21)
 
