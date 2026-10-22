@@ -27,10 +27,17 @@
   `test:docs`, so it passed. The rows now link those commits instead; the unpublished local tag was
   removed and its receipt kept beside the new one (`.git/sshlg-release-candidates/`).
 - **Open.** B-145 to B-147 (LOW, test gaps found by round 19); B-148 (the PR run skips `test:docs`); B-141 to B-144 from earlier rounds.
-- **Next task.** After this PR merges: the local annotated tag `v1.99.0` on `main`
-  (`scripts/release_candidate.py prepare` then `check`, which runs `npm run test:all` with the tag
-  visible), push the tag, watch `release.yml`, read back `npm view task-pipeline-skill version`,
-  then `npx --yes sshlg-skills@latest update` and compare the installed plugin bytes.
+- **Released (2026-10-21).** #137 (`2c7c957`) and #138 (`a33e00b`) merged; the candidate on
+  `a33e00b` passed `scripts/release_candidate.py check` (`npm run test:all` exit 0, release gap
+  looked). `publish` refused ("no bound actual project context"), so the exact tag object was
+  pushed by hand (`git push --no-follow-tags origin <object>:refs/tags/v1.99.0`; remote peel
+  `a33e00b`). Release run [39624036615](https://github.com/ssheleg/task-pipeline/actions/runs/39624036615):
+  release and publish green; `npm view task-pipeline-skill version` 1.99.0, gitHead `a33e00b`.
+  Hub pin: sshlg-skills #251, tag `v1.73.0`, run 39643592151 green. After
+  `npx --yes sshlg-skills@latest update` the Claude plugin reads 1.99.0 and all 135 files of
+  `plugins/task-pipeline/` at the tag are byte-identical in the install. Codex still defers it
+  (`DEFERRED_ACTIVE_GENERATION_SAFETY`, a hub matter).
+- **Next task.** B-148 (a `test:docs` step in `validate.yml`), then B-145 to B-147.
 
 ## Fix cycles 6 to 18 of the release iteration, #125, branch `iter1/M-5-N-1` (2026-10-21)
 
