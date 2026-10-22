@@ -7,8 +7,17 @@
   `design_gate.py report --subscription` and the `subscription` block; `design_gate.py panel`
   counts locals and tourists; doctrine in `design-tester.md`, `design-review.md`, `stages.md`,
   `retrospective.md`. B-044 collapsed into B-040; B-150 filed.
-- **Next task.** After merge: release 1.101.0 from a fresh clone (`release_candidate.py
-  prepare`, `check`, `publish`), then the sshlg-skills pin bump; then B-150.
+- **Released (2026-10-22).** PR #143 squash `22209f8` (CI run 39785309420 green). The tagged
+  gate refused twice and kept its evidence each time: attempt 1 stopped for disk (free space under
+  400 MB while the machine swapped), attempt 2 failed negative 502 because `lessons_test` H1
+  slept a fixed 1.5 s and lost the race at a load average near 300. PR #144 (squash `8c0a064`, CI
+  run 39809104854) gives H1 a handshake and re-points B-147's citation. Attempt 3 from a fresh
+  clone: `prepare`, `check` (CHECK_PASSED), `publish` (PUBLISHED, `v1.101.0` peels to `8c0a064`).
+  Release run 39818118825 succeeded; `npm view task-pipeline-skill version` 1.101.0;
+  sshlg-skills pins it in 1.74.0.
+- **Filed.** B-152: the installed 1.99.1 `release-gate.sh` refused a read-only command as an
+  outward act.
+- **Next task.** B-152, then B-150.
 
 ## 1.100.0: the design-review gate, branch `feat/design-review-gate` (2026-10-22)
 
