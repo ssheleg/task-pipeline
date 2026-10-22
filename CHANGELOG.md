@@ -22,6 +22,10 @@ R2, from GP Bullhound's *Consumer Subscription Software*, October 2025, p. 18).
   a line per run. A line whose block no longer hashes stays as its own line.
 - **Board:** B-044 collapsed into B-040 (the same finding); B-150 files the two fw07 branches
   kept on purpose.
+- **A test that raced the clock:** `test/lessons_test.py` H1 waited a fixed 1.5 s for a rebuild
+  to reach its read; under a load average near 300 the add ran first and the tagged gate failed
+  on negative 502. The rebuild's read now blocks on a handshake until the add has landed (431
+  cases).
 
 ## v1.100.0 (2026-10-22)
 

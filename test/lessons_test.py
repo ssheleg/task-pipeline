@@ -1095,7 +1095,11 @@ def round10_controls():
     binp = work / "h1-bin"
     binp.mkdir()
     flag = work / "h1-slow"
-    (binp / "git").write_text(f"#!/bin/sh\nif [ \"$1\" = cat-file ] && [ -f {flag} ]; then sleep 4; fi\n"
+    entered, release = work / "h1-entered", work / "h1-release"
+    # A handshake, not a sleep: the rebuild's read blocks until the add has landed. Under
+    # load a fixed 1.5 s let the add run before the rebuild had read at all (2026-10-22).
+    (binp / "git").write_text(f"#!/bin/sh\nif [ \"$1\" = cat-file ] && [ -f {flag} ]; then : > {entered}; i=0; "
+                              f"while [ ! -f {release} ] && [ $i -lt 1200 ]; do sleep 0.1; i=$((i+1)); done; fi\n"
                               f"exec {shutil.which('git')} \"$@\"\n", encoding="utf-8")
     (binp / "git").chmod(0o755)
     flag.write_text("1", encoding="utf-8")
@@ -1103,11 +1107,15 @@ def round10_controls():
     env.update(HOME=str(HOME), PATH=f"{binp}:{env['PATH']}")
     proc = subprocess.Popen([sys.executable, str(SCRIPT), "rebuild", "--roots", str(root), "--index", str(idx)],
                             env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-    time.sleep(1.5)
+    deadline = time.time() + 120
+    while not entered.exists() and proc.poll() is None and time.time() < deadline:
+        time.sleep(0.05)
     flag.unlink()
     write_retros(x, [("retro.md", "export gate", KEY), ("retro.md", "added mid run", K2)], sha)
     rc_add = run("add", "--retro", "docs/evidence/retro.md", "--entry", "added mid run", cwd=x, index=idx)[0]
+    release.write_text("1", encoding="utf-8")
     out, err = proc.communicate(timeout=120)
+    ok(entered.exists(), "H1: the rebuild reached its read inside the handshake window")
     ok(rc_add == 0 and proc.returncode == 0 and K2 in entries_of(idx),
        f"H1: an add racing a rebuild is kept ({rc_add} {proc.returncode} {out!r} {err!r})")
 
