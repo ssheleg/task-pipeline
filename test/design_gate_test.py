@@ -31,7 +31,8 @@ def run(script, *args):
     return r.returncode, r.stdout, r.stderr
 
 
-def portrait(n, scenarios="SCR-01, SCR-02", basis="hypothesis"):
+def portrait(n, scenarios="SCR-01, SCR-02", basis="hypothesis", segment=None):
+    segment = segment or ("local" if n % 2 else "tourist")
     return f"""## P-{n:02d} Persona {n}
 
 - **basis**: {basis}
@@ -40,7 +41,7 @@ def portrait(n, scenarios="SCR-01, SCR-02", basis="hypothesis"):
 - **features**: search, checkout
 - **scenarios**: {scenarios}
 - **activation**: sign up, first order; drops at the payment step
-- **retention**: weekly reminder, reorder, saved cart brings them back
+- **retention**: {segment}: weekly reminder, reorder, saved cart brings them back
 - **needs**: iOS Safari, large text
 """
 
@@ -94,6 +95,15 @@ with tempfile.TemporaryDirectory() as d:
     noscr.write_text(panel_text().replace("SCR-01, SCR-02", "checkout flow", 1))
     rc, out, _ = run(DG, "panel", noscr)
     ok(rc == 1 and "cite no SCR- id" in out, f"composite scenarios without SCR ids fail ({rc} {out!r})")
+    # 1.101.0 (M2 R3): at least two locals and two tourists among the portraits.
+    one_tourist = d / "one-tourist.md"
+    one_tourist.write_text("# Test panel\n\n" + "\n".join(portrait(i, segment="tourist" if i == 1 else "local") for i in range(1, 11)))
+    rc, out, _ = run(DG, "panel", one_tourist)
+    ok(rc == 1 and "9 locals and 1 tourist" in out, f"a panel with one tourist fails, counted ({rc} {out!r})")
+    unmarked = d / "unmarked.md"
+    unmarked.write_text(panel_text().replace("local: ", "").replace("tourist: ", ""))
+    rc, out, _ = run(DG, "panel", unmarked)
+    ok(rc == 1 and "opens with `local` or `tourist`" in out, f"a retention line without its segment fails, named ({rc} {out!r})")
     rc, out, _ = run(DG, "panel", d / "absent.md")
     ok(rc == 3 and "NOT_RUN" in out, f"no panel is NOT_RUN, never PASS ({rc} {out!r})")
 
@@ -104,6 +114,45 @@ with tempfile.TemporaryDirectory() as d:
 
     rc, out, _ = rep(report(full_rows()), "--require", "build")
     ok(rc == 0 and "PASS" in out, f"a full matrix, clean, closed: PASS ({rc} {out!r})")
+
+    # 1.101.0 (M2 G8, R2): a subscription surface owes cancel parity and one clear offer.
+    SUB_OK = {"cancel_parity": "pass", "subscribe_steps": 3, "cancel_steps": 2,
+              "cancel_path": "Settings > Subscription > Cancel", "single_offer": "pass", "pause": "offered"}
+
+    def subrep(sub, *extra, cls="product"):
+        doc = report(full_rows())
+        if sub is not None:
+            doc["subscription"] = sub
+        return rep(doc, "--require", "build", *extra, cls=cls)
+
+    rc, out, _ = subrep(None, "--subscription")
+    ok(rc == 1 and "cancel parity" in out, f"a subscription surface without its cancel-parity block fails ({rc} {out!r})")
+    rc, out, _ = subrep(dict(SUB_OK), "--subscription")
+    ok(rc == 0 and "PASS" in out, f"cancel no harder than subscribe, one offer: PASS ({rc} {out!r})")
+    rc, out, _ = subrep(dict(SUB_OK))
+    ok(rc == 0, f"a report that carries the block is checked without the flag ({rc} {out!r})")
+    rc, out, _ = subrep(dict(SUB_OK, cancel_parity="fail", cancel_steps=6))
+    ok(rc == 1 and "6 steps" in out and "3 to subscribe" in out, f"cancelling in more steps than subscribing fails, counted ({rc} {out!r})")
+    rc, out, _ = subrep(dict(SUB_OK, cancel_steps=5))
+    ok(rc == 1 and "contradicts" in out, f"a `pass` over a longer cancel path is refused ({rc} {out!r})")
+    rc, out, _ = subrep(dict(SUB_OK, subscribe_steps=0))
+    ok(rc == 1 and "subscribe_steps" in out, f"a step count is a positive integer ({rc} {out!r})")
+    rc, out, _ = subrep(dict(SUB_OK, cancel_parity="yes"))
+    ok(rc == 1 and "cancel_parity" in out, f"an unknown parity value is refused, never read as pass ({rc} {out!r})")
+    rc, out, _ = subrep(dict(SUB_OK, single_offer="fail"))
+    ok(rc == 1 and "single clear offer" in out, f"a paywall without one clear offer fails ({rc} {out!r})")
+    rc, out, _ = subrep(dict(SUB_OK, cancel_parity="NOT_RUN"))
+    ok(rc == 1 and "reason" in out, f"a NOT_RUN parity carries its reason ({rc} {out!r})")
+    rc, out, _ = subrep(dict(SUB_OK, cancel_parity="NOT_RUN", reason="no test account can subscribe"))
+    ok(rc == 3 and "NOT_RUN" in out, f"parity never walked is NOT_RUN, never PASS ({rc} {out!r})")
+    rc, out, _ = subrep(dict(SUB_OK, pause="absent"))
+    ok(rc == 0 and "no pause" in out, f"a missing pause is reported, not gated ({rc} {out!r})")
+    rc, out, _ = subrep(dict(SUB_OK, pause="maybe"))
+    ok(rc == 1 and "pause" in out, f"pause is offered, absent or na ({rc} {out!r})")
+    rc, out, _ = subrep(None, "--subscription", cls="internal")
+    ok(rc == 0 and "cancel parity" in out, f"an internal class reports the gap without gating ({rc} {out!r})")
+    rc, out, _ = subrep("yes")
+    ok(rc == 1 and "`subscription` is an object" in out, f"a non-object block is refused ({rc} {out!r})")
     rc, out, _ = rep(report(full_rows(("design",))), "--require", "design")
     ok(rc == 0, f"pass D alone satisfies --require design ({rc} {out!r})")
     rc, out, _ = rep(report(full_rows(("design",))), "--require", "build")

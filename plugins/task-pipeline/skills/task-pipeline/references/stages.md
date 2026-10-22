@@ -308,7 +308,9 @@ never that the work was skipped quietly.
   **On any class but `none` the design review's pass B ran over the build** (since
   1.100.0): the same `design_gate.py report` with `--require build` exits 0, every capture
   names its engine, and `python3 scripts/resource_guard.py verify <ledger>` is clean
-  ([`design-review.md`](design-review.md)).
+  ([`design-review.md`](design-review.md)). A subscription surface (paywall, trial, pricing,
+  cancel) adds `--subscription`: cancelling takes no more steps than subscribing and the
+  paywall makes one clear offer (since 1.101.0).
 - **What the look finds is fixed here.** A rendering defect found at stage 6 is a
   stage-6 finding: fix it, look again, then call the stage green. Filing it to the
   board and advancing is how a run reports *checked in a browser* for a page it has

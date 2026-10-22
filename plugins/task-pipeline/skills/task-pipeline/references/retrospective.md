@@ -208,7 +208,11 @@ narrative are how a capped list grows anyway.
   An older retro whose standing instructions are a numbered list and whose stamps are
   `- **date: title**` items is read the same way: the item keeps its bold rule and its
   `*(Retire ...)*` trigger, a stamp keeps its title, stamps past the cap rotate out by date,
-  and, over budget, the Run stamps section's loose prune paragraphs move.
+  and, over budget, the Run stamps section's loose prune paragraphs move. Rotation keeps
+  **one `Rotated out:` line per archive**: a later rotation re-archives the quarter's
+  earlier rotated stamps with its own as one block and the line names that block, so a
+  floor that rotates every run does not grow by a line per run. A line whose block no
+  longer hashes stays as its own line.
 - **A prune that retires nothing writes its count into the stamp row**, as
   `prune: 0 retired`, and no paragraph. Repeated "nothing to prune" notes were a
   measured share of the floor.

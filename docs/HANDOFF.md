@@ -1,3 +1,15 @@
+## 1.101.0: cancel parity, locals and tourists, one rotation line, branch `fix/b246-rotation-line` (2026-10-22)
+
+- **Objective.** sshlg-skills milestone M1 wave 3 (B-246: each stamp rotation added one pointer
+  line to the retro floor) and M2 wave 2 (G8 and R2: cancel parity and one clear offer on every
+  subscription surface; R3: at least two locals and two tourists on the test panel).
+- **Done.** `retro_budget.py migrate` keeps one `Rotated out:` line per archive (B-151);
+  `design_gate.py report --subscription` and the `subscription` block; `design_gate.py panel`
+  counts locals and tourists; doctrine in `design-tester.md`, `design-review.md`, `stages.md`,
+  `retrospective.md`. B-044 collapsed into B-040; B-150 filed.
+- **Next task.** After merge: release 1.101.0 from a fresh clone (`release_candidate.py
+  prepare`, `check`, `publish`), then the sshlg-skills pin bump; then B-150.
+
 ## 1.100.0: the design-review gate, branch `feat/design-review-gate` (2026-10-22)
 
 - **Objective.** Operator, 2026-10-22: a mandatory design-review agent (a tester of the
