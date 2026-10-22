@@ -1491,6 +1491,10 @@ three quarters of the work on this run.
 
 ## Releases that carry no stamp — stated, not stamped
 
+**`v1.101.0` carries no stamp, declared before its tag.** It ships cancel parity and the
+locals/tourists panel rule (hub milestone M2) and B-151 (one rotation line per archive). The
+runs were driven from sshlg-skills, so their stamps belong there, not here.
+
 **`v1.100.0` carries no stamp, declared before its tag.** It ships the design-review gate and the
 parallel-agent budget the operator asked for on 2026-10-22. The run was driven from
 sshlg-skills, so its stage-10 stamp belongs there, not here.

@@ -1,3 +1,28 @@
+## v1.101.0 (2026-10-22)
+
+Guards: 530 → **530**; property checks 15 → **15**. No negative was added: the new checks are
+sixteen cases in `test/design_gate_test.py` (75 to 91) and two in
+`test/audit_regressions/diet_retro_budget.py`.
+
+**Cancel parity and one clear offer on every subscription surface** (hub milestone M2, G8 and
+R2, from GP Bullhound's *Consumer Subscription Software*, October 2025, p. 18).
+
+- **`design_gate.py report --subscription`** (or a `subscription` block in the report): the
+  surface sells, renews or cancels a subscription, so the report counts the steps to subscribe
+  and to cancel. Cancelling in more steps fails, a `pass` over a longer cancel path is refused, a
+  paywall without one clear offer fails, a check not walked is NOT_RUN with its reason, and a
+  missing pause is reported, not gated. `agents/design-tester.md` step 7 walks it;
+  `references/design-review.md` and the stage 6 gate in `references/stages.md` state it.
+- **The panel counts locals and tourists** (M2 R3): `design_gate.py panel` requires each
+  retention line to open with `local` or `tourist` and at least two of each, the rule super-ux
+  0.65.0's test panel template states.
+- **One rotation line per archive** (B-151, found as sshlg-skills B-246): `retro_budget.py
+  migrate` re-archives a quarter's earlier rotated stamps with the new ones as one block and
+  keeps one `Rotated out:` line per archive, so a floor that rotates every run no longer grows by
+  a line per run. A line whose block no longer hashes stays as its own line.
+- **Board:** B-044 collapsed into B-040 (the same finding); B-150 files the two fw07 branches
+  kept on purpose.
+
 ## v1.100.0 (2026-10-22)
 
 Guards: 530 → **530**; property checks 15 → **15**. No negative was added: the new checks are

@@ -1,8 +1,13 @@
 # Verification — task-pipeline
 
-## Shipped state — v1.100.0 (NOT SHIPPED until the v1.100.0 release run is read)
+## Shipped state — v1.101.0 (NOT SHIPPED until the v1.101.0 release run is read)
 
-v1.100.0 adds the design-review gate: `agents/design-tester.md`, `scripts/design_gate.py` and
+v1.101.0 adds cancel parity on subscription surfaces (`design_gate.py report --subscription`)
+and the locals/tourists panel rule (`test/design_gate_test.py`, 91 cases), and B-151, one
+rotation line per archive (`test/audit_regressions/diet_retro_budget.py`, two new cases).
+
+
+v1.100.0 added the design-review gate: `agents/design-tester.md`, `scripts/design_gate.py` and
 `scripts/resource_guard.py` (`test/design_gate_test.py`, 75 cases), the tester's browser block,
 and `run.finish.maxAgents` read by `waves.py finish` (`test/waves_test.py`, 143 cases).
 
