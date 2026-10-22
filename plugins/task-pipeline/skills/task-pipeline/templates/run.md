@@ -20,7 +20,7 @@ Run: `<topic>` · started `<YYYY-MM-DD>` · module map: `<path or "none">`
 
 ## `read:` — which doctrine this run actually opened
 
-The bundle is 53 reference files and nothing recorded which of them a run read, so **a
+The bundle is 54 reference files and nothing recorded which of them a run read, so **a
 skipped file and a read one were indistinguishable** — the class every guard in this
 pipeline exists to catch, left standing over the doctrine itself.
 
@@ -48,7 +48,7 @@ same claim one level down.
 |---|---|---|
 | `unmeasured — no run ledger` | there is no ledger | nothing to read from |
 | `unmeasured — the ledger carries no read: lines` | the hook is absent, **or** the run opened no doctrine | two opposite facts, and the ledger cannot separate them, so neither is claimed |
-| `N of 53 reference files read — unattested`, then each unread one | the hook is installed and fired | the count alone says there is a gap, not where — and `unattested` says the ledger cannot name who wrote the lines |
+| `N of 54 reference files read — unattested`, then each unread one | the hook is installed and fired | the count alone says there is a gap, not where — and `unattested` says the ledger cannot name who wrote the lines |
 
 **It is a disclosure: no floor, no direction, never a target.** A run that needs four files
 and reads four is not worse than one that reads thirty — and the moment the number becomes
@@ -73,7 +73,8 @@ event: <compact|session-end|subagent|memory> — <detail> — <ISO-8601>
 review: <stage id> — surface <name> — rounds <N> — <returned|approved|unresolved> — <ISO-8601>
 finding: <id> — blocking:B<n> | deferred:B-NNN | noise — round <N> — base-repro yes|no|n/a
 round: <N> — <reading> — new blocking <k>
-finish: done|budget|blocked — rounds <n>/<max> — releases <n>/<max>
+agents: <N> — <most sub-agents running at once in round N>
+finish: done|budget|blocked — rounds <n>/<max> — releases <n>/<max> — agents <n>/<max>
 read:  references/<file>.md            # hook-appended, deduped, UNATTESTED (no writer field)
 ```
 
@@ -161,6 +162,7 @@ review: 6 — surface landing — rounds 1 — returned — 2026-08-10T12:02Z
 finding: F-021 — blocking:B3 — round 1 — base-repro no
 finding: F-022 — deferred:B-118 — round 1 — base-repro yes
 round: 1 — exit checks + audit axis seams — new blocking 1
+agents: 1 — 2
 finding: F-023 — noise — round 2 — base-repro n/a
 round: 2 — exit checks + observer — new blocking 0
 round: 3 — exit checks + post-release readback — new blocking 0
@@ -169,7 +171,7 @@ hand:  3 — task "add CSV export to the orders table" — done 2 — surfaced 1
        scope 5f21ac3/node-24-linux/REQ-001,REQ-004 — unverified 1 (XLSX path: no fixture)
 holds: 5 — 2 (worktree: build-csv-export, this run; container: pg-test, this run) — enumerated 8/8 classes
 holds: 10 — none — enumerated 7/8 classes, unlooked: containers (no docker on this host)
-finish: done — rounds 3/3 — releases 1/2
+finish: done — rounds 3/3 — releases 1/2 — agents 2/2
 ```
 
 The last two lines are a **trip**: the same file, two consecutive passes, the same

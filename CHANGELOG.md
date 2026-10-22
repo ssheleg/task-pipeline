@@ -1,3 +1,34 @@
+## v1.100.0 (2026-10-22)
+
+Guards: 530 → **530**; property checks 15 → **15**. No negative was added: the new checks are
+`test/design_gate_test.py` (75 cases) and eight new cases in `test/waves_test.py`.
+
+**The design review is a gate** (operator, 2026-10-22). Every node that changes an interface
+owes it, in a single run, a wave or a release iteration.
+
+- **`design-tester`** (`agents/design-tester.md`) walks the project's ten-portrait test panel
+  (super-ux 0.64.0, `docs/ux/test-panel.md`) through the changed scenarios: pass D over the
+  Figma frames or mockups before build (stage 3), pass B in a real browser over the build after
+  it (stage 6). Every step answers a fixed checklist (frame, primary action, controls, focus,
+  states, text fit, outcome); a `breaks` finding names the item that failed.
+- **`scripts/design_gate.py`** gates the panel (ten portraits, each with basis, features,
+  composite scenarios, activation and retention), the report `design-review/1` (coverage of
+  scope scenario × persona, the checklist, no open `breaks`, one pass of each kind per round,
+  the resource receipt) and the recorded browser (`browser.storageState` outside the repo).
+- **The tester's browser** (`references/browser.md`): asked once per project and recorded in
+  `pipeline.json` → `browser`, WebKit first, a prepared signed-in session, a fallback that is
+  said, never silent.
+- **`scripts/resource_guard.py`**: load, memory pressure and free disk before a run (wait over
+  the line), caps on browsers, pages and dev servers, a ledger of what the run started, and a
+  close that touches only that, verified empty.
+- **The stop, in every run**: stage 10 computes the finish verdict with `waves.py finish` over
+  the run's own ledger, and `run.finish.maxAgents` (default 2) fails a round whose `agents:`
+  line ran more sub-agents at once.
+- `scripts/backlog_sources.py` no longer cites a private repository.
+- **Reviewed under its own budget:** three blind unit readings found 4, then 2, then 2 `breaks`
+  (each fixed with a regression case); the round budget of 3 was reached, so no fourth reading
+  ran.
+
 ## v1.99.1 (2026-10-21)
 
 Guards: 530 → **530**; property checks 15 → **15**. No negative was added: the new cases

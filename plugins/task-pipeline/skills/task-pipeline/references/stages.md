@@ -110,7 +110,9 @@ never that the work was skipped quietly.
   harvested source has a recorded resolution** (which governs, and whether the doc
   is now stale), no open contradictions, **every
   autonomy-sweep row is answered or explicitly marked "stop and ask here"**, **a
-  user-facing task's brief names its `surface_class`**, the
+  user-facing task's brief names its `surface_class`**, and on any class but `none`
+  **the project's test browser is recorded** (`pipeline.json` → `browser`, asked once,
+  [`browser.md`](browser.md) → *The tester's browser*), the
   **REQ table is written and every row names its check**, **the brief's `## Finish line`
   is filled — objective, exit checks on the artefact the operator uses, scope, budget and
   base** ([`finish-line.md`](finish-line.md)), the carry-over ledger is
@@ -192,6 +194,11 @@ never that the work was skipped quietly.
   validator reads **NOT_RUN** beside the verdict — never PASS — and the gate stands on
   the floor, said so. A record saying `Mode: declined` with its reason is the refusal,
   and it passes.
+  **And the design review's pass D ran over the design before build** (since 1.100.0):
+  the `design-tester` walked the test panel through the changed scenarios over the Figma
+  frames or mockups, and `python3 scripts/design_gate.py report <design-review.json>
+  --class <surface_class> --panel docs/ux/test-panel.md --scope <SCR ids> --require design`
+  exits 0 ([`design-review.md`](design-review.md)).
   **Where both tracks ran, their convergence check is recorded** — findings with the
   ruling, or `Tracks converge: clean`; a screen where each track is right alone and they
   disagree together is the defect neither track's own review can see.
@@ -298,6 +305,10 @@ never that the work was skipped quietly.
   **one, two at most**, then `unresolved` to the person — never round three — and only
   external, specific feedback starts a round. The procedure and the order of the checks:
   [`browser.md`](browser.md) → *The visual half*.
+  **On any class but `none` the design review's pass B ran over the build** (since
+  1.100.0): the same `design_gate.py report` with `--require build` exits 0, every capture
+  names its engine, and `python3 scripts/resource_guard.py verify <ledger>` is clean
+  ([`design-review.md`](design-review.md)).
 - **What the look finds is fixed here.** A rendering defect found at stage 6 is a
   stage-6 finding: fix it, look again, then call the stage green. Filing it to the
   board and advancing is how a run reports *checked in a browser* for a page it has
@@ -390,7 +401,9 @@ never that the work was skipped quietly.
   options rather than listed**, and the ambiguity count computed from the four
   registers with its ids ([`progress.md`](progress.md) → *The hand-back*) — a run
   that cannot say what happened has not finished, it has stopped; **the `finish:` line is
-  printed beside this verdict — `done`, `budget` or `blocked`, with its block**
+  printed beside this verdict — `done`, `budget` or `blocked`, with its block** and
+  computed, in every run and not only in waves, by `scripts/waves.py finish` over this
+  run's ledger, which also fails a round whose `agents:` line exceeds `maxAgents`
   ([`finish-line.md`](finish-line.md) → *The finish block*); **the environment is
   given back** — all eight classes enumerated, everything this run started ended and
   verified by re-enumerating rather than by the teardown's reply, an earlier run of

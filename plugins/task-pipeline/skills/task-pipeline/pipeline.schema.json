@@ -81,6 +81,70 @@
           "description": "The resume point that survives context loss."
         }
       }
+    },
+    "browser": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "The browser the design-tester and every look use (since 1.100.0). Asked once per project at stage 0 when absent, then recorded here. WebKit first (references/browser.md). Doctrine: references/browser.md, The tester's browser.",
+      "required": [
+        "primary"
+      ],
+      "properties": {
+        "primary": {
+          "type": "string",
+          "enum": [
+            "safari",
+            "playwright-webkit",
+            "chrome-dev",
+            "playwright-chromium"
+          ],
+          "description": "The engine and driver tried first."
+        },
+        "fallback": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "safari",
+              "playwright-webkit",
+              "chrome-dev",
+              "playwright-chromium"
+            ]
+          },
+          "description": "Tried in order when the primary fails to start or attach twice; a fallback is said in every receipt, never silent."
+        },
+        "storageState": {
+          "type": "string",
+          "description": "Path of the Playwright signed-in state file. A credential: it must sit outside the repository (design_gate.py browser refuses a path inside it)."
+        },
+        "limits": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "maxBrowsers": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 2
+            },
+            "maxPages": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 4
+            },
+            "maxServers": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            },
+            "maxLoadRatio": {
+              "type": "number",
+              "minimum": 0.1,
+              "default": 1.0
+            }
+          },
+          "description": "What resource_guard.py enforces: browsers, pages and dev servers at once, and the load average per core over which a run waits."
+        }
+      }
     }
   },
   "definitions": {
@@ -180,6 +244,12 @@
               "minimum": 1,
               "default": 2,
               "description": "Releases per iteration, the first included; every corrective release after a post-release failure counts against it."
+            },
+            "maxAgents": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 2,
+              "description": "Sub-agents running at once in one round (since 1.100.0). Each round's ledger carries `agents: <round> — <n>`, the most that ran together; waves.py finish fails a round over it. Two is the energy-saving default the operator set on 2026-10-22."
             }
           }
         }
@@ -235,7 +305,9 @@
           "type": "string",
           "minLength": 1,
           "pattern": "\\S",
-          "not": {"pattern": "[\\r\\n]"},
+          "not": {
+            "pattern": "[\\r\\n]"
+          },
           "description": "Optional single-line source locator (for example docs/DECISIONS.md:42) for the standing authorization covering the tag and its publication. A locator, not a grant: how it is read and verified lives in references/deploy-targets.md, When the release waits for an approval."
         },
         "approval": {

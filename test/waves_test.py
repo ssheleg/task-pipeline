@@ -189,6 +189,31 @@ def finish_cases():
     rc, out, err = fin(from_zero, "--rounds", "2", *GREEN)
     ok(rc == 6 and "self-inflicted" in out,
        f"0 → 1 and that one self-inflicted did not fall: diverging, exit 6 ({rc} {out!r} {err!r})")
+    # 1.100.0: the parallel-agent budget, read from the ledger's `agents:` lines.
+    ledger.write_text("round: 1 — exit checks + audit — new blocking 0\nagents: 1 — 3\n")
+    rc, out, err = fin([], "--ledger", str(ledger), *GREEN)
+    ok(rc == 5 and "agents over budget" in out and "round 1: 3/2" in out,
+       f"three sub-agents at once against the default two: budget, exit 5 ({rc} {out!r} {err!r})")
+    rc, out, err = fin([], "--ledger", str(ledger), "--operator-go", *GREEN)
+    ok(rc == 0 and "agents 3/2" in out,
+       f"the operator's go lifts the agent budget and the block still shows 3/2 ({rc} {out!r} {err!r})")
+    ledger.write_text("round: 1 — exit checks + audit — new blocking 0\nagents: 1 — 2\n")
+    rc, out, err = fin([], "--ledger", str(ledger), *GREEN)
+    ok(rc == 0 and "agents 2/2" in out, f"two at once is within the default budget: done ({rc} {out!r} {err!r})")
+    rc, out, err = fin([], "--ledger", str(ledger), "--max-agents", "1", *GREEN)
+    ok(rc == 5 and "round 1: 2/1" in out, f"--max-agents 1 makes two over budget ({rc} {out!r} {err!r})")
+    ledger.write_text("round: 1 — exit checks + audit — new blocking 0\nagents: one — 2\n")
+    rc, out, err = fin([], "--ledger", str(ledger), *GREEN)
+    ok(rc == 1 and "not `agents: <N>" in err, f"a malformed agents line is refused ({rc} {err!r})")
+    ledger.write_text("round: 1 — exit checks + audit — new blocking 0\nagents: 7 — 3\n")
+    rc, out, err = fin([], "--ledger", str(ledger), *GREEN)
+    ok(rc == 1 and "only rounds 1..1 ran" in err, f"an agents line for a round that never ran is malformed ({rc} {err!r})")
+    ledger.write_text("round: 1 — exit checks + audit — new blocking 0\nagents: 1 — 6\n")
+    rc, out, err = fin([], "--ledger", str(ledger), "--operator-go", *GREEN)
+    ok(rc == 0 and "on the operator's go" in out and "round 1: 6/2" in out,
+       f"the operator's go lifts the agent budget out loud ({rc} {out!r} {err!r})")
+    rc, out, err = fin([], "--rounds", "1", *GREEN)
+    ok(rc == 0 and "agents unrecorded/2" in out, f"without a ledger the agent count reads unrecorded ({rc} {out!r})")
     noisy = [item(f"N-{n}", triage="noise", round=n % 2 + 1) for n in range(6)]
     rc, out, err = fin(noisy, "--rounds", "2", *GREEN)
     ok(rc == 0 and "noise: 6" in out, f"noise in both rounds is ignored: done, exit 0 ({rc} {out!r} {err!r})")

@@ -1,6 +1,10 @@
 # Verification — task-pipeline
 
-## Shipped state — v1.99.1 (NOT SHIPPED until the v1.99.1 release run is read)
+## Shipped state — v1.100.0 (NOT SHIPPED until the v1.100.0 release run is read)
+
+v1.100.0 adds the design-review gate: `agents/design-tester.md`, `scripts/design_gate.py` and
+`scripts/resource_guard.py` (`test/design_gate_test.py`, 75 cases), the tester's browser block,
+and `run.finish.maxAgents` read by `waves.py finish` (`test/waves_test.py`, 143 cases).
 
 v1.99.1 adds B-149: `retro_budget.py` measures and migrates a retro whose floor is a numbered
 list and list stamps (`test/audit_regressions/diet_retro_budget.py`, seventeen new cases).

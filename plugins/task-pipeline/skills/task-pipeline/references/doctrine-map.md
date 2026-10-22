@@ -60,6 +60,7 @@ Custom profiles use their own declared stages and doctrine, with the kernel inta
 | **first run · the entry audit** (offered once) | `references/setup.md` |
 | **what travels with the bundle vs stays in a project** | `references/portability.md` |
 | 0–10 · when an iteration stops — the contract fixed at intake, triage at discovery, the round budget | `references/finish-line.md` |
+| 3, 6 · the design review: the test panel walked over the design, then the build, in the recorded browser, bounded and closed | `references/design-review.md` |
 | any repeating loop | `references/loop-guard.md` |
 | run-wide · what the run **leaves running and leaves behind** — every gate, and stage 10 | `references/residue.md` |
 | run-wide · what the run **prints about itself** — the rail, the iteration line | `references/progress.md` |

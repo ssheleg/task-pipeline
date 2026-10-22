@@ -1,3 +1,17 @@
+## 1.100.0: the design-review gate, branch `feat/design-review-gate` (2026-10-22)
+
+- **Objective.** Operator, 2026-10-22: a mandatory design-review agent (a tester of the
+  interface and its business logic) in every pipeline, walking ten user portraits through the
+  scenarios, Figma first then the build, in a browser the operator chose, watching the machine's
+  load and closing what it opened; and agents that move in bounded, checkable iterations.
+- **Done.** `agents/design-tester.md`, `references/design-review.md`, `scripts/design_gate.py`,
+  `scripts/resource_guard.py`, the tester's browser in `references/browser.md`, stage 0/3/6/10
+  gates in `references/stages.md`, `run.finish.maxAgents` in the schema, `finish-line.md` and
+  `waves.py finish`; spec `docs/evidence/specs/2026-10-22-design-review.md`. super-ux 0.64.0
+  ships the test panel template.
+- **Next task.** After merge: release 1.100.0 from a fresh clone (`release_candidate.py
+  prepare`, `check`, `publish`), then the sshlg-skills pin bump.
+
 ## 1.99.1: `retro_budget.py` reads a numbered-list retro, branch `fix/retro-budget-numbered` (2026-10-21)
 
 - **Objective.** sshlg-skills B-244: `retro_budget.py` read that repository's retro floor

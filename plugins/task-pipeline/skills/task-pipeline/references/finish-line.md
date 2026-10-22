@@ -24,9 +24,10 @@ fields, written at stage 0 and confirmed with the brief:
 - **Exit checks** — REQ ids, each with its command, run on the artefact the operator uses:
   released, installed or deployed. A branch is not that artefact.
 - **Scope** — the modules, paths and REQ ids this iteration may change, as a list.
-- **Budget** — `run.finish.maxRounds` (default 3) and `run.finish.maxReleases` (default 2),
-  from `pipeline.json` ([`../pipeline.schema.json`](../pipeline.schema.json)), and
-  `run.finish.cleanRounds`: 1, or 2 when the iteration carries an R3 or flagship node.
+- **Budget** — `run.finish.maxRounds` (default 3), `run.finish.maxReleases` (default 2) and
+  `run.finish.maxAgents` (sub-agents at once, default 2, since 1.100.0), from `pipeline.json`
+  ([`../pipeline.schema.json`](../pipeline.schema.json)), and `run.finish.cleanRounds`: 1,
+  or 2 when the iteration carries an R3 or flagship node.
 - **Base** — the commit the iteration started from.
 
 Widening the scope is a recorded revision of the brief, with the operator's go. A finding is
@@ -92,7 +93,12 @@ finding to count:
 
 ```
 round: <N> — <reading> — new blocking <k>
+agents: <N> — <most sub-agents running at once in round N>
 ```
+
+Every run computes its verdict, not only a wave: a single run's inventory is its one node
+(`waves.py finish --inventory`), and a person checks the same three numbers the script read:
+rounds n/max, agents n/max, exit checks k/m on the named artefact.
 
 ## Computing the verdict
 

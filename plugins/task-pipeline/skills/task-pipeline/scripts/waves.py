@@ -32,7 +32,7 @@ reviewed; a table and a re-run can. This script is that re-run:
         (a plan that spans several repositories' graphs).
     waves.py finish --inventory FILE --max-rounds N --max-releases M (--rounds K | --ledger RUN.md)
                     --checks K/M --artefact NAME@SHA [--releases R] [--operator-go]
-                    [--clean-rounds 1|2]
+                    [--clean-rounds 1|2] [--max-agents 2]
         the finish-line verdict (`references/finish-line.md`) from the triaged items, and the
         finish block printed. Only `triage: blocking` items count, less those closed as
         duplicate, stale or not-reproduced; deferred and noise never change the verdict. The
@@ -47,7 +47,10 @@ reviewed; a table and a re-run can. This script is that re-run:
         self-inflicted >= new, from round 2 on); 3 continue (including no --checks); 1
         malformed (a schema error, a blocking item without `test` or `round`, B3 with
         base_repro yes, a round past the rounds run, no round count, a ledger that disagrees,
-        --max-rounds below 2, an artefact that is not NAME@SHA).
+        --max-rounds below 2, an artefact that is not NAME@SHA). Since 1.100.0 the ledger's
+        `agents: <N> — <k>` lines (the most sub-agents running at once in round N) are read
+        too: a round over --max-agents (run.finish.maxAgents, 2 by default) is a budget
+        verdict, exit 5, unless --operator-go.
 
 **The plan** is any JSON whose `nodes` list `{id, wave, closes}` — a work graph that carries
 `closes` on its nodes is one, and so is a short hand-written table. A node may carry
@@ -559,6 +562,7 @@ def cmd_sync_graph(a) -> int:
 # A blocking item closed as one of these was never a blocker: it counts in no round.
 NOT_COUNTED = ("duplicate", "stale", "not-reproduced")
 ROUND_LINE = re.compile(r"^round:\s*(\d+)\s*[—-]\s*(.*?)\s*[—-]\s*new blocking\s*(\d+)\s*$")
+AGENTS_LINE = re.compile(r"^agents:\s*(\d+)\s*[—-]\s*(\d+)\b")
 ARTEFACT = re.compile(r"^[^@\s]+@[0-9a-f]{7,40}$")
 
 
@@ -593,6 +597,27 @@ def ledger_rounds(path: pathlib.Path) -> dict[int, int]:
         out[r] = int(m[3])
     if out and sorted(out) != list(range(1, max(out) + 1)):
         errs.append(f"{path}: rounds {sorted(out)} are not 1..{max(out)} — a round line is missing")
+    if errs:
+        raise Fail(1, errs)
+    return out
+
+
+def ledger_agents(path: pathlib.Path) -> dict[int, int]:
+    """{round: most sub-agents at once} from the run ledger's `agents:` lines (since 1.100.0).
+    A round written twice keeps its larger count: the budget is about the peak."""
+    try:
+        text = path.read_text(encoding="utf-8")
+    except (OSError, UnicodeError) as exc:
+        raise Fail(1, [f"the run ledger {path} cannot be read ({type(exc).__name__})"])
+    out, errs = {}, []
+    for n, line in enumerate(text.splitlines(), 1):
+        if not line.startswith("agents:"):
+            continue
+        m = AGENTS_LINE.match(line.strip())
+        if not m:
+            errs.append(f"{path}:{n}: not `agents: <N> — <k>`")
+            continue
+        out[int(m[1])] = max(out.get(int(m[1]), 0), int(m[2]))
     if errs:
         raise Fail(1, errs)
     return out
@@ -693,12 +718,31 @@ def cmd_finish(a) -> int:
         raise Fail(1, [f"--artefact {a.artefact!r} is not NAME@SHA (a commit of 7-40 hex digits)"])
     code, word, f = finish_verdict(items, rounds, a.max_rounds, a.max_releases, a.releases, checks,
                                    a.operator_go, a.clean_rounds)
+    # The parallel-agent budget (run.finish.maxAgents): a round that ran more sub-agents at
+    # once than the budget allows stops the iteration like any other budget, said with the
+    # numbers; the operator's go lifts it, out loud.
+    agents = ledger_agents(pathlib.Path(a.ledger)) if a.ledger else {}
+    if a.max_agents < 1:
+        raise Fail(1, [f"--max-agents {a.max_agents} is below 1"])
+    stray = sorted(r for r in agents if r < 1 or r > rounds)
+    if stray:
+        raise Fail(1, [f"{a.ledger}: an `agents:` line names round {r}, and only rounds 1..{rounds} ran"
+                       for r in stray])
+    over = sorted((r, k) for r, k in agents.items() if k > a.max_agents)
+    named = ", ".join(f"round {r}: {k}/{a.max_agents}" for r, k in over)
+    if over and not a.operator_go and code in (0, 3):
+        code, word = 5, "budget"
+        f = dict(f, why="agents over budget — " + named)
+    elif over and a.operator_go and code in (0, 3):
+        f = dict(f, why=((f.get("why") + "; ") if f.get("why") else "") + "agents over budget on the operator's go — " + named)
     deferred = sorted((x for x in items if x.get("triage") == "deferred"), key=_priority)
     noise = [x for x in items if x.get("triage") == "noise"]
     risks = [x for x in deferred if x.get("blast") == 3 or x.get("rung") in ("I4", "I5")]
     pool = sorted((x for x in items if x.get("triage") != "blocking" and _needs_node(x)
                    and x.get("triage") != "noise"), key=_priority)
-    budget = f"rounds {f['rounds']}/{a.max_rounds} — releases {a.releases}/{a.max_releases}"
+    peak = max(agents.values()) if agents else None
+    budget = (f"rounds {f['rounds']}/{a.max_rounds} — releases {a.releases}/{a.max_releases} — agents "
+              + (f"{peak}/{a.max_agents}" if peak is not None else f"unrecorded/{a.max_agents}"))
     if word == "continue":
         print(f"next round: {f['rounds'] + 1}/{a.max_rounds} — {f['why']} — {budget}")
     else:
@@ -756,8 +800,11 @@ def main(argv: list[str]) -> int:
     f.add_argument("--rounds", type=int, help="rounds run, clean ones included")
     f.add_argument("--ledger", help="the run ledger; its `round:` lines are the round count")
     f.add_argument("--operator-go", action="store_true",
-                   help="the operator's recorded go for rounds past --max-rounds")
+                   help="the operator's recorded go for rounds past --max-rounds and sub-agents past "
+                        "--max-agents; the block says which budget it lifted")
     f.add_argument("--checks", help="K/M — exit checks green on the artefact")
+    f.add_argument("--max-agents", type=int, default=2,
+                   help="run.finish.maxAgents: sub-agents running at once in one round (default 2)")
     f.add_argument("--artefact", help="what they ran on, as NAME@SHA")
     a = p.parse_args(argv)
     verbs = {"merge": cmd_merge, "assign": cmd_assign, "count": cmd_count, "validate": cmd_validate,
