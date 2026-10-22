@@ -1491,6 +1491,10 @@ three quarters of the work on this run.
 
 ## Releases that carry no stamp — stated, not stamped
 
+**`v1.101.1` carries no stamp, declared before its tag.** It ships B-153, the release gate's
+fallback reading command shapes instead of words. The run was driven from sshlg-skills
+milestone M3, so its stamp belongs there.
+
 **`v1.101.0` carries no stamp, declared before its tag.** It ships cancel parity and the
 locals/tourists panel rule (hub milestone M2) and B-151 (one rotation line per archive). The
 runs were driven from sshlg-skills, so their stamps belong there, not here.

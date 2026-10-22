@@ -252,10 +252,13 @@ status=$?
 if [ $status -ne 0 ] || [ -z "$verdict" ]; then
   [ -f "$ledger" ] || exit 0
   # B-152: without python3 the command cannot be classified, and refusing EVERY
-  # Bash call took the whole session down on a full disk. A word-level pre-filter
-  # keeps fail-closed exactly where it matters: anything that could tag, push,
-  # release or publish is still refused; `ls` is not.
-  if ! printf '%s' "$input" | grep -Eq '(^|[^[:alnum:]_])(tag|tags|push|release|publish)([^[:alnum:]_]|$)'; then
+  # Bash call took the whole session down on a full disk. A pre-filter keeps
+  # fail-closed exactly where it matters: anything that could tag, push, release or
+  # publish is still refused; `ls` is not.
+  # B-153: it matched the WORDS, so `ls .git/sshlg-release-candidates/` was refused
+  # as an outward act. It now matches the command shapes: `git … tag|push`,
+  # `gh … release`, `npm … publish`, each word standing alone as an argument.
+  if ! printf '%s' "$input" | grep -Eq '(^|[^[:alnum:]_./-])(git([[:space:]]+[^[:space:];&|]+)*[[:space:]]+(tag|push)|gh([[:space:]]+[^[:space:];&|]+)*[[:space:]]+release|npm([[:space:]]+[^[:space:];&|]+)*[[:space:]]+publish)([[:space:]"]|$)'; then
     exit 0
   fi
   echo "task-pipeline: the stage-7 gate could not run (python3 missing or failed), and this project has a run in flight ($ledger). Refusing an outward act rather than failing open." >&2
