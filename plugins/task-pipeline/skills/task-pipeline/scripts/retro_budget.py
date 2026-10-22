@@ -252,6 +252,32 @@ def block(kind, label, text):
                % (datetime.date.today().isoformat(), kind, label, h, text))
 
 
+ROTATED = re.compile(r"^Rotated out: ([0-9]+) oldest run stamps, verbatim in (\S+) sha256:([0-9a-f]{12,64})$")
+ARCHIVED = re.compile(r"<!-- sha256:([0-9a-f]{64}) -->\n(.*?)\n(?=\n#{2,3} |\Z)", re.S)
+
+
+def rotation_lines(lines, span, rel):
+    """(line index, stamp count, short sha) of each rotation pointer into `rel`."""
+    out = []
+    for k in range(span[0], span[1]):
+        r = ROTATED.match(lines[k])
+        if r and r.group(2) == rel:
+            out.append((k, int(r.group(1)), r.group(3)))
+    return out
+
+
+def archived_text(path, short):
+    """(offset, text) of the archive block whose text hashes to `short`, or None."""
+    try:
+        arch = read(path)
+    except Unmeasurable:
+        return None
+    for m in ARCHIVED.finditer(arch):
+        if m.group(1).startswith(short) and digest(m.group(2)) == m.group(1):
+            return m.start(), m.group(2)
+    return None
+
+
 def cmd_check(a):
     m = measure(read(a.retro), a.budget, a.row, a.stamp)
     print(summary(m, a.row, a.stamp))
@@ -332,11 +358,28 @@ def cmd_migrate(a):
                     j += 1
                 if all((r, r + 1) in rotated for r in range(k + 2, j)):
                     moved.append((k, k + 2, [], None, None))   # archived above, with its rows
-            h, b = block("stamps", "%d oldest rotated" % len(rotated), text)
+            # B-246: one pointer line per archive, not one per rotation. Earlier rotations
+            # into the same archive are re-archived with this one as a single block, and
+            # their lines give way to one line naming it. The archive stays append-only:
+            # the earlier blocks remain, only the floor stops pointing at them.
+            count, earlier = len(rotated), []
+            for k, n, short in rotation_lines(lines, m["spans"][STAMPS], rel):
+                prior = archived_text(archive, short)
+                if prior is None:
+                    print("migrate: the rotation line sha256:%s does not resolve in %s; "
+                          "it stays as its own line" % (short, rel))
+                    continue
+                earlier.append((prior[0], k, prior[1]))
+                count += n
+            for _, k, _ in earlier:
+                moved.append((k, k + 1, [], None, None))
+            if earlier:
+                text = "\n".join([t for _, _, t in sorted(earlier)] + [text])
+            h, b = block("stamps", "%d oldest rotated" % count, text)
             for sp in rotated:
                 moved.append((sp[0], sp[1], [], None, None))
             notes.append(("Rotated out: %d oldest run stamps, verbatim in %s sha256:%s"
-                          % (len(rotated), rel, h[:12]), b, "%d oldest run stamps rotated" % len(rotated)))
+                          % (count, rel, h[:12]), b, "%d oldest run stamps rotated" % len(rotated)))
     for sp in m["stm"]:
         i = sp[0]
         if sp in rotated or len("\n".join(lines[sp[0]:sp[1]])) <= a.stamp:
@@ -502,7 +545,7 @@ def verify(retro):
             bad.append("sha256:%s points at %s, which does not exist" % (short, rel))
             continue
         ok = False
-        for m in re.finditer(r"<!-- sha256:([0-9a-f]{64}) -->\n(.*?)\n(?=\n#{2,3} |\Z)", arch, re.S):
+        for m in ARCHIVED.finditer(arch):
             if m.group(1).startswith(short) and digest(m.group(2)) == m.group(1):
                 ok = True
                 break

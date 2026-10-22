@@ -9,11 +9,14 @@ with an exit code. Stdlib only.
         hypothesis instrument, and saying so is part of the portrait.
     design_gate.py report <design-review.json> --class <surface_class>
                           [--panel <test-panel.md>] [--scope SCR-01,SCR-02] [--require build]
-                          [--max-passes 1] [--json]
+                          [--max-passes 1] [--subscription] [--json]
         stage 3 (`--require design`) and stage 6 (`--require build`): the report covers
         every scope scenario × every panel persona that uses it, every step carries the
         full checklist, no `breaks` finding is open, each round holds at most --max-passes
         passes of each kind, and the resource receipt shows every process it started closed.
+        `--subscription` (or a `subscription` block in the report): the surface sells, renews
+        or cancels a subscription, so cancelling takes no more steps than subscribing and the
+        paywall makes one clear offer (1.101.0).
 
     design_gate.py browser <pipeline.json> [--repo DIR] [--json]
         the recorded test browser: `browser.primary` is set (NOT_RUN when the block is
@@ -174,10 +177,52 @@ def row_problems(r, i):
     return out
 
 
-def report_check(doc, surface_class, panel=None, scope=(), require=None, max_passes=1):
+PARITY = ("pass", "fail", "NOT_RUN")
+PAUSE = ("offered", "absent", "na")
+
+
+def subscription_problems(sub):
+    """M2 G8/R2: cancelling is as easy as subscribing, and the paywall makes one clear offer.
+    Returns (problems, notes, not_run)."""
+    if sub is None:
+        return (["a subscription surface carries its cancel parity check (`subscription` block: "
+                 "cancel_parity, subscribe_steps, cancel_steps, single_offer, pause)"], [], False)
+    if not isinstance(sub, dict):
+        return ["`subscription` is an object, not %r" % (sub,)], [], False
+    out, notes = [], []
+    for k in ("cancel_parity", "single_offer"):
+        if sub.get(k) not in PARITY:
+            out.append("subscription.%s is %r, not one of %s" % (k, sub.get(k), "/".join(PARITY)))
+    steps = {k: _posint(sub.get(k)) for k in ("subscribe_steps", "cancel_steps")}
+    for k, v in steps.items():
+        if v is None and sub.get("cancel_parity") != "NOT_RUN":
+            out.append("subscription.%s is a positive integer, not %r" % (k, sub.get(k)))
+    s, c = steps["subscribe_steps"], steps["cancel_steps"]
+    if sub.get("cancel_parity") == "fail":
+        out.append("cancelling takes %s steps against %s to subscribe: cancel parity fails" % (c, s))
+    elif sub.get("cancel_parity") == "pass" and s and c and c > s:
+        out.append("cancel_parity `pass` contradicts %d cancel steps against %d to subscribe" % (c, s))
+    if sub.get("single_offer") == "fail":
+        out.append("the paywall makes no single clear offer")
+    if sub.get("pause") not in PAUSE:
+        out.append("subscription.pause is offered, absent or na, not %r" % (sub.get("pause"),))
+    elif sub.get("pause") == "absent":
+        notes.append("no pause offered on the cancel path (a save offer, not gated)")
+    idle = [k for k in ("cancel_parity", "single_offer") if sub.get(k) == "NOT_RUN"]
+    if idle and not sub.get("reason"):
+        out.append("a NOT_RUN %s carries its reason" % " and ".join(idle))
+    return out, notes, bool(idle)
+
+
+def report_check(doc, surface_class, panel=None, scope=(), require=None, max_passes=1, subscription=False):
     problems, notes = [], []
     if not isinstance(doc, dict) or doc.get("schema") != "design-review/1":
         return "FAIL", ["the report is not design-review/1"], notes
+    sub_idle = False
+    if subscription or "subscription" in doc:
+        sp, sn, sub_idle = subscription_problems(doc.get("subscription"))
+        problems += sp
+        notes += sn
     rows = doc.get("rows") or []
     if not isinstance(rows, list) or any(not isinstance(r, dict) for r in rows):
         return "FAIL", ["`rows` is a list of objects"], notes
@@ -252,6 +297,8 @@ def report_check(doc, surface_class, panel=None, scope=(), require=None, max_pas
             return "NOT_RUN", ["every %s step is NOT_RUN: the %s pass did not run" % (k, k)], notes
         if k in kinds and not mine:
             return "NOT_RUN", ["no %s step in the report" % k], notes
+    if sub_idle:
+        return "NOT_RUN", ["the subscription checks were not walked: %s" % doc["subscription"].get("reason")], notes
     partial = ["%s step %s for %s (%s)" % (r.get("scenario"), r.get("step"), r.get("persona"), r.get("reason", "no reason"))
                for r in rows if any(v == "NOT_RUN" for v in (r.get("checks") or {}).values())]
     if partial:
@@ -322,6 +369,8 @@ def main(argv=None):
     p2.add_argument("--scope", default="")
     p2.add_argument("--require", choices=PASSES)
     p2.add_argument("--max-passes", type=int, default=1)
+    p2.add_argument("--subscription", action="store_true",
+                    help="the surface sells, renews or cancels a subscription: cancel parity and one clear offer are owed")
     p2.add_argument("--json", action="store_true")
     a = ap.parse_args(argv)
     if a.cmd == "panel":
@@ -354,7 +403,7 @@ def main(argv=None):
         return 2
     panel = parse_panel(read_text(a.panel)) if a.panel and os.path.exists(a.panel) else None
     scope = [s.strip() for s in a.scope.split(",") if s.strip()]
-    verdict, probs, notes = report_check(doc, a.cls, panel, scope, a.require, a.max_passes)
+    verdict, probs, notes = report_check(doc, a.cls, panel, scope, a.require, a.max_passes, a.subscription)
     return emit(verdict, probs, notes, a.json)
 
 

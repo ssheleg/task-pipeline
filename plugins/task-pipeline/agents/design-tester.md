@@ -49,8 +49,14 @@ Your inputs, and nothing else is yours:
 5. **Close what you opened.** `resource_guard.py close` then `resource_guard.py verify --json`;
    its output is the report's `resources` block. A live process is a failed gate, not a note.
 6. **Gate yourself.** `python3 scripts/design_gate.py report <report> --class <surface_class>
-   --panel docs/ux/test-panel.md --scope <ids> --require design|build`. Quote its output as
-   your first evidence. NOT_RUN is said as NOT_RUN.
+   --panel docs/ux/test-panel.md --scope <ids> --require design|build`, plus `--subscription`
+   when the surface sells, renews or cancels a subscription. Quote its output as your first
+   evidence. NOT_RUN is said as NOT_RUN.
+7. **A subscription surface: walk the way out.** Count the steps from the paywall to an active
+   subscription and from the account to a confirmed cancellation, as one persona, in the same
+   pass. Cancelling takes no more steps than subscribing (California's click-to-cancel rule
+   from 2025-07-01 says the same), the paywall makes one clear offer, and note whether a pause
+   is offered. This is the report's `subscription` block.
 
 ## The report, `design-review/1`
 
@@ -63,8 +69,15 @@ Your inputs, and nothing else is yours:
                       "focus": "pass", "states": "na", "text_fit": "pass", "outcome": "pass"},
            "findings": [{"severity": "breaks", "what": "no way back from the summary",
                          "where": "summary screen", "status": "open"}]}],
- "resources": {"started": [], "live": [], "closed": true}}
+ "resources": {"started": [], "live": [], "closed": true},
+ "subscription": {"cancel_parity": "pass", "subscribe_steps": 3, "cancel_steps": 2,
+                  "cancel_path": "Settings > Subscription > Cancel", "single_offer": "pass",
+                  "pause": "offered"}}
 ```
+
+`subscription` is present only on a subscription surface. `cancel_parity` and `single_offer` are
+pass, fail or NOT_RUN (with `reason`); `pause` is offered, absent or na. A `pass` over a cancel
+path longer than the subscribe path is refused.
 
 `breaks` stops the user in a scenario step or contradicts the scenario's outcome. `risk` makes a
 step slower, unclear or easy to get wrong. `nit` is polish. Taste is none of them: a finding

@@ -225,6 +225,64 @@ def _():
             assert re.search(r"Rotated out: 6 oldest run stamps, verbatim in retro/\d{4}-Q\d\.md sha256:", after), after
 
 
+@case("B-246: repeated rotations into one archive keep one pointer line, losslessly")
+def _():
+    with tempfile.TemporaryDirectory() as d:
+        p = write(d, legacy())
+        arch = os.path.join(d, "retro", "2026-Q4.md")
+        code, out = run("migrate", "--retro", p, "--archive", arch, "--write")
+        assert code == 0, out
+        first = pathlib.Path(p).read_text(encoding="utf-8")
+        newer = "".join("- **2026-09-%d — run %d** (base `abc%04d`). newer.\n\n" % (k, k, k) for k in (21, 20))
+        grown = plant(first, "- **2026-09-14 — run 13**", newer + "- **2026-09-14 — run 13**")
+        pathlib.Path(p).write_text(grown, encoding="utf-8")
+        code, out = run("migrate", "--retro", p, "--archive", arch, "--write")
+        assert code == 0, out
+        after = pathlib.Path(p).read_text(encoding="utf-8")
+        ptr = re.findall(r"^Rotated out: (\d+) oldest run stamps, verbatim in (\S+) sha256:(\w+)$", after, re.M)
+        assert len(ptr) == 1 and ptr[0][0] == "8", "one line naming all 8 rotated stamps, got %r" % ptr
+        archived = pathlib.Path(arch).read_text(encoding="utf-8")
+        lost = [l for l in grown.split("\n") if l.strip() and not l.startswith("Rotated out: ")
+                and l not in after and l not in archived]
+        assert not lost, "lines lost by the second rotation: %r" % lost[:3]
+        sys.path.insert(0, str(SK / "scripts"))
+        import retro_budget as rb
+        block = rb.archived_text(arch, ptr[0][2])
+        assert block and "run 0**" in block[1] and "run 5**" in block[1] and "(one)" in block[1], \
+            "the pointed block does not hold every rotated stamp of the quarter"
+        assert len(after) <= len(first) + len(newer) - 2 * len("- **2026-09-0X — run X** (base `abc000X`). ") , \
+            "the floor grew by a pointer line"
+        code, out = run("verify", "--retro", p)
+        assert code == 0, out
+        # A pointer into another quarter's archive is that quarter's line: it stays.
+        third = plant(after, "- **2026-09-21 — run 21**", "- **2026-09-23 — run 23** (base `abc0023`). q.\n\n- **2026-09-21 — run 21**")
+        pathlib.Path(p).write_text(third, encoding="utf-8")
+        code, out = run("migrate", "--retro", p, "--archive", os.path.join(d, "retro", "2027-Q1.md"), "--write")
+        assert code == 0, out
+        lines = re.findall(r"^Rotated out: .*$", pathlib.Path(p).read_text(encoding="utf-8"), re.M)
+        assert len(lines) == 2 and any("2026-Q4" in l for l in lines) and any("2027-Q1" in l for l in lines), lines
+
+
+@case("B-246: a rotation line whose block no longer resolves is not merged away")
+def _():
+    with tempfile.TemporaryDirectory() as d:
+        p = write(d, legacy())
+        arch = os.path.join(d, "retro", "2026-Q4.md")
+        code, out = run("migrate", "--retro", p, "--archive", arch, "--write")
+        assert code == 0, out
+        first = pathlib.Path(p).read_text(encoding="utf-8")
+        old = re.search(r"^Rotated out: .*$", first, re.M).group(0)
+        text = pathlib.Path(arch).read_text(encoding="utf-8")
+        pathlib.Path(arch).write_text(plant(text, "run 0** (base", "run 0** (BASE"), encoding="utf-8")
+        grown = plant(first, "- **2026-09-14 — run 13**", "- **2026-09-21 — run 21** (base `abc0021`). n.\n\n- **2026-09-14 — run 13**")
+        pathlib.Path(p).write_text(grown, encoding="utf-8")
+        code, out = run("migrate", "--retro", p, "--archive", arch, "--write")
+        assert "does not resolve" in out, out
+        after = pathlib.Path(p).read_text(encoding="utf-8")
+        assert old in after and len(re.findall(r"^Rotated out: ", after, re.M)) == 2, \
+            "an unprovable pointer was dropped instead of kept"
+
+
 @case("B-244: loose prune prose moves only when the floor is over budget")
 def _():
     with tempfile.TemporaryDirectory() as d:

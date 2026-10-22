@@ -47,6 +47,16 @@ finding; a `breaks` finding names its failed item. NOT_RUN is never PASS.
 With Figma, pass D judges what the designer drew and pass B how it was built against it.
 Without Figma, pass D judges the mockups and pass B the build against them.
 
+## A subscription surface: cancel parity and one clear offer
+
+A surface that sells, renews or cancels a subscription (paywall, trial, pricing, cancel) adds
+`--subscription` to both gates. The report's `subscription` block counts the steps to subscribe
+and to cancel, walked by one persona in the same pass: cancelling takes no more steps than
+subscribing (the click-to-cancel standard, law in California from 2025-07-01), the paywall makes
+one clear offer, and whether a pause is offered is noted. A missing block, a longer cancel path
+or a paywall without one offer fails; a check not walked is NOT_RUN with its reason; a missing
+pause is reported, not gated. The block's fields are in `agents/design-tester.md`.
+
 ## The budget, and where findings go
 
 One pass D and one pass B per surface per round; a re-review reads only the steps the fix
