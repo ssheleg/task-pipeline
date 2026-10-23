@@ -52,6 +52,23 @@ def ok(cond, what):
         sys.exit(1)
 
 
+def _rm(path):
+    """B-156: git's background maintenance can delete a file while `rmtree` walks the tree
+    (`maintenance.lock`, `bitmap-ref-tips_*`, CI 2026-10-23). A file already gone is gone;
+    a directory something wrote into meanwhile is retried."""
+    def gone(fn, p, exc):
+        if not isinstance(exc, FileNotFoundError):
+            raise exc
+    for attempt in range(3):
+        try:
+            shutil.rmtree(path, onexc=gone)
+            return
+        except OSError:
+            if attempt == 2:
+                raise
+            time.sleep(0.2)
+
+
 def tree(prefix):
     d = pathlib.Path(tempfile.mkdtemp(prefix=prefix))
     _TREES.append(d)
@@ -477,9 +494,9 @@ def high_root_repo(name, entries, parent):
         if git(repo, "rev-list", "--max-parents=0", "HEAD")[0] in "89abcdef":
             parent.mkdir(parents=True, exist_ok=True)
             shutil.move(str(repo), str(parent / name))
-            shutil.rmtree(stage)
+            _rm(stage)
             return parent / name, sha
-        shutil.rmtree(stage)  # a failed attempt leaves no repository behind
+        _rm(stage)  # a failed attempt leaves no repository behind
     raise SystemExit(f"fixture {name}: no upper-half root in 60 tries")
 
 def record_mem(idx, cwd, class_key, mem):
@@ -964,7 +981,7 @@ def round10_controls():
     run("rebuild", "--roots", str(root), index=idx)
     record_mem(idx, x, KEY, "mem:j2")
     old_key = lesson_of(idx)["origins"][0]["project"]
-    shutil.rmtree(x / ".git")
+    _rm(x / ".git")
     git(x, "init", "-q")
     (x / "NEW").write_text("reinit", encoding="utf-8")
     git(x, "add", "-A")
@@ -1443,7 +1460,7 @@ def round12_controls():
     g, _ = headed_repo("repo", [("retro.md", "export gate", KEY)], parent=root)
     idx = work / "g.jsonl"
     run("add", "--retro", "docs/evidence/retro.md", "--all", cwd=g, index=idx)
-    shutil.rmtree(g / ".git")
+    _rm(g / ".git")
     git(g, "init", "-q")
     (g / "NEW").write_text("reinit", encoding="utf-8")
     git(g, "add", "-A")
@@ -1501,7 +1518,7 @@ def round13_controls():
                 git(repo, "fetch", "-q", str(other), "HEAD:otherhist")
                 git(repo, "merge", "-q", "--allow-unrelated-histories", "-m", "subtree", "otherhist")
                 return repo, sha, "p-" + own[:12], "p-" + theirs[:12]
-            shutil.rmtree(root / str(attempt))
+            _rm(root / str(attempt))
         raise SystemExit("K fixture: no unrelated root sorted lower in 40 tries")
 
     def as_v195(idx, old_key, memory, commit=None):
@@ -1695,7 +1712,7 @@ def round13_controls():
     # The re-initialised root sorts BELOW the old one (round 14, L1), so "the smaller key" would
     # pick the later holder: only the earlier-holder rule passes, every run.
     for attempt in range(60):
-        shutil.rmtree(r / ".git")
+        _rm(r / ".git")
         git(r, "init", "-q")
         (r / "NEW").write_text(f"reinit {attempt}", encoding="utf-8")
         git(r, "add", "-A")
@@ -1867,7 +1884,7 @@ def round14_controls():
         """A fresh repository whose root commit satisfies want(root), retried."""
         for attempt in range(200):
             if (repo / ".git").exists():
-                shutil.rmtree(repo / ".git")
+                _rm(repo / ".git")
             repo.mkdir(parents=True, exist_ok=True)
             git(repo, "init", "-q")
             (repo / f"ROOT-{text.replace(' ', '-')}.md").write_text(f"{text} {attempt}", encoding="utf-8")
@@ -2225,7 +2242,7 @@ def round16_controls():
     def init_root(repo, text, want):
         for attempt in range(200):
             if (repo / ".git").exists():
-                shutil.rmtree(repo / ".git")
+                _rm(repo / ".git")
             repo.mkdir(parents=True, exist_ok=True)
             git(repo, "init", "-q")
             (repo / f"ROOT-{text.replace(' ', '-')}.md").write_text(f"{text} {attempt}", encoding="utf-8")
@@ -2372,7 +2389,7 @@ def round17_controls():
     def init_root(repo, text, want):
         for attempt in range(600):
             if (repo / ".git").exists():
-                shutil.rmtree(repo / ".git")
+                _rm(repo / ".git")
             repo.mkdir(parents=True, exist_ok=True)
             git(repo, "init", "-q")
             (repo / f"ROOT-{text.replace(' ', '-')}.md").write_text(f"{text} {attempt}", encoding="utf-8")
@@ -2566,7 +2583,7 @@ def round18_controls():
     def init_root(repo, text, want):
         for attempt in range(600):
             if (repo / ".git").exists():
-                shutil.rmtree(repo / ".git")
+                _rm(repo / ".git")
             repo.mkdir(parents=True, exist_ok=True)
             git(repo, "init", "-q")
             (repo / f"ROOT-{text.replace(' ', '-')}.md").write_text(f"{text} {attempt}", encoding="utf-8")
