@@ -4,8 +4,11 @@
   fallback refused a read-only command for a word in a path.
 - **Done.** `hooks/release-gate.sh` fallback matches `git … tag|push`, `gh … release`,
   `npm … publish`; two cases in `test/release_gate_test.py`, the first red on 1.101.0.
-- **Next task.** After merge: release 1.101.1 from a fresh clone (`release_candidate.py
-  prepare`, `check`, `publish`), then the sshlg-skills pin bump; then B-150.
+- **Released (2026-10-23).** PR #146 squash `c914a84`; tagged gate CHECK_PASSED, PUBLISHED (`v1.101.1`
+  peels to `c914a84`); release run 39873303636 failed on attempt 1 (B-156, a cleanup race) and
+  passed on attempt 2; npm 1.101.1; sshlg-skills pins it in 1.76.0. #147 then landed the family
+  member gate and the B-156 fix; B-150 closed.
+- **Next task.** B-155 (a dated first Closed bullet exempts the section), then the highest open row.
 
 ## 1.101.0: cancel parity, locals and tourists, one rotation line, branch `fix/b246-rotation-line` (2026-10-22)
 
