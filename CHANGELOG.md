@@ -1,3 +1,17 @@
+## v1.101.2 (2026-10-24)
+
+Guards: 530 → **530**; property checks 15 → **15**. No negative was added.
+
+- **The family member gate** (sshlg-skills B-108, B-109): `test/family_gate.py`, a byte-for-byte
+  copy of the hub's `member-gate/family_gate.py` with its `# shared-mechanism: family-gate` and
+  `# diverges: none` declaration, runs with `--self-test` from
+  `test/audit_regressions/family_gate_member.py` (the board parses; `release.yml` keeps the
+  tag-ancestry check).
+- **B-156:** `test/lessons_test.py` cleanup tolerates a file git's background maintenance
+  already removed (`_rm()`), the race that failed the v1.101.1 release run's first attempt.
+- **B-150 closed:** the two kept fw07 branches were deleted; their heads stay reachable as
+  `refs/pull/123/head` and `refs/pull/124/head`.
+
 ## v1.101.1 (2026-10-23)
 
 Guards: 530 → **530**; property checks 15 → **15**. No negative was added: the new checks are
