@@ -337,6 +337,14 @@ never that the work was skipped quietly.
   tagging, the CI verdict for what was just pushed is READ, not assumed**
   ([`conventions.md`](conventions.md) → *The CI verdict*) — a tag on a commit whose
   run nobody read is how a red `main` ships.
+- **A release with users owes its impact card before the outward act** (since the
+  operator's rule of 2026-10-24): who is affected and how, the tracking with its watch
+  window, the alerting and whether it was ever seen firing, the rollback or hotfix with its
+  decision trigger. `python3 scripts/release_impact.py check <card.md> --pipeline
+  pipeline.json` exits 0 before the tag, the publish or the deploy; NOT_RUN (no card) stops
+  the release like FAIL. `release.users: none` owes no card and prints `users: none` beside
+  this verdict; absent is unknown and treated as `external`
+  ([`release-impact.md`](release-impact.md)).
 - **The independent reader is dispatched by this stage, and read by its output**
   ([`review.md`](review.md) → *The independent reader*). On any change that adds or
   widens a check, the run dispatches a reader — a subagent it can watch, a bot whose
@@ -364,6 +372,11 @@ never that the work was skipped quietly.
   steps — never silent success. **The CI verdict is one of the reported facts, with
   its run id** — "CI is green" written without a command behind it prints the same
   whether it looked or not ([`gates.md`](gates.md) → *False success*).
+- **Watch the release impact card's signals for its window** and record what they read in
+  the card's `## Outcome` (`Result:` held, rolled back, hotfixed, or watching with its
+  watcher); `release_impact.py check <card.md> --outcome` exits 0. When the card's decision
+  trigger fires, roll back or ship the hotfix **per the card**, then verify that act as a
+  deploy ([`release-impact.md`](release-impact.md) → *Stage 8: the watch and the decision*).
 - **Write the verification row.** One line per REQ this run shipped, into
   `<artifacts>/verification.md` ([`verification.md`](verification.md)) — the run,
   the tag or commit it went out in, what the gate said, and `Human: never` unless the

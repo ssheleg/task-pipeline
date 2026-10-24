@@ -59,6 +59,7 @@ a row pointing outside the bundle is the defect this file exists to catch.
 | The documentation system, the Doc Loop, supersede semantics | `references/documentation.md` |
 | Gate types, the enforcement ladder, degrees of freedom, probing | `references/gates.md` |
 | Deploy runbook template, per-platform verbs, the verification trio | `references/deploy-targets.md` |
+| **Release impact**: who has users, the card owed before an outward act (affected, tracking, alerting, rollback), the stage 8 watch and its decision trigger | `references/release-impact.md`, `templates/release-impact.md`, `scripts/release_impact.py` |
 | The Claude Code hook contract | `references/hooks.md` |
 | First run in a project: greenfield and brownfield | `references/adoption.md` |
 | The entry audit and what it inspects | `references/setup.md` |

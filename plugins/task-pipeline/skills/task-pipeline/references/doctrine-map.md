@@ -38,6 +38,7 @@ Custom profiles use their own declared stages and doctrine, with the kernel inta
 | any stage · The canons, and where each is enforced | [`evidence-docs`](../../evidence-docs/SKILL.md) — the sibling skill in this plugin |
 | 6–10 · Gates | `references/gates.md` |
 | 7–8 · Deploy targets | `references/deploy-targets.md` |
+| 7–8 · Release impact: who a release with users touches, its tracking, alerting and way back, the card owed before the outward act and the watch after it | `references/release-impact.md` |
 | any stage · Hooks | `references/hooks.md` |
 | 0 Knowledge harvest (pre-grill) | `references/knowledge-sources.md` |
 | 0, 9 The code graph (graphify — recommended, never required) | `references/knowledge-graph.md` |

@@ -36,6 +36,7 @@ docs/
       YYYY-MM-DD-<topic>-inventory.json # wave mode, stage 0 — every open item by id, verified
       YYYY-MM-DD-<topic>-canvas.md    # wave mode, stages 2–3 — the target state over the current logic
       YYYY-MM-DD-<topic>-design.md    # stage 3 — the spec / module dossier (locks shared contracts)
+      YYYY-MM-DD-<topic>-release-impact.md # stage 7 card (users, tracking, alerting, rollback); 8 adds its outcome
       YYYY-MM-DD-<topic>-acceptance.md # stage 10 — REQ coverage table + evidence
     plans/
       YYYY-MM-DD-<topic>.md           # stage 4 — the implementation plan
@@ -177,6 +178,7 @@ them is a finding, not a tie-break ([`knowledge-sources.md`](knowledge-sources.m
 | 3 Spec | `specs/<topic>-design.md` — module dossier for a decomposed platform (+ links `docs/ux/*` for UI) | stage 4 |
 | 4 Plan | `plans/<topic>.md` | stage 5 |
 | 3 UX track | `docs/ux/{foundation,flows,screens,scenarios}.md` | stages 4–9 + `/ux-lint` |
+| 7 Release impact | `specs/<topic>-release-impact.md`: the card owed before an outward act when the project has users ([`release-impact.md`](release-impact.md)) | stage 8 watches it and writes its `## Outcome`; stage 10 reads it |
 | 8 Post-deploy | log/health notes (in the run, not a committed file) | stage 9 |
 | 9 Docs+wiki | host module docs + wiki pages + the refreshed `graphify-out/graph.json` (`knowledge-graph.md`) | the **next** run's stage-0 harvest |
 

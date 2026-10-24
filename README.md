@@ -187,6 +187,7 @@ and the inline fallback satisfy the same [provider contract](plugins/task-pipeli
 | 5–6 TDD | [`tdd.md`](plugins/task-pipeline/skills/task-pipeline/references/tdd.md) — the iron law, red/green/refactor, the suite gate |
 | 5, 6, 8 The browser | [`browser.md`](plugins/task-pipeline/skills/task-pipeline/references/browser.md) — the ref model both channels share, the four commands the look is made of, sessions, and the three different things *"tested in a browser"* means |
 | 3, 6 The design review | [`design-review.md`](plugins/task-pipeline/skills/task-pipeline/references/design-review.md): the `design-tester` agent walks the ten-portrait test panel through the changed scenarios over the Figma frames or mockups before build and in the recorded browser after it, judges every step on a fixed checklist, and closes everything it started (`scripts/design_gate.py`, `scripts/resource_guard.py`) |
+| 7, 8 Release impact | [`release-impact.md`](plugins/task-pipeline/skills/task-pipeline/references/release-impact.md): a release in a project with users owes a card before the tag, the publish or the deploy (who is affected and how, the tracking and its watch window, the alerting and whether it ever fired, the rollback or hotfix and its decision trigger), and stage 8 watches it and acts on the trigger (`scripts/release_impact.py`) |
 | 10 Acceptance | [`acceptance.md`](plugins/task-pipeline/skills/task-pipeline/references/acceptance.md) — REQ coverage table, evidence rules, the closing question |
 | 10 + any audit | [`audit.md`](plugins/task-pipeline/skills/task-pipeline/references/audit.md) — the L0→L7 ladder and its seams, axis rotation, ratchets, proven checks |
 | any loop | [`loop-guard.md`](plugins/task-pipeline/skills/task-pipeline/references/loop-guard.md) — churn detection, caps, the break protocol |
@@ -642,7 +643,7 @@ must say so.
 ### Held to Anthropic's own Skill authoring guidance
 
 Audited against the four Agent Skills pages. Most of it already held — `name`
-13/64 chars, `description` 386/1024 chars, `SKILL.md` 207/500 lines, all 54 references
+13/64 chars, `description` 386/1024 chars, `SKILL.md` 207/500 lines, all 55 references
 reachable from `SKILL.md` through explicit reference routes, and the bundle far under the 30 MB ceiling. What
 did not, now does:
 

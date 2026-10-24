@@ -177,6 +177,7 @@
     "_goal_note": "REQ-010. **Not yet printed beside the frontier — that lands with T-6's iteration wiring; `next` prints the frontier and `goal` is a separate verb today.** Recorded here now because the field is what the printing will read, and because a note claiming a behaviour that does not exist is the defect the wave-2 convergence check caught in this very line. Once wired: a node serving neither this goal nor a REQ is parked WITH THAT AS THE REASON rather than done quietly.",
     "enabled": true,
     "trigger": "tag",
+    "users": "external",
     "steps": [
       "create a GitHub release from the matching CHANGELOG section",
       "npm publish (task-pipeline-skill) — armed by the repository variable PUBLISH_NPMJS, currently true, so a pushed tag publishes with no human step"
