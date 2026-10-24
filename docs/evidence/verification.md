@@ -1,8 +1,12 @@
 # Verification — task-pipeline
 
-## Shipped state — v1.101.1 (NOT SHIPPED until the v1.101.1 release run is read)
+## Shipped state — v1.101.2 (NOT SHIPPED until the v1.101.2 release run is read)
 
-v1.101.1 adds B-153: the release gate's python3-failure fallback matches command shapes, not
+v1.101.2 adds the family member gate (`test/audit_regressions/family_gate_member.py`) and
+B-156's cleanup fix in `test/lessons_test.py` (431 cases).
+
+
+v1.101.1 added B-153: the release gate's python3-failure fallback matches command shapes, not
 words (`test/release_gate_test.py`, 67 checks).
 
 

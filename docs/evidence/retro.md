@@ -1491,6 +1491,9 @@ three quarters of the work on this run.
 
 ## Releases that carry no stamp — stated, not stamped
 
+**`v1.101.2` carries no stamp, declared before its tag.** It releases the family member gate,
+the B-156 cleanup fix and the B-150 closure; the runs were driven from sshlg-skills.
+
 **`v1.101.1` carries no stamp, declared before its tag.** It ships B-153, the release gate's
 fallback reading command shapes instead of words. The run was driven from sshlg-skills
 milestone M3, so its stamp belongs there.

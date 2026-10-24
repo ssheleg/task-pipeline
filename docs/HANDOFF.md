@@ -1,3 +1,9 @@
+## 1.101.2: the family member gate and a cleanup race, released (2026-10-24)
+
+- **Done.** Releases what merged since v1.101.1: the family member gate, B-156, B-150.
+- **Next task.** After merge: release 1.101.2 from a fresh clone (`release_candidate.py
+  prepare`, `check`, `publish`), then the sshlg-skills pin bump; then B-155.
+
 ## 1.101.1: the release gate reads command shapes, branch `fix/b153-release-gate-paths` (2026-10-23)
 
 - **Objective.** sshlg-skills milestone M3 wave 2: B-153 (filed as B-152), the release gate's
