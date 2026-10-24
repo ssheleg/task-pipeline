@@ -780,11 +780,12 @@ def _is_dated_record(text, match):
         _h = _hm
     if _h is None:
         return False
+    # B-155: the stamp is the heading and the ONE block under it. Reading a second block
+    # took `## Closed`'s newest item as the section's stamp, so one dated closed item
+    # exempted every number below it and negative 442 went quiet (1.101.1 PR, CI shard 2).
     _be = text.find("\n\n", _h.end() + 1)
     _be = len(text) if _be < 0 else _be
-    _stamp_end = text.find("\n\n", _be + 2)
-    _stamp_end = len(text) if _stamp_end < 0 else _stamp_end
-    return bool(_ISO_DATE.search(text[_h.start():_stamp_end]))
+    return bool(_ISO_DATE.search(text[_h.start():_be]))
 
 # Each living document is read ONCE, not once per class. Nested class-outer/doc-inner
 # opened ~36 files six times over; the states logic below is unchanged.

@@ -1,3 +1,13 @@
+## Unreleased
+
+Guards: 530 → **531**; property checks 15 → **15**. Negative 550 is new.
+
+- **B-155:** `_is_dated_record()` read a section as dated when its heading and the first two
+  blocks under it carried an ISO date; under `## Closed` the second block is the newest closed
+  item, so one dated item exempted every number in the section and negative 442 stopped firing.
+  The section stamp is now the heading and the one block beneath it. Negative 550 plants a
+  dated first Closed item beside a skewed fixture count and must fail.
+
 ## v1.101.2 (2026-10-24)
 
 Guards: 530 → **530**; property checks 15 → **15**. No negative was added.
