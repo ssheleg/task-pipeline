@@ -1491,6 +1491,10 @@ three quarters of the work on this run.
 
 ## Releases that carry no stamp — stated, not stamped
 
+**`v1.102.0` carries no stamp, declared before its tag.** It ships the release impact card
+(operator, 2026-10-24) and B-155; its own card is
+`docs/evidence/specs/2026-10-24-v1102-release-impact.md`. The run was driven from sshlg-skills.
+
 **`v1.101.2` carries no stamp, declared before its tag.** It releases the family member gate,
 the B-156 cleanup fix and the B-150 closure; the runs were driven from sshlg-skills.
 

@@ -1,4 +1,4 @@
-## Unreleased
+## v1.102.0 (2026-10-24)
 
 Guards: 530 → **531**; property checks 15 → **15**. Negative 550 is new; the release impact
 checks are `test/release_impact_test.py` (47 cases), wired into `npm test` and `test:all`.

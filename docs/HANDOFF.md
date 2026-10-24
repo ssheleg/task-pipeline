@@ -1,3 +1,13 @@
+## 1.102.0: the release impact card, released (2026-10-24)
+
+- **Objective.** Operator, 2026-10-24: every release in a project with users assesses its effect
+  on current users and has tracking, alerting and a rollback or hotfix plan.
+- **Done.** `references/release-impact.md`, `templates/release-impact.md`,
+  `scripts/release_impact.py`, stage 7 and 8 wiring, `release.users`; B-155. This release's own
+  card: `docs/evidence/specs/2026-10-24-v1102-release-impact.md` (checker PASS).
+- **Next task.** After merge: release 1.102.0 from a fresh clone, pin it in sshlg-skills, then
+  stage 8 for this card: read its signals for 24 hours and add the Outcome.
+
 ## Unreleased: the release impact card, branch `feat/release-impact` (2026-10-24)
 
 - **Objective.** Operator, 2026-10-24: whenever a release is decided in a project with users,
