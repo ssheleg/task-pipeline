@@ -1,3 +1,19 @@
+## Unreleased: the release impact card, branch `feat/release-impact` (2026-10-24)
+
+- **Objective.** Operator, 2026-10-24: whenever a release is decided in a project with users,
+  first make sure current users are not harmed and say how they are affected; always track
+  that it goes as it should, alert when it does not, and hold a plan to roll back or hotfix.
+- **Done.** `references/release-impact.md`, `templates/release-impact.md`,
+  `scripts/release_impact.py` (`check`, `--outcome`), `test/release_impact_test.py` (47 cases,
+  red against an always-PASS stub and against one mutant per rule before green); stage 7 GATE
+  and stage 8 in `references/stages.md`, `stage-07-lint-deploy.md`, `stage-08-post-deploy.md`;
+  `release.users` in `pipeline.schema.json`, `pipeline.example.json` and this repository's
+  `pipeline.json` (`external`); doctrine map, portability manifest, README, artifacts and
+  templates index. No version bump; no negative added (Guards 530).
+- **Open.** Not pushed, no PR. The next release of this repository owes its own card.
+- **Next task.** Review and merge `feat/release-impact`; the release after it writes the first
+  card (`<artifacts>/specs/YYYY-MM-DD-<topic>-release-impact.md`) before its tag.
+
 ## 1.101.2: the family member gate and a cleanup race, released (2026-10-24)
 
 - **Done.** Releases what merged since v1.101.1: the family member gate, B-156, B-150.

@@ -1,3 +1,31 @@
+## Unreleased
+
+Guards: 530 → **530**; property checks 15 → **15**. No negative was added: the new checks are
+`test/release_impact_test.py` (47 cases), wired into `npm test` and `test:all`.
+
+**Every release in a project with users owes a release impact card** (operator, 2026-10-24):
+before a release harms anyone, it says who it touches and how, how it is watched, what tells
+someone it went wrong, and the way back.
+
+- **`references/release-impact.md`** and **`templates/release-impact.md`**: the card
+  (`release-impact/1`) is owed at stage 7 before any outward act (tag, publish, deploy) when
+  `pipeline.json` → `release.users` is `external` or `internal`; absent is unknown and treated as
+  `external`; `none` owes no card and prints `users: none` beside the stage 7 verdict. Four
+  sections, each answered or `n/a: <reason>`: who is affected and how (segments, changes,
+  breakage, rollout, timing), tracking (signals, baseline, where, watch window), alerting
+  (condition, receiver, whether it was ever seen firing), rollback or hotfix (procedure, time,
+  data reversibility, kill switch, hotfix path, decision trigger). Worked examples for a package
+  release and for a web or mobile product.
+- **`scripts/release_impact.py check`** refuses a missing, empty or duplicated section, `n/a`
+  without a reason, a `TODO`, tracking without a watch window, alerting that does not say
+  whether it ever fired, a rollback without a decision trigger, tracking, alerting or rollback
+  answered `n/a` on a release with users, and a card whose `users:` disagrees with the project;
+  no card where one is owed is NOT_RUN (exit 3). `--outcome` checks stage 8's record.
+- **Stages:** the stage 7 GATE in `references/stages.md` owes the card; stage 8 watches its
+  signals for the window, records the outcome and acts on the decision trigger per the card.
+  `pipeline.schema.json` declares `release.users`; this repository's own `pipeline.json` says
+  `external`.
+
 ## v1.101.2 (2026-10-24)
 
 Guards: 530 → **530**; property checks 15 → **15**. No negative was added.

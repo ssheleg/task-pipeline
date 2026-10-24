@@ -28,3 +28,9 @@ The full gate and freedom level remain in [stages.md](stages.md).
   search and answer-engine visibility with `seo-aeo-audit`
   ([`companion-skills.md`](companion-skills.md)) — recommended, never a gate;
   absent, visibility ships unaudited and the close-out says so.
+- **Watch the release impact card** ([`release-impact.md`](release-impact.md) → *Stage 8:
+  the watch and the decision*): read each signal against its baseline for the card's watch
+  window, write the card's `## Outcome`, and run `release_impact.py check <card.md>
+  --outcome`. A decision trigger that fires is acted on per the card, not debated; a window
+  that outlives the session is `Result: watching` with the watcher named, or the absence of
+  one said.

@@ -27,6 +27,7 @@ from `super-ux`.
 | `hooks.example.json` | the project's `.claude/settings.json` | 0 — offered, never installed silently |
 | `browser-claims.json` | stage 6, beside the look — one row per browser claim | REQ/scenario id + state + kind (look/suite/library); validated by `test/browser_claims_test.py`, stdlib only |
 | `finding-evidence.json` | one record per audit finding, wherever the finding lives | the five-axes evidence schema: mechanism / reproduction / exposure / incidence / impact uncertainty, observations apart from assumptions |
+| `release-impact.md` | `docs/evidence/specs/YYYY-MM-DD-<topic>-release-impact.md`, one per release | 7 writes it before any outward act when the project has users, checked by `scripts/release_impact.py check`; 8 adds its `## Outcome` (`--outcome`) |
 | `routing-rule.md` | the operator's `CLAUDE.md` — **offered by `setup`, never written silently** | 0 / `setup` |
 | `retro.md` | `docs/evidence/retro.md` — **one per project, not per run** | 10 writes (stamp → prune → entry), 0 reads it in full |
 | `retro-archive.md` | `docs/evidence/retro/YYYY-QN.md` | 10 rotates into it, 0 **queries** it |

@@ -310,6 +310,14 @@
           },
           "description": "Optional single-line source locator (for example docs/DECISIONS.md:42) for the standing authorization covering the tag and its publication. A locator, not a grant: how it is read and verified lives in references/deploy-targets.md, When the release waits for an approval."
         },
+        "users": {
+          "enum": [
+            "external",
+            "internal",
+            "none"
+          ],
+          "description": "Who uses what this project releases: `external` (people or systems outside the team install, call or open it), `internal` (only the team or its own agents), `none` (nothing ships to anyone). `external` and `internal` owe a release impact card at stage 7 before any outward act (scripts/release_impact.py check); `none` owes no card and the run prints `users: none` beside the stage 7 verdict. Absent means unknown and is treated as `external` (references/release-impact.md)."
+        },
         "approval": {
           "enum": [
             "checks",
