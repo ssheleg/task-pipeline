@@ -1,7 +1,13 @@
 ## Unreleased
 
-Guards: 530 → **530**; property checks 15 → **15**. No negative was added: the new checks are
-`test/release_impact_test.py` (47 cases), wired into `npm test` and `test:all`.
+Guards: 530 → **531**; property checks 15 → **15**. Negative 550 is new; the release impact
+checks are `test/release_impact_test.py` (47 cases), wired into `npm test` and `test:all`.
+
+- **B-155:** `_is_dated_record()` read a section as dated when its heading and the first two
+  blocks under it carried an ISO date; under `## Closed` the second block is the newest closed
+  item, so one dated item exempted every number in the section and negative 442 stopped firing.
+  The section stamp is now the heading and the one block beneath it. Negative 550 plants a
+  dated first Closed item beside a skewed fixture count and must fail.
 
 **Every release in a project with users owes a release impact card** (operator, 2026-10-24):
 before a release harms anyone, it says who it touches and how, how it is watched, what tells
