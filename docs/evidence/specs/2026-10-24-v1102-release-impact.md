@@ -34,3 +34,8 @@ date: 2026-10-24
 - **Kill switch:** a project sets `release.users: none` in its `pipeline.json` and no card is owed there
 - **Hotfix path:** a patch release v1.102.1 through the same `release_candidate.py` prepare, check and publish flow
 - **Decision trigger:** roll back if, within 24 hours of the hub pin, `update` fails for task-pipeline or a run in a project without users is blocked by the card
+
+## Outcome
+
+- **Read:** 2026-10-24T06:35Z, the first reading after the hub pin (sshlg-skills 1.77.0): release run 40064387415 success; `npm view task-pipeline-skill version` 1.102.0; `npx --yes sshlg-skills@latest update` reports `task-pipeline: verified` for Claude, while Codex defers its move until no Codex process runs (the hub's generation-safety rule, not a failure); open issues on ssheleg/task-pipeline 0; no alert fired; the decision trigger did not fire
+- **Result:** watching (until 2026-10-25T06:35Z, watcher: the next session through docs/HANDOFF.md, which reads the four signals again and closes this card as held or rolled back)

@@ -5,8 +5,12 @@
 - **Done.** `references/release-impact.md`, `templates/release-impact.md`,
   `scripts/release_impact.py`, stage 7 and 8 wiring, `release.users`; B-155. This release's own
   card: `docs/evidence/specs/2026-10-24-v1102-release-impact.md` (checker PASS).
-- **Next task.** After merge: release 1.102.0 from a fresh clone, pin it in sshlg-skills, then
-  stage 8 for this card: read its signals for 24 hours and add the Outcome.
+- **Released (2026-10-24).** PR #154 squash `34251bf`; tagged gate CHECK_PASSED and PUBLISHED on
+  the first attempt; release run 40064387415 green; npm 1.102.0; sshlg-skills pins it in 1.77.0.
+  v1.101.2 was not tagged (its candidate failed the documentation gate on B-150's SHAs).
+- **Stage 8, open.** The card's Outcome reads `watching` until 2026-10-25T06:35Z.
+- **Next task.** On or after 2026-10-25T06:35Z: read the card's four signals again and set its
+  Outcome to `held` or `rolled back`; then the highest open board row.
 
 ## Unreleased: the release impact card, branch `feat/release-impact` (2026-10-24)
 
