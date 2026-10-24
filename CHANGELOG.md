@@ -34,6 +34,10 @@ someone it went wrong, and the way back.
 
 ## v1.101.2 (2026-10-24)
 
+**Not tagged.** Its candidate failed the tagged documentation gate: the B-150 closure cited
+the two fw07 branch heads by SHA, and after the branches were deleted a clone cannot follow
+them. The citation now names the pull request refs; everything below ships in v1.102.0.
+
 Guards: 530 → **530**; property checks 15 → **15**. No negative was added.
 
 - **The family member gate** (sshlg-skills B-108, B-109): `test/family_gate.py`, a byte-for-byte
