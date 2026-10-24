@@ -128,7 +128,7 @@ Rows leave the table above only into this list, one line each, with the commit.
 
 - **B-155 · One ISO date in the first item of `## Closed` exempted every number in the section** (this change): the section stamp in `_is_dated_record()` is now the heading and the one block beneath it; negative 550 (a dated first Closed item beside a skewed fixture count) fails as it must, and negative 442 still fires.
 
-- **B-150 · Two closed-PR branches kept on purpose: `feat/fw07-stage-routes` and `fix/fw07-checkpoint-profile`** (sshlg-skills milestone M3 wave 3): both heads equalled `refs/pull/123/head` (`5316132e`) and `refs/pull/124/head` (`cb4c9db7`), which GitHub keeps, so the evidence SHAs #128 links stay reachable; the branches were deleted.
+- **B-150 · Two closed-PR branches kept on purpose: `feat/fw07-stage-routes` and `fix/fw07-checkpoint-profile`** (sshlg-skills milestone M3 wave 3): both heads equalled `refs/pull/123/head` and `refs/pull/124/head`, which GitHub keeps, so the evidence SHAs #128 links stay reachable; the branches were deleted.
 
 - **B-156 · `lessons_test` crashed in its own cleanup when git's background maintenance deleted a file mid-`rmtree`** (this change, PR #147): a release run and this PR's CI failed negatives 531 and the K re-key case on `FileNotFoundError` (`maintenance.lock`, `bitmap-ref-tips_*`) instead of on their plants. Every bare `shutil.rmtree` in `test/lessons_test.py` now goes through `_rm()`, which treats a file already gone as gone and retries a directory written to meanwhile; 431 cases pass.
 

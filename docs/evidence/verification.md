@@ -1,8 +1,13 @@
 # Verification — task-pipeline
 
-## Shipped state — v1.101.2 (NOT SHIPPED until the v1.101.2 release run is read)
+## Shipped state — v1.102.0 (NOT SHIPPED until the v1.102.0 release run is read)
 
-v1.101.2 adds the family member gate (`test/audit_regressions/family_gate_member.py`) and
+v1.102.0 adds the release impact card (`scripts/release_impact.py`, `test/release_impact_test.py`
+47 cases) and B-155 (negative 550). Its own card passes the checker:
+`docs/evidence/specs/2026-10-24-v1102-release-impact.md`.
+
+
+v1.101.2 added the family member gate (`test/audit_regressions/family_gate_member.py`) and
 B-156's cleanup fix in `test/lessons_test.py` (431 cases).
 
 
