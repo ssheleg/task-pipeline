@@ -1,3 +1,12 @@
+## v1.102.1: descriptions within a 300-character budget
+
+- **Descriptions within a 300-character budget** (hub board row B-255 (a)): Claude Code lists every
+  skill's description in one ~30,000-character budget, and on the operator's machine the listing
+  stood at 51,178. Measured the hub's way (whitespace collapsed, front matter only): task-pipeline
+  388 to 294, project-audit 401 to 295, evidence-docs 397 to 283. The full trigger lists stay in each
+  `## Triggers`; B-001 and the README conformance sentence carry the new figure. Release impact card:
+  `docs/evidence/specs/2026-10-25-v11021-release-impact.md`.
+
 ## v1.102.0 (2026-10-24)
 
 Guards: 530 → **531**; property checks 15 → **15**. Negative 550 is new; the release impact

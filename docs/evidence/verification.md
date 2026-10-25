@@ -1,6 +1,12 @@
 # Verification — task-pipeline
 
-## Shipped state — v1.102.0 (NOT SHIPPED until the v1.102.0 release run is read)
+## Shipped state — v1.102.1 (NOT SHIPPED until the v1.102.1 release run is read)
+
+v1.102.1 trims the three skill descriptions to the family's 300-character budget (hub board row
+B-255 (a)): task-pipeline 388 to 294, project-audit 401 to 295, evidence-docs 397 to 283, hub
+measure. No doctrine or script changes. Its card passes the checker:
+`docs/evidence/specs/2026-10-25-v11021-release-impact.md`.
+
 
 v1.102.0 adds the release impact card (`scripts/release_impact.py`, `test/release_impact_test.py`
 47 cases) and B-155 (negative 550). Its own card passes the checker:

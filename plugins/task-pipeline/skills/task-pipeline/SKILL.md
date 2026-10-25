@@ -1,6 +1,6 @@
 ---
 name: task-pipeline
-description: "Use when work changes the repository: feature, fix, bug, refactor, migration, integration, audit, PR review; фича, фикс, баг, рефактор, миграция, интеграция, аудит. Runs a substantial task through gated stages, intake grill to docs/wiki and acceptance; a small change takes a short path. 'waves'/'волнами' closes the board. Not for questions or one-line edits; 'без пайплайна' opts out."
+description: "Use when work changes the repository: feature, fix, refactor, migration, integration, audit, PR review; фича, баг, интеграция, аудит. Runs a substantial task through gated stages to acceptance; 'waves'/'волнами' closes the board. Not for questions or one-line edits; 'без пайплайна' opts out."
 license: MIT
 compatibility: "Doctrine runs on any agent. The bundled scripts need python3; the run needs git. Missing either degrades, never blocks — the graph verbs and seeded gates go unused, and the run says so."
 ---

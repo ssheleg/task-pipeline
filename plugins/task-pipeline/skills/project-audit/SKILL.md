@@ -1,6 +1,6 @@
 ---
 name: project-audit
-description: "Use when someone asks what is true of a whole project: finished, half-built, broken, unexplored ('project audit', 'аудит проекта'). Discovers the project, runs probes, reads production evidence, leaves a JSON sidecar, an HTML report on request. Read-only: proposes board rows, commits nothing. Not for: one deliverable inside a run, a diff review, a skill's construction; 'без диагностики' opts out."
+description: "Use when someone asks what is true of a whole project ('project audit', 'аудит проекта'): finished, broken, unexplored. Probes it, reads production evidence, leaves a JSON sidecar. Read-only. Not for: one deliverable in a run, a diff review, a skill's construction; 'без диагностики' opts out."
 license: MIT
 compatibility: "The collector (scripts/audit.py) needs python3 and reads committed state, so it needs git. Probes needing gh, npm, network or a browser declare it and report blind when it is absent — degraded, never silent."
 ---
