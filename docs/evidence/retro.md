@@ -1491,6 +1491,15 @@ three quarters of the work on this run.
 
 ## Releases that carry no stamp — stated, not stamped
 
+**`v1.102.2` carries no stamp, declared before its tag.** It ships v1.102.1's content (the three
+descriptions within the family's 300-character budget, hub board row B-255 (a)) with this
+declaration; its card is `docs/evidence/specs/2026-10-25-v11022-release-impact.md`. The run was
+driven from sshlg-skills.
+
+**`v1.102.1` carries no stamp and was never published:** its tag was pushed, and the release run
+(40241842429) refused it because this section did not name it. The tag stays; its content ships
+in v1.102.2.
+
 **`v1.102.0` carries no stamp, declared before its tag.** It ships the release impact card
 (operator, 2026-10-24) and B-155; its own card is
 `docs/evidence/specs/2026-10-24-v1102-release-impact.md`. The run was driven from sshlg-skills.

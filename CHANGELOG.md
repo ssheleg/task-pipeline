@@ -1,3 +1,10 @@
+## v1.102.2: v1.102.1 republished
+
+- **v1.102.1 republished.** Its tag was pushed and the release run (40241842429) refused it before
+  publishing: `docs/evidence/retro.md` → *Releases that carry no stamp* did not name v1.102.1. That
+  section now names v1.102.1 and v1.102.2, and v1.102.2 ships v1.102.1's content (the three
+  descriptions within a 300-character budget). `v1.102.1` stays as an unpublished tag.
+
 ## v1.102.1: descriptions within a 300-character budget
 
 - **Descriptions within a 300-character budget** (hub board row B-255 (a)): Claude Code lists every

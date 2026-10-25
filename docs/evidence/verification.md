@@ -1,6 +1,9 @@
 # Verification — task-pipeline
 
-## Shipped state — v1.102.1 (NOT SHIPPED until the v1.102.1 release run is read)
+## Shipped state — v1.102.2 (NOT SHIPPED until the v1.102.2 release run is read)
+
+v1.102.2 republishes v1.102.1, whose release run refused the tag for a missing retro
+declaration. Its card passes the checker: `docs/evidence/specs/2026-10-25-v11022-release-impact.md`.
 
 v1.102.1 trims the three skill descriptions to the family's 300-character budget (hub board row
 B-255 (a)): task-pipeline 388 to 294, project-audit 401 to 295, evidence-docs 397 to 283, hub

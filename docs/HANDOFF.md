@@ -1,3 +1,11 @@
+## v1.102.2: v1.102.1 republished (2026-10-26)
+
+- **Done.** v1.102.1's tag was refused by its release run (40241842429: `docs/evidence/retro.md`
+  did not name it under *Releases that carry no stamp*). v1.102.2 adds that declaration and ships
+  v1.102.1's content: the three descriptions within the 300-character budget (hub B-255 (a)).
+- **Next task.** After merge: tag `v1.102.2`, watch the release, then the sshlg-skills pin bump; then
+  the highest open board row.
+
 ## v1.102.1: descriptions within a 300-character budget (2026-10-25)
 
 - **Done.** Every skill description in this member is at or under 300 characters (hub measure:
