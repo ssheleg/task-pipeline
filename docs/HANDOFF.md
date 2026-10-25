@@ -8,9 +8,10 @@
 - **Released (2026-10-24).** PR #154 squash `34251bf`; tagged gate CHECK_PASSED and PUBLISHED on
   the first attempt; release run 40064387415 green; npm 1.102.0; sshlg-skills pins it in 1.77.0.
   v1.101.2 was not tagged (its candidate failed the documentation gate on B-150's SHAs).
-- **Stage 8, open.** The card's Outcome reads `watching` until 2026-10-25T06:35Z.
-- **Next task.** On or after 2026-10-25T06:35Z: read the card's four signals again and set its
-  Outcome to `held` or `rolled back`; then the highest open board row.
+- **Stage 8, closed 2026-10-25.** Read again after the window: release run green, npm 1.102.0,
+  Claude and Codex both on 1.102.0 (Codex moved 2026-10-25T20:26Z), 0 open issues, no alert. The
+  card's Outcome is `held`.
+- **Next task.** The highest open board row.
 
 ## Unreleased: the release impact card, branch `feat/release-impact` (2026-10-24)
 
