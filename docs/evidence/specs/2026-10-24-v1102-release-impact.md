@@ -38,4 +38,5 @@ date: 2026-10-24
 ## Outcome
 
 - **Read:** 2026-10-24T06:35Z, the first reading after the hub pin (sshlg-skills 1.77.0): release run 40064387415 success; `npm view task-pipeline-skill version` 1.102.0; `npx --yes sshlg-skills@latest update` reports `task-pipeline: verified` for Claude, while Codex defers its move until no Codex process runs (the hub's generation-safety rule, not a failure); open issues on ssheleg/task-pipeline 0; no alert fired; the decision trigger did not fire
-- **Result:** watching (until 2026-10-25T06:35Z, watcher: the next session through docs/HANDOFF.md, which reads the four signals again and closes this card as held or rolled back)
+- **Read again:** 2026-10-25T20:30Z, after the window closed: the v1.102.0 release run still success; `npm view task-pipeline-skill version` 1.102.0; Claude installs 1.102.0, and Codex moved to 1.102.0 at 2026-10-25T20:26Z once no Codex process ran (`codex plugin list`: `task-pipeline@task-pipeline 1.102.0`); open issues on ssheleg/task-pipeline 0; no alert fired; the decision trigger did not fire
+- **Result:** held
