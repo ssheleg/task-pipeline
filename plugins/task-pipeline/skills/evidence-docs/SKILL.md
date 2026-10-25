@@ -1,6 +1,6 @@
 ---
 name: evidence-docs
-description: "Use when writing or reviewing anything read as true: a decision record, ADR, README, acceptance report, runbook, changelog, audit finding, or a claim that something was verified. Applies the ten canons of evidence-backed documentation and routes to the doctrine enforcing each; also a documentation gate or decision register. Not for: drafts, chat answers, commit messages; 'без доков' opts out."
+description: "Use when writing or reviewing anything read as true: a decision record, ADR, README, acceptance report, runbook, changelog, audit finding, a claim of verification. Applies the ten canons of evidence-backed docs. Not for: drafts, chat answers, commit messages; 'без доков' opts out."
 license: MIT
 compatibility: "Doctrine runs on any agent. No bundled scripts — nothing to install and nothing to degrade."
 ---
