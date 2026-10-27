@@ -218,10 +218,19 @@ Since v1.50.0 the plugin carries hooks of its own. `hooks/release-gate.sh`
 (`PreToolUse` on `Bash`) refuses an **outward, irreversible act** — `git tag`, a
 tag push, `gh release create`, `npm publish` — while the run says the suite has not
 passed. `hooks/gate-observer.sh` (`PostToolUse` and `PostToolUseFailure`) records
-what the declared gate command actually did. `hooks/memory-nudge.sh` (`PostToolUse` on `Bash|Edit|Write|MultiEdit`) reminds,
+what the declared gate command actually did. `hooks/memory-nudge.sh` (`PostToolUse` on `Bash|Edit|Write|MultiEdit|apply_patch`) reminds,
 once per returned gate, that no workflow-memory line follows it — unless the run recorded
 memory unavailable with `--for-run`
 ([`continuity.md`](continuity.md), Part 3).
+
+`hooks/build-gate.sh` (`PreToolUse` on `Edit|Write|MultiEdit|NotebookEdit|apply_patch`)
+asks before the product is edited while the run has not entered its build stage.
+**Codex edits through `apply_patch`**, the patch text in `tool_input.command`, so the
+gate reads every `*** Add File:`, `*** Update File:`, `*** Delete File:` and
+`*** Move to:` path in it and asks when any one is gated (hub B-211). **Codex has no
+`PostToolUseFailure` event:** there `gate-observer.sh` records a failing gate command
+only if Codex's `PostToolUse` reports it, so a missing `gate:` line after a red run
+is not proof the suite never ran (the limit is Codex's event set, not this hook's).
 
 **Two lessons from v1.50.0, both shipped as defects and both fixed in v1.51.0.**
 

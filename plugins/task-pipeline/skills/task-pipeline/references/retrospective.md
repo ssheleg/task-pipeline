@@ -205,14 +205,20 @@ narrative are how a capped list grows anyway.
   `Because`) **verbatim** into the quarter's archive, each block carrying the sha256 of
   its text, and leaves a pointer; `retro_budget.py verify` proves every pointer. An
   instruction still over 600 characters after its story moved is rewritten by hand.
+  A shortened stamp row keeps its own table's header and column count: date, commit
+  and version cells stay whole, the long prose cells are capped at one common length,
+  and the pointer ends the last cell. A row that already carries a pointer is not
+  moved again.
   An older retro whose standing instructions are a numbered list and whose stamps are
   `- **date: title**` items is read the same way: the item keeps its bold rule and its
   `*(Retire ...)*` trigger, a stamp keeps its title, stamps past the cap rotate out by date,
   and, over budget, the Run stamps section's loose prune paragraphs move. Rotation keeps
   **one `Rotated out:` line per archive**: a later rotation re-archives the quarter's
   earlier rotated stamps with its own as one block and the line names that block, so a
-  floor that rotates every run does not grow by a line per run. A line whose block no
-  longer hashes stays as its own line.
+  floor that rotates every run does not grow by a line per run. A floor that already
+  holds several lines for one quarter has them merged on the next `migrate --write`,
+  each in its own quarter's archive. A line whose block no longer hashes stays as its
+  own line.
 - **A prune that retires nothing writes its count into the stamp row**, as
   `prune: 0 retired`, and no paragraph. Repeated "nothing to prune" notes were a
   measured share of the floor.

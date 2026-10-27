@@ -528,6 +528,45 @@
         "Does not retry the search with other filters or a project id to force lessons out of it, and does not record the old engine as an outage"
       ],
       "why": "Profile B with an old engine: turn records crowd lessons out of an unfiltered match window, so a hit there is not evidence about lessons. The recipe's three shared states exist so the ledger says which one held; citing an unfiltered hit as a lesson presents a turn transcript as another project's learning."
+    },
+    {
+      "id": "TRIG-13",
+      "category": "should_trigger",
+      "skills": [
+        "task-pipeline"
+      ],
+      "query": "напиши тесты для модуля биллинга, их там нет",
+      "expected_behavior": [
+        "Invokes the task-pipeline skill rather than editing inline",
+        "Runs the stage-0 knowledge harvest before the first interview question"
+      ],
+      "why": "'write tests' / «напиши тесты» is a repository change advertised in ## Triggers since 1.102.3 (hub B-84)."
+    },
+    {
+      "id": "TRIG-14",
+      "category": "should_trigger",
+      "skills": [
+        "task-pipeline"
+      ],
+      "query": "зарелизь то, что лежит в main, и выпусти релиз 2.4.0",
+      "expected_behavior": [
+        "Invokes the task-pipeline skill rather than editing inline",
+        "Runs the stage-0 knowledge harvest before the first interview question"
+      ],
+      "why": "'cut a release' / «зарелизь» / «выпусти релиз» is an outward act the stage 7 gate owns; advertised since 1.102.3 (hub B-84)."
+    },
+    {
+      "id": "TRIG-15",
+      "category": "should_trigger",
+      "skills": [
+        "task-pipeline"
+      ],
+      "query": "удали мёртвый код в пакете payments",
+      "expected_behavior": [
+        "Invokes the task-pipeline skill rather than editing inline",
+        "Runs the stage-0 knowledge harvest before the first interview question"
+      ],
+      "why": "'remove dead code' / «удали мёртвый код» changes the repository; advertised since 1.102.3 (hub B-84)."
     }
   ]
 }

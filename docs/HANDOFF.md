@@ -1,3 +1,20 @@
+## v1.102.3: stamp rows keep their table, one rotation line per quarter, apply_patch gated, branch `waves/1027-task-pipeline` (2026-10-27)
+
+- **Objective.** Hub board waves 2026-10-27: B-258 (`retro_budget.py migrate` broke stamp tables
+  not shaped `Date | Topic | Commit | Verdict`), B-246's remainder (merge existing rotation lines
+  per quarter), B-211's task-pipeline part (the build gate in Codex's `apply_patch`) and B-84
+  (three trigger phrases in SKILL.md's `## Triggers`).
+- **Done.** B-157, B-158, B-159, B-160 closed in `docs/evidence/backlog.md`; `scripts/retro_budget.py`,
+  `hooks/build-gate.sh`, `hooks/hooks.json`, `references/retrospective.md`, both copies of
+  `references/hooks.md`, SKILL.md `## Triggers`, `evals/task-pipeline.evals.json` TRIG-13 to 15; card `docs/evidence/specs/2026-10-27-v11023-release-impact.md` (PASS).
+  Checks run: `test/audit_regressions/diet_retro_budget.py` (seven new cases, six red on 1.102.2),
+  `test/release_gate_test.py` (71, two red on 1.102.2), `npm test`.
+- **Open.** A rotation re-archives the quarter's earlier rotated stamps each time, so an archive
+  grows by every earlier stamp per rotation (the floor stays flat); see the next task.
+- **Next task.** After merge: release 1.102.3 from a fresh clone (`release_candidate.py prepare`,
+  `check`, `publish`), watch the tag's release run, then the sshlg-skills pin bump; then the
+  highest open board row.
+
 ## v1.102.2: v1.102.1 republished (2026-10-26)
 
 - **Done.** v1.102.1's tag was refused by its release run (40241842429: `docs/evidence/retro.md`

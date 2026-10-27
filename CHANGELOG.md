@@ -1,3 +1,35 @@
+## v1.102.3: stamp rows keep their table's shape, one rotation line per quarter, apply_patch gated
+
+Guards: 531 → **531**; property checks 15 → **15**. No negative was added: the new checks are
+cases in `test/audit_regressions/diet_retro_budget.py` and `test/release_gate_test.py`.
+
+- **A shortened stamp row keeps its own table** (hub board row B-258): `retro_budget.py migrate`
+  assumed every stamp table was `Date | Topic | Commit | Verdict`. On sheleg-design-skill's
+  `Date | Commit | Task | Diverged?` it cut the Commit cell (`working tree` to `working…`) and kept
+  the long Task, so eight rows stayed over 300 characters; on super-ux's three columns it added a
+  fourth cell and broke the table. The row now keeps its header's column count, leaves date,
+  commit and version cells whole, caps the long prose cells at one common length and ends the
+  last cell with the pointer. An escaped `\|` stays inside its cell, and a row that already
+  carries a pointer is not archived again. Five new cases in
+  `test/audit_regressions/diet_retro_budget.py`, red on 1.102.2.
+- **One `Rotated out:` line per archive quarter, also on floors written before 1.101.0** (hub
+  board row B-246): 1.101.0 merged the earlier lines only when a new rotation went into the same
+  quarter. A floor that already held several lines for one quarter, or for a quarter this run
+  does not rotate into, now has them merged on the next `migrate --write`, each block appended to
+  its own quarter's archive; a line whose block no longer hashes still stays. Two new cases: three
+  rotations in a row leave one line, and a planted five-line floor over two quarters leaves two.
+- **The build gate acts in Codex** (hub board row B-211, task-pipeline part; CODEX-4 in the hub's
+  2026-10-16 compatibility report): Codex edits through `apply_patch` with the patch text in
+  `tool_input.command`, so `hooks/build-gate.sh` read no `file_path` and stayed silent. Its
+  matcher and memory-nudge's now name `apply_patch`, and the gate asks when any `*** Add File:`,
+  `*** Update File:`, `*** Delete File:` or `*** Move to:` path is gated. Codex has no
+  `PostToolUseFailure`, which `references/hooks.md` now states for `gate-observer.sh`. Four new
+  checks in `test/release_gate_test.py` (71).
+- **Three more trigger phrases** (hub board row B-84): SKILL.md's `## Triggers` advertises
+  'write tests'/«напиши тесты», 'cut a release'/«зарелизь»/«выпусти релиз» and 'remove dead
+  code'/«удали мёртвый код», so the hub's route table may carry them; the description is
+  unchanged. Three should-trigger cases in `evals/task-pipeline.evals.json` (TRIG-13 to 15).
+
 ## v1.102.2: v1.102.1 republished
 
 - **v1.102.1 republished.** Its tag was pushed and the release run (40241842429) refused it before
