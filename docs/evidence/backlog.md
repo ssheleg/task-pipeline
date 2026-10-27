@@ -126,6 +126,14 @@
 
 Rows leave the table above only into this list, one line each, with the commit.
 
+- **B-160 · Three prompts the hub routes to task-pipeline had no phrase in its SKILL.md** (v1.102.3, this change; hub B-84): `## Triggers` now advertises 'write tests'/«напиши тесты», 'cut a release'/«зарелизь»/«выпусти релиз», 'remove dead code'/«удали мёртвый код»; the description is unchanged. `evals/task-pipeline.evals.json`: TRIG-13 to TRIG-15.
+
+- **B-159 · The build gate never acted in Codex** (v1.102.3, this change; hub B-211, task-pipeline part): Codex edits through `apply_patch`, the patch in `tool_input.command`, and `hooks/build-gate.sh` read only `file_path`. The PreToolUse and memory-nudge matchers name `apply_patch`; the gate reads every Add, Update, Delete and Move-to path and asks when one is gated; `references/hooks.md` states Codex's missing `PostToolUseFailure`. `test/release_gate_test.py`: four new checks, two red on 1.102.2.
+
+- **B-158 · Several `Rotated out:` lines for one quarter stayed until a rotation into that quarter** (v1.102.3, this change; hub B-246's remainder): `migrate --write` now merges them on any run, each into its own quarter's archive. `test/audit_regressions/diet_retro_budget.py`: a planted five-line floor over two quarters (red on 1.102.2) and three rotations in a row.
+
+- **B-157 · `retro_budget.py migrate` shortened stamp rows as if every table were `Date | Topic | Commit | Verdict`** (v1.102.3, this change; hub B-258): it cut a Commit cell, kept a long Task and widened a three-column table. The row now keeps its header's column count, its date, commit and version cells, caps prose evenly and ends the last cell with the pointer; a row with a pointer is not moved again. Five cases, red on 1.102.2.
+
 - **B-155 · One ISO date in the first item of `## Closed` exempted every number in the section** (this change): the section stamp in `_is_dated_record()` is now the heading and the one block beneath it; negative 550 (a dated first Closed item beside a skewed fixture count) fails as it must, and negative 442 still fires.
 
 - **B-150 · Two closed-PR branches kept on purpose: `feat/fw07-stage-routes` and `fix/fw07-checkpoint-profile`** (sshlg-skills milestone M3 wave 3): both heads equalled `refs/pull/123/head` and `refs/pull/124/head`, which GitHub keeps, so the evidence SHAs #128 links stay reachable; the branches were deleted.

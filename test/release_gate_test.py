@@ -778,6 +778,66 @@ def a_previous_runs_dev_stage_does_not_silence_a_new_run():
 it("a previous run's dev stage does not silence a new run", a_previous_runs_dev_stage_does_not_silence_a_new_run)
 it("the shipped example is silent once dev is entered", the_shipped_example_is_silent_once_dev_is_entered)
 
+
+# Hub B-211 (CODEX-4 in the hub's 2026-10-16 compatibility report): Codex sends an edit
+# as `tool_name: "apply_patch"` with the patch text in `tool_input.command`, so the gate
+# read no `file_path` and never acted in Codex.
+def patch_gate(patch, ledger=OPEN_RUN, pipeline=BUILD_FLOW, key="command", raw=None):
+    with tempfile.TemporaryDirectory() as project:
+        os.makedirs(os.path.join(project, ".task-pipeline"))
+        open(os.path.join(project, ".task-pipeline", "run.md"), "w").write(ledger)
+        json.dump(pipeline, open(os.path.join(project, "pipeline.json"), "w"))
+        payload = raw if raw is not None else json.dumps({
+            "hook_event_name": "PreToolUse", "tool_name": "apply_patch",
+            "tool_input": {key: patch}})
+        r = subprocess.run(["bash", BUILDGATE], input=payload,
+                           env=dict(os.environ, CLAUDE_PROJECT_DIR=project), capture_output=True, text=True)
+        assert r.returncode == 0, "the hook failed loudly: %r" % r.stderr
+        out = (r.stdout or "").strip()
+        return json.loads(out)["hookSpecificOutput"]["permissionDecision"] if out else None
+
+
+def a_patch(*heads):
+    return "*** Begin Patch\n" + "".join("%s\n+x\n" % h for h in heads) + "*** End Patch\n"
+
+
+def an_apply_patch_touching_source_asks():
+    assert patch_gate(a_patch("*** Update File: src/app.js")) == "ask", "apply_patch passed the gate"
+    assert patch_gate(a_patch("*** Add File: docs/x.md", "*** Add File: src/new.js")) == "ask", \
+        "one gated path among exempt ones passed"
+    assert patch_gate(a_patch("*** Update File: docs/a.md\n*** Move to: src/a.js")) == "ask", \
+        "a move into the product passed"
+    assert patch_gate(a_patch("*** Delete File: lib/old.py"), key="input") == "ask", \
+        "the patch under `input` was not read"
+
+
+def an_apply_patch_touching_only_the_runs_artefacts_is_silent():
+    assert patch_gate(a_patch("*** Update File: docs/evidence/specs/x.md",
+                              "*** Add File: .task-pipeline/notes.md", "*** Update File: README.md")) is None
+    led = OPEN_RUN + "stage: 5 build — gate auto — 2026-08-13T01:30:00Z\n"
+    assert patch_gate(a_patch("*** Update File: src/app.js"), ledger=led) is None, \
+        "apply_patch was gated inside the build stage"
+
+
+def a_malformed_apply_patch_payload_is_silent():
+    for raw in ("not json", json.dumps({"tool_name": "apply_patch", "tool_input": {"command": 7}}),
+                json.dumps({"tool_name": "apply_patch", "tool_input": "x"}),
+                json.dumps({"tool_name": "apply_patch", "tool_input": {"command": "no headers here"}})):
+        assert patch_gate(None, raw=raw) is None, "a malformed payload produced a decision: %r" % raw
+
+
+def the_hooks_json_matchers_name_apply_patch():
+    cfg = json.load(open(os.path.join(ROOT, "plugins", "task-pipeline", "hooks", "hooks.json"), encoding="utf-8"))
+    for event, script in (("PreToolUse", "build-gate.sh"), ("PostToolUse", "memory-nudge.sh")):
+        ms = [e["matcher"] for e in cfg["hooks"][event] if any(script in h["command"] for h in e["hooks"])]
+        assert ms and all("apply_patch" in m.split("|") for m in ms), "%s's matcher misses apply_patch: %r" % (script, ms)
+
+
+it("B-211: an apply_patch touching source asks", an_apply_patch_touching_source_asks)
+it("B-211: an apply_patch touching only the run's artefacts is silent", an_apply_patch_touching_only_the_runs_artefacts_is_silent)
+it("B-211: a malformed apply_patch payload is silent", a_malformed_apply_patch_payload_is_silent)
+it("B-211: hooks.json routes apply_patch to build-gate and memory-nudge", the_hooks_json_matchers_name_apply_patch)
+
 if failures:
     for f in failures:
         print("FAIL: " + f)

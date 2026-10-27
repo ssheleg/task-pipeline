@@ -38,15 +38,34 @@ try:
 except Exception:
     raise SystemExit(0)
 
-ti = data.get("tool_input") or {}
-path = ti.get("file_path") or ti.get("notebook_path") or ""
-if not path:
+ti = data.get("tool_input") if isinstance(data, dict) else None
+if not isinstance(ti, dict):
     raise SystemExit(0)
+if data.get("tool_name") == "apply_patch":
+    # Codex edits through apply_patch, the patch text in `command` (hub B-211, CODEX-4):
+    # every file it adds, updates, deletes or moves to is a path this gate decides.
+    txt = ti.get("command") or ti.get("input") or ""
+    if not isinstance(txt, str):
+        raise SystemExit(0)
+    paths = [a or b for a, b in re.findall(
+        r"^\*\*\* (?:Add|Update|Delete) File: (.+)$|^\*\*\* Move to: (.+)$", txt, re.M)]
+else:
+    paths = [ti.get("file_path") or ti.get("notebook_path") or ""]
 
-rel = os.path.relpath(path, project) if os.path.isabs(path) else path
-rel = rel.replace(os.sep, "/")
-# The run writes these; gating them would fire on the work stages 0-4 are for.
-if rel.startswith("..") or re.match(r"^(docs/|\.task-pipeline/|\.claude/|CHANGELOG\.md|README\.md)", rel):
+
+def gated(path):
+    if not isinstance(path, str) or not path.strip():
+        return False
+    path = path.strip()
+    rel = os.path.relpath(path, project) if os.path.isabs(path) else path
+    rel = rel.replace(os.sep, "/")
+    # The run writes these; gating them would fire on the work stages 0-4 are for.
+    return not (rel.startswith("..") or re.match(
+        r"^(docs/|\.task-pipeline/|\.claude/|CHANGELOG\.md|README\.md)", rel))
+
+
+# One gated path is enough: a patch that also touches docs/ still edits the product.
+if not any(gated(p) for p in paths):
     raise SystemExit(0)
 
 try:

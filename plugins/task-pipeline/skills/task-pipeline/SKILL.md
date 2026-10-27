@@ -205,3 +205,7 @@ The description is the short form. The full trigger list it carried until 1.98.0
 moved here verbatim, still routes to this skill:
 
 "Use when work changes the repository — feature, fix, bug, refactor, migration, integration, rewrite, adoption or hardening; фича, фикс, баг, рефактор, миграция, интеграция, доработать, починить, внедрить, перевести — or a finding that lands in it: audit/аудит, bug hunt/проверь ошибки, production check/проверь прод, PR review/ревью PR — or on 'run this through the pipeline'/'прогони по конвейеру', 'the full cycle'/'полный цикл', /task-pipeline. Runs a substantial task through gated stages: intake grill, docs, brainstorm, spec, plan, build, tests, deploy, post-deploy, docs/wiki, acceptance. 'waves'/'волнами'/'release iteration'/'итерация релиза' closes the board; 'checkup'/'чекап' lists unconfirmed releases; 'setup' audits docs. Not for: answering a question, explaining, a typo, a one-line edit, a rename, recon that lands nothing — say 'no pipeline'/'без пайплайна' to opt out."
+
+Added in 1.102.3 (hub board row B-84), each a repository change that runs through the
+stages: 'write tests'/'напиши тесты', 'cut a release'/'зарелизь'/'выпусти релиз',
+'remove dead code'/'удали мёртвый код'.

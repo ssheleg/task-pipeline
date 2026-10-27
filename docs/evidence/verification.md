@@ -1,6 +1,15 @@
 # Verification — task-pipeline
 
-## Shipped state — v1.102.2 (NOT SHIPPED until the v1.102.2 release run is read)
+## Shipped state — v1.102.3 (NOT SHIPPED until the v1.102.3 release run is read)
+
+v1.102.3 ships B-258 and B-246 in `retro_budget.py migrate` (`test/audit_regressions/diet_retro_budget.py`,
+seven new cases, six red on 1.102.2) and B-211's task-pipeline part in `hooks/build-gate.sh` and
+`hooks/hooks.json` (`test/release_gate_test.py`, four new checks, two red on 1.102.2), and B-84's three
+trigger phrases (`evals/task-pipeline.evals.json` TRIG-13 to 15). Its card
+passes the checker: `docs/evidence/specs/2026-10-27-v11023-release-impact.md`.
+
+v1.102.2 was read shipped on 2026-10-27: release run 40245813429 success, GitHub release
+`v1.102.2`, `npm view task-pipeline-skill version` 1.102.2.
 
 v1.102.2 republishes v1.102.1, whose release run refused the tag for a missing retro
 declaration. Its card passes the checker: `docs/evidence/specs/2026-10-25-v11022-release-impact.md`.

@@ -142,7 +142,8 @@ def _():
         assert code == 0, out
         row = [l for l in pathlib.Path(p).read_text(encoding="utf-8").split("\n")
                if l.startswith("| 2026-05-04 |")][0]
-        assert row.count("|") == 6, "the migrated stamp has %d pipes, the table 6: %s" % (row.count("|"), row)
+        pipes = len(re.findall(r"(?<!\\)\|", row))   # an escaped `\|` is a cell's text
+        assert pipes == 6, "the migrated stamp has %d pipes, the table 6: %s" % (pipes, row)
 
 
 @case("an instruction too long to shorten by moving its story stays a failure after migrate")
@@ -478,6 +479,183 @@ def _():
         inside = lines[first[0]:first[1]]
         for line in ("+ plus item", "> a quote", "1) paren item"):
             assert line not in inside, "%r was swallowed into item 1" % line
+
+
+# B-258 (sshlg-skills, 2026-10-26): migrate assumed every stamp table was
+# `Date | Topic | Commit | Verdict | ...`. On `Date | Commit | Task | Diverged?` it cut the
+# Commit cell and kept the long Task; on a three-column table it appended a fourth cell.
+def split_row(row):
+    """Cells of a table row, an escaped `\\|` staying inside its cell."""
+    s = row.strip()
+    s = s[1:] if s.startswith("|") else s
+    s = s[:-1] if s.endswith("|") and not s.endswith("\\|") else s
+    return [c.strip() for c in re.split(r"(?<!\\)\|", s)]
+
+
+def stamp_retro(header, row):
+    cols = split_row(header)
+    return "\n".join(["# Retro", "", "## Standing instructions", "", "None in force.", "",
+                      "## Run stamps", "", header, "|" + "---|" * len(cols), row, "",
+                      "## Recent log", "", "queried, not read.", ""])
+
+
+def migrate_stamp(header, row):
+    """Migrate one over-long stamp row; returns (old cells, new cells, new row, archive text)."""
+    with tempfile.TemporaryDirectory() as d:
+        p = write(d, stamp_retro(header, row))
+        arch = os.path.join(d, "retro", "2026-Q4.md")
+        code, out = run("check", "--retro", p)
+        assert code == 1 and "over 300" in out, "the fixture row is not over the stamp limit: " + out
+        code, out = run("migrate", "--retro", p, "--archive", arch, "--write")
+        assert code == 0, out
+        after = pathlib.Path(p).read_text(encoding="utf-8")
+        new = [l for l in after.split("\n") if l.startswith("| 2026-")]
+        assert len(new) == 1, "expected one stamp row, got %r" % new
+        assert len(new[0]) <= 300, "the shortened row is %d chars" % len(new[0])
+        archived = pathlib.Path(arch).read_text(encoding="utf-8")
+        assert row in archived, "the original row is not in the archive verbatim"
+        code, out = run("verify", "--retro", p)
+        assert code == 0, out
+        once = (pathlib.Path(p).read_bytes(), pathlib.Path(arch).read_bytes())
+        code, out = run("migrate", "--retro", p, "--archive", arch, "--write")
+        assert code == 0 and "nothing to move" in out, "a second migrate moved the row again: " + out
+        assert (pathlib.Path(p).read_bytes(), pathlib.Path(arch).read_bytes()) == once, \
+            "a second migrate rewrote the retro or the archive"
+        return split_row(row), split_row(new[0]), new[0], archived
+
+
+def assert_shape(old, new, keep, shrink):
+    """`keep`: indices that must be unchanged; `shrink`: indices that must be capped evenly."""
+    assert len(new) == len(old), "the row has %d cells, its table %d: %r" % (len(new), len(old), new)
+    last = len(new) - 1
+    assert re.search(r"(?:^| )moved: retro/2026-Q4\.md sha256:[0-9a-f]{12}$", new[last]), \
+        "the pointer is not at the end of the last cell: %r" % new[last]
+    body = [re.sub(r"\s*moved: retro/\S+ sha256:[0-9a-f]{12}$", "", c) if j == last else c
+            for j, c in enumerate(new)]
+    for j in keep:
+        assert body[j] == old[j], "cell %d (%r) was shortened to %r" % (j, old[j], body[j])
+    for j in shrink:
+        assert body[j].endswith("…") and len(body[j]) < len(old[j]), \
+            "cell %d was not shortened: %r" % (j, body[j])
+    caps = [len(body[j]) for j in shrink]
+    assert max(caps) - min(caps) <= 2, "the long cells were not capped evenly: %r" % caps
+
+
+@case("B-258: `Date | Topic | Task | Verdict` keeps four cells, the date, and caps the prose evenly")
+def _():
+    row = "| 2026-10-20 | %s | %s | %s |" % ("topic " * 15, "the task, told at length. " * 9, "verdict words " * 12)
+    old, new, _, _ = migrate_stamp("| Date | Topic | Task | Verdict |", row)
+    assert_shape(old, new, keep=[0], shrink=[1, 2, 3])
+
+
+@case("B-258: `Date | Commit | Task | Diverged?` keeps the Commit cell whole, shortens Task")
+def _():
+    for commit in ("working tree", "`3f9c2ab`"):
+        row = "| 2026-10-20 | %s | %s | %s |" % (commit, "the task, told at length. " * 10,
+                                                   "yes: the run diverged here. " * 6)
+        old, new, _, _ = migrate_stamp("| Date | Commit | Task | Diverged? |", row)
+        assert_shape(old, new, keep=[0, 1], shrink=[2, 3])
+
+
+@case("B-258: a three-column table keeps three cells; the pointer joins the last")
+def _():
+    row = "| 2026-10-20 | %s | %s |" % ("the task, told at length. " * 10, "no. " * 30)
+    old, new, _, _ = migrate_stamp("| Date | Task | Diverged? |", row)
+    assert_shape(old, new, keep=[0], shrink=[1, 2])
+
+
+@case("B-258: a five-column table keeps five cells, its version and commit whole")
+def _():
+    row = "| 2026-10-20 | v1.102.2 | `ce33d5d` | %s | %s |" % ("the task, told at length. " * 10,
+                                                              "14/14 verified, and then some. " * 5)
+    old, new, _, _ = migrate_stamp("| Date | Version | Commit | Task | Verdict |", row)
+    assert_shape(old, new, keep=[0, 1, 2], shrink=[3, 4])
+
+
+@case("B-258: an escaped pipe inside a cell is one cell, and a cut never leaves it a delimiter")
+def _():
+    row = "| 2026-10-20 | %s | %s | ok |" % ("topic", "a \\| b, the escaped pipe inside one cell. " * 9)
+    old, new, line, _ = migrate_stamp("| Date | Topic | Task | Verdict |", row)
+    assert len(old) == 4, "the fixture's escaped pipe split its cell: %r" % old
+    assert_shape(old, new, keep=[0, 1], shrink=[2])
+    assert not re.search(r"\\\s*\|", line.replace("\\|", "")), "a cut left a backslash before a delimiter"
+
+
+# B-246 (sshlg-skills, 2026-10-22): one `Rotated out:` line per archive quarter.
+def rotation_lines(text):
+    return re.findall(r"^Rotated out: (\d+) oldest run stamps, verbatim in (\S+) sha256:(\w+)$", text, re.M)
+
+
+@case("B-246: three migrates with rotations leave one Rotated out line, every stamp proved")
+def _():
+    with tempfile.TemporaryDirectory() as d:
+        p = write(d, legacy())
+        arch = os.path.join(d, "retro", "2026-Q4.md")
+        seen, day = [], 21
+        for n, add in enumerate((0, 2, 3)):
+            if add:
+                cur = pathlib.Path(p).read_text(encoding="utf-8")
+                first = re.search(r"^- \*\*2026-09-\d\d — run \d+\*\*", cur, re.M).group(0)
+                newer = "".join("- **2026-09-%d — run %d** (base `abc%04d`). newer.\n\n" % (k, k, k)
+                                for k in range(day + add - 1, day - 1, -1))
+                day += add
+                pathlib.Path(p).write_text(plant(cur, first, newer + first), encoding="utf-8")
+            seen.append(pathlib.Path(p).read_text(encoding="utf-8"))
+            code, out = run("migrate", "--retro", p, "--archive", arch, "--write")
+            assert code == 0, "run %d: %s" % (n + 1, out)
+            after = pathlib.Path(p).read_text(encoding="utf-8")
+            ptr = rotation_lines(after)
+            assert len(ptr) == 1, "run %d left %d Rotated out lines: %r" % (n + 1, len(ptr), ptr)
+            assert ptr[0][0] == str(6 + sum((0, 2, 3)[:n + 1])), "run %d counts %s" % (n + 1, ptr[0][0])
+            code, out = run("verify", "--retro", p)
+            assert code == 0, out
+        archived = pathlib.Path(arch).read_text(encoding="utf-8")
+        lost = [l for t in seen for l in t.split("\n") if l.strip() and not l.startswith("Rotated out: ")
+                and l not in after and l not in archived]
+        assert not lost, "lines lost across three rotations: %r" % lost[:3]
+
+
+@case("B-246: a floor already holding several lines for one quarter is merged by the next migrate")
+def _():
+    sys.path.insert(0, str(SK / "scripts"))
+    import retro_budget as rb
+    with tempfile.TemporaryDirectory() as d:
+        seed = legacy(stamps=4, long_items=False, prose=False).replace("narrative. " * 40, "short.")
+        lines, texts = [], {}
+        for q, stamps in (("2026-Q4", ("| 2026-07-01 | B-9: q4a | `a1` | no |", "| 2026-07-02 | B-9: q4b | `a2` | no |",
+                                        "| 2026-07-03 | B-9: q4c | `a3` | no |")),
+                          ("2026-Q3", ("| 2026-06-01 | B-8: q3a | `b1` | no |", "| 2026-06-02 | B-8: q3b | `b2` | no |"))):
+            path = pathlib.Path(d, "retro", q + ".md")
+            path.parent.mkdir(exist_ok=True)
+            body = "# Retro archive · %s\n" % q
+            for s in stamps:
+                text = "| Date | Task | Commit | Diverged? |\n|---|---|---|---|\n" + s
+                h, b = rb.block("stamps", "1 oldest rotated", text)
+                body += b
+                lines.append("Rotated out: 1 oldest run stamps, verbatim in retro/%s.md sha256:%s" % (q, h[:12]))
+                texts.setdefault(q, []).append(s)
+            path.write_text(body, encoding="utf-8")
+        seed = plant(seed, "## Run stamps\n", "## Run stamps\n\n" + "\n\n".join(lines) + "\n")
+        p = write(d, seed)
+        code, out = run("verify", "--retro", p)
+        assert code == 0, "the planted floor does not verify: " + out
+        assert len(rotation_lines(seed)) == 5, "the plant did not seed five lines"
+        arch = os.path.join(d, "retro", "2026-Q4.md")
+        code, out = run("migrate", "--retro", p, "--archive", arch, "--write")
+        assert code == 0, out
+        after = pathlib.Path(p).read_text(encoding="utf-8")
+        ptr = sorted(rotation_lines(after), key=lambda x: x[1])
+        assert [(n, rel) for n, rel, _ in ptr] == [("2", "retro/2026-Q3.md"), ("3", "retro/2026-Q4.md")], ptr
+        for n, rel, short in ptr:
+            q = rel[len("retro/"):-3]
+            block = rb.archived_text(os.path.join(d, rel), short)
+            assert block and all(s in block[1] for s in texts[q]), "the %s block lost a stamp" % q
+        code, out = run("verify", "--retro", p)
+        assert code == 0, out
+        once = (pathlib.Path(p).read_bytes(), pathlib.Path(arch).read_bytes())
+        code, out = run("migrate", "--retro", p, "--archive", arch, "--write")
+        assert code == 0 and "nothing to move" in out, out
+        assert (pathlib.Path(p).read_bytes(), pathlib.Path(arch).read_bytes()) == once, "a second merge rewrote"
 
 
 @case("this repository's own retro floor is within budget and every pointer is proved")

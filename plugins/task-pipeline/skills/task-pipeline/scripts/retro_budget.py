@@ -14,10 +14,13 @@ on 2026-10-20 across ~50 projects the floor ran from ~3k to ~76k tokens, one of 
     retro_budget.py migrate [--retro PATH] [--archive PATH] [--write]
         moves narrative out of the floor VERBATIM into the archive, each block
         carrying the sha256 of the text it holds, and leaves a pointer in its place:
-        a stamp row over the stamp limit keeps Date, Topic and Commit; a standing row
-        over the row limit loses its `Because` cell; a standing instruction written as
+        a stamp row over the stamp limit keeps its table's own columns and their count,
+        its date, commit and version cells whole, caps the long prose cells at one common
+        length and ends its last cell with the pointer; a standing row over the row limit
+        loses its `Because` cell; a standing instruction written as
         a numbered list item keeps its bold rule and its `*(Retire ...)*` trigger; the
-        oldest run stamps past the cap of ten rotate out whole. Without --write it prints the
+        oldest run stamps past the cap of ten rotate out whole, and rotation leaves one
+        `Rotated out:` line per archive quarter, merging any earlier ones. Without --write it prints the
         plan and writes nothing. Exit 0 when the floor is then within budget, 1 when a
         row is still over (an instruction too long to shorten by moving its story:
         rewrite it by hand), 2 could not measure.
@@ -84,17 +87,76 @@ def table_rows(lines, span):
 
 
 def cells(row):
-    parts = row.strip().split("|")
-    return [c.strip() for c in parts[1:-1]]
+    """A table row's cells. An escaped `\\|` is text inside its cell, not a delimiter
+    (B-258: splitting on it widened the row that replaced it)."""
+    s = row.strip()
+    s = s[1:] if s.startswith("|") else s
+    s = s[:-1] if s.endswith("|") and not s.endswith("\\|") else s
+    return [c.strip() for c in re.split(r"(?<!\\)\|", s)]
+
+
+def header_of(lines, i):
+    """Index of the header line of the table holding row i."""
+    k = i
+    while k > 0 and lines[k - 1].startswith("|"):
+        k -= 1
+    return k
 
 
 def header_cols(lines, i):
     """Column count of the table holding row i, read from its header (a `|` inside a
     cell's text must not widen the row that replaces it)."""
-    k = i
-    while k > 0 and lines[k - 1].startswith("|"):
-        k -= 1
-    return len(cells(lines[k]))
+    return len(cells(lines[header_of(lines, i)]))
+
+
+# A short identifier cell (a date, a commit, a version, an id) is never cut to keep a long
+# prose cell (B-258: `working tree` became `working…` while a 200-character Task stayed).
+ID_MAX = 40
+ID_CELL = re.compile(r"^(?:\d{4}-\d{2}-\d{2}\b.*|`?[0-9a-f]{7,40}`?|`?v?\d+\.\d+\.\d+[\w.+-]*`?"
+                     r"|#\d+|[A-Z]{1,6}-\d+)$")
+ID_HEAD = re.compile(r"^(?:date|when|commit|sha|hash|base|version|ver|tag|release|pr|id)\b", re.I)
+MIN_CAP = 8
+
+
+def stamp_label(lines, i):
+    """`<date> <first other identifier>` of a stamp table row, for messages and archive
+    headings: the column holding the commit differs from table to table."""
+    c, head = cells(lines[i]), cells(lines[header_of(lines, i)])
+    ids = [x for j, x in enumerate(c[1:], 1)
+           if is_id(x, head[j] if j < len(head) else "")]
+    return " ".join(([c[0]] if c else []) + ids[:1])
+
+
+def is_id(cell, name):
+    return len(cell) <= ID_MAX and bool(ID_CELL.match(cell) or ID_HEAD.match(name.strip()))
+
+
+def clip(cell, cap):
+    """The cell cut to at most `cap` characters, ending in `…`. A cut never ends on a
+    backslash: it would escape the delimiter that follows."""
+    if len(cell) <= cap:
+        return cell
+    return cell[:cap - 1].rstrip().rstrip("\\").rstrip() + "…"
+
+
+def fit_stamp(c, head, ptr, limit):
+    """A stamp row in its table's own shape: as many cells as the header, identifier cells
+    whole, every prose cell capped at one common length K (the largest K that fits), and
+    the pointer appended to the last cell."""
+    n = len(head)
+    if len(c) > n:      # unescaped pipes in the narrative: the overflow is the last cell's text
+        c = c[:n - 1] + [" \\| ".join(c[n - 1:])]
+    c = c + [""] * (n - len(c))
+    prose = [j for j in range(n) if not is_id(c[j], head[j])]
+
+    def build(cap):
+        out = [clip(x, cap) if j in prose else x for j, x in enumerate(c)]
+        out[-1] = (out[-1] + " " + ptr) if out[-1] else ptr
+        return "| " + " | ".join(out) + " |"
+    cap = max([len(c[j]) for j in prose] or [0])
+    while cap > MIN_CAP and len(build(cap)) > limit:
+        cap -= 1
+    return build(cap)
 
 
 ITEM = re.compile(r"^(\d+)\.\s")
@@ -203,8 +265,7 @@ def measure(text, budget=BUDGET, row=ROW, stamp=STAMP):
             over.append("standing row %s is %d chars, over %d" % (label, width(sp), row))
     for sp in stm:
         if width(sp) > stamp:
-            c = cells(lines[sp[0]]) if lines[sp[0]].startswith("|") else []
-            label = "%s %s" % (c[0], c[2] if len(c) > 2 else "") if c \
+            label = stamp_label(lines, sp[0]) if lines[sp[0]].startswith("|") \
                 else "%s (list)" % (stamp_date(lines, sp) or "undated")
             over.append("stamp %s is %d chars, over %d" % (label.strip(), width(sp), stamp))
     if len(std) > CAP:
@@ -256,14 +317,31 @@ ROTATED = re.compile(r"^Rotated out: ([0-9]+) oldest run stamps, verbatim in (\S
 ARCHIVED = re.compile(r"<!-- sha256:([0-9a-f]{64}) -->\n(.*?)\n(?=\n#{2,3} |\Z)", re.S)
 
 
-def rotation_lines(lines, span, rel):
-    """(line index, stamp count, short sha) of each rotation pointer into `rel`."""
-    out = []
+def rotation_lines(lines, span, rel=None):
+    """(line index, stamp count, short sha) of each rotation pointer into `rel`; with no
+    `rel`, {archive: [those triples]} for every archive a rotation line names."""
+    out = {}
     for k in range(span[0], span[1]):
         r = ROTATED.match(lines[k])
-        if r and r.group(2) == rel:
-            out.append((k, int(r.group(1)), r.group(3)))
-    return out
+        if r:
+            out.setdefault(r.group(2), []).append((k, int(r.group(1)), r.group(3)))
+    return out if rel is None else out.get(rel, [])
+
+
+def earlier_rotations(lines, span, rel, path):
+    """The rotation lines into `rel` whose archive block still hashes: ([(offset, line
+    index, text)], summed stamp count). A line that does not resolve is named and left as
+    its own line, never merged away unproved."""
+    earlier, count = [], 0
+    for k, n, short in rotation_lines(lines, span, rel):
+        prior = archived_text(path, short)
+        if prior is None:
+            print("migrate: the rotation line sha256:%s does not resolve in %s; "
+                  "it stays as its own line" % (short, rel))
+            continue
+        earlier.append((prior[0], k, prior[1]))
+        count += n
+    return earlier, count
 
 
 def archived_text(path, short):
@@ -290,6 +368,22 @@ def cmd_check(a):
     return 0
 
 
+def append_blocks(archive, blocks):
+    """Append blocks to an archive, creating it with its header first."""
+    if not blocks:
+        return
+    os.makedirs(os.path.dirname(os.path.abspath(archive)), exist_ok=True)
+    if not os.path.exists(archive):
+        with open(archive, "w", encoding="utf-8") as fh:
+            fh.write("# Retro archive · %s\n\n**Append-only. Queried, never read in full.** "
+                     "Blocks moved here by `retro_budget.py migrate` carry the sha256 of the "
+                     "text they hold; the floor keeps a pointer to it.\n"
+                     % os.path.basename(archive)[:-3])
+    with open(archive, "a", encoding="utf-8") as fh:
+        for b in blocks:
+            fh.write(b)
+
+
 def cmd_migrate(a):
     text = read(a.retro)
     m = measure(text, a.budget, a.row, a.stamp)
@@ -301,6 +395,8 @@ def cmd_migrate(a):
     head = m["spans"][STAMPS][0]
     notes = []      # pointer lines inserted under the Run stamps heading
     rotated = set()
+    merged = set()  # archives whose rotation lines this run already merged
+    elsewhere = []  # (archive path, block, label, rel): blocks bound for another quarter's file
     if len(m["stm"]) > CAP:
         # The cap rotates the OLDEST stamps out whole (references/retrospective.md, *The
         # stamp table is capped at ten*). Oldest is read from the date, never from the
@@ -362,15 +458,9 @@ def cmd_migrate(a):
             # into the same archive are re-archived with this one as a single block, and
             # their lines give way to one line naming it. The archive stays append-only:
             # the earlier blocks remain, only the floor stops pointing at them.
-            count, earlier = len(rotated), []
-            for k, n, short in rotation_lines(lines, m["spans"][STAMPS], rel):
-                prior = archived_text(archive, short)
-                if prior is None:
-                    print("migrate: the rotation line sha256:%s does not resolve in %s; "
-                          "it stays as its own line" % (short, rel))
-                    continue
-                earlier.append((prior[0], k, prior[1]))
-                count += n
+            earlier, count = earlier_rotations(lines, m["spans"][STAMPS], rel, archive)
+            count += len(rotated)
+            merged.add(rel)
             for _, k, _ in earlier:
                 moved.append((k, k + 1, [], None, None))
             if earlier:
@@ -380,9 +470,39 @@ def cmd_migrate(a):
                 moved.append((sp[0], sp[1], [], None, None))
             notes.append(("Rotated out: %d oldest run stamps, verbatim in %s sha256:%s"
                           % (count, rel, h[:12]), b, "%d oldest run stamps rotated" % len(rotated)))
+    # B-246: a floor that already holds several rotation lines for one archive (written
+    # before 1.101.0, or into a quarter this run does not rotate into) gets one line per
+    # archive on this run too: the earlier blocks are re-archived as one, in their own
+    # quarter's file, and their lines give way to the line naming it.
+    base = os.path.dirname(os.path.abspath(a.retro))
+    for other, group in sorted(rotation_lines(lines, m["spans"][STAMPS]).items()):
+        # Only an archive a floor pointer can prove (`retro/YYYY-QN.md`) is written to.
+        if other in merged or len(group) < 2 or not POINTER.match(other + " sha256:" + "0" * 12):
+            continue
+        path = os.path.join(base, other)
+        earlier, count = earlier_rotations(lines, m["spans"][STAMPS], other, path)
+        if len(earlier) < 2:
+            continue
+        h, b = block("stamps", "%d oldest rotated" % count,
+                     "\n".join(t for _, _, t in sorted(earlier)))
+        for _, k, _ in earlier:
+            moved.append((k, k + 1, [], None, None))
+        note = "Rotated out: %d oldest run stamps, verbatim in %s sha256:%s" % (count, other, h[:12])
+        label = "%d rotation lines merged" % len(earlier)
+        if other == rel:
+            notes.append((note, b, label))
+        else:
+            notes.append((note, None, None))
+            elsewhere.append((path, b, label, other))
     for sp in m["stm"]:
         i = sp[0]
         if sp in rotated or len("\n".join(lines[sp[0]:sp[1]])) <= a.stamp:
+            continue
+        if any(POINTER.search(l) for l in lines[sp[0]:sp[1]]):
+            # Already migrated: its narrative is in the archive. Moving it again would
+            # archive the same row on every run (B-258).
+            print("migrate: stamp %s already points at its archive and is still over %d; "
+                  "shorten it by hand" % (stamp_date(lines, sp) or "undated", a.stamp))
             continue
         if not lines[i].startswith("|"):
             # A list stamp keeps its bold title; the narrative moves.
@@ -401,23 +521,17 @@ def cmd_migrate(a):
             moved.append((sp[0], sp[1], ["- %s%s" % (t, ptr)], b,
                           "stamp %s (list)" % (stamp_date(lines, sp) or "undated")))
             continue
-        c = cells(lines[i])
-        if len(c) < 3:
+        head = cells(lines[header_of(lines, i)])
+        if len(head) < 2:
+            print("migrate: stamp %s sits in a one-column table; shorten it by hand"
+                  % (stamp_date(lines, sp) or "undated"))
             continue
-        h, b = block("stamp", "%s %s" % (c[0], c[2]), lines[i])
-        ptr = "moved: %s sha256:%s" % (rel, h[:12])
-        # the table keeps its column count: the pointer fills Verdict, `·` the rest
-        tail = ["·"] * max(0, header_cols(lines, i) - 4)
-
-        def row_of(topic):
-            return "| " + " | ".join([c[0], topic, c[2], ptr] + tail) + " |"
-
-        topic = c[1]
-        new = row_of(topic)
-        if len(new) > a.stamp:
-            keep = max(8, len(topic) - (len(new) - a.stamp) - 1)
-            new = row_of(topic[:keep].rstrip() + "…")
-        moved.append((i, i + 1, [new], b, "stamp %s %s" % (c[0], c[2])))
+        label = stamp_label(lines, i)
+        h, b = block("stamp", label, lines[i])
+        # B-258: the row keeps its table's own header and column count; identifier cells
+        # stay whole, the long prose cells are capped evenly, the pointer ends the last cell.
+        new = fit_stamp(cells(lines[i]), head, "moved: %s sha256:%s" % (rel, h[:12]), a.stamp)
+        moved.append((i, i + 1, [new], b, "stamp %s" % label))
     if m["bytes"] > a.budget:
         # Prune paragraphs between the stamps were a measured share of the floor
         # (*A prune that retires nothing writes its count into the stamp row*): over
@@ -440,7 +554,8 @@ def cmd_migrate(a):
     if notes:
         moved.append((head + 1, head + 1, sum([["", n] for n, _, _ in notes], []), None, None))
         for n, b, label in notes:
-            moved.append((head + 1, head + 1, [], b, label))
+            if b:
+                moved.append((head + 1, head + 1, [], b, label))
     for s0, s1 in m["std"]:
         item = "\n".join(lines[s0:s1])
         if len(item) <= a.row:
@@ -480,20 +595,14 @@ def cmd_migrate(a):
         if label:
             print("migrate: %s -> %s%s" % (label, rel, "" if s0 == s1 else " (%d -> %d chars)" % (
                 len("\n".join(lines[s0:s1])), len("\n".join(new)))))
+    for _, _, label, other in elsewhere:
+        print("migrate: %s -> %s" % (label, other))
     if not a.write:
         print("migrate: dry run, nothing written (pass --write)")
         return 0
-    os.makedirs(os.path.dirname(os.path.abspath(archive)), exist_ok=True)
-    if not os.path.exists(archive):
-        with open(archive, "w", encoding="utf-8") as fh:
-            fh.write("# Retro archive · %s\n\n**Append-only. Queried, never read in full.** "
-                     "Blocks moved here by `retro_budget.py migrate` carry the sha256 of the "
-                     "text they hold; the floor keeps a pointer to it.\n"
-                     % os.path.basename(archive)[:-3])
-    with open(archive, "a", encoding="utf-8") as fh:
-        for _, _, _, b, _ in moved:
-            if b:
-                fh.write(b)
+    append_blocks(archive, [b for _, _, _, b, _ in moved if b])
+    for path, b, _, _ in elsewhere:
+        append_blocks(path, [b])
     # Rebuild from the bottom so earlier spans keep their indices.
     for s0, s1, new, _, _ in sorted(moved, key=lambda x: (x[0], x[1]), reverse=True):
         lines[s0:s1] = new
