@@ -1,3 +1,26 @@
+## v1.102.4: the Bash hooks start no process in a project with no run
+
+- **Fewer processes per Bash call, same verdicts** (hub board row B-310). The plugin's Bash
+  hooks run on every Bash call in every project, and they started processes before learning
+  there was no run. Measured by PID delta (macOS allocates PIDs in order; minimum of 25 runs,
+  the hook's own bash included): `release-gate.sh` 14, `gate-observer.sh` 3 and
+  `memory-nudge.sh` 1, so 18 per Bash call in a project with no `.task-pipeline/run.md`, and 23
+  with a run in flight (14, 4 and 5). Now 3 (1, 1, 1) and 11 (5, 4, 2). Three changes:
+  `release-gate.sh` tests for the ledger before it reads stdin or starts python3 (`-e`, as
+  the python asks `os.path.exists`, so a ledger path that is a directory is still refused as
+  unreadable); it splits its `state`, `act`, `why` verdict with parameter expansion instead
+  of three `printf | cut` pipelines, keeping `cut`'s field rules, and a verdict of more than
+  one line still goes through the pipelines; `gate-observer.sh` reads stdin after the ledger
+  test; `memory-nudge.sh` finds its scripts directory from `${BASH_SOURCE[0]}` without
+  `$(cd "$(dirname …)" && pwd)`. Behaviour is unchanged: a differential run of the old and
+  new hooks over 4,950 cases (eight ledger states, five flows, 30 payloads, python3 working
+  and broken) gave 0 differences in exit code, stdout, stderr and ledger contents.
+  `test/release_gate_test.py` (74, three new): with no ledger each Bash hook exits 0 silent and starts
+  none of python3, cat, cut, dirname (PATH shims log any start; red on 1.102.3, which started
+  cat and python3), a negative control that the shims do see python3, and a refusal that
+  carries its act and whole reason. `test/memory_nudge_test.py` (43, two new): the run marker is still
+  honoured when the hook is started by a bare name or a relative path.
+
 ## v1.102.3: stamp rows keep their table's shape, one rotation line per quarter, apply_patch gated
 
 Guards: 531 → **531**; property checks 15 → **15**. No negative was added: the new checks are

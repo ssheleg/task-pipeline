@@ -1,6 +1,14 @@
 # Verification — task-pipeline
 
-## Shipped state — v1.102.3 (NOT SHIPPED until the v1.102.3 release run is read)
+## Shipped state — v1.102.4 (NOT SHIPPED until the v1.102.4 release run is read)
+
+v1.102.4 ships hub board row B-310 in `hooks/release-gate.sh`, `hooks/gate-observer.sh` and
+`hooks/memory-nudge.sh`: 3 processes per Bash call in a project with no run (was 18), 11 with one
+(was 23), verdicts unchanged (`test/release_gate_test.py` 74, `test/memory_nudge_test.py` 43). Its
+card passes the checker: `docs/evidence/specs/2026-10-28-v11024-release-impact.md`.
+
+v1.102.3 was read shipped on 2026-10-28: release run 40528794932 success, GitHub release
+`v1.102.3`, `npm view task-pipeline-skill version` 1.102.3.
 
 v1.102.3 ships B-258 and B-246 in `retro_budget.py migrate` (`test/audit_regressions/diet_retro_budget.py`,
 seven new cases, six red on 1.102.2) and B-211's task-pipeline part in `hooks/build-gate.sh` and

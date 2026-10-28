@@ -43,10 +43,18 @@
 # crashing gate that fails open is worse than no gate, because it reads as one.
 set -uo pipefail
 
-input=$(cat 2>/dev/null || true)
-
 project="${CLAUDE_PROJECT_DIR:-$PWD}"
 ledger="$project/.task-pipeline/run.md"
+
+# Narrowness 2, before anything else starts (hub B-310): with no ledger every path
+# below ends in `skip` or `exit 0` with no output, so the answer is known without
+# reading stdin or starting python3. `-e`, not `-f`: the python below asks
+# `os.path.exists`, so a ledger path that is a directory still reaches it and is
+# still refused as unreadable. Leaving stdin unread is what memory-nudge.sh has
+# always done on a project with no run.
+[ -e "$ledger" ] || exit 0
+
+input=$(cat 2>/dev/null || true)
 
 decide() {
   # The payload travels in the environment, NOT on stdin: the heredoc below IS
@@ -265,9 +273,27 @@ if [ $status -ne 0 ] || [ -z "$verdict" ]; then
   exit 2
 fi
 
-state=$(printf '%s' "$verdict" | cut -f1)
-act=$(printf '%s' "$verdict" | cut -f2)
-why=$(printf '%s' "$verdict" | cut -f3)
+# The verdict is `state<TAB>act<TAB>why`, split in the shell itself rather than by
+# three `printf | cut` pipelines (nine processes per call, hub B-310). Each value is
+# what `cut -fN` gives on one line: a line with no tab is its own field 1, 2 and 3;
+# a line with one tab has an empty field 3; a field ends at the next tab. A verdict
+# of more than one line (a newline inside a declared command or stage id) keeps the
+# original pipelines, so that case reads exactly as before.
+case "$verdict" in
+  *$'\n'*)
+    state=$(printf '%s' "$verdict" | cut -f1)
+    act=$(printf '%s' "$verdict" | cut -f2)
+    why=$(printf '%s' "$verdict" | cut -f3) ;;
+  *$'\t'*)
+    state=${verdict%%$'\t'*}
+    rest=${verdict#*$'\t'}
+    act=${rest%%$'\t'*}
+    case "$rest" in
+      *$'\t'*) rest=${rest#*$'\t'}; why=${rest%%$'\t'*} ;;
+      *) why= ;;
+    esac ;;
+  *) state=$verdict act=$verdict why=$verdict ;;
+esac
 
 case "$state" in
   skip|ok) exit 0 ;;

@@ -838,6 +838,82 @@ it("B-211: an apply_patch touching only the run's artefacts is silent", an_apply
 it("B-211: a malformed apply_patch payload is silent", a_malformed_apply_patch_payload_is_silent)
 it("B-211: hooks.json routes apply_patch to build-gate and memory-nudge", the_hooks_json_matchers_name_apply_patch)
 
+# --- B-310 (hub board): no run ledger means no process beyond the hook's bash --
+#
+# A globally installed plugin pays its hooks on every Bash call of every project.
+# release-gate.sh started python3 and three `printf | cut` pipelines (14 processes,
+# measured by PID delta) before learning there was no run; gate-observer.sh read
+# stdin with `cat` first. With no ledger each of the three Bash hooks must exit 0,
+# print nothing and start nothing: python3, cat, cut and dirname are shims on PATH
+# that write their name to a log, and the log must stay empty.
+HOOKS = os.path.join(ROOT, "plugins", "task-pipeline", "hooks")
+SHIMMED = ("python3", "python", "cat", "cut", "dirname")
+
+
+def run_shimmed(script, payload, ledger=None, shimmed=SHIMMED):
+    with tempfile.TemporaryDirectory() as project, tempfile.TemporaryDirectory() as fake:
+        log = os.path.join(fake, "started.log")
+        for name in shimmed:
+            shim = os.path.join(fake, name)
+            with open(shim, "w") as fh:
+                fh.write("#!/bin/sh\necho %s >> '%s'\nexit 1\n" % (name, log))
+            os.chmod(shim, 0o755)
+        if ledger is not None:
+            os.makedirs(os.path.join(project, ".task-pipeline"))
+            with open(os.path.join(project, ".task-pipeline", "run.md"), "w") as fh:
+                fh.write(ledger)
+        env = dict(os.environ, CLAUDE_PROJECT_DIR=project,
+                   PATH=fake + os.pathsep + os.environ["PATH"])
+        proc = subprocess.run(["bash", os.path.join(HOOKS, script)], input=payload,
+                              env=env, cwd=project, capture_output=True, text=True)
+        started = open(log).read().split() if os.path.exists(log) else []
+        return proc.returncode, proc.stdout, proc.stderr, started
+
+
+def no_ledger_starts_nothing():
+    pre = json.dumps({"hook_event_name": "PreToolUse", "tool_name": "Bash",
+                      "tool_input": {"command": "git tag v1.2.3"}})
+    post = json.dumps({"hook_event_name": "PostToolUse", "tool_name": "Bash",
+                       "tool_input": {"command": "npm test"},
+                       "tool_response": {"stdout": "ok\n", "stderr": "", "interrupted": False}})
+    for script, payload in (("release-gate.sh", pre), ("release-gate.sh", ""),
+                            ("release-gate.sh", "not json {{{"),
+                            ("gate-observer.sh", post), ("memory-nudge.sh", post)):
+        code, out, err, started = run_shimmed(script, payload)
+        what = "%s with %r" % (script, payload[:40])
+        assert code == ALLOW, "%s: exit %d in a project running no pipeline" % (what, code)
+        assert out == "" and err == "", "%s spoke in a project running no pipeline: %r %r" % (what, out, err)
+        assert started == [], "%s started %s in a project running no pipeline" % (what, started)
+
+
+def the_shims_do_catch_a_started_python():
+    """The negative control: with a ledger the gate does start python3, the shim
+    logs it, and its failure is still refused as an outward act (only python3 is
+    shimmed here, so the payload is read)."""
+    code, _, err, started = run_shimmed(
+        "release-gate.sh", json.dumps({"tool_input": {"command": "git tag v1.2.3"}}), NO_STAGE6_LEDGER,
+        shimmed=("python3",))
+    assert "python3" in started, "the shim log missed a started python3: %r" % started
+    assert code == BLOCK, "a failed python3 let an outward act through (exit %d): %s" % (code, err)
+
+
+it("B-310: with no ledger, the Bash hooks exit 0 silent and start no process", no_ledger_starts_nothing)
+it("B-310: the process shims see python3 when a run is in flight", the_shims_do_catch_a_started_python)
+
+
+# B-310: the verdict is split in the shell; every refusal reads exactly as the
+# `cut` pipelines produced it, field 3 included.
+def a_refusal_carries_its_whole_reason():
+    _, err = run("git tag v9.9.9", FAILED_LEDGER)
+    assert "`git tag` is an outward, irreversible act" in err, err
+    assert "passed in this run — no `stage: 6 … verdict pass` line in the ledger." in err, err
+    code, err, _ = run_raw("", NO_STAGE6_LEDGER)
+    assert code == BLOCK and "received an unreadable hook payload (empty payload)," in err, err
+
+
+it("B-310: a refusal carries its act and its whole reason", a_refusal_carries_its_whole_reason)
+
+
 if failures:
     for f in failures:
         print("FAIL: " + f)

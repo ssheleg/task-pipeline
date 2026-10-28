@@ -1,3 +1,22 @@
+## v1.102.4: the Bash hooks start no process in a project with no run, branch `waves/1028-task-pipeline-hooks` (2026-10-28)
+
+- **Objective.** Hub board row B-310: the plugin's Bash hooks started 18 processes per Bash call
+  in a project with no run; cut the count with every verdict, message and exit code unchanged.
+- **Done.** B-161 closed in `docs/evidence/backlog.md`. `hooks/release-gate.sh` (ledger test
+  before stdin and python3; verdict split in the shell, multi-line verdicts keep the `cut`
+  pipelines), `hooks/gate-observer.sh` (stdin after the ledger test), `hooks/memory-nudge.sh`
+  (scripts directory from `${BASH_SOURCE[0]}`), both copies of `references/hooks.md`; card
+  `docs/evidence/specs/2026-10-28-v11024-release-impact.md` (PASS). Measured by PID delta
+  (minimum of 25 runs, the hook's bash included): 18 to 3 per Bash call with no run, 23 to 11
+  with one. Checks run: a 4,950-case differential of the 1.102.3 and new hooks (0 differences),
+  `test/release_gate_test.py` (74; the no-ledger case red on 1.102.3),
+  `test/memory_nudge_test.py` (43), `npm test`.
+- **Open.** A verdict of more than one line (a newline inside a declared `gate.command` or stage
+  id) makes the release gate's `state` unmatched and it exits 0: a fail-open kept as it was,
+  because this release changes no verdict; proposed to the hub board as a row.
+- **Next task.** After merge: tag `v1.102.4` with the hub's `release-member.js`, watch the tag's
+  release run, then the sshlg-skills pin bump; then the highest open board row.
+
 ## v1.102.3: stamp rows keep their table, one rotation line per quarter, apply_patch gated, branch `waves/1027-task-pipeline` (2026-10-27)
 
 - **Objective.** Hub board waves 2026-10-27: B-258 (`retro_budget.py migrate` broke stamp tables
