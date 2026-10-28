@@ -126,6 +126,8 @@
 
 Rows leave the table above only into this list, one line each, with the commit.
 
+- **B-161 · The Bash hooks started 18 processes per Bash call in a project with no run** (v1.102.4, this change; hub B-310): `release-gate.sh` read stdin, started python3 and split its verdict with three `printf | cut` pipelines before learning there was no ledger; `gate-observer.sh` read stdin first; `memory-nudge.sh` found its scripts with `cd`/`dirname`. Now 3 per Bash call with no run, 11 with one (was 23), by PID delta; a 4,950-case differential of old and new hooks found 0 differences. `test/release_gate_test.py`: three new checks, one red on 1.102.3; `test/memory_nudge_test.py`: two new cases.
+
 - **B-160 · Three prompts the hub routes to task-pipeline had no phrase in its SKILL.md** (v1.102.3, this change; hub B-84): `## Triggers` now advertises 'write tests'/«напиши тесты», 'cut a release'/«зарелизь»/«выпусти релиз», 'remove dead code'/«удали мёртвый код»; the description is unchanged. `evals/task-pipeline.evals.json`: TRIG-13 to TRIG-15.
 
 - **B-159 · The build gate never acted in Codex** (v1.102.3, this change; hub B-211, task-pipeline part): Codex edits through `apply_patch`, the patch in `tool_input.command`, and `hooks/build-gate.sh` read only `file_path`. The PreToolUse and memory-nudge matchers name `apply_patch`; the gate reads every Add, Update, Delete and Move-to path and asks when one is gated; `references/hooks.md` states Codex's missing `PostToolUseFailure`. `test/release_gate_test.py`: four new checks, two red on 1.102.2.

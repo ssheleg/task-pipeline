@@ -20,7 +20,14 @@
 set -uo pipefail
 ledger="${CLAUDE_PROJECT_DIR:-$PWD}/.task-pipeline/run.md"
 [ -f "$ledger" ] || exit 0
-TP_SCRIPTS="$(cd "$(dirname "${BASH_SOURCE[0]}")/../skills/task-pipeline/scripts" 2>/dev/null && pwd)" \
+# The scripts directory without `$(cd "$(dirname …)" && pwd)`, which started two
+# processes per call (hub B-310). `dirname` of a bare name is `.`; a directory that
+# does not exist leaves TP_SCRIPTS empty, as the failed `cd` did.
+here=${BASH_SOURCE[0]}
+case "$here" in */*) here=${here%/*} ;; *) here=. ;; esac
+TP_SCRIPTS="$here/../skills/task-pipeline/scripts"
+[ -d "$TP_SCRIPTS" ] || TP_SCRIPTS=
+TP_SCRIPTS="$TP_SCRIPTS" \
 python3 - "$ledger" <<'PY' 2>/dev/null || true
 import hashlib, json, os, re, sys
 ledger = sys.argv[1]

@@ -26,10 +26,12 @@
 # running a pipeline.
 set -uo pipefail
 
-input=$(cat 2>/dev/null || true)
 project="${CLAUDE_PROJECT_DIR:-$PWD}"
 ledger="$project/.task-pipeline/run.md"
+# The ledger test comes before stdin is read (hub B-310): with no run, reading the
+# payload starts `cat` for nothing. memory-nudge.sh has always exited unread here.
 [ -f "$ledger" ] || exit 0
+input=$(cat 2>/dev/null || true)
 
 HOOK_INPUT="$input" python3 - "$ledger" "$project" <<'PY' 2>/dev/null || true
 import json, os, re, sys, datetime

@@ -1491,6 +1491,11 @@ three quarters of the work on this run.
 
 ## Releases that carry no stamp — stated, not stamped
 
+**`v1.102.4` carries no stamp, declared before its tag.** It ships hub board row B-310 (the Bash
+hooks start no process in a project with no run, and fewer with one; verdicts unchanged); its card is
+`docs/evidence/specs/2026-10-28-v11024-release-impact.md`. The run was driven from sshlg-skills as a
+wave build node; no run diverged here, so no entry.
+
 **`v1.102.3` carries no stamp, declared before its tag.** It ships hub board rows B-258 and B-246
 (`retro_budget.py migrate`) and B-211's task-pipeline part (the build gate reads Codex's
 `apply_patch`) and B-84 (three trigger phrases); its card is

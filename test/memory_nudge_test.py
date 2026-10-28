@@ -133,6 +133,22 @@ def main():
     led.write_text(led.read_text(encoding="utf-8").replace("module map: none", "module map: `docs/map.md`")
                    + "stage: 4 Plan — gate manual — verdict pass — 2026-10-13T11:00Z\n", encoding="utf-8")
     ok(hook(mm) == "", "changing only the module-map field mid-run keeps the marker: silent")
+    # B-310: the scripts directory comes from ${BASH_SOURCE[0]} without `cd`/`dirname`. The
+    # run marker is read through stage_checkpoint.py from there, so a hook started by a
+    # relative path or a bare name must still honour it: a fresh stage line stays silent.
+    rel = project(HEAD + STAGE)
+    hook(rel)
+    subprocess.run([sys.executable, str(ck), "record", "--unavailable", "no Observatory", "--for-run"],
+                   cwd=rel, check=True, capture_output=True)
+    for n, (argv0, cwd) in enumerate(((HOOK.name, HOOK.parent),
+                                      (f"hooks/{HOOK.name}", HOOK.parent.parent)), start=4):
+        with (rel / ".task-pipeline" / "run.md").open("a", encoding="utf-8") as f:
+            f.write(f"stage: {n} S — gate auto — verdict pass — 2026-10-12T1{n}:00Z\n")
+        r2 = subprocess.run(["bash", argv0], input='{"tool_name":"Bash"}', cwd=cwd,
+                            env=dict(os.environ, CLAUDE_PROJECT_DIR=str(rel)),
+                            capture_output=True, text=True, timeout=60)
+        ok(r2.returncode == 0 and r2.stdout.strip() == "",
+           f"started as `bash {argv0}`, the hook honours the run marker (got {r2.stdout.strip()[:80]!r})")
     print(f"PASS: memory-nudge.sh — {CASES} cases")
 
 

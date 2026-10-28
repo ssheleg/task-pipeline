@@ -254,7 +254,7 @@ reusable part:
 | Narrowness | Why it is not a smaller feature |
 |---|---|
 | Only outward acts, never ordinary commits | stage 5 commits per task by design; a gate that fights the build loop is removed within a day |
-| Silent where no `.task-pipeline/run.md` exists | enabling the plugin must change nothing in a repository that runs no pipeline |
+| Silent where no `.task-pipeline/run.md` exists, before python3 starts | enabling the plugin must change nothing in a repository that runs no pipeline, and every Bash call there pays these hooks: each Bash hook tests for the ledger before it reads stdin or starts python3, so one Bash call costs three bash processes instead of eighteen (hub B-310; `test/release_gate_test.py`, "with no ledger, the Bash hooks exit 0 silent and start no process") |
 | Reads the ledger, never reruns a suite | `progress.md` already makes the ledger append-only; a second source of truth about "did stage 6 pass" is the failure this file warns about below |
 
 **Fail-closed, deliberately.** Every non-zero exit code other than `2` is
