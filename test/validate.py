@@ -7966,7 +7966,8 @@ def check_routed_triggers_still_advertised():
     `fail(` call below it, because such a check runs after PASS on a clean repo and never
     at all on a corrupted one.
     """
-    script = os.path.join(str(ROOT), "..", "..", "test", "advertised_check.js")
+    # B-304: a standalone CI clone points SSHLG_HUB_ROOT at a checkout of the hub.
+    script = os.path.join(os.environ.get("SSHLG_HUB_ROOT") or os.path.join(str(ROOT), "..", ".."), "test", "advertised_check.js")
     if not os.path.isfile(script):
         _UNLOOKED.append("routed triggers — no sshlg-skills umbrella above this checkout")
         return

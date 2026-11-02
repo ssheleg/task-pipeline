@@ -69,6 +69,13 @@ jobs:
       - name: Install jsonschema (enables full pipeline.example.json conformance pass)
         run: python3 -m pip install --quiet jsonschema
 
+      - name: The family hub, so the routed-triggers check looks instead of disclosing (B-304)
+        # Inside the hub the check sits two levels up; a standalone clone has no hub above it.
+        run: |
+          git clone --quiet --depth 1 https://github.com/ssheleg/sshlg-skills.git "$RUNNER_TEMP/sshlg-skills"
+          test -f "$RUNNER_TEMP/sshlg-skills/test/advertised_check.js"
+          echo "SSHLG_HUB_ROOT=$RUNNER_TEMP/sshlg-skills" >> "$GITHUB_ENV"
+
       - name: Structural validator
         run: python3 test/validate.py
 
