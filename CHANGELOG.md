@@ -1,4 +1,6 @@
-## v1.103.0: a prompt of several asks is split, researched in parallel, merged, and the rest filed
+## v1.103.1: a prompt of several asks is split, researched in parallel, merged, and the rest filed
+
+> **Why 1.103.1 and not 1.103.0.** The `v1.103.0` tag was cut against a tree that did not yet carry this release's line in `docs/evidence/retro.md` → *Releases that carry no stamp*; its release round stopped on that rule (run 42365245798), publish was skipped, and npm never left 1.102.4. The tag ruleset forbids deletion, so `v1.103.0` is declared dead there and this version carries the same payload.
 
 - **Stage 0 splits a request that carries several asks** (operator, 2026-11-06: a big
   dictated request is cut into modules first, each module researched in parallel, the
