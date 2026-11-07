@@ -774,12 +774,11 @@ def discover(root: pathlib.Path, artifacts: str) -> tuple[int, dict | None, list
     # kept it, wherever `paths.artifacts` put the root (`.pipeline`, `docs/runs`), as 1.102.4
     # read it. Exact name, nothing on the way a link; a hidden root is allowed here.
     own = f"{artifacts}/backlog.md"
-    if _present(root, own):
-        add(own, "known-path", own)
-    for path in list(KNOWN) + _remediation(root):
+    for path in [own] + list(KNOWN) + _remediation(root):
         if _present(root, path):
             add(path, "known-path", path)
         elif path not in deep_seen and path not in negset and _unwalkable(root, path):
+            deep_seen.add(path)
             deep.append({"kind": "unwalked", "path": path, "where": "known path"})  # a link, say
     trackers = []
     unresolved = []

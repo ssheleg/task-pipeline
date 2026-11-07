@@ -1330,8 +1330,26 @@ def case_discover_thirtieth_round():
         (d / "docs" / "runs").mkdir(parents=True)
         os.symlink(d / "elsewhere.md", d / "docs" / "runs" / "backlog.md")
         code, doc, _ = discover(d, "--artifacts", "docs/runs")
-        ok(code == 5 and doc["seed"] is None and {"kind": "seed-path-taken", "path": "docs/runs/backlog.md"} in doc["signals"],
+        ok(code == 5 and doc["seed"] is None and any(sg.get("path") == "docs/runs/backlog.md"
+                                                     and sg["kind"] in ("unwalked", "seed-path-taken") for sg in doc["signals"]),
            f"a seed path already taken is a signal, never seeded over ({code}, {doc['signals']})")
+    for art in ("docs/runs", ".pipeline"):
+        with tempfile.TemporaryDirectory(prefix="tp-bdisc-") as t:
+            d = tree(t, {"board.md": "| ID |\n", "docs/backlog.md": "| ID |\n", "README.md": "x\n"})
+            (d / art).mkdir(parents=True, exist_ok=True)
+            os.symlink(d / "board.md", d / art / "backlog.md")
+            code, doc, _ = discover(d, "--artifacts", art)
+            ok(code == 5 and doc["home"] is None
+               and {"kind": "unwalked", "path": f"{art}/backlog.md", "where": "known path"} in doc["signals"],
+               f"the run's own board as a link under {art} is a signal and stops a fallback home ({code}, {doc['home']})")
+    for target in ("nowhere.md", "backlog.md"):
+        with tempfile.TemporaryDirectory(prefix="tp-bdisc-") as t:
+            d = tree(t, {"src/main.py": "x\n"})
+            (d / "docs" / "runs").mkdir(parents=True)
+            os.symlink(target, d / "docs" / "runs" / "backlog.md")  # dangling, or a loop onto itself
+            code, doc, _ = discover(d, "--artifacts", "docs/runs")
+            ok(code == 5 and doc["seed"] is None and {"kind": "seed-path-taken", "path": "docs/runs/backlog.md"} in doc["signals"],
+               f"a dangling or looping link at the seed path is taken, never seeded through ({target}: {code}, {doc['signals']})")
     print("PASS: --discover holds on the thirtieth reader's fixtures")
 
 
