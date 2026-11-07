@@ -1576,7 +1576,8 @@ def case_discover_thirtieth_round():
                          ("Frozen; since 2026-09-01 open work moved to ../x/backlog.md", True),
                          ("Frozen. 2026-09-01 is the last update.", True),
                          ("This board (docs/backlog.md) replaces docs/TODO.md, frozen on 2026-09-01.", True),
-                         ("See frozen-2026-09-01.md for the old rows.", False)):
+                         ("See frozen-2026-09-01.md for the old rows.", False),
+                         ("Replaces docs/TODO.md, frozen on 2026-09-01.\n> Frozen 2026-10-01: open work moved to Linear.", True)):
         with tempfile.TemporaryDirectory(prefix="tp-bdisc-") as t:
             d = tree(t, {"docs/backlog.md": f"# Backlog\n\n{line}\n\n| ID |\n", "README.md": "x\n"})
             code, doc, _ = discover(d)
