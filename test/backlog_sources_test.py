@@ -1569,6 +1569,19 @@ def case_discover_thirtieth_round():
         d = tree(t, {"docs/backlog.md": "# Backlog\n\nReplaces docs/TODO.md, frozen on 2026-09-01.\n\n| ID |\n", "README.md": "x\n"})
         code, doc, _ = discover(d)
         ok(code == 0 and doc["home"]["path"] == "docs/backlog.md", f"a freeze of another file stays its own ({code}, {doc['home']})")
+    # Round 41: the order in a clause, every marker in a clause, markers past a clause break.
+    for line, frozen in (("> Frozen 2026-09-01, open work moved to docs/ROADMAP.md.", True),
+                         ("docs/TODO.md frozen on 2026-09-01, docs/backlog.md frozen on 2026-10-01.", True),
+                         ("**Status:** frozen | **Since:** 2026-09-01", True),
+                         ("Frozen; since 2026-09-01 open work moved to ../x/backlog.md", True),
+                         ("Frozen. 2026-09-01 is the last update.", True),
+                         ("This board (docs/backlog.md) replaces docs/TODO.md, frozen on 2026-09-01.", True),
+                         ("See frozen-2026-09-01.md for the old rows.", False)):
+        with tempfile.TemporaryDirectory(prefix="tp-bdisc-") as t:
+            d = tree(t, {"docs/backlog.md": f"# Backlog\n\n{line}\n\n| ID |\n", "README.md": "x\n"})
+            code, doc, _ = discover(d)
+            got = "docs/backlog.md" in doc["negated"]
+            ok(got == frozen and code == (5 if frozen else 0), f"{line!r}: frozen={got}, want {frozen} ({code})")
     print("PASS: --discover holds on the thirtieth reader's fixtures")
 
 

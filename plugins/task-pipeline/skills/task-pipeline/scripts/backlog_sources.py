@@ -644,19 +644,23 @@ def _frozen(root: pathlib.Path, path: str) -> bool:
     for h in _head(root, path):
         if not FROZEN_HEAD.search(h):
             continue
-        # Every marker on the line, each judged within its clause, in one pass over the clause:
-        # the freeze is this file's when no path stands before it in the clause, or this file's
-        # name does ("This file (docs/backlog.md, not docs/TODO.md) is frozen"; "...; this board
-        # frozen on ..."), and another file's only when every path before it is another file.
-        for piece in CLAUSE.split(h):
-            events = sorted([(m.start(), 0, m.group(1).rsplit("/", 1)[-1]) for m in PATH_IN_TEXT.finditer(piece)]
-                            + [(f.start(), 1, "") for f in FROZEN_HEAD.finditer(piece)])
-            names: set[str] = set()
-            for _, is_marker, name in events:
-                if not is_marker:
-                    names.add(name)
-                elif not names or me in names:
-                    return True
+        # Every marker on the line, each judged within the clause where it starts, in one sorted
+        # pass over the whole line (paths, markers and clause breaks), so a marker whose date sits
+        # past a `|` or `;` still counts: the freeze is this file's when no path stands before it
+        # in its clause, or this file's name does ("This file (docs/backlog.md, not docs/TODO.md)
+        # is frozen"; "...; this board frozen on ..."); another file's only when every path
+        # before it is another file. At one offset a path sorts before a marker.
+        events = sorted([(m.start(), 1, m.group(1).rsplit("/", 1)[-1]) for m in PATH_IN_TEXT.finditer(h)]
+                        + [(f.start(), 2, "") for f in FROZEN_HEAD.finditer(h)]
+                        + [(c.start(), 0, "") for c in CLAUSE.finditer(h)])
+        names: set[str] = set()
+        for _, kind, name in events:
+            if kind == 0:
+                names = set()
+            elif kind == 1:
+                names.add(name)
+            elif not names or me in names:
+                return True
     return False
 
 
