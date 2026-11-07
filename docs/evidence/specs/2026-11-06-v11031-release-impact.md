@@ -1,7 +1,7 @@
-# Release impact: task-pipeline v1.103.0
+# Release impact: task-pipeline v1.103.1
 
 schema: release-impact/1
-release: v1.103.0
+release: v1.103.1
 users: external
 date: 2026-11-06
 
@@ -16,9 +16,9 @@ date: 2026-11-06
 ## 2. Tracking
 
 - **Signals:** the tag's release run conclusion; `npm view task-pipeline-skill version`; a run that seeds a second board beside an existing one, or files a split item outside the discovered home; new issues on ssheleg/task-pipeline
-- **Baseline:** v1.102.4 on npm; `test/backlog_sources_test.py` 40 cases on 1.102.4 and 330 on 1.103.0 (Python 3.9, 3.11, 3.12, 3.13 and 3.14); `--discover` read back on 2026-11-06 over 156 repositories (each direct child of `~/DATA` that is not a symlink and has a `.git` directory, except names starting with `_`, ending in `-data`, or containing `backup`, `-wt-` or `obsidian`; a 157th, go-to-market-strategy, was created at 18:23 that day, after the measurement, and exits 5): 14 manifest, 22 instruction, 3 tracker, 39 known path, 69 signals (exit 5, read before seeding), 9 with no instruction file and nothing else (exit 4); 30 homes outside both artifact paths plus at least 10 boards or trackers reported as signals, each of which 1.102.4 would have duplicated
-- **Where:** `gh run list -R ssheleg/task-pipeline -b v1.103.0`; `npm view task-pipeline-skill version`; `python3 test/backlog_sources_test.py`; `gh issue list -R ssheleg/task-pipeline`
-- **Watch window:** 24 hours after the hub pins v1.103.0
+- **Baseline:** v1.102.4 on npm; `test/backlog_sources_test.py` 40 cases on 1.102.4 and 330 on 1.103.1 (Python 3.9, 3.11, 3.12, 3.13 and 3.14); `--discover` read back on 2026-11-06 over 156 repositories (each direct child of `~/DATA` that is not a symlink and has a `.git` directory, except names starting with `_`, ending in `-data`, or containing `backup`, `-wt-` or `obsidian`; a 157th, go-to-market-strategy, was created at 18:23 that day, after the measurement, and exits 5): 14 manifest, 22 instruction, 3 tracker, 39 known path, 69 signals (exit 5, read before seeding), 9 with no instruction file and nothing else (exit 4); 30 homes outside both artifact paths plus at least 10 boards or trackers reported as signals, each of which 1.102.4 would have duplicated
+- **Where:** `gh run list -R ssheleg/task-pipeline -b v1.103.1`; `npm view task-pipeline-skill version`; `python3 test/backlog_sources_test.py`; `gh issue list -R ssheleg/task-pipeline`
+- **Watch window:** 24 hours after the hub pins v1.103.1
 
 ## 3. Alerting
 
@@ -28,7 +28,7 @@ date: 2026-11-06
 
 ## 4. Rollback or hotfix
 
-- **Rollback:** re-pin task-pipeline 1.102.4 in sshlg-skills with a hub patch release, run `npx --yes sshlg-skills@latest update`, and `npm deprecate task-pipeline-skill@1.103.0` with the reason
+- **Rollback:** re-pin task-pipeline 1.102.4 in sshlg-skills with a hub patch release, run `npx --yes sshlg-skills@latest update`, and `npm deprecate task-pipeline-skill@1.103.1` with the reason
 - **Time to roll back:** about two hours (one hub release and one update on a loaded machine)
 - **Data reversible:** yes: the change is doctrine and a read-only discovery script; rows it caused to be filed stay valid rows on the project's own board
 - **Kill switch:** none needed beyond the rollback: `--discover` writes nothing, and the doctrine is read, not executed

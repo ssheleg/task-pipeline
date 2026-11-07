@@ -1,11 +1,11 @@
 # Verification — task-pipeline
 
-## Shipped state — v1.103.0 (NOT SHIPPED until the v1.103.0 release run is read)
+## Shipped state — v1.103.1 (NOT SHIPPED until the v1.103.1 release run is read)
 
-v1.103.0 ships the intake split: `references/intake-split.md`, stage 0 phase 1a, and
+v1.103.1 ships the intake split: `references/intake-split.md`, stage 0 phase 1a, and
 `scripts/backlog_sources.py --discover` (`test/backlog_sources_test.py` 40 → 330 cases; read back
 over 156 git repositories under the operator's `~/DATA`). Its card:
-`docs/evidence/specs/2026-11-06-v11030-release-impact.md`.
+`docs/evidence/specs/2026-11-06-v11031-release-impact.md`.
 
 v1.102.4 was read shipped on 2026-11-06: release run 40666772831 success (2026-10-28), GitHub
 release `v1.102.4`, `npm view task-pipeline-skill version` 1.102.4.
