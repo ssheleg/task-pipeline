@@ -63,7 +63,8 @@ The full gate and freedom level remain in [stages.md](stages.md).
   ([`intake-split.md`](intake-split.md)). `scripts/backlog_sources.py --discover` names
   where the project already keeps its open work (a manifest, the board its instruction
   file names, an agent-sync register, a known path, a tracker); stage 0 seeds a board only
-  when it exits 4, or exits 5 and the signals, read first, name no live board. A prompt with one ask goes on; several asks are listed as `ASK-n`
+  when it exits 4, or exits 5 and the signals, read first, name no live board, and never over a
+  `seed-path-taken` path (it asks once where to seed instead). A prompt with one ask goes on; several asks are listed as `ASK-n`
   and triaged one by one; past the threshold they are cut into modules, researched in
   parallel, merged into one plan with a second pass, ranked, and every item but the top
   is filed on that board before stage 1.

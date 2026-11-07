@@ -43,7 +43,7 @@
   when stated), and always the project's instruction files themselves are `signals`, exit 5:
   read them before seeding. Exit 4 and a `seed` path are left for a tree with none of `CLAUDE.md`,
   `AGENTS.md`, `.claude/CLAUDE.md`, `.github/copilot-instructions.md` (a symlink of any kind
-  counts) or a README, and none of the above. Thirty-three blind readings reported 177 findings on
+  counts) or a README, and none of the above. Thirty-four blind readings reported 180 findings on
   the earlier cuts, among them substring names (`cloud-board.md`, `build.md`) taken for boards,
   prose ("if there is no docs/backlog.md") read as a negation that erased the board, a frozen
   copy returned as the home (project-observatory), and, round after round, a realistic way of
