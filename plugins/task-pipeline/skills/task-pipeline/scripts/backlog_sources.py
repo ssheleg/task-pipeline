@@ -71,7 +71,9 @@ path or a candidate) being picked; a home the manifest, a stated rule or a state
 still stands, with a note on stderr. A tree with none of
 those files and none of the above: `home` is null, `seed` is `<artifacts>/backlog.md`, exit 4.
 `<artifacts>/backlog.md` itself is probed first among the known paths, wherever the root was
-moved; a seed path already taken (a link, a frozen copy) is a `seed-path-taken` signal.
+moved; anything at that path that is not walked as a board (a link out of the repository,
+another letter case, a dangling link) is a `seed-path-taken` signal, never seeded over, and it
+stops a fallback home unless it is the same file as a board already found.
 A path that leaves the repository or passes through a symlink is never a candidate.
 
 Exit codes: 0 the manifest is readable and nothing undeclared was found, or there is no
@@ -774,12 +776,33 @@ def discover(root: pathlib.Path, artifacts: str) -> tuple[int, dict | None, list
     # kept it, wherever `paths.artifacts` put the root (`.pipeline`, `docs/runs`), as 1.102.4
     # read it. Exact name, nothing on the way a link; a hidden root is allowed here.
     own = f"{artifacts}/backlog.md"
+    own_full = os.path.join(os.fspath(root), artifacts, "backlog.md")
+    try:
+        own_there = os.path.lexists(own_full)
+    except (OSError, ValueError):
+        own_there = False
     for path in [own] + list(KNOWN) + _remediation(root):
+        if path == own and path.count("/") >= MAX_SEGMENTS and not own_there:
+            continue  # a deep root with nothing there is where the seed goes, not a signal
         if _present(root, path):
             add(path, "known-path", path)
         elif path not in deep_seen and path not in negset and _unwalkable(root, path):
             deep_seen.add(path)
             deep.append({"kind": "unwalked", "path": path, "where": "known path"})  # a link, say
+    # Something sits at the run's own board path that is neither walked nor a link inside the
+    # repository: a link out (a board kept in a sibling data repository) or another letter case
+    # on a case-insensitive disk. 1.102.4 read it; here it is a signal that stops a fallback home,
+    # unless it is the same file as a board already found.
+    if own_there and own not in seen_paths and own not in deep_seen and own not in negset:
+        same = False
+        for c in candidates:
+            try:
+                same = same or os.path.samefile(own_full, os.path.join(os.fspath(root), c["path"]))
+            except (OSError, ValueError):
+                pass
+        if not same:
+            deep_seen.add(own)
+            deep.append({"kind": "seed-path-taken", "path": own, "where": "known path"})
     trackers = []
     unresolved = []
     named_lines = {(name, n) for name, n, path, neg, said, _ in mentions if path in seen_paths}
@@ -864,7 +887,7 @@ def discover(root: pathlib.Path, artifacts: str) -> tuple[int, dict | None, list
         # kept finding phrasings it missed), the project's own words always are.
         for name in _instruction_files(root):
             signals.append({"kind": "instructions", "path": name})
-    if not home and not signals and os.path.lexists(os.path.join(os.fspath(root), artifacts, "backlog.md")):
+    if not home and own not in deep_seen and own_there:
         # Something already sits where the seed would go (a link, a frozen copy): never seed
         # over it; it is the first thing to read.
         signals.append({"kind": "seed-path-taken", "path": f"{artifacts}/backlog.md"})

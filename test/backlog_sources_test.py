@@ -24,6 +24,7 @@ import os
 import pathlib
 import subprocess
 import sys
+import shutil
 import tempfile
 
 sys.dont_write_bytecode = True
@@ -369,8 +370,9 @@ def case_discover_refuses_escape():
         (d / "docs").mkdir()
         os.symlink(out, d / "docs" / "evidence")
         code, doc, _ = discover(d)
-        ok(code == 5 and doc["home"] is None
-           and sig(doc) == [{"kind": "instruction-line", "where": "CLAUDE.md:1"}],
+        ok(code == 5 and doc["home"] is None and doc["seed"] is None
+           and {"kind": "instruction-line", "where": "CLAUDE.md:1"} in sig(doc)
+           and all(sg.get("kind") in ("instruction-line", "seed-path-taken") for sg in sig(doc)),
            f"a path outside the repository is never the home; its line is a signal, not a seed ({doc})")
     print("PASS: --discover refuses a path that leaves the repository")
 
@@ -1348,8 +1350,50 @@ def case_discover_thirtieth_round():
             (d / "docs" / "runs").mkdir(parents=True)
             os.symlink(target, d / "docs" / "runs" / "backlog.md")  # dangling, or a loop onto itself
             code, doc, _ = discover(d, "--artifacts", "docs/runs")
-            ok(code == 5 and doc["seed"] is None and {"kind": "seed-path-taken", "path": "docs/runs/backlog.md"} in doc["signals"],
+            ok(code == 5 and doc["seed"] is None and any(sg["kind"] == "seed-path-taken" and sg.get("path") == "docs/runs/backlog.md"
+                                                         for sg in doc["signals"]),
                f"a dangling or looping link at the seed path is taken, never seeded through ({target}: {code}, {doc['signals']})")
+    # Round 32: an own board behind a link out of the repository, or under another letter case.
+    with tempfile.TemporaryDirectory(prefix="tp-bdisc-") as t, tempfile.TemporaryDirectory(prefix="tp-bdisc-out-") as out:
+        pathlib.Path(out, "backlog.md").write_text("| ID |\n", encoding="utf-8")
+        for beside in (True, False):
+            d = pathlib.Path(t) / ("a" if beside else "b")
+            files = {"README.md": "x\n"}
+            if beside:
+                files["docs/backlog.md"] = "| ID |\n"
+            tree(str(d), files)
+            (d / "docs" / "evidence").mkdir(parents=True, exist_ok=True)
+            os.symlink(pathlib.Path(out, "backlog.md"), d / "docs" / "evidence" / "backlog.md")
+            code, doc, _ = discover(d)
+            ok(code == 5 and doc["home"] is None and doc["seed"] is None
+               and {"kind": "seed-path-taken", "path": "docs/evidence/backlog.md", "where": "known path"} in doc["signals"],
+               f"an own board linked out of the repository is a signal (docs/backlog.md beside: {beside}; {code}, {doc['home']})")
+    probe = tempfile.mkdtemp(prefix="tp-bdisc-case-")
+    pathlib.Path(probe, "x").write_text("x", encoding="utf-8")
+    insensitive = os.path.exists(os.path.join(probe, "X"))
+    shutil.rmtree(probe)
+    if insensitive:
+        with tempfile.TemporaryDirectory(prefix="tp-bdisc-") as t:
+            d = tree(t, {"docs/Evidence/backlog.md": "| ID |\n", "docs/backlog.md": "| ID |\n", "README.md": "x\n"})
+            code, doc, _ = discover(d)
+            ok(code == 5 and doc["home"] is None
+               and {"kind": "seed-path-taken", "path": "docs/evidence/backlog.md", "where": "known path"} in doc["signals"],
+               f"an own board under another letter case is a signal, not lost to docs/backlog.md ({code}, {doc['home']})")
+            code, doc, _ = discover(d, "--artifacts", "Docs")
+            ok(code == 0 and doc["home"]["path"] == "docs/backlog.md",
+               f"an own path that is the found board under another case is not a signal ({code}, {doc['home']})")
+    with tempfile.TemporaryDirectory(prefix="tp-bdisc-") as t:
+        d = tree(t, {"rows.md": "| ID |\n", "src/main.py": "x\n"})
+        (d / "docs").mkdir()
+        os.symlink("../rows.md", d / "docs" / "backlog.md")
+        code, doc, _ = discover(d, "--artifacts", "docs")
+        hits = [sg for sg in doc["signals"] if sg.get("path") == "docs/backlog.md"]
+        ok(code == 5 and len(hits) == 1, f"an own path that is also a known path is one signal, not two ({hits})")
+    with tempfile.TemporaryDirectory(prefix="tp-bdisc-") as t:
+        d = tree(t, {"src/main.py": "x\n"})
+        deep = "/".join(["a"] * 20)
+        code, doc, _ = discover(d, "--artifacts", deep)
+        ok(code == 4 and doc["seed"] == f"{deep}/backlog.md", f"a deep root with nothing there is still where the seed goes ({code})")
     print("PASS: --discover holds on the thirtieth reader's fixtures")
 
 
