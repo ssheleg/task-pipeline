@@ -39,7 +39,9 @@ that names no file here, such as a sibling data folder or another repository, a 
 work, a tracker named in any words, a directory or agent-sync config that could not be read,
 and always
 the project's instruction files themselves):
-read them before seeding. The listed lines rank what to read first; the rule that a project
+read them before seeding. A `seed-path-taken` signal is the seed path itself, already occupied
+(a link, a frozen copy, another letter case): read it, never write over it; if it names no live
+board, say so in the brief and ask once where to seed. The listed lines rank what to read first; the rule that a project
 which wrote instructions is read before a board is seeded is what prevents the duplicate,
 because no vocabulary is complete. Exit 5 is conservative by design: a false signal costs one line read, a
 false exit 4 starts a second board; one that names

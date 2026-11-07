@@ -61,7 +61,8 @@ names, an agent-sync register, `docs/backlog.md`, `docs/superpowers/backlog.md`,
 or a remediation queue, or a tracker such as Linear ([`intake-split.md`](intake-split.md)
 §1). That board is the home, and nothing is seeded beside it. Exit 5 lists `signals` to read
 first (a frozen board, a tracked backlog file elsewhere, a line naming a board outside the
-repository). Only when it exits 4, or the signals name no live board, stage 0 seeds `<artifacts>/backlog.md` from
+repository; `seed-path-taken`, the seed path already occupied, which is read and never written
+over). Only when it exits 4, or the signals name no live board, stage 0 seeds `<artifacts>/backlog.md` from
 [`templates/backlog.md`](../templates/backlog.md) and says so in the brief. Seeding is
 not a decision that needs asking: an empty board and no board are the same thing to
 work on, and only one of them can be appended to.

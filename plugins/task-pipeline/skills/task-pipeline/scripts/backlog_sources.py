@@ -793,7 +793,7 @@ def discover(root: pathlib.Path, artifacts: str) -> tuple[int, dict | None, list
     # repository: a link out (a board kept in a sibling data repository) or another letter case
     # on a case-insensitive disk. 1.102.4 read it; here it is a signal that stops a fallback home,
     # unless it is the same file as a board already found.
-    if own_there and own not in seen_paths and own not in deep_seen and own not in negset:
+    if own_there and own not in seen_paths and own not in deep_seen:  # a frozen own board too: read it
         same = False
         for c in candidates:
             try:

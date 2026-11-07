@@ -1394,6 +1394,24 @@ def case_discover_thirtieth_round():
         deep = "/".join(["a"] * 20)
         code, doc, _ = discover(d, "--artifacts", deep)
         ok(code == 4 and doc["seed"] == f"{deep}/backlog.md", f"a deep root with nothing there is still where the seed goes ({code})")
+    # Round 33: a frozen own board that points elsewhere is read, not lost to docs/backlog.md.
+    for pointer in ("open work moved to ../proj-data/backlog.md", "open work moved to Linear (team PRJ)"):
+        with tempfile.TemporaryDirectory(prefix="tp-bdisc-") as t:
+            d = tree(t, {"docs/evidence/backlog.md": f"# Backlog\n\nFrozen 2026-09-01: {pointer}.\n\n| ID |\n",
+                         "docs/backlog.md": "| ID |\n", "README.md": "x\n"})
+            code, doc, _ = discover(d)
+            ok(code == 5 and doc["home"] is None
+               and [sg for sg in doc["signals"] if sg["kind"] == "seed-path-taken"] == [
+                   {"kind": "seed-path-taken", "path": "docs/evidence/backlog.md", "where": "known path"}],
+               f"a frozen own board stops a fallback home and is named once ({pointer}: {code}, {doc['home']}, {doc['signals']})")
+    with tempfile.TemporaryDirectory(prefix="tp-bdisc-") as t, tempfile.TemporaryDirectory(prefix="tp-bdisc-out-") as out:
+        pathlib.Path(out, "backlog.md").write_text("| ID |\n", encoding="utf-8")
+        d = tree(t, {"README.md": "x\n"})
+        (d / "docs" / "evidence").mkdir(parents=True)
+        os.symlink(pathlib.Path(out, "backlog.md"), d / "docs" / "evidence" / "backlog.md")
+        code, doc, _ = discover(d)
+        ok(len([sg for sg in doc["signals"] if sg["kind"] == "seed-path-taken"]) == 1,
+           f"a link out at the seed path is named once, not twice ({doc['signals']})")
     print("PASS: --discover holds on the thirtieth reader's fixtures")
 
 
