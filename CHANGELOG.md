@@ -25,7 +25,8 @@
   each. The 30 homes: `docs/backlog.md` 11, `docs/BACKLOG.md` 7, a roadmap 6, `TASKS.md` or
   `docs/TASKS.md` 2, another backlog file 3, Linear 1.
   `--discover` collects board files from the manifest, the instruction files, agent-sync
-  registers (an `outline` or `notion` backend marked remote) and known paths, and picks the
+  registers (an `outline` or `notion` backend marked remote) and known paths (the run's own
+  `<artifacts>/backlog.md` first, wherever `paths.artifacts` moved the root), and picks the
   home strongest first: the manifest; a file named in an instruction clause about tracking
   ("open work is tracked in", «записывай в»), a board before a roadmap; a tracker named that
   way (Linear, Jira, GitHub issues, the Fabric board); a file named backlog; any candidate. A
@@ -41,7 +42,7 @@
   when stated), and always the project's instruction files themselves are `signals`, exit 5:
   read them before seeding. Exit 4 and a `seed` path are left for a tree with none of `CLAUDE.md`,
   `AGENTS.md`, `.claude/CLAUDE.md`, `.github/copilot-instructions.md` (a symlink of any kind
-  counts) or a README, and none of the above. Twenty-nine blind readings reported 162 findings on
+  counts) or a README, and none of the above. Thirty blind readings reported 165 findings on
   the earlier cuts, among them substring names (`cloud-board.md`, `build.md`) taken for boards,
   prose ("if there is no docs/backlog.md") read as a negation that erased the board, a frozen
   copy returned as the home (project-observatory), and, round after round, a realistic way of
@@ -56,7 +57,7 @@
   with signals (exit 5, read before seeding), 9 with no instruction file and nothing else
   (exit 4, seed). Selection: each direct child of `~/DATA` that is not a symlink and has a
   `.git` directory, except names starting with `_`, ending in `-data`, or containing `backup`,
-  `-wt-` or `obsidian`; a 157th, created at 18:23 that day, exits 5. An instruction file is read up to 1 MB, the negated paths are kept in a set, finding a file lists each directory and reads each path prefix once per run, and a path that text, agent-sync or git names counts only up to 16 segments (a manifest's declared path is read as the plain CLI reads it), so a pathological file, a folder of thousands of boards or chains 340 directories deep cost seconds, not minutes. A board path the walk refuses (deeper than that, hidden, over 700 characters, or reached through a link inside the repository) and an agent-sync register that is absent are signals, and while one stands no fallback file is picked as the home. With `docs/` unreadable, or a manifest path past the platform's limit, the plain CLI now exits 1 `not readable` instead of a traceback (3.9 to 3.13) or a silent "no manifest" (3.14), and `--discover` names the manifest as unreadable and picks no fallback home past it (a home a stated rule or a stated tracker names still stands, with a note on stderr). `test/backlog_sources_test.py`: 40 → 279 cases, green on Python 3.9, 3.11, 3.12, 3.13 and 3.14.
+  `-wt-` or `obsidian`; a 157th, created at 18:23 that day, exits 5. An instruction file is read up to 1 MB, the negated paths are kept in a set, finding a file lists each directory and reads each path prefix once per run, and a path that text, agent-sync or git names counts only up to 16 segments (a manifest's declared path is read as the plain CLI reads it), so a pathological file, a folder of thousands of boards or chains 340 directories deep cost seconds, not minutes. A board path the walk refuses (deeper than that, hidden, over 700 characters, or reached through a link inside the repository) and an agent-sync register that is absent are signals, and while one stands no fallback file is picked as the home. With `docs/` unreadable, or a manifest path past the platform's limit, the plain CLI now exits 1 `not readable` instead of a traceback (3.9 to 3.13) or a silent "no manifest" (3.14), and `--discover` names the manifest as unreadable and picks no fallback home past it (a home a stated rule or a stated tracker names still stands, with a note on stderr). `test/backlog_sources_test.py`: 40 → 284 cases, green on Python 3.9, 3.11, 3.12, 3.13 and 3.14.
 - `prioritisation.md`: several tasks named at once are ordered, none dropped. `decomposition.md`
   points to the earlier cut. `backlog.md` and the grill's `0 Work-list` row run the discovery
   before seeding. Board rows B-162 to B-166 filed from the retro harvest and from what this

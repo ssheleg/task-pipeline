@@ -1306,6 +1306,35 @@ def case_discover_twentyeighth_round():
     print("PASS: --discover holds on the twenty-eighth reader's fixtures")
 
 
+def case_discover_thirtieth_round():
+    """The thirtieth blind reading (2026-11-07): a project that moved its artifacts root
+    (`paths.artifacts`) keeps its board at `<root>/backlog.md`; 1.102.4 read it there, and
+    --discover probed only the fixed list, so it reported no board and printed that same file
+    as the path to seed."""
+    for art in ("docs/runs", ".pipeline"):
+        with tempfile.TemporaryDirectory(prefix="tp-bdisc-") as t:
+            d = tree(t, {f"{art}/backlog.md": "| ID | Status |\n|---|---|\n| B-1 | open |\n", "src/main.py": "x\n"})
+            code, doc, _ = discover(d, "--artifacts", art)
+            ok(code == 0 and doc["home"]["path"] == f"{art}/backlog.md" and doc["seed"] is None,
+               f"the board under a moved artifacts root ({art}) is the home, never a seed ({code}, {doc['home']}, {doc['seed']})")
+    with tempfile.TemporaryDirectory(prefix="tp-bdisc-") as t:
+        d = tree(t, {"docs/superpowers/backlog.md": "| ID |\n", "docs/backlog.md": "| ID |\n", "README.md": "x\n"})
+        code, doc, _ = discover(d, "--artifacts", "docs/superpowers")
+        ok(code == 0 and doc["home"]["path"] == "docs/superpowers/backlog.md",
+           f"the run's own board outranks an older docs/backlog.md beside it ({code}, {doc['home']})")
+        code, doc, _ = discover(d)
+        ok(code == 0 and doc["home"]["path"] == "docs/backlog.md",
+           f"with the default root the fixed order stands ({code}, {doc['home']})")
+    with tempfile.TemporaryDirectory(prefix="tp-bdisc-") as t:
+        d = tree(t, {"src/main.py": "x\n", "elsewhere.md": "| ID |\n"})
+        (d / "docs" / "runs").mkdir(parents=True)
+        os.symlink(d / "elsewhere.md", d / "docs" / "runs" / "backlog.md")
+        code, doc, _ = discover(d, "--artifacts", "docs/runs")
+        ok(code == 5 and doc["seed"] is None and {"kind": "seed-path-taken", "path": "docs/runs/backlog.md"} in doc["signals"],
+           f"a seed path already taken is a signal, never seeded over ({code}, {doc['signals']})")
+    print("PASS: --discover holds on the thirtieth reader's fixtures")
+
+
 if __name__ == "__main__":
     for case in (case_no_manifest, case_good_manifest, case_malformed, case_symlinked_source,
                  case_undeclared_finding, case_doctrine_names_script,
@@ -1322,6 +1351,7 @@ if __name__ == "__main__":
                  case_discover_fourteenth_round, case_discover_fifteenth_round,
                  case_discover_sixteenth_round, case_discover_twentyfirst_round,
                  case_discover_twentythird_round, case_discover_twentyfourth_round,
-                 case_discover_twentyfifth_round, case_discover_twentyeighth_round):
+                 case_discover_twentyfifth_round, case_discover_twentyeighth_round,
+                 case_discover_thirtieth_round):
         case()
     print(f"PASS: backlog_sources.py — {CASES} cases")

@@ -70,6 +70,8 @@ manifest that could not be looked at, or such a board path, also stops a fallbac
 path or a candidate) being picked; a home the manifest, a stated rule or a stated tracker names
 still stands, with a note on stderr. A tree with none of
 those files and none of the above: `home` is null, `seed` is `<artifacts>/backlog.md`, exit 4.
+`<artifacts>/backlog.md` itself is probed first among the known paths, wherever the root was
+moved; a seed path already taken (a link, a frozen copy) is a `seed-path-taken` signal.
 A path that leaves the repository or passes through a symlink is never a candidate.
 
 Exit codes: 0 the manifest is readable and nothing undeclared was found, or there is no
@@ -768,6 +770,12 @@ def discover(root: pathlib.Path, artifacts: str) -> tuple[int, dict | None, list
             stated.add(path)
     for f in (sync or {}).get("files", []):
         add(f, "agent-sync", ".claude/agent-sync.json")
+    # The run's own board first: `<artifacts>/backlog.md` is where earlier runs of this pipeline
+    # kept it, wherever `paths.artifacts` put the root (`.pipeline`, `docs/runs`), as 1.102.4
+    # read it. Exact name, nothing on the way a link; a hidden root is allowed here.
+    own = f"{artifacts}/backlog.md"
+    if _present(root, own):
+        add(own, "known-path", own)
     for path in list(KNOWN) + _remediation(root):
         if _present(root, path):
             add(path, "known-path", path)
@@ -857,6 +865,10 @@ def discover(root: pathlib.Path, artifacts: str) -> tuple[int, dict | None, list
         # kept finding phrasings it missed), the project's own words always are.
         for name in _instruction_files(root):
             signals.append({"kind": "instructions", "path": name})
+    if not home and not signals and os.path.lexists(os.path.join(os.fspath(root), artifacts, "backlog.md")):
+        # Something already sits where the seed would go (a link, a frozen copy): never seed
+        # over it; it is the first thing to read.
+        signals.append({"kind": "seed-path-taken", "path": f"{artifacts}/backlog.md"})
     seed = None if home or signals else f"{artifacts}/backlog.md"
     if seed:
         notes.append(f"no board found: seed {seed} from templates/backlog.md")
