@@ -79,6 +79,7 @@ among them); seed only when they name no live board.
 from __future__ import annotations
 
 import argparse
+import errno
 import json
 import os
 import pathlib
@@ -155,15 +156,18 @@ def _schema_errors(doc: dict) -> list[str]:
 
 def _manifest(root: pathlib.Path) -> str | None:
     """The one presence test both modes use: None when there is no manifest (absent, a link
-    loop or a dangling link, as 1.102.4 read them), "" when it is there, the error's name when
-    something is there that cannot be looked at (a docs/ without search permission)."""
+    loop or a dangling link: the errors pathlib's exists() swallowed, as 1.102.4 read them), ""
+    when it is there, the error's name when something may be there that cannot be looked at (a
+    docs/ without search permission, a path past the platform's limit)."""
     try:
         os.stat(root / MANIFEST)
         return ""
-    except PermissionError as exc:
-        return type(exc).__name__
-    except (OSError, ValueError):
+    except ValueError:
         return None
+    except OSError as exc:
+        if exc.errno in (errno.ENOENT, errno.ENOTDIR, errno.ELOOP, errno.EBADF):
+            return None
+        return type(exc).__name__
 
 
 def check(root: pathlib.Path, found: list[str]) -> tuple[int, dict | None, list[str]]:
@@ -694,7 +698,10 @@ def discover(root: pathlib.Path, artifacts: str) -> tuple[int, dict | None, list
         candidates.append({"path": path, "via": via, "evidence": evidence})
         seen_paths.add(path)
 
-    if _manifest(root) == "":  # an unreadable one is the unreadable-directory signal below
+    unread_manifest = _manifest(root)
+    if unread_manifest:  # declared sources this run cannot read: no home is guessed past them
+        notes.append(f"{MANIFEST}: not readable ({unread_manifest}); its declared sources are unknown")
+    if unread_manifest == "":
         code, harvest, reasons = check(root, [])
         if code == 1:
             return 1, None, reasons
@@ -805,7 +812,7 @@ def discover(root: pathlib.Path, artifacts: str) -> tuple[int, dict | None, list
     by_tracker = [{"path": None, "via": "tracker", "tracker": tracker["name"],
                    "evidence": tracker["where"]}] if tracker else []
     pick = by_manifest or by_rule or by_tracker or named or candidates
-    if deep and not (by_manifest or by_rule or by_tracker):
+    if (deep or unread_manifest) and not (by_manifest or by_rule or by_tracker):
         pick = []  # a board the instructions name, too deep to walk, outranks any file found here
     if pick is candidates and all(_queue(c["path"]) for c in candidates) \
             and any(p in BOARDS or "backlog" in p.lower() for p in negated):
@@ -817,6 +824,8 @@ def discover(root: pathlib.Path, artifacts: str) -> tuple[int, dict | None, list
     signals = []
     if home is None:
         signals += [{"kind": "negated", "path": p} for p in negated]
+        if unread_manifest:
+            signals.append({"kind": "unreadable", "path": MANIFEST})
         signals += deep
         signals += [{"kind": "tracked-file", "path": p} for p in _tracked_backlogs(root, notes)
                     if p not in negset]

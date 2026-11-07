@@ -1249,6 +1249,46 @@ def case_discover_twentyfifth_round():
     print("PASS: --discover holds on the twenty-fifth reader's fixtures")
 
 
+def case_discover_twentyeighth_round():
+    """The twenty-eighth blind reading (2026-11-07): a manifest path past the platform's limit
+    read as "no manifest" (exit 0) where 1.102.4 exited 1; and with a home elsewhere, --discover
+    passed over a manifest it could not look at."""
+    if os.name != "posix":
+        return
+    with tempfile.TemporaryDirectory(prefix="tp-bdisc-") as t:
+        limit = os.pathconf(t, "PC_PATH_MAX")
+        root = pathlib.Path(t)
+        while len(str(root)) < limit - 12:  # the root fits; root/docs/backlog-sources.json does not
+            root = root / ("r" * max(1, min(100, limit - 12 - len(str(root)) - 1)))
+        os.makedirs(root)
+        cwd = os.getcwd()
+        os.chdir(root)
+        try:
+            os.makedirs("docs")
+            pathlib.Path("docs/backlog-sources.json").write_text('{"schema": 2}', encoding="utf-8")
+            pathlib.Path("docs/backlog.md").write_text("| ID |\n", encoding="utf-8")
+        finally:
+            os.chdir(cwd)
+        r = subprocess.run([sys.executable, str(SCRIPT), "--root", str(root)], capture_output=True, text=True, timeout=60)
+        out = r.stdout + r.stderr
+        ok(r.returncode == 1 and "not readable" in out and "Traceback" not in out,
+           f"a manifest past the path limit is not read as absent ({r.returncode}, {out.strip()[:160]})")
+        code, doc, err = discover(root)
+        ok(code == 5 and doc["home"] is None and {"kind": "unreadable", "path": "docs/backlog-sources.json"} in doc["signals"],
+           f"--discover guesses no home past a manifest it cannot read ({code}, {doc and doc['home']})")
+    if os.geteuid() != 0:
+        with tempfile.TemporaryDirectory(prefix="tp-bdisc-") as t:
+            d = tree(t, {"docs/backlog-sources.json": "{}", "BACKLOG.md": "| ID |\n"})
+            os.chmod(d / "docs", 0o600)
+            try:
+                code, doc, _ = discover(d)
+            finally:
+                os.chmod(d / "docs", 0o755)
+            ok(code == 5 and doc["home"] is None,
+               f"an unsearchable docs/ holding a manifest stops a root BACKLOG.md becoming the home ({code}, {doc and doc['home']})")
+    print("PASS: --discover holds on the twenty-eighth reader's fixtures")
+
+
 if __name__ == "__main__":
     for case in (case_no_manifest, case_good_manifest, case_malformed, case_symlinked_source,
                  case_undeclared_finding, case_doctrine_names_script,
@@ -1265,6 +1305,6 @@ if __name__ == "__main__":
                  case_discover_fourteenth_round, case_discover_fifteenth_round,
                  case_discover_sixteenth_round, case_discover_twentyfirst_round,
                  case_discover_twentythird_round, case_discover_twentyfourth_round,
-                 case_discover_twentyfifth_round):
+                 case_discover_twentyfifth_round, case_discover_twentyeighth_round):
         case()
     print(f"PASS: backlog_sources.py — {CASES} cases")
