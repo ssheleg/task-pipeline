@@ -1473,6 +1473,18 @@ def case_discover_thirtieth_round():
                 os.chmod(d / ".pipeline", 0o755)
             ok(code == 5 and doc["seed"] is None and {"kind": "unreadable", "path": ".pipeline"} in doc["signals"],
                f"an unreadable artifacts root is a signal, never a blind seed ({code}, {doc['signals']})")
+    # Round 37: a directory that can be entered but not listed (0o311) is unreadable too.
+    if os.geteuid() != 0:
+        for dname, art in (("docs", None), (".pipeline", ".pipeline")):
+            with tempfile.TemporaryDirectory(prefix="tp-bdisc-") as t:
+                d = tree(t, {f"{dname}/backlog.md": "| ID |\n|---|\n| B-1 | open |\n"})
+                os.chmod(d / dname, 0o311)
+                try:
+                    code, doc, _ = discover(d, *(("--artifacts", art) if art else ()))
+                finally:
+                    os.chmod(d / dname, 0o755)
+                ok(code == 5 and doc["seed"] is None and {"kind": "unreadable", "path": dname} in doc["signals"],
+                   f"{dname}/ that can be entered but not listed is unreadable, never a blind seed ({code}, {doc['signals']})")
     print("PASS: --discover holds on the thirtieth reader's fixtures")
 
 
