@@ -12,7 +12,7 @@ from `super-ux`.
 | `brief.md` | `docs/evidence/specs/YYYY-MM-DD-<topic>-brief.md` | 0 — intake grill |
 | `carryover.md` | `docs/evidence/specs/YYYY-MM-DD-<topic>-carryover.md` | 0 seeds, all stages append, 10 reads |
 | `verification.md` | `docs/evidence/verification.md` | 8 writes a row per shipped REQ, 10 requires it, a human fills `Human` |
-| `backlog.md` | `docs/evidence/backlog.md` | 0 seeds when absent, any stage appends, 10 resolves and re-derives |
+| `backlog.md` | `docs/evidence/backlog.md` | 0 seeds it only when `backlog_sources.py --discover` finds no board, any stage appends, 10 resolves and re-derives |
 | `run.md` | `.task-pipeline/run.md` — **git-ignored**, one per run | 0 seeds it, every gate appends a verdict, every repeating pass a `touch:` line |
 | `context.md` | `CONTEXT.md` at the repo root (or per context) | 0 — grill, domain awareness |
 | `adr.md` | `docs/adr/NNNN-<slug>.md` | 0 — grill, hard-to-reverse decisions |

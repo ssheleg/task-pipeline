@@ -135,7 +135,7 @@ never that the work was skipped quietly.
   run's memory state: a previous run's "memory unavailable" marker is honoured only while
   its own ledger line is in the ledger, so a reseeded ledger — even the same day — is nudged
   again, and the stale marker is cleared at the next `stage_checkpoint.py record`.
-- **The board is read, or seeded.** `<artifacts>/backlog.md` ([`backlog.md`](backlog.md)) — its **open count is quoted in the brief**, measured by a command at the top of the run rather than inherited from the last run's report. Absent ⇒ seeded from the template and said so; an empty board and no board are the same thing to work on, and only one of them can be appended to.
+- **The board is found, read, or seeded.** The home `scripts/backlog_sources.py --discover` prints ([`intake-split.md`](intake-split.md) §1, [`backlog.md`](backlog.md)): its **open count is quoted in the brief**, measured by a command at the top of the run rather than inherited from the last run's report. Exit 4, no board anywhere, or exit 5 whose signals name no live board ⇒ `<artifacts>/backlog.md` seeded from the template and said so, unless a `seed-path-taken` signal stands: that path is never written over, the brief says so and stage 0 asks once where to seed; an empty board and no board are the same thing to work on, and only one of them can be appended to.
 
 ## 1 — Docs study
 - **Freedom: medium** — which sources to fetch is judgement; grounding contracts on fetched docs is not ([`gates.md`](gates.md) → *Axis C*).

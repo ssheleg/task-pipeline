@@ -1,3 +1,69 @@
+## v1.103.0: a prompt of several asks is split, researched in parallel, merged, and the rest filed
+
+- **Stage 0 splits a request that carries several asks** (operator, 2026-11-06: a big
+  dictated request is cut into modules first, each module researched in parallel, the
+  findings merged into one plan and run through once more, the top item first and the rest
+  on the project's backlog; a simple single task gets none of it). New
+  `references/intake-split.md`, phase 1a of `stage-00-intake.md`: list the asks as `ASK-n`
+  with the operator's phrase, triage each with `short_path.py`; one ask, or only small asks,
+  means no fan-out; otherwise modules by capability, one read-only researcher per module
+  (dossier shape plus the four fields of `prioritisation.md` §4, at most six at once, after
+  the 2026-10-28 quota run-out), the merge by iteration's integration pass, and a second pass
+  by a fresh reader over the merged plan alone. An order the operator states is kept; the
+  ladder orders the rest and drops none; the top item becomes the brief and every other one
+  gets a row on the board before stage 1. «Всё сразу», or items that share a seam no cut
+  separates, go to `/task-pipeline waves` instead.
+  Until now `grill.md` read every prompt as one brief and the module cut waited for stage 2
+  and a platform build.
+- **The board is found before anything is filed: `backlog_sources.py --discover`.** Stage 0
+  seeded `<artifacts>/backlog.md` whenever that one path was absent. Of the 156 repositories
+  measured on the operator's machine on 2026-11-06 (selection below), 30 have a home
+  `--discover` finds and neither `docs/evidence/backlog.md` nor `docs/superpowers/backlog.md`,
+  and at least 10 more keep a board or tracker it reports as signals (usa-immigration,
+  cmo-creative-agent, project-observatory, sshlg-brand-agent, nicegram-desktop, blog-cms,
+  underline-node, underline-chat, esim-ai-funnels-aptabase, nicegram-product-workspace): 1.102.4 would have started a second board beside
+  each. The 30 homes: `docs/backlog.md` 11, `docs/BACKLOG.md` 7, a roadmap 6, `TASKS.md` or
+  `docs/TASKS.md` 2, another backlog file 3, Linear 1.
+  `--discover` collects board files from the manifest, the instruction files, agent-sync
+  registers (an `outline` or `notion` backend marked remote) and known paths (the run's own
+  `<artifacts>/backlog.md` first, wherever `paths.artifacts` moved the root; anything else at that
+  path, a link out or another letter case, is a signal and never seeded over), and picks the
+  home strongest first: the manifest; a file named in an instruction clause about tracking
+  ("open work is tracked in", «записывай в»), a board before a roadmap; a tracker named that
+  way (Linear, Jira, GitHub issues, the Fabric board); a file named backlog; any candidate. A
+  file a filing rule negates ("do not file in", "no longer in", "is retired") is `negated`
+  unless another line states it, the manifest declares it or agent-sync names it; a board
+  whose own header says frozen or not canonical is `negated` unless the manifest declares it.
+  No home is not yet no board. A negated board, a tracked file named as a board elsewhere in the
+  tree (a closed report excepted), an instruction line about where work lives (a sibling data
+  folder, "не здесь, а в ssheleg/underline", "goes to", tickets, an issue-key template such as
+  `ESM-<number>`), a file its own clause calls the place of work ("Open defects live in X"), a
+  tracker named in any words (Linear, Jira, GitHub or GitLab issues, Trello, Notion, YouTrack,
+  Asana, ClickUp, Redmine, Azure DevOps, Shortcut, monday.com, Basecamp; the Fabric board only
+  when stated), and always the project's instruction files themselves are `signals`, exit 5:
+  read them before seeding. Exit 4 and a `seed` path are left for a tree with none of `CLAUDE.md`,
+  `AGENTS.md`, `.claude/CLAUDE.md`, `.github/copilot-instructions.md` (a symlink of any kind
+  counts) or a README, and none of the above. Forty-two blind readings reported 210 findings on
+  the earlier cuts, among them substring names (`cloud-board.md`, `build.md`) taken for boards,
+  prose ("if there is no docs/backlog.md") read as a negation that erased the board, a frozen
+  copy returned as the home (project-observatory), and, round after round, a realistic way of
+  saying where work lives that the vocabulary missed, so a project with a board got a blind
+  seed (usa-immigration, cmo-creative-agent, sshlg-brand-agent, nicegram-desktop, blog-cms,
+  underline-node, underline-chat, esim-ai-funnels-aptabase, nicegram-product-workspace). Each
+  is now a case, and the last class is closed by the rule rather than by the list: the
+  project's own instructions are read before a board is seeded, the matched lines only rank
+  what to read first. Names are matched exactly, because on a case-insensitive disk
+  `docs/BACKLOG.md` opens `docs/backlog.md`. Read back on the same 156: 14 homes from a
+  manifest, 22 from an instruction clause, 3 from a stated Linear tracker, 39 known paths, 69
+  with signals (exit 5, read before seeding), 9 with no instruction file and nothing else
+  (exit 4, seed). Selection: each direct child of `~/DATA` that is not a symlink and has a
+  `.git` directory, except names starting with `_`, ending in `-data`, or containing `backup`,
+  `-wt-` or `obsidian`; a 157th, created at 18:23 that day, exits 5. An instruction file is read up to 1 MB, the negated paths are kept in a set, finding a file lists each directory and reads each path prefix once per run, and a path that text, agent-sync or git names counts only up to 16 segments (a manifest's declared path is read as the plain CLI reads it), every run in the patterns that could overlap the literal after it is bounded (a fuzzer over all 35 patterns flags none), so a pathological file (a 1 MB line of one stem glued to itself included), a folder of thousands of boards or chains 340 directories deep cost seconds, not minutes. A board path the walk refuses (deeper than that, hidden, over 700 characters, or reached through a link inside the repository) and an agent-sync register that is absent are signals, and while one stands no fallback file is picked as the home. With `docs/` unreadable, or a manifest path past the platform's limit, the plain CLI now exits 1 `not readable` instead of a traceback (3.9 to 3.13) or a silent "no manifest" (3.14), and `--discover` names the manifest as unreadable and picks no fallback home past it (a home a stated rule or a stated tracker names still stands, with a note on stderr). `test/backlog_sources_test.py`: 40 → 330 cases, green on Python 3.9, 3.11, 3.12, 3.13 and 3.14.
+- `prioritisation.md`: several tasks named at once are ordered, none dropped. `decomposition.md`
+  points to the earlier cut. `backlog.md` and the grill's `0 Work-list` row run the discovery
+  before seeding. Board rows B-162 to B-166 filed from the retro harvest and from what this
+  change leaves out (a behavioural eval, a tracker adapter, the open `--discover` choices).
+
 ## v1.102.4: the Bash hooks start no process in a project with no run
 
 - **Fewer processes per Bash call, same verdicts** (hub board row B-310). The plugin's Bash

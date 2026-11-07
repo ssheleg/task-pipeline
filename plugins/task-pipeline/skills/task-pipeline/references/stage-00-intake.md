@@ -59,6 +59,15 @@ The full gate and freedom level remain in [stages.md](stages.md).
   the graph's own reply about itself, not a measurement of it). It is retrieval
   scoped by the task's own nouns, not a read of everything — and it is what makes
   phase 2's answers checkable instead of merely confident.
+- **Phase 1a: find the board, then split a request that carries several asks**
+  ([`intake-split.md`](intake-split.md)). `scripts/backlog_sources.py --discover` names
+  where the project already keeps its open work (a manifest, the board its instruction
+  file names, an agent-sync register, a known path, a tracker); stage 0 seeds a board only
+  when it exits 4, or exits 5 and the signals, read first, name no live board, and never over a
+  `seed-path-taken` path (it asks once where to seed instead). A prompt with one ask goes on; several asks are listed as `ASK-n`
+  and triaged one by one; past the threshold they are cut into modules, researched in
+  parallel, merged into one plan with a second pass, ranked, and every item but the top
+  is filed on that board before stage 1.
 - **Phase 1b — the documentation inventory**
   ([`documentation.md`](documentation.md)). Four questions, answered before the
   interview and written to `docs/DOCMAP.md` (seeded from
@@ -83,7 +92,7 @@ The full gate and freedom level remain in [stages.md](stages.md).
   starting on an unresolved divergence means building against a system that does
   not exist.
 - **Phase 1d — the short-path triage, and the proportional run: a small change
-  takes the short path by default.** This pipeline's boundary exempts a typo and a one-line edit; until 1.98.0
+  takes the short path by default** (after a split, it runs on the item this run keeps). This pipeline's boundary exempts a typo and a one-line edit; until 1.98.0
   the next size up still met eleven stages and five manual gates, because the short
   path was only *proposed* and silence took the full flow. Under a standing "decide and
   act" instruction silence is the normal answer, so a proposal was the full flow every

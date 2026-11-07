@@ -51,13 +51,21 @@ pass in each direction finds both.
 
 ## Seeded or picked up
 
-Stage 0's harvest reads `<artifacts>/backlog.md` when it exists — it is a source
-in the ledger like any other, and its **open count is quoted in the brief**, because a
+Stage 0's harvest reads the board `--discover` names (below), most often
+`<artifacts>/backlog.md` — it is a source in the ledger like any other, and its **open count is quoted in the brief**, because a
 run that begins without knowing what is already queued will cheerfully re-discover it.
 
-When the file is absent, stage 0 seeds it from
-[`templates/backlog.md`](../templates/backlog.md) and says so in the brief. Seeding is
-not a decision that needs asking: an empty board and no board are the same thing to
+**Look before seeding.** `scripts/backlog_sources.py --discover` finds the board the
+project already keeps, under any name: a manifest's source, a path the instruction file
+names, an agent-sync register, `docs/backlog.md`, `docs/superpowers/backlog.md`, a roadmap
+or a remediation queue, or a tracker such as Linear ([`intake-split.md`](intake-split.md)
+§1). That board is the home, and nothing is seeded beside it. Exit 5 lists `signals` to read
+first (a frozen board, a tracked backlog file elsewhere, a line naming a board outside the
+repository; `seed-path-taken`, the seed path already occupied, which is read and never written
+over). Only when it exits 4, or the signals name no live board, stage 0 seeds `<artifacts>/backlog.md` from
+[`templates/backlog.md`](../templates/backlog.md) and says so in the brief, unless a
+`seed-path-taken` signal stands: then the brief says so and stage 0 asks once where to seed.
+Whether to seed is not a decision that needs asking: an empty board and no board are the same thing to
 work on, and only one of them can be appended to.
 
 **A picked-up board is re-measured, not recalled.** Its open count comes from a command
