@@ -1,6 +1,10 @@
 # Verification — task-pipeline
 
-## Shipped state — v1.103.1 (NOT SHIPPED until the v1.103.1 release run is read)
+## Shipped state — v1.103.1
+
+v1.103.1 was read shipped on 2026-11-07: release run 42366771853 success (the publish job passed on its
+re-run at 15:19 UTC, after the operator set the npm trusted publisher with the permission `npm publish`;
+hub board row B-325), GitHub release `v1.103.1`, `npm view task-pipeline-skill version` 1.103.1.
 
 v1.103.1 ships the intake split: `references/intake-split.md`, stage 0 phase 1a, and
 `scripts/backlog_sources.py --discover` (`test/backlog_sources_test.py` 40 → 330 cases; read back

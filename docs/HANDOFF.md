@@ -1,3 +1,16 @@
+## v1.103.1: the intake split, shipped (2026-11-07)
+
+- **Objective.** Operator, 2026-11-06 (hub session 574eafda): cut a big request into modules, research
+  them in parallel and merge them into one plan; rank several asks, run the top one and file the rest
+  on the project's own board, found the way each project keeps it.
+- **Done.** PR #162 squash `60a707f` and release PR #163 squash `1f500a2`: `references/intake-split.md`,
+  stage 0 phase 1a, `scripts/backlog_sources.py --discover` (`test/backlog_sources_test.py` 330 cases).
+  Tag `v1.103.1`, release run 42366771853 success, `npm view task-pipeline-skill version` 1.103.1.
+  The `v1.103.0` tag is dead (its release round stopped before publishing; tags cannot be deleted).
+  Card: `docs/evidence/specs/2026-11-06-v11031-release-impact.md`.
+- **Open.** Non-blocking findings of all review rounds are in board row B-166.
+- **Next task.** The hub pins 1.103.1 as sshlg-skills 1.86.1; then the highest open board row.
+
 ## v1.102.4: the Bash hooks start no process in a project with no run, branch `waves/1028-task-pipeline-hooks` (2026-10-28)
 
 - **Objective.** Hub board row B-310: the plugin's Bash hooks started 18 processes per Bash call
