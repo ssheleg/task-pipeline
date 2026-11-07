@@ -1227,6 +1227,25 @@ def case_discover_twentyfifth_round():
                 os.chmod(d / "docs", 0o755)
             ok(r.returncode == 1 and "not readable" in r.stdout + r.stderr and "Traceback" not in r.stderr,
                f"a manifest behind an unreadable docs/ is not read as absent ({r.returncode}, {(r.stdout + r.stderr).strip()[:160]})")
+    with tempfile.TemporaryDirectory(prefix="tp-bdisc-") as t:
+        d = tree(t, {"work/rows.md": "| ID |\n", "docs/TODO.md": "- [ ] x\n"})
+        os.symlink(d / "work" / "rows.md", d / "work" / "backlog.md")
+        subprocess.run(["git", "-C", str(d), "init", "-q"], check=True)
+        subprocess.run(["git", "-C", str(d), "add", "-A"], check=True)
+        os.remove(d / "docs" / "TODO.md")
+        tree(t, {"docs/TODO.md": "- [ ] x\n"})
+        code, doc, _ = discover(d)
+        paths = {sg.get("path") for sg in doc["signals"] if sg["kind"] == "tracked-file"}
+        ok(code == 5 and {"work/backlog.md", "docs/TODO.md"} <= paths,
+           f"a tracked link named backlog and a tracked board-named file are signals, not a seed ({code}, {doc['signals']})")
+    with tempfile.TemporaryDirectory(prefix="tp-bdisc-") as t:
+        d = tree(t, {"src/main.py": "x\n"})
+        (d / "docs").mkdir()
+        os.symlink("backlog-sources.json", d / "docs" / "backlog-sources.json")
+        r = subprocess.run([sys.executable, str(SCRIPT), "--root", str(d)], capture_output=True, text=True, timeout=60)
+        code, doc, _ = discover(d)
+        ok(r.returncode == 0 and "no docs/backlog-sources.json" in r.stdout + r.stderr and code == 4,
+           f"a manifest link that loops reads as absent in both modes, as in 1.102.4 ({r.returncode}, {code})")
     print("PASS: --discover holds on the twenty-fifth reader's fixtures")
 
 

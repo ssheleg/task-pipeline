@@ -34,7 +34,7 @@ backend means the local file is a mirror), the paths a filing rule `negated` and
 input, never the board). Exit 4 means nothing at all: seed the printed `seed` path from
 `templates/backlog.md`; it is left for a tree with none of `CLAUDE.md`, `AGENTS.md`, `.claude/CLAUDE.md`,
 `.github/copilot-instructions.md` or a README (a symlink of any kind counts) and nothing else. Exit 5 means no home but `signals` (a frozen or negated board, a
-tracked file named backlog elsewhere in the tree, an instruction line about where work lives
+tracked file named as a board elsewhere in the tree, an instruction line about where work lives
 that names no file here, such as a sibling data folder or another repository, a file its own clause calls the place of
 work, a tracker named in any words, a directory or agent-sync config that could not be read,
 and always

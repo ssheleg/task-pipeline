@@ -153,15 +153,27 @@ def _schema_errors(doc: dict) -> list[str]:
     return out
 
 
+def _manifest(root: pathlib.Path) -> str | None:
+    """The one presence test both modes use: None when there is no manifest (absent, a link
+    loop or a dangling link, as 1.102.4 read them), "" when it is there, the error's name when
+    something is there that cannot be looked at (a docs/ without search permission)."""
+    try:
+        os.stat(root / MANIFEST)
+        return ""
+    except PermissionError as exc:
+        return type(exc).__name__
+    except (OSError, ValueError):
+        return None
+
+
 def check(root: pathlib.Path, found: list[str]) -> tuple[int, dict | None, list[str]]:
     """(exit code, the harvest list or None, reasons)."""
     mf = root / MANIFEST
-    try:
-        os.stat(mf)
-    except (FileNotFoundError, NotADirectoryError):
+    state = _manifest(root)
+    if state is None:
         return 0, None, [f"no {MANIFEST} — the harvest discovers its sources"]
-    except (OSError, ValueError) as exc:  # a manifest that cannot be looked at is not an absent one
-        return 1, None, [f"{MANIFEST}: not readable ({type(exc).__name__})"]
+    if state:  # a manifest that cannot be looked at is not an absent one
+        return 1, None, [f"{MANIFEST}: not readable ({state})"]
     try:
         doc = json.loads(mf.read_text(encoding="utf-8"))
     except (OSError, ValueError, RecursionError) as exc:
@@ -631,7 +643,7 @@ def _tracked_backlogs(root: pathlib.Path, notes: list[str]) -> list[str]:
             notes.append(f"git ls-files failed ({why[0][:160]}): tracked backlog files not listed")
         return []
     named = sorted({f for f in r.stdout.decode("utf-8", "replace").split("\0")
-                   if f and "backlog" in f.rsplit("/", 1)[-1].lower()
+                   if f and ("backlog" in f.rsplit("/", 1)[-1].lower() or _board_file(f))
                    and "{report}" not in f.rsplit("/", 1)[-1].lower()})  # a conflict lists one file per stage
     out = []
     walked = 0
@@ -682,7 +694,7 @@ def discover(root: pathlib.Path, artifacts: str) -> tuple[int, dict | None, list
         candidates.append({"path": path, "via": via, "evidence": evidence})
         seen_paths.add(path)
 
-    if os.path.exists(root / MANIFEST):
+    if _manifest(root) == "":  # an unreadable one is the unreadable-directory signal below
         code, harvest, reasons = check(root, [])
         if code == 1:
             return 1, None, reasons
