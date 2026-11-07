@@ -73,7 +73,8 @@ those files and none of the above: `home` is null, `seed` is `<artifacts>/backlo
 `<artifacts>/backlog.md` itself is probed first among the known paths, wherever the root was
 moved; anything at that path that is not walked as a board (a link out of the repository,
 another letter case, a dangling link) is a `seed-path-taken` signal, never seeded over, and it
-stops a fallback home unless it is the same file as a board already found.
+stops a fallback home unless it is the same file, under another letter case or a hard link, as
+a board already found (a symbolic link to that board still stops it).
 A path that leaves the repository or passes through a symlink is never a candidate.
 
 Exit codes: 0 the manifest is readable and nothing undeclared was found, or there is no
@@ -866,7 +867,7 @@ def discover(root: pathlib.Path, artifacts: str) -> tuple[int, dict | None, list
                     if p not in negset]
         if sync is None and os.path.lexists(root / ".claude/agent-sync.json"):
             signals.append({"kind": "unreadable", "path": ".claude/agent-sync.json"})
-        for dname in ("docs", ".claude", "docs/evidence", "docs/superpowers", "docs/audits"):
+        for dname in dict.fromkeys(("docs", ".claude", "docs/evidence", "docs/superpowers", "docs/audits", artifacts)):
             dpath = root / dname
             if os.path.isdir(dpath) and not os.access(dpath, os.R_OK | os.X_OK):
                 notes.append(f"{dname}/: not readable, a board inside it could not be looked for")
@@ -888,10 +889,11 @@ def discover(root: pathlib.Path, artifacts: str) -> tuple[int, dict | None, list
         # kept finding phrasings it missed), the project's own words always are.
         for name in _instruction_files(root):
             signals.append({"kind": "instructions", "path": name})
-    if not home and own_there and own not in deep_seen:
+    taken = {"kind": "seed-path-taken", "path": own, "where": "known path"}
+    if not home and own_there and taken not in signals:  # whichever pass saw the path first
         # The run's own board was found but something else stopped it being the home: the
         # seed path is taken all the same, and never written over.
-        signals.append({"kind": "seed-path-taken", "path": own, "where": "known path"})
+        signals.append(taken)
     seed = None if home or signals else f"{artifacts}/backlog.md"
     if seed:
         notes.append(f"no board found: seed {seed} from templates/backlog.md")

@@ -1433,6 +1433,46 @@ def case_discover_thirtieth_round():
         code, doc, _ = discover(d)
         ok({"kind": "seed-path-taken", "path": "docs/evidence/backlog.md", "where": "known path"} in doc["signals"],
            f"an in-repo link at the seed path is named seed-path-taken, the kind the doctrine protects ({doc['signals']})")
+    # Round 36: the seed path named first by an instruction line or agent-sync is still taken.
+    for name, extra in (("instruction line", {"CLAUDE.md": "Open work is tracked in docs/evidence/backlog.md.\n"}),
+                        ("agent-sync register", {".claude/agent-sync.json": json.dumps(
+                            {"idRegisters": {"b": {"file": "docs/evidence/backlog.md"}}})})):
+        with tempfile.TemporaryDirectory(prefix="tp-bdisc-") as t:
+            files = {"old/board.md": "# Board\n\nFrozen 2026-09-01: superseded.\n\n| ID |\n", "README.md": "x\n"}
+            files.update(extra)
+            d = tree(t, files)
+            (d / "docs" / "evidence").mkdir(parents=True)
+            os.symlink("../../old/board.md", d / "docs" / "evidence" / "backlog.md")
+            code, doc, _ = discover(d)
+            ok(code == 5 and doc["seed"] is None and [sg for sg in doc["signals"] if sg["kind"] == "seed-path-taken"] == [
+                {"kind": "seed-path-taken", "path": "docs/evidence/backlog.md", "where": "known path"}],
+               f"an occupied seed path that {name} named first is still taken, once ({code}, {doc['signals']})")
+    with tempfile.TemporaryDirectory(prefix="tp-bdisc-") as t:
+        d = tree(t, {"docs/evidence/backlog.md": "| ID |\n", "README.md": "x\n"})
+        code, doc, _ = discover(d)
+        ok(code == 0 and doc["home"]["path"] == "docs/evidence/backlog.md" and doc["signals"] == [],
+           f"the own board as the home carries no signal ({code}, {doc['signals']})")
+    probe = tempfile.mkdtemp(prefix="tp-bdisc-case-")
+    pathlib.Path(probe, "x").write_text("x", encoding="utf-8")
+    insensitive = os.path.exists(os.path.join(probe, "X"))
+    shutil.rmtree(probe)
+    if insensitive:
+        with tempfile.TemporaryDirectory(prefix="tp-bdisc-") as t:
+            d = tree(t, {"docs/evidence/backlog.md": "| ID |\n", "README.md": "x\n", "shared/roadmap.md": "- [ ] x\n"})
+            os.symlink("../shared/roadmap.md", d / "docs" / "ROADMAP.md")
+            code, doc, _ = discover(d, "--artifacts", "docs/Evidence")
+            ok(code == 5 and {"kind": "seed-path-taken", "path": "docs/Evidence/backlog.md", "where": "known path"} in doc["signals"],
+               f"the own path spelt in another case over a found board is still taken when no home stands ({code}, {doc['signals']})")
+    if os.geteuid() != 0:
+        with tempfile.TemporaryDirectory(prefix="tp-bdisc-") as t:
+            d = tree(t, {".pipeline/backlog.md": "| ID |\n"})
+            os.chmod(d / ".pipeline", 0)
+            try:
+                code, doc, _ = discover(d, "--artifacts", ".pipeline")
+            finally:
+                os.chmod(d / ".pipeline", 0o755)
+            ok(code == 5 and doc["seed"] is None and {"kind": "unreadable", "path": ".pipeline"} in doc["signals"],
+               f"an unreadable artifacts root is a signal, never a blind seed ({code}, {doc['signals']})")
     print("PASS: --discover holds on the thirtieth reader's fixtures")
 
 
