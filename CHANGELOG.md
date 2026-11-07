@@ -32,7 +32,7 @@
   file a filing rule negates ("do not file in", "no longer in", "is retired") is `negated`
   unless another line states it, the manifest declares it or agent-sync names it; a board
   whose own header says frozen or not canonical is `negated` unless the manifest declares it.
-  No home is not yet no board. A negated board, a tracked file named backlog elsewhere in the
+  No home is not yet no board. A negated board, a tracked file named as a board elsewhere in the
   tree (a closed report excepted), an instruction line about where work lives (a sibling data
   folder, "не здесь, а в ssheleg/underline", "goes to", tickets, an issue-key template such as
   `ESM-<number>`), a file its own clause calls the place of work ("Open defects live in X"), a
@@ -41,7 +41,7 @@
   when stated), and always the project's instruction files themselves are `signals`, exit 5:
   read them before seeding. Exit 4 and a `seed` path are left for a tree with none of `CLAUDE.md`,
   `AGENTS.md`, `.claude/CLAUDE.md`, `.github/copilot-instructions.md` (a symlink of any kind
-  counts) or a README, and none of the above. Twenty-six blind readings reported 151 findings on
+  counts) or a README, and none of the above. Twenty-seven blind readings reported 155 findings on
   the earlier cuts, among them substring names (`cloud-board.md`, `build.md`) taken for boards,
   prose ("if there is no docs/backlog.md") read as a negation that erased the board, a frozen
   copy returned as the home (project-observatory), and, round after round, a realistic way of

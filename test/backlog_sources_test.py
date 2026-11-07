@@ -1225,7 +1225,7 @@ def case_discover_twentyfifth_round():
                 r = subprocess.run([sys.executable, str(SCRIPT), "--root", str(d)], capture_output=True, text=True, timeout=60)
             finally:
                 os.chmod(d / "docs", 0o755)
-            ok(r.returncode == 1 and "not readable" in r.stdout + r.stderr and "Traceback" not in r.stderr,
+            ok(r.returncode == 1 and "not readable (PermissionError)" in r.stdout + r.stderr and "Traceback" not in r.stderr,
                f"a manifest behind an unreadable docs/ is not read as absent ({r.returncode}, {(r.stdout + r.stderr).strip()[:160]})")
     with tempfile.TemporaryDirectory(prefix="tp-bdisc-") as t:
         d = tree(t, {"work/rows.md": "| ID |\n", "docs/TODO.md": "- [ ] x\n"})

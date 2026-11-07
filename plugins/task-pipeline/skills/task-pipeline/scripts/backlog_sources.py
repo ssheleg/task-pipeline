@@ -61,7 +61,7 @@ A tracker mentioned on any other line is reported in `trackers` and never the ho
 Plan folders and handoff pages are `weak` signals: input to the harvest, never the board.
 Two board-named files with no manifest set `ambiguous` and print the finding that a manifest
 should choose. A board whose own header says frozen or not canonical is `negated`. No home
-but `signals` (a negated board, a tracked file named backlog elsewhere, an instruction line
+but `signals` (a negated board, a tracked file named as a board elsewhere, an instruction line
 about where work lives, a tracker named in any words, and always the instruction files
 themselves, `READ_FIRST` plus the README in any case, a probed directory that could not be read,
 and an agent-sync config that could not be read): exit 5, `seed` null. A tree with none of
@@ -629,7 +629,7 @@ def _frozen(root: pathlib.Path, path: str) -> bool:
 
 
 def _tracked_backlogs(root: pathlib.Path, notes: list[str]) -> list[str]:
-    """Tracked `.md` files named backlog anywhere in the tree: not a home (a report may be
+    """Tracked `.md` files named as a board (backlog, todo, tasks, roadmap...) anywhere in the tree: not a home (a report may be
     called that), but a reason not to seed blindly (usa-immigration, cmo-creative-agent)."""
     try:
         r = subprocess.run(["git", "-C", str(root), "ls-files", "-z", "--", "*.md"],
@@ -811,7 +811,7 @@ def discover(root: pathlib.Path, artifacts: str) -> tuple[int, dict | None, list
             and any(p in BOARDS or "backlog" in p.lower() for p in negated):
         pick = []  # the board is frozen; a roadmap beside it is no home by default
     home: dict | None = dict(pick[0]) if pick else None
-    # No home is not yet "no board". A frozen or negated board, a tracked file named backlog
+    # No home is not yet "no board". A frozen or negated board, a tracked file named as a board
     # elsewhere in the tree, or an instruction line about the board that names no file here
     # (a board in a sibling data folder) is a signal: exit 5, read them before seeding.
     signals = []
