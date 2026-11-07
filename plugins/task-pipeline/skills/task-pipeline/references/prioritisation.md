@@ -31,6 +31,11 @@ and then starting theirs. Not a second ask, not a hedge, not a silent substituti
 operator who knows what they are doing is the most reliable prioritiser in the system, and
 an agent that argues with them twice has made itself expensive to use.
 
+**When they name several tasks at once**, an order they state is kept, the ladder orders
+the rest and drops none: the top one runs now, every other one is filed on the project's
+board with its rank
+([`intake-split.md`](intake-split.md) §5).
+
 ## 1. The impact ladder
 
 Impact is the rung, not a feeling. The ladder exists so a bug and a feature can be compared

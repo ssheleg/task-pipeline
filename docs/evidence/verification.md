@@ -1,6 +1,15 @@
 # Verification — task-pipeline
 
-## Shipped state — v1.102.4 (NOT SHIPPED until the v1.102.4 release run is read)
+## Shipped state — v1.103.0 (NOT SHIPPED until the v1.103.0 release run is read)
+
+v1.103.0 ships the intake split: `references/intake-split.md`, stage 0 phase 1a, and
+`scripts/backlog_sources.py --discover` (`test/backlog_sources_test.py` 40 → 272 cases; read back
+over 156 git repositories under the operator's `~/DATA`). Its card:
+`docs/evidence/specs/2026-11-06-v11030-release-impact.md`.
+
+v1.102.4 was read shipped on 2026-11-06: release run 40666772831 success (2026-10-28), GitHub
+release `v1.102.4`, `npm view task-pipeline-skill version` 1.102.4.
+
 
 v1.102.4 ships hub board row B-310 in `hooks/release-gate.sh`, `hooks/gate-observer.sh` and
 `hooks/memory-nudge.sh`: 3 processes per Bash call in a project with no run (was 18), 11 with one

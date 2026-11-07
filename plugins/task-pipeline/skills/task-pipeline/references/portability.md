@@ -83,6 +83,7 @@ a row pointing outside the bundle is the defect this file exists to catch.
 | What a stage-3/4 self-review must read back, and that its trace is computed numbers | `references/spec.md`, `references/planning.md`, `references/learned.md` |
 | What a stage reads, and which host files bind it | `references/artifacts.md` |
 | The design conversation, its hard gate, UI detection, user paths | `references/brainstorm.md` |
+| **Intake split**: a prompt of several asks; find the project's board, list the asks, the fan-out threshold, parallel module research, the merged plan and its second pass, the top kept and the rest filed | `references/intake-split.md` |
 | Cutting a platform into modules, brick criteria, build order | `references/decomposition.md` |
 | **Wave mode** — the whole board: the inventory, the canvas, the one question batch, the wave cut and the close pass | `references/waves.md` |
 | **Release iteration** — the loop around the waves; the shared lesson store is optional, detected by the tools the session lists | `references/iteration.md` |

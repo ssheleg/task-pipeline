@@ -20,6 +20,10 @@ Stage-4 leaf sizing still applies when work is handed to independent agents; ski
 
 ## When it applies
 
+A prompt that carries several asks is cut earlier, at stage 0
+([`intake-split.md`](intake-split.md)): asks into modules, researched in parallel, merged,
+the top item kept. This section cuts the one item a run keeps, when it is a platform.
+
 Decompose when any of these is true:
 
 - the brief names several independent capabilities ("accounts, billing, reporting");

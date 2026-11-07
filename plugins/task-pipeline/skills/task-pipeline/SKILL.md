@@ -96,7 +96,8 @@ archive, verbatim and hash-proved.
    `references/continuity.md`; absent means off, and the mode never collapses a
    `manual` gate) and the optional companions: super-ux for UI tasks, context7,
    wiki-update, graphify (`references/companion-skills.md`).
-2. **Run stage 0.** Harvest, then the gap check, then the proportional decision
+2. **Run stage 0.** Harvest, find the board, split a prompt of several asks (the top
+   kept, the rest filed), the gap check, the proportional decision
    (`references/stage-00-intake.md`). **Entered from super-ux** (a validated
    `docs/ux/` chain or a `docs/ux/plans/…` fix plan exists)? Check `/ux-lint` green,
    confirm scope in one line and skip to the first stage with real work.
@@ -136,6 +137,7 @@ one section at a time; never preload all details). The rest loads on its trigger
 
 | Reference | Read when |
 |---|---|
+| `references/intake-split.md` | every run (§1, the board); several asks (§2-§5) |
 | `references/grill.md` | the gap check leaves a material unknown |
 | `references/knowledge-sources.md` | a source needs more than its ledger row: the code graph, the wiki, a lesson store, a carried-in claim, a stale row |
 | `references/companion-skills.md` | a user-facing task (the provider rule), a substituted skill set, or a companion is missing |
@@ -149,7 +151,7 @@ All stages run on the **one model confirmed at preflight**.
 
 | # | Stage | Gate | Type |
 |---|---|---|---|
-| 0 | Intake grill — **mandatory** | source ledger written with its `Contradictions:` line; `docs/DOCMAP.md` answered and intent reconciled against as-built; the retro floor read in full, its bytes printed; autonomy sweep covered; UI: `surface_class` recorded; brief locked and confirmed | auto |
+| 0 | Intake grill — **mandatory** | source ledger written with its `Contradictions:` line; board found, every ask but the kept one filed; `docs/DOCMAP.md` answered and intent reconciled against as-built; the retro floor read in full, its bytes printed; autonomy sweep covered; UI: `surface_class` recorded; brief locked and confirmed | auto |
 | 1 | Docs study | contracts grounded on fetched docs | auto |
 | 2 | Brainstorm + decompose | design approved; UI verdict recorded; every REQ answered; **the queue is an artifact** — a work graph validates and its coverage names no unserved REQ; platform: module map approved | auto |
 | 3 | Spec | committed + reviewed; UI: chain validated, linter green, scenarios and `SCR-` traced; COPY and VISUAL are a parallel layer after UX, and where both ran their convergence check is recorded; VISUAL is checked by its director record | auto |

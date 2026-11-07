@@ -54,7 +54,8 @@ from outside, and only one of them means nothing has closed.
 
 ## How rows arrive
 
-1. **Stage 0** seeds this file when it is absent, and reads it when it is present.
+1. **Stage 0** seeds this file only when `backlog_sources.py --discover` finds no board, and
+   reads it when it is the home.
 2. **Any stage, mid-run** — the moment something is said aloud and not done. Same rule
    as the carry-over ledger: *deferred out loud, or lost.*
 3. **Stage 10** — every carry-over row that is unresolved arrives here with a real id,
