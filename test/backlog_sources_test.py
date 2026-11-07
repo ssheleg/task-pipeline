@@ -1485,6 +1485,44 @@ def case_discover_thirtieth_round():
                     os.chmod(d / dname, 0o755)
                 ok(code == 5 and doc["seed"] is None and {"kind": "unreadable", "path": dname} in doc["signals"],
                    f"{dname}/ that can be entered but not listed is unreadable, never a blind seed ({code}, {doc['signals']})")
+    # Round 38: a long board header is read in one pass; a long link chain is a signal, not a crash.
+    import resource
+    with tempfile.TemporaryDirectory(prefix="tp-bdisc-") as t:
+        d = tree(t, {"docs/evidence/backlog.md": "# Backlog " + "a.md " * 32000 + "frozen 2026-09-01\n\n| ID |\n",
+                     "README.md": "x\n"})
+        before = resource.getrusage(resource.RUSAGE_CHILDREN)
+        code, doc, err = discover(d)
+        after = resource.getrusage(resource.RUSAGE_CHILDREN)
+        cpu = (after.ru_utime - before.ru_utime) + (after.ru_stime - before.ru_stime)
+        # The marker belongs to the last path before it ("a.md ... frozen"), as before; only the cost changed.
+        ok(code == 0 and doc["home"]["path"] == "docs/evidence/backlog.md" and cpu < 10,
+           f"a 160 KB header naming another file as frozen is read in one pass ({cpu:.1f}s CPU, {code})")
+        (d / "docs" / "evidence" / "backlog.md").write_text("# Backlog " + "a.md; " * 32000 + "this board is frozen 2026-09-01\n\n| ID |\n",
+                                                          encoding="utf-8")
+        before = resource.getrusage(resource.RUSAGE_CHILDREN)
+        code, doc, err = discover(d)
+        after = resource.getrusage(resource.RUSAGE_CHILDREN)
+        cpu = (after.ru_utime - before.ru_utime) + (after.ru_stime - before.ru_stime)
+        ok(code == 5 and "docs/evidence/backlog.md" in doc["negated"] and cpu < 10,
+           f"a 160 KB header freezing this board is read in one pass ({cpu:.1f}s CPU, {code})")
+    for head in ("docs/backlog.md", "CLAUDE.md"):
+        with tempfile.TemporaryDirectory(prefix="tp-bdisc-") as t:
+            d = tree(t, {"l/real.md": "| ID |\n", "README.md": "x\n"})
+            prev = "real.md"
+            for i in range(1500):
+                os.symlink(prev, d / "l" / f"h{i}.md")
+                prev = f"h{i}.md"
+            (d / head).parent.mkdir(parents=True, exist_ok=True)
+            os.symlink(os.path.relpath(d / "l" / prev, (d / head).parent), d / head)
+            r = subprocess.run([sys.executable, str(SCRIPT), "--root", str(d), "--discover"],
+                               capture_output=True, text=True, timeout=120)
+            ok(r.returncode == 5 and "Traceback" not in r.stderr and json.loads(r.stdout)["seed"] is None,
+               f"a 1,500-link chain at {head} is a signal, not a traceback ({r.returncode}, {r.stderr.strip()[-160:]})")
+    with tempfile.TemporaryDirectory(prefix="tp-bdisc-") as t:
+        d = tree(t, {".claude/agent-sync.json": "{nope"})
+        code, doc, _ = discover(d)
+        ok(code == 5 and {"kind": "unreadable", "path": ".claude/agent-sync.json"} in doc["signals"],
+           f"an agent-sync config that cannot be read is a signal on its own, never a seed ({code}, {doc['signals']})")
     print("PASS: --discover holds on the thirtieth reader's fixtures")
 
 

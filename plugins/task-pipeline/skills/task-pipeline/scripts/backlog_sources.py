@@ -443,7 +443,8 @@ def _unwalkable(root: pathlib.Path, path: object) -> bool:
         if seg not in _names(cur):
             return False
         cur = os.path.join(cur, seg)
-    return _inside(root, path)  # a link out of the repository is not this project's board
+    inside = _inside(root, path)  # a link out of the repository is not this project's board
+    return True if inside is None else inside  # a chain too long to follow: a signal, never dropped
 
 
 def _has_md(d: pathlib.Path) -> bool:
@@ -481,11 +482,19 @@ MAX_INSTRUCTION_BYTES = 1_000_000
 READ_FIRST = ("CLAUDE.md", "AGENTS.md", ".claude/CLAUDE.md", ".github/copilot-instructions.md")
 
 
-def _inside(root: pathlib.Path, path: str) -> bool:
-    """`path` resolves to a regular file inside the repository. os.path.realpath never raises on
-    a symlink loop (pathlib's resolve() does, on Python 3.9-3.12)."""
-    real_root = os.path.realpath(root)
-    target = os.path.realpath(root / path)
+def _inside(root: pathlib.Path, path: str) -> bool | None:
+    """`path` resolves to a regular file inside the repository; None when that cannot be told.
+    os.stat goes first: the kernel stops a link chain at its own limit (ELOOP), where
+    os.path.realpath on Python 3.9-3.12 recurses once per hop and a long chain of tracked links
+    raises RecursionError (blind reading, round 38)."""
+    try:
+        os.stat(root / path)
+        real_root = os.path.realpath(root)
+        target = os.path.realpath(root / path)
+    except FileNotFoundError:
+        return False
+    except (OSError, ValueError, RecursionError):
+        return None
     return (target == real_root or target.startswith(real_root + os.sep)) and os.path.isfile(target)
 
 
@@ -613,7 +622,7 @@ def _head(root: pathlib.Path, path: str) -> list[str]:
     try:
         with (root / path).open(encoding="utf-8", errors="replace") as fh:
             for _ in range(15):
-                line = fh.readline()
+                line = fh.readline(MAX_INSTRUCTION_BYTES)  # bounded like an instruction file
                 if not line or line.lstrip().startswith("|"):
                     break
                 out.append(line)
@@ -632,10 +641,11 @@ def _frozen(root: pathlib.Path, path: str) -> bool:
         f = FROZEN_HEAD.search(h)
         if not f:
             continue
+        # The owner is the last path in the clause that holds the marker: one pass, not a
+        # rescan of the rest of the line per path (blind reading, round 38: 160 KB took 88 s).
         owner = None
-        for m in PATH_IN_TEXT.finditer(h[:f.start()]):
-            if not CLAUSE.search(h[m.end():f.start()]):
-                owner = m.group(1)
+        for m in PATH_IN_TEXT.finditer(CLAUSE.split(h[:f.start()])[-1]):
+            owner = m.group(1)
         if owner is None or owner.rsplit("/", 1)[-1] == me:
             return True
     return False
