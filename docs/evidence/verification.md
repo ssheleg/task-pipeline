@@ -3,7 +3,7 @@
 ## Shipped state — v1.103.0 (NOT SHIPPED until the v1.103.0 release run is read)
 
 v1.103.0 ships the intake split: `references/intake-split.md`, stage 0 phase 1a, and
-`scripts/backlog_sources.py --discover` (`test/backlog_sources_test.py` 40 → 319 cases; read back
+`scripts/backlog_sources.py --discover` (`test/backlog_sources_test.py` 40 → 322 cases; read back
 over 156 git repositories under the operator's `~/DATA`). Its card:
 `docs/evidence/specs/2026-11-06-v11030-release-impact.md`.
 

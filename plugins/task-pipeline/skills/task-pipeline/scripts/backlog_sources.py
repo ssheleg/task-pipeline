@@ -479,9 +479,10 @@ def _remediation(root: pathlib.Path) -> list[str]:
 # The longest instruction line on the operator's machine is about 8 KB and the largest file far
 # under 1 MB; a bound keeps a pathological file from costing minutes (blind reading, round 21).
 MAX_INSTRUCTION_BYTES = 1_000_000
-# Every unbounded run before a literal in the patterns above is bounded ({0,12}, not *): a line
-# that glues one stem a hundred thousand times cost minutes when they were not (blind reading,
-# round 39). test/backlog_sources_test.py times each one on a 1 MB line.
+# Every run in the patterns above that could overlap the literal after it is bounded ({0,12},
+# not *): a line that glues one stem a hundred thousand times cost minutes when they were not
+# (blind reading, round 39). A fuzzer over all 35 compiled patterns flags none, and
+# test/backlog_sources_test.py times each fixed stem on a 1 MB line.
 READ_FIRST = ("CLAUDE.md", "AGENTS.md", ".claude/CLAUDE.md", ".github/copilot-instructions.md")
 
 
@@ -641,16 +642,21 @@ def _frozen(root: pathlib.Path, path: str) -> bool:
     # frozen: a wrong exit 5 is cheap, a wrong exit 0 files into a dead board.
     me = path.rsplit("/", 1)[-1]
     for h in _head(root, path):
-        f = FROZEN_HEAD.search(h)
-        if not f:
+        if not FROZEN_HEAD.search(h):
             continue
-        # The owner is the last path in the clause that holds the marker: one pass, not a
-        # rescan of the rest of the line per path (blind reading, round 38: 160 KB took 88 s).
-        owner = None
-        for m in PATH_IN_TEXT.finditer(CLAUSE.split(h[:f.start()])[-1]):
-            owner = m.group(1)
-        if owner is None or owner.rsplit("/", 1)[-1] == me:
-            return True
+        # Every marker on the line, each judged within its clause, in one pass over the clause:
+        # the freeze is this file's when no path stands before it in the clause, or this file's
+        # name does ("This file (docs/backlog.md, not docs/TODO.md) is frozen"; "...; this board
+        # frozen on ..."), and another file's only when every path before it is another file.
+        for piece in CLAUSE.split(h):
+            events = sorted([(m.start(), 0, m.group(1).rsplit("/", 1)[-1]) for m in PATH_IN_TEXT.finditer(piece)]
+                            + [(f.start(), 1, "") for f in FROZEN_HEAD.finditer(piece)])
+            names: set[str] = set()
+            for _, is_marker, name in events:
+                if not is_marker:
+                    names.add(name)
+                elif not names or me in names:
+                    return True
     return False
 
 

@@ -1558,6 +1558,17 @@ def case_discover_thirtieth_round():
         code, doc, _ = discover(d)
         ok(code == 5 and {"kind": "unreadable", "path": ".claude/agent-sync.json"} in doc["signals"],
            f"an agent-sync config that cannot be read is a signal on its own, never a seed ({code}, {doc['signals']})")
+    # Round 40: every freeze marker on a header line counts, and this file named before it owns it.
+    for line in ("This file (docs/backlog.md, not docs/TODO.md) is frozen since 2026-09-01.",
+                 "Replaces docs/TODO.md, frozen on 2026-09-01; this board frozen on 2026-10-01."):
+        with tempfile.TemporaryDirectory(prefix="tp-bdisc-") as t:
+            d = tree(t, {"docs/backlog.md": f"# Backlog\n\n{line}\n\n| ID |\n", "README.md": "x\n"})
+            code, doc, _ = discover(d)
+            ok(code == 5 and "docs/backlog.md" in doc["negated"], f"{line!r} freezes this board ({code}, {doc['home']})")
+    with tempfile.TemporaryDirectory(prefix="tp-bdisc-") as t:
+        d = tree(t, {"docs/backlog.md": "# Backlog\n\nReplaces docs/TODO.md, frozen on 2026-09-01.\n\n| ID |\n", "README.md": "x\n"})
+        code, doc, _ = discover(d)
+        ok(code == 0 and doc["home"]["path"] == "docs/backlog.md", f"a freeze of another file stays its own ({code}, {doc['home']})")
     print("PASS: --discover holds on the thirtieth reader's fixtures")
 
 
