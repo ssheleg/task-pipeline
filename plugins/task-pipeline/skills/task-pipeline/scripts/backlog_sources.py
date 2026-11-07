@@ -303,7 +303,7 @@ TRACKERS = (("Linear", re.compile(r"(?-i:\bLinear\b)|linear\.app|\b(?:in|on|to|v
                                          r"\bissues\b[^.;|]{0,30}\bon GitHub\b", I)),
             ("Trello", re.compile(r"\bTrello\b", I)), ("Notion", re.compile(r"\bNotion\b", I)),
             ("YouTrack", re.compile(r"\bYouTrack\b", I)), ("Asana", re.compile(r"\bAsana\b", I)),
-            ("ClickUp", re.compile(r"\bClickUp\b", I)), ("GitLab issues", re.compile(r"\bGitLab issues?\b|gitlab\.com/\S+/issues|\bglab issue\b|"
+            ("ClickUp", re.compile(r"\bClickUp\b", I)), ("GitLab issues", re.compile(r"\bGitLab issues?\b|gitlab\.com/\S{1,200}?/issues|\bglab issue\b|"
                                                        r"\bissues\b[^.;|]{0,30}\bon GitLab\b", I)),
             ("Redmine", re.compile(r"\bRedmine\b", I)), ("Azure DevOps", re.compile(r"\bAzure Boards\b|\bAzure DevOps work items?\b|"
                                                      r"\bwork items?\b[^.;|]{0,30}\bAzure DevOps\b", I)),
@@ -334,7 +334,7 @@ REMOTE_BACKENDS = ("outline", "notion")
 # Words that say where work is tracked. They count only in the path's or the tracker's own
 # clause (cut at `;`, `|`, a sentence end) and within NEAR characters, every path blanked: a
 # line that mentions `tasks` in one clause and a roadmap in another states nothing about either.
-TRACKING = re.compile(r"backlog|бэклог|реестр\w* (?:\w+ )?задач|task register|task status|\btrack(?:s|ed|ing|er)?\b|трекер|source of truth|"
+TRACKING = re.compile(r"backlog|бэклог|реестр\w{0,12} (?:\w{1,30} )?задач|task register|task status|\btrack(?:s|ed|ing|er)?\b|трекер|source of truth|"
                       r"open work|open rows|\bfiled\b|where work|записыва|занос|воронк|"
                       r"очередь задач|задачи вед|задачи живут", re.IGNORECASE)
 NEAR = 80
@@ -479,6 +479,9 @@ def _remediation(root: pathlib.Path) -> list[str]:
 # The longest instruction line on the operator's machine is about 8 KB and the largest file far
 # under 1 MB; a bound keeps a pathological file from costing minutes (blind reading, round 21).
 MAX_INSTRUCTION_BYTES = 1_000_000
+# Every unbounded run before a literal in the patterns above is bounded ({0,12}, not *): a line
+# that glues one stem a hundred thousand times cost minutes when they were not (blind reading,
+# round 39). test/backlog_sources_test.py times each one on a 1 MB line.
 READ_FIRST = ("CLAUDE.md", "AGENTS.md", ".claude/CLAUDE.md", ".github/copilot-instructions.md")
 
 
@@ -585,7 +588,7 @@ def _agent_sync(root: pathlib.Path, notes: list[str]) -> dict | None:
 # A board whose own header says it is frozen or not canonical is not the home: its first lines
 # are the project's word on it (project-observatory's docs/BACKLOG.md, 2026-11-06).
 FROZEN_HEAD = re.compile(r"non-canonical|not canonical|неканонич|не канонич|"
-                         r"(?:frozen|заморожен\w*)\W+(?:as of\W+|since\W+|on\W+|с\W+)?\d{4}-\d\d-\d\d",
+                         r"(?:frozen|заморожен\w{0,4})\W+(?:as of\W+|since\W+|on\W+|с\W+)?\d{4}-\d\d-\d\d",
                          re.IGNORECASE)
 BOARD_NOUN = re.compile(r"backlog|бэклог|\bboard\b|доск|реестр|register", re.IGNORECASE)
 # A clause that says where WORK is kept (not decisions, not "the source of truth" for a spec).
@@ -606,9 +609,9 @@ WORK_NOUN = re.compile(r"\btasks? (?:live|lives|are kept|are in|go)\b|\btickets?
                        r"(?:planned|pending|deferred|next) (?:work|items)|work items?|планы работ|"
                        r"(?-i:\b(?!(?:UTF|SHA|ISO|RFC|AES|TLS|SSL|HTTP|CVE|IPV|MD|ES|PEP|CWE|OWASP)-)[A-Z]{2,10}-(?:\d{3,}|<number>|<n>|NNN+|X{3,}|\\d\+))", re.IGNORECASE)
 FILING = re.compile(r"\bgoes to\b|\badd (?:it|them) to\b|\bfile (?:it|them) in\b|\bkept in\b|deferred|"
-                    r"future work|отложенн|хран\w+ в|складыва", re.IGNORECASE)
+                    r"future work|отложенн|хран\w{1,12} в|складыва", re.IGNORECASE)
 ELSEWHERE = re.compile(r"\bnot here\b|не здесь|\bin the [\w./-]+ repo(?:sitory)?\b|в репозитории|"
-                       r"\bsibling (?:repo|folder|repository)\b|instance folder|data folder|папк\w+ данных",
+                       r"\bsibling (?:repo|folder|repository)\b|instance folder|data folder|папк\w{1,6} данных",
                        re.IGNORECASE)
 # Instruction and handoff pages are read anyway; naming one is never a board signal.
 NOT_BOARD_FILES = ("claude.md", "agents.md", "readme.md", "handoff.md")

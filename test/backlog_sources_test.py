@@ -1516,8 +1516,43 @@ def case_discover_thirtieth_round():
             os.symlink(os.path.relpath(d / "l" / prev, (d / head).parent), d / head)
             r = subprocess.run([sys.executable, str(SCRIPT), "--root", str(d), "--discover"],
                                capture_output=True, text=True, timeout=120)
-            ok(r.returncode == 5 and "Traceback" not in r.stderr and json.loads(r.stdout)["seed"] is None,
+            out = json.loads(r.stdout)
+            ok(r.returncode == 5 and "Traceback" not in r.stderr and out["seed"] is None
+               and (head != "docs/backlog.md" or {"kind": "unwalked", "path": "docs/backlog.md", "where": "known path"} in out["signals"]),
                f"a 1,500-link chain at {head} is a signal, not a traceback ({r.returncode}, {r.stderr.strip()[-160:]})")
+    # Round 39: a chain or a self-loop at a known path is a signal that stops a fallback home.
+    for shape in ("chain", "self-loop"):
+        with tempfile.TemporaryDirectory(prefix="tp-bdisc-") as t:
+            d = tree(t, {"l/real.md": "| ID |\n", "docs/ROADMAP.md": "- [ ] x\n"})
+            if shape == "chain":
+                prev = "real.md"
+                for i in range(1500):
+                    os.symlink(prev, d / "l" / f"h{i}.md")
+                    prev = f"h{i}.md"
+                os.symlink(f"../l/{prev}", d / "docs" / "backlog.md")
+            else:
+                os.symlink("backlog.md", d / "docs" / "backlog.md")
+            code, doc, _ = discover(d)
+            ok(code == 5 and doc["home"] is None
+               and {"kind": "unwalked", "path": "docs/backlog.md", "where": "known path"} in doc["signals"],
+               f"a {shape} at docs/backlog.md stops docs/ROADMAP.md becoming the home ({code}, {doc['home']})")
+    # Round 39: no pattern backtracks quadratically on a 1 MB line of one stem glued to itself.
+    for stem in ("хран", "реестр", "папк", "gitlab.com/"):
+        with tempfile.TemporaryDirectory(prefix="tp-bdisc-") as t:
+            d = tree(t, {"CLAUDE.md": "# Rules\n" + stem * (990_000 // len(stem)) + "\n", "docs/backlog.md": "| ID |\n"})
+            before = resource.getrusage(resource.RUSAGE_CHILDREN)
+            code, doc, _ = discover(d)
+            after = resource.getrusage(resource.RUSAGE_CHILDREN)
+            cpu = (after.ru_utime - before.ru_utime) + (after.ru_stime - before.ru_stime)
+            ok(code == 0 and cpu < 10, f"a 1 MB instruction line of {stem!r} costs seconds ({cpu:.1f}s CPU, {code})")
+    with tempfile.TemporaryDirectory(prefix="tp-bdisc-") as t:
+        d = tree(t, {"docs/backlog.md": "# Backlog " + "заморожен" * 40000 + "\n\n| ID |\n"})
+        before = resource.getrusage(resource.RUSAGE_CHILDREN)
+        code, doc, _ = discover(d)
+        after = resource.getrusage(resource.RUSAGE_CHILDREN)
+        cpu = (after.ru_utime - before.ru_utime) + (after.ru_stime - before.ru_stime)
+        ok(code == 0 and doc["home"]["path"] == "docs/backlog.md" and cpu < 10,
+           f"a 720 KB header of a glued freeze word costs seconds ({cpu:.1f}s CPU, {code})")
     with tempfile.TemporaryDirectory(prefix="tp-bdisc-") as t:
         d = tree(t, {".claude/agent-sync.json": "{nope"})
         code, doc, _ = discover(d)
