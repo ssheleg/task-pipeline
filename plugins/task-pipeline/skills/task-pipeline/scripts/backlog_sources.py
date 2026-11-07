@@ -788,7 +788,7 @@ def discover(root: pathlib.Path, artifacts: str) -> tuple[int, dict | None, list
             add(path, "known-path", path)
         elif path not in deep_seen and path not in negset and _unwalkable(root, path):
             deep_seen.add(path)
-            deep.append({"kind": "too-deep" if path.count("/") >= MAX_SEGMENTS else "unwalked",
+            deep.append({"kind": "seed-path-taken" if path == own else "unwalked",
                          "path": path, "where": "known path"})  # a link, say
     # Something sits at the run's own board path that is neither walked nor a link inside the
     # repository: a link out (a board kept in a sibling data repository) or another letter case
@@ -888,6 +888,10 @@ def discover(root: pathlib.Path, artifacts: str) -> tuple[int, dict | None, list
         # kept finding phrasings it missed), the project's own words always are.
         for name in _instruction_files(root):
             signals.append({"kind": "instructions", "path": name})
+    if not home and own_there and own not in deep_seen:
+        # The run's own board was found but something else stopped it being the home: the
+        # seed path is taken all the same, and never written over.
+        signals.append({"kind": "seed-path-taken", "path": own, "where": "known path"})
     seed = None if home or signals else f"{artifacts}/backlog.md"
     if seed:
         notes.append(f"no board found: seed {seed} from templates/backlog.md")

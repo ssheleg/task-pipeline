@@ -1342,7 +1342,7 @@ def case_discover_thirtieth_round():
             os.symlink(d / "board.md", d / art / "backlog.md")
             code, doc, _ = discover(d, "--artifacts", art)
             ok(code == 5 and doc["home"] is None
-               and {"kind": "unwalked", "path": f"{art}/backlog.md", "where": "known path"} in doc["signals"],
+               and {"kind": "seed-path-taken", "path": f"{art}/backlog.md", "where": "known path"} in doc["signals"],
                f"the run's own board as a link under {art} is a signal and stops a fallback home ({code}, {doc['home']})")
     for target in ("nowhere.md", "backlog.md"):
         with tempfile.TemporaryDirectory(prefix="tp-bdisc-") as t:
@@ -1412,6 +1412,27 @@ def case_discover_thirtieth_round():
         code, doc, _ = discover(d)
         ok(len([sg for sg in doc["signals"] if sg["kind"] == "seed-path-taken"]) == 1,
            f"a link out at the seed path is named once, not twice ({doc['signals']})")
+    # Round 35: the own board is a live candidate, something else empties the home.
+    for name, extra in (("roadmap link", None), ("absent register", {".claude/agent-sync.json": json.dumps(
+            {"idRegisters": {"d": {"file": "docs/decisions-backlog.md"}}})})):
+        with tempfile.TemporaryDirectory(prefix="tp-bdisc-") as t:
+            files = {"docs/evidence/backlog.md": "| ID | Status |\n|---|---|\n| B-1 | open |\n", "README.md": "x\n",
+                     "shared/roadmap.md": "- [ ] x\n"}
+            files.update(extra or {})
+            d = tree(t, files)
+            if extra is None:
+                os.symlink("../shared/roadmap.md", d / "docs" / "ROADMAP.md")
+            code, doc, _ = discover(d)
+            ok(code == 5 and doc["seed"] is None and [sg for sg in doc["signals"] if sg["kind"] == "seed-path-taken"] == [
+                {"kind": "seed-path-taken", "path": "docs/evidence/backlog.md", "where": "known path"}],
+               f"a live own board without a home is still a taken seed path, named once ({name}: {code}, {doc['signals']})")
+    with tempfile.TemporaryDirectory(prefix="tp-bdisc-") as t:
+        d = tree(t, {"old/board.md": "| ID |\n", "README.md": "x\n"})
+        (d / "docs" / "evidence").mkdir(parents=True)
+        os.symlink("../../old/board.md", d / "docs" / "evidence" / "backlog.md")
+        code, doc, _ = discover(d)
+        ok({"kind": "seed-path-taken", "path": "docs/evidence/backlog.md", "where": "known path"} in doc["signals"],
+           f"an in-repo link at the seed path is named seed-path-taken, the kind the doctrine protects ({doc['signals']})")
     print("PASS: --discover holds on the thirtieth reader's fixtures")
 
 
