@@ -64,13 +64,17 @@ should choose. A board whose own header says frozen or not canonical is `negated
 but `signals` (a negated board, a tracked file named as a board elsewhere, an instruction line
 about where work lives, a tracker named in any words, and always the instruction files
 themselves, `READ_FIRST` plus the README in any case, a probed directory that could not be read,
-and an agent-sync config that could not be read): exit 5, `seed` null. A tree with none of
+an agent-sync config that could not be read, a manifest that could not be looked at, and a board
+path the walk refuses: `too-deep`, `unwalked`, `agent-sync-register`): exit 5, `seed` null. A
+manifest that could not be looked at, or such a board path, also stops a fallback home (a known
+path or a candidate) being picked; a home the manifest, a stated rule or a stated tracker names
+still stands, with a note on stderr. A tree with none of
 those files and none of the above: `home` is null, `seed` is `<artifacts>/backlog.md`, exit 4.
 A path that leaves the repository or passes through a symlink is never a candidate.
 
 Exit codes: 0 the manifest is readable and nothing undeclared was found, or there is no
 manifest (discovery then, as `references/knowledge-sources.md` describes — printed, not
-silent); 1 the manifest is malformed, every reason printed; 3 the manifest is fine and a
+silent); 1 the manifest is malformed or cannot be looked at, every reason printed; 3 the manifest is fine and a
 `--found` source is not in it — the finding the doctrine asks for; 4 (`--discover` only) the
 project keeps no board, so the run seeds the printed `seed` path; 5 (`--discover` only) no home,
 but `signals` to read before seeding (every kind is listed above, the instruction files always

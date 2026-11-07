@@ -1286,6 +1286,23 @@ def case_discover_twentyeighth_round():
                 os.chmod(d / "docs", 0o755)
             ok(code == 5 and doc["home"] is None,
                f"an unsearchable docs/ holding a manifest stops a root BACKLOG.md becoming the home ({code}, {doc and doc['home']})")
+    with tempfile.TemporaryDirectory(prefix="tp-bdisc-") as t:
+        d = tree(t, {"docs": "a file, not a folder\n", "src/main.py": "x\n"})
+        r = subprocess.run([sys.executable, str(SCRIPT), "--root", str(d)], capture_output=True, text=True, timeout=60)
+        code, doc, err = discover(d)
+        ok(r.returncode == 0 and "no docs/backlog-sources.json" in r.stdout + r.stderr and code == 4,
+           f"docs as a regular file is no manifest, as in 1.102.4 ({r.returncode}, {code})")
+    if os.geteuid() != 0:
+        with tempfile.TemporaryDirectory(prefix="tp-bdisc-") as t:
+            d = tree(t, {"docs/backlog-sources.json": "{}", "BACKLOG.md": "| ID |\n",
+                         "CLAUDE.md": "Open work is tracked in BACKLOG.md.\n"})
+            os.chmod(d / "docs", 0o600)
+            try:
+                code, doc, err = discover(d)
+            finally:
+                os.chmod(d / "docs", 0o755)
+            ok(code == 0 and doc["home"]["path"] == "BACKLOG.md" and "docs/backlog-sources.json: not readable" in err,
+               f"a stated home stands past an unreadable manifest, with the note on stderr ({code}, {err.strip()[-160:]})")
     print("PASS: --discover holds on the twenty-eighth reader's fixtures")
 
 
