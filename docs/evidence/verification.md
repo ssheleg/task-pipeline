@@ -1,5 +1,13 @@
 # Verification — task-pipeline
 
+## Shipped state — v1.104.0 (source candidate; NOT SHIPPED yet)
+
+The AI-native change (`references/agent-surface.md`, the actor branch at stage 0, the `agent`
+tier in `scripts/graph.py`, `agents/agent-tester.md` and `agents/verifier-agent.md`,
+`short_path.py --agent-facing`) is on branch `feat/ai-native-1109` with the local suite run on
+the candidate source. Review, merge, tag, release jobs, npm payload and installed readback
+remain pending; this header declares the version, not a shipped state.
+
 ## Shipped state — v1.103.1
 
 v1.103.1 was read shipped on 2026-11-07: release run 42366771853 success (the publish job passed on its

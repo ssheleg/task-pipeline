@@ -9,6 +9,12 @@ shows the operator.
 
     short_path.py --files PATH [PATH ...] --contract yes|no --user-facing yes|no
                   --deploy yes|no --risk R1|R2|R3 [--unknowns N]
+                  [--agent-facing yes|no]
+
+Answer 3 is "behaviour a user OR AN AGENT observes changes" (since 1.104.0,
+`references/agent-surface.md`). `--user-facing` keeps its meaning, a person sees it;
+`--agent-facing` (default `no`, so every older call reads as it did) is a change only
+an agent observes: a tool, a schema, an error body. Either one rules the short path out.
 
 Exit 0: the short path (brief in the run ledger, build with tests, one verification,
 docs and handoff). Exit 3: the full flow, with every answer that ruled the short path
@@ -21,8 +27,11 @@ MAX_FILES = 5
 SMALL_RISK = "R1"
 
 
-def decide(files, contract, user_facing, deploy, risk, unknowns=0):
-    """(short?, line) for the five answers plus the gap check's unknowns."""
+def decide(files, contract, user_facing, deploy, risk, unknowns=0, agent_facing=False):
+    """(short?, line) for the five answers plus the gap check's unknowns.
+
+    Answer 3 is two flags: `user_facing` (a person observes the change) and
+    `agent_facing` (an agent does). Either is a change somebody outside the code sees."""
     n = len(set(files))
     why = []
     if unknowns:
@@ -35,6 +44,8 @@ def decide(files, contract, user_facing, deploy, risk, unknowns=0):
         why.append("a public contract is touched")
     if user_facing:
         why.append("a user-observable change")
+    if agent_facing:
+        why.append("an agent-observable change")
     if deploy:
         why.append("a deploy target")
     if risk != SMALL_RISK:
@@ -56,12 +67,17 @@ def main(argv=None):
     p = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     p.add_argument("--files", nargs="*", default=[], help="the paths the change touches")
     p.add_argument("--contract", type=yes_no, required=True)
-    p.add_argument("--user-facing", type=yes_no, required=True)
+    p.add_argument("--user-facing", type=yes_no, required=True,
+                   help="a person observes the change (a UI, a message, an output)")
+    p.add_argument("--agent-facing", type=yes_no, default=False,
+                   help="an agent observes the change (a tool, a schema, an error body); "
+                        "default no")
     p.add_argument("--deploy", type=yes_no, required=True)
     p.add_argument("--risk", choices=("R1", "R2", "R3"), required=True)
     p.add_argument("--unknowns", type=int, default=0)
     a = p.parse_args(argv)
-    short, line = decide(a.files, a.contract, a.user_facing, a.deploy, a.risk, a.unknowns)
+    short, line = decide(a.files, a.contract, a.user_facing, a.deploy, a.risk, a.unknowns,
+                         a.agent_facing)
     print(line)
     return 0 if short else 3
 

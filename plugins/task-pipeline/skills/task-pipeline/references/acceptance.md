@@ -58,6 +58,15 @@ scripts/visual_gate.py sheet <file> --class <surface_class> --require-approval` 
 written into the acceptance file, because the ledger does not outlive the run and the
 count of human passes is the number this whole layer exists to bring down.
 
+**Where stage 0's actor branch is armed, the walk carries a `C→B` row and the parity
+matrix** ([`agent-surface.md`](agent-surface.md)). `C→B` is `audit.md`'s contract to
+behaviour seam: the committed contract source read against what the `agent` tier
+executed (the proving call, the contract tests, the agent tester's pass B where it was
+owed). The parity matrix lists every `CAP` the run touched with one of two states:
+`exposed`, with the tool ids the snapshot carries, or `Agent excluded`, with its
+evidence (`presence`, `legal`) or its board row (`debt`). A touched capability in
+neither state is an absence, and becomes a REQ row like any other.
+
 - **An absence found here becomes a new REQ row with its check**, then the table is
   written. The list is frozen against *narrowing*, never against additions
   ([`grill.md`](grill.md) → *The REQ spine*). Writing the table first and appending

@@ -17,6 +17,11 @@ The full gate and freedom level remain in [stages.md](stages.md).
   reports and diffs together, before the first worktree is integrated**
   ([`build.md`](build.md) §4.2a) — a per-task review reads one diff and cannot see a
   contradiction that exists only between two of them.
+- **Where the actor branch is armed, TDD starts at the contract**
+  ([`agent-surface.md`](agent-surface.md)): the first failing test of a capability
+  task is its contract test (the schema, the typed errors, an idempotent retry, a
+  scope refusal), watched fail before any handler exists. The UI is built after it,
+  as one client of that contract, never as the place a function first exists.
 - **Web front end? The task's own surface is checked in a browser, not in the diff.**
   Where a browser channel is connected — `playwright` **or** `chrome-devtools`, either
   one, on WebKit first with Chromium a stated exception (**how**, and the engine order:

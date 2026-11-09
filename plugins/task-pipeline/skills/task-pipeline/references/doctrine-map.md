@@ -62,6 +62,7 @@ Custom profiles use their own declared stages and doctrine, with the kernel inta
 | **what travels with the bundle vs stays in a project** | `references/portability.md` |
 | 0–10 · when an iteration stops — the contract fixed at intake, triage at discovery, the round budget | `references/finish-line.md` |
 | 3, 6 · the design review: the test panel walked over the design, then the build, in the recorded browser, bounded and closed | `references/design-review.md` |
+| 0–10 · the agent surface, when stage 0's actor branch forecasts a capability or contract change: the capability map first (2), the contract before the screens (3, 4, 5), the proving call and the agent tester (6), the snapshot diff (7), called not curled (8), `AGENTS.md` generated (9), the `C→B` row and the parity matrix (10), and the `agent` tier | `references/agent-surface.md` |
 | any repeating loop | `references/loop-guard.md` |
 | run-wide · what the run **leaves running and leaves behind** — every gate, and stage 10 | `references/residue.md` |
 | run-wide · what the run **prints about itself** — the rail, the iteration line | `references/progress.md` |

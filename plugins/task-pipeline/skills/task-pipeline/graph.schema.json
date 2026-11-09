@@ -206,6 +206,14 @@
           ],
           "description": "The class of the user-facing surface this node builds, copied from the brief's `surface_class` (stage 0). It selects the gate profile, and `graph.py certify` reads it: on `flagship` or `product` the fourth, `visual` tier report is REQUIRED, because none of unit, seam or product opens the contact sheet; on any other class a `visual` report is accepted when given. Absent on a node that builds no user-facing surface. `references/certification.md` → *The fourth reading*."
         },
+        "agent_surface": {
+          "enum": [
+            "public",
+            "internal",
+            "library"
+          ],
+          "description": "OPTIONAL. The agent surface this node builds, copied from the brief's actor branch (stage 0, `references/agent-surface.md`). `graph.py certify` reads it: on `public` or `internal` the `agent` tier report is REQUIRED, because none of unit, seam, product or visual calls the product the way an agent will (the proving call and the contract tests, executed); on `library` it is owed by no one and accepted when given. Absent means nothing is owed, so a graph written before the field existed validates unchanged. The brief's `none` is never a node value: a node that builds no agent surface omits the field. `references/certification.md` → *The agent reading*."
+        },
         "risk": {
           "enum": ["R1", "R2", "R3"],
           "description": "The node's risk class (`references/iteration.md` → *Verification starts when a node lands*), computed from what it touches and never lowered to save time. It sets how many PASSING certification rounds the node owes (a failed round counts for nothing): R1 one (with one blind tier), R2 one, R3 two, one of them recorded adversarial (`certify --kind adversarial`); a flagship surface owes two, one adversarial. A round is the blind tiers the class owes (three; one on R1) plus one fix cycle. Absent outside wave mode or a release iteration. `graph.py close` refuses a node until the rounds its class owes have passed."
@@ -262,6 +270,12 @@
                     "pass",
                     "fail"
                   ]
+                },
+                "agent": {
+                  "enum": [
+                    "pass",
+                    "fail"
+                  ]
                 }
               }
             },
@@ -305,6 +319,12 @@
                     ]
                   },
                   "visual": {
+                    "enum": [
+                      "pass",
+                      "fail"
+                    ]
+                  },
+                  "agent": {
                     "enum": [
                       "pass",
                       "fail"

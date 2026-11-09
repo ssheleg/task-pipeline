@@ -19,6 +19,7 @@ queue is — graph or plan — is what decides, not the mood of the closer.
 - Why one verifier is not enough, stated as the failure it produces
 - The three tiers
 - The fourth reading — `visual`, on a flagship or product surface
+- The agent reading, on a public or internal agent surface
 - Blind, and it is the whole design
 - A pass has to mean something, so two rules have teeth
 - The report, and where each field lands
@@ -107,6 +108,40 @@ and they never see it. Its own rules, because a judge of pixels fails in its own
 - **A judge item (J) is `NOT_ASSESSED` until a labelled set exists** and the judge's
   agreement with it has been measured. It goes in `not_examined`, which reaches the
   closing verdict as `not_verified` — the honest name for an opinion nobody calibrated.
+
+## The agent reading, on a public or internal agent surface
+
+The four tiers above read code, callers, documents and pixels. **None of them calls
+the product the way an agent will.** A tool whose schema validates and whose handler
+type-checks can still answer a bare 500, refuse without a typed error, or perform an
+effect its contract never declared; the seam tier reads those callers statically and
+runs nothing, so it cannot see any of it.
+
+| Tier | Subject | Characteristic finding |
+|---|---|---|
+| `agent` | the contract source and its snapshot, the proving call through a real client, the contract tests, the agent tester's pass-B report where one is owed | an untyped refusal where the contract names a code; a retry with the same idempotency key that writes twice; a scope the principal does not hold that is not refused; a snapshot that no longer equals the contract source |
+
+**When it runs.** A node copies `agent_surface` from the brief's actor branch
+([`agent-surface.md`](agent-surface.md) → *What stage 0 records*). On **`public` and
+`internal`** the `agent` report is **required**: `graph.py certify` refuses the round
+without it and names the tier. On `library` it is not owed (the types, the docs and the
+doctests are that profile's proof) and is accepted when given. A node with no
+`agent_surface` owes nothing, so every graph written before the field existed validates
+and certifies as it did.
+
+**It executes, and it is blind like the others.** Same eight-key report, same
+`breaks`/`risk`, and it never sees another tier's report. Its own rules:
+
+- **The deterministic run comes first and is quoted:** the proving call and the contract
+  tests, each with its exit code. A failing one is a `breaks` finding whatever else the
+  report says; a call that could not be made is NOT_RUN in `not_examined`, never a pass.
+- **The judgment is read, not redone.** Where the agent tester's pass B was owed (an R3
+  node, a `public` surface), the tier reads its `agent-review/1` report and checks it is
+  for this tree; it does not re-run the cold agent.
+- **One reading per round, at the build's tree.** A rerun on an unchanged tree is
+  refused like any other tier's.
+
+Agent: [`verifier-agent.md`](../assets/verifier-agent.md).
 
 ## Blind, and it is the whole design
 
@@ -197,6 +232,9 @@ graph.py certify --node N-007 \
 # a node with surface_class flagship or product: four, or the round is refused
 graph.py certify --node N-008 \
     --tier unit.json --tier seam.json --tier product.json --tier visual.json
+# a node with agent_surface public or internal: the agent tier too
+graph.py certify --node N-009 \
+    --tier unit.json --tier seam.json --tier product.json --tier agent.json
 
 # unchanged, and still the only thing that moves the graph
 graph.py close --verdict .task-pipeline/verdict-N-007.json
@@ -273,7 +311,8 @@ blind rounds had passed. That is why R3 keeps it and drops the second blind roun
 
 ## What this costs, said out loud
 
-Three agents per node instead of one, four on a flagship or product surface, one on R1.
+Three agents per node instead of one, four on a flagship or product surface, one on R1,
+and one more, the `agent` tier, on a public or internal agent surface.
 The tiers are dispatched in parallel, so the wall-clock cost is roughly one reading and
 the token cost is the tier count. Where a tier runs and finds nothing it says so in
 `scope` and `not_examined`, because **a skipped level and a clean level are

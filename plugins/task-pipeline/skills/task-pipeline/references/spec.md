@@ -26,6 +26,22 @@ For a **user-facing task** (stage-2 UI verdict = yes) the UX chain runs **first*
 scenarios before interface, always. For everything else, go straight to *Write the
 spec*.
 
+**Where stage 0's actor branch is armed** ([`agent-surface.md`](agent-surface.md)),
+the order inside this stage is the design order of `AN-2`:
+
+```
+foundation → capabilities → contract source + agent scenarios → logic
+  → { human flows, screens, scenarios → COPY ∥ VISUAL }
+```
+
+The **contract source** is schema-first and committed here: tool definitions with
+their input and output schemas and annotations, an OpenAPI file, or a CLI spec, which
+the code validates against or is generated from. Agent scenarios are written beside it
+because they are its acceptance tests. The UX track below then designs the human lanes
+only, each screen a client of the contract. **Dossier section 4, *Contracts in and
+out*, is owed by every capability or contract change**, platform module or not;
+section 7 only where a human lane exists.
+
 ## UX track (user-facing tasks only)
 
 Apply [the artifact-provider contract](companion-skills.md): super-ux is the
@@ -194,7 +210,9 @@ gets. Cover all of it, in this order, each section carrying its `covers: REQ-…
 4. **Contracts — in and out.** For every inbound API/event this module serves and
    every outbound one it consumes: exact signature or schema, auth, idempotency,
    versioning, and **the behavior when the other side is unavailable or wrong**.
-   These are the seams the map named; here they get their shapes.
+   These are the seams the map named; here they get their shapes. Outside a
+   platform this section is still owed by every capability or contract change
+   (*Order of operations*, above).
 5. **Business logic and rules** — the rules in the domain's language, each with the
    condition that triggers it and the outcome. Rules that only exist as code are
    rules nobody can review.

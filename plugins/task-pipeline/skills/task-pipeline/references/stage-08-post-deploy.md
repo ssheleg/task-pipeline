@@ -19,6 +19,12 @@ The full gate and freedom level remain in [stages.md](stages.md).
   the console and the network log; quote what you read, not that you looked
   ([`companion-skills.md`](companion-skills.md)). Absent → say the check was an HTTP
   response only, which is the honest name for it.
+- **A deployed agent surface is called, not curled** ([`agent-surface.md`](agent-surface.md)).
+  A `200` from a health route says the server answered, not that an agent can use
+  it. Against the deployed target: discovery (`server/discover`, or the OpenAPI
+  document), the tool list equal to the stage-7 snapshot, one read-only call, and
+  one typed-error probe that must come back typed. A `library` surface has no
+  call to make here.
 - **Read the CI verdict for the deploy's own commit** ([`conventions.md`](conventions.md)
   → *The CI verdict*): the run's conclusion quoted, the **failing step's log quoted**
   on anything but `success`, and one of the three states stated — including **`no run

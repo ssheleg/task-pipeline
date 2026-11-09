@@ -90,7 +90,7 @@ a row pointing outside the bundle is the defect this file exists to catch.
 | What a spec must lock, the UX-track order, the module dossier | `references/spec.md` |
 | The zero-context plan format, parallel groups, set equality | `references/planning.md` |
 | The work graph: its fields, the verbs and their exit codes, and the three invariants a schema cannot state | `references/work-graph.md`, `scripts/graph.py`, `graph.schema.json` |
-| How a node is CLOSED: three blind readings at escalating visibility, all three required — four on a flagship or product surface — and the round ledger the ceiling reads | `references/certification.md`, `agents/verifier-{unit,seam,product,visual}.md`, `scripts/graph.py certify` |
+| How a node is CLOSED: three blind readings at escalating visibility, all three required, four on a flagship or product surface, plus the `agent` reading on a public or internal agent surface, and the round ledger the ceiling reads | `references/certification.md`, `agents/verifier-{unit,seam,product,visual,agent}.md`, `scripts/graph.py certify` |
 | Workspace isolation, the subagent loop, who may write the register | `references/build.md` |
 | The review rubric, diff packages, the three verdicts | `references/review.md` |
 | **False success** — the class, its known shapes and its two rules | `references/gates.md` |
@@ -99,6 +99,7 @@ a row pointing outside the bundle is the defect this file exists to catch.
 | The TDD iron law and the suite gate | `references/tdd.md` |
 | How the browser look is taken, and how a spec suite sits beside it | `references/browser.md` |
 | How the design review walks the test panel over the design, then the build, bounded and closed | `references/design-review.md` |
+| How the pipeline applies the AI-native canon when a capability or contract changes: the actor branch, the capability map, the contract first, the proving call, the agent tester and the `agent` tier | `references/agent-surface.md`, `assets/verifier-agent.md` (the plugin also ships the agent-tester agent) |
 | The REQ coverage table, evidence rules, the closing question | `references/acceptance.md` |
 | How the host project's own conventions are read | `references/conventions.md` |
 | Which companions exist, what is required, self-currency | `references/companion-skills.md` |

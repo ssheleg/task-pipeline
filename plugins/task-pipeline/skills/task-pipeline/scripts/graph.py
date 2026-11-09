@@ -299,6 +299,17 @@ def violations(graph):
                        f"{', '.join(SURFACE_CLASSES)}. A class nobody recognises requires no "
                        "visual reading, so a typo here would drop the tier that reads the pixels")
 
+        # The agent surface (stage 0's actor branch, `references/agent-surface.md`) decides
+        # whether `certify` owes the `agent` reading. OPTIONAL: absent owes nothing, so a
+        # graph written before the field existed validates unchanged. A value outside the
+        # three would silently owe nothing, the one outcome a typo must not have; `none`
+        # is a brief value, never a node value (a node with no surface omits the field).
+        if "agent_surface" in n and n["agent_surface"] not in AGENT_SURFACES:
+            out.append(f"{nid}: agent_surface is {n['agent_surface']!r}, and it must be one "
+                       f"of {', '.join(AGENT_SURFACES)}. A node that builds no agent surface "
+                       "omits the field; a value nobody recognises owes no agent reading, so "
+                       "a typo here would drop the tier that calls the product")
+
         # The risk class (`references/iteration.md` → *Verification starts when a node
         # lands*) sets how many certification rounds a node owes. A class outside the three
         # would owe an unknown number, and the cheapest misreading is one round.
@@ -636,6 +647,9 @@ def verdict_violations(v):
 #   visual   the pixels — the contact sheet, the director record, the project
 #            linter and the rubric. Owed only where the node's `surface_class` is
 #            flagship or product; accepted, and counted, wherever it is given
+#   agent    the call an agent makes: the proving call through a real client and
+#            the contract tests, executed. Owed only where the node's
+#            `agent_surface` is public or internal; accepted wherever it is given
 #
 # **All three must pass, and blind is the point.** Three agents that read each
 # other's reports are one opinion with three signatures; the disagreement is the
@@ -652,8 +666,18 @@ TIERS = ("unit", "seam", "product")
 # given on any other node, and blind to the other three exactly as they are to each
 # other. `references/certification.md` → *The fourth reading*.
 VISUAL_TIER = "visual"
-ALL_TIERS = TIERS + (VISUAL_TIER,)
+# The fifth reading, `agent`, CALLS the product the way an agent will: the proving call
+# through a real client and the contract tests, executed against the node's build, plus
+# the agent tester's pass-B report where one is owed. None of the four runs a call. It is
+# owed by a node whose `agent_surface` is one of AGENT_REQUIRED, accepted when given on
+# any other node, and blind like the rest. `references/certification.md` → *The agent
+# reading*; `references/agent-surface.md`.
+AGENT_TIER = "agent"
+ALL_TIERS = TIERS + (VISUAL_TIER, AGENT_TIER)
 SURFACE_CLASSES = ("flagship", "product", "internal", "ad")
+AGENT_SURFACES = ("public", "internal", "library")
+# `library` owes no agent tier: its types, docs and doctests are that profile's proof.
+AGENT_REQUIRED = ("public", "internal")
 RISK_CLASSES = ("R1", "R2", "R3")
 # Passing certification rounds a node owes before `close` accepts it, by risk class
 # (`references/certification.md` → *Rounds owed by risk class*). A clean round ends the
@@ -726,10 +750,10 @@ SEVERITIES = ("breaks", "risk")
 # "the unit tier's verdict…"). Widened to the tense and possessive forms the
 # reader planted; still a closed list on purpose — a looser net here starts
 # matching a report's honest prose about its OWN tier.
-CROSS_TIER = re.compile(r"\b(?:unit|seam|product|visual)\s+tier(?:'s)?\s+"
+CROSS_TIER = re.compile(r"\b(?:unit|seam|product|visual|agent)\s+tier(?:'s)?\s+"
                         r"(?:passed|failed|says|said|confirm\w*|verdict|report)"
                         r"|\btier\s+\d\s+(?:passed|failed|says|said|confirm\w*)"
-                        r"|as\s+the\s+(?:unit|seam|product|visual)\s+tier", re.I)
+                        r"|as\s+the\s+(?:unit|seam|product|visual|agent)\s+tier", re.I)
 
 
 def tier_violations(t):
@@ -1597,7 +1621,7 @@ def cmd_producer(graph, args):
 def cmd_doctrine(graph, args):
     """Which doctrine this run actually read — B-061.
 
-    The bundle is 56 reference files. A run reads some subset and nothing recorded which,
+    The bundle is 57 reference files. A run reads some subset and nothing recorded which,
     so **a skipped file and a read one were indistinguishable** — the class every guard in
     this repository exists to catch, left standing over the doctrine itself.
 
@@ -1756,7 +1780,15 @@ def cmd_certify(graph, args):
             "pixels are part of the requirement: none of unit, seam or product opens the "
             "contact sheet, so without the fourth reading nobody looked at what a user sees "
             "(references/certification.md → *The fourth reading*)" % (VISUAL_TIER, nid, sclass))
-    # The tiers THIS round read, in a stable order: the three always, `visual` when given.
+    asurf = node.get("agent_surface")
+    if asurf in AGENT_REQUIRED and AGENT_TIER not in reports:
+        die("certification is missing the `%s` report: %s is a %s agent surface, and on one "
+            "the call an agent makes is part of the requirement. None of unit, seam, product "
+            "or visual runs the proving call or the contract tests, so without this reading "
+            "nobody called the product the way an agent will (references/certification.md "
+            "→ *The agent reading*)" % (AGENT_TIER, nid, asurf))
+    # The tiers THIS round read, in a stable order: the three always, `visual` and
+    # `agent` when given.
     tiers = [x for x in ALL_TIERS if x in reports]
 
     # The stamp, read here and never accepted from a report — same law as `close`.

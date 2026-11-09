@@ -1,3 +1,25 @@
+## Unreleased 1.104.0: the agent surface, branch `feat/ai-native-1109` (2026-11-09)
+
+- **Objective.** Operator, 2026-11-09 (hub run `2026-11-09-ai-native`, packet P-TP): products are
+  AI-native, every function available to agents, designed jobs and stories first, then capabilities
+  and the contract, then the interfaces; the pipeline applies that order without new stage numbers.
+- **Done.** `references/agent-surface.md` (stage-by-stage application; cites `AN-1` to `AN-10` in
+  super-ux and agent-stack by raw URL); the actor branch at stage 0 (`stage-00-intake.md`, `grill.md`
+  sweep row `0 Actors`, `templates/brief.md` fields); ordering text in stages 2 to 5 and short gate
+  additions at 0, 2, 3, 6, 7, 8, 10 (`stages.md`); `C→B` seam (`audit.md`, `acceptance.md`); the
+  `agent` tier (`graph.py` `AGENT_TIER`, `AGENT_SURFACES`, `AGENT_REQUIRED`, `cmd_certify` refusal;
+  `graph.schema.json` optional `agent_surface`); `agents/verifier-agent.md` + `assets/` mirror and
+  `agents/agent-tester.md`; `short_path.py --agent-facing`; BN-22 wording fixed; version 1.104.0.
+- **Checks run.** `npm test` exit 0 (validator PASS, `graph.py` 182 cases); `certify_mutations.py`
+  (control 40 fixtures); `negatives.py -k agent` and `-k "short path blind"` (six new plants, each
+  rejected); `audit_skill.py --house` 19 PASS, body 3894/4750 tokens (3890 before).
+- **Open.** Not merged, not tagged. The hub plan's integration order is agent-stack, super-ux, then this
+  member; the cited homes `agent-interop/references/agent-surface.md` and
+  `agent-evals/references/operability.md` resolve only after agent-stack's W1 release.
+- **Next task.** Review and merge the PR; before the tag, write this release's impact card
+  (`docs/evidence/specs/2026-11-09-v11040-release-impact.md`) and declare `v1.104.0` under
+  `docs/evidence/retro.md` → *Releases that carry no stamp*, then tag with the hub's release script.
+
 ## v1.103.1: the intake split, shipped (2026-11-07)
 
 - **Objective.** Operator, 2026-11-06 (hub session 574eafda): cut a big request into modules, research
