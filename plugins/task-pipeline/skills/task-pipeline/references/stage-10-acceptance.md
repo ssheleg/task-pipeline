@@ -39,7 +39,9 @@ The full gate and freedom level remain in [stages.md](stages.md).
   sheet is approved (`visual_gate.py sheet … --require-approval` exits 0), and the last
   `review:` line per surface — how many human rounds it took — is copied into the
   acceptance file, because `.task-pipeline/run.md` does not outlive the run
-  ([`audit.md`](audit.md) → the `V→R` seam). An absence
+  ([`audit.md`](audit.md) → the `V→R` seam). **Where the actor branch is armed, the
+  walk carries the `C→B` row** (the contract against the behaviour the agent tier
+  executed) **and the parity matrix** ([`acceptance.md`](acceptance.md)). An absence
   becomes a **new REQ row with its check** and *then* the table is written;
   appending after the table is how acceptance goes green over a gap. Findings that
   belong to a lower layer go back to that layer (spec → stage 3, plan → stage 4).

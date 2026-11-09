@@ -1491,6 +1491,8 @@ three quarters of the work on this run.
 
 ## Releases that carry no stamp — stated, not stamped
 
+**`v1.104.0` carries no stamp, declared before its tag.** It ships the agent surface (hub run `2026-11-09-ai-native`, packet P-TP): the actor branch at stage 0, capabilities and the contract before screens at stages 2 to 5, the `agent` certification reading, `agents/agent-tester.md` and `agents/verifier-agent.md`, `short_path.py --agent-facing`; its card is `docs/evidence/specs/2026-11-09-v11040-release-impact.md`. The run was driven from sshlg-skills; its lessons are on hub board rows B-329 to B-333.
+
 **`v1.103.1` carries no stamp, declared before its tag.** It ships the intake split (stage 0 phase 1a, `references/intake-split.md`) and `backlog_sources.py --discover`; its card is `docs/evidence/specs/2026-11-06-v11031-release-impact.md`. The run was driven from sshlg-skills (session 574eafda), certified by 43 blind unit readings; its lessons are on board rows B-162 to B-166.
 
 **`v1.103.0` is a dead tag and carries no stamp: it was cut against a tree that did not yet carry the line above, its release round failed on this section's check (run 42365245798), publish was skipped, npm never saw it, and the tag ruleset forbids deletion.** The same payload ships as `v1.103.1`. The lesson is the one `v1.81.0` already paid for: run the gate on a tree where the tag exists (`git fetch --tags`) before cutting it, because the branch run cannot see a tag that is not there yet.

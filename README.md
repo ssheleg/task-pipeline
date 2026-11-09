@@ -183,11 +183,12 @@ and the inline fallback satisfy the same [provider contract](plugins/task-pipeli
 | 3 Spec | [`spec.md`](plugins/task-pipeline/skills/task-pipeline/references/spec.md) — UX-track order, locked contracts, global constraints, self-review |
 | 4 Plan | [`planning.md`](plugins/task-pipeline/skills/task-pipeline/references/planning.md) — zero-context tasks, parallel groups, no placeholders |
 | the queue | [`work-graph.md`](plugins/task-pipeline/skills/task-pipeline/references/work-graph.md) — a script walks the graph so the model never reads it: 400 nodes and 4 print the same 27-byte frontier |
-| closing a node | [`certification.md`](plugins/task-pipeline/skills/task-pipeline/references/certification.md) — three blind readings at escalating visibility (the changed code, what reaches it, the product around it), all three required to pass (one on an R1 node; a clean round ends a node unless it is R3 or flagship) — and a fourth, `verifier-visual`, on a flagship or product surface, which reads the contact sheet against the director record; a failing round records itself and the node stays open, and at the ceiling the node is parked with its evidence |
+| closing a node | [`certification.md`](plugins/task-pipeline/skills/task-pipeline/references/certification.md): three blind readings at escalating visibility (the changed code, what reaches it, the product around it), all three required to pass (one on an R1 node; a clean round ends a node unless it is R3 or flagship), and a fourth, `verifier-visual`, on a flagship or product surface, which reads the contact sheet against the director record, and an `agent` reading, `verifier-agent`, on a node with `agent_surface: public` or `internal`, which runs the proving call and the contract tests; a failing round records itself and the node stays open, and at the ceiling the node is parked with its evidence |
 | 5 Build | [`build.md`](plugins/task-pipeline/skills/task-pipeline/references/build.md) + [`review.md`](plugins/task-pipeline/skills/task-pipeline/references/review.md) — isolation, ledger, subagent loop, review rubric, fix loop |
 | 5–6 TDD | [`tdd.md`](plugins/task-pipeline/skills/task-pipeline/references/tdd.md) — the iron law, red/green/refactor, the suite gate |
 | 5, 6, 8 The browser | [`browser.md`](plugins/task-pipeline/skills/task-pipeline/references/browser.md) — the ref model both channels share, the four commands the look is made of, sessions, and the three different things *"tested in a browser"* means |
 | 3, 6 The design review | [`design-review.md`](plugins/task-pipeline/skills/task-pipeline/references/design-review.md): the `design-tester` agent walks the ten-portrait test panel through the changed scenarios over the Figma frames or mockups before build and in the recorded browser after it, judges every step on a fixed checklist, and closes everything it started (`scripts/design_gate.py`, `scripts/resource_guard.py`) |
+| 0–10 The agent surface | [`agent-surface.md`](plugins/task-pipeline/skills/task-pipeline/references/agent-surface.md): when stage 0's actor branch forecasts a capability or contract change, the capability map comes first, the contract before the screens, the proving call and the `agent-tester` prove it at stage 6, a snapshot diff re-decides the forecast at stage 7, stage 8 calls the deployed surface rather than curling it, and a node with `agent_surface: public` or `internal` owes the `agent` tier (`verifier-agent`). It cites the AI-native canon (`AN-1` to `AN-10`) in its owners' files, super-ux and agent-stack, and restates none of it |
 | 7, 8 Release impact | [`release-impact.md`](plugins/task-pipeline/skills/task-pipeline/references/release-impact.md): a release in a project with users owes a card before the tag, the publish or the deploy (who is affected and how, the tracking and its watch window, the alerting and whether it ever fired, the rollback or hotfix and its decision trigger), and stage 8 watches it and acts on the trigger (`scripts/release_impact.py`) |
 | 10 Acceptance | [`acceptance.md`](plugins/task-pipeline/skills/task-pipeline/references/acceptance.md) — REQ coverage table, evidence rules, the closing question |
 | 10 + any audit | [`audit.md`](plugins/task-pipeline/skills/task-pipeline/references/audit.md) — the L0→L7 ladder and its seams, axis rotation, ratchets, proven checks |
@@ -225,7 +226,7 @@ project's records can answer, then asks you the rest in **one batch**, ordered b
 dependency, each with a recommended answer — one at a time only where the answers
 depend on each other or you ask for it — until every decision branch is resolved and
 locked into a **task brief**. The depth is proportional: a small change (R1, at
-most five files, no public contract, no user-facing change, no deploy) takes the
+most five files, no public contract, no change a user or an agent observes, no deploy) takes the
 **short path** by default, printed in one line: the brief in the run ledger, build
 with tests, one verification, docs and handoff. Anything larger starts stage 1 only
 on a committed, confirmed brief.
@@ -644,7 +645,7 @@ must say so.
 ### Held to Anthropic's own Skill authoring guidance
 
 Audited against the four Agent Skills pages. Most of it already held — `name`
-13/64 chars, `description` 292/1024 chars, `SKILL.md` 213/500 lines, all 56 references
+13/64 chars, `description` 292/1024 chars, `SKILL.md` 213/500 lines, all 57 references
 reachable from `SKILL.md` through explicit reference routes, and the bundle far under the 30 MB ceiling. What
 did not, now does:
 

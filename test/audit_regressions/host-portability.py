@@ -19,7 +19,7 @@ PLUGIN = ROOT / 'plugins/task-pipeline'
 def check_payloads(root):
     pipeline = root / 'task-pipeline'
     project = root / 'project-audit'
-    for tier in ('unit', 'seam', 'product', 'visual'):
+    for tier in ('unit', 'seam', 'product', 'visual', 'agent'):
         body = (pipeline / 'assets' / ('verifier-' + tier + '.md')).read_text()
         canonical = (PLUGIN / 'agents' / ('verifier-' + tier + '.md')).read_text().split('---', 2)[2].lstrip()
         assert body == canonical, 'portable verifier body drift: ' + tier

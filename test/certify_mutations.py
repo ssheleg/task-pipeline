@@ -34,7 +34,7 @@ import tempfile
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 GRAPH_REL = "plugins/task-pipeline/skills/task-pipeline/scripts/graph.py"
-EXPECTED_FIXTURES = 33
+EXPECTED_FIXTURES = 40
 
 # (name, the source to disable, what to replace it with). Each disables exactly one
 # rule; the fixture that must notice is named in the output when it does.
@@ -81,6 +81,14 @@ MUTATIONS = [
      'if False:\n        die("%s is already %s — certifying'),
     ("the visual tier on a flagship or product surface",
      'if sclass in VISUAL_REQUIRED and VISUAL_TIER not in reports:', 'if False:'),
+    # The agent reading (references/certification.md -> *The agent reading*): owed on a
+    # public or internal agent surface, never on library, never on a node without the field.
+    ("the agent tier on a public or internal agent surface",
+     'if asurf in AGENT_REQUIRED and AGENT_TIER not in reports:', 'if False:'),
+    ("library owes no agent tier",
+     'AGENT_REQUIRED = ("public", "internal")', 'AGENT_REQUIRED = ("public", "internal", "library")'),
+    ("an absent agent_surface owes nothing",
+     'asurf = node.get("agent_surface")', 'asurf = node.get("agent_surface", "public")'),
     ("open-blocker refusal",
      'if open_blockers:\n        die("%s waits on %s, which %s not closed — certifying',
      'if False:\n        die("%s waits on %s, which %s not closed — certifying'),

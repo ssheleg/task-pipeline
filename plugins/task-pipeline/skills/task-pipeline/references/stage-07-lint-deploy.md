@@ -13,6 +13,13 @@ The full gate and freedom level remain in [stages.md](stages.md).
   from inference about the project is one nobody can repeat or roll back, and the
   operator is standing at this gate anyway. That reference also carries the CLI
   verbs per target for when the runbook names a platform you have to recall.
+- **Where a contract snapshot exists, diff it before deploy**
+  ([`agent-surface.md`](agent-surface.md) → *When it is armed*). Regenerate the
+  snapshot (MCP `tools/list`, an OpenAPI document, `--help --json`) and diff it
+  against the base. The diff re-decides stage 0's forecast: non-empty on a task
+  forecast `no` fails this stage and sends the task back to stage 2. Then the schema
+  lint and the tool-description lint; for a CLI, `--json`, stable exit codes and
+  non-interactive flags.
 - **Before the tag, the publish or the deploy, write the release impact card** when the
   project has users (`pipeline.json` → `release.users` is not `none`; absent counts as
   `external`): seed `templates/release-impact.md` to

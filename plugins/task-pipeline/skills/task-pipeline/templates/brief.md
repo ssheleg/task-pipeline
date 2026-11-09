@@ -8,9 +8,18 @@
 - **Task (one line):** <what the operator asked for, restated>
 - **UI verdict:** yes / no — does this touch a user-facing surface (web/mobile/CLI/TUI)?
   If yes, the stage-3 super-ux UX track is armed.
-- **surface_class:** flagship / product / internal / ad — UI tasks only. Selects the
-  visual gate profile: the director record's fields at stage 3, whether the visual half
-  of the look gates stage 6, and whether stage 10 needs the approved contact sheet.
+- **surface_class:** flagship / product / internal / ad, one per human surface the task
+  touches; none recorded means no human surface. Selects the visual gate profile: the
+  director record's fields at stage 3, whether the visual half of the look gates stage
+  6, and whether stage 10 needs the approved contact sheet.
+- **capability_change:** yes / no. A forecast: does this add or remove a capability,
+  or change its behaviour, actors or gate? Stage 7's contract snapshot diff re-decides it.
+- **contract_change:** yes / no. A forecast: does it change what an agent reads (a
+  schema, an error code, an effect, a tool description, an error body, what a read
+  returns after a migration)?
+- **agent_surface:** public / internal / library / none, on either `yes` above;
+  `none` only when the product has no capability an agent could use, with the reason.
+  The skill's `references/agent-surface.md` says what each later stage then owes.
 
 ## Contents
 
@@ -144,9 +153,10 @@ is not neutral — it is a scheduled interruption.
 | 0 Work-list | Which register holds task **state**, and the command that reads it — re-run at every harvest, at every loop iteration and at the close | … (e.g. `bash scripts/board.sh`; none → record empty) |
 | 0 Setup audit | … (yes / no — recorded either way) | doc map absent or stale: run the entry audit over the existing documentation before building on it (the skill's `references/setup.md`)? Asked once; a refusal is recorded and never re-asked |
 | 0 Docs regime | Where settled things live (register or ADR set — one home, never both); who may write it; lease mechanism present, or is this run `ungated`? Gate command + ratchet floors; may this run raise a floor? | … |
+| 0 Actors | Who acts on what this changes (person, agent, both); `capability_change`, `contract_change`, `agent_surface`; the human surfaces with their serving reasons | … (forecast; stage 7's snapshot diff re-decides it) |
 | 1 Docs | External libs/APIs/SDKs in play; any context7 can't resolve → where their docs live | … |
 | 2 Decompose | Platform (several capabilities/surfaces) or one module? If platform — deploy cadence: per module, or once at the end | … |
-| 2–3 Spec | UI verdict (arms super-ux) and `surface_class`; scenario-tracing waiver, if any | … |
+| 2–3 Spec | UI verdict (arms super-ux) and the `surface_class` of each human surface; scenario-tracing waiver, if any | … |
 | 3 Design surface | UI only: Figma on or text-only (check `docs/ux/foundation.md` → Design tooling first); Figma MCP connected? **If not — ship text-only, or stop and connect it?** | … (super-ux never blocks on a missing MCP, so an unanswered row here ships the feature without mockups) |
 | 3 Design file | Figma on only: **which team/org + which file per surface** (App, Web, ASO) — existing URL, or "create one in team `<name>`" **with creation authorized**. Canonical record: `docs/ux/foundation.md` → Design tooling | … (team: `<name>` · App: `<url>` · Web: `<url>` · ASO: `<url>` \| `create in <team>, authorized` — never create when a recorded file resolves) |
 | 4–5 Dev | Base branch; worktree/branch policy; is `main` off-limits; commit convention; task tracker | … |

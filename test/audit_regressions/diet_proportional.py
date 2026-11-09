@@ -78,6 +78,36 @@ def _():
     assert code == 3 and "not bounded" in out, "an unbounded change took the short path: " + out
 
 
+@case("answer 3 reads a user OR an agent: an agent-only change leaves the short path (exit 3)")
+def _():
+    short, line = sp.decide(**dict(SMALL, agent_facing=True))
+    assert not short and "agent-observable" in line, line
+    short, line = sp.decide(**dict(SMALL, agent_facing=False))
+    assert short, "an unflagged change left the short path: " + line
+    code, out = run("--files", "a.py", "--contract", "no", "--user-facing", "no",
+                    "--agent-facing", "yes", "--deploy", "no", "--risk", "R1")
+    assert code == 3 and "agent-observable" in out, out
+    code, out = run("--files", "a.py", "--contract", "no", "--user-facing", "no",
+                    "--agent-facing", "no", "--deploy", "no", "--risk", "R1")
+    assert code == 0 and out.startswith("short path: R1"), out
+    code, out = run("--files", "a.py", "--contract", "no", "--user-facing", "no",
+                    "--agent-facing", "maybe", "--deploy", "no", "--risk", "R1")
+    assert code == 2, "a non yes/no answer was accepted: " + out
+
+
+@case("the CLI stays backward compatible: a call without --agent-facing decides as before")
+def _():
+    code, out = run("--files", "a.py", "--contract", "no", "--user-facing", "no",
+                    "--deploy", "no", "--risk", "R1")
+    assert code == 0 and out.startswith("short path: R1 · 1 file · no contract"), out
+    short, line = sp.decide(["a.py"], False, False, False, "R1")
+    assert short, "the positional five-answer call changed meaning: " + line
+    st0 = (SK / "references/stage-00-intake.md").read_text(encoding="utf-8")
+    assert "a user or an agent observes" in re.sub(r"\s+", " ", st0), \
+        "stage-00-intake.md does not state answer 3 as a user or an agent"
+    assert "--agent-facing" in st0, "the doctrine does not name the flag the script reads"
+
+
 @case("the doctrine states the thresholds the script enforces")
 def _():
     st0 = (SK / "references/stage-00-intake.md").read_text(encoding="utf-8")

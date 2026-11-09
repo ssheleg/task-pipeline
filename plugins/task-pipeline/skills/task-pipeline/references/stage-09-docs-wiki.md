@@ -22,6 +22,11 @@ The full gate and freedom level remain in [stages.md](stages.md).
 - Update host module docs / runbooks per the project's self-update rules, in the
   **same change**. For UI tasks, confirm the super-ux layers were updated in this
   change and the linter is green (super-ux *same-change* + *no-drift* rules).
+- **Where the actor branch is armed, `AGENTS.md` is generated, not edited**
+  ([`agent-surface.md`](agent-surface.md)): its capability list comes from
+  `docs/ux/capabilities.md` and the contract snapshot, with the registration
+  command and one proving call. The event catalogue is updated only when events
+  changed.
 - **Sync the knowledge wiki** — `wiki-update` when
   [obsidian-wiki](https://github.com/ar9av/obsidian-wiki) is installed (detect:
   `~/.obsidian-wiki/config`, or the skill resolves). Not installed → recommend it

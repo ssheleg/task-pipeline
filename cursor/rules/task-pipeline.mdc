@@ -70,7 +70,7 @@ event, not the end of the run — what loses work is crossing it mid-item.
 Never skipped, and nothing to install: the grill is part of this rule. Its depth is
 proportional. **A small change takes the short path by default** when the gap check
 leaves no material unknown and the change is R1 risk, at most five files, no public
-contract, no user-facing change and no deploy: say so in one line, write the brief and
+contract, no change a user or an agent observes and no deploy: say so in one line, write the brief and
 its REQ rows into the run ledger, build with tests, run one verification, update the
 docs and handoff, and write a retro entry only for a new lesson. Anything larger runs
 the full flow, and a one-line task ("build feature X") is not enough to finish it
@@ -132,7 +132,10 @@ mid-flight questions:
    and still ship?").
 7. Run the **autonomy sweep** — resolve now whatever would stop stages 1→10 later:
    external libs and where their docs live; **which doc sources beyond this repo are
-   in play and whether stage 9 may write to them**; UI verdict; base branch, branch policy,
+   in play and whether stage 9 may write to them**; the **actor branch** (who acts on
+   what this changes, a person, an agent or both: a forecast of a capability change and
+   of a contract change, and on either the agent surface, public, internal, library or
+   none with its reason); UI verdict and each human surface's class; base branch, branch policy,
    commit convention, task tracker; the test command and what "green" means; the
    lint command; the deploy target, release toggle and **deploy authorization**;
    where logs/health live; which docs and runbooks this change updates. For UI
@@ -610,6 +613,24 @@ while `git show <sha>` reconstructs the whole incident months later. Entries old
 than the last five run stamps **move** to an append-only archive that is *queried*
 by the task's nouns rather than read — which keeps the in-force file short enough to
 read in full, and makes pruning cost no knowledge.
+
+## When agents use the product (an armed actor branch)
+
+When stage 0 forecasts a capability change or a contract change, the product is
+designed as capabilities with a contract, and a screen is one client of it. Inside
+the same stages: map the capabilities first at stage 2 (each story to a capability
+row naming its actors, gate and tools, or why an agent is excluded); at stage 3 commit
+the contract source (schemas, typed errors, effects) and the agent scenarios before
+any human flow; at stage 4 plan contract tasks first, a UI task waiting on the
+contract it consumes; at stage 5 start TDD with a failing contract test; at stage 6
+make the proving call through a real client and run the contract tests, plus a
+cold-agent review where the change is high risk or the surface is public; at stage 7
+diff the contract snapshot against the base (a non-empty diff on a task forecast
+"no" sends it back to stage 2); at stage 8 call the deployed surface, never only
+curl it; at stage 9 generate `AGENTS.md` from the capability rows. A breaking
+contract change is high risk; an additive one is not. A product with no agent
+surface yet gets its skeleton (auth, refusal vocabulary, audit row, health,
+snapshot) as its own first item.
 
 ## Three tracks for user-facing tasks (stage 3)
 

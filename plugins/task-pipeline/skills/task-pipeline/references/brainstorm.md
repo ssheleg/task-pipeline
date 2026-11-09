@@ -20,6 +20,7 @@ approved design — not at code.
 - Design for isolation and clarity
 - Working in an existing codebase
 - UI detection — a required output
+- The capability map, before the screens
 - The approved design is a set of decisions — record them
 - User paths are a design output, not a spec detail
 - GATE (auto)
@@ -104,6 +105,27 @@ it arms the stage-3 UX track ([`spec.md`](spec.md) → *UX track*). When it's
 genuinely borderline, record "yes": a false positive costs one extra chain, a false
 negative ships an unspecified interface.
 
+## The capability map, before the screens
+
+Where stage 0's actor branch forecast a capability or contract change
+([`agent-surface.md`](agent-surface.md)), the design starts from what the product
+can do, not from what a screen shows. In this order:
+
+1. **REQ, then stories, then `CAP-` rows.** Each row names its actors (human,
+   agent, automation), roles, gate, what it emits, its automation, and its human
+   surface or none. The fields and their enums are super-ux's (`AN-1`, `AN-4`,
+   `scenario-format.md`); this stage fills them, it does not redefine them.
+2. **Agent paths as call sequences**, with their states (pending, partial, denied,
+   an async job) and the typed error each failure returns. They are the agent's
+   user paths, and the section below applies to them as it does to a screen's.
+3. **Then the human surfaces**, each a client of the capabilities it fronts, each
+   with its serving reason.
+
+The gate adds one criterion: every `CAP` row has `Tools` or `Agent excluded` with
+its evidence. A capability found later, while drawing a screen, flows back into the
+map in the same change; a function that exists only in a screen is the defect
+`AN-2` names.
+
 ## The approved design is a set of decisions — record them
 
 An approved approach is a decision, and so is each alternative rejected for a reason
@@ -150,7 +172,9 @@ same gate. Two more criteria close it, and the gate of record —
 **the queue is an artifact rather than a recollection** (where it is a work graph,
 `graph.py validate` exits 0 and `graph.py coverage` names any requirement no node
 serves), and **the loop's arming state is printed** — armed with its queue and
-pacing, or not armed with the reason. Then, and only then, stage 3 writes it up.
+pacing, or not armed with the reason. Where the actor branch is armed, every `CAP`
+row has `Tools` or `Agent excluded` (*The capability map, before the screens*).
+Then, and only then, stage 3 writes it up.
 
 ## Rationalizations
 

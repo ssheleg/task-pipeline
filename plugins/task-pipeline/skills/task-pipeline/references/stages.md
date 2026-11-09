@@ -109,8 +109,11 @@ never that the work was skipped quietly.
   a recorded answer or an explicit deferral, **every answer that contradicted a
   harvested source has a recorded resolution** (which governs, and whether the doc
   is now stale), no open contradictions, **every
-  autonomy-sweep row is answered or explicitly marked "stop and ask here"**, **a
-  user-facing task's brief names its `surface_class`**, and on any class but `none`
+  autonomy-sweep row is answered or explicitly marked "stop and ask here"**, **the
+  actor branch is answered** (`capability_change` and `contract_change` forecast, and
+  on either `yes` the `agent_surface`, [`agent-surface.md`](agent-surface.md)), **every
+  human surface the task touches has its `surface_class` recorded**, and wherever a
+  class is recorded (an absent class is the only "none")
   **the project's test browser is recorded** (`pipeline.json` → `browser`, asked once,
   [`browser.md`](browser.md) → *The tester's browser*), the
   **REQ table is written and every row names its check**, **the brief's `## Finish line`
@@ -160,7 +163,9 @@ never that the work was skipped quietly.
   approved**: brick criteria met or excepted in writing, dependency graph acyclic,
   build order topological, every REQ mapped to exactly one module, cross-module
   contracts named with their owner — **and the loop's arming state is printed**:
-  armed with its queue and pacing, or not armed with the reason.
+  armed with its queue and pacing, or not armed with the reason. **Where the actor
+  branch is armed, the capability map came first and every `CAP` row has `Tools` or
+  `Agent excluded`** ([`agent-surface.md`](agent-surface.md)).
 
 ## 3 — Spec — with UX track for user-facing tasks
 - **Freedom: medium** — what the contract says is judgement; which contracts must be locked is a list ([`gates.md`](gates.md) → *Axis C*).
@@ -202,6 +207,9 @@ never that the work was skipped quietly.
   **Where both tracks ran, their convergence check is recorded** — findings with the
   ruling, or `Tracks converge: clean`; a screen where each track is right alone and they
   disagree together is the defect neither track's own review can see.
+  **Where the actor branch is armed, the contract source is committed before any
+  human flow, dossier section 4 covers it, and the agent tester's pass C read it
+  cold** ([`agent-surface.md`](agent-surface.md)).
   No plan (stage 4)
   starts before this — the chain comes BEFORE interface.
 
@@ -265,7 +273,9 @@ never that the work was skipped quietly.
   ([`audit.md`](audit.md)) — **and so are the disclosures**, `abstained` and
   `unlooked` ([`gates.md`](gates.md) → *Disclosures*): what the run declined to claim,
   and what a check never looked at. Neither has a floor and neither may be targeted; a
-  target on an abstention count is an instruction to guess.
+  target on an abstention count is an instruction to guess. **Where the actor branch is
+  armed, the proving call through a real client and the contract tests exit 0, and the
+  agent tester's pass B ran where it is owed** ([`agent-surface.md`](agent-surface.md)).
 - **Web front end? Then the surface is checked in a browser, not in the diff.**
   A passing suite proves the code does what its assertions say. It does not prove the
   page rendered — a component can be correct and land under a fixed header, a request
@@ -305,7 +315,7 @@ never that the work was skipped quietly.
   **one, two at most**, then `unresolved` to the person — never round three — and only
   external, specific feedback starts a round. The procedure and the order of the checks:
   [`browser.md`](browser.md) → *The visual half*.
-  **On any class but `none` the design review's pass B ran over the build** (since
+  **Wherever a `surface_class` is recorded, the design review's pass B ran over the build** (since
   1.100.0): the same `design_gate.py report` with `--require build` exits 0, every capture
   names its engine, and `python3 scripts/resource_guard.py verify <ledger>` is clean
   ([`design-review.md`](design-review.md)). A subscription surface (paywall, trial, pricing,
@@ -336,7 +346,10 @@ never that the work was skipped quietly.
   direct link to the run that is actually `waiting`, never a request without it. Respect deploy-from-main rules if the project mandates them. **Before
   tagging, the CI verdict for what was just pushed is READ, not assumed**
   ([`conventions.md`](conventions.md) → *The CI verdict*) — a tag on a commit whose
-  run nobody read is how a red `main` ships.
+  run nobody read is how a red `main` ships. **Where a contract snapshot exists, its
+  diff against the base re-decides stage 0's forecast**: a non-empty diff on a task
+  forecast `no` fails this gate and sends the task back to stage 2
+  ([`agent-surface.md`](agent-surface.md)).
 - **A release with users owes its impact card before the outward act** (since the
   operator's rule of 2026-10-24): who is affected and how, the tracking with its watch
   window, the alerting and whether it was ever seen firing, the rollback or hotfix with its
@@ -371,7 +384,10 @@ never that the work was skipped quietly.
 - **GATE (auto):** clean boot confirmed, or an **honest degradation report** with next
   steps — never silent success. **The CI verdict is one of the reported facts, with
   its run id** — "CI is green" written without a command behind it prints the same
-  whether it looked or not ([`gates.md`](gates.md) → *False success*).
+  whether it looked or not ([`gates.md`](gates.md) → *False success*). **A deployed
+  agent surface is called, not curled:** discovery, the tool list equal to the
+  snapshot, one read-only call and one typed-error probe
+  ([`agent-surface.md`](agent-surface.md)).
 - **Watch the release impact card's signals for its window** and record what they read in
   the card's `## Outcome` (`Result:` held, rolled back, hotfixed, or watching with its
   watcher); `release_impact.py check <card.md> --outcome` exits 0. When the card's decision
@@ -461,7 +477,10 @@ never that the work was skipped quietly.
   the answer the operator can give at any time. `auto` by default since 1.98.0: a
   check proves the table well-formed, and only the person who asked can confirm it is
   what they asked for, so the run hands that question back rather than waiting on it.
-  A project that wants the wait sets this gate `manual`.
+  A project that wants the wait sets this gate `manual`. **Where the actor branch is
+  armed, the ladder walk carried the `C→B` row and the parity matrix: every touched
+  `CAP` is `exposed`, or `Agent excluded` with its evidence or board row**
+  ([`agent-surface.md`](agent-surface.md)).
 
 ## The program loop — a platform, one brick at a time
 

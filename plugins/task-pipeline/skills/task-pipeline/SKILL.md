@@ -151,7 +151,7 @@ All stages run on the **one model confirmed at preflight**.
 
 | # | Stage | Gate | Type |
 |---|---|---|---|
-| 0 | Intake grill — **mandatory** | source ledger written with its `Contradictions:` line; board found, every ask but the kept one filed; `docs/DOCMAP.md` answered and intent reconciled against as-built; the retro floor read in full, its bytes printed; autonomy sweep covered; UI: `surface_class` recorded; brief locked and confirmed | auto |
+| 0 | Intake grill — **mandatory** | source ledger written with its `Contradictions:` line; board found, every ask but the kept one filed; `docs/DOCMAP.md` answered and intent reconciled against as-built; the retro floor read in full, its bytes printed; autonomy sweep covered; actor branch answered; `surface_class` per human surface; brief locked and confirmed | auto |
 | 1 | Docs study | contracts grounded on fetched docs | auto |
 | 2 | Brainstorm + decompose | design approved; UI verdict recorded; every REQ answered; **the queue is an artifact** — a work graph validates and its coverage names no unserved REQ; platform: module map approved | auto |
 | 3 | Spec | committed + reviewed; UI: chain validated, linter green, scenarios and `SCR-` traced; COPY and VISUAL are a parallel layer after UX, and where both ran their convergence check is recorded; VISUAL is checked by its director record | auto |

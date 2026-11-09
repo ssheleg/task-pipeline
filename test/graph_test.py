@@ -2069,6 +2069,107 @@ def _():
     assert r.returncode != 0 and "surface_class" in (r.stdout + r.stderr), \
         r.stdout + r.stderr
 
+# --- the agent reading: `agent`, owed by a public or internal agent surface --------
+#
+# A node that declares `agent_surface: public | internal` builds something agents call.
+# None of the four other tiers makes that call, so on that node an `agent` report is
+# REQUIRED. `library` owes none (its types, docs and doctests are its proof), and a node
+# without the field owes nothing: the field is optional and old graphs are unchanged.
+# references/certification.md -> *The agent reading*; references/agent-surface.md.
+
+AGT = g([dict(node("N-001"), agent_surface="public")])
+
+
+@case("certify: a public agent-surface node without the agent tier is refused and the tier is named")
+def _():
+    code, out, d = certify(AGT, three())
+    assert code != 0 and "`agent`" in out and "public" in out, out
+    assert not (pathlib.Path(d) / "verdict-N-001.json").exists(), out
+    n = json.loads((pathlib.Path(d) / "graph.json").read_text())["nodes"][0]
+    assert "certification" not in n, "a refused round wrote a certification: %r" % n
+
+
+@case("certify: an internal agent-surface node owes the agent tier too")
+def _():
+    internal = g([dict(node("N-001"), agent_surface="internal")])
+    code, out, _ = certify(internal, three())
+    assert code != 0 and "`agent`" in out and "internal" in out, out
+
+
+@case("certify: a public node with a passing agent tier writes a verdict that names it")
+def _():
+    code, out, d = certify(AGT, three() + [tier("agent")], git=True)
+    assert code == 0, out
+    v = json.loads((pathlib.Path(d) / "verdict-N-001.json").read_text())
+    assert any(e.startswith("agent:") for e in v["evidence"]), v["evidence"]
+    n = json.loads((pathlib.Path(d) / "graph.json").read_text())["nodes"][0]
+    assert n["certification"]["tiers"]["agent"] == "pass", n["certification"]
+    code, out2 = close_in(d)
+    assert code == 0, "close refused the verdict with the agent tier: " + out2
+
+
+@case("certify: a library node owes no agent tier, and takes one when given")
+def _():
+    lib = g([dict(node("N-001"), agent_surface="library")])
+    code, out, _ = certify(lib, three())
+    assert code == 0, "a library node was made to owe the agent tier: " + out
+    code, out, _ = certify(lib, three() + [tier("agent")])
+    assert code == 0 and "agent" in out, out
+
+
+@case("certify: a node with no agent_surface owes no agent tier, so old graphs certify as before")
+def _():
+    code, out, _ = certify(ONE, three())
+    assert code == 0, "a node without the field was made to owe something: " + out
+    code, out, _ = certify(ONE, three() + [tier("agent")])
+    assert code == 0 and "agent" in out, out
+
+
+@case("certify: a failing agent tier fails the round and is recorded in its history")
+def _():
+    reports = three() + [tier("agent", verdict="fail", confirms=[], findings=[breaks(
+        check="python3 tests/contract/test_cap07.py -q  # the typed refusal for a revoked grant")])]
+    code, out, d = certify(AGT, reports)
+    assert code == 1 and "`agent`" in out, out
+    n = json.loads((pathlib.Path(d) / "graph.json").read_text())["nodes"][0]
+    assert n["certification"]["history"][-1].get("agent") == "fail", n["certification"]
+
+
+@case("certify: an agent report citing another tier's verdict was not written blind")
+def _():
+    reports = three() + [tier("agent", confirms=["as the seam tier confirmed, the call holds"])]
+    code, out, _ = certify(AGT, reports)
+    assert code != 0 and "cites another tier" in out, out
+    reports = three()
+    reports[0]["confirms"] = ["the agent tier passed, so the unit holds"]
+    code, out, _ = certify(AGT, reports + [tier("agent")])
+    assert code != 0 and "cites another tier" in out, out
+
+
+@case("validate: a node's agent_surface outside the three profiles is refused, `none` included")
+def _():
+    for bad_value in ("partner", "none", ""):
+        bad = g([dict(node("N-001"), agent_surface=bad_value)])
+        d = residue.workspace("graph")
+        gp = pathlib.Path(d) / "graph.json"
+        gp.write_text(json.dumps(bad))
+        r = subprocess.run([sys.executable, str(GRAPH), "validate", "--graph", str(gp)],
+                           capture_output=True, text=True)
+        assert r.returncode != 0 and "agent_surface" in (r.stdout + r.stderr), \
+            (bad_value, r.stdout + r.stderr)
+
+
+@case("validate: each agent_surface profile validates, and a graph without the field is unchanged")
+def _():
+    for graph in [ONE] + [g([dict(node("N-001"), agent_surface=v)])
+                          for v in ("public", "internal", "library")]:
+        d = residue.workspace("graph")
+        gp = pathlib.Path(d) / "graph.json"
+        gp.write_text(json.dumps(graph))
+        r = subprocess.run([sys.executable, str(GRAPH), "validate", "--graph", str(gp)],
+                           capture_output=True, text=True)
+        assert r.returncode == 0, r.stdout + r.stderr
+
 # --- wave mode: references/waves.md ----------------------------------------------
 
 

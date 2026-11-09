@@ -104,7 +104,8 @@ The full gate and freedom level remain in [stages.md](stages.md).
                                               syncs, its schema or config
                                               contracts, a shipped command,
                                               its README                    -> yes/no
-  3. behaviour a user observes changes        a UI, a message, an output    -> yes/no
+  3. behaviour a user or an agent observes    a UI, a message, an output,
+     changes                                  a tool, an error body          -> yes/no
   4. a deploy target in the brief             stage 7's target exists       -> yes/no
   5. risk class                               work-graph.md R1-R3           -> R1/R2/R3
   ```
@@ -114,7 +115,9 @@ The full gate and freedom level remain in [stages.md](stages.md).
   the short path and prints one line:
   `short path: R1 · N files · no contract · no user-facing change · no deploy`.
   `scripts/short_path.py` computes the decision from the five answers (exit 0 short,
-  3 full) and prints that line.
+  3 full) and prints that line. Answer 3 is two flags, `--user-facing` and
+  `--agent-facing` (default `no`): a change only an agent observes (a tool, a schema,
+  an error body) leaves the short path like a change a person sees.
   The short path is: the brief and its REQ rows written into the run ledger (no grill,
   no committed brief file) → stage 5, build with tests → stage 6, the suite plus **one**
   verification (one blind tier, [`certification.md`](certification.md)) → stage 9, the
@@ -148,14 +151,22 @@ The full gate and freedom level remain in [stages.md](stages.md).
   authorization: no loop mode collapses a `manual` gate or an outward act. The
   same file carries the other half of pacing — the context budget, which fires
   only on a harness signal or the operator's word, never on an estimate.
-- **UI early-detect:** one branch of the grill is always "does this touch a
-  user-facing surface (web/mobile/CLI/TUI)?". If yes → surface **super-ux**
-  now (use it if installed; otherwise give the install line — see SKILL.md
-  *Prerequisites*); this arms the stage-3 UX track. **And the same branch records
-  the surface's class** — the next bullet.
-- **The surface class.** Every user-facing task's brief carries
-  `surface_class: flagship | product | internal | ad`, and the class selects the gate
-  profile the visual layer is held to for the rest of the run:
+- **The actor branch** (it replaced the single UI question). One branch of the grill
+  is always: who acts on what this changes, a person, an agent, or both? It records
+  two forecasts, `capability_change` and `contract_change`; on either `yes`, the
+  product's `agent_surface` (`public | internal | library | none`, `none` with its
+  reason), the actors, and the human surfaces with their serving reasons. An armed
+  answer loads [`agent-surface.md`](agent-surface.md), which says what each later
+  stage then owes; stage 7's snapshot diff re-decides the forecast. Where a human
+  surface (web, mobile, CLI, TUI) is touched, surface **super-ux** now (use it if
+  installed; otherwise give the install line, see SKILL.md *Prerequisites*); this
+  arms the stage-3 UX track, and the branch records each human surface's class: the
+  next bullet.
+- **The surface class.** Every human surface the task touches carries
+  `surface_class: flagship | product | internal | ad`, recorded per human-surface
+  node (one task can hold a `flagship` paywall and an `internal` admin view), and the
+  class selects the gate profile the visual layer is held to for the rest of the run.
+  A task with no human surface records no class; an absent class is the only "none":
 
   | Class | What it is | Director record (stage 3) | Visual half (stages 5–6) | Stage 10 |
   |---|---|---|---|---|
@@ -172,7 +183,8 @@ The full gate and freedom level remain in [stages.md](stages.md).
   ([`certification.md`](certification.md) → *The fourth reading*).
 - **Artifact:** lock the resolved decisions into a **task brief** committed at
   `<artifacts>/specs/YYYY-MM-DD-<topic>-brief.md` (scope, users/UI verdict and,
-  for a user-facing task, `surface_class`, constraints, assumptions, explicitly-deferred items, done-criteria) **plus the
+  for each human surface, `surface_class`; the actor branch's `capability_change`,
+  `contract_change` and `agent_surface`; constraints, assumptions, explicitly-deferred items, done-criteria) **plus the
   autonomy sweep's per-stage answers and the model decision**. Seed it from
   the skill's `templates/brief.md` skeleton — but only when absent, never
   overwrite an existing brief. Stages 2–4 build on this brief; stages 5–10 read

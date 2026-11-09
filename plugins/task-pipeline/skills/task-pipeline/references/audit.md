@@ -131,6 +131,7 @@ done it. What survives lives between rungs:
 | F→L7 | *(UI)* did what shipped match the frame, or did the frame become fiction? | the frame is still the design of record and no longer describes anything that exists |
 | →F | *(UI)* is every frame **in a recorded file**? | a design file outside the recorded set — one per surface — that nobody opens, holding real work; the check is a `:fileKey` set membership (`visual_gate.py filekeys`), so it is a gate, not an opinion |
 | V→R | *(UI, VISUAL track ran)* does the **approved contact sheet** carry the intent the **director record** set? | a render that passed every frame check and lost the falsifier, the signature moment or a rubric item the record wrote first; or a sheet nobody approved, standing in for the person's pass. The rounds it took (`review:` lines) go into the acceptance file |
+| C→B | *(agent surface, actor branch armed)* does what the contract **says** match what an agent **gets** when it calls? | a tool whose schema validates and whose call returns a bare 500, an untyped refusal, or an effect the contract never declared; a capability marked `exposed` that the snapshot does not carry |
 
 The L7→L0 seam is stage 10's question, expressed as a seam. When it fails, the run
 did every instruction correctly and delivered the wrong thing.

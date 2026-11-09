@@ -1,3 +1,49 @@
+## v1.104.0: the pipeline designs for agents as well as people, without a new stage
+
+Guards: 531 → **537**; property checks 15 → **15**. Negatives 551 to 556 are new: five
+plant the agent-tier rules into `graph.py` and require `graph_test.py` to fail, one plants
+a short path blind to `--agent-facing` and requires `diet_proportional.py` to fail.
+
+- **The actor branch replaces the single UI question at stage 0** (operator, 2026-11-09:
+  products are AI-native, every function available to agents; the design order is jobs and
+  stories, then agent capabilities and the contract, and only then the interfaces). The grill
+  now asks who acts on what a change touches and records two forecasts, `capability_change`
+  and `contract_change`, and on either the product's `agent_surface` (`public`, `internal`,
+  `library`, or `none` with its reason). Until now a change only an agent could see (a tool, a
+  schema, an error body) passed every UI-shaped gate, because the only question was whether a
+  person would see it.
+- **New `references/agent-surface.md`: how the pipeline applies the canon, stage by stage.**
+  The canon (`AN-1` to `AN-10`) is stated once in its owners' files, super-ux contract v5 and
+  agent-stack's `agent-interop` and `agent-evals`, and cited here by id and raw URL; nothing is
+  restated. Inside the existing stages: the capability map before the screens (2), the
+  contract source and agent scenarios before any human flow, dossier section 4 owed by every
+  capability or contract change (3), contract tasks first with `CAP-` traces (4), TDD from a
+  failing contract test (5), the proving call and the contract tests as the gate with the agent
+  tester's pass B as judgment (6), a contract snapshot diff that re-decides the stage 0
+  forecast (7), "called, not curled" (8), `AGENTS.md` generated (9), a `C→B` seam and the parity
+  matrix (10). Risk follows the contract: R3 on a break or a ceiling change, R2 when additive.
+  No stage number moves (`plan_audit.py` and the stage-route checks hold eleven).
+- **The `agent` tier.** A work-graph node may carry `agent_surface` (`public`, `internal`,
+  `library`); on `public` or `internal`, `graph.py certify` refuses a round without an `agent`
+  report and names the tier, because none of unit, seam, product or visual makes the call an
+  agent makes. `library` owes none; a node without the field owes nothing, so every graph
+  written before this release validates and certifies unchanged. New agents
+  `agents/verifier-agent.md` (with its portable `assets/` mirror) and `agents/agent-tester.md`
+  (report `agent-review/1`, on the design tester's pattern). `graph_test.py` carries nine new
+  cases, `certify_mutations.py` three new mutations, and six new negative plants prove the
+  owed, not-owed, absent-field and library rules and the short-path flag each fail when broken.
+- **The short path's answer 3 is "a user or an agent observes".** `short_path.py` takes
+  `--agent-facing yes|no` beside `--user-facing`, default `no`, so every older call decides as
+  before.
+- **A drift fixed on the way (BN-22).** Stage 0, stage 6, the design review and the design
+  tester said "any class but `none`" while no `surface_class` enum has `none`; they now say a
+  recorded class, absent meaning no human surface, and the class is recorded per human-surface
+  node. The design tester also checks the attention budget (super-ux `AN-5`).
+- **Measured.** `SKILL.md` body 3890 tokens before, 3894 after (`audit_skill.py --house`,
+  `tiktoken:cl100k_base`, working limit 4750); one stage-table cell changed.
+- Design record: hub `docs/evidence/specs/2026-11-09-ai-native-pipeline.md` and
+  `docs/evidence/plans/2026-11-09-ai-native.md`, packet P-TP.
+
 ## v1.103.1: a prompt of several asks is split, researched in parallel, merged, and the rest filed
 
 > **Why 1.103.1 and not 1.103.0.** The `v1.103.0` tag was cut against a tree that did not yet carry this release's line in `docs/evidence/retro.md` → *Releases that carry no stamp*; its release round stopped on that rule (run 42365245798), publish was skipped, and npm never left 1.102.4. The tag ruleset forbids deletion, so `v1.103.0` is declared dead there and this version carries the same payload.

@@ -10,6 +10,13 @@ The full gate and freedom level remain in [stages.md](stages.md).
   approved section by section. **Hard gate:** no code, no scaffolding, no implementation
   skill before the operator approves the design — including on "obviously simple"
   tasks.
+- **The capability map comes first, where the actor branch is armed**
+  ([`agent-surface.md`](agent-surface.md)): REQ, then stories, then `CAP-` rows
+  (actors, roles, gate, emits, automation, human surface or none), and the agent
+  paths as call sequences with their states (pending, partial, denied, async job)
+  and typed errors. Every `CAP` row has `Tools` or `Agent excluded`. Screens are
+  designed after it, as clients of it ([`brainstorm.md`](brainstorm.md) → *The
+  capability map, before the screens*).
 - **UI detection (mandatory check):** decide whether the task touches any
   user-facing surface (web, mobile, CLI, TUI — new feature, new screen/command,
   or a change to user-visible behavior). Record the verdict; it arms the UX

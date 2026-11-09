@@ -233,6 +233,13 @@ For UI tasks, every task that builds user-facing behavior names the **scenario
 ID(s)** and `SCR-` screen(s) it implements, and its DoD includes satisfying them
 **and** updating the affected super-ux layers in the same change.
 
+**Where the actor branch is armed, the contract is planned first**
+([`agent-surface.md`](agent-surface.md)). Contract and logic tasks come before any
+UI task; a UI task is `blocked_by` the contract task it consumes, and that edge's
+`Carries` cell names the contract version. Every task that builds a capability
+names its `CAP-` row(s) beside its `Implements:` line, and its DoD includes the
+failing contract test it starts from (stage 5).
+
 ## No placeholders
 
 These are plan failures. Never write them:
@@ -421,7 +428,8 @@ consistent across tasks; parallel-group tasks share no files **or other mutable
 target**; each task has a verifiable DoD. **Every edge in the *Execution order*
 table has a non-empty `Carries` cell, and the `Edges:` line of the self-review is
 computed** — each retained edge names data, control or resource semantics. An
-unexplained edge blocks the gate until justified or safely removed. UI tasks carry their scenario IDs and `SCR-` screens. Verify all
+unexplained edge blocks the gate until justified or safely removed. UI tasks carry their scenario IDs and `SCR-` screens; capability tasks carry
+their `CAP-` rows, and a UI task waits on the contract it consumes. Verify all
 of it yourself and stop on failure — this gate has no operator in it.
 
 ## Execution packets

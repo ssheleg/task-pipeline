@@ -1,6 +1,6 @@
 # Design review: the interface, walked by its users, as a gate
 
-Load this when a node's brief names a `surface_class` other than `none`, at stage 3 (before
+Load this when a node's brief records a `surface_class` (absent means no human surface), at stage 3 (before
 build) and at stage 6 (after build), in a single run, a wave or a release iteration. The agent
 is [`../../../agents/design-tester.md`](../../../agents/design-tester.md); its gate is
 `scripts/design_gate.py`; its machine discipline is `scripts/resource_guard.py`; its browser is
