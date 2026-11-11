@@ -1,7 +1,7 @@
-# Verification — <project>
+# Verification: <project>
 
 > **Append-only.** One row per REQ, written by stage 8 when the change ships. Nobody
-> edits a row except to fill `Human` — and filling it is the one thing in this
+> edits a row except to fill `Human`: and filling it is the one thing in this
 > repository a machine may not do.
 >
 > This is not a second coverage table. The coverage table says *an automated check
@@ -9,7 +9,7 @@
 > after it shipped, nor whether it still works N releases later, and it dies with its
 > run. This file is the column that outlives it.
 
-## Producer — what wrote the rows below
+## Producer: what wrote the rows below
 
 Computed, never typed, and every field prints even when it cannot be resolved:
 
@@ -29,7 +29,7 @@ trace: unavailable: TASK_PIPELINE_TRACE is not set by this harness
 
 **Paste one such block per run, above the rows that run wrote.** Without it, two runs six
 months apart under different generations of this doctrine leave rows nobody can tell
-apart — so a defect traced to a doctrine change cannot be scoped to the runs that carried
+apart: so a defect traced to a doctrine change cannot be scoped to the runs that carried
 it. `skill`, `config` and `commit` resolve from the tree; `actor`, `model`, `runtime` and
 `trace` are the harness's to export, and each says so by name when unset, because a field
 that vanishes when unavailable is indistinguishable from one nobody checked.
@@ -40,12 +40,12 @@ worse than saying nothing.
 
 ## Contents
 
-- [Staleness — a row is true about the tree it OBSERVED](#staleness--a-row-is-true-about-the-tree-it-observed)
-- [Environment — a proof is only valid where it ran](#environment--a-proof-is-only-valid-where-it-ran)
-- the ledger itself — one row per REQ, appended by stage 8
+- [Staleness: a row is true about the tree it OBSERVED](#staleness-a-row-is-true-about-the-tree-it-observed)
+- [Environment: a proof is only valid where it ran](#environment-a-proof-is-only-valid-where-it-ran)
+- the ledger itself: one row per REQ, appended by stage 8
 - [What `Human` means, and what it does not](#what-human-means-and-what-it-does-not)
 
-## Staleness — a row is true about the tree it OBSERVED
+## Staleness: a row is true about the tree it OBSERVED
 
 `Observed at` is the commit the check ran against. Without it a row verified at commit A
 reads `verified` after commit B forever, and the ledger tracks rows nobody ever confirmed
@@ -53,26 +53,26 @@ while having no notion of a row the tree has since **overtaken**. Those are the 
 failure from two ends, and only one end was instrumented.
 
 `scripts/exposure.sh` reports four states, and it is a **disclosure**: no floor, no
-direction, never a target — for the same reason the `Human` column has none.
+direction, never a target; for the same reason the `Human` column has none.
 
 | State | Condition | What it means |
 |---|---|---|
 | **current** | 0 commits behind `HEAD` | the row still speaks about this tree |
 | **behind** | N commits / M days behind | *not trusted for the current tree until re-observed* |
-| **unresolvable** | the commit does not resolve here | rebase, squash or shallow clone — same marker |
+| **unresolvable** | the commit does not resolve here | rebase, squash or shallow clone: same marker |
 | **unanchored** | no commit recorded | nothing can say what it saw |
 
 **State zero prints out loud.** `current 12 · behind 0 · unresolvable 0 · unanchored 0` is
 a measurement; printing nothing when everything is fresh is what makes freshness
 indistinguishable from a check that never looked.
 
-**Invalidation is not deletion.** An overtaken row is not wrong — it is true about the tree
+**Invalidation is not deletion.** An overtaken row is not wrong: it is true about the tree
 it observed, and it stays. Re-observing appends a **new** row; it does not edit the old
 one. Four things overtake a row, and naming which one applies is the note's job: a **code**
 change in what it covers, a **dependency** change, an **environment** change, and a
-**policy** change — the last being the rule under which the evidence was accepted.
+**policy** change; the last being the rule under which the evidence was accepted.
 
-## Environment — a proof is only valid where it ran
+## Environment: a proof is only valid where it ran
 
 `Observed at` says which tree the check saw. It does not say **where**, and without that a
 smoke test against a preview URL enters the record in a shape indistinguishable from one
@@ -81,7 +81,7 @@ indistinguishable from one green on a runner that started clean. Those are the t
 of the same question, and only one was instrumented.
 
 **`Environment` is a required cell on every row.** Its vocabulary is the project's own,
-declared in the runbook and not invented per row — this file ships with four, and a project
+declared in the runbook and not invented per row: this file ships with four, and a project
 that deploys differently declares different ones:
 
 | Value | What it means |
@@ -90,44 +90,44 @@ that deploys differently declares different ones:
 | `preview` | a per-branch or per-PR deployment; proves the build, never the release |
 | `ci` | a clean runner, no accumulated state |
 | `local` | a developer machine, with whatever state it has |
-| `—` | **recorded absence** — a row written before this column existed, or one whose environment nobody recorded. Not a value, and never a default to reach for |
+| `—` | **recorded absence**: a row written before this column existed, or one whose environment nobody recorded. Not a value, and never a default to reach for |
 
 A missing cell is not the same as `—`: the first is a row that forgot the question, and it is
 **refused**. The second is an answer.
 
 **A REQ claiming production behaviour may not be closed on a non-production
-observation.** Stage 8 writes the row and refuses that pairing rather than recording it —
+observation.** Stage 8 writes the row and refuses that pairing rather than recording it:
 `pass` in `ci` against a requirement about the deployed product is the exact substitution
 this column exists to make visible.
 
 | REQ | What | Run | Shipped in | Observed at | Environment | Auto | Human | Note |
 |---|---|---|---|---|---|---|---|---|
 | REQ-001 | CSV export from a report | `2026-07-28-export` | v1.4.0 | `5f21ac3` | production | pass | 2026-07-30 | opened the deployed page, exported, opened the file |
-| REQ-004 | XLSX export | `2026-07-28-export` | v1.4.0 | `5f21ac3` | ci | pass | **never** | — |
+| REQ-004 | XLSX export | `2026-07-28-export` | v1.4.0 | `5f21ac3` | ci | pass | **never** | - |
 | REQ-007 | Export respects active filters | `2026-07-28-export` | v1.4.0 | `5f21ac3` | preview | partial | **never** | CSV path only |
 
 ## Columns
 
-- **REQ** — the id from the run's brief. The brief's REQ table is the spine; a row here
+- **REQ**: the id from the run's brief. The brief's REQ table is the spine; a row here
   whose id is in no brief is a row about nothing.
-- **What** — copied from the brief, not re-worded. *"Check REQ-004"* sends a human to
+- **What**: copied from the brief, not re-worded. *"Check REQ-004"* sends a human to
   look something up; *"XLSX export"* sends them to the feature.
-- **Run** — the brief's topic slug, so the context is one file away.
-- **Shipped in** — the tag or commit that carried it. Where a project does not tag,
+- **Run**: the brief's topic slug, so the context is one file away.
+- **Shipped in**: the tag or commit that carried it. Where a project does not tag,
   the commit, and the same value every row of that run carries.
-- **Observed at** — the commit the check ran against. `—` where nobody recorded one.
-- **Environment** — where it ran, from the project's declared vocabulary. Required; `—` is
-  the recorded absence and an omitted cell is refused. See *Environment — a proof is only
+- **Observed at**: the commit the check ran against. `—` where nobody recorded one.
+- **Environment**: where it ran, from the project's declared vocabulary. Required; `—` is
+  the recorded absence and an omitted cell is refused. See *Environment: a proof is only
   valid where it ran*.
-- **Auto** — what the run's own gate said: `pass` · `partial` · `none`. Copied from the
+- **Auto**: what the run's own gate said: `pass` · `partial` · `none`. Copied from the
   coverage table rather than re-derived; where the two disagree the coverage table wins
-  and the disagreement is a finding. A coverage verdict of **`review`** — *no check can
-  decide this* — becomes `none`, because this column records what a machine established
+  and the disagreement is a finding. A coverage verdict of **`review`**: *no check can
+  decide this*; becomes `none`, because this column records what a machine established
   and there the honest answer is *nothing*.
-- **Human** — a date, or the literal **`never`**. Nothing else. *"soon"*, *"mostly"* and
+- **Human**: a date, or the literal **`never`**. Nothing else. *"soon"*, *"mostly"* and
   *"looks fine"* are how a column stops being answerable, and this is the only column in
   the pipeline that a machine may not fill on your behalf.
-- **Note** — what the human actually did. *"opened the deployed page and exported"* is a
+- **Note**: what the human actually did. *"opened the deployed page and exported"* is a
   note; *"checked"* is not, and six weeks later nobody can tell those two apart.
 
 ## `never` is a fact, not a failure
@@ -143,8 +143,8 @@ and let the number be what it is.
 ## How rows arrive
 
 1. **Stage 8** writes one row per REQ the run shipped, immediately after the deploy
-   verification it already performs — `Human` starts at `never` unless the operator
+   verification it already performs: `Human` starts at `never` unless the operator
    confirmed during the run, in which case the note says what they did.
-2. **A human, later** — fills `Human` with the date they looked, and the note with what
+2. **A human, later**: fills `Human` with the date they looked, and the note with what
    they looked at. This is the only edit any row ever receives.
 3. **Nothing else writes here.** Not stage 10, not a script, not a release job.

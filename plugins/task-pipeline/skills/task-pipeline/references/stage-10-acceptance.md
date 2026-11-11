@@ -55,10 +55,13 @@ The full gate and freedom level remain in [stages.md](stages.md).
   passing test name, `file:line`, a command and its output, or a scenario ID).
   "Done" without evidence is not done: downgrade to `partial` and say so rather
   than upgrading the claim.
-- Then ask the operator the closing question out loud, list in hand: *here's what
-  you asked for, here's what shipped, here's what's deferred and where it lives —
-  what's missing?* Ask it even when the table is green; the operator holds context
-  the brief never captured, and this is the cheapest moment in the run to hear it.
+- Then write the closing statement into the hand-back, list in hand: *here is what
+  you asked for, here is what shipped, here is what is deferred and where it lives.*
+  It is a statement, never a question, and the run does not wait on it: the operator
+  holds context the brief never captured and can add to it at any time, and an
+  addition becomes new REQ rows. A question goes to the operator only for a human
+  gate (a sign-in, a consent, a payment, a typed secret, spend above a limit, a
+  decision recorded as the operator's).
 - **Several repositories: a submodule is finished when its parent says so.** A
   parent records each submodule as a **pointer to one commit**, and moving the
   submodule does not move the pointer — so the work is committed, pushed, CI green

@@ -116,7 +116,7 @@ def item_errors(x: object) -> list[str]:
         return ["an item is a JSON object"]
     iid = x.get("id", "?")
     errs = [f"{iid}: missing `{k}`" for k in REQUIRED if k not in x]
-    errs += [f"{iid}: unknown field `{k}` — inventory/1 names its fields, and a project's own go "
+    errs += [f"{iid}: unknown field `{k}`; inventory/1 names its fields, and a project's own go "
              "under an `x-` prefix" for k in x if k not in REQUIRED + OPTIONAL and not EXT.match(k)]
     if "id" in x and (not isinstance(x["id"], str) or not ID.match(x["id"])):
         errs.append(f"{iid}: `id` is not an id (a letter, then letters, digits, . _ -)")
@@ -130,7 +130,7 @@ def item_errors(x: object) -> list[str]:
     ev = x.get("evidence")
     if "evidence" in x and not ((isinstance(ev, str) and len(ev.strip()) >= 3) or (
             isinstance(ev, list) and ev and all(isinstance(e, str) and len(e.strip()) >= 3 for e in ev))):
-        errs.append(f"{iid}: `evidence` is empty — a finding is a fact with a receipt")
+        errs.append(f"{iid}: `evidence` is empty; a finding is a fact with a receipt")
     if "status" in x and x["status"] not in STATUS:
         errs.append(f"{iid}: `status` {x['status']!r} is not one of {', '.join(STATUS)}")
     if "node" in x and (not isinstance(x["node"], list) or not all(isinstance(n, str) for n in x["node"])):
@@ -156,13 +156,13 @@ def item_errors(x: object) -> list[str]:
     if "rung" in x and x["rung"] not in RUNGS:
         errs.append(f"{iid}: `rung` {x['rung']!r} is not one of {', '.join(RUNGS)}")
     if x.get("triage") == "blocking":
-        errs += [f"{iid}: blocking without `{k}` — a blocking finding names the B test that "
+        errs += [f"{iid}: blocking without `{k}`; a blocking finding names the B test that "
                  "matched and the round that found it" for k in ("test", "round") if k not in x]
         if x.get("test") == "B3" and x.get("base_repro") == "yes":
             errs.append(f"{iid}: B3 says it passes at Base, and `base_repro: yes` says it fails "
-                        "there — one of the two is wrong")
+                        "there; one of the two is wrong")
     elif "test" in x:
-        errs.append(f"{iid}: `test` on an item that is not blocking — a B test is what makes a "
+        errs.append(f"{iid}: `test` on an item that is not blocking; a B test is what makes a "
                     "finding blocking; without one it is deferred or noise")
     return errs
 
@@ -210,7 +210,7 @@ def load_inventory(path: pathlib.Path) -> tuple[dict, list[dict]]:
     errs = [e for x in items for e in item_errors(x)]
     errs += schema_errors(items)
     ids = [x.get("id") for x in items]
-    errs += [f"{i}: appears {ids.count(i)} times — an id is unique across the inventory"
+    errs += [f"{i}: appears {ids.count(i)} times; an id is unique across the inventory"
              for i in sorted({i for i in ids if ids.count(i) > 1}, key=str)]
     if errs:
         raise Fail(2, errs)
@@ -245,7 +245,7 @@ def load_modules(path: pathlib.Path) -> dict[str, str]:
     for mod in sorted(table):
         for i in table[mod]:
             if i in owner and owner[i] != mod:
-                errs.append(f"{i}: claimed by both {owner[i]} and {mod} — an item sits in exactly "
+                errs.append(f"{i}: claimed by both {owner[i]} and {mod}; an item sits in exactly "
                             "one module")
             owner.setdefault(i, mod)
     if errs:
@@ -366,10 +366,10 @@ def cmd_merge(a) -> int:
     seen: dict[str, list[str]] = {}
     for x in items:
         seen.setdefault(x.get("id"), []).append(x.get("source_file"))
-    errs += [f"{i}: appears twice — in {', '.join(fs)}; an id is unique across the inventory"
+    errs += [f"{i}: appears twice; in {', '.join(fs)}; an id is unique across the inventory"
              for i, fs in seen.items() if len(fs) > 1]
     for s in skipped:
-        print(f"waves: skipped {s} — not an item list", file=sys.stderr)
+        print(f"waves: skipped {s}; not an item list", file=sys.stderr)
     if errs:
         raise Fail(2, errs)
     doc = {"schema": "inventory/1", "items": items}
@@ -419,10 +419,10 @@ def cmd_assign(a) -> int:
     print(json.dumps({"items": len(new), **counts(new, fields), "unclaimed": unclaimed,
                       "unplaced": unplaced}, ensure_ascii=False))
     for i in unclaimed:
-        print(f"waves: {i} lands on no module — the canvas has a gap, or the module table a "
+        print(f"waves: {i} lands on no module; the canvas has a gap, or the module table a "
               "missing row", file=sys.stderr)
     for i in unplaced:
-        print(f"waves: {i} is open and no node closes it — put it on a node, carry it "
+        print(f"waves: {i} is open and no node closes it; put it on a node, carry it "
               "(`status: carried`), or close it with its receipt", file=sys.stderr)
     return 1 if unclaimed or unplaced else 0
 
@@ -444,9 +444,9 @@ def cmd_validate(a) -> int:
         for x in items:
             mod = owner.get(x["id"])
             if mod is None:
-                problems.append(f"{x['id']}: on no module — every item lands in exactly one")
+                problems.append(f"{x['id']}: on no module; every item lands in exactly one")
             elif "module" in x and x["module"] != mod:
-                problems.append(f"{x['id']}: recorded on {x['module']}, the table says {mod} — re-run assign")
+                problems.append(f"{x['id']}: recorded on {x['module']}, the table says {mod}; re-run assign")
     if a.plan:
         plan_nodes = load_plan(pathlib.Path(a.plan))
         problems += [f"{i}: node {n['id']} closes it, and the inventory has no such item"
@@ -457,16 +457,16 @@ def cmd_validate(a) -> int:
             if p:
                 for k in ("node", "wave", "release"):
                     if k in x and x[k] != p[k]:
-                        problems.append(f"{x['id']}: `{k}` is {x[k]!r}, the plan now says {p[k]!r} — "
+                        problems.append(f"{x['id']}: `{k}` is {x[k]!r}, the plan now says {p[k]!r}; "
                                         "re-run assign")
             elif "node" in x and x["node"]:
                 problems.append(f"{x['id']}: recorded on {', '.join(x['node'])}, which no longer "
                                 "close it")
             elif _needs_node(x):
-                problems.append(f"{x['id']}: open, and no node closes it — it lands nowhere "
+                problems.append(f"{x['id']}: open, and no node closes it; it lands nowhere "
                                 "(carry it with `status: carried`, or put it on a node)")
             elif _carried(x) and x.get("release") != "program":
-                problems.append(f"{x['id']}: carried, and its release is not program — re-run assign")
+                problems.append(f"{x['id']}: carried, and its release is not program; re-run assign")
     for p in problems:
         print(f"waves: {p}", file=sys.stderr)
     print(json.dumps({"items": len(items), "problems": len(problems)}))
@@ -501,7 +501,7 @@ def cmd_sync_graph(a) -> int:
             raise Fail(2, [f"the work graph {gpath} cannot be read ({exc})"])
         before = G.violations(graph)
         if before:
-            raise Fail(1, [f"{gpath} was already invalid — nothing was written:"] + before)
+            raise Fail(1, [f"{gpath} was already invalid: nothing was written:"] + before)
         current = {n.get("id"): n for n in graph.get("nodes") or [] if isinstance(n, dict)}
 
         def gid(n: dict) -> str:  # a canvas id need not be graph.py's `N-001` shape
@@ -510,7 +510,7 @@ def cmd_sync_graph(a) -> int:
         absent = [gid(n) for n in nodes if (_wave(n) is not None or "risk" in n)
                   and gid(n) not in current]
         if absent and not a.only_present:
-            raise Fail(1, [f"{nid} is in the plan and not in {pathlib.Path(gpath).name} — "
+            raise Fail(1, [f"{nid} is in the plan and not in {pathlib.Path(gpath).name}: "
                            "nothing was written; add it, or pass --only-present for a plan "
                            "that spans several graphs" for nid in absent])
         moves = sorted(((gid(n), _wave(n)) for n in nodes if _wave(n) is not None
@@ -532,7 +532,7 @@ def cmd_sync_graph(a) -> int:
             risk_moves.append((nid, was, r))
         lower_why = " ".join((a.lower_why or "").split())
         if lowered and not lower_why:
-            raise Fail(1, ["lowering a risk class needs its own reason (--lower-why) — nothing "
+            raise Fail(1, ["lowering a risk class needs its own reason (--lower-why): nothing "
                            "was written: " + ", ".join(lowered)])
         lines = []
         for nid, was, r in sorted(risk_moves):
@@ -547,7 +547,7 @@ def cmd_sync_graph(a) -> int:
             lines.append(f"{nid}: wave {old if old is not None else 'none'} → {wave}: {why}")
         bad = G.violations(graph)
         if bad:
-            raise Fail(1, ["the re-cut would break the graph — nothing was written:"] + bad)
+            raise Fail(1, ["the re-cut would break the graph: nothing was written:"] + bad)
         if moves or risk_moves:
             G.save(gpath, graph)
     for ln in lines:
@@ -561,6 +561,8 @@ def cmd_sync_graph(a) -> int:
 
 # A blocking item closed as one of these was never a blocker: it counts in no round.
 NOT_COUNTED = ("duplicate", "stale", "not-reproduced")
+# The run ledger's field separator (templates/run.md): a record format, not prose.
+LEDGER_SEP = " \u2014 "
 ROUND_LINE = re.compile(r"^round:\s*(\d+)\s*[—-]\s*(.*?)\s*[—-]\s*new blocking\s*(\d+)\s*$")
 AGENTS_LINE = re.compile(r"^agents:\s*(\d+)\s*[—-]\s*(\d+)\b")
 ARTEFACT = re.compile(r"^[^@\s]+@[0-9a-f]{7,40}$")
@@ -589,14 +591,14 @@ def ledger_rounds(path: pathlib.Path) -> dict[int, int]:
             continue
         m = ROUND_LINE.match(line.strip())
         if not m:
-            errs.append(f"{path}:{n}: not `round: <N> — <reading> — new blocking <k>`")
+            errs.append(f"{path}:{n}: not `round: <N>; <reading>; new blocking <k>`")
             continue
         r = int(m[1])
         if r < 1 or r in out:
             errs.append(f"{path}:{n}: round {r} is below 1 or written twice")
         out[r] = int(m[3])
     if out and sorted(out) != list(range(1, max(out) + 1)):
-        errs.append(f"{path}: rounds {sorted(out)} are not 1..{max(out)} — a round line is missing")
+        errs.append(f"{path}: rounds {sorted(out)} are not 1..{max(out)}; a round line is missing")
     if errs:
         raise Fail(1, errs)
     return out
@@ -615,7 +617,7 @@ def ledger_agents(path: pathlib.Path) -> dict[int, int]:
             continue
         m = AGENTS_LINE.match(line.strip())
         if not m:
-            errs.append(f"{path}:{n}: not `agents: <N> — <k>`")
+            errs.append(f"{path}:{n}: not `agents: <N>; <k>`")
             continue
         out[int(m[1])] = max(out.get(int(m[1]), 0), int(m[2]))
     if errs:
@@ -647,27 +649,27 @@ def finish_verdict(items: list[dict], rounds: int, max_rounds: int, max_releases
         if rounds <= max_rounds:
             return 0, "done", facts
         if operator_go:
-            return 0, "done", dict(facts, why=f"past budget — rounds {rounds}/{max_rounds} on the "
+            return 0, "done", dict(facts, why=f"past budget: rounds {rounds}/{max_rounds} on the "
                                               "operator's go")
-        return 5, "budget", dict(facts, why=f"past budget — operator's go required: done at round "
+        return 5, "budget", dict(facts, why=f"past budget, operator's go required: done at round "
                                             f"{rounds}/{max_rounds}")
     if rounds >= max_rounds:
         owed = (f"{len(open_b)} blocker(s) open" if open_b else
                 "exit checks not supplied" if checks is None else
                 "exit checks not all green" if not green else "a clean round still owed")
-        return 5, "budget", dict(facts, why=f"rounds {rounds}/{max_rounds} reached before done — {owed}")
+        return 5, "budget", dict(facts, why=f"rounds {rounds}/{max_rounds} reached before done: {owed}")
     if open_b and releases >= max_releases:
         return 5, "budget", dict(facts, why=f"releases {releases}/{max_releases} reached before "
-                                            f"done — {len(open_b)} blocker(s) open")
+                                            f"done: {len(open_b)} blocker(s) open")
     if rounds >= 2 and new[-1] >= new[-2] > 0:
-        return 6, "blocked", dict(facts, why=f"diverging — new blocking {new[-2]} → {new[-1]} "
+        return 6, "blocked", dict(facts, why=f"diverging: new blocking {new[-2]} → {new[-1]} "
                                              "did not fall; run the loop guard's break protocol")
     if rounds >= 2 and new[-1] >= new[-2] and selfinf and selfinf >= new[-1] - selfinf:
-        return 6, "blocked", dict(facts, why=f"diverging — round {rounds}: {selfinf} self-inflicted "
+        return 6, "blocked", dict(facts, why=f"diverging: round {rounds}: {selfinf} self-inflicted "
                                              f"≥ {new[-1] - selfinf} new, and the count did not "
                                              "fall; run the loop guard's break protocol")
     why = (f"{len(open_b)} blocker(s) open" if open_b else
-           "exit checks not supplied — pass --checks K/M read on the artefact" if checks is None else
+           "exit checks not supplied: pass --checks K/M read on the artefact" if checks is None else
            "exit checks not all green" if not green else
            ("a second round with no new blocking finding is owed" if clean_rounds > 1 else
             "a round with no new blocking finding is owed"))
@@ -686,17 +688,17 @@ def cmd_finish(a) -> int:
                            ("--releases", a.releases, 0), ("--rounds", a.rounds, 0)):
         if v is not None and v < least:
             raise Fail(1, [f"{flag} {v} is below {least}" + (
-                f" — done needs {a.clean_rounds} clean rounds, so a smaller budget can never be met"
+                f": done needs {a.clean_rounds} clean rounds, so a smaller budget can never be met"
                 if flag == "--max-rounds" else "")])
     # THE ROUND COUNT IS EXPLICIT. A clean round leaves no item, so a count derived from the
     # items can never see the two clean rounds `done` needs: the verdict would stay
     # `continue` for ever. It comes from --rounds or from the ledger's `round:` lines.
     led = ledger_rounds(pathlib.Path(a.ledger)) if a.ledger else None
     if led is not None and not led and a.rounds is None:
-        raise Fail(1, [f"{a.ledger} carries no `round:` line and --rounds is absent — the round "
+        raise Fail(1, [f"{a.ledger} carries no `round:` line and --rounds is absent; the round "
                        "count cannot be read"])
     if led is None and a.rounds is None:
-        raise Fail(1, ["the round count is not given — pass --rounds N, or --ledger with the run "
+        raise Fail(1, ["the round count is not given: pass --rounds N, or --ledger with the run "
                        "ledger's `round:` lines; clean rounds leave no item to count"])
     rounds = a.rounds if a.rounds is not None else max(led)
     if led and a.rounds is not None and a.rounds != max(led):
@@ -732,26 +734,28 @@ def cmd_finish(a) -> int:
     named = ", ".join(f"round {r}: {k}/{a.max_agents}" for r, k in over)
     if over and not a.operator_go and code in (0, 3):
         code, word = 5, "budget"
-        f = dict(f, why="agents over budget — " + named)
+        f = dict(f, why="agents over budget: " + named)
     elif over and a.operator_go and code in (0, 3):
-        f = dict(f, why=((f.get("why") + "; ") if f.get("why") else "") + "agents over budget on the operator's go — " + named)
+        f = dict(f, why=((f.get("why") + "; ") if f.get("why") else "") + "agents over budget on the operator's go: " + named)
     deferred = sorted((x for x in items if x.get("triage") == "deferred"), key=_priority)
     noise = [x for x in items if x.get("triage") == "noise"]
     risks = [x for x in deferred if x.get("blast") == 3 or x.get("rung") in ("I4", "I5")]
     pool = sorted((x for x in items if x.get("triage") != "blocking" and _needs_node(x)
                    and x.get("triage") != "noise"), key=_priority)
     peak = max(agents.values()) if agents else None
-    budget = (f"rounds {f['rounds']}/{a.max_rounds} — releases {a.releases}/{a.max_releases} — agents "
-              + (f"{peak}/{a.max_agents}" if peak is not None else f"unrecorded/{a.max_agents}"))
+    budget = LEDGER_SEP.join([f"rounds {f['rounds']}/{a.max_rounds}",
+                              f"releases {a.releases}/{a.max_releases}",
+                              "agents " + (f"{peak}/{a.max_agents}" if peak is not None
+                                           else f"unrecorded/{a.max_agents}")])
     if word == "continue":
-        print(f"next round: {f['rounds'] + 1}/{a.max_rounds} — {f['why']} — {budget}")
+        print(f"next round: {f['rounds'] + 1}/{a.max_rounds}; {f['why']}; {budget}")
     else:
-        print(f"finish: {word} — {budget}" + (f" — {f['why']}" if f.get("why") else ""))
+        print(f"finish: {word} — {budget}" + (LEDGER_SEP + f["why"] if f.get("why") else ""))
     print("  exit checks: " + (f"{checks[0]}/{checks[1]} green on {a.artefact or '<artefact not named>'}"
-                               if checks else "not supplied — read them on the artefact (--checks K/M)"))
-    print(f"  blocking: {len(f['open'])} open · {f['fixed']} fixed — new per round "
+                               if checks else "not supplied: read them on the artefact (--checks K/M)"))
+    print(f"  blocking: {len(f['open'])} open · {f['fixed']} fixed; new per round "
           f"{' · '.join(str(n) for n in f['new']) or 'none'}"
-          + (f" — open: {', '.join(x['id'] for x in f['open'])}" if f["open"] else ""))
+          + (f": open: {', '.join(x['id'] for x in f['open'])}" if f["open"] else ""))
     top = ", ".join(_board_id(x) for x in deferred[:5]) + (" …" if len(deferred) > 5 else "")
     print(f"  deferred: {len(deferred)}" + (f" → {top}" if deferred else ""))
     print(f"  noise: {len(noise)}")
@@ -802,7 +806,7 @@ def main(argv: list[str]) -> int:
     f.add_argument("--operator-go", action="store_true",
                    help="the operator's recorded go for rounds past --max-rounds and sub-agents past "
                         "--max-agents; the block says which budget it lifted")
-    f.add_argument("--checks", help="K/M — exit checks green on the artefact")
+    f.add_argument("--checks", help="K/M: exit checks green on the artefact")
     f.add_argument("--max-agents", type=int, default=2,
                    help="run.finish.maxAgents: sub-agents running at once in one round (default 2)")
     f.add_argument("--artefact", help="what they ran on, as NAME@SHA")

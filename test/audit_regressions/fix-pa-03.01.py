@@ -69,7 +69,7 @@ def t_read_only_is_the_target():
     d = flat()
     assert '"Read-only" is about the TARGET, not the disk.' in d
     assert "Writing the sidecar there is not a violation of read-only" in d
-    assert "`--out-dir` to relocate" in d
+    assert "`--out` to relocate" in d
 
 
 # ---- the DoD as behaviour

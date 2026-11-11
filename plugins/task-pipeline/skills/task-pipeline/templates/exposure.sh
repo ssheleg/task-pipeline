@@ -43,7 +43,7 @@ BOARD=${BOARD:-$EVIDENCE_DIR/backlog.md}
 LIST_MAX=${LIST_MAX:-8}
 
 if [ ! -f "$LEDGER" ]; then
-  echo "dormant: exposure — no $LEDGER yet, so nothing has been shipped-and-unconfirmed"
+  echo "dormant: exposure; no $LEDGER yet, so nothing has been shipped-and-unconfirmed"
   exit 0
 fi
 
@@ -108,13 +108,13 @@ if [ "$ROWS" -eq 0 ]; then
   if [ "$HEADERLESS" -gt 0 ]; then
     # THE CASE THAT WAS SILENTLY GREEN. Rows exist and none can be read, which is the one
     # answer that must never be spelled "0 unverified".
-      echo "dormant: exposure — $LEDGER has $HEADERLESS row(s) but no column named Human,"
+      echo "dormant: exposure; $LEDGER has $HEADERLESS row(s) but no column named Human,"
     echo "         Last verified, Status or State. Columns like Verified by or How it is"
     echo "         checked name the EVIDENCE, not the state, and are deliberately not read."
     echo "         Nothing here can say whether anybody looked, so this reports no number."
     exit 0
   fi
-  echo "dormant: exposure — $LEDGER has no REQ rows yet"
+  echo "dormant: exposure; $LEDGER has no REQ rows yet"
   exit 0
 fi
 if [ "$HEADERLESS" -gt 0 ]; then
@@ -187,7 +187,7 @@ print((datetime.date.today() - d).days)
 PY
 )
   if [ -z "${DAYS:-}" ]; then
-    echo "FAIL: exposure — $LEDGER has a confirmation date this script cannot parse: $NEWEST"
+    echo "FAIL: exposure; $LEDGER has a confirmation date this script cannot parse: $NEWEST"
     exit 1
   fi
   # The same discipline as the clean bill below: only a `Human` column licenses the word
@@ -221,7 +221,7 @@ LINE="exposure: $UNVERIFIED unverified · $SINCE · $RELEASES releases carry one
 # Not decoration: a later hand adding "(N%)" here is exactly how the estimate-wearing-a-
 # measurement's-clothes returns, and it would return looking helpful.
 case "$LINE" in
-  *%*) echo "FAIL: exposure — the line contains a percentage: $LINE"
+  *%*) echo "FAIL: exposure; the line contains a percentage: $LINE"
        echo "      references/exposure.md: no percentage, ever. A single score invites a"
        echo "      threshold, and a threshold here is a target on \`never\`."
        exit 1 ;;
@@ -269,7 +269,7 @@ if [ -f "$LEDGER" ] && git rev-parse --git-dir >/dev/null 2>&1; then
   ' "$LEDGER" 2>/dev/null)
 
   if [ -z "$OBSERVED" ]; then
-    STALE_STATE="dormant: the ledger has no \`Observed at\` column — no row can say which tree it saw"
+    STALE_STATE="dormant: the ledger has no \`Observed at\` column; no row can say which tree it saw"
   else
     STALE_STATE=""
     OLDIFS=$IFS; IFS='
@@ -281,7 +281,7 @@ if [ -f "$LEDGER" ] && git rev-parse --git-dir >/dev/null 2>&1; then
       case "$sha" in
         ""|"-"|"—"|"never"|"n/a")
           STALE_UNANCHORED=$((STALE_UNANCHORED+1))
-          STALE_LIST="$STALE_LIST$rid unanchored — no commit recorded, so nothing can say what it saw
+          STALE_LIST="$STALE_LIST$rid unanchored: no commit recorded, so nothing can say what it saw
 " ;;
         *)
           if git rev-parse --verify -q "${sha}^{commit}" >/dev/null 2>&1; then
@@ -295,12 +295,12 @@ if [ -f "$LEDGER" ] && git rev-parse --git-dir >/dev/null 2>&1; then
               if [ -n "$ts" ] && [ -n "$now" ]; then days=" / $(( (now - ts) / 86400 ))d"; fi
               STALE_BEHIND=$((STALE_BEHIND+1))
               plural="commits"; [ "$behind" -eq 1 ] && plural="commit"
-              STALE_LIST="$STALE_LIST$rid observed \`$sha\` — $behind $plural$days behind HEAD — not trusted for the current tree until re-observed
+              STALE_LIST="$STALE_LIST$rid observed \`$sha\`: $behind $plural$days behind HEAD: not trusted for the current tree until re-observed
 "
             fi
           else
             STALE_UNRESOLVABLE=$((STALE_UNRESOLVABLE+1))
-            STALE_LIST="$STALE_LIST$rid observed \`$sha\`, which does not resolve in this checkout (rebase, squash or shallow clone) — not trusted until re-observed
+            STALE_LIST="$STALE_LIST$rid observed \`$sha\`, which does not resolve in this checkout (rebase, squash or shallow clone): not trusted until re-observed
 "
           fi ;;
       esac
@@ -315,13 +315,13 @@ fi
 
 echo ""
 if [ -n "${STALE_STATE:-}" ]; then
-  echo "staleness — $STALE_STATE"
+  echo "staleness: $STALE_STATE"
 else
   # State zero out loud: printing nothing when every row is current is what makes
   # freshness indistinguishable from a check that never looked.
-  echo "staleness — current $STALE_CURRENT · behind $STALE_BEHIND · unresolvable $STALE_UNRESOLVABLE · unanchored $STALE_UNANCHORED"
+  echo "staleness: current $STALE_CURRENT · behind $STALE_BEHIND · unresolvable $STALE_UNRESOLVABLE · unanchored $STALE_UNANCHORED"
   echo "             (a disclosure: no floor, no direction, never a target. Invalidation is"
-  echo "              not deletion — an overtaken row stays true about the tree it observed.)"
+  echo "              not deletion: an overtaken row stays true about the tree it observed.)"
   if [ -n "$STALE_LIST" ]; then
     printf '%s' "$STALE_LIST" | head -8 | while IFS= read -r l; do
       [ -n "$l" ] && echo "           $l"
@@ -348,7 +348,7 @@ if [ "$UNVERIFIED" -eq 0 ]; then
   if [ "$SCOL" = "human" ]; then
     echo "         every shipped row carries a human confirmation"
   else
-    echo "         every shipped row is confirmed in its \`$SCOL\` column — which does not"
+    echo "         every shipped row is confirmed in its \`$SCOL\` column: which does not"
     echo "         separate a person from a command; only a \`Human\` column does that"
   fi
   exit 0
@@ -358,7 +358,7 @@ fi
 # Version sort, so v1.9.0 precedes v1.10.0 — a lexical sort puts the newer one first and
 # hands the operator the wrong end of the list.
 awk -F'\t' '{ req=$1; what=$3; ship=$4;
-             if (ship == "") ship = "—";
+             if (ship == "") ship = "-";
              # Truncated on a WORD boundary, never mid-character: awk counts bytes
              # here, so `substr(what, 1, 56)` cut a Cyrillic letter in half and printed
              # a replacement glyph. Appending whole words cannot land inside one.
@@ -403,6 +403,6 @@ done
 
 REST=$((UNVERIFIED - LIST_MAX))
 if [ "$REST" -gt 0 ]; then
-  echo "           … and $REST more — the full list is \`/task-pipeline checkup\`"
+  echo "           … and $REST more: the full list is \`/task-pipeline checkup\`"
 fi
 exit 0

@@ -5,10 +5,10 @@ rm -rf /tmp/stl1-copy && cp -R . /tmp/stl1-copy
 python3 - <<'EOF'
 p = "/tmp/stl1-copy/plugins/task-pipeline/skills/task-pipeline/templates/exposure.sh"
 t = open(p, encoding="utf-8").read()
-needle = '  echo "staleness — current $STALE_CURRENT'
+needle = '  echo "staleness: current $STALE_CURRENT'
 assert needle in t, "PLANT DID NOT LAND: stl1 — the staleness line moved"
 open(p, "w", encoding="utf-8").write(
-    t.replace(needle, '  [ "$STALE_BEHIND" -gt 0 ] && echo "staleness — current $STALE_CURRENT', 1))
+    t.replace(needle, '  [ "$STALE_BEHIND" -gt 0 ] && echo "staleness: current $STALE_CURRENT', 1))
 EOF
 if python3 /tmp/stl1-copy/test/validate.py; then
   echo "ERROR: staleness counts that print nothing when everything is current were

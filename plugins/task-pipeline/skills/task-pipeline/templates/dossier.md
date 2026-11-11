@@ -1,8 +1,8 @@
-# Dossier <letter> — <module name>
+# Dossier <letter>: <module name>
 
 One dossier per cluster of inventory items (`references/iteration.md` → *Module dossiers*),
 written in parallel with the others, read-only on every repository: the dossier is the only
-write. **A dossier is a design, not a plan** — it does not cut waves. Evidence for every
+write. **A dossier is a design, not a plan**: it does not cut waves. Evidence for every
 claim: `file:line @commit`, or a command and its output. No secret values, ever.
 
 Written <date> against: <repository @ commit, one per repository read>.
@@ -65,7 +65,7 @@ Count by risk: <R1 n · R2 n · R3 n>.
 
 ## 7. Deletes
 
-What the new version removes — code, docs, rows, files — by node.
+What the new version removes: code, docs, rows, files: by node.
 
 ## 8. Questions
 

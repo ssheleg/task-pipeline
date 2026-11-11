@@ -1,5 +1,13 @@
 # Verification — task-pipeline
 
+## Shipped state — v1.104.1 (source candidate; NOT SHIPPED yet)
+
+The 2026-11-11 audit fixes (preflight as a notice, triage first, the gap check, the closing
+statement, the host's finish line and standing grants, companion install lines, the audit-fix
+description, `audit.py --prior`, no em dash in templates and printed strings) are on branch
+`fix/audit-1111` with the local gate run on the candidate source. Merge, tag, release jobs and
+the npm readback remain pending; this header declares the version, not a shipped state.
+
 ## Shipped state — v1.104.0 (source candidate; NOT SHIPPED yet)
 
 The AI-native change (`references/agent-surface.md`, the actor branch at stage 0, the `agent`

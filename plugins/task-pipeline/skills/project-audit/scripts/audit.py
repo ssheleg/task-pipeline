@@ -619,6 +619,23 @@ def load_prior(out_dir, exclude=None):
     return None
 
 
+def load_prior_path(path):
+    """`--prior`: a sidecar file, or a directory whose newest sidecar is read.
+
+    For a host that keeps each report in its own dated folder (a reports convention
+    such as `docs/reports/<date>-<topic>/`), the newest sidecar is not in this run's
+    output directory, so the caller names it. A path that holds no readable sidecar
+    returns None, and the caller refuses rather than starting a fresh ratchet."""
+    if os.path.isdir(path):
+        return load_prior(path)
+    try:
+        with open(path, encoding="utf-8") as fh:
+            payload = json.load(fh)
+    except (ValueError, OSError):
+        return None
+    return payload if payload.get("schema") == SCHEMA else None
+
+
 # ---------------------------------------------------------------------------
 # the page
 # ---------------------------------------------------------------------------
@@ -1271,7 +1288,11 @@ def main(argv=None):
         description="Collect a project audit and write two artefacts.")
     ap.add_argument("--root", default=".", help="project root (default: .)")
     ap.add_argument("--out", default=None,
-                    help="output directory (default: <root>/docs/audit)")
+                    help="output directory (default: <root>/docs/audit); a host "
+                         "reports convention, e.g. docs/reports/<date>-<topic>/, wins")
+    ap.add_argument("--prior", default=None,
+                    help="the previous run's sidecar, or the directory holding it "
+                         "(default: the newest sidecar in the output directory)")
     ap.add_argument("--report", action="store_true",
                     help="also write the HTML page and open it (default: the JSON "
                          "sidecar and a stdout summary only)")
@@ -1295,7 +1316,14 @@ def main(argv=None):
     day = payload["generated_at"][:10]
     base = "%s-audit" % day
     os.makedirs(out_dir, exist_ok=True)
-    prior = load_prior(out_dir, exclude=base + ".json")
+    if args.prior:
+        prior = load_prior_path(args.prior)
+        if prior is None:
+            sys.stderr.write("--prior names no readable %s sidecar: %s\n"
+                             % (SCHEMA, args.prior))
+            return 2
+    else:
+        prior = load_prior(out_dir, exclude=base + ".json")
     payload = carry_forward(payload, prior)
     payload["ratchet"] = ratchet(payload, prior)
     payload["sidecar"] = os.path.join(out_dir, base + ".json")

@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/ssheleg/task-pipeline/blob/main/plugins/task-pipeline/skills/task-pipeline/templates/inventory.schema.json",
-  "title": "inventory/1 — <artifacts>/specs/YYYY-MM-DD-<topic>-inventory.json",
+  "title": "inventory/1: <artifacts>/specs/YYYY-MM-DD-<topic>-inventory.json",
   "description": "Wave 0's single machine-readable inventory: one item per open item of the board, every survey and every harvested source (references/waves.md, Wave 0). scripts/waves.py merges audit outputs into it (`merge`), writes `module`, `node`, `wave` and `release` from two short tables (`assign`), counts it (`count`), refuses an item that lands nowhere (`validate`) and computes the finish-line verdict from the triaged items (`finish`, references/finish-line.md). The document is an object carrying `schema` and `items`; a bare array of items is read as the items of one. Fields a project needs beyond these go under an `x-` prefix.",
   "type": "object",
   "additionalProperties": false,

@@ -117,7 +117,8 @@ closing a stage with an unread CI verdict.
 - **Wiki:** [obsidian-wiki](https://github.com/ar9av/obsidian-wiki) — the
   `wiki-update` skill (resolves the vault via `~/.obsidian-wiki/config`). Detect it
   the same way the harvest does; if absent, recommend it once
-  (`pip install obsidian-wiki` → `obsidian-wiki setup --vault <path>`) and continue.
+  (`pip install obsidian-wiki` → back up `~/.obsidian-wiki/`, which `setup` rewrites →
+  `obsidian-wiki setup --vault <path>`) and continue.
   A project may of course use a different knowledge base — then its own
   `CLAUDE.md` names the sync command, and that wins.
 - **Docs in another repository** (a docs repo, a submodule, a sibling checkout the

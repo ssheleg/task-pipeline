@@ -68,19 +68,19 @@ one must never look alike.
 
 | Skill / tool | Needed for | Required? | Install |
 |---|---|---|---|
-| **super-ux** (`ux-foundation`, `ux-flows`, `ux-scenarios`, `ux-audit`, `/ux`, `/ux-lint` — **and the copy half**: `copywriting`, `brand-voice`, `/brand-init`, `/copy`, `/brand-lint`, plus `/vision`) | stage 3 — the **UX track** *and* the **COPY track**. This row named six surfaces until 2026-08-10 while super-ux shipped eight skills and fifteen commands: the whole brand-and-copy half was invisible to this pipeline, so a run built scenarios and screens and then wrote the interface strings by taste | **Artifact required for any user-facing task** — the scenarios, not the package: an equivalent scenario set from another provider or the inline fallback passes the same gate | `/plugin marketplace add ssheleg/super-ux` → `/plugin install super-ux@super-ux` (or `npx skills add ssheleg/super-ux`) |
-| **sheleg-design** (`/sheleg-design`) | stage 3 — the **VISUAL track**: tokens and themes, typography and rhythm, motion and how it degrades to rest, the visual language a brand is recognised by. It answers *how it looks*, which no other companion here answers — `super-ux` decides what the interface must do, `copywriting` how it sounds. Before 2026-08-10 this skill appeared once in the whole bundle, as a name in a list | **Recommended** on any task with a visual surface; never a gate. Absent → judge the visual layer by its RESULT: a third-party design workflow that recorded tokens, states and decisions is designed; only a layer with no design evidence at all ships **undesigned**, which is the honest name for picking values at the keyboard | `/plugin marketplace add ssheleg/sheleg-design` → `/plugin install sheleg-design@sheleg-design-skill` |
+| **super-ux** (`ux-foundation`, `ux-flows`, `ux-scenarios`, `ux-audit`, `/ux`, `/ux-lint` — **and the copy half**: `copywriting`, `brand-voice`, `/brand-init`, `/copy`, `/brand-lint`, plus `/vision`) | stage 3 — the **UX track** *and* the **COPY track**. This row named six surfaces until 2026-08-10 while super-ux shipped eight skills and fifteen commands: the whole brand-and-copy half was invisible to this pipeline, so a run built scenarios and screens and then wrote the interface strings by taste | **Artifact required for any user-facing task** — the scenarios, not the package: an equivalent scenario set from another provider or the inline fallback passes the same gate | family member: `npx --yes sshlg-skills@latest update` |
+| **sheleg-design** (`/sheleg-design`) | stage 3 — the **VISUAL track**: tokens and themes, typography and rhythm, motion and how it degrades to rest, the visual language a brand is recognised by. It answers *how it looks*, which no other companion here answers — `super-ux` decides what the interface must do, `copywriting` how it sounds. Before 2026-08-10 this skill appeared once in the whole bundle, as a name in a list | **Recommended** on any task with a visual surface; never a gate. Absent → judge the visual layer by its RESULT: a third-party design workflow that recorded tokens, states and decisions is designed; only a layer with no design evidence at all ships **undesigned**, which is the honest name for picking values at the keyboard | family member: `npx --yes sshlg-skills@latest update` (repository `ssheleg/sheleg-design-skill`) |
 | **context7** (MCP — call tools fully qualified: `context7:resolve-library-id`, `context7:query-docs`) | stage 1 docs study | Recommended (web-search fallback) | connect the context7 MCP server |
 | **Figma** (MCP) | stage 3 UX track, when the project designs visually — super-ux mirrors each `SCR-` screen/state into a frame | Optional, **UI + Figma-on only**. Absent → super-ux degrades to text-only *by itself and never blocks*, so shipping a UI feature with no mockups becomes a silent scope call — which is why the stage-0 sweep decides it | connect the Figma MCP server (`/mcp`, or your claude.ai connectors) |
-| **[obsidian-wiki](https://github.com/ar9av/obsidian-wiki)** (`wiki-query`, `wiki-update`) | **stage 0 harvest** (query what's already known) **+ stage 9 sync** | **Recommended** — never a gate; absent → harvest runs on repo docs alone | `pip install obsidian-wiki` → `obsidian-wiki setup --vault /path/to/your/vault` |
+| **[obsidian-wiki](https://github.com/ar9av/obsidian-wiki)** (`wiki-query`, `wiki-update`) | **stage 0 harvest** (query what's already known) **+ stage 9 sync** | **Recommended** — never a gate; absent → harvest runs on repo docs alone | `pip install obsidian-wiki` (PyPI, checked 2026-11-11) → back up `~/.obsidian-wiki/` (setup rewrites the active profile) → `obsidian-wiki setup --vault /path/to/your/vault` |
 | **[graphify](https://github.com/Graphify-Labs/graphify)** (`/graphify`, `graphify query`, `graphify affected`, `graphify god-nodes`) | **stage 0 harvest** (reach: what calls this, what breaks if it moves) **+ stage 9 refresh + the graph↔docs divergence check** ([`knowledge-graph.md`](knowledge-graph.md)) | **Recommended** — never a gate; absent → the harvest greps instead, and the divergence axis is unavailable | `uv tool install graphifyy` → `graphify install` → `/graphify .` |
 | **playwright** (CLI — `playwright-cli open`, `snapshot`, `click`, `type`, and the two this pipeline actually asks for: `console` and `requests`; or MCP — `browser_navigate`, `browser_snapshot`, `browser_click`, `browser_console_messages`, `browser_network_requests`) | **The default route — WebKit first** (`DEC-0007`): `playwright-cli open --browser webkit`, or the MCP started with `--browser webkit`; on macOS, Safari itself through `safaridriver` and Safari Web Inspector to debug ([`browser.md`](browser.md) → *Engine order*). **Stages 5–6 on any project with a web front end**, and **stage 8** on a deployed target — the same job as the row below: open the surface, snapshot it, read the console and the network log. Its own difference is **the channel a look arrives on**: the CLI is a shell command, so it does not put a tool schema in the context window the way an MCP channel does — that is upstream's own comparison and it is *CLI against MCP*, which makes it a claim about this row's own two halves before it is a claim about the row below. Both channels default to an **accessibility-tree snapshot rather than pixels**, so the ordinary look costs a page of text and no vision model; `screenshot` exists in both and costs one when you ask for it | **Recommended** — never a gate; absent → say the surface was verified **by reading the diff** and treat that as the weaker claim it is | CLI: `npm install -D @playwright/cli@latest` → `npx playwright-cli --help` (or `npm i -g` for the global binary; `playwright-cli install --skills` adds its agent skills, `--global` to the home directory), then `playwright-cli install-browser webkit`. MCP: `claude mcp add playwright -- npx @playwright/mcp@latest --browser webkit` |
-| **chrome-devtools** (MCP — `list_pages`, `navigate_page`, `take_snapshot`, `take_screenshot`, `evaluate_script`, `list_console_messages`, `list_network_requests`, `lighthouse_audit`, `performance_start_trace`, `take_heapsnapshot`) | **The stated Chromium exception** — it drives Chrome only, so it is reached for when the question needs Chrome, said with the reason, and a look taken only here is reported as *checked in Chromium*. **Stages 5–6 on any project with a web front end** — verify the **rendered** surface rather than the diff: computed layout, console errors, failed requests. **Stage 8** on a deployed web target: load the page and read what the browser did, not what the deploy said. Its own difference is **reach past the page**: a Lighthouse category (`lighthouse_audit`, which `seo-aeo-audit` builds on) and a heap snapshot have no equivalent in the row above. A performance trace has one — `playwright-cli tracing-start` records one — but only this row's arrives with `performance_analyze_insight` over it | **Recommended** — never a gate; absent → say the surface was verified **by reading the diff** and treat that as the weaker claim it is | `/plugin install chrome-devtools-mcp@claude-plugins-official` (or connect the MCP server directly) |
-| **[agent-sync](https://github.com/ssheleg/agent-sync)** (`/agent-sync`, **≥ 1.3.0** — `finish` did not exist before it, so an older install turns the stage-10 close-out into a command that is not there) | **guarded registers** — a lease before writing one, `reserve` before minting an id, `reconcile`/`record` for intent vs as-built, and `finish` for the stage-10 multi-repository close-out ([`documentation.md`](documentation.md)) | **Recommended** — never a gate. Absent → the run is **`ungated`** and must say so out loud; the discipline still applies, only the arbitration is missing | `npx sshlg-skills install` |
-| **sheleg-dev** (`stripe-billing`, `crypto-payments`, `error-tracking`, `ad-tracking`, `google-signin`, `google-auth`, `frontend-performance`) | **stage 5 when the task wires money, tracking, sign-in or page speed** — the seams a generated integration gets wrong in ways no screen shows: the webhook is the payment, a thank-you-page event cannot know the charge cleared, a duplicated `event_id` counts revenue twice | **Recommended** — never a gate; absent → the integration ships on the host's own doctrine and the close-out names the seam nobody checked | `/plugin marketplace add ssheleg/sheleg-dev` → `/plugin install sheleg-dev@sheleg-dev` |
-| **agent-stack** (`agent-orchestrator`, `agent-evals`, `agent-interop`, `agent-harness`) | **stage 5 when the thing being BUILT is an agent system**: the orchestrator's loop, evals that say whether it got better, the protocols it speaks (MCP/A2A), the wallet under LLM resale. **And stage 3 when a product's agent surface is designed** (the actor branch armed, [`agent-surface.md`](agent-surface.md)): `agent-interop` for the contract source and snapshot, the gate protocol and a safe surface; `agent-evals` for the operability eval the agent tester runs. Not for coordinating the agents editing this repository (that is agent-sync, above) | **Recommended**, never a gate; absent, the agent layer ships unevaluated and the close-out says so | `/plugin marketplace add ssheleg/agent-stack` → `/plugin install agent-stack@agent-stack` |
-| **telegram-dev** (`telegram-bots`, `telegram-userbots`, `telegram-miniapps`) | **stage 5 when Telegram is the platform, not the transport** — `update_id` as the only idempotency key, a session file that is a logged-in person, a Mini App authenticated by one signed query string | **Recommended** — never a gate; absent → the surface ships on the Bot API docs alone and the close-out names the dedup and auth seams unverified | `/plugin marketplace add ssheleg/telegram-dev` → `/plugin install telegram-dev@telegram-dev` |
-| **seo-aeo-audit** (`/seo-aeo-audit`) | **stage 8 when a logged-out reader or a crawler will see the shipped surface** — the check that a machine will find it; the design-time rule lives with the host, this is the audit after | **Recommended** — never a gate; absent → visibility ships undesigned and unaudited, said in those words | `/plugin marketplace add ssheleg/seo-aeo-audit` → `/plugin install seo-aeo-audit@seo-aeo-audit` |
+| chrome-devtools, not offered at preflight (MCP — `list_pages`, `navigate_page`, `take_snapshot`, `take_screenshot`, `evaluate_script`, `list_console_messages`, `list_network_requests`, `lighthouse_audit`, `performance_start_trace`, `take_heapsnapshot`) | **The stated Chromium exception** — it drives Chrome only, so it is reached for when the question needs Chrome, said with the reason, and a look taken only here is reported as *checked in Chromium*. **Stages 5–6 on any project with a web front end** — verify the **rendered** surface rather than the diff: computed layout, console errors, failed requests. **Stage 8** on a deployed web target: load the page and read what the browser did, not what the deploy said. Its own difference is **reach past the page**: a Lighthouse category (`lighthouse_audit`, which `seo-aeo-audit` builds on) and a heap snapshot have no equivalent in the row above. A performance trace has one — `playwright-cli tracing-start` records one — but only this row's arrives with `performance_analyze_insight` over it | **Recommended** — never a gate; absent → say the surface was verified **by reading the diff** and treat that as the weaker claim it is | none offered: used only where the host already connects it, as the stated Chrome-only exception ([`browser.md`](browser.md) → *Engine order*) |
+| **[agent-sync](https://github.com/ssheleg/agent-sync)** (`/agent-sync`, **≥ 1.3.0** — `finish` did not exist before it, so an older install turns the stage-10 close-out into a command that is not there) | **guarded registers** — a lease before writing one, `reserve` before minting an id, `reconcile`/`record` for intent vs as-built, and `finish` for the stage-10 multi-repository close-out ([`documentation.md`](documentation.md)) | **Recommended** — never a gate. Absent → the run is **`ungated`** and must say so out loud; the discipline still applies, only the arbitration is missing | family member: `npx --yes sshlg-skills@latest update` |
+| **sheleg-dev** (`stripe-billing`, `crypto-payments`, `error-tracking`, `ad-tracking`, `google-signin`, `google-auth`, `frontend-performance`) | **stage 5 when the task wires money, tracking, sign-in or page speed** — the seams a generated integration gets wrong in ways no screen shows: the webhook is the payment, a thank-you-page event cannot know the charge cleared, a duplicated `event_id` counts revenue twice | **Recommended** — never a gate; absent → the integration ships on the host's own doctrine and the close-out names the seam nobody checked | family member: `npx --yes sshlg-skills@latest update` |
+| **agent-stack** (`agent-orchestrator`, `agent-evals`, `agent-interop`, `agent-harness`) | **stage 5 when the thing being BUILT is an agent system**: the orchestrator's loop, evals that say whether it got better, the protocols it speaks (MCP/A2A), the wallet under LLM resale. **And stage 3 when a product's agent surface is designed** (the actor branch armed, [`agent-surface.md`](agent-surface.md)): `agent-interop` for the contract source and snapshot, the gate protocol and a safe surface; `agent-evals` for the operability eval the agent tester runs. Not for coordinating the agents editing this repository (that is agent-sync, above) | **Recommended**, never a gate; absent, the agent layer ships unevaluated and the close-out says so | family member: `npx --yes sshlg-skills@latest update` |
+| **telegram-dev** (`telegram-bots`, `telegram-userbots`, `telegram-miniapps`) | **stage 5 when Telegram is the platform, not the transport** — `update_id` as the only idempotency key, a session file that is a logged-in person, a Mini App authenticated by one signed query string | **Recommended** — never a gate; absent → the surface ships on the Bot API docs alone and the close-out names the dedup and auth seams unverified | family member: `npx --yes sshlg-skills@latest update` |
+| **seo-aeo-audit** (`/seo-aeo-audit`) | **stage 8 when a logged-out reader or a crawler will see the shipped surface** — the check that a machine will find it; the design-time rule lives with the host, this is the audit after | **Recommended** — never a gate; absent → visibility ships undesigned and unaudited, said in those words | family member: `npx --yes sshlg-skills@latest update` |
 | ~~superpowers~~ | — | **Not a dependency.** Stages 2/4/5/6 run on the built-in doctrine above. See *Optional bridge* | — |
 | ~~grill-me / grilling~~ | — | **Not a dependency.** The stage-0 grill is built in (`references/grill.md`) | — |
 
@@ -134,98 +134,101 @@ Rules for that bridge:
 
 ## Preflight (emit before stage 0)
 
-Detect the optional companions and print ONE block — companions **plus the model
-decision** (`model-tiering.md`), so the operator arms the whole run in a single
-exchange:
+**A notice, never a stop.** Preflight prints ONE block, records what it found in the
+brief, and the run goes on in the same turn: it waits for no answer, asks no question
+and hands the operator no command to run. It is emitted on the **full flow only**: the
+short-path triage runs first ([`stage-00-intake.md`](stage-00-intake.md) → Phase 1d),
+and a short-path run prints its triage line instead of this block. The block carries
+the companions **plus the model decision** (`model-tiering.md`):
 
 ```
-Pipeline companions (stage doctrine is built in — nothing to install for it):
-  ✗ super-ux           — this task looks user-facing; required for the UX track,
-                         and it also owns the COPY track (copywriting, brand-voice):
-                           /plugin marketplace add ssheleg/super-ux
-                           /plugin install super-ux@super-ux
-  ✗ sheleg-design      — this task has a visual surface; it owns the VISUAL track:
-                         tokens, themes, typography, rhythm, motion and its rest state:
-                           /plugin marketplace add ssheleg/sheleg-design
-                           /plugin install sheleg-design@sheleg-design-skill
-                         (running without it — the visual layer ships undesigned,
-                          and the close-out says so in those words)
-  ✓ context7           — ready
-  ✗ Figma MCP          — this task is user-facing and the project designs in Figma
-                         (docs/ux/foundation.md → Design tooling). Without it the
-                         UX chain still runs, text-only — no mockups this run:
-                           connect the Figma MCP via /mcp
-                         (say "text-only is fine" and I'll record that instead)
-  ✗ obsidian-wiki      — recommended: stage 0 queries it before grilling you,
-                         stage 9 syncs back what this run learned:
-                           pip install obsidian-wiki
-                           obsidian-wiki setup --vault /path/to/your/vault
-                         (running without it — the harvest uses repo docs only)
-  ✗ agent-sync         — recommended: guarded registers, id reservation before
-                         minting, intent-vs-as-built reconcile, and the stage-10
-                         multi-repository close-out:
-                           npx sshlg-skills install
-                         (running without it — the doc track still applies, the
-                          run is recorded `ungated`, and that is said out loud)
-  ✗ graphify           — recommended: stage 0 asks it what reaches what,
-                         stage 9 refreshes it beside the docs and the wiki:
-                           uv tool install graphifyy
-                           graphify install
-                           /graphify .        (once, in this project)
-                         (running without it — no reach queries, no graph↔docs
-                          divergence check)
-  ✗ playwright         — recommended when this project has a web front end.
-                         The default look: it reaches WebKit (Safari's engine),
-                         which is checked first; a project that already runs
-                         Playwright has this one for free:
-                           npm install -D @playwright/cli@latest   (then npx playwright-cli)
-                           playwright-cli install-browser webkit
-                           claude mcp add playwright -- npx @playwright/mcp@latest --browser webkit
-                         (running without it — see the line below; without BOTH,
-                          the surface is verified by reading the diff)
-  ✗ sheleg-dev         — this task wires money, tracking, sign-in or page speed;
-                         it owns the seams no screen shows (the webhook IS the
-                         payment, a thank-you event cannot know the charge cleared):
-                           /plugin marketplace add ssheleg/sheleg-dev
-                           /plugin install sheleg-dev@sheleg-dev
-  ✗ agent-stack        — the thing being BUILT here is an agent system; it owns
-                         the loop, the evals, the protocols and the wallet:
-                           /plugin marketplace add ssheleg/agent-stack
-                           /plugin install agent-stack@agent-stack
-  ✗ telegram-dev       — Telegram is this task's platform, not its transport;
-                         it owns update dedup, session files and Mini App auth:
-                           /plugin marketplace add ssheleg/telegram-dev
-                           /plugin install telegram-dev@telegram-dev
-  ✗ seo-aeo-audit      — a logged-out reader will see the shipped surface;
-                         stage 8 can audit what a machine will find:
-                           /plugin marketplace add ssheleg/seo-aeo-audit
-                           /plugin install seo-aeo-audit@seo-aeo-audit
-  ✗ chrome-devtools    — recommended when this project has a web front end:
-                         stages 5-6 check the RENDERED surface instead of the
-                         diff, stage 8 reads what the browser did after a deploy.
-                         The stated Chromium exception: Chrome only, and it
-                         alone reaches lighthouse_audit and heap snapshots, and
-                         analyses a trace rather than only recording one:
-                           /plugin install chrome-devtools-mcp@claude-plugins-official
-                         (running without it — the surface is verified by reading
-                          the diff, and the close-out says so in those words)
+Pipeline companions (stage doctrine is built in, nothing to install for it):
+  ✗ super-ux: this task looks user-facing; it owns the UX track and the COPY
+               track (copywriting, brand-voice). Family member:
+                 npx --yes sshlg-skills@latest update
+               (absent: the inline scenario fallback runs, and the close-out names
+                the lint that was not run)
+  ✗ sheleg-design: this task has a visual surface; it owns the VISUAL track:
+               tokens, themes, typography, rhythm, motion and its rest state.
+               Family member:
+                 npx --yes sshlg-skills@latest update
+               (absent: the visual layer ships undesigned, and the close-out says
+                so in those words)
+  ✓ context7: ready
+  ✗ Figma MCP: this task is user-facing and the project designs in Figma
+               (docs/ux/foundation.md → Design tooling). Absent: the UX chain runs
+               text-only, no mockups this run, and the brief records that
+  ✗ obsidian-wiki: recommended; stage 0 queries it before the interview, stage 9
+               syncs back what this run learned:
+                 pip install obsidian-wiki
+                 obsidian-wiki setup --vault /path/to/your/vault
+               (back up ~/.obsidian-wiki/ first: setup rewrites the active
+                profile; absent: the harvest uses repo docs only)
+  ✗ agent-sync: recommended; guarded registers, id reservation before minting,
+               intent-vs-as-built reconcile, the stage-10 multi-repository
+               close-out. Family member:
+                 npx --yes sshlg-skills@latest update
+               (absent: the doc track still applies, and the run is recorded
+                `ungated`, said out loud)
+  ✗ graphify: recommended; stage 0 asks it what reaches what, stage 9 refreshes
+               it beside the docs and the wiki:
+                 uv tool install graphifyy
+                 graphify install
+                 /graphify .        (once, in this project)
+               (absent: no reach queries, no graph↔docs divergence check)
+  ✗ playwright: recommended when this project has a web front end. The default
+               look: it reaches WebKit (Safari's engine), which is checked first;
+               a project that already runs Playwright has it for free:
+                 npm install -D @playwright/cli@latest   (then npx playwright-cli)
+                 playwright-cli install-browser webkit
+                 claude mcp add playwright -- npx @playwright/mcp@latest --browser webkit
+               (absent: the surface is verified by reading the diff, and the
+                close-out says so in those words)
+  ✗ sheleg-dev: this task wires money, tracking, sign-in or page speed; it owns
+               the seams no screen shows (the webhook IS the payment, a thank-you
+               event cannot know the charge cleared). Family member:
+                 npx --yes sshlg-skills@latest update
+  ✗ agent-stack: the thing being BUILT here is an agent system; it owns the
+               loop, the evals, the protocols and the wallet. Family member:
+                 npx --yes sshlg-skills@latest update
+  ✗ telegram-dev: Telegram is this task's platform, not its transport; it owns
+               update dedup, session files and Mini App auth. Family member:
+                 npx --yes sshlg-skills@latest update
+  ✗ seo-aeo-audit: a logged-out reader will see the shipped surface; stage 8
+               can audit what a machine will find. Family member:
+                 npx --yes sshlg-skills@latest update
 
-🧠 Model for this run: recommended <top tier available>. You're on <current>.
-   /model <id> to switch, or "keep current", or name per-stage overrides.
+🧠 Model: <current>, kept. Recommended for this run: <top tier available>.
+   A switch is the operator's /model at any time; the brief records it.
 
 ⚠  This skill's own behaviour is unverified: evals/RESULTS.md records <N> blind
    run(s) on <M> model(s). Its triggering and its stage compliance are authored,
-   not measured. Nothing here is blocked by that — you are told because a skill
+   not measured. Nothing here is blocked by that; you are told because a skill
    that never says so is one you would assume had been tested.
 
-Install the ✗ items you want, answer the model line, then say "continue".
+Recorded in the brief: model kept, the ✗ companions absent with their fallbacks.
+Continuing to stage 0.
 ```
 
 Rules:
 
-- Only flag **super-ux** when the task implies a UI (the stage-0 grill decides;
-  when unsure, flag it — a false positive costs one install). It arms **two** tracks,
-  not one: the UX chain and the copy layer.
+- **Who installs.** A family member (super-ux, sheleg-design, agent-sync, sheleg-dev,
+  agent-stack, telegram-dev, seo-aeo-audit) is installed by the **agent**, through the
+  family launcher (`npx --yes sshlg-skills@latest update`; `install` on a host that has
+  no member yet), when the host's instructions delegate installs or terminal work to
+  the agent; it then re-detects and says `✓ installed`. Where they do not, or the
+  install fails, the member is recorded as absent with its fallback and the run goes
+  on. A third-party companion (context7, Figma MCP, obsidian-wiki, graphify,
+  playwright) follows the same rule under the host's delegation; otherwise its line is
+  printed once as information. **Never** a bare `/plugin install` per member, which
+  leaves the family in a combination nobody tested, and never a stop to wait for one.
+- **The model is kept.** A skill runs inside the current context and cannot change
+  the main-loop model; preflight records the current one, names the recommended tier
+  as advice, and continues. The operator's `/model` at any time is the override,
+  recorded when it happens (`model-tiering.md` → *Mechanic*).
+- Only flag **super-ux** when the task implies a UI (stage 0 decides; when unsure,
+  flag it: a false positive costs one line). It arms **two** tracks, not one: the UX
+  chain and the copy layer.
 - **sheleg-design**: flag it when the task has a **visual** surface — a page, a screen,
   a themed component, a landing, a dashboard. Detect via a resolving `/sheleg-design`.
   **A CLI, a library, a backend service or an internal script does not flag it**, and
@@ -236,8 +239,9 @@ Rules:
   it as one, exactly as it does for a surface verified by reading the diff.
 - **obsidian-wiki**: detect via `~/.obsidian-wiki/config` or a resolving
   `wiki-query`/`wiki-update`. Present → say `✓ ready` and use it in the harvest.
-  Absent → print the two install lines **once** and continue; never ask twice in a
-  run and never block a stage on it ([`knowledge-sources.md`](knowledge-sources.md)).
+  Absent → print the two install lines **once** (back up `~/.obsidian-wiki/` before
+  `setup`, which rewrites the active profile) and continue; never ask twice in a run
+  and never block a stage on it ([`knowledge-sources.md`](knowledge-sources.md)).
 - **The browser channels — `playwright` and `chrome-devtools`, one rule for both, WebKit
   first.**
   Flag them only when the project **has a web front end** — an `index.html`, a
@@ -248,8 +252,10 @@ Rules:
   `@playwright/cli` or `@playwright/mcp` dependency, a `playwright.config.*`, or
   `mcp__playwright__browser_navigate`; detect `chrome-devtools` via a resolving
   `mcp__chrome-devtools__list_pages` (either one under whatever prefix the host uses).
-  Present → `✓ ready`. Absent → print its install lines **once** and continue; neither
-  is a gate.
+  Present → `✓ ready`. Absent → `playwright` prints its install lines **once** and the
+  run continues; `chrome-devtools` is **never offered** at preflight (it is the
+  Chrome-only exception, used where the host already has it, [`browser.md`](browser.md)
+  → *Engine order*). Neither is a gate.
 - **They are two channels for one look, and the run needs one of them, not both —
   on WebKit first** (`DEC-0007`, [`browser.md`](browser.md) → *Engine order*). Both open
   the page, snapshot it and read the console and the network log, so the look is taken
@@ -305,13 +311,13 @@ Rules:
 - **Never gate any stage on an install.** On UI tasks the stage-3 gate requires the
   valid scenario artifact under the provider rule above, not a package.
 - Optional tools missing → state the fallback, don't block.
-- Re-detect after the operator installs; don't assume.
-- The model answer goes into the brief. Don't ask again per stage
+- Re-detect after an install, the agent's or the operator's; don't assume.
+- The model line goes into the brief. Don't ask about it at any stage
   (`model-tiering.md` → *Mechanic*).
 
 ## Is this skill itself current?
 
-Preflight's other question, asked once beside the companion block. A pipeline running
+Preflight's other check, made once beside the companion block. A pipeline running
 on a stale copy of its own doctrine repeats a class of failure that was already fixed
 upstream — and nothing in a run would ever reveal it.
 
@@ -319,8 +325,8 @@ upstream — and nothing in a run would ever reveal it.
 npx --yes sshlg-skills@latest list      # what the current release of each member is
 ```
 
-Compare it with what is installed. Behind → offer the **launcher**, never the bare
-per-skill form:
+Compare it with what is installed. Behind → the **launcher**, never the bare per-skill
+form; the agent runs it where the host delegates installs, and names it once otherwise:
 
 ```bash
 npx --yes sshlg-skills@latest update

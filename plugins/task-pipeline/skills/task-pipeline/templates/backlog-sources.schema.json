@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/ssheleg/task-pipeline/blob/main/plugins/task-pipeline/skills/task-pipeline/templates/backlog-sources.schema.json",
-  "title": "backlog-sources/1 — docs/backlog-sources.json",
+  "title": "backlog-sources/1: docs/backlog-sources.json",
   "description": "The declared task sources a wave-0 harvest reads (references/waves.md, Wave 0; references/backlog.md, A declared source list). Where a repository carries docs/backlog-sources.json, the harvest reads exactly the sources it lists, with the id, title and status columns each names, and a source of open work it does not list is reported as a finding. This schema is the rule for anyone using this skill. It is compatible with the Fabric workspace's source contract of the same name (cited as provenance, not authority), with one deliberate widening: `repository` may be any GitHub repository. Two rules a schema cannot state are the harvest's: each `path` exists as a regular file reached through no symlink, and no two declarations are identical.",
   "type": "object",
   "additionalProperties": false,

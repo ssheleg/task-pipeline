@@ -639,8 +639,10 @@ in the stage-0 brief:
    re-run the full suite on the result. A branch that was green in isolation and red
    after integration is red — fix it here, not at stage 7.
 2. **Land it the project's way:** merge into the base branch, or open a PR when the
-   project requires review. Opening a PR is outward-facing — do it only with the
-   operator's go or the brief's specific standing authorization.
+   project requires review. Opening a PR is outward-facing: it needs the operator's
+   go, and a standing grant counts as that go. Read the host's instructions first;
+   where they authorize opening and integrating PRs (or the brief records such a
+   grant), that is the go, cited with its source. Absent any grant, ask once.
 3. **Never force-push a shared branch**, and never land on `main` when the brief put
    it off-limits.
 4. **Remove the worktree** once merged (`git worktree remove <path>`, or the native

@@ -1163,7 +1163,8 @@ if os.path.isfile(_cs):
         # The preflight names a companion then dashes into its explanation; take everything
         # before the dash, so "Figma MCP" arrives whole rather than truncated at the space.
         _offered = set()
-        for _line in re.findall(r"^\s*[✓✗]\s+(.+?)\s+[—-]", _block.group(1), re.M):
+        # 1.104.1: the name ends at a colon (`✗ super-ux: …`); a dash is still read.
+        for _line in re.findall(r"^\s*[✓✗]\s+([^:\n]+?)(?::\s|\s+[—-]\s)", _block.group(1), re.M):
             _offered.add(re.sub(r"\s*mcp$", "", _line.strip().lower()))
 
         def _same(_a, _b):
@@ -4240,9 +4241,9 @@ else:
         # A LINE that starts with it, not a substring anywhere in the output. `"staleness"
         # not in _so` was the first version and `was-staleness` satisfied it — the fourth
         # time in this session a check read a name where it needed an anchor.
-        _sline = [l for l in _so.splitlines() if l.strip().startswith("staleness —")]
+        _sline = [l for l in _so.splitlines() if l.strip().startswith("staleness:")]
         if not _sline:
-            fail("templates/exposure.sh prints no line beginning `staleness —` — B-081: the "
+            fail("templates/exposure.sh prints no line beginning `staleness:` — B-081: the "
                  "ledger has no notion of a row the tree has overtaken. Output: "
                  + _so.strip()[-300:])
         else:
@@ -7945,6 +7946,101 @@ else:
                         + ", ".join(f"{_v} {_k}" for _k, _v in
                                     sorted(_nb.items(), key=lambda _x: -_x[1]))
                         + ")  (disclosure — no floor, no target)")
+
+
+def check_no_em_dash_in_text_people_read():
+    """Text a person reads carries no em dash (U+2014): the seeded templates and the
+    strings the bundled scripts print. Agent doctrine (`references/`) is out of scope.
+
+    1.104.1, 2026-11-11: an audit found 286 template lines and hundreds of printed
+    strings carrying the character a family host's instructions ban in any text for
+    people. Code keeps it: a fenced block or an inline code span in a template, a
+    comment or a `case`/regex recogniser in a shell template, and in a script a
+    docstring, a regex or strip argument (input that may carry the character) and a
+    run-ledger record format (`stage:`, `event:`, `finish:` …), which the parsers read
+    with the em dash as their separator. Everything else is prose and fails here.
+    """
+    import ast as _ast
+    D = "\u2014"
+    tpl = os.path.join(_skill_dir, "templates")
+    hits = []
+    for name in sorted(os.listdir(tpl)) if os.path.isdir(tpl) else []:
+        path = os.path.join(tpl, name)
+        text = open(path, encoding="utf-8").read()
+        if D not in text:
+            continue
+        rel = f"templates/{name}"
+        if name.endswith(".md"):
+            fence = False
+            for no, line in enumerate(text.split("\n"), 1):
+                if re.match(r"^\s*(```|~~~)", line):
+                    fence = not fence
+                    continue
+                if not fence and D in re.sub(r"`[^`]*`", "", line):
+                    hits.append(f"{rel}:{no}")
+        elif name.endswith(".sh"):
+            for no, line in enumerate(text.split("\n"), 1):
+                if D not in line or line.lstrip().startswith("#"):
+                    continue
+                code = re.sub(r"\[[^\]]*\]", "", line)              # regex brackets
+                code = re.sub(r'(^|\|)\s*"' + D + r'"\s*(?=\||\))', "", code)  # case patterns
+                code = code.split(" # ")[0]
+                if D in code:
+                    hits.append(f"{rel}:{no}")
+        elif name.endswith(".json"):
+            for no, line in enumerate(text.split("\n"), 1):
+                if D in line:
+                    hits.append(f"{rel}:{no}")
+    ledger = re.compile(r"^\s*(stage|iter|touch|hand|holds|gate|event|review|finding|"
+                        r"round|agents|finish|read|loop|lesson):")
+    sdir = os.path.join(_skill_dir, "scripts")
+    for name in sorted(os.listdir(sdir)) if os.path.isdir(sdir) else []:
+        if not name.endswith(".py"):
+            continue
+        path = os.path.join(sdir, name)
+        src = open(path, encoding="utf-8").read()
+        if D not in src:
+            continue
+        tree = _ast.parse(src)
+        docs, parent = set(), {}
+        for n in _ast.walk(tree):
+            for c in _ast.iter_child_nodes(n):
+                parent[id(c)] = n
+            if isinstance(n, (_ast.Module, _ast.FunctionDef, _ast.AsyncFunctionDef,
+                              _ast.ClassDef)) and n.body:
+                f = n.body[0]
+                if isinstance(f, _ast.Expr) and isinstance(f.value, _ast.Constant):
+                    docs.add(id(f.value))
+        for n in _ast.walk(tree):
+            if isinstance(n, _ast.JoinedStr):
+                txt = "".join(v.value for v in n.values
+                              if isinstance(v, _ast.Constant) and isinstance(v.value, str))
+            elif isinstance(n, _ast.Constant) and isinstance(n.value, str):
+                txt = n.value
+            else:
+                continue
+            if D not in txt or id(n) in docs or ledger.match(txt) or txt.strip() == D:
+                continue
+            q, exempt = parent.get(id(n)), False
+            if isinstance(q, (_ast.JoinedStr, _ast.FormattedValue)):
+                continue
+            while q is not None and not isinstance(q, _ast.stmt):
+                if isinstance(q, _ast.Call):
+                    fn = q.func
+                    exempt = isinstance(fn, _ast.Attribute) and (
+                        fn.attr in ("strip", "lstrip", "rstrip")
+                        or (isinstance(fn.value, _ast.Name) and fn.value.id == "re"))
+                    break
+                q = parent.get(id(q))
+            if not exempt:
+                hits.append(f"scripts/{name}:{n.lineno}")
+    if hits:
+        fail(f"{len(hits)} em dash(es) in text a person reads (templates, printed "
+             "strings): " + ", ".join(hits[:12]) + (" …" if len(hits) > 12 else "")
+             + ". Use a colon, a comma, a full stop or parentheses; code keeps it")
+
+
+check_no_em_dash_in_text_people_read()
 
 
 def check_routed_triggers_still_advertised():

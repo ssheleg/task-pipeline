@@ -559,6 +559,27 @@ class TestIdempotence(Fixtures):
                       "reads as a failure to write one")
         shutil.rmtree(out, ignore_errors=True)
 
+    def test_prior_reads_a_sidecar_kept_in_another_folder(self):
+        """A host reports convention keeps each run in its own dated folder, so the
+        previous sidecar is not in this run's output directory: `--prior` names it,
+        and a path holding no sidecar is refused rather than read as a first run."""
+        tree = self.trees["go-no-ci"]
+        first = os.path.join(tree, "docs/reports/2026-01-01-project-audit")
+        second = os.path.join(tree, "docs/reports/2026-01-02-project-audit")
+        run = lambda *a: subprocess.run([sys.executable, SCRIPT, "--root", tree,
+                                         "--offline", "--json", *a],
+                                        capture_output=True, text=True)
+        p1 = run("--out", first)
+        self.assertEqual(p1.returncode, 0, p1.stderr[-800:])
+        p2 = run("--out", second, "--prior", first)
+        self.assertEqual(p2.returncode, 0, p2.stderr[-800:])
+        ratchet = json.loads(p2.stdout)["ratchet"]
+        self.assertFalse(ratchet.get("first_run"),
+                         f"--prior was ignored and the run read as a first run: {ratchet}")
+        bad = run("--out", second, "--prior", os.path.join(tree, "docs/reports/none"))
+        self.assertEqual(bad.returncode, 2, "an unreadable --prior must be refused")
+        shutil.rmtree(os.path.join(tree, "docs/reports"), ignore_errors=True)
+
     def test_report_writes_both_artefacts(self):
         tree = self.trees["go-no-ci"]
         subprocess.run([sys.executable, SCRIPT, "--root", tree, "--report",

@@ -184,7 +184,7 @@ def check(root: pathlib.Path, found: list[str]) -> tuple[int, dict | None, list[
     mf = root / MANIFEST
     state = _manifest(root)
     if state is None:
-        return 0, None, [f"no {MANIFEST} — the harvest discovers its sources"]
+        return 0, None, [f"no {MANIFEST}: the harvest discovers its sources"]
     if state:  # a manifest that cannot be looked at is not an absent one
         return 1, None, [f"{MANIFEST}: not readable ({state})"]
     try:
@@ -196,7 +196,7 @@ def check(root: pathlib.Path, found: list[str]) -> tuple[int, dict | None, list[
     if not isinstance(doc, dict):
         return 1, None, [f"{MANIFEST}: not an object"]
     errs: list[str] = []
-    errs += [f"{MANIFEST}: unknown key `{k}` — backlog-sources/1 names {', '.join(TOP_KEYS)}"
+    errs += [f"{MANIFEST}: unknown key `{k}`; backlog-sources/1 names {', '.join(TOP_KEYS)}"
              for k in doc if k not in TOP_KEYS]
     if doc.get("schema") != 1:
         errs.append(f"{MANIFEST}: `schema` is {doc.get('schema')!r}, not 1")
@@ -205,7 +205,7 @@ def check(root: pathlib.Path, found: list[str]) -> tuple[int, dict | None, list[
                     "https://github.com/<owner>/<repo> URL")
     sources = doc.get("sources")
     if not isinstance(sources, list) or not 1 <= len(sources) <= 100:
-        errs.append(f"{MANIFEST}: `sources` must list 1–100 entries — a context-only "
+        errs.append(f"{MANIFEST}: `sources` must list 1–100 entries; a context-only "
                     "repository still declares one")
         sources = sources if isinstance(sources, list) else []
     tasks, context, seen = [], [], set()
@@ -216,7 +216,7 @@ def check(root: pathlib.Path, found: list[str]) -> tuple[int, dict | None, list[
             continue
         path, kind, fmt = s.get("path"), s.get("kind", "tasks"), s.get("format")
         where = f"{where} ({path})"
-        errs += [f"{where}: unknown key `{k}` — a source names only {', '.join(SOURCE_KEYS)}"
+        errs += [f"{where}: unknown key `{k}`; a source names only {', '.join(SOURCE_KEYS)}"
                  for k in s if k not in SOURCE_KEYS]
         if "heading" in s and not isinstance(s["heading"], str):
             errs.append(f"{where}: `heading` is not a string")
@@ -246,7 +246,7 @@ def check(root: pathlib.Path, found: list[str]) -> tuple[int, dict | None, list[
             errs.append(f"{where}: the declared source is missing, or reached through a symlink")
         if kind == "tasks":
             if fmt not in FORMATS:
-                errs.append(f"{where}: `format` {fmt!r} is not one of {', '.join(FORMATS)} — "
+                errs.append(f"{where}: `format` {fmt!r} is not one of {', '.join(FORMATS)}; "
                             "an unsupported source is migrated or declared as context")
             if fmt == "table":
                 has_status, has_default = "statusColumn" in s, "defaultStatus" in s

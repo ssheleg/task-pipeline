@@ -78,6 +78,10 @@ audit axis, an observer, or the post-release readback. Rotating the axis
   second of which may read only the last fix's diff. Two for every iteration was the
   default until 1.98.0, and a clean round that changed nothing bought a second reading
   of the same tree.
+  **A finish line the host's instructions state wins** (for example, two consecutive
+  verification rounds with nothing blocking for every unit): the run applies the
+  host's count (`waves.py finish --clean-rounds 2` for two) and names its source in
+  the ledger; the counts above are the default only where the host states none.
 - **Diverging** — new blocking findings did not fall from one round to the next, or
   self-inflicted ≥ new. Run [`loop-guard.md`](loop-guard.md)'s break protocol.
 - **Budget spent** — `maxRounds` or `maxReleases` reached before done: a blocker open, or the

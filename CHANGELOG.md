@@ -1,3 +1,60 @@
+## v1.104.1: the run stops only at a human gate, and text for people carries no em dash
+
+Guards: 537 → **539**; property checks 15 → **15**. Negatives 557 and 558 are new: one
+plants an em dash into a seeded template's prose, one into a string a script prints, and
+both require `test/validate.py` to fail.
+
+Fixes from the family audit of 2026-11-11, each generic: where the host's instructions
+delegate or state the thing, the host wins; otherwise the previous default holds.
+
+- **Preflight is a notice, never a stop.** It ended on "Install the ✗ items you want,
+  answer the model line, then say continue", so every run halted before stage 0 on
+  choices that are not human gates. It now prints once, keeps the current model and
+  records it, lists what is missing with its fallback, and continues. Family members are
+  installed by the agent through the family launcher (`npx --yes sshlg-skills@latest
+  update`) where the host delegates installs, else recorded absent. `model-tiering.md`
+  no longer calls preflight interactive.
+- **The short-path triage runs first.** `short_path.py` is decided from the request, its
+  files and the instruction file before the companion block and the full harvest; a
+  short-path run prints neither. A three-file change no longer reads the whole harvest
+  to learn that it was small.
+- **Stage 0 is the gap check, not a grill.** `stage-00-intake.md` said "grill the
+  operator" against SKILL.md's "a complete brief yields zero intake questions". The brief
+  is built from the sources; only a material unknown is asked, and under a host
+  delegation it is decided (recorded decisions, then the project's goal, then the safest
+  reversible option) and written into the brief.
+- **Stage 10 writes a closing statement.** "Ask the operator the closing question ... even
+  when the table is green" is now a statement in the hand-back (shipped and deferred,
+  listed); no sign-off is waited for, and only a human gate is asked. A deferred row
+  carries the operator's agreement or, under a delegation, the agent's recorded decision.
+- **A finish line the host states wins** (`finish-line.md`, SKILL.md): two consecutive
+  clean rounds where the host says so (`waves.py finish --clean-rounds 2`), the
+  proportional default otherwise.
+- **Opening a PR and shipping a `partial` read the standing grant** (`build.md`,
+  `stages.md`, `pipeline.example.json`): where the host's instructions authorize it, that
+  is the go, cited with its source.
+- **Companion install lines corrected.** sheleg-design's repository is
+  `ssheleg/sheleg-design-skill`; family members point at the launcher instead of bare
+  `/plugin install` lines; the wiki setup line says to back up `~/.obsidian-wiki/` first
+  (setup rewrites the active profile; `obsidian-wiki` on PyPI checked 2026-11-11);
+  chrome-devtools is no longer offered at preflight and stays the Chrome-only exception.
+- **The description routes audit fixes, not a bare "audit, PR review".** The bare words
+  collided with project-audit, make-skill, seo-aeo-audit and ux-audit, and "PR review"
+  contradicted the hub boundary (reading code is not through the pipeline). Same length.
+  The `## Triggers` bodies (task-pipeline, project-audit, evidence-docs) no longer claim
+  they "still route to this skill": a host's skill selection reads the description, and
+  the body is what the family hub's routing hook matches, which is why it stays.
+- **project-audit writes where the host keeps reports.** `--out` takes a reports
+  convention's folder (`docs/reports/<date>-<topic>/`), and the new `--prior` names the
+  previous run's sidecar so the ratchet survives a dated folder; an unreadable `--prior`
+  exits 2. The SKILL.md said `--out-dir`, a flag that never existed.
+- **No em dash in text for people.** Templates (prose outside code) and the strings the
+  scripts print use a colon, a comma or a full stop; run-ledger record formats, regexes and
+  input recognisers keep the character, because the parsers read it. A new validator
+  check covers those paths.
+- `evals/RESULTS.md` notes that the last trigger run (2026-10-14) predates the v1.98.0
+  and v1.104.1 descriptions; the runs were not repeated.
+
 ## v1.104.0: the pipeline designs for agents as well as people, without a new stage
 
 Guards: 531 → **537**; property checks 15 → **15**. Negatives 551 to 556 are new: five

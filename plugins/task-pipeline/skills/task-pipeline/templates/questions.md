@@ -1,12 +1,12 @@
-# Questions — <topic> (YYYY-MM-DD)
+# Questions: <topic> (YYYY-MM-DD)
 
-The single question queue of an iteration (`references/iteration.md` → *Question rounds —
+The single question queue of an iteration (`references/iteration.md` → *Question rounds:
 asked in batches, never blocking*; `references/waves.md` → *The questions*). Every question
 is first tried against the sources. One the sources answer is recorded under **Closed**, with
 its citation, and never asked. The rest fall into three groups:
-- **Operator** — ordered so prerequisite decisions come first;
-- **Peers** — grouped by the repository or session that owns the answer;
-- **Assumed** — taken on the recommendation because the answer is internal and reversible;
+- **Operator**; ordered so prerequisite decisions come first;
+- **Peers**: grouped by the repository or session that owns the answer;
+- **Assumed**; taken on the recommendation because the answer is internal and reversible;
   the nodes resting on each are named, so a different answer re-plans exactly those.
 
 An outward or irreversible act is never assumed. A round is called on the first of three

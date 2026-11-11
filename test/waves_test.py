@@ -259,7 +259,7 @@ def finish_cases():
     ok(rc == 0, f"--max-rounds 1 with one clean round owed is a budget that can be met ({rc} {err!r})")
     # Fix 8: done past the budget needs the operator's go.
     rc, out, err = fin([], "--rounds", "4", *GREEN)
-    ok(rc == 5 and "past budget — operator's go required" in out,
+    ok(rc == 5 and "past budget, operator's go required" in out,
        f"done at round 4/3 without the go: exit 5, flagged ({rc} {out!r} {err!r})")
     rc, out, err = fin([], "--rounds", "4", "--operator-go", *GREEN)
     ok(rc == 0 and "past budget" in out, f"done at round 4/3 on the operator's go: exit 0, still disclosed ({rc} {out!r})")

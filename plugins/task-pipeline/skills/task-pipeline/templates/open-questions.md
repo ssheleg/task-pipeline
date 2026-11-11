@@ -1,8 +1,8 @@
-# Open questions — <project>
+# Open questions: <project>
 
 Everything undecided, with an owner and what it blocks. This register was
 established by DEC-0001. Doctrine: `references/documentation.md`. A question is
-**never deleted** — the question is the history of the answer, and deleting it is
+**never deleted**: the question is the history of the answer, and deleting it is
 how the same thing gets re-argued a quarter later.
 
 **Next free ID:** `OQ-0002`

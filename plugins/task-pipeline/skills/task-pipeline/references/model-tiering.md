@@ -11,9 +11,9 @@
 - Degradation
 - A harness clause encodes a model's weakness — stress-test it per generation
 
-**One model, confirmed once, before the run starts.** Not a per-stage tier list,
-not a hardcoded vendor id — a single decision the operator makes at preflight and
-the pipeline then honors without nagging.
+**One model, recorded once, before the run starts.** Not a per-stage tier list,
+not a hardcoded vendor id: the model already running, kept and recorded at preflight
+unless the operator switches it, and then honored without nagging.
 
 ## The default
 
@@ -62,25 +62,25 @@ operator's say-so is the same defect as the silent downgrade.
 
 ## Mechanic — confirm at preflight, then stop asking
 
-Once, as part of the preflight (before stage 0):
+Once, as one line of the preflight notice (before stage 0, on the full flow):
 
-> 🧠 **Model for this run:** recommended **`<top tier available>`**. You're on
-> `<current>`.
-> Switch with `/model <id>`, or say "keep current" / name another. Per-stage
-> overrides welcome (e.g. a cheaper model for mechanical stages) — say so now and
-> I'll record the map.
+> 🧠 **Model:** `<current>`, kept. Recommended for this run: **`<top tier
+> available>`**. A switch is the operator's `/model` at any time; the brief records
+> it.
 
-Record the answer in the stage-0 brief (`Model` row of the autonomy sweep). After
-that:
+The line is a **notice, not a question**: the run does not wait for an answer.
+Record the current model in the stage-0 brief (`Model` row of the autonomy sweep),
+and a per-stage override map only when the operator states one. After that:
 
-- **Do not re-prompt at every stage boundary.** The decision is made; nagging is
+- **Do not prompt at any stage boundary.** The decision is recorded; nagging is
   the thing this replaces.
-- **Re-prompt only** when the operator recorded a *per-stage override map* and the
-  next stage's entry differs from the current model — then emit the same block
+- **Print the line again only** when the operator recorded a *per-stage override
+  map* and the next stage's entry differs from the current model: the same notice,
   scoped to that stage.
 - A skill runs inside the current context and **cannot change the main-loop
-  model**; only the operator can, via `/model` (or `/fast`). Preflight is
-  interactive anyway, so this costs one exchange.
+  model**; only the operator can, via `/model` (or `/fast`). That is why the
+  default is the model already running: a run that stopped to ask would stop every
+  run for a choice the operator can make at any moment without being asked.
 
 ## The plan-then-execute profile
 
@@ -102,7 +102,7 @@ planning tier because acceptance is a judgment too: it decides whether the evide
 answers the claim.
 
 **It changes nothing about how a switch is recorded.** This is still an override the
-operator states at preflight and the brief records with its basis, exactly as the rule
+operator states, at preflight or later, and the brief records with its basis, exactly as the rule
 above demands; naming it here saves the composing, not the recording. Task size still
 switches nothing. And it is still ADVICE — an environment with one tier runs the whole
 pipeline on that tier and says so.

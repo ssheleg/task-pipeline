@@ -264,7 +264,7 @@ def authority_for(path):
     """The seam a Fabric adapter replaces for distributed execution. Today it
     returns the local SQLite authority; fail-closed if it cannot be built."""
     if not path:
-        raise AuthorityUnavailable("no authority path given — external mode needs one")
+        raise AuthorityUnavailable("no authority path given: external mode needs one")
     parent = os.path.dirname(os.path.abspath(path))
     if parent and not os.path.isdir(parent):
         raise AuthorityUnavailable(f"authority directory does not exist: {parent}")

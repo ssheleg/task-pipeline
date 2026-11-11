@@ -113,7 +113,7 @@ while read -r f; do
 done < "$TMP/files"
 NMD=$(wc -l < "$TMP/md" | tr -d ' ')
 
-echo "hygiene gate — mode $MODE · $NFILES file(s), $NMD markdown"
+echo "hygiene gate: mode $MODE · $NFILES file(s), $NMD markdown"
 
 # The floor a check is judged against. Diff mode has none: zero tolerance.
 floor_for() {
@@ -127,18 +127,18 @@ judge() { # judge <n> <count> <label>
   # gate reporting a pass it never computed. Refuse rather than default to zero: a
   # missing floor is a bug in the gate, and a bug in the gate is not a passing file.
   case "$_f" in
-    ''|*[!0-9]*) err "check $1 — $3: no floor declared (HYGIENE_FLOOR_$1) — the gate cannot judge $2 finding(s)"; return ;;
+    ''|*[!0-9]*) err "check $1: $3: no floor declared (HYGIENE_FLOOR_$1); the gate cannot judge $2 finding(s)"; return ;;
   esac
   if [ "$2" -gt "$_f" ]; then
-    err "check $1 — $3: $2 finding(s), floor $_f"
+    err "check $1: $3: $2 finding(s), floor $_f"
     sed 's/^/         /' "$TMP/hits$1"
   else
-    ok "check $1 — $3: $2 (floor $_f)"
+    ok "check $1: $3: $2 (floor $_f)"
   fi
 }
 
 if [ "$NFILES" -eq 0 ]; then
-  dormant "every check — no files in scope"
+  dormant "every check: no files in scope"
   C1=0; C2=0; C3=0; C4=0; C5=0; C6=0; C7=0
 else
 
@@ -164,7 +164,7 @@ judge 2 "$C2" "surviving placeholders"
 # ---------- 3. unterminated code fence ----------
 : > "$TMP/hits3"
 if [ "$NMD" -eq 0 ]; then
-  dormant "check 3 — unterminated fence: no markdown in scope"
+  dormant "check 3: unterminated fence: no markdown in scope"
   C3=0
 else
   while read -r f; do
@@ -173,7 +173,7 @@ else
     n=$(grep -c '^[[:space:]]*```' "$f" 2>/dev/null) || n=0
     [ -z "$n" ] && n=0
     if [ "$n" -gt 0 ] && [ "$(expr "$n" % 2)" -ne 0 ]; then
-      echo "$f:1: odd fence count ($n) — a code block is not closed" >> "$TMP/hits3"
+      echo "$f:1: odd fence count ($n); a code block is not closed" >> "$TMP/hits3"
     fi
   done < "$TMP/md"
   C3=$(wc -l < "$TMP/hits3" | tr -d ' ')
@@ -218,7 +218,7 @@ judge 5 "$C5" "duplicated adjacent block"
 # lines entirely and so reported every section whose body is one code block.
 : > "$TMP/hits6"
 if [ "$NMD" -eq 0 ]; then
-  dormant "check 6 — empty section: no markdown in scope"
+  dormant "check 6: empty section: no markdown in scope"
   C6=0
 else
   while read -r f; do
@@ -227,7 +227,7 @@ else
       fence { prev = 0; next }
       /^#{1,6} / {
         match($0, /^#+/); lvl = RLENGTH
-        if (prev && lvl <= prev) print F ":" NR ": empty section — h" prev " then h" lvl " with no body"
+        if (prev && lvl <= prev) print F ":" NR ": empty section; h" prev " then h" lvl " with no body"
         prev = lvl; next
       }
       NF { prev = 0 }
@@ -247,7 +247,7 @@ fi
 # what turns a finding into a check rather than a third ledger row.
 : > "$TMP/hits7"
 if [ "$NMD" -eq 0 ]; then
-  dormant "check 7 — blank line inside a table: no markdown in scope"
+  dormant "check 7: blank line inside a table: no markdown in scope"
   C7=0
 else
   while read -r f; do
@@ -258,7 +258,7 @@ else
       END {
         for (i = 2; i < NR; i++)
           if (line[i] == "" && line[i-1] ~ /^\|/ && line[i+1] ~ /^\|/)
-            print F ":" i ": blank line inside a table — the rows below it stop being a table"
+            print F ":" i ": blank line inside a table; the rows below it stop being a table"
       }
     ' "$f" >> "$TMP/hits7" 2>/dev/null
   done < "$TMP/md"
@@ -270,8 +270,8 @@ fi
 
 # ---------- VERDICT — nothing may run after this block ----------
 if [ "$FAIL" -ne 0 ]; then
-  echo "FAIL: hygiene gate — mode $MODE · conflict ${C1} · placeholder ${C2} · fence ${C3} · truncation ${C4} · duplicate ${C5} · empty-section ${C6} · split-table ${C7}"
+  echo "FAIL: hygiene gate; mode $MODE · conflict ${C1} · placeholder ${C2} · fence ${C3} · truncation ${C4} · duplicate ${C5} · empty-section ${C6} · split-table ${C7}"
   exit 1
 fi
-echo "OK: hygiene gate — mode $MODE · $NFILES file(s) · conflict ${C1} · placeholder ${C2} · fence ${C3} · truncation ${C4} · duplicate ${C5} · empty-section ${C6} · split-table ${C7}"
+echo "OK: hygiene gate; mode $MODE · $NFILES file(s) · conflict ${C1} · placeholder ${C2} · fence ${C3} · truncation ${C4} · duplicate ${C5} · empty-section ${C6} · split-table ${C7}"
 exit 0

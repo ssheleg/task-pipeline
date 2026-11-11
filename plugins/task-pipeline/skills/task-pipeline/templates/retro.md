@@ -1,4 +1,4 @@
-# Pipeline retrospective — <project>
+# Pipeline retrospective: <project>
 
 One file per project, not per run. Written as the **last act of stage 10**:
 **stamp first, then prune**, then write an entry **only if the run diverged**.
@@ -6,7 +6,7 @@ The order is load-bearing: the cold-retirement trigger reads the stamp this stag
 writes, so a prune ahead of it can never run on real data (`learned.md` rule 21).
 Doctrine: `references/retrospective.md`.
 
-**What stage 0 reads in full:** *Standing instructions* and *Run stamps* — both
+**What stage 0 reads in full:** *Standing instructions* and *Run stamps*; both
 are bounded by construction (ten rows, one line per run), which is why the cap is
 not negotiable. The **Recent log** and the **archive**
 (`docs/evidence/retro/YYYY-QN.md`) are *queried* by the task's nouns and never
@@ -18,7 +18,7 @@ bytes, a standing row at most 600 characters (the story goes to the archive), a 
 one line of at most 300. `scripts/retro_budget.py check` measures it at stage 0 and at
 gate 10; `migrate --write` moves narrative to the archive verbatim, hash-proved.
 
-## Standing instructions (max 10 — in force right now)
+## Standing instructions (max 10: in force right now)
 
 Every row is a rule an agent must follow, that **no check can decide**. A rule a
 check *can* decide is not written here: it is written as the check (grade 1).
@@ -26,7 +26,7 @@ No row is accepted without its **retire-when** trigger, written at birth.
 
 Two SHA columns, and they are not bookkeeping: a `file:line` rots at the next edit,
 while `git show <sha>` reconstructs the whole incident months later. Every SHA here
-must resolve — the documentation gate runs `git rev-parse --verify` over all of
+must resolve: the documentation gate runs `git rev-parse --verify` over all of
 them.
 
 | id | Born | Commit | Instruction | Because | Retire when | Last fired | Fired at |
@@ -36,9 +36,9 @@ them.
 Retire on **any** of: it became a check · every path/command it names is gone · it
 has not fired in the last five run stamps, or in the last sixty days. At eleven
 rows, the oldest never-fired
-row goes — the cap is not negotiable, ranking is.
+row goes: the cap is not negotiable, ranking is.
 
-## Recent log — narrative entries, uncapped and queried rather than read (newest first)
+## Recent log: narrative entries, uncapped and queried rather than read (newest first)
 
 Older entries and every retirement **move** to `docs/evidence/retro/YYYY-QN.md`
 at the prune. Moving is not deleting: the archive is append-only and holds the
@@ -47,36 +47,36 @@ stays short precisely so that reading it in full at stage 0 stays cheap.
 
 ### 2026-05-04 · `<topic>` · gate 6 reopened twice
 
-- **Symptom:** … (one line + evidence — a command, a `file:line`, the gate)
+- **Symptom:** … (one line + evidence; a command, a `file:line`, the gate)
 - **Surfaced at:** stage 6 · **Owned by:** stage 4 (the plan never named the check)
-- **Root cause:** … (why the pipeline permitted it — "the agent was careless" is
+- **Root cause:** … (why the pipeline permitted it; "the agent was careless" is
   not a cause; it is the absence of one, and it produces no fix)
-- **Fix:** grade 1 (mechanical) — … / grade 2 → `R-00N` / grade 3, expires in
+- **Fix:** grade 1 (mechanical); … / grade 2 → `R-00N` / grade 3, expires in
   2 runs
 - **The check:** … (what catches this the first time, from now on)
 - **Class:** `exit-code` | `unwatched-check` | `release` | `collision` |
   `destructive-undo` | `claim-by-say-so` | `stale-doc` | `wrong-copy` | `sibling` |
   `truncated-output` | `shell-instrument` | `handback` | `loop` (recurrence is counted
   by class) · **Cost:** … (rounds, burned tags, time)
-- **Lesson:** `<class-key>` — <the class, one sentence> · **When:** <trigger> · **Nouns:** <a>, <b>, <c>
+- **Lesson:** `<class-key>`; <the class, one sentence> · **When:** <trigger> · **Nouns:** <a>, <b>, <c>
   (optional, and on ONE line: write it only when the class would be true in another
-  project — it makes the entry a lesson for `scripts/lessons.py add`, lesson/1. Without
+  project; it makes the entry a lesson for `scripts/lessons.py add`, lesson/1. Without
   it the entry stays private to this project)
-- **Commit:** `<sha>` — the change that fixed it
+- **Commit:** `<sha>`; the change that fixed it
 - **Upstream?** … (a lesson true in any repo belongs in the skill's own
-  `references/learned.md` — open an issue and say so here)
+  `references/learned.md`: open an issue and say so here)
 
 ### Retirements
 
-One line each, newest first. A retirement is a record, not a section — so it is a
+One line each, newest first. A retirement is a record, not a section: so it is a
 list item. A heading promises a body, and a heading with nothing under it is the
 shape the hygiene gate's check 6 exists to find.
 
-- 2026-05-04 · retired R-000 — became a check (`npm run lint:paths`) · `<sha>`
+- 2026-05-04 · retired R-000: became a check (`npm run lint:paths`) · `<sha>`
 
 ## Run stamps
 
-One line per run, appended at stage 10, **capped at ten** — at the eleventh the
+One line per run, appended at stage 10, **capped at ten**: at the eleventh the
 oldest rotates whole into the archive. One line per run is a slope, not a bound:
 this section is read in full at stage 0.
 

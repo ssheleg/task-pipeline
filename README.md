@@ -193,7 +193,7 @@ and the inline fallback satisfy the same [provider contract](plugins/task-pipeli
 | 10 Acceptance | [`acceptance.md`](plugins/task-pipeline/skills/task-pipeline/references/acceptance.md) — REQ coverage table, evidence rules, the closing question |
 | 10 + any audit | [`audit.md`](plugins/task-pipeline/skills/task-pipeline/references/audit.md) — the L0→L7 ladder and its seams, axis rotation, ratchets, proven checks |
 | any loop | [`loop-guard.md`](plugins/task-pipeline/skills/task-pipeline/references/loop-guard.md) — churn detection, caps, the break protocol |
-| when an iteration stops | [`finish-line.md`](plugins/task-pipeline/skills/task-pipeline/references/finish-line.md) — a contract fixed at intake (objective, exit checks on the artefact, scope, budget, base), every finding triaged when found — blocking, deferred or noise — and a stop at two rounds with no new blocking finding or at the budget, computed by `waves.py finish` |
+| when an iteration stops | [`finish-line.md`](plugins/task-pipeline/skills/task-pipeline/references/finish-line.md) — a contract fixed at intake (objective, exit checks on the artefact, scope, budget, base), every finding triaged when found — blocking, deferred or noise — and a stop at one round with no new blocking finding (two for an R3 or flagship node; a finish line the host's instructions state wins) or at the budget, computed by `waves.py finish` |
 | every gate + stage 10 | [`residue.md`](plugins/task-pipeline/skills/task-pipeline/references/residue.md) — what the run leaves **running** and leaves **behind**: eight classes enumerated by class rather than by one tool, `holds: N` beside every verdict, and a teardown that ends what this run started and only reports what it did not |
 | run-wide reporting | [`progress.md`](plugins/task-pipeline/skills/task-pipeline/references/progress.md) — the header block at task start and the one-line iteration close: the stage rail computed from the project's own `pipeline.json`, every number borrowed from the gate that measured it |
 | run-wide pacing | [`continuity.md`](plugins/task-pipeline/skills/task-pipeline/references/continuity.md) — the loop mode (`run.loop`, default off, never collapses a manual gate) and the context budget (fires on a harness signal, never on an estimate) |
@@ -292,8 +292,8 @@ There are **two channels and either is enough**, and the **engine** is ranked:
 `claude mcp add playwright -- npx @playwright/mcp@latest --browser webkit`) is the default
 look: it reaches WebKit, needs no plugin, is already there on a project that runs
 Playwright, and its CLI half puts no tool schema in the context window; on macOS Safari
-itself is driven through `safaridriver`. `chrome-devtools`
-(`/plugin install chrome-devtools-mcp@claude-plugins-official`) drives Chrome only and is
+itself is driven through `safaridriver`. `chrome-devtools`, used where the host already
+connects it and never offered as an install at preflight, drives Chrome only and is
 reached for when the question needs Chrome — Lighthouse, heap snapshots, a performance
 trace analysed rather than only recorded — said with the reason; a look taken only there
 is reported as *checked in Chromium*. Neither is a gate,
@@ -307,6 +307,7 @@ recommended once, with the line, and the run continues:
 
 ```bash
 pip install obsidian-wiki
+cp -R ~/.obsidian-wiki ~/.obsidian-wiki.bak   # setup rewrites the active profile
 obsidian-wiki setup --vault /path/to/your/vault
 ```
 
@@ -422,7 +423,7 @@ From there the ids thread through everything:
 | Plan | every task carries `Implements: REQ-…`; **the gate is set equality** against the brief — a difference is printed as the explicit list of dropped requirements |
 | Build | the implementer's brief quotes the REQ statement verbatim, so it optimises the requirement and not just the instruction |
 | Review | a third verdict beside spec-compliance and code-quality: **does this satisfy its REQ?** |
-| Deploy | no REQ may still be `open`; a `partial` ships only with explicit acceptance |
+| Deploy | no REQ may still be `open`; a `partial` ships only with the operator's acceptance (a standing grant that covers it counts) |
 | **Acceptance** | every REQ gets `verified` / `partial` / `deferred` / `dropped` — and `verified` requires **evidence**: a passing test name, a `file:line`, a command and its output |
 
 Two rules keep it honest. **The list is frozen** — adding mid-run is free, removing
@@ -788,8 +789,7 @@ the refusal is **recorded**, because a track skipped in silence and a track that
 are the same thing in a transcript.
 
 ```
-/plugin marketplace add ssheleg/super-ux
-/plugin install super-ux@super-ux
+npx --yes sshlg-skills@latest update    # the family launcher; `install` on a host with no member yet
 ```
 
 **Figma is super-ux's, and the decision about it is stage 0's.** super-ux mirrors

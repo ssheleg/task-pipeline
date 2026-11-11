@@ -235,8 +235,11 @@ Two more traps, both of which shipped in the first draft and are now fixtures:
 
 ## The artefacts — the sidecar always, the page on request
 
-`docs/audit/<date>-audit.json` is written on every run. **The HTML page is written
-only with `--report`.** Three output modes, and only one needs a browser:
+The sidecar `<date>-audit.json` is written on every run, to the location the host's
+reports convention names when it states one (a reports skill's
+`docs/reports/<date>-<topic>/`, passed as `--out`, with the previous run's folder as
+`--prior` so the ratchet still reads it), and to `docs/audit/` otherwise. **The HTML
+page is written only with `--report`.** Three output modes, and only one needs a browser:
 **stdout** (`--stdout` — the summary in the terminal, nothing written but the
 sidecar), **json** (the sidecar alone, the default — a machine reads it, no
 page and no browser), **html** (`--report` — the page too). A json-only or
@@ -264,7 +267,7 @@ enough to finish.
 **"Read-only" is about the TARGET, not the disk.** The audit reads the
 project's source, data and production evidence and mutates NONE of it, and it
 commits nothing. It DOES write its own artefacts into its allowed output
-directory (`docs/audit/` by default, `--out-dir` to relocate) — the sidecar
+directory (`docs/audit/` by default, `--out` to relocate) — the sidecar
 always, the page on `--report`. Writing the sidecar there is not a violation of
 read-only; writing into the target's source, or `git add`-ing anything, is.
 
@@ -321,7 +324,8 @@ requested, not a fixed page-and-browser:
 
 ## Triggers
 
-The description is the short form. The full trigger list it carried until 1.98.0,
-moved here verbatim, still routes to this skill:
+The description is the short form, and the only text a host's own skill selection
+reads. The trigger list it carried until 1.98.0, kept here verbatim, is what the family
+hub's routing hook matches prompts against:
 
 "Use when someone asks what is actually true of a whole project right now — what is finished, what is half-built, what is broken, and what nobody has looked at. Walks a cold start: discover what the project is, run a registry of probes chosen from that, read production evidence (published artefact against source, CI history, telemetry present or absent), then leave a JSON sidecar so the next audit can say what moved, and a self-contained HTML report on request. Read-only: it proposes board rows and commits nothing. Triggers - 'project audit', 'audit the project', 'codebase audit', 'state of the project', 'what is unfinished', 'project health check', 'аудит проекта', 'проаудируй проект', 'состояние проекта', 'что не доделано', 'аудит кодовой базы'. Not for: auditing one deliverable inside a run (that is the pipeline's own ladder), reviewing a diff, or checking a skill's construction — say 'без диагностики' to opt out."

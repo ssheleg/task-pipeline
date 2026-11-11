@@ -1,4 +1,4 @@
-# Run ledger — `.task-pipeline/run.md`
+# Run ledger: `.task-pipeline/run.md`
 
 > **One file per run.** Seeded at stage 0, appended by every stage, never rewritten.
 > Two readers depend on it and neither can work from the agent's memory: the skill's
@@ -18,23 +18,23 @@ Run: `<topic>` · started `<YYYY-MM-DD>` · module map: `<path or "none">`
 - Why it is not the build ledger
 - What closes it, and what survives it
 
-## `read:` — which doctrine this run actually opened
+## `read:`: which doctrine this run actually opened
 
 The bundle is 57 reference files and nothing recorded which of them a run read, so **a
-skipped file and a read one were indistinguishable** — the class every guard in this
+skipped file and a read one were indistinguishable**: the class every guard in this
 pipeline exists to catch, left standing over the doctrine itself.
 
 `read:` is **written by a hook rather than by the agent**, for the same reason `gate:` is: a
 claim about what somebody read, written by the party the claim is about, is not evidence. The
 hook is in `hooks.example.json`, matches `Read`, records the path only
-when it is inside the bundle's `references/`, deduplicates, and **always exits 0** — a hook
+when it is inside the bundle's `references/`, deduplicates, and **always exits 0**: a hook
 that can fail a `Read` would break every turn in every session.
 
 **That is an intent, not a proof, and the line says so.** This file is the one the agent
 appends to at every stage, so nothing in it distinguishes a hook-written line from one an
 agent typed: there is no writer field, and `scripts/graph.py` has no provenance check
 because the format gives it nothing to check. The doctrine here said *hook-written, never
-agent-written* until 2026-08-20 — a provenance claim in the file whose whole subject is that
+agent-written* until 2026-08-20: a provenance claim in the file whose whole subject is that
 a claim by the interested party is not evidence, which is B-014's class committed by the
 mechanism built to close it. So `doctrine` and the `gate:` reader both report **`unattested`**
 beside their counts, and the two claims that survive are the ones the ledger can support:
@@ -46,12 +46,12 @@ same claim one level down.
 
 | It prints | When | Why not just a number |
 |---|---|---|
-| `unmeasured — no run ledger` | there is no ledger | nothing to read from |
-| `unmeasured — the ledger carries no read: lines` | the hook is absent, **or** the run opened no doctrine | two opposite facts, and the ledger cannot separate them, so neither is claimed |
-| `N of 57 reference files read — unattested`, then each unread one | the hook is installed and fired | the count alone says there is a gap, not where, and `unattested` says the ledger cannot name who wrote the lines |
+| `unmeasured; no run ledger` | there is no ledger | nothing to read from |
+| `unmeasured; the ledger carries no read: lines` | the hook is absent, **or** the run opened no doctrine | two opposite facts, and the ledger cannot separate them, so neither is claimed |
+| `N of 57 reference files read; unattested`, then each unread one | the hook is installed and fired | the count alone says there is a gap, not where, and `unattested` says the ledger cannot name who wrote the lines |
 
 **It is a disclosure: no floor, no direction, never a target.** A run that needs four files
-and reads four is not worse than one that reads thirty — and the moment the number becomes
+and reads four is not worse than one that reads thirty; and the moment the number becomes
 something to raise, agents will open files to raise it. There is **no per-file reading
 floor** in this pipeline; stage 0's mandatory items are the floor that exists, and they are
 not per-file. Inventing one inside a measurement would be a doctrine decision smuggled in
@@ -59,7 +59,7 @@ as a count.
 
 ## Lines
 
-Append-only. These shapes, and nothing else belongs here (the list is the count — a written one drifts, and this one already had):
+Append-only. These shapes, and nothing else belongs here (the list is the count: a written one drifts, and this one already had):
 
 ```
 stage: <id> <name> — gate <auto|manual> — verdict <pass|fail|skip> — <ISO-8601>
@@ -78,22 +78,22 @@ finish: done|budget|blocked — rounds <n>/<max> — releases <n>/<max> — agen
 read:  references/<file>.md            # hook-appended, deduped, UNATTESTED (no writer field)
 ```
 
-- **`stage:`** — written when a gate **returns**, not when the stage is entered. The
+- **`stage:`**: written when a gate **returns**, not when the stage is entered. The
   rail's `✓` is derived from this line and from nothing else; a glyph set from memory
   is a summary that is confidently wrong exactly when it matters.
-- **`gate:`** — appended by `hooks/gate-observer.sh` rather than by an agent, and
+- **`gate:`**: appended by `hooks/gate-observer.sh` rather than by an agent, and
   **unattested** for the reason `read:` is: this file is agent-written at every stage
   and carries no writer field, so the line's provenance is an intent the format cannot
   prove. It is the only line here that records what a command **did** rather than what
   somebody concluded: the exit code of the stage's declared `gate.command`, observed. The
   `stage:` line above it is the agent's claim, and the release gate requires the
-  two to agree — without this, a gate reads a claim written by the party it
+  two to agree: without this, a gate reads a claim written by the party it
   constrains and confirms an assertion with itself. Absent where the project
   declares no command, and the release gate then degrades to the claim alone.
 
-- **`event:`** — written by `hooks/run-lifecycle.sh`, the three moments this file
+- **`event:`**: written by `hooks/run-lifecycle.sh`, the three moments this file
   otherwise cannot show. `compact` marks the boundary the ledger exists *because
-  of* — without it a resumed run cannot tell a compaction from nothing happening.
+  of*: without it a resumed run cannot tell a compaction from nothing happening.
   `session-end` marks a run whose session ended without reaching acceptance, which
   is what `/task-pipeline checkup` looks for and what was previously invisible: the
   ledger simply stopped, and a stopped ledger looks exactly like a run still in
@@ -101,12 +101,12 @@ read:  references/<file>.md            # hook-appended, deduped, UNATTESTED (no 
   something to be checked against other than itself.
 
   **It never writes a `hand:` line.** That shape carries `done`, `surfaced`,
-  `decisions` and `amb` — judgements only the agent holds, and a hook filling them
+  `decisions` and `amb`: judgements only the agent holds, and a hook filling them
   in would fabricate the evidence the line exists to provide.
 
-- **`iter:`** — one line per iteration closed. The progress line's counter is
+- **`iter:`**: one line per iteration closed. The progress line's counter is
   `grep -c '^iter:'`, never a number anyone remembers.
-- **`hand:`** — one per hand-back, at an iteration's close and at stage 10
+- **`hand:`**: one per hand-back, at an iteration's close and at stage 10
   (`references/progress.md` → *The hand-back*, inside the skill). The
   narrative goes to the operator; **this line is the trace it leaves**, and it exists
   because v1.43.0 shipped a gate criterion with no artefact behind it: every guard could
@@ -114,34 +114,34 @@ read:  references/<file>.md            # hook-appended, deduped, UNATTESTED (no 
   it. A later audit reads `grep -c '^hand:'` against `grep -c '^iter:'` and the two
   should agree, plus one for stage 10.
   **`amb` prints its ids or `— no register`, never a bare `0` with nothing beside it.**
-- **`review:`** — one line each time the person reviewing a visual surface's contact sheet
+- **`review:`**: one line each time the person reviewing a visual surface's contact sheet
   answers it: `returned` with triples, `approved`, or `unresolved` items they took over.
-  `rounds` is the sheet's `review_rounds` after that answer — the count of human passes the
+  `rounds` is the sheet's `review_rounds` after that answer: the count of human passes the
   surface took, written where it happened rather than recalled at the end
   (`references/browser.md` → *The visual half*). `scripts/stage_checkpoint.py` carries it
   into the checkpoint of the stage it names, and stage 10 copies the last one per surface
   into the acceptance file. **It is a measurement, never a target**: a number of passes to
   beat is an instruction to stop showing the sheet.
-- **`finding:`** — one line per finding, written when it is found and before anyone fixes
+- **`finding:`**: one line per finding, written when it is found and before anyone fixes
   it (`references/finish-line.md` → *Triage at discovery*, inside the skill). The class is
   one of `blocking`, `deferred`, `noise`; a blocking line names its test, one of `B1`, `B2`,
   `B3`, `B4`; a deferred line names its board row. `base-repro` says whether the failure
-  reproduces at the iteration's Base — `no` is a finding this iteration caused.
-- **`round:`** — one line per finish-line round, **clean rounds included**: its number, the
+  reproduces at the iteration's Base: `no` is a finding this iteration caused.
+- **`round:`**: one line per finish-line round, **clean rounds included**: its number, the
   independent reading it ran (an audit axis, an observer, the post-release readback) and how
   many new blocking findings it produced. A clean round leaves no `finding:` line, so without
   this line two clean rounds and no rounds look the same; `scripts/waves.py finish --ledger`
   counts the rounds from it and refuses when its counts disagree with the inventory.
-- **`finish:`** — one line when the iteration stops, beside stage 10's verdict: `done`,
+- **`finish:`**: one line when the iteration stops, beside stage 10's verdict: `done`,
   `budget` or `blocked`, with the rounds and releases spent against their budget. The
   block under it is `references/finish-line.md` → *The finish block*;
   `scripts/waves.py finish` computes the verdict from the inventory.
-- **`touch:`** — one line per file per pass, and the reason names **what forced the
+- **`touch:`**: one line per file per pass, and the reason names **what forced the
   edit**: a finding id, a failed gate item, an operator instruction. *"Cleanup"*,
   *"polish"* and *"while I was there"* are not reasons; they are churn with better
   manners.
 
-A `skip` verdict carries its reason on the same line — a skipped stage and a stage
+A `skip` verdict carries its reason on the same line: a skipped stage and a stage
 never entered look identical from outside, and they mean opposite things.
 
 ## Log
@@ -175,28 +175,28 @@ finish: done — rounds 3/3 — releases 1/2 — agents 2/2
 ```
 
 The last two lines are a **trip**: the same file, two consecutive passes, the same
-reason. `references/loop-guard.md` → *Detection* item 2 — the fix did not fix it, or
+reason. `references/loop-guard.md` → *Detection* item 2: the fix did not fix it, or
 the two passes disagree about what *fixed* means. Stop editing and run the break
 protocol; do not dispatch a fourth pass.
 
 ## Why it is not the build ledger
 
-`.task-pipeline/build/<plan>/progress.md` covers **one stage** — stage 5's tasks, and
+`.task-pipeline/build/<plan>/progress.md` covers **one stage**: stage 5's tasks, and
 whether a task was already dispatched (`references/build.md`). This file
 covers **the run**: stage verdicts, iterations, and every repeating pass anywhere in
 the pipeline, including the loops between stages that the build ledger cannot see.
 
 Keeping them separate is deliberate. A run that has no stage-5 work still loops, still
-re-enters stages and still needs a rail — and it would have no ledger at all if the
+re-enters stages and still needs a rail: and it would have no ledger at all if the
 run's memory lived inside the build directory that stage 5 deletes.
 
 ## What closes it, and what survives it
 
-**This file is git-ignored** — `.task-pipeline/` is, and this lives inside it. It is
+**This file is git-ignored**: `.task-pipeline/` is, and this lives inside it. It is
 the run's working memory, not its record: it exists to survive a **compaction**, which
 is a different problem from surviving the run.
 
-So stage 10 **reads it and copies out what outlives the run** — the pass counts and
+So stage 10 **reads it and copies out what outlives the run**: the pass counts and
 any loop-guard ruling go into the acceptance file and the retro stamp, which are
 committed. What is not carried out is gone when the directory is cleared, and that is
 the correct outcome for a `touch:` line whose finding has been closed.

@@ -178,7 +178,7 @@ def audit(graph, packets, orphans=(), model_map=None):
     findings = []
     nodes = [n for n in (graph.get("nodes") or []) if isinstance(n, dict)]
     if not nodes:
-        findings.append(("plan", "-", "the graph declares no nodes — a plan with no "
+        findings.append(("plan", "-", "the graph declares no nodes: a plan with no "
                                       "tasks is not a plan this gate can hand to anyone"))
         return findings
     live = [n for n in nodes if str(n.get("status", "")).lower() not in SETTLED]
@@ -192,7 +192,7 @@ def audit(graph, packets, orphans=(), model_map=None):
         if pkt is None:
             findings.append((
                 "context", nid,
-                "no execution packet — the next agent would start from the title. "
+                "no execution packet: the next agent would start from the title. "
                 "Compile one with `context_packets.py compile-leaf`; the eight "
                 "questions it must answer are " + ", ".join(COLD_READER_QUESTIONS)))
             continue
@@ -203,7 +203,7 @@ def audit(graph, packets, orphans=(), model_map=None):
         findings.append((
             "contradiction", f"{a}+{b}",
             f"both name {path} as an edit target and the graph orders neither before "
-            "the other — whichever runs second overwrites the first, and no gate "
+            "the other: whichever runs second overwrites the first, and no gate "
             "before this one looked outside a declared parallel group"))
 
     if model_map is not None:
@@ -215,12 +215,12 @@ def audit(graph, packets, orphans=(), model_map=None):
                     findings.append((
                         "model", "-",
                         f"the model map names stage {stage!r}, which this pipeline does "
-                        f"not have (stages are {STAGES[0]}–{STAGES[-1]}) — a profile that "
+                        f"not have (stages are {STAGES[0]}–{STAGES[-1]}): a profile that "
                         "names a stage nobody runs is an override that never fires"))
                 elif not str(model_map[stage] or "").strip():
                     findings.append((
                         "model", "-",
-                        f"stage {stage} maps to {model_map[stage]!r} — an entry with no "
+                        f"stage {stage} maps to {model_map[stage]!r}: an entry with no "
                         "model is silence wearing a record's clothes"))
     return findings
 
@@ -229,7 +229,7 @@ def report(graph, packets, findings, stream=sys.stdout):
     nodes = [n for n in (graph.get("nodes") or []) if isinstance(n, dict)]
     live = [n for n in nodes if str(n.get("status", "")).lower() not in SETTLED]
     rank = unblocks(live)
-    print("plan audit — %d node(s), %d live" % (len(nodes), len(live)), file=stream)
+    print("plan audit: %d node(s), %d live" % (len(nodes), len(live)), file=stream)
     print("\n  priority (computed: how many nodes each unblocks, transitively)",
           file=stream)
     for n in sorted(live, key=lambda x: (-rank.get(x.get("id"), 0), x.get("id") or "")):
@@ -246,7 +246,7 @@ def report(graph, packets, findings, stream=sys.stdout):
     for kind, nid, msg in findings:
         print("  %-13s %-10s %s" % (kind.upper(), nid, msg), file=stream)
     kinds = sorted({k for k, _, _ in findings})
-    print("\nFAIL: %d finding(s) across %s — stage 5 does not open. The plan is fixed "
+    print("\nFAIL: %d finding(s) across %s; stage 5 does not open. The plan is fixed "
           "here, not worked around there." % (len(findings), ", ".join(kinds)),
           file=stream)
 
@@ -371,7 +371,7 @@ def main(argv=None):
         return _self_test()
 
     if not os.path.isfile(args.graph):
-        print("no work graph at %s — stage 2 writes it and stage 4 audits it. Nothing "
+        print("no work graph at %s: stage 2 writes it and stage 4 audits it. Nothing "
               "was read." % args.graph, file=sys.stderr)
         return 2
     graph = load_json(args.graph)

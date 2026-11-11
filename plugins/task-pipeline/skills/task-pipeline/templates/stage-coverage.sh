@@ -32,8 +32,8 @@ while [ $# -gt 0 ]; do
   esac
 done
 
-[ -f "$CONFIG" ] || { echo "STAGE COVERAGE CANNOT RUN: no $CONFIG — the flow does not say what it declares" >&2; exit 2; }
-[ -f "$LEDGER" ] || { echo "STAGE COVERAGE CANNOT RUN: no $LEDGER — there is no run to account for" >&2; exit 2; }
+[ -f "$CONFIG" ] || { echo "STAGE COVERAGE CANNOT RUN: no $CONFIG; the flow does not say what it declares" >&2; exit 2; }
+[ -f "$LEDGER" ] || { echo "STAGE COVERAGE CANNOT RUN: no $LEDGER; there is no run to account for" >&2; exit 2; }
 
 python3 - "$CONFIG" "$LEDGER" <<'PY'
 import json, re, sys
@@ -57,9 +57,9 @@ missing = [i for i in declared if i not in seen]
 unpassed = [(i, v) for i, v in sorted(seen.items()) if v not in ("pass", "skip")]
 
 for i in missing:
-    print(f"  stage {i} ({names.get(i,'')}) — DECLARED BY {cfg_p}, NO VERDICT IN THE LEDGER")
+    print(f"  stage {i} ({names.get(i,'')}): DECLARED BY {cfg_p}, NO VERDICT IN THE LEDGER")
 for i, v in unpassed:
-    print(f"  stage {i} ({names.get(i,'')}) — last verdict is '{v}'")
+    print(f"  stage {i} ({names.get(i,'')}): last verdict is '{v}'")
 
 covered = len(declared) - len(missing)
 print(f"\nstages declared {len(declared)} · accounted for {covered} · "
@@ -67,8 +67,8 @@ print(f"\nstages declared {len(declared)} · accounted for {covered} · "
 
 if missing:
     print("\nA run that reaches acceptance with a stage unaccounted for is a run whose own\n"
-          "record disagrees with its flow. Either stamp what actually happened — a merged\n"
-          "stage still has an outcome — or stop declaring a stage this project folds into\n"
+          "record disagrees with its flow. Either stamp what actually happened: a merged\n"
+          "stage still has an outcome: or stop declaring a stage this project folds into\n"
           "another, in pipeline.json, where the flow describes itself.")
     raise SystemExit(1)
 if unpassed:
