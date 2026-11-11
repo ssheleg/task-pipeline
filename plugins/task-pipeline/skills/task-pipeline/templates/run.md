@@ -98,7 +98,8 @@ read:  references/<file>.md            # hook-appended, deduped, UNATTESTED (no 
   is what `/task-pipeline checkup` looks for and what was previously invisible: the
   ledger simply stopped, and a stopped ledger looks exactly like a run still in
   progress. `subagent` records one finishing, so the `hand:` count below has
-  something to be checked against other than itself.
+  something to be checked against other than itself (`unknown` when the payload
+  names no agent type). After acceptance the hook writes none of the three.
 
   **It never writes a `hand:` line.** That shape carries `done`, `surfaced`,
   `decisions` and `amb`: judgements only the agent holds, and a hook filling them

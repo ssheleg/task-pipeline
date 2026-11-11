@@ -61,26 +61,32 @@ def clean(text, limit=90):
     return s[:limit]
 
 
+if event not in ("PreCompact", "SessionEnd", "SubagentStop"):
+    raise SystemExit(0)
+
+# A run that reached acceptance is finished. None of the three events belongs to it
+# any more: an end would file it as abandoned in `checkup`, and a compaction or a
+# subagent of the same session (a review after stage 10, an unrelated task) would
+# append to a ledger already committed as final. That last case reached a project's
+# history on 2026-11-11 (board finding a6a2f281): `event: subagent ... unknown`
+# written after stage 10, which its own pre-commit check then refused.
+try:
+    text = open(ledger, encoding="utf-8").read()
+except Exception:
+    raise SystemExit(0)
+stages = [l.strip() for l in text.splitlines() if l.strip().startswith("stage:")]
+if any(re.search(r"verdict\s+pass", l) and re.search(r"accept", l, re.I) for l in stages):
+    raise SystemExit(0)
+
 if event == "PreCompact":
     kind, detail = "compact", clean(data.get("trigger") or "unknown")
 elif event == "SessionEnd":
-    # A run that reached acceptance is finished, not abandoned. Recording an end
-    # for it would fill `checkup` with runs that closed exactly as intended.
-    try:
-        text = open(ledger, encoding="utf-8").read()
-    except Exception:
-        raise SystemExit(0)
-    stages = [l.strip() for l in text.splitlines() if l.strip().startswith("stage:")]
-    closed = any(re.search(r"verdict\s+pass", l) and re.search(r"accept", l, re.I) for l in stages)
-    if closed:
-        raise SystemExit(0)
     kind = "session-end"
     detail = "%s - run not closed, no acceptance recorded" % clean(data.get("reason") or "other", 40)
-elif event == "SubagentStop":
+else:
+    # `unknown`: the SubagentStop payload carried no `agent_type`.
     kind = "subagent"
     detail = clean(data.get("agent_type") or "unknown", 40)
-else:
-    raise SystemExit(0)
 
 stamp = datetime.datetime.now(datetime.timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
 with open(ledger, "a", encoding="utf-8") as fh:

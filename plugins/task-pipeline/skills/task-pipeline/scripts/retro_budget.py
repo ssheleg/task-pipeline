@@ -521,8 +521,10 @@ def cmd_migrate(a):
             moved.append((sp[0], sp[1], ["- %s%s" % (t, ptr)], b,
                           "stamp %s (list)" % (stamp_date(lines, sp) or "undated")))
             continue
-        head = cells(lines[header_of(lines, i)])
-        if len(head) < 2:
+        # `hdr`, never `head`: `head` is the Run stamps heading's line number, used below
+        # to place the prose pointer; rebinding it crashed migrate (board 6580c2ff).
+        hdr = cells(lines[header_of(lines, i)])
+        if len(hdr) < 2:
             print("migrate: stamp %s sits in a one-column table; shorten it by hand"
                   % (stamp_date(lines, sp) or "undated"))
             continue
@@ -530,7 +532,7 @@ def cmd_migrate(a):
         h, b = block("stamp", label, lines[i])
         # B-258: the row keeps its table's own header and column count; identifier cells
         # stay whole, the long prose cells are capped evenly, the pointer ends the last cell.
-        new = fit_stamp(cells(lines[i]), head, "moved: %s sha256:%s" % (rel, h[:12]), a.stamp)
+        new = fit_stamp(cells(lines[i]), hdr, "moved: %s sha256:%s" % (rel, h[:12]), a.stamp)
         moved.append((i, i + 1, [new], b, "stamp %s" % label))
     if m["bytes"] > a.budget:
         # Prune paragraphs between the stamps were a measured share of the floor

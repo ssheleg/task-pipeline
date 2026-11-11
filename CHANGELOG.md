@@ -1,3 +1,34 @@
+## v1.104.2: `retro_budget.py migrate` no longer crashes on a stamps table, and a closed run takes no more ledger lines
+
+Guards: 539 → **539**. Two defects reported on the project board on 2026-11-11, each with a regression case
+that fails on v1.104.1.
+
+- **`migrate` crashed on a floor with a table in Run stamps** (board finding 6580c2ff,
+  a 549 KB retro with 140 stamps). The loop over table stamps rebound `head`, the Run
+  stamps heading's line number, to the table header's cells; when the floor was also
+  over budget, placing the pointer for the moved prose paragraphs added 1 to that list:
+  `TypeError: can only concatenate list (not "int") to list`. The header now lives in
+  its own variable. The case needs both at once (a table stamp over the row limit and
+  loose prose moved), which is why no earlier fixture reached it:
+  `test/audit_regressions/diet_retro_budget.py`, case `6580c2ff`.
+- **A closed run's ledger took lines after acceptance** (board finding a6a2f281). The
+  acceptance check in `hooks/run-lifecycle.sh` covered only `SessionEnd`; a subagent or
+  a compaction later in the same session still appended `event: subagent ... unknown`
+  to a ledger the project had already committed as final, and that project's
+  pre-commit check refused the em dash in it. All three events now stop at a recorded
+  acceptance (`test/release_gate_test.py`, "a run closed at acceptance takes no
+  subagent or compaction line"). `unknown` means the SubagentStop payload named no
+  agent type. The em dash separators of the ledger grammar itself are unchanged: v1.104.1
+  kept them because the parsers read them, and moving the grammar is filed as its own
+  row rather than changed in a patch.
+- **The agents-disclosure check ran the installers against the host's real config.** It
+  gave both installers a scratch `HOME` but kept `CLAUDE_CONFIG_DIR`, so in a session an
+  account manager points at its own config folder the installers found the real plugin,
+  refused, and `npm test` failed on clean `main`. The scratch environment now drops it.
+- **`test/lessons_test.py` ran only on Python 3.12+.** Its cleanup helper passed
+  `shutil.rmtree(onexc=...)`, so on the macOS system `python3` (3.9) `npm test` stopped
+  with a TypeError before the later suites ran. It now falls back to `onerror` below 3.12.
+
 ## v1.104.1: the run stops only at a human gate, and text for people carries no em dash
 
 Guards: 537 → **539**; property checks 15 → **15**. Negatives 557 and 558 are new: one

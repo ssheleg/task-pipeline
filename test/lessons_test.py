@@ -61,7 +61,10 @@ def _rm(path):
             raise exc
     for attempt in range(3):
         try:
-            shutil.rmtree(path, onexc=gone)
+            if sys.version_info >= (3, 12):
+                shutil.rmtree(path, onexc=gone)
+            else:      # `onexc` is 3.12+; `onerror` passes (type, value, tb) instead
+                shutil.rmtree(path, onerror=lambda fn, p, info: gone(fn, p, info[1]))
             return
         except OSError:
             if attempt == 2:

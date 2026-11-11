@@ -413,6 +413,10 @@ The fourth kind, `memory`, is appended by `scripts/stage_checkpoint.py` rather t
 by the hook. It records a workflow checkpoint written at a stage boundary, a refusal,
 or that memory was unavailable ([`continuity.md`](continuity.md) → *Part 3*).
 
+Once a `stage:` line records acceptance with `verdict pass`, the hook writes none
+of its three kinds: the run is closed, and a subagent or a compaction later in the
+same session belongs to other work, not to a ledger already committed as final.
+
 The rail reads none of them; `checkup` reads `session-end`, which is how an
 abandoned run stops being invisible. Before this the ledger simply stopped at
 whatever stage the session died on — and a stopped ledger is indistinguishable
