@@ -7,10 +7,10 @@ The full gate and freedom level remain in [stages.md](stages.md).
 - 0 — Intake grill — MANDATORY
 
 ## 0 — Intake grill — MANDATORY
-- **Stage 0 always runs, and its depth is proportional.** The gap check, the
-  harvest and the brief are never skipped; the interview, the committed brief file
-  and stages 1-4 are what a small change does without (Phase 1d below, the
-  *proportional run*). A run that starts building without a brief and its REQ rows
+- **Stage 0 always runs, and its depth is proportional.** The gap check, a harvest
+  scoped to the change and the brief are never skipped; the preflight block, the full
+  harvest, the interview, the committed brief file and stages 1-4 are what a small
+  change does without (Phase 1d below, the *proportional run*, which runs first). A run that starts building without a brief and its REQ rows
   (in the brief file, or on the short path in the run ledger) is a **failed run**:
   stop and go back. The entry-from-super-ux short-circuit below is the other
   sanctioned shortening.
@@ -21,19 +21,68 @@ The full gate and freedom level remain in [stages.md](stages.md).
   if `docs/ux/` already holds a validated chain (foundation → flows → screens →
   scenarios) and/or a fresh fix plan, **do not re-run the grill or the stage-3
   UX track from scratch.** Instead: (1) run a quick check — `/ux-lint`
-  (`docs/ux/lint.py`) green, chain present, plan (if any) readable; (2) confirm
-  the scope with the operator in ONE line; (3) skip to the first stage that
-  still has real work (usually stage 4 Plan if a UX fix plan already exists, or
+  (`docs/ux/lint.py`) green, chain present, plan (if any) readable; (2) state
+  the adopted scope in ONE line, a statement rather than a question; (3) skip to
+  the first stage that still has real work (usually stage 4 Plan if a UX fix plan already exists, or
   stage 3 Spec to formalize it). Record what was adopted vs skipped. If the
   check finds drift/gaps, fall back to the normal flow for the missing parts
   only.
-- **What (normal entry):** the operator's one-line task is almost never enough to
-  run autonomously. Before anything else, **grill the operator** to expand that
-  one line into a complete, unambiguous brief — resolve every decision branch
-  up front so stages 1→10 need no further human input beyond the manual gates.
-  This is input expansion, not design: turn "make me feature X" into locked
-  answers for scope, users, constraints, data, edge cases, done-criteria.
-- **Phase 1 — harvest the knowledge sources FIRST**
+- **Phase 1d — the short-path triage, and the proportional run: a small change
+  takes the short path by default. It runs FIRST**, before the preflight block and the
+  full harvest, on the request, the files it names and the project's instruction file;
+  a prompt carrying several asks splits first (Phase 1a) and triages the item it keeps.
+  Reading the companion matrix and the full harvest before deciding that a
+  three-file change was small is the cost this order removes. This pipeline's boundary exempts a typo
+  and a one-line edit; until 1.98.0 the next size up still met eleven stages and five manual gates, because the short
+  path was only *proposed* and silence took the full flow. Under a standing "decide and
+  act" instruction silence is the normal answer, so a proposal was the full flow every
+  time. The triage now **decides**, from five answers with something behind each:
+
+  ```
+  1. files the change touches, resolved      git ls-files -- <paths>       -> N
+  2. any of them a public contract            the surfaces the host's release
+                                              syncs, its schema or config
+                                              contracts, a shipped command,
+                                              its README                    -> yes/no
+  3. behaviour a user or an agent observes    a UI, a message, an output,
+     changes                                  a tool, an error body          -> yes/no
+  4. a deploy target in the brief             stage 7's target exists       -> yes/no
+  5. risk class                               work-graph.md R1-R3           -> R1/R2/R3
+  ```
+
+  **Small** means all of: the gap check left zero material unknowns, N ≤ 5, no public
+  contract, no user-observable change, no deploy, and risk **R1**. Small ⇒ the run takes
+  the short path and prints one line:
+  `short path: R1 · N files · no contract · no user-facing change · no deploy`.
+  `scripts/short_path.py` computes the decision from the five answers (exit 0 short,
+  3 full) and prints that line. Answer 3 is two flags, `--user-facing` and
+  `--agent-facing` (default `no`): a change only an agent observes (a tool, a schema,
+  an error body) leaves the short path like a change a person sees.
+  The short path is: the brief and its REQ rows written into the run ledger (no grill,
+  no committed brief file, no preflight block, no full harvest: the source ledger names
+  the scoped sources read, the instruction file, the touched files and the retro
+  floor) → stage 5, build with tests → stage 6, the suite plus **one**
+  verification (one blind tier, [`certification.md`](certification.md)) → stage 9, the
+  docs the change makes false and the handoff → stage 10, the hand-back and a run stamp;
+  a retro entry only when the run taught a new lesson. Stages 1-4, 7 and 8 print `⊘`
+  with the triage line as their reason ([`progress.md`](progress.md)).
+  **Triggers that bring a skipped stage back:** a deploy target appears (7, 8); a wiki or
+  code graph exists and the change touched what it indexes (9 in full); a check reveals a
+  contract or a user-facing effect (leave the short path, resume at stage 2); the
+  operator asks for the full cycle. Any answer outside *small* takes the full flow,
+  printed the same way with the failing answer as its reason.
+- **What (normal entry): the gap check.** Build the brief from the sources first:
+  the request, the files and the harvest answer scope, users, constraints, data,
+  edge cases and done-criteria, resolving every decision branch up front so stages
+  1→10 need no further human input beyond the manual gates. Ask the operator only a
+  **material unknown** the sources cannot answer; a complete brief asks nothing.
+  Where the host's instructions delegate decisions to the agent, a material unknown
+  is decided instead, by the recorded decisions, then the project's goal, then the
+  safest reversible option, and the decision and its reason go into the brief; only
+  a human gate (a sign-in, a consent, a payment, a typed secret, spend above a limit,
+  a decision recorded as the operator's) still goes to the operator. This is input
+  expansion, not design.
+- **Phase 1 — harvest the knowledge sources before any question** (full flow)
   ([`knowledge-sources.md`](knowledge-sources.md)). Before the first question:
   query what the project already knows about this task — code, **the code graph**
   when one is built ([`knowledge-graph.md`](knowledge-graph.md): `graphify query` /
@@ -82,8 +131,8 @@ The full gate and freedom level remain in [stages.md](stages.md).
 - **Phase 1b+ — offer the entry audit, once** ([`setup.md`](setup.md)). When
   `docs/DOCMAP.md` is absent or its regime line predates the project's last release,
   ask whether to audit the documentation that already exists **before** building on
-  it. Record the answer — including a refusal — in the brief's autonomy sweep and
-  never ask again. `audit.md`'s ladder runs at the *end* over the change; this runs
+  it (under a host delegation, decide it by the project's goal instead). Record the
+  answer, a refusal included, in the brief's autonomy sweep and never ask again. `audit.md`'s ladder runs at the *end* over the change; this runs
   at the *start* over what is already there.
 - **Phase 1c — reconcile intent against as-built.** Git says how it *should* be;
   the run record says how it *turned out*. Read both for the area you are about to
@@ -91,44 +140,6 @@ The full gate and freedom level remain in [stages.md](stages.md).
   or they genuinely disagree and that is a decision. There is no fourth option, and
   starting on an unresolved divergence means building against a system that does
   not exist.
-- **Phase 1d — the short-path triage, and the proportional run: a small change
-  takes the short path by default** (after a split, it runs on the item this run keeps). This pipeline's boundary exempts a typo and a one-line edit; until 1.98.0
-  the next size up still met eleven stages and five manual gates, because the short
-  path was only *proposed* and silence took the full flow. Under a standing "decide and
-  act" instruction silence is the normal answer, so a proposal was the full flow every
-  time. The triage now **decides**, from five answers with something behind each:
-
-  ```
-  1. files the change touches, resolved      git ls-files -- <paths>       -> N
-  2. any of them a public contract            the surfaces the host's release
-                                              syncs, its schema or config
-                                              contracts, a shipped command,
-                                              its README                    -> yes/no
-  3. behaviour a user or an agent observes    a UI, a message, an output,
-     changes                                  a tool, an error body          -> yes/no
-  4. a deploy target in the brief             stage 7's target exists       -> yes/no
-  5. risk class                               work-graph.md R1-R3           -> R1/R2/R3
-  ```
-
-  **Small** means all of: the gap check left zero material unknowns, N ≤ 5, no public
-  contract, no user-observable change, no deploy, and risk **R1**. Small ⇒ the run takes
-  the short path and prints one line:
-  `short path: R1 · N files · no contract · no user-facing change · no deploy`.
-  `scripts/short_path.py` computes the decision from the five answers (exit 0 short,
-  3 full) and prints that line. Answer 3 is two flags, `--user-facing` and
-  `--agent-facing` (default `no`): a change only an agent observes (a tool, a schema,
-  an error body) leaves the short path like a change a person sees.
-  The short path is: the brief and its REQ rows written into the run ledger (no grill,
-  no committed brief file) → stage 5, build with tests → stage 6, the suite plus **one**
-  verification (one blind tier, [`certification.md`](certification.md)) → stage 9, the
-  docs the change makes false and the handoff → stage 10, the hand-back and a run stamp;
-  a retro entry only when the run taught a new lesson. Stages 1-4, 7 and 8 print `⊘`
-  with the triage line as their reason ([`progress.md`](progress.md)).
-  **Triggers that bring a skipped stage back:** a deploy target appears (7, 8); a wiki or
-  code graph exists and the change touched what it indexes (9 in full); a check reveals a
-  contract or a user-facing effect (leave the short path, resume at stage 2); the
-  operator asks for the full cycle. Any answer outside *small* takes the full flow,
-  printed the same way with the failing answer as its reason.
 - **How it runs: [`grill.md`](grill.md)**, read only when the gap check leaves a
   material unknown (a complete brief asks nothing). In short: close what the sources can, then ONE batch
   of the material unknowns, ordered by dependency, a recommended answer with each —
@@ -159,7 +170,8 @@ The full gate and freedom level remain in [stages.md](stages.md).
   answer loads [`agent-surface.md`](agent-surface.md), which says what each later
   stage then owes; stage 7's snapshot diff re-decides the forecast. Where a human
   surface (web, mobile, CLI, TUI) is touched, surface **super-ux** now (use it if
-  installed; otherwise give the install line, see SKILL.md *Prerequisites*); this
+  installed; otherwise install it or record it absent,
+  [`companion-skills.md`](companion-skills.md) → *Preflight*); this
   arms the stage-3 UX track, and the branch records each human surface's class: the
   next bullet.
 - **The surface class.** Every human surface the task touches carries

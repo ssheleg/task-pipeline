@@ -15,8 +15,9 @@ Start with the mechanical half, then spend your reading where it could not look:
 python3 "${CLAUDE_PLUGIN_ROOT}/skills/project-audit/scripts/audit.py" --root .
 ```
 
-It writes `docs/audit/<date>-audit.html` and `docs/audit/<date>-audit.json` and
-opens the page. Read the sidecar's `probes` array before saying anything is
+It writes the sidecar `docs/audit/<date>-audit.json` (or where the host's reports
+convention puts reports, with `--out` and `--prior`), and the page only with
+`--report`. Read the sidecar's `probes` array before saying anything is
 clean — every `blind` entry is a question this run did not answer, and its
 reason is why.
 

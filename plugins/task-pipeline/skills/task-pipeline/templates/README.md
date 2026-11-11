@@ -1,41 +1,41 @@
 # templates
 
-Skeletons task-pipeline seeds into a host project. Two are **seeded files** — the
+Skeletons task-pipeline seeds into a host project. Two are **seeded files**: the
 **brief** (the stage-0 intake artifact) and the **retro** (created at the first
 stage-10 close-out, then appended to for the life of the project). The spec and plan
-have no skeleton here — their required structure is prescribed inline by
+have no skeleton here: their required structure is prescribed inline by
 `references/spec.md` and `references/planning.md`; the `docs/ux/*` skeletons come
 from `super-ux`.
 
 | Template | Seeded to | Stage |
 |---|---|---|
-| `brief.md` | `docs/evidence/specs/YYYY-MM-DD-<topic>-brief.md` | 0 — intake grill |
+| `brief.md` | `docs/evidence/specs/YYYY-MM-DD-<topic>-brief.md` | 0: intake grill |
 | `carryover.md` | `docs/evidence/specs/YYYY-MM-DD-<topic>-carryover.md` | 0 seeds, all stages append, 10 reads |
 | `verification.md` | `docs/evidence/verification.md` | 8 writes a row per shipped REQ, 10 requires it, a human fills `Human` |
 | `backlog.md` | `docs/evidence/backlog.md` | 0 seeds it only when `backlog_sources.py --discover` finds no board, any stage appends, 10 resolves and re-derives |
-| `run.md` | `.task-pipeline/run.md` — **git-ignored**, one per run | 0 seeds it, every gate appends a verdict, every repeating pass a `touch:` line |
-| `context.md` | `CONTEXT.md` at the repo root (or per context) | 0 — grill, domain awareness |
-| `adr.md` | `docs/adr/NNNN-<slug>.md` | 0 — grill, hard-to-reverse decisions |
-| `docmap.md` | `docs/DOCMAP.md` — **one per project** | 0 — the documentation inventory |
-| `decisions.md` | `docs/DECISIONS.md` — the decision register | 0 seeds it, the Doc Loop appends |
+| `run.md` | `.task-pipeline/run.md`; **git-ignored**, one per run | 0 seeds it, every gate appends a verdict, every repeating pass a `touch:` line |
+| `context.md` | `CONTEXT.md` at the repo root (or per context) | 0: grill, domain awareness |
+| `adr.md` | `docs/adr/NNNN-<slug>.md` | 0; grill, hard-to-reverse decisions |
+| `docmap.md` | `docs/DOCMAP.md`: **one per project** | 0: the documentation inventory |
+| `decisions.md` | `docs/DECISIONS.md`; the decision register | 0 seeds it, the Doc Loop appends |
 | `open-questions.md` | `docs/OPEN_QUESTIONS.md` | 0 seeds it, the Doc Loop resolves rows |
 | `docgate.sh` | `scripts/check-docs.sh` | 0 seeds it · 9 runs it · 10 proves it |
 | `exposure.sh` | `scripts/exposure.sh` | 0 reads it · 10 recomputes it · `checkup` prints it |
-| `convergence.sh` | `scripts/check-convergence.sh` | 0 seeds it · **10 runs it before the release closes** — only where the project pins components |
+| `convergence.sh` | `scripts/check-convergence.sh` | 0 seeds it · **10 runs it before the release closes**: only where the project pins components |
 | `hygiene.sh` | `scripts/check-hygiene.sh` | 0 seeds it · **5 runs it after every task** · 6 and 9 run it · 10 proves it |
-| `stage-coverage.sh` | `scripts/stage-coverage.sh` | 0 seeds it · **10 runs it before the coverage table** — every stage the flow declares must carry a verdict, or the flow stops declaring one it merges |
-| `hooks.example.json` | the project's `.claude/settings.json` | 0 — offered, never installed silently |
-| `browser-claims.json` | stage 6, beside the look — one row per browser claim | REQ/scenario id + state + kind (look/suite/library); validated by `test/browser_claims_test.py`, stdlib only |
+| `stage-coverage.sh` | `scripts/stage-coverage.sh` | 0 seeds it · **10 runs it before the coverage table**; every stage the flow declares must carry a verdict, or the flow stops declaring one it merges |
+| `hooks.example.json` | the project's `.claude/settings.json` | 0: offered, never installed silently |
+| `browser-claims.json` | stage 6, beside the look; one row per browser claim | REQ/scenario id + state + kind (look/suite/library); validated by `test/browser_claims_test.py`, stdlib only |
 | `finding-evidence.json` | one record per audit finding, wherever the finding lives | the five-axes evidence schema: mechanism / reproduction / exposure / incidence / impact uncertainty, observations apart from assumptions |
 | `release-impact.md` | `docs/evidence/specs/YYYY-MM-DD-<topic>-release-impact.md`, one per release | 7 writes it before any outward act when the project has users, checked by `scripts/release_impact.py check`; 8 adds its `## Outcome` (`--outcome`) |
-| `routing-rule.md` | the operator's `CLAUDE.md` — **offered by `setup`, never written silently** | 0 / `setup` |
-| `retro.md` | `docs/evidence/retro.md` — **one per project, not per run** | 10 writes (stamp → prune → entry), 0 reads it in full |
+| `routing-rule.md` | the operator's `CLAUDE.md`: **offered by `setup`, never written silently** | 0 / `setup` |
+| `retro.md` | `docs/evidence/retro.md`; **one per project, not per run** | 10 writes (stamp → prune → entry), 0 reads it in full |
 | `retro-archive.md` | `docs/evidence/retro/YYYY-QN.md` | 10 rotates into it, 0 **queries** it |
-| `inventory.schema.json` | nothing is seeded: the shape of wave 0's `docs/evidence/specs/YYYY-MM-DD-<topic>-inventory.json` (inventory/1), and of the module table and plan `scripts/waves.py` reads | 0 (wave mode) — `waves.py merge` writes it, `assign` places it, `validate` refuses an item that lands nowhere |
-| `canvas.md` | `docs/evidence/specs/YYYY-MM-DD-<topic>-canvas.md` | 2–4 (wave mode, iteration step 3) — the target state over today's logic |
-| `questions.md` | `docs/evidence/specs/<topic>-questions.md` | 0–4, then every question round — the one queue: closed from sources, operator, peers, assumed |
-| `dossier.md` | `docs/evidence/specs/<topic>-dossiers/<letter>-<module>.md` | iteration step 2 — one per cluster, written in parallel; a risk class per node |
-| `backlog-sources.schema.json` | nothing is seeded: the shape of a project's `docs/backlog-sources.json` (backlog-sources/1) | 0 — the harvest reads exactly the sources it declares |
+| `inventory.schema.json` | nothing is seeded: the shape of wave 0's `docs/evidence/specs/YYYY-MM-DD-<topic>-inventory.json` (inventory/1), and of the module table and plan `scripts/waves.py` reads | 0 (wave mode); `waves.py merge` writes it, `assign` places it, `validate` refuses an item that lands nowhere |
+| `canvas.md` | `docs/evidence/specs/YYYY-MM-DD-<topic>-canvas.md` | 2–4 (wave mode, iteration step 3): the target state over today's logic |
+| `questions.md` | `docs/evidence/specs/<topic>-questions.md` | 0–4, then every question round; the one queue: closed from sources, operator, peers, assumed |
+| `dossier.md` | `docs/evidence/specs/<topic>-dossiers/<letter>-<module>.md` | iteration step 2; one per cluster, written in parallel; a risk class per node |
+| `backlog-sources.schema.json` | nothing is seeded: the shape of a project's `docs/backlog-sources.json` (backlog-sources/1) | 0; the harvest reads exactly the sources it declares |
 | `lesson.schema.json` | nothing is seeded: the shape of one *lesson* (lesson/1), a retro entry's class carried by its `**Lesson:**` line into the local index (`scripts/lessons.py`; `~/.sshlg-skills/lessons/index.jsonl` where the family's directory exists, else `~/.task-pipeline/lessons/index.jsonl`) and, where the host lists one, the shared store | 10 writes (`lessons.py add`), 0 **queries** it (`lessons.py query`) |
 
 The documentation-track templates (`docmap.md`, `decisions.md`,
@@ -46,11 +46,11 @@ day one that the gate is noise, so this repo's own validator runs the seeded gat
 over a scratch project on every `npm test` and fails if it is not green.
 
 `context.md` and `adr.md` are **format references**, not files to copy wholesale:
-the grill writes `CONTEXT.md` entries and ADRs in their shape, lazily — only once
+the grill writes `CONTEXT.md` entries and ADRs in their shape, lazily; only once
 there is a resolved term or a decision worth recording.
 
 Seeding rule (per the ssheleg canon): create a template copy **only when the
 target is absent**; never overwrite an existing brief. The rule is hardest and most
 important for `retro.md`: it is the only artifact that accumulates across runs, so
-overwriting it with the skeleton destroys every lesson the project has bought —
+overwriting it with the skeleton destroys every lesson the project has bought;
 seed it once, then read, prune and append.

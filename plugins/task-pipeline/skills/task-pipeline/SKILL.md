@@ -1,6 +1,6 @@
 ---
 name: task-pipeline
-description: "Use when work changes the repository: feature, fix, refactor, migration, integration, audit, PR review; фича, баг, интеграция, аудит. Runs a substantial task through gated stages to acceptance; 'waves'/'волнами' closes the board. Not for questions or one-line edits; 'без пайплайна' opts out."
+description: "Use when work changes the repository: feature, fix, refactor, migration, integration, audit fixes; фича, баг, интеграция, фикс по аудиту. Runs a substantial task via gated stages to acceptance; 'waves'/'волнами' closes the board. Not for questions or one-line edits; 'без пайплайна' opts out."
 license: MIT
 compatibility: "Doctrine runs on any agent. The bundled scripts need python3; the run needs git. Missing either degrades, never blocks — the graph verbs and seeded gates go unused, and the run says so."
 ---
@@ -9,7 +9,7 @@ compatibility: "Doctrine runs on any agent. The bundled scripts need python3; th
 
 Self-contained orchestrator. Runs a task through **gated stages**, each carrying its
 own built-in doctrine; no companion plugin is required. No stage advances until its
-gate passes, and the whole run uses one model, confirmed before it starts.
+gate passes, and the whole run uses one model, recorded before it starts.
 
 **Proportional, then autonomous.** Stage 0 is a **gap check** before it is an
 interview: the brief is built from the request, the files and the harvest, and a
@@ -88,20 +88,21 @@ archive, verbatim and hash-proved.
 
 ## How to run
 
-1. Restate the task in one line, track each stage from 0 (host task tool or a prose
-   checklist, for resume), then emit the **preflight block** once: the model decision
-   (`references/model-tiering.md`: recommend the most capable model as advice, the
-   operator confirms or overrides, the choice — inherited verbatim by plan, stages and
-   subagents), the run mode (`pipeline.json` → `run.loop`,
-   `references/continuity.md`; absent means off, and the mode never collapses a
-   `manual` gate) and the optional companions: super-ux for UI tasks, context7,
-   wiki-update, graphify (`references/companion-skills.md`).
+1. Restate the task in one line; track each stage from 0 (a task tool or a prose
+   checklist). **Triage first**: `scripts/short_path.py` decides from the request,
+   its files and the instruction file (`references/stage-00-intake.md` → Phase 1d).
+   Short path: its line, no companion block, no full harvest. Full flow: the
+   **preflight notice**, never a stop: the model kept, the choice inherited verbatim
+   by plan, stages and subagents (`references/model-tiering.md`), the run mode
+   (`run.loop`, `references/continuity.md`; absent is off), the companions, a
+   missing one installed where the host delegates it, else recorded absent
+   (`references/companion-skills.md`).
 2. **Run stage 0.** Harvest, find the board, split a prompt of several asks (the top
-   kept, the rest filed), the gap check, the proportional decision
-   (`references/stage-00-intake.md`). **Entered from super-ux** (a validated
-   `docs/ux/` chain or a `docs/ux/plans/…` fix plan exists)? Check `/ux-lint` green,
-   confirm scope in one line and skip to the first stage with real work.
-3. Walk the stages on the model confirmed at preflight; don't re-ask it per stage.
+   kept, the rest filed), the gap check (`references/stage-00-intake.md`). **Entered
+   from super-ux** (a validated `docs/ux/` chain or a `docs/ux/plans/…` fix plan
+   exists)? Check `/ux-lint` green, state the scope in one line and skip to the first
+   stage with real work.
+3. Walk the stages on the model recorded at preflight; never ask about it per stage.
    **The SELECTED profile is compiled once, at preflight, and only ITS declared
    stages and gates run**: a custom profile with three stages runs three, and no
    hidden stage 0, 7 or 10 is injected. What a custom profile does NOT escape is the
@@ -113,8 +114,8 @@ archive, verbatim and hash-proved.
    `/task-pipeline waves` (`references/waves.md`). **Releases:**
    `references/iteration.md`; findings are triaged when found, and the iteration stops
    at its finish line: exit checks green on the artefact and one round with no new
-   blocking finding (two for an R3 or flagship node), or the budget spent
-   (`references/finish-line.md`).
+   blocking finding (two for an R3 or flagship node), or the budget spent; a host's
+   stated finish line wins (`references/finish-line.md`).
 4. Do **not** advance until the stage **gate** passes (`references/stages.md`). For
    `auto`, verify the `check` yourself; for `judgment`, record the ruling as judgement;
    for `manual`, cite the operator's go or the standing authorization naming this act.
@@ -147,7 +148,7 @@ one section at a time; never preload all details). The rest loads on its trigger
 
 ## Stages (gates and routes in `references/stages.md`)
 
-All stages run on the **one model confirmed at preflight**.
+All stages run on the **one model recorded at preflight**.
 
 | # | Stage | Gate | Type |
 |---|---|---|---|
@@ -170,11 +171,11 @@ repositories?** A submodule is finished when its parent says so:
 [`references/acceptance.md`](references/acceptance.md) → *A project of several
 repositories*.
 
-## Model: ask once, at preflight
+## Model: recorded once, at preflight
 
-Recommend **the most capable reasoning model available**, a tier resolved at runtime,
-**never a hardcoded id** (`references/model-tiering.md` → *Mechanic*). Record the
-answer in the brief; stage-5 subagents are pinned to it.
+Keep the running model and record it; recommend **the most capable reasoning model
+available** as advice, a tier, **never a hardcoded id** (`references/model-tiering.md`
+→ *Mechanic*). Stage-5 subagents are pinned to it.
 
 ## Degradation
 
@@ -203,11 +204,10 @@ row it cannot map blocks the compile.
 
 ## Triggers
 
-The description is the short form. The full trigger list it carried until 1.98.0,
-moved here verbatim, still routes to this skill:
+The description is the short form and all a host's skill selection reads. The list
+it carried until 1.98.0, kept verbatim, is what the family hub's routing hook matches:
 
 "Use when work changes the repository — feature, fix, bug, refactor, migration, integration, rewrite, adoption or hardening; фича, фикс, баг, рефактор, миграция, интеграция, доработать, починить, внедрить, перевести — or a finding that lands in it: audit/аудит, bug hunt/проверь ошибки, production check/проверь прод, PR review/ревью PR — or on 'run this through the pipeline'/'прогони по конвейеру', 'the full cycle'/'полный цикл', /task-pipeline. Runs a substantial task through gated stages: intake grill, docs, brainstorm, spec, plan, build, tests, deploy, post-deploy, docs/wiki, acceptance. 'waves'/'волнами'/'release iteration'/'итерация релиза' closes the board; 'checkup'/'чекап' lists unconfirmed releases; 'setup' audits docs. Not for: answering a question, explaining, a typo, a one-line edit, a rename, recon that lands nothing — say 'no pipeline'/'без пайплайна' to opt out."
 
-Added in 1.102.3 (hub board row B-84), each a repository change that runs through the
-stages: 'write tests'/'напиши тесты', 'cut a release'/'зарелизь'/'выпусти релиз',
+Added in 1.102.3 (hub row B-84), each a repository change: 'write tests'/'напиши тесты', 'cut a release'/'зарелизь'/'выпусти релиз',
 'remove dead code'/'удали мёртвый код'.

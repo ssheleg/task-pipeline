@@ -97,7 +97,7 @@ def claim_problems(claim, artifact_root=None):
             out.append(f"{cid}: {field} missing")
     if claim.get("kind") not in KINDS:
         out.append(f"{cid}: kind {claim.get('kind')!r} is not one of "
-                   f"{sorted(KINDS)} — the look/suite/library split is the contract")
+                   f"{sorted(KINDS)}; the look/suite/library split is the contract")
     if claim.get("status") not in STATUSES:
         out.append(f"{cid}: status {claim.get('status')!r} unknown")
     if claim.get("status") == "NOT_RUN" and not claim.get("reason"):
@@ -109,12 +109,12 @@ def claim_problems(claim, artifact_root=None):
         else:
             if artifact_root is not None and \
                     not os.path.isfile(os.path.join(artifact_root, claim["artifact"])):
-                out.append(f"{cid}: artifact {claim['artifact']} does not exist "
-                           "— a named file that is not there proves nothing")
+                out.append(f"{cid}: artifact {claim['artifact']} does not exist"
+                           "; a named file that is not there proves nothing")
             if claim.get("artifact_state") != claim.get("state"):
                 out.append(f"{cid}: artifact captured in state "
                            f"{claim.get('artifact_state')!r} cannot close a claim about "
-                           f"{claim.get('state')!r} — the initial screenshot does not "
+                           f"{claim.get('state')!r}; the initial screenshot does not "
                            "close an opened/error state")
     return out
 
@@ -182,7 +182,7 @@ def visual_row_problems(c, revision, approved):
         return [f"{cid}: `axes` must be an object of {', '.join(AXES)}"]
     for a in AXES:
         if not _filled(axes.get(a)):
-            out.append(f"{cid}: axes.{a} is missing — a frame whose {a} nobody recorded "
+            out.append(f"{cid}: axes.{a} is missing; a frame whose {a} nobody recorded "
                        "cannot answer a claim about any one of them")
     for k in ("figma_frame", "baseline"):
         if c.get(k) is not None and not _filled(c.get(k)):
@@ -194,7 +194,7 @@ def visual_row_problems(c, revision, approved):
             diff = None
         else:
             if diff.get("against") not in ("figma", "baseline"):
-                out.append(f"{cid}: diff.against is {diff.get('against')!r} — it compares "
+                out.append(f"{cid}: diff.against is {diff.get('against')!r}; it compares "
                            "against `figma` or `baseline`")
             if diff.get("status") not in DIFF_STATUS:
                 out.append(f"{cid}: diff.status {diff.get('status')!r} is not one of "
@@ -222,22 +222,22 @@ def visual_row_problems(c, revision, approved):
             t = r.get("triple")
             if not (isinstance(t, dict) and all(_filled(t.get(k))
                                                  for k in ("region", "defect", "fix"))):
-                out.append(f"{cid}: {rid} is {st} without its triple — region, defect, fix. "
+                out.append(f"{cid}: {rid} is {st} without its triple; region, defect, fix. "
                            "A finding nobody can locate and act on is an impression")
         if r.get("type") == "J" and st in ("PASS", "FAIL") and not _filled(r.get("calibration")):
-            out.append(f"{cid}: {rid} is a judge item reported {st} with no `calibration` — "
+            out.append(f"{cid}: {rid} is a judge item reported {st} with no `calibration`; "
                        "until a labelled set exists and the judge's agreement with it is "
                        "measured, a J item is NOT_ASSESSED, not a verdict")
         if r.get("type") == "H" and st == "PASS" and not approved:
             out.append(f"{cid}: {rid} is a human item reported PASS on a sheet nobody "
-                       "approved — only the person who reviewed the sheet can pass it")
+                       "approved; only the person who reviewed the sheet can pass it")
         if r.get("type") == "G" and st == "FAIL":
             g_fail.append(rid)
     if c.get("status") == "PASS":
         cap = c.get("capture")
         if not isinstance(cap, dict):
             out.append(f"{cid}: a PASS frame carries its capture record "
-                       f"({', '.join(CAPTURE)}) — a screenshot with no record is an image, "
+                       f"({', '.join(CAPTURE)}); a screenshot with no record is an image, "
                        "not evidence")
         else:
             for k in CAPTURE:
@@ -249,16 +249,16 @@ def visual_row_problems(c, revision, approved):
             if _filled(revision) and _filled(cap.get("revision")) and \
                     cap["revision"] != revision:
                 out.append(f"{cid}: captured at {cap['revision']!r} while the sheet is for "
-                           f"{revision!r} — a stale frame proves the revision before")
+                           f"{revision!r}; a stale frame proves the revision before")
         if (c.get("figma_frame") or c.get("baseline")) and diff is None:
             out.append(f"{cid}: a frame with a reference ({'figma_frame' if c.get('figma_frame') else 'baseline'}) "
-                       "and no `diff` — the comparison is the point of having the reference")
+                       "and no `diff`; the comparison is the point of having the reference")
         if diff is not None and diff.get("status") == "FAIL":
-            out.append(f"{cid}: PASS over a failing diff against {diff.get('against')} — "
+            out.append(f"{cid}: PASS over a failing diff against {diff.get('against')}; "
                        "either the frame drifted, or a person approves a new baseline; "
                        "neither is a PASS written by the run")
         if g_fail:
-            out.append(f"{cid}: PASS while gate item(s) {', '.join(g_fail)} FAIL — a "
+            out.append(f"{cid}: PASS while gate item(s) {', '.join(g_fail)} FAIL; a "
                        "deterministic gate item is a floor the judge never overrides")
     return out
 
@@ -269,20 +269,20 @@ def coverage_gaps(rows, states):
     seen_states = {c.get("state") for c in rows}
     for s in states:
         if s not in seen_states:
-            gaps.append(f"state {s!r} has no frame — a hole in the matrix")
+            gaps.append(f"state {s!r} has no frame: a hole in the matrix")
     ax = [c.get("axes") for c in rows if isinstance(c.get("axes"), dict)]
     if not ax:
         return gaps + ["no state × axes row at all"]
     if not any(_large_text(a.get("text")) for a in ax):
-        gaps.append("the text axis never leaves its default — large text (200% / AX5) is a "
+        gaps.append("the text axis never leaves its default: large text (200% / AX5) is a "
                     "mandatory column")
     darks = [a for a in ax if "dark" in str(a.get("theme", "")).lower()]
     if darks and any(_large_text(a.get("text")) for a in ax) and \
             not any(_large_text(a.get("text")) for a in darks):
-        gaps.append("no frame is dark × large text — a mandatory pair")
+        gaps.append("no frame is dark × large text: a mandatory pair")
     rtls = [a for a in ax if RTL.search(str(a.get("locale", "")))]
     if rtls and not any(_narrow(a.get("viewport")) for a in rtls):
-        gaps.append("no frame is RTL × narrow — a mandatory pair")
+        gaps.append("no frame is RTL × narrow: a mandatory pair")
     # Pairwise coverage: every value of one axis meets every value of every other axis in
     # SOME frame. The full cross product is what makes a sheet unreadable; pairs are the
     # smallest set that still catches a defect that appears only where one axis meets another.
@@ -300,7 +300,7 @@ def sheet_report(doc, surface_class, artifact_root=None, states=(), require_appr
     """(verdict, problems, notes) for a contact sheet at one surface class."""
     problems, notes = [], []
     if not isinstance(doc, dict) or doc.get("schema_version") != "browser-claims/1":
-        return "FAIL", ["not a browser-claims/1 document — the contact sheet extends that "
+        return "FAIL", ["not a browser-claims/1 document: the contact sheet extends that "
                         "file, there is no second schema"], notes
     claims = doc.get("claims")
     if not isinstance(claims, list):
@@ -314,22 +314,22 @@ def sheet_report(doc, surface_class, artifact_root=None, states=(), require_appr
     if rows or surface_class in GATED:
         for k in ("surface", "revision"):
             if not _filled(doc.get(k)):
-                problems.append(f"the sheet names no `{k}` — a contact sheet is for one "
+                problems.append(f"the sheet names no `{k}`: a contact sheet is for one "
                                 "surface at one revision")
         rr = doc.get("review_rounds")
         if not isinstance(rr, int) or isinstance(rr, bool) or rr < 0:
-            problems.append("`review_rounds` must be a whole number — it is how passes are "
+            problems.append("`review_rounds` must be a whole number: it is how passes are "
                             "measured, and a sheet that cannot say how many returns it took "
                             "cannot show the count falling")
     if approved and not (_filled(doc.get("approved_by")) and _iso(doc.get("approved_at"))):
         problems.append("an approval names who (`approved_by`) and when (`approved_at`, "
-                        "ISO-8601) — half an approval is not one")
+                        "ISO-8601): half an approval is not one")
     if require_approval and not approved:
-        problems.append("the sheet is not approved — at acceptance the contact sheet is the "
+        problems.append("the sheet is not approved: at acceptance the contact sheet is the "
                         "human's one pass, and an unapproved sheet is a pass that did not "
                         "happen")
     if surface_class in GATED and not rows:
-        problems.append(f"a {surface_class} surface with no state × axes row — the visual "
+        problems.append(f"a {surface_class} surface with no state × axes row: the visual "
                         "look did not run, and on this class it is a gate")
     j_fail = set()
     pending = []
@@ -344,8 +344,8 @@ def sheet_report(doc, surface_class, artifact_root=None, states=(), require_appr
         if c.get("status") in ("NOT_RUN", "BLOCKED"):
             pending.append(f"{c.get('id')} {c.get('status')}")
     if surface_class == "flagship" and len(j_fail) > 2:
-        problems.append(f"{len(j_fail)} judge items FAIL ({', '.join(sorted(map(str, j_fail)))}) "
-                        "— the flagship profile admits at most two, each with its triple")
+        problems.append(f"{len(j_fail)} judge items FAIL ({', '.join(sorted(map(str, j_fail)))})"
+                        ": the flagship profile admits at most two, each with its triple")
     if rows:
         gaps = coverage_gaps(rows, states)
         if surface_class == "flagship":
@@ -357,7 +357,7 @@ def sheet_report(doc, surface_class, artifact_root=None, states=(), require_appr
         else:
             notes += gaps
     if isinstance(doc.get("review_rounds"), int) and doc["review_rounds"] > 2 and not approved:
-        notes.append(f"review_rounds is {doc['review_rounds']}: past the budget of two — the "
+        notes.append(f"review_rounds is {doc['review_rounds']}: past the budget of two; the "
                      "open items go to the person as `unresolved`, not into another round")
     if pending:
         notes.append("for the person on the sheet: " + "; ".join(pending))
@@ -403,7 +403,7 @@ def record_floor(text, surface_class):
                         f"{', '.join(SURFACE_CLASSES)}")
     elif declared != surface_class:
         problems.append(f"the record says surface_class {declared!r} and the brief says "
-                        f"{surface_class!r} — one of them is stale, and the gate profile "
+                        f"{surface_class!r}: one of them is stale, and the gate profile "
                         "depends on which")
     mode_body = sec.get("mode", "")
     mode = (re.match(r"[`*_\s]*([A-Za-z]+)", mode_body) or [None, ""])[1].lower()
@@ -411,20 +411,20 @@ def record_floor(text, surface_class):
         problems.append("## Mode is missing or empty")
         return problems, False
     if mode not in MODES:
-        problems.append(f"## Mode is {mode!r} — one of {', '.join(MODES)}")
+        problems.append(f"## Mode is {mode!r}: one of {', '.join(MODES)}")
     if mode == "declined":
         reason = re.sub(r"^[`*_\s]*declined[`*_\s:—-]*", "", mode_body, flags=re.I).strip()
         if len(reason.split()) < 3:
-            problems.append("## Mode: declined carries no reason — a refusal passes the gate "
+            problems.append("## Mode: declined carries no reason; a refusal passes the gate "
                             "only when it says why, in words a reader can disagree with")
         return problems, True
     for field in RECORD_FIELDS[surface_class]:
         body = sec.get(field.lower())
         if body is None:
-            problems.append(f"## {field} is missing — the {surface_class} profile owes it")
+            problems.append(f"## {field} is missing: the {surface_class} profile owes it")
         elif not body or (PLACEHOLDER.match(body) and
                           not (field in BARE_NA_OK and re.match(r"^n/?a\.?$", body, re.I))):
-            problems.append(f"## {field} is empty ({body!r}) — a heading with nothing under "
+            problems.append(f"## {field} is empty ({body!r}): a heading with nothing under "
                             "it is the fact of the track, not its trace")
     return problems, False
 
@@ -441,7 +441,7 @@ def _run_tool(cmd, flag, args, timeout=180):
     except (OSError, subprocess.SubprocessError) as e:
         return "NOT_RUN", f"`{cmd} --help` could not run ({type(e).__name__})"
     if flag not in (h.stdout + h.stderr):
-        return "NOT_RUN", (f"`{cmd}` does not offer {flag} — sheleg-design is not installed, "
+        return "NOT_RUN", (f"`{cmd}` does not offer {flag}: sheleg-design is not installed, "
                            "or older than that flag")
     try:
         r = subprocess.run(argv + [flag] + args, capture_output=True, text=True,
@@ -463,14 +463,14 @@ def cmd_record(a):
     try:
         text = open(a.path, encoding="utf-8").read()
     except OSError:
-        return _emit(a, "record", "FAIL", [f"{a.path} does not exist — the VISUAL track "
+        return _emit(a, "record", "FAIL", [f"{a.path} does not exist: the VISUAL track "
                                            "leaves a director record, or a recorded refusal"],
                      [])
     problems, declined = record_floor(text, a.surface_class)
     status, detail = _run_tool(a.validator, "--check-record", [a.path])
-    notes = [f"validator: {status}" + (f" — {detail}" if status != "PASS" else "")]
+    notes = [f"validator: {status}" + (f": {detail}" if status != "PASS" else "")]
     if declined and not problems:
-        notes.insert(0, "the visual track was declined, with its reason — a recorded "
+        notes.insert(0, "the visual track was declined, with its reason: a recorded "
                         "refusal passes")
     floor = "FAIL" if problems else "PASS"
     if status == "FAIL":
@@ -530,11 +530,11 @@ def cmd_filekeys(a):
     used = sorted(set(FIGMA_KEY.findall(scr)))
     problems = []
     if used and not recorded:
-        problems.append("frames link to Figma and the record names no file — the "
+        problems.append("frames link to Figma and the record names no file: the "
                         "destination was never decided, or was decided somewhere else")
     for k in used:
         if recorded and k not in recorded:
-            problems.append(f"frame file key {k} is not a recorded file — a second file "
+            problems.append(f"frame file key {k} is not a recorded file: a second file "
                             "nobody will open, holding real work")
     notes = [f"recorded: {', '.join(recorded) or 'none'}",
              f"linked from screens: {', '.join(used) or 'none'}"]
@@ -587,7 +587,7 @@ def figma_variables(doc):
     for k, v in doc.items():
         if isinstance(v, dict):
             if not any(key in v for key in VAR_KEYS):
-                raise ValueError(f"{k!r} holds a group, not a variable — a nested token tree")
+                raise ValueError(f"{k!r} holds a group, not a variable: a nested token tree")
             cs = v.get("codeSyntax")
             out.append((k, cs.get("WEB") if isinstance(cs, dict) else None))
         elif isinstance(v, list):
@@ -617,7 +617,7 @@ def token_drift(variables, props):
                 continue
             target = m.group(1)
         if target in owner:
-            problems.append(f"{owner[target]!r} and {name!r} both map to {target} — one "
+            problems.append(f"{owner[target]!r} and {name!r} both map to {target}: one "
                             "property cannot hold both")
             continue
         owner[target] = name
@@ -646,7 +646,7 @@ def cmd_tokens(a):
         return 2
     if not os.path.isfile(a.figma):
         return _emit(a, "tokens", "NOT_RUN", [], [
-            f"no Figma variable export at {a.figma} — export it (`get_variable_defs`, or the "
+            f"no Figma variable export at {a.figma}: export it (`get_variable_defs`, or the "
             "REST variables endpoint) and run again; until then the drift is unmeasured"])
     try:
         doc = json.load(open(a.figma, encoding="utf-8"))
@@ -656,11 +656,11 @@ def cmd_tokens(a):
     try:
         variables = figma_variables(doc)
     except ValueError as e:
-        print(f"visual_gate: {a.figma} is not a variable export — {e}", file=sys.stderr)
+        print(f"visual_gate: {a.figma} is not a variable export; {e}", file=sys.stderr)
         return 2
     if not variables:
         return _emit(a, "tokens", "NOT_RUN", [], [
-            f"{a.figma} holds no variables — there is nothing to compare, and nothing "
+            f"{a.figma} holds no variables: there is nothing to compare, and nothing "
             "compared is not a pass"])
     props = css_properties(css)
     problems, rep = token_drift(variables, props)
@@ -679,7 +679,7 @@ def _emit(a, check, verdict, problems, notes, extra=None):
         print(json.dumps(out, ensure_ascii=False))
     else:
         cls = getattr(a, "surface_class", None)
-        print(f"{check}: {verdict}" + (f" — class {cls}" if cls else ""))
+        print(f"{check}: {verdict}" + (f": class {cls}" if cls else ""))
         for p in problems:
             print(f"  ✗ {p}")
         for n in notes:

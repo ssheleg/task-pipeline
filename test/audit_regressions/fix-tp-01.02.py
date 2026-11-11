@@ -44,7 +44,7 @@ def t_advice_vs_choice():
     assert "Advice and choice are different things, and the second wins." in d
     assert "inherit it unchanged" in d
     s = flat("SKILL.md")
-    assert "the choice — inherited verbatim by plan, stages and subagents" in s
+    assert "the choice inherited verbatim by plan, stages and subagents" in s
 
 
 def t_task_size_is_not_a_basis():

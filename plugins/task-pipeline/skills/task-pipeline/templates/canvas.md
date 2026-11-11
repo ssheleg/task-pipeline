@@ -1,4 +1,4 @@
-# Canvas — <topic> (YYYY-MM-DD)
+# Canvas: <topic> (YYYY-MM-DD)
 
 The target state of the next version, laid over today's logic: wave mode's committed
 target-state spec (`references/waves.md` → *The canvas*), written at step 3 of an iteration
@@ -7,7 +7,7 @@ is `<topic>-plan.json` (or the work graph), the inventory is `<topic>-inventory.
 (inventory/1), and the question queue is `<topic>-questions.md`. This page cites the
 dossiers by section and does not repeat them.
 
-**Read at:** <repository @ commit, one per repository the canvas touches — the state this
+**Read at:** <repository @ commit, one per repository the canvas touches; the state this
 design was laid over>.
 
 **Decisions applied without re-opening:** <each recorded decision this canvas rests on, with
@@ -50,7 +50,7 @@ change one seam were designed together; a ★ marks a seam that re-designed a do
 Generated, not hand-written: `scripts/waves.py assign --modules <modules.json> --plan
 <plan.json> --write`, then `waves.py count`. Every inventory item is a row. An item on no
 node is closed with its receipt, carried (`release: program`, with the reason), or a gap in
-this canvas — `waves.py validate` exits 1 on the last.
+this canvas: `waves.py validate` exits 1 on the last.
 
 | Item | Module | Node(s) | Wave(s) | Status |
 |---|---|---|---|---|
@@ -58,7 +58,7 @@ this canvas — `waves.py validate` exits 1 on the last.
 
 ## 4. Deleted or superseded
 
-What the next version removes — code, screens, contracts, docs, rows — and which node
+What the next version removes: code, screens, contracts, docs, rows: and which node
 removes it. A removal nobody wrote down survives the release.
 
 | Node | Removes |

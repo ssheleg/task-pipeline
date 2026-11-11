@@ -55,12 +55,12 @@ fi
 #   ADOPTING THIS GATE IN AN EXISTING REPOSITORY MEANS SETTING IT TO THE NEXT FREE
 #   ID: from today the rule binds, and the history becomes one printed number instead
 #   of a thousand failures nobody will fix. Lower it as tranches are cleared.
-PROP_FLOOR=${PROP_FLOOR:-0}        # id threshold — entries >= this must propagate
+PROP_FLOOR=${PROP_FLOOR:-0}        # id threshold; entries >= this must propagate
 #
 # RESIDUE_FLOOR is a COUNT: how many unmarked citations of retired decisions are
 #   tolerated. On adoption set it to what the repository measurably has today, then
 #   only ever lower it.
-RESIDUE_FLOOR=${RESIDUE_FLOOR:-0}  # count — tolerated unmarked citations, today's number
+RESIDUE_FLOOR=${RESIDUE_FLOOR:-0}  # count; tolerated unmarked citations, today's number
 
 TMP=$(mktemp -d 2>/dev/null || mktemp -d -t docgate)
 trap 'rm -rf "$TMP"' EXIT
@@ -111,7 +111,7 @@ find . -maxdepth 1 -type f -name '*.md' 2>/dev/null | sort >> "$TMP/files" || tr
 FILE_COUNT=$(wc -l < "$TMP/files" | tr -d ' ')
 
 if [ "$FILE_COUNT" = "0" ]; then
-  echo "FAIL: documentation gate — no markdown found in $DOCS_DIR/ or the repository root."
+  echo "FAIL: documentation gate; no markdown found in $DOCS_DIR/ or the repository root."
   echo "      Seed the doc map and the registers first (task-pipeline stage 0, phase 1b),"
   echo "      or point DOCS_DIR at wherever this project keeps its documentation."
   exit 1
@@ -140,7 +140,7 @@ if [ -d "$ADR_DIR" ]; then
 fi
 
 if [ "$have_reg" = "1" ] && [ "$have_adr" = "1" ]; then
-  err "two decision homes: $DEC_FILE and $ADR_DIR both hold entries — one project, one register (references/documentation.md)"
+  err "two decision homes: $DEC_FILE and $ADR_DIR both hold entries; one project, one register (references/documentation.md)"
 fi
 
 # Pull the six owed fields out of one entry body on stdin, for id $1 in file $2.
@@ -189,7 +189,7 @@ fi
 
 DECS=$(wc -l < "$TMP/entries" | tr -d ' ')
 case "$SHAPE" in
-  none) dormant "decision home — neither $DEC_FILE nor $ADR_DIR/NNNN-*.md yet" ;;
+  none) dormant "decision home: neither $DEC_FILE nor $ADR_DIR/NNNN-*.md yet" ;;
   *)    ok "decision home: $SHAPE ($DECS entr$([ "$DECS" = "1" ] && echo y || echo ies), ids $ID_PREFIX-####)" ;;
 esac
 
@@ -217,7 +217,7 @@ fi
 
 # ---------- 2. every id referenced is defined ----------
 if [ "$SHAPE" = "none" ]; then
-  dormant "id integrity — no decision home yet"
+  dormant "id integrity: no decision home yet"
   OQS=0
 else
   cut -f1 "$TMP/entries" | sort -u > "$TMP/dec_def"
@@ -250,7 +250,7 @@ fi
 # check is that no two files claim one number.
 check_next_free() {
   _file=$1; _prefix=$2; _deffile=$3
-  [ -f "$_file" ] || { dormant "next-free-$_prefix — no $_file yet"; return; }
+  [ -f "$_file" ] || { dormant "next-free-$_prefix: no $_file yet"; return; }
   _claim=$(grep -o "Next free ID:\** *\`\?$_prefix-[0-9][0-9]*" "$_file" | head -1 |
            grep -o '[0-9][0-9]*$')
   if [ -z "${_claim:-}" ]; then
@@ -285,11 +285,11 @@ case "$SHAPE" in
     _dupes=$(sed 's|.*/||; s|^\([0-9][0-9]*\)-.*|\1|' "$TMP/adrfiles" | sort | uniq -d | tr '\n' ' ')
     _adr_n=$(wc -l < "$TMP/adrfiles" | tr -d ' ')
     if [ -n "$(echo "$_dupes" | tr -d ' ')" ]; then
-      err "duplicate ADR number(s) — two files claim one id: $_dupes"
+      err "duplicate ADR number(s): two files claim one id: $_dupes"
     else
       ok "ADR numbers are unique ($_adr_n files)"
     fi ;;
-  *) dormant "id allocator — no decision home yet" ;;
+  *) dormant "id allocator: no decision home yet" ;;
 esac
 check_next_free "$OQ_FILE" OQ "$TMP/oq_def"
 
@@ -305,7 +305,7 @@ if [ -n "$_size_src" ] && grep -q 'Register size:' "$_size_src" 2>/dev/null; the
     ok "stated register size matches the computed one ($DECS)"
   fi
 else
-  dormant "register-size cross-check — no 'Register size:' line stated"
+  dormant "register-size cross-check: no 'Register size:' line stated"
 fi
 
 # ---------- 5. consequences propagation (RATCHETED) ----------
@@ -314,7 +314,7 @@ fi
 # the exact failure the loop exists to prevent.
 PROP_MISSING=0
 if [ "$SHAPE" = "none" ]; then
-  dormant "propagation — no decision home yet"
+  dormant "propagation: no decision home yet"
 else
   : > "$TMP/prop"
   while IFS="$(printf '\t')" read -r id doc; do
@@ -343,7 +343,7 @@ fi
 # One word for "adds to" and "replaces a clause of" is unenforceable, so the
 # markers are distinct and only two of them oblige the target to say so.
 if [ "$SHAPE" = "none" ]; then
-  dormant "supersede annotations — no decision home yet"
+  dormant "supersede annotations: no decision home yet"
 else
   : > "$TMP/ann"
   while IFS="$(printf '\t')" read -r src marker target; do
@@ -373,7 +373,7 @@ fi
 # is mostly noise is a gate people switch off.
 RESIDUE=0
 if [ "$SHAPE" = "none" ]; then
-  dormant "retired residue — no decision home yet"
+  dormant "retired residue: no decision home yet"
 else
   : > "$TMP/retired"
   while IFS="$(printf '\t')" read -r id file status; do
@@ -412,7 +412,7 @@ fi
 # An unrecognised status is worse than a missing one: it looks answered, and every
 # check on that row skips in silence.
 if [ "$SHAPE" = "none" ]; then
-  dormant "decision status vocabulary — no decision home yet"
+  dormant "decision status vocabulary: no decision home yet"
 else
   : > "$TMP/vocab"
   while IFS="$(printf '\t')" read -r id file status; do
@@ -442,7 +442,7 @@ if [ -f "$OQ_FILE" ]; then
     ok "open-question statuses are inside the closed vocabulary"
   fi
 else
-  dormant "open-question status vocabulary — no $OQ_FILE yet"
+  dormant "open-question status vocabulary: no $OQ_FILE yet"
 fi
 
 # ---------- 9. every commit SHA named in the retro resolves ----------
@@ -454,9 +454,9 @@ fi
 # the section printed `skip` while five SHAs in the archive did not resolve at all. Ask git
 # whether it is inside a work tree; it knows about all three shapes and this does not.
 if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
-  skipmsg "commit-SHA resolution — not a git working tree"
+  skipmsg "commit-SHA resolution: not a git working tree"
 elif [ ! -d "$RETRO_GLOB" ]; then
-  dormant "commit-SHA resolution — no $RETRO_GLOB yet"
+  dormant "commit-SHA resolution: no $RETRO_GLOB yet"
 else
   : > "$TMP/sha"
   # An enumerated exception, never a floor. A commit whose history was rewritten before any
@@ -479,7 +479,7 @@ else
       # the stamp, and the SHA the stamp recorded stopped being reachable. Ask the
       # question a reader actually has: is it in this history at all.
       elif ! git merge-base --is-ancestor "$s^{commit}" HEAD >/dev/null 2>&1; then
-        echo "$f:$ln: commit \`$s\` resolves but is NOT reachable from HEAD — amended away, or on a branch this checkout does not have" >> "$TMP/sha"
+        echo "$f:$ln: commit \`$s\` resolves but is NOT reachable from HEAD; amended away, or on a branch this checkout does not have" >> "$TMP/sha"
       fi
     done
   done
@@ -494,7 +494,7 @@ fi
 # The direction that feels redundant is the one that finds things: a register the
 # map never names is a register nobody is told about.
 if [ ! -f "$MAP_FILE" ]; then
-  dormant "doc-map coverage — no $MAP_FILE yet"
+  dormant "doc-map coverage: no $MAP_FILE yet"
 else
   # Forward direction is scoped to the "## Registers" table: that table is a CLAIM
   # about what exists. The SSOT table below it legitimately names documents a young
@@ -533,5 +533,5 @@ if [ "$FAIL" -ne 0 ]; then
   echo "FAIL: documentation gate"
   exit 1
 fi
-echo "OK: documentation gate — shape $SHAPE · ${DECS:-0} decisions · ${OQS:-0} open questions · propagation backlog ${PROP_MISSING:-0} (floor $PROP_FLOOR) · retired residue ${RESIDUE:-0} (floor $RESIDUE_FLOOR)"
+echo "OK: documentation gate; shape $SHAPE · ${DECS:-0} decisions · ${OQS:-0} open questions · propagation backlog ${PROP_MISSING:-0} (floor $PROP_FLOOR) · retired residue ${RESIDUE:-0} (floor $RESIDUE_FLOOR)"
 exit 0

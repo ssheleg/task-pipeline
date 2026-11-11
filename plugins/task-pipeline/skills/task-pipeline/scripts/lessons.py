@@ -212,7 +212,7 @@ def set_aside(path: pathlib.Path) -> pathlib.Path:
     try:
         os.replace(path, dest)
     except OSError as exc:
-        raise Refused(f"the corrupt index {path} could not be set aside ({type(exc).__name__}) — "
+        raise Refused(f"the corrupt index {path} could not be set aside ({type(exc).__name__}): "
                       "nothing was written; move it away by hand")
     return dest
 
@@ -232,7 +232,7 @@ def open_index(idx: pathlib.Path, notes: list[str]) -> dict[str, dict]:
     except IndexCorrupt:
         good, future, bad, only = _salvage(idx, notes)
         dest = set_aside(idx)
-        notes.append(f"the index {idx} could not be parsed — kept whole as {dest.name}; "
+        notes.append(f"the index {idx} could not be parsed: kept whole as {dest.name}; "
                      f"{len(good)} lesson line{'' if len(good) == 1 else 's'} salvaged into the "
                      f"live index, {bad} bad line{'' if bad == 1 else 's'} left only in {dest.name}; "
                      "`lessons.py rebuild --roots <dir>` re-derives the rest from the retros")
@@ -259,11 +259,11 @@ def _merge_legacy(idx: pathlib.Path, notes: list[str]) -> None:
         old = load(legacy)
     except IndexCorrupt:
         dest = set_aside(legacy)
-        notes.append(f"the old index {legacy} is corrupt — kept as {dest.name}, not merged; "
+        notes.append(f"the old index {legacy} is corrupt: kept as {dest.name}, not merged; "
                      "`lessons.py rebuild --roots <dir>` re-derives the lessons from the retros")
         return
     except IndexUnreadable as exc:
-        notes.append(f"{exc} — the old index was not merged")
+        notes.append(f"{exc}: the old index was not merged")
         return
     old_future = list(_FUTURE.get(str(legacy), []))
     both = idx.exists()
@@ -283,12 +283,12 @@ def _merge_legacy(idx: pathlib.Path, notes: list[str]) -> None:
         os.replace(legacy, dest)
     except OSError as exc:
         raise Refused(f"merged the old index into {idx} but could not rename {legacy} "
-                      f"({type(exc).__name__}) — remove it by hand so one index is read")
-    what = ("both index files existed — read both: merged" if both else
+                      f"({type(exc).__name__}): remove it by hand so one index is read")
+    what = ("both index files existed: read both: merged" if both else
             "the family index was corrupt and set aside, so only the local one was read: moved"
             if set_aside_family else "moved the local index from")
     kept = "" if set_aside_family else ", the family copy kept wherever both had one"
-    notes.append(f"{what} {legacy} into {idx} — {len(copied)} of {len(old)} lessons copied"
+    notes.append(f"{what} {legacy} into {idx}: {len(copied)} of {len(old)} lessons copied"
                  f"{kept}; the old file is kept as {dest.name}")
 
 
@@ -351,17 +351,17 @@ def _git(root: pathlib.Path, *args: str) -> str | None:
         r = subprocess.run(["git", *args], cwd=root, capture_output=True, text=True,
                            timeout=timeout)
     except subprocess.TimeoutExpired:
-        raise Refused(f"git {args[0]} did not answer within {timeout:g}s — the machine is "
+        raise Refused(f"git {args[0]} did not answer within {timeout:g}s: the machine is "
                       "busy, not the lesson wrong; nothing was written, retry")
     except OSError as exc:
-        raise Refused(f"git cannot be run ({type(exc).__name__}) — a lesson needs its commit")
+        raise Refused(f"git cannot be run ({type(exc).__name__}): a lesson needs its commit")
     return r.stdout.strip() if r.returncode == 0 else None
 
 
 def repo_root(start: pathlib.Path) -> pathlib.Path:
     top = _git(start, "rev-parse", "--show-toplevel")
     if not top:
-        raise Refused(f"{start} is not inside a git repository — a lesson carries its evidence "
+        raise Refused(f"{start} is not inside a git repository: a lesson carries its evidence "
                       "commit, and a commit needs a repository")
     _show(pathlib.Path(top))
     return pathlib.Path(top)
@@ -427,7 +427,7 @@ def project_key(root: pathlib.Path) -> str:
         if roots:
             _KEYS[key] = "p-" + roots.split()[-1][:12]
             return _KEYS[key]
-    raise Refused(f"the repository {root.name} has no commit — a project key needs one")
+    raise Refused(f"the repository {root.name} has no commit: a project key needs one")
 
 
 _RESOLVES: dict[tuple[str, str], bool] = {}
@@ -500,7 +500,7 @@ def _check_text(name: str, value: object, lo: int, hi: int) -> list[str]:
     # title once made every later read of the index call it corrupt.
     if value != "".join(value.splitlines()) or any(ch in value for ch in "\r\n"):
         errs.append(f"{name} carries a line break (\\n, \\r, U+2028, U+2029, U+0085 or "
-                    "another separator) — one line each")
+                    "another separator): one line each")
     for rx, what in FORBIDDEN:
         if rx.search(value):
             errs.append(f"{name} carries {what}")
@@ -511,7 +511,7 @@ def validate(lesson: object) -> list[str]:
     """Every reason lesson/1 refuses this object, in one list (empty = valid)."""
     if not isinstance(lesson, dict):
         return ["a lesson is a JSON object"]
-    errs = [f"unknown field {k!r} — lesson/1 carries {', '.join(FIELDS)} and nothing else"
+    errs = [f"unknown field {k!r}: lesson/1 carries {', '.join(FIELDS)} and nothing else"
             for k in lesson if k not in FIELDS]
     errs += [f"missing field {k!r}" for k in FIELDS if k not in lesson]
     if errs:
@@ -574,7 +574,7 @@ def complete(lesson: dict, root: pathlib.Path) -> dict:
         given = o.get("project")
         if isinstance(given, str) and PROJECT.match(given) and given != mine:
             raise Refused(f"{out.get('classKey', '?')}: origin.project is {given}, but this "
-                          f"repository's key is {mine} — a lesson is added from the project "
+                          f"repository's key is {mine}; a lesson is added from the project "
                           "that learned it; nothing was written")
         o.setdefault("project", mine)
         out["origin"] = o
@@ -855,7 +855,7 @@ def _put(out: dict[str, dict], e: dict, notes: list[str] | None) -> None:
     out[ck] = derive(list(by_key.values()))
     if notes is not None and (twice or dropped):
         lost = f"dropped {', '.join(dropped)}" if dropped else "none dropped"
-        notes.append(f"{'two lines' if twice else 'one line'} for {ck} merged — {len(by_key)} origin"
+        notes.append(f"{'two lines' if twice else 'one line'} for {ck} merged: {len(by_key)} origin"
                      f"{'' if len(by_key) == 1 else 's'} kept, {lost}")
 
 
@@ -901,9 +901,9 @@ def load(path: pathlib.Path, notes: list[str] | None = None) -> dict[str, dict]:
         text = path.read_text(encoding="utf-8")
     except (OSError, UnicodeDecodeError) as exc:
         if isinstance(exc, UnicodeDecodeError):
-            raise IndexCorrupt(f"the index {path} is not UTF-8 text — `lessons.py rebuild` "
+            raise IndexCorrupt(f"the index {path} is not UTF-8 text: `lessons.py rebuild` "
                                "keeps it as .corrupt-<date> and re-derives it")
-        raise IndexUnreadable(f"the index {path} cannot be read ({type(exc).__name__}) — fix "
+        raise IndexUnreadable(f"the index {path} cannot be read ({type(exc).__name__}): fix "
                               "its permissions; nothing was written")
     out, future = {}, []
     # One index line per "\n", exactly as `dump` writes it — never str.splitlines(), which also
@@ -915,14 +915,14 @@ def load(path: pathlib.Path, notes: list[str] | None = None) -> dict[str, dict]:
         try:
             e = json.loads(line)
         except ValueError:
-            raise IndexCorrupt(f"the index {path} does not parse (line {i}) — `lessons.py "
+            raise IndexCorrupt(f"the index {path} does not parse (line {i}): `lessons.py "
                                "rebuild` keeps it as .corrupt-<date> and re-derives it")
         if isinstance(e, dict) and e.get("schema", "lesson-index/1") != "lesson-index/1":
             future.append(line)
             continue
         _migrate_stages(e, notes)
         if not _entry_shape(e):
-            raise IndexCorrupt(f"the index {path} has a line that is not a lesson (line {i}) — "
+            raise IndexCorrupt(f"the index {path} has a line that is not a lesson (line {i}): "
                                "`lessons.py rebuild` keeps it as .corrupt-<date> and re-derives it")
         _put(out, e, notes)
     _FUTURE[str(path)] = future
@@ -952,7 +952,7 @@ class locked:
         try:
             import fcntl
         except ImportError:
-            print("note: no file locking on this platform — a concurrent write could lose a "
+            print("note: no file locking on this platform; a concurrent write could lose a "
                   "lesson", file=sys.stderr)
             return self
         try:
@@ -962,8 +962,8 @@ class locked:
         try:
             fd = os.open(self.lock, os.O_RDWR | os.O_CREAT, 0o600)
         except OSError as exc:
-            raise Refused(f"the index lock {self.lock} cannot be opened ({type(exc).__name__}) "
-                          "— nothing was written")
+            raise Refused(f"the index lock {self.lock} cannot be opened ({type(exc).__name__})"
+                          ": nothing was written")
         self.fh = os.fdopen(fd, "a+")
         deadline = time.monotonic() + timeout
         while True:
@@ -975,7 +975,7 @@ class locked:
                     self.fh.close()
                     self.fh = None
                     raise Refused(f"the index is locked by another writer ({self.lock}) after "
-                                  f"{timeout:g}s — nothing was written; retry")
+                                  f"{timeout:g}s: nothing was written; retry")
                 time.sleep(0.05)
 
     def __exit__(self, *exc):
@@ -1002,7 +1002,7 @@ def _ensure_dir(d: pathlib.Path) -> None:
                 continue
             os.chmod(m, 0o700)
     except OSError as exc:
-        raise Refused(f"the index directory {d} cannot be created ({type(exc).__name__}) — "
+        raise Refused(f"the index directory {d} cannot be created ({type(exc).__name__}): "
                       "nothing was written")
 
 
@@ -1047,7 +1047,7 @@ def save(path: pathlib.Path, entries: dict[str, dict]) -> None:
             except OSError:
                 pass
         if isinstance(exc, OSError):
-            raise Refused(f"the index {path} cannot be written ({type(exc).__name__}) — "
+            raise Refused(f"the index {path} cannot be written ({type(exc).__name__}): "
                           "the previous index is intact")
         raise
 
@@ -1070,7 +1070,7 @@ def refuse_shallow(root: pathlib.Path) -> None:
     that will not last."""
     if _git(root, "rev-parse", "--is-shallow-repository") == "true":
         raise Refused(f"{root.name} is a shallow clone: its project key changes when it is "
-                      "deepened — deepen it first (git fetch --unshallow); nothing was written")
+                      "deepened; deepen it first (git fetch --unshallow); nothing was written")
 
 
 def cmd_add(a, idx: pathlib.Path) -> int:
@@ -1099,7 +1099,7 @@ def cmd_add(a, idx: pathlib.Path) -> int:
             missing = want - {x["origin"]["retro"].split("#", 1)[1] for x in found}
             if missing:
                 raise Refused("no Lesson-bearing entry " + ", ".join(sorted(missing))
-                              + f" in {retro.name} — the anchor is the heading's slug")
+                              + f" in {retro.name}: the anchor is the heading's slug")
     errors = []
     for le in lessons:
         errs = validate(le)
@@ -1144,7 +1144,7 @@ def cmd_add(a, idx: pathlib.Path) -> int:
                           ) if memory else {}
                 marked = [dict(x, **source)
                           if _origin_key(x) == _origin_key(n) else x for x in marked if x is not o]
-                rekeyed.append(f"{ck} — {o['retro']}: {o['project']} is {project} (written before "
+                rekeyed.append(f"{ck}: {o['retro']}: {o['project']} is {project} (written before "
                                "provenance; its commit resolves here)" + (f" · {memory}" if memory else ""))
             if marked != origins:
                 entries[ck] = derive(marked)
@@ -1164,7 +1164,7 @@ def cmd_add(a, idx: pathlib.Path) -> int:
     print(f"lessons: {n} lesson{'' if n == 1 else 's'} · {changed} changed{note}")
     for le in lessons:
         e = entries[le["classKey"]]
-        print(f"  {e['id']} {e['classKey']} — {e['status']} (seen {e['seen']}, projects {e['projects']})")
+        print(f"  {e['id']} {e['classKey']}: {e['status']} (seen {e['seen']}, projects {e['projects']})")
     for n in rekeyed:
         print(f"  re-keyed: {n}")
     for n in reclaimed:
@@ -1188,7 +1188,7 @@ def cmd_query(a, idx: pathlib.Path) -> int:
     with session(idx, a.default_index) as ss:
         entries = ss.entries
     if not entries and not idx.exists():
-        print(_say(f"lessons: local index absent ({idx}) — nothing to read; the retro and "
+        print(_say(f"lessons: local index absent ({idx}); nothing to read; the retro and "
                    "learned.md still run"))
         return 0
     query = [part.strip().casefold() for arg in a.nouns for part in arg.split(",") if part.strip()]
@@ -1204,7 +1204,7 @@ def cmd_query(a, idx: pathlib.Path) -> int:
     scored.sort(key=lambda t: t[:4])
     limit = max(1, min(a.limit, 10))
     for *_, e in scored[:limit]:
-        print(f"[lesson {e['id']}] {e['title']} — {e['trigger']} — {e['check']} "
+        print(f"[lesson {e['id']}] {e['title']}: {e['trigger']}: {e['check']} "
               f"(seen {e['seen']}, projects {e['projects']})")
     print(f"lessons: {min(len(scored), limit)} of {len(scored)} match · {len(entries)} in the local index")
     return 0
@@ -1470,8 +1470,8 @@ def _rekey_legacy(old: dict[str, dict], entries: dict[str, dict],
             twin = next((x for x in origins if _origin_key(x) == _origin_key(n)), None)
             if (twin and twin.get("memory") and o.get("memory")
                     and mem_base(twin["memory"]) != mem_base(o["memory"])):
-                said.append(f"{ck} — {o['project']} {o['retro']}: the same repository as "
-                            f"{n['project']}, but each holds its own memory id — left carried")
+                said.append(f"{ck}: {o['project']} {o['retro']}: the same repository as "
+                            f"{n['project']}, but each holds its own memory id; left carried")
                 continue
             moved = {k: v for k, v in o.items() if k not in ("carried", "rekeyedFrom")}
             moved["project"] = n["project"]
@@ -1487,7 +1487,7 @@ def _rekey_legacy(old: dict[str, dict], entries: dict[str, dict],
                 elif (twin or {}).get("rekeyedFrom"):
                     moved["rekeyedFrom"] = twin["rekeyedFrom"]
             origins = [x for x in origins if x is not o and x is not twin] + [moved]
-            said.append(f"{ck} — {o['retro']}: {o['project']} is {n['project']} (written before "
+            said.append(f"{ck}: {o['retro']}: {o['project']} is {n['project']} (written before "
                         "provenance; its commit resolves in the checkout that re-derived it)"
                         + (f" · {memory}" if memory else ""))
             changed = True
@@ -1542,7 +1542,7 @@ def _reclaim(entries: dict[str, dict]) -> list[str]:
                           and mem_base(y["memory"]) != base), None)
             if other:
                 said.append(f"{ck}: {base} was re-keyed from {src} into {o['project']}, but {src} now "
-                            f"holds its own {mem_base(other)} — nothing moved; two store records are not one")
+                            f"holds its own {mem_base(other)}; nothing moved; two store records are not one")
                 continue
             keep = _newer_memory(o["memory"], next((y["memory"] for y in origins if y["project"] == src
                                                     and y.get("memory")), None))
@@ -1593,7 +1593,7 @@ def _one_project_per_memory(entries: dict[str, dict], old: dict[str, dict]) -> l
                         and o.get("carried") != CARRY_FOREIGN):
                     said.append(f"{base} is held by {keep} and {o['project']} for {ck}; one id is "
                                 f"one project's store record, so it stays on {keep}, which held it "
-                                f"first — {o['project']} {o['retro']} keeps its place without it "
+                                f"first: {o['project']} {o['retro']} keeps its place without it "
                                 "(record that project's own id there)")
                     # `rekeyedFrom` goes with the id (round 17, F1): the loader refuses a source
                     # beside no memory id, and would set the whole index aside.
@@ -1702,7 +1702,7 @@ def _attach_memory(entries: dict[str, dict], old: dict[str, dict], notes: list[s
                             o["rekeyedFrom"] = source[(exact[0], project)]
                         changed = True
                 if not any(o.get("memory") for o in mine):
-                    notes.append(f"{ck} — {project}: several memory ids and none matches a retro "
+                    notes.append(f"{ck}: {project}: several memory ids and none matches a retro "
                                  "anchor uniquely; the previous origins keep them")
         if changed:
             entries[ck] = derive(origins)
@@ -1742,7 +1742,7 @@ def _one_class_per_memory(entries: dict[str, dict], notes: list[str]) -> None:
     for ck, e in entries.items():
         for o in e["origins"]:
             if o.get("memory") and holders[mem_base(o["memory"])][0] != ck:
-                raise Refused(f"memory id {o['memory']} is on two class keys — nothing was written")
+                raise Refused(f"memory id {o['memory']} is on two class keys: nothing was written")
 
 
 def cmd_rebuild(a, idx: pathlib.Path) -> int:
@@ -1828,14 +1828,14 @@ def cmd_rebuild(a, idx: pathlib.Path) -> int:
         try:
             if _git(repo, "rev-parse", "--is-shallow-repository") == "true":
                 shallow.add(repo)
-                problems.append((repo, f"{repo.name}: a shallow clone — never a source; deepen it "
+                problems.append((repo, f"{repo.name}: a shallow clone; never a source; deepen it "
                                        "(git fetch --unshallow) for its lessons to be read"))
         except Refused as exc:
             # A shallow check that does not answer is refused, not trusted (round 12): the
             # checkout is no source this run, and that is a problem it owns. Unlike a clone that
             # answered "shallow", nothing was learned from it: it does not count as read.
             unchecked.add(repo)
-            problems.append((repo, f"{repo.name}: the shallow check did not answer ({exc}) — not "
+            problems.append((repo, f"{repo.name}: the shallow check did not answer ({exc}); not "
                                    "a source this run"))
     for repo, retro in found:
         if repo in shallow or repo in unchecked:
@@ -1884,7 +1884,7 @@ def cmd_rebuild(a, idx: pathlib.Path) -> int:
     if problems and not seen_files and not run["complete"] and not shallow:
         for _, problem in problems:
             print(f"  not read: {redact(problem)}")
-        print("lessons: rebuild refused — nothing could be read; the index, its lock directory "
+        print("lessons: rebuild refused; nothing could be read; the index, its lock directory "
               "and any migration were not touched", file=sys.stderr)
         return 1
     with session(idx, a.default_index) as ss:
@@ -1893,7 +1893,7 @@ def cmd_rebuild(a, idx: pathlib.Path) -> int:
         for (repo, retro), stamp in stats.items():
             if _stamp(retro) != stamp:
                 problems.append((repo, f"{repo.name}: {_relative(repo, retro)} changed while the "
-                                       "rebuild ran — read again next run"))
+                                       "rebuild ran; read again next run"))
                 run["complete"].discard(checkout_id(repo))
         # The previous index lends its memory ids and its carried origins. `session` already
         # refused an unreadable one (its contents may be good) and set a corrupt one aside, its
@@ -1936,7 +1936,7 @@ def cmd_rebuild(a, idx: pathlib.Path) -> int:
         after = {mem_base(o["memory"]) for e in entries.values() for o in e["origins"] if o.get("memory")}
         gone = before - after - {mem_base(o["memory"]) for _, o in pruned if o.get("memory")}
         if gone:
-            raise Refused(f"rebuild would lose {len(gone)} memory id(s) ({sorted(gone)[:3]}) — "
+            raise Refused(f"rebuild would lose {len(gone)} memory id(s) ({sorted(gone)[:3]}): "
                           "nothing was written; this is a defect, report it")
         lost_to_corrupt = sorted(m for m in corrupt_only if mem_base(m) not in after)
         ss.entries = entries
@@ -1948,10 +1948,10 @@ def cmd_rebuild(a, idx: pathlib.Path) -> int:
           f"{'' if len(carried) == 1 else 's'} carried forward (an origin leaves the index only "
           "by --prune-carried)")
     for ck, o in carried:
-        print(f"  carried ({o['carried']}): {ck} — {o['project']} {o['retro']}"
+        print(f"  carried ({o['carried']}): {ck}; {o['project']} {o['retro']}"
               + (f" · {o['memory']}" if o.get("memory") else ""))
     for ck, o in pruned:
-        print(f"  pruned ({o['carried']}): {ck} — {o['project']} {o['retro']}")
+        print(f"  pruned ({o['carried']}): {ck}; {o['project']} {o['retro']}")
     for u in unresolved:
         print(f"  skipped, commit does not resolve: {u}")
     for n in rekeyed:
@@ -1963,7 +1963,7 @@ def cmd_rebuild(a, idx: pathlib.Path) -> int:
     for n in notes:
         print(f"  memory: {redact(n)}")
     for m in lost_to_corrupt:
-        print(f"  memory: {m} is held only by a bad line, kept in {corrupt_name} — not in the live index")
+        print(f"  memory: {m} is held only by a bad line, kept in {corrupt_name}; not in the live index")
     for n in index_notes:
         print(f"  previous index: {redact(n)}")
     for _, p in problems:
@@ -1986,7 +1986,7 @@ def cmd_candidates(a, idx: pathlib.Path) -> int:
     hits = sorted((e for e in entries.values() if e["projects"] >= a.min_projects),
                   key=lambda e: (-e["projects"], e["classKey"]))
     for e in hits:
-        print(f"{e['id']} {e['classKey']} — {e['title']} (projects {e['projects']}, seen {e['seen']})")
+        print(f"{e['id']} {e['classKey']}: {e['title']} (projects {e['projects']}, seen {e['seen']})")
     print(f"lessons: {len(hits)} candidate{'' if len(hits) == 1 else 's'} for learned.md "
           f"(projects ≥ {a.min_projects}) · {len(entries)} in the local index")
     return 0
@@ -1996,7 +1996,7 @@ def _this_origin(e: dict, root: pathlib.Path) -> dict:
     project = project_key(root)
     mine = [o for o in e["origins"] if o["project"] == project]
     if not mine:
-        raise Refused(f"{e['id']} has no origin in this repository — emit and record from the "
+        raise Refused(f"{e['id']} has no origin in this repository: emit and record from the "
                       "project that learned it")
     # The origin that holds this project's memory id first, then the first by (project, retro):
     # emit revises the record the store already has, and record writes where emit reads (round 9).
@@ -2097,7 +2097,7 @@ def cmd_record(a, idx: pathlib.Path) -> int:
         # backslash would make the next read set the whole index aside.
         if not MEM_RE.fullmatch(memory):
             print(f"lessons: {mid!r} is not a memory id this index can hold (mem:<id>@<rev>, no "
-                  "quote, backslash or space) — nothing written", file=sys.stderr)
+                  "quote, backslash or space); nothing written", file=sys.stderr)
             return 2
         # One id is one PROJECT's record (round 12, C): an id another project's origin holds is
         # refused, naming that project — unless that origin is carried as `checkout holds another
@@ -2114,7 +2114,7 @@ def cmd_record(a, idx: pathlib.Path) -> int:
                           and not (y.get("carried") == CARRY_FOREIGN and here in (y.get("checkouts") or []))})
         if holders:
             print(f"lessons: {mid} is the store record of project {', '.join(holders)} for "
-                  f"{e['classKey']} — refused for {o['project']}, nothing written", file=sys.stderr)
+                  f"{e['classKey']}; refused for {o['project']}, nothing written", file=sys.stderr)
             return 1
         # One id is one store record of one class (round 10, G1): an answer naming an id another
         # class key holds is a stale or misplaced answer — refused, nothing written, or `emit`
@@ -2122,20 +2122,20 @@ def cmd_record(a, idx: pathlib.Path) -> int:
         others = sorted(ck for ck, x in entries.items() if ck != e["classKey"]
                         and any(mem_base(y.get("memory") or "") == mid for y in x["origins"]))
         if others:
-            print(f"lessons: {mid} is the store record of {', '.join(others)} — refused for "
+            print(f"lessons: {mid} is the store record of {', '.join(others)}; refused for "
                   f"{e['classKey']}, nothing written", file=sys.stderr)
             return 1
         # A revision never goes back (G1b): a replayed older answer is refused.
         held = max((mem_rev(y["memory"]) for y in e["origins"]
                     if y.get("memory") and mem_base(y["memory"]) == mid), default=0)
         if int(rev) < held:
-            print(f"lessons: {mid} is at revision {held}; revision {int(rev)} is older — refused, "
+            print(f"lessons: {mid} is at revision {held}; revision {int(rev)} is older: refused, "
                   "nothing written", file=sys.stderr)
             return 1
         # Replacing the id this origin already holds is a deliberate act (round 11, R5): without
         # --replace the old store record would be orphaned in silence.
         if o.get("memory") and mem_base(o["memory"]) != mid and not a.replace:
-            print(f"lessons: this origin holds {o['memory']}; {mid} would replace it — pass "
+            print(f"lessons: this origin holds {o['memory']}; {mid} would replace it: pass "
                   "--replace to do that on purpose; nothing written", file=sys.stderr)
             return 1
         # The same id elsewhere in this entry takes the new revision too: one record, one revision.
@@ -2198,7 +2198,7 @@ def main(argv: list[str]) -> int:
     rb.add_argument("--roots", nargs="+", required=True)
     rb.add_argument("--depth", type=int, default=3, help="directory levels below each root")
     rb.add_argument("--prune-carried", action="store_true",
-                    help="remove, on purpose, every origin the rebuild would carry forward — the "
+                    help="remove, on purpose, every origin the rebuild would carry forward: the "
                          "only way an origin leaves the index")
     rb.add_argument("--prune-carried-reason", choices=PRUNE_REASONS, default=None,
                     help="with --prune-carried: prune only the origins carried for this reason")

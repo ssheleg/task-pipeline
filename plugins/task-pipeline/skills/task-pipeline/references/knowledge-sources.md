@@ -146,7 +146,9 @@ pattern: raw sources → distilled wiki → schema). It is the one source that c
   obsidian-wiki setup --vault /path/to/your/vault
   ```
 
-  Then continue without it. It is a **recommendation, never a gate** — no stage
+  Back up `~/.obsidian-wiki/` before `setup`: it rewrites the active profile. Where
+  the host's instructions delegate installs, the agent runs the lines itself. Then
+  continue without it. It is a **recommendation, never a gate** — no stage
   blocks on a missing wiki, and the pipeline never nags twice in a run.
 
 ## How to harvest — retrieval, not reading

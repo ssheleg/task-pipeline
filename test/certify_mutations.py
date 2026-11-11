@@ -77,8 +77,8 @@ MUTATIONS = [
     ("the eight required keys", 'if k not in t:', 'if False:'),
     ("the verdict enum", 'if t["verdict"] not in TIER_VERDICTS:', 'if False:'),
     ("terminal-node refusal",
-     'if node.get("status") in TERMINAL:\n        die("%s is already %s — certifying',
-     'if False:\n        die("%s is already %s — certifying'),
+     'if node.get("status") in TERMINAL:\n        die("%s is already %s: certifying',
+     'if False:\n        die("%s is already %s: certifying'),
     ("the visual tier on a flagship or product surface",
      'if sclass in VISUAL_REQUIRED and VISUAL_TIER not in reports:', 'if False:'),
     # The agent reading (references/certification.md -> *The agent reading*): owed on a
@@ -90,8 +90,8 @@ MUTATIONS = [
     ("an absent agent_surface owes nothing",
      'asurf = node.get("agent_surface")', 'asurf = node.get("agent_surface", "public")'),
     ("open-blocker refusal",
-     'if open_blockers:\n        die("%s waits on %s, which %s not closed — certifying',
-     'if False:\n        die("%s waits on %s, which %s not closed — certifying'),
+     'if open_blockers:\n        die("%s waits on %s, which %s not closed: certifying',
+     'if False:\n        die("%s waits on %s, which %s not closed: certifying'),
 ]
 
 

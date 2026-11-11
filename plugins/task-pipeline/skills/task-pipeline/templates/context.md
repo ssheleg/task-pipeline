@@ -1,9 +1,9 @@
-# CONTEXT.md — format
+# CONTEXT.md: format
 
 The project's living glossary. The stage-0 grill writes to it **inline**, as each
 term is resolved. Seeded at the repo root (`CONTEXT.md`) for a single-context repo.
 
-> Adapted from Matt Pocock's `grill-with-docs` (MIT — see the repo LICENSE →
+> Adapted from Matt Pocock's `grill-with-docs` (MIT: see the repo LICENSE →
 > *Third-party*).
 
 ## Structure
@@ -56,7 +56,7 @@ _Avoid_: Client, buyer, account
   Before adding: is this unique to this context, or just programming?
 - **Group under subheadings** when natural clusters emerge; a flat list is fine
   when the terms are one cohesive area.
-- **Write an example dialogue** — a dev and a domain expert using the terms
+- **Write an example dialogue**: a dev and a domain expert using the terms
   naturally, which is what exposes the boundaries between related concepts.
 
 ## Single vs multi-context repos

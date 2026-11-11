@@ -219,8 +219,10 @@ here even when it was fixed in passing — especially then.
 
 **DECISIONS WAITING are asked, not listed.** A question parked in a report is a question
 the operator answers days later, if at all. Ask it at the boundary, with options and a
-recommendation, in the same breath as the report. If there are none, the field prints
-`0` — [`gates.md`](gates.md)'s rule about absence applies here too.
+recommendation, in the same breath as the report. Where the host's instructions
+delegate decisions, only a human gate waits here; every other decision is taken by the
+agent, recorded with its reason and reported as decided. If there are none, the field
+prints `0` — [`gates.md`](gates.md)'s rule about absence applies here too.
 
 ### AMBIGUITIES are computed from four registers the run already keeps
 

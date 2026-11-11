@@ -117,12 +117,12 @@ def die(msg, code=1):
 
 def load(path):
     if not os.path.isfile(path):
-        die(f"no graph at {path} — stage 2 writes it", 2)
+        die(f"no graph at {path}: stage 2 writes it", 2)
     try:
         with open(path, encoding="utf-8") as fh:
             return json.load(fh)
     except ValueError as e:
-        die(f"{path}: not readable as JSON — {e}")
+        die(f"{path}: not readable as JSON; {e}")
 
 
 def shape(graph, path):
@@ -182,7 +182,7 @@ def save(path, graph):
             os.unlink(tmp)
         except OSError:
             pass
-        die("could not write %s — nothing was changed: %s" % (path, e))
+        die("could not write %s: nothing was changed: %s" % (path, e))
 
 
 # --- the three a schema cannot reach ------------------------------------------
@@ -201,25 +201,25 @@ def violations(graph):
     seen = set()
     for i in ids:
         if i in seen:
-            out.append(f"duplicate node id {i} — two nodes with one id is a graph "
+            out.append(f"duplicate node id {i}: two nodes with one id is a graph "
                        "nobody can cite, and a verdict naming it would close the wrong one")
         seen.add(i)
 
     declared = set(graph.get("requirements") or []) | set(graph.get("goal_clauses") or [])
     if not (graph.get("requirements") or []):
-        out.append("the graph declares no `requirements` — `serves` then resolves against "
+        out.append("the graph declares no `requirements`: `serves` then resolves against "
                    "nothing, and that field is the one edge joining the intent graph to "
                    "this one. Copy the REQ ids the brief froze")
 
     if not (graph.get("goal") or "").strip():
-        out.append("the graph has no `goal` — every iteration is supposed to print it "
+        out.append("the graph has no `goal`: every iteration is supposed to print it "
                    "above the frontier, and a queue that cannot say what it serves is a "
                    "queue nothing can be parked against")
 
     for n in nodes:
         nid = n.get("id")
         if not isinstance(nid, str) or not ID_SHAPE.match(nid):
-            out.append(f"node id {nid!r} is not the shape `N-001` the schema requires — "
+            out.append(f"node id {nid!r} is not the shape `N-001` the schema requires: "
                        "and an id nothing can parse is an id no verdict can cite")
         status = n.get("status")
         if not isinstance(status, str) or status not in STATUSES:
@@ -233,7 +233,7 @@ def violations(graph):
         owner = n.get("owner")
         if owner not in ROLES:
             near = [r for r in sorted(ROLES) if r[:4] == (owner or "")[:4]]
-            hint = f" — did you mean {near[0]}?" if near else ""
+            hint = f": did you mean {near[0]}?" if near else ""
             out.append(f"{nid}: owner {owner!r} is not a role this pipeline "
                        f"ships{hint}. A node nobody can dispatch never leaves the frontier, "
                        "and nothing says why")
@@ -246,7 +246,7 @@ def violations(graph):
         blockers = n.get("blocked_by") or []
         if len(set(blockers)) != len(blockers):
             dupes = sorted({b for b in blockers if blockers.count(b) > 1})
-            out.append(f"{nid}: blocked_by repeats {', '.join(dupes)} — the schema calls "
+            out.append(f"{nid}: blocked_by repeats {', '.join(dupes)}; the schema calls "
                        "the list unique, and a dependency counted twice is one nobody "
                        "removes on the first pass")
         for b in blockers:
@@ -257,7 +257,7 @@ def violations(graph):
             val = n.get(field)
             if not isinstance(val, str) or not val.strip():
                 out.append(f"{nid}: `{field}` is {val!r}. The schema requires a non-empty "
-                           "string and never ran against a live graph, so this passed — a "
+                           "string and never ran against a live graph, so this passed: a "
                            "node with no title is a frontier row nobody can act on, and a "
                            "node serving nothing is REQ-012's park case")
             elif any(c in val for c in "\n\r"):
@@ -266,7 +266,7 @@ def violations(graph):
                            "a row for a node that does not exist")
             elif field == "serves" and declared and val not in declared:
                 near = [d for d in sorted(declared) if d[:5] == val[:5]]
-                hint = f" — did you mean {near[0]}?" if near else ""
+                hint = f": did you mean {near[0]}?" if near else ""
                 out.append(f"{nid}: serves {val!r}, which is neither a declared requirement "
                            f"nor a declared goal clause{hint}. A node serving something "
                            "nobody asked for is work the brief cannot account for, and the "
@@ -281,7 +281,7 @@ def violations(graph):
         if n.get("status") != "parked":
             chk = n.get("check")
             if not isinstance(chk, str) or not chk.strip():
-                out.append(f"{nid}: `check` is {chk!r} — B-080: a node that cannot say how "
+                out.append(f"{nid}: `check` is {chk!r}; B-080: a node that cannot say how "
                            "it will be closed leaves the verifier inventing a check or "
                            "running everything, and `agents/verifier.md` forbids both. Name "
                            "the command, or the judge where no command can decide it. Only a "
@@ -295,7 +295,7 @@ def violations(graph):
         # owes the fourth, `visual` reading. A class outside the four would silently
         # require nothing, which is the one outcome a typo must not have.
         if "surface_class" in n and n["surface_class"] not in SURFACE_CLASSES:
-            out.append(f"{nid}: surface_class is {n['surface_class']!r} — it must be one of "
+            out.append(f"{nid}: surface_class is {n['surface_class']!r}; it must be one of "
                        f"{', '.join(SURFACE_CLASSES)}. A class nobody recognises requires no "
                        "visual reading, so a typo here would drop the tier that reads the pixels")
 
@@ -314,14 +314,14 @@ def violations(graph):
         # lands*) sets how many certification rounds a node owes. A class outside the three
         # would owe an unknown number, and the cheapest misreading is one round.
         if "risk" in n and n["risk"] not in RISK_CLASSES:
-            out.append(f"{nid}: risk is {n['risk']!r} — it must be one of "
+            out.append(f"{nid}: risk is {n['risk']!r}; it must be one of "
                        f"{', '.join(RISK_CLASSES)}; a class nobody recognises owes no known "
                        "number of rounds")
 
         # Wave mode (`references/waves.md`). `True` is an int in Python, and a wave of
         # `true` is a typo the ordering check below would read as wave 1.
         if "wave" in n and not _is_wave(n["wave"]):
-            out.append(f"{nid}: wave is {n['wave']!r} — it must be an integer from 1. A wave "
+            out.append(f"{nid}: wave is {n['wave']!r}; it must be an integer from 1. A wave "
                        "nobody can order is a node no `next --wave` ever prints, and the "
                        "order check below cannot see it")
 
@@ -329,15 +329,15 @@ def violations(graph):
             ev = n.get("evidence")
             if not isinstance(ev, list) or not [e for e in ev
                                                 if isinstance(e, str) and e.strip()]:
-                out.append(f"{nid}: status is done and `evidence` carries nothing readable "
-                           "— a node called done by assertion is what evidence exists for")
+                out.append(f"{nid}: status is done and `evidence` carries nothing readable"
+                           "; a node called done by assertion is what evidence exists for")
         if n.get("status") == "parked":
             # `isinstance` rather than truthiness: `null` is the shape a schema whose
             # `parked_reason` was typed nullable would let through, and it satisfies
             # every string-only assertion vacuously.
             reason = n.get("parked_reason")
             if not isinstance(reason, str) or not reason.strip():
-                out.append(f"{nid}: status is parked and `parked_reason` is {reason!r} — "
+                out.append(f"{nid}: status is parked and `parked_reason` is {reason!r}; "
                            "REQ-012: a park without a reason is indistinguishable from "
                            "work that was quietly dropped")
 
@@ -356,7 +356,7 @@ def violations(graph):
         pay = e.get("payload")
         if not isinstance(pay, str) or not pay.strip():
             out.append(f"edge {e.get('from')}→{e.get('to')}: `payload` is {pay!r}. An edge "
-                       "carrying no named artifact is chronology drawn as architecture — "
+                       "carrying no named artifact is chronology drawn as architecture: "
                        "`references/planning.md`'s fake-edge test, on the graph rather than "
                        "on the plan")
         else:
@@ -378,7 +378,7 @@ def violations(graph):
         src, dst = e.get("from"), e.get("to")
         if src in wave_of and dst in wave_of and wave_of[src] > wave_of[dst]:
             out.append(f"edge {src}→{dst}: {src} is in wave {wave_of[src]} and {dst} in "
-                       f"wave {wave_of[dst]} — an earlier wave would wait on a later one, "
+                       f"wave {wave_of[dst]}; an earlier wave would wait on a later one, "
                        "so it cannot close in its own pass (references/waves.md). Move "
                        f"{dst} to wave {wave_of[src]} or later, or {src} earlier")
 
@@ -390,13 +390,13 @@ def violations(graph):
             out.extend(f"revisions[{i}]: {err}" for err in wait_errors(r['waiting_on']))
         if r.get("verb") not in REVISION_VERBS:
             out.append(f"revisions[{i}] records verb {r.get('verb')!r}, which is not one of "
-                       f"{sorted(REVISION_VERBS)} — the schema enumerates them and "
+                       f"{sorted(REVISION_VERBS)}: the schema enumerates them and "
                        "`violations()` never reached the enum, so `close` wrote a revision "
                        "its own shipped schema rejected (found by a probe, not by the "
                        "fixture that asserts the graph still validates)")
         if not isinstance(r.get("why"), str) or not r["why"].strip():
             out.append(f"revisions[{i}] records {r.get('verb')} on {r.get('node')} with "
-                       f"`why` = {r.get('why')!r} — a revision log whose reasons are blank "
+                       f"`why` = {r.get('why')!r}: a revision log whose reasons are blank "
                        "is the log's own failure mode, not a record")
 
     out.extend(cycles(nodes))
@@ -542,7 +542,7 @@ def verdict_violations(v):
 
     for k in VERDICT_KEYS:
         if k not in v:
-            out.append(f"verdict has no `{k}` — all seven are required, because a "
+            out.append(f"verdict has no `{k}`: all seven are required, because a "
                        "verdict that omits one is silent about it rather than clear")
     if out:
         return out
@@ -573,7 +573,7 @@ def verdict_violations(v):
 
     if isinstance(v.get("done"), list) and isinstance(v.get("evidence"), list):
         if v["done"] and not v["evidence"]:
-            out.append("verdict claims `done` with empty `evidence` — the field exists "
+            out.append("verdict claims `done` with empty `evidence`: the field exists "
                        "for exactly this, and a node closed on an unevidenced claim is "
                        "the thing the whole ledger is built to prevent")
         # And each entry must be a non-empty string, because `graph.schema.json`
@@ -586,7 +586,7 @@ def verdict_violations(v):
         # per-task review that had already read this function.
         for i, e in enumerate(v["evidence"]):
             if not isinstance(e, str) or not e.strip():
-                out.append(f"verdict `evidence[{i}]` is {e!r} — every entry must be a "
+                out.append(f"verdict `evidence[{i}]` is {e!r}: every entry must be a "
                            "non-empty string, and a list of blanks is the shape a script "
                            "emitting an empty command output produces")
 
@@ -596,7 +596,7 @@ def verdict_violations(v):
             continue
         if "blocks" not in b or "can_continue_around" not in b:
             out.append(f"blocker {b.get('what')!r} does not say what it `blocks` and "
-                       "whether the run `can_continue_around` it — without both, the "
+                       "whether the run `can_continue_around` it: without both, the "
                        "manager cannot tell a pause from a stop")
 
     rp = v.get("replan")
@@ -606,7 +606,7 @@ def verdict_violations(v):
         if "possible" not in rp:
             out.append("verdict `replan` does not say whether a re-plan is `possible`")
         elif rp.get("possible") is False and not (rp.get("why") or "").strip():
-            out.append("verdict says a re-plan is not possible and gives no `why` — a "
+            out.append("verdict says a re-plan is not possible and gives no `why`: a "
                        "stop with no reason is indistinguishable from a stall")
         for nid in rp.get("park") or []:
             if not isinstance(nid, str) or not nid.startswith(NODE_ID):
@@ -621,7 +621,7 @@ def verdict_violations(v):
             # close over a field the verdict could have been asked for.
             _c = nid.get("check")
             if not isinstance(_c, str) or not _c.strip():
-                out.append(f"replan.add entry {nid.get('title')!r} names no `check` — the "
+                out.append(f"replan.add entry {nid.get('title')!r} names no `check`: the "
                            "node it creates has to say how IT will be closed, or the next "
                            "verifier faces the absence this one was told to read")
     return out
@@ -727,7 +727,7 @@ def owed_shortfall(node):
         kinds = list(cert.get("kinds") or [])
         failed_adv = any(k == "adversarial" and not all(v == "pass" for v in (h or {}).values())
                          for h, k in zip(cert.get("history") or [], kinds))
-        return ("%d of %d owed passing rounds, but none of them adversarial — %srun one that "
+        return ("%d of %d owed passing rounds, but none of them adversarial: %srun one that "
                 "passes with `--kind adversarial`"
                 % (len(passed), owed,
                    "a FAILED adversarial round does not count; " if failed_adv else ""))
@@ -769,7 +769,7 @@ def tier_violations(t):
 
     for k in TIER_KEYS:
         if k not in t:
-            out.append("tier report has no `%s` — all eight are required, because a "
+            out.append("tier report has no `%s`: all eight are required, because a "
                        "report that omits one is silent about it rather than clear" % k)
     if out:
         return out
@@ -777,10 +777,10 @@ def tier_violations(t):
     if not isinstance(t["node"], str) or not t["node"].startswith(NODE_ID):
         out.append("tier report `node` is %r, which is not a node id" % (t["node"],))
     if t["tier"] not in ALL_TIERS:
-        out.append("tier report `tier` is %r — it must be one of %s"
+        out.append("tier report `tier` is %r: it must be one of %s"
                    % (t["tier"], ", ".join(ALL_TIERS)))
     if t["verdict"] not in TIER_VERDICTS:
-        out.append("tier report `verdict` is %r — it must be `pass` or `fail`, because "
+        out.append("tier report `verdict` is %r: it must be `pass` or `fail`, because "
                    "a certification that admits a third state admits a maybe"
                    % (t["verdict"],))
 
@@ -793,7 +793,7 @@ def tier_violations(t):
     for k in ("scope", "confirms", "evidence", "not_examined"):
         for i, e in enumerate(t[k]):
             if not isinstance(e, str) or not e.strip():
-                out.append("tier report `%s[%d]` is %r — every entry must be a non-empty "
+                out.append("tier report `%s[%d]` is %r: every entry must be a non-empty "
                            "string, and a list of blanks is the shape a script emitting "
                            "empty output produces" % (k, i, e))
 
@@ -807,7 +807,7 @@ def tier_violations(t):
                 out.append("tier report `findings[%d]` does not say `%s`" % (i, k))
         sev = f.get("severity")
         if sev is not None and sev not in SEVERITIES:
-            out.append("tier report `findings[%d].severity` is %r — it must be `breaks` "
+            out.append("tier report `findings[%d].severity` is %r: it must be `breaks` "
                        "(the node is not done) or `risk` (found, judged survivable, and "
                        "named)" % (i, sev))
         # A break has to say how its fix will be PROVEN, for the same reason
@@ -815,20 +815,20 @@ def tier_violations(t):
         # to close, and handing it the absence is how the defect returns a round
         # later.
         if sev == "breaks" and not str(f.get("check", "")).strip():
-            out.append("tier report `findings[%d]` breaks the node and names no `check` "
-                       "— the fix node it becomes has to say how IT will be closed" % i)
+            out.append("tier report `findings[%d]` breaks the node and names no `check`"
+                       ": the fix node it becomes has to say how IT will be closed" % i)
         findings.append(f)
 
     breaks = [f for f in findings if isinstance(f, dict) and f.get("severity") == "breaks"]
     if t["verdict"] == "pass":
         # The two rules that make a pass mean something.
         if not t["scope"]:
-            out.append("tier report `%s` passes on an empty `scope` — a report that names "
+            out.append("tier report `%s` passes on an empty `scope`: a report that names "
                        "nothing it read is a rubber stamp, and three of those cost three "
                        "times one verifier and read as three times the assurance"
                        % t["tier"])
         if not t["evidence"]:
-            out.append("tier report `%s` passes with empty `evidence` — the field exists "
+            out.append("tier report `%s` passes with empty `evidence`: the field exists "
                        "for exactly this" % t["tier"])
         if breaks:
             out.append("tier report `%s` passes while carrying %d finding(s) at severity "
@@ -837,8 +837,8 @@ def tier_violations(t):
                           "; ".join(str(f.get("what")) for f in breaks)))
     elif t["verdict"] == "fail":
         if not breaks:
-            out.append("tier report `%s` fails and names no finding at severity `breaks` "
-                       "— a fail that does not say what broke is a fail the next round "
+            out.append("tier report `%s` fails and names no finding at severity `breaks`"
+                       ": a fail that does not say what broke is a fail the next round "
                        "cannot act on" % t["tier"])
 
     # Blind, and checked. EVERY prose field can carry it — the scan covered three
@@ -847,7 +847,7 @@ def tier_violations(t):
     for k in ("confirms", "evidence", "not_examined", "scope"):
         for i, e in enumerate(t[k]):
             if isinstance(e, str) and CROSS_TIER.search(e):
-                out.append("tier report `%s[%d]` cites another tier's verdict (%r) — the "
+                out.append("tier report `%s[%d]` cites another tier's verdict (%r): the "
                            "three run blind, because three reports that read each other "
                            "are one opinion with three signatures" % (k, i, e.strip()[:70]))
     # Enumerated over the RAW list, so the index in this refusal and the index
@@ -862,7 +862,7 @@ def tier_violations(t):
             v = f.get(k)
             if isinstance(v, str) and CROSS_TIER.search(v):
                 out.append("tier report `findings[%d].%s` cites another tier's verdict "
-                           "(%r) — the three run blind, because three reports that read "
+                           "(%r): the three run blind, because three reports that read "
                            "each other are one opinion with three signatures"
                            % (i, k, v.strip()[:70]))
     return out
@@ -878,17 +878,17 @@ def cmd_validate(graph, args):
 
 def cmd_next(graph, args):
     if violations(graph):
-        die("graph does not validate — run `validate` first", 1)
+        die("graph does not validate: run `validate` first", 1)
     nodes = graph.get("nodes") or []
     wave = getattr(args, "wave", None)
     if wave is not None:
         # One wave's frontier, and its own endings: `3` is *this wave is done*, which is
         # the close pass's cue, not the release's (references/waves.md).
         if not _is_wave(wave):
-            die("--wave %r is not a wave — waves are integers from 1" % wave, 2)
+            die("--wave %r is not a wave: waves are integers from 1" % wave, 2)
         nodes = [n for n in nodes if n.get("wave") == wave]
         if not nodes:
-            die("no node is in wave %d — nothing to walk, and an empty wave is a wave plan "
+            die("no node is in wave %d: nothing to walk, and an empty wave is a wave plan "
                 "and a graph that disagree" % wave)
     if nodes and all(n.get("status") in TERMINAL for n in nodes):
         return 3
@@ -907,7 +907,7 @@ def cmd_next(graph, args):
             reasons = "; ".join(
                 f"{b}: {_by_id[b].get('parked_reason', '?')}" for b in parked_blockers)
             print(f"held: {n.get('id')} waits on parked {', '.join(parked_blockers)} "
-                  f"({reasons}) — a park does not produce the artifact; if an "
+                  f"({reasons}); a park does not produce the artifact; if an "
                   f"alternative producer exists, change the edge explicitly",
                   file=sys.stderr)
     if not ready:
@@ -953,12 +953,12 @@ def cmd_next(graph, args):
     pairs, undeclared = collisions(ready)
     for a, b, shared in pairs:
         print(f"collision: {a} and {b} are both runnable and both mutate "
-              f"{', '.join(shared)} — dispatching them together is the false parallelism "
+              f"{', '.join(shared)}; dispatching them together is the false parallelism "
               "`references/planning.md` refuses: distinct is not independent, and the check "
               "is what they touch", file=sys.stderr)
     if undeclared:
         print(f"undeclared: {len(undeclared)} of {len(ready)} runnable node(s) declare no "
-              f"`touches` ({', '.join(undeclared[:6])}) — a frontier nobody described cannot "
+              f"`touches` ({', '.join(undeclared[:6])}); a frontier nobody described cannot "
               "be checked for collisions, and no warning here is not the same as no "
               "collision", file=sys.stderr)
     return 0
@@ -986,22 +986,22 @@ def cmd_claim(graph, args):
     4 the node is not runnable, 1 the authority was unavailable — and 1 means
     NO work starts, which is the whole point of fail-closed."""
     if violations(graph):
-        die("graph does not validate — run `validate` first", 1)
+        die("graph does not validate: run `validate` first", 1)
     node_id = args.node
     ready = {n["id"]: n for n in frontier(graph)}
     if node_id not in ready:
-        die(f"{node_id} is not in the frontier — claim only a runnable node", 4)
+        die(f"{node_id} is not in the frontier: claim only a runnable node", 4)
     revision = int(ready[node_id].get("revision", 0) or 0)
     ea = _load_authority(args)
     try:
         auth = ea.authority_for(args.authority)
     except ea.AuthorityUnavailable as e:
-        die(f"authority unavailable — dispatch BLOCKED, no work started: {e}", 1)
+        die(f"authority unavailable: dispatch BLOCKED, no work started: {e}", 1)
     try:
         grant = auth.claim(node_id, args.owner, revision, now=time.time(),
                            ttl_seconds=args.ttl)
     except ea.AuthorityUnavailable as e:
-        die(f"arbitration failed — dispatch BLOCKED, no work started: {e}", 1)
+        die(f"arbitration failed: dispatch BLOCKED, no work started: {e}", 1)
     finally:
         auth.close()
     if grant is None:
@@ -1024,10 +1024,10 @@ def cmd_recover(graph, args):
     fence. A still-live claim is not recoverable (that is stealing a working
     node); this exits 5 while the lease holds."""
     if violations(graph):
-        die("graph does not validate — run `validate` first", 1)
+        die("graph does not validate: run `validate` first", 1)
     node = next((n for n in graph.get('nodes') or [] if n.get('id') == args.node), None)
     if node is not None and node.get('status') == 'waiting':
-        die("node is waiting — resolve its recorded wait before recovery", 4)
+        die("node is waiting: resolve its recorded wait before recovery", 4)
     ea = _load_authority(args)
     try:
         auth = ea.authority_for(args.authority)
@@ -1065,7 +1065,7 @@ def cmd_complete(graph, args):
         auth.close()
     if grant is None:
         print(f"not completed: {args.node} is not held by {args.owner} at fence "
-              f"{args.fence} — a late or superseded worker cannot complete it", file=sys.stderr)
+              f"{args.fence}; a late or superseded worker cannot complete it", file=sys.stderr)
         return 5
     print(json.dumps(grant, ensure_ascii=False))
     return 0
@@ -1103,7 +1103,7 @@ def cmd_waive(graph, args):
     nid = args.node
     by_id = {n.get("id"): n for n in graph.get("nodes") or []}
     if nid not in by_id:
-        die("no node %s in this graph — nothing was waived" % nid)
+        die("no node %s in this graph: nothing was waived" % nid)
     reason = (args.reason or "").strip()
     who = (args.by or "").strip()
     if not reason:
@@ -1122,10 +1122,10 @@ def cmd_waive(graph, args):
            precondition=at)
     bad = violations(graph)
     if bad:
-        die("waiving %s would break the graph — nothing was written:\n  %s"
+        die("waiving %s would break the graph: nothing was written:\n  %s"
             % (nid, "\n  ".join(bad)))
     save(args.graph, graph)
-    print("waived %s — authorized exception by %s (never a certification)" % (nid, who))
+    print("waived %s: authorized exception by %s (never a certification)" % (nid, who))
     return 0
 
 
@@ -1146,7 +1146,7 @@ def cmd_invalidate(graph, args):
     nid = args.node
     by_id = {n.get("id"): n for n in graph.get("nodes") or []}
     if nid not in by_id:
-        die("no node %s in this graph — nothing was invalidated" % nid)
+        die("no node %s in this graph: nothing was invalidated" % nid)
     why = (args.why or "").strip()
     if not why:
         die("invalidate needs --why: a superseding revision with no reason is "
@@ -1173,7 +1173,7 @@ def cmd_invalidate(graph, args):
 
     bad = violations(graph)
     if bad:
-        die("invalidating %s would break the graph — nothing was written:\n  %s"
+        die("invalidating %s would break the graph: nothing was written:\n  %s"
             % (nid, "\n  ".join(bad)))
     save(args.graph, graph)
     print("invalidated %s and %d downstream node(s); reset %d certified proof(s): %s"
@@ -1215,7 +1215,7 @@ class held:
         try:
             import fcntl
         except ImportError:
-            die("graph mutation needs file locking on this platform — "
+            die("graph mutation needs file locking on this platform: "
                 "nothing was written: %s" % self.path)
         d = os.path.dirname(self.path) or "."
         try:
@@ -1225,7 +1225,7 @@ class held:
             if self.fh:
                 self.fh.close()
                 self.fh = None
-            die("could not take the graph lock (%s) — nothing was written" % e)
+            die("could not take the graph lock (%s): nothing was written" % e)
         return self
 
     def __exit__(self, *exc):
@@ -1263,7 +1263,7 @@ def guard(graph, path):
     """
     bad = violations(graph)
     if bad:
-        die("%s was ALREADY invalid before this mutation — nothing was written. Fix "
+        die("%s was ALREADY invalid before this mutation: nothing was written. Fix "
             "these first:\n  %s" % (path, "\n  ".join(bad)))
 
 
@@ -1272,34 +1272,34 @@ def cmd_wait(graph, args):
     guard(graph, args.graph)
     why = args.why.strip()
     if not why or any(c in why for c in "\r\n"):
-        die("wait/resume needs a nonblank single-line --why — nothing was written")
+        die("wait/resume needs a nonblank single-line --why: nothing was written")
     node = next((n for n in graph['nodes'] if n['id'] == args.node), None)
     if node is None:
-        die("no node %s — nothing was written" % args.node)
+        die("no node %s: nothing was written" % args.node)
     if node.get('claim') is not None:
-        die("node has a recorded execution claim — release it first; nothing was written")
+        die("node has a recorded execution claim: release it first; nothing was written")
     if args.verb == 'wait':
         if node['status'] not in ('pending', 'blocked'):
-            die("only pending or blocked nodes can wait — nothing was written")
+            die("only pending or blocked nodes can wait: nothing was written")
         import uuid
         record = {'id': uuid.uuid4().hex, 'kind': args.kind, 'watcher': args.watcher}
         bad = wait_errors(record)
         if bad:
-            die('; '.join(bad) + ' — nothing was written')
+            die('; '.join(bad) + ': nothing was written')
         node['status'] = 'waiting'
         node['waiting_on'] = record
     else:
         if node['status'] != 'waiting':
-            die("node is not waiting — nothing was written")
+            die("node is not waiting: nothing was written")
         record = node['waiting_on']
         if args.wait_id != record['id']:
-            die("stale wait identity — nothing was written")
+            die("stale wait identity: nothing was written")
         node.pop('waiting_on')
         node['status'] = 'pending'
     revise(graph, args.verb, args.node, why, waiting_on=record)
     bad = violations(graph)
     if bad:
-        die('wait transition would break the graph — nothing was written: ' + '; '.join(bad))
+        die('wait transition would break the graph: nothing was written: ' + '; '.join(bad))
     save(args.graph, graph)
     print('%s %s: %s' % (args.node, args.verb, record['id']))
     return 0
@@ -1316,17 +1316,17 @@ def cmd_park(graph, args):
     reason = (args.reason or "").strip()
     if any(c in reason for c in "\n\r"):
         die("--reason contains a line break, and a reason is read back beside the node "
-            "it explains — nothing was written")
+            "it explains: nothing was written")
     if not reason:
         die("`park` needs a --reason with something in it. The flag being present is "
             "not a reason being given, and an empty one parks the node while recording "
-            "nothing about why — which is the shape parking exists to prevent")
+            "nothing about why: which is the shape parking exists to prevent")
 
     node = next((n for n in graph.get("nodes") or [] if n.get("id") == args.node), None)
     if node is None:
-        die("no node %s in this graph — nothing was written" % args.node)
+        die("no node %s in this graph: nothing was written" % args.node)
     if node.get("status") == "done":
-        die("%s is done — parking it would overwrite a closed result and its evidence. "
+        die("%s is done: parking it would overwrite a closed result and its evidence. "
             "If the close was wrong, say so in a verdict rather than here" % args.node)
     if node.get("status") == "parked":
         die("%s is already parked, and the reason recorded is: %r. A second park would "
@@ -1338,7 +1338,7 @@ def cmd_park(graph, args):
     revise(graph, "park", args.node, reason, waiting_on=node.pop('waiting_on', None))
     bad = violations(graph)
     if bad:
-        die("parking %s would break the graph — nothing was written:\n  %s"
+        die("parking %s would break the graph: nothing was written:\n  %s"
             % (args.node, "\n  ".join(bad)))
     save(args.graph, graph)
     print("%s parked: %s" % (args.node, reason))
@@ -1357,27 +1357,27 @@ def cmd_wave(graph, args):
     why = (args.why or "").strip()
     if not why:
         die("`wave` needs a --why with something in it: a re-cut nobody gave a reason for "
-            "is the quiet edit the revision log exists to refuse — nothing was written")
+            "is the quiet edit the revision log exists to refuse; nothing was written")
     if any(c in why for c in "\n\r"):
-        die("--why contains a line break — nothing was written")
+        die("--why contains a line break: nothing was written")
     if not _is_wave(args.to):
-        die("--to %r is not a wave — waves are integers from 1. Nothing was written"
+        die("--to %r is not a wave: waves are integers from 1. Nothing was written"
             % args.to)
     node = next((n for n in graph.get("nodes") or [] if n.get("id") == args.node), None)
     if node is None:
-        die("no node %s in this graph — nothing was written" % args.node)
+        die("no node %s in this graph: nothing was written" % args.node)
     if node.get("status") == "done":
-        die("%s is done, in wave %s — moving it would rewrite which pass closed it. "
+        die("%s is done, in wave %s: moving it would rewrite which pass closed it. "
             "Nothing was written" % (args.node, node.get("wave")))
     if node.get("wave") == args.to:
-        die("%s is already in wave %d — nothing was written" % (args.node, args.to))
+        die("%s is already in wave %d: nothing was written" % (args.node, args.to))
 
     before = node.get("wave")
     node["wave"] = args.to
     revise(graph, "wave", args.node, why)
     bad = violations(graph)
     if bad:
-        die("moving %s to wave %d would break the graph — nothing was written:\n  %s"
+        die("moving %s to wave %d would break the graph: nothing was written:\n  %s"
             % (args.node, args.to, "\n  ".join(bad)))
     save(args.graph, graph)
     print("%s: wave %s → %d: %s" % (args.node, before if before is not None else "none",
@@ -1409,32 +1409,32 @@ def cmd_add(graph, args):
         die("`add` needs a --title with something in it")
     if not serves:
         die("`add` needs --serves: the REQ or goal clause this node exists for. A node "
-            "that serves nothing is not a node to add — it is REQ-012's park case, and "
+            "that serves nothing is not a node to add: it is REQ-012's park case, and "
             "adding it hides the decision that ought to be recorded")
     declared = set(graph.get("requirements") or []) | set(graph.get("goal_clauses") or [])
     if declared and serves not in declared:
         die("--serves %r is neither a declared requirement nor a declared goal clause. The "
-            "REQ table is frozen at stage 0 — adding to it is free and the BRIEF does it, "
+            "REQ table is frozen at stage 0: adding to it is free and the BRIEF does it, "
             "not a node. Amend the brief and the graph's `requirements`, or serve one of: "
             "%s. Nothing was written" % (serves, ", ".join(sorted(declared)[:6])))
 
     if args.owner not in ROLES:
         near = [r for r in sorted(ROLES) if r[:4] == (args.owner or "")[:4]]
-        die("owner %r is not a role this pipeline ships%s — nothing was written"
-            % (args.owner, (" — did you mean %s?" % near[0]) if near else ""))
+        die("owner %r is not a role this pipeline ships%s: nothing was written"
+            % (args.owner, (": did you mean %s?" % near[0]) if near else ""))
 
     check = (args.check or "").strip()
     if not check:
         die("`add` needs a --check with something in it: the command that closes this node, "
             "or the judge where no command can decide it. A node that cannot say how it "
-            "will be closed leaves the verifier inventing a check or running everything — "
+            "will be closed leaves the verifier inventing a check or running everything: "
             "B-080, and `agents/verifier.md` forbids both. Nothing was written")
 
     for name, val in (("--title", title), ("--serves", serves), ("--check", check)):
         if any(c in val for c in "\n\r"):
             die("%s contains a line break. `next` prints one row per node and the loop "
                 "reads those rows, so a break here forges a row for a node that does not "
-                "exist — nothing was written" % name)
+                "exist: nothing was written" % name)
 
     nodes = graph.setdefault("nodes", [])
     known = {n.get("id") for n in nodes}
@@ -1447,7 +1447,7 @@ def cmd_add(graph, args):
             "revision of the plan, and a revision nobody recorded a reason for is how a "
             "run explains its own completion by a plan that existed only at the end")
     if any(c in why for c in "\n\r"):
-        die("--why contains a line break — nothing was written")
+        die("--why contains a line break: nothing was written")
 
     # `dict.fromkeys` for the dependency, and the payloads must survive the same
     # deduplication or they stop pairing by index.
@@ -1455,7 +1455,7 @@ def cmd_add(graph, args):
     raw_carries = args.carries or []
     if len(raw_blocked) != len(raw_carries):
         die("--blocked-by was given %d time(s) and --carries %d. Each dependency names "
-            "what it hands over, and they pair in the order written — an edge carrying no "
+            "what it hands over, and they pair in the order written: an edge carrying no "
             "named artifact is chronology drawn as architecture. Nothing was written"
             % (len(raw_blocked), len(raw_carries)))
     pairs, seen_b = [], set()
@@ -1465,18 +1465,18 @@ def cmd_add(graph, args):
         seen_b.add(b)
         if not c.strip():
             die("--carries for %s is blank. A payload nobody named is the fake edge with a "
-                "field around it — nothing was written" % b)
+                "field around it: nothing was written" % b)
         pairs.append((b, c.strip()))
     blocked = [b for b, _ in pairs]
     for b in blocked:
         if b not in known:
-            die("--blocked-by names %s, which is not in this graph — nothing was written" % b)
+            die("--blocked-by names %s, which is not in this graph: nothing was written" % b)
 
     nid = args.id or next_id(known)
     if not ID_SHAPE.match(nid):
         die("--id %r is not a node id; the shape is N-001 and the schema enforces it" % nid)
     if nid in known:
-        die("node id %s already exists — nothing was written. Omit --id and one is "
+        die("node id %s already exists: nothing was written. Omit --id and one is "
             "allocated from the highest in use" % nid)
 
     new = {"id": nid, "title": title, "owner": args.owner, "status": "pending",
@@ -1496,7 +1496,7 @@ def cmd_add(graph, args):
         # Belt over the braces: every shape enumerated above is checked before this
         # point, so this fires only on one that was NOT enumerated — and the right
         # answer to an unenumerated shape is to refuse rather than to write and hope.
-        die("adding %s would break the graph — nothing was written:\n  %s"
+        die("adding %s would break the graph: nothing was written:\n  %s"
             % (nid, "\n  ".join(bad)))
     save(args.graph, graph)
     print("%s added: %s" % (nid, title))
@@ -1517,7 +1517,7 @@ def cmd_coverage(graph, args):
     relation and is the more dangerous half.
     """
     if violations(graph):
-        die("graph does not validate — run `validate` first", 1)
+        die("graph does not validate: run `validate` first", 1)
     nodes = graph.get("nodes") or []
     reqs = list(graph.get("requirements") or []) + list(graph.get("goal_clauses") or [])
     by_req = {r: [] for r in reqs}
@@ -1533,7 +1533,7 @@ def cmd_coverage(graph, args):
         live = [n for n in served if n.get("status") != "parked"]
         marks = " ".join(f"{n['id']}({n.get('status')})" for n in served)
         if not live:
-            bad.append(f"{r}: every node serving it is parked — {marks}. Covered on paper "
+            bad.append(f"{r}: every node serving it is parked; {marks}. Covered on paper "
                        "and by nothing that will run")
         else:
             print(f"{r}  {marks}")
@@ -1541,7 +1541,7 @@ def cmd_coverage(graph, args):
     for line in bad:
         print(line, file=sys.stderr)
     print("not read here: whether an evidence row in docs/evidence/verification.md closes "
-          "no requirement — that is the fourth direction of this relation and it lives in "
+          "no requirement; that is the fourth direction of this relation and it lives in "
           "the ledger, not the graph", file=sys.stderr)
     return 1 if bad else 0
 
@@ -1579,21 +1579,21 @@ def cmd_producer(graph, args):
         man = os.path.join(os.path.dirname(os.path.dirname(here)),
                            ".claude-plugin", "plugin.json")
         if not os.path.isfile(man):
-            return ("unavailable: no plugin manifest above this bundle — the skill is "
+            return ("unavailable: no plugin manifest above this bundle; the skill is "
                     "installed as a plain directory, which carries no version of its own")
         try:
             with open(man, encoding="utf-8") as fh:
                 v = json.load(fh).get("version")
             return f"task-pipeline@{v}" if v else "unavailable: the manifest states no version"
         except (OSError, ValueError) as e:
-            return f"unavailable: the plugin manifest is unreadable — {e}"
+            return f"unavailable: the plugin manifest is unreadable; {e}"
 
     def config_digest():
         for name in ("pipeline.json", os.path.join(".task-pipeline", "pipeline.json")):
             if os.path.isfile(name):
                 with open(name, "rb") as fh:
                     return "sha256:" + hashlib.sha256(fh.read()).hexdigest()[:16]
-        return ("unavailable: no pipeline.json in this directory — the run's stage and gate "
+        return ("unavailable: no pipeline.json in this directory; the run's stage and gate "
                 "configuration cannot be fingerprinted")
 
     def commit():
@@ -1601,7 +1601,7 @@ def cmd_producer(graph, args):
         try:
             r = subprocess.run(["git", "rev-parse", "HEAD"], capture_output=True, text=True)
         except OSError as e:
-            return f"unavailable: git is not runnable here — {e}"
+            return f"unavailable: git is not runnable here; {e}"
         out = r.stdout.strip()
         if r.returncode or not out:
             return "unavailable: not inside a git checkout, so no commit identifies the tree"
@@ -1648,12 +1648,12 @@ def cmd_doctrine(graph, args):
     here = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     refs_dir = os.path.join(here, "references")
     if not os.path.isdir(refs_dir):
-        die("no references/ beside this script — cannot say what the bundle holds", 2)
+        die("no references/ beside this script: cannot say what the bundle holds", 2)
     refs = sorted(f for f in os.listdir(refs_dir) if f.endswith(".md"))
 
     ledger = args.ledger
     if not os.path.isfile(ledger):
-        print(f"doctrine: unmeasured — no run ledger at {ledger}")
+        print(f"doctrine: unmeasured; no run ledger at {ledger}")
         print(f"          the bundle holds {len(refs)} reference files; nothing records "
               "which of them this run opened")
         return 0
@@ -1670,7 +1670,7 @@ def cmd_doctrine(graph, args):
     if not read:
         # The whole point. An empty set here has two causes with opposite meanings and the
         # ledger cannot tell them apart, so this says so instead of printing 0.
-        print("doctrine: unmeasured — the ledger carries no `read:` lines")
+        print("doctrine: unmeasured; the ledger carries no `read:` lines")
         print("          Either the hook that writes them is not installed (see "
               "templates/hooks.example.json) or this run opened no doctrine at all. Those "
               "are opposite facts and nothing here can separate them, so neither is claimed.")
@@ -1678,7 +1678,7 @@ def cmd_doctrine(graph, args):
         return 0
 
     unread = [r for r in refs if r not in read]
-    print(f"doctrine: {len(read)} of {len(refs)} reference files read — unattested")
+    print(f"doctrine: {len(read)} of {len(refs)} reference files read; unattested")
     print("          unattested: the ledger is the file the agent appends to at every stage, "
           "so nothing in it proves the hook wrote these lines rather than an agent. The "
           "count is what the ledger says; who wrote it is not recorded.")
@@ -1717,16 +1717,16 @@ def cmd_certify(graph, args):
     by_id = {n.get("id"): n for n in graph.get("nodes") or []}
     node = by_id.get(nid)
     if node is None:
-        die("no node %s in this graph — nothing was written" % nid)
+        die("no node %s in this graph: nothing was written" % nid)
     if node.get("status") == "waiting":
-        die("node is waiting — resolve its recorded wait before certification/close; nothing was written")
+        die("node is waiting: resolve its recorded wait before certification/close; nothing was written")
     if node.get("status") in TERMINAL:
-        die("%s is already %s — certifying it again would overwrite the record of the "
+        die("%s is already %s: certifying it again would overwrite the record of the "
             "close that already happened" % (nid, node.get("status")))
     open_blockers = [b for b in node.get("blocked_by") or []
                      if by_id.get(b, {}).get("status") != "done"]
     if open_blockers:
-        die("%s waits on %s, which %s not closed — certifying work that could not have "
+        die("%s waits on %s, which %s not closed: certifying work that could not have "
             "run certifies nothing" % (nid, ", ".join(open_blockers),
                                        "is" if len(open_blockers) == 1 else "are"))
 
@@ -1736,9 +1736,9 @@ def cmd_certify(graph, args):
             with open(path, encoding="utf-8") as fh:
                 t = json.load(fh)
         except OSError as e:
-            die("cannot read the tier report at %s — %s" % (path, e), 2)
+            die("cannot read the tier report at %s: %s" % (path, e), 2)
         except ValueError as e:
-            die("%s: not readable as JSON — %s" % (path, e))
+            die("%s: not readable as JSON; %s" % (path, e))
         v = tier_violations(t)
         if v:
             bad += ["%s: %s" % (os.path.basename(path), line) for line in v]
@@ -1748,22 +1748,22 @@ def cmd_certify(graph, args):
         # and recording one as a tier is the fake this refuses by name.
         exposure = str(t.get("exposure", "")).strip().lower()
         if exposure and re.search(r"\b(lint|syntax[- ]only|grep[- ]only|regex[- ]only)\b", exposure):
-            bad.append("%s: exposure is %r — a syntax lint is not a blind review, and a "
+            bad.append("%s: exposure is %r; a syntax lint is not a blind review, and a "
                        "tier cannot be certified on one" % (os.path.basename(path), exposure))
             continue
         if t["node"] != nid:
-            bad.append("%s: reports on %s while this certification is for %s — a report "
+            bad.append("%s: reports on %s while this certification is for %s; a report "
                        "about another node is not evidence about this one"
                        % (os.path.basename(path), t["node"], nid))
             continue
         if t["tier"] in reports:
-            bad.append("%s: a second `%s` report — the three tiers are three distances, "
+            bad.append("%s: a second `%s` report; the three tiers are three distances, "
                        "and two readings at one distance leave another unread"
                        % (os.path.basename(path), t["tier"]))
             continue
         reports[t["tier"]] = t
     if bad:
-        die("the tier reports are malformed — nothing was written:\n  " + "\n  ".join(bad))
+        die("the tier reports are malformed: nothing was written:\n  " + "\n  ".join(bad))
 
     missing = [x for x in TIERS if x not in reports]
     if node.get("risk") in ONE_TIER_RISK:
@@ -1771,12 +1771,12 @@ def cmd_certify(graph, args):
             die("certification of an %s node needs one blind tier report (unit, seam or "
                 "product); none was given" % node.get("risk"))
     elif missing:
-        die("certification is missing the %s report(s) — all three are required, because "
+        die("certification is missing the %s report(s): all three are required, because "
             "the level nobody read is the level the defect survives at (an R1 node "
             "certifies with one)" % ", ".join("`%s`" % m for m in missing))
     sclass = node.get("surface_class")
     if sclass in VISUAL_REQUIRED and VISUAL_TIER not in reports:
-        die("certification is missing the `%s` report — %s is a %s surface, and on one the "
+        die("certification is missing the `%s` report: %s is a %s surface, and on one the "
             "pixels are part of the requirement: none of unit, seam or product opens the "
             "contact sheet, so without the fourth reading nobody looked at what a user sees "
             "(references/certification.md → *The fourth reading*)" % (VISUAL_TIER, nid, sclass))
@@ -1819,7 +1819,7 @@ def cmd_certify(graph, args):
     node["certification"] = {
         "round": round_no,
         "tiers": tiers_now,
-        "at": head or "unavailable — not inside a git checkout",
+        "at": head or "unavailable: not inside a git checkout",
         "history": history,
         "kinds": kinds,
     }
@@ -1856,7 +1856,7 @@ def cmd_certify(graph, args):
             for f in reports[tier]["findings"]:
                 if f.get("severity") != "breaks":
                     continue
-                print("  [%s] %s — %s" % (tier, f["where"], f["what"]), file=sys.stderr)
+                print("  [%s] %s: %s" % (tier, f["where"], f["what"]), file=sys.stderr)
                 print("      fix:   %s" % f.get("fix", "(not stated)"), file=sys.stderr)
                 print("      check: %s" % f["check"], file=sys.stderr)
         if stop:
@@ -1865,7 +1865,7 @@ def cmd_certify(graph, args):
                   % (nid, failed_rounds, args.ceiling), file=sys.stderr)
             if churning:
                 print("The same tier has failed every round: %s. That is not a fix "
-                      "away — the level itself is being misread, or the node is the "
+                      "away: the level itself is being misread, or the node is the "
                       "wrong shape. references/loop-guard.md."
                       % ", ".join("`%s`" % c for c in churning), file=sys.stderr)
             else:
@@ -1920,7 +1920,7 @@ def cmd_certify(graph, args):
     # cannot hand the run a verdict its own consumer refuses.
     broken = verdict_violations(verdict)
     if broken:
-        die("every tier passed and the assembled verdict is still malformed — this "
+        die("every tier passed and the assembled verdict is still malformed: this "
             "is a defect in `certify`, not in the reports:\n  " + "\n  ".join(broken))
 
     out = args.verdict_out or os.path.join(os.path.dirname(args.graph) or ".",
@@ -1934,14 +1934,14 @@ def cmd_certify(graph, args):
     owed, _adv = owed_rounds(node)
     short = owed_shortfall(node)
     if short:
-        print("round %d: %s — not closable yet. The next round reads the node's whole diff at "
+        print("round %d: %s; not closable yet. The next round reads the node's whole diff at "
               "the new HEAD (references/certification.md → *Rounds owed by risk class*)."
               % (round_no, short))
         print("verdict written to %s" % out)
         return 0
     if owed:
-        print("%d of %d owed passing rounds — closable." % (len(passing_rounds(node["certification"])), owed))
-    print("verdict written to %s — close it with:" % out)
+        print("%d of %d owed passing rounds: closable." % (len(passing_rounds(node["certification"])), owed))
+    print("verdict written to %s: close it with:" % out)
     print("  graph.py close --verdict %s" % out)
     return 0
 
@@ -1969,28 +1969,28 @@ def cmd_close(graph, args):
         with open(args.verdict, encoding="utf-8") as fh:
             v = json.load(fh)
     except OSError as e:
-        die("cannot read the verdict at %s — %s" % (args.verdict, e), 2)
+        die("cannot read the verdict at %s: %s" % (args.verdict, e), 2)
     except ValueError as e:
-        die("%s: not readable as JSON — %s" % (args.verdict, e))
+        die("%s: not readable as JSON; %s" % (args.verdict, e))
 
     bad = verdict_violations(v)
     if bad:
-        die("the verdict is malformed — nothing was written:\n  " + "\n  ".join(bad))
+        die("the verdict is malformed: nothing was written:\n  " + "\n  ".join(bad))
 
     nid = v["node"]
     by_id = {n.get("id"): n for n in graph.get("nodes") or []}
     node = by_id.get(nid)
     if node is None:
-        die("no node %s in this graph — nothing was written" % nid)
+        die("no node %s in this graph: nothing was written" % nid)
     if node.get("status") == "waiting":
-        die("node is waiting — resolve its recorded wait before certification/close; nothing was written")
+        die("node is waiting: resolve its recorded wait before certification/close; nothing was written")
     if node.get("status") in TERMINAL:
-        die("%s is already %s — a second close would overwrite the record of the first"
+        die("%s is already %s: a second close would overwrite the record of the first"
             % (nid, node.get("status")))
     open_blockers = [b for b in node.get("blocked_by") or []
                      if by_id.get(b, {}).get("status") != "done"]
     if open_blockers:
-        die("%s waits on %s, which %s not closed — a verdict about work that could not have "
+        die("%s waits on %s, which %s not closed: a verdict about work that could not have "
             "run is a verdict about nothing" % (nid, ", ".join(open_blockers),
                                                 "is" if len(open_blockers) == 1 else "are"))
 
@@ -2013,16 +2013,16 @@ def cmd_close(graph, args):
     if head:
         # Inside a checkout: provenance must be PROVEN, not assumed.
         if not tested.get("head"):
-            die("the verdict declares no `tested.head` — inside a checkout close must "
+            die("the verdict declares no `tested.head`: inside a checkout close must "
                 "confirm the reviewer saw THIS tree; re-run the verifier and record the "
                 "commit it tested. Nothing was written.")
         if tested["head"] != head:
-            die("the verdict tested %s but HEAD is %s — the code moved under the proof. "
+            die("the verdict tested %s but HEAD is %s: the code moved under the proof. "
                 "A verdict written before the tree changed is evidence about a different "
                 "tree; re-verify at HEAD and issue a fresh verdict. Nothing was written."
                 % (tested["head"][:12], head[:12]))
         if tested.get("tree") and tree and tested["tree"] != tree:
-            die("the verdict tested tree %s but HEAD's tree is %s — the working tree moved "
+            die("the verdict tested tree %s but HEAD's tree is %s: the working tree moved "
                 "under the proof even though the commit matches. Nothing was written."
                 % (tested["tree"][:12], tree[:12]))
         stamp = "proven at " + head + ((" (tree " + tree + ")") if tree else "")
@@ -2034,7 +2034,7 @@ def cmd_close(graph, args):
         if isinstance(tested.get("checks"), list):
             node["proof"]["checks"] = list(tested["checks"])
     else:
-        stamp = "observed at unavailable — not inside a git checkout, so no commit " \
+        stamp = "observed at unavailable: not inside a git checkout, so no commit " \
                 "identifies the tree"
         node["proof"] = {"head": "unavailable"}
 
@@ -2050,14 +2050,14 @@ def cmd_close(graph, args):
     # not step around it. An authorized exception (`waive`) stays the only way past.
     short = owed_shortfall(node)
     if short and not exc:
-        die("%s is %s: %s — not closable yet. Run the next round with `graph.py certify`, "
+        die("%s is %s: %s; not closable yet. Run the next round with `graph.py certify`, "
             "or record an authorized exception with `waive`. Nothing was written."
             % (nid, node.get("risk") or "a %s surface" % node.get("surface_class"), short))
     if cert:
         tiers = cert.get("tiers") or {}
         failing = sorted(k for k, val in tiers.items() if val != "pass")
         if failing and not exc:
-            die("%s has a certification (round %s) with failing tier(s): %s — a direct "
+            die("%s has a certification (round %s) with failing tier(s): %s; a direct "
                 "close cannot step around a failed certification; fix the finding and "
                 "re-certify, or record an AUTHORIZED EXCEPTION with `waive` (its own "
                 "disposition, never a pass). Nothing was written."
@@ -2071,7 +2071,7 @@ def cmd_close(graph, args):
         # ANOTHER commit is stale either way.
         cert_at = cert.get("at") or ""
         if head and cert_at and not str(cert_at).startswith("unavailable") and cert_at != head:
-            die("%s was certified at %s but HEAD is %s — the certification is for a "
+            die("%s was certified at %s but HEAD is %s: the certification is for a "
                 "different candidate; re-certify at the current one. Nothing was written."
                 % (nid, str(cert_at)[:12], head[:12]))
     if exc and not (cert and sorted(k for k, val in (cert.get("tiers") or {}).items()
@@ -2091,9 +2091,9 @@ def cmd_close(graph, args):
         serves = str(spec.get("serves", node.get("serves"))).strip()
         check = str(spec.get("check", "")).strip()
         if not title:
-            die("replan.add carries an entry with no title — nothing was written")
+            die("replan.add carries an entry with no title: nothing was written")
         if not check:
-            die("replan.add carries an entry with no check — nothing was written")
+            die("replan.add carries an entry with no check: nothing was written")
         if owner not in ROLES:
             die("replan.add names owner %r, which is not a role this pipeline ships" % owner)
         new_id = next_id({n.get("id") for n in graph["nodes"]})
@@ -2105,11 +2105,11 @@ def cmd_close(graph, args):
     for pid in rp.get("park") or []:
         target = by_id.get(pid)
         if target is None:
-            die("replan.park names %s, which is not in this graph — nothing was written" % pid)
+            die("replan.park names %s, which is not in this graph: nothing was written" % pid)
         if target.get("status") in TERMINAL:
             continue
         if not why:
-            die("replan.park names %s and the verdict gives no `why` — a park without a "
+            die("replan.park names %s and the verdict gives no `why`: a park without a "
                 "reason is indistinguishable from work quietly dropped" % pid)
         target["status"] = "parked"
         target["parked_reason"] = why
@@ -2121,7 +2121,7 @@ def cmd_close(graph, args):
 
     bad = violations(graph)
     if bad:
-        die("closing %s would break the graph — nothing was written:\n  %s"
+        die("closing %s would break the graph: nothing was written:\n  %s"
             % (nid, "\n  ".join(bad)))
     save(args.graph, graph)
 
@@ -2136,7 +2136,7 @@ def cmd_close(graph, args):
         # so rather than printing nothing.
         print("not verified: none within the scope this verdict names")
     if rp.get("possible") is False:
-        print("STOP — the run cannot continue around what this verdict found: %s"
+        print("STOP: the run cannot continue around what this verdict found: %s"
               % (why or "no reason given"), file=sys.stderr)
         return 1
     return 0
@@ -2148,7 +2148,7 @@ VERBS = {
     "goal": (cmd_goal, "the release goal this graph serves"),
     "claim": (cmd_claim, "external mode: arbitrate one runnable node to a single owner (fail-closed)"),
     "invalidate": (cmd_invalidate, "a REQ/interface/brief change supersedes a node and invalidates proofs downstream"),
-    "waive": (cmd_waive, "record an AUTHORIZED EXCEPTION (reason + identity) — its own disposition, never a fake PASS"),
+    "waive": (cmd_waive, "record an AUTHORIZED EXCEPTION (reason + identity): its own disposition, never a fake PASS"),
     "recover": (cmd_recover, "external mode: reclaim an EXPIRED node for a new owner (fenced)"),
     "complete": (cmd_complete, "external mode: record completion from the current fence-holder (late worker refused)"),
     "release": (cmd_release, "external mode: give back a hold this run owns"),
@@ -2188,13 +2188,13 @@ def main(argv=None):
     p_add.add_argument("--serves", required=True)
     p_add.add_argument("--check", required=True,
                        help="the command that closes this node, or the judge where no "
-                            "command can decide it — the verifier runs it and reports its "
+                            "command can decide it: the verifier runs it and reports its "
                             "output as the evidence row")
     p_add.add_argument("--blocked-by", dest="blocked_by", action="append", default=[])
     p_add.add_argument("--carries", action="append", default=[],
                        help="what each --blocked-by hands over; pairs in the order written")
     p_add.add_argument("--why", required=True,
-                       help="why this node appeared mid-run — it enters the revision log")
+                       help="why this node appeared mid-run: it enters the revision log")
     p_add.add_argument("--id", default=None, help="omit to allocate the next one")
     p_add.add_argument("--touches", action="append", default=[],
                        help="a path, register or resource this node mutates; repeat per target")
@@ -2225,11 +2225,11 @@ def main(argv=None):
                                 help="path to the local sqlite execution authority "
                                      "(external mode; a Fabric adapter replaces this seam)")
         made[verb].add_argument("--owner", required=True,
-                                help="the session/attempt identity making the claim — NOT a role")
+                                help="the session/attempt identity making the claim: NOT a role")
         made[verb].add_argument("--node", required=True, help="the node to act on")
     for verb in ("claim", "recover"):
         made[verb].add_argument("--ttl", type=int, default=1800,
-                                help="lease seconds; the OS lock is NOT held this long — the "
+                                help="lease seconds; the OS lock is NOT held this long: the "
                                      "lease is, and a crashed holder frees the node by expiry")
     for verb in ("release", "complete"):
         made[verb].add_argument("--fence", type=int, required=True,
@@ -2238,7 +2238,7 @@ def main(argv=None):
     made["invalidate"].add_argument("--node", required=True,
                                     help="the node whose REQ/interface/brief changed")
     made["invalidate"].add_argument("--why", required=True,
-                                    help="why the contract changed — enters the revision log")
+                                    help="why the contract changed: enters the revision log")
     made["waive"].add_argument("--node", required=True, help="the node the exception covers")
     made["waive"].add_argument("--reason", required=True,
                                help="why this node ships without/despite certification")
@@ -2252,7 +2252,7 @@ def main(argv=None):
     p_wave.add_argument("node")
     p_wave.add_argument("--to", type=int, required=True, help="the wave to move it to")
     p_wave.add_argument("--why", required=True,
-                        help="why the re-cut moved it — it enters the revision log")
+                        help="why the re-cut moved it: it enters the revision log")
 
     p_park = made["park"]
     p_park.add_argument("node")

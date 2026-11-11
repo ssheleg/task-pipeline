@@ -7,6 +7,14 @@ phrasings (TRIG-11, TRIG-12, NOTRIG-09), one per model.** The instruction-follow
 cases remain unexecuted and say so per run, because they need a full interactive
 session — a skip is not a pass, and a guessed verdict is worse than a vacant row.
 
+**Stale for triggering, noted 2026-11-11.** The last trigger run (2026-10-14) predates
+the v1.98.0 description (2026-10-20), which moved the trigger lists into each
+SKILL.md's `## Triggers` body, and the v1.104.1 description, which replaced the bare
+"audit, PR review" with audit fixes. Its verdicts describe descriptions that no longer
+ship. The runs are not repeated here (they cost a paid session per query and model);
+until a new dated run is recorded, read the trigger rows below as history, not as
+evidence about the current description.
+
 **The numbers below are computed, not asserted.** `python3 evals/run.py` counts the
 suite and the dated run headings in this file. A value typed here that disagrees with
 what it prints is the defect, and it is the document that is wrong — this file said

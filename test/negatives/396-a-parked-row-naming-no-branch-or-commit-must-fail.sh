@@ -8,7 +8,7 @@ rm -rf /tmp/prk1-copy && cp -R . /tmp/prk1-copy
 python3 - <<'EOF'
 p = "/tmp/prk1-copy/plugins/task-pipeline/skills/task-pipeline/templates/backlog.md"
 t = open(p, encoding="utf-8").read()
-n = "parked — feat/upload-retry"
+n = "parked: feat/upload-retry"
 assert n in t, "PLANT DID NOT LAND: no parked worked example"
 open(p, "w", encoding="utf-8").write(t.replace(n, "parked", 1))
 EOF

@@ -1,4 +1,4 @@
-# Decisions — <project>
+# Decisions: <project>
 
 **Append-only.** Every settled thing that shapes the product, the architecture, the
 scope, security, data, pricing or process. Doctrine:
@@ -6,7 +6,7 @@ scope, security, data, pricing or process. Doctrine:
 
 **Next free ID:** `DEC-0002`
 
-Reading *"Next free ID"* is **not** reserving it — a second agent reading it in the
+Reading *"Next free ID"* is **not** reserving it: a second agent reading it in the
 same minute gets the same answer. Reserve it, then write.
 
 ## Format
@@ -26,7 +26,7 @@ same minute gets the same answer. Reserve it, then write.
 | Field | Rule |
 |---|---|
 | `Status` | `Accepted` · `Superseded by DEC-####` · `Reversed` · `Accepted · **Partially superseded by DEC-####** — <one line>` · `Accepted · **Refined by DEC-####**` |
-| `Consequences / affects` | every document that must change. **Each one must cite this id** — the gate checks it |
+| `Consequences / affects` | every document that must change. **Each one must cite this id**: the gate checks it |
 | `Source` | the run that produced it **and the commit**; the commit is what survives a rename |
 | edge markers | `Refines:` additive, target needs no annotation · `Contradicts:` a named clause falls, target **must** be annotated · `Supersedes:` the whole target retires, target **must** be annotated |
 
@@ -35,7 +35,7 @@ one, leave its body intact. Never renumber. Never delete.
 
 ---
 
-### DEC-0001 — Documentation is governed: registers, a doc map and a gate
+### DEC-0001: Documentation is governed: registers, a doc map and a gate
 
 - **Date:** <YYYY-MM-DD>
 - **Status:** Accepted

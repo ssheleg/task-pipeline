@@ -16,7 +16,7 @@ lines = open(p, encoding="utf-8").read().split("\n")
 _t = next((n for n, ln in enumerate(lines)
            if re.match(r"^\|\s*B-\d+\s*\|", ln)
            and len(ln.split("|")) >= 11
-           and ln.split("|")[8].strip() == "\u2014"), None)
+           and ln.split("|")[8].strip() in ("\u2014", "-")), None)
 assert _t is not None, "PLANT DID NOT LAND: no row with a cleared priority"
 c = lines[_t].split("|")
 c[8] = " 3 "

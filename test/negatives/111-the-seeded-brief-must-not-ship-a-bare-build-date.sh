@@ -5,7 +5,7 @@ rm -rf /tmp/gs05-copy && cp -R . /tmp/gs05-copy
 python3 - <<'EOF'
 p = "/tmp/gs05-copy/plugins/task-pipeline/skills/task-pipeline/templates/brief.md"
 t = open(p, encoding="utf-8").read()
-needle = "built `<sha>` — N commits / M days behind HEAD, signal: built_at_commit (exact) — ⚠ not trusted for reach until refreshed"
+needle = "built `<sha>`; N commits / M days behind HEAD, signal: built_at_commit (exact); ⚠ not trusted for reach until refreshed"
 assert needle in t, "PLANT DID NOT LAND: needle absent before edit"
 t = t.replace(needle, "built YYYY-MM-DD")
 open(p, "w", encoding="utf-8").write(t)

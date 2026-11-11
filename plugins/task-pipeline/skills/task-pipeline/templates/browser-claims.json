@@ -1,6 +1,6 @@
 {
  "schema_version": "browser-claims/1",
- "note": "One row = one browser claim: which REQ/scenario it serves, which STATE it was captured in, and which KIND of check produced it — the look, the spec suite or the library script (the browser.md split). A functional PASS never yields a visual PASS; an artifact closes only the state it was captured in (the initial screenshot does not close an opened/error claim); no browser channel means status NOT_RUN with the reason, never a quiet green. python3 test/browser_claims_test.py validates a filled copy with stdlib only. THE VISUAL LOOK (references/browser.md → The visual half) is the same file, not a second schema: a look row that carries `axes` is a frame of the contact sheet — one SCR state at one viewport × theme × text × locale, with its `capture` record (revision, route, motion, captured_at, source), the Figma frame and/or approved `baseline` it is compared against, the `diff` of that comparison, and the `rubric` items read on it (type G gate / J judge / H human; a J item stays NOT_ASSESSED until a labelled set calibrates the judge; every FAIL carries its region → defect → fix triple). File-level: the `surface` and `revision` the sheet is for, `review_rounds` (each return from the person with triples adds one — the measure of passes), and `approved_by` / `approved_at`, which make its frames the next baseline. Rows cover the states pairwise across the axes plus the mandatory pairs (dark × large text, RTL × narrow), never the full cross product. Frames and the viewing HTML stay out of git; this JSON goes in. python3 scripts/visual_gate.py sheet <file> --class <surface_class> validates it.",
+ "note": "One row = one browser claim: which REQ/scenario it serves, which STATE it was captured in, and which KIND of check produced it; the look, the spec suite or the library script (the browser.md split). A functional PASS never yields a visual PASS; an artifact closes only the state it was captured in (the initial screenshot does not close an opened/error claim); no browser channel means status NOT_RUN with the reason, never a quiet green. python3 test/browser_claims_test.py validates a filled copy with stdlib only. THE VISUAL LOOK (references/browser.md → The visual half) is the same file, not a second schema: a look row that carries `axes` is a frame of the contact sheet; one SCR state at one viewport × theme × text × locale, with its `capture` record (revision, route, motion, captured_at, source), the Figma frame and/or approved `baseline` it is compared against, the `diff` of that comparison, and the `rubric` items read on it (type G gate / J judge / H human; a J item stays NOT_ASSESSED until a labelled set calibrates the judge; every FAIL carries its region → defect → fix triple). File-level: the `surface` and `revision` the sheet is for, `review_rounds` (each return from the person with triples adds one; the measure of passes), and `approved_by` / `approved_at`, which make its frames the next baseline. Rows cover the states pairwise across the axes plus the mandatory pairs (dark × large text, RTL × narrow), never the full cross product. Frames and the viewing HTML stay out of git; this JSON goes in. python3 scripts/visual_gate.py sheet <file> --class <surface_class> validates it.",
  "surface": "landing",
  "revision": "<commit the frames were captured at>",
  "review_rounds": 0,
@@ -17,7 +17,7 @@
    "artifact": "shots/nav-menu-initial.png",
    "artifact_state": "initial",
    "status": "NOT_RUN",
-   "reason": "template row — replace with a real capture"
+   "reason": "template row: replace with a real capture"
   },
   {
    "id": "BC-02",
@@ -29,7 +29,7 @@
    "artifact": "shots/nav-menu-opened.png",
    "artifact_state": "opened",
    "status": "NOT_RUN",
-   "reason": "template row — replace with a real capture"
+   "reason": "template row: replace with a real capture"
   },
   {
    "id": "BC-03",
@@ -53,7 +53,7 @@
    "artifact": null,
    "artifact_state": null,
    "status": "NOT_RUN",
-   "reason": "the spec suite half — its PASS counts for functional claims only"
+   "reason": "the spec suite half: its PASS counts for functional claims only"
   },
   {
    "id": "BC-05",
@@ -82,7 +82,7 @@
    "diff": {
     "against": "figma",
     "status": "NOT_RUN",
-    "reason": "template row — the frame is compared once it is captured"
+    "reason": "template row: the frame is compared once it is captured"
    },
    "rubric": [
     {
@@ -98,7 +98,7 @@
     }
    ],
    "status": "NOT_RUN",
-   "reason": "template row — the visual look: one SCR state at one point of the axes matrix"
+   "reason": "template row: the visual look: one SCR state at one point of the axes matrix"
   },
   {
    "id": "BC-06",
@@ -127,7 +127,7 @@
    "diff": {
     "against": "figma",
     "status": "NOT_RUN",
-    "reason": "template row — the frame is compared once it is captured"
+    "reason": "template row: the frame is compared once it is captured"
    },
    "rubric": [
     {
@@ -143,7 +143,7 @@
     }
    ],
    "status": "NOT_RUN",
-   "reason": "template row — the visual look: one SCR state at one point of the axes matrix"
+   "reason": "template row: the visual look: one SCR state at one point of the axes matrix"
   },
   {
    "id": "BC-07",
@@ -172,7 +172,7 @@
    "diff": {
     "against": "figma",
     "status": "NOT_RUN",
-    "reason": "template row — the frame is compared once it is captured"
+    "reason": "template row: the frame is compared once it is captured"
    },
    "rubric": [
     {
@@ -188,7 +188,7 @@
     }
    ],
    "status": "NOT_RUN",
-   "reason": "template row — the visual look: one SCR state at one point of the axes matrix"
+   "reason": "template row: the visual look: one SCR state at one point of the axes matrix"
   },
   {
    "id": "BC-08",
@@ -229,7 +229,7 @@
     }
    ],
    "status": "NOT_RUN",
-   "reason": "template row — the visual look: one SCR state at one point of the axes matrix"
+   "reason": "template row: the visual look: one SCR state at one point of the axes matrix"
   },
   {
    "id": "BC-09",
@@ -270,7 +270,7 @@
     }
    ],
    "status": "NOT_RUN",
-   "reason": "template row — the visual look: one SCR state at one point of the axes matrix"
+   "reason": "template row: the visual look: one SCR state at one point of the axes matrix"
   }
  ]
 }

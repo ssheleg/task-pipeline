@@ -52,10 +52,10 @@ def _ref_problems(ref, where, need_id=False):
     if need_id and not ref.get("id"):
         out.append(f"{where}: decision without an id")
     if not ref.get("address"):
-        out.append(f"{where}: missing address — a ref that points nowhere")
+        out.append(f"{where}: missing address; a ref that points nowhere")
     sha = ref.get("sha256", "")
     if not sha:
-        out.append(f"{where}: missing sha256 digest — freshness cannot be checked, "
+        out.append(f"{where}: missing sha256 digest; freshness cannot be checked, "
                    "so this blocks dispatch")
     elif not SHA_RE.match(str(sha)):
         out.append(f"{where}: sha256 is not 64 hex chars")
@@ -73,11 +73,11 @@ def problems(packet):
     # is still read until the live packets carrying it are migrated (backlog B-135).
     m = re.match(r"^(?:task-pipeline/)?execution-packet/(\d+)$", version)
     if not m:
-        out.append(f"schema_version {version!r} is not 'task-pipeline/execution-packet/<major>' — "
+        out.append(f"schema_version {version!r} is not 'task-pipeline/execution-packet/<major>': "
                    "a packet without a mandatory version is unversioned, rejected")
     elif int(m.group(1)) not in KNOWN_MAJORS:
         out.append(f"schema_version major {m.group(1)} is unknown to this consumer "
-                   f"(knows: {sorted(KNOWN_MAJORS)}) — rejected, never skimmed; "
+                   f"(knows: {sorted(KNOWN_MAJORS)}); rejected, never skimmed; "
                    "upgrade the consumer or re-issue the packet at a known major")
 
     for field in ("id", "module", "intent"):
@@ -100,7 +100,7 @@ def problems(packet):
 
     scope = packet.get("source_scope")
     if not isinstance(scope, dict) or not isinstance(scope.get("edit_targets"), list):
-        out.append("source_scope.edit_targets must be a list — a packet that names no "
+        out.append("source_scope.edit_targets must be a list: a packet that names no "
                    "files it may touch has an unbounded blast radius")
     else:
         for i, t in enumerate(scope["edit_targets"]):
@@ -114,7 +114,7 @@ def problems(packet):
             if mode == "Edit":
                 sha = t.get("baseline_sha256", "")
                 if not sha:
-                    out.append(f"{where}: an Edit target without baseline_sha256 — "
+                    out.append(f"{where}: an Edit target without baseline_sha256; "
                                "'the source moved under the plan' would be undetectable")
                 elif not SHA_RE.match(str(sha)):
                     out.append(f"{where}: baseline_sha256 is not 64 hex chars")
@@ -136,7 +136,7 @@ def problems(packet):
         if dep.get("kind") not in DEP_KINDS:
             out.append(f"{where}: kind {dep.get('kind')!r} is not one of {sorted(DEP_KINDS)}")
         if not dep.get("rationale"):
-            out.append(f"{where}: missing rationale — an edge nobody can explain is an "
+            out.append(f"{where}: missing rationale; an edge nobody can explain is an "
                        "edge nobody dares remove or trust")
         edge = (dep["task_id"], dep.get("kind"))
         if edge in seen_edges:
@@ -145,7 +145,7 @@ def problems(packet):
         # A CONTROL edge with no satisfaction is VALID and PRESERVED: ordering is
         # its whole payload. Only data/resource edges owe a satisfaction.
         if dep.get("kind") in ("data", "resource") and not dep.get("satisfaction"):
-            out.append(f"{where}: a {dep['kind']} edge without satisfaction — what would "
+            out.append(f"{where}: a {dep['kind']} edge without satisfaction; what would "
                        "mark it met? A control edge may omit this; a payload edge may not")
 
     return out
@@ -166,14 +166,14 @@ def result_problems(env, current_revision=None, current_fence=None):
     version = str(env.get("schema_version", ""))
     m = re.match(r"^execution-result/(\d+)$", version)
     if not m:
-        out.append(f"schema_version {version!r} is not 'execution-result/<major>' — rejected")
+        out.append(f"schema_version {version!r} is not 'execution-result/<major>': rejected")
     elif int(m.group(1)) not in RESULT_MAJORS:
         out.append(f"schema_version major {m.group(1)} is unknown to this consumer "
-                   f"(knows: {sorted(RESULT_MAJORS)}) — rejected, never skimmed")
+                   f"(knows: {sorted(RESULT_MAJORS)}); rejected, never skimmed")
 
     grant = env.get("grant")
     if isinstance(grant, bool) or grant is None or not isinstance(grant, dict):
-        out.append(f"grant is {grant!r} — a boolean confirmation is not a grant: it names "
+        out.append(f"grant is {grant!r}: a boolean confirmation is not a grant: it names "
                    "no issuer, no revision, no fence; nothing a later reader could check")
     else:
         for field in ("grant_id", "packet_id", "holder"):
@@ -181,22 +181,22 @@ def result_problems(env, current_revision=None, current_fence=None):
                 out.append(f"grant.{field} is missing")
         for field in ("revision", "fence"):
             if not isinstance(grant.get(field), int):
-                out.append(f"grant.{field} must be an integer — the grant is checkable "
+                out.append(f"grant.{field} must be an integer: the grant is checkable "
                            "or it is not a grant")
         if env.get("packet_id") and grant.get("packet_id") \
                 and env["packet_id"] != grant["packet_id"]:
             out.append("the envelope and its grant name different packets")
         if current_fence is not None and isinstance(grant.get("fence"), int) \
                 and grant["fence"] < current_fence:
-            out.append(f"grant fence {grant['fence']} is superseded (current {current_fence}) "
-                       "— exclusivity was lost mid-flight; this result must not land")
+            out.append(f"grant fence {grant['fence']} is superseded (current {current_fence})"
+                       ": exclusivity was lost mid-flight; this result must not land")
 
     rev = env.get("built_against_revision")
     if not isinstance(rev, int):
         out.append("built_against_revision must be an integer")
     elif current_revision is not None and rev < current_revision:
         out.append(f"STALE candidate: built against revision {rev}, current is "
-                   f"{current_revision} — re-plan, never land as current")
+                   f"{current_revision}; re-plan, never land as current")
 
     cand = env.get("candidate")
     if not isinstance(cand, dict) or not isinstance(cand.get("changed"), list):
@@ -215,25 +215,25 @@ def result_problems(env, current_revision=None, current_fence=None):
     else:
         for i, c in enumerate(checks):
             if not isinstance(c, dict) or not c.get("name") or not c.get("command"):
-                out.append(f"checks[{i}]: needs name and command — an unnamed check "
+                out.append(f"checks[{i}]: needs name and command; an unnamed check "
                            "cannot be re-run")
                 continue
             if c.get("status") not in CHECK_STATUSES:
                 out.append(f"checks[{i}]: status {c.get('status')!r} is not one of "
-                           f"{sorted(CHECK_STATUSES)} — NOT_RUN is a status, not a gap")
+                           f"{sorted(CHECK_STATUSES)}; NOT_RUN is a status, not a gap")
             elif c["status"] in ("FAIL", "ERROR"):
                 failing += 1
 
     for i, row in enumerate(env.get("evidence") or []):
         if not isinstance(row, dict) or row.get("class") not in EVIDENCE_CLASSES:
-            out.append(f"evidence[{i}]: class must be one of {sorted(EVIDENCE_CLASSES)} — "
+            out.append(f"evidence[{i}]: class must be one of {sorted(EVIDENCE_CLASSES)}; "
                        "fact, defect and unknown effect are three verdicts, never blended")
 
     secretish = re.compile(r"(?i)^(?:.*[_-])?(token|secret|password|passwd|api[_-]?key|"
                            r"apikey|credential|authorization|cookie|private[_-]?key)s?$")
     for i, row in enumerate(env.get("outputs") or []):
         if not isinstance(row, dict) or not row.get("name") or not row.get("address"):
-            out.append(f"outputs[{i}]: needs name, kind, address, sha256 — an untyped "
+            out.append(f"outputs[{i}]: needs name, kind, address, sha256; an untyped "
                        "output cannot be consumed by digest")
             continue
         if row.get("kind") not in OUTPUT_KINDS:
@@ -242,23 +242,23 @@ def result_problems(env, current_revision=None, current_fence=None):
         if not SHA_RE.match(str(row.get("sha256", ""))):
             out.append(f"outputs[{i}]: missing or malformed sha256")
         if secretish.match(str(row["name"])):
-            out.append(f"outputs[{i}]: {row['name']!r} names a credential — a result "
+            out.append(f"outputs[{i}]: {row['name']!r} names a credential; a result "
                        "outlives its session exactly like the packet; reference the "
                        "store by name, never carry the value (FIX-PF-05.03)")
     pd = env.get("packet_digest")
     if pd is not None and not SHA_RE.match(str(pd)):
-        out.append("packet_digest: malformed — the tie to the dispatch packet must be "
+        out.append("packet_digest: malformed; the tie to the dispatch packet must be "
                    "a sha256 or absent, never a guess")
     for i, row in enumerate(env.get("consumed") or []):
         if not isinstance(row, dict) or not row.get("name")                 or not SHA_RE.match(str(row.get("sha256", ""))):
-            out.append(f"consumed[{i}]: needs name + sha256 — freshness is a comparison, "
+            out.append(f"consumed[{i}]: needs name + sha256; freshness is a comparison, "
                        "and an unpinned consumption cannot be compared")
 
     status = env.get("status")
     if status not in RESULT_STATUSES:
         out.append(f"status {status!r} is not one of {sorted(RESULT_STATUSES)}")
     elif status == "completed" and failing:
-        out.append(f"status 'completed' beside {failing} failing check(s) — a completed "
+        out.append(f"status 'completed' beside {failing} failing check(s): a completed "
                    "attempt with red checks is a contradiction, not a nuance")
 
     return out
@@ -290,7 +290,7 @@ def graph_problems(packets):
         return ["the graph is not a non-empty list of packets"]
     ids = [p.get("id") for p in packets if isinstance(p, dict)]
     for dup in sorted({i for i in ids if ids.count(i) > 1}):
-        out.append(f"duplicate packet id {dup!r} — two packets, one name, no arbitration")
+        out.append(f"duplicate packet id {dup!r}: two packets, one name, no arbitration")
     known = set(ids)
     edges = {}
     for p in packets:
@@ -340,7 +340,7 @@ def main(argv):
         with open(argv[2], encoding="utf-8") as fh:
             packet = json.load(fh)
     except (OSError, json.JSONDecodeError) as exc:
-        print(f"REJECTED: cannot read the packet — {exc}")
+        print(f"REJECTED: cannot read the packet; {exc}")
         return 1
     if argv[1] == "validate-graph":
         found = graph_problems(packet)
@@ -376,7 +376,7 @@ def main(argv):
         checks = packet.get("checks") or []
         not_run = sum(1 for c in checks if c.get("status") == "NOT_RUN")
         green = sum(1 for c in checks if c.get("status") == "PASS")
-        print(f"ok: {packet['packet_id']} ({packet['status']}) — {green} PASS, "
+        print(f"ok: {packet['packet_id']} ({packet['status']}); {green} PASS, "
               f"{not_run} NOT_RUN of {len(checks)} check(s); "
               f"revision {packet['built_against_revision']}, fence {packet['grant']['fence']}")
         return 0
@@ -392,7 +392,7 @@ def main(argv):
         for p in found:
             print(f"REJECTED: {p}")
         return 1
-    print(f"ok: {packet['id']} ({packet['schema_version']}) — "
+    print(f"ok: {packet['id']} ({packet['schema_version']}); "
           f"{len(packet['inputs'])} input(s), {len(packet['decision_refs'])} decision(s), "
           f"{len(packet['source_scope']['edit_targets'])} edit target(s)")
     return 0

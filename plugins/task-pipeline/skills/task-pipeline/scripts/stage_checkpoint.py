@@ -327,7 +327,7 @@ def emit(ledger: pathlib.Path, project: str | None, constraints: list[str],
     profile, identity = _profile(root)
     names = {s["id"]: s["name"] for s in profile}
     if not stages:
-        raise SystemExit("stage_checkpoint: no `stage:` line yet — a checkpoint follows a gate")
+        raise SystemExit("stage_checkpoint: no `stage:` line yet; a checkpoint follows a gate")
     sid, name, gate, verdict, at, line = stages[-1]
     state = _load_state(ledger, strict=True)
     run = run_key(ledger.read_text(encoding="utf-8").splitlines())
@@ -485,7 +485,7 @@ def handoff(ledger: pathlib.Path, provider: str, model: str | None, reason: str,
     """
     state = _load_state(ledger)
     if not state.get("workflowId"):
-        raise SystemExit("stage_checkpoint: no workflow yet — write a checkpoint first "
+        raise SystemExit("stage_checkpoint: no workflow yet; write a checkpoint first "
                          "(emit → observatory_checkpoint_write → record)")
     to = {"provider": provider, **({"model": model} if model else {})}
     # Observatory digests the whole request, TTL included, so the TTL is in the key (another

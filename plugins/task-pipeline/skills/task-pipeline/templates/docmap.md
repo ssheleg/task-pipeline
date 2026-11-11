@@ -1,4 +1,4 @@
-# Doc map — <project>
+# Doc map: <project>
 
 **One per project, not per run.** The four questions of
 `references/documentation.md`, answered for this repository: where settled things
@@ -6,7 +6,7 @@ live, what each fact's single home is, what a change obliges, and what proves it
 
 Seeded by task-pipeline at stage 0 **only when absent**. Extend it whenever a new
 document class appears; never let it grow a second copy of something stated
-elsewhere — where another file already says it, this one holds a **pointer line**,
+elsewhere: where another file already says it, this one holds a **pointer line**,
 not a copy. A doc map that duplicates `AGENTS.md` is the first violation of the
 rule it publishes.
 
@@ -23,10 +23,10 @@ rule it publishes.
 
 ## Regime
 
-`governed` — established <YYYY-MM-DD> by run `<topic>`, recorded as `DEC-0001`.
+`governed`: established <YYYY-MM-DD> by run `<topic>`, recorded as `DEC-0001`.
 
 Governed scales by **volume**, never by dropping rules: a register with three
-entries is a register. Nothing here is authored twice — every entry is transcribed
+entries is a register. Nothing here is authored twice: every entry is transcribed
 from an artefact the run already produced (the brief's *Decisions locked*, the
 spec's contracts, an ADR).
 
@@ -39,7 +39,7 @@ spec's contracts, an ADR).
 | `<fill me>` | `<path>` | `<PREFIX-####>` | … | … |
 
 > One decision home per project. If this repository already had `docs/adr/`, that
-> is the register and the first row names it instead — never both.
+> is the register and the first row names it instead: never both.
 
 ## Single source of truth
 
@@ -56,22 +56,22 @@ in two places is a bug: collapse it to one home and link from the other.
 ## Propagation matrix
 
 **The harvest ledger names what you read. This names what you owe.** A row's third
-column names the check that notices when the row is not honoured — or the word
+column names the check that notices when the row is not honoured: or the word
 `review` **with a one-line reason why no check can decide it**. An empty third
 column is a finding, not a blank.
 
 | Change type | Update these | Checked by |
 |---|---|---|
-| **A new document or rule** — start with this row | every surface that must *learn* it exists: the index a reader opens, the map, any manifest, the agent-facing rules file | `<the check, or `review` with its reason>` |
+| **A new document or rule**: start with this row | every surface that must *learn* it exists: the index a reader opens, the map, any manifest, the agent-facing rules file | `<the check, or `review` with its reason>` |
 | New/changed **decision** | `docs/DECISIONS.md` + every doc in its `Consequences / affects:` line | gate §5 propagation |
 | Question **resolved** | `docs/OPEN_QUESTIONS.md` → `Resolved→DEC-####`, the owning topic doc | gate §2 ids · gate §8 status vocabulary |
-| **Scope** change | `<roadmap>`, `<mvp>`, the register | review — scope is a judgement, not a shape |
+| **Scope** change | `<roadmap>`, `<mvp>`, the register | review; scope is a judgement, not a shape |
 | `<new/changed entity or field>` | `<data model>` (canonical), `<glossary>` | `<fill me>` |
 | `<user-facing behaviour>` | `<scenarios>` + `<flows>` + `<screens>`, same change | `<ux linter>` |
 | `<fill me>` | … | … |
 
 
-**Start with the row above.** The most frequent change in any documented project is *adding a document*, and it is the row nobody writes — so the matrix ends up unable to catch the class it will meet most. On the project this practice comes from, nine findings across five audits were that one missing row.
+**Start with the row above.** The most frequent change in any documented project is *adding a document*, and it is the row nobody writes: so the matrix ends up unable to catch the class it will meet most. On the project this practice comes from, nine findings across five audits were that one missing row.
 
 ## Gates
 
@@ -96,7 +96,7 @@ Raising a floor is a decision and belongs in the register.
 ## Terms
 
 Only terms **declared here** are checked. A heuristic over every capitalised word
-cries wolf, and a gate that cries wolf is removed by the third person who hits it —
+cries wolf, and a gate that cries wolf is removed by the third person who hits it:
 so this table is the project's own list, and it may start with three rows.
 
 | Term | Definition lives in | Anchor |
@@ -113,4 +113,4 @@ the same defect as a fact with two homes.
 - One definition per entity, with an explicit anchor.
 - A mention links to the **anchor**, not to the file.
 - Indexes and summaries link; they never restate a rule. An index that falls behind
-  lies with authority — a reader concludes the entry does not exist.
+  lies with authority: a reader concludes the entry does not exist.

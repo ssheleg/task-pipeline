@@ -16,7 +16,7 @@ requirement.** It is what turns the pipeline from a funnel into a circle.
 - Output — the coverage table
 - Evidence, not assertion
 - Several repositories — a submodule is finished when its parent says so
-- The closing question
+- The closing statement
 - The retrospective — the run's last act
 - A `verified by` name is a claim until it resolves
 - A seam is not a deliverable, and REQ rows are written against deliverables
@@ -245,22 +245,24 @@ at checkout because the parent pinned a commit that existed only on one machine,
 | *"The pointer is at the newest commit, so it is current."* | Current and *published* are different facts. A clone gets what the remote has |
 | *"I ran the cross-component check, it passed."* | Then say which versions it observed. A record citing no version cannot say which composition it proved |
 
-## The closing question
+## The closing statement
 
-The table is preparation. The stage exists for the question that follows it, asked
-out loud, with the list in front of the operator:
+The table is preparation. The stage exists for the statement that follows it, written
+into the hand-back with the list in front of the operator:
 
-> Here's what you asked for, here's what shipped, here's what's deferred and where
-> it lives. **What's missing?**
+> Here is what you asked for, here is what shipped, here is what is deferred and
+> where it lives.
 
-Ask it even when the table is all green. The operator holds context the brief
-never captured, and this is the cheapest moment in the whole run to hear it. An
-answer here becomes new REQ rows or new ledger entries — not a new argument about
-whether the run was finished.
+Write it even when the table is all green, and do not wait on a reply: it is a
+statement, not a question. The operator holds context the brief never captured and
+can add to it at any time; an addition becomes new REQ rows or new ledger entries,
+not a new argument about whether the run was finished. Only a human gate (a sign-in,
+a consent, a payment, a typed secret, spend above a limit, a decision recorded as the
+operator's) is asked as a question, and the hand-back names it.
 
 ## The retrospective — the run's last act
 
-After the closing question, before the run is called done:
+After the closing statement, before the run is called done:
 [`retrospective.md`](retrospective.md), written to `<artifacts>/retro.md`.
 Every run **stamps and prunes**; only a run that *diverged* writes an entry.
 
@@ -385,7 +387,8 @@ All of:
 5. **Every `verified` carries evidence** of the kind above.
 6. **Every `partial` names what's missing** and where it's tracked.
 7. **Every `deferred` / `dropped` has the operator's agreement** recorded (in the
-   ledger or here) and, for `deferred`, a tracker entry.
+   ledger or here), or under a host delegation the agent's decision with its reason,
+   and, for `deferred`, a tracker entry.
 8. **No carry-over row is left `unresolved`** — every one has a home, and the
    ledger's counts are printed with this verdict, not just filed.
 7a. **Every disclosure is printed** ([`gates.md`](gates.md) → *Disclosures*):
@@ -398,7 +401,8 @@ All of:
 9. **Every repository is closed, the parent included** — `git submodule status`
    shows no `+`, and each repo is clean and pushed. A submodule is finished when
    its parent points at it.
-10. **The operator answers the closing question** and signs off.
+10. **The closing statement is in the hand-back**, shipped and deferred listed; no
+    sign-off is waited for.
 11. **The retrospective is written** ([`retrospective.md`](retrospective.md)) — **in
     order**: the run is stamped with its commit first, **then** the prune runs before
     anything is added (standing instructions checked against their retirement triggers,
@@ -408,9 +412,10 @@ All of:
     ([`learned.md`](learned.md) rule 21). The counts are printed beside this verdict,
     not filed.
 
-Manual by design. An automated check can prove the table is *well-formed*; only
-the person who asked can confirm it is *what they asked for*. Do not let a green
-table substitute for that answer.
+`auto` by default (`stages.md` → stage 10). An automated check can prove the table
+is *well-formed*; only the person who asked can confirm it is *what they asked for*,
+so the closing statement hands that to them and the run does not wait on it. A
+project that wants the wait sets this gate `manual`.
 12. **The hand-back is written** ([`progress.md`](progress.md) → *The hand-back*) —
    the request quoted as it was GIVEN, where the run stands against it, what was solved
    with its evidence, what surfaced that nobody asked for, every decision still waiting

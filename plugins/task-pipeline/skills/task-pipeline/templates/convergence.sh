@@ -38,8 +38,8 @@ bad()  { FAILED=$((FAILED+1)); say "FAIL: $*"; }
 dorm() { say "dormant: $*"; }
 
 if ! git rev-parse --git-dir >/dev/null 2>&1; then
-  dorm "not a git checkout — nothing to converge"
-  say ""; say "VERDICT: PASS (dormant) — components 0 · live checks 0"
+  dorm "not a git checkout: nothing to converge"
+  say ""; say "VERDICT: PASS (dormant); components 0 · live checks 0"
   exit 0
 fi
 
@@ -56,8 +56,8 @@ say "range: ${BASE}..HEAD"
 
 # --- 1. the components this repository pins -----------------------------------------
 if [ ! -f .gitmodules ]; then
-  dorm "no .gitmodules — this repository pins no components"
-  say ""; say "VERDICT: PASS (dormant) — components 0 · live checks 0"
+  dorm "no .gitmodules: this repository pins no components"
+  say ""; say "VERDICT: PASS (dormant); components 0 · live checks 0"
   exit 0
 fi
 
@@ -72,7 +72,7 @@ say "components: $N"
 # so a clone of the parent gets a different tree than the one that was tested.
 DIRTY="$(git submodule status 2>/dev/null | grep '^+' | awk '{print $2}')"
 if [ -n "$DIRTY" ]; then
-  for d in $DIRTY; do bad "$d: the parent's pointer and the child's HEAD disagree — a clone gets a different tree than the one tested"; done
+  for d in $DIRTY; do bad "$d: the parent's pointer and the child's HEAD disagree; a clone gets a different tree than the one tested"; done
 else
   ok "every pointer matches the child's HEAD"
 fi
@@ -90,13 +90,13 @@ for c in $COMPONENTS; do
   [ -n "$PIN" ] || { dorm "$c: the parent's tree records no pointer for it"; continue; }
   SHORT="$(printf '%.7s' "$PIN")"
   if [ ! -d "$c/.git" ] && [ ! -f "$c/.git" ]; then
-    dorm "$c: pinned at $SHORT but not checked out — cannot ask its remote whether that commit is published"
+    dorm "$c: pinned at $SHORT but not checked out; cannot ask its remote whether that commit is published"
     continue
   fi
   if git -C "$c" branch -r --contains "$PIN" 2>/dev/null | grep -q .; then
     ok "$c: pinned at $SHORT and that commit is published"
   else
-    bad "$c: pinned at $SHORT, which no remote branch of the component contains — every clone of the parent fails at checkout while this machine stays green"
+    bad "$c: pinned at $SHORT, which no remote branch of the component contains; every clone of the parent fails at checkout while this machine stays green"
   fi
 done
 
@@ -110,7 +110,7 @@ for c in $COMPONENTS; do
 done
 
 if [ -z "$MOVED" ]; then
-  dorm "no component pointer moved in this range — no seam was crossed"
+  dorm "no component pointer moved in this range: no seam was crossed"
 else
   RECORD=""
   for f in docs/evidence/convergence.md docs/superpowers/convergence.md CONVERGENCE.md; do
@@ -118,7 +118,7 @@ else
   done
   if [ -z "$RECORD" ]; then
     for c in $MOVED; do
-      bad "$c: its pointer moved and no convergence record exists (docs/evidence/convergence.md) — the composition at these versions was never observed"
+      bad "$c: its pointer moved and no convergence record exists (docs/evidence/convergence.md); the composition at these versions was never observed"
     done
   else
     ok "convergence record: $RECORD"
@@ -130,7 +130,7 @@ else
       if [ -n "$SHORT" ] && grep -q "$SHORT" "$RECORD"; then
         ok "$c: the record names the exact version it observed ($SHORT)"
       else
-        bad "$c: pinned at ${SHORT:-?} and $RECORD does not name that version — a record citing no version cannot say which composition it observed"
+        bad "$c: pinned at ${SHORT:-?} and $RECORD does not name that version; a record citing no version cannot say which composition it observed"
       fi
     done
   fi
@@ -139,8 +139,8 @@ fi
 # --- VERDICT — nothing runs after this ------------------------------------------------
 say ""
 if [ "$FAILED" -gt 0 ]; then
-  say "VERDICT: FAIL — components $N · live checks $LIVE · failures $FAILED"
+  say "VERDICT: FAIL; components $N · live checks $LIVE · failures $FAILED"
   exit 1
 fi
-say "VERDICT: PASS — components $N · live checks $LIVE"
+say "VERDICT: PASS; components $N · live checks $LIVE"
 exit 0

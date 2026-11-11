@@ -88,10 +88,11 @@ never that the work was skipped quietly.
 
 **On entry or resume:** read [stage-00-intake.md](stage-00-intake.md) before stage work.
 
-- **On the short path** (`stage-00-intake.md` → Phase 1d) this gate
+- **On the short path** (`stage-00-intake.md` → Phase 1d, which runs first) this gate
   is: the triage line printed, the brief and its REQ rows in the run ledger, the retro
-  floor read with its byte count, and the source ledger. Everything else below applies
-  to the full flow.
+  floor read with its byte count, and the source ledger of the scoped sources read. No
+  preflight block and no full harvest are owed. Everything else below applies to the
+  full flow.
 - **GATE (auto):** shared understanding reached — **the source ledger is written
   (every source consulted, or an explicit "none found")** and **its `Contradictions:`
   line is written under it** — the harvest is a fan-out that converges on one brief, and
@@ -334,7 +335,9 @@ never that the work was skipped quietly.
 
 - **GATE (auto):** lint clean (host linter **and**, for UI projects, the super-ux
   linter) **and** suite green **before** deploy, **and no REQ is still `open`** — a
-  `partial` ships only with the operator's explicit acceptance. A gap is cheapest to
+  `partial` ships only with the operator's acceptance, which a standing grant in the
+  host's instructions or the brief gives when it covers shipping with named gaps
+  (cited with its source; absent one, explicit acceptance). A gap is cheapest to
   close before it ships. **The
   carry-over count is printed beside this verdict.** Deploy is outward → explicit
   operator go, or a specific standing authorization naming that act, cited with its source
@@ -471,10 +474,11 @@ never that the work was skipped quietly.
   once against a planted defect** (an unproven check's green is not evidence);
   every REQ has a status (none `unknown`); every `verified`
   carries evidence; every `partial` names what's missing and where it's tracked;
-  every `deferred`/`dropped` has the operator's agreement and, for `deferred`, a
-  tracker entry; no carry-over row left `unresolved`, and the ledger's counts are
-  printed with the verdict; the hand-back asks the closing question and carries
-  the answer the operator can give at any time. `auto` by default since 1.98.0: a
+  every `deferred`/`dropped` has the operator's agreement, or under a host delegation
+  the agent's recorded decision with its reason, and, for `deferred`, a tracker entry;
+  no carry-over row left `unresolved`, and the ledger's counts are printed with the
+  verdict; the hand-back carries the closing statement (shipped and deferred, listed)
+  and the operator can add to it at any time. `auto` by default since 1.98.0: a
   check proves the table well-formed, and only the person who asked can confirm it is
   what they asked for, so the run hands that question back rather than waiting on it.
   A project that wants the wait sets this gate `manual`. **Where the actor branch is

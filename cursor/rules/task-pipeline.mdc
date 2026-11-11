@@ -108,7 +108,8 @@ reading them all is cheap; say the byte count). Stamp
 each one the moment it fires: that date is the only evidence behind the
 cold-retirement rule at stage 10.
 If no wiki is installed, recommend it once and continue:
-`pip install obsidian-wiki` → `obsidian-wiki setup --vault <path>`. If no graph is
+`pip install obsidian-wiki` → back up `~/.obsidian-wiki/` (setup rewrites the active
+profile) → `obsidian-wiki setup --vault <path>`. If no graph is
 built, recommend it once and continue: `uv tool install graphifyy` →
 `graphify install` → `/graphify .`. Neither is ever a gate.
 
@@ -289,8 +290,8 @@ not authorize an outward, irreversible action — stage 7 stops and asks.
    default look, needs no plugin, and its CLI half puts no tool schema in the context
    window; on macOS, Safari itself through `safaridriver`, and `open -a Safari <url>`
    rather than the system default browser for a person.
-   `/plugin install chrome-devtools-mcp@claude-plugins-official` drives Chrome only and
-   is reached for when the question needs Chrome — Lighthouse, heap snapshots, a trace
+   The chrome-devtools MCP, where the host already connects it (never offered as an
+   install), drives Chrome only and is reached for when the question needs Chrome — Lighthouse, heap snapshots, a trace
    analysed rather than only recorded — said with the reason; a look taken only there
    is reported as "checked in Chromium", never "tested in a browser". Never a gate. A CLI, a
    library or a backend service is never offered either.
@@ -362,10 +363,11 @@ not authorize an outward, irreversible action — stage 7 stops and asks.
     `deferred` / `dropped`, and every `verified` carries **evidence** — a passing
     test name, a `file:line`, a command and its output. "Done" without evidence is
     downgraded to `partial`, never upgraded, and **a green from a check nobody has
-    watched fail against a planted defect is not evidence at all**. Then ask out
-    loud, list in hand: *here's what you asked for, here's what shipped, here's
-    what's deferred and where it lives — what's missing?* Ask it even when the
-    table is green.
+    watched fail against a planted defect is not evidence at all**. Then write the
+    closing statement into the hand-back, list in hand: *here is what you asked for,
+    here is what shipped, here is what is deferred and where it lives.* Write it even
+    when the table is green; it is a statement, not a question, and the run does not
+    wait on it. Only a human gate is asked.
     **In a project of several repositories, close the parent too.** A parent records
     each submodule as a **pointer to one commit**, and moving the submodule does not
     move the pointer — so the work is committed, pushed, CI green and done in its own
@@ -643,7 +645,7 @@ interface must **do**, how it **sounds**, how it **looks**.
    screens → scenarios (the source of truth) → run its linter. Without the skill,
    still design that chain, get it approved, and trace every user-facing
    requirement to a scenario before building.
-   Install: `npx skills add ssheleg/super-ux`.
+   Install: `npx --yes sshlg-skills@latest update` (family launcher).
 2. **COPY track — copywriting (super-ux ships it).** Every string a product's
    user reads goes through it, against the brand pack; no pack means running
    brand-init BEFORE the first string, not after. Not through it: commit
@@ -652,7 +654,8 @@ interface must **do**, how it **sounds**, how it **looks**.
    typography and rhythm, motion and how it degrades to rest, the Figma boundary
    (tokens as variables, never raw values carried across). Not through it: a
    purely structural change, text, a backend, an internal script.
-   Install: `npx skills add ssheleg/sheleg-design`.
+   Install: `npx --yes sshlg-skills@latest update` (family launcher; repository
+   `ssheleg/sheleg-design-skill`).
 
 **A refusal is a sentence, never a silence.** "as is" ends the visual track and
 "draft" ends the copy track; either is the operator's call and costs nothing, but

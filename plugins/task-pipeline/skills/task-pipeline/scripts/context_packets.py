@@ -88,11 +88,11 @@ def _row_problems(row, where, need_explicit_id):
         return [f"{where}: not an object"]
     for field in REQUIRED:
         if not row.get(field):
-            out.append(f"{where}: missing {field} — an unmappable row is a "
+            out.append(f"{where}: missing {field}; an unmappable row is a "
                        "problem, never a silent drop")
     for field in SMUGGLED:
         if field in row:
-            out.append(f"{where}: carries `{field}` — status axes are separate "
+            out.append(f"{where}: carries `{field}`; status axes are separate "
                        "fields the mapper assigns, a report cannot smuggle one")
     if need_explicit_id and isinstance(row.get("id"), str) \
             and row["id"].startswith(PARENT_PREFIX):
@@ -134,7 +134,7 @@ def compile_parents(report):
         pid = PARENT_PREFIX + str(row["id"])
         if pid in seen:
             problems.append(f"{where}: finding id {row['id']!r} already mapped "
-                            f"from {seen[pid]} — a duplicate id is two claims "
+                            f"from {seen[pid]}; a duplicate id is two claims "
                             "to one receipt")
             continue
         seen[pid] = where
@@ -181,7 +181,7 @@ def verify_parents(report, plan):
     if len(got) != len(plan["parents"]):
         out.append("parents file: duplicate or malformed parent ids")
     for pid in sorted(set(want) - set(got)):
-        out.append(f"{pid}: dropped — its finding is still in the report")
+        out.append(f"{pid}: dropped; its finding is still in the report")
     for pid in sorted(set(got) - set(want)):
         out.append(f"{pid}: present in the plan but derived from no finding or "
                    "declared capability")
@@ -219,27 +219,27 @@ def compile_leaf(parent, slice_spec):
     for i, ref in enumerate(decisions):
         if not _bound(ref):
             problems.append(
-                f"decision_refs[{i}]: unresolved — a decision without address+"
+                f"decision_refs[{i}]: unresolved; a decision without address+"
                 "digest is a rumour, and a broad unresolved parent dispatches "
                 "no leaf")
     acceptance = slice_spec.get("acceptance", [])
     kinds = {a.get("kind") for a in acceptance if isinstance(a, dict)}
     if "positive" not in kinds or "negative" not in kinds:
         problems.append("acceptance: needs at least one positive and one "
-                        "negative case — a slice provable only by success is "
+                        "negative case; a slice provable only by success is "
                         "not testable")
     if not slice_spec.get("expected_result"):
-        problems.append("expected_result: missing — every slice has a concrete "
+        problems.append("expected_result: missing; every slice has a concrete "
                         "expected result")
     if not slice_spec.get("outputs"):
-        problems.append("outputs: missing — a leaf without an output contract "
+        problems.append("outputs: missing; a leaf without an output contract "
                         "fails readiness")
     for field in ("id", "module", "intent"):
         if not slice_spec.get(field):
             problems.append(f"{field}: missing")
     for i, ref in enumerate(slice_spec.get("inputs", [])):
         if not _bound(ref):
-            problems.append(f"inputs[{i}]: missing address or digest — an "
+            problems.append(f"inputs[{i}]: missing address or digest; an "
                             "unverifiable input does not dispatch")
     if problems:
         return None, problems
@@ -255,7 +255,7 @@ def compile_leaf(parent, slice_spec):
             dropped.append(appendix.pop())
         if size(primary) > budget:
             return None, ["budgets.context_bytes: smaller than the primary "
-                          "material — a budget cuts appendix, never decisions "
+                          "material; a budget cuts appendix, never decisions "
                           "or acceptance; raise it or split the slice"]
 
     leaf = {
@@ -308,20 +308,20 @@ def compile_dispatch_packet(leaf, context):
                 "base", "scope", "budget", "profile", "skill_lock")
     for key in required:
         if key not in context:
-            problems.append(f"{key}: missing — a fresh packet carries every "
+            problems.append(f"{key}: missing; a fresh packet carries every "
                             "required constraint, and an absent one is a refusal, "
                             "not a default")
     for key in ("requirements", "constraints", "interfaces", "artifacts"):
         for i, ref in enumerate(context.get(key) or []):
             if not _bound(ref):
-                problems.append(f"{key}[{i}]: unresolved — a required ref without "
+                problems.append(f"{key}[{i}]: unresolved; a required ref without "
                                 "address+digest does not compile")
     base = context.get("base") or {}
     if "base" in context and not base.get("head"):
-        problems.append("base.head: missing — a packet with no base revision is a "
+        problems.append("base.head: missing; a packet with no base revision is a "
                         "packet about no tree")
     if "skill_lock" in context and not _bound(context.get("skill_lock") or {}):
-        problems.append("skill_lock: unresolved — the skill versions the build ran "
+        problems.append("skill_lock: unresolved; the skill versions the build ran "
                         "under are part of the proof")
 
     packet = {
@@ -344,7 +344,7 @@ def compile_dispatch_packet(leaf, context):
                 if _SECRETISH.match(str(k)):
                     problems.append(
                         f"{path}.{k}: a dispatch packet carries no ephemeral "
-                        "secret — it outlives the session; reference the store "
+                        "secret; it outlives the session; reference the store "
                         "by NAME, never the value")
                 scan(v, f"{path}.{k}")
         elif isinstance(node, list):
@@ -363,7 +363,7 @@ def leaf_readiness(leaf):
     if not isinstance(leaf, dict):
         return ["leaf: not an object"]
     if leaf.get("schema_version") not in (LEAF_SCHEMA,) + LEGACY_LEAF_SCHEMAS:
-        problems.append("schema_version: missing or unknown — an unversioned "
+        problems.append("schema_version: missing or unknown; an unversioned "
                         "packet fails readiness")
     answers = {
         "goal": leaf.get("intent"),
@@ -378,7 +378,7 @@ def leaf_readiness(leaf):
     for q in COLD_READER_QUESTIONS:
         if not answers.get(q):
             problems.append(f"cold reader cannot answer {q!r} from the packet "
-                            "alone — readiness fails")
+                            "alone: readiness fails")
     return problems
 
 
@@ -386,7 +386,7 @@ def select_slice(slices, active_id):
     """A slice is chosen by explicit id. No id, no fallback — 'the newest
     file' is an authority nobody granted (never mtime)."""
     if not active_id:
-        raise ValueError("no active slice id given — selection by mtime or "
+        raise ValueError("no active slice id given: selection by mtime or "
                          "recency is refused; name the slice")
     matches = [s for s in slices if isinstance(s, dict) and s.get("id") == active_id]
     if not matches:
@@ -404,14 +404,14 @@ CREDENTIAL_NAMES = (".env", "id_rsa", "id_ed25519", "credentials", ".netrc",
 def _locator_problems(addr):
     a = str(addr)
     if os.path.isabs(a) or (len(a) > 1 and a[1] == ":"):
-        return [f"{a}: absolute locator — a bundle carries relative locators "
+        return [f"{a}: absolute locator; a bundle carries relative locators "
                 "only; an absolute path is a fact about the author's machine"]
     if ".." in a.replace("\\", "/").split("/"):
-        return [f"{a}: escaping locator — `..` walks out of any root"]
+        return [f"{a}: escaping locator; `..` walks out of any root"]
     base = os.path.basename(a).lower()
     for cred in CREDENTIAL_NAMES:
         if cred in base:
-            return [f"{a}: looks like a credential ({cred}) — a bundle carries "
+            return [f"{a}: looks like a credential ({cred}); a bundle carries "
                     "no credentials, ever"]
     return []
 
@@ -435,12 +435,12 @@ def export_bundle(leaf, src_root, out_dir):
             with open(src, "rb") as fh:
                 data = fh.read()
         except OSError:
-            problems.append(f"{addr}: unreadable under the source root — an "
+            problems.append(f"{addr}: unreadable under the source root; an "
                             "input the author cannot read cannot travel")
             continue
         digest = hashlib.sha256(data).hexdigest()
         if digest != ref.get("sha256"):
-            problems.append(f"{addr}: bytes do not match the declared digest — "
+            problems.append(f"{addr}: bytes do not match the declared digest; "
                             "the source moved under the plan; recompile first")
             continue
         locators[addr] = digest
@@ -467,9 +467,9 @@ def import_bundle(bundle_dir, dest_root):
         with open(os.path.join(bundle_dir, "manifest.json"), encoding="utf-8") as fh:
             manifest = json.load(fh)
     except (OSError, ValueError) as e:
-        return None, [f"manifest.json: unreadable — {e}"]
+        return None, [f"manifest.json: unreadable; {e}"]
     if manifest.get("schema_version") != BUNDLE_SCHEMA:
-        return None, ["manifest: missing or unknown schema_version — an "
+        return None, ["manifest: missing or unknown schema_version; an "
                       "unversioned bundle does not import"]
     verified = {}
     for addr, digest in sorted((manifest.get("locators") or {}).items()):
@@ -479,12 +479,12 @@ def import_bundle(bundle_dir, dest_root):
             with open(blob, "rb") as fh:
                 data = fh.read()
         except OSError:
-            problems.append(f"{addr}: blob {digest} is MISSING — dispatch blocks")
+            problems.append(f"{addr}: blob {digest} is MISSING; dispatch blocks")
             continue
         actual = hashlib.sha256(data).hexdigest()
         if actual != digest:
             problems.append(f"{addr}: blob is CORRUPT (manifest says {digest}, "
-                            f"bytes hash to {actual}) — dispatch blocks")
+                            f"bytes hash to {actual}); dispatch blocks")
             continue
         verified[addr] = data
     if problems:
@@ -511,18 +511,18 @@ def predispatch(leaf, root, capabilities=None, produced=None):
     for i, ref in enumerate(leaf.get("inputs", [])):
         addr, want = ref.get("address"), ref.get("sha256")
         if not addr or not want:
-            problems.append(f"inputs[{i}]: missing address or digest — "
+            problems.append(f"inputs[{i}]: missing address or digest; "
                             "unverifiable, blocks dispatch")
             continue
         try:
             with open(os.path.join(root, addr), "rb") as fh:
                 actual = hashlib.sha256(fh.read()).hexdigest()
         except OSError:
-            problems.append(f"{addr}: not present under the root — the plan's "
+            problems.append(f"{addr}: not present under the root; the plan's "
                             "input is gone, blocks dispatch")
             continue
         if actual != want:
-            problems.append(f"{addr}: source DRIFT — on disk {actual[:12]}…, the "
+            problems.append(f"{addr}: source DRIFT; on disk {actual[:12]}…, the "
                             f"plan was made against {want[:12]}…; recompile, do "
                             "not dispatch stale context")
 
@@ -532,7 +532,7 @@ def predispatch(leaf, root, capabilities=None, produced=None):
             continue
         if dep.get("kind") == "data" and dep.get("task_id") not in have_produced:
             problems.append(f"dependency {dep.get('task_id')}: its output is not "
-                            "materialized — a data prerequisite blocks dispatch")
+                            "materialized; a data prerequisite blocks dispatch")
 
     # 3. The PRIMARY context budget — never a silent truncation.
     budget = (leaf.get("budgets") or {}).get("context_bytes")
@@ -541,19 +541,19 @@ def predispatch(leaf, root, capabilities=None, produced=None):
         size = sum(len(canon(x)) for x in primary)
         if size > budget:
             problems.append(f"primary context is {size} bytes over the "
-                            f"{budget}-byte budget — the budget cuts appendix, "
+                            f"{budget}-byte budget: the budget cuts appendix, "
                             "never primary; split the leaf, do not truncate")
 
     # 4. Declared capability and resource ownership.
     for cap in leaf.get("required_capabilities", []):
         if cap not in have_caps:
-            problems.append(f"capability {cap!r} is not available on this host — "
+            problems.append(f"capability {cap!r} is not available on this host: "
                             "blocks dispatch")
     scope = leaf.get("source_scope") or {}
     claim = scope.get("claim")
     if scope.get("edit_targets") and not claim:
         problems.append("edit targets are declared but no coordination claim is "
-                        "named — take the claim before dispatch where the project "
+                        "named: take the claim before dispatch where the project "
                         "has agent-sync on")
     return problems
 
@@ -568,7 +568,7 @@ def main(argv):
         try:
             report = _load(argv[1])
         except (OSError, ValueError) as e:
-            print(f"REJECTED: unreadable report — {e}", file=sys.stderr)
+            print(f"REJECTED: unreadable report; {e}", file=sys.stderr)
             return 1
         result, problems = compile_parents(report)
         if problems:
@@ -614,7 +614,7 @@ def main(argv):
             print(f"REJECTED: {pr}", file=sys.stderr)
         if problems:
             return 1
-        print("READY — the cold reader's eight questions are answered")
+        print("READY: the cold reader's eight questions are answered")
         return 0
     if len(argv) >= 3 and argv[0] == "predispatch":
         try:
@@ -640,7 +640,7 @@ def main(argv):
             print(f"BLOCKED: {pr}", file=sys.stderr)
         if problems:
             return 1
-        print("CLEAR — inputs fresh, prerequisites materialized, budget met, "
+        print("CLEAR: inputs fresh, prerequisites materialized, budget met, "
               "capabilities and claim present")
         return 0
     if len(argv) == 4 and argv[0] == "export-bundle":
@@ -675,7 +675,7 @@ def main(argv):
             print(f"REJECTED: {p}", file=sys.stderr)
         if problems:
             return 1
-        print(f"OK — {len(plan['parents'])} parents, every one traced")
+        print(f"OK: {len(plan['parents'])} parents, every one traced")
         return 0
     print(__doc__.strip().splitlines()[0], file=sys.stderr)
     print("usage: context_packets.py compile <report.json> | "
