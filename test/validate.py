@@ -4433,6 +4433,10 @@ if _agents:
     # validator run, measured 2026-10-12 — every plant runs the validator once.
     _probe = _tf.mkdtemp(prefix="tp-agents-home-")
     _env = dict(os.environ, HOME=_probe)
+    # A session that points Claude Code at another config folder (an account manager
+    # does) would let both installers find the host's real plugin through
+    # CLAUDE_CONFIG_DIR and refuse, so the check read a refusal instead of the install.
+    _env.pop("CLAUDE_CONFIG_DIR", None)
     _runs = {
         "install.sh": ["bash", os.path.join(ROOT, "install.sh")],
         # No verb: the installer installs by default, and `install` is not one of its

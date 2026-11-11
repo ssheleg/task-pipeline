@@ -658,6 +658,38 @@ def _():
         assert (pathlib.Path(p).read_bytes(), pathlib.Path(arch).read_bytes()) == once, "a second merge rewrote"
 
 
+# Board finding 6580c2ff (2026-11-11, a 549 KB retro with 140 stamps): `migrate` died with
+# `TypeError: can only concatenate list (not "int") to list`. The loop over table stamps
+# rebound `head`, the Run stamps heading's line number, to a table header's cells, and
+# the pointer for the moved prose paragraphs then added 1 to that list. It needs both at
+# once: a table stamp over the row limit and loose prose moved because the floor is over
+# budget.
+@case("6580c2ff: a long table stamp and moved prose in one migrate do not crash and lose nothing")
+def _():
+    seed = legacy(stamps=8)    # with the two table stamps: ten, at the cap, so none rotates
+    long_row = "| 2026-08-16 (one) | B-1: %s | `aaa` | no |" % ("a long table stamp, " * 30).strip()
+    text = plant(seed, "| 2026-08-16 (one) | B-1: a table stamp | `aaa` | no |", long_row)
+    with tempfile.TemporaryDirectory() as d:
+        p = write(d, text)
+        arch = os.path.join(d, "retro", "2026-Q4.md")
+        code, out = run("check", "--retro", p, "--budget", "3000")
+        assert code == 1 and "over" in out, "the fixture is not over a limit: " + out
+        code, out = run("migrate", "--retro", p, "--budget", "3000", "--archive", arch, "--write")
+        assert "Traceback" not in out, out
+        assert code == 0, out
+        after = pathlib.Path(p).read_text(encoding="utf-8")
+        archived = pathlib.Path(arch).read_text(encoding="utf-8")
+        assert long_row in archived, "the long table stamp is not in the archive verbatim"
+        assert "Moved out:" in after, "the moved prose left no pointer under Run stamps"
+        lines = after.split("\n")
+        heading = lines.index("## Run stamps")
+        assert lines[heading + 2].startswith("Moved out:"), \
+            "the prose pointer is not under the Run stamps heading: %r" % lines[heading:heading + 4]
+        assert "Rotated out:" not in after, "a stamp rotated, so the table row never reached migrate"
+        code, out = run("verify", "--retro", p)
+        assert code == 0, out
+
+
 @case("this repository's own retro floor is within budget and every pointer is proved")
 def _():
     retro = ROOT / "docs/evidence/retro.md"

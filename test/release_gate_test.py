@@ -642,6 +642,16 @@ def a_subagent_stop_is_observed():
     assert "event: subagent — general-purpose" in out, out
 
 
+def a_closed_run_takes_no_more_events():
+    """Board finding a6a2f281 (2026-11-11): a subagent of the same session stopped
+    after stage 10, and its line reached a ledger already committed as final."""
+    for payload in ({"hook_event_name": "SubagentStop"},
+                    {"hook_event_name": "SubagentStop", "agent_type": "general-purpose"},
+                    {"hook_event_name": "PreCompact", "trigger": "auto"}):
+        out = lifecycle(payload, CLOSED_RUN)
+        assert out == CLOSED_RUN, "a closed run's ledger was appended to: %r" % out[len(CLOSED_RUN):]
+
+
 def it_never_writes_a_hand_line():
     """`hand:` carries judgements only the agent holds; a hook filling them in
     would fabricate the very evidence the line exists to provide."""
@@ -668,6 +678,7 @@ def no_ledger_no_lifecycle():
 
 it("a compaction is recorded at the boundary", compaction_is_recorded)
 it("a run whose session ended unclosed is recorded", an_abandoned_run_is_recorded)
+it("a run closed at acceptance takes no subagent or compaction line", a_closed_run_takes_no_more_events)
 it("a run that reached acceptance is not called abandoned", a_finished_run_is_not_called_abandoned)
 it("a subagent stopping is observed", a_subagent_stop_is_observed)
 it("it never writes a hand: line — those are judgements it does not have", it_never_writes_a_hand_line)
