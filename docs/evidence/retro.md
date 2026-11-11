@@ -1491,6 +1491,8 @@ three quarters of the work on this run.
 
 ## Releases that carry no stamp — stated, not stamped
 
+**`v1.104.1` carries no stamp, declared before its tag.** It ships the 2026-11-11 family audit fixes (preflight as a notice, the short-path triage first, the gap check, the closing statement, a host-stated finish line and standing grants, corrected companion install lines, the audit-fix description, `audit.py --prior`, no em dash in templates and printed strings), merged as PR #166. The run was driven from sshlg-skills as an audit fixer; the miss it taught (this line was not in the merged tree, so the release helper refused the tag) is the `v1.103.0` lesson again, no new entry.
+
 **`v1.104.0` carries no stamp, declared before its tag.** It ships the agent surface (hub run `2026-11-09-ai-native`, packet P-TP): the actor branch at stage 0, capabilities and the contract before screens at stages 2 to 5, the `agent` certification reading, `agents/agent-tester.md` and `agents/verifier-agent.md`, `short_path.py --agent-facing`; its card is `docs/evidence/specs/2026-11-09-v11040-release-impact.md`. The run was driven from sshlg-skills; its lessons are on hub board rows B-329 to B-333.
 
 **`v1.103.1` carries no stamp, declared before its tag.** It ships the intake split (stage 0 phase 1a, `references/intake-split.md`) and `backlog_sources.py --discover`; its card is `docs/evidence/specs/2026-11-06-v11031-release-impact.md`. The run was driven from sshlg-skills (session 574eafda), certified by 43 blind unit readings; its lessons are on board rows B-162 to B-166.
