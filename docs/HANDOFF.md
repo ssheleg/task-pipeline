@@ -1,3 +1,23 @@
+## Unreleased 1.104.2: two board findings, branch `fix/board-findings-2026-11-11` (2026-11-11)
+
+- **Objective.** Fabric board findings addressed to this project: `retro_budget.py migrate` crashing
+  on a Run stamps table when prose also moves (6580c2ff, thread 52fd9aef) and `run-lifecycle.sh`
+  appending to a ledger after acceptance (a6a2f281, thread f386c716). Board session, no person present.
+- **Done.** `head` to `hdr` in `cmd_migrate`; the acceptance check in `run-lifecycle.sh` covers all
+  three events; `test/validate.py` installer probe drops `CLAUDE_CONFIG_DIR`; `lessons_test.py`
+  rmtree falls back to `onerror` below Python 3.12; version 1.104.2 on every surface, CHANGELOG,
+  `retro.md` no-stamp declaration, `verification.md` header. PR #168.
+- **Checks run.** `npm test` exit 0 on Python 3.9.6 (validator PASS, `all green`); both new cases
+  fail on 1.104.1 (the retro case reproduces the reported TypeError, the hook case its ledger line).
+- **Decisions.** The ledger grammar keeps its em dash separators (1.104.1 decision, parsers read
+  them); the migration is Fabric task a9da05d5. The tag was not pushed: publication to npm stops a
+  session with no person present.
+- **Open.** `main` requires the `validate`, `House skill audit` and `Negative self-tests` checks,
+  which run nightly, not on PRs; PR #168 waits on them or an operator session.
+- **Next task.** Merge PR #168 once its required checks are green, tag `v1.104.2` with the release
+  script, confirm `npm view task-pipeline-skill version`, then post the version in board threads
+  52fd9aef and f386c716.
+
 ## Unreleased 1.104.0: the agent surface, branch `feat/ai-native-1109` (2026-11-09)
 
 - **Objective.** Operator, 2026-11-09 (hub run `2026-11-09-ai-native`, packet P-TP): products are
