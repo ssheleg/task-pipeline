@@ -20,7 +20,11 @@ that fails on v1.104.1.
   subagent or compaction line"). `unknown` means the SubagentStop payload named no
   agent type. The em dash separators of the ledger grammar itself are unchanged: v1.104.1
   kept them because the parsers read them, and moving the grammar is filed as its own
-  row rather than changed in a patch.
+  row rather than changed in a patch. The negative self-test that disarms this check
+  (`test/negatives/005-an-abandoned-run-must-be-told-from-a-finished-one.sh`) anchored
+  on the old `if closed:` line inside the `SessionEnd` branch; it now anchors on the
+  shared early exit. The manual `validate` run 43195479628 caught it as a `PLANT NO-OP`
+  before the tag.
 - **The agents-disclosure check ran the installers against the host's real config.** It
   gave both installers a scratch `HOME` but kept `CLAUDE_CONFIG_DIR`, so in a session an
   account manager points at its own config folder the installers found the real plugin,
