@@ -1491,6 +1491,8 @@ three quarters of the work on this run.
 
 ## Releases that carry no stamp — stated, not stamped
 
+**`v1.104.3` carries no stamp, declared before its tag.** It re-releases v1.104.2's payload, whose tag was pushed but never published (release run 43537193623 failed at `npm run test:docs` on the board finding id 6580c2ff written in backticks in `docs/evidence/verification.md`), and fixes fixture F1d of `test/lessons_test.py` for git 2.54's `main` default branch. Board request 4c274b2a, a board session with no person present; it ran no pipeline stages, so there is no divergence to stamp.
+
 **`v1.104.2` carries no stamp, declared before its tag.** It ships two fixes reported on the project board on 2026-11-11 (`retro_budget.py migrate` crashing on a Run stamps table when prose also moves, finding 6580c2ff; `run-lifecycle.sh` appending to a ledger after acceptance, finding a6a2f281). The run was a board session with no person present, driven from the task-pipeline project; it ran no pipeline stages, so there is no divergence to stamp.
 
 **`v1.104.1` carries no stamp, declared before its tag.** It ships the 2026-11-11 family audit fixes (preflight as a notice, the short-path triage first, the gap check, the closing statement, a host-stated finish line and standing grants, corrected companion install lines, the audit-fix description, `audit.py --prior`, no em dash in templates and printed strings), merged as PR #166. The run was driven from sshlg-skills as an audit fixer; the miss it taught (this line was not in the merged tree, so the release helper refused the tag) is the `v1.103.0` lesson again, no new entry.
