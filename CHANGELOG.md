@@ -1,3 +1,22 @@
+## v1.104.3: v1.104.2's payload, released with a documentation gate that passes
+
+Guards: 539 → **539**. No behaviour changes; this release carries v1.104.2's fixes unchanged.
+
+- **The tag `v1.104.2` was never published.** Its release run 43528514399 hung and closed
+  `failure`; the rerun 43537193623 passed every suite except `npm run test:docs`, so no
+  package reached npm or the plugin channel. Install 1.104.3; 1.104.2 exists only as a tag.
+- **The documentation gate read a board finding id as a commit.** `docs/evidence/verification.md`
+  wrote the id of board finding 6580c2ff in backticks, and `templates/docgate.sh` treats
+  eight hex characters in backticks as a commit reference a clone must resolve. The id is
+  now plain text, as this changelog already wrote it. The PR suite (`npm test`) does not
+  run `test:docs`, only the release's `npm run test:all` does, which is why the PR was
+  green; running the documentation gate on PRs is filed as its own row.
+- **`test/lessons_test.py` failed about half its runs on git 2.54.** Fixture F1d ran
+  `git init` and later `git branch -f main <sha>`; git 2.54 names the first branch `main`,
+  so whenever the first R1 try qualified the command hit the checked-out branch and
+  refused. The fixture now starts on a scratch branch. Four consecutive runs pass all
+  431 cases (board task 0766af5a recorded the flake on 2026-11-13).
+
 ## v1.104.2: `retro_budget.py migrate` no longer crashes on a stamps table, and a closed run takes no more ledger lines
 
 Guards: 539 → **539**. Two defects reported on the project board on 2026-11-11, each with a regression case

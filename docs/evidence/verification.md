@@ -1,13 +1,23 @@
 # Verification — task-pipeline
 
-## Shipped state — v1.104.2 (source candidate; NOT SHIPPED yet)
+## Shipped state — v1.104.3 (source candidate; NOT SHIPPED yet)
+
+v1.104.2's payload, released again because the tag `v1.104.2` was never published: its
+release run 43537193623 failed only at `npm run test:docs`, which read the board finding id
+6580c2ff, then written in backticks in the v1.104.2 section below, as a commit a clone
+could not follow. The id is now plain text, as CHANGELOG writes it. The tag, release jobs
+and the npm readback remain pending; this header declares the version, not a shipped state.
+
+## Shipped state — v1.104.2 (tag pushed; NEVER PUBLISHED, superseded by v1.104.3)
 
 Two board findings of 2026-11-11: `retro_budget.py migrate` crashing on a Run stamps table
 when loose prose also moves (6580c2ff), and `hooks/run-lifecycle.sh` appending to a ledger
 after acceptance (a6a2f281). On branch `fix/board-findings-2026-11-11`; each fix has a case
-that fails on v1.104.1 (`diet_retro_budget.py` case `6580c2ff`, `release_gate_test.py` "a run
-closed at acceptance takes no subagent or compaction line"). The tag, release jobs and the npm
-readback remain pending; this header declares the version, not a shipped state.
+that fails on v1.104.1 (`diet_retro_budget.py`, the case for board finding 6580c2ff;
+`release_gate_test.py`, "a run closed at acceptance takes no subagent or compaction
+line"). The tag was pushed and both release runs failed (43528514399 hung and closed
+`failure`; 43537193623 failed at `test:docs`); nothing reached npm.
+The payload ships as v1.104.3.
 
 ## Shipped state — v1.104.1 (source candidate; NOT SHIPPED yet)
 
