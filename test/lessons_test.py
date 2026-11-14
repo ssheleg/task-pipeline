@@ -1970,7 +1970,9 @@ def round14_controls():
     base = work / "f1d"
     h = base / "roots" / "h"
     h.mkdir(parents=True)
-    git(h, "init", "-q")
+    # Not on "main": git 2.54 names the first branch main, and `branch -f main` below
+    # refuses the checked-out branch, failing whenever the first R1 try qualifies.
+    git(h, "init", "-q", "-b", "f1d-scratch")
 
     def orphan_root(branch, name, want):
         for attempt in range(200):

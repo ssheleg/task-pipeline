@@ -1,3 +1,21 @@
+## Unreleased 1.104.3: v1.104.2's payload with a passing documentation gate, branch `fix/release-1.104.3-docgate` (2026-11-14)
+
+- **Objective.** Board request 4c274b2a (thread 14841db6, from fabric-workspace): the tag
+  `v1.104.2` was pushed but its release failed only at `npm run test:docs` (run 43537193623),
+  because `docs/evidence/verification.md:8` wrote board finding 6580c2ff in backticks and
+  `docgate.sh` reads that as a commit. Board session, no person present.
+- **Done.** The finding id is plain text; version 1.104.3 on every surface; CHANGELOG says the
+  tag `v1.104.2` was never published; `verification.md` marks v1.104.2 superseded; fixture F1d
+  of `test/lessons_test.py` starts on a scratch branch (git 2.54 names the first branch `main`);
+  `retro.md` declares v1.104.3 without a stamp, before its tag.
+- **Checks run.** `npm run test:docs` OK (was ERR on `verification.md:8`); `npm test` and
+  `test/lessons_test.py` four times in a row, 431 cases each.
+- **Decisions.** Merge, tag and release watching stay with fabric-workspace, as for #168: a
+  session with no person stops before publication. Running the documentation gate in the PR
+  suite is Fabric task 11d6f030, not this patch.
+- **Next task.** fabric-workspace merges the PR once its `ready_for_review` checks are green,
+  tags `v1.104.3`, watches release.yml to `npm view task-pipeline-skill version` = 1.104.3.
+
 ## Unreleased 1.104.2: two board findings, branch `fix/board-findings-2026-11-11` (2026-11-11)
 
 - **Objective.** Fabric board findings addressed to this project: `retro_budget.py migrate` crashing
