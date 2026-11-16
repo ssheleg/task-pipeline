@@ -1,0 +1,732 @@
+{
+ "files": {
+  "plugins/task-pipeline/agents/agent-tester.md": {
+   "bold": 17,
+   "caps": 0,
+   "em_dash": 0,
+   "version_history": 0,
+   "words": 817
+  },
+  "plugins/task-pipeline/agents/design-tester.md": {
+   "bold": 15,
+   "caps": 0,
+   "em_dash": 0,
+   "version_history": 0,
+   "words": 894
+  },
+  "plugins/task-pipeline/agents/verifier-agent.md": {
+   "bold": 13,
+   "caps": 0,
+   "em_dash": 0,
+   "version_history": 0,
+   "words": 929
+  },
+  "plugins/task-pipeline/agents/verifier-product.md": {
+   "bold": 14,
+   "caps": 0,
+   "em_dash": 11,
+   "version_history": 0,
+   "words": 827
+  },
+  "plugins/task-pipeline/agents/verifier-seam.md": {
+   "bold": 16,
+   "caps": 1,
+   "em_dash": 17,
+   "version_history": 0,
+   "words": 789
+  },
+  "plugins/task-pipeline/agents/verifier-unit.md": {
+   "bold": 7,
+   "caps": 0,
+   "em_dash": 11,
+   "version_history": 0,
+   "words": 703
+  },
+  "plugins/task-pipeline/agents/verifier-visual.md": {
+   "bold": 16,
+   "caps": 3,
+   "em_dash": 18,
+   "version_history": 0,
+   "words": 1007
+  },
+  "plugins/task-pipeline/agents/verifier.md": {
+   "bold": 13,
+   "caps": 0,
+   "em_dash": 16,
+   "version_history": 0,
+   "words": 1051
+  },
+  "plugins/task-pipeline/commands/project-audit.md": {
+   "bold": 1,
+   "caps": 1,
+   "em_dash": 4,
+   "version_history": 0,
+   "words": 152
+  },
+  "plugins/task-pipeline/commands/task-pipeline.md": {
+   "bold": 4,
+   "caps": 1,
+   "em_dash": 4,
+   "version_history": 1,
+   "words": 216
+  },
+  "plugins/task-pipeline/skills/evidence-docs/SKILL.md": {
+   "bold": 31,
+   "caps": 2,
+   "em_dash": 25,
+   "version_history": 1,
+   "words": 1627
+  },
+  "plugins/task-pipeline/skills/evidence-docs/references/GENERATED.md": {
+   "bold": 0,
+   "caps": 1,
+   "em_dash": 1,
+   "version_history": 1,
+   "words": 79
+  },
+  "plugins/task-pipeline/skills/evidence-docs/references/documentation.md": {
+   "bold": 107,
+   "caps": 2,
+   "em_dash": 60,
+   "version_history": 0,
+   "words": 4370
+  },
+  "plugins/task-pipeline/skills/evidence-docs/references/gates.md": {
+   "bold": 127,
+   "caps": 3,
+   "em_dash": 95,
+   "version_history": 0,
+   "words": 6681
+  },
+  "plugins/task-pipeline/skills/evidence-docs/references/hooks.md": {
+   "bold": 31,
+   "caps": 1,
+   "em_dash": 28,
+   "version_history": 4,
+   "words": 2336
+  },
+  "plugins/task-pipeline/skills/evidence-docs/references/learned.md": {
+   "bold": 111,
+   "caps": 17,
+   "em_dash": 72,
+   "version_history": 0,
+   "words": 6227
+  },
+  "plugins/task-pipeline/skills/evidence-docs/references/retrospective.md": {
+   "bold": 5,
+   "caps": 0,
+   "em_dash": 0,
+   "version_history": 1,
+   "words": 178
+  },
+  "plugins/task-pipeline/skills/evidence-docs/references/setup.md": {
+   "bold": 20,
+   "caps": 0,
+   "em_dash": 20,
+   "version_history": 0,
+   "words": 1215
+  },
+  "plugins/task-pipeline/skills/evidence-docs/templates/decisions.md": {
+   "bold": 15,
+   "caps": 1,
+   "em_dash": 0,
+   "version_history": 0,
+   "words": 244
+  },
+  "plugins/task-pipeline/skills/project-audit/SKILL.md": {
+   "bold": 56,
+   "caps": 18,
+   "em_dash": 49,
+   "version_history": 1,
+   "words": 3273
+  },
+  "plugins/task-pipeline/skills/project-audit/references/portable-method.md": {
+   "bold": 0,
+   "caps": 3,
+   "em_dash": 0,
+   "version_history": 0,
+   "words": 855
+  },
+  "plugins/task-pipeline/skills/project-audit/references/probes.md": {
+   "bold": 19,
+   "caps": 0,
+   "em_dash": 18,
+   "version_history": 0,
+   "words": 1636
+  },
+  "plugins/task-pipeline/skills/task-pipeline/SKILL.md": {
+   "bold": 54,
+   "caps": 13,
+   "em_dash": 12,
+   "version_history": 2,
+   "words": 2415
+  },
+  "plugins/task-pipeline/skills/task-pipeline/assets/verifier-agent.md": {
+   "bold": 13,
+   "caps": 0,
+   "em_dash": 0,
+   "version_history": 0,
+   "words": 823
+  },
+  "plugins/task-pipeline/skills/task-pipeline/assets/verifier-product.md": {
+   "bold": 14,
+   "caps": 0,
+   "em_dash": 11,
+   "version_history": 0,
+   "words": 738
+  },
+  "plugins/task-pipeline/skills/task-pipeline/assets/verifier-seam.md": {
+   "bold": 16,
+   "caps": 0,
+   "em_dash": 15,
+   "version_history": 0,
+   "words": 701
+  },
+  "plugins/task-pipeline/skills/task-pipeline/assets/verifier-unit.md": {
+   "bold": 7,
+   "caps": 0,
+   "em_dash": 8,
+   "version_history": 0,
+   "words": 612
+  },
+  "plugins/task-pipeline/skills/task-pipeline/assets/verifier-visual.md": {
+   "bold": 16,
+   "caps": 2,
+   "em_dash": 16,
+   "version_history": 0,
+   "words": 895
+  },
+  "plugins/task-pipeline/skills/task-pipeline/references/acceptance.md": {
+   "bold": 71,
+   "caps": 5,
+   "em_dash": 69,
+   "version_history": 0,
+   "words": 4155
+  },
+  "plugins/task-pipeline/skills/task-pipeline/references/adoption.md": {
+   "bold": 15,
+   "caps": 2,
+   "em_dash": 22,
+   "version_history": 0,
+   "words": 1570
+  },
+  "plugins/task-pipeline/skills/task-pipeline/references/agent-surface.md": {
+   "bold": 33,
+   "caps": 0,
+   "em_dash": 0,
+   "version_history": 0,
+   "words": 2042
+  },
+  "plugins/task-pipeline/skills/task-pipeline/references/artifacts.md": {
+   "bold": 54,
+   "caps": 0,
+   "em_dash": 37,
+   "version_history": 1,
+   "words": 2204
+  },
+  "plugins/task-pipeline/skills/task-pipeline/references/audit.md": {
+   "bold": 86,
+   "caps": 4,
+   "em_dash": 60,
+   "version_history": 0,
+   "words": 4339
+  },
+  "plugins/task-pipeline/skills/task-pipeline/references/backlog.md": {
+   "bold": 36,
+   "caps": 0,
+   "em_dash": 31,
+   "version_history": 0,
+   "words": 2362
+  },
+  "plugins/task-pipeline/skills/task-pipeline/references/brainstorm.md": {
+   "bold": 29,
+   "caps": 4,
+   "em_dash": 32,
+   "version_history": 1,
+   "words": 1687
+  },
+  "plugins/task-pipeline/skills/task-pipeline/references/browser.md": {
+   "bold": 77,
+   "caps": 6,
+   "em_dash": 70,
+   "version_history": 0,
+   "words": 4191
+  },
+  "plugins/task-pipeline/skills/task-pipeline/references/build.md": {
+   "bold": 117,
+   "caps": 13,
+   "em_dash": 97,
+   "version_history": 0,
+   "words": 6328
+  },
+  "plugins/task-pipeline/skills/task-pipeline/references/certification.md": {
+   "bold": 50,
+   "caps": 2,
+   "em_dash": 43,
+   "version_history": 3,
+   "words": 3286
+  },
+  "plugins/task-pipeline/skills/task-pipeline/references/companion-skills.md": {
+   "bold": 105,
+   "caps": 7,
+   "em_dash": 74,
+   "version_history": 0,
+   "words": 4069
+  },
+  "plugins/task-pipeline/skills/task-pipeline/references/continuity.md": {
+   "bold": 72,
+   "caps": 1,
+   "em_dash": 70,
+   "version_history": 0,
+   "words": 4807
+  },
+  "plugins/task-pipeline/skills/task-pipeline/references/conventions.md": {
+   "bold": 26,
+   "caps": 0,
+   "em_dash": 23,
+   "version_history": 0,
+   "words": 1300
+  },
+  "plugins/task-pipeline/skills/task-pipeline/references/decomposition.md": {
+   "bold": 21,
+   "caps": 2,
+   "em_dash": 21,
+   "version_history": 0,
+   "words": 1703
+  },
+  "plugins/task-pipeline/skills/task-pipeline/references/deploy-targets.md": {
+   "bold": 11,
+   "caps": 0,
+   "em_dash": 12,
+   "version_history": 0,
+   "words": 1063
+  },
+  "plugins/task-pipeline/skills/task-pipeline/references/design-review.md": {
+   "bold": 12,
+   "caps": 0,
+   "em_dash": 0,
+   "version_history": 1,
+   "words": 669
+  },
+  "plugins/task-pipeline/skills/task-pipeline/references/doctrine-map.md": {
+   "bold": 11,
+   "caps": 1,
+   "em_dash": 11,
+   "version_history": 0,
+   "words": 831
+  },
+  "plugins/task-pipeline/skills/task-pipeline/references/documentation.md": {
+   "bold": 107,
+   "caps": 2,
+   "em_dash": 60,
+   "version_history": 0,
+   "words": 4370
+  },
+  "plugins/task-pipeline/skills/task-pipeline/references/exposure.md": {
+   "bold": 16,
+   "caps": 0,
+   "em_dash": 12,
+   "version_history": 0,
+   "words": 1134
+  },
+  "plugins/task-pipeline/skills/task-pipeline/references/finish-line.md": {
+   "bold": 19,
+   "caps": 0,
+   "em_dash": 20,
+   "version_history": 2,
+   "words": 1169
+  },
+  "plugins/task-pipeline/skills/task-pipeline/references/gates.md": {
+   "bold": 127,
+   "caps": 3,
+   "em_dash": 95,
+   "version_history": 0,
+   "words": 6681
+  },
+  "plugins/task-pipeline/skills/task-pipeline/references/grill.md": {
+   "bold": 76,
+   "caps": 4,
+   "em_dash": 73,
+   "version_history": 0,
+   "words": 3337
+  },
+  "plugins/task-pipeline/skills/task-pipeline/references/hooks.md": {
+   "bold": 31,
+   "caps": 1,
+   "em_dash": 28,
+   "version_history": 4,
+   "words": 2336
+  },
+  "plugins/task-pipeline/skills/task-pipeline/references/intake-split.md": {
+   "bold": 9,
+   "caps": 0,
+   "em_dash": 0,
+   "version_history": 1,
+   "words": 1166
+  },
+  "plugins/task-pipeline/skills/task-pipeline/references/iteration.md": {
+   "bold": 55,
+   "caps": 0,
+   "em_dash": 43,
+   "version_history": 0,
+   "words": 5735
+  },
+  "plugins/task-pipeline/skills/task-pipeline/references/knowledge-graph.md": {
+   "bold": 34,
+   "caps": 1,
+   "em_dash": 44,
+   "version_history": 0,
+   "words": 2111
+  },
+  "plugins/task-pipeline/skills/task-pipeline/references/knowledge-sources.md": {
+   "bold": 87,
+   "caps": 0,
+   "em_dash": 81,
+   "version_history": 0,
+   "words": 4170
+  },
+  "plugins/task-pipeline/skills/task-pipeline/references/learned.md": {
+   "bold": 111,
+   "caps": 17,
+   "em_dash": 72,
+   "version_history": 0,
+   "words": 6227
+  },
+  "plugins/task-pipeline/skills/task-pipeline/references/loop-guard.md": {
+   "bold": 45,
+   "caps": 1,
+   "em_dash": 33,
+   "version_history": 2,
+   "words": 2067
+  },
+  "plugins/task-pipeline/skills/task-pipeline/references/model-tiering.md": {
+   "bold": 17,
+   "caps": 5,
+   "em_dash": 22,
+   "version_history": 0,
+   "words": 1207
+  },
+  "plugins/task-pipeline/skills/task-pipeline/references/planning.md": {
+   "bold": 44,
+   "caps": 12,
+   "em_dash": 53,
+   "version_history": 0,
+   "words": 3934
+  },
+  "plugins/task-pipeline/skills/task-pipeline/references/portability.md": {
+   "bold": 33,
+   "caps": 1,
+   "em_dash": 32,
+   "version_history": 0,
+   "words": 1899
+  },
+  "plugins/task-pipeline/skills/task-pipeline/references/prioritisation.md": {
+   "bold": 53,
+   "caps": 0,
+   "em_dash": 21,
+   "version_history": 0,
+   "words": 1760
+  },
+  "plugins/task-pipeline/skills/task-pipeline/references/probing.md": {
+   "bold": 39,
+   "caps": 1,
+   "em_dash": 28,
+   "version_history": 0,
+   "words": 2030
+  },
+  "plugins/task-pipeline/skills/task-pipeline/references/progress.md": {
+   "bold": 58,
+   "caps": 9,
+   "em_dash": 51,
+   "version_history": 2,
+   "words": 3919
+  },
+  "plugins/task-pipeline/skills/task-pipeline/references/release-impact.md": {
+   "bold": 11,
+   "caps": 0,
+   "em_dash": 0,
+   "version_history": 0,
+   "words": 1626
+  },
+  "plugins/task-pipeline/skills/task-pipeline/references/residue.md": {
+   "bold": 43,
+   "caps": 0,
+   "em_dash": 27,
+   "version_history": 0,
+   "words": 2069
+  },
+  "plugins/task-pipeline/skills/task-pipeline/references/retrospective.md": {
+   "bold": 137,
+   "caps": 4,
+   "em_dash": 98,
+   "version_history": 1,
+   "words": 6218
+  },
+  "plugins/task-pipeline/skills/task-pipeline/references/review.md": {
+   "bold": 47,
+   "caps": 0,
+   "em_dash": 43,
+   "version_history": 0,
+   "words": 2004
+  },
+  "plugins/task-pipeline/skills/task-pipeline/references/setup.md": {
+   "bold": 20,
+   "caps": 0,
+   "em_dash": 20,
+   "version_history": 0,
+   "words": 1215
+  },
+  "plugins/task-pipeline/skills/task-pipeline/references/spec.md": {
+   "bold": 71,
+   "caps": 17,
+   "em_dash": 66,
+   "version_history": 0,
+   "words": 3053
+  },
+  "plugins/task-pipeline/skills/task-pipeline/references/stage-00-intake.md": {
+   "bold": 37,
+   "caps": 4,
+   "em_dash": 29,
+   "version_history": 1,
+   "words": 2256
+  },
+  "plugins/task-pipeline/skills/task-pipeline/references/stage-01-docs-study.md": {
+   "bold": 2,
+   "caps": 0,
+   "em_dash": 2,
+   "version_history": 0,
+   "words": 59
+  },
+  "plugins/task-pipeline/skills/task-pipeline/references/stage-02-brainstorm.md": {
+   "bold": 10,
+   "caps": 2,
+   "em_dash": 11,
+   "version_history": 0,
+   "words": 631
+  },
+  "plugins/task-pipeline/skills/task-pipeline/references/stage-03-spec.md": {
+   "bold": 20,
+   "caps": 11,
+   "em_dash": 18,
+   "version_history": 0,
+   "words": 756
+  },
+  "plugins/task-pipeline/skills/task-pipeline/references/stage-04-plan.md": {
+   "bold": 1,
+   "caps": 0,
+   "em_dash": 2,
+   "version_history": 0,
+   "words": 70
+  },
+  "plugins/task-pipeline/skills/task-pipeline/references/stage-05-dev.md": {
+   "bold": 10,
+   "caps": 1,
+   "em_dash": 12,
+   "version_history": 0,
+   "words": 721
+  },
+  "plugins/task-pipeline/skills/task-pipeline/references/stage-06-tests.md": {
+   "bold": 3,
+   "caps": 0,
+   "em_dash": 2,
+   "version_history": 0,
+   "words": 150
+  },
+  "plugins/task-pipeline/skills/task-pipeline/references/stage-07-lint-deploy.md": {
+   "bold": 3,
+   "caps": 0,
+   "em_dash": 4,
+   "version_history": 0,
+   "words": 270
+  },
+  "plugins/task-pipeline/skills/task-pipeline/references/stage-08-post-deploy.md": {
+   "bold": 8,
+   "caps": 0,
+   "em_dash": 7,
+   "version_history": 0,
+   "words": 422
+  },
+  "plugins/task-pipeline/skills/task-pipeline/references/stage-09-docs-wiki.md": {
+   "bold": 14,
+   "caps": 0,
+   "em_dash": 6,
+   "version_history": 0,
+   "words": 497
+  },
+  "plugins/task-pipeline/skills/task-pipeline/references/stage-10-acceptance.md": {
+   "bold": 18,
+   "caps": 2,
+   "em_dash": 17,
+   "version_history": 0,
+   "words": 1139
+  },
+  "plugins/task-pipeline/skills/task-pipeline/references/stages.md": {
+   "bold": 127,
+   "caps": 25,
+   "em_dash": 130,
+   "version_history": 5,
+   "words": 5984
+  },
+  "plugins/task-pipeline/skills/task-pipeline/references/tdd.md": {
+   "bold": 46,
+   "caps": 6,
+   "em_dash": 42,
+   "version_history": 0,
+   "words": 2436
+  },
+  "plugins/task-pipeline/skills/task-pipeline/references/verification.md": {
+   "bold": 37,
+   "caps": 0,
+   "em_dash": 22,
+   "version_history": 0,
+   "words": 1782
+  },
+  "plugins/task-pipeline/skills/task-pipeline/references/waves.md": {
+   "bold": 31,
+   "caps": 2,
+   "em_dash": 30,
+   "version_history": 1,
+   "words": 2799
+  },
+  "plugins/task-pipeline/skills/task-pipeline/references/work-graph.md": {
+   "bold": 31,
+   "caps": 8,
+   "em_dash": 33,
+   "version_history": 0,
+   "words": 2680
+  },
+  "plugins/task-pipeline/skills/task-pipeline/templates/README.md": {
+   "bold": 14,
+   "caps": 0,
+   "em_dash": 0,
+   "version_history": 0,
+   "words": 775
+  },
+  "plugins/task-pipeline/skills/task-pipeline/templates/adr.md": {
+   "bold": 15,
+   "caps": 1,
+   "em_dash": 0,
+   "version_history": 0,
+   "words": 469
+  },
+  "plugins/task-pipeline/skills/task-pipeline/templates/backlog.md": {
+   "bold": 20,
+   "caps": 1,
+   "em_dash": 0,
+   "version_history": 0,
+   "words": 673
+  },
+  "plugins/task-pipeline/skills/task-pipeline/templates/brief.md": {
+   "bold": 48,
+   "caps": 6,
+   "em_dash": 0,
+   "version_history": 0,
+   "words": 2011
+  },
+  "plugins/task-pipeline/skills/task-pipeline/templates/canvas.md": {
+   "bold": 6,
+   "caps": 1,
+   "em_dash": 0,
+   "version_history": 0,
+   "words": 569
+  },
+  "plugins/task-pipeline/skills/task-pipeline/templates/carryover.md": {
+   "bold": 12,
+   "caps": 1,
+   "em_dash": 0,
+   "version_history": 0,
+   "words": 563
+  },
+  "plugins/task-pipeline/skills/task-pipeline/templates/context.md": {
+   "bold": 10,
+   "caps": 1,
+   "em_dash": 0,
+   "version_history": 0,
+   "words": 239
+  },
+  "plugins/task-pipeline/skills/task-pipeline/templates/decisions.md": {
+   "bold": 15,
+   "caps": 1,
+   "em_dash": 0,
+   "version_history": 0,
+   "words": 244
+  },
+  "plugins/task-pipeline/skills/task-pipeline/templates/docmap.md": {
+   "bold": 15,
+   "caps": 2,
+   "em_dash": 0,
+   "version_history": 0,
+   "words": 807
+  },
+  "plugins/task-pipeline/skills/task-pipeline/templates/dossier.md": {
+   "bold": 2,
+   "caps": 0,
+   "em_dash": 0,
+   "version_history": 0,
+   "words": 521
+  },
+  "plugins/task-pipeline/skills/task-pipeline/templates/open-questions.md": {
+   "bold": 3,
+   "caps": 0,
+   "em_dash": 0,
+   "version_history": 0,
+   "words": 146
+  },
+  "plugins/task-pipeline/skills/task-pipeline/templates/questions.md": {
+   "bold": 6,
+   "caps": 1,
+   "em_dash": 0,
+   "version_history": 0,
+   "words": 312
+  },
+  "plugins/task-pipeline/skills/task-pipeline/templates/release-impact.md": {
+   "bold": 20,
+   "caps": 2,
+   "em_dash": 0,
+   "version_history": 0,
+   "words": 348
+  },
+  "plugins/task-pipeline/skills/task-pipeline/templates/retro-archive.md": {
+   "bold": 13,
+   "caps": 3,
+   "em_dash": 0,
+   "version_history": 0,
+   "words": 458
+  },
+  "plugins/task-pipeline/skills/task-pipeline/templates/retro.md": {
+   "bold": 25,
+   "caps": 0,
+   "em_dash": 0,
+   "version_history": 0,
+   "words": 810
+  },
+  "plugins/task-pipeline/skills/task-pipeline/templates/routing-rule.md": {
+   "bold": 13,
+   "caps": 3,
+   "em_dash": 0,
+   "version_history": 0,
+   "words": 530
+  },
+  "plugins/task-pipeline/skills/task-pipeline/templates/run.md": {
+   "bold": 22,
+   "caps": 0,
+   "em_dash": 0,
+   "version_history": 0,
+   "words": 1607
+  },
+  "plugins/task-pipeline/skills/task-pipeline/templates/verification.md": {
+   "bold": 36,
+   "caps": 4,
+   "em_dash": 0,
+   "version_history": 0,
+   "words": 1341
+  }
+ },
+ "total": {
+  "bold": 3567,
+  "caps": 282,
+  "em_dash": 2572,
+  "version_history": 36,
+  "words": 195408
+ }
+}
