@@ -1,9 +1,7 @@
 # The doctrine map — which reference owns which stage
 
-Split out of `SKILL.md` on 2026-09-10, when its body measured 5429 tokens against the
-house budget of 5000. Nothing here is new: it is the table that says where each stage's
-built-in doctrine lives, so an agent loads the one file the stage needs instead of
-carrying the whole index in every turn.
+The table says where each stage's built-in doctrine lives, so an agent loads the one
+file the stage needs instead of carrying the whole index in every turn.
 
 The rule the table serves stays in `SKILL.md`: every stage's doctrine ships inside this
 skill and no stage blocks on an install. The stage-3 UX gate on a user-facing task

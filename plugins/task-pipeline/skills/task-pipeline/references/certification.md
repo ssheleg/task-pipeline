@@ -2,7 +2,7 @@
 
 A node is not closed by one agent's opinion. It is closed by **three independent
 readings at escalating visibility**, and the run may not advance until all three
-pass. **The cost follows the risk** (since 1.98.0): an **R1** node certifies with **one**
+pass. **The cost follows the risk**: an **R1** node certifies with **one**
 blind tier (`unit` by default; `graph.py certify` accepts any one of the three), and a
 clean round ends a node unless it is **R3 or a flagship surface** (*Rounds owed by risk
 class*, below).
@@ -281,9 +281,8 @@ rounds — not closable yet` until the count is met (`k of M owed passing rounds
 closable` once it is), and `graph.py close` refuses the verdict until then. **Only
 passing rounds count**, read from `certification.history`, and for R3 or a flagship one
 of them must be recorded with `--kind adversarial` (`certification.kinds`). A node with
-a `risk` and no certification at all is refused by `close` too. R2 owed two blind
-rounds until 1.98.0, and a clean round did not cancel the next: the second reading of
-an unchanged diff found nothing it had not already been asked.
+a `risk` and no certification at all is refused by `close` too. A clean round ends an R2
+node: a second reading of an unchanged diff finds nothing it was not already asked.
 
 **What a round after a clean round reads.** The node's **whole diff at the new HEAD** — not
 the fix diff alone, and not the previous round's reports. On an unchanged tree the only

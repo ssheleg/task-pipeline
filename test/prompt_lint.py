@@ -155,7 +155,7 @@ def rebaseline():
     _, total, files = measure()
     if os.path.isfile(BASELINE):
         old = json.load(open(BASELINE))["total"]
-        up = [k for k in METRICS if total[k] > old.get(k, 0)]
+        up = [k for k in METRICS if k in old and total[k] > old[k]]  # a new metric enters at its value
         if up:
             print("refused: rebaseline would raise " + ", ".join(
                 f"{k} {old[k]} -> {total[k]}" for k in up))

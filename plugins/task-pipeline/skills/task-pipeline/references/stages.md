@@ -3,7 +3,7 @@
 For the selected **default profile**, read **one stage section of this file when that
 stage starts** (the stage table in `SKILL.md` is the index), then the one detail it
 links, on every entry or resume, including wave iterations and approved short paths
-(the triage approves the short path itself since 1.98.0). Never read this file end to
+(the triage approves the short path itself). Never read this file end to
 end. Do not preload all stage details. Missing or unreadable detail means stop that stage and repair its route, never guess. A custom
 profile uses its own declared doctrine and stages; numeric ids do not select these
 default details, and the kernel still applies.
@@ -200,7 +200,7 @@ never that the work was skipped quietly.
   validator reads **NOT_RUN** beside the verdict — never PASS — and the gate stands on
   the floor, said so. A record saying `Mode: declined` with its reason is the refusal,
   and it passes.
-  **And the design review's pass D ran over the design before build** (since 1.100.0):
+  **And the design review's pass D ran over the design before build**:
   the `design-tester` walked the test panel through the changed scenarios over the Figma
   frames or mockups, and `python3 scripts/design_gate.py report <design-review.json>
   --class <surface_class> --panel docs/ux/test-panel.md --scope <SCR ids> --require design`
@@ -321,7 +321,7 @@ never that the work was skipped quietly.
   names its engine, and `python3 scripts/resource_guard.py verify <ledger>` is clean
   ([`design-review.md`](design-review.md)). A subscription surface (paywall, trial, pricing,
   cancel) adds `--subscription`: cancelling takes no more steps than subscribing and the
-  paywall makes one clear offer (since 1.101.0).
+  paywall makes one clear offer.
 - **What the look finds is fixed here.** A rendering defect found at stage 6 is a
   stage-6 finding: fix it, look again, then call the stage green. Filing it to the
   board and advancing is how a run reports *checked in a browser* for a page it has

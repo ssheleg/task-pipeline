@@ -10,8 +10,6 @@ once, for the whole board. Stages 5–8 run once per wave. Stages 9–10 close t
 Every gate in [`stages.md`](stages.md) still holds where its stage runs; what the mode
 changes is how many times each stage runs, and over what.
 
-Decided by the operator on 2026-10-11 and first applied that day to a board of 701 items.
-
 ## Contents
 
 - The rule it exists for
@@ -60,7 +58,7 @@ on real agents, tasks and users rather than on the first guess.
 **One planning gate, not three prompts.** The gates of stages 0, 2 and 3 are presented
 together at the end of planning: the brief, the canvas, the wave plan and the question
 batch in one message. Each gate's criteria are still checked and printed. They are `auto`
-by default (since 1.98.0): the standing authorization recorded in the brief closes them
+by default: the standing authorization recorded in the brief closes them
 and the run continues; where the project made them `manual`, the operator is asked once,
 the go names the gates it closes, and silence closes none.
 

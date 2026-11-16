@@ -76,9 +76,8 @@ audit axis, an observer, or the post-release readback. Rotating the axis
 
 - **Done** — every exit check green on the artefact, and one round with no new blocking
   finding; two consecutive ones when the iteration carries an R3 or flagship node, the
-  second of which may read only the last fix's diff. Two for every iteration was the
-  default until 1.98.0, and a clean round that changed nothing bought a second reading
-  of the same tree.
+  second of which may read only the last fix's diff. A second clean round
+  over an unchanged tree buys nothing.
   **A finish line the host's instructions state wins** (for example, two consecutive
   verification rounds with nothing blocking for every unit): the run applies the
   host's count (`waves.py finish --clean-rounds 2` for two) and names its source in

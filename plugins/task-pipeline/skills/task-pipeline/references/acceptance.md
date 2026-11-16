@@ -476,8 +476,6 @@ git -C <submodule> push
 git add <submodule> && git commit -m "chore: bump <name> submodule — <why>"
 ```
 
-Moved out of `SKILL.md` on 2026-08-16: the body was 6685 tokens against a
-< 5000 budget, and stage-10 close-out is what this file is for.
 
 
 

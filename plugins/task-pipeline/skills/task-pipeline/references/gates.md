@@ -643,7 +643,6 @@ of is deleted in the next refactor by someone who assumed it was dead.
    operator go — or a **specific** standing authorization recorded in the brief
    (named target + preconditions; a vague "do everything" is not one).
 
-Moved out of `SKILL.md` on 2026-08-16 for the same budget reason as the
-multi-repository block: these fire at any stage, so they belong with the gate
-doctrine rather than inside step 5 of the run order.
+These fire at any stage, so they live with the gate doctrine rather than inside
+step 5 of the run order.
 

@@ -33,10 +33,9 @@ The full gate and freedom level remain in [stages.md](stages.md).
   a prompt carrying several asks splits first (Phase 1a) and triages the item it keeps.
   Reading the companion matrix and the full harvest before deciding that a
   three-file change was small is the cost this order removes. This pipeline's boundary exempts a typo
-  and a one-line edit; until 1.98.0 the next size up still met eleven stages and five manual gates, because the short
-  path was only *proposed* and silence took the full flow. Under a standing "decide and
-  act" instruction silence is the normal answer, so a proposal was the full flow every
-  time. The triage now **decides**, from five answers with something behind each:
+  and a one-line edit; for the next size up a proposed short path would be the full flow
+  every time, because under a standing "decide and act" instruction silence is the normal
+  answer. So the triage **decides**, from five answers with something behind each:
 
   ```
   1. files the change touches, resolved      git ls-files -- <paths>       -> N

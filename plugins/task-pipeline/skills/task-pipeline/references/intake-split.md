@@ -4,13 +4,11 @@ Stage 0, phase 1a. Read when the request carries more than one ask: a long messa
 dictated list, several features named in one go. Every run reads §1, which finds the
 board; a single ask skips §2 to §5.
 
-The operator's rule (2026-11-06): a big request is cut into modules first; each module is
+The operator's rule: a big request is cut into modules first; each module is
 researched separately and in parallel; the findings merge into one plan, which is run
 through once more; the highest-priority item goes first and every other item lands on the
 project's backlog, found and kept the way that project keeps it. A simple single task gets
-none of this. Until 1.103.1 a run read every prompt as one task: `grill.md` expands "a
-one-line request" into one brief, and the module cut (`decomposition.md`) waited until
-stage 2 and fired only for a platform build (task-pipeline board row B-097).
+none of this.
 
 ## Contents
 

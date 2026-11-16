@@ -76,7 +76,7 @@ Caps that trip the guard by themselves: **3 fix rounds** per task
 module in the program loop, **3 review rounds** per artifact, and **3 failing
 certification rounds** per node ([`certification.md`](certification.md)). Each one
 **stops**: the remaining findings become blocker rows with their evidence and the run
-moves on (since 1.98.0; the review cap used to measure only).
+moves on.
 
 **Two rules hold under every cap.** Never retry an unchanged failing action: the same
 command on the same input gives the same answer, so a retry is a loop with no

@@ -618,7 +618,8 @@ of is deleted in the next refactor by someone who assumed it was dead.
    **anything deferred, dropped or left half-done goes into the carry-over ledger
    the moment it's said** — deferred out loud is forgotten; **never narrow the task
    silently** — the REQ list is frozen, adding is free, removing needs the
-   operator's explicit agreement; **when a loop starts undoing an earlier pass —
+   operator's explicit agreement, or under a host delegation the agent's recorded
+   decision; **when a loop starts undoing an earlier pass —
    the same file edited twice for the same reason, a closed finding coming back, a
    third entry into one stage — stop and run the loop guard**
    (`references/loop-guard.md`): name the two shapes, escalate to the layer that
@@ -642,7 +643,6 @@ of is deleted in the next refactor by someone who assumed it was dead.
    operator go — or a **specific** standing authorization recorded in the brief
    (named target + preconditions; a vague "do everything" is not one).
 
-Moved out of `SKILL.md` on 2026-08-16 for the same budget reason as the
-multi-repository block: these fire at any stage, so they belong with the gate
-doctrine rather than inside step 5 of the run order.
+These fire at any stage, so they live with the gate doctrine rather than inside
+step 5 of the run order.
 
