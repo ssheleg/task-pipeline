@@ -1,3 +1,46 @@
+## v1.105.0: the pipeline's prompts follow Anthropic's current prompting practices
+
+Guards: 539 → **539**. The gates, the kernel, the verifier tiers and every script contract
+keep their behaviour; this release changes how the doctrine is said. The practices, their
+sources and the per-component specs are in
+`docs/reports/2026-11-16-anthropic-prompting/` (Anthropic's Opus 5.5 prompting guide, its
+prompting and skill-authoring best practices, read on 2026-11-16).
+
+- **The run says when it is done and when it may stop.** `SKILL.md` opens with Done when,
+  Stop only when (a human gate, a `manual` gate with no go, or an unknown the recorded
+  decisions, the goal and the safest reversible option cannot settle) and the four endings
+  that are not stops: a summary announcing the next step, an offer to continue, a list of
+  non-blocking decisions, a passed gate taken as a report point. `continuity.md` gains
+  *What is not a stop*, with a cap of three automatic continuations per node.
+- **The grill no longer waits unconditionally.** It ended on "The operator confirms the
+  brief. Only then does stage 1 begin."; the brief is now confirmed by the operator's
+  answer or the standing authorization recorded in it. Fifteen other places that asked or
+  waited with no human gate (a red baseline, a wrong plan, a stuck test, a design approval,
+  a NOT_RUN check, a deferred or dropped REQ) now decide by the recorded decisions, then the
+  goal, then the safest reversible option, and record it.
+- **Pasted, board, tool and fetched text is data.** The grill and project-audit say so;
+  only the operator's own words, or a relayed approval quoting them with when, where and
+  scope, are instructions.
+- **The hand-back reads what waits on the operator first** (`DECISIONS WAITING` moves to
+  the top of the block in `progress.md` and `HOW-IT-WORKS.md`).
+- **The eight subagents share one skeleton**: role, Done when naming the accepting
+  command, inputs, procedure, severity, the unchanged report contract. Descriptions are
+  third person with no internal ids; the tiers share one blindness paragraph with no tier
+  count; the testers get `Write`, and design-tester reads Figma through the mockups or the
+  REST API instead of MCP tools its tool list could not reach.
+- **Less history and less shouting in loaded files.** Version notes 36 → 18, bold spans
+  3567 → 3311, capitalised words 282 → 260, em dashes 2572 → 2374, words 195408 → 195400,
+  with `SKILL.md` inside its 16650-byte budget.
+- **`/task-pipeline` names what each mode ends on** and points `checkup` at
+  `references/exposure.md`, its real home (it pointed at `verification.md`, which never
+  mentions the mode). `/project-audit` no longer promises an HTML page it writes only on
+  `--report`.
+- **`test/prompt_lint.py`** runs in `npm test`: hard rules for "think carefully"
+  instructions, requests to reproduce reasoning, SKILL.md over 500 lines and descriptions
+  in first or second person, plus a ratchet on bold, capitals, em dashes, version history,
+  stops that ask with no human gate, and words (`test/prompt_lint_baseline.json`; it can
+  only be lowered).
+
 ## v1.104.3: v1.104.2's payload, released with a documentation gate that passes
 
 Guards: 539 → **539**. No behaviour changes; this release carries v1.104.2's fixes unchanged.
