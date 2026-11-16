@@ -8,8 +8,8 @@ The full gate and freedom level remain in [stages.md](stages.md).
   explore the codebase, scope-check for decomposition, the open questions in one
   batch, 2–3 approaches with a recommendation, design presented in sections and
   approved section by section. **Hard gate:** no code, no scaffolding, no implementation
-  skill before the operator approves the design — including on "obviously simple"
-  tasks.
+  skill before the design is approved, by the operator or by the standing
+  authorization recorded in the brief, including on "obviously simple" tasks.
 - **The capability map comes first, where the actor branch is armed**
   ([`agent-surface.md`](agent-surface.md)): REQ, then stories, then `CAP-` rows
   (actors, roles, gate, emits, automation, human surface or none), and the agent

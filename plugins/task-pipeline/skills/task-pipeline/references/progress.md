@@ -157,6 +157,7 @@ the two it is running.
 
 ```
 ── hand-back · <topic> · iteration <n> ───────────────────────────
+DECISIONS WAITING  <n>   each as a question with options, asked HERE
 TASK        the request as it was GIVEN, quoted from the brief — not
             as it looks now that you understand it
 PROGRESS    where the run stands against that request: gates passed,
@@ -173,7 +174,6 @@ FINISH      finish: done | budget | blocked — the finish block, as
             finish-line.md prints it; mid-iteration, the round and
             the open blocking count
 
-DECISIONS WAITING  <n>   each as a question with options, asked HERE
 AMBIGUITIES        <n>   computed, below
 ```
 

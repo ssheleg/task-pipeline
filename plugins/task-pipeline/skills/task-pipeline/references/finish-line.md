@@ -30,7 +30,8 @@ fields, written at stage 0 and confirmed with the brief:
   or 2 when the iteration carries an R3 or flagship node.
 - **Base** — the commit the iteration started from.
 
-Widening the scope is a recorded revision of the brief, with the operator's go. A finding is
+Widening the scope is a recorded revision of the brief, with the operator's go or the
+agent's recorded decision under a host delegation. A finding is
 not one.
 
 ## Triage at discovery

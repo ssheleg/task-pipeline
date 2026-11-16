@@ -15,6 +15,9 @@ Hard rules (any hit fails):
 
 Ratchet metrics (may fall, never rise above the committed baseline):
   bold, caps, em_dash, version_history, words   P-08, P-09, P-10
+  unwanted_stop   P-04  "ask the operator", "otherwise wait", "escalate to the
+                  operator" and kin in a paragraph that names no human gate and
+                  no delegation
 
 Text inside fenced code blocks and inline code spans is not checked: quoting a
 phrase is not instructing it.
@@ -30,7 +33,7 @@ import json, os, re, sys, tempfile
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PLUGIN = os.path.join(ROOT, "plugins", "task-pipeline")
 BASELINE = os.path.join(ROOT, "test", "prompt_lint_baseline.json")
-METRICS = ("bold", "caps", "em_dash", "version_history", "words")
+METRICS = ("bold", "caps", "em_dash", "version_history", "unwanted_stop", "words")
 
 FENCE = re.compile(r"^[ \t]*(```|~~~).*?^[ \t]*\1[^\n]*$", re.M | re.S)
 INLINE = re.compile(r"`[^`\n]*`")
@@ -49,6 +52,12 @@ CAPS_OK = {"REQ", "JSON", "HTML", "TODO", "SKILL", "DOCMAP", "HANDOFF", "README"
            "HOLD", "PARK", "OPEN", "TRUE", "FALSE", "NULL", "NONE", "MCP", "SHA", "UTF",
            "ASCII", "CSV", "XML", "SQL", "HEAD", "ADR", "PARTIAL", "SKIP", "SKIPPED"}
 HISTORY = re.compile(r"\b(until|since|added in|from|before|as of) v?\d+\.\d+(\.\d+)?\b", re.I)
+STOP = re.compile(r"\b(ask the (operator|user)|let the (operator|user) decide|otherwise wait|"
+                  r"escalate to the (operator|user)|wait for the (operator|user)|"
+                  r"stop and (ask|report)|the operator decides)\b", re.I)
+STOP_OK = re.compile(r"(standing authori[sz]ation|delegat|human gate|sign-in|one-time code|"
+                     r"consent|payment|typed secret|spend above|recorded as the operator|"
+                     r"`manual`|manual gate|outward|explicit go|\bgo\b)", re.I)
 FIRST_SECOND = re.compile(r"^\s*(I|I'm|I'll|My|You|You're|You'll|Your)\b")
 
 
@@ -101,7 +110,13 @@ def lint_file(path, rel):
                 hits.append(f"{rel}: description: {len(d)} characters (limit 1024)")
             if FIRST_SECOND.search(d):
                 hits.append(f"{rel}: description: first or second person ({d[:30]!r})")
+    unwanted = 0
+    for para in re.split(r"\n\s*\n", text):
+        for m in STOP.finditer(para):
+            if not NEGATION.search(para[:m.start()][-60:]) and not STOP_OK.search(para):
+                unwanted += 1
     metrics = {
+        "unwanted_stop": unwanted,
         "bold": len(BOLD.findall(text)),
         "caps": sum(1 for w in CAPS.findall(text) if w not in CAPS_OK),
         "em_dash": text.count("—"),
@@ -157,6 +172,8 @@ def selftest():
         "desc": ("---\nname: x\ndescription: \"You can use me to do things.\"\n---\nbody\n", "description"),
         "long": ("---\nname: x\ndescription: \"Does x. Use when y.\"\n---\n" + "line\n" * 501, "skill-length"),
     }
+    stop_cases = (("Unclear? Ask the operator and otherwise wait.\n", 2),
+                  ("Unclear? Ask the operator unless a standing authorization covers it.\n", 0))
     clean = ("Do not tell the model to think carefully.\n"
              "Write `think step by step` nowhere.\n"
              "```\nThink carefully.\n```\n")
@@ -177,6 +194,14 @@ def selftest():
         hits, _, _ = measure(d)
         print(("ok  " if not hits else "FAIL") + "  negated, inline and fenced quotes pass")
         failed += bool(hits)
+        for i, (body, want) in enumerate(stop_cases):
+            d = os.path.join(td, f"stop{i}")
+            os.makedirs(d)
+            open(os.path.join(d, "ref.md"), "w").write(body)
+            _, total, _ = measure(d)
+            ok = total["unwanted_stop"] == want
+            print(("ok  " if ok else "FAIL") + f"  unwanted_stop counts {want} for case {i}")
+            failed += not ok
         bl = os.path.join(td, "bl.json")
         json.dump({"total": dict.fromkeys(METRICS, 0)}, open(bl, "w"))
         probs, _ = check(os.path.join(td, "think"), bl)

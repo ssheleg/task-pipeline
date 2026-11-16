@@ -56,7 +56,8 @@ providers owe the same scenario quality and traces, not these package commands.
    (App, Web, ASO) — ([`grill.md`](grill.md) → *The design destination*), and
    `docs/ux/foundation.md` → *Design tooling* is the canonical record. Confirm each
    recorded file **resolves** before any drawing. **Never create a file when a
-   recorded one resolves; if it doesn't resolve, stop and ask — never create a
+   recorded one resolves; if it doesn't resolve, hold the visual track and ask once (an access
+     problem; the rest of the run goes on), and never create a
    replacement.** A creation happens at most once per project, in the team the
    brief names, and its URL goes into the canonical record before the first frame.
 1. `/ux` — the single super-ux entry: reports which `docs/ux/` layers exist,
@@ -300,12 +301,11 @@ no entry names it, the run has agreed to decide it again later.
 
 ## GATE (auto)
 
-> "Spec written and committed to `<path>`. Review it and tell me if anything should
-> change before I write the implementation plan."
+> "Spec committed to `<path>`, reviewed by <reader>; continuing to the plan."
 
-Where the brief records a standing authorization (the default gate is `auto` since
-1.98.0), an independent reader reviews the spec and the run continues; otherwise wait
-for the operator. Changes requested → apply, re-run the self-review, and review again.
+The default gate is `auto`: an independent reader reviews the spec and the run
+continues. Only a `manual` gate in the project's `pipeline.json` waits for the
+operator's go. Changes requested → apply, re-run the self-review, and review again.
 
 The gate is not only the operator's word: **every section carries `covers: REQ-…`
 and every REQ in the brief appears in at least one section.** For UI tasks it

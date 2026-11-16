@@ -169,8 +169,9 @@ not "just try one more thing". Then, in this order:
    is being re-litigated at the wrong altitude:
    - two findings disagree → the **review rubric** decides
      ([`review.md`](review.md)); if it genuinely doesn't, it's a spec question;
-   - a finding contradicts the plan → the **operator** decides which governs
-     (never dismiss the finding, never fix against the plan silently);
+   - a finding contradicts the plan → decide which governs by the recorded decisions, then the project's goal, then the safest reversible option,
+     and record the ruling (never dismiss the finding, never fix against the plan
+     silently); only a decision recorded as the operator's goes to the operator;
    - the plan contradicts the spec → back to **stage 4** with the evidence;
    - the spec is ambiguous or wrong → back to **stage 3**, and if the ambiguity was
      an unresolved intake question, say so — that is a stage-0 miss worth recording;
@@ -194,8 +195,8 @@ not "just try one more thing". Then, in this order:
 
 ## When to stop and hand back
 
-If step 2 lands on "the operator decides", or a cap is hit a second time after a
-re-planned pass, **stop and report BLOCKED** with: the two shapes, the evidence, the
+If step 2 lands on a decision recorded as the operator's, or a cap is hit a second
+time after a re-planned pass, **park the node as BLOCKED** and report it with: the two shapes, the evidence, the
 history of passes, and your recommendation. That is a complete, honest hand-back —
 far cheaper than a third round of the same argument.
 

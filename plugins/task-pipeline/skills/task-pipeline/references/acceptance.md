@@ -147,8 +147,8 @@ Run: <branch/commit range> · Date: YYYY-MM-DD
 |---|---|---|
 | `verified` | done and demonstrated | **evidence** — a passing test name, `file:line`, command output, or a scenario ID with PASS |
 | `partial` | works for some of what was asked | an explicit list of what's missing + where it's tracked |
-| `deferred` | agreed not to do it now | the operator's agreement **and** a tracker entry |
-| `dropped` | agreed it isn't wanted | the operator's agreement + the reason |
+| `deferred` | agreed not to do it now | the operator's agreement, or under a host delegation the agent's recorded decision, **and** a tracker entry |
+| `dropped` | agreed it isn't wanted | the operator's agreement, or under a host delegation the agent's recorded decision, + the reason |
 
 **A `dropped` is a scope decision, and it outlives this run.** The operator's
 agreement closes the row here; the **Doc Loop**

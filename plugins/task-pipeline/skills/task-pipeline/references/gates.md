@@ -618,7 +618,8 @@ of is deleted in the next refactor by someone who assumed it was dead.
    **anything deferred, dropped or left half-done goes into the carry-over ledger
    the moment it's said** — deferred out loud is forgotten; **never narrow the task
    silently** — the REQ list is frozen, adding is free, removing needs the
-   operator's explicit agreement; **when a loop starts undoing an earlier pass —
+   operator's explicit agreement, or under a host delegation the agent's recorded
+   decision; **when a loop starts undoing an earlier pass —
    the same file edited twice for the same reason, a closed finding coming back, a
    third entry into one stage — stop and run the loop guard**
    (`references/loop-guard.md`): name the two shapes, escalate to the layer that

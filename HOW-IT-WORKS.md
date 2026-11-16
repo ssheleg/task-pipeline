@@ -197,18 +197,18 @@ Long iterations lose context. So at the end of every iteration, and at stage 10,
 the run reports in a fixed shape:
 
 ```
+DECISIONS WAITING  <n>   each as a question with options, asked HERE
 TASK               the request AS IT WAS GIVEN, quoted from the brief
 PROGRESS           where the run stands against that request
 DONE               what was solved, each with its evidence
 SURFACED           what came up that nobody asked for
-DECISIONS WAITING  <n>   each as a question with options, asked HERE
 AMBIGUITIES        <n>   computed from the registers, below
 ```
 
 Three details carry the weight:
 
 - `TASK` is **quoted, not paraphrased** — the paraphrase is exactly what drifts.
-- `DECISIONS WAITING` are asked **here**, not deferred. A missing decision, a
+- `DECISIONS WAITING` come first and are asked **here**, not deferred. A missing decision, a
   missing document or an ambiguity left standing is what turns into a large
   consequence three stages later.
 - `AMBIGUITIES` is **computed from four registers that already exist** — not a

@@ -188,7 +188,7 @@ annotation queues and simulated users — see the `agent-evals` skill in the
 
 | Problem | What it means |
 |---|---|
-| Don't know how to test it | Write the API you wish existed, then the assertion. Still stuck → ask the operator. |
+| Don't know how to test it | Write the API you wish existed, then the assertion. Still stuck → park the task with what you tried and take the next one. |
 | The test is too complicated | The design is too complicated. Simplify the interface. |
 | Everything has to be mocked | The code is too coupled. Inject dependencies. |
 | Setup is enormous | Extract helpers; if it's still huge, the design is the problem. |

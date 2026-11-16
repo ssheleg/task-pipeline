@@ -267,7 +267,7 @@ never that the work was skipped quietly.
   seen rejecting a planted defect and passing the clean tree, asserted on its exit
   code** ([`probing.md`](probing.md)); no `skip`/`xfail` smuggling a red suite past the gate; **on a
   `flagship`, `product` or `ad` surface where the VISUAL track ran, the visual half's
-  `visual_gate.py sheet` exits 0** — NOT_RUN stops and asks, it is not green
+  `visual_gate.py sheet` exits 0** — NOT_RUN holds that check and is not green; the run records it and continues with work that does not depend on it
   ([`browser.md`](browser.md) → *The visual half*). Never advance
   to deploy on a red or partial run. **The carry-over count is printed beside this
   verdict** — a ratchet nobody prints is a TODO with a better name
@@ -499,8 +499,8 @@ module N → 3 spec (dossier) → 4 plan → 5 build → 6 tests → 7 lint+depl
 ```
 
 - **No re-grilling, no re-decomposing per module.** New information that changes the
-  map goes back to stage 2 as an explicit, operator-approved map revision — never a
-  quiet edit mid-module.
+  map goes back to stage 2 as an explicit map revision, approved by the operator or by
+  the standing authorization recorded in the brief, never a quiet edit mid-module.
 - **Each module's spec is a full dossier** (`spec.md`): architecture, entities,
   contracts in and out, business rules, edge and failure cases, UI/Figma chain when
   it has a surface.

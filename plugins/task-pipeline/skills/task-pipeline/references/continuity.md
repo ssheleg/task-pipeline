@@ -11,6 +11,7 @@ almost no window left, loses the middle of it, and re-derives what it already di
 
 - The limit, before the capability
 - Part 1 — the loop
+- What is not a stop
 - Part 1a — the queue is stage 2's, and the loop arms on it
 - Arming it on Claude Code
 - Other harnesses, and honest degradation
@@ -130,6 +131,25 @@ the boundary between one agent turn and the next. This file is that reach.
 **Where it is recorded:** `pipeline.json` → `run.loop`. A project sets it once and
 is never asked again — which is the entire point. A mode that has to be requested
 every run is not a mode, it is a habit the operator maintains by hand.
+
+## What is not a stop
+
+A turn that ends in text while work is still owed is a report, not completion. Four
+endings look like stops and are not, whether or not the loop is armed:
+
+- a summary of what was done that announces the next step instead of taking it;
+- an offer to carry on unless the operator would rather not;
+- a list of decisions for the operator when none of them blocks the rest of the work
+  (record them with their recommendation and go on);
+- deciding that a passed gate, a certified node or a landed wave is a good place to
+  report because the turn has been long.
+
+Put status notes in the same message as the next action. The stops that are wanted are
+the ones above under *Part 1*: nothing can move without a person, or the thing blocking
+the work is deliberately protected. After three automatic continuations on one node
+without a gate passing, park the node with its open items named and take the next one,
+so a run that is genuinely stuck ends where it can be reviewed. None of this removes the
+confirmation that a risky or irreversible act needs.
 
 ## Part 1a — the queue is stage 2's, and the loop arms on it
 

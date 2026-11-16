@@ -7,6 +7,30 @@ compatibility: "Doctrine runs on any agent. The bundled scripts need python3; th
 
 # task-pipeline
 
+**Done when** the selected profile's last gate passes: every REQ is accounted for with
+evidence, every repository is clean, pushed and pointed at, the hand-back is written
+(what is blocked on the operator first, then what changed, what was found and what
+could not be confirmed), and the retrospective is written last.
+
+**Stop only when** nothing can move without a person: a human gate (sign-in, one-time
+code, consent, payment, typed secret, spend above a limit, a decision recorded as the
+operator's); a `manual` gate with neither a go nor a standing authorization naming the
+act; or a material unknown that the recorded decisions, then the project's goal, then
+the safest reversible option cannot settle. A stop names its gate and what resumes it,
+and work that does not depend on it continues.
+
+**These are not stops**: a summary that announces the next stage instead of starting
+it; an offer to continue; a list of decisions that block nothing (record them in the
+brief and go on); treating a passed gate, a certified node or a landed wave as a place
+to report. Put status notes in the same message as the next action
+([`references/continuity.md`](references/continuity.md) → *What is not a stop*).
+
+**Terms.** A *stage* is one step of the selected profile and its *gate* the check that
+lets the run past it. A *node* is one unit of work in the graph. A *REQ* is one
+addressable row of the request. The *brief* is stage 0's locked statement of the task.
+The *run ledger* (`.task-pipeline/run.md`) is the task list the run ticks as work lands;
+the *source ledger* lists what stage 0 read and what each source is worth.
+
 Self-contained orchestrator. Runs a task through **gated stages**, each carrying its
 own built-in doctrine; no companion plugin is required. No stage advances until its
 gate passes, and the whole run uses one model, recorded before it starts.
@@ -14,15 +38,15 @@ gate passes, and the whole run uses one model, recorded before it starts.
 **Proportional, then autonomous.** Stage 0 is a **gap check** before it is an
 interview: the brief is built from the request, the files and the harvest, and a
 question is asked only for a **material unknown** the sources cannot answer. A
-complete brief yields ZERO intake questions; what the request or the project already
+complete brief yields zero intake questions; what the request or the project already
 decided is recorded, never re-negotiated. When the change is also small (R1 risk, at most five
 files, no public contract, no user-facing change, no deploy), the run **takes the short
 path by default** and says so in one line: brief in the run ledger, build with tests,
 one verification, docs and handoff, a retro entry only for a new lesson
 ([`references/stage-00-intake.md`](references/stage-00-intake.md) → Phase 1d, which
 also names the triggers that bring a skipped stage back). Anything larger runs the
-full flow, with the interview, where gaps remain, as ONE batch that pre-resolves
-stages 1→10: every MATERIAL question skipped at stage 0 comes back as an interruption
+full flow, with the interview, where gaps remain, as one batch that pre-resolves
+stages 1→10: every material question skipped at stage 0 comes back as an interruption
 later.
 
 **Config contract: [`pipeline.schema.json`](pipeline.schema.json).** A pipeline is an
@@ -88,8 +112,8 @@ archive, verbatim and hash-proved.
 
 ## How to run
 
-1. Restate the task in one line; track each stage from 0 (a task tool or a prose
-   checklist). **Triage first**: `scripts/short_path.py` decides from the request,
+1. Restate the task in one line; track each stage from 0 in the run ledger
+   (`.task-pipeline/run.md`) and tick it as work lands. **Triage first**: `scripts/short_path.py` decides from the request,
    its files and the instruction file (`references/stage-00-intake.md` → Phase 1d).
    Short path: its line, no companion block, no full harvest. Full flow: the
    **preflight notice**, never a stop: the model kept, the choice inherited verbatim
