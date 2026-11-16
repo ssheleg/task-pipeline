@@ -550,7 +550,8 @@ cycle.
   rounds per artifact, 3 failing certification rounds and 3 automatic continuations per
   node ([`loop-guard.md`](loop-guard.md)).
 - **On a trip: stop editing.** Name shapes A and B with their evidence, escalate to
-  the layer that owns the conflict (rubric → operator → plan → spec → module map),
+  the layer that owns the conflict (rubric → recorded decisions and goal, the operator only
+  for their recorded decisions → plan → spec → module map),
   re-plan the check as an ordered one-item-per-line checklist, then go through it in
   order, one commit per item. Never settle a higher-layer conflict inside a lower
   loop, and never adjudicate before the cap.

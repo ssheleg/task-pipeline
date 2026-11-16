@@ -31,10 +31,12 @@ almost no window left, loses the middle of it, and re-derives what it already di
 - A `manual` gate requires the operator's explicit go. A specific standing authorization
   naming that gate's act is such a go; cite its source and scope in the gate record.
   Without it, the gate waits. A generic instruction to continue is not authorization.
-- An outward or irreversible act — deploy, publish, a tag or a release, sending to a
-  person, spending money above a recorded limit, deletion, a PR, creating or editing a
-  shared design file (`SKILL.md` → *Stop only when* holds the full list) — still needs its own
-  **specific** authorization. A recorded loop mode is a **generic** flag, and a generic
+- An outward or irreversible act still needs its own **specific** authorization. The full
+  list, which `SKILL.md` cites: deploy; a tag or a release; publication; sending to a
+  person; spending money (any spend, unless the brief records a spend line it stays
+  under); deletion of what this run did not create or what git cannot restore (data,
+  records, a remote branch, a release); a push or a pull request (below);
+  creating a repository; creating or editing a shared design file. A recorded loop mode is a **generic** flag, and a generic
   flag is not a specific authorization; that floor is set in [`grill.md`](grill.md) and
   this file does not lower it.
 - **Pushing this repository's work and opening its pull request** is armed by a specific
@@ -147,8 +149,8 @@ endings look like stops and are not, whether or not the loop is armed:
 
 Put status notes in the same message as the next action. The wanted stops are the four
 under *Part 1*, where an ambiguity counts only if the recorded decisions, the goal and the
-safest reversible option cannot settle it, plus the human gates and outward acts `SKILL.md`
-names. After three automatic continuations on one node (resumes across a turn boundary that
+safest reversible option cannot settle it, plus the human gates `SKILL.md` names and the outward
+acts listed under *The limit, before the capability*. After three automatic continuations on one node (resumes across a turn boundary that
 produced no new commit or evidence and are not fix, review or certification rounds or
 watcher wake-ups on a recorded wait) without a gate passing, park the node
 with its open items named and take the next one,

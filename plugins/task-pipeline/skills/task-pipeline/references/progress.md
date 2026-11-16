@@ -173,7 +173,6 @@ NOT VERIFIED what was built and NOT checked, or could not be. The literal
 FINISH      finish: done | budget | blocked — the finish block, as
             finish-line.md prints it; mid-iteration, the round and
             the open blocking count
-
 AMBIGUITIES        <n>   computed, below
 ```
 

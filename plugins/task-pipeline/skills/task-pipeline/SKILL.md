@@ -12,17 +12,19 @@ evidence, every repository clean, pushed and pointed at, the hand-back written (
 waits on the operator first, then what changed, what was found, what could not be
 confirmed), the retrospective last.
 
-**Stop only when** nothing can move without a person: a human gate (sign-in, one-time
-code, consent, payment, typed secret, spend above a limit, a decision recorded as the
-operator's), a `manual` gate or an outward or irreversible act (deploy, a tag or release,
-publication, sending to people, deletion, a PR, creating a repository, creating or
-editing a shared design file) with no go and no standing authorization naming it, or a material unknown that the recorded decisions, then the goal, then the safest
-reversible option cannot settle. Name the gate and what resumes it; independent work
-continues. **Not stops**: a summary announcing the next stage, an offer to continue,
-non-blocking decisions, a passed gate taken as a place to report ([`references/continuity.md`](references/continuity.md) → *What is not a stop*).
+**Hold an item only when** it cannot move without a person: a human gate (sign-in,
+one-time code, consent, payment, typed secret, a decision recorded as the operator's); a
+`manual` gate or an outward or irreversible act (deploy, release, publication, sending,
+spending, unrecoverable deletion, a push or PR, a new repository or shared design file;
+the full list is [`references/continuity.md`](references/continuity.md) → *The limit,
+before the capability*) with no go and no standing authorization naming it; or a material
+unknown the recorded decisions, then the goal, then the safest reversible option cannot
+settle. Name the gate and what resumes it, and keep other work going; the
+run stops only when nothing can move. **Not stops**: a summary announcing the next stage,
+an offer to continue, non-blocking decisions, a passed gate taken as a place to report
+(same file → *What is not a stop*).
 
-**Terms.** *Stage*, *gate*: a step and the check that passes it. *Node*: a unit of
-work. *REQ*: a row of the request. *Brief*: stage 0's locked task. *Run ledger*
+**Terms.** *Node*: a unit of work. *REQ*: a row of the request. *Brief*: stage 0's locked task. *Run ledger*
 (`.task-pipeline/run.md`): the task list the run ticks.
 
 Self-contained orchestrator. Runs a task through **gated stages**, each carrying its
@@ -188,9 +190,9 @@ available as advice, a tier, never a hardcoded id (`references/model-tiering.md`
 
 ## Degradation
 
-No python3: the queue becomes a prose plan and the gates checklists, said out loud. No
-git: no worktree isolation or commit-addressed evidence. No browser channel: a web
-surface is read from the diff. Each records the weaker claim it can make.
+Without python3 the queue is a prose plan and the gates checklists; without git, no
+worktrees or commit-addressed evidence; without a browser, a web surface is read from
+the diff. Each says so and records the weaker claim.
 
 ## References
 
