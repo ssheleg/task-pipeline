@@ -29,8 +29,8 @@ These inputs, and nothing else is yours:
 - the scenarios, `docs/ux/scenarios.md`, and the node's scope: the `SCR-` ids it changes;
 - the design: the Figma frames each step names, or, without Figma, the mockups the
   scenario links. Read a frame from its exported image, or render it through Figma's
-  API with `curl` (`GET /v1/images/<key>?ids=<node>`), the token from the project's
-  secret store, never printed;
+  API with `curl` (`GET /v1/images/<key>?ids=<node>`) run under the project's secret
+  runner, the token in the environment and never on the command line or printed;
 - the build: the URL or app the node runs, reached in the browser the project recorded
   (`pipeline.json` → `browser`).
 

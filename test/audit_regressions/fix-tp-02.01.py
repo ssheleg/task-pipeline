@@ -47,7 +47,7 @@ def flat(name):
 
 def t_gate_checks_artifact_not_package():
     s = flat("SKILL.md")
-    assert "the stage-3\ngate checks the artifact, not the package" in s or "the stage-3 gate checks the artifact, not the package" in s  # softened in 1.105.0 (P-08)
+    assert "the stage-3 gate checks the artifact, not the package" in s  # softened in 1.105.0 (P-08)
     assert "Not installed on a UI task? The stage-3 spec gate stops" not in s, \
         "the package-presence gate survived"
     c = flat("references/companion-skills.md")

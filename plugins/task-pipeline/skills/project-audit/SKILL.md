@@ -19,9 +19,10 @@ when one is asked for.
 Done when: the *Exit criterion* below holds (every probe has a verdict, the sidecar
 is written, and the close is printed in its order).
 
-Stop only when: an unknown would change the action, or the next step needs a
-credential the operator has not connected. Ask about that one thing; anything else
-that cannot be read is recorded `blind` and the run continues.
+Stop only when: an unknown would change the action; ask about that one thing.
+A source that needs a credential the operator has not connected is recorded `blind`
+and named in the close; never ask for a new secret. Anything else that cannot be read
+is recorded `blind` and the run continues.
 
 ## Contents
 
@@ -130,7 +131,7 @@ what ran are the same object.
 
 This skill commits nothing. Findings leave as board rows in the project's
 own vocabulary, priced with the board header's declared formula (the shipped
-default is `Sev × Blast + age_bonus`, ([`references/portable-method.md`](references/portable-method.md),
+default is `Sev × Blast + age_bonus`; [`references/portable-method.md`](references/portable-method.md),
 the local priority contract), and the operator accepts them. Effort never ranks inside an
 audit: what a fix costs is the fixer's decision, not the finder's
 ([`references/portable-method.md`](references/portable-method.md)). An audit

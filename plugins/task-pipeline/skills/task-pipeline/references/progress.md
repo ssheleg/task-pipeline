@@ -102,7 +102,7 @@ omitting the field is indistinguishable from forgetting it.
 The stage ids on the rail come from the project's `pipeline.json` → `stages[]`. They
 are **not** the eleven in [`../pipeline.example.json`](../pipeline.example.json), which
 is this plugin's *example* flow — a host project replaces it with its own stages
-(`SKILL.md` → *Bring your own skills*).
+(`pipeline.schema.json`, the only contract).
 
 A bar reading `gates 5/11` in a project with six stages is a false success in the
 purest form the pipeline has: a summary that is confidently wrong about the thing it

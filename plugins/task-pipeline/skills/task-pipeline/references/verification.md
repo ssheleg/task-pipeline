@@ -112,20 +112,8 @@ would have been dormant precisely when it was needed.
 evidence: a command, a CI run id, a fixture name. The second is the `Human` axis, and it is
 the one the exposure line is defined over.
 
-A ledger may carry either or both, and most carry only the first. Measured across this
-family on 2026-08-16 — nine repositories, **ten** header shapes, **815** rows:
-
-| what the state column can say | rows | repositories |
-|---|---|---|
-| whether a **person** looked (`Human`) | **126** | 1 |
-| a date and what was watched (`Last verified`) | 180 | 1 |
-| `verified` — by a person **or** a command, indistinguishable | 391 | 4 |
-| nothing: the ledger records evidence and carries no state column | 118 | 3 |
-
-So **`never` is measurable in one repository of nine, over 15% of the rows**, and the exposure line — which this
-doctrine defines over it — is undefined in the rest. That is not a defect in those
-ledgers. Recording *what confirmed it* is the Auto job done properly, and a project that
-never asks the human question is making a choice.
+A ledger may carry either or both, and most carry only the first, which is the Auto job
+done properly; a project that never asks the human question is making a choice.
 
 What is a defect is **doctrine that speaks as though the column were there**. So:
 
@@ -151,11 +139,7 @@ already does. `Human` starts at `never` unless the operator confirmed during the
 
 **A REQ that spans two modules is stamped with the second, not the first.** Its criterion
 is satisfied when the last part of it exists, and stamping the earlier release claims a
-capability the project did not yet have. Caught by a reader on the first ledger this
-skill ever seeded: one row said a file was named in the maps a release before that file
-existed, and the row directly below it said when the file arrived. Two rows of one
-table, disagreeing about the same date.
-
+capability the project did not yet have.
 **Stage 10** refuses a REQ that shipped and has no row — and, in the other direction, a
 row whose REQ appears in no brief. They are different failures: a shipped feature that
 entered no ledger, and a ledger row about nothing. One direction alone finds one of them

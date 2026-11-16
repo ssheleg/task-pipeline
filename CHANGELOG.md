@@ -28,9 +28,14 @@ prompting and skill-authoring best practices, read on 2026-11-16).
   third person with no internal ids; the tiers share one blindness paragraph with no tier
   count; the testers get `Write`, and design-tester reads Figma through the mockups or the
   REST API instead of MCP tools its tool list could not reach.
-- **Less history and less shouting in loaded files.** Version notes 36 → 18, bold spans
-  3567 → 3311, capitalised words 282 → 260, em dashes 2572 → 2374, words 195408 → 195400,
+- **Less history and less shouting in loaded files.** Version notes 36 → 14, bold spans
+  3567 → 3305, capitalised words 282 → 260, em dashes 2572 → 2368, words 195408 → 195389,
   with `SKILL.md` inside its 16650-byte budget.
+- **The outward-act floor stays a stop.** Stop only when names a deploy, publication,
+  deletion, a PR, or creating a repository or a Figma file with no go and no standing
+  authorization naming it; where an older file still said "asks" or "the operator
+  confirms" (seeding a board on an occupied path, a NOT_RUN visual check, a design
+  approval, the brief template, a dropped REQ) it now says the same as the new contract.
 - **`/task-pipeline` names what each mode ends on** and points `checkup` at
   `references/exposure.md`, its real home (it pointed at `verification.md`, which never
   mentions the mode). `/project-audit` no longer promises an HTML page it writes only on

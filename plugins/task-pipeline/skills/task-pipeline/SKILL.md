@@ -14,8 +14,9 @@ confirmed), the retrospective last.
 
 **Stop only when** nothing can move without a person: a human gate (sign-in, one-time
 code, consent, payment, typed secret, spend above a limit, a decision recorded as the
-operator's), a `manual` gate with no go and no standing authorization naming the act, or
-a material unknown that the recorded decisions, then the goal, then the safest
+operator's), a `manual` gate or an outward or irreversible act (deploy, publication,
+deletion, a PR, creating a repository or a Figma file) with no go and no standing
+authorization naming it, or a material unknown that the recorded decisions, then the goal, then the safest
 reversible option cannot settle. Name the gate and what resumes it; independent work
 continues. **Not stops**: a summary announcing the next stage, an offer to continue, a
 list of decisions that block nothing, a passed gate or landed wave taken as a place to
@@ -75,29 +76,24 @@ profile's** normative gate set; the kernel is normative for all; another skill s
 `references/companion-skills.md`.
 
 super-ux is the preferred provider for any user-facing task, and the stage-3
-gate checks the artifact, not the package: valid scenarios covering the change, from
-super-ux, an equivalent provider or the inline fallback in
-`references/companion-skills.md`, pass. The absence of any scenario artifact stops the
-gate; a missing tool is reported as the named check that was not done, never as a
-failed task.
+gate checks the artifact, not the package: valid scenarios from super-ux, an equivalent
+provider or the inline fallback (`references/companion-skills.md`) pass; no scenario
+artifact stops the gate; a missing tool is reported as the named check that was not
+done, never as a failed task.
 
-The grill is built in (`references/grill.md`) and produces the REQ spine: the
-request as an addressable list, each row naming how it is verified, which stages 3–5
-trace to and stage 10 accounts for every one of. Harvest before you ask
-(`references/knowledge-sources.md`): stage 0 pulls what the project already knows,
-writes the source ledger, and checks every answer against it; the operator outranks a
-document but only out loud.
+The grill (`references/grill.md`) produces the REQ spine: the request as rows, each
+naming how it is verified, traced by stages 3–5 and accounted for at stage 10. Harvest
+before you ask (`references/knowledge-sources.md`): stage 0 writes the source ledger and
+checks every answer against it; the operator outranks a document but only out loud.
 
-Three artifacts close a run and they converge: stage 9 syncs the docs, the wiki
-and the code graph, and the graph↔docs divergence check is the gate over them where a
-graph exists (`references/knowledge-graph.md`). **Documentation is a deliverable with a
+Stage 9 syncs the docs, the wiki and the code graph; the graph↔docs divergence check
+gates them where a graph exists (`references/knowledge-graph.md`). **Documentation is a deliverable with a
 gate** (`references/documentation.md`): `docs/DOCMAP.md`, the Doc Loop at any stage,
 the propagation matrix at stage 9, and *"docs in sync"* as a command with an exit code.
 
 The run teaches the next run, and the list stays short
-(`references/retrospective.md`). Stage 10's last act, **in this order and the order is
-load-bearing**: stamp the run, then prune, then write the entry (`references/learned.md`
-rule 21). The floor stage 0 reads in full has a byte budget
+(`references/retrospective.md`). Stage 10's last act, in this order (it is load-bearing):
+stamp the run, then prune, then write the entry (`learned.md` rule 21). The floor stage 0 reads in full has a byte budget
 (`scripts/retro_budget.py check`); gate 10 fails over it until `migrate` moves the
 narrative to the archive, verbatim and hash-proved.
 
@@ -187,8 +183,8 @@ repositories*.
 
 ## Model: recorded once, at preflight
 
-Keep the running model and record it; recommend **the most capable reasoning model
-available** as advice, a tier, **never a hardcoded id** (`references/model-tiering.md`
+Keep the running model and record it; recommend the most capable reasoning model
+available as advice, a tier, never a hardcoded id (`references/model-tiering.md`
 → *Mechanic*). Stage-5 subagents are pinned to it.
 
 ## Degradation
@@ -202,8 +198,10 @@ surface is read from the diff. Each records the weaker claim it can make.
 Most references are routed from `references/doctrine-map.md` by stage; `stages.md`,
 `learned.md` and `probing.md` are routed by prose. Beside this file: the config
 contracts and the family's task and result packets (`execution-packet.schema.json`,
-`execution-result.schema.json`, with examples), validated by `scripts/packet.py`;
-`scripts/context_packets.py compile|verify` maps an audit report onto parent tasks.
+`execution-result.schema.json`, with examples), validated by `scripts/packet.py` (an unknown mandatory version, a ref without its digest
+or an unbound decision is rejected; a stale result re-plans); `scripts/context_packets.py
+compile|verify` maps an audit report onto parent tasks by finding id, and a row it cannot
+map blocks the compile.
 
 ## Triggers
 

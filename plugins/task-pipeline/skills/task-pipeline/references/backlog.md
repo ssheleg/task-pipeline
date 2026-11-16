@@ -64,7 +64,7 @@ first (a frozen board, a tracked backlog file elsewhere, a line naming a board o
 repository; `seed-path-taken`, the seed path already occupied, which is read and never written
 over). Only when it exits 4, or the signals name no live board, stage 0 seeds `<artifacts>/backlog.md` from
 [`templates/backlog.md`](../templates/backlog.md) and says so in the brief, unless a
-`seed-path-taken` signal stands: then the brief says so and stage 0 asks once where to seed.
+`seed-path-taken` signal stands: then the brief says so and stage 0 asks once where to seed, and the run goes on meanwhile.
 Whether to seed is not a decision that needs asking: an empty board and no board are the same thing to
 work on, and only one of them can be appended to.
 

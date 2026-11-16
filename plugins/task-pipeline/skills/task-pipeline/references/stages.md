@@ -15,13 +15,13 @@ orchestrator verifies the check itself, pass/fail), `judgment` (a named judge
 rules where no complete deterministic check exists — [`gates.md`](gates.md) →
 *The judgment gate*) or `manual` (requires the operator's explicit go, including a
 specific standing authorization naming the act, cited with its source and scope;
-otherwise wait). **This example ships every gate `auto`** (since 1.98.0): where it
+otherwise wait). **This example ships every gate `auto`**: where it
 names an approval, the operator's answer or the standing authorization recorded in the
 brief satisfies it without a pause. A project makes a gate `manual` in its own
 `pipeline.json`. These stages (0 intake + 1→10) are the plugin's
 **example** flow, encoded in `pipeline.example.json` against the universal contract
 `pipeline.schema.json`; a host project replaces it with its own
-stages/agents/types (see SKILL.md → *Bring your own skills*).
+stages/agents/types (see `pipeline.schema.json`, the only contract).
 
 ## The run checklist — printed, not remembered
 
@@ -139,7 +139,7 @@ never that the work was skipped quietly.
   run's memory state: a previous run's "memory unavailable" marker is honoured only while
   its own ledger line is in the ledger, so a reseeded ledger — even the same day — is nudged
   again, and the stale marker is cleared at the next `stage_checkpoint.py record`.
-- **The board is found, read, or seeded.** The home `scripts/backlog_sources.py --discover` prints ([`intake-split.md`](intake-split.md) §1, [`backlog.md`](backlog.md)): its **open count is quoted in the brief**, measured by a command at the top of the run rather than inherited from the last run's report. Exit 4, no board anywhere, or exit 5 whose signals name no live board ⇒ `<artifacts>/backlog.md` seeded from the template and said so, unless a `seed-path-taken` signal stands: that path is never written over, the brief says so and stage 0 asks once where to seed; an empty board and no board are the same thing to work on, and only one of them can be appended to.
+- **The board is found, read, or seeded.** The home `scripts/backlog_sources.py --discover` prints ([`intake-split.md`](intake-split.md) §1, [`backlog.md`](backlog.md)): its **open count is quoted in the brief**, measured by a command at the top of the run rather than inherited from the last run's report. Exit 4, no board anywhere, or exit 5 whose signals name no live board ⇒ `<artifacts>/backlog.md` seeded from the template and said so, unless a `seed-path-taken` signal stands: that path is never written over, the brief says so and stage 0 asks once where to seed while the run goes on; an empty board and no board are the same thing to work on, and only one of them can be appended to.
 
 ## 1 — Docs study
 - **Freedom: medium** — which sources to fetch is judgement; grounding contracts on fetched docs is not ([`gates.md`](gates.md) → *Axis C*).
@@ -267,7 +267,7 @@ never that the work was skipped quietly.
   seen rejecting a planted defect and passing the clean tree, asserted on its exit
   code** ([`probing.md`](probing.md)); no `skip`/`xfail` smuggling a red suite past the gate; **on a
   `flagship`, `product` or `ad` surface where the VISUAL track ran, the visual half's
-  `visual_gate.py sheet` exits 0** — NOT_RUN holds that check and is not green; the run records it and continues with work that does not depend on it
+  `visual_gate.py sheet` exits 0**; NOT_RUN holds that check and is not green; the run records it and continues with work that does not depend on it
   ([`browser.md`](browser.md) → *The visual half*). Never advance
   to deploy on a red or partial run. **The carry-over count is printed beside this
   verdict** — a ratchet nobody prints is a TODO with a better name
@@ -478,7 +478,7 @@ never that the work was skipped quietly.
   the agent's recorded decision with its reason, and, for `deferred`, a tracker entry;
   no carry-over row left `unresolved`, and the ledger's counts are printed with the
   verdict; the hand-back carries the closing statement (shipped and deferred, listed)
-  and the operator can add to it at any time. `auto` by default since 1.98.0: a
+  and the operator can add to it at any time. `auto` by default: a
   check proves the table well-formed, and only the person who asked can confirm it is
   what they asked for, so the run hands that question back rather than waiting on it.
   A project that wants the wait sets this gate `manual`. **Where the actor branch is

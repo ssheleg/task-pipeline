@@ -59,7 +59,7 @@ thing, the canon is the *why* and the rule is the *how*.
 | audit documentation a project already has | [`setup.md`](references/setup.md) | seven passes, cheapest first, output is a fix plan |
 | carry a lesson to the next run | [`retrospective.md`](references/retrospective.md) | stamp first (the cold trigger reads it), then prune to a cap of ten; every lesson names its commit |
 | seed a gate into a host project | [`templates/docgate.sh`](templates/docgate.sh) | it seeds green: dormant where there is no input yet |
-| claim that an agent behaves | `tdd.md` → *When the thing under test is an agent* — named rather than linked, because this navigator's out-of-directory links break wherever a packager ships this skill alone | the address is a trace id and the assertion that ran (canon 1); a judge nobody watched disagree is a green nobody watched turn red (canon 5) |
+| claim that an agent behaves | `tdd.md` → *When the thing under test is an agent* (named, not linked: an out-of-directory link breaks wherever this skill ships alone) | the address is a trace id and the assertion that ran (canon 1); a judge nobody watched disagree is a green nobody watched turn red (canon 5) |
 | take a whole change through to acceptance | the `task-pipeline` skill (install it separately) | this skill is the standard; that one is how a change reaches the repository |
 
 ## When this applies
@@ -98,9 +98,9 @@ negotiation, not a second warning, and never a silent refusal dressed as a quest
 the operator confirms they know, the claim ships with a marker naming it as forward-looking;
 that marker is the whole of what this skill owes here, and the task gets done.
 
-Following intent is the floor. Where it costs nothing extra, leave the result more
-structural and easier to maintain than asked, while it is still the thing that was asked
-for.
+Then do the harder half: following intent is the floor. Make the result more
+structural, more predictable and easier to maintain and extend than asked, while it is
+still the thing that was asked for.
 
 ## The one test
 
@@ -110,6 +110,9 @@ address, delete it, or mark it as an unbacked claim the operator chose to make a
 it. The third option is not a loophole; it is the reason the other two are worth
 anything. A rule with no way to proceed under it becomes a rule people route around, and
 then nothing carries an address.
+
+`references/` and `templates/` are generated copies: edit them at their source home, as
+[`references/GENERATED.md`](references/GENERATED.md) says.
 
 ## Triggers
 

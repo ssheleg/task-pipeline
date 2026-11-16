@@ -23,7 +23,8 @@ Task: $ARGUMENTS
   - `setup`: an audit of the documentation the project already has, until its plan
     file is written and its findings are filed (`references/setup.md`).
   - `checkup`: what has shipped with no person confirming it, with no task in
-    flight; it prints every section, zeros included, and writes nothing
+    flight; it prints every section (zeros out loud, an unread source as
+    `dormant:`) and files board rows only when asked
     (`references/exposure.md` → *`/task-pipeline checkup`*).
 - Close with the hand-back: what is blocked on the operator first, then what
   changed, what was found and what could not be confirmed.

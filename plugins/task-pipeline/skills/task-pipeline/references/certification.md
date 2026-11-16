@@ -255,7 +255,7 @@ records the tree each round read and refuses a round of the same kind on the sam
 tree, before writing anything. A tier's second answer about a tree it already read is
 its first answer again, and asking twice is the loop.
 
-**At the ceiling the gate STOPS** ([`loop-guard.md`](loop-guard.md), since 1.98.0).
+**At the ceiling the gate STOPS** ([`loop-guard.md`](loop-guard.md)).
 `--ceiling` defaults to 3 failing rounds. The round that reaches it still reports the
 tiers, names the tier that has failed **every** round, and then **parks the node** with
 the evidence (failing tiers, the first break and its check) as its reason, exit `7`.

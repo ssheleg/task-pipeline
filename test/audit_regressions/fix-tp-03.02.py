@@ -51,8 +51,7 @@ def t_compile_once_declared_only():
 
 def t_kernel_not_bypassed():
     d = flat()
-    assert "What a custom\n profile does not escape is the kernel".replace("\n ", " ") in d \
-        or "does NOT escape is the KERNEL" in d
+    assert "What a custom\n profile does not escape is the kernel".replace("\n ", " ") in d
     assert "dropping stages never drops the evidence gate" in d
 
 

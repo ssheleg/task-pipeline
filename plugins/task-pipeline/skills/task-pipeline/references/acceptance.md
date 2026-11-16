@@ -151,7 +151,7 @@ Run: <branch/commit range> · Date: YYYY-MM-DD
 | `dropped` | agreed it isn't wanted | the operator's agreement, or under a host delegation the agent's recorded decision, + the reason |
 
 **A `dropped` is a scope decision, and it outlives this run.** The operator's
-agreement closes the row here; the **Doc Loop**
+agreement, or under a host delegation the agent's recorded decision, closes the row here; the **Doc Loop**
 ([`documentation.md`](documentation.md)) is what stops the same requirement being
 re-proposed next quarter by someone who never saw this table. A `deferred` needs its
 tracker entry, not an entry in the register — it is a schedule, not a decision.

@@ -43,7 +43,7 @@ One line per file per pass. The reason must name **what forced the edit** — a
 finding id, a failed gate item, an operator instruction. "Cleanup", "polish" and
 "while I was there" are not reasons; they are churn with better manners.
 
-Fan-out is bookkept too (since 1.100.0): each round writes `agents: <N> — <k>`, the most
+Fan-out is bookkept too: each round writes `agents: <N> — <k>`, the most
 sub-agents that ran at once in it. `waves.py finish` charges the peak against
 `run.finish.maxAgents` (2 by default), so a loop that tries to escape its round budget by
 spawning wider is stopped by the same verdict ([`finish-line.md`](finish-line.md)).
@@ -73,8 +73,11 @@ stage's gate — which is the whole difference between a rule and a rule that ru
 
 Caps that trip the guard by themselves: **3 fix rounds** per task
 ([`build.md`](build.md)), **2 re-entries** per stage per artifact, **3 passes** per
-module in the program loop, **3 review rounds** per artifact, and **3 failing
-certification rounds** per node ([`certification.md`](certification.md)). Each one
+module in the program loop, **3 review rounds** per artifact, **3 failing
+certification rounds** per node ([`certification.md`](certification.md)), and **3 automatic
+continuations** per node: a resume across a turn boundary that is not a fix, review or
+certification round and passed no gate ([`continuity.md`](continuity.md) → *What is not a
+stop*). Each one
 **stops**: the remaining findings become blocker rows with their evidence and the run
 moves on.
 

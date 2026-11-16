@@ -144,10 +144,12 @@ endings look like stops and are not, whether or not the loop is armed:
 - deciding that a passed gate, a certified node or a landed wave is a good place to
   report because the turn has been long.
 
-Put status notes in the same message as the next action. The stops that are wanted are
-the ones above under *Part 1*: nothing can move without a person, or the thing blocking
-the work is deliberately protected. After three automatic continuations on one node
-without a gate passing, park the node with its open items named and take the next one,
+Put status notes in the same message as the next action. The wanted stops are the four
+under *Part 1*, where an ambiguity counts only if the recorded decisions, the goal and the
+safest reversible option cannot settle it, plus the human gates and outward acts `SKILL.md`
+names. After three automatic continuations on one node (resumes across a turn boundary
+that are not fix, review or certification rounds) without a gate passing, park the node
+with its open items named and take the next one,
 so a run that is genuinely stuck ends where it can be reviewed. None of this removes the
 confirmation that a risky or irreversible act needs.
 

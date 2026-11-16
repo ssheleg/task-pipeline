@@ -50,14 +50,14 @@ CAPS_OK = {"REQ", "JSON", "HTML", "TODO", "SKILL", "DOCMAP", "HANDOFF", "README"
            "DONE", "PASS", "FAIL", "BLOCKED", "KERNEL", "PROFILE", "NOTICE", "LICENSE",
            "GET", "PUT", "PATCH", "DELETE", "OAUTH", "CI", "API", "URL", "SPEC", "WARN",
            "HOLD", "PARK", "OPEN", "TRUE", "FALSE", "NULL", "NONE", "MCP", "SHA", "UTF",
-           "ASCII", "CSV", "XML", "SQL", "HEAD", "ADR", "PARTIAL", "SKIP", "SKIPPED"}
+           "ASCII", "CSV", "XML", "GENERATED", "SQL", "HEAD", "ADR", "PARTIAL", "SKIP", "SKIPPED"}
 HISTORY = re.compile(r"\b(until|since|added in|from|before|as of) v?\d+\.\d+(\.\d+)?\b", re.I)
 STOP = re.compile(r"\b(ask the (operator|user)|let the (operator|user) decide|otherwise wait|"
                   r"escalate to the (operator|user)|wait for the (operator|user)|"
                   r"stop and (ask|report)|the operator decides)\b", re.I)
 STOP_OK = re.compile(r"(standing authori[sz]ation|delegat|human gate|sign-in|one-time code|"
                      r"consent|payment|typed secret|spend above|recorded as the operator|"
-                     r"`manual`|manual gate|outward|explicit go|\bgo\b)", re.I)
+                     r"manual gate|a `manual` gate|outward|explicit go|operator's go|\bthe go\b)", re.I)
 FIRST_SECOND = re.compile(r"^\s*(I|I'm|I'll|My|You|You're|You'll|Your)\b")
 
 
@@ -175,7 +175,8 @@ def selftest():
         "long": ("---\nname: x\ndescription: \"Does x. Use when y.\"\n---\n" + "line\n" * 501, "skill-length"),
     }
     stop_cases = (("Unclear? Ask the operator and otherwise wait.\n", 2),
-                  ("Unclear? Ask the operator unless a standing authorization covers it.\n", 0))
+                  ("Unclear? Ask the operator unless a standing authorization covers it.\n", 0),
+                  ("Unclear? Ask the operator, then go on.\n", 1))
     clean = ("Do not tell the model to think carefully.\n"
              "Write `think step by step` nowhere.\n"
              "```\nThink carefully.\n```\n")

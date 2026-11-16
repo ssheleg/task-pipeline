@@ -1,7 +1,7 @@
 # Task brief: <topic>
 
-> Stage-0 intake artifact. The grill fills this in and the operator confirms it
-> before stage 1. Copy to `docs/evidence/specs/YYYY-MM-DD-<topic>-brief.md`.
+> Stage-0 intake artifact. The grill fills this in; the operator's answer or the standing
+> authorization recorded in it confirms it before stage 1. Copy to `docs/evidence/specs/YYYY-MM-DD-<topic>-brief.md`.
 > Every field is a resolved decision or an explicit deferral: no open unknowns.
 
 - **Date:** YYYY-MM-DD
