@@ -16,7 +16,8 @@ session's history, so it stays focused; your context stays free for coordination
 
 **Continuous execution:** don't check in between tasks. The operator asked for the
 plan to be executed: execute it. Stop only for a block that needs a person (a human
-gate), an ambiguity the recorded decisions cannot settle, or completion. Any other
+gate or an outward act with no go, `SKILL.md` → *Stop only when*), an ambiguity the
+recorded decisions cannot settle, or completion. Any other
 ambiguity is decided by the recorded decisions, then the project's goal, then the safest reversible option, recorded on the
 task, and the work goes on. "Should I continue?" between tasks is noise.
 

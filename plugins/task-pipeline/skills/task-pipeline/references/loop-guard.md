@@ -75,8 +75,9 @@ Caps that trip the guard by themselves: **3 fix rounds** per task
 ([`build.md`](build.md)), **2 re-entries** per stage per artifact, **3 passes** per
 module in the program loop, **3 review rounds** per artifact, **3 failing
 certification rounds** per node ([`certification.md`](certification.md)), and **3 automatic
-continuations** per node: a resume across a turn boundary that is not a fix, review or
-certification round and passed no gate ([`continuity.md`](continuity.md) → *What is not a
+continuations** per node: a resume across a turn boundary that produced no new commit or
+evidence, passed no gate, and is not a fix, review or certification round or a watcher
+wake-up on a recorded wait ([`continuity.md`](continuity.md) → *What is not a
 stop*). Each one
 **stops**: the remaining findings become blocker rows with their evidence and the run
 moves on.

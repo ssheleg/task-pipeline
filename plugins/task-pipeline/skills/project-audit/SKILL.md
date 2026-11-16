@@ -19,7 +19,8 @@ when one is asked for.
 Done when: the *Exit criterion* below holds (every probe has a verdict, the sidecar
 is written, and the close is printed in its order).
 
-Stop only when: an unknown would change the action; ask about that one thing.
+Stop only when: an unknown would change the action and the recorded decisions, the goal
+and the safest reversible option cannot settle it; ask about that one thing.
 A source that needs a credential the operator has not connected is recorded `blind`
 and named in the close; never ask for a new secret. Anything else that cannot be read
 is recorded `blind` and the run continues.

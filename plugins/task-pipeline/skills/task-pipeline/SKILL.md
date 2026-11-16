@@ -14,13 +14,12 @@ confirmed), the retrospective last.
 
 **Stop only when** nothing can move without a person: a human gate (sign-in, one-time
 code, consent, payment, typed secret, spend above a limit, a decision recorded as the
-operator's), a `manual` gate or an outward or irreversible act (deploy, publication,
-deletion, a PR, creating a repository or a Figma file) with no go and no standing
-authorization naming it, or a material unknown that the recorded decisions, then the goal, then the safest
+operator's), a `manual` gate or an outward or irreversible act (deploy, a tag or release,
+publication, sending to people, deletion, a PR, creating a repository, creating or
+editing a shared design file) with no go and no standing authorization naming it, or a material unknown that the recorded decisions, then the goal, then the safest
 reversible option cannot settle. Name the gate and what resumes it; independent work
-continues. **Not stops**: a summary announcing the next stage, an offer to continue, a
-list of decisions that block nothing, a passed gate or landed wave taken as a place to
-report ([`references/continuity.md`](references/continuity.md) → *What is not a stop*).
+continues. **Not stops**: a summary announcing the next stage, an offer to continue,
+non-blocking decisions, a passed gate taken as a place to report ([`references/continuity.md`](references/continuity.md) → *What is not a stop*).
 
 **Terms.** *Stage*, *gate*: a step and the check that passes it. *Node*: a unit of
 work. *REQ*: a row of the request. *Brief*: stage 0's locked task. *Run ledger*
@@ -93,7 +92,7 @@ the propagation matrix at stage 9, and *"docs in sync"* as a command with an exi
 
 The run teaches the next run, and the list stays short
 (`references/retrospective.md`). Stage 10's last act, in this order (it is load-bearing):
-stamp the run, then prune, then write the entry (`learned.md` rule 21). The floor stage 0 reads in full has a byte budget
+stamp, then prune, then write the entry (`learned.md` rule 21). The floor stage 0 reads in full has a byte budget
 (`scripts/retro_budget.py check`); gate 10 fails over it until `migrate` moves the
 narrative to the archive, verbatim and hash-proved.
 
@@ -181,7 +180,7 @@ repositories?** A submodule is finished when its parent says so:
 [`references/acceptance.md`](references/acceptance.md) → *A project of several
 repositories*.
 
-## Model: recorded once, at preflight
+## Model
 
 Keep the running model and record it; recommend the most capable reasoning model
 available as advice, a tier, never a hardcoded id (`references/model-tiering.md`

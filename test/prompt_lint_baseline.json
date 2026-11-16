@@ -84,7 +84,7 @@
    "bold": 14,
    "caps": 0,
    "em_dash": 12,
-   "unwanted_stop": 0,
+   "unwanted_stop": 1,
    "version_history": 0,
    "words": 1629
   },
@@ -110,7 +110,7 @@
    "em_dash": 95,
    "unwanted_stop": 0,
    "version_history": 0,
-   "words": 6676
+   "words": 6693
   },
   "plugins/task-pipeline/skills/evidence-docs/references/hooks.md": {
    "bold": 31,
@@ -140,9 +140,9 @@
    "bold": 20,
    "caps": 0,
    "em_dash": 19,
-   "unwanted_stop": 0,
+   "unwanted_stop": 1,
    "version_history": 0,
-   "words": 1207
+   "words": 1214
   },
   "plugins/task-pipeline/skills/evidence-docs/templates/decisions.md": {
    "bold": 15,
@@ -158,7 +158,7 @@
    "em_dash": 2,
    "unwanted_stop": 0,
    "version_history": 0,
-   "words": 3364
+   "words": 3378
   },
   "plugins/task-pipeline/skills/project-audit/references/portable-method.md": {
    "bold": 0,
@@ -182,7 +182,7 @@
    "em_dash": 11,
    "unwanted_stop": 0,
    "version_history": 0,
-   "words": 2448
+   "words": 2444
   },
   "plugins/task-pipeline/skills/task-pipeline/assets/verifier-agent.md": {
    "bold": 0,
@@ -294,7 +294,7 @@
    "em_dash": 96,
    "unwanted_stop": 1,
    "version_history": 0,
-   "words": 6337
+   "words": 6348
   },
   "plugins/task-pipeline/skills/task-pipeline/references/certification.md": {
    "bold": 50,
@@ -318,7 +318,7 @@
    "em_dash": 70,
    "unwanted_stop": 0,
    "version_history": 0,
-   "words": 5039
+   "words": 5069
   },
   "plugins/task-pipeline/skills/task-pipeline/references/conventions.md": {
    "bold": 26,
@@ -334,7 +334,7 @@
    "em_dash": 21,
    "unwanted_stop": 0,
    "version_history": 0,
-   "words": 1703
+   "words": 1714
   },
   "plugins/task-pipeline/skills/task-pipeline/references/deploy-targets.md": {
    "bold": 11,
@@ -350,7 +350,7 @@
    "em_dash": 0,
    "unwanted_stop": 0,
    "version_history": 0,
-   "words": 667
+   "words": 677
   },
   "plugins/task-pipeline/skills/task-pipeline/references/doctrine-map.md": {
    "bold": 11,
@@ -390,7 +390,7 @@
    "em_dash": 95,
    "unwanted_stop": 0,
    "version_history": 0,
-   "words": 6676
+   "words": 6693
   },
   "plugins/task-pipeline/skills/task-pipeline/references/grill.md": {
    "bold": 76,
@@ -454,7 +454,7 @@
    "em_dash": 33,
    "unwanted_stop": 0,
    "version_history": 0,
-   "words": 2120
+   "words": 2134
   },
   "plugins/task-pipeline/skills/task-pipeline/references/model-tiering.md": {
    "bold": 17,
@@ -508,7 +508,7 @@
    "bold": 11,
    "caps": 0,
    "em_dash": 0,
-   "unwanted_stop": 0,
+   "unwanted_stop": 1,
    "version_history": 0,
    "words": 1626
   },
@@ -540,15 +540,15 @@
    "bold": 20,
    "caps": 0,
    "em_dash": 19,
-   "unwanted_stop": 0,
+   "unwanted_stop": 1,
    "version_history": 0,
-   "words": 1207
+   "words": 1214
   },
   "plugins/task-pipeline/skills/task-pipeline/references/spec.md": {
    "bold": 71,
    "caps": 17,
    "em_dash": 65,
-   "unwanted_stop": 0,
+   "unwanted_stop": 1,
    "version_history": 0,
    "words": 3054
   },
@@ -558,7 +558,7 @@
    "em_dash": 29,
    "unwanted_stop": 0,
    "version_history": 0,
-   "words": 2242
+   "words": 2245
   },
   "plugins/task-pipeline/skills/task-pipeline/references/stage-01-docs-study.md": {
    "bold": 2,
@@ -580,7 +580,7 @@
    "bold": 20,
    "caps": 11,
    "em_dash": 17,
-   "unwanted_stop": 0,
+   "unwanted_stop": 1,
    "version_history": 0,
    "words": 770
   },
@@ -644,9 +644,9 @@
    "bold": 127,
    "caps": 25,
    "em_dash": 128,
-   "unwanted_stop": 0,
+   "unwanted_stop": 1,
    "version_history": 0,
-   "words": 6001
+   "words": 6018
   },
   "plugins/task-pipeline/skills/task-pipeline/references/tdd.md": {
    "bold": 46,
@@ -659,10 +659,10 @@
   "plugins/task-pipeline/skills/task-pipeline/references/verification.md": {
    "bold": 31,
    "caps": 0,
-   "em_dash": 18,
+   "em_dash": 15,
    "unwanted_stop": 0,
    "version_history": 0,
-   "words": 1609
+   "words": 1442
   },
   "plugins/task-pipeline/skills/task-pipeline/references/waves.md": {
    "bold": 31,
@@ -828,9 +828,9 @@
  "total": {
   "bold": 3305,
   "caps": 260,
-  "em_dash": 2368,
-  "unwanted_stop": 6,
+  "em_dash": 2365,
+  "unwanted_stop": 13,
   "version_history": 14,
-  "words": 195389
+  "words": 195376
  }
 }

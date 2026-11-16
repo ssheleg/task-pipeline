@@ -139,7 +139,7 @@ never that the work was skipped quietly.
   run's memory state: a previous run's "memory unavailable" marker is honoured only while
   its own ledger line is in the ledger, so a reseeded ledger — even the same day — is nudged
   again, and the stale marker is cleared at the next `stage_checkpoint.py record`.
-- **The board is found, read, or seeded.** The home `scripts/backlog_sources.py --discover` prints ([`intake-split.md`](intake-split.md) §1, [`backlog.md`](backlog.md)): its **open count is quoted in the brief**, measured by a command at the top of the run rather than inherited from the last run's report. Exit 4, no board anywhere, or exit 5 whose signals name no live board ⇒ `<artifacts>/backlog.md` seeded from the template and said so, unless a `seed-path-taken` signal stands: that path is never written over, the brief says so and stage 0 asks once where to seed while the run goes on; an empty board and no board are the same thing to work on, and only one of them can be appended to.
+- **The board is found, read, or seeded.** The home `scripts/backlog_sources.py --discover` prints ([`intake-split.md`](intake-split.md) §1, [`backlog.md`](backlog.md)): its **open count is quoted in the brief**, measured by a command at the top of the run rather than inherited from the last run's report. Exit 4, no board anywhere, or exit 5 whose signals name no live board ⇒ `<artifacts>/backlog.md` seeded from the template and said so, unless a `seed-path-taken` signal stands: that path is never written over, the brief says so and stage 0 seeds beside it, records where and names it in the hand-back; an empty board and no board are the same thing to work on, and only one of them can be appended to.
 
 ## 1 — Docs study
 - **Freedom: medium** — which sources to fetch is judgement; grounding contracts on fetched docs is not ([`gates.md`](gates.md) → *Axis C*).
@@ -546,7 +546,9 @@ cycle.
 - **Trips on:** revert-oscillation (A→B→A); the same file edited twice for the same
   reason; a finding already ADDRESSED or parked coming back; a stage entered a third
   time for one artifact; two loops editing one file. Hard caps, each a stop: 3 fix
-  rounds per task, 2 re-entries per stage per artifact, 3 passes per module.
+  rounds per task, 2 re-entries per stage per artifact, 3 passes per module, 3 review
+  rounds per artifact, 3 failing certification rounds and 3 automatic continuations per
+  node ([`loop-guard.md`](loop-guard.md)).
 - **On a trip: stop editing.** Name shapes A and B with their evidence, escalate to
   the layer that owns the conflict (rubric → operator → plan → spec → module map),
   re-plan the check as an ordered one-item-per-line checklist, then go through it in

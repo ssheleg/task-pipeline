@@ -26,6 +26,9 @@ phrase is not instructing it.
   python3 test/prompt_lint.py measure      print the metrics as JSON
   python3 test/prompt_lint.py rebaseline   lower the baseline to the current numbers
                                            (refuses to raise any metric)
+  python3 test/prompt_lint.py rebaseline --reset unwanted_stop
+                                           a metric whose definition changed enters
+                                           at its new value; say why in the commit
   python3 test/prompt_lint.py selftest     plant each defect and require a rejection
 """
 import json, os, re, sys, tempfile
@@ -54,10 +57,11 @@ CAPS_OK = {"REQ", "JSON", "HTML", "TODO", "SKILL", "DOCMAP", "HANDOFF", "README"
 HISTORY = re.compile(r"\b(until|since|added in|from|before|as of) v?\d+\.\d+(\.\d+)?\b", re.I)
 STOP = re.compile(r"\b(ask the (operator|user)|let the (operator|user) decide|otherwise wait|"
                   r"escalate to the (operator|user)|wait for the (operator|user)|"
-                  r"stop and (ask|report)|the operator decides)\b", re.I)
+                  r"stop and (ask|report)|the operator decides|asks? once|"
+                  r"(the )?operator (approves|confirms))\b", re.I)
 STOP_OK = re.compile(r"(standing authori[sz]ation|delegat|human gate|sign-in|one-time code|"
                      r"consent|payment|typed secret|spend above|recorded as the operator|"
-                     r"manual gate|a `manual` gate|outward|explicit go|operator's go|\bthe go\b)", re.I)
+                     r"manual gate|outward|explicit go|operator's go|\bthe go\b)", re.I)
 FIRST_SECOND = re.compile(r"^\s*(I|I'm|I'll|My|You|You're|You'll|Your)\b")
 
 
@@ -153,11 +157,14 @@ def check(base=PLUGIN, baseline_path=BASELINE):
     return problems, total
 
 
-def rebaseline():
+def rebaseline(reset=()):
+    """Lower the baseline. `reset` names metrics whose definition changed in this commit:
+    they enter at their new value, the only way a metric may rise, and the commit says why."""
     _, total, files = measure()
     if os.path.isfile(BASELINE):
         old = json.load(open(BASELINE))["total"]
-        up = [k for k in METRICS if k in old and total[k] > old[k]]  # a new metric enters at its value
+        up = [k for k in METRICS
+              if k in old and k not in reset and total[k] > old[k]]  # a new metric enters at its value
         if up:
             print("refused: rebaseline would raise " + ", ".join(
                 f"{k} {old[k]} -> {total[k]}" for k in up))
@@ -221,7 +228,12 @@ def main(argv):
         print(json.dumps({"hits": hits, "total": total, "files": files}, indent=1, sort_keys=True))
         return 0
     if cmd == "rebaseline":
-        return rebaseline()
+        reset = tuple(argv[argv.index("--reset") + 1].split(",")) if "--reset" in argv else ()
+        bad = [m for m in reset if m not in METRICS]
+        if bad:
+            print("unknown metric: " + ", ".join(bad))
+            return 2
+        return rebaseline(reset)
     if cmd == "selftest":
         return 1 if selftest() else 0
     problems, total = check()

@@ -4,9 +4,8 @@
 
 Stage 8 already performs the verification trio, reads the CI verdict and opens the
 rendered page ([`stage-08-post-deploy.md`](stage-08-post-deploy.md) → *8 — Post-deploy*). All of it is **per run**,
-and none of it accumulates. Ask a project *"which features has nobody confirmed since
-they shipped?"* and before this file the honest answer was: nobody knows, and no
-artifact could be consulted.
+and none of it accumulates. This file answers *"which features has nobody confirmed since they
+shipped?"*.
 
 **Boundary, so this is not a second coverage table.**
 [`acceptance.md`](acceptance.md)'s table says *an automated check passed at the moment of
@@ -29,20 +28,10 @@ the run*. Three things it does not say, and each is why this file exists:
 
 ## Why it keys to the brief, not to the coverage table
 
-The obvious spine is the coverage table — it already carries one row per REQ with a
-verdict. Measured before building on it: **ten acceptance files in this repository, and
-the first REQ-bearing table differs in nearly every one.** Ladder walks and coverage
-tables share a file with different columns, because `acceptance.md` fixes the shape in
-prose and prose does not hold a shape across ten runs.
-
-The brief's REQ table does: **eight of nine briefs here carry machine-readable
-`| REQ-NNN |` rows**, and the ninth was fixed the day this was measured. So the ledger
-keys to the brief, and the coverage table remains what it always was — the run's own
-verdict, quoted into the `Auto` column and never re-derived.
-
-That the coverage table has no template and has already drifted is a real finding with a
-real cost, and it is on the board rather than fixed here: a run that widens its own scope
-to fix everything it touches finishes nothing.
+The coverage table already carries one row per REQ, but its shape drifts between runs
+because `acceptance.md` fixes it only in prose. The brief's REQ table holds a
+machine-readable `| REQ-NNN |` shape, so the ledger keys to the brief, and the coverage
+table stays the run's own verdict, quoted into the `Auto` column and never re-derived.
 
 ## `never` is a fact
 
@@ -57,11 +46,8 @@ failing; it is a project that now knows something it could not previously ask.
 
 ## Staleness — the other end of `never`
 
-This file tracked rows nobody had ever confirmed and had **no notion of a row whose
-confirmation the tree has overtaken.** A row verified at commit A read `verified` after
-commit B, forever. Those are the same failure from two ends, and only one end was
-instrumented — which is why a ledger could read fully green over a tree where every check
-ran against code that has since moved.
+A row verified at commit A must not read `verified` after commit B: an unconfirmed row
+and an overtaken one are the same failure from two ends.
 
 `Observed at` is the commit the check ran against. `scripts/exposure.sh` reports four
 states from it, and the whole thing is a **port**: `references/knowledge-graph.md` already
@@ -140,6 +126,7 @@ already does. `Human` starts at `never` unless the operator confirmed during the
 **A REQ that spans two modules is stamped with the second, not the first.** Its criterion
 is satisfied when the last part of it exists, and stamping the earlier release claims a
 capability the project did not yet have.
+
 **Stage 10** refuses a REQ that shipped and has no row — and, in the other direction, a
 row whose REQ appears in no brief. They are different failures: a shipped feature that
 entered no ledger, and a ledger row about nothing. One direction alone finds one of them

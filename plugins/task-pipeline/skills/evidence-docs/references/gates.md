@@ -636,7 +636,8 @@ of is deleted in the next refactor by someone who assumed it was dead.
    tracker + conventional commits per host conventions; worktree isolation for the
    build, integrated back per the brief's branch policy before stage 7; honest
    degradation (never claim a failed/skipped step succeeded);
-   outward/irreversible actions (deploy, publish, repo create, opening a PR,
+   outward/irreversible actions (`SKILL.md` → *Stop only when* holds the full list:
+   deploy, a tag or release, publish, sending to people, deletion, repo create, opening a PR,
    **editing a shared design file — frames are read by designers and stakeholders,
    so drawing in one is publishing — and above all *creating* one, which needs a
    named team and never happens while a recorded file resolves**) need explicit

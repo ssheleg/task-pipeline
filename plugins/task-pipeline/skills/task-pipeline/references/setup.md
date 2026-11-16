@@ -4,7 +4,7 @@
 building on top of it.** [`audit.md`](audit.md)'s ladder runs at the *end* of a run,
 over the change. This runs at the *start*, over what is already there.
 
-**Offered, never imposed.** Stage 0 asks once, when `docs/DOCMAP.md` is absent or its
+**Offered, never imposed.** Stage 0 asks once (or decides under a host delegation, `stage-00-intake.md`), when `docs/DOCMAP.md` is absent or its
 regime line is older than the project's last release. The answer — including "no" —
 is recorded in the brief's autonomy sweep and never asked again.
 

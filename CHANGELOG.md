@@ -31,11 +31,14 @@ prompting and skill-authoring best practices, read on 2026-11-16).
 - **Less history and less shouting in loaded files.** Version notes 36 → 14, bold spans
   3567 → 3305, capitalised words 282 → 260, em dashes 2572 → 2368, words 195408 → 195389,
   with `SKILL.md` inside its 16650-byte budget.
-- **The outward-act floor stays a stop.** Stop only when names a deploy, publication,
-  deletion, a PR, or creating a repository or a Figma file with no go and no standing
-  authorization naming it; where an older file still said "asks" or "the operator
+- **The outward-act floor stays a stop.** *Stop only when* in `SKILL.md` is the one full
+  list: deploy, a tag or release, publication, sending to people, deletion, a PR, creating
+  a repository, creating or editing a shared design file, with no go and no standing
+  authorization naming it; `continuity.md`, `gates.md` and `build.md` point to it; where an older file still said "asks" or "the operator
   confirms" (seeding a board on an occupied path, a NOT_RUN visual check, a design
-  approval, the brief template, a dropped REQ) it now says the same as the new contract.
+  approval, the module map, the test panel, the brief template, a dropped REQ) it now says
+  the same as the new contract. The cap of three automatic continuations counts only
+  resumes that produced no commit or evidence, never a watcher wake-up on a recorded wait.
 - **`/task-pipeline` names what each mode ends on** and points `checkup` at
   `references/exposure.md`, its real home (it pointed at `verification.md`, which never
   mentions the mode). `/project-audit` no longer promises an HTML page it writes only on

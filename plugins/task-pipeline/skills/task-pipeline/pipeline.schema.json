@@ -377,7 +377,7 @@
                 "judgment",
                 "manual"
               ],
-              "description": "auto = the orchestrator verifies `check` itself, pass/fail — a fact a MACHINE established. judgment = there is no complete deterministic check and someone rules on it; the ruling is recorded AS judgement and never as a measurement, and the gate must name its `judge`. manual = wait for the operator's explicit go. Two types were not enough: a reviewer's ruling, a check that scenarios are coherent and a verdict that a mockup is good all rode in `auto`, indistinguishable from an exit code — so a coverage table could not tell a measured row from an opinion."
+              "description": "auto = the orchestrator verifies `check` itself, pass/fail — a fact a MACHINE established. judgment = there is no complete deterministic check and someone rules on it; the ruling is recorded AS judgement and never as a measurement, and the gate must name its `judge`. manual = wait for the operator's explicit go, or a specific standing authorization naming the act. Two types were not enough: a reviewer's ruling, a check that scenarios are coherent and a verdict that a mockup is good all rode in `auto`, indistinguishable from an exit code — so a coverage table could not tell a measured row from an opinion."
             },
             "check": {
               "type": "string",
