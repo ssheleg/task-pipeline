@@ -20,6 +20,7 @@ runs by hand once the script has printed where it could not look.
 - Production evidence through connected MCP servers
 - Adding a probe
 - What deliberately has no probe
+- Where these rules came from
 
 ## How to read this file
 
@@ -197,3 +198,25 @@ Four rules, each of which has a defect behind it:
 - **Anything requiring a credential the operator has not already connected.**
   An audit that asks for a new secret to run is a supply-chain risk wearing a
   clipboard.
+
+## Where these rules came from
+
+Measured history behind rules `SKILL.md` states without it. In the task-pipeline
+repository, the first two are recorded in `docs/evidence/retro/2026-Q4.md` (the
+2026-09-04 row, issues #77, #78 and #84), the third in `CHANGELOG.md` (v1.76.0).
+
+- Five axes, not one. One audit had eight consecutive rows rewritten by
+  measurement. Two of them would have destroyed inventory if remedied as written,
+  because both read an absence of sales as an absence of demand; the asset class they
+  prescribed releasing was the product's own inventory, deliberately held.
+- Already decided is not a finding. Five of eight rows in one run reported
+  decisions the project had already written a few lines from the code they cited. The
+  durable fix in all five was a guard that asks the project's own instruction of every
+  copy.
+- Compare trees, never labels. Measured in this family on 2026-08-22: npm served
+  one file at 4344 lines while the marketplace served it at 4575, and all three
+  channels reported `1.15.0`. The pin checker was green throughout, correctly, because
+  it compared two strings. The first draft of `channel-divergence` compared the
+  registry tarball against the tag and reported clean, and it counted `.github/` as a
+  disagreement, producing 22 findings where one file had moved. Both traps are
+  fixtures now.

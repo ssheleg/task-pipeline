@@ -47,7 +47,7 @@ def flat(name):
 
 def t_gate_checks_artifact_not_package():
     s = flat("SKILL.md")
-    assert "the stage-3 gate checks the ARTIFACT, not the package" in s
+    assert "the stage-3\ngate checks the artifact, not the package" in s or "the stage-3 gate checks the artifact, not the package" in s  # softened in 1.105.0 (P-08)
     assert "Not installed on a UI task? The stage-3 spec gate stops" not in s, \
         "the package-presence gate survived"
     c = flat("references/companion-skills.md")
@@ -127,7 +127,7 @@ def t_absent_tool_names_the_check():
     assert "WHICH check was therefore not done" in c
     assert "scenario lint NOT_RUN" in c
     s = flat("SKILL.md")
-    assert "NAMED check that was not done, never as a failed task" in s
+    assert "named check that was not done, never as a failed task" in s  # softened in 1.105.0 (P-08)
 
 
 # ---- the gate as behaviour

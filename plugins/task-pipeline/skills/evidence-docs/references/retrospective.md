@@ -3,8 +3,8 @@
 The retrospective doctrine has one home:
 [task-pipeline's `references/retrospective.md`](https://github.com/ssheleg/task-pipeline/blob/main/plugins/task-pipeline/skills/task-pipeline/references/retrospective.md).
 With the task-pipeline plugin installed, the same file sits beside this skill at
-`skills/task-pipeline/references/retrospective.md`. Until 1.98.0 this file was a
-34.7 KB copy of it with no delta of its own; a copy is a second thing to keep true.
+`skills/task-pipeline/references/retrospective.md`. This file stays a pointer: a copy
+would be a second thing to keep true.
 
 What evidence-docs relies on from it, in short:
 

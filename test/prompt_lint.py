@@ -144,7 +144,9 @@ def check(base=PLUGIN, baseline_path=BASELINE):
     if os.path.isfile(baseline_path):
         bl = json.load(open(baseline_path))["total"]
         for k in METRICS:
-            if total[k] > bl.get(k, 0):
+            if k not in bl:
+                problems.append(f"ratchet: {k} has no baseline yet (run rebaseline)")
+            elif total[k] > bl[k]:
                 problems.append(f"ratchet: {k} rose to {total[k]} (baseline {bl[k]})")
     else:
         problems.append(f"ratchet: no baseline at {os.path.relpath(baseline_path, ROOT)}")

@@ -56,7 +56,7 @@ def t_complete_brief_zero_questions():
     assert "A complete brief yields zero intake questions" in g
     assert "re-negotiating what is already decided" in g
     s = flat("SKILL.md")
-    assert "A complete brief yields ZERO intake questions" in s
+    assert "complete brief yields zero intake questions" in s  # wording softened in 1.105.0 (P-08)
     assert "recorded, never re-negotiated" in s
 
 
@@ -74,7 +74,7 @@ def t_relentless_default_is_gone():
     s = flat("SKILL.md")
     assert "never enough to finish without a human in the loop" not in s, \
         "the guaranteed-human-round claim survived"
-    assert "every MATERIAL question skipped" in s
+    assert "every material question skipped" in s  # wording softened in 1.105.0 (P-08)
     assert "confirming what the sources already said" in g
 
 
