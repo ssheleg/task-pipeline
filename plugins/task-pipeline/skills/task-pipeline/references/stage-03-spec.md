@@ -30,7 +30,7 @@ The full gate and freedom level remain in [stages.md](stages.md).
      logo), never one file for every frame; `docs/ux/foundation.md` → *Design tooling*
      is the canonical record. Confirm each **resolves** before drawing. **Never create a file while a
      recorded one resolves; if it doesn't resolve, hold the visual track and ask once (an access
-   problem; the rest of the run goes on), and never create a
+     problem; the rest of the run goes on), and never create a
      replacement** (that is the duplicate, and it hides a permissions problem).
      A creation happens at most once, in the named team, and its URL is written to
      the canonical record before the first frame.

@@ -18,7 +18,9 @@ Task: $ARGUMENTS
   - `waves`: the whole board, until it is empty or every remaining node is parked
     with its reason (`references/waves.md`).
   - `iteration`: the release loop around the waves, until the release ships, its
-    post-release check is read and the next pool is handed back
+    post-release check is read and the next pool is handed back (its tag, publication
+    and deploy each need a go or a standing authorization naming them; otherwise the
+    run holds there and names it)
     (`references/iteration.md`).
   - `setup`: an audit of the documentation the project already has, until its plan
     file is written with each finding as a task (`references/setup.md`).

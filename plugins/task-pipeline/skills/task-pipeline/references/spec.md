@@ -301,10 +301,13 @@ no entry names it, the run has agreed to decide it again later.
 
 ## GATE (auto)
 
+With a standing authorization recorded in the brief, an independent reader reviews the
+spec and the run says:
+
 > "Spec committed to `<path>`, reviewed by <reader>; continuing to the plan."
 
-Where the brief records a standing authorization, an independent reader reviews the spec
-and the run continues; otherwise the operator reviews it. Changes requested → apply, re-run the self-review, and review again.
+Otherwise it says "Spec committed to `<path>`; review it before I write the plan." and
+waits for the operator's review. Changes requested → apply, re-run the self-review, and review again.
 
 The gate is not only the operator's word: **every section carries `covers: REQ-…`
 and every REQ in the brief appears in at least one section.** For UI tasks it

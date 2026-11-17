@@ -147,8 +147,9 @@ endings look like stops and are not, whether or not the loop is armed:
   report because the turn has been long.
 
 Put status notes in the same message as the next action. The wanted stops are the four
-under *Part 1*, where an ambiguity counts only if the recorded decisions, the goal and the
-safest reversible option cannot settle it, plus the human gates `SKILL.md` names and the outward
+under *Part 1*, where an ambiguity counts unless a host delegation lets the recorded decisions,
+the goal and the safest reversible option settle it (an internal, reversible one is taken
+as assumed, *Part 1*), plus the human gates `SKILL.md` names and the outward
 acts listed under *The limit, before the capability*. After three automatic continuations on one node (resumes across a turn boundary that
 produced no new commit or evidence and are not fix, review or certification rounds or
 watcher wake-ups on a recorded wait) without a gate passing, park the node

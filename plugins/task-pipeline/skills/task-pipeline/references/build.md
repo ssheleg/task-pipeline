@@ -71,7 +71,8 @@ git rev-parse --show-superproject-working-tree   # non-empty ⇒ submodule, not 
 - `GIT_DIR != GIT_COMMON` and **not** a submodule → you are already in a linked
   worktree. Do not create another. Report the path and branch, go to *Setup*.
 - Otherwise you are in a normal checkout. Honor the brief's worktree preference; if
-  none was recorded, create one (the default) and record it in the run ledger.
+  none was recorded, under a host delegation create one (the default) and record it in the
+  run ledger; otherwise ask once before creating one.
 
 **Creating one — native tool first.** If the harness offers a worktree tool
 (`EnterWorktree`, a `/worktree` command, a `--worktree` flag), use it: it owns

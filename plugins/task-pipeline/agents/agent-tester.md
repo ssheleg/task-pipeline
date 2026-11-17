@@ -1,6 +1,6 @@
 ---
 name: agent-tester
-description: Walks a project's agent panel through the agent-channel scenarios a task-pipeline node changes, first reading the published contract cold, then calling the build through a real client. Judges each step on a fixed checklist, closes gated steps with sandbox fixtures and writes an agent-review/1 report. Use when a node with a public or internal agent surface reaches agent review. Not for the contract tests (the agent tier) or human screens (design-tester).
+description: Walks a project's agent panel through the agent-channel scenarios a task-pipeline node changes, first reading the published contract cold, then calling the build through a real client. Judges each step on a fixed checklist, closes gated steps with sandbox fixtures and writes an agent-review/1 report. Use when a node with a public or internal agent surface reaches stage 3 (contract pass) or stage 6 (build pass). Not for the contract tests (the agent tier) or human screens (design-tester).
 model: inherit
 tools: Read, Grep, Glob, Bash, Write
 ---

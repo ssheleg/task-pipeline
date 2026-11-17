@@ -267,7 +267,7 @@ never that the work was skipped quietly.
   seen rejecting a planted defect and passing the clean tree, asserted on its exit
   code** ([`probing.md`](probing.md)); no `skip`/`xfail` smuggling a red suite past the gate; **on a
   `flagship`, `product` or `ad` surface where the VISUAL track ran, the visual half's
-  `visual_gate.py sheet` exits 0**; NOT_RUN holds that check and is not green; the run records it and continues with work that does not depend on it
+  `visual_gate.py sheet` exits 0**; NOT_RUN holds that check, asks once and is not green; the run continues with work that does not depend on it
   ([`browser.md`](browser.md) → *The visual half*). Never advance
   to deploy on a red or partial run. **The carry-over count is printed beside this
   verdict** — a ratchet nobody prints is a TODO with a better name

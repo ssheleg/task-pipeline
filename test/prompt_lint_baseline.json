@@ -6,7 +6,7 @@
    "em_dash": 0,
    "unwanted_stop": 0,
    "version_history": 0,
-   "words": 894
+   "words": 901
   },
   "plugins/task-pipeline/agents/design-tester.md": {
    "bold": 0,
@@ -78,7 +78,7 @@
    "em_dash": 4,
    "unwanted_stop": 0,
    "version_history": 0,
-   "words": 321
+   "words": 344
   },
   "plugins/task-pipeline/skills/evidence-docs/SKILL.md": {
    "bold": 14,
@@ -99,10 +99,10 @@
   "plugins/task-pipeline/skills/evidence-docs/references/documentation.md": {
    "bold": 107,
    "caps": 2,
-   "em_dash": 60,
+   "em_dash": 58,
    "unwanted_stop": 0,
    "version_history": 0,
-   "words": 4370
+   "words": 4294
   },
   "plugins/task-pipeline/skills/evidence-docs/references/gates.md": {
    "bold": 126,
@@ -158,7 +158,7 @@
    "em_dash": 2,
    "unwanted_stop": 0,
    "version_history": 0,
-   "words": 3378
+   "words": 3386
   },
   "plugins/task-pipeline/skills/project-audit/references/portable-method.md": {
    "bold": 0,
@@ -182,7 +182,7 @@
    "em_dash": 11,
    "unwanted_stop": 0,
    "version_history": 0,
-   "words": 2449
+   "words": 2451
   },
   "plugins/task-pipeline/skills/task-pipeline/assets/verifier-agent.md": {
    "bold": 0,
@@ -284,9 +284,9 @@
    "bold": 77,
    "caps": 6,
    "em_dash": 70,
-   "unwanted_stop": 0,
+   "unwanted_stop": 1,
    "version_history": 0,
-   "words": 4202
+   "words": 4205
   },
   "plugins/task-pipeline/skills/task-pipeline/references/build.md": {
    "bold": 117,
@@ -294,7 +294,7 @@
    "em_dash": 96,
    "unwanted_stop": 1,
    "version_history": 0,
-   "words": 6407
+   "words": 6417
   },
   "plugins/task-pipeline/skills/task-pipeline/references/certification.md": {
    "bold": 50,
@@ -318,7 +318,7 @@
    "em_dash": 68,
    "unwanted_stop": 0,
    "version_history": 0,
-   "words": 5096
+   "words": 5108
   },
   "plugins/task-pipeline/skills/task-pipeline/references/conventions.md": {
    "bold": 25,
@@ -363,10 +363,10 @@
   "plugins/task-pipeline/skills/task-pipeline/references/documentation.md": {
    "bold": 107,
    "caps": 2,
-   "em_dash": 60,
+   "em_dash": 58,
    "unwanted_stop": 0,
    "version_history": 0,
-   "words": 4370
+   "words": 4294
   },
   "plugins/task-pipeline/skills/task-pipeline/references/exposure.md": {
    "bold": 16,
@@ -398,7 +398,7 @@
    "em_dash": 72,
    "unwanted_stop": 1,
    "version_history": 0,
-   "words": 3453
+   "words": 3467
   },
   "plugins/task-pipeline/skills/task-pipeline/references/hooks.md": {
    "bold": 31,
@@ -454,7 +454,7 @@
    "em_dash": 33,
    "unwanted_stop": 0,
    "version_history": 0,
-   "words": 2108
+   "words": 2114
   },
   "plugins/task-pipeline/skills/task-pipeline/references/model-tiering.md": {
    "bold": 17,
@@ -550,7 +550,7 @@
    "em_dash": 65,
    "unwanted_stop": 1,
    "version_history": 0,
-   "words": 3050
+   "words": 3066
   },
   "plugins/task-pipeline/skills/task-pipeline/references/stage-00-intake.md": {
    "bold": 37,
@@ -644,9 +644,9 @@
    "bold": 127,
    "caps": 25,
    "em_dash": 128,
-   "unwanted_stop": 1,
+   "unwanted_stop": 2,
    "version_history": 0,
-   "words": 6029
+   "words": 6028
   },
   "plugins/task-pipeline/skills/task-pipeline/references/tdd.md": {
    "bold": 46,
@@ -828,9 +828,9 @@
  "total": {
   "bold": 3300,
   "caps": 260,
-  "em_dash": 2356,
-  "unwanted_stop": 13,
+  "em_dash": 2352,
+  "unwanted_stop": 15,
   "version_history": 14,
-  "words": 195271
+  "words": 195219
  }
 }

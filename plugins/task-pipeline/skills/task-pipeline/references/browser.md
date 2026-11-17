@@ -276,8 +276,8 @@ python3 scripts/visual_gate.py sheet design/review/contact-sheet.json \
 
 Exit `0` PASS · `1` FAIL · `2` unreadable · `3` NOT_RUN — a frame that did not run makes
 the whole verdict NOT_RUN, never PASS. **On a gated class NOT_RUN holds the visual
-check** while the run continues with work that does not depend on it: connect a capture
-channel, or the operator accepts the surface as `unverified`,
+check and asks once** while the run continues with work that does not depend on it:
+connect a capture channel, or the operator accepts the surface as `unverified`,
 recorded in the brief and named in the close-out. It is never reported around, which is
 the failure `DEC-0004` kept the functional look ungated to avoid; `DEC-0006` gates the
 visual half on these classes and keeps that exit open in words.

@@ -198,7 +198,8 @@ not "just try one more thing". Then, in this order:
 
 ## When to stop and hand back
 
-If step 2 lands on a decision recorded as the operator's, or a cap is hit a second
+If step 2 lands on the operator (no host delegation, or a decision recorded as the
+operator's), or a cap is hit a second
 time after a re-planned pass, **park the node as BLOCKED** and report it with: the two shapes, the evidence, the
 history of passes, and your recommendation. That is a complete, honest hand-back —
 far cheaper than a third round of the same argument.
