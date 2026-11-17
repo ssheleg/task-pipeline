@@ -158,7 +158,7 @@
    "em_dash": 2,
    "unwanted_stop": 0,
    "version_history": 0,
-   "words": 3384
+   "words": 3368
   },
   "plugins/task-pipeline/skills/project-audit/references/portable-method.md": {
    "bold": 0,
@@ -831,6 +831,6 @@
   "em_dash": 2348,
   "unwanted_stop": 15,
   "version_history": 11,
-  "words": 195203
+  "words": 195187
  }
 }

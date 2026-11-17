@@ -1,3 +1,11 @@
+## v1.105.1: evidence-docs and project-audit keep their shorter descriptions
+
+Guards: 539 → **539**. 1.105.0 lengthened the descriptions of evidence-docs (by 9 characters)
+and project-audit (by 67) while both already began with "Use when". The family hub sums every
+member's description against a ceiling that may only fall (`sshlg-skills` `docs/DOCMAP.md`, 11446
+characters), and the two grew it by 76. Both descriptions are back to their 1.104.3 text; nothing
+else changes.
+
 ## v1.105.0: the pipeline's prompts follow Anthropic's current prompting practices
 
 Guards: 539 → **539**. The gates, the kernel, the verifier tiers and every script contract
