@@ -58,14 +58,14 @@ def t_kernel_named():
 
 def t_stage_numbers_belong_to_profile():
     d = flat()
-    assert "The stage numbers belong to the SELECTED profile, never to the kernel:" in d
+    assert "The stage numbers belong to the selected profile, never to the kernel:" in d  # softened in 1.105.0 (P-08)
     assert 'a minimal three-stage profile has no "stage 7"' in d
     assert "a rule keyed on a global stage number is a rule about the default profile" in d
 
 
 def t_precedence_resolved():
     d = flat()
-    assert "on a CUSTOM profile the **kernel wins**" in d
+    assert "on a custom profile the kernel wins" in d  # softened in 1.105.0 (P-08)
     assert "the **default profile's** normative gate set" in d
     assert "the kernel is normative for all" in d
 

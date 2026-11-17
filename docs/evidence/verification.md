@@ -1,6 +1,14 @@
 # Verification — task-pipeline
 
-## Shipped state — v1.104.3 (source candidate; NOT SHIPPED yet)
+## Shipped state — v1.105.0 (source candidate; NOT SHIPPED yet)
+
+The pipeline's prompts rewritten to Anthropic's current prompting practices, on branch
+`prompt/anthropic-practices-2026-11-16`. `npm test` exit 0 at 9873893 (validator PASS, prompt
+lint PASS, every suite green); the practices, specs and baseline are in
+`docs/reports/2026-11-16-anthropic-prompting/`. The tag, release jobs and the npm readback
+remain pending; this header declares the version, not a shipped state.
+
+## Shipped state — v1.104.3
 
 v1.104.2's payload, released again because the tag `v1.104.2` was never published: its
 release run 43537193623 failed only at `npm run test:docs`, which read the board finding id

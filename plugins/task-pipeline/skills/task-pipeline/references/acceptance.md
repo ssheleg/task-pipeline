@@ -147,11 +147,11 @@ Run: <branch/commit range> · Date: YYYY-MM-DD
 |---|---|---|
 | `verified` | done and demonstrated | **evidence** — a passing test name, `file:line`, command output, or a scenario ID with PASS |
 | `partial` | works for some of what was asked | an explicit list of what's missing + where it's tracked |
-| `deferred` | agreed not to do it now | the operator's agreement **and** a tracker entry |
-| `dropped` | agreed it isn't wanted | the operator's agreement + the reason |
+| `deferred` | agreed not to do it now | the operator's agreement, or under a host delegation the agent's recorded decision, **and** a tracker entry |
+| `dropped` | agreed it isn't wanted | the operator's agreement, or under a host delegation the agent's recorded decision, + the reason |
 
 **A `dropped` is a scope decision, and it outlives this run.** The operator's
-agreement closes the row here; the **Doc Loop**
+agreement, or under a host delegation the agent's recorded decision, closes the row here; the **Doc Loop**
 ([`documentation.md`](documentation.md)) is what stops the same requirement being
 re-proposed next quarter by someone who never saw this table. A `deferred` needs its
 tracker entry, not an entry in the register — it is a schedule, not a decision.
@@ -235,9 +235,8 @@ Where one moved, the acceptance owes three things:
 
 `templates/convergence.sh` mechanises the pointer half and requires the record for the
 seam half. It also checks the one thing `git submodule status` cannot see: **whether the
-pinned commit is published at all.** Measured here on 2026-08-16 — a release tag failed CI
-at checkout because the parent pinned a commit that existed only on one machine, and
-`git submodule status` showed no `+` because the pointer matched the *local* head.
+pinned commit is published at all**: a pin to a commit that exists on one machine only
+fails at checkout, and `git submodule status` shows no `+` for it.
 
 | Rationalization | Why it is wrong |
 |---|---|
@@ -257,7 +256,7 @@ Write it even when the table is all green, and do not wait on a reply: it is a
 statement, not a question. The operator holds context the brief never captured and
 can add to it at any time; an addition becomes new REQ rows or new ledger entries,
 not a new argument about whether the run was finished. Only a human gate (a sign-in,
-a consent, a payment, a typed secret, spend above a limit, a decision recorded as the
+a consent, a payment, a typed secret, spending money, a decision recorded as the
 operator's) is asked as a question, and the hand-back names it.
 
 ## The retrospective — the run's last act
@@ -476,8 +475,6 @@ git -C <submodule> push
 git add <submodule> && git commit -m "chore: bump <name> submodule — <why>"
 ```
 
-Moved out of `SKILL.md` on 2026-08-16: the body was 6685 tokens against a
-< 5000 budget, and stage-10 close-out is what this file is for.
 
 
 

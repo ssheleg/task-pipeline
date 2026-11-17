@@ -4,13 +4,11 @@ Stage 0, phase 1a. Read when the request carries more than one ask: a long messa
 dictated list, several features named in one go. Every run reads §1, which finds the
 board; a single ask skips §2 to §5.
 
-The operator's rule (2026-11-06): a big request is cut into modules first; each module is
+The operator's rule: a big request is cut into modules first; each module is
 researched separately and in parallel; the findings merge into one plan, which is run
 through once more; the highest-priority item goes first and every other item lands on the
 project's backlog, found and kept the way that project keeps it. A simple single task gets
-none of this. Until 1.103.1 a run read every prompt as one task: `grill.md` expands "a
-one-line request" into one brief, and the module cut (`decomposition.md`) waited until
-stage 2 and fired only for a platform build (task-pipeline board row B-097).
+none of this.
 
 ## Contents
 
@@ -41,7 +39,7 @@ and always
 the project's instruction files themselves):
 read them before seeding. A `seed-path-taken` signal is the seed path itself, already occupied
 (a link, a frozen copy, another letter case): read it, never write over it; if it names no live
-board, say so in the brief and ask once where to seed. The listed lines rank what to read first; the rule that a project
+board, say so in the brief, seed beside it, record where and name it in the hand-back. The listed lines rank what to read first; the rule that a project
 which wrote instructions is read before a board is seeded is what prevents the duplicate,
 because no vocabulary is complete. Exit 5 is conservative by design: a false signal costs one line read, a
 false exit 4 starts a second board; one that names
@@ -82,9 +80,8 @@ triage line.
    calls). Each gets its module and nothing else, writes nothing, and returns the dossier
    shape of [`../templates/dossier.md`](../templates/dossier.md) plus the four fields of
    `prioritisation.md` §4: what it touches (`file:line`), what it depends on and what depends
-   on it, what is already measured, what would make it wrong. **At most six at once**: a
-   wave of subagents ran out of the weekly quota mid-release on 2026-10-28 (hub retro); more
-   modules queue behind the first six. No subagent tool: research them in turn and say so.
+   on it, what is already measured, what would make it wrong. **At most six at once**, for the
+   quota; more modules queue behind the first six. No subagent tool: research them in turn and say so.
 3. **Merge** with [`iteration.md`](iteration.md) → *Integration, until it converges*: lay the
    dossiers side by side; a pair that changes one seam, contract or file is redesigned
    together; repeat until a pass changes nothing, three passes at most; what still conflicts

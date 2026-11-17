@@ -13,7 +13,7 @@ Stage-4 leaf sizing still applies when work is handed to independent agents; ski
 - When it applies
 - How to cut
 - The module map — the artifact
-- GATE (part of stage 2, manual)
+- GATE (part of stage 2's gate)
 - The program loop — one brick at a time
 - Executor-sized tasks and context
 - Program done
@@ -103,7 +103,7 @@ Every REQ from the brief appears in exactly one module's `REQs` cell. A REQ that
 fits nowhere means the map is incomplete; a REQ in two modules means the seam runs
 through a requirement — re-cut or split the REQ.
 
-## GATE (part of stage 2, manual)
+## GATE (part of stage 2's gate)
 
 Together with the design approval:
 
@@ -113,7 +113,8 @@ Together with the design approval:
 4. Every REQ maps to exactly one module.
 5. Cross-module contracts are named (shape can be locked later, in each module's
    spec — but the *existence* and *owner* of each contract is decided here).
-6. The operator approves the map and the order.
+6. The map and the order are approved, by the operator or by the standing authorization
+   recorded in the brief.
 
 ## The program loop — one brick at a time
 

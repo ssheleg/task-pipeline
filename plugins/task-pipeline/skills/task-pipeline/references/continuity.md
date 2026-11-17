@@ -11,6 +11,7 @@ almost no window left, loses the middle of it, and re-derives what it already di
 
 - The limit, before the capability
 - Part 1 — the loop
+- What is not a stop
 - Part 1a — the queue is stage 2's, and the loop arms on it
 - Arming it on Claude Code
 - Other harnesses, and honest degradation
@@ -30,9 +31,11 @@ almost no window left, loses the middle of it, and re-derives what it already di
 - A `manual` gate requires the operator's explicit go. A specific standing authorization
   naming that gate's act is such a go; cite its source and scope in the gate record.
   Without it, the gate waits. A generic instruction to continue is not authorization.
-- An outward or irreversible act — deploy, publish, a tag or a release, sending to a
-  person, spending money, creating or editing a shared design file — still needs its own
-  **specific** authorization. A recorded loop mode is a **generic** flag, and a generic
+- An outward or irreversible act still needs its own **specific** authorization. The full
+  list, which `SKILL.md` cites: deploy; a tag or a release; publication; sending to a
+  person; spending money;
+  deletion outside this run's own worktree and this run's own unpushed branches, whoever created it (data, records, a remote branch, a release, a published package); a push or a pull request (below);
+  creating a repository; creating or editing a shared design file. A recorded loop mode is a **generic** flag, and a generic
   flag is not a specific authorization; that floor is set in [`grill.md`](grill.md) and
   this file does not lower it.
 - **Pushing this repository's work and opening its pull request** is armed by a specific
@@ -130,6 +133,30 @@ the boundary between one agent turn and the next. This file is that reach.
 **Where it is recorded:** `pipeline.json` → `run.loop`. A project sets it once and
 is never asked again — which is the entire point. A mode that has to be requested
 every run is not a mode, it is a habit the operator maintains by hand.
+
+## What is not a stop
+
+A turn that ends in text while work is still owed is a report, not completion. Four
+endings look like stops and are not, whether or not the loop is armed:
+
+- a summary of what was done that announces the next step instead of taking it;
+- an offer to carry on unless the operator would rather not;
+- a list of decisions for the operator when none of them blocks the rest of the work
+  (record them with their recommendation and do what does not depend on them;
+  without a host delegation they stay the operator's);
+- deciding that a passed gate, a certified node or a landed wave is a good place to
+  report because the turn has been long.
+
+Put status notes in the same message as the next action. The wanted stops are the four
+under *Part 1*, where an ambiguity counts unless a host delegation lets the recorded decisions,
+the goal and the safest reversible option settle it (an internal, reversible one is taken
+as assumed, *Part 1*), plus the human gates `SKILL.md` names and the outward
+acts listed under *The limit, before the capability*. After three automatic continuations on one node (resumes across a turn boundary that
+produced no new commit or evidence and are not fix, review or certification rounds or
+watcher wake-ups on a recorded wait) without a gate passing, park the node
+with its open items named and take the next one,
+so a run that is genuinely stuck ends where it can be reviewed. None of this removes the
+confirmation that a risky or irreversible act needs.
 
 ## Part 1a — the queue is stage 2's, and the loop arms on it
 

@@ -1491,6 +1491,8 @@ three quarters of the work on this run.
 
 ## Releases that carry no stamp — stated, not stamped
 
+**`v1.105.0` carries no stamp, declared before its tag.** It rewrites how the doctrine is said to Anthropic's current prompting practices (Done when and Stop only when at every entry, the four endings that are not stops, the grill's unconditional wait removed, fifteen stops with no human gate made decisions, the subagents' common skeleton, history and emphasis out of loaded files) and adds `test/prompt_lint.py` with its ratchet. The run was driven from sshlg-skills on the operator's request of 2026-11-16, in waves recorded in `docs/reports/2026-11-16-anthropic-prompting/SPEC.md`; it ran no stamped pipeline stages, so there is no divergence to stamp.
+
 **`v1.104.3` carries no stamp, declared before its tag.** It re-releases v1.104.2's payload, whose tag was pushed but never published (release run 43537193623 failed at `npm run test:docs` on the board finding id 6580c2ff written in backticks in `docs/evidence/verification.md`), and fixes fixture F1d of `test/lessons_test.py` for git 2.54's `main` default branch. Board request 4c274b2a, a board session with no person present; it ran no pipeline stages, so there is no divergence to stamp.
 
 **`v1.104.2` carries no stamp, declared before its tag.** It ships two fixes reported on the project board on 2026-11-11 (`retro_budget.py migrate` crashing on a Run stamps table when prose also moves, finding 6580c2ff; `run-lifecycle.sh` appending to a ledger after acceptance, finding a6a2f281). The run was a board session with no person present, driven from the task-pipeline project; it ran no pipeline stages, so there is no divergence to stamp.

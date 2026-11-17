@@ -27,16 +27,10 @@ that goes stale when the answer changes.
 
 ## Why this is a phase and not "explore a bit first"
 
-An agent that starts asking without harvesting spends the operator's turns on
-questions the project already answered — in an ADR, in a runbook, in a wiki page
-written three months ago by the same person now being asked. That is the expensive
-failure, but not the worst one.
-
-The worst one is silent: **the operator misremembers, the agent believes them, and
-the run builds on it.** People answer from memory about systems they wrote a year
-ago. Without the documents in hand you cannot tell a decision from a recollection,
-so every later gate passes honestly on a false premise. Harvesting first is what
-makes the grill's answers *checkable* instead of merely confident.
+Asking before harvesting spends the operator's turns on questions an ADR, a runbook
+or a wiki page already answered. Worse, an operator answering from memory can be wrong,
+and without the documents in hand the run cannot tell a decision from a recollection.
+Harvesting first makes the grill's answers checkable instead of merely confident.
 
 ## The sources, in the order to try them
 
@@ -223,15 +217,7 @@ fixes.
 run wrote down** — a board row, which reads like a finding because it was one, on the day
 it was filed.
 
-Three rows expired inside a single day on 2026-08-16, and each was caught only because the
-cycle that picked it up happened to measure before building:
-
-- one recorded a script and thirteen green fixtures as *built and parked*; every artifact
-  had been deleted, and the row had read as ready-to-merge for two days;
-- one named six files belonging to another repository; a sweep found **eleven**;
-- one said the graphs were frozen at a date nine days old; every one had been rebuilt.
-
-None of the three was wrong when written. **A row states the world at its `Source` date and
+A row is right when written and can expire within a day. **A row states the world at its `Source` date and
 says nothing about now**, and the run that acts on it is the first reader in a position to
 tell the difference.
 
@@ -242,9 +228,7 @@ acted on as an assumption, out loud.
 
 **The row's own derived columns decay too, and that one is pure arithmetic.** A rank
 computed from an age term is wrong the moment the age moves, and nothing notices because
-the number still looks like a number. This repository's own board carried a constant age
-for eleven days — the four oldest rows sat at the bottom of a ranking whose stated purpose
-was to raise them. If a board computes a priority, something must recompute it; a promise
+the number still looks like a number. If a board computes a priority, something must recompute it; a promise
 in the header that it happens at stage 10 is not a mechanism.
 
 ## The source is not the copy you have

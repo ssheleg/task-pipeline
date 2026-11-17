@@ -9,7 +9,7 @@ taken to its gate — and this file never shortens it to "iteration".
 document → release → check the release → show the operator the next pool → repeat.** A
 project moves forward in whole releases. It does not move fix by fix.
 
-Decided by the operator on 2026-10-12. The reason, in their words: a fix made alone
+The reason, in the operator's words: a fix made alone
 reproduces new defects and breaks earlier ones, and some fixes are already obsolete by the
 time they land. Seeing every problem at once lets the next version solve them together.
 
@@ -85,11 +85,7 @@ gh pr list -R <owner>/<repo> --state merged -L 20 --json number,headRefName,merg
 ```
 
 Each node has one owner. When work has to be split, record the split on the PR you would
-otherwise collide with. *A lesson of release iteration 1 (2026-10-13): fix PRs from other
-tools' branches landed on nodes a fix cycle was rebuilding, and a later cycle was briefed on
-a PR that had already merged. Source: the iteration's run record, which is private, and
-[task-pipeline#125](https://github.com/ssheleg/task-pipeline/pull/125), which carries the
-rule.*
+otherwise collide with.
 
 ## Module dossiers
 

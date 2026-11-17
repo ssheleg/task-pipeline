@@ -25,12 +25,13 @@ fields, written at stage 0 and confirmed with the brief:
   released, installed or deployed. A branch is not that artefact.
 - **Scope** — the modules, paths and REQ ids this iteration may change, as a list.
 - **Budget** — `run.finish.maxRounds` (default 3), `run.finish.maxReleases` (default 2) and
-  `run.finish.maxAgents` (sub-agents at once, default 2, since 1.100.0), from `pipeline.json`
+  `run.finish.maxAgents` (sub-agents at once, default 2), from `pipeline.json`
   ([`../pipeline.schema.json`](../pipeline.schema.json)), and `run.finish.cleanRounds`: 1,
   or 2 when the iteration carries an R3 or flagship node.
 - **Base** — the commit the iteration started from.
 
-Widening the scope is a recorded revision of the brief, with the operator's go. A finding is
+Widening the scope is a recorded revision of the brief, with the operator's go or the
+agent's recorded decision under a host delegation. A finding is
 not one.
 
 ## Triage at discovery
@@ -75,9 +76,8 @@ audit axis, an observer, or the post-release readback. Rotating the axis
 
 - **Done** — every exit check green on the artefact, and one round with no new blocking
   finding; two consecutive ones when the iteration carries an R3 or flagship node, the
-  second of which may read only the last fix's diff. Two for every iteration was the
-  default until 1.98.0, and a clean round that changed nothing bought a second reading
-  of the same tree.
+  second of which may read only the last fix's diff. A second clean round
+  over an unchanged tree buys nothing.
   **A finish line the host's instructions state wins** (for example, two consecutive
   verification rounds with nothing blocking for every unit): the run applies the
   host's count (`waves.py finish --clean-rounds 2` for two) and names its source in

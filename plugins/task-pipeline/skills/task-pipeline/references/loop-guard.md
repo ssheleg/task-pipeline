@@ -43,7 +43,7 @@ One line per file per pass. The reason must name **what forced the edit** — a
 finding id, a failed gate item, an operator instruction. "Cleanup", "polish" and
 "while I was there" are not reasons; they are churn with better manners.
 
-Fan-out is bookkept too (since 1.100.0): each round writes `agents: <N> — <k>`, the most
+Fan-out is bookkept too: each round writes `agents: <N> — <k>`, the most
 sub-agents that ran at once in it. `waves.py finish` charges the peak against
 `run.finish.maxAgents` (2 by default), so a loop that tries to escape its round budget by
 spawning wider is stopped by the same verdict ([`finish-line.md`](finish-line.md)).
@@ -73,10 +73,12 @@ stage's gate — which is the whole difference between a rule and a rule that ru
 
 Caps that trip the guard by themselves: **3 fix rounds** per task
 ([`build.md`](build.md)), **2 re-entries** per stage per artifact, **3 passes** per
-module in the program loop, **3 review rounds** per artifact, and **3 failing
-certification rounds** per node ([`certification.md`](certification.md)). Each one
+module in the program loop, **3 review rounds** per artifact, **3 failing
+certification rounds** per node ([`certification.md`](certification.md)), and **3 automatic
+continuations** per node, as [`continuity.md`](continuity.md) → *What is not a stop*
+defines them. Each one
 **stops**: the remaining findings become blocker rows with their evidence and the run
-moves on (since 1.98.0; the review cap used to measure only).
+moves on.
 
 **Two rules hold under every cap.** Never retry an unchanged failing action: the same
 command on the same input gives the same answer, so a retry is a loop with no
@@ -169,8 +171,10 @@ not "just try one more thing". Then, in this order:
    is being re-litigated at the wrong altitude:
    - two findings disagree → the **review rubric** decides
      ([`review.md`](review.md)); if it genuinely doesn't, it's a spec question;
-   - a finding contradicts the plan → the **operator** decides which governs
-     (never dismiss the finding, never fix against the plan silently);
+   - a finding contradicts the plan → under a host delegation (the host's instructions or a standing authorization), decide which governs
+     by the recorded decisions, then the project's goal, then the safest reversible
+     option, and record the ruling; otherwise the operator decides (never dismiss the
+     finding, never fix against the plan silently);
    - the plan contradicts the spec → back to **stage 4** with the evidence;
    - the spec is ambiguous or wrong → back to **stage 3**, and if the ambiguity was
      an unresolved intake question, say so — that is a stage-0 miss worth recording;
@@ -194,8 +198,9 @@ not "just try one more thing". Then, in this order:
 
 ## When to stop and hand back
 
-If step 2 lands on "the operator decides", or a cap is hit a second time after a
-re-planned pass, **stop and report BLOCKED** with: the two shapes, the evidence, the
+If step 2 lands on the operator (no host delegation, or a decision recorded as the
+operator's), or a cap is hit a second
+time after a re-planned pass, **park the node as BLOCKED** and report it with: the two shapes, the evidence, the
 history of passes, and your recommendation. That is a complete, honest hand-back —
 far cheaper than a third round of the same argument.
 

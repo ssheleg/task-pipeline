@@ -15,8 +15,12 @@ brief, its interfaces, the global constraints, nothing else. It never inherits t
 session's history, so it stays focused; your context stays free for coordination.
 
 **Continuous execution:** don't check in between tasks. The operator asked for the
-plan to be executed — execute it. Stop only for BLOCKED you can't resolve, a
-genuine ambiguity, or completion. "Should I continue?" between tasks is noise.
+plan to be executed: execute it. Hold a task that needs a person (a human gate,
+or an outward act with no go, [`continuity.md`](continuity.md) → *The limit, before the
+capability*) and continue the tasks that do not depend on it; stop only for completion. Under a host delegation (the host's instructions or a standing authorization), an
+ambiguity is decided by the recorded decisions, then the project's goal, then the safest
+reversible option, and recorded on the task; otherwise it goes to the operator while the
+tasks that do not depend on it go on. "Should I continue?" between tasks is noise.
 
 **Scope, so this is not mistaken for the run-wide mode:** the rule above governs
 the *inside* of this stage and is unconditional — it holds whether or not a loop
@@ -67,7 +71,8 @@ git rev-parse --show-superproject-working-tree   # non-empty ⇒ submodule, not 
 - `GIT_DIR != GIT_COMMON` and **not** a submodule → you are already in a linked
   worktree. Do not create another. Report the path and branch, go to *Setup*.
 - Otherwise you are in a normal checkout. Honor the brief's worktree preference; if
-  none was recorded, ask once before creating one.
+  none was recorded, under a host delegation create one (the default) and record it in the
+  run ledger; otherwise ask once before creating one.
 
 **Creating one — native tool first.** If the harness offers a worktree tool
 (`EnterWorktree`, a `/worktree` command, a `--worktree` flag), use it: it owns
@@ -92,8 +97,9 @@ on a sandbox permission error, say so plainly and work in place.
 **Setup + baseline.** Install dependencies the way the project does (`npm install`,
 `cargo build`, `pip install -r requirements.txt`, `poetry install`, `go mod
 download`), then run the test command from the brief's autonomy sweep. A dirty
-baseline makes every later failure ambiguous: report failures and let the operator
-decide whether to proceed.
+baseline makes every later failure ambiguous: under a host delegation record the failing checks
+as the known-red baseline ([`gates.md`](gates.md)), keep them out of this run's claims and
+proceed; otherwise report the failures and let the operator decide whether to proceed.
 
 ## 1a. Another agent may be in this repository right now
 
@@ -241,13 +247,6 @@ implementer, a reviewer or a verifier:
 > Do not edit repository files with inline heredocs: use the editor tool or a script file.
 > If a command has not returned in about 5 minutes and no process is running, rephrase it.
 
-*A lesson of release iteration 1 (2026-10-13): background agents stopped silently. Each was
-waiting on a command the harness held for a permission no one could see. The triggers were a
-`cd X; python3 - <<EOF` compound and `rm -rf $HOME` with HOME overridden. Source: the
-iteration's run record, which is private, and
-[task-pipeline#125](https://github.com/ssheleg/task-pipeline/pull/125), which carries the
-rule.*
-
 ### 4.1a Decisions settled inside a task — and who may write them down
 
 The report above already asks for *"decisions you made"*, and stage 5 settles more
@@ -328,7 +327,8 @@ single diff:
    implementer applied and another did not.
 
 **A finding here is not a per-task fix loop.** It is a group-level decision: pick
-which task is right, send the other back with the ruling, or park both and escalate.
+which task is right, send the other back with the ruling, or park both and escalate (under a host
+delegation to the stage-4 plan, otherwise to the operator).
 Log it once, on the group:
 `Group <G>: convergence check — <n> findings (<one-liners>); ruling: <what governs>`.
 
@@ -343,7 +343,7 @@ this is the check most likely to be skipped because every task already went gree
 | `DONE` | **Run the hygiene gate in diff mode first** (below), then build the review package and dispatch the task review ([`review.md`](review.md)). |
 | `DONE_WITH_CONCERNS` | Read the concerns first. Correctness or scope → resolve before review. Observations ("this file is getting large") → **append to the carry-over ledger**, then proceed. A concern that stays only in the report dies with the workspace. |
 | `NEEDS_CONTEXT` | Supply exactly what's missing, re-dispatch. |
-| `BLOCKED` | Diagnose: missing context → re-dispatch with it; needs more reasoning → a more capable model; too large → split the task; the plan itself is wrong → escalate to the operator. |
+| `BLOCKED` | Diagnose: missing context → re-dispatch with it; needs more reasoning → a more capable model; too large → split the task; the plan itself is wrong → re-plan at stage 4 with the evidence under a host delegation, otherwise escalate to the operator. |
 
 ### The hygiene gate — after every task, before the review
 

@@ -29,7 +29,7 @@ each with **basis** (`evidence RE-NN` or `hypothesis`), **situation**, **goals**
 it drops), **retention** (opening with `local` or `tourist`, then trigger → action → reward →
 what brings it back) and **needs** (device, engine, locale, accessibility). At least two
 portraits are locals and two are tourists: lifetime value rests on the first, churn on the
-second (since 1.101.0). The operator confirms it once; a later change of the product revises
+second. The operator confirms it once, or under a host delegation the agent records the decision; a later change of the product revises
 it. `python3 scripts/design_gate.py panel docs/ux/test-panel.md` gates it.
 
 A portrait marked `hypothesis` chooses what to test, never what to build: the super-ux rule

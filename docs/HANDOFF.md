@@ -1,3 +1,20 @@
+## Unreleased 1.105.0: the pipeline's prompts to Anthropic's practices, branch `prompt/anthropic-practices-2026-11-16` (2026-11-16)
+
+- **Objective.** Operator request of 2026-11-16 (sshlg-skills session): study Anthropic's
+  prompting and skill-authoring practices, write a spec per skill, command and agent of the
+  core pipeline, close it in waves, release, and say when sessions can be reloaded.
+- **Done.** Practices and per-component specs in `docs/reports/2026-11-16-anthropic-prompting/`
+  (`README.md`, `SPEC.md`, `specs/`); waves W0 (prompt lint), W1 (run contract and stops),
+  W2 (subagents), W3 (hand-back order, evidence-docs, project-audit), W4 (history out).
+- **Checks run.** `npm test` exit 0; `python3 test/prompt_lint.py` PASS against a lowered
+  baseline; `npm run test:all` before the tag.
+- **Decisions.** Five regression needles that pinned shouted capitals now pin the same words
+  in plain case. Deferred work is on the Fabric board as five rows spawned from task
+  0b274413 (incident archive, gate bullets split, script mechanics out of waves and
+  iteration, stage 0 phase order and the Figma section, hook messages).
+- **Next task.** Tag `v1.105.0` after the merge, watch release.yml to
+  `npm view task-pipeline-skill version` = 1.105.0, then pin it in sshlg-skills.
+
 ## Unreleased 1.104.3: v1.104.2's payload with a passing documentation gate, branch `fix/release-1.104.3-docgate` (2026-11-14)
 
 - **Objective.** Board request 4c274b2a (thread 14841db6, from fabric-workspace): the tag

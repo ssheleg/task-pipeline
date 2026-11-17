@@ -28,7 +28,7 @@ approved design — not at code.
 
 ## The hard gate
 
-**No implementation action before the operator approves a design.** No code, no
+**No implementation action before the design is approved**, by the operator or by the standing authorization recorded in the brief. No code, no
 scaffolding, no file creation "to see how it'd look", no invoking a
 frontend/backend/build skill. This holds for every task regardless of how simple it
 looks.

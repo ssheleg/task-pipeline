@@ -1,24 +1,32 @@
 ---
 name: evidence-docs
-description: "Use when writing or reviewing anything read as true: a decision record, ADR, README, acceptance report, runbook, changelog, audit finding, a claim of verification. Applies the ten canons of evidence-backed docs. Not for: drafts, chat answers, commit messages; 'без доков' opts out."
+description: "Use when writing or reviewing anything read as true: a decision record, ADR, README, acceptance report, runbook, changelog, audit finding or claim of verification. Applies the ten canons of evidence-backed documentation. Not for: drafts, chat answers, commit messages; 'без доков' opts out."
 license: MIT
-compatibility: "Doctrine runs on any agent. No bundled scripts — nothing to install and nothing to degrade."
+compatibility: "Doctrine runs on any agent. No bundled scripts: nothing to install and nothing to degrade."
 ---
 
 # Evidence-backed documentation
 
-**A claim is documentation only when it carries the means to check it.** This skill is
+A claim is documentation only when it carries the means to check it. This skill is
 the standard and the map: ten canons, and where each is defined, enforced and seeded.
 
-It is a **navigator, not a second copy**. Every law below has exactly one home — that is
-canon 3, and a navigator that restated the doctrine would break the rule it is indexing.
+It is a navigator, not a second copy. Every law below has exactly one home (canon 3),
+and a navigator that restated the doctrine would break the rule it is indexing.
 The full statement of each canon, its rationale and its enforcement live in
 [`documentation.md`](references/documentation.md) → *The canons*.
+
+Done when: every sentence that would fail *"how do you know?"* carries its address, is
+deleted, or ships marked as an unbacked claim the operator chose to make (*The one test*
+below).
+
+Stop only when: a measurement would have to say something it did not, or an estimate
+would ship presented as a measurement (canon 8). An unbacked claim the operator asked for is not a stop: say so
+once, label it, continue.
 
 ## The ten canons
 
 1. **A claim carries its address** — `file:line`, a command with its output, a test name; a lesson names its commit.
-   - **1a. A token that looks like evidence is not evidence until it has been resolved.** A sha, a line number, a path, a flag, a test name: every one can be plausible and absent, and each is trusted at exactly the moment nobody re-reads it. A commit reference is filled **after** the commit exists and checked with a command.
+   - **1a. A token that looks like evidence is not evidence until it has been resolved.** A sha, a line number, a path, a flag, a test name: every one can be plausible and absent, and each is trusted at exactly the moment nobody re-reads it. A commit reference is filled after the commit exists and checked with a command.
 2. **Numbers are computed, never restated.**
    - **2a. A number out of the shell is not a measurement until you have looked at what matched.** Print the matched items classified beside the count whenever the token can occur inside something else, and never pipe a command whose exit status governs what happens next — the shell then answers about the pager. *Eighteen lines containing these three digits* and *eighteen throttle events* are different claims.
 3. **Every fact has exactly one home** — others link, never restate.
@@ -32,8 +40,8 @@ The full statement of each canon, its rationale and its enforcement live in
    - **9a. A measured zero and an unmeasured quantity may not print the same** — canon 9 says carry the absence; 9a says refuse the number when nothing measured it.
 10. **The document ships in the change that made it true** — and a correction is appended, never written over.
 
-They are **epistemic**: what makes a claim documentation. The operational layer — what to
-do at a given trigger, with a check and an exit criterion — is
+They are epistemic: what makes a claim documentation. The operational layer (what to
+do at a given trigger, with a check and an exit criterion) is
 [`learned.md`](references/learned.md). When the two seem to say the same
 thing, the canon is the *why* and the rule is the *how*.
 
@@ -47,31 +55,31 @@ thing, the canon is the *why* and the rule is the *how*.
 | decide where a fact belongs | *Single source of truth* | two homes disagree the day one of them is updated |
 | build a check that cannot lie | [`gates.md`](references/gates.md) | three axes, the enforcement ladder, progressive arming, probing |
 | trust a mechanism that reports success | [`gates.md`](references/gates.md) → *False success* | the failure that removes the reason to look |
-| wire a check into the agent's own tooling | [`hooks.md`](references/hooks.md) | the hook contract, and why a crashed guard **allows** the action |
+| wire a check into the agent's own tooling | [`hooks.md`](references/hooks.md) | the hook contract, and why a crashed guard allows the action |
 | audit documentation a project already has | [`setup.md`](references/setup.md) | seven passes, cheapest first, output is a fix plan |
 | carry a lesson to the next run | [`retrospective.md`](references/retrospective.md) | stamp first (the cold trigger reads it), then prune to a cap of ten; every lesson names its commit |
-| seed a gate into a host project | [`templates/docgate.sh`](templates/docgate.sh) | it seeds **green**: dormant where there is no input yet |
-| claim that an **agent** behaves | `tdd.md` → *When the thing under test is an agent* — named rather than linked, because this navigator's out-of-directory links break wherever a packager ships this skill alone | the address is a trace id and the assertion that ran (canon 1); a judge nobody watched disagree is a green nobody watched turn red (canon 5) |
+| seed a gate into a host project | [`templates/docgate.sh`](templates/docgate.sh) | it seeds green: dormant where there is no input yet |
+| claim that an agent behaves | `tdd.md` → *When the thing under test is an agent* (named, not linked: an out-of-directory link breaks wherever this skill ships alone) | the address is a trace id and the assertion that ran (canon 1); a judge nobody watched disagree is a green nobody watched turn red (canon 5) |
 | take a whole change through to acceptance | the `task-pipeline` skill (install it separately) | this skill is the standard; that one is how a change reaches the repository |
 
 ## When this applies
 
-**The boundary is "it will be read as true."** A decision record, a README, an acceptance
+The boundary is "it will be read as true." A decision record, a README, an acceptance
 report, a runbook, a changelog for users, an audit finding, a claim that something was
 verified.
 
-**Not through this skill:** a draft, thinking out loud, an answer in chat, a commit
+Not through this skill: a draft, thinking out loud, an answer in chat, a commit
 message, a code comment. Demanding a `file:line` for "let me check that" is the fastest
 way to teach an agent to route around the rule where it actually protects something.
 
-**Refusal phrase — "без доков" / "on my word".** It works on a task that would otherwise
-pass through here: do it directly and **say out loud** that the claim is unbacked, rather
+Refusal phrase: "без доков" / "on my word". It works on a task that would otherwise
+pass through here: do it directly and say out loud that the claim is unbacked, rather
 than presenting an estimate as a measurement (canon 8).
 
 ## Whom the canons serve
 
-**The operator's intent is the point. Evidence is how it survives contact with reality —
-not a licence to refuse it.**
+The operator's intent is the point. Evidence is how it survives contact with reality,
+not a licence to refuse it.
 
 Everything above exists so the operator gets the result they actually wanted and nothing
 breaks quietly on the way. It does not exist to decide *what they are allowed to say*. A
@@ -82,37 +90,33 @@ The line, and it is not the same line:
 
 | The operator may | The operator may not, and this is refusal ground |
 |---|---|
-| assert something not yet true — a landing page describing the product they are building, a roadmap, a pitch | make a **measurement** say something it did not: a test that passed, a benchmark, a count, a citation |
-| ship an unbacked claim knowingly, after being told once | have an estimate **presented as** a measurement (canon 8), which is the one thing no intent authorises |
+| assert something not yet true: a landing page describing the product they are building, a roadmap, a pitch | make a measurement say something it did not: a test that passed, a benchmark, a count, a citation |
+| ship an unbacked claim knowingly, after being told once | have an estimate presented as a measurement (canon 8), which is the one thing no intent authorises |
 
-**So the sequence on an unproven claim is: say it once, label it, do the work.** Not a
+So the sequence on an unproven claim is: say it once, label it, do the work. Not a
 negotiation, not a second warning, and never a silent refusal dressed as a question. If
-the operator confirms they know, the claim ships with a marker naming it as forward-looking
-— that marker is the whole of what this skill owes here, and the task gets done.
+the operator confirms they know, the claim ships with a marker naming it as forward-looking;
+that marker is the whole of what this skill owes here, and the task gets done.
 
-**Then do the harder half.** Following intent is the floor, not the service. The service is
-making that intent *better* — more structural, more predictable, easier to maintain and
-extend than the operator asked for — while still being the thing they asked for. An agent
-that only obeys is a slower keyboard.
+Then do the harder half: following intent is the floor. Make the result more
+structural, more predictable and easier to maintain and extend than asked, while it is
+still the thing that was asked for.
 
 ## The one test
 
 Before a document ships, read it for the sentence that would embarrass you if someone
-asked *"how do you know?"* — then do one of **three** things: give that sentence its
-address, delete it, or **mark it as an unbacked claim the operator chose to make and ship
-it**. The third option is not a loophole; it is the reason the other two are worth
+asked *"how do you know?"*, then do one of three things: give that sentence its
+address, delete it, or mark it as an unbacked claim the operator chose to make and ship
+it. The third option is not a loophole; it is the reason the other two are worth
 anything. A rule with no way to proceed under it becomes a rule people route around, and
 then nothing carries an address.
 
-**Editing these references.** The files under `references/` and `templates/` here are
-GENERATED copies, so a single-skill install of this skill resolves every link without a
-neighbouring checkout. Edit the source home, never the copy — which file is generated,
-from where, and how to re-sync: [`GENERATED.md`](references/GENERATED.md).
+`references/` and `templates/` are generated copies: edit them at their source home, as
+[`references/GENERATED.md`](references/GENERATED.md) says.
 
 ## Triggers
 
 The description is the short form, and the only text a host's own skill selection
-reads. The trigger list it carried until 1.98.0, kept here verbatim, is what the family
-hub's routing hook matches prompts against:
+reads. The list below is the source the family hub's route table is curated from; keep it verbatim.
 
 "Use when writing or reviewing anything that will be read as true — a decision record, a README, an acceptance report, a runbook, a changelog entry, an audit finding, or any claim that something was verified. Applies the ten canons of evidence-backed documentation — what makes a claim documentation rather than an assertion — and routes to the doctrine that enforces each one. Also use when a project needs a documentation gate, a decision register, a propagation matrix, or a retrospective that outlives its author. Triggers - 'documentation gate', 'decision record', 'ADR', 'acceptance report', 'runbook', 'is this verified', 'доказательная документация', 'записать решение', 'запиши решение', 'отчёт о приёмке', 'раннбук', 'чем это подтверждено', 'доки в синхроне'. Not for: drafts, chat answers, commit messages or code comments — say 'без доков' to opt out."

@@ -59,8 +59,7 @@ The half that costs more, because it is written by the person who understands th
 note explaining *"the count was written wrongly as `Guards: 412 → 412`"* has just placed a
 second readable count in a section whose count a gate reads — so when the probe removes the
 real one, the narrative still matches and the guard reports green over a section that states
-nothing. Measured three times in one hour on 2026-08-22, each time inside prose *about* this
-very failure: the release note, the board row filed against it, and the repair to the probe.
+nothing.
 
 The rule the umbrella already states for commands — **name a dead command, never claim it**
 — holds for a number, a version and a shape. Describe the wrong form; do not write it.
@@ -425,12 +424,8 @@ A register is the one file two agents will write in the same minute.
   enforces it is worse than having no protection, because everyone downstream
   believes the guarantee.
 - **A register declared against a backend that cannot reserve is a register in name
-  only, and its presence is what stops the manual procedure being written.** Measured
-  2026-08-15: a project declared three id registers over a local-filesystem backend
-  whose `reserve` correctly refuses — *pretending would hand two agents the same id* —
-  and two sessions filed a different `B-073` on the same afternoon. The tool was honest;
-  the *declaration* was the problem, because a capability that appears to exist is one
-  nobody replaces. Where reservation is not available, write the three-step manual
+  only, and its presence is what stops the manual procedure being written.** A
+  capability that appears to exist is one nobody replaces. Where reservation is not available, write the three-step manual
   allocation down where an agent reads it, and make it follow the lease:
   1. take the lease on the register's file **first**;
   2. compute the next id from the **committed** file — `git show HEAD:<file>` — never

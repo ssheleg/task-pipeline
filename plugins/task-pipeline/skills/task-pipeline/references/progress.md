@@ -102,7 +102,7 @@ omitting the field is indistinguishable from forgetting it.
 The stage ids on the rail come from the project's `pipeline.json` → `stages[]`. They
 are **not** the eleven in [`../pipeline.example.json`](../pipeline.example.json), which
 is this plugin's *example* flow — a host project replaces it with its own stages
-(`SKILL.md` → *Bring your own skills*).
+(`pipeline.schema.json`, the only contract).
 
 A bar reading `gates 5/11` in a project with six stages is a false success in the
 purest form the pipeline has: a summary that is confidently wrong about the thing it
@@ -157,6 +157,7 @@ the two it is running.
 
 ```
 ── hand-back · <topic> · iteration <n> ───────────────────────────
+DECISIONS WAITING  <n>   each as a question with options, asked HERE
 TASK        the request as it was GIVEN, quoted from the brief — not
             as it looks now that you understand it
 PROGRESS    where the run stands against that request: gates passed,
@@ -172,8 +173,6 @@ NOT VERIFIED what was built and NOT checked, or could not be. The literal
 FINISH      finish: done | budget | blocked — the finish block, as
             finish-line.md prints it; mid-iteration, the round and
             the open blocking count
-
-DECISIONS WAITING  <n>   each as a question with options, asked HERE
 AMBIGUITIES        <n>   computed, below
 ```
 
@@ -220,8 +219,9 @@ here even when it was fixed in passing — especially then.
 **DECISIONS WAITING are asked, not listed.** A question parked in a report is a question
 the operator answers days later, if at all. Ask it at the boundary, with options and a
 recommendation, in the same breath as the report. Where the host's instructions
-delegate decisions, only a human gate waits here; every other decision is taken by the
-agent, recorded with its reason and reported as decided. If there are none, the field
+delegate decisions, only a human gate, a `manual` gate or an outward act with no go waits here
+([`continuity.md`](continuity.md) → *The limit, before the capability*); every other
+decision is taken by the agent, recorded with its reason and reported as decided. If there are none, the field
 prints `0` — [`gates.md`](gates.md)'s rule about absence applies here too.
 
 ### AMBIGUITIES are computed from four registers the run already keeps

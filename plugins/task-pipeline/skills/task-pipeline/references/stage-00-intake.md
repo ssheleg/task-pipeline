@@ -33,10 +33,9 @@ The full gate and freedom level remain in [stages.md](stages.md).
   a prompt carrying several asks splits first (Phase 1a) and triages the item it keeps.
   Reading the companion matrix and the full harvest before deciding that a
   three-file change was small is the cost this order removes. This pipeline's boundary exempts a typo
-  and a one-line edit; until 1.98.0 the next size up still met eleven stages and five manual gates, because the short
-  path was only *proposed* and silence took the full flow. Under a standing "decide and
-  act" instruction silence is the normal answer, so a proposal was the full flow every
-  time. The triage now **decides**, from five answers with something behind each:
+  and a one-line edit; for the next size up a proposed short path would be the full flow
+  every time, because under a standing "decide and act" instruction silence is the normal
+  answer. So the triage **decides**, from five answers with something behind each:
 
   ```
   1. files the change touches, resolved      git ls-files -- <paths>       -> N
@@ -79,8 +78,10 @@ The full gate and freedom level remain in [stages.md](stages.md).
   Where the host's instructions delegate decisions to the agent, a material unknown
   is decided instead, by the recorded decisions, then the project's goal, then the
   safest reversible option, and the decision and its reason go into the brief; only
-  a human gate (a sign-in, a consent, a payment, a typed secret, spend above a limit,
-  a decision recorded as the operator's) still goes to the operator. This is input
+  a human gate (a sign-in, a consent, a payment, a typed secret, spending money,
+  a decision recorded as the operator's) still goes to the operator, and an outward or
+  irreversible act still needs its go ([`continuity.md`](continuity.md) → *The limit, before
+  the capability*); an absent operator is not one. This is input
   expansion, not design.
 - **Phase 1 — harvest the knowledge sources before any question** (full flow)
   ([`knowledge-sources.md`](knowledge-sources.md)). Before the first question:
@@ -113,7 +114,7 @@ The full gate and freedom level remain in [stages.md](stages.md).
   where the project already keeps its open work (a manifest, the board its instruction
   file names, an agent-sync register, a known path, a tracker); stage 0 seeds a board only
   when it exits 4, or exits 5 and the signals, read first, name no live board, and never over a
-  `seed-path-taken` path (it asks once where to seed instead). A prompt with one ask goes on; several asks are listed as `ASK-n`
+  `seed-path-taken` path (it seeds beside it, records where in the brief and names it in the hand-back). A prompt with one ask goes on; several asks are listed as `ASK-n`
   and triaged one by one; past the threshold they are cut into modules, researched in
   parallel, merged into one plan with a second pass, ranked, and every item but the top
   is filed on that board before stage 1.

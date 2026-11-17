@@ -50,11 +50,7 @@ the only evidence** ([`gates.md`](gates.md) → *False success*). "CI is green" 
 without a command behind it is a sentence that prints the same whether it looked or
 not.
 
-This is not hypothetical. On 2026-08-06 this repository's `validate` was
-`completed/failure` on a push to `main` and on a release tag. The failure was
-**correct** — the *Every v\* tag must be contained in main* guard firing on a tag that
-was not yet an ancestor — and nothing in this bundle obliged anyone to read it. A
-guard nobody reads is a fail-open hook with extra steps.
+A failing check nobody reads is a fail-open hook with extra steps.
 
 ```bash
 # authenticated

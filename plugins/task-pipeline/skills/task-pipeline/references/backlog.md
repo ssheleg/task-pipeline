@@ -64,7 +64,7 @@ first (a frozen board, a tracked backlog file elsewhere, a line naming a board o
 repository; `seed-path-taken`, the seed path already occupied, which is read and never written
 over). Only when it exits 4, or the signals name no live board, stage 0 seeds `<artifacts>/backlog.md` from
 [`templates/backlog.md`](../templates/backlog.md) and says so in the brief, unless a
-`seed-path-taken` signal stands: then the brief says so and stage 0 asks once where to seed.
+`seed-path-taken` signal stands: then the brief says so and stage 0 seeds beside it, records where and names it in the hand-back.
 Whether to seed is not a decision that needs asking: an empty board and no board are the same thing to
 work on, and only one of them can be appended to.
 
@@ -199,13 +199,6 @@ public reader never needs it.
 `open` is work not done. `dropped` is an idea abandoned. Neither fits a deliberate **no**
 that could be revisited, and putting one in `open` has a cost that only shows up later:
 **a decision accrues age exactly like debt, and eventually outranks real work.**
-
-Measured in this family on 2026-08-16. Two rows recorded deliberate decisions on
-2026-08-06 — one waiving a UX chain in favour of fixtures, one keeping a skill an audit
-because another router carries the design-time rule. They sat `open`. The moment the age
-term started being computed they reached the **top** of the board at 2.67 each, and the
-next run spent itself re-deriving two decisions that were correct when made and are still
-correct.
 
 So:
 

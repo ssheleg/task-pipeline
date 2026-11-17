@@ -44,21 +44,20 @@ def flat():
 
 def t_compile_once_declared_only():
     d = flat()
-    assert "The SELECTED profile is compiled once, at preflight, and only ITS declared stages and gates run" in d
+    assert "The selected profile is compiled once, at preflight, and only its declared stages and gates run" in d  # softened in 1.105.0 (P-08)
     assert "no hidden stage\n 0, 7 or 10 is injected".replace("\n ", " ") in d \
         or "no hidden stage 0, 7 or 10 is injected" in d
 
 
 def t_kernel_not_bypassed():
     d = flat()
-    assert "What a custom\n profile does NOT escape is the KERNEL".replace("\n ", " ") in d \
-        or "does NOT escape is the KERNEL" in d
+    assert "What a custom\n profile does not escape is the kernel".replace("\n ", " ") in d
     assert "dropping stages never drops the evidence gate" in d
 
 
 def t_unknown_mandatory_blocks():
     d = flat()
-    assert "an unknown MANDATORY capability blocks the compile" in d
+    assert "An unknown mandatory capability blocks the compile" in d  # softened in 1.105.0 (P-08)
     assert "refused, never run with the capability silently absent" in d
     schema = json.load(open(SCHEMA, encoding="utf-8"))
     mu = schema["properties"]["must_understand"]["description"]

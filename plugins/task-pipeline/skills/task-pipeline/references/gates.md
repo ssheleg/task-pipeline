@@ -378,11 +378,6 @@ Not a preference: an arithmetic. A release workflow that runs the full suite tak
 twenty-five to forty minutes per round, and it reports one failure at a time. The same
 suite on the machine that wrote the change takes twelve and reports all of them at once.
 
-On 2026-08-22 one tag took **five CI rounds** — a stray key in a `run:` block, a missing
-run stamp, a stamp cap, and then four rotted probes — where a single local `test:all`
-before the first push would have found the last four together. Every refusal was correct.
-The cost was entirely in asking the wrong machine.
-
 **A green local suite is not evidence until you know which checks LOOKED.** This
 instruction failed on its own release: the local run was green, CI was not, and the
 difference was a precondition asking `os.path.isdir(".git")` — false in a submodule
@@ -618,7 +613,8 @@ of is deleted in the next refactor by someone who assumed it was dead.
    **anything deferred, dropped or left half-done goes into the carry-over ledger
    the moment it's said** — deferred out loud is forgotten; **never narrow the task
    silently** — the REQ list is frozen, adding is free, removing needs the
-   operator's explicit agreement; **when a loop starts undoing an earlier pass —
+   operator's explicit agreement, or under a host delegation the agent's recorded
+   decision; **when a loop starts undoing an earlier pass —
    the same file edited twice for the same reason, a closed finding coming back, a
    third entry into one stage — stop and run the loop guard**
    (`references/loop-guard.md`): name the two shapes, escalate to the layer that
@@ -635,14 +631,15 @@ of is deleted in the next refactor by someone who assumed it was dead.
    tracker + conventional commits per host conventions; worktree isolation for the
    build, integrated back per the brief's branch policy before stage 7; honest
    degradation (never claim a failed/skipped step succeeded);
-   outward/irreversible actions (deploy, publish, repo create, opening a PR,
+   outward/irreversible actions (the full list is task-pipeline's `continuity.md` →
+   *The limit, before the capability*: deploy, a tag or release, publish, sending to people,
+   spending money, deletion outside this run's own worktree and this run's own unpushed branches, whoever created it (data, records, a remote branch, a release, a published package), repo create, pushing or opening a PR,
    **editing a shared design file — frames are read by designers and stakeholders,
    so drawing in one is publishing — and above all *creating* one, which needs a
    named team and never happens while a recorded file resolves**) need explicit
    operator go — or a **specific** standing authorization recorded in the brief
    (named target + preconditions; a vague "do everything" is not one).
 
-Moved out of `SKILL.md` on 2026-08-16 for the same budget reason as the
-multi-repository block: these fire at any stage, so they belong with the gate
-doctrine rather than inside step 5 of the run order.
+These fire at any stage, so they live with the gate doctrine rather than inside
+step 5 of the run order.
 

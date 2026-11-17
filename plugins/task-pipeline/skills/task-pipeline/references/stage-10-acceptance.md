@@ -60,7 +60,7 @@ The full gate and freedom level remain in [stages.md](stages.md).
   It is a statement, never a question, and the run does not wait on it: the operator
   holds context the brief never captured and can add to it at any time, and an
   addition becomes new REQ rows. A question goes to the operator only for a human
-  gate (a sign-in, a consent, a payment, a typed secret, spend above a limit, a
+  gate (a sign-in, a consent, a payment, a typed secret, spending money, a
   decision recorded as the operator's).
 - **Several repositories: a submodule is finished when its parent says so.** A
   parent records each submodule as a **pointer to one commit**, and moving the

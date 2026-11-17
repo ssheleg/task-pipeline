@@ -3,7 +3,7 @@
 For the selected **default profile**, read **one stage section of this file when that
 stage starts** (the stage table in `SKILL.md` is the index), then the one detail it
 links, on every entry or resume, including wave iterations and approved short paths
-(the triage approves the short path itself since 1.98.0). Never read this file end to
+(the triage approves the short path itself). Never read this file end to
 end. Do not preload all stage details. Missing or unreadable detail means stop that stage and repair its route, never guess. A custom
 profile uses its own declared doctrine and stages; numeric ids do not select these
 default details, and the kernel still applies.
@@ -15,13 +15,13 @@ orchestrator verifies the check itself, pass/fail), `judgment` (a named judge
 rules where no complete deterministic check exists — [`gates.md`](gates.md) →
 *The judgment gate*) or `manual` (requires the operator's explicit go, including a
 specific standing authorization naming the act, cited with its source and scope;
-otherwise wait). **This example ships every gate `auto`** (since 1.98.0): where it
+otherwise wait). **This example ships every gate `auto`**: where it
 names an approval, the operator's answer or the standing authorization recorded in the
 brief satisfies it without a pause. A project makes a gate `manual` in its own
 `pipeline.json`. These stages (0 intake + 1→10) are the plugin's
 **example** flow, encoded in `pipeline.example.json` against the universal contract
 `pipeline.schema.json`; a host project replaces it with its own
-stages/agents/types (see SKILL.md → *Bring your own skills*).
+stages/agents/types (see `pipeline.schema.json`, the only contract).
 
 ## The run checklist — printed, not remembered
 
@@ -139,7 +139,7 @@ never that the work was skipped quietly.
   run's memory state: a previous run's "memory unavailable" marker is honoured only while
   its own ledger line is in the ledger, so a reseeded ledger — even the same day — is nudged
   again, and the stale marker is cleared at the next `stage_checkpoint.py record`.
-- **The board is found, read, or seeded.** The home `scripts/backlog_sources.py --discover` prints ([`intake-split.md`](intake-split.md) §1, [`backlog.md`](backlog.md)): its **open count is quoted in the brief**, measured by a command at the top of the run rather than inherited from the last run's report. Exit 4, no board anywhere, or exit 5 whose signals name no live board ⇒ `<artifacts>/backlog.md` seeded from the template and said so, unless a `seed-path-taken` signal stands: that path is never written over, the brief says so and stage 0 asks once where to seed; an empty board and no board are the same thing to work on, and only one of them can be appended to.
+- **The board is found, read, or seeded.** The home `scripts/backlog_sources.py --discover` prints ([`intake-split.md`](intake-split.md) §1, [`backlog.md`](backlog.md)): its **open count is quoted in the brief**, measured by a command at the top of the run rather than inherited from the last run's report. Exit 4, no board anywhere, or exit 5 whose signals name no live board ⇒ `<artifacts>/backlog.md` seeded from the template and said so, unless a `seed-path-taken` signal stands: that path is never written over, the brief says so and stage 0 seeds beside it, records where and names it in the hand-back; an empty board and no board are the same thing to work on, and only one of them can be appended to.
 
 ## 1 — Docs study
 - **Freedom: medium** — which sources to fetch is judgement; grounding contracts on fetched docs is not ([`gates.md`](gates.md) → *Axis C*).
@@ -200,7 +200,7 @@ never that the work was skipped quietly.
   validator reads **NOT_RUN** beside the verdict — never PASS — and the gate stands on
   the floor, said so. A record saying `Mode: declined` with its reason is the refusal,
   and it passes.
-  **And the design review's pass D ran over the design before build** (since 1.100.0):
+  **And the design review's pass D ran over the design before build**:
   the `design-tester` walked the test panel through the changed scenarios over the Figma
   frames or mockups, and `python3 scripts/design_gate.py report <design-review.json>
   --class <surface_class> --panel docs/ux/test-panel.md --scope <SCR ids> --require design`
@@ -267,7 +267,7 @@ never that the work was skipped quietly.
   seen rejecting a planted defect and passing the clean tree, asserted on its exit
   code** ([`probing.md`](probing.md)); no `skip`/`xfail` smuggling a red suite past the gate; **on a
   `flagship`, `product` or `ad` surface where the VISUAL track ran, the visual half's
-  `visual_gate.py sheet` exits 0** — NOT_RUN stops and asks, it is not green
+  `visual_gate.py sheet` exits 0**; NOT_RUN holds that check, asks once and is not green; the run continues with work that does not depend on it
   ([`browser.md`](browser.md) → *The visual half*). Never advance
   to deploy on a red or partial run. **The carry-over count is printed beside this
   verdict** — a ratchet nobody prints is a TODO with a better name
@@ -321,7 +321,7 @@ never that the work was skipped quietly.
   names its engine, and `python3 scripts/resource_guard.py verify <ledger>` is clean
   ([`design-review.md`](design-review.md)). A subscription surface (paywall, trial, pricing,
   cancel) adds `--subscription`: cancelling takes no more steps than subscribing and the
-  paywall makes one clear offer (since 1.101.0).
+  paywall makes one clear offer.
 - **What the look finds is fixed here.** A rendering defect found at stage 6 is a
   stage-6 finding: fix it, look again, then call the stage green. Filing it to the
   board and advancing is how a run reports *checked in a browser* for a page it has
@@ -478,7 +478,7 @@ never that the work was skipped quietly.
   the agent's recorded decision with its reason, and, for `deferred`, a tracker entry;
   no carry-over row left `unresolved`, and the ledger's counts are printed with the
   verdict; the hand-back carries the closing statement (shipped and deferred, listed)
-  and the operator can add to it at any time. `auto` by default since 1.98.0: a
+  and the operator can add to it at any time. `auto` by default: a
   check proves the table well-formed, and only the person who asked can confirm it is
   what they asked for, so the run hands that question back rather than waiting on it.
   A project that wants the wait sets this gate `manual`. **Where the actor branch is
@@ -499,8 +499,8 @@ module N → 3 spec (dossier) → 4 plan → 5 build → 6 tests → 7 lint+depl
 ```
 
 - **No re-grilling, no re-decomposing per module.** New information that changes the
-  map goes back to stage 2 as an explicit, operator-approved map revision — never a
-  quiet edit mid-module.
+  map goes back to stage 2 as an explicit map revision, approved by the operator or by
+  the standing authorization recorded in the brief, never a quiet edit mid-module.
 - **Each module's spec is a full dossier** (`spec.md`): architecture, entities,
   contracts in and out, business rules, edge and failure cases, UI/Figma chain when
   it has a surface.
@@ -546,9 +546,12 @@ cycle.
 - **Trips on:** revert-oscillation (A→B→A); the same file edited twice for the same
   reason; a finding already ADDRESSED or parked coming back; a stage entered a third
   time for one artifact; two loops editing one file. Hard caps, each a stop: 3 fix
-  rounds per task, 2 re-entries per stage per artifact, 3 passes per module.
+  rounds per task, 2 re-entries per stage per artifact, 3 passes per module, 3 review
+  rounds per artifact, 3 failing certification rounds and 3 automatic continuations per
+  node ([`loop-guard.md`](loop-guard.md)).
 - **On a trip: stop editing.** Name shapes A and B with their evidence, escalate to
-  the layer that owns the conflict (rubric → operator → plan → spec → module map),
+  the layer that owns the conflict (rubric → the operator, or under a host delegation the recorded
+  decisions and goal → plan → spec → module map),
   re-plan the check as an ordered one-item-per-line checklist, then go through it in
   order, one commit per item. Never settle a higher-layer conflict inside a lower
   loop, and never adjudicate before the cap.

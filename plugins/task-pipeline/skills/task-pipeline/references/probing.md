@@ -1,9 +1,8 @@
 # Probing — how a check is proven before it is trusted
 
 The authoring doctrine for **probes**: planting a defect, watching the guard
-refuse it, and keeping that proof alive after the release that ships it. It
-lived inside [`gates.md`](gates.md) until 2026-08-31 and moved here whole —
-one home, routed from the gate doctrine it proves. The law it serves is
+refuse it, and keeping that proof alive after the release that ships it. It is
+routed from the gate doctrine it proves ([`gates.md`](gates.md)). The law it serves is
 [`audit.md`](audit.md)'s exit criterion: **a green from a check nobody has
 watched fail is not evidence.**
 

@@ -1,0 +1,6 @@
+measured 2026-11-16 on origin/main ef5bcc2 (1.104.3)
+grep over cat of all plugin .md:
+lines 20391 words 208571 bold 3712 caps(4+,filtered) 1881 em_dash 2884 version_history 24 think_instruction 1 (negated, false positive) reasoning_extraction 0
+test/prompt_lint.py measure (code spans and fences excluded):
+{"bold": 3567, "caps": 282, "em_dash": 2572, "version_history": 36, "words": 195408}
+npm test: exit 0 (all green)
