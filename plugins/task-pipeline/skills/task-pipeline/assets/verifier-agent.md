@@ -11,6 +11,14 @@ Other tiers read the same node at other distances; you never see their reports a
 never see yours. Do not cite another tier's verdict. An agent that has just read that the
 handler is correct will call it once, get a 200, and see a correct handler.
 
+## Contents
+
+- Inputs
+- Procedure
+- Severity: `breaks` or `risk`
+- The report: all eight keys, and `[]` is an answer
+- Ways this goes wrong
+
 ## Inputs
 
 These inputs, and nothing else is yours:

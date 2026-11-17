@@ -93,8 +93,8 @@ gate** (`references/documentation.md`): `docs/DOCMAP.md`, the Doc Loop at any st
 the propagation matrix at stage 9, and *"docs in sync"* as a command with an exit code.
 
 The run teaches the next run, and the list stays short
-(`references/retrospective.md`). Stage 10's last act, in this order (it is load-bearing):
-stamp, then prune, then write the entry (`learned.md` rule 21). The floor stage 0 reads in full has a byte budget
+(`references/retrospective.md`). Stage 10's last act, in this order:
+stamp the run, then prune, then write the entry (`learned.md` rule 21). The floor stage 0 reads in full has a byte budget
 (`scripts/retro_budget.py check`); gate 10 fails over it until `migrate` moves the
 narrative to the archive, verbatim and hash-proved.
 

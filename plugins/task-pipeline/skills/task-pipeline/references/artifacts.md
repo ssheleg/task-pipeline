@@ -100,9 +100,7 @@ returns, an `iter:` line when an iteration closes, and a
 `touch:` line per file per repeating pass. Two readers depend on it —
 [`loop-guard.md`](loop-guard.md) detects churn from the `touch:` lines after a lost
 context, and [`progress.md`](progress.md) derives the stage rail and the iteration
-counter from the other two. It was described as loop-only until 2026-08-10 and, in
-practice, written by no run at all: the guard that calls its own detection *mechanical*
-had no input in any run to date.
+counter from the other two. A run that skips the `touch:` lines leaves the guard blind.
 
 Stage 5 also creates a **git-ignored** scratch workspace per plan at
 `.task-pipeline/build/<plan-basename>/` — ledger, task briefs, implementer reports,

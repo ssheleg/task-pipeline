@@ -232,7 +232,7 @@ gate reads every `*** Add File:`, `*** Update File:`, `*** Delete File:` and
 only if Codex's `PostToolUse` reports it, so a missing `gate:` line after a red run
 is not proof the suite never ran (the limit is Codex's event set, not this hook's).
 
-**Two lessons from v1.50.0, both shipped as defects and both fixed in v1.51.0.**
+**Two rules a gate keeps.**
 
 *A gate keyed to a stage NUMBER is the rail's mistake with worse consequences.*
 The first version matched `stage: 6` literally. `progress.md` says the rail "is
@@ -261,12 +261,9 @@ reusable part:
 non-blocking, so an internal failure exits `2` as well. A crashing gate that fails
 open is worse than no gate: it reads as one.
 
-**The defect worth remembering** — the first implementation fed its own python
-source to `python3 -` through a heredoc *and* read the payload from stdin. The
-heredoc **is** stdin, so the payload came back empty, every act classified as "not
-a release", and the gate allowed everything while looking installed. Eight fixtures
-caught it. A hook that cannot see its own input is indistinguishable, from the
-outside, from a hook that approves.
+**A gate reads its payload from stdin, never through a heredoc.** A heredoc is
+stdin, so the payload arrives empty and the gate approves everything while looking
+installed: a hook that cannot see its input reads, from outside, as one that approves.
 
 ## Leases are not reimplemented here
 
