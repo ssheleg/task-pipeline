@@ -20,7 +20,7 @@ deleted, or ships marked as an unbacked claim the operator chose to make (*The o
 below).
 
 Stop only when: a measurement would have to say something it did not, or an estimate
-would ship presented as a measurement (canon 8). An unbacked claim is not a stop: say so
+would ship presented as a measurement (canon 8). An unbacked claim the operator asked for is not a stop: say so
 once, label it, continue.
 
 ## The ten canons

@@ -86,7 +86,7 @@
    "em_dash": 12,
    "unwanted_stop": 1,
    "version_history": 0,
-   "words": 1629
+   "words": 1633
   },
   "plugins/task-pipeline/skills/evidence-docs/references/GENERATED.md": {
    "bold": 0,
@@ -110,7 +110,7 @@
    "em_dash": 93,
    "unwanted_stop": 0,
    "version_history": 0,
-   "words": 6664
+   "words": 6667
   },
   "plugins/task-pipeline/skills/evidence-docs/references/hooks.md": {
    "bold": 31,
@@ -227,10 +227,10 @@
   "plugins/task-pipeline/skills/task-pipeline/references/acceptance.md": {
    "bold": 71,
    "caps": 5,
-   "em_dash": 69,
+   "em_dash": 68,
    "unwanted_stop": 0,
    "version_history": 0,
-   "words": 4156
+   "words": 4141
   },
   "plugins/task-pipeline/skills/task-pipeline/references/adoption.md": {
    "bold": 15,
@@ -318,7 +318,7 @@
    "em_dash": 68,
    "unwanted_stop": 0,
    "version_history": 0,
-   "words": 5108
+   "words": 5124
   },
   "plugins/task-pipeline/skills/task-pipeline/references/conventions.md": {
    "bold": 25,
@@ -390,7 +390,7 @@
    "em_dash": 93,
    "unwanted_stop": 0,
    "version_history": 0,
-   "words": 6664
+   "words": 6667
   },
   "plugins/task-pipeline/skills/task-pipeline/references/grill.md": {
    "bold": 76,
@@ -414,7 +414,7 @@
    "em_dash": 0,
    "unwanted_stop": 0,
    "version_history": 0,
-   "words": 1133
+   "words": 1121
   },
   "plugins/task-pipeline/skills/task-pipeline/references/iteration.md": {
    "bold": 55,
@@ -828,9 +828,9 @@
  "total": {
   "bold": 3300,
   "caps": 260,
-  "em_dash": 2352,
+  "em_dash": 2351,
   "unwanted_stop": 15,
   "version_history": 14,
-  "words": 195219
+  "words": 195218
  }
 }

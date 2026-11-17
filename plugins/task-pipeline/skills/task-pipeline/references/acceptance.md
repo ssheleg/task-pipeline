@@ -235,9 +235,8 @@ Where one moved, the acceptance owes three things:
 
 `templates/convergence.sh` mechanises the pointer half and requires the record for the
 seam half. It also checks the one thing `git submodule status` cannot see: **whether the
-pinned commit is published at all.** Measured here on 2026-08-16 — a release tag failed CI
-at checkout because the parent pinned a commit that existed only on one machine, and
-`git submodule status` showed no `+` because the pointer matched the *local* head.
+pinned commit is published at all**: a pin to a commit that exists on one machine only
+fails at checkout, and `git submodule status` shows no `+` for it.
 
 | Rationalization | Why it is wrong |
 |---|---|

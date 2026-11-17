@@ -80,9 +80,8 @@ triage line.
    calls). Each gets its module and nothing else, writes nothing, and returns the dossier
    shape of [`../templates/dossier.md`](../templates/dossier.md) plus the four fields of
    `prioritisation.md` §4: what it touches (`file:line`), what it depends on and what depends
-   on it, what is already measured, what would make it wrong. **At most six at once**: a
-   wave of subagents ran out of the weekly quota mid-release on 2026-10-28 (hub retro); more
-   modules queue behind the first six. No subagent tool: research them in turn and say so.
+   on it, what is already measured, what would make it wrong. **At most six at once**, for the
+   quota; more modules queue behind the first six. No subagent tool: research them in turn and say so.
 3. **Merge** with [`iteration.md`](iteration.md) → *Integration, until it converges*: lay the
    dossiers side by side; a pair that changes one seam, contract or file is redesigned
    together; repeat until a pass changes nothing, three passes at most; what still conflicts

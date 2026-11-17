@@ -15,8 +15,8 @@ confirmed), the retrospective last.
 **Hold an item only when** it cannot move without a person: a human gate (sign-in,
 one-time code, consent, payment, typed secret, a decision recorded as the operator's); a
 `manual` gate or an outward or irreversible act (deploy, a tag or a release, publication,
-sending to a person, spending, deletion outside the run's worktree and unpushed
-branches, a push or PR, a new
+sending to a person, spending, deletion outside the run's own worktree and own
+unpushed branches, a push or PR, a new
 repository, a shared design file; list in [`references/continuity.md`](references/continuity.md)
 → *The limit, before the capability*) with no go and no standing authorization naming
 it; or a material unknown, which only a host delegation lets the agent settle by the
@@ -25,7 +25,7 @@ what resumes it; other work goes on. **Not stops**: a summary announcing the nex
 stage, an offer to continue, non-blocking decisions, a passed gate as a report
 point (same file, *What is not a stop*).
 
-**Terms.** *Node*: a unit of work. *REQ*: a row of the request. *Brief*: stage 0's locked task. *Run ledger*: the task list the run ticks.
+**Terms.** *Node*: a unit of work. *REQ*: a row of the request. *Brief*: stage 0's locked task. *Run ledger*: the run's task list.
 
 Self-contained orchestrator. Runs a task through **gated stages**, each carrying its
 own built-in doctrine; no companion plugin is required. No stage advances until its
