@@ -1,12 +1,17 @@
 # Verification — task-pipeline
 
-## Shipped state — v1.105.0 (source candidate; NOT SHIPPED yet)
+## Shipped state — v1.105.1 (source candidate; NOT SHIPPED yet)
 
-The pipeline's prompts rewritten to Anthropic's current prompting practices, on branch
-`prompt/anthropic-practices-2026-11-16`. `npm test` exit 0 at 9873893 (validator PASS, prompt
-lint PASS, every suite green); the practices, specs and baseline are in
-`docs/reports/2026-11-16-anthropic-prompting/`. The tag, release jobs and the npm readback
-remain pending; this header declares the version, not a shipped state.
+evidence-docs and project-audit descriptions restored to their 1.104.3 text so the family's
+description total stays under the hub's ceiling. The tag, release jobs and the npm readback remain
+pending; this header declares the version, not a shipped state.
+
+## Shipped state — v1.105.0
+
+The pipeline's prompts rewritten to Anthropic's current prompting practices: PR #170 squash-merged
+as `a4eaee0`, tag `v1.105.0`, release run 44021491647 success (release and publish jobs), `npm view
+task-pipeline-skill version` read 1.105.0 on 2026-11-17. The practices, specs and baseline are in
+`docs/reports/2026-11-16-anthropic-prompting/`.
 
 ## Shipped state — v1.104.3
 
