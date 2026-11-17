@@ -33,9 +33,8 @@ almost no window left, loses the middle of it, and re-derives what it already di
   Without it, the gate waits. A generic instruction to continue is not authorization.
 - An outward or irreversible act still needs its own **specific** authorization. The full
   list, which `SKILL.md` cites: deploy; a tag or a release; publication; sending to a
-  person; spending money (any spend, unless the brief records a spend line it stays
-  under); deletion of what this run did not create or what git cannot restore (data,
-  records, a remote branch, a release); a push or a pull request (below);
+  person; spending money;
+  deletion this run cannot undo (what it did not create and git cannot restore: data, records, another's remote branch, a release); a push or a pull request (below);
   creating a repository; creating or editing a shared design file. A recorded loop mode is a **generic** flag, and a generic
   flag is not a specific authorization; that floor is set in [`grill.md`](grill.md) and
   this file does not lower it.

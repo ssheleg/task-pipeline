@@ -15,10 +15,10 @@ brief, its interfaces, the global constraints, nothing else. It never inherits t
 session's history, so it stays focused; your context stays free for coordination.
 
 **Continuous execution:** don't check in between tasks. The operator asked for the
-plan to be executed: execute it. Stop only for a block that needs a person (a human
-gate or an outward act with no go, [`continuity.md`](continuity.md) → *The limit, before
-the capability*), an ambiguity the
-recorded decisions cannot settle, or completion. Any other
+plan to be executed: execute it. Hold a task that needs a person (a human gate,
+or an outward act with no go, [`continuity.md`](continuity.md) → *The limit, before the
+capability*) and continue the tasks that do not depend on it; stop only for an ambiguity
+the recorded decisions cannot settle, or completion. Any other
 ambiguity is decided by the recorded decisions, then the project's goal, then the safest reversible option, recorded on the
 task, and the work goes on. "Should I continue?" between tasks is noise.
 

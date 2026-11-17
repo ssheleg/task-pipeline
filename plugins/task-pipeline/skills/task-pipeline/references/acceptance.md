@@ -257,7 +257,7 @@ Write it even when the table is all green, and do not wait on a reply: it is a
 statement, not a question. The operator holds context the brief never captured and
 can add to it at any time; an addition becomes new REQ rows or new ledger entries,
 not a new argument about whether the run was finished. Only a human gate (a sign-in,
-a consent, a payment, a typed secret, spend above a limit, a decision recorded as the
+a consent, a payment, a typed secret, spending money, a decision recorded as the
 operator's) is asked as a question, and the hand-back names it.
 
 ## The retrospective — the run's last act

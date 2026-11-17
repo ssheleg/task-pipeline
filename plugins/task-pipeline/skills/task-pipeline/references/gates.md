@@ -378,11 +378,6 @@ Not a preference: an arithmetic. A release workflow that runs the full suite tak
 twenty-five to forty minutes per round, and it reports one failure at a time. The same
 suite on the machine that wrote the change takes twelve and reports all of them at once.
 
-On 2026-08-22 one tag took **five CI rounds** — a stray key in a `run:` block, a missing
-run stamp, a stamp cap, and then four rotted probes — where a single local `test:all`
-before the first push would have found the last four together. Every refusal was correct.
-The cost was entirely in asking the wrong machine.
-
 **A green local suite is not evidence until you know which checks LOOKED.** This
 instruction failed on its own release: the local run was green, CI was not, and the
 difference was a precondition asking `os.path.isdir(".git")` — false in a submodule
@@ -638,7 +633,7 @@ of is deleted in the next refactor by someone who assumed it was dead.
    degradation (never claim a failed/skipped step succeeded);
    outward/irreversible actions (the full list is task-pipeline's `continuity.md` →
    *The limit, before the capability*: deploy, a tag or release, publish, sending to people,
-   spending, unrecoverable deletion, repo create, pushing or opening a PR,
+   spending money, deletion this run cannot undo (what it did not create and git cannot restore: data, records, another's remote branch, a release), repo create, pushing or opening a PR,
    **editing a shared design file — frames are read by designers and stakeholders,
    so drawing in one is publishing — and above all *creating* one, which needs a
    named team and never happens while a recorded file resolves**) need explicit

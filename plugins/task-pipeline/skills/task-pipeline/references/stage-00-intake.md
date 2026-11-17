@@ -78,8 +78,10 @@ The full gate and freedom level remain in [stages.md](stages.md).
   Where the host's instructions delegate decisions to the agent, a material unknown
   is decided instead, by the recorded decisions, then the project's goal, then the
   safest reversible option, and the decision and its reason go into the brief; only
-  a human gate (a sign-in, a consent, a payment, a typed secret, spend above a limit,
-  a decision recorded as the operator's) still goes to the operator. This is input
+  a human gate (a sign-in, a consent, a payment, a typed secret, spending money,
+  a decision recorded as the operator's) still goes to the operator, and an outward or
+  irreversible act still needs its go ([`continuity.md`](continuity.md) → *The limit, before
+  the capability*); an absent operator is not one. This is input
   expansion, not design.
 - **Phase 1 — harvest the knowledge sources before any question** (full flow)
   ([`knowledge-sources.md`](knowledge-sources.md)). Before the first question:
