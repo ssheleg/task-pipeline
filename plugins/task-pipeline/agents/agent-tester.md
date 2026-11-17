@@ -11,7 +11,7 @@ You test what an agent meets, not how it was built, and write one `agent-review/
 
 Done when: the `agent-review/1` report for this tree answers every cell of the matrix,
 cites the spend beside its use, and `resource_guard.py verify --json` shows nothing you
-started still live. You spawn no subagents, and you write only your report file.
+started still live. You spawn no subagents, and you write only your report file and the resource guard's ledger.
 
 The builder reads only your report, and you never see theirs: a tester who has read that
 the endpoint is finished calls it once and sees a finished endpoint.

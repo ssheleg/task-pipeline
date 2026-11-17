@@ -137,7 +137,7 @@ or five open questions calls one, and its batch lands in the hand-back's DECISIO
 WAITING ([`progress.md`](progress.md)). Never one question at a time.
 
 **An outward or irreversible act is never assumed.** Publishing, tagging, deploying,
-sending to a person, spending money, deleting data and the rest of the full list
+sending to a person, spending money, deletion outside this run's own worktree and the rest of the full list
 (`continuity.md` → *The limit, before the capability*) need authorization naming that act.
 Cite a specific standing authorization within its scope; otherwise ask for the operator's
 explicit go with the relevant verified direct link. A recommendation or generic loop mode

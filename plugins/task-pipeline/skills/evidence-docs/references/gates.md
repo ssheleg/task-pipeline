@@ -633,7 +633,7 @@ of is deleted in the next refactor by someone who assumed it was dead.
    degradation (never claim a failed/skipped step succeeded);
    outward/irreversible actions (the full list is task-pipeline's `continuity.md` →
    *The limit, before the capability*: deploy, a tag or release, publish, sending to people,
-   spending money, deletion this run cannot undo (what it did not create and git cannot restore: data, records, another's remote branch, a release), repo create, pushing or opening a PR,
+   spending money, deletion outside this run's own worktree and unpushed branches, whoever created it (data, records, a remote branch, a release, a published package), repo create, pushing or opening a PR,
    **editing a shared design file — frames are read by designers and stakeholders,
    so drawing in one is publishing — and above all *creating* one, which needs a
    named team and never happens while a recorded file resolves**) need explicit

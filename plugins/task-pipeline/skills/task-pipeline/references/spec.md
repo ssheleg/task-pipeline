@@ -57,7 +57,7 @@ providers owe the same scenario quality and traces, not these package commands.
    `docs/ux/foundation.md` → *Design tooling* is the canonical record. Confirm each
    recorded file **resolves** before any drawing. **Never create a file when a
    recorded one resolves; if it doesn't resolve, hold the visual track and ask once (an access
-     problem; the rest of the run goes on), and never create a
+   problem; the rest of the run goes on), and never create a
    replacement.** A creation happens at most once per project, in the team the
    brief names, and its URL goes into the canonical record before the first frame.
 1. `/ux` — the single super-ux entry: reports which `docs/ux/` layers exist,
@@ -303,9 +303,8 @@ no entry names it, the run has agreed to decide it again later.
 
 > "Spec committed to `<path>`, reviewed by <reader>; continuing to the plan."
 
-The default gate is `auto`: an independent reader reviews the spec and the run
-continues. Only a `manual` gate in the project's `pipeline.json` waits for the
-operator's go. Changes requested → apply, re-run the self-review, and review again.
+Where the brief records a standing authorization, an independent reader reviews the spec
+and the run continues; otherwise the operator reviews it. Changes requested → apply, re-run the self-review, and review again.
 
 The gate is not only the operator's word: **every section carries `covers: REQ-…`
 and every REQ in the brief appears in at least one section.** For UI tasks it

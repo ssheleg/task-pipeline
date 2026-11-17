@@ -64,8 +64,8 @@ not depend on it.
 Where material unknowns remain, interview the operator about those until you
 reach a **shared understanding**. Walk down each unresolved branch of the
 decision tree, resolving dependencies between decisions in order. Where the host
-delegates decisions (a standing authorization, or an operator who is not there to
-answer), decide each unknown by the recorded decisions, then the project's goal,
+delegates decisions (its instructions or a standing authorization do; an absent operator
+delegates nothing), decide each unknown by the recorded decisions, then the project's goal,
 then the safest reversible option, record the decision and its reason in the
 brief, and go on. An outward or irreversible act still needs its go
 ([`continuity.md`](continuity.md) → *The limit, before the capability*); an absent operator

@@ -171,9 +171,10 @@ not "just try one more thing". Then, in this order:
    is being re-litigated at the wrong altitude:
    - two findings disagree → the **review rubric** decides
      ([`review.md`](review.md)); if it genuinely doesn't, it's a spec question;
-   - a finding contradicts the plan → decide which governs by the recorded decisions, then the project's goal, then the safest reversible option,
-     and record the ruling (never dismiss the finding, never fix against the plan
-     silently); only a decision recorded as the operator's goes to the operator;
+   - a finding contradicts the plan → under a host delegation (the host's instructions or a standing authorization), decide which governs
+     by the recorded decisions, then the project's goal, then the safest reversible
+     option, and record the ruling; otherwise the operator decides (never dismiss the
+     finding, never fix against the plan silently);
    - the plan contradicts the spec → back to **stage 4** with the evidence;
    - the spec is ambiguous or wrong → back to **stage 3**, and if the ambiguity was
      an unresolved intake question, say so — that is a stage-0 miss worth recording;

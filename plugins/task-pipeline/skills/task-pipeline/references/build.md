@@ -17,10 +17,10 @@ session's history, so it stays focused; your context stays free for coordination
 **Continuous execution:** don't check in between tasks. The operator asked for the
 plan to be executed: execute it. Hold a task that needs a person (a human gate,
 or an outward act with no go, [`continuity.md`](continuity.md) → *The limit, before the
-capability*) and continue the tasks that do not depend on it; stop only for an ambiguity
-the recorded decisions cannot settle, or completion. Any other
-ambiguity is decided by the recorded decisions, then the project's goal, then the safest reversible option, recorded on the
-task, and the work goes on. "Should I continue?" between tasks is noise.
+capability*) and continue the tasks that do not depend on it; stop only for completion. Under a host delegation (the host's instructions or a standing authorization), an
+ambiguity is decided by the recorded decisions, then the project's goal, then the safest
+reversible option, and recorded on the task; otherwise it goes to the operator while the
+tasks that do not depend on it go on. "Should I continue?" between tasks is noise.
 
 **Scope, so this is not mistaken for the run-wide mode:** the rule above governs
 the *inside* of this stage and is unconditional — it holds whether or not a loop
@@ -96,9 +96,9 @@ on a sandbox permission error, say so plainly and work in place.
 **Setup + baseline.** Install dependencies the way the project does (`npm install`,
 `cargo build`, `pip install -r requirements.txt`, `poetry install`, `go mod
 download`), then run the test command from the brief's autonomy sweep. A dirty
-baseline makes every later failure ambiguous: record the failing checks as the
-known-red baseline ([`gates.md`](gates.md)), keep them out of this run's claims, and
-proceed.
+baseline makes every later failure ambiguous: under a host delegation record the failing checks
+as the known-red baseline ([`gates.md`](gates.md)), keep them out of this run's claims and
+proceed; otherwise report the failures and let the operator decide whether to proceed.
 
 ## 1a. Another agent may be in this repository right now
 
@@ -326,8 +326,8 @@ single diff:
    implementer applied and another did not.
 
 **A finding here is not a per-task fix loop.** It is a group-level decision: pick
-which task is right, send the other back with the ruling, or park both and take the
-conflict back to the stage-4 plan.
+which task is right, send the other back with the ruling, or park both and escalate (under a host
+delegation to the stage-4 plan, otherwise to the operator).
 Log it once, on the group:
 `Group <G>: convergence check — <n> findings (<one-liners>); ruling: <what governs>`.
 
@@ -342,7 +342,7 @@ this is the check most likely to be skipped because every task already went gree
 | `DONE` | **Run the hygiene gate in diff mode first** (below), then build the review package and dispatch the task review ([`review.md`](review.md)). |
 | `DONE_WITH_CONCERNS` | Read the concerns first. Correctness or scope → resolve before review. Observations ("this file is getting large") → **append to the carry-over ledger**, then proceed. A concern that stays only in the report dies with the workspace. |
 | `NEEDS_CONTEXT` | Supply exactly what's missing, re-dispatch. |
-| `BLOCKED` | Diagnose: missing context → re-dispatch with it; needs more reasoning → a more capable model; too large → split the task; the plan itself is wrong → re-plan at stage 4 with the evidence. |
+| `BLOCKED` | Diagnose: missing context → re-dispatch with it; needs more reasoning → a more capable model; too large → split the task; the plan itself is wrong → re-plan at stage 4 with the evidence under a host delegation, otherwise escalate to the operator. |
 
 ### The hygiene gate — after every task, before the review
 

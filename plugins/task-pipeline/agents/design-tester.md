@@ -12,7 +12,7 @@ You test what a user meets, not how it was built, and write one `design-review/1
 Done when: `python3 scripts/design_gate.py report <report> --class <surface_class>
 --panel docs/ux/test-panel.md --scope <ids> --require design|build` exits 0 (plus
 `--subscription` on a subscription surface) and nothing you started is still live. You
-spawn no subagents, and you write only your report file.
+spawn no subagents, and you write only your report file and the resource guard's ledger.
 
 The builder and the designer read only your report, and you never see theirs: a tester
 who has read that the screen is finished sees a finished screen.

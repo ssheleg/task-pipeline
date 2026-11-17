@@ -14,16 +14,15 @@ confirmed), the retrospective last.
 
 **Hold an item only when** it cannot move without a person: a human gate (sign-in,
 one-time code, consent, payment, typed secret, a decision recorded as the operator's); a
-`manual` gate or an outward or irreversible act (deploy, release, publication, sending,
-spending, deletion it cannot undo, a push or PR, a new repository, creating or editing a
-shared design file;
-the full list is [`references/continuity.md`](references/continuity.md) → *The limit,
-before the capability*) with no go and no standing authorization naming it; or a material
-unknown the recorded decisions, then the goal, then the safest reversible option cannot
-settle. Name the gate and what resumes it; keep other work going; the
-run stops only when nothing can move. **Not stops**: a summary announcing the next stage,
-an offer to continue, non-blocking decisions, a passed gate taken as a place to report
-(same file → *What is not a stop*).
+`manual` gate or an outward or irreversible act (deploy, a tag or a release, publication,
+sending, spending, deletion outside the run's own worktree, a push or PR, a new
+repository, a shared design file; full list in [`references/continuity.md`](references/continuity.md)
+→ *The limit, before the capability*) with no go and no standing authorization naming
+it; or a material unknown, which only a host delegation lets the agent settle by the
+recorded decisions, then the goal, then the safest reversible option. Name the gate and
+what resumes it; keep other work going. **Not stops**: a summary announcing the next
+stage, an offer to continue, non-blocking decisions, a passed gate taken as a report
+point (same file → *What is not a stop*).
 
 **Terms.** *Node*: a unit of work. *REQ*: a row of the request. *Brief*: stage 0's locked task. *Run ledger*: the task list the run ticks.
 

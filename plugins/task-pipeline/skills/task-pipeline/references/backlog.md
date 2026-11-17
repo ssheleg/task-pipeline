@@ -200,13 +200,6 @@ public reader never needs it.
 that could be revisited, and putting one in `open` has a cost that only shows up later:
 **a decision accrues age exactly like debt, and eventually outranks real work.**
 
-Measured in this family on 2026-08-16. Two rows recorded deliberate decisions on
-2026-08-06 — one waiving a UX chain in favour of fixtures, one keeping a skill an audit
-because another router carries the design-time rule. They sat `open`. The moment the age
-term started being computed they reached the **top** of the board at 2.67 each, and the
-next run spent itself re-deriving two decisions that were correct when made and are still
-correct.
-
 So:
 
 ```
