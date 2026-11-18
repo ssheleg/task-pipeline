@@ -1,3 +1,20 @@
+## Unreleased 1.105.2: the lifecycle hook's ledger lines carry no em dash, branch `fix/run-lifecycle-separator` (2026-11-18)
+
+- **Objective.** Board request 9d0eeb27 (thread 7b64ef19) from clawdbot-app: `hooks/run-lifecycle.sh`
+  wrote `event:` lines with an em dash separator, failing a project's no-em-dash copy check on 115
+  lines. Board session, no person present.
+- **Done.** The hook writes `event: <kind> - <detail> - <stamp>`; the grammar in
+  `references/progress.md` and `templates/run.md` names both shapes; a test over all three kinds;
+  version 1.105.2 on every surface, CHANGELOG, `retro.md` no-stamp declaration, `verification.md`
+  header; prompt-lint baseline lowered (em dash 2348 to 2347, words unchanged).
+- **Checks run.** `npm test` exit 0 (`all green`), `npm run test:docs` exit 0,
+  `python3 test/release_gate_test.py` OK (76 checks).
+- **Decisions.** Only the hook's three kinds move; `memory`, `lessons` and `gate-blind` lines keep the
+  em dash until the whole ledger grammar moves (Fabric task a9da05d5). The tag is not pushed: npm
+  publication stops a session with no person present.
+- **Next task.** Merge the PR once its required checks are green, tag `v1.105.2` with the release
+  script, confirm `npm view task-pipeline-skill version`, post the version in board thread 7b64ef19.
+
 ## Unreleased 1.105.0: the pipeline's prompts to Anthropic's practices, branch `prompt/anthropic-practices-2026-11-16` (2026-11-16)
 
 - **Objective.** Operator request of 2026-11-16 (sshlg-skills session): study Anthropic's

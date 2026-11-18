@@ -406,8 +406,12 @@ again, and it looks like enforcement while being a mirror.
 Three moments the rail cannot show, recorded by `hooks/run-lifecycle.sh` as
 
 ```
-event: <compact|session-end|subagent|memory> — <detail> — <ISO-8601>
+event: <compact|session-end|subagent> - <detail> - <ISO-8601>
+event: memory — <detail> — <ISO-8601>
 ```
+
+The hook separates fields with ` - ` (board request 9d0eeb27); readers take the
+first word and last field, so both separators parse.
 
 The fourth kind, `memory`, is appended by `scripts/stage_checkpoint.py` rather than
 by the hook. It records a workflow checkpoint written at a stage boundary, a refusal,
@@ -417,11 +421,9 @@ Once a `stage:` line records acceptance with `verdict pass`, the hook writes non
 of its three kinds: the run is closed, and a subagent or a compaction later in the
 same session belongs to other work, not to a ledger already committed as final.
 
-The rail reads none of them; `checkup` reads `session-end`, which is how an
-abandoned run stops being invisible. Before this the ledger simply stopped at
-whatever stage the session died on — and a stopped ledger is indistinguishable
-from a run still in progress, which is the exact shape *absent is a word, never a
-zero* exists to refuse.
+The rail reads none of them; `checkup` reads `session-end`, so an abandoned run
+is no longer indistinguishable from one still in progress (*absent is a word,
+never a zero*).
 
 ## The run ledger this reads from
 

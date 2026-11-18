@@ -1,10 +1,16 @@
 # Verification — task-pipeline
 
-## Shipped state — v1.105.1 (source candidate; NOT SHIPPED yet)
+## Shipped state — v1.105.2 (source candidate; NOT SHIPPED yet)
+
+`hooks/run-lifecycle.sh` separates the fields of its `event:` lines with ` - ` instead of an em
+dash (board request 9d0eeb27). The tag, release jobs and the npm readback remain pending; this
+header declares the version, not a shipped state.
+
+## Shipped state — v1.105.1
 
 evidence-docs and project-audit descriptions restored to their 1.104.3 text so the family's
-description total stays under the hub's ceiling. The tag, release jobs and the npm readback remain
-pending; this header declares the version, not a shipped state.
+description total stays under the hub's ceiling. Tag `v1.105.1` pushed; `npm view
+task-pipeline-skill version` read 1.105.1 on 2026-11-18.
 
 ## Shipped state — v1.105.0
 

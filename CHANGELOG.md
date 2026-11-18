@@ -1,3 +1,16 @@
+## v1.105.2: the lifecycle hook's ledger lines carry no em dash
+
+Guards: 539 → **539**. `hooks/run-lifecycle.sh` wrote its `event: compact`, `session-end` and
+`subagent` lines with an em dash between fields, though its `clean()` already took the character
+out of the detail. Every subagent stop appended one to a project's committed ledger, and a project
+that refuses the em dash in text a person reads failed its copy check on 115 of them (board request
+9d0eeb27, from clawdbot-app on 2026-11-18). The hook now separates fields with ` - `. Readers take
+the kind as the first word and the stamp as the last field (`checkup` looks for `session-end`), so
+lines an older hook wrote still parse. The grammar in `references/progress.md` and
+`templates/run.md` says so; `memory`, `lessons` and `gate-blind` lines keep their em dash until the
+whole ledger grammar moves (its own Fabric task). `test/release_gate_test.py` gains "the hook's
+lines carry no em dash" over all three kinds.
+
 ## v1.105.1: evidence-docs and project-audit keep their shorter descriptions
 
 Guards: 539 → **539**. 1.105.0 lengthened the descriptions of evidence-docs (by 9 characters)

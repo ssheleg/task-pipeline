@@ -499,10 +499,10 @@
   "plugins/task-pipeline/skills/task-pipeline/references/progress.md": {
    "bold": 58,
    "caps": 9,
-   "em_dash": 51,
+   "em_dash": 50,
    "unwanted_stop": 0,
    "version_history": 2,
-   "words": 3933
+   "words": 3923
   },
   "plugins/task-pipeline/skills/task-pipeline/references/release-impact.md": {
    "bold": 11,
@@ -814,7 +814,7 @@
    "em_dash": 0,
    "unwanted_stop": 0,
    "version_history": 0,
-   "words": 1607
+   "words": 1617
   },
   "plugins/task-pipeline/skills/task-pipeline/templates/verification.md": {
    "bold": 36,
@@ -828,7 +828,7 @@
  "total": {
   "bold": 3298,
   "caps": 260,
-  "em_dash": 2348,
+  "em_dash": 2347,
   "unwanted_stop": 15,
   "version_history": 11,
   "words": 195187
