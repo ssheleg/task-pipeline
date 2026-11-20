@@ -1,38 +1,72 @@
-## 1.106.0: documentation is a graph from the first day, branch `feat/doc-graph-starter` (2026-11-20)
+## Unreleased 1.106.0: documentation is a graph from the first day, branch `feat/doc-graph-starter` (2026-11-20, paused 2026-11-21)
 
-- **Objective.** Operator, 2026-11-20 (CEO window of Fabric, brief
+- **Objective.** Owner, 2026-11-20 (CEO window of Fabric, brief
   `2026-11-20-release-ui-rounds-and-graph-docs-brief.md`, items 2 and 3): docs and data
   rooms built on a data graph from the start with basic self-healing and cleanup; a
   starter pack installed with one command; a hidden refactoring with its own backlog; one
   graph format with Fabric's Memory and Sound Engine's brain.
+- **State.** Paused by the owner on 2026-11-21 00:30: every session waits for the strategic
+  plan (fabric-workspace session 2d03ce15). Committed and pushed, **not merged, not
+  tagged, not released**; the family release waits for the resume.
 - **Done.** `scripts/docgraph.py` (+ byte copy in evidence-docs), `references/doc-graph.md`
   (+ pointer in evidence-docs), stage 0 and 9 hooks, project-audit probe `docs-graph`,
-  `npx task-pipeline-skill doc-graph`, `test/docgraph_test.py` (18 cases, each watched red). Prompt-lint words kept under the baseline by folding restated
-  wiki and code-graph doctrine into pointers to their one home.
+  `npx task-pipeline-skill doc-graph`, `test/docgraph_test.py` (18 cases, each watched red).
+  Measured on a copy of fabric-agents-database (163 documents): `init` 4.3 s, 44 failing
+  links found, `heal --fix` repaired 44 in two files without touching a citation, 0 after.
+  Prompt-lint words held under the baseline by folding restated wiki and code-graph
+  doctrine into pointers to their one home. Hub branch `feat/doc-graph-family-rule`
+  (`d83f0df`) carries the family rule in the evidence-docs router.
 - **Decisions.** The format is the agents database's D5 model as `knowledge-graph/1`,
   profile `starter`; the graph is derived and git-ignored, the map and the refactoring
-  backlog are committed; `heal --fix` repairs only links with one answer; `prune` moves,
-  never deletes.
+  backlog are committed; only a broken Markdown link and a passed `valid_until` fail the
+  check (a citation may name another repository, dated records are counted); `heal --fix`
+  repairs only links with one answer and never a citation; `prune` moves, never deletes.
 - **Open.** Board thread 66fb9f10: requests a7c06548 (fabric, Memory), 5a04a9de
   (sound-engine, brain; no responder), db7761ba (agents database; its daily review on
-  2026-11-21, inbox `ib-20261120-403f49b7d2`). A change to a field lands in the table and
-  the script in one release. Board request 1ace85b7 (`checkup --healer`) is not started.
+  2026-11-21, inbox `ib-20261120-403f49b7d2`). Board request 1ace85b7 (`checkup --healer`)
+  is not started.
 - **Checks run.** `python3 test/docgraph_test.py` PASS 18; `python3 test/prompt_lint.py`
-  PASS; `npm test` (see `docs/evidence/verification.md`).
-- **Next task.** Merge, tag `v1.106.0` with the hub's `scripts/release-member.js`, watch
-  release.yml to `npm view task-pipeline-skill version` = 1.106.0, pin it in sshlg-skills
-  with the evidence-docs router line (hub branch `feat/doc-graph-family-rule`), run
-  `npx --yes sshlg-skills@latest update`, notify the owner.
-- **Queued after it, in order (owner's orders relayed by the CEO window of Fabric).**
-  (1) Reports: brief `2026-11-20-reports-artifacts-sharing-brief.md` items 1 and 2: one
-  family "Reports" skill or section (self-contained HTML without CDN, short, large with
-  charts, PDF; sources configured, data refreshed on a schedule, the page fetches nothing on
-  open; errors and self-healing), sharing left as a connection point for
-  passioncode-platform (353fa3d7). (2) Cross-agent skills: brief
-  `2026-11-21-cleanup-module-cloud-offer-crossagent-skills-brief.md` package 4: the family's
-  bundles and Fabric's skills install and work in every agent Fabric supports, checked
-  against fabric-agent-adapter's agent matrix (6a78ed83). (3) Board request 1ace85b7
-  (`checkup --healer`).
+  PASS; pinned make-skill house audit (`5ca5c367`) 0 GAP on all three skills of a clean
+  tree; full `npm test`: see `docs/evidence/verification.md` and the commit after this one.
+
+### Proposals for the strategic plan
+
+1. **Documentation graph.** Ship 1.106.0 as built, then one format in practice: Memory
+   and the brain read `knowledge-graph/1` (export and import, not a shared store); the
+   agents database owns the schema name. Next increments, in order of value per cost:
+   `docgraph.py serve` behind MCP `search` and `execute` (the R33 O17 rule asks every
+   project for a cited search behind two doors), vectors only where a project already
+   runs a local embedder, a gold set of ten questions per project as the search gate.
+2. **Hidden refactoring.** Keep it as built: one conversion step per task, its own commit,
+   one row in `docs/refactor-backlog.md`, never a stop. Roll it out through the agents
+   base's templates (request db7761ba) so every agent and organisation copy carries it,
+   and let project-audit's `docs-graph` probe count unconverted projects across the
+   estate, so the backlog is visible without anyone reading repositories.
+3. **Reports** (brief `2026-11-20-reports-artifacts-sharing-brief.md`, items 1 and 2).
+   One family section, not a new skill per variant: a `reports` reference plus a
+   stdlib builder that writes one self-contained HTML (no CDN, inline SVG charts by the
+   dataviz rules, sheleg-design tokens), three shapes (short, large with charts, PDF
+   through the system's headless WebKit or Chromium print), and a data contract: sources
+   named in a manifest, refreshed by a scheduler into a last-good snapshot, the page
+   embeds the snapshot and fetches nothing on open, a failed refresh keeps the last good
+   data and prints its age (the `alert-episodes` and `cloud-showcase` patterns of the
+   agents base apply; R33 O8: the report is also an agent capability). project-reports
+   keeps where reports live; sharing is a connection point for passioncode-platform
+   (353fa3d7): the builder emits a bundle and a manifest, the platform uploads and
+   manages links. An inventory of existing generators was started and not finished.
+4. **Cross-agent skills** (brief `2026-11-21-cleanup-module-cloud-offer-crossagent-skills-brief.md`,
+   package 4). Not started. Proposed method: take fabric-agent-adapter's agent matrix
+   (6a78ed83) as the list, install each family bundle and Fabric skill per agent through
+   `sshlg-skills`, prove each with one scripted call that loads the skill and runs a
+   bundled script (for this family: `docgraph.py detect`), and close holes in the
+   launcher's per-agent install paths; scripts stay Python stdlib so every agent can run
+   them.
+
+- **Next task, when resumed.** Merge this branch, tag `v1.106.0` with the hub's
+  `scripts/release-member.js`, watch release.yml to `npm view task-pipeline-skill version`
+  = 1.106.0, pin it on the hub branch, release the hub, run
+  `npx --yes sshlg-skills@latest update`, notify the owner; then the queue: Reports,
+  cross-agent skills, board request 1ace85b7.
 
 ## Unreleased 1.105.0: the pipeline's prompts to Anthropic's practices, branch `prompt/anthropic-practices-2026-11-16` (2026-11-16)
 
