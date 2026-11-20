@@ -15,11 +15,18 @@ agent-ready during any task, marks it in the task and keeps a separate refactori
   forms and returns each verbatim at `path#La-Lb`; `cite` accepts a quote only when it
   stands verbatim and refuses one that adds a number; `neighbours` walks edges both ways.
   `npx --yes task-pipeline-skill doc-graph init` runs the same file without a skill install.
-- **Basic self-healing and cleanup.** `check` exits 1 on a broken link, a broken citation
-  or an expired `valid_until`; `heal --fix` rewrites a link whose file moved when exactly one
-  file of that name exists, and lists stale facts in the map's "Needs re-checking"; orphans
-  are reached through the map. `prune --apply` moves superseded documents to `docs/archive/`
-  with `git mv` and rewrites their inbound links. Nothing is deleted.
+- **Basic self-healing and cleanup.** `check` exits 1 on a broken Markdown link or an
+  expired `valid_until`; a `path:line` citation that does not resolve warns (the estate
+  cites other repositories' files in prose), and findings in dated records (`HANDOFF.md`,
+  `CHANGELOG.md`, `docs/reports/`, `docs/evidence/`) are counted, never failed. `heal --fix`
+  repairs only links with one answer: the one file whose path ends with the link's path
+  (a root-relative link written without its slash, `file.py:232` becoming `#L232`), or the
+  one file of that name for a link with no folder; it never rewrites a citation or a dated
+  record. Stale facts go to the map's "Needs re-checking"; orphans are reached through the
+  map. `prune --apply` moves superseded documents to `docs/archive/` with `git mv` and
+  rewrites their inbound links. Nothing is deleted. Measured on a copy of the agents
+  database (163 documents): 44 failing links before, `heal --fix` repaired 44 in two files
+  without touching a citation, 0 after; `init` took 4.3 s.
 - **One format, not three.** The graph is `knowledge-graph/1`, profile `starter`: the node
   and edge fields of the agents database's knowledge-graph design (D5), with a field map
   for Sound Engine's brain and Fabric's Memory in `references/doc-graph.md`. Board requests
@@ -32,9 +39,10 @@ agent-ready during any task, marks it in the task and keeps a separate refactori
 - **evidence-docs** carries a byte copy of the script and of `doc-graph.md` (the sync guard
   `test/audit_regressions/fix-ed-01.01.py` now covers scripts). **project-audit** gains the
   read-only probe `docs-graph` (`detect`, then `check --no-write`).
-- **Proof.** `test/docgraph_test.py`, 15 cases, in `npm test`; each was watched failing
+- **Proof.** `test/docgraph_test.py`, 18 cases, in `npm test`; each was watched failing
   under a planted mutation (severity lowered, the moved-file repair disabled, stemming
-  disabled, the verbatim check disabled).
+  disabled, the verbatim check disabled) or on the earlier script (the false-alarm,
+  root-relative and citation cases).
 
 ## v1.105.1: evidence-docs and project-audit keep their shorter descriptions
 

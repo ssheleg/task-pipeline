@@ -143,7 +143,26 @@ def a_broken_link_alone_fails_the_check(root):
     expect(code == 1 and "fail broken-link" in out, f"a lone broken link passed the check: {code} {out}")
     write(root, "docs/guide.md", "# Guide\n\nSee `docs/gone/away.md:4` for the numbers.\n")
     code, out = run(root, "check")
-    expect(code == 1 and "broken-citation" in out, f"a lone broken citation passed the check: {code} {out}")
+    expect(code == 0 and "warn broken-citation" in out, f"a lone missing citation must warn, not fail: {code} {out}")
+
+
+@case
+def no_false_alarm_on_line_suffixes_other_repos_and_dated_records(root):
+    os.remove(os.path.join(root, "docs/pricing.md"))
+    write(root, "docs/index.md", "# Index\n\n[Old plan](old-plan.md), [lonely](lonely.md), "
+          "[guide at a line](guide.md:3), [sibling](../../elsewhere/x.md).\n")
+    write(root, "docs/guide.md", "# Guide\n\nSee [runbook](ops/runbook.md) and `Hub/hub_brain.py:12`.\n")
+    write(root, "docs/HANDOFF.md", "# Handoff\n\nThen it lived at [plan](plans/gone.md).\n")
+    write(root, "AGENTS.md", "# Agents\n\nStart at [the index](docs/index.md) and [handoff](docs/HANDOFF.md).\n")
+    run(root, "init")
+    code, out = run(root, "check")
+    expect(code == 0, f"false alarm failed the check: {out}")
+    expect("guide.md:3" not in out and "elsewhere" not in out, f"line suffix or outside link flagged: {out}")
+    expect("warn broken-citation" in out and "another repository" in out, f"foreign citation: {out}")
+    expect("(dated record)" in out, f"a dated record's link is not marked: {out}")
+    run(root, "heal", "--fix")
+    with open(os.path.join(root, "docs/HANDOFF.md")) as fh:
+        expect("](plans/gone.md)" in fh.read(), "heal rewrote a dated record")
 
 
 @case
@@ -162,6 +181,32 @@ def heal_fix_rewrites_a_moved_file_link(root):
         fh.write("# Index\n\n[Old plan](old-plan.md), [guide](guide.md), [lonely](lonely.md).\n")
     code, out = run(root, "check")
     expect(code == 0, f"check still fails after the fix: {out}")
+
+
+@case
+def heal_fix_resolves_a_root_relative_link_with_a_line(root):
+    write(root, "docs/ops/README.md", "# Ops\n")
+    write(root, "docs/ux/notes.md", "# Notes\n\nSee [the runbook](docs/ops/runbook.md:2) and [ops](docs/ops/README.md).\n")
+    write(root, "docs/index.md", "# Index\n\n[Old plan](old-plan.md), [guide](guide.md), [lonely](lonely.md), "
+          "[notes](ux/notes.md).\n")
+    run(root, "init")
+    code, out = run(root, "heal", "--fix")
+    with open(os.path.join(root, "docs/ux/notes.md")) as fh:
+        body = fh.read()
+    expect("](../ops/runbook.md#L2)" in body, f"root-relative link with a line not repaired: {body}")
+    expect("](../ops/README.md)" in body, f"suffix match lost to two files named README.md: {body}")
+
+
+@case
+def heal_never_rewrites_a_citation_or_guesses_across_folders(root):
+    write(root, "templates/x/code/workflow.py", "x = 1\n")
+    write(root, "docs/guide.md", "# Guide\n\nThe engine's `store/workflow.py:3` and [a link](store/workflow.py).\n")
+    run(root, "init")
+    run(root, "heal", "--fix")
+    with open(os.path.join(root, "docs/guide.md")) as fh:
+        body = fh.read()
+    expect("`store/workflow.py:3`" in body, f"a citation was rewritten: {body}")
+    expect("](store/workflow.py)" in body, f"a link was guessed into another folder: {body}")
 
 
 @case

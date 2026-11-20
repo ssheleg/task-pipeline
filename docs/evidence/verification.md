@@ -3,7 +3,7 @@
 ## Shipped state — v1.106.0 (source candidate; NOT SHIPPED yet)
 
 The documentation graph's starter pack (`scripts/docgraph.py`, `references/doc-graph.md`) and the
-hidden refactoring. `test/docgraph_test.py` 15 cases in `npm test`. The tag, release jobs and the
+hidden refactoring. `test/docgraph_test.py` 18 cases in `npm test`. The tag, release jobs and the
 npm readback remain pending; this header declares the version, not a shipped state.
 
 ## Shipped state — v1.105.1

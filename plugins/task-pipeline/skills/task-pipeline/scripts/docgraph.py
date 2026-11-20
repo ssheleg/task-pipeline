@@ -8,7 +8,7 @@ network, no dependency beyond the Python standard library.
 
     docgraph.py init     [--root R]            write the pack, build, report (idempotent)
     docgraph.py build    [--root R]            rebuild the derived graph and the map
-    docgraph.py check    [--root R] [--json] [--no-write]  exit 1 on a broken link, citation or expired fact
+    docgraph.py check    [--root R] [--json] [--no-write]  exit 1 on a broken link or an expired fact
     docgraph.py heal     [--root R] [--fix]    find broken links, stale facts, orphans; --fix repairs
     docgraph.py prune    [--root R] [--apply]  retired and superseded docs; --apply moves them to docs/archive/
     docgraph.py search   QUERY [--root R] [-k N] [--json]   ranked passages with their lines
@@ -58,6 +58,8 @@ DEFAULT_CONFIG = {
     "exclude": ["docs/archive/**", "CHANGELOG.md"],
     "entry": ["README.md", "AGENTS.md", "CLAUDE.md", "docs/graph/MAP.md"],
     "stale_days": 90,
+    # Dated records cite the tree as it was: their findings are counted, never failed.
+    "history": ["CHANGELOG.md", "**/HANDOFF.md", "docs/reports/**", "docs/evidence/**"],
     "areas": {
         "decisions": ["docs/adr/", "docs/decisions", "docs/DECISIONS", "decisions.md"],
         "scenarios": ["docs/ux/", "scenarios.md"],
@@ -321,23 +323,42 @@ def cite(root, quote, rel):
 
 # ---------------------------------------------------------------- the graph
 
+_FILES = {}
+
+
+def _all_files(root):
+    """Every file under root, repo-relative (cached per root)."""
+    if root not in _FILES:
+        out = []
+        for dirpath, dirnames, filenames in os.walk(root):
+            dirnames[:] = [d for d in dirnames if d not in SKIP_DIRS and not d.startswith(".")]
+            for name in filenames:
+                out.append(os.path.relpath(os.path.join(dirpath, name), root).replace(os.sep, "/"))
+        _FILES[root] = out
+    return _FILES[root]
+
+
 def resolve_link(root, rel, target):
     """A Markdown link target → repo-relative path, or None when it is not a file link."""
-    if re.match(r"^[a-z][a-z0-9+.-]*:", target, re.I) or target.startswith("#"):
-        return None
+    if re.match(r"^[a-z][a-z0-9+.-]*:", target, re.I) or target.startswith("#") or re.search(r"[<>{}]", target):
+        return None  # a URL, an anchor here, or a template placeholder such as <repo>/
     path = target.split("#", 1)[0].split("?", 1)[0]
+    path = re.sub(r":\d+(?:[-:]\d+)*$", "", path)  # `file.md:167` names a line, not a file
     if not path:
         return None
     if path.startswith("/"):
         joined = path.lstrip("/")
     else:
         joined = os.path.normpath(os.path.join(os.path.dirname(rel), path)).replace(os.sep, "/")
+    if joined.startswith("../") or joined == "..":
+        return None  # outside this repository: a sibling checkout, not looked at
     return joined
 
 
 def build(root, cfg=None, today=None):
     cfg = cfg or load_config(root)
     today = today or datetime.date.today()
+    _FILES.pop(root, None)
     rels = documents(root, cfg)
     dates = last_changed(root, rels)
     texts = {r: read(root, r) for r in rels}
@@ -352,6 +373,8 @@ def build(root, cfg=None, today=None):
                   "source_at": dates.get("README.md")}
     defined = {}
     stale_days = int(cfg.get("stale_days", 90))
+    tops = {r.split("/", 1)[0] for r in _all_files(root)}
+    suffixes = _all_files(root)
 
     for rel, text in sorted(texts.items()):
         meta = front_matter(text)
@@ -429,10 +452,16 @@ def build(root, cfg=None, today=None):
                     os.path.normpath(os.path.join(os.path.dirname(rel), path)).replace(os.sep, "/")
                 full = os.path.join(root, cpath)
                 if not os.path.isfile(full):
-                    if "/" in path:
-                        findings.append({"kind": "broken-citation", "severity": "fail", "where": f"{rel}#L{n}",
-                                         "what": f"cites {path}:{a}, and {path} does not exist",
-                                         "target": path, "fix": "point it at the file's new home"})
+                    if "/" in path and not any(f.endswith("/" + path) for f in suffixes):
+                        # A citation may name another repository's path (the estate cites across
+                        # repositories in prose), so a miss warns; a Markdown link here must open here.
+                        ours = path.split("/", 1)[0] in tops
+                        findings.append({"kind": "broken-citation", "severity": "warn",
+                                         "where": f"{rel}#L{n}",
+                                         "what": f"cites {path}:{a}, and {path} does not exist" +
+                                         ("" if ours else " here (another repository's file?)"),
+                                         "target": path, "fix": "point it at the file's new home, or name "
+                                         "the repository it lives in"})
                     continue
                 try:
                     with open(full, encoding="utf-8", errors="replace") as fh:
@@ -461,6 +490,13 @@ def build(root, cfg=None, today=None):
             findings.append({"kind": "orphan", "severity": "warn", "where": f"{nid[4:]}#L1",
                              "what": "no document links to it; the map is its only way in",
                              "fix": "link it from the document it belongs to"})
+    # Dated records are counted, never failed: they cite the tree as it was.
+    for f in findings:
+        if any(_glob_match(f["where"].split("#", 1)[0], h) or
+               (h.startswith("**/") and f["where"].split("#", 1)[0].endswith(h[3:]))
+               for h in cfg.get("history", [])) and f["severity"] == "fail":
+            f["severity"] = "warn"
+            f["what"] += " (dated record)"
     # One edge per (src, dst, kind): the first provenance wins.
     seen, uniq = set(), []
     for e in edges:
@@ -574,15 +610,29 @@ def heal(root, graph, fix=False):
             names.setdefault(name, []).append(rel)
     edits = {}
     for f in graph["findings"]:
-        if f["kind"] in ("broken-link", "broken-citation") and fix:
+        # Only links are repaired: a citation may name another repository's file, and rewriting it to a
+        # same-named file here would change what the text claims.
+        if f["kind"] == "broken-link" and fix and "(dated record)" not in f["what"]:
             path, _, anchor = f["where"].partition("#")
             target = f["target"]
-            base = os.path.basename(target.split("#", 1)[0])
-            cands = names.get(base, [])
+            bare = target.split("#", 1)[0]
+            line = re.search(r":(\d+)(?:[-:](\d+))*$", bare)
+            bare = bare[:line.start()] if line else bare
+            base = os.path.basename(bare)
+            tail = bare.lstrip("./")
+            # The file whose path ends with the target's own path wins (a root-relative link written
+            # without its slash); else the one file of that name.
+            if "/" in tail:
+                cands = [c for c in _all_files(root) if c == tail or c.endswith("/" + tail)]
+                parent = os.path.basename(os.path.dirname(tail))
+                cands = cands or [c for c in names.get(base, [])
+                                  if os.path.basename(os.path.dirname(c)) == parent]
+            else:
+                cands = names.get(base, [])
             if len(cands) == 1:
                 new_abs = cands[0]
                 if f["kind"] == "broken-link":
-                    frag = "#" + target.split("#", 1)[1] if "#" in target else ""
+                    frag = "#" + target.split("#", 1)[1] if "#" in target else (f"#L{line.group(1)}" if line else "")
                     new = os.path.relpath(new_abs, os.path.dirname(path) or ".").replace(os.sep, "/") + frag
                 else:
                     new = new_abs
@@ -709,7 +759,7 @@ the source of truth; the graph is derived into `.docgraph/graph.json` (git-ignor
 | See what a node links to and from | `docgraph.py neighbours D-12` |
 | Find and repair broken links, stale facts, orphans | `docgraph.py heal` then `docgraph.py heal --fix` |
 | Move superseded documents to `docs/archive/` | `docgraph.py prune` then `docgraph.py prune --apply` |
-| Gate a change (exit 1 on a broken link, citation or expired fact) | `docgraph.py check` |
+| Gate a change (exit 1 on a broken link or an expired fact) | `docgraph.py check` |
 
 `docgraph.py` ships with the task-pipeline and evidence-docs skills (`scripts/docgraph.py`); without them,
 `npx --yes task-pipeline-skill doc-graph <command>` runs the same file. Settings: [docgraph.json](docgraph.json).

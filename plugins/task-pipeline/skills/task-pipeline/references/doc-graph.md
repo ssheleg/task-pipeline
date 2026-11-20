@@ -46,10 +46,10 @@ The owners were asked on the board to confirm this table.
 
 ## Self-healing and cleanup
 
-`check` fails on a broken link or citation and a passed `valid_until`; warns on
-an old `as_of` and an orphan. `heal --fix` repairs a link to a moved file with a
-unique name; stale facts go to the map's re-check list. `prune --apply` moves
-superseded documents to `docs/archive/`, rewriting links; nothing is deleted.
+`check` fails on a broken link and a passed `valid_until`; it warns on a
+missing citation (maybe another repository's), an old `as_of`, an orphan.
+`heal --fix` repairs a link with one answer; stale facts go to the map's
+re-check list. `prune --apply` archives superseded documents, rewriting links.
 
 ## Hidden refactoring
 
