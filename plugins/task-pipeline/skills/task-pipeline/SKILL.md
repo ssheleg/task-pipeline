@@ -91,8 +91,6 @@ Stage 9 syncs the docs, the wiki and the code graph; the graph↔docs divergence
 gates them where a graph exists (`references/knowledge-graph.md`). **Documentation is a deliverable with a
 gate** (`references/documentation.md`): `docs/DOCMAP.md`, the Doc Loop at any stage,
 the propagation matrix at stage 9, and *"docs in sync"* as a command with an exit code.
-Documentation is a graph from its first day (`references/doc-graph.md`, `scripts/docgraph.py`);
-a task meeting docs not yet agent-ready converts them on the side (hidden refactoring).
 
 The run teaches the next run, and the list stays short
 (`references/retrospective.md`). Stage 10's last act, in this order:

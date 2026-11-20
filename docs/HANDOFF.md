@@ -27,7 +27,7 @@
   is not started.
 - **Checks run.** `python3 test/docgraph_test.py` PASS 18; `python3 test/prompt_lint.py`
   PASS; pinned make-skill house audit (`5ca5c367`) 0 GAP on all three skills of a clean
-  tree; full `npm test`: see `docs/evidence/verification.md` and the commit after this one.
+  tree; full `npm test` green in three parts (`docs/evidence/verification.md`, header).
 
 ### Proposals for the strategic plan
 
@@ -53,7 +53,10 @@
    agents base apply; R33 O8: the report is also an agent capability). project-reports
    keeps where reports live; sharing is a connection point for passioncode-platform
    (353fa3d7): the builder emits a bundle and a manifest, the platform uploads and
-   manages links. An inventory of existing generators was started and not finished.
+   manages links. The inventory of existing generators (about a dozen, with the gaps
+   nobody covers) is in the projects wiki, page
+   `projects/task-pipeline/reports-inventory-2026-11-21` (kept out of this public
+   repository because it names private projects).
 4. **Cross-agent skills** (brief `2026-11-21-cleanup-module-cloud-offer-crossagent-skills-brief.md`,
    package 4). Not started. Proposed method: take fabric-agent-adapter's agent matrix
    (6a78ed83) as the list, install each family bundle and Fabric skill per agent through

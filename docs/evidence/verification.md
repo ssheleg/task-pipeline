@@ -3,8 +3,13 @@
 ## Shipped state — v1.106.0 (source candidate; NOT SHIPPED yet)
 
 The documentation graph's starter pack (`scripts/docgraph.py`, `references/doc-graph.md`) and the
-hidden refactoring. `test/docgraph_test.py` 18 cases in `npm test`. The tag, release jobs and the
-npm readback remain pending; this header declares the version, not a shipped state.
+hidden refactoring. `test/docgraph_test.py` 18 cases in `npm test`. `npm test` on 2026-11-21 ran in
+three parts on this branch: the full chain failed once on `test/backlog_sources_test.py`'s 10-second
+bound (10.1 s at load average 165), which passed alone (330 cases); the rest of the chain passed
+(lessons 431, waves 143, docgraph 18, `install_test.sh`, audit regressions) after `SKILL.md` was
+restored under `diet_proportional.py`'s 16 650-byte bound; `test/validate.py` and
+`test/prompt_lint.py` PASS on the final tree. The tag, release jobs and the npm readback remain
+pending; this header declares the version, not a shipped state.
 
 ## Shipped state — v1.105.1
 

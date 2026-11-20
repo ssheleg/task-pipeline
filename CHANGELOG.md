@@ -36,6 +36,10 @@ agent-ready during any task, marks it in the task and keeps a separate refactori
   one row with `docgraph.py refactor-note`, and one line in its ledger; it never widens the
   task and never blocks it. Stage 0's harvest searches through the graph where it exists;
   stage 9 rebuilds and checks it, or converts.
+- **`SKILL.md` is unchanged.** It sits 15 bytes under its headroom bound
+  (`test/audit_regressions/diet_proportional.py`, 16 650); the doctrine is reached from
+  stage 0's harvest (`knowledge-sources.md`) and stage 9 (`stage-09-docs-wiki.md`), and a
+  shorter paragraph that made room dropped the code graph's "where a graph exists".
 - **evidence-docs** carries a byte copy of the script and of `doc-graph.md` (the sync guard
   `test/audit_regressions/fix-ed-01.01.py` now covers scripts). **project-audit** gains the
   read-only probe `docs-graph` (`detect`, then `check --no-write`).
