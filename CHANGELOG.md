@@ -1,3 +1,41 @@
+## v1.106.0: documentation is a graph from the first day; the hidden refactoring converts the rest
+
+Guards: 539 → **539**. The operator, 2026-11-20 (CEO window of Fabric, brief
+`2026-11-20-release-ui-rounds-and-graph-docs-brief.md`, items 2 and 3): documentation and
+data rooms are built on a data graph from the start, with updatable nodes and basic
+self-healing; a starter pack («пакет новичка») that is useful at once and installs with one
+command; and a hidden refactoring in which an agent converts documentation that is not yet
+agent-ready during any task, marks it in the task and keeps a separate refactoring backlog.
+
+- **`scripts/docgraph.py`, the starter pack.** Python standard library only, no model, no
+  network. `init` writes `docs/graph/` (settings, README, a generated map of the project,
+  its decisions, scenarios and documents by area), `docs/refactor-backlog.md` and one
+  `.gitignore` line, then builds the derived graph in `.docgraph/graph.json`; it is
+  idempotent (three runs, same bytes). `search` ranks passages by Russian and English word
+  forms and returns each verbatim at `path#La-Lb`; `cite` accepts a quote only when it
+  stands verbatim and refuses one that adds a number; `neighbours` walks edges both ways.
+  `npx --yes task-pipeline-skill doc-graph init` runs the same file without a skill install.
+- **Basic self-healing and cleanup.** `check` exits 1 on a broken link, a broken citation
+  or an expired `valid_until`; `heal --fix` rewrites a link whose file moved when exactly one
+  file of that name exists, and lists stale facts in the map's "Needs re-checking"; orphans
+  are reached through the map. `prune --apply` moves superseded documents to `docs/archive/`
+  with `git mv` and rewrites their inbound links. Nothing is deleted.
+- **One format, not three.** The graph is `knowledge-graph/1`, profile `starter`: the node
+  and edge fields of the agents database's knowledge-graph design (D5), with a field map
+  for Sound Engine's brain and Fabric's Memory in `references/doc-graph.md`. Board requests
+  to both owners and to the agents database ask them to confirm it.
+- **Hidden refactoring.** `references/doc-graph.md` says when and how: `docgraph.py detect`
+  says not agent-ready, the task runs `init` and `heal --fix` in a commit of its own, adds
+  one row with `docgraph.py refactor-note`, and one line in its ledger; it never widens the
+  task and never blocks it. Stage 0's harvest searches through the graph where it exists;
+  stage 9 rebuilds and checks it, or converts.
+- **evidence-docs** carries a byte copy of the script and of `doc-graph.md` (the sync guard
+  `test/audit_regressions/fix-ed-01.01.py` now covers scripts). **project-audit** gains the
+  read-only probe `docs-graph` (`detect`, then `check --no-write`).
+- **Proof.** `test/docgraph_test.py`, 15 cases, in `npm test`; each was watched failing
+  under a planted mutation (severity lowered, the moved-file repair disabled, stemming
+  disabled, the verbatim check disabled).
+
 ## v1.105.1: evidence-docs and project-audit keep their shorter descriptions
 
 Guards: 539 → **539**. 1.105.0 lengthened the descriptions of evidence-docs (by 9 characters)

@@ -38,6 +38,11 @@ Usage:
                                       other file that names the old path, and edits
                                       none of them.
 
+  npx task-pipeline-skill doc-graph <init|build|check|heal|prune|search|cite|neighbours|detect|refactor-note>
+                                      the documentation graph's starter pack in this
+                                      folder (python3 required): init sets it up in one
+                                      command; see references/doc-graph.md
+
 Other install paths:
   Claude Code plugin:  /plugin marketplace add ${REPO}
                        /plugin install task-pipeline@task-pipeline
@@ -240,6 +245,24 @@ function hostRoot(agent, home, env, explicit) {
   return path.join(home, HOST_DIR[agent]);
 }
 
+// The documentation graph's starter pack (references/doc-graph.md): one command runs the
+// bundled docgraph.py in the current folder, so a project with Node but no skill install
+// gets it with `npx --yes task-pipeline-skill doc-graph init`.
+function docGraph(rest) {
+  const script = path.join(ROOT, 'plugins/task-pipeline/skills/task-pipeline/scripts/docgraph.py');
+  if (!fs.existsSync(script)) {
+    console.error(`error: ${script} missing: corrupted package?`);
+    return 1;
+  }
+  const { spawnSync } = require('child_process');
+  const r = spawnSync('python3', [script, ...(rest.length ? rest : ['--help'])], { stdio: 'inherit' });
+  if (r.error) {
+    console.error(`error: python3 is required for doc-graph (${r.error.message})`);
+    return 1;
+  }
+  return r.status === null ? 1 : r.status;
+}
+
 function main(argv) {
   const args = argv.slice(2);
   if (args.includes('--help') || args.includes('-h')) {
@@ -247,6 +270,7 @@ function main(argv) {
     return 0;
   }
   if (args[0] === 'migrate-artifacts') return migrateArtifacts(args.slice(1));
+  if (args[0] === 'doc-graph') return docGraph(args.slice(1));
 
   const force = args.includes('--force');
   const unknown = args.filter((a) => a !== '--force');

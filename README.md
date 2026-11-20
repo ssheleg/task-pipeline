@@ -359,6 +359,13 @@ then, in the project root:
 /graphify .
 ```
 
+Documentation itself is a graph too
+([`doc-graph.md`](plugins/task-pipeline/skills/task-pipeline/references/doc-graph.md)):
+`npx --yes task-pipeline-skill doc-graph init` sets up the starter pack in one command
+(documents and the ids they define as nodes, links as edges, search with verbatim
+citations, basic self-healing), and a task that meets documentation not yet agent-ready
+converts it in a commit of its own and logs a row in `docs/refactor-backlog.md`.
+
 **Stage 0 asks it what grep can't** — `graphify query "how does session reach the
 API layer"`, `graphify affected "AuthModule"`, `graphify god-nodes` — and records it
 in the source ledger **with its measured lag**, because a graph goes stale exactly
@@ -646,7 +653,7 @@ must say so.
 ### Held to Anthropic's own Skill authoring guidance
 
 Audited against the four Agent Skills pages. Most of it already held — `name`
-13/64 chars, `description` 292/1024 chars, `SKILL.md` 215/500 lines, all 57 references
+13/64 chars, `description` 292/1024 chars, `SKILL.md` 217/500 lines, all 58 references
 reachable from `SKILL.md` through explicit reference routes, and the bundle far under the 30 MB ceiling. What
 did not, now does:
 
@@ -1018,6 +1025,7 @@ recommendation, so you arm the whole run in one exchange. Detail:
 | [`references/probing.md`](plugins/task-pipeline/skills/task-pipeline/references/probing.md) | the probe recipe — plant, run, restore; how a probe rots; the neighbour probe; the landed-mutation rule |
 | [`references/deploy-targets.md`](plugins/task-pipeline/skills/task-pipeline/references/deploy-targets.md) | stages 7–8: writing the runbook when there is none, the template, per-platform deploy and log verbs, the verification trio |
 | [`references/hooks.md`](plugins/task-pipeline/skills/task-pipeline/references/hooks.md) | the `PreToolUse` contract, the fail-open hazard, placement, and the Claude-Code-only limit |
+| [`references/doc-graph.md`](plugins/task-pipeline/skills/task-pipeline/references/doc-graph.md) | documentation as a graph: the starter pack (`scripts/docgraph.py`), one format with the estate's graphs, self-healing, cleanup, the hidden refactoring |
 | [`references/knowledge-graph.md`](plugins/task-pipeline/skills/task-pipeline/references/knowledge-graph.md) | the code graph: install line, stage-0 reach queries, the stage-9 refresh, the graph↔docs divergence check |
 | [`references/retrospective.md`](plugins/task-pipeline/skills/task-pipeline/references/retrospective.md) | the project retro: the three grades of fix, the mandatory prune, the cap of ten |
 | [`references/model-tiering.md`](plugins/task-pipeline/skills/task-pipeline/references/model-tiering.md) | model policy, the `/model` reminder, overrides |

@@ -104,19 +104,12 @@ closing a stage with an unread CI verdict.
   file URL into the host's own docs (`CLAUDE.md`, or the README) in this change, so the next
   run reads the destination instead of creating a second file
   ([`grill.md`](grill.md) → *The design destination*).
-- **The code graph:** [graphify](https://github.com/Graphify-Labs/graphify) —
-  `/graphify . --update` when `graphify-out/` exists, in the same change as the docs
-  and the wiki ([`knowledge-graph.md`](knowledge-graph.md)). It is derived, so
-  `graphify-out/` is git-ignored unless the project's own `CLAUDE.md` says the team
-  commits it. A project that uses a different graph/index tool names its refresh
-  command there, and that wins.
-- **Wiki:** [obsidian-wiki](https://github.com/ar9av/obsidian-wiki) — the
-  `wiki-update` skill (resolves the vault via `~/.obsidian-wiki/config`). Detect it
-  the same way the harvest does; if absent, recommend it once
-  (`pip install obsidian-wiki` → back up `~/.obsidian-wiki/`, which `setup` rewrites →
-  `obsidian-wiki setup --vault <path>`) and continue.
-  A project may of course use a different knowledge base — then its own
-  `CLAUDE.md` names the sync command, and that wins.
+- **The code graph:** [graphify](https://github.com/Graphify-Labs/graphify),
+  refreshed in the same change as the docs ([`knowledge-graph.md`](knowledge-graph.md));
+  a project's own `CLAUDE.md` may name another tool, and that wins.
+- **Wiki:** [obsidian-wiki](https://github.com/ar9av/obsidian-wiki)'s `wiki-update`,
+  detected and recommended as the harvest does ([`knowledge-sources.md`](knowledge-sources.md));
+  a project's own `CLAUDE.md` may name another sync command, and that wins.
 - **Docs in another repository** (a docs repo, a submodule, a sibling checkout the
   project names): updating it is **outward** — propose the change, get an explicit
   operator go, open a PR there. Never push to a repo the task didn't name.

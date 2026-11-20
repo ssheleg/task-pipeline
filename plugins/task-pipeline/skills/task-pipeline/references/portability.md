@@ -103,6 +103,7 @@ a row pointing outside the bundle is the defect this file exists to catch.
 | The REQ coverage table, evidence rules, the closing question | `references/acceptance.md` |
 | How the host project's own conventions are read | `references/conventions.md` |
 | Which companions exist, what is required, self-currency | `references/companion-skills.md` |
+| Documentation as a graph: starter pack, self-healing, hidden refactoring | `references/doc-graph.md` |
 | The code graph: queries, refresh, the graph↔docs divergence | `references/knowledge-graph.md` |
 | How the graph's staleness is measured and stated in the ledger | `references/knowledge-graph.md` |
 | How a CI run's verdict is established, and its three states | `references/conventions.md` |

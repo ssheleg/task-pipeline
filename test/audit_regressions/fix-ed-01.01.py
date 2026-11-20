@@ -38,9 +38,13 @@ TP = os.path.join(SKILLS, "task-pipeline")
 REFS = ["documentation.md", "learned.md", "gates.md", "hooks.md",
         "setup.md"]
 TPLS = ["decisions.md", "docgate.sh"]
+# Scripts copied byte for byte (1.106.0): the documentation graph's starter pack must run
+# from an evidence-docs install alone, so its one source home in task-pipeline/scripts/
+# travels as a copy, guarded like the references.
+SCRIPTS = ["docgraph.py"]
 # Hand-written pointers, not generated copies (1.98.0): the retro doctrine was a 34.7 KB
 # near-verbatim copy with no delta of its own, so evidence-docs points at its one home.
-POINTERS = ["retrospective.md"]
+POINTERS = ["retrospective.md", "doc-graph.md"]
 
 
 HOME_URL = ("https://github.com/ssheleg/task-pipeline/blob/main/"
@@ -87,7 +91,11 @@ def sync():
     for f in TPLS:
         shutil.copy(os.path.join(TP, "templates", f),
                     os.path.join(ED, "templates", f))
-    print(f"generated {len(REFS)} references + {len(TPLS)} templates from the source home")
+    os.makedirs(os.path.join(ED, "scripts"), exist_ok=True)
+    for f in SCRIPTS:
+        shutil.copy(os.path.join(TP, "scripts", f), os.path.join(ED, "scripts", f))
+    print(f"generated {len(REFS)} references + {len(TPLS)} templates + {len(SCRIPTS)} scripts "
+          "from the source home")
 
 
 failures = []
@@ -122,6 +130,10 @@ def t_copies_match_source_home():
         src = read(os.path.join(TP, "templates", f))
         cp = read(os.path.join(ED, "templates", f))
         assert src == cp, f"templates/{f} drifted from the source home — re-run --sync"
+    for f in SCRIPTS:
+        src = read(os.path.join(TP, "scripts", f))
+        cp = read(os.path.join(ED, "scripts", f))
+        assert src == cp, f"scripts/{f} drifted from the source home: re-run --sync"
 
 
 def t_pointers_are_pointers():

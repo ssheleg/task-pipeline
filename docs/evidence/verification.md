@@ -1,10 +1,16 @@
 # Verification — task-pipeline
 
-## Shipped state — v1.105.1 (source candidate; NOT SHIPPED yet)
+## Shipped state — v1.106.0 (source candidate; NOT SHIPPED yet)
+
+The documentation graph's starter pack (`scripts/docgraph.py`, `references/doc-graph.md`) and the
+hidden refactoring. `test/docgraph_test.py` 15 cases in `npm test`. The tag, release jobs and the
+npm readback remain pending; this header declares the version, not a shipped state.
+
+## Shipped state — v1.105.1
 
 evidence-docs and project-audit descriptions restored to their 1.104.3 text so the family's
-description total stays under the hub's ceiling. The tag, release jobs and the npm readback remain
-pending; this header declares the version, not a shipped state.
+description total stays under the hub's ceiling. Published: `npm view task-pipeline-skill version`
+answered 1.105.1 on 2026-11-20.
 
 ## Shipped state — v1.105.0
 
