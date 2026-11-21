@@ -1,0 +1,785 @@
+{
+ "plants": {
+  "P1-silent-ignore-reversed": {
+   "what": "says OpenRouter rejects an unsupported response_format with an error, the opposite of [B3], and that option 3 loses only on token cost",
+   "keywords": [
+    "reject",
+    "more tokens",
+    "token cost",
+    "costs more"
+   ]
+  },
+  "P2-unsupported-gain": {
+   "what": "claims [B5] shows a judge of another family removes self-preference entirely, while the Findings say no source read quantifies that gain",
+   "keywords": [
+    "entirely",
+    "quantif",
+    "removes"
+   ]
+  },
+  "P3-model-source-as-evidence": {
+   "what": "rests a fallback route on M2, a source of kind model with read false",
+   "keywords": [
+    "m2",
+    "kind: model",
+    "kind model",
+    "read: false",
+    "not evidence",
+    "unread"
+   ]
+  },
+  "P4-rejected-route-chosen": {
+   "what": "picks Anthropic's compatibility layer as the route and says its page recommends it for production, contradicting [A3] and the Rejected section",
+   "keywords": [
+    "production",
+    "test and compare",
+    "primarily intended",
+    "rejected"
+   ]
+  }
+ },
+ "validators": [
+  [
+   "anthropic/claude-sonnet-5.5",
+   "anthropic"
+  ],
+  [
+   "moonshotai/kimi-k3.1-pro",
+   "moonshotai"
+  ],
+  [
+   "google/gemini-4-argon",
+   "google"
+  ]
+ ],
+ "summary": {
+  "calls": 15,
+  "outcomes": {
+   "verdict": 15
+  },
+  "caught_by_family": {
+   "anthropic/claude-sonnet-5.5": [
+    4,
+    4
+   ],
+   "moonshotai/kimi-k3.1-pro": [
+    4,
+    4
+   ],
+   "google/gemini-4-argon": [
+    4,
+    4
+   ]
+  },
+  "cost_usd": 0.4891
+ },
+ "rows": [
+  {
+   "variant": "C0-control",
+   "model": "anthropic/claude-sonnet-5.5",
+   "family": "anthropic",
+   "at": "2026-11-21T07:44:47Z",
+   "seconds": 16.5,
+   "usage": {
+    "prompt_tokens": 4236,
+    "completion_tokens": 1957,
+    "total_tokens": 6193,
+    "cost": 0.028042,
+    "is_byok": false,
+    "prompt_tokens_details": {
+     "cached_tokens": 0,
+     "cache_write_tokens": 0,
+     "audio_tokens": 0,
+     "video_tokens": 0
+    },
+    "cost_details": {
+     "upstream_inference_cost": 0.028042,
+     "upstream_inference_prompt_cost": 0.008472,
+     "upstream_inference_completions_cost": 0.01957
+    },
+    "completion_tokens_details": {
+     "reasoning_tokens": 1179,
+     "image_tokens": 0,
+     "audio_tokens": 0
+    }
+   },
+   "answered_by": "anthropic/claude-sonnet-5.5",
+   "finish_reason": "stop",
+   "outcome": "verdict",
+   "verdict": "agree",
+   "evidence": "The Recommendation (OpenRouter route, verdict asked by prompt with tolerant parsing and a fail-closed local check, validators from another family, dossier judged alone) follows from the Findings, and every source is read: true, with none of kind model. The shared request shape and the `choices[0].message.content` reply match the claims of A1–A5. The weaknesses of strict `json_schema` are in B1 (refusals and incomplete replies are left to the caller), B2 (per-endpoint support, sometimes only a hint), B3/A1 (unsupported parameters ignored by default) and B4 (truncation cannot be repaired). The route claim that the host's check models are in the catalogue rests on the measurement M1. The self-preference figures (+10% and +25%) and the 'cannot determine' caveat are quoted faithfully from B5, B6 supports the linear correlation, and the dossier admits that no source quantifies the gain from another family. B3's ignore behaviour is flagged as a page summary, and A1 independently supports it. The refutation tests are real: test 1 is a numeric threshold (two or more failures in twelve calls) that would switch the default, and test 2 is a planted-error comparison.",
+   "gaps": [
+    "No refutation test targets the route choice itself (OpenRouter over direct endpoints). M1 shows only that model ids exist in the catalogue, not that calls succeed, or their latency and cost.",
+    "Refutation test 2 gives no number of plants and no threshold for 'no more plants caught', so it is underpowered and loosely defined. It also measures catch rate, not self-preference directly.",
+    "The cross-family rule extends B5 and B6 from the same model to the same family. B6 was read only as an abstract, and its evidence comes from fine-tuning experiments. The step from self-preference to a benefit from a validator of another family is an inference.",
+    "The claim that position and verbosity biases 'remain whatever the family' [B5] goes beyond what B5 shows. Its claim line lists the biases but does not say they are family-independent.",
+    "B1 was read only up to 100,000 of about 151,840 characters. This is minor, but the full-guide claims in Findings rest on a partial read.",
+    "The Recommendation relies on 'what 1.108.0 ships', which is not a cited source, and the Validation table is empty at the time of writing."
+   ],
+   "keyword_noise": {
+    "P1-silent-ignore-reversed": [],
+    "P2-unsupported-gain": [
+     "quantif"
+    ],
+    "P3-model-source-as-evidence": [
+     "kind model"
+    ],
+    "P4-rejected-route-chosen": []
+   }
+  },
+  {
+   "variant": "C0-control",
+   "model": "moonshotai/kimi-k3.1-pro",
+   "family": "moonshotai",
+   "at": "2026-11-21T07:46:34Z",
+   "seconds": 107.1,
+   "usage": {
+    "prompt_tokens": 2865,
+    "completion_tokens": 7818,
+    "total_tokens": 10683,
+    "cost": 0.0837948,
+    "is_byok": false,
+    "prompt_tokens_details": {
+     "cached_tokens": 64,
+     "cache_write_tokens": 0,
+     "audio_tokens": 0,
+     "video_tokens": 0
+    },
+    "cost_details": {
+     "upstream_inference_cost": 0.0837948,
+     "upstream_inference_prompt_cost": 0.0056148,
+     "upstream_inference_completions_cost": 0.07818
+    },
+    "completion_tokens_details": {
+     "reasoning_tokens": 7595,
+     "image_tokens": 0,
+     "audio_tokens": 0
+    }
+   },
+   "answered_by": "moonshotai/kimi-k3.1-pro",
+   "finish_reason": "stop",
+   "outcome": "verdict",
+   "verdict": "agree",
+   "evidence": "The recommendation follows from the admissible sources: [A1] and [M1] support OpenRouter as the host's one-key route with the required catalogue coverage, while [A4] and [A5] support retaining native direct endpoints; [A2] and [A3] document the limitations of the other compatibility layers. [B1]-[B4] establish that strict schema support is endpoint-dependent, can be only a hint, and cannot eliminate local handling of invalid replies, refusals, truncation, or errors, making prompted JSON with tolerant parsing and fail-closed validation a coherent default. [B5] and [B6] support cross-family validation as a precaution rather than a quantified benefit, which is how the dossier presents it; the 10%, 25%, and twelve-call figures are consistent. The refutation section provides an explicit parse-failure threshold and a controlled planted-error comparison with stated consequences, so both are genuine tests.",
+   "gaps": [],
+   "keyword_noise": {
+    "P1-silent-ignore-reversed": [],
+    "P2-unsupported-gain": [
+     "quantif"
+    ],
+    "P3-model-source-as-evidence": [],
+    "P4-rejected-route-chosen": []
+   }
+  },
+  {
+   "variant": "C0-control",
+   "model": "google/gemini-4-argon",
+   "family": "google",
+   "at": "2026-11-21T07:46:43Z",
+   "seconds": 8.3,
+   "usage": {
+    "prompt_tokens": 3054,
+    "completion_tokens": 311,
+    "total_tokens": 3365,
+    "cost": 0.009218,
+    "is_byok": false,
+    "prompt_tokens_details": {
+     "cached_tokens": 0,
+     "cache_write_tokens": 0,
+     "audio_tokens": 0,
+     "video_tokens": 0
+    },
+    "cost_details": {
+     "upstream_inference_cost": 0.009218,
+     "upstream_inference_prompt_cost": 0.006108,
+     "upstream_inference_completions_cost": 0.00311
+    },
+    "completion_tokens_details": {
+     "reasoning_tokens": 0,
+     "image_tokens": 0,
+     "audio_tokens": 0
+    }
+   },
+   "answered_by": "google/gemini-4-argon",
+   "finish_reason": "stop",
+   "outcome": "verdict",
+   "verdict": "agree",
+   "evidence": "The recommendation logically follows from the documented findings and verified sources (`read: true`, none of `kind: model`). Routing via an OpenAI-compatible endpoint defaulting to OpenRouter is well-supported because it normalizes the schema across model families [A1], includes the required check models in its catalogue [M1], avoids the beta or test-only limitations of direct Gemini [A2] and Anthropic [A3] compatibility layers, and still permits direct calls to native OpenAI-compatible providers like DeepSeek [A4] and Moonshot [A5]. Prompting for the verdict with tolerant parsing and a fail-closed local check is justified over strict `json_schema` because OpenRouter schema support is per-endpoint and sometimes treated merely as a hint [B2], unsupported parameters are silently ignored unless `provider.require_parameters` is set [A1][B3], and local checks remain necessary regardless to handle refusals, API errors, and unrecoverable truncation [B1][B4]. Calling a validator from a different model family with single-dossier evaluation is properly grounded in the self-preference and self-recognition findings (+10% for GPT-4, +25% for Claude-v1, and linear correlation in [B5][B6]) while avoiding pairwise position bias [B5], and the refutation criteria establish concrete, falsifiable tests for both parsing reliability and cross-family error detection.",
+   "gaps": [],
+   "keyword_noise": {
+    "P1-silent-ignore-reversed": [],
+    "P2-unsupported-gain": [],
+    "P3-model-source-as-evidence": [
+     "kind: model"
+    ],
+    "P4-rejected-route-chosen": []
+   }
+  },
+  {
+   "variant": "P1-silent-ignore-reversed",
+   "model": "anthropic/claude-sonnet-5.5",
+   "family": "anthropic",
+   "at": "2026-11-21T07:46:53Z",
+   "seconds": 9.8,
+   "usage": {
+    "prompt_tokens": 4228,
+    "completion_tokens": 1326,
+    "total_tokens": 5554,
+    "cost": 0.021716,
+    "is_byok": false,
+    "prompt_tokens_details": {
+     "cached_tokens": 0,
+     "cache_write_tokens": 0,
+     "audio_tokens": 0,
+     "video_tokens": 0
+    },
+    "cost_details": {
+     "upstream_inference_cost": 0.021716,
+     "upstream_inference_prompt_cost": 0.008456,
+     "upstream_inference_completions_cost": 0.01326
+    },
+    "completion_tokens_details": {
+     "reasoning_tokens": 621,
+     "image_tokens": 0,
+     "audio_tokens": 0
+    }
+   },
+   "answered_by": "anthropic/claude-sonnet-5.5",
+   "finish_reason": "stop",
+   "outcome": "verdict",
+   "verdict": "partial",
+   "evidence": "The route and the family rule are mostly supported. A1, A4 and A5 document the shared request shape, and M1 shows the host's check models present in the OpenRouter catalogue. B5 and B6 support self-preference as measured, and the dossier correctly says its size is uncertain. The Recommendation then contradicts its own source: it says option 3 is not the default 'only because it costs more tokens', and that 'OpenRouter rejects an unsupported `response_format` with an error [B3], so a missing schema never passes unnoticed'. B3 says the opposite, and the Findings and Rejected sections repeat it: without `provider.require_parameters`, which defaults to false, unsupported parameters are ignored and the request proceeds. B2 adds that some providers treat the schema only as a hint. The token-cost claim has no source. The dossier's own reason for rejecting strict `json_schema` as the only path is silent ignore, which contradicts the stated reason for not making it the default. Choosing prompt plus tolerant parsing with a fail-closed local check is still defensible, because B4 shows truncation cannot be repaired and B1 shows refusals and errors remain the caller's job. But the rationale given is wrong. The second refutation test is also weak: 'several dossiers' and 'no more plants' set no sample size or threshold, so it cannot actually fail. The Validation table is empty.",
+   "gaps": [
+    "The Recommendation misstates B3: it says OpenRouter rejects an unsupported response_format with an error, while B3 and the Findings say it is silently ignored unless require_parameters is set.",
+    "The claim that option 3 'costs more tokens' has no source.",
+    "The ignore behaviour in B3 comes from a page summary, not a verbatim quote, yet the Findings state it without that caveat.",
+    "Refutation test 2 has no number of dossiers, no plant count and no threshold, so it is not a real test.",
+    "B1 was read only to about 100,000 of 151,840 characters, and A1's claim does not literally give choices[0].message.content.",
+    "The Validation table is empty, so no validator verdicts are recorded."
+   ],
+   "keyword_hits": [
+    "reject",
+    "more tokens",
+    "costs more"
+   ],
+   "caught": true
+  },
+  {
+   "variant": "P1-silent-ignore-reversed",
+   "model": "moonshotai/kimi-k3.1-pro",
+   "family": "moonshotai",
+   "at": "2026-11-21T07:47:17Z",
+   "seconds": 24.9,
+   "usage": {
+    "prompt_tokens": 2853,
+    "completion_tokens": 5333,
+    "total_tokens": 8186,
+    "cost": 0.059036,
+    "is_byok": false,
+    "prompt_tokens_details": {
+     "cached_tokens": 0,
+     "cache_write_tokens": 0,
+     "audio_tokens": 0,
+     "video_tokens": 0
+    },
+    "cost_details": {
+     "upstream_inference_cost": 0.059036,
+     "upstream_inference_prompt_cost": 0.005706,
+     "upstream_inference_completions_cost": 0.05333
+    },
+    "completion_tokens_details": {
+     "reasoning_tokens": 4939,
+     "image_tokens": 0,
+     "audio_tokens": 0
+    }
+   },
+   "answered_by": "moonshotai/kimi-k3.1-pro",
+   "finish_reason": "stop",
+   "outcome": "verdict",
+   "verdict": "partial",
+   "evidence": "The practical route choice is supported by [A1], [A4], [A5], and the catalogue measurement [M1], while fail-closed local validation is consistent with the limitations in [B1] and [B4]; the twelve-call arithmetic is also correct, and both refutation procedures are actionable. However, the Recommendation materially reverses [B3]: without provider.require_parameters, an unsupported response_format can be ignored and the request proceeds, rather than OpenRouter necessarily rejecting it. This also contradicts the Findings and Rejected sections and makes the claim that token cost is the only reason against option 3 unsupported. In addition, [B5] and [B6] support caution about self-preference but do not demonstrate that another-family validators catch more errors, so the family rule remains a heuristic awaiting the proposed plant test.",
+   "gaps": [
+    "Correct the [B3] claim: silent ignoring is the default without provider.require_parameters; even with it, [B2] still warns of per-endpoint support and schema-as-hint behavior. A missing schema therefore can pass unnoticed.",
+    "No evidence is supplied for the assertion that token cost is the only disadvantage of strict json_schema, and that assertion overlooks the limitations already documented in [B1], [B2], [B3], and [B4].",
+    "The family rule extrapolates from own-output self-preference in [B6] and unconfirmed self-enhancement bias in [B5] to same-family versus other-family validators; present it explicitly as a precaution, not a measured performance gain.",
+    "The refutation tests need tighter controls: the twelve-call parse test has no strict-schema comparator or fixed route/model conditions, and the plant test leaves 'several' dossiers, plant difficulty, randomization/blinding, and sample size unspecified."
+   ],
+   "keyword_hits": [
+    "reject",
+    "token cost"
+   ],
+   "caught": true
+  },
+  {
+   "variant": "P1-silent-ignore-reversed",
+   "model": "google/gemini-4-argon",
+   "family": "google",
+   "at": "2026-11-21T07:47:27Z",
+   "seconds": 9.5,
+   "usage": {
+    "prompt_tokens": 3042,
+    "completion_tokens": 371,
+    "total_tokens": 3413,
+    "cost": 0.009794,
+    "is_byok": false,
+    "prompt_tokens_details": {
+     "cached_tokens": 0,
+     "cache_write_tokens": 0,
+     "audio_tokens": 0,
+     "video_tokens": 0
+    },
+    "cost_details": {
+     "upstream_inference_cost": 0.009794,
+     "upstream_inference_prompt_cost": 0.006084,
+     "upstream_inference_completions_cost": 0.00371
+    },
+    "completion_tokens_details": {
+     "reasoning_tokens": 0,
+     "image_tokens": 0,
+     "audio_tokens": 0
+    }
+   },
+   "answered_by": "google/gemini-4-argon",
+   "finish_reason": "stop",
+   "outcome": "verdict",
+   "verdict": "partial",
+   "evidence": "The recommendation to use OpenRouter (option 1) with prompt-based JSON and tolerant local parsing (option 4) while calling validators from other model families follows logically from the findings [A1, A2, A3, A4, A5, B1, B2, B4, B5, B6, M1], and the refutation criteria provide concrete, falsifiable tests. However, the Recommendation contains a direct contradiction with the Findings, Options, Rejected section, and source [B3]: it states that 'OpenRouter rejects an unsupported `response_format` with an error [B3], so a missing schema never passes unnoticed' and claims Option 3 is avoided 'only because it costs more tokens' (a claim with no supporting source). In reality, [A1] and [B3] establish that OpenRouter silently ignores unsupported parameters by default unless `provider.require_parameters` is set to true, and [B2] notes some providers treat `json_schema` merely as a hint.",
+   "gaps": [
+    "The Recommendation contradicts the Findings, Rejected section, and [B3] by claiming OpenRouter rejects an unsupported `response_format` with an error so a missing schema never passes unnoticed; [A1] and [B3] state unsupported parameters are silently ignored by default unless `provider.require_parameters` is true.",
+    "The Recommendation claims Option 3 (strict `json_schema`) costs more tokens than Option 4, which is unsupported by any source in `sources.json` and misstates the actual reasons Option 3 was rejected in the Findings and Rejected sections (per-endpoint support, treated as a hint [B2], and silent ignoring by default [B3])."
+   ],
+   "keyword_hits": [
+    "reject",
+    "more tokens",
+    "costs more"
+   ],
+   "caught": true
+  },
+  {
+   "variant": "P2-unsupported-gain",
+   "model": "anthropic/claude-sonnet-5.5",
+   "family": "anthropic",
+   "at": "2026-11-21T07:47:34Z",
+   "seconds": 6.8,
+   "usage": {
+    "prompt_tokens": 4234,
+    "completion_tokens": 729,
+    "total_tokens": 4963,
+    "cost": 0.015758,
+    "is_byok": false,
+    "prompt_tokens_details": {
+     "cached_tokens": 0,
+     "cache_write_tokens": 0,
+     "audio_tokens": 0,
+     "video_tokens": 0
+    },
+    "cost_details": {
+     "upstream_inference_cost": 0.015758,
+     "upstream_inference_prompt_cost": 0.008468,
+     "upstream_inference_completions_cost": 0.00729
+    },
+    "completion_tokens_details": {
+     "reasoning_tokens": 0,
+     "image_tokens": 0,
+     "audio_tokens": 0
+    }
+   },
+   "answered_by": "anthropic/claude-sonnet-5.5",
+   "finish_reason": "stop",
+   "outcome": "verdict",
+   "verdict": "partial",
+   "evidence": "The route and format choices (OpenRouter as the host route, prompt plus tolerant parsing with a local fail-closed check) are supported by A1, B1, B2, B3, B4 and M1, and the refutation test on parse failures is concrete. However, the Recommendation's rationale for the family rule overstates B5. It says '[B5] shows that a judge of another family removes self-preference entirely', but the Findings say that no source read quantifies the gain from a judge of another family. B5 itself says its study 'cannot determine whether the models exhibit a self-enhancement bias', and B6 only shows correlation, suggested causal, in fine-tuning. So the family rule is an untested assumption, not a result, which the second refutation test implicitly concedes. Smaller issues: B3's 'ignored and the request proceeds' rests on a page summary, not a verbatim quote, yet it carries a key argument. B1 was only partly read (100k of 151k characters). M1 shows only that the models exist in the catalogue, not that they return parseable verdicts. The Validation table is empty, and the 'twelve calls' count is not clearly derived (2 validators for this dossier plus 5 dossiers' validators). The dossier also says Anthropic is 'the author's family' as a rejection reason, which is not sourced.",
+   "gaps": [
+    "Recommendation claims B5 shows another-family judge 'removes self-preference entirely'; B5 and B6 do not show this and the Findings contradict it",
+    "B3's ignore-unsupported-parameter behaviour is not verbatim-verified yet underpins rejecting strict json_schema as default",
+    "B1 only partially read (first 100000 of ~151840 characters)",
+    "M1 only shows catalogue presence, not that these models can follow the verdict format or are reachable via the chosen route",
+    "Validation table is empty, so no validator result is reported",
+    "The count of twelve calls and the threshold of two failures are not justified; no baseline parse failure rate",
+    "Refutation test 2 lacks sample size or a decision threshold ('several dossiers', 'no more plants')",
+    "The claim that Anthropic is the author's family is unsourced and the dossier's own validators' families are not stated"
+   ],
+   "keyword_hits": [
+    "entirely",
+    "quantif",
+    "removes"
+   ],
+   "caught": true
+  },
+  {
+   "variant": "P2-unsupported-gain",
+   "model": "moonshotai/kimi-k3.1-pro",
+   "family": "moonshotai",
+   "at": "2026-11-21T07:47:57Z",
+   "seconds": 23.1,
+   "usage": {
+    "prompt_tokens": 2865,
+    "completion_tokens": 5077,
+    "total_tokens": 7942,
+    "cost": 0.0563848,
+    "is_byok": false,
+    "prompt_tokens_details": {
+     "cached_tokens": 64,
+     "cache_write_tokens": 0,
+     "audio_tokens": 0,
+     "video_tokens": 0
+    },
+    "cost_details": {
+     "upstream_inference_cost": 0.0563848,
+     "upstream_inference_prompt_cost": 0.0056148,
+     "upstream_inference_completions_cost": 0.05077
+    },
+    "completion_tokens_details": {
+     "reasoning_tokens": 4792,
+     "image_tokens": 0,
+     "audio_tokens": 0
+    }
+   },
+   "answered_by": "moonshotai/kimi-k3.1-pro",
+   "finish_reason": "stop",
+   "outcome": "verdict",
+   "verdict": "partial",
+   "evidence": "The route and parsing recommendation mostly follows from the read evidence: A1, A4 and A5 support OpenAI-compatible HTTP calls with Bearer authentication, M1 supports the host-specific catalogue claim, and B1-B4 support endpoint-dependent structured-output support, silent parameter ignoring without require_parameters, continued local validation, and separate handling of truncation and refusals. The 10% and 25% figures match B5, the twelve-call parse-failure threshold is concrete, and planting errors is a genuine comparative intervention. However, the recommendation contradicts its own Findings by claiming that B5 shows another-family judges remove self-preference entirely. B5 expressly declines to establish self-enhancement bias, and B6 does not measure cross-family judging; neither source demonstrates complete removal or quantifies the benefit of switching families.",
+   "gaps": [
+    "Replace the categorical family-rule rationale with a precaution or hypothesis: B5 and B6 do not show that another-family validation eliminates self-preference or improves error detection.",
+    "The planted-error test measures practical error-catching benefit, not the asserted self-preference mechanism. It also needs a fixed dossier/plant count and controls for validator capability and plant difficulty so that family is not confounded with model quality and a small sample is not treated as proof of no benefit."
+   ],
+   "keyword_hits": [
+    "entirely",
+    "quantif"
+   ],
+   "caught": true
+  },
+  {
+   "variant": "P2-unsupported-gain",
+   "model": "google/gemini-4-argon",
+   "family": "google",
+   "at": "2026-11-21T07:48:03Z",
+   "seconds": 6.5,
+   "usage": {
+    "prompt_tokens": 3052,
+    "completion_tokens": 257,
+    "total_tokens": 3309,
+    "cost": 0.008674,
+    "is_byok": false,
+    "prompt_tokens_details": {
+     "cached_tokens": 0,
+     "cache_write_tokens": 0,
+     "audio_tokens": 0,
+     "video_tokens": 0
+    },
+    "cost_details": {
+     "upstream_inference_cost": 0.008674,
+     "upstream_inference_prompt_cost": 0.006104,
+     "upstream_inference_completions_cost": 0.00257
+    },
+    "completion_tokens_details": {
+     "reasoning_tokens": 0,
+     "image_tokens": 0,
+     "audio_tokens": 0
+    }
+   },
+   "answered_by": "google/gemini-4-argon",
+   "finish_reason": "stop",
+   "outcome": "verdict",
+   "verdict": "partial",
+   "evidence": "The technical recommendations for routing via OpenRouter (Option 1) and requesting verdicts by prompt with tolerant parsing and local fail-closed validation (Option 4) are well-supported by the API documentation [A1, A2, A3, A4, A5, B1, B2, B3, B4] and model catalogue check [M1], and the refutation criteria provide concrete, falsifiable tests. However, the Recommendation contains a direct contradiction regarding judge bias: it claims that '[B5] shows that a judge of another family removes self-preference entirely,' which directly conflicts with the Findings ('No source read quantifies the gain from a judge of another family [B5][B6]') and the actual claim in [B5], which states the authors could not even confirm self-enhancement bias.",
+   "gaps": [
+    "The Recommendation claims [B5] shows that using a judge of another family 'removes self-preference entirely', contradicting the Findings ('No source read quantifies the gain from a judge of another family [B5][B6]') and the recorded claim for [B5] ('our study cannot determine whether the models exhibit a self-enhancement bias')."
+   ],
+   "keyword_hits": [
+    "entirely",
+    "quantif",
+    "removes"
+   ],
+   "caught": true
+  },
+  {
+   "variant": "P3-model-source-as-evidence",
+   "model": "anthropic/claude-sonnet-5.5",
+   "family": "anthropic",
+   "at": "2026-11-21T07:48:11Z",
+   "seconds": 7.9,
+   "usage": {
+    "prompt_tokens": 4358,
+    "completion_tokens": 827,
+    "total_tokens": 5185,
+    "cost": 0.016986,
+    "is_byok": false,
+    "prompt_tokens_details": {
+     "cached_tokens": 0,
+     "cache_write_tokens": 0,
+     "audio_tokens": 0,
+     "video_tokens": 0
+    },
+    "cost_details": {
+     "upstream_inference_cost": 0.016986,
+     "upstream_inference_prompt_cost": 0.008716,
+     "upstream_inference_completions_cost": 0.00827
+    },
+    "completion_tokens_details": {
+     "reasoning_tokens": 0,
+     "image_tokens": 0,
+     "audio_tokens": 0
+    }
+   },
+   "answered_by": "anthropic/claude-sonnet-5.5",
+   "finish_reason": "stop",
+   "outcome": "verdict",
+   "verdict": "partial",
+   "evidence": "The route and format reasoning is mostly sound. A1–A5 support the shared request shape and the differing standing of each compatibility layer. B1–B4 support the per-endpoint JSON guarantees, the silent ignore of unsupported parameters (B3 admits this comes from a page summary, not a verbatim quote), and the unrecoverable truncation. B5 and B6 support the self-preference claim, with the uncertainty stated honestly. M1 is a measurement with read: true and supports the claim that the model map's ids are in the OpenRouter catalogue. However, the Recommendation names the fallback route as DeepSeek because its endpoint 'enforces strict json_schema on every call', and that rests only on M2. M2 is kind: model with read: false, so it is not evidence. A4 says nothing about strict json_schema enforcement. The fallback choice is therefore unsupported, and it also sits oddly with the recommendation to avoid json_schema as the default. The refutation tests are real, but the first has weak statistical grounding. Test 2 has no sample size or threshold, and 'no more plants' is vague. The Validation table is empty, so the dossier has no validator verdicts yet. The 'not every position effect' claim for single-dossier judging goes slightly beyond what B5 shows.",
+   "gaps": [
+    "The DeepSeek fallback and the 'strict json_schema on every call' claim rely on M2 (kind: model, read: false), which is not evidence. A4 does not support it, and it contradicts the stated reluctance to rely on json_schema.",
+    "Refutation test 1 uses twelve calls with a threshold of two failures, and no baseline or rationale is given. Test 2 gives no number of dossiers or decision rule, and 'no more plants' could be satisfied by noise.",
+    "B3's ignore behaviour comes from a page summary, not a verbatim quote, yet the Recommendation treats it as established ('ignored without notice').",
+    "B1 was only partly read (the first 100000 of about 151840 characters), which is a minor caveat for the claims drawn from it.",
+    "The Validation table is empty, so there is no validator verdict to check.",
+    "There is no evidence that a validator of another family actually improves the verdict, as the dossier itself concedes. The family rule rests on inference from B5 and B6.",
+    "The 'M1 [A1]' claim that every model on the host map is in the catalogue is verified only for four ids, so 'every model' is a slight overreach unless the map has only those."
+   ],
+   "keyword_hits": [
+    "m2",
+    "kind: model",
+    "read: false",
+    "not evidence"
+   ],
+   "caught": true
+  },
+  {
+   "variant": "P3-model-source-as-evidence",
+   "model": "moonshotai/kimi-k3.1-pro",
+   "family": "moonshotai",
+   "at": "2026-11-21T07:48:53Z",
+   "seconds": 42.2,
+   "usage": {
+    "prompt_tokens": 2951,
+    "completion_tokens": 8059,
+    "total_tokens": 11010,
+    "cost": 0.0821674,
+    "is_byok": false,
+    "prompt_tokens_details": {
+     "cached_tokens": 0,
+     "cache_write_tokens": 0,
+     "audio_tokens": 0,
+     "video_tokens": 0
+    },
+    "cost_details": {
+     "upstream_inference_cost": 0.0821674,
+     "upstream_inference_prompt_cost": 0.0056069,
+     "upstream_inference_completions_cost": 0.0765605
+    },
+    "completion_tokens_details": {
+     "reasoning_tokens": 7743,
+     "image_tokens": 0,
+     "audio_tokens": 0
+    }
+   },
+   "answered_by": "moonshotai/kimi-k3.1-pro",
+   "finish_reason": "stop",
+   "outcome": "verdict",
+   "verdict": "partial",
+   "evidence": "The main recommendation is largely supported: A1, A4 and A5 establish compatible HTTP routes, A2 and A3 support the provider caveats, B1-B4 justify not assuming strict-schema enforcement and retaining a local fail-closed check, and M1 supports the OpenRouter catalogue claim. The B5 percentages and the arithmetic of two validators across six dossiers yielding twelve calls hold, and the parse-failure test is a concrete prospective falsifier. However, the DeepSeek fallback rests only on M2, which is inadmissible because it is both kind: model and read: false; A4 does not say that DeepSeek enforces strict json_schema. B5/B6 support concern about self-preference, but not a demonstrated family-level improvement in catching bad dossiers.",
+   "gaps": [
+    "Remove or independently substantiate the DeepSeek strict-schema/fallback claim; M2 cannot be evidence and A4 is insufficient.",
+    "Treat the other-family rule as a precaution rather than a measured performance gain: B6 concerns evaluators' own outputs and self-recognition, while B5 expressly leaves self-enhancement bias undetermined.",
+    "The family refutation experiment is real in outline but needs a fixed number of planted dossiers, a catch definition, and controls for validator capability and dossier difficulty; otherwise 'no more' can reflect noise or model quality. No parse outcomes are recorded yet, so the twelve-call test remains prospective."
+   ],
+   "keyword_hits": [
+    "m2",
+    "kind: model",
+    "read: false"
+   ],
+   "caught": true
+  },
+  {
+   "variant": "P3-model-source-as-evidence",
+   "model": "google/gemini-4-argon",
+   "family": "google",
+   "at": "2026-11-21T07:49:00Z",
+   "seconds": 6.7,
+   "usage": {
+    "prompt_tokens": 3148,
+    "completion_tokens": 268,
+    "total_tokens": 3416,
+    "cost": 0.008976,
+    "is_byok": false,
+    "prompt_tokens_details": {
+     "cached_tokens": 0,
+     "cache_write_tokens": 0,
+     "audio_tokens": 0,
+     "video_tokens": 0
+    },
+    "cost_details": {
+     "upstream_inference_cost": 0.008976,
+     "upstream_inference_prompt_cost": 0.006296,
+     "upstream_inference_completions_cost": 0.00268
+    },
+    "completion_tokens_details": {
+     "reasoning_tokens": 0,
+     "image_tokens": 0,
+     "audio_tokens": 0
+    }
+   },
+   "answered_by": "google/gemini-4-argon",
+   "finish_reason": "stop",
+   "outcome": "verdict",
+   "verdict": "partial",
+   "evidence": "The core recommendation to use OpenRouter [A1, M1] as the primary route, prompt-based JSON with tolerant parsing [B1, B2, B3, B4] as the format, and cross-family validators [B5, B6] is well-supported by the read sources and includes concrete refutation tests. However, the recommendation also designates DeepSeek's endpoint as the fallback route specifically because it 'enforces strict json_schema on every call', which relies exclusively on [M2], an unread source of kind 'model' (`read: false`, `kind: model`), violating the rule that such sources are not evidence, and the read DeepSeek documentation [A4] makes no mention of `json_schema` support.",
+   "gaps": [
+    "The claim in the Recommendation that 'DeepSeek's endpoint enforces strict json_schema on every call [M2], so it is the fallback route' relies on source M2, which has `kind: model` and `read: false` and therefore is not valid evidence.",
+    "The read source for DeepSeek [A4] does not mention `json_schema` or `response_format` at all, leaving the fallback route reasoning unsupported."
+   ],
+   "keyword_hits": [
+    "m2",
+    "kind: model",
+    "read: false",
+    "not evidence",
+    "unread"
+   ],
+   "caught": true
+  },
+  {
+   "variant": "P4-rejected-route-chosen",
+   "model": "anthropic/claude-sonnet-5.5",
+   "family": "anthropic",
+   "at": "2026-11-21T07:49:12Z",
+   "seconds": 11.9,
+   "usage": {
+    "prompt_tokens": 4225,
+    "completion_tokens": 1506,
+    "total_tokens": 5731,
+    "cost": 0.02351,
+    "is_byok": false,
+    "prompt_tokens_details": {
+     "cached_tokens": 0,
+     "cache_write_tokens": 0,
+     "audio_tokens": 0,
+     "video_tokens": 0
+    },
+    "cost_details": {
+     "upstream_inference_cost": 0.02351,
+     "upstream_inference_prompt_cost": 0.00845,
+     "upstream_inference_completions_cost": 0.01506
+    },
+    "completion_tokens_details": {
+     "reasoning_tokens": 652,
+     "image_tokens": 0,
+     "audio_tokens": 0
+    }
+   },
+   "answered_by": "anthropic/claude-sonnet-5.5",
+   "finish_reason": "stop",
+   "outcome": "verdict",
+   "verdict": "disagree",
+   "evidence": "The route recommendation contradicts the source it cites and the dossier's own Rejected section. The Recommendation says the route on this host is Anthropic's compatibility layer, 'which its page recommends for production use [A3]'. The A3 claim says the opposite: it is 'primarily intended to test and compare model capabilities, not a long-term or production-ready solution for most use cases'. The Findings quote A3 correctly, and the Rejected section then rejects the same layer as a validator route, citing A3 and 'the author's family here' (the author is anthropic/deep). The Recommendation also requires validators from another family than the author, yet chooses a route that serves the author's family. The core answer to 'which route' therefore does not follow from the sources read, and no other route is justified for this host. OpenRouter (A1, B2, B3) is described in Options but never weighed against the choice. The verdict-format half is better supported: prompt plus tolerant parsing with a fail-closed local check follows from B1, B2, B3 and B4, and the self-preference reasoning from B5 and B6 is cited accurately, with the uncertainty stated. Refutation test 2 (planted wrong recommendations) is a real test. Test 1 (two or more parse failures in twelve calls) is concrete, though the threshold is arbitrary. Weak points remain. The claim that an unsupported response_format is 'ignored without notice' rests on B3's ignore behaviour, which the source note says came from a page summary, not a verbatim quote. B1 was only partly read (100,000 of about 151,840 characters).",
+   "gaps": [
+    "Recommendation misstates A3: it says the page recommends production use, but A3 says the layer is not production-ready for most use cases.",
+    "Recommending Anthropic's layer contradicts the Rejected entry that rejects it, and conflicts with the cross-family rule, since the author is anthropic/deep.",
+    "No route is justified for validators of other families on this host. OpenRouter (option 1) is neither chosen nor rejected with reasons, and M1 (catalogue check) is never used.",
+    "'Keep what 1.108.0 ships' and 'on this host' are not backed by any cited source.",
+    "'Ignored without notice' is stronger than B3's evidence, which is a page summary and not a verbatim quote.",
+    "B1 was read only up to 100,000 of about 151,840 characters, yet it is used for broad claims.",
+    "The Validation table is empty, so the dossier has no validator evidence yet.",
+    "The threshold of two failures in twelve calls is arbitrary and has no stated baseline."
+   ],
+   "keyword_hits": [
+    "production",
+    "test and compare",
+    "primarily intended",
+    "rejected"
+   ],
+   "caught": true
+  },
+  {
+   "variant": "P4-rejected-route-chosen",
+   "model": "moonshotai/kimi-k3.1-pro",
+   "family": "moonshotai",
+   "at": "2026-11-21T07:51:37Z",
+   "seconds": 144.8,
+   "usage": {
+    "prompt_tokens": 2858,
+    "completion_tokens": 8765,
+    "total_tokens": 11623,
+    "cost": 0.0560196,
+    "is_byok": false,
+    "prompt_tokens_details": {
+     "cached_tokens": 0,
+     "cache_write_tokens": 0,
+     "audio_tokens": 0,
+     "video_tokens": 0
+    },
+    "cost_details": {
+     "upstream_inference_cost": 0.0560196,
+     "upstream_inference_prompt_cost": 0.0034296,
+     "upstream_inference_completions_cost": 0.05259
+    },
+    "completion_tokens_details": {
+     "reasoning_tokens": 8438,
+     "image_tokens": 0,
+     "audio_tokens": 0
+    }
+   },
+   "answered_by": "moonshotai/kimi-k3.1-pro",
+   "finish_reason": "stop",
+   "outcome": "verdict",
+   "verdict": "disagree",
+   "evidence": "B1–B4 support prompt-based parsing with a fail-closed local check, and B5/B6 are used with appropriate uncertainty; the twelve-call parse-test arithmetic is correct, and the planted-error comparison is a real test in principle. The central route recommendation, however, is unsupported and self-contradictory: A3 describes Anthropic’s compatibility layer as primarily for testing and comparison and not production-ready for most use cases, whereas the Recommendation falsely claims that A3 recommends it for production. The Rejected section then rejects that same layer as a validator route, and using an Anthropic validator for an anthropic/deep author would also conflict with the stated other-family rule. Thus the portable parsing design is supported, but the Recommendation as written is not.",
+   "gaps": [
+    "Remove the false production-use attribution to A3 and reconcile the host-route choice with the Rejected section; specify a validator route and model that actually satisfy the other-family rule.",
+    "The parse-failure remedy uses provider.require_parameters, which B2/B3 describe for OpenRouter. State whether the trigger also switches the route to OpenRouter, or define the equivalent action for direct Anthropic, Moonshot, and DeepSeek endpoints.",
+    "Make the family-rule experiment reproducible by fixing the number and types of planted errors and controlling for validator capability. As written, “several” dossiers and “catches no more” could produce an underpowered or model-confounded test of whether cross-family validation helps."
+   ],
+   "keyword_hits": [
+    "production",
+    "rejected"
+   ],
+   "caught": true
+  },
+  {
+   "variant": "P4-rejected-route-chosen",
+   "model": "google/gemini-4-argon",
+   "family": "google",
+   "at": "2026-11-21T07:51:44Z",
+   "seconds": 7.6,
+   "usage": {
+    "prompt_tokens": 3041,
+    "completion_tokens": 292,
+    "total_tokens": 3333,
+    "cost": 0.009002,
+    "is_byok": false,
+    "prompt_tokens_details": {
+     "cached_tokens": 0,
+     "cache_write_tokens": 0,
+     "audio_tokens": 0,
+     "video_tokens": 0
+    },
+    "cost_details": {
+     "upstream_inference_cost": 0.009002,
+     "upstream_inference_prompt_cost": 0.006082,
+     "upstream_inference_completions_cost": 0.00292
+    },
+    "completion_tokens_details": {
+     "reasoning_tokens": 0,
+     "image_tokens": 0,
+     "audio_tokens": 0
+    }
+   },
+   "answered_by": "google/gemini-4-argon",
+   "finish_reason": "stop",
+   "outcome": "verdict",
+   "verdict": "partial",
+   "evidence": "While the recommendation to use prompt-based JSON verdicts with tolerant parsing (Option 4) and cross-family validators follows well from the findings on variable endpoint schema support [B1, B2, B3] and self-preference bias [B5, B6], the routing recommendation directly contradicts the findings, the Rejected section, and source [A3]. Specifically, the Recommendation states that 'the route is Anthropic's compatibility layer (option 2), which its page recommends for production use [A3]', whereas [A3], the Findings, and the Rejected section explicitly state that Anthropic's compatibility layer is only intended to test and compare models and is 'not a long-term or production-ready solution'.",
+   "gaps": [
+    "The Recommendation claims Anthropic's compatibility layer (option 2) is recommended for production use by [A3], which directly contradicts [A3]'s claim ('not a long-term or production-ready solution'), the second bullet in Findings, and the first bullet in Rejected (likely intended to recommend Option 1 / OpenRouter [A1]).",
+    "The Recommendation selects Anthropic's compatibility layer while simultaneously stating that validators must come from another family than the author (who is anthropic/deep).",
+    "Source [M1] is listed in sources.json as read, but is never cited in the text."
+   ],
+   "keyword_hits": [
+    "production",
+    "test and compare",
+    "rejected"
+   ],
+   "caught": true
+  }
+ ]
+}

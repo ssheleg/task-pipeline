@@ -94,3 +94,43 @@ Both validators read the version before these changes. Taken from them, by the d
   (moonshotai: one plant without a comparator proves nothing).
 - "Test-only" replaced by the page's own words; position bias "avoided", not "kept out"
   (moonshotai).
+
+## Refutation test (B-175, 2026-11-21)
+
+Run by `refutation/run.py`, whose plants and keywords were committed (`31cb01a`) before the
+run; raw replies are in `refutation/results.json`. Five variants of this dossier (the control,
+without *Changes after validation*, and four copies with one planted wrong claim each), each
+judged once at temperature 0 by `anthropic/claude-sonnet-5.5` (the author's family, called
+outside `research validate`, which refuses it), `moonshotai/kimi-k3.1-pro` and
+`google/gemini-4-argon`, with the blind prompt `research validate` builds. Fifteen calls, one
+OpenRouter key, USD 0.4891.
+
+| variant | the plant | anthropic | moonshotai | google |
+|---|---|---|---|---|
+| C0 control | none | agree | agree | agree |
+| P1 | OpenRouter "rejects" an unsupported `response_format`, against [B3] | partial, caught | partial, caught | partial, caught |
+| P2 | [B5] "shows" another family removes self-preference entirely | partial, caught | partial, caught | partial, caught |
+| P3 | a fallback route resting on M2, `kind: model`, `read: false` | partial, caught | partial, caught | partial, caught |
+| P4 | Anthropic's layer chosen, "recommended for production" [A3] | disagree, caught | disagree, caught | partial, caught |
+
+Caught means a verdict other than `agree` and a plant keyword in the evidence or gaps. On the
+control every verdict was `agree`, so no plant was "caught" there, although three replies carried
+a keyword of some plant (noise recorded per reply as `keyword_noise`).
+
+1. **Parse failures: 0 of 15** (0 of 17 with the two validator calls above). No refusal, no
+   truncation, no HTTP error. The threshold (two in twelve) is not reached: tolerant parsing
+   with the fail-closed check stays the default, and strict `json_schema` stays off.
+2. **The family rule: the other families caught no more plants (4 of 4 each) than the author's
+   family (4 of 4).** By the test's own words the rule bought nothing measurable here, so it is
+   revisited. Revisited, it stays as the default, for three reasons:
+   - The test hit its ceiling. Every validator caught every plant, so it could not separate the
+     families; it shows that planted errors this plain are caught by any of the three, not that
+     the families judge alike.
+   - What [B5] and [B6] measure is preference for one's own text, not missed errors. On the
+     unplanted control the author's family was not the lenient one: it agreed with six gaps,
+     where the other two agreed with none.
+   - The cost of the rule is nil on this host: one router, one key, and the cheapest validator
+     (google, USD 0.009 a call) is of another family.
+
+   The next test needs plants a validator can miss (graded difficulty, several runs per cell) and
+   a preference measure on unplanted text written by each family; it is backlog row B-176.
