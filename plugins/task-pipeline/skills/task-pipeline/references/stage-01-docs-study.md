@@ -8,3 +8,6 @@ The full gate and freedom level remain in [stages.md](stages.md).
 - **Invoke:** the `context7` MCP — `context7:resolve-library-id` → `context7:query-docs`,
   scoped by topic or the `context7-docs` skill. Web-search fallback for libs context7
   can't resolve.
+- **Research, by size:** a size-M or L spec, or a new domain, owes a research
+  dossier by scouts, a decider and validators of another model family
+  ([`spec-protocol.md`](spec-protocol.md) → *3*).

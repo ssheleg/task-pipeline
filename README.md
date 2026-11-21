@@ -180,7 +180,7 @@ and the inline fallback satisfy the same [provider contract](plugins/task-pipeli
 | 0 Intake grill | [`grill.md`](plugins/task-pipeline/skills/task-pipeline/references/grill.md) — interview loop, domain awareness, autonomy sweep |
 | 2 Brainstorm | [`brainstorm.md`](plugins/task-pipeline/skills/task-pipeline/references/brainstorm.md) — approaches, YAGNI, the no-code-before-approval gate |
 | 2 Decompose | [`decomposition.md`](plugins/task-pipeline/skills/task-pipeline/references/decomposition.md) — platforms only: brick criteria, module map, build order |
-| 3 Spec | [`spec.md`](plugins/task-pipeline/skills/task-pipeline/references/spec.md) — UX-track order, locked contracts, global constraints, self-review |
+| 3 Spec | [`spec.md`](plugins/task-pipeline/skills/task-pipeline/references/spec.md) — UX-track order, locked contracts, global constraints, self-review; [`spec-protocol.md`](plugins/task-pipeline/skills/task-pipeline/references/spec-protocol.md): the spec sized S, M or L, the classed question ledger (only strategy reaches the owner), research by scouts and validators of another model family, `scripts/spec_protocol.py` checks each, spec then board then build |
 | 4 Plan | [`planning.md`](plugins/task-pipeline/skills/task-pipeline/references/planning.md) — zero-context tasks, parallel groups, no placeholders |
 | the queue | [`work-graph.md`](plugins/task-pipeline/skills/task-pipeline/references/work-graph.md) — a script walks the graph so the model never reads it: 400 nodes and 4 print the same 27-byte frontier |
 | closing a node | [`certification.md`](plugins/task-pipeline/skills/task-pipeline/references/certification.md): three blind readings at escalating visibility (the changed code, what reaches it, the product around it), all three required to pass (one on an R1 node; a clean round ends a node unless it is R3 or flagship), and a fourth, `verifier-visual`, on a flagship or product surface, which reads the contact sheet against the director record, and an `agent` reading, `verifier-agent`, on a node with `agent_surface: public` or `internal`, which runs the proving call and the contract tests; a failing round records itself and the node stays open, and at the ceiling the node is parked with its evidence |
@@ -653,7 +653,7 @@ must say so.
 ### Held to Anthropic's own Skill authoring guidance
 
 Audited against the four Agent Skills pages. Most of it already held — `name`
-13/64 chars, `description` 292/1024 chars, `SKILL.md` 215/500 lines, all 58 references
+13/64 chars, `description` 292/1024 chars, `SKILL.md` 215/500 lines, all 59 references
 reachable from `SKILL.md` through explicit reference routes, and the bundle far under the 30 MB ceiling. What
 did not, now does:
 
@@ -1026,6 +1026,7 @@ recommendation, so you arm the whole run in one exchange. Detail:
 | [`references/deploy-targets.md`](plugins/task-pipeline/skills/task-pipeline/references/deploy-targets.md) | stages 7–8: writing the runbook when there is none, the template, per-platform deploy and log verbs, the verification trio |
 | [`references/hooks.md`](plugins/task-pipeline/skills/task-pipeline/references/hooks.md) | the `PreToolUse` contract, the fail-open hazard, placement, and the Claude-Code-only limit |
 | [`references/doc-graph.md`](plugins/task-pipeline/skills/task-pipeline/references/doc-graph.md) | documentation as a graph: the starter pack (`scripts/docgraph.py`), one format with the estate's graphs, self-healing, cleanup, the hidden refactoring |
+| [`references/spec-protocol.md`](plugins/task-pipeline/skills/task-pipeline/references/spec-protocol.md) | stages 0 to 4 as checks: size, question classes, research with other models, the spec gate and the order spec, board, build (`scripts/spec_protocol.py`) |
 | [`references/knowledge-graph.md`](plugins/task-pipeline/skills/task-pipeline/references/knowledge-graph.md) | the code graph: install line, stage-0 reach queries, the stage-9 refresh, the graph↔docs divergence check |
 | [`references/retrospective.md`](plugins/task-pipeline/skills/task-pipeline/references/retrospective.md) | the project retro: the three grades of fix, the mandatory prune, the cap of ten |
 | [`references/model-tiering.md`](plugins/task-pipeline/skills/task-pipeline/references/model-tiering.md) | model policy, the `/model` reminder, overrides |

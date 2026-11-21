@@ -1,3 +1,32 @@
+## Unreleased 1.107.0: the spec protocol, branch `feat/spec-protocol` (2026-11-21)
+
+- **Orders.** Owner via Telegram, 2026-11-21 ~03:15, board request f6537624 to the CEO, brief
+  `2026-11-21-spec-protocol-prioritization-process-brief.md` item 3: a working spec protocol in
+  stages 1-4 (size adaptive to complexity, grilling, research by agents with web search and other
+  models on Sound Engine's pattern, technical and research questions decided by agents, the owner
+  asked only about concept, vision and meaning, spec then board then build). Amendment A-2 of the
+  system plan (board 460f0599, OT-07) asks the same of the grill. The owner lifted the pause for
+  this session (reconciler A-3, step 7): release 1.106.0, update installs, then this.
+- **Done.** `scripts/spec_protocol.py` (size, questions, research init|plan|check, check, gate),
+  `references/spec-protocol.md`, hooks in grill.md phase 2 and stages 1 to 4,
+  `test/spec_protocol_test.py` (19 cases, OT-07's acceptance first; ten planted mutations each
+  turned a case red). Backlog rows B-171..B-174 (SD-TPL-01..03, OT-07); a thread message with them
+  went to board thread b31929d9 (message b4e6e648).
+- **Decisions.** Question classes `strategy`, `tactics`, `known-domain`, `unknown`; tactics and
+  known domains are never `pending`; every owner question carries a default the work goes on with;
+  model tiers are named (deep, work, fast; Opus, Sonnet, Haiku on a Claude host), never vendor ids;
+  a model's answer is never a source (the agents base's research trap). Words held at the prompt-lint
+  baseline by folding stage 3's restated UX chain and COPY/VISUAL summary into pointers.
+- **Checks run.** Full `npm test` green on the branch before the rebase (exit 0); `test/validate.py`
+  and `test/prompt_lint.py` PASS after it; pinned make-skill house audit (`5ca5c367`) 0 GAP on all
+  three skills of a clean tree.
+- **1.106.0.** Merged as PR #174 (`5374b77`) with #172 and #173 folded in and closed; PR #175
+  declared it in the retro; tagged through the hub's `scripts/release-member.js`.
+- **Next task.** PR for this branch (draft, then ready, so `validate` runs), merge, tag
+  `v1.107.0` with `release-member.js`, check `gh release view` and `npm view`, pin both versions
+  on the hub branch `feat/doc-graph-family-rule`, release the hub, `npx --yes sshlg-skills@latest
+  update`, communicator_notify. Then the queue: Reports, cross-agent skills, board 1ace85b7.
+
 ## Unreleased 1.106.0: documentation is a graph from the first day, branch `feat/doc-graph-starter` (2026-11-20, paused 2026-11-21)
 
 - **Objective.** Owner, 2026-11-20 (CEO window of Fabric, brief
