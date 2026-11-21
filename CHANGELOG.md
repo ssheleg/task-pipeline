@@ -17,6 +17,10 @@ the call to the host. Lifted pause of 2026-11-21 (reconciler A-3, step 7): conti
   pass; blindness; the author's family refused; four failed calls leave the dossier unchanged).
   Three planted mutations (blindness off, the family check off, a bad verdict accepted) each
   turned a case red.
+- **The doc graph's format table, corrected.** `references/doc-graph.md` gave Fabric Memory's
+  edge as `src`, `dst`, `rel`; Fabric's model (`@fabric/graph`) is `from`, `to`, `kind`, with
+  `group` and `conf` for area and basis (Fabric's answer on the board, 2026-11-21, after Sound
+  Engine noticed it while shipping the mapping, REQ-0538).
 - **First live run.** `docs/research/2026-11-21-validator-route/`: the question this release
   answers, run by the protocol itself. Two working-tier scouts with web search read 11 sources
   (9 official docs, 2 papers), the decider rechecked two quotes against the pages, and two
