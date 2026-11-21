@@ -62,12 +62,8 @@ Rules for the list:
 - **The wiki and the graph are optional; the harvest is not.** With no wiki, no
   graph and no doc repos, the harvest is sources 1 and 3–7 and takes two minutes.
   Skipping it is never the answer.
-- **Source 7 is read in full where it is bounded, and queried where it is not.** The
-  standing instructions (capped at ten) and the run stamps (one line each) are read;
-  the *Recent log* is queried by the task's nouns like the archive. Measured on the
-  file this doctrine was written for, the log was **74% of it** — and it is the one
-  section nothing caps. Source 7 is still the source that *binds* the run rather than
-  informing it; that is why the part which binds must stay cheap enough to read.
+- **Source 7 is read where bounded, queried where not** (row 7):
+  the *Recent log* is queried by the task's nouns like the archive (74%, uncapped).
 
 ## The retro's standing instructions — an instruction source, not background
 
@@ -91,59 +87,18 @@ Two obligations that come with reading them:
 
 ## The code graph — recommended
 
-Full doctrine: [`knowledge-graph.md`](knowledge-graph.md). In one paragraph: a grep
-finds a **name**, a graph finds **reach** — what calls this, what breaks if it
-moves, which module every change passes through. That is the class of question the
-harvest most needs answered and the class documents answer least reliably, because a
-document records the reach its author remembered.
-
-**Detect it** — `graphify-out/graph.json` exists (built), or `graphify` resolves but
-the directory doesn't (installed, not built).
-
-- **Built → query it** during the harvest: `graphify query "<the task, as a
-  question>"`, `graphify affected "<the thing being changed>"`, `graphify god-nodes`.
-  Record the row **with the graph's measured lag** — how far behind `HEAD` it is and
-  which signal said so — because a graph is a source and goes stale like one, and a
-  build date is the graph's own reply about itself rather than a measurement of it.
-  The three commands and the three states:
-  [`knowledge-graph.md`](knowledge-graph.md) → *Measure the lag*.
-- **Not installed → recommend it once**, in the preflight block, with the lines:
-
-  ```bash
-  uv tool install graphifyy      # the CLI
-  graphify install               # add the /graphify skill to this agent
-  ```
-
-  then `/graphify .` in the project root. Then continue — it is a
-  **recommendation, never a gate**, exactly like the wiki.
-
-The graph **points; the code decides.** Retrieval order puts it right after the
-code, never as the tiebreaker.
+A grep finds a name, a graph finds reach. Detect, query, measure its lag, and
+recommend it once when absent, never as a gate: [`knowledge-graph.md`](knowledge-graph.md).
+The graph points; the code decides.
 
 ## The knowledge wiki — recommended
 
-The wiki this pipeline is built to work with is
-**[obsidian-wiki](https://github.com/ar9av/obsidian-wiki)** (Karpathy's LLM-wiki
-pattern: raw sources → distilled wiki → schema). It is the one source that carries
-*why* across projects and across months, which is exactly what a fresh context lacks.
-
-**Detect it** — any of: `~/.obsidian-wiki/config` exists; the `wiki-query` /
-`wiki-update` skills resolve.
-
-- **Installed → use it.** Query it during the harvest (`wiki-query`, or the vault's
-  `index.md` + a targeted grep when the skill isn't loaded), and sync back at stage
-  9 (`wiki-update`).
-- **Not installed → recommend it once, in the preflight block, with the line:**
-
-  ```
-  pip install obsidian-wiki
-  obsidian-wiki setup --vault /path/to/your/vault
-  ```
-
-  Back up `~/.obsidian-wiki/` before `setup`: it rewrites the active profile. Where
-  the host's instructions delegate installs, the agent runs the lines itself. Then
-  continue without it. It is a **recommendation, never a gate** — no stage
-  blocks on a missing wiki, and the pipeline never nags twice in a run.
+**[obsidian-wiki](https://github.com/ar9av/obsidian-wiki)** carries *why* across
+projects and months, which a fresh context lacks. Detect: `~/.obsidian-wiki/config`
+exists or `wiki-query`/`wiki-update` resolve. Installed: query it here, sync it at
+stage 9 (`wiki-update`). Absent: its install lines are printed once at preflight
+([`companion-skills.md`](companion-skills.md), back up `~/.obsidian-wiki/` before
+`setup`), and the run continues; never a gate.
 
 ## How to harvest — retrieval, not reading
 
@@ -152,8 +107,9 @@ reading the wiki; you are asking it about this task.
 
 1. **Take the task's nouns** — the entities, the feature name, the subsystem, the
    file paths the operator mentioned — plus their obvious synonyms.
-2. **Query each source with those terms**: `wiki-query` for the wiki; `grep`/`Read`
-   for repo docs; the tracker/hosted-doc tool if one is connected.
+2. **Query each source with those terms**: `wiki-query` for the wiki;
+   `docgraph.py search` for repo docs with `docs/graph/` ([`doc-graph.md`](doc-graph.md)),
+   else `grep`/`Read`; the tracker/hosted-doc tool if one is connected.
 3. **Follow one hop, not ten.** A hit that names an ADR, a scenario id or a module
    is worth opening. A page three links away is context, not evidence.
 4. **Stop when the terms stop returning anything new.** Same rule as the interview:

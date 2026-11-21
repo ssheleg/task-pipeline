@@ -2,7 +2,7 @@
 name: evidence-docs
 description: "Use when writing or reviewing anything read as true: a decision record, ADR, README, acceptance report, runbook, changelog, audit finding, a claim of verification. Applies the ten canons of evidence-backed docs. Not for: drafts, chat answers, commit messages; 'без доков' opts out."
 license: MIT
-compatibility: "Doctrine runs on any agent. No bundled scripts: nothing to install and nothing to degrade."
+compatibility: "Doctrine runs on any agent. One bundled script, scripts/docgraph.py (Python 3 standard library), builds the documentation graph; without Python the doctrine still applies."
 ---
 
 # Evidence-backed documentation
@@ -50,6 +50,7 @@ thing, the canon is the *why* and the rule is the *how*.
 | You are about to… | Read | Because |
 |---|---|---|
 | set a project's documentation up from nothing | [`documentation.md`](references/documentation.md) → *The inventory* | four questions answered before the first line of work |
+| make docs an agent can walk, search and cite, or meet docs that are not | [`doc-graph.md`](references/doc-graph.md), `scripts/docgraph.py init` | a graph from day one; the hidden refactoring converts the rest |
 | record a decision so it survives its author | *Registers and ids* + [`templates/decisions.md`](templates/decisions.md) | append-only ids, edge markers, one decision home |
 | change something and not orphan the docs | *The Doc Loop* + *The propagation matrix* | which documents a change owes, starting with the meta-row |
 | decide where a fact belongs | *Single source of truth* | two homes disagree the day one of them is updated |

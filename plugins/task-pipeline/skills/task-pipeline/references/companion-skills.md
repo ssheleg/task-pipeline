@@ -237,11 +237,8 @@ Rules:
   spent a rule learning that about the browser. Absent → the run continues and says the
   visual layer shipped **undesigned**; that is a weaker claim and the close-out records
   it as one, exactly as it does for a surface verified by reading the diff.
-- **obsidian-wiki**: detect via `~/.obsidian-wiki/config` or a resolving
-  `wiki-query`/`wiki-update`. Present → say `✓ ready` and use it in the harvest.
-  Absent → print the two install lines **once** (back up `~/.obsidian-wiki/` before
-  `setup`, which rewrites the active profile) and continue; never ask twice in a run
-  and never block a stage on it ([`knowledge-sources.md`](knowledge-sources.md)).
+- **obsidian-wiki**: detected and offered as [`knowledge-sources.md`](knowledge-sources.md)
+  says, with the install lines of the table above, once per run, never a gate.
 - **The browser channels — `playwright` and `chrome-devtools`, one rule for both, WebKit
   first.**
   Flag them only when the project **has a web front end** — an `index.html`, a
@@ -270,11 +267,8 @@ Rules:
   surface was verified **by reading the diff**. The rank is of the **engine**, not of the
   tools' quality: neither channel is *the better browser*, and a run that claims one is
   has invented a fact this matrix does not carry.
-- **graphify**: detect via `graphify-out/graph.json` (built → `✓ ready`, query it in
-  the harvest) or a resolving `graphify` binary with no `graphify-out/` (installed,
-  not built → offer the one-line `/graphify .`). Absent → print the install lines
-  **once** and continue. Same law as the wiki: recommended, never a gate, never
-  asked twice ([`knowledge-graph.md`](knowledge-graph.md)).
+- **graphify**: detected and offered as [`knowledge-graph.md`](knowledge-graph.md)
+  → *Detect it* says; the same law as the wiki.
 - **Figma MCP**: flag it only when the task is user-facing **and** the project
   designs visually — read `docs/ux/foundation.md` → *Design tooling* first; no
   record yet means the choice itself is a stage-0 question (super-ux's default is

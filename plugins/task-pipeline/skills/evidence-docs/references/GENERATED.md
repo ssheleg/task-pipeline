@@ -5,7 +5,8 @@ single-skill install of evidence-docs resolves every link without a neighbouring
 checkout (FIX-ED-01.01). The one exception is `retrospective.md`, a hand-written
 pointer to its single home.
 
-- Source home: `skills/task-pipeline/references/` and `skills/task-pipeline/templates/`.
+- Source home: `skills/task-pipeline/references/` and `skills/task-pipeline/templates/`;
+  `scripts/docgraph.py` is a byte copy of `skills/task-pipeline/scripts/docgraph.py`.
 - Transform: deterministic. Links inside the copied set stay relative; links outside
   it point at the source home's canonical URL.
 - Editing: edit the source home, never the copy, then re-run

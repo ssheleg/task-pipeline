@@ -1,3 +1,64 @@
+## v1.106.0: documentation is a graph from the first day; the hidden refactoring converts the rest
+
+Guards: 539 → **539**. The operator, 2026-11-20 (CEO window of Fabric, brief
+`2026-11-20-release-ui-rounds-and-graph-docs-brief.md`, items 2 and 3): documentation and
+data rooms are built on a data graph from the start, with updatable nodes and basic
+self-healing; a starter pack («пакет новичка») that is useful at once and installs with one
+command; and a hidden refactoring in which an agent converts documentation that is not yet
+agent-ready during any task, marks it in the task and keeps a separate refactoring backlog.
+
+- **`scripts/docgraph.py`, the starter pack.** Python standard library only, no model, no
+  network. `init` writes `docs/graph/` (settings, README, a generated map of the project,
+  its decisions, scenarios and documents by area), `docs/refactor-backlog.md` and one
+  `.gitignore` line, then builds the derived graph in `.docgraph/graph.json`; it is
+  idempotent (three runs, same bytes). `search` ranks passages by Russian and English word
+  forms and returns each verbatim at `path#La-Lb`; `cite` accepts a quote only when it
+  stands verbatim and refuses one that adds a number; `neighbours` walks edges both ways.
+  `npx --yes task-pipeline-skill doc-graph init` runs the same file without a skill install.
+- **Basic self-healing and cleanup.** `check` exits 1 on a broken Markdown link or an
+  expired `valid_until`; a `path:line` citation that does not resolve warns (the estate
+  cites other repositories' files in prose), and findings in dated records (`HANDOFF.md`,
+  `CHANGELOG.md`, `docs/reports/`, `docs/evidence/`) are counted, never failed. `heal --fix`
+  repairs only links with one answer: the one file whose path ends with the link's path
+  (a root-relative link written without its slash, `file.py:232` becoming `#L232`), or the
+  one file of that name for a link with no folder; it never rewrites a citation or a dated
+  record. Stale facts go to the map's "Needs re-checking"; orphans are reached through the
+  map. `prune --apply` moves superseded documents to `docs/archive/` with `git mv` and
+  rewrites their inbound links. Nothing is deleted. Measured on a copy of the agents
+  database (163 documents): 44 failing links before, `heal --fix` repaired 44 in two files
+  without touching a citation, 0 after; `init` took 4.3 s.
+- **One format, not three.** The graph is `knowledge-graph/1`, profile `starter`: the node
+  and edge fields of the agents database's knowledge-graph design (D5), with a field map
+  for Sound Engine's brain and Fabric's Memory in `references/doc-graph.md`. Board requests
+  to both owners and to the agents database ask them to confirm it.
+- **Hidden refactoring.** `references/doc-graph.md` says when and how: `docgraph.py detect`
+  says not agent-ready, the task runs `init` and `heal --fix` in a commit of its own, adds
+  one row with `docgraph.py refactor-note`, and one line in its ledger; it never widens the
+  task and never blocks it. Stage 0's harvest searches through the graph where it exists;
+  stage 9 rebuilds and checks it, or converts.
+- **`SKILL.md` is unchanged.** It sits 15 bytes under its headroom bound
+  (`test/audit_regressions/diet_proportional.py`, 16 650); the doctrine is reached from
+  stage 0's harvest (`knowledge-sources.md`) and stage 9 (`stage-09-docs-wiki.md`), and a
+  shorter paragraph that made room dropped the code graph's "where a graph exists".
+- **evidence-docs** carries a byte copy of the script and of `doc-graph.md` (the sync guard
+  `test/audit_regressions/fix-ed-01.01.py` now covers scripts). **project-audit** gains the
+  read-only probe `docs-graph` (`detect`, then `check --no-write`).
+- **Proof.** `test/docgraph_test.py`, 18 cases, in `npm test`; each was watched failing
+  under a planted mutation (severity lowered, the moved-file repair disabled, stemming
+  disabled, the verbatim check disabled) or on the earlier script (the false-alarm,
+  root-relative and citation cases).
+- **The lifecycle hook's ledger lines carry no em dash** (built as 1.105.2 on
+  `fix/run-lifecycle-separator`, PR #172, never released alone; it ships here). `hooks/run-lifecycle.sh` wrote its `event: compact`, `session-end` and
+  `subagent` lines with an em dash between fields, though its `clean()` already took the character
+  out of the detail. Every subagent stop appended one to a project's committed ledger, and a project
+  that refuses the em dash in text a person reads failed its copy check on 115 of them (board request
+  9d0eeb27, from clawdbot-app on 2026-11-18). The hook now separates fields with ` - `. Readers take
+  the kind as the first word and the stamp as the last field (`checkup` looks for `session-end`), so
+  lines an older hook wrote still parse. The grammar in `references/progress.md` and
+  `templates/run.md` says so; `memory`, `lessons` and `gate-blind` lines keep their em dash until the
+  whole ledger grammar moves (its own Fabric task). `test/release_gate_test.py` gains "the hook's
+  lines carry no em dash" over all three kinds.
+
 ## v1.105.1: evidence-docs and project-audit keep their shorter descriptions
 
 Guards: 539 → **539**. 1.105.0 lengthened the descriptions of evidence-docs (by 9 characters)

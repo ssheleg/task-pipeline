@@ -1072,6 +1072,58 @@ def _p_docs(ctx):
                      "test it, where the docs are")])
 
 
+def _docgraph_script():
+    """docgraph.py from a sibling skill of the same install, or None."""
+    here = os.path.dirname(os.path.abspath(__file__))
+    for skill in ("task-pipeline", "evidence-docs"):
+        cand = os.path.join(here, "..", "..", skill, "scripts", "docgraph.py")
+        if os.path.isfile(cand):
+            return os.path.normpath(cand)
+    return None
+
+
+@probe("docs-graph", "seams", needs=())
+def _p_docs_graph(ctx):
+    """Is the documentation agent-ready (task-pipeline references/doc-graph.md)?
+
+    Read-only: `detect` writes nothing and `check --no-write` builds in memory.
+    """
+    script = _docgraph_script()
+    if not script:
+        return Result("blind", "docgraph.py is not installed beside this skill")
+    rc, out, err = ctx.sh(sys.executable, script, "detect", "--json", "--root", ctx.root)
+    if classify_output(rc, out, err) != "read":
+        return Result("blind", "docgraph.py detect: %s" % (err.strip() or "no output"))
+    d = json.loads(out)
+    if not d.get("has_docs"):
+        return Result("clean", "no Markdown documentation to convert")
+    if not d.get("agent_ready"):
+        return Result("finding", "documentation is not agent-ready: missing %s"
+                      % ", ".join(d.get("missing") or []), findings=[_finding(
+            "docs-graph", "docs/",
+            "The documentation is not a graph: no links an agent can walk, "
+            "no search with citations, no self-healing",
+            "low", 1, 1, "hidden refactoring: docgraph.py init, then heal --fix, "
+            "in a commit of their own; one row by docgraph.py refactor-note",
+            detail="%d Markdown documents" % d.get("documents", 0),
+            evidence="docgraph.py detect --json: %s" % out.strip())])
+    rc, out, err = ctx.sh(sys.executable, script, "check", "--json", "--no-write",
+                          "--root", ctx.root)
+    if rc not in (0, 1) or not out.strip():
+        return Result("blind", "docgraph.py check: %s" % (err.strip() or "no output"))
+    report = json.loads(out)
+    fails = [f for f in report.get("findings", []) if f.get("severity") == "fail"]
+    if not fails:
+        return Result("clean", "documentation graph: %(nodes)d nodes, %(edges)d edges, "
+                               "no failing finding" % report["counts"])
+    return Result("finding", "%d failing documentation-graph finding(s)" % len(fails),
+                  findings=[_finding(
+                      "docs-graph", f["where"], "Documentation graph: %s" % f["kind"],
+                      "low", 1, 1, f.get("fix", "docgraph.py heal --fix"),
+                      detail=f.get("what", ""), evidence="docgraph.py check --json")
+                      for f in fails])
+
+
 @probe("gitignore-secrets", "probe", needs=("git",))
 def _p_gitignore(ctx):
     tracked = tracked_files(ctx.root)

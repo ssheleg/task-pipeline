@@ -1,3 +1,93 @@
+## Unreleased 1.106.0: documentation is a graph from the first day, branch `feat/doc-graph-starter` (2026-11-20, paused 2026-11-21)
+
+- **Objective.** Owner, 2026-11-20 (CEO window of Fabric, brief
+  `2026-11-20-release-ui-rounds-and-graph-docs-brief.md`, items 2 and 3): docs and data
+  rooms built on a data graph from the start with basic self-healing and cleanup; a
+  starter pack installed with one command; a hidden refactoring with its own backlog; one
+  graph format with Fabric's Memory and Sound Engine's brain.
+- **State.** Paused by the owner on 2026-11-21 00:30: every session waits for the strategic
+  plan (fabric-workspace session 2d03ce15). Committed and pushed, **not merged, not
+  tagged, not released**; the family release waits for the resume.
+- **Done.** `scripts/docgraph.py` (+ byte copy in evidence-docs), `references/doc-graph.md`
+  (+ pointer in evidence-docs), stage 0 and 9 hooks, project-audit probe `docs-graph`,
+  `npx task-pipeline-skill doc-graph`, `test/docgraph_test.py` (18 cases, each watched red).
+  Measured on a copy of fabric-agents-database (163 documents): `init` 4.3 s, 44 failing
+  links found, `heal --fix` repaired 44 in two files without touching a citation, 0 after.
+  Prompt-lint words held under the baseline by folding restated wiki and code-graph
+  doctrine into pointers to their one home. Hub branch `feat/doc-graph-family-rule`
+  (`d83f0df`) carries the family rule in the evidence-docs router.
+- **Decisions.** The format is the agents database's D5 model as `knowledge-graph/1`,
+  profile `starter`; the graph is derived and git-ignored, the map and the refactoring
+  backlog are committed; only a broken Markdown link and a passed `valid_until` fail the
+  check (a citation may name another repository, dated records are counted); `heal --fix`
+  repairs only links with one answer and never a citation; `prune` moves, never deletes.
+- **Open.** Board thread 66fb9f10: requests a7c06548 (fabric, Memory), 5a04a9de
+  (sound-engine, brain; no responder), db7761ba (agents database; its daily review on
+  2026-11-21, inbox `ib-20261120-403f49b7d2`). Board request 1ace85b7 (`checkup --healer`)
+  is not started.
+- **Checks run.** `python3 test/docgraph_test.py` PASS 18; `python3 test/prompt_lint.py`
+  PASS; pinned make-skill house audit (`5ca5c367`) 0 GAP on all three skills of a clean
+  tree; full `npm test` green in three parts (`docs/evidence/verification.md`, header).
+
+### Proposals for the strategic plan
+
+1. **Documentation graph.** Ship 1.106.0 as built, then one format in practice: Memory
+   and the brain read `knowledge-graph/1` (export and import, not a shared store); the
+   agents database owns the schema name. Next increments, in order of value per cost:
+   `docgraph.py serve` behind MCP `search` and `execute` (the R33 O17 rule asks every
+   project for a cited search behind two doors), vectors only where a project already
+   runs a local embedder, a gold set of ten questions per project as the search gate.
+2. **Hidden refactoring.** Keep it as built: one conversion step per task, its own commit,
+   one row in `docs/refactor-backlog.md`, never a stop. Roll it out through the agents
+   base's templates (request db7761ba) so every agent and organisation copy carries it,
+   and let project-audit's `docs-graph` probe count unconverted projects across the
+   estate, so the backlog is visible without anyone reading repositories.
+3. **Reports** (brief `2026-11-20-reports-artifacts-sharing-brief.md`, items 1 and 2).
+   One family section, not a new skill per variant: a `reports` reference plus a
+   stdlib builder that writes one self-contained HTML (no CDN, inline SVG charts by the
+   dataviz rules, sheleg-design tokens), three shapes (short, large with charts, PDF
+   through the system's headless WebKit or Chromium print), and a data contract: sources
+   named in a manifest, refreshed by a scheduler into a last-good snapshot, the page
+   embeds the snapshot and fetches nothing on open, a failed refresh keeps the last good
+   data and prints its age (the `alert-episodes` and `cloud-showcase` patterns of the
+   agents base apply; R33 O8: the report is also an agent capability). project-reports
+   keeps where reports live; sharing is a connection point for passioncode-platform
+   (353fa3d7): the builder emits a bundle and a manifest, the platform uploads and
+   manages links. The inventory of existing generators (about a dozen, with the gaps
+   nobody covers) is in the projects wiki, page
+   `projects/task-pipeline/reports-inventory-2026-11-21` (kept out of this public
+   repository because it names private projects).
+4. **Cross-agent skills** (brief `2026-11-21-cleanup-module-cloud-offer-crossagent-skills-brief.md`,
+   package 4). Not started. Proposed method: take fabric-agent-adapter's agent matrix
+   (6a78ed83) as the list, install each family bundle and Fabric skill per agent through
+   `sshlg-skills`, prove each with one scripted call that loads the skill and runs a
+   bundled script (for this family: `docgraph.py detect`), and close holes in the
+   launcher's per-agent install paths; scripts stay Python stdlib so every agent can run
+   them.
+
+- **Next task, when resumed.** Merge this branch, tag `v1.106.0` with the hub's
+  `scripts/release-member.js`, watch release.yml to `npm view task-pipeline-skill version`
+  = 1.106.0, pin it on the hub branch, release the hub, run
+  `npx --yes sshlg-skills@latest update`, notify the owner; then the queue: Reports,
+  cross-agent skills, board request 1ace85b7.
+
+## Folded into 1.106.0 (was unreleased 1.105.2): the lifecycle hook's ledger lines carry no em dash, branch `fix/run-lifecycle-separator` (2026-11-18)
+
+- **Objective.** Board request 9d0eeb27 (thread 7b64ef19) from clawdbot-app: `hooks/run-lifecycle.sh`
+  wrote `event:` lines with an em dash separator, failing a project's no-em-dash copy check on 115
+  lines. Board session, no person present.
+- **Done.** The hook writes `event: <kind> - <detail> - <stamp>`; the grammar in
+  `references/progress.md` and `templates/run.md` names both shapes; a test over all three kinds;
+  version 1.105.2 on every surface, CHANGELOG, `retro.md` no-stamp declaration, `verification.md`
+  header; prompt-lint baseline lowered (em dash 2348 to 2347, words unchanged).
+- **Checks run.** `npm test` exit 0 (`all green`), `npm run test:docs` exit 0,
+  `python3 test/release_gate_test.py` OK (76 checks).
+- **Decisions.** Only the hook's three kinds move; `memory`, `lessons` and `gate-blind` lines keep the
+  em dash until the whole ledger grammar moves (Fabric task a9da05d5). The tag is not pushed: npm
+  publication stops a session with no person present.
+- **Next task.** Merge the PR once its required checks are green, tag `v1.105.2` with the release
+  script, confirm `npm view task-pipeline-skill version`, post the version in board thread 7b64ef19.
+
 ## Unreleased 1.105.0: the pipeline's prompts to Anthropic's practices, branch `prompt/anthropic-practices-2026-11-16` (2026-11-16)
 
 - **Objective.** Operator request of 2026-11-16 (sshlg-skills session): study Anthropic's
