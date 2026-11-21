@@ -1,3 +1,23 @@
+## Decision input: project brain for skills and task-pipeline, branch `docs/brain-task-pipeline-report` (2026-11-21)
+
+- **Objective.** The owner's order of 2026-11-21 (Telegram message 481968d0, relayed by the
+  Fabric CEO, board request 0b6bfd75): research and a spec on a project brain for the skills
+  and for task-pipeline, as a PDF, for a decision. No skill or pipeline change until he says so.
+- **Done.** Report `task-pipeline/2026-11-21-brain-task-pipeline`
+  ([README](reports/2026-11-21-brain-task-pipeline/README.md), commit 5c23072): inventory of the
+  memory systems, where context is lost, outside evidence, the brain/1 protocol, rollout,
+  risks, three options. Russian brief and PDF beside it; the PDF was delivered to the owner's
+  Saved Messages through the Telegram gateway (job `job_a2054c57862c209082429f17`, succeeded),
+  under a grant issued for that one chat and revoked after the send.
+- **Decisions taken.** The repository is public, so business side names and the closed parts of
+  the agents database are left out of the report. Recommendation: the minimum (read-only recall
+  at stage 0), then two weeks of measurement.
+- **Open, the owner's.** Do nothing, the minimum or the full version; whether a brain may ever
+  lower scrutiny; side boundaries for lessons; expiry defaults (report section 8).
+- **Checks run.** `reports.py check` 0 errors; `python3 test/validate.py` PASS; `npm run test:docs` OK.
+- **Next task.** On the owner's «делаем»: backlog rows for phase 0 (B-163 first) and phase 1,
+  then `/task-pipeline` on them. Without it: nothing.
+
 ## Released 1.109.0: the family rule measured; the author's family recorded with a warning (2026-11-21)
 
 - **Objective.** Continue the spec protocol (owner, 2026-11-21, board f6537624 item 3; lifted
