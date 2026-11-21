@@ -1,3 +1,35 @@
+## v1.107.0: the spec protocol, stages 0 to 4 as checks; only strategy reaches the owner
+
+Guards: 539 → **539**. The owner, 2026-11-21 (Telegram, relayed by the CEO of Fabric, board
+request f6537624, brief `2026-11-21-spec-protocol-prioritization-process-brief.md`, item 3): a
+working spec protocol, not a description: the spec sized by the task's complexity, grilling,
+research by agents with web search and other models, technical and research questions decided
+by agents, the owner asked only about concept, vision and meaning, and the order spec, board,
+build. The 2026-11-21 system plan's amendment A-2 (board request 460f0599, OT-07) asks the same
+of the grill: each question classed strategy, tactics or known domain.
+
+- **`scripts/spec_protocol.py`**, standard library only. `size` gives S, M or L from the
+  brief's facts with the sections each owes and the research depth; `questions` reads the
+  spec's classed ledger (`strategy`, `tactics`, `known-domain`, `unknown`) and prints the
+  owner's batch: tactics and known domains are decided and recorded, a known-domain answer
+  cites its source, strategy is never decided by the agent, every owner question carries a
+  default, an unknown is researched first; `research init|plan|check` writes the dossier
+  skeleton first, plans scouts, a decider, blind validators of another model family and a
+  merge, and fails an unresolved citation, an unopened source or a model's answer used as
+  evidence, too few sources or validators, a disagreement without a resolution; `check`
+  holds the spec to its size; `gate` opens the build only when the board and the plan cite
+  the spec.
+- **`references/spec-protocol.md`** is the doctrine, built on Sound Engine's research method
+  (a scout who recommends nothing, a decider who sends gaps back, blind cross-family
+  validators, sources counted only when read). The grill's phase 2 classes each material
+  unknown; stages 1 to 4 each name their step.
+- **OT-07's acceptance holds:** a planted spec with five tactical and one strategic question
+  sends the owner exactly one (`test/spec_protocol_test.py`, first case).
+- **Proof.** `test/spec_protocol_test.py`, 19 cases, in `npm test`; ten planted mutations of
+  the script (each rule disabled in turn) each turned a case red.
+- **Words held.** The prompt-lint word count stays at its baseline: grill phase 2 and stage
+  3's restated UX chain and COPY/VISUAL summary now point to their one home in `spec.md`.
+
 ## v1.106.0: documentation is a graph from the first day; the hidden refactoring converts the rest
 
 Guards: 539 → **539**. The operator, 2026-11-20 (CEO window of Fabric, brief

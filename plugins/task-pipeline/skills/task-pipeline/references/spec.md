@@ -90,10 +90,7 @@ entered from super-ux), verify it and embed it; build only what's missing.
 
 Three tracks, three questions, and they do not substitute for each other:
 super-ux decides what the interface must **do**; `copywriting` how it
-**sounds**; `sheleg-design` how it **looks**. Until 2026-08-10 stage 3 named
-only the first, so a run designed a flow, then wrote its strings by taste and
-picked its values at the keyboard — and every gate in the pipeline reported
-green over both.
+**sounds**; `sheleg-design` how it **looks**.
 
 - **COPY track — how it sounds.** Every string a product's user will read is written
   through super-ux's `copywriting`, against the brand pack (`docs/brand/voice.md`,

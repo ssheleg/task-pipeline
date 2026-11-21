@@ -9,3 +9,5 @@ The full gate and freedom level remain in [stages.md](stages.md).
   paths, complete code in every step, TDD steps with expected output, DoD each,
   dependency graph + parallel groups, non-overlapping file ownership, and the
   Global Constraints block copied verbatim from the spec.
+- **Spec, then board, then build:** the plan's rows reach the board first, and
+  `spec_protocol.py gate <spec> --board <backlog> --plan <plan>` passes before stage 5.

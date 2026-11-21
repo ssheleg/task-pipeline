@@ -52,17 +52,12 @@ not a question to re-open from scratch.
    conventions the repo already follows. Do this before asking anything.
 2. **Scope check, early.** If the task actually describes several independent
    capabilities or separately shippable surfaces, say so immediately: that is a
-   **platform**, and it gets cut into modules at the end of this stage by
-   [`decomposition.md`](decomposition.md), before any spec is written. Brainstorm
-   the platform's shape — the pieces, how they relate, what order they land in —
-   not the details of one corner; those belong to each module's own stage-3
-   dossier. Don't refine something that needs splitting first.
-3. **Questions in one batch, after the sources.** What the brief, the code and the
-   recorded decisions cannot answer goes in one message, ordered by dependency, each
-   with a recommendation; one at a time only where an answer reshapes the next
-   question or the operator asks ([`grill.md`](grill.md)). Multiple choice where it
-   fits, open where it doesn't. Purpose, constraints, success criteria — anything the
-   brief left at design level.
+   **platform**, cut into modules at the end of this stage
+   ([`decomposition.md`](decomposition.md)). Brainstorm its shape (the pieces, how
+   they relate, the order they land in), not one corner's details.
+3. **Questions in one batch, after the sources**, each classed and with a default:
+   only strategy and researched unknowns reach the operator
+   ([`spec-protocol.md`](spec-protocol.md) → *2. Grill with classes*).
 4. **Propose 2–3 approaches with trade-offs**, lead with your recommendation and
    the reason for it. **YAGNI ruthlessly** — strip anything the task doesn't need
    from every option before presenting.
