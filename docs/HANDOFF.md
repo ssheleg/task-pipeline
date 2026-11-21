@@ -5,6 +5,9 @@
 - **Done.** `spec_protocol.py research validate` (blind dossier, OpenAI-compatible endpoint, key
   from a variable, verdict row plus `validation/*.json`, nothing recorded on failure);
   `references/spec-protocol.md` item 3; 22 test cases; CHANGELOG v1.108.0.
+- **Live run.** `docs/research/2026-11-21-validator-route/` passes `research check`: Kimi
+  partial, Gemini agree, gaps taken in, USD 0.105. Its refutation test (twelve calls, parse
+  failures counted apart; same family against another on planted errors) is backlog row B-175.
 - **Key.** `task-pipeline-research` (OpenRouter, Appvillis account, USD 20 a month) for live
   validation runs, vault slot `task-pipeline/local/OPENROUTER_API_KEY`, used only through
   `use_secret.py run`.

@@ -1,0 +1,98 @@
+[
+ {
+  "id": "A1",
+  "kind": "docs",
+  "title": "OpenRouter API Reference: Overview",
+  "url": "https://openrouter.ai/docs/api-reference/overview",
+  "read": true,
+  "claim": "POST https://openrouter.ai/api/v1/chat/completions with Authorization: Bearer; request model (vendor-prefixed) and messages; response choices[] and usage (prompt_tokens, completion_tokens, total_tokens, cost); normalizes the schema across models and providers; unsupported parameters are ignored; finish_reason normalized."
+ },
+ {
+  "id": "A2",
+  "kind": "docs",
+  "title": "Gemini API: OpenAI compatibility",
+  "url": "https://aistudio.google.com/docs/openai",
+  "read": true,
+  "claim": "Base URL https://generativelanguage.googleapis.com/v1beta/openai/; key as Authorization: Bearer in REST; chat completions, structured output supported; support is still in beta; Gemini-specific options in extra_body."
+ },
+ {
+  "id": "A3",
+  "kind": "docs",
+  "title": "Anthropic: OpenAI SDK compatibility",
+  "url": "https://platform.claude.com/docs/en/api/openai-sdk",
+  "read": true,
+  "claim": "Base URL https://api.anthropic.com/v1/; primarily intended to test and compare model capabilities, not a long-term or production-ready solution for most use cases; n must be 1; response_format accepts only json_schema with strict true; many fields ignored; response read as choices[0].message.content."
+ },
+ {
+  "id": "A4",
+  "kind": "docs",
+  "title": "DeepSeek API Docs (quick start)",
+  "url": "https://api-docs.deepseek.com/",
+  "read": true,
+  "claim": "Base URL https://api.deepseek.com, an API format compatible with OpenAI/Anthropic; POST /chat/completions with Authorization: Bearer and a body of model, messages, stream."
+ },
+ {
+  "id": "A5",
+  "kind": "docs",
+  "title": "Moonshot / Kimi API: Chat Completions",
+  "url": "https://platform.kimi.ai/docs/api/chat",
+  "read": true,
+  "claim": "POST /v1/chat/completions on https://api.moonshot.ai/v1 with a Bearer key; response_format text/json_object/json_schema; response choices[].message.content plus reasoning_content; usage with prompt/completion/total tokens; does not claim full compatibility."
+ },
+ {
+  "id": "B1",
+  "kind": "docs",
+  "title": "OpenAI: Structured Outputs guide",
+  "url": "https://developers.openai.com/api/docs/guides/structured-outputs",
+  "read": true,
+  "claim": "JSON mode ensures valid JSON but not schema adherence; only Structured Outputs (json_schema, strict true) ensure schema adherence; the application still needs to handle refusals, incomplete responses and API errors; business rules a schema cannot express need separate validation. First 100000 of about 151840 characters read."
+ },
+ {
+  "id": "B2",
+  "kind": "docs",
+  "title": "OpenRouter: Structured Outputs",
+  "url": "https://openrouter.ai/docs/guides/features/structured-outputs",
+  "read": true,
+  "claim": "response_format json_schema is supported by select models; support is determined per endpoint, not just per model, and changes over time; some providers treat the schema as a strong hint, so exact compliance is not guaranteed on every endpoint; require_parameters true routes only to supporting endpoints."
+ },
+ {
+  "id": "B3",
+  "kind": "docs",
+  "title": "OpenRouter: Provider Routing",
+  "url": "https://openrouter.ai/docs/features/provider-routing",
+  "read": true,
+  "claim": "provider.require_parameters is a boolean defaulting to false: 'Only use providers that support all parameters in your request.' Without it, providers lacking a parameter ignore it and the request proceeds (rechecked by the decider 2026-11-21: the default verbatim; the ignore behaviour from a page summary, not a verbatim quote)."
+ },
+ {
+  "id": "B4",
+  "kind": "docs",
+  "title": "OpenRouter: Response Healing plugin",
+  "url": "https://openrouter.ai/docs/guides/features/plugins/response-healing",
+  "read": true,
+  "claim": "Opt-in plugin repairing malformed JSON (brackets, commas, quotes, fences, preceding prose) for non-streaming json_schema or json_object requests; cannot repair output truncated by the token limit."
+ },
+ {
+  "id": "B5",
+  "kind": "paper",
+  "title": "Zheng et al. 2023, Judging LLM-as-a-Judge with MT-Bench and Chatbot Arena",
+  "url": "https://arxiv.org/html/2306.05685",
+  "read": true,
+  "claim": "Position, verbosity and self-enhancement biases; 'GPT-4 favors itself with a 10% higher win rate; Claude-v1 favors itself with a 25% higher win rate'; 'our study cannot determine whether the models exhibit a self-enhancement bias' (both quotes rechecked verbatim by the decider 2026-11-21)."
+ },
+ {
+  "id": "B6",
+  "kind": "paper",
+  "title": "Panickssery et al. 2024, LLM Evaluators Recognize and Favor Their Own Generations",
+  "url": "https://arxiv.org/abs/2404.13076",
+  "read": true,
+  "claim": "Abstract read: evaluators score their own outputs higher than humans rate them; models recognize their own text with non-trivial accuracy; fine-tuning shows a linear correlation between self-recognition and self-preference, suggested causal."
+ },
+ {
+  "id": "M1",
+  "kind": "measurement",
+  "title": "OpenRouter model catalogue, read 2026-11-21",
+  "url": "https://openrouter.ai/api/v1/models",
+  "read": true,
+  "claim": "GET returned the ids moonshotai/kimi-k3.1-pro, google/gemini-4-argon, z-ai/glm-5.3 and deepseek/deepseek-v4.1-flash (the host model map's check and volume models) as present."
+ }
+]

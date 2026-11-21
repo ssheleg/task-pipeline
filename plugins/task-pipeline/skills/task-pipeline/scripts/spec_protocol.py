@@ -427,7 +427,9 @@ def research_validate(d, model, family, endpoint, key_env, timeout=180, dry_run=
     verdict, err = parse_verdict(content)
     if err:
         return None, err + ": no verdict recorded"
-    slug = re.sub(r"[^a-z0-9]+", "-", ("%s-%s" % (family, model)).lower()).strip("-")
+    slug = re.sub(r"[^a-z0-9]+", "-", model.lower()).strip("-")
+    if not slug.startswith(re.sub(r"[^a-z0-9]+", "-", family.lower())):
+        slug = re.sub(r"[^a-z0-9]+", "-", family.lower()) + "-" + slug
     rec_rel = "validation/%s.json" % slug
     record = dict(verdict, model=model, family=family,
                   at=time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),

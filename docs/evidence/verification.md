@@ -13,7 +13,7 @@ The spec protocol (`scripts/spec_protocol.py`, `references/spec-protocol.md`).
 mutation; `test/validate.py` and `test/prompt_lint.py` PASS. The tag, release jobs and the npm
 readback remain pending; this header declares the version, not a shipped state.
 
-## Shipped state — v1.106.0 (source candidate; NOT SHIPPED yet)
+## Shipped state — v1.106.0 (shipped 2026-11-21: tag v1.106.0 on efde6c6, release run 44869482142 release and publish success, npm task-pipeline-skill 1.106.0)
 
 The documentation graph's starter pack (`scripts/docgraph.py`, `references/doc-graph.md`) and the
 hidden refactoring. `test/docgraph_test.py` 18 cases in `npm test`. `npm test` on 2026-11-21 ran in
