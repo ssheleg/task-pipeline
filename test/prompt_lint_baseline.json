@@ -454,7 +454,7 @@
    "em_dash": 71,
    "unwanted_stop": 0,
    "version_history": 0,
-   "words": 3668
+   "words": 3664
   },
   "plugins/task-pipeline/skills/task-pipeline/references/learned.md": {
    "bold": 111,
@@ -847,6 +847,6 @@
   "em_dash": 2332,
   "unwanted_stop": 15,
   "version_history": 11,
-  "words": 195151
+  "words": 195147
  }
 }

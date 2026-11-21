@@ -62,8 +62,8 @@ Rules for the list:
 - **The wiki and the graph are optional; the harvest is not.** With no wiki, no
   graph and no doc repos, the harvest is sources 1 and 3–7 and takes two minutes.
   Skipping it is never the answer.
-- **Source 7 binds the run, so its bounded part stays cheap to read** (row 7). The
-  uncapped *Recent log* was 74% of the file this doctrine was written for.
+- **Source 7 is read where bounded, queried where not** (row 7):
+  the *Recent log* is queried by the task's nouns like the archive (74%, uncapped).
 
 ## The retro's standing instructions — an instruction source, not background
 
