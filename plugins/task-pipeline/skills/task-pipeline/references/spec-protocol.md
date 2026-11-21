@@ -65,15 +65,16 @@ Roles by model tier (`model-tiering.md`), at most five agents at once:
    What would refute it and Rejected; a gap goes back to a scout, never filled
    from memory.
 3. **Validators** (top tier of another model family, blind to each other):
-   `agree`, `partial` or `disagree` with evidence. On a Claude host the tiers are
-   Opus, Sonnet and Haiku; another family comes through the host's route to other
-   providers or another agent's command line.
+   `agree`, `partial` or `disagree` with evidence. Another family is called by
+   `research validate <dir> --model <id> --family <f> --endpoint <url> --key-env
+   <VAR>` (any OpenAI-compatible route): blind, never the author's family,
+   recording nothing on a failed call.
 4. **Merge** (fast tier): on a `disagree`, `## Resolution` says whose evidence is
-   stronger and why. No voting.
+   stronger. No voting.
 
 `research check <dir>` fails an unresolved citation, an unopened source or a
-model's answer used as evidence, too few sources or validators for the size, a
-disagreement without Resolution. Spend follows the host's per-run line.
+model's answer as evidence, too few sources or validators, a disagreement without
+Resolution. Spend follows the host's per-run line.
 
 ## 4. Check the spec, then the board, then the build
 

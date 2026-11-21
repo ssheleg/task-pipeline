@@ -11,6 +11,8 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import threading
+from http.server import BaseHTTPRequestHandler, HTTPServer
 
 sys.dont_write_bytecode = True
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -24,8 +26,9 @@ def case(fn):
     return fn
 
 
-def run(*args):
-    r = subprocess.run([sys.executable, SCRIPT, *args], capture_output=True, text=True)
+def run(*args, env=None):
+    r = subprocess.run([sys.executable, SCRIPT, *args], capture_output=True, text=True,
+                       env=dict(os.environ, **(env or {})))
     return r.returncode, r.stdout + r.stderr
 
 
@@ -298,6 +301,97 @@ def the_order_is_spec_then_board_then_build(root):
     plan = write(root, "plan.md", "Builds 2026-11-21-export-design.\n")
     code, out = run("gate", spec, "--board", board, "--plan", plan)
     expect(code == 0, out)
+
+
+class FakeModel:
+    """An OpenAI-compatible endpoint on localhost that records what it was sent."""
+
+    def __init__(self, status=200, content=None):
+        seen = self.seen = []
+        answer = content if content is not None else json.dumps(
+            {"verdict": "partial", "evidence": "S1 holds; the refutation test is vague",
+             "gaps": ["name the page that would fetch on open"]})
+
+        class H(BaseHTTPRequestHandler):
+            def do_POST(self):
+                body = self.rfile.read(int(self.headers["Content-Length"])).decode()
+                seen.append({"path": self.path, "auth": self.headers.get("Authorization"),
+                             "body": body})
+                out = json.dumps({"model": "fake/validator", "usage": {"total_tokens": 9},
+                                  "choices": [{"message": {"content": answer}}]}).encode()
+                self.send_response(status)
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
+                self.wfile.write(out)
+
+            def log_message(self, *a):
+                pass
+
+        self.server = HTTPServer(("127.0.0.1", 0), H)
+        self.url = "http://127.0.0.1:%d/v1" % self.server.server_address[1]
+        threading.Thread(target=self.server.serve_forever, daemon=True).start()
+
+    def close(self):
+        self.server.shutdown()
+        self.server.server_close()
+
+
+KEY = {"SPEC_PROTOCOL_API_KEY": "planted-key-not-a-secret"}
+
+
+@case
+def a_validator_of_another_family_is_called_and_recorded(root):
+    d = dossier(root, validators=())
+    code, out = run("research", "check", d)
+    expect(code == 1 and "validator" in out, "a dossier with no validator passed: " + out)
+    fake = FakeModel()
+    try:
+        code, out = run("research", "validate", d, "--model", "fake/validator",
+                        "--family", "family-b", "--endpoint", fake.url, env=KEY)
+    finally:
+        fake.close()
+    expect(code == 0 and "partial" in out, out)
+    expect(fake.seen and fake.seen[0]["path"] == "/v1/chat/completions", fake.seen)
+    expect(fake.seen[0]["auth"] == "Bearer planted-key-not-a-secret", "the key was not sent as a header")
+    expect("planted-key" not in fake.seen[0]["body"] and "planted-key" not in out, "the key leaked")
+    text = open(os.path.join(d, "README.md")).read()
+    expect("| fake/validator | family-b | partial |" in text, text)
+    rec = json.load(open(os.path.join(d, "validation", "family-b-fake-validator.json")))
+    expect(rec["gaps"] and rec["usage"] == {"total_tokens": 9}, rec)
+    code, out = run("research", "check", d)
+    expect(code == 0, "the recorded verdict did not count: " + out)
+
+
+@case
+def the_validator_is_blind_and_never_the_authors_family(root):
+    d = dossier(root, validators=(("first-model", "family-c", "disagree"),), resolution=True)
+    code, out = run("research", "validate", d, "--model", "m", "--family", "Family-A",
+                    "--endpoint", "http://127.0.0.1:9", env=KEY)
+    expect(code == 1 and "author" in out, "the author's family was accepted: " + out)
+    code, out = run("research", "validate", d, "--model", "m", "--family", "family-b", "--dry-run")
+    expect(code == 0 and "Embed the snapshot" in out, out)
+    expect("first-model" not in out and "weaker" not in out,
+           "the prompt shows another validator's verdict or the Resolution")
+
+
+@case
+def a_failed_call_records_no_verdict(root):
+    d = dossier(root, validators=())
+    before = open(os.path.join(d, "README.md")).read()
+    for status, content in ((500, None), (200, "I think it is fine."),
+                            (200, '{"verdict": "looks good"}')):
+        fake = FakeModel(status, content)
+        try:
+            code, out = run("research", "validate", d, "--model", "m", "--family", "family-b",
+                            "--endpoint", fake.url, env=KEY)
+        finally:
+            fake.close()
+        expect(code == 1 and "no verdict recorded" in out, out)
+    code, out = run("research", "validate", d, "--model", "m", "--family", "family-b",
+                    "--endpoint", "http://127.0.0.1:9", env={"SPEC_PROTOCOL_API_KEY": ""})
+    expect(code == 1 and "SPEC_PROTOCOL_API_KEY" in out, out)
+    expect(open(os.path.join(d, "README.md")).read() == before, "a failed call changed the dossier")
+    expect(not os.path.exists(os.path.join(d, "validation")), "a failed call wrote a record")
 
 
 def main():

@@ -1,3 +1,23 @@
+## v1.108.0: the spec protocol calls a validator of another model family
+
+Guards: 539 → **539**. The owner's order of 2026-11-21 (board request f6537624, item 3) asked for
+research by agents with calls to other models; 1.107.0 counted cross-family validators but left
+the call to the host. Lifted pause of 2026-11-21 (reconciler A-3, step 7): continue the protocol.
+
+- **`spec_protocol.py research validate <dir> --model <id> --family <f>`** sends the dossier to
+  any OpenAI-compatible endpoint (`--endpoint` or `SPEC_PROTOCOL_ENDPOINT`; the key only from the
+  variable `--key-env` names, never an argument) and records the verdict: a row in
+  `## Validation` and `validation/<family>-<model>.json` with the gaps, the usage and the time.
+  The validator is blind: other validators' rows and `## Resolution` are removed from what it
+  reads. It refuses the author's family. A failed call (HTTP error, no JSON, an unknown verdict,
+  an empty key) records nothing. `--dry-run` prints the blind prompt and calls nothing. The
+  model id and the endpoint come from the caller: the shipped skill names no vendor model.
+- **Proof.** `test/spec_protocol_test.py`, 22 cases, three new against a local fake endpoint
+  (the key sent only as a header and never echoed; the recorded verdict makes `research check`
+  pass; blindness; the author's family refused; four failed calls leave the dossier unchanged).
+  Three planted mutations (blindness off, the family check off, a bad verdict accepted) each
+  turned a case red.
+
 ## v1.107.0: the spec protocol, stages 0 to 4 as checks; only strategy reaches the owner
 
 Guards: 539 → **539**. The owner, 2026-11-21 (Telegram, relayed by the CEO of Fabric, board

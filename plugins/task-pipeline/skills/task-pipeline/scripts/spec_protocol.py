@@ -2,7 +2,7 @@
 """spec_protocol.py: stages 0-4 as a protocol a script checks, not prose a model recalls.
 
 `references/spec-protocol.md` is the doctrine. This file makes four of its rules
-mechanical, standard library only, no model, no network:
+mechanical, standard library only; only `research validate` calls a model:
 
     size      --reqs N --files N [--surfaces N] [--contract] [--outward]
               [--irreversible] [--cross-project] [--new-domain] [--unknowns N] [--json]
@@ -16,8 +16,12 @@ mechanical, standard library only, no model, no network:
     research  init DIR --tier T --question Q --author FAMILY/TIER
               plan --tier T [--json]
               check DIR [--tier T] [--json]
+              validate DIR --model ID --family F [--endpoint URL] [--key-env NAME]
               The research dossier: skeleton first, sources with what was actually
               read, citations that resolve, validators of another model family.
+              `validate` is the one verb that calls a model: it sends the dossier,
+              blind to other verdicts, to an OpenAI-compatible endpoint and records
+              the verdict. The model id and endpoint come from the caller.
     check     SPEC [--tier T] [--json]
               The spec is complete for its size: sections, ledger, research, no TBD.
     gate      SPEC [--plan PLAN] [--board FILE]
@@ -31,6 +35,9 @@ import json
 import os
 import re
 import sys
+import time
+import urllib.error
+import urllib.request
 
 TIERS = {
     "S": {
@@ -326,6 +333,118 @@ def research_check(d, tier=None):
     return errors, warns
 
 
+VALIDATOR_BRIEF = """You are a blind validator of a research dossier. Another model wrote it;
+you see neither its author's reasoning nor other validators' verdicts. Check that the
+Recommendation follows from the Findings and the sources that were read, that numbers and
+citations hold, and that What would refute it is a real test. A source with read: false
+or kind: model is not evidence. Answer with one JSON object and nothing else:
+{"verdict": "agree" | "partial" | "disagree", "evidence": "<the reason, one paragraph,
+naming source ids>", "gaps": ["<what is missing or wrong>", ...]}"""
+
+
+def blind_dossier(text):
+    """The dossier without other validators' rows and without Resolution."""
+    out, section = [], ""
+    for line in text.splitlines():
+        if line.startswith("## "):
+            section = line[3:].strip().lower()
+        elif section == "resolution":
+            continue
+        elif (section == "validation" and line.startswith("|")
+              and not re.match(r"^\|\s*(validator\b|-)", line)):
+            continue
+        if section != "resolution" or not line.startswith("## "):
+            out.append(line)
+    return "\n".join(out) + "\n"
+
+
+def parse_verdict(content):
+    m = re.search(r"\{.*\}", content or "", re.S)
+    if not m:
+        return None, "the answer holds no JSON object"
+    try:
+        obj = json.loads(m.group(0))
+    except ValueError as e:
+        return None, "the answer's JSON does not parse: %s" % e
+    v = str(obj.get("verdict", "")).lower()
+    if v not in VERDICTS:
+        return None, "verdict %r is not agree, partial or disagree" % obj.get("verdict")
+    return {"verdict": v, "evidence": str(obj.get("evidence", "")).strip(),
+            "gaps": [str(g) for g in obj.get("gaps", []) if g]}, None
+
+
+def add_validation_row(text, row):
+    lines = text.splitlines()
+    start = next((i for i, l in enumerate(lines) if l.strip().lower() == "## validation"), None)
+    if start is None:
+        return None
+    end = next((i for i in range(start + 1, len(lines)) if lines[i].startswith("## ")), len(lines))
+    last = max((i for i in range(start, end) if lines[i].startswith("|")), default=None)
+    if last is None:
+        return None
+    lines.insert(last + 1, row)
+    return "\n".join(lines) + "\n"
+
+
+def research_validate(d, model, family, endpoint, key_env, timeout=180, dry_run=False):
+    """Returns (result, error). Writes nothing unless a verdict came back."""
+    readme, src = os.path.join(d, "README.md"), os.path.join(d, "sources.json")
+    if not os.path.isfile(readme):
+        return None, "no README.md in " + d
+    text = open(readme).read()
+    author = (header_value(text, "Author") or "").lower().split("/")[0]
+    if not author:
+        return None, "no `Author: <family>/<tier>` header: a validator's family cannot be compared"
+    if family.lower() == author:
+        return None, "validator family %r is the author's: a validator comes from another family" % family
+    sources = open(src).read() if os.path.isfile(src) else "[]"
+    prompt = "%s\n\n--- README.md ---\n%s\n--- sources.json ---\n%s" % (
+        VALIDATOR_BRIEF, blind_dossier(text), sources)
+    if dry_run:
+        return {"prompt": prompt, "model": model, "family": family}, None
+    if not endpoint:
+        return None, "no endpoint: pass --endpoint or set SPEC_PROTOCOL_ENDPOINT"
+    key = os.environ.get(key_env, "")
+    if not key:
+        return None, "the key variable %s is empty: run under the host's secret runner" % key_env
+    body = json.dumps({"model": model, "temperature": 0,
+                       "messages": [{"role": "user", "content": prompt}]}).encode()
+    req = urllib.request.Request(endpoint.rstrip("/") + "/chat/completions", data=body,
+                                 headers={"Content-Type": "application/json",
+                                          "Authorization": "Bearer " + key})
+    started = time.time()
+    try:
+        with urllib.request.urlopen(req, timeout=timeout) as r:
+            reply = json.loads(r.read().decode("utf-8", "replace"))
+    except urllib.error.HTTPError as e:
+        return None, "the endpoint answered HTTP %d: no verdict recorded" % e.code
+    except (urllib.error.URLError, OSError, ValueError) as e:
+        return None, "the endpoint failed (%s): no verdict recorded" % type(e).__name__
+    try:
+        content = reply["choices"][0]["message"]["content"]
+    except (KeyError, IndexError, TypeError):
+        return None, "the reply has no choices[0].message.content: no verdict recorded"
+    verdict, err = parse_verdict(content)
+    if err:
+        return None, err + ": no verdict recorded"
+    slug = re.sub(r"[^a-z0-9]+", "-", ("%s-%s" % (family, model)).lower()).strip("-")
+    rec_rel = "validation/%s.json" % slug
+    record = dict(verdict, model=model, family=family,
+                  at=time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+                  seconds=round(time.time() - started, 1), usage=reply.get("usage"),
+                  answered_by=reply.get("model", model))
+    note = re.sub(r"[|\n]+", " ", verdict["evidence"])[:200].strip() or "no evidence given"
+    new = add_validation_row(text, "| %s | %s | %s | %s; %s |" % (model, family, verdict["verdict"], note, rec_rel))
+    if new is None:
+        return None, "no `## Validation` table to record into: no verdict recorded"
+    os.makedirs(os.path.join(d, "validation"), exist_ok=True)
+    with open(os.path.join(d, rec_rel), "w") as fh:
+        json.dump(record, fh, ensure_ascii=False, indent=1)
+    with open(readme, "w") as fh:
+        fh.write(new)
+    return dict(record, record=rec_rel), None
+
+
 # ---------------------------------------------------------------- spec check and gate
 
 def check(path, tier=None):
@@ -413,6 +532,17 @@ def main(argv=None):
     rc.add_argument("dir")
     rc.add_argument("--tier", choices=list(TIERS))
     rc.add_argument("--json", action="store_true")
+    rv = rs.add_parser("validate")
+    rv.add_argument("dir")
+    rv.add_argument("--model", required=True, help="the validator's model id, as the endpoint names it")
+    rv.add_argument("--family", required=True, help="its model family; must differ from the author's")
+    rv.add_argument("--endpoint", default=os.environ.get("SPEC_PROTOCOL_ENDPOINT"),
+                    help="an OpenAI-compatible base URL (default: $SPEC_PROTOCOL_ENDPOINT)")
+    rv.add_argument("--key-env", default="SPEC_PROTOCOL_API_KEY",
+                    help="the environment variable holding the key; the key itself is never an argument")
+    rv.add_argument("--timeout", type=int, default=180)
+    rv.add_argument("--dry-run", action="store_true", help="print the blind prompt, call nothing")
+    rv.add_argument("--json", action="store_true")
     c = sub.add_parser("check")
     c.add_argument("spec")
     c.add_argument("--tier", choices=list(TIERS))
@@ -451,6 +581,18 @@ def main(argv=None):
                  + ["  %d x %s (%s tier%s): %s" % (x["count"], x["role"], x["tier"],
                                                   ", " + x["family"] if "family" in x else "", x["does"])
                     for x in out["roles"]] + ["budget: " + out["budget"]])
+            return 0
+        if a.rcmd == "validate":
+            res, err = research_validate(a.dir, a.model, a.family, a.endpoint, a.key_env,
+                                         a.timeout, a.dry_run)
+            if err:
+                print("FAIL " + err)
+                return 1
+            if a.dry_run:
+                print(res["prompt"])
+                return 0
+            emit(res, a.json, ["%s (%s): %s; recorded in %s" % (a.model, a.family, res["verdict"], res["record"])]
+                 + ["  gap: " + g for g in res["gaps"]])
             return 0
         errors, warns = research_check(a.dir, a.tier)
         emit({"errors": errors, "warnings": warns}, a.json,

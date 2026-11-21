@@ -1,5 +1,11 @@
 # Verification — task-pipeline
 
+## Shipped state — v1.108.0 (source candidate; NOT SHIPPED yet)
+
+`research validate` in `scripts/spec_protocol.py`. `test/spec_protocol_test.py` 22 cases in
+`npm test` (three against a local fake endpoint), each new rule watched red under a planted
+mutation; `test/validate.py` and `test/prompt_lint.py` PASS. Tag, release and npm readback pending.
+
 ## Shipped state — v1.107.0 (source candidate; NOT SHIPPED yet)
 
 The spec protocol (`scripts/spec_protocol.py`, `references/spec-protocol.md`).
