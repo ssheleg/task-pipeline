@@ -1,3 +1,26 @@
+## v1.109.0: the author's family is recorded as a validator, with a warning, never counted
+
+Guards: 539 → **539**. The owner's order of 2026-11-21 (board request f6537624, item 3), lifted
+pause (reconciler A-3, step 7): continue the spec protocol. 1.108.0 refused a validator of the
+author's family on a bias the literature measures as preference, not as missed errors; two
+measurements on this repository, with their decision rules committed before each run, tested it.
+
+- **`research validate` with the author's family** now records the verdict, prints `WARN`, adds
+  `same_family: true` to the record and "the author's family, not counted" to the row.
+  `research check` still counts only other families toward the tier's minimum.
+  `references/spec-protocol.md`: the decider answers every validator gap, `agree` included.
+- **Why: B-175 and B-176** (`docs/research/2026-11-21-validator-route/refutation/`,
+  `docs/research/2026-11-21-family-rule/`). B-175, four plain plants at temperature 0: every family
+  caught all four. B-176, eight quieter plants, three runs a cell at temperature 0.7: the author's
+  family (anthropic) caught 24 of 24, moonshotai 18, google 12 (google named the plant in 23 but
+  kept `agree` in 11). Each family wrote the same dossier with the author withheld: the author's
+  family agreed least with its own family's text (0 of 3), and one judge of another family met the
+  preference rule on its own text, which is why the minimum still asks for another family.
+  Parse failures: 0 in 125 validator calls, so tolerant parsing stays. The dossier passed
+  `research check` with Kimi and Gemini `agree`. Cost USD 4.16 on the research key.
+- **Proof.** `test/spec_protocol_test.py`, 22 cases: the family case now proves the warning, the
+  record field and that a same-family row does not meet the minimum; red on 1.108.0's code.
+
 ## v1.108.0: the spec protocol calls a validator of another model family
 
 Guards: 539 → **539**. The owner's order of 2026-11-21 (board request f6537624, item 3) asked for

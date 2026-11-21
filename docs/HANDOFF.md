@@ -1,3 +1,16 @@
+## Unreleased 1.109.0: the family rule measured; the author's family recorded with a warning, branch `feat/b175-refutation` (2026-11-21)
+
+- **Objective.** Continue the spec protocol (owner, 2026-11-21, board f6537624 item 3; lifted
+  pause, reconciler A-3 step 7): run the validator dossier's refutation test and act on it.
+- **Done.** B-175 (`docs/research/2026-11-21-validator-route/refutation/`): 0 parse failures, all
+  families caught four plain plants. B-176 (`docs/research/2026-11-21-family-rule/`, Kimi and
+  Gemini `agree`): the author's family caught the most quiet plants and did not favour its own
+  text, so `research validate` records it with a warning and `research check` never counts it.
+  22 test cases; CHANGELOG v1.109.0. Spend USD 4.16 (USD 4.27 this month with 1.108.0's run) of the research key's USD 20 a month.
+- **Checks run.** `npm test` PASS; `research check` PASS on both dossiers.
+- **Next task.** Merge PR #178, tag v1.109.0 with `release-member.js`, pin it in the next hub
+  release (hub 1.91.0 pins 1.108.0).
+
 ## Unreleased 1.108.0: the spec protocol calls a validator of another family, branch `feat/spec-research-ask` (2026-11-21)
 
 - **Objective.** The owner's order of 2026-11-21 (board f6537624, item 3): research by agents

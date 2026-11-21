@@ -58,17 +58,17 @@ python3 <skill>/scripts/spec_protocol.py research plan --tier M
 
 Roles by model tier (`model-tiering.md`), at most five agents at once:
 
-1. **Scouts** (working tier, web search and reading): fill Findings, Options and
-   `sources.json` (`id`, `kind`, `title`, `url`, `read`, `claim`); recommends
-   nothing; what it could not open is `read: false`.
+1. **Scouts** (working tier, web search): fill Findings, Options and
+   `sources.json` (`id`, `kind`, `title`, `url`, `read`, `claim`); recommend
+   nothing; an unopened page is `read: false`.
 2. **Decider** (top tier): rechecks numbers and citations, writes Recommendation,
    What would refute it and Rejected; a gap goes back to a scout, never filled
-   from memory.
+   from memory; every validator gap is answered, `agree` included.
 3. **Validators** (top tier of another model family, blind to each other):
-   `agree`, `partial` or `disagree` with evidence. Another family is called by
-   `research validate <dir> --model <id> --family <f> --endpoint <url> --key-env
-   <VAR>` (any OpenAI-compatible route): blind, never the author's family,
-   recording nothing on a failed call.
+   `agree`, `partial` or `disagree` with evidence, by `research validate <dir>
+   --model <id> --family <f> --endpoint <url> --key-env <VAR>` (any
+   OpenAI-compatible route), recording nothing on a failed call. The author's
+   family is recorded with a warning, never counted.
 4. **Merge** (fast tier): on a `disagree`, `## Resolution` says whose evidence is
    stronger. No voting.
 

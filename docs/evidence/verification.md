@@ -1,5 +1,11 @@
 # Verification — task-pipeline
 
+## Shipped state — v1.109.0 (source candidate; NOT SHIPPED yet)
+
+`research validate` records the author's family with a warning (`scripts/spec_protocol.py`);
+`test/spec_protocol_test.py` 22 cases, the family case red on 1.108.0's code; `test/validate.py`
+and `test/prompt_lint.py` PASS. Tag, release and npm readback pending.
+
 ## Shipped state — v1.108.0 (source candidate; NOT SHIPPED yet)
 
 `research validate` in `scripts/spec_protocol.py`. `test/spec_protocol_test.py` 22 cases in

@@ -363,15 +363,26 @@ def a_validator_of_another_family_is_called_and_recorded(root):
 
 
 @case
-def the_validator_is_blind_and_never_the_authors_family(root):
+def the_validator_is_blind_and_the_authors_family_never_counts(root):
     d = dossier(root, validators=(("first-model", "family-c", "disagree"),), resolution=True)
-    code, out = run("research", "validate", d, "--model", "m", "--family", "Family-A",
-                    "--endpoint", "http://127.0.0.1:9", env=KEY)
-    expect(code == 1 and "author" in out, "the author's family was accepted: " + out)
     code, out = run("research", "validate", d, "--model", "m", "--family", "family-b", "--dry-run")
     expect(code == 0 and "Embed the snapshot" in out, out)
     expect("first-model" not in out and "weaker" not in out,
            "the prompt shows another validator's verdict or the Resolution")
+    # B-176: the author's family is recorded with a warning and never counts toward the minimum.
+    d = dossier(os.path.join(root, "same"), validators=())
+    fake = FakeModel()
+    try:
+        code, out = run("research", "validate", d, "--model", "m", "--family", "Family-A",
+                        "--endpoint", fake.url, env=KEY)
+    finally:
+        fake.close()
+    expect(code == 0 and "WARN" in out and "author" in out,
+           "the author's family was refused or recorded silently: " + out)
+    rec = json.load(open(os.path.join(d, "validation", "family-a-m.json")))
+    expect(rec.get("same_family") is True, "the record does not say same family: %r" % rec)
+    code, out = run("research", "check", d)
+    expect(code == 1 and "validator" in out, "a same-family validator met the minimum: " + out)
 
 
 @case

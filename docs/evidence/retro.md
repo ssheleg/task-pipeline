@@ -1491,6 +1491,8 @@ three quarters of the work on this run.
 
 ## Releases that carry no stamp — stated, not stamped
 
+**`v1.109.0` carries no stamp, declared before its tag.** It turns the spec protocol's refusal of a validator of the author's family into a recorded warning that never counts toward the minimum, after the measurements B-175 and B-176 (`docs/research/2026-11-21-family-rule/`); it continues the owner's order of 2026-11-21 (board request f6537624, item 3) and ran no stamped pipeline stages, so there is no divergence to stamp.
+
 **`v1.108.0` carries no stamp, declared before its tag.** It adds `research validate` to the spec protocol (`scripts/spec_protocol.py`): the dossier sent blind to a model of another family through an OpenAI-compatible endpoint, the verdict recorded, nothing recorded on a failed call; it continues the owner's order of 2026-11-21 (board request f6537624, item 3) and ran no stamped pipeline stages, so there is no divergence to stamp.
 
 **`v1.107.0` carries no stamp, declared before its tag.** It ships the spec protocol (`scripts/spec_protocol.py`, `references/spec-protocol.md`: the spec sized by complexity, the classed question ledger in which only strategy and a researched unknown reach the owner, research by scouts and validators of another model family, spec then board then build), ordered by the owner on 2026-11-21 (board request f6537624, item 3) with OT-07 of amendment A-2; it ran no stamped pipeline stages, so there is no divergence to stamp.

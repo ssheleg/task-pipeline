@@ -395,8 +395,9 @@ def research_validate(d, model, family, endpoint, key_env, timeout=180, dry_run=
     author = (header_value(text, "Author") or "").lower().split("/")[0]
     if not author:
         return None, "no `Author: <family>/<tier>` header: a validator's family cannot be compared"
-    if family.lower() == author:
-        return None, "validator family %r is the author's: a validator comes from another family" % family
+    # B-176: the author's family caught the most plants and did not favour its own text, so it
+    # is recorded with a warning; research_check still counts only other families.
+    same = family.lower() == author
     sources = open(src).read() if os.path.isfile(src) else "[]"
     prompt = "%s\n\n--- README.md ---\n%s\n--- sources.json ---\n%s" % (
         VALIDATOR_BRIEF, blind_dossier(text), sources)
@@ -431,11 +432,13 @@ def research_validate(d, model, family, endpoint, key_env, timeout=180, dry_run=
     if not slug.startswith(re.sub(r"[^a-z0-9]+", "-", family.lower())):
         slug = re.sub(r"[^a-z0-9]+", "-", family.lower()) + "-" + slug
     rec_rel = "validation/%s.json" % slug
-    record = dict(verdict, model=model, family=family,
+    record = dict(verdict, model=model, family=family, same_family=same,
                   at=time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
                   seconds=round(time.time() - started, 1), usage=reply.get("usage"),
                   answered_by=reply.get("model", model))
     note = re.sub(r"[|\n]+", " ", verdict["evidence"])[:200].strip() or "no evidence given"
+    if same:
+        note = "the author's family, not counted; " + note
     new = add_validation_row(text, "| %s | %s | %s | %s; %s |" % (model, family, verdict["verdict"], note, rec_rel))
     if new is None:
         return None, "no `## Validation` table to record into: no verdict recorded"
@@ -444,7 +447,11 @@ def research_validate(d, model, family, endpoint, key_env, timeout=180, dry_run=
         json.dump(record, fh, ensure_ascii=False, indent=1)
     with open(readme, "w") as fh:
         fh.write(new)
-    return dict(record, record=rec_rel), None
+    out = dict(record, record=rec_rel)
+    if same:
+        out["warning"] = ("validator family %r is the author's: recorded, never counted toward "
+                          "the tier's validators of another family" % family)
+    return out, None
 
 
 # ---------------------------------------------------------------- spec check and gate
@@ -537,7 +544,7 @@ def main(argv=None):
     rv = rs.add_parser("validate")
     rv.add_argument("dir")
     rv.add_argument("--model", required=True, help="the validator's model id, as the endpoint names it")
-    rv.add_argument("--family", required=True, help="its model family; must differ from the author's")
+    rv.add_argument("--family", required=True, help="its model family; the author's own is recorded with a warning, never counted")
     rv.add_argument("--endpoint", default=os.environ.get("SPEC_PROTOCOL_ENDPOINT"),
                     help="an OpenAI-compatible base URL (default: $SPEC_PROTOCOL_ENDPOINT)")
     rv.add_argument("--key-env", default="SPEC_PROTOCOL_API_KEY",
@@ -593,7 +600,8 @@ def main(argv=None):
             if a.dry_run:
                 print(res["prompt"])
                 return 0
-            emit(res, a.json, ["%s (%s): %s; recorded in %s" % (a.model, a.family, res["verdict"], res["record"])]
+            emit(res, a.json, (["WARN " + res["warning"]] if res.get("warning") else [])
+                 + ["%s (%s): %s; recorded in %s" % (a.model, a.family, res["verdict"], res["record"])]
                  + ["  gap: " + g for g in res["gaps"]])
             return 0
         errors, warns = research_check(a.dir, a.tier)
