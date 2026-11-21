@@ -32,17 +32,17 @@ writes D5, the data rooms' etalon: `knowledge-graph/1`, profile `starter`.
 |---|---|---|---|
 | node `id` | `doc:<path>`, `id:<D-12>`, `project:<name>` | `id` | `id` |
 | `kind` | `document`, `decision`, `scenario` and kin | `kind` | `kind` |
-| `area` | from the settings | `region` | none |
+| `area` | from the settings | `region` | `group` |
 | `title` | `title` | `title` | `label` |
 | `pointer` | `path#La-Lb` | `ref` | `attrs` |
 | `status` | `active`, `stale`, `superseded` | none | none |
 | `source_at` | last commit day | `rev` | `at` |
-| edge `src`, `dst` | same | `from`, `to` | `src`, `dst` |
-| edge `kind` | `cites`, `part-of`, `about` | `type` | `rel` |
-| `basis` | `fact`, `rule` | `confidence` `declared`, `proven`, `heuristic` | none |
+| edge `src`, `dst` | same | `from`, `to` | `from`, `to` |
+| edge `kind` | `cites`, `part-of`, `about` | `type` | `kind` |
+| `basis` | `fact`, `rule` | `confidence` `declared`, `proven`, `heuristic` | `conf` |
 | `provenance` | `path#Ln` | `evidence` | `evidence` |
 
-The owners were asked on the board to confirm this table.
+Both owners confirmed this table on the board on 2026-11-21.
 
 ## Self-healing and cleanup
 
