@@ -1491,6 +1491,8 @@ three quarters of the work on this run.
 
 ## Releases that carry no stamp — stated, not stamped
 
+**`v1.106.0` carries no stamp, declared before its tag.** It ships the documentation graph's starter pack (`scripts/docgraph.py`, `references/doc-graph.md`: one command, cited search, basic self-healing and cleanup, the hidden refactoring) and carries the `v1.105.2` change, which was never tagged on its own (PR #172, folded into PR #174). Ordered by the owner on 2026-11-20 and released as SD-TPL-01 of the 2026-11-21 system plan; it ran no stamped pipeline stages, so there is no divergence to stamp.
+
 **`v1.105.2` carries no stamp, declared before its tag.** It changes the separator of the three ledger lines `hooks/run-lifecycle.sh` writes from an em dash to ` - ` (board request 9d0eeb27, a board session with no person present); it ran no pipeline stages, so there is no divergence to stamp.
 
 **`v1.105.1` carries no stamp, declared before its tag.** It restores two skill descriptions that 1.105.0 lengthened past the family hub's description ceiling; it ran no stamped pipeline stages, so there is no divergence to stamp.
