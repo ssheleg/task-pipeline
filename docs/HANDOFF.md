@@ -1,4 +1,4 @@
-## Unreleased 1.109.0: the family rule measured; the author's family recorded with a warning, branch `feat/b175-refutation` (2026-11-21)
+## Released 1.109.0: the family rule measured; the author's family recorded with a warning (2026-11-21)
 
 - **Objective.** Continue the spec protocol (owner, 2026-11-21, board f6537624 item 3; lifted
   pause, reconciler A-3 step 7): run the validator dossier's refutation test and act on it.
@@ -8,23 +8,14 @@
   text, so `research validate` records it with a warning and `research check` never counts it.
   22 test cases; CHANGELOG v1.109.0. Spend USD 4.16 (USD 4.27 this month with 1.108.0's run) of the research key's USD 20 a month.
 - **Checks run.** `npm test` PASS; `research check` PASS on both dossiers.
-- **Next task.** Merge PR #178, tag v1.109.0 with `release-member.js`, pin it in the next hub
-  release (hub 1.91.0 pins 1.108.0).
-- **Resume point (09:39 Warsaw, stopped for the Fabric 0.3.27 install).** Nothing in flight:
-  every branch is pushed, both worktrees clean. Waits and their exact next steps, in order:
-  1. task-pipeline release run 44880693811 (tag v1.108.0 on b707dde): `gh run view 44880693811
-     -R ssheleg/task-pipeline`, then `npm view task-pipeline-skill version` must read 1.108.0.
-  2. On this branch: set the v1.108.0 header in `docs/evidence/verification.md` to shipped (run id,
-     npm 1.108.0), `npm test`, push; `gh pr ready 178` (required checks run on ready_for_review),
-     merge when green; tag v1.109.0 with `node scripts/release-member.js <worktree at the merge
-     commit> v1.109.0 --push` from `~/DATA/_worktrees/hub-doc-graph`; watch its release run.
-  3. Hub PR #331 (branch `feat/doc-graph-family-rule`, head 4d9decb9, pins task-pipeline 1.108.0,
-     hub 1.91.0, `npm test` PASS): once npm has 1.108.0, toggle draft and ready to rerun CI, merge,
-     tag hub v1.91.0, watch the release, `npm view sshlg-skills version`.
-  4. `npx --yes sshlg-skills@latest update`; read back the installed task-pipeline version; say
-     whether a session reload is needed. Pin 1.109.0 in the next hub release.
-  5. Remove worktrees `~/DATA/_worktrees/tp-b175` and `hub-doc-graph` after their merges; send the
-     owner the one-line result through `communicator_notify`.
+- **Shipped.** PR #178 squash-merged as bd3f50f; tag v1.109.0 (object 0a15356) pushed by
+  `release-member.js` after `npm run test:all` exit 0; release run 44912854373; npm
+  `task-pipeline-skill` 1.109.0. The first tag attempt failed because `/usr/bin/python3` lacked
+  `jsonschema` (`test/negatives.py` case 401); rerun with Homebrew python first on PATH.
+- **Pre-registration commits.** The dossiers cite 31cb01a and f17d94a; the squash orphaned them,
+  so they are kept at `refs/archive/2026-11-21/feat-b175-refutation` (c6f55d9) on origin.
+- **Next task.** Hub PR #334 pins 1.109.0 (hub 1.91.1); after it merges and releases, run
+  `npx --yes sshlg-skills@latest update` and read back the installed version.
 
 ## Unreleased 1.108.0: the spec protocol calls a validator of another family, branch `feat/spec-research-ask` (2026-11-21)
 

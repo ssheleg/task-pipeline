@@ -1,16 +1,18 @@
 # Verification — task-pipeline
 
-## Shipped state — v1.109.0 (source candidate; NOT SHIPPED yet)
+## Shipped state — v1.109.0 (shipped 2026-11-21: tag v1.109.0 on bd3f50f, release run 44912854373 release and publish success, npm task-pipeline-skill 1.109.0)
 
 `research validate` records the author's family with a warning (`scripts/spec_protocol.py`);
 `test/spec_protocol_test.py` 22 cases, the family case red on 1.108.0's code; `test/validate.py`
-and `test/prompt_lint.py` PASS. Tag, release and npm readback pending.
+and `test/prompt_lint.py` PASS. The dossiers' pre-registration commits (31cb01a, f17d94a) are kept
+at `refs/archive/2026-11-21/feat-b175-refutation` because the squash merge orphaned them.
 
 ## Shipped state — v1.108.0 (shipped 2026-11-21: tag v1.108.0 on b707dde, release run 44880693811 release and publish success, npm task-pipeline-skill 1.108.0)
 
 `research validate` in `scripts/spec_protocol.py`. `test/spec_protocol_test.py` 22 cases in
 `npm test` (three against a local fake endpoint), each new rule watched red under a planted
-mutation; `test/validate.py` and `test/prompt_lint.py` PASS. Tag, release and npm readback pending.
+mutation; `test/validate.py` and `test/prompt_lint.py` PASS. The dossiers' pre-registration commits (31cb01a, f17d94a) are kept
+at `refs/archive/2026-11-21/feat-b175-refutation` because the squash merge orphaned them.
 
 ## Shipped state — v1.107.0 (shipped 2026-11-21: tag v1.107.0 on 631b541, release run 44873711880 release and publish success, npm task-pipeline-skill 1.107.0)
 
