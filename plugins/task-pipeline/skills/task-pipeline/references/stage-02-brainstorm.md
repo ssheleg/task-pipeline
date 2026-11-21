@@ -3,13 +3,13 @@
 The full gate and freedom level remain in [stages.md](stages.md).
 
 ## 2 — Brainstorm + decompose
-- **How it runs: [`brainstorm.md`](brainstorm.md)** — built into this skill. Read
-  the brief first (stage 0 already answered scope/constraints/done-criteria), then
-  explore the codebase, scope-check for decomposition, the open questions in one
-  batch, 2–3 approaches with a recommendation, design presented in sections and
-  approved section by section. **Hard gate:** no code, no scaffolding, no implementation
-  skill before the design is approved, by the operator or by the standing
-  authorization recorded in the brief, including on "obviously simple" tasks.
+- **Size the spec** with `spec_protocol.py size` from the brief's facts; the size
+  sets the sections and the research ([`spec-protocol.md`](spec-protocol.md) → *1*).
+- **How it runs: [`brainstorm.md`](brainstorm.md)**: from the brief, explore,
+  scope-check, 2–3 approaches with a recommendation, the design approved section by
+  section. **Hard gate:** no code, no scaffolding, no implementation skill before
+  the design is approved (by the operator or the brief's standing authorization),
+  including on "obviously simple" tasks.
 - **The capability map comes first, where the actor branch is armed**
   ([`agent-surface.md`](agent-surface.md)): REQ, then stories, then `CAP-` rows
   (actors, roles, gate, emits, automation, human surface or none), and the agent
