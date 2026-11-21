@@ -1491,6 +1491,8 @@ three quarters of the work on this run.
 
 ## Releases that carry no stamp — stated, not stamped
 
+**`v1.107.0` carries no stamp, declared before its tag.** It ships the spec protocol (`scripts/spec_protocol.py`, `references/spec-protocol.md`: the spec sized by complexity, the classed question ledger in which only strategy and a researched unknown reach the owner, research by scouts and validators of another model family, spec then board then build), ordered by the owner on 2026-11-21 (board request f6537624, item 3) with OT-07 of amendment A-2; it ran no stamped pipeline stages, so there is no divergence to stamp.
+
 **`v1.106.0` carries no stamp, declared before its tag.** It ships the documentation graph's starter pack (`scripts/docgraph.py`, `references/doc-graph.md`: one command, cited search, basic self-healing and cleanup, the hidden refactoring) and carries the `v1.105.2` change, which was never tagged on its own (PR #172, folded into PR #174). Ordered by the owner on 2026-11-20 and released as SD-TPL-01 of the 2026-11-21 system plan; it ran no stamped pipeline stages, so there is no divergence to stamp.
 
 **`v1.105.2` carries no stamp, declared before its tag.** It changes the separator of the three ledger lines `hooks/run-lifecycle.sh` writes from an em dash to ` - ` (board request 9d0eeb27, a board session with no person present); it ran no pipeline stages, so there is no divergence to stamp.
