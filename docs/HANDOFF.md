@@ -15,9 +15,8 @@
   reconciling agent (fabric-workspace 25879d0f); nothing released.
   - `feat/doc-graph-starter` at `6633336` (pushed): 1.106.0 plus PR #172 (1.105.2, the hook's
     em dash, folded in, never released alone) and PR #173 (A-1 backlog rows B-167..B-170).
-    `test/validate.py` PASS, `release_gate_test.py` OK, `docgraph_test.py` 18 PASS on it; a full
-    `npm test` was started before the pause (log `~/DATA/_worktrees/tp-doc-graph-npmtest.log`,
-    outside the repo). Not merged, not tagged. The 1.104.x history is already settled in
+    `test/validate.py` PASS, `release_gate_test.py` OK, `docgraph_test.py` 18 PASS on it; the full
+    `npm test` chain passed in one run on `6633336` (exit 0, "all green", 2026-11-21). Not merged, not tagged. The 1.104.x history is already settled in
     CHANGELOG (v1.104.2 is a tag only; 1.104.3 carries it).
   - `feat/spec-protocol` (this branch, from `6633336`): `scripts/spec_protocol.py`, first draft,
     untested: `size` (S/M/L from the brief's facts, sections owed, research depth), `questions`
@@ -34,7 +33,7 @@
     at most five agents. Private names and key slots are not copied.
 - **Exact next step, when the CEO signals.** Take the reconciler's order first. Then, if it
   keeps this order: (1) close PRs #172 and #173 as folded, open the PR for
-  `feat/doc-graph-starter`, read the npm test log, merge, tag `v1.106.0` with the hub's
+  `feat/doc-graph-starter`, merge, tag `v1.106.0` with the hub's
   `scripts/release-member.js`, check `gh release view v1.106.0` and `npm view`, pin and release
   the hub branch `feat/doc-graph-family-rule`, `npx --yes sshlg-skills@latest update`
   (SD-TPL-01); (2) on this branch write `test/spec_protocol_test.py` (the OT-07 planted spec
