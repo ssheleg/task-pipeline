@@ -190,7 +190,7 @@
    "em_dash": 11,
    "unwanted_stop": 0,
    "version_history": 0,
-   "words": 2474
+   "words": 2450
   },
   "plugins/task-pipeline/skills/task-pipeline/assets/verifier-agent.md": {
    "bold": 0,
@@ -366,7 +366,7 @@
    "em_dash": 0,
    "unwanted_stop": 0,
    "version_history": 0,
-   "words": 453
+   "words": 448
   },
   "plugins/task-pipeline/skills/task-pipeline/references/doctrine-map.md": {
    "bold": 11,
@@ -515,10 +515,10 @@
   "plugins/task-pipeline/skills/task-pipeline/references/progress.md": {
    "bold": 58,
    "caps": 9,
-   "em_dash": 51,
+   "em_dash": 50,
    "unwanted_stop": 0,
    "version_history": 2,
-   "words": 3933
+   "words": 3923
   },
   "plugins/task-pipeline/skills/task-pipeline/references/release-impact.md": {
    "bold": 11,
@@ -646,7 +646,7 @@
    "em_dash": 2,
    "unwanted_stop": 0,
    "version_history": 0,
-   "words": 366
+   "words": 363
   },
   "plugins/task-pipeline/skills/task-pipeline/references/stage-10-acceptance.md": {
    "bold": 18,
@@ -830,7 +830,7 @@
    "em_dash": 0,
    "unwanted_stop": 0,
    "version_history": 0,
-   "words": 1607
+   "words": 1617
   },
   "plugins/task-pipeline/skills/task-pipeline/templates/verification.md": {
    "bold": 36,
@@ -844,9 +844,9 @@
  "total": {
   "bold": 3282,
   "caps": 260,
-  "em_dash": 2333,
+  "em_dash": 2332,
   "unwanted_stop": 15,
   "version_history": 11,
-  "words": 195183
+  "words": 195151
  }
 }

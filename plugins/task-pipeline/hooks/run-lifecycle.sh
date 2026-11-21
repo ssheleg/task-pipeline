@@ -4,7 +4,13 @@
 #
 # One line shape for all three:
 #
-#     event: <kind> — <detail> — <ISO-8601>
+#     event: <kind> - <detail> - <ISO-8601>
+#
+# The separator is a spaced hyphen, not the em dash the agent-written lines use
+# (board request 9d0eeb27, 2026-11-18): these lines land in a project's committed
+# ledger on every subagent stop, and a project that refuses em dashes in text a
+# person reads failed its check on them. Readers take the kind as the first word
+# and the stamp as the last field, so either separator parses.
 #
 # **Why one shape and not three.** A ledger grammar is read by four documents and
 # two hooks; every shape added is a shape each of them must learn. These three are
@@ -90,6 +96,6 @@ else:
 
 stamp = datetime.datetime.now(datetime.timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
 with open(ledger, "a", encoding="utf-8") as fh:
-    fh.write('event: %s — %s — %s\n' % (kind, detail, stamp))
+    fh.write('event: %s - %s - %s\n' % (kind, detail, stamp))
 PY
 exit 0

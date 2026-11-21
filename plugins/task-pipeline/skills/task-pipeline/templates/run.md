@@ -69,7 +69,8 @@ hand:  <N|10> — task "<quoted>" — done <n> — surfaced <n> — decisions <n
        scope <commit>/<env>/<REQ ids> — unverified <n|none-in-scope> (<what, or the literal>)
 holds: <stage id> — <n> (<class: what, owner>; … or "none") — enumerated <n>/8 classes, <unlooked: classes not enumerable>
 gate:  <stage id> — command "<cmd>" — exit <N> — <ISO-8601>
-event: <compact|session-end|subagent|memory> — <detail> — <ISO-8601>
+event: <compact|session-end|subagent> - <detail> - <ISO-8601>
+event: memory — <detail> — <ISO-8601>
 review: <stage id> — surface <name> — rounds <N> — <returned|approved|unresolved> — <ISO-8601>
 finding: <id> — blocking:B<n> | deferred:B-NNN | noise — round <N> — base-repro yes|no|n/a
 round: <N> — <reading> — new blocking <k>
@@ -99,7 +100,8 @@ read:  references/<file>.md            # hook-appended, deduped, UNATTESTED (no 
   ledger simply stopped, and a stopped ledger looks exactly like a run still in
   progress. `subagent` records one finishing, so the `hand:` count below has
   something to be checked against other than itself (`unknown` when the payload
-  names no agent type). After acceptance the hook writes none of the three.
+  names no agent type). After acceptance the hook writes none of the three. Its fields
+  are separated by ` - `, not an em dash.
 
   **It never writes a `hand:` line.** That shape carries `done`, `surfaced`,
   `decisions` and `amb`: judgements only the agent holds, and a hook filling them
@@ -156,8 +158,8 @@ stage: 1 Docs study — gate auto — verdict pass — 2026-08-10T11:31Z
 touch: src/export.ts — pass 1 (stage 5) — reason: TASK-3
 touch: src/export.ts — pass 2 (stage 5) — reason: F-014
 touch: src/export.ts — pass 3 (stage 5) — reason: F-014
-event: compact — auto — 2026-08-10T11:58Z
-event: subagent — general-purpose — 2026-08-10T12:00Z
+event: compact - auto - 2026-08-10T11:58Z
+event: subagent - general-purpose - 2026-08-10T12:00Z
 gate:  6 — command "npm test" — exit 0 — 2026-08-10T12:02Z
 review: 6 — surface landing — rounds 1 — returned — 2026-08-10T12:02Z
 finding: F-021 — blocking:B3 — round 1 — base-repro no

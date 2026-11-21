@@ -9,7 +9,9 @@ bound (10.1 s at load average 165), which passed alone (330 cases); the rest of 
 (lessons 431, waves 143, docgraph 18, `install_test.sh`, audit regressions) after `SKILL.md` was
 restored under `diet_proportional.py`'s 16 650-byte bound; `test/validate.py` and
 `test/prompt_lint.py` PASS on the final tree. The tag, release jobs and the npm readback remain
-pending; this header declares the version, not a shipped state.
+pending; this header declares the version, not a shipped state. This version also carries the 1.105.2 change
+(PR #172): `hooks/run-lifecycle.sh` separates the fields of its `event:` lines with ` - ` instead
+of an em dash (board request 9d0eeb27).
 
 ## Shipped state — v1.105.1
 

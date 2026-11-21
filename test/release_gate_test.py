@@ -17,6 +17,7 @@ that repeats. Exit 2 blocks in Claude Code; every other code does not.
 
 import json
 import os
+import re
 import subprocess
 import sys
 import tempfile
@@ -622,7 +623,7 @@ CLOSED_RUN = OPEN_RUN + "stage: 10 acceptance — gate manual — verdict pass �
 def compaction_is_recorded():
     """The ledger exists because compaction happens, and could not show it."""
     out = lifecycle({"hook_event_name": "PreCompact", "trigger": "auto"}, OPEN_RUN)
-    assert "event: compact — auto" in out, out
+    assert "event: compact - auto - " in out, out
 
 
 def an_abandoned_run_is_recorded():
@@ -639,7 +640,7 @@ def a_finished_run_is_not_called_abandoned():
 
 def a_subagent_stop_is_observed():
     out = lifecycle({"hook_event_name": "SubagentStop", "agent_type": "general-purpose"}, OPEN_RUN)
-    assert "event: subagent — general-purpose" in out, out
+    assert "event: subagent - general-purpose - " in out, out
 
 
 def a_closed_run_takes_no_more_events():
@@ -663,7 +664,23 @@ def separators_in_input_cannot_break_the_grammar():
     out = lifecycle({"hook_event_name": "SubagentStop", "agent_type": "a — b\nc"}, OPEN_RUN)
     lines = [l for l in out.splitlines() if l.startswith("event:")]
     assert len(lines) == 1, "one event became %d lines" % len(lines)
-    assert lines[0].count("—") == 2, "an em dash from the payload broke the shape: %s" % lines[0]
+    assert "\u2014" not in lines[0], "an em dash from the payload reached the line: %s" % lines[0]
+    assert lines[0].startswith("event: subagent - a - b c - "), lines[0]
+
+
+def the_hook_writes_no_em_dash():
+    """Board request 9d0eeb27 (2026-11-18): every subagent stop appended a line
+    with an em dash separator, and a project refusing the character in text a
+    person reads failed its check on 115 of them."""
+    for payload in ({"hook_event_name": "PreCompact", "trigger": "auto"},
+                    {"hook_event_name": "SessionEnd", "reason": "logout"},
+                    {"hook_event_name": "SubagentStop", "agent_type": "general-purpose"},
+                    {"hook_event_name": "SubagentStop"}):
+        out = lifecycle(payload, OPEN_RUN)
+        added = out[len(OPEN_RUN):]
+        assert added.startswith("event: "), "no line for %r" % payload
+        assert "\u2014" not in added, "an em dash reached the ledger: %r" % added
+        assert re.match(r"^event: [a-z-]+ - .+ - \d{4}-\d\d-\d\dT[\d:]+Z\n$", added), added
 
 
 def no_ledger_no_lifecycle():
@@ -683,6 +700,7 @@ it("a run that reached acceptance is not called abandoned", a_finished_run_is_no
 it("a subagent stopping is observed", a_subagent_stop_is_observed)
 it("it never writes a hand: line — those are judgements it does not have", it_never_writes_a_hand_line)
 it("payload text cannot break the ledger's grammar", separators_in_input_cannot_break_the_grammar)
+it("the hook's lines carry no em dash", the_hook_writes_no_em_dash)
 it("no ledger, no lifecycle", no_ledger_no_lifecycle)
 
 
