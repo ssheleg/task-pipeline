@@ -1,0 +1,66 @@
+[
+ {
+  "id": "B5",
+  "kind": "paper",
+  "title": "Zheng et al. 2023, Judging LLM-as-a-Judge with MT-Bench and Chatbot Arena",
+  "url": "https://arxiv.org/html/2306.05685",
+  "read": true,
+  "claim": "Position, verbosity and self-enhancement biases; 'GPT-4 favors itself with a 10% higher win rate; Claude-v1 favors itself with a 25% higher win rate'; 'our study cannot determine whether the models exhibit a self-enhancement bias' (both quotes rechecked verbatim by the decider 2026-11-21)."
+ },
+ {
+  "id": "B6",
+  "kind": "paper",
+  "title": "Panickssery et al. 2024, LLM Evaluators Recognize and Favor Their Own Generations",
+  "url": "https://arxiv.org/abs/2404.13076",
+  "read": true,
+  "claim": "Abstract read: evaluators score their own outputs higher than humans rate them; models recognize their own text with non-trivial accuracy; fine-tuning shows a linear correlation between self-recognition and self-preference, suggested causal."
+ },
+ {
+  "id": "C1",
+  "kind": "paper",
+  "title": "Verga et al. 2024, Replacing Judges with Juries: Evaluating LLM Generations with a Panel of Diverse Models (PoLL)",
+  "url": "https://arxiv.org/abs/2404.18796",
+  "read": true,
+  "claim": "Abstract only: \"using a PoLL composed of a larger number of smaller models outperforms a single large judge, exhibits less intra-model bias due to its composition of disjoint model families, and does so while being over seven times less expensive.\" No numeric size for the bias reduction in the abstract."
+ },
+ {
+  "id": "C2",
+  "kind": "paper",
+  "title": "Wataoka, Takahashi, Ri 2024, Self-Preference Bias in LLM-as-a-Judge",
+  "url": "https://arxiv.org/abs/2410.21819",
+  "read": true,
+  "claim": "Full text (arXiv HTML v1). Pairwise comparison with swapped positions on Chatbot Arena dialogues, eight judges. Demographic-parity bias: GPT-4 0.749, Vicuna-13b 0.382, GPT-3.5-turbo 0.191, others near zero or negative. Mechanism: LLMs rate lower-perplexity outputs higher than humans do \"regardless of whether the outputs were self-generated\"; the factor is \"not whether the response is their own but rather the perplexity of the responses.\" Caveats: GPT-4 and GPT-3.5 perplexity unavailable; scores do not account for intrinsic quality."
+ },
+ {
+  "id": "C3",
+  "kind": "paper",
+  "title": "Self-Correction Bench: Uncovering and Addressing the Self-Correction Blind Spot in Large Language Models (arXiv 2507.02778)",
+  "url": "https://arxiv.org/abs/2507.02778",
+  "read": true,
+  "claim": "Abstract only. The same error injected as external (user) or internal (model) context: \"Testing 14 open-source non-reasoning models reveals a 64.5% Self-Correction Blind Spot: models correct external errors but fail on identical internal ones\"; appending \"Wait\" reduces it by 89.3%. Self-correction, not a cross-family judge."
+ },
+ {
+  "id": "C4",
+  "kind": "paper",
+  "title": "arXiv 2601.22548 (2026), on whether LLM evaluators' self-preference is narcissism or an evaluator-quality confound",
+  "url": "https://arxiv.org/abs/2601.22548",
+  "read": true,
+  "claim": "Abstract only, read through a summarising fetch. Against an evaluator-quality baseline, \"only 51% of examples in previous findings retain statistical significance\", covering \"89.6% of total self-preference probability mass\"; evaluators may prefer their own outputs partly because they answer questions they fail on."
+ },
+ {
+  "id": "M1",
+  "kind": "measurement",
+  "title": "B-175 refutation test, 2026-11-21 (docs/research/2026-11-21-validator-route/refutation/results.json)",
+  "url": "../2026-11-21-validator-route/refutation/results.json",
+  "read": true,
+  "claim": "15 calls at temperature 0: control agreed by all three families; four plain plants caught 4 of 4 by anthropic/claude-sonnet-5.5, moonshotai/kimi-k3.1-pro and google/gemini-4-argon; 0 parse failures; USD 0.4891."
+ },
+ {
+  "id": "M2",
+  "kind": "measurement",
+  "title": "B-176 experiment, 2026-11-21 (experiment/results.json, harness committed f17d94a before the run)",
+  "url": "experiment/results.json",
+  "read": true,
+  "claim": "Part A, 81 calls at temperature 0.7: caught anthropic/claude-sonnet-5.5 24/24, moonshotai/kimi-k3.1-pro 18/24, google/gemini-4-argon 12/24 (Gemini mentioned 23/24); control non-agree 1/3, 0/3, 0/3. Part B, 3 writes and 27 judgements: own-family agree rate and mean gaps vs others: anthropic 0.0 and 7.0 vs 1.0 and 6.5; moonshotai 1.0 and 0.67 vs 0.833 and 2.5 (meets the preference rule); google 1.0 and 0.0 vs 0.833 and 0.83. One Kimi reply ended finish_reason error. Cost USD 3.4855. Decision rule output: refusal_becomes_warning true."
+ }
+]
