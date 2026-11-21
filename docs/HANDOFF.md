@@ -1,3 +1,50 @@
+## Paused 2026-11-21 ~03:30: the spec protocol (stages 0-4), branch `feat/spec-protocol`, and the 1.106.0 release
+
+- **Orders.** (1) Owner via Telegram, ~03:15, board request f6537624 to the CEO, brief
+  `2026-11-21-spec-protocol-prioritization-process-brief.md` item 3: a working spec protocol in stages
+  1-4 (size adaptive to complexity, grilling, research by agents with web search and other models
+  on the Sound Engine pattern, technical and research questions decided by agents, only concept,
+  vision and meaning to the owner, order spec -> board -> build), released through make-skill and
+  `npx --yes sshlg-skills@latest update`, result through communicator_notify. (2) System plan,
+  board d890b7e6: SD-TPL-01 (wave 0, now) = release 1.106.0; SD-TPL-02, SD-TPL-03 later; reply
+  with backlog rows by 2026-11-24. (3) Amendment A-2, board 460f0599: OT-07, the grill marks each
+  question strategy, tactics or known domain, only strategy and real unknowns reach the owner
+  (rule by 2026-11-28; check: a planted spec with five tactical and one strategic question sends
+  the owner exactly one); reply with backlog rows by 2026-11-25. OT-07 and order (1) are one piece.
+- **State at the pause.** Owner's pause, 2026-11-21 ~03:30: every session waits for the
+  reconciling agent (fabric-workspace 25879d0f); nothing released.
+  - `feat/doc-graph-starter` at `6633336` (pushed): 1.106.0 plus PR #172 (1.105.2, the hook's
+    em dash, folded in, never released alone) and PR #173 (A-1 backlog rows B-167..B-170).
+    `test/validate.py` PASS, `release_gate_test.py` OK, `docgraph_test.py` 18 PASS on it; a full
+    `npm test` was started before the pause (log `~/DATA/_worktrees/tp-doc-graph-npmtest.log`,
+    outside the repo). Not merged, not tagged. The 1.104.x history is already settled in
+    CHANGELOG (v1.104.2 is a tag only; 1.104.3 carries it).
+  - `feat/spec-protocol` (this branch, from `6633336`): `scripts/spec_protocol.py`, first draft,
+    untested: `size` (S/M/L from the brief's facts, sections owed, research depth), `questions`
+    (ledger columns id, question, class, answer, by, basis; tactics and known-domain never
+    pending; strategy and researched unknowns go to the owner as one batch with defaults),
+    `research init|plan|check` (skeleton first; sources.json with id, kind, title, url, read,
+    claim; a model's answer is not a source; unread sources are not evidence; validators of
+    another family, two families at L; a disagree needs `## Resolution`), `check` (sections by
+    size, no TBD, ledger, research), `gate` (the board rows and the plan cite the spec).
+  - Sound Engine's method, read for this (its research protocol, runner scripts, operating
+    model): a scout writes findings and recommends nothing; a decider rechecks and sends gaps
+    back; two blind validators of other families; depth by tier A/B/C; minimum sources with
+    primary ones; `[Sn]` citations resolved; refuting experiment and recorded rejections;
+    at most five agents. Private names and key slots are not copied.
+- **Exact next step, when the CEO signals.** Take the reconciler's order first. Then, if it
+  keeps this order: (1) close PRs #172 and #173 as folded, open the PR for
+  `feat/doc-graph-starter`, read the npm test log, merge, tag `v1.106.0` with the hub's
+  `scripts/release-member.js`, check `gh release view v1.106.0` and `npm view`, pin and release
+  the hub branch `feat/doc-graph-family-rule`, `npx --yes sshlg-skills@latest update`
+  (SD-TPL-01); (2) on this branch write `test/spec_protocol_test.py` (the OT-07 planted spec
+  first), `references/spec-protocol.md` (sizes, question classes, research roles by tier
+  deep/work/fast and another family, owner only for concept/vision/meaning, spec -> board ->
+  build), hooks in grill.md phase 2, stage-02/03/04, the prompt-lint word ratchet held by
+  folding text, version 1.107.0, make-skill audit, release, update, communicator_notify;
+  (3) answer d890b7e6 and 460f0599 with backlog rows (SD-TPL-01..03, OT-07) before
+  2026-11-24 and 2026-11-25.
+
 ## Unreleased 1.106.0: documentation is a graph from the first day, branch `feat/doc-graph-starter` (2026-11-20, paused 2026-11-21)
 
 - **Objective.** Owner, 2026-11-20 (CEO window of Fabric, brief
