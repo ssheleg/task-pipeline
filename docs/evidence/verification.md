@@ -1,11 +1,11 @@
 # Verification — task-pipeline
 
-## Shipped state — v1.111.0 (source candidate; NOT SHIPPED yet)
+## Shipped state — v1.111.0 (shipped 2026-11-22: tag v1.111.0 on 2882775, release run 45029538413 release and publish success, npm task-pipeline-skill 1.111.0)
 
 `scripts/task_prompt.py` and `hooks/task-prompt-nudge.sh`; `test/task_prompt_test.py` 13 cases,
 `test/task_prompt_nudge_test.py` 11 cases; the corpus run is `docs/reports/2026-11-22-task-prompts/`.
 
-## Shipped state — v1.110.0 (merged as 478dce5; tag and release run in `docs/HANDOFF.md`)
+## Shipped state — v1.110.0 (shipped 2026-11-22: tag v1.110.0 on 478dce5, release run 44985031524 release and publish success, npm task-pipeline-skill 1.110.0)
 
 The spec's author is the session's own model (`references/model-tiering.md`,
 `references/spec-protocol.md` → *The loop*); `scripts/spec_protocol.py loop`.
