@@ -6,7 +6,7 @@ ships tells every host project to keep one. Doctrine: `references/documentation.
 **never deleted** — the question is the history of the answer, and deleting it is
 how the same thing gets re-argued a quarter later.
 
-**Next free ID:** `OQ-0004`
+**Next free ID:** `OQ-0005`
 
 Reserve the id before you write it; reading this line is not reserving it.
 
@@ -19,6 +19,7 @@ in silence.
 | OQ-0001 | Can `SURFACED` be checked at all? It is defined as what a run learned by accident — recoverable from no artefact — so *"nothing surfaced"* is a quiet decision by construction. The `hand:` line records that a hand-back happened, never that it was complete | operator | whether the hand-back's own gate means anything beyond its presence | Resolved→DEC-0001 |
 | OQ-0002 | Which guards without a neighbour probe read a **scoped span**? The list cannot be computed from the code as written, so `B-057`'s remaining half has no work-list. *(The row said "the 250 guards" until 2026-08-20, when this register entered the claim registry's corpus and the suite held 390. A question's premise is not a live measurement, so the total is not restated here — `DEC-0002` carries what was measured, with its date.)* | operator | `B-057`, and the fourth consecutive release caught by a reader rather than a check | Resolved→DEC-0002 |
 | OQ-0003 | Playwright MCP as a second browser path beside chrome-devtools: is it a **second** recommended companion or **the** one where a project already runs it in CI? A pasted note of ~6 lines did not reach the agent and may hold the answer | operator | `B-056` | Resolved→DEC-0004 |
+| OQ-0004 | In the owner's order of 2026-11-22 (board request 94a61249) two words came through speech recognition unclear: «агенты B» (who researches for code, mathematics and science) and «D2». Defaults applied until he says otherwise: «агенты B» are the specialist agents `references/spec-protocol.md` *The loop* names for those fields; «D2» is read as the CEO of Fabric read it (the subscription session writes the spec by default), which 1.110.0 shipped. Neither default changes the skill if wrong in its letter | operator, through the CEO of Fabric | nothing (defaults applied, board request 784a8487 item 3) | Open |
 
 **When one resolves:** flip the status to `Resolved→DEC-####` in the **same
 change** as the decision that answers it, and leave the row where it is.

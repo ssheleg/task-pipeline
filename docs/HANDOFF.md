@@ -1,3 +1,15 @@
+## Current: 1.110.0 and 1.111.0 shipped; the board's follow-ups filed (2026-11-22)
+
+- **Objective.** Close the release of the owner's two orders of 2026-11-22 (board requests 94a61249
+  and bd16f215) and answer what the board added to them.
+- **Done.** 1.110.0: tag on 478dce5, release run 44985031524 success, npm 1.110.0. 1.111.0: tag on
+  2882775, release run 45029538413 success, npm 1.111.0. The hub pins 2882775 in its 1.92.0
+  (ssheleg/sshlg-skills#345). Board request 784a8487: items 1 and 2 are 1.110.0 (*The loop* in
+  `references/spec-protocol.md`, `spec_protocol.py loop`, `references/model-tiering.md`); item 3 is
+  [OQ-0004](OPEN_QUESTIONS.md) with its defaults; item 4 and request ed4b73c6 (K1-17) are B-184; the
+  validator's payer is B-185.
+- **Next task.** B-185, then B-179 (due 2026-11-25), then B-184 (2026-11-27).
+
 ## Candidate 1.111.0: a task for an executor is read before it leaves, branch `feat/task-prompt-check` (2026-11-22)
 
 - **Objective.** The owner's order of 2026-11-22 (Telegram 02:54 UTC, board request bd16f215):
