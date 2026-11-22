@@ -1491,6 +1491,8 @@ three quarters of the work on this run.
 
 ## Releases that carry no stamp — stated, not stamped
 
+**`v1.111.0` carries no stamp, declared before its tag.** It adds `scripts/task_prompt.py` (a task for an executor is read for its end result, finish criterion, closing pass and stops) and the advisory hook `task-prompt-nudge.sh`, and ends the implementer contract with a closing pass; it carries out the owner's order of 2026-11-22 (board request bd16f215) and ran no stamped pipeline stages, so there is no divergence to stamp.
+
 **`v1.110.0` carries no stamp, declared before its tag.** It records who writes the spec (the session's own model; a paid call to another model only on the operator's recorded request) and adds `spec_protocol.py loop`, the spec loop in five steps with who does each; it carries out the owner's order of 2026-11-22 (board request 94a61249) and ran no stamped pipeline stages, so there is no divergence to stamp.
 
 **`v1.109.0` carries no stamp, declared before its tag.** It turns the spec protocol's refusal of a validator of the author's family into a recorded warning that never counts toward the minimum, after the measurements B-175 and B-176 (`docs/research/2026-11-21-family-rule/`); it continues the owner's order of 2026-11-21 (board request f6537624, item 3) and ran no stamped pipeline stages, so there is no divergence to stamp.

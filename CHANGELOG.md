@@ -1,3 +1,33 @@
+## v1.111.0: a task for an executor is read before it leaves: end result, finish criterion, a pass for what was missed, no stops
+
+Guards: 539 → **539**. The owner, 2026-11-22 (Telegram 02:54 UTC, relayed by the CEO of Fabric,
+board request bd16f215): «…верификацию промптов … всегда описываем конечный результат, к
+которому хотим прийти; всегда идем волнами, находим то, что пропускали, и не раскладываем в
+гейты.»
+
+- **`scripts/task_prompt.py check <file|->`** reads a task written for a subagent, a wave's node
+  owner or another session, with the brief it points to, and answers six questions by name: the
+  end result (P1), the finish criterion (P2), a closing pass for what was missed (P3), no stop
+  for approval between steps (P4), the return form (P5), the pointers and limits (P6). A task
+  that changes something owes P1 to P4; a lookup owes P1 and P5; a verdict owes P1, P2 and P5.
+  A brief nobody can read leaves its questions open and says so. `corpus` runs it over many.
+- **The hook `task-prompt-nudge.sh`** runs the check before every subagent dispatch, in any
+  project (the one hook here that needs no run ledger), and adds a note naming the missing
+  part. It never blocks; `TASK_PROMPT_NUDGE=off` silences it.
+- **The doctrine.** `references/build.md` 4.1: the dispatch is checked before it goes out; the
+  implementer contract now ends with a closing pass and a list of what was not examined, and
+  an ambiguous brief returns `NEEDS_CONTEXT` instead of "ask before starting".
+  `references/waves.md`: a node's task passed the check before it was handed over. The skill's
+  word count did not rise.
+- **Why: measured.** `docs/reports/2026-11-22-task-prompts/`: 2,410 tasks of three days from 41
+  projects. Of 1,058 working tasks given to subagents, 105 asked for a closing pass and 68
+  carried all four parts; 3 tasks stopped for approval. The family had rules for the end
+  result and against stops, none for the executor's own closing pass, and nothing read a task
+  when it was written.
+- **Proof.** `test/task_prompt_test.py` 13 cases (each question against a planted prompt, both
+  languages, a brief on disk, a brief that cannot be read); `test/task_prompt_nudge_test.py` 11
+  cases over the real hook process (a note, silence, the switch, four malformed payloads).
+
 ## v1.110.0: the session's own model writes the spec; the spec loop is one command away
 
 Guards: 539 → **539**. The owner, 2026-11-22 (Telegram 02:36 UTC, relayed by the CEO of Fabric,

@@ -1,3 +1,18 @@
+## Candidate 1.111.0: a task for an executor is read before it leaves, branch `feat/task-prompt-check` (2026-11-22)
+
+- **Objective.** The owner's order of 2026-11-22 (Telegram 02:54 UTC, board request bd16f215):
+  verify that tasks given to agents state the end result, go in waves that look for what was
+  missed and are not laid out as gates; name the mechanics still missing.
+- **Done.** `scripts/task_prompt.py` (check, corpus), `hooks/task-prompt-nudge.sh` wired before
+  the subagent tool, `references/build.md` 4.1 and the implementer contract, `references/waves.md`;
+  24 test cases in two suites; report `docs/reports/2026-11-22-task-prompts/`; rows B-179 to
+  B-183 (three of them answer board request 83d5b776, the loss audit's R3, R4 and M-1 R3).
+- **Decisions.** The hook is advisory: the patterns have no measured precision yet, so a
+  refusal would stop real dispatches on a guess (B-182 decides after a week). The corpus and the
+  per-project table stay in `task-pipeline-data/prompt-audit-2026-11-22/`: this repository is public.
+- **Next task.** Merge, tag v1.111.0 with the hub's `release-member.js`, pin it in the hub,
+  `npx --yes sshlg-skills@latest update`; then B-179.
+
 ## Candidate 1.110.0: the session's own model writes the spec; the spec loop at hand, branch `feat/spec-author-default` (2026-11-22)
 
 - **Objective.** The owner's order of 2026-11-22 (Telegram 02:36 UTC, board request 94a61249,
