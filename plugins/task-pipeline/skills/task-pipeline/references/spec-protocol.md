@@ -3,6 +3,30 @@
 Stages 0 to 4 turn a request into a spec a builder starts from without a second
 question; `scripts/spec_protocol.py` checks each step. The order: spec, board rows, build.
 
+## Contents
+
+- The loop
+- 1. Size the spec
+- 2. Grill with classes
+- 3. Research with agents and other models
+- 4. Check the spec, then the board, then the build
+- Rationalizations
+
+## The loop
+
+Five steps in this order; `spec_protocol.py loop` prints them.
+
+| Step | Stage | Who | Takes | Leaves |
+|---|---|---|---|---|
+| 1. Analysis | 0 to 2 | the author | the request, the brief, the documents | the gaps, the size, the classed ledger |
+| 2. Definition | 2 to 3 | the author | the brief, the size, the ledger | the approved design and the spec draft |
+| 3. Research planning | 3 | the author | the ledger's open rows, the size | the dossier skeleton, one question a scout |
+| 4. Research | 3 | other agents: working-tier scouts, specialists for code, mathematics, science | one question each | Findings, Options, sources read |
+| 5. Verification | 3 to 4 | the author, validators of another model family, the scripts | the dossier and the spec | Recommendation, verdicts, `check` and `gate` pass |
+
+The author is the session's own model; a paid author runs only on the operator's
+recorded request ([`model-tiering.md`](model-tiering.md)). Size S runs steps 1, 2, 5.
+
 ## 1. Size the spec
 
 After the gap check (`grill.md`, phase 2), size the spec from the brief's facts:
@@ -61,7 +85,7 @@ Roles by model tier (`model-tiering.md`), at most five agents at once:
 1. **Scouts** (working tier, web search): fill Findings, Options and
    `sources.json` (`id`, `kind`, `title`, `url`, `read`, `claim`); recommend
    nothing; an unopened page is `read: false`.
-2. **Decider** (top tier): rechecks numbers and citations, writes Recommendation,
+2. **Decider** (the author): rechecks numbers and citations, writes Recommendation,
    What would refute it and Rejected; a gap goes back to a scout, never filled
    from memory; every validator gap is answered, `agree` included.
 3. **Validators** (top tier of another model family, blind to each other):

@@ -139,6 +139,8 @@
 
 Rows leave the table above only into this list, one line each, with the commit.
 
+- **B-177 · The spec is written by the session's own model, and the spec loop is at hand** (v1.110.0, this change): the owner's order of 2026-11-22 (board request 94a61249). No shipped file named a vendor model, but the preflight recommendation and the decider's "top tier" could be read as a reason for a paid call; `references/model-tiering.md` now says a paid author runs only on the operator's recorded request, and `spec_protocol.py loop` prints the five steps with who does each. Evidence: `test/spec_protocol_test.py`, 24 cases.
+
 - **B-176 · The family rule's harder test** (v1.109.0, this change): eight quiet plants, three runs a cell, and a self-preference measure on dossiers written by each family (`docs/research/2026-11-21-family-rule/`, Kimi and Gemini `agree`). The author's family caught 24 of 24 against 18 and 12 and agreed least with its own family's text; by the rule committed before the run, `research validate` records it with a warning and `research check` never counts it. `test/spec_protocol_test.py`: the family case, red on 1.108.0.
 
 - **B-175 · The validator's refutation test** (this change, no release: a research record): 15 calls (five variants of the validator-route dossier, three families), 0 parse failures, so tolerant parsing stays; the author's family and the two others each caught 4 of 4 plants, so the family rule was revisited and kept (ceiling, preference not tested, nil cost), the harder test filed as B-176. `docs/research/2026-11-21-validator-route/refutation/`.

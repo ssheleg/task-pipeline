@@ -4,6 +4,10 @@
 `references/spec-protocol.md` is the doctrine. This file makes four of its rules
 mechanical, standard library only; only `research validate` calls a model:
 
+    loop      [--json]
+              The spec loop at hand: analysis, definition, research planning,
+              research by other agents, verification; who does each step, what it
+              takes and what it leaves. The author is the session's own model.
     size      --reqs N --files N [--surfaces N] [--contract] [--outward]
               [--irreversible] [--cross-project] [--new-domain] [--unknowns N] [--json]
               The spec's size (S, M, L) from the brief's facts: which sections it owes,
@@ -241,15 +245,47 @@ def research_init(d, tier, question, author):
     return "wrote " + readme + " and sources.json"
 
 
+AUTHOR_RULE = ("the spec's author is the session's own model (on a subscription host, the "
+               "subscription session). A paid call to another model to write the spec runs "
+               "only on the operator's recorded request for that piece of work. Scouts and "
+               "validators are other agents; their spend follows the host's per-run line.")
+
+LOOP = [
+    {"step": 1, "name": "analysis", "stages": "0-2", "who": "the author",
+     "takes": "the request, the brief, the documents stage 1 read",
+     "leaves": "the gap list, the spec's size (`size`), the classed question ledger (`questions`)"},
+    {"step": 2, "name": "definition", "stages": "2-3", "who": "the author",
+     "takes": "the brief, the size, the ledger",
+     "leaves": "the approved design and the spec draft: goal, scope, requirements, contracts; "
+               "tactics and known domains decided, strategy batched for the owner"},
+    {"step": 3, "name": "research planning", "stages": "3", "who": "the author",
+     "takes": "the ledger's unknown and known-domain rows, the size",
+     "leaves": "the dossier skeleton (`research init`) and the roles (`research plan`): "
+               "one question a scout"},
+    {"step": 4, "name": "research", "stages": "3",
+     "who": "other agents than the author: working-tier scouts with web search, and a "
+            "specialist agent for code, mathematics or science where the host has one",
+     "takes": "one question and the dossier skeleton each",
+     "leaves": "Findings, Options and sources.json with what was read; no recommendation"},
+    {"step": 5, "name": "verification", "stages": "3-4",
+     "who": "the author rechecks; validators of another model family, blind; then the scripts",
+     "takes": "the dossier and the spec",
+     "leaves": "Recommendation, validator verdicts and Resolution; `research check`, `check` "
+               "and `gate` pass"},
+]
+
+
 def research_plan(tier):
     r = TIERS[tier]["research"] if tier in TIERS else DESK
     roles = []
     if r["scouts"]:
         roles.append({"role": "scout", "count": r["scouts"], "tier": "work",
-                      "does": "web search and reading; fills Findings, Options and sources.json; "
+                      "does": "another agent than the author (a specialist for code, mathematics "
+                              "or science where the host has one); web search and reading; fills Findings, Options and sources.json; "
                               "recommends nothing; what it could not open it did not read"})
-        roles.append({"role": "decider", "count": 1, "tier": "deep",
-                      "does": "rechecks numbers and citations, writes Recommendation, What would "
+        roles.append({"role": "decider", "count": 1, "tier": "session",
+                      "does": "the spec's author, the session's own model (a paid call to another "
+                              "model only on the operator's recorded request); rechecks numbers and citations, writes Recommendation, What would "
                               "refute it and Rejected; sends gaps back to a scout, never fills "
                               "them from memory"})
     if r["validators"]:
@@ -524,6 +560,8 @@ def main(argv=None):
     for f in ("contract", "outward", "irreversible", "cross-project", "new-domain"):
         s.add_argument("--" + f, action="store_true")
     s.add_argument("--json", action="store_true")
+    lp = sub.add_parser("loop")
+    lp.add_argument("--json", action="store_true")
     q = sub.add_parser("questions")
     q.add_argument("spec")
     q.add_argument("--json", action="store_true")
@@ -572,6 +610,13 @@ def main(argv=None):
             "research: %d scout(s), %d validator(s) of another family, %d sources read, %d primary"
             % (res["scouts"], res["validators"], res["sources"], res["primary"]),
             out["note"]])
+        return 0
+    if a.cmd == "loop":
+        emit({"author": AUTHOR_RULE, "steps": LOOP}, a.json,
+             ["the spec loop, stages 0 to 4:"]
+             + ["  %d. %s (stage %s). Who: %s. Takes: %s. Leaves: %s."
+                % (x["step"], x["name"], x["stages"], x["who"], x["takes"], x["leaves"]) for x in LOOP]
+             + ["author: " + AUTHOR_RULE])
         return 0
     if a.cmd == "questions":
         owner, errors, warns = questions(open(a.spec).read())

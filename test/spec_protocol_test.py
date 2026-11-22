@@ -405,6 +405,33 @@ def a_failed_call_records_no_verdict(root):
     expect(not os.path.exists(os.path.join(d, "validation")), "a failed call wrote a record")
 
 
+@case
+def the_loop_is_at_hand_in_its_order(root):
+    code, out = run("loop", "--json")
+    data = json.loads(out)
+    names = [s["name"] for s in data["steps"]]
+    expect(code == 0 and names == ["analysis", "definition", "research planning", "research",
+                                   "verification"], out)
+    expect(all(s["who"] and s["takes"] and s["leaves"] and s["stages"] for s in data["steps"]),
+           "a step without who, takes, leaves or stages")
+    expect("other agents than the author" in data["steps"][3]["who"], "research is not other agents'")
+    expect("another model family" in data["steps"][4]["who"], "verification names no other family")
+    code, out = run("loop")
+    expect(code == 0 and out.index("1. analysis") < out.index("5. verification"), out)
+
+
+@case
+def the_author_is_the_session_model_and_a_paid_author_needs_the_operators_request(root):
+    code, out = run("loop", "--json")
+    rule = json.loads(out)["author"]
+    expect("the session's own model" in rule and "only on the operator's recorded request" in rule, rule)
+    code, out = run("research", "plan", "--tier", "M", "--json")
+    roles = {r["role"]: r for r in json.loads(out)["roles"]}
+    expect(roles["decider"]["tier"] == "session", "the decider is not the session's model: %r" % roles["decider"])
+    expect("only on the operator's recorded request" in roles["decider"]["does"], roles["decider"]["does"])
+    expect("another agent than the author" in roles["scout"]["does"], roles["scout"]["does"])
+
+
 def main():
     for fn in CASES:
         root = tempfile.mkdtemp(prefix="specproto-")

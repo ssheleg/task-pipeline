@@ -23,6 +23,11 @@ different provider. Resolve the top tier available at runtime, tell the user wha
 you recommend and what they're on, let them confirm or override (per-stage
 overrides welcome), record the answer — then **stop asking at every stage**. If the
 recommended tier isn't available, say which one you're using and continue.
+The spec (stages 2 to 4) is written by the session's own model; a paid call to
+another model to write it runs only on the user's explicit request for that piece
+of work. The spec loop: analysis, definition, research planning, research by other
+agents (scouts, specialists for code, mathematics, science), verification by the
+author and by validators of another model family.
 
 ## Pacing — the run mode, and the context budget
 
