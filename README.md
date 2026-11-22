@@ -847,6 +847,11 @@ runs only when you ask for it for that piece of work. The spec loop (analysis,
 definition, research planning, research by other agents, verification) is one
 command away: `spec_protocol.py loop`.
 
+A task handed to a subagent is read before it leaves (`task_prompt.py check`): its end
+result, its finish criterion, a closing pass for what was missed, no stop for approval
+between steps. The plugin's hook does this on every dispatch and adds a note when a part
+is missing; it never blocks.
+
 ---
 
 ## Configure it for your project

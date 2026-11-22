@@ -188,8 +188,8 @@ overall.
 
 ## 4. The task loop
 
-Everything you paste into a dispatch prompt — and everything a subagent prints back
-— stays in your context for the rest of the session. **Hand artifacts over as
+Everything you paste into a dispatch prompt, and everything a subagent prints back,
+stays in your context. **Hand artifacts over as
 files.**
 
 ### 4.1 Dispatch the implementer
@@ -201,9 +201,8 @@ fix-round diffs need it.
 `<workspace>/task-<N>-brief.md`. The brief is the single source of requirements;
 exact values (numbers, strings, signatures, test cases) live **only** there.
 Include the task's `Implements:` ids **with each REQ's one-line statement quoted
-verbatim** — an implementer who sees only an instruction optimises the
-instruction; one who sees the requirement behind it catches the case the
-instruction didn't cover.
+verbatim** — an implementer who sees the requirement behind an instruction catches the
+case the instruction didn't cover.
 
 The dispatch prompt contains exactly five things:
 
@@ -213,6 +212,11 @@ The dispatch prompt contains exactly five things:
 3. Interfaces and decisions from earlier tasks the brief can't know.
 4. Your resolution of any ambiguity you spotted in the brief.
 5. The report path (`<workspace>/task-<N>-report.md`) and the report contract.
+
+Before it goes out, `python3 scripts/task_prompt.py check <prompt-file>` reads the prompt
+with its brief: the end result is stated, the finish criterion is named, a closing pass
+looks for what was missed, and nothing stops for approval between steps. The plugin's hook
+runs it on every subagent dispatch as a note, never a block.
 
 Never paste accumulated history ("state after tasks 1–3") into later dispatches.
 Never make a subagent read the whole plan. If an earlier task parked a finding in
@@ -236,8 +240,9 @@ Record the implementer's agent identity: fix rounds 1–3 resume it.
 > what you built, the files touched, the commits, the test command and its
 > output, decisions you made, anything you're unsure about. Return **only**:
 > status (`DONE` / `DONE_WITH_CONCERNS` / `NEEDS_CONTEXT` / `BLOCKED`), the
-> commit range, a one-line test summary, and your concerns. Ask before starting
-> if anything in the brief is ambiguous — questions are cheaper than rework.
+> commit range, a one-line test summary, and your concerns. Before the report, make
+> a closing pass over the whole task for what you missed, and list what you did not
+> examine. An ambiguous brief returns `NEEDS_CONTEXT` with the question; never wait.
 
 **Command hygiene** — put this in every background dispatch, whether it goes to an
 implementer, a reviewer or a verifier:
@@ -255,35 +260,29 @@ review finding, a constraint discovered in the code. Every one is a Doc Loop tri
 ([`documentation.md`](documentation.md)) — and this is the one stage where running
 that loop naively breaks something.
 
-**A subagent never writes the register.** Not a style rule; the same physical
-argument as §4.2 below, one level up:
+**A subagent never writes the register.** The same physical argument as §4.2 below:
 
 - The register is **append-only shared state**. Two implementers appending in two
-  worktrees conflict on the one file a project cannot afford to hand-merge, and the
-  loser's entry is the one that quietly disappears.
+  worktrees conflict on that file, and the loser's entry quietly disappears.
 - An **id cannot be reserved from inside an isolated branch.** Reserving *is* an
-  arbitration between concurrent writers, and a worktree is by construction unable
-  to see the other writers ([`documentation.md`](documentation.md) → *Registers are
+  arbitration between concurrent writers, and a worktree cannot see the other writers ([`documentation.md`](documentation.md) → *Registers are
   shared state*).
 
 So the route is fixed: a decision settled in a task goes into the **implementer
 report**, and into the **carry-over ledger** if it outlives the task — and the
 **orchestrator runs the Doc Loop after integration**, on the base branch, as a
-single writer. Nothing is lost and nothing collides.
+single writer.
 
-**What that costs, said out loud:** between the ruling and the entry there is a
-window in which the decision exists only in a report. That is exactly why the gate
-below harvests every report and parked finding into the ledger **before the scratch
-workspace is deleted** — the ledger is what survives the window.
+What that costs: until the entry is written the decision exists only in a report,
+which is why the gate below harvests every report and parked finding into the ledger
+**before the scratch workspace is deleted**.
 
 ### 4.2 Parallel groups — when fan-out is allowed
 
 The plan's parallel groups ([`planning.md`](planning.md)) describe what *may* run
-concurrently. Whether it actually does is this stage's call, and the constraint is
-physical: **two implementers writing one working tree corrupt each other's state.**
+concurrently. Whether it does is this stage's call, and the constraint is physical: **two implementers writing one working tree corrupt each other's state.**
 
-- **Default: sequential.** One implementer at a time, review after each. Correct for
-  every group, and always correct when the tasks are small.
+- **Default: sequential.** One implementer at a time, review after each: correct for every group.
 - **Fan out only when all three hold:** the tasks are in the same group (no
   `depends:` between them), their file ownership is exclusive per the plan, and
   **each implementer gets its own isolated worktree**. Then dispatch them together,

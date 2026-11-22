@@ -207,7 +207,8 @@ close pass below then re-measures what those rounds already proved.
 
 ## The close pass, after every wave
 
-In this order, inside the wave rather than after it:
+In this order, inside the wave; a node's task passed `task_prompt.py check`
+before it was handed over ([`build.md`](build.md) → 4.1):
 
 1. **Verify.** Every node the wave closes is certified ([`certification.md`](certification.md)),
    most of it already, as each node landed,

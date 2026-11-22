@@ -1,5 +1,5 @@
 {
-  "description": "task-pipeline — the gates and the observations they rest on. Every hook exits 0 immediately when the project has no .task-pipeline/run.md, so installing the plugin globally changes nothing in a repository that is not running a pipeline.",
+  "description": "task-pipeline — the gates and the observations they rest on. Every hook exits 0 immediately when the project has no .task-pipeline/run.md, so installing the plugin globally changes nothing in a repository that is not running a pipeline. One exception, on purpose: task-prompt-nudge.sh reads every task handed to a subagent, in any project, adds a note when a part is missing, and never blocks.",
   "hooks": {
     "PreToolUse": [
       {
@@ -21,6 +21,17 @@
             "type": "command",
             "shell": "bash",
             "command": "\"${CLAUDE_PLUGIN_ROOT}/hooks/build-gate.sh\"",
+            "timeout": 20
+          }
+        ]
+      },
+      {
+        "matcher": "Agent|Task",
+        "hooks": [
+          {
+            "type": "command",
+            "shell": "bash",
+            "command": "\"${CLAUDE_PLUGIN_ROOT}/hooks/task-prompt-nudge.sh\"",
             "timeout": 20
           }
         ]
