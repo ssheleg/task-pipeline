@@ -1,5 +1,11 @@
 # Verification — task-pipeline
 
+## Shipped state — v1.110.0 (source candidate; NOT SHIPPED yet)
+
+The spec's author is the session's own model (`references/model-tiering.md`,
+`references/spec-protocol.md` → *The loop*); `scripts/spec_protocol.py loop`.
+`test/spec_protocol_test.py` 24 cases, the two new ones red on 1.109.0's code.
+
 ## Shipped state — v1.109.0 (shipped 2026-11-21: tag v1.109.0 on bd3f50f, release run 44912854373 release and publish success, npm task-pipeline-skill 1.109.0)
 
 `research validate` records the author's family with a warning (`scripts/spec_protocol.py`);

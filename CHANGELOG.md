@@ -1,3 +1,31 @@
+## v1.110.0: the session's own model writes the spec; the spec loop is one command away
+
+Guards: 539 → **539**. The owner, 2026-11-22 (Telegram 02:36 UTC, relayed by the CEO of Fabric,
+board request 94a61249): «Мне не нужно, чтобы все спеки писались на Fable 5.2. Это только по
+моему отдельному запросу … мы просто будем писать спеки на Fable на подписочных наших Claude
+Code. Это дефолтный сетап … Весь этот луп, который у нас есть, пожалуйста, пусть будет
+зафиксирован где-то под рукой.»
+
+- **Who writes the spec.** The skill named no vendor model, but two lines let a run buy one:
+  the preflight recommendation of the top tier, and the spec protocol's decider described as
+  "top tier". Now stages 2 to 4 are written by the model the session already runs on (on a
+  subscription host, the subscription session), and a paid call to another model to write the
+  spec runs only on the operator's recorded request for that piece of work
+  (`references/model-tiering.md` → *The spec's author is the session's own model*). The rule
+  limits who writes, not who checks: scouts and validators of another family keep their spend
+  line. `research plan` names the decider as the session's model.
+- **The loop, at hand.** `spec_protocol.py loop` prints the five steps in order (analysis,
+  definition, research planning, research by other agents, verification), each with its stage,
+  who does it, what it takes and what it leaves; `--json` for a script. The same table opens
+  `references/spec-protocol.md`, and stages 2, 3 and 4 point at it. Research is done by other
+  agents than the author: working-tier scouts with web search and a specialist agent for code,
+  mathematics or science where the host has one. `SKILL.md`, the README and the Cursor rule
+  carry the rule in one sentence each. The skill's word count did not rise: the
+  model policy and stage 2 were tightened to make room (`test/prompt_lint.py` ratchet).
+- **Proof.** `test/spec_protocol_test.py`, 24 cases, two new (the loop's order and fields; the
+  decider is the session's model and a paid author needs the operator's request), both red on
+  1.109.0's code, which has no `loop` verb.
+
 ## v1.109.0: the author's family is recorded as a validator, with a warning, never counted
 
 Guards: 539 → **539**. The owner's order of 2026-11-21 (board request f6537624, item 3), lifted

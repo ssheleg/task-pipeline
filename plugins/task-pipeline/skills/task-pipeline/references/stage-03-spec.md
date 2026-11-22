@@ -6,6 +6,9 @@ The full gate and freedom level remain in [stages.md](stages.md).
 - **The mechanical gate:** `spec_protocol.py check <spec>` passes (sections owed by
   its size, the classed question ledger, the research, no open decision in prose):
   [`spec-protocol.md`](spec-protocol.md).
+- Who does what ([`spec-protocol.md`](spec-protocol.md) → *The loop*): the author defines
+  the spec and plans the research; other agents research; the author and validators
+  of another family verify.
 - **How it runs: [`spec.md`](spec.md)** — built into this skill: the UX-track order,
   what the spec must lock (types, schemas, signatures, file layout, the **Global
   Constraints** block stages 4–5 depend on), the self-review pass and the operator

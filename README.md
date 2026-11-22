@@ -841,6 +841,12 @@ Stage-5 subagents are pinned to the confirmed model automatically. If the
 recommended tier isn't available, the pipeline says which one it's using and
 continues — a reminder, never a block.
 
+The spec (stages 2 to 4) is written by the model your session already runs on: on a
+subscription, the subscription session. A paid call to another model to write it
+runs only when you ask for it for that piece of work. The spec loop (analysis,
+definition, research planning, research by other agents, verification) is one
+command away: `spec_protocol.py loop`.
+
 ---
 
 ## Configure it for your project

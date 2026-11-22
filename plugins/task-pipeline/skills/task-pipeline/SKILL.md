@@ -184,9 +184,9 @@ repositories*.
 
 ## Model
 
-Keep the running model and record it; recommend the most capable reasoning model
-available as advice, a tier, never a hardcoded id (`references/model-tiering.md`
-→ *Mechanic*). Stage-5 subagents are pinned to it.
+Keep the running model and record it: it writes the spec, a paid author only on the
+operator's request. A stronger tier is advice, never a hardcoded id
+(`references/model-tiering.md`). Stage-5 subagents are pinned to it.
 
 ## Degradation
 

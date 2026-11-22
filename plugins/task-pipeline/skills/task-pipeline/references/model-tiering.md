@@ -5,6 +5,7 @@
 - The default
 - Never hardcode a model id
 - The operator's explicit choice is inherited, verbatim
+- The spec's author is the session's own model
 - Mechanic — confirm at preflight, then stop asking
 - The plan-then-execute profile
 - Subagents
@@ -13,7 +14,7 @@
 
 **One model, recorded once, before the run starts.** Not a per-stage tier list,
 not a hardcoded vendor id: the model already running, kept and recorded at preflight
-unless the operator switches it, and then honored without nagging.
+unless the operator switches it.
 
 ## The default
 
@@ -21,44 +22,47 @@ unless the operator switches it, and then honored without nagging.
 > writing that is the **latest Opus generation**, but read that as *"the top tier
 > of whatever you're on"*, not as a specific string.
 
-Every stage runs on that model by default. The pipeline is a full delivery cycle:
-the grill has to hear what the operator didn't say, the spec has to lock contracts
-a zero-context implementer will follow, and the build has to hold a plan in its
-head. Downgrading any of those to save tokens costs more in rework than it saves.
+Every stage runs on that model by default: the grill hears what the operator didn't
+say, the spec locks contracts a zero-context implementer follows, the build holds a
+plan in its head. Downgrading any of those costs more in rework than it saves.
 
 ## Never hardcode a model id
 
-Model ids go stale — generations ship, tiers get renamed, and the operator may not
-even be on the same provider. So:
+Model ids go stale, and the operator may be on another provider. So:
 
-- **Resolve at runtime.** Look at what the environment actually offers (`/model`,
-  the harness's model list) and pick the top reasoning tier available there.
+- **Resolve at runtime.** Pick the top reasoning tier the environment offers
+  (`/model`, the harness's model list).
 - **Treat any id in this repo as an example**, including in `pipeline.example.json`.
   Stage configs use provider-agnostic tokens:
   - `default` — the model confirmed for this run (the recommendation above)
   - `inherit` — whatever the operator is currently on; no recommendation
-- **Another provider is fine.** "Top tier available" is the contract. If the
-  environment has no Opus-class model, the best available one is the right answer —
-  say which one you settled on and keep going.
+- **Another provider is fine.** "Top tier available" is the contract: with no
+  Opus-class model, the best available one is right; say which and keep going.
 
 ## The operator's explicit choice is inherited, verbatim
 
 **Advice and choice are different things, and the second wins.** The
-recommendation above is ADVICE — printed once at preflight. A model or effort
-the operator has set explicitly (`/model`, `/fast`, a config entry, an answer
+recommendation above is ADVICE, printed once at preflight. A model or effort
+the operator set explicitly (`/model`, `/fast`, a config entry, an answer
 at preflight) is the CHOICE, and the plan, every stage and every subagent
 inherit it unchanged. **Task size is not a basis for switching**: a large task
-does not upgrade the model, a mechanical stage does not downgrade it — the only
-thing that changes the model mid-run is an override the operator RECORDED, with
-its basis, in the per-stage map. A switch nobody recorded is a defect, whatever
-it saved.
+does not upgrade the model, a mechanical stage does not downgrade it; only an override
+the operator RECORDED, with its basis, in the per-stage map changes it mid-run. A switch nobody recorded is a defect, whatever it saved.
 
 **An unsupported capability is its own line, never a silent swap.** When the
-confirmed model cannot do what a stage needs — vision it lacks, a context
-window the material exceeds, a tool the tier does not offer — the run states
-that limitation by NAME, records it in the brief, and asks (or proceeds with
-the gap named). Substituting a different model to cover the gap without the
-operator's say-so is the same defect as the silent downgrade.
+confirmed model cannot do what a stage needs (vision, a context window, a tool), the
+run states that limitation by NAME, records it in the brief, and asks or proceeds with the gap
+named. Substituting another model without the operator's say-so is the same defect as
+the silent downgrade.
+
+## The spec's author is the session's own model
+
+Stages 2 to 4 are written by the model the session already runs on: on a
+subscription host, the subscription session, with no paid call. A paid call to
+another model to write the spec runs only on the operator's recorded request for
+that piece of work, quoted in the brief with its date. The rule limits who writes,
+not who checks: scouts and validators keep the host's per-run line
+([`spec-protocol.md`](spec-protocol.md) → *The loop*).
 
 ## Mechanic — confirm at preflight, then stop asking
 
@@ -68,70 +72,54 @@ Once, as one line of the preflight notice (before stage 0, on the full flow):
 > available>`**. A switch is the operator's `/model` at any time; the brief records
 > it.
 
-The line is a **notice, not a question**: the run does not wait for an answer.
+The line is a **notice, not a question**.
 Record the current model in the stage-0 brief (`Model` row of the autonomy sweep),
 and a per-stage override map only when the operator states one. After that:
 
-- **Do not prompt at any stage boundary.** The decision is recorded; nagging is
-  the thing this replaces.
+- **Do not prompt at any stage boundary**: the decision is recorded.
 - **Print the line again only** when the operator recorded a *per-stage override
-  map* and the next stage's entry differs from the current model: the same notice,
-  scoped to that stage.
-- A skill runs inside the current context and **cannot change the main-loop
-  model**; only the operator can, via `/model` (or `/fast`). That is why the
-  default is the model already running: a run that stopped to ask would stop every
-  run for a choice the operator can make at any moment without being asked.
+  map* and the next stage's entry differs from the current model, scoped to that stage.
+- A skill **cannot change the main-loop model**; only the operator can (`/model`,
+  `/fast`). So the default is the model already running.
 
 ## The plan-then-execute profile
 
-The per-stage override the *Mechanic* block offers is usually declined, and the
-default — one tier for the whole run — is the right answer when one tier is what the
-environment has. Where two are available, one override has a basis worth writing down,
-so it ships as a named profile the operator can ask for by name instead of composing:
+The per-stage override is usually declined, and one tier for the whole run is right
+when one tier is what the environment has. Where two are available, one override has a
+basis worth writing down, so it ships as a named profile:
 
 > **plan-then-execute** — the most capable reasoning tier for stages 0–4 (intake,
 > docs, brainstorm, spec, plan) and stage 10 (acceptance); the strongest *working*
 > tier for stages 5–9 (build, tests, deploy, post-deploy, docs).
 
-**Its basis, which is the part that makes it a decision rather than a preference:**
-what stages 0–4 produce is *judgment that the later stages consume* — a brief that
-hears what was not said, contracts a zero-context implementer will follow, and a plan
-whose packets survive a stranger. A weak plan is not recovered by a strong build; a
-strong plan executed by a working tier is ordinary delivery. Stage 10 is back on the
-planning tier because acceptance is a judgment too: it decides whether the evidence
-answers the claim.
+**Its basis:** stages 0–4 produce *judgment that the later stages consume*: a brief,
+contracts and a plan a stranger can follow. A weak plan is not recovered by a strong
+build; a strong plan executed by a working tier is ordinary delivery. Acceptance is a
+judgment too, so stage 10 returns to the planning tier.
 
-**It changes nothing about how a switch is recorded.** This is still an override the
-operator states, at preflight or later, and the brief records with its basis, exactly as the rule
-above demands; naming it here saves the composing, not the recording. Task size still
-switches nothing. And it is still ADVICE — an environment with one tier runs the whole
-pipeline on that tier and says so.
+It is still an override the operator states and the brief records with its basis.
+Task size still switches nothing, and an environment with one tier runs the whole pipeline
+on that tier and says so.
 
 `scripts/plan_audit.py --models <map.json>` checks the recorded map at stage 4: a stage
-number this pipeline does not have, or an entry with no model behind it, fails there
-rather than at the boundary it was written for.
+number this pipeline does not have, or an entry with no model behind it, fails there.
 
 ## Subagents
 
 Stage 5 spawns subagents; the orchestrator pins them to the **run's confirmed
-model** via the `Agent` / `Workflow` model override. No operator action needed —
-and no silent downgrade to a cheaper tier.
+model** via the `Agent` / `Workflow` model override. No silent downgrade to a cheaper tier.
 
 ## Degradation
 
 The recommendation is a **reminder, not a block**. If the recommended tier isn't
-available, keep the current model, state plainly which one is in use, and run. The
-pipeline never stalls on a model it can't get.
+available, keep the current model, say which, and run.
 
 ## A harness clause encodes a model's weakness — stress-test it per generation
 
-Every fixed control in this pipeline — a cap, a mandatory checkpoint, a fix-loop
-ceiling — encodes an assumption about what the confirmed model cannot yet do
-reliably, and those assumptions expire: Anthropic reports removing an entire
-construct from its own long-running harness when a newer model generation stopped
-needing it (*Harness design for long-running agents*,
-anthropic.com/engineering, read 2026-08-30). So when the confirmed tier moves a
-generation, re-test the clauses that exist to compensate the old one instead of
-carrying them as doctrine — a control the model has outgrown is not free, it is a
-stop nobody can name the reason for. The retro's cold-retirement trigger is the
-same rule applied to standing instructions; this is it applied to the harness.
+Every fixed control here (a cap, a mandatory checkpoint, a fix-loop ceiling) encodes
+what the confirmed model cannot yet do reliably, and that expires: Anthropic reports
+removing a whole construct from its long-running harness when a newer generation
+stopped needing it (*Harness design for long-running agents*,
+anthropic.com/engineering, read 2026-08-30). When the confirmed tier moves a
+generation, re-test those clauses instead of carrying them as doctrine: a control the
+model has outgrown is a stop nobody can name the reason for.

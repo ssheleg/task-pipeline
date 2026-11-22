@@ -1,3 +1,18 @@
+## Candidate 1.110.0: the session's own model writes the spec; the spec loop at hand, branch `feat/spec-author-default` (2026-11-22)
+
+- **Objective.** The owner's order of 2026-11-22 (Telegram 02:36 UTC, board request 94a61249,
+  relayed by the CEO of Fabric): specs are written by the subscription session's model by default,
+  a paid API model only on his separate request; the spec loop recorded where it is at hand.
+- **Done.** `references/model-tiering.md` (new section on the spec's author),
+  `references/spec-protocol.md` (*The loop* table; the decider is the author), stages 2 to 4,
+  `SKILL.md`, README, Cursor rule; `spec_protocol.py loop` and `research plan`; 24 test cases;
+  CHANGELOG v1.110.0; backlog B-177 closed.
+- **Decisions.** The skill keeps naming no vendor model, so the rule is written as "the session's
+  own model". Validators of another family stay a paid call under the host's per-run line: the
+  order limits who writes the spec, not who checks it.
+- **Next task.** Merge the PR, tag v1.110.0 with the hub's `release-member.js`, pin it in the
+  hub, then `npx --yes sshlg-skills@latest update` and read back the installed version.
+
 ## Released 1.109.0: the family rule measured; the author's family recorded with a warning (2026-11-21)
 
 - **Objective.** Continue the spec protocol (owner, 2026-11-21, board f6537624 item 3; lifted
