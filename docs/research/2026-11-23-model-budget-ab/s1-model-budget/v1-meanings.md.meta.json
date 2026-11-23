@@ -1,0 +1,13 @@
+{
+ "finish": "stop",
+ "cost": 0.387136,
+ "cost_source": "openrouter",
+ "cost_known": true,
+ "tokens_in": 6507,
+ "tokens_out": 8377,
+ "seconds": 95.2,
+ "served_by": "anthropic/claude-fable-5.2",
+ "model": "anthropic/claude-fable-5.2",
+ "task": "model-budget-ab",
+ "at": "2026-11-23T19:12:27Z"
+}

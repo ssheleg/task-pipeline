@@ -1,5 +1,9 @@
 # Verification — task-pipeline
 
+## Shipped state — v1.114.0 (candidate 2026-11-23: money by role and the spend ledger; tag, run and npm version are added once shipped)
+
+- Candidate on branch `feat/model-budget-by-role`; `npm test` green before the tag; the A/B record is `docs/research/2026-11-23-model-budget-ab/`.
+
 ## Shipped state — v1.113.1 (candidate 2026-11-23: v1.113.0 tagged on 26bb446, release run 45238108083 refused it over a squashed branch commit cited here, not on npm; the consilium; carries v1.112.0 and v1.112.1, refused by their release runs and never on npm; tag, run and npm version are added once shipped)
 
 `scripts/consilium.py` (panel, review, decide, check, `--judge-only`) with `test/consilium_test.py` (21 cases against a

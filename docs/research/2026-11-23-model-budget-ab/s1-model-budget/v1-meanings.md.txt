@@ -1,0 +1,132 @@
+# Meanings
+
+Thinker: anthropic/claude-fable-5.2
+Task: model-budget-ab
+
+## Goal and meaning
+
+task-pipeline stops meaning "one model for the whole run" and starts meaning "a model and a route per role". The owner's order of 2026-11-23 is the recorded choice that replaces the 2026-11-22 rule (the session's model authors the spec).
+
+The promise has three parts:
+- **Paid thinking is spent only where an artefact decides something**, and there without a cap.
+- **Everything else runs on subscriptions.**
+- **Every token call is recorded** with route, model, role, cost and task, and the owner sees day and month totals and a warning before USD 5,000 a month.
+
+Quality holds because the thinker fixes meanings, the writer may not change them, and the council still judges the finished text.
+
+## Key features
+
+1. **A role map in host configuration.** Each role resolves to a model and a route; no model id lives in doctrine or code.
+
+| Role | Does | Route |
+|---|---|---|
+| `thinker` | deciding artefacts | Fable 5.2, API tokens |
+| `writer` | the spec's text | Opus 5.5, subscription |
+| `routine` | gap check, sizing, research planning | Fable, subscription session |
+| `main` | build, tests, docs | Opus 5.5, subscription |
+| `specialist-code`, `specialist-math` | specialist work | subscriptions |
+| `validator` | panel verdicts | tokens |
+| `judge` | the final ruling | Fable 5.2, API tokens |
+
+2. **Spec definition split in two.** The thinker returns a meanings file; the writer writes the spec from it. `check` verifies the link between them.
+3. **Consilium brought to the rule.** The panel is the five named validator families, one request each a round. The judge is always Fable by API.
+4. **One estate spend ledger.** It is an append-only host file that every token-calling script writes to. A summary verb gives day, month, by role, by model and by task.
+5. **Ceiling warning.** It is read from Observatory's provider-measured figure, with the ledger as fallback.
+6. **Cost correctness fixes.** BYOK cost is read from the upstream field, a `--judge-only` rerun no longer erases panel cost, and `research validate` records cost.
+
+## Decisions
+
+- D1: Roles, not stages or task size, select the model, and the role map is the operator's recorded choice. Because the order assigns models by kind of work, and the existing rule already lets a recorded override change the model mid-run.
+- D2: The thinker is called by API for exactly four artefacts from size M up: the spec's meanings, the research Recommendation, the decisions of an L plan, and the consilium ruling. Because these are the artefacts that decide; a longer list turns "key thinking" into "all thinking".
+- D3: Size S makes no paid thinker call; the `routine` role writes its meanings in the subscription session. Because a bounded change has no deciding artefact worth a token route, and S already skips the council.
+- D4: Gap check, sizing, the classed ledger and research planning are `routine`. Because they are smart but prepare decisions without making them.
+- D5: The thinker receives the full brief, the ledger and the cited documents, never a summary, and its calls carry no token or cost cap. Because the owner said "without stinting", and a starved thinker is the main quality risk of the split.
+- D6: The meanings file is a stored artefact beside the spec with a fixed section set (goal, key features, numbered decisions, contracts, non-goals, risks, owner questions). Because meanings held only in context are lost with the session and cannot be checked.
+- D7: The writer may not add, drop or alter a decision or a contract; a disagreement returns to the thinker as a question. Because two authors of meaning produce a spec nobody decided.
+- D8: `spec_protocol.py check` fails an M or L spec that has no meanings reference, a stale meanings hash, or a decision id absent from the spec. Because a mechanical link is the only enforceable form of D7.
+- D9: The plan-then-execute profile and the section "The spec's author is the session's own model" are deleted and replaced by the role section. Because the role map supersedes both and the word ratchet needs the room.
+- D10: The panel is the five named validator families; a panelist of the thinker's or the writer's family is removed. Because the author never sits on its own artefact's panel, and there are now two authors.
+- D11: Each validator gets one billed request a round, with one retry only when the first attempt returned no billed usage; an unparsable answer is not retried and counts as a missing verdict. Because the order says one request each, and the gate of three verdicts from three families already tolerates loss.
+- D12: The judge is a fresh call with no thinker context. Because Fable judging meanings Fable wrote is the design's weakest point, and context isolation is the mitigation available.
+- D13: Every rejected blocker or major finding is listed with its reason in `summary.md`. Because a rejected serious finding is where self-judgement would hide, so the owner must be able to see it.
+- D14: The judge labels each accepted finding `meaning` or `text`; `meaning` goes back to the thinker, `text` to the writer. Because otherwise the writer would change meanings while fixing findings.
+- D15: `max_usd_per_round` counts panel spend only; the judge's cost is recorded but never counted toward it, and the judge is never skipped for its own cost. Because the owner ordered that Fable rules last even when paid.
+- D16: A panel over the cap still fails the round before the judge. Because a runaway panel should not be ruled on.
+- D17: The thinker and the judge are exempt from the host's per-run line; validators and scouts stay under it. Because "without stinting" and a per-run cap cannot both bind the same call.
+- D18: Recorded cost is `usage.cost` plus `usage.cost_details.upstream_inference_cost` when present, with both raw values kept. Because the BYOK call measured on 2026-11-23 reported zero in the first field and the real cost in the second.
+- D19: A call with no provider cost is priced from the configured price table and marked `estimated`; with no price it is recorded as `null` and counted as unpriced, never as zero. Because a silent zero is the defect already observed.
+- D20: A round ledger is append-only; `--judge-only` appends, and the round total sums all entries. Because the rerun currently zeroes the panel's cost.
+- D21: One estate ledger, a JSON-lines host file (path from an environment variable, with a default under the host's state directory), is written through a single shared script module. Because three scripts with three formats cannot be summed.
+- D22: A token call without a task label is refused before any spend. Because the order requires every call recorded with its task, and an unlabelled cost cannot be attributed later.
+- D23: The ledger stores no prompt or response text. Because people's text must not leak into an accounting file.
+- D24: Subscription calls are not written to the ledger. Because the order tracks token routes, and subscription usage has no per-call cost.
+- D25: Day and month are UTC. Because providers bill in UTC and Observatory compares against them.
+- D26: The ceiling figure is the sum of every project's `totalUsd` from Observatory; when Observatory is unreachable, the ledger's month total is used and labelled a lower bound. Because the ceiling is estate-wide, provider-measured, and covers spend outside this skill.
+- D27: Warnings fire at 80%, 95% and 100% of USD 5,000, printed before each token call and in the summary, together with a linear end-of-month projection. Because "approaching" needs a number and one early line is easy to miss.
+- D28: The warning never blocks a call. Because the owner asked for a warning, and a block is an authorisation rule he did not order.
+- D29: The owner's view is Observatory, which reads the summary verb's JSON output; the Observatory-side change is a board row outside this repository. Until it lands, the summary verb prints a terminal and Markdown view. Because OpenRouter's dashboard cannot see the direct Fable API route.
+- D30: The summary shows the drift between the ledger's month total and Observatory's figure for this project, and flags it above 10%. Because an accounting system nobody reconciles is not trusted.
+- D31: When the thinker route is unavailable, the run names the gap, writes meanings with `routine`, and marks the spec `Thinker: degraded`; the council still runs. A missing judge fails the round as today. Because silent substitution is a defect under the existing doctrine, and a stalled pipeline is worse than a marked one.
+- D32: The preflight line prints the resolved role map once, and subagents are pinned to their role's model. Because "confirm once, then stop asking" stays the mechanic; only its content changes.
+- D33: Doctrine edits are net zero or negative in words. Because the ratchet is a repository gate.
+
+## Contracts
+
+**Role map** (host config; the shipped template carries placeholders that the scripts refuse to call):
+- Each role gives `model`, `route` and, for token routes, a key variable and an optional price.
+- Routes are `subscription`, `api-direct`, `openrouter` and `openrouter-byok`.
+- An unresolved role fails at preflight, not mid-run.
+
+**Thinker call** (a new verb):
+- Takes the brief, the ledger and the documents, plus a task label and the artefact kind (one of D2's four).
+- Leaves the meanings file and one ledger record. On failure it leaves nothing but still records any billed usage.
+
+**Meanings to spec:**
+- The spec header carries the meanings path and content hash.
+- Every decision id in the meanings appears in the spec's Decisions with its meaning unchanged.
+- The writer owns wording, order and examples only.
+
+**Consilium round:**
+- Promises at most one billed request per validator, a judge ruling that classifies each accepted finding, and a round ledger whose total is never reduced by a rerun.
+- `check` still demands three verdicts of three families, a parsable ruling and panel spend within the cap.
+
+**`research validate`:**
+- One call, and a ledger record with cost under D18 and D19.
+- A failed call still records nothing in the dossier.
+
+**Ledger record:**
+- Fields: UTC timestamp, script, route, model, role, task, stage, input and output tokens, `cost_usd`, `cost_source` (`provider`, `upstream`, `estimated`, `unknown`), raw cost fields, provider request id.
+- A request id is counted once in summaries.
+- Each write is a single appended line, so concurrent agents are safe.
+
+**Summary verb:**
+- Returns today and month-to-date totals, split by role, model, route and task.
+- Also returns the unpriced-call count, the estate figure with its source, the percentage of the ceiling, the projection, the warning level and the drift.
+- The JSON form is the stable interface Observatory reads.
+
+## Non-goals
+
+- Changing Observatory, or building a dashboard in this repository.
+- Metering or limiting subscription usage.
+- Blocking spend at the ceiling.
+- Choosing concrete model ids in doctrine.
+- Changing council cadence (when it sits, the number of rounds) or the size S flow beyond D3.
+- Backfilling spend from before the ledger exists.
+
+## Risks
+
+- **Self-judgement.** Fable rules on meanings Fable wrote. This is mitigated by D12, D13 and the blind panel of five other families. It is refuted if the judge's rejection rate for blocker findings on thinker-authored specs is clearly higher than on other artefacts.
+- **Quality loss in the split.** The writer may flatten or drift from the meanings. The design is refuted if the first five M specs under the split show more accepted blocker or major findings in round 1 than the last five before it, or if `meaning` findings are routinely caused by the text.
+- **Thinker scope creep.** If thinker spend exceeds half of monthly token spend without a matching rise in deciding artefacts, D2's list is too loose.
+- **Under-recording.** A token call made outside the shared module escapes the ledger. Drift above 10% (D30) is the detector.
+- **Refusal friction.** D22 may stop ad hoc runs; this is accepted.
+- **Estimated prices go stale.** The unpriced and estimated counts are shown so the owner can discount the total.
+- **Observatory lag.** Provider figures may trail by hours, so the warning can be late near the ceiling. The ledger fallback and the projection reduce this but do not remove it.
+- **Thin panel.** One request each with five validators leaves a margin of two failures before the gate fails.
+- **Ratchet.** The new role section may not fit within the deleted words; if it does not, other doctrine must be trimmed in the same change.
+
+## Questions for the owner
+
+- Q1: At 100% of the USD 5,000 ceiling, should token calls stop until you lift it, or only warn? Default: warn only, never block (D28).
+- Q2: Should size S specs also get the paid thinker? Default: no, S uses Fable in the subscription session (D3).
+- Q3: Is USD 5,000 the ceiling for the whole estate's provider spend, or only for task-pipeline's token routes? Default: the whole estate, measured by Observatory (D26).

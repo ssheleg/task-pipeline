@@ -1,0 +1,37 @@
+{
+ "meta": {
+  "id": "openai",
+  "model": "openai/gpt-6.2-astra-pro",
+  "family": "openai",
+  "at": "2026-11-23T19:26:37Z",
+  "route": "tokens",
+  "finish": "stop",
+  "cost": 0.4955088,
+  "cost_source": "byok",
+  "cost_known": true,
+  "tokens_in": 73398,
+  "tokens_out": 1190,
+  "seconds": 21.3,
+  "served_by": "openai/gpt-6.2-astra-pro",
+  "parsed": true
+ },
+ "verdict": {
+  "ranking": [
+   "Y",
+   "X"
+  ],
+  "pick": "Y",
+  "why": "Y is the better implementation base. Design §1 audits current and target routes from analysis through acceptance. REQ-4 and T9 test the owner's actual unit of spend: one HTTP request per validator, even on failure. X R9 instead permits a retry when no billed usage was returned; a timeout is not proof the first request was free. Y routes new decisions back to meanings regardless of spec size, whereas X R3–R5 invent a size-S exemption. Y also gives the operator a stronger rollout: check ledger writability before spending, verify BYOK against provider fixtures, preserve prior panel and judge rows on reruns, and compare canary quality with a baseline (Design §5; Rollout 2–6). X is stronger on the explicit Fable/Opus role assignments, unresolved-role preflight and unknown-cost reporting (Design role table; R1, R13–R16), but its unconditional addition of router and upstream cost is not justified by the measured zero-router-cost case. Its Q4–Q17 also leave tactical answers marked pending.",
+  "risks": [
+   "Y Design §§2, 4 lets a missing map restore the superseded single-model rule, permits a legacy six-member panel, and checks judge identity after spend. Rollout 4 configures the intended estate, but a missing or stale file can undo that choice. Validate the owner's role routes, five families and judge before the first POST.",
+   "Y Design §5 can book absent BYOK cost fields as zero. Its proposed manual correction also cannot clear an original successful null-cost row: C6 still fails that row. Preserve unknowns and specify linked corrections that reconcile without double counting.",
+   "Y Design §6 allows an Observatory cache of any age after a failure; without a month check, last month's spend can drive this month's warning. Neither Y Rollout 7 nor X R18 proves the owner can actually see day and month totals in Observatory: both stop at a board row. Verify the displayed totals and warning before declaring rollout complete.",
+   "Y's ID tags verify coverage, not meaning. Design §4 gives the judge the source meanings only when `--meanings` is supplied. Require that input for split-spec reviews so the canary's fidelity counts are interpretable."
+  ],
+  "score": {
+   "Y": 8,
+   "X": 6
+  }
+ },
+ "raw": "{\n  \"ranking\": [\"Y\", \"X\"],\n  \"pick\": \"Y\",\n  \"why\": \"Y is the better implementation base. Design §1 audits current and target routes from analysis through acceptance. REQ-4 and T9 test the owner's actual unit of spend: one HTTP request per validator, even on failure. X R9 instead permits a retry when no billed usage was returned; a timeout is not proof the first request was free. Y routes new decisions back to meanings regardless of spec size, whereas X R3–R5 invent a size-S exemption. Y also gives the operator a stronger rollout: check ledger writability before spending, verify BYOK against provider fixtures, preserve prior panel and judge rows on reruns, and compare canary quality with a baseline (Design §5; Rollout 2–6). X is stronger on the explicit Fable/Opus role assignments, unresolved-role preflight and unknown-cost reporting (Design role table; R1, R13–R16), but its unconditional addition of router and upstream cost is not justified by the measured zero-router-cost case. Its Q4–Q17 also leave tactical answers marked pending.\",\n  \"risks\": [\n    \"Y Design §§2, 4 lets a missing map restore the superseded single-model rule, permits a legacy six-member panel, and checks judge identity after spend. Rollout 4 configures the intended estate, but a missing or stale file can undo that choice. Validate the owner's role routes, five families and judge before the first POST.\",\n    \"Y Design §5 can book absent BYOK cost fields as zero. Its proposed manual correction also cannot clear an original successful null-cost row: C6 still fails that row. Preserve unknowns and specify linked corrections that reconcile without double counting.\",\n    \"Y Design §6 allows an Observatory cache of any age after a failure; without a month check, last month's spend can drive this month's warning. Neither Y Rollout 7 nor X R18 proves the owner can actually see day and month totals in Observatory: both stop at a board row. Verify the displayed totals and warning before declaring rollout complete.\",\n    \"Y's ID tags verify coverage, not meaning. Design §4 gives the judge the source meanings only when `--meanings` is supplied. Require that input for split-spec reviews so the canary's fidelity counts are interpretable.\"\n  ],\n  \"score\": {\"Y\": 8, \"X\": 6}\n}"
+}

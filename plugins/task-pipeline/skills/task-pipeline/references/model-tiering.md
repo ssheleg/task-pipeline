@@ -5,7 +5,7 @@
 - The default
 - Never hardcode a model id
 - The operator's explicit choice is inherited, verbatim
-- The spec's author is the session's own model
+- Roles and money
 - Mechanic — confirm at preflight, then stop asking
 - The plan-then-execute profile
 - Subagents
@@ -22,9 +22,8 @@ unless the operator switches it.
 > writing that is the **latest Opus generation**, but read that as *"the top tier
 > of whatever you're on"*, not as a specific string.
 
-Every stage runs on that model by default: the grill hears what the operator didn't
-say, the spec locks contracts a zero-context implementer follows, the build holds a
-plan in its head. Downgrading any of those costs more in rework than it saves.
+Every stage runs on that model by default; *Roles and money* says which calls
+go to tokens.
 
 ## Never hardcode a model id
 
@@ -36,13 +35,12 @@ Model ids go stale, and the operator may be on another provider. So:
   Stage configs use provider-agnostic tokens:
   - `default` — the model confirmed for this run (the recommendation above)
   - `inherit` — whatever the operator is currently on; no recommendation
-- **Another provider is fine.** "Top tier available" is the contract: with no
-  Opus-class model, the best available one is right; say which and keep going.
+- **Another provider is fine:** the best available tier; say which.
 
 ## The operator's explicit choice is inherited, verbatim
 
 **Advice and choice are different things, and the second wins.** The
-recommendation above is ADVICE, printed once at preflight. A model or effort
+recommendation above is advice, printed once at preflight. A model or effort
 the operator set explicitly (`/model`, `/fast`, a config entry, an answer
 at preflight) is the CHOICE, and the plan, every stage and every subagent
 inherit it unchanged. **Task size is not a basis for switching**: a large task
@@ -55,14 +53,21 @@ run states that limitation by NAME, records it in the brief, and asks or proceed
 named. Substituting another model without the operator's say-so is the same defect as
 the silent downgrade.
 
-## The spec's author is the session's own model
+## Roles and money
 
-Stages 2 to 4 are written by the model the session already runs on: on a
-subscription host, the subscription session, with no paid call. A paid call to
-another model to write the spec runs only on the operator's recorded request for
-that piece of work, quoted in the brief with its date. The rule limits who writes,
-not who checks: scouts and validators keep the host's per-run line
-([`spec-protocol.md`](spec-protocol.md) → *The loop*).
+The owner, 2026-11-23: tokens buy only the thinking that decides.
+
+| Role | Route |
+|---|---|
+| Thinker: decisions, a spec's meanings (`meanings.py write`) | tokens, the strongest model |
+| Writer of the spec's text (`meanings.py writer-task`); main work; specialists; scouts | subscription |
+| Validators | tokens, one call each, never retried |
+| The council's verdict ([`consilium.md`](consilium.md)) | tokens, the strongest model |
+
+`scripts/spend.py` books every token call (route, model, cost, task; an unknown
+cost is never zero) and sums the day and month beside the estate's month from
+Observatory; at 80 % of USD 5,000 `spend.py ceiling` exits 3 with the owner's
+question.
 
 ## Mechanic — confirm at preflight, then stop asking
 
@@ -97,9 +102,7 @@ contracts and a plan a stranger can follow. A weak plan is not recovered by a st
 build; a strong plan executed by a working tier is ordinary delivery. Acceptance is a
 judgment too, so stage 10 returns to the planning tier.
 
-It is still an override the operator states and the brief records with its basis.
-Task size still switches nothing, and an environment with one tier runs the whole pipeline
-on that tier and says so.
+It is still an override the operator states and the brief records. Task size still switches nothing.
 
 `scripts/plan_audit.py --models <map.json>` checks the recorded map at stage 4: a stage
 number this pipeline does not have, or an entry with no model behind it, fails there.
@@ -116,10 +119,7 @@ available, keep the current model, say which, and run.
 
 ## A harness clause encodes a model's weakness — stress-test it per generation
 
-Every fixed control here (a cap, a mandatory checkpoint, a fix-loop ceiling) encodes
-what the confirmed model cannot yet do reliably, and that expires: Anthropic reports
-removing a whole construct from its long-running harness when a newer generation
-stopped needing it (*Harness design for long-running agents*,
-anthropic.com/engineering, read 2026-08-30). When the confirmed tier moves a
-generation, re-test those clauses instead of carrying them as doctrine: a control the
-model has outgrown is a stop nobody can name the reason for.
+Every fixed control here (a cap, a checkpoint, a fix-loop ceiling) encodes what the
+confirmed model cannot yet do, and that expires (*Harness design for long-running
+agents*, anthropic.com/engineering, read 2026-08-30). When the tier moves a
+generation, re-test those clauses.

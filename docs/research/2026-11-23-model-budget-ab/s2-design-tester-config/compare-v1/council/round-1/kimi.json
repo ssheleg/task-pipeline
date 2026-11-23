@@ -1,0 +1,37 @@
+{
+ "meta": {
+  "id": "kimi",
+  "model": "moonshotai/kimi-k3.1-pro",
+  "family": "moonshot",
+  "at": "2026-11-23T19:21:30Z",
+  "route": "tokens",
+  "finish": "stop",
+  "cost": 0.1193888,
+  "cost_source": "openrouter",
+  "cost_known": true,
+  "tokens_in": 16207,
+  "tokens_out": 8709,
+  "seconds": 48.5,
+  "served_by": "moonshotai/kimi-k3.1-pro",
+  "parsed": true
+ },
+ "verdict": {
+  "ranking": [
+   "Option X",
+   "Option Y"
+  ],
+  "pick": "Option X",
+  "why": "Option X is the more complete and buildable specification. It preserves the scenarios × personas matrix, defines a closed four-axis configuration with derived direction, and gives explicit panel, row, finding, summary, CLI, diagnostic, and exit-code contracts (Design, C1–C7). Compatibility and class-specific behavior are verifiable through REQ-9/REQ-10 and concrete fixtures. Its stand design is particularly stronger: read-only intake is separated from the gate through a normalized local manifest, with scenario/step association, configuration equality, SHA-256, and build checks (REQ-8, C5–C8), so most of the gate can be implemented before the door API is known. Rollout also avoids blocking on super-ux by permitting manually added panel lines, and supplies the requested backlog row and concrete default dates. Option Y contains useful repository-specific parser and test guidance, but Q1 never provides actual backlog dates; its mandatory baseline, duplicate/stacked-axis rules, and ux-foundation assignment add constraints and cross-repository dependencies beyond the brief; and its stated fifth `dir` axis creates the acknowledged four-versus-five-axis stand integration problem in Q12. Its stand gate validates row metadata but has no equivalent capture manifest or hash verification. It is also substantially more repetitive, with numerous pending questions despite defaults.",
+  "risks": [
+   "Option X's Stand intake step 4 rejects untagged explore screenshots, although the brief explicitly mentions explore runs. Reusing those runs therefore depends on the stand providing or later adding scenario/step tagging.",
+   "The stand door verbs and client-key availability remain unresolved in Q5/Q6. The local-manifest gate is buildable immediately, but the fetch procedure and the 2026-12-21 intake date remain conditional.",
+   "REQ-6/C4 verifies that a control exists and differs on the blamed axes, but cannot establish that the same check actually passes there. A false `config_only` claim can therefore still rely on tester discipline.",
+   "Rollback compatibility is conditional on confirming that the previous gate ignores unknown panel and report fields, as noted in Rollout step 6."
+  ],
+  "score": {
+   "Option X": 9,
+   "Option Y": 7
+  }
+ },
+ "raw": "{\"ranking\":[\"Option X\",\"Option Y\"],\"pick\":\"Option X\",\"why\":\"Option X is the more complete and buildable specification. It preserves the scenarios × personas matrix, defines a closed four-axis configuration with derived direction, and gives explicit panel, row, finding, summary, CLI, diagnostic, and exit-code contracts (Design, C1–C7). Compatibility and class-specific behavior are verifiable through REQ-9/REQ-10 and concrete fixtures. Its stand design is particularly stronger: read-only intake is separated from the gate through a normalized local manifest, with scenario/step association, configuration equality, SHA-256, and build checks (REQ-8, C5–C8), so most of the gate can be implemented before the door API is known. Rollout also avoids blocking on super-ux by permitting manually added panel lines, and supplies the requested backlog row and concrete default dates. Option Y contains useful repository-specific parser and test guidance, but Q1 never provides actual backlog dates; its mandatory baseline, duplicate/stacked-axis rules, and ux-foundation assignment add constraints and cross-repository dependencies beyond the brief; and its stated fifth `dir` axis creates the acknowledged four-versus-five-axis stand integration problem in Q12. Its stand gate validates row metadata but has no equivalent capture manifest or hash verification. It is also substantially more repetitive, with numerous pending questions despite defaults.\",\"risks\":[\"Option X's Stand intake step 4 rejects untagged explore screenshots, although the brief explicitly mentions explore runs. Reusing those runs therefore depends on the stand providing or later adding scenario/step tagging.\",\"The stand door verbs and client-key availability remain unresolved in Q5/Q6. The local-manifest gate is buildable immediately, but the fetch procedure and the 2026-12-21 intake date remain conditional.\",\"REQ-6/C4 verifies that a control exists and differs on the blamed axes, but cannot establish that the same check actually passes there. A false `config_only` claim can therefore still rely on tester discipline.\",\"Rollback compatibility is conditional on confirming that the previous gate ignores unknown panel and report fields, as noted in Rollout step 6.\"],\"score\":{\"Option X\":9,\"Option Y\":7}}"
+}

@@ -1491,6 +1491,8 @@ three quarters of the work on this run.
 
 ## Releases that carry no stamp — stated, not stamped
 
+**`v1.114.0` carries no stamp, declared before its tag.** It routes models by role and books every token call (the owner's order of 2026-11-23 18:58 UTC: the spec's meanings by tokens, its text on the subscription, validators one call each, `scripts/spend.py`, `scripts/meanings.py`). What diverged in the run is recorded where it was measured, `docs/research/2026-11-23-model-budget-ab/` (the first writer's task lost the blind comparison and was rewritten before release).
+
 **`v1.113.1` and `v1.113.0` carry no stamp, declared before the `v1.113.1` tag.** `v1.113.0` was tagged on 26bb446 and its release run 45238108083 refused it (a squashed branch commit cited in verification.md); `v1.113.1` is the same change with the citation fixed. It adds the consilium (a council of models of different
 vendors judges every evaluation and decision, the strongest model rules last), on the owner's order of 2026-11-23
 (requests 6f5b7054 and 62e0c402). The run's ledger and evidence live in fabric-workspace

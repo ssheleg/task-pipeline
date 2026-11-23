@@ -1,0 +1,38 @@
+{
+ "meta": {
+  "id": "grok",
+  "model": "x-ai/grok-4.7",
+  "family": "xai",
+  "at": "2026-11-23T19:24:58Z",
+  "route": "tokens",
+  "finish": "stop",
+  "cost": 0.130684,
+  "cost_source": "openrouter",
+  "cost_known": true,
+  "tokens_in": 17912,
+  "tokens_out": 16098,
+  "seconds": 257.1,
+  "served_by": "x-ai/grok-4.7",
+  "parsed": true
+ },
+ "verdict": {
+  "ranking": [
+   "X",
+   "Y"
+  ],
+  "pick": "X",
+  "why": "Against the brief’s ordered criteria, X is the spec a zero-context implementer can build without asking. Criterion 1: the owner asked for taken, one backlog row, and a date — X Rollout steps 4–5 and Decisions Q2 give one row and 2026-12-07 / 2026-12-21, keep the matrix at scenarios × personas, leave agent-tester byte-identical (REQ-12), and consume the stated facts (door test-stand.sshlg, key per sender, never on the command line) in C8. The six hard cells in C2 match the 2026-11-23 study (RTL, double-length, largest text, dark, small screen, tablet). Criterion 2: C1–C7 plus T-01–T-22 fix grammars, exit codes, and the stand check (local stand-captures/1 manifest, cell config equality, SHA-256, --build). Criterion 3: one-config-per-persona, derived dir, gap-gating, and schema staying design-review/1 are decided with rejected alternatives; unknowns Q5–Q6 are isolated to phase 2 so phase 1 is not blocked. Y misses the required date (Goal: dates are the owner’s; Q1 answer is only “next minor release”, by pending), pushes line syntax and JSON names to pending Q3–Q13, and its report gate never checks cell equality, capture bytes, or hashes (R11/C5–C6 only require non-empty run/cell/build). That is more questions and a part 2 that cannot be verified. Y’s separate dir axis and “yes blocked on a gap” (R9) are better readings of “language and direction” and “only in this configuration”, but they do not outweigh a spec the implementer cannot close.",
+  "risks": [
+   "X Design stand-intake step 4 refuses untagged explore screenshots, which can cancel the brief’s “explore or scripted runs” path if cells are not tagged with design-review scenario ids — a join the facts never state.",
+   "Direction is derived from a fixed script/language list rather than stored, so the owner’s “language and direction” column can be wrong for locales outside that list; the list is unsupported invention.",
+   "The realization table writes unconfirmed xcrun/adb/browser flags into references/design-review.md (Q9). Wrong flags become doctrine and rework.",
+   "Phase 2 fetch is explicitly not buildable until Q5/Q6, yet the reply dates claim stand intake; CFG-STAND-NOBUILD is only a warning, so stand rows can pass with no --build.",
+   "C2’s Config declined line waives a hard cell, so the six stress configurations are not actually mandatory. REQ-5 also assumes --require build/design, which the brief’s facts never name."
+  ],
+  "score": {
+   "X": 7,
+   "Y": 5
+  }
+ },
+ "raw": "{\"ranking\": [\"X\", \"Y\"], \"pick\": \"X\", \"why\": \"Against the brief’s ordered criteria, X is the spec a zero-context implementer can build without asking. Criterion 1: the owner asked for taken, one backlog row, and a date — X Rollout steps 4–5 and Decisions Q2 give one row and 2026-12-07 / 2026-12-21, keep the matrix at scenarios × personas, leave agent-tester byte-identical (REQ-12), and consume the stated facts (door test-stand.sshlg, key per sender, never on the command line) in C8. The six hard cells in C2 match the 2026-11-23 study (RTL, double-length, largest text, dark, small screen, tablet). Criterion 2: C1–C7 plus T-01–T-22 fix grammars, exit codes, and the stand check (local stand-captures/1 manifest, cell config equality, SHA-256, --build). Criterion 3: one-config-per-persona, derived dir, gap-gating, and schema staying design-review/1 are decided with rejected alternatives; unknowns Q5–Q6 are isolated to phase 2 so phase 1 is not blocked. Y misses the required date (Goal: dates are the owner’s; Q1 answer is only “next minor release”, by pending), pushes line syntax and JSON names to pending Q3–Q13, and its report gate never checks cell equality, capture bytes, or hashes (R11/C5–C6 only require non-empty run/cell/build). That is more questions and a part 2 that cannot be verified. Y’s separate dir axis and “yes blocked on a gap” (R9) are better readings of “language and direction” and “only in this configuration”, but they do not outweigh a spec the implementer cannot close.\", \"risks\": [\"X Design stand-intake step 4 refuses untagged explore screenshots, which can cancel the brief’s “explore or scripted runs” path if cells are not tagged with design-review scenario ids — a join the facts never state.\", \"Direction is derived from a fixed script/language list rather than stored, so the owner’s “language and direction” column can be wrong for locales outside that list; the list is unsupported invention.\", \"The realization table writes unconfirmed xcrun/adb/browser flags into references/design-review.md (Q9). Wrong flags become doctrine and rework.\", \"Phase 2 fetch is explicitly not buildable until Q5/Q6, yet the reply dates claim stand intake; CFG-STAND-NOBUILD is only a warning, so stand rows can pass with no --build.\", \"C2’s Config declined line waives a hard cell, so the six stress configurations are not actually mandatory. REQ-5 also assumes --require build/design, which the brief’s facts never name.\"], \"score\": {\"X\": 7, \"Y\": 5}}"
+}

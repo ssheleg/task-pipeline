@@ -1,0 +1,36 @@
+{
+ "meta": {
+  "id": "gemini",
+  "model": "google/gemini-4-argon",
+  "family": "google",
+  "at": "2026-11-23T19:36:09Z",
+  "route": "tokens",
+  "finish": "stop",
+  "cost": 0.046116,
+  "cost_source": "openrouter",
+  "cost_known": true,
+  "tokens_in": 19168,
+  "tokens_out": 778,
+  "seconds": 18.2,
+  "served_by": "google/gemini-4-argon",
+  "parsed": true
+ },
+ "verdict": {
+  "ranking": [
+   "X",
+   "Y"
+  ],
+  "pick": "X",
+  "why": "From the lens of evidence, sources, and measurability, Option X is vastly superior. (1) Measurability and Verifiability: Option X provides exact, concrete acceptance checks in its Requirements table (R1-R16), naming existing test helpers (`portrait`, `panel_text`, `row`, `report` in `test/design_gate_test.py`), exact planted failure conditions, and exact git/CLI commands (`git diff --numstat`, `python3 test/validate.py`, `com.get`). It even includes a Measurable Refutation criterion in its Risks section ('after three reviewed nodes, zero findings are marked config-only while the stand finds configuration bugs on the same builds'). Option Y uses abstract test IDs (T-01 to T-22) and leaves critical codebase facts as 'unknown' for the implementer to figure out (Q7: portrait field markup, Q8: how findings name checklist items, Q9: tool flags to be confirmed against installed versions, and Rollback: 'the implementer confirms that before release'). (2) Evidence Integrity: Option X enforces strict evidence rules for 'only in this configuration' findings (R8, D7, D8). By requiring at least two zero-edge personas and capping personas at two edge values, X ensures clean baseline comparisons and prevents unattributable 4-axis bugs. Furthermore, X verifies that a `only_in_config: true` finding is not contradicted by a zero-edge row failing the same checklist `item` at the same step. Option Y (C4, Q8) only checks that a control persona has a different config value on the named axis, without verifying whether the control row also failed the check, nor does it prevent stacking all edge values onto one persona. For stand captures (Row B), X requires verifiable evidence of the `outcome` check (R14, D16: either a quoted passing scripted assertion from the manifest or an explicit `outcome_read_back: true`), whereas Y (Design: Stand intake #5) allows an unverified free-text outcome string or falls back to self-capture, and makes `--build` verification optional (emitting only a warning `CFG-STAND-NOBUILD` when omitted, C7). (3) Sources: Option X grounds its platform text-size and locale mappings in official Apple and Android documentation (Q18) and actual codebase structure, while Y leaves platform realization 'to be confirmed' (Design: Realizing a value, Q9) and drops web `pseudo-double` support as a gap.",
+  "risks": [
+   "In Option X, requiring every finding on an edged build row to explicitly state `only_in_config` as a boolean (R10) and requiring `frame_in_config` on every design row (R9) adds strict schema ceremony that could cause gate failures if the LLM agent forgets a boolean field.",
+   "In Option X, the synthetic DOM-mutation script for web `pseudo-double` (Design: The tester's walk) may introduce layout artifacts not representative of real translations, though X mitigates this by requiring the finding's `what` field to note when the script was used.",
+   "Row B depends on an external service (`test-stand.sshlg`) adopting the proposed manifest contract; if the stand team does not implement scenario/step tagging and SHA-256 manifest exports by 2026-12-21, Row B will be blocked (mitigated by splitting Row A and Row B)."
+  ],
+  "score": {
+   "X": 9.5,
+   "Y": 6.0
+  }
+ },
+ "raw": "{\"ranking\": [\"X\", \"Y\"], \"pick\": \"X\", \"why\": \"From the lens of evidence, sources, and measurability, Option X is vastly superior. (1) Measurability and Verifiability: Option X provides exact, concrete acceptance checks in its Requirements table (R1-R16), naming existing test helpers (`portrait`, `panel_text`, `row`, `report` in `test/design_gate_test.py`), exact planted failure conditions, and exact git/CLI commands (`git diff --numstat`, `python3 test/validate.py`, `com.get`). It even includes a Measurable Refutation criterion in its Risks section ('after three reviewed nodes, zero findings are marked config-only while the stand finds configuration bugs on the same builds'). Option Y uses abstract test IDs (T-01 to T-22) and leaves critical codebase facts as 'unknown' for the implementer to figure out (Q7: portrait field markup, Q8: how findings name checklist items, Q9: tool flags to be confirmed against installed versions, and Rollback: 'the implementer confirms that before release'). (2) Evidence Integrity: Option X enforces strict evidence rules for 'only in this configuration' findings (R8, D7, D8). By requiring at least two zero-edge personas and capping personas at two edge values, X ensures clean baseline comparisons and prevents unattributable 4-axis bugs. Furthermore, X verifies that a `only_in_config: true` finding is not contradicted by a zero-edge row failing the same checklist `item` at the same step. Option Y (C4, Q8) only checks that a control persona has a different config value on the named axis, without verifying whether the control row also failed the check, nor does it prevent stacking all edge values onto one persona. For stand captures (Row B), X requires verifiable evidence of the `outcome` check (R14, D16: either a quoted passing scripted assertion from the manifest or an explicit `outcome_read_back: true`), whereas Y (Design: Stand intake #5) allows an unverified free-text outcome string or falls back to self-capture, and makes `--build` verification optional (emitting only a warning `CFG-STAND-NOBUILD` when omitted, C7). (3) Sources: Option X grounds its platform text-size and locale mappings in official Apple and Android documentation (Q18) and actual codebase structure, while Y leaves platform realization 'to be confirmed' (Design: Realizing a value, Q9) and drops web `pseudo-double` support as a gap.\", \"risks\": [\"In Option X, requiring every finding on an edged build row to explicitly state `only_in_config` as a boolean (R10) and requiring `frame_in_config` on every design row (R9) adds strict schema ceremony that could cause gate failures if the LLM agent forgets a boolean field.\", \"In Option X, the synthetic DOM-mutation script for web `pseudo-double` (Design: The tester's walk) may introduce layout artifacts not representative of real translations, though X mitigates this by requiring the finding's `what` field to note when the script was used.\", \"Row B depends on an external service (`test-stand.sshlg`) adopting the proposed manifest contract; if the stand team does not implement scenario/step tagging and SHA-256 manifest exports by 2026-12-21, Row B will be blocked (mitigated by splitting Row A and Row B).\"], \"score\": {\"X\": 9.5, \"Y\": 6.0}}"
+}

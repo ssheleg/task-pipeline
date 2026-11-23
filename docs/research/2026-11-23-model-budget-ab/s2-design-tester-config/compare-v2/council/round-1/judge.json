@@ -1,0 +1,46 @@
+{
+ "meta": {
+  "id": "judge",
+  "model": "anthropic/claude-fable-5.2",
+  "family": "anthropic",
+  "at": "2026-11-23T19:41:19Z",
+  "route": "tokens",
+  "finish": "stop",
+  "cost": 0.30392,
+  "cost_source": "openrouter",
+  "cost_known": true,
+  "tokens_in": 30340,
+  "tokens_out": 1530,
+  "seconds": 17.2,
+  "served_by": "anthropic/claude-fable-5.2",
+  "parsed": true,
+  "letters": {
+   "gemini": "A",
+   "glm": "B",
+   "grok": "C",
+   "kimi": "D",
+   "openai": "E"
+  }
+ },
+ "ruling": {
+  "ranking": [
+   "X",
+   "Y"
+  ],
+  "pick": "X",
+  "why": "The brief demands an answer: \"taken, with a backlog row and a date, or why not\", and criterion 3 forbids pushing tactical questions to the owner. X delivers that outright: the Goal says \"The answer to request 77741b8d is **taken**, in two backlog rows\", gives due dates 2026-12-07 and 2026-12-21, and supplies the board reply verbatim. Y leaves the reply as a template (\"Taken. Backlog row <id>. Persona configurations by <date 1>, stand intake by <date 2>\") and classes the dates as an owner question (Q2 \"owner, pending\"), so the one deliverable the brief names explicitly is not finished.\n\nOn item 1, the brief says the report \"names the configurations it looked at and marks a finding 'only in this configuration'\". X makes this a checked comparison: R8 requires named axes that differ from the reference, a reference capture that exists, and \"no zero-edge row at the same scenario, step and pass failing the same item\". R10 forces an explicit boolean on edged build rows, and `config_axes` may not name the row's gapped axis. Y's C4 only checks that the control \"must differ from the row's `config` on every axis in `axes`\". It never checks that the control did not show the defect, and it allows a config-only claim on an axis absent from `config_applied`. Y's Q8 also leaves the finding's checklist item \"unknown\" for the implementer.\n\nOn item 2, both depend on a stand export the facts do not establish. X isolates it as Row B, which \"does not block Row A\" (D19), with a concrete manifest contract. It checks build equality against `node_commit`, the hash, the scenario and step, and the cell-to-config mapping (R14). Y's local normalized `stand-captures/1` manifest is a good decoupling idea, but C7 makes a missing `--build` only a warning (`CFG-STAND-NOBUILD`; T-19 \"exit 0\"). A screenshot from another build can therefore pass the gate. Y's Q5-Q7 also leave the door contract, the client key and the portrait markup open.\n\nBuildability favours X: a worked ten-persona panel, a full passing report example, and a planted refusal for each requirement, against Y's bare fixture table. Y's C1 locale regex accepts `en-XA` without counting it as double-length, and its rollback says \"the implementer confirms that before release\".\n\nX loses points on criteria 4 and 5. It invents coverage quotas (at most two edges per persona, at least two zero-edge personas), a `large` text value, device bands with dead zones (\"Viewport width 380 | in no band: FAIL for every class\"), and a thinner RTL derivation than Y's script-aware rule. It also leaves two strategy questions pending while already enforcing their answers. These cause rework at the edges; Y's gaps are in the core contract and the owner-facing answer.",
+  "risks": [
+   "X adds rules the brief never asked for: six-edge coverage with waivers, at most two edges per persona, at least two zero-edge personas, a `desktop` class and `text=large`. Its Q1 and Q2 are still \"pending\" with the owner while R3 and R11 already enforce them, so an owner \"no\" means rework of the gate and fixtures.",
+   "X's device bands leave dead zones (376-389, 431-743, 1025-1279), so a real 380-wide phone fails every class. Its RTL derivation covers only `pseudo-rtl` and `ar`, `he`, `fa`, `ur`; Y's script-aware rule is better and worth adopting.",
+   "Row B relies on a stand manifest that the brief's facts do not establish (only the door and a per-sender key). X's D14 also bars untagged `explore` captures from filling rows, although the brief names `explore`, so item 2 may slip past 2026-12-21 or deliver less than asked.",
+   "X assumes repository details not in the brief's facts: a seven-item `CHECKS` tuple, the class names, `com.get`, the secret-runner variable and the no-deleted-lines test check. I could not verify these, and some acceptance checks may fail on contact with the tree.",
+   "X's contradiction check works per checklist item and does not require the same round, so a different `text_fit` defect or a stale control row could wrongly refuse a legitimate config-only finding.",
+   "X is heavy for size M. The web `pseudo-double` text-doubling script is synthetic and may produce findings that real long locales would not."
+  ],
+  "score": {
+   "X": 8,
+   "Y": 6
+  }
+ },
+ "raw": "{\"ranking\":[\"X\",\"Y\"],\"pick\":\"X\",\"why\":\"The brief demands an answer: \\\"taken, with a backlog row and a date, or why not\\\", and criterion 3 forbids pushing tactical questions to the owner. X delivers that outright: the Goal says \\\"The answer to request 77741b8d is **taken**, in two backlog rows\\\", gives due dates 2026-12-07 and 2026-12-21, and supplies the board reply verbatim. Y leaves the reply as a template (\\\"Taken. Backlog row <id>. Persona configurations by <date 1>, stand intake by <date 2>\\\") and classes the dates as an owner question (Q2 \\\"owner, pending\\\"), so the one deliverable the brief names explicitly is not finished.\\n\\nOn item 1, the brief says the report \\\"names the configurations it looked at and marks a finding 'only in this configuration'\\\". X makes this a checked comparison: R8 requires named axes that differ from the reference, a reference capture that exists, and \\\"no zero-edge row at the same scenario, step and pass failing the same item\\\". R10 forces an explicit boolean on edged build rows, and `config_axes` may not name the row's gapped axis. Y's C4 only checks that the control \\\"must differ from the row's `config` on every axis in `axes`\\\". It never checks that the control did not show the defect, and it allows a config-only claim on an axis absent from `config_applied`. Y's Q8 also leaves the finding's checklist item \\\"unknown\\\" for the implementer.\\n\\nOn item 2, both depend on a stand export the facts do not establish. X isolates it as Row B, which \\\"does not block Row A\\\" (D19), with a concrete manifest contract. It checks build equality against `node_commit`, the hash, the scenario and step, and the cell-to-config mapping (R14). Y's local normalized `stand-captures/1` manifest is a good decoupling idea, but C7 makes a missing `--build` only a warning (`CFG-STAND-NOBUILD`; T-19 \\\"exit 0\\\"). A screenshot from another build can therefore pass the gate. Y's Q5-Q7 also leave the door contract, the client key and the portrait markup open.\\n\\nBuildability favours X: a worked ten-persona panel, a full passing report example, and a planted refusal for each requirement, against Y's bare fixture table. Y's C1 locale regex accepts `en-XA` without counting it as double-length, and its rollback says \\\"the implementer confirms that before release\\\".\\n\\nX loses points on criteria 4 and 5. It invents coverage quotas (at most two edges per persona, at least two zero-edge personas), a `large` text value, device bands with dead zones (\\\"Viewport width 380 | in no band: FAIL for every class\\\"), and a thinner RTL derivation than Y's script-aware rule. It also leaves two strategy questions pending while already enforcing their answers. These cause rework at the edges; Y's gaps are in the core contract and the owner-facing answer.\",\"risks\":[\"X adds rules the brief never asked for: six-edge coverage with waivers, at most two edges per persona, at least two zero-edge personas, a `desktop` class and `text=large`. Its Q1 and Q2 are still \\\"pending\\\" with the owner while R3 and R11 already enforce them, so an owner \\\"no\\\" means rework of the gate and fixtures.\",\"X's device bands leave dead zones (376-389, 431-743, 1025-1279), so a real 380-wide phone fails every class. Its RTL derivation covers only `pseudo-rtl` and `ar`, `he`, `fa`, `ur`; Y's script-aware rule is better and worth adopting.\",\"Row B relies on a stand manifest that the brief's facts do not establish (only the door and a per-sender key). X's D14 also bars untagged `explore` captures from filling rows, although the brief names `explore`, so item 2 may slip past 2026-12-21 or deliver less than asked.\",\"X assumes repository details not in the brief's facts: a seven-item `CHECKS` tuple, the class names, `com.get`, the secret-runner variable and the no-deleted-lines test check. I could not verify these, and some acceptance checks may fail on contact with the tree.\",\"X's contradiction check works per checklist item and does not require the same round, so a different `text_fit` defect or a stale control row could wrongly refuse a legitimate config-only finding.\",\"X is heavy for size M. The web `pseudo-double` text-doubling script is synthetic and may produce findings that real long locales would not.\"],\"score\":{\"X\":8,\"Y\":6}}"
+}

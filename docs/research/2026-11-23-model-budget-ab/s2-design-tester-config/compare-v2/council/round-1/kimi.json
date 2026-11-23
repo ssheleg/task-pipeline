@@ -1,0 +1,37 @@
+{
+ "meta": {
+  "id": "kimi",
+  "model": "moonshotai/kimi-k3.1-pro",
+  "family": "moonshot",
+  "at": "2026-11-23T19:39:13Z",
+  "route": "tokens",
+  "finish": "stop",
+  "cost": 0.1205284,
+  "cost_source": "openrouter",
+  "cost_known": true,
+  "tokens_in": 17681,
+  "tokens_out": 9151,
+  "seconds": 201.7,
+  "served_by": "moonshotai/kimi-k3.1-pro",
+  "parsed": true
+ },
+ "verdict": {
+  "ranking": [
+   "X",
+   "Y"
+  ],
+  "pick": "X",
+  "why": "Option X gives a zero-context implementer the more complete and verifiable contract. R1–R13 and the Contracts section define the panel syntax, vocabulary, configuration IDs, report linkage, compatibility behavior, worked panel and report examples, and planted acceptance tests. In particular, R8 makes “only in this configuration” a checkable comparison, R11 distinguishes configuration gaps from silent fallbacks, and R14 verifies stand captures by build, scenario/step, cell configuration, and file hash while also checking outcome evidence. It also supplies the requested board reply, backlog dates, and an explicit agent-tester no-change check. Option Y has worthwhile ideas—especially its normalized local stand manifest, which decouples the gate from Fabric, and its more thorough RTL-direction derivation—but it is weaker on evidence and completion: REQ-6/C4 check that a control exists and differs without recording that the defect is absent there; C7/T-19 allow stand rows without build verification as only a warning; and Q5–Q8 leave door, parser, and finding-details unresolved. X therefore leads on the brief's first three criteria despite being less concise.",
+  "risks": [
+   "Option X is heavy for size M and goes beyond the brief with desktop and large-text values, mandatory coverage/waiver machinery, prescribed viewport bands, and extensive release and cross-repository mechanics.",
+   "X's direction(locale) rule recognizes only pseudo-rtl and ar/he/fa/ur, missing other RTL languages and script-based cases that Y handles; its same-checklist-item contradiction rule can also reject legitimate distinct findings, particularly across review rounds.",
+   "Both stand designs require export and tagging capabilities not established by the brief. X makes Row B conditional on a new manifest and prevents untagged explore captures from filling rows, so item 2 is not guaranteed by the stated date.",
+   "X's extensive specification still needs consolidation before implementation: for example, its no-deleted-test-lines acceptance check can conflict with modifying existing test helpers."
+  ],
+  "score": {
+   "X": 8,
+   "Y": 7
+  }
+ },
+ "raw": "{\n  \"ranking\": [\"X\", \"Y\"],\n  \"pick\": \"X\",\n  \"why\": \"Option X gives a zero-context implementer the more complete and verifiable contract. R1–R13 and the Contracts section define the panel syntax, vocabulary, configuration IDs, report linkage, compatibility behavior, worked panel and report examples, and planted acceptance tests. In particular, R8 makes “only in this configuration” a checkable comparison, R11 distinguishes configuration gaps from silent fallbacks, and R14 verifies stand captures by build, scenario/step, cell configuration, and file hash while also checking outcome evidence. It also supplies the requested board reply, backlog dates, and an explicit agent-tester no-change check. Option Y has worthwhile ideas—especially its normalized local stand manifest, which decouples the gate from Fabric, and its more thorough RTL-direction derivation—but it is weaker on evidence and completion: REQ-6/C4 check that a control exists and differs without recording that the defect is absent there; C7/T-19 allow stand rows without build verification as only a warning; and Q5–Q8 leave door, parser, and finding-details unresolved. X therefore leads on the brief's first three criteria despite being less concise.\",\n  \"risks\": [\n    \"Option X is heavy for size M and goes beyond the brief with desktop and large-text values, mandatory coverage/waiver machinery, prescribed viewport bands, and extensive release and cross-repository mechanics.\",\n    \"X's direction(locale) rule recognizes only pseudo-rtl and ar/he/fa/ur, missing other RTL languages and script-based cases that Y handles; its same-checklist-item contradiction rule can also reject legitimate distinct findings, particularly across review rounds.\",\n    \"Both stand designs require export and tagging capabilities not established by the brief. X makes Row B conditional on a new manifest and prevents untagged explore captures from filling rows, so item 2 is not guaranteed by the stated date.\",\n    \"X's extensive specification still needs consolidation before implementation: for example, its no-deleted-test-lines acceptance check can conflict with modifying existing test helpers.\"\n  ],\n  \"score\": {\n    \"X\": 8,\n    \"Y\": 7\n  }\n}"
+}

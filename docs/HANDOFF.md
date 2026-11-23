@@ -1,3 +1,30 @@
+## v1.114.0: money by role and the spend ledger (2026-11-23)
+
+- **Objective.** The owner's order of 2026-11-23 18:58 UTC (relayed by the Fabric CEO; host instructions, *Model and
+  token budget by role*): the strongest model by tokens only for the thinking that decides (a spec's meanings, the
+  council's verdict); the spec's text by a writer on the subscription; validators GLM, Kimi, Grok, Gemini and Astra by
+  tokens, one call each; every token route tracked, with a day and month summary and a warning near the USD 5,000
+  development-mode ceiling; quality kept.
+- **Done.** `scripts/spend.py`, `scripts/meanings.py` (new); `consilium.py` (BYOK cost, `--judge-only` spend,
+  subscription panelists by `--import`, booking); `spec_protocol.py` (loop, validator booking, `Meanings:`);
+  `references/model-tiering.md` *Roles and money*, `consilium.md`, `spec-protocol.md`; tests `test/spend_test.py`,
+  `test/consilium_test.py`, `test/spec_protocol_test.py`. The review of routes and the A/B test:
+  `docs/research/2026-11-23-model-budget-ab/README.md`.
+- **Host setup (not in Git).** `~/.config/task-pipeline/consilium.json`: Opus moved to `route: subscription`, `thinker`
+  Fable 5.2 added; the previous file beside it as `consilium.json.bak-2026-11-23-before-roles`. The spend ledger lives
+  in `~/.local/state/task-pipeline/spend.jsonl`.
+- **Outside this repository.** Wiki `synthesis/llm-models.md` *Money by role*; board request `5c2a2dba` to
+  fabric-agents-database (agents.improve) for the pattern and the rollout.
+- **The project brain, minimum (same release).** The Fabric CEO's decision of 2026-11-23: `scripts/brain.py recall`
+  at stage 0 (`knowledge-sources.md` row 0a), read-only, this project's memory only; B-163 fixed in `lessons.py` (the
+  machine index holds its first lesson). Measurement row B-187, due 2026-12-08: `brain.py stats --days 14 --cite <briefs>`
+  and the report to the CEO, who decides on the full version.
+- **Open.** `Meanings:` is a warning for M and L in this release, an error in the next minor one. fabric-workspace's
+  `memory_heal_model.py` books its spend only in its own output (a finding for that project).
+- **Next task.** After v1.113.1's release run finishes: merge this branch, tag `v1.114.0` (annotated) on the merge
+  commit, watch the release, confirm npm `task-pipeline-skill@1.114.0`, `npx --yes sshlg-skills@latest update`,
+  record the shipped state in `docs/evidence/verification.md`.
+
 ## v1.113.1: the consilium, the default judge (2026-11-23; v1.113.0 refused by its release run, see CHANGELOG)
 
 - **Objective.** The owner's order of 2026-11-23 16:17 UTC (requests 6f5b7054, 62e0c402): a council of models (GLM,

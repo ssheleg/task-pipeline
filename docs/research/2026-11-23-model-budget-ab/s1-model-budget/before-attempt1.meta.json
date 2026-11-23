@@ -1,0 +1,10 @@
+{
+ "error": "no text: the token budget ran out (reasoning ate it); cap reasoning or raise max_tokens",
+ "cost": 1.33188,
+ "cost_source": "openrouter",
+ "cost_known": true,
+ "tokens_in": 6485,
+ "tokens_out": 32000,
+ "seconds": 356.2,
+ "finish": "length"
+}

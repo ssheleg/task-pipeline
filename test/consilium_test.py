@@ -52,8 +52,13 @@ class Fake(http.server.BaseHTTPRequestHandler):
             text = "I think it is fine overall."
         else:
             text = '{"verdict": "revise", "score": 5, "summary": "s", "findings": [{"id": "f1", "severity": "major", "where": "2", "issue": "i", "fix": "x"}]}'
-        out = {"model": model, "choices": [{"message": {"content": text}, "finish_reason": "stop"}],
-               "usage": {"prompt_tokens": 10, "completion_tokens": 5, "cost": 0.5}}
+        usage = {"prompt_tokens": 10, "completion_tokens": 5, "cost": 0.5}
+        if model == "byok/model":  # OpenRouter's shape for a call billed to our own key (measured 2026-11-23)
+            usage = {"prompt_tokens": 10, "completion_tokens": 5, "cost": 0, "is_byok": True,
+                     "cost_details": {"upstream_inference_cost": 0.25}}
+        out = {"model": model, "choices": [{"message": {"content": text}, "finish_reason": "stop"}]}
+        if model != "nousage/model":
+            out["usage"] = usage
         data = json.dumps(out).encode()
         self.send_response(200)
         self.send_header("Content-Type", "application/json")
@@ -62,8 +67,16 @@ class Fake(http.server.BaseHTTPRequestHandler):
         self.wfile.write(data)
 
 
+SPEND_LOG = pathlib.Path(tempfile.mkdtemp()) / "spend.jsonl"
+_TREES.append(SPEND_LOG.parent)
+
+
+def spend_rows():
+    return [json.loads(x) for x in SPEND_LOG.read_text().splitlines()] if SPEND_LOG.exists() else []
+
+
 def run(args, env_extra=None):
-    env = dict(os.environ, **(env_extra or {}))
+    env = dict(os.environ, TASK_PIPELINE_SPEND_LOG=str(SPEND_LOG), TASK_PIPELINE_TASK="", **(env_extra or {}))
     return subprocess.run([sys.executable, str(SCRIPT)] + args, capture_output=True, text=True, env=env, timeout=60)
 
 
@@ -140,7 +153,44 @@ def main():
     new = SEEN[n:]
     ok(len(new) == 1 and "<council>" in new[0]["messages"][-1]["content"], "judge-only makes exactly one call, the judge's")
     led = json.loads((rd / "ledger.json").read_text())
-    ok(all(c.get("reused") for c in led["calls"] if c["id"] != "judge"), "the reused verdicts are marked and cost nothing")
+    ok(all(c.get("reused") for c in led["calls"] if c["id"] != "judge"), "the reused verdicts are marked")
+    ok(abs(led["spent_usd"] - 2.5) < 1e-9, "judge-only keeps the panel's paid spend in the round: %s" % led["spent_usd"])
+
+    # Money: one token call per panelist, BYOK read from its upstream cost, an unknown cost never zero,
+    # a subscription panelist never called, every paid call in the spend ledger with its task.
+    money = dict(cfg, panel=[{"id": "a", "model": "v1/a", "family": "f1"},
+                             {"id": "byok", "model": "byok/model", "family": "f2"},
+                             {"id": "nu", "model": "nousage/model", "family": "f3"},
+                             {"id": "sub", "model": "session/opus", "family": "f4", "route": "subscription"}])
+    (tmp / "money.json").write_text(json.dumps(money))
+    imp = tmp / "sub-verdict.json"
+    imp.write_text('{"verdict": "pass", "score": 8, "summary": "s", "findings": []}')
+    before, n = len(spend_rows()), len(SEEN)
+    r = run(["review", "--doc", str(doc), "--brief", str(brief), "--out", str(tmp / "money"), "--config",
+             str(tmp / "money.json"), "--endpoint", endpoint, "--key-env", "CONSILIUM_TEST_KEY", "--task", "T-42",
+             "--import", "sub=" + str(imp)], {"CONSILIUM_TEST_KEY": "k"})
+    ok(r.returncode in (0, 1), "the money round runs: " + r.stderr[-400:])
+    called = [b["model"] for b in SEEN[n:]]
+    ok("session/opus" not in called, "a subscription panelist is never called by tokens")
+    ok(all(called.count(m) == 1 for m in ("v1/a", "byok/model", "nousage/model")), "one token call per validator: %s" % called)
+    ml = json.loads((tmp / "money" / "round-1" / "ledger.json").read_text())
+    by = {c["id"]: c for c in ml["calls"]}
+    ok(abs(by["byok"]["cost"] - 0.25) < 1e-9 and by["byok"]["cost_source"] == "byok", "BYOK cost is the upstream cost")
+    ok(by["nu"]["cost_known"] is False and ml["unknown_cost_calls"] == 1, "a call without usage is unknown, not zero")
+    ok(by["sub"]["parsed"] and by["sub"]["cost_source"] == "subscription", "the imported verdict counts, at no token cost")
+    rows = spend_rows()[before:]
+    ok(len(rows) == 4 and all(x["task"] == "T-42" for x in rows), "three panel calls and the judge in the ledger, booked to the task")
+    ok({x["route"] for x in rows} == {"consilium.review.panel", "consilium.review.judge"}, "routes named")
+    ok([x["usd"] for x in rows if x["model"] == "nousage/model"] == [None], "the ledger keeps the unknown cost unknown")
+    r = run(["review", "--doc", str(doc), "--brief", str(brief), "--out", str(tmp / "money2"), "--config",
+             str(tmp / "money.json"), "--endpoint", endpoint, "--key-env", "CONSILIUM_TEST_KEY"], {"CONSILIUM_TEST_KEY": "k"})
+    sl = json.loads((tmp / "money2" / "round-1" / "ledger.json").read_text())
+    ok(any(c["id"] == "sub" and "--import" in c.get("error", "") for c in sl["calls"]),
+       "a subscription panelist without its verdict is named, never called")
+    r = run(["review", "--doc", str(doc), "--brief", str(brief), "--out", str(tmp / "money3"), "--config",
+             str(tmp / "money.json"), "--endpoint", endpoint, "--key-env", "CONSILIUM_TEST_KEY", "--import", "zz=" + str(imp)],
+            {"CONSILIUM_TEST_KEY": "k"})
+    ok(r.returncode == 2, "an import naming no panelist is refused")
 
     # The shipped example names roles, not models: a run on it refuses before any call.
     example = ROOT / "plugins" / "task-pipeline" / "skills" / "task-pipeline" / "assets" / "consilium.example.json"

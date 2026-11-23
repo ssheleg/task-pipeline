@@ -1,0 +1,47 @@
+{
+ "meta": {
+  "id": "judge",
+  "model": "anthropic/claude-fable-5.2",
+  "family": "anthropic",
+  "at": "2026-11-23T20:22:44Z",
+  "route": "tokens",
+  "finish": "stop",
+  "cost": 0.408024,
+  "cost_source": "openrouter",
+  "cost_known": true,
+  "tokens_in": 43848,
+  "tokens_out": 1431,
+  "seconds": 16.2,
+  "served_by": "anthropic/claude-fable-5.2",
+  "parsed": true,
+  "letters": {
+   "gemini": "A",
+   "glm": "B",
+   "grok": "C",
+   "kimi": "D",
+   "openai": "E"
+  }
+ },
+ "ruling": {
+  "ranking": [
+   "X",
+   "Y"
+  ],
+  "pick": "X",
+  "why": "Criterion 1 decides it. The order replaces the 2026-11-22 rule, names five validators at one request each, and says Fable gives the final verdict. X builds that. D2: \"The split applies to every size and every path that writes a spec.\" D8: \"The panel is exactly the five named validators... the sixth seat is dropped.\" D11: an overrun \"never skips a validator or the judge.\" D24 stops at preflight rather than swap in subscription Fable.\n\nY contradicts the order in five places:\n- **Old rule survives.** Design 2: \"With no map, or the template only, the previous behaviour holds: one model does everything.\" Rollout 8 makes that the rollback.\n- **Judge skipped for money.** T22: \"a panel over the cap skips the judge.\" This also contradicts Y's own REQ-12 (\"the thinker is never skipped or failed for money\").\n- **Key thinking on a subscription.** Design 3: meanings \"may be produced in a subscription session\" via `--from-file`.\n- **Sixth seat stays legal.** Design 4: \"A host file listing more panelists keeps working.\"\n- **Free validator choice.** C2 keeps `research validate --model ID --family F --endpoint URL`.\n\nOn the measured facts, X's C4 matches the BYOK measurement exactly (c = 0 with u > 0 gives u; c > 0 is never added to u), and D18 with the `judge_only` test fixes the zeroed panel cost. Y fixes the rerun too, but its cost rule 1 invents `usage.is_byok` and sums router plus upstream, which the measurement does not support. Y's `estate_usd = max(observatory_usd, local_month_usd)` with a `local-only` fallback can report level `ok` from one host, which is not the estate.\n\nCriterion 3: X answers all 22 questions as the agent. Y leaves Q1 to Q3 \"pending\", and Q2 (warn or stop) is already answered by the brief's word \"warning\".\n\nCriterion 2: X's acceptance checks carry numeric fixtures (C4, C10, C8). Y's `[M<n>]` tags, stale-revision check and `ensure_ledger` before dispatch are good ideas, but they sit on a rule that is optional.\n\nX loses points on criteria 4 and 5: it is long and invents beyond the facts, with internal clashes listed under risks. Those are repairable in build; Y's defects change what ships.",
+  "risks": [
+   "X's C9 accepts the estate figure only if it matches an `observatory_inventory_cmd` that C1 itself calls \"an assumed listing\". The brief confirms only `totalUsd`. If the listing does not exist, the estate stays `unknown` and the USD 5,000 warning never fires. Run Rollout step 3 first and relax coverage if needed.",
+   "X contradicts itself on the judge rerun: R10 refuses \"a second `ok` `verdict` in one round run\", while R8 and the edge cases allow `--judge-only` to append judge rows. Define the exception before coding the repeat index.",
+   "X's Q1 puts the hash on a separate `Meanings-sha256:` line, while D4, C11 and R2 require `Meanings: <path> sha256:<64 hex>`. The implementer must build R2/C11, not the spec's own header.",
+   "X's R4 test makes the ledger directory read-only yet expects `uncommitted.jsonl` to be written; C1 places that file in the same spend dir. The fixture needs a file-level failure instead.",
+   "X's merge gate depends on a replay over `s2-design-tester-config` and on model ids and prices taken from `meanings-review/round-1/ledger.json`. None of these are in the brief; if the pairs are missing, the rule never activates.",
+   "X is heavy for size M: 29 decisions, 13 contracts, a thinker repeat index, replay and pass-rate verbs. It also adds unasked changes, such as a second Gemini validation for size L and removal of the research merge.",
+   "X's byte-exact D-line fidelity check (C11) is brittle: any rewrap by the writer fails `check`."
+  ],
+  "score": {
+   "X": 8,
+   "Y": 5
+  }
+ },
+ "raw": "{\"ranking\":[\"X\",\"Y\"],\"pick\":\"X\",\"why\":\"Criterion 1 decides it. The order replaces the 2026-11-22 rule, names five validators at one request each, and says Fable gives the final verdict. X builds that. D2: \\\"The split applies to every size and every path that writes a spec.\\\" D8: \\\"The panel is exactly the five named validators... the sixth seat is dropped.\\\" D11: an overrun \\\"never skips a validator or the judge.\\\" D24 stops at preflight rather than swap in subscription Fable.\\n\\nY contradicts the order in five places:\\n- **Old rule survives.** Design 2: \\\"With no map, or the template only, the previous behaviour holds: one model does everything.\\\" Rollout 8 makes that the rollback.\\n- **Judge skipped for money.** T22: \\\"a panel over the cap skips the judge.\\\" This also contradicts Y's own REQ-12 (\\\"the thinker is never skipped or failed for money\\\").\\n- **Key thinking on a subscription.** Design 3: meanings \\\"may be produced in a subscription session\\\" via `--from-file`.\\n- **Sixth seat stays legal.** Design 4: \\\"A host file listing more panelists keeps working.\\\"\\n- **Free validator choice.** C2 keeps `research validate --model ID --family F --endpoint URL`.\\n\\nOn the measured facts, X's C4 matches the BYOK measurement exactly (c = 0 with u > 0 gives u; c > 0 is never added to u), and D18 with the `judge_only` test fixes the zeroed panel cost. Y fixes the rerun too, but its cost rule 1 invents `usage.is_byok` and sums router plus upstream, which the measurement does not support. Y's `estate_usd = max(observatory_usd, local_month_usd)` with a `local-only` fallback can report level `ok` from one host, which is not the estate.\\n\\nCriterion 3: X answers all 22 questions as the agent. Y leaves Q1 to Q3 \\\"pending\\\", and Q2 (warn or stop) is already answered by the brief's word \\\"warning\\\".\\n\\nCriterion 2: X's acceptance checks carry numeric fixtures (C4, C10, C8). Y's `[M<n>]` tags, stale-revision check and `ensure_ledger` before dispatch are good ideas, but they sit on a rule that is optional.\\n\\nX loses points on criteria 4 and 5: it is long and invents beyond the facts, with internal clashes listed under risks. Those are repairable in build; Y's defects change what ships.\",\"risks\":[\"X's C9 accepts the estate figure only if it matches an `observatory_inventory_cmd` that C1 itself calls \\\"an assumed listing\\\". The brief confirms only `totalUsd`. If the listing does not exist, the estate stays `unknown` and the USD 5,000 warning never fires. Run Rollout step 3 first and relax coverage if needed.\",\"X contradicts itself on the judge rerun: R10 refuses \\\"a second `ok` `verdict` in one round run\\\", while R8 and the edge cases allow `--judge-only` to append judge rows. Define the exception before coding the repeat index.\",\"X's Q1 puts the hash on a separate `Meanings-sha256:` line, while D4, C11 and R2 require `Meanings: <path> sha256:<64 hex>`. The implementer must build R2/C11, not the spec's own header.\",\"X's R4 test makes the ledger directory read-only yet expects `uncommitted.jsonl` to be written; C1 places that file in the same spend dir. The fixture needs a file-level failure instead.\",\"X's merge gate depends on a replay over `s2-design-tester-config` and on model ids and prices taken from `meanings-review/round-1/ledger.json`. None of these are in the brief; if the pairs are missing, the rule never activates.\",\"X is heavy for size M: 29 decisions, 13 contracts, a thinker repeat index, replay and pass-rate verbs. It also adds unasked changes, such as a second Gemini validation for size L and removal of the research merge.\",\"X's byte-exact D-line fidelity check (C11) is brittle: any rewrap by the writer fails `check`.\"],\"score\":{\"X\":8,\"Y\":5}}"
+}

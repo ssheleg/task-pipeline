@@ -1,0 +1,38 @@
+{
+ "meta": {
+  "id": "grok",
+  "model": "x-ai/grok-4.7",
+  "family": "xai",
+  "at": "2026-11-23T19:30:41Z",
+  "route": "tokens",
+  "finish": "stop",
+  "cost": 0.158112,
+  "cost_source": "openrouter",
+  "cost_known": true,
+  "tokens_in": 24735,
+  "tokens_out": 18395,
+  "seconds": 265.4,
+  "served_by": "x-ai/grok-4.7",
+  "parsed": true
+ },
+ "verdict": {
+  "ranking": [
+   "Y",
+   "X"
+  ],
+  "pick": "Y",
+  "why": "A zero-context implementer can build Y and cannot build X without stopping to ask. Brief item (1) is a review of which stage calls which model and route: Y Design 1 is a 12-row Today/Target table; X never states today's route and leaves research scouts off the role map entirely. Item (2): the order says validators answer in one request each and Fable gives the final verdict. Y REQ-4 and Design 4 send exactly one HTTP request, no retry, no repair; X D11 adds a retry the order does not allow. Y REQ-5 fails the round unless the judge model is roles.thinker, and Design 4 gives that judge the meanings so the verdict can catch dropped decisions. X R10/D12 send the judge only brief, artefact and panel, so it cannot check fidelity, against 'do not lose quality', and Q11 still leaves meanings.py --kind ruling versus consilium.py unresolved. Item (3): both record route, model, cost and task and warn at 80/95/100 without blocking, which matches 'a warning' rather than a stop. Y C1–C7, exit codes and the stderr line are exact; X parks file paths, price unit, hash form, estate JSON and field spelling in Q4–Q15, every one marked pending, so criterion 3 fails. X also invents a size-S exemption (D3) the order does not give, and R7 only checks that meanings ids appear in the spec, so a writer can add or alter a decision and pass. Y Design 3's [M<n>] checks fail additions, drops, retired ids and a stale revision. X's Design role table is the one place the full order is written down (routine = Fable subscription, main = Opus 5.5, specialists on subscriptions). That does not outweigh the missing review, the contradictions, and the uncommitted contracts.",
+  "risks": [
+   "Y C1/C2 default the thinker to max_output_tokens 32000, a cap the order's 'without stinting' does not allow unless the host raises it.",
+   "Y Design 5 rule 2 trusts usage.cost whenever is_byok is false, so the measured BYOK pattern (usage.cost = 0, real cost in upstream_inference_cost) is recorded as zero if that flag is false; is_byok is not in the brief. A simpler rule is: if cost is 0 and upstream_inference_cost is present, use upstream. Rollout step 2 only helps if someone actually compares the fixture.",
+   "Y never puts the order's model assignment for routine (Fable subscription), main/worker (Opus 5.5) or the two specialists into Rollout step 4 or the Roles table, so the host file can be filled with the wrong ids.",
+   "Y's out-of-scope 'OpenAI-compatible only' can miss a native Fable token route if it is not the OpenRouter path the judge already uses.",
+   "Y bills a thinker call for size S; X would have skipped it. The order states no exemption, but that spend is an invention if S has nothing to decide."
+  ],
+  "score": {
+   "Y": 7,
+   "X": 5
+  }
+ },
+ "raw": "{\"ranking\":[\"Y\",\"X\"],\"pick\":\"Y\",\"why\":\"A zero-context implementer can build Y and cannot build X without stopping to ask. Brief item (1) is a review of which stage calls which model and route: Y Design 1 is a 12-row Today/Target table; X never states today's route and leaves research scouts off the role map entirely. Item (2): the order says validators answer in one request each and Fable gives the final verdict. Y REQ-4 and Design 4 send exactly one HTTP request, no retry, no repair; X D11 adds a retry the order does not allow. Y REQ-5 fails the round unless the judge model is roles.thinker, and Design 4 gives that judge the meanings so the verdict can catch dropped decisions. X R10/D12 send the judge only brief, artefact and panel, so it cannot check fidelity, against 'do not lose quality', and Q11 still leaves meanings.py --kind ruling versus consilium.py unresolved. Item (3): both record route, model, cost and task and warn at 80/95/100 without blocking, which matches 'a warning' rather than a stop. Y C1–C7, exit codes and the stderr line are exact; X parks file paths, price unit, hash form, estate JSON and field spelling in Q4–Q15, every one marked pending, so criterion 3 fails. X also invents a size-S exemption (D3) the order does not give, and R7 only checks that meanings ids appear in the spec, so a writer can add or alter a decision and pass. Y Design 3's [M<n>] checks fail additions, drops, retired ids and a stale revision. X's Design role table is the one place the full order is written down (routine = Fable subscription, main = Opus 5.5, specialists on subscriptions). That does not outweigh the missing review, the contradictions, and the uncommitted contracts.\",\"risks\":[\"Y C1/C2 default the thinker to max_output_tokens 32000, a cap the order's 'without stinting' does not allow unless the host raises it.\",\"Y Design 5 rule 2 trusts usage.cost whenever is_byok is false, so the measured BYOK pattern (usage.cost = 0, real cost in upstream_inference_cost) is recorded as zero if that flag is false; is_byok is not in the brief. A simpler rule is: if cost is 0 and upstream_inference_cost is present, use upstream. Rollout step 2 only helps if someone actually compares the fixture.\",\"Y never puts the order's model assignment for routine (Fable subscription), main/worker (Opus 5.5) or the two specialists into Rollout step 4 or the Roles table, so the host file can be filled with the wrong ids.\",\"Y's out-of-scope 'OpenAI-compatible only' can miss a native Fable token route if it is not the OpenRouter path the judge already uses.\",\"Y bills a thinker call for size S; X would have skipped it. The order states no exemption, but that spend is an invention if S has nothing to decide.\"],\"score\":{\"Y\":7,\"X\":5}}"
+}

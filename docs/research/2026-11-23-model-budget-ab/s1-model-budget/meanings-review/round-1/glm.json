@@ -1,0 +1,96 @@
+{
+ "meta": {
+  "id": "glm",
+  "model": "z-ai/glm-5.3",
+  "family": "zhipu",
+  "at": "2026-11-23T19:48:18Z",
+  "route": "tokens",
+  "finish": "stop",
+  "cost": 0.031172,
+  "cost_source": "openrouter",
+  "cost_known": true,
+  "tokens_in": 4566,
+  "tokens_out": 8254,
+  "seconds": 68.4,
+  "served_by": "z-ai/glm-5.3",
+  "parsed": true
+ },
+ "verdict": {
+  "verdict": "revise",
+  "score": 5,
+  "summary": "The architecture (role map, single call path, ledger, ceiling states) honours most of the order, but the order's explicit 'one request each' is broken by a permitted retry, several internal contradictions exist between the table, D5/D6, D15's fixtures and D19's check, and the rule is set to merge while three owner questions that it depends on are unanswered. Each defect is fixable by editing the named decisions.",
+  "findings": [
+   {
+    "id": "validator-retry",
+    "severity": "blocker",
+    "where": "D9 and contract 'One request each'",
+    "issue": "The owner says validators answer 'one request each'; D9 permits one retry when the first attempt returned no usage. The brief's review question explicitly forbids 'a retry where it says one request'. The contract check 'at most one row with tokens above zero per panelist per round' also tolerates two attempts.",
+    "fix": "Delete the retry clause from D9: an attempt that returns no usage or an unparsable answer counts as a missing verdict, full stop. Change the contract check to 'exactly one row per panelist per round; a missing verdict is recorded as such', and note that D17 already writes rows only for attempts that returned usage, so a no-usage attempt leaves no row."
+   },
+   {
+    "id": "writer-gap-call",
+    "severity": "major",
+    "where": "D5 vs D6",
+    "issue": "D5 creates a revision call from writer to thinker when the meanings have a gap, but D6 enumerates thinker's calls exhaustively ('these calls and no others') and does not include a writer-reported gap. The two decisions contradict; a script implementing D6 literally would refuse D5's call.",
+    "fix": "Add to D6's list: 'a revision when the writer reports a gap in the meanings'."
+   },
+   {
+    "id": "resolution-owner",
+    "severity": "major",
+    "where": "Review table 'Research merge' vs D6",
+    "issue": "The table says research merge is removed because 'a Resolution is a decision, so thinker writes it', unconditionally; D6 says thinker makes the Resolution call 'only on a disagree'. When the scouts agree, no one is assigned to write the Resolution — either a decision runs on a non-thinker model (violating the order) or the Resolution is never produced.",
+    "fix": "Make every Resolution a thinker call in both places (it decides something, so the order puts it on Fable by API), or explicitly define the agree-path (e.g. the worker drafts, thinker confirms in the same call as the Recommendation) and align the table and D6 to the same rule."
+   },
+   {
+    "id": "cost-rule-extrapolation",
+    "severity": "major",
+    "where": "D15 and contract 'Cost rule'",
+    "issue": "The measured fact covers only the BYOK case (c = 0, real cost in u). D15's rule 'if u present and c < u, then cost = c + u' extrapolates to a case never measured, the contract fixture 'c = 0.02, u = 0.40 gives 0.42 upstream' enshrines it as required behaviour, and the Risks section itself admits this may double count ordinary calls. A contract is locking in a rule the artefact flags as probably wrong.",
+    "fix": "Restrict the upstream rule to the measured case: if c == 0 and u is present, cost_usd = u, source 'upstream'; if c > 0, cost_usd = c, source 'provider', regardless of u (raw fields kept for recount). Change the third fixture to 'c = 0.02, u = 0.40 gives 0.02 provider'. If the c>0-with-upstream case is believed real, verify it with one probe call before merge instead of hard-coding the sum."
+   },
+   {
+    "id": "unpriced-check-contradiction",
+    "severity": "major",
+    "where": "D19 vs D1, D14, D15 and contract 'Summary'",
+    "issue": "D1 makes `price` optional on api roles and D15 makes `cost_usd = null` with source `unpriced` a legitimate outcome (the Summary contract even counts unpriced rows as normal), but D19's `check` exits 1 on any unpriced row. A validly configured role without a price therefore makes every run fail check.",
+    "fix": "Either make `price` mandatory for `route: api` roles (role resolution refuses a role with no price), or change `check` to exit 1 only on malformed rows and report unpriced rows as a loud warning with their count. Pick one and align D1, D15 and D19."
+   },
+   {
+    "id": "merge-before-answers",
+    "severity": "major",
+    "where": "D29 with Q1-Q3 and D2",
+    "issue": "D29 makes the rule effective on merge, but three questions with order-affecting defaults (warn vs block at the ceiling, ceiling scope, size-S thinker) are still open, so unconfirmed defaults become binding. In particular D2's size-S exemption is an exception the owner's order does not make — the order states the meanings/text split without a size qualifier.",
+    "fix": "Gate the merge date on the owner's answers to Q1-Q3, or state in D29 that the defaults are provisional and flip automatically if the owner answers otherwise. For D2 specifically, make the default consistent with the order (the split applies to all sizes) and let Q3 be the owner's grant of an exemption, not the reverse."
+   },
+   {
+    "id": "judge-fallback",
+    "severity": "minor",
+    "where": "D24 vs D11",
+    "issue": "D11 says the judge always runs and the table says it is 'never skipped for money', but D24's missing-Fable-key fallback covers only the thinker path of an M/L spec. What the consilium judge does when the API key is missing is unspecified, so D11 and D24 conflict for that case.",
+    "fix": "Extend D24: the same fallback applies to the judge (Fable in the subscription session if the host has one, otherwise the round stops and asks the owner); it is never silently skipped or replaced by another model."
+   },
+   {
+    "id": "ledger-route-derivation",
+    "severity": "minor",
+    "where": "D14 vs D1",
+    "issue": "D14 defines ledger routes `openrouter`, `openrouter-byok`, `direct-api`, but D1's role schema (`endpoint`, `key_env`) gives no rule for deriving which of the three a call was, so two hosts could classify the same call differently and the by-route summary would be unreliable.",
+    "fix": "Add one sentence to D14: route is `direct-api` when the configured endpoint is not openrouter.ai, `openrouter-byok` when the call carries a provider key through OpenRouter, `openrouter` otherwise; and state which key the `key_env` value identifies for that decision."
+   },
+   {
+    "id": "observatory-config-shape",
+    "severity": "minor",
+    "where": "D20 vs D1",
+    "issue": "D20 puts `observatory_spend_cmd` in roles.json, but D1 defines roles.json's schema as a per-role map only; and 'the build step runs the command once and records its real shape' does not say where the shape is recorded or how it is checked, so the contract list has nothing to verify it.",
+    "fix": "Extend D1's roles.json schema with a top-level `observatory_spend_cmd`, and add a contract check: the recorded output shape (single object with `totalUsd`, or a list summed per D20) matches what `check` re-reads; mismatch exits 1."
+   },
+   {
+    "id": "three-family-floor",
+    "severity": "minor",
+    "where": "Contract 'One request each'",
+    "issue": "'at least three verdicts of three families' invents a quorum the owner never set; a round can pass with 3 of 5 named validators and the source of the number three is stated nowhere.",
+    "fix": "State the floor's justification in the decision itself (e.g. D8: a round is valid only with at least three parsable verdicts from three different families, recorded as a quality gate), or add it as a fourth owner question before merge."
+   }
+  ]
+ },
+ "raw": "{\"verdict\": \"revise\", \"score\": 5, \"summary\": \"The architecture (role map, single call path, ledger, ceiling states) honours most of the order, but the order's explicit 'one request each' is broken by a permitted retry, several internal contradictions exist between the table, D5/D6, D15's fixtures and D19's check, and the rule is set to merge while three owner questions that it depends on are unanswered. Each defect is fixable by editing the named decisions.\", \"findings\": [{\"id\": \"validator-retry\", \"severity\": \"blocker\", \"where\": \"D9 and contract 'One request each'\", \"issue\": \"The owner says validators answer 'one request each'; D9 permits one retry when the first attempt returned no usage. The brief's review question explicitly forbids 'a retry where it says one request'. The contract check 'at most one row with tokens above zero per panelist per round' also tolerates two attempts.\", \"fix\": \"Delete the retry clause from D9: an attempt that returns no usage or an unparsable answer counts as a missing verdict, full stop. Change the contract check to 'exactly one row per panelist per round; a missing verdict is recorded as such', and note that D17 already writes rows only for attempts that returned usage, so a no-usage attempt leaves no row.\"}, {\"id\": \"writer-gap-call\", \"severity\": \"major\", \"where\": \"D5 vs D6\", \"issue\": \"D5 creates a revision call from writer to thinker when the meanings have a gap, but D6 enumerates thinker's calls exhaustively ('these calls and no others') and does not include a writer-reported gap. The two decisions contradict; a script implementing D6 literally would refuse D5's call.\", \"fix\": \"Add to D6's list: 'a revision when the writer reports a gap in the meanings'.\"}, {\"id\": \"resolution-owner\", \"severity\": \"major\", \"where\": \"Review table 'Research merge' vs D6\", \"issue\": \"The table says research merge is removed because 'a Resolution is a decision, so thinker writes it', unconditionally; D6 says thinker makes the Resolution call 'only on a disagree'. When the scouts agree, no one is assigned to write the Resolution — either a decision runs on a non-thinker model (violating the order) or the Resolution is never produced.\", \"fix\": \"Make every Resolution a thinker call in both places (it decides something, so the order puts it on Fable by API), or explicitly define the agree-path (e.g. the worker drafts, thinker confirms in the same call as the Recommendation) and align the table and D6 to the same rule.\"}, {\"id\": \"cost-rule-extrapolation\", \"severity\": \"major\", \"where\": \"D15 and contract 'Cost rule'\", \"issue\": \"The measured fact covers only the BYOK case (c = 0, real cost in u). D15's rule 'if u present and c < u, then cost = c + u' extrapolates to a case never measured, the contract fixture 'c = 0.02, u = 0.40 gives 0.42 upstream' enshrines it as required behaviour, and the Risks section itself admits this may double count ordinary calls. A contract is locking in a rule the artefact flags as probably wrong.\", \"fix\": \"Restrict the upstream rule to the measured case: if c == 0 and u is present, cost_usd = u, source 'upstream'; if c > 0, cost_usd = c, source 'provider', regardless of u (raw fields kept for recount). Change the third fixture to 'c = 0.02, u = 0.40 gives 0.02 provider'. If the c>0-with-upstream case is believed real, verify it with one probe call before merge instead of hard-coding the sum.\"}, {\"id\": \"unpriced-check-contradiction\", \"severity\": \"major\", \"where\": \"D19 vs D1, D14, D15 and contract 'Summary'\", \"issue\": \"D1 makes `price` optional on api roles and D15 makes `cost_usd = null` with source `unpriced` a legitimate outcome (the Summary contract even counts unpriced rows as normal), but D19's `check` exits 1 on any unpriced row. A validly configured role without a price therefore makes every run fail check.\", \"fix\": \"Either make `price` mandatory for `route: api` roles (role resolution refuses a role with no price), or change `check` to exit 1 only on malformed rows and report unpriced rows as a loud warning with their count. Pick one and align D1, D15 and D19.\"}, {\"id\": \"merge-before-answers\", \"severity\": \"major\", \"where\": \"D29 with Q1-Q3 and D2\", \"issue\": \"D29 makes the rule effective on merge, but three questions with order-affecting defaults (warn vs block at the ceiling, ceiling scope, size-S thinker) are still open, so unconfirmed defaults become binding. In particular D2's size-S exemption is an exception the owner's order does not make — the order states the meanings/text split without a size qualifier.\", \"fix\": \"Gate the merge date on the owner's answers to Q1-Q3, or state in D29 that the defaults are provisional and flip automatically if the owner answers otherwise. For D2 specifically, make the default consistent with the order (the split applies to all sizes) and let Q3 be the owner's grant of an exemption, not the reverse.\"}, {\"id\": \"judge-fallback\", \"severity\": \"minor\", \"where\": \"D24 vs D11\", \"issue\": \"D11 says the judge always runs and the table says it is 'never skipped for money', but D24's missing-Fable-key fallback covers only the thinker path of an M/L spec. What the consilium judge does when the API key is missing is unspecified, so D11 and D24 conflict for that case.\", \"fix\": \"Extend D24: the same fallback applies to the judge (Fable in the subscription session if the host has one, otherwise the round stops and asks the owner); it is never silently skipped or replaced by another model.\"}, {\"id\": \"ledger-route-derivation\", \"severity\": \"minor\", \"where\": \"D14 vs D1\", \"issue\": \"D14 defines ledger routes `openrouter`, `openrouter-byok`, `direct-api`, but D1's role schema (`endpoint`, `key_env`) gives no rule for deriving which of the three a call was, so two hosts could classify the same call differently and the by-route summary would be unreliable.\", \"fix\": \"Add one sentence to D14: route is `direct-api` when the configured endpoint is not openrouter.ai, `openrouter-byok` when the call carries a provider key through OpenRouter, `openrouter` otherwise; and state which key the `key_env` value identifies for that decision.\"}, {\"id\": \"observatory-config-shape\", \"severity\": \"minor\", \"where\": \"D20 vs D1\", \"issue\": \"D20 puts `observatory_spend_cmd` in roles.json, but D1 defines roles.json's schema as a per-role map only; and 'the build step runs the command once and records its real shape' does not say where the shape is recorded or how it is checked, so the contract list has nothing to verify it.\", \"fix\": \"Extend D1's roles.json schema with a top-level `observatory_spend_cmd`, and add a contract check: the recorded output shape (single object with `totalUsd`, or a list summed per D20) matches what `check` re-reads; mismatch exits 1.\"}, {\"id\": \"three-family-floor\", \"severity\": \"minor\", \"where\": \"Contract 'One request each'\", \"issue\": \"'at least three verdicts of three families' invents a quorum the owner never set; a round can pass with 3 of 5 named validators and the source of the number three is stated nowhere.\", \"fix\": \"State the floor's justification in the decision itself (e.g. D8: a round is valid only with at least three parsable verdicts from three different families, recorded as a quality gate), or add it as a fourth owner question before merge.\"}]}"
+}

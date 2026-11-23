@@ -156,7 +156,10 @@ FORBIDDEN = (
 )
 ENTRY_HEAD = re.compile(r"^###\s+(.+?)\s*$")
 LESSON_LINE = re.compile(
-    r"^\s*-\s+\*\*Lesson:\*\*\s*`([^`]+)`\s*[—-]\s*(.+?)\s*·\s*\*\*When:\*\*\s*(.+?)\s*·\s*\*\*Nouns:\*\*\s*(.+?)\s*$")
+    # The separator after the key: the em dash the format was born with, or what a writer under the
+    # no-em-dash rule uses instead (a hyphen, colon, semicolon or comma). Only the em dash was read
+    # until 1.114.0, so every lesson written under that rule was counted private (B-163).
+    r"^\s*-\s+\*\*Lesson:\*\*\s*`([^`]+)`\s*[—:;,-]\s*(.+?)\s*·\s*\*\*When:\*\*\s*(.+?)\s*·\s*\*\*Nouns:\*\*\s*(.+?)\s*$")
 SURFACED = re.compile(r"\*\*Surfaced at:\*\*\s*stage\s+([^\s·,()]+)")
 OWNED = re.compile(r"\*\*Owned by:\*\*\s*stage\s+([^\s·,()]+)")
 GRADE = re.compile(r"\*\*Fix:\*\*\s*grade\s+([1-3])\b")
@@ -613,7 +616,19 @@ def parse_retro(path: pathlib.Path, root: pathlib.Path, project: str,
     for head, body in entries:
         if not head:
             continue
-        ln = next((LESSON_LINE.match(b) for b in body if LESSON_LINE.match(b)), None)
+        ln = None
+        for i, b in enumerate(body):
+            if not b.lstrip().startswith("- **Lesson:**"):
+                continue
+            joined = [b.rstrip()]
+            for cont in body[i + 1:]:  # a Lesson bullet wrapped onto indented lines (B-163)
+                if cont.startswith("  ") and not cont.lstrip().startswith("- "):
+                    joined.append(cont.strip())
+                else:
+                    break
+            ln = LESSON_LINE.match(" ".join(joined))
+            if ln:
+                break
         if not ln:
             private += 1
             continue
@@ -1273,6 +1288,10 @@ def find_retros(roots: list[str], depth: int) -> tuple[list[tuple[pathlib.Path, 
                 raise Refused(f"{archive}: retro archive is not a directory")
             archived = sorted(archive.iterdir()) if archive_info is not None else []
             files = [art / "retro.md"] + [p for p in archived if p.suffix == ".md"]
+            if _source_stat(art / "retro.md") is None:
+                # A project without the artifact root keeps its retro where its docs are; rebuild read
+                # only the artifact root until 1.114.0, so those lessons never reached the index (B-163).
+                files += [c for c in (here / "docs" / "retro.md", here / "retro.md") if c != art / "retro.md"]
             for f in files:
                 info = _source_stat(f)
                 if info is None:

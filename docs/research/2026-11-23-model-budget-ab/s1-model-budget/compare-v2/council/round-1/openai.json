@@ -1,0 +1,38 @@
+{
+ "meta": {
+  "id": "openai",
+  "model": "openai/gpt-6.2-astra-pro",
+  "family": "openai",
+  "at": "2026-11-23T19:41:10Z",
+  "route": "tokens",
+  "finish": "stop",
+  "cost": 0.476684,
+  "cost_source": "byok",
+  "cost_known": true,
+  "tokens_in": 77378,
+  "tokens_out": 1334,
+  "seconds": 25.0,
+  "served_by": "openai/gpt-6.2-astra-pro",
+  "parsed": true
+ },
+ "verdict": {
+  "ranking": [
+   "X",
+   "Y"
+  ],
+  "pick": "X",
+  "why": "X is the better implementation base because its failure path honors both “one request each” and “every token call.” X Design §§4–5 and T9–T17 specify one POST, no retry, and a task-attributed row even on timeout, with unknown cost rather than an assumed zero. Y R7 explicitly tests that a validator is called twice and booked once; C4 and Q8 extend that retry to research validation. A missing usage response does not establish that the provider did no billable work. Both preserve panel spend on judge-only reruns, but X also checks the cost rule against BYOK and non-BYOK provider fixtures (Rollout §2). X routes new decisions back to the thinker regardless of size and checks for stale meanings revisions (Design §§1–3); Y exempts S and refuses a thinker plan call for M even when planning decides something (D2, C4). Y is stronger on council configuration: C8 enforces the named five and derives the judge directly from the thinker role. Its `unknown` estate state is also safer than X's local-only fallback. Those are worth adopting without Y's retry and accounting rules.",
+  "risks": [
+   "X can still ship the superseded workflow: no role map restores session authorship, `--from-file` permits subscription meanings, and an existing six-seat config remains valid (Design §§2–4). Rollout §4 should verify the owner's actual model/route assignments and exact roster before enabling the release.",
+   "X T22 skips the judge when the panel alone exceeds its cap. That withholds the required Fable verdict after the validators have already been paid. Y C8 separates the two outcomes correctly: obtain the verdict when quorum exists, then fail the panel budget check.",
+   "Neither option completes owner-surface delivery: X Rollout §7 and Y Rollout §4 create Observatory board rows, not a verified day/month view. X Design §6 can also report `ok` from this host alone or use a cache of any age; neither establishes current estate headroom.",
+   "X's append-only accounting has no working correction contract: C6 `record` appends a row, but `check` still rejects the original successful null-cost row. Y has a different cost risk: D15 infers BYOK from relative cost fields, which its own Risks section says can double-count ordinary calls.",
+   "X's three-spec canary is feasible but a weak regression gate: deterioration triggers a question whose default is to keep the split (Rollout §6). Y's blind replay is a better direct comparison in principle, but R15 requires two finished M specs and Q23 identifies none in the base repository, leaving the acceptance inputs unresolved."
+  ],
+  "score": {
+   "X": 8,
+   "Y": 6
+  }
+ },
+ "raw": "{\n  \"ranking\": [\"X\", \"Y\"],\n  \"pick\": \"X\",\n  \"why\": \"X is the better implementation base because its failure path honors both “one request each” and “every token call.” X Design §§4–5 and T9–T17 specify one POST, no retry, and a task-attributed row even on timeout, with unknown cost rather than an assumed zero. Y R7 explicitly tests that a validator is called twice and booked once; C4 and Q8 extend that retry to research validation. A missing usage response does not establish that the provider did no billable work. Both preserve panel spend on judge-only reruns, but X also checks the cost rule against BYOK and non-BYOK provider fixtures (Rollout §2). X routes new decisions back to the thinker regardless of size and checks for stale meanings revisions (Design §§1–3); Y exempts S and refuses a thinker plan call for M even when planning decides something (D2, C4). Y is stronger on council configuration: C8 enforces the named five and derives the judge directly from the thinker role. Its `unknown` estate state is also safer than X's local-only fallback. Those are worth adopting without Y's retry and accounting rules.\",\n  \"risks\": [\n    \"X can still ship the superseded workflow: no role map restores session authorship, `--from-file` permits subscription meanings, and an existing six-seat config remains valid (Design §§2–4). Rollout §4 should verify the owner's actual model/route assignments and exact roster before enabling the release.\",\n    \"X T22 skips the judge when the panel alone exceeds its cap. That withholds the required Fable verdict after the validators have already been paid. Y C8 separates the two outcomes correctly: obtain the verdict when quorum exists, then fail the panel budget check.\",\n    \"Neither option completes owner-surface delivery: X Rollout §7 and Y Rollout §4 create Observatory board rows, not a verified day/month view. X Design §6 can also report `ok` from this host alone or use a cache of any age; neither establishes current estate headroom.\",\n    \"X's append-only accounting has no working correction contract: C6 `record` appends a row, but `check` still rejects the original successful null-cost row. Y has a different cost risk: D15 infers BYOK from relative cost fields, which its own Risks section says can double-count ordinary calls.\",\n    \"X's three-spec canary is feasible but a weak regression gate: deterioration triggers a question whose default is to keep the split (Rollout §6). Y's blind replay is a better direct comparison in principle, but R15 requires two finished M specs and Q23 identifies none in the base repository, leaving the acceptance inputs unresolved.\"\n  ],\n  \"score\": {\"X\": 8, \"Y\": 6}\n}"
+}

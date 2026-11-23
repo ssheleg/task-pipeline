@@ -1,0 +1,36 @@
+{
+ "meta": {
+  "id": "openai",
+  "model": "openai/gpt-6.2-astra-pro",
+  "family": "openai",
+  "at": "2026-11-23T19:20:58Z",
+  "route": "tokens",
+  "finish": "stop",
+  "cost": 0.3207192,
+  "cost_source": "byok",
+  "cost_known": true,
+  "tokens_in": 52079,
+  "tokens_out": 923,
+  "seconds": 17.2,
+  "served_by": "openai/gpt-6.2-astra-pro",
+  "parsed": true
+ },
+ "verdict": {
+  "ranking": [
+   "X",
+   "Y"
+  ],
+  "pick": "X",
+  "why": "X gives the implementer a usable first release without waiting on either external service. Its Rollout specifies one backlog row, a dated board reply (2026-12-07 for persona configurations; 2026-12-21 conditional on stand readiness), and manual panel updates until the super-ux template lands. Both options preserve the scenario × persona budget and leave agent-tester unchanged. X is stronger on evidence: C4 resolves a comparison persona to the same step, pass and round; C6–C7 and T-15–T-19 check the reused capture's cell, step, bytes and, when supplied, build ID without putting the gate on the network. Y has useful safeguards worth retaining: R9 forbids an ‘only here’ claim on a row with an unrealised axis, and R18 preserves resource accounting for stand reads. But Y explicitly allows a nonexistent comparison row to escape detection (Edge cases), and its C5 example makes the very claim R9 forbids. Its Rollout also substitutes ‘next minor’ for the requested date, creates a backlog row even for no change, and ties panel adoption to another project's release.",
+  "risks": [
+   "X's phase-two date is conditional, not a confirmed stand capability. Q5–Q6 leave the export contract and sender key unresolved; Stand intake step 4 excludes untagged explore screenshots, so those runs save no capture work.",
+   "X C7/T-19 lets a stand row pass without --build, leaving stale evidence possible despite the agent instruction to supply it. X C3's example also shows a complete config_applied alongside a config_gap that its own validator rejects.",
+   "Both options let wholly unconfigured panels keep passing. That avoids a disruptive migration but does not deliver the requested coverage until projects actually assign configurations to all ten portraits."
+  ],
+  "score": {
+   "X": 8,
+   "Y": 6
+  }
+ },
+ "raw": "{\n  \"ranking\": [\"X\", \"Y\"],\n  \"pick\": \"X\",\n  \"why\": \"X gives the implementer a usable first release without waiting on either external service. Its Rollout specifies one backlog row, a dated board reply (2026-12-07 for persona configurations; 2026-12-21 conditional on stand readiness), and manual panel updates until the super-ux template lands. Both options preserve the scenario × persona budget and leave agent-tester unchanged. X is stronger on evidence: C4 resolves a comparison persona to the same step, pass and round; C6–C7 and T-15–T-19 check the reused capture's cell, step, bytes and, when supplied, build ID without putting the gate on the network. Y has useful safeguards worth retaining: R9 forbids an ‘only here’ claim on a row with an unrealised axis, and R18 preserves resource accounting for stand reads. But Y explicitly allows a nonexistent comparison row to escape detection (Edge cases), and its C5 example makes the very claim R9 forbids. Its Rollout also substitutes ‘next minor’ for the requested date, creates a backlog row even for no change, and ties panel adoption to another project's release.\",\n  \"risks\": [\n    \"X's phase-two date is conditional, not a confirmed stand capability. Q5–Q6 leave the export contract and sender key unresolved; Stand intake step 4 excludes untagged explore screenshots, so those runs save no capture work.\",\n    \"X C7/T-19 lets a stand row pass without --build, leaving stale evidence possible despite the agent instruction to supply it. X C3's example also shows a complete config_applied alongside a config_gap that its own validator rejects.\",\n    \"Both options let wholly unconfigured panels keep passing. That avoids a disruptive migration but does not deliver the requested coverage until projects actually assign configurations to all ten portraits.\"\n  ],\n  \"score\": {\"X\": 8, \"Y\": 6}\n}"
+}

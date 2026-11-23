@@ -1,0 +1,104 @@
+# Meanings
+
+Thinker: anthropic/claude-fable-5.2
+Task: model-budget-ab
+
+## Goal and meaning
+
+Every stage of task-pipeline runs on a named role that host configuration resolves to one model on one route. Tokens pay only for thinking that decides something, and for validators; everything else runs on subscriptions. Every token call leaves one ledger row; the owner sees day and month totals against the USD 5,000 ceiling.
+
+This order replaces the rule of 2026-11-22 ("the spec's author is the session's own model"). Quality rests on the strongest model deciding every meaning, a blind panel checking the result and a replay test against the old way.
+
+Call sites, today and after:
+
+| Site | Today | After |
+|---|---|---|
+| Spec analysis, definition, research Recommendation, plan decisions | the session, unpaid | `thinker` (Fable 5.2, API tokens) gives the meanings; `writer` (Opus 5.5 subscription) the text |
+| `consilium.py` panel | six vendors via OpenRouter | the five named validators, one request each per round |
+| `consilium.py` judge | Fable 5.2, BYOK cost recorded as 0 | the same model from the role map, real cost, never skipped for money |
+| `research validate` | one model, no cost recorded | the same single call, cost and task recorded |
+| Research scouts | working-tier subagents | `worker` (Opus 5.5 subscription) |
+| Research merge | fast tier | removed; a Resolution is a decision, so `thinker` writes it |
+| Stages 5 to 9 | the run's model | `worker`; code and mathematics to `specialist-code`, `specialist-math` (subscriptions) |
+| Any judgment deciding no meaning, plan or verdict (e.g. citation rechecks, diff review) | the session | `routine` (Fable, subscription session) |
+
+## Key features
+
+1. **Role map.** Seven roles: `thinker`, `writer`, `routine`, `worker`, `specialist-code`, `specialist-math`, `validators` (five keyed entries). Doctrine names roles; host config holds model ids.
+2. **Meanings and text split.** One `thinker` call returns the meanings; the writer writes the spec from them, changing no meaning.
+3. **One call path.** One module makes every token call and writes its row.
+4. **Spend ledger.** Append-only rows with route, model, role, cost, cost source and task.
+5. **Summary and ceiling.** Day and month totals by route, model, role and task; Observatory's estate total warns near the ceiling.
+6. **Two consilium fixes.** BYOK cost from the upstream field; `--judge-only` keeps panel rows.
+7. **Replay test.** Two finished specs rebuilt through the split, judged blind against the old.
+
+## Decisions
+
+- D1: The role map is `~/.config/task-pipeline/roles.json`, overridden by `$TASK_PIPELINE_ROLES`, template `assets/roles.example.json`, whose placeholders scripts refuse. Each role has `model` and `route` (`api` or `subscription`); an `api` role also `endpoint`, `key_env` and a `price` (USD per million tokens in and out) that resolution requires. `validators` maps exactly GLM, Kimi, Grok, Gemini and Astra, each to `model`, `endpoint`, `key_env` and `price`; `research validate` uses Kimi, plus Gemini for L. Top-level `observatory_spend_cmd` holds D20's command; output other than an object with `totalUsd` or a list of such gives `unknown` and fails `check`. Because the existing rule forbids hardcoded ids and consilium configuration already uses this pattern.
+- D2: The split applies to every size and every path that writes a spec. Because the order names no size and replaces the 2026-11-22 rule.
+- D3: The meanings file is `<spec>.meanings.md` with seven sections in order: Goal and meaning, Key features, Decisions, Contracts, Non-goals, Risks, Questions for the owner; decisions are lines `D<n>`. Because a fixed shape lets a script check the writer's fidelity.
+- D4: The spec header carries `Meanings: <path> sha256:<hex>`. Because the gate must prove which meanings the text was written from.
+- D5: The writer returns a gap in the meanings to `thinker` as a revision call and never fills it itself. Because the writer may not invent a decision.
+- D6: `thinker` makes only these calls: analysis with meanings, research Recommendation and plan decisions at any size (one each), every Resolution, the consilium verdict (one per round), the replay verdict, binding decisions arising in stages 5 to 9, and a revision when the brief changed, the judge accepted a meaning-layer finding or the writer reports a gap in the meanings. None repeats on unchanged input. Because "without stinting" means no cap on needed calls, not calls on unchanged input.
+- D7: `judge.json` marks every accepted finding `layer: meaning|text`; meaning findings go to `thinker`, text ones to the writer. Because routing by layer keeps token calls to decisions.
+- D8: The panel is exactly the five named validators, chosen by key, not seat; the sixth seat is dropped. Families: GLM Zhipu, Kimi Moonshot, Grok xAI, Gemini Google, Astra OpenAI (the measured BYOK seat); none is Anthropic, the thinker's and writer's family, so Fable and Opus never sit. A round is valid with three parsable verdicts of three families, the existing `consilium.py check` rule. Because the owner named the five, and both author families are now the author.
+- D9: One request per validator per round, never retried for any cause: timeout, transport failure, missing usage or an unparsable answer is a missing verdict. Because the order says one request each.
+- D10: The judge comes from the `thinker` role, not `consilium.json`. Because one source prevents drift.
+- D11: `max_usd_per_round` is advisory: an overrun records a warning and never skips a validator or the judge. Because the order names the five who answer and makes Fable's verdict unconditional.
+- D12: Only the new standard-library module `scripts/llm_call.py` connects to a model; `consilium.py` and `spec_protocol.py` call it. Because only one path guarantees every call is recorded.
+- D13: The ledger is `~/.local/state/task-pipeline/spend/YYYY-MM.jsonl` (directory overridable by `$TASK_PIPELINE_SPEND_DIR`), one line per call in a single append, UTC timestamps. Because monthly files make the month summary one read.
+- D14: Row fields are `ts`, `call_id`, `script`, `role`, `route` (`openrouter`, `openrouter-byok`, `direct-api`), `model` (as returned), `task`, `repo`, `stage`, `round`, `tokens_in`, `tokens_out`, `cost_usd`, `cost_source`, `raw_cost`, `raw_upstream_cost`. Route: openrouter.ai with the config's `byok` flag is `openrouter-byok`, without it `openrouter`, any other host `direct-api`. Because the order names route, model, cost and task, and the raw fields allow a later recount.
+- D15: Cost rule (c = `usage.cost`, u = `usage.cost_details.upstream_inference_cost`): c 0 or absent with u > 0 gives u, `upstream`; c > 0 gives c, `provider`, never adding u; c = u = 0 gives 0, `provider`; else a `price` gives the token-computed figure, `price-table`; else null, `unpriced`. Both raw fields are kept. Because the measured BYOK case reports c = 0 with the real cost in u, and blind summing would double count ordinary calls.
+- D16: A token call without a task id (`--task` or `$TASK_PIPELINE_TASK`) exits 2 before any request. Because an unattributed row cannot be repaired after the money is spent.
+- D17: Every dispatched attempt writes a row with a `status`; without usage, `cost_usd` is null and `cost_source` `unknown`. On a failed ledger write the result is kept, the row goes to `uncommitted.jsonl` in the spend dir and the script exits 3; `spend_ledger.py check` exits 1 while that file has a line. Because billed failures are spend, and a lost row must be loud.
+- D18: A round's `ledger.json` becomes append-only: `--judge-only` appends judge rows, panel rows stay; the round total sums all rows. Because the measured rerun zeroed the panel's cost.
+- D19: New `scripts/spend_ledger.py`: `summary --day YYYY-MM-DD | --month YYYY-MM [--json]` and `check`, which exits 1 on a malformed or unpriced row. Because the owner needs a view, and unpriced spend must not hide.
+- D20: The estate month total is Observatory's, through `observatory_spend_cmd` (default `tools/spend.py project --json`), reading `totalUsd`, summed over a list; it counts only when it covers every project in Observatory's inventory once, else `unknown`. The build runs it once and records its real shape. Because Observatory measures at the providers across all projects; the ledger sees one host.
+- D21: Ceiling states on the estate total: `ok` only below USD 4,000 with the projection below 5,000; `warn` from 4,000, or when the projection (month-to-date over elapsed days, times days in the month) reaches 5,000; `critical` from 4,750; `over` from 5,000; `unknown` with no Observatory figure. Elapsed days is the UTC day of month, minimum 1; projection applies from day 3; higher states beat a projected `warn`. Because a warning must come while there is room to act.
+- D22: The state line prints in every run's preflight notice, each round's `summary.md` and the final report; the summary also goes to the spend dir. The Observatory view is a deliverable, accepted when day and month totals read there; the build first checks whether Observatory renders an external JSON row unchanged, else names the one Observatory change. Because Observatory is the owner's surface and OpenRouter's view understates BYOK cost.
+- D23: The ceiling warns and never blocks a call. Because the order asks for a warning, and blocking would stint the thinking it protects.
+- D24: Without the thinker's API endpoint or key, preflight stops before definition and any panel dispatch, naming the missing key and calling no model; likewise for the judge. Subscription Fable is `routine` only. Because the order puts key thinking on Fable through the API; any swap is a silent downgrade.
+- D25: Subscription calls are not ledgered. Because they have no marginal cost and the order tracks token routes.
+- D26: In `model-tiering.md`, "Roles and routes" replaces the sections on the spec's author and the plan-then-execute profile, mapping its provisions: stages 0 to 4 to `thinker`, `writer` and `routine`; 5 to 9 to `worker` and the specialists; 10 to `routine`, its consilium verdict to `thinker`; the operator's override to `roles.json`; size-independence to D2; a one-tier host maps every subscription role to that tier. "Subagents" pins each subagent to its role's model; `spec-protocol.md`'s loop table and research roles and `consilium.md`'s money paragraph are edited in place; Markdown words do not grow. Because the ratchet forbids growth and the role map supersedes both sections.
+- D27: Stage configs and `plan_audit.py --models` accept role names alongside `default` and `inherit`. Because the recorded map must stay checkable at stage 4.
+- D28: Replay test: two finished M specs rebuilt from their briefs through the split; `consilium.py decide` compares old and new blind; the split passes if the new spec wins or ties both times. Because "do not lose quality" needs a comparison, not a claim.
+- D29: Merge, gated by the Replay contract, activates the rule; the ledger starts then, without backfill. A quality review due 2026-12-07, a backlog row run in the stage-10 retrospective, compares round-1 pass rates (verdict `pass` over parsable round-1 rulings) of the first three split specs and the last five earlier M or L specs with a consilium ruling (or fewer). On refutation the thinker revises the split; the session-author rule returns only on the owner's word. Because fourteen days gives the first specs under the split.
+
+## Contracts
+
+- **Role resolution.** Every role a stage uses resolves to a non-placeholder model; `thinker` and the five validators are `api`, all others `subscription`; `llm_call.py` refuses a subscription role with exit 2 and no row. Check: `plan_audit.py --models` fails an unknown role, a placeholder or a wrong route; the judge id in `judge.json` equals the `thinker` model.
+- **Meanings fidelity.** Check in `spec_protocol.py check`, every size: the meanings file's sha256 equals the header's; each `D<n>` line of the spec's Decisions equals the meanings line byte for byte, any extra, missing or altered line failing (a mutation test proves it); the meanings have their seven sections in order. The panel gets both files and reports a changed meaning; an accepted meaning-layer fidelity finding blocks release.
+- **Single call path.** Check: a test fails if a file under `scripts/` other than `llm_call.py` imports `urllib`, `http.client` or `socket`.
+- **Ledger completeness.** Check: a round's `ledger.json` holds the same set of `call_id`s as the global ledger for that run, with equal `cost_usd` sums.
+- **Cost rule.** Fixtures: c = 0, u = 0.42 gives 0.42 `upstream`; c = 0.10, u absent, 0.10 `provider`; c = 0.02, u = 0.40, 0.02 `provider`; both absent with a price, the computed figure, `price-table`; both absent without one, null `unpriced`.
+- **Judge-only rerun.** Check: panel `cost_usd` sums match before and after the rerun; only judge rows are added.
+- **One request each.** Check in `consilium.py check`: exactly one attempt row (by `call_id`) per named validator per round, a second failing; all five rows precede the three-family quorum, below which the round is marked insufficient; a cap overrun only warns; the ruling parses, with `layer` on every accepted finding.
+- **Task attribution.** Check: a call without a task id exits 2 and the ledger line count is unchanged.
+- **Summary.** Check on a fixture month: totals by route, model, role and task each sum to the month total; unpriced plus unknown counts equal the null-cost rows.
+- **Ceiling.** Fixtures on the estate figure, dated 2026-11-30 unless stated: 3,999.99 `ok`; 4,000 `warn`; 4,750 `critical`; 5,000 `over`; no figure `unknown`; 2,000 on 2026-11-10 `warn` by projection; a token call still runs in `over`.
+- **Reconciliation.** Lower-bound sanity check only: the ledger's month sum (labelled this host) is at most Observatory's total (labelled the estate); a larger sum prints `accounting mismatch`.
+- **Replay.** Gates merge: `consilium.py decide` gets old and new with labels stripped and order randomised; the split passes only when the recorded ruling picks the new spec or a tie on both replays.
+- **Ratchet.** Check: the word-count script passes; total words do not grow.
+
+## Non-goals
+
+- No change to Observatory's code beyond the one change D22's check may name.
+- No blocking of calls at the ceiling.
+- No ledger of subscription usage.
+- No backfill of spend before activation.
+- No change to the panel's lenses, the number of rounds or the scouts' source rules.
+- No model id written into doctrine.
+
+## Risks
+
+- OpenRouter may report the upstream field on ordinary calls with c below u; the raw fields allow a recount.
+- Observatory's output shape is unverified; until coverage is proven the state is `unknown`, which is loud.
+- Observatory's month boundary may differ from UTC, shifting totals at month edges.
+- The ledger is per host; only Observatory is estate truth.
+- Dropping the sixth seat removes one family; five remain against a floor of three.
+- The writer may soften a meaning without changing a decision id; only the panel catches that.
+- Refuted if: either replay loses; the first three split specs' round-1 pass rate is below the baseline's (D29); or the judge accepts more than one "writer changed a meaning" finding by 2026-12-07.
+
+## Questions for the owner
+
+None.

@@ -1,0 +1,29 @@
+# Consilium round 1 (decide)
+
+Config: host: /Users/sshlg/.config/task-pipeline/consilium.json. Spent USD 1.29 of the cap 15.00.
+
+| Panelist | Model | Verdict | Score | Findings | Cost |
+|---|---|---|---|---|---|
+| opus | `claude-opus-5.5 (subscription agent of the session)` | subscription panelist: run it as an agent of the session and |  | 0 | 0.000 |
+| kimi | `moonshotai/kimi-k3.1-pro` | Option X |  | 0 | 0.155 |
+| glm | `z-ai/glm-5.3` | option-x |  | 0 | 0.027 |
+| gemini | `google/gemini-4-argon` | X |  | 0 | 0.060 |
+| grok | `x-ai/grok-4.7` | X |  | 0 | 0.187 |
+| openai | `openai/gpt-6.2-astra-pro` | X |  | 0 | 0.477 |
+
+## Ruling by `anthropic/claude-fable-5.2`: pick **Option X**
+
+Criterion 1 decides it. The council is unanimous for X, and the artefact bears out its main reasons.
+
+1. One request each. X REQ-4: "each panelist receives exactly one HTTP request: no retry, no repair call." Y's R7 tests that a fake panelist "that drops the connection once is called twice and booked once", and Q8 extends that retry to `research validate`. That contradicts the order.
+
+2. Every token call tracked. X REQ-8 appends one row per HTTP request "whether the call succeeded, failed or timed out", and an unwritable ledger means "no record, no call". Y's D17 books only attempts that returned usage (C6: "An attempt with no usage has no row"), and on a failed ledger write the money is spent with the row only on stderr.
+
+3. Cost rule. The brief measured only `usage.cost = 0` with the real cost in upstream. Y's D15 sums c + u whenever c < u, and Y's own Risks admit "D15 would then double count". X's rule 3 covers the measured case directly, and Rollout step 2 captures real BYOK and non-BYOK fixtures.
+
+4. Scope of the split. The order makes no size exemption. X applies the split to every size and decides that itself (Q5). Y exempts S (D2) and then pushes it to the owner as Q3. Y also refuses a thinker plan call for an M spec (C4), though the order sends planning that decides something to Fable.
+
+5. Buildability. X is self-contained: verbatim thinker prompt, JSON schemas, exit codes, 24 tests mapped to requirements. Y cites an external meanings file not in the spec, its C3 header block shows only `Size: M`, and R15 demands a replay of two finished M specs while Q23 records "no `Size: M` spec exists in this repository at 26bb446". Y's review also "sends both files' text to every seat", weakening the blind panel.
+
+Y is better in places worth grafting onto X: the judge resolved directly from the `thinker` role (D10), the judge still running when the panel is over the cap (D11, C8), the exact five-seat roster enforced at load, the estate state `unknown` "never `ok`" without a figure, and the R8 round/global ledger equality. These do not outweigh Y's contradictions of the order on retries, ledger completeness and size.
+

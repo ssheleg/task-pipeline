@@ -1,0 +1,49 @@
+{
+ "meta": {
+  "id": "judge",
+  "model": "anthropic/claude-fable-5.2",
+  "family": "anthropic",
+  "at": "2026-11-23T19:46:44Z",
+  "route": "tokens",
+  "finish": "stop",
+  "cost": 0.386976,
+  "cost_source": "openrouter",
+  "cost_known": true,
+  "tokens_in": 40847,
+  "tokens_out": 1505,
+  "seconds": 18.1,
+  "served_by": "anthropic/claude-fable-5.2",
+  "parsed": true,
+  "letters": {
+   "gemini": "A",
+   "glm": "B",
+   "grok": "C",
+   "kimi": "D",
+   "openai": "E"
+  }
+ },
+ "ruling": {
+  "ranking": [
+   "Option X",
+   "Option Y"
+  ],
+  "pick": "Option X",
+  "why": "Criterion 1 decides it. The council is unanimous for X, and the artefact bears out its main reasons.\n\n1. One request each. X REQ-4: \"each panelist receives exactly one HTTP request: no retry, no repair call.\" Y's R7 tests that a fake panelist \"that drops the connection once is called twice and booked once\", and Q8 extends that retry to `research validate`. That contradicts the order.\n\n2. Every token call tracked. X REQ-8 appends one row per HTTP request \"whether the call succeeded, failed or timed out\", and an unwritable ledger means \"no record, no call\". Y's D17 books only attempts that returned usage (C6: \"An attempt with no usage has no row\"), and on a failed ledger write the money is spent with the row only on stderr.\n\n3. Cost rule. The brief measured only `usage.cost = 0` with the real cost in upstream. Y's D15 sums c + u whenever c < u, and Y's own Risks admit \"D15 would then double count\". X's rule 3 covers the measured case directly, and Rollout step 2 captures real BYOK and non-BYOK fixtures.\n\n4. Scope of the split. The order makes no size exemption. X applies the split to every size and decides that itself (Q5). Y exempts S (D2) and then pushes it to the owner as Q3. Y also refuses a thinker plan call for an M spec (C4), though the order sends planning that decides something to Fable.\n\n5. Buildability. X is self-contained: verbatim thinker prompt, JSON schemas, exit codes, 24 tests mapped to requirements. Y cites an external meanings file not in the spec, its C3 header block shows only `Size: M`, and R15 demands a replay of two finished M specs while Q23 records \"no `Size: M` spec exists in this repository at 26bb446\". Y's review also \"sends both files' text to every seat\", weakening the blind panel.\n\nY is better in places worth grafting onto X: the judge resolved directly from the `thinker` role (D10), the judge still running when the panel is over the cap (D11, C8), the exact five-seat roster enforced at load, the estate state `unknown` \"never `ok`\" without a figure, and the R8 round/global ledger equality. These do not outweigh Y's contradictions of the order on retries, ledger completeness and size.",
+  "risks": [
+   "X contradicts itself on the verdict: REQ-12 says the thinker is \"never skipped or failed for money\", yet Design 4 says \"The judge runs when the panel is within the cap\" and T22 has \"a panel over the cap skips the judge\". Fix to Y's rule: judge runs on quorum, `check` fails the panel budget.",
+   "X checks the judge against `roles.thinker.model` only in `check`, after the round, so a misconfigured judge is paid for before it fails. Resolve the judge from the role at load.",
+   "X does not enforce the five named validators: \"A host file listing more panelists keeps working\". The existing six-vendor panel survives unless Rollout step 4 is done; add a load-time check or a rollout verification.",
+   "X's estate fallback can report `ok` from `local-only` or a stale cache of any age while the estate nears USD 5,000. Print the source loudly, or adopt Y's `unknown` state.",
+   "X has no working correction for a null-cost `ok` row: the ledger is append-only, `spend.py record` adds a new row, and `spend.py check` keeps failing on the original. A supersession rule is needed.",
+   "X rule 1 relies on `usage.is_byok`, a field the brief did not measure, and sums router + upstream. Confirm it against the Rollout step 2 fixtures before trusting ceiling arithmetic.",
+   "X's quality guard is weak: the canary only reports numbers and asks a question defaulting to \"keep the split\". `[M<n>]` tags prove coverage, not semantic fidelity, and only the judge sees the meanings.",
+   "The owner's summary view is not delivered in this release: Observatory ingestion is a board row elsewhere, so until then the owner reads `summary.md` and closing reports.",
+   "X is heavy for size M (gaps.md, kind taxonomy, projection, degraded `--from-file` path, `spend.py record`). The degraded path does not require the session to be on the thinker's model, as Y's D24 does."
+  ],
+  "score": {
+   "Option X": 8,
+   "Option Y": 5
+  }
+ },
+ "raw": "{\"ranking\":[\"Option X\",\"Option Y\"],\"pick\":\"Option X\",\"why\":\"Criterion 1 decides it. The council is unanimous for X, and the artefact bears out its main reasons.\\n\\n1. One request each. X REQ-4: \\\"each panelist receives exactly one HTTP request: no retry, no repair call.\\\" Y's R7 tests that a fake panelist \\\"that drops the connection once is called twice and booked once\\\", and Q8 extends that retry to `research validate`. That contradicts the order.\\n\\n2. Every token call tracked. X REQ-8 appends one row per HTTP request \\\"whether the call succeeded, failed or timed out\\\", and an unwritable ledger means \\\"no record, no call\\\". Y's D17 books only attempts that returned usage (C6: \\\"An attempt with no usage has no row\\\"), and on a failed ledger write the money is spent with the row only on stderr.\\n\\n3. Cost rule. The brief measured only `usage.cost = 0` with the real cost in upstream. Y's D15 sums c + u whenever c < u, and Y's own Risks admit \\\"D15 would then double count\\\". X's rule 3 covers the measured case directly, and Rollout step 2 captures real BYOK and non-BYOK fixtures.\\n\\n4. Scope of the split. The order makes no size exemption. X applies the split to every size and decides that itself (Q5). Y exempts S (D2) and then pushes it to the owner as Q3. Y also refuses a thinker plan call for an M spec (C4), though the order sends planning that decides something to Fable.\\n\\n5. Buildability. X is self-contained: verbatim thinker prompt, JSON schemas, exit codes, 24 tests mapped to requirements. Y cites an external meanings file not in the spec, its C3 header block shows only `Size: M`, and R15 demands a replay of two finished M specs while Q23 records \\\"no `Size: M` spec exists in this repository at 26bb446\\\". Y's review also \\\"sends both files' text to every seat\\\", weakening the blind panel.\\n\\nY is better in places worth grafting onto X: the judge resolved directly from the `thinker` role (D10), the judge still running when the panel is over the cap (D11, C8), the exact five-seat roster enforced at load, the estate state `unknown` \\\"never `ok`\\\" without a figure, and the R8 round/global ledger equality. These do not outweigh Y's contradictions of the order on retries, ledger completeness and size.\",\"risks\":[\"X contradicts itself on the verdict: REQ-12 says the thinker is \\\"never skipped or failed for money\\\", yet Design 4 says \\\"The judge runs when the panel is within the cap\\\" and T22 has \\\"a panel over the cap skips the judge\\\". Fix to Y's rule: judge runs on quorum, `check` fails the panel budget.\",\"X checks the judge against `roles.thinker.model` only in `check`, after the round, so a misconfigured judge is paid for before it fails. Resolve the judge from the role at load.\",\"X does not enforce the five named validators: \\\"A host file listing more panelists keeps working\\\". The existing six-vendor panel survives unless Rollout step 4 is done; add a load-time check or a rollout verification.\",\"X's estate fallback can report `ok` from `local-only` or a stale cache of any age while the estate nears USD 5,000. Print the source loudly, or adopt Y's `unknown` state.\",\"X has no working correction for a null-cost `ok` row: the ledger is append-only, `spend.py record` adds a new row, and `spend.py check` keeps failing on the original. A supersession rule is needed.\",\"X rule 1 relies on `usage.is_byok`, a field the brief did not measure, and sums router + upstream. Confirm it against the Rollout step 2 fixtures before trusting ceiling arithmetic.\",\"X's quality guard is weak: the canary only reports numbers and asks a question defaulting to \\\"keep the split\\\". `[M<n>]` tags prove coverage, not semantic fidelity, and only the judge sees the meanings.\",\"The owner's summary view is not delivered in this release: Observatory ingestion is a board row elsewhere, so until then the owner reads `summary.md` and closing reports.\",\"X is heavy for size M (gaps.md, kind taxonomy, projection, degraded `--from-file` path, `spend.py record`). The degraded path does not require the session to be on the thinker's model, as Y's D24 does.\"],\"score\":{\"Option X\":8,\"Option Y\":5}}"
+}

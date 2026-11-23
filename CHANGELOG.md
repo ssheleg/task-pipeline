@@ -1,3 +1,47 @@
+## v1.114.0: money by role (the spec's meanings by tokens, its text on the subscription, every token call booked) and the project brain's minimum
+
+Guards: 539 → **539**.
+
+The owner's order of 2026-11-23 18:58 UTC (relayed by the Fabric CEO; host instructions, *Model and token budget by
+role*): tokens buy only the thinking that decides (the strongest model, without stinting); the spec's text is written by
+a writer on the subscription from the thinker's meanings; main work, code and mathematics agents run on subscriptions;
+decision validators (GLM, Kimi, Grok, Gemini, Astra) answer by tokens, one call each; every token route is tracked. It
+replaces the 2026-11-22 rule of v1.110.0 (the session's own model writes the whole spec, a paid author only on request).
+
+- **`scripts/spend.py`** (new): one JSON line per token call (route, model, USD, cost source, task, tokens) in
+  `~/.local/state/task-pipeline/spend.jsonl` or `$TASK_PIPELINE_SPEND_LOG`; `summary` gives the day and the month by
+  route, model and task plus the estate's month as Observatory measures it at the providers; `ceiling` exits 3 at 80 %
+  of the development-mode ceiling (USD 5,000) with the one question for the owner and its default. An unknown cost is
+  counted apart, never as zero.
+- **`scripts/meanings.py`** (new): `write` is the thinker's ONE call (the consilium config's `thinker`, else its judge)
+  that returns the meanings in seven fixed sections; `check` holds them whole and short (decisions with reasons, at most
+  2,500 words); `writer-task` is the subscription writer's task, which passes `task_prompt.py check --kind work`.
+  `review-brief` gives the council its brief over the meanings: from size M the council judges the meanings BEFORE
+  the writer starts (the A/B test found the thinker's short call can bend an order, and the writer carries it on).
+- **`scripts/consilium.py`**: a call billed to our own provider key (BYOK) answers `usage.cost = 0`; its cost is now the
+  upstream cost (measured 2026-11-23 on `openai/gpt-6.2-astra-pro`; the memory healing council booked Astra's 300,026
+  tokens over two rounds as free). `--judge-only` no longer zeroes the panel's paid spend. A panelist with `"route": "subscription"` is
+  never called by tokens; `--import ID=FILE` brings its verdict in. Every call goes to the spend ledger with `--task`.
+- **`scripts/spec_protocol.py`**: the loop's definition step is the thinker's meanings and the writer's text; scouts
+  and specialists on the subscription; `research validate` books its call (one, never retried); an M or L spec without
+  `Meanings: <file>` is warned (an error in a later release), a `Meanings:` naming no file fails.
+- Doctrine: `references/model-tiering.md` *Roles and money* replaces *The spec's author is the session's own model*;
+  `consilium.md` and `spec-protocol.md` follow; the prompt-lint word ratchet fell from 195,147 to 195,100.
+- `assets/consilium.example.json`: a `thinker` role and a subscription panelist.
+- Tests: `test/spend_test.py` (34 cases), `test/consilium_test.py` 21 → 33, `test/spec_protocol_test.py` (the 2026-11-22
+  author case replaced by the money-by-role case, the validator's booking, the `Meanings:` header).
+- Review of the routes and the A/B test of quality and price on two real specs: `docs/research/2026-11-23-model-budget-ab/`.
+- **The project brain, minimum** (the Fabric CEO's decision of 2026-11-23 on the owner's rule «любая задача агентов
+  сначала идёт в мозг»; report `docs/reports/2026-11-21-brain-task-pipeline`): `scripts/brain.py recall <nouns>` gives
+  stage 0 at most ten lines of this project's own memory (the lessons it wrote, the retro's standing instructions,
+  decisions, open backlog rows, past specs and plans, shipped-state recipes), each with kind, source line, date,
+  freshness and side. Read-only and removable; a line is a pointer, re-derived before use; nothing of another project
+  is read until records carry a side. `brain.py stats` is the two-week measurement (recalls, empty share, used-hit
+  rate). `knowledge-sources.md` row 0a. `test/brain_test.py` (17 cases).
+- **The shared lesson index is no longer empty (B-163):** `lessons.py` read a Lesson line only with an em dash after
+  the key, which the owner's rule forbids, and only on one line; `rebuild` read only the artifact root's retro. All
+  three fixed; the machine's index holds its first lesson.
+
 ## v1.113.1: v1.113.0 released, its verification citation fixed
 
 Guards: 539 → **539**.

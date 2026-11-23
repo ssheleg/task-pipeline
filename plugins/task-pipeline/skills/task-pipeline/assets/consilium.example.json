@@ -1,7 +1,7 @@
 {
   "schema": "consilium-config/1",
   "note": "A template, not a config: the placeholders name roles, never models, because model ids go stale. A host writes its own ~/.config/task-pipeline/consilium.json from its model map; consilium.py refuses to call a placeholder.",
-  "source": "The operator's order of 2026-11-23: a council of six vendors' models (a decision model, a strong cheap text model, the session vendor's top model, a plan validator, a judge of an unused family, the latest model of one more vendor); the strongest model of the map rules last.",
+  "source": "The operator's order of 2026-11-23: a council of six vendors' models (a decision model, a strong cheap text model, the session vendor's top model, a plan validator, a judge of an unused family, the latest model of one more vendor); the strongest model of the map rules last. Money by role (the owner, 2026-11-23): validators answer by tokens, one call each; the session's vendor sits on the subscription through --import; the strongest model thinks the spec's meanings and rules last, by tokens.",
   "min_panel": 3,
   "max_usd_per_round": 10,
   "panel": [
@@ -10,47 +10,57 @@
       "model": "<the map's decision model (vendor A)>",
       "family": "vendor-a",
       "max_tokens": 16000,
-      "lens": "architecture and buildability"
+      "lens": "architecture and buildability",
+      "route": "tokens"
     },
     {
       "id": "p2",
       "model": "<the map's strong cheap text model (vendor B)>",
       "family": "vendor-b",
       "max_tokens": 12000,
-      "lens": "logic, contradictions and edge cases"
+      "lens": "logic, contradictions and edge cases",
+      "route": "tokens"
     },
     {
       "id": "p3",
-      "model": "<the top model of the session's vendor (vendor C)>",
+      "model": "<the session's own top model, run as an agent of the session; its verdict comes in by --import p3=FILE>",
       "family": "vendor-c",
-      "max_tokens": 12000,
-      "lens": "safety, data loss and failure modes"
+      "lens": "safety, data loss and failure modes",
+      "route": "subscription"
     },
     {
       "id": "p4",
       "model": "<the map's plan validator (vendor D)>",
       "family": "vendor-d",
       "max_tokens": 12000,
-      "lens": "evidence, sources and measurability"
+      "lens": "evidence, sources and measurability",
+      "route": "tokens"
     },
     {
       "id": "p5",
       "model": "<a judge of a family no writer uses (vendor E)>",
       "family": "vendor-e",
       "max_tokens": 12000,
-      "lens": "what a sceptic would attack; simpler alternatives"
+      "lens": "what a sceptic would attack; simpler alternatives",
+      "route": "tokens"
     },
     {
       "id": "p6",
       "model": "<the latest model of vendor F>",
       "family": "vendor-f",
       "max_tokens": 12000,
-      "lens": "operations, cost and rollout"
+      "lens": "operations, cost and rollout",
+      "route": "tokens"
     }
   ],
   "judge": {
     "model": "<the strongest model of the host's model map on the day>",
     "family": "vendor-c",
     "max_tokens": 20000
+  },
+  "thinker": {
+    "model": "<the strongest model of the host's model map on the day: the spec's meanings, by tokens>",
+    "family": "vendor-c",
+    "max_tokens": 32000
   }
 }
