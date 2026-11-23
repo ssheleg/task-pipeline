@@ -87,7 +87,7 @@ the `judgment` type in one instance.
 
 Three obligations, and the third is the one that bites:
 
-1. **It names its `judge`** — a role, an agent, a person. The schema refuses the gate
+1. **It names its `judge`** — a role, an agent, a person (with no person named, the council of models, `references/consilium.md`). The schema refuses the gate
    without one. A ruling with no author cannot be weighed for independence, and
    independence is not a property of *having* a reviewer: this pipeline's own `R-005` reader
    shares a model, instructions and repository with the author it reviews, differing only in

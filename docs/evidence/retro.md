@@ -1491,6 +1491,12 @@ three quarters of the work on this run.
 
 ## Releases that carry no stamp — stated, not stamped
 
+**`v1.113.0` carries no stamp, declared before its tag.** It adds the consilium (a council of models of different
+vendors judges every evaluation and decision, the strongest model rules last), on the owner's order of 2026-11-23
+(requests 6f5b7054 and 62e0c402). The run's ledger and evidence live in fabric-workspace
+(`docs/plans/2026-11-23-memory-healing/`, branch `memory-healing-2026-11-23`), whose spec was the council's first real use,
+so there is no divergence to stamp here. It also ships the v1.112.0 and v1.112.1 change, which never reached npm.
+
 **`v1.112.1` and `v1.112.0` carry no stamp, declared before the `v1.112.1` tag.** They add the novice walk to the design review: `design_gate.py panel` reads the experience level that opens each needs line, and the design-tester checks frames against the screen's action map. They carry out the owner's order of 2026-11-23 (request dcc725be); the run's ledger and stamp live in the sibling sheleg-design repository (`.task-pipeline/run.md`), so there is no divergence to stamp here. `v1.112.0` was tagged on ec4bd15 and its release run 45116896034 refused it because this declaration was missing; it never reached npm, and `v1.112.1` is the same change with the declaration.
 
 **`v1.111.0` carries no stamp, declared before its tag.** It adds `scripts/task_prompt.py` (a task for an executor is read for its end result, finish criterion, closing pass and stops) and the advisory hook `task-prompt-nudge.sh`, and ends the implementer contract with a closing pass; it carries out the owner's order of 2026-11-22 (board request bd16f215) and ran no stamped pipeline stages, so there is no divergence to stamp.

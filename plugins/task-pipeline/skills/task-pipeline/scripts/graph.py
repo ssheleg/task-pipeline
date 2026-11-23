@@ -1621,7 +1621,7 @@ def cmd_producer(graph, args):
 def cmd_doctrine(graph, args):
     """Which doctrine this run actually read — B-061.
 
-    The bundle is 59 reference files. A run reads some subset and nothing recorded which,
+    The bundle is 60 reference files. A run reads some subset and nothing recorded which,
     so **a skipped file and a read one were indistinguishable** — the class every guard in
     this repository exists to catch, left standing over the doctrine itself.
 

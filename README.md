@@ -653,7 +653,7 @@ must say so.
 ### Held to Anthropic's own Skill authoring guidance
 
 Audited against the four Agent Skills pages. Most of it already held — `name`
-13/64 chars, `description` 292/1024 chars, `SKILL.md` 215/500 lines, all 59 references
+13/64 chars, `description` 292/1024 chars, `SKILL.md` 215/500 lines, all 60 references
 reachable from `SKILL.md` through explicit reference routes, and the bundle far under the 30 MB ceiling. What
 did not, now does:
 
@@ -1041,6 +1041,7 @@ recommendation, so you arm the whole run in one exchange. Detail:
 | [`references/knowledge-graph.md`](plugins/task-pipeline/skills/task-pipeline/references/knowledge-graph.md) | the code graph: install line, stage-0 reach queries, the stage-9 refresh, the graph↔docs divergence check |
 | [`references/retrospective.md`](plugins/task-pipeline/skills/task-pipeline/references/retrospective.md) | the project retro: the three grades of fix, the mandatory prune, the cap of ten |
 | [`references/model-tiering.md`](plugins/task-pipeline/skills/task-pipeline/references/model-tiering.md) | model policy, the `/model` reminder, overrides |
+| [`references/consilium.md`](plugins/task-pipeline/skills/task-pipeline/references/consilium.md) | the council of models that judges every evaluation and decision by default; the strongest model rules last (`scripts/consilium.py`) |
 | [`templates/`](plugins/task-pipeline/skills/task-pipeline/templates/README.md) | brief, carry-over ledger, `CONTEXT.md` and ADR skeletons, the doc map, both registers, the retro and its archive, the seeded `docgate.sh` and `hygiene.sh`, a worked hook |
 | [`references/adoption.md`](plugins/task-pipeline/skills/task-pipeline/references/adoption.md) | the first run in a project: greenfield seeding, and the brownfield walkthrough |
 | [`references/waves.md`](plugins/task-pipeline/skills/task-pipeline/references/waves.md) | wave mode: the whole board as one inventory, one canvas of the target state, one question batch, then waves that each close in one pass |

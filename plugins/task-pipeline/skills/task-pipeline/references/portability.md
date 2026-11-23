@@ -109,6 +109,7 @@ a row pointing outside the bundle is the defect this file exists to catch.
 | How the graph's staleness is measured and stated in the ledger | `references/knowledge-graph.md` |
 | How a CI run's verdict is established, and its three states | `references/conventions.md` |
 | Model policy — tier not id, recorded once at preflight | `references/model-tiering.md` |
+| The consilium — a blind council of models of different vendors judges, the strongest model rules last | `references/consilium.md` |
 | This boundary | `references/portability.md` |
 
 **The routing rule is the row worth watching.** A skill's `description` raises the

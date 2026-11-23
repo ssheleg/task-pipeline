@@ -1,3 +1,31 @@
+## v1.113.0: the consilium, a council of models judges and the strongest rules last
+
+Guards: 539 → **539**.
+
+The operator's order of 2026-11-23 16:17 UTC (Telegram, relayed by the Fabric CEO, requests 6f5b7054 and 62e0c402):
+every evaluation and decision goes to a council of models of different vendors by default, and the strongest model of
+the host's map rules last, even when it is paid by tokens.
+
+- **`scripts/consilium.py`** (standard library): `panel` prints the resolved council; `review` runs one blind round
+  (each panelist through its own lens, a `verdict/1` answer) and then the judge's ruling over the anonymised verdicts
+  (each finding accepted or rejected with a reason, what all missed, the verdict); `decide` does the same for a choice;
+  `check` is the gate (three verdicts of three families, a ruling, spend within the cap). Every call's cost, tokens and
+  serving model land in `ledger.json`. An empty answer that ran out of tokens is an error, not a verdict.
+- **`references/consilium.md`**: when the council sits (spec of size M and L, design choices, an L plan, a judgment gate
+  with no person named, an L or outward acceptance, a delegated pick), two to three rounds, money, what it is not.
+  `spec-protocol.md` adds the council to the M and L verification; `gates.md` names it as the default judge.
+- **`assets/consilium.example.json`**: a template that names roles, never model ids; the script refuses to call a
+  placeholder. A host keeps its own council in `~/.config/task-pipeline/consilium.json` from its model map.
+- `consilium.py review --judge-only` reruns only the judge over the round's saved verdicts (a failed judge is never a
+  reason to pay the panel again); a judge's reasoning is capped in the host file.
+- `test/consilium_test.py`: 21 cases against a local fake endpoint (blind panel, failures recorded, anonymised judge,
+  cap skips the judge, three families required, placeholders never called). Doctrine trimmed elsewhere so the
+  prompt-lint word ratchet holds; `SKILL.md` unchanged (its byte headroom).
+- First real use: the memory healing spec of fabric-workspace (2026-11-23), six vendors and Fable 5.2 as the judge.
+- Carries v1.112.0 and v1.112.1 (the novice walk in the design review), whose release runs were refused: the documentation
+  gate could not resolve a fabric-workspace commit cited in `docs/evidence/backlog.md`; the citation now names that
+  repository in prose. Neither reached npm; this release ships them.
+
 ## v1.112.1: v1.112.0 released, with its retro declaration
 
 Guards: 539 → **539**.
