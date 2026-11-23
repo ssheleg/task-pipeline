@@ -8,6 +8,8 @@ with an exit code. Stdlib only.
         retention loop and needs. A portrait without a basis line is refused: a panel is a
         hypothesis instrument, and saying so is part of the portrait. Each retention line
         opens with `local` or `tourist`, and the panel holds at least two of each (1.101.0).
+        Each needs line opens with `novice`, `regular` or `expert`; a panel that names any
+        level holds at least two novices and one expert, and one that names none is warned.
     design_gate.py report <design-review.json> --class <surface_class>
                           [--panel <test-panel.md>] [--scope SCR-01,SCR-02] [--require build]
                           [--max-passes 1] [--subscription] [--json]
@@ -57,6 +59,10 @@ FIELD = re.compile(r"^\s*[-*]\s+\*\*(%s)\s*:?\*\*\s*[:—–-]?\s*(.+?)\s*$"
                    % "|".join(sorted(list(FIELDS) + list(ALIASES), key=len, reverse=True)), re.I)
 SCR = re.compile(r"\bSCR-\d+\b")
 SEGMENT = re.compile(r"^\s*(local|tourist)\b\s*:?", re.I)
+# UI mechanics (2026-11-23): the needs line opens with the portrait's experience with this
+# kind of app, so the novice walk has walkers (super-ux templates/test-panel.md).
+LEVEL = re.compile(r"^\s*(novice|regular|expert)\b(?!\s*\|)\s*:?", re.I)  # not the unfilled template
+MIN_NOVICES, MIN_EXPERTS = 2, 1
 
 
 def read_text(path):
@@ -126,7 +132,30 @@ def panel_problems(panel, minimum):
     if panel and (locals_ < 2 or tourists < 2):
         out.append("the panel carries %d local%s and %d tourist%s; it owes at least two of each"
                    % (locals_, "" if locals_ == 1 else "s", tourists, "" if tourists == 1 else "s"))
+    # Experience levels are staged: a panel that names none is warned (panel_notes) in this
+    # release; a panel that names any owes them on every portrait and in the counts.
+    lvl = {pid: LEVEL.match(p.get("needs", "")) for pid, p in panel.items()}
+    if any(lvl.values()):
+        for pid, m in sorted(lvl.items()):
+            if panel[pid].get("needs") and not m:
+                out.append("%s: the needs line opens with `novice`, `regular` or `expert`" % pid)
+        novices = sum(1 for m in lvl.values() if m and m.group(1).lower() == "novice")
+        experts = sum(1 for m in lvl.values() if m and m.group(1).lower() == "expert")
+        if novices < MIN_NOVICES or experts < MIN_EXPERTS:
+            out.append("the panel carries %d novice%s and %d expert%s; it owes at least %d novices and %d expert"
+                       % (novices, "" if novices == 1 else "s", experts, "" if experts == 1 else "s",
+                          MIN_NOVICES, MIN_EXPERTS))
     return out
+
+
+def panel_notes(panel):
+    """Staged warnings: printed, never failing, until the next minor release."""
+    panel = portraits(panel)
+    if panel and not any(LEVEL.match(p.get("needs", "")) for p in panel.values()):
+        return ["warning: no portrait names its experience level; open each needs line with "
+                "`novice`, `regular` or `expert` (two novices and one expert are owed from the "
+                "next minor release)"]
+    return []
 
 
 def personas_using(panel, scenario):
@@ -391,7 +420,8 @@ def main(argv=None):
             return emit("NOT_RUN", ["no test panel at %s: super-ux `ux-foundation` builds it" % a.path], [], a.json)
         panel = parse_panel(read_text(a.path))
         probs = panel_problems(panel, a.min)
-        return emit("FAIL" if probs else "PASS", probs, ["%d portrait(s)" % len(portraits(panel))], a.json)
+        return emit("FAIL" if probs else "PASS", probs,
+                    ["%d portrait(s)" % len(portraits(panel))] + panel_notes(panel), a.json)
     if a.cmd == "browser":
         try:
             cfg = json.loads(read_text(a.path))

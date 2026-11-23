@@ -106,6 +106,31 @@ with tempfile.TemporaryDirectory() as d:
     ok(rc == 1 and "opens with `local` or `tourist`" in out, f"a retention line without its segment fails, named ({rc} {out!r})")
     rc, out, _ = run(DG, "panel", d / "absent.md")
     ok(rc == 3 and "NOT_RUN" in out, f"no panel is NOT_RUN, never PASS ({rc} {out!r})")
+    # UI mechanics (2026-11-23): experience levels on the needs line, staged.
+    rc, out, _ = run(DG, "panel", panel)
+    ok(rc == 0 and "no portrait names its experience level" in out,
+       f"a panel with no levels passes with the staged warning ({rc} {out!r})")
+    def leveled(levels):
+        return "# Test panel\n\n" + "\n".join(
+            portrait(i).replace("- **needs**: ", "- **needs**: %s: " % levels[i - 1]) for i in range(1, 11))
+    good = d / "levels-ok.md"
+    good.write_text(leveled(["novice", "novice", "expert"] + ["regular"] * 7))
+    rc, out, _ = run(DG, "panel", good)
+    ok(rc == 0 and "experience level" not in out, f"two novices and one expert pass, unwarned ({rc} {out!r})")
+    one_novice = d / "one-novice.md"
+    one_novice.write_text(leveled(["novice", "expert"] + ["regular"] * 8))
+    rc, out, _ = run(DG, "panel", one_novice)
+    ok(rc == 1 and "1 novice and 1 expert" in out, f"one novice fails, counted ({rc} {out!r})")
+    unfilled = d / "levels-unfilled.md"
+    unfilled.write_text(leveled(["novice | regular | expert"] * 10))
+    rc, out, _ = run(DG, "panel", unfilled)
+    ok(rc == 0 and "no portrait names its experience level" in out,
+       f"the template's unfilled level is not a level ({rc} {out!r})")
+    partial = d / "levels-partial.md"
+    partial.write_text(leveled(["novice", "novice", "expert"] + ["regular"] * 7).replace("- **needs**: regular: ", "- **needs**: ", 1))
+    rc, out, _ = run(DG, "panel", partial)
+    ok(rc == 1 and "opens with `novice`, `regular` or `expert`" in out,
+       f"a portrait without its level in a levelled panel fails, named ({rc} {out!r})")
 
     def rep(doc, *extra, cls="product"):
         p = d / "r.json"

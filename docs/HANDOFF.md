@@ -1,3 +1,25 @@
+## v1.112.0: the novice walk in the design review (2026-11-23)
+
+- **Objective.** The operator's order of 2026-11-23 00:47 (request dcc725be): screens that are beautiful and
+  simple, grouped, with few actions, clear to a user new to the app but not stupid, and a pipeline that checks it.
+- **Siblings.** sheleg-design, super-ux and task-pipeline branches `feat/ui-mechanics-2026-11-23`, one PR each.
+  Research and doctrine: sheleg-design `docs/reports/2026-11-23-ui-guidelines/` (README, guidelines.md,
+  doctrine.md). Private material (captures, audits, trial plans of the two apps) stays in those apps' own
+  repositories and on the operator machine, never here.
+- **Trial run.** Two of the operator's app teams (app D and app P in the doctrine) took the rules: app D
+  builds its wave-3 mockups of a lyrics-and-beat screen on the target action map (due 2026-11-25), app P builds
+  its metronome after into its next release (estimate 2026-12-04). The first run's novice walk was made by this
+  plugin's design-tester; the after scorecards close when the teams' captures arrive.
+- **Release.** Hold the merge and tags until the trial's first after captures are read (the operator: release
+  the skills after the trial, from 2026-11-27); then merge super-ux, sheleg-design, task-pipeline in that order,
+  tag, publish, bump the sshlg-skills pins and update the local install.
+- **Done here.** `design_gate.py panel` experience levels (staged warning), design-tester questions.
+  Gate: `npm test` all green on the branch.
+- **Open.** T2 of the doctrine's change list (the finding vocabulary and one walk row per novice per screen in
+  `design_gate.py report`). Failing a panel with no levels at all (the staged step) in the next minor release; `visual_gate.py`
+  owing `Signature` on `product` when a director record exists.
+- **Next task.** After merge: tag `v1.112.0` (annotated) on the merge commit, watch the release, record the shipped state in `docs/evidence/verification.md`, then the sshlg-skills pin bump.
+
 ## Current: 1.110.0 and 1.111.0 shipped; the board's follow-ups filed (2026-11-22)
 
 - **Objective.** Close the release of the owner's two orders of 2026-11-22 (board requests 94a61249
