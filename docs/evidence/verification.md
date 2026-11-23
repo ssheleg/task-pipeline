@@ -1,5 +1,12 @@
 # Verification — task-pipeline
 
+## Shipped state — v1.112.0 (candidate 2026-11-23: PR #184; tag, release run and npm version are added here once shipped)
+
+`scripts/design_gate.py panel` reads the experience level that opens each needs line; `test/design_gate_test.py` five new
+cases (levels pass, one novice fails, a portrait without its level fails, no levels warns, the unfilled template line is not a
+level); `agents/design-tester.md` question block within the prompt-lint word baseline. Thirteen blind review rounds over the
+three sibling changes; rounds 12 and 13 found no blocker.
+
 ## Shipped state — v1.111.0 (shipped 2026-11-22: tag v1.111.0 on 2882775, release run 45029538413 release and publish success, npm task-pipeline-skill 1.111.0)
 
 `scripts/task_prompt.py` and `hooks/task-prompt-nudge.sh`; `test/task_prompt_test.py` 13 cases,

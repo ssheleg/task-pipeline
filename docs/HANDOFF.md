@@ -1,4 +1,4 @@
-## Unreleased: the novice walk in the design review (2026-11-23)
+## v1.112.0: the novice walk in the design review (2026-11-23)
 
 - **Objective.** The operator's order of 2026-11-23 00:47 (request dcc725be): screens that are beautiful and
   simple, grouped, with few actions, clear to a user new to the app but not stupid, and a pipeline that checks it.
@@ -18,7 +18,7 @@
 - **Open.** T2 of the doctrine's change list (the finding vocabulary and one walk row per novice per screen in
   `design_gate.py report`). Failing a panel with no levels at all (the staged step) in the next minor release; `visual_gate.py`
   owing `Signature` on `product` when a director record exists.
-- **Next task.** After the trial, merge and release as a minor version; then the sshlg-skills pin.
+- **Next task.** After merge: tag `v1.112.0` (annotated) on the merge commit, watch the release, record the shipped state in `docs/evidence/verification.md`, then the sshlg-skills pin bump.
 
 ## Current: 1.110.0 and 1.111.0 shipped; the board's follow-ups filed (2026-11-22)
 
