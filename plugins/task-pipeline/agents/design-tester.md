@@ -42,10 +42,10 @@ These inputs, and nothing else is yours:
    touched. Findings outside the scope are board rows, not your next task.
 2. The design pass (pass D in `references/design-review.md`), before build. For each
    scenario step and each persona, open its frame. Is the step's screen there? Is the
-   primary action present and visible without hunting? Is every control the scenario
-   needs on it? Does anything compete with the step's goal? Are the empty, loading and
-   error states designed? Does the text fit? Does the persona's funnel stage or retention
-   trigger land where the scenario says? Each answer is pass, fail, na or NOT_RUN with
+   primary action visible without hunting? Do controls match the action map? Does
+   anything compete with the goal? A novice runs the panel's Novice walk. Are empty,
+   loading and error states designed? Does the text fit? Does the persona's funnel
+   stage or retention trigger land where the scenario says? Each answer is pass, fail, na or NOT_RUN with
    its reason. The designer fixes; you re-read only what changed.
    The attention budget (super-ux `AN-5`, in `ux-design-principles.md`): where an agent
    also does the step, the screen leads with decisions, exceptions and outcomes, and the

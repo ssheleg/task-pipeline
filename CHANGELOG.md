@@ -1,3 +1,17 @@
+## Unreleased: the novice walk in the design review
+
+Guards: 539 → 539.
+
+Operator order 2026-11-23 00:47 Europe/Warsaw (Telegram, relayed by the Fabric CEO, request dcc725be): simple, grouped screens with few actions that a user new to the app understands, checked by the pipeline. Research: https://github.com/ssheleg/sheleg-design-skill/tree/main/docs/reports/2026-11-23-ui-guidelines
+
+- **`design_gate.py panel`** reads the experience level that opens each `needs` line (`novice`, `regular`,
+  `expert`). A panel that names any level owes it on every portrait and holds at least two novices and one
+  expert; a panel that names none passes with a warning in this release (staged). Four new cases in
+  `test/design_gate_test.py`.
+- **`agents/design-tester.md`**: the design pass checks the frame against the screen's action map and has a
+  novice run the panel's Novice walk (super-ux `templates/test-panel.md`); word count within the prompt-lint
+  baseline.
+
 ## v1.111.0: a task for an executor is read before it leaves: end result, finish criterion, a pass for what was missed, no stops
 
 Guards: 539 → **539**. The owner, 2026-11-22 (Telegram 02:54 UTC, relayed by the CEO of Fabric,
