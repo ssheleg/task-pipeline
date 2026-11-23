@@ -1,0 +1,36 @@
+{
+ "meta": {
+  "id": "glm",
+  "model": "z-ai/glm-5.3",
+  "family": "zhipu",
+  "at": "2026-11-23T19:20:47Z",
+  "route": "tokens",
+  "finish": "stop",
+  "cost": 0.0110633,
+  "cost_source": "openrouter",
+  "cost_known": true,
+  "tokens_in": 16318,
+  "tokens_out": 509,
+  "seconds": 5.4,
+  "served_by": "z-ai/glm-5.3",
+  "parsed": true
+ },
+ "verdict": {
+  "ranking": [
+   "X",
+   "Y"
+  ],
+  "pick": "X",
+  "why": "X and Y are close in coverage: both give one config per persona, keep the matrix at scenarios×personas, mark config-only findings with a control, keep schema design-review/1 additive, treat stand capture as read-only intake, and leave agent-tester untouched. X is pickable on buildability and internal consistency. (1) Correctness: X derives direction from locale, making dir-locale contradiction impossible by construction; Y states dir independently and must then invent contradiction rules (pseudo-rtl with ltr is refused, but 'ar' with ltr is accepted — an inconsistency the owner didn't ask for). (2) Verifiability: X ships 22 concrete gate tests tied to named exit codes and codes (CFG-*), plus a manifest contract (stand-captures/1) with SHA-256 checks, so the gate never calls the network; Y's stand contract is largely asserted against an unconfirmed door. (3) Decisions with reasons: both are strong, but X's decisions table is tighter and its open questions (Q1–Q10) all carry a default so the implementer is never blocked; Y leaves Q1 (dates, the owner-asked deliverable) pending. (4) Non-invention: Y introduces a panel-level exemptions line, a 'baseline persona' requirement, duplicate/stacked-axes warnings, and clean_in with yes/no/unverified — machinery the brief does not ask for; X's decline line for hard cells is leaner. (5) Conciseness: X's report row carries four axes vs Y's five (Y's dir is redundant with locale). X's weakness: the RTL-derivation table (T-22) embeds language knowledge in the gate, and REQ-3's six hard cells plus desktop is slightly beyond the brief's five configurations — but it covers exactly what the study names.",
+  "risks": [
+   "X's phase-2 stand fetch depends on an unconfirmed door contract (X flags this as Q5/Q6 and defers the fetch step)",
+   "X's locale-derived direction puts a language list inside the gate; wrong or contested entries cause false rtl/ltr cell assignments",
+   "Y risks failing real panels via its baseline-persona and exemptions constraints, and its stand contract is unverifiable until the door is confirmed"
+  ],
+  "score": {
+   "X": 8,
+   "Y": 6
+  }
+ },
+ "raw": "{\"ranking\": [\"X\", \"Y\"], \"pick\": \"X\", \"why\": \"X and Y are close in coverage: both give one config per persona, keep the matrix at scenarios×personas, mark config-only findings with a control, keep schema design-review/1 additive, treat stand capture as read-only intake, and leave agent-tester untouched. X is pickable on buildability and internal consistency. (1) Correctness: X derives direction from locale, making dir-locale contradiction impossible by construction; Y states dir independently and must then invent contradiction rules (pseudo-rtl with ltr is refused, but 'ar' with ltr is accepted — an inconsistency the owner didn't ask for). (2) Verifiability: X ships 22 concrete gate tests tied to named exit codes and codes (CFG-*), plus a manifest contract (stand-captures/1) with SHA-256 checks, so the gate never calls the network; Y's stand contract is largely asserted against an unconfirmed door. (3) Decisions with reasons: both are strong, but X's decisions table is tighter and its open questions (Q1–Q10) all carry a default so the implementer is never blocked; Y leaves Q1 (dates, the owner-asked deliverable) pending. (4) Non-invention: Y introduces a panel-level exemptions line, a 'baseline persona' requirement, duplicate/stacked-axes warnings, and clean_in with yes/no/unverified — machinery the brief does not ask for; X's decline line for hard cells is leaner. (5) Conciseness: X's report row carries four axes vs Y's five (Y's dir is redundant with locale). X's weakness: the RTL-derivation table (T-22) embeds language knowledge in the gate, and REQ-3's six hard cells plus desktop is slightly beyond the brief's five configurations — but it covers exactly what the study names.\", \"risks\": [\"X's phase-2 stand fetch depends on an unconfirmed door contract (X flags this as Q5/Q6 and defers the fetch step)\", \"X's locale-derived direction puts a language list inside the gate; wrong or contested entries cause false rtl/ltr cell assignments\", \"Y risks failing real panels via its baseline-persona and exemptions constraints, and its stand contract is unverifiable until the door is confirmed\"], \"score\": {\"X\": 8, \"Y\": 6}}"
+}

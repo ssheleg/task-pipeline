@@ -1,0 +1,32 @@
+# Consilium round 1 (decide)
+
+Config: host: /Users/sshlg/.config/task-pipeline/consilium.json. Spent USD 1.40 of the cap 15.00.
+
+| Panelist | Model | Verdict | Score | Findings | Cost |
+|---|---|---|---|---|---|
+| opus | `claude-opus-5.5 (subscription agent of the session)` | subscription panelist: run it as an agent of the session and |  | 0 | 0.000 |
+| kimi | `moonshotai/kimi-k3.1-pro` | X |  | 0 | 0.164 |
+| glm | `z-ai/glm-5.3` | option-x |  | 0 | 0.033 |
+| gemini | `google/gemini-4-argon` | Option X |  | 0 | 0.066 |
+| grok | `x-ai/grok-4.7` | X |  | 0 | 0.167 |
+| openai | `openai/gpt-6.2-astra-pro` | X |  | 0 | 0.565 |
+
+## Ruling by `anthropic/claude-fable-5.2`: pick **X**
+
+Criterion 1 decides it. The order replaces the 2026-11-22 rule, names five validators at one request each, and says Fable gives the final verdict. X builds that. D2: "The split applies to every size and every path that writes a spec." D8: "The panel is exactly the five named validators... the sixth seat is dropped." D11: an overrun "never skips a validator or the judge." D24 stops at preflight rather than swap in subscription Fable.
+
+Y contradicts the order in five places:
+- **Old rule survives.** Design 2: "With no map, or the template only, the previous behaviour holds: one model does everything." Rollout 8 makes that the rollback.
+- **Judge skipped for money.** T22: "a panel over the cap skips the judge." This also contradicts Y's own REQ-12 ("the thinker is never skipped or failed for money").
+- **Key thinking on a subscription.** Design 3: meanings "may be produced in a subscription session" via `--from-file`.
+- **Sixth seat stays legal.** Design 4: "A host file listing more panelists keeps working."
+- **Free validator choice.** C2 keeps `research validate --model ID --family F --endpoint URL`.
+
+On the measured facts, X's C4 matches the BYOK measurement exactly (c = 0 with u > 0 gives u; c > 0 is never added to u), and D18 with the `judge_only` test fixes the zeroed panel cost. Y fixes the rerun too, but its cost rule 1 invents `usage.is_byok` and sums router plus upstream, which the measurement does not support. Y's `estate_usd = max(observatory_usd, local_month_usd)` with a `local-only` fallback can report level `ok` from one host, which is not the estate.
+
+Criterion 3: X answers all 22 questions as the agent. Y leaves Q1 to Q3 "pending", and Q2 (warn or stop) is already answered by the brief's word "warning".
+
+Criterion 2: X's acceptance checks carry numeric fixtures (C4, C10, C8). Y's `[M<n>]` tags, stale-revision check and `ensure_ledger` before dispatch are good ideas, but they sit on a rule that is optional.
+
+X loses points on criteria 4 and 5: it is long and invents beyond the facts, with internal clashes listed under risks. Those are repairable in build; Y's defects change what ships.
+

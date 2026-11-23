@@ -1,0 +1,70 @@
+{
+ "rounds": [
+  {
+   "pair": "s1-model-budget/compare-v1",
+   "panel_for_after": 1,
+   "panel": 5,
+   "judge": "before",
+   "panel_mean_after": 6.6,
+   "panel_mean_before": 7.8,
+   "round_usd": 1.2198,
+   "unknown_cost_calls": 0
+  },
+  {
+   "pair": "s1-model-budget/compare-v2",
+   "panel_for_after": 0,
+   "panel": 5,
+   "judge": "before",
+   "panel_mean_after": 6.0,
+   "panel_mean_before": 8.0,
+   "round_usd": 1.2932,
+   "unknown_cost_calls": 0
+  },
+  {
+   "pair": "s1-model-budget/compare-v3",
+   "panel_for_after": 5,
+   "panel": 5,
+   "judge": "after",
+   "panel_mean_after": 7.8,
+   "panel_mean_before": 5.4,
+   "round_usd": 1.4026,
+   "unknown_cost_calls": 0
+  },
+  {
+   "pair": "s2-design-tester-config/compare-v1",
+   "panel_for_after": 1,
+   "panel": 5,
+   "judge": "before",
+   "panel_mean_after": 6.6,
+   "panel_mean_before": 7.8,
+   "round_usd": 0.9101,
+   "unknown_cost_calls": 0
+  },
+  {
+   "pair": "s2-design-tester-config/compare-v2",
+   "panel_for_after": 5,
+   "panel": 5,
+   "judge": "after",
+   "panel_mean_after": 8.3,
+   "panel_mean_before": 6.2,
+   "round_usd": 1.1587,
+   "unknown_cost_calls": 0
+  }
+ ],
+ "costs": {
+  "s1": {
+   "before_usd": 3.4208,
+   "before_note": "two Fable calls: 32,000 tokens spent with no text, then 64,000",
+   "after_meanings_usd": 0.550376,
+   "after_meanings_council_usd": 1.209,
+   "after_writer_usd": 0.0
+  },
+  "s2": {
+   "before_usd": 1.023312,
+   "after_meanings_usd": 0.487144,
+   "after_meanings_council_usd": null,
+   "after_writer_usd": 0.0
+  },
+  "discarded_v1_meanings_usd": 0.8608
+ }
+}

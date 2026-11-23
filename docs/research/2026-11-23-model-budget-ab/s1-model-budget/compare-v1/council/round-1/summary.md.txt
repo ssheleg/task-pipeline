@@ -1,0 +1,39 @@
+# Consilium round 1 (decide)
+
+Config: host: /Users/sshlg/.config/task-pipeline/consilium.json. Spent USD 1.22 of the cap 15.00.
+
+| Panelist | Model | Verdict | Score | Findings | Cost |
+|---|---|---|---|---|---|
+| opus | `claude-opus-5.5 (subscription agent of the session)` | subscription panelist: run it as an agent of the session and |  | 0 | 0.000 |
+| kimi | `moonshotai/kimi-k3.1-pro` | Y |  | 0 | 0.128 |
+| glm | `z-ai/glm-5.3` | option-x |  | 0 | 0.007 |
+| gemini | `google/gemini-4-argon` | Option Y |  | 0 | 0.057 |
+| grok | `x-ai/grok-4.7` | Y |  | 0 | 0.158 |
+| openai | `openai/gpt-6.2-astra-pro` | Y |  | 0 | 0.496 |
+
+## Ruling by `anthropic/claude-fable-5.2`: pick **Y**
+
+Y is the spec a zero-context implementer can build with the fewest questions, though it is not the more faithful one on every point.
+
+**Brief item (1), the review.** Y's Design 1 is a 12-row Today/Target table of call sites, with a grep step for "any other script". X has only a target role table and never states today's routes.
+
+**Item (2), validators.** The order says "one request each". Y REQ-4 holds this literally: "exactly one HTTP request: no retry, no repair call". X D11 allows "one retry only when the first attempt returned no billed usage". As Y notes, "a timed-out request may already be billed", so X's retry can exceed the order.
+
+**Criterion 3, decisions made.** X's own Questions table marks Q4 to Q17 as `pending`. These cover file and verb names, the price unit, the hash form, the Observatory JSON shape and the field spelling. X's Contracts close with "Field names, verb names and streams in this section are the writer's form of the meanings' contracts (Q4, Q15)". That pushes tactical questions to the owner, which the brief forbids. Y answers its tactical questions `by: agent` and leaves three strategy questions with defaults.
+
+**Criterion 2, buildable.** Y gives exact CLIs, exit codes, the system prompt, the C3 and C5 schemas, a five-branch cost rule, the write discipline (`O_APPEND`, `flock`, a row in `finally`) and the replacement doctrine text for the ratchet. X leaves the output contracts of three of its four thinker kinds unspecified and leaves Q11 (who makes the ruling) open.
+
+**Fidelity of the split.** X R7 checks only that meanings ids appear in the spec, so a writer can add a decision and pass. Y's `[M<n>]` tag rules fail untagged requirements, retired ids and stale revisions.
+
+**Size S.** X D3 exempts S from the paid thinker. The order has no such exemption, and X itself lists it as a pending strategy question.
+
+**Quality.** Y REQ-14 and Rollout step 6 measure quality against a baseline. X only names a refutation condition under Risks.
+
+**Where X is better, and it matters:**
+- **Role assignment.** X writes the owner's map down: routine is Fable on subscription, main is Opus 5.5, and the judge is always Fable. Y never does.
+- **Old rule.** Y's "split not in force" mode keeps the superseded 2026-11-22 rule alive on a host with no map. X fails at preflight instead.
+- **Judge context.** X's fresh-context judge (D12) and its rejected-findings list (D13) address self-judgement better than Y, which hands the judge its own meanings.
+- **Output limit.** X sends the model's maximum output. Y defaults to 32000 tokens.
+
+These are a few lines of fixes to Y. X's gaps need a contracts pass.
+

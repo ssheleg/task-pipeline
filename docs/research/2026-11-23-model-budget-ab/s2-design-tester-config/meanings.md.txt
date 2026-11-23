@@ -1,0 +1,144 @@
+# Meanings
+
+Thinker: anthropic/claude-fable-5.2
+Task: model-budget-ab
+
+## Goal and meaning
+
+Each of the ten panel personas carries one fixed device configuration (device class, locale and direction, text size, theme), and the design-tester judges every step as that persona in that configuration. The `design-review/1` report names the configurations it looked at and says which findings exist only there. The matrix does not grow: it stays scope scenarios × personas that use them, one configuration per persona.
+
+Verdict on request 77741b8d: **taken**, in two backlog rows, with item 3 confirmed as no change. Dates are counted from 2026-11-23, the request date, taken as today.
+
+- Row A (this spec, size M): "design-tester: device configuration per persona, config-only findings, gate checks". Due 2026-12-07.
+- Row B (size S, depends on the stand): "design-tester: after-build captures from test-stand cells through the stand door". Due 2026-12-21. It starts only once the stand publishes a capture manifest that meets the contract below.
+- Reply to post on the board: "Taken. Item 1 lands by 2026-12-07: a config line per persona, configurations named in the report, findings marked only-in-configuration and checked by the gate. Item 2 lands by 2026-12-21 if the stand door serves a per-run capture manifest (build id, cell, scenario, step, sha256); we send that contract to the stand board with this reply. Item 3 agreed, agent-tester is unchanged. No code is copied, only the concept."
+
+## Key features
+
+1. **Panel `config` line.** A ninth portrait field: `config: device=<d>; locale=<l>; text=<t>; theme=<th>`. The config id is `<d>.<l>.<t>.<th>`, for example `phone-small.pseudo-rtl.default.light`.
+2. **Closed vocabulary.**
+
+| Axis | Values | Edge values |
+|---|---|---|
+| device | `phone-small`, `phone-large`, `tablet`, `desktop` | `phone-small`, `tablet` |
+| locale | a BCP 47 tag, `pseudo-rtl`, `pseudo-double` | `rtl` (direction), `pseudo-double` |
+| text | `default`, `large`, `largest` | `largest` |
+| theme | `light`, `dark` | `dark` |
+
+   - Direction is derived, never written: `rtl` for `pseudo-rtl` or primary language `ar`, `he`, `fa`, `ur`; otherwise `ltr`.
+3. **Device bands and the tester's default viewport** (CSS px or points, portrait):
+
+| Class | Width band | Default viewport |
+|---|---|---|
+| `phone-small` | ≤ 375 | 360x640 |
+| `phone-large` | 390 to 430 | 430x932 |
+| `tablet` | 744 to 1024 | 820x1180 |
+| `desktop` | ≥ 1280 | 1440x900 |
+
+4. **Text size mapping.**
+
+| Value | iOS | Android | Web |
+|---|---|---|---|
+| `large` | Dynamic Type xxxLarge | font scale 1.3 | root font 130% |
+| `largest` | Dynamic Type AX5 | font scale 2.0 | root font 200% |
+
+5. **Pseudo-locale mapping.**
+
+| Value | iOS | Android | Web |
+|---|---|---|---|
+| `pseudo-rtl` | Right-to-Left Pseudolanguage | `ar-XB` | `dir="rtl"` on the root |
+| `pseudo-double` | Double-Length Pseudolanguage | `en-XA` | each text node doubled by a script injected in the tester's browser |
+
+   - Android `en-XA` lengthens text but does not double it, so it is recorded as an approximation in `configurations`.
+6. **Coverage rules for a panel that names configurations.**
+   - Every one of the six edge values appears on at least one persona, unless waived.
+   - No persona carries more than two edge values.
+   - At least two personas carry none.
+   - A waiver is a panel header line `Configurations not owed: <edge> (<reason>), ...`.
+7. **Report additions** (schema name stays `design-review/1`; all fields are additive):
+   - top level: `configurations` (id to `{device, viewport, locale, direction, text_size, theme}`) and `reference_config` (an id with zero edge values);
+   - row: `config`, optional `config_gap: {axis, reason}`, and in pass D `frame_in_config: true|false`;
+   - finding: `only_in_config: true|false`, and when true `config_axes: [...]` and `reference_capture`.
+8. **How a config-only finding is established.** The defect shows in the persona's configuration and is absent in the reference configuration at the same scenario step. The reference capture is the capture of a zero-edge persona's row for that step when one exists; otherwise the tester takes one extra capture for that finding.
+9. **Pass D.** A frame is usually drawn in one configuration. The row still names the persona's config. When `frame_in_config` is false, the tester judges `text_fit` and `controls` by reasoning and may not set `only_in_config: true`.
+10. **Row B: stand captures.**
+    - The tester consumes an existing stand run. It never starts one.
+    - Row fields are `capture_source: "stand"`, `stand_run` and `capture_sha256`.
+    - The gate takes `--stand-manifest <file>`.
+
+## Decisions
+
+- D1: One configuration per persona, fixed in the panel and not chosen per run. Because the matrix must stay scenarios × personas, and a config chosen at run time is not reproducible across rounds.
+- D2: The panel `config` line is opt-in at panel level, following the gate's existing level rule. No portrait has it: WARN, exit unchanged. Some but not all have it: FAIL. All have it: the coverage rules apply. Because existing panels and reports must keep passing until super-ux revises the template.
+- D3: The schema stays `design-review/1` with additive fields. Because the brief names that schema, and a config-less panel with an old report must pass byte-for-byte as before.
+- D4: When the panel carries configs, `report` enforces the config contracts automatically, with no new flag. Because an optional flag is a check nobody passes.
+- D5: The checklist stays at seven items. Configuration defects land in `text_fit`, `controls`, `primary_action`, `states` or `focus`. Because an eighth item would invalidate every existing report.
+- D6: `desktop` is a fourth device class and is not an edge value. Because the tester's browser pass is desktop web today, and a desktop product must not be forced into phone portraits only.
+- D7: A persona carries at most two edge values and two personas carry none. Because a failure under four stacked edge values cannot be attributed to one, and zero-edge personas give free reference captures.
+- D8: `only_in_config: true` requires a reference capture and named axes. Because "only here" is a comparison claim and needs its other side.
+- D9: Axis attribution within the differing axes is the tester's judgement. The gate checks only that named axes actually differ from the reference. Because isolating one axis would need a capture per axis, which the budget forbids.
+- D10: A configuration the build cannot produce is recorded as `config_gap`, with the step walked without that axis. An owed edge value with no gap-free build row makes the gate NOT_RUN (exit 3) on gated classes and is reported on `internal`. Because a silent fallback to the reference would read as covered.
+- D11: Waivers live in the panel with a reason, and the gate prints them. Because whether a product owes RTL or dark is a product fact that the panel's confirmer owns.
+- D12: Edge coverage is enforced only with `--require build`. With `--require design` the config ids are checked but coverage is not. Because frames rarely exist per configuration.
+- D13: The prose `needs` line stays, and `config` governs the walk where they disagree. Because `needs` is free text and `config` is checkable.
+- D14: Stand captures fill a row only when the manifest entry carries a scenario id and step. Untagged `explore` captures may be attached to a finding as evidence and nothing more. Because a row is a claim about one step.
+- D15: A stand capture is used only when its build id equals the node's commit sha under review and its cell maps to the persona's config on all four axes. Because a screenshot of another build or another cell is evidence about something else.
+- D16: With a stand capture, `outcome` is `pass` only when the manifest carries the scripted assertion result for that step, quoted in the row, or when the tester reads the outcome back itself. Otherwise it is NOT_RUN with a reason. Because a screenshot does not prove the order exists.
+- D17: The stand client key is read through the project's secret runner under the design-tester's own sender identity, and is never on a command line or printed. Because the stand keys per sender, and this is the existing Figma token rule.
+- D18: Stand runs are not entered in the resource guard ledger. Because the tester did not start them, and the receipt covers only what it started.
+- D19: Row B is separate and does not block Row A. Because the stand's manifest is not ours to ship, and item 1 has value alone.
+- D20: `agent-tester` is unchanged. Because it judges agent surfaces, which have no device configuration.
+- D21: The super-ux panel template change is a cross-repository board row filed with Row A, not done here. Because super-ux owns the template.
+
+## Contracts
+
+- **Panel**, `design_gate.py panel`:
+  - every `config` line parses to four axes with values in the vocabulary;
+  - the device and locale tokens are valid;
+  - the set of edge values across portraits, plus the waived set, equals the six;
+  - the per-persona edge count is ≤ 2;
+  - the count of zero-edge personas is ≥ 2;
+  - every waiver has a non-empty reason.
+- **Row config.** For every row, `row.config` equals the id computed from that persona's panel line (string equality), and that id is a key of `configurations`.
+- **Configurations block.** For each entry:
+  - its fields equal the parse of its id;
+  - `direction` equals the derived direction;
+  - the viewport width lies in the band of its device class.
+- **Reference.** `reference_config` resolves in `configurations` and has zero edge values.
+- **Config-only finding.** For `only_in_config: true`:
+  - `config_axes` is non-empty;
+  - every named axis has different values in the row's config and the reference;
+  - `reference_capture` resolves to an existing file;
+  - no zero-edge row with the same scenario, step and pass fails the same checklist item, otherwise the finding is refused as contradicted;
+  - in pass D, `frame_in_config` is true.
+- **Finding completeness.** Every finding in a build-pass row whose config has at least one edge value carries `only_in_config` as an explicit boolean.
+- **Edge coverage**, `--require build`: each owed edge value has at least one build row without a `config_gap` on that axis and with at least one check that is not NOT_RUN. If not, the outcome follows D10.
+- **Stand capture**, Row B. For a row with `capture_source: "stand"`:
+  - the sha256 of the file at `capture` equals `capture_sha256` and equals the manifest entry's hash;
+  - the entry's build id equals the report's node commit sha;
+  - the entry's scenario and step equal the row's;
+  - the entry's cell, mapped through the tables above, equals the row's config on all four axes.
+  - Any mismatch is FAIL.
+- **Manifest asked of the stand**: `{run, build, entries: [{scenario, step, cell: {device_width, locale, text_size, theme}, sha256, assertion}]}`.
+- **Backward compatibility.** A config-less panel with a report that has no config fields produces the same exit code as before the change. This is proved by running the existing fixtures unchanged.
+
+## Non-goals
+
+- A full cross product of configurations per persona.
+- A new checklist item or a new schema version.
+- Starting, scheduling or configuring stand runs, or changing the stand.
+- Changing `agent-tester`, the visual tier's pixel diff, or the super-ux template in this repository.
+- Landscape orientation, foldables, or real-locale translation quality.
+
+## Risks
+
+- **Stacked axes hide the cause.** If most config-only findings name two axes, attribution is too coarse. Move to one edge value per persona.
+- **Web pseudo-double is synthetic.** Doubling text nodes may break layouts that real long locales would not. Findings reached only this way say so in `what`.
+- **Unproduced configurations block the gate.** Products that cannot switch theme or locale in the build go NOT_RUN until they are waived, so expect waiver pressure.
+- **The stand's manifest may lack scenario tags or build ids.** Row B then delivers nothing, and native mobile pass B stays NOT_RUN as it is today.
+- **Refutation.** The design is wrong if, after three reviewed nodes, zero findings are marked config-only while the stand finds configuration bugs on the same builds.
+
+## Questions for the owner
+
+- Must every product owe all six edge values, including RTL where there is no RTL market? Default: yes, unless the panel waives the value with a reason.
+- May a gated class pass with a waived edge value on the confirmer's word alone? Default: yes, and the gate prints the waiver on every run.

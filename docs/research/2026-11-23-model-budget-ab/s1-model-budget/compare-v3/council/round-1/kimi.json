@@ -1,0 +1,37 @@
+{
+ "meta": {
+  "id": "kimi",
+  "model": "moonshotai/kimi-k3.1-pro",
+  "family": "moonshot",
+  "at": "2026-11-23T20:20:36Z",
+  "route": "tokens",
+  "finish": "stop",
+  "cost": 0.1641474,
+  "cost_source": "openrouter",
+  "cost_known": true,
+  "tokens_in": 27163,
+  "tokens_out": 12806,
+  "seconds": 157.3,
+  "served_by": "moonshotai/kimi-k3.1-pro",
+  "parsed": true
+ },
+ "verdict": {
+  "ranking": [
+   "X",
+   "Y"
+  ],
+  "pick": "X",
+  "why": "Option X is more faithful to the order and more mechanically verifiable. R1–R3 make role routing mandatory and testable; R2/C11 enforce meanings-to-text provenance; R8–R10 specify exactly five single-attempt validators, a thinker-supplied judge, and an advisory cap that skips neither panel nor judge. C4 and D18 directly fix both measured accounting defects: BYOK upstream cost and `--judge-only` erasing panel spend. C3–C10 give concrete ledger, summary, Observatory, and non-blocking ceiling behavior, while R11 and Rollout steps 6–8 provide stronger quality controls than Y's post-release canary. R12 also explicitly tests the doctrine ratchet. Option Y has useful JSON traceability and a simpler Observatory fallback, but it permits the pre-order single-author behavior when no map exists (Design 2 and Rollout 8), subscription-produced 'degraded' meanings (Design 3), extra panelists and arbitrary research-validator model selection (Design 4 and C2), and—most directly contrary to the order—skipping the judge when the panel exceeds its cap (T22), despite REQ-12 saying the thinker is never skipped for money.",
+  "risks": [
+   "X is substantially over-scoped for size M: the thinker repeat index, inventory-coverage proof, replay machinery, release mechanics, and external Observatory work increase implementation and integration risk beyond the core order.",
+   "X's C9 inventory-coverage requirement is not supported by the stated Observatory fact, which guarantees `totalUsd`. A valid provider total could therefore become `unknown`, disabling the estate ceiling warning until an assumed inventory command or Observatory change exists.",
+   "Some X acceptance rules need reconciliation: R10's ban on a second successful verdict in a round conflicts with R8 and the edge cases allowing judge-only reruns to append further judge rows; R4's read-only-directory setup does not reliably make the primary append fail while allowing `uncommitted.jsonl` to be written in that same directory.",
+   "X asserts repository-specific replay paths, served model ids, measured replay cost, and other host details beyond the supplied facts. These must be verified rather than treated as fixtures, and two replay pairs with ties accepted are only a limited quality signal."
+  ],
+  "score": {
+   "X": 8,
+   "Y": 5
+  }
+ },
+ "raw": "{\"ranking\":[\"X\",\"Y\"],\"pick\":\"X\",\"why\":\"Option X is more faithful to the order and more mechanically verifiable. R1–R3 make role routing mandatory and testable; R2/C11 enforce meanings-to-text provenance; R8–R10 specify exactly five single-attempt validators, a thinker-supplied judge, and an advisory cap that skips neither panel nor judge. C4 and D18 directly fix both measured accounting defects: BYOK upstream cost and `--judge-only` erasing panel spend. C3–C10 give concrete ledger, summary, Observatory, and non-blocking ceiling behavior, while R11 and Rollout steps 6–8 provide stronger quality controls than Y's post-release canary. R12 also explicitly tests the doctrine ratchet. Option Y has useful JSON traceability and a simpler Observatory fallback, but it permits the pre-order single-author behavior when no map exists (Design 2 and Rollout 8), subscription-produced 'degraded' meanings (Design 3), extra panelists and arbitrary research-validator model selection (Design 4 and C2), and—most directly contrary to the order—skipping the judge when the panel exceeds its cap (T22), despite REQ-12 saying the thinker is never skipped for money.\",\"risks\":[\"X is substantially over-scoped for size M: the thinker repeat index, inventory-coverage proof, replay machinery, release mechanics, and external Observatory work increase implementation and integration risk beyond the core order.\",\"X's C9 inventory-coverage requirement is not supported by the stated Observatory fact, which guarantees `totalUsd`. A valid provider total could therefore become `unknown`, disabling the estate ceiling warning until an assumed inventory command or Observatory change exists.\",\"Some X acceptance rules need reconciliation: R10's ban on a second successful verdict in a round conflicts with R8 and the edge cases allowing judge-only reruns to append further judge rows; R4's read-only-directory setup does not reliably make the primary append fail while allowing `uncommitted.jsonl` to be written in that same directory.\",\"X asserts repository-specific replay paths, served model ids, measured replay cost, and other host details beyond the supplied facts. These must be verified rather than treated as fixtures, and two replay pairs with ties accepted are only a limited quality signal.\"],\"score\":{\"X\":8,\"Y\":5}}"
+}

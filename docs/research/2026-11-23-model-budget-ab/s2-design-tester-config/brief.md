@@ -1,0 +1,31 @@
+# Brief: device configurations in the design-tester's panel walk
+
+Size: M. Repository: task-pipeline. Surface: the `design-tester` agent (`agents/design-tester.md`), the
+`design-review/1` report and `scripts/design_gate.py`.
+
+## The request (test-stand-agent, 2026-11-23, board request 77741b8d)
+
+The owner: «… лучше типа по концепции перетягивать и дорабатывать наши библиотеку» (take good concepts over and
+improve our library). Analysis in test-stand-agent `docs/reports/2026-11-23-config-matrix-agent-testers/README.md`:
+configuration-dependent bugs (right-to-left, the largest text size, a small screen, a tablet, long words, the dark
+theme) are visible only in that configuration; in the source study 29 of 46 bugs were found by a single cell.
+
+Proposed:
+1. `design-tester`: every one of the panel's ten personas gets a device configuration column: device class (small
+   phone, large phone, tablet), language and direction (including the RTL and double-length pseudo-locales), text
+   size, theme. The judge looks at the screen in the persona's configuration; the `design-review/1` report names the
+   configurations it looked at and marks a finding "only in this configuration".
+2. For mobile nodes the after-build pass may take screenshots from the test stand's cells (its `explore` or scripted
+   runs) through the stand's door instead of capturing them itself: one run on the Mac Studio feeds both the stand
+   and the design review.
+3. `agent-tester`: no change (it judges agent surfaces, not device screens).
+
+Nothing is copied from another project's code. Answer: taken, with a backlog row and a date, or why not.
+
+## Facts
+
+- The panel lives in the project's `docs/ux/test-panel.md` (super-ux template); `design_gate.py panel` checks its
+  portraits (ten by default; fields basis, situation, goals, features, scenarios, activation, retention, needs; the
+  needs line opens with novice, regular or expert).
+- `design_gate.py report` checks a `design-review/1` report: every scope scenario times every persona that uses it.
+- The test stand is a separate Fabric service (`test-stand.sshlg`) reached with a client key per sender.

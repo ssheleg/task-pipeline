@@ -1,0 +1,481 @@
+# Spec: device configurations in the design-tester's panel walk
+
+Size: M
+Meanings: /Users/sshlg/DATA/_worktrees/tp-model-budget/docs/research/2026-11-23-model-budget-ab/s2-design-tester-config/meanings.md
+Research: none (A/B experiment)
+Brief: board request 77741b8d (test-stand-agent, 2026-11-23), `brief.md` in this folder
+Repository: task-pipeline. Surfaces: `plugins/task-pipeline/agents/design-tester.md`, the `design-review/1`
+report, `scripts/design_gate.py`, `references/design-review.md`, `test/design_gate_test.py`.
+
+## Goal
+
+Each of the ten panel personas carries one fixed device configuration (device class, locale and direction,
+text size, theme), and the design-tester judges every step as that persona in that configuration. The
+`design-review/1` report names the configurations it looked at and says which findings exist only there.
+The matrix does not grow: it stays scope scenarios × personas that use them, one configuration per persona.
+
+The answer to request 77741b8d is **taken**, in two backlog rows, item 3 confirmed as no change. Dates
+count from 2026-11-23, the request date, taken as today.
+
+| Row | Title | Size | Due | Starts |
+|---|---|---|---|---|
+| A (this spec) | design-tester: device configuration per persona, config-only findings, gate checks | M | 2026-12-07 | now |
+| B | design-tester: after-build captures from test-stand cells through the stand door | S | 2026-12-21 | once the stand publishes a capture manifest meeting the manifest contract below |
+
+The reply posted on the board to request 77741b8d, verbatim:
+
+> Taken. Item 1 lands by 2026-12-07: a config line per persona, configurations named in the report,
+> findings marked only-in-configuration and checked by the gate. Item 2 lands by 2026-12-21 if the stand
+> door serves a per-run capture manifest (build id, cell, scenario, step, sha256); we send that contract to
+> the stand board with this reply. Item 3 agreed, agent-tester is unchanged. No code is copied, only the
+> concept.
+
+## Scope
+
+In scope:
+
+- `design_gate.py panel`: the optional `config` line, its vocabulary, the coverage rules and waivers.
+- `design_gate.py report`: the additive `design-review/1` fields and their contracts; `--stand-manifest`
+  (Row B).
+- `agents/design-tester.md` and `references/design-review.md`: walking a persona in its configuration,
+  the reference capture, `config_gap`, pass D's `frame_in_config`, stand captures (Row B).
+- `test/design_gate_test.py`: planted refusals and passing fixtures for every contract below.
+- Board deliverables: the reply, Rows A and B in `docs/evidence/backlog.md`, a cross-repository row to
+  super-ux for the panel template (D21), the manifest contract sent to the test stand's board.
+
+Non-goals:
+
+- A full cross product of configurations per persona.
+- A new checklist item or a new schema version.
+- Starting, scheduling or configuring stand runs, or changing the stand.
+- Changing `agent-tester`, the visual tier's pixel diff, or the super-ux template in this repository.
+- Landscape orientation, foldables, or real-locale translation quality.
+- Copying code from another project: only the concept is taken.
+
+## Requirements
+
+Each requirement's acceptance check is a planted fixture in `test/design_gate_test.py` (or the named
+command) that asserts the exit code and the named message; a refusal fixture must fail for the stated
+reason, never only for a missing field.
+
+| id | requirement | source | acceptance check |
+|---|---|---|---|
+| R1 | A portrait may carry a ninth field `- **config**: device=<d>; locale=<l>; text=<t>; theme=<th>`. It parses to four axes, each key exactly once, values in the closed vocabulary; the config id is `<d>.<l>.<t>.<th>`. Direction is derived, never written. | KF1, KF2 | `panel` on the ten-persona example panel (Contracts) exits 0 and its `--json` lists the ten ids equal to the table's; planted: `device=phone-mini`, `locale=english`, `locale=en-XA`, `text=huge`, `theme=sepia`, a missing `theme`, a repeated `device`, a written `direction=rtl` each exit 1 naming the persona and the axis |
+| R2 | The `config` line is opt-in at panel level: no portrait has it, a warning and the exit code unchanged; some but not all, FAIL; all, the coverage rules apply. | D2 | the existing config-less panel fixture keeps its exit code and prints the warning; a panel with nine configs exits 1 naming the tenth persona |
+| R3 | Coverage rules on a configured panel: the union of edge values carried and edge values waived equals the six; no persona carries more than two edge values; at least two personas carry none; every waiver names one of the six and a non-empty reason. Waivers print on every `panel` and `report` run. | KF6, D7, D11 | example panel exits 0; planted: no persona carries `dark` and no waiver (exit 1, names `dark`); a persona with three edges (exit 1, names it and its three edges); one zero-edge persona (exit 1); `Configurations not owed: dark ()` (exit 1); `Configurations not owed: sepia (x)` (exit 1); with a valid `dark` waiver the output contains `waived: dark (<reason>)` |
+| R4 | Device classes have width bands and the tester's default viewports; a `configurations` entry's viewport width lies in its class's band. | KF3 | planted entry `phone-large` with viewport `360x640` exits 1; `tablet` at `744x1133` passes; `desktop` at `1100x800` exits 1 |
+| R5 | Text size and pseudo-locale settings are applied per platform as the mapping tables say; Android `en-XA` is recorded as an approximation in its `configurations` entry. | KF4, KF5 | `references/design-review.md` and `agents/design-tester.md` carry both tables cell for cell as in Contracts and the approximation rule (a test compares each cell); an `approximation` that is present and empty or not a string exits 1 |
+| R6 | The report adds `configurations`, `reference_config`, row `config`, `config_gap`, `frame_in_config`, finding `only_in_config`, `config_axes`, `reference_capture`, `item`; the schema stays `design-review/1`. | KF7, D3, D5 | the example report (Contracts) exits 0 under `--require build`; `schema` other than `design-review/1` still exits 1; `CHECKS` in `design_gate.py` still holds seven items (test asserts the tuple) |
+| R7 | When the panel carries configs, `report` enforces the config contracts with no new flag: row config equality with the panel, configurations block equal to the parse of its ids, `reference_config` with zero edge values. | D4, Contracts | planted: row `config` differing by one character from the panel's id (exit 1); a row config absent from `configurations` (exit 1); an entry whose `theme` disagrees with its id (exit 1); `direction: ltr` on a `pseudo-rtl` entry (exit 1); `reference_config` with `theme=dark` (exit 1) |
+| R8 | A config-only finding is a comparison: `only_in_config: true` requires named axes that differ from the reference, a reference capture that exists, and no zero-edge row at the same scenario, step and pass failing the same item. | KF8, D8, D9 | planted: empty `config_axes`; `config_axes: ["theme"]` where both themes are `light`; `reference_capture` naming a missing file; a zero-edge row failing `text_fit` at the same step (refused as contradicted); each exits 1 |
+| R9 | In pass D every row names the persona's config and `frame_in_config`; with `frame_in_config: false`, `only_in_config: true` is refused. | KF9 | planted design row with `frame_in_config: false` and a config-only finding exits 1; a design row without `frame_in_config` on a configured panel exits 1 |
+| R10 | Every finding in a build row whose config carries at least one edge value states `only_in_config` as a boolean. | Contracts | planted finding without it, and one with `"only_in_config": "yes"`, each exit 1 |
+| R11 | With `--require build`, each edge value owed by the report has a build row in a configuration carrying it, without a `config_gap` on that axis and with at least one check not NOT_RUN; otherwise NOT_RUN (exit 3) on gated classes and a note on `internal`. With `--require design` the config ids are checked and coverage is not. A configuration the build cannot produce is a `config_gap`, never a silent fallback. | D10, D12 | planted: the only `rtl` row carries `config_gap: {axis: locale, ...}`, `--class product` exits 3 naming `rtl`, `--class internal` exits 0 with the note; the same report with `--require design` exits 0 |
+| R12 | A config-less panel with a report carrying no config fields gives the same exit code as before the change. | D3, Contracts | every existing fixture in `test/design_gate_test.py` runs unchanged and passes; `git diff --numstat <base> -- test/design_gate_test.py` shows 0 deleted lines |
+| R13 | The design-tester walks each persona in its configuration, applying the settings before the first step, captures in it, takes the reference capture, records `config_gap` and `frame_in_config`, and names configurations in the report. | Goal, KF8, KF9, D13 | `agents/design-tester.md` and `references/design-review.md` carry the procedure (Design section); `python3 test/validate.py` passes (link and corpus guards); the report example in the agent file passes `design_gate.py report` in a test that extracts and runs it |
+| R14 | Row B: for mobile nodes the build pass may fill a row from an existing stand run's capture through the stand door, checked against `--stand-manifest`; the tester never starts a stand run. | KF10, D14 to D18 | Row B's own fixtures: a matching manifest exits 0; a one-byte change to the capture file, a different `build`, another step, a cell `device_width: 820` on a `phone-small` row each exit 1; an untagged entry used to fill a row exits 1; `outcome: pass` with no assertion and no read-back exits 1; a stand row with no `--stand-manifest` exits 3 |
+| R15 | `agent-tester` is unchanged. | D20 | `git diff --stat <base> -- plugins/task-pipeline/agents/agent-tester.md` prints nothing |
+| R16 | The board deliverables exist: the reply posted to 77741b8d, Rows A and B in the backlog with their due dates, the super-ux template row, the manifest contract on the stand's board. | Goal, D19, D21 | `com.get 77741b8d` shows the reply text above; `grep -n "device configuration per persona.*Due 2026-12-07" docs/evidence/backlog.md` and `grep -n "captures from test-stand cells.*Due 2026-12-21" docs/evidence/backlog.md` each print one row; the super-ux and test-stand requests resolve by id with `com.get` |
+
+## Design
+
+### The panel
+
+`parse_panel` keeps `config` out of `FIELDS` (it stays optional) and reads it through its own alias. A new
+`parse_config(value)` splits on `;`, then on the first `=`, trims, and returns the four axes or the list of
+problems. `config_id(axes)` joins `device.locale.text.theme` in that fixed order with the values exactly as
+written (no case folding). `direction(locale)` is `rtl` for `pseudo-rtl` or a primary language subtag in
+`ar`, `he`, `fa`, `ur`, else `ltr`. `edges(axes)` returns the subset of the six edge values the
+configuration carries: `phone-small` or `tablet` from device, `rtl` from the derived direction,
+`pseudo-double` from locale, `largest` from text, `dark` from theme.
+
+`panel_problems` gains the level rule of D2 and the coverage rules of R3; `panel_notes` gains the
+config-less warning and one `waived: <edge> (<reason>)` line per waiver. The waiver line is read only
+before the first `## P-` heading.
+
+### The report
+
+`report_check` reads the panel's configs once. When every portrait has one, it runs the config contracts
+(R7 to R11) and adds their problems to the existing list, so the existing FAIL and NOT_RUN order holds:
+problems FAIL first, then the coverage gap, then edge coverage NOT_RUN (R11), then the existing per-pass
+NOT_RUN. When no portrait has one and the report carries any config field, it fails (D1: configurations
+are fixed in the panel, not chosen at run time). When the panel is partly configured, it fails and names
+`design_gate.py panel`. Without `--panel`, the config contracts that need the panel are not computed and a
+note says so, as coverage is today.
+
+The edge values a report owes are the non-waived edge values carried by personas that use at least one
+scope scenario; an edge carried by no in-scope persona is a note, `not reached by this scope: <edge>`
+(Questions Q3).
+
+### The tester's walk
+
+Before a persona's first step the tester sets the persona's configuration and records it in
+`configurations`: the viewport (the class's default, or a real device's width inside the band), the locale
+or pseudo-locale, the text size and the theme, by the platform tables in Contracts. On the web: the
+driver's viewport and locale, `dir="rtl"` on the root for `pseudo-rtl`, a root font of 130% or 200%, the
+driver's color-scheme emulation where it has one, else the product's own theme setting; `pseudo-double`
+injects a script that repeats each visible text node's text twice, joined by a space, on load and on DOM
+mutation, skipping `script`, `style` and form values. A finding reached only through that script says so in
+its `what`. What the build cannot produce is a `config_gap` on that axis, the step walked without it.
+
+`needs` stays as prose; where it disagrees with `config`, `config` governs the walk (D13).
+
+A config-only finding: the defect shows in the persona's configuration and is absent at the same scenario
+step in the reference. The reference capture is the `capture` of a zero-edge persona's row at that
+scenario, step and pass when one exists, and the reference is then that row's config; otherwise the tester
+takes one extra capture in `reference_config` for that finding (not a row, not a second pass), and the
+reference is `reference_config`. `reference_config` is the configuration of the zero-edge persona that uses
+the most scope scenarios. Within the axes that differ, which axis caused the defect is the tester's
+judgement (D9).
+
+Pass D: a frame is usually drawn in one configuration. The row names the persona's config and
+`frame_in_config`; when it is false the tester judges `text_fit` and `controls` by reasoning and does not
+mark a finding config-only.
+
+### Row B: stand captures
+
+For mobile nodes the build pass may fill a row from a stand run that already exists, read through the
+stand door with the design-tester's own client key (D17); the tester never starts, schedules or configures
+a run, and stand runs are not entered in the resource guard ledger (D18). Only manifest entries with a
+scenario and a step fill a row (D14); an untagged `explore` capture can be attached to a finding as
+`stand_evidence` and nothing more. `design_gate.py report` takes `--stand-manifest <file>`, repeatable, one
+file per run.
+
+## Contracts
+
+### Vocabulary
+
+| Axis | Key in the panel line | Values | Edge values |
+|---|---|---|---|
+| device | `device` | `phone-small`, `phone-large`, `tablet`, `desktop` | `phone-small`, `tablet` |
+| locale | `locale` | a BCP 47 tag, `pseudo-rtl`, `pseudo-double` | `rtl` (derived direction), `pseudo-double` |
+| text | `text` | `default`, `large`, `largest` | `largest` |
+| theme | `theme` | `light`, `dark` | `dark` |
+
+- A BCP 47 tag here is `language[-Script][-REGION]`: 2 or 3 lowercase letters, an optional 4-letter
+  title-case script, an optional 2-letter uppercase or 3-digit region (`en-US`, `ar`, `zh-Hant-TW`).
+  The platform realizations `en-XA` and `ar-XB` are refused in the panel: it writes `pseudo-double` and
+  `pseudo-rtl`.
+- Direction: `rtl` for `pseudo-rtl` or primary language `ar`, `he`, `fa`, `ur`; otherwise `ltr`.
+- Axis names in `config_gap.axis` and `config_axes` are `device`, `locale`, `text`, `theme`.
+
+### Device bands (CSS px or points, portrait)
+
+| Class | Width band | Default viewport |
+|---|---|---|
+| `phone-small` | ≤ 375 | 360x640 |
+| `phone-large` | 390 to 430 | 430x932 |
+| `tablet` | 744 to 1024 | 820x1180 |
+| `desktop` | ≥ 1280 | 1440x900 |
+
+A width between bands (376 to 389, 431 to 743, 1025 to 1279) belongs to no class.
+
+### Text size and pseudo-locale per platform
+
+| Value | iOS | Android | Web |
+|---|---|---|---|
+| `default` | Dynamic Type Large (system default) | font scale 1.0 | root font 100% |
+| `large` | Dynamic Type xxxLarge | font scale 1.3 | root font 130% |
+| `largest` | Dynamic Type AX5 | font scale 2.0 | root font 200% |
+| `pseudo-rtl` | Right-to-Left Pseudolanguage | `ar-XB` | `dir="rtl"` on the root |
+| `pseudo-double` | Double-Length Pseudolanguage | `en-XA` | each text node doubled by a script injected in the tester's browser |
+
+Android `en-XA` lengthens text but does not double it: its `configurations` entry carries
+`"approximation": "en-XA lengthens, does not double"`.
+
+### Panel
+
+Syntax (a fragment, not a whole panel):
+
+```markdown
+# Test panel
+
+Configurations not owed: dark (the product ships one theme until v2)
+
+## P-01 Persona 1
+- **config**: device=phone-small; locale=pseudo-rtl; text=default; theme=light
+```
+
+The waiver line is optional, one per panel, before the first portrait; each item is `<edge> (<reason>)`,
+items separated by commas, the edge one of the six, the reason non-empty and free of parentheses.
+
+`design_gate.py panel` on a configured panel:
+
+- every `config` line parses to the four axes with values in the vocabulary;
+- the device and locale tokens are valid;
+- the set of edge values across portraits, plus the waived set, equals the six;
+- the per-persona edge count is ≤ 2;
+- the count of zero-edge personas is ≥ 2;
+- every waiver has a non-empty reason.
+
+A passing ten-persona example (the other eight fields of each portrait unchanged; no waiver line):
+
+| Persona | config line values | id | edge values |
+|---|---|---|---|
+| P-01 | device=phone-small; locale=pseudo-rtl; text=default; theme=light | `phone-small.pseudo-rtl.default.light` | phone-small, rtl |
+| P-02 | device=phone-large; locale=en-US; text=default; theme=light | `phone-large.en-US.default.light` | none |
+| P-03 | device=tablet; locale=de-DE; text=largest; theme=light | `tablet.de-DE.largest.light` | tablet, largest |
+| P-04 | device=phone-large; locale=pseudo-double; text=default; theme=dark | `phone-large.pseudo-double.default.dark` | pseudo-double, dark |
+| P-05 | device=phone-large; locale=en-GB; text=large; theme=light | `phone-large.en-GB.large.light` | none |
+| P-06 | device=desktop; locale=en-US; text=default; theme=dark | `desktop.en-US.default.dark` | dark |
+| P-07 | device=phone-large; locale=he-IL; text=large; theme=light | `phone-large.he-IL.large.light` | rtl |
+| P-08 | device=desktop; locale=fr-FR; text=default; theme=light | `desktop.fr-FR.default.light` | none |
+| P-09 | device=phone-small; locale=es-ES; text=default; theme=dark | `phone-small.es-ES.default.dark` | phone-small, dark |
+| P-10 | device=tablet; locale=ja-JP; text=large; theme=light | `tablet.ja-JP.large.light` | tablet |
+
+All six edge values appear; no persona carries more than two; P-02, P-05 and P-08 carry none.
+
+### Report additions (`design-review/1`, additive)
+
+- top level: `configurations` (id to `{device, viewport, locale, direction, text_size, theme}`, plus
+  `approximation` where KF5 asks), `reference_config`; Row B adds `node_commit`;
+- row: `config`, optional `config_gap: {axis, reason}`, in pass D `frame_in_config: true|false`; Row B adds
+  `capture_source: "stand"`, `stand_run`, `capture_sha256`, optional `outcome_read_back: true`;
+- finding: `only_in_config: true|false`, and when true `item`, `config_axes: [...]`, `reference_capture`;
+  Row B adds optional `stand_evidence: [{stand_run, capture, capture_sha256}]`.
+
+`viewport` is the string `<width>x<height>`. Relative paths (`capture`, `reference_capture`) resolve
+against the directory the gate runs in, the repository root.
+
+Example for `--panel` holding the example panel above, `--scope SCR-03 --require build --class product`, where P-01 and P-02 are the panel's only
+users of SCR-03 (the owed edges are then `phone-small` and `rtl`, both carried by P-01's gap-free build row):
+
+```json
+{"schema": "design-review/1", "surface": "checkout", "panel_revision": "abc1234",
+ "configurations": {
+   "phone-small.pseudo-rtl.default.light": {"device": "phone-small", "viewport": "360x640",
+     "locale": "pseudo-rtl", "direction": "rtl", "text_size": "default", "theme": "light"},
+   "phone-large.en-US.default.light": {"device": "phone-large", "viewport": "430x932",
+     "locale": "en-US", "direction": "ltr", "text_size": "default", "theme": "light"}},
+ "reference_config": "phone-large.en-US.default.light",
+ "rows": [
+  {"scenario": "SCR-03", "step": 2, "persona": "P-01", "pass": "design", "round": 1,
+   "config": "phone-small.pseudo-rtl.default.light", "frame_in_config": false, "frame": "figma:12:34",
+   "checks": {"frame": "pass", "primary_action": "pass", "controls": "pass", "focus": "pass",
+              "states": "pass", "text_fit": "pass", "outcome": "pass"}, "findings": []},
+  {"scenario": "SCR-03", "step": 2, "persona": "P-02", "pass": "design", "round": 1,
+   "config": "phone-large.en-US.default.light", "frame_in_config": true, "frame": "figma:12:34",
+   "checks": {"frame": "pass", "primary_action": "pass", "controls": "pass", "focus": "pass",
+              "states": "pass", "text_fit": "pass", "outcome": "pass"}, "findings": []},
+  {"scenario": "SCR-03", "step": 2, "persona": "P-01", "pass": "build", "round": 1,
+   "config": "phone-small.pseudo-rtl.default.light",
+   "capture": "review/captures/SCR-03-2-P-01.png", "engine": "webkit",
+   "outcome": "order #1042 created, visible in history",
+   "checks": {"frame": "pass", "primary_action": "pass", "controls": "pass", "focus": "pass",
+              "states": "pass", "text_fit": "fail", "outcome": "pass"},
+   "findings": [{"severity": "risk", "what": "total price clipped at the left edge of the summary",
+                 "where": "summary screen", "status": "open", "item": "text_fit",
+                 "only_in_config": true, "config_axes": ["locale"],
+                 "reference_capture": "review/captures/SCR-03-2-P-02.png"}]},
+  {"scenario": "SCR-03", "step": 2, "persona": "P-02", "pass": "build", "round": 1,
+   "config": "phone-large.en-US.default.light",
+   "capture": "review/captures/SCR-03-2-P-02.png", "engine": "webkit",
+   "outcome": "order #1043 created, visible in history",
+   "checks": {"frame": "pass", "primary_action": "pass", "controls": "pass", "focus": "pass",
+              "states": "pass", "text_fit": "pass", "outcome": "pass"}, "findings": []}],
+ "resources": {"started": [], "live": [], "closed": true}}
+```
+
+### Report checks when the panel carries configs
+
+- **Row config.** For every row, `row.config` equals the id computed from that persona's panel line
+  (string equality), and that id is a key of `configurations`.
+- **Configurations block.** For each entry: its `device`, `locale`, `text_size`, `theme` equal the parse of
+  its id; `direction` equals the derived direction; the viewport width lies in the band of its device
+  class; an `approximation`, when present, is a non-empty string.
+- **Reference.** `reference_config` resolves in `configurations` and has zero edge values.
+- **Pass D.** Every design row carries `frame_in_config` as a boolean.
+- **Config-only finding.** For `only_in_config: true`:
+  - `item` is one of the seven checklist items and that item is `fail` in the row;
+  - `config_axes` is non-empty, each a known axis name, none equal to the row's `config_gap.axis`;
+  - `reference_capture` resolves to an existing file; when it equals another row's `capture`, that row has
+    the same scenario, step and pass and a config with zero edge values, and the reference is that row's
+    config; otherwise the reference is `reference_config`;
+  - every named axis has different values in the row's config and the reference;
+  - no zero-edge row with the same scenario, step and pass has `checks[item] == "fail"`, otherwise the
+    finding is refused as contradicted;
+  - in pass D, `frame_in_config` is true.
+- **Finding completeness.** Every finding in a build-pass row whose config has at least one edge value
+  carries `only_in_config` as an explicit boolean.
+- **config_gap.** `axis` is a known axis name and `reason` is non-empty.
+- **Edge coverage**, `--require build`: each owed edge value has at least one build row whose config
+  carries it, without a `config_gap` on that edge's axis and with at least one check that is not NOT_RUN.
+  If not: NOT_RUN (exit 3) on `flagship`, `product`, `ad`; a note on `internal`.
+
+Exit codes are unchanged: 0 PASS, 1 FAIL, 2 usage or unreadable input, 3 NOT_RUN.
+
+### Row B: the manifest asked of the stand, and the stand-capture check
+
+```json
+{"run": "<run id>", "build": "<40-hex commit sha>",
+ "entries": [{"scenario": "SCR-03", "step": 2,
+              "cell": {"device_width": 360, "locale": "ar-XB", "text_size": "1.0", "theme": "light"},
+              "sha256": "<64-hex>", "assertion": {"text": "order exists in history", "result": "pass"}}]}
+```
+
+`assertion` is `{text, result}` with `result` `pass` or `fail`, or `null` when the step had no scripted
+assertion. A cell maps to a config id through the tables above: `device_width` to the class whose band
+holds it; `locale` `ar-XB` or the iOS Right-to-Left Pseudolanguage to `pseudo-rtl`, `en-XA` or the iOS
+Double-Length Pseudolanguage to `pseudo-double`, any other BCP 47 tag to itself; `text_size` from the
+platform value to `default`, `large`, `largest`; `theme` as is. A value with no mapping is a mismatch.
+
+For a row with `capture_source: "stand"`:
+
+- the sha256 of the file at `capture` equals `capture_sha256` and equals the manifest entry's `sha256`;
+- the manifest's `run` equals the row's `stand_run`;
+- the manifest's `build` equals the report's `node_commit`, which resolves to a commit in the repository
+  the gate runs in;
+- the entry's scenario and step equal the row's, and the entry carries both;
+- the entry's cell, mapped, equals the row's config on all four axes;
+- `checks.outcome` is `pass` only when the entry's `assertion.result` is `pass` and `assertion.text`
+  appears verbatim in the row's `outcome`, or the row carries `outcome_read_back: true`; otherwise it is
+  NOT_RUN with a reason, or `fail` when the assertion failed.
+
+Any mismatch is FAIL. A stand row with no `--stand-manifest` for its run is NOT_RUN with that reason. A
+`stand_evidence` item's file hash equals its `capture_sha256` and an entry's `sha256` in that run's
+manifest, or the finding fails.
+
+The stand client key is read through the project's secret runner as `TEST_STAND_CLIENT_KEY` under the
+design-tester's own sender identity, in the environment only, never on a command line or printed.
+
+### Backward compatibility
+
+A config-less panel with a report that has no config fields produces the same exit code as before the
+change, proved by the existing fixtures run unchanged (R12).
+
+## Edge cases
+
+| Case | Behaviour |
+|---|---|
+| Config-less panel | `panel` warns, exit unchanged; `report` runs as today |
+| Config-less panel, report with config fields | FAIL: configurations are fixed in the panel (D1) |
+| Nine of ten portraits configured | `panel` and `report` FAIL, naming the persona without one |
+| `needs` says "iPad" while `config` says `phone-small` | the walk follows `config` (D13); no gate finding |
+| Persona with three edge values | FAIL, naming the persona and the three |
+| Edge value both carried and waived | passes; the waiver still prints |
+| Build cannot switch theme | `config_gap: {axis: theme, reason}`, the step walked in the product's theme; if that leaves `dark` uncovered: NOT_RUN on gated classes |
+| Scope reaches no persona carrying `tablet` | `tablet` is not owed by this report; a note says it was not reached |
+| `config_axes` names the row's gapped axis | FAIL: that axis was not produced |
+| Two zero-edge personas with different configs | either one's row at that step may give the reference capture; the axis check compares against that row's config |
+| No zero-edge row at the finding's step | the tester takes one extra capture in `reference_config` for that finding |
+| `frame_in_config: false` and a text overflow drawn only for the frame's config | judged by reasoning; the finding may not be config-only |
+| A defect present in both the persona's and the reference configuration | an ordinary finding, `only_in_config: false` |
+| Web `pseudo-double` breaks a layout | the finding's `what` says it was reached only through the injected script |
+| Viewport width 380 | in no band: FAIL for every class |
+| Stand manifest entry without scenario or step | cannot fill a row (FAIL if used); may be `stand_evidence` on a finding |
+| Stand manifest of another build | FAIL on every row it fills |
+| Stand assertion `fail`, row outcome `pass`, no read-back | FAIL |
+| Stand row, no `--stand-manifest` given | NOT_RUN with the reason |
+
+## Questions
+
+| id | question | class | answer | by | basis |
+|---|---|---|---|---|---|
+| Q1 | Must every product owe all six edge values, including RTL where there is no RTL market? | strategy | yes, unless the panel waives the value with a reason | pending | meanings, Questions for the owner |
+| Q2 | May a gated class pass with a waived edge value on the confirmer's word alone? | strategy | yes, and the gate prints the waiver on every run | pending | meanings, Questions for the owner |
+| Q3 | Which edge values does one report owe when its scope reaches only some personas? | tactics | the non-waived edge values carried by personas using a scope scenario; the rest is a note | agent | the Goal: the matrix does not grow, so coverage cannot require walks outside it |
+| Q4 | How does the gate know which checklist item a config-only finding is about? | tactics | a finding field `item`, required when `only_in_config` is true, and that item is `fail` in the row | agent | the contradiction check compares "the same checklist item"; the row may fail several |
+| Q5 | Where does the report carry the node's commit sha for Row B? | tactics | top-level `node_commit`, 40-hex, resolving to a commit in the repository | agent | the stand check compares the manifest's build with it; the report has no such field today |
+| Q6 | How are capture paths resolved? | tactics | relative to the directory the gate runs in (the repository root) | agent | the tester runs the Done-when command from the root |
+| Q7 | Key order, id order and case in the config line? | tactics | keys in any order, each once; id in fixed order device.locale.text.theme; values as written, no case folding | agent | string equality of row config and panel id |
+| Q8 | Which BCP 47 grammar is accepted, and may the panel write `en-XA`? | tactics | language, optional script, optional region; `en-XA` and `ar-XB` refused in favour of the pseudo values | agent | one spelling per configuration keeps the edge count computable |
+| Q9 | Format of `viewport`? | tactics | the string `<width>x<height>` | agent | the default viewport table's format |
+| Q10 | Axis names in `config_gap` and `config_axes`? | tactics | `device`, `locale`, `text`, `theme`; `config_axes` never names the row's gapped axis | agent | the panel line's keys; a gapped axis was not produced (D10) |
+| Q11 | Which zero-edge configuration is `reference_config`, and what does a finding compare against? | tactics | the zero-edge persona using the most scope scenarios; a finding compares against the config of the zero-edge row whose capture it cites (same scenario, step, pass), else against `reference_config` | agent | KF8 lets any zero-edge row's capture serve; D8: the comparison needs its actual other side |
+| Q12 | Is `frame_in_config` required on every design row? | tactics | yes, when the panel carries configs | agent | KF9 names it on pass D rows; a missing value hides the reasoning rule |
+| Q13 | Where is the Android `en-XA` approximation recorded? | tactics | an `approximation` string in the `configurations` entry | agent | KF5 says it is recorded in `configurations` |
+| Q14 | How does the web pass produce dark and pseudo-double? | tactics | the driver's color-scheme emulation, else the product's theme setting, else `config_gap`; a script repeating each visible text node twice, on load and on mutation | agent | KF5's web column; D10 for what cannot be produced |
+| Q15 | What shape is the manifest's `assertion`, and how is a tester read-back marked? | tactics | `{text, result}` or null; `outcome_read_back: true` on the row | agent | D16 needs both paths to be checkable |
+| Q16 | A stand row with no manifest given? | tactics | NOT_RUN with the reason | agent | design_gate: a check that could not run says NOT_RUN |
+| Q17 | How is an untagged explore capture attached to a finding? | tactics | `stand_evidence` items, hash-checked against the run's manifest | agent | D14 allows evidence only; every check verifies a hash |
+| Q18 | What platform values does `default` text size map to? | known-domain | iOS Dynamic Type Large, Android font scale 1.0, web root 100% | agent | https://developer.apple.com/documentation/uikit/uicontentsizecategory/large and https://developer.android.com/reference/android/content/res/Configuration#fontScale |
+| Q19 | Backlog ids for Rows A and B? | tactics | assigned when filed, from the committed backlog under the lease | agent | the repository's id procedure (CLAUDE.md, allocating an id) |
+| Q20 | What is the stand key's variable name? | tactics | `TEST_STAND_CLIENT_KEY`, read by the secret runner | agent | D17; the Figma token rule already reads its token this way |
+| Q21 | Which version does Row A ship as? | tactics | the next minor after the highest remote tag, read at release | agent | the repository's version procedure (CLAUDE.md) |
+
+## Decisions
+
+| id | decision | reason |
+|---|---|---|
+| D1 | One configuration per persona, fixed in the panel and not chosen per run. | The matrix must stay scenarios × personas, and a config chosen at run time is not reproducible across rounds. |
+| D2 | The panel `config` line is opt-in at panel level, following the gate's existing level rule: none, warning and exit unchanged; some, FAIL; all, the coverage rules apply. | Existing panels and reports must keep passing until super-ux revises the template. |
+| D3 | The schema stays `design-review/1` with additive fields. | The brief names that schema, and a config-less panel with an old report must pass byte-for-byte as before. |
+| D4 | When the panel carries configs, `report` enforces the config contracts automatically, with no new flag. | An optional flag is a check nobody passes. |
+| D5 | The checklist stays at seven items; configuration defects land in `text_fit`, `controls`, `primary_action`, `states` or `focus`. | An eighth item would invalidate every existing report. |
+| D6 | `desktop` is a fourth device class and is not an edge value. | The tester's browser pass is desktop web today, and a desktop product must not be forced into phone portraits only. |
+| D7 | A persona carries at most two edge values and two personas carry none. | A failure under four stacked edge values cannot be attributed to one, and zero-edge personas give free reference captures. |
+| D8 | `only_in_config: true` requires a reference capture and named axes. | "Only here" is a comparison claim and needs its other side. |
+| D9 | Axis attribution within the differing axes is the tester's judgement; the gate checks only that named axes differ from the reference. | Isolating one axis would need a capture per axis, which the budget forbids. |
+| D10 | A configuration the build cannot produce is a `config_gap`, the step walked without that axis; an owed edge value with no gap-free build row makes the gate NOT_RUN (exit 3) on gated classes and is reported on `internal`. | A silent fallback to the reference would read as covered. |
+| D11 | Waivers live in the panel with a reason, and the gate prints them. | Whether a product owes RTL or dark is a product fact that the panel's confirmer owns. |
+| D12 | Edge coverage is enforced only with `--require build`; with `--require design` the config ids are checked but coverage is not. | Frames rarely exist per configuration. |
+| D13 | The prose `needs` line stays, and `config` governs the walk where they disagree. | `needs` is free text and `config` is checkable. |
+| D14 | Stand captures fill a row only when the manifest entry carries a scenario id and step; untagged `explore` captures are finding evidence and nothing more. | A row is a claim about one step. |
+| D15 | A stand capture is used only when its build id equals the node's commit sha under review and its cell maps to the persona's config on all four axes. | A screenshot of another build or another cell is evidence about something else. |
+| D16 | With a stand capture, `outcome` is `pass` only when the manifest carries the scripted assertion result for that step, quoted in the row, or the tester reads the outcome back itself; otherwise NOT_RUN with a reason. | A screenshot does not prove the order exists. |
+| D17 | The stand client key is read through the project's secret runner under the design-tester's own sender identity, never on a command line or printed. | The stand keys per sender, and this is the existing Figma token rule. |
+| D18 | Stand runs are not entered in the resource guard ledger. | The tester did not start them, and the receipt covers only what it started. |
+| D19 | Row B is separate and does not block Row A. | The stand's manifest is not ours to ship, and item 1 has value alone. |
+| D20 | `agent-tester` is unchanged. | It judges agent surfaces, which have no device configuration. |
+| D21 | The super-ux panel template change is a cross-repository board row filed with Row A, not done here. | super-ux owns the template. |
+
+## Tests
+
+All in `test/design_gate_test.py` (run by `npm test`), built on the existing `portrait`, `panel_text`,
+`row` and `report` helpers with a `config=` keyword added; every refusal is planted and asserted on its
+exit code and message, every pass is a real fixture.
+
+1. Panel parse and vocabulary (R1): the example panel passes and its ids match; each planted bad token,
+   missing key, repeated key, written direction and `en-XA` fails.
+2. Opt-in (R2): config-less panel keeps its exit code and prints the warning; nine of ten fails.
+3. Coverage and waivers (R3): missing edge, three-edge persona, one zero-edge persona, empty reason,
+   unknown waived token each fail; a valid waiver passes and prints.
+4. Bands and mappings (R4, R5): out-of-band viewports fail per class; an empty `approximation` fails;
+   the doctrine tables match the Contracts cells.
+5. Report config contracts (R6, R7, R10): the example report passes under `--require build`; each planted
+   mismatch (row id, missing key in `configurations`, field disagreeing with its id, wrong direction,
+   edged reference, finding without an explicit boolean) fails.
+6. Config-only findings (R8, R9): empty axes, axis not differing, missing reference file, reference
+   capture from an edged row or another step, contradicted by a zero-edge row, gapped axis named, pass D with
+   `frame_in_config: false` each fail.
+7. Edge coverage (R11): gapped only-`rtl` row gives exit 3 on `product`, exit 0 with a note on
+   `internal`, exit 0 under `--require design`; an unreached edge gives the note, not NOT_RUN.
+8. Backward compatibility (R12): the existing cases run unchanged; `git diff --numstat` shows no deleted
+   line in the test file.
+9. Agent example (R13): the JSON example in `agents/design-tester.md` is extracted and passes `report`.
+10. Row B (R14): the stand-capture fixtures listed in R14, with real files hashed in a temp directory and
+    a temp git repository holding the `node_commit`.
+11. `agent-tester` untouched (R15): `git diff --stat` on its file is empty.
+
+Gate for Row A: `npm test` green, including `python3 test/validate.py` (version sync, doc links).
+
+## Rollout
+
+Row A, due 2026-12-07:
+
+1. File Row A and Row B in `docs/evidence/backlog.md` (ids by the lease procedure, Q19), post the reply on
+   request 77741b8d, send the manifest contract to the test stand's board (`com.submit` to the stand
+   project) and the panel template row to super-ux (`com.submit`), all on 2026-11-23.
+2. Tests first (Tests 1 to 9), then `design_gate.py`: parse, panel rules, report contracts, docstring.
+3. `agents/design-tester.md` and `references/design-review.md`: the walk, the tables, the report example.
+4. CHANGELOG and README entries, version on all five surfaces (Q21), `npm test` green, release by tag.
+
+Row B, due 2026-12-21, starts when the stand's manifest meeting the contract is served through its door:
+Tests 10, the `--stand-manifest` code, the tester's Row B procedure. If the manifest is not served by the
+due date, Row B stays open with that blocker and native mobile pass B stays NOT_RUN as today.
+
+Backout: the change is additive; reverting the release commit restores the previous gate, and a
+config-less panel behaves identically either way.
+
+## Risks
+
+- **Stacked axes hide the cause.** If most config-only findings name two axes, attribution is too coarse:
+  move to one edge value per persona.
+- **Web pseudo-double is synthetic.** Doubling text nodes may break layouts that real long locales would
+  not; findings reached only this way say so in `what`.
+- **Unproduced configurations block the gate.** Products that cannot switch theme or locale in the build
+  go NOT_RUN until they are waived, so expect waiver pressure.
+- **The stand's manifest may lack scenario tags or build ids.** Row B then delivers nothing, and native
+  mobile pass B stays NOT_RUN as it is today.
+- **Refutation.** The design is wrong if, after three reviewed nodes, zero findings are marked config-only
+  while the stand finds configuration bugs on the same builds.

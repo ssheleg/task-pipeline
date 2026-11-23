@@ -1,0 +1,37 @@
+{
+ "meta": {
+  "id": "kimi",
+  "model": "moonshotai/kimi-k3.1-pro",
+  "family": "moonshot",
+  "at": "2026-11-23T19:28:59Z",
+  "route": "tokens",
+  "finish": "stop",
+  "cost": 0.12793032,
+  "cost_source": "openrouter",
+  "cost_known": true,
+  "tokens_in": 23170,
+  "tokens_out": 9592,
+  "seconds": 164.0,
+  "served_by": "moonshotai/kimi-k3.1-pro",
+  "parsed": true
+ },
+ "verdict": {
+  "ranking": [
+   "Y",
+   "X"
+  ],
+  "pick": "Y",
+  "why": "Option Y is the more complete and buildable implementation specification. Design 1 explicitly reviews the spec loop, research, council, planning, build and remaining HTTP call sites, while C1-C7 define concrete configuration, CLIs, validation rules, ledger rows, summaries, warnings and exit codes, with T1-T24 covering them. It also follows two literal requirements that X relaxes without support: REQ-4 permits exactly one HTTP request per validator with no retry, whereas X/D11 can issue a second request; and Y applies the paid thinker/writer split to every size, whereas X/D3 invents a size-S exemption despite the order giving none. Y's finally-appended spend rows, O_APPEND/flock writes, cost-preserving --judge-only behaviour, branch-specific BYOK accounting, Observatory-backed ceiling reporting and Rollout-6 quality canary are also more operationally complete. X has the clearer owner's-estate role table and strong requirement traceability, but its four thinker artefact kinds lack equally complete output and integration contracts, D18 unconditionally adds cost fields and could double-count when upstream cost is already included, and Q4-Q17 leave many implementation decisions marked pending.",
+  "risks": [
+   "Y never explicitly requires the deployed routine role to be Fable on subscription and worker/main to be Opus 5.5 on subscription; Rollout step 4 merely says to write real ids. X states this owner-specific mapping correctly.",
+   "Y's subscription --from-file degraded path still permits non-API meanings, and its 2,000,000-byte input limit and 32,000-token default output limit are compromises not established by the order and can conflict with unstinted key thinking.",
+   "Y assumes usage.is_byok and restricts the release to OpenAI-compatible chat completions; neither is established by the brief, so the real Fable and OpenRouter fixtures must validate those assumptions.",
+   "Y's estate_usd=max(observatory_usd, local_month_usd) can understate current estate spend when Observatory lags, rather than reliably representing all projects' totalUsd. Its null-cost recovery is also internally inconsistent: appending a manual record does not remove the original row that spend.py check will continue to fail."
+  ],
+  "score": {
+   "Y": 8,
+   "X": 7
+  }
+ },
+ "raw": "{\n  \"ranking\": [\"Y\", \"X\"],\n  \"pick\": \"Y\",\n  \"why\": \"Option Y is the more complete and buildable implementation specification. Design 1 explicitly reviews the spec loop, research, council, planning, build and remaining HTTP call sites, while C1-C7 define concrete configuration, CLIs, validation rules, ledger rows, summaries, warnings and exit codes, with T1-T24 covering them. It also follows two literal requirements that X relaxes without support: REQ-4 permits exactly one HTTP request per validator with no retry, whereas X/D11 can issue a second request; and Y applies the paid thinker/writer split to every size, whereas X/D3 invents a size-S exemption despite the order giving none. Y's finally-appended spend rows, O_APPEND/flock writes, cost-preserving --judge-only behaviour, branch-specific BYOK accounting, Observatory-backed ceiling reporting and Rollout-6 quality canary are also more operationally complete. X has the clearer owner's-estate role table and strong requirement traceability, but its four thinker artefact kinds lack equally complete output and integration contracts, D18 unconditionally adds cost fields and could double-count when upstream cost is already included, and Q4-Q17 leave many implementation decisions marked pending.\",\n  \"risks\": [\n    \"Y never explicitly requires the deployed routine role to be Fable on subscription and worker/main to be Opus 5.5 on subscription; Rollout step 4 merely says to write real ids. X states this owner-specific mapping correctly.\",\n    \"Y's subscription --from-file degraded path still permits non-API meanings, and its 2,000,000-byte input limit and 32,000-token default output limit are compromises not established by the order and can conflict with unstinted key thinking.\",\n    \"Y assumes usage.is_byok and restricts the release to OpenAI-compatible chat completions; neither is established by the brief, so the real Fable and OpenRouter fixtures must validate those assumptions.\",\n    \"Y's estate_usd=max(observatory_usd, local_month_usd) can understate current estate spend when Observatory lags, rather than reliably representing all projects' totalUsd. Its null-cost recovery is also internally inconsistent: appending a manual record does not remove the original row that spend.py check will continue to fail.\"\n  ],\n  \"score\": {\n    \"Y\": 8,\n    \"X\": 7\n  }\n}"
+}

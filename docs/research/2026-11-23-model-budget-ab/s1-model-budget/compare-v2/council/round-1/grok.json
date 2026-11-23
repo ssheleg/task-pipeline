@@ -1,0 +1,40 @@
+{
+ "meta": {
+  "id": "grok",
+  "model": "x-ai/grok-4.7",
+  "family": "xai",
+  "at": "2026-11-23T19:46:26Z",
+  "route": "tokens",
+  "finish": "stop",
+  "cost": 0.187134,
+  "cost_source": "openrouter",
+  "cost_known": true,
+  "tokens_in": 26088,
+  "tokens_out": 22781,
+  "seconds": 341.1,
+  "served_by": "x-ai/grok-4.7",
+  "parsed": true
+ },
+ "verdict": {
+  "ranking": [
+   "X",
+   "Y"
+  ],
+  "pick": "X",
+  "why": "Against the 2026-11-23 order, X is what a zero-context implementer can build without inventing the product. Meanings are decisions the writer must cite and must not fill (Design 3, C3, REQ-3); the thinker prompt is given verbatim (C2). Validators get exactly one HTTP request (REQ-4), matching 'one request each.' The measured BYOK case (usage.cost=0, real cost in upstream_inference_cost) is cost-rule case 3, not a sum. Every model HTTP attempt is ledgered with route, model, cost and task, or not sent (REQ-8, Design 5, REQ-9). Day and month are one summary (C7); --judge-only keeps panel rows (REQ-7). Routine vs worker vs specialists is assigned in the call-site review (Design 1), which is the order's three subscription lines. Y contradicts the order: D9/R7 retry a validator when the first attempt has no usage; D2 exempts size S though the order gives no size cut; C2 has the thinker emit Contracts, Non-goals and Risks, so token spend covers text the writer was supposed to write; D17/R5 book only attempts that returned usage and still spend if the ledger write fails (exit 3, row on stderr). D15/R6 lock c+u whenever c<u, which the 2026-11-23 measurement does not support and Y's own Risks say can double-count. R15 cannot be executed: Q23 records that no Size M spec exists at 26bb446. Y also shows the meanings to every seat (R7), which drops the blind panel the facts state; X keeps the panel blind and gives meanings to the judge only (Design 4).",
+  "risks": [
+   "X does not actually decide the verdict. Design 4 and T22 skip the judge when panel spend exceeds the cap; REQ-12 says the thinker is never skipped for money; the order says Fable gives the final verdict. An implementer following the test will stint the verdict.",
+   "Design 5 case 1 invents usage.is_byok and sums router+upstream. The brief only measures cost=0 plus upstream_inference_cost. If that flag appears with a real usage.cost, the ceiling maths double-count.",
+   "The five named validators are not refused at load (Q4, Design 4). Only Rollout step 4 drops the sixth vendor. Skip that step and the six-vendor panel the order replaces stays.",
+   "Scope leaves plan_audit.py and pipeline stage tokens unchanged, so Design 1 rows 9-10 need not become code. Stages can keep the old pinned model.",
+   "If estate_cmd fails and there is no cache, Design 6 reports local-only and can print ok while Observatory's estate total, across projects, is near USD 5,000.",
+   "A null-cost ok row cannot be fixed: the ledger is append-only, record adds a second line, and check keeps failing. The 'four ledger classes' in C3 are not named. T16 does not scan requests., so the only-HTTP-call claim is holey.",
+   "Both specs are heavier than the order. The smaller build is a host role file, one append-only cost row, the two ledger bugfixes, a day/month total, and a warning off Observatory totalUsd. X's gaps.md, kind taxonomy, projection and degraded path are rework the brief does not require."
+  ],
+  "score": {
+   "X": 7,
+   "Y": 5
+  }
+ },
+ "raw": "{\"ranking\":[\"X\",\"Y\"],\"pick\":\"X\",\"why\":\"Against the 2026-11-23 order, X is what a zero-context implementer can build without inventing the product. Meanings are decisions the writer must cite and must not fill (Design 3, C3, REQ-3); the thinker prompt is given verbatim (C2). Validators get exactly one HTTP request (REQ-4), matching 'one request each.' The measured BYOK case (usage.cost=0, real cost in upstream_inference_cost) is cost-rule case 3, not a sum. Every model HTTP attempt is ledgered with route, model, cost and task, or not sent (REQ-8, Design 5, REQ-9). Day and month are one summary (C7); --judge-only keeps panel rows (REQ-7). Routine vs worker vs specialists is assigned in the call-site review (Design 1), which is the order's three subscription lines. Y contradicts the order: D9/R7 retry a validator when the first attempt has no usage; D2 exempts size S though the order gives no size cut; C2 has the thinker emit Contracts, Non-goals and Risks, so token spend covers text the writer was supposed to write; D17/R5 book only attempts that returned usage and still spend if the ledger write fails (exit 3, row on stderr). D15/R6 lock c+u whenever c<u, which the 2026-11-23 measurement does not support and Y's own Risks say can double-count. R15 cannot be executed: Q23 records that no Size M spec exists at 26bb446. Y also shows the meanings to every seat (R7), which drops the blind panel the facts state; X keeps the panel blind and gives meanings to the judge only (Design 4).\",\"risks\":[\"X does not actually decide the verdict. Design 4 and T22 skip the judge when panel spend exceeds the cap; REQ-12 says the thinker is never skipped for money; the order says Fable gives the final verdict. An implementer following the test will stint the verdict.\",\"Design 5 case 1 invents usage.is_byok and sums router+upstream. The brief only measures cost=0 plus upstream_inference_cost. If that flag appears with a real usage.cost, the ceiling maths double-count.\",\"The five named validators are not refused at load (Q4, Design 4). Only Rollout step 4 drops the sixth vendor. Skip that step and the six-vendor panel the order replaces stays.\",\"Scope leaves plan_audit.py and pipeline stage tokens unchanged, so Design 1 rows 9-10 need not become code. Stages can keep the old pinned model.\",\"If estate_cmd fails and there is no cache, Design 6 reports local-only and can print ok while Observatory's estate total, across projects, is near USD 5,000.\",\"A null-cost ok row cannot be fixed: the ledger is append-only, record adds a second line, and check keeps failing. The 'four ledger classes' in C3 are not named. T16 does not scan requests., so the only-HTTP-call claim is holey.\",\"Both specs are heavier than the order. The smaller build is a host role file, one append-only cost row, the two ledger bugfixes, a day/month total, and a warning off Observatory totalUsd. X's gaps.md, kind taxonomy, projection and degraded path are rework the brief does not require.\"],\"score\":{\"X\":7,\"Y\":5}}"
+}

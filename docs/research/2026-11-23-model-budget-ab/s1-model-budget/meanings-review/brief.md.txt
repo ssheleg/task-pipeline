@@ -1,0 +1,41 @@
+# Brief: model and token budget by role in task-pipeline
+
+Size: M. Repository: task-pipeline (a skill: doctrine in Markdown plus standard-library Python scripts that agents run).
+
+## The owner's order (2026-11-23, relayed by the Fabric CEO; his words, translated)
+
+Fable 5.2 through the API (paid by tokens) is used only for the key thinking: decisions, the meaning and the key
+features of a spec, analysis and planning that decide something; there it is used without stinting. The spec's text
+itself is written by writer agents on Opus 5.5 subscriptions from Fable's meanings. Smart but routine work runs on Fable
+in a subscription session; the main work on Opus 5.5 subscriptions; code and mathematics specialist agents on
+subscriptions. Decision validators (GLM, Kimi, Grok, Gemini, Astra) answer through tokens, one request each. The usage of
+every token route is tracked.
+
+What to do: (1) review where the spec loop, the consilium script, research and other stages call which model and on
+which route; (2) bring them to the rule: split spec definition into meanings (Fable by API) and text (Opus writer on
+the subscription); consilium validators one call each by tokens, Fable gives the final verdict; (3) spend accounting:
+every token call written with route, model, cost and task; a day and month summary visible to the owner (through
+Observatory or OpenRouter); a warning when the estate approaches the development-mode ceiling of USD 5,000 a month;
+(4) do not lose quality.
+
+## Facts
+
+- `scripts/consilium.py` (v1.113.0) runs a blind panel of six vendors through OpenRouter and a final judge
+  (Fable 5.2); its ledger records cost per call. Measured on 2026-11-23: a call through our own OpenAI key (BYOK)
+  returns `usage.cost = 0` with the real cost in `usage.cost_details.upstream_inference_cost`; a `--judge-only`
+  rerun zeroes the panel's cost in the round's ledger.
+- `scripts/spec_protocol.py` has a `research validate` verb that calls one validator model; it records usage but
+  no cost.
+- The previous rule (2026-11-22) said the spec's author is the session's own model and a paid author runs only on the
+  owner's request; this order replaces it.
+- Observatory (the estate's inventory tool) already measures every project's monthly spend at the providers
+  (`tools/spend.py project --json`, field `totalUsd`).
+- The repository's Markdown is under a word-count ratchet: doctrine may not grow in total words.
+
+## What the council reviews
+
+The artefact is the MEANINGS of the spec (goal, key features, decisions, contracts, non-goals, risks, owner
+questions), written by the thinker before a writer turns them into the spec's text. The writer may not change a
+meaning, so an error here becomes an error in the spec. Judge: is every item of the owner's order honoured
+literally (no exception the order does not make, no retry where it says one request)? Is every decision correct
+against the brief's facts, and does each contract say how it is proven? Is any tactical question pushed to the owner?

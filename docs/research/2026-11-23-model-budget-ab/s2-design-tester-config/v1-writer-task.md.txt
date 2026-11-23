@@ -1,0 +1,24 @@
+Your job: write the spec `/Users/sshlg/DATA/_worktrees/tp-model-budget/docs/research/2026-11-23-model-budget-ab/s2-design-tester-config/after-spec.md` from the meanings in `/Users/sshlg/DATA/_worktrees/tp-model-budget/docs/research/2026-11-23-model-budget-ab/s2-design-tester-config/meanings.md` for the brief in `/Users/sshlg/DATA/_worktrees/tp-model-budget/docs/research/2026-11-23-model-budget-ab/s2-design-tester-config/brief.md`.
+You are the writer on the subscription; the meanings were decided by the thinker and are not yours to change.
+
+End result: `/Users/sshlg/DATA/_worktrees/tp-model-budget/docs/research/2026-11-23-model-budget-ab/s2-design-tester-config/after-spec.md` exists, carries `Size: M` and `Meanings: /Users/sshlg/DATA/_worktrees/tp-model-budget/docs/research/2026-11-23-model-budget-ab/s2-design-tester-config/meanings.md` in its header, and turns every
+meaning into the sections `references/spec-protocol.md` owes for size M: every key feature into a
+requirement with an acceptance check, every decision into the Decisions table with its reason, every
+contract into its exact shape. Nothing in it contradicts the meanings; nothing in the meanings is missing.
+
+Done when: `python3 <skill>/scripts/spec_protocol.py check /Users/sshlg/DATA/_worktrees/tp-model-budget/docs/research/2026-11-23-model-budget-ab/s2-design-tester-config/after-spec.md` exits 0, and a closing pass over the
+meanings, line by line, finds each one in the spec.
+
+Work in waves: write the sections, then a closing pass that rereads the whole spec against the meanings and
+lists what was missed or left vague; fix it in the same run. A gap the meanings do not settle is not filled
+by invention: write it into `## Questions` with the class `unknown` and a default, and go on. Do not stop
+between steps for approval; the limits are the meanings and the brief.
+
+Return: the path of the spec, the output of the check, and the list of open questions with their defaults.
+Context: read the brief and the meanings first; the documents the brief names; do not change any other file.
+
+Experiment note (A/B of 2026-11-23, both arms alike): this spec carries no research dossier, so write
+`Research: none (A/B experiment)` in the header; the check's research error is expected and the only one
+allowed. The skill lives at `/Users/sshlg/DATA/_worktrees/tp-model-budget/plugins/task-pipeline/skills/task-pipeline/scripts/..` (`<skill>` above). The brief's input documents are `/Users/sshlg/DATA/_worktrees/tp-model-budget/docs/research/2026-11-23-model-budget-ab/s2-design-tester-config/input-*.txt`
+(copies of the repository's files at commit 26bb446). Write in English, never the em dash character. Do not open
+any `before-spec*` file in this folder: it is the other arm of a blind comparison.

@@ -1,0 +1,152 @@
+{
+ "meta": {
+  "id": "grok",
+  "model": "x-ai/grok-4.7",
+  "family": "xai",
+  "at": "2026-11-23T19:55:12Z",
+  "route": "tokens",
+  "finish": "stop",
+  "cost": 0.212676,
+  "cost_source": "openrouter",
+  "cost_known": true,
+  "tokens_in": 5787,
+  "tokens_out": 33805,
+  "seconds": 481.6,
+  "served_by": "x-ai/grok-4.7",
+  "parsed": true
+ },
+ "verdict": {
+  "verdict": "revise",
+  "score": 4,
+  "summary": "The order is not honoured literally: D9 allows a retry, D2 and the non-goals exempt size S and the short path, and the questions section reopens decisions the order already made. One validator role cannot name five models, the cost rule adds fields the measured BYOK fact does not, and fidelity, replay, routes, and the owner-visible summary are not proven.",
+  "findings": [
+   {
+    "id": "retry-not-allowed",
+    "severity": "blocker",
+    "where": "D9; Contracts One request each",
+    "issue": "The order says one request each. D9 allows a second request when the first returns no usage, and the check allows it because a no-usage attempt writes no row. A floor of three parsed verdicts must not become a reason for another request.",
+    "fix": "Delete the retry. Attempt each named validator once per round, including transport failure. Ledger every attempt, with cost 0 and a status when no usage was returned. The check requires exactly one attempt row per configured validator per round and fails on a second. If fewer than three verdicts parse, fail the round with no further request."
+   },
+   {
+    "id": "size-and-short-path",
+    "severity": "blocker",
+    "where": "D2; Non-goals; Questions 3",
+    "issue": "The order gives meanings to Fable by API and text to the Opus subscription writer, with no size or path exemption. D2 and the non-goal restore the 2026-11-22 session author for size S and an undefined short path.",
+    "fix": "Delete the size gate, the non-goal 'No paid thinker for size S or the short path', and question 3. Apply the meanings/text split to every path that writes a spec."
+   },
+   {
+    "id": "owner-questions",
+    "severity": "blocker",
+    "where": "Questions for the owner",
+    "issue": "All three questions are tactical. The order already requires a warning, not a stop, and an estate ceiling of USD 5,000. Asking reopens D21 and D23, and D3 would force the questions into the spec.",
+    "fix": "Replace the three questions with 'None.' Keep warn-only and the estate total against USD 5,000. Do not add a blocking mode."
+   },
+   {
+    "id": "ids-versus-doctrine",
+    "severity": "blocker",
+    "where": "Goal table; Key features 1; Non-goals; D26",
+    "issue": "The goal names Fable 5.2, Opus 5.5, and the five vendors, while the non-goal forbids model ids in doctrine. The writer may not change a meaning, so the writer cannot satisfy both.",
+    "fix": "In text the writer must copy, name roles only. Bind the models in the host-config contract: thinker is the order's Fable 5.2 on the API, writer is the order's Opus 5.5 on a subscription, validators are the five named vendors. Doctrine says 'as named in the 2026-11-23 order, values only in roles.json'."
+   },
+   {
+    "id": "validator-cardinality",
+    "severity": "blocker",
+    "where": "Goal; Key features 1; D1; D8",
+    "issue": "Each role resolves to one model, and the only validator role is singular, but the order names five validators. That map cannot build the panel. Research validate has no model source. 'Drop the sixth seat' can drop the wrong vendor if seat order is used.",
+    "fix": "Replace the single validator role with a config list of exactly five objects, each with vendor, model, route api, endpoint, and key_env. The vendor set must equal GLM, Kimi, Grok, Gemini, Astra. Add a separate one-model api entry research_validate for the existing research-validate call. The check calls those five by vendor, not 'length 5 after deleting seat 6'."
+   },
+   {
+    "id": "cost-sum-unmeasured",
+    "severity": "major",
+    "where": "D15; Contracts Cost rule; Risks",
+    "issue": "The measured fact is usage.cost 0 and the real cost in upstream_inference_cost. D15 adds c and u whenever c < u, and the fixture requires 0.02+0.40=0.42. The decision's own rationale says summing double-counts. Addition is not in the facts. c=0 and u=0 also falls through to unpriced.",
+    "fix": "If c is 0 or absent and u is present and u>0, cost_usd=u and cost_source=upstream. If c is 0 and u is 0, cost_usd=0 and cost_source=provider. If c>0, cost_usd=c and cost_source=provider; do not add u. Else price-table, else unpriced. Replace the third fixture with c=0.02, u=0.40 giving 0.02 provider. Keep the raw fields. An unpriced row fails the round."
+   },
+   {
+    "id": "panel-cap-skips",
+    "severity": "major",
+    "where": "D11",
+    "issue": "max_usd_per_round bounds panel spend, while only the judge 'always runs'. That can skip validators the order says must answer. The order asked for an estate warning, not a round cap.",
+    "fix": "Delete max_usd_per_round. Never skip a validator or the judge for money. The only money signal is the D21 estate warning."
+   },
+   {
+    "id": "subscription-thinker-fallback",
+    "severity": "major",
+    "where": "D24",
+    "issue": "If the Fable API key is missing, key thinking moves to subscription Fable. That breaks the API-only rule for decisions and, with D25, leaves those calls untracked. The order does not allow the substitute.",
+    "fix": "Delete the subscription fallback. If the thinker API key is missing, stop before definition, name the missing key, and do not call a model. Do not alias thinker to routine."
+   },
+   {
+    "id": "fidelity-ids-only",
+    "severity": "major",
+    "where": "D3; Contracts Meanings fidelity; Risks",
+    "issue": "The script check compares decision ids, not decision text. The writer can change a meaning, keep D<n>, and pass. The risk admits only the panel might notice, so D3's claim that a script checks fidelity is false.",
+    "fix": "Require each Decisions line D<n> in the spec to equal the meanings line byte for byte. Fail on any extra, missing, or altered line. Keep the panel only as a second check for prose outside those lines."
+   },
+   {
+    "id": "table-contradicts-d6",
+    "severity": "major",
+    "where": "Goal table; D6",
+    "issue": "The table sends all plan decisions and every Resolution to thinker. D6 limits plan decisions to size L and Resolution to a disagree. M plan decisions and agree-path Resolutions have no role.",
+    "fix": "Change D6 to match the table. Any plan decision, at every size, is a thinker call. Whenever a Resolution is written, thinker writes it, agree or disagree. Delete 'for L' and 'only on a disagree'."
+   },
+   {
+    "id": "routine-closed-list",
+    "severity": "major",
+    "where": "Goal table last row",
+    "issue": "The order puts smart but routine work on subscription Fable. The table names citation rechecks and diff review, which reads as a closed list, so other non-deciding judgment can stay on the session model.",
+    "fix": "Define routine as every judgment that does not decide a meaning, a plan, or a verdict. State that citation recheck and diff review are examples. The subagent list must map each such step to routine, and the check fails on a mismatch."
+   },
+   {
+    "id": "ceiling-projection",
+    "severity": "major",
+    "where": "D21; Contracts Ceiling",
+    "issue": "'ok below 80%' contradicts the projection rule. The fixture says 3999.99 is ok with no day, but early in the month that figure projects over 5000. The day-10 fixture warns on 2000, so warn becomes the normal state. Nothing proves a call still proceeds at 5000.",
+    "fix": "Delete the projection clause. States: ok below 4000, warn from 4000, critical from 4750, over from 5000, unknown with no figure. Fixtures: 3999.99 ok, 4000 warn, 4750 critical, 5000 over, no figure unknown. Add a fixture that the token call still runs when the state is over and that the warning is recorded."
+   },
+   {
+    "id": "replay-unproven",
+    "severity": "major",
+    "where": "D28; D29; Risks; Contracts",
+    "issue": "'Do not lose quality' has no contract. Two specs, a tie, and a judge that wrote the meanings do not prove it. It does not gate merge; D29 postpones review to 2026-12-07 with no measurement.",
+    "fix": "Add a merge-gate contract. Rebuild two finished specs, strip labels, randomize order, and have the five validators compare them with the thinker recused. Fail merge if either new spec loses, a loss being three or more validators preferring the old. The 2026-12-07 check is a script: fail if the round-1 pass rate of the first three split specs is below the pre-split rate, or if more than one accepted finding says the writer changed a meaning."
+   },
+   {
+    "id": "summary-not-visible",
+    "severity": "major",
+    "where": "D20; D22; Non-goals",
+    "issue": "The order requires the day and month summary visible through Observatory or OpenRouter. D22 only asks Observatory to render JSON, and the non-goal forbids Observatory code changes. OpenRouter understates BYOK, so it is not the cost view. 'The build step records the real shape' defers the contract.",
+    "fix": "Read the ceiling from Observatory's existing totalUsd. Commit a board-row file in this repo that points at spend_ledger.py summary --month --json and --day, and check that the file exists. Accept only an object with totalUsd, or a list of those objects to sum; any other shape is unknown and fails check. Delete 'asks' and the build-step discovery sentence. If Observatory does not load an in-repo board row, drop the non-goal and name the one Observatory change. Do not cite OpenRouter as the cost display."
+   },
+   {
+    "id": "reconciliation-vacuous",
+    "severity": "major",
+    "where": "Contracts Reconciliation",
+    "issue": "Requiring the host ledger sum to be at most the whole-estate total passes when every call cost is wrong or missing. It does not prove the cost rule.",
+    "fix": "Delete that comparison. Prove cost only with the D15 fixtures and the round-row equality check. Label the ledger summary as this host and the Observatory figure as the estate, and never present one as the other."
+   },
+   {
+    "id": "routes-unproven",
+    "severity": "major",
+    "where": "D1; D14; D12; D25; Contracts Role resolution",
+    "issue": "Nothing proves thinker and validators are api, or writer, routine, worker, and the specialists are subscription. D1's route enum and D14's ledger route enum have no mapping, so BYOK can be mislabeled. llm_call can bill a subscription role. Non-ledgering of subscription calls is unchecked.",
+    "fix": "Fail role resolution unless thinker, every validators entry, and research_validate are api, and writer, routine, worker, specialist-code, and specialist-math are subscription. Add config boolean byok. Ledger route is openrouter or direct-api, plus byok. Delete openrouter-byok unless defined as byok true and host openrouter. llm_call on a subscription role exits 2 and writes no row. A subscription launch test asserts zero new ledger rows."
+   },
+   {
+    "id": "ledger-write-lost",
+    "severity": "major",
+    "where": "D17",
+    "issue": "If the ledger write fails, the row goes to stderr and the result is kept. Stderr is not the ledger, so a billed call can be untracked.",
+    "fix": "On write failure, append the same row to the spend directory's uncommitted.jsonl and exit 3. spend_ledger.py check exits 1 if that file has any line. Do not treat stderr as the record."
+   },
+   {
+    "id": "network-scan-vague",
+    "severity": "minor",
+    "where": "Contracts Single call path",
+    "issue": "'Opens a network connection to a model endpoint' is not a decidable scan, so the single-path claim is unverifiable.",
+    "fix": "The test fails if any file under scripts/ other than llm_call.py imports urllib, http.client, or socket, or contains the configured model endpoint hosts."
+   }
+  ]
+ },
+ "raw": "{\"verdict\":\"revise\",\"score\":4,\"summary\":\"The order is not honoured literally: D9 allows a retry, D2 and the non-goals exempt size S and the short path, and the questions section reopens decisions the order already made. One validator role cannot name five models, the cost rule adds fields the measured BYOK fact does not, and fidelity, replay, routes, and the owner-visible summary are not proven.\",\"findings\":[{\"id\":\"retry-not-allowed\",\"severity\":\"blocker\",\"where\":\"D9; Contracts One request each\",\"issue\":\"The order says one request each. D9 allows a second request when the first returns no usage, and the check allows it because a no-usage attempt writes no row. A floor of three parsed verdicts must not become a reason for another request.\",\"fix\":\"Delete the retry. Attempt each named validator once per round, including transport failure. Ledger every attempt, with cost 0 and a status when no usage was returned. The check requires exactly one attempt row per configured validator per round and fails on a second. If fewer than three verdicts parse, fail the round with no further request.\"},{\"id\":\"size-and-short-path\",\"severity\":\"blocker\",\"where\":\"D2; Non-goals; Questions 3\",\"issue\":\"The order gives meanings to Fable by API and text to the Opus subscription writer, with no size or path exemption. D2 and the non-goal restore the 2026-11-22 session author for size S and an undefined short path.\",\"fix\":\"Delete the size gate, the non-goal 'No paid thinker for size S or the short path', and question 3. Apply the meanings/text split to every path that writes a spec.\"},{\"id\":\"owner-questions\",\"severity\":\"blocker\",\"where\":\"Questions for the owner\",\"issue\":\"All three questions are tactical. The order already requires a warning, not a stop, and an estate ceiling of USD 5,000. Asking reopens D21 and D23, and D3 would force the questions into the spec.\",\"fix\":\"Replace the three questions with 'None.' Keep warn-only and the estate total against USD 5,000. Do not add a blocking mode.\"},{\"id\":\"ids-versus-doctrine\",\"severity\":\"blocker\",\"where\":\"Goal table; Key features 1; Non-goals; D26\",\"issue\":\"The goal names Fable 5.2, Opus 5.5, and the five vendors, while the non-goal forbids model ids in doctrine. The writer may not change a meaning, so the writer cannot satisfy both.\",\"fix\":\"In text the writer must copy, name roles only. Bind the models in the host-config contract: thinker is the order's Fable 5.2 on the API, writer is the order's Opus 5.5 on a subscription, validators are the five named vendors. Doctrine says 'as named in the 2026-11-23 order, values only in roles.json'.\"},{\"id\":\"validator-cardinality\",\"severity\":\"blocker\",\"where\":\"Goal; Key features 1; D1; D8\",\"issue\":\"Each role resolves to one model, and the only validator role is singular, but the order names five validators. That map cannot build the panel. Research validate has no model source. 'Drop the sixth seat' can drop the wrong vendor if seat order is used.\",\"fix\":\"Replace the single validator role with a config list of exactly five objects, each with vendor, model, route api, endpoint, and key_env. The vendor set must equal GLM, Kimi, Grok, Gemini, Astra. Add a separate one-model api entry research_validate for the existing research-validate call. The check calls those five by vendor, not 'length 5 after deleting seat 6'.\"},{\"id\":\"cost-sum-unmeasured\",\"severity\":\"major\",\"where\":\"D15; Contracts Cost rule; Risks\",\"issue\":\"The measured fact is usage.cost 0 and the real cost in upstream_inference_cost. D15 adds c and u whenever c < u, and the fixture requires 0.02+0.40=0.42. The decision's own rationale says summing double-counts. Addition is not in the facts. c=0 and u=0 also falls through to unpriced.\",\"fix\":\"If c is 0 or absent and u is present and u>0, cost_usd=u and cost_source=upstream. If c is 0 and u is 0, cost_usd=0 and cost_source=provider. If c>0, cost_usd=c and cost_source=provider; do not add u. Else price-table, else unpriced. Replace the third fixture with c=0.02, u=0.40 giving 0.02 provider. Keep the raw fields. An unpriced row fails the round.\"},{\"id\":\"panel-cap-skips\",\"severity\":\"major\",\"where\":\"D11\",\"issue\":\"max_usd_per_round bounds panel spend, while only the judge 'always runs'. That can skip validators the order says must answer. The order asked for an estate warning, not a round cap.\",\"fix\":\"Delete max_usd_per_round. Never skip a validator or the judge for money. The only money signal is the D21 estate warning.\"},{\"id\":\"subscription-thinker-fallback\",\"severity\":\"major\",\"where\":\"D24\",\"issue\":\"If the Fable API key is missing, key thinking moves to subscription Fable. That breaks the API-only rule for decisions and, with D25, leaves those calls untracked. The order does not allow the substitute.\",\"fix\":\"Delete the subscription fallback. If the thinker API key is missing, stop before definition, name the missing key, and do not call a model. Do not alias thinker to routine.\"},{\"id\":\"fidelity-ids-only\",\"severity\":\"major\",\"where\":\"D3; Contracts Meanings fidelity; Risks\",\"issue\":\"The script check compares decision ids, not decision text. The writer can change a meaning, keep D<n>, and pass. The risk admits only the panel might notice, so D3's claim that a script checks fidelity is false.\",\"fix\":\"Require each Decisions line D<n> in the spec to equal the meanings line byte for byte. Fail on any extra, missing, or altered line. Keep the panel only as a second check for prose outside those lines.\"},{\"id\":\"table-contradicts-d6\",\"severity\":\"major\",\"where\":\"Goal table; D6\",\"issue\":\"The table sends all plan decisions and every Resolution to thinker. D6 limits plan decisions to size L and Resolution to a disagree. M plan decisions and agree-path Resolutions have no role.\",\"fix\":\"Change D6 to match the table. Any plan decision, at every size, is a thinker call. Whenever a Resolution is written, thinker writes it, agree or disagree. Delete 'for L' and 'only on a disagree'.\"},{\"id\":\"routine-closed-list\",\"severity\":\"major\",\"where\":\"Goal table last row\",\"issue\":\"The order puts smart but routine work on subscription Fable. The table names citation rechecks and diff review, which reads as a closed list, so other non-deciding judgment can stay on the session model.\",\"fix\":\"Define routine as every judgment that does not decide a meaning, a plan, or a verdict. State that citation recheck and diff review are examples. The subagent list must map each such step to routine, and the check fails on a mismatch.\"},{\"id\":\"ceiling-projection\",\"severity\":\"major\",\"where\":\"D21; Contracts Ceiling\",\"issue\":\"'ok below 80%' contradicts the projection rule. The fixture says 3999.99 is ok with no day, but early in the month that figure projects over 5000. The day-10 fixture warns on 2000, so warn becomes the normal state. Nothing proves a call still proceeds at 5000.\",\"fix\":\"Delete the projection clause. States: ok below 4000, warn from 4000, critical from 4750, over from 5000, unknown with no figure. Fixtures: 3999.99 ok, 4000 warn, 4750 critical, 5000 over, no figure unknown. Add a fixture that the token call still runs when the state is over and that the warning is recorded.\"},{\"id\":\"replay-unproven\",\"severity\":\"major\",\"where\":\"D28; D29; Risks; Contracts\",\"issue\":\"'Do not lose quality' has no contract. Two specs, a tie, and a judge that wrote the meanings do not prove it. It does not gate merge; D29 postpones review to 2026-12-07 with no measurement.\",\"fix\":\"Add a merge-gate contract. Rebuild two finished specs, strip labels, randomize order, and have the five validators compare them with the thinker recused. Fail merge if either new spec loses, a loss being three or more validators preferring the old. The 2026-12-07 check is a script: fail if the round-1 pass rate of the first three split specs is below the pre-split rate, or if more than one accepted finding says the writer changed a meaning.\"},{\"id\":\"summary-not-visible\",\"severity\":\"major\",\"where\":\"D20; D22; Non-goals\",\"issue\":\"The order requires the day and month summary visible through Observatory or OpenRouter. D22 only asks Observatory to render JSON, and the non-goal forbids Observatory code changes. OpenRouter understates BYOK, so it is not the cost view. 'The build step records the real shape' defers the contract.\",\"fix\":\"Read the ceiling from Observatory's existing totalUsd. Commit a board-row file in this repo that points at spend_ledger.py summary --month --json and --day, and check that the file exists. Accept only an object with totalUsd, or a list of those objects to sum; any other shape is unknown and fails check. Delete 'asks' and the build-step discovery sentence. If Observatory does not load an in-repo board row, drop the non-goal and name the one Observatory change. Do not cite OpenRouter as the cost display.\"},{\"id\":\"reconciliation-vacuous\",\"severity\":\"major\",\"where\":\"Contracts Reconciliation\",\"issue\":\"Requiring the host ledger sum to be at most the whole-estate total passes when every call cost is wrong or missing. It does not prove the cost rule.\",\"fix\":\"Delete that comparison. Prove cost only with the D15 fixtures and the round-row equality check. Label the ledger summary as this host and the Observatory figure as the estate, and never present one as the other.\"},{\"id\":\"routes-unproven\",\"severity\":\"major\",\"where\":\"D1; D14; D12; D25; Contracts Role resolution\",\"issue\":\"Nothing proves thinker and validators are api, or writer, routine, worker, and the specialists are subscription. D1's route enum and D14's ledger route enum have no mapping, so BYOK can be mislabeled. llm_call can bill a subscription role. Non-ledgering of subscription calls is unchecked.\",\"fix\":\"Fail role resolution unless thinker, every validators entry, and research_validate are api, and writer, routine, worker, specialist-code, and specialist-math are subscription. Add config boolean byok. Ledger route is openrouter or direct-api, plus byok. Delete openrouter-byok unless defined as byok true and host openrouter. llm_call on a subscription role exits 2 and writes no row. A subscription launch test asserts zero new ledger rows.\"},{\"id\":\"ledger-write-lost\",\"severity\":\"major\",\"where\":\"D17\",\"issue\":\"If the ledger write fails, the row goes to stderr and the result is kept. Stderr is not the ledger, so a billed call can be untracked.\",\"fix\":\"On write failure, append the same row to the spend directory's uncommitted.jsonl and exit 3. spend_ledger.py check exits 1 if that file has any line. Do not treat stderr as the record.\"},{\"id\":\"network-scan-vague\",\"severity\":\"minor\",\"where\":\"Contracts Single call path\",\"issue\":\"'Opens a network connection to a model endpoint' is not a decidable scan, so the single-path claim is unverifiable.\",\"fix\":\"The test fails if any file under scripts/ other than llm_call.py imports urllib, http.client, or socket, or contains the configured model endpoint hosts.\"}]}"
+}

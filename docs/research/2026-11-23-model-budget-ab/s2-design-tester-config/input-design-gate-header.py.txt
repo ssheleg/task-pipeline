@@ -1,0 +1,40 @@
+#!/usr/bin/env python3
+"""The design-review gate: the test panel and the design-tester's report, as commands
+with an exit code. Stdlib only.
+
+    design_gate.py panel  <docs/ux/test-panel.md> [--min 10] [--json]
+        the test panel the design-tester walks: ten portraits (or --min), each with its
+        basis, situation, goals, features, composite scenarios, activation funnel,
+        retention loop and needs. A portrait without a basis line is refused: a panel is a
+        hypothesis instrument, and saying so is part of the portrait. Each retention line
+        opens with `local` or `tourist`, and the panel holds at least two of each (1.101.0).
+        Each needs line opens with `novice`, `regular` or `expert`; a panel that names any
+        level holds at least two novices and one expert, and one that names none is warned.
+    design_gate.py report <design-review.json> --class <surface_class>
+                          [--panel <test-panel.md>] [--scope SCR-01,SCR-02] [--require build]
+                          [--max-passes 1] [--subscription] [--json]
+        stage 3 (`--require design`) and stage 6 (`--require build`): the report covers
+        every scope scenario × every panel persona that uses it, every step carries the
+        full checklist, no `breaks` finding is open, each round holds at most --max-passes
+        passes of each kind, and the resource receipt shows every process it started closed.
+        `--subscription` (or a `subscription` block in the report): the surface sells, renews
+        or cancels a subscription, so cancelling takes no more steps than subscribing and the
+        paywall makes one clear offer (1.101.0).
+
+    design_gate.py browser <pipeline.json> [--repo DIR] [--json]
+        the recorded test browser: `browser.primary` is set (NOT_RUN when the block is
+        absent: stage 0 asks the operator once), the fallback names known drivers, and
+        `browser.storageState`, a credential, sits outside the repository.
+
+`<surface_class>` is the brief's stage-0 answer: flagship | product | internal | ad. On
+flagship, product and ad the review is a GATE; on internal the report is checked for honesty
+and its coverage only reported (`references/design-review.md`).
+
+**A check that could not run says NOT_RUN, and NOT_RUN is never PASS.** No report on a gated
+class is NOT_RUN; a step whose capture could not be taken is NOT_RUN with its reason.
+
+Exit codes: 0 PASS · 1 FAIL · 2 usage, or an input that cannot be read · 3 NOT_RUN.
+"""
+from __future__ import annotations
+
+import argparse

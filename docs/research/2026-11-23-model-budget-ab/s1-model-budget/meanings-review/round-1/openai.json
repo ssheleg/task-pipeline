@@ -1,0 +1,96 @@
+{
+ "meta": {
+  "id": "openai",
+  "model": "openai/gpt-6.2-astra-pro",
+  "family": "openai",
+  "at": "2026-11-23T19:48:01Z",
+  "route": "tokens",
+  "finish": "stop",
+  "cost": 0.25731,
+  "cost_source": "byok",
+  "cost_known": true,
+  "tokens_in": 18979,
+  "tokens_out": 3719,
+  "seconds": 51.2,
+  "served_by": "openai/gpt-6.2-astra-pro",
+  "parsed": true
+ },
+ "verdict": {
+  "verdict": "block",
+  "score": 3,
+  "summary": "The meanings authorize subscription authorship of decisions, repeat validator requests, and an unsupported BYOK cost calculation. The proposed checks can pass with missing calls, an incomplete estate total, and no day summary visible to the owner.",
+  "findings": [
+   {
+    "id": "thinker-route",
+    "severity": "blocker",
+    "where": "Key features 2; D2, D6, D24; Non-goals",
+    "issue": "Size S, the short path, non-L planning and missing API credentials are treated as reasons to move or omit paid thinking. The order distinguishes work by whether it decides something, not by size or key availability.",
+    "fix": "Require Fable 5.2 by API wherever spec meanings or binding analysis and plan decisions are made, and an Opus 5.5 subscription writer wherever spec text is produced. If the required route is unavailable, stop before that operation with an actionable configuration error; test S, M, L and short-path routing."
+   },
+   {
+    "id": "panel-requests",
+    "severity": "blocker",
+    "where": "D8–D11; Contracts / One request each",
+    "issue": "No reported usage does not mean no request or no charge. Counting positive-token rows and requiring three verdicts allows a retry, a skipped seat or a spend cap that cuts the panel short, all while passing the check.",
+    "fix": "Dispatch exactly once per named seat per round with transport retries and provider fallbacks disabled. Persist dispatch identity across restarts; mark a timeout or malformed response missing, never resend it. Test five distinct outbound requests including failures, zero panel dispatches on judge-only, and a Fable verdict with missing seats disclosed. Make the panel cap advisory, not a seat-selection rule."
+   },
+   {
+    "id": "cost-rule",
+    "severity": "blocker",
+    "where": "Call-site table / consilium judge; D15; Contracts / Cost rule; Risks",
+    "issue": "The measurement establishes c=0 with upstream cost on the own-OpenAI-key call, not on the Fable judge or on every route where c<u. The 0.02+0.40 fixture asserts additive charges without evidence; the rule also leaves c absent with u present undefined.",
+    "fix": "Attribute the measurement to the observed route. Use u for the verified BYOK zero-cost case and provider-reported cost for verified ordinary routes. Add fees only with route-specific evidence that they are separate charges. Preserve both raw values, distinguish absent from zero, and mark ambiguous cases unresolved until reconciled to provider records; replace the speculative fixture."
+   },
+   {
+    "id": "durable-accounting",
+    "severity": "blocker",
+    "where": "D12–D19; Contracts / Ledger completeness, Task attribution, Judge-only rerun",
+    "issue": "D17 loses every dispatch without returned usage, and stderr is not a durable ledger. Two ledgers can omit the same call and still have equal counts and sums; that check does not cover standalone research or thinker calls.",
+    "fix": "Durably reserve a unique call ID with task, requested route and model before dispatch; refuse dispatch if reservation fails. Record completion or unknown billing status under that ID, including timeouts and parse failures, and expose one logical call row without treating unknown cost as zero. Derive round views from those IDs. Test transport calls against IDs for each caller, concurrent writers, a post-dispatch crash, and preservation of the exact panel IDs and amounts on judge-only."
+   },
+   {
+    "id": "role-enforcement",
+    "severity": "major",
+    "where": "Goal; call-site table / research validate; D1, D8, D10, D14, D27; Contracts / Role resolution",
+    "issue": "One scalar validator role cannot resolve to five distinct seats. Non-placeholder validation and judge-to-config equality do not prove the configured model is Fable or uses the API. The config's api/subscription field also does not specify how to distinguish the three token ledger routes.",
+    "fix": "Define a five-seat validator map and bind research validate to one named token seat. Specify billing route and credential source separately from subscription/API execution. Validate effective model, route and distinct seat identities against the mandatory assignments before dispatch, including resolved default/inherit stages and writer, routine and specialist sessions. Add negative tests for wrong-family and right-model/wrong-route configurations."
+   },
+   {
+    "id": "revision-routing",
+    "severity": "major",
+    "where": "D5–D7; Contracts / Meanings fidelity",
+    "issue": "D5 requires escalation of a writer-discovered gap, but D6's exhaustive list forbids that revision unless the brief changes or the judge has already accepted a finding. A panel finding about changed meaning is reportable but not expressly a release gate.",
+    "fix": "Allow a writer-discovered missing decision to trigger a thinker revision. Distinguish incomplete source meanings from text that misstates complete meanings: send the former to the thinker and the latter to the writer. Require regenerated text against the current hash and no unresolved accepted fidelity finding before release; test unchanged decision IDs with altered meaning."
+   },
+   {
+    "id": "owner-surface",
+    "severity": "major",
+    "where": "D19, D20, D22; Non-goals; Risks / per-host ledger; Contracts / Summary",
+    "issue": "A local Markdown file and a board request do not deliver day and month summaries through Observatory or OpenRouter. The month arithmetic fixture cannot establish day filtering, owner access or coverage when multiple hosts make calls.",
+    "fix": "Make the owner surface a rollout dependency: publish deduplicated host call summaries to an owner-accessible supported view, showing UTC day and month, coverage, freshness and unresolved costs, separately from estate month spend. Require an acceptance check that reads both periods through that surface and matches known calls across hosts and a UTC day boundary."
+   },
+   {
+    "id": "estate-scope",
+    "severity": "major",
+    "where": "D20–D21; Contracts / Ceiling, Reconciliation",
+    "issue": "A valid totalUsd for one project can be mistaken for the estate; recording output shape does not prove project coverage. A host ledger below a possibly much larger estate total will not detect most double counting or omissions. The 3,999.99 fixture can also be warn by projection.",
+    "fix": "Verify coverage against Observatory's project inventory for the same billing month, summing each project once or consuming a verified estate aggregate. Return unknown for partial, stale or invalid coverage. Reconcile like-scoped provider/project/period totals with explicit lag and boundary handling; retain estate comparison only as a sanity check. Set dates in all ceiling fixtures and define over/critical precedence over projected warn."
+   },
+   {
+    "id": "rollout-gate",
+    "severity": "major",
+    "where": "D28–D29; Risks / Refuted if",
+    "issue": "Activation on merge is not conditioned on replay results or operational readiness. The first-three pass-rate comparison lacks a fixed baseline, and no action follows a failed quality review. A fixed ledger start date with no backfill also implies coverage before activation if merge is later.",
+    "fix": "Require replay passes, accounting tests and owner-surface verification before activation. Preselect comparable historical specs and define the pass-rate denominator and observation window; assign a maintainer to halt promotion and correct failures without reverting to an unauthorized route. Record actual activation time, label partial ledger periods and schedule the review relative to activation."
+   },
+   {
+    "id": "owner-questions",
+    "severity": "minor",
+    "where": "Questions for the owner 1–3",
+    "issue": "The brief already calls for a warning, identifies the estate ceiling, and gives no size exception. Asking the owner to settle these points leaves settled requirements open to renegotiation.",
+    "fix": "Replace the three questions with 'None.' State warning-only behavior, estate scope and decision-based routing as binding decisions."
+   }
+  ]
+ },
+ "raw": "{\n  \"verdict\": \"block\",\n  \"score\": 3,\n  \"summary\": \"The meanings authorize subscription authorship of decisions, repeat validator requests, and an unsupported BYOK cost calculation. The proposed checks can pass with missing calls, an incomplete estate total, and no day summary visible to the owner.\",\n  \"findings\": [\n    {\n      \"id\": \"thinker-route\",\n      \"severity\": \"blocker\",\n      \"where\": \"Key features 2; D2, D6, D24; Non-goals\",\n      \"issue\": \"Size S, the short path, non-L planning and missing API credentials are treated as reasons to move or omit paid thinking. The order distinguishes work by whether it decides something, not by size or key availability.\",\n      \"fix\": \"Require Fable 5.2 by API wherever spec meanings or binding analysis and plan decisions are made, and an Opus 5.5 subscription writer wherever spec text is produced. If the required route is unavailable, stop before that operation with an actionable configuration error; test S, M, L and short-path routing.\"\n    },\n    {\n      \"id\": \"panel-requests\",\n      \"severity\": \"blocker\",\n      \"where\": \"D8–D11; Contracts / One request each\",\n      \"issue\": \"No reported usage does not mean no request or no charge. Counting positive-token rows and requiring three verdicts allows a retry, a skipped seat or a spend cap that cuts the panel short, all while passing the check.\",\n      \"fix\": \"Dispatch exactly once per named seat per round with transport retries and provider fallbacks disabled. Persist dispatch identity across restarts; mark a timeout or malformed response missing, never resend it. Test five distinct outbound requests including failures, zero panel dispatches on judge-only, and a Fable verdict with missing seats disclosed. Make the panel cap advisory, not a seat-selection rule.\"\n    },\n    {\n      \"id\": \"cost-rule\",\n      \"severity\": \"blocker\",\n      \"where\": \"Call-site table / consilium judge; D15; Contracts / Cost rule; Risks\",\n      \"issue\": \"The measurement establishes c=0 with upstream cost on the own-OpenAI-key call, not on the Fable judge or on every route where c<u. The 0.02+0.40 fixture asserts additive charges without evidence; the rule also leaves c absent with u present undefined.\",\n      \"fix\": \"Attribute the measurement to the observed route. Use u for the verified BYOK zero-cost case and provider-reported cost for verified ordinary routes. Add fees only with route-specific evidence that they are separate charges. Preserve both raw values, distinguish absent from zero, and mark ambiguous cases unresolved until reconciled to provider records; replace the speculative fixture.\"\n    },\n    {\n      \"id\": \"durable-accounting\",\n      \"severity\": \"blocker\",\n      \"where\": \"D12–D19; Contracts / Ledger completeness, Task attribution, Judge-only rerun\",\n      \"issue\": \"D17 loses every dispatch without returned usage, and stderr is not a durable ledger. Two ledgers can omit the same call and still have equal counts and sums; that check does not cover standalone research or thinker calls.\",\n      \"fix\": \"Durably reserve a unique call ID with task, requested route and model before dispatch; refuse dispatch if reservation fails. Record completion or unknown billing status under that ID, including timeouts and parse failures, and expose one logical call row without treating unknown cost as zero. Derive round views from those IDs. Test transport calls against IDs for each caller, concurrent writers, a post-dispatch crash, and preservation of the exact panel IDs and amounts on judge-only.\"\n    },\n    {\n      \"id\": \"role-enforcement\",\n      \"severity\": \"major\",\n      \"where\": \"Goal; call-site table / research validate; D1, D8, D10, D14, D27; Contracts / Role resolution\",\n      \"issue\": \"One scalar validator role cannot resolve to five distinct seats. Non-placeholder validation and judge-to-config equality do not prove the configured model is Fable or uses the API. The config's api/subscription field also does not specify how to distinguish the three token ledger routes.\",\n      \"fix\": \"Define a five-seat validator map and bind research validate to one named token seat. Specify billing route and credential source separately from subscription/API execution. Validate effective model, route and distinct seat identities against the mandatory assignments before dispatch, including resolved default/inherit stages and writer, routine and specialist sessions. Add negative tests for wrong-family and right-model/wrong-route configurations.\"\n    },\n    {\n      \"id\": \"revision-routing\",\n      \"severity\": \"major\",\n      \"where\": \"D5–D7; Contracts / Meanings fidelity\",\n      \"issue\": \"D5 requires escalation of a writer-discovered gap, but D6's exhaustive list forbids that revision unless the brief changes or the judge has already accepted a finding. A panel finding about changed meaning is reportable but not expressly a release gate.\",\n      \"fix\": \"Allow a writer-discovered missing decision to trigger a thinker revision. Distinguish incomplete source meanings from text that misstates complete meanings: send the former to the thinker and the latter to the writer. Require regenerated text against the current hash and no unresolved accepted fidelity finding before release; test unchanged decision IDs with altered meaning.\"\n    },\n    {\n      \"id\": \"owner-surface\",\n      \"severity\": \"major\",\n      \"where\": \"D19, D20, D22; Non-goals; Risks / per-host ledger; Contracts / Summary\",\n      \"issue\": \"A local Markdown file and a board request do not deliver day and month summaries through Observatory or OpenRouter. The month arithmetic fixture cannot establish day filtering, owner access or coverage when multiple hosts make calls.\",\n      \"fix\": \"Make the owner surface a rollout dependency: publish deduplicated host call summaries to an owner-accessible supported view, showing UTC day and month, coverage, freshness and unresolved costs, separately from estate month spend. Require an acceptance check that reads both periods through that surface and matches known calls across hosts and a UTC day boundary.\"\n    },\n    {\n      \"id\": \"estate-scope\",\n      \"severity\": \"major\",\n      \"where\": \"D20–D21; Contracts / Ceiling, Reconciliation\",\n      \"issue\": \"A valid totalUsd for one project can be mistaken for the estate; recording output shape does not prove project coverage. A host ledger below a possibly much larger estate total will not detect most double counting or omissions. The 3,999.99 fixture can also be warn by projection.\",\n      \"fix\": \"Verify coverage against Observatory's project inventory for the same billing month, summing each project once or consuming a verified estate aggregate. Return unknown for partial, stale or invalid coverage. Reconcile like-scoped provider/project/period totals with explicit lag and boundary handling; retain estate comparison only as a sanity check. Set dates in all ceiling fixtures and define over/critical precedence over projected warn.\"\n    },\n    {\n      \"id\": \"rollout-gate\",\n      \"severity\": \"major\",\n      \"where\": \"D28–D29; Risks / Refuted if\",\n      \"issue\": \"Activation on merge is not conditioned on replay results or operational readiness. The first-three pass-rate comparison lacks a fixed baseline, and no action follows a failed quality review. A fixed ledger start date with no backfill also implies coverage before activation if merge is later.\",\n      \"fix\": \"Require replay passes, accounting tests and owner-surface verification before activation. Preselect comparable historical specs and define the pass-rate denominator and observation window; assign a maintainer to halt promotion and correct failures without reverting to an unauthorized route. Record actual activation time, label partial ledger periods and schedule the review relative to activation.\"\n    },\n    {\n      \"id\": \"owner-questions\",\n      \"severity\": \"minor\",\n      \"where\": \"Questions for the owner 1–3\",\n      \"issue\": \"The brief already calls for a warning, identifies the estate ceiling, and gives no size exception. Asking the owner to settle these points leaves settled requirements open to renegotiation.\",\n      \"fix\": \"Replace the three questions with 'None.' State warning-only behavior, estate scope and decision-based routing as binding decisions.\"\n    }\n  ]\n}"
+}

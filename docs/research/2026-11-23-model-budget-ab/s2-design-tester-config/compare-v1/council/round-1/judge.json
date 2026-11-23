@@ -1,0 +1,48 @@
+{
+ "meta": {
+  "id": "judge",
+  "model": "anthropic/claude-fable-5.2",
+  "family": "anthropic",
+  "at": "2026-11-23T19:25:14Z",
+  "route": "tokens",
+  "finish": "stop",
+  "cost": 0.28844,
+  "cost_source": "openrouter",
+  "cost_known": true,
+  "tokens_in": 28285,
+  "tokens_out": 1554,
+  "seconds": 16.0,
+  "served_by": "anthropic/claude-fable-5.2",
+  "parsed": true,
+  "letters": {
+   "gemini": "A",
+   "glm": "B",
+   "grok": "C",
+   "kimi": "D",
+   "openai": "E"
+  }
+ },
+ "ruling": {
+  "ranking": [
+   "Option X",
+   "Option Y"
+  ],
+  "pick": "Option X",
+  "why": "Criterion 1 decides first. The brief demands an answer \"taken, with a backlog row and a date, or why not\". X gives it: Rollout step 4 adds one row \"with both dates\", and step 5 replies \"Taken. Backlog row <id>. Persona configurations by <date 1>, stand intake by <date 2>\", with defaults 2026-12-07 and 2026-12-21 (Q2). Y gives no date: \"The dates are the owner's (Q1)\" and the Q1 default is \"the next minor release\", marked pending. That misses a stated deliverable and pushes it back to the owner.\n\nCriterion 2, buildability, also favours X. X names every condition with a code and an exit (C7 table) and ties each to a fixture (T-01 to T-22). Its stand path is verifiable now: REQ-8 checks a local `stand-captures/1` manifest, so \"run and cell exist, cell config equals row config... the file's SHA-256 matches\" without the gate touching the network. Y's gate only checks that `run`, `cell` and `build` are \"each a non-empty string\" (C5), so a mismatched stand capture passes. Y also admits a hole in its config-only check: a `clean_in.row` naming a persona that walked nothing is \"Not caught: the gate checks presence and a different configuration, not truth\". X's C4 requires the control to \"resolve to a row in the same report with the same scenario, step, pass and round\".\n\nY is internally inconsistent where it matters. Its C5 example row carries a non-empty `config_gap` and a finding with `\"config_only\": \"yes\"`, which its own R9 makes a FAIL. Its fifth `dir` axis creates the four-versus-five problem it concedes in Q12, which could turn every stand row NOT_RUN. X has a smaller slip: the C3 example shows a full `config_applied` alongside a `config_gap`, which its own edge case rejects as `CFG-ROW-SYNTAX`.\n\nCriterion 3: Y marks all thirteen questions \"pending\", including tactical ones such as line syntax (Q3) and JSON field names (Q7), even though defaults are given. X leaves only strategy to the owner and unknowns to the stand owner. X's Q7 and Q8 do push parser markup to the implementer, and here Y is genuinely better grounded: it cites `FIELD`, `FIELDS`, `panel_notes`, `report_check` and `test/design_gate_test.py`. That is Y's real merit and A's point is fair, but it does not outweigh the missing date and the weaker gate.\n\nCriterion 4: both invent. X adds a manifest schema, a `pipeline.json` stand block and an unconfirmed platform flag table (Q9). Y adds a mandatory baseline persona, duplicate and stacked-axis warnings, a third `unverified` state, and a rule that super-ux `ux-foundation` assigns configurations. X's inventions serve verification; Y's add constraints and a cross-repository dependency (\"Until it lands every panel stays in the warned state\"), where X lets projects \"add the line by hand\".\n\nWorth carrying over from Y into X: R9 (no config-only claim on a gap row) and R18 (resources block still required on stand rows).",
+  "risks": [
+   "X's stand intake step 4 says \"Untagged `explore` screenshots serve no row\", yet the brief names `explore` runs as a source; reuse depends on the stand tagging captures by scenario and step.",
+   "X's phase 2 date (2026-12-21) is promised in the reply while Q5 and Q6 (door export contract, client key) are unanswered; the fetch step cannot ship until they are.",
+   "`CFG-STAND-NOBUILD` is only a warning, so stand rows can pass without `--build` and stale captures can slip through.",
+   "X's direction derivation embeds a script and language list in the gate; a locale outside the list is silently treated as ltr.",
+   "X's realization table writes unconfirmed xcrun, adb and browser flags into doctrine (Q9); wrong flags mean rework.",
+   "X's C3 example contradicts its own validator (full `config_applied` plus `config_gap`); the implementer must fix the example.",
+   "X's Q7 and Q8 leave the portrait markup and finding shape to be read from the existing parser, since X did not cite the source files as Y did.",
+   "Unconfigured panels keep passing in both options, so no coverage is delivered until projects add configurations to all ten portraits."
+  ],
+  "score": {
+   "Option X": 8,
+   "Option Y": 6
+  }
+ },
+ "raw": "{\"ranking\":[\"Option X\",\"Option Y\"],\"pick\":\"Option X\",\"why\":\"Criterion 1 decides first. The brief demands an answer \\\"taken, with a backlog row and a date, or why not\\\". X gives it: Rollout step 4 adds one row \\\"with both dates\\\", and step 5 replies \\\"Taken. Backlog row <id>. Persona configurations by <date 1>, stand intake by <date 2>\\\", with defaults 2026-12-07 and 2026-12-21 (Q2). Y gives no date: \\\"The dates are the owner's (Q1)\\\" and the Q1 default is \\\"the next minor release\\\", marked pending. That misses a stated deliverable and pushes it back to the owner.\\n\\nCriterion 2, buildability, also favours X. X names every condition with a code and an exit (C7 table) and ties each to a fixture (T-01 to T-22). Its stand path is verifiable now: REQ-8 checks a local `stand-captures/1` manifest, so \\\"run and cell exist, cell config equals row config... the file's SHA-256 matches\\\" without the gate touching the network. Y's gate only checks that `run`, `cell` and `build` are \\\"each a non-empty string\\\" (C5), so a mismatched stand capture passes. Y also admits a hole in its config-only check: a `clean_in.row` naming a persona that walked nothing is \\\"Not caught: the gate checks presence and a different configuration, not truth\\\". X's C4 requires the control to \\\"resolve to a row in the same report with the same scenario, step, pass and round\\\".\\n\\nY is internally inconsistent where it matters. Its C5 example row carries a non-empty `config_gap` and a finding with `\\\"config_only\\\": \\\"yes\\\"`, which its own R9 makes a FAIL. Its fifth `dir` axis creates the four-versus-five problem it concedes in Q12, which could turn every stand row NOT_RUN. X has a smaller slip: the C3 example shows a full `config_applied` alongside a `config_gap`, which its own edge case rejects as `CFG-ROW-SYNTAX`.\\n\\nCriterion 3: Y marks all thirteen questions \\\"pending\\\", including tactical ones such as line syntax (Q3) and JSON field names (Q7), even though defaults are given. X leaves only strategy to the owner and unknowns to the stand owner. X's Q7 and Q8 do push parser markup to the implementer, and here Y is genuinely better grounded: it cites `FIELD`, `FIELDS`, `panel_notes`, `report_check` and `test/design_gate_test.py`. That is Y's real merit and A's point is fair, but it does not outweigh the missing date and the weaker gate.\\n\\nCriterion 4: both invent. X adds a manifest schema, a `pipeline.json` stand block and an unconfirmed platform flag table (Q9). Y adds a mandatory baseline persona, duplicate and stacked-axis warnings, a third `unverified` state, and a rule that super-ux `ux-foundation` assigns configurations. X's inventions serve verification; Y's add constraints and a cross-repository dependency (\\\"Until it lands every panel stays in the warned state\\\"), where X lets projects \\\"add the line by hand\\\".\\n\\nWorth carrying over from Y into X: R9 (no config-only claim on a gap row) and R18 (resources block still required on stand rows).\",\"risks\":[\"X's stand intake step 4 says \\\"Untagged `explore` screenshots serve no row\\\", yet the brief names `explore` runs as a source; reuse depends on the stand tagging captures by scenario and step.\",\"X's phase 2 date (2026-12-21) is promised in the reply while Q5 and Q6 (door export contract, client key) are unanswered; the fetch step cannot ship until they are.\",\"`CFG-STAND-NOBUILD` is only a warning, so stand rows can pass without `--build` and stale captures can slip through.\",\"X's direction derivation embeds a script and language list in the gate; a locale outside the list is silently treated as ltr.\",\"X's realization table writes unconfirmed xcrun, adb and browser flags into doctrine (Q9); wrong flags mean rework.\",\"X's C3 example contradicts its own validator (full `config_applied` plus `config_gap`); the implementer must fix the example.\",\"X's Q7 and Q8 leave the portrait markup and finding shape to be read from the existing parser, since X did not cite the source files as Y did.\",\"Unconfigured panels keep passing in both options, so no coverage is delivered until projects add configurations to all ten portraits.\"],\"score\":{\"Option X\":8,\"Option Y\":6}}"
+}

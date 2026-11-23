@@ -1,0 +1,89 @@
+{
+ "meta": {
+  "id": "gemini",
+  "model": "google/gemini-4-argon",
+  "family": "google",
+  "at": "2026-11-23T19:47:46Z",
+  "route": "tokens",
+  "finish": "stop",
+  "cost": 0.029046,
+  "cost_source": "openrouter",
+  "cost_known": true,
+  "tokens_in": 4833,
+  "tokens_out": 1938,
+  "seconds": 35.9,
+  "served_by": "google/gemini-4-argon",
+  "parsed": true
+ },
+ "verdict": {
+  "verdict": "revise",
+  "score": 6,
+  "summary": "The meanings introduce unrequested exceptions to the owner's strict model and route rules (for size S specs and missing API keys), and push three already-answered or tactical questions back to the owner. Additionally, the roles schema cannot represent multiple validators, the `consilium.py decide` replay check violates the new panel composition rules, and the ceiling projection formula fails on the first day of the month.",
+  "findings": [
+   {
+    "id": "unapproved-size-s-exception",
+    "severity": "blocker",
+    "where": "Key features 2, D2, Non-goals line 5, Contracts (Meanings fidelity)",
+    "issue": "D2 exempts size S specs from the thinker/writer split ('Size S stays on the session with one validator'). The owner's order explicitly replaces the 'session's own model' rule and mandates the split for spec definition without any size exception. The brief asks the council to judge whether every item of the order is honoured literally with 'no exception the order does not make'.",
+    "fix": "Change D2 and Key features 2 so that all spec definitions (S, M, and L) use the `thinker` (Fable 5.2 API) for meanings and `writer` (Opus 5.5 subscription) for text. Remove 'No paid thinker for size S or the short path' from Non-goals, and update Contracts (Meanings fidelity) to apply to S, M, and L."
+   },
+   {
+    "id": "unapproved-route-fallback",
+    "severity": "blocker",
+    "where": "D24",
+    "issue": "D24 allows `thinker` to fall back to a subscription session when the Fable API key is missing, and per D25, subscription calls are not ledgered. This violates two literal rules in the owner's order: that key thinking uses 'Fable 5.2 through the API (paid by tokens)' and that every thinker call is tracked in spend accounting.",
+    "fix": "Replace D24 with a fail-fast rule: if the `thinker` API key (`key_env`) is missing or empty, `llm_call.py` refuses the call and exits 2 before any work runs."
+   },
+   {
+    "id": "tactical-owner-questions",
+    "severity": "major",
+    "where": "Questions for the owner (1, 2, 3)",
+    "issue": "The brief asks whether any tactical question is pushed to the owner. All three questions are either already answered in the brief or are unauthorized exceptions: Q1 asks whether to block or warn (the brief explicitly says 'a warning when the estate approaches...'), Q2 asks if the ceiling is for the estate (the brief explicitly says 'when the estate approaches the development-mode ceiling of USD 5,000 a month'), and Q3 asks about the size S exception (which the order does not make).",
+    "fix": "Delete Questions 1, 2, and 3, and set the 'Questions for the owner' section to 'None.'"
+   },
+   {
+    "id": "validator-role-cardinality",
+    "severity": "major",
+    "where": "Key features 1, D1, D8",
+    "issue": "Key features 1 and D1 state that each of the seven roles (including singular `validator`) resolves to 'one model on one route' (`Each role carries model, route...`). However, D8 requires a panel of five distinct validator models (GLM, Kimi, Grok, Gemini, Astra) and `research validate` calls one validator. A single `model` string on the `validator` role cannot configure five panel models.",
+    "fix": "Amend Key features 1 and D1 so that the `validator` role holds an ordered list of five validator model entries (for GLM, Kimi, Grok, Gemini, Astra), each with `model`, `route`, `endpoint`, `key_env`, and optional `price`, and specify which entry (e.g., the first or a named key) `spec_protocol.py research validate` uses."
+   },
+   {
+    "id": "owner-visibility-broken",
+    "severity": "major",
+    "where": "D22, Non-goals line 1",
+    "issue": "The owner's order requires 'a day and month summary visible to the owner (through Observatory or OpenRouter)'. D22 states that OpenRouter understates BYOK cost and relies on Observatory by adding a 'board row [that] asks Observatory to render the `--json` output', while Non-goals says 'No change to Observatory's code'. If Observatory is not changed during this task and OpenRouter is inaccurate for BYOK, the requirement for an accurate day and month summary visible to the owner is not met upon delivery.",
+    "fix": "Either include the Observatory rendering change in scope, or specify in D22 how the generated `~/.local/state/task-pipeline/spend/summary.md` is published to an existing owner-visible surface in Observatory without code changes (e.g., writing to a path Observatory already indexes and displays)."
+   },
+   {
+    "id": "replay-test-violates-d6-d8",
+    "severity": "major",
+    "where": "D28, Risks (Refuted if)",
+    "issue": "D28 mandates using `consilium.py decide` to compare old and new specs in the replay test, and D6 states `thinker` makes 'these calls and no others' (which omits `decide`). Furthermore, if `consilium.py` is updated per D8, the panel has 5 validators, whereas `consilium.py decide` is not accounted for in the call site table or D6, and it is unstated how `decide` runs without violating D6 or how a tie is determined across 5 panelists and 1 judge.",
+    "fix": "Add `consilium.py decide` (for replay/A-B evaluation) to the allowed `thinker` calls in D6 and the call-site table, and specify the exact pass condition in D28 (e.g., judge verdict in `judge.json` selects the new spec or declares a tie on both replays)."
+   },
+   {
+    "id": "observatory-cmd-unpinned",
+    "severity": "minor",
+    "where": "D20, Risks line 2",
+    "issue": "The brief states as a given fact that Observatory measures every project's monthly spend via `tools/spend.py project --json`, field `totalUsd`. D20 treats this as an unverified host-configured command (`observatory_spend_cmd`) whose output shape must be discovered during the build step.",
+    "fix": "In D20, pin the default `observatory_spend_cmd` to `tools/spend.py project --json` and define the parser contract against its JSON output (`totalUsd` summed across project entries)."
+   },
+   {
+    "id": "projection-day-zero-math",
+    "severity": "minor",
+    "where": "D21, Contracts (Ceiling)",
+    "issue": "D21 defines the projection warning as 'month-to-date divided by elapsed days times days in the month reaches USD 5,000'. On day 1 of the month before a full day has elapsed (or if 'elapsed days' is 0-indexed), dividing by elapsed days causes a division by zero or inflates a single morning call by 30x.",
+    "fix": "Specify in D21 and the Ceiling contract that elapsed days is the 1-indexed UTC day-of-month (`max(1, utc_day)`), and only evaluate the projection rule when `utc_day >= 3` (or another fixed minimum day threshold) to prevent day-1 false alarms."
+   },
+   {
+    "id": "refutation-baseline-undefined",
+    "severity": "minor",
+    "where": "Risks (Refuted if)",
+    "issue": "The refutation condition 'the round-1 pass rate of the first three split specs is below that of earlier specs' is unverifiable because 'earlier specs' has no defined sample or numerical baseline.",
+    "fix": "Replace 'that of earlier specs' with a fixed numerical threshold or a specific cohort (e.g., 'below the round-1 pass rate of the last 10 M/L specs prior to 2026-11-23')."
+   }
+  ]
+ },
+ "raw": "{\n  \"verdict\": \"revise\",\n  \"score\": 6,\n  \"summary\": \"The meanings introduce unrequested exceptions to the owner's strict model and route rules (for size S specs and missing API keys), and push three already-answered or tactical questions back to the owner. Additionally, the roles schema cannot represent multiple validators, the `consilium.py decide` replay check violates the new panel composition rules, and the ceiling projection formula fails on the first day of the month.\",\n  \"findings\": [\n    {\n      \"id\": \"unapproved-size-s-exception\",\n      \"severity\": \"blocker\",\n      \"where\": \"Key features 2, D2, Non-goals line 5, Contracts (Meanings fidelity)\",\n      \"issue\": \"D2 exempts size S specs from the thinker/writer split ('Size S stays on the session with one validator'). The owner's order explicitly replaces the 'session's own model' rule and mandates the split for spec definition without any size exception. The brief asks the council to judge whether every item of the order is honoured literally with 'no exception the order does not make'.\",\n      \"fix\": \"Change D2 and Key features 2 so that all spec definitions (S, M, and L) use the `thinker` (Fable 5.2 API) for meanings and `writer` (Opus 5.5 subscription) for text. Remove 'No paid thinker for size S or the short path' from Non-goals, and update Contracts (Meanings fidelity) to apply to S, M, and L.\"\n    },\n    {\n      \"id\": \"unapproved-route-fallback\",\n      \"severity\": \"blocker\",\n      \"where\": \"D24\",\n      \"issue\": \"D24 allows `thinker` to fall back to a subscription session when the Fable API key is missing, and per D25, subscription calls are not ledgered. This violates two literal rules in the owner's order: that key thinking uses 'Fable 5.2 through the API (paid by tokens)' and that every thinker call is tracked in spend accounting.\",\n      \"fix\": \"Replace D24 with a fail-fast rule: if the `thinker` API key (`key_env`) is missing or empty, `llm_call.py` refuses the call and exits 2 before any work runs.\"\n    },\n    {\n      \"id\": \"tactical-owner-questions\",\n      \"severity\": \"major\",\n      \"where\": \"Questions for the owner (1, 2, 3)\",\n      \"issue\": \"The brief asks whether any tactical question is pushed to the owner. All three questions are either already answered in the brief or are unauthorized exceptions: Q1 asks whether to block or warn (the brief explicitly says 'a warning when the estate approaches...'), Q2 asks if the ceiling is for the estate (the brief explicitly says 'when the estate approaches the development-mode ceiling of USD 5,000 a month'), and Q3 asks about the size S exception (which the order does not make).\",\n      \"fix\": \"Delete Questions 1, 2, and 3, and set the 'Questions for the owner' section to 'None.'\"\n    },\n    {\n      \"id\": \"validator-role-cardinality\",\n      \"severity\": \"major\",\n      \"where\": \"Key features 1, D1, D8\",\n      \"issue\": \"Key features 1 and D1 state that each of the seven roles (including singular `validator`) resolves to 'one model on one route' (`Each role carries model, route...`). However, D8 requires a panel of five distinct validator models (GLM, Kimi, Grok, Gemini, Astra) and `research validate` calls one validator. A single `model` string on the `validator` role cannot configure five panel models.\",\n      \"fix\": \"Amend Key features 1 and D1 so that the `validator` role holds an ordered list of five validator model entries (for GLM, Kimi, Grok, Gemini, Astra), each with `model`, `route`, `endpoint`, `key_env`, and optional `price`, and specify which entry (e.g., the first or a named key) `spec_protocol.py research validate` uses.\"\n    },\n    {\n      \"id\": \"owner-visibility-broken\",\n      \"severity\": \"major\",\n      \"where\": \"D22, Non-goals line 1\",\n      \"issue\": \"The owner's order requires 'a day and month summary visible to the owner (through Observatory or OpenRouter)'. D22 states that OpenRouter understates BYOK cost and relies on Observatory by adding a 'board row [that] asks Observatory to render the `--json` output', while Non-goals says 'No change to Observatory's code'. If Observatory is not changed during this task and OpenRouter is inaccurate for BYOK, the requirement for an accurate day and month summary visible to the owner is not met upon delivery.\",\n      \"fix\": \"Either include the Observatory rendering change in scope, or specify in D22 how the generated `~/.local/state/task-pipeline/spend/summary.md` is published to an existing owner-visible surface in Observatory without code changes (e.g., writing to a path Observatory already indexes and displays).\"\n    },\n    {\n      \"id\": \"replay-test-violates-d6-d8\",\n      \"severity\": \"major\",\n      \"where\": \"D28, Risks (Refuted if)\",\n      \"issue\": \"D28 mandates using `consilium.py decide` to compare old and new specs in the replay test, and D6 states `thinker` makes 'these calls and no others' (which omits `decide`). Furthermore, if `consilium.py` is updated per D8, the panel has 5 validators, whereas `consilium.py decide` is not accounted for in the call site table or D6, and it is unstated how `decide` runs without violating D6 or how a tie is determined across 5 panelists and 1 judge.\",\n      \"fix\": \"Add `consilium.py decide` (for replay/A-B evaluation) to the allowed `thinker` calls in D6 and the call-site table, and specify the exact pass condition in D28 (e.g., judge verdict in `judge.json` selects the new spec or declares a tie on both replays).\"\n    },\n    {\n      \"id\": \"observatory-cmd-unpinned\",\n      \"severity\": \"minor\",\n      \"where\": \"D20, Risks line 2\",\n      \"issue\": \"The brief states as a given fact that Observatory measures every project's monthly spend via `tools/spend.py project --json`, field `totalUsd`. D20 treats this as an unverified host-configured command (`observatory_spend_cmd`) whose output shape must be discovered during the build step.\",\n      \"fix\": \"In D20, pin the default `observatory_spend_cmd` to `tools/spend.py project --json` and define the parser contract against its JSON output (`totalUsd` summed across project entries).\"\n    },\n    {\n      \"id\": \"projection-day-zero-math\",\n      \"severity\": \"minor\",\n      \"where\": \"D21, Contracts (Ceiling)\",\n      \"issue\": \"D21 defines the projection warning as 'month-to-date divided by elapsed days times days in the month reaches USD 5,000'. On day 1 of the month before a full day has elapsed (or if 'elapsed days' is 0-indexed), dividing by elapsed days causes a division by zero or inflates a single morning call by 30x.\",\n      \"fix\": \"Specify in D21 and the Ceiling contract that elapsed days is the 1-indexed UTC day-of-month (`max(1, utc_day)`), and only evaluate the projection rule when `utc_day >= 3` (or another fixed minimum day threshold) to prevent day-1 false alarms.\"\n    },\n    {\n      \"id\": \"refutation-baseline-undefined\",\n      \"severity\": \"minor\",\n      \"where\": \"Risks (Refuted if)\",\n      \"issue\": \"The refutation condition 'the round-1 pass rate of the first three split specs is below that of earlier specs' is unverifiable because 'earlier specs' has no defined sample or numerical baseline.\",\n      \"fix\": \"Replace 'that of earlier specs' with a fixed numerical threshold or a specific cohort (e.g., 'below the round-1 pass rate of the last 10 M/L specs prior to 2026-11-23').\"\n    }\n  ]\n}"
+}

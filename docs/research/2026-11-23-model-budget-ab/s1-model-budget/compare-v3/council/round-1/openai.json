@@ -1,0 +1,37 @@
+{
+ "meta": {
+  "id": "openai",
+  "model": "openai/gpt-6.2-astra-pro",
+  "family": "openai",
+  "at": "2026-11-23T20:18:19Z",
+  "route": "tokens",
+  "finish": "stop",
+  "cost": 0.5651704,
+  "cost_source": "byok",
+  "cost_known": true,
+  "tokens_in": 85592,
+  "tokens_out": 1061,
+  "seconds": 20.1,
+  "served_by": "openai/gpt-6.2-astra-pro",
+  "parsed": true
+ },
+ "verdict": {
+  "ranking": [
+   "X",
+   "Y"
+  ],
+  "pick": "X",
+  "why": "X makes the owner's order a release condition. R1–R3 require API thinker meanings and subscription writer text at every size; R8 tests that exactly the five named validators receive one request each and that even a cap overrun does not skip Fable's verdict. C4 handles the measured zero-router-cost BYOK case without adding upstream cost to a positive provider cost. R8 also tests that a judge-only rerun preserves panel spend. For rollout, R7 requires an actual Observatory readback of day and month totals, and R11 requires a blind quality comparison before merge. Y has useful operational details worth retaining: ledger writability is checked before dispatch (Design 5), summaries are refreshed at verb exit (Design 6), and stale meanings revisions fail validation (Design 3). But Y allows one-model operation or subscription-authored meanings, permits extra panelists, and explicitly tests skipping the judge when the panel exceeds its cap (Design 2–4, T22). Its Observatory deliverable ends at filing a board row, not demonstrating owner visibility (Rollout 7). These are differences in what can ship, not just implementation preferences.",
+  "risks": [
+   "X C9 assumes an inventory command and per-project IDs beyond the brief's confirmed `totalUsd` field. Run the Observatory probe before building the adapter: Rollout 3 may uncover a need for both inventory access and a display change, despite budgeting for one change.",
+   "X R4's read-only-directory test expects a fallback append in the same directory. Distinguish a failed primary-file write from an unwritable directory and test the stderr last resort separately.",
+   "X R8 requires a successful judge-only rerun to append a judge row, while R10 refuses a second successful verdict in one round run. C3 derives that run from the round directory. Define the rerun identity or exception before implementing deduplication.",
+   "Y Design 5 assumes positive router and upstream costs are additive when `is_byok` is true; the supplied measurement establishes only the zero-router case. Design 6 can also report an `ok` ceiling level from one host or an arbitrarily stale cache, neither of which establishes current estate spend."
+  ],
+  "score": {
+   "X": 8,
+   "Y": 5
+  }
+ },
+ "raw": "{\n  \"ranking\": [\"X\", \"Y\"],\n  \"pick\": \"X\",\n  \"why\": \"X makes the owner's order a release condition. R1–R3 require API thinker meanings and subscription writer text at every size; R8 tests that exactly the five named validators receive one request each and that even a cap overrun does not skip Fable's verdict. C4 handles the measured zero-router-cost BYOK case without adding upstream cost to a positive provider cost. R8 also tests that a judge-only rerun preserves panel spend. For rollout, R7 requires an actual Observatory readback of day and month totals, and R11 requires a blind quality comparison before merge. Y has useful operational details worth retaining: ledger writability is checked before dispatch (Design 5), summaries are refreshed at verb exit (Design 6), and stale meanings revisions fail validation (Design 3). But Y allows one-model operation or subscription-authored meanings, permits extra panelists, and explicitly tests skipping the judge when the panel exceeds its cap (Design 2–4, T22). Its Observatory deliverable ends at filing a board row, not demonstrating owner visibility (Rollout 7). These are differences in what can ship, not just implementation preferences.\",\n  \"risks\": [\n    \"X C9 assumes an inventory command and per-project IDs beyond the brief's confirmed `totalUsd` field. Run the Observatory probe before building the adapter: Rollout 3 may uncover a need for both inventory access and a display change, despite budgeting for one change.\",\n    \"X R4's read-only-directory test expects a fallback append in the same directory. Distinguish a failed primary-file write from an unwritable directory and test the stderr last resort separately.\",\n    \"X R8 requires a successful judge-only rerun to append a judge row, while R10 refuses a second successful verdict in one round run. C3 derives that run from the round directory. Define the rerun identity or exception before implementing deduplication.\",\n    \"Y Design 5 assumes positive router and upstream costs are additive when `is_byok` is true; the supplied measurement establishes only the zero-router case. Design 6 can also report an `ok` ceiling level from one host or an arbitrarily stale cache, neither of which establishes current estate spend.\"\n  ],\n  \"score\": {\"X\": 8, \"Y\": 5}\n}"
+}

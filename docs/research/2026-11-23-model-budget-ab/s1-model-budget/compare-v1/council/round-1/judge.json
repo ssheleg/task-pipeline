@@ -1,0 +1,50 @@
+{
+ "meta": {
+  "id": "judge",
+  "model": "anthropic/claude-fable-5.2",
+  "family": "anthropic",
+  "at": "2026-11-23T19:31:00Z",
+  "route": "tokens",
+  "finish": "stop",
+  "cost": 0.374072,
+  "cost_source": "openrouter",
+  "cost_known": true,
+  "tokens_in": 38309,
+  "tokens_out": 1690,
+  "seconds": 19.5,
+  "served_by": "anthropic/claude-fable-5.2",
+  "parsed": true,
+  "letters": {
+   "gemini": "A",
+   "glm": "B",
+   "grok": "C",
+   "kimi": "D",
+   "openai": "E"
+  }
+ },
+ "ruling": {
+  "ranking": [
+   "Y",
+   "X"
+  ],
+  "pick": "Y",
+  "why": "Y is the spec a zero-context implementer can build with the fewest questions, though it is not the more faithful one on every point.\n\n**Brief item (1), the review.** Y's Design 1 is a 12-row Today/Target table of call sites, with a grep step for \"any other script\". X has only a target role table and never states today's routes.\n\n**Item (2), validators.** The order says \"one request each\". Y REQ-4 holds this literally: \"exactly one HTTP request: no retry, no repair call\". X D11 allows \"one retry only when the first attempt returned no billed usage\". As Y notes, \"a timed-out request may already be billed\", so X's retry can exceed the order.\n\n**Criterion 3, decisions made.** X's own Questions table marks Q4 to Q17 as `pending`. These cover file and verb names, the price unit, the hash form, the Observatory JSON shape and the field spelling. X's Contracts close with \"Field names, verb names and streams in this section are the writer's form of the meanings' contracts (Q4, Q15)\". That pushes tactical questions to the owner, which the brief forbids. Y answers its tactical questions `by: agent` and leaves three strategy questions with defaults.\n\n**Criterion 2, buildable.** Y gives exact CLIs, exit codes, the system prompt, the C3 and C5 schemas, a five-branch cost rule, the write discipline (`O_APPEND`, `flock`, a row in `finally`) and the replacement doctrine text for the ratchet. X leaves the output contracts of three of its four thinker kinds unspecified and leaves Q11 (who makes the ruling) open.\n\n**Fidelity of the split.** X R7 checks only that meanings ids appear in the spec, so a writer can add a decision and pass. Y's `[M<n>]` tag rules fail untagged requirements, retired ids and stale revisions.\n\n**Size S.** X D3 exempts S from the paid thinker. The order has no such exemption, and X itself lists it as a pending strategy question.\n\n**Quality.** Y REQ-14 and Rollout step 6 measure quality against a baseline. X only names a refutation condition under Risks.\n\n**Where X is better, and it matters:**\n- **Role assignment.** X writes the owner's map down: routine is Fable on subscription, main is Opus 5.5, and the judge is always Fable. Y never does.\n- **Old rule.** Y's \"split not in force\" mode keeps the superseded 2026-11-22 rule alive on a host with no map. X fails at preflight instead.\n- **Judge context.** X's fresh-context judge (D12) and its rejected-findings list (D13) address self-judgement better than Y, which hands the judge its own meanings.\n- **Output limit.** X sends the model's maximum output. Y defaults to 32000 tokens.\n\nThese are a few lines of fixes to Y. X's gaps need a contracts pass.",
+  "risks": [
+   "Y never records the owner's assignment (routine is Fable on subscription, worker is Opus 5.5, specialists on subscriptions), so Rollout step 4 can be filled with the wrong ids. Copy X's role table into Y's rollout.",
+   "Y's \"split not in force\" fallback restores the replaced 2026-11-22 rule when the role map is missing or is the template. On the owner's estate that should be a preflight failure, as in X R1.",
+   "Y's cost rule depends on `usage.is_byok`, which the brief does not attest. Rule 2 would book the measured BYOK case as zero if that flag is false. The rule should take the upstream cost whenever `usage.cost` is 0 and upstream is present.",
+   "Y's fix for a null-cost row is a `record` entry, but `spend.py check` still fails on the original row, so the correction path contradicts itself.",
+   "Y caps the thinker at a 32000-token default output and 2,000,000 input bytes. Its `--from-file` degraded path also writes no spend row. All three sit badly with \"without stinting\"; the default should be the model's maximum.",
+   "Y checks judge identity and panel families only in `check`, after the money is spent. A host file with six panelists also \"keeps working\", against the five the order names. Both should be validated before the first POST.",
+   "Y gives the judge the thinker's own meanings, and only when `--meanings` is passed. That raises the self-judgement risk X's D12 and D13 mitigate. The flag should be required for split specs, and X's rejected-findings list adopted.",
+   "Y's `max(observatory_usd, local_month_usd)` with a cache \"of any age\" can understate estate spend or carry last month's figure into this month's warning.",
+   "Y bills a thinker call for size S. That follows the order's wording but may be spend the owner did not intend, so it should be raised with him.",
+   "Both options stop at a board row for the owner's Observatory view. The day and month summary is not proven visible until that row lands."
+  ],
+  "score": {
+   "Y": 8,
+   "X": 6
+  }
+ },
+ "raw": "{\"ranking\":[\"Y\",\"X\"],\"pick\":\"Y\",\"why\":\"Y is the spec a zero-context implementer can build with the fewest questions, though it is not the more faithful one on every point.\\n\\n**Brief item (1), the review.** Y's Design 1 is a 12-row Today/Target table of call sites, with a grep step for \\\"any other script\\\". X has only a target role table and never states today's routes.\\n\\n**Item (2), validators.** The order says \\\"one request each\\\". Y REQ-4 holds this literally: \\\"exactly one HTTP request: no retry, no repair call\\\". X D11 allows \\\"one retry only when the first attempt returned no billed usage\\\". As Y notes, \\\"a timed-out request may already be billed\\\", so X's retry can exceed the order.\\n\\n**Criterion 3, decisions made.** X's own Questions table marks Q4 to Q17 as `pending`. These cover file and verb names, the price unit, the hash form, the Observatory JSON shape and the field spelling. X's Contracts close with \\\"Field names, verb names and streams in this section are the writer's form of the meanings' contracts (Q4, Q15)\\\". That pushes tactical questions to the owner, which the brief forbids. Y answers its tactical questions `by: agent` and leaves three strategy questions with defaults.\\n\\n**Criterion 2, buildable.** Y gives exact CLIs, exit codes, the system prompt, the C3 and C5 schemas, a five-branch cost rule, the write discipline (`O_APPEND`, `flock`, a row in `finally`) and the replacement doctrine text for the ratchet. X leaves the output contracts of three of its four thinker kinds unspecified and leaves Q11 (who makes the ruling) open.\\n\\n**Fidelity of the split.** X R7 checks only that meanings ids appear in the spec, so a writer can add a decision and pass. Y's `[M<n>]` tag rules fail untagged requirements, retired ids and stale revisions.\\n\\n**Size S.** X D3 exempts S from the paid thinker. The order has no such exemption, and X itself lists it as a pending strategy question.\\n\\n**Quality.** Y REQ-14 and Rollout step 6 measure quality against a baseline. X only names a refutation condition under Risks.\\n\\n**Where X is better, and it matters:**\\n- **Role assignment.** X writes the owner's map down: routine is Fable on subscription, main is Opus 5.5, and the judge is always Fable. Y never does.\\n- **Old rule.** Y's \\\"split not in force\\\" mode keeps the superseded 2026-11-22 rule alive on a host with no map. X fails at preflight instead.\\n- **Judge context.** X's fresh-context judge (D12) and its rejected-findings list (D13) address self-judgement better than Y, which hands the judge its own meanings.\\n- **Output limit.** X sends the model's maximum output. Y defaults to 32000 tokens.\\n\\nThese are a few lines of fixes to Y. X's gaps need a contracts pass.\",\"risks\":[\"Y never records the owner's assignment (routine is Fable on subscription, worker is Opus 5.5, specialists on subscriptions), so Rollout step 4 can be filled with the wrong ids. Copy X's role table into Y's rollout.\",\"Y's \\\"split not in force\\\" fallback restores the replaced 2026-11-22 rule when the role map is missing or is the template. On the owner's estate that should be a preflight failure, as in X R1.\",\"Y's cost rule depends on `usage.is_byok`, which the brief does not attest. Rule 2 would book the measured BYOK case as zero if that flag is false. The rule should take the upstream cost whenever `usage.cost` is 0 and upstream is present.\",\"Y's fix for a null-cost row is a `record` entry, but `spend.py check` still fails on the original row, so the correction path contradicts itself.\",\"Y caps the thinker at a 32000-token default output and 2,000,000 input bytes. Its `--from-file` degraded path also writes no spend row. All three sit badly with \\\"without stinting\\\"; the default should be the model's maximum.\",\"Y checks judge identity and panel families only in `check`, after the money is spent. A host file with six panelists also \\\"keeps working\\\", against the five the order names. Both should be validated before the first POST.\",\"Y gives the judge the thinker's own meanings, and only when `--meanings` is passed. That raises the self-judgement risk X's D12 and D13 mitigate. The flag should be required for split specs, and X's rejected-findings list adopted.\",\"Y's `max(observatory_usd, local_month_usd)` with a cache \\\"of any age\\\" can understate estate spend or carry last month's figure into this month's warning.\",\"Y bills a thinker call for size S. That follows the order's wording but may be spend the owner did not intend, so it should be raised with him.\",\"Both options stop at a board row for the owner's Observatory view. The day and month summary is not proven visible until that row lands.\"],\"score\":{\"Y\":8,\"X\":6}}"
+}

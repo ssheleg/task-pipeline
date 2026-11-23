@@ -21,7 +21,7 @@
   and the report to the CEO, who decides on the full version.
 - **Open.** `Meanings:` is a warning for M and L in this release, an error in the next minor one. fabric-workspace's
   `memory_heal_model.py` books its spend only in its own output (a finding for that project).
-- **Next task.** After v1.113.0's release run finishes: merge this branch, tag `v1.114.0` (annotated) on the merge
+- **Next task.** After v1.113.1's release run finishes: merge this branch, tag `v1.114.0` (annotated) on the merge
   commit, watch the release, confirm npm `task-pipeline-skill@1.114.0`, `npx --yes sshlg-skills@latest update`,
   record the shipped state in `docs/evidence/verification.md`.
 

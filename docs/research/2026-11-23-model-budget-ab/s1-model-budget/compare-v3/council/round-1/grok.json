@@ -1,0 +1,39 @@
+{
+ "meta": {
+  "id": "grok",
+  "model": "x-ai/grok-4.7",
+  "family": "xai",
+  "at": "2026-11-23T20:22:27Z",
+  "route": "tokens",
+  "finish": "stop",
+  "cost": 0.16653,
+  "cost_source": "openrouter",
+  "cost_known": true,
+  "tokens_in": 28932,
+  "tokens_out": 18399,
+  "seconds": 268.4,
+  "served_by": "x-ai/grok-4.7",
+  "parsed": true
+ },
+ "verdict": {
+  "ranking": [
+   "X",
+   "Y"
+  ],
+  "pick": "X",
+  "why": "Criteria 1–3 pick X. The order replaces the 2026-11-22 session-author rule and requires Fable 5.2 by API, unstinted, for decisions; Opus subscription writers for text; exactly GLM, Kimi, Grok, Gemini and Astra, one token request each; Fable’s verdict; every token call ledgered with route, model, cost and task; a day/month view; a warning as the estate nears USD 5,000, not a stop. X’s call-site table, R1–R11, D8–D11, D15, D18, D23–D25 and C4 do that: judge is the thinker role, the cap never skips a call, usage.cost=0 is booked from upstream_inference_cost and never added to it, --judge-only only appends, research validate is one map-backed call with cost and task, subscriptions are not ledgered. Y would build a different rule. Design 2 keeps the old session-author behaviour whenever the split is not in force. Design 4 and Q4 leave the sixth seat legal. C2 still takes arbitrary --model/--endpoint/--key-env on research validate. T22 skips the judge when the panel exceeds the cap, contradicting REQ-12 and the order’s unconditional verdict. Design 3’s meanings --from-file path lets key thinking run on a subscription. Design 5 invents usage.is_byok and adds router+upstream, which the measured BYOK fact does not support. Design 6’s local-only estate is not the estate. Q1–Q3 are left pending, so criterion 3 fails. Y is the simpler contract, but simplicity that contradicts the order loses to X.",
+  "risks": [
+   "X is not what a zero-context implementer can build without rework: Q1 puts the meanings hash on a second Meanings-sha256 line so the base isfile check passes, while D4, C11 and R2 require Meanings: <path> sha256:<64 hex>.",
+   "C1’s slugs and prices (claude-fable-5.2, glm-5.3, kimi-k3.1-pro, grok-4.7, gemini-4-argon, gpt-6.2-astra-pro) are not in the brief; they are asserted from meanings-review/round-1/ledger.json. Rollout step 4 says to write that file. Copying it configures models the facts do not name. Only the template’s placeholders are safe.",
+   "R7 and C9 will not arm the USD 5,000 warning unless an invented observatory_inventory_cmd covers every project id. If that listing does not exist, estate stays unknown (D20) while D23 still sends calls, so the warning the order asked for never fires.",
+   "Done-when, D28 and C12 block merge on a replay over s2-design-tester-config, which the brief does not contain. Missing pairs mean the rule never activates.",
+   "X invents work the order did not ask for and that can stint or drop quality: a second Gemini research-validate for size L (the fact says one validator), removal of research merge, and D6/R10 refusing a second analysis, recommendation, plan or verdict. The advisory thresholds 4000/4750 and the day-3 projection are also unasked.",
+   "Criterion 5: 29 decisions, 22 questions and C1–C13 bury the two real clashes. An implementer who codes the Questions table rather than R2/C11 will fail the fidelity tests and reopen the header."
+  ],
+  "score": {
+   "X": 6,
+   "Y": 4
+  }
+ },
+ "raw": "{\"ranking\": [\"X\", \"Y\"], \"pick\": \"X\", \"why\": \"Criteria 1–3 pick X. The order replaces the 2026-11-22 session-author rule and requires Fable 5.2 by API, unstinted, for decisions; Opus subscription writers for text; exactly GLM, Kimi, Grok, Gemini and Astra, one token request each; Fable’s verdict; every token call ledgered with route, model, cost and task; a day/month view; a warning as the estate nears USD 5,000, not a stop. X’s call-site table, R1–R11, D8–D11, D15, D18, D23–D25 and C4 do that: judge is the thinker role, the cap never skips a call, usage.cost=0 is booked from upstream_inference_cost and never added to it, --judge-only only appends, research validate is one map-backed call with cost and task, subscriptions are not ledgered. Y would build a different rule. Design 2 keeps the old session-author behaviour whenever the split is not in force. Design 4 and Q4 leave the sixth seat legal. C2 still takes arbitrary --model/--endpoint/--key-env on research validate. T22 skips the judge when the panel exceeds the cap, contradicting REQ-12 and the order’s unconditional verdict. Design 3’s meanings --from-file path lets key thinking run on a subscription. Design 5 invents usage.is_byok and adds router+upstream, which the measured BYOK fact does not support. Design 6’s local-only estate is not the estate. Q1–Q3 are left pending, so criterion 3 fails. Y is the simpler contract, but simplicity that contradicts the order loses to X.\", \"risks\": [\"X is not what a zero-context implementer can build without rework: Q1 puts the meanings hash on a second Meanings-sha256 line so the base isfile check passes, while D4, C11 and R2 require Meanings: <path> sha256:<64 hex>.\", \"C1’s slugs and prices (claude-fable-5.2, glm-5.3, kimi-k3.1-pro, grok-4.7, gemini-4-argon, gpt-6.2-astra-pro) are not in the brief; they are asserted from meanings-review/round-1/ledger.json. Rollout step 4 says to write that file. Copying it configures models the facts do not name. Only the template’s placeholders are safe.\", \"R7 and C9 will not arm the USD 5,000 warning unless an invented observatory_inventory_cmd covers every project id. If that listing does not exist, estate stays unknown (D20) while D23 still sends calls, so the warning the order asked for never fires.\", \"Done-when, D28 and C12 block merge on a replay over s2-design-tester-config, which the brief does not contain. Missing pairs mean the rule never activates.\", \"X invents work the order did not ask for and that can stint or drop quality: a second Gemini research-validate for size L (the fact says one validator), removal of research merge, and D6/R10 refusing a second analysis, recommendation, plan or verdict. The advisory thresholds 4000/4750 and the day-3 projection are also unasked.\", \"Criterion 5: 29 decisions, 22 questions and C1–C13 bury the two real clashes. An implementer who codes the Questions table rather than R2/C11 will fail the fidelity tests and reopen the header.\"], \"score\": {\"X\": 6, \"Y\": 4}}"
+}

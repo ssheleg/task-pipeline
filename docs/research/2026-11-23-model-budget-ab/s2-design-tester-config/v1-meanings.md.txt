@@ -1,0 +1,140 @@
+# Meanings
+
+Thinker: anthropic/claude-fable-5.2
+Task: model-budget-ab
+
+## Goal and meaning
+
+Configuration-dependent defects (right-to-left, largest text, small screen, tablet, long words, dark theme) show only in the configuration that triggers them, and the design-tester walks every persona in one implicit default. The change gives each panel persona one device configuration, makes the judge look at the screen in that configuration, and makes the report say which configurations were looked at and which findings exist only there.
+
+The matrix stays scenarios × personas: a configuration is an attribute of a persona, not a new dimension. Ten personas means ten cells, chosen to spread the stress values.
+
+Answer to the request:
+- Part 1: taken.
+- Part 2: taken as an optional capture source for pass B. It is inert until the stand's door serves captures by cell, which the brief does not confirm.
+- Part 3: confirmed, `agent-tester` is unchanged.
+- Backlog: one row per part. The dates are the owner's (see Questions).
+
+## Key features
+
+- **A `config` line per portrait**, with five named values:
+  - device: `phone-small`, `phone-large`, `tablet`, `desktop`
+  - locale: a language tag, or `pseudo-rtl`, or `pseudo-long`
+  - dir: `ltr`, `rtl`
+  - text: `default`, `largest`
+  - theme: `light`, `dark`
+- **Stress coverage at panel level.** A panel that declares configurations holds at least one persona each for: `phone-small`, `tablet`, `rtl`, `pseudo-long`, `largest`, `dark`. It also holds at least one baseline persona.
+- **Panel exemptions.** A panel-level line removes a stress value the product does not support, with a reason (for example: no RTL locale shipped).
+- **Rows carry the configuration.** Each row names the persona's configuration and any axis that could not be realised.
+- **Findings carry `config_only`**: `yes`, `no` or `unverified`. `yes` names where the same step was seen clean.
+- **Gate summary.** The gate prints the configurations looked at and the stress values the node's scope did not reach.
+- **Stand captures in pass B.** A row may take its capture from a named test-stand run cell instead of the tester's own browser.
+
+## Decisions
+
+- D1: The configuration lives in the panel as its own `config` line, not inside `needs`. Because `needs` describes the persona's real context, while `config` is a test assignment, and the two may legitimately differ.
+- D2: One configuration per persona; the tester never walks a persona in a second configuration as a matrix row. Because the work bound (scope scenarios × personas) is the agent's finish line, and a full cross product multiplies it.
+- D3: super-ux `ux-foundation` assigns configurations as a panel revision; the tester never invents or changes one. Because a tester who picks its own cells can pick the ones that pass.
+- D4: A panel with no `config` lines gets a warning from `design_gate.py panel`, and its reports need no configuration fields. Because existing panels must keep passing, and the levels rule set this precedent.
+- D5: A panel where any portrait has `config` must have it on every portrait, with valid values, the stress coverage and a baseline, else FAIL. Because a half-configured panel reads as covered when it is not.
+- D6: Baseline means: device `phone-large` or `desktop`, a real locale, `ltr`, `default` text, `light` theme. Because `config_only` needs a clean reference and the gate must recognise it without knowing the product.
+- D7: `dir` is stated, not derived; `pseudo-rtl` with `ltr`, or `pseudo-long` with `rtl`, is refused. Because a derivation table of languages in the gate would be a second source of truth.
+- D8: Text size has two values only. Because the request names the largest size, and a middle step adds cells without a stated defect class.
+- D9: `desktop` is a device value but not a stress value. Because web surfaces need it for the baseline, while the request's evidence concerns small and tablet screens.
+- D10: The gate warns on two personas with identical configurations and on a persona with more than two non-baseline axes. Because duplicates waste cells and stacked stress values blur which one caused a finding; neither is wrong enough to fail.
+- D11: The schema stays `design-review/1` with additive fields. Because old reports against unconfigured panels must stay valid.
+- D12: A row's configuration must equal the persona's panel configuration at the report's `panel_revision`; a mismatch is FAIL. Because looking in another configuration is a different test from the one claimed.
+- D13: An unrealised axis is recorded as a gap with its reason. Because NOT_RUN is never PASS, and a silent default is the bug this change removes.
+- D14: In pass D a gap is allowed and counted in the gate output. Because designers rarely draw every variant, and blocking stage 3 on missing RTL frames would stop all design review.
+- D15: In pass B a row with a gap counts as NOT_RUN for the gate. Because the panel only assigns values the product supports (exemptions cover the rest), so a gap there is a tooling failure.
+- D16: `config_only: yes` requires `clean_in`: either another row for the same scenario step and pass in a different configuration where the same check passes, or one extra baseline capture. The gate checks its presence and that it names a different configuration. Because "only here" is a comparative claim.
+- D17: The extra baseline capture is allowed once per finding and is not a matrix row. Because it bounds the comparison cost to findings.
+- D18: A finding on a row with a gap cannot be `yes`. Because the configuration was not actually seen.
+- D19: `config_only` never changes severity. Because a user in that configuration is stopped just as fully.
+- D20: The gate computes scope coverage of stress values from the rows and prints the ones not reached; this is reported, not gated. Because coverage follows which personas use the scope's scenarios, and the tester may not widen the scope.
+- D21: For web surfaces the device class maps to one fixed viewport per class and `largest` to 200% text scaling, recorded in `references/browser.md`; the row's capture records the actual size. Because the class is the meaning and the numbers must be the same in every run.
+- D22: The tester only reads a stand run the dispatcher names; it never starts one. Because it spawns nothing, and the run's load belongs to the stand's own guard.
+- D23: From the stand the tester takes screenshots and cell identity only, never the stand's findings or verdicts. Because a tester who has read another judge's verdict sees that verdict.
+- D24: A stand capture is usable only if its cell equals the persona's configuration on all five values and its build is the node's build. Any differing axis is a gap; a different build is refused. Because a stale or near-miss capture is evidence about something else.
+- D25: With a stand capture, `outcome` passes only when the run's artefacts show the outcome read back; otherwise it is NOT_RUN with its reason. Because a screenshot of a tap does not prove the order exists.
+- D26: The stand's client key goes through the project's secret runner and is never on a command line or printed. Because this is the existing rule for the Figma token.
+- D27: With no named run, an unreachable door or a missing cell, the tester falls back to its own capture where a browser can reach the surface; otherwise the row is NOT_RUN. Because the stand is a source, not a dependency of the gate.
+- D28: Panel vocabulary and gate logic are written fresh in this repository. Because nothing is copied from another project's code.
+
+## Contracts
+
+**Panel (`docs/ux/test-panel.md`)**
+- Each portrait may carry one `config` line with all five values.
+- The panel may carry one exemptions line: each entry is a stress value plus a reason.
+- An exempted value is not required. A persona that still holds an exempted value is refused.
+
+**`design_gate.py panel`**
+- No `config` anywhere: warning; exit code as today.
+- Any `config` present: FAIL on a missing line, an unknown value, a contradictory `dir`, a missing unexempted stress value, an exemption without a reason, or no baseline persona.
+- Warnings: duplicate configurations; more than two non-baseline axes on one persona.
+- Exit codes are unchanged in meaning.
+
+**Report row (additive)**
+
+| Field | Meaning |
+|---|---|
+| `config` | the five values the persona was walked in |
+| `config_gap` | axes not realised, each with a reason; absent means fully realised |
+| `source` | `self` (default) or `stand` |
+| `stand` | with `source: stand`: run identity, cell identity, build identity |
+
+**Report finding (additive)**
+
+| Field | Meaning |
+|---|---|
+| `config_only` | `yes`, `no` or `unverified` |
+| `clean_in` | with `yes`: the configuration and the row or capture where the step was clean |
+
+**`design_gate.py report` (when the panel declares configurations)**
+- FAIL: a row without `config`; a `config` that differs from the panel's; a gap without a reason; `yes` without a valid `clean_in`; `yes` on a row with a gap; a stand row missing run, cell or build.
+- NOT_RUN: a pass B row with a gap.
+- A new `--build` option makes the gate check that every stand row's build equals it. Without the option, presence alone is checked.
+- Output: the configurations looked at, the pass D gap count, and the stress values the scope did not reach.
+- On `internal`: the same honesty checks apply, and coverage is only reported.
+- Against a panel without configurations, behaviour is exactly as today.
+
+**`design-tester` agent**
+- Inputs gain: the persona's configuration from the panel, and optionally a stand run named by the dispatcher.
+- Pass D: it judges the frame in the persona's configuration where a variant exists, and records a gap otherwise.
+- Pass B: it sets viewport, locale, direction, text size and theme before driving each persona, or reads the matching stand cell.
+- Stand rows start no process. The `resources` block is still present and still verified.
+- Every in-scope finding carries `config_only`.
+
+**Test stand door**
+- The assumed promise: for a named run, it returns screenshots keyed by cell (the four axes) and step, with the build identity.
+- The tester issues read requests only.
+
+**`agent-tester`**
+- No change.
+
+## Non-goals
+
+- A full configuration cross product, or more than one configuration per persona.
+- The tester choosing, rotating or randomising configurations.
+- Changing the checklist items, the severity scale or the round budget.
+- Starting, scheduling or configuring stand runs; reading the stand's findings.
+- Generating pseudo-locales for a product that lacks them; that is the product's build work, and the exemption covers it until then.
+- A configuration for the `subscription` walk beyond the persona's own.
+- Failing unconfigured panels now.
+- Pixel-diffing stand captures (the visual tier).
+
+## Risks
+
+- **Narrow scopes miss stress values.** A scenario used by two personas may never see RTL. D20 makes this visible but does not fix it. The design is refuted if most gated nodes print most stress values as not reached; rotating assignments would then be needed.
+- **Exemptions become the default.** Projects without pseudo-locales exempt `pseudo-long`, and long-word defects stay unseen. Signal: exemption counts across projects.
+- **Pass D gaps are the norm.** If designers never draw variants, the stage 3 configuration is nominal and all its value sits in pass B.
+- **The stand's door is unverified.** Its cells may use other axes, may not key screenshots by scenario step, or may not expose build identity. Any of these makes part 2 unusable as specified; D27 keeps the gate working without it.
+- **Outcome read-back from the stand may rarely exist.** Mobile rows would then be NOT_RUN on `outcome` and gated nodes would stall.
+- **Cross-ownership.** The portrait template belongs to super-ux. If it does not gain the `config` line, every panel stays in the warned state and the feature is dead.
+- **`clean_in` is unverified by the gate.** It checks presence, not truth; a careless `yes` passes.
+- **Persona realism.** A stress configuration on a persona whose `needs` contradict it yields findings that rest on a test assignment. The report should say so, as it does for hypothesis portraits.
+
+## Questions for the owner
+
+1. Dates for the backlog rows. Default: part 1 ships in the next minor release of task-pipeline, with the super-ux template change in the same release. Part 2 ships in that release as an optional source and is switched on in a project once the stand's door is confirmed to serve captures by cell and build.
+2. Should an unconfigured panel eventually fail on gated classes? Default: no; it stays a warning until two projects run configured panels, then a separate request decides.

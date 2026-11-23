@@ -1,0 +1,527 @@
+# Spec: model and token budget by role in task-pipeline
+
+Size: M
+Author: anthropic/thinker
+
+## Goal
+
+Bring task-pipeline to the owner's order of 2026-11-23, which replaces the 2026-11-22 rule that the spec's author is the session's own model.
+
+- Paid-by-token calls to the strongest model (the `thinker`, Fable 5.2 on the owner's estate) carry only the thinking that decides something, and carry it without a cap.
+- The spec's text is written by a subscription `writer` (Opus 5.5 on the owner's estate) from the thinker's meanings.
+- Decision validators answer by tokens, one request each, and the thinker gives the final verdict.
+- Every token call is written down with route, model, cost and task; the owner sees a day and month summary and a warning as the estate nears USD 5,000 a month.
+- Spec quality does not drop.
+
+## Scope
+
+In:
+
+- A host role map (`roles.json`) and a shipped template.
+- A new verb `spec_protocol.py meanings` (the thinker call) and trace rules in `check` and `gate`.
+- `consilium.py`: one request per panelist, judge equals thinker, real cost under BYOK, a `--judge-only` rerun that keeps the panel's cost, `--task`, `--meanings`.
+- `spec_protocol.py research validate`: cost, task, one request.
+- A new stdlib module and CLI `scripts/spend.py`: the only place a model HTTP call is made, the host spend ledger, summaries, the ceiling warning.
+- Doctrine edits in `model-tiering.md`, `spec-protocol.md`, `consilium.md`, inside the word ratchet.
+
+Out:
+
+- Changes inside Observatory. This spec defines the file Observatory reads; ingesting it is a board row in that repository.
+- Tracking subscription usage. The order tracks token routes.
+- Native vendor protocols. Only OpenAI-compatible chat completions is supported in this release.
+- Merging ledgers across hosts.
+- `pipeline.example.json` stage tokens (`default`, `inherit`) and `plan_audit.py`, which stay as they are.
+- A hard stop at the ceiling (see Q2).
+
+Assumption on paths: the doctrine directory is the one holding `model-tiering.md`, written `references/` below. Scripts live in `scripts/`, templates in `assets/`.
+
+## Requirements
+
+| id | Requirement | Verified by |
+|---|---|---|
+| REQ-1 | A role map resolves by the chain `--roles`, `$TASK_PIPELINE_ROLES`, `~/.config/task-pipeline/roles.json`, shipped `assets/roles.example.json`. The template's placeholders are never called. `spec_protocol.py roles` prints and validates it. | T1, T2 |
+| REQ-2 | `spec_protocol.py meanings` sends one request to the `thinker` on a tokens route, validates the answer and writes `meanings-<N>.json`. | T3, T4, T5 |
+| REQ-3 | When the split is in force, `check` fails a spec whose text is stale against, or does not cover, the cited meanings; `gate` fails a spec with no `Meanings:` line unless `--allow-no-meanings`. | T6, T7, T8 |
+| REQ-4 | In a council round each panelist receives exactly one HTTP request: no retry, no repair call. `research validate` sends exactly one. | T9, T10 |
+| REQ-5 | `consilium.py check` fails a round whose judge model is not the `thinker`, or whose panel includes the thinker's or the writer's family. The judge receives the meanings when `--meanings` is given. | T11, T12 |
+| REQ-6 | Cost follows the cost rule (Design 5). A BYOK call with `usage.cost = 0` records the upstream cost. | T13 |
+| REQ-7 | After `--judge-only`, every panel row in `round-N/ledger.json` keeps its cost, earlier judge rows remain, and the total is the sum of all rows. | T14 |
+| REQ-8 | Every model HTTP request made by any script appends exactly one row to the host spend ledger, with route, model, cost and task. `urllib.request.urlopen` and `http.client` appear in `scripts/spend.py` only. | T15, T16 |
+| REQ-9 | Every token-spending verb requires a task id (`--task` or `$TASK_PIPELINE_TASK`) and exits 2 before any request without one. | T17 |
+| REQ-10 | `spend.py summary` reports day and month totals by route, model, role and task, and writes `summary.json` and `summary.md` for the owner's surface. | T18, T19 |
+| REQ-11 | `spend.py ceiling` and every token-spending verb warn when the estate reaches 80%, 95% and 100% of the ceiling (default USD 5,000 a month). The warning never blocks a call. | T20, T21 |
+| REQ-12 | The cap `max_usd_per_round` is tested against validator rows only; the thinker is never skipped or failed for money. | T22 |
+| REQ-13 | Doctrine states the role rule, and the repository's word-count ratchet passes with no increase in total doctrine words. | T23, the ratchet check |
+| REQ-14 | Quality is measured on the first three specs of size M or L under the split against the baseline (Rollout step 6), and the numbers go to the owner. | Rollout step 6 |
+| REQ-15 | Standard library only; tests make no network call; the existing test suite passes. | T24, the suite |
+
+## Design
+
+### 1. Review of call sites
+
+Today's column is taken from the brief and the three doctrine files.
+
+| # | Call site | Today | Target |
+|---|---|---|---|
+| 1 | Analysis, stages 0 to 2 (gaps, size, classed ledger) | the session's model, subscription | `routine` gathers and reads; the `thinker` decides in a `meanings` run, tokens |
+| 2 | Definition, stages 2 to 3 | the session's model writes the spec | meanings by the `thinker`, tokens; text by the `writer`, subscription |
+| 3 | Research planning | the author | the scout questions are the `research` list of the meanings; the skeleton is `routine` |
+| 4 | Research scouts and specialists | working-tier agents | `worker`; `specialist-code`, `specialist-math`; all subscription |
+| 5 | Research decider and merge | the author; fast tier | Recommendation, Rejected and Resolution are decided in a `meanings` run over the dossier; `routine` rechecks numbers and citations; the `writer` writes |
+| 6 | `research validate` | one model, any OpenAI-compatible route; usage recorded, no cost | tokens, one request, cost, task, spend row |
+| 7 | Council panel | six vendors through OpenRouter; BYOK cost recorded as 0 | the order's five by default, one request each, real cost |
+| 8 | Council judge | Fable 5.2; `--judge-only` zeroes the panel's cost | the `thinker` by tokens; reads the meanings; ledger merged, not rewritten |
+| 9 | Plan, stage 4 | the session; an L plan goes to the council | plan text by the `worker` from the spec; a new decision goes back to `meanings`; an L plan still goes to the council |
+| 10 | Build to docs, stages 5 to 9 | subagents pinned to the run's model | `worker`, specialists |
+| 11 | Acceptance, stage 10 | the council for L or outward tasks | unchanged; the judge is the `thinker` |
+| 12 | Any other script | not known from the brief | build step: `grep -nE "urlopen|http\.client|requests\." scripts/*.py`; every hit moves onto `spend.post_chat` |
+
+### 2. The role map
+
+One JSON file per host (Contracts C1) names routes, roles, prices and spend settings. The repository ships only a template with placeholders, so no model id is hardcoded. The roles are `thinker`, `writer`, `routine`, `worker`, `specialist-code` and `specialist-math`. Panelists and the judge stay in the council's own configuration.
+
+- **In force.** The split is in force when the resolved file is not the shipped template and defines `thinker` on a route whose `billing` is `tokens`. With no map, or the template only, the previous behaviour holds: one model does everything, `gate` asks for no meanings, and `meanings` refuses to call.
+- **Subscription roles.** Scripts never call them. The orchestrating session starts a subagent pinned to the role's model through the harness's model override. If the session already runs on the role's model, it does the work itself.
+- **A role the harness cannot start.** This is a named limitation recorded in the brief, under the existing rule for unsupported capabilities, and never a silent swap.
+- **Choosing a role.** Does the output decide something a later stage builds on? Then `thinker`. Is it the artefact itself (text, code, tests, a search)? Then `writer`, `worker` or a specialist. Is it judgement that decides nothing (a recheck, a merge, a diff review)? Then `routine`.
+
+### 3. Meanings and text
+
+`spec_protocol.py meanings <spec.md>` builds one request from the brief and the inputs, sends it to the `thinker`, and writes `<spec stem>.meanings/meanings-<N>.json`. N is one more than the highest existing revision.
+
+- **Content.** The meanings are the decisions: goal, size, items (each one checkable statement with a basis; a decision also names what it rejected), the classed question ledger, the research questions, and what could not be decided.
+- **Reruns.** The verb is rerun whenever something new must be decided: after research (the dossier as `--input`), after a council ruling (`judge.json` as `--input`), after a writer gap. The previous revision is passed as `--input`. The prompt requires stable ids for unchanged items and a `retired` list instead of id reuse.
+- **No stint.** The verb has no cost cap and no call limit.
+
+The writer receives the latest meanings file, the brief, the dossier and the section list for the size. It writes every owed section and decides nothing.
+
+- **Headers.** The spec carries `Author: <family>/thinker`, `Writer: <family>/writer` and `Meanings: <relative path> sha256:<first 16 hex of the file>`.
+- **Tags.** Every requirement line and every row of the Decisions table carries at least one tag `[M<n>]`. Every non-retired item id appears at least once in the spec.
+- **Gaps.** Anything the writer finds undecided goes into `<spec stem>.meanings/gaps.md`, one line each, and back to the thinker as `--input`. The writer never fills a gap.
+
+When the spec has a `Meanings:` line, `check` fails on any of:
+
+- the cited file is missing, or the hash prefix does not match;
+- a higher revision exists in the directory (the text is stale);
+- an item id that is not retired is not cited;
+- a tag names an unknown or retired id;
+- a line matching `^\W*REQ-\d+`, or a data row of the table under `## Decisions`, has no tag;
+- the `Writer:` line is missing;
+- `gaps.md` exists, is not empty, and its current sha256 is not among the `inputs` of the cited revision.
+
+Degraded path: when the thinker's token route cannot be used (no key, provider down), the meanings may be produced in a subscription session and registered with `meanings --from-file <json> --reason "<text>"`. The same validation applies, and the envelope records `route: "subscription"` and `degraded`. No request is made, no spend row is written, and `check` prints a warning naming the reason.
+
+### 4. The council
+
+- **One request each.** `consilium.py` calls `spend.post_chat` once per panelist per round. A failed, timed-out or unparsable answer is saved raw, yields no verdict, and is not retried in that round. The remedy for fewer than three verdicts of three families is a new round.
+- **The judge is the thinker.** The judge is still read from the council's configuration. When the split is in force, `check` compares the model id in the round's judge row with `roles.thinker.model` and fails on a difference.
+- **Authors off the panel.** There are now two authors. `check` fails a round where a panelist's family equals `roles.thinker.family` or `roles.writer.family`. `research validate` records such a family with the existing warning and does not count it.
+- **Fidelity.** `review --meanings <file>` appends the file to the judge's user message only, under the heading `## Meanings (the author's decisions; the text must carry each one)`. The judge instruction gains one sentence: "List as a finding every meaning the text drops, weakens or contradicts." The panel stays blind to the meanings.
+- **Money.** The cap `max_usd_per_round` is summed over rows with role `validator` only. The judge runs when the panel is within the cap, and `check` tests the same sum.
+- **Template.** `assets/consilium.example.json` lists five placeholder panelists, one for each of the order's validators (GLM, Kimi, Grok, Gemini, Astra), and a judge placeholder. A host file listing more panelists keeps working. Two entries with the same model id are refused at load with exit 2.
+
+### 5. The spend ledger and the cost rule
+
+`scripts/spend.py` owns the only HTTP call to a model.
+
+`post_chat(*, endpoint, key_env, model, messages, task, role, kind, family=None, ref=None, max_tokens=None, timeout=600, extra_body=None)`:
+
+- performs exactly one POST and never retries;
+- appends one row to the host ledger in a `finally` block, whether the call succeeded, failed or timed out;
+- returns an object with `ok`, `status`, `http_status`, `content`, `finish_reason`, `usage`, `row`.
+
+The request body is what `consilium.py` sends today to obtain `usage.cost`, plus `"user": "tp:<task>"`. When the endpoint host ends with `openrouter.ai`, the header `X-Title: task-pipeline` is added so OpenRouter's own activity view can be filtered.
+
+The ledger:
+
+- **Location.** `$TASK_PIPELINE_SPEND_DIR`, else `spend.dir` of the role map, else `${XDG_STATE_HOME:-~/.local/state}/task-pipeline/spend/`.
+- **Files.** One per UTC month, `calls-YYYY-MM.jsonl`, append only. A row goes to the file of its own `ts`.
+- **Writes.** One `write` of one line, on a descriptor opened with `O_APPEND`, under `fcntl.flock(LOCK_EX)` where `fcntl` exists.
+- **Before the first request.** A verb calls `spend.ensure_ledger()`. A ledger directory that cannot be created or written is exit 2: no record, no call.
+- **Content.** The ledger holds no prompt text, no answer text and no key.
+
+The cost rule, `spend.cost_from_usage(usage, model, prices)`, returns `(cost_usd, cost_source, router, upstream)`. Here `router` is `usage.cost` and `upstream` is `usage.cost_details.upstream_inference_cost`, each a number or absent.
+
+1. `usage.is_byok` is true: cost is `(router or 0) + (upstream or 0)`, source `router+upstream`.
+2. `usage.is_byok` is false and `router` is a number: cost is `router`, source `router`.
+3. `usage.is_byok` is absent: `router > 0` gives `router`, source `router`. `router == 0` with `upstream > 0` gives `upstream`, source `upstream`. `router == 0` with no positive upstream gives 0, source `router`; the summary counts it under `zero_cost_calls` when tokens were used.
+4. There is no `router`, and `prices` has the model: cost is `prompt_tokens / 1e6 * input_usd_per_mtok + completion_tokens / 1e6 * output_usd_per_mtok`, source `priced`.
+5. Otherwise: cost is `null`, source `unknown`.
+
+Failed and timed-out calls:
+
+- A call with an HTTP error and no usage records cost 0, source `none`, status `failed`.
+- A timeout records `null`, source `unknown`, status `timeout`.
+- A row with status `ok` and a `null` cost is a defect: `spend.py check` and `consilium.py check` fail on it.
+
+Costs are stored rounded to six decimals.
+
+Each `round-N/ledger.json` row is the same dict as the host row, so the two never disagree. `--judge-only` loads the existing ledger, leaves every row in place, appends the new judge row and recomputes the totals. With no ledger file it exits 2 with `no round to rerun`.
+
+### 6. Summary and ceiling
+
+`spend.py summary` reads the month file or files and prints the day (a UTC date) and the month. Each has calls, cost, and cost by route, by model, by role and by task, plus the estate block.
+
+- `--write` stores `summary.json` and `summary.md` in the spend directory by temp file and rename.
+- Every token-spending verb does the same write at exit, so the files are current after every call.
+- `summary.json` is the contract Observatory reads (Q1).
+
+Estate figure:
+
+- **Source.** `spend.estate_cmd` (an argv list, on the owner's estate Observatory's `tools/spend.py project --json`) runs with a 60 second timeout. Its JSON yields `observatory_usd`: a top-level numeric `totalUsd`; else the sum of `totalUsd` over a top-level array; else the sum over the array under `projects`; else the source is unavailable.
+- **Cache.** The result is cached in `estate.json` for `spend.estate_ttl_s` (default 3600). When the command fails, a cache of any age is used and marked `stale`. With no cache the source is `local-only`.
+- **Value.** `estate_usd = max(observatory_usd, local_month_usd)`. The provider-side figure already contains this host's calls and may lag them, so the two are never added.
+- **Fraction.** `fraction = estate_usd / ceiling_usd_month`.
+- **Level.** `ok` below `warn_at` (0.80), `warn` from 0.80, `critical` from `critical_at` (0.95), `over` from 1.0.
+- **Projection.** `projected_month_usd = estate_usd * seconds_in_month / seconds_elapsed`, computed from the 7th day of the month on and `null` before. `projected_over` is true when it reaches the ceiling.
+
+Warning: once per process, before its first request, a token-spending verb prints one stderr line when the level is not `ok` or `projected_over` is true (text in C7), then proceeds. The preflight notice and the run's closing report carry the same line from `spend.py ceiling`.
+
+### 7. Doctrine edits
+
+All three files are edited inside the ratchet: the total must not grow.
+
+`model-tiering.md`:
+
+- The bold lead becomes: "**One map, recorded once, before the run starts.** A host with a role map runs each role on its line; a host without one runs everything on the model already running."
+- The sections on the spec's author being the session's model, on the plan-then-execute profile, and on subagents are deleted, and so are their Contents entries.
+- The `Roles` section below replaces them, with a Contents entry.
+- In the Mechanic section, the notice gains: "With a role map, the line lists each role's model and billing, then `spend.py ceiling`." The brief's `Model` row records the role map's path.
+
+```markdown
+## Roles
+
+A host may record a role map (`roles.json`; template [`assets/roles.example.json`](../assets/roles.example.json)). It is the operator's choice, inherited verbatim. With no map, one model does everything.
+
+| Role | Does | Billing |
+|---|---|---|
+| `thinker` | what a later stage builds on: a spec's meanings, a decision, the council's ruling | tokens, no cap |
+| `writer` | the spec's text from the meanings; decides nothing | subscription |
+| `routine` | judgement that decides nothing: rechecks, merges, reviews | subscription |
+| `worker` | the main work: scouting, plan, build, tests, docs | subscription |
+| `specialist-code`, `specialist-math` | code and mathematics | subscription |
+| validators | one request each, blind ([`consilium.md`](consilium.md)) | tokens |
+
+Every token call is recorded with route, model, cost and task (`scripts/spend.py`). Subagents are pinned to their role's model; a role the harness cannot start is a named limitation. `plan_audit.py --models <map.json>` still checks a per-stage map an operator records.
+```
+
+`spec-protocol.md`:
+
+- The Who column of the loop table becomes, for rows 1 to 5:
+  1. "`routine` gathers, the `thinker` decides (`meanings`)"
+  2. "the `thinker` for meanings, the `writer` for text"
+  3. "the `thinker` (the `research` list)"
+  4. "`worker` scouts, specialists"
+  5. "validators by tokens, the council, the scripts"
+- The sentence under the table becomes: "With no role map the session's model is every role ([`model-tiering.md`](model-tiering.md)). The writer tags each requirement and decision row `[M<n>]` and sends gaps back, never fills them. Size S runs steps 1, 2, 5."
+- In section 3, the Decider and Merge items are merged into one: "**Decider** (the `thinker`, a `meanings` run over the dossier): Recommendation, What would refute it, Rejected and, on a `disagree`, Resolution; `routine` rechecks numbers and citations; a gap goes back to a scout."
+- The `research validate` example gains `--task <id>`.
+
+`consilium.md`:
+
+- In "How a round runs", step 1 gains "in one request, never retried within the round".
+- In "Panel, judge, money", "The judge is the strongest model of the map on the day, paid by tokens if it must be. The author never sits on its own artefact's panel." becomes "The judge is the `thinker`, by tokens; neither the thinker's nor the writer's family sits on the panel; `--meanings` gives the judge the author's decisions."
+- "Each round has a cap" becomes "The panel has a cap (`max_usd_per_round`)".
+- The last line gains "the panel's cost stays in the ledger".
+
+If the ratchet still reports growth, trim within these three files first.
+
+## Contracts
+
+### C1. `roles.json` (schema 1)
+
+```json
+{
+  "schema": 1,
+  "routes": {
+    "tokens-main": {"billing": "tokens", "protocol": "openai-chat",
+                    "endpoint": "<chat-completions-url>", "key_env": "<ENV_VAR>"},
+    "sub-writer": {"billing": "subscription"}
+  },
+  "roles": {
+    "thinker": {"route": "tokens-main", "model": "<thinker-model-id>", "family": "<family>", "max_output_tokens": 32000},
+    "writer": {"route": "sub-writer", "model": "<writer-model-id>", "family": "<family>"},
+    "routine": {"route": "sub-writer", "model": "<routine-model-id>", "family": "<family>"},
+    "worker": {"route": "sub-writer", "model": "<worker-model-id>", "family": "<family>"},
+    "specialist-code": {"route": "sub-writer", "model": "<code-model-id>", "family": "<family>"},
+    "specialist-math": {"route": "sub-writer", "model": "<math-model-id>", "family": "<family>"}
+  },
+  "prices": {"<model-id>": {"input_usd_per_mtok": 0.0, "output_usd_per_mtok": 0.0}},
+  "spend": {"dir": null, "ceiling_usd_month": 5000, "warn_at": 0.8, "critical_at": 0.95,
+            "estate_cmd": null, "estate_ttl_s": 3600}
+}
+```
+
+Rules:
+
+- `billing` is `tokens` or `subscription`.
+- `protocol` is required on a tokens route and must be `openai-chat`.
+- A string that starts with `<` and ends with `>` is a placeholder.
+- A role names an existing route. `thinker` must be on a tokens route. `family` is a non-empty lower-case string.
+- `prices` and `spend` are optional; the defaults are those shown.
+- Unknown keys are ignored.
+
+### C2. `spec_protocol.py`
+
+```
+spec_protocol.py roles [--roles FILE] [--json]
+spec_protocol.py meanings SPEC --task ID --brief FILE [--input FILE]... [--roles FILE]
+                 [--max-output-tokens N] [--timeout SECONDS] [--dry-run]
+spec_protocol.py meanings SPEC --task ID --from-file JSON --reason TEXT
+spec_protocol.py research validate DIR --model ID --family F --endpoint URL --key-env VAR --task ID [--route NAME]
+spec_protocol.py gate SPEC --board B --plan P [--allow-no-meanings]
+```
+
+`roles`:
+
+- Prints one line per role: `role  model  route  billing`, then `split: in force` or `split: not in force (<reason>)`.
+- `--json` prints `{"source": path, "in_force": bool, "roles": {...}, "routes": {...}}`.
+- Exit 0 valid, 1 invalid (each defect on stderr), 2 file unreadable or not JSON.
+
+`meanings`:
+
+- `--dry-run` prints the resolved model, the route and the request size in bytes, makes no request and writes nothing.
+- Inputs over 2,000,000 bytes in total are exit 2.
+- `--max-output-tokens` defaults to the role's `max_output_tokens`, else 32000. `--timeout` defaults to 600.
+- On success it prints the path written.
+- Exit codes:
+  - 0 written;
+  - 1 the answer is not valid meanings (raw answer saved as `meanings-<N>.raw.txt`, spend row written, no JSON file);
+  - 2 usage or configuration error: no task, split not in force, placeholder, key variable unset, ledger not writable;
+  - 4 the request failed or timed out (spend row written).
+
+The user message is `# Task`, the id, then `# Brief (<path>)` and each `# Input (<path>)` with the file's text.
+
+The system message is this text:
+
+```
+You are the thinker of a specification. You decide; a writer turns your decisions into text and may not add, drop or change one. From the brief and the inputs return one JSON object and nothing else, with the keys goal, size, items, questions, research, open, retired. Each item is one decision or meaning a builder needs: a statement that can be checked, its basis, and for a decision the alternative you rejected. Decide every tactical question yourself. Leave the owner only strategy, each with a default. When an input is an earlier revision, keep the id of every item you keep, list dropped ids under retired, and never reuse an id. Write no prose sections.
+```
+
+`research validate`:
+
+- `--route` defaults to `openrouter` when the endpoint host ends with `openrouter.ai`, else to the endpoint host.
+- The stored validation record gains `route`, `cost_usd`, `cost_source`, `task`.
+- A failed call still records no verdict, and now records a spend row.
+
+`check` and `gate` keep their exit codes: the new failures use the existing failure code, and each prints one line naming the rule. `loop` prints the new Who column.
+
+### C3. `meanings-<N>.json` (schema 1)
+
+```json
+{
+  "schema": 1, "task": "T-123", "revision": 2, "created": "2026-11-24T10:00:00Z",
+  "model": "<id requested>", "model_returned": "<id in the response>", "route": "tokens-main",
+  "degraded": null, "spend_id": "<ledger row id or null>",
+  "inputs": [{"path": "docs/briefs/x.md", "sha256": "<64 hex>"}],
+  "goal": "one paragraph",
+  "size": "M",
+  "items": [{"id": "M1", "kind": "requirement", "statement": "...", "basis": "...", "rejected": null}],
+  "questions": [{"id": "Q1", "question": "...", "class": "tactics", "answer": "...", "by": "agent", "basis": "..."}],
+  "research": [{"id": "R1", "question": "..."}],
+  "open": ["..."],
+  "retired": ["M4"]
+}
+```
+
+The script writes the envelope keys (`schema` to `inputs`); the model returns the rest. Validation:
+
+- `size` is S, M or L.
+- `items` is not empty.
+- Item ids match `^M[1-9][0-9]*$`, are unique, and none is in `retired`.
+- `kind` is one of `scope-in`, `scope-out`, `requirement`, `design`, `contract`, `edge`, `decision`, `rollout`, `test`, `risk`.
+- `statement` and `basis` are non-empty; a `decision` has a non-empty `rejected`.
+- `class` is one of the four ledger classes.
+- An answer wrapped in one Markdown code fence is unwrapped before parsing.
+- A `finish_reason` of `length` is invalid.
+
+### C4. `consilium.py`
+
+```
+consilium.py review|decide <existing arguments> --task ID [--meanings FILE] [--roles FILE]
+consilium.py check DIR --round N [--roles FILE]
+```
+
+- `--task` is required, or `$TASK_PIPELINE_TASK`. `--meanings` is accepted by `review` only.
+- Exit codes are unchanged; a missing task is exit 2.
+- `ledger.json` gains `"schema": 2`. Each call row is the C5 row. Existing keys with the same meaning are kept once; readers accept schema 1 files.
+- Totals: `total_usd` is the sum of all rows; `panel_usd` is the sum of rows with role `validator`.
+- `check` adds these failures, each with a one-line reason:
+  - a panelist with more than one row in the round;
+  - a row with status `ok` and `null` cost;
+  - `panel_usd` over the cap;
+  - the judge model differs from the thinker (split in force);
+  - a panelist's family is the thinker's or the writer's (split in force);
+  - `total_usd` is not the sum of the rows.
+
+### C5. Spend ledger row (schema 1, one JSON object per line)
+
+| Field | Type | Value |
+|---|---|---|
+| `schema` | int | 1 |
+| `id` | string | 32 hex, unique |
+| `ts` | string | UTC, `YYYY-MM-DDTHH:MM:SSZ`, when the call ended |
+| `host` | string | hostname |
+| `task` | string | matches `^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$` |
+| `role` | string | `thinker`, `validator`, `other` |
+| `kind` | string | `meanings`, `judge`, `panel`, `research-validate`, `manual` |
+| `route` | string | the route's name |
+| `endpoint_host` | string or null | host of the URL |
+| `model` | string | the id requested |
+| `model_returned` | string or null | the response's `model` |
+| `family` | string or null | |
+| `request_id` | string or null | the response's `id` |
+| `status` | string | `ok`, `failed`, `timeout` |
+| `http_status` | int or null | |
+| `prompt_tokens`, `completion_tokens` | int or null | from `usage` |
+| `cost_usd` | number or null | by the cost rule |
+| `cost_source` | string | `router`, `router+upstream`, `upstream`, `priced`, `manual`, `none`, `unknown` |
+| `cost_router_usd`, `cost_upstream_usd` | number or null | the raw fields |
+| `script`, `version` | string | the caller and its version |
+| `ref` | string or null | the round directory, meanings file or dossier |
+
+### C6. `spend.py`
+
+```
+spend.py summary [--day YYYY-MM-DD] [--month YYYY-MM] [--task ID] [--json] [--write]
+spend.py ceiling [--refresh] [--json]
+spend.py check [--month YYYY-MM]
+spend.py record --task ID --role ROLE --route NAME --model ID --cost-usd X
+                [--prompt-tokens N] [--completion-tokens N] [--ref PATH]
+```
+
+- `summary`: defaults are today and the current month, UTC. `--task` limits every figure to one task. Exit 0; 2 on an unreadable ledger.
+- `ceiling`: `--refresh` ignores the cache. Exit 0 at level `ok`; 3 at `warn`, `critical` or `over`; 2 on a configuration error.
+- `check`: exit 1 when a line is not JSON, lacks a C5 field, has status `ok` with `null` cost, has a bad task id or repeats an `id`. The file and line number are printed. Zero-cost rows that used tokens are printed as warnings. Exit 0 otherwise.
+- `record`: writes a row with kind `manual`, source `manual`, status `ok`, for a token call made outside the scripts. Exit 0; 2 on a bad argument.
+
+### C7. `summary.json` (schema 1), `summary.md`, the warning line
+
+```json
+{
+  "schema": 1, "host": "h1", "generated": "2026-11-24T10:05:00Z",
+  "day": {"date": "2026-11-24", "calls": 12, "cost_usd": 3.4112, "unknown_cost_calls": 0, "zero_cost_calls": 0,
+          "by_route": {"tokens-main": {"calls": 12, "cost_usd": 3.4112}},
+          "by_model": {}, "by_role": {}, "by_task": {}},
+  "month": {"month": "2026-11", "calls": 950, "cost_usd": 412.3, "unknown_cost_calls": 1, "zero_cost_calls": 0,
+            "by_route": {}, "by_model": {}, "by_role": {}, "by_task": {}},
+  "estate": {"ceiling_usd": 5000, "observatory_usd": 3120.5, "local_month_usd": 412.3, "estate_usd": 3120.5,
+             "source": "observatory", "stale": false, "as_of": "2026-11-24T09:40:00Z",
+             "fraction": 0.6241, "level": "ok", "projected_month_usd": 4070.2, "projected_over": false}
+}
+```
+
+- `source` is `observatory` or `local-only`. The `by_*` maps have the shape of `by_route`.
+- `summary.md` and the plain output give the same data as text: a header line, a `Day` block and a `Month` block (total, then one line each for route, role, model and task, as `name amount (calls)`, amounts to two decimals), an `Estate` line and a `Warnings` line.
+- The warning line on stderr is `WARNING spend: estate at <pct>% of USD <ceiling> (USD <estate>, level <level>, source <source>)`.
+- When only the projection is over, it is `WARNING spend: projected USD <projected> this month, ceiling USD <ceiling>`.
+
+## Edge cases
+
+| Case | Behaviour |
+|---|---|
+| BYOK call, `usage.cost` 0, upstream cost present | cost is the upstream cost (rule 1 or 3) |
+| No `usage` in an `ok` response, model not in `prices` | row with `null` cost; the call's result is kept; `check` fails until a price is added and the row is corrected by a `record` entry |
+| Free model, tokens used, cost 0 | recorded as 0, counted in `zero_cost_calls`, no failure |
+| Timeout | status `timeout`, cost `null`, no retry; counted in `unknown_cost_calls`, no gate failure |
+| Fewer than three verdicts after single calls | the round fails the existing gate; a new round is run |
+| `--judge-only` twice | both judge rows stay; the last parsable ruling is the ruling; the total includes both |
+| Panel within the cap only because BYOK was counted as 0 | after the fix the round may exceed the cap; Rollout step 4 reviews the cap |
+| Ledger directory unwritable | exit 2 before any request |
+| Two processes or threads appending | one locked single-line write each; no interleaving |
+| A call ending after UTC midnight on the last day | the row goes to the new month's file, by its `ts` |
+| `estate_cmd` unset, failing, or returning an unknown shape | cache if any (marked stale), else `local-only`; the level is computed from the local month and the line says so |
+| Observatory total below the local month total | the local total is the estate figure |
+| Before the 7th of the month | no projection |
+| Role map is the template only | split not in force; `meanings` exits 2; council and research verbs work as before, with `--task` and the ledger |
+| Thinker answer truncated or not JSON | exit 1, raw saved, cost recorded; the agent reruns, with a higher `--max-output-tokens` if truncated |
+| Spec cites revision 1 while revision 2 exists | `check` fails as stale |
+| A writer adds a requirement with no tag, or cites a retired id | `check` fails and names the line |
+| A spec opened before the release | `Meanings: none (<reason>)` passes `check` with a warning; `gate` needs `--allow-no-meanings` |
+| The judge shares the meanings author's family | allowed by the order; the panel stays blind and of other families; the judge must rule on every finding |
+| A role's model cannot be started by the harness | named in the brief; the session's model does the work; no silent swap |
+| Thinker route down | `meanings --from-file --reason`; the council judge still needs the token route, and the round fails without it |
+
+## Decisions
+
+| Decision | Reason | Rejected alternative |
+|---|---|---|
+| Roles live in a host file; the repository ships placeholders | doctrine forbids hardcoded model ids; other hosts keep one model | writing Fable 5.2 and Opus 5.5 into scripts and doctrine |
+| The split is a script verb plus a JSON file with ids | a meaning the text must carry can be checked mechanically | a prose handover from thinker to writer, with no check |
+| Inline `[M<n>]` tags on requirements and decision rows | one regex proves coverage and blocks requirements the writer invented | a separate coverage file, which drifts from the text |
+| Every size owes meanings when the split is in force | the order names the meaning of a spec with no size exemption; an S call is small | exempting size S |
+| No retry for a validator, in any failure | "one request each"; a timed-out request may already be billed | one retry on transport errors |
+| No automatic retry for the thinker either; reruns are explicit | every paid call is an act an agent chose and the ledger shows | a repair loop inside the verb |
+| All model HTTP goes through `spend.post_chat` | a call cannot be made without its ledger row; one grep verifies it | each script writing its own ledger row |
+| `--task` is mandatory | the order wants the task on every call; a default would hide spend | a default task `unassigned` |
+| The cap counts validator rows only | the thinker is used without stinting; the cap exists to bound the panel | a cap on the round's total |
+| The judge is checked against `roles.thinker` at the gate, not merged into one config | the council's configuration and lookup chain stay as they are | moving panel and judge into `roles.json` |
+| The meanings go to the judge only | the panel judges the artefact blind; five more copies add cost and no independence | sending the meanings to every panelist |
+| The thinker judges text built on its own meanings | the owner's order; mitigated by a blind panel of other families and the fidelity instruction | a judge of another family |
+| The estate figure is the larger of Observatory's and the local total | provider data includes local calls and may lag them; adding would count twice | the sum of the two |
+| Days and months are UTC | one boundary for all hosts and for the providers' own activity views | the owner's local time zone |
+| Only OpenAI-compatible chat completions | it is what both existing callers speak | adding vendor-native protocols now |
+| The warning never blocks | the order asks for a warning; a block would stop the thinking it wants unstinted | a hard stop at 100% (Q2) |
+
+## Rollout
+
+1. Build `scripts/spend.py`, then move the two existing HTTP call sites onto `post_chat`, then add `meanings`, the `check` and `gate` rules, and the council changes. Tests are written with each step. Run the grep of Design 1 row 12 and convert any further hit.
+2. Capture fixtures with two real calls, each under USD 0.05, with `--task fixture-cost`: one through the BYOK key and one without. Store the two `usage` objects as test fixtures and confirm the cost rule reproduces the provider's figures. Capture one real output of the Observatory command as the estate fixture.
+3. Ship the doctrine edits in the same release as the scripts and run the ratchet. Bump the version (1.114.0 if the version is repository-wide).
+4. On the owner's estate, write `~/.config/task-pipeline/roles.json` with the real ids, routes, prices for any route that returns no cost, and `estate_cmd`. Set the council's host file to the five validators and the thinker as judge. Raise `max_usd_per_round` if the panel's real BYOK cost exceeds it, and record the new value in the release note.
+5. Run `spec_protocol.py roles`, `spend.py check` and `spend.py ceiling`; all exit 0 (or 3 for `ceiling` with a correct level).
+6. Canary: the first three specs of size M or L run under the split.
+   - For each, record from the round artefacts the accepted blocker and major findings in round 1 (the count the pass rule already uses), the rounds to pass, and the accepted fidelity findings.
+   - The baseline is the same figures from the last three council-reviewed specs before the release. If fewer exist, the baseline is called thin in the report.
+   - The numbers go to the owner in one message.
+   - If the canary median of round-1 accepted findings exceeds the baseline median by more than one, or a canary spec is still open after round 3, the message carries one question with the default "keep the split".
+7. Open a board row in Observatory: read `summary.json` (C7) from each host's spend directory and show day, month and level.
+8. Rollback: remove `thinker` from the host's `roles.json`. The split is then not in force and `gate` asks for no meanings, while the ledger and the cost fixes stay. A full rollback is a revert of the release commit.
+
+## Questions
+
+| id | question | class | answer | by | basis |
+|---|---|---|---|---|---|
+| Q1 | Where does the owner read the day and month summary: Observatory or OpenRouter? | strategy | default: Observatory, from `summary.json`; until it ingests the file, the summary is in each run's closing report and `summary.md` | pending | the order allows either; Observatory already holds estate spend |
+| Q2 | At 100% of the ceiling, does the pipeline stop token calls or only warn? | strategy | default: warn only, on every token-spending verb | pending | the order asks for a warning and for unstinted thinking |
+| Q3 | Does the USD 5,000 ceiling mean provider spend as Observatory measures it, or also subscription fees? | strategy | default: what Observatory's `totalUsd` measures | pending | the brief ties the ceiling to the estate and names Observatory as its measure |
+| Q4 | The panel has six vendors today and the order names five. What ships? | tactics | the template lists the five; a host file with more keeps working, one request each | agent | the panel is configuration; the gate needs three families |
+| Q5 | Does size S pay for a thinker call? | tactics | yes, when the split is in force | agent | the order has no size exemption |
+| Q6 | How is a BYOK call costed? | known-domain | upstream cost when `usage.cost` is 0, by the cost rule | agent | brief, Facts: measured 2026-11-23, real cost in `usage.cost_details.upstream_inference_cost` |
+| Q7 | What is the shape of Observatory's JSON? | tactics | accept a top-level `totalUsd`, an array, or `projects`; fix by the fixture of Rollout step 2 | agent | the brief gives the field name only |
+| Q8 | Which thresholds mean "approaches"? | tactics | 80% warn, 95% critical, 100% over, plus a projection from day 7; all in configuration | agent | early enough to act within a month; adjustable without code |
+| Q9 | May a validator call be retried? | tactics | no | agent | "one request each"; a timeout may be billed |
+| Q10 | Where does the ledger live? | tactics | the XDG state directory, one JSONL file per UTC month | agent | host-wide, outside any repository, append only |
+| Q11 | What happens when the thinker route is down? | tactics | `meanings --from-file --reason`, recorded as degraded | agent | the existing rule: a limitation is named, never swapped silently |
+| Q12 | Does the cap bind the judge? | tactics | no, validator rows only | agent | the order: the thinker is used without stinting |
+
+## Tests
+
+All tests use `unittest` and sit beside the existing tests. They run against a stub `http.server.ThreadingHTTPServer` on `127.0.0.1` port 0 that returns canned chat completions and counts requests per model. Each test uses a temporary `TASK_PIPELINE_SPEND_DIR` and a temporary role map. No test reaches the network.
+
+| id | Test | Covers |
+|---|---|---|
+| T1 | The lookup chain picks flag, then environment, then host file, then template; the template gives `in_force` false | REQ-1 |
+| T2 | `roles` exits 1 for an unknown route, a thinker on a subscription route, a missing protocol; exits 0 for a valid map | REQ-1 |
+| T3 | `meanings` sends exactly one request to the thinker's model, writes `meanings-1.json` with envelope and hashes, then `meanings-2.json` on a second run | REQ-2 |
+| T4 | A fenced answer is unwrapped; a non-JSON answer, a duplicate id, a decision without `rejected`, and `finish_reason: length` each exit 1 with a raw file and a spend row | REQ-2 |
+| T5 | `--dry-run` makes no request and writes nothing; the template exits 2; an unset key variable exits 2; `--from-file` without `--reason` exits 2 | REQ-2 |
+| T6 | `check` passes a spec that cites the latest revision and tags every item, requirement and decision row | REQ-3 |
+| T7 | `check` fails on each of: wrong hash, newer revision present, uncited item, retired id cited, untagged requirement, untagged decision row, missing `Writer:`, unanswered `gaps.md` | REQ-3 |
+| T8 | `gate` fails with no `Meanings:` line when the split is in force, passes with `--allow-no-meanings`, and passes without the line when the split is not in force | REQ-3 |
+| T9 | A round with one panelist returning HTTP 500 and one returning non-JSON: the stub counts one request per panelist, no verdict is stored for either | REQ-4 |
+| T10 | `research validate` sends one request on failure and on success; the record carries `cost_usd`, `route`, `task` | REQ-4 |
+| T11 | `consilium.py check` fails when the judge row's model differs from the thinker, and when a panelist's family equals the writer's | REQ-5 |
+| T12 | With `--meanings`, the judge request body contains the heading and the file text, and no panel request does | REQ-5 |
+| T13 | `cost_from_usage` over the fixtures: BYOK true, BYOK false, flag absent with cost 0 and upstream present, flag absent with positive cost, no cost with a price, no cost and no price | REQ-6 |
+| T14 | A round, then a judge failure, then `--judge-only`: panel rows are byte-identical, two judge rows exist, `total_usd` is the sum; `--judge-only` with no ledger exits 2 | REQ-7 |
+| T15 | After `review`, `meanings` and `research validate`, the number of host ledger rows equals the stub's request count, and each row has route, model, cost and task | REQ-8 |
+| T16 | A source scan finds `urlopen` and `http.client` in `scripts/spend.py` only | REQ-8 |
+| T17 | Each token-spending verb without `--task` and without the environment variable exits 2 with zero requests; an unwritable ledger directory does the same | REQ-9 |
+| T18 | `summary --json` over a fixed ledger gives the expected day and month totals by route, model, role and task; `--task` filters them | REQ-10 |
+| T19 | `--write` produces `summary.json` matching C7 and a `summary.md`; a verb's exit rewrites both | REQ-10 |
+| T20 | `ceiling` with a stub `estate_cmd` at 79%, 80%, 95% and 100% gives levels `ok`, `warn`, `critical`, `over` and exits 0, 3, 3, 3; the three accepted JSON shapes parse; a failing command falls back to cache, then `local-only` | REQ-11 |
+| T21 | At level `over` a token-spending verb prints the warning line once and still makes its request; the projection is `null` on day 6 and set on day 7 (clock injected) | REQ-11 |
+| T22 | A round whose panel is within the cap and whose judge call alone exceeds the cap passes the money check; a panel over the cap skips the judge | REQ-12 |
+| T23 | `loop` prints `thinker` and `writer`; `model-tiering.md` has the `Roles` heading and lacks the three removed headings | REQ-13 |
+| T24 | Twenty threads appending rows produce twenty valid lines; `spend.py check` exits 0 on them and 1 on a file with a duplicated id | REQ-15 |

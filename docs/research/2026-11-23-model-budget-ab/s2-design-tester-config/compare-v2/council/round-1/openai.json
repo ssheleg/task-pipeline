@@ -1,0 +1,37 @@
+{
+ "meta": {
+  "id": "openai",
+  "model": "openai/gpt-6.2-astra-pro",
+  "family": "openai",
+  "at": "2026-11-23T19:36:10Z",
+  "route": "tokens",
+  "finish": "stop",
+  "cost": 0.5134808,
+  "cost_source": "byok",
+  "cost_known": true,
+  "tokens_in": 56420,
+  "tokens_out": 888,
+  "seconds": 19.0,
+  "served_by": "openai/gpt-6.2-astra-pro",
+  "parsed": true
+ },
+ "verdict": {
+  "ranking": [
+   "X",
+   "Y"
+  ],
+  "pick": "X",
+  "why": "X gives the implementer the stronger acceptance tests for the two claims that matter: the defect appeared only in the tested configuration, and a reused screenshot came from the build under review. R8–R10 require a failed checklist item, a reference capture and differing axes; R14 checks the stand capture's build, cell, scenario, step and hash. Y's C4 usefully requires a persona control from the same round, but permits a config-only claim on an axis that was never applied. C7/T-19 explicitly lets stand evidence pass without a build comparison. Both preserve the scenario × persona matrix and leave agent-tester unchanged. Operationally, X's separately dated rows make December 7 deliverable without the stand and give the December 21 dependency a clear blocked state (D19, Rollout). Y is leaner and better specifies self-capture fallback, but its gate can certify evidence that its own intake procedure says not to use.",
+  "risks": [
+   "X R3–R4 impose panel composition quotas and discontinuous viewport bands not requested by the brief. A 380-wide phone fails every class, creating avoidable capture and panel rework.",
+   "X R8 checks contradiction by checklist item rather than defect and does not require the same round. A different text-fit defect, or a stale control, can invalidate a legitimate finding.",
+   "Neither option establishes that the stand exports the required metadata or that the sender has a key. Y Q5–Q6 correctly identify both as dependencies; December 21 is conditional, not a confirmed integration date.",
+   "Both allow entirely unconfigured legacy panels. Compatibility avoids a release-day break, but shipping the gate does not itself put configurations on every project's ten portraits."
+  ],
+  "score": {
+   "X": 8,
+   "Y": 7
+  }
+ },
+ "raw": "{\n  \"ranking\": [\"X\", \"Y\"],\n  \"pick\": \"X\",\n  \"why\": \"X gives the implementer the stronger acceptance tests for the two claims that matter: the defect appeared only in the tested configuration, and a reused screenshot came from the build under review. R8–R10 require a failed checklist item, a reference capture and differing axes; R14 checks the stand capture's build, cell, scenario, step and hash. Y's C4 usefully requires a persona control from the same round, but permits a config-only claim on an axis that was never applied. C7/T-19 explicitly lets stand evidence pass without a build comparison. Both preserve the scenario × persona matrix and leave agent-tester unchanged. Operationally, X's separately dated rows make December 7 deliverable without the stand and give the December 21 dependency a clear blocked state (D19, Rollout). Y is leaner and better specifies self-capture fallback, but its gate can certify evidence that its own intake procedure says not to use.\",\n  \"risks\": [\n    \"X R3–R4 impose panel composition quotas and discontinuous viewport bands not requested by the brief. A 380-wide phone fails every class, creating avoidable capture and panel rework.\",\n    \"X R8 checks contradiction by checklist item rather than defect and does not require the same round. A different text-fit defect, or a stale control, can invalidate a legitimate finding.\",\n    \"Neither option establishes that the stand exports the required metadata or that the sender has a key. Y Q5–Q6 correctly identify both as dependencies; December 21 is conditional, not a confirmed integration date.\",\n    \"Both allow entirely unconfigured legacy panels. Compatibility avoids a release-day break, but shipping the gate does not itself put configurations on every project's ten portraits.\"\n  ],\n  \"score\": {\"X\": 8, \"Y\": 7}\n}"
+}
