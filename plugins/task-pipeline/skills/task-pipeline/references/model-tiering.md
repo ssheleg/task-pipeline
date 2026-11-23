@@ -5,7 +5,7 @@
 - The default
 - Never hardcode a model id
 - The operator's explicit choice is inherited, verbatim
-- The spec's author is the session's own model
+- Roles and money
 - Mechanic — confirm at preflight, then stop asking
 - The plan-then-execute profile
 - Subagents
@@ -22,9 +22,8 @@ unless the operator switches it.
 > writing that is the **latest Opus generation**, but read that as *"the top tier
 > of whatever you're on"*, not as a specific string.
 
-Every stage runs on that model by default: the grill hears what the operator didn't
-say, the spec locks contracts a zero-context implementer follows, the build holds a
-plan in its head. Downgrading any of those costs more in rework than it saves.
+Every stage runs on that model by default; *Roles and money* says which calls
+go to tokens.
 
 ## Never hardcode a model id
 
@@ -36,33 +35,41 @@ Model ids go stale, and the operator may be on another provider. So:
   Stage configs use provider-agnostic tokens:
   - `default` — the model confirmed for this run (the recommendation above)
   - `inherit` — whatever the operator is currently on; no recommendation
-- **Another provider is fine.** "Top tier available" is the contract: with no
-  Opus-class model, the best available one is right; say which and keep going.
+- **Another provider is fine:** the best available tier; say which.
 
 ## The operator's explicit choice is inherited, verbatim
 
-**Advice and choice are different things, and the second wins.** The
-recommendation above is ADVICE, printed once at preflight. A model or effort
-the operator set explicitly (`/model`, `/fast`, a config entry, an answer
-at preflight) is the CHOICE, and the plan, every stage and every subagent
-inherit it unchanged. **Task size is not a basis for switching**: a large task
-does not upgrade the model, a mechanical stage does not downgrade it; only an override
-the operator RECORDED, with its basis, in the per-stage map changes it mid-run. A switch nobody recorded is a defect, whatever it saved.
+**Advice and choice differ, and the choice wins.** The recommendation is ADVICE,
+printed once at preflight. A model or effort the operator set (`/model`, `/fast`, a
+config entry, a preflight answer) is the CHOICE; the plan, every stage and every
+subagent inherit it. **Task size switches nothing**; only an override the operator
+RECORDED, with its basis, changes it mid-run. An unrecorded switch is a defect.
 
-**An unsupported capability is its own line, never a silent swap.** When the
-confirmed model cannot do what a stage needs (vision, a context window, a tool), the
-run states that limitation by NAME, records it in the brief, and asks or proceeds with the gap
-named. Substituting another model without the operator's say-so is the same defect as
-the silent downgrade.
+**An unsupported capability is named, never silently swapped.** When the model cannot
+do what a stage needs (vision, a context window, a tool), the run names the limitation
+in the brief and asks or proceeds with the gap named.
 
-## The spec's author is the session's own model
+## Roles and money
 
-Stages 2 to 4 are written by the model the session already runs on: on a
-subscription host, the subscription session, with no paid call. A paid call to
-another model to write the spec runs only on the operator's recorded request for
-that piece of work, quoted in the brief with its date. The rule limits who writes,
-not who checks: scouts and validators keep the host's per-run line
-([`spec-protocol.md`](spec-protocol.md) → *The loop*).
+The owner, 2026-11-23 (host instructions, *Model and token budget by role*):
+tokens buy only the thinking that decides; the rest runs on the subscription.
+
+| Role | Route | Model of the host's map |
+|---|---|---|
+| Thinker: decisions, a spec's meanings and key features, analysis and planning that decide | tokens, no stinting | the strongest (`meanings.py write`) |
+| Writer: the spec's text from the meanings | subscription | the session's working tier (`meanings.py writer-task`) |
+| Main work, routine hard thinking, code and mathematics specialists, scouts | subscription | the session's model |
+| Validators of a decision | tokens, one call each, never retried | other vendors (the council's panel) |
+| The council's final verdict | tokens | the strongest ([`consilium.md`](consilium.md)) |
+
+Every token call goes into the spend ledger with its route, model, cost and task
+(`scripts/spend.py`; consilium, meanings and research validation write it
+themselves). `spend.py summary` gives the day and the month by route, model and
+task, with the estate's month as Observatory measures it at the providers; an
+unknown cost is counted apart, never as zero, and a call billed to the host's own
+provider key is read from its upstream cost. At 80 % of the development-mode
+ceiling (USD 5,000 a month) `spend.py ceiling` exits 3 with the one question the
+owner gets, with its default.
 
 ## Mechanic — confirm at preflight, then stop asking
 
@@ -79,8 +86,7 @@ and a per-stage override map only when the operator states one. After that:
 - **Do not prompt at any stage boundary**: the decision is recorded.
 - **Print the line again only** when the operator recorded a *per-stage override
   map* and the next stage's entry differs from the current model, scoped to that stage.
-- A skill **cannot change the main-loop model**; only the operator can (`/model`,
-  `/fast`). So the default is the model already running.
+- A skill **cannot change the main-loop model**; only the operator can.
 
 ## The plan-then-execute profile
 
@@ -97,9 +103,7 @@ contracts and a plan a stranger can follow. A weak plan is not recovered by a st
 build; a strong plan executed by a working tier is ordinary delivery. Acceptance is a
 judgment too, so stage 10 returns to the planning tier.
 
-It is still an override the operator states and the brief records with its basis.
-Task size still switches nothing, and an environment with one tier runs the whole pipeline
-on that tier and says so.
+It is still an override the operator states and the brief records.
 
 `scripts/plan_audit.py --models <map.json>` checks the recorded map at stage 4: a stage
 number this pipeline does not have, or an entry with no model behind it, fails there.
@@ -116,10 +120,7 @@ available, keep the current model, say which, and run.
 
 ## A harness clause encodes a model's weakness — stress-test it per generation
 
-Every fixed control here (a cap, a mandatory checkpoint, a fix-loop ceiling) encodes
-what the confirmed model cannot yet do reliably, and that expires: Anthropic reports
-removing a whole construct from its long-running harness when a newer generation
-stopped needing it (*Harness design for long-running agents*,
-anthropic.com/engineering, read 2026-08-30). When the confirmed tier moves a
-generation, re-test those clauses instead of carrying them as doctrine: a control the
-model has outgrown is a stop nobody can name the reason for.
+Every fixed control here (a cap, a checkpoint, a fix-loop ceiling) encodes what the
+confirmed model cannot yet do, and that expires (*Harness design for long-running
+agents*, anthropic.com/engineering, read 2026-08-30). When the tier moves a
+generation, re-test those clauses.

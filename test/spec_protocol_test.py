@@ -26,9 +26,16 @@ def case(fn):
     return fn
 
 
+SPEND_LOG = os.path.join(tempfile.mkdtemp(prefix="specproto-spend-"), "spend.jsonl")
+
+
+def spend_rows():
+    return [json.loads(x) for x in open(SPEND_LOG)] if os.path.exists(SPEND_LOG) else []
+
+
 def run(*args, env=None):
     r = subprocess.run([sys.executable, SCRIPT, *args], capture_output=True, text=True,
-                       env=dict(os.environ, **(env or {})))
+                       env=dict(os.environ, TASK_PIPELINE_SPEND_LOG=SPEND_LOG, **(env or {})))
     return r.returncode, r.stdout + r.stderr
 
 
@@ -220,7 +227,14 @@ def a_medium_spec_owes_its_research(root):
     expect(code == 1 and "owes research" in out, out)
     dossier(root)
     code, out = run("check", write(root, "spec2.md", m.replace("Size: M", "Size: M\nResearch: research/export")))
-    expect(code == 0, out)
+    expect(code == 0 and "Meanings" in out, "an M spec without its meanings is not warned: " + out)
+    code, out = run("check", write(root, "spec3.md", m.replace(
+        "Size: M", "Size: M\nResearch: research/export\nMeanings: nowhere.md")))
+    expect(code == 1 and "names no file" in out, out)
+    write(root, "meanings.md", "# Meanings\n")
+    code, out = run("check", write(root, "spec4.md", m.replace(
+        "Size: M", "Size: M\nResearch: research/export\nMeanings: meanings.md")))
+    expect(code == 0 and "Meanings" not in out, out)
 
 
 @case
@@ -358,6 +372,9 @@ def a_validator_of_another_family_is_called_and_recorded(root):
     expect("| fake/validator | family-b | partial |" in text, text)
     rec = json.load(open(os.path.join(d, "validation", "family-b-fake-validator.json")))
     expect(rec["gaps"] and rec["usage"] == {"total_tokens": 9}, rec)
+    rows = [x for x in spend_rows() if x["route"] == "research.validate" and x["model"] == "fake/validator"]
+    expect(rows and rows[-1]["usd"] is None and rows[-1]["source"] == "unknown",
+           "the validator's call is not in the spend ledger, or a missing cost became zero: %r" % rows)
     code, out = run("research", "check", d)
     expect(code == 0, "the recorded verdict did not count: " + out)
 
@@ -415,20 +432,26 @@ def the_loop_is_at_hand_in_its_order(root):
     expect(all(s["who"] and s["takes"] and s["leaves"] and s["stages"] for s in data["steps"]),
            "a step without who, takes, leaves or stages")
     expect("other agents than the author" in data["steps"][3]["who"], "research is not other agents'")
-    expect("another model family" in data["steps"][4]["who"], "verification names no other family")
+    expect("other families" in data["steps"][4]["who"], "verification names no other family")
     code, out = run("loop")
     expect(code == 0 and out.index("1. analysis") < out.index("5. verification"), out)
 
 
 @case
-def the_author_is_the_session_model_and_a_paid_author_needs_the_operators_request(root):
+def money_by_role_meanings_on_tokens_text_on_the_subscription(root):
+    # The owner, 2026-11-23: the thinker decides the meanings by tokens, a writer on the
+    # subscription writes the text, validators answer by tokens one call each.
     code, out = run("loop", "--json")
-    rule = json.loads(out)["author"]
-    expect("the session's own model" in rule and "only on the operator's recorded request" in rule, rule)
+    data = json.loads(out)
+    rule = data["author"]
+    expect("meanings" in rule and "subscription" in rule and "one call each" in rule, rule)
+    expect("meanings.py write" in data["steps"][1]["who"] and "writer" in data["steps"][1]["who"],
+           data["steps"][1]["who"])
     code, out = run("research", "plan", "--tier", "M", "--json")
     roles = {r["role"]: r for r in json.loads(out)["roles"]}
-    expect(roles["decider"]["tier"] == "session", "the decider is not the session's model: %r" % roles["decider"])
-    expect("only on the operator's recorded request" in roles["decider"]["does"], roles["decider"]["does"])
+    expect(roles["decider"]["tier"] == "thinker", "the decider is not the thinker: %r" % roles["decider"])
+    expect(roles["scout"]["route"] == "subscription", roles["scout"])
+    expect(roles["validator"]["route"].startswith("tokens, one call"), roles["validator"])
     expect("another agent than the author" in roles["scout"]["does"], roles["scout"]["does"])
 
 

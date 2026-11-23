@@ -6,13 +6,20 @@ called through one OpenAI-compatible endpoint (OpenRouter by default); the key i
 read from an environment variable the caller fills (for example through
 `use_secret.py run`), never from a file and never printed.
 
+Money (`references/model-tiering.md`, Roles and money): every panelist on tokens
+answers in ONE call per round, never retried; a panelist marked
+`"route": "subscription"` is never called here: a subscription agent of the session
+writes its verdict/1 JSON and `--import ID=FILE` brings it in at no token cost. Every
+paid call is appended to the spend ledger (`spend.py`) with its route, model, cost
+and `--task`; a BYOK call's cost is read from its upstream cost, never taken as 0.
+
     panel     [--config FILE] [--json]
               The panel and the final judge this host resolves to, and where each
               came from (the --config file, $TASK_PIPELINE_CONSILIUM, the host file
               ~/.config/task-pipeline/consilium.json, or the example in assets/).
     review    --doc FILE [--doc FILE ...] --brief FILE --out DIR [--round N]
               [--config FILE] [--max-usd X] [--only ID,ID] [--key-env NAME]
-              [--endpoint URL] [--timeout S] [--dry-run]
+              [--endpoint URL] [--timeout S] [--dry-run] [--task T] [--import ID=FILE]
               One round. Every panelist reads the artefact and the brief BLIND (no
               other verdict) and returns a verdict/1 JSON: verdict, score, findings.
               Then the judge reads the artefact, the brief and the anonymised panel
@@ -43,6 +50,8 @@ import urllib.error
 import urllib.request
 
 HERE = pathlib.Path(__file__).resolve().parent
+sys.path.insert(0, str(HERE))
+import spend  # noqa: E402  (the shared spend ledger, scripts/spend.py)
 EXAMPLE = HERE.parent / "assets" / "consilium.example.json"
 HOST = pathlib.Path(os.path.expanduser("~/.config/task-pipeline/consilium.json"))
 DEFAULT_ENDPOINT = "https://openrouter.ai/api/v1"
@@ -96,6 +105,8 @@ def validate_config(cfg):
             out.append("every panelist needs id, model and family")
             continue
         fams.add(m["family"])
+        if m.get("route", "tokens") not in ("tokens", "subscription"):
+            out.append(f"panelist {m['id']}: route is tokens or subscription")
     if panel and len(fams) < 3:
         out.append("the panel needs at least three model families")
     judge = cfg.get("judge")
@@ -124,14 +135,16 @@ def call(endpoint, key, model, messages, timeout, max_tokens, extra=None):
     choice = (data.get("choices") or [{}])[0]
     msg = choice.get("message") or {}
     usage = data.get("usage") or {}
+    usd, source = spend.cost_of(usage)
+    paid = {"cost": usd or 0.0, "cost_source": source, "cost_known": usd is not None}
     if not (msg.get("content") or "").strip() and choice.get("finish_reason") == "length":
         # A reasoning model can spend the whole budget thinking and answer nothing (Fable 5.2, 2026-11-23):
         # cap reasoning in the panelist's "extra" ({"reasoning": {"max_tokens": N}}) or raise max_tokens.
         return {"error": "no text: the token budget ran out (reasoning ate it); cap reasoning or raise max_tokens",
-                "cost": float((data.get("usage") or {}).get("cost") or 0.0), "seconds": round(time.time() - t0, 1),
-                "finish": "length"}
+                **paid, "tokens_in": usage.get("prompt_tokens"), "tokens_out": usage.get("completion_tokens"),
+                "seconds": round(time.time() - t0, 1), "finish": "length"}
     return {"text": msg.get("content") or "", "finish": choice.get("finish_reason"),
-            "cost": float(usage.get("cost") or 0.0), "tokens_in": usage.get("prompt_tokens"),
+            **paid, "tokens_in": usage.get("prompt_tokens"),
             "tokens_out": usage.get("completion_tokens"), "seconds": round(time.time() - t0, 1),
             "served_by": data.get("model")}
 
@@ -217,6 +230,20 @@ def run_round(args, kind):
     if args.only:
         keep = set(args.only.split(","))
         panel = [m for m in panel if m["id"] in keep]
+    task = args.task or os.environ.get("TASK_PIPELINE_TASK") or pathlib.Path(args.out).name
+    imports = {}
+    for spec in args.imports or []:
+        pid, _, f = spec.partition("=")
+        if not f:
+            print(f"consilium: --import takes ID=FILE, got {spec!r}", file=sys.stderr)
+            return 2
+        imports[pid] = f
+    unknown = set(imports) - {m["id"] for m in panel}
+    if unknown:
+        print("consilium: --import names no panelist: " + ", ".join(sorted(unknown)), file=sys.stderr)
+        return 2
+    sub = [m for m in panel if m.get("route") == "subscription" or m["id"] in imports]
+    panel = [m for m in panel if m not in sub]
     placeholders = [m["model"] for m in panel + [cfg["judge"]] if m["model"].startswith("<")]
     if placeholders and not args.dry_run:
         print("consilium: the configuration names roles, not models (" + cfg["_source"] + "); write the host file "
@@ -226,21 +253,46 @@ def run_round(args, kind):
     ledger = {"schema": "consilium-ledger/1", "round": args.round, "kind": kind, "started": now(),
               "config": cfg["_source"], "cap_usd": cap, "calls": []}
     if args.dry_run:
-        print(json.dumps({"panel": [m["model"] for m in panel], "judge": cfg["judge"]["model"],
-                          "prompt_chars": len(artefact) + len(brief), "cap_usd": cap}, indent=1))
+        print(json.dumps({"panel": [m["model"] for m in panel], "subscription": [m["id"] for m in sub],
+                          "judge": cfg["judge"]["model"], "prompt_chars": len(artefact) + len(brief),
+                          "cap_usd": cap, "task": task}, indent=1))
         return 0
 
     def one(m):
         res = call(args.endpoint, key, m["model"], panel_prompt(kind, brief, artefact, m.get("lens")),
                    args.timeout, m.get("max_tokens", 12000), m.get("extra"))
         parsed = parse_json(res.get("text"))
-        rec = {"id": m["id"], "model": m["model"], "family": m["family"], "at": now(),
+        rec = {"id": m["id"], "model": m["model"], "family": m["family"], "at": now(), "route": "tokens",
                **{k: v for k, v in res.items() if k != "text"}, "parsed": parsed is not None}
+        log_spend(rec, f"consilium.{kind}.panel", task)
         (out / f"{m['id']}.json").write_text(json.dumps({"meta": rec, "verdict": parsed, "raw": res.get("text", "")},
                                                           ensure_ascii=False, indent=1), encoding="utf-8")
         return m, rec, parsed
 
     verdicts = {}
+    for m in sub:
+        # A subscription panelist: its verdict was written by an agent of the session, never called here.
+        f = imports.get(m["id"])
+        parsed, err = None, None
+        if not f:
+            err = "subscription panelist: run it as an agent of the session and pass --import ID=FILE"
+        else:
+            try:
+                raw = pathlib.Path(f).read_text(encoding="utf-8")
+                parsed = parse_json(raw)
+                err = None if parsed is not None else "the imported file holds no JSON verdict"
+            except OSError as e:
+                err = f"import unreadable: {e}"
+        rec = {"id": m["id"], "model": m["model"], "family": m["family"], "at": now(), "route": "subscription",
+               "cost": 0.0, "cost_source": "subscription", "cost_known": True, "parsed": parsed is not None,
+               **({"error": err} if err else {}), **({"imported": f} if f else {})}
+        ledger["calls"].append(rec)
+        if parsed is not None:
+            verdicts[m["id"]] = parsed
+            (out / f"{m['id']}.json").write_text(json.dumps({"meta": rec, "verdict": parsed}, ensure_ascii=False,
+                                                              indent=1), encoding="utf-8")
+        print(f"  {m['id']:<10} {m['model']:<34} {'imported' if parsed else 'NO VERDICT':<10} subscription "
+              f"{err or ''}", file=sys.stderr)
     if args.judge_only:
         # Rerun only the judge over the verdicts this round already holds (a judge that failed is not
         # a reason to pay the panel again).
@@ -248,7 +300,9 @@ def run_round(args, kind):
             f = out / f"{m['id']}.json"
             if f.exists():
                 rec = json.loads(f.read_text(encoding="utf-8"))
-                ledger["calls"].append(dict(rec["meta"], reused=True, cost=0.0))
+                # The panel's spend stays in the round's total (it was paid); the spend ledger
+                # already holds it, so nothing is logged again.
+                ledger["calls"].append(dict(rec["meta"], reused=True))
                 if rec.get("verdict") is not None:
                     verdicts[m["id"]] = rec["verdict"]
         panel_iter = []
@@ -270,24 +324,33 @@ def run_round(args, kind):
     else:
         # Anonymise: the judge sees panelists by letter and family, never by vendor rank.
         letters = {pid: chr(65 + i) for i, pid in enumerate(sorted(verdicts))}
-        anon = {f"{letters[p]} ({next(m['family'] for m in panel if m['id'] == p)})": v for p, v in verdicts.items()}
+        anon = {f"{letters[p]} ({next(m['family'] for m in panel + sub if m['id'] == p)})": v for p, v in verdicts.items()}
         j = cfg["judge"]
         res = call(args.endpoint, key, j["model"], judge_prompt(kind, brief, artefact, anon), args.timeout,
                    j.get("max_tokens", 16000), j.get("extra"))
         ruling = parse_json(res.get("text"))
-        rec = {"id": "judge", "model": j["model"], "family": j["family"], "at": now(),
+        rec = {"id": "judge", "model": j["model"], "family": j["family"], "at": now(), "route": "tokens",
                **{k: v for k, v in res.items() if k != "text"}, "parsed": ruling is not None, "letters": letters}
+        log_spend(rec, f"consilium.{kind}.judge", task)
         ledger["calls"].append(rec)
         (out / "judge.json").write_text(json.dumps({"meta": rec, "ruling": ruling, "raw": res.get("text", "")},
                                                     ensure_ascii=False, indent=1), encoding="utf-8")
         print(f"  {'judge':<10} {j['model']:<34} {'ok' if ruling else 'NO RULING':<10} ${rec.get('cost', 0):.3f} "
               f"{rec.get('seconds')}s {rec.get('error', '')[:120]}", file=sys.stderr)
     ledger["spent_usd"] = round(sum(c.get("cost", 0) for c in ledger["calls"]), 4)
+    ledger["unknown_cost_calls"] = sum(1 for c in ledger["calls"] if c.get("cost_known") is False)
+    ledger["task"] = task
     ledger["finished"] = now()
     (out / "ledger.json").write_text(json.dumps(ledger, ensure_ascii=False, indent=1), encoding="utf-8")
     (out / "summary.md").write_text(summary_md(ledger, verdicts, ruling, kind), encoding="utf-8")
     print(str(out / "summary.md"))
     return 0 if ruling and (kind == "decide" or ruling.get("verdict") == "pass") else 1
+
+
+def log_spend(rec, route, task):
+    spend.record(route, rec["model"], rec.get("cost") if rec.get("cost_known", True) else None,
+                 rec.get("cost_source", "unknown"), task, rec.get("tokens_in"), rec.get("tokens_out"),
+                 rec.get("served_by"))
 
 
 def summary_md(ledger, verdicts, ruling, kind):
@@ -371,6 +434,9 @@ def main(argv=None):
         r.add_argument("--dry-run", action="store_true")
         r.add_argument("--judge-only", action="store_true",
                        help="rerun only the judge over this round's saved verdicts")
+        r.add_argument("--task", help="the task the spend is booked to (default $TASK_PIPELINE_TASK, else --out's name)")
+        r.add_argument("--import", dest="imports", action="append", metavar="ID=FILE",
+                       help="a verdict a subscription agent wrote for panelist ID; never a token call")
     c = sub.add_parser("check")
     c.add_argument("dir")
     c.add_argument("--round", type=int, default=1)
@@ -385,7 +451,7 @@ def main(argv=None):
         else:
             print(f"source: {cfg['_source']}")
             for m in cfg["panel"]:
-                print(f"  panel  {m['id']:<10} {m['model']:<36} {m['family']}")
+                print(f"  panel  {m['id']:<10} {m['model']:<36} {m['family']:<10} {m.get('route', 'tokens')}")
             print(f"  judge  {'':<10} {cfg['judge']['model']:<36} {cfg['judge']['family']}")
         return 0
     if a.cmd == "check":

@@ -19,13 +19,13 @@ Five steps in this order; `spec_protocol.py loop` prints them.
 | Step | Stage | Who | Takes | Leaves |
 |---|---|---|---|---|
 | 1. Analysis | 0 to 2 | the author | the request, the brief, the documents | the gaps, the size, the classed ledger |
-| 2. Definition | 2 to 3 | the author | the brief, the size, the ledger | the approved design and the spec draft |
+| 2. Definition | 2 to 3 | the thinker by tokens (meanings), a writer on the subscription (text) | the brief, the size, the ledger | `meanings.md` that passes `meanings.py check`, the spec draft citing it |
 | 3. Research planning | 3 | the author | the ledger's open rows, the size | the dossier skeleton, one question a scout |
-| 4. Research | 3 | other agents: working-tier scouts, specialists for code, mathematics, science | one question each | Findings, Options, sources read |
-| 5. Verification | 3 to 4 | the author, validators of another model family, the scripts | the dossier and the spec | Recommendation, verdicts, `check` and `gate` pass |
+| 4. Research | 3 | other agents on the subscription: scouts, specialists for code, mathematics, science | one question each | Findings, Options, sources read |
+| 5. Verification | 3 to 4 | the author; validators of other families by tokens, one call each; the scripts | the dossier and the spec | Recommendation, verdicts, `check` and `gate` pass |
 
-The author is the session's own model; a paid author runs only on the operator's
-recorded request ([`model-tiering.md`](model-tiering.md)). Size S runs steps 1, 2, 5.
+Who runs on tokens and who on the subscription: [`model-tiering.md`](model-tiering.md),
+*Roles and money*. An M or L spec carries `Meanings: <file>`. Size S runs steps 1, 2, 5.
 
 ## 1. Size the spec
 

@@ -1,3 +1,35 @@
+## v1.114.0: money by role, the spec's meanings by tokens and its text on the subscription, every token call booked
+
+Guards: 539 → **539**.
+
+The owner's order of 2026-11-23 18:58 UTC (relayed by the Fabric CEO; host instructions, *Model and token budget by
+role*): tokens buy only the thinking that decides (the strongest model, without stinting); the spec's text is written by
+a writer on the subscription from the thinker's meanings; main work, code and mathematics agents run on subscriptions;
+decision validators (GLM, Kimi, Grok, Gemini, Astra) answer by tokens, one call each; every token route is tracked. It
+replaces the 2026-11-22 rule of v1.110.0 (the session's own model writes the whole spec, a paid author only on request).
+
+- **`scripts/spend.py`** (new): one JSON line per token call (route, model, USD, cost source, task, tokens) in
+  `~/.local/state/task-pipeline/spend.jsonl` or `$TASK_PIPELINE_SPEND_LOG`; `summary` gives the day and the month by
+  route, model and task plus the estate's month as Observatory measures it at the providers; `ceiling` exits 3 at 80 %
+  of the development-mode ceiling (USD 5,000) with the one question for the owner and its default. An unknown cost is
+  counted apart, never as zero.
+- **`scripts/meanings.py`** (new): `write` is the thinker's ONE call (the consilium config's `thinker`, else its judge)
+  that returns the meanings in seven fixed sections; `check` holds them whole and short (decisions with reasons, at most
+  2,500 words); `writer-task` is the subscription writer's task, which passes `task_prompt.py check --kind work`.
+- **`scripts/consilium.py`**: a call billed to our own provider key (BYOK) answers `usage.cost = 0`; its cost is now the
+  upstream cost (measured 2026-11-23 on `openai/gpt-6.2-astra-pro`; the memory healing council booked Astra's 300,026
+  tokens over two rounds as free). `--judge-only` no longer zeroes the panel's paid spend. A panelist with `"route": "subscription"` is
+  never called by tokens; `--import ID=FILE` brings its verdict in. Every call goes to the spend ledger with `--task`.
+- **`scripts/spec_protocol.py`**: the loop's definition step is the thinker's meanings and the writer's text; scouts
+  and specialists on the subscription; `research validate` books its call (one, never retried); an M or L spec without
+  `Meanings: <file>` is warned (an error in a later release), a `Meanings:` naming no file fails.
+- Doctrine: `references/model-tiering.md` *Roles and money* replaces *The spec's author is the session's own model*;
+  `consilium.md` and `spec-protocol.md` follow; the prompt-lint word ratchet fell by two.
+- `assets/consilium.example.json`: a `thinker` role and a subscription panelist.
+- Tests: `test/spend_test.py` (34 cases), `test/consilium_test.py` 21 → 33, `test/spec_protocol_test.py` (the 2026-11-22
+  author case replaced by the money-by-role case, the validator's booking, the `Meanings:` header).
+- Review of the routes and the A/B test of quality and price on two real specs: `docs/research/2026-11-23-model-budget-ab/`.
+
 ## v1.113.1: v1.113.0 released, its verification citation fixed
 
 Guards: 539 → **539**.

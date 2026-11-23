@@ -7,7 +7,8 @@ mechanical, standard library only; only `research validate` calls a model:
     loop      [--json]
               The spec loop at hand: analysis, definition, research planning,
               research by other agents, verification; who does each step, what it
-              takes and what it leaves. The author is the session's own model.
+              takes and what it leaves. Meanings by the thinker on tokens
+              (`meanings.py write`), the text by a writer on the subscription.
     size      --reqs N --files N [--surfaces N] [--contract] [--outward]
               [--irreversible] [--cross-project] [--new-domain] [--unknowns N] [--json]
               The spec's size (S, M, L) from the brief's facts: which sections it owes,
@@ -25,9 +26,11 @@ mechanical, standard library only; only `research validate` calls a model:
               read, citations that resolve, validators of another model family.
               `validate` is the one verb that calls a model: it sends the dossier,
               blind to other verdicts, to an OpenAI-compatible endpoint and records
-              the verdict. The model id and endpoint come from the caller.
+              the verdict in ONE call, never retried, and books its cost to the
+              spend ledger (`spend.py`). The model id and endpoint come from the caller.
     check     SPEC [--tier T] [--json]
-              The spec is complete for its size: sections, ledger, research, no TBD.
+              The spec is complete for its size: sections, ledger, research, no TBD;
+              size M and L name their meanings (`Meanings: <file>`, a warning for now).
     gate      SPEC [--plan PLAN] [--board FILE]
               The order spec -> board -> build: the spec passes, the board rows and
               the plan cite it.
@@ -38,6 +41,10 @@ import argparse
 import json
 import os
 import re
+import sys
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import spend  # noqa: E402  (the shared spend ledger)
 import sys
 import time
 import urllib.error
@@ -245,30 +252,34 @@ def research_init(d, tier, question, author):
     return "wrote " + readme + " and sources.json"
 
 
-AUTHOR_RULE = ("the spec's author is the session's own model (on a subscription host, the "
-               "subscription session). A paid call to another model to write the spec runs "
-               "only on the operator's recorded request for that piece of work. Scouts and "
-               "validators are other agents; their spend follows the host's per-run line.")
+AUTHOR_RULE = ("money by role (the owner, 2026-11-23): the thinker, the strongest model through "
+               "the API, decides the meanings and key features (`meanings.py write`, tokens, no "
+               "stinting); a writer agent on the subscription writes the text from them; scouts "
+               "and code or mathematics specialists run on the subscription; validators answer by "
+               "tokens, one call each. Every token call is booked to the spend ledger.")
 
 LOOP = [
     {"step": 1, "name": "analysis", "stages": "0-2", "who": "the author",
      "takes": "the request, the brief, the documents stage 1 read",
      "leaves": "the gap list, the spec's size (`size`), the classed question ledger (`questions`)"},
-    {"step": 2, "name": "definition", "stages": "2-3", "who": "the author",
+    {"step": 2, "name": "definition", "stages": "2-3",
+     "who": "the thinker on tokens writes the meanings (`meanings.py write`, `check`); a writer "
+            "on the subscription writes the spec's text from them (`meanings.py writer-task`)",
      "takes": "the brief, the size, the ledger",
-     "leaves": "the approved design and the spec draft: goal, scope, requirements, contracts; "
-               "tactics and known domains decided, strategy batched for the owner"},
+     "leaves": "the meanings (goal, key features, decisions with reasons, contracts, non-goals, "
+               "risks, strategy questions with defaults) and the spec draft that cites them"},
     {"step": 3, "name": "research planning", "stages": "3", "who": "the author",
      "takes": "the ledger's unknown and known-domain rows, the size",
      "leaves": "the dossier skeleton (`research init`) and the roles (`research plan`): "
                "one question a scout"},
     {"step": 4, "name": "research", "stages": "3",
-     "who": "other agents than the author: working-tier scouts with web search, and a "
-            "specialist agent for code, mathematics or science where the host has one",
+     "who": "other agents than the author, on the subscription: working-tier scouts with web "
+            "search, and a specialist agent for code, mathematics or science",
      "takes": "one question and the dossier skeleton each",
      "leaves": "Findings, Options and sources.json with what was read; no recommendation"},
     {"step": 5, "name": "verification", "stages": "3-4",
-     "who": "the author rechecks; validators of another model family, blind; then the scripts",
+     "who": "the author rechecks; validators of other families by tokens, one call each, blind; "
+            "the council's final verdict by the strongest model on tokens; then the scripts",
      "takes": "the dossier and the spec",
      "leaves": "Recommendation, validator verdicts and Resolution; `research check`, `check` "
                "and `gate` pass"},
@@ -279,23 +290,23 @@ def research_plan(tier):
     r = TIERS[tier]["research"] if tier in TIERS else DESK
     roles = []
     if r["scouts"]:
-        roles.append({"role": "scout", "count": r["scouts"], "tier": "work",
+        roles.append({"role": "scout", "count": r["scouts"], "tier": "work", "route": "subscription",
                       "does": "another agent than the author (a specialist for code, mathematics "
                               "or science where the host has one); web search and reading; fills Findings, Options and sources.json; "
                               "recommends nothing; what it could not open it did not read"})
-        roles.append({"role": "decider", "count": 1, "tier": "session",
-                      "does": "the spec's author, the session's own model (a paid call to another "
-                              "model only on the operator's recorded request); rechecks numbers and citations, writes Recommendation, What would "
-                              "refute it and Rejected; sends gaps back to a scout, never fills "
-                              "them from memory"})
+        roles.append({"role": "decider", "count": 1, "tier": "thinker",
+                      "does": "the thinker (the strongest model, by tokens) decides; rechecks numbers "
+                              "and citations, writes Recommendation, What would refute it and Rejected; "
+                              "sends gaps back to a scout, never fills them from memory"})
     if r["validators"]:
-        roles.append({"role": "validator", "count": r["validators"], "tier": "deep",
+        roles.append({"role": "validator", "count": r["validators"], "tier": "deep", "route": "tokens, one call",
                       "family": "another model family than the author, each blind to the other",
                       "does": "verdict agree, partial or disagree with evidence in Validation"})
         roles.append({"role": "merge", "count": 1, "tier": "fast",
                       "does": "on any disagree: Resolution, whose evidence is stronger and why"})
     return {"tier": tier, "minimums": r, "roles": roles,
-            "budget": "the host's per-run spend line; an unknown cost is never counted as zero"}
+            "budget": "every token call in the spend ledger (`spend.py summary`); the host's per-run "
+                      "line binds; an unknown cost is never counted as zero"}
 
 
 def research_check(d, tier=None):
@@ -461,6 +472,10 @@ def research_validate(d, model, family, endpoint, key_env, timeout=180, dry_run=
         content = reply["choices"][0]["message"]["content"]
     except (KeyError, IndexError, TypeError):
         return None, "the reply has no choices[0].message.content: no verdict recorded"
+    usd, source = spend.cost_of(reply.get("usage"))
+    u = reply.get("usage") or {}
+    spend.record("research.validate", model, usd, source, None, u.get("prompt_tokens"),
+                 u.get("completion_tokens"), reply.get("model"))
     verdict, err = parse_verdict(content)
     if err:
         return None, err + ": no verdict recorded"
@@ -470,7 +485,8 @@ def research_validate(d, model, family, endpoint, key_env, timeout=180, dry_run=
     rec_rel = "validation/%s.json" % slug
     record = dict(verdict, model=model, family=family, same_family=same,
                   at=time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-                  seconds=round(time.time() - started, 1), usage=reply.get("usage"),
+                  seconds=round(time.time() - started, 1), usage=reply.get("usage"), cost_usd=usd,
+                  cost_source=source,
                   answered_by=reply.get("model", model))
     note = re.sub(r"[|\n]+", " ", verdict["evidence"])[:200].strip() or "no evidence given"
     if same:
@@ -515,6 +531,14 @@ def check(path, tier=None):
     owner, qerr, qwarn = questions(text)
     errors += qerr
     warns += qwarn
+    meanings = header_value(text, "Meanings")
+    if meanings:
+        mp = meanings if os.path.isabs(meanings) else os.path.join(os.path.dirname(path), meanings)
+        if not os.path.isfile(mp) and not os.path.isfile(meanings):
+            errors.append("`Meanings: %s` names no file" % meanings)
+    elif tier in ("M", "L"):
+        warns.append("size %s: no `Meanings: <file>` header; the meanings are thought on tokens "
+                     "(`meanings.py write`) and the text written from them (a warning in this release)" % tier)
     research = header_value(text, "Research")
     if tier in ("M", "L") or research:
         if not research or research.lower().startswith("none"):
