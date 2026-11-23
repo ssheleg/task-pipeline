@@ -1,4 +1,4 @@
-## v1.114.0: money by role, the spec's meanings by tokens and its text on the subscription, every token call booked
+## v1.114.0: money by role (the spec's meanings by tokens, its text on the subscription, every token call booked) and the project brain's minimum
 
 Guards: 539 → **539**.
 
@@ -16,6 +16,8 @@ replaces the 2026-11-22 rule of v1.110.0 (the session's own model writes the who
 - **`scripts/meanings.py`** (new): `write` is the thinker's ONE call (the consilium config's `thinker`, else its judge)
   that returns the meanings in seven fixed sections; `check` holds them whole and short (decisions with reasons, at most
   2,500 words); `writer-task` is the subscription writer's task, which passes `task_prompt.py check --kind work`.
+  `review-brief` gives the council its brief over the meanings: from size M the council judges the meanings BEFORE
+  the writer starts (the A/B test found the thinker's short call can bend an order, and the writer carries it on).
 - **`scripts/consilium.py`**: a call billed to our own provider key (BYOK) answers `usage.cost = 0`; its cost is now the
   upstream cost (measured 2026-11-23 on `openai/gpt-6.2-astra-pro`; the memory healing council booked Astra's 300,026
   tokens over two rounds as free). `--judge-only` no longer zeroes the panel's paid spend. A panelist with `"route": "subscription"` is
@@ -29,6 +31,16 @@ replaces the 2026-11-22 rule of v1.110.0 (the session's own model writes the who
 - Tests: `test/spend_test.py` (34 cases), `test/consilium_test.py` 21 → 33, `test/spec_protocol_test.py` (the 2026-11-22
   author case replaced by the money-by-role case, the validator's booking, the `Meanings:` header).
 - Review of the routes and the A/B test of quality and price on two real specs: `docs/research/2026-11-23-model-budget-ab/`.
+- **The project brain, minimum** (the Fabric CEO's decision of 2026-11-23 on the owner's rule «любая задача агентов
+  сначала идёт в мозг»; report `docs/reports/2026-11-21-brain-task-pipeline`): `scripts/brain.py recall <nouns>` gives
+  stage 0 at most ten lines of this project's own memory (the lessons it wrote, the retro's standing instructions,
+  decisions, open backlog rows, past specs and plans, shipped-state recipes), each with kind, source line, date,
+  freshness and side. Read-only and removable; a line is a pointer, re-derived before use; nothing of another project
+  is read until records carry a side. `brain.py stats` is the two-week measurement (recalls, empty share, used-hit
+  rate). `knowledge-sources.md` row 0a. `test/brain_test.py` (17 cases).
+- **The shared lesson index is no longer empty (B-163):** `lessons.py` read a Lesson line only with an em dash after
+  the key, which the owner's rule forbids, and only on one line; `rebuild` read only the artifact root's retro. All
+  three fixed; the machine's index holds its first lesson.
 
 ## v1.113.1: v1.113.0 released, its verification citation fixed
 

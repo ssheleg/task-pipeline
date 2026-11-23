@@ -63,11 +63,9 @@ tokens buy only the thinking that decides; the rest runs on the subscription.
 | The council's final verdict | tokens | the strongest ([`consilium.md`](consilium.md)) |
 
 Every token call goes into the spend ledger with its route, model, cost and task
-(`scripts/spend.py`; consilium, meanings and research validation write it
-themselves). `spend.py summary` gives the day and the month by route, model and
-task, with the estate's month as Observatory measures it at the providers; an
-unknown cost is counted apart, never as zero, and a call billed to the host's own
-provider key is read from its upstream cost. At 80 % of the development-mode
+(`scripts/spend.py`; the scripts here write it). `spend.py summary` gives the day and the month by route, model and
+task, with the estate's month as Observatory measures it; an unknown cost is
+counted apart, never as zero; a call on the host's own key is read from its upstream cost. At 80 % of the development-mode
 ceiling (USD 5,000 a month) `spend.py ceiling` exits 3 with the one question the
 owner gets, with its default.
 

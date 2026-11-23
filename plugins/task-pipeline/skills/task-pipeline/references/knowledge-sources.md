@@ -27,16 +27,16 @@ that goes stale when the answer changes.
 
 ## Why this is a phase and not "explore a bit first"
 
-Asking before harvesting spends the operator's turns on questions an ADR, a runbook
-or a wiki page already answered. Worse, an operator answering from memory can be wrong,
-and without the documents in hand the run cannot tell a decision from a recollection.
-Harvesting first makes the grill's answers checkable instead of merely confident.
+Asking before harvesting spends the operator's turns on questions the documents already
+answer, and an answer from memory cannot be told from a decision. Harvesting first makes
+the grill's answers checkable.
 
 ## The sources, in the order to try them
 
 | # | Source | How to find it | What it's good for |
 |---|---|---|---|
 | 0 | **A host's launch context** | a session started by Fabric or Fabric Dashboards (`session-handoff/1`): the brief arrives appended to the system prompt, the task as the first prompt, and `context.md` is the cited context pack | the request in the words the operator gave the host — taken as the request, not re-asked; the context pack is a harvest source like any other and is cited by its section |
+| 0a | The project brain, first | `scripts/brain.py recall <nouns, both languages>` and `fabric_memory_search` with the same nouns | at most ten lines of this project's own memory (lessons, decisions, open rows, specs, recipes); each is `recalled`, re-derived before use; no other side's memory |
 | 1 | **The code** | the repo you're in | what actually runs — the tiebreaker |
 | 2 | **The code graph** | `graphify-out/graph.json` — see below | *reach*: what calls this, what breaks if it moves, what every change passes through |
 | 3 | **Host agent docs** | `CLAUDE.md`, `AGENTS.md`, `.cursor/rules/` | conventions, commands, deploy path, house rules |
@@ -102,8 +102,7 @@ stage 9 (`wiki-update`). Absent: its install lines are printed once at preflight
 
 ## How to harvest — retrieval, not reading
 
-The harvest is bounded by the *task*, not by the size of the sources. You are not
-reading the wiki; you are asking it about this task.
+The harvest is bounded by the *task*: you ask each source about this task.
 
 1. **Take the task's nouns** — the entities, the feature name, the subsystem, the
    file paths the operator mentioned — plus their obvious synonyms.
@@ -112,8 +111,7 @@ reading the wiki; you are asking it about this task.
    else `grep`/`Read`; the tracker/hosted-doc tool if one is connected.
 3. **Follow one hop, not ten.** A hit that names an ADR, a scenario id or a module
    is worth opening. A page three links away is context, not evidence.
-4. **Stop when the terms stop returning anything new.** Same rule as the interview:
-   no grinding past diminishing returns.
+4. **Stop when the terms stop returning anything new.**
 
 ## Record it — the source ledger
 

@@ -462,7 +462,7 @@
    "em_dash": 71,
    "unwanted_stop": 0,
    "version_history": 0,
-   "words": 3664
+   "words": 3658
   },
   "plugins/task-pipeline/skills/task-pipeline/references/learned.md": {
    "bold": 111,
@@ -486,7 +486,7 @@
    "em_dash": 8,
    "unwanted_stop": 0,
    "version_history": 0,
-   "words": 976
+   "words": 967
   },
   "plugins/task-pipeline/skills/task-pipeline/references/planning.md": {
    "bold": 44,
@@ -574,7 +574,7 @@
    "em_dash": 0,
    "unwanted_stop": 0,
    "version_history": 0,
-   "words": 853
+   "words": 859
   },
   "plugins/task-pipeline/skills/task-pipeline/references/spec.md": {
    "bold": 71,
@@ -863,6 +863,6 @@
   "em_dash": 2274,
   "unwanted_stop": 14,
   "version_history": 11,
-  "words": 195145
+  "words": 195136
  }
 }

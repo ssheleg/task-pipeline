@@ -263,8 +263,9 @@ LOOP = [
      "takes": "the request, the brief, the documents stage 1 read",
      "leaves": "the gap list, the spec's size (`size`), the classed question ledger (`questions`)"},
     {"step": 2, "name": "definition", "stages": "2-3",
-     "who": "the thinker on tokens writes the meanings (`meanings.py write`, `check`); a writer "
-            "on the subscription writes the spec's text from them (`meanings.py writer-task`)",
+     "who": "the thinker on tokens writes the meanings (`meanings.py write`, `check`); for size M "
+            "and L the council judges them (`consilium.py review`, `meanings.py review-brief`); a "
+            "writer on the subscription writes the spec's text from them (`meanings.py writer-task`)",
      "takes": "the brief, the size, the ledger",
      "leaves": "the meanings (goal, key features, decisions with reasons, contracts, non-goals, "
                "risks, strategy questions with defaults) and the spec draft that cites them"},

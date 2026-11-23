@@ -15,6 +15,10 @@
   in `~/.local/state/task-pipeline/spend.jsonl`.
 - **Outside this repository.** Wiki `synthesis/llm-models.md` *Money by role*; board request `5c2a2dba` to
   fabric-agents-database (agents.improve) for the pattern and the rollout.
+- **The project brain, minimum (same release).** The Fabric CEO's decision of 2026-11-23: `scripts/brain.py recall`
+  at stage 0 (`knowledge-sources.md` row 0a), read-only, this project's memory only; B-163 fixed in `lessons.py` (the
+  machine index holds its first lesson). Measurement row B-187, due 2026-12-08: `brain.py stats --days 14 --cite <briefs>`
+  and the report to the CEO, who decides on the full version.
 - **Open.** `Meanings:` is a warning for M and L in this release, an error in the next minor one. fabric-workspace's
   `memory_heal_model.py` books its spend only in its own output (a finding for that project).
 - **Next task.** After v1.113.0's release run finishes: merge this branch, tag `v1.114.0` (annotated) on the merge

@@ -18,6 +18,12 @@ from them. Standard library only.
                  The meanings are whole and short: every section present and filled, each
                  decision with its reason, no TBD, at most N words (default 2500: meanings,
                  not the spec; the text is the writer's).
+    review-brief --brief FILE
+                 The brief for the council that reviews the meanings BEFORE the writer
+                 starts (size M and L): `consilium.py review --doc meanings.md --brief -`.
+                 The A/B test of 2026-11-23 found the thinker's short call can bend an order
+                 (a retry where the order said one request); the writer carries such an
+                 error into the spec, so the meanings are judged first.
     writer-task  --meanings FILE --brief FILE --spec-out FILE [--size S|M|L]
                  The task for the writer, a subscription agent of the session: write the
                  spec from the meanings, change no meaning, send a gap back as a question.
@@ -27,7 +33,7 @@ Sections of the meanings, in order:
     ## Goal and meaning        what the work is for and what is true when it is done
     ## Key features            the features that make it what it is, each one line
     ## Decisions               `- D1: <decision>. Because <reason>.`
-    ## Contracts               what each interface promises, in meaning, not in schema
+    ## Contracts               what each interface promises and the check that proves it
     ## Non-goals               what it will not do
     ## Risks                   what could break it, and what would refute the design
     ## Questions for the owner strategy only, each with a default; or `none`
@@ -52,13 +58,16 @@ REASON = re.compile(r"\b(because|since|so that)\b|потому что|так к�
 
 SYSTEM = """You are the thinker of an engineering specification. You decide its meaning, not its prose:
 another agent writes the spec's text from what you return, and it may not change a meaning you set.
-Decide; do not defer a tactical choice to the owner. Ask the owner only a strategy question (who it is for,
-what it promises, price, name), always with the default the work goes on with.
+Decide every tactical choice yourself (formats, names, thresholds, dates counted from today, what a check
+compares); the writer may not invent a decision. Ask the owner only a strategy question (who it is for, what it
+promises, price, name), always with the default the work goes on with. Where the brief asks for a deliverable
+(a reply, a date, a row), decide its concrete value.
 Return Markdown with exactly these sections, in this order, and nothing before the first one:
 ## Goal and meaning
 ## Key features
 ## Decisions        (each line: `- D<n>: <decision>. Because <reason>.`)
-## Contracts        (what each interface promises, in meaning)
+## Contracts        (what each interface promises, and the check that proves it holds: an equality, a
+                     hash, a resolution, never only that a field is present)
 ## Non-goals
 ## Risks            (what could break it; what would refute the design)
 ## Questions for the owner   (strategy only, each with a default; or `none`)
@@ -163,15 +172,37 @@ requirement with an acceptance check, every decision into the Decisions table wi
 contract into its exact shape. Nothing in it contradicts the meanings; nothing in the meanings is missing.
 
 Done when: `python3 <skill>/scripts/spec_protocol.py check {spec}` exits 0, and a closing pass over the
-meanings, line by line, finds each one in the spec.
+meanings, line by line, finds each one in the spec, and a second pass checks every example and contract
+against every rule it falls under.
 
 Work in waves: write the sections, then a closing pass that rereads the whole spec against the meanings and
 lists what was missed or left vague; fix it in the same run. A gap the meanings do not settle is not filled
-by invention: write it into `## Questions` with the class `unknown` and a default, and go on. Do not stop
-between steps for approval; the limits are the meanings and the brief.
+by invention of meaning: decide it as a tactic, record it in `## Questions` with the class `tactics`, `by`
+agent and its basis, and go on. Only a strategy question the meanings already list stays `pending`. Every
+check verifies the truth of what it guards (an equality, a hash, a resolution), never only that a field is
+present. Every example passes the spec's own rules. Where the brief asks for a deliverable (a date, a reply),
+the spec gives its concrete value. Be concise: say each thing once. Do not stop between steps for approval;
+the limits are the meanings and the brief.
 
 Return: the path of the spec, the output of the check, and the list of open questions with their defaults.
 Context: read the brief and the meanings first; the documents the brief names; do not change any other file."""
+
+
+REVIEW_ADDENDUM = """
+
+## What the council reviews
+
+The artefact is the MEANINGS of the spec (goal, key features, decisions, contracts, non-goals, risks, owner
+questions), written by the thinker before a writer turns them into the spec's text. The writer may not change a
+meaning, so an error here becomes an error in the spec. Judge: is every item of the order honoured literally (no
+exception the order does not make, no retry where it says one request)? Is every decision correct against the
+brief's facts, and does each contract say how it is proven? Is any tactical question pushed to the owner?
+"""
+
+
+def review_brief(a):
+    print(pathlib.Path(a.brief).read_text(encoding="utf-8").rstrip() + REVIEW_ADDENDUM)
+    return 0
 
 
 def writer_task(a):
@@ -199,6 +230,8 @@ def main(argv=None):
     c.add_argument("file")
     c.add_argument("--max-words", type=int, default=2500)
     c.add_argument("--json", action="store_true")
+    rb = sub.add_parser("review-brief")
+    rb.add_argument("--brief", required=True)
     t = sub.add_parser("writer-task")
     t.add_argument("--meanings", required=True)
     t.add_argument("--brief", required=True)
@@ -209,6 +242,8 @@ def main(argv=None):
         return write(a)
     if a.cmd == "writer-task":
         return writer_task(a)
+    if a.cmd == "review-brief":
+        return review_brief(a)
     r = check(a.file, a.max_words)
     print(json.dumps(r, indent=1) if a.json else ("PASS " if r["pass"] else "FAIL ") + "; ".join(r["errors"]))
     return 0 if r["pass"] else 1

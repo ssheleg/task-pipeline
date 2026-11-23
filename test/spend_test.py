@@ -203,6 +203,11 @@ def main():
                        input=r.stdout, capture_output=True, text=True)
     ok(t.returncode == 0 and "Meanings: m.md" in r.stdout and "Size: L" in r.stdout, "the writer's task passes: " + t.stdout)
 
+    # review-brief: the council judges the meanings before the writer starts, literally against the order.
+    r = run("meanings.py", ["review-brief", "--brief", str(brief)])
+    ok(r.returncode == 0 and r.stdout.startswith("Monthly export for the owner.") and "honoured literally" in r.stdout,
+       "the meanings' review brief carries the brief and the literal-order question: " + r.stdout[:200])
+
     print(f"spend_test: {CASES} cases passed")
 
 
