@@ -121,6 +121,11 @@ with tempfile.TemporaryDirectory() as d:
     one_novice.write_text(leveled(["novice", "expert"] + ["regular"] * 8))
     rc, out, _ = run(DG, "panel", one_novice)
     ok(rc == 1 and "1 novice and 1 expert" in out, f"one novice fails, counted ({rc} {out!r})")
+    unfilled = d / "levels-unfilled.md"
+    unfilled.write_text(leveled(["novice | regular | expert"] * 10))
+    rc, out, _ = run(DG, "panel", unfilled)
+    ok(rc == 0 and "no portrait names its experience level" in out,
+       f"the template's unfilled level is not a level ({rc} {out!r})")
     partial = d / "levels-partial.md"
     partial.write_text(leveled(["novice", "novice", "expert"] + ["regular"] * 7).replace("- **needs**: regular: ", "- **needs**: ", 1))
     rc, out, _ = run(DG, "panel", partial)

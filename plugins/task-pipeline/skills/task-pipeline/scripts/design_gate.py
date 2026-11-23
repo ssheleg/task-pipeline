@@ -61,7 +61,7 @@ SCR = re.compile(r"\bSCR-\d+\b")
 SEGMENT = re.compile(r"^\s*(local|tourist)\b\s*:?", re.I)
 # UI mechanics (2026-11-23): the needs line opens with the portrait's experience with this
 # kind of app, so the novice walk has walkers (super-ux templates/test-panel.md).
-LEVEL = re.compile(r"^\s*(novice|regular|expert)\b\s*:?", re.I)
+LEVEL = re.compile(r"^\s*(novice|regular|expert)\b(?!\s*\|)\s*:?", re.I)  # not the unfilled template
 MIN_NOVICES, MIN_EXPERTS = 2, 1
 
 
