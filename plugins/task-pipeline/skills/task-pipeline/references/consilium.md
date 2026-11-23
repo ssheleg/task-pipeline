@@ -8,17 +8,17 @@ The operator, 2026-11-23 (requests `6f5b7054`, `62e0c402`): «консилиум
 
 By default, from size M up: the verification of a spec (stage 3), a choice between designs (stage 2, `decide`), the
 plan of an L task (stage 4), a `judgment` gate with no person named, the acceptance of an L or outward task (stage
-10), and any pick the operator delegated. Size S keeps one validator of another family
-([`spec-protocol.md`](spec-protocol.md)). A host may be stricter in `pipeline.json`, never looser.
+10), any delegated pick. Size S keeps one validator ([`spec-protocol.md`](spec-protocol.md)). A host may be
+stricter, never looser.
 
 ## How a round runs
 
-1. A blind panel: each panelist reads the artefact and the brief only, through its own lens, and answers a verdict
-   (pass, revise, block), a score and findings, each with the exact change.
-2. The judge, the strongest model of the host's map, reads the artefact, the brief and the panel anonymised to a
-   letter and a family; accepts or rejects every finding with a reason and adds what all missed. A reason binds, a
-   majority does not. A pass leaves no accepted blocker or major finding.
-3. The author applies the ruling and records each accepted finding in the artefact's decision table.
+1. A blind panel: each panelist reads only the artefact and the brief, through its own lens, and answers a verdict,
+   a score and findings with the exact change.
+2. The judge, the strongest model of the host's map, reads the panel anonymised; accepts or rejects every finding
+   with a reason and adds what all missed. A reason binds, a majority does not. A pass leaves no accepted blocker or
+   major finding.
+3. The author applies the ruling and records each accepted finding in the decision table.
 
 `scripts/consilium.py review|decide` runs a round and writes `round-N/` (each verdict, `judge.json`, `ledger.json`,
 `summary.md`); `consilium.py check DIR --round N` is the gate: at least three verdicts of three families, a parsable
@@ -27,17 +27,17 @@ ruling, spend within the cap.
 ## Panel, judge, money
 
 Configuration, never code ([`model-tiering.md`](model-tiering.md)): `--config`, `$TASK_PIPELINE_CONSILIUM`, the host
-file `~/.config/task-pipeline/consilium.json`, else the shipped template, whose placeholders the script refuses to
-call. The judge is the strongest model of the map on the day, paid by tokens if it must be. The author never sits on
+file `~/.config/task-pipeline/consilium.json`, else the shipped template
+([`assets/consilium.example.json`](../assets/consilium.example.json)), whose placeholders the script refuses to call. The judge is the strongest model of the map on the day, paid by tokens if it must be. The author never sits on
 its own artefact's panel. People's text goes only to models the map allows for it. Each round has a cap
 (`max_usd_per_round`); over it the judge is skipped and the round fails. The host's per-run line still binds.
 
 ## Rounds
 
-Two, a third only when round 2 left an accepted blocker or major finding, never on unchanged input (the ledger hashes
-it). After round 3 what is open goes to the operator as one question with the judge's default, or to the backlog.
+Two; a third only for an accepted blocker or major finding left, never on unchanged input. After round 3 what is
+open goes to the operator as one question with the judge's default, or to the backlog.
 
 ## What it is not
 
-Not an authorisation (outward, irreversible or paid acts stay `manual`, [`gates.md`](gates.md)), not a measurement
-(tests and evidence still run), not the author ([`model-tiering.md`](model-tiering.md)).
+Not an authorisation (outward or paid acts stay `manual`), not a measurement, not the author
+([`model-tiering.md`](model-tiering.md)). A failed judge is rerun alone with `--judge-only`.
