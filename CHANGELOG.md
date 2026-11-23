@@ -1,6 +1,6 @@
 ## v1.112.0: the novice walk in the design review
 
-Guards: 539 → 539.
+Guards: 539 → **539**.
 
 Operator order 2026-11-23 00:47 Europe/Warsaw (Telegram, relayed by the Fabric CEO, request dcc725be): simple, grouped screens with few actions that a user new to the app understands, checked by the pipeline. Research: https://github.com/ssheleg/sheleg-design-skill/tree/main/docs/reports/2026-11-23-ui-guidelines
 
