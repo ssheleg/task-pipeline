@@ -1491,6 +1491,8 @@ three quarters of the work on this run.
 
 ## Releases that carry no stamp — stated, not stamped
 
+**`v1.112.1` and `v1.112.0` carry no stamp, declared before the `v1.112.1` tag.** They add the novice walk to the design review: `design_gate.py panel` reads the experience level that opens each needs line, and the design-tester checks frames against the screen's action map. They carry out the owner's order of 2026-11-23 (request dcc725be); the run's ledger and stamp live in the sibling sheleg-design repository (`.task-pipeline/run.md`), so there is no divergence to stamp here. `v1.112.0` was tagged on ec4bd15 and its release run 45116896034 refused it because this declaration was missing; it never reached npm, and `v1.112.1` is the same change with the declaration.
+
 **`v1.111.0` carries no stamp, declared before its tag.** It adds `scripts/task_prompt.py` (a task for an executor is read for its end result, finish criterion, closing pass and stops) and the advisory hook `task-prompt-nudge.sh`, and ends the implementer contract with a closing pass; it carries out the owner's order of 2026-11-22 (board request bd16f215) and ran no stamped pipeline stages, so there is no divergence to stamp.
 
 **`v1.110.0` carries no stamp, declared before its tag.** It records who writes the spec (the session's own model; a paid call to another model only on the operator's recorded request) and adds `spec_protocol.py loop`, the spec loop in five steps with who does each; it carries out the owner's order of 2026-11-22 (board request 94a61249) and ran no stamped pipeline stages, so there is no divergence to stamp.

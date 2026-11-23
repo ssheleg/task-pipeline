@@ -1,3 +1,11 @@
+## v1.112.1: v1.112.0 released, with its retro declaration
+
+Guards: 539 → **539**.
+
+- The same change as v1.112.0 (the novice walk in the design review). The v1.112.0 tag (on ec4bd15) was refused by its own
+  release run (45116896034) because `docs/evidence/retro.md` did not name it under *Releases that carry no stamp*; it never
+  reached npm. This release adds that declaration for both tags.
+
 ## v1.112.0: the novice walk in the design review
 
 Guards: 539 → **539**.

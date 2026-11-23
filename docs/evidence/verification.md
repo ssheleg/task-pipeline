@@ -1,6 +1,6 @@
 # Verification — task-pipeline
 
-## Shipped state — v1.112.0 (candidate 2026-11-23: PR #184; tag, release run and npm version are added here once shipped)
+## Shipped state — v1.112.1 (candidate 2026-11-23: the v1.112.0 change plus its retro declaration; v1.112.0 tagged on ec4bd15, release run 45116896034 refused it, not on npm; tag, run and npm version of v1.112.1 are added once shipped)
 
 `scripts/design_gate.py panel` reads the experience level that opens each needs line; `test/design_gate_test.py` five new
 cases (levels pass, one novice fails, a portrait without its level fails, no levels warns, the unfilled template line is not a
