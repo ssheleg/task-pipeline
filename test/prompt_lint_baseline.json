@@ -486,7 +486,7 @@
    "em_dash": 8,
    "unwanted_stop": 0,
    "version_history": 0,
-   "words": 967
+   "words": 931
   },
   "plugins/task-pipeline/skills/task-pipeline/references/planning.md": {
    "bold": 44,
@@ -863,6 +863,6 @@
   "em_dash": 2274,
   "unwanted_stop": 14,
   "version_history": 11,
-  "words": 195136
+  "words": 195100
  }
 }

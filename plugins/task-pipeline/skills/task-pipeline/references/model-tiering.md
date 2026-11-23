@@ -39,35 +39,35 @@ Model ids go stale, and the operator may be on another provider. So:
 
 ## The operator's explicit choice is inherited, verbatim
 
-**Advice and choice differ, and the choice wins.** The recommendation is ADVICE,
-printed once at preflight. A model or effort the operator set (`/model`, `/fast`, a
-config entry, a preflight answer) is the CHOICE; the plan, every stage and every
-subagent inherit it. **Task size switches nothing**; only an override the operator
-RECORDED, with its basis, changes it mid-run. An unrecorded switch is a defect.
+**Advice and choice are different things, and the second wins.** The
+recommendation above is advice, printed once at preflight. A model or effort
+the operator set explicitly (`/model`, `/fast`, a config entry, an answer
+at preflight) is the CHOICE, and the plan, every stage and every subagent
+inherit it unchanged. **Task size is not a basis for switching**: a large task
+does not upgrade the model, a mechanical stage does not downgrade it; only an override
+the operator RECORDED, with its basis, in the per-stage map changes it mid-run. A switch nobody recorded is a defect, whatever it saved.
 
-**An unsupported capability is named, never silently swapped.** When the model cannot
-do what a stage needs (vision, a context window, a tool), the run names the limitation
-in the brief and asks or proceeds with the gap named.
+**An unsupported capability is its own line, never a silent swap.** When the
+confirmed model cannot do what a stage needs (vision, a context window, a tool), the
+run states that limitation by NAME, records it in the brief, and asks or proceeds with the gap
+named. Substituting another model without the operator's say-so is the same defect as
+the silent downgrade.
 
 ## Roles and money
 
-The owner, 2026-11-23 (host instructions, *Model and token budget by role*):
-tokens buy only the thinking that decides; the rest runs on the subscription.
+The owner, 2026-11-23: tokens buy only the thinking that decides.
 
-| Role | Route | Model of the host's map |
-|---|---|---|
-| Thinker: decisions, a spec's meanings and key features, analysis and planning that decide | tokens, no stinting | the strongest (`meanings.py write`) |
-| Writer: the spec's text from the meanings | subscription | the session's working tier (`meanings.py writer-task`) |
-| Main work, routine hard thinking, code and mathematics specialists, scouts | subscription | the session's model |
-| Validators of a decision | tokens, one call each, never retried | other vendors (the council's panel) |
-| The council's final verdict | tokens | the strongest ([`consilium.md`](consilium.md)) |
+| Role | Route |
+|---|---|
+| Thinker: decisions, a spec's meanings (`meanings.py write`) | tokens, the strongest model |
+| Writer of the spec's text (`meanings.py writer-task`); main work; specialists; scouts | subscription |
+| Validators | tokens, one call each, never retried |
+| The council's verdict ([`consilium.md`](consilium.md)) | tokens, the strongest model |
 
-Every token call goes into the spend ledger with its route, model, cost and task
-(`scripts/spend.py`; the scripts here write it). `spend.py summary` gives the day and the month by route, model and
-task, with the estate's month as Observatory measures it; an unknown cost is
-counted apart, never as zero; a call on the host's own key is read from its upstream cost. At 80 % of the development-mode
-ceiling (USD 5,000 a month) `spend.py ceiling` exits 3 with the one question the
-owner gets, with its default.
+`scripts/spend.py` books every token call (route, model, cost, task; an unknown
+cost is never zero) and sums the day and month beside the estate's month from
+Observatory; at 80 % of USD 5,000 `spend.py ceiling` exits 3 with the owner's
+question.
 
 ## Mechanic — confirm at preflight, then stop asking
 
@@ -84,7 +84,8 @@ and a per-stage override map only when the operator states one. After that:
 - **Do not prompt at any stage boundary**: the decision is recorded.
 - **Print the line again only** when the operator recorded a *per-stage override
   map* and the next stage's entry differs from the current model, scoped to that stage.
-- A skill **cannot change the main-loop model**; only the operator can.
+- A skill **cannot change the main-loop model**; only the operator can (`/model`,
+  `/fast`). So the default is the model already running.
 
 ## The plan-then-execute profile
 
@@ -101,7 +102,7 @@ contracts and a plan a stranger can follow. A weak plan is not recovered by a st
 build; a strong plan executed by a working tier is ordinary delivery. Acceptance is a
 judgment too, so stage 10 returns to the planning tier.
 
-It is still an override the operator states and the brief records.
+It is still an override the operator states and the brief records. Task size still switches nothing.
 
 `scripts/plan_audit.py --models <map.json>` checks the recorded map at stage 4: a stage
 number this pipeline does not have, or an entry with no model behind it, fails there.

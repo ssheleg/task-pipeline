@@ -26,7 +26,7 @@ replaces the 2026-11-22 rule of v1.110.0 (the session's own model writes the who
   and specialists on the subscription; `research validate` books its call (one, never retried); an M or L spec without
   `Meanings: <file>` is warned (an error in a later release), a `Meanings:` naming no file fails.
 - Doctrine: `references/model-tiering.md` *Roles and money* replaces *The spec's author is the session's own model*;
-  `consilium.md` and `spec-protocol.md` follow; the prompt-lint word ratchet fell by two.
+  `consilium.md` and `spec-protocol.md` follow; the prompt-lint word ratchet fell from 195,147 to 195,100.
 - `assets/consilium.example.json`: a `thinker` role and a subscription panelist.
 - Tests: `test/spend_test.py` (34 cases), `test/consilium_test.py` 21 → 33, `test/spec_protocol_test.py` (the 2026-11-22
   author case replaced by the money-by-role case, the validator's booking, the `Meanings:` header).
