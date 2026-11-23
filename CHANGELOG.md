@@ -1,3 +1,11 @@
+## v1.113.1: v1.113.0 released, its verification citation fixed
+
+Guards: 539 → **539**.
+
+- The same change as v1.113.0 (the consilium). The v1.113.0 tag (on 26bb446) was refused by its release run
+  (45238108083): `docs/evidence/verification.md` cited a branch commit that the squash merge left unreachable from
+  `main`. The citation now names the squash commit; v1.113.0 never reached npm.
+
 ## v1.113.0: the consilium, a council of models judges and the strongest rules last
 
 Guards: 539 → **539**.

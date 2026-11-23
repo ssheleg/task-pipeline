@@ -1,11 +1,11 @@
 # Verification — task-pipeline
 
-## Shipped state — v1.113.0 (candidate 2026-11-23: the consilium; carries v1.112.0 and v1.112.1, refused by their release runs and never on npm; tag, run and npm version are added once shipped)
+## Shipped state — v1.113.1 (candidate 2026-11-23: v1.113.0 tagged on 26bb446, release run 45238108083 refused it over a squashed branch commit cited here, not on npm; the consilium; carries v1.112.0 and v1.112.1, refused by their release runs and never on npm; tag, run and npm version are added once shipped)
 
 `scripts/consilium.py` (panel, review, decide, check, `--judge-only`) with `test/consilium_test.py` (21 cases against a
 local fake endpoint); `references/consilium.md`; the council named in `spec-protocol.md` (M and L) and `gates.md` (the
-default judge); `assets/consilium.example.json` names roles, never models. `npm test` all green on `d2ce9dc` before the
-release edits; the documentation gate's foreign-commit citation fixed (`docs/evidence/backlog.md:142`).
+default judge); `assets/consilium.example.json` names roles, never models. `npm test` all green on the branch before the
+release edits (its commits were squashed into `26bb446`); the documentation gate's foreign-commit citation fixed (`docs/evidence/backlog.md:142`).
 
 ## Shipped state — v1.112.1 (candidate 2026-11-23: the v1.112.0 change plus its retro declaration; v1.112.0 tagged on ec4bd15, release run 45116896034 refused it, not on npm; tag, run and npm version of v1.112.1 are added once shipped)
 
