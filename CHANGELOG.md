@@ -6,7 +6,7 @@ Operator order 2026-11-23 00:47 Europe/Warsaw (Telegram, relayed by the Fabric C
 
 - **`design_gate.py panel`** reads the experience level that opens each `needs` line (`novice`, `regular`,
   `expert`). A panel that names any level owes it on every portrait and holds at least two novices and one
-  expert; a panel that names none passes with a warning in this release (staged). Four new cases in
+  expert; a panel that names none passes with a warning in this release (staged). Five new cases in
   `test/design_gate_test.py`.
 - **`agents/design-tester.md`**: the design pass checks the frame against the screen's action map and has a
   novice run the panel's Novice walk (super-ux `templates/test-panel.md`); word count within the prompt-lint
