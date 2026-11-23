@@ -38,8 +38,8 @@ python3 <skill>/scripts/spec_protocol.py size --reqs 5 --files 8 --contract
 | Size | When | Sections it owes | Research |
 |---|---|---|---|
 | S | a bounded change | Goal, Scope, Requirements, Design, Questions, Tests | none; a new domain owes one scout and three sources |
-| M | a contract, several surfaces or unknowns | S plus Contracts, Edge cases, Decisions, Rollout | two scouts, six sources (one primary), one validator of another family |
-| L | hard to reverse, cross-project, large | M plus Architecture, Data, Non-functional, Alternatives, Risks | up to four scouts, twelve sources (two primary), two blind validators of two other families |
+| M | a contract, several surfaces or unknowns | S plus Contracts, Edge cases, Decisions, Rollout | two scouts, six sources (one primary), one validator of another family, then the council ([consilium.md](consilium.md)) |
+| L | hard to reverse, cross-project, large | M plus Architecture, Data, Non-functional, Alternatives, Risks | up to four scouts, twelve sources (two primary), two blind validators of two other families, then the council ([consilium.md](consilium.md)) |
 
 The spec carries `Size: S|M|L`. Small is shorter, never incomplete: every owed
 section is filled or says in one line why not. A run on the short path
