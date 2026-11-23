@@ -121,10 +121,6 @@ Practically, that makes the order:
 2. **then** stamp, in a commit of its own, naming the commit from step 1;
 3. prune and write the entry in that same second commit, or a third.
 
-The stamp costs one line and one commit. A run that folds it back into the work to keep
-the history tidy is trading a reader's ability to find the incident for the appearance of
-tidiness — and the reader is the entire reason the stamp exists.
-
 ## A release stamp names the TAG, and the merge commit — never the branch's own SHA
 
 The sibling of the amend rule, one level up, and it recurred three times after the amend
@@ -150,8 +146,7 @@ the merge is precisely the SHA the merge is about to destroy, so the rule cannot
 - **cite the release tag** — `v1.84.1` is immutable, it is the thing being released, and
   it resolves in any clone;
 - **or write the stamp AFTER the merge**, in a second PR, naming the **merge commit**.
-  This is the default, because it is what the amend rule already forces one level down:
-  once a file names a SHA, that commit is frozen, so the SHA has to exist first.
+  This is the default: under the amend rule the SHA has to exist first.
 
 The order for a release run is therefore:
 
@@ -173,11 +168,7 @@ Measured 2026-08-10: standing instructions **~1 234 tok** behind a cap of ten, r
 **~2 099 tok over 27 rows** behind nothing. Both are read in full at stage 0 and both
 were described as *bounded by construction*. One line per run is a **slope**: at a
 hundred runs the stamp table alone is ~7 800 tokens of a floor the doctrine believes is
-bounded.
-
-This is the same shape the 2026-08-10 audit found in the narrative log and moved out of
-the floor — and it left the neighbour in the same file, with the same property, because
-the neighbour's growth is *tidy*. A tidy slope is still a slope.
+bounded. A tidy slope is still a slope.
 
 **The cap is ten and the trigger is why.** The cold rule reads *the last five run
 stamps*; ten is that with a margin, so a stamp rotating out can never be one the trigger
@@ -238,19 +229,13 @@ narrative are how a capped list grows anyway.
 Reported from another project, and the report is about this file: an operator asked, after
 many runs, why nothing had ever been published.
 
-The floor is right and does not move — publishing is opt-in per project, off by default,
-because an outward act taken from a generic flag is an outward act nobody authorized. The
-gap is what happens next. A project with no configuration produces, run after run,
-retrospective entries carrying lessons about **the skill**, and the mechanism reports
-nothing, because it was never armed. **An unarmed mechanism and a mechanism with nothing
-to say are indistinguishable from the outside** — [`gates.md`](gates.md)'s false success,
-applied to this bundle's own learning path. In the reporting project several runs had
-produced skill-level lessons over months; the count of published insights was zero and no
-gate had ever mentioned it.
-
-Stage 10 prints ratchets and two disclosures — what the run declined to claim, and what a
-check never looked at. Publishing is neither, so its absence is not observable at the only
-moment anyone is reading.
+Publishing stays opt-in per project, off by default, because an outward act taken from a
+generic flag is an outward act nobody authorized. The gap is what happens next: an
+unconfigured project produces skill-level lessons run after run, and the mechanism,
+never armed, reports nothing. **An unarmed mechanism and a mechanism with nothing to say
+are indistinguishable from the outside** ([`gates.md`](gates.md)'s false success). In the
+reporting project the count of published insights was zero after months, and no gate had
+mentioned it, because stage 10's ratchets and disclosures do not cover publishing.
 
 **So stage 10's block carries one line for publication:**
 
@@ -263,11 +248,6 @@ publish: not configured (N insight-grade entries stayed local)
 It arms nothing and authorizes nothing; it makes the silence legible. A count of zero
 beside *configured* is a fine answer. A **blank** where configuration is absent is how an
 instruction went unread for eight releases.
-
-**The failure mode survived its own fix, in a quieter form.** This section once said
-*"open an issue upstream"* while naming no repository, no trigger and no authorization,
-and every reader took it as done. The mechanism that replaced it is correct — and until
-this line existed it still had no way to say it never ran.
 
 ## Rotation — the archive is how pruning stops losing things
 
@@ -308,11 +288,9 @@ preference: the cold trigger below reads *the last five run stamps*, and the sta
 the prune. The trigger read a counter the same stage produced later, so on any list it had never run
 on real data — and it stays unreadable for exactly as long as nobody stamps.
 
-Measured on a real project: last entry five days old; stamps per day 33, 20, 26, **3, 0** — the zero
-on a day with 107 commits — and the list sitting at **10 of 10**. Every run arrived at a stage that
-opened with a full list, an unusable trigger and a mandatory deletion. It was not skipped out of
-laziness; its first step could not be performed, and the cheap step that would have made it
-performable was queued behind it.
+Measured on a real project: stamps per day 33, 20, 26, **3, 0** (the zero on a day with 107
+commits) and the list at **10 of 10**: a full list, an unusable trigger and a mandatory deletion
+whose first step could not be performed.
 
 **The stamp is one line and costs nothing.** It is also the only thing that makes the prune
 computable, which is why it goes first:
@@ -527,9 +505,8 @@ and an outward act taken from a generic flag is an outward act nobody authorized
 ([`continuity.md`](continuity.md) → *The limit, before the capability*).
 
 **The body is printed in full before the issue is opened, every time.** Not a summary
-of it, not its title — the string that will be sent. The operator standing at stage
-10's manual gate is already reading; showing them what leaves the machine costs one
-block and is the only moment anyone can stop it.
+of it, not its title: the string that will be sent, at the only moment anyone can
+stop it.
 
 ```
 ── would open issue ──────────────────────────────────────────
@@ -547,9 +524,8 @@ degradation; a second transport is not.
 
 ## The improvement iteration — what happens to a published insight next
 
-Publishing is half a loop. An issue that is opened and never triaged is a lesson
-that cost a run and bought nothing, and a tracker full of those teaches everyone
-that publishing is where findings go to be filed.
+Publishing is half a loop: an issue opened and never triaged cost a run and bought
+nothing.
 
 **The loop, and every arrow in it is somebody's obligation:**
 
@@ -573,8 +549,7 @@ cycle that consumed published issues:
   relabelled, not closed as stale. The pile is the queue, and its depth is the
   honest measure of how far behind the doctrine is.
 - **Nothing is deleted.** A closed issue keeps its number, and the number is what
-  the CHANGELOG and the retro entry point at. Deleting one severs both, and the
-  cost lands on whoever next asks *why is this rule here*.
+  the CHANGELOG and the retro entry point at.
 
 **Where the queue comes from at the start of a cycle**, in this order: open issues
 published by any project running this skill, then the board's open rows by computed
@@ -584,9 +559,8 @@ take it says so, which is a fuller queue rather than a quiet one.
 
 **The measurement that keeps this honest.** Print, at the close: issues consumed,
 issues resolved with an address, issues left open. Three numbers, no floor, no
-target, and the third one rising is information rather than a failure — it means
-the projects running this skill are finding more than one cycle can absorb, which
-is what you want them to do.
+target; the third rising is information, not a failure: the projects running this
+skill find more than one cycle can absorb.
 
 ## What may leave the project — the redaction list
 

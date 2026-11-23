@@ -27,29 +27,19 @@ Both are checked the same way and this file covers both.
 
 ## The measured reason this file exists
 
-On 2026-08-11, mid-run, a monitor was armed to watch CI. **What follows is two
-observations of two different things, taken at two different moments**, and each
-one is stamped so that a reader is not left reconciling them. One minute after
-the monitor was armed, the harness task inventory was queried; the process table
-was read after that:
+On 2026-08-11, mid-run, a monitor was armed to watch CI. One minute later the
+harness task inventory was queried; the process table was read after that:
 
 ```
 TaskList              →  "No tasks found"
 ps -eo pid,etime,cmd  →  52693  03:12  /bin/zsh -c … gh pr checks …
 ```
 
-`etime` is elapsed life, so the `03:12` in that line dates its own reading:
-three minutes and twelve seconds after the monitor was armed, a little over two
-minutes after the inventory had come back empty. The monitor was **alive and
-polling**, and the inventory tool reported nothing. Both readings were accurate.
-They were readings of different things, made about two minutes apart.
-
-**What this record does not carry, said plainly: the wall-clock times.** Neither
-observation was stamped with the hour at which it was taken, so what was
-observed is the two offsets above — one minute to the inventory, `03:12` of
-process life at the `ps` reading — and the interval between them is derived from
-those two. The absolute times are not recoverable from anything this record
-kept, and nothing here reconstructs them.
+`etime` is elapsed life: three minutes and twelve seconds after it was armed, a little
+over two minutes after the inventory came back empty, the monitor was
+**alive and polling**. Both readings were accurate: readings of different things, taken
+at two different moments. The record kept no wall-clock times, only the two offsets, and
+nothing here reconstructs them.
 
 This is the class this whole doctrine exists to catch: **a check answered by
 something that is not its subject.** An inventory that does not enumerate the
@@ -86,8 +76,8 @@ or the next one. A held lease costs a *different agent*, right now, and it looks
 to them like the register is permanently unavailable rather than briefly held.
 Release it at the stage that took it — not at the end.
 
-**A container is the one that is invisible and expensive.** Nothing in the diff
-mentions it, no test fails because of it, and it will still be running tomorrow.
+**A container is the one that is invisible and expensive**: nothing in the diff
+mentions it, and it will still be running tomorrow.
 
 ---
 

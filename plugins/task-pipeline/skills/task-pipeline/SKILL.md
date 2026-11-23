@@ -58,8 +58,7 @@ never to the kernel: a minimal three-stage profile has no "stage 7", and a rule
 keyed on a global stage number is a rule about the default profile. A custom profile
 may drop stages, never a kernel field. Each gate has a **type**: `auto` (the orchestrator verifies the
 `check`), `judgment` (a named judge rules, recorded as judgement, never as a
-measurement; `references/gates.md` → *The judgment gate*; by default the judge is the council of models,
-`references/consilium.md`) or `manual` (an explicit go).
+measurement; `references/gates.md` → *The judgment gate*) or `manual` (an explicit go).
 **The
 default profile's gates are `auto`; a gate is `manual` only where the operator's
 `pipeline.json` says so, and a standing operator authorization naming the act counts
@@ -157,7 +156,6 @@ one section at a time; never preload all details). The rest loads on its trigger
 | `references/continuity.md` | `run.loop` is armed, a context-budget signal arrives, or a run resumes |
 | `references/model-tiering.md` | the operator overrides the model, or a stage map differs |
 | `references/gates.md` | you write or change a check, a gate's verdict is disputed, or a judgment gate runs |
-| `references/consilium.md` | anything is evaluated or decided from size M up: a blind council of models, the strongest rules last |
 
 ## Stages (gates and routes in `references/stages.md`)
 

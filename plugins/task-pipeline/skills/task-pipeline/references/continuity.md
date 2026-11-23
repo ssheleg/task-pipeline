@@ -160,9 +160,8 @@ confirmation that a risky or irreversible act needs.
 
 ## Part 1a — the queue is stage 2's, and the loop arms on it
 
-**A loop with no queue is a timer.** Until this section existed, `run.loop` said *how
-often* to continue and never said *what the next item is*, so the mode could be armed
-and still leave the run picking its next move by recollection — which is the failure
+**A loop with no queue is a timer.** It says *how often* to continue, not *what the
+next item is*, and leaves the run picking its next move by recollection: the failure
 [`learned.md`](learned.md) rule 16 is about, running once per fire.
 
 **Where a work graph exists it is the queue** ([`work-graph.md`](work-graph.md)):
@@ -194,9 +193,7 @@ instruction itself says otherwise, and the ledger cites it.
 
 **Where nothing is recorded, nothing arms.** Silence arms nothing here too — this section
 moves *where* a recorded mode is armed, from preflight to the close of stage 2. It does
-not make arming unconditional, and a reader who takes it that way would arm a loop in a
-project with no `pipeline.json` at all. That reading was in this section's first draft;
-an independent reader found it before it shipped.
+not make arming unconditional: a project with no `pipeline.json` arms no loop.
 
 **What arming does NOT change, and this is load-bearing:** the four stops are the four
 stops. A `manual` gate waits unless a specific standing authorization already names
@@ -205,9 +202,8 @@ specific authorization — *a generic flag is not a specific authorization*, and
 queue is the most generic flag there is. Arming decides only that the run does not stop
 to ask *"shall I take the next one?"*.
 
-**`mode: dynamic` — when the harness paces itself.** `interval` was the only mode while
-the only primitive was a fixed tick. A harness that can schedule its own next turn
-should: the run picks the delay from what it is waiting for, and a wait on nothing is a
+**`mode: dynamic` — when the harness paces itself.** A harness that can schedule its
+own next turn should: the run picks the delay from what it is waiting for, and a wait on nothing is a
 wait of minutes rather than a fixed tick nobody chose. On a harness with neither
 primitive the mode degrades to prose discipline plus the build ledger, and **the run
 says which one it is running** — the rule below about claiming a capability you do not
@@ -230,9 +226,8 @@ So at the bottom of an iteration, beside the re-derived `prio`:
    graph the move is a committed `revisions` entry — `park`, `add`, or `wave` between
    waves — never an untracked edit.
 
-A queue re-derived only by `age` and `sev` is a queue that is honest about priority and
-silent about purpose. Both numbers can be right while the run is finishing something the
-operator stopped wanting two items ago.
+A queue re-derived only by `age` and `sev` is honest about priority and silent about
+purpose.
 
 ## Arming it on Claude Code
 
@@ -409,10 +404,8 @@ Flushing means **making the artifacts that already exist true**:
 - the brief's REQ statuses;
 - the task list.
 
-It does **not** mean writing a summary for the compactor. A summary is a fourth
-copy of the truth, it is written once, nobody updates it, and the next run reads
-it as current. The artifacts above are read by later stages anyway; making them
-right costs nothing extra and pays twice.
+It does **not** mean writing a summary for the compactor: a fourth copy of the
+truth that nobody updates and the next run reads as current.
 
 ## Part 3 — workflow memory at the stage boundary
 

@@ -124,6 +124,12 @@ def call(endpoint, key, model, messages, timeout, max_tokens, extra=None):
     choice = (data.get("choices") or [{}])[0]
     msg = choice.get("message") or {}
     usage = data.get("usage") or {}
+    if not (msg.get("content") or "").strip() and choice.get("finish_reason") == "length":
+        # A reasoning model can spend the whole budget thinking and answer nothing (Fable 5.2, 2026-11-23):
+        # cap reasoning in the panelist's "extra" ({"reasoning": {"max_tokens": N}}) or raise max_tokens.
+        return {"error": "no text: the token budget ran out (reasoning ate it); cap reasoning or raise max_tokens",
+                "cost": float((data.get("usage") or {}).get("cost") or 0.0), "seconds": round(time.time() - t0, 1),
+                "finish": "length"}
     return {"text": msg.get("content") or "", "finish": choice.get("finish_reason"),
             "cost": float(usage.get("cost") or 0.0), "tokens_in": usage.get("prompt_tokens"),
             "tokens_out": usage.get("completion_tokens"), "seconds": round(time.time() - t0, 1),
