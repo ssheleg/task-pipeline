@@ -1,3 +1,16 @@
+## v1.113.0: the consilium, the default judge (2026-11-23)
+
+- **Objective.** The owner's order of 2026-11-23 16:17 UTC (requests 6f5b7054, 62e0c402): a council of models (GLM,
+  Opus, Kimi, Gemini, Grok, the latest OpenAI model) judges every evaluation and decision by default; the strongest
+  model of the map (Fable 5.2 today) rules last, even when paid by tokens.
+- **Done.** `scripts/consilium.py`, `references/consilium.md`, `assets/consilium.example.json`, `test/consilium_test.py`
+  (21 cases); `spec-protocol.md` and `gates.md` point at it; doctrine trimmed to hold the prompt-lint ratchet; the
+  documentation gate's unresolvable citation fixed (it refused v1.112.0 and v1.112.1).
+- **Checks run.** `npm test` all green on `d2ce9dc` (MacBook, nice); `docgate.sh` OK after the citation fix.
+- **Host setup.** This Mac's council lives in `~/.config/task-pipeline/consilium.json` (not in Git).
+- **Next task.** Tag `v1.113.0` after the PR merges; watch the release run; confirm npm `task-pipeline-skill@1.113.0`; then
+  `npx --yes sshlg-skills@latest update` on this Mac.
+
 ## v1.112.0: the novice walk in the design review (2026-11-23)
 
 - **Objective.** The operator's order of 2026-11-23 00:47 (request dcc725be): screens that are beautiful and

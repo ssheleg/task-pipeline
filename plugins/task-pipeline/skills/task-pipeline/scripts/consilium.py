@@ -241,8 +241,21 @@ def run_round(args, kind):
         return m, rec, parsed
 
     verdicts = {}
-    with concurrent.futures.ThreadPoolExecutor(max_workers=len(panel)) as ex:
-        for m, rec, parsed in ex.map(one, panel):
+    if args.judge_only:
+        # Rerun only the judge over the verdicts this round already holds (a judge that failed is not
+        # a reason to pay the panel again).
+        for m in panel:
+            f = out / f"{m['id']}.json"
+            if f.exists():
+                rec = json.loads(f.read_text(encoding="utf-8"))
+                ledger["calls"].append(dict(rec["meta"], reused=True, cost=0.0))
+                if rec.get("verdict") is not None:
+                    verdicts[m["id"]] = rec["verdict"]
+        panel_iter = []
+    else:
+        panel_iter = panel
+    with concurrent.futures.ThreadPoolExecutor(max_workers=max(1, len(panel_iter))) as ex:
+        for m, rec, parsed in ex.map(one, panel_iter):
             ledger["calls"].append(rec)
             if parsed is not None:
                 verdicts[m["id"]] = parsed
@@ -356,6 +369,8 @@ def main(argv=None):
         r.add_argument("--endpoint", default=DEFAULT_ENDPOINT)
         r.add_argument("--timeout", type=int, default=600)
         r.add_argument("--dry-run", action="store_true")
+        r.add_argument("--judge-only", action="store_true",
+                       help="rerun only the judge over this round's saved verdicts")
     c = sub.add_parser("check")
     c.add_argument("dir")
     c.add_argument("--round", type=int, default=1)

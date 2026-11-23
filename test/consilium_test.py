@@ -133,6 +133,15 @@ def main():
     r = run(["check", str(tmp / "out"), "--round", "2"])
     ok(r.returncode == 1, "check fails without a ruling")
 
+    # --judge-only reruns the judge over the saved verdicts and calls no panelist again.
+    n = len(SEEN)
+    r = run(["review", "--doc", str(doc), "--brief", str(brief), "--out", str(tmp / "out"), "--round", "1", "--judge-only",
+             "--config", str(cfg_path), "--endpoint", endpoint, "--key-env", "CONSILIUM_TEST_KEY"], {"CONSILIUM_TEST_KEY": "k"})
+    new = SEEN[n:]
+    ok(len(new) == 1 and "<council>" in new[0]["messages"][-1]["content"], "judge-only makes exactly one call, the judge's")
+    led = json.loads((rd / "ledger.json").read_text())
+    ok(all(c.get("reused") for c in led["calls"] if c["id"] != "judge"), "the reused verdicts are marked and cost nothing")
+
     # The shipped example names roles, not models: a run on it refuses before any call.
     example = ROOT / "plugins" / "task-pipeline" / "skills" / "task-pipeline" / "assets" / "consilium.example.json"
     n = len(SEEN)
