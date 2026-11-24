@@ -1,10 +1,12 @@
 # Verification — task-pipeline
 
-## Shipped state — v1.114.0 (candidate 2026-11-23: money by role and the spend ledger; tag, run and npm version are added once shipped)
+## Shipped state — v1.114.0 (shipped 2026-11-23: tag v1.114.0 on 14a6cf0, release run 45276162070 release and publish success, npm task-pipeline-skill 1.114.0)
 
-- Candidate on branch `feat/model-budget-by-role`; `npm test` green before the tag; the A/B record is `docs/research/2026-11-23-model-budget-ab/`.
+- PR #188 squash-merged as `14a6cf0` (tree equal to the checked branch head); its PR checks were green, and `test:all` ran
+  green on the Mac Studio (539 negative guards, with jsonschema and pyyaml in a scratch venv). The A/B record is
+  `docs/research/2026-11-23-model-budget-ab/`. The family pin moves in sshlg-skills 1.92.3 (ssheleg/sshlg-skills#358).
 
-## Shipped state — v1.113.1 (candidate 2026-11-23: v1.113.0 tagged on 26bb446, release run 45238108083 refused it over a squashed branch commit cited here, not on npm; the consilium; carries v1.112.0 and v1.112.1, refused by their release runs and never on npm; tag, run and npm version are added once shipped)
+## Shipped state — v1.113.1 (shipped 2026-11-23: tag v1.113.1 on 0cbced0, release run 45252420742 success, npm task-pipeline-skill 1.113.1; v1.113.0 tagged on 26bb446 was refused by release run 45238108083 over a squashed branch commit cited here and never reached npm; the consilium; carries v1.112.0 and v1.112.1, refused by their release runs and never on npm)
 
 `scripts/consilium.py` (panel, review, decide, check, `--judge-only`) with `test/consilium_test.py` (21 cases against a
 local fake endpoint); `references/consilium.md`; the council named in `spec-protocol.md` (M and L) and `gates.md` (the
