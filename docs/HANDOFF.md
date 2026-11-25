@@ -1,3 +1,17 @@
+## Decision input: project brain report, public copy redacted by the IP gate (2026-11-25)
+
+- **Objective.** Land the project brain report of 2026-11-21 (owner's order 481968d0, board request 0b6bfd75) in
+  `main` without disclosing how a brain works: the IP gate (ip-gate/1) held six passages of its README.
+- **Done.** [Report](reports/2026-11-21-brain-task-pipeline/README.md) with the held passages withheld (three
+  paragraphs, the summary and main point 1 rewritten); the Russian brief, the PDF and `raw/` unchanged. The full
+  copy is kept in a private repository. PR #180 (the unredacted branch) is closed and its branch deleted after its
+  commits were archived privately. Decision: the Fabric CEO, 2026-11-25 07:26 UTC, variant A.
+- **Checks run.** `ip_gate.py scan --git-staged` pass; `python3 test/validate.py` exit 0; `npm run test:docs` OK;
+  `reports.py check` 0 errors.
+- **Open, the owner's.** The report's options (section 8): do nothing, the minimum or the full version. Whether to ask
+  GitHub support to purge the closed PR's refs stays the owner's (default: do not ask).
+- **Next task.** On the owner's «делаем»: backlog rows for phase 0 (B-163 first), then `/task-pipeline` on them.
+
 ## v1.114.0: money by role and the spend ledger (2026-11-23)
 
 - **Objective.** The owner's order of 2026-11-23 18:58 UTC (relayed by the Fabric CEO; host instructions, *Model and
