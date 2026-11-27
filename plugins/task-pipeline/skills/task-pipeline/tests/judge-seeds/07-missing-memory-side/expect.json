@@ -1,0 +1,6 @@
+{
+ "schema": "judge-seed/1",
+ "defect": "the header does not name the memory side",
+ "zero": [],
+ "caught_when": "the verdict is not pass"
+}

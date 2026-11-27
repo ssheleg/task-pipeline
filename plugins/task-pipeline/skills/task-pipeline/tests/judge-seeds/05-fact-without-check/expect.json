@@ -1,0 +1,6 @@
+{
+ "schema": "judge-seed/1",
+ "defect": "fact 5 has no row in Acceptance",
+ "zero": [],
+ "caught_when": "the verdict is not pass"
+}

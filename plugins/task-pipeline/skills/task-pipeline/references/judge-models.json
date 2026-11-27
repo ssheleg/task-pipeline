@@ -1,0 +1,10 @@
+{
+  "schema": "judge-models/1",
+  "note": "A template, not a list: the entries name roles, never models, because model ids go stale and a host may be on another provider. A host writes its own ~/.config/task-pipeline/judge-models.json (or passes --models) with concrete ids from its model map; spec_judge.py refuses to call a placeholder and exits 3 when nothing callable is left. The estate's model owner edits the host file like any other change.",
+  "endpoint": "https://openrouter.ai/api/v1",
+  "models": [
+    {"model": "<the map's strongest document reader (vendor A)>", "family": "vendor-a", "rank": 100, "max_tokens": 8000},
+    {"model": "<the map's decision model (vendor B)>", "family": "vendor-b", "rank": 90, "max_tokens": 8000},
+    {"model": "<the session vendor's verification model (vendor C)>", "family": "vendor-c", "rank": 80, "max_tokens": 8000}
+  ]
+}

@@ -1,3 +1,52 @@
+## v1.115.0: every spec is the final state, judged cold by another model family before anything is built (S0)
+
+Guards: 539 → **541**.
+
+The owner, 2026-11-27 16:31 UTC (Telegram, relayed by the Fabric CEO, board message `4b1cb756`): «мы всегда строим
+финальный вариант ... Когда пишем любые спеки, это на уровне протокола фабрика надо ... И на каждую спеку ещё нужен
+судья, который скажет, все ли там понятно». Fabric's spec protocol S0 (fabric-workspace
+`docs/plans/2026-11-28-fabric-refactor/spec-protocol.md`, board request `7b8d571f`) gives task-pipeline the template,
+the judge and the gate; this release is that share (delivery order item 1, due 2026-11-30).
+
+- **`references/spec-template.md`** (new): one template at every size, in the order header, outcome, users, final
+  behaviour, data and contracts, boundaries, acceptance, delivery order, waits and gates, estimate, question ledger,
+  glossary, judge record. Final behaviour is the finished product in the present tense; every numbered fact owes an
+  acceptance row. `spec_protocol.py check` reads a spec with a `## Header` table in this template (sections present and
+  in order, header values from their lists, a row per fact, no placeholder or open decision left); the size tiers stay
+  for specs written before it.
+- **`scripts/spec_judge.py`** (new): `check` sends the spec, the canon glossary and the rubric to ONE judge of another
+  family, one call, never retried; the verdict (`pass`, `pass-with-fixes`, `fail`) is computed from the scores, the
+  blocking questions and the automatic fails, never taken from the judge's word. Rounds 2 and 3 get the previous
+  questions and the diff; a third round only for one open blocker; after it the spec stays `draft` and
+  `judge/escalation.json` holds the task «спека не прошла судью». `check --verify` calls nothing and binds the verdict to
+  SHA-256 of `spec.md` without its `## Judge record` section, a heading matched at a line start and outside code fences
+  (S0's own spec was cut at fact 7 by a first-occurrence search in fabric-workspace 42ed5bc; the test plants that cut over a fixture whose prose mentions the heading).
+  Also `init`, `validate` (a design validator of another family), `hash`, `gate` (CI) and `calibrate`. Exit codes 0
+  pass or allowed `judged-degraded`, 1 not passed, 2 unreadable, 3 no judge model. Every call is booked to the spend
+  ledger (route `spec.judge`) with its cost and generation id.
+- **`references/judge-rubric.md`** (new, `judge-rubric/1`, YAML front matter): five core dimensions, `extra_dimensions`
+  for an organisation, `require_cross_family` (false here; the PassionCode estate sets true in its copy). A copy without
+  a core dimension is refused. **`references/judge-models.json`** (new, `judge-models/1`) names roles only, as the house
+  rule on model ids requires; the host's `~/.config/task-pipeline/judge-models.json` holds the models.
+- **One provider**: a same-family judge gives `judged-degraded`, enough for S and M; L stays `draft`. **Design review is
+  kept**: M owes one validator of another family and a council ruling on file, L two validators of two families and the
+  council; `--verify` reads them.
+- **`hooks/build-gate.sh`**: `deny` (it was `ask`) for a product edit while the run's `spec:` does not verify, and for any
+  run started from 2026-11-28 that names no spec; the old question stays for a judged spec before the build stage and for
+  runs started earlier. Root `*.md` files join the pipeline's own artefacts.
+- **Stage 3**: the operator-review branch is removed (`stages.md`, `spec.md`, `stage-03-spec.md`, `SKILL.md`,
+  `pipeline.example.json`, README); the gate is `spec_protocol.py check` and `spec_judge.py check --verify`.
+- **`tests/judge-seeds/`** (new): ten specs, one known defect each, with `expect.json`. Live calibration on this host,
+  2026-11-27: 10 of 10 caught by the configured judge, USD 0.0686; the clean control they were cut from passed with every
+  score 2, USD 0.0033 (`docs/evidence/s0-spec-judge/`).
+- **`ci/spec-gate.yml`** (caller template) and **`.github/workflows/spec-gate.yml`** (reusable, no trigger of its own here):
+  a pull request body carries `Spec: <spec id>@<commit>`; the spec directory whose `spec.json` has that id at that commit
+  is verified offline.
+- Prompt lint: the seeds are data the judge reads, kept out of it on purpose (`test/prompt_lint.py`
+  `NOT_PROMPTS`); stage 3's doctrine was tightened so the word ratchet fell from 195,100 to 195,018 (bold 3,273 to 3,264).
+- Tests: `test/spec_judge_test.py` (22 cases, a local stub judge), negatives 560 (the judge record cut at its first
+  mention) and 561 (the spec gate asking instead of denying). Doctrine: `spec-protocol.md` section 5, *The clarity judge*.
+
 ## v1.114.0: money by role (the spec's meanings by tokens, its text on the subscription, every token call booked) and the project brain's minimum
 
 Guards: 539 → **539**.

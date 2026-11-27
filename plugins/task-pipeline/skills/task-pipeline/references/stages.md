@@ -50,7 +50,7 @@ Pipeline progress
 - [ ]  0  Intake — harvest + doc inventory + reconcile, grill, REQ table, brief locked
 - [ ]  1  Docs study — every contract grounded on fetched docs, not recall
 - [ ]  2  Brainstorm — design approved, UI verdict recorded, every REQ answered
-- [ ]  3  Spec — committed, reviewed, every section covers: REQ-…
+- [ ]  3  Spec — committed, judged, every section covers: REQ-…
 - [ ]  4  Plan — REQ set equality holds, no placeholders, groups share no files
 - [ ]  5  Dev — tasks DONE, three verdicts each, suite green, branch integrated
 - [ ]  6  Tests — full suite green, new checks probed both ways
@@ -173,46 +173,32 @@ never that the work was skipped quietly.
 
 **On entry or resume:** read [stage-03-spec.md](stage-03-spec.md) before stage work.
 
-- **GATE (auto):** the **`## Self-review` section written and committed with
-  computed values** — every check the spec names resolving or marked `review`, the
-  brief's decisions and stage 2's rejected options read back with no unresolved
-  contradiction, and the cost delta printed; spec committed **and** reviewed (by the
-  operator, or under the brief's standing authorization by an independent reader); **every section carries
-  `covers: REQ-…` and every REQ appears in at least one section**; for UI tasks
-  additionally: the super-ux chain (foundation → flows → screens → scenarios) is
-  designed, validated and approved; scenarios validated in `docs/ux/scenarios.md`;
-  the linter passes; every user-facing spec requirement traces to a scenario ID
-  (or an explicit v1-mode/tiny-project waiver by the operator). **With Figma on:
-  the canonical record names one file per surface (App, Web, ASO), and every
-  `screens.md` frame link's `:fileKey` is one of them** — a string match, not a
-  judgement (`python3 scripts/visual_gate.py filekeys --record docs/ux/foundation.md
-  --screens docs/ux/screens.md`); a key outside the set means the run drew in a file
-  nobody recorded and nobody will open. **Every user-facing string went
-  through the COPY track or the refusal is recorded**, and **the visual layer went
-  through the VISUAL track or the refusal is recorded** — a recorded refusal passes
-  this gate and an unmentioned one does not, which is the only difference that matters.
-  **And the VISUAL track is checked by its trace, not by the fact that it ran:** on a
-  `flagship`, `product` or `ad` surface the director record exists and carries the
-  fields its class owes — `python3 scripts/visual_gate.py record
-  docs/design/<surface>/director-record.md --class <surface_class>` exits 0. That
-  command checks the headings itself and runs the record's own validator from `sheleg-design`
-  (`--check-record`) where it is installed and new enough; where it is not, the
-  validator reads **NOT_RUN** beside the verdict — never PASS — and the gate stands on
-  the floor, said so. A record saying `Mode: declined` with its reason is the refusal,
-  and it passes.
-  **And the design review's pass D ran over the design before build**:
-  the `design-tester` walked the test panel through the changed scenarios over the Figma
-  frames or mockups, and `python3 scripts/design_gate.py report <design-review.json>
-  --class <surface_class> --panel docs/ux/test-panel.md --scope <SCR ids> --require design`
-  exits 0 ([`design-review.md`](design-review.md)).
-  **Where both tracks ran, their convergence check is recorded** — findings with the
-  ruling, or `Tracks converge: clean`; a screen where each track is right alone and they
-  disagree together is the defect neither track's own review can see.
-  **Where the actor branch is armed, the contract source is committed before any
-  human flow, dossier section 4 covers it, and the agent tester's pass C read it
-  cold** ([`agent-surface.md`](agent-surface.md)).
-  No plan (stage 4)
-  starts before this — the chain comes BEFORE interface.
+- **GATE (auto):** the `## Self-review` section committed with computed values (every
+  named check resolving or marked `review`, the brief's decisions and stage 2's rejected
+  options read back, the cost delta printed); spec committed and judged
+  (`spec_protocol.py check`, `spec_judge.py check --verify <dir>` exit 0;
+  [`spec-protocol.md`](spec-protocol.md) section 5); **every section carries `covers: REQ-…`
+  and every REQ appears in at least one section**. For UI tasks: the super-ux chain
+  (foundation → flows → screens → scenarios) designed, validated and approved, scenarios in
+  `docs/ux/scenarios.md`, the linter green, every user-facing requirement traced to a
+  scenario ID (or the operator's v1-mode/tiny-project waiver). **With Figma on**, every
+  `screens.md` frame link's `:fileKey` is one the canonical record names
+  (`python3 scripts/visual_gate.py filekeys --record docs/ux/foundation.md --screens
+  docs/ux/screens.md`). **Every user-facing string went through the COPY track and the
+  visual layer through the VISUAL track, or the refusal is recorded**; a recorded refusal
+  passes, an unmentioned one does not. **The VISUAL track is checked by its trace:** on a
+  `flagship`, `product` or `ad` surface `python3 scripts/visual_gate.py record
+  docs/design/<surface>/director-record.md --class <surface_class>` exits 0 (its
+  `sheleg-design` validator reads **NOT_RUN**, never PASS, where it is not installed;
+  `Mode: declined` with its reason passes). **The design review's pass D ran before
+  build:** `python3 scripts/design_gate.py report <design-review.json> --class
+  <surface_class> --panel docs/ux/test-panel.md --scope <SCR ids> --require design` exits 0
+  ([`design-review.md`](design-review.md)). **Where both tracks ran, their convergence
+  check is recorded**: findings with the ruling, or `Tracks converge: clean`. **Where the
+  actor branch is armed, the contract source is committed before any human flow, dossier
+  section 4 covers it, and the agent tester's pass C read it cold**
+  ([`agent-surface.md`](agent-surface.md)). No plan (stage 4) starts before this; the
+  chain comes BEFORE interface.
 
 ## 4 — Plan
 - **Freedom: low** — the task format is prescribed and the REQ set-comparison is mechanical ([`gates.md`](gates.md) → *Axis C*).

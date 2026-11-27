@@ -1,5 +1,14 @@
 # Verification — task-pipeline
 
+## Shipped state — v1.115.0 (candidate 2026-11-27: S0, the final-state template and the clarity judge; tag, run and npm version are added once shipped)
+
+`scripts/spec_judge.py` with `test/spec_judge_test.py` (22 cases against a local stub judge); `spec_protocol.py check`
+on the template passes a whole spec and fails it cut at its prose mention of the heading (`test/fixtures/spec-judge/`; the S0 round-2 text itself, kept out of this public repository, passed on 2026-11-27); the hook's
+deny and the first-occurrence strip are each watched failing (negatives 560, 561). Live on this host 2026-11-27 with the
+task-pipeline OpenRouter key through Observatory: `spec_judge.py calibrate` caught 10 of 10 seeds (USD 0.0686, rubric sha256 7ba4c124,
+`docs/evidence/s0-spec-judge/calibration-2026-11-27.json`); the clean control passed, every score 2 (USD 0.0033,
+`docs/evidence/s0-spec-judge/control/`).
+
 ## Shipped state — v1.114.0 (shipped 2026-11-23: tag v1.114.0 on 14a6cf0, release run 45276162070 release and publish success, npm task-pipeline-skill 1.114.0)
 
 - PR #188 squash-merged as `14a6cf0` (tree equal to the checked branch head); its PR checks were green, and `test:all` ran

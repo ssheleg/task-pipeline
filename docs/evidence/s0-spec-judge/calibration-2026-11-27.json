@@ -1,0 +1,160 @@
+{
+ "schema": "judge-calibration/1",
+ "at": "2026-11-27T18:26:18Z",
+ "seeds": 10,
+ "caught": 10,
+ "min": 9,
+ "cost_usd": 0.068604,
+ "results": [
+  {
+   "seed": "01-phase-one-only",
+   "defect": "Final behaviour describes only a first phase (finality)",
+   "verdict": "fail",
+   "scores": {
+    "clarity": 1,
+    "completeness": 0,
+    "testability": 0,
+    "finality": 0,
+    "consistency": 0
+   },
+   "caught": true,
+   "generation_id": "gen-1795803882-4cGV90T3eXDz4ZJvEo3Z",
+   "cost_usd": 0.006586
+  },
+  {
+   "seed": "02-tbd-left",
+   "defect": "a TBD left in Final behaviour",
+   "verdict": "fail",
+   "scores": {
+    "clarity": 1,
+    "completeness": 0,
+    "testability": 0,
+    "finality": 0,
+    "consistency": 1
+   },
+   "caught": true,
+   "generation_id": "gen-1795803893-Nqv194JAvWQJg4Vgk1IA",
+   "cost_usd": 0.00492
+  },
+  {
+   "seed": "03-undefined-term",
+   "defect": "a term the spec relies on (live in its swimlane) is defined nowhere",
+   "verdict": "fail",
+   "scores": {
+    "clarity": 1,
+    "completeness": 1,
+    "testability": 2,
+    "finality": 2,
+    "consistency": 1
+   },
+   "caught": true,
+   "generation_id": "gen-1795803899-RVw0yG9Pla3ZseqzLfO6",
+   "cost_usd": 0.00685
+  },
+  {
+   "seed": "04-open-decision",
+   "defect": "a decision left open in prose (refuse or overwrite, a flag if needed)",
+   "verdict": "fail",
+   "scores": {
+    "clarity": 1,
+    "completeness": 1,
+    "testability": 2,
+    "finality": 0,
+    "consistency": 1
+   },
+   "caught": true,
+   "generation_id": "gen-1795803907-HvJBP17xnileIgelcYkd",
+   "cost_usd": 0.006692
+  },
+  {
+   "seed": "05-fact-without-check",
+   "defect": "fact 5 has no row in Acceptance",
+   "verdict": "fail",
+   "scores": {
+    "clarity": 1,
+    "completeness": 1,
+    "testability": 0,
+    "finality": 2,
+    "consistency": 2
+   },
+   "caught": true,
+   "generation_id": "gen-1795803917-st2EqvkLgwXRjCLFodfD",
+   "cost_usd": 0.006588
+  },
+  {
+   "seed": "06-missing-user-kind",
+   "defect": "Users names no kind of user",
+   "verdict": "fail",
+   "scores": {
+    "clarity": 2,
+    "completeness": 1,
+    "testability": 2,
+    "finality": 2,
+    "consistency": 2
+   },
+   "caught": true,
+   "generation_id": "gen-1795803927-sl3AcMOtCCpX12QwFTqJ",
+   "cost_usd": 0.005552
+  },
+  {
+   "seed": "07-missing-memory-side",
+   "defect": "the header does not name the memory side",
+   "verdict": "fail",
+   "scores": {
+    "clarity": 1,
+    "completeness": 1,
+    "testability": 2,
+    "finality": 2,
+    "consistency": 2
+   },
+   "caught": true,
+   "generation_id": "gen-1795803938-J5S0b3ENmo9b3VNRKP80",
+   "cost_usd": 0.00745
+  },
+  {
+   "seed": "08-unnamed-owner",
+   "defect": "no named owner repository and no owner in Delivery order",
+   "verdict": "fail",
+   "scores": {
+    "clarity": 1,
+    "completeness": 0,
+    "testability": 2,
+    "finality": 1,
+    "consistency": 2
+   },
+   "caught": true,
+   "generation_id": "gen-1795803948-7vyep0u9B8Qvvtpw1qDF",
+   "cost_usd": 0.007968
+  },
+  {
+   "seed": "09-contradiction",
+   "defect": "the column count and the exit codes contradict between sections",
+   "verdict": "fail",
+   "scores": {
+    "clarity": 1,
+    "completeness": 1,
+    "testability": 2,
+    "finality": 2,
+    "consistency": 0
+   },
+   "caught": true,
+   "generation_id": "gen-1795803960-h8JLHpF4OFSqxOx820VZ",
+   "cost_usd": 0.009528
+  },
+  {
+   "seed": "10-untestable",
+   "defect": "every acceptance check is a feeling, not a pass or fail",
+   "verdict": "fail",
+   "scores": {
+    "clarity": 2,
+    "completeness": 2,
+    "testability": 0,
+    "finality": 2,
+    "consistency": 2
+   },
+   "caught": true,
+   "generation_id": "gen-1795803970-FAnMMO4pf151BoiLxgjL",
+   "cost_usd": 0.00647
+  }
+ ]
+}

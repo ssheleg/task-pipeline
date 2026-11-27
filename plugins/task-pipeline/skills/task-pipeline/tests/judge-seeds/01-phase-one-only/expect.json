@@ -1,0 +1,8 @@
+{
+ "schema": "judge-seed/1",
+ "defect": "Final behaviour describes only a first phase (finality)",
+ "zero": [
+  "finality"
+ ],
+ "caught_when": "the verdict is not pass and finality scores 0"
+}

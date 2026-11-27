@@ -1,0 +1,6 @@
+{
+ "schema": "judge-seed/1",
+ "defect": "a term the spec relies on (live in its swimlane) is defined nowhere",
+ "zero": [],
+ "caught_when": "the verdict is not pass"
+}

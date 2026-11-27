@@ -9,7 +9,7 @@ this repository did not — the same gap `B-009` found for open questions, and i
 surfaced the same way: a status vocabulary (`Resolved→DEC-####`) pointing at a file
 that was not there.
 
-**Next free ID:** `DEC-0008`
+**Next free ID:** `DEC-0009`
 
 Reading *"Next free ID"* is **not** reserving it — a second agent reading it in the
 same minute gets the same answer. Reserve it, then write.
@@ -18,6 +18,29 @@ same minute gets the same answer. Reserve it, then write.
 one, leave its body intact. Never renumber. Never delete.
 
 ---
+
+### DEC-0008 — the spec is judged by a model of another family, the hook denies, and the judge list ships as roles
+
+- **Date:** 2026-11-27
+- **Status:** Accepted
+- **Context:** Fabric's spec protocol S0 (fabric-workspace `docs/plans/2026-11-28-fabric-refactor/spec-protocol.md`,
+  request `7b8d571f`) on the owner's words of 2026-11-27: every spec is the final state and a judge says whether it is
+  all clear before anything is built. S0 names `references/judge-models.json` with `{model, family, rank}`; this
+  repository's invariant forbids a vendor model id in anything it ships (`test/validate.py`, *No hardcoded vendor model
+  ids*). The committed S0 text was cut at fact 7; the round-2 text the judge passed is the source used.
+- **Decision:** (1) the shipped `judge-models.json` names roles; the tool takes the host's list
+  (`--models`, `$TASK_PIPELINE_JUDGE_MODELS`, `~/.config/task-pipeline/judge-models.json`) and exits 3 when only
+  placeholders are left, as `consilium.example.json` already does. (2) The shipped rubric says
+  `require_cross_family: false` so an install with one provider gets `judged-degraded` for S and M; the PassionCode estate
+  sets true in its copy or passes the flag. (3) `build-gate.sh` denies while the spec does not verify, and keeps its
+  question for a judged spec before the build stage; runs started before 2026-11-28 with no `spec:` line keep the old
+  behaviour so an upgrade strands no run in flight; new files count as product files too (a tracked-only rule would let a
+  new file through); `.claude/` stays open as harness configuration. (4) After three rounds the script writes the task
+  into `judge/escalation.json` and the agent files it on the board: the script has no door into Fabric.
+  (5) The verdict is computed from what the judge listed, never from the word it chose.
+- **Consequences:** a host with no judge list cannot pass stage 3 until it writes one (exit 3 names the file). The Fabric
+  side (board states, the claim refusal), `spec/1` in fabric-agent-contract and the rollout through the agents
+  database are their owners' rows in S0's delivery order.
 
 ### DEC-0007 — the look's engine is ranked: WebKit (Safari) first, Chromium a stated exception
 

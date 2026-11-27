@@ -3,7 +3,7 @@
 Writing the approved design down so a zero-context implementer — human or subagent
 — can build from it without asking. Built into this skill; nothing to install.
 
-> The spec write-up, its self-review pass and the operator-review gate are ported
+> The spec write-up and its self-review pass are ported
 > from the tail of the `brainstorming` skill in
 > [obra/superpowers](https://github.com/obra/superpowers) (MIT — see `LICENSE` →
 > *Third-party*), extended here with the UX track and the Global Constraints block
@@ -82,9 +82,8 @@ source and the spec says so, screen by screen. A screen whose values were taken 
 screenshot is named as such: *sighted* and *read from the file* are different claims
 ([`build.md`](build.md) → *A screen is the frame, implemented*).
 
-These skills are **idempotent** — extend the existing `docs/ux/` layers, never
-rebuild them. If the chain already exists and is validated (typically when the run
-entered from super-ux), verify it and embed it; build only what's missing.
+These skills are **idempotent**: extend the `docs/ux/` layers, never rebuild them; a
+validated chain is verified and embedded, and only what is missing is built.
 
 ## The COPY and VISUAL tracks, and their convergence
 
@@ -162,11 +161,9 @@ super-ux decides what the interface must **do**; `copywriting` how it
 
 ## Write the spec
 
-Path: `<artifacts>/specs/YYYY-MM-DD-<topic>-design.md`, committed, **same
-`<topic>` slug as the brief** so brief → design → plan is traceable at a glance.
-(The directory name is this pipeline's historical convention, not a dependency on
-anything; a host project may relocate the root via its `CLAUDE.md` — keep the
-shape. See [`artifacts.md`](artifacts.md).)
+Path: `docs/specs/YYYY-MM-DD-<topic>/spec.md` with its `spec.json`, committed, the
+brief's `<topic>` slug (`spec_judge.py init`; [`artifacts.md`](artifacts.md)). Runs
+before 2026-11-28 keep `<artifacts>/specs/YYYY-MM-DD-<topic>-design.md`.
 
 **Every section carries `covers: REQ-…`** — the brief's requirement ids it serves.
 This is what makes the brief→spec seam checkable instead of a re-telling: at the
@@ -228,11 +225,8 @@ gets. Cover all of it, in this order, each section carrying its `covers: REQ-…
    decided and who decides. An open question that reaches the plan becomes an
    implementer's guess.
 
-A dossier that skips a section says why in one line (`no UI surface`, `owns no
-entities`). Silence is not a skip.
-
-Anything the stage-1 docs study could not ground (a library context7 can't resolve,
-a private API) is **flagged in the spec** as an assumption, not silently assumed.
+A skipped section says why in one line (`no UI surface`); silence is not a skip. What
+stage 1 could not ground (a private API) is **flagged as an assumption**.
 
 ## Self-review — before showing it
 
@@ -241,29 +235,19 @@ Read what you wrote with fresh eyes and fix inline. No subagent, no second pass:
 1. **REQ coverage:** does every REQ in the brief appear in at least one section's
    `covers:` line, and does every section cover at least one REQ? A missing REQ is
    scope lost here; a section covering none is scope creep or a missing REQ.
-2. **Placeholders:** any TBD / TODO / "handle edge cases" / unfinished section? Fix.
-3. **Internal consistency:** do sections contradict each other? Does the
-   architecture match the feature descriptions and the locked signatures?
+2. **Placeholders, contradictions, two readings:** fix them now; the judge fails them.
+3. **Internal consistency:** does the architecture match the locked signatures?
 4. **Scope:** is this one implementable plan, or does it need decomposition?
-5. **Ambiguity:** can any requirement be read two ways? Pick one and say it.
+5. **Ambiguity:** a requirement read two ways gets one reading, said.
 6. **Traceability (UI):** does every user-facing requirement name its scenario ID?
-7. **Every check this spec names resolves.** Walk the verification claims — the
-   table, and every sentence that says how something is proven. For each: does that
-   check exist today, or is this plan building it? A check that is neither is **not**
-   a verification: mark it `review` and say so, or build it. This repository's whole
-   doctrine is that a green from a check nobody watched fail is not evidence — and
-   this stage is where checks are first *named*, which is one step earlier than
-   anyone was looking.
-8. **Read the decisions back.** Open the brief's `## Decisions locked` table **and**
-   the register entries stage 2 recorded for the alternatives it *rejected*
-   (`references/brainstorm.md` → *The approved design is a set of decisions*). Does
-   any contract here contradict one? Resolve it **out loud** — amend the spec, or
-   reverse the decision and record the reversal. A spec that quietly contradicts a
-   settled decision re-opens a question the operator already answered.
-9. **Print the cost.** Count the surfaces this spec touches, the guards it adds and
-   the REQ rows, now versus at stage 2. **Print all three and decide nothing.**
-   Growth is information for the operator, whose gate this is; an agent that narrows
-   the task on its own judgement breaks *never narrow the task silently*.
+7. **Every check this spec names resolves:** each verification claim names a check that
+   exists today or that this plan builds; any other is marked `review`. A green from a
+   check nobody watched fail is not evidence, and this stage is where checks are named.
+8. **Read the decisions back:** the brief's `## Decisions locked` and stage 2's rejected
+   options (`references/brainstorm.md`). A contradiction is resolved out loud: amend the
+   spec, or reverse the decision and record it.
+9. **Print the cost:** surfaces, guards and REQ rows now versus at stage 2; print all
+   three and decide nothing (*never narrow the task silently*).
 10. **Run the hygiene gate** over what this stage wrote and record its counts below.
 
 ### The `## Self-review` section — committed, not asserted
@@ -286,11 +270,9 @@ one habit covers both stages.
 
 ## Locked contracts are decisions — the register, not only the spec
 
-This stage settles more than any other: a schema, a signature, a status vocabulary,
-an error shape. Each has a life longer than the document it is written into, so run
-the **Doc Loop** ([`documentation.md`](documentation.md)) for the ones that bind
-future work — record the entry, propagate by the matrix, and cite the id from the
-spec section instead of restating the reasoning there.
+A schema, a signature, a status vocabulary or an error shape outlives the spec: run the
+**Doc Loop** ([`documentation.md`](documentation.md)) for each that binds future work and
+cite its id from the spec section.
 
 **A spec states a contract; the register makes it addressable.** A spec is per-run
 and the next one supersedes it; an id survives. If this stage settled something and
@@ -298,30 +280,21 @@ no entry names it, the run has agreed to decide it again later.
 
 ## GATE (auto)
 
-With a standing authorization recorded in the brief, an independent reader reviews the
-spec and the run says:
+The spec is judged, never reviewed by the operator instead: `spec_protocol.py check
+<dir>/spec.md` and `spec_judge.py check --verify <dir>` both exit 0 (the template
+[`spec-template.md`](spec-template.md); judge, rounds and design review in
+[`spec-protocol.md`](spec-protocol.md) section 5). The run says "Spec committed to
+`<path>`, judged `pass` by <model> (<family>), round <n>". Otherwise apply the fixes and
+judge again; after three rounds the open questions go to the owning project's coordinator.
 
-> "Spec committed to `<path>`, reviewed by <reader>; continuing to the plan."
+Also: **every section carries `covers: REQ-…` and every REQ appears in one.** UI tasks:
+the chain designed, validated and approved, `/ux-lint` green, every user-facing
+requirement traced to a scenario ID (or the operator's recorded waiver); **every string
+through the COPY track and the visual layer through the VISUAL track, or the refusal
+recorded**; where both ran, **their convergence check recorded** (findings with the ruling,
+or `Tracks converge: clean`).
 
-Otherwise it says "Spec committed to `<path>`; review it before I write the plan." and
-waits for the operator's review. Changes requested → apply, re-run the self-review, and review again.
-
-The gate is not only the operator's word: **every section carries `covers: REQ-…`
-and every REQ in the brief appears in at least one section.** For UI tasks it
-additionally requires: the chain (foundation → flows → screens → scenarios)
-designed, validated and approved; `/ux-lint` green; every user-facing requirement
-traced to a scenario ID — or an explicit waiver from the operator recorded in the
-spec. **Every user-facing string went through the COPY track or the refusal is
-recorded, the visual layer went through the VISUAL track or the refusal is
-recorded** — a recorded refusal passes and an unmentioned one does not — **and
-where both tracks ran, their convergence check is recorded**: findings with the
-ruling, or `Tracks converge: clean` (*The COPY and VISUAL tracks*, above).
-
-With Figma on, one more, and it is mechanical: **the canonical record names a file,
-and every frame link in `screens.md` carries that same file key.** Deep links are
-`figma.com/design/:fileKey/…`, so this is a string comparison, not a judgement — a
-link whose key differs points at a *second* file, which means the run drew
-somewhere nobody will look. Same check at the audit's `F` rung
-([`audit.md`](audit.md)); if it ever fires twice, it belongs in the host's lint.
+With Figma on, every frame link in `screens.md` carries a file key the canonical record
+names (a string match, `visual_gate.py filekeys`; the audit's `F` rung, [`audit.md`](audit.md)).
 
 No plan starts before this gate passes.

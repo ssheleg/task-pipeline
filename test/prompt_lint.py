@@ -69,8 +69,16 @@ def strip_code(text):
     return INLINE.sub("", FENCE.sub("", text))
 
 
+# Data, not prompts: the seeded specs carry their defects on purpose (a TBD, a phase-one
+# scope, an undefined term) for the clarity judge to find; holding them to these rules
+# would ask the plants to be fixed. They are read by a judge as a spec under review.
+NOT_PROMPTS = (os.path.join("tests", "judge-seeds"),)
+
+
 def md_files(base):
     for d, _, fs in os.walk(base):
+        if any(os.sep + x + os.sep in d + os.sep for x in NOT_PROMPTS):
+            continue
         for f in sorted(fs):
             if f.endswith(".md"):
                 yield os.path.join(d, f)

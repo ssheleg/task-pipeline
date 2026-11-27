@@ -1,0 +1,26 @@
+{
+ "schema": "spec/1",
+ "id": "seed-07-missing-memory-side",
+ "owner": "board-service",
+ "side": "personal",
+ "size": "S",
+ "kind": "feature",
+ "user_kinds": [
+  "owner"
+ ],
+ "supersedes": [],
+ "path": ".",
+ "commit": null,
+ "content_sha256": null,
+ "status": "draft",
+ "author_family": "seed-author",
+ "judge": [],
+ "acceptance": [],
+ "estimate": {
+  "kind": "feature",
+  "p50_h": 0.8,
+  "p85_h": 3.6,
+  "slot": null
+ },
+ "waits": []
+}

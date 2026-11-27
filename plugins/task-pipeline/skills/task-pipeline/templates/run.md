@@ -10,6 +10,10 @@
 > run's position lives in a context window that will not survive one.
 
 Run: `<topic>` · started `<YYYY-MM-DD>` · module map: `<path or "none">`
+spec: `<docs/specs/YYYY-MM-DD-slug>`
+
+> `spec:` names the run's spec directory; from runs started 2026-11-28, `build-gate.sh`
+> refuses product edits until `spec_judge.py check --verify <dir>` exits 0.
 
 ## Contents
 
@@ -20,7 +24,7 @@ Run: `<topic>` · started `<YYYY-MM-DD>` · module map: `<path or "none">`
 
 ## `read:`: which doctrine this run actually opened
 
-The bundle is 60 reference files and nothing recorded which of them a run read, so **a
+The bundle is 62 reference files and nothing recorded which of them a run read, so **a
 skipped file and a read one were indistinguishable**: the class every guard in this
 pipeline exists to catch, left standing over the doctrine itself.
 
@@ -48,7 +52,7 @@ same claim one level down.
 |---|---|---|
 | `unmeasured; no run ledger` | there is no ledger | nothing to read from |
 | `unmeasured; the ledger carries no read: lines` | the hook is absent, **or** the run opened no doctrine | two opposite facts, and the ledger cannot separate them, so neither is claimed |
-| `N of 60 reference files read; unattested`, then each unread one | the hook is installed and fired | the count alone says there is a gap, not where, and `unattested` says the ledger cannot name who wrote the lines |
+| `N of 62 reference files read; unattested`, then each unread one | the hook is installed and fired | the count alone says there is a gap, not where, and `unattested` says the ledger cannot name who wrote the lines |
 
 **It is a disclosure: no floor, no direction, never a target.** A run that needs four files
 and reads four is not worse than one that reads thirty; and the moment the number becomes

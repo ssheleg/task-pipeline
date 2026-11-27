@@ -1,0 +1,6 @@
+{
+ "schema": "judge-seed/1",
+ "defect": "no named owner repository and no owner in Delivery order",
+ "zero": [],
+ "caught_when": "the verdict is not pass"
+}
