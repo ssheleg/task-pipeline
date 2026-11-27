@@ -13,6 +13,9 @@
 - **Blocked, a human gate.** GitHub Actions: «account is locked due to a billing issue» (run 46060408709), so the
   required checks and the release workflow cannot start. Asked the owner through Fabric (question f7680f80); no
   `--admin` bypass. Billing page: https://github.com/settings/billing/summary .
+- **Fallback tried (Fabric CEO, 2026-11-27).** Merge on local checks: refused by the branch rule (required statuses,
+  no bypass actor; repository auto-merge off). Release without Actions: no self-hosted runner, no npm token in the
+  vault, npm signed in neither here nor on the Studio; a local publish needs an npm sign-in by the owner.
 - **Next task.** When billing is fixed: `gh pr ready 192 --undo && gh pr ready 192` (the checks run on
   `ready_for_review`), squash-merge #192, annotated tag `v1.115.0` on main, watch the release run, `npm view
   task-pipeline-skill version`; rebase this branch with `git rebase --onto origin/main feat/spec-judge-s0`, PR, same
