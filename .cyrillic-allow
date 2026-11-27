@@ -1,0 +1,12 @@
+# English-docs scanner exceptions (order 72185b98). One glob per line; the comment above
+# each glob is its reason. Dated records stay as written until wave 4 (translation, or an
+# English summary on top).
+# Dated record: release history (wave 4).
+CHANGELOG.md
+# Dated records: specs, plans, retros, backlog and verification receipts (wave 4).
+docs/evidence/**
+# Dated records: research reports with their specs (wave 4).
+docs/reports/**
+# Dated records: eval run results; their Russian rows are the test inputs (wave 4).
+evals/**/RESULTS.md
+evals/RESULTS.md

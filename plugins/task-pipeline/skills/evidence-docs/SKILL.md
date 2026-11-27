@@ -1,6 +1,6 @@
 ---
 name: evidence-docs
-description: "Use when writing or reviewing anything read as true: a decision record, ADR, README, acceptance report, runbook, changelog, audit finding, a claim of verification. Applies the ten canons of evidence-backed docs. Not for: drafts, chat answers, commit messages; 'без доков' opts out."
+description: "Use when writing or reviewing anything read as true: a decision record, ADR, README, acceptance report, runbook, changelog, audit finding, a claim of verification. Applies the ten canons of evidence-backed docs. Not for: drafts, chat answers, commit messages; «без доков» opts out."
 license: MIT
 compatibility: "Doctrine runs on any agent. One bundled script, scripts/docgraph.py (Python 3 standard library), builds the documentation graph; without Python the doctrine still applies."
 ---
@@ -73,7 +73,7 @@ Not through this skill: a draft, thinking out loud, an answer in chat, a commit
 message, a code comment. Demanding a `file:line` for "let me check that" is the fastest
 way to teach an agent to route around the rule where it actually protects something.
 
-Refusal phrase: "без доков" / "on my word". It works on a task that would otherwise
+Refusal phrase: «без доков» / "on my word". It works on a task that would otherwise
 pass through here: do it directly and say out loud that the claim is unbacked, rather
 than presenting an estimate as a measurement (canon 8).
 
@@ -120,4 +120,4 @@ then nothing carries an address.
 The description is the short form, and the only text a host's own skill selection
 reads. The list below is the source the family hub's route table is curated from; keep it verbatim.
 
-"Use when writing or reviewing anything that will be read as true — a decision record, a README, an acceptance report, a runbook, a changelog entry, an audit finding, or any claim that something was verified. Applies the ten canons of evidence-backed documentation — what makes a claim documentation rather than an assertion — and routes to the doctrine that enforces each one. Also use when a project needs a documentation gate, a decision register, a propagation matrix, or a retrospective that outlives its author. Triggers - 'documentation gate', 'decision record', 'ADR', 'acceptance report', 'runbook', 'is this verified', 'доказательная документация', 'записать решение', 'запиши решение', 'отчёт о приёмке', 'раннбук', 'чем это подтверждено', 'доки в синхроне'. Not for: drafts, chat answers, commit messages or code comments — say 'без доков' to opt out."
+"Use when writing or reviewing anything that will be read as true — a decision record, a README, an acceptance report, a runbook, a changelog entry, an audit finding, or any claim that something was verified. Applies the ten canons of evidence-backed documentation — what makes a claim documentation rather than an assertion — and routes to the doctrine that enforces each one. Also use when a project needs a documentation gate, a decision register, a propagation matrix, or a retrospective that outlives its author. Triggers - 'documentation gate', 'decision record', 'ADR', 'acceptance report', 'runbook', 'is this verified', «доказательная документация», «записать решение», «запиши решение», «отчёт о приёмке», «раннбук», «чем это подтверждено», «доки в синхроне». Not for: drafts, chat answers, commit messages or code comments — say «без доков» to opt out."

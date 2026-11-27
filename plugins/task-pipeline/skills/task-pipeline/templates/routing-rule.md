@@ -47,7 +47,7 @@ rule's own exclusion quoted back as the reason.
 Running ten gated stages for one character is the fastest way to teach an agent to
 route around the pipeline entirely.
 
-**The opt-out is "без пайплайна" or "quick".** It applies to a task that *would*
+**The opt-out is «без пайплайна» or "quick".** It applies to a task that *would*
 qualify: do it directly, and **say out loud** that the cycle was skipped at the
 operator's request; never silently.
 

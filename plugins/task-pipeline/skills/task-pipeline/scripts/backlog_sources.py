@@ -310,13 +310,13 @@ TRACKERS = (("Linear", re.compile(r"(?-i:\bLinear\b)|linear\.app|\b(?:in|on|to|v
             ("Shortcut", re.compile(r"\bShortcut\b(?= (?:story|stories|ticket|board|issue))|app\.shortcut\.com", I)),
             ("Monday", re.compile(r"\bmonday\.com\b", I)), ("Basecamp", re.compile(r"\b(?:to-?dos?|tasks?)\b[^.;|]{0,30}\bBasecamp\b|\bBasecamp to-?dos?\b", I)),
             ("Fabric board", re.compile(r"\bFabric board\b|\bfabric_task|\bcom\.submit\b")))
-# "not Linear", "do not use Linear", "не в Linear", "do not file in docs/TODO.md" negate;
+# "not Linear", "do not use Linear", «не в Linear», "do not file in docs/TODO.md" negate;
 # "does not replace Linear" does not: only these few words may sit between.
 NEGATION = re.compile(r"(?:\bnot|n't|\bno|\bnever|\bwithout|\bне|\bбез|\bбольше не)\W+"
                       r"(?:(?:use|using|file|keep|track|longer|in|into|via|on|through|в|во|через)"
                       r"\W+){0,3}$", re.IGNORECASE)
 # A path is negated only by a filing rule, never by prose that happens to hold "no":
-# "not in X", "do not file in X", "don't file in X", "no longer in X", "не в X", "больше не в X"
+# "not in X", "do not file in X", "don't file in X", "no longer in X", «не в X», «больше не в X»
 # before it; "X is retired", "X was deprecated", "X (deprecated)" after it. "If there is no X",
 # "without X", "X: archived rows are struck through" negate nothing. A rule with a qualifier
 # after the path ("X directly", "X without a claim", "X by hand") says HOW to file there.
@@ -339,7 +339,7 @@ TRACKING = re.compile(r"backlog|бэклог|реестр\w{0,12} (?:\w{1,30} )?
                       r"очередь задач|задачи вед|задачи живут", re.IGNORECASE)
 NEAR = 80
 # A tracking word is unsaid only where a negation governs it: "no longer tracked in X", "don't
-# track work in X", "stopped tracking in X", "больше не записываем в X", "moved from X", and the
+# track work in X", "stopped tracking in X", «больше не записываем в X», "moved from X", and the
 # object of an active replacement ("which replaced X"). A "not" elsewhere in the clause ("not
 # finished today is tracked in X", "don't block a release are tracked in X") says nothing.
 UNSAID_BEFORE = re.compile(r"(?:\bnot|n't|\bnever|\bno longer|\bstopped|\bбольше не|\bне)\W+"
@@ -602,7 +602,7 @@ WORK_CLAUSE = re.compile(r"open work|\btasks?\b|task list|work items?|open (?:de
 # Only phrases that redefine the work noun itself veto it ("user jobs" is UX, not open work).
 NOT_WORK = re.compile(r"задачи пользовател|user jobs|jobs to be done", re.IGNORECASE)
 # Where the work goes, said with a placement verb or a pointer elsewhere: "goes to X", "add it to
-# X", "kept in the data folder", "deferred", "не здесь, а в ssheleg/underline".
+# X", "kept in the data folder", "deferred", «не здесь, а в ssheleg/underline».
 # Work nouns beside a place: tickets, issues, bugs, to-dos, known issues, planned or pending work,
 # an issue-key template ("ESM-<number>", "NCG-XXXXX"). A ranking aid for the reader; exit 5 does
 # not depend on it (see discover()).

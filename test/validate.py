@@ -6226,7 +6226,7 @@ _SK_P = os.path.join(_skill_dir, "SKILL.md")
 _RR_P = os.path.join(_skill_dir, "templates", "routing-rule.md")
 _CR_P = os.path.join(ROOT, "cursor", "rules", "task-pipeline.mdc")
 # A reading exclusion may return in any of these forms, in either language. The first
-# version matched `\breading\b` alone; `a code read`, `read-through` and `чтение кода`
+# version matched `\breading\b` alone; `a code read`, `read-through` and «чтение кода»
 # all sailed past it, and the incident sentence itself will not be reproduced verbatim
 # by whoever rewords it next.
 # Narrowed after it fired on `mapping code so a person can read it` — a sentence that
@@ -6314,11 +6314,11 @@ else:
                  "and said the two must not drift")
 
     # 3. Every verb the v1.9.0 design locked must be on the TRIGGER half of the
-    #    surface. DISCOVERED from that design: `перевести` was locked on 2026-08-03,
+    #    surface. DISCOVERED from that design: «перевести» was locked on 2026-08-03,
     #    never shipped, and REQ-003 was accepted `verified` anyway because the evidence
     #    recorded was the clause's shape and its character count — neither of which can
     #    see a missing member of the list the REQ locked. Searching the WHOLE
-    #    description was the first version's bug: `Not for: перевести one file` satisfied
+    #    description was the first version's bug: «Not for: перевести one file» satisfied
     #    it, which is the locked verb's exact inversion.
     _LOCK_P = os.path.join(ARTP, "specs",
                            "2026-08-03-default-routing-adoption-design.md")
@@ -6420,7 +6420,7 @@ else:
 
 
 # --- the loop as a mechanism (v1.40.0) ----------------------------------------
-# B-054's occasion: a run wrote "продолжаю без остановки" and the turn ended,
+# B-054's occasion: a run wrote «продолжаю без остановки» and the turn ended,
 # because a sentence about future behaviour is not a wakeup. The mode existed and
 # said how OFTEN to continue, never WHAT the next item is. These guards hold the
 # three halves of the new contract to each other: the queue, the arming point, and

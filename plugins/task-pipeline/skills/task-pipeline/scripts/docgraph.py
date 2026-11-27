@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """docgraph: a project's documentation as a graph of linked nodes, the starter pack.
 
-The starter pack ("пакет новичка") is the smallest graph that is useful on the first
+The starter pack («пакет новичка») is the smallest graph that is useful on the first
 day: what the project is, its decisions, its scenarios, which document links to which,
 and a search whose every hit is a verbatim passage at `path#La-Lb`. No model, no
 network, no dependency beyond the Python standard library.

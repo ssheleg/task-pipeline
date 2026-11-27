@@ -2,8 +2,9 @@
 """brain.py: before a task, one command recalls up to ten lines of this project's own memory.
 
 The minimum of the project brain (report docs/reports/2026-11-21-brain-task-pipeline, the
-Fabric CEO's decision of 2026-11-23 on the owner's rule «любая задача агентов сначала идёт в
-мозг»). Read-only and removable: it writes nothing a project reads, only its own usage log.
+Fabric CEO's decision of 2026-11-23 on the owner's rule that every agent task goes to the brain
+first: «любая задача агентов сначала идёт в мозг»). Read-only and removable: it writes nothing
+a project reads, only its own usage log.
 Standard library only; the model never reads the stores, the script does.
 
     recall NOUN ... [--root DIR] [--limit 10] [--json] [--no-log]

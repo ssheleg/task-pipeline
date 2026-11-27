@@ -1,8 +1,8 @@
 ---
 name: task-pipeline
-description: "Use when work changes the repository: feature, fix, refactor, migration, integration, audit fixes; фича, баг, интеграция, фикс по аудиту. Runs a substantial task via gated stages to acceptance; 'waves'/'волнами' closes the board. Not for questions or one-line edits; 'без пайплайна' opts out."
+description: "Use when work changes the repository: feature, fix, refactor, migration, integration, audit fixes; «фича, баг, интеграция, фикс по аудиту». Runs a substantial task via gated stages to acceptance; 'waves'/«волнами» closes the board. Not for questions or one-line edits; «без пайплайна» opts out."
 license: MIT
-compatibility: "Doctrine runs on any agent. The bundled scripts need python3; the run needs git. Missing either degrades, never blocks — the graph verbs and seeded gates go unused, and the run says so."
+compatibility: "Doctrine runs on any agent. The bundled scripts need python3; the run needs git. Missing either degrades, never blocks: the graph verbs and seeded gates go unused, and the run says so."
 ---
 
 # task-pipeline
@@ -209,7 +209,6 @@ map blocks the compile.
 The description is the short form and all a host's skill selection reads. The full list
 below is the source the family hub's route table is curated from; keep it verbatim:
 
-"Use when work changes the repository — feature, fix, bug, refactor, migration, integration, rewrite, adoption or hardening; фича, фикс, баг, рефактор, миграция, интеграция, доработать, починить, внедрить, перевести — or a finding that lands in it: audit/аудит, bug hunt/проверь ошибки, production check/проверь прод, PR review/ревью PR — or on 'run this through the pipeline'/'прогони по конвейеру', 'the full cycle'/'полный цикл', /task-pipeline. Runs a substantial task through gated stages: intake grill, docs, brainstorm, spec, plan, build, tests, deploy, post-deploy, docs/wiki, acceptance. 'waves'/'волнами'/'release iteration'/'итерация релиза' closes the board; 'checkup'/'чекап' lists unconfirmed releases; 'setup' audits docs. Not for: answering a question, explaining, a typo, a one-line edit, a rename, recon that lands nothing — say 'no pipeline'/'без пайплайна' to opt out."
+>"Use when work changes the repository — feature, fix, bug, refactor, migration, integration, rewrite, adoption or hardening; фича, фикс, баг, рефактор, миграция, интеграция, доработать, починить, внедрить, перевести — or a finding that lands in it: audit/аудит, bug hunt/проверь ошибки, production check/проверь прод, PR review/ревью PR — or on 'run this through the pipeline'/'прогони по конвейеру', 'the full cycle'/'полный цикл', /task-pipeline. Runs a substantial task through gated stages: intake grill, docs, brainstorm, spec, plan, build, tests, deploy, post-deploy, docs/wiki, acceptance. 'waves'/'волнами'/'release iteration'/'итерация релиза' closes the board; 'checkup'/'чекап' lists unconfirmed releases; 'setup' audits docs. Not for: answering a question, explaining, a typo, a one-line edit, a rename, recon that lands nothing — say 'no pipeline'/'без пайплайна' to opt out."
 
-Also triggers, each a repository change: 'write tests'/'напиши тесты', 'cut a release'/'зарелизь'/'выпусти релиз',
-'remove dead code'/'удали мёртвый код'.
+>Also triggers, each a repository change: 'write tests'/'напиши тесты', 'cut a release'/'зарелизь'/'выпусти релиз', 'remove dead code'/'удали мёртвый код'.
