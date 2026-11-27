@@ -1,3 +1,22 @@
+## v1.115.1: one cut reply no longer takes a council round down
+
+Guards: 541 → **541**.
+
+Board request `fb909e59` (fabric-workspace, 2026-11-24): in `consilium.py review` one panelist's reply arrived cut
+(`http.client.IncompleteRead`), the exception rose out of the thread pool and the round lost its summary, the judge's
+ruling and four paid answers.
+
+- **`scripts/consilium.py`**: a lost reply (a cut or undecodable body, a reset, a timeout, HTTP 429, 502, 503 or 504) is
+  retried once after a pause (`CONSILIUM_RETRY_PAUSE`, default 5 s); a second loss is that panelist `status: failed` in
+  its file and the ledger, and the round goes on to the judge with the others (`check` still decides by its minimums).
+  A verdict is never asked twice: a reply that parsed but holds no JSON is not retried. Any other exception of one
+  panelist is that panelist's failure, never the round's.
+- **`parse_json`** reads the last balanced top-level object, braces inside JSON strings ignored, instead of a fence
+  regex that returned an inner object (`{}`) for a reply with a fence inside a string and a stray closing fence (the
+  memory-healing handoff of 2026-11-23).
+- Tests: `test/consilium_test.py` 33 → 43 cases (a reply cut once and retried, cut twice and failed, the round reaching
+  its judge, the parser cases). Doctrine: `references/consilium.md` says one retry for a lost reply.
+
 ## v1.115.0: every spec is the final state, judged cold by another model family before anything is built (S0)
 
 Guards: 539 → **541**.

@@ -7,7 +7,7 @@ read from an environment variable the caller fills (for example through
 `use_secret.py run`), never from a file and never printed.
 
 Money (`references/model-tiering.md`, Roles and money): every panelist on tokens
-answers in ONE call per round, never retried; a panelist marked
+answers in ONE call per round (one retry only for a lost reply); a panelist marked
 `"route": "subscription"` is never called here: a subscription agent of the session
 writes its verdict/1 JSON and `--import ID=FILE` brings it in at no token cost. Every
 paid call is appended to the spend ledger (`spend.py`) with its route, model, cost
@@ -40,6 +40,7 @@ import argparse
 import concurrent.futures
 import datetime
 import hashlib
+import http.client
 import json
 import os
 import pathlib
@@ -115,7 +116,26 @@ def validate_config(cfg):
     return out
 
 
+TRANSIENT_HTTP = {429, 502, 503, 504}
+
+
 def call(endpoint, key, model, messages, timeout, max_tokens, extra=None):
+    """One call, and ONE retry after a pause when the transport failed (a cut or undecodable
+    body, a reset, a timeout, 429/502/503/504): a verdict is never asked twice, a lost
+    reply is (board request fb909e59: one IncompleteRead took a whole round down)."""
+    res = _call_once(endpoint, key, model, messages, timeout, max_tokens, extra)
+    if res.get("transient"):
+        time.sleep(float(os.environ.get("CONSILIUM_RETRY_PAUSE", "5")))
+        first = res.get("error")
+        res = _call_once(endpoint, key, model, messages, timeout, max_tokens, extra)
+        res["retried"] = first
+    if res.get("error"):
+        res["status"] = "failed"
+    res.pop("transient", None)
+    return res
+
+
+def _call_once(endpoint, key, model, messages, timeout, max_tokens, extra=None):
     body = {"model": model, "messages": messages, "max_tokens": max_tokens,
             "usage": {"include": True}}
     if extra:
@@ -128,10 +148,15 @@ def call(endpoint, key, model, messages, timeout, max_tokens, extra=None):
         with urllib.request.urlopen(req, timeout=timeout) as r:
             data = json.load(r)
     except urllib.error.HTTPError as e:
-        detail = e.read().decode("utf-8", "replace")[:400]
-        return {"error": f"http {e.code}: {detail}", "seconds": round(time.time() - t0, 1)}
-    except (urllib.error.URLError, OSError, ValueError) as e:
-        return {"error": f"{type(e).__name__}: {e}", "seconds": round(time.time() - t0, 1)}
+        try:
+            detail = e.read().decode("utf-8", "replace")[:400]
+        except (http.client.HTTPException, OSError):
+            detail = ""
+        return {"error": f"http {e.code}: {detail}", "seconds": round(time.time() - t0, 1),
+                "transient": e.code in TRANSIENT_HTTP}
+    except (urllib.error.URLError, http.client.HTTPException, OSError, ValueError) as e:
+        # http.client.IncompleteRead is an HTTPException, not an OSError (fb909e59).
+        return {"error": f"{type(e).__name__}: {e}", "seconds": round(time.time() - t0, 1), "transient": True}
     choice = (data.get("choices") or [{}])[0]
     msg = choice.get("message") or {}
     usage = data.get("usage") or {}
@@ -149,30 +174,45 @@ def call(endpoint, key, model, messages, timeout, max_tokens, extra=None):
             "served_by": data.get("model")}
 
 
+def _top_level_objects(text):
+    """Every balanced top-level {...} in text, braces inside JSON strings ignored."""
+    out, depth, start, in_str, esc = [], 0, None, False, False
+    for i, ch in enumerate(text):
+        if in_str:
+            if esc:
+                esc = False
+            elif ch == "\\":
+                esc = True
+            elif ch == '"':
+                in_str = False
+            continue
+        if ch == '"' and depth > 0:
+            in_str = True
+        elif ch == "{":
+            if depth == 0:
+                start = i
+            depth += 1
+        elif ch == "}" and depth > 0:
+            depth -= 1
+            if depth == 0:
+                out.append(text[start:i + 1])
+    return out
+
+
 def parse_json(text):
-    """The last JSON object in a reply (models wrap it in prose or a fence)."""
+    """The last top-level JSON object in a reply (models wrap it in prose or a fence).
+
+    Read by balanced braces, never by a fence regex: a non-greedy fence match took the
+    INNER object when a reply carried a stray closing fence (handoff 2026-11-23)."""
     if not text:
         return None
-    fenced = re.findall(r"```(?:json)?\s*(\{.*?\})\s*```", text, re.S)
-    for cand in reversed(fenced or []):
+    for cand in reversed(_top_level_objects(text)):
         try:
-            return json.loads(cand)
+            data = json.loads(cand)
         except ValueError:
-            pass
-    start = text.find("{")
-    while start != -1:
-        depth = 0
-        for i in range(start, len(text)):
-            if text[i] == "{":
-                depth += 1
-            elif text[i] == "}":
-                depth -= 1
-                if depth == 0:
-                    try:
-                        return json.loads(text[start:i + 1])
-                    except ValueError:
-                        break
-        start = text.find("{", start + 1)
+            continue
+        if isinstance(data, dict):
+            return data
     return None
 
 
@@ -259,8 +299,11 @@ def run_round(args, kind):
         return 0
 
     def one(m):
-        res = call(args.endpoint, key, m["model"], panel_prompt(kind, brief, artefact, m.get("lens")),
-                   args.timeout, m.get("max_tokens", 12000), m.get("extra"))
+        try:
+            res = call(args.endpoint, key, m["model"], panel_prompt(kind, brief, artefact, m.get("lens")),
+                       args.timeout, m.get("max_tokens", 12000), m.get("extra"))
+        except Exception as e:  # one panelist never takes the round down (fb909e59)
+            res = {"error": f"{type(e).__name__}: {e}", "status": "failed"}
         parsed = parse_json(res.get("text"))
         rec = {"id": m["id"], "model": m["model"], "family": m["family"], "at": now(), "route": "tokens",
                **{k: v for k, v in res.items() if k != "text"}, "parsed": parsed is not None}

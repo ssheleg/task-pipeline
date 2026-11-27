@@ -41,6 +41,16 @@ class Fake(http.server.BaseHTTPRequestHandler):
         SEEN.append(body)
         model = body["model"]
         user = body["messages"][-1]["content"]
+        if model in ("cut/model", "cutalways/model"):
+            CUTS[model] = CUTS.get(model, 0) + 1
+            if model == "cutalways/model" or CUTS[model] == 1:
+                # A reply cut mid-body: http.client.IncompleteRead in the reader (fb909e59).
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json")
+                self.send_header("Content-Length", "5000")
+                self.end_headers()
+                self.wfile.write(b'{"model": "x", "choices": [')
+                return
         if model == "fail/model":
             self.send_response(500)
             self.end_headers()
@@ -67,6 +77,7 @@ class Fake(http.server.BaseHTTPRequestHandler):
         self.wfile.write(data)
 
 
+CUTS = {}
 SPEND_LOG = pathlib.Path(tempfile.mkdtemp()) / "spend.jsonl"
 _TREES.append(SPEND_LOG.parent)
 
@@ -76,7 +87,7 @@ def spend_rows():
 
 
 def run(args, env_extra=None):
-    env = dict(os.environ, TASK_PIPELINE_SPEND_LOG=str(SPEND_LOG), TASK_PIPELINE_TASK="", **(env_extra or {}))
+    env = dict(os.environ, TASK_PIPELINE_SPEND_LOG=str(SPEND_LOG), TASK_PIPELINE_TASK="", CONSILIUM_RETRY_PAUSE="0", **(env_extra or {}))
     return subprocess.run([sys.executable, str(SCRIPT)] + args, capture_output=True, text=True, env=env, timeout=60)
 
 
@@ -205,6 +216,43 @@ def main():
     (tmp / "bad.json").write_text(json.dumps(bad))
     r = run(["panel", "--config", str(tmp / "bad.json")])
     ok(r.returncode != 0 and "families" in (r.stderr + r.stdout), "fewer than three families is refused")
+
+    # fb909e59: a reply cut mid-body (IncompleteRead) is retried once; cut twice it is one
+    # failed panelist, and the round still reaches the judge with the others.
+    cut_cfg = dict(cfg, panel=[{"id": "a", "model": "v1/a", "family": "f1"},
+                               {"id": "b", "model": "v2/b", "family": "f2"},
+                               {"id": "c", "model": "cut/model", "family": "f3"},
+                               {"id": "d", "model": "cutalways/model", "family": "f4"},
+                               {"id": "e", "model": "v5/e", "family": "f5"}])
+    (tmp / "cut.json").write_text(json.dumps(cut_cfg))
+    n = len(SEEN)
+    r = run(["review", "--doc", str(doc), "--brief", str(brief), "--out", str(tmp / "cutout"), "--config",
+             str(tmp / "cut.json"), "--endpoint", endpoint, "--key-env", "CONSILIUM_TEST_KEY"], {"CONSILIUM_TEST_KEY": "k"})
+    ok("Traceback" not in r.stderr, "a cut reply never raises: " + r.stderr[-400:])
+    rd = tmp / "cutout" / "round-1"
+    ok((rd / "summary.md").exists() and (rd / "judge.json").exists(), "the round reaches the judge and its summary")
+    c = json.loads((rd / "c.json").read_text())
+    ok(c["verdict"] is not None and "IncompleteRead" in c["meta"].get("retried", ""), "one cut reply is retried once")
+    d = json.loads((rd / "d.json").read_text())
+    ok(d["verdict"] is None and d["meta"].get("status") == "failed" and "IncompleteRead" in d["meta"]["error"],
+       "a reply cut twice is one failed panelist")
+    ok(sum(1 for b in SEEN[n:] if b["model"] == "cutalways/model") == 2, "a failed transport is retried once, not more")
+    ok(sum(1 for b in SEEN[n:] if b["model"] == "fail/model") == 0 and
+       len([b for b in SEEN[n:] if "<council>" in b["messages"][-1]["content"]]) == 1, "one judge call")
+
+    # parse_json reads balanced braces: a stray closing fence or a brace inside a string does
+    # not hand back an inner object (handoff 2026-11-23).
+    sys.path.insert(0, str(SCRIPT.parent))
+    import consilium as cs
+    outer = {"verdict": "pass", "findings": [{"id": "f1", "fix": "use {x} here"}]}
+    stray = "Verdict:\n```json\n" + json.dumps(outer) + "\n```\n```\n"
+    ok(cs.parse_json(stray) == outer, "a stray closing fence keeps the outer object")
+    inner_first = "```json\n" + json.dumps(outer, indent=1) + "\n```"
+    ok(cs.parse_json(inner_first) == outer, "a nested, indented object is read whole")
+    edits = {"edits": [{"new": "an empty config: ``` {} ```"}], "verdict": "pass"}
+    ok(cs.parse_json(json.dumps(edits) + "\n```") == edits,
+       "a fence inside a string and a stray closing fence keep the outer object (the old regex returned {})")
+    ok(cs.parse_json("no json here") is None, "prose is no object")
 
     srv.shutdown()
     print(f"consilium_test: {CASES} cases passed")

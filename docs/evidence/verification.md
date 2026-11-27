@@ -1,6 +1,20 @@
 # Verification — task-pipeline
 
+## Shipped state — v1.115.1 (candidate 2026-11-27: consilium survives a cut reply; tag, run and npm version are added once shipped)
+
+`test/consilium_test.py` 43 cases against a local fake endpoint that cuts a reply mid-body; the old parser returns `{}`
+on the new parser case and the new one the outer object (checked against origin/main's `consilium.py`).
+
 ## Shipped state — v1.115.0 (candidate 2026-11-27: S0, the final-state template and the clarity judge; tag, run and npm version are added once shipped)
+
+**Hosted CI did not run.** GitHub Actions refused every job of run 46060408709 (PR #192, head 0b34c76, 2026-11-27
+19:58 UTC): «The job was not started because your account is locked due to a billing issue». The checks ran locally on
+the operator's Mac instead: `npm test` exit 0 on 0b34c76, `npm run test:all` exit 0 (18:52 to 19:58 UTC, the release
+suite with its 541 negatives), output attached to PR #192 (issuecomment-7227223489). The branch rule's required
+statuses (validate, House skill audit, Negative self-tests) are still owed on the same SHA once billing is fixed; the
+rule has no bypass actor, so #192 is not merged and nothing is tagged or on npm yet. A local npm publish was the
+fallback the Fabric CEO named (2026-11-27): no npm token is in Observatory's vault, CI publishes by OIDC, and npm is
+signed in neither here nor on the Studio (`npm whoami` E401, ENEEDAUTH), so it waits on an npm sign-in, the owner's.
 
 `scripts/spec_judge.py` with `test/spec_judge_test.py` (23 cases against a local stub judge); `spec_protocol.py check`
 on the template passes a whole spec and fails it cut at its prose mention of the heading (`test/fixtures/spec-judge/`; the S0 round-2 text itself, kept out of this public repository, passed on 2026-11-27); the hook's

@@ -1,3 +1,33 @@
+## v1.115.0 S0 spec judge and v1.115.1 consilium fix: built, released on GitHub billing (2026-11-27)
+
+- **Objective.** Fabric's spec protocol S0, task-pipeline's share (board request `7b8d571f`, due 2026-11-30): the
+  final-state template, the clarity judge, the deny hook, seeds, spec-gate CI. Then board request `fb909e59`: one cut
+  reply must not take a council round down.
+- **Done.** v1.115.0 on `feat/spec-judge-s0` (0b34c76, PR #192): `references/spec-template.md`, `judge-rubric.md`,
+  `judge-models.json`, `scripts/spec_judge.py`, `hooks/build-gate.sh` deny, stage 3 without the operator review,
+  `tests/judge-seeds/`, `ci/spec-gate.yml`, `.github/workflows/spec-gate.yml`; DEC-0008. v1.115.1 on
+  `fix/consilium-incomplete-read`, stacked on it: retry once on a lost reply, `status: failed`, balanced-brace
+  `parse_json`. Live calibration 10 of 10, clean control pass ([evidence](evidence/s0-spec-judge/)).
+- **Checks run.** `npm test` green on both branches; `npm run test:all` green on 0b34c76's tree (2026-11-27 20:00 UTC);
+  IP gate over the S0 diff: pass after the S0 text fixtures were replaced by a synthetic one.
+- **Blocked, a human gate.** GitHub Actions: «account is locked due to a billing issue» (run 46060408709), so the
+  required checks and the release workflow cannot start. Asked the owner through Fabric (question f7680f80); no
+  `--admin` bypass. Billing page: https://github.com/settings/billing/summary .
+- **Fallback tried (Fabric CEO, 2026-11-27).** Merge on local checks: refused by the branch rule (required statuses,
+  no bypass actor; repository auto-merge off). Release without Actions: no self-hosted runner, no npm token in the
+  vault, npm signed in neither here nor on the Studio; a local publish needs an npm sign-in by the owner.
+- **Next task.** When billing is fixed: `gh pr ready 192 --undo && gh pr ready 192` (the checks run on
+  `ready_for_review`), squash-merge #192, annotated tag `v1.115.0` on main, watch the release run, `npm view
+  task-pipeline-skill version`; rebase this branch with `git rebase --onto origin/main feat/spec-judge-s0`, PR, same
+  for `v1.115.1`; then the family pin in sshlg-skills, and a release message on the S0 thread
+  (d14cc786) and the consilium thread (8d66e37d); clear Fabric wait `14a9c742`.
+- **When the owner signs in to npm** (Fabric CEO, 2026-11-27): create at once a granular publish token limited to the
+  family's packages, store it with `vault.py put` (value on stdin, never printed) and as the repository secret
+  `NPM_TOKEN`, so no sign-in is needed again; then publish v1.115.0 and v1.115.1, check `npm view`, run
+  `npx --yes sshlg-skills@latest update`, tag after the merges.
+- **Also open.** B-189 (Monday calibration trigger), B-190 (escalation filed by the script), B-191 (the archived
+  judges-by-complexity work renumbers to 1.116.0 or later).
+
 ## Decision input: project brain report, public copy redacted by the IP gate (2026-11-25)
 
 - **Objective.** Land the project brain report of 2026-11-21 (owner's order 481968d0, board request 0b6bfd75) in
