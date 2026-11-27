@@ -20,19 +20,20 @@ stricter, never looser.
    major finding.
 3. The author applies the ruling and records each accepted finding in the decision table.
 
-`scripts/consilium.py review|decide` runs a round and writes `round-N/` (each verdict, `judge.json`, `ledger.json`,
-`summary.md`); `consilium.py check DIR --round N` is the gate: at least three verdicts of three families, a parsable
-ruling, spend within the cap.
+`scripts/consilium.py review|decide` runs a round and writes `round-N/`; `consilium.py check DIR --round N` is the
+gate: at least three verdicts of three families, a parsable ruling, spend within the cap.
 
 ## Panel, judge, money
 
 Configuration, never code ([`model-tiering.md`](model-tiering.md), *Roles and money*): `--config`,
 `$TASK_PIPELINE_CONSILIUM`, the host file `~/.config/task-pipeline/consilium.json`, else the shipped template
 ([`assets/consilium.example.json`](../assets/consilium.example.json)), whose placeholders the script refuses to call.
+`$TASK_PIPELINE_CONSILIUM_OVERRIDE` or `~/.config/task-pipeline/consilium.override` may name a host's own council,
+run in its place under the same contract (`consilium.py --help`).
 Validators answer by tokens, one call each (a lost reply retried once); a panelist with `"route": "subscription"` is an agent of
-the session whose verdict comes in by `--import ID=FILE`. The map's strongest model judges, by tokens.
+the session whose verdict comes in by `--import ID=FILE`.
 The author never sits on its panel. People's text goes only to models the map allows. Each round has a cap
-(`max_usd_per_round`, the round's whole spend); over it the judge is skipped. Every call lands in the spend ledger
+(`max_usd_per_round`); over it the judge is skipped. Every call lands in the spend ledger
 (`--task`).
 
 ## Rounds

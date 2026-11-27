@@ -1,5 +1,11 @@
 # Verification — task-pipeline
 
+## Shipped state — v1.116.0 (candidate 2026-11-27: a host may run its own council; tag, run and npm version are added once shipped)
+
+`test/consilium_test.py` 49 cases: a probe script named by the variable and by the host file receives the arguments and
+returns its exit code; `off`, a missing path, a run already inside the host's script and the shipped script itself keep
+the shipped council. Stacked on v1.115.1, so it ships after v1.115.0 and v1.115.1 (GitHub billing, see below).
+
 ## Shipped state — v1.115.1 (candidate 2026-11-27: consilium survives a cut reply; tag, run and npm version are added once shipped)
 
 `test/consilium_test.py` 43 cases against a local fake endpoint that cuts a reply mid-body; the old parser returns `{}`
