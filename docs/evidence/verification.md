@@ -1,5 +1,10 @@
 # Verification — task-pipeline
 
+## Shipped state — v1.115.1 (candidate 2026-11-27: consilium survives a cut reply; tag, run and npm version are added once shipped)
+
+`test/consilium_test.py` 43 cases against a local fake endpoint that cuts a reply mid-body; the old parser returns `{}`
+on the new parser case and the new one the outer object (checked against origin/main's `consilium.py`).
+
 ## Shipped state — v1.115.0 (candidate 2026-11-27: S0, the final-state template and the clarity judge; tag, run and npm version are added once shipped)
 
 `scripts/spec_judge.py` with `test/spec_judge_test.py` (23 cases against a local stub judge); `spec_protocol.py check`
