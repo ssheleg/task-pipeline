@@ -1,38 +1,51 @@
 #!/usr/bin/env bash
-# PreToolUse — editing the product before the plan is agreed.
+# PreToolUse: editing the product before its spec is judged, or before the plan is agreed.
 #
-# `stages.md` says no stage advances until its gate passes, and stage 5 is where
-# code gets written. Editing the product during intake, docs, brainstorm, spec or
-# plan is the pipeline's own discipline being skipped — and it is the skip nobody
-# notices, because the work looks like progress.
+# **`deny` when the run's spec does not verify (S0, the spec protocol, 2026-11-27).** The
+# owner's rule: no product file is edited until a judge of another model family read the
+# spec cold and found nothing a builder would have to ask. The current run's ledger names
+# its spec (`spec: <dir>`); `spec_judge.py check --verify <dir>` must exit 0 (its verdict
+# on file matches the content). No spec, or one that does not verify: `deny`, with the
+# command that lifts it. A typo or a one-line fix is not exempt INSIDE a run (an incident
+# gets an S spec, one page, one judge call); outside a run this hook says nothing at all.
+# Runs started before 2026-11-28 with no `spec:` line keep the old question below, so an
+# upgrade never strands a run in flight.
 #
-# **`ask`, never `deny`, and the reason is this file's own doctrine.** The routing
-# boundary says a typo, a one-line edit or a mechanical rename does not go through
-# the pipeline, and no hook can tell a typo from a feature. A refusal here would
-# fight the honest cases daily and be removed inside a week; a question answered
-# once costs a keystroke.
+# **`ask` once the spec verifies but the run has not entered the build stage.** The routing
+# boundary says a mechanical rename does not go through the pipeline, and no hook can tell
+# one from a feature; with a judged spec the remaining risk is order, not content, and a
+# question answered once costs a keystroke.
 #
 # **The build stage is resolved by ROLE, never by number.** v1.50.0 matched
 # `stage: 6` literally and blocked every release in a six-stage project; the same
 # mistake here would put a prompt in front of every edit in any project whose flow
-# is numbered differently. `pipeline.json` → a stage whose `state` is `build`, else
-# one whose name says build. Unresolvable → silence, because a question nobody can
+# is numbered differently. `pipeline.json` -> a stage whose `state` is `build`, else
+# one whose name says build. Unresolvable -> no question, because a question nobody can
 # act on is worse than none.
 #
 # **The pipeline's own artefacts are never gated.** Stages 0-4 exist to WRITE
-# things — the brief, the spec, the plan, the ledger. A gate that asked about those
-# would fire on the very work it is protecting.
+# things: the brief, the spec, the plan, the ledger. `docs/`, `.task-pipeline/`,
+# `.claude/` and the root `*.md` files are never asked about or refused.
+#
+# **Fails silent.** A malformed payload or a crash of this script lets the edit through
+# (the house rule: a hook never breaks another session); a spec that cannot be read is
+# a refusal, because that is a finding about the spec, not about the hook.
 set -uo pipefail
 
 input=$(cat 2>/dev/null || true)
 project="${CLAUDE_PROJECT_DIR:-$PWD}"
+hook_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" 2>/dev/null && pwd)"
 ledger="$project/.task-pipeline/run.md"
-[ -f "$ledger" ] || exit 0
+if [ ! -f "$ledger" ]; then
+  # `run-<slug>.md` ledgers (S0): the newest one is the current run.
+  ledger=$(ls -t "$project"/.task-pipeline/run-*.md 2>/dev/null | head -1)
+  [ -n "$ledger" ] && [ -f "$ledger" ] || exit 0
+fi
 
-HOOK_INPUT="$input" python3 - "$ledger" "$project" <<'PY' 2>/dev/null || exit 0
-import json, os, re, sys
+HOOK_INPUT="$input" python3 - "$ledger" "$project" "$hook_dir" <<'PY' 2>/dev/null || exit 0
+import json, os, re, subprocess, sys
 
-ledger, project = sys.argv[1], sys.argv[2]
+ledger, project, hook_dir = sys.argv[1], sys.argv[2], sys.argv[3]
 try:
     data = json.loads(os.environ.get("HOOK_INPUT", ""))
 except Exception:
@@ -61,7 +74,7 @@ def gated(path):
     rel = rel.replace(os.sep, "/")
     # The run writes these; gating them would fire on the work stages 0-4 are for.
     return not (rel.startswith("..") or re.match(
-        r"^(docs/|\.task-pipeline/|\.claude/|CHANGELOG\.md|README\.md)", rel))
+        r"^(docs/|\.task-pipeline/|\.claude/)", rel) or re.match(r"^[^/]+\.md$", rel))
 
 
 # One gated path is enough: a patch that also touches docs/ still edits the product.
@@ -80,6 +93,48 @@ _starts = [i for i, l in enumerate(_lines) if l.strip().startswith("Run:")]
 text = "\n".join(_lines[_starts[-1]:] if _starts else _lines)
 
 stage_lines = [l.strip() for l in text.splitlines() if l.strip().startswith("stage:")]
+
+
+def deny(reason):
+    print(json.dumps({"hookSpecificOutput": {
+        "hookEventName": "PreToolUse",
+        "permissionDecision": "deny",
+        "permissionDecisionReason": reason}}))
+    raise SystemExit(0)
+
+
+# The spec gate (S0). `spec: <dir>` in the current run names the spec directory.
+STRICT_FROM = "2026-11-28"
+spec_m = re.search(r"^\s*spec:\s*`?([^`\s]+)`?\s*$", text, re.M)
+started = re.search(r"started\s+`?(\d{4}-\d{2}-\d{2})", text)
+strict = bool(started) and started.group(1) >= STRICT_FROM
+if spec_m:
+    spec_dir = spec_m.group(1)
+    if not os.path.isabs(spec_dir):
+        spec_dir = os.path.join(project, spec_dir)
+    tool = os.path.join(os.path.dirname(hook_dir), "skills", "task-pipeline", "scripts", "spec_judge.py")
+    if not os.path.isfile(tool):
+        raise SystemExit(0)      # a broken install is not a finding about the spec
+    try:
+        r = subprocess.run([sys.executable, tool, "check", spec_dir, "--verify", "--project", project],
+                           capture_output=True, text=True, timeout=15, cwd=project)
+    except Exception:
+        raise SystemExit(0)
+    if r.returncode != 0:
+        said = " ".join((r.stdout or "").strip().splitlines()[:3])[:600]
+        deny("The run's spec does not verify, so no product file is edited yet: %s\n\n"
+             "Judge it (`spec_judge.py check %s`), revise it until the judge passes it, or, "
+             "after three rounds, take the open questions to the owning project's coordinator. "
+             "The pipeline's own artefacts (docs/, .task-pipeline/, root *.md) stay open."
+             % (said or "exit %d" % r.returncode, spec_m.group(1)))
+elif strict:
+    deny("This run (started %s) names no spec: no product file is edited until a spec "
+         "describes the finished product and a judge of another model family passed it. "
+         "Write it (`spec_judge.py init docs/specs/<date>-<slug> --id <id> --author-family "
+         "<yours>`), judge it (`spec_judge.py check <dir>`), then record `spec: <dir>` in "
+         "%s. An incident or a one-line fix gets an S spec: one page, one judge call."
+         % (started.group(1), ledger))
+
 if not stage_lines:
     raise SystemExit(0)
 
@@ -130,7 +185,7 @@ print(json.dumps({"hookSpecificOutput": {
         "Allow if this is a typo, a one-line fix or a mechanical rename, which the "
         "routing boundary says never went through the pipeline anyway. Otherwise "
         "finish the plan and record stage %s in %s.\n\n"
-        "The pipeline's own artefacts — docs/, .task-pipeline/, README, CHANGELOG — "
+        "The pipeline's own artefacts (docs/, .task-pipeline/, the root *.md files) "
         "are never gated." % (now, build_id, build_id, ledger),
 }}))
 PY

@@ -509,9 +509,110 @@ def research_validate(d, model, family, endpoint, key_env, timeout=180, dry_run=
 
 # ---------------------------------------------------------------- spec check and gate
 
+# ---------------------------------------------------------------- the final-state template
+
+# references/spec-template.md: one template, the same sections at every size, in this order.
+TEMPLATE = ["Header", "Outcome", "Users", "Final behaviour", "Data and contracts", "Boundaries",
+            "Acceptance", "Delivery order", "Waits and gates", "Estimate", "Question ledger",
+            "Glossary", "Judge record"]
+HEADER_FIELDS = {"id": None, "owner repositories": None, "size": ("S", "M", "L"),
+                 "kind": ("feature", "fix", "research", "release", "docs"), "memory side": None,
+                 "supersedes": None,
+                 "status": ("draft", "judged", "judged-degraded", "built", "observed", "superseded")}
+PLACEHOLDER_LINE = re.compile(r"^\s*(?:[-*]|\d+\.|\|)?\s*(?:\*\*)?<[^`>]+>")
+
+
+def _ordered_headings(text):
+    out, fence = [], False
+    for line in text.splitlines():
+        if re.match(r"^\s*(`{3,}|~{3,})", line):
+            fence = not fence
+            continue
+        m = None if fence else re.match(r"^##\s+(.+?)\s*$", line)
+        if m and not line.startswith("###"):
+            out.append(m.group(1).strip().lower())
+    return out
+
+
+def is_template_spec(text):
+    head = find_section(sections(text), "header")
+    return head is not None and bool(re.search(r"^\|\s*`?id`?\s*\|", head, re.M | re.I)) \
+        and bool(re.search(r"^\|\s*`?status`?\s*\|", head, re.M | re.I))
+
+
+def _vague_use(line):
+    """A TBD that is USED, not one that is mentioned: `a TBD`, `no TODO` and code spans
+    name the marker (the rubric's own list of automatic fails does), they leave nothing open."""
+    bare = re.sub(r"`[^`]*`|\u00ab[^\u00bb]*\u00bb|\"[^\"]*\"", "", line)
+    for m in VAGUE.finditer(bare):
+        if not re.search(r"\b(?:a|an|the|no|any|every)\s+$", bare[:m.start()], re.I):
+            return m.group(0)
+    return None
+
+
+def template_check(text):
+    """Errors for a spec in the final-state template (fact 1 of S0)."""
+    errors, warns = [], []
+    found = _ordered_headings(text)
+    secs = sections(text)
+    want = [s.lower() for s in TEMPLATE]
+    for name in TEMPLATE:
+        body = find_section(secs, name)
+        if body is None:
+            errors.append("section `%s` missing: the template owes every section at every size "
+                          "(write `none` and why when it is empty)" % name)
+        elif not body.strip() and name != "Judge record":
+            errors.append("section `%s` is empty: write `none` and why" % name)
+    order = [h for h in found if h in want]
+    if order != [w for w in want if w in order]:
+        errors.append("sections out of the template's order: %s" % ", ".join(order))
+    head = table(find_section(secs, "header") or "")
+    fields = {}
+    for row in head:
+        vals = list(row.values())
+        if len(vals) >= 2:
+            fields[vals[0].strip("`* ").lower()] = vals[1].strip()
+    for name, allowed in HEADER_FIELDS.items():
+        val = fields.get(name)
+        if not val:
+            errors.append("header field `%s` missing or empty" % name)
+            continue
+        if allowed:
+            tok = re.findall(r"`([^`]+)`", val)
+            first = (tok[0] if tok else val.split()[0]).strip().strip(".,;")
+            if first not in allowed:
+                errors.append("header `%s` is %r: one of %s" % (name, first, ", ".join(allowed)))
+    facts = set(re.findall(r"^(\d+)\.\s", find_section(secs, "final behaviour") or "", re.M))
+    if not facts:
+        errors.append("`Final behaviour` has no numbered facts: each fact gets a number and a check")
+    rows = table(find_section(secs, "acceptance") or "")
+    checked = set()
+    for r in rows:
+        first = (list(r.values()) or [""])[0]
+        checked |= set(re.findall(r"\d+", first))
+    for f in sorted(facts - checked, key=int):
+        errors.append("fact %s of `Final behaviour` has no row in `Acceptance`" % f)
+    for n, line in enumerate(text.splitlines(), 1):
+        if PLACEHOLDER_LINE.match(line) and "Judge record" not in line and "spec_judge.py" not in line:
+            errors.append("line %d is still a template placeholder: %s" % (n, line.strip()[:60]))
+        hit = _vague_use(line)
+        if hit and not line.lstrip().startswith("|"):
+            errors.append("line %d leaves a decision open (%s): decide it or put it in the "
+                          "Question ledger" % (n, hit))
+    ledger = find_section(secs, "question ledger")
+    if ledger is not None:
+        _, qerr, qwarn = questions("## Questions\n" + ledger)
+        errors += qerr
+        warns += qwarn
+    return errors, warns
+
+
 def check(path, tier=None):
     text = open(path).read()
     errors, warns = [], []
+    if is_template_spec(text) and not tier:
+        errors, warns = template_check(text)
+        return errors, warns, []
     declared = (header_value(text, "Size") or "").upper()[:1]
     tier = (tier or declared or "").upper()[:1]
     if tier not in TIERS:

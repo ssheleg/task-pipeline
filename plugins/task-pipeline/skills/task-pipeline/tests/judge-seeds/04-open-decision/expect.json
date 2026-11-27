@@ -1,0 +1,6 @@
+{
+ "schema": "judge-seed/1",
+ "defect": "a decision left open in prose (refuse or overwrite, a flag if needed)",
+ "zero": [],
+ "caught_when": "the verdict is not pass"
+}

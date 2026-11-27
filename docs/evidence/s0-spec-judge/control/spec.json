@@ -1,0 +1,45 @@
+{
+ "schema": "spec/1",
+ "id": "seed-clean-control",
+ "owner": "board-service",
+ "side": "personal",
+ "size": "S",
+ "kind": "feature",
+ "user_kinds": [
+  "owner"
+ ],
+ "supersedes": [],
+ "path": ".",
+ "commit": null,
+ "content_sha256": "f75982b709939b532d0e44cf51ac6a61c1db5baaf3315848a350c96f19bce4fc",
+ "status": "judged",
+ "author_family": "seed-author",
+ "judge": [
+  {
+   "round": 1,
+   "model": "google/gemini-4-argon",
+   "family": "google",
+   "rubric": "judge-rubric/1",
+   "verdict": "pass",
+   "scores": {
+    "clarity": 2,
+    "completeness": 2,
+    "testability": 2,
+    "finality": 2,
+    "consistency": 2
+   },
+   "questions": [],
+   "cost_usd": 0.003312,
+   "generation_id": "gen-1795803979-BXUZoIYOyFQNzkl4OAu9",
+   "at": "2026-11-27T18:26:25Z"
+  }
+ ],
+ "acceptance": [],
+ "estimate": {
+  "kind": "feature",
+  "p50_h": 0.8,
+  "p85_h": 3.6,
+  "slot": null
+ },
+ "waits": []
+}

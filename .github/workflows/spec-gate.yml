@@ -1,0 +1,48 @@
+# spec-gate: no pull request merges without a spec judged for its exact content (S0).
+#
+# A reusable workflow: it has no trigger of its own here, so it adds no run to this
+# repository's CI. A repository calls it from a pull_request workflow (the caller
+# template ships in the skill bundle as `ci/spec-gate.yml`). It reads the
+# `Spec: <spec id>@<commit>` trailer in the pull request body, finds the spec
+# directory whose spec.json carries that id under docs/specs/ or docs/plans/ at that
+# commit, and runs `spec_judge.py check --verify` on it: offline, no model call, seconds.
+name: spec-gate
+
+on:
+  workflow_call:
+    inputs:
+      require_cross_family:
+        description: "A same-family judge never satisfies the gate (the PassionCode estate sets true)"
+        type: boolean
+        default: false
+      task_pipeline_ref:
+        description: "The task-pipeline ref whose spec_judge.py runs (default: this workflow's own commit)"
+        type: string
+        default: ""
+
+permissions:
+  contents: read
+
+jobs:
+  spec-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/checkout@v4
+        with:
+          repository: ssheleg/task-pipeline
+          ref: ${{ inputs.task_pipeline_ref || github.job_workflow_sha }}
+          path: .spec-gate-tool
+      - name: Verify the judged spec the pull request cites
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+          CROSS: ${{ inputs.require_cross_family }}
+        run: |
+          printf '%s\n' "$PR_BODY" > "$RUNNER_TEMP/pr-body.md"
+          flag=""
+          [ "$CROSS" = "true" ] && flag="--require-cross-family"
+          python3 .spec-gate-tool/plugins/task-pipeline/skills/task-pipeline/scripts/spec_judge.py \
+            gate --pr-body "$RUNNER_TEMP/pr-body.md" --repo . $flag

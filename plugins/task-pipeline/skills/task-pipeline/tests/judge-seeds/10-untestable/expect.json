@@ -1,0 +1,6 @@
+{
+ "schema": "judge-seed/1",
+ "defect": "every acceptance check is a feeling, not a pass or fail",
+ "zero": [],
+ "caught_when": "the verdict is not pass"
+}

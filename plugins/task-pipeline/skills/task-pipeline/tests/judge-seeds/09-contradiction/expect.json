@@ -1,0 +1,6 @@
+{
+ "schema": "judge-seed/1",
+ "defect": "the column count and the exit codes contradict between sections",
+ "zero": [],
+ "caught_when": "the verdict is not pass"
+}

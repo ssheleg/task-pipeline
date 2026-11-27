@@ -92,7 +92,7 @@ Every gate is **typed**: `auto` — the orchestrator verifies it itself, pass/fa
 | 0 | Harvest + intake grill — **mandatory** | source ledger written **with the work-list measured, not recalled**; the documentation inventory answered into `docs/DOCMAP.md`; intent reconciled against as-built; shared understanding + autonomy sweep; brief locked | manual |
 | 1 | Docs study | contracts grounded on current docs | auto |
 | 2 | Brainstorm + decompose | design approved; UI verdict recorded; every REQ answered; platform: module map approved | manual |
-| 3 | Spec | committed + reviewed; UI: super-ux chain validated, linter green | manual |
+| 3 | Spec | committed + judged cold by another model family (`spec_judge.py check --verify`); UI: super-ux chain validated, linter green | manual |
 | 4 | Plan | parallel-ready, DoD per task; **every edge names what it carries** — an arrow whose payload nobody can fill is a fake edge | auto |
 | 5 | Dev | tasks DONE (three review verdicts each), TDD green per task; **a fanned-out group gets one convergence check over all its diffs together before the first worktree lands** | auto |
 | 6 | Tests | full suite green, new code covered; **on a web front end the surface is checked in a browser, not in the diff** | auto |
@@ -653,7 +653,7 @@ must say so.
 ### Held to Anthropic's own Skill authoring guidance
 
 Audited against the four Agent Skills pages. Most of it already held — `name`
-13/64 chars, `description` 292/1024 chars, `SKILL.md` 215/500 lines, all 60 references
+13/64 chars, `description` 292/1024 chars, `SKILL.md` 215/500 lines, all 62 references
 reachable from `SKILL.md` through explicit reference routes, and the bundle far under the 30 MB ceiling. What
 did not, now does:
 
@@ -1038,6 +1038,8 @@ recommendation, so you arm the whole run in one exchange. Detail:
 | [`references/hooks.md`](plugins/task-pipeline/skills/task-pipeline/references/hooks.md) | the `PreToolUse` contract, the fail-open hazard, placement, and the Claude-Code-only limit |
 | [`references/doc-graph.md`](plugins/task-pipeline/skills/task-pipeline/references/doc-graph.md) | documentation as a graph: the starter pack (`scripts/docgraph.py`), one format with the estate's graphs, self-healing, cleanup, the hidden refactoring |
 | [`references/spec-protocol.md`](plugins/task-pipeline/skills/task-pipeline/references/spec-protocol.md) | stages 0 to 4 as checks: size, question classes, research with other models, the spec gate and the order spec, board, build (`scripts/spec_protocol.py`) |
+| [`references/spec-template.md`](plugins/task-pipeline/skills/task-pipeline/references/spec-template.md) | the final-state spec template (S0): the same sections at every size, the finished product in the present tense, one acceptance row per fact; `spec_judge.py init` copies it |
+| [`references/judge-rubric.md`](plugins/task-pipeline/skills/task-pipeline/references/judge-rubric.md) | the clarity judge's prompt and dimensions (`judge-rubric/1`): a model of another family reads the spec cold, lists a builder's questions, scores five dimensions; `spec_judge.py` computes the verdict and binds it to the content hash |
 | [`references/knowledge-graph.md`](plugins/task-pipeline/skills/task-pipeline/references/knowledge-graph.md) | the code graph: install line, stage-0 reach queries, the stage-9 refresh, the graph↔docs divergence check |
 | [`references/retrospective.md`](plugins/task-pipeline/skills/task-pipeline/references/retrospective.md) | the project retro: the three grades of fix, the mandatory prune, the cap of ten |
 | [`references/model-tiering.md`](plugins/task-pipeline/skills/task-pipeline/references/model-tiering.md) | model policy, the `/model` reminder, overrides |

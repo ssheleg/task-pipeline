@@ -1,0 +1,18 @@
+# Copy to .github/workflows/spec-gate.yml in a repository that builds from judged specs,
+# then make the `spec-gate / spec-gate` check required on the default branch.
+#
+# Every pull request body carries one line `Spec: <spec id>@<commit>`: the id from the
+# spec's spec.json, the commit at which its judge verdict is on file. The check is
+# offline (no model call, no key) and takes seconds. Pin `@<tag>` to the task-pipeline
+# release you run; doctrine: references/spec-protocol.md -> The clarity judge.
+name: spec-gate
+
+on:
+  pull_request:
+    types: [opened, edited, reopened, synchronize]
+
+jobs:
+  spec-gate:
+    uses: ssheleg/task-pipeline/.github/workflows/spec-gate.yml@main
+    with:
+      require_cross_family: false

@@ -214,7 +214,7 @@ than a detail to omit.
 
 ## The one this skill ships
 
-Since v1.50.0 the plugin carries hooks of its own. `hooks/release-gate.sh`
+The plugin carries hooks of its own. `hooks/release-gate.sh`
 (`PreToolUse` on `Bash`) refuses an **outward, irreversible act** — `git tag`, a
 tag push, `gh release create`, `npm publish` — while the run says the suite has not
 passed. `hooks/gate-observer.sh` (`PostToolUse` and `PostToolUseFailure`) records
@@ -224,7 +224,9 @@ memory unavailable with `--for-run`
 ([`continuity.md`](continuity.md), Part 3).
 
 `hooks/build-gate.sh` (`PreToolUse` on `Edit|Write|MultiEdit|NotebookEdit|apply_patch`)
-asks before the product is edited while the run has not entered its build stage.
+denies a product edit while the ledger's `spec:` does not verify, or in a run started from
+2026-11-28 with no `spec:` ([`spec-protocol.md`](spec-protocol.md) section 5); a judged spec
+before the build stage, or an older run, gets the question instead.
 **Codex edits through `apply_patch`**, the patch text in `tool_input.command`, so the
 gate reads every `*** Add File:`, `*** Update File:`, `*** Delete File:` and
 `*** Move to:` path in it and asks when any one is gated (hub B-211). **Codex has no
@@ -234,19 +236,13 @@ is not proof the suite never ran (the limit is Codex's event set, not this hook'
 
 **Two rules a gate keeps.**
 
-*A gate keyed to a stage NUMBER is the rail's mistake with worse consequences.*
-The first version matched `stage: 6` literally. `progress.md` says the rail "is
-computed, never eleven" because a host project replaces the flow — and a project
-whose flow has six stages, tests green at stage 4, could never tag anything again.
-A wrong rail misinforms; a wrong gate stops the work. The stage is resolved from
-`pipeline.json` (`state: "tests"`, or a stage declaring `gate.command`), and
-failing that from the ledger by name.
+*A gate keyed to a stage NUMBER stops the work.* The first version matched `stage: 6`
+and a six-stage flow could never tag again. The stage is resolved from `pipeline.json`
+(`state: "tests"`, or a stage declaring `gate.command`), else from the ledger by name.
 
-*A gate that reads a claim written by the party it constrains confirms an
-assertion with itself.* `stage: … verdict pass` is typed by the agent. Where the
-stage declares `gate.command`, the observer writes the **observed** exit code as a
-`gate:` line and the release gate requires both. Declare no command and it
-degrades to the claim alone — which is stated here rather than discovered.
+*A gate that reads the constrained party's own claim confirms it with itself.* Where the
+stage declares `gate.command`, the observer writes the **observed** exit code as a `gate:`
+line and the release gate requires both; with no command it degrades to the claim, said here.
 
 It is the worked example above, made real, and its three narrownesses are the
 reusable part:
@@ -254,16 +250,12 @@ reusable part:
 | Narrowness | Why it is not a smaller feature |
 |---|---|
 | Only outward acts, never ordinary commits | stage 5 commits per task by design; a gate that fights the build loop is removed within a day |
-| Silent where no `.task-pipeline/run.md` exists, before python3 starts | enabling the plugin must change nothing in a repository that runs no pipeline, and every Bash call there pays these hooks: each Bash hook tests for the ledger before it reads stdin or starts python3, so one Bash call costs three bash processes instead of eighteen (hub B-310; `test/release_gate_test.py`, "with no ledger, the Bash hooks exit 0 silent and start no process") |
+| Silent where no `.task-pipeline/run.md` exists, before python3 starts | a repository with no pipeline must not pay: three bash processes per Bash call, not eighteen (hub B-310; `test/release_gate_test.py`) |
 | Reads the ledger, never reruns a suite | `progress.md` already makes the ledger append-only; a second source of truth about "did stage 6 pass" is the failure this file warns about below |
 
-**Fail-closed, deliberately.** Every non-zero exit code other than `2` is
-non-blocking, so an internal failure exits `2` as well. A crashing gate that fails
-open is worse than no gate: it reads as one.
-
-**A gate reads its payload from stdin, never through a heredoc.** A heredoc is
-stdin, so the payload arrives empty and the gate approves everything while looking
-installed: a hook that cannot see its input reads, from outside, as one that approves.
+**The release gate fails closed:** only exit `2` blocks, so an internal failure exits `2`
+too. **A gate reads its payload from stdin, never through a heredoc**, which would empty
+the payload and approve everything while looking installed.
 
 ## Leases are not reimplemented here
 

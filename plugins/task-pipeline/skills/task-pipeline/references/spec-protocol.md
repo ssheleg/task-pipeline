@@ -10,6 +10,7 @@ question; `scripts/spec_protocol.py` checks each step. The order: spec, board ro
 - 2. Grill with classes
 - 3. Research with agents and other models
 - 4. Check the spec, then the board, then the build
+- 5. The clarity judge
 - Rationalizations
 
 ## The loop
@@ -35,7 +36,7 @@ After the gap check (`grill.md`, phase 2), size the spec from the brief's facts:
 python3 <skill>/scripts/spec_protocol.py size --reqs 5 --files 8 --contract
 ```
 
-| Size | When | Sections it owes | Research |
+| Size | When | Sections it owes (legacy) | Research |
 |---|---|---|---|
 | S | a bounded change | Goal, Scope, Requirements, Design, Questions, Tests | none; a new domain owes one scout and three sources |
 | M | a contract, several surfaces or unknowns | S plus Contracts, Edge cases, Decisions, Rollout | two scouts, six sources (one primary), one validator of another family, then the council ([consilium.md](consilium.md)) |
@@ -109,9 +110,32 @@ python3 <skill>/scripts/spec_protocol.py gate <spec> --board <backlog> --plan <p
 
 `gate` opens stage 5 only when the spec passes and the board and the plan cite it.
 
+## 5. The clarity judge
+
+The owner, 2026-11-27: «на каждую спеку ещё нужен судья» (S0). `scripts/spec_judge.py`:
+
+- `init <dir>`: `spec.md` from [the template](spec-template.md) and `spec.json`
+  (`spec/1`, naming `author_family`) in `docs/specs/<date>-<slug>/`.
+- `check <dir>`: ONE call to a judge of another family, never retried, with
+  [the rubric](judge-rubric.md) and `--glossary`; the judge comes from a `judge-models/1`
+  list (`--models`, `~/.config/task-pipeline/judge-models.json`; the shipped
+  [list](judge-models.json) names roles, never called). The tool computes `pass`,
+  `pass-with-fixes` or `fail` from what the judge listed and books the cost (`spend.py`).
+  Round 2 adds the questions and the diff; a third round only for one open blocker; then
+  the spec stays `draft` and `judge/escalation.json` holds the coordinator's task.
+- `check --verify <dir>`: no call; 0 only when a pass carries the current hash (`spec.md`
+  without `## Judge record`). One provider gives `judged-degraded`: S and M only, never
+  under `require_cross_family: true`. M owes one validator of another family (`validate`)
+  and a council ruling ([consilium.md](consilium.md), `--out <dir>/review/council`); L two
+  validators of two families and the council.
+- `gate`: CI over the `Spec: <id>@<commit>` trailer (`ci/spec-gate.yml`); `calibrate`: the
+  ten seeds of `tests/judge-seeds/`, 9 caught, every Monday. Exits: 0 pass, 1 not, 2
+  unreadable, 3 no judge. `build-gate.sh` denies product edits until `spec:` verifies.
+
 ## Rationalizations
 
 | The excuse | Why it fails |
 |---|---|
 | "Ask the owner, to be safe." | A tactical question asked costs a human round for what the agent could decide. |
+| "It is a one-line fix, no spec." | Inside a run no kind is exempt: an S spec is one page and one judge call. |
 | "The model said so." | A model's answer is not a source; its claim needs a page that was read. |

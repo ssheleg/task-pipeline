@@ -1,0 +1,6 @@
+{
+ "schema": "judge-seed/1",
+ "defect": "a TBD left in Final behaviour",
+ "zero": [],
+ "caught_when": "the verdict is not pass"
+}
