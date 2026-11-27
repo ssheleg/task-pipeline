@@ -1,3 +1,24 @@
+## v1.116.0: a host's own council; the judges-by-complexity work kept private (2026-11-27)
+
+- **Objective.** Task 1878a280 (judges by task complexity, the owner's order of 2026-11-24) after the owner's answer
+  to Fabric question 19b148bf (2026-11-27 20:29 UTC): «Держать закрыто». The mechanics go to a private repository;
+  this public skill gets only an interface without the algorithm, parameters or schema names; the leak is recorded;
+  pushes to public repositories pass the IP gate.
+- **Done.** Private repository `ssheleg/task-pipeline-private` (clone `~/DATA/task-pipeline-private`, branch
+  `feat/judges-by-complexity-v1.116`, the full work, plus the 2026-11-24 archive branch). Here, branch
+  `feat/consilium-host-override` (stacked on `fix/consilium-incomplete-read`): `consilium.py` runs a host's own
+  council named by `$TASK_PIPELINE_CONSILIUM_OVERRIDE` or `~/.config/task-pipeline/consilium.override`; 6 test cases.
+  IP gate hooks (`ip_gate.py install-hooks --org ssheleg`) on every local clone of a public `ssheleg` repository; the
+  hook refuses the private commit towards this origin (checked). Observatory lesson `gate-before-push-to-public-remote`.
+- **Decisions.** A separate private clone, never a second remote of this public clone: the gate's pre-push range skips
+  commits already on any remote (board request 5a00ffcd to fabric-workspace). No GitHub support purge of the leaked
+  commit (the owner's answer, precedent of 2026-11-25).
+- **Checks run.** `python3 test/consilium_test.py` 49 cases; `npm test`; `ip_gate.py scan` on this branch's diff
+  (see the commit).
+- **Next task.** Ship order: v1.115.0, v1.115.1, then this v1.116.0 (all wait on GitHub billing, question f7680f80).
+  Private side: bring the private branch onto this seam (its `consilium.py` as the host script, the judges rule into
+  the agents base through fabric-agents-database), then write the host file on this Mac.
+
 ## v1.115.0 S0 spec judge and v1.115.1 consilium fix: built, released on GitHub billing (2026-11-27)
 
 - **Objective.** Fabric's spec protocol S0, task-pipeline's share (board request `7b8d571f`, due 2026-11-30): the

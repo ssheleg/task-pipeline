@@ -1,3 +1,20 @@
+## v1.116.0: a host may run its own council in place of the shipped one
+
+Guards: 541 → **541**.
+
+The owner's decision of 2026-11-27 20:29 UTC (Fabric question `19b148bf`, task `1878a280`): the judges-by-complexity
+work stays private, on the operator's machines, and this public skill gets only an interface without its algorithm,
+parameters or schema names. This release is that interface.
+
+- **`scripts/consilium.py`**: when `$TASK_PIPELINE_CONSILIUM_OVERRIDE` or `~/.config/task-pipeline/consilium.override`
+  names a script, the command runs that script with the same arguments and returns its exit code; `off`, a run already
+  inside the host's script, or the shipped script itself keep the shipped council, and a path that does not exist is
+  reported on stderr before the shipped council runs. Library callers (`meanings.py`) are unchanged.
+- **`references/consilium.md`**, *Panel, judge, money*: one sentence names the two places and the contract; two
+  repeated phrases cut so the prompt-lint word ratchet holds.
+- Tests: `test/consilium_test.py` 43 → 49 cases; its runs set the override `off`, so a host file on the test machine
+  never takes them over.
+
 ## v1.115.1: one cut reply no longer takes a council round down
 
 Guards: 541 → **541**.

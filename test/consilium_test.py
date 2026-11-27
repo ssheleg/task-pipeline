@@ -87,7 +87,9 @@ def spend_rows():
 
 
 def run(args, env_extra=None):
-    env = dict(os.environ, TASK_PIPELINE_SPEND_LOG=str(SPEND_LOG), TASK_PIPELINE_TASK="", CONSILIUM_RETRY_PAUSE="0", **(env_extra or {}))
+    env = dict(os.environ, TASK_PIPELINE_SPEND_LOG=str(SPEND_LOG), TASK_PIPELINE_TASK="", CONSILIUM_RETRY_PAUSE="0",
+               TASK_PIPELINE_CONSILIUM_OVERRIDE="off")
+    env.update(env_extra or {})
     return subprocess.run([sys.executable, str(SCRIPT)] + args, capture_output=True, text=True, env=env, timeout=60)
 
 
@@ -253,6 +255,34 @@ def main():
     ok(cs.parse_json(json.dumps(edits) + "\n```") == edits,
        "a fence inside a string and a stray closing fence keep the outer object (the old regex returned {})")
     ok(cs.parse_json("no json here") is None, "prose is no object")
+
+    # The host's own council (1.116.0): a named script runs in place of the shipped one, with
+    # the same arguments and its exit code; `off`, a missing path or a run already inside it
+    # keep the shipped council. The host file is read from $HOME, which these runs point at tmp.
+    probe = tmp / "host-council.py"
+    probe.write_text("import json, os, sys\n"
+                     "open(os.environ['PROBE_OUT'], 'w').write(json.dumps({'argv': sys.argv[1:], "
+                     "'inside': os.environ.get('TASK_PIPELINE_CONSILIUM_OVERRIDDEN')}))\n"
+                     "sys.exit(7)\n")
+    out = tmp / "probe.json"
+    r = run(["panel", "--json"], {"TASK_PIPELINE_CONSILIUM_OVERRIDE": str(probe), "PROBE_OUT": str(out)})
+    seen = json.loads(out.read_text()) if out.exists() else {}
+    ok(r.returncode == 7 and seen.get("argv") == ["panel", "--json"], "the host's council gets the arguments and its exit code")
+    ok(seen.get("inside") == "1", "the host's council runs marked, so a copy of this script does not call itself")
+    home = tmp / "home"
+    (home / ".config" / "task-pipeline").mkdir(parents=True)
+    (home / ".config" / "task-pipeline" / "consilium.override").write_text(str(probe) + "\n")
+    out.unlink()
+    env = {k: v for k, v in os.environ.items() if k != "TASK_PIPELINE_CONSILIUM_OVERRIDE"}
+    env.update(HOME=str(home), PROBE_OUT=str(out), TASK_PIPELINE_SPEND_LOG=str(SPEND_LOG))
+    r = subprocess.run([sys.executable, str(SCRIPT), "panel"], capture_output=True, text=True, env=env, timeout=60)
+    ok(r.returncode == 7 and out.exists(), "the host file names the host's council when the variable is unset")
+    r = run(["panel"], {"TASK_PIPELINE_CONSILIUM_OVERRIDE": str(tmp / "absent.py"), "PROBE_OUT": str(out)})
+    ok(r.returncode != 7 and "does not exist" in r.stderr, "a missing host council is reported and the shipped one runs")
+    r = run(["panel"], {"TASK_PIPELINE_CONSILIUM_OVERRIDE": str(probe), "TASK_PIPELINE_CONSILIUM_OVERRIDDEN": "1"})
+    ok(r.returncode != 7, "inside the host's council the shipped code never delegates again")
+    r = run(["panel"], {"TASK_PIPELINE_CONSILIUM_OVERRIDE": str(SCRIPT)})
+    ok(r.returncode != 7 and "does not exist" not in r.stderr, "an override naming this very script is the shipped council")
 
     srv.shutdown()
     print(f"consilium_test: {CASES} cases passed")

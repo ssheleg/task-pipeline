@@ -34,6 +34,11 @@ and `--task`; a BYOK call's cost is read from its upstream cost, never taken as 
               at least --min-panel of them (default 3) of at least --min-families
               families (default 3), a judge ruling, and spend within the ledger's cap.
 
+A host may run its own council in place of this one: the path of its script in
+$TASK_PIPELINE_CONSILIUM_OVERRIDE, else in ~/.config/task-pipeline/consilium.override
+(`off` turns it off). That script gets the same arguments and keeps the same files
+and gate; a path that does not exist is reported and the shipped council runs.
+
 Exit 0 pass, 1 findings or a failed check, 2 usage or no key.
 """
 import argparse
@@ -45,6 +50,7 @@ import json
 import os
 import pathlib
 import re
+import subprocess
 import sys
 import time
 import urllib.error
@@ -453,7 +459,36 @@ def check(args):
     return 0 if res["pass"] else 1
 
 
+OVERRIDE_ENV = "TASK_PIPELINE_CONSILIUM_OVERRIDE"
+OVERRIDE_FILE = pathlib.Path("~/.config/task-pipeline/consilium.override")
+OVERRIDE_ACTIVE = "TASK_PIPELINE_CONSILIUM_OVERRIDDEN"
+
+
+def host_override():
+    """The host's own council script, or None: none named, `off`, missing, or already inside it."""
+    if os.environ.get(OVERRIDE_ACTIVE):
+        return None
+    raw = os.environ.get(OVERRIDE_ENV)
+    if raw is None:
+        f = OVERRIDE_FILE.expanduser()
+        raw = f.read_text(encoding="utf-8").strip() if f.is_file() else ""
+    if not raw or raw.strip().lower() == "off":
+        return None
+    path = pathlib.Path(raw.strip()).expanduser()
+    if not path.is_file():
+        print(f"consilium.py: the host's council {path} does not exist; the shipped council runs", file=sys.stderr)
+        return None
+    if path.resolve() == pathlib.Path(__file__).resolve():
+        return None
+    return path
+
+
 def main(argv=None):
+    override = host_override()
+    if override is not None:
+        args = sys.argv[1:] if argv is None else list(argv)
+        env = dict(os.environ, **{OVERRIDE_ACTIVE: "1"})
+        return subprocess.call([sys.executable, str(override)] + args, env=env)
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = ap.add_subparsers(dest="cmd", required=True)
     p = sub.add_parser("panel")
