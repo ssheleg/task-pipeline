@@ -1,0 +1,8 @@
+{
+ "schema": "spec/1",
+ "id": "seed-03",
+ "size": "S",
+ "kind": "feature",
+ "author_family": "vendor-a",
+ "status": "draft"
+}

@@ -11,8 +11,8 @@ The full gate and freedom level remain in [stages.md](stages.md).
   of another family verify.
 - **How it runs: [`spec.md`](spec.md)** — built into this skill: the UX-track order,
   what the spec must lock (types, schemas, signatures, file layout, the **Global
-  Constraints** block stages 4–5 depend on), the self-review pass and the operator
-  review gate.
+  Constraints** block stages 4–5 depend on), the self-review pass and the judge.
+- The judge replaces operator review (S0): [`judge-rubric.md`](judge-rubric.md).
 - **Where the actor branch is armed, the contract comes before the screens**
   ([`agent-surface.md`](agent-surface.md); [`spec.md`](spec.md) → *Order of
   operations*): `foundation → capabilities → contract source + agent scenarios →

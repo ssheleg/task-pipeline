@@ -653,7 +653,7 @@ must say so.
 ### Held to Anthropic's own Skill authoring guidance
 
 Audited against the four Agent Skills pages. Most of it already held — `name`
-13/64 chars, `description` 292/1024 chars, `SKILL.md` 215/500 lines, all 60 references
+13/64 chars, `description` 292/1024 chars, `SKILL.md` 215/500 lines, all 62 references
 reachable from `SKILL.md` through explicit reference routes, and the bundle far under the 30 MB ceiling. What
 did not, now does:
 
@@ -1037,6 +1037,8 @@ recommendation, so you arm the whole run in one exchange. Detail:
 | [`references/deploy-targets.md`](plugins/task-pipeline/skills/task-pipeline/references/deploy-targets.md) | stages 7–8: writing the runbook when there is none, the template, per-platform deploy and log verbs, the verification trio |
 | [`references/hooks.md`](plugins/task-pipeline/skills/task-pipeline/references/hooks.md) | the `PreToolUse` contract, the fail-open hazard, placement, and the Claude-Code-only limit |
 | [`references/doc-graph.md`](plugins/task-pipeline/skills/task-pipeline/references/doc-graph.md) | documentation as a graph: the starter pack (`scripts/docgraph.py`), one format with the estate's graphs, self-healing, cleanup, the hidden refactoring |
+| [`references/spec-template.md`](plugins/task-pipeline/skills/task-pipeline/references/spec-template.md) | the final-state spec: its sections in order, `spec/1`, size, kind and status, the `Spec: <id>@<commit>` trailer (`scripts/spec_judge.py`, `ci/spec-gate.yml`) |
+| [`references/judge-rubric.md`](plugins/task-pipeline/skills/task-pipeline/references/judge-rubric.md) | the judge of another model family (`judge-rubric/1`): questions, five scores, automatic fails, rounds 1 to 3, verdict bound to the content hash; models from `references/judge-models.json` |
 | [`references/spec-protocol.md`](plugins/task-pipeline/skills/task-pipeline/references/spec-protocol.md) | stages 0 to 4 as checks: size, question classes, research with other models, the spec gate and the order spec, board, build (`scripts/spec_protocol.py`) |
 | [`references/knowledge-graph.md`](plugins/task-pipeline/skills/task-pipeline/references/knowledge-graph.md) | the code graph: install line, stage-0 reach queries, the stage-9 refresh, the graph↔docs divergence check |
 | [`references/retrospective.md`](plugins/task-pipeline/skills/task-pipeline/references/retrospective.md) | the project retro: the three grades of fix, the mandatory prune, the cap of ten |

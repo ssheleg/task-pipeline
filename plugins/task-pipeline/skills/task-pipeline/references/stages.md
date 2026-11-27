@@ -176,8 +176,9 @@ never that the work was skipped quietly.
 - **GATE (auto):** the **`## Self-review` section written and committed with
   computed values** — every check the spec names resolving or marked `review`, the
   brief's decisions and stage 2's rejected options read back with no unresolved
-  contradiction, and the cost delta printed; spec committed **and** reviewed (by the
-  operator, or under the brief's standing authorization by an independent reader); **every section carries
+  contradiction, and the cost delta printed; spec committed **and** judged (`spec_judge.py check --verify`
+  exits 0: a judge of another family, verdict bound to the content hash;
+  [`judge-rubric.md`](judge-rubric.md)), with no operator-review branch; **every section carries
   `covers: REQ-…` and every REQ appears in at least one section**; for UI tasks
   additionally: the super-ux chain (foundation → flows → screens → scenarios) is
   designed, validated and approved; scenarios validated in `docs/ux/scenarios.md`;

@@ -1,0 +1,4 @@
+{
+ "defect": "Boundaries is empty instead of none",
+ "caught_by": "lint"
+}

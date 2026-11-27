@@ -1,5 +1,11 @@
 # Verification — task-pipeline
 
+## Shipped state — v1.115.0 (candidate 2026-11-27: spec S0 in task-pipeline, the judge of another family; tag, release run and npm version are added once shipped)
+
+- Built for fabric-workspace's board request 7b8d571f (Fabric refactor P0 3e406717, spec S0
+  `docs/plans/2026-11-28-fabric-refactor/spec-protocol.md`). Checks run on the branch: `npm test` (see the PR), the
+  new `test/spec_judge_test.py` and the deny cases of `test/release_gate_test.py`.
+
 ## Shipped state — v1.114.0 (shipped 2026-11-23: tag v1.114.0 on 14a6cf0, release run 45276162070 release and publish success, npm task-pipeline-skill 1.114.0)
 
 - PR #188 squash-merged as `14a6cf0` (tree equal to the checked branch head); its PR checks were green, and `test:all` ran

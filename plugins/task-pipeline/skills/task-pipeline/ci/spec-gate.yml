@@ -1,0 +1,52 @@
+# spec-gate: a pull request merges only when the spec it cites is judged.
+#
+# Copy into a project's .github/workflows/ (or call it with `uses:` and
+# `workflow_call`). Every commit of the pull request that changes a product file
+# carries a trailer `Spec: <spec id>@<commit>`; the gate resolves the id to its
+# directory (docs/specs/*/ or docs/plans/**/, field `id` of spec.json) with
+# `spec_judge.py find`, checks the spec out AT the cited commit and runs
+# `spec_judge.py check --verify`: exit 0 passes, 1 not passing, 2 no or stale
+# verdict, 3 cannot run. A pull request with no trailer and product changes fails.
+# Doctrine: references/spec-template.md and references/judge-rubric.md.
+name: spec-gate
+on:
+  workflow_call:
+    inputs:
+      skill-ref:
+        description: task-pipeline ref that provides spec_judge.py
+        type: string
+        default: main
+jobs:
+  spec-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/checkout@v4
+        with:
+          repository: ssheleg/task-pipeline
+          ref: ${{ inputs.skill-ref }}
+          path: .task-pipeline-skill
+      - name: Verify every cited spec
+        env:
+          BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          SJ=.task-pipeline-skill/plugins/task-pipeline/skills/task-pipeline/scripts/spec_judge.py
+          product=$(git diff --name-only "$BASE" "$HEAD" | grep -Ev '^(docs/|\.task-pipeline/|\.claude/|CHANGELOG\.md|README\.md)' || true)
+          cites=$(git log --format='%(trailers:key=Spec,valueonly)' "$BASE..$HEAD" | sed '/^$/d' | sort -u)
+          if [ -z "$cites" ]; then
+            if [ -n "$product" ]; then echo "::error::product files change and no commit carries 'Spec: <id>@<commit>'"; exit 1; fi
+            echo "no product change and no spec cited"; exit 0
+          fi
+          rc=0
+          while IFS= read -r cite; do
+            id=${cite%@*}; at=${cite#*@}
+            work=$(mktemp -d); git worktree add -q --detach "$work" "$at"
+            dir=$(python3 "$SJ" find "$id" --root "$work") || { echo "::error::spec $id not found at $at"; rc=1; continue; }
+            if python3 "$SJ" check "$dir" --verify; then echo "spec $id@$at judged"; else echo "::error::spec $id@$at is not judged (exit $?)"; rc=1; fi
+            git worktree remove --force "$work"
+          done <<< "$cites"
+          exit $rc

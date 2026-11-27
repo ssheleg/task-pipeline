@@ -15,10 +15,12 @@ The hook is run as a process, with real JSON on stdin, because that is the layer
 that repeats. Exit 2 blocks in Claude Code; every other code does not.
 """
 
+import atexit
 import json
 import os
 import re
 import subprocess
+import shutil
 import sys
 import tempfile
 
@@ -706,25 +708,35 @@ it("no ledger, no lifecycle", no_ledger_no_lifecycle)
 
 # --- editing the product before the plan is agreed --------------------------
 
-def build_gate(path, ledger, pipeline=None):
+def build_gate(path, ledger, pipeline=None, plugin_root=None, setup=None, reason=False):
     with tempfile.TemporaryDirectory() as project:
         os.makedirs(os.path.join(project, ".task-pipeline"))
         open(os.path.join(project, ".task-pipeline", "run.md"), "w").write(ledger)
         if pipeline is not None:
             json.dump(pipeline, open(os.path.join(project, "pipeline.json"), "w"))
+        if setup is not None:
+            setup(project)
+        env = dict(os.environ, CLAUDE_PROJECT_DIR=project)
+        env.pop("CLAUDE_PLUGIN_ROOT", None)
+        if plugin_root is not None:
+            env["CLAUDE_PLUGIN_ROOT"] = plugin_root
         r = subprocess.run(["bash", BUILDGATE], input=json.dumps({
             "hook_event_name": "PreToolUse", "tool_name": "Edit",
             "tool_input": {"file_path": os.path.join(project, path)}}),
-            env=dict(os.environ, CLAUDE_PROJECT_DIR=project), capture_output=True, text=True)
+            env=env, capture_output=True, text=True)
         out = (r.stdout or "").strip()
-        return json.loads(out)["hookSpecificOutput"]["permissionDecision"] if out else None
+        if not out:
+            return (None, "") if reason else None
+        h = json.loads(out)["hookSpecificOutput"]
+        return (h["permissionDecision"], h["permissionDecisionReason"]) if reason \
+            else h["permissionDecision"]
 
 
 BUILD_FLOW = {"stages": [{"id": 5, "state": "build"}]}
 
 
-def editing_source_before_build_asks():
-    assert build_gate("src/app.js", OPEN_RUN, BUILD_FLOW) == "ask"
+def editing_source_before_build_is_denied():
+    assert build_gate("src/app.js", OPEN_RUN, BUILD_FLOW) == "deny"
 
 
 def the_pipelines_own_artefacts_are_never_gated():
@@ -755,11 +767,109 @@ def no_run_no_gate():
         assert (r.stdout or "").strip() == "", "gated a repository running no pipeline"
 
 
-it("editing source before the build stage asks", editing_source_before_build_asks)
+it("editing source before the build stage is denied", editing_source_before_build_is_denied)
 it("the pipeline's own artefacts are never gated", the_pipelines_own_artefacts_are_never_gated)
 it("once the build stage is entered the gate is silent", once_the_build_stage_is_entered_it_is_silent)
 it("an unresolvable flow is silent", an_unresolvable_flow_is_silent)
 it("no run, no gate", no_run_no_gate)
+
+# --- spec protocol S0 (owner, 27.11.2026): deny, the recorded escape, the judged spec
+
+def the_denial_names_the_recorded_escape():
+    d, why = build_gate("src/app.js", OPEN_RUN, BUILD_FLOW, reason=True)
+    assert d == "deny" and "exempt: <reason>" in why, \
+        "the denial does not tell an honest typo how to pass: %r" % why
+
+
+def an_exempt_line_with_a_reason_lets_the_edit_through():
+    assert build_gate("src/app.js", OPEN_RUN + "exempt: typo in a log message\n", BUILD_FLOW) is None, \
+        "a recorded exemption was refused"
+    assert build_gate("src/app.js", OPEN_RUN + "exempt:   \n", BUILD_FLOW) == "deny", \
+        "an exemption with no reason passed"
+
+
+def an_exempt_line_from_a_previous_run_does_not_count():
+    led = "Run: `old` \u00b7 x\n" + OPEN_RUN + "exempt: old typo\nRun: `new` \u00b7 y\n" + OPEN_RUN
+    assert build_gate("src/app.js", led, BUILD_FLOW) == "deny", \
+        "a previous run's exemption silenced the gate for this one"
+
+
+_TMP_TREES = []
+atexit.register(lambda: [shutil.rmtree(t, ignore_errors=True) for t in _TMP_TREES])
+
+
+def stub_judge(code):
+    """A plugin root whose spec_judge.py exits with `code`: the hook's contract
+    with the tool, independent of the tool's own logic."""
+    root = tempfile.mkdtemp()
+    _TMP_TREES.append(root)
+    d = os.path.join(root, "skills", "task-pipeline", "scripts")
+    os.makedirs(d)
+    open(os.path.join(d, "spec_judge.py"), "w").write(
+        "import sys\nassert sys.argv[1:3] == ['check', '--verify'], sys.argv\n"
+        "print('stub verify %s')\nsys.exit(" + str(code) + ")\n")
+    return root
+
+
+IN_BUILD = OPEN_RUN + "spec: docs/specs/x\nstage: 5 build \u2014 gate auto \u2014 2026-11-27T10:00:00Z\n"
+
+
+def the_judged_spec_is_checked_even_inside_the_build_stage():
+    assert build_gate("src/app.js", IN_BUILD, BUILD_FLOW, plugin_root=stub_judge(0)) is None, \
+        "a verified spec was refused"
+    for code in (1, 2, 3, 7):
+        d, why = build_gate("src/app.js", IN_BUILD, BUILD_FLOW, plugin_root=stub_judge(code), reason=True)
+        assert d == "deny", "verify exit %d let a product edit through" % code
+        assert "spec_judge.py check docs/specs/x" in why, "the denial names no fix: %r" % why
+    assert build_gate("docs/specs/x/spec.md", IN_BUILD, BUILD_FLOW, plugin_root=stub_judge(2)) is None, \
+        "the spec itself was gated: the author could never revise it"
+
+
+def a_missing_judge_tool_fails_closed():
+    root = tempfile.mkdtemp()
+    _TMP_TREES.append(root)
+    d, why = build_gate("src/app.js", IN_BUILD, BUILD_FLOW, plugin_root=root, reason=True)
+    assert d == "deny" and "missing" in why, "a missing judge tool opened the gate: %r" % (why,)
+
+
+def _spec_dir(project, verdict, edit_after=False):
+    import hashlib
+    sdir = os.path.join(project, "docs", "specs", "x")
+    os.makedirs(os.path.join(sdir, "judge"))
+    body = "# Spec x\n\n## Outcome\n\nA thing.\n\n"
+    record = "## Judge record\n\n| Round | Verdict |\n|---|---|\n| 1 | %s |\n" % verdict
+    digest = hashlib.sha256(body.encode("utf-8")).hexdigest()
+    open(os.path.join(sdir, "spec.md"), "w").write(
+        (body + "Changed after the verdict.\n" if edit_after else body) + record)
+    json.dump({"schema": "spec/1", "id": "x", "size": "S", "kind": "fix",
+               "author_family": "anthropic"}, open(os.path.join(sdir, "spec.json"), "w"))
+    json.dump({"round": 1, "verdict": verdict, "content_sha256": digest,
+               "rubric": "judge-rubric/1", "model": "m", "family": "google",
+               "questions": [], "auto_fail": [], "scores": {}},
+              open(os.path.join(sdir, "judge", "1.json"), "w"))
+
+
+def the_shipped_judge_tool_verifies_a_passed_spec_and_refuses_a_stale_one():
+    """Through the real `spec_judge.py`: the hook and the tool agree on exit codes."""
+    root = os.path.join(ROOT, "plugins", "task-pipeline")
+    assert build_gate("src/app.js", IN_BUILD, BUILD_FLOW, plugin_root=root,
+                      setup=lambda p: _spec_dir(p, "pass")) is None, \
+        "a spec judged pass, unchanged since, was refused"
+    assert build_gate("src/app.js", IN_BUILD, BUILD_FLOW, plugin_root=root,
+                      setup=lambda p: _spec_dir(p, "pass", edit_after=True)) == "deny", \
+        "a spec edited after its verdict still opened the gate"
+    assert build_gate("src/app.js", IN_BUILD, BUILD_FLOW, plugin_root=root,
+                      setup=lambda p: _spec_dir(p, "fail")) == "deny", \
+        "a failed verdict opened the gate"
+
+
+it("S0: the denial names the recorded escape", the_denial_names_the_recorded_escape)
+it("S0: an exempt line with a reason lets the edit through", an_exempt_line_with_a_reason_lets_the_edit_through)
+it("S0: an exempt line from a previous run does not count", an_exempt_line_from_a_previous_run_does_not_count)
+it("S0: the judged spec is checked even inside the build stage", the_judged_spec_is_checked_even_inside_the_build_stage)
+it("S0: a missing judge tool fails closed", a_missing_judge_tool_fails_closed)
+it("S0: the shipped judge tool verifies a passed spec and refuses a stale one",
+   the_shipped_judge_tool_verifies_a_passed_spec_and_refuses_a_stale_one)
 
 # --- the gate must fire on the flow this plugin actually ships ---------------
 #
@@ -776,7 +886,7 @@ EXAMPLE = os.path.join(ROOT, "plugins", "task-pipeline", "skills", "task-pipelin
 def the_shipped_example_arms_the_build_gate():
     with open(EXAMPLE, encoding="utf-8") as fh:
         flow = json.load(fh)
-    assert build_gate("src/app.js", OPEN_RUN, flow) == "ask", \
+    assert build_gate("src/app.js", OPEN_RUN, flow) == "deny", \
         "the canonical pipeline.example.json never arms the build gate"
 
 
@@ -800,7 +910,7 @@ def a_previous_runs_dev_stage_does_not_silence_a_new_run():
     old = "Run: `old` · 2026-10-06\n" + OPEN_RUN + "stage: 5 dev — gate auto — 2026-10-06T01:30:00Z\n"
     new = old + "Run: `new` · 2026-10-11\n" + OPEN_RUN
     assert build_gate("src/app.js", old, flow) is None, "fixture premise: the old run was in dev"
-    assert build_gate("src/app.js", new, flow) == "ask", \
+    assert build_gate("src/app.js", new, flow) == "deny", \
         "a previous run's dev stage silenced the build gate for this one"
 
 
@@ -830,13 +940,13 @@ def a_patch(*heads):
     return "*** Begin Patch\n" + "".join("%s\n+x\n" % h for h in heads) + "*** End Patch\n"
 
 
-def an_apply_patch_touching_source_asks():
-    assert patch_gate(a_patch("*** Update File: src/app.js")) == "ask", "apply_patch passed the gate"
-    assert patch_gate(a_patch("*** Add File: docs/x.md", "*** Add File: src/new.js")) == "ask", \
+def an_apply_patch_touching_source_is_denied():
+    assert patch_gate(a_patch("*** Update File: src/app.js")) == "deny", "apply_patch passed the gate"
+    assert patch_gate(a_patch("*** Add File: docs/x.md", "*** Add File: src/new.js")) == "deny", \
         "one gated path among exempt ones passed"
-    assert patch_gate(a_patch("*** Update File: docs/a.md\n*** Move to: src/a.js")) == "ask", \
+    assert patch_gate(a_patch("*** Update File: docs/a.md\n*** Move to: src/a.js")) == "deny", \
         "a move into the product passed"
-    assert patch_gate(a_patch("*** Delete File: lib/old.py"), key="input") == "ask", \
+    assert patch_gate(a_patch("*** Delete File: lib/old.py"), key="input") == "deny", \
         "the patch under `input` was not read"
 
 
@@ -862,7 +972,7 @@ def the_hooks_json_matchers_name_apply_patch():
         assert ms and all("apply_patch" in m.split("|") for m in ms), "%s's matcher misses apply_patch: %r" % (script, ms)
 
 
-it("B-211: an apply_patch touching source asks", an_apply_patch_touching_source_asks)
+it("B-211: an apply_patch touching source is denied", an_apply_patch_touching_source_is_denied)
 it("B-211: an apply_patch touching only the run's artefacts is silent", an_apply_patch_touching_only_the_runs_artefacts_is_silent)
 it("B-211: a malformed apply_patch payload is silent", a_malformed_apply_patch_payload_is_silent)
 it("B-211: hooks.json routes apply_patch to build-gate and memory-nudge", the_hooks_json_matchers_name_apply_patch)
