@@ -128,8 +128,8 @@ Every gate is **typed**: `auto` — the orchestrator verifies it itself, pass/fa
 ```
 
 Then say *"run this through the pipeline"*, *"the full cycle"*, or invoke
-`/task-pipeline <one-line task>`. Russian phrasings (*"полный цикл"*, *"прогони по
-конвейеру"*) route the same way. The skill creates a TaskList with one entry per
+`/task-pipeline <one-line task>`. Russian phrasings («полный цикл»,
+«прогони по конвейеру») route the same way. The skill creates a TaskList with one entry per
 stage and walks the gates. See [Install](#install) for the other channels.
 
 ---
@@ -653,7 +653,7 @@ must say so.
 ### Held to Anthropic's own Skill authoring guidance
 
 Audited against the four Agent Skills pages. Most of it already held — `name`
-13/64 chars, `description` 292/1024 chars, `SKILL.md` 215/500 lines, all 60 references
+13/64 chars, `description` 294/1024 chars, `SKILL.md` 214/500 lines, all 60 references
 reachable from `SKILL.md` through explicit reference routes, and the bundle far under the 30 MB ceiling. What
 did not, now does:
 

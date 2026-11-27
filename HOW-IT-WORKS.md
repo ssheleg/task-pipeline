@@ -39,7 +39,7 @@ That list is written in three parts, and the middle one was learned the hard way
   integration, rewrite, adoption or hardening, in English and Russian both.
 - **Work whose *output* lands in the repository** — `audit`, `bug hunt`,
   `production check`, `PR review`. Before this clause existed, agents facing
-  "проверь, нет ли ошибок" **quoted this skill's own exclusion line as their
+  «проверь, нет ли ошибок» **quoted this skill's own exclusion line as their
   reason to refuse**. The measurement is in `evals/routing/RESULTS.md`.
 - **What it is not for** — answering a question, explaining code, a typo, a
   one-line edit. The boundary runs in both directions on purpose: running ten

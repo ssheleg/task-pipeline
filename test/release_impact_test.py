@@ -84,7 +84,7 @@ with tempfile.TemporaryDirectory() as d:
     ok(rc == 0 and "n/a: a build-only change" in out, f"section 1 as n/a with a reason passes, its reason printed ({rc} {out!r})")
     rc, out, _ = check(card(alerting=ALERTING.replace("yes, the smoke test failed a release once", "never")))
     ok(rc == 0 and "never been seen firing" in out, f"an alert never seen firing passes and is said to be untested ({rc} {out!r})")
-    rc, out, _ = check(card(rollback=ROLLBACK.replace("roll back if an install fails", "откатить, если установка падает")))
+    rc, out, _ = check(card(rollback=ROLLBACK.replace("roll back if an install fails", "«откатить, если установка падает»")))
     ok(rc == 0, f"a decision trigger in Russian states its condition ({rc} {out!r})")
     rc, out, _ = run("check", d / "absent.md", "--users", "none")
     ok(rc == 0 and "not owed" in out, f"users none and no card: PASS, the card is not owed ({rc} {out!r})")

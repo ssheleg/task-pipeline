@@ -130,8 +130,8 @@ super-ux decides what the interface must **do**; `copywriting` how it
   and a bare `declined` with no reason does not. The Rubric is written **before** any
   direction is rendered; a rubric written after the render grades the render it already
   liked.
-- **Each track's refusal is a sentence, never a silence.** *"Без дизайна" / "as is"*
-  ends the visual track; *"без бренда" / "draft"* ends the copy track. Either one is
+- **Each track's refusal is a sentence, never a silence.** *«Без дизайна» / "as is"*
+  ends the visual track; *«без бренда» / "draft"* ends the copy track. Either one is
   the operator's to make and costs nothing — but it is **recorded in the brief and
   said out loud in the close-out**, because a track skipped silently and a track that
   ran are the same thing in a transcript. This is the rail's `⊘` rule one layer up: a

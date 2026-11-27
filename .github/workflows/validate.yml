@@ -79,6 +79,9 @@ jobs:
       - name: Structural validator
         run: python3 test/validate.py
 
+      - name: English system docs (order 72185b98)
+        run: python3 tools/lang/cyrillic_scan.py check .
+
       - name: The rest of the `npm test` equation (graph suite + shipped audit collector)
         # CLAUDE.md documents `npm test` as three suites; this job ran only the
         # first, so a PR breaking graph.py merged green and the defect surfaced
