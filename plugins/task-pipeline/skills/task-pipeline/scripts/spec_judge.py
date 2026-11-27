@@ -32,6 +32,7 @@ import argparse
 import datetime
 import difflib
 import hashlib
+import http.client
 import json
 import os
 import re
@@ -396,7 +397,9 @@ def call_model(endpoint, key, model, prompt, timeout, max_tokens):
             data = json.loads(r.read().decode("utf-8", "replace"))
     except urllib.error.HTTPError as e:
         return {"error": "the endpoint answered HTTP %d" % e.code, "seconds": round(time.time() - t0, 1)}
-    except (urllib.error.URLError, OSError, ValueError) as e:
+    except (urllib.error.URLError, http.client.HTTPException, OSError, ValueError) as e:
+        # http.client.IncompleteRead (a reply cut mid-body) is an HTTPException, not an OSError:
+        # uncaught, it took a whole council round down (task-pipeline board request fb909e59).
         return {"error": "the endpoint failed (%s)" % type(e).__name__, "seconds": round(time.time() - t0, 1)}
     choice = (data.get("choices") or [{}])[0] if isinstance(data, dict) else {}
     usage = data.get("usage") if isinstance(data, dict) else None

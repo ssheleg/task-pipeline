@@ -2,7 +2,7 @@
 
 ## Shipped state — v1.115.0 (candidate 2026-11-27: S0, the final-state template and the clarity judge; tag, run and npm version are added once shipped)
 
-`scripts/spec_judge.py` with `test/spec_judge_test.py` (22 cases against a local stub judge); `spec_protocol.py check`
+`scripts/spec_judge.py` with `test/spec_judge_test.py` (23 cases against a local stub judge); `spec_protocol.py check`
 on the template passes a whole spec and fails it cut at its prose mention of the heading (`test/fixtures/spec-judge/`; the S0 round-2 text itself, kept out of this public repository, passed on 2026-11-27); the hook's
 deny and the first-occurrence strip are each watched failing (negatives 560, 561). Live on this host 2026-11-27 with the
 task-pipeline OpenRouter key through Observatory: `spec_judge.py calibrate` caught 10 of 10 seeds (USD 0.0686, rubric sha256 7ba4c124,

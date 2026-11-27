@@ -52,6 +52,13 @@ class Stub:
                 n = int(self.headers.get("Content-Length") or 0)
                 stub.requests.append(json.loads(self.rfile.read(n)))
                 reply = stub.replies.pop(0) if stub.replies else verdict()
+                if reply == "truncate":
+                    self.send_response(200)
+                    self.send_header("Content-Type", "application/json")
+                    self.send_header("Content-Length", "5000")
+                    self.end_headers()
+                    self.wfile.write(b'{"id": "gen-cut", "choices": [')
+                    return
                 body = json.dumps({"id": "gen-%d" % len(stub.requests), "model": "stub/judge",
                                    "choices": [{"message": {"content": json.dumps(reply)},
                                                 "finish_reason": "stop"}],
@@ -311,6 +318,14 @@ def fact5_family():
     assert code == 1, "the estate rubric's flag was ignored"
 
 
+def a_reply_cut_mid_body_is_a_failed_call():
+    d = new_spec("cut")
+    STUB.replies = ["truncate"]
+    code, out = run("check", d)
+    assert code == 1 and "IncompleteRead" in out and "Traceback" not in out, out
+    assert not os.path.isdir(os.path.join(d, "judge")), "a cut reply left a round on file"
+
+
 def placeholders_are_never_called():
     d = new_spec("ph")
     shipped = os.path.join(SKILL, "references", "judge-models.json")
@@ -504,6 +519,7 @@ it("fact 2: a phase-one spec gets finality 0 and fail", fact2_phase_one_fails)
 it("fact 4: rounds carry the diff; a third failure escalates and stays draft", fact4_rounds_and_escalation)
 it("a third round only for one open blocker", round3_only_for_one_blocker)
 it("fact 5: another family judges; one provider gives judged-degraded", fact5_family)
+it("a reply cut mid-body is a failed call, never a traceback", a_reply_cut_mid_body_is_a_failed_call)
 it("placeholders are never called", placeholders_are_never_called)
 it("a rubric without a core dimension is refused", a_rubric_without_a_core_dimension_is_refused)
 it("fact 6: M and L owe validators of other families and a council ruling", fact6_design_review)

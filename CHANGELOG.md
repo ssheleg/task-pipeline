@@ -24,6 +24,8 @@ the judge and the gate; this release is that share (delivery order item 1, due 2
   Also `init`, `validate` (a design validator of another family), `hash`, `gate` (CI) and `calibrate`. Exit codes 0
   pass or allowed `judged-degraded`, 1 not passed, 2 unreadable, 3 no judge model. Every call is booked to the spend
   ledger (route `spec.judge`) with its cost and generation id.
+  A reply cut mid-body (`http.client.IncompleteRead`, the class of board request `fb909e59`) is a failed
+  call with no round on file, never a traceback.
 - **`references/judge-rubric.md`** (new, `judge-rubric/1`, YAML front matter): five core dimensions, `extra_dimensions`
   for an organisation, `require_cross_family` (false here; the PassionCode estate sets true in its copy). A copy without
   a core dimension is refused. **`references/judge-models.json`** (new, `judge-models/1`) names roles only, as the house
@@ -44,7 +46,7 @@ the judge and the gate; this release is that share (delivery order item 1, due 2
   is verified offline.
 - Prompt lint: the seeds are data the judge reads, kept out of it on purpose (`test/prompt_lint.py`
   `NOT_PROMPTS`); stage 3's doctrine was tightened so the word ratchet fell from 195,100 to 195,018 (bold 3,273 to 3,264).
-- Tests: `test/spec_judge_test.py` (22 cases, a local stub judge), negatives 560 (the judge record cut at its first
+- Tests: `test/spec_judge_test.py` (23 cases, a local stub judge), negatives 560 (the judge record cut at its first
   mention) and 561 (the spec gate asking instead of denying). Doctrine: `spec-protocol.md` section 5, *The clarity judge*.
 
 ## v1.114.0: money by role (the spec's meanings by tokens, its text on the subscription, every token call booked) and the project brain's minimum
