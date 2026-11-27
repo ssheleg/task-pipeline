@@ -1,0 +1,4 @@
+{
+ "defect": "fact 3 has no acceptance check",
+ "caught_by": "lint"
+}

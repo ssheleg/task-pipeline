@@ -1,3 +1,43 @@
+## v1.115.0: every spec is the final state, judged cold by another model family before it is built (spec S0)
+
+Guards: 539 → **539**.
+
+The owner, 27.11 16:31 UTC (Telegram, relayed by the Fabric CEO, board message `4b1cb756`): «мы всегда строим
+финальный вариант ... Когда пишем любые спеки, это на уровне протокола фабрика надо ... И на каждую спеку ещё нужен
+судья, который скажет, все ли там понятно». The Fabric refactor's spec S0 (fabric-workspace
+`docs/plans/2026-11-28-fabric-refactor/spec-protocol.md`, judged pass in round 2) gives task-pipeline the template, the
+rubric, the judge tool, the deny hook, the seeds and the CI gate. Before this, stage 3 ended on an operator review and
+the build gate only asked; a spec could describe a first phase and be built from with a question still open.
+
+- **`references/spec-template.md`** (new): the sections in order (header, outcome, users, final behaviour, data and
+  contracts, boundaries, acceptance, delivery order, waits and gates, estimate, question ledger, glossary, judge
+  record), `spec/1` in `spec.json`, the size, kind and status enums, the `Spec: <id>@<commit>` trailer.
+- **`references/judge-rubric.md`** (new, `judge-rubric/1`, YAML front matter `version`, `require_cross_family`,
+  `extra_dimensions`): the judge lists every question a builder would ask (blocking or not, each with a fix), scores
+  clarity, completeness, testability, finality and consistency 0 to 2, lists automatic fails.
+- **`references/judge-models.json`** (new, `judge-models/1`): `{model, family, rank}`; shipped with role placeholders
+  because vendor ids go stale and the validator refuses them in the bundle; a host or estate writes
+  `~/.config/task-pipeline/judge-models.json`.
+- **`scripts/spec_judge.py`** (new): `check` runs one round (round 1 the whole spec; round 2 and 3 the spec, the previous
+  questions and the diff; a third round only for exactly one open blocking question; after it the spec stays `draft`
+  and `judge/escalation.md` is the coordinator's task «спека не прошла судью»). The verdict is computed by the tool,
+  never taken from the model, and bound to SHA-256 of `spec.md` without its `## Judge record`. `check --verify` is the
+  gate: 0 judged, 1 not passing, 2 no or stale verdict, 3 cannot run. A same-family judge gives `judged-degraded`, which
+  passes for S and M unless the rubric sets `require_cross_family: true`; L never. `--import` brings in a
+  subscription judge's answer at no token cost; token calls go to the spend ledger. Also `hash`, `prompt`, `lint`,
+  `find` and `seeds`.
+- **`hooks/build-gate.sh`: ask became deny.** A product edit before the build stage is refused; an `exempt: <reason>`
+  line in the current run is the recorded escape for a typo or a mechanical rename. A run carrying `spec: <dir>` is
+  refused on every product edit until `spec_judge.py check --verify <dir>` exits 0, build stage included.
+- **Stage 3: the operator-review branch is removed.** The spec is judged instead; design review (validators of other
+  families and the council, `spec-protocol.md`, `consilium.md`) stays as it was.
+- **`test/judge-seeds/`** (new): ten specs with known defects and a clean control; `seeds DIR --min 9` is the weekly
+  calibration against a real judge, and `--lint-only` catches the six mechanical ones with no model.
+- **`ci/spec-gate.yml`** (new, a reusable workflow for projects): every cited `Spec: <id>@<commit>` is resolved and
+  verified at that commit; product changes with no cited spec fail.
+- Tests: `test/spec_judge_test.py` (38 cases) joins `npm test`; `test/release_gate_test.py` covers the deny, the escape
+  and the spec check.
+
 ## v1.114.0: money by role (the spec's meanings by tokens, its text on the subscription, every token call booked) and the project brain's minimum
 
 Guards: 539 → **539**.

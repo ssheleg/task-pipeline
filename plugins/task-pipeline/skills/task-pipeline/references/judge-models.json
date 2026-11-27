@@ -1,0 +1,9 @@
+{
+  "schema": "judge-models/1",
+  "note": "A template, not a map: the placeholders name roles, never models, because model ids go stale and the validator refuses vendor ids in what ships. A host writes ~/.config/task-pipeline/judge-models.json (or points $TASK_PIPELINE_JUDGE_MODELS at its file) from its own model map; the estate's model owner edits that file like any other change. spec_judge.py never calls a placeholder. rank 1 is the strongest; the tool takes the strongest entry whose family differs from the spec's author_family, else the strongest of the same family, recorded as judged-degraded.",
+  "models": [
+    {"model": "<the map's strongest model of vendor A>", "family": "vendor-a", "rank": 1},
+    {"model": "<the map's strongest model of vendor B>", "family": "vendor-b", "rank": 2},
+    {"model": "<the map's strongest model of vendor C>", "family": "vendor-c", "rank": 3}
+  ]
+}

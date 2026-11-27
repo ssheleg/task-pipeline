@@ -3,11 +3,12 @@
 Writing the approved design down so a zero-context implementer — human or subagent
 — can build from it without asking. Built into this skill; nothing to install.
 
-> The spec write-up, its self-review pass and the operator-review gate are ported
-> from the tail of the `brainstorming` skill in
+> The spec write-up and its self-review pass are ported from the tail of the
+> `brainstorming` skill in
 > [obra/superpowers](https://github.com/obra/superpowers) (MIT — see `LICENSE` →
 > *Third-party*), extended here with the UX track and the Global Constraints block
-> that stages 4–5 depend on.
+> that stages 4–5 depend on. Its operator-review gate was replaced by the judge of
+> the spec protocol S0 (27.11.2026).
 
 ## Contents
 
@@ -298,15 +299,17 @@ no entry names it, the run has agreed to decide it again later.
 
 ## GATE (auto)
 
-With a standing authorization recorded in the brief, an independent reader reviews the
-spec and the run says:
+The spec is judged, never waited on (spec protocol S0, 27.11.2026; the operator
+review that stood here is gone): `spec_judge.py check <spec dir>` and its rounds,
+verdicts and hash are [`judge-rubric.md`](judge-rubric.md). The run then says:
 
-> "Spec committed to `<path>`, reviewed by <reader>; continuing to the plan."
+> "Spec committed to `<path>`, judged `<verdict>` by <model> (<family>) in round
+> <n>; continuing to the plan."
 
-Otherwise it says "Spec committed to `<path>`; review it before I write the plan." and
-waits for the operator's review. Changes requested → apply, re-run the self-review, and review again.
+Design review by size (validators, council: [`spec-protocol.md`](spec-protocol.md))
+stays and is added to the judge.
 
-The gate is not only the operator's word: **every section carries `covers: REQ-…`
+The gate is not only the judge's word: **every section carries `covers: REQ-…`
 and every REQ in the brief appears in at least one section.** For UI tasks it
 additionally requires: the chain (foundation → flows → screens → scenarios)
 designed, validated and approved; `/ux-lint` green; every user-facing requirement

@@ -15,8 +15,7 @@ that acts *while the agent is working* rather than after the commit.
 - Performance
 - What belongs in a hook, and what does not
 - A worked example
-- Debugging
-- Removing them
+- Debugging and removing
 - The one this skill ships
 - Leases are not reimplemented here
 - Rationalizations
@@ -32,12 +31,9 @@ enforcement. Without a verified adapter, run the same gates explicitly and recor
 Never describe a project as protected merely because a rule or a hook file exists.
 A false guarantee makes downstream readers stop checking.
 
-> **Provenance.** Every contract below is quoted from the Claude Code hooks
-> reference (`code.claude.com/docs/en/hooks`), fetched **2026-08-03**. Re-fetch
-> before relying on it: this is an external API, and stage 1 of this very pipeline
-> exists because a contract recalled from memory is a contract that has already
-> moved. Where the reference and this file disagree, the reference wins and this
-> file is the bug.
+> **Provenance.** Quoted from the Claude Code hooks reference
+> (`code.claude.com/docs/en/hooks`), fetched **2026-08-03**; re-fetch before
+> relying on it. Where the two disagree, the reference wins.
 
 ## The events
 
@@ -93,21 +89,12 @@ strongest rung and the one whose failure is quietest.
 
 ## What the hook receives
 
-JSON on stdin. Common to every event: `session_id`, `transcript_path`, `cwd`,
-`permission_mode` (`default` · `plan` · `acceptEdits` · `auto` · `dontAsk` ·
-`bypassPermissions`), `effort` (an object with `level`), `hook_event_name`, and —
-inside a subagent — `agent_id` and `agent_type`. `prompt_id` is present from a
-recent version onward, so treat it as optional unless you pin one.
-
-Tool events add `tool_name`, `tool_input` and `tool_use_id`. **`tool_input` is
-where the target lives** — `file_path` for an edit, `command` for a Bash call.
-Parse it; do not infer the target from anything else in the environment
-([`learned.md`](learned.md) rule 15: a heuristic over strings the environment also
-produces matched the throwaway shell of every tool call).
-
-`agent_id` matters more here than it looks: stage 5 runs implementers as subagents
-in worktrees, and a guard that must behave differently for the orchestrator and for
-an implementer has exactly one honest way to tell them apart.
+JSON on stdin: `session_id`, `transcript_path`, `cwd`, `permission_mode`,
+`hook_event_name`, and inside a subagent `agent_id` and `agent_type` (the one
+honest way to tell an implementer from the orchestrator). Tool events add
+`tool_name`, `tool_input` and `tool_use_id`; **the target lives in `tool_input`**
+(`file_path`, `command`). Parse it, never infer it from the environment
+([`learned.md`](learned.md) rule 15).
 
 ## Where it lives
 
@@ -152,11 +139,9 @@ your script in the path of every tool call the agent makes.
 
 ## Performance
 
-A `PostToolUse` hook on `"*"` runs after **every** call, so it must be a no-op in
-the common case: read one timestamp file, return. Touch the network at most once
-per throttle interval. If it becomes slower than that, the throttle is broken —
-**fix the throttle, never remove the hook**, because a hook removed for latency is
-a protection removed permanently for a reason that had a fix.
+A `PostToolUse` hook on `"*"` runs after every call: a no-op in the common case,
+the network at most once per throttle interval. Slow means the throttle is
+broken: **fix the throttle, never remove the hook**.
 
 ## What belongs in a hook, and what does not
 
@@ -174,43 +159,17 @@ comment into a dead end.
 
 ## A worked example
 
-The one hook this skill ships — run the documentation gate before a commit, and
-refuse the commit if it fails. It is
-[`../templates/hooks.example.json`](../templates/hooks.example.json); copy it into
-the project's `.claude/settings.json`.
+[`../templates/hooks.example.json`](../templates/hooks.example.json) runs the
+documentation gate before `git commit` and refuses the commit when it fails; its
+`|| exit 2` is the contract, because the gate's own `exit 1` is non-blocking.
 
-```json
-{ "hooks": { "PreToolUse": [
-  { "matcher": "Bash",
-    "hooks": [{ "type": "command", "if": "Bash(git commit *)", "shell": "bash",
-      "timeout": 60, "command": "bash scripts/check-docs.sh >&2 || exit 2" }] } ] } }
-```
+## Debugging and removing
 
-`|| exit 2` is the contract, not a flourish: without it the gate's own `exit 1`
-lands in the "non-blocking error" branch and the commit proceeds.
-
-## Debugging
-
-| Symptom | Cause |
-|---|---|
-| Guarded edits go through | the guard crashed — any exit code other than 2 is non-blocking. Run it by hand |
-| Everything is denied | no config, or no lease. The tool's `status` says which |
-| Session start is slow | the backend is unreachable; it must time out and degrade, never hang |
-| The renew hook floods the log | the throttle file is not being written — check the path is writable |
-
-Run the guard directly and see what it decides:
-
-```bash
-echo '{"tool_name":"Edit","tool_input":{"file_path":"docs/DECISIONS.md"},"cwd":"'"$PWD"'"}' \
-  | bash .claude/hooks/guard.sh; echo "exit=$?"
-```
-
-## Removing them
-
-Delete the `hooks` block from the project's `.claude/settings.json`. Everything the
-hooks enforced is still available as a command and still stated in the doctrine —
-and the run is **`ungated`** from then on, which is a thing to say out loud rather
-than a detail to omit.
+Guarded edits go through: the guard crashed (any exit but 2 is non-blocking); run
+it by hand with a JSON line on stdin and read `exit=$?`. Everything denied: no
+config or no lease. Slow session start: an unreachable backend that must time out
+and degrade. Removing the `hooks` block leaves every rule as a command and in the
+doctrine, and the run is **`ungated`** from then on, said out loud.
 
 ## The one this skill ships
 
@@ -224,29 +183,25 @@ memory unavailable with `--for-run`
 ([`continuity.md`](continuity.md), Part 3).
 
 `hooks/build-gate.sh` (`PreToolUse` on `Edit|Write|MultiEdit|NotebookEdit|apply_patch`)
-asks before the product is edited while the run has not entered its build stage.
+denies a product edit before the run enters its build stage, and every product edit
+of a run that names its spec (`spec: <dir>`) until `spec_judge.py check --verify <dir>`
+exits 0 ([`judge-rubric.md`](judge-rubric.md)). It asked until spec protocol S0
+(27.11.2026); the escape is a recorded `exempt: <reason>` line in the current run.
 **Codex edits through `apply_patch`**, the patch text in `tool_input.command`, so the
 gate reads every `*** Add File:`, `*** Update File:`, `*** Delete File:` and
-`*** Move to:` path in it and asks when any one is gated (hub B-211). **Codex has no
+`*** Move to:` path in it and denies when any one is gated (hub B-211). **Codex has no
 `PostToolUseFailure` event:** there `gate-observer.sh` records a failing gate command
 only if Codex's `PostToolUse` reports it, so a missing `gate:` line after a red run
 is not proof the suite never ran (the limit is Codex's event set, not this hook's).
 
-**Two rules a gate keeps.**
-
-*A gate keyed to a stage NUMBER is the rail's mistake with worse consequences.*
-The first version matched `stage: 6` literally. `progress.md` says the rail "is
-computed, never eleven" because a host project replaces the flow — and a project
-whose flow has six stages, tests green at stage 4, could never tag anything again.
-A wrong rail misinforms; a wrong gate stops the work. The stage is resolved from
-`pipeline.json` (`state: "tests"`, or a stage declaring `gate.command`), and
-failing that from the ledger by name.
-
-*A gate that reads a claim written by the party it constrains confirms an
-assertion with itself.* `stage: … verdict pass` is typed by the agent. Where the
-stage declares `gate.command`, the observer writes the **observed** exit code as a
-`gate:` line and the release gate requires both. Declare no command and it
-degrades to the claim alone — which is stated here rather than discovered.
+**Two rules a gate keeps.** *Resolve the stage by role, never by number:* the
+first version matched `stage: 6` and a six-stage project tests green at stage 4
+could never tag again; the stage comes from `pipeline.json` (`state: "tests"` or
+a declared `gate.command`), else the ledger by name. *Never confirm a claim with
+its author:* `stage: … verdict pass` is typed by the agent, so where the stage
+declares `gate.command` the observer writes the **observed** exit code as a
+`gate:` line and the release gate requires both; with no command it degrades to
+the claim alone, said here.
 
 It is the worked example above, made real, and its three narrownesses are the
 reusable part:
@@ -257,13 +212,9 @@ reusable part:
 | Silent where no `.task-pipeline/run.md` exists, before python3 starts | enabling the plugin must change nothing in a repository that runs no pipeline, and every Bash call there pays these hooks: each Bash hook tests for the ledger before it reads stdin or starts python3, so one Bash call costs three bash processes instead of eighteen (hub B-310; `test/release_gate_test.py`, "with no ledger, the Bash hooks exit 0 silent and start no process") |
 | Reads the ledger, never reruns a suite | `progress.md` already makes the ledger append-only; a second source of truth about "did stage 6 pass" is the failure this file warns about below |
 
-**Fail-closed, deliberately.** Every non-zero exit code other than `2` is
-non-blocking, so an internal failure exits `2` as well. A crashing gate that fails
-open is worse than no gate: it reads as one.
-
-**A gate reads its payload from stdin, never through a heredoc.** A heredoc is
-stdin, so the payload arrives empty and the gate approves everything while looking
-installed: a hook that cannot see its input reads, from outside, as one that approves.
+**Fail-closed, deliberately:** an internal failure exits `2` too, since a gate
+that fails open reads as one. **Payload from stdin, never through a heredoc:** a
+heredoc is stdin, so the gate would see nothing and approve everything.
 
 ## Leases are not reimplemented here
 
