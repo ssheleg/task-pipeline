@@ -1,3 +1,21 @@
+## Fabric major release, third batch: row G-19 taken (2026-11-28)
+
+- **Objective.** Answer Fabric board request 49c2d062 (Fabric major release, lead of the release, the owner's first
+  priority): take or refuse the one step 1 row this repository owns (fabric-workspace `main`,
+  `docs/programs/2026-11-28-fabric-major-release/vision/g-watchers-and-intake.md` section 35, row G-19).
+- **Done.** Taken as backlog row B-212, due 2026-12-05, waiting on G-17 (fabric-workspace, due 2026-11-30): the
+  placement tool whose stage-entry check this row calls. No code in this change.
+- **Decisions.** The pipeline does not reimplement the seven-part check: it calls G-17's tool and acts on its answer
+  (refuse, ledger line, return to the designer, a single signal on the third return). A run with no order or with an
+  errand order keeps today's behaviour. No reachable tool reads `unmeasured`, never a pass. The date holds only if
+  G-17 lands a check a script can call by 2026-11-30; a later G-17 moves it by the same days. Not started before
+  G-17, because its command and answer shape are not fixed yet and a guessed interface would be rebuilt.
+- **Checks run.** `python3 test/validate.py` and `npm test` on this branch (results in the commit message), on the
+  Studio; the IP gate on the new text before the push.
+- **Next task.** When G-17 lands in fabric-workspace `main`: read its stage-entry command and answer, build B-212
+  parts (1) to (4) with the program's drift fixture as the failing test first, through `/task-pipeline`; take the
+  version from `git ls-remote --tags origin`; the PR carries the Kimi judge's verdict.
+
 ## Decision input: project brain report, public copy redacted by the IP gate (2026-11-25)
 
 - **Objective.** Land the project brain report of 2026-11-21 (owner's order 481968d0, board request 0b6bfd75) in
