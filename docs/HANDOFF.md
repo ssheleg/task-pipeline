@@ -1,3 +1,20 @@
+## System reliability program, module 13: row M13-05c taken (2026-11-28)
+
+- **Objective.** Answer Fabric board request 7c4f210f (the Fabric CEO's program, owner priority 1, addition 3 of 28.11):
+  take or refuse the one new module 13 row the program gives this repository (fabric-workspace `main`,
+  `docs/programs/2026-11-28-system-reliability/spec/m13-feedback-outcomes.md`, row M13-05c).
+- **Done.** Taken as backlog row B-209, due 2026-12-10, waiting on M13-04 (fabric) for live marks. No code in this
+  change.
+- **Decisions.** Several profiles become an optional, named and versioned list in `pipeline.json`; one profile keeps
+  today's behaviour. Marks stay on the machine because this repository is public. Until M13-04 offers a read route a
+  script can call, a missing reading is `unmeasured`, never a mark. The row restates no detail of the private spec: the
+  IP gate held the first draft that did.
+- **Checks run.** `python3 test/validate.py` and `npm test` on this branch (results in the commit message); the IP gate
+  on the new text before the push.
+- **Next task.** B-209 parts (1), (3) and (4) over fixture marks, with the spec row's fixture as the test; take the
+  version from `git ls-remote --tags origin` after open PRs #191 to #194 land. Live marks after M13-04 (10.12); the
+  claim half after B-206.
+
 ## Decision input: project brain report, public copy redacted by the IP gate (2026-11-25)
 
 - **Objective.** Land the project brain report of 2026-11-21 (owner's order 481968d0, board request 0b6bfd75) in
