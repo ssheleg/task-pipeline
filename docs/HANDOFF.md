@@ -1,3 +1,26 @@
+## System reliability program, third batch: rows M14-G07 and M13-18 taken (2026-11-28)
+
+- **Objective.** Answer Fabric board request 973107d0 (the Fabric CEO's program, owner's orders of 28.11 on concepts
+  and protocol, exit gates and the execution validator): take or refuse the two rows the program gives this repository
+  (fabric-workspace `main` at cd0dfe8f, `docs/programs/2026-11-28-system-reliability/spec/m14-concepts-protocol.md`
+  row M14-G07 and `.../m13-feedback-outcomes.md` section 12 row M13-18).
+- **Done.** Both taken: M14-G07 as backlog row B-210 (due 2026-12-05), M13-18 as B-211 (due 2026-12-10). No code in
+  this change.
+- **Decisions.** (1) The program row cites `graph.py:1793-1795`; the place it means is `scripts/graph.py:2044-2045`
+  on main 4826d54, and B-210 cites both. (2) The ceiling already stops since 1.98.0 (`graph.py:1836`); what B-210
+  changes is that a caller can no longer raise it with `--ceiling` without a recorded CEO grant. (3) A close without a
+  certification takes a recorded reason, mapped to `gate/1` `waived`, which the contract allows on `close` only. (4) A
+  script cannot call MCP, so the BLOCKED request to the CEO project is written as a packet by the script and filed
+  through the board by the stage, as B-206 point 4 already decided.
+- **Prerequisites.** M14-G03 (fabric-agent-contract, 2026-12-03) for `gate/1` field names; M13-14 (same, 2026-12-03)
+  for `expectation/1`; B-206 (M9-01f, this repository) for the done claim B-211 rides on.
+- **Checks run.** `python3 test/validate.py` and `npm test` on this branch (results in the commit message); the IP gate
+  on the new text before the push.
+- **Next task.** B-210 parts (1) and (4) now: `close` refuses a never-certified node without `waive` or `--reason`,
+  with a negative self-test and `graph_test.py` cases; adjust every test and doctrine example that closes an
+  uncertified node. Take the version from `git ls-remote --tags origin` after open PRs #191 to #196 land. Parts (2),
+  (3) and (5) after M14-G03; B-211 over a fixture record after M13-14.
+
 ## Decision input: project brain report, public copy redacted by the IP gate (2026-11-25)
 
 - **Objective.** Land the project brain report of 2026-11-21 (owner's order 481968d0, board request 0b6bfd75) in
