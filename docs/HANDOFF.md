@@ -1,3 +1,20 @@
+## System reliability program, waves 1 and 2: our four rows taken (2026-11-28)
+
+- **Objective.** Answer Fabric board request 5b9ba568 (the Fabric CEO's program, owner priority 1 of 28.11): take or
+  refuse the four new rows the program's specs give this repository (fabric-workspace `main`,
+  `docs/programs/2026-11-28-system-reliability/spec/m07-m08-capacity-cleanup.md` and `m09-finish-learning.md`).
+- **Done.** All four taken as backlog rows B-205 (M8-01t), B-206 (M9-01f), B-207 (M9-13), B-208 (M9-07) with due dates,
+  dependencies and the design limits each needs. M8-01t's doctrine is written in `references/build.md` *Isolation*.
+- **Decisions.** M9-13 is armed once at the estate level (family config key), not by hand per repository; scope is the
+  operator's own repositories, organisations only with a recorded share, the isolated environment never; the IP gate
+  runs on every issue body because the repository is public. M9-01f engages only where the done contract is declared,
+  since the skill also runs without Fabric. M8-01t's guard was set aside so this branch claims no version while open
+  PRs #191 to #194 hold 1.115.0 to 1.116.0.
+- **Checks run.** `python3 test/validate.py`: PASS; `npm test` on this branch (result in the commit message).
+- **Next task.** B-205: add the guard over the three lock clauses with its negative self-test, take the next free
+  version from `git ls-remote --tags origin` after the open PRs land, release. Then B-207 (no dependency, due 05.12).
+  B-206 starts when M9-01b and M9-01c land (03.12); B-208's ledger half can start after B-206.
+
 ## Decision input: project brain report, public copy redacted by the IP gate (2026-11-25)
 
 - **Objective.** Land the project brain report of 2026-11-21 (owner's order 481968d0, board request 0b6bfd75) in

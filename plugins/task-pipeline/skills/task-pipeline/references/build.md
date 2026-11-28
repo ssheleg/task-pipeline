@@ -74,10 +74,9 @@ git rev-parse --show-superproject-working-tree   # non-empty ⇒ submodule, not 
   none was recorded, under a host delegation create one (the default) and record it in the
   run ledger; otherwise ask once before creating one.
 
-**Creating one — native tool first.** If the harness offers a worktree tool
-(`EnterWorktree`, a `/worktree` command, a `--worktree` flag), use it: it owns
-placement, branch creation and cleanup. Reaching for raw `git worktree add` when a
-native tool exists creates state the harness can't see or clean up.
+**Creating one, native tool first.** Use the harness's worktree tool where one
+exists (`EnterWorktree`, `/worktree`, `--worktree`): it owns placement, branch and
+cleanup; raw `git worktree add` beside it makes state the harness cannot clean.
 
 **Git fallback**, only when there is no native tool:
 
@@ -86,17 +85,21 @@ native tool exists creates state the harness can't see or clean up.
 git check-ignore -q .worktrees || printf '.worktrees/\n' >> .gitignore
 git check-ignore -q .task-pipeline || printf '.task-pipeline/\n' >> .gitignore
 git diff --quiet .gitignore || git commit -m "chore: ignore build scratch dirs" .gitignore
-git worktree add ".worktrees/$BRANCH" -b "$BRANCH"
+git worktree add --lock --reason "session:$SESSION_ID since:$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+  ".worktrees/$BRANCH" -b "$BRANCH"
 ```
 
-Directory priority: an explicit operator preference → an existing `.worktrees/` →
-an existing `worktrees/` → default `.worktrees/`. An unignored worktree directory
-commits the entire tree into the repo — verify before creating. If creation fails
-on a sandbox permission error, say so plainly and work in place.
+Lock it with its session so a cleanup spares a live checkout
+(`SESSION_ID`: the session or launch id, else `unknown-<host>-<pid>`). After a
+native tool: `git worktree lock --reason "session:<id> since:<UTC>" <path>`; a full
+clone gets `.git/agent-owner.json` `{"sessionId", "createdAt", "machine", "purpose"}`.
 
-**Setup + baseline.** Install dependencies the way the project does (`npm install`,
-`cargo build`, `pip install -r requirements.txt`, `poetry install`, `go mod
-download`), then run the test command from the brief's autonomy sweep. A dirty
+Directory priority: the operator's preference → an existing `.worktrees/` →
+`worktrees/` → `.worktrees/`. An unignored worktree directory commits the whole
+tree into the repo: verify first. A sandbox refusal: say so, work in place.
+
+**Setup + baseline.** Install dependencies as the project does (`npm install`,
+`cargo build`, `poetry install`), then run the test command from the brief's autonomy sweep. A dirty
 baseline makes every later failure ambiguous: under a host delegation record the failing checks
 as the known-red baseline ([`gates.md`](gates.md)), keep them out of this run's claims and
 proceed; otherwise report the failures and let the operator decide whether to proceed.
@@ -644,8 +647,8 @@ in the stage-0 brief:
    grant), that is the go, cited with its source. Absent any grant, ask once.
 3. **Never force-push a shared branch**, and never land on `main` when the brief put
    it off-limits.
-4. **Remove the worktree** once merged (`git worktree remove <path>`, or the native
-   tool that created it), and delete this plan's workspace
+4. **Remove the worktree** once merged (`git worktree unlock <path>`, then
+   `git worktree remove <path>` or the native tool that made it), and delete this plan's workspace
    (`rm -rf .task-pipeline/build/<plan-basename>`) — git history is the record now.
    Sibling directories belong to other plans; leave them.
 
